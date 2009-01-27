@@ -93,100 +93,21 @@
 
     <target name="compileFlex" depends="compileJava">
         <mxmlc file="../../flex/src/PrimaryWorkspace.mxml" output="${flex.path}/PrimaryWorkspace.swf"
-               static-rsls="false">
+               static-rsls="true">
             <load-config filename="..\\..\\flex\\flex-config.xml"/>
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
-                <url rsl-url="framework_3.1.0.2170.swz"/>
-                <url policy-file-url=""/>
-                <url rsl-url="framework_3.1.0.2170.swf"/>
-                <url policy-file-url=""/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/datavisualization.swc">
-                <url rsl-url="datavisualization_3.1.0.2170.swz"/>
-                <url policy-file-url=""/>
-                <url rsl-url="datavisualization_3.1.0.2170.swf"/>
-                <url policy-file-url=""/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
-                <url rsl-url="rpc_3.0.0.3.1.0.2170.swz"/>
-                <url policy-file-url=""/>
-                <url rsl-url="rpc_3.0.0.3.1.0.2170.swf"/>
-                <url policy-file-url=""/>
-            </runtime-shared-library-path>
         </mxmlc>
-
         <mxmlc file="../../flex/src/com/easyinsight/dashboard/ListViewModule.mxml" output="${flex.path}/ListViewModule.swf"
-               static-rsls="false">
+               static-rsls="true">
             <load-config filename="../../flex/list-module.xml"/>
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
-                <url rsl-url="framework_3.1.0.2170.swz"/>
-                <url policy-file-url=""/>
-                <url rsl-url="framework_3.1.0.2170.swf"/>
-                <url policy-file-url=""/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/datavisualization.swc">
-                <url rsl-url="datavisualization_3.1.0.2170.swz"/>
-                <url policy-file-url=""/>
-                <url rsl-url="datavisualization_3.1.0.2170.swf"/>
-                <url policy-file-url=""/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
-                <url rsl-url="rpc_3.0.0.3.1.0.2170.swz"/>
-                <url policy-file-url=""/>
-                <url rsl-url="rpc_3.0.0.3.1.0.2170.swf"/>
-                <url policy-file-url=""/>
-            </runtime-shared-library-path>
         </mxmlc>
-        <mxmlc file="../../flex/src/AdministrationApplication.mxml" output="${flex.path}/AdministrationApplication.swf" static-rsls="false">
+        <mxmlc file="../../flex/src/AdministrationApplication.mxml" output="${flex.path}/AdministrationApplication.swf" static-rsls="true">
             <load-config filename="../../flex/administration-app.xml"/>
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
-                <url rsl-url="framework_3.1.0.2170.swz"/>
-                <url policy-file-url=""/>
-                <url rsl-url="framework_3.1.0.2170.swf"/>
-                <url policy-file-url=""/>
-            </runtime-shared-library-path>
 
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/datavisualization.swc">
-                <url rsl-url="datavisualization_3.1.0.2170.swz"/>
-                <url policy-file-url=""/>
-                <url rsl-url="datavisualization_3.1.0.2170.swf"/>
-                <url policy-file-url=""/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
-                <url rsl-url="rpc_3.0.0.3.1.0.2170.swz"/>
-                <url policy-file-url=""/>
-                <url rsl-url="rpc_3.0.0.3.1.0.2170.swf"/>
-                <url policy-file-url=""/>
-            </runtime-shared-library-path>
         </mxmlc>
-        <mxmlc file="../../flex/src/EmbeddedInsight.mxml" output="${flex.path}/EmbeddedInsight.swf" static-rsls="false">
+        <mxmlc file="../../flex/src/EmbeddedInsight.mxml" output="${flex.path}/EmbeddedInsight.swf" static-rsls="true">
             <load-config filename="../../flex/embedded-insight.xml"/>
 
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
-                <url rsl-url="framework_3.1.0.2170.swz"/>
-                <url policy-file-url=""/>
-                <url rsl-url="framework_3.1.0.2170.swf"/>
-                <url policy-file-url=""/>
-            </runtime-shared-library-path>
 
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/datavisualization.swc">
-                <url rsl-url="datavisualization_3.1.0.2170.swz"/>
-                <url policy-file-url=""/>
-                <url rsl-url="datavisualization_3.1.0.2170.swf"/>
-                <url policy-file-url=""/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
-                <url rsl-url="rpc_3.0.0.3.1.0.2170.swz"/>
-                <url policy-file-url=""/>
-                <url rsl-url="rpc_3.0.0.3.1.0.2170.swf"/>
-                <url policy-file-url=""/>
-            </runtime-shared-library-path>
         </mxmlc>
     </target>
 
