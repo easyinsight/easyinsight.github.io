@@ -1,0 +1,18 @@
+<Context reloadable="true">
+
+    <Valve className="flex.messaging.security.TomcatValve"/>
+
+	<!--
+	<Transaction factory="org.objectweb.jotm.UserTransactionFactory" jotm.timeout="60"/>
+	-->
+
+	<!--
+	<Resource name="JmsConnectionFactory" auth="Container"
+		type="org.apache.activemq.ActiveMQConnectionFactory"
+		description="JMS Connection Factory"
+		factory="org.apache.activemq.jndi.JNDIReferenceFactory"
+		brokerURL="vm://localhost"
+		brokerName="LocalActiveMQBroker"/>
+	-->
+
+</Context>

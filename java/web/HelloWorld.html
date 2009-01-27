@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:widget="http://www.netvibes.com/ns/">
+<head>
+
+    <meta name="author" content="Easy Insight"/>
+    <meta name="description" content="A descriptive description"/>
+    <meta name="inline" content="true" />
+    <meta name="autoRefresh" content="20" />
+    <meta name="debugMode" content="true" />    
+
+    <link rel="stylesheet" type="text/css"
+          href="http://www.netvibes.com/themes/uwa/style.css"/>
+    <script type="text/javascript"
+            src="http://www.netvibes.com/js/UWA/load.js.php?env=Standalone"></script>
+
+    <widget:preferences>
+        <preference name="userName" type="text" label="User Name" defaultValue=""/>
+        <preference name="password" type="password" label="Password" defaultValue=""/>
+        <preference name="insightCombo" type="hidden" label="Insight" defaultValue="" />
+    </widget:preferences>
+
+
+    <title>Easy Insight</title>
+    <link rel="icon" type="image/png"
+          href="http://www.netvibes.com/favicon.ico"/>
+    <script type="text/javascript">
+        // widget.onLoad() is fired when the widget is fully loaded
+        // or when the preferences are validated
+        widget.onLoad = function() {
+          var contentHtml = '';
+
+          contentHtml += '<div style="margin: 0 auto;text-align:center;">';
+          contentHtml += '<object type="application/x-shockwave-flash" data="http://ec2-67-202-40-33.compute-1.amazonaws.com/DMS/easyui-debug/InsightView.swf" allowScriptAccess="always" width="550" height="450" class="flash">';
+          contentHtml += '<param name="movie" value="http://ec2-67-202-40-33.compute-1.amazonaws.com/DMS/easyui-debug/InsightView.swf" />';
+          //contentHtml += '<param name="wmode" value="opaque" />';
+          contentHtml += '<embed type="application/x-shockwave-flash" allowScriptAccess="always" allowNetworking="all" src="ec2-67-202-40-33.compute-1.amazonaws.com/DMS/easyui-debug/InsightView.swf" width="550" height="450"></embed>';
+          contentHtml += '</object>';
+          contentHtml += '</div>';
+
+          widget.setBody(contentHtml);
+          widget.onResize();
+        }
+
+
+        widget.onResize = function() {
+  var elements = widget.body.getElementsByTagName("object");
+  var flash = elements[0];
+  if (flash) {
+    flash.width = 1;
+    flash.width = widget.body.getDimensions().width - 10;
+    flash.height = Math.round(flash.width * 3/4);
+  }
+}
+    </script>
+
+</head>
+<body>
+    <p>Loading...</p>
+</body>
+</html>

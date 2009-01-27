@@ -1,0 +1,122 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!DOCTYPE hibernate-configuration PUBLIC
+        "-//Hibernate/Hibernate Configuration DTD 3.0//EN"
+        "http://hibernate.sourceforge.net/hibernate-configuration-3.0.dtd">
+
+<hibernate-configuration>
+
+    <session-factory>
+
+        <!-- Database connection settings -->
+        <property name="connection.driver_class">org.gjt.mm.mysql.Driver</property>
+        <property name="connection.url">jdbc:mysql://localhost:3306/dms</property>
+        <property name="connection.username">dms</property>
+        <property name="connection.password">dms</property>
+                      <!--
+        <property name="hibernate.dbcp.maxWait">20000</property>
+        <property name="hibernate.dbcp.maxIdle">5</property>
+        <property name="hibernate.dbcp.maxActive">10</property>
+                          -->
+
+        <property name="c3p0.min_size">10</property>
+        <property name="c3p0.max_size">100</property>
+        <property name="c3p0.timeout">10</property>
+        <property name="c3p0.acquireRetryAttempts">30</property>
+
+        <property name="c3p0.acquireIncrement">1</property>
+
+        <property name="c3p0.idleConnectioTestPeriod">300</property>
+
+        <property name="c3p0.initialPoolSize">20</property>
+        <property name="c3p0.maxPoolSize">100</property>
+        <property name="c3p0.maxIdleTime">3000</property>
+        <property name="c3p0.maxStatements">50</property>
+        <property name="c3p0.minPoolSize">10</property>
+
+
+
+        <!-- JDBC connection pool (use the built-in) -->
+        <!--
+        <property name="connection.pool_size">1</property>
+        -->
+
+        <!-- SQL dialect -->
+        <property name="dialect">org.hibernate.dialect.MySQL5Dialect</property>
+
+        <!-- Enable Hibernate's automatic session context management -->
+        <property name="current_session_context_class">thread</property>
+
+        <!-- Disable the second-level cache  -->
+        <property name="cache.provider_class">org.hibernate.cache.NoCacheProvider</property>
+
+        <!-- Echo all executed SQL to stdout -->
+        <property name="show_sql">true</property>
+
+        <mapping class="com.easyinsight.users.User"/>
+        <mapping class="com.easyinsight.users.Permission"/>
+        <mapping class="com.easyinsight.analysis.AnalysisDefinition"/>
+        <mapping class="com.easyinsight.analysis.Tag"/>
+        <mapping class="com.easyinsight.analysis.TagCloud"/>
+        <mapping class="com.easyinsight.analysis.FormattingConfiguration"/>
+        <mapping class="com.easyinsight.analysis.PersistableFilterDefinition"/>
+        <mapping class="com.easyinsight.analysis.PersistableValueFilterDefinition"/>
+        <mapping class="com.easyinsight.analysis.PersistableRangeFilterDefinition"/>
+        <mapping class="com.easyinsight.analysis.PersistableDateRangeFilterDefinition"/>
+        <mapping class="com.easyinsight.analysis.PersistableRollingFilterDefinition"/>
+        <mapping class="com.easyinsight.analysis.FilterDefinitionValue"/>
+        <mapping class="com.easyinsight.analysis.ListDefinition"/>
+        <mapping class="com.easyinsight.analysis.CrosstabDefinition"/>
+        <mapping class="com.easyinsight.analysis.ChartDefinition"/>
+        <mapping class="com.easyinsight.analysis.MapDefinition"/>
+        <mapping class="com.easyinsight.analysis.YahooMapDefinition"/>
+        <mapping class="com.easyinsight.AnalysisItem"/>
+        <mapping class="com.easyinsight.AnalysisDimension"/>
+        <mapping class="com.easyinsight.AnalysisRangeDimension"/>
+        <mapping class="com.easyinsight.AnalysisMeasure"/>
+        <mapping class="com.easyinsight.AnalysisDateDimension"/>
+        <mapping class="com.easyinsight.AnalysisList"/>
+        <mapping class="com.easyinsight.AnalysisCalculation"/>
+        <mapping class="com.easyinsight.analysis.TemporalAnalysisMeasure"/>
+        <mapping class="com.easyinsight.analysis.ComplexAnalysisMeasure"/>
+        <mapping class="com.easyinsight.analysis.AnalysisHierarchyItem"/>
+        <mapping class="com.easyinsight.analysis.Hierarchy"/>
+        <mapping class="com.easyinsight.analysis.HierarchyLevel"/>
+        <mapping class="com.easyinsight.analysis.AnalysisField"/>
+        <mapping class="com.easyinsight.analysis.ListField"/>
+        <mapping class="com.easyinsight.analysis.ChartField"/>
+        <mapping class="com.easyinsight.analysis.CrosstabField"/>
+        <mapping class="com.easyinsight.analysis.CrosstabColumnField"/>
+        <mapping class="com.easyinsight.analysis.CrosstabRowField"/>
+        <mapping class="com.easyinsight.analysis.CrosstabMeasureField"/>
+        <mapping class="com.easyinsight.analysis.ChartDimensionField"/>
+        <mapping class="com.easyinsight.analysis.ChartMeasureField"/>
+        <mapping class="com.easyinsight.analysis.UserToAnalysisBinding"/>
+        <mapping class="com.easyinsight.analysis.LimitsMetadata"/>
+        <mapping class="com.easyinsight.analysis.ListLimitsMetadata"/>
+        <mapping class="com.easyinsight.scrubbing.DataScrub"/>
+        <mapping class="com.easyinsight.scrubbing.LookupTableScrub"/>
+        <mapping class="com.easyinsight.scrubbing.LookupTablePair"/>
+        <mapping class="com.easyinsight.scrubbing.TextReplaceScrub"/>
+
+        <mapping class="com.easyinsight.core.PersistableValue"/>
+        <mapping class="com.easyinsight.core.PersistableStringValue"/>
+        <mapping class="com.easyinsight.core.PersistableDateValue"/>
+        <mapping class="com.easyinsight.core.PersistableEmptyValue"/>
+        <mapping class="com.easyinsight.core.PersistableNumericValue"/>
+
+        <mapping class="com.easyinsight.conditions.MeasureConditionRange"/>
+        <mapping class="com.easyinsight.conditions.MeasureCondition"/>
+
+        <mapping class="com.easyinsight.stores.Merchant"/>
+        <mapping class="com.easyinsight.stores.UserMerchantBinding"/>
+        <mapping class="com.easyinsight.stores.Payment"/>
+        <mapping class="com.easyinsight.stores.Purchase"/>
+
+        <mapping class="com.easyinsight.core.Key"/>
+        <mapping class="com.easyinsight.core.NamedKey"/>
+        <mapping class="com.easyinsight.core.DerivedKey"/>
+        <mapping class="com.easyinsight.users.Account"/>
+        <mapping class="com.easyinsight.users.SubscriptionLicense"/>
+    </session-factory>
+
+</hibernate-configuration>

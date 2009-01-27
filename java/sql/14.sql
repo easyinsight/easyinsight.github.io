@@ -1,0 +1,1 @@
+alter table analysis_item add hidden tinyint;

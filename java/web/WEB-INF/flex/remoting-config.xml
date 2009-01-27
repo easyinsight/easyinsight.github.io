@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<service id="remoting-service" 
+    class="flex.messaging.services.RemotingService">
+
+    <adapters>
+        <adapter-definition id="java-object" class="flex.messaging.services.remoting.adapters.JavaAdapter" default="true"/>
+    </adapters>
+
+    <default-channels>
+        <channel ref="my-amf"/>
+    </default-channels>
+
+    <destination id="google">
+        <properties>
+            <source>com.easyinsight.datafeeds.google.GoogleDataProvider</source>
+        </properties>
+    </destination>
+
+    <destination id="exportService">
+        <properties>
+            <source>com.easyinsight.export.ExportService</source>
+        </properties>
+    </destination>
+
+    <destination id="icons">
+        <properties>
+            <source>com.easyinsight.icons.IconService</source>
+        </properties>
+    </destination>
+
+    <destination id="apiService">
+        <properties>
+            <source>com.easyinsight.api.APIService</source>
+        </properties>
+    </destination>
+
+    <destination id="userUpload">
+        <properties>
+            <source>com.easyinsight.userupload.UserUploadService</source>
+        </properties>
+    </destination>
+
+    <destination id="salesforce">
+        <properties>
+            <source>com.easyinsight.datafeeds.salesforce.SalesforceConnection</source>
+        </properties>
+    </destination>
+
+    <destination id="data">
+        <properties>
+            <source>com.easyinsight.DataService</source>
+        </properties>
+    </destination>
+
+    <!-- <destination id="login" channels="my-secure-amf"> -->
+    <destination id="login">
+        <properties>
+            <source>com.easyinsight.users.UserService</source>
+        </properties>
+    </destination>
+
+    <destination id="feeds">
+        <properties>
+            <source>com.easyinsight.datafeeds.FeedService</source>
+        </properties>
+    </destination>
+    
+    <destination id="analysisDefinition">
+        <properties>
+            <source>com.easyinsight.analysis.AnalysisService</source>
+        </properties>
+    </destination>
+
+    <destination id="store">
+        <properties>
+            <source>com.easyinsight.stores.StoreService</source>
+        </properties>
+    </destination>
+
+    <destination id="collaborationService">
+        <properties>
+            <source>com.easyinsight.collaboration.CollaborationService</source>
+        </properties>
+    </destination>
+
+    <destination id="admin">
+        <properties>
+            <source>com.easyinsight.admin.AdminService</source>
+        </properties>
+    </destination>
+
+    <destination id="share">
+        <properties>
+            <source>com.easyinsight.email.ShareService</source>
+        </properties>
+    </destination>
+
+    <destination id="groupService">
+        <properties>
+            <source>com.easyinsight.groups.GroupService</source>
+        </properties>
+    </destination>
+
+    <destination id="solutionService">
+        <properties>
+            <source>com.easyinsight.solutions.SolutionService</source>
+        </properties>
+    </destination>
+
+    <destination id="goalService">
+        <properties>
+            <source>com.easyinsight.goals.GoalService</source>
+        </properties>
+    </destination>
+
+</service>
