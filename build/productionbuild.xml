@@ -92,20 +92,20 @@
     </target>
 
     <target name="compileFlex" depends="compileJava">
-        <mxmlc file="../flex/src/PrimaryWorkspace.mxml" output="${flex.path}/PrimaryWorkspace.swf"
+        <mxmlc file="${teamcity.build.checkoutDir}/flex/src/PrimaryWorkspace.mxml" output="${flex.path}/PrimaryWorkspace.swf"
                static-rsls="true">
             <load-config filename="${teamcity.build.checkoutDir}/flex/flex-config.xml"/>
         </mxmlc>
-        <mxmlc file="../flex/src/com/easyinsight/dashboard/ListViewModule.mxml" output="${flex.path}/ListViewModule.swf"
+        <mxmlc file="${teamcity.build.checkoutDir}/flex/src/com/easyinsight/dashboard/ListViewModule.mxml" output="${flex.path}/ListViewModule.swf"
                static-rsls="true">
-            <load-config filename="../flex/list-module.xml"/>
+            <load-config filename="${teamcity.build.checkoutDir}/flex/list-module.xml"/>
         </mxmlc>
-        <mxmlc file="../flex/src/AdministrationApplication.mxml" output="${flex.path}/AdministrationApplication.swf" static-rsls="true">
-            <load-config filename="../flex/administration-app.xml"/>
+        <mxmlc file="${teamcity.build.checkoutDir}/flex/src/AdministrationApplication.mxml" output="${flex.path}/AdministrationApplication.swf" static-rsls="true">
+            <load-config filename="${teamcity.build.checkoutDir}/flex/administration-app.xml"/>
 
         </mxmlc>
-        <mxmlc file="../flex/src/EmbeddedInsight.mxml" output="${flex.path}/EmbeddedInsight.swf" static-rsls="true">
-            <load-config filename="../flex/embedded-insight.xml"/>
+        <mxmlc file="${teamcity.build.checkoutDir}/flex/src/EmbeddedInsight.mxml" output="${flex.path}/EmbeddedInsight.swf" static-rsls="true">
+            <load-config filename="${teamcity.build.checkoutDir}/flex/embedded-insight.xml"/>
 
 
         </mxmlc>
