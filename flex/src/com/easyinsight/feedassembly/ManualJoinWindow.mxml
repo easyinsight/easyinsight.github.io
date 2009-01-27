@@ -1,0 +1,71 @@
+<?xml version="1.0" ?>
+<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" creationComplete="getDefinitions()">
+    <mx:Script><![CDATA[
+import mx.managers.PopUpManager;
+import mx.collections.ArrayCollection;
+import com.easyinsight.administration.feed.FeedDefinitionData;
+        public var sourceFeedID:int;
+        public var targetFeedID:int;
+
+        private var sourceDefinition:FeedDefinitionData;
+        private var targetDefinition:FeedDefinitionData;
+
+        [Bindable]
+        private var sourceFeedName:String;
+        [Bindable]
+        private var targetFeedName:String;
+        [Bindable]
+        private var sourceFields:ArrayCollection;
+        [Bindable]
+        private var targetFields:ArrayCollection;
+
+        private function getDefinitions():void {
+            feedService.getMultipleFeeds.send(sourceFeedID, targetFeedID);
+        }
+
+        private function gotFeeds():void {
+            var feeds:ArrayCollection = feedService.getMultipleFeeds.lastResult as ArrayCollection;
+            sourceDefinition = feeds.getItemAt(0) as FeedDefinitionData;
+            targetDefinition = feeds.getItemAt(1) as FeedDefinitionData;
+            sourceFeedName = sourceDefinition.feedName;
+            targetFeedName = targetDefinition.feedName;
+            sourceFields = sourceDefinition.fields;
+            targetFields = targetDefinition.fields;
+        }
+
+        private function create():void {
+            var connects:ArrayCollection = new ArrayCollection();
+            var connect:ConnectionWithInfo = new ConnectionWithInfo();
+            connect.sourceFeedID = sourceDefinition.dataFeedID;
+            connect.targetFeedID = targetDefinition.dataFeedID;
+            connect.sourceJoin = sourceBox.selectedItem.key;
+            connect.targetJoin = targetBox.selectedItem.key;
+            connects.addItem(connect);
+            dispatchEvent(new JoinSelectionEvent(connects));
+            PopUpManager.removePopUp(this);
+        }
+
+        private function cancel():void {
+            PopUpManager.removePopUp(this);
+        }
+]]></mx:Script>
+    <mx:RemoteObject destination="feeds" id="feedService">
+        <mx:method name="getMultipleFeeds" result="gotFeeds()"/>
+    </mx:RemoteObject>
+    <mx:VBox>
+        <mx:HBox>
+            <mx:VBox>
+                <mx:Label text="{sourceFeedName}"/>
+                <mx:ComboBox id="sourceBox" dataProvider="{sourceFields}" labelField="display"/>
+            </mx:VBox>
+            <mx:VBox>
+                <mx:Label text="{targetFeedName}"/>
+                <mx:ComboBox id="targetBox" dataProvider="{targetFields}" labelField="display"/>
+            </mx:VBox>
+        </mx:HBox>
+        <mx:HBox width="100%" horizontalAlign="center">
+            <mx:Button label="Create" click="create()"/>
+            <mx:Button label="Cancel" click="cancel()"/>
+        </mx:HBox>
+    </mx:VBox>
+</mx:TitleWindow>

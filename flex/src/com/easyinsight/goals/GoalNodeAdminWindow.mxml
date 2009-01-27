@@ -1,0 +1,325 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" creationComplete="setupData()">
+	<mx:Script>
+		<![CDATA[
+import com.easyinsight.solutions.Solution;
+import com.easyinsight.icons.IconSelectionEvent;
+import com.easyinsight.filtering.FilterDefinition;
+import com.easyinsight.analysis.AnalysisMeasure;
+import com.easyinsight.filtering.RollingDateRangeFilterDefinition;
+import com.easyinsight.administration.feed.FeedDefinitionData;
+import com.easyinsight.analysis.AnalysisItemTypes;
+			import com.easyinsight.analysis.AnalysisItem;
+			import com.easyinsight.administration.feed.TagCloud;
+            import com.easyinsight.icons.IconSelectionWindow;
+			import mx.managers.PopUpManager;
+			import mx.collections.ArrayCollection;
+			
+			[Bindable]
+	        [Embed(source="../../../../assets/pencil.png")]
+	        private var editIcon:Class;
+	        
+	        [Bindable]
+	        [Embed(source="../../../../assets/navigate_cross.png")]
+	        private var deleteIcon:Class;
+
+            [Bindable]
+            [Embed(source="../../../../assets/data_blue_x16.png")]
+        	public var dataSourceIcon:Class;
+			
+			private var _goalTreeNode:GoalTreeNode;
+			
+			[Bindable]
+			private var nodeName:String;
+			[Bindable]
+			private var nodeDescription:String;
+			[Bindable]
+			private var nodeTags:String;
+			[Bindable]
+			private var insightBound:Boolean;
+			[Bindable]
+			private var availableItems:ArrayCollection;
+			[Bindable]
+			private var feedName:String;
+			private var feedID:int;
+			
+			[Bindable]
+			private var highValues:Boolean = true;
+			[Bindable]
+			private var lowValues:Boolean = false;
+
+            [Bindable]
+            private var rangeOptions:ArrayCollection;
+
+            [Bindable]
+            private var availableDates:ArrayCollection;
+
+            [Bindable]
+            private var dateSelected:Boolean;
+
+            [Bindable]
+            private var datesAvailable:Boolean;
+
+            [Bindable]
+            private var measureSelected:Boolean;
+
+            [Bindable]
+            private var targetValue:String;
+
+            private var filterDefinition:FilterDefinition;
+
+            private var analysisMeasure:AnalysisMeasure;
+
+            [Bindable]
+            private var iconPath:String;
+
+            private var newSolutions:ArrayCollection = new ArrayCollection();
+
+            private var newChildren:ArrayCollection = new ArrayCollection();
+
+            private static const NONE:AnalysisItem = new AnalysisItem();
+
+            private function setupData():void {
+                rangeOptions = new ArrayCollection();
+                rangeOptions.addItem(new RangeOption("Last Day", RollingDateRangeFilterDefinition.DAY));
+                rangeOptions.addItem(new RangeOption("Last 7 Days", RollingDateRangeFilterDefinition.WEEK));
+                rangeOptions.addItem(new RangeOption("Last 30 Days", RollingDateRangeFilterDefinition.MONTH));
+                rangeOptions.addItem(new RangeOption("Last 90 Days", RollingDateRangeFilterDefinition.QUARTER));
+                rangeOptions.addItem(new RangeOption("Last 365 Days", RollingDateRangeFilterDefinition.YEAR));
+                rangeOptions.addItem(new RangeOption("Today", RollingDateRangeFilterDefinition.DAY_TO_NOW));
+                rangeOptions.addItem(new RangeOption("Week to Date", RollingDateRangeFilterDefinition.WEEK_TO_NOW));
+                rangeOptions.addItem(new RangeOption("Month to Date", RollingDateRangeFilterDefinition.MONTH_TO_NOW));
+                rangeOptions.addItem(new RangeOption("Quarter to Date", RollingDateRangeFilterDefinition.QUARTER_TO_NOW));
+                rangeOptions.addItem(new RangeOption("Year to Date", RollingDateRangeFilterDefinition.YEAR_TO_NOW));
+                NONE.displayName = "[ No Selection ]";
+            }
+			
+			public function set goalTreeNode(goalTreeNode:GoalTreeNode):void {
+				this._goalTreeNode = goalTreeNode;
+				this.nodeName = goalTreeNode.name;
+				this.nodeDescription = goalTreeNode.description;
+				this.nodeTags = TagCloud.toString(goalTreeNode.tags);
+                this.iconPath = goalTreeNode.iconImage;
+                this.feedID = goalTreeNode.coreFeedID;
+				if (goalTreeNode.coreFeedID > 0) {
+					insightBound = true;
+					this.feedName = goalTreeNode.coreFeedName;
+                    this.filterDefinition = goalTreeNode.filterDefinition;
+                    this.analysisMeasure = goalTreeNode.analysisMeasure;
+                    this.highValues = goalTreeNode.highIsGood;
+                    this.lowValues = !goalTreeNode.highIsGood;
+                    this.targetValue = String(goalTreeNode.goalValue);
+					feedService.getDataFeedConfiguration.send(goalTreeNode.coreFeedID);
+				}
+			}
+			
+			private function clear():void {
+				feedID = 0;
+				feedName = "";
+				insightBound = false;
+			}
+			
+			private function save():void {
+				_goalTreeNode.name = nameInput.text;
+				_goalTreeNode.description = descriptionTextArea.text;
+				_goalTreeNode.tags = TagCloud.fromString(tagsInput.text);
+                _goalTreeNode.iconImage = this.iconPath;
+                _goalTreeNode.newSolutions = newSolutions;
+				if (insightBound) {
+					_goalTreeNode.coreFeedID = feedID;
+					_goalTreeNode.coreFeedName = feedName;
+					var analysisItem:AnalysisMeasure = availableItemBox.selectedItem as AnalysisMeasure;
+                    _goalTreeNode.analysisMeasure = analysisItem;
+                    var highGoal:Boolean = highValuesGoal.selected;
+                    _goalTreeNode.highIsGood = highGoal;
+                    var targetValue:int = int(targetValueInput.text);
+                    _goalTreeNode.goalValue = targetValue;
+                    var selectedDate:AnalysisItem = availableDateBox.selectedItem as AnalysisItem;
+                    if (selectedDate != NONE) {
+                        var rangeOption:RangeOption = rollingDateBox.selectedItem as RangeOption;
+                        var rangeSelection:int = rangeOption.data as int;
+                        var rollingFilterDefinition:RollingDateRangeFilterDefinition = new RollingDateRangeFilterDefinition();
+                        rollingFilterDefinition.field = selectedDate;
+                        rollingFilterDefinition.interval = rangeSelection;
+                        _goalTreeNode.filterDefinition = rollingFilterDefinition;
+                    }
+				}
+                dispatchEvent(new GoalEditEvent());
+				PopUpManager.removePopUp(this);								
+			}
+			
+			private function cancel():void {
+				PopUpManager.removePopUp(this);
+			}
+			
+			private function bindDataSource():void {
+				var window:DataSourceChoiceWindow = DataSourceChoiceWindow(PopUpManager.createPopUp(this, DataSourceChoiceWindow, true));
+				window.addEventListener(DataSourceChoiceEvent.DATA_SOURCE_CHOICE, boundDataSource);
+				PopUpManager.centerPopUp(window);
+			}
+			
+			private function boundDataSource(event:DataSourceChoiceEvent):void {
+				this.feedName = event.feedDefinition.feedName;
+				this.feedID = event.feedDefinition.dataFeedID;
+				insightBound = true;
+                processFeed(event.feedDefinition);
+			}
+
+            private function processFeed(feedDefinition:FeedDefinitionData):void {
+                var measures:ArrayCollection = new ArrayCollection();
+                var dates:ArrayCollection = new ArrayCollection();
+                for each (var analysisItem:AnalysisItem in feedDefinition.fields) {
+                    if (analysisItem.hasType(AnalysisItemTypes.MEASURE)) {
+                        measures.addItem(analysisItem);
+                    } else if (analysisItem.hasType(AnalysisItemTypes.DATE)) {
+                        dates.addItem(analysisItem);
+                    }
+                }
+				this.availableItems = measures;
+                if (dates.length == 0) {
+                    datesAvailable = false;
+                } else {
+                    datesAvailable = true;
+                    dates.addItemAt(NONE, 0);
+                }
+                this.availableDates = dates;
+            }
+
+            private function onDateSelection():void {
+                var selectedObject:Object = availableDateBox.selectedItem;
+                dateSelected = (selectedObject != NONE);
+            }
+			
+			private function gotDefinition():void {
+				var feedDefinition:FeedDefinitionData = feedService.getDataFeedConfiguration.lastResult as FeedDefinitionData;
+				processFeed(feedDefinition);
+				availableItemBox.selectedItem = _goalTreeNode.analysisMeasure;
+                if (analysisMeasure != null) {
+                    var foundAnalysisItem:AnalysisItem = null;
+                    for (var i:int = 0; i < availableItems.length && foundAnalysisItem == null; i++) {
+                        var analysisTest:AnalysisItem = availableItems.getItemAt(i) as AnalysisItem;
+                        if (analysisTest.display == analysisMeasure.display) {
+                            foundAnalysisItem = analysisTest;
+                        }
+                    }
+                    if (analysisTest != null) {
+                        availableItemBox.selectedItem = foundAnalysisItem;
+                    }
+                }
+                if (filterDefinition != null) {
+                    if (filterDefinition != null) {
+                        var foundDate:AnalysisItem = null;
+                        for (var j:int = 0; j < availableDates.length && foundDate == null; j++) {
+                            var dateTest:AnalysisItem = availableDates.getItemAt(j) as AnalysisItem;
+                            if (dateTest.display == filterDefinition.field.display) {
+                                foundDate = dateTest;
+                            }
+                        }
+                        if (analysisTest != null) {
+                            availableDateBox.selectedItem = foundDate;
+                        }
+                    }
+                    dateSelected = true;
+                }
+			}
+
+            private function addIcon():void {
+                var iconWindow:IconSelectionWindow = IconSelectionWindow(PopUpManager.createPopUp(this, IconSelectionWindow, true));
+                iconWindow.addEventListener(IconSelectionEvent.ICON_SELECTION, iconSelected);
+                PopUpManager.centerPopUp(iconWindow);
+            }
+
+            private function iconSelected(event:IconSelectionEvent):void {
+                this.iconPath = event.icon.path;
+            }
+
+            private function removeIcon():void {
+                this.iconPath = null;
+            }
+
+            private function installSolution(event:GoalSolutionInstallEvent):void {
+                var solution:Solution = event.solution;
+                newSolutions.addItem(solution.solutionID);
+                // key of installing the solution here is the goal tree
+                // once we have the solution, we need to retrieve its goal tree
+                if (solution.goalTreeID > 0) {
+                    goalService.getGoalTree.send(solution.goalTreeID);
+                }
+            }
+
+            private function gotGoalTree():void {
+                var goalTree:GoalTree = goalService.getGoalTree.lastResult as GoalTree;
+                var rootNode:GoalTreeNode = goalTree.rootNode;
+                var clonedNode:GoalTreeNode = rootNode.clone();
+                clonedNode.parent = _goalTreeNode;
+                _goalTreeNode.children.addItem(clonedNode);
+            }
+
+            private function chooseSolution():void {
+                var goalSolutionInstallWindow:GoalSolutionInstallWindow = new GoalSolutionInstallWindow();
+                goalSolutionInstallWindow.goalTreeNode = _goalTreeNode;
+                goalSolutionInstallWindow.addEventListener(GoalSolutionInstallEvent.GOAL_SOLUTION_INSTALL, installSolution);
+                PopUpManager.addPopUp(goalSolutionInstallWindow, this, true);
+                PopUpManager.centerPopUp(goalSolutionInstallWindow);
+            }
+		]]>
+	</mx:Script>
+	<mx:RemoteObject destination="userUpload" id="feedService">
+		<mx:method name="getDataFeedConfiguration" result="gotDefinition()"/>
+	</mx:RemoteObject>
+    <mx:RemoteObject destination="goalService" id="goalService">
+		<mx:method name="getGoalTree" result="gotGoalTree()"/>
+	</mx:RemoteObject>
+	<mx:VBox styleName="TitleWindowContents">
+		<mx:Form>						
+			<mx:FormItem label="Name:">
+				<mx:TextInput id="nameInput" text="{nodeName}"/>
+			</mx:FormItem>
+			<mx:FormItem label="Tags:">
+				<mx:TextInput id="tagsInput" text="{nodeTags}"/>						
+			</mx:FormItem>
+			<mx:FormItem label="Description:">
+				<mx:TextArea id="descriptionTextArea" width="300" height="100" text="{nodeDescription}"/>
+			</mx:FormItem>
+            <mx:FormItem label="Icon:" direction="horizontal">
+                <mx:Image source="{iconPath}"/>
+                <mx:Button label="Add or Change Icon..." click="addIcon()"/>
+                <mx:Button icon="{deleteIcon}" toolTip="Remove Icon" click="removeIcon()"/>
+            </mx:FormItem>
+            <mx:FormItem label="">
+                <mx:Button label="Install Solution..." click="chooseSolution()"/>
+            </mx:FormItem>
+			<mx:FormItem label="Goal Data Source Binding:" direction="horizontal">
+				<mx:Label text="{feedName}"/>
+				<mx:Button icon="{dataSourceIcon}" toolTip="Bind Data Source" click="bindDataSource()"/>
+				<mx:Button icon="{deleteIcon}" toolTip="Clear" click="clear()"/>
+			</mx:FormItem>
+			<mx:FormItem label="" enabled="{insightBound}" direction="horizontal">
+                <mx:Form>
+                    <mx:FormItem label="Measure:">
+                        <mx:ComboBox dataProvider="{availableItems}" labelField="display" id="availableItemBox"/>
+                    </mx:FormItem>
+                    <mx:FormItem label="" direction="horizontal">
+                        <mx:RadioButtonGroup id="goalGroup"/>
+				        <mx:RadioButton label="Goal of High Values" value="highValuesGoal" group="{goalGroup}" id="highValuesGoal" selected="{highValues}"/>
+				        <mx:RadioButton label="Goal of Low Values" value="lowValuesGoal" group="{goalGroup}" id="lowValuesGoal" selected="{lowValues}"/>
+                    </mx:FormItem>
+                    <mx:FormItem label="Target Value:">
+                        <mx:TextInput id="targetValueInput" text="{targetValue}"/>
+                    </mx:FormItem>
+                    <mx:FormItem label="Date Field:" enabled="{datesAvailable}">
+                        <mx:ComboBox dataProvider="{availableDates}" labelField="display" id="availableDateBox" close="onDateSelection()"/>
+                    </mx:FormItem>
+                    <mx:FormItem label="Date Range:" enabled="{dateSelected}">
+                        <mx:ComboBox dataProvider="{rangeOptions}" labelField="label" id="rollingDateBox"/>
+                    </mx:FormItem>
+                </mx:Form>
+			</mx:FormItem>
+		</mx:Form>
+		<mx:HBox width="100%" horizontalAlign="center">
+			<mx:Button label="Save" click="save()"/>
+			<mx:Button label="Cancel" click="cancel()"/>
+		</mx:HBox>	
+	</mx:VBox>
+	
+</mx:TitleWindow>

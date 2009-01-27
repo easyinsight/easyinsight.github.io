@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Accordion xmlns:mx="http://www.adobe.com/2006/mxml" width="400">
+	<mx:VBox label="Grid">
+		<mx:List>
+			<mx:Object label="List"/>        
+	        <mx:Object label="Crosstab"/>        
+		</mx:List>	
+	</mx:VBox>	
+	<mx:HBox label="Chart">
+		<mx:Spacer width="20"/>
+		<mx:Accordion>
+		<mx:VBox label="Column">
+			<mx:List>
+				<mx:Object label="2D Column"/>        
+	        	<mx:Object label="3D Column"/>
+	        	<mx:Object label="2D Stacked Column"/>        
+	        	<mx:Object label="3D Stacked Column"/>
+			</mx:List>	
+		</mx:VBox>
+		<mx:VBox label="Bar">
+			<mx:List>
+				<mx:Object label="2D Bar"/>        
+	        	<mx:Object label="3D Bar"/>
+	        	<mx:Object label="2D Stacked Bar"/>        
+	        	<mx:Object label="3D Stacked Bar"/>
+			</mx:List>	
+		</mx:VBox>
+		<mx:VBox label="Pie">
+			<mx:List>
+				<mx:Object label="2D Pie"/>        
+	       		<mx:Object label="3D Pie"/>   
+			</mx:List>	
+		</mx:VBox>
+		</mx:Accordion>							
+	</mx:HBox>
+</mx:Accordion>

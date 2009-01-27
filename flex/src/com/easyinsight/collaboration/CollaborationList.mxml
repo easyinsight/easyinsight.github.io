@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Panel xmlns:mx="http://www.adobe.com/2006/mxml" doubleClickEnabled="true" 
+	implements="com.easyinsight.listing.IPerspective" xmlns:listing="com.easyinsight.listing.*" width="100%" height="100%">
+	<mx:states>
+		<mx:State name="notLoggedIn">
+			<mx:RemoveChild target="{sessionGrid}"/>
+			<mx:AddChild relativeTo="{coreContent}">
+				<listing:GottaLoginPage loginEvent2="gotFocus()"/>
+			</mx:AddChild>
+		</mx:State>
+	</mx:states>
+	<mx:Script>
+		<![CDATA[
+			import mx.events.ListEvent;
+			import mx.events.ItemClickEvent;
+			import mx.collections.ArrayCollection;
+			import com.easyinsight.framework.User;
+			import com.easyinsight.listing.AnalyzeSource;
+			
+			[Bindable]
+			private var displayedSessions:ArrayCollection;
+			private var sourceSessions:ArrayCollection;
+
+            public function search(keyword:String):void {
+
+            }
+
+            public function analyze():AnalyzeSource {
+                var session:CollaborationSession = null;
+                if (sessionGrid.selectedItem != null) {
+                    session = sessionGrid.selectedItem as CollaborationSession;
+                } else {
+                    if (displayedSessions.length == 0) {
+                        // can't do anything...
+                    } else {
+                        session = displayedSessions.getItemAt(0) as CollaborationSession;
+                    }
+                }
+                var analyzeSource:CollaborationAnalyzeSource = null;
+                if (session != null) {
+                    analyzeSource = new CollaborationAnalyzeSource(null, null);
+                }
+                return analyzeSource;
+            }
+
+            public function gotFocus():void {
+				var user:User = User.getInstance();
+	            if (user == null) {
+	                currentState="notLoggedIn";
+	            } else {
+	                if (currentState != "") {
+	                    currentState = "";
+	                }
+	                collabService.getCollaborationSessions.send();
+	            }
+            }
+
+            public function getDefaultAnalyzeState():Boolean {
+                return false;
+            }
+
+            public function isKeywordSearchInstant():Boolean {
+                return false;
+            }
+            
+            private function gotSessions():void {
+            	this.sourceSessions = collabService.getCollaborationSessions.lastResult;
+            	this.displayedSessions = new ArrayCollection(this.sourceSessions.toArray());
+            }
+            
+            private function gridDoubleClick(event:ListEvent):void {
+            	
+            }
+        ]]>
+	</mx:Script>
+	<mx:RemoteObject id="collabService" destination="collaborationService">
+		<mx:method name="getCollaborationSessions" result="gotSessions()"/>
+	</mx:RemoteObject>
+	<mx:HBox id="coreContent" width="100%" height="100%">
+	<mx:DataGrid dataProvider="{displayedSessions}" id="sessionGrid" width="100%" height="100%"
+		itemDoubleClick="gridDoubleClick(event)">
+		<mx:columns>
+			<mx:DataGridColumn headerText="Name" dataField="sessionName"/>
+			<mx:DataGridColumn headerText="Host" dataField="host"/>
+			<mx:DataGridColumn headerText="" dataField="sessionName" 
+				itemRenderer="com.easyinsight.collaboration.JoinCollaborationSessionButton"/>
+		</mx:columns>
+	</mx:DataGrid>
+	</mx:HBox>
+</mx:Panel>

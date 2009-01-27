@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" 
+	creationComplete="addEventListener(KeyboardEvent.KEY_UP, keyEvent); focusManager.setFocus(nameInput)">
+	<mx:Script>
+		<![CDATA[
+			import mx.managers.PopUpManager;
+
+        private function keyEvent(event:KeyboardEvent):void {
+            if (event.keyCode == Keyboard.ENTER) {
+                createField();
+            }
+        }
+
+        private function createField():void {
+            var analysisItem:AnalysisItem;
+            if (grouping.selected) {
+                analysisItem = new AnalysisDimension();
+            } else {
+                analysisItem = new AnalysisMeasure();
+            }
+            var namedKey:NamedKey = new NamedKey();
+            namedKey.name = nameInput.text;
+            analysisItem.key = namedKey;
+            dispatchEvent(new AnalysisItemCreationEvent(analysisItem));
+            PopUpManager.removePopUp(this);
+        }
+
+        private function cancel():void {
+            PopUpManager.removePopUp(this);
+        }
+		]]>
+	</mx:Script>
+	<mx:VBox styleName="TitleWindowContents">
+		<mx:TextInput id="nameInput"/>
+        <mx:RadioButtonGroup id="typeGroup"/>
+        <mx:HBox>
+            <mx:RadioButton label="Grouping" selected="true" value="grouping" id="grouping" group="{typeGroup}"/>
+            <mx:RadioButton label="Sum" value="sum" id="sum" group="{typeGroup}"/>    
+        </mx:HBox>
+		<mx:HBox>
+			<mx:Button label="Create" click="createField()"/>
+			<mx:Button label="Cancel" click="cancel()"/>
+		</mx:HBox>
+	</mx:VBox>
+</mx:TitleWindow>

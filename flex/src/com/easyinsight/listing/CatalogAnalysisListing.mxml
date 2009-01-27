@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%" implements="com.easyinsight.genredata.ICatalogPage"
+	doubleClickEnabled="true">
+	<mx:Metadata>
+		[Event(name="returnToStore", type="com.easyinsight.listing.CatalogNavigationEvent")]
+	</mx:Metadata> 	
+	<mx:Script>
+		<![CDATA[
+			import com.easyinsight.analysis.AnalysisDefinition;
+			import mx.events.ListEvent;
+			import com.easyinsight.genredata.AnalyzeEvent;
+			import mx.events.ItemClickEvent;
+			import mx.collections.ArrayCollection;
+			[Bindable]
+            public var analysisDefinitions:ArrayCollection;            
+			
+			public function analyze():AnalyzeSource {
+                var analysisDefinition:AnalysisDefinition = null;
+                if (analysisDefinitionGrid.selectedItem != null) {
+                    analysisDefinition = analysisDefinitionGrid.selectedItem as AnalysisDefinition;
+                } else {
+                    if (analysisDefinitions.length == 0) {
+                        // can't do anything...
+                    } else {
+                        analysisDefinition = analysisDefinitions.getItemAt(0) as AnalysisDefinition;
+                    }
+                }
+                var analyzeSource:AnalyzeSource = null;
+                if (analysisDefinition != null) {
+                    analyzeSource = new AnalysisDefinitionAnalyzeSource(analysisDefinition);
+                }
+                return analyzeSource;
+            }
+			
+			private function returnToStore():void {
+				dispatchEvent(new CatalogNavigationEvent(CatalogNavigationEvent.RETURN_TO_STORE));
+			}
+			
+			private function gridDoubleClick(event:ListEvent):void {
+				var analysisDefinition:AnalysisDefinition = event.currentTarget.selectedItem as AnalysisDefinition;
+				dispatchEvent(new AnalyzeEvent(new AnalysisDefinitionAnalyzeSource(analysisDefinition)));
+			}
+		]]>
+	</mx:Script>
+	<mx:VBox width="100%" height="100%">
+		<mx:Button label="Return to Store" click="returnToStore()"/>	
+		<mx:DataGrid dataProvider="{analysisDefinitions}" width="100%" height="100%" id="analysisDefinitionGrid" selectable="true" itemDoubleClick="gridDoubleClick(event)">
+			<mx:columns>				
+				<mx:DataGridColumn headerText="" width="20" dataField="title" itemRenderer="com.easyinsight.listing.AnalysisDefinitionIcon"/>
+				<mx:DataGridColumn headerText="Name" dataField="name"/>
+				<mx:DataGridColumn headerText="" width="100" dataField="name" itemRenderer="com.easyinsight.listing.AnalysisCatalogIconControls"/>
+			</mx:columns>				
+		</mx:DataGrid>
+	</mx:VBox>
+</mx:Canvas>

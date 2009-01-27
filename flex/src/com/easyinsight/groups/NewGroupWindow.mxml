@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" creationComplete="onCreationComplete()" title="New Group">
+	<mx:Script>
+		<![CDATA[
+			import mx.validators.Validator;
+			import mx.managers.PopUpManager;
+			
+			private var validators:Array;
+			
+			private function onCreationComplete():void {
+				validators = [ nameValidator ];				
+			}
+			
+			private function createGroup():void {
+				var results:Array = Validator.validateAll(validators);
+				if (results.length == 0) {
+					var group:Group = new Group();
+					group.name = nameInput.text;
+					group.description = descriptionInput.text;
+					group.publiclyVisible = anyoneCanView.selected;
+					group.publiclyJoinable = anyoneCanJoin.selected;
+					groupService.addGroup.send(group);
+				}
+			}
+			
+			private function cancel():void {
+				PopUpManager.removePopUp(this);
+			}
+			
+			private function addedGroup():void {
+				var groupID:int = groupService.addGroup.lastResult as int;
+				dispatchEvent(new GroupSelectedEvent(groupID));
+				PopUpManager.removePopUp(this);
+			}
+		]]>
+	</mx:Script>
+	<mx:RemoteObject destination="groupService" id="groupService">
+		<mx:method name="addGroup" result="addedGroup()"/>
+	</mx:RemoteObject>
+	<mx:Form styleName="TitleWindowContents">
+		<mx:FormItem label="Group Name: ">
+			<mx:TextInput id="nameInput"/>
+		</mx:FormItem>
+		<mx:FormItem label="Group Description: ">
+			<mx:TextArea id="descriptionInput"/>
+		</mx:FormItem>
+		<mx:FormItem label="Anyone Can View This Group: ">
+			<mx:CheckBox id="anyoneCanView"/>
+		</mx:FormItem>
+		<mx:FormItem label="Anyone Can Join This Group: ">
+			<mx:CheckBox id="anyoneCanJoin"/>
+		</mx:FormItem>
+		<mx:FormItem label="" direction="horizontal">
+			<mx:Button label="Create!" click="createGroup()"/>
+			<mx:Button label="Cancel" click="cancel()"/>
+		</mx:FormItem>
+	</mx:Form>
+	<mx:StringValidator id="nameValidator" source="{nameInput}" minLength="5" maxLength="30" property="text"/>	
+</mx:TitleWindow>

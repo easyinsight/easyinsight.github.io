@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Module xmlns:mx="http://www.adobe.com/2006/mxml" implements="com.easyinsight.dashboard.IViewFactory" initialize="initHandler()">
+	<mx:Script>
+		<![CDATA[
+			import com.easyinsight.analysis.AnalysisItem;
+			import com.easyinsight.analysis.AnalysisCalculation;
+			import com.easyinsight.analysis.AnalysisList;
+			import com.easyinsight.analysis.AnalysisRangeDimension;
+			import com.easyinsight.analysis.AnalysisDateDimension;
+			import com.easyinsight.analysis.AnalysisDimension;
+			import com.easyinsight.analysis.AnalysisMeasure;
+			import mx.collections.ArrayCollection;
+			import com.easyinsight.framework.DataService;
+			import com.easyinsight.analysis.FeedMetadata;
+			import com.easyinsight.analysis.AnalysisDefinition;
+			import com.easyinsight.analysis.BasicChartView;
+			
+			import mx.core.BitmapAsset;
+			
+			private var chartView:BasicChartView;
+			
+			private function initHandler():void {
+				Security.allowDomain("*.nvmodules.netvibes.com");
+			}
+			
+			public function createDisplay(definition:AnalysisDefinition):DisplayObject {
+				chartView = new BasicChartView();
+				var dataService:DataService = new DataService();
+                dataService.dataFeedID = definition.dataFeedID;                
+                chartView.showDropAreas = false;
+                chartView.dataService = dataService;
+                chartView.analysisDefinition = definition;                                       
+                dataService.reloadInitialContent(this, handleFeedMetadata);
+                chartView.visible = false;                
+                return chartView;
+			}
+			
+			private function handleFeedMetadata(feedMetadata:FeedMetadata):void {				
+                chartView.availableFields = new ArrayCollection(feedMetadata.fields);
+                chartView.initializeToDefinition();
+                chartView.visible = true;
+            }
+		]]>
+	</mx:Script>
+	<mx:Style source="com/easyinsight/skin/osx/OSX.css"/>
+</mx:Module>

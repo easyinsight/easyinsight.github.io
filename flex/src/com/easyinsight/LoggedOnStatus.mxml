@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:HBox xmlns:mx="http://www.adobe.com/2006/mxml">
+	<mx:Script>
+		<![CDATA[
+			import com.easyinsight.framework.LoginEvent;
+			import mx.messaging.config.ServerConfig;
+			import mx.core.Application;
+            import com.easyinsight.framework.AccountManagementWindow;
+            import mx.managers.PopUpManager;
+            import com.easyinsight.framework.User;
+
+            public function logout():void {
+                User.destroy();
+                ServerConfig.getChannelSet(authService.destination).logout();
+                User.getEventNotifier().dispatchEvent(new LoginEvent(LoginEvent.LOGOUT));
+            }
+        ]]>
+	</mx:Script>
+	<mx:RemoteObject id="authService" destination="login">
+	</mx:RemoteObject>
+	<mx:Button label="Log Out" click="logout()"/>
+</mx:HBox>

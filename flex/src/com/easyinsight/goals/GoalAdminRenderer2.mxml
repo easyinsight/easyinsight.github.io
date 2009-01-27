@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="utf-8"?>
+<OrgChartItemRendererBase xmlns="com.easyinsight.goals.*" xmlns:mx="http://www.adobe.com/2006/mxml"
+	borderStyle="solid" borderColor="#CCCCCC" cornerRadius="10">
+	<mx:Script>
+		<![CDATA[
+			import mx.managers.PopUpManager;
+			import mx.events.DragEvent;
+			import mx.collections.ArrayCollection;
+			import ilog.orgchart.OrgChartItem;
+			
+			[Bindable]
+	        [Embed(source="../../../../assets/navigate_cross.png")]
+	        private var deleteIcon:Class;
+	        
+	        [Bindable]
+	        [Embed(source="../../../../assets/add.png")]
+	        private var addIcon:Class;
+	        
+	        [Bindable]
+	        [Embed(source="../../../../assets/pencil.png")]
+	        private var editIcon:Class;
+
+            [Bindable]
+	        [Embed(source="../../../../assets/pencil.png")]
+	        private var chartIcon:Class;
+	        
+	        private var orgChartItem:OrgChartItem;
+
+            [Bindable]
+            private var goalIcon:String;
+
+            [Bindable]
+            private var goalIconExists:Boolean;
+	        
+	        [Bindable]
+	        private var goalName:String;
+
+            [Bindable]
+            private var nodeText:String;
+	        
+	        override public function set data(value:Object):void {
+	        	this.orgChartItem = value as OrgChartItem;
+                var goalTreeNode:GoalTreeNode = orgChartItem.data as GoalTreeNode;
+                if (goalTreeNode != null) {
+                    goalName = goalTreeNode.name;
+                    goalIcon = goalTreeNode.iconImage;
+                    goalIconExists = goalTreeNode.iconImage != null && goalTreeNode.iconImage != "";
+                    nodeText = "This goal is derived from the results of its children.";
+                    nodeText = "This goal is bound to a data source.";
+                    nodeText = "This goal is derived from its children.";
+                }
+	        }
+	        
+	        override public function get data():Object {
+	        	return this.orgChartItem;
+	        }        	       
+	        
+	        private function deleteSelf(event:MouseEvent):void {
+				var goalTreeNode:GoalTreeNode = orgChartItem.data as GoalTreeNode;
+				var parent:GoalTreeNode = goalTreeNode.parent;
+				parent.children.removeItemAt(parent.children.getItemIndex(goalTreeNode));
+				if (goalTreeNode.children != null) {
+					for each (var childNode:GoalTreeNode in goalTreeNode.children) {
+						childNode.parent = parent;
+						parent.children.addItem(childNode);
+					}				
+				}
+				dispatchEvent(new OrganizationChartRefreshEvent());
+			}
+			
+			private function addChildNode(event:MouseEvent):void {
+				var goalTreeNode:GoalTreeNode = orgChartItem.data as GoalTreeNode;
+				if (goalTreeNode.children == null) {
+					goalTreeNode.children = new ArrayCollection();
+				}
+				var newChild:GoalTreeNode = new GoalTreeNode();
+				goalTreeNode.children.addItem(newChild);
+				newChild.parent = goalTreeNode;
+				dispatchEvent(new OrganizationChartRefreshEvent());
+			}
+			
+			override protected function configureLevelOfDetails():void {
+		        //here we customize the visibility of children depending 
+		        //on the current level of detail
+		        
+		        //As simple example we set 2 layers
+		        //At the first level of detail, only the background is visible
+		        
+		        //Layer1 is visible in level of detail 1 and layer 2 at level 2.
+		        //With this API you can share elements to be visible in several levels.
+		        
+		        //By default 3 levels of detail are specified, this can be customized
+		        //by the OrgChart.lodLevels property. 
+		                 
+		        //setLevelsOfDetails(layer1, [1]);
+		        setLevelsOfDetails(layer2, [2]);        
+		    }
+                                      
+		    override protected function updateDisplayList(unscaledWidth:Number, unscaledHeight:Number):void {
+		        
+		        super.updateDisplayList(unscaledWidth, unscaledHeight);
+		                                      
+		        var theData:OrgChartItem = data as OrgChartItem;
+		        
+		        if (theData != null) {
+		          
+		          //Have a different style depending on the state of the rendered item.
+		          //here the background of the item changes if the item is selected and/or highlighted.
+		          var isHightlighted:Boolean = theData.orgChart.isItemHighlighted(theData);
+		          var isSelected:Boolean = theData.orgChart.isItemSelected(theData);
+		          
+		          var color:uint;         
+		          if (isHightlighted) {
+		            color = isSelected ? 0x8695FF: 0xFEFBBA;               
+		          } else {          
+		            color = isSelected ? 0x637DFF: 0xEAF1F6;            
+		          }
+		          
+		          setStyle("backgroundColor", color);          
+		          
+		        }
+		    }
+		    
+		    private function editNode(event:MouseEvent):void {
+		    	var goalNodeWindow:GoalNodeAdminWindow = new GoalNodeAdminWindow();
+		    	goalNodeWindow.goalTreeNode = orgChartItem.data as GoalTreeNode;
+                goalNodeWindow.addEventListener(GoalEditEvent.GOAL_EDIT, goalEdited);
+		    	PopUpManager.addPopUp(goalNodeWindow, this.parent.parent);
+		    	PopUpManager.centerPopUp(goalNodeWindow);
+		    }
+
+            private function goalEdited(event:GoalEditEvent):void {
+                var goalTreeNode:GoalTreeNode = orgChartItem.data as GoalTreeNode;
+                goalNameInput.text = goalTreeNode.name;
+                if (goalTreeNode.newSolutions.length > 0) {
+                    dispatchEvent(new OrganizationChartRefreshEvent());
+                }
+            }
+		    
+		    private function onDragDrop(event:DragEvent):void {
+		    	// if the drag source is a solution with a goal tree...
+		    	// add that tree as a child to this node
+		    }
+
+            private function onNameChange():void {
+                var goalTreeNode:GoalTreeNode = orgChartItem.data as GoalTreeNode;
+                goalTreeNode.name = goalNameInput.text;
+            }
+		]]>
+	</mx:Script>
+	<mx:VBox id="layer2" verticalAlign="middle" paddingLeft="10" 
+           paddingRight="10" paddingTop="0" paddingBottom="0" width="220" height="60" horizontalAlign="center">
+        <mx:HBox>
+            <mx:Image id="iconImage" source="{goalIcon}" visible="{goalIconExists}"/>
+            <mx:TextInput id="goalNameInput" text="{goalName}" fontSize="12" change="onNameChange()"/>
+        </mx:HBox>
+		<mx:HBox width="100%" horizontalAlign="center">
+            <mx:Button toolTip="Edit..." icon="{editIcon}" click="editNode(event)"/>
+            <mx:Button toolTip="Add Child" icon="{addIcon}" click="addChildNode(event)"/>
+            <mx:Button toolTip="Delete" icon="{deleteIcon}" click="deleteSelf(event)"/>
+        </mx:HBox>
+	</mx:VBox>
+</OrgChartItemRendererBase>

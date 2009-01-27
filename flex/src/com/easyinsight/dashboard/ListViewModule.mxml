@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Module xmlns:mx="http://www.adobe.com/2006/mxml" implements="com.easyinsight.dashboard.IViewFactory">
+	<mx:Script>
+		<![CDATA[
+			import mx.core.ScrollControlBase;
+			import com.easyinsight.analysis.AnalysisItem;
+			import com.easyinsight.analysis.AnalysisCalculation;
+			import com.easyinsight.analysis.AnalysisList;
+			import com.easyinsight.analysis.AnalysisRangeDimension;
+			import com.easyinsight.analysis.AnalysisDateDimension;
+			import com.easyinsight.analysis.AnalysisDimension;
+			import com.easyinsight.analysis.AnalysisMeasure;
+			import mx.collections.ArrayCollection;
+			import com.easyinsight.framework.DataService;
+			import com.easyinsight.analysis.FeedMetadata;
+			import com.easyinsight.analysis.AnalysisDefinition;
+			import com.easyinsight.analysis.ListView;
+			
+			private var listView:ListView;
+			
+			public function createDisplay(definition:AnalysisDefinition):DisplayObject {
+				listView = new ListView();
+				var dataService:DataService = new DataService();
+                dataService.dataFeedID = definition.dataFeedID;                
+                listView.showDropAreas = false;
+                listView.dataService = dataService;
+                listView.analysisDefinition = definition;                                       
+                dataService.reloadInitialContent(this, handleFeedMetadata);
+                listView.visible = false;                
+                return listView;
+			}
+			
+			private function handleFeedMetadata(feedMetadata:FeedMetadata):void {				
+                listView.availableFields = new ArrayCollection(feedMetadata.fields);
+                listView.initializeToDefinition();
+                listView.visible = true;
+            }
+            
+            private function annoyingDependencies():void {
+            	var analysisMeasure:AnalysisMeasure;
+            	var analysisDimension:AnalysisDimension;
+            	var analysisDateDimension:AnalysisDateDimension;
+            	var analysisRangeDimension:AnalysisRangeDimension;
+            	var analysisList:AnalysisList;
+            	var analysisCalc:AnalysisCalculation;
+            	var analysisItem:AnalysisItem;
+            	var scrollControlBase:ScrollControlBase;
+            }
+		]]>
+	</mx:Script>
+	<mx:Style source="com/easyinsight/skin/osx/OSX.css"/>
+</mx:Module>

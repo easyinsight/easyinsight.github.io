@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%" implements="com.easyinsight.genredata.ICatalogPage"
+	doubleClickEnabled="true">
+	<mx:Metadata>
+		[Event(name="returnToStore", type="com.easyinsight.listing.CatalogNavigationEvent")]
+	</mx:Metadata> 	
+	<mx:Script>
+		<![CDATA[
+			import mx.events.ListEvent;
+			import com.easyinsight.genredata.AnalyzeEvent;
+			import mx.events.ItemClickEvent;
+			import mx.collections.ArrayCollection;
+			[Bindable]
+			public var dataFeeds:ArrayCollection;
+			
+			public function analyze():AnalyzeSource {				
+				var dataFeedDescriptor:DataFeedDescriptor = null;
+				if (dataFeedGrid.selectedItem != null) {
+					dataFeedDescriptor = dataFeedGrid.selectedItem as DataFeedDescriptor;					
+				} else {
+					if (dataFeeds.length == 0) {
+						// can't do anything...
+					} else {
+						dataFeedDescriptor = dataFeeds.getItemAt(0) as DataFeedDescriptor;
+					}
+				}
+				var analyzeSource:AnalyzeSource = null;
+				if (dataFeedDescriptor != null) {
+					analyzeSource = new DescriptorAnalyzeSource(dataFeedDescriptor);
+				}
+				return analyzeSource;
+			}
+			
+			private function returnToStore():void {
+				dispatchEvent(new CatalogNavigationEvent(CatalogNavigationEvent.RETURN_TO_STORE));
+			}
+			
+			private function gridDoubleClick(event:ListEvent):void {
+				var feedDescriptor:DataFeedDescriptor = event.currentTarget.selectedItem as DataFeedDescriptor;
+				dispatchEvent(new AnalyzeEvent(new DescriptorAnalyzeSource(feedDescriptor)));
+			}
+		]]>
+	</mx:Script>
+	<mx:VBox width="100%" height="100%">
+		<mx:Button label="Return to Store" click="returnToStore()"/>	
+		<mx:DataGrid dataProvider="{dataFeeds}" width="100%" height="100%" id="dataFeedGrid" selectable="true" itemDoubleClick="gridDoubleClick(event)">
+			<mx:columns>				
+				<mx:DataGridColumn headerText="Name" dataField="name"/>
+				<mx:DataGridColumn headerText="Owner" width="120" dataField="ownerName"/>
+				<mx:DataGridColumn headerText="Attribution" width="160" dataField="attribution"/>
+				<mx:DataGridColumn headerText="Price" width="90" dataField="name" itemRenderer="com.easyinsight.listing.PriceRenderer"/>
+				<mx:DataGridColumn headerText="" width="100" dataField="name" itemRenderer="com.easyinsight.listing.CatalogIconControls"/>
+			</mx:columns>				
+		</mx:DataGrid>
+	</mx:VBox>		
+</mx:Canvas>

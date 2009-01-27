@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:List xmlns:mx="http://www.adobe.com/2006/mxml" initialize="createContents()" dataProvider="{genres}" labelField="genreName"
+	iconField="icon" textIndent="5" rowCount="4">
+	<mx:Metadata>
+		[Event(name="genreChanged", type="com.easyinsight.listing.GenreChangedEvent")]
+	</mx:Metadata>
+	<mx:Script>
+		<![CDATA[
+			import com.easyinsight.genredata.Sports;
+                    import genredata.Financial;
+                    import genredata.Intro;
+                    import genredata.Adult;
+                    import mx.controls.List;
+                    import mx.events.ListEvent;
+                    import genredata.GenreDataProvider;
+                    import salesforce.SalesForceSelection;
+                    import google.GoogleSpreadsheetSelection;
+                    import mx.collections.ArrayCollection;
+
+                    [Bindable]
+                    private var genres:ArrayCollection;
+                    private var currentGenre:Genre;
+
+
+                    [Bindable]
+                    [Embed(source="../../../../assets/house.png")]
+                    public var houseIcon:Class;
+
+                    [Bindable]
+                    [Embed(source="../../../../assets/currency_dollar.png")]
+                    public var finacom.easyinsight.introIcon:Class;
+
+                    [Bindable]
+                    [Embed(source="../../../../assets/basketball.png")]
+                    public var sportsIcon:Class;
+
+                    private function createContents():vocom.easyinsight.intro                        var genres:ArrayCollection = new ArrayCollection();
+                        var homeProvider:GenreDataProvider = new GenreDataProvider();
+                        homeProvider.intro = new Intro()com.easyinsight.intro                     var homeGenre:Genre = new Genre("Home", null, homeProvider, houseIcon);
+                        genres.addItem(homeGenre);
+                        //var adultProvider:GenreDataProvider = new GenreDataProvider();
+                        //adultProvider.genre = "Adult";
+                        //adultProvider.intro = new Adult();
+                        //genres.addItem(new com.easyinsight.intro("Adult", "Adult", adultProvider));
+                        var financialProvider:GenreDataProvider = new GenreDataProvider();
+                        financialProvider.genre = "Financial";
+                        financialProvider.intro = new Financial();
+                        genres.addItem(new Genre("Financial", "Financial", financialProvider, financialIcon));
+                        genres.addItem(new Genre("Google", "Google", new GoogleSpreadsheetSelection(), null));
+                        //genres.addItem(new Genre("Salesforce", new SalesForceSelection()));
+                        var sportsProvider:GenreDataProvider = new GenreDataProvider();
+                        sportsProvider.genre = "Sports";
+                        sportsProvider.intro = new Sports();
+                        genres.addItem(new Genre("Sports", "Sports", sportsProvider, sportsIcon));
+                        this.genres = genres;
+                        this.currentGenre = homeGenre;
+                        addEventListener(MouseEvent.CLICK, genreSelected);
+                    }
+
+                    public function getCurrentGenre():Genre {
+                        return currentGenre;
+                    }
+
+                    private function genreSelected(event:MouseEvent):void {
+                        var genre:Genre = this.selectedItem as Genre;
+                        currentGenre = genre;
+                        dispatchEvent(new GenreChangedEvent(genre));
+                    }
+                ]]>
+	</mx:Script>
+</mx:List>

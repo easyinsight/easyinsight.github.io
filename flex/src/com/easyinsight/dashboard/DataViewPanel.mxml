@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:analysis="analysis.*" alpha="1" backgroundAlpha=".1" 
+	width="100%" height="100%" backgroundColor="#FFFFFF">
+	<mx:Metadata>
+		[Event(name="analyze", type="com.easyinsight.genredata.AnalyzeEvent")]
+		[Event(name="returnToList", type="com.easyinsight.dashboard.ReturnToListEvent")]
+	</mx:Metadata> 
+	<mx:Script>
+		<![CDATA[
+			import com.easyinsight.map.YahooMapView;
+			import com.easyinsight.map.ILogMapView;
+			import mx.controls.Label;
+			import mx.rpc.events.FaultEvent;
+			import com.easyinsight.listing.AnalysisDefinitionAnalyzeSource;
+                    import com.easyinsight.genredata.AnalyzeEvent;
+                    import com.easyinsight.analysis.AnalysisDefinitionLoadedEvent;
+                    import mx.managers.PopUpManager;
+                    import mx.collections.ArrayCollection;
+                    import com.easyinsight.analysis.FeedMetadata;
+                    import com.easyinsight.analysis.ListView;
+                    import com.easyinsight.analysis.CrosstabView;
+                    import com.easyinsight.analysis.BasicChartView;
+                    import com.easyinsight.analysis.DataView;
+                    import com.easyinsight.framework.DataService;
+                    import com.easyinsight.analysis.AnalysisDefinition;
+
+                    private var definition:AnalysisDefinition;
+                    [Bindable]
+                    private var title:String;
+                    private var dataView:DataView;
+                    
+                    private var titleFunction:Function;
+                    
+                    public function set titleClickFunction(functionName:Function):void {
+                    	this.titleFunction = functionName;
+                    }
+                    
+                    public function set analysisID(analysisID:int):void {
+                    	analysisService.openAnalysisDefinition.send(analysisID);
+                    }
+                    
+                    private function gotAnalysisDefinition():void {
+                    	this.analysisDefinition = analysisService.openAnalysisDefinition.lastResult as AnalysisDefinition;
+                    }
+
+                    public function set analysisDefinition(definition:AnalysisDefinition):void {
+                        this.definition = definition;
+                        var dataService:DataService = new DataService();
+                        dataService.dataFeedID = definition.dataFeedID;
+                        var dataView:DataView;
+                        if (definition.getDataFeedType() == "Crosstab") {
+                            dataView = new CrosstabView();
+                        } else if (definition.getDataFeedType() == "Chart") {
+                            dataView = new BasicChartView();
+                        } else if (definition.getDataFeedType() == "Map") {
+                        	dataView = new ILogMapView();
+                        } else if (definition.getDataFeedType() == "Yahoo Map") {
+                        	dataView = new YahooMapView();
+                        } else {
+                            dataView = new ListView();
+                        }
+                        dataView.showDropAreas = false;
+                        dataView.dataService = dataService;
+                        dataView.analysisDefinition = definition;
+                        this.dataView = dataView;                        
+                        //dataView.initializeToDefinition();
+                        this.title = definition.name;                        
+                        dataService.reloadInitialContent(this, handleFeedMetadata);
+                        dataView.visible = false;
+                    }
+                    
+                    override protected function commitProperties():void {
+                    	super.commitProperties();
+                    	if (coreVBox.getChildren().length == 0) {
+                        	coreVBox.addChild(dataView);
+                        }
+                    	if (dataView != null) {
+                    		dataView.initializeToDefinition();
+                    	}	
+                    }
+
+                    private function handleFeedMetadata(feedMetadata:FeedMetadata):void {
+                        dataView.availableFields = new ArrayCollection(feedMetadata.fields);
+                        dataView.visible = true;
+                    }
+
+                    private function closeThis():void {
+                        PopUpManager.removePopUp(this);
+                    }
+
+                    private function search():void {
+                        trace("searching");
+                    }
+
+                    private function analyze():void {
+                        dispatchEvent(new AnalysisDefinitionLoadedEvent(definition));
+                    }
+
+                    private function blah():void {
+                    	/*if (dataView != null) {
+                        	coreVBox.addChild(dataView);
+                        }*/
+                    }
+
+                    private function titleClick():void {
+                        dispatchEvent(new AnalyzeEvent(new AnalysisDefinitionAnalyzeSource(definition)));
+                    }
+                    
+                    private function failure(event:FaultEvent):void {
+                    	var failureLabel:String = event.message.toString();
+                    	var label:Label = new Label();
+                    	label.text = failureLabel;
+                    	coreVBox.addChild(label);
+                    }
+                    
+                    private function returnToList():void {
+						dispatchEvent(new ReturnToListEvent());                    	
+                    }
+                ]]>
+	</mx:Script>
+	<mx:RemoteObject id="analysisService" destination="analysisDefinition">
+		<mx:method name="openAnalysisDefinition" result="gotAnalysisDefinition()" fault="failure(event)"/>
+	</mx:RemoteObject>
+	<mx:ApplicationControlBar width="100%">
+		<mx:LinkButton label="{title}" click="titleClick()" textDecoration="underline"/>
+		<mx:Button label="Return" click="returnToList()"/>
+	</mx:ApplicationControlBar>	
+	<mx:VBox id="coreVBox" height="100%" width="100%" creationComplete="blah()">
+		<!-- <mx:HBox width="100%">
+			<mx:Label text="Search:"/>
+			<mx:TextInput change="search()" id="searchInput"/>
+			<mx:Button label="Analyze" click="analyze()"/>	
+		</mx:HBox> -->
+	</mx:VBox>
+</mx:VBox>

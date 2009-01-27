@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" title="Embedding">
+	<mx:states>
+		<mx:State name="customize">
+			<mx:AddChild relativeTo="{quickBox}" position="firstChild">
+				<mx:VBox>
+					<mx:Grid>
+						<mx:GridRow>
+							<mx:GridItem/>													
+							<mx:GridItem>
+								<mx:HSlider minimum="0" maximum="600" liveDragging="true" change="changeSize()"
+									id="widthSlider" snapInterval="1" tickInterval="50" value="{canvasWidth}" labels="['0', '600']"
+									allowTrackClick="true" tickColor="black" width="600"/>
+							</mx:GridItem>	
+						</mx:GridRow>
+						<mx:GridRow>
+							<mx:GridItem>
+								<mx:VSlider minimum="0" maximum="700" liveDragging="true" change="changeSize()"
+									id="heightSlider" snapInterval="1" tickInterval="50" value="{canvasHeight}" labels="['700', '0']"
+									allowTrackClick="true" tickColor="black" height="700"/>
+							</mx:GridItem>
+							<mx:GridItem>
+								<mx:Canvas width="{canvasWidth}" height="{canvasHeight}" backgroundColor="#000000" 
+									backgroundAlpha="1"/>
+							</mx:GridItem>	
+						</mx:GridRow>
+					</mx:Grid>
+				</mx:VBox>
+			</mx:AddChild>
+		</mx:State>
+	</mx:states>
+	<mx:Script>
+		<![CDATA[
+			import mx.managers.PopUpManager;
+			import mx.events.ItemClickEvent;
+			[Bindable]
+			private var url:String;
+			
+			[Bindable]
+			private var canvasWidth:int = 400;
+			
+			[Bindable]
+			private var canvasHeight:int = 350;
+			
+			private var _analysisID:int;
+			
+			public function set analysisID(analysisID:int):void {
+				this._analysisID = analysisID;
+				updateURL();			
+			}
+			
+			private function updateURL():void {
+				url = "<object width=\""+canvasWidth+"\" height=\""+canvasHeight+"\"><param name=\"movie\" value=\"EmbeddedInsight.swf\" /><param name=\"quality\" value=\"high\" /><param name=\"bgcolor\" value=\"#869ca7\" /><param name=\"allowScriptAccess\" value=\"always\" /><param name=\"flashvars\" value=\"analysisID="+_analysisID+"\"/><embed src=\"http://ec2-67-202-40-33.compute-1.amazonaws.com/DMS/easyui-debug/EmbeddedInsight.swf\" quality=\"high\" bgcolor=\"#869ca7\" width=\""+canvasWidth+"\" height=\""+canvasHeight+"\" name=\"EmbeddedInsight\" align=\"middle\" play=\"true\" loop=\"false\" quality=\"high\" flashvars=\"analysisID=8\" allowScriptAccess=\"always\" type=\"application/x-shockwave-flash\" pluginspage=\"http://www.adobe.com/go/getflashplayer\"></embed></object>";
+			}
+			
+			private function changeSize():void {
+				canvasWidth = widthSlider.value;
+				canvasHeight = heightSlider.value;
+				updateURL();
+			}
+			
+			private function modeChange(event:ItemClickEvent):void {
+				if (event.currentTarget.selectedValue == "quickMode") {
+					currentState = "";
+				} else {
+					currentState = "customize";
+				}
+			}
+			
+			private function copyToClipboard():void {
+				System.setClipboard(url);
+			}
+		]]>
+	</mx:Script>
+	<mx:VBox>
+		<mx:HBox>
+			<mx:RadioButtonGroup id="modesGroup" itemClick="modeChange(event)"/>
+			<mx:RadioButton label="Quick" groupName="modesGroup" id="quickMode" value="quickMode" selected="true"/>
+			<mx:RadioButton label="Customize" groupName="modesGroup" id="customizeMode" value="customizeMode"/>
+		</mx:HBox>
+		<mx:HBox id="quickBox">			
+			<mx:TextArea text="{url}" width="400" height="50" wordWrap="true" id="firstTextArea"/>
+			<mx:Button label="Copy to Clipboard" click="copyToClipboard()"/>
+		</mx:HBox>
+		<mx:Button label="Close" click="PopUpManager.removePopUp(this)"/>
+	</mx:VBox>
+</mx:TitleWindow>

@@ -1,0 +1,189 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%" implements="com.easyinsight.analysis.IAnalysisDefinitionProvider"
+		creationComplete="getDataIfPossible()">
+	<mx:Script>
+		<![CDATA[
+			import analysis.CrosstabDefinition;
+                    import com.easyinsight.framework.IDataService;
+                    import mx.charts.series.PieSeries;
+                    import mx.collections.ArrayCollection;
+                    import mx.events.DragEvent;
+                    import mx.managers.DragManager;
+                    import mx.containers.Canvas;
+                    import mx.binding.utils.BindingUtils;
+                    import mx.controls.dataGridClasses.DataGridColumn;
+                    import mx.controls.List;
+                    import analysis.AnalysisDefinition;
+
+                    [Bindable]
+                    private var rowLabel:String = "Drop Dimension Here";
+                    [Bindable]
+                    private var columnLabel:String = "Drop Dimension Here";
+                    [Bindable]
+                    private var measureLabel:String = "Drop Measure Here";
+
+                    [Bindable]
+                    public var dataService:IDataService;
+
+                    [Bindable]
+                    private var myDataSet:ArrayCollection = new ArrayCollection();
+
+                    [Bindable]
+                    public var startingCrosstabDefinition:CrosstabDefinition;
+
+                    public function getDataIfPossible():void {
+                        if (startingCrosstabDefinition != null) {
+                            openAnalysis(startingCrosstabDefinition);
+                        }
+                    }
+
+                    public function openAnalysis(analysisDefinition:CrosstabDefinition):void {
+                        rowLabel = analysisDefinition.rowName;
+                        columnLabel = analysisDefinition.columnName;
+                        measureLabel = analysisDefinition.measureName;
+                        requestPivotTable();
+                    }
+
+                    privacom.easyinsight.analysision dragEnterHandler(event:DragEvent):void {
+                        var initialList:List = List(event.dragInitiator);
+                        var selectedObject:Object = Object(initialList.selectedItem);
+                        var objectType:String = initialList.id;
+                        var targetCanvas:Canvas = Canvas(event.currentTarget);
+                        var accept:Boolean = ((targetCanvas.id == "columnCanvas" || targetCanvas.id == "rowCanvas") &&
+                            objectType == "Dimension") || ((targetCanvas.id == "measureCanvas") &&
+                            objectType == "Measure");
+                        if (accept) {
+                            DragManager.acceptDragDrop(targetCanvas);
+                        }
+                    }
+
+                    public function debugStuff():void {
+                        trace(dataSet.scrollToIndex(8));
+                    }
+
+                    public function createAnalysisDefinition():AnalysisDefinition {
+                        trace("creating analysis definition");
+                        var analysisDefinition:CrosstabDefinition = new CrosstabDefinition();
+                        analysisDefinition.dataFeedID = dataService.dataFeedID;
+                        analysisDefinition.dataFeedType = "Crosstab";
+                        analysisDefinition.columnName = columnLabel;
+                        analysisDefinition.measureName = measureLabel;
+                        analysisDefinition.rowName = rowLabel;
+                        if (startingCrosstabDefinition != null) {
+                            analysisDefinition.analysisID = startingCrosstabDefinition.analysisID;
+                        }
+                        return analysisDefinition;
+                    }
+
+                    private function dragDropHandler(event:DragEvent):void {
+                        var targetCanvas:Canvas = Canvas(event.currentTarget);
+                        var initialList:List = List(event.dragInitiator);
+                        var selectedObject:Object = Object(initialList.selectedItem);
+                        var label:String = String(selectedObject);
+                        if (targetCanvas.id == "columnCanvas") {
+                            columnLabel = label;
+                        } else if (targetCanvas.id == "rowCanvas") {
+                            rowLabel = label;
+                        } else if (measureCanvas.id == "measureCanvas") {
+                            measureLabel = label;
+                        }
+                        requestPivotTable();
+                    }
+
+                    private function requestPivotTable():void {
+                        if (rowLabel != "Drop Dimension Here" && columnLabel != "Drop Dimension Here" &&
+                            measureLabel != "Drop Measure Here") {
+                                trace("calling the data service...");
+                                dataService.getPivotData(measureLabel, rowLabel, columnLabel, this, processPivotTable);
+                            }
+                    }
+
+
+
+                    public function processPivotTable(pivotRowData:Object):void {
+                        trace("processing...");
+                        //var pivotRowData:Object = pivotService.pivot.lastResult;
+                        myDataSet = new ArrayCollection()
+                        if (pivotRowData == null) {
+                            trace("pivot row data was null");
+                        } else {
+                            trace("doing stuff...");
+                            trace(this.currentState);
+                            var headers:ArrayCollection = new ArrayCollection(pivotRowData.headers as Array);
+                            var rowData:ArrayCollection = new ArrayCollection(pivotRowData.dataRows as Array);
+                            for (var j:int = 0; j < rowData.length; j++) {
+                                trace("doing stuff for " + j);
+                                var dataRowObject:Object = rowData.getItemAt(j);
+                                var rows:ArrayCollection = new ArrayCollection(dataRowObject.values as Array);
+                                var rowHeader:String = dataRowObject.rowHeader;
+                                var myRow:ArrayCollection = new ArrayCollection();
+                                var element:Object = new Object();
+                                element.Data = rowHeader;
+                                for (var i:int = 0; i < headers.length; i++) {
+                                    var cell:String = String(rows.getItemAt(i));
+                                    if (cell == null) {
+                                        cell = "0";
+                                    }
+                                    var hack:Object = new Object();
+                                    hack.blah = cell;
+                                    var header:String = String(headers.getItemAt(i));
+                                    BindingUtils.bindProperty(element, header, hack, 'blah');
+                                }
+                                myDataSet.addItem(element);
+                            }
+                            trace(myDataSet);
+                            if (this.currentState == null || this.currentState == '') {
+                                var columns:Array = new Array();
+                                var initialColumnHeader:DataGridColumn = new DataGridColumn();
+                                initialColumnHeader.headerText = "";
+                                initialColumnHeader.dataField = "Data";
+                                columns[0] = initialColumnHeader;
+                                for (var k:int = 0; k < headers.length; k++) {
+                                    var myHeader:String = String(headers.getItemAt(k));
+                                    var columnHeaderObject:DataGridColumn = new DataGridColumn();
+                                    columnHeaderObject.headerText = myHeader;
+                                    columnHeaderObject.dataField = myHeader;
+                                    columns[k + 1] = columnHeaderObject;
+                                }
+                                dataSet.columns = columns;
+                            } else if (this.currentState == 'PieGraph') {
+                            }
+                        }
+                    }
+                ]]>
+	</mx:Script>
+		
+		<!-- <mx:HBox height="100%" id="blah">-->
+		<mx:Grid>
+				<mx:GridRow width="100%" height="100%">
+					<mx:GridItem width="100%" height="100%">
+					</mx:GridItem>
+					<mx:GridItem width="100%" height="100%">
+						<mx:Canvas borderStyle="solid" borderThickness="1" dragEnter="dragEnterHandler(event)"
+							dragDrop="dragDropHandler(event)" id="columnCanvas">
+							<mx:Label text="{columnLabel}"/>
+						</mx:Canvas>
+					</mx:GridItem>
+				</mx:GridRow>
+				<mx:GridRow width="100%" height="100%">
+					<mx:GridItem width="100%" height="100%">
+						<mx:Canvas borderStyle="solid" borderThickness="1" dragEnter="dragEnterHandler(event)"
+							dragDrop="dragDropHandler(event)" id="rowCanvas">
+							<mx:Label text="{rowLabel}"/>
+						</mx:Canvas>
+					</mx:GridItem>
+					<mx:GridItem width="100%" height="100%">
+						<mx:Canvas borderStyle="solid" borderThickness="1" dragEnter="dragEnterHandler(event)"
+							dragDrop="dragDropHandler(event)" id="measureCanvas">
+							<mx:Label text="{measureLabel}"/>
+						</mx:Canvas>
+					</mx:GridItem>
+				</mx:GridRow>
+			</mx:Grid>
+						
+		<!--</mx:HBox>-->	
+			<mx:DataGrid id="dataSet" dataProvider="{myDataSet}" height="100%">
+				
+			</mx:DataGrid>
+	
+</mx:VBox>

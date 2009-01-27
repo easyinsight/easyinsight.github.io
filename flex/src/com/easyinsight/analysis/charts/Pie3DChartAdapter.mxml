@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ChartAdapter xmlns="com.easyinsight.analysis.charts.*" xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" xmlns:ilog="http://www.ilog.com/2007/ilog/flex">
+	<mx:Script>
+		<![CDATA[
+			import ilog.charts3d.series.PieSeries3D;
+			import com.easyinsight.analysis.AnalysisItem;
+			import com.easyinsight.filtering.FilterRawData;
+			import mx.charts.ChartItem;
+			import mx.formatters.Formatter;
+			import mx.charts.series.items.PieSeriesItem;
+			import mx.charts.events.ChartItemEvent;
+			import mx.collections.ArrayCollection;
+			[Bindable]
+			private var graphData:ArrayCollection = new ArrayCollection();
+			
+			[Bindable]
+			private var dimension:String;
+			
+			[Bindable]
+			private var measureName:String;
+			
+			private var measureFormatter:Formatter;
+			
+			[Bindable]
+			private var explodeData:Array = [];
+			
+			private var dimensionItem:AnalysisItem;
+			
+			override public function dataChange(dataSet:ArrayCollection, dimensions:Array, measures:Array):void {
+				graphData = dataSet;
+				this.measureFormatter = measures[0].getFormatter();
+				measureName = measures[0].key.createString();
+				dimension = dimensions[0].key.createString();
+				this.dimensionItem = dimensions[0];	
+			}
+			
+			private function chartSelection(event:ChartItemEvent):void {
+				for (var j:int = 0; j < graphData.length; j++) {
+					var graphObj:Object = graphData.getItemAt(j);
+					var explode:Boolean = false;				
+					for (var i:int = 0; i < pieChart.selectedChartItems.length; i++) {
+						var obj:PieSeriesItem = pieChart.selectedChartItems[i];
+						if (obj.item == graphObj) {
+							explode = true;
+						}																
+					}
+					if (explode) {
+						explodeData[j] = .2;
+					} else {
+						explodeData[j] = 0;
+					}
+				}
+				var pieChartSeries:PieSeries3D = pieChart.series[0] as PieSeries3D;
+				pieChartSeries.perWedgeExplodeRadius = explodeData;
+			}
+			
+			private function renderPieLabel(data:Object, field:String, index:Number, percentValue:Number):String {
+				return data[dimension] + ": " + '\n' + this.measureFormatter.format(data[measureName]);	
+			} 
+			
+			override public function getMaxMeasures():int {
+				return 1;
+			}
+			
+			override public function getMaxDimensions():int {
+				return 1;
+			}
+			
+			override public function createFilterRawData():FilterRawData {
+				var filterRawData:FilterRawData = new FilterRawData();
+				for (var i:int = 0; i < pieChart.selectedChartItems.length; i++) {
+                	var obj:ChartItem = pieChart.selectedChartItems[i];
+					filterRawData.addPair(dimensionItem, obj.item[dimensionItem.key.createString()]);                	
+                }
+				return filterRawData;
+			}
+			
+			override public function get chartType():int {
+				return ChartTypes.PIE_3D;
+			}
+		]]>
+	</mx:Script>
+	<ilog:PieChart3D id="pieChart" dataProvider="{graphData}" selectionMode="multiple" height="100%" width="100%"
+					paddingLeft="0" paddingRight="0" paddingTop="0" paddingBottom="0" depth="5">
+		<ilog:series>
+			<ilog:PieSeries3D field="{measureName}" nameField="{dimension}" labelPosition="inside"
+				labelFunction="renderPieLabel">				               
+            </ilog:PieSeries3D> 
+		</ilog:series>
+	</ilog:PieChart3D>
+	<mx:Legend dataProvider="{pieChart}" height="100%"/>
+</ChartAdapter>

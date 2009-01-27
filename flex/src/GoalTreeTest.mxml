@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Application xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:goals="com.easyinsight.goals.*"
+	creationComplete="blah()">
+	<mx:Script>
+		<![CDATA[
+			import mx.collections.ArrayCollection;
+			import com.easyinsight.goals.GoalTreeNode;
+			
+			private function blah():void {
+				var rootNode:GoalTreeNode = new GoalTreeNode();
+				var childNode1:GoalTreeNode = new GoalTreeNode();
+				childNode1.parent = rootNode;
+				var childNode2:GoalTreeNode = new GoalTreeNode();
+				childNode2.parent = rootNode;
+				var children:ArrayCollection = new ArrayCollection([ childNode1, childNode2 ]);
+				rootNode.children = children;
+				goalChart.goalTreeNodes = rootNode;
+			}
+		]]>
+	</mx:Script>
+	<goals:GoalOrganizationChart id="goalChart"/>	
+</mx:Application>

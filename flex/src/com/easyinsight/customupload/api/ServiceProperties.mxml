@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml">
+	<mx:Script>
+		<![CDATA[
+			import mx.managers.PopUpManager;
+			[Bindable]
+			private var wsdlText:String;
+			
+			public function set serviceDescriptor(descriptor:DynamicServiceDescriptor):void {
+				wsdlText = descriptor.wsdlURL;
+			}
+			
+			private function closeThis():void {
+				PopUpManager.removePopUp(this);
+			}
+			
+			private function copyToClipboard():void {
+				System.setClipboard(wsdlText);
+			}
+		]]>
+	</mx:Script>
+	<mx:Form styleName="TitleWindowContents">
+		<mx:FormItem label="WSDL URL:" direction="horizontal">
+			<mx:Text text="{wsdlText}"/>
+			<mx:Button label="Copy to Clipboard" click="copyToClipboard()"/>
+		</mx:FormItem>		
+		<mx:FormItem label="" direction="horizontal">
+			<mx:Button label="Close" click="closeThis()"/>
+		</mx:FormItem>
+	</mx:Form>
+</mx:TitleWindow>

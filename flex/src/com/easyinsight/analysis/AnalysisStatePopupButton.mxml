@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Box xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*">
+	<mx:Metadata>
+		[Event(name="analysisStateChange", type="com.easyinsight.analysis.AnalysisStateChangeEvent")]
+	</mx:Metadata>
+	<mx:Script>
+		<![CDATA[
+			import com.easyinsight.analysis.AnalysisStateChangeEvent;
+			import com.easyinsight.analysis.charts.ChartTypes;
+			import mx.events.MenuEvent;
+			
+			[Bindable]
+            [Embed(source="../../../../assets/table.png")]
+            public var listIcon:Class;
+
+            [Bindable]
+            [Embed(source="../../../../assets/table2_selection_block.png")]
+            public var crosstabIcon:Class;
+
+            [Bindable]
+            [Embed(source="../../../../assets/chart_pie2.png")]
+            public var graphIcon:Class;
+            
+            [Bindable]
+            [Embed(source="../../../../assets/earth.png")]
+            public var yahooMapIcon:Class;
+            
+            [Bindable]
+            private var xmlList:XMLList;
+            
+            public function set mode(mode:String):void {
+            	if (mode == "all") {
+            		xmlList = all;
+            	} else if (mode == "splitSource") {
+            		xmlList = splitSource;
+            	} else if (mode == "splitTarget") {
+            		xmlList = splitTarget;
+            	}
+            }
+			
+			private function itemClickHandler(event:MenuEvent):void {
+                event.currentTarget.label= event.label;
+                var state:String = event.item.@state;
+                var subStateString:String = event.item.@subState;
+                var subState:int = subStateString == "" ? 0 : int(subStateString);
+                dispatchEvent(new AnalysisStateChangeEvent(state, subState)); 
+            }
+            
+            public function set selectedLabel(selectedLabel:String):void {
+            	p2.label = selectedLabel;          	
+            }
+		]]>
+	</mx:Script>
+	  <mx:XMLList id="all">
+        <node label="Grid        " icon="{crosstabIcon}">
+        	<node label="List" state="" icon="{listIcon}"/>
+        	<node label="Crosstab" state="Crosstab" icon="{crosstabIcon}"/>
+        </node>
+        <node label="Chart" icon="">
+        	<node label="Column" state="BasicChart" subState="{ChartTypes.COLUMN_FAMILY}" icon=""/>
+        	<node label="Bar" state="BasicChart" subState="{ChartTypes.BAR_FAMILY}" icon=""/>
+        	<node label="Line" state="BasicChart" subState="{ChartTypes.LINE_FAMILY}" icon=""/>
+        	<node label="Pie" state="BasicChart" subState="{ChartTypes.PIE_FAMILY}" icon=""/>
+        	<node label="Plot" state="BasicChart" subState="{ChartTypes.PLOT_FAMILY}" icon=""/>
+        	<node label="Bubble" state="BasicChart" subState="{ChartTypes.BUBBLE_FAMILY}" icon=""/>
+        	<node label="Area" state="BasicChart" subState="{ChartTypes.AREA_FAMILY}" icon=""/>
+        </node>
+        <node label="Map" icon="" state="ILogMap"/>
+        <node label="Split" icon="" state="Split"/>
+    </mx:XMLList>
+    <mx:XMLList id="splitSource">        
+    	<node label="List" state="" icon="{listIcon}"/>        	        
+    </mx:XMLList>
+    <mx:XMLList id="splitTarget">
+        <node label="Grid" icon="">
+        	<node label="Crosstab" state="Crosstab" icon="{crosstabIcon}"/>
+        </node>
+        <node label="Chart" icon="">
+        	<node label="Column" state="BasicChart" subState="{ChartTypes.COLUMN_FAMILY}" icon=""/>
+        	<node label="Bar" state="BasicChart" subState="{ChartTypes.BAR_FAMILY}" icon=""/>
+        	<node label="Line" state="BasicChart" subState="{ChartTypes.LINE_FAMILY}" icon=""/>
+        	<node label="Pie" state="BasicChart" subState="{ChartTypes.PIE_FAMILY}" icon=""/>
+        </node>
+        <node label="Map" icon="">
+        	<node label="Country and State" state="ILogMap" icon=""/>
+        	<node label="Satellite and Street" state="YahooMap" icon=""/>
+        </node>        
+    </mx:XMLList>
+    <mx:PopUpMenuButton id="p2" 
+            dataProvider="{xmlList}"
+            labelField="@label" width="100" popUpStyleName="CustomPopupMenu"
+            showRoot="false" itemClick="itemClickHandler(event);"/>
+</mx:Box>

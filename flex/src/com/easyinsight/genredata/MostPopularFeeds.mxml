@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<AnalyzableItemPanel xmlns="genredata.*" xmlns:mx="http://www.adobe.com/2006/mxml" title="Most Popular Feeds">
+	<mx:Script>
+		<![CDATA[
+			
+			override protected function getItemRenderer():IFactory {
+				return new ClassFactory(PopularFeed);
+			}
+		]]>
+	</mx:Script>	
+</AnalyzableItemPanel>

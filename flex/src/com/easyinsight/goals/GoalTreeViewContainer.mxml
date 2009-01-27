@@ -1,0 +1,65 @@
+<?xml version="1.0" ?>
+<FullScreenPage xmlns="com.easyinsight.*" xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:ilog="ilog.orgchart.*"
+                xmlns:goals="com.easyinsight.goals.*" width="100%" height="100%">
+    <mx:Script><![CDATA[
+import com.easyinsight.analysis.AnalysisCloseEvent;
+        public var goalTree:GoalTree;
+
+        [Bindable]
+        private var _goalTreeNodes:GoalTreeNode;
+
+        [Bindable]
+        private var startDate:Date;
+
+        [Bindable]
+        private var endDate:Date;
+
+        override protected function createChildren():void {
+            super.createChildren();
+            endDate = new Date();
+            startDate = new Date(endDate.getTime() - (1000 * 60 * 60 * 24 * 7));
+        }
+
+        override protected function commitProperties():void {
+            _goalTreeNodes = goalTree.rootNode;
+        }
+
+        private function onDatesChanged():void {
+            goalService.createDataTree.send(goalTree.goalTreeID, startChooser.selectedDate, endChooser.selectedDate);
+        }
+
+        private function gotTree():void {
+            goalTree = goalService.createDataTree.lastResult as GoalTree;
+            _goalTreeNodes = goalTree.rootNode;
+            myOrgChart.dataProvider = _goalTreeNodes;
+        }
+
+        private function close():void {
+            dispatchEvent(new AnalysisCloseEvent(this));
+        }
+        ]]></mx:Script>
+    <mx:RemoteObject destination="goalService" id="goalService">
+        <mx:method name="createDataTree" result="gotTree()"/>
+    </mx:RemoteObject>
+    <mx:HBox id="buttonBox" paddingLeft="5" paddingTop="5" paddingBottom="5">
+			<mx:Button id="wrapButton" icon="@Embed(source='../../../../assets/document_out.png')" click="close()" toolTip="Close"/>
+		</mx:HBox>
+    <mx:VBox width="100%" height="100%">
+        <mx:HBox width="100%" horizontalAlign="center">
+            <mx:DateField id="startChooser" selectedDate="{startDate}" change="onDatesChanged()"/>
+            <mx:Spacer width="200"/>
+            <mx:DateField id="endChooser" selectedDate="{endDate}" change="onDatesChanged()"/>
+        </mx:HBox>
+        <mx:Box height="100%" width="100%">
+            <ilog:OrgChart id="myOrgChart" dataProvider="{_goalTreeNodes}"
+                           width="100%" height="100%" minZoomLevel="1" maxZoomLevel="1" allowSelection="false">
+                <ilog:itemRenderer>
+                    <mx:Component>
+                        <goals:GoalDataRenderer/>
+                    </mx:Component>
+                </ilog:itemRenderer>
+            </ilog:OrgChart>
+        </mx:Box>
+    </mx:VBox>
+
+</FullScreenPage>

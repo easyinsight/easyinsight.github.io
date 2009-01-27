@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%"
+	creationComplete="doCreationComplete(event)">
+	<mx:Script>
+		<![CDATA[
+			import mx.controls.Alert;
+			import mx.managers.PopUpManager;
+			import mx.rpc.events.ResultEvent;
+			import com.easyinsight.framework.User;
+                    // Reference to the file on disk (selected by user)
+                    [Bindable]
+                    public var file:FileReference = new FileReference();
+
+                    private var uploadID:Number;
+
+                    // Called when the "Browse" button is clicked
+                    public function doBrowse( event:Event ):void
+                    {
+                        // Prompt the user to select a file from disk
+                        file.browse();
+                    }
+
+                    private function next():void {
+                    	nextButton.enabled = false;
+                    	finishingSection.visible = true;
+                    	uploadService.create.send(uploadID, feedName.text);
+                        //dispatchEvent(new UserUploadEvent(UserUploadEvent.USER_UPLOAD_COMPLETE, uploadID));
+                    }
+                    
+                    private function created():void {
+                    	var uploadResponse:UploadResponse = uploadService.create.lastResult as UploadResponse;
+                    	if (uploadResponse.successful) {
+                    		dispatchEvent(new UploadConfigEvent(UploadConfigEvent.UPLOAD_CONFIG_COMPLETE, uploadResponse.feedID));
+                        	PopUpManager.removePopUp(this);
+                    	} else {
+                    		Alert.show(uploadResponse.failureMessage);
+                    	}
+                    }
+
+                    // Called when the upload operation has completed
+                    // Specifically manages response data
+                    public function doComplete( event:DataEvent ):void
+                    {
+                        var xml:XML = new XML(event.data);                        
+						var uploadIDString:String = xml.uploadID.toString();
+						var uploadID:Number = parseInt(uploadIDString);
+                        this.uploadID = uploadID;
+                        successMessage.visible = true;
+                        //formatBox.enabled = true;
+                        nextButton.enabled = true;   
+                    }
+
+                    // Called when the application has completed startup
+                    public function doCreationComplete( event:Event ):void
+                    {
+                        // Listen for when the user has selected a file
+                        // Listen for when the file upload is complete
+                        file.addEventListener( Event.SELECT, doSelect );
+                        file.addEventListener( DataEvent.UPLOAD_COMPLETE_DATA, doComplete );
+                    }
+
+                    // Called when the user selects a file from disk
+                    public function doSelect( event:Event ):void
+                    {
+                        // Puts the name of the selected file into the UI
+                        txtPhoto.text = file.name;
+                        uploadButton.enabled = true;
+                    }
+
+                    // Called when the "Submit" button is clicked
+                    // Initiates file upload operation
+                    public function doSubmit( event:Event ):void
+                    {
+                        // Specify the endpoint for the upload operation
+                        // Create an object to hold additional data fields
+                        var request:URLRequest = new URLRequest( "/DMS/UploadExample" );
+                        var vars:URLVariables = new URLVariables();
+
+                        // Set the data fields as appropriate
+                        vars.userName = new String(User.getInstance().userName);
+                        vars.password = new String(User.getInstance().password);
+
+                        // Assign the data fields to the request
+                        request.data = vars;
+
+                        progressBar.visible = true;
+
+                        // Start the file upload process
+                        file.upload( request );
+                    }
+
+                    private function cancel():void {
+                        PopUpManager.removePopUp(this);
+                    }
+                ]]>
+	</mx:Script>
+	<mx:RemoteObject id="uploadService" destination="userUpload">
+		<mx:method name="create" result="created()"/>
+	</mx:RemoteObject>
+	<mx:VBox width="100%" height="100%" id="coreVBox">
+		
+		
+	<mx:Form id="coreForm">
+		<mx:FormItem label="Name:">
+			<mx:TextInput id="feedName"/>
+		</mx:FormItem>
+		<mx:FormItem label="Select a file to upload:" direction="horizontal">
+			<mx:TextInput id="txtPhoto" editable="false" />
+			<mx:Button label="Browse..." click="doBrowse( event )" />
+		</mx:FormItem>
+		<mx:FormItem label="" direction="horizontal">
+			<mx:Button label="Upload" click="doSubmit( event )" id="uploadButton" enabled="false"/>
+		</mx:FormItem>
+		<mx:FormItem label="" direction="horizontal">
+			<mx:HBox horizontalAlign="center">
+				<mx:ProgressBar id="progressBar" visible="false" source="file"/>	
+			</mx:HBox>
+			<mx:Label text="Upload successful!" visible="false" id="successMessage"/>
+		</mx:FormItem>		
+		<mx:FormItem label="" direction="horizontal">
+			<mx:Button label="Finish" click="next()" enabled="false" id="nextButton"/>
+			<mx:Button label="Cancel" click="cancel()"/>
+		</mx:FormItem>
+		<mx:FormItem label="" direction="horizontal" visible="false" id="finishingSection">
+			<mx:HBox horizontalAlign="center">
+				<mx:ProgressBar indeterminate="true"/>	
+			</mx:HBox>
+			<mx:Label text="Creating the data source..."/>
+		</mx:FormItem>		
+	</mx:Form>
+	
+	
+	</mx:VBox>
+</mx:TitleWindow>

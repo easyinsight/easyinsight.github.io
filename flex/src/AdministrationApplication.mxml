@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Application xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" 
+	xmlns:genres="com.easyinsight.administration.genres.*" creationComplete="setup()" xmlns:system="com.easyinsight.administration.system.*">
+	<mx:Script>
+		<![CDATA[
+			import com.easyinsight.solutions.UpdateSolutionArchiveWindow;
+			import mx.managers.PopUpManager;
+			import com.easyinsight.solutions.CreateSolutionWindow;
+			import com.easyinsight.framework.Permission;
+			import com.easyinsight.framework.UserServiceResponse;
+			import mx.collections.ArrayCollection;
+			import com.easyinsight.framework.User;
+			import com.easyinsight.listing.IPerspective;
+			
+			private function setup():void {
+				//var user:User = User.getInstance();
+				//if (user == null) {
+				//	currentState = 'notLoggedIn';					
+				//}				
+			}					
+			
+			/*private function tabChanged():void {
+				var perspective:IPerspective = coreTabNavigator.selectedChild as IPerspective;
+				perspective.gotFocus();
+			}
+			
+			private function signon():void {
+				authService.authenticate.send(userName.text, password.text);
+				tabChanged();
+			}*/
+			
+			private function handleAuthentication():void {
+				/*var authResult:UserServiceResponse = authService.authenticate.lastResult as UserServiceResponse;
+                var successful:Boolean = authResult.successful;
+                if (successful) {
+                	var permissionObj:Object = new Object();
+                	var permissions:ArrayCollection = authResult.permissions;
+                	if (permissions != null) {
+						for (var i:int = 0; i < permissions.length; i++) {
+							var permission:Permission = permissions.getItemAt(i) as Permission;
+							permissionObj[permission.name] = permission;
+						}
+					}
+					if (permissionObj["Administrator"] == null) {
+						failureMessageLabel.text = "You do not have administration access.";
+					} else {
+						currentState = "";
+					}	
+                } else {
+                	failureMessageLabel.text = authResult.failureMessage;
+                }*/
+			}
+			
+			private function dumpThreads():void {
+				adminService.threadDump.send();
+			}
+			
+			private function createSolution():void {
+            	var window:CreateSolutionWindow = CreateSolutionWindow(PopUpManager.createPopUp(this, CreateSolutionWindow, true));
+            	PopUpManager.centerPopUp(window);
+            }
+            
+            private function updateArchive():void {
+            	var window:UpdateSolutionArchiveWindow = UpdateSolutionArchiveWindow(PopUpManager.createPopUp(this, UpdateSolutionArchiveWindow, true));
+            	PopUpManager.centerPopUp(window);
+            }
+		]]>
+	</mx:Script>
+	<mx:RemoteObject id="authService" destination="login">
+		<mx:method name="authenticate" result="handleAuthentication()"/>
+	</mx:RemoteObject>
+	<mx:RemoteObject id="adminService" destination="admin">
+		<mx:method name="threadDump"/>
+	</mx:RemoteObject>
+	
+	<mx:VBox>
+		<system:HealthInfoDisplay/>
+		<mx:Button label="Thread Dump" click="dumpThreads()"/>
+		<mx:Button label="Create Solution..." click="createSolution()"/>
+		<mx:Button label="Update Solution Archive..." click="updateArchive()"/>	
+	</mx:VBox>
+	
+	<!-- <mx:Canvas id="coreCanvas" width="100%" height="100%">
+		<mx:TabNavigator id="coreTabNavigator" width="100%" creationPolicy="all" tabChildrenChange="tabChanged()">
+			<genres:GenreAdministrationPanel label="Catalog" id="catalogAdmin"/>
+			<mx:HBox label="System Health" id="systemHealth"/>
+		</mx:TabNavigator>	
+	</mx:Canvas>-->	
+	
+</mx:Application>

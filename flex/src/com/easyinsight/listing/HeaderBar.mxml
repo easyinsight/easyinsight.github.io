@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<mx:HBox xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:local="*" xmlns:listing="com.easyinsight.listing.*"
+         width="100%" borderStyle="none" xmlns:easyinsight="com.easyinsight.*" horizontalGap="25" verticalAlign="middle" backgroundColor="0xF0F0F0">
+    <mx:Metadata>
+        [Event(name="keywordSearch", type="com.easyinsight.listing.KeywordSearchEvent")]
+        [Event(name="triggerAnalyze", type="com.easyinsight.listing.TriggerAnalyzeEvent")]
+        [Event(name="listingChange", type="com.easyinsight.listing.ListingChangeEvent")]
+    </mx:Metadata>
+    <mx:Script>
+		<![CDATA[
+import mx.collections.ICollectionView;
+        import com.easyinsight.goals.MyGoals;
+        import com.easyinsight.solutions.SolutionsSummary;
+        import com.easyinsight.groups.GroupsSummary;
+        import com.easyinsight.account.AccountBasePage;
+        import com.easyinsight.customupload.api.APIPage;
+        import com.easyinsight.genredata.GenreDataProvider;
+        import com.easyinsight.intro.IntroPanel;
+
+        [Bindable]
+        [Embed(source="../../../../assets/headericons/house.png")]
+        private var homeIcon:Class;
+
+        [Bindable]
+        [Embed(source="../../../../assets/headericons/chart_area.png")]
+        private var myDataIcon:Class;
+
+        [Bindable]
+        [Embed(source="../../../../assets/headericons/shopping_bag.png")]
+        private var catalogIcon:Class;
+
+        [Bindable]
+        [Embed(source="../../../../assets/headericons/users2.png")]
+        private var groupsIcon:Class;
+
+        [Bindable]
+        [Embed(source="../../../../assets/headericons/components.png")]
+        private var solutionsIcon:Class;
+
+        [Bindable]
+        [Embed(source="../../../../assets/headericons/branch.png")]
+        private var goalsIcon:Class;
+
+        [Bindable]
+        [Embed(source="../../../../assets/headericons/user.png")]
+        private var accountIcon:Class;
+
+        [Bindable]
+        [Embed(source="../../../../assets/headericons/application_enterprise.png")]
+        private var apiIcon:Class;
+
+        [Bindable]
+        [Embed(source="../../../../assets/headericons/help.png")]
+        private var helpIcon:Class;
+
+        // import com.flexspy.FlexSpy;
+
+        private function onListingChange(event:ListingChangeEvent):void {
+            dispatchEvent(event);
+        }
+
+        private function findNode(targetPage:String, items:Array):ListingOption {
+            for each (var obj:Object in items) {
+                if (obj is ListingOption) {
+                    var listingOption:ListingOption = obj as ListingOption;
+                    if (listingOption.displayName == targetPage) {
+                        return listingOption;
+                    }
+                }
+            }
+            return null;
+        }
+
+        public function explicitChange(targetPage:String):void {
+            var listingOption:ListingOption = findNode(targetPage, getChildren());
+            dispatchEvent(new ListingChangeEvent(listingOption.perspective));
+        }
+		]]>
+    </mx:Script>
+    <mx:Image source="@Embed('../../../../assets/logo2.png')"/>
+    <mx:Spacer width="40"/>
+    <listing:ListingOption perspective="{new IntroPanel()}" enableAnalysis="false" displayName="Intro" listingChange="onListingChange(event)" width="50">
+        <mx:Image source="{homeIcon}"/>
+        <mx:Label text="Intro" fontSize="12" fontFamily="Tahoma" fontWeight="bold" color="0x323232"/>
+    </listing:ListingOption>
+    <listing:ListingOption perspective="{new MyData()}" enableAnalysis="false" displayName="My Data" listingChange="onListingChange(event)">
+        <mx:Image source="{myDataIcon}"/>
+        <mx:Label text="My Data" fontSize="12" fontFamily="Tahoma" fontWeight="bold" color="0x323232"/>
+    </listing:ListingOption>
+    <listing:ListingOption perspective="{new GenreDataProvider()}" enableAnalysis="false" displayName="Marketplace" listingChange="onListingChange(event)">
+        <mx:Image source="{catalogIcon}"/>
+        <mx:Label text="Marketplace" fontSize="12" fontFamily="Tahoma" fontWeight="bold" color="0x323232"/>
+    </listing:ListingOption>
+    <listing:ListingOption perspective="{new GroupsSummary()}" enableAnalysis="false" displayName="Groups" listingChange="onListingChange(event)">
+        <mx:Image source="{groupsIcon}"/>
+        <mx:Label text="Groups" fontSize="12" fontFamily="Tahoma" fontWeight="bold" color="0x323232"/>
+    </listing:ListingOption>
+    <listing:ListingOption perspective="{new SolutionsSummary()}" enableAnalysis="false" displayName="Solutions" listingChange="onListingChange(event)">
+        <mx:Image source="{solutionsIcon}"/>
+        <mx:Label text="Solutions" fontSize="12" fontFamily="Tahoma" fontWeight="bold" color="0x323232"/>
+    </listing:ListingOption>
+    <listing:ListingOption perspective="{new MyGoals()}" enableAnalysis="false" displayName="Goals" listingChange="onListingChange(event)">
+        <mx:Image source="{goalsIcon}"/>
+        <mx:Label text="Goals" fontSize="12" fontFamily="Tahoma" fontWeight="bold" color="0x323232"/>
+    </listing:ListingOption>
+    <listing:ListingOption perspective="{new APIPage()}" enableAnalysis="false" displayName="API" listingChange="onListingChange(event)">
+        <mx:Image source="{apiIcon}"/>
+        <mx:Label text="API" fontSize="12" fontFamily="Tahoma" fontWeight="bold" color="0x323232"/>
+    </listing:ListingOption>
+    <listing:ListingOption perspective="{new AccountBasePage()}" enableAnalysis="false" displayName="Accounts" listingChange="onListingChange(event)">
+        <mx:Image source="{accountIcon}"/>
+        <mx:Label text="Account" fontSize="12" fontFamily="Tahoma" fontWeight="bold" color="0x323232"/>
+    </listing:ListingOption>
+    <!-- <listing:ListingOption icon="{helpIcon}" perspective="{new Box()}" enableAnalysis="false" displayName="My Account"/> -->
+
+    <!--
+		<mx:Button label="Analyze" click="analyze()" id="analyzeButton" enabled="false" fontSize="16"/>
+		-->
+    <mx:Spacer width="100%"/>
+    <!-- <mx:Button id="btnFlexSpy" label="FlexSpy" click="FlexSpy.show()" /> -->
+    <!-- <mx:TextInput id="searchText"/>
+		<mx:Button toolTip="Search" icon="@Embed(source='../../../../assets/view.png')" id="searchButton" click="search(event)"/> -->
+    <easyinsight:LoginStatusDisplay id="loginStatusDisplay" horizontalAlign="right"/>
+
+</mx:HBox>

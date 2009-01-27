@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:analysis="com.easyinsight.analysis.*">
+	<mx:Script>
+		<![CDATA[
+			import com.easyinsight.analysis.AnalysisItemEditor;
+			import mx.managers.PopUpManager;
+			import mx.collections.ArrayCollection;
+			import com.easyinsight.analysis.AnalysisItem;
+			
+			[Bindable]
+			private var _analysisItem:AnalysisItem;
+			[Bindable]
+			private var _analysisItems:ArrayCollection;
+			
+			private var _filterDefinition:FilterDefinition;
+			
+			[Bindable]
+			private var beforeAgg:Boolean;
+			
+			private var editor:AnalysisItemEditor;
+			
+			private var _detailClass:Class;
+			
+			private var filterDetailEditor:IFilterDetailEditor;
+			
+			public function set analysisItems(analysisItems:ArrayCollection):void {
+				_analysisItems = analysisItems;
+			}
+			
+			public function set detailClass(detailClass:Class):void {
+				_detailClass = detailClass;
+			}
+			
+			public function set filterDefinition(filterDefinition:FilterDefinition):void {
+				_filterDefinition = filterDefinition;
+				_analysisItem = _filterDefinition.field;
+				beforeAgg = _filterDefinition.applyBeforeAggregation;
+				
+			}
+			
+			override protected function createChildren():void {
+				super.createChildren();
+				var index:int = 1;
+				if (_detailClass != null) {
+					if (filterDetailEditor == null) {
+						filterDetailEditor = new _detailClass();
+						filterDetailEditor.filterDefinition = _filterDefinition;
+					}
+					coreBox.addChildAt(filterDetailEditor as DisplayObject, index);
+					index++;					
+				}
+				
+				if (editor == null) {
+					editor = new AnalysisItemEditor();
+					editor.analysisItem = _analysisItem;
+					editor.analysisItems = _analysisItems;
+					editor.fieldNameEditable = false;
+				}
+				coreBox.addChildAt(editor, index);
+			}
+			
+			private function save():void {
+				var previousDefinition:FilterDefinition = _filterDefinition;
+				_filterDefinition = filterDetailEditor.makeUpdates();
+				_filterDefinition.field = editor.save();
+				_filterDefinition.applyBeforeAggregation = aggregationCheckbox.selected;
+				
+				dispatchEvent(new FilterEditEvent(_filterDefinition, previousDefinition));
+				PopUpManager.removePopUp(this);	
+			}
+			
+			private function cancel():void {
+				PopUpManager.removePopUp(this);
+			}
+		]]>
+	</mx:Script>
+	<mx:VBox id="coreBox" styleName="TitleWindowContents">
+		<mx:CheckBox label="Apply Before Aggregation" selected="{beforeAgg}" id="aggregationCheckbox"/>
+		<mx:HBox width="100%" horizontalAlign="center">
+			<mx:Button label="Save" click="save()"/>
+			<mx:Button label="Cancel" click="cancel()"/>
+		</mx:HBox>	
+	</mx:VBox>
+	
+</mx:TitleWindow>

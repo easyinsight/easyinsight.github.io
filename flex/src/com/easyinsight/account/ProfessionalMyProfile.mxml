@@ -1,0 +1,56 @@
+<?xml version="1.0" ?>
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:customupload="com.easyinsight.customupload.*" creationComplete="initProperties()"
+        width="100%" height="100%">
+    <mx:Script><![CDATA[
+import mx.managers.PopUpManager;
+import com.easyinsight.framework.User;
+import mx.collections.ArrayCollection;
+        [Bindable]
+        private var userName:String;
+        [Bindable]
+        private var fullName:String;
+        [Bindable]
+        private var email:String;
+
+        [Bindable]
+        [Embed(source="../../../../assets/pencil.png")]
+        private var editIcon:Class;
+
+        private function initProperties():void {
+            this.userName = User.getInstance().userName;
+            this.fullName = User.getInstance().getName();
+            this.email = User.getInstance().getEmail();
+        }
+
+        private function editProfile():void {
+
+        }
+
+        private function editPassword():void {
+            var window:ChangePasswordWindow = new ChangePasswordWindow();
+            PopUpManager.addPopUp(window, this, true);
+            PopUpManager.centerPopUp(window);
+        }
+]]></mx:Script>
+    <mx:HBox width="100%" horizontalAlign="center">
+    <mx:VBox id="userProfileBox" verticalGap="0" borderThickness="1" borderColor="#D42525" borderStyle="solid" dropShadowEnabled="true">
+        <mx:Box width="100%" height="5" backgroundColor="#D42525" left="0" right="0"/>
+        <mx:Box width="100%" backgroundColor="#F1EE8D" horizontalAlign="center">
+            <mx:Label text="User Profile" fontFamily="Tahoma" fontWeight="bold" fontSize="14"/>
+            <mx:Button label="Edit Profile..." click="editProfile()"/>
+            <mx:Button label="Change Password..." click="editPassword()"/>
+        </mx:Box>
+        <mx:Form width="100%" backgroundColor="0xF3F2DF">
+            <mx:FormItem label="User Name: " fontFamily="Tahoma" fontWeight="bold">
+                <mx:TextInput text="{userName}" fontFamily="Lucida Grande" fontWeight="normal" editable="false"/>
+            </mx:FormItem>
+            <mx:FormItem label="Full Name: " fontFamily="Tahoma" fontWeight="bold" direction="horizontal">
+                <mx:TextInput text="{fullName}" fontFamily="Lucida Grande" fontWeight="normal" editable="false"/>
+            </mx:FormItem>
+            <mx:FormItem label="Email Address: " fontFamily="Tahoma" fontWeight="bold" direction="horizontal">
+                <mx:TextInput text="{email}" fontFamily="Lucida Grande" fontWeight="normal" editable="false"/>
+            </mx:FormItem>
+        </mx:Form>
+    </mx:VBox>
+    </mx:HBox>
+</mx:VBox>

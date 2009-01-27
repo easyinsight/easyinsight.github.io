@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:listing="com.easyinsight.listing.*"
+           implements="com.easyinsight.listing.IPerspective" creationComplete="onCreation()" width="100%" height="100%">
+    <mx:states>
+        <mx:State name="notLoggedIn">
+            <mx:RemoveChild target="{controlsBox}"/>
+            <mx:RemoveChild target="{goalTreesBox}"/>
+            <mx:AddChild relativeTo="{coreContent}">
+                <listing:GottaLoginPage/>
+            </mx:AddChild>
+        </mx:State>
+    </mx:states>
+    <mx:Script>
+		<![CDATA[
+import mx.utils.URLUtil;
+import mx.managers.BrowserManager;
+import com.easyinsight.framework.LoginEvent;
+import com.easyinsight.framework.User;
+        import com.easyinsight.listing.AnalyzeSource;
+        import com.easyinsight.genredata.AnalyzeEvent;
+        import mx.collections.ArrayCollection;
+
+        [Bindable]
+        private var goalTrees:ArrayCollection;
+
+        [Bindable]
+        private var myGoals:ArrayCollection;
+
+        [Bindable]
+        [Embed(source="../../../../assets/branch_add.png")]
+        public var addIcon:Class;
+
+        private function createGoalTree():void {
+            dispatchEvent(new AnalyzeEvent(new GoalTreeAdminAnalyzeSource(null)));
+        }
+
+        public function analyze():AnalyzeSource {
+            return null;
+        }
+
+        private function onCreation():void {
+            User.getEventNotifier().addEventListener(LoginEvent.LOGIN, onLogin);
+        }
+
+        private function onLogin(event:LoginEvent):void {
+            gotFocus();
+        }
+
+        public function gotFocus():void {
+            var fragmentObject:Object = new Object();
+            fragmentObject.page = "myGoals";
+            BrowserManager.getInstance().setTitle("Easy Insight - Goals");
+            var fragmentString:String = URLUtil.objectToString(fragmentObject);
+            BrowserManager.getInstance().setFragment(fragmentString);
+            var user:User = User.getInstance();
+            if (user == null) {
+                currentState="notLoggedIn";
+            } else {
+                if (currentState != "") {
+                    currentState = "";
+                }
+                goalService.getGoalTrees.send();                
+            }
+        }
+
+        public function getDefaultAnalyzeState():Boolean {
+            return false;
+        }
+
+        public function isKeywordSearchInstant():Boolean {
+            return false;
+        }
+
+        private function gotTrees():void {
+            goalTrees = goalService.getGoalTrees.lastResult as ArrayCollection;
+        }
+		]]>
+    </mx:Script>
+    <mx:RemoteObject destination="goalService" id="goalService">
+        <mx:method name="getGoalTrees" result="gotTrees()"/>
+    </mx:RemoteObject>
+    <mx:Box width="100%" height="5" backgroundColor="#254BD4" left="0" right="0"/>
+    <mx:VBox id="coreContent" height="100%" width="100%" paddingTop="10" paddingBottom="10" paddingLeft="10" paddingRight="10" verticalGap="10">
+        <mx:HBox width="100%" id="controlsBox">
+            <mx:Button toolTip="Add Goal Tree..." click="createGoalTree()" id="uploadButton" icon="{addIcon}"
+                       label="Add Goal Tree" labelPlacement="bottom"/>
+            <mx:Button icon="@Embed('../../../../assets/helpx48.png')" label="Help..." labelPlacement="bottom"/>
+        </mx:HBox>
+        <mx:AdvancedDataGrid dataProvider="{goalTrees}" width="100%" id="goalTreesBox">
+            <mx:columns>
+                <mx:AdvancedDataGridColumn headerText="Name" dataField="goalTreeName"/>
+                <mx:AdvancedDataGridColumn headerText="" dataField="goalTreeName" width="150"
+                                           itemRenderer="com.easyinsight.goals.MyGoalsControls"/>
+            </mx:columns>
+        </mx:AdvancedDataGrid>
+    </mx:VBox>
+</mx:VBox>

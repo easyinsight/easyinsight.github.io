@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml">
+	<mx:Script>
+		<![CDATA[
+			import mx.managers.PopUpManager;
+			import com.easyinsight.analysis.AnalysisDefinition;
+			import mx.collections.ArrayCollection;
+			
+			[Bindable]
+			private var scrubs:ArrayCollection;
+			
+			[Bindable]
+			private var scrubEditorFactory:ScrubEditorFactory;
+			
+			private var analysisItems:ArrayCollection;
+			private var feedID:int;
+			
+			public function initState(analysisItems:ArrayCollection, feedID:int):void {
+				this.analysisItems = analysisItems;
+				this.feedID = feedID;
+				this.scrubEditorFactory = new ScrubEditorFactory(analysisItems, feedID);
+			}
+			
+			public function set definition(definition:AnalysisDefinition):void {
+				var textScrubs:ArrayCollection = new ArrayCollection();
+				if (definition.dataScrubs != null) {
+					for each (var scrub:DataScrub in definition.dataScrubs) {
+						if (scrub is TextReplaceScrub) {
+							textScrubs.addItem(scrub);
+						}
+					}
+				}
+				this.scrubs = textScrubs;
+			}
+			
+			private function closeWindow():void {
+				PopUpManager.removePopUp(this);
+			}
+		]]>
+	</mx:Script>
+	<mx:VBox styleName="TitleWindowContents" paddingLeft="10" paddingTop="10" paddingRight="10" paddingBottom="10">		
+		<mx:ApplicationControlBar horizontalAlign="center" width="100%">
+			<mx:Label text="Text Replacement Data Scrubs"/>
+		</mx:ApplicationControlBar>
+		<mx:DataGrid dataProvider="{scrubs}" id="scrubGrid">
+			<mx:columns>
+				<mx:DataGridColumn headerText="Source Text" dataField="sourceText"/>
+				<mx:DataGridColumn headerText="Replacement Text" dataField="replaceText"/>
+				<mx:DataGridColumn headerText="" dataField="sourceText" itemRenderer="{scrubEditorFactory}"/>
+			</mx:columns>
+		</mx:DataGrid>
+		<mx:HBox width="100%" horizontalAlign="center">
+			<mx:Button label="Close" click="closeWindow()"/>
+		</mx:HBox>		
+	</mx:VBox>
+</mx:TitleWindow>

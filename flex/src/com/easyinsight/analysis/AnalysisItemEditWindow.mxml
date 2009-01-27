@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:analysis="com.easyinsight.analysis.*">
+	<mx:Script>
+		<![CDATA[
+			import mx.managers.PopUpManager;
+			import mx.collections.ArrayCollection;
+			
+			[Bindable]
+			private var _analysisItem:AnalysisItem;
+			[Bindable]
+			private var _analysisItems:ArrayCollection;
+			
+			private var _editorClass:Class;
+			
+			private var editor:AnalysisItemEditor;
+			
+			public function set analysisItem(analysisItem:AnalysisItem):void {
+				_analysisItem = analysisItem;
+			}
+			
+			public function set analysisItems(analysisItems:ArrayCollection):void {
+				_analysisItems = analysisItems;
+			}
+			
+			public function set editorClass(editorClass:Class):void {
+				this._editorClass = editorClass;
+				invalidateProperties();
+			}
+			
+			override protected function createChildren():void {
+				super.createChildren();
+				editor = new _editorClass();
+				editor.analysisItem = _analysisItem;
+				editor.analysisItems = _analysisItems;
+				editorFormItem.addChildAt(editor, 0);
+			}
+			
+			private function cancel():void {
+                PopUpManager.removePopUp(this);
+            }
+            
+            private function save():void {
+            	dispatchEvent(new AnalysisItemEditEvent(editor.save(), true));
+            	PopUpManager.removePopUp(this);
+            }
+		]]>
+	</mx:Script>
+	<mx:VBox styleName="TitleWindowContents" id="editorFormItem">			
+		<mx:HBox width="100%" horizontalAlign="center">
+			<mx:Button label="Save" click="save()" id="saveButton"/>
+			<mx:Button label="Cancel" click="cancel()"/>
+		</mx:HBox>	
+	</mx:VBox>
+	
+</mx:TitleWindow>

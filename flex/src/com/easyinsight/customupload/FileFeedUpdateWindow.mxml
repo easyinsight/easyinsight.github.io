@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" width="600" height="300" creationComplete="doCreationComplete()">
+	<mx:Script>
+		<![CDATA[
+			import com.easyinsight.framework.User;
+			import mx.rpc.events.ResultEvent;
+			import mx.managers.PopUpManager;
+			
+			private var rawUploadID:int;
+			private var _feedID:int;
+			[Bindable]
+            public var file:FileReference = new FileReference();
+            
+            public function set feedID(feedID:int):void {
+            	this._feedID = feedID; 
+            }
+            
+            public function doBrowse( event:Event ):void {
+                file.browse();
+            }
+            
+            public function doComplete( event:DataEvent ):void  {
+                var xml:XML = new XML(event.data);
+				var uploadIDString:String = xml.uploadID.toString();
+				var uploadID:Number = parseInt(uploadIDString);
+                this.rawUploadID = uploadID;
+                successMessage.visible = true;
+                //formatBox.enabled = true;
+                replaceButton.enabled = true;
+                appendButton.enabled = true;   
+            }
+
+            // Called when the window has completed startup
+            public function doCreationComplete():void {
+                // Listen for when the user has selected a file
+                // Listen for when the file upload is complete
+                file.addEventListener( Event.SELECT, doSelect );
+                file.addEventListener( DataEvent.UPLOAD_COMPLETE_DATA, doComplete );
+            }
+
+            // Called when the user selects a file from disk
+            public function doSelect( event:Event ):void {
+                // Puts the name of the selected file into the UI
+                txtPhoto.text = file.name;
+                uploadButton.enabled = true;
+            }
+
+            // Called when the "Submit" button is clicked
+            // Initiates file upload operation
+            public function doSubmit( event:Event ):void {
+                // Specify the endpoint for the upload operation
+                // Create an object to hold additional data fields
+                var request:URLRequest = new URLRequest( "/DMS/UploadExample" );
+                var vars:URLVariables = new URLVariables();
+
+                // Set the data fields as appropriate
+                vars.userName = new String(User.getInstance().userName);
+                vars.password = new String(User.getInstance().password);
+
+                // Assign the data fields to the request
+                request.data = vars;
+
+                progressBar.visible = true;
+
+                // Start the file upload process
+                file.upload( request );
+            }
+
+			
+			private function replace():void {
+				uploadService.updateData.send(_feedID, rawUploadID, true);
+			}
+			
+			private function append():void {
+				uploadService.updateData.send(_feedID, rawUploadID, false);
+			}
+			
+			private function cancel():void {
+				PopUpManager.removePopUp(this);
+			}
+			
+			private function updatedData():void {
+				PopUpManager.removePopUp(this);
+			}
+		]]>
+	</mx:Script>
+	<mx:RemoteObject id="uploadService" destination="userUpload">
+		<mx:method name="updateData" result="updatedData()"/>
+	</mx:RemoteObject>
+	<mx:VBox width="100%" height="100%" id="coreVBox" styleName="TitleWindowContents">		
+		<mx:Form id="coreForm">
+			<mx:FormItem label="Select a file to upload:" direction="horizontal">
+				<mx:TextInput id="txtPhoto" editable="false" />
+				<mx:Button label="Browse..." click="doBrowse( event )" />
+			</mx:FormItem>
+			<mx:FormItem label="" direction="horizontal">
+				<mx:Button label="Upload" click="doSubmit( event )" id="uploadButton" enabled="false"/>
+			</mx:FormItem>
+			<mx:FormItem label="" direction="horizontal">
+				<mx:HBox horizontalAlign="center">
+					<mx:ProgressBar id="progressBar" visible="false" source="file"/>	
+				</mx:HBox>
+				<mx:Label text="Upload successful!" visible="false" id="successMessage"/>
+			</mx:FormItem>		
+			<mx:FormItem label="" direction="horizontal">
+				<mx:Button label="Replace" click="replace()" enabled="false" id="replaceButton"/>
+				<mx:Button label="Append" click="append()" enabled="false" id="appendButton"/>
+				<mx:Button label="Cancel" click="cancel()"/>
+			</mx:FormItem>
+		</mx:Form>
+	</mx:VBox>
+</mx:TitleWindow>

@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml">
+	<mx:Metadata>
+		[Event(name="createdMerchant", type="com.easyinsight.stores.CreatedMerchantEvent")]
+	</mx:Metadata>
+	<mx:Script>
+		<![CDATA[
+			import mx.rpc.events.ResultEvent;
+			import com.easyinsight.framework.User;
+			import mx.controls.Alert;
+			import mx.rpc.events.FaultEvent;
+			import mx.managers.PopUpManager;
+			
+			private var merchant:Merchant;
+			
+			private function create():void {
+				this.merchant = new Merchant();
+				merchant.name = accountName.text;
+				storeService.createMerchant.send(merchant);	
+			}
+			
+			private function createdMerchant(event:ResultEvent):void {
+				var merchantID:int = storeService.createMerchant.lastResult as int;
+				this.merchant.merchantID = merchantID;
+				User.getInstance().addMerchant(merchant);
+				dispatchEvent(new CreatedMerchantEvent(merchant));
+				PopUpManager.removePopUp(this);
+			}
+			
+			private function cancel():void {
+				PopUpManager.removePopUp(this);	
+			}
+			
+			private function failure(event:FaultEvent):void {
+				Alert.show(event.message.toString());
+			}
+		]]>
+	</mx:Script>
+	<mx:RemoteObject id="storeService" destination="store">
+		<mx:method name="createMerchant" result="createdMerchant(event)" fault="failure(event)"/>		
+	</mx:RemoteObject>
+	<mx:Form>
+		<mx:FormItem label="Account Name:">
+			<mx:TextInput id="accountName"/>
+		</mx:FormItem>
+		<mx:FormItem label="">
+			<mx:Button label="Create" click="create()"/>
+			<mx:Button label="Cancel" click="cancel()"/>
+		</mx:FormItem>
+	</mx:Form>
+</mx:TitleWindow>

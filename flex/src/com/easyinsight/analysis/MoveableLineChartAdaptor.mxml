@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ChartAdaaptor xmlns="com.easyinsight.analysis.*" xmlns:charting="com.easyinsight.charting.*" xmlns:mx="http://www.adobe.com/2006/mxml">
+	<mx:Script>
+		<![CDATA[
+			import mx.collections.ArrayCollection;
+			[Bindable]
+			private var graphData:ArrayCollection = new ArrayCollection();
+			
+			[Bindable]
+			private var dimension:String;
+			
+			[Bindable]
+			private var measures:Array;
+			
+			override public function dataChange(dataSet:ArrayCollection, dimensions:Array, measures:Array):void {
+				trace("hmmmmmmmm....");
+				graphData = dataSet;
+				var dimension:AnalysisItem = dimensions[0] as AnalysisItem;
+				moveableChart.setDimension(dimension.key.createString());
+				moveableChart.rangeDataSet = dataSet;
+				trace(dataSet.length);
+				var measureColl:ArrayCollection = new ArrayCollection();
+				for (var i:int = 0; i < measures.length; i++) {
+					var measureItem:AnalysisItem = measures[i] as AnalysisItem;					
+					measureColl.addItem(measureItem.key);
+				}
+				moveableChart.setMeasures(measureColl);
+			}
+			
+			override public function getMaxMeasures():int {
+				return -1;
+			}
+			
+			override public function getMaxDimensions():int {
+				return 1;
+			}
+		]]>
+	</mx:Script>
+	<mx:HBox>
+		<charting:CoolCharting id="moveableChart"/>	
+	</mx:HBox>
+	
+</ChartAdaaptor>

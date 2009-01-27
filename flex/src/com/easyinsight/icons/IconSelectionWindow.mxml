@@ -1,0 +1,52 @@
+<?xml version="1.0" ?>
+<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:icons="com.easyinsight.icons.*"
+                creationComplete="getIcons()">
+    <mx:Script><![CDATA[
+import mx.managers.PopUpManager;
+        import mx.collections.ArrayCollection;
+
+        [Bindable]
+        private var icons:ArrayCollection;
+
+        private var searchText:String;
+
+        private function getIcons():void {
+            iconList.addEventListener(IconSelectionEvent.ICON_SELECTION, iconChosen);
+            iconService.getIcons.send();
+        }
+
+        private function gotIcons():void {
+            icons = iconService.getIcons.lastResult as ArrayCollection;
+        }
+
+        private function searchTextChanged():void {
+            this.searchText = searchInput.text;
+            icons.filterFunction(filterIcons);
+        }
+
+        private function filterIcons(item:Object):Boolean {
+            var icon:Icon = item as Icon;
+            return icon.name.toLowerCase().indexOf(searchText) != -1;
+        }
+
+        private function iconChosen(event:IconSelectionEvent):void {
+            dispatchEvent(event);
+            PopUpManager.removePopUp(this);
+        }
+
+        private function cancel():void {
+            PopUpManager.removePopUp(this);
+        }
+        ]]></mx:Script>
+    <mx:RemoteObject id="iconService" destination="icons">
+        <mx:method name="getIcons" result="gotIcons()"/>
+    </mx:RemoteObject>
+    <mx:HBox horizontalAlign="right" width="100%">
+        <mx:Label text="Name:"/>
+        <mx:TextInput id="searchInput" change="searchTextChanged()"/>
+    </mx:HBox>
+    <mx:TileList id="iconList" width="500" height="400" rowHeight="90" columnWidth="80" dataProvider="{icons}" itemRenderer="com.easyinsight.icons.IconButton"/>
+    <mx:HBox width="100%" horizontalAlign="right">
+        <mx:Button label="Cancel" click="cancel()"/>
+    </mx:HBox>
+</mx:TitleWindow>

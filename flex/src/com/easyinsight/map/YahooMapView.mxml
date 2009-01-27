@@ -1,0 +1,220 @@
+<?xml version="1.0" encoding="utf-8"?>
+<DataView xmlns="com.easyinsight.analysis.*" xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:analysis="com.easyinsight.analysis.*" 
+	creationComplete="initHandlers()">
+	<mx:Script>
+		<![CDATA[
+			import com.easyinsight.analysis.MapDefinition;
+			import com.easyinsight.analysis.YahooMapDefinition;
+			import com.easyinsight.analysis.GraphicDefinition;
+			import com.yahoo.maps.api.markers.Marker;
+			import com.yahoo.maps.webservices.geocoder.GeocoderResult;
+			import com.yahoo.maps.api.YahooMapEvent;
+			import com.yahoo.maps.webservices.geocoder.events.GeocoderEvent;
+			import mx.events.ResizeEvent;
+			import com.yahoo.maps.api.core.location.Address;
+			import com.yahoo.maps.api.YahooMap;
+			import com.easyinsight.analysis.AnalysisItemTypes;
+			import mx.collections.ArrayCollection;
+			import com.easyinsight.analysis.AnalysisItem;
+			import com.easyinsight.analysis.ListDataResults;
+			import com.easyinsight.analysis.CrosstabDefinition;
+			import com.easyinsight.analysis.ChartDefinition;
+			import com.easyinsight.analysis.AnalysisItemUpdateEvent;
+			import com.easyinsight.analysis.ListDefinition;
+			import com.easyinsight.analysis.AnalysisDefinition;
+			
+			[Bindable]
+            private var graphData:ArrayCollection = new ArrayCollection();
+
+            private var masterDataSet:ArrayCollection = new ArrayCollection();
+            
+            private var yahooMap:YahooMap;
+            
+            private var initAddress:Address;
+			
+			private function initHandlers():void {
+                dimensionDropArea.addEventListener(AnalysisItemUpdateEvent.ANALYSIS_LIST_UPDATE, requestPivotTable);
+                measureDropArea.addEventListener(AnalysisItemUpdateEvent.ANALYSIS_LIST_UPDATE, requestPivotTable);
+            }
+            
+            override protected function fromListDefinition(listDefinition:ListDefinition):AnalysisDefinition {
+                var yahooMapDefinition:YahooMapDefinition = new YahooMapDefinition();            
+                //dimensionDropArea.resetMaxElements(1);
+                //measureDropArea.resetMaxElements(1);
+                yahooMapDefinition.dataFeedID = listDefinition.dataFeedID;
+                if (listDefinition.columns != null) {
+                    for (var i:int = 0; i < listDefinition.columns.length; i++) {
+                        var column:AnalysisItem = listDefinition.columns[i];
+                        if (column.hasType(AnalysisItemTypes.DIMENSION)) {
+                            yahooMapDefinition.dimensions.addItem(column);
+                        } else if (column.hasType(AnalysisItemTypes.MEASURE)) {
+                            yahooMapDefinition.measures.addItem(column);
+                        }
+                    }
+                }
+                return yahooMapDefinition;
+            }
+            
+            override protected function fromYahooMapDefinition(graphicDefinition:YahooMapDefinition):AnalysisDefinition {
+            	
+                return graphicDefinition;
+            }
+            
+            override protected function fromMapDefinition(mapDefinition:MapDefinition):AnalysisDefinition {
+            	var yahooMapDefinition:YahooMapDefinition = new YahooMapDefinition();
+            	yahooMapDefinition.dimensions = mapDefinition.dimensions;
+            	yahooMapDefinition.measures = mapDefinition.measures;
+                return yahooMapDefinition;
+            }
+
+            override public function requestData():void {
+                requestPivotTable(null);
+            }
+
+            override protected function fromGraphicDefinition(graphicDefinition:GraphicDefinition):AnalysisDefinition {
+                var mapDefinition:YahooMapDefinition = new YahooMapDefinition();
+            	mapDefinition.dimensions = graphicDefinition.dimensions;
+            	mapDefinition.measures = graphicDefinition.measures;
+                return graphicDefinition;
+            }
+            
+
+            override protected function fromCrosstabDefinition(crosstabDefinition:CrosstabDefinition):AnalysisDefinition {
+                var mapDefinition:YahooMapDefinition = new YahooMapDefinition();                
+                if (crosstabDefinition.rows != null && crosstabDefinition.rows.length > 0) {
+                    mapDefinition.dimensions[0] = crosstabDefinition.rows[0];
+                }
+                if (crosstabDefinition.measures != null && crosstabDefinition.measures.length > 0) {
+                    mapDefinition.measures[0] = crosstabDefinition.measures[0];
+                }
+                return mapDefinition;
+            }
+
+            override public function createNewDefinition():AnalysisDefinition {
+                var analysisDefinition:ChartDefinition = new ChartDefinition();
+                analysisDefinition.name = "New Analysis";
+                return analysisDefinition;
+            }
+            
+            override public function initializeToDefinition():void {
+                if (!showDropAreas) {
+                    chartVBox.removeChild(dropAreas);
+                }
+                dimensionDropArea.reset(1);
+                measureDropArea.reset(1);
+                var yahooMapDefinition:YahooMapDefinition = getAnalysisDefinition() as YahooMapDefinition;
+                for (var i:int = 0; i < yahooMapDefinition.dimensions.length; i++) {
+                    dimensionDropArea.addAnalysisItem(yahooMapDefinition.dimensions[i]);
+                }
+                for (var j:int = 0; j < yahooMapDefinition.measures.length; j++) {
+                    measureDropArea.addAnalysisItem(yahooMapDefinition.measures[j]);
+                }
+                var appid:String = "3fTu1nnV34HT_qxJ86JP1V7S5V_8.p8mCEQHem3o.cCBRWl7lI7Qs7BBlZ2X4ICHkcO3Sg--";
+                yahooMap = new YahooMap(); 
+				
+				// list for the MAP_INITIALIZE event from YahooMap
+				yahooMap.addEventListener(YahooMapEvent.MAP_INITIALIZE, handleMapInitialize);
+				
+				// initialize the map, passing the app-id, width and height.
+				yahooMap.init(appid, stupidYahoo.width, stupidYahoo.height);
+				 
+				stupidYahoo.addChild(yahooMap); 
+				stupidYahoo.addEventListener(ResizeEvent.RESIZE, handleContainerResize); 
+				 
+				yahooMap.addPanControl(); 
+				yahooMap.addZoomWidget(); 
+				yahooMap.addTypeWidget();  
+                requestPivotTable(null);
+            }
+            
+            private function handleGeocodeSuccess(event:GeocoderEvent):void  
+			{ 
+			    // retrieve the first result returned by the geocoder. 
+			    var result:GeocoderResult = initAddress.geocoderResultSet.firstResult; 
+			    
+			    // then we'll get the zoom level and center latlon to position the map on. 
+			    yahooMap.zoomLevel = result.zoomLevel; 
+			    yahooMap.centerLatLon = result.latlon; 
+			    
+			} 
+            
+            private function handleMapInitialize(event:YahooMapEvent):void  
+			{ 
+				// creating a new address object, passing our address string as the single parameter. 
+				initAddress = new Address("1401 wewatta st denver,co"); 
+				 
+				// listen for the GEOCODER_SUCCESS event dispatched when the data comes back from the webservice.
+				initAddress.addEventListener(GeocoderEvent.GEOCODER_SUCCESS, handleGeocodeSuccess);
+				
+				// send the geocode request.
+				initAddress.geocode(); 
+			} 
+
+			private function handleContainerResize(event:ResizeEvent):void {
+				// set the size of the map based on its containers size.
+			    yahooMap.setSize(stupidYahoo.width, stupidYahoo.height); 
+			}
+
+
+            private function requestPivotTable(event:AnalysisItemUpdateEvent):void {
+            	var dimensions:Array = dimensionDropArea.getListColumns();
+                var measures:Array = measureDropArea.getListColumns();
+
+                var yahooMapDefinition:YahooMapDefinition = getAnalysisDefinition() as YahooMapDefinition;
+
+                yahooMapDefinition.dimensions = new ArrayCollection(dimensions);
+                yahooMapDefinition.measures = new ArrayCollection(measures);
+
+                if (dimensions.length > 0 && measures.length > 0) {
+                    dataService.getListData(yahooMapDefinition, this, processListResults);
+                } else {
+                    graphData = new ArrayCollection();
+                    masterDataSet = new ArrayCollection();
+                }
+            }
+            
+            private function processListResults(listRowData:ListDataResults):void {
+            	yahooMap.markerManager.removeAllMarkers();
+            	var dimensions:Array = dimensionDropArea.getListColumns();
+                var measures:Array = measureDropArea.getListColumns();
+                var headers:ArrayCollection = new ArrayCollection(listRowData.headers);
+                var rows:ArrayCollection = new ArrayCollection(listRowData.rows);
+                graphData = new ArrayCollection();
+                for (var i:int = 0; i < rows.length; i++) {
+                    var row:Object = rows.getItemAt(i);
+                    var values:Array = row.values as Array;
+                    var endObject:Object = new Object();
+                    for (var j:int = 0; j < headers.length; j++) {
+                        var headerDimension:AnalysisItem = headers[j];
+                        if (headerDimension.hasType(AnalysisItemTypes.DIMENSION)) {
+	                        var value:String = values[j].getValue();
+	                        var marker:Marker = new SimpleCustomMarker();
+	                        marker.address = new Address(value);
+	                        yahooMap.markerManager.addMarker(marker);
+                        }
+                    }
+                }
+            }
+
+            override public function getCoreView():DisplayObject {
+            	return stupidYahoo;
+            }
+		]]>
+	</mx:Script>
+	<mx:VBox id="chartVBox" width="100%" height="100%">
+		<mx:HBox width="100%" visible="{showDropAreas}" id="dropAreas">
+			<mx:Grid>
+				<mx:GridRow width="100%" height="100%">
+					<mx:GridItem width="100%" height="100%">
+						<analysis:ListDropAreaGrouping id="dimensionDropArea" borderStyle="solid" borderThickness="1" dropAreaType="com.easyinsight.analysis.DimensionDropArea"/>
+					</mx:GridItem>
+					<mx:GridItem width="100%" height="100%">
+						<analysis:ListDropAreaGrouping id="measureDropArea" borderStyle="solid" borderThickness="1" dropAreaType="com.easyinsight.analysis.MeasureDropArea"/>
+					</mx:GridItem>
+				</mx:GridRow>
+			</mx:Grid>					
+		</mx:HBox>
+		
+		<mx:UIComponent id="stupidYahoo" width="100%" height="100%"/>
+	</mx:VBox>
+</DataView>

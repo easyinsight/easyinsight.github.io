@@ -1,0 +1,178 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%" xmlns:account="com.easyinsight.account.*">
+	<mx:Metadata>
+		[Event(name="accountCreated", type="com.easyinsight.account.AccountWizardResultEvent")]
+	</mx:Metadata>
+	<mx:states>
+		<mx:State name="UserInfo">
+			<mx:RemoveChild target="{initialContent}"/>			
+			<mx:AddChild relativeTo="{coreContent}">
+				<account:LoginCreation userDefined="postUserInfo(event)" previousPage="onPreviousPage(event)"/>
+			</mx:AddChild>
+		</mx:State>
+		<mx:State name="BillingSetup">
+			<mx:RemoveChild target="{initialContent}"/>
+			<mx:AddChild relativeTo="{coreContent}">
+				<account:BillingInfoSetup billingInfoDefined="postBillingInfo(event)" previousPage="onPreviousPage(event)"/>
+			</mx:AddChild>
+		</mx:State>
+		<mx:State name="ConfirmCreation">
+			<mx:RemoveChild target="{initialContent}"/>
+			<mx:AddChild relativeTo="{coreContent}">
+				<account:AccountConfirmationRequest accountCreationConfirmed="accountConfirmed(event)" previousPage="onPreviousPage(event)"
+					account="{account}"/>
+			</mx:AddChild>
+		</mx:State>
+		<mx:State name="AccountCreated">
+			<mx:RemoveChild target="{initialContent}"/>
+			<mx:AddChild relativeTo="{coreContent}">
+				<account:AccountCreated/>
+			</mx:AddChild>
+		</mx:State>
+	</mx:states>
+	<mx:Script>
+		<![CDATA[
+			import mx.rpc.AsyncResponder;
+			import mx.messaging.config.ServerConfig;
+			import mx.rpc.events.ResultEvent;
+			import mx.rpc.events.FaultEvent;
+			import mx.rpc.AsyncToken;
+			import com.easyinsight.framework.LoginEvent;
+			import com.easyinsight.framework.UserServiceResponse;
+			import com.easyinsight.framework.UserTransferObject;
+			import com.easyinsight.framework.User;
+			
+			[Bindable]
+			private var account:Account;
+			private var user:UserTransferObject;
+            private var password:String;
+
+			public function startAccountCreation():void {
+				var accountTypeObj:AccountType;
+            	switch (accountType.selectedValue) {
+            		case "free":
+            			accountTypeObj = new FreeAccountType();
+    					break;
+					case "individual":
+						accountTypeObj = new IndividualAccountType();
+						break;
+					case "professional":
+						accountTypeObj = new CommercialAccountType();
+						break;
+					case "enterprise":
+						break;
+            	}
+				this.account = new Account();
+				account.accountType = accountTypeObj;
+				this.currentState = "UserInfo";
+			}
+			
+			private function onPreviousPage(event:PreviousPageEvent):void {
+				switch (this.currentState) {
+					case "UserInfo":
+						currentState = "";
+						break;
+					case "BillingSetup":
+						currentState = "UserInfo";
+						break;
+					case "ConfirmCreation":
+						currentState = "BillingSetup";
+						break;					
+				}
+			}
+			
+			private function postUserInfo(event:UserDefinitionEvent):void {
+				this.user = event.user;
+                this.password = event.password;
+				switch (account.accountType.getAccountType()) {
+					case AccountType.FREE:
+						attemptAccountCreation();
+						break;						
+					case AccountType.INDIVIDUAL:						
+					case AccountType.COMMERCIAL:
+						currentState = "BillingSetup";
+						break;
+				}
+			}
+			
+			private function postBillingInfo(event:BillingInfoDefinitionEvent):void {
+				currentState = "ConfirmCreation";
+			}
+			
+			private function accountConfirmed(event:AccountCreationConfirmationEvent):void {
+				attemptAccountCreation();
+			}
+			
+			private function attemptAccountCreation():void {
+				creationService.createAccount(user, account);
+			}
+			
+			private function createdAccount():void {
+				var resultID:int = creationService.createAccount.lastResult as int;
+				account.accountID = resultID;
+				if (creationService.channelSet == null) {
+            		creationService.channelSet = ServerConfig.getChannelSet(creationService.destination);
+            	}
+            	var token:AsyncToken = creationService.channelSet.login(user.userName, password);
+            	token.addResponder(new AsyncResponder(
+            		function (event:ResultEvent, token:Object = null):void {
+            			switch (event.result) {
+            				case "success":
+            					creationService.authenticate.send(user.userName, password);
+            					break;
+        					default:
+        						trace(event.result);					
+            			}
+            		},
+            		function (event:FaultEvent, token:Object = null):void {
+            			switch (event.fault.faultCode) {
+            				case "Client.Authentication":
+            				default:
+            					trace("this shouldn't happen...");
+            			}
+            		}
+        		));
+				//creationService.authenticate.send(user.userName, user.password);
+				//dispatchEvent(new AccountWizardResultEvent(AccountWizardResultEvent.ACCOUNT_CREATED, account));
+				
+			}
+			
+			private function gotUserInfo():void {
+				var user:UserServiceResponse = creationService.authenticate.lastResult as UserServiceResponse;
+				User.initializeUser(user.name, user.email, user.accountType, user.spaceAllowed, user.accountAdmin,
+                            user.dataSourceCreator, user.insightCreator);
+            	User.getInstance().password = user.encryptedPassword;
+            	User.getInstance().userName = user.userName;
+            	User.getEventNotifier().dispatchEvent(new LoginEvent(LoginEvent.LOGIN));
+				currentState = "AccountCreated";
+			}		
+		]]>
+	</mx:Script>
+	<mx:VBox width="100%" height="100%" id="coreContent" backgroundColor="#FFFFFF" backgroundAlpha=".7" paddingLeft="15" 
+		paddingTop="15" paddingBottom="15" paddingRight="15">
+		<mx:VBox width="100%" height="100%" id="initialContent" horizontalAlign="center">
+            <account:NoAccountText id="noAccountText" width="80%"/>
+			<mx:Spacer height="30"/>
+			<mx:HBox width="80%" id="box1">
+				<mx:VBox width="50%" backgroundColor="#FFFFFF">
+					<mx:RadioButtonGroup id="accountType" selectedValue="free"/>
+					<mx:RadioButton groupName="accountType" fontSize="12" id="free" value="free" label="Free Account - The quick and free way to start"/>
+					<mx:RadioButton groupName="accountType" fontSize="12" id="individual" value="individual" label="Individual Account - More features, more space, more insight!"/>
+					<mx:RadioButton groupName="accountType" fontSize="12" id="professional" value="professional" label="Professional Account - For the company ready to move ahead"/>
+				</mx:VBox>
+				<mx:Spacer width="40"/>
+				<mx:VBox verticalAlign="middle" height="100%">
+					<mx:Spacer height="100%"/>
+					<mx:Button fontSize="14" label="Create Account!" click="startAccountCreation()"/>
+					<mx:Spacer height="100%"/>
+				</mx:VBox>
+			</mx:HBox>
+			<mx:Spacer height="30"/>		
+			<account:AccountTypeComparison width="80%" id="accountComparison"/>
+		</mx:VBox>
+	</mx:VBox>
+	<mx:RemoteObject id="creationService" destination="login">
+		<mx:method name="createAccount" result="createdAccount()"/>
+		<mx:method name="authenticate" result="gotUserInfo()"/>
+	</mx:RemoteObject>
+</mx:Canvas>

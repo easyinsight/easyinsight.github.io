@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute"
+	creationComplete="apiService.getAvailableFeeds.send()">
+	<mx:Script>
+		<![CDATA[
+			import com.easyinsight.administration.feed.FeedDefinitionData;
+			import mx.managers.PopUpManager;
+			import com.easyinsight.listing.DataFeedDescriptor;
+			import mx.rpc.events.ResultEvent;
+			import mx.collections.ArrayCollection;
+			[Bindable]
+			private var descriptors:ArrayCollection;
+		
+			private function gotFeeds(event:ResultEvent):void {
+				descriptors = apiService.getAvailableFeeds.lastResult as ArrayCollection;				
+			}
+			
+			private function chose():void {
+				var descriptor:DataFeedDescriptor = feedBox.selectedItem as DataFeedDescriptor;
+				apiService.deployService.send(descriptor.dataFeedID);
+			}
+			
+			private function cancel():void {
+				PopUpManager.removePopUp(this);
+			}
+			
+			private function deployed():void {
+				dispatchEvent(new ServiceDefinitionEvent(ServiceDefinitionEvent.SERVICE_DEFINED, feedBox.selectedItem as DataFeedDescriptor));
+				PopUpManager.removePopUp(this);
+			}
+		]]>
+	</mx:Script>
+	<mx:RemoteObject destination="apiService" id="apiService">
+		<mx:method name="getAvailableFeeds" result="gotFeeds(event)"/>
+		<mx:method name="deployService" result="deployed()"/>
+	</mx:RemoteObject>
+	<mx:Form styleName="TitleWindowContents">
+		<mx:FormItem label="Choose a Feed:">
+			<mx:ComboBox id="feedBox" dataProvider="{descriptors}" selectedIndex="0" labelField="name"/>		
+		</mx:FormItem>
+		<mx:FormItem label="" direction="horizontal">
+			<mx:Button label="OK" click="chose()"/>
+			<mx:Button label="Cancel" click="cancel()"/>			
+		</mx:FormItem>
+	</mx:Form>
+</mx:TitleWindow>

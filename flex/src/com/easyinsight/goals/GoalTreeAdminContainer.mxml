@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FullScreenPage xmlns="com.easyinsight.*" xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:goals="com.easyinsight.goals.*"
+	width="100%" height="100%" backgroundColor="#DCE2F8">
+	<mx:Script>
+		<![CDATA[
+import mx.collections.ArrayCollection;
+import mx.controls.Alert;
+			import com.easyinsight.analysis.AnalysisCloseEvent;
+			private var _goalTree:GoalTree;
+			[Bindable]
+			private var goalTreeName:String;
+			[Bindable]
+			private var goalTreeDescription:String;
+			[Bindable]
+			private var rootNode:GoalTreeNode;
+
+            [Bindable]
+            private var newSolutions:ArrayCollection;
+			
+			public function set goalTree(goalTree:GoalTree):void {
+				this._goalTree = goalTree;
+			}
+			
+			override protected function commitProperties():void {
+				if (_goalTree == null) {
+					_goalTree = new GoalTree();
+					var goalTreeNode:GoalTreeNode = new GoalTreeNode();
+					_goalTree.rootNode = goalTreeNode;					
+				}
+				rootNode = _goalTree.rootNode;
+				goalTreeName = _goalTree.name;
+				goalTreeDescription = _goalTree.description;
+			}
+			
+			override protected function createChildren():void {
+				super.createChildren();
+				
+			}
+			
+			private function save():void {
+				_goalTree.name = nameInput.text;
+                _goalTree.description = descriptionTextArea.text;
+                if (_goalTree.goalTreeID == 0) {
+                    goalService.createGoalTree.send(_goalTree);
+                } else {
+                    goalService.updateGoalTree.send(_goalTree);
+                }
+			}
+			
+			private function close():void {
+				dispatchEvent(new AnalysisCloseEvent(this));
+			}
+			
+			private function savedGoalTree():void {
+				Alert.show("Saved successfully!");
+			}
+
+            private function updatedGoalTree():void {
+                Alert.show("Updated successfully!");
+			}
+		]]>
+	</mx:Script>
+	<mx:RemoteObject destination="goalService" id="goalService">
+		<mx:method name="createGoalTree" result="savedGoalTree()"/>
+		<mx:method name="updateGoalTree" result="updatedGoalTree()"/>
+	</mx:RemoteObject>
+	<mx:VBox  width="100%" height="100%" paddingLeft="10" paddingTop="10" paddingRight="10" paddingBottom="10">
+		<mx:HBox id="buttonBox" paddingLeft="5" paddingTop="5" paddingBottom="5">		
+			<mx:Button id="saveButton" icon="@Embed(source='../../../../assets/floppy_disk.png')" click="save()" toolTip="Save"/>
+			<mx:Button id="wrapButton" icon="@Embed(source='../../../../assets/document_out.png')" click="close()" toolTip="Close"/>
+		</mx:HBox>
+        <mx:HBox width="100%">
+            <mx:VBox verticalGap="0">
+                <mx:Box width="100%" height="5" backgroundColor="#10319A" left="0" right="0"/>
+                <mx:Box width="100%" backgroundColor="#3B56AF" horizontalAlign="center">
+                    <mx:Label text="Goal Tree Attributes" color="0xFFFFFF"/>
+                </mx:Box>
+                <mx:Form paddingTop="0" paddingLeft="0" paddingBottom="0" paddingRight="0">
+                    <mx:FormItem label="Name:" paddingTop="20" fontFamily="Tahoma" fontWeight="bold">
+                        <mx:TextInput id="nameInput" text="{goalTreeName}" fontFamily="Lucida Grande" fontWeight="normal"/>
+                    </mx:FormItem>
+                    <mx:FormItem label="Description:" fontFamily="Tahoma" fontWeight="bold">
+                        <mx:TextArea id="descriptionTextArea" width="300" height="60" text="{goalTreeDescription}" fontFamily="Lucida Grande" fontWeight="normal"/>
+                    </mx:FormItem>
+                </mx:Form>
+            </mx:VBox>
+            <mx:VBox verticalGap="0">
+                <mx:Box width="100%" height="5" backgroundColor="#10319A" left="0" right="0"/>
+                <mx:Box width="100%" backgroundColor="#3B56AF" horizontalAlign="center">
+                    <mx:Label text="New Solutions to be Installed" color="0xFFFFFF"/>
+                </mx:Box>
+                <mx:List dataProvider="{newSolutions}" width="100%"/>
+            </mx:VBox>
+        </mx:HBox>
+        <goals:GoalTreeAdminWindow goalTreeNode="{rootNode}"/>
+	</mx:VBox>
+</FullScreenPage>

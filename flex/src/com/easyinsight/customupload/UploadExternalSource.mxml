@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml"
+	creationComplete="initHandlers()" xmlns:google="com.easyinsight.google.*">
+	<mx:states>
+		<mx:State name="salesforce">
+			
+		</mx:State>
+		<mx:State name="wesabe">
+			
+		</mx:State>
+	</mx:states>
+	<mx:Script>
+		<![CDATA[
+			import mx.managers.PopUpManager;
+            
+            private function initHandlers():void {
+            	
+            }
+            
+            private function onFeedCreation(event:UploadConfigEvent):void {
+            	dispatchEvent(event);
+            	PopUpManager.removePopUp(this);            	
+            }
+            
+            private function cancel(event:UploadConfigEvent):void {
+            	dispatchEvent(event);
+            	PopUpManager.removePopUp(this);
+            }
+		]]>
+	</mx:Script>
+	<mx:VBox width="100%" height="100%" styleName="TitleWindowContents" backgroundSize="100%">
+		<mx:RadioButtonGroup id="uploadTypeGroup" selectedValue="google"/>
+		<mx:HBox width="100%" horizontalAlign="center" paddingTop="20">
+			<mx:RadioButton groupName="uploadTypeGroup" label="Google Documents" value="google" id="google" fontSize="14"/>
+			<mx:RadioButton groupName="uploadTypeGroup" label="Salesforce.com" value="salesforce" id="salesforce" fontSize="14"/>
+			<mx:RadioButton groupName="uploadTypeGroup" label="Wesabe" value="wesabe" id="wesabe" fontSize="14"/>
+		</mx:HBox>
+		<mx:Canvas id="coreCanvas" width="100%" height="100%">
+			<google:GoogleSpreadsheetSelection userConfigComplete="onFeedCreation(event)" userConfigCancel="cancel(event)"/>
+		</mx:Canvas>
+	</mx:VBox>
+</mx:TitleWindow>

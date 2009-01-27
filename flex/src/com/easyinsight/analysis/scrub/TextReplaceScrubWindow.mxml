@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrubEditWindow xmlns="com.easyinsight.analysis.scrub.*" xmlns:mx="http://www.adobe.com/2006/mxml" title="Replace Text">
+	<mx:Script>
+		<![CDATA[
+			import mx.managers.PopUpManager;
+			[Bindable]
+			private var sourceText:String;
+			[Bindable]
+			private var replaceText:String;
+			[Bindable]
+			private var caseSensitive:Boolean;
+			[Bindable]
+			private var regularExpression:Boolean;
+			
+			private var textReplaceScrub:TextReplaceScrub;
+			
+			override public function set scrub(scrub:DataScrub):void {
+				var textScrub:TextReplaceScrub = scrub as TextReplaceScrub;
+				this.textReplaceScrub = textScrub;
+				sourceText = textScrub.sourceText;
+				replaceText = textScrub.replaceText;
+				caseSensitive = textScrub.caseSensitive;
+				regularExpression = textScrub.regex;
+			}
+			
+			private function save():void {
+				var newScrub:Boolean = false;
+				if (textReplaceScrub == null) {
+					textReplaceScrub = new TextReplaceScrub();
+					newScrub = true;					
+				}
+				textReplaceScrub.sourceText = textToFind.text;
+				textReplaceScrub.replaceText = replaceWith.text;
+				textReplaceScrub.caseSensitive = caseSensitiveCheck.selected;
+				textReplaceScrub.regex = regularExpressionCheck.selected;
+				if (newScrub)
+					dispatchEvent(new DataScrubEvent(DataScrubEvent.ADDED_SCRUB, textReplaceScrub));
+				else
+					dispatchEvent(new DataScrubEvent(DataScrubEvent.UPDATED_SCRUB, textReplaceScrub));
+				PopUpManager.removePopUp(this);
+			}
+			
+			private function cancel():void {
+				PopUpManager.removePopUp(this);
+			}
+		]]>
+	</mx:Script>
+	<mx:Form>
+		<mx:FormItem label="Text To Find: " direction="horizontal">
+			<mx:TextInput id="textToFind" text="{sourceText}"/>
+		</mx:FormItem>
+		<mx:FormItem label="Replace With: " direction="horizontal">
+			<mx:TextInput id="replaceWith" text="{replaceText}"/>
+		</mx:FormItem>
+		<mx:FormItem label="Case Sensitive: ">
+			<mx:CheckBox id="caseSensitiveCheck" selected="{caseSensitive}"/>
+		</mx:FormItem>
+		<mx:FormItem label="Regular Expression: ">
+			<mx:CheckBox id="regularExpressionCheck" selected="{regularExpression}"/>
+		</mx:FormItem>
+		<mx:FormItem label="" direction="horizontal">
+			<mx:Button label="Save" click="save()"/>
+			<mx:Button label="Cancel" click="cancel()"/>
+		</mx:FormItem> 
+	</mx:Form>
+</ScrubEditWindow>

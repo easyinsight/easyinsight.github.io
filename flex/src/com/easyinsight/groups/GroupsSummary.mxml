@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%" implements="com.easyinsight.listing.IPerspective" 
+	xmlns:groups="com.easyinsight.groups.*" backgroundColor="#DCE2F8"
+	creationComplete="initListeners()" xmlns:listing="com.easyinsight.listing.*">
+	<mx:states>
+		<mx:State name="notLoggedIn">
+			<mx:RemoveChild target="{topBox}"/>
+			<mx:RemoveChild target="{bodyBox}"/>
+			<mx:AddChild relativeTo="{coreContent}">
+				<listing:GottaLoginPage/>
+			</mx:AddChild>
+		</mx:State>
+	</mx:states>
+	<mx:Script>
+		<![CDATA[
+			import mx.utils.URLUtil;
+			import mx.managers.BrowserManager;
+			import com.easyinsight.framework.LoginEvent;
+			import com.easyinsight.framework.NavigationEvent;
+			import com.easyinsight.framework.User;
+			import mx.managers.PopUpManager;
+			import mx.collections.ArrayCollection;
+			import com.easyinsight.listing.AnalyzeSource;
+
+			[Bindable]			
+			private var myGroups:ArrayCollection;
+			
+			[Bindable]
+			private var publicGroups:ArrayCollection;
+			
+			[Bindable]
+			private var publicGroupRowCount:int;
+			
+			[Bindable]
+			private var showMyGroups:Boolean = false;
+			
+			private function initListeners():void {
+			    User.getEventNotifier().addEventListener(LoginEvent.LOGIN, onLogin);
+			}
+			
+			private function onLogin(event:LoginEvent):void {
+				gotFocus();
+			}
+
+            public function search(keyword:String = null):void {
+
+            }
+            
+            private function searchKeyUp(event:KeyboardEvent):void {
+            	
+            }
+
+            public function analyze():AnalyzeSource {
+                return null;
+            }
+
+            public function gotFocus():void {
+            	var fragmentObject:Object = new Object();
+                fragmentObject.page = "groups";
+                BrowserManager.getInstance().setTitle("Easy Insight - Groups");
+                var fragmentString:String = URLUtil.objectToString(fragmentObject);
+				BrowserManager.getInstance().setFragment(fragmentString);
+                var user:User = User.getInstance();
+                if (user == null) {
+                    currentState="notLoggedIn";
+                } else {
+                    if (currentState != "") {
+                        currentState = "";
+                    }
+                    groupService.getMemberGroups.send();
+            		groupService.getPublicGroups.send();
+                }            	
+            }
+
+            public function lostFocus():void {
+            }
+
+            public function getDefaultAnalyzeState():Boolean {
+                return false;
+            }
+
+            public function isKeywordSearchInstant():Boolean {
+                return false;
+            }
+            
+            private function groupSelected(event:GroupSelectedEvent):void {
+            	var groupDetail:GroupDetail = new GroupDetail();
+            	groupDetail.groupID = event.groupID;
+            	User.getEventNotifier().dispatchEvent(new NavigationEvent(null, groupDetail));
+            }
+            
+            private function gotMemberGroups():void {
+            	this.myGroups = groupService.getMemberGroups.lastResult as ArrayCollection;
+            	showMyGroups =  (myGroups.length > 0);            		
+            }
+            
+            private function gotPublicGroups():void {
+            	this.publicGroups = groupService.getPublicGroups.lastResult as ArrayCollection;
+            	publicGroupRowCount = this.publicGroups.length;
+            }
+            
+            private function createNewGroup():void {
+            	var groupWindow:NewGroupWindow = NewGroupWindow(PopUpManager.createPopUp(this, NewGroupWindow, true));
+            	groupWindow.addEventListener(GroupSelectedEvent.GROUP_SELECTED, groupSelected);
+            	PopUpManager.centerPopUp(groupWindow);
+            }
+
+            private function joinPublicGroup():void {
+                var groupJoinWindow:GroupJoinWindow = new GroupJoinWindow();
+                groupJoinWindow.addEventListener(GroupSelectedEvent.GROUP_SELECTED, groupSelected);
+                PopUpManager.addPopUp(groupJoinWindow, this, true);
+                PopUpManager.centerPopUp(groupJoinWindow);
+            }
+        ]]>
+	</mx:Script>
+	<mx:RemoteObject destination="groupService" id="groupService">
+		<mx:method name="getMemberGroups" result="gotMemberGroups()"/>
+		<mx:method name="getPublicGroups" result="gotPublicGroups()"/>		
+	</mx:RemoteObject>
+    <mx:Box width="100%" height="5" backgroundColor="#254BD4" left="0" right="0"/>
+	<mx:VBox width="100%" height="100%" id="coreContent" paddingTop="10" paddingLeft="10" paddingRight="10" paddingBottom="10"  >
+		<mx:HBox width="100%" id="topBox">
+			<mx:Button icon="@Embed('../../../../assets/users3_add.png')" label="Create a New Group..." click="createNewGroup()" labelPlacement="bottom"/>
+			<mx:Button icon="@Embed('../../../../assets/earth_new.png')" label="Join a Public Group..." click="joinPublicGroup()" labelPlacement="bottom"/>
+			<mx:Button icon="@Embed('../../../../assets/helpx48.png')" label="Help..." labelPlacement="bottom"/>
+			<mx:Spacer width="100%"/>
+			<mx:HBox borderThickness="1" paddingTop="5" paddingBottom="5" paddingLeft="5" paddingRight="5">
+				<mx:TextInput id="searchText" keyUp="searchKeyUp(event)"/>
+				<mx:Button toolTip="Search" icon="@Embed(source='../../../../assets/view.png')" id="searchButton" click="search()"/>
+			</mx:HBox>				
+		</mx:HBox>
+        <mx:HBox width="100%" id="bodyBox">
+            <mx:VBox>
+                <mx:HBox width="100%" horizontalAlign="center">
+                    <mx:ApplicationControlBar>
+                        <mx:Label fontSize="14" text="My Groups"/>
+                    </mx:ApplicationControlBar>
+                </mx:HBox>
+                <mx:DataGrid id="myGroupsGrid" dataProvider="{myGroups}" headerStyleName="BlueHeader">
+                    <mx:columns>
+                        <mx:DataGridColumn dataField="name" headerText="Name" headerRenderer="com.easyinsight.groups.CustomGroupHeader"/>
+                        <mx:DataGridColumn dataField="name" width="50" headerText="" itemRenderer="com.easyinsight.groups.MyGroupsControls"/>
+                    </mx:columns>
+                </mx:DataGrid>
+            </mx:VBox>
+            <mx:VBox width="100%">
+                <mx:HBox width="100%" horizontalAlign="center" verticalAlign="middle">
+                    <mx:ApplicationControlBar>
+                        <mx:Label fontSize="14" text="Group Messages"/>
+                    </mx:ApplicationControlBar>
+                    <mx:Label fontSize="12" text="Between"/>
+                    <mx:DateField id="startDate"/>
+                    <mx:Label fontSize="12" text="and"/>
+                    <mx:DateField id="endDate"/>
+                </mx:HBox>
+                <mx:DataGrid id="groupChangesGrid" width="100%" dataProvider="{myGroups}" headerStyleName="BlueHeader">
+
+                </mx:DataGrid>
+            </mx:VBox>
+        </mx:HBox>
+	</mx:VBox>
+</mx:VBox>

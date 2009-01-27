@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%" xmlns:items="com.easyinsight.administration.items.*"
+	creationComplete="setup()">
+	<mx:states>
+		<mx:State name="FinishingParse">
+			<mx:RemoveChild target="{coreForm}"/>
+			<mx:RemoveChild target="{analysisList}"/>
+			<mx:RemoveChild target="{buttons}"/>
+			<mx:AddChild relativeTo="{coreVBox}">
+				<mx:VBox verticalAlign="middle" width="100%" height="100%">
+					<mx:Spacer/>
+					<mx:HBox horizontalAlign="center" width="100%" height="100%">
+						<mx:Spacer/>
+							<mx:VBox>	
+								<mx:Label text="Persisting your data into our warehouse..."/>
+								<mx:ProgressBar indeterminate="true"/>
+							</mx:VBox>
+						<mx:Spacer/>
+					</mx:HBox>
+					<mx:Spacer/>
+				</mx:VBox>
+			</mx:AddChild>
+		</mx:State>
+		<mx:State name="TooLongParse">
+			<mx:RemoveChild target="{coreForm}"/>
+			<mx:RemoveChild target="{analysisList}"/>
+			<mx:RemoveChild target="{buttons}"/>
+			<mx:AddChild relativeTo="{coreVBox}">
+				<mx:VBox verticalAlign="middle">
+					<mx:Spacer/>
+					<mx:HBox horizontalAlign="center">
+						<mx:Spacer/>
+							<mx:VBox>																								
+								<mx:Label text="With the amount of data you've uploaded, it may take a while for your data 
+								to be fully processed and persisted in our warehouse. You can check the progress bar in your 
+								My Data page to look for completion."/>
+								<mx:Button label="Close" click="closeTooLong()"/>
+							</mx:VBox>
+						<mx:Spacer/>
+					</mx:HBox>
+					<mx:Spacer/>					
+				</mx:VBox>
+			</mx:AddChild>
+		</mx:State>
+	</mx:states>
+	<mx:Script>
+		<![CDATA[
+			import com.easyinsight.administration.feed.TagCloud;
+			import com.easyinsight.framework.User;
+            import mx.collections.ArrayCollection;
+            [Bindable]
+            private var items:ArrayCollection;                    
+
+            private var uploadID:Number;
+            private var uploadFormat:UploadFormat;
+            
+            private var validators:Array;
+            
+            private var uploadSize:int;
+            
+            private function setup():void {
+            	focusManager.setFocus(dataFeedName);
+            	validators = [ nameValidator ];
+            }
+
+            public function go(uploadID:Number, uploadFormat:UploadFormat):void {
+                uploadService.attemptParse(uploadID, uploadFormat);
+                this.uploadID = uploadID;
+                this.uploadFormat = uploadFormat;
+            }
+
+            private function submit():void {
+            	var results:Array = Validator.validateAll(validators);
+            	if (results.length == 0) {
+	                var uploadPolicy:UploadPolicy = new PrivateUploadPolicy();
+					var tagCloud:TagCloud = new TagCloud();
+					tagCloud.fromString(tagsInput.text);
+					if (uploadSize < 1000000) {
+						currentState = "FinishingParse";                        
+		                uploadService.parsed.send(uploadID, uploadFormat, dataFeedName.text, genreName.text,
+		                    analysisList.analysisItems, uploadPolicy, tagCloud);
+		   			} else {
+		   				currentState = "TooLongParse";
+		   				uploadService.asyncParse.send(uploadID, uploadFormat, dataFeedName.text, genreName.text,
+		                    analysisList.analysisItems, uploadPolicy, tagCloud);
+		   			} 
+	            }
+            }
+
+            private function handleParseAttemptResults():void {
+                var uploadAnalysis:UserUploadAnalysis = uploadService.attemptParse.lastResult as UserUploadAnalysis;
+                if (uploadAnalysis.successful) {
+                    items = uploadAnalysis.fields;
+                    uploadSize = uploadAnalysis.size;
+                }
+            }
+
+            private function handleParsed():void {                
+                var dataFeedID:int = uploadService.parsed.lastResult as int;
+                dispatchEvent(new UploadMetadataCompleteEvent(dataFeedName.text, genreName.text,
+                    analysisList.analysisItems, dataFeedID));
+            }
+            
+            private function handleAsyncParsed():void {            	               
+            }
+            
+            private function closeTooLong():void {
+            	dispatchEvent(new UploadMetadataCompleteEvent(dataFeedName.text, genreName.text,
+                    analysisList.analysisItems, 0));
+            }
+
+            private function cancel():void {
+                dispatchEvent(new UploadCancelEvent());
+            }
+        ]]>
+	</mx:Script>
+	<mx:RemoteObject id="uploadService" destination="userUpload">
+		<mx:method name="attemptParse" result="handleParseAttemptResults()"/>
+		<mx:method name="parsed" result="handleParsed()"/>
+		<mx:method name="asyncParse" result="handleParsed()"/>
+	</mx:RemoteObject>
+	<mx:VBox width="100%" height="100%" id="coreVBox">				
+	<mx:Form width="100%" id="coreForm">
+		<mx:FormItem label="Feed Name:" direction="horizontal">							
+			<mx:TextInput id="dataFeedName"/>
+		</mx:FormItem>
+		<mx:FormItem label="Genre:" direction="horizontal">
+			<mx:ComboBox id="genreName" editable="true">
+				<mx:ArrayCollection>
+					<mx:String>Financial</mx:String>
+		        	<mx:String>Sports</mx:String>        		
+				</mx:ArrayCollection>				
+			</mx:ComboBox>			
+		</mx:FormItem>
+		<mx:FormItem label="Tags:" direction="horizontal" width="100%">
+			<mx:TextInput id="tagsInput" text="" width="100%"/>			
+		</mx:FormItem>
+	</mx:Form>		
+	<items:AnalysisItemEditorList analysisItems="{items}" id="analysisList"/>		
+	<mx:Form width="100%" id="buttons">
+		<mx:FormItem width="100%" direction="horizontal">				
+			<mx:Button label="Finish" click="submit()"/>
+			<mx:Button label="Cancel" click="cancel()"/>
+		</mx:FormItem>		
+	</mx:Form>
+	</mx:VBox>
+	<mx:Validator source="{dataFeedName}" property="text" id="nameValidator"/>	
+</mx:Canvas>

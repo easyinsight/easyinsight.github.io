@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" creationComplete="analysisService.getAnalysisDefinitions.send()">
+	<mx:Script>
+		<![CDATA[
+			import com.easyinsight.analysis.AnalysisDefinition;
+			import mx.managers.PopUpManager;
+			import mx.collections.ArrayCollection;
+			
+			[Bindable]
+			private var availableInsights:ArrayCollection;
+			
+			private function gotDefinitions():void {
+				this.availableInsights = analysisService.getAnalysisDefinitions.lastResult as ArrayCollection;
+			}		
+			
+			private function save():void {
+				var analysisDefinition:AnalysisDefinition = insightBox.selectedItem as AnalysisDefinition;
+				dispatchEvent(new InsightChoiceEvent(analysisDefinition.name, analysisDefinition.analysisID,
+					analysisDefinition.getFields()));
+				PopUpManager.removePopUp(this);
+			}
+			
+			private function cancel():void {
+				PopUpManager.removePopUp(this);
+			}
+		]]>
+	</mx:Script>
+	<mx:RemoteObject destination="analysisDefinition" id="analysisService">
+		<mx:method name="getAnalysisDefinitions" result="gotDefinitions()"/>
+	</mx:RemoteObject>
+	<mx:Form>
+		<mx:FormItem label="Insight: ">
+			<mx:ComboBox id="insightBox" dataProvider="{availableInsights}" labelField="name"/>
+		</mx:FormItem>
+		<mx:FormItem label="" direction="horizontal">
+			<mx:Button label="Save" click="save()"/>
+			<mx:Button label="Cancel" click="cancel()"/>
+		</mx:FormItem>
+	</mx:Form>
+</mx:TitleWindow>

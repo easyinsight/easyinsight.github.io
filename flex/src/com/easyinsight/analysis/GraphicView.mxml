@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<DataView xmlns="com.easyinsight.analysis.*" xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%" 
+	xmlns:analysis="com.easyinsight.analysis.*" creationComplete="initHandlers()" 
+	xmlns:charting="com.easyinsight.charting.*" xmlns:util="com.easyinsight.util.*">
+	
+</DataView>

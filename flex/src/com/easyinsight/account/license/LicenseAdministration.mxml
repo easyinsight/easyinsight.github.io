@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" width="1000" height="600" 
+	xmlns:yahoo="http://www.yahoo.com/astra/2006/mxml" creationComplete="gotFocus()">
+	<mx:Script>
+		<![CDATA[
+			import com.easyinsight.account.BriefFeedInfo;
+			import com.easyinsight.framework.UserServiceResponse;
+			import mx.controls.DataGrid;
+			import mx.managers.DragManager;
+			import mx.events.DragEvent;
+			import com.easyinsight.account.Account;
+			import com.easyinsight.account.SubscriptionLicense;
+			import mx.managers.PopUpManager;
+			import com.easyinsight.framework.UserTransferObject;
+			import com.easyinsight.framework.User;
+			import mx.collections.ArrayCollection;
+			import com.easyinsight.listing.AnalyzeSource;
+			
+			[Bindable]
+			private var unassignedLicenses:ArrayCollection;
+			
+			[Bindable]
+			private var displayUnassignedLicenses:ArrayCollection;
+			
+			[Bindable]
+			private var users:ArrayCollection;
+			
+			[Bindable]
+			private var displayUsers:ArrayCollection;
+			
+			[Bindable]
+			private var userMap:Object = new Object();
+			
+			private var account:Account;
+
+            public function gotFocus():void {            	
+				userService.retrieveAccount.send(); 
+            }
+            
+            private function gotAccount():void {
+            	account = userService.retrieveAccount.lastResult as Account;
+            	unassignedLicenses = new ArrayCollection();
+            	var feedIDs:ArrayCollection = new ArrayCollection();            	
+            	for each (var license:SubscriptionLicense in account.licenses) {
+            		feedIDs.addItem(license.feedID);            		
+            		var unassociated:Boolean = true;
+/*            		for each (var user:UserTransferObject in account.users) {
+            			if (user.licenses.contains(license)) {
+            				unassociated = false;
+            				break;
+            			}
+            		}
+            		if (unassociated) {
+            			unassignedLicenses.addItem(license);
+            		}*/
+            	}
+            	displayUnassignedLicenses = new ArrayCollection(unassignedLicenses.toArray());
+            	//this.users = account.users;
+                  
+
+            	displayUsers = new ArrayCollection(this.users.toArray());
+            	feedService.getBriefFeedInfo.send(feedIDs);
+            }
+            
+            private function gotBriefFeedInfo():void {
+            	var briefFeedInfos:ArrayCollection = feedService.getBriefFeedInfo.lastResult as ArrayCollection;
+            	var lookupMap:Object = new Object();
+            	for each (var briefFeedInfo:BriefFeedInfo in briefFeedInfos) {
+            		lookupMap[briefFeedInfo.feedID] = briefFeedInfo;
+            	}
+            	for each (var license:SubscriptionLicense in account.licenses) {
+            		var feedInfo:BriefFeedInfo = lookupMap[license.feedID] as BriefFeedInfo;
+            		license.feedName = feedInfo.name;
+            	}
+            	vbox.visible = true;
+            }
+                        
+            private function updateList():void {
+            	
+            }
+            
+            private function save():void {
+            	//account.users = this.users;
+            	userService.updateAccount.send(account);
+            }
+            
+            private function updatedAccount():void {
+            	PopUpManager.removePopUp(this);
+            }
+            
+            private function cancel():void {
+            	PopUpManager.removePopUp(this);
+            }
+            
+            private function dragCompletehandler(event:DragEvent):void {
+            	if (event.action != DragManager.NONE) {
+            		var grid:DataGrid = DataGrid(event.dragInitiator);
+            		var data:ArrayCollection = ArrayCollection(grid.dataProvider);
+            		var item:Object = event.dragSource.dataForFormat("items")[0];
+            		for (var i:uint = 0; i < data.length; i++) {
+            			if (data.getItemAt(i).subscriptionLicenseID == item.subscriptionLicenseID) {
+            				data.removeItemAt(i);            				
+            				break;
+            			}
+            		}
+            	}
+            }
+            
+            private function searchChanged(event:KeyboardEvent):void {
+            	var keyword:String = searchInput.text.toLowerCase();
+                //var sort:Sort = displayDataFeeds.sort;
+                var newUsers:ArrayCollection = new ArrayCollection();
+                for each (var user:UserTransferObject in users) {
+                	if (user.userName.indexOf(keyword) > -1) {
+                		newUsers.addItem(user);
+                	}
+                }
+                displayUsers = newUsers;
+            }
+                ]]>
+	</mx:Script>
+	<mx:RemoteObject destination="login" id="userService">
+		<mx:method name="retrieveAccount" result="gotAccount()"/>
+		<mx:method name="updateAccount" result="updatedAccount()"/>
+	</mx:RemoteObject>
+	<mx:RemoteObject destination="feeds" id="feedService">
+		<mx:method name="getBriefFeedInfo" result="gotBriefFeedInfo()"/>
+	</mx:RemoteObject>
+	<mx:VBox width="100%" height="100%" id="vbox" visible="false" styleName="TitleWindowContents">
+		<mx:HBox width="100%">
+			<mx:VBox>
+				<mx:ApplicationControlBar width="100%">
+					<mx:LinkButton label="Unassigned Licenses"/>
+				</mx:ApplicationControlBar>
+				<mx:DataGrid dataProvider="{unassignedLicenses}" dragEnabled="true" dropEnabled="true" dragComplete="dragCompletehandler(event)">
+					<mx:columns>
+						<mx:DataGridColumn dataField="subscriptionLicenseID" headerText="License ID"/>
+						<mx:DataGridColumn dataField="feedName" headerText="Feed Name"/>						
+					</mx:columns>
+				</mx:DataGrid>
+			</mx:VBox>
+			<mx:ApplicationControlBar>
+				<mx:Label text="Search"/>
+				<mx:TextInput id="searchInput" keyUp="searchChanged(event)"/>
+			</mx:ApplicationControlBar>
+		</mx:HBox>		
+		<mx:Tile width="100%" height="100%" direction="horizontal" borderStyle="inset" 
+            horizontalGap="10" verticalGap="15"
+            paddingLeft="10" paddingTop="10" paddingBottom="10" paddingRight="10">
+		<mx:Repeater id="userRepeater" dataProvider="{displayUsers}">
+			<mx:VBox>
+				<mx:ApplicationControlBar width="100%">
+					<mx:LinkButton label="{userRepeater.currentItem.userName}"/>
+				</mx:ApplicationControlBar>
+				<mx:DataGrid dataProvider="{userRepeater.currentItem.licenses}" dragEnabled="true" 
+					dropEnabled="true" dragComplete="dragCompletehandler(event)" rowCount="{userRepeater.currentItem.licenses.length}">
+					<mx:columns>
+						<mx:DataGridColumn dataField="subscriptionLicenseID" headerText="License ID"/>
+						<mx:DataGridColumn dataField="feedName" headerText="Feed Name"/>						
+					</mx:columns>
+				</mx:DataGrid>
+			</mx:VBox>
+		</mx:Repeater>
+		
+		</mx:Tile>
+		<mx:HBox>
+			<mx:Button label="Save" click="save()"/>
+			<mx:Button label="Cancel" click="cancel()"/>		
+		</mx:HBox>
+	</mx:VBox>	
+</mx:TitleWindow>

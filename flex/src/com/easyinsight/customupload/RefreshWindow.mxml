@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" width="400" height="300" creationComplete="onCreationComplete()">
+	<mx:Script>
+		<![CDATA[
+			import com.easyinsight.salesforce.SalesforceCredentialsWindow;
+			import mx.managers.PopUpManager;
+			import com.easyinsight.administration.feed.CredentialsResponse;
+			import com.easyinsight.analysis.CredentialsWindow;
+			import com.easyinsight.analysis.CredentialsDefinition;
+			
+			public var feedID:int;
+			private var credentialsWindow:CredentialsWindow;
+			
+			private function onCreationComplete():void {
+				uploadService.getCredentialsForFeed.send(feedID);
+			}
+			
+			private function gotCredentialRequirements():void {
+				var credentialsType:int = uploadService.getCredentialsForFeed.lastResult as int;				
+				switch (credentialsType) {
+					case CredentialsDefinition.STANDARD_USERNAME_PW:
+						credentialsWindow = new StandardCredentialsWindow();
+						break;
+					case CredentialsDefinition.SALESFORCE:
+						credentialsWindow = new SalesforceCredentialsWindow();
+						break;
+				}
+				credentialsBox.addChild(credentialsWindow);
+			}
+			
+			private function refresh():void {			
+				uploadService.refreshData.send(feedID, credentialsWindow.credentials);
+				progressBar.visible = true;
+				failureMessage.visible = false;
+			}
+			
+			private function updatedData():void {
+				progressBar.visible = false;
+				var credentialsResponse:CredentialsResponse = uploadService.refreshData.lastResult as CredentialsResponse;
+				if (credentialsResponse.successful) {
+					PopUpManager.removePopUp(this);
+				} else {
+					failureMessage.visible = true;
+					failureMessage.text = credentialsResponse.failureMessage;
+				}
+			}
+			
+			private function cancel():void {
+				PopUpManager.removePopUp(this);
+			}
+		]]>
+	</mx:Script>
+	<mx:RemoteObject id="uploadService" destination="userUpload">
+		<mx:method name="getCredentialsForFeed" result="gotCredentialRequirements()"/>		
+		<mx:method name="refreshData" result="updatedData()"/>
+	</mx:RemoteObject>
+	<mx:VBox width="100%" height="100%" id="coreVBox" styleName="TitleWindowContents">
+		<mx:VBox width="100%" height="100%" id="credentialsBox"/>
+		<mx:Label text="" visible="false" id="failureMessage"/>
+		<mx:ProgressBar id="progressBar" indeterminate="true" visible="false"/>		
+		<mx:HBox width="100%">
+			<mx:Button label="Refresh" click="refresh()"/>
+			<mx:Button label="Cancel" click="cancel()"/>
+		</mx:HBox>
+	</mx:VBox>
+</mx:TitleWindow>

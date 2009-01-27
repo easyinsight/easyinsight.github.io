@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Application xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" xmlns:ilog="http://www.ilog.com/2007/ilog/flex"
+	creationComplete="setup()">
+	<mx:Script>
+		<![CDATA[
+			import com.easyinsight.util.OrgChartSample;
+			import mx.collections.ArrayCollection;
+			
+			[Bindable]
+			private var dataStuff:Array = [];
+			
+			private var xml:XML  = <employee name="Employee 1" position="WW Manager" location="United States">
+         <employee name="Employee 2" position="Europe Manager" location="France">
+           <employee name="Employee 4x" position="Europe Manager" location="Francex"/>
+         </employee>
+         <employee name="Employee 3" position="Asia Manager" location="China">
+           <employee name="Employee 4" position="Europe Manager" location="France"/>
+         </employee>         
+       </employee>;
+
+			
+			private function setup():void {
+				
+				var feed3:OrgChartSample = new OrgChartSample("Feed 3");
+				var feed2:OrgChartSample = new OrgChartSample("Feed 2");
+				var feed1:OrgChartSample = new OrgChartSample("Feed 1");
+				//feed1.children.addItem(feed2);
+				//feed1.children.addItem(feed3);
+				dataStuff = [feed1];
+				//blah.dataProvider = dataStuff;
+				blah.dataProvider = xml;				
+			} 
+		]]>
+	</mx:Script>
+	<mx:Box width="100%" height="100%" borderThickness="15" borderStyle="solid">
+		<ilog:OrgChart width="100%" height="100%" id="blah" maxZoomLevel="1" minZoomLevel="1"/>	
+	</mx:Box>
+	
+</mx:Application>

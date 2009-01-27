@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" title="New Calculation" xmlns:analysis="com.easyinsight.analysis.*">
+	<mx:Script>
+		<![CDATA[
+			import mx.controls.DataGrid;
+			import mx.managers.DragManager;
+			import mx.controls.List;
+			import mx.events.DragEvent;
+			import mx.events.ValidationResultEvent;
+			import mx.validators.ValidationResult;
+			import mx.managers.PopUpManager;
+			
+			[Bindable]
+			private var failureMessage:String;
+			
+			private function save():void {
+				var validationResult:ValidationResultEvent = nameValidator.validate();
+				if (validationResult.type == ValidationResultEvent.VALID) {
+					analysisService.validateCalculation.send(calculationInput.text);
+				}				
+			}
+			
+			private function cancel():void {
+				PopUpManager.removePopUp(this);
+			}
+			
+			private function validatedCalculation():void {
+				failureMessage = analysisService.validateCalculation.lastResult as String;
+				if (failureMessage != null) {
+					calcValidator.validate();
+				} else {
+					var analysisCalculation:AnalysisCalculation = new AnalysisCalculation();
+					var namedKey:NamedKey = new NamedKey();
+					namedKey.name = nameInput.text;
+					analysisCalculation.key = namedKey;					
+					analysisCalculation.calculationString = calculationInput.text;
+					dispatchEvent(new AnalysisItemCreationEvent(analysisCalculation));
+				}
+				PopUpManager.removePopUp(this);
+			}
+			
+			private function dragEnterHandler(event:DragEvent):void {
+				var analysisItem:AnalysisItem;
+				if (event.dragInitiator is List) {
+					var initialList:List = List(event.dragInitiator);						
+					analysisItem = initialList.selectedItem as AnalysisItem;
+				} else if (event.dragInitiator is DropArea) {
+					var dropArea:DropArea = event.dragInitiator as DropArea;
+					analysisItem = dropArea.analysisItem;
+				}
+				DragManager.acceptDragDrop(event.target as TextArea);
+			}
+			
+			private function dragDropHandler(event:DragEvent):void {
+				var analysisItem:AnalysisItem;
+				if (event.dragInitiator is DataGrid) {
+					var initialList:DataGrid = DataGrid(event.dragInitiator);						
+					var analysisItemWrapper:AnalysisItemWrapper = initialList.selectedItem as AnalysisItemWrapper;
+					analysisItem = analysisItemWrapper.analysisItem;
+				} else if (event.dragInitiator is DropArea) {
+					var dropArea:DropArea = event.dragInitiator as DropArea;
+					analysisItem = dropArea.analysisItem;
+				}
+				calculationInput.text += analysisItem.key.createString();
+			}
+		]]>
+	</mx:Script>
+	<mx:RemoteObject destination="analysisDefinition" id="analysisService">
+		<mx:method name="validateCalculation" result="validatedCalculation()"/>
+	</mx:RemoteObject>
+	<mx:HBox styleName="TitleWindowContents">
+		<mx:VBox>
+			<mx:Label text="Available Functions"/>
+			<mx:Tree labelField="@label" width="300">
+				<mx:XMLListCollection>
+					<mx:XMLList>
+						<group label="Math">
+							<function label="ln"/>
+						</group>
+						<group label="Statistics">
+							<function label="stddev"/>
+						</group>
+					</mx:XMLList>
+				</mx:XMLListCollection>
+			</mx:Tree>
+		</mx:VBox>	
+		<mx:Form width="400">
+			<mx:FormItem label="Name: " direction="horizontal" width="100%">
+				<mx:TextInput id="nameInput" width="100%"/>			
+			</mx:FormItem>
+			<mx:FormItem label="Calculation: " direction="horizontal" width="100%">
+				<mx:TextArea id="calculationInput" dragEnter="dragEnterHandler(event)" dragDrop="dragDropHandler(event)" width="100%" height="300"/>
+			</mx:FormItem>
+			<mx:FormItem label="" direction="horizontal">
+				<mx:Button label="Save" click="save()"/>
+				<mx:Button label="Cancel" click="cancel()"/>
+			</mx:FormItem>
+		</mx:Form>
+	</mx:HBox>	
+	<mx:StringValidator id="nameValidator" source="{nameInput}" property="text" minLength="3"/>
+	<analysis:CalculationValidator id="calcValidator" source="{calculationInput}" property="text" failureMessage="{failureMessage}"/>
+</mx:TitleWindow>

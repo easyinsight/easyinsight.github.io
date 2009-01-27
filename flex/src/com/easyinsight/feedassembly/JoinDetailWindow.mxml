@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml">
+	<mx:Script>
+		<![CDATA[
+			import mx.managers.PopUpManager;		
+			private var connection:ConnectionWithInfo;
+			
+			public function set feedConnection(feedConnection:ConnectionWithInfo):void {
+				this.connection = feedConnection;
+				var joinDetail:JoinDetail = new JoinDetail();
+				joinDetail.feedConnection = feedConnection;
+				coreBox.addChild(joinDetail);
+			}
+			
+			private function closeWindow():void {
+				PopUpManager.removePopUp(this);
+			}
+		]]>
+	</mx:Script>
+	<mx:VBox paddingBottom="10" paddingLeft="10" paddingTop="10" paddingRight="10">
+		<mx:VBox id="coreBox">
+			
+		</mx:VBox>
+		<mx:HBox width="100%" horizontalAlign="center">
+			<mx:Button label="Close" click="closeWindow()"/>
+		</mx:HBox>		
+	</mx:VBox>
+</mx:TitleWindow>

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" width="400" height="300">
+	<mx:Script>
+		<![CDATA[
+			import mx.managers.PopUpManager;
+			
+			private function closeThis():void {
+				PopUpManager.removePopUp(this);
+			}
+		]]>
+	</mx:Script>
+	<mx:VBox styleName="TitleWindowContents" width="100%" height="100%">
+		<mx:Text fontSize="16" text="I'm confused, what are dynamic services?"/>
+		<mx:TextArea fontSize="14" backgroundAlpha="0" borderThickness="0" borderStyle="none" width="100%" height="100%"
+			text="If you want to send data from your own applications into Easy Insight, you can take advantage of our API. Instead of providing a single generic interface for publishing data and leaving it at that, we provide you with dynamic APIs which are based on your actual data. This way, the resulting web service has strong typing and much less margin for error."/>
+		<mx:HBox width="100%" horizontalAlign="center">
+			<mx:Button label="Close" click="closeThis()"/>
+		</mx:HBox>				
+	</mx:VBox>
+	
+</mx:TitleWindow>

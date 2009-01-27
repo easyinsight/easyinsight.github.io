@@ -1,0 +1,250 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FullScreenPage xmlns="com.easyinsight.*" xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%" 
+	xmlns:feed="com.easyinsight.administration.feed.*" paddingTop="10" paddingLeft="10" paddingRight="10" paddingBottom="10"
+        creationComplete="setupListeners()" backgroundColor="#DCE2F8">
+	<mx:Script>
+		<![CDATA[
+import com.easyinsight.analysis.AnalysisHierarchyItem;
+import com.easyinsight.analysis.AnalysisItem;
+import com.easyinsight.analysis.AnalysisChangedEvent;
+			import mx.events.CloseEvent;
+			import mx.managers.BrowserManager;
+			import com.easyinsight.administration.AnalysisBasedFeedAdmin;
+			import mx.validators.Validator;
+			import mx.controls.Alert;
+			import com.easyinsight.feedassembly.CompositeFeedDefinition;
+			import com.easyinsight.feedassembly.CompositeWorkspace;
+			import com.easyinsight.listing.DataFeedDescriptor;
+			import com.easyinsight.analysis.AnalysisCloseEvent;
+			import mx.collections.ArrayCollection;
+			import com.easyinsight.analysis.AnalysisDefinition;
+			import com.easyinsight.DataAnalysisContainer;
+			import com.easyinsight.framework.DataService;
+			import com.easyinsight.customupload.UploadPolicy;
+			private var feedAdminMode:Boolean = false;
+			[Bindable]                                  
+            private var feedName:String;
+            [Bindable]
+            private var feedTags:String;
+            [Bindable]            
+            private var feedUploadPolicy:UploadPolicy;
+            [Bindable]
+            private var feedDescription:String;
+            [Bindable]
+            private var feedAttribution:String;
+            [Bindable]
+			private var feedOwnerName:String;
+            [Bindable]
+			private var _analysisDefinition:AnalysisDefinition;
+			private var dataAnalysisContainer:DataAnalysisContainer;
+			private var feedType:int;
+            [Bindable]
+			private var feedDefinition:FeedDefinitionData;
+			
+			private var unsavedChanges:Boolean = false;
+
+            [Bindable]
+            private var showImpl:Boolean = false;
+			
+			private var _feedID:int;
+			
+			private var feedAdminDetail:IFeedAdminDetail;
+			
+			private var generalValidators:Array = [];
+			
+			private var fieldsValidators:Array = [];
+
+            private function setupListeners():void {
+                addEventListener(AnalysisChangedEvent.ANALYSIS_CHANGED, onChange);
+            }
+			
+			public function set feedID(feedID:int):void {
+				this._feedID = feedID;
+			}
+			
+			public function set analysisDefinition(analysisDefinition:AnalysisDefinition):void {
+				this._analysisDefinition = analysisDefinition;
+			}
+			
+			override protected function createChildren():void {
+				super.createChildren();
+				var dataService:DataService = new DataService();
+				dataService.dataFeedID = _feedID;
+				dataAnalysisContainer = new DataAnalysisContainer();	
+				dataAnalysisContainer.dataService = dataService;			
+				dataAnalysisContainer.label = _analysisDefinition.name;
+				dataAnalysisContainer.feedAdministrationMode(feedName, feedTags, feedUploadPolicy, feedDescription, feedOwnerName, feedAttribution);			
+				dataAnalysisContainer.openAnalysis(_analysisDefinition);
+				fieldsBox.addChild(dataAnalysisContainer);
+				feedService.getFeedDefinition.send(_feedID);			
+			}
+			
+			private function gotFeedDefinition():void {				
+				this.feedDefinition = feedService.getFeedDefinition.lastResult as FeedDefinitionData;
+				BrowserManager.getInstance().setTitle("Easy Insight - " + feedDefinition.feedName);
+				if (feedType == DataFeedDescriptor.COMPOSITE) {					
+					var compositeFeedDefinition:CompositeFeedDefinition = feedDefinition as CompositeFeedDefinition; 
+					var compositeWorkspace:CompositeWorkspace = new CompositeWorkspace();
+					compositeWorkspace.addExistingDef(compositeFeedDefinition.compositeFeedNodes, compositeFeedDefinition.connections);
+					implBox.addChild(compositeWorkspace);
+                    showImpl = true;
+					this.feedAdminDetail = compositeWorkspace;
+				} else if (feedType == DataFeedDescriptor.GOOGLE) {
+					var google:GoogleFeedAdministration = new GoogleFeedAdministration();
+					this.feedAdminDetail = google;
+				} else if (feedType == DataFeedDescriptor.STATIC || feedType == DataFeedDescriptor.EMPTY) {
+					var fileFeed:FileUploadFeedAdmin = new FileUploadFeedAdmin();
+					this.feedAdminDetail = fileFeed;					
+				} else if (feedType == DataFeedDescriptor.ANALYSIS) {
+					var analysisBasedFeed:AnalysisBasedFeedAdmin = new AnalysisBasedFeedAdmin();
+					this.feedAdminDetail = analysisBasedFeed;
+				}			
+			}
+			
+			public function feedAdministrationMode(feedName:String, feedTags:String, uploadPolicy:UploadPolicy,
+            	feedDescription:String, feedOwnerName:String, feedAttribution:String, feedType:int):void {
+            	this.feedAdminMode = true;
+            	this.feedName = feedName;
+            	this.feedTags = feedTags;
+            	this.feedUploadPolicy = uploadPolicy;
+            	this.feedDescription = feedDescription;
+            	this.feedOwnerName = feedOwnerName;
+            	this.feedAttribution = feedAttribution;
+            	this.feedType = feedType;           	
+            }	
+            
+            private function onChange(event:AnalysisChangedEvent):void {
+                if (event.metadata) {
+            	    this.unsavedChanges = true;
+                }
+            }
+            
+            private function save():void {
+            	var results:Array = Validator.validateAll(generalValidators);
+            	var detailValidated:Boolean = feedAdminDetail.validate();
+            	if (results.length > 0 || !detailValidated) {
+            		Alert.show("There are one or more errors which must be fixed before you can save this feed.");
+            	} else {
+                    var analysisDefinition:AnalysisDefinition = dataAnalysisContainer.getAnalysisDefinition();
+                    analysisDefinition.hierarchies = hierarchiesBox.getHierarchies();
+	            	var analysisItems:ArrayCollection = dataAnalysisContainer.getAnalysisItems();
+                    for each (var analysisItem:AnalysisHierarchyItem in analysisDefinition.hierarchies) {
+                        if (analysisItem.analysisItemID == 0) {
+                            analysisItems.addItem(analysisItem);
+                        }
+                    }
+	            	feedDefinition.fields = analysisItems;
+	            	feedDefinition.feedName = feedNameInput.text;
+	            	feedDefinition.uploadPolicy = feedPolicy.uploadPolicy;
+	            	feedDefinition.description = feedDescriptionTextArea.text;
+	            	feedDefinition.attribution = feedAttributionInput.text;
+	            	feedDefinition.ownerName = feedOwnerNameInput.text;
+                    analysisService.saveAnalysisDefinition.send(analysisDefinition);
+	            	feedAdminDetail.updateFeedDefinition(feedDefinition);        		
+	    			feedService.updateFeedDefinition.send(feedDefinition, feedTagsInput.text);
+	    			this.unsavedChanges = false;
+            	}
+            }
+            
+            private function close():void {
+                if (unsavedChanges) {
+                    Alert.show("You have unsaved changes. Are you sure you want to exit?", "Alert",
+		                		Alert.OK | Alert.CANCEL, null, alertListener, null, Alert.CANCEL);
+                } else {
+                    dataAnalysisContainer.cleanup();
+                    dispatchEvent(new AnalysisCloseEvent(this));
+                }
+            }
+
+            private function alertListener(event:CloseEvent):void {
+                if (event.detail == Alert.OK) {
+                    dataAnalysisContainer.cleanup();
+                    dispatchEvent(new AnalysisCloseEvent(this));
+                }
+            }
+            
+            private function updatedFeed():void {
+            	Alert.show("Saved successfully!");
+            }
+            
+            private function clearFeedData():void {
+            	Alert.show("Are you sure you want to clear all stored data for this feed?", "Alert",
+		                		Alert.OK | Alert.CANCEL, this, alertFeedListener, null, Alert.CANCEL);
+            }
+            
+            private function alertFeedListener(event:CloseEvent):void {
+                if (event.detail == Alert.OK) {
+                	feedService.wipeData.send(_feedID);
+                }
+            }
+            
+            private function wipedData():void {
+            	Alert.show("All data cleared!");
+            }
+		]]>
+	</mx:Script>
+	<mx:RemoteObject id="feedService" destination="feeds">
+		<mx:method name="getFeedDefinition" result="gotFeedDefinition()"/>
+		<mx:method name="updateFeedDefinition" result="updatedFeed()"/>
+		<mx:method name="wipeData" result="wipedData()"/>
+	</mx:RemoteObject>
+    <mx:RemoteObject id="analysisService" destination="analysisDefinition">
+        <mx:method name="saveAnalysisDefinition"/>
+    </mx:RemoteObject>
+	<mx:VBox width="100%" height="100%" paddingLeft="5">
+		<mx:HBox id="buttonBox" paddingLeft="5" paddingTop="5" paddingBottom="5">		
+			<mx:Button id="saveButton" icon="@Embed(source='../../../../../assets/floppy_disk.png')" click="save()" toolTip="Save"/>
+			<mx:Button id="wrapButton" icon="@Embed(source='../../../../../assets/document_out.png')" click="close()" toolTip="Close"/>
+			<mx:Label fontSize="14" color="#FFFFFF"/>						
+		</mx:HBox>
+		<mx:TabNavigator width="100%" height="100%" creationPolicy="all" paddingTop="0" paddingBottom="0" 
+			paddingLeft="0" paddingRight="0" resizeToContent="true">
+			<mx:HBox label="General" paddingLeft="10" paddingTop="10" paddingBottom="10" paddingRight="10">
+				<mx:VBox>
+					<mx:HBox width="100%" horizontalAlign="center">										
+						<mx:Box backgroundColor="#FFFFFF" backgroundAlpha=".8" color="#000000" width="50%" horizontalAlign="center">
+							<mx:Label text="Fields" fontSize="14"/>	
+						</mx:Box>
+					</mx:HBox>
+					<mx:Form>						
+						<mx:FormItem label="Name:" paddingTop="20">
+							<mx:TextInput id="feedNameInput" text="{feedName}"/>
+						</mx:FormItem>
+						<mx:FormItem label="Tags:">
+							<mx:TextInput id="feedTagsInput" text="{feedTags}"/>
+						</mx:FormItem>
+						<mx:FormItem label="Description:">
+							<mx:TextArea id="feedDescriptionTextArea" width="300" height="100" text="{feedDescription}"/>
+						</mx:FormItem>
+						<mx:FormItem label="Attribution:">
+							<mx:TextInput id="feedAttributionInput" text="{feedAttribution}"/>
+						</mx:FormItem>
+						<mx:FormItem label="Owner Name:" paddingBottom="20">
+							<mx:TextInput id="feedOwnerNameInput" text="{feedOwnerName}"/>
+						</mx:FormItem>
+						<mx:FormItem label="Delete All Data:">
+							<mx:Button label="Clear Feed Data" click="clearFeedData()"/>
+						</mx:FormItem>																	
+					</mx:Form>
+				</mx:VBox>
+				<mx:VBox>
+					<mx:HBox width="100%" horizontalAlign="center">
+						<mx:Box backgroundColor="#FFFFFF" backgroundAlpha=".8" width="50%" horizontalAlign="center">
+							<mx:Label text="Sharing" fontSize="14"/>	
+						</mx:Box>
+					</mx:HBox>			
+					<feed:FeedSharing id="feedPolicy" paddingTop="15" paddingLeft="45" uploadPolicy="{feedUploadPolicy}"/>								
+				</mx:VBox>										
+			</mx:HBox>
+			<mx:Box label="Data" id="fieldsBox">
+			</mx:Box>
+            <mx:Box label="Hierarchies" paddingLeft="10" paddingTop="10" paddingBottom="10" paddingRight="10">
+                <feed:HierarchyAdministration  id="hierarchiesBox" analysisDefinition="{_analysisDefinition}" feedDefinition="{feedDefinition}"/>
+            </mx:Box>
+			<mx:Box label="Impl" paddingLeft="10" paddingTop="10" paddingBottom="10" paddingRight="10" id="implBox">
+				
+			</mx:Box>
+		</mx:TabNavigator>	
+	</mx:VBox>
+	<mx:StringValidator id="nameValidator" source="{feedNameInput}" property="text" minLength="3" maxLength="40"/>	
+</FullScreenPage>

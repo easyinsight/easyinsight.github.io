@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" width="1000" height="800" xmlns:easyinsight="com.easyinsight.*">
+	<mx:Script>
+		<![CDATA[
+			[Bindable]
+			private var _amazonURL:String;
+		
+			public function set amazonURL(url:String):void {
+				this._amazonURL = url;
+				billingFrame.visible = true;				
+			}
+		]]>
+	</mx:Script>
+	
+	<easyinsight:IFrame id="billingFrame" source="{_amazonURL}" width="100%" height="100%" visible="false"/>
+</mx:TitleWindow>

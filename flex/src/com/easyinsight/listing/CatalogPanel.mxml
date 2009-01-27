@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Box xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%" xmlns:listing="com.easyinsight.listing.*"
+	implements="com.easyinsight.listing.IPerspective" xmlns:genredata="com.easyinsight.genredata.*">
+	<mx:Metadata>
+		[Event(name="headerBarUpdate", type="com.easyinsight.listing.HeaderBarEvent")]
+		[Event(name="analyze", type="com.easyinsight.genredata.AnalyzeEvent")]
+	</mx:Metadata>	
+	<mx:Script>
+		<![CDATA[
+			import com.easyinsight.genredata.AnalyzeEvent;
+                    import mx.core.Container;
+                    import com.easyinsight.genredata.ICatalogPage;
+                    import mx.collections.ArrayCollection;
+                    import com.easyinsight.framework.User;
+                    [Bindable]
+                    public var genre:String;
+
+                    /*private function genreChanged(event:GenreChangedEvent):void {
+                        if (this.genre != null) {
+                            this.genre.component.removeEventListener(AnalyzeEvent.ANALYZE, internalAnalyze);
+                        }
+                        genre = event.genre;
+          com.easyinsight.analysis      coreHBox.removeAllChildren();
+                        coreHBox.addChild(genre.component);
+                        genre.component.addEventListener(AnalyzeEvent.ANALYZE, internalAnalyze);
+                    }*/
+
+                    private function internalAnalyze(event:AnalyzeEvent):void {
+                        trace("internal analysis successful");
+                        //dispatchEvent(event);
+                    }
+
+                    /*private function postInitialized():void {
+                        coreHBox.addChild(genres.getCurrentGenre().component);
+                    }*/
+
+                    public function analyze():AnalyzeSource {
+                        /*var catalogPage:ICatalogPage = viewStack.selectedChild as ICatalogPage;
+                        return catalogPage.analyze();*/
+                        return null;
+                    }
+
+                    public function gotFocus():void {
+
+                    }
+
+                    public function getDefaultAnalyzeState():Boolean {
+                        return false;
+                    }
+
+                    public function isKeywordSearchInstant():Boolean {
+                        return false;
+                    }
+
+                ]]>
+	</mx:Script>
+	
+	
+	
+	<!--
+	<mx:ViewStack id="viewStack" width="100%" height="100%" creationPolicy="all">	
+		<com.easyinsight.genredata:CatalogEntryPanel width="100%" height="100%" id="fullViewBox">
+			<com.easyinsight.listing:Genres genreChanged="genreChanged(event)" id="genres" width="30%"/>
+			<mx:HBox width="70%" height="100%" id="coreHBox"/>
+		</com.easyinsight.genredata:CatalogEntryPanel>
+	</mx:ViewStack>
+	-->
+						
+</mx:Box>

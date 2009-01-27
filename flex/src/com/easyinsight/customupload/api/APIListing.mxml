@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Box xmlns:mx="http://www.adobe.com/2006/mxml" creationComplete="onCreation()" width="100%" height="100%">
+	<mx:Script>
+		<![CDATA[
+			import mx.collections.ArrayCollection;
+			import mx.managers.PopUpManager;
+			[Bindable]
+			private var services:ArrayCollection;
+			
+			[Bindable]
+	        [Embed(source="../../../../../assets/application_enterprise_add.png")]
+	        public var addIcon:Class;
+	        
+	        [Bindable]
+	        [Embed(source="../../../../../assets/helpx48.png")]
+	        public var helpIcon:Class;
+			
+			private function onCreation():void {
+				servicesGrid.addEventListener(ServiceDefinitionEvent.SERVICE_REMOVED, serviceRemoved);
+				apiService.getDeployedServices.send();				
+			}
+			
+			private function gotDeployedServices():void {
+				this.services = apiService.getDeployedServices.lastResult as ArrayCollection;
+			}
+			
+			private function addService():void {
+				var serviceFeedChoice:ServiceFeedChoice = ServiceFeedChoice(PopUpManager.createPopUp(this, ServiceFeedChoice, true));
+				serviceFeedChoice.addEventListener(ServiceDefinitionEvent.SERVICE_DEFINED, serviceDefined);
+				PopUpManager.centerPopUp(serviceFeedChoice);
+			}
+			
+			private function serviceDefined(event:ServiceDefinitionEvent):void {
+				apiService.getDeployedServices.send();
+			}
+			
+			private function serviceRemoved(event:ServiceDefinitionEvent):void {
+				apiService.getDeployedServices.send();
+			}
+			
+			private function help():void {
+				var helpWindow:DynamicServiceHelpWindow = DynamicServiceHelpWindow(PopUpManager.createPopUp(this,
+					DynamicServiceHelpWindow, true));
+				PopUpManager.centerPopUp(helpWindow);
+			}
+		]]>
+	</mx:Script>
+	<mx:RemoteObject destination="apiService" id="apiService">
+		<mx:method name="getDeployedServices" result="gotDeployedServices()"/>
+	</mx:RemoteObject>
+	<mx:Box paddingLeft="10" paddingTop="10" paddingRight="10" paddingBottom="10" width="100%" height="100%" verticalGap="10">			
+		<mx:HBox width="100%">
+			<mx:Button icon="{addIcon}" toolTip="Add Service..." click="addService()"/>
+            <mx:Button icon="{helpIcon}" toolTip="Help!" click="help()" />
+		</mx:HBox>
+        <mx:HBox width="100%" verticalGap="0">
+            <mx:VBox verticalGap="0">
+                <mx:Box width="100%" height="5" backgroundColor="#D42525" left="0" right="0"/>
+                <mx:Box width="100%" backgroundColor="#F6A76B" horizontalAlign="center">
+                    <mx:Label text="Standard Web Service APIs"/>
+                </mx:Box>
+                <mx:Form paddingTop="0" paddingLeft="0" paddingRight="0" paddingBottom="0" backgroundColor="#F5CDAF">
+                    <mx:FormItem label="Validated Publish" fontFamily="Tahoma" fontWeight="bold" direction="vertical">
+                        <mx:LinkButton textDecoration="underline" label="View WSDL" fontFamily="Lucida Grande" fontWeight="normal"/>
+                    </mx:FormItem>
+                    <mx:FormItem label="Unchecked Publish" fontFamily="Tahoma" fontWeight="bold" direction="vertical">
+                        <mx:LinkButton textDecoration="underline" label="View WSDL" fontFamily="Lucida Grande" fontWeight="normal"/>
+                    </mx:FormItem>
+                </mx:Form>
+            </mx:VBox>
+            <mx:VBox verticalGap="0">
+                <mx:Box width="100%" height="5" backgroundColor="#D42525" left="0" right="0"/>
+                <mx:Box width="100%" backgroundColor="#F6A76B" horizontalAlign="center">
+                    <mx:Label text="Generated Input APIs"/>
+                </mx:Box>
+                <mx:DataGrid dataProvider="{services}" width="400" height="100%" selectable="false" id="servicesGrid">
+                    <mx:columns>
+                        <mx:DataGridColumn headerText="Data Source Name" dataField="feedName" headerRenderer="com.easyinsight.groups.CustomGroupHeader"/>
+                        <mx:DataGridColumn headerText="" width="150" dataField="feedName" itemRenderer="com.easyinsight.customupload.api.DynamicServiceButtons"/>
+                    </mx:columns>
+                </mx:DataGrid>
+            </mx:VBox>
+        </mx:HBox>
+
+	</mx:Box>
+</mx:Box>

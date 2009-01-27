@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:HBox xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:goals="com.easyinsight.goals.*" width="100%" height="100%" creationComplete="populateData()" borderStyle="solid"
+        borderThickness="1" cornerRadius="15" paddingTop="10" paddingLeft="10" paddingRight="10" paddingBottom="10">
+	<mx:Script> 
+		<![CDATA[
+import mx.collections.ArrayCollection;
+			[Bindable]
+			private var _goalTreeNode:GoalTreeNode;
+
+            [Bindable]
+            private var solutions:ArrayCollection;
+            [Bindable]
+            private var dataSources:ArrayCollection;
+            [Bindable]
+            private var insights:ArrayCollection;
+
+            private function populateData():void {
+                feedService.searchForSubscribedFeeds.send();
+                solutionService.getSolutions.send();
+                analysisService.getAnalysisDefinitions.send();
+            }
+			
+			public function set goalTreeNode(goalTreeNode:GoalTreeNode):void {
+				_goalTreeNode = goalTreeNode;
+			}
+
+            private function gotFeeds():void {
+                dataSources = feedService.searchForSubscribedFeeds.lastResult as ArrayCollection;
+            }
+
+            private function gotSolutions():void {
+                solutions = solutionService.getSolutions.lastResult as ArrayCollection;
+            }
+
+            private function gotInsights():void {
+                insights = solutionService.getSolutions.lastResult as ArrayCollection;
+            }
+		]]>
+	</mx:Script>
+    <mx:RemoteObject destination="feeds" id="feedService">
+        <mx:method name="searchForSubscribedFeeds" result="gotFeeds()"/>
+    </mx:RemoteObject>
+    <mx:RemoteObject destination="solutionService" id="solutionService">
+        <mx:method name="getSolutions" result="gotSolutions()"/>
+    </mx:RemoteObject>
+    <mx:RemoteObject destination="analysisDefinition" id="analysisService">
+        <mx:method name="getAnalysisDefinitions" result="gotInsights()"/>
+    </mx:RemoteObject>
+	<goals:GoalOrganizationChart goalTreeNodes="{_goalTreeNode}" width="100%" height="100%" backgroundColor="#FFFFFF" backgroundAlpha="1"/>
+	<mx:Accordion fontSize="14">
+		<mx:VBox label="Solutions">
+			<mx:List dataProvider="{solutions}" width="100%" labelField="name" dragEnabled="true"/>
+		</mx:VBox>
+		<mx:VBox label="Data Sources">
+			<mx:List dataProvider="{dataSources}" width="100%" labelField="name" dragEnabled="true"/>
+		</mx:VBox>
+		<mx:VBox label="Insights">
+			<mx:List dataProvider="{insights}" width="100%" labelField="name" dragEnabled="true"/>
+		</mx:VBox>
+	</mx:Accordion>
+</mx:HBox>

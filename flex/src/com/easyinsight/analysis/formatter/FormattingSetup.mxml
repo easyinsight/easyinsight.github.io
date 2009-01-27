@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:HBox xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*">
+	<mx:Script>
+		<![CDATA[
+			public function set formattingConfiguration(formatConfig:FormattingConfiguration):void {
+				switch (formatConfig.formattingType) {
+					case FormattingConfiguration.NUMBER:
+						formattingType.selectedValue = "Number";
+						break;
+					case FormattingConfiguration.CURRENCY:
+						formattingType.selectedValue = "Currency";
+						break;
+					case FormattingConfiguration.PERCENTAGE:
+						formattingType.selectedValue = "Percentage"
+						break;
+				}				
+			}		
+		
+			public function get formattingConfiguration():FormattingConfiguration {
+				var formattingConfiguration:FormattingConfiguration = new FormattingConfiguration();
+				formattingConfiguration.formattingType = formattingType.value as int;
+				return formattingConfiguration;
+			}
+		]]>
+	</mx:Script>
+	<util:ValueAwareComboBox id="formattingType" selectedIndex="0">
+		<mx:Object label="Number" data="{FormattingConfiguration.NUMBER}"/>
+		<mx:Object label="Currency" data="{FormattingConfiguration.CURRENCY}"/>
+		<mx:Object label="Percentage" data="{FormattingConfiguration.PERCENTAGE}"/>		
+	</util:ValueAwareComboBox>
+</mx:HBox>

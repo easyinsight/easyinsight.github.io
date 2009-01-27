@@ -1,0 +1,202 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" 
+	creationComplete="retrieveSpreadsheets(); spreadsheetTree.addEventListener(AnalyzeEvent.ANALYZE, analysis)"
+	label="Google" width="100%" height="100%" xmlns:local="com.easyinsight.*" xmlns:listing="com.easyinsight.listing.*" 
+	doubleClickEnabled="true">
+	<mx:Metadata>
+		[Event(name="userConfigComplete", type="com.easyinsight.customupload.UploadConfigEvent")]
+		[Event(name="userConfigCancel", type="com.easyinsight.customupload.UploadConfigEvent")]
+	</mx:Metadata>
+	<mx:states>
+		<mx:State name="notLoggedIn">
+			<mx:RemoveChild target="{coreHBox}"/>
+			<mx:RemoveChild target="{spreadsheetTree}"/>
+			<mx:AddChild relativeTo="{coreContent}">
+				<listing:GottaLoginPage loginEvent2="currentState=''; retrieveSpreadsheets()"/>
+			</mx:AddChild>
+		</mx:State>
+	</mx:states>
+	<mx:Script>
+		<![CDATA[
+			import com.easyinsight.customupload.UploadConfigEvent;
+			import com.easyinsight.listing.DescriptorAnalyzeSource;
+			import mx.events.ListEvent;
+			import com.easyinsight.listing.AnalyzeSource;
+            import com.easyinsight.genredata.AnalyzeEvent;
+            import com.easyinsight.framework.Credentials;
+            import com.easyinsight.framework.NewViewCreationEvent;
+            import com.easyinsight.framework.CancelViewCreationEvent;
+            import mx.collections.ArrayCollection;
+            import mx.managers.PopUpManager;
+            import com.easyinsight.framework.User;
+
+            [Bindable]
+            private var credentials:Credentials;
+            
+            [Bindable]
+            private var googleSpreadsheets:ArrayCollection = new ArrayCollection();
+
+            [Bindable]
+            private var connectMessage:String = "";
+            
+            [Bindable]
+            [Embed(source="../../../../assets/tables_x16.png")]
+        	public var spreadsheetIcon:Class;
+                
+            [Bindable]
+	        [Embed(source="../../../../assets/table_x16.png")]
+	        public var worksheetIcon:Class;
+
+            private function analysis(event:AnalyzeEvent):void {
+                //dispatchEvent(event);
+            }
+
+            public function search(keyword:String):void {
+
+            }
+
+            public function analyze():AnalyzeSource {
+                return null;
+            }
+
+            public function gotFocus():void {
+				focusManager.setFocus(userName);
+            }
+
+            public function getDefaultAnalyzeState():Boolean {
+                return false;
+            }
+
+            public function isKeywordSearchInstant():Boolean {
+                return false;
+            }
+
+            private function worksheetClick():void {
+                if (spreadsheetTree.selectedItem != null) {
+                    trace(spreadsheetTree.selectedItem.dataFeedID);
+                }
+            }
+
+            private function passThrough(event:Event):void {
+                dispatchEvent(event);
+            }
+
+             private function retrieveSpreadsheets():void {
+				 var user:User = User.getInstance();
+                 if (user == null) {
+                     currentState = "notLoggedIn";
+                 } else {
+                     if (credentials != null) {
+                         userName.text = credentials.userName;
+                         password.text = credentials.password;
+                         attemptGoogleConnect();
+                     }
+                 }
+             }
+
+             private function processSpreadsheets():void {
+             	connectMessage = "Successfully connected to Google Spreadsheets.";
+             	progressBar.visible = false;
+                 var spreadsheets:ArrayCollection = new ArrayCollection(dataService.getAvailableGoogleSpreadsheets.lastResult);
+                 this.googleSpreadsheets = spreadsheets;
+                 spreadsheetTree.rowCount = spreadsheets.length;
+                 gc.refresh();
+                 spreadsheetTree.visible = true;
+             }
+
+             private function attemptGoogleConnect():void {
+                 credentials = new Credentials();
+                 credentials.userName = userName.text;
+                 credentials.password = password.text;
+                 User.getInstance().addCredentials("google", credentials);
+                 dataService.testGoogleConnect.send(credentials);
+                 progressBar.visible = true;
+             }
+
+             private function googleConnectAttempted():void {
+                 var success:Boolean = dataService.testGoogleConnect.lastResult;
+                if (success) {
+                    connectMessage = "Successfully connected to Google Spreadsheets, retrieving available spreadsheets...";
+                    dataService.getAvailableGoogleSpreadsheets.send(credentials);
+                } else {
+                    connectMessage = "Could not connect with those credentials--check your user name and password values.";
+                    progressBar.visible = false;
+                }
+             }
+             
+             private function onKeyUp(event:KeyboardEvent):void {
+            	if (event.keyCode == Keyboard.ENTER) {
+            		attemptGoogleConnect();	
+            	}
+             }
+             
+             private function cancel():void {
+             	dispatchEvent(new UploadConfigEvent(UploadConfigEvent.UPLOAD_CONFIG_CANCEL));
+             }
+            
+             /*private function doubleClicked(event:ListEvent):void {
+             	var selectedObject:Object = event.currentTarget.selectedItem;
+             	if (selectedObject is Worksheet) {
+             		var worksheet:Worksheet = selectedObject as Worksheet;
+             		dispatchEvent(new AnalyzeEvent(new DescriptorAnalyzeSource(worksheet.feedDescriptor)));
+             	}
+             }*/
+                ]]>
+	</mx:Script>
+	<mx:RemoteObject id="dataService" destination="google">
+		<mx:method name="getAvailableGoogleSpreadsheets" result="processSpreadsheets()"/>
+		<mx:method name="testGoogleConnect" result="googleConnectAttempted()"/>		
+	</mx:RemoteObject>
+	<mx:WipeRight id="wipeIn" duration="1000"/>
+	<mx:VBox id="coreContent" width="100%" height="100%">
+		<mx:HBox id="coreHBox" width="100%">
+			<mx:Form id="loginForm" keyUp="onKeyUp(event)">
+				<mx:FormItem label="Google Documents User Name:" direction="horizontal">
+					<mx:TextInput id="userName"/>				
+				</mx:FormItem>
+				<mx:FormItem label="Password:" direction="horizontal">
+					<mx:TextInput id="password" displayAsPassword="true"/>				
+				</mx:FormItem>
+				<mx:FormItem label="" direction="horizontal">						
+					<mx:Button label="Connect" click="attemptGoogleConnect()"/>					
+					<mx:Button label="Cancel" click="cancel()"/>								
+				</mx:FormItem>
+				<mx:FormItem label="">
+					<mx:Label id="connectMessageLabel" text="{connectMessage}"/>
+				</mx:FormItem>
+			</mx:Form>
+	
+			<mx:VBox verticalAlign="middle" height="100%">
+				<mx:Spacer/>
+				<mx:ProgressBar id="progressBar" indeterminate="true" visible="false"/>
+				<mx:Spacer/>
+			</mx:VBox>
+		</mx:HBox>		
+		<mx:AdvancedDataGrid width="100%" height="100%"
+			id="spreadsheetTree" initialize="gc.refresh()" rowHeight="28" fontSize="12" rowCount="5" visible="false" showEffect="{wipeIn}"
+			defaultLeafIcon="{worksheetIcon}" folderOpenIcon="{spreadsheetIcon}" folderClosedIcon="{spreadsheetIcon}">
+			<mx:dataProvider>
+				<mx:GroupingCollection id="gc" source="{googleSpreadsheets}">
+					<mx:grouping>
+						<mx:Grouping>
+							<mx:GroupingField name="spreadsheet"/>
+						</mx:Grouping>
+					</mx:grouping>
+				</mx:GroupingCollection>
+			</mx:dataProvider>
+			<mx:columns>
+				<mx:AdvancedDataGridColumn headerText="Spreadsheet" dataField="spreadsheet"/>
+				<mx:AdvancedDataGridColumn headerText="Worksheet" dataField="title"/>
+				<mx:AdvancedDataGridColumn id="spFeed" width="80" headerText="" dataField="title"/>
+			</mx:columns>
+			<mx:rendererProviders>
+        <mx:AdvancedDataGridRendererProvider 
+            column="{spFeed}"
+            depth="2" 
+            columnSpan="1" 
+            renderer="com.easyinsight.google.SpreadsheetFeedButton"/>
+    </mx:rendererProviders>
+		
+		</mx:AdvancedDataGrid>
+	</mx:VBox>
+</mx:Canvas>

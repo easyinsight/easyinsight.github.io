@@ -1,0 +1,303 @@
+<?xml version="1.0" encoding="utf-8"?>
+<listing:CatalogPanel xmlns:listing="com.easyinsight.listing.*" xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%" 
+	xmlns:genredata="com.easyinsight.genredata.*" xmlns:dashboard="com.easyinsight.dashboard.*" creationPolicy="all"
+         backgroundColor="#DCE2F8">
+	<listing:states>
+		<mx:State name="SearchState">
+			<mx:RemoveChild target="{headlineDisplayBox}"/>
+			<mx:RemoveChild target="{topSpacer}"/>
+			<mx:RemoveChild target="{listsBox}"/>			
+			<mx:AddChild relativeTo="{centerBox}">
+				<listing:CatalogListing id="catalogListing" returnToStore="navigateToHome(event)"/>
+			</mx:AddChild>
+		</mx:State>
+		<mx:State name="AnalysisSearchState">
+			<mx:RemoveChild target="{headlineDisplayBox}"/>
+			<mx:RemoveChild target="{topSpacer}"/>
+			<mx:RemoveChild target="{listsBox}"/>			
+			<mx:AddChild relativeTo="{centerBox}">
+				<listing:CatalogAnalysisListing id="analysisCatalogListing" returnToStore="navigateToHome(event)"/>
+			</mx:AddChild>
+		</mx:State>
+	</listing:states>
+	<mx:Script>
+		<![CDATA[
+			import mx.utils.URLUtil;
+			import mx.managers.BrowserManager;
+			import mx.rpc.events.FaultEvent;
+                    import mx.controls.Alert;
+                    import mx.rpc.events.ResultEvent;
+                    import com.easyinsight.listing.HeaderBarEvent;
+                    import mx.core.Container;
+                    import com.easyinsight.listing.CatalogListing;
+                    import com.easyinsight.listing.CatalogNavigationEvent;
+                    import com.easyinsight.listing.AnalyzeSource;
+                    import com.easyinsight.dashboard.DataViewPanel;
+     				import com.easyinsight.analysis.AnalysisDefinition;
+                    import com.easyinsight.framework.User;
+                    import mx.collections.ArrayCollection;
+                    import mx.containers.Canvas;
+
+                    public var intro:Canvas;
+                    private var analysisDefinitions:ArrayCollection;
+                    private var currentIndex:int = 0;
+                    private var lastGenre:String = "xyzxyzxyz";
+
+                    private function gotFeeds():void {
+                        var dataProviderDescriptors:ArrayCollection = dataProvider.searchForAvailableFeeds.lastResult;
+                        currentState = "SearchState";
+                        catalogListing.dataFeeds = dataProviderDescriptors;
+                        dispatchEvent(new HeaderBarEvent(true, false));
+                    }
+
+                    private function onSearchAnalysis(event:ChildSearchEvent):void {
+						var analysisDefs:ArrayCollection = event.items;
+                        currentState = "AnalysisSearchState";
+                        analysisCatalogListing.analysisDefinitions = analysisDefs;
+                        dispatchEvent(new HeaderBarEvent(true, false));
+                    }
+
+                    private function onSearchFeed(event:ChildSearchEvent):void {
+                        var dataProviderDescriptors:ArrayCollection = event.items;
+                        currentState = "SearchState";
+                        catalogListing.dataFeeds = dataProviderDescriptors;
+                        dispatchEvent(new HeaderBarEvent(true, false));
+                    }
+
+                    override public function analyze():AnalyzeSource {
+                        if (currentState == "SearchState") {
+                            return catalogListing.analyze();
+                        } else if (currentState == "AnalysisSearchState") {
+                        	return analysisCatalogListing.analyze();
+                        } else {
+                            return null;
+                        }
+                    }
+
+                    private function navigateToHome(event:CatalogNavigationEvent):void {
+                        currentState = "";
+                        dispatchEvent(new HeaderBarEvent(false, false));
+                    }
+
+                    override public function gotFocus():void {
+                    	if (lastGenre != genre) {
+	                    	lastGenre = genre;                    
+	                        var pageString:String; 
+	                        if (genre == null) {
+	                        	BrowserManager.getInstance().setTitle("Easy Insight - Marketplace");
+	                        	pageString = "Marketplace";
+	                        } else {
+	                        	BrowserManager.getInstance().setTitle("Easy Insight - " + genre);
+	                        	pageString = genre;
+	                        }                    
+	                        var fragmentObject:Object = new Object();
+	                        fragmentObject.page = "marketplace";			                               
+			                var fragmentString:String = URLUtil.objectToString(fragmentObject);
+							BrowserManager.getInstance().setFragment(fragmentString);  	                        
+	                    }
+	                    dataProvider.getHeadlineAnalysesForGenre.send(genre);
+                        topRatedAnalyses.refreshData();
+                        mostPopularAnalyses.refreshData();
+                        mostRecentAnalyses.refreshData();
+                        topRatedFeeds.refreshData();
+                        mostPopularFeeds.refreshData();
+                        mostRecentFeeds.refreshData();
+                        tagListing.refresh(genre);
+                    }
+
+                    private function gotHeadlines(event:ResultEvent):void {
+                        analysisDefinitions = dataProvider.getHeadlineAnalysesForGenre.lastResult as ArrayCollection;
+                        refreshHeadlineAnalyses();
+                    }
+
+                    private function previousHeadline():void {
+                        if (currentIndex == 0) {
+                            currentIndex = analysisDefinitions.length - 1;
+                        } else {
+                            currentIndex--;
+                        }
+                        refreshHeadlineAnalyses();
+                    }
+
+                    private function refreshHeadlineAnalyses():void {
+                        if (analysisDefinitions.length > 0) {
+                            var analysisDefinition:AnalysisDefinition = analysisDefinitions.getItemAt(currentIndex) as AnalysisDefinition;
+                            var dataViewPanel:DataViewPanel = new DataViewPanel();
+                            dataViewPanel.analysisDefinition = analysisDefinition;
+                            centerLBox.removeAllChildren();
+                            centerLBox.addChild(dataViewPanel);
+                        }
+                        if (analysisDefinitions.length > 1) {
+                            var rightIndex:int = currentIndex + 1;
+                            if (rightIndex == analysisDefinitions.length) {
+                                rightIndex = 0;
+                            }
+                            var analysisDefinition2:AnalysisDefinition = analysisDefinitions.getItemAt(rightIndex) as AnalysisDefinition;
+                            var dataViewPanel2:DataViewPanel = new DataViewPanel();
+                            dataViewPanel2.analysisDefinition = analysisDefinition2;
+                            centerRBox.removeAllChildren();
+                            centerRBox.addChild(dataViewPanel2);
+                        }
+                    }
+
+                    private function nextHeadline():void {
+                        if (currentIndex == analysisDefinitions.length - 1) {
+                            currentIndex = 0;
+                        } else {
+                            currentIndex++;
+                        }
+                        refreshHeadlineAnalyses();
+                    }
+
+                    public function search():void {
+                    	var keyword:String = searchText.text.toLowerCase();
+                        var genreName:String = null;
+                        if (genre != null) {
+                            genreName = genre;
+                        }
+                        dataProvider.searchForAvailableFeeds.send(keyword, genreName);
+                    }
+
+                    private function failure(event:FaultEvent):void {
+                        Alert.show(event.fault.message);
+                    }
+
+                    private function selectTopRated():void {
+                        topRatedButton.styleName = "blueButton";
+                        mostPopularButton.styleName = "Button";
+                        mostRecentButton.styleName = "Button";
+                        feedsBox.selectedIndex = 0;
+                    }
+
+                    private function selectMostPopular():void {
+                        mostPopularButton.styleName = "blueButton";
+                        topRatedButton.styleName = "Button";
+                        mostRecentButton.styleName = "Button";
+                        feedsBox.selectedIndex = 1;
+                    }
+
+                    private function selectMostRecent():void {
+                        mostRecentButton.styleName = "blueButton";
+                        mostPopularButton.styleName = "Button";
+                        topRatedButton.styleName = "Button";
+                        feedsBox.selectedIndex = 2;
+                    }
+                    
+                    private function tagFocus(event:TagFocusEvent):void {
+                    	this.genre = event.tag;
+                    	gotFocus();
+                    }
+                    
+                    private function searchKeyUp(event:KeyboardEvent):void {
+                    	if (event.keyCode == Keyboard.ENTER) {
+                    		search();
+                    	}
+                    }
+                ]]>
+	</mx:Script>
+	<mx:RemoteObject id="dataProvider" destination="feeds">
+		<mx:method name="searchForAvailableFeeds" result="gotFeeds()" fault="failure(event)"/>
+		<mx:method name="getMostPopularFeeds"/>
+		<mx:method name="getMostRecentFeeds"/>
+		<mx:method name="getTopRatedFeeds"/>
+		<mx:method name="getHeadlineAnalysesForGenre" result="gotHeadlines(event)" fault="failure(event)"/>
+		<mx:method name="getMostPopularAnalyses"/>
+		<mx:method name="getTopRatedAnalyses"/>
+		<mx:method name="getMostRecentAnalyses"/>
+	</mx:RemoteObject>
+	
+	<mx:RemoteObject id="dataProvider2" destination="feeds">
+		<mx:method name="getMostPopularFeeds"/>
+		<mx:method name="getMostRecentFeeds"/>
+		<mx:method name="getTopRatedFeeds"/>
+		<mx:method name="getMostPopularAnalyses"/>
+		<mx:method name="getTopRatedAnalyses"/>
+		<mx:method name="getMostRecentAnalyses"/>
+	</mx:RemoteObject>
+
+    <mx:Box width="100%" height="5" backgroundColor="#254BD4" left="0" right="0"/>
+	
+	<mx:VBox id="centerBox" width="100%" height="100%">
+		<mx:HBox width="100%">
+			<mx:VBox>
+				<mx:ApplicationControlBar width="100%">
+					<mx:LinkButton label="Popular Tags"/>
+				</mx:ApplicationControlBar>
+				<listing:TagListing width="100%" id="tagListing" tagFocus="tagFocus(event)"/>	
+			</mx:VBox>			
+			<mx:Spacer width="100%"/>
+			<mx:HBox horizontalAlign="right">
+				<mx:TextInput id="searchText" keyUp="searchKeyUp(event)"/>
+				<mx:Button toolTip="Search" icon="@Embed(source='../../../../assets/view.png')" id="searchButton" click="search()"/>
+			</mx:HBox>				
+		</mx:HBox>		
+		<mx:HBox width="100%" height="55%" id="headlineDisplayBox" horizontalAlign="center">
+			<mx:VBox height="100%" verticalAlign="middle">
+				<mx:Button id="previousHeadlineButton" click="previousHeadline()" 
+					icon="@Embed(source='../../../../assets/nav_left_green.png')" />
+			</mx:VBox>
+			<mx:VBox height="380" width="400" verticalAlign="middle" id="centerLBox" verticalScrollPolicy="off"/>
+			<mx:Spacer width="30"/>			
+			<mx:VBox height="380" width="400" verticalAlign="middle" id="centerRBox" verticalScrollPolicy="off"/>
+			<mx:VBox height="100%" verticalAlign="middle">
+				<mx:Button id="nextHeadlineButton" click="nextHeadline()" icon="@Embed(source='../../../../assets/nav_right_green.png')"/>
+			</mx:VBox>					
+		</mx:HBox>
+		<mx:Spacer height="20" id="topSpacer"/>
+		<mx:VBox width="100%" height="500" id="listsBox" backgroundColor="#FFFFFF" backgroundAlpha=".1">
+			
+	<mx:HBox width="100%" horizontalAlign="center">
+		
+								
+	<mx:HBox horizontalAlign="center" id="buttonBox" backgroundColor="#FFFFFF" backgroundAlpha=".1">
+		<mx:Button label="Top Rated" id="topRatedButton" click="selectTopRated()" styleName="blueButton"/>
+		<mx:Button label="Most Popular" id="mostPopularButton" click="selectMostPopular()"/>
+		<mx:Button label="Most Recent" id="mostRecentButton" click="selectMostRecent()"/>
+	</mx:HBox>
+	</mx:HBox>
+	<mx:Spacer height="20" id="centerSpacer"/>
+	<mx:ViewStack id="feedsBox" width="100%" height="100%" creationPolicy="all"
+	    paddingTop="10" paddingLeft="10" paddingRight="10" paddingBottom="10">
+		<mx:HBox width="100%" height="100%" label="Analyses" backgroundColor="#FFFFFF" backgroundAlpha=".1">
+			<mx:Spacer width="5%"/>
+			<genredata:AnalyzableItemPanel rendererClass="com.easyinsight.genredata.PopularAnalysisItem" width="28%" id="topRatedAnalyses"
+				title="Top Rated Analyses" genre="{genre}" dataOperation="{dataProvider.getTopRatedAnalyses}"
+				fullDataOperation="{dataProvider2.getTopRatedAnalyses}" fullEventType="{ChildSearchEvent.ANALYSIS_SEARCH}"
+				analysisSearch="onSearchAnalysis(event)"/>
+			<mx:Spacer width="5%"/>
+			<genredata:AnalyzableItemPanel rendererClass="com.easyinsight.genredata.PopularFeed" width="28%" id="topRatedFeeds"
+				title="Top Rated Feeds" genre="{genre}" dataOperation="{dataProvider.getTopRatedFeeds}"
+				fullDataOperation="{dataProvider2.getTopRatedFeeds}" fullEventType="{ChildSearchEvent.FEED_SEARCH}"
+				feedSearch="onSearchFeed(event)" />			
+			<mx:Spacer width="5%"/>							
+		</mx:HBox>
+		<mx:HBox width="100%" height="100%" label="Feeds" backgroundColor="#FFFFFF" backgroundAlpha=".1">
+			<mx:Spacer width="5%"/>
+			<genredata:AnalyzableItemPanel rendererClass="com.easyinsight.genredata.PopularAnalysisItem" width="28%" id="mostPopularAnalyses"
+				title="Most Popular Analyses" genre="{genre}" dataOperation="{dataProvider.getMostPopularAnalyses}"
+				fullDataOperation="{dataProvider2.getMostPopularAnalyses}" fullEventType="{ChildSearchEvent.ANALYSIS_SEARCH}"
+				analysisSearch="onSearchAnalysis(event)"/>
+			<mx:Spacer width="5%"/>
+			<genredata:AnalyzableItemPanel rendererClass="com.easyinsight.genredata.PopularFeed" width="28%" id="mostPopularFeeds"
+				title="Most Popular Feeds" genre="{genre}" dataOperation="{dataProvider.getMostPopularFeeds}"
+				fullDataOperation="{dataProvider2.getMostPopularFeeds}" fullEventType="{ChildSearchEvent.FEED_SEARCH}"
+				feedSearch="onSearchFeed(event)"/>
+			<mx:Spacer width="5%"/>				
+		</mx:HBox>
+		<mx:HBox width="100%" height="100%" label="Feeds" backgroundColor="#FFFFFF" backgroundAlpha=".1">
+			<mx:Spacer width="5%"/>
+			<genredata:AnalyzableItemPanel rendererClass="com.easyinsight.genredata.PopularAnalysisItem" width="28%" id="mostRecentAnalyses"
+				title="Most Recent Analyses" genre="{genre}" dataOperation="{dataProvider.getMostRecentAnalyses}"
+				fullDataOperation="{dataProvider2.getMostRecentAnalyses}" fullEventType="{ChildSearchEvent.ANALYSIS_SEARCH}"
+				analysisSearch="onSearchAnalysis(event)"/>
+			<mx:Spacer width="5%"/>
+			<genredata:AnalyzableItemPanel rendererClass="com.easyinsight.genredata.PopularFeed" width="28%" id="mostRecentFeeds"
+				title="Most Recent Feeds" genre="{genre}" dataOperation="{dataProvider.getMostRecentFeeds}"
+				fullDataOperation="{dataProvider2.getMostRecentFeeds}" fullEventType="{ChildSearchEvent.FEED_SEARCH}"
+				feedSearch="onSearchFeed(event)"/>			
+			<mx:Spacer width="5%"/>		
+		</mx:HBox>
+	</mx:ViewStack>
+	</mx:VBox>
+	</mx:VBox>
+</listing:CatalogPanel>

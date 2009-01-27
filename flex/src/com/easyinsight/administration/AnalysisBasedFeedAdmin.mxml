@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%" implements="com.easyinsight.administration.feed.IFeedAdminDetail">
+	<mx:Script>
+		<![CDATA[
+			import com.easyinsight.administration.feed.FeedDefinitionData;
+			
+			public function updateFeedDefinition(feedDefinition:FeedDefinitionData):void {
+			}
+			
+			public function validate():Boolean {
+				return true;
+			}
+		]]>
+	</mx:Script>	
+</mx:Canvas>

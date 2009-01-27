@@ -1,0 +1,179 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="400" height="300">
+	<mx:Script>
+		<![CDATA[
+			import mx.controls.olapDataGridClasses.OLAPDataGridItemRendererProvider;
+			import mx.olap.IOLAPAxisPosition;
+			import com.easyinsight.analysis.conditions.ConditionRenderer;
+			import mx.collections.ICollectionView;
+			import mx.olap.OLAPResult;
+			import mx.controls.Alert;
+			import mx.olap.IOLAPCube;
+			import mx.events.CubeEvent;
+			import mx.controls.OLAPDataGrid;
+			import mx.rpc.AsyncResponder;
+			import mx.rpc.AsyncToken;
+			import mx.olap.OLAPSet;
+			import mx.olap.IOLAPQueryAxis;
+			import mx.olap.OLAPQuery;
+			import mx.olap.IOLAPQuery;
+			import mx.olap.OLAPMeasure;
+			import mx.olap.OLAPLevel;
+			import mx.olap.OLAPHierarchy;
+			import mx.olap.OLAPAttribute;
+			import mx.olap.OLAPDimension;
+			import mx.collections.ArrayCollection;
+			import mx.collections.IList;
+			import mx.olap.OLAPCube;
+			
+			private var _crosstabDefinition:CrosstabDefinition;
+			private var grid:OLAPDataGrid;
+			private var cube:OLAPCube;
+			
+			private var renderer:ConditionRenderer;
+			
+			private function styleValue(row:IOLAPAxisPosition, column:IOLAPAxisPosition, 
+            	value:Number):Object {
+        		if (renderer.hasCustomColor()) {
+					return {color: renderer.getColor(value) };
+        		} else {
+        			return null;
+        		}
+			}
+			
+			public function populate(crosstabDefinition:CrosstabDefinition, data:ICollectionView, grid:OLAPDataGrid):void {
+				this.grid = grid;
+				grid.styleFunction = styleValue;
+				this._crosstabDefinition = crosstabDefinition;
+				var analysisMeasure:AnalysisMeasure = crosstabDefinition.measures[0] as AnalysisMeasure;
+				this.renderer = analysisMeasure.createClientRenderer();
+				this.cube = new OLAPCube();						
+				cube.dataProvider = normalize(data);
+				//grid.itemRenderer = new AnalysisCellRendererFactory(analysisMeasure.key.createString(), analysisMeasure, renderer);
+				var provider:OLAPDataGridItemRendererProvider = new OLAPDataGridItemRendererProvider();
+				provider.formatter = analysisMeasure.getFormatter();
+				provider.type = OLAPDataGrid.OLAP_DIMENSION;
+				provider.uniqueName = "row";
+				grid.itemRendererProviders = [ provider ];
+				var dimensionList:IList = new ArrayCollection();
+				dimensionList.addItem(createDimension(crosstabDefinition.columns, "column"));
+				dimensionList.addItem(createDimension(crosstabDefinition.rows, "row"));
+				var olapMeasure:OLAPMeasure = new OLAPMeasure();
+				olapMeasure.name = analysisMeasure.key.createString();
+				olapMeasure.dataField = analysisMeasure.key.createString();			    
+				olapMeasure.aggregator = "SUM";
+				var measures:IList = new ArrayCollection();
+				measures.addItem(olapMeasure);
+				cube.measures = measures;
+				cube.dimensions = dimensionList;
+				cube.addEventListener(CubeEvent.CUBE_COMPLETE, runQuery);
+				cube.refresh();						 
+			}
+			
+			private function normalize(data:ICollectionView):ICollectionView {
+				var newData:ArrayCollection = new ArrayCollection();				
+				for each (var object:Object in data) {
+					var newObject:Object = new Object();
+					for each (var columnItem:AnalysisItem in _crosstabDefinition.columns) {
+						var key:String = columnItem.key.createString(); 
+						var existingValue:Value = object[key];
+						if (existingValue != null) {
+							var value:Object = existingValue.getValue();
+							this.renderer.addValue(value);
+							newObject[key] = value;
+						} 
+					}
+					for each (var rowItem:AnalysisItem in _crosstabDefinition.rows) {
+						var rowKey:String = rowItem.key.createString(); 
+						var rowExistingValue:Value = object[rowKey];
+						if (rowExistingValue != null) {
+							var rowValue:Object = rowExistingValue.getValue();
+							this.renderer.addValue(rowValue);
+							newObject[rowKey] = rowValue;
+						} 
+					}
+					for each (var measureItem:AnalysisItem in _crosstabDefinition.measures) {
+						var measureKey:String = measureItem.key.createString(); 
+						var measureExistingValue:Value = object[measureKey];
+						if (measureExistingValue != null) {
+							var measureValue:Object = measureExistingValue.getValue();
+							this.renderer.addValue(measureValue);
+							newObject[measureKey] = measureValue;
+						} 
+					}
+					newData.addItem(newObject);	
+				}
+				return newData;
+			}
+			
+			private function createDimension(items:Array, dimensionName:String):OLAPDimension {
+				var columnDimension:OLAPDimension = new OLAPDimension();
+				columnDimension.name = dimensionName;
+				var elements:Array = [];				
+				var columnHierarchy:OLAPHierarchy = new OLAPHierarchy();
+				columnHierarchy.name = dimensionName;
+				columnHierarchy.hasAll = true;
+				var columnHierarchyLevelsList:IList = new ArrayCollection();
+				for (var columnIndex:int = 0; columnIndex < items.length; columnIndex++) {
+					var analysisItem:AnalysisItem = items[columnIndex] as AnalysisItem;
+					var olapAttribute:OLAPAttribute = new OLAPAttribute();
+					elements[columnIndex] = olapAttribute;
+					olapAttribute.name = analysisItem.key.createString();
+					olapAttribute.dataField = analysisItem.key.createString();
+					var olapLevel:OLAPLevel = new OLAPLevel();
+					olapLevel.attributeName = analysisItem.key.createString();
+					columnHierarchyLevelsList.addItem(olapLevel);					
+				}
+				columnHierarchy.elements = columnHierarchyLevelsList.toArray();
+			 	elements[elements.length] = columnHierarchy;
+			 	columnDimension.elements = elements;
+				return columnDimension;				
+			}
+			
+			private function createQuery(crosstabDefinition:CrosstabDefinition):IOLAPQuery {
+				var query:OLAPQuery = new OLAPQuery();
+				var rowQueryAxis:IOLAPQueryAxis = query.getAxis(OLAPQuery.ROW_AXIS);
+				var rowSet:OLAPSet = createOLAPSet(crosstabDefinition.rows, "row");
+				rowQueryAxis.addSet(rowSet);
+				var columnQueryAxis:IOLAPQueryAxis = query.getAxis(OLAPQuery.COLUMN_AXIS);
+				var columnSet:OLAPSet = createOLAPSet(crosstabDefinition.columns, "column");
+				columnQueryAxis.addSet(columnSet);
+				return query;
+			}
+			
+			private function runQuery(event:CubeEvent):void {            
+	            var cube:IOLAPCube = IOLAPCube(event.currentTarget);
+	            var query:IOLAPQuery = createQuery(_crosstabDefinition);
+	            var token:AsyncToken = cube.execute(query);
+	            token.addResponder(new AsyncResponder(showResult, showFault));
+        	}
+
+	        private function showFault(result:Object, token:Object):void {
+	            Alert.show("Error in query.");
+	        }
+
+	        private function showResult(result:Object, token:Object):void {
+	            if (!result) {
+	                Alert.show("No results from query.");
+	                return;
+	            }
+	            grid.dataProvider = result as OLAPResult;            
+	        }       
+			
+			private function createOLAPSet(items:Array, dimensionName:String):OLAPSet {
+				var olapSet:OLAPSet = null;
+				for (var columnIndex:int = 0; columnIndex < items.length; columnIndex++) {
+					var attributeSet:OLAPSet = new OLAPSet();
+					var analysisItem:AnalysisItem = items[columnIndex] as AnalysisItem;
+					attributeSet.addElements(cube.findDimension(dimensionName).findAttribute(analysisItem.key.createString()).children);
+					if (olapSet == null) {
+						olapSet = attributeSet;
+					} else {
+						olapSet.crossJoin(attributeSet);
+					}
+				}
+				return olapSet;	
+			}
+		]]>
+	</mx:Script>
+</mx:Canvas>

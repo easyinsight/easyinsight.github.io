@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" creationComplete="initHandlers()"  width="100%" height="100%">
+	<mx:Script>
+		<![CDATA[
+			import mx.managers.PopUpManager;
+			import mx.collections.ArrayCollection;
+			import com.easyinsight.customupload.UploadPolicy;
+			import com.easyinsight.customupload.PrivateUploadPolicy;
+			[Bindable]
+            private var userLinks:ArrayCollection = new ArrayCollection();
+            
+            public function set initialPolicy(uploadPolicy:UploadPolicy):void {
+				if (uploadPolicy is PrivateUploadPolicy) {
+					var privateUploadPolicy:PrivateUploadPolicy = uploadPolicy as PrivateUploadPolicy;
+					userLinks = privateUploadPolicy.userFeedLinks;
+				}
+			}
+            
+            private function initHandlers():void {
+            	accessGrid.addEventListener(UserLinkEvent.DELETE_USER_LINK, deleteUser);
+            }
+            
+            private function addAccess():void {
+            	var window:AddUserToFeedWindow = AddUserToFeedWindow(PopUpManager.createPopUp(this.parent.parent, AddUserToFeedWindow, true));
+            	window.addEventListener(UserLinkEvent.ADD_USER_LINK, addUser);
+            	PopUpManager.centerPopUp(window);
+            }
+            
+            private function addUser(event:UserLinkEvent):void {
+            	//userLinks.addItem(event.userLink);
+            }
+            
+            private function deleteUser(event:UserLinkEvent):void {
+            	//var index:int = userLinks.getItemIndex(event.userLink);
+            	//userLinks.removeItemAt(index);
+            }
+            
+            public function createPolicy():UploadPolicy {
+				var privatePolicy:PrivateUploadPolicy = new PrivateUploadPolicy();
+				privatePolicy.userFeedLinks = this.userLinks;
+				return privatePolicy;
+			}
+		]]>
+	</mx:Script>	
+	<mx:HBox>
+		<mx:Button label="Add Access..." click="addAccess()"/>
+	</mx:HBox>
+	<mx:DataGrid id="accessGrid" dataProvider="{userLinks}">
+		<mx:columns>
+			<mx:DataGridColumn headerText="User" dataField="userName"/>
+			<mx:DataGridColumn headerText="" dataField="userName" width="64"
+				itemRenderer="com.easyinsight.administration.feed.DeleteUserButton"/>
+		</mx:columns>
+	</mx:DataGrid>
+</mx:VBox>

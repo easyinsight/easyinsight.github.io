@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" creationComplete="initHandlers()" 
+	width="800" height="600">
+	<mx:Script>
+		<![CDATA[
+			import com.easyinsight.customupload.UploadConfigEvent;
+			import com.easyinsight.analysis.Key;
+			import com.easyinsight.analysis.AnalysisItem;
+			import com.easyinsight.administration.feed.FeedDefinitionData;
+			import com.easyinsight.listing.DataFeedDescriptor;
+			import com.easyinsight.framework.User;
+            import com.easyinsight.analysis.FeedMetadata;
+            import mx.managers.PopUpManager;
+            import com.easyinsight.feedassembly.FeedDeletionEvent;
+            import com.easyinsight.feedassembly.Connector;
+            import com.easyinsight.feedassembly.Feed;
+            import mx.collections.ArrayCollection;
+            import mx.core.UIComponent;
+            import mx.events.ListEvent;
+            import mx.events.DragEvent;
+            import mx.managers.DragManager;
+            import mx.core.DragSource;
+            import mx.containers.Canvas;
+            import mx.controls.DataGrid;
+
+            private var feeds:ArrayCollection = new ArrayCollection();
+            private var topFeed:Feed;
+
+            private function initHandlers():void {
+            	
+            }
+
+            private function addExternalFeed():void {
+            	var feedChoice:FeedChoice = FeedChoice(PopUpManager.createPopUp(this, FeedChoice, true));
+            	feedChoice.addEventListener(FeedAdditionEvent.FEED_ADDED, feedChosen);
+            	PopUpManager.centerPopUp(feedChoice);
+            }
+
+            private function createFeed(feedDefinition:FeedDefinitionData):Feed {
+                var feed:Feed = new Feed(feedDefinition);
+                feeds.addItem(feed);
+                feed.x = 100;
+                feed.y = 100;
+                feed.addEventListener(FeedDeletionEvent.FEED_DELETION, feedDeleted);
+                ourPanel.addChild(feed);
+                if (topFeed == null) {
+                	topFeed = feed;
+                }
+                return feed;
+            }
+
+            private function feedChosen(event:FeedAdditionEvent):void {
+            	var feedDefinition:FeedDefinitionData = event.feedDescriptor;
+            	createFeed(feedDefinition);                    	
+            }
+
+            private function feedDeleted(event:FeedDeletionEvent):void {
+                var index:int = feeds.getItemIndex(event.feed);
+                feeds.removeItemAt(index);
+                ourPanel.removeChild(event.feed);
+            }
+
+            private function dragEnterHandler(event:DragEvent):void {
+                var target:Panel = Panel(event.currentTarget);
+                DragManager.acceptDragDrop(target);
+            }
+
+            private function createCompositeFeed():void {
+                var compositeFeedNode:CompositeFeedNode = topFeed.createCompositeFeedNode(null);
+                feedService.createCompositeFeed.send(compositeFeedNode, feedTitle.text);                         
+            }
+
+            private function createdCompositeFeed():void {
+            	dispatchEvent(new UploadConfigEvent(UploadConfigEvent.UPLOAD_CONFIG_COMPLETE, 0));
+                PopUpManager.removePopUp(this);
+            }
+
+            private function dragDropHandler(event:DragEvent):void {
+
+                var initiator:Feed = Feed(event.dragInitiator);
+                var panel:Panel = Panel(event.currentTarget);
+                //panel.addChild(initiator);
+                var pt:Point = new Point(event.localX, event.localY);
+                   pt = event.target.localToGlobal(pt);
+
+            // Convert the global coordinates to the content coordinates
+            // inside the outer c1 Canvas control.
+                   pt = ourPanel.globalToContent(pt);
+
+                trace(event.localX);
+                trace(event.localY);
+                initiator.x = event.localX;
+                initiator.y = event.localY;
+                //initiator.y = pt.y;
+                initiator.moved();
+            }
+
+            private function attemptJoin():void {
+                var selectedFeeds:ArrayCollection = new ArrayCollection();
+                var selectedAttributes:ArrayCollection = new ArrayCollection();
+                for (var i:int = 0; i < feeds.length; i++) {
+                    var feed:Feed = feeds.getItemAt(i) as Feed;
+                    var object:AnalysisItem = feed.list.selectedItem as AnalysisItem;
+                    if (object != null) {
+                        selectedFeeds.addItem(feed);
+                        selectedAttributes.addItem(object.key);
+                    }
+                }
+                if (selectedFeeds.length > 2) {
+                    trace("too many feeds selected");
+                } else if (selectedFeeds.length < 2) {
+                    trace("not enough feeds selected");
+                } else {
+                    joinThing(selectedFeeds.getItemAt(0) as Feed, selectedAttributes.getItemAt(0) as Key,
+                    selectedFeeds.getItemAt(1) as Feed, selectedAttributes.getItemAt(1) as Key);
+                }
+            }
+
+            private function joinThing(grid1:Feed, attribute1:Key, grid2:Feed, attribute2:Key):void {
+                trace("filling?");
+                var connector:Connector = new Connector(grid1, attribute1, grid2, attribute2);
+                grid1.addConnector(connector);
+                grid2.addConnector(connector);
+                connector.renderConnection();
+                ourPanel.addChildAt(connector, 0);
+                trace("stopped filling from " + grid1.x + " to " + grid2.x);
+
+                //myConnector.x = grid1.x;
+                //myConnector.y = grid1.y;
+            }
+            
+            private function cancel():void {
+            	PopUpManager.removePopUp(this);
+            }
+        ]]>
+	</mx:Script>
+	<mx:RemoteObject id="feedService" destination="feeds">
+		<mx:method name="createCompositeFeed" result="createdCompositeFeed()"/>
+	</mx:RemoteObject>
+	<mx:VBox width="100%" height="100%" styleName="TitleWindowContents">		
+		<mx:HBox width="100%">		
+			<mx:Button label="Add Data Feed" click="addExternalFeed()"/>
+			<mx:Button label="Join Data Feeds" click="attemptJoin()"/>		    
+		    <mx:Button label="Create Composite Feed" click="createCompositeFeed()"/>
+		    <mx:Button label="Cancel" click="cancel()"/>
+		    <mx:Label text="Feed Title: "/>
+		    <mx:TextInput id="feedTitle"/>
+	    </mx:HBox>	
+		<mx:Panel id="ourPanel" layout="absolute" width="100%" height="100%" dragEnter="dragEnterHandler(event)"
+			dragDrop="dragDropHandler(event)"/>						
+	</mx:VBox>
+</mx:TitleWindow>

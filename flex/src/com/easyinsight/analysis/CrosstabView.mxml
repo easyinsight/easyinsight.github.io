@@ -1,0 +1,198 @@
+<?xml version="1.0" encoding="utf-8"?>
+<analysis:DataView xmlns:analysis="com.easyinsight.analysis.*" width="100%" height="100%" xmlns:mx="http://www.adobe.com/2006/mxml" 
+	creationComplete="initHandlers()">
+	<mx:Script>
+		<![CDATA[
+			import mx.olap.OLAPCube;
+			import mx.collections.ArrayCollection;
+			import mx.binding.utils.BindingUtils;
+			import mx.controls.dataGridClasses.DataGridColumn;
+			
+			[Bindable]
+			private var myDataSet:ArrayCollection = new ArrayCollection();
+			
+			private function initHandlers():void {
+				rowDropArea.addEventListener(AnalysisItemUpdateEvent.ANALYSIS_LIST_UPDATE, requestPivotTable);
+				columnDropArea.addEventListener(AnalysisItemUpdateEvent.ANALYSIS_LIST_UPDATE, requestPivotTable);
+				measureDropArea.addEventListener(AnalysisItemUpdateEvent.ANALYSIS_LIST_UPDATE, requestPivotTable);			
+			}
+		
+			override protected function fromListDefinition(listDefinition:ListDefinition):AnalysisDefinition {
+				var crosstabDefinition:CrosstabDefinition = new CrosstabDefinition();
+				var addToRow:Boolean = true;
+				columnDropArea.reset(1);
+				rowDropArea.reset(1);
+				measureDropArea.reset(1);
+				if (listDefinition.columns != null) {
+					for (var i:int = 0; i < listDefinition.columns.length; i++) {
+						var column:AnalysisItem = listDefinition.columns[i];
+						if (column.hasType(AnalysisItemTypes.DIMENSION)) {
+							if (addToRow) {
+								columnDropArea.addAnalysisItem(column);
+								addToRow = false;
+							} else {
+								rowDropArea.addAnalysisItem(column);
+								addToRow = true;
+							}
+						} else if (column.hasType(AnalysisItemTypes.MEASURE)) {
+							measureDropArea.addAnalysisItem(column);
+						}				
+					}
+				}
+				return crosstabDefinition;	
+			}
+			
+			override protected function fromGraphicDefinition(graphicDefinition:GraphicDefinition):AnalysisDefinition {
+				var crosstabDefinition:CrosstabDefinition = new CrosstabDefinition();
+				var addToRow:Boolean = true;
+				for (var i:int = 0; i < graphicDefinition.dimensions.length; i++) {
+					var dimension:AnalysisItem = graphicDefinition.dimensions[i];
+					if (dimension.hasType(AnalysisItemTypes.DIMENSION)) {
+						if (addToRow) {
+							rowDropArea.addAnalysisItem(dimension);
+							addToRow = false;
+						} else {
+							columnDropArea.addAnalysisItem(dimension);
+							addToRow = true;
+						}
+					}
+				}
+				for (i = 0; i < graphicDefinition.measures.length; i++) {
+					dimension = graphicDefinition.dimensions[i];					
+					if (dimension.hasType(AnalysisItemTypes.MEASURE)) {
+						measureDropArea.addAnalysisItem(dimension);
+					}
+				}
+				return crosstabDefinition;
+			}
+			
+			override protected function fromMapDefinition(graphicDefinition:MapDefinition):AnalysisDefinition {
+				var crosstabDefinition:CrosstabDefinition = new CrosstabDefinition();
+				var addToRow:Boolean = true;
+				for (var i:int = 0; i < graphicDefinition.dimensions.length; i++) {
+					var dimension:AnalysisItem = graphicDefinition.dimensions[i];
+					if (dimension.hasType(AnalysisItemTypes.DIMENSION)) {
+						if (addToRow) {
+							rowDropArea.addAnalysisItem(dimension);
+							addToRow = false;
+						} else {
+							columnDropArea.addAnalysisItem(dimension);
+							addToRow = true;
+						}
+					}
+				}
+				for (i = 0; i < graphicDefinition.measures.length; i++) {
+					dimension = graphicDefinition.dimensions[i];					
+					if (dimension.hasType(AnalysisItemTypes.MEASURE)) {
+						measureDropArea.addAnalysisItem(dimension);
+					}
+				}
+				return crosstabDefinition;
+			}
+			
+			override protected function fromYahooMapDefinition(graphicDefinition:YahooMapDefinition):AnalysisDefinition {
+				var crosstabDefinition:CrosstabDefinition = new CrosstabDefinition();
+				var addToRow:Boolean = true;
+				for (var i:int = 0; i < graphicDefinition.dimensions.length; i++) {
+					var dimension:AnalysisItem = graphicDefinition.dimensions[i];
+					if (dimension.hasType(AnalysisItemTypes.DIMENSION)) {
+						if (addToRow) {
+							rowDropArea.addAnalysisItem(dimension);
+							addToRow = false;
+						} else {
+							columnDropArea.addAnalysisItem(dimension);
+							addToRow = true;
+						}
+					}
+				}
+				for (i = 0; i < graphicDefinition.measures.length; i++) {
+					dimension = graphicDefinition.dimensions[i];					
+					if (dimension.hasType(AnalysisItemTypes.MEASURE)) {
+						measureDropArea.addAnalysisItem(dimension);
+					}
+				}
+				return crosstabDefinition;
+			}
+			
+			override protected function fromCrosstabDefinition(crosstabDefinition:CrosstabDefinition):AnalysisDefinition {
+				return crosstabDefinition;
+			}
+			
+			override public function createNewDefinition():AnalysisDefinition {
+				var analysisDefinition:CrosstabDefinition = new CrosstabDefinition();
+				analysisDefinition.name = "New Analysis";
+				return analysisDefinition;
+			}
+			
+			override public function initializeToDefinition():void {
+				var crosstabDefinition:CrosstabDefinition = getAnalysisDefinition() as CrosstabDefinition;
+				 
+				if (crosstabDefinition.columns != null) {
+					for (var columnIndex:int = 0; columnIndex < crosstabDefinition.columns.length; columnIndex++) {
+						columnDropArea.addAnalysisItem(crosstabDefinition.columns[columnIndex]);	
+					}									
+				}
+				if (crosstabDefinition.rows != null) {
+					for (var rowIndex:int = 0; rowIndex < crosstabDefinition.rows.length; rowIndex++) {
+						rowDropArea.addAnalysisItem(crosstabDefinition.rows[rowIndex]);	
+					}									
+				}
+				if (crosstabDefinition.measures != null) {
+					for (var measureIndex:int = 0; measureIndex < crosstabDefinition.measures.length; measureIndex++) {
+						measureDropArea.addAnalysisItem(crosstabDefinition.measures[measureIndex]);	
+					}									
+				}
+				requestPivotTable(null); 	
+			}
+			
+			override public function requestData():void {
+				requestPivotTable(null);
+			}				
+			
+			private function requestPivotTable(event:AnalysisItemUpdateEvent):void {
+				var columnItems:Array = columnDropArea.getListColumns();
+				var rowItems:Array = rowDropArea.getListColumns();
+				var measureItems:Array = measureDropArea.getListColumns();
+				if (columnItems.length > 0 && rowItems.length > 0 && measureItems.length > 0) {
+					var crosstabDefinition:CrosstabDefinition = getAnalysisDefinition() as CrosstabDefinition;
+					crosstabDefinition.columns = columnItems;
+					crosstabDefinition.measures = measureItems;
+					crosstabDefinition.rows = rowItems;					
+					dataService.getPivotData(crosstabDefinition, this, processPivotTable);			
+				}
+			}					
+			
+			public function processPivotTable(pivotRowData:CrossTabDataResults):void {
+				myDataSet = new ArrayCollection()
+				if (pivotRowData == null) {
+				} else {
+					var cube:Cube = new Cube();
+					var crosstabDefinition:CrosstabDefinition = getAnalysisDefinition() as CrosstabDefinition;					
+					cube.populate(crosstabDefinition, pivotRowData.results, dataSet);		
+				}
+			}
+
+            override public function getCoreView():DisplayObject {
+            	return dataSet;
+            }
+		]]>
+	</mx:Script>
+	<mx:Grid>
+		<mx:GridRow width="100%" height="100%">
+			<mx:GridItem width="100%" height="100%">
+			</mx:GridItem>
+			<mx:GridItem width="100%" height="100%">
+				<analysis:ListDropAreaGrouping id="columnDropArea" borderStyle="solid" borderThickness="1" dropAreaType="com.easyinsight.analysis.DimensionDropArea"/>
+			</mx:GridItem>
+		</mx:GridRow>
+		<mx:GridRow width="100%" height="100%">
+			<mx:GridItem width="100%" height="100%">
+				<analysis:ListDropAreaGrouping id="rowDropArea" borderStyle="solid" borderThickness="1" dropAreaType="com.easyinsight.analysis.DimensionDropArea"/>
+			</mx:GridItem>
+			<mx:GridItem width="100%" height="100%">
+				<analysis:ListDropAreaGrouping id="measureDropArea" borderStyle="solid" borderThickness="1" dropAreaType="com.easyinsight.analysis.MeasureDropArea"/>
+			</mx:GridItem>
+		</mx:GridRow>
+	</mx:Grid>
+	<mx:OLAPDataGrid id="dataSet" height="100%" width="100%"/>	
+</analysis:DataView>

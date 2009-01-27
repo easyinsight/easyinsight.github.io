@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" creationComplete="groupService.getMemberGroups.send()">
+	<mx:Script>
+		<![CDATA[
+			import mx.managers.PopUpManager;
+			import com.easyinsight.groups.GroupDescriptor;
+			import mx.collections.ArrayCollection;
+			
+			[Bindable]
+			private var groups:ArrayCollection;								
+		
+			private function gotGroups():void {
+				this.groups = groupService.getMemberGroups.lastResult as ArrayCollection;
+			}
+			
+			private function save():void {
+				var groupDescriptor:GroupDescriptor = groupBox.selectedItem as GroupDescriptor;
+				dispatchEvent(new GroupLinkEvent(GroupLinkEvent.ADD_GROUP_LINK, groupDescriptor));
+				PopUpManager.removePopUp(this);
+			}			
+			
+			private function cancel():void {
+				PopUpManager.removePopUp(this);
+			}
+		]]>
+	</mx:Script>
+	<mx:RemoteObject destination="groupService" id="groupService">
+		<mx:method name="getMemberGroups" result="gotGroups()"/>
+	</mx:RemoteObject>
+	<mx:Form>
+		<mx:FormItem label="Group: ">
+			<mx:ComboBox id="groupBox" dataProvider="{groups}" labelField="name"/>			
+		</mx:FormItem>
+		<mx:FormItem label="" direction="horizontal">
+			<mx:Button label="Add" click="save()"/>
+			<mx:Button label="Cancel" click="cancel()"/>
+		</mx:FormItem>
+	</mx:Form>
+</mx:TitleWindow>

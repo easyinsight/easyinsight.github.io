@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%" creationComplete="initHandlers()">
+	<mx:Script>
+		<![CDATA[
+			import com.easyinsight.analysis.AnalysisItem;
+			import com.easyinsight.analysis.AnalysisItemEditEvent;
+			import mx.collections.ArrayCollection;
+			
+			[Bindable]
+			private var analysisItemList:ArrayCollection;
+			
+			public function set analysisItems(analysisItems:ArrayCollection):void {
+				this.analysisItemList = analysisItems;
+			}
+			
+			public function get analysisItems():ArrayCollection {
+				return analysisItemList;
+			}	
+			
+			private function initHandlers():void {
+				grid.addEventListener(AnalysisItemEditEvent.ANALYSIS_ITEM_EDIT, analysisItemChange);
+			}
+			
+			private function analysisItemChange(event:AnalysisItemEditEvent):void {
+				var index:int = -1;
+				for (var i:int = 0; i < analysisItemList.length; i++) {
+					var analysisItem:AnalysisItem = analysisItemList.getItemAt(i) as AnalysisItem;
+					if (analysisItem.key == event.analysisItem.key) {
+						index = i;
+						break;
+					}
+				}
+				if (index > -1) {
+					analysisItemList.removeItemAt(index);
+					analysisItemList.addItemAt(event.analysisItem, index);
+				}
+			}		
+		]]>
+	</mx:Script>
+	<mx:DataGrid dataProvider="{analysisItemList}" id="grid" width="100%" height="100%">
+		<mx:columns>				
+			<mx:DataGridColumn headerText="Name" dataField="displayName"/>
+			<mx:DataGridColumn headerText="Type" dataField="displayName" itemRenderer="com.easyinsight.administration.items.AnalysisItemDescription"/>
+			<mx:DataGridColumn headerText="" dataField="key" width="80" itemRenderer="com.easyinsight.administration.items.AnalysisItemEditorButton"/>
+		</mx:columns>
+	</mx:DataGrid>
+</mx:Canvas>

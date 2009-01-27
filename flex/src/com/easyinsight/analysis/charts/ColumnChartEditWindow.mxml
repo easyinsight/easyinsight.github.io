@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<charts:ChartEditWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:charts="com.easyinsight.analysis.charts.*">
+	<mx:Script>
+		<![CDATA[
+			import mx.managers.PopUpManager;
+			
+			[Bindable]
+	        [Embed(source="../../../../../assets/chart_column.png")]
+	        public var columnChartIcon:Class;
+	        
+	        override public function set chartType(chartType:int):void {
+	        	super.chartType = chartType;
+	        	chartSubTypes.selectedIndex = chartType;
+	        }
+			
+			private function save():void {
+				var chartOption:ChartOption = chartSubTypes.selectedItem as ChartOption;
+				var chartAdapter:ChartAdapter = chartOption.configuration.createChartAdapter();
+				dispatchEvent(new ChartAdapterUpdateEvent(chartAdapter));
+				PopUpManager.removePopUp(this);
+			}
+			
+			private function cancel():void {
+				PopUpManager.removePopUp(this);
+			}
+		]]>
+	</mx:Script>
+	<mx:VBox>
+		<mx:TileList id="chartSubTypes">
+			<mx:dataProvider>
+				<mx:Array>
+					<charts:ChartOption configurationClass="com.easyinsight.analysis.charts.ColumnChartConfiguration" 
+						icon="{columnChartIcon}" label="2D Column"/>
+					<charts:ChartOption configurationClass="com.easyinsight.analysis.charts.StackedColumnChartConfiguration" 
+						icon="{columnChartIcon}" label="2D Stacked Column"/>	
+				</mx:Array>
+			</mx:dataProvider>
+		</mx:TileList>
+		<mx:Form>
+			<mx:FormItem label="" direction="horizontal">
+				<mx:Button label="OK" click="save()"/>
+				<mx:Button label="Cancel" click="cancel()"/>
+			</mx:FormItem>
+		</mx:Form>
+	</mx:VBox>
+</charts:ChartEditWindow>

@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Box xmlns:mx="http://www.adobe.com/2006/mxml" creationComplete="adminService.getHealthInfo.send()">
+	<mx:Script>
+		<![CDATA[
+			import mx.formatters.NumberFormatter;
+			import mx.formatters.Formatter;
+			[Bindable]
+			public var currentMemory:String;
+			[Bindable]
+			public var freeMemory:String;
+			[Bindable]
+			public var threadCount:String;
+			[Bindable]
+			public var activeDBConnections:String;
+			[Bindable]
+			public var idleDBConnections:String;
+			[Bindable]
+			public var activeUsers:String;
+			[Bindable]
+			public var majorCollectionCount:String;
+			[Bindable]
+			public var minorCollectionCount:String;
+			[Bindable]
+			public var majorCollectionTime:String;
+			[Bindable]
+			public var minorCollectionTime:String;
+			[Bindable]
+			public var systemLoadAverage:String;
+			[Bindable]
+			public var compilationTime:String;
+			[Bindable]
+			public var clientCount:String;
+			
+			private function updateFromHealthInfo(healthInfo:HealthInfo):void {
+				var formatter:Formatter = new NumberFormatter();
+				this.currentMemory = formatter.format(healthInfo.currentMemory) + " mb";
+				this.freeMemory = formatter.format(healthInfo.freeMemory) + " mb";
+				this.threadCount = healthInfo.threadCount + " threads";
+				this.activeDBConnections = healthInfo.activeDBConnections + " connections";
+				this.idleDBConnections = healthInfo.idleDBConnections + " connections";
+				this.activeUsers = healthInfo.activeUsers + " users";
+				this.majorCollectionCount = healthInfo.majorCollectionCount + " collections";
+				this.majorCollectionTime = healthInfo.majorCollectionTime + " ms";
+				this.minorCollectionCount = healthInfo.minorCollectionCount + " collections";
+				this.minorCollectionTime = healthInfo.minorCollectionTime + " ms";
+				this.systemLoadAverage = String(healthInfo.systemLoadAverage);
+				this.compilationTime = healthInfo.compilationTime + " ms";
+				this.clientCount = healthInfo.clientCount + " clients";
+			}
+			
+			private function gotHealthInfo():void {
+				updateFromHealthInfo(adminService.getHealthInfo.lastResult as HealthInfo);
+			}
+		]]>
+	</mx:Script>
+	<mx:RemoteObject id="adminService" destination="admin">
+		<mx:method name="getHealthInfo" result="gotHealthInfo()"/>
+	</mx:RemoteObject>	
+	<mx:Form>
+		<mx:FormItem label="Free Memory:">
+			<mx:Label text="{this.freeMemory}"/>
+		</mx:FormItem>
+		<mx:FormItem label="Current Memory:">
+			<mx:Label text="{this.currentMemory}"/>
+		</mx:FormItem>
+		<mx:FormItem label="Thread Count:">
+			<mx:Label text="{this.threadCount}"/>
+		</mx:FormItem>
+		<mx:FormItem label="Active DB Connections:">
+			<mx:Label text="{this.activeDBConnections}"/>
+		</mx:FormItem>
+		<mx:FormItem label="Idle DB Connections:">
+			<mx:Label text="{this.idleDBConnections}"/>
+		</mx:FormItem>
+		<mx:FormItem label="Major Collection Count:">
+			<mx:Label text="{this.majorCollectionCount}"/>
+		</mx:FormItem>
+		<mx:FormItem label="Major Collection Time:">
+			<mx:Label text="{this.majorCollectionTime}"/>
+		</mx:FormItem>
+		<mx:FormItem label="Minor Collection Count:">
+			<mx:Label text="{this.minorCollectionCount}"/>
+		</mx:FormItem>
+		<mx:FormItem label="Minor Collection Time:">
+			<mx:Label text="{this.minorCollectionTime}"/>
+		</mx:FormItem>
+		<mx:FormItem label="Compilation Time:">
+			<mx:Label text="{this.compilationTime}"/>
+		</mx:FormItem>
+		<mx:FormItem label="System Load Average:">
+			<mx:Label text="{this.systemLoadAverage}"/>
+		</mx:FormItem>
+		<mx:FormItem label="Active Clients:">
+			<mx:Label text="{this.clientCount}"/>
+		</mx:FormItem>
+	</mx:Form>
+	<mx:Button label="Refresh" click="adminService.getHealthInfo.send()"/>		
+</mx:Box>

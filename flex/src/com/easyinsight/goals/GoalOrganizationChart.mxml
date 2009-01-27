@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Box xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:ilog="http://www.ilog.com/2007/ilog/flex"
+	creationComplete="blah()" width="100%" height="100%" xmlns:goals="com.easyinsight.goals.*">
+	<mx:Script>
+		<![CDATA[
+			import mx.collections.ArrayCollection;
+			
+			//[Bindable]
+			//private var _goalTreeNodes:ArrayCollection;
+			
+			[Bindable]
+			private var _goalTreeNodes:GoalTreeNode;
+								
+			[Bindable]
+			private var goalAdminRendererFactory:GoalAdminRendererFactory = new GoalAdminRendererFactory();
+			
+			public function set goalTreeNodes(nodes:GoalTreeNode):void {
+				this._goalTreeNodes = nodes;
+			}	
+			
+			private function blah():void {
+				myOrgChart.addEventListener(OrganizationChartRefreshEvent.ORG_CHART_REFRESH, orgRefresh);
+                myOrgChart.dataProvider = _goalTreeNodes;
+			}	
+			
+			private function orgRefresh(event:OrganizationChartRefreshEvent):void {
+				myOrgChart.dataProvider = _goalTreeNodes;
+			}
+		]]>
+	</mx:Script>
+	<mx:Box height="100%" width="100%">			
+		<ilog:OrgChart id="myOrgChart"
+			width="100%" height="100%" minZoomLevel="1" maxZoomLevel="1" allowSelection="false">
+			<ilog:itemRenderer>
+		      <mx:Component>
+		        <goals:GoalAdminRenderer2/>
+		      </mx:Component>
+	    </ilog:itemRenderer>
+		</ilog:OrgChart>
+	</mx:Box>
+</mx:Box>

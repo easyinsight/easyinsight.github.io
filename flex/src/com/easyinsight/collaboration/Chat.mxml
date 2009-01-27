@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml">
+	<mx:Script>
+		<![CDATA[
+			import mx.messaging.events.MessageEvent;
+			import com.easyinsight.framework.User;
+			import mx.messaging.messages.AsyncMessage;
+			import mx.messaging.Producer;
+			
+			private var userName:String;
+			
+			public function set sessionName(name:String):void {
+				producer.subtopic = name + ".chat";
+				consumer.subtopic = name + ".chat";
+				consumer.subscribe();
+				userName = User.getInstance().getName();
+			}
+		
+			private function send():void {
+				var message:AsyncMessage = new AsyncMessage();
+				message.body.userName = userName;
+				message.body.text = msg.text;
+				producer.send(message); 
+				displayMessage(userName, msg.text);
+				msg.text = "";
+			}
+			
+			private function displayMessage(userName:String, message:String):void {
+				log.text += userName + ": " + message + "\n";
+				log.verticalScrollPosition = log.maxVerticalScrollPosition;
+			}
+
+			private function messageHandler(event:MessageEvent):void {
+				if (event.message.body.userName != userName) {
+					displayMessage(userName, event.message.body.text);
+				}	
+			}
+		]]>
+	</mx:Script>
+	<mx:Producer id="producer" destination="collaboration"/>
+	<mx:Consumer id="consumer" destination="collaboration" message="messageHandler(event)"/>
+	<mx:VBox width="100%" height="100%">
+		<mx:TextArea id="log"/>
+		<mx:TextInput id="msg" enter="send()" text="Enter chat message here" color="#BBBBBB"/>
+	</mx:VBox>
+</mx:Canvas>

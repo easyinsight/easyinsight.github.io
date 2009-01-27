@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:DataGrid xmlns:mx="http://www.adobe.com/2006/mxml" dataProvider="{comparisons}" creationComplete="setup()" sortableColumns="false"
+	resizableColumns="false" selectable="false" rowCount="10" fontSize="12" verticalGridLines="false">
+	<mx:Script>
+		<![CDATA[
+			import mx.collections.ArrayCollection;
+			
+			[Bindable]			
+			private var comparisons:ArrayCollection;		
+			
+			private function setup():void {
+				comparisons = new ArrayCollection( [
+					new AccountComparisonIcon("Drag and Drop Analysis", true, true, true),
+					new AccountComparisonIcon("Intuitive Charting", true, true, true),
+					new AccountComparisonIcon("Public Sharing", true, true, true),
+                    new AccountComparisonIcon("Yahoo Map Mashups", false, true, true),                        
+					new AccountComparisonIcon("Powerful APIs", false, true, true),
+                    new AccountComparisonIcon("Solution Access", false, false, true),
+                    new AccountComparisonIcon("Goal Trees", false, false, true),
+					new AccountComparisonRow("Maximum Users", "1", "1", "Unlimited"),
+					new AccountComparisonRow("Available Space", "100 KB", "Starting at 10 MB", "Starting at 1 GB"),
+					new AccountComparisonRow("Monthly Cost", "FREE!", "$10", "$75/user"),
+					] );
+				trace(comparisons.length);
+			}
+		]]>
+	</mx:Script>
+	<mx:columns>
+		<mx:DataGridColumn headerText="" dataField="comparisonRowName" width="220"/>
+		<mx:DataGridColumn headerText="Free" dataField="free" width="120" itemRenderer="{new AccountComparisonFactory('free')}" headerRenderer="com.easyinsight.groups.CustomGroupHeader"/>
+		<mx:DataGridColumn headerText="Individual" dataField="individual" width="120" itemRenderer="{new AccountComparisonFactory('individual')}" headerRenderer="com.easyinsight.groups.CustomGroupHeader"/>
+		<mx:DataGridColumn headerText="Professional" dataField="professional" width="120"  itemRenderer="{new AccountComparisonFactory('professional')}" headerRenderer="com.easyinsight.groups.CustomGroupHeader"/>
+	</mx:columns>
+</mx:DataGrid>

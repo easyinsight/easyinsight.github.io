@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%" creationComplete="gotFocus()">
+	<mx:Script>
+		<![CDATA[
+			import mx.managers.PopUpManager;
+			import mx.collections.ArrayCollection;
+
+            [Bindable]
+            private var userButtonFactory:EditUserButtonFactory ;
+
+			[Bindable]
+			private var users:ArrayCollection;
+
+            public function gotFocus():void {
+                usersGrid.addEventListener(RefreshAccountEvent.REFRESH_ACCOUNT, refreshAccount);
+                userButtonFactory = new EditUserButtonFactory(this);
+            	userService.getUsers.send();
+            }
+            
+			private function refreshAccount(event:RefreshAccountEvent):void {
+				userService.getUsers.send();
+			}            
+            
+            private function gotUsers():void {
+            	users = userService.getUsers.lastResult as ArrayCollection;
+            }
+            
+            private function addUser():void {
+            	var newUserDialog:NewUserDialog = NewUserDialog(PopUpManager.createPopUp(this, NewUserDialog, true));
+            	PopUpManager.centerPopUp(newUserDialog);
+            }
+        ]]>
+	</mx:Script>
+	<mx:RemoteObject destination="login" id="userService">
+		<mx:method name="getUsers" result="gotUsers()"/>
+	</mx:RemoteObject>
+	<mx:VBox width="100%" height="100%" horizontalAlign="center">
+        <mx:VBox>
+		<mx:HBox width="100%">
+			<mx:Button label="Add User..." click="addUser()"/>			
+		</mx:HBox>
+        <mx:VBox id="accountSettingsBox" verticalGap="0" borderThickness="1" borderColor="#D42525" borderStyle="solid" dropShadowEnabled="true">
+            <mx:Box width="100%" height="5" backgroundColor="#D42525" left="0" right="0"/>
+            <mx:Box width="100%" backgroundColor="#F1EE8D" horizontalAlign="center">
+                <mx:Label text="Users" fontFamily="Tahoma" fontWeight="bold" fontSize="14"/>
+            </mx:Box>
+            <mx:DataGrid dataProvider="{users}" width="100%" id="usersGrid">
+                <mx:columns>
+                    <mx:DataGridColumn dataField="userName" headerText="User Name" headerRenderer="com.easyinsight.groups.CustomGroupHeader"/>
+                    <mx:DataGridColumn dataField="name" headerText="Full Name" headerRenderer="com.easyinsight.groups.CustomGroupHeader"/>
+                    <mx:DataGridColumn dataField="userName" width="100" headerText="" itemRenderer="{userButtonFactory}"/>
+                </mx:columns>
+            </mx:DataGrid>
+        </mx:VBox>
+            </mx:VBox>
+	</mx:VBox>
+</mx:Canvas>

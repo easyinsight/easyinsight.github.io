@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:HBox xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:local="com.easyinsight.*" creationComplete="initHandlers()" xmlns:easyinsight="com.easyinsight.*">
+	<mx:states>
+		<mx:State name="LoggedInState">
+			<mx:RemoveChild target="{anonymouslogonstatus1}"/>
+			<mx:AddChild>
+				<local:LoggedOnStatus id="loggedOnStatus"/>				
+			</mx:AddChild>
+		</mx:State>
+	</mx:states>
+	<mx:Script>
+		<![CDATA[
+			import com.easyinsight.framework.User;
+                    import com.easyinsight.framework.LoginEvent;
+
+                    private function initHandlers():void {
+                        anonymouslogonstatus1.addEventListener(LoginEvent.LOGIN, loggedIn);
+                        User.getEventNotifier().addEventListener(LoginEvent.LOGIN, loggedIn);
+                        User.getEventNotifier().addEventListener(LoginEvent.LOGOUT, loggedOut);
+                    }
+
+                    public function loggedIn(event:Event):void {
+                        currentState = "LoggedInState";
+                        dispatchEvent(new LoginEvent(LoginEvent.LOGIN));
+                    }
+                    
+                    private function loggedOut(event:LoginEvent):void {
+                    	currentState = "";
+                    }
+                ]]>
+	</mx:Script>
+	<easyinsight:AnonymousLogonStatus id="anonymouslogonstatus1"/>
+</mx:HBox>

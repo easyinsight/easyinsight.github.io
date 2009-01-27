@@ -1,0 +1,130 @@
+<?xml version="1.0" ?>
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml">
+    <mx:Script><![CDATA[
+import com.easyinsight.analysis.AnalysisDefinition;
+import mx.events.ListEvent;
+import com.easyinsight.analysis.HierarchyLevel;
+import mx.controls.List;
+import mx.managers.DragManager;
+import mx.events.DragEvent;
+import com.easyinsight.analysis.NamedKey;
+import com.easyinsight.analysis.Hierarchy;
+import com.easyinsight.analysis.AnalysisHierarchyItem;
+import com.easyinsight.analysis.AnalysisItemTypes;
+import com.easyinsight.analysis.AnalysisItem;
+        import mx.collections.ArrayCollection;
+
+        [Bindable]
+        private var availableDimensions:ArrayCollection;
+        [Bindable]
+        private var hierarchies:ArrayCollection;
+
+        private var _analysisDefinition:AnalysisDefinition;
+
+        [Bindable]
+        [Embed(source="../../../../../assets/cubes_blue_add.png")]
+        private var cubeAddImage:Class;
+
+        override protected function commitProperties():void {
+            super.commitProperties();
+        }
+
+        public function getHierarchies():ArrayCollection {
+            saveState();
+            return hierarchies;
+        }
+
+        private function saveState():void {
+            if (workspace.getChildren().length > 0) {
+                var hierarchyAdminBox:HierarchyAdminBox = workspace.getChildAt(0) as HierarchyAdminBox;
+                var item:AnalysisHierarchyItem = hierarchyAdminBox.analysisHierarchyItem;
+                var list:List = hierarchyAdminBox.list;
+                item.hierarchyLevels = ArrayCollection(list.dataProvider);
+                item.hierarchyLevel = item.hierarchyLevels.getItemAt(0) as HierarchyLevel;
+            }
+        }
+
+        private function newHierarchy():void {
+            saveState();
+            var hierarchyAdminBox:HierarchyAdminBox = new HierarchyAdminBox();
+            var hierarchyItem:AnalysisHierarchyItem = new AnalysisHierarchyItem();
+            var key:NamedKey = new NamedKey();
+            key.name = "New Hierarchy";
+            hierarchyItem.key = key;
+            hierarchyAdminBox.analysisHierarchyItem = hierarchyItem;
+            hierarchies.addItem(hierarchyItem);
+            workspace.removeAllChildren();
+            workspace.addChild(hierarchyAdminBox);
+        }
+
+        private function onDragComplete(event:DragEvent):void {
+            if (event.action != DragManager.NONE) {
+                var hierarchyAdminBox:HierarchyAdminBox = workspace.getChildAt(0) as HierarchyAdminBox;
+                var list:List = hierarchyAdminBox.list;
+                var data:ArrayCollection = ArrayCollection(list.dataProvider);
+                var newItem:AnalysisItem = event.dragSource.dataForFormat("items")[0];
+                for (var i:int = 0; i < data.length; i++) {
+                    var item:Object = data.getItemAt(i);
+                    if (item is AnalysisItem) {
+                        var analysisItem:AnalysisItem = item as AnalysisItem;
+                        if (analysisItem.display == newItem.display) {
+                            var hierarchyLevel:HierarchyLevel = new HierarchyLevel();
+                            hierarchyLevel.analysisItem = newItem;
+                            hierarchyLevel.parentItem = hierarchyAdminBox.analysisHierarchyItem;
+                            data.removeItemAt(i);
+                            data.addItemAt(hierarchyLevel, i);
+                        }
+                    }
+                }
+            }
+        }
+
+        public function set feedDefinition(val:FeedDefinitionData):void {
+            for each (var analysisItem:AnalysisItem in val.fields) {
+                if (analysisItem.hasType(AnalysisItemTypes.DIMENSION)) {
+                    availableDimensions.addItem(analysisItem);
+                }
+            }
+        }
+
+        public function set analysisDefinition(val:AnalysisDefinition):void {
+            _analysisDefinition = val;
+            hierarchies = new ArrayCollection();
+            availableDimensions = new ArrayCollection();
+            if (_analysisDefinition.hierarchies != null) {
+                for each (var hierarchyItem:AnalysisHierarchyItem in _analysisDefinition.hierarchies) {
+                    hierarchies.addItem(hierarchyItem);
+                }
+            }
+        }
+
+        private function onHierarchyClick(event:ListEvent):void {
+            saveState();
+            var index:int = event.columnIndex;
+            workspace.removeAllChildren();
+            var item:AnalysisHierarchyItem = hierarchies.getItemAt(index) as AnalysisHierarchyItem;
+            var hierarchyAdminBox:HierarchyAdminBox = new HierarchyAdminBox();
+            hierarchyAdminBox.analysisHierarchyItem = item;
+            workspace.addChild(hierarchyAdminBox);
+        }
+        ]]></mx:Script>
+    <mx:Grid>
+        <mx:GridRow>
+            <mx:GridItem/>
+            <mx:GridItem>
+                <mx:HBox>
+                    <mx:Button icon="{cubeAddImage}" toolTip="Create Hierarchy" click="newHierarchy()"/>
+                    <mx:TileList dataProvider="{hierarchies}" itemRenderer="com.easyinsight.administration.feed.HierarchyTileRenderer" itemClick="onHierarchyClick(event)"/>
+                </mx:HBox>
+            </mx:GridItem>
+        </mx:GridRow>
+        <mx:GridRow>
+            <mx:GridItem>
+                <mx:List dataProvider="{availableDimensions}" labelField="display" dragEnabled="true" dragMoveEnabled="false" dragComplete="onDragComplete(event)"/>
+            </mx:GridItem>
+            <mx:GridItem>
+                <mx:Box width="100%" height="100%" horizontalAlign="center" verticalAlign="middle" id="workspace"/>
+            </mx:GridItem>
+        </mx:GridRow>
+    </mx:Grid>
+</mx:VBox>

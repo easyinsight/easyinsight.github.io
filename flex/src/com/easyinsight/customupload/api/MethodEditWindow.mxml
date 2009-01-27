@@ -1,0 +1,111 @@
+<?xml version="1.0" ?>
+<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" creationComplete="onCreation()">
+    <mx:Script><![CDATA[
+import com.easyinsight.analysis.AnalysisItem;
+import mx.controls.Alert;
+        import mx.managers.PopUpManager;
+        import mx.collections.ArrayCollection;
+import com.easyinsight.analysis.AnalysisItemWrapper;
+
+        [Bindable]
+        private var analysisItems:ArrayCollection = new ArrayCollection();
+
+        private var _configuredMethod:ConfiguredMethod;
+
+        [Bindable]
+        private var methodName:String;
+        [Bindable]
+        private var updateMethod:Boolean = true;
+
+        public var fields:ArrayCollection;
+
+        [Bindable]
+        private var factory:ParameterChoiceBoxFactory = new ParameterChoiceBoxFactory();
+
+        private function onCreation():void {
+            analysisItemsGrid.addEventListener(MethodItemEvent.METHOD_ITEM_DELETED, itemDeleted);
+        }
+
+        public function set configuredMethod(val:ConfiguredMethod):void {
+            _configuredMethod = val;
+        }
+
+        override protected function commitProperties():void {
+            super.commitProperties();
+            if (_configuredMethod != null) {
+                methodName = _configuredMethod.methodName;
+                updateMethod = _configuredMethod.methodType == ConfiguredMethod.UPDATE;
+                var wrappers:ArrayCollection = new ArrayCollection();
+                for each (var item:AnalysisItem in _configuredMethod.keys) {
+                    wrappers.addItem(new AnalysisItemWrapper(item));
+                }
+                analysisItems = wrappers;
+            }
+            factory.analysisItems = fields;
+        }
+
+        private function itemDeleted(event:MethodItemEvent):void {
+            analysisItems.removeItemAt(analysisItems.getItemIndex((event.analysisItem)));
+        }
+
+        private function save():void {
+            if (analysisItems.length == 0) {
+                Alert.show("You must include at least one field.");
+            } else {
+                var newMethod:Boolean = false;
+                if (_configuredMethod == null) {
+                    _configuredMethod = new ConfiguredMethod();
+                    newMethod = true;
+                }
+                _configuredMethod.methodName = nameInput.text;
+                _configuredMethod.methodType = updateButton.selected ? ConfiguredMethod.UPDATE : ConfiguredMethod.DELETE;
+                var keys:ArrayCollection = new ArrayCollection();
+                for each (var wrapper:AnalysisItemWrapper in analysisItems) {
+                    keys.addItem(wrapper.analysisItem);
+                }
+                _configuredMethod.keys = keys;
+                if (newMethod) {
+                    dispatchEvent(new MethodDefinitionEvent(MethodDefinitionEvent.METHOD_DEFINED, _configuredMethod));
+                } else {
+                    dispatchEvent(new MethodDefinitionEvent(MethodDefinitionEvent.METHOD_EDITED, _configuredMethod));
+                }
+                PopUpManager.removePopUp(this);
+            }
+        }
+
+        private function cancel():void {
+            PopUpManager.removePopUp(this);
+        }
+
+        private function addParameter():void {
+            analysisItems.addItem(new AnalysisItemWrapper(fields.getItemAt(0) as AnalysisItem));
+        }
+
+        ]]></mx:Script>
+    <mx:VBox>
+        <mx:Form>
+            <mx:FormItem label="Method Name: ">
+                <mx:TextInput id="nameInput" text="{methodName}"/>
+            </mx:FormItem>
+            <mx:FormItem label="Method Type: ">
+                <mx:RadioButtonGroup id="methodTypeGroup"/>
+                <mx:RadioButton group="{methodTypeGroup}" label="Update" value="updateButton" id="updateButton" selected="{updateMethod}"/>
+                <mx:RadioButton group="{methodTypeGroup}" label="Delete" value="deleteButton" id="deleteButton"/>
+            </mx:FormItem>
+        </mx:Form>
+        <mx:ApplicationControlBar>
+            <mx:Label text="Parameters"/>
+            <mx:Button label="Add Parameter..." click="addParameter()"/>
+        </mx:ApplicationControlBar>
+        <mx:DataGrid dataProvider="{analysisItems}" id="analysisItemsGrid" width="100%" height="100%" rowHeight="28">
+            <mx:columns>
+                <mx:DataGridColumn headerText="Name" dataField="displayName" itemRenderer="{factory}" rendererIsEditor="true" editorDataField="data"/>
+                <mx:DataGridColumn headerText="" dataField="displayName" itemRenderer="com.easyinsight.customupload.api.MethodEditControls" width="50"/>
+            </mx:columns>
+        </mx:DataGrid>
+        <mx:HBox width="100%" horizontalAlign="center">
+            <mx:Button label="Save" click="save()"/>
+            <mx:Button label="Cancel" click="cancel()"/>
+        </mx:HBox>
+    </mx:VBox>
+</mx:TitleWindow>

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<AnalyzableItemPanel xmlns="genredata.*" xmlns:mx="http://www.adobe.com/2006/mxml" title="Most Popular Analyses" width="100%" height="100%">
+	<mx:Script>
+		<![CDATA[
+			override protected function getItemRenderer():IFactory {
+				return new ClassFactory(PopularAnalysisItem);
+			}
+		]]>
+	</mx:Script>		
+</AnalyzableItemPanel>

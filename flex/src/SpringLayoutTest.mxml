@@ -1,0 +1,238 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Application xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" xmlns:adobe="http://www.adobe.com/2006/fc"
+	xmlns:util="com.easyinsight.util.*" creationComplete="startStuff()">
+	<!--
+	////////////////////////////////////////////////////////////////////////////////
+	//
+	//  Copyright (C) 2006 Adobe Macromedia Software LLC and its licensors.
+	//  All Rights Reserved. The following is Source Code and is subject to all
+	//  restrictions on such code as contained in the End User License Agreement
+	//  accompanying this product.
+	//
+	////////////////////////////////////////////////////////////////////////////////
+	-->
+	
+	<!-- SpringGraphDemo.mxml is the main application file. -->
+	
+	<mx:Script>
+		<![CDATA[
+			import com.easyinsight.feedassembly.CompositeFeedNode;
+			import com.easyinsight.util.GraphSelectionState;
+			import com.easyinsight.util.EdgeSelectionEvent;
+			import com.easyinsight.util.NodeSelectionEvent;
+			import com.easyinsight.util.GraphFeedNode;
+			import mx.collections.ArrayCollection;
+			import com.easyinsight.util.TestEdgeRenderer;
+			import com.easyinsight.util.GraphLine;
+			import com.adobe.flex.extras.controls.springgraph.Item;
+			import com.adobe.flex.extras.controls.springgraph.Graph;
+
+			private var g: Graph = new Graph();
+			private var prevItem: Item;
+			private var itemCount: int = 0;
+			
+			[Bindable]
+			private var edgeCreationAllowed:Boolean = false;
+			[Bindable]
+			private var deletionAllowed:Boolean = false;
+			
+			[Bindable]
+			private var testEdgeRenderer:TestEdgeRenderer;
+			
+			private function startStuff():void {
+				testEdgeRenderer = new TestEdgeRenderer(s);
+				s.addEventListener(NodeSelectionEvent.NODE_SELECTED, nodeSelected);
+				s.addEventListener(NodeSelectionEvent.NODE_CTRL_SELECT, nodeCtrlSelect);
+				s.addEventListener(NodeSelectionEvent.NODE_DESELECTED, nodeDeselected);
+				s.addEventListener(EdgeSelectionEvent.EDGE_SELECTED, edgeSelected);
+				s.addEventListener(EdgeSelectionEvent.EDGE_CTRL_SELECT, edgeCtrlSelect);
+				s.addEventListener(EdgeSelectionEvent.EDGE_DESELECTED, edgeDeselected);
+			}
+			
+			private function determineCounts():GraphSelectionState {
+				var state:GraphSelectionState = new GraphSelectionState();
+				for each (var obj:Object in s.getChildren()) {
+					if (obj is GraphFeedNode) {
+						var graphFeedNode:GraphFeedNode = obj as GraphFeedNode;
+						if (graphFeedNode.isSelected()) {
+							state.pushNode(graphFeedNode);
+						}						
+					} else if (obj is GraphLine) {
+						var graphLine:GraphLine = obj as GraphLine;
+						if (graphLine.isSelected()) {
+							state.pushEdge(graphLine);
+						}
+					}
+				}
+				return state;
+			}
+			
+			private function join():void {
+				var state:GraphSelectionState = determineCounts();
+				var firstNode:GraphFeedNode = state.nodeCount[0];
+				var secondNode:GraphFeedNode = state.nodeCount[1];
+				var firstItem:Item = g.find(String(firstNode.feedID));
+				var secondItem:Item = g.find(String(secondNode.feedID));
+				g.link(firstItem, secondItem);				
+			}
+			
+			private function determine():void {
+				for each (var item:Item in g.nodes) {
+					var feedID:Number = Number(item.id);
+					new CompositeFeedNode();
+				}
+				for each (var obj:Object in s.getChildren()) {
+					if (obj is GraphLine) {
+						var edge:GraphLine = obj as GraphLine;											
+					}
+				}				
+			}
+			
+			private function fromComposite():void {
+				
+			}
+			
+			private function deleteItem():void {
+				var state:GraphSelectionState = determineCounts();
+				for each (var edge:GraphLine in state.edgeCount) {
+					var firstItem:Item = g.find(String(edge.fromID));
+					var secondItem:Item = g.find(String(edge.toID));
+					g.unlink(firstItem, secondItem);
+				 	s.removeChild(edge);
+				}
+				for each (var node:GraphFeedNode in state.nodeCount) {
+					var item:Item = g.find(String(node.feedID));
+					g.remove(item);
+				}
+			}
+			
+			private function updateState():void {
+				var state:GraphSelectionState = determineCounts();
+				updateEdgeCreationAllowed(state);
+				updateDeletionAllowed(state);
+			}
+			
+			private function updateEdgeCreationAllowed(state:GraphSelectionState):void {
+				var allowed:Boolean = false;
+				if (state.nodeCount.length == 2 && state.edgeCount.length == 0) {
+					if (!testEdgeRenderer.related(state.nodeCount[0].feedID, state.nodeCount[1].feedID)) {
+						allowed = true;
+					}
+				}
+				edgeCreationAllowed = allowed;
+			}
+			
+			private function updateDeletionAllowed(state:GraphSelectionState):void {
+				deletionAllowed = state.edgeCount.length + state.nodeCount.length > 0;
+			} 					
+			
+			private function edgeSelected(event:EdgeSelectionEvent):void {
+				onEdgeSelection(event.graphLine);
+				updateState();
+			}
+			
+			private function edgeDeselected(event:EdgeSelectionEvent):void {
+				updateState();	
+			}
+			
+			private function edgeCtrlSelect(event:EdgeSelectionEvent):void {
+				updateState();
+			}
+			
+			private function nodeSelected(event:NodeSelectionEvent):void {
+				onSelection(event.node);
+				updateState();
+			}
+			
+			private function nodeDeselected(event:NodeSelectionEvent):void {
+				updateState();
+			}
+			
+			private function nodeCtrlSelect(event:NodeSelectionEvent):void {
+				updateState();
+			}
+
+			private function newItem(): void {
+				var ourItemCount:int = ++itemCount;
+				var item: Item = new Item(String(ourItemCount));
+				item.data = new Object();
+				item.data["feedID"] = String(ourItemCount);
+				item.data["feedName"] = "XXX";				
+				g.add(item);				
+				prevItem = item;
+				s.dataProvider = g;
+			}
+			
+			private function translate():void {
+				
+			}				
+			
+			private function onSelection(node:GraphFeedNode):void {
+				for each (var obj:Object in s.getChildren()) {
+					if (obj is GraphFeedNode && obj != node) {
+						var graphFeedNode:GraphFeedNode = obj as GraphFeedNode;
+						graphFeedNode.clearSelection();
+					} else if (obj is GraphLine) {
+						var graphLine:GraphLine = obj as GraphLine;
+						graphLine.clearSelection();
+					}
+				}
+			}
+			
+			private function onEdgeSelection(line:GraphLine):void {
+				for each (var obj:Object in s.getChildren()) {
+					if (obj is GraphFeedNode) {
+						var graphFeedNode:GraphFeedNode = obj as GraphFeedNode;						
+						graphFeedNode.clearSelection();
+					} else if (obj is GraphLine && obj != line) {
+						var graphLine:GraphLine = obj as GraphLine;
+						graphLine.clearSelection();
+					}
+				}
+			}
+			
+			private function linkItems(fromId: String, toId: String): void {
+				var fromItem: Item = g.find(fromId);
+				var toItem: Item = g.find(toId);
+				g.link(fromItem, toItem);
+				s.dataProvider = g;
+			}		
+			
+			private function unlinkItems(fromId: String, toId: String): void {
+				var fromItem: Item = g.find(fromId);
+				var toItem: Item = g.find(toId);
+				g.unlink(fromItem, toItem);
+				s.dataProvider = g;
+			}		
+		]]>
+	</mx:Script>
+	
+	<mx:Style source="com/easyinsight/skin/osx/OSX.css"/>
+
+	<mx:Canvas id="canvas" width="100%" height="100%">
+		
+	
+		<mx:Text fontSize="9"
+			htmlText="&lt;a href=&quot;http://mark-shepherd.com&quot;&gt;mark-shepherd.com&lt;/a&gt;" y="31" fontWeight="bold" textAlign="right" right="11" width="114"/>
+		<mx:Button click="newItem()" x="29" y="18" label="New item"/>
+		<mx:HSlider id="repulsionSlider" x="462" y="61" value="0.5" minimum="0.02" maximum="1.5" change="s.refresh()" liveDragging="true" width="147"/>
+		<mx:Label x="365" y="65" text="Repulsion"/>
+		<mx:Button x="30" y="51" label="Link item" click="join()" enabled="{edgeCreationAllowed}"/>
+		<mx:TextInput x="136" y="51" width="42" text="1" id="linkFrom"/>
+		<mx:TextInput x="242" y="51" width="42" text="3" id="linkTo"/>
+		<mx:Label x="181" y="53" text="to item"/>
+		<mx:Button x="30" y="86" label="Unlink item" click="unlinkItems(unlinkFrom.text, unlinkTo.text)"/>
+		<mx:TextInput x="136" y="86" width="42" text="1" id="unlinkFrom"/>
+		<mx:TextInput x="242" y="86" width="42" text="3" id="unlinkTo"/>
+		<mx:Button label="Delete" enabled="{deletionAllowed}" click="deleteItem()"/>
+		<mx:Label x="180" y="88" text="from item"/>
+		<mx:Label y="6" text="SpringGraph Component Tester" right="10" fontSize="18"/>
+		<mx:HSlider id="fontSizeSlider" x="462" y="83" value="32" minimum="10" maximum="100" change="s.refresh()" liveDragging="true" width="147"/>
+		<mx:Label x="365" y="87" text="Font Size"/>
+	
+		<adobe:SpringGraph id="s" backgroundColor="#777777" 
+			lineColor="#6666ff" repulsionFactor="{repulsionSlider.value}" left="10" right="10" top="124" bottom="10" autoFit="true"
+			edgeRenderer="{testEdgeRenderer}" itemRenderer="{ new com.easyinsight.util.GraphFeedNodeFactory() }" width="600" height="600">			
+		</adobe:SpringGraph>	
+	</mx:Canvas>
+</mx:Application>

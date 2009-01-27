@@ -1,0 +1,239 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ChartAdapter xmlns="com.easyinsight.analysis.charts.*" xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%">
+	<mx:Metadata>
+		[Event(name="chartSort", type="com.easyinsight.analysis.ChartSortEvent")]
+	</mx:Metadata>
+	<mx:Script>
+		<![CDATA[
+			import ilog.charts3d.charts3dClasses.Series3D;
+			import ilog.charts3d.series.ColumnSet3D;
+			import ilog.charts3d.AxisRenderer3D;
+			import ilog.charts3d.series.ColumnSeries3D;
+			import ilog.charts3d.ColumnChart3D;
+			import com.easyinsight.analysis.AnalysisItemTypes;
+			import mx.charts.chartClasses.AxisBase;
+			import com.easyinsight.analysis.SortableAxisTitleFactory;
+			import com.easyinsight.analysis.AnalysisItem;
+			import mx.events.FlexEvent;
+			import mx.controls.TextInput;
+			import mx.charts.ColumnChart;
+			import mx.charts.AxisRenderer;
+			import com.easyinsight.filtering.FilterRawData;
+			import mx.graphics.SolidColor;
+			import mx.graphics.IFill;
+			import com.easyinsight.analysis.conditions.ConditionRenderer;
+			import mx.charts.chartClasses.IAxis;
+			import mx.charts.LinearAxis;
+			import mx.formatters.Formatter;
+			import mx.charts.series.items.ColumnSeriesItem;			
+			import mx.charts.ChartItem;
+			import mx.charts.CategoryAxis;			
+			import mx.collections.ArrayCollection;
+			
+			[Bindable]
+			private var graphData:ArrayCollection = new ArrayCollection();
+			
+			[Bindable]
+			private var xAxisTitle:String = "";
+			
+			[Bindable]
+			private var yAxisTitle:String = "";
+			
+			[Bindable]
+			private var xAxisItem:AnalysisItem;					
+			[Bindable]
+			private var yAxisItem:AnalysisItem;
+			
+			[Bindable]
+			private var _xField:String;
+			[Bindable]
+			private var yField:String;
+			
+			private var measureFormatter:Formatter;
+			
+			private var customColors:Boolean = false;
+			private var conditionRenderer:ConditionRenderer;
+			
+			private var columnChart:ColumnChart3D;
+			
+			private var xAxis:CategoryAxis;
+			private var yAxis:LinearAxis;
+			
+			//private var xAxisTitleRendererFactory:SortableAxisTitleFactory;
+			
+			//private var yAxisTitleRendererFactory:SortableAxisTitleFactory;
+			
+			private var columnSeries:ColumnSeries3D;
+			
+			
+			
+			[Bindable]
+			public function get xField():String {
+				return _xField;
+			}
+			
+			public function set xField(xField:String):void {
+				this._xField = xField;
+				dispatchEvent(new FlexEvent(FlexEvent.DATA_CHANGE));
+			}
+			
+			override public function get chartType():int {
+				return ChartTypes.COLUMN_3D;
+			}
+			
+			private function createChart():void {
+				if (columnChart == null) {
+					
+					
+					
+					// define the chart itself
+					
+					columnChart = new ColumnChart3D();
+					
+					columnChart.projectionType = "oblique";
+					columnChart.percentHeight = 100;
+					columnChart.percentWidth = 100;
+					columnChart.showDataTips = true;
+					columnChart.dataProvider = graphData;
+					
+					// define the X axis
+					
+					xAxis = new CategoryAxis();				
+					xAxis.categoryField = xField;
+					xAxis.dataProvider = graphData;
+					xAxis.title = xAxisTitle;
+					columnChart.horizontalAxis = xAxis;
+					//var axisRenderer:AxisRenderer3D = new AxisRenderer3D();
+			        //axisRenderer.axis = xAxis;
+			        //xAxisTitleRendererFactory = new SortableAxisTitleFactory(xAxisItem, true);			        
+			        //axisRenderer.titleRenderer = xAxisTitleRendererFactory;
+			        //axisRenderer.setStyle("color", "#FFFFFF");
+			        //axisRenderer.placement = "bottom";
+			        //columnChart.horizontalAxisRenderer = axisRenderer;
+			        //columnChart.horizontalAxisRenderers = [ axisRenderer ];
+			        
+			        // define the Y axis
+			        
+			        yAxis = new LinearAxis();
+			        yAxis.title = yAxisTitle;
+			        yAxis.labelFunction = renderAxis;
+			        columnChart.verticalAxis = yAxis;
+			        //var yAxisRenderer:AxisRenderer3D = new AxisRenderer3D();
+			        //yAxisRenderer.axis = yAxis;
+			        //yAxisRenderer.setStyle("color", "#FFFFFF");
+			        //yAxisTitleRendererFactory = new SortableAxisTitleFactory(yAxisItem, false); 
+			        //yAxisRenderer.titleRenderer = yAxisTitleRendererFactory;
+			        //yAxisRenderer.placement = "left";
+			        //columnChart.verticalAxisRenderer = yAxisRenderer;
+			        //columnChart.verticalAxisRenderers = [ yAxisRenderer ];
+			        
+			        // create the data series
+			        
+			        var columnSet:ColumnSet3D = new ColumnSet3D();
+					columnSeries = new ColumnSeries3D();
+					columnSeries.xField = xField;
+					columnSeries.yField = yField;					
+					columnSeries.labelFunction = renderChartLabel;
+					columnSeries.dataProvider = graphData;
+					columnSeries.displayName = xAxisTitle;
+					columnSeries.setStyle("showDataEffect", interpolateIn);
+					//var mySeries:Array = new Array();
+					//mySeries.push(columnSeries);
+					columnSet.series = [ columnSeries ];
+					columnChart.series = [ columnSet ];										
+					addChild(columnChart);
+				}	
+			}
+			
+			override public function dataChange(dataSet:ArrayCollection, dimensions:Array, measures:Array):void {
+				
+				createChart();
+				
+				if (measures.length == 1) {
+					measureFormatter = measures[0].getFormatter();
+					var conditionRenderer:ConditionRenderer = measures[0].createClientRenderer();
+					if (conditionRenderer.hasCustomColor()) {
+						customColors = true;
+						this.conditionRenderer = conditionRenderer;
+					}
+				}
+				
+				var newXAxisItem:AnalysisItem = dimensions[0];
+				if (xAxisItem == null || newXAxisItem.key.createString() != xAxisItem.key.createString()) {
+					xAxisItem = newXAxisItem;
+					//xAxisTitleRendererFactory.analysisItem = xAxisItem;
+				}
+				
+				var newYAxisItem:AnalysisItem = measures[0];
+				if (yAxisItem == null || newYAxisItem.key.createString() != yAxisItem.key.createString()) {
+					yAxisItem = newYAxisItem;
+					//yAxisTitleRendererFactory.analysisItem = yAxisItem;
+				}
+
+				var newXField:String = dimensions[0].key.createString();
+				if (newXField != xField) {
+					xField = newXField;				
+					xAxis.categoryField = xField;
+					columnSeries.xField = xField;
+				}
+				
+				var newXAxisTitle:String = dimensions[0].display;
+				if (newXAxisTitle != xAxisTitle) {
+					xAxisTitle = newXAxisTitle;
+					xAxis.title = xAxisTitle;
+					columnSeries.displayName = xAxisTitle;
+				}
+				
+				var newYField:String = measures[0].key.createString();
+				if (newYField != yField) {
+					yField = newYField;
+					columnSeries.yField = yField;
+				}
+				
+				var newYAxisTitle:String = measures[0].display;
+				if (newYAxisTitle != yAxisTitle) {
+					yAxisTitle = newYAxisTitle;
+					yAxis.title = yAxisTitle;					
+				}		
+				
+				columnChart.dataProvider = dataSet;
+				columnSeries.dataProvider = dataSet;
+				xAxis.dataProvider = dataSet;
+				graphData = dataSet;		
+			}
+			
+			private function renderChartLabel(element:ChartItem, series:Series3D):String {
+				var columnSeriesItem:ColumnSeriesItem = element as ColumnSeriesItem;
+				return measureFormatter.format(columnSeriesItem.xNumber);
+			}
+			
+			private function customFill(element:ChartItem, index:Number):IFill {
+				var item:ColumnSeriesItem = element as ColumnSeriesItem;
+				var color:SolidColor = new SolidColor(conditionRenderer.getColor(item.yValue));
+				return color;
+			}
+			
+			private function renderAxis(labelValue:Object, previousValue:Object, axis:IAxis):String {
+				return measureFormatter.format(labelValue);
+			}
+			
+			override public function getMaxMeasures():int {
+				return 1;
+			}
+			
+			override public function getMaxDimensions():int {
+				return 1;
+			}
+			
+			override public function createFilterRawData():FilterRawData {
+				var filterRawData:FilterRawData = new FilterRawData();
+				for (var i:int = 0; i < columnChart.selectedChartItems.length; i++) {
+                	var obj:ChartItem = columnChart.selectedChartItems[i];
+					filterRawData.addPair(xAxisItem, obj.item[xAxisItem.key.createString()]);                	
+                }
+				return filterRawData;
+			}
+		]]>
+	</mx:Script>
+	<mx:SeriesInterpolate id="interpolateIn" duration="1000"/>
+</ChartAdapter>

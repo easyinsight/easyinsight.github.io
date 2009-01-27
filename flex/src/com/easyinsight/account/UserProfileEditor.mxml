@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%"
+	initialize="initHandlers()" backgroundAlpha=".95" backgroundColor="#FFFFFF">
+	<mx:states>
+		<mx:State name="security">
+			
+		</mx:State>
+	</mx:states>
+	<mx:Script>
+		<![CDATA[
+import mx.events.ItemClickEvent;
+import com.easyinsight.framework.UserTransferObject;
+			import mx.validators.Validator;
+
+        [Bindable]
+        private var userNameText:String;
+
+        [Bindable]
+        private var fullNameText:String;
+
+        [Bindable]
+        private var emailText:String;
+
+        private var _user:UserTransferObject;
+
+        private var validators:Array;
+
+
+        public function set user(val:UserTransferObject):void {
+            _user = val;
+        }
+
+        override protected function commitProperties():void {
+            super.commitProperties();
+            userNameText = _user.userName;
+            fullNameText = _user.name;
+            emailText = _user.email;
+        }
+
+        private function initHandlers():void {
+            validators = [ emailValidator, userNameValidator, fullNameValidator ];
+        }
+
+        private function save():void {
+            var results:Array = Validator.validateAll(validators);
+            if (results.length > 0) {
+                var failureMessage:String = "There are one or more problems with the fields above.";
+                failureMessageLabel.text = failureMessage;
+            } else {
+                failureMessageLabel.text = "";
+                creationService.updateUser.send(userName.text, fullName.text, email.text);
+            }
+        }
+
+        private function onItemClick(event:ItemClickEvent):void {
+            if (event.label == "Profile") {
+                currentState = "";
+            } else if (event.label == "Security") {
+                currentState = "security";
+            }
+        }
+
+        private function savedUser():void {
+
+        }
+                ]]>
+	</mx:Script>
+	
+	<mx:VBox width="100%" height="100%">
+		<mx:HBox width="100%">
+            <mx:ToggleButtonBar itemClick="onItemClick(event)">
+                <mx:dataProvider>
+                    <mx:Array>
+                        <mx:String>Profile</mx:String>
+                        <mx:String>Security</mx:String>
+                    </mx:Array>
+                </mx:dataProvider>
+            </mx:ToggleButtonBar>
+			<mx:Button label="Profile" id="profileButton" click="currentState=''" styleName="blueButton"/>
+			<mx:Button label="Security" id="securityButton" click="currentState='security'"/>
+		</mx:HBox>		
+		<mx:Form>
+			<mx:FormItem label="User ID:" direction="horizontal">
+				<mx:TextInput id="userName" text="{userNameText}"/>				
+			</mx:FormItem>
+			<mx:FormItem label="Name:" direction="horizontal">
+				<mx:TextInput id="fullName" text="{fullNameText}"/>				
+			</mx:FormItem>
+			<mx:FormItem label="Email Address:" direction="horizontal">
+				<mx:TextInput id="email" text="{emailText}"/>				
+			</mx:FormItem>
+			<mx:FormItem>
+				<mx:HBox>
+					<mx:Button label="Save" click="save()"/>						
+				</mx:HBox>	
+			</mx:FormItem>
+			<mx:FormItem label="">
+				<mx:Text text="" id="failureMessageLabel"/>
+			</mx:FormItem>
+		</mx:Form>
+	</mx:VBox>
+	<mx:StringValidator source="{userName}" property="text" id="userNameValidator" minLength="3" maxLength="20"/>	
+	<mx:StringValidator source="{fullName}" property="text" id="fullNameValidator" minLength="3" maxLength="40"/>
+	<mx:EmailValidator source="{email}" property="text" id="emailValidator"/>
+	<mx:RemoteObject id="creationService" destination="login">
+		<mx:method name="updateUser" result="savedUser()"/>
+	</mx:RemoteObject>
+</mx:TitleWindow>

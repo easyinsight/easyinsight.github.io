@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml">
+	<mx:Script>
+		<![CDATA[
+			import mx.managers.PopUpManager;
+			
+			private function create():void {
+				uploadService.createNewDefaultFeed.send(feedName.text);
+			}
+			
+			private function cancel():void {
+				PopUpManager.removePopUp(this);
+			}
+			
+			private function createdFeed():void {
+				var feedID:int = uploadService.createNewDefaultFeed.lastResult as int;
+				dispatchEvent(new UploadConfigEvent(UploadConfigEvent.UPLOAD_CONFIG_COMPLETE, feedID));
+				PopUpManager.removePopUp(this);
+			}
+		]]>
+	</mx:Script>
+	<mx:RemoteObject id="uploadService" destination="userUpload">
+		<mx:method name="createNewDefaultFeed" result="createdFeed()"/>
+	</mx:RemoteObject>
+	<mx:Form id="coreForm" styleName="TitleWindowContents" width="100%" height="100%">
+		<mx:FormItem label="Name:">
+			<mx:TextInput id="feedName"/>
+		</mx:FormItem>
+		<mx:FormItem label="" direction="horizontal">
+			<mx:Button label="Create" click="create()"/>
+			<mx:Button label="Cancel" click="cancel()"/>
+		</mx:FormItem>
+	</mx:Form>
+</mx:TitleWindow>

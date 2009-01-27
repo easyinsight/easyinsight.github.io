@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%">
+	<mx:states>
+		<mx:State name="AttemptingParse">
+			<mx:RemoveChild target="{coreForm}"/>
+			<mx:AddChild relativeTo="{coreVBox}">
+				<mx:VBox>
+					<mx:Label text="Attempting to automatically parse your data..."/>
+					<mx:ProgressBar indeterminate="true"/>
+				</mx:VBox>
+			</mx:AddChild>
+		</mx:State>
+	</mx:states>
+	<mx:Script>
+		<![CDATA[
+			import mx.rpc.events.FaultEvent;
+			import mx.controls.Alert;
+			import mx.collections.ArrayCollection;
+			import mx.events.ItemClickEvent;
+			private var uploadID:Number;
+			[Bindable]
+			private var resultingFields:ArrayCollection;
+
+			[Bindable]			
+			private var parseText:String;
+			
+			private function next():void {
+				dispatchEvent(new UploadParseCompleteEvent(uploadID, createUploadFormat()));
+			}
+			
+			public function go(uploadID:Number):void {
+				this.uploadID = uploadID;
+				this.currentState = "AttemptingParse";
+				userService.initialGuess.send(uploadID);							
+			}
+			
+			private function formatSelection(event:ItemClickEvent):void {
+				if (event.currentTarget.selectedValue == "delimitedFile") {
+					delimiterInputForm.visible = true;
+					escapeInputForm.visible = true;					
+				}
+			}
+			
+			private function cancel():void {
+				dispatchEvent(new UploadCancelEvent());
+			}
+			
+			private function createUploadFormat():UploadFormat {
+				var uploadFormat:UploadFormat;
+				if (formatGroup.selectedValue == "delimitedFile") {
+					var flatFileUploadFormat:FlatFileUploadFormat = new FlatFileUploadFormat();
+					flatFileUploadFormat.delimiter = delimiterInput.text;
+					flatFileUploadFormat.escapeSequence = escapeSequence.text;
+					uploadFormat = flatFileUploadFormat;	
+				} else if (formatGroup.selectedValue == "excelFile") {
+					var excelFormat:ExcelUploadFormat = new ExcelUploadFormat();
+					uploadFormat = excelFormat;
+				}
+				return uploadFormat;
+			}
+			
+			private function attemptParse():void {
+				userService.attemptParse.send(uploadID, createUploadFormat());
+				discoveredFields.visible = true; 	
+			}
+			
+			private function gotParseAttempt():void {
+				var userUploadAnalysis:UserUploadAnalysis = userService.attemptParse.lastResult as UserUploadAnalysis;				
+				resultingFields = userUploadAnalysis.fields;
+				nextButton.enabled = true;				
+			}
+			
+			private function failure(event:FaultEvent):void {
+				Alert.show(event.fault.message);
+			}
+			
+			private function gotInitialGuess():void {				
+				var uploadFormatAnalysis:UploadFormatAnalysis = userService.initialGuess.lastResult as UploadFormatAnalysis;
+				if (uploadFormatAnalysis.uploadFormat != null) {
+					var uploadFormat:UploadFormat = uploadFormatAnalysis.uploadFormat;
+					if (uploadFormat.getFormatType() == UploadFormat.FLAT_FILE) {
+						var flatFormat:FlatFileUploadFormat = uploadFormat as FlatFileUploadFormat;
+						formatGroup.selectedValue = "delimitedFile";
+						delimiterInput.text = flatFormat.delimiter;
+						delimiterInputForm.visible = true;
+						escapeInputForm.visible = true;
+						parseText = "It looks like you uploaded a delimited file with the following settings. If that's correct, click Next. Otherwise, change the parameters and click Attempt Parse again.";
+					} else if (uploadFormat.getFormatType() == UploadFormat.EXCEL) {
+						var excelFormat:ExcelUploadFormat = uploadFormat as ExcelUploadFormat;
+						formatGroup.selectedValue = "excelFile";
+						parseText = "It looks like you uploaded an Excel spreadsheet. If that's correct, click Next. Otherwise, change the parameters and click Attempt Parse again.";					
+					}
+					resultingFields = uploadFormatAnalysis.userUploadAnalysis.fields;
+					discoveredFields.visible = true;
+					nextButton.enabled = true;					   
+				}
+				currentState = "";
+			}
+		]]>
+	</mx:Script>
+	<mx:RemoteObject id="userService" destination="userUpload">
+		<mx:method name="initialGuess" result="gotInitialGuess()" fault="failure(event)"/> 
+		<mx:method name="attemptParse" result="gotParseAttempt()" fault="failure(event)"/>
+	</mx:RemoteObject>
+	<mx:VBox id="coreVBox" width="100%" height="100%">
+		
+	
+	<mx:Form width="100%" id="coreForm">
+		<mx:FormItem label="" direction="horizontal" width="100%">
+			<mx:TextArea text="{parseText}" width="100%" borderStyle="none" backgroundAlpha="0"/>
+		</mx:FormItem>
+		<mx:FormItem label="Choose the file format:" direction="horizontal">
+			<mx:RadioButtonGroup id="formatGroup" itemClick="formatSelection(event)"/>
+			<mx:RadioButton groupName="formatGroup" id="delimitedFile" value="delimitedFile"
+				label="Delimited Text File"/>	
+			<mx:RadioButton groupName="formatGroup" id="excelFile" value="excelFile"
+				label="Microsoft Excel 1997 to 2003 File"/>
+		</mx:FormItem>
+		<mx:FormItem label="Delimiter Character:" id="delimiterInputForm"
+			visible="false" direction="horizontal">
+			<mx:TextInput id="delimiterInput"/>
+		</mx:FormItem>
+		<mx:FormItem label="Escape Sequence:" 
+			id="escapeInputForm" visible="false" direction="horizontal">
+			<mx:TextInput id="escapeSequence"/>
+		</mx:FormItem>		
+		<mx:FormItem label="" direction="horizontal">
+			<mx:Button label="Attempt Parse" click="attemptParse()"/>
+		</mx:FormItem>
+		<mx:FormItem label="Discovered Fields" direction="horizontal" id="discoveredFields" visible="false">
+			<mx:List id="discoveredFieldsList" dataProvider="{resultingFields}" labelField="displayName" width="350"/>
+		</mx:FormItem>
+		<mx:FormItem label="" direction="horizontal">
+			<mx:Button label="Next" click="next()" enabled="false" id="nextButton"/>
+			<mx:Button label="Cancel" click="cancel()"/>
+		</mx:FormItem>
+	</mx:Form>
+	</mx:VBox>
+</mx:Canvas>

@@ -1,0 +1,331 @@
+<?xml version="1.0" encoding="utf-8"?>
+<DataView xmlns="com.easyinsight.analysis.*" xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%" 
+	xmlns:ilog="http://www.ilog.com/2007/ilog/flex" xmlns:analysis="com.easyinsight.analysis.*" creationComplete="initHandlers()" xmlns:map="com.easyinsight.map.*">
+	<analysis:states>
+		<mx:State name="World">
+			<mx:RemoveChild target="{unitedStatesMap}"/>
+			<mx:AddChild relativeTo="{coreCanvas}" creationPolicy="all">
+				<ilog:WorldCountriesMap width="100%" height="100%" id="worldMap"/>
+			</mx:AddChild>
+		</mx:State>
+		<mx:State name="Europe">
+			<mx:RemoveChild target="{unitedStatesMap}"/>
+			<mx:AddChild relativeTo="{coreCanvas}" creationPolicy="all">
+				<ilog:ContinentalEuropeMap width="100%" height="100%" id="europeMap"/>
+			</mx:AddChild>
+		</mx:State>
+		<mx:State name="AsiaPac">
+			<mx:RemoveChild target="{unitedStatesMap}"/>
+			<mx:AddChild relativeTo="{coreCanvas}" creationPolicy="all">
+				<ilog:AsiaPacificMap width="100%" height="100%" id="asiaMap"/>
+			</mx:AddChild>
+		</mx:State>
+		<mx:State name="Americas">
+			<mx:RemoveChild target="{unitedStatesMap}"/>
+			<mx:AddChild relativeTo="{coreCanvas}" creationPolicy="all">
+				<ilog:AmericasMap width="100%" height="100%" id="americasMap"/>
+			</mx:AddChild>
+		</mx:State>
+		<mx:State name="MiddleEast">
+			<mx:RemoveChild target="{unitedStatesMap}"/>
+			<mx:AddChild relativeTo="{coreCanvas}" creationPolicy="all">
+				<ilog:EuropeMiddleEastAfricaMap width="100%" height="100%" id="middleEastMap"/>
+			</mx:AddChild>
+		</mx:State>
+	</analysis:states>
+	<mx:Script>
+		<![CDATA[
+			import com.easyinsight.analysis.YahooMapDefinition;
+			import mx.binding.utils.BindingUtils;
+			import com.easyinsight.analysis.MapDefinition;
+			import com.easyinsight.analysis.GraphicDefinition;
+			import ilog.maps.MapBase;
+			import com.easyinsight.analysis.conditions.ConditionRenderer;
+			import ilog.maps.MapFeature;
+			import com.easyinsight.map.util.MapLocationLookup;
+			import com.easyinsight.analysis.AnalysisItemTypes;
+			import mx.collections.ArrayCollection;
+			import com.easyinsight.analysis.AnalysisItem;
+			import com.easyinsight.analysis.ListDataResults;
+			import com.easyinsight.analysis.CrosstabDefinition;
+			import com.easyinsight.analysis.MapDefinition;
+			import com.easyinsight.analysis.AnalysisItemUpdateEvent;
+			import com.easyinsight.analysis.ListDefinition;
+			import com.easyinsight.analysis.AnalysisDefinition;
+			
+			[Bindable]
+            private var graphData:ArrayCollection = new ArrayCollection();
+
+            private var masterDataSet:ArrayCollection = new ArrayCollection();
+            
+            private var dimensionItem:AnalysisItem;
+            private var measureItem:AnalysisItem;
+            
+            private var map:MapBase;
+            
+            private var mapType:int = MapDefinition.USA;
+            
+            private var hasDropAreas:Boolean = true;                                   
+			
+			private function initHandlers():void {
+                dimensionDropArea.addEventListener(AnalysisItemUpdateEvent.ANALYSIS_LIST_UPDATE, requestPivotTable);
+                measureDropArea.addEventListener(AnalysisItemUpdateEvent.ANALYSIS_LIST_UPDATE, requestPivotTable);
+            }
+            
+            override protected function fromListDefinition(listDefinition:ListDefinition):AnalysisDefinition {
+                var mapDefinition:MapDefinition = new MapDefinition();          
+                //dimensionDropArea.resetMaxElements(1);
+                //measureDropArea.resetMaxElements(1);
+                mapDefinition.mapType = MapDefinition.USA;
+                if (listDefinition.columns != null) {
+                    for (var i:int = 0; i < listDefinition.columns.length; i++) {
+                        var column:AnalysisItem = listDefinition.columns[i];
+                        if (column.hasType(AnalysisItemTypes.DIMENSION)) {
+                            mapDefinition.dimensions.addItem(column);
+                        } else if (column.hasType(AnalysisItemTypes.MEASURE)) {
+                            mapDefinition.measures.addItem(column);
+                        }
+                    }
+                }
+                return mapDefinition;
+            }
+            
+            override protected function fromGraphicDefinition(graphicDefinition:GraphicDefinition):AnalysisDefinition {
+            	var mapDefinition:MapDefinition = new MapDefinition();
+            	mapDefinition.dimensions = graphicDefinition.dimensions;
+            	mapDefinition.measures = graphicDefinition.measures;
+            	mapDefinition.mapType = MapDefinition.USA;
+                return mapDefinition;
+            }
+
+            override public function requestData():void {
+                requestPivotTable(null);
+            }
+
+            override protected function fromYahooMapDefinition(graphicDefinition:YahooMapDefinition):AnalysisDefinition {
+            	var mapDefinition:MapDefinition = new MapDefinition();
+            	mapDefinition.dimensions = graphicDefinition.dimensions;
+            	mapDefinition.measures = graphicDefinition.measures;
+            	mapDefinition.mapType = MapDefinition.USA;
+                return graphicDefinition;
+            }
+            
+            override protected function fromMapDefinition(mapDefinition:MapDefinition):AnalysisDefinition {
+            	return mapDefinition;
+            }
+
+            override protected function fromCrosstabDefinition(crosstabDefinition:CrosstabDefinition):AnalysisDefinition {
+                var mapDefinition:MapDefinition = new MapDefinition();
+                if (crosstabDefinition.rows != null && crosstabDefinition.rows.length > 0) {
+                    mapDefinition.dimensions[0] = crosstabDefinition.rows[0];
+                }
+                if (crosstabDefinition.measures != null && crosstabDefinition.measures.length > 0) {
+                    mapDefinition.measures[0] = crosstabDefinition.measures[0];
+                }
+                return mapDefinition;
+            }
+
+            override public function createNewDefinition():AnalysisDefinition {
+                var analysisDefinition:MapDefinition = new MapDefinition();
+                analysisDefinition.name = "New Analysis";
+                return analysisDefinition;
+            }
+            
+            override public function initializeToDefinition():void {
+                if (!showDropAreas && hasDropAreas) {
+                	hasDropAreas = false;
+                    chartVBox.removeChild(dropAreas);
+                }                
+                dimensionDropArea.reset(1);
+                measureDropArea.reset(1);
+                var mapDefinition:MapDefinition = getAnalysisDefinition() as MapDefinition;
+                this.mapType = mapDefinition.mapType;
+                this.mapTypeSelector.selectedIndex = this.mapType - 1;
+                switch (mapType) {
+                	case MapDefinition.USA:
+                		currentState = "";
+        				map = unitedStatesMap;
+        				break;
+    				case MapDefinition.WORLD:            	
+            			currentState = "World";  
+        				map = worldMap;
+            			break;
+            		case MapDefinition.EUROPE:            		
+            			currentState = "Europe"; 
+            			map = europeMap;
+	            		break;
+            		case MapDefinition.ASIA:            	
+            			currentState = "AsiaPac";  
+            			map = asiaMap;
+	            		break;
+            		case MapDefinition.AMERICAS:            	
+            			currentState = "Americas";
+            			map = americasMap;
+            			break;            		
+            		case MapDefinition.MIDDLE_EAST:
+            			currentState = "MiddleEast"
+            			map = middleEastMap;
+	            		break;
+            	}
+                for (var i:int = 0; i < mapDefinition.dimensions.length; i++) {
+                    dimensionDropArea.addAnalysisItem(mapDefinition.dimensions[i]);
+                }
+                for (var j:int = 0; j < mapDefinition.measures.length; j++) {
+                    measureDropArea.addAnalysisItem(mapDefinition.measures[j]);
+                }
+                
+                
+                requestPivotTable(null);
+            }
+
+
+            private function requestPivotTable(event:AnalysisItemUpdateEvent):void {
+            	var dimensions:Array = dimensionDropArea.getListColumns();
+                var measures:Array = measureDropArea.getListColumns();
+
+                var mapDefinition:MapDefinition = getAnalysisDefinition() as MapDefinition;
+
+                mapDefinition.dimensions = new ArrayCollection(dimensions);
+                mapDefinition.measures = new ArrayCollection(measures);                              
+
+                if (dimensions.length > 0 && measures.length > 0) {
+                	this.measureItem = measures[0];
+                	this.dimensionItem = dimensions[0];
+                    dataService.getListData(mapDefinition, this, processListResults);
+                } else {
+                    graphData = new ArrayCollection();
+                    masterDataSet = new ArrayCollection();
+                }
+            }
+            
+            private function createRenderer(rows:ArrayCollection, headers:ArrayCollection):ConditionRenderer {
+            	var renderer:ConditionRenderer = measureItem.createClientRenderer();
+                for (var i:int = 0; i < rows.length; i++) {
+                    var row:Object = rows.getItemAt(i);
+                    var values:Array = row.values as Array;
+                    var dimensionValue:String;
+                    var measureValue:Object;                                       
+                    for (var j:int = 0; j < headers.length; j++) {
+                        var headerDimension:AnalysisItem = headers[j];
+                        if (headerDimension.hasType(AnalysisItemTypes.DIMENSION)) {                        	
+	                        dimensionValue = values[j].getValue();
+                        } else {
+                        	measureValue = values[j].getValue();
+                        }    
+                    }
+                    var location:String = MapLocationLookup.instance().getLocation(dimensionValue, String(mapType));
+                    if (location != null) {
+                    	renderer.addValue(measureValue);
+                    }
+                }   
+                return renderer;
+            }
+            
+            private function processListResults(listRowData:ListDataResults):void {            	            
+            	var dimensions:Array = dimensionDropArea.getListColumns();
+                var measures:Array = measureDropArea.getListColumns();
+                var headers:ArrayCollection = new ArrayCollection(listRowData.headers);
+                var rows:ArrayCollection = new ArrayCollection(listRowData.rows);
+                graphData = new ArrayCollection();
+                var renderer:ConditionRenderer = createRenderer(rows, headers);
+                for (var i:int = 0; i < rows.length; i++) {
+                    var row:Object = rows.getItemAt(i);
+                    var values:Array = row.values as Array;
+                    var endObject:Object = new Object();
+                    var dimensionValue:String;
+                    var measureValue:Object;                                       
+                    for (var j:int = 0; j < headers.length; j++) {
+                        var headerDimension:AnalysisItem = headers[j];                        
+                        if (headerDimension.hasType(AnalysisItemTypes.DIMENSION)) {                        	
+	                        dimensionValue = values[j].getValue();
+                        } else {
+                        	measureValue = values[j].getValue();
+                        }
+                    }
+                    
+                    var location:String = MapLocationLookup.instance().getLocation(dimensionValue, String(mapType));
+                    if (location != null) {
+                    	var mapFeature:MapFeature = map.getFeature(location);
+                    	if (mapFeature != null) {                    	
+	                    	var color:uint = renderer.getColor(measureValue);	                    	
+	                    	mapFeature.setStyle(MapBase.FILL, color);
+	                    }
+                	}
+                }   
+            }
+           
+            private function changeMapType():void {
+            	if (mapTypeSelector.value == "1") {
+            		currentState = "";
+            		mapType = MapDefinition.USA;
+            		map = unitedStatesMap;
+            	} else if (mapTypeSelector.value == "2") {
+            		currentState = "World";
+            		mapType = MapDefinition.WORLD;
+            		if (worldMap != null) {
+            			map = worldMap;
+            		}
+            	} else if (mapTypeSelector.value == "3") {
+            		currentState = "Europe";
+            		mapType = MapDefinition.EUROPE;
+            		if (europeMap != null) {
+            			map = europeMap;
+            		}
+            	} else if (mapTypeSelector.value == "4") {
+            		currentState = "AsiaPac";
+            		mapType = MapDefinition.ASIA;
+            		if (asiaMap != null) {
+            			map = asiaMap;
+            		}
+            	} else if (mapTypeSelector.value == "5") {
+            		currentState = "Americas";
+            		mapType = MapDefinition.AMERICAS;
+            		if (americasMap != null) {
+            			map = americasMap;
+            		}
+            	} else if (mapTypeSelector.value == "6") {
+            		currentState = "MiddleEast";
+            		mapType = MapDefinition.MIDDLE_EAST;
+            		if (middleEastMap != null) {
+            			map = middleEastMap;
+            		}
+            	}
+            	var mapDefinition:MapDefinition = getAnalysisDefinition() as MapDefinition;
+            	mapDefinition.mapType = int(mapTypeSelector.value);
+            	requestPivotTable(null);
+            }
+
+            override public function getCoreView():DisplayObject {
+            	return coreCanvas;
+            }
+		]]>
+	</mx:Script>
+	<mx:VBox id="chartVBox" width="100%" height="100%">
+		<mx:HBox width="100%" visible="{showDropAreas}" id="dropAreas">
+			<mx:Grid>			
+				<mx:GridRow width="100%" height="100%">
+					<mx:GridItem width="100%" height="100%">
+						<mx:ComboBox id="mapTypeSelector" rowCount="6" change="changeMapType()">
+							<mx:Object label="United States" data="1"/>
+							<mx:Object label="World" data="2"/>
+							<mx:Object label="Europe" data="3"/>
+							<mx:Object label="Asia/Pacific" data="4"/>
+							<mx:Object label="Americas" data="5"/>
+							<mx:Object label="Europe, Middle East, Africa" data="6"/>
+						</mx:ComboBox>
+					</mx:GridItem>
+					<mx:GridItem width="100%" height="100%">					
+						<analysis:ListDropAreaGrouping id="dimensionDropArea" borderStyle="solid" borderThickness="1" dropAreaType="com.easyinsight.analysis.DimensionDropArea"/>
+					</mx:GridItem>
+					<mx:GridItem width="100%" height="100%">
+						<map:MapDropAreaGrouping id="measureDropArea" borderStyle="solid" borderThickness="1" dropAreaType="com.easyinsight.analysis.MeasureDropArea"/>
+					</mx:GridItem>
+				</mx:GridRow>
+			</mx:Grid>					
+		</mx:HBox>
+		
+		<mx:Canvas id="coreCanvas" width="100%" height="100%">
+			<ilog:USStatesMap width="100%" height="100%" id="unitedStatesMap" allowNavigation="true" allowMultipleSelection="true"/>
+		</mx:Canvas>
+	</mx:VBox>
+</DataView>

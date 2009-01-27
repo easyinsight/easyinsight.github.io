@@ -1,0 +1,118 @@
+<?xml version="1.0" ?>
+<OrgChartItemRendererBase xmlns="com.easyinsight.goals.*" xmlns:mx="http://www.adobe.com/2006/mxml"
+        borderStyle="solid" borderColor="#CCCCCC" cornerRadius="10">
+    <mx:Script><![CDATA[
+import ilog.orgchart.OrgChartItem;
+        [Bindable]
+        private var trendImage:Class;
+        [Bindable]
+        private var treeName:String;
+        [Bindable]
+        private var trendTooltip:String;
+
+        [Bindable]
+        [Embed(source="../../../../assets/arrow2_up_green.png")]
+        private var positiveUpIcon:Class;
+
+        [Bindable]
+        [Embed(source="../../../../assets/arrow2_down_green.png")]
+        private var positiveDownIcon:Class;
+
+        [Bindable]
+        [Embed(source="../../../../assets/arrow2_up_red.png")]
+        private var negativeUpIcon:Class;
+
+        [Bindable]
+        [Embed(source="../../../../assets/arrow2_down_red.png")]
+        private var negativeDownIcon:Class;
+
+        [Bindable]
+        [Embed(source="../../../../assets/bullet_ball_blue.png")]
+        private var neutralIcon:Class;
+
+        [Bindable]
+        [Embed(source="../../../../assets/bullet_square_grey.png")]
+        private var noDataIcon:Class;
+
+        private var goalTreeNodeData:GoalTreeNodeData;
+
+        private var orgChartItem:OrgChartItem;
+
+        [Bindable]
+        private var goalIcon:String;
+
+        [Bindable]
+        private var iconExists:Boolean;
+
+        override protected function configureLevelOfDetails():void {
+            setLevelsOfDetails(layer2, [2]);
+        }
+
+        override public function get data():Object {
+            return this.orgChartItem;
+        }
+
+        override public function set data(value:Object):void {
+            this.orgChartItem = value as OrgChartItem;
+            goalTreeNodeData = orgChartItem.data as GoalTreeNodeData;
+            if (goalTreeNodeData != null) {
+                goalIcon = goalTreeNodeData.iconImage;
+                iconExists = goalIcon != null;                                
+                treeName = goalTreeNodeData.name;
+                switch (goalTreeNodeData.goalOutcome.outcomeState) {
+                    case GoalOutcome.EXCEEDING_GOAL:
+                    case GoalOutcome.POSITIVE:
+                        trendImage = goalTreeNodeData.highIsGood ? positiveUpIcon : positiveDownIcon;
+                        break;
+                    case GoalOutcome.NEGATIVE:
+                        trendImage = goalTreeNodeData.highIsGood ? negativeDownIcon : negativeUpIcon;
+                        break;
+                    case GoalOutcome.NEUTRAL:
+                        trendImage = neutralIcon;
+                        break;
+                    case GoalOutcome.NO_DATA:
+                        trendImage = noDataIcon;
+                        break;
+                }
+                if (goalTreeNodeData.goalOutcome is ConcreteGoalOutcome) {
+                    var concreteGoalOutcome:ConcreteGoalOutcome = goalTreeNodeData as ConcreteGoalOutcome;
+                    trendTooltip = concreteGoalOutcome.startValue + " to " + concreteGoalOutcome.endValue + " (" +
+                                   concreteGoalOutcome.percentChange + "%)";
+                }
+            }
+        }
+
+        override protected function updateDisplayList(unscaledWidth:Number, unscaledHeight:Number):void {
+
+            super.updateDisplayList(unscaledWidth, unscaledHeight);
+                                          
+            var theData:OrgChartItem = data as OrgChartItem;
+
+            if (theData != null) {
+
+              //Have a different style depending on the state of the rendered item.
+              //here the background of the item changes if the item is selected and/or highlighted.
+              var isHightlighted:Boolean = theData.orgChart.isItemHighlighted(theData);
+              var isSelected:Boolean = theData.orgChart.isItemSelected(theData);
+
+              var color:uint;
+              if (isHightlighted) {
+                color = isSelected ? 0x8695FF: 0xFEFBBA;
+              } else {
+                color = isSelected ? 0x637DFF: 0xEAF1F6;
+              }
+
+              setStyle("backgroundColor", color);
+
+            }
+        }
+]]></mx:Script>
+    <mx:VBox id="layer2" verticalAlign="middle" paddingLeft="10"
+           paddingRight="10" paddingTop="0" paddingBottom="0" width="180" height="60" horizontalAlign="center">
+        <mx:HBox>
+            <mx:Image source="{goalIcon}" visible="{iconExists}"/>
+            <mx:Image source="{trendImage}" toolTip="{trendTooltip}"/>
+        </mx:HBox>
+        <mx:Label text="{treeName}" fontSize="12"/>
+    </mx:VBox>
+</OrgChartItemRendererBase>

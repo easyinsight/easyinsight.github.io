@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%">
+	<mx:Metadata>
+		[Event(name="feedSearch", type="com.easyinsight.genredata.ChildSearchEvent")]
+		[Event(name="analysisSearch", type="com.easyinsight.genredata.ChildSearchEvent")]
+	</mx:Metadata> 
+	<mx:Script>
+		<![CDATA[
+			import com.easyinsight.framework.User;
+                    import mx.rpc.events.FaultEvent;
+                    import mx.controls.Alert;
+                    import mx.rpc.events.ResultEvent;
+                    import mx.rpc.remoting.Operation;
+                    import mx.collections.ArrayCollection;
+                    [Bindable]
+                    private var popularListData:ArrayCollection;
+
+                    private var itemRendererClass:Class;
+
+                    protected var operation:Operation;
+
+                    protected var fullListOperation:Operation;
+
+                    [Bindable]
+                    private var _genre:String;
+
+                    private var _title:String;
+
+                    private var _fullEventType:String;
+                    
+                    [Bindable]
+                    private var rendererFactory:IFactory;                                                                              
+
+                    public function set genre(genreName:String):void {
+                        this._genre = genreName;
+                    }
+
+                    public function set rendererClass(renderClass:Class):void {
+                    	
+                    	rendererFactory = new PopularItemFactory(renderClass);                        
+                    }
+
+                    public function set fullEventType(fullEventType:String):void {
+                        this._fullEventType = fullEventType;
+                    }
+
+                    public function set dataOperation(operation:Operation):void {
+                        this.operation = operation;
+                        this.operation.addEventListener(ResultEvent.RESULT, gotData);
+                        //this.operation.addEventListener(FaultEvent.FAULT, failure);
+                    }
+
+                    public function set fullDataOperation(operation:Operation):void {
+                        this.fullListOperation = operation;
+                        this.fullListOperation.addEventListener(ResultEvent.RESULT, gotFullData);
+                        //this.operation.addEventListener(FaultEvent.FAULT, failure);
+                    }
+
+                    private function gotFullData(event:ResultEvent):void {
+                        trace("got full data!");
+                        dispatchEvent(new ChildSearchEvent(_fullEventType, fullListOperation.lastResult as ArrayCollection));
+                    }
+
+                    public function refreshData():void {
+                        this.operation.send(_genre, 5);
+                    }
+
+                    private function gotData(event:ResultEvent):void {
+                        trace("got normal data");
+                        popularListData = operation.lastResult as ArrayCollection;
+                    }
+
+                    private function failure(event:FaultEvent):void {
+                        Alert.show(event.fault.message);
+                    }
+
+                    protected function getItemRenderer():IFactory {
+                        return rendererFactory;
+                    }
+
+                    [Bindable]
+                    public function set title(title:String):void {
+                        this._title = title;
+                    }
+
+                    public function get title():String {
+                        return this._title;
+                    }
+
+                    protected function titleClick():void {
+                        this.fullListOperation.send(_genre, 100);
+                    }
+                ]]>
+	</mx:Script>
+	<mx:ApplicationControlBar width="100%">
+		<mx:LinkButton label="{title}" click="titleClick()" textDecoration="underline"/>
+	</mx:ApplicationControlBar>
+	<mx:List id="popularList" dataProvider="{popularListData}" labelField="name" width="100%" height="100%"
+		itemRenderer="{rendererFactory}" textDecoration="underline" textAlign="left" fontSize="12" rowCount="5"/>
+</mx:VBox>

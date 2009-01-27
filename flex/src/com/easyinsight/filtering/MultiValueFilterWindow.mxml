@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml">
+	<mx:Script>
+		<![CDATA[
+			import mx.rpc.remoting.RemoteObject;
+			import mx.rpc.events.ResultEvent;
+			import mx.managers.PopUpManager;
+			import mx.collections.ArrayCollection;
+			import com.easyinsight.analysis.Value;
+			import com.easyinsight.analysis.AnalysisDimensionResultMetadata;
+			
+			private var _filterValueDefinition:FilterValueDefinition;
+			
+			[Bindable]
+			private var sourceValues:ArrayCollection;
+			[Bindable]
+			private var targetValues:ArrayCollection;
+			
+			private var _feedID:int;
+			
+			private var dataService:RemoteObject;
+			
+			public function set filterValueDefinition(filterValueDefinition:FilterValueDefinition):void {
+				this._filterValueDefinition = filterValueDefinition;				
+			}
+			
+			public function set feedID(feedID:int):void {
+				this._feedID = feedID;
+			}
+			
+			override protected function commitProperties():void {
+				super.commitProperties();						
+				dataService = new RemoteObject();
+				dataService.destination = "data";
+				dataService.getAnalysisItemMetadata.addEventListener(ResultEvent.RESULT, gotMetadata);
+				dataService.getAnalysisItemMetadata.send(_feedID, _filterValueDefinition.field);
+			}
+			
+			private function gotMetadata(event:ResultEvent):void {
+				var analysisDimensionResultMetadata:AnalysisDimensionResultMetadata = dataService.getAnalysisItemMetadata.lastResult as 
+				AnalysisDimensionResultMetadata;
+				var strings:ArrayCollection = new ArrayCollection();
+				for each (var value:Value in analysisDimensionResultMetadata.values) {
+					var string:String = String(value.getValue());
+					if (!strings.contains(string) && !_filterValueDefinition.filteredValues.contains(string)) {
+						strings.addItem(string);
+					}
+				}
+				sourceValues = strings;
+				targetValues = _filterValueDefinition.filteredValues;
+			}
+			
+			private function save():void {
+				_filterValueDefinition.filteredValues = targetList.dataProvider as ArrayCollection;
+				dispatchEvent(new FilterEditEvent(this._filterValueDefinition, null));
+				PopUpManager.removePopUp(this);
+			}
+			
+			private function cancel():void {
+				PopUpManager.removePopUp(this);
+			}
+		]]>
+	</mx:Script>
+	<mx:VBox styleName="TitleWindowContents">
+		<mx:Label text="Drag Items Between Available and Included to Filter"/> 
+		<mx:HBox>
+			<mx:VBox>
+				<mx:ApplicationControlBar width="200">
+					<mx:Label text="Available Values"/>
+				</mx:ApplicationControlBar>
+				<mx:List dataProvider="{sourceValues}" dragMoveEnabled="true" dropEnabled="true" dragEnabled="true" width="200"/>	
+			</mx:VBox>
+			<mx:VBox>
+				<mx:ApplicationControlBar width="200">
+					<mx:Label text="Included Values"/>
+				</mx:ApplicationControlBar>
+				<mx:List dataProvider="{targetValues}" dropEnabled="true" dragEnabled="true" dragMoveEnabled="true" id="targetList"
+					width="200"/>	
+			</mx:VBox>			
+		</mx:HBox>
+		<mx:HBox width="100%" horizontalAlign="center">			
+			<mx:Button label="Save" click="save()"/>
+			<mx:Button label="Cancel" click="cancel()"/>
+		</mx:HBox>
+	</mx:VBox>
+</mx:TitleWindow>

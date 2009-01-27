@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Panel xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:local="*" width="100%" height="100%"
+	implements="com.easyinsight.listing.IPerspective" xmlns:listing="com.easyinsight.listing.*" 
+	creationComplete="initListeners()" xmlns:customupload="com.easyinsight.customupload.*"
+	title="My Uploads">
+	<mx:states>
+		<mx:State name="notLoggedIn">
+			<mx:RemoveChild target="{uploads}"/>
+			<mx:RemoveChild target="{uploadButton}"/>
+			<mx:RemoveChild target="{compositeFeedButton}"/>
+			<mx:RemoveChild target="{spaceUsage}"/>
+			<mx:AddChild relativeTo="{coreContent}">
+				<listing:GottaLoginPage loginEvent2="gotFocus()"/>
+			</mx:AddChild>
+		</mx:State>
+	</mx:states>
+	<mx:Script>
+		<![CDATA[
+			import com.easyinsight.feedassembly.JoinWorkspace;
+			import mx.events.CloseEvent;
+                    import com.easyinsight.listing.DescriptorAnalyzeSource;
+                    import mx.collections.Sort;
+                    import com.easyinsight.listing.AnalyzeSource;
+                    import mx.controls.Alert;
+                    import mx.rpc.events.FaultEvent;
+                    import com.easyinsight.listing.DataFeedDescriptor;
+                    import com.easyinsight.framework.User;
+                    import mx.managers.PopUpManager;
+                    import com.easyinsight.framework.NewViewCreationEvent;
+                    import com.easyinsight.framework.CancelViewCreationEvent;
+                    import mx.collections.ArrayCollection;
+                    [Bindable]
+                    private var displayUserUploads:ArrayCollection = new ArrayCollection();
+                    private var sourceUserUploads:ArrayCollection = new ArrayCollection();
+
+                    private function initListeners():void {
+                        addEventListener(KeyboardEvent.KEY_UP, keyHit);
+                    }
+
+                    private function keyHit(event:KeyboardEvent):void {
+                        if (event.keyCode == Keyboard.DELETE) {
+                            if (uploads.selectedItem != null) {
+                                Alert.show("Are you sure you want to delete this feed?", "Alert",
+                                    Alert.OK | Alert.CANCEL, this, alertListener, null, Alert.CANCEL);
+                            }
+                        }
+                    }
+
+                    private function alertListener(event:CloseEvent):void {
+                        if (event.detail == Alert.OK) {
+                            var feedDescriptor:DataFeedDescriptor = uploads.selectedItem as DataFeedDescriptor;
+                            uploadService.deleteUserUpload.send(feedDescriptor.dataFeedID);
+                        }
+                    }
+
+                    public function search(keyword:String):void {
+                        keyword = keyword.toLowerCase();
+                        var sort:Sort = displayUserUploads.sort;
+                        var newDataSet:ArrayCollection = new ArrayCollection();
+                        for (var i:int = 0; i < sourceUserUploads.length; i++) {
+                            var dataFeedDescriptor:DataFeedDescriptor = sourceUserUploads.getItemAt(i) as DataFeedDescriptor;
+                            var match:Boolean = (dataFeedDescriptor.name.toLowerCase().indexOf(keyword) > -1) ||
+                                            (dataFeedDescriptor.genre.toLowerCase().indexOf(keyword) > -1);
+                            if (match) {
+                                newDataSet.addItem(dataFeedDescriptor);
+                            }
+                        }
+                        displayUserUploads = newDataSet;
+                        displayUserUploads.sort = sort;
+                        displayUserUploads.refresh();
+                    }
+
+                    public function analyze():AnalyzeSource {
+                        var dataFeedDescriptor:DataFeedDescriptor = null;
+                        if (uploads.selectedItem != null) {
+                            dataFeedDescriptor = uploads.selectedItem as DataFeedDescriptor;
+                        } else {
+                            if (displayUserUploads.length == 0) {
+                                // can't do anything...
+                            } else {
+                                dataFeedDescriptor = displayUserUploads.getItemAt(0) as DataFeedDescriptor;
+                            }
+                        }
+                        var analyzeSource:AnalyzeSource = null;
+                        if (dataFeedDescriptor != null) {
+                            analyzeSource = new DescriptorAnalyzeSource(dataFeedDescriptor);
+                        }
+                        return analyzeSource;
+                    }
+
+                    public function gotFocus():void {
+                        var user:User = User.getInstance();
+                        if (user == null) {
+                            currentState="notLoggedIn";
+                        } else {
+                            if (currentState != "") {
+                                currentState = "";
+                            }
+                            uploadService.getOwnedFeeds.send();
+                        }
+                    }
+
+                    public function getDefaultAnalyzeState():Boolean {
+                        return true;
+                    }
+
+                    public function isKeywordSearchInstant():Boolean {
+                        return true;
+                    }
+
+                    private function passThrough(event:Event):void {
+                        dispatchEvent(event);
+                    }
+
+                    private function toUpload():void {
+                        var userUpload:UserUploadContainer = UserUploadContainer(PopUpManager.createPopUp(this, UserUploadContainer, true));
+                        userUpload.addEventListener(UploadConfigEvent.UPLOAD_CONFIG_COMPLETE, uploadConfigComplete);
+                        PopUpManager.centerPopUp(userUpload);
+                    }
+
+                    private function uploadConfigComplete(event:UploadConfigEvent):void {
+                        uploadService.getOwnedFeeds.send();
+                    }
+
+                    private function gotUserUploads():void {
+                        sourceUserUploads = uploadService.getOwnedFeeds.lastResult as ArrayCollection;
+                        displayUserUploads = new ArrayCollection(sourceUserUploads.toArray());
+                    }
+
+                    private function failure(event:FaultEvent):void {
+                        Alert.show(event.fault.message);
+                    }
+
+                    private function deleted():void {
+                        uploadService.getOwnedFeeds.send();
+                    }
+                    
+                    private function createCompositeFeed():void {
+                    	if (uploads.selectedItems != null) {
+                    		for (var feedObj:Object in uploads.selectedItems) {                    			
+                    			var descriptor:DataFeedDescriptor = feedObj as DataFeedDescriptor;
+                    			trace(feedObj);	
+                    		}
+                    	}
+                    	var joinWorkspace:JoinWorkspace = JoinWorkspace(PopUpManager.createPopUp(this, JoinWorkspace, true));
+                    	PopUpManager.centerPopUp(joinWorkspace);                    	
+                    }
+                ]]>
+	</mx:Script>
+	<mx:RemoteObject id="uploadService" destination="userUpload">
+		<mx:method name="getOwnedFeeds" result="gotUserUploads()"/>
+		<mx:method name="deleteUserUpload" result="deleted()"/>		
+	</mx:RemoteObject>
+	<mx:VBox width="100%" height="100%" id="coreContent">
+		<mx:HBox width="100%">			
+			<mx:Button label="Upload data..." click="toUpload()" id="uploadButton"/>
+			<mx:Button label="Create composite feed..." click="createCompositeFeed()" id="compositeFeedButton"/>
+			<customupload:SpaceUsage id="spaceUsage" descriptors="{displayUserUploads}"/>
+		</mx:HBox>			
+		<mx:DataGrid dataProvider="{displayUserUploads}" id="uploads" width="100%" height="100%" allowMultipleSelection="true">
+			<mx:columns>				
+				<mx:DataGridColumn headerText="Name" dataField="name"/>
+				<mx:DataGridColumn headerText="Genre" dataField="genre"/>
+				<mx:DataGridColumn headerText="Policy" dataField="policy" itemRenderer="com.easyinsight.customupload.UploadPolicyRenderer"/>
+				<mx:DataGridColumn headerText="Size" dataField="size"/>
+				<mx:DataGridColumn headerText="" dataField="name" itemRenderer="com.easyinsight.customupload.UpdateFeedButton"/>
+				<mx:DataGridColumn headerText="" dataField="name" itemRenderer="com.easyinsight.customupload.AdministerButton"/>
+			</mx:columns>
+		</mx:DataGrid>
+	</mx:VBox>	
+</mx:Panel>

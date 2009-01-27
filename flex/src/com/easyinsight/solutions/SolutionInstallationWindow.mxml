@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:solutions="com.easyinsight.solutions.*"
+	creationComplete="setup()">
+	<mx:states>
+		<mx:State name="installComplete">
+			<mx:RemoveChild target="{buttonBox}"/>
+			<mx:RemoveChild target="{coreForm}"/>
+			<mx:AddChild relativeTo="{coreBox}">
+				<mx:VBox width="100%" height="100%">
+					<solutions:SolutionDetail solution="{_solution}" treeData="{installResult}"/>
+					<mx:HBox width="100%" horizontalAlign="center">
+						<mx:Button label="Close" click="cancel()"/>
+					</mx:HBox>					
+				</mx:VBox>							
+			</mx:AddChild>
+		</mx:State>
+	</mx:states>
+	<mx:Script>
+		<![CDATA[
+			import mx.collections.ArrayCollection;
+			import mx.managers.PopUpManager;
+
+            [Bindable]
+            [Embed(source="../../../../assets/data_blue_x16.png")]
+            public var dataSourceIcon:Class;
+
+            [Bindable]
+            [Embed(source="../../../../assets/chart_column.png")]
+            public var insightIcon:Class;
+
+            [Bindable]
+            [Embed(source="../../../../assets/branchx16.png")]
+            public var goalTreeIcon:Class;
+			
+			[Bindable]
+			private var _solution:Solution;
+			
+			[Bindable]
+			private var description:String;
+			
+			[Bindable]
+			private var solutionName:String;
+
+            [Bindable]
+            private var dataSources:ArrayCollection;
+
+            [Bindable]
+            private var goalTrees:ArrayCollection;
+
+            [Bindable]
+            private var insights:ArrayCollection;
+			
+			[Bindable]
+			private var installResult:ArrayCollection;
+
+            [Bindable]
+            private var showDataSources:Boolean;
+
+            [Bindable]
+            private var showInsights:Boolean;
+
+            [Bindable]
+            private var showGoalTrees:Boolean;
+
+            private function setup():void {
+                solutionService.getSolutionContents.send(_solution.solutionID);
+            }
+			
+			public function set solution(solution:Solution):void {
+				this._solution = solution;
+				solutionName = solution.name;
+				description = solution.description;
+			}
+			
+			private function install():void {
+                var insightDescriptor:InsightDescriptor;
+				solutionService.installSolution.send(_solution.solutionID);
+			}
+			
+			private function cancel():void {
+				PopUpManager.removePopUp(this);
+			}
+
+            private function gotContents():void {
+                var solutionContents:SolutionContents = solutionService.getSolutionContents.lastResult as SolutionContents;
+                dataSources = solutionContents.feedDescriptors;
+                showDataSources = dataSources.length > 0;
+                insights = solutionContents.insightDescriptors;
+                showInsights = insights.length > 0;
+                goalTrees = solutionContents.goalTreeDescriptors;
+                showGoalTrees = goalTrees.length > 0;
+            }
+			
+			private function installedSolution():void {
+				installResult = solutionService.installSolution.lastResult as ArrayCollection;
+				currentState = "installComplete";			
+				dispatchEvent(new SolutionEvent(SolutionEvent.SOLUTION_INSTALLED, _solution.solutionID));
+			}
+		]]>
+	</mx:Script>
+	<mx:RemoteObject destination="solutionService" id="solutionService">
+		<mx:method name="installSolution" result="installedSolution()"/>
+		<mx:method name="getSolutionContents" result="gotContents()"/>
+	</mx:RemoteObject>
+	<mx:VBox id="coreBox" styleName="TitleWindowContents" paddingLeft="10" paddingTop="10" paddingRight="10" paddingBottom="10"
+		width="100%" height="100%">
+		<mx:HBox width="100%" horizontalAlign="center">
+			<mx:Label fontSize="14" text="Solution Summary"/>
+		</mx:HBox>		
+		<mx:Form id="coreForm" paddingTop="0" paddingBottom="0" paddingLeft="0" paddingRight="0">
+			<mx:FormItem label="Solution Name:">
+				<mx:Label text="{solutionName}"/>		
+			</mx:FormItem>
+			<mx:FormItem label="Description:">
+				<mx:TextArea text="{description}" id="descriptionBox" width="400" height="100"/>		
+			</mx:FormItem>
+		</mx:Form>
+        <mx:Label text="Installing this solution will add the following objects to your account:"/>
+        <mx:HBox>
+        <mx:DataGrid dataProvider="{dataSources}" visible="{showDataSources}">
+            <mx:columns>
+                <mx:DataGridColumn headerText="" dataField="name" width="50">
+                    <mx:itemRenderer>
+                        <mx:Component>
+                            <mx:HBox width="100%" horizontalAlign="center">
+                                <mx:Image source="{outerDocument.dataSourceIcon}"/>
+                            </mx:HBox>
+                        </mx:Component>
+                    </mx:itemRenderer>
+                </mx:DataGridColumn>
+                <mx:DataGridColumn headerText="Name" dataField="name" headerRenderer="com.easyinsight.groups.CustomGroupHeader"/>
+            </mx:columns>
+        </mx:DataGrid>
+        <mx:DataGrid dataProvider="{insights}" visible="{showInsights}">
+            <mx:columns>
+                <mx:DataGridColumn headerText="" dataField="name" width="50">
+                    <mx:itemRenderer>
+                        <mx:Component>
+                            <mx:HBox width="100%" horizontalAlign="center">
+                                <mx:Image source="{outerDocument.insightIcon}"/>
+                            </mx:HBox>
+                        </mx:Component>
+                    </mx:itemRenderer>
+                </mx:DataGridColumn>
+                <mx:DataGridColumn headerText="Name" dataField="insightName" headerRenderer="com.easyinsight.groups.CustomGroupHeader"/>
+            </mx:columns>
+        </mx:DataGrid>
+        <mx:DataGrid dataProvider="{goalTrees}" visible="{showGoalTrees}">
+            <mx:columns>
+                <mx:DataGridColumn headerText="" dataField="name" width="50">
+                    <mx:itemRenderer>
+                        <mx:Component>
+                            <mx:HBox width="100%" horizontalAlign="center">
+                                <mx:Image source="{outerDocument.goalTreeIcon}"/>
+                            </mx:HBox>
+                        </mx:Component>
+                    </mx:itemRenderer>
+                </mx:DataGridColumn>
+                <mx:DataGridColumn headerText="Name" dataField="goalTreeName" headerRenderer="com.easyinsight.groups.CustomGroupHeader"/>
+            </mx:columns>
+        </mx:DataGrid>
+        </mx:HBox>
+		<mx:HBox id="buttonBox" width="100%" horizontalAlign="center">
+			<mx:Button label="Install" click="install()"/>
+			<mx:Button label="Cancel" click="cancel()"/>
+		</mx:HBox>		
+	</mx:VBox>
+</mx:TitleWindow>

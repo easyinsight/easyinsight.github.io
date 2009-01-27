@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Application xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute">
+	<mx:Script>
+		<![CDATA[
+			[Bindable]
+			private var newColor:uint;
+		
+			private function blah():void {
+				var red1:uint = Math.floor (cp1.selectedColor / 65536);
+				var green1:uint = Math.floor ((cp1.selectedColor - red1 * 65536) / 256);
+				var blue1:uint = cp1.selectedColor - red1 * 65536 - green1 * 256;
+				trace("red 1 = " + red1);
+				trace("green 1 = " + green1);
+				trace("blue 1 = " + blue1);
+				
+				var red2:uint = Math.floor (cp2.selectedColor / 65536);
+				var green2:uint = Math.floor ((cp2.selectedColor - red2 * 65536) / 256);
+				var blue2:uint = cp2.selectedColor - red2 * 65536 - green2 * 256;
+				trace("red 2 = " + red2);
+				trace("green 2 = " + green2);
+				trace("blue 2 = " + blue2);				
+				
+				var upperWeight:Number = Number(weight.text);
+				var lowerWeight:Number = 100 - upperWeight;				
+				
+				// (2 + 6) / 2 = 4
+				// if we weight things .75 versus .25
+				// ((2 * 75) + (6 * 25)) / 100
+				var mixedRed:uint = ((red1 * upperWeight) + (red2 * lowerWeight)) / 100;
+				var mixedGreen:uint = ((green1 * upperWeight) + (green2 * lowerWeight)) / 100;
+				var mixedBlue:uint = ((blue1 * upperWeight) + (blue2 * lowerWeight)) / 100;
+				
+				trace("final red = " + mixedRed);
+				trace("final green = " + mixedGreen);
+				trace("final blue = " + mixedBlue);			
+				
+				newColor = mixedRed << 16 | mixedGreen << 8 | mixedBlue;
+				
+								 
+			}
+		]]>
+	</mx:Script>
+	<mx:HBox>
+		<mx:TextInput id="weight"/>
+		<mx:VBox>
+			<mx:ColorPicker id="cp1" showTextField="true" selectedColor="0xFFFFFF"/>
+			<mx:Label color="blue" text="selectedColor: 0x{cp1.selectedColor.toString(16)}"/>
+			<mx:Button label="Blah" click="blah()"/> 
+		</mx:VBox>
+		<mx:VBox>
+			<mx:ColorPicker id="cp2" showTextField="true" selectedColor="0xFFFFFF"/>
+			<mx:Label color="blue" text="selectedColor: 0x{cp2.selectedColor.toString(16)}"/>
+			<mx:Button label="Blah" click="blah()"/> 
+		</mx:VBox>
+		<mx:VBox>
+			<mx:Label color="{newColor}" text="new color: 0x{newColor.toString(16)}"/>
+		</mx:VBox>
+	</mx:HBox>
+</mx:Application>

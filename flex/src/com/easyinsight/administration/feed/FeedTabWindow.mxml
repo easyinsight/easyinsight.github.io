@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml">
+	<mx:Script>
+		<![CDATA[
+			private var _feedState:FeedState;
+		
+			[Bindable]
+			public function set feedState(feedState:FeedState):void {
+				this._feedState = feedState;				
+			}
+			
+			public function feedStateEstablished():void {
+			}
+			
+			public function get feedState():FeedState {
+				return this._feedState;
+			}
+			
+			public function updateState():void {
+				
+			}
+			
+		]]>
+	</mx:Script>
+</mx:Canvas>

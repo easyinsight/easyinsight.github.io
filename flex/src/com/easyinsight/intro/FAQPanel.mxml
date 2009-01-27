@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Box xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%" implements="com.easyinsight.listing.IPerspective">
+	<mx:Script>
+		<![CDATA[
+			import com.easyinsight.listing.AnalyzeSource;
+
+            public function search(keyword:String):void {
+
+            }
+
+            public function analyze():AnalyzeSource {
+                return null;
+            }
+
+            public function gotFocus():void {
+            }
+
+            public function lostFocus():void {
+            }
+
+            public function getDefaultAnalyzeState():Boolean {
+                return false;
+            }
+
+            public function isKeywordSearchInstant():Boolean {
+                return false;
+            }
+        ]]>
+	</mx:Script>
+</mx:Box>

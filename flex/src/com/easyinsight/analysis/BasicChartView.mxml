@@ -1,0 +1,467 @@
+<?xml version="1.0" encoding="utf-8"?>
+<analysis:DataView xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:analysis="com.easyinsight.analysis.*" 
+	creationComplete="initHandlers()" xmlns:charting="com.easyinsight.charting.*" xmlns:util="com.easyinsight.util.*" xmlns:charts="com.easyinsight.analysis.charts.*">
+	<mx:Script>
+		<![CDATA[
+			import com.easyinsight.analysis.charts.AreaChartAdapterOption;
+			import com.easyinsight.analysis.charts.BubbleChartAdapterOption;
+			import com.easyinsight.analysis.charts.PlotChartAdapterOption;
+			import com.easyinsight.analysis.charts.PieChartAdapterOption;
+			import com.easyinsight.analysis.charts.LineChartAdapterOption;
+			import com.easyinsight.analysis.charts.BarChartAdapterOption;
+			import com.easyinsight.analysis.charts.ColumnChartAdapterOption;
+			import com.easyinsight.analysis.charts.ChartTypes;
+			import com.easyinsight.analysis.charts.ChartAdapterUpdateEvent;
+			import com.easyinsight.analysis.charts.ChartAdapterOption;
+			import com.easyinsight.analysis.charts.ChartAdapter;
+			import com.easyinsight.filtering.FilterRawData;
+			import mx.collections.Sort;
+            import mx.collections.SortField;
+            import mx.collections.ArrayCollection;
+
+            [Bindable]
+            private var graphData:ArrayCollection = new ArrayCollection();
+
+            private var masterDataSet:ArrayCollection = new ArrayCollection();
+
+            private var chartAdaptor:ChartAdapter;
+            private var chartAdapterOption:ChartAdapterOption;
+
+            private var columnChartAdapterOption:ColumnChartAdapterOption = new ColumnChartAdapterOption();
+            private var barChartAdapterOption:BarChartAdapterOption = new BarChartAdapterOption();
+            private var lineChartAdapterOption:LineChartAdapterOption = new LineChartAdapterOption();
+            private var pieChartAdapterOption:PieChartAdapterOption = new PieChartAdapterOption();
+            private var plotChartAdapterOption:PlotChartAdapterOption = new PlotChartAdapterOption();
+            private var bubbleChartAdapterOption:BubbleChartAdapterOption = new BubbleChartAdapterOption();
+            private var areaChartAdapterOption:AreaChartAdapterOption = new AreaChartAdapterOption();
+
+            [Bindable]
+            private var stackedVisible:Boolean = false;
+            [Bindable]
+            private var threeDVisible:Boolean = false;
+            [Bindable]
+            private var stackedSelected:Boolean = false;
+            [Bindable]
+            private var threeDSelected:Boolean = false;
+
+            [Bindable]
+            private var limitText:String;
+            [Bindable]
+            private var limitTextVisible:Boolean = false;
+
+            private function initHandlers():void {
+                dimensionDropArea.addEventListener(AnalysisItemUpdateEvent.ANALYSIS_LIST_UPDATE, requestPivotTable);
+                measureDropArea.addEventListener(AnalysisItemUpdateEvent.ANALYSIS_LIST_UPDATE, requestPivotTable);
+                columnChartAdapterOption.addEventListener(ChartAdapterUpdateEvent.CHART_UPDATE, onChartUpdate);
+                barChartAdapterOption.addEventListener(ChartAdapterUpdateEvent.CHART_UPDATE, onChartUpdate);
+                pieChartAdapterOption.addEventListener(ChartAdapterUpdateEvent.CHART_UPDATE, onChartUpdate);
+                lineChartAdapterOption.addEventListener(ChartAdapterUpdateEvent.CHART_UPDATE, onChartUpdate);
+                plotChartAdapterOption.addEventListener(ChartAdapterUpdateEvent.CHART_UPDATE, onChartUpdate);
+                columnChartAdapterOption.addEventListener(ChartSortEvent.CHART_SORT, onChartSort);
+                barChartAdapterOption.addEventListener(ChartSortEvent.CHART_SORT, onChartSort);
+            }
+
+            /*override protected function commitProperties():void {
+            	super.commitProperties();
+            	if (getAnalysisDefinition() != null) {
+            		initializeToDefinition();
+            	}
+            }*/
+
+            override public function createFilterRawData():FilterRawData {
+                return chartAdaptor.createFilterRawData();
+            }
+
+            private function updateDropAreas(chartDefinition:ChartDefinition):void {
+                dimensionDropArea.reset(chartAdaptor.getMaxDimensions());
+                measureDropArea.reset(chartAdaptor.getMaxMeasures());
+                for (var i:int = 0; i < chartDefinition.dimensions.length && i < dimensionDropArea.maxElements; i++) {
+                    dimensionDropArea.addAnalysisItem(chartDefinition.dimensions[i]);
+                }
+                for (var j:int = 0; j < chartDefinition.measures.length && j < measureDropArea.maxElements; j++) {
+                    measureDropArea.addAnalysisItem(chartDefinition.measures[j]);
+                }
+            }
+
+            override protected function fromListDefinition(listDefinition:ListDefinition):AnalysisDefinition {
+                var chartDefinition:ChartDefinition = new ChartDefinition();
+                chartDefinition.chartFamily = ChartTypes.COLUMN_FAMILY;
+                chartDefinition.limitsMetadata = createDefaultLimits(ChartTypes.COLUMN_FAMILY);
+
+                chartDefinition.dataFeedID = listDefinition.dataFeedID;
+                if (listDefinition.columns != null) {
+                    for (var i:int = 0; i < listDefinition.columns.length; i++) {
+                        var column:AnalysisItem = listDefinition.columns[i];
+                        if (column.hasType(AnalysisItemTypes.DIMENSION)) {
+                            chartDefinition.dimensions.addItem(column);
+                        } else if (column.hasType(AnalysisItemTypes.MEASURE)) {
+                            chartDefinition.measures.addItem(column);
+                        }
+                    }
+                }
+
+                //selectValue(columnChartAdapterOption);
+                return chartDefinition;
+            }
+
+            override public function getCoreView():DisplayObject {
+            	return chartAdaptor;
+            }
+
+            override public function requestData():void {
+                requestPivotTable(null);
+            }
+
+            override protected function fromGraphicDefinition(graphicDefinition:GraphicDefinition):AnalysisDefinition {
+                return graphicDefinition;
+            }
+
+            override protected function fromMapDefinition(mapDefinition:MapDefinition):AnalysisDefinition {
+            	var chartDefinition:ChartDefinition = new ChartDefinition();
+
+                chartDefinition.chartFamily = ChartTypes.COLUMN_FAMILY;
+                chartDefinition.limitsMetadata = createDefaultLimits(ChartTypes.COLUMN_FAMILY);
+                chartDefinition.dimensions = mapDefinition.dimensions;
+                chartDefinition.measures = mapDefinition.measures;
+
+                //selectValue(columnChartAdapterOption);
+                return chartDefinition;
+            }
+
+            override protected function fromYahooMapDefinition(mapDefinition:YahooMapDefinition):AnalysisDefinition {
+            	var chartDefinition:ChartDefinition = new ChartDefinition();
+
+                chartDefinition.chartFamily = ChartTypes.COLUMN_FAMILY;
+                chartDefinition.limitsMetadata = createDefaultLimits(ChartTypes.COLUMN_FAMILY);
+                chartDefinition.dimensions = mapDefinition.dimensions;
+                chartDefinition.measures = mapDefinition.measures;
+
+                //selectValue(columnChartAdapterOption);
+                return chartDefinition;
+            }
+
+            override protected function fromCrosstabDefinition(crosstabDefinition:CrosstabDefinition):AnalysisDefinition {
+                var chartDefinition:ChartDefinition = new ChartDefinition();
+
+                chartDefinition.chartFamily = ChartTypes.COLUMN_FAMILY;
+                chartDefinition.limitsMetadata = createDefaultLimits(ChartTypes.COLUMN_FAMILY);
+                if (crosstabDefinition.rows != null && crosstabDefinition.rows.length > 0) {
+                    chartDefinition.dimensions.addItem(crosstabDefinition.rows[0]);
+                }
+                if (crosstabDefinition.measures != null && crosstabDefinition.measures.length > 0) {
+                    chartDefinition.measures.addItem(crosstabDefinition.measures[0]);
+                }
+
+                //selectValue(columnChartAdapterOption);
+                return chartDefinition;
+            }
+
+            override public function createNewDefinition():AnalysisDefinition {
+                var analysisDefinition:ChartDefinition = new ChartDefinition();
+                analysisDefinition.name = "New Analysis";
+                analysisDefinition.chartFamily = ChartTypes.COLUMN_FAMILY;
+                analysisDefinition.limitsMetadata = createDefaultLimits(ChartTypes.COLUMN_FAMILY);
+                return analysisDefinition;
+            }
+
+            private function createDefaultLimits(chartFamily:int):LimitsMetadata {
+            	var limitsMetadata:LimitsMetadata = new LimitsMetadata();
+            	var limitNumber:int;
+            	switch (chartFamily) {
+            		case ChartTypes.COLUMN_FAMILY:
+            		case ChartTypes.BAR_FAMILY:
+            		case ChartTypes.PIE_FAMILY:
+            			limitNumber = 15;
+            			break;
+        			case ChartTypes.PLOT_FAMILY:
+        			case ChartTypes.BUBBLE_FAMILY:
+        				limitNumber = 100;
+        				break;
+    				case ChartTypes.LINE_FAMILY:
+    				case ChartTypes.AREA_FAMILY:
+    					limitNumber = 100;
+    					break;
+            	}
+            	limitsMetadata.number = limitNumber;
+            	limitsMetadata.top = true;
+            	return limitsMetadata;
+            }
+
+            override public function set subState(subState:int):void {
+            	var chartAdapterOption:ChartAdapterOption;
+            	switch (subState) {
+            		case ChartTypes.COLUMN_FAMILY:
+            			chartAdapterOption = columnChartAdapterOption;
+            			break;
+        			case ChartTypes.BAR_FAMILY:
+        				chartAdapterOption = barChartAdapterOption;
+        				break;
+    				case ChartTypes.PIE_FAMILY:
+    					chartAdapterOption = pieChartAdapterOption;
+    					break;
+					case ChartTypes.LINE_FAMILY:
+						chartAdapterOption = lineChartAdapterOption;
+						break;
+					case ChartTypes.PLOT_FAMILY:
+						chartAdapterOption = plotChartAdapterOption;
+						break;
+					case ChartTypes.AREA_FAMILY:
+						chartAdapterOption = areaChartAdapterOption;
+						break;
+					case ChartTypes.BUBBLE_FAMILY:
+						chartAdapterOption = bubbleChartAdapterOption;
+						break;
+            	}
+            	var chartDefinition:ChartDefinition = getAnalysisDefinition() as ChartDefinition;
+                selectValue(chartAdapterOption);
+                requestPivotTable(null);
+            }
+
+            override public function initializeToDefinition():void {
+                if (showingDropAreas && !showDropAreas) {
+                	showingDropAreas = false;
+                    chartVBox.removeChild(dropAreas);
+                } else if (!showingDropAreas && showDropAreas) {
+
+                }
+
+                var chartDefinition:ChartDefinition = getAnalysisDefinition() as ChartDefinition;
+
+                threeDCheckbox.selected = chartDefinition.threeDSelected;
+                stackedCheckbox.selected = chartDefinition.stackedSelected;
+
+                switch (chartDefinition.chartFamily) {
+                	case ChartTypes.COLUMN_FAMILY:
+                		selectValue(columnChartAdapterOption, chartDefinition.chartType);
+                		break;
+            		case ChartTypes.BAR_FAMILY:
+            			selectValue(barChartAdapterOption);
+                		break;
+            		case ChartTypes.PIE_FAMILY:
+            			selectValue(pieChartAdapterOption);
+                		break;
+            		case ChartTypes.LINE_FAMILY:
+            			selectValue(lineChartAdapterOption);
+                		break;
+            		case ChartTypes.PLOT_FAMILY:
+            			selectValue(plotChartAdapterOption);
+                		break;
+        			case ChartTypes.AREA_FAMILY:
+        				selectValue(areaChartAdapterOption);
+        				break;
+    				case ChartTypes.BUBBLE_FAMILY:
+    					selectValue(bubbleChartAdapterOption);
+    					break;
+                }
+
+                requestPivotTable(null);
+            }
+
+            private function requestPivotTable(event:AnalysisItemUpdateEvent):void {
+                var dimensions:Array = dimensionDropArea.getListColumns();
+                var measures:Array = measureDropArea.getListColumns();
+
+                var chartDefinition:ChartDefinition = getAnalysisDefinition() as ChartDefinition;
+
+                chartDefinition.dimensions = new ArrayCollection(dimensions);
+                chartDefinition.measures = new ArrayCollection(measures);
+
+                if (dimensions.length > 0 && measures.length > 0) {
+                    dataService.getListData(chartDefinition, this, processListResults);
+                } else {
+                    graphData = new ArrayCollection();
+                    masterDataSet = new ArrayCollection();
+                }
+            }
+
+            override public function search(keyword:String):void {
+                var dimensions:Array = dimensionDropArea.getListColumns();
+                var measures:Array = measureDropArea.getListColumns();
+                var listColumns:Array = dimensions.concat(measures);
+                var newDataSet:ArrayCollection = new ArrayCollection();
+                for (var i:int = 0; i < masterDataSet.length; i++) {
+                    var object:Object = masterDataSet.getItemAt(i);
+                    for (var j:int = 0; j < listColumns.length; j++) {
+                        var analysisItem:AnalysisItem = listColumns[j] as AnalysisItem;
+                        var stringForm:String = object[analysisItem.key] as String;
+                        if (stringForm != null) {
+                            if (stringForm.toLowerCase().indexOf(keyword) > -1) {
+                                newDataSet.addItem(object);
+                                break;
+                            }
+                        }
+                    }
+                }
+                graphData = newDataSet;
+                chartAdaptor.dataChange(graphData, dimensions, measures);
+            }
+
+            /*public function changeGraphType():void {
+                var chartDefinition:ChartDefinition = getAnalysisDefinition() as ChartDefinition;
+                var chartAdapterOption:ChartAdapterOption = graphTypeSelector.selectedItem as ChartAdapterOption;
+                selectValue(chartAdapterOption);
+                requestPivotTable(null);
+            }*/
+
+            private function selectValue(chartAdapterOption:ChartAdapterOption, chartType:int = 0):void {
+            	//graphTypeSelector.selectedItem = chartAdapterOption;
+            	if (this.chartAdapterOption != null) {
+            		chartAdapterOption.changeAwayFrom();
+            	}
+            	if (this.chartAdaptor != null) {
+            		chartVBox.removeChild(this.chartAdaptor);
+            	}
+            	this.chartAdapterOption = chartAdapterOption;
+            	this.threeDVisible = chartAdapterOption.threeDVisible;
+            	this.stackedVisible = chartAdapterOption.stackedVisible;
+            	chartAdapterOption.threeDSelected = threeDCheckbox.selected;
+                //var chartAdapter:ChartAdapter = chartAdapterOption.createChartAdapter(chartType);
+                var chartAdapter:ChartAdapter = chartAdapterOption.chartTypeFromSelections;
+                this.chartAdaptor = chartAdapter;
+                var chartDefinition:ChartDefinition = getAnalysisDefinition() as ChartDefinition;
+                if (chartDefinition != null) {
+	                chartDefinition.chartFamily = chartAdapterOption.chartFamily;
+	                chartDefinition.chartType = chartAdapter.chartType;
+	                chartDefinition.limitsMetadata = createDefaultLimits(chartAdapterOption.chartFamily);
+                }
+                chartVBox.addChild(chartAdapter);
+
+                updateDropAreas(chartDefinition);
+
+                if (chartAdapterOption.chartFamily == ChartTypes.LINE_FAMILY ||
+                	chartAdapterOption.chartFamily == ChartTypes.AREA_FAMILY) {
+                	var dateItem:AnalysisItem = findDateItem();
+                	if (dateItem != null && dimensionDropArea.getListColumns().length < 2) {
+                		dimensionDropArea.addAnalysisItem(dateItem, 1);
+                	}
+                }
+            }
+
+            public function createAnalysisDefinition():AnalysisDefinition {
+                var analysisDefinition:ChartDefinition = new ChartDefinition();
+                analysisDefinition.name = "New Analysis";
+                analysisDefinition.chartFamily = ChartTypes.COLUMN_FAMILY;
+                return analysisDefinition;
+            }
+
+            private function processListResults(listRowData:ListDataResults):void {
+            	var limited:Boolean = listRowData.limitedResults;
+            	if (limited) {
+            		limitText = chartAdapterOption.createLimitLabel(listRowData.limitResults, listRowData.maxResults);
+            		limitTextVisible = true;
+            	} else {
+            		limitTextVisible = false;
+            		limitText = "";
+            	}
+                var dimensions:Array = dimensionDropArea.getListColumns();
+                var measures:Array = measureDropArea.getListColumns();
+                var headers:ArrayCollection = new ArrayCollection(listRowData.headers);
+                var rows:ArrayCollection = new ArrayCollection(listRowData.rows);
+                graphData = new ArrayCollection();
+                for (var i:int = 0; i < rows.length; i++) {
+                    var row:Object = rows.getItemAt(i);
+                    var values:Array = row.values as Array;
+                    var endObject:Object = new Object();
+                    for (var j:int = 0; j < headers.length; j++) {
+                        var headerDimension:AnalysisItem = headers[j];
+                        var value:Value = values[j];
+                        endObject[headerDimension.key.createString()] = value.getValue();
+                    }
+                    graphData.addItem(endObject);
+                }
+                var sort:Sort = new Sort();
+                sort.fields = [ new SortField(dimensions[0].key, true)];
+                graphData.sort = sort;
+                graphData.refresh();
+                masterDataSet = graphData;
+                chartAdaptor.dataChange(graphData, dimensions, measures);
+            }
+
+
+
+            private function onChartSort(event:ChartSortEvent):void {
+            	if (event.sortState == ChartSortButton.ASCENDING ||
+            		event.sortState == ChartSortButton.DESCENDING) {
+        			var dimensions:Array = dimensionDropArea.getListColumns();
+                	var measures:Array = measureDropArea.getListColumns();
+                	var sort:Sort = new Sort();
+                	sort.fields = [ new SortField(event.analysisItem.key.createString(), false,
+                		event.sortState == ChartSortButton.DESCENDING) ];
+            		graphData.sort = sort;
+            		graphData.refresh();
+            		masterDataSet = graphData;
+            		//chartAdaptor.dataChange(graphData, dimensions, measures);
+            	}
+            }
+
+            protected function geticon(item:Object):Class {
+                return item["icon"];
+            }
+
+            private function configureChart():void {
+            	var chartDefinition:ChartDefinition = getAnalysisDefinition() as ChartDefinition;
+            	chartAdapterOption.createDetailEditor(this, chartDefinition.chartType);
+            }
+
+            private function chartSubTypeChange(chartAdapter:ChartAdapter):void {
+            	if (this.chartAdapterOption != null) {
+            		chartAdapterOption.changeAwayFrom();
+            	}
+            	if (this.chartAdaptor != null) {
+            		chartVBox.removeChild(this.chartAdaptor);
+            	}
+                this.chartAdaptor = chartAdapter;
+                var chartDefinition:ChartDefinition = getAnalysisDefinition() as ChartDefinition;
+                chartDefinition.chartFamily = chartAdapterOption.chartFamily;
+                chartDefinition.chartType = chartAdapter.chartType;
+                chartVBox.addChild(chartAdapter);
+                updateDropAreas(chartDefinition);
+                requestPivotTable(null);
+            }
+
+            private function onChartUpdate(event:ChartAdapterUpdateEvent):void {
+            	//graphTypeSelector.selectedItem = chartAdapterOption;
+            	chartSubTypeChange(event.chartAdapter);
+            }
+
+            private function select3D():void {
+            	chartAdapterOption.threeDSelected = threeDCheckbox.selected;
+            	chartSubTypeChange(chartAdapterOption.chartTypeFromSelections);
+            }
+
+            private function selectStacked():void {
+            	chartAdapterOption.stackedSelected = stackedCheckbox.selected;
+            	chartSubTypeChange(chartAdapterOption.chartTypeFromSelections);
+            }
+        ]]>
+	</mx:Script>
+	
+	<mx:SeriesInterpolate id="interpolateIn" duration="1000"/>
+	
+	<mx:SeriesZoom id="zoomIn" duration="1000"/>
+	<mx:SeriesZoom id="zoomOut" duration="1000"/>
+	
+	<mx:SeriesSlide id="slideIn" duration="1000" direction="right"/>
+    <mx:SeriesSlide id="slideOut" duration="1000" direction="left"/>
+	
+	<mx:VBox id="chartVBox" width="100%" height="100%">
+		
+	
+		<mx:HBox width="100%" visible="{showDropAreas}" id="dropAreas" verticalAlign="middle">
+		
+			<mx:CheckBox color="#FFFFFF" label="3D" id="threeDCheckbox" visible="{threeDVisible}" selected="{threeDSelected}" click="select3D()"/>
+			<mx:CheckBox color="#FFFFFF" label="Stacked" id="stackedCheckbox" visible="{stackedVisible}" selected="{stackedSelected}" click="selectStacked()"/>
+<!--
+			<mx:Button toolTip="Chart Details..." click="configureChart()" icon="@Embed(source='../../../../assets/table_edit.png')"/>
+-->
+			<analysis:ListDropAreaGrouping id="dimensionDropArea" borderStyle="solid" borderThickness="1" 
+				dropAreaType="com.easyinsight.analysis.DimensionDropArea" analysisItems="{availableFields}"/>
+
+			<analysis:ListDropAreaGrouping id="measureDropArea" borderStyle="solid" borderThickness="1" 
+				dropAreaType="com.easyinsight.analysis.MeasureDropArea" analysisItems="{availableFields}"/>
+			<mx:Spacer width="30"/>	
+			<mx:Label color="#FFFFFF" text="{limitText}" visible="{limitTextVisible}"/>
+		</mx:HBox>
+	</mx:VBox>
+						
+</analysis:DataView>

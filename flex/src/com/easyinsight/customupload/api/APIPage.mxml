@@ -1,0 +1,64 @@
+<?xml version="1.0" ?>
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:api="com.easyinsight.customupload.api.*"
+         xmlns:listing="com.easyinsight.listing.*"
+         implements="com.easyinsight.listing.IPerspective" width="100%" height="100%"
+         creationComplete="setupListeners()">
+    <mx:states>
+        <mx:State name="notLoggedIn">
+            <mx:RemoveChild target="{apiListing}"/>
+            <mx:AddChild relativeTo="{coreContent}">
+                <listing:GottaLoginPage/>
+            </mx:AddChild>
+        </mx:State>
+    </mx:states>
+    <mx:Script><![CDATA[
+        import com.easyinsight.framework.LoginEvent;
+        import com.easyinsight.framework.User;
+        import mx.utils.URLUtil;
+        import mx.managers.BrowserManager;
+        import com.easyinsight.listing.AnalyzeSource;
+
+        private function setupListeners():void {
+            User.getEventNotifier().addEventListener(LoginEvent.LOGIN, onLogin);
+            User.getEventNotifier().addEventListener(LoginEvent.LOGIN, onLogOut);
+        }
+
+        private function onLogin(loginEvent:LoginEvent):void {
+            currentState = "";
+        }
+
+        private function onLogOut(loginEvent:LoginEvent):void {
+            currentState = "notLoggedIn";
+        }
+
+        public function analyze():AnalyzeSource {
+            return null;
+        }
+        public function gotFocus():void {
+            var fragmentObject:Object = new Object();
+            fragmentObject.page = "apis";
+            BrowserManager.getInstance().setTitle("Easy Insight - API Management");
+            var fragmentString:String = URLUtil.objectToString(fragmentObject);
+            BrowserManager.getInstance().setFragment(fragmentString);
+            var user:User = User.getInstance();
+            if (user == null) {
+                currentState = "notLoggedIn";
+            } else {
+                if (currentState != "") {
+                    currentState = "";
+                }
+            }
+        }
+        public function getDefaultAnalyzeState():Boolean {
+            return false;
+        }
+        public function isKeywordSearchInstant():Boolean {
+            return false;
+        }]]></mx:Script>
+    <mx:Box width="100%" height="5" backgroundColor="#254BD4" left="0" right="0"/>
+    <mx:VBox id="coreContent" height="100%" width="100%" paddingTop="10" paddingLeft="10" paddingRight="10"
+             paddingBottom="10" verticalGap="10">
+        <api:APIListing id="apiListing"/>
+    </mx:VBox>
+
+</mx:VBox>

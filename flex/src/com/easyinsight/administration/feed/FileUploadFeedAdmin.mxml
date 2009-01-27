@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%" implements="com.easyinsight.administration.feed.IFeedAdminDetail">
+	<mx:Script>
+		<![CDATA[
+			import com.easyinsight.customupload.ExcelUploadFormat;
+			import com.easyinsight.customupload.FlatFileUploadFormat;
+			
+			[Bindable]
+			private var formatType:String;
+			
+			[Bindable]
+			private var delimiter:String;
+			
+			public function updateFeedDefinition(feedDefinition:FeedDefinitionData):void {
+				/*var fileBasedFeedDefinition:FileBasedFeedDefinition = feedDefinition as FileBasedFeedDefinition;
+				if (fileBasedFeedDefinition is FlatFileUploadFormat) {
+					var flatFile:FlatFileUploadFormat;
+					formatType = "Flat File";
+					delimiter = flatFile.delimiter;
+				} else {
+					var excelFile:ExcelUploadFormat;
+					formatType = "Excel 1997-2003 Spreadsheet";
+					delimiterForm.visible = false;					
+				}*/	
+			}
+			
+			public function validate():Boolean {
+				return true;
+			}
+		]]>
+	</mx:Script>
+	<mx:Form>
+		<mx:FormItem label="Format:">
+			<mx:Label text="{formatType}"/>
+		</mx:FormItem>
+		<mx:FormItem label="Delimiter:" id="delimiterForm">
+			<mx:Label text="{delimiter}"/>
+		</mx:FormItem>
+	</mx:Form>
+</mx:Canvas>

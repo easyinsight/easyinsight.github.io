@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml">
+<mx:Metadata>
+		[Event(name="loginEvent2", type="com.easyinsight.framework.LoginEvent")]
+	</mx:Metadata>
+	<mx:Script>
+		<![CDATA[
+			import mx.rpc.events.ResultEvent;
+			import mx.rpc.events.FaultEvent;
+			import mx.messaging.config.ServerConfig;
+			import mx.rpc.AsyncResponder;
+			import mx.rpc.AsyncToken;
+			import com.easyinsight.framework.UserServiceResponse;
+			import com.easyinsight.framework.NavigationEvent;
+			import com.easyinsight.LoginDialog;			
+			import mx.core.Application;
+            import com.easyinsight.framework.User;
+            import mx.managers.PopUpManager;
+            import com.easyinsight.framework.LoginEvent;
+            
+            private var failureMessage:String;
+            
+			[Bindable]
+            [Embed(source="../../../../assets/user_x64.png")]
+            public var accountIcon:Class;
+            
+            /*private function login():void {
+                var displayObject:DisplayObject = Application.application as DisplayObject;
+                var loginContainer:LoginDialog = LoginDialog(PopUpManager.createPopUp(displayObject, LoginDialog, true));
+                //loginContainer.addEventListener(LoginEvent.LOGIN, loggedIn);
+                User.getEventNotifier().addEventListener(LoginEvent.LOGIN, loggedIn);
+                PopUpManager.centerPopUp(loginContainer);
+            }
+
+            private function loggedIn(event:LoginEvent):void {
+                dispatchEvent(event);
+            }*/
+            
+            private function handleAuthentication():void {
+                    	
+                var authResult:UserServiceResponse = authService.authenticate.lastResult as UserServiceResponse;
+                var successful:Boolean = authResult.successful;
+                if (successful) {                            
+                    User.initializeUser(authResult.name, authResult.email,
+                    	authResult.accountType, authResult.spaceAllowed, authResult.accountAdmin,
+                            authResult.dataSourceCreator, authResult.insightCreator);
+                	User.getInstance().password = authResult.encryptedPassword;
+                	User.getInstance().userName = authResult.userName;                    
+                    dispatchEvent(new LoginEvent(LoginEvent.LOGIN));
+                    User.getEventNotifier().dispatchEvent(new LoginEvent(LoginEvent.LOGIN));
+                    //_loginContainer.dispatchEvent(new LoginEvent());
+                } else {
+                    var failureMessage:String = authResult.failureMessage;
+                    failureMessageLabel.text = failureMessage;
+                }
+            }
+
+            private function signon():void {
+            	if (authService.channelSet == null) {
+            		authService.channelSet = ServerConfig.getChannelSet(authService.destination);
+            	}
+            	var token:AsyncToken = authService.channelSet.login(userNameInput.text, passwordInput.text);
+            	token.addResponder(new AsyncResponder(
+            		function (event:ResultEvent, token:Object = null):void {
+            			switch (event.result) {
+            				case "success":
+            					authService.authenticate.send(userNameInput.text, passwordInput.text);
+            					break;
+        					default:
+        						trace(event.result);					
+            			}
+            		},
+            		function (event:FaultEvent, token:Object = null):void {
+            			switch (event.fault.faultCode) {
+            				case "Client.Authentication":
+            				default:
+            					var failureMessage:String = event.fault.faultString;
+                    			failureMessageLabel.text = failureMessage;
+            			}
+            		}
+        		));
+                
+            }
+            
+            private function forgotPassword():void {
+            	
+            }
+            
+            private function toAccount():void {
+            	User.getEventNotifier().dispatchEvent(new NavigationEvent("My Account"));
+        	}
+        ]]>
+	</mx:Script>
+	<mx:RemoteObject id="authService" destination="login">
+		<mx:method name="authenticate" result="handleAuthentication()"/>
+	</mx:RemoteObject>
+	<mx:VBox width="100%" paddingLeft="40" height="100%">
+		<mx:Text text="Before you can upload your own data, you'll need to log in." fontSize="20" color="#000000"/>
+		<mx:Spacer height="30"/>
+		<mx:HBox horizontalGap="40">
+			<mx:VBox horizontalAlign="left" verticalGap="12">
+				<mx:Label fontSize="28" color="#000000" text="Already Have an Account?"/>
+				<mx:Label fontSize="20" color="#000000" text="Go Right Ahead."/>
+				<mx:Label fontSize="14" text="User Name:" color="#000000"/>
+				<mx:TextInput id="userNameInput" width="120"/>
+				<mx:Label fontSize="14" text="Password:" color="#000000"/>
+				<mx:TextInput id="passwordInput" width="120" displayAsPassword="true"/>
+				<mx:Label id="failureMessageLabel"/>
+				<mx:HBox>
+					<mx:Button click="signon()" label="Login" fontSize="14"/>
+					<mx:LinkButton click="forgotPassword()" color="#000000" fontSize="12"
+						label="Forgot Password?" textDecoration="underline"/>	
+				</mx:HBox>			
+			</mx:VBox>
+			<mx:VBox verticalGap="12">
+				<mx:Label fontSize="28" color="#000000" text="No Account Yet?"/>
+				<mx:Label fontSize="20" color="#000000" text="It's free and easy."/>
+				<mx:Image source="{accountIcon}"/>
+				<mx:Button label="Register!" fontSize="14" click="toAccount()"/>
+			</mx:VBox>
+		</mx:HBox>		
+	</mx:VBox>
+</mx:Canvas>

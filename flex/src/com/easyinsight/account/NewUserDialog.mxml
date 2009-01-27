@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%" creationComplete="initHandlers()">
+	<mx:Metadata>
+		[Event(name="refreshAccount", type="com.easyinsight.account.RefreshAccountEvent")]
+	</mx:Metadata>
+	<mx:Script>
+		<![CDATA[
+			import com.easyinsight.framework.UserTransferObject;
+			import mx.validators.Validator;
+			import mx.managers.PopUpManager;
+			
+			private var validators:Array;
+
+            [Bindable]
+            private var userName:String;
+            [Bindable]
+            private var email:String;
+            [Bindable]
+            private var fullName:String;
+            [Bindable]
+            private var accountAdmin:Boolean;
+            [Bindable]
+            private var dataSourceCreator:Boolean;
+            [Bindable]
+            private var insightCreator:Boolean;
+            private var userID:int;
+
+            [Bindable]
+            private var createLabel:String = "Create User";
+
+            public function set user(userTransferObject:UserTransferObject):void {
+                this.userID = userTransferObject.userID;
+                this.userName = userTransferObject.userName;
+                this.email = userTransferObject.email;
+                this.fullName = userTransferObject.name;
+                this.accountAdmin = userTransferObject.accountAdmin;
+                this.dataSourceCreator = userTransferObject.dataSourceCreator;
+                this.insightCreator = userTransferObject.insightCreator;
+                createLabel = "Update User";
+            }
+
+			private function created():void {
+				var userCreationResponse:UserCreationResponse = creationService.addUserToAccount.lastResult as UserCreationResponse;
+				if (userCreationResponse.successful) {
+					dispatchEvent(new RefreshAccountEvent());
+					PopUpManager.removePopUp(this);
+				} else {
+					failureMessageLabel.text = userCreationResponse.failureMessage;
+				}				
+			}
+
+            private function updated():void {
+                dispatchEvent(new RefreshAccountEvent());
+                PopUpManager.removePopUp(this);
+            }
+			
+			private function initHandlers():void {
+            	validators = [ emailValidator, userNameValidator, fullNameValidator ];
+            }
+            
+            private function save():void {
+            	var results:Array = Validator.validateAll(validators);
+            	if (results.length > 0) {
+                    failureMessageLabel.text = "There are one or more problems with the fields above.";
+            	} else {
+            		failureMessageLabel.text = "";
+            		var user:UserTransferObject = new UserTransferObject();
+                    user.userID = userID;
+            		user.email = emailInput.text;
+            		user.userName = userNameInput.text;
+            		user.name = fullNameInput.text;
+                    user.accountAdmin = accountAdminCheckbox.selected;
+                    user.insightCreator = insightCreatorCheckbox.selected;
+                    user.dataSourceCreator = dataSourceCreatorCheckbox.selected;
+                    if (userID == 0) creationService.addUserToAccount.send(user);
+                    else creationService.updateUser.send(user);
+	            }
+            }
+			
+			private function cancel():void {
+				PopUpManager.removePopUp(this);
+			}
+		]]>
+	</mx:Script>
+	<mx:Form styleName="TitleWindowContents">
+		<mx:FormItem label="User Name:" direction="horizontal">
+			<mx:TextInput id="userNameInput" text="{userName}"/>
+		</mx:FormItem>
+		<mx:FormItem label="Your Name:" direction="horizontal">
+			<mx:TextInput id="fullNameInput" text="{fullName}"/>
+		</mx:FormItem>
+		<mx:FormItem label="Email Address:" direction="horizontal">
+			<mx:TextInput id="emailInput" text="{email}"/>
+		</mx:FormItem>
+        <mx:FormItem label="Account Administrator">
+            <mx:CheckBox id="accountAdminCheckbox" selected="{accountAdmin}"/>
+        </mx:FormItem>
+        <mx:FormItem label="Data Source Creator">
+            <mx:CheckBox id="dataSourceCreatorCheckbox" selected="{dataSourceCreator}"/>
+        </mx:FormItem>
+        <mx:FormItem label="Insight Creator">
+            <mx:CheckBox id="insightCreatorCheckbox" selected="{insightCreator}"/>
+        </mx:FormItem>
+		<mx:FormItem>
+			<mx:HBox>
+				<mx:Button label="{createLabel}" click="save()"/>
+				<mx:Button label="Cancel" click="cancel()"/>						
+			</mx:HBox>	
+		</mx:FormItem>
+		<mx:FormItem label="">
+			<mx:Text text="" id="failureMessageLabel"/>
+		</mx:FormItem>
+	</mx:Form>
+	<mx:StringValidator source="{userNameInput}" property="text" id="userNameValidator" minLength="3" maxLength="20"/>
+	<mx:StringValidator source="{fullNameInput}" property="text" id="fullNameValidator" minLength="3" maxLength="40"/>
+	<mx:EmailValidator source="{emailInput}" property="text" id="emailValidator"/>
+	<mx:RemoteObject id="creationService" destination="login">
+		<mx:method name="addUserToAccount" result="created()"/>		
+		<mx:method name="updateUser" result="updated()"/>
+	</mx:RemoteObject>
+</mx:TitleWindow>

@@ -1,0 +1,334 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%" creationComplete="initListeners()"
+	implements="com.easyinsight.listing.IPerspective" xmlns:listing="com.easyinsight.listing.*" 
+	xmlns:customupload="com.easyinsight.customupload.*" doubleClickEnabled="true" backgroundColor="#DCE2F8">
+	<mx:states>
+		<mx:State name="notLoggedIn">
+			<mx:RemoveChild target="{uploadBox}"/>
+			<mx:RemoveChild target="{uploadGrid}"/>
+			<mx:AddChild relativeTo="{coreContent}">
+				<listing:GottaLoginPage/>
+			</mx:AddChild>
+		</mx:State>
+	</mx:states>
+	<mx:Script>
+		<![CDATA[
+			import com.easyinsight.customupload.SimpleFeedWindow;
+			import com.easyinsight.help.MyDataHelp;
+			import com.easyinsight.help.HelpWindow;
+			import com.easyinsight.customupload.api.APIListing;
+			import com.easyinsight.customupload.UserUpload;
+			import com.easyinsight.framework.LoginEvent;
+			import com.easyinsight.customupload.UploadExternalSource;
+			import mx.utils.URLUtil;
+			import mx.managers.BrowserManager;
+			import com.easyinsight.customupload.UploadPolicy;
+			import mx.events.ListEvent;
+			import com.easyinsight.genredata.AnalyzeEvent;
+			import mx.collections.IHierarchicalCollectionView;
+			import mx.collections.HierarchicalData;
+			import com.easyinsight.analysis.AnalysisDefinition;
+			import mx.controls.Alert;
+			import com.easyinsight.framework.User;
+			import com.easyinsight.customupload.UploadConfigEvent;
+			import mx.rpc.events.FaultEvent;
+			import mx.events.CloseEvent;
+			import mx.managers.PopUpManager;
+			import mx.collections.ArrayCollection;
+			
+			[Embed(source="../../../../assets/data_blue_x16.png")]
+        	public var listIcon:Class;
+                
+            [Bindable]
+	        [Embed(source="../../../../assets/chart_column.png")]
+	        public var crosstabIcon:Class;
+	        
+	        [Bindable]
+	        [Embed(source="../../../../assets/data_connection.png")]
+	        public var dataConnectionIcon:Class;
+	        
+	        [Bindable]
+	        [Embed(source="../../../../assets/data_table_x64.png")]
+	        public var joinIcon:Class;
+	        
+	        [Bindable]
+	        [Embed(source="../../../../assets/data_add_x64.png")]
+	        public var addIcon:Class;
+	        
+	        [Bindable]
+	        [Embed(source="../../../../assets/application_enterprise.png")]
+	        public var apiIcon:Class;
+	        
+	        [Bindable]
+	        [Embed(source="../../../../assets/helpx48.png")]
+	        public var helpIcon:Class;
+			
+			[Bindable]
+			private var displayTreeData:ArrayCollection;
+			private var sourceTreeData:ArrayCollection;
+			
+			private var keyword:String;
+			
+			private function initListeners():void {
+			    addEventListener(KeyboardEvent.KEY_UP, keyHit);
+			    User.getEventNotifier().addEventListener(LoginEvent.LOGIN, onLogin);
+			}
+			
+			private function onLogin(event:LoginEvent):void {
+				gotFocus();
+			}
+			
+			private function keyHit(event:KeyboardEvent):void {
+			    if (event.keyCode == Keyboard.DELETE) {
+			        if (uploadGrid.selectedItem != null) {
+		            	deleteItem(uploadGrid.selectedItem);
+			        }
+			    }
+			}
+			
+			private function deleteItem(selectedItem:Object):void {
+				if (uploadGrid.selectedItem is DataFeedDescriptor) {
+	        		var descriptor:DataFeedDescriptor = uploadGrid.selectedItem as DataFeedDescriptor;
+	        		if (descriptor.role == DataFeedDescriptor.OWNER) {
+	        			if (descriptor.policy.getPolicyType() == UploadPolicy.COMMERCIAL) {
+	        				Alert.show("This feed is currently available for sale in the marketplace.", "Alert",
+		                		Alert.OK | Alert.CANCEL, this, alertFeedListener, null, Alert.CANCEL);
+	        			} else {
+		        			Alert.show("Are you sure you want to delete this feed?", "Alert",
+		                		Alert.OK | Alert.CANCEL, this, alertFeedListener, null, Alert.CANCEL);
+		          		} 	
+	        		} else {
+	        			if (descriptor.policy.getPolicyType() == UploadPolicy.COMMERCIAL) {
+	        				Alert.show("Are you sure you want to cancel your subscription to this feed?", "Alert",
+		                		Alert.OK | Alert.CANCEL, this, alertFeedListener, null, Alert.CANCEL);
+	        			} else {
+	        				Alert.show("Are you sure you want to cancel your subscription to this feed?", "Alert",
+		                		Alert.OK | Alert.CANCEL, this, alertFeedListener, null, Alert.CANCEL);
+		          		}
+	        		}			        		
+	        	} else {
+	        		Alert.show("Are you sure you want to delete this insight?", "Alert",
+	                	Alert.OK | Alert.CANCEL, this, alertInsightListener, null, Alert.CANCEL);
+	        	}	
+			}
+			
+			private function alertFeedListener(event:CloseEvent):void {
+                if (event.detail == Alert.OK) {
+                    var feedDescriptor:DataFeedDescriptor = uploadGrid.selectedItem as DataFeedDescriptor;
+                    uploadService.deleteUserUpload.send(feedDescriptor.dataFeedID);
+                }
+            } 
+            
+            private function alertInsightListener(event:CloseEvent):void {
+                if (event.detail == Alert.OK) {
+                    var definition:AnalysisDefinition = uploadGrid.selectedItem as AnalysisDefinition;
+                    analysisService.deleteAnalysisDefinition.send(definition);
+                }
+            }
+            
+            private function deletedAnalysis():void {
+            	uploadService.getFeedAnalysisTree.send();
+            }
+            
+            public function search():void {            	
+            	this.keyword = searchText.text.toLowerCase();
+            	IHierarchicalCollectionView(uploadGrid.dataProvider).refresh();
+            }
+            
+            private function gridDoubleClick(event:ListEvent):void {
+            	var analyzeSource:AnalyzeSource = null;
+				var selectedObject:Object = event.currentTarget.selectedItem;
+				if (selectedObject is DataFeedDescriptor) {
+                	analyzeSource = new DescriptorAnalyzeSource(selectedObject as DataFeedDescriptor);
+                } else {
+                	analyzeSource = new AnalysisDefinitionAnalyzeSource(selectedObject as AnalysisDefinition);
+                }
+                dispatchEvent(new AnalyzeEvent(analyzeSource));
+			}
+            
+            public function analyze():AnalyzeSource {
+            	var analyzeSource:AnalyzeSource = null;
+                if (uploadGrid.selectedItem != null) {
+                    var selectedObject:Object = uploadGrid.selectedItem;
+                    if (selectedObject is DataFeedDescriptor) {
+                    	analyzeSource = new DescriptorAnalyzeSource(selectedObject as DataFeedDescriptor);
+                    } else {
+                    	analyzeSource = new AnalysisDefinitionAnalyzeSource(selectedObject as AnalysisDefinition);
+                    }
+                } else {
+                    if (displayTreeData.length == 0) {
+                        // can't do anything...
+                    } else {
+                    	selectedObject = displayTreeData.getItemAt(0);
+                        if (selectedObject is DataFeedDescriptor) {
+	                    	analyzeSource = new DescriptorAnalyzeSource(selectedObject as DataFeedDescriptor);
+	                    } else {
+	                    	analyzeSource = new AnalysisDefinitionAnalyzeSource(selectedObject as AnalysisDefinition);
+	                    }
+                    }
+                }
+                return analyzeSource;
+            }
+            
+            public function gotFocus():void {
+            	            	
+            	var fragmentObject:Object = new Object();
+                fragmentObject.page = "myData";
+                BrowserManager.getInstance().setTitle("Easy Insight - My Data");
+                var fragmentString:String = URLUtil.objectToString(fragmentObject);
+				BrowserManager.getInstance().setFragment(fragmentString);
+                var user:User = User.getInstance();
+                if (user == null) {
+                    currentState="notLoggedIn";
+                } else {
+                    if (currentState != "") {
+                        currentState = "";
+                    }
+                    uploadService.getFeedAnalysisTree.send();
+                }
+            }
+
+            public function getDefaultAnalyzeState():Boolean {
+                return true;
+            }
+
+            public function isKeywordSearchInstant():Boolean {
+                return true;
+            }
+
+            private function passThrough(event:Event):void {
+                dispatchEvent(event);
+            }
+
+            private function toUpload():void {
+                var userUpload:UserUpload = UserUpload(PopUpManager.createPopUp(this, UserUpload, true));
+                userUpload.addEventListener(UploadConfigEvent.UPLOAD_CONFIG_COMPLETE, uploadConfigComplete);
+                PopUpManager.centerPopUp(userUpload);
+            }
+            
+            private function createEmptyFeed():void {
+                var userUpload:SimpleFeedWindow = SimpleFeedWindow(PopUpManager.createPopUp(this, SimpleFeedWindow, true));
+                userUpload.addEventListener(UploadConfigEvent.UPLOAD_CONFIG_COMPLETE, uploadConfigComplete);
+                PopUpManager.centerPopUp(userUpload);
+            }
+            
+            private function externalConnect():void {
+            	var uploadExternal:UploadExternalSource = UploadExternalSource(PopUpManager.createPopUp(this, UploadExternalSource, true));
+            	uploadExternal.addEventListener(UploadConfigEvent.UPLOAD_CONFIG_COMPLETE, uploadConfigComplete);
+            	uploadExternal.width = uploadGrid.width;
+            	uploadExternal.height = uploadGrid.height;
+            	var point:Point = new Point();
+            	point.x = 0;
+            	point.y = 0;
+            	point = uploadGrid.localToGlobal(point);
+            	uploadExternal.x = point.x;
+            	uploadExternal.y = point.y;
+            }
+
+            private function uploadConfigComplete(event:UploadConfigEvent):void {
+                uploadService.getFeedAnalysisTree.send();
+            }
+
+            private function gotFeedAnalysisTree():void {
+                sourceTreeData = uploadService.getFeedAnalysisTree.lastResult as ArrayCollection;
+                displayTreeData = new ArrayCollection(sourceTreeData.toArray());
+                var hierarchicalData:HierarchicalData = new HierarchicalData();
+                hierarchicalData.source = displayTreeData;
+                uploadGrid.dataProvider = hierarchicalData;
+                IHierarchicalCollectionView(uploadGrid.dataProvider).filterFunction = filterFunction;
+            }
+            
+            private function filterFunction(item:Object):Boolean {            	
+            	if (keyword != null && keyword.length > 0) {
+	            	return (item.name.toLowerCase().indexOf(keyword) > -1 || 
+	            		(item.genre != null && item.genre.toLowerCase().indexOf(keyword) > -1));
+	            }
+	            return true;
+            }
+            
+            private function iconFunction(item:Object, depth:int):Class {
+            	/*if (item is DataFeedDescriptor) {
+            		return listIcon;
+            	} else {
+            		return crosstabIcon;
+            	}*/
+            	return listIcon;
+            }
+
+            private function failure(event:FaultEvent):void {
+                Alert.show(event.fault.message);
+            }
+
+            private function deleted():void {
+                uploadService.getFeedAnalysisTree.send();
+            }
+            
+            private function createCompositeFeed():void {            	
+            	
+            	/*var joinWorkspace:JoinWorkspace = JoinWorkspace(PopUpManager.createPopUp(this, JoinWorkspace, true));
+            	joinWorkspace.addEventListener(UploadConfigEvent.UPLOAD_CONFIG_COMPLETE, uploadConfigComplete);
+            	PopUpManager.centerPopUp(joinWorkspace);*/
+            	var descriptors:ArrayCollection = new ArrayCollection();
+            	if (uploadGrid.selectedItems != null) {
+            		
+            		for each (var obj:Object in uploadGrid.selectedItems) {
+            			if (obj is DataFeedDescriptor) {
+            				descriptors.addItem(obj);
+            			}
+            		}
+            		
+            	}                    	
+            	dispatchEvent(new AnalyzeEvent(new CompositeFeedCreationSource(descriptors)));
+            }                       
+            
+            private function apiConfiguration():void {
+            	var apiListing:APIListing = APIListing(PopUpManager.createPopUp(this, APIListing, true));
+            	PopUpManager.centerPopUp(apiListing);
+            }
+            
+            private function help():void {
+            	HelpWindow.createHelpWindow(MyDataHelp, this);
+            }
+		]]>
+	</mx:Script>
+	<mx:RemoteObject id="uploadService" destination="userUpload">
+		<mx:method name="getFeedAnalysisTree" result="gotFeedAnalysisTree()"/>
+		<mx:method name="deleteUserUpload" result="deleted()"/>		
+	</mx:RemoteObject>
+	<mx:RemoteObject id="analysisService" destination="analysisDefinition">
+		<mx:method name="deleteAnalysisDefinition" result="deletedAnalysis()"/>
+	</mx:RemoteObject>
+    <mx:Box width="100%" height="5" backgroundColor="#254BD4" left="0" right="0"/>
+	<mx:VBox id="coreContent" height="100%" width="100%" paddingTop="10" paddingLeft="10" paddingRight="10" paddingBottom="10" verticalGap="10">
+		<mx:HBox width="100%" id="uploadBox">	
+			<mx:Button toolTip="Upload data from Excel or CSV..." click="toUpload()" id="uploadButton" icon="{addIcon}" 
+				label="Upload File" labelPlacement="bottom"/>
+			<mx:Button toolTip="Connect to external data source..." click="externalConnect()" id="connectButton" icon="{dataConnectionIcon}"
+				label="External Data" labelPlacement="bottom"/>
+			<mx:Button toolTip="Create composite feed..." click="createCompositeFeed()" id="compositeFeedButton" icon="{joinIcon}"
+				label="Combine Feeds" labelPlacement="bottom"/>
+			<mx:Button toolTip="Create empty feed..." click="createEmptyFeed()" id="emptyFeedButton" icon="{addIcon}"
+				label="New Empty Feed" labelPlacement="bottom"/>			
+            <mx:Button icon="{helpIcon}" label="Help..." labelPlacement="bottom" click="help()"/>
+			<customupload:SpaceUsage id="spaceUsage" descriptors="{displayTreeData}"/>
+            <mx:Spacer width="100%"/>
+            <mx:HBox borderStyle="inset" borderThickness="1" paddingTop="5" paddingBottom="5" paddingLeft="5" paddingRight="5">
+                <mx:TextInput id="searchText" keyUp="search()"/>
+			    <mx:Button toolTip="Search" icon="@Embed(source='../../../../assets/view.png')" id="searchButton"/>
+            </mx:HBox>
+		</mx:HBox>
+
+		<mx:AdvancedDataGrid width="100%" height="100%" id="uploadGrid" allowMultipleSelection="true" fontSize="12"
+			groupIconFunction="iconFunction" defaultLeafIcon="{crosstabIcon}" itemDoubleClick="gridDoubleClick(event)" headerStyleName="BlueHeader">
+			<mx:dataProvider>
+	            <mx:HierarchicalData source="{displayTreeData}"/>
+	        </mx:dataProvider>
+			<mx:columns>
+				<mx:AdvancedDataGridColumn headerText="Name" dataField="name"/>
+				<mx:AdvancedDataGridColumn headerText="Size" dataField="size" width="110"/>
+				<mx:AdvancedDataGridColumn width="150" headerText="" dataField="name" itemRenderer="com.easyinsight.listing.MyDataIconControls"/>
+
+			</mx:columns>
+		</mx:AdvancedDataGrid>
+	</mx:VBox>
+</mx:VBox>

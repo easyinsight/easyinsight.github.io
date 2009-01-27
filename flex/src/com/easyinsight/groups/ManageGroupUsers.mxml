@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" creationComplete="onCreation()">
+	<mx:Script>
+		<![CDATA[
+			import com.easyinsight.administration.sharing.UserStub;
+			import com.easyinsight.administration.feed.UserLinkEvent;
+			import mx.managers.PopUpManager;
+			import com.easyinsight.administration.feed.AddUserToFeedWindow;
+			import mx.collections.ArrayCollection;
+			
+			[Bindable]
+			private var users:ArrayCollection;
+			
+			private var _groupID:int;
+			
+			public function get groupUsers():ArrayCollection {
+				return this.users;
+			}
+			
+			public function set groupID(groupID:int):void {
+				this._groupID = groupID;
+			}
+			
+			private function addUser():void {
+				var window:AddUserToFeedWindow = AddUserToFeedWindow(PopUpManager.createPopUp(this, AddUserToFeedWindow));
+				window.addEventListener(UserLinkEvent.ADD_USER_LINK, userChange);
+				PopUpManager.centerPopUp(window);
+			}
+			
+			private function userChange(event:UserLinkEvent):void {
+				var userStub:UserStub = event.userStub as UserStub;
+				var groupUser:GroupUser = new GroupUser();
+				groupUser.email = userStub.email;
+				groupUser.fullName = userStub.fullName;
+				groupUser.name = userStub.name;
+				groupUser.userID = userStub.userID;
+				groupUser.role = 3;
+				this.users.addItem(groupUser);	
+			}
+			
+			private function onCreation():void {
+				userGrid.addEventListener(UserLinkEvent.DELETE_USER_LINK, userChange);
+				groupService.getUsers.send(_groupID);		
+			}
+			
+			private function gotUsers():void {
+				this.users = groupService.getUsers.lastResult as ArrayCollection;
+			}
+		]]>
+	</mx:Script>
+	<mx:RemoteObject destination="groupService" id="groupService">
+		<mx:method name="getUsers" result="gotUsers()"/>
+	</mx:RemoteObject>
+	<mx:Button label="Add User..." click="addUser()"/>
+	<mx:DataGrid dataProvider="{users}" id="userGrid">
+		<mx:columns>
+			<mx:DataGridColumn headerText="User Name" dataField="name" width="200" headerRenderer="com.easyinsight.groups.CustomGroupHeader"/>
+			<mx:DataGridColumn headerText="Role" dataField="name" itemRenderer="com.easyinsight.groups.GroupRoleEditor"
+				rendererIsEditor="true" editorDataField="data" headerRenderer="com.easyinsight.groups.CustomGroupHeader"/>
+			<mx:DataGridColumn headerText="" dataField="name" itemRenderer="com.easyinsight.groups.GroupUserIcons" width="50"/>
+		</mx:columns>	
+	</mx:DataGrid>
+</mx:VBox>

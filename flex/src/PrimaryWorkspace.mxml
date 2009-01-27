@@ -1,0 +1,269 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Application xmlns:mx="http://www.adobe.com/2006/mxml" creationComplete="startWorkspace()" xmlns:local="*" 
+	xmlns:listing="listing.*" xmlns:customupload="customupload.*" xmlns:genredata="genredata.*"
+	xmlns:intro="intro.*" xmlns:listing1="com.easyinsight.listing.*" xmlns:intro1="com.easyinsight.intro.*" 
+	historyManagementEnabled="false" paddingTop="0" top="0" borderThickness="0" left="0" paddingLeft="0" right="0" paddingRight="0"
+	bottom="0" paddingBottom="0">
+	<mx:states>
+		<mx:State name="Analysis">
+			<mx:RemoveChild target="{headerBar}"/>
+			<mx:RemoveChild target="{coreSpace}"/>
+			<mx:AddChild relativeTo="{coreVBox}" target="{dataAnalysis}"/>
+		</mx:State>
+	</mx:states>
+	<mx:Script>
+		<![CDATA[
+import com.adobe.ac.mxeffects.Flip;
+import mx.core.UIComponent;
+import com.adobe.ac.mxeffects.CubeRotate;
+			import com.easyinsight.FullScreenPage;
+			import com.easyinsight.analysis.DelayedFeedLink;
+			import com.easyinsight.analysis.DelayedDeepLink;
+			import com.easyinsight.listing.PageFactory;
+			import mx.messaging.ChannelSet;
+			import mx.messaging.config.ServerConfig;
+			import mx.rpc.events.FaultEvent;
+			import com.easyinsight.LoginDialog;
+			import com.easyinsight.framework.SessionExpirationEvent;
+			import com.easyinsight.images.ImageFactory;
+			import com.easyinsight.framework.UserServiceResponse;
+			import com.easyinsight.analysis.AnalysisCloseEvent;
+			import com.easyinsight.framework.NavigationEvent;
+			import mx.controls.Alert;
+			import mx.utils.URLUtil;
+			import mx.managers.IBrowserManager;
+			import mx.events.BrowserChangeEvent;
+			import mx.managers.BrowserManager;
+			import com.easyinsight.listing.BlogPanel;
+            import com.easyinsight.genredata.AnalyzeEvent;
+            import com.easyinsight.listing.AnalyzeSource;
+            import com.easyinsight.listing.HeaderBarEvent;
+            import com.easyinsight.listing.IPerspective;
+            import com.easyinsight.listing.KeywordSearchEvent;
+            import com.easyinsight.listing.ListingChangeEvent;
+            import com.easyinsight.commands.CommandProcessor;
+            import com.easyinsight.framework.User;
+            import com.easyinsight.framework.LoginEvent;
+            import mx.managers.PopUpManager;
+
+            private var perspective:IPerspective;
+            
+            [Bindable]
+            private var dataAnalysis:FullScreenPage; 
+            
+            public var browserManager:IBrowserManager;
+
+            private function startWorkspace():void {
+                new CommandProcessor();
+                //mx.core.Application.application.setStyle('backgroundImage', ImageFactory.getBackgroundImage());
+                addEventListener(FaultEvent.FAULT, onFault, true);
+                //mx.core.Application.application.addEventListener(SessionExpirationEvent.SESSION_EXPIRATION, sessionExpired);
+                this.perspective = introPanel;
+                browserManager = BrowserManager.getInstance();
+                browserManager.addEventListener(BrowserChangeEvent.BROWSER_URL_CHANGE, parseURL);
+                browserManager.init("", "Intro");
+                introPanel.gotFocus();
+                User.getEventNotifier().addEventListener(NavigationEvent.NAVIGATION, navigation);
+                userService.isSessionLoggedIn.send();
+            }
+            
+            private function onFault(event:FaultEvent):void {
+            	var fatal:Boolean = false;
+            	if (event.fault.faultString.indexOf("com.easyinsight.security.SecurityException") != -1) {
+            		var channelSet:ChannelSet = ServerConfig.getChannelSet("login");
+            		if (channelSet.authenticated) {
+            			// session expired
+            			fatal = true;
+            			ExternalInterface.call("window.location.reload()");
+            		}            		
+            	}
+            	if (!fatal) {
+            		Alert.show(event.fault.name, "A server error occurred.");
+            	}
+            }
+            
+            private function sessionExpired(event:SessionExpirationEvent):void {
+            	var loginDialog:LoginDialog = LoginDialog(PopUpManager.createPopUp(this, LoginDialog, true));
+            	PopUpManager.centerPopUp(loginDialog);
+            }
+            
+            private function navigation(event:NavigationEvent):void {
+                if (event.targetPerspective == null) {
+                    headerBar.explicitChange(event.targetPage);
+                } else {
+                    changePerspective(new ListingChangeEvent(event.targetPerspective));
+                }
+            }
+            
+            private function parseURL(event:Event):void {
+            	var o:Object = URLUtil.stringToObject(browserManager.fragment);
+            	var analysisID:String = o.analysisID;
+            	if (analysisID != null) {
+        			//createAnalysisSource(Number(analysisID));
+        			var deepAnalysisLink:DelayedDeepLink = new DelayedDeepLink(Number(analysisID));
+        			deepAnalysisLink.addEventListener(AnalyzeEvent.ANALYZE, internalAnalyze);
+        			deepAnalysisLink.execute(); 
+            	} else {
+            		var feedID:String = o.feedID;
+            		trace(feedID);
+            		if (feedID != null) {
+            			var deepFeedLink:DelayedFeedLink = new DelayedFeedLink(Number(feedID));
+            			deepFeedLink.addEventListener(AnalyzeEvent.ANALYZE, internalAnalyze);
+            			deepFeedLink.execute();            			
+            		} else {
+            			var page:String = o.page;
+            			if (page != null) {
+            				if (currentState == "Analysis") {
+            					currentState = "";
+				            	dataAnalysis.removeEventListener(AnalysisCloseEvent.ANALYSIS_CLOSE, analysisClosed);
+				            	dataAnalysis = null;	
+            				}
+            				switch (page) {
+            					case "myData":
+            						navigation(new NavigationEvent("My Data"));
+            						break;
+                                case "myGoals":
+                                    navigation(new NavigationEvent("Goals"));
+                                    break;
+        						case "marketplace":        							
+        							navigation(new NavigationEvent("Marketplace"));        							
+        							break;
+    							case "groups":
+    								navigation(new NavigationEvent("Groups"));
+    								break;
+								case "groupDetail":
+									break;
+								case "intro":
+									navigation(new NavigationEvent(null, PageFactory.getIntroPanel()));
+									break;
+								case "faq":
+									navigation(new NavigationEvent(null, PageFactory.getFAQPanel()));									
+									break;
+								case "companyInfo":
+									navigation(new NavigationEvent(null, PageFactory.getCompanyInfoPanel()));
+									break;
+								case "blog":
+									navigation(new NavigationEvent(null, PageFactory.getBlogPanel()));
+									break;
+								case "solutions":
+									navigation(new NavigationEvent("Solutions"));
+									break;
+								case "account":
+									navigation(new NavigationEvent("My Account"));
+									break;        						
+            				}
+            			}
+            		}
+            	}
+            }
+            
+            /*private function createAnalysisSource(analysisID:Number):void {
+            	analysisService.openAnalysisIfPossible.send(analysisID);
+            }*/
+            
+            /*private function gotAnalysisDefinition():void {
+            	var insightResponse:InsightResponse = analysisService.openAnalysisIfPossible.lastResult as InsightResponse;
+            	if (insightResponse.successful) {
+            		doAnalyze(new AnalysisDefinitionAnalyzeSource(insightResponse.definition));	
+            	} else {
+            		var loginDialog:LoginDialog = LoginDialog(PopUpManager.createPopUp(this, LoginDialog, true));
+            		loginDialog.addEventListener(LoginEvent.LOGIN, delayedAnalysis);
+                    PopUpManager.centerPopUp(loginDialog);
+            	}            	
+            }                   
+            
+            private function delayedAnalysis(event:LoginEvent):void {
+            	
+            }  */
+            
+            private function doAnalyze(analyzeSource:AnalyzeSource):void {
+            	if (analyzeSource != null) {
+            		var analysisWindow:FullScreenPage = analyzeSource.createAnalysisPopup();
+            		analysisWindow.addEventListener(AnalysisCloseEvent.ANALYSIS_CLOSE, analysisClosed);
+            		dataAnalysis = analysisWindow;
+            		currentState = "Analysis";
+            	}
+            }
+            
+            private function analysisClosed(event:AnalysisCloseEvent):void {
+            	currentState = "";
+            	event.dataAnalysisContainer.removeEventListener(AnalysisCloseEvent.ANALYSIS_CLOSE, analysisClosed);
+            	dataAnalysis = null;
+            	this.perspective.gotFocus();
+            }
+
+            private function changePerspective(event:ListingChangeEvent):void {
+            	if (event.perspective != null) {
+                    if (this.perspective != null) {
+                        var effect:Flip = new Flip();
+                        effect.target = this.perspective;
+                        effect.siblings = [ event.perspective ];
+                        //effect.direction = "RIGHT";
+                        effect.duration = 1000;
+                        var existingDispatcher:EventDispatcher = this.perspective as EventDispatcher;
+                        existingDispatcher.removeEventListener(AnalyzeEvent.ANALYZE, internalAnalyze);
+                        var uiComponent:UIComponent = this.perspective as UIComponent;
+                        //uiComponent.setStyle("removedEffect", effect);
+                    }
+                    if (this.perspective is BlogPanel) {
+                        var blogPanel:BlogPanel = this.perspective as BlogPanel;
+                        blogPanel.lostFocus();
+                    }
+                    coreSpace.removeChildAt(0);
+                    this.perspective = event.perspective;
+                    coreSpace.addChildAt(perspective as DisplayObject, 0);
+                    perspective.gotFocus();
+                    var dispatcher:EventDispatcher = perspective as EventDispatcher;
+                    dispatcher.addEventListener(AnalyzeEvent.ANALYZE, internalAnalyze);
+                }
+            }
+
+            private function search(event:KeywordSearchEvent):void {
+                //getCurrentPerspective().search(event.keyword);
+            }
+
+            private function getCurrentPerspective():IPerspective {
+                return this.perspective;
+            }
+
+            private function analyze():void {
+                var analyzeSource:AnalyzeSource = getCurrentPerspective().analyze();
+                doAnalyze(analyzeSource);
+            }
+
+            private function internalAnalyze(event:AnalyzeEvent):void {
+                var analyzeSource:AnalyzeSource = event.analyzeSource;
+                doAnalyze(analyzeSource);
+            } 
+            
+            private function sessionCheck():void {
+            	var authResult:UserServiceResponse = userService.isSessionLoggedIn.lastResult;
+            	if (authResult != null) {
+            		User.initializeUser(authResult.name, authResult.email,
+                            	authResult.accountType, authResult.spaceAllowed, authResult.accountAdmin,
+                            authResult.dataSourceCreator, authResult.insightCreator);
+                	User.getInstance().password = authResult.encryptedPassword;
+                	User.getInstance().userName = authResult.userName;
+                    User.getEventNotifier().dispatchEvent(new LoginEvent(LoginEvent.LOGIN));
+            	}
+            }                       
+        ]]>
+	</mx:Script>
+	<mx:Style source="com/easyinsight/skin/osx/OSX.css"/>
+
+	<mx:RemoteObject id="userService" destination="login">
+		<mx:method name="isSessionLoggedIn" result="sessionCheck()"/>
+	</mx:RemoteObject>	
+	
+	<mx:VBox width="100%" height="100%" id="coreVBox" paddingLeft="0" verticalGap="0" paddingRight="0">
+		<listing1:HeaderBar keywordSearch="search(event)" triggerAnalyze="analyze()" width="100%" id="headerBar"
+			paddingTop="5" paddingBottom="5" paddingLeft="10" paddingRight="10" bottom="0" top="0" 
+			listingChange="changePerspective(event)"/>			
+		<mx:HBox width="100%" height="100%" id="coreSpace" paddingLeft="0" paddingTop="0" top="0" paddingRight="0">
+									
+				<intro1:IntroPanel id="introPanel" width="100%" height="100%" paddingTop="0" navigation="navigation(event)"/>
+						
+		</mx:HBox>
+	</mx:VBox>
+	
+</mx:Application>

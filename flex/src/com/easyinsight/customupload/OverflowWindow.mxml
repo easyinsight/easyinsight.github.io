@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" width="400" height="300">
+	<mx:Script>
+		<![CDATA[
+			import mx.managers.PopUpManager;
+			
+			private function cancel():void {
+				PopUpManager.removePopUp(this);
+			}
+		]]>
+	</mx:Script>
+	<mx:VBox styleName="TitleWindowContents">
+		<mx:Label text="That file is too large for your account."/>
+		<mx:HBox>
+			<mx:Button label="Upgrade Account!"/>
+			<mx:Button label="Cancel" click="cancel()"/>
+		</mx:HBox>
+	</mx:VBox>
+</mx:TitleWindow>
