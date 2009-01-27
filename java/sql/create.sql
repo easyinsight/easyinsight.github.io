@@ -23,8 +23,10 @@ DROP TABLE IF EXISTS `account`;
 CREATE TABLE `account` (
   `account_id` bigint(20) NOT NULL auto_increment,
   `account_type` int(11) NOT NULL,
+  `max_size` bigint(20) default NULL,
+  `max_users` int(11) default NULL,
   PRIMARY KEY  (`account_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=15 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=latin1;
 
 --
 -- Table structure for table `account_to_feed`
@@ -58,7 +60,7 @@ CREATE TABLE `account_to_merchant` (
   KEY `account_id` (`account_id`),
   CONSTRAINT `account_to_merchant_ibfk_1` FOREIGN KEY (`merchant_id`) REFERENCES `merchant` (`merchant_id`) ON DELETE CASCADE,
   CONSTRAINT `account_to_merchant_ibfk_2` FOREIGN KEY (`account_id`) REFERENCES `account` (`account_id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 --
 -- Table structure for table `account_to_user`
@@ -69,11 +71,11 @@ CREATE TABLE `account_to_user` (
   `account_to_user_id` bigint(20) NOT NULL auto_increment,
   `account_id` bigint(20) NOT NULL,
   `user_id` bigint(20) NOT NULL,
-    PRIMARY KEY  (`account_to_user_id`),
-    KEY account_id (account_id),
-    KEY user_id (user_id),
-    CONSTRAINT account_to_user_ibfk_1 FOREIGN KEY(account_id) REFERENCES account (account_id) ON DELETE CASCADE,
-    CONSTRAINT account_to_user_ibfk_2 FOREIGN KEY(user_id) REFERENCES user (user_id) ON DELETE CASCADE
+  PRIMARY KEY  (`account_to_user_id`),
+  KEY `account_id` (`account_id`),
+  KEY `user_id` (`user_id`),
+  CONSTRAINT `account_to_user_ibfk_1` FOREIGN KEY (`account_id`) REFERENCES `account` (`account_id`) ON DELETE CASCADE,
+  CONSTRAINT `account_to_user_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 --
@@ -86,10 +88,10 @@ CREATE TABLE `additional_items` (
   `analysis_id` bigint(20) default NULL,
   `analysis_item_id` bigint(20) default NULL,
   PRIMARY KEY  (`additional_items_id`),
-    KEY analysis_id (analysis_id),
-    KEY analysis_item_id (analysis_item_id),
-    CONSTRAINT additional_items_ibfk_1 FOREIGN KEY(analysis_id) REFERENCES analysis (analysis_id) ON DELETE CASCADE,
-    CONSTRAINT additional_items_ibfk_2 FOREIGN KEY(analysis_item_id) REFERENCES analysis_item (analysis_item_id) ON DELETE CASCADE
+  KEY `analysis_id` (`analysis_id`),
+  KEY `analysis_item_id` (`analysis_item_id`),
+  CONSTRAINT `additional_items_ibfk_1` FOREIGN KEY (`analysis_id`) REFERENCES `analysis` (`analysis_id`) ON DELETE CASCADE,
+  CONSTRAINT `additional_items_ibfk_2` FOREIGN KEY (`analysis_item_id`) REFERENCES `analysis_item` (`analysis_item_id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 --
@@ -116,7 +118,7 @@ CREATE TABLE `analysis` (
   PRIMARY KEY  (`analysis_id`),
   KEY `data_feed_id` (`data_feed_id`),
   CONSTRAINT `analysis_ibfk_1` FOREIGN KEY (`data_feed_id`) REFERENCES `data_feed` (`data_feed_id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=27 DEFAULT CHARSET=latin1;
 
 --
 -- Table structure for table `analysis_based_feed`
@@ -146,7 +148,7 @@ CREATE TABLE `analysis_calculation` (
   PRIMARY KEY  (`analysis_calculation_id`),
   KEY `analysis_item_id` (`analysis_item_id`),
   CONSTRAINT `analysis_calculation_ibfk_1` FOREIGN KEY (`analysis_item_id`) REFERENCES `analysis_item` (`analysis_item_id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 --
 -- Table structure for table `analysis_date`
@@ -161,7 +163,7 @@ CREATE TABLE `analysis_date` (
   PRIMARY KEY  (`analysis_date_id`),
   KEY `analysis_item_id` (`analysis_item_id`),
   CONSTRAINT `analysis_date_ibfk_1` FOREIGN KEY (`analysis_item_id`) REFERENCES `analysis_item` (`analysis_item_id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=419 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=32 DEFAULT CHARSET=latin1;
 
 --
 -- Table structure for table `analysis_dimension`
@@ -173,12 +175,28 @@ CREATE TABLE `analysis_dimension` (
   `group_by` tinyint(4) default NULL,
   `analysis_item_id` bigint(20) default NULL,
   `key_dimension_id` bigint(20) default NULL,
+  `hierarchy_id` bigint(20) default NULL,
+  `hierarchy_level_id` bigint(20) default NULL,
   PRIMARY KEY  (`analysis_dimension_id`),
   KEY `analysis_item_id` (`analysis_item_id`),
-  KEY key_dimension_id (key_dimension_id),
+  KEY `key_dimension_id` (`key_dimension_id`),
   CONSTRAINT `analysis_dimension_ibfk_1` FOREIGN KEY (`analysis_item_id`) REFERENCES `analysis_item` (`analysis_item_id`) ON DELETE CASCADE,
   CONSTRAINT `analysis_dimension_ibfk_2` FOREIGN KEY (`key_dimension_id`) REFERENCES `analysis_item` (`analysis_item_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=3721 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=389 DEFAULT CHARSET=latin1;
+
+--
+-- Table structure for table `analysis_hierarchy_item`
+--
+
+DROP TABLE IF EXISTS `analysis_hierarchy_item`;
+CREATE TABLE `analysis_hierarchy_item` (
+  `analysis_hierarchy_item_id` bigint(20) NOT NULL auto_increment,
+  `analysis_item_id` bigint(20) NOT NULL,
+  `hierarchy_level_id` bigint(20) NOT NULL,
+  PRIMARY KEY  (`analysis_hierarchy_item_id`),
+  KEY `analysis_item_id` (`analysis_item_id`),
+  CONSTRAINT `analysis_hierarchy_item_ibfk2` FOREIGN KEY (`analysis_item_id`) REFERENCES `analysis_item` (`analysis_item_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=latin1;
 
 --
 -- Table structure for table `analysis_item`
@@ -192,10 +210,11 @@ CREATE TABLE `analysis_item` (
   `formatting_configuration_id` int(11) default NULL,
   `sort` int(11) default NULL,
   `display_name` varchar(255) default NULL,
+  `width` int(11) default '0',
   PRIMARY KEY  (`analysis_item_id`),
   KEY `item_key_id` (`item_key_id`),
   CONSTRAINT `analysis_item_ibfk_1` FOREIGN KEY (`item_key_id`) REFERENCES `item_key` (`item_key_id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=5577 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=477 DEFAULT CHARSET=latin1;
 
 --
 -- Table structure for table `analysis_list`
@@ -224,10 +243,10 @@ CREATE TABLE `analysis_measure` (
   `measure_condition_range_id` bigint(20) default NULL,
   PRIMARY KEY  (`analysis_measure_id`),
   KEY `analysis_item_id` (`analysis_item_id`),
-  KEY measure_condition_range_id (measure_condition_range_id),
-  CONSTRAINT `analysis_measure_ibfk_1` FOREIGN KEY (`analysis_item_id`) REFERENCES `analysis_item` (`analysis_item_id`) ON DELETE CASCADE,
-  CONSTRAINT analysis_measure_ibfk2 FOREIGN KEY (measure_condition_range_id) REFERENCES measure_condition_range (measure_condition_range_id) ON DELETE CASCADE  
-) ENGINE=InnoDB AUTO_INCREMENT=3866 DEFAULT CHARSET=latin1;
+  KEY `measure_condition_range_id` (`measure_condition_range_id`),
+  CONSTRAINT `analysis_measure_ibfk2` FOREIGN KEY (`measure_condition_range_id`) REFERENCES `measure_condition_range` (`measure_condition_range_id`) ON DELETE CASCADE,
+  CONSTRAINT `analysis_measure_ibfk_1` FOREIGN KEY (`analysis_item_id`) REFERENCES `analysis_item` (`analysis_item_id`) ON DELETE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=89 DEFAULT CHARSET=latin1;
 
 --
 -- Table structure for table `analysis_range`
@@ -252,7 +271,7 @@ CREATE TABLE `analysis_tags` (
   `tag` varchar(100) default NULL,
   `use_count` int(11) default '0',
   PRIMARY KEY  (`analysis_tags_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=278 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=18 DEFAULT CHARSET=latin1;
 
 --
 -- Table structure for table `analysis_to_analysis_item`
@@ -269,7 +288,7 @@ CREATE TABLE `analysis_to_analysis_item` (
   KEY `analysis_item_id` (`analysis_item_id`),
   CONSTRAINT `analysis_to_analysis_item_ibfk_1` FOREIGN KEY (`analysis_id`) REFERENCES `analysis` (`analysis_id`) ON DELETE CASCADE,
   CONSTRAINT `analysis_to_analysis_item_ibfk_2` FOREIGN KEY (`analysis_item_id`) REFERENCES `analysis_item` (`analysis_item_id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=latin1;
 
 --
 -- Table structure for table `analysis_to_filter_join`
@@ -288,6 +307,18 @@ CREATE TABLE `analysis_to_filter_join` (
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 --
+-- Table structure for table `analysis_to_hierarchy_join`
+--
+
+DROP TABLE IF EXISTS `analysis_to_hierarchy_join`;
+CREATE TABLE `analysis_to_hierarchy_join` (
+  `analysis_to_hierarchy_join` bigint(20) NOT NULL auto_increment,
+  `analysis_id` bigint(20) default NULL,
+  `analysis_item_id` bigint(20) default NULL,
+  PRIMARY KEY  (`analysis_to_hierarchy_join`)
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=latin1;
+
+--
 -- Table structure for table `analysis_to_tag`
 --
 
@@ -301,7 +332,7 @@ CREATE TABLE `analysis_to_tag` (
   KEY `analysis_tags_id` (`analysis_tags_id`),
   CONSTRAINT `analysis_to_tag_ibfk_1` FOREIGN KEY (`analysis_id`) REFERENCES `analysis` (`analysis_id`) ON DELETE CASCADE,
   CONSTRAINT `analysis_to_tag_ibfk_2` FOREIGN KEY (`analysis_tags_id`) REFERENCES `analysis_tags` (`analysis_tags_id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=latin1;
 
 --
 -- Table structure for table `chart_definition`
@@ -314,12 +345,12 @@ CREATE TABLE `chart_definition` (
   `graphic_definition_id` bigint(20) default NULL,
   `chart_type` int(11) default NULL,
   `chart_family` int(11) default NULL,
-    limits_metadata_id bigint(20) DEFAULT NULL,
+  `limits_metadata_id` bigint(20) default NULL,
   PRIMARY KEY  (`chart_definition_id`),
   KEY `analysis_id` (`analysis_id`),
   KEY `limits_metadata_id` (`limits_metadata_id`),
   CONSTRAINT `chart_definition_ibfk_1` FOREIGN KEY (`analysis_id`) REFERENCES `analysis` (`analysis_id`) ON DELETE CASCADE,
-  CONSTRAINT chart_definition_ibfk_2 FOREIGN KEY (limits_metadata_id) REFERENCES limits_metadata (limits_metadata_id)
+  CONSTRAINT `chart_definition_ibfk_2` FOREIGN KEY (`limits_metadata_id`) REFERENCES `limits_metadata` (`limits_metadata_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 --
@@ -341,6 +372,21 @@ CREATE TABLE `chart_field` (
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 --
+-- Table structure for table `chart_limits_metadata`
+--
+
+DROP TABLE IF EXISTS `chart_limits_metadata`;
+CREATE TABLE `chart_limits_metadata` (
+  `list_limits_metadata_id` bigint(20) NOT NULL auto_increment,
+  `analysis_item_id` bigint(20) default NULL,
+  `top_items` tinyint(4) default NULL,
+  `number_items` int(11) default NULL,
+  PRIMARY KEY  (`list_limits_metadata_id`),
+  KEY `analysis_item_id` (`analysis_item_id`),
+  CONSTRAINT `charts_limits_metadata_ibfk_1` FOREIGN KEY (`analysis_item_id`) REFERENCES `analysis_item` (`analysis_item_id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+--
 -- Table structure for table `community_group`
 --
 
@@ -353,9 +399,9 @@ CREATE TABLE `community_group` (
   `description` text,
   `tag_cloud_id` bigint(20) default NULL,
   PRIMARY KEY  (`community_group_id`),
-        KEY tag_cloud_id (tag_cloud_id),
-        CONSTRAINT community_group_ibfk1 FOREIGN KEY (tag_cloud_id) REFERENCES analysis_tags (analysis_tags_id) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=latin1;
+  KEY `tag_cloud_id` (`tag_cloud_id`),
+  CONSTRAINT `community_group_ibfk1` FOREIGN KEY (`tag_cloud_id`) REFERENCES `analysis_tags` (`analysis_tags_id`) ON DELETE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=latin1;
 
 --
 -- Table structure for table `complex_analysis_measure`
@@ -367,8 +413,8 @@ CREATE TABLE `complex_analysis_measure` (
   `analysis_item_id` bigint(20) default NULL,
   `wrapped_aggregation` int(11) default NULL,
   PRIMARY KEY  (`complex_analysis_measure_id`),
-    KEY analysis_item_id (analysis_item_id),
-    CONSTRAINT complex_analysis_measure_ibfk1 FOREIGN KEY (`analysis_item_id`) REFERENCES `analysis_item` (`analysis_item_id`) ON DELETE CASCADE
+  KEY `analysis_item_id` (`analysis_item_id`),
+  CONSTRAINT `complex_analysis_measure_ibfk1` FOREIGN KEY (`analysis_item_id`) REFERENCES `analysis_item` (`analysis_item_id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 --
@@ -384,17 +430,17 @@ CREATE TABLE `composite_connection` (
   `source_join` bigint(20) NOT NULL,
   `target_join` bigint(20) NOT NULL,
   PRIMARY KEY  (`composite_connection_id`),
-        KEY composite_feed_id (composite_feed_id),
-        KEY source_feed_node_id (source_feed_node_id),
-        KEY target_feed_node_id (target_feed_node_id),
-        KEY source_join (source_join),
-        KEY target_join (target_join),
-        CONSTRAINT composite_connection_ibfk1 FOREIGN KEY (composite_feed_id) REFERENCES composite_feed (composite_feed_id),
-        CONSTRAINT composite_connection_ibfk2 FOREIGN KEY (source_feed_node_id) REFERENCES composite_node (composite_node_id),
-        CONSTRAINT composite_connection_ibfk3 FOREIGN KEY (target_feed_node_id) REFERENCES composite_node (composite_node_id),
-        CONSTRAINT composite_connection_ibfk4 FOREIGN KEY (source_join) REFERENCES item_key (item_key_id),
-        CONSTRAINT composite_connection_ibfk5 FOREIGN KEY (target_join) REFERENCES item_key (item_key_id)
-) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=latin1;
+  KEY `composite_feed_id` (`composite_feed_id`),
+  KEY `source_feed_node_id` (`source_feed_node_id`),
+  KEY `target_feed_node_id` (`target_feed_node_id`),
+  KEY `source_join` (`source_join`),
+  KEY `target_join` (`target_join`),
+  CONSTRAINT `composite_connection_ibfk1` FOREIGN KEY (`composite_feed_id`) REFERENCES `composite_feed` (`composite_feed_id`),
+  CONSTRAINT `composite_connection_ibfk2` FOREIGN KEY (`source_feed_node_id`) REFERENCES `composite_node` (`composite_node_id`),
+  CONSTRAINT `composite_connection_ibfk3` FOREIGN KEY (`target_feed_node_id`) REFERENCES `composite_node` (`composite_node_id`),
+  CONSTRAINT `composite_connection_ibfk4` FOREIGN KEY (`source_join`) REFERENCES `item_key` (`item_key_id`),
+  CONSTRAINT `composite_connection_ibfk5` FOREIGN KEY (`target_join`) REFERENCES `item_key` (`item_key_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 --
 -- Table structure for table `composite_feed`
@@ -419,11 +465,11 @@ CREATE TABLE `composite_node` (
   `composite_feed_id` bigint(20) NOT NULL,
   `data_feed_id` bigint(20) NOT NULL,
   PRIMARY KEY  (`composite_node_id`),
-  KEY composite_feed_id (composite_feed_id),
-  KEY data_feed_id (data_feed_id),
+  KEY `composite_feed_id` (`composite_feed_id`),
+  KEY `data_feed_id` (`data_feed_id`),
   CONSTRAINT `composite_node_ibfk_1` FOREIGN KEY (`data_feed_id`) REFERENCES `data_feed` (`data_feed_id`) ON DELETE CASCADE,
   CONSTRAINT `composite_node_ibfk_2` FOREIGN KEY (`composite_feed_id`) REFERENCES `composite_feed` (`composite_feed_id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=17 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 --
 -- Table structure for table `crosstab_definition`
@@ -494,9 +540,9 @@ CREATE TABLE `data_feed` (
   `PUBLICLY_VISIBLE` tinyint(4) default NULL,
   `MARKETPLACE_VISIBLE` tinyint(4) default NULL,
   PRIMARY KEY  (`data_feed_id`),
-   KEY dynamic_service_definition_id (dynamic_service_definition_id),
-   CONSTRAINT data_feed_ibfk1 FOREIGN KEY (dynamic_service_definition_id) REFERENCES dynamic_service_definition (dynamic_service_definition_id)
-) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=latin1;
+  KEY `dynamic_service_definition_id` (`dynamic_service_definition_id`),
+  CONSTRAINT `data_feed_ibfk1` FOREIGN KEY (`dynamic_service_definition_id`) REFERENCES `dynamic_service_definition` (`dynamic_service_definition_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=28 DEFAULT CHARSET=latin1;
 
 --
 -- Table structure for table `data_scrub`
@@ -507,9 +553,46 @@ CREATE TABLE `data_scrub` (
   `data_scrub_id` bigint(20) NOT NULL auto_increment,
   `analysis_id` bigint(20) default NULL,
   PRIMARY KEY  (`data_scrub_id`),
-  KEY analysis_id (analysis_id),
-  CONSTRAINT data_scrub_ibfk_1 FOREIGN KEY (`analysis_id`) REFERENCES `analysis` (`analysis_id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=latin1;
+  KEY `analysis_id` (`analysis_id`),
+  CONSTRAINT `data_scrub_ibfk_1` FOREIGN KEY (`analysis_id`) REFERENCES `analysis` (`analysis_id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+--
+-- Table structure for table `data_source_audit_message`
+--
+
+DROP TABLE IF EXISTS `data_source_audit_message`;
+CREATE TABLE `data_source_audit_message` (
+  `data_source_audit_message_id` bigint(20) NOT NULL auto_increment,
+  `data_source_id` bigint(20) NOT NULL,
+  `user_id` bigint(20) NOT NULL,
+  `comment` text NOT NULL,
+  `audit_time` datetime NOT NULL,
+  PRIMARY KEY  (`data_source_audit_message_id`),
+  KEY `data_source_id` (`data_source_id`),
+  KEY `user_id` (`user_id`),
+  CONSTRAINT `data_source_audit_message_ibfk1` FOREIGN KEY (`data_source_id`) REFERENCES `data_feed` (`data_feed_id`),
+  CONSTRAINT `data_source_audit_message_ibfk2` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+--
+-- Table structure for table `data_source_comment`
+--
+
+DROP TABLE IF EXISTS `data_source_comment`;
+CREATE TABLE `data_source_comment` (
+  `data_source_comment_id` bigint(20) NOT NULL auto_increment,
+  `data_source_id` bigint(20) NOT NULL,
+  `user_id` bigint(20) NOT NULL,
+  `comment` text NOT NULL,
+  `time_created` datetime NOT NULL,
+  `time_updated` datetime default NULL,
+  PRIMARY KEY  (`data_source_comment_id`),
+  KEY `data_source_id` (`data_source_id`),
+  KEY `user_id` (`user_id`),
+  CONSTRAINT `data_source_comment_ibfk1` FOREIGN KEY (`data_source_id`) REFERENCES `data_feed` (`data_feed_id`),
+  CONSTRAINT `data_source_comment_ibfk2` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 --
 -- Table structure for table `date_range_filter`
@@ -524,7 +607,7 @@ CREATE TABLE `date_range_filter` (
   PRIMARY KEY  (`date_range_filter_id`),
   KEY `filter_id` (`filter_id`),
   CONSTRAINT `date_range_filter_ibfk_1` FOREIGN KEY (`filter_id`) REFERENCES `filter` (`filter_id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 --
 -- Table structure for table `date_value`
@@ -536,8 +619,8 @@ CREATE TABLE `date_value` (
   `value_id` bigint(20) default NULL,
   `date_contet` datetime NOT NULL,
   PRIMARY KEY  (`date_value_id`),
-    KEY value_id (value_id),
-    CONSTRAINT date_value_ibfk1 FOREIGN KEY (value_id) REFERENCES value (value_id) ON DELETE CASCADE
+  KEY `value_id` (`value_id`),
+  CONSTRAINT `date_value_ibfk1` FOREIGN KEY (`value_id`) REFERENCES `value` (`value_id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 --
@@ -553,11 +636,11 @@ CREATE TABLE `derived_item_key` (
   PRIMARY KEY  (`derived_item_key_id`),
   KEY `item_key_id` (`item_key_id`),
   KEY `parent_item_key_id` (`parent_item_key_id`),
-  KEY feed_id (feed_id),
+  KEY `feed_id` (`feed_id`),
   CONSTRAINT `derived_item_key_ibfk_1` FOREIGN KEY (`item_key_id`) REFERENCES `item_key` (`item_key_id`) ON DELETE CASCADE,
   CONSTRAINT `derived_item_key_ibfk_2` FOREIGN KEY (`parent_item_key_id`) REFERENCES `item_key` (`item_key_id`) ON DELETE CASCADE,
-  CONSTRAINT derived_item_key_ibfk_3 FOREIGN KEY (feed_id) REFERENCES data_feed (data_feed_id) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=89 DEFAULT CHARSET=latin1;
+  CONSTRAINT `derived_item_key_ibfk_3` FOREIGN KEY (`feed_id`) REFERENCES `data_feed` (`data_feed_id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 --
 -- Table structure for table `dynamic_service_code`
@@ -572,9 +655,9 @@ CREATE TABLE `dynamic_service_code` (
   `bean_bytecode` blob,
   `bean_name` varchar(255) default NULL,
   PRIMARY KEY  (`dynamic_service_code_id`),
-  KEY feed_id (feed_id),
-  CONSTRAINT dynamic_service_code_ibfk1 FOREIGN KEY (feed_id) REFERENCES data_feed (data_feed_id) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=20 DEFAULT CHARSET=latin1;
+  KEY `feed_id` (`feed_id`),
+  CONSTRAINT `dynamic_service_code_ibfk1` FOREIGN KEY (`feed_id`) REFERENCES `data_feed` (`data_feed_id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 --
 -- Table structure for table `dynamic_service_descriptor`
@@ -585,9 +668,9 @@ CREATE TABLE `dynamic_service_descriptor` (
   `dynamic_service_descriptor_id` bigint(20) NOT NULL auto_increment,
   `feed_id` bigint(20) default NULL,
   PRIMARY KEY  (`dynamic_service_descriptor_id`),
- KEY feed_id (feed_id),
-  CONSTRAINT dynamic_service_descriptor_ibfk1 FOREIGN KEY (feed_id) REFERENCES data_feed (data_feed_id) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=27 DEFAULT CHARSET=latin1;
+  KEY `feed_id` (`feed_id`),
+  CONSTRAINT `dynamic_service_descriptor_ibfk1` FOREIGN KEY (`feed_id`) REFERENCES `data_feed` (`data_feed_id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 --
 -- Table structure for table `dynamic_service_method`
@@ -602,7 +685,7 @@ CREATE TABLE `dynamic_service_method` (
   PRIMARY KEY  (`dynamic_service_method_id`),
   KEY `dynamic_service_descriptor_id` (`dynamic_service_descriptor_id`),
   CONSTRAINT `dynamic_service_method_ibfk_1` FOREIGN KEY (`dynamic_service_descriptor_id`) REFERENCES `dynamic_service_descriptor` (`dynamic_service_descriptor_id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 --
 -- Table structure for table `dynamic_service_method_key`
@@ -617,8 +700,8 @@ CREATE TABLE `dynamic_service_method_key` (
   KEY `dynamic_service_method_id` (`dynamic_service_method_id`),
   KEY `analysis_item_id` (`analysis_item_id`),
   CONSTRAINT `dynamic_service_method_key_ibfk_1` FOREIGN KEY (`dynamic_service_method_id`) REFERENCES `dynamic_service_method` (`dynamic_service_method_id`) ON DELETE CASCADE,
-  CONSTRAINT `dynamic_service_method_key_ibfk_2` FOREIGN KEY (`analysis_item_id`) REFERENCES `analysis_item` (`analysis_item_id`) ON DELETE CASCADE    
-) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=latin1;
+  CONSTRAINT `dynamic_service_method_key_ibfk_2` FOREIGN KEY (`analysis_item_id`) REFERENCES `analysis_item` (`analysis_item_id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 --
 -- Table structure for table `empty_value`
@@ -629,9 +712,21 @@ CREATE TABLE `empty_value` (
   `empty_value_id` bigint(20) NOT NULL auto_increment,
   `value_id` bigint(20) default NULL,
   PRIMARY KEY  (`empty_value_id`),
-    KEY value_id (value_id),
-    CONSTRAINT empty_value_ibfk1 FOREIGN KEY (value_id) REFERENCES value (value_id) ON DELETE CASCADE
+  KEY `value_id` (`value_id`),
+  CONSTRAINT `empty_value_ibfk1` FOREIGN KEY (`value_id`) REFERENCES `value` (`value_id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+--
+-- Table structure for table `excel_export`
+--
+
+DROP TABLE IF EXISTS `excel_export`;
+CREATE TABLE `excel_export` (
+  `excel_export_id` bigint(20) NOT NULL auto_increment,
+  `excel_file` longblob NOT NULL,
+  `user_id` bigint(20) NOT NULL,
+  PRIMARY KEY  (`excel_export_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=latin1;
 
 --
 -- Table structure for table `excel_upload_format`
@@ -644,7 +739,7 @@ CREATE TABLE `excel_upload_format` (
   PRIMARY KEY  (`excel_upload_format_id`),
   KEY `feed_id` (`feed_id`),
   CONSTRAINT `excel_upload_format_ibfk_1` FOREIGN KEY (`feed_id`) REFERENCES `data_feed` (`data_feed_id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=latin1;
 
 --
 -- Table structure for table `feed_commercial_policy`
@@ -704,10 +799,11 @@ CREATE TABLE `feed_persistence_metadata` (
   `feed_id` bigint(20) default NULL,
   `size` int(11) default NULL,
   `version` int(11) default NULL,
+  `database_name` varchar(100) default NULL,
   PRIMARY KEY  (`feed_persistence_metadata_id`),
-  KEY feed_id (feed_id),
-  CONSTRAINT feed_persistence_metadata_ibfk1 FOREIGN KEY (feed_id) REFERENCES data_feed (data_feed_id) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=latin1;
+  KEY `feed_id` (`feed_id`),
+  CONSTRAINT `feed_persistence_metadata_ibfk1` FOREIGN KEY (`feed_id`) REFERENCES `data_feed` (`data_feed_id`) ON DELETE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=21 DEFAULT CHARSET=latin1;
 
 --
 -- Table structure for table `feed_popularity`
@@ -739,7 +835,7 @@ CREATE TABLE `feed_to_analysis_item` (
   KEY `analysis_item_id` (`analysis_item_id`),
   CONSTRAINT `feed_to_analysis_item_ibfk_1` FOREIGN KEY (`feed_id`) REFERENCES `data_feed` (`data_feed_id`) ON DELETE CASCADE,
   CONSTRAINT `feed_to_analysis_item_ibfk_2` FOREIGN KEY (`analysis_item_id`) REFERENCES `analysis_item` (`analysis_item_id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=1094 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=467 DEFAULT CHARSET=latin1;
 
 --
 -- Table structure for table `feed_to_tag`
@@ -755,7 +851,7 @@ CREATE TABLE `feed_to_tag` (
   KEY `analysis_tags_id` (`analysis_tags_id`),
   CONSTRAINT `feed_to_tag_ibfk_1` FOREIGN KEY (`feed_id`) REFERENCES `data_feed` (`data_feed_id`) ON DELETE CASCADE,
   CONSTRAINT `feed_to_tag_ibfk_2` FOREIGN KEY (`analysis_tags_id`) REFERENCES `analysis_tags` (`analysis_tags_id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=23 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=15 DEFAULT CHARSET=latin1;
 
 --
 -- Table structure for table `filter`
@@ -772,7 +868,7 @@ CREATE TABLE `filter` (
   PRIMARY KEY  (`filter_id`),
   KEY `analysis_item_id` (`analysis_item_id`),
   CONSTRAINT `filter_ibfk_1` FOREIGN KEY (`analysis_item_id`) REFERENCES `analysis_item` (`analysis_item_id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=40 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=42 DEFAULT CHARSET=latin1;
 
 --
 -- Table structure for table `filter_analysis_measure`
@@ -818,7 +914,7 @@ CREATE TABLE `filter_to_value` (
   KEY `value_id` (`value_id`),
   CONSTRAINT `filter_to_value_ibfk_1` FOREIGN KEY (`filter_id`) REFERENCES `filter` (`filter_id`) ON DELETE CASCADE,
   CONSTRAINT `filter_to_value_ibfk_2` FOREIGN KEY (`value_id`) REFERENCES `value` (`value_id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 --
 -- Table structure for table `filter_value`
@@ -847,7 +943,7 @@ CREATE TABLE `flat_file_upload_format` (
   PRIMARY KEY  (`flat_file_upload_format_id`),
   KEY `feed_id` (`feed_id`),
   CONSTRAINT `flat_file_upload_format_ibfk_1` FOREIGN KEY (`feed_id`) REFERENCES `data_feed` (`data_feed_id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=26 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=latin1;
 
 --
 -- Table structure for table `formatting_configuration`
@@ -859,7 +955,124 @@ CREATE TABLE `formatting_configuration` (
   `formatting_type` int(11) NOT NULL,
   `text_uom` varchar(100) default NULL,
   PRIMARY KEY  (`formatting_configuration_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=2117 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=135 DEFAULT CHARSET=latin1;
+
+--
+-- Table structure for table `goal_history`
+--
+
+DROP TABLE IF EXISTS `goal_history`;
+CREATE TABLE `goal_history` (
+  `goal_history_id` bigint(20) NOT NULL auto_increment,
+  `goal_tree_node_id` bigint(20) NOT NULL,
+  `evaluation_date` datetime NOT NULL,
+  `evaluation_result` double NOT NULL,
+  PRIMARY KEY  (`goal_history_id`),
+  KEY `goal_tree_node_id` (`goal_tree_node_id`),
+  CONSTRAINT `goal_history_ibfk1` FOREIGN KEY (`goal_tree_node_id`) REFERENCES `goal_tree_node` (`goal_tree_node_id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+--
+-- Table structure for table `goal_tree`
+--
+
+DROP TABLE IF EXISTS `goal_tree`;
+CREATE TABLE `goal_tree` (
+  `goal_tree_id` bigint(20) NOT NULL auto_increment,
+  `name` varchar(200) NOT NULL,
+  `description` text,
+  `root_node` bigint(20) NOT NULL,
+  PRIMARY KEY  (`goal_tree_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=latin1;
+
+--
+-- Table structure for table `goal_tree_node`
+--
+
+DROP TABLE IF EXISTS `goal_tree_node`;
+CREATE TABLE `goal_tree_node` (
+  `goal_tree_node_id` bigint(20) NOT NULL auto_increment,
+  `parent_goal_tree_node_id` bigint(20) default NULL,
+  `feed_id` bigint(20) default NULL,
+  `goal_value` int(11) default NULL,
+  `analysis_measure_id` bigint(20) default NULL,
+  `filter_id` bigint(20) default NULL,
+  `name` varchar(200) NOT NULL,
+  `description` text,
+  `high_is_good` tinyint(4) default NULL,
+  `icon_image` varchar(255) default NULL,
+  PRIMARY KEY  (`goal_tree_node_id`),
+  KEY `parent_goal_tree_node_id` (`parent_goal_tree_node_id`),
+  KEY `feed_id` (`feed_id`),
+  KEY `analysis_measure_id` (`analysis_measure_id`),
+  KEY `filter_id` (`filter_id`),
+  CONSTRAINT `goal_tree_node_ibfk1` FOREIGN KEY (`parent_goal_tree_node_id`) REFERENCES `goal_tree_node` (`goal_tree_node_id`) ON DELETE CASCADE,
+  CONSTRAINT `goal_tree_node_ibfk2` FOREIGN KEY (`feed_id`) REFERENCES `data_feed` (`data_feed_id`) ON DELETE CASCADE,
+  CONSTRAINT `goal_tree_node_ibfk3` FOREIGN KEY (`analysis_measure_id`) REFERENCES `analysis_item` (`analysis_item_id`) ON DELETE CASCADE,
+  CONSTRAINT `goal_tree_node_ibfk4` FOREIGN KEY (`filter_id`) REFERENCES `filter` (`filter_id`) ON DELETE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=26 DEFAULT CHARSET=latin1;
+
+--
+-- Table structure for table `goal_tree_node_tag`
+--
+
+DROP TABLE IF EXISTS `goal_tree_node_tag`;
+CREATE TABLE `goal_tree_node_tag` (
+  `goal_tree_node_tag_id` bigint(20) NOT NULL auto_increment,
+  `goal_tree_node_id` bigint(20) NOT NULL,
+  `tag` varchar(255) NOT NULL,
+  PRIMARY KEY  (`goal_tree_node_tag_id`),
+  KEY `goal_tree_node_id` (`goal_tree_node_id`),
+  CONSTRAINT `goal_tree_node_tag_ibfk1` FOREIGN KEY (`goal_tree_node_id`) REFERENCES `goal_tree_node` (`goal_tree_node_id`) ON DELETE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=131 DEFAULT CHARSET=latin1;
+
+--
+-- Table structure for table `goal_tree_node_to_feed`
+--
+
+DROP TABLE IF EXISTS `goal_tree_node_to_feed`;
+CREATE TABLE `goal_tree_node_to_feed` (
+  `goal_tree_node_to_feed_id` bigint(20) NOT NULL auto_increment,
+  `goal_tree_node_id` bigint(20) NOT NULL,
+  `feed_id` bigint(20) NOT NULL,
+  PRIMARY KEY  (`goal_tree_node_to_feed_id`),
+  KEY `goal_tree_node_id` (`goal_tree_node_id`),
+  KEY `feed_id` (`feed_id`),
+  CONSTRAINT `goal_tree_node_to_feed_ibfk1` FOREIGN KEY (`goal_tree_node_id`) REFERENCES `goal_tree_node` (`goal_tree_node_id`) ON DELETE CASCADE,
+  CONSTRAINT `goal_tree_node_to_feed_ibfk2` FOREIGN KEY (`feed_id`) REFERENCES `data_feed` (`data_feed_id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+--
+-- Table structure for table `goal_tree_node_to_insight`
+--
+
+DROP TABLE IF EXISTS `goal_tree_node_to_insight`;
+CREATE TABLE `goal_tree_node_to_insight` (
+  `goal_tree_node_to_insight_id` bigint(20) NOT NULL auto_increment,
+  `goal_tree_node_id` bigint(20) NOT NULL,
+  `insight_id` bigint(20) NOT NULL,
+  PRIMARY KEY  (`goal_tree_node_to_insight_id`),
+  KEY `goal_tree_node_id` (`goal_tree_node_id`),
+  KEY `insight_id` (`insight_id`),
+  CONSTRAINT `goal_tree_node_to_insight_ibfk1` FOREIGN KEY (`goal_tree_node_id`) REFERENCES `goal_tree_node` (`goal_tree_node_id`) ON DELETE CASCADE,
+  CONSTRAINT `goal_tree_node_to_insight_ibfk2` FOREIGN KEY (`insight_id`) REFERENCES `analysis` (`analysis_id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+--
+-- Table structure for table `goal_tree_node_to_solution`
+--
+
+DROP TABLE IF EXISTS `goal_tree_node_to_solution`;
+CREATE TABLE `goal_tree_node_to_solution` (
+  `goal_tree_node_to_solution_id` bigint(20) NOT NULL auto_increment,
+  `goal_tree_node_id` bigint(20) NOT NULL,
+  `solution_id` bigint(20) NOT NULL,
+  PRIMARY KEY  (`goal_tree_node_to_solution_id`),
+  KEY `goal_tree_node_id` (`goal_tree_node_id`),
+  KEY `solution_id` (`solution_id`),
+  CONSTRAINT `goal_tree_node_to_solution_ibfk1` FOREIGN KEY (`goal_tree_node_id`) REFERENCES `goal_tree_node` (`goal_tree_node_id`) ON DELETE CASCADE,
+  CONSTRAINT `goal_tree_node_to_solution_ibfk2` FOREIGN KEY (`solution_id`) REFERENCES `analysis` (`analysis_id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 --
 -- Table structure for table `google_feed`
@@ -887,6 +1100,43 @@ CREATE TABLE `graphic_definition` (
   KEY `analysis_id` (`analysis_id`),
   CONSTRAINT `graphic_definition_ibfk_1` FOREIGN KEY (`analysis_id`) REFERENCES `analysis` (`analysis_id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+--
+-- Table structure for table `group_audit_message`
+--
+
+DROP TABLE IF EXISTS `group_audit_message`;
+CREATE TABLE `group_audit_message` (
+  `group_audit_message_id` bigint(20) NOT NULL auto_increment,
+  `group_id` bigint(20) NOT NULL,
+  `user_id` bigint(20) NOT NULL,
+  `comment` text NOT NULL,
+  `audit_time` datetime NOT NULL,
+  PRIMARY KEY  (`group_audit_message_id`),
+  KEY `group_id` (`group_id`),
+  KEY `user_id` (`user_id`),
+  CONSTRAINT `group_audit_message_ibfk1` FOREIGN KEY (`group_id`) REFERENCES `community_group` (`community_group_id`),
+  CONSTRAINT `group_audit_message_ibfk2` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+--
+-- Table structure for table `group_comment`
+--
+
+DROP TABLE IF EXISTS `group_comment`;
+CREATE TABLE `group_comment` (
+  `group_comment_id` bigint(20) NOT NULL auto_increment,
+  `group_id` bigint(20) NOT NULL,
+  `user_id` bigint(20) NOT NULL,
+  `comment` text NOT NULL,
+  `time_created` datetime NOT NULL,
+  `time_updated` datetime default NULL,
+  PRIMARY KEY  (`group_comment_id`),
+  KEY `group_id` (`group_id`),
+  KEY `user_id` (`user_id`),
+  CONSTRAINT `group_comment_ibfk1` FOREIGN KEY (`group_id`) REFERENCES `community_group` (`community_group_id`),
+  CONSTRAINT `group_comment_ibfk2` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=latin1;
 
 --
 -- Table structure for table `group_to_feed_join`
@@ -935,7 +1185,7 @@ CREATE TABLE `group_to_tag` (
   KEY `analysis_tags_id` (`analysis_tags_id`),
   CONSTRAINT `group_to_tag_ibfk_1` FOREIGN KEY (`group_id`) REFERENCES `community_group` (`community_group_id`) ON DELETE CASCADE,
   CONSTRAINT `group_to_tag_ibfk_2` FOREIGN KEY (`analysis_tags_id`) REFERENCES `analysis_tags` (`analysis_tags_id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=latin1;
 
 --
 -- Table structure for table `group_to_user_join`
@@ -952,7 +1202,32 @@ CREATE TABLE `group_to_user_join` (
   KEY `group_id` (`group_id`),
   CONSTRAINT `group_to_user_join_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE,
   CONSTRAINT `group_to_user_join_ibfk_2` FOREIGN KEY (`group_id`) REFERENCES `community_group` (`community_group_id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=latin1;
+
+--
+-- Table structure for table `hierarchy`
+--
+
+DROP TABLE IF EXISTS `hierarchy`;
+CREATE TABLE `hierarchy` (
+  `hierarchy_id` bigint(20) NOT NULL auto_increment,
+  PRIMARY KEY  (`hierarchy_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=latin1;
+
+--
+-- Table structure for table `hierarchy_level`
+--
+
+DROP TABLE IF EXISTS `hierarchy_level`;
+CREATE TABLE `hierarchy_level` (
+  `hierarchy_level_id` bigint(20) NOT NULL auto_increment,
+  `level` int(11) default NULL,
+  `parent_item_id` bigint(20) default NULL,
+  `analysis_item_id` bigint(20) NOT NULL,
+  PRIMARY KEY  (`hierarchy_level_id`),
+  KEY `analysis_item_id` (`analysis_item_id`),
+  CONSTRAINT `hierarchy_level_ibfk2` FOREIGN KEY (`analysis_item_id`) REFERENCES `analysis_item` (`analysis_item_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=latin1;
 
 --
 -- Table structure for table `icon`
@@ -964,6 +1239,43 @@ CREATE TABLE `icon` (
   `icon_name` varchar(100) default NULL,
   `icon_file` varchar(100) default NULL,
   PRIMARY KEY  (`icon_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+--
+-- Table structure for table `insight_audit_message`
+--
+
+DROP TABLE IF EXISTS `insight_audit_message`;
+CREATE TABLE `insight_audit_message` (
+  `insight_audit_message_id` bigint(20) NOT NULL auto_increment,
+  `insight_id` bigint(20) NOT NULL,
+  `user_id` bigint(20) NOT NULL,
+  `comment` text NOT NULL,
+  `audit_time` datetime NOT NULL,
+  PRIMARY KEY  (`insight_audit_message_id`),
+  KEY `insight_id` (`insight_id`),
+  KEY `user_id` (`user_id`),
+  CONSTRAINT `insight_audit_message_ibfk1` FOREIGN KEY (`insight_id`) REFERENCES `analysis` (`analysis_id`),
+  CONSTRAINT `insight_audit_message_ibfk2` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+--
+-- Table structure for table `insight_comment`
+--
+
+DROP TABLE IF EXISTS `insight_comment`;
+CREATE TABLE `insight_comment` (
+  `insight_comment_id` bigint(20) NOT NULL auto_increment,
+  `insight_id` bigint(20) NOT NULL,
+  `user_id` bigint(20) NOT NULL,
+  `comment` text NOT NULL,
+  `time_created` datetime NOT NULL,
+  `time_updated` datetime default NULL,
+  PRIMARY KEY  (`insight_comment_id`),
+  KEY `insight_id` (`insight_id`),
+  KEY `user_id` (`user_id`),
+  CONSTRAINT `insight_comment_ibfk1` FOREIGN KEY (`insight_id`) REFERENCES `analysis` (`analysis_id`),
+  CONSTRAINT `insight_comment_ibfk2` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 --
@@ -992,7 +1304,7 @@ CREATE TABLE `item_key` (
   `item_key_id` bigint(20) NOT NULL auto_increment,
   `display_name` varchar(255) default NULL,
   PRIMARY KEY  (`item_key_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=2620 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=136 DEFAULT CHARSET=latin1;
 
 --
 -- Table structure for table `license_subscription`
@@ -1023,7 +1335,7 @@ CREATE TABLE `limits_metadata` (
   `top_items` tinyint(4) default NULL,
   `number_items` int(11) default NULL,
   PRIMARY KEY  (`limits_metadata_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 --
 -- Table structure for table `list_analysis_field`
@@ -1055,7 +1367,7 @@ CREATE TABLE `list_definition` (
   PRIMARY KEY  (`list_definition_id`),
   KEY `analysis_id` (`analysis_id`),
   CONSTRAINT `list_definition_ibfk_1` FOREIGN KEY (`analysis_id`) REFERENCES `analysis` (`analysis_id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=48 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=27 DEFAULT CHARSET=latin1;
 
 --
 -- Table structure for table `list_limits_metadata`
@@ -1067,13 +1379,11 @@ CREATE TABLE `list_limits_metadata` (
   `limits_metadata_id` bigint(20) default NULL,
   `analysis_item_id` bigint(20) default NULL,
   PRIMARY KEY  (`list_limits_metadata_id`),
-  KEY limits_metadata_id (limits_metadata_id),
-  KEY analysis_item_id (analysis_item_id),
-  CONSTRAINT `list_limits_metadata_ibfk_2` FOREIGN KEY (`limits_metadata_id`) REFERENCES `limits_metadata` (`limits_metadata_id`) ON DELETE CASCADE,
-  CONSTRAINT `list_limits_metadata_ibfk_1` FOREIGN KEY (`analysis_item_id`) REFERENCES `analysis_item` (`analysis_item_id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=latin1;
-
-
+  KEY `limits_metadata_id` (`limits_metadata_id`),
+  KEY `analysis_item_id` (`analysis_item_id`),
+  CONSTRAINT `list_limits_metadata_ibfk_1` FOREIGN KEY (`analysis_item_id`) REFERENCES `analysis_item` (`analysis_item_id`) ON DELETE CASCADE,
+  CONSTRAINT `list_limits_metadata_ibfk_2` FOREIGN KEY (`limits_metadata_id`) REFERENCES `limits_metadata` (`limits_metadata_id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 --
 -- Table structure for table `lookup_table_scrub`
@@ -1086,7 +1396,7 @@ CREATE TABLE `lookup_table_scrub` (
   `source_key` bigint(20) default NULL,
   `target_key` bigint(20) default NULL,
   PRIMARY KEY  (`lookup_table_scrub_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 --
 -- Table structure for table `lookup_table_scrub_pair`
@@ -1099,7 +1409,7 @@ CREATE TABLE `lookup_table_scrub_pair` (
   `target_value` varchar(255) default NULL,
   `data_scrub_id` bigint(20) default NULL,
   PRIMARY KEY  (`lookup_table_scrub_pair_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 --
 -- Table structure for table `map_definition`
@@ -1130,7 +1440,7 @@ CREATE TABLE `measure_condition` (
   `high_color` int(11) NOT NULL,
   `high_value` int(11) NOT NULL,
   PRIMARY KEY  (`measure_condition_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 --
 -- Table structure for table `measure_condition_range`
@@ -1147,7 +1457,7 @@ CREATE TABLE `measure_condition_range` (
   KEY `high_measure_condition_id` (`high_measure_condition_id`),
   CONSTRAINT `measure_condition_range_ibfk_1` FOREIGN KEY (`low_measure_condition_id`) REFERENCES `measure_condition` (`measure_condition_id`) ON DELETE CASCADE,
   CONSTRAINT `measure_condition_range_ibfk_2` FOREIGN KEY (`high_measure_condition_id`) REFERENCES `measure_condition` (`measure_condition_id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 --
 -- Table structure for table `merchant`
@@ -1158,7 +1468,7 @@ CREATE TABLE `merchant` (
   `merchant_id` bigint(20) NOT NULL auto_increment,
   `merchant_name` varchar(100) NOT NULL,
   PRIMARY KEY  (`merchant_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 --
 -- Table structure for table `named_item_key`
@@ -1172,7 +1482,7 @@ CREATE TABLE `named_item_key` (
   PRIMARY KEY  (`named_item_key_id`),
   KEY `item_key_id` (`item_key_id`),
   CONSTRAINT `named_item_key_ibfk_1` FOREIGN KEY (`item_key_id`) REFERENCES `item_key` (`item_key_id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=2408 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=136 DEFAULT CHARSET=latin1;
 
 --
 -- Table structure for table `numeric_value`
@@ -1197,7 +1507,7 @@ CREATE TABLE `payment` (
   `payment_date` datetime NOT NULL,
   `purchase_id` bigint(20) NOT NULL,
   PRIMARY KEY  (`payment_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 --
 -- Table structure for table `png_export`
@@ -1209,7 +1519,7 @@ CREATE TABLE `png_export` (
   `user_id` bigint(20) NOT NULL,
   `png_image` blob NOT NULL,
   PRIMARY KEY  (`png_export_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=latin1;
 
 --
 -- Table structure for table `price`
@@ -1220,7 +1530,7 @@ CREATE TABLE `price` (
   `price_id` bigint(20) NOT NULL auto_increment,
   `cost` double NOT NULL,
   PRIMARY KEY  (`price_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 --
 -- Table structure for table `purchase`
@@ -1235,7 +1545,7 @@ CREATE TABLE `purchase` (
   `purchase_date` datetime NOT NULL,
   `canceled` tinyint(4) default NULL,
   PRIMARY KEY  (`purchase_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 --
 -- Table structure for table `range_filter`
@@ -1250,7 +1560,7 @@ CREATE TABLE `range_filter` (
   PRIMARY KEY  (`range_filter_id`),
   KEY `filter_id` (`filter_id`),
   CONSTRAINT `range_filter_ibfk_1` FOREIGN KEY (`filter_id`) REFERENCES `filter` (`filter_id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 --
 -- Table structure for table `rolling_range_filter`
@@ -1264,21 +1574,7 @@ CREATE TABLE `rolling_range_filter` (
   PRIMARY KEY  (`rolling_range_filter_id`),
   KEY `filter_id` (`filter_id`),
   CONSTRAINT `rolling_range_filter_ibfk_1` FOREIGN KEY (`filter_id`) REFERENCES `filter` (`filter_id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
-
---
--- Table structure for table `salesforce_subject_definition`
---
-
--- DROP TABLE IF EXISTS `salesforce_subject_definition`;
--- CREATE TABLE `salesforce_subject_definition` (
---  `salesforce_subject_definition_id` int(11) NOT NULL auto_increment,
---  `data_feed_id` int(11) NOT NULL,
---  `subject_type` int(11) NOT NULL,
---  PRIMARY KEY  (`salesforce_subject_definition_id`),
---  KEY `data_feed_id` (`data_feed_id`),
---  CONSTRAINT `salesforce_subject_definition_ibfk_1` FOREIGN KEY (`data_feed_id`) REFERENCES `data_feed` (`data_feed_id`) ON DELETE CASCADE
--- ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=42 DEFAULT CHARSET=latin1;
 
 --
 -- Table structure for table `solution`
@@ -1294,8 +1590,23 @@ CREATE TABLE `solution` (
   `copy_data` tinyint(4) default NULL,
   `industry` varchar(255) default NULL,
   `author` varchar(255) default NULL,
+  `goal_tree_id` bigint(20) default NULL,
   PRIMARY KEY  (`solution_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=latin1;
+
+--
+-- Table structure for table `solution_tag`
+--
+
+DROP TABLE IF EXISTS `solution_tag`;
+CREATE TABLE `solution_tag` (
+  `solution_tag_id` bigint(20) NOT NULL auto_increment,
+  `solution_id` bigint(20) NOT NULL,
+  `tag_name` varchar(255) NOT NULL,
+  PRIMARY KEY  (`solution_tag_id`),
+  KEY `solution_id` (`solution_id`),
+  CONSTRAINT `solution_tag_ibfk1` FOREIGN KEY (`solution_id`) REFERENCES `solution` (`solution_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 --
 -- Table structure for table `solution_to_feed`
@@ -1307,7 +1618,23 @@ CREATE TABLE `solution_to_feed` (
   `feed_id` bigint(20) NOT NULL,
   `solution_id` bigint(20) NOT NULL,
   PRIMARY KEY  (`solution_to_feed_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=latin1;
+
+--
+-- Table structure for table `solution_to_goal_tree`
+--
+
+DROP TABLE IF EXISTS `solution_to_goal_tree`;
+CREATE TABLE `solution_to_goal_tree` (
+  `solution_to_goal_tree_id` bigint(20) NOT NULL auto_increment,
+  `solution_id` bigint(20) NOT NULL,
+  `goal_tree_id` bigint(20) NOT NULL,
+  PRIMARY KEY  (`solution_to_goal_tree_id`),
+  KEY `solution_id` (`solution_id`),
+  KEY `goal_tree_id` (`goal_tree_id`),
+  CONSTRAINT `solution_to_goal_tree_ibfk1` FOREIGN KEY (`solution_id`) REFERENCES `solution` (`solution_id`) ON DELETE CASCADE,
+  CONSTRAINT `solution_to_goal_tree_ibfk2` FOREIGN KEY (`goal_tree_id`) REFERENCES `goal_tree` (`goal_tree_id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 --
 -- Table structure for table `store`
@@ -1336,7 +1663,7 @@ CREATE TABLE `string_value` (
   PRIMARY KEY  (`string_value_id`),
   KEY `value_id` (`value_id`),
   CONSTRAINT `string_value_ibfk_1` FOREIGN KEY (`value_id`) REFERENCES `value` (`value_id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=68 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 --
 -- Table structure for table `tag_cloud`
@@ -1346,7 +1673,7 @@ DROP TABLE IF EXISTS `tag_cloud`;
 CREATE TABLE `tag_cloud` (
   `tag_cloud_id` bigint(20) NOT NULL auto_increment,
   PRIMARY KEY  (`tag_cloud_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=236 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 --
 -- Table structure for table `tag_cloud_to_tag`
@@ -1377,7 +1704,7 @@ CREATE TABLE `text_replace_scrub` (
   `regex` tinyint(4) default NULL,
   `case_sensitive` tinyint(4) default NULL,
   PRIMARY KEY  (`text_replace_scrub_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 --
 -- Table structure for table `time_based_analysis_measure`
@@ -1416,7 +1743,7 @@ CREATE TABLE `upload_policy_users` (
   `user_id` bigint(20) NOT NULL,
   `role` int(11) NOT NULL,
   PRIMARY KEY  (`upload_policy_users_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=127 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=79 DEFAULT CHARSET=latin1;
 
 --
 -- Table structure for table `user`
@@ -1431,10 +1758,13 @@ CREATE TABLE `user` (
   `email` varchar(60) NOT NULL,
   `username` varchar(40) NOT NULL,
   `permissions` int(11) NOT NULL,
+  `account_admin` tinyint(4) NOT NULL default '1',
+  `data_source_creator` tinyint(4) NOT NULL default '0',
+  `insight_creator` tinyint(4) NOT NULL default '0',
   PRIMARY KEY  (`user_id`),
   KEY `account_id` (`account_id`),
   CONSTRAINT `user_ibfk_1` FOREIGN KEY (`account_id`) REFERENCES `account` (`account_id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=15 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=latin1;
 
 --
 -- Table structure for table `user_permission`
@@ -1466,7 +1796,7 @@ CREATE TABLE `user_to_analysis` (
   KEY `analysis_id` (`analysis_id`),
   CONSTRAINT `user_to_analysis_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE,
   CONSTRAINT `user_to_analysis_ibfk_2` FOREIGN KEY (`analysis_id`) REFERENCES `analysis` (`analysis_id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=261 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=34 DEFAULT CHARSET=latin1;
 
 --
 -- Table structure for table `user_to_feed`
@@ -1484,6 +1814,23 @@ CREATE TABLE `user_to_feed` (
   CONSTRAINT `user_to_feed_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE,
   CONSTRAINT `user_to_feed_ibfk_2` FOREIGN KEY (`data_feed_id`) REFERENCES `data_feed` (`data_feed_id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+--
+-- Table structure for table `user_to_goal_tree`
+--
+
+DROP TABLE IF EXISTS `user_to_goal_tree`;
+CREATE TABLE `user_to_goal_tree` (
+  `user_to_goal_tree_id` bigint(20) NOT NULL auto_increment,
+  `goal_tree_id` bigint(20) NOT NULL,
+  `user_id` bigint(20) NOT NULL,
+  `user_role` int(11) default NULL,
+  PRIMARY KEY  (`user_to_goal_tree_id`),
+  KEY `user_id` (`user_id`),
+  KEY `goal_tree_id` (`goal_tree_id`),
+  CONSTRAINT `user_to_goal_tree_ibfk1` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE,
+  CONSTRAINT `user_to_goal_tree_ibfk2` FOREIGN KEY (`goal_tree_id`) REFERENCES `goal_tree` (`goal_tree_id`) ON DELETE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=latin1;
 
 --
 -- Table structure for table `user_to_license_subscription`
@@ -1512,19 +1859,23 @@ CREATE TABLE `user_to_solution` (
   `solution_id` bigint(20) default NULL,
   `user_role` int(11) default NULL,
   PRIMARY KEY  (`user_solution_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=33 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=latin1;
 
-drop table if exists user_to_solution_to_feed;
-create table user_to_solution_to_feed (
-    user_to_solution_to_feed_id bigint(20) auto_increment not null,
-    user_to_solution_id bigint(20) not null,
-    feed_id bigint(20) not null,
-    primary key(user_to_solution_to_feed_id),
-    KEY user_to_solution_id (user_to_solution_id),
-    CONSTRAINT user_to_solution_to_feed_ibfk_1 FOREIGN KEY (user_to_solution_id) REFERENCES user_solution (user_solution_id) ON DELETE CASCADE,
-    KEY feed_id (feed_id),
-    CONSTRAINT user_to_solution_to_feed_ibfk_2 FOREIGN KEY (feed_id) REFERENCES data_feed (data_feed_id) ON DELETE CASCADE
-);
+--
+-- Table structure for table `user_to_solution_to_feed`
+--
+
+DROP TABLE IF EXISTS `user_to_solution_to_feed`;
+CREATE TABLE `user_to_solution_to_feed` (
+  `user_to_solution_to_feed_id` bigint(20) NOT NULL auto_increment,
+  `user_to_solution_id` bigint(20) NOT NULL,
+  `feed_id` bigint(20) NOT NULL,
+  PRIMARY KEY  (`user_to_solution_to_feed_id`),
+  KEY `user_to_solution_id` (`user_to_solution_id`),
+  KEY `feed_id` (`feed_id`),
+  CONSTRAINT `user_to_solution_to_feed_ibfk_1` FOREIGN KEY (`user_to_solution_id`) REFERENCES `user_solution` (`user_solution_id`) ON DELETE CASCADE,
+  CONSTRAINT `user_to_solution_to_feed_ibfk_2` FOREIGN KEY (`feed_id`) REFERENCES `data_feed` (`data_feed_id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 --
 -- Table structure for table `user_upload`
@@ -1539,7 +1890,7 @@ CREATE TABLE `user_upload` (
   PRIMARY KEY  (`user_upload_id`),
   KEY `account_id` (`account_id`),
   CONSTRAINT `user_upload_ibfk_1` FOREIGN KEY (`account_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=77 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=latin1;
 
 --
 -- Table structure for table `value`
@@ -1549,7 +1900,7 @@ DROP TABLE IF EXISTS `value`;
 CREATE TABLE `value` (
   `value_id` bigint(20) NOT NULL auto_increment,
   PRIMARY KEY  (`value_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=68 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 --
 -- Table structure for table `value_based_filter`
@@ -1563,7 +1914,7 @@ CREATE TABLE `value_based_filter` (
   PRIMARY KEY  (`value_based_filter_id`),
   KEY `filter_id` (`filter_id`),
   CONSTRAINT `value_based_filter_ibfk_1` FOREIGN KEY (`filter_id`) REFERENCES `filter` (`filter_id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=33 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 --
 -- Table structure for table `yahoo_map_definition`
@@ -1590,4 +1941,4 @@ CREATE TABLE `yahoo_map_definition` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2008-12-20  1:51:43
+-- Dump completed on 2009-01-27 16:15:11

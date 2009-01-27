@@ -3,16 +3,58 @@
     <taskdef resource="flexTasks.tasks" classpath="${flex.sdk.dir}/ant/lib/flexTasks.jar"/>
 
     <taskdef name="S3Upload" classname="dak.ant.taskdefs.S3Upload"/>
+    <taskdef name="StopInstances" classname="com.easyinsight.watchdog.updatetask.ShutdownAppInstanceTask"/>
+    <taskdef name="UpdateInstances" classname="com.easyinsight.watchdog.updatetask.UpdateAppInstanceTask"/>
+    <taskdef name="StartInstances" classname="com.easyinsight.watchdog.updatetask.StartAppInstanceTask"/>
 
 
     <property name="FLEX_HOME" value="${flex.sdk.dir}"/>
+
+    <property name="watchdog.out.path" value="../java/out/watchdog/"/>
+    <property name="watchdog.archive.path" value="${watchdog.out.path}/watchdog"/>
 
     <property name="code.path" value="../java/out/code/"/>
     <property name="webapp.path" value="${code.path}/webapp"/>
     <property name="flex.path" value="${webapp.path}/easyui-debug"/>
 
+    <target name="shutdownInstances">
+        <StopInstances/>
+    </target>
+
+    <target name="updateInstances">
+        <UpdateInstances/>
+    </target>
+
+    <target name="startInstances">
+        <StartInstances/>
+    </target>
+
+    <target name="appwatchdog">
+        <mkdir dir="${watchdog.archive.path}"/>
+        <javac destdir="${watchdog.archive.path}"
+               optimize="off"
+               debug="on" failonerror="false"
+               srcdir="../build/src"
+               excludes="**/*.smap">
+            <classpath>
+                <fileset dir="../build/lib">
+                    <include name="*.jar"/>
+                </fileset>
+            </classpath>
+            <include name="**"/>
+            <exclude name="tags/**"/>
+        </javac>
+        <unzip dest="${watchdog.archive.path}">
+            <fileset dir="../build/lib">
+                <include name="*.jar"/>
+            </fileset>
+        </unzip>
+        <jar destfile="${watchdog.out.path}/watchdog.jar" baseDir="${watchdog.archive.path}"/>
+    </target>
+
     <target name="clean">
         <delete dir="${webapp.path}"/>
+        <delete dir="${watchdog.archive.path}"/>
     </target>
 
     <target name="archive" depends="compileFlex">
