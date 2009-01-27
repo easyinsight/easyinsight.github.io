@@ -117,7 +117,7 @@
                   secretKey="bTUPJqHHeC15+g59BQP8ackadCZj/TsSucNwPwuI"
                   bucket="eiproduction"
                   publicRead="false">
-            <fileset dir="../out/code" includes="code.zip"/>
+            <fileset dir="${code.path}" includes="code.zip"/>
         </S3Upload>
     </target>
 </project>
