@@ -75,6 +75,7 @@ import com.adobe.ac.mxeffects.CubeRotate;
             			// session expired
             			fatal = true;
             			ExternalInterface.call("window.location.reload()");
+                        trace("blah");
             		}            		
             	}
             	if (!fatal) {
