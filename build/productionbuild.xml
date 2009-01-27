@@ -94,7 +94,7 @@
     <target name="compileFlex" depends="compileJava">
         <mxmlc file="../flex/src/PrimaryWorkspace.mxml" output="${flex.path}/PrimaryWorkspace.swf"
                static-rsls="true">
-            <load-config filename="../flex/flex-config.xml"/>
+            <load-config filename="${teamcity.build.checkoutDir}/flex/flex-config.xml"/>
         </mxmlc>
         <mxmlc file="../flex/src/com/easyinsight/dashboard/ListViewModule.mxml" output="${flex.path}/ListViewModule.swf"
                static-rsls="true">
