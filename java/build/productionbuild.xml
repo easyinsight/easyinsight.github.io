@@ -94,7 +94,7 @@
     <target name="compileFlex" depends="compileJava">
         <mxmlc file="../../flex/src/PrimaryWorkspace.mxml" output="${flex.path}/PrimaryWorkspace.swf"
                static-rsls="false">
-            <load-config filename="../../flex/flex-config.xml"/>
+            <load-config filename="..\\..\\flex\\flex-config.xml"/>
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
                 <url rsl-url="framework_3.1.0.2170.swz"/>
                 <url policy-file-url=""/>
