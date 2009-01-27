@@ -5,7 +5,6 @@ import com.easyinsight.database.Database;
 import com.easyinsight.datafeeds.FeedStorage;
 import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.userupload.UserUploadService;
-import com.easyinsight.billing.*;
 import com.easyinsight.logging.LogClass;
 
 import java.util.Collection;
@@ -23,7 +22,7 @@ import org.hibernate.Session;
 @SuppressWarnings({"UnusedAssignment"})
 public class StoreService {
 
-    private TransactionStorage transactionStorage = new TransactionStorage();
+    //private TransactionStorage transactionStorage = new TransactionStorage();
 
     public void addStore() {
 
@@ -37,7 +36,7 @@ public class StoreService {
         
     }
 
-    public String createURL() {
+    /*public String createURL() {
         try {
             InstallPaymentInstruction obj = new InstallPaymentInstruction();
             String callerID;
@@ -71,9 +70,9 @@ public class StoreService {
             LogClass.error(e);
             throw new RuntimeException(e);
         }
-    }
+    }    */
 
-    public String amazonBuy(String senderID, String callerReference) {
+    /*public String amazonBuy(String senderID, String callerReference) {
         try {
             InstallPaymentInstruction obj = new InstallPaymentInstruction();
             String callerID;
@@ -103,7 +102,7 @@ public class StoreService {
             }
             LogClass.debug("got " + senderID);
             //String response = new Driver(obj.payRequest(recipientID, callerID, senderID, "10", callerReference), true).call();
-            Transaction transaction = Pay.pay(recipientID, callerID, senderID, "10", callerReference);
+            Transaction transaction = Pay.pay(recipientID, callerID, senderID, "10", callerReference);  */
             /*BuyResponse buyResponse;
             if (transaction.isComplete()) {
                 if (transaction.isFailed()) {
@@ -115,7 +114,7 @@ public class StoreService {
             } else {
                 
             }*/
-            transactionStorage.addTransaction(transaction);
+       /*     transactionStorage.addTransaction(transaction);
             //LogClass.debug(response);
             //return response;
         } catch (Exception e) {
@@ -123,7 +122,7 @@ public class StoreService {
             throw new RuntimeException(e);
         }
         return "";
-    }
+    }       */
 
     public Collection<Merchant> getMerchants() {
         Session session = Database.instance().createSession();

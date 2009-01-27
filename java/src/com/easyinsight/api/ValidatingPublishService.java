@@ -272,7 +272,7 @@ public class ValidatingPublishService extends PublishService implements IValidat
         Vector results = (Vector) ctx.get("RECV_RESULTS");
         WSHandlerResult wsHandlerResult = (WSHandlerResult) results.get(0);
         WSSecurityEngineResult securityResult = (WSSecurityEngineResult) wsHandlerResult.getResults().get(0);
-        WSUsernameTokenPrincipal principal = (WSUsernameTokenPrincipal) securityResult.get("principal");
+        WSUsernameTokenPrincipal principal = (WSUsernameTokenPrincipal) securityResult.getPrincipal();
         return principal.getName();
     }
 }
