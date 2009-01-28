@@ -111,6 +111,11 @@
                 <include name="**/*"/>
             </fileset>
         </copy>
+        <copy todir="${webapp.path}/WEB-INF/classes">
+            <fileset dir="../java/src">
+                <include name="**/*"/>
+            </fileset>
+        </copy>
         <copy todir="${webapp.path}/META-INF">
             <fileset dir="../java/web/META-INF">
                 <include name="**/*"/>
