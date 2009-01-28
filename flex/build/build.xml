@@ -2,115 +2,12 @@
     <property file="local.build.properties"/>
     <taskdef resource="flexTasks.tasks" classpath="${flex.sdk.dir}/ant/lib/flexTasks.jar"/>
 
-    <taskdef name="S3Upload" classname="dak.ant.taskdefs.S3Upload"/>
-
 
     <property name="FLEX_HOME" value="${flex.sdk.dir}"/>
     <target name="compile">
-        <mxmlc file="../src/PrimaryWorkspace.mxml" output="c:/flexout/PrimaryWorkspace.swf"
-               static-rsls="false">
+        <mxmlc file="../src/PrimaryWorkspace.mxml" output="c:/apache-tomcat-6.0.14/webapps/DMS/easyui-debug/PrimaryWorkspace.swf"
+               static-rsls="true">
             <load-config filename="../flex-config.xml"/>
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
-                <url rsl-url="framework_3.1.0.2170.swz"/>
-                <url policy-file-url=""/>
-                <url rsl-url="framework_3.1.0.2170.swf"/>
-                <url policy-file-url=""/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/datavisualization.swc">
-                <url rsl-url="datavisualization_3.1.0.2170.swz"/>
-                <url policy-file-url=""/>
-                <url rsl-url="datavisualization_3.1.0.2170.swf"/>
-                <url policy-file-url=""/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
-                <url rsl-url="rpc_3.0.0.3.1.0.2170.swz"/>
-                <url policy-file-url=""/>
-                <url rsl-url="rpc_3.0.0.3.1.0.2170.swf"/>
-                <url policy-file-url=""/>
-            </runtime-shared-library-path>
         </mxmlc>
-        <mxmlc file="../src/com/easyinsight/dashboard/ListViewModule.mxml" output="c:/flexout/ListViewModule.swf"
-               static-rsls="false">
-            <load-config filename="../list-module.xml"/>
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
-                <url rsl-url="framework_3.1.0.2170.swz"/>
-                <url policy-file-url=""/>
-                <url rsl-url="framework_3.1.0.2170.swf"/>
-                <url policy-file-url=""/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/datavisualization.swc">
-                <url rsl-url="datavisualization_3.1.0.2170.swz"/>
-                <url policy-file-url=""/>
-                <url rsl-url="datavisualization_3.1.0.2170.swf"/>
-                <url policy-file-url=""/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
-                <url rsl-url="rpc_3.0.0.3.1.0.2170.swz"/>
-                <url policy-file-url=""/>
-                <url rsl-url="rpc_3.0.0.3.1.0.2170.swf"/>
-                <url policy-file-url=""/>
-            </runtime-shared-library-path>
-        </mxmlc>
-        <mxmlc file="../src/AdministrationApplication.mxml" output="c:/flexout/AdministrationApplication.swf" static-rsls="false">
-            <load-config filename="../administration-app.xml"/>
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
-                <url rsl-url="framework_3.1.0.2170.swz"/>
-                <url policy-file-url=""/>
-                <url rsl-url="framework_3.1.0.2170.swf"/>
-                <url policy-file-url=""/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/datavisualization.swc">
-                <url rsl-url="datavisualization_3.1.0.2170.swz"/>
-                <url policy-file-url=""/>
-                <url rsl-url="datavisualization_3.1.0.2170.swf"/>
-                <url policy-file-url=""/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
-                <url rsl-url="rpc_3.0.0.3.1.0.2170.swz"/>
-                <url policy-file-url=""/>
-                <url rsl-url="rpc_3.0.0.3.1.0.2170.swf"/>
-                <url policy-file-url=""/>
-            </runtime-shared-library-path>
-        </mxmlc>
-        <mxmlc file="../src/EmbeddedInsight.mxml" output="c:/flexout/EmbeddedInsight.swf" static-rsls="false">
-            <load-config filename="../embedded-insight.xml"/>
-            
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
-                <url rsl-url="framework_3.1.0.2170.swz"/>
-                <url policy-file-url=""/>
-                <url rsl-url="framework_3.1.0.2170.swf"/>
-                <url policy-file-url=""/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/datavisualization.swc">
-                <url rsl-url="datavisualization_3.1.0.2170.swz"/>
-                <url policy-file-url=""/>
-                <url rsl-url="datavisualization_3.1.0.2170.swf"/>
-                <url policy-file-url=""/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
-                <url rsl-url="rpc_3.0.0.3.1.0.2170.swz"/>
-                <url policy-file-url=""/>
-                <url rsl-url="rpc_3.0.0.3.1.0.2170.swf"/>
-                <url policy-file-url=""/>
-            </runtime-shared-library-path>
-        </mxmlc>
-    </target>
-
-    <target name="upload">
-        <S3Upload verbose="true"
-                accessId="0AWCBQ78TJR8QCY8ABG2"
-                secretKey="bTUPJqHHeC15+g59BQP8ackadCZj/TsSucNwPwuI"
-                bucket="eiproduction"
-                publicRead="false">
-            <fileset dir="c:/flexout" includes="**/*"/>
-        </S3Upload>
     </target>
 </project>

@@ -51,7 +51,7 @@ public class UserTest extends TestCase {
         // create an account
         AccountTransferObject accountTransferObject = new AccountTransferObject();
         accountTransferObject.setAccountType(new FreeAccount());
-        long accountID = userService.createAccount(testUser, accountTransferObject);
+        //long accountID = userService.createAccount(testUser, accountTransferObject);
         AccountTransferObject retrievedTransferObject = userService.retrieveAccount();
         //retrievedTransferObject.setAccountType(new IndividualAccount());
         // need transactionality on this...

@@ -8,7 +8,7 @@ package com.easyinsight.framework
 	{
 		public static const NAVIGATION:String = "navigation";
 		
-		public static const ACCOUNTS:String = "My Account";
+		public static const ACCOUNTS:String = "Accounts";
 		
 		public var targetPage:String;
 		public var targetPerspective:IPerspective;

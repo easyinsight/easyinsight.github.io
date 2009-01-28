@@ -36,9 +36,9 @@ public class Database {
         try {
             AnnotationConfiguration configuration = new AnnotationConfiguration().configure();
             String url = MessageFormat.format(urlTemplate, host, port, databaseName);
-            configuration.setProperty("connection.url", url);
-            configuration.setProperty("connection.username", userName);
-            configuration.setProperty("connection.password", password);
+            configuration.setProperty("hibernate.connection.url", url);
+            configuration.setProperty("hibernate.connection.username", userName);
+            configuration.setProperty("hibernate.connection.password", password);
             sessionFactory = configuration.buildSessionFactory();
         } catch (Throwable e) {
             LogClass.error(e);

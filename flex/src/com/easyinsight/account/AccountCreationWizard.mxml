@@ -104,7 +104,7 @@
 			}
 			
 			private function attemptAccountCreation():void {
-				creationService.createAccount(user, account);
+				creationService.createAccount(user, account, password);
 			}
 			
 			private function createdAccount():void {

@@ -26,7 +26,7 @@ public class TestUtil {
             User initialUser = new User("testuser", "password", "James Boe", "testuser99@gmail.com");
             AccountTransferObject account = new AccountTransferObject();
             account.setAccountType(new IndividualAccount());
-            userService.createAccount(initialUser, account);
+            //userService.createAccount(initialUser, account);
             userID = initialUser.getUserID();
         } else {
             userID = user.getUserID();

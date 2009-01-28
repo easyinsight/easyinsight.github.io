@@ -100,8 +100,8 @@ public class SalesTest extends TestCase {
             User buyer = new User("testbuyer", "password", "James Boe", "testbuyer99@gmail.com");
             AccountTransferObject account = new AccountTransferObject();
             account.setAccountType(new IndividualAccount());
-            userService.createAccount(buyer, account);
-            userService.createAccount(buyer, account);
+            //userService.createAccount(buyer, account);
+            //userService.createAccount(buyer, account);
             userID = buyer.getUserID();
         } else {
             userID = user.getUserID();

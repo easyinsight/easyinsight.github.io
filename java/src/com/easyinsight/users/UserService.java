@@ -210,17 +210,21 @@ public class UserService implements IUserService {
     // change the permissions on a user within the context of an account
     // reassign licenses between users
 
-    public long createAccount(User initialUser, AccountTransferObject accountTransferObject) {
+    public long createAccount(UserTransferObject userTransferObject, AccountTransferObject accountTransferObject, String password) {
         Session session = Database.instance().createSession();
         try {
             session.beginTransaction();
             Account account = accountTransferObject.toAccount();
-            initialUser.setPassword(PasswordService.getInstance().encrypt(initialUser.getPassword()));
-            //session.save(initialUser);
-            initialUser.setPermissions(AccountUserPermissions.GRANT_SUBSCRIBE_EXTERNAL |
-                    AccountUserPermissions.ADD_USERS | AccountUserPermissions.DELETE_USERS |
-                    AccountUserPermissions.SUBSCRIBE_EXTERNAL);
-            account.addUser(initialUser);
+            User user = new User();
+            user.setAccountAdmin(userTransferObject.isAccountAdmin());
+            user.setAccountID(account);
+            user.setDataSourceCreator(userTransferObject.isDataSourceCreator());
+            user.setEmail(userTransferObject.getEmail());
+            user.setInsightCreator(userTransferObject.isInsightCreator());
+            user.setName(userTransferObject.getName());
+            user.setUserName(userTransferObject.getUserName());
+            user.setPassword(PasswordService.getInstance().encrypt(password));
+            account.addUser(user);
             session.save(account);
             session.getTransaction().commit();
             return account.getAccountID();
