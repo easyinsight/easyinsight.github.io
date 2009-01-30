@@ -4,16 +4,6 @@ import junit.framework.TestCase;
 import com.easyinsight.database.Database;
 import com.easyinsight.datafeeds.FeedRegistry;
 import com.easyinsight.storage.DataRetrieval;
-import com.easyinsight.groups.GroupService;
-import com.easyinsight.groups.Group;
-import com.easyinsight.groups.GroupToUserBinding;
-import com.easyinsight.analysis.TagCloud;
-import com.easyinsight.analysis.Tag;
-import com.easyinsight.users.InternalUserService;
-import test.util.TestUtil;
-
-import java.util.Arrays;
-import java.util.List;
 
 /**
  * User: James Boe
@@ -29,7 +19,7 @@ public class GroupTest extends TestCase {
     }
 
     public void testGroupStorage() {
-        /*long userID = TestUtil.getTestUser();
+        /*long userID = TestUtil.getIndividualTestUser();
         GroupService groupService = new GroupService();
         Group group = new Group();
         group.setName("Test Group");

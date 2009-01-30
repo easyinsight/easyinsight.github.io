@@ -9,8 +9,6 @@ import com.easyinsight.datafeeds.FeedService;
 import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.storage.DataRetrieval;
 import com.easyinsight.*;
-import com.easyinsight.security.SecurityUtil;
-import com.easyinsight.core.NamedKey;
 import com.easyinsight.webservice.google.ListDataResults;
 
 import java.util.Arrays;
@@ -32,11 +30,9 @@ public class UploadTest extends TestCase {
     }
 
     public void testUpload() {
-        long accountID = TestUtil.getTestUser();
-        UserUploadService userUploadService = new UserUploadService();
-        long dataFeedID = createFirstDataFeed(accountID, userUploadService);
+        long userID = TestUtil.getIndividualTestUser();
+        long dataFeedID = TestUtil.createDefaultTestDataSource(userID);
         System.out.println(dataFeedID);
-        createCommercialDataFeed(accountID, userUploadService);
         FeedService dataProviderService = new FeedService();
 
         System.out.println(dataProviderService.searchForAvailableFeeds(null, null).size());
@@ -70,34 +66,10 @@ public class UploadTest extends TestCase {
         assertEquals(3, dataResults.getHeaders().length);
         assertEquals(1, dataResults.getRows().length);
 
+        UserUploadService userUploadService = new UserUploadService();
         FeedDefinition update = userUploadService.getDataFeedConfiguration(dataFeedID);
         update.setGenre("MoreTesting");
         update.setFeedName("Renamed Feed");
         userUploadService.updateFeedDefinition(update);
-    }
-
-    private long createFirstDataFeed(long accountID, UserUploadService userUploadService) {
-        String csvText = "Customer,Product,Revenue\nAcme,WidgetX,500\nAcme,WidgetY,200";
-        long uploadID = userUploadService.addRawUploadData(accountID, "test.csv", csvText.getBytes());
-        System.out.println(uploadID);
-        UserUploadAnalysis userUploadAnalysis = userUploadService.attemptParse(uploadID, new FlatFileUploadFormat(",", "\\,"));
-        assertTrue(userUploadAnalysis.isSuccessful());
-        long dataFeedID = userUploadService.parsed(uploadID, new FlatFileUploadFormat(",", "\\,"), "Test Feed", "Testing",
-                Arrays.asList(new AnalysisMeasure(new NamedKey("Revenue"), AggregationTypes.SUM), new AnalysisDimension(new NamedKey("Customer"), true),
-                        new AnalysisDimension(new NamedKey("Product"), true)),
-                new UploadPolicy(), new TagCloud());
-        return dataFeedID;
-    }
-
-    private long createCommercialDataFeed(long accountID, UserUploadService userUploadService) {
-        String csvText = "Customer,Product,Revenue\nAcme,WidgetX,500\nAcme,WidgetY,200";
-        long uploadID = userUploadService.addRawUploadData(accountID, "stocks.csv", csvText.getBytes());
-        System.out.println(uploadID);
-        UserUploadAnalysis userUploadAnalysis = userUploadService.attemptParse(uploadID, new FlatFileUploadFormat(",", "\\,"));
-        assertTrue(userUploadAnalysis.isSuccessful());
-        long dataFeedID = userUploadService.parsed(uploadID, new FlatFileUploadFormat(",", "\\,"), "Commercial Feed", "Financial",
-                Arrays.asList(new AnalysisMeasure(new NamedKey("Revenue"), AggregationTypes.SUM), new AnalysisDimension(new NamedKey("Customer"), true),
-                        new AnalysisDimension(new NamedKey("Product"), true)), new UploadPolicy(), new TagCloud());
-        return dataFeedID;
     }
 }

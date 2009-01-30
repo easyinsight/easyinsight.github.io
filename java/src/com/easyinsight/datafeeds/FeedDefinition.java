@@ -42,9 +42,53 @@ public class FeedDefinition implements Cloneable {
     private String description;
     private long dynamicServiceDefinitionID;
     private String apiKey;
-    
+    private boolean uncheckedAPIEnabled;
+    private boolean uncheckedAPIUsingBasicAuth;
+    private boolean validatedAPIEnabled;
+    private boolean validatedAPIUsingBasicAuth;
+    private boolean inheritAccountAPISettings;
 
     public FeedDefinition() {
+    }
+
+    public boolean isInheritAccountAPISettings() {
+        return inheritAccountAPISettings;
+    }
+
+    public void setInheritAccountAPISettings(boolean inheritAccountAPISettings) {
+        this.inheritAccountAPISettings = inheritAccountAPISettings;
+    }
+
+    public boolean isUncheckedAPIUsingBasicAuth() {
+        return uncheckedAPIUsingBasicAuth;
+    }
+
+    public void setUncheckedAPIUsingBasicAuth(boolean uncheckedAPIUsingBasicAuth) {
+        this.uncheckedAPIUsingBasicAuth = uncheckedAPIUsingBasicAuth;
+    }
+
+    public boolean isValidatedAPIUsingBasicAuth() {
+        return validatedAPIUsingBasicAuth;
+    }
+
+    public void setValidatedAPIUsingBasicAuth(boolean validatedAPIUsingBasicAuth) {
+        this.validatedAPIUsingBasicAuth = validatedAPIUsingBasicAuth;
+    }
+
+    public boolean isUncheckedAPIEnabled() {
+        return uncheckedAPIEnabled;
+    }
+
+    public void setUncheckedAPIEnabled(boolean uncheckedAPIEnabled) {
+        this.uncheckedAPIEnabled = uncheckedAPIEnabled;
+    }
+
+    public boolean isValidatedAPIEnabled() {
+        return validatedAPIEnabled;
+    }
+
+    public void setValidatedAPIEnabled(boolean validatedAPIEnabled) {
+        this.validatedAPIEnabled = validatedAPIEnabled;
     }
 
     public String getApiKey() {

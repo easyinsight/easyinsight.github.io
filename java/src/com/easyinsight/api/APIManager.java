@@ -3,6 +3,9 @@ package com.easyinsight.api;
 import com.easyinsight.api.dynamic.DynamicDeploymentUnit;
 import com.easyinsight.api.dynamic.DynamicServiceDefinition;
 import com.easyinsight.api.dynamic.APIPasswordCallback;
+import com.easyinsight.api.basicauth.BasicAuthUncheckedPublishService;
+import com.easyinsight.api.basicauth.BasicAuthAuthorizationInterceptor;
+import com.easyinsight.api.wsdeathstar.WSDeathStarUncheckedPublishService;
 import com.easyinsight.database.Database;
 import com.easyinsight.logging.LogClass;
 
@@ -33,22 +36,45 @@ public class APIManager {
     public void start() {
         try {
             instance = this;
-            UncheckedPublishService publishService = new UncheckedPublishService();
-            EndpointImpl endpointImpl = (EndpointImpl) Endpoint.publish("/UncheckedPublish", publishService);
+            createUncheckedSOAPAPI();
             ValidatingPublishService validatingPublishService = new ValidatingPublishService();
             Endpoint.publish("/ValidatingPublish", validatingPublishService);
-            org.apache.cxf.endpoint.Endpoint endpoint = endpointImpl.getServer().getEndpoint();
-            Map<String, Object> securityInProps = new HashMap<String, Object>();
-            securityInProps.put(WSHandlerConstants.ACTION, WSHandlerConstants.USERNAME_TOKEN);
-            securityInProps.put(WSHandlerConstants.PASSWORD_TYPE, WSConstants.PW_TEXT);
-            securityInProps.put(WSHandlerConstants.PW_CALLBACK_CLASS, APIPasswordCallback.class.getName());
-            WSS4JInInterceptor wssIn = new WSS4JInInterceptor(securityInProps);
-            endpoint.getInInterceptors().add(wssIn);
             go();
         } catch (Exception e) {
             LogClass.error(e);
         }
     }
+
+    private void createUncheckedSOAPAPI() {
+        UncheckedPublishService basicAuthPublishService = new BasicAuthUncheckedPublishService();
+        EndpointImpl basicAuthEndpoint = (EndpointImpl) Endpoint.publish("/UncheckedPublishBasic", basicAuthPublishService);
+        configureBasicAuth(basicAuthEndpoint);
+        UncheckedPublishService wsDeathStarPublishService = new WSDeathStarUncheckedPublishService();
+        EndpointImpl wsDeathStarEndpoint = (EndpointImpl) Endpoint.publish("/UncheckedPublishWSS", wsDeathStarPublishService);
+        configureWSDeathStar(wsDeathStarEndpoint);
+    }
+
+    private void configureBasicAuth(EndpointImpl endpointImpl) {
+        org.apache.cxf.endpoint.Endpoint endpoint = endpointImpl.getServer().getEndpoint();
+        BasicAuthAuthorizationInterceptor basicAuthInterceptor = new BasicAuthAuthorizationInterceptor();
+        endpoint.getInInterceptors().add(basicAuthInterceptor);
+    }
+
+    private void configureWSDeathStar(EndpointImpl endpointImpl) {
+        org.apache.cxf.endpoint.Endpoint endpoint = endpointImpl.getServer().getEndpoint();
+        Map<String, Object> securityInProps = new HashMap<String, Object>();
+        securityInProps.put(WSHandlerConstants.ACTION, WSHandlerConstants.USERNAME_TOKEN);
+        securityInProps.put(WSHandlerConstants.PASSWORD_TYPE, WSConstants.PW_TEXT);
+        securityInProps.put(WSHandlerConstants.PW_CALLBACK_CLASS, APIPasswordCallback.class.getName());
+        WSS4JInInterceptor wssIn = new WSS4JInInterceptor(securityInProps);
+        endpoint.getInInterceptors().add(wssIn);
+    }
+
+    private void createValidatedSOAPAPI() {
+
+    }
+
+
 
     private void go() {
         Connection conn = Database.instance().getConnection();

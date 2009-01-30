@@ -31,8 +31,9 @@ public class FeedStorage {
         PreparedStatement insertDataFeedStmt;
         insertDataFeedStmt = conn.prepareStatement("INSERT INTO DATA_FEED (FEED_NAME, FEED_TYPE, PUBLICLY_VISIBLE, FEED_SIZE, " +
                     "CREATE_DATE, UPDATE_DATE, FEED_VIEWS, FEED_RATING_COUNT, FEED_RATING_AVERAGE, DESCRIPTION," +
-                    "ATTRIBUTION, OWNER_NAME, DYNAMIC_SERVICE_DEFINITION_ID, ANALYSIS_ID, MARKETPLACE_VISIBLE) " +
-                        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                    "ATTRIBUTION, OWNER_NAME, DYNAMIC_SERVICE_DEFINITION_ID, ANALYSIS_ID, MARKETPLACE_VISIBLE, " +
+                "API_KEY, UNCHECKED_API_BASIC_AUTH, UNCHECKED_API_ENABLED, validated_api_basic_auth, validated_api_enabled, INHERIT_ACCOUNT_API_SETTINGS) " +
+                        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                         Statement.RETURN_GENERATED_KEYS);
         insertDataFeedStmt.setString(1, feedDefinition.getFeedName());
         insertDataFeedStmt.setInt(2, feedDefinition.getFeedType().getType());
@@ -62,6 +63,12 @@ public class FeedStorage {
             insertDataFeedStmt.setNull(14, Types.BIGINT);
         }
         insertDataFeedStmt.setBoolean(15, feedDefinition.getUploadPolicy().isMarketplaceVisible());
+        insertDataFeedStmt.setString(16, feedDefinition.getApiKey());
+        insertDataFeedStmt.setBoolean(17, feedDefinition.isUncheckedAPIUsingBasicAuth());
+        insertDataFeedStmt.setBoolean(18, feedDefinition.isUncheckedAPIEnabled());
+        insertDataFeedStmt.setBoolean(19, feedDefinition.isValidatedAPIUsingBasicAuth());
+        insertDataFeedStmt.setBoolean(20, feedDefinition.isValidatedAPIEnabled());
+        insertDataFeedStmt.setBoolean(21, feedDefinition.isInheritAccountAPISettings());
         insertDataFeedStmt.execute();
         long feedID = Database.instance().getAutoGenKey(insertDataFeedStmt);
         feedDefinition.setDataFeedID(feedID);

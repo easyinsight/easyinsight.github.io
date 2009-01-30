@@ -9,26 +9,16 @@ import com.easyinsight.datafeeds.FeedStorage;
 import com.easyinsight.users.UserService;
 import com.easyinsight.userupload.UploadPolicy;
 import com.easyinsight.*;
-import com.easyinsight.api.NumberWhere;
-import com.easyinsight.core.NamedKey;
 import com.easyinsight.analysis.AggregationTypes;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.database.Database;
 
-import javax.xml.ws.WebServiceContext;
-import javax.xml.ws.handler.MessageContext;
-import javax.annotation.Resource;
 import java.util.List;
 import java.util.ArrayList;
-import java.util.Vector;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-
-import org.apache.ws.security.handler.WSHandlerResult;
-import org.apache.ws.security.WSSecurityEngineResult;
-import org.apache.ws.security.WSUsernameTokenPrincipal;
 
 /**
  * User: James Boe
@@ -36,10 +26,9 @@ import org.apache.ws.security.WSUsernameTokenPrincipal;
  * Time: 2:05:30 PM
  */
 
-public class UncheckedPublishService extends PublishService implements IPublishService {
+public abstract class UncheckedPublishService extends PublishService {
 
-    @Resource
-    private WebServiceContext context;
+    protected abstract String getUserName();
 
     public void addRow(String dataSourceName, Row row) {
         Connection conn = Database.instance().getConnection();
@@ -107,14 +96,7 @@ public class UncheckedPublishService extends PublishService implements IPublishS
         }
     }
 
-    private String getUserName() {
-        MessageContext ctx = context.getMessageContext();
-        Vector results = (Vector) ctx.get("RECV_RESULTS");
-        WSHandlerResult wsHandlerResult = (WSHandlerResult) results.get(0);
-        WSSecurityEngineResult securityResult = (WSSecurityEngineResult) wsHandlerResult.getResults().get(0);
-        WSUsernameTokenPrincipal principal = (WSUsernameTokenPrincipal) securityResult.getPrincipal();
-        return principal.getName();
-    }
+    
 
     public void replaceRows(String dataSourceName, Row[] rows) {
         Connection conn = Database.instance().getConnection();

@@ -7,8 +7,6 @@ import com.easyinsight.database.Database;
 import com.easyinsight.userupload.*;
 import com.easyinsight.datafeeds.Feed;
 import com.easyinsight.datafeeds.FeedRegistry;
-import com.easyinsight.core.Key;
-import com.easyinsight.core.NamedKey;
 import com.easyinsight.analysis.TagCloud;
 
 import java.io.*;
@@ -30,7 +28,7 @@ public class DataRetrievalTest extends TestCase {
     }
 
     public void testRetrieval() throws IOException {
-        File file = new File("c:/tmpcsv/fred.csv");
+        /*File file = new File("c:/tmpcsv/fred.csv");
         FileInputStream fis = new FileInputStream(file);
         byte[] array = new byte[(int) file.length()];
         int size = fis.read(array);
@@ -42,7 +40,7 @@ public class DataRetrievalTest extends TestCase {
         dataRetrieval.deleteData(-1);
         UserUploadService userUploadService = new UserUploadService();
 
-        long uploadID = userUploadService.addRawUploadData(TestUtil.getTestUser(), "blah.csv", array);
+        long uploadID = userUploadService.addRawUploadData(TestUtil.getIndividualTestUser(), "blah.csv", array);
         UploadFormat uploadFormat = new FlatFileUploadFormat(",", "");
         UserUploadAnalysis userUploadAnalysis = userUploadService.attemptParse(uploadID, uploadFormat);
         long createdFeedID = userUploadService.parsed(uploadID, uploadFormat, "TestFredFeed", "Testing", userUploadAnalysis.getFields(),
@@ -61,7 +59,7 @@ public class DataRetrievalTest extends TestCase {
         dataSet = feed.getDataSet(columns, null, false, null);
         long postCacheTime = System.currentTimeMillis();
         System.out.println(postCacheTime - preCacheTime);
-        System.out.println(dataSet.getRows().size());
+        System.out.println(dataSet.getRows().size());    */
         /*TestDataSetCreator testDataSetCreator = new TestDataSetCreator(5000);
         DataSet dataSet = testDataSetCreator.createDataSet();
         dataRetrieval.storeData(-1, dataSet);

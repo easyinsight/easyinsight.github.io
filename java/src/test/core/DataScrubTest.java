@@ -37,26 +37,14 @@ public class DataScrubTest extends TestCase {
     }
 
     public void testScrubbing() {
-        long accountID = TestUtil.getTestUser();
-        UserUploadService userUploadService = new UserUploadService();
-        long dataFeedID = createDataFeed(accountID, userUploadService);
-        WSListDefinition listDefinition = createListDefinition(accountID, dataFeedID);
+        long userID = TestUtil.getIndividualTestUser();
+        long dataFeedID = TestUtil.createDefaultTestDataSource(userID);
+        WSListDefinition listDefinition = createListDefinition(userID, dataFeedID);
         DataService dataService = new DataService();
         ListDataResults results = dataService.list(listDefinition, null);
         ListRow listRow = results.getRows()[0];
         //String firstVal = (String) listRow.getValues()[0];
         //assertTrue(firstVal.equals("Widget X") || firstVal.equals("Widget Y"));
-    }
-
-    private long createDataFeed(long accountID, UserUploadService userUploadService) {
-        String csvText = "Customer,Product,Revenue\nAcme,WidgetX,500\nAcme,WidgetY,200";
-        long uploadID = userUploadService.addRawUploadData(accountID, "test.csv", csvText.getBytes());
-        System.out.println(uploadID);
-        UserUploadAnalysis userUploadAnalysis = userUploadService.attemptParse(uploadID, new FlatFileUploadFormat(",", "\\,"));
-        assertTrue(userUploadAnalysis.isSuccessful());
-        return userUploadService.parsed(uploadID, new FlatFileUploadFormat(",", "\\,"), "Test Feed", "Testing",
-                Arrays.asList(new AnalysisMeasure(new NamedKey("Revenue"), AggregationTypes.SUM), new AnalysisDimension(new NamedKey("Customer"), true),
-                        new AnalysisDimension(new NamedKey("Product"), true)), new UploadPolicy(accountID), new TagCloud());
     }
 
     private WSListDefinition createListDefinition(long accountID, long dataFeedID) {

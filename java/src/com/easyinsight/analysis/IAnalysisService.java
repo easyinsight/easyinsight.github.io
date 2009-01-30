@@ -13,6 +13,4 @@ public interface IAnalysisService {
     public void deleteAnalysisDefinition(WSAnalysisDefinition analysisDefinition);
 
     WSAnalysisDefinition openAnalysisDefinition(long analysisID);
-
-    public Collection<WSAnalysisDefinition> getAllDefinitions();
 }

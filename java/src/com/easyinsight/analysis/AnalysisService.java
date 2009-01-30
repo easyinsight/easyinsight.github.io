@@ -198,21 +198,6 @@ public class AnalysisService implements IAnalysisService {
         return insightResponse;
     }
 
-    public Collection<WSAnalysisDefinition> getAllDefinitions() {
-        /*long userID = SecurityUtil.getUserID();
-        try {
-            Collection<WSAnalysisDefinition> analysisDefinitions = new ArrayList<WSAnalysisDefinition>();
-            for (AnalysisDefinition analysisDefinition : analysisStorage.getAllDefinitions(userID)) {
-                analysisDefinitions.add(analysisDefinition.createWSDefinition());
-            }
-            return analysisDefinitions;
-        } catch (Exception e) {
-            LogClass.error(e);
-            throw new RuntimeException(e);
-        } */
-        throw new UnsupportedOperationException();
-    }
-
     public UserCapabilities getUserCapabilitiesForFeed(long feedID) {
         long userID = SecurityUtil.getUserID();
         int feedRole = Integer.MAX_VALUE;

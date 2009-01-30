@@ -1,0 +1,1 @@
+insert into DATABASE_VERSION (VERSION) VALUES (37);

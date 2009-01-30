@@ -13,6 +13,7 @@ public class UserUploadAnalysis {
     private boolean successful;
     private String failureMessage;
     private List<AnalysisItem> fields;
+    private GridMapping gridMapping;
     private long size;
 
     public UserUploadAnalysis() {
@@ -26,6 +27,14 @@ public class UserUploadAnalysis {
     public UserUploadAnalysis(List<AnalysisItem> fields) {
         this.successful = true;
         this.fields = fields;
+    }
+
+    public GridMapping getGridMapping() {
+        return gridMapping;
+    }
+
+    public void setGridMapping(GridMapping gridMapping) {
+        this.gridMapping = gridMapping;
     }
 
     public long getSize() {

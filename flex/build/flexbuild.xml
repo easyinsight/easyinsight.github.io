@@ -1,0 +1,21 @@
+<project default="compileFlex" basedir="." name="Flex Build">
+    <property file="local.build.properties"/>
+    <taskdef resource="flexTasks.tasks" classpath="${flex.sdk.dir}/ant/lib/flexTasks.jar"/>
+
+
+    <property name="FLEX_HOME" value="${flex.sdk.dir}"/>
+
+    <target name="compileFlex">
+        <mxmlc file="../src/PrimaryWorkspace.mxml" output="${deployment.path}/PrimaryWorkspace.swf"
+               static-rsls="true">
+            <load-config filename="../flex-config.xml"/>
+        </mxmlc>
+    </target>
+
+    <target name="compileRIA">
+        <mxmlc file="../src/PrimaryWorkspace.mxml" output="${deployment.path}/PrimaryWorkspace.swf"
+               static-rsls="true">
+            <load-config filename="../riatest-core-config.xml"/>
+        </mxmlc>
+    </target>
+</project>

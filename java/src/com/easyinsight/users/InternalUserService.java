@@ -17,9 +17,9 @@ public class InternalUserService {
     
     @Nullable
     public User retrieveUser(String userName) {
+        Session session = Database.instance().createSession();
         try {
             User user = null;
-            Session session = Database.instance().createSession();
             List results;
             try {
                 session.beginTransaction();
@@ -28,8 +28,6 @@ public class InternalUserService {
             } catch (Exception e) {
                 session.getTransaction().rollback();
                 throw new RuntimeException(e);
-            } finally {
-                session.close();
             }
             if (results.size() > 0) {
                 user = (User) results.get(0);
@@ -39,13 +37,15 @@ public class InternalUserService {
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);
+        } finally {
+            session.close();
         }
     }
 
     public User retrieveUser(long userID) {
+        Session session = Database.instance().createSession();
         try {
             User user = null;
-            Session session = Database.instance().createSession();
             List results;
             try {
                 session.beginTransaction();
@@ -54,8 +54,6 @@ public class InternalUserService {
             } catch (Exception e) {
                 session.getTransaction().rollback();
                 throw new RuntimeException(e);
-            } finally {
-                session.close();
             }
             if (results.size() > 0) {
                 user = (User) results.get(0);
@@ -65,6 +63,8 @@ public class InternalUserService {
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);
+        } finally {
+            session.close();
         }
     }
 }

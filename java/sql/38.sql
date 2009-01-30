@@ -1,0 +1,1 @@
+alter table account add name varchar(255);

@@ -54,9 +54,11 @@ public class Database {
     }
 
     public static void initialize() {
-        instance = new Database(ConfigLoader.instance().getDatabaseHost(), ConfigLoader.instance().getDatabasePort(),
+        if (instance == null) {
+            instance = new Database(ConfigLoader.instance().getDatabaseHost(), ConfigLoader.instance().getDatabasePort(),
                 ConfigLoader.instance().getDatabaseName(), ConfigLoader.instance().getDatabaseUserName(),
                 ConfigLoader.instance().getDatabasePassword());
+        }
     }
 
     public Session createSession() {

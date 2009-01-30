@@ -1,4 +1,4 @@
-<project default="compileFlex" basedir=".">
+<project default="compileFlex" basedir="." name="Production">
     <property file="local.build.properties"/>
     <taskdef resource="flexTasks.tasks" classpath="${flex.sdk.dir}/ant/lib/flexTasks.jar"/>
 
@@ -7,6 +7,7 @@
     <taskdef name="UpdateInstances" classname="com.easyinsight.watchdog.updatetask.UpdateAppInstanceTask"/>
     <taskdef name="StartInstances" classname="com.easyinsight.watchdog.updatetask.StartAppInstanceTask"/>
 
+    <taskdef name="migration" classname="com.easyinsight.database.ant.DatabaseMigrationTask"/>
 
     <property name="FLEX_HOME" value="${flex.sdk.dir}"/>
 
@@ -16,6 +17,9 @@
     <property name="code.path" value="../java/out/code/"/>
     <property name="webapp.path" value="${code.path}/webapp"/>
     <property name="flex.path" value="${webapp.path}/easyui-debug"/>
+
+    <property name="test.path" value="../java/out/test"/>
+    <property name="reports.tests" value="../java/out/test/reports"/>
 
     <target name="shutdownInstances">
         <StopInstances/>
@@ -27,6 +31,84 @@
 
     <target name="startInstances">
         <StartInstances/>
+    </target>
+
+    <target name="migration">
+        <migration sqlDirectory="../java/sql" databaseName="${database.name}" databaseUserName="${database.username}"
+                   databasePassword="${database.password}"/>
+    </target>
+
+    <target name="tests" depends="migration">
+        <delete dir="${test.path}/classes"/>
+        <mkdir dir="${test.path}/classes"/>
+        <delete dir="${reports.tests}"/>
+        <mkdir dir="${reports.tests}"/>
+       <javac destdir="${test.path}/classes"
+               optimize="off"
+               debug="on" failonerror="false"
+               srcdir="../java/src"
+               excludes="**/*.smap">
+            <classpath>
+                <fileset dir="../java/lib/cxf2">
+                    <include name="*.jar"/>
+                </fileset>
+                <fileset dir="../java/lib/blazeds">
+                    <include name="*.jar"/>
+                </fileset>
+                <fileset dir="../java/lib/core">
+                    <include name="*.jar"/>
+                </fileset>
+                <fileset dir="../java/lib/commons">
+                    <include name="*.jar"/>
+                </fileset>
+                <fileset dir="../java/lib/hibernate">
+                    <include name="*.jar"/>
+                </fileset>
+                <fileset dir="../java/lib/google">
+                    <include name="*.jar"/>
+                </fileset>
+                <fileset dir="../java/lib/excel">
+                    <include name="*.jar"/>
+                </fileset>
+            </classpath>
+            <include name="**"/>
+            <exclude name="tags/**"/>
+        </javac>
+        <junit printsummary="yes" haltonfailure="no">
+            <classpath>
+                <pathelement location="${test.path}/classes"/>
+                <pathelement location="../java/src"/>
+                <fileset dir="../java/lib/cxf2">
+                    <include name="*.jar"/>
+                </fileset>
+                <fileset dir="../java/lib/blazeds">
+                    <include name="*.jar"/>
+                </fileset>
+                <fileset dir="../java/lib/core">
+                    <include name="*.jar"/>
+                </fileset>
+                <fileset dir="../java/lib/commons">
+                    <include name="*.jar"/>
+                </fileset>
+                <fileset dir="../java/lib/hibernate">
+                    <include name="*.jar"/>
+                </fileset>
+                <fileset dir="../java/lib/google">
+                    <include name="*.jar"/>
+                </fileset>
+                <fileset dir="../java/lib/excel">
+                    <include name="*.jar"/>
+                </fileset>
+            </classpath>
+
+            <formatter type="plain"/>
+
+            <batchtest fork="yes" todir="${reports.tests}">
+                <fileset dir="../java/src">
+                    <include name="**/*Test.java"/>
+                </fileset>
+            </batchtest>
+        </junit>
     </target>
 
     <target name="appwatchdog">
@@ -139,19 +221,23 @@
     </target>
 
     <target name="compileFlex" depends="compileJava">
-        <mxmlc file="${teamcity.build.checkoutDir}/flex/src/PrimaryWorkspace.mxml" output="${flex.path}/PrimaryWorkspace.swf"
+        <mxmlc file="${teamcity.build.checkoutDir}/flex/src/PrimaryWorkspace.mxml"
+               output="${flex.path}/PrimaryWorkspace.swf"
                static-rsls="true">
             <load-config filename="${teamcity.build.checkoutDir}/flex/flex-config.xml"/>
         </mxmlc>
-        <mxmlc file="${teamcity.build.checkoutDir}/flex/src/com/easyinsight/dashboard/ListViewModule.mxml" output="${flex.path}/ListViewModule.swf"
+        <mxmlc file="${teamcity.build.checkoutDir}/flex/src/com/easyinsight/dashboard/ListViewModule.mxml"
+               output="${flex.path}/ListViewModule.swf"
                static-rsls="true">
             <load-config filename="${teamcity.build.checkoutDir}/flex/list-module.xml"/>
         </mxmlc>
-        <mxmlc file="${teamcity.build.checkoutDir}/flex/src/AdministrationApplication.mxml" output="${flex.path}/AdministrationApplication.swf" static-rsls="true">
+        <mxmlc file="${teamcity.build.checkoutDir}/flex/src/AdministrationApplication.mxml"
+               output="${flex.path}/AdministrationApplication.swf" static-rsls="true">
             <load-config filename="${teamcity.build.checkoutDir}/flex/administration-app.xml"/>
 
         </mxmlc>
-        <mxmlc file="${teamcity.build.checkoutDir}/flex/src/EmbeddedInsight.mxml" output="${flex.path}/EmbeddedInsight.swf" static-rsls="true">
+        <mxmlc file="${teamcity.build.checkoutDir}/flex/src/EmbeddedInsight.mxml"
+               output="${flex.path}/EmbeddedInsight.swf" static-rsls="true">
             <load-config filename="${teamcity.build.checkoutDir}/flex/embedded-insight.xml"/>
 
 

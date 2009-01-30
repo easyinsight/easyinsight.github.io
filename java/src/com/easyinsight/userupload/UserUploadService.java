@@ -199,6 +199,7 @@ public class UserUploadService implements IUserUploadService {
                 uploadResponse = new UploadResponse(result.getFeedID(), feedDefinition.getAnalysisDefinitionID());
                 tableDef.commit();                
             }
+            tableDef.commit();
             conn.commit();
         } catch (Exception e) {
             LogClass.error(e);
@@ -313,40 +314,6 @@ public class UserUploadService implements IUserUploadService {
         }
     }
 
-    public UploadFormatAnalysis initialGuess(long uploadID) {
-         try {
-             RawUploadData rawUploadData = retrieveRawData(uploadID);
-             UploadFormat uploadFormat = new UploadFormatTester().determineFormat(rawUploadData.userData);
-             UserUploadAnalysis analysis = null;
-             if (uploadFormat != null) {
-                 analysis = uploadFormat.analyze(uploadID, rawUploadData.userData);
-             }
-             UploadFormatAnalysis uploadFormatAnalysis = new UploadFormatAnalysis();
-             uploadFormatAnalysis.setUploadFormat(uploadFormat);
-             uploadFormatAnalysis.setUserUploadAnalysis(analysis);
-             return uploadFormatAnalysis;
-         } catch (Exception e) {
-             LogClass.error(e);
-             throw new RuntimeException(e);
-        }
-    }
-
-    // initial parse...
-
-    public UserUploadAnalysis attemptParse(long uploadID, UploadFormat uploadFormat) {
-        try {
-            UserUploadAnalysis userUploadAnalysis = UploadAnalysisCache.instance().getUploadAnalysis(uploadID);
-            if (userUploadAnalysis == null) {
-                RawUploadData rawUploadData = retrieveRawData(uploadID);
-                userUploadAnalysis = uploadFormat.analyze(uploadID, rawUploadData.userData);
-            }
-            return userUploadAnalysis;
-        } catch (Exception e) {
-            LogClass.error(e);
-            throw new RuntimeException(e);
-        }
-    }
-
     public List<FeedDescriptor> getOwnedFeeds() {
         long userID = SecurityUtil.getUserID();
         try {
@@ -370,29 +337,6 @@ public class UserUploadService implements IUserUploadService {
         }
         AsyncPersistanceManager.instance().addAsyncPersistence(new AsyncPersistence(dataSet, feedDefinition.getDataFeedID()));
         return feedDefinition.getDataFeedID();
-    }
-
-    public long parsed(long uploadID, UploadFormat uploadFormat, String feedName, String genre,
-                       List<AnalysisItem> fields, UploadPolicy uploadPolicy, TagCloud tagCloud) {
-        /*try {
-            RawUploadData rawUploadData = retrieveRawData(uploadID);
-            PersistableDataSetForm dataSet = UploadAnalysisCache.instance().getDataSet(uploadID);
-            if (dataSet == null) {
-                dataSet = uploadFormat.createDataSet(rawUploadData.userData, fields);
-            }
-            for (AnalysisItem field : fields) {
-                dataSet.refreshKey(field.getKey());
-            }
-            FeedDefinition feedDefinition = createFeedFromUpload(uploadID, uploadFormat, feedName, genre, fields, uploadPolicy, tagCloud);
-            feedDefinition.getDataFeedID();
-            long dataFeedID = feedDefinition.getDataFeedID();
-            DataRetrievalManager.instance().storeData(dataFeedID, dataSet);
-            return dataFeedID;
-        } catch (Exception e) {
-            LogClass.error(e);
-            throw new RuntimeException(e);
-        }*/
-        throw new UnsupportedOperationException();
     }
 
     public long createAnalysisBasedFeed(AnalysisBasedFeedDefinition definition) {

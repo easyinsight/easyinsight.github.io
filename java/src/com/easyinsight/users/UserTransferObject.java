@@ -22,13 +22,13 @@ public class UserTransferObject {
     }
 
     public UserTransferObject(String userName, long userID, String email, String name,
-                              List<SubscriptionLicense> licenses, int permissions) {
+                              List<SubscriptionLicense> licenses) {
         this.userName = userName;
         this.userID = userID;
         this.email = email;
         this.name = name;
         this.licenses = licenses;
-    }
+    }        
 
     public boolean isAccountAdmin() {
         return accountAdmin;

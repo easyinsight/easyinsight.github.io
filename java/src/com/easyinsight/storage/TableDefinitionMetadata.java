@@ -564,11 +564,10 @@ public class TableDefinitionMetadata {
                 String column = "k" + keyMetadata.getKey().getKeyID();
                 sqlBuilder.append(column);
                 sqlBuilder.append(")");
-                if (keyIter.hasNext()) {
-                    sqlBuilder.append(",");
-                }
+                sqlBuilder.append(",");
             }
         }
+        if (sqlBuilder.charAt(sqlBuilder.length() - 1) == ',') sqlBuilder.deleteCharAt(sqlBuilder.length() - 1);
         sqlBuilder.append(" )");
         return sqlBuilder.toString();
     }

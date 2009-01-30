@@ -31,7 +31,7 @@ public class TagsTest extends TestCase {
     }
 
     public void testTags() {
-        long userID = TestUtil.getTestUser();
+        long userID = TestUtil.getIndividualTestUser();
         UserUploadService userUploadService = new UserUploadService();
         long dataFeedID = createFirstDataFeed(userID, userUploadService);
         FeedDefinition feedDefinition = userUploadService.getDataFeedConfiguration(dataFeedID);

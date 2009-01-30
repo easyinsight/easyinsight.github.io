@@ -48,7 +48,7 @@ public class NewAccountInvitation {
         String body = MessageFormat.format(invitationText, feedName, feedURL);
         String subject = feedName + " (Easy Insight)";
         try {
-            new GoogleTest().sendSSLMessage(to, subject, body, from);
+            new GMailConnection().sendSSLMessage(to, subject, body, from);
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);
@@ -78,7 +78,7 @@ public class NewAccountInvitation {
         String body = MessageFormat.format(messageText, analysisName, feedURL);
         String subject = analysisName + " (Easy Insight)";
         try {
-            new GoogleTest().sendSSLMessage(to, subject, body, from);
+            new GMailConnection().sendSSLMessage(to, subject, body, from);
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);

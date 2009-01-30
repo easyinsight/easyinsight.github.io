@@ -23,7 +23,7 @@ public class AccountMemberInvitation {
         String body = MessageFormat.format(groupInviteText, accountOwner, userName, password);
         String subject = "Easy Insight Account Creation";
         try {
-            new GoogleTest().sendSSLMessage(to, subject, body, accountOwner);
+            new GMailConnection().sendSSLMessage(to, subject, body, accountOwner);
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);
