@@ -34,7 +34,7 @@
     </target>
 
     <target name="migration">
-        <migration sqlDirectory="../java/sql" databaseName="${database.name}" databaseUserName="${database.username}"
+        <migration sqlDirectory="java/sql" databaseName="${database.name}" databaseUserName="${database.username}"
                    databasePassword="${database.password}"/>
     </target>
 
