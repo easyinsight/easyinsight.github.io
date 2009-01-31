@@ -42,21 +42,26 @@ public class DatabaseWatchdogServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest httpServletRequest, HttpServletResponse response) throws ServletException, IOException {
-        updateFromS3();
-        response.setContentType("text/html");
-        response.setStatus(HttpServletResponse.SC_OK);
+        try {
+            updateFromS3();
+            response.setContentType("text/html");
+            response.setStatus(HttpServletResponse.SC_OK);
+        } catch (Exception e) {
+            response.setContentType("text/html");
+            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+        }
     }
 
-    private void updateFromS3() {
-        try {
+    private void updateFromS3() throws Exception {
             AWSCredentials credentials = new AWSCredentials("0AWCBQ78TJR8QCY8ABG2", "bTUPJqHHeC15+g59BQP8ackadCZj/TsSucNwPwuI");
             RestS3Service s3Service = new RestS3Service(credentials);
             S3Bucket bucket = s3Service.getBucket("eisql");
             S3Object[] objects = s3Service.listObjects(bucket);
             for (S3Object object : objects) {
+                S3Object retrievedObject = s3Service.getObject(bucket, object.getKey());
                 byte retrieveBuf[];
                 retrieveBuf = new byte[1];
-                InputStream bfis = object.getDataInputStream();
+                InputStream bfis = retrievedObject.getDataInputStream();
                 ByteArrayOutputStream baos = new ByteArrayOutputStream();
                 while (bfis.read(retrieveBuf) != -1) {
                     baos.write(retrieveBuf);
@@ -69,9 +74,6 @@ public class DatabaseWatchdogServlet extends HttpServlet {
                 fw.close();
             }
             migrate();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
     }
 
     private void migrate() {

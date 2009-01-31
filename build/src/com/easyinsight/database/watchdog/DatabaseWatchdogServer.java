@@ -16,7 +16,7 @@ public class DatabaseWatchdogServer {
     private boolean running = false;
 
     public static void main(String[] args) throws Exception {
-        new AppWatchdogServer().initialize();
+        new DatabaseWatchdogServer().initialize();
     }
 
     public void initialize() throws Exception {
