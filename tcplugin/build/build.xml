@@ -1,0 +1,52 @@
+<project default="plugin" basedir="." name="TeamCityPlugin">
+    <property name="outjar.path" value="../out/pluginjar"/>
+    <property name="out.path" value="../out/plugin"/>
+    <property name="server.path" value="${out.path}/server"/>
+
+    <target name="clean">
+        <delete dir="${out.path}"/>
+        <delete dir="${outjar.path}"/>
+    </target>
+
+    <target name="pluginJar" depends="clean">
+        <mkdir dir="${out.path}"/>
+        <mkdir dir="${server.path}"/>
+        <mkdir dir="${outjar.path}"/>
+        <javac destdir="${outjar.path}"
+               optimize="off"
+               debug="on" failonerror="false"
+               srcdir="../src"
+               excludes="**/*.smap">
+            <classpath>
+                <fileset dir="../lib/axis">
+                    <include name="*.jar"/>
+                </fileset>
+                <fileset dir="../lib/openapi">
+                    <include name="*.jar"/>
+                </fileset>
+            </classpath>
+            <include name="**"/>
+        </javac>
+        <mkdir dir="${outjar.path}/META-INF"/>
+        <copy todir="${outjar.path}/META-INF">
+            <fileset dir="../conf">
+                <include name="build-server-plugin.xml"/>
+            </fileset>
+        </copy>
+        <jar destfile="${server.path}/eiplugin.jar" baseDir="${outjar.path}"/>
+    </target>
+
+    <target name="plugin" depends="pluginJar">
+        <copy todir="${out.path}">
+            <fileset dir="../conf">
+                <include name="teamcity-plugin.xml"/>
+            </fileset>
+        </copy>
+        <copy todir="${server.path}">
+            <fileset dir="../lib/axis">
+                <include name="**/*"/>
+            </fileset>
+        </copy>
+        <zip destfile="../out/easyinsight.zip" baseDir="${out.path}"/>
+    </target>
+</project>
