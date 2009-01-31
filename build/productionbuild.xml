@@ -137,6 +137,8 @@
     <target name="clean">
         <delete dir="${webapp.path}"/>
         <delete dir="${watchdog.archive.path}"/>
+        <delete dir="${test.path}/classes"/>
+        <delete dir="${reports.tests}"/>
     </target>
 
     <target name="archive" depends="compileFlex">
