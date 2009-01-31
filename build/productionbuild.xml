@@ -6,6 +6,7 @@
     <taskdef name="StopInstances" classname="com.easyinsight.watchdog.updatetask.ShutdownAppInstanceTask"/>
     <taskdef name="UpdateInstances" classname="com.easyinsight.watchdog.updatetask.UpdateAppInstanceTask"/>
     <taskdef name="StartInstances" classname="com.easyinsight.watchdog.updatetask.StartAppInstanceTask"/>
+    <taskdef name="UpdateDB" classname="com.easyinsight.database.ant.DatabaseUpdateTask"/>
 
     <taskdef name="migration" classname="com.easyinsight.database.ant.DatabaseMigrationTask"/>
 
@@ -31,6 +32,10 @@
 
     <target name="startInstances">
         <StartInstances/>
+    </target>
+
+    <target name="updateDatabase">
+        <UpdateDB/>
     </target>
 
     <target name="migration">
@@ -253,6 +258,16 @@
                   bucket="eiproduction"
                   publicRead="false">
             <fileset dir="${code.path}" includes="code.zip"/>
+        </S3Upload>
+    </target>
+
+    <target name="uploadSQL">
+        <S3Upload verbose="true"
+                  accessId="0AWCBQ78TJR8QCY8ABG2"
+                  secretKey="bTUPJqHHeC15+g59BQP8ackadCZj/TsSucNwPwuI"
+                  bucket="eisql"
+                  publicRead="false">
+            <fileset dir="../java/sql" includes="*.sql"/>
         </S3Upload>
     </target>
 </project>
