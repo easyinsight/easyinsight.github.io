@@ -21,6 +21,15 @@ public abstract class Feed {
     private long feedID;
     private List<AnalysisItem> fields;
     private WSAnalysisDefinition analysisDefinition;
+    private int version;
+
+    public int getVersion() {
+        return version;
+    }
+
+    public void setVersion(int version) {
+        this.version = version;
+    }
 
     public List<AnalysisItem> getFields() {
         return fields;

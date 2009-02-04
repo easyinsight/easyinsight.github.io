@@ -1,0 +1,25 @@
+<flex-config xmlns="http://www.adobe.com/2006/flex-config">
+  <compiler>
+        <debug>true</debug>
+        <external-library-path>
+         <path-element>${flexlib}/libs/player/9/playerglobal.swc</path-element>
+      </external-library-path>
+       <library-path>
+         <path-element>${flexlib}/libs/datavisualization.swc</path-element>
+         <path-element>${flexlib}/libs/flex.swc</path-element>
+         <path-element>${flexlib}/libs/framework.swc</path-element>
+         <path-element>${flexlib}/libs/rpc.swc</path-element>
+         <path-element>${flexlib}/libs/utilities.swc</path-element>
+         <path-element>${flexlib}/locale/{locale}</path-element>
+      </library-path>
+        <source-path>
+         <path-element>/src</path-element>
+      </source-path>
+      <context-root>/</context-root>
+        <services>../web2/WEB-INF/flex/services-config.xml</services>
+    </compiler>
+    <file-specs>
+        <path-element>src/DBAdmin.mxml</path-element>
+    </file-specs>
+    <static-link-runtime-shared-libraries>true</static-link-runtime-shared-libraries>
+</flex-config>

@@ -23,8 +23,93 @@ import org.hibernate.Session;
  * Time: 6:27:22 PM
  */
 public class APIService {
-    public void enableAPI(long feedID) {
+    public long updateDataSourceAPI(DataSourceAPIDescriptor descriptor, DynamicServiceDefinition dynamicServiceDefinition) {
+        long dynamicServiceID = 0;
+        Connection conn = Database.instance().getConnection();
+        Session session = Database.instance().createSession(conn);
+        try {
+            conn.setAutoCommit(false);
+            if (dynamicServiceDefinition != null) {
+                DynamicServiceDefinition existingDefinition = getDynamicServiceDefinition(dynamicServiceDefinition.getFeedID(), conn, session);
+                if (existingDefinition != null) {
+                    undeployService(dynamicServiceDefinition.getFeedID(), conn);
+                }
+                dynamicServiceID = addDynamicServiceDefinition(dynamicServiceDefinition, conn);
+            } else {
+                undeployService(descriptor.getFeedID(), conn);
+            }
+            saveDataSourceAPI(descriptor, conn);
+            conn.commit();
+        } catch (Exception e) {
+            LogClass.error(e);
+            try {
+                conn.rollback();
+            } catch (SQLException e1) {
+                LogClass.error(e1);
+            }
+        } finally {
+            try {
+                conn.setAutoCommit(true);
+            } catch (SQLException e) {
+                LogClass.error(e);
+            }
+            session.close();
+            Database.instance().closeConnection(conn);
+        }
+        return dynamicServiceID;
+    }
 
+    private void saveDataSourceAPI(DataSourceAPIDescriptor descriptor, Connection conn) throws SQLException {
+        PreparedStatement updateStmt = conn.prepareStatement("UPDATE DATA_FEED SET UNCHECKED_API_ENABLED = ?, validated_api_enabled = ? WHERE DATA_FEED_ID = ?");
+        updateStmt.setBoolean(1, descriptor.isUncheckedEnabled());
+        updateStmt.setBoolean(2, descriptor.isValidatedEnabled());
+        updateStmt.setLong(3, descriptor.getFeedID());
+        int rows = updateStmt.executeUpdate();
+        if (rows != 1) {
+            throw new RuntimeException("Update of API properties failed");
+        }
+    }
+
+    public List<DataSourceAPIDescriptor> getDataSourceAPIs() {
+        List<DataSourceAPIDescriptor> apis = new ArrayList<DataSourceAPIDescriptor>();
+        long userID = SecurityUtil.getUserID();
+        Connection conn = Database.instance().getConnection();
+        Session session = Database.instance().createSession(conn);
+        try {
+            PreparedStatement queryStmt = conn.prepareStatement("SELECT DATA_FEED.DATA_FEED_ID, FEED_NAME," +
+                    "data_feed.unchecked_api_enabled, data_feed.validated_api_enabled, data_feed.api_key FROM DATA_FEED, UPLOAD_POLICY_USERS " +
+                    "WHERE UPLOAD_POLICY_USERS.FEED_ID = DATA_FEED.DATA_FEED_ID AND " +
+                    "UPLOAD_POLICY_USERS.USER_ID = ? AND UPLOAD_POLICY_USERS.ROLE = ?");
+            PreparedStatement serviceStmt = conn.prepareStatement("SELECT dynamic_service_descriptor_id FROM dynamic_service_descriptor WHERE feed_id = ?");
+            queryStmt.setLong(1, userID);
+            queryStmt.setInt(2, Roles.OWNER);
+            ResultSet rs = queryStmt.executeQuery();
+            while (rs.next()) {
+                long feedID = rs.getLong(1);
+                String name = rs.getString(2);
+                boolean uncheckedEnabled = rs.getBoolean(3);
+                boolean validatedEnabled = rs.getBoolean(4);
+                String apiKey = rs.getString(5);
+                serviceStmt.setLong(1, feedID);
+                DynamicServiceDescriptor descriptor = null;                
+                ResultSet serviceRS = serviceStmt.executeQuery();
+                if (serviceRS.next()) {
+                    long serviceID = serviceRS.getLong(1);
+                    if (serviceID > 0) {
+                        String wsdl = "http://localhost:8080/DMS/services/s" + feedID + "?wsdl";
+                        descriptor = new DynamicServiceDescriptor(feedID, name, wsdl, serviceID, getDynamicServiceDefinition(feedID, conn, session));
+                    }
+                }
+                apis.add(new DataSourceAPIDescriptor(feedID, name, uncheckedEnabled, validatedEnabled, descriptor, apiKey));
+            }
+        } catch (SQLException e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        } finally {
+            session.close();
+            Database.instance().closeConnection(conn);
+        }
+        return apis;
     }
 
     public List<FeedDescriptor> getAvailableFeeds() {
@@ -147,7 +232,7 @@ public class APIService {
         }
     }
 
-    public void addDynamicServiceDefinition(DynamicServiceDefinition definition, Connection conn) {
+    public long addDynamicServiceDefinition(DynamicServiceDefinition definition, Connection conn) {
 
         try {
             PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO DYNAMIC_SERVICE_DESCRIPTOR (FEED_ID) VALUES (?)",
@@ -172,6 +257,7 @@ public class APIService {
                     insertItemStmt.execute();
                 }
             }
+            return id;
         } catch (SQLException e) {
             LogClass.error(e);
             throw new RuntimeException(e);

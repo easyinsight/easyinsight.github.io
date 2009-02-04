@@ -1,0 +1,43 @@
+<project default="jdbcsolution" basedir="." name="JDBCSolution">
+    <property file="../../../build/local.build.properties"/>
+    <taskdef resource="flexTasks.tasks" classpath="${flex.sdk.dir}/ant/lib/flexTasks.jar"/>
+    <property name="FLEX_HOME" value="${flex.sdk.dir}"/>
+
+    <property name="jdbc.out.path" value="../java/out/jdbc/"/>
+    <property name="jdbc.archive.path" value="${jdbc.out.path}/jdbc"/>
+
+    <target name="clean">
+        <delete dir="${jdbc.out.path}"/>
+        <delete dir="${jdbc.archive.path}"/>
+    </target>
+
+    <target name="buildFlex">
+         <mxmlc file="../flex/src/DBAdmin.mxml" output="../web2/DatabaseAdmin.swf"
+               static-rsls="true">
+            <load-config filename="../flex/compiler-config.xml"/>
+        </mxmlc>
+    </target>
+
+    <target name="jdbcsolution">
+        <mkdir dir="${jdbc.archive.path}"/>
+        <javac destdir="${jdbc.archive.path}"
+               optimize="off"
+               debug="on" failonerror="false"
+               srcdir="../build/src"
+               excludes="**/*.smap">
+            <classpath>
+                <fileset dir="../build/lib">
+                    <include name="*.jar"/>
+                </fileset>
+            </classpath>
+            <include name="**"/>
+            <exclude name="tags/**"/>
+        </javac>
+        <unzip dest="${jdbc.archive.path}">
+            <fileset dir="../build/lib">
+                <include name="*.jar"/>
+            </fileset>
+        </unzip>
+        <jar destfile="${jdbc.out.path}/watchdog.jar" baseDir="${jdbc.archive.path}"/>
+    </target>
+</project>

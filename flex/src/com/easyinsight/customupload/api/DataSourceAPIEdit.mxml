@@ -1,0 +1,191 @@
+<?xml version="1.0" ?>
+<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:api="com.easyinsight.customupload.api.*" backgroundColor="#D4D5EC">
+    <mx:states>
+        <mx:State name="dynamicService">
+            <mx:RemoveChild target="{noDynamicServiceLabel}"/>
+            <mx:RemoveChild target="{defineDynamicServiceButton}"/>
+            <mx:AddChild relativeTo="{dynamicServiceItem}">
+                <api:DynamicServiceEditWindow feedID="{feedID}" dynamicServiceDefinition="{dynamicServiceDefinition}"/>
+            </mx:AddChild>
+        </mx:State>
+    </mx:states>
+    <mx:Script><![CDATA[
+        import mx.managers.PopUpManager;
+
+        [Bindable]
+        private var feedID:int;
+        [Bindable]
+        private var dataSourceName:String;
+        [Bindable]
+        private var dataSourceAPIKey:String;
+        [Bindable]
+        private var dynamicServiceDefinition:DynamicServiceDefinition;
+        [Bindable]
+        private var uncheckedAPIEnabled:Boolean;
+        [Bindable]
+        private var validatedAPIEnabled:Boolean;
+        [Bindable]
+        private var uncheckedBasicWSDL:String = "http://api.easy-insight.com/UncheckedPublishBasic?wsdl";
+        [Bindable]
+        private var uncheckedWSSWSDL:String = "http://api.easy-insight.com/UncheckedPublishWSS?wsdl";
+        [Bindable]
+        private var validatedBasicWSDL:String = "http://api.easy-insight.com/ValidatedPublishBasic?wsdl";
+        [Bindable]
+        private var validatedWSSWSDL:String = "http://api.easy-insight.com/ValidatedPublishWSS?wsdl";
+
+        private var _dataSourceAPIDescriptor:DataSourceAPIDescriptor;
+
+        private function viewValidatedBasicWSDL():void {
+            flash.net.navigateToURL(new URLRequest(validatedBasicWSDL), "_blank");
+        }
+
+        private function viewUncheckedBasicWSDL():void {
+            flash.net.navigateToURL(new URLRequest(uncheckedBasicWSDL), "_blank");
+        }
+
+        private function viewValidatedWSSWSDL():void {
+            flash.net.navigateToURL(new URLRequest(validatedWSSWSDL), "_blank");
+        }
+
+        private function viewUncheckedWSSWSDL():void {
+            flash.net.navigateToURL(new URLRequest(uncheckedWSSWSDL), "_blank");
+        }
+
+        [Bindable]
+        [Embed(source="../../../../../assets/help.png")]
+        private var helpIcon:Class;
+
+        public function set dataSourceAPIDescriptor(val:DataSourceAPIDescriptor):void {
+            _dataSourceAPIDescriptor = val;
+        }
+
+        override protected function commitProperties():void {
+            super.commitProperties();
+            dataSourceName = _dataSourceAPIDescriptor.name;
+            dataSourceAPIKey = _dataSourceAPIDescriptor.apiKey;
+            feedID = _dataSourceAPIDescriptor.feedID;
+            dynamicServiceDefinition = _dataSourceAPIDescriptor.dynamicServiceDescriptor != null ? _dataSourceAPIDescriptor.dynamicServiceDescriptor.dynamicServiceDefinition : null;
+            uncheckedAPIEnabled = _dataSourceAPIDescriptor.uncheckedEnabled;
+            validatedAPIEnabled = _dataSourceAPIDescriptor.validatedEnabled;
+            if (dynamicServiceDefinition != null) {
+                currentState = "dynamicService";
+            }
+        }
+
+        private function save():void {
+            _dataSourceAPIDescriptor.uncheckedEnabled = uncheckedAPIEnabledCheckBox.selected;
+            _dataSourceAPIDescriptor.validatedEnabled = validatedAPIEnabledCheckbox.selected;
+            var dynamicServiceDescriptor:DynamicServiceDescriptor = new DynamicServiceDescriptor();
+            dynamicServiceDescriptor.dynamicServiceDefinition = dynamicServiceDefinition;
+            _dataSourceAPIDescriptor.dynamicServiceDescriptor = dynamicServiceDescriptor;
+            apiService.updateDataSourceAPI.send(_dataSourceAPIDescriptor, dynamicServiceDefinition);
+        }
+
+        private function defineDynamicService():void {
+            dynamicServiceDefinition = new DynamicServiceDefinition();
+            dynamicServiceDefinition.feedID = _dataSourceAPIDescriptor.feedID;
+            currentState = "dynamicService";
+            PopUpManager.centerPopUp(this);
+        }
+
+        private function cancel():void {
+            PopUpManager.removePopUp(this);
+        }
+
+        private function savedAPI():void {
+            if (dynamicServiceDefinition != null) {
+                dynamicServiceDefinition.serviceID = apiService.updateDataSourceAPI.lastResult as int;
+            }
+            PopUpManager.removePopUp(this);
+        }
+
+        private function updateUnchecked():void {
+            uncheckedAPIEnabled = uncheckedAPIEnabledCheckBox.selected;
+        }
+
+        private function updateValidated():void {
+            validatedAPIEnabled = validatedAPIEnabledCheckbox.selected;
+        }
+        ]]></mx:Script>
+    <mx:RemoteObject destination="apiService" id="apiService">
+        <mx:method name="updateDataSourceAPI" result="savedAPI()"/>
+    </mx:RemoteObject>
+    <mx:VBox paddingTop="10" paddingBottom="10" paddingLeft="10" paddingRight="10">
+        <mx:Form backgroundColor="#AEB1D6">
+            <mx:FormItem label="Data Source Name" fontFamily="Tahoma" fontWeight="bold">
+                <mx:Label text="{dataSourceName}" fontFamily="Lucida Grande" fontWeight="normal"/>
+            </mx:FormItem>
+            <mx:FormItem label="Data Source API Key" fontFamily="Tahoma" fontWeight="bold">
+                <mx:Label text="{dataSourceAPIKey}" fontFamily="Lucida Grande" fontWeight="normal"/>
+            </mx:FormItem>
+        </mx:Form>
+        <mx:Spacer height="20"/>
+        <mx:Grid backgroundColor="#AEB1D6" verticalGap="0" paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5">
+            <mx:GridRow>
+                <mx:GridItem>
+                </mx:GridItem>
+                <mx:GridItem>
+                    <mx:HBox width="100%">
+                        <mx:VRule height="24"/>
+                        <mx:Label text="Basic Auth" fontFamily="Tahoma" fontWeight="bold"/>
+                        <mx:Button icon="{helpIcon}"/>
+                    </mx:HBox>
+                </mx:GridItem>
+                <mx:GridItem>
+                    <mx:HBox width="100%">
+                        <mx:VRule height="24"/>
+                        <mx:Label text="WS-Security" fontFamily="Tahoma" fontWeight="bold"/>
+                        <mx:Button icon="{helpIcon}"/>
+                    </mx:HBox>
+                </mx:GridItem>
+            </mx:GridRow>
+            <mx:GridRow borderThickness="1">
+                <mx:GridItem>
+                    <mx:CheckBox label="Unchecked API Enabled" selected="{uncheckedAPIEnabled}"
+                                 id="uncheckedAPIEnabledCheckBox" change="updateUnchecked()"/>
+                </mx:GridItem>
+                <mx:GridItem>
+                    <mx:HBox width="100%" visible="{uncheckedAPIEnabled}">
+                        <mx:VRule height="24"/>
+                        <mx:LinkButton textDecoration="underline" label="View WSDL" fontFamily="Lucida Grande" fontWeight="normal" click="viewUncheckedBasicWSDL()"/>
+                    </mx:HBox>
+                </mx:GridItem>
+                <mx:GridItem>
+                    <mx:HBox width="100%" visible="{uncheckedAPIEnabled}">
+                        <mx:VRule height="24"/>
+                        <mx:LinkButton textDecoration="underline" label="View WSDL" fontFamily="Lucida Grande" fontWeight="normal" click="viewUncheckedWSSWSDL()"/>
+                    </mx:HBox>
+                </mx:GridItem>
+            </mx:GridRow>
+            <mx:GridRow borderThickness="1">
+                <mx:GridItem>
+                    <mx:CheckBox label="Validated API Enabled" selected="{validatedAPIEnabled}"
+                                 id="validatedAPIEnabledCheckbox" change="updateValidated()"/>
+                </mx:GridItem>
+                <mx:GridItem>
+                    <mx:HBox width="100%" visible="{validatedAPIEnabled}">
+                        <mx:VRule height="24"/>
+                        <mx:LinkButton textDecoration="underline" label="View WSDL" fontFamily="Lucida Grande" fontWeight="normal" click="viewValidatedBasicWSDL()"/>
+                    </mx:HBox>
+                </mx:GridItem>
+                <mx:GridItem>
+                    <mx:HBox width="100%" visible="{validatedAPIEnabled}">
+                        <mx:VRule height="24"/>
+                        <mx:LinkButton textDecoration="underline" label="View WSDL" fontFamily="Lucida Grande" fontWeight="normal" click="viewValidatedWSSWSDL()"/>
+                    </mx:HBox>
+                </mx:GridItem>
+            </mx:GridRow>
+        </mx:Grid>
+        <mx:Spacer height="20"/>
+        <mx:HBox width="100%" id="dynamicServiceItem">
+            <mx:Label text="There is no dynamic service currently defined for this data source."
+                      id="noDynamicServiceLabel"/>
+            <mx:Button label="Define dynamic service" id="defineDynamicServiceButton" click="defineDynamicService()"/>
+        </mx:HBox>
+        <mx:Spacer height="20"/>
+        <mx:HBox width="100%" horizontalAlign="center">
+            <mx:Button label="Save" click="save()"/>
+            <mx:Button label="Cancel" click="cancel()"/>
+        </mx:HBox>
+    </mx:VBox>
+</mx:TitleWindow>

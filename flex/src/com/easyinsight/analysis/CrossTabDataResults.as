@@ -7,6 +7,8 @@ package com.easyinsight.analysis
 	public class CrossTabDataResults
 	{
 		public var results:ArrayCollection;
+        public var invalidAnalysisItemIDs:ArrayCollection;
+        public var feedMetadata:FeedMetadata;
 		public function CrossTabDataResults()
 		{			
 		}

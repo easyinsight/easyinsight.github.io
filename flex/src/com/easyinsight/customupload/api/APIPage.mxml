@@ -14,13 +14,27 @@
     <mx:Script><![CDATA[
         import com.easyinsight.framework.LoginEvent;
         import com.easyinsight.framework.User;
-        import mx.utils.URLUtil;
+        import mx.collections.ArrayCollection;
+import mx.managers.PopUpManager;
+import mx.utils.URLUtil;
         import mx.managers.BrowserManager;
         import com.easyinsight.listing.AnalyzeSource;
+
+        [Bindable]
+        private var services:ArrayCollection;
+
+        [Bindable]
+        private var apis:ArrayCollection;
+
+        [Bindable]
+        [Embed(source="../../../../../assets/helpx48.png")]
+        public var helpIcon:Class;
 
         private function setupListeners():void {
             User.getEventNotifier().addEventListener(LoginEvent.LOGIN, onLogin);
             User.getEventNotifier().addEventListener(LoginEvent.LOGIN, onLogOut);
+            factory = new DataSourceAPIEditControlsFactory(this);
+            servicesGrid.addEventListener(ServiceDefinitionEvent.SERVICE_REMOVED, serviceRemoved);
         }
 
         private function onLogin(loginEvent:LoginEvent):void {
@@ -47,6 +61,7 @@
                 if (currentState != "") {
                     currentState = "";
                 }
+                apiService.getDataSourceAPIs.send();                
             }
         }
         public function getDefaultAnalyzeState():Boolean {
@@ -54,11 +69,100 @@
         }
         public function isKeywordSearchInstant():Boolean {
             return false;
-        }]]></mx:Script>
+        }
+
+        [Bindable]
+        private var factory:DataSourceAPIEditControlsFactory;
+
+        private function gotDeployedServices():void {
+            this.services = apiService.getDeployedServices.lastResult as ArrayCollection;
+        }
+
+        private function addService():void {
+            var serviceFeedChoice:ServiceFeedChoice = ServiceFeedChoice(PopUpManager.createPopUp(this, ServiceFeedChoice, true));
+            serviceFeedChoice.addEventListener(ServiceDefinitionEvent.SERVICE_DEFINED, serviceDefined);
+            PopUpManager.centerPopUp(serviceFeedChoice);
+        }
+
+        private function serviceDefined(event:ServiceDefinitionEvent):void {
+            apiService.getDeployedServices.send();
+        }
+
+        private function serviceRemoved(event:ServiceDefinitionEvent):void {
+            apiService.getDeployedServices.send();
+        }
+
+        private function help():void {
+            var helpWindow:DynamicServiceHelpWindow = DynamicServiceHelpWindow(PopUpManager.createPopUp(this,
+                DynamicServiceHelpWindow, true));
+            PopUpManager.centerPopUp(helpWindow);
+        }
+
+        private function gotAPIs():void {
+            this.apis = apiService.getDataSourceAPIs.lastResult as ArrayCollection;
+        }
+
+        private function viewValidatedWSDL():void {
+            flash.net.navigateToURL(new URLRequest("http://api.easy-insight.com/ValidatedPublishBasic?wsdl"), "_blank");
+        }
+
+        private function viewUncheckedWSDL():void {
+            flash.net.navigateToURL(new URLRequest("http://api.easy-insight.com/UncheckedPublishBasic?wsdl"), "_blank");
+        }
+
+        private function search():void {
+        }
+        ]]></mx:Script>
+    <mx:RemoteObject destination="apiService" id="apiService">
+		<mx:method name="getDeployedServices" result="gotDeployedServices()"/>
+		<mx:method name="getDataSourceAPIs" result="gotAPIs()"/>
+	</mx:RemoteObject>
     <mx:Box width="100%" height="5" backgroundColor="#254BD4" left="0" right="0"/>
     <mx:VBox id="coreContent" height="100%" width="100%" paddingTop="10" paddingLeft="10" paddingRight="10"
              paddingBottom="10" verticalGap="10">
-        <api:APIListing id="apiListing"/>
+        <mx:Box paddingLeft="10" paddingTop="10" paddingRight="10" paddingBottom="10" width="100%" height="100%" verticalGap="10" id="apiListing">			
+		<mx:HBox width="100%">
+            <mx:Button icon="{helpIcon}" toolTip="Help!" click="help()" />
+            <mx:Spacer width="100%"/>
+            <mx:HBox borderStyle="inset" borderThickness="1" paddingTop="5" paddingBottom="5" paddingLeft="5" paddingRight="5">
+                <mx:TextInput id="searchText" keyUp="search()"/>
+			    <mx:Button toolTip="Search" icon="@Embed(source='../../../../../assets/view.png')" id="searchButton"/>
+            </mx:HBox>
+		</mx:HBox>
+        <mx:HBox width="100%" height="100%" verticalGap="0">
+            <mx:VBox verticalGap="0">
+                <mx:Box width="100%" height="5" backgroundColor="#D42525" left="0" right="0"/>
+                <mx:Box width="100%" backgroundColor="#F6A76B" horizontalAlign="center">
+                    <mx:Label text="Standard Web Service APIs"/>
+                </mx:Box>
+                <mx:Form paddingTop="0" paddingLeft="0" paddingRight="0" paddingBottom="0" backgroundColor="#F5CDAF">
+                    <mx:FormItem label="Validated Publish" fontFamily="Tahoma" fontWeight="bold" direction="vertical">
+                        <mx:LinkButton textDecoration="underline" label="View WSDL" fontFamily="Lucida Grande" fontWeight="normal" click="viewValidatedWSDL()"/>
+                    </mx:FormItem>
+                    <mx:FormItem label="Unchecked Publish" fontFamily="Tahoma" fontWeight="bold" direction="vertical">
+                        <mx:LinkButton textDecoration="underline" label="View WSDL" fontFamily="Lucida Grande" fontWeight="normal" click="viewUncheckedWSDL()"/>
+                    </mx:FormItem>
+                </mx:Form>
+            </mx:VBox>
+            <mx:VBox verticalGap="0" height="100%">
+                <mx:Box width="100%" height="5" backgroundColor="#D42525" left="0" right="0"/>
+                <mx:Box width="100%" backgroundColor="#F6A76B" horizontalAlign="center">
+                    <mx:Label text="Data Sources and their API Configurations"/>
+                </mx:Box>
+                <mx:DataGrid dataProvider="{apis}" width="700" height="100%" selectable="false" id="servicesGrid">
+                    <mx:columns>
+                        <mx:DataGridColumn headerText="Data Source Name" dataField="name" headerRenderer="com.easyinsight.groups.CustomGroupHeader"/>
+                        <mx:DataGridColumn headerText="API Key" width="120" dataField="apiKey" headerRenderer="com.easyinsight.groups.CustomGroupHeader"/>
+                        <mx:DataGridColumn headerText="Unchecked API" dataField="uncheckedEnabled" headerRenderer="com.easyinsight.groups.CustomGroupHeader"
+                                itemRenderer="com.easyinsight.customupload.api.UncheckedAPICheckbox" width="120"/>
+                        <mx:DataGridColumn headerText="Validated API" dataField="validatedEnabled" headerRenderer="com.easyinsight.groups.CustomGroupHeader"
+                                itemRenderer="com.easyinsight.customupload.api.ValidatedAPICheckbox" width="120"/>
+                        <mx:DataGridColumn headerText="" width="60" dataField="feedName" itemRenderer="{factory}" sortable="false"/>
+                    </mx:columns>
+                </mx:DataGrid>
+            </mx:VBox>
+        </mx:HBox>
+	</mx:Box>
     </mx:VBox>
 
 </mx:VBox>

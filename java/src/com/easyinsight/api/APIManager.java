@@ -5,7 +5,9 @@ import com.easyinsight.api.dynamic.DynamicServiceDefinition;
 import com.easyinsight.api.dynamic.APIPasswordCallback;
 import com.easyinsight.api.basicauth.BasicAuthUncheckedPublishService;
 import com.easyinsight.api.basicauth.BasicAuthAuthorizationInterceptor;
+import com.easyinsight.api.basicauth.BasicAuthValidatingPublishService;
 import com.easyinsight.api.wsdeathstar.WSDeathStarUncheckedPublishService;
+import com.easyinsight.api.wsdeathstar.WSDeathStarValidatingPublishService;
 import com.easyinsight.database.Database;
 import com.easyinsight.logging.LogClass;
 
@@ -37,12 +39,20 @@ public class APIManager {
         try {
             instance = this;
             createUncheckedSOAPAPI();
-            ValidatingPublishService validatingPublishService = new ValidatingPublishService();
-            Endpoint.publish("/ValidatingPublish", validatingPublishService);
+            createdValidatedSOAPAPI();
             go();
         } catch (Exception e) {
             LogClass.error(e);
         }
+    }
+
+    private void createdValidatedSOAPAPI() {
+        ValidatingPublishService basicAuthPublishService = new BasicAuthValidatingPublishService();
+        EndpointImpl basicAuthEndpoint = (EndpointImpl) Endpoint.publish("/ValidatedPublishBasic", basicAuthPublishService);
+        configureBasicAuth(basicAuthEndpoint);
+        ValidatingPublishService wsDeathStarPublishService = new WSDeathStarValidatingPublishService();
+        EndpointImpl wsDeathStarEndpoint = (EndpointImpl) Endpoint.publish("/ValidatedPublishWSS", wsDeathStarPublishService);
+        configureWSDeathStar(wsDeathStarEndpoint);
     }
 
     private void createUncheckedSOAPAPI() {
@@ -69,12 +79,6 @@ public class APIManager {
         WSS4JInInterceptor wssIn = new WSS4JInInterceptor(securityInProps);
         endpoint.getInInterceptors().add(wssIn);
     }
-
-    private void createValidatedSOAPAPI() {
-
-    }
-
-
 
     private void go() {
         Connection conn = Database.instance().getConnection();

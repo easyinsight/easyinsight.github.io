@@ -338,7 +338,8 @@ public class FeedStorage {
 
     public void updateDataFeedConfiguration(FeedDefinition feedDefinition, Connection conn) throws SQLException {
         PreparedStatement updateDataFeedStmt = conn.prepareStatement("UPDATE DATA_FEED SET FEED_NAME = ?, FEED_TYPE = ?, PUBLICLY_VISIBLE = ?, GENRE = ?, " +
-                        "FEED_SIZE = ?, ANALYSIS_ID = ?, DESCRIPTION = ?, ATTRIBUTION = ?, OWNER_NAME = ?, DYNAMIC_SERVICE_DEFINITION_ID = ?, MARKETPLACE_VISIBLE = ? WHERE DATA_FEED_ID = ?");
+                        "FEED_SIZE = ?, ANALYSIS_ID = ?, DESCRIPTION = ?, ATTRIBUTION = ?, OWNER_NAME = ?, DYNAMIC_SERVICE_DEFINITION_ID = ?, MARKETPLACE_VISIBLE = ?," +
+                "API_KEY = ?, validated_api_enabled = ?, unchecked_api_enabled = ?  WHERE DATA_FEED_ID = ?");
         feedDefinition.setDateUpdated(new Date());
         updateDataFeedStmt.setString(1, feedDefinition.getFeedName());
         updateDataFeedStmt.setInt(2, feedDefinition.getFeedType().getType());
@@ -354,7 +355,10 @@ public class FeedStorage {
         else
             updateDataFeedStmt.setNull(10, Types.BIGINT);
         updateDataFeedStmt.setBoolean(11, feedDefinition.getUploadPolicy().isMarketplaceVisible());
-        updateDataFeedStmt.setLong(12, feedDefinition.getDataFeedID());
+        updateDataFeedStmt.setString(12, feedDefinition.getApiKey());
+        updateDataFeedStmt.setBoolean(13, feedDefinition.isValidatedAPIEnabled());
+        updateDataFeedStmt.setBoolean(14, feedDefinition.isUncheckedAPIEnabled());
+        updateDataFeedStmt.setLong(15, feedDefinition.getDataFeedID());
         int rows = updateDataFeedStmt.executeUpdate();
         if (rows != 1) {
             throw new RuntimeException("Could not locate row to update");
@@ -394,7 +398,8 @@ public class FeedStorage {
         try {
             PreparedStatement queryFeedStmt = conn.prepareStatement("SELECT FEED_NAME, FEED_TYPE, PUBLICLY_VISIBLE, GENRE, CREATE_DATE," +
                     "UPDATE_DATE, FEED_VIEWS, FEED_RATING_COUNT, FEED_RATING_AVERAGE, FEED_SIZE, ANALYSIS_ID," +
-                    "ATTRIBUTION, DESCRIPTION, OWNER_NAME, DYNAMIC_SERVICE_DEFINITION_ID, MARKETPLACE_VISIBLE FROM DATA_FEED WHERE " +
+                    "ATTRIBUTION, DESCRIPTION, OWNER_NAME, DYNAMIC_SERVICE_DEFINITION_ID, MARKETPLACE_VISIBLE, API_KEY, unchecked_api_enabled, validated_api_enabled" +
+                    " FROM DATA_FEED WHERE " +
                     "DATA_FEED_ID = ?");
             queryFeedStmt.setLong(1, identifier);
             ResultSet rs = queryFeedStmt.executeQuery();
@@ -422,7 +427,7 @@ public class FeedStorage {
                 feedDefinition.setFeedName(feedName);
                 feedDefinition.setDataFeedID(identifier);
                 boolean publiclyVisible = rs.getBoolean(3);
-                boolean marketplaceVisible = rs.getBoolean(15);
+                boolean marketplaceVisible = rs.getBoolean(16);
                 feedDefinition.setUploadPolicy(createUploadPolicy(conn, identifier, publiclyVisible, marketplaceVisible));
                 Date createDate = new Date(rs.getDate(5).getTime());
                 Date updateDate = new Date(rs.getDate(6).getTime());
@@ -447,10 +452,13 @@ public class FeedStorage {
                 feedDefinition.setDescription(description);
                 feedDefinition.setOwnerName(ownerName);
                 feedDefinition.setDynamicServiceDefinitionID(rs.getLong(15));
+                feedDefinition.setApiKey(rs.getString(17));
+                feedDefinition.setUncheckedAPIEnabled(rs.getBoolean(18));
+                feedDefinition.setValidatedAPIEnabled(rs.getBoolean(19));
                 feedDefinition.setTags(getTags(feedDefinition.getDataFeedID(), conn));
                 feedDefinition.customLoad(conn);
             } else {
-                throw new RuntimeException("hmm");
+                throw new RuntimeException("Could not find data source " + identifier);
             }
             queryFeedStmt.close();
         } catch (SQLException e) {

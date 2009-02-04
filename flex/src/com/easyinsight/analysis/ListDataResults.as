@@ -13,6 +13,8 @@ package com.easyinsight.analysis
 		public var limitedResults:Boolean;
 		public var limitResults:int;
 		public var maxResults:int;
+        public var invalidAnalysisItemIDs:ArrayCollection;
+        public var feedMetadata:FeedMetadata;
 		
 		public function ListDataResults()
 			{

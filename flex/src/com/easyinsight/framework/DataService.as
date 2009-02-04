@@ -28,6 +28,7 @@ package com.easyinsight.framework
 		public var previewMode:Boolean = false;
 		
 		public function DataService() {
+            super();
 			dataRemoteSource = new RemoteObject();
 			dataRemoteSource.destination = "data";			
 			dataRemoteSource.getFeedMetadata.addEventListener(ResultEvent.RESULT, processFeedMetadata);
@@ -57,7 +58,7 @@ package com.easyinsight.framework
 		
 		public function processFeedMetadata(resultEvent:ResultEvent):void {
 			var call:Object = resultEvent.token;
-			var feedMetadata:FeedMetadata = dataRemoteSource.getFeedMetadata.lastResult;
+			var feedMetadata:FeedMetadata = dataRemoteSource.getFeedMetadata.lastResult as FeedMetadata;
 			onMetadata.call(onMetadataCaller, feedMetadata);
 			dispatchEvent(new DataServiceLoadingEvent(DataServiceLoadingEvent.LOADING_STOPPED));	
 		}					
@@ -80,6 +81,9 @@ package com.easyinsight.framework
 		
 		public function processListData(resultEvent:Event):void {			
 			var listData:ListDataResults = dataRemoteSource.list.lastResult as ListDataResults;
+            if (listData.invalidAnalysisItemIDs != null && listData.invalidAnalysisItemIDs.length > 0) {
+                dispatchEvent(new InvalidFieldsEvent(listData.invalidAnalysisItemIDs, listData.feedMetadata));
+            }
 			onListData.call(onListDataCaller, listData);
 			dispatchEvent(new DataServiceLoadingEvent(DataServiceLoadingEvent.LOADING_STOPPED));
 		}

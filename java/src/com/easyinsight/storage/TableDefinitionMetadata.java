@@ -145,6 +145,10 @@ public class TableDefinitionMetadata {
     }
 
     public void createTable() throws SQLException {
+        ResultSet existsRS = storageConn.getMetaData().getTables(null, null, getTableName(), null);
+        if (existsRS.next()) {
+            storageConn.prepareStatement("DROP TABLE " + getTableName()).execute();
+        }
         String sql = defineTableSQL();
         PreparedStatement createSQL = storageConn.prepareStatement(sql);
         createSQL.execute();
@@ -256,6 +260,10 @@ public class TableDefinitionMetadata {
                 }
             }
 
+            ResultSet existsRS = storageConn.getMetaData().getTables(null, null, getTableName(), null);
+            if (existsRS.next()) {
+                storageConn.prepareStatement("DROP TABLE " + getTableName()).execute();
+            }
             String sql = defineTableSQL();
             PreparedStatement createSQL = storageConn.prepareStatement(sql);
             createSQL.execute();

@@ -38,6 +38,11 @@ public class ValidatingPublishService extends PublishService implements IValidat
     @Resource
     private WebServiceContext context;
 
+
+    public boolean validateCredentials() {
+        return true;
+    }
+
     public void addRow(String dataSourceName, Row row) {
         Connection conn = Database.instance().getConnection();
         TableDefinitionMetadata tableDefinitionMetadata = null;

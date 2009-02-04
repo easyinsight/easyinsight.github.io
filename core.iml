@@ -91,7 +91,7 @@
         <jarDirectory url="file://$MODULE_DIR$/java/lib/cxf2" recursive="false" />
       </library>
     </orderEntry>
-    <orderEntry type="inheritedJdk" />
+    <orderEntry type="jdk" jdkName="1.6" jdkType="JavaSDK" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="module-library">
       <library name="core">

@@ -6,6 +6,7 @@ package com.easyinsight.framework
 	public class InsightRequestMetadata
 	{
 		public var now:Date;
+        public var version:int;
 		
 		public function InsightRequestMetadata()
 		{

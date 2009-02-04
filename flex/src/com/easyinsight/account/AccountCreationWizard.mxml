@@ -20,7 +20,7 @@
 			<mx:RemoveChild target="{initialContent}"/>
 			<mx:AddChild relativeTo="{coreContent}">
 				<account:AccountConfirmationRequest accountCreationConfirmed="accountConfirmed(event)" previousPage="onPreviousPage(event)"
-					account="{account}"/>
+					account="{account}" user="{user}"/>
 			</mx:AddChild>
 		</mx:State>
 		<mx:State name="AccountCreated">
@@ -44,6 +44,7 @@
 			
 			[Bindable]
 			private var account:Account;
+            [Bindable]
 			private var user:UserTransferObject;
             private var password:String;
 

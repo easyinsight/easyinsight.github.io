@@ -33,6 +33,12 @@ import mx.collections.ArrayCollection;
             PopUpManager.addPopUp(window, this, true);
             PopUpManager.centerPopUp(window);
         }
+
+        private function upgradeAccount():void {
+            var window:ChangeAccountTypeWindow = new ChangeAccountTypeWindow();
+            PopUpManager.addPopUp(window, this, true);
+            PopUpManager.centerPopUp(window);
+        }
 ]]></mx:Script>
     <mx:HBox width="100%" horizontalAlign="center">
     <mx:VBox id="accountSettingsBox" verticalGap="0" borderThickness="1" borderColor="#D42525" borderStyle="solid" dropShadowEnabled="true">
@@ -48,7 +54,7 @@ import mx.collections.ArrayCollection;
                 <customupload:SpaceUsage id="spaceUsage" descriptors="{dataSources}"/>
             </mx:FormItem>
             <mx:FormItem label="">
-                <mx:Button label="Upgrade Account..."/>
+                <mx:Button label="Upgrade Account..." click="upgradeAccount()"/>
             </mx:FormItem>
             <mx:FormItem>
                 <mx:Button label="Cancel Account..."/>

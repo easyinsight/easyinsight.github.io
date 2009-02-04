@@ -11,6 +11,10 @@ import javax.jws.WebParam;
 @WebService
 
 public interface IPublishService {
+
+    public boolean validateCredentials();
+
+    public void disableUnchecked(@WebParam(name="dataSourceKey") String dataSourceKey);
     
     public void replaceRows(@WebParam(name="dataSourceName") String dataSourceName,
                             @WebParam(name="rows") Row[] rows);

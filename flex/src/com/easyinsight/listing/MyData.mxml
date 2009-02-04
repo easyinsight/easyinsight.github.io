@@ -15,8 +15,7 @@
 		<![CDATA[
 			import com.easyinsight.customupload.SimpleFeedWindow;
 			import com.easyinsight.help.MyDataHelp;
-			import com.easyinsight.help.HelpWindow;
-			import com.easyinsight.customupload.api.APIListing;
+			import com.easyinsight.help.HelpWindow;			
 			import com.easyinsight.customupload.UserUpload;
 			import com.easyinsight.framework.LoginEvent;
 			import com.easyinsight.customupload.UploadExternalSource;
@@ -279,11 +278,6 @@
             		
             	}                    	
             	dispatchEvent(new AnalyzeEvent(new CompositeFeedCreationSource(descriptors)));
-            }                       
-            
-            private function apiConfiguration():void {
-            	var apiListing:APIListing = APIListing(PopUpManager.createPopUp(this, APIListing, true));
-            	PopUpManager.centerPopUp(apiListing);
             }
             
             private function help():void {

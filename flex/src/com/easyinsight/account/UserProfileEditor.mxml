@@ -8,33 +8,39 @@
 	</mx:states>
 	<mx:Script>
 		<![CDATA[
+        import com.easyinsight.framework.User;
 import mx.events.ItemClickEvent;
-import com.easyinsight.framework.UserTransferObject;
-			import mx.validators.Validator;
+
+        import com.easyinsight.framework.UserTransferObject;
+
+        import mx.managers.PopUpManager;
+        import mx.validators.Validator;
 
         [Bindable]
-        private var userNameText:String;
+        private var _userNameText:String;
 
         [Bindable]
-        private var fullNameText:String;
+        private var _fullNameText:String;
 
         [Bindable]
-        private var emailText:String;
+        private var _emailText:String;
 
-        private var _user:UserTransferObject;
+        [Bindable]
+        private var _securityConfigurable:Boolean = false;
 
         private var validators:Array;
 
 
-        public function set user(val:UserTransferObject):void {
-            _user = val;
+        public function set userNameText(val:String):void {
+            _userNameText = val;
         }
 
-        override protected function commitProperties():void {
-            super.commitProperties();
-            userNameText = _user.userName;
-            fullNameText = _user.name;
-            emailText = _user.email;
+        public function set fullNameText(val:String):void {
+            _fullNameText = val;
+        }
+
+        public function set emailText(val:String):void {
+            _emailText = val;
         }
 
         private function initHandlers():void {
@@ -48,7 +54,7 @@ import com.easyinsight.framework.UserTransferObject;
                 failureMessageLabel.text = failureMessage;
             } else {
                 failureMessageLabel.text = "";
-                creationService.updateUser.send(userName.text, fullName.text, email.text);
+                creationService.updateUserLabels.send(userName.text, fullName.text, email.text);
             }
         }
 
@@ -61,14 +67,17 @@ import com.easyinsight.framework.UserTransferObject;
         }
 
         private function savedUser():void {
-
+            User.getInstance().updateLabels(userName.text, fullName.text, email.text);
+            dispatchEvent(new RefreshAccountEvent());
+            PopUpManager.removePopUp(this);
         }
                 ]]>
 	</mx:Script>
 	
-	<mx:VBox width="100%" height="100%">
+	<mx:VBox width="100%" height="100%" styleName="TitleWindowContents">
+        <!--
 		<mx:HBox width="100%">
-            <mx:ToggleButtonBar itemClick="onItemClick(event)">
+            <mx:ToggleButtonBar itemClick="onItemClick(event)" visible="{_securityConfigurable}">
                 <mx:dataProvider>
                     <mx:Array>
                         <mx:String>Profile</mx:String>
@@ -78,31 +87,31 @@ import com.easyinsight.framework.UserTransferObject;
             </mx:ToggleButtonBar>
 			<mx:Button label="Profile" id="profileButton" click="currentState=''" styleName="blueButton"/>
 			<mx:Button label="Security" id="securityButton" click="currentState='security'"/>
-		</mx:HBox>		
+		</mx:HBox>
+				-->
 		<mx:Form>
-			<mx:FormItem label="User ID:" direction="horizontal">
-				<mx:TextInput id="userName" text="{userNameText}"/>				
+			<mx:FormItem label="User ID:" direction="horizontal" fontFamily="Tahoma" fontWeight="bold">
+				<mx:TextInput id="userName" text="{_userNameText}" fontFamily="Lucida Grande" fontWeight="normal"/>
 			</mx:FormItem>
-			<mx:FormItem label="Name:" direction="horizontal">
-				<mx:TextInput id="fullName" text="{fullNameText}"/>				
+			<mx:FormItem label="Name:" direction="horizontal" fontFamily="Tahoma" fontWeight="bold">
+				<mx:TextInput id="fullName" text="{_fullNameText}" fontFamily="Lucida Grande" fontWeight="normal"/>
 			</mx:FormItem>
-			<mx:FormItem label="Email Address:" direction="horizontal">
-				<mx:TextInput id="email" text="{emailText}"/>				
-			</mx:FormItem>
-			<mx:FormItem>
-				<mx:HBox>
-					<mx:Button label="Save" click="save()"/>						
-				</mx:HBox>	
+			<mx:FormItem label="Email Address:" direction="horizontal" fontFamily="Tahoma" fontWeight="bold">
+				<mx:TextInput id="email" text="{_emailText}" fontFamily="Lucida Grande" fontWeight="normal"/>
 			</mx:FormItem>
 			<mx:FormItem label="">
 				<mx:Text text="" id="failureMessageLabel"/>
 			</mx:FormItem>
 		</mx:Form>
+        <mx:HBox width="100%">
+            <mx:Button label="Save" click="save()"/>
+            <mx:Button label="Cancel" click="PopUpManager.removePopUp(this)"/>
+        </mx:HBox>
 	</mx:VBox>
 	<mx:StringValidator source="{userName}" property="text" id="userNameValidator" minLength="3" maxLength="20"/>	
 	<mx:StringValidator source="{fullName}" property="text" id="fullNameValidator" minLength="3" maxLength="40"/>
 	<mx:EmailValidator source="{email}" property="text" id="emailValidator"/>
 	<mx:RemoteObject id="creationService" destination="login">
-		<mx:method name="updateUser" result="savedUser()"/>
+		<mx:method name="updateUserLabels" result="savedUser()"/>
 	</mx:RemoteObject>
 </mx:TitleWindow>

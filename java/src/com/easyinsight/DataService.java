@@ -50,6 +50,7 @@ public class DataService implements IDataService {
             FeedMetadata feedMetadata = new FeedMetadata();
             feedMetadata.setFields(feedItemArray);
             feedMetadata.setDataFeedID(feedID);
+            feedMetadata.setVersion(feed.getVersion());
             return feedMetadata;
         } catch (Exception e) {
             LogClass.error(e);
@@ -67,11 +68,42 @@ public class DataService implements IDataService {
         return pivot(analysisDefinition.createBlazeDefinition());
     } */
 
+    private Set<Long> validate(WSAnalysisDefinition analysisDefinition, Feed feed) {
+        Set<Long> ids = new HashSet<Long>();
+        Set<Long> invalidIDs = new HashSet<Long>();
+        for (AnalysisItem analysisItem : feed.getFields()) {
+            ids.add(analysisItem.getAnalysisItemID());
+        }
+        List<AnalysisItem> items = analysisDefinition.getAllAnalysisItems();
+        for (AnalysisItem analysisItem : items) {
+            if (!ids.contains(analysisItem.getAnalysisItemID())) {
+                invalidIDs.add(analysisItem.getAnalysisItemID());
+            }
+        }
+        if (analysisDefinition.getFilterDefinitions() != null) {
+            for (FilterDefinition filterDefinition : analysisDefinition.getFilterDefinitions()) {
+                if (!ids.contains(filterDefinition.getField().getAnalysisItemID())) {
+                    invalidIDs.add(filterDefinition.getField().getAnalysisItemID());
+                }
+            }
+        }
+        return invalidIDs;
+    }
+
     public ListDataResults list(WSAnalysisDefinition analysisDefinition, boolean preview, InsightRequestMetadata insightRequestMetadata) {
-        try {                                             
+        try {
+            ListDataResults results;
             Feed feed = feedRegistry.getFeed(analysisDefinition.getDataFeedID());
-            DataSet dataSet = feed.getDataSet(analysisDefinition.getColumnKeys(feed.getFields()), preview ? 5 : null, false, insightRequestMetadata);
-            return dataSet.toList(analysisDefinition, feed.getFields(), insightRequestMetadata);
+            Set<Long> ids = validate(analysisDefinition, feed);
+            if (ids.size() > 0) {
+                results = new ListDataResults();
+                results.setInvalidAnalysisItemIDs(ids);
+                results.setFeedMetadata(getFeedMetadata(analysisDefinition.getDataFeedID(), false));
+            } else {
+                DataSet dataSet = feed.getDataSet(analysisDefinition.getColumnKeys(feed.getFields()), preview ? 5 : null, false, insightRequestMetadata);
+                results = dataSet.toList(analysisDefinition, feed.getFields(), insightRequestMetadata);
+            }
+            return results;
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);
@@ -82,11 +114,17 @@ public class DataService implements IDataService {
         try {
             WSCrosstabDefinition crosstabDefinition = (WSCrosstabDefinition) analysisDefinition;
             Feed feed = feedRegistry.getFeed(crosstabDefinition.getDataFeedID());
+            Set<Long> ids = validate(analysisDefinition, feed);
             CrossTabDataResults crossTabDataResults = new CrossTabDataResults();
-            DataSet dataSet = feed.getDataSet(analysisDefinition.getColumnKeys(feed.getFields()), preview ? 5 : null, false, insightRequestMetadata);
-            Crosstab crosstab = dataSet.toCrosstab(crosstabDefinition, insightRequestMetadata);
-            Collection<Map<String, Value>> results = crosstab.outputForm();
-            crossTabDataResults.setResults(results);
+            if (ids.size() > 0) {
+                crossTabDataResults.setInvalidAnalysisItemIDs(ids);
+                crossTabDataResults.setFeedMetadata(getFeedMetadata(analysisDefinition.getDataFeedID(), false));
+            } else {
+                DataSet dataSet = feed.getDataSet(analysisDefinition.getColumnKeys(feed.getFields()), preview ? 5 : null, false, insightRequestMetadata);
+                Crosstab crosstab = dataSet.toCrosstab(crosstabDefinition, insightRequestMetadata);
+                Collection<Map<String, Value>> results = crosstab.outputForm();
+                crossTabDataResults.setResults(results);
+            }
             return crossTabDataResults;
         } catch (Exception e) {
             LogClass.error(e);

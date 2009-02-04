@@ -23,6 +23,7 @@ package com.easyinsight.framework
         public var accountAdmin:Boolean;
         public var dataSourceCreator:Boolean;
         public var insightCreator:Boolean;
+
 		private var merchants:ArrayCollection = new ArrayCollection();
 		private var storeService:RemoteObject;
 		
@@ -41,6 +42,18 @@ package com.easyinsight.framework
 			_user.storeService.getMerchants.addEventListener(ResultEvent.RESULT, _user.gotMerchants);
 			_user.storeService.getMerchants.send();*/
 		}
+
+        public function updateLabels(userName:String, fullName:String, email:String) {
+            this.email = email;
+            this.userName = userName;
+            this.name = fullName;
+        }
+
+        public function resync(userTransferObject:UserTransferObject):void {
+            this.accountAdmin = userTransferObject.accountAdmin;
+            this.dataSourceCreator = userTransferObject.dataSourceCreator;
+            this.insightCreator = userTransferObject.insightCreator;
+        }
 		
 		private function gotMerchants(event:ResultEvent):void {
 			this.merchants = storeService.getMerchants.lastResult;
@@ -60,6 +73,10 @@ package com.easyinsight.framework
 		public function getAccountType():AccountType {
 			return accountType;
 		}
+
+        public function setAccountType(type:AccountType) {
+            this.accountType = type;
+        }
 		
 		public function getEmail():String {
 			return email;

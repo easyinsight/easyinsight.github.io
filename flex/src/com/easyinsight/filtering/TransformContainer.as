@@ -37,6 +37,24 @@ import com.easyinsight.commands.CommandEvent;
 			this.addEventListener(DragEvent.DRAG_OVER, dragOverHandler);
 			this.addEventListener(DragEvent.DRAG_EXIT, dragExitHandler);					
 		}
+
+        public function invalidateItems(items:ArrayCollection):void {
+            for each (var itemID:int in items) {
+                for each (var filter:IFilter in filterMap) {
+                    if (filter.filterDefinition.field.analysisItemID == itemID) {
+                        filterTile.removeChild(filter as DisplayObject);
+                        filterMap[filter.filterDefinition.field.qualifiedName()] = null;
+                        var index:int = filterDefinitions.getItemIndex(filter.filterDefinition);
+                        filterDefinitions.removeItemAt(index);
+                        if (filterDefinitions.length == 0) {
+                            noFilters = true;
+                            removeChild(filterTile);
+                            addChild(dropHereBox);
+                        }
+                    }
+                }
+            }
+        }
 		
 		public function set analysisItems(analysisItems:ArrayCollection):void {
 			_analysisItems = analysisItems;

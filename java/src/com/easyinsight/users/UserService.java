@@ -22,7 +22,34 @@ import flex.messaging.FlexContext;
  * Date: Jan 2, 2008
  * Time: 5:34:56 PM
  */
-public class UserService implements IUserService {    
+public class UserService implements IUserService {
+
+    public UserTransferObject upgradeAccount(AccountType toType) {
+        long accountID = SecurityUtil.getAccountID();
+        Session session = Database.instance().createSession();
+        try {
+            session.beginTransaction();
+            Account account = (Account) session.createQuery("from Account where accountID = ?").setLong(0, accountID).list().get(0);
+            User user = (User) session.createQuery("from User where userID = ?").setLong(0, SecurityUtil.getAccountID()).list().get(0);
+            account.setAccountType(toType.getAccountType());
+            if (toType.getAccountType() == AccountType.COMMERCIAL) {
+                user.setAccountAdmin(true);
+                user.setDataSourceCreator(true);
+                user.setInsightCreator(true);
+                session.update(user);
+            }
+            session.update(account);
+            account.toTransferObject();
+            session.getTransaction().commit();
+            return user.toUserTransferObject();
+        } catch (Exception e) {
+            LogClass.error(e);
+            session.getTransaction().rollback();
+            throw new RuntimeException(e);
+        } finally {
+            session.close();
+        }
+    }
 
     public void deleteUser(User user) {
         Session session = Database.instance().createSession();
@@ -113,7 +140,7 @@ public class UserService implements IUserService {
         }
     }
 
-    /*public void updateUser(String userName, String fullName, String email) {
+    public void updateUserLabels(String userName, String fullName, String email) {
         User user = retrieveUser();
         if (SecurityUtil.getAccountID() != user.getAccountID().getAccountID()) {
             throw new SecurityException();
@@ -133,7 +160,7 @@ public class UserService implements IUserService {
         } finally {
             session.close();
         }
-    }  */
+    }
 
     public boolean updatePassword(String existingPassword, String password) {
         Session session = Database.instance().createSession();

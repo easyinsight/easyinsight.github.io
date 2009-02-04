@@ -1,0 +1,82 @@
+<?xml version="1.0" ?>
+<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:dbservice="com.easyinsight.dbservice.*">
+    <mx:states>
+        <mx:State name="dbConfig">
+            <mx:RemoveChild target="{coreForm}"/>
+            <mx:AddChild relativeTo="{coreBox}">
+                <dbservice:DBSettings dbConfigured="onDBConfigured(event)"/>
+            </mx:AddChild>
+        </mx:State>
+    </mx:states>
+    <mx:Script><![CDATA[
+        import mx.managers.PopUpManager;
+
+        [Bindable]
+        private var eiUserName:String;
+        [Bindable]
+        private var eiPassword:String;
+
+        [Bindable]
+        private var validationResult:String;
+
+        private var eiConfig:EIConfiguration;
+
+        private var eiValidated:Boolean;
+
+        private function validated():void {
+            var validationResult:String = dbService.validateEI.lastResult as String;
+            if (validationResult == null) {
+                eiValidated = true;
+                this.validationResult = "Validated!";
+            } else {
+                this.validationResult = validationResult;
+            }
+        }
+
+        private function onDBConfigured(event:ConfigProgressionEvent):void {
+            dispatchEvent(new ConfigProgressionEvent(event.dbConfig, eiConfig));
+            PopUpManager.removePopUp(this);
+        }
+
+        private function assigned():void {
+            currentState = "dbConfig";
+        }
+
+        private function validate():void {
+            dbService.validateEI.send(createEIConfiguration());
+        }
+
+        private function createEIConfiguration():EIConfiguration {
+            eiConfig = new EIConfiguration();
+            eiConfig.userName = eiUserNameInput.text;
+            eiConfig.password = eiPasswordInput.text;
+            return eiConfig;
+        }
+
+        private function next():void {
+            dbService.assignEI.send(createEIConfiguration());
+        }
+        ]]></mx:Script>
+    <mx:RemoteObject id="dbService" destination="dbremote">
+        <mx:method name="validateEI" result="validated()"/>
+        <mx:method name="assignEI" result="assigned()"/>
+    </mx:RemoteObject>
+    <mx:Box width="100%" height="100%" id="coreBox">
+        <mx:Form id="coreForm">
+            <mx:FormItem label="Easy Insight User Name:">
+                <mx:TextInput id="eiUserNameInput" text="{eiUserName}"/>
+            </mx:FormItem>
+            <mx:FormItem label="Easy Insight Password:">
+                <mx:TextInput id="eiPasswordInput" displayAsPassword="true" text="{eiPassword}"/>
+            </mx:FormItem>
+            <mx:FormItem>
+                <mx:Button label="Validate" click="validate()"/>
+                <mx:Label text="{validationResult}"/>
+            </mx:FormItem>
+            <mx:FormItem>
+                <mx:Button label="To Database Configuration" click="next()"/>
+                <mx:Button label="Cancel" click="PopUpManager.removePopUp(this)"/>
+            </mx:FormItem>
+        </mx:Form>
+    </mx:Box>
+</mx:TitleWindow>

@@ -1,25 +1,31 @@
 <?xml version="1.0" ?>
-<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" creationComplete="retrieveFields()">
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" creationComplete="retrieveFields()">
     <mx:Script><![CDATA[
-import com.easyinsight.administration.feed.FeedDefinitionData;
-        import mx.managers.PopUpManager;
+        import com.easyinsight.administration.feed.FeedDefinitionData;
+
         import mx.collections.ArrayCollection;
+        import mx.managers.PopUpManager;
+
         [Bindable]
         private var methods:ArrayCollection;
 
         private var _dynamicServiceDefinition:DynamicServiceDefinition;
         private var _feedID:int;
         private var fields:ArrayCollection;
+        [Bindable]
+        private var wsdlText:String;
 
         public function get dynamicServiceDefinition():DynamicServiceDefinition {
             return _dynamicServiceDefinition;
         }
+
         public function set dynamicServiceDefinition(val:DynamicServiceDefinition):void {
             _dynamicServiceDefinition = val;
         }
 
         public function set feedID(val:int):void {
             _feedID = val;
+            wsdlText = "http://api.easy-insight.com/s" + _feedID + "?wsdl";            
         }
 
         override protected function createChildren():void {
@@ -29,13 +35,17 @@ import com.easyinsight.administration.feed.FeedDefinitionData;
             }
         }
 
+        override protected function commitProperties():void {
+            super.commitProperties();
+            uploadService.getDataFeedConfiguration.send(_feedID);            
+        }
+
         private function save():void {
             _dynamicServiceDefinition.configuredMethods = methods;
             apiService.deployServiceDefinition.send(_dynamicServiceDefinition);
         }
 
         private function deployed():void {
-            PopUpManager.removePopUp(this);
         }
 
         private function editMethod(event:EditMethodEvent):void {
@@ -48,13 +58,16 @@ import com.easyinsight.administration.feed.FeedDefinitionData;
         }
 
         private function onMethodEdit(event:MethodDefinitionEvent):void {
-             
+
+        }
+
+        private function copyToClipboard():void {
+            System.setClipboard(wsdlText);
         }
 
         private function retrieveFields():void {
             methodsGrid.addEventListener(MethodDefinitionEvent.METHOD_REMOVED, onMethodRemove);
             methodsGrid.addEventListener(EditMethodEvent.EDIT_METHOD, editMethod);
-            uploadService.getDataFeedConfiguration.send(_feedID);
         }
 
         private function onMethodRemove(event:MethodDefinitionEvent):void {
@@ -64,10 +77,6 @@ import com.easyinsight.administration.feed.FeedDefinitionData;
         private function gotFeed():void {
             var feed:FeedDefinitionData = uploadService.getDataFeedConfiguration.lastResult as FeedDefinitionData;
             this.fields = feed.fields;
-        }
-
-        private function cancel():void {
-            PopUpManager.removePopUp(this);
         }
 
         private function addMethod():void {
@@ -89,20 +98,21 @@ import com.easyinsight.administration.feed.FeedDefinitionData;
     <mx:RemoteObject destination="apiService" id="apiService">
 		<mx:method name="deployServiceDefinition" result="deployed()"/>
 	</mx:RemoteObject>
-    <mx:VBox>
-        <mx:ApplicationControlBar>
+    <mx:VBox verticalGap="0">
+        <mx:HBox backgroundColor="#8F96F0" width="100%">
+            <mx:Label text="Service WSDL: "/>
+            <mx:Text text="{wsdlText}"/>
+            <mx:Button label="Copy to Clipboard" click="copyToClipboard()"/>
+        </mx:HBox>
+        <mx:HBox backgroundColor="#AEB2F0" width="100%">
             <mx:Label text="Methods"/>
             <mx:Button label="Add Method..." click="addMethod()"/>
-        </mx:ApplicationControlBar>
+        </mx:HBox>
         <mx:DataGrid dataProvider="{methods}" id="methodsGrid"  width="100%" height="100%" rowHeight="24">
             <mx:columns>
                 <mx:DataGridColumn headerText="Method Name" dataField="methodName" />
                 <mx:DataGridColumn headerText="" dataField="methodName" itemRenderer="com.easyinsight.customupload.api.DynamicServiceEditControls" width="50"/>
             </mx:columns>
         </mx:DataGrid>
-        <mx:HBox width="100%" horizontalAlign="center">
-            <mx:Button label="Save" click="save()"/>
-            <mx:Button label="Cancel" click="cancel()"/>
-        </mx:HBox>
     </mx:VBox>
-</mx:TitleWindow>
+</mx:VBox>

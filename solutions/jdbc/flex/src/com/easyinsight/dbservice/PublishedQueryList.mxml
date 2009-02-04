@@ -1,0 +1,33 @@
+<?xml version="1.0" ?>
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" addedToStage="setup()">
+    <mx:Script><![CDATA[
+        import mx.collections.ArrayCollection;
+import mx.controls.Alert;
+        import mx.rpc.events.FaultEvent;
+
+        [Bindable]
+        private var queries:ArrayCollection;
+
+        private function setup():void  {
+            dbService.getQueryConfigurations.send();
+        }
+
+        private function onFault(event:FaultEvent):void {
+            Alert.show(event.message.toString());
+        }
+
+        private function gotQueries():void {
+            this.queries = dbService.getQueryConfigurations.lastResult as ArrayCollection;
+        }
+]]></mx:Script>
+    <mx:RemoteObject id="dbService" destination="dbremote" fault="onFault(event)">
+        <mx:method name="getQueryConfigurations" result="gotQueries()"/>
+    </mx:RemoteObject>
+    <mx:DataGrid dataProvider="{queries}" width="600">
+        <mx:columns>
+            <mx:DataGridColumn dataField="name" headerText="name" width="100"/>
+            <mx:DataGridColumn dataField="query" headerText="query" width="400"/>
+            <mx:DataGridColumn dataField="name" headerText="query" sortable="false" width="100" itemRenderer="com.easyinsight.dbservice.PublishedQueryEdits"/>
+        </mx:columns>
+    </mx:DataGrid>
+</mx:VBox>

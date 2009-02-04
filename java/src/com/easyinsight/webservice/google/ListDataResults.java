@@ -1,10 +1,12 @@
 package com.easyinsight.webservice.google;
 
 import com.easyinsight.AnalysisItem;
+import com.easyinsight.FeedMetadata;
 import com.easyinsight.analysis.AnalysisItemResultMetadata;
 import com.easyinsight.datafeeds.CredentialFailure;
 
 import java.util.List;
+import java.util.Set;
 import java.io.Serializable;
 
 public class ListDataResults implements Serializable {
@@ -15,6 +17,24 @@ public class ListDataResults implements Serializable {
     private boolean limitedResults;
     private int limitResults;
     private int maxResults;
+    private Set<Long> invalidAnalysisItemIDs;
+    private FeedMetadata feedMetadata;
+
+    public FeedMetadata getFeedMetadata() {
+        return feedMetadata;
+    }
+
+    public void setFeedMetadata(FeedMetadata feedMetadata) {
+        this.feedMetadata = feedMetadata;
+    }
+
+    public Set<Long> getInvalidAnalysisItemIDs() {
+        return invalidAnalysisItemIDs;
+    }
+
+    public void setInvalidAnalysisItemIDs(Set<Long> invalidAnalysisItemIDs) {
+        this.invalidAnalysisItemIDs = invalidAnalysisItemIDs;
+    }
 
     public boolean isLimitedResults() {
         return limitedResults;

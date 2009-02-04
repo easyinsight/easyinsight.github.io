@@ -32,6 +32,10 @@
             public function getAnalysisDefinition():AnalysisDefinition {
                 return analysisDefinition;
             }
+
+            public function invalidateItems(items:ArrayCollection):void {
+
+            }
             
             public function set subState(subState:int):void {
             	

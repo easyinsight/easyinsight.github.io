@@ -1,0 +1,245 @@
+/**
+ * Where.java
+ *
+ * This file was auto-generated from WSDL
+ * by the Apache Axis 1.4 Apr 22, 2006 (06:55:48 PDT) WSDL2Java emitter.
+ */
+
+package com.easyinsight.dbservice.validated;
+
+public class Where  implements java.io.Serializable {
+    private com.easyinsight.dbservice.validated.DateWhere[] dateWheres;
+
+    private com.easyinsight.dbservice.validated.NumberWhere[] numberWheres;
+
+    private com.easyinsight.dbservice.validated.StringWhere[] stringWheres;
+
+    public Where() {
+    }
+
+    public Where(
+           com.easyinsight.dbservice.validated.DateWhere[] dateWheres,
+           com.easyinsight.dbservice.validated.NumberWhere[] numberWheres,
+           com.easyinsight.dbservice.validated.StringWhere[] stringWheres) {
+           this.dateWheres = dateWheres;
+           this.numberWheres = numberWheres;
+           this.stringWheres = stringWheres;
+    }
+
+
+    /**
+     * Gets the dateWheres value for this Where.
+     * 
+     * @return dateWheres
+     */
+    public com.easyinsight.dbservice.validated.DateWhere[] getDateWheres() {
+        return dateWheres;
+    }
+
+
+    /**
+     * Sets the dateWheres value for this Where.
+     * 
+     * @param dateWheres
+     */
+    public void setDateWheres(com.easyinsight.dbservice.validated.DateWhere[] dateWheres) {
+        this.dateWheres = dateWheres;
+    }
+
+    public com.easyinsight.dbservice.validated.DateWhere getDateWheres(int i) {
+        return this.dateWheres[i];
+    }
+
+    public void setDateWheres(int i, com.easyinsight.dbservice.validated.DateWhere _value) {
+        this.dateWheres[i] = _value;
+    }
+
+
+    /**
+     * Gets the numberWheres value for this Where.
+     * 
+     * @return numberWheres
+     */
+    public com.easyinsight.dbservice.validated.NumberWhere[] getNumberWheres() {
+        return numberWheres;
+    }
+
+
+    /**
+     * Sets the numberWheres value for this Where.
+     * 
+     * @param numberWheres
+     */
+    public void setNumberWheres(com.easyinsight.dbservice.validated.NumberWhere[] numberWheres) {
+        this.numberWheres = numberWheres;
+    }
+
+    public com.easyinsight.dbservice.validated.NumberWhere getNumberWheres(int i) {
+        return this.numberWheres[i];
+    }
+
+    public void setNumberWheres(int i, com.easyinsight.dbservice.validated.NumberWhere _value) {
+        this.numberWheres[i] = _value;
+    }
+
+
+    /**
+     * Gets the stringWheres value for this Where.
+     * 
+     * @return stringWheres
+     */
+    public com.easyinsight.dbservice.validated.StringWhere[] getStringWheres() {
+        return stringWheres;
+    }
+
+
+    /**
+     * Sets the stringWheres value for this Where.
+     * 
+     * @param stringWheres
+     */
+    public void setStringWheres(com.easyinsight.dbservice.validated.StringWhere[] stringWheres) {
+        this.stringWheres = stringWheres;
+    }
+
+    public com.easyinsight.dbservice.validated.StringWhere getStringWheres(int i) {
+        return this.stringWheres[i];
+    }
+
+    public void setStringWheres(int i, com.easyinsight.dbservice.validated.StringWhere _value) {
+        this.stringWheres[i] = _value;
+    }
+
+    private java.lang.Object __equalsCalc = null;
+    public synchronized boolean equals(java.lang.Object obj) {
+        if (!(obj instanceof Where)) return false;
+        Where other = (Where) obj;
+        if (obj == null) return false;
+        if (this == obj) return true;
+        if (__equalsCalc != null) {
+            return (__equalsCalc == obj);
+        }
+        __equalsCalc = obj;
+        boolean _equals;
+        _equals = true && 
+            ((this.dateWheres==null && other.getDateWheres()==null) || 
+             (this.dateWheres!=null &&
+              java.util.Arrays.equals(this.dateWheres, other.getDateWheres()))) &&
+            ((this.numberWheres==null && other.getNumberWheres()==null) || 
+             (this.numberWheres!=null &&
+              java.util.Arrays.equals(this.numberWheres, other.getNumberWheres()))) &&
+            ((this.stringWheres==null && other.getStringWheres()==null) || 
+             (this.stringWheres!=null &&
+              java.util.Arrays.equals(this.stringWheres, other.getStringWheres())));
+        __equalsCalc = null;
+        return _equals;
+    }
+
+    private boolean __hashCodeCalc = false;
+    public synchronized int hashCode() {
+        if (__hashCodeCalc) {
+            return 0;
+        }
+        __hashCodeCalc = true;
+        int _hashCode = 1;
+        if (getDateWheres() != null) {
+            for (int i=0;
+                 i<java.lang.reflect.Array.getLength(getDateWheres());
+                 i++) {
+                java.lang.Object obj = java.lang.reflect.Array.get(getDateWheres(), i);
+                if (obj != null &&
+                    !obj.getClass().isArray()) {
+                    _hashCode += obj.hashCode();
+                }
+            }
+        }
+        if (getNumberWheres() != null) {
+            for (int i=0;
+                 i<java.lang.reflect.Array.getLength(getNumberWheres());
+                 i++) {
+                java.lang.Object obj = java.lang.reflect.Array.get(getNumberWheres(), i);
+                if (obj != null &&
+                    !obj.getClass().isArray()) {
+                    _hashCode += obj.hashCode();
+                }
+            }
+        }
+        if (getStringWheres() != null) {
+            for (int i=0;
+                 i<java.lang.reflect.Array.getLength(getStringWheres());
+                 i++) {
+                java.lang.Object obj = java.lang.reflect.Array.get(getStringWheres(), i);
+                if (obj != null &&
+                    !obj.getClass().isArray()) {
+                    _hashCode += obj.hashCode();
+                }
+            }
+        }
+        __hashCodeCalc = false;
+        return _hashCode;
+    }
+
+    // Type metadata
+    private static org.apache.axis.description.TypeDesc typeDesc =
+        new org.apache.axis.description.TypeDesc(Where.class, true);
+
+    static {
+        typeDesc.setXmlType(new javax.xml.namespace.QName("http://basicauth.api.easyinsight.com/", "where"));
+        org.apache.axis.description.ElementDesc elemField = new org.apache.axis.description.ElementDesc();
+        elemField.setFieldName("dateWheres");
+        elemField.setXmlName(new javax.xml.namespace.QName("", "dateWheres"));
+        elemField.setXmlType(new javax.xml.namespace.QName("http://basicauth.api.easyinsight.com/", "dateWhere"));
+        elemField.setMinOccurs(0);
+        elemField.setNillable(true);
+        elemField.setMaxOccursUnbounded(true);
+        typeDesc.addFieldDesc(elemField);
+        elemField = new org.apache.axis.description.ElementDesc();
+        elemField.setFieldName("numberWheres");
+        elemField.setXmlName(new javax.xml.namespace.QName("", "numberWheres"));
+        elemField.setXmlType(new javax.xml.namespace.QName("http://basicauth.api.easyinsight.com/", "numberWhere"));
+        elemField.setMinOccurs(0);
+        elemField.setNillable(true);
+        elemField.setMaxOccursUnbounded(true);
+        typeDesc.addFieldDesc(elemField);
+        elemField = new org.apache.axis.description.ElementDesc();
+        elemField.setFieldName("stringWheres");
+        elemField.setXmlName(new javax.xml.namespace.QName("", "stringWheres"));
+        elemField.setXmlType(new javax.xml.namespace.QName("http://basicauth.api.easyinsight.com/", "stringWhere"));
+        elemField.setMinOccurs(0);
+        elemField.setNillable(true);
+        elemField.setMaxOccursUnbounded(true);
+        typeDesc.addFieldDesc(elemField);
+    }
+
+    /**
+     * Return type metadata object
+     */
+    public static org.apache.axis.description.TypeDesc getTypeDesc() {
+        return typeDesc;
+    }
+
+    /**
+     * Get Custom Serializer
+     */
+    public static org.apache.axis.encoding.Serializer getSerializer(
+           java.lang.String mechType, 
+           java.lang.Class _javaType,  
+           javax.xml.namespace.QName _xmlType) {
+        return 
+          new  org.apache.axis.encoding.ser.BeanSerializer(
+            _javaType, _xmlType, typeDesc);
+    }
+
+    /**
+     * Get Custom Deserializer
+     */
+    public static org.apache.axis.encoding.Deserializer getDeserializer(
+           java.lang.String mechType, 
+           java.lang.Class _javaType,  
+           javax.xml.namespace.QName _xmlType) {
+        return 
+          new  org.apache.axis.encoding.ser.BeanDeserializer(
+            _javaType, _xmlType, typeDesc);
+    }
+
+}

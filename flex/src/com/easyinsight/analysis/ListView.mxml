@@ -28,6 +28,10 @@
             [Embed(source="../../../../assets/table_edit.png")]
             public var tableEditIcon:Class;
 
+            override public function invalidateItems(items:ArrayCollection):void {
+                listDropAreas.invalidateItems(items);
+            }
+
             override protected function fromListDefinition(listDefinition:ListDefinition):AnalysisDefinition {
                 return listDefinition;
             }
@@ -306,7 +310,7 @@
 
             private function processListResults(listRowData:ListDataResults):void {
                 var sort:Sort = myDataSet.sort;
-                myDataSet = new ArrayCollection()
+                myDataSet = new ArrayCollection();
                 var headers:ArrayCollection = new ArrayCollection(listRowData.headers as Array);                            
                 var rowData:ArrayCollection = new ArrayCollection(listRowData.rows as Array);
                 var clientProcessorMap:Object = new Object();

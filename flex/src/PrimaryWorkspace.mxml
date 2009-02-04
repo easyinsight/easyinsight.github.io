@@ -3,7 +3,7 @@
 	xmlns:listing="listing.*" xmlns:customupload="customupload.*" xmlns:genredata="genredata.*"
 	xmlns:intro="intro.*" xmlns:listing1="com.easyinsight.listing.*" xmlns:intro1="com.easyinsight.intro.*" 
 	historyManagementEnabled="false" paddingTop="0" top="0" borderThickness="0" left="0" paddingLeft="0" right="0" paddingRight="0"
-	bottom="0" paddingBottom="0">
+	bottom="0" paddingBottom="0" preloader="com.easyinsight.preloader.EIProgressBar">
 	<mx:states>
 		<mx:State name="Analysis">
 			<mx:RemoveChild target="{headerBar}"/>

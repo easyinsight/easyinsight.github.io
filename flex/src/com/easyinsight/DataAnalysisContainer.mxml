@@ -65,7 +65,8 @@ import com.easyinsight.analysis.AnalysisChangedEvent;
         import com.easyinsight.analysis.AddInsightToGroupWindow;
         import com.easyinsight.analysis.UserCapabilities;
         import com.easyinsight.administration.feed.TagCloud;
-        import mx.collections.SortField;
+import com.easyinsight.framework.InvalidFieldsEvent;
+import mx.collections.SortField;
         import mx.collections.Sort;
         import mx.validators.Validator;
         import com.easyinsight.analysis.AnalysisItemWrapper;
@@ -193,6 +194,19 @@ import com.easyinsight.analysis.AnalysisChangedEvent;
             this.dataService.previewMode = previewMode;
         }
 
+        public function onInvalidFields(event:InvalidFieldsEvent):void {
+            transformContainer.invalidateItems(event.invalidAnalysisItemIDs);
+            dataView.invalidateItems(event.invalidAnalysisItemIDs);
+            availableFields = new ArrayCollection();
+            for each (var analysisItem:AnalysisItem in event.feedMetadata.fields) {
+                var analysisWrapper:AnalysisItemWrapper = new AnalysisItemWrapper(analysisItem);
+                availableFields.addItem(analysisWrapper);
+            }
+            dataView.availableFields = availableFields;
+            Alert.show("The underlying data to this data source has been changed, so some fields may have been removed from your filters or report.");
+            dataView.requestData();
+        }
+
         public function commandStateChange(newState:String):void {
 
         }
@@ -281,6 +295,7 @@ import com.easyinsight.analysis.AnalysisChangedEvent;
         }
 
         private function onMetadataReceipt(feedMetadata:FeedMetadata):void {
+            dataService.addEventListener(InvalidFieldsEvent.INVALID_FIELDS, onInvalidFields);
             this.analysisValidators = [ analysisNameValidator ];
             this.feedMetadata = feedMetadata;
             availableFields = new ArrayCollection();

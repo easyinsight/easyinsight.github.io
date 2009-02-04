@@ -4,7 +4,7 @@
     <defaultAnt bundledAnt="true" />
     <buildFile url="file://$PROJECT_DIR$/flex/build/flexbuild.xml">
       <additionalClassPath />
-      <antReference name="Apache Ant version 1.6.5" />
+      <antReference name="EI Ant" />
       <customJdkName value="" />
       <maximumHeapSize value="128" />
       <maximumStackSize value="32" />
@@ -26,6 +26,14 @@
       <maximumStackSize value="32" />
       <properties />
     </buildFile>
+    <buildFile url="file://$PROJECT_DIR$/solutions/jdbc/build/build.xml">
+      <additionalClassPath />
+      <antReference name="EI Ant" />
+      <customJdkName value="" />
+      <maximumHeapSize value="128" />
+      <maximumStackSize value="32" />
+      <properties />
+    </buildFile>
   </component>
   <component name="BuildJarProjectSettings">
     <option name="BUILD_JARS_ON_MAKE" value="false" />
@@ -36,7 +44,7 @@
   </component>
   <component name="CompilerConfiguration">
     <option name="DEFAULT_COMPILER" value="Javac" />
-    <option name="DEPLOY_AFTER_MAKE" value="0" />
+    <option name="DEPLOY_AFTER_MAKE" value="2" />
     <resourceExtensions>
       <entry name=".+\.(properties|xml|html|dtd|tld)" />
       <entry name=".+\.(gif|png|jpeg|jpg)" />
@@ -52,6 +60,9 @@
       <entry name="?*.dtd" />
       <entry name="?*.tld" />
       <entry name="?*.ftl" />
+      <entry name="?*.js" />
+      <entry name="?*.css" />
+      <entry name="?*.swf" />
     </wildcardResourcePatterns>
   </component>
   <component name="CopyrightManager" default="">
@@ -7420,6 +7431,7 @@
     <option name="MAXIMUM_HEAP_SIZE" value="128" />
   </component>
   <component name="Encoding" useUTFGuessing="true" native2AsciiForPropertiesFiles="false" />
+  <component name="IdProvider" IDEtalkID="9CCFD791CF041E312FAD5F67D24DB07B" />
   <component name="InspectionProjectProfileManager">
     <option name="PROJECT_PROFILE" value="Project Default" />
     <option name="USE_PROJECT_LEVEL_SETTINGS" value="false" />
@@ -7467,7 +7479,11 @@
   <component name="ProjectDetails">
     <option name="projectName" value="core" />
   </component>
-  <component name="ProjectFileVersion" converted="true" />
+  <component name="ProjectFileVersion" converted="true">
+    <converter id="javaee-modules" />
+    <converter id="ror-modules" />
+    <converter id="SelenaRunConfToDiana" />
+  </component>
   <component name="ProjectKey">
     <option name="state" value="https://wush.net/svn/easyinsight/code/core.ipr" />
   </component>
@@ -7477,7 +7493,8 @@
       <module fileurl="file://$PROJECT_DIR$/build/build.iml" filepath="$PROJECT_DIR$/build/build.iml" />
       <module fileurl="file://$PROJECT_DIR$/core.iml" filepath="$PROJECT_DIR$/core.iml" />
       <module fileurl="file://$PROJECT_DIR$/flex/flex.iml" filepath="$PROJECT_DIR$/flex/flex.iml" />
-      <module fileurl="file://$PROJECT_DIR$/jdbcjava/jdbcjava.iml" filepath="$PROJECT_DIR$/jdbcjava/jdbcjava.iml" />
+      <module fileurl="file://$PROJECT_DIR$/solutions/jdbc/jdbc.iml" filepath="$PROJECT_DIR$/solutions/jdbc/jdbc.iml" />
+      <module fileurl="file://$PROJECT_DIR$/solutions/jdbc/flex/jdbcflex.iml" filepath="$PROJECT_DIR$/solutions/jdbc/flex/jdbcflex.iml" />
       <module fileurl="file://$PROJECT_DIR$/solutions/tcplugin/tcplugin.iml" filepath="$PROJECT_DIR$/solutions/tcplugin/tcplugin.iml" />
     </modules>
   </component>
@@ -7512,6 +7529,7 @@
   <component name="VcsDirectoryMappings">
     <mapping directory="" vcs="svn" />
     <mapping directory="$PROJECT_DIR$/flex" vcs="svn" />
+    <mapping directory="$PROJECT_DIR$/solutions/jdbcjava" vcs="svn" />
   </component>
   <component name="WebServicesPlugin" addRequiredLibraries="true" />
   <component name="com.sixrr.metrics.MetricsReloaded">

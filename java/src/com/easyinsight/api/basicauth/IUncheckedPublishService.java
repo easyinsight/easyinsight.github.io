@@ -11,20 +11,25 @@ import javax.jws.WebService;
  * Date: Jan 29, 2009
  * Time: 1:40:56 PM
  */
-@WebService(name="UncheckedPublishService", portName = "UncheckedPublishPort")
+@WebService(name="BasicAuthUncheckedPublish", portName = "BasicAuthUncheckedPublishPort", serviceName = "BasicAuthUncheckedPublish")
 public interface IUncheckedPublishService {
-    public void replaceRows(@WebParam(name="dataSourceName") String dataSourceName,
+
+    boolean validateCredentials();
+
+    void disableUnchecked(@WebParam(name="dataSourceKey") String dataSourceKey);
+
+    String replaceRows(@WebParam(name="dataSourceName") String dataSourceName,
                             @WebParam(name="rows") Row[] rows);
 
-    void addRow(@WebParam(name="dataSourceName") String dataSourceName, Row row);
+    String addRow(@WebParam(name="dataSourceName") String dataSourceName, Row row);
 
-    void addRows(@WebParam(name="dataSourceName") String dataSourceName,
+    String addRows(@WebParam(name="dataSourceName") String dataSourceName,
                  @WebParam(name="rows") Row[] rows);
 
-    void updateRow(@WebParam(name="dataSourceName") String dataSourceName,
+    String updateRow(@WebParam(name="dataSourceName") String dataSourceName,
                    @WebParam(name="row") Row row, @WebParam(name="where") Where where);
 
-    void updateRows(@WebParam(name="dataSourceName") String dataSourceName,
+    String updateRows(@WebParam(name="dataSourceName") String dataSourceName,
                     @WebParam(name="rows") Row[] rows, @WebParam(name="where") Where where);
 
     void deleteRows(@WebParam(name="dataSourceName") String dataSourceName, @WebParam(name="where") Where where);

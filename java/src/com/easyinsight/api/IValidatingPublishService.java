@@ -12,22 +12,23 @@ import javax.jws.WebParam;
 @WebService(name="ValidatingPublishService")
 public interface IValidatingPublishService {
 
-    @WebMethod
-    void addRow(@WebParam(name="dataSourceName") String dataSourceName,
+    public boolean validateCredentials();
+
+    void addRow(@WebParam(name="dataSourceKey") String dataSourceName,
                 @WebParam(name="row") Row row);
 
-    void addRows(@WebParam(name="dataSourceName") String dataSourceKey,
+    void addRows(@WebParam(name="dataSourceKey") String dataSourceKey,
                  @WebParam(name="rows")Row[] rows);
 
-    void replaceRows(@WebParam(name="dataSourceName") String dataSourceKey,
+    void replaceRows(@WebParam(name="dataSourceKey") String dataSourceKey,
                      @WebParam(name="rows") Row[] rows);
 
-    void updateRow(@WebParam(name="dataSourceName") String dataSourceKey,
+    void updateRow(@WebParam(name="dataSourceKey") String dataSourceKey,
                    @WebParam(name="row") Row row, @WebParam(name="where") Where wheres);
 
-    void updateRows(@WebParam(name="dataSourceName") String dataSourceKey,
+    void updateRows(@WebParam(name="dataSourceKey") String dataSourceKey,
                     @WebParam(name="rows")Row[] rows, @WebParam(name="where") Where wheres);
 
-    void deleteRows(@WebParam(name="dataSourceName") String dataSourceKey,
+    void deleteRows(@WebParam(name="dataSourceKey") String dataSourceKey,
                     @WebParam(name="where") Where wheres);
 }

@@ -5,6 +5,6 @@ import mx.collections.ArrayCollection;
 public class DynamicServiceDefinition {
     public var feedID:int;
     public var serviceID:int;
-    public var configuredMethods:ArrayCollection;
+    public var configuredMethods:ArrayCollection = new ArrayCollection();
 }
 }

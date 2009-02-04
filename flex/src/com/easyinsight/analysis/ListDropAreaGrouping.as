@@ -25,6 +25,18 @@ package com.easyinsight.analysis
 			addEventListener(FlexEvent.CREATION_COMPLETE, initializeState);
 		}
 
+        public function invalidateItems(items:ArrayCollection):void {
+            for each (var itemID:int in items) {
+                for each (var dropArea:DropArea in dropAreas) {
+                    if (dropArea.analysisItem != null && dropArea.analysisItem.analysisItemID == itemID) {
+                        removeChild(dropArea);
+                        var index:int = dropAreas.getItemIndex(dropArea);
+                        dropAreas.removeItemAt(index);
+                    }
+                }
+            }
+        }
+
         public function drilldown(field:String):void {
             for (var i:int = 0; i < dropAreas.length; i++) {
                 var dropArea:DropArea = dropAreas.getItemAt(i) as DropArea;

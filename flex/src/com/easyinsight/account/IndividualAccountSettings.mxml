@@ -25,7 +25,13 @@ import mx.collections.ArrayCollection;
         }
 
         private function editProfile():void {
-            
+            var window:UserProfileEditor = new UserProfileEditor();
+            window.emailText = email;
+            window.userNameText = userName;
+            window.fullNameText = fullName;
+            window.addEventListener(RefreshAccountEvent.REFRESH_ACCOUNT, onRefresh);
+            PopUpManager.addPopUp(window, this, true);
+            PopUpManager.centerPopUp(window);
         }
 
         private function editPassword():void {
@@ -33,14 +39,25 @@ import mx.collections.ArrayCollection;
             PopUpManager.addPopUp(window, this, true);
             PopUpManager.centerPopUp(window);
         }
+
+        private function upgradeAccount():void {
+            var window:ChangeAccountTypeWindow = new ChangeAccountTypeWindow();
+            window.addEventListener(RefreshAccountEvent.REFRESH_ACCOUNT, onRefresh);
+            PopUpManager.addPopUp(window, this, true);
+            PopUpManager.centerPopUp(window);
+        }
+
+        private function onRefresh(event:RefreshAccountEvent):void {
+            dispatchEvent(event);
+        }
 ]]></mx:Script>
     <mx:HBox width="100%" horizontalAlign="center">
-    <mx:VBox id="accountSettingsBox" verticalGap="0" borderThickness="1" borderColor="#D42525" borderStyle="solid" dropShadowEnabled="true">
-        <mx:Box width="100%" height="5" backgroundColor="#D42525" left="0" right="0"/>
-        <mx:Box width="100%" backgroundColor="#F1EE8D" horizontalAlign="center">
+    <mx:VBox verticalGap="0" borderThickness="5" borderColor="#8296D2" borderStyle="solid" dropShadowEnabled="true" cornerRadius="15"
+            paddingLeft="10" paddingBottom="10" paddingRight="10" paddingTop="10" backgroundColor="#E9ECF2">
+        <mx:Box width="100%"  horizontalAlign="center" paddingTop="5" paddingLeft="5" paddingBottom="5" paddingRight="5">
             <mx:Label text="Account Attributes" fontFamily="Tahoma" fontWeight="bold" fontSize="14"/>
         </mx:Box>
-        <mx:Form width="100%" backgroundColor="0xF3F2DF">
+        <mx:Form width="100%">
             <mx:FormItem label="Account Type: " fontFamily="Tahoma" fontWeight="bold">
                 <mx:Label text="Individual" fontFamily="Lucida Grande" fontWeight="normal"/>
             </mx:FormItem>
@@ -51,7 +68,7 @@ import mx.collections.ArrayCollection;
                 <mx:Button label="Manage Billing..."/>
             </mx:FormItem>
             <mx:FormItem label="">
-                <mx:Button label="Upgrade Account to Professional..."/>
+                <mx:Button label="Upgrade Account to Professional..." click="upgradeAccount()"/>
             </mx:FormItem>
             <mx:FormItem>
                 <mx:Button label="Cancel Account..."/>
@@ -59,14 +76,16 @@ import mx.collections.ArrayCollection;
         </mx:Form>
     </mx:VBox>
     <mx:Spacer width="40"/>
-    <mx:VBox id="userProfileBox" verticalGap="0" borderThickness="1" borderColor="#D42525" borderStyle="solid" dropShadowEnabled="true">
-        <mx:Box width="100%" height="5" backgroundColor="#D42525" left="0" right="0"/>
-        <mx:Box width="100%" backgroundColor="#F1EE8D" horizontalAlign="center">
+    <mx:VBox id="userProfileBox" verticalGap="0" borderThickness="5" borderColor="#8296D2" borderStyle="solid" dropShadowEnabled="true" cornerRadius="15"
+            paddingLeft="10" paddingBottom="10" paddingRight="10" paddingTop="10" backgroundColor="#E9ECF2">
+        <!-- <mx:Box width="100%" height="5" backgroundColor="#D42525" left="0" right="0"/> -->
+        <mx:Box width="100%"  horizontalAlign="center" paddingTop="5" paddingLeft="5" paddingBottom="5" paddingRight="5">
             <mx:Label text="User Profile" fontFamily="Tahoma" fontWeight="bold" fontSize="14"/>
+            <mx:Spacer height="5"/>
             <mx:Button label="Edit Profile..." click="editProfile()"/>
             <mx:Button label="Change Password..." click="editPassword()"/>
         </mx:Box>
-        <mx:Form width="100%" backgroundColor="0xF3F2DF">
+        <mx:Form width="100%" paddingBottom="5" paddingRight="5" paddingTop="5" paddingLeft="5">
             <mx:FormItem label="User Name: " fontFamily="Tahoma" fontWeight="bold">
                 <mx:TextInput text="{userName}" fontFamily="Lucida Grande" fontWeight="normal" editable="false"/>
             </mx:FormItem>

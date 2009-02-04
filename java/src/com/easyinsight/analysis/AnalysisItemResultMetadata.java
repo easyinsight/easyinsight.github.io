@@ -12,6 +12,16 @@ import java.io.Serializable;
  */
 public class AnalysisItemResultMetadata implements Serializable {
 
+    private int version;
+
+    public int getVersion() {
+        return version;
+    }
+
+    public void setVersion(int version) {
+        this.version = version;
+    }
+
     public void addValue(AnalysisItem analysisItem, Value value) {
     }
 }
