@@ -11,6 +11,7 @@ import java.util.ArrayList;
  */
 public class GoalTreeNodeData extends GoalTreeNode {
     private GoalOutcome goalOutcome;
+    private GoalValue currentValue;
 
     public GoalOutcome getGoalOutcome() {
         return goalOutcome;
@@ -18,6 +19,18 @@ public class GoalTreeNodeData extends GoalTreeNode {
 
     public void setGoalOutcome(GoalOutcome goalOutcome) {
         this.goalOutcome = goalOutcome;
+    }
+
+    public GoalValue getCurrentValue() {
+        return currentValue;
+    }
+
+    public void setCurrentValue(GoalValue currentValue) {
+        this.currentValue = currentValue;
+    }
+
+    public void populateCurrentValue() {
+        this.currentValue = new GoalEvaluationStorage().evaluateGoalTreeNode(this, new Date());
     }
 
     public void determineOutcome(Date startDate, Date endDate, GoalEvaluationStorage goalEvaluationStorage) {

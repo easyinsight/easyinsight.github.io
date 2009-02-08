@@ -56,7 +56,7 @@ import ilog.orgchart.OrgChartItem;
             this.orgChartItem = value as OrgChartItem;
             goalTreeNodeData = orgChartItem.data as GoalTreeNodeData;
             if (goalTreeNodeData != null) {
-                goalIcon = goalTreeNodeData.iconImage;
+                goalIcon = "/DMS/assets/icons/32x32/" + goalTreeNodeData.iconImage;
                 iconExists = goalIcon != null;                                
                 treeName = goalTreeNodeData.name;
                 switch (goalTreeNodeData.goalOutcome.outcomeState) {

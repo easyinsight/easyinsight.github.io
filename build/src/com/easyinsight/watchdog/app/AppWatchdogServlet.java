@@ -1,5 +1,7 @@
 package com.easyinsight.watchdog.app;
 
+import org.mortbay.jetty.security.Password;
+
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -26,5 +28,10 @@ public class AppWatchdogServlet extends HttpServlet {
         }
         response.setContentType("text/html");
         response.setStatus(HttpServletResponse.SC_OK);
+    }
+
+    public static void main(String[] args) {
+        System.out.println(Password.Crypt.crypt("einsight", "eJAqp0Q~j!n>L"));
+
     }
 }

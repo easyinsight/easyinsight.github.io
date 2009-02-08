@@ -23,15 +23,15 @@
     <property name="reports.tests" value="../java/out/test/reports"/>
 
     <target name="shutdownInstances">
-        <StopInstances/>
+        <StopInstances userName="einsight" password="eJAqp0Q~j!n>L"/>
     </target>
 
     <target name="updateInstances">
-        <UpdateInstances/>
+        <UpdateInstances userName="einsight" password="eJAqp0Q~j!n>L"/>
     </target>
 
     <target name="startInstances">
-        <StartInstances/>
+        <StartInstances userName="einsight" password="eJAqp0Q~j!n>L"/>
     </target>
 
     <target name="updateDatabase">

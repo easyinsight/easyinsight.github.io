@@ -90,7 +90,7 @@
                     <mx:Label text="{dataSource}" fontFamily="Lucida Grande" fontWeight="normal"/>
                 </mx:FormItem>
                 <mx:FormItem label="Query: " fontFamily="Tahoma" fontWeight="bold">
-                    <mx:TextArea text="{query}" fontFamily="Lucida Grande" fontWeight="normal"/>
+                    <mx:TextArea text="{query}" fontFamily="Lucida Grande" fontWeight="normal" editable="false" backgroundAlpha="0" width="300" height="80"/>
                 </mx:FormItem>
             </mx:Form>
             <mx:HBox width="100%" horizontalAlign="center">

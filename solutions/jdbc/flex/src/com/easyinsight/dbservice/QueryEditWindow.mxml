@@ -16,24 +16,24 @@
         <mx:VBox verticalGap="0" borderThickness="5" borderColor="#8296D2" borderStyle="solid" dropShadowEnabled="true" cornerRadius="15"
             paddingLeft="10" paddingBottom="10" paddingRight="10" paddingTop="10" backgroundColor="#E9ECF2">
             <mx:Box width="100%" horizontalAlign="center" paddingTop="5" paddingLeft="5" paddingBottom="5" paddingRight="5">
-                <mx:Label text="Publish Query" fontFamily="Tahoma" fontWeight="bold" fontSize="14"/>
-                <mx:TextArea text="This query will execute at midnight every night, sending its data to Easy Insight. Once you publish the query, you will no longer be able to alter the query from within this application unless you explicitly reenable the unchecked API in Easy Insight."
+                <mx:Label text="Edit Query" fontFamily="Tahoma" fontWeight="bold" fontSize="14"/>
+                <mx:TextArea text="Because this query has been published, you can't directly edit its contents at this point. If you want to make changes to the query, you need to reenable the Unchecked API for the target data source."
                           fontFamily="Tahoma" fontWeight="bold" fontSize="12" backgroundAlpha="0" borderThickness="0"
                         width="400" height="100"/>
             </mx:Box>
             <mx:Form width="100%" paddingBottom="5" paddingRight="5" paddingTop="5" paddingLeft="5">
-                <mx:FormItem label="Please Name this Query:" fontFamily="Tahoma" fontWeight="bold">
+                <mx:FormItem label="Query Name:" fontFamily="Tahoma" fontWeight="bold">
                     <mx:TextInput id="nameInput" fontFamily="Lucida Grande" fontWeight="normal"/>
                 </mx:FormItem>
                 <mx:FormItem label="Data Source API Key: " fontFamily="Tahoma" fontWeight="bold">
                     <mx:Label text="{dataSource}" fontFamily="Lucida Grande" fontWeight="normal"/>
                 </mx:FormItem>
                 <mx:FormItem label="Query: " fontFamily="Tahoma" fontWeight="bold">
-                    <mx:TextArea text="{query}" fontFamily="Lucida Grande" fontWeight="normal"/>
+                    <mx:TextArea text="{query}" fontFamily="Lucida Grande" fontWeight="normal" backgroundAlpha="0" width="300" height="80"/>
                 </mx:FormItem>
             </mx:Form>
             <mx:HBox width="100%" horizontalAlign="center">
-                <mx:Button label="Publish!" fontSize="14" click="publish()" fontWeight="bold"/>
+                <mx:Button label="Edit Query in Database Explorer" fontSize="14" click="publish()" fontWeight="bold"/>
                 <mx:Button label="Cancel" click="PopUpManager.removePopUp(this)"/>
             </mx:HBox>
         </mx:VBox>

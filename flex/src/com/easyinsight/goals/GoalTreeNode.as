@@ -9,7 +9,7 @@ import com.easyinsight.analysis.AnalysisMeasure;
 	public class GoalTreeNode
 	{
         public var goalTreeNodeID:int;
-		public var children:ArrayCollection;
+		public var children:ArrayCollection = new ArrayCollection();
 		public var parent:GoalTreeNode;
 		public var coreFeedID:int;
 		public var coreFeedName:String;
@@ -25,10 +25,19 @@ import com.easyinsight.analysis.AnalysisMeasure;
 		public var description:String;
         public var iconImage:String;
         public var newSolutions:ArrayCollection = new ArrayCollection();
+        private var _renderer:GoalAdminRenderer2;
 		
 		public function GoalTreeNode()
 		{
 		}
+
+        public function getRenderer():GoalAdminRenderer2 {
+            return _renderer;
+        }
+
+        public function setRenderer(val:GoalAdminRenderer2):void {
+            _renderer = val;
+        }
 
         public function clone():GoalTreeNode {
             var clonedNode:GoalTreeNode = new GoalTreeNode();
@@ -48,7 +57,7 @@ import com.easyinsight.analysis.AnalysisMeasure;
                 clonedChild.parent = clonedNode;
                 newChildren.addItem(clonedChild);
             }
-            this.children = newChildren;
+            clonedNode.children = newChildren;
             return clonedNode;
         }
 	}

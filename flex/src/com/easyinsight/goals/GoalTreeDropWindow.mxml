@@ -1,0 +1,55 @@
+<?xml version="1.0" ?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" backgroundColor="#DCE2F8" borderThickness="1" cornerRadius="15" dropShadowEnabled="true">
+    <mx:Script><![CDATA[
+        import com.easyinsight.solutions.Solution;
+        import mx.managers.PopUpManager;
+
+        private var _goalTreeNode:GoalTreeNode;
+        private var _solution:Solution;
+
+        private function addTree():void {
+            goalService.getGoalTree.send(_solution.goalTreeID);
+        }
+
+        private function gotGoalTree():void {
+            var goalTree:GoalTree = goalService.getGoalTree.lastResult as GoalTree;
+            var rootNode:GoalTreeNode = goalTree.rootNode;
+            var clonedNode:GoalTreeNode = rootNode.clone();
+            clonedNode.parent = _goalTreeNode;
+            _goalTreeNode.children.addItem(clonedNode);
+            var goalSolution:GoalSolution = new GoalSolution();
+            goalSolution.solutionID = _solution.solutionID;
+            goalSolution.solutionName = _solution.name;
+            goalSolution.solutionArchiveName = _solution.solutionArchiveName;
+            _goalTreeNode.associatedSolutions.addItem(goalSolution);
+            dispatchEvent(new OrganizationChartRefreshEvent());
+            PopUpManager.removePopUp(this);
+        }
+
+        private function addSolutionOnly():void {
+            var goalSolution:GoalSolution = new GoalSolution();
+            goalSolution.solutionID = _solution.solutionID;
+            goalSolution.solutionName = _solution.name;
+            goalSolution.solutionArchiveName = _solution.solutionArchiveName;
+            _goalTreeNode.associatedSolutions.addItem(goalSolution);
+            PopUpManager.removePopUp(this);
+        }
+
+        public function set goalTreeNode(val:GoalTreeNode):void {
+            _goalTreeNode = val;
+        }
+
+        public function set solution(val:Solution):void {
+            _solution = val;
+        }]]></mx:Script>
+    <mx:RemoteObject destination="goalService" id="goalService">
+        <mx:method name="getGoalTree" result="gotGoalTree()"/>
+    </mx:RemoteObject>
+    <mx:VBox>
+        <mx:Label text="This solution contains a goal tree. Do you wish to add the tree as a child to this goal?"/>
+        <mx:HBox>
+            <mx:Button label="Yes, Add the Goal Tree" click="addTree()"/>
+            <mx:Button label="No, Just Add the Solution" click="addSolutionOnly()"/>
+        </mx:HBox>
+    </mx:VBox>
+</mx:Canvas>

@@ -4,6 +4,7 @@ import mx.containers.HBox;
 import mx.controls.Alert;
 import mx.controls.Button;
 import mx.events.CloseEvent;
+import mx.managers.PopUpManager;
 public class PublishedQueryEdits extends HBox{
 
     private var queryConfiguration:QueryConfiguration;
@@ -16,8 +17,13 @@ public class PublishedQueryEdits extends HBox{
     [Embed(source="navigate_cross.png")]
     private var deleteIcon:Class;
 
+    [Bindable]
+    [Embed(source="media_play_green.png")]
+    private var forceIcon:Class;
+
     private var editButton:Button;
     private var deleteButton:Button;
+    private var forceButton:Button;
 
     public function PublishedQueryEdits() {
         super();
@@ -29,12 +35,23 @@ public class PublishedQueryEdits extends HBox{
         deleteButton.setStyle("icon", deleteIcon);
         deleteButton.toolTip = "Delete";
         deleteButton.addEventListener(MouseEvent.CLICK, onDelete);
+        forceButton = new Button();
+        forceButton.setStyle("icon", forceIcon);
+        forceButton.toolTip = "Force Run...";
+        forceButton.addEventListener(MouseEvent.CLICK, forceRun);
         percentWidth = 100;
         setStyle("horizontalAlign", "center");
     }
 
+    private function forceRun(edit:MouseEvent):void {
+        var runWindow:ForceRunWindow = new ForceRunWindow();
+        runWindow.queryConfiguration = queryConfiguration;
+        PopUpManager.addPopUp(runWindow, this.parent, true);
+    }
+
     override protected function createChildren():void {
         super.createChildren();
+        addChild(forceButton);
         addChild(editButton);
         addChild(deleteButton);
     }
@@ -50,7 +67,7 @@ public class PublishedQueryEdits extends HBox{
 
     private function alertListener(event:CloseEvent):void {
         if (event.detail == Alert.OK) {
-            
+            dispatchEvent(new DeleteQueryEvent(queryConfiguration));
         }
     }
 

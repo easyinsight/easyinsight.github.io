@@ -33,11 +33,12 @@ import org.apache.ws.security.WSUsernameTokenPrincipal;
  * Date: Jan 15, 2009
  * Time: 2:33:40 PM
  */
-public class ValidatingPublishService extends PublishService implements IValidatingPublishService {
+public abstract class ValidatingPublishService extends PublishService implements IValidatingPublishService {
 
     @Resource
     private WebServiceContext context;
 
+    protected abstract String getUserName();
 
     public boolean validateCredentials() {
         return true;
@@ -162,7 +163,7 @@ public class ValidatingPublishService extends PublishService implements IValidat
         List<Long> dataSourceIDs = new ArrayList<Long>();
         PreparedStatement queryStmt = conn.prepareStatement("SELECT DISTINCT DATA_FEED.DATA_FEED_ID" +
                     " FROM UPLOAD_POLICY_USERS, DATA_FEED, user WHERE " +
-                    "UPLOAD_POLICY_USERS.user_id = user.user_id AND user.username = ? AND DATA_FEED.DATA_FEED_ID = UPLOAD_POLICY_USERS.FEED_ID AND DATA_FEED.FEED_NAME = ?");
+                    "UPLOAD_POLICY_USERS.user_id = user.user_id AND user.username = ? AND DATA_FEED.DATA_FEED_ID = UPLOAD_POLICY_USERS.FEED_ID AND DATA_FEED.API_KEY = ?");
         queryStmt.setString(1, userName);
         queryStmt.setString(2, dataSourceName);
         ResultSet rs = queryStmt.executeQuery();
@@ -270,14 +271,5 @@ public class ValidatingPublishService extends PublishService implements IValidat
             }
             Database.instance().closeConnection(conn);
         }
-    }
-
-    private String getUserName() {
-        MessageContext ctx = context.getMessageContext();
-        Vector results = (Vector) ctx.get("RECV_RESULTS");
-        WSHandlerResult wsHandlerResult = (WSHandlerResult) results.get(0);
-        WSSecurityEngineResult securityResult = (WSSecurityEngineResult) wsHandlerResult.getResults().get(0);
-        WSUsernameTokenPrincipal principal = (WSUsernameTokenPrincipal) securityResult.getPrincipal();
-        return principal.getName();
     }
 }

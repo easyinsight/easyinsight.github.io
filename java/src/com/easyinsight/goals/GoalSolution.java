@@ -8,6 +8,15 @@ package com.easyinsight.goals;
 public class GoalSolution {
     private long solutionID;
     private String solutionName;
+    private String solutionArchiveName;
+
+    public String getSolutionArchiveName() {
+        return solutionArchiveName;
+    }
+
+    public void setSolutionArchiveName(String solutionArchiveName) {
+        this.solutionArchiveName = solutionArchiveName;
+    }
 
     public long getSolutionID() {
         return solutionID;

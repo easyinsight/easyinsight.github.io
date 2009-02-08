@@ -18,10 +18,11 @@ public class IconService {
         for (File iconFile : iconFiles) {
             String fileName = iconFile.getName();
             if (fileName.endsWith("png")) {
-                String path = "/DMS/assets/icons/32x32/" + fileName;
+                //String path = "/DMS/assets/icons/32x32/" + fileName;
+                //String path = fileName;
                 Icon icon = new Icon();
                 icon.setName(fileName.substring(0, fileName.length() - 4));
-                icon.setPath(path);
+                icon.setPath(fileName);
                 icons.add(icon);
             }
         }

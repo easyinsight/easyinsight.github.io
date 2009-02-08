@@ -1,5 +1,5 @@
 <?xml version="1.0" ?>
-<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" addedToStage="setup()">
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" addedToStage="setup()" creationComplete="setupListeners()">
     <mx:Script><![CDATA[
         import mx.collections.ArrayCollection;
 import mx.controls.Alert;
@@ -7,6 +7,18 @@ import mx.controls.Alert;
 
         [Bindable]
         private var queries:ArrayCollection;
+
+        private function setupListeners():void {
+            queryGrid.addEventListener(DeleteQueryEvent.DELETE_QUERY, deleteQuery);
+        }
+
+        private function deleteQuery(event:DeleteQueryEvent):void {
+            dbService.deleteQueryConfiguration.send(event.queryConfiguration.queryConfigurationID);
+        }
+
+        private function deletedQuery():void {
+            dbService.getQueryConfigurations.send();
+        }
 
         private function setup():void  {
             dbService.getQueryConfigurations.send();
@@ -22,12 +34,13 @@ import mx.controls.Alert;
 ]]></mx:Script>
     <mx:RemoteObject id="dbService" destination="dbremote" fault="onFault(event)">
         <mx:method name="getQueryConfigurations" result="gotQueries()"/>
+        <mx:method name="deleteQueryConfiguration" result="deletedQuery()"/>
     </mx:RemoteObject>
-    <mx:DataGrid dataProvider="{queries}" width="600">
+    <mx:DataGrid dataProvider="{queries}" width="630" id="queryGrid">
         <mx:columns>
-            <mx:DataGridColumn dataField="name" headerText="name" width="100"/>
-            <mx:DataGridColumn dataField="query" headerText="query" width="400"/>
-            <mx:DataGridColumn dataField="name" headerText="query" sortable="false" width="100" itemRenderer="com.easyinsight.dbservice.PublishedQueryEdits"/>
+            <mx:DataGridColumn dataField="name" headerText="Name" width="100"/>
+            <mx:DataGridColumn dataField="query" headerText="Query" width="400"/>
+            <mx:DataGridColumn dataField="name" headerText="" sortable="false" width="160" itemRenderer="com.easyinsight.dbservice.PublishedQueryEdits"/>
         </mx:columns>
     </mx:DataGrid>
 </mx:VBox>

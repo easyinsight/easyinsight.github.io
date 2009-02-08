@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <mx:HBox xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:goals="com.easyinsight.goals.*" width="100%" height="100%" creationComplete="populateData()" borderStyle="solid"
-        borderThickness="1" cornerRadius="15" paddingTop="10" paddingLeft="10" paddingRight="10" paddingBottom="10">
+        paddingTop="10" paddingLeft="10" paddingRight="10" paddingBottom="10">
 	<mx:Script> 
 		<![CDATA[
 import mx.collections.ArrayCollection;
@@ -14,7 +14,37 @@ import mx.collections.ArrayCollection;
             [Bindable]
             private var insights:ArrayCollection;
 
+            [Bindable]
+            private var newSolutions:ArrayCollection;
+
+            [Bindable]
+            [Embed(source="../../../../assets/component_x16.png")]
+            private var solutionIcon:Class;
+
+            [Bindable]
+            [Embed(source="../../../../assets/data_blue_x16.png")]
+            private var dataSourceIcon:Class;
+
+            [Bindable]
+            [Embed(source="../../../../assets/chart_pie2.png")]
+            private var reportIcon:Class;
+
             private function populateData():void {
+                accordion.getHeaderAt(0).setStyle("fontSize", 12);
+                accordion.getHeaderAt(0).setStyle("icon", solutionIcon);
+                accordion.getHeaderAt(0).labelPlacement = "right";
+                accordion.getHeaderAt(0).setStyle("fontfamily", "Tahoma");
+                accordion.getHeaderAt(0).setStyle("fontWeight", "bold");
+                accordion.getHeaderAt(1).setStyle("fontSize", 12);
+                accordion.getHeaderAt(1).setStyle("icon", dataSourceIcon);
+                accordion.getHeaderAt(1).labelPlacement = "right";
+                accordion.getHeaderAt(1).setStyle("fontfamily", "Tahoma");
+                accordion.getHeaderAt(1).setStyle("fontWeight", "bold");
+                accordion.getHeaderAt(2).setStyle("fontSize", 12);
+                accordion.getHeaderAt(2).setStyle("icon", reportIcon);
+                accordion.getHeaderAt(2).labelPlacement = "right";
+                accordion.getHeaderAt(2).setStyle("fontfamily", "Tahoma");
+                accordion.getHeaderAt(2).setStyle("fontWeight", "bold");
                 feedService.searchForSubscribedFeeds.send();
                 solutionService.getSolutions.send();
                 analysisService.getAnalysisDefinitions.send();
@@ -33,7 +63,7 @@ import mx.collections.ArrayCollection;
             }
 
             private function gotInsights():void {
-                insights = solutionService.getSolutions.lastResult as ArrayCollection;
+                insights = analysisService.getAnalysisDefinitions.lastResult as ArrayCollection;
             }
 		]]>
 	</mx:Script>
@@ -46,16 +76,28 @@ import mx.collections.ArrayCollection;
     <mx:RemoteObject destination="analysisDefinition" id="analysisService">
         <mx:method name="getAnalysisDefinitions" result="gotInsights()"/>
     </mx:RemoteObject>
+    <mx:VBox height="100%">
+        <mx:VBox verticalGap="0" height="100%" width="100%">
+            <mx:Box width="100%" backgroundColor="#3B56AF" horizontalAlign="center">
+                <mx:TextArea text="You can drag the below items onto goals to create associations." color="0xFFFFFF" backgroundAlpha="0" borderThickness="0" width="100%" height="57"/>
+            </mx:Box>
+            <mx:Accordion height="100%" id="accordion" width="100%" headerHeight="18">
+                <mx:VBox label="Solutions" width="100%" height="100%">
+                    <mx:DataGrid dataProvider="{solutions}" width="100%" height="100%" dragEnabled="true">
+                        <mx:columns>
+                            <mx:DataGridColumn headerText="" dataField="name" width="30" itemRenderer="com.easyinsight.goals.SolutionGoalTreeIcon"/>
+                            <mx:DataGridColumn headerText="" dataField="name"/>
+                        </mx:columns>
+                    </mx:DataGrid>
+                </mx:VBox>
+                <mx:VBox label="Data Sources" width="100%" height="100%">
+                    <mx:List dataProvider="{dataSources}" width="100%" height="100%" labelField="name" dragEnabled="true"/>
+                </mx:VBox>
+                <mx:VBox label="Reports" width="100%" height="100%">
+                    <mx:List dataProvider="{insights}" width="100%" height="100%" labelField="name" dragEnabled="true"/>
+                </mx:VBox>
+            </mx:Accordion>
+        </mx:VBox>
+    </mx:VBox>
 	<goals:GoalOrganizationChart goalTreeNodes="{_goalTreeNode}" width="100%" height="100%" backgroundColor="#FFFFFF" backgroundAlpha="1"/>
-	<mx:Accordion fontSize="14">
-		<mx:VBox label="Solutions">
-			<mx:List dataProvider="{solutions}" width="100%" labelField="name" dragEnabled="true"/>
-		</mx:VBox>
-		<mx:VBox label="Data Sources">
-			<mx:List dataProvider="{dataSources}" width="100%" labelField="name" dragEnabled="true"/>
-		</mx:VBox>
-		<mx:VBox label="Insights">
-			<mx:List dataProvider="{insights}" width="100%" labelField="name" dragEnabled="true"/>
-		</mx:VBox>
-	</mx:Accordion>
 </mx:HBox>

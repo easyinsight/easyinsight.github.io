@@ -5,10 +5,7 @@ import com.easyinsight.AnalysisItem;
 import com.easyinsight.AnalysisItemTypes;
 import com.easyinsight.IRow;
 import com.easyinsight.dataset.DataSet;
-import com.easyinsight.core.Value;
-import com.easyinsight.core.StringValue;
-import com.easyinsight.core.NumericValue;
-import com.easyinsight.core.DateValue;
+import com.easyinsight.core.*;
 
 import java.util.Map;
 import java.util.HashMap;
@@ -52,10 +49,15 @@ public class DataTransformation {
                     throw new RuntimeException("Unrecognized field " + stringPair.getKey() + " passed as a StringPair.");
                 }
                 if (type != Value.STRING) {
-                    throw new RuntimeException("Field " + stringPair.getKey() + " was passed as a StringPair value when Easy Insight was expecting a " +
-                        (type == Value.NUMBER ? "NumberPair." : "DatePair."));
+                    if (stringPair.getValue() == null || "".equals(stringPair.getValue())) {
+                        transformedRow.addValue(stringPair.getKey(), new EmptyValue());
+                    } else {
+                        throw new RuntimeException("Field " + stringPair.getKey() + " was passed as a StringPair value when Easy Insight was expecting a " +
+                            (type == Value.NUMBER ? "NumberPair." : "DatePair."));
+                    }
+                } else {
+                    transformedRow.addValue(stringPair.getKey(), new StringValue(stringPair.getValue()));
                 }
-                transformedRow.addValue(stringPair.getKey(), new StringValue(stringPair.getValue()));
             }
         }
         NumberPair[] numberPairs = row.getNumberPairs();
@@ -83,7 +85,11 @@ public class DataTransformation {
                     throw new RuntimeException("Field " + datePair.getKey() + " was passed as a DatePair value when Easy Insight was expecting a " +
                         (type == Value.NUMBER ? "NumberPair." : "StringPair."));
                 }
-                transformedRow.addValue(datePair.getKey(), new DateValue(datePair.getValue()));
+                if (datePair.getValue() == null) {
+                    transformedRow.addValue(datePair.getKey(), new EmptyValue());
+                } else {
+                    transformedRow.addValue(datePair.getKey(), new DateValue(datePair.getValue()));
+                }
             }
         }
         return transformedRow;

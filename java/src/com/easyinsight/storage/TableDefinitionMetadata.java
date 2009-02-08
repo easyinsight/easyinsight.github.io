@@ -557,7 +557,7 @@ public class TableDefinitionMetadata {
         for (KeyMetadata keyMetadata : keys.values()) {
             sqlBuilder.append(getColumnDefinitionSQL(keyMetadata.getKey(), keyMetadata.getType()));
             sqlBuilder.append(",");
-        }
+        }                                                         
         String primaryKey = getTableName() + "_ID";
         sqlBuilder.append(primaryKey);
         sqlBuilder.append(" BIGINT NOT NULL AUTO_INCREMENT,");

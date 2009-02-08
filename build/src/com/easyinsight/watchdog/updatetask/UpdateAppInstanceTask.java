@@ -1,9 +1,8 @@
 package com.easyinsight.watchdog.updatetask;
 
 import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.HttpMethod;
-import org.apache.commons.httpclient.HttpStatus;
+import org.apache.commons.httpclient.*;
+import org.apache.commons.httpclient.auth.AuthScope;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.tools.ant.Task;
 import org.apache.tools.ant.BuildException;
@@ -40,9 +39,12 @@ public class UpdateAppInstanceTask extends AppInstanceTask {
 
     public void execute() throws BuildException {
         try {
-            HttpClient httpClient = new HttpClient();            
+            HttpClient httpClient = new HttpClient();
+            httpClient.getParams().setAuthenticationPreemptive(true);
+            Credentials defaultcreds = new UsernamePasswordCredentials(getUserName(), getPassword());
+            httpClient.getState().setCredentials(new AuthScope(AuthScope.ANY), defaultcreds);
             for (String instance : getInstances()) {
-                HttpMethod updateMethod = new GetMethod("http://" + instance + ":4000/update?operation=update");
+                HttpMethod updateMethod = new GetMethod("http://" + instance + ":4000/?operation=update");
                 httpClient.executeMethod(updateMethod);
             }
         } catch (Exception e) {

@@ -1,0 +1,43 @@
+<?xml version="1.0" ?>
+<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml">
+    <mx:Script><![CDATA[
+        import mx.controls.Alert;
+        import mx.managers.PopUpManager;
+import mx.rpc.events.FaultEvent;
+
+        private var _queryConfiguration:QueryConfiguration;
+
+        public function set queryConfiguration(val:QueryConfiguration):void {
+            _queryConfiguration = val;
+        }
+
+        private function onFault(event:FaultEvent):void {
+            Alert.show(event.message.toString());
+        }
+
+        private function triggerRun():void {
+            dbService.forceRun.send(_queryConfiguration.queryConfigurationID);
+            progressBar.visible = true;
+        }
+
+        private function forcedRun():void {
+            progressBar.visible = false;
+            Alert.show("Data published!");
+            PopUpManager.removePopUp(this);
+        }
+        ]]></mx:Script>
+    <mx:RemoteObject id="dbService" destination="dbremote" fault="onFault(event)">
+        <mx:method name="forceRun" result="forcedRun()"/>
+    </mx:RemoteObject>
+    <mx:VBox verticalGap="0" borderThickness="5" borderColor="#8296D2" borderStyle="solid" dropShadowEnabled="true" cornerRadius="15"
+        paddingLeft="10" paddingBottom="10" paddingRight="10" paddingTop="10" backgroundColor="#E9ECF2">
+        <mx:Box width="100%" horizontalAlign="center" paddingTop="5" paddingLeft="5" paddingBottom="5" paddingRight="5">
+            <mx:Label text="Force Query Execution" fontFamily="Tahoma" fontWeight="bold" fontSize="14"/>
+        </mx:Box>
+        <mx:ProgressBar indeterminate="true" visible="false" id="progressBar"/>
+        <mx:HBox width="100%" horizontalAlign="center">
+            <mx:Button label="Force Run" click="triggerRun()"/>
+            <mx:Button label="Cancel" click="PopUpManager.removePopUp(this)"/>                        
+        </mx:HBox>
+    </mx:VBox>
+</mx:TitleWindow>

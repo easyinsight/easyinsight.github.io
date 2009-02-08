@@ -69,7 +69,7 @@ package com.easyinsight.goals
 			var newChild:GoalTreeNode = new GoalTreeNode();
 			goalTreeNode.children.addItem(newChild);
 			newChild.parent = goalTreeNode;
-			dispatchEvent(new OrganizationChartRefreshEvent());
+			dispatchEvent(new OrganizationChartRefreshEvent(newChild));
 		}
 		
 		override public function set data(value:Object):void {

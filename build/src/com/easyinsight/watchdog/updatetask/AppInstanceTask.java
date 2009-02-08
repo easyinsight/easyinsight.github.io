@@ -39,6 +39,25 @@ public class AppInstanceTask extends Task {
     private static String queryString = "https://ec2.amazonaws.com?Action={0}&AWSAccessKeyId={1}&SignatureVersion=1&Timestamp={2}&" +
             "Version=2006-10-01&Signature={3}";
 
+    private String password;
+    private String userName;
+
+    public String getUserName() {
+        return userName;
+    }
+
+    public void setUserName(String userName) {
+        this.userName = userName;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
     protected List<String> getInstances() throws ParserConfigurationException, SignatureException, IOException, SAXException {
         String action = "DescribeInstances";
 

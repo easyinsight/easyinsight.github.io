@@ -1,12 +1,17 @@
 package com.easyinsight.dbservice;
 
 import com.easyinsight.solutions.dbservice.webservice.*;
+import com.easyinsight.dbservice.validated.BasicAuthValidatedPublish;
+import com.easyinsight.dbservice.validated.BasicAuthValidatingPublishServiceServiceLocator;
+import com.easyinsight.dbservice.validated.BasicAuthValidatingPublishServiceServiceSoapBindingStub;
 
 import java.util.*;
 import java.sql.*;
 import java.sql.Date;
 
 import flex.messaging.FlexContext;
+
+import javax.xml.rpc.ServiceException;
 
 /**
  * User: James Boe
@@ -21,6 +26,22 @@ public class DBRemote {
     private static Map<String, EIConfiguration> eiConfigMap = new HashMap<String, EIConfiguration>();
 
     private MetadataStorage metadataStorage = new MetadataStorage();
+
+    public void forceRun(long queryConfigurationID) {
+        try {
+            EIConfiguration eiConfiguration = getEIConfiguration();
+            DBConfiguration dbConfiguration = getDBConfiguration();
+            QueryConfiguration queryConfiguration = getQueryConfiguration(queryConfigurationID);
+            BasicAuthValidatedPublish service = new BasicAuthValidatingPublishServiceServiceLocator().getBasicAuthValidatingPublishServicePort();
+            ((BasicAuthValidatingPublishServiceServiceSoapBindingStub)service).setUsername(eiConfiguration.getUserName());
+            ((BasicAuthValidatingPublishServiceServiceSoapBindingStub)service).setPassword(eiConfiguration.getPassword());
+            QueryValidatedPublish publish = new QueryValidatedPublish(queryConfiguration, service);
+            publish.execute(dbConfiguration);
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException(e);
+        }
+    }
 
     public DBConfiguration getDBConfiguration() {
         DBConfiguration dbConfiguration = null;
@@ -189,6 +210,24 @@ public class DBRemote {
         return columns;
     }
 
+    public void deleteQuery(long queryConfigurationID) {
+        Connection conn = getConnection();
+        try {
+            PreparedStatement deleteStmt = conn.prepareStatement("DELETE FROM QUERY_CONFIGURATION WHERE QUERY_CONFIGURATION_ID = ?");
+            deleteStmt.setLong(1, queryConfigurationID);
+            deleteStmt.executeUpdate();
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException(e);
+        } finally {
+            try {
+                conn.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
     public TestQueryResults testQuery(QueryConfiguration queryConfiguration) {
         try {
             DBConfiguration savedConfiguration = dbConfigMap.get(FlexContext.getFlexSession().getId());
@@ -288,6 +327,36 @@ public class DBRemote {
         } catch (SQLException e) {
             e.printStackTrace();
             throw new RuntimeException(e);
+        }
+    }
+
+    public QueryConfiguration getQueryConfiguration(long queryConfigurationID) {
+        Connection conn = getConnection();
+        try {
+            PreparedStatement queryStmt = conn.prepareStatement("SELECT DATA_SOURCE, QUERY, AD_HOC, NAME, QUERY_MODE FROM QUERY_CONFIG WHERE " +
+                    "QUERY_CONFIG_ID = ?");
+            queryStmt.setLong(1, queryConfigurationID);
+            ResultSet rs = queryStmt.executeQuery();
+            if (rs.next()) {
+                QueryConfiguration queryConfiguration = new QueryConfiguration();
+                queryConfiguration.setDataSource(rs.getString(1));
+                queryConfiguration.setQuery(rs.getString(2));
+                queryConfiguration.setAdHoc(rs.getBoolean(3));
+                queryConfiguration.setName(rs.getString(4));
+                queryConfiguration.setPublishMode(rs.getInt(5));
+                return queryConfiguration;
+            } else {
+                throw new RuntimeException();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException(e);
+        } finally {
+            try {
+                conn.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
         }
     }
 

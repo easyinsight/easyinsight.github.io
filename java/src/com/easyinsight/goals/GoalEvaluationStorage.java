@@ -106,7 +106,7 @@ public class GoalEvaluationStorage {
         return dates;
     }
 
-    private GoalValue evaluateGoalTreeNode(GoalTreeNode goalTreeNode, Date date) {
+    public GoalValue evaluateGoalTreeNode(GoalTreeNode goalTreeNode, Date date) {
         GoalValue goalValue = null;
         if (goalTreeNode.getCoreFeedID() > 0) {
             WSListDefinition listDefinition = new WSListDefinition();
