@@ -347,11 +347,11 @@ import mx.collections.SortField;
 
                 analysisState.selectedLabel = analysisDefinition.getLabel();
 
-                if (analysisDefinition.addedItems != null) {
+                /*if (analysisDefinition.addedItems != null) {
                     for each (var analysisField:AnalysisItem in analysisDefinition.addedItems) {
                         availableFields.addItem(new AnalysisItemWrapper(analysisField));
                     }
-                }
+                }*/
 
                 if (analysisDefinition.hierarchies != null) {
                     for each (var hierarchyField:AnalysisItem in analysisDefinition.hierarchies) {

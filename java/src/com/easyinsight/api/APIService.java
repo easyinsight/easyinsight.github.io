@@ -30,11 +30,14 @@ public class APIService {
         try {
             conn.setAutoCommit(false);
             if (dynamicServiceDefinition != null) {
+                FeedDefinition feedDefinition = new FeedStorage().getFeedDefinitionData(descriptor.getFeedID(), conn);
                 DynamicServiceDefinition existingDefinition = getDynamicServiceDefinition(dynamicServiceDefinition.getFeedID(), conn, session);
                 if (existingDefinition != null) {
                     undeployService(dynamicServiceDefinition.getFeedID(), conn);
                 }
                 dynamicServiceID = addDynamicServiceDefinition(dynamicServiceDefinition, conn);
+                dynamicServiceDefinition.generateCode(feedDefinition, conn);
+                dynamicServiceDefinition.deploy(conn);
             } else {
                 undeployService(descriptor.getFeedID(), conn);
             }
