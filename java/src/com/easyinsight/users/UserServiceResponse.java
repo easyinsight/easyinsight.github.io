@@ -26,7 +26,8 @@ public class UserServiceResponse {
     }
 
     public UserServiceResponse(boolean successful, long userID, long accountID, String name, AccountType accountType,
-                               long spaceAllowed, String email, String userName, String encryptedPassword) {
+                               long spaceAllowed, String email, String userName, String encryptedPassword, boolean accountAdmin,
+                               boolean dataSourceCreator, boolean insightCreator) {
         this.successful = successful;
         this.userID = userID;
         this.accountID = accountID;
@@ -36,6 +37,9 @@ public class UserServiceResponse {
         this.email = email;
         this.userName = userName;
         this.encryptedPassword = encryptedPassword;
+        this.accountAdmin = accountAdmin;
+        this.dataSourceCreator = dataSourceCreator;
+        this.insightCreator = insightCreator;
     }
 
     public UserServiceResponse() {

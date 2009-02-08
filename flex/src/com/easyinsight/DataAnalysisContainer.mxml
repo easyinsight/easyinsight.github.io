@@ -81,8 +81,7 @@ import mx.collections.SortField;
         import com.easyinsight.analysis.CalculationWindow;
         import com.easyinsight.analysis.scrub.DataScrubEvent;
         import com.easyinsight.analysis.scrub.TextReplaceScrubWindow;
-        import com.easyinsight.filtering.FilterRawData;
-        import com.easyinsight.filtering.TransformsUpdatedEvent;
+        import com.easyinsight.util.ProgressAlert;
         import com.easyinsight.commands.CommandEvent;
         import mx.utils.URLUtil;
         import mx.managers.BrowserManager;
@@ -486,13 +485,15 @@ import mx.collections.SortField;
                         analysisDefinition.marketplaceVisible = marketplaceVisibleCheckbox.selected;
                         analysisDefinition.publiclyVisible = publiclyVisibleCheckbox.selected;
                         analysisDefinition.visibleAtFeedLevel = shareDataSourceSharingCheckbox.selected;
+                        ProgressAlert.alert(this, "Saving the report...", "Saved!", analysisService.saveAnalysisDefinition);
                         analysisService.saveAnalysisDefinition(analysisDefinition);
+
                     } else {
                         tabNavigator.selectedIndex = 0;
-                        Alert.show("There are one or more errors which need to be corrected before this insight can be saved.");
+                        Alert.show("There are one or more errors which need to be corrected before this report can be saved.");
                     }
                 } else {
-                    Alert.show("You are not allowed to directly modify this insight--use Save As instead.");
+                    Alert.show("You are not allowed to directly modify this report--use Save As instead.");
                 }
             }
         }
@@ -505,7 +506,6 @@ import mx.collections.SortField;
         private function saved():void {
             analysisDefinition.analysisID = analysisService.saveAnalysisDefinition.lastResult as int;
             this.analysisChanged = false;
-            Alert.show("Saved successfully!");
         }
 
         private function saveAs():void {
@@ -560,37 +560,10 @@ import mx.collections.SortField;
             commandProcessor.redo();
         }
 
-        private function buy():void {
-            Alert.show("Are you sure you want to pay for this subscription?", "", 3, this, alertClickHandler);
-        }
-
-        private function alertClickHandler(event:CloseEvent):void {
-            var user:User = User.getInstance();
-            if (user == null) {
-                var loginContainer:LoginDialog = LoginDialog(PopUpManager.createPopUp(this, LoginDialog, true));
-                //loginContainer.addEventListener(LoginEvent.LOGIN, loggedIn);
-            } else {
-                var remoteService:RemoteObject = new RemoteObject();
-                remoteService.destination = "store";
-                remoteService.buy.addEventListener(ResultEvent.RESULT, bought);
-                remoteService.buy.send(dataService.dataFeedID, 1);
-            }
-        }
-
         private function bought(event:ResultEvent):void {
             this._previewMode = false;
             this.dataService.previewMode = false;
             dataView.requestData();
-        }
-
-        private function startCollaborate():void {
-            //var canvas:MDICanvas = parent as MDICanvas;
-            //var collaborationWindow:CollaborationWindow = new CollaborationWindow();
-            //canvas.windowManager.add(collaborationWindow);
-        }
-
-        public function joinCollaboration(sessionName:String):void {
-            //var canvas:MDICanvas = parent as MDICanvas;
         }
 
         private function refresh():void {
@@ -766,7 +739,7 @@ import mx.collections.SortField;
 
         private function subscribedToInsight():void {
             canSubscribeToInsight = false;
-            Alert.show("This insight will now show in your My Data page.");
+            Alert.show("This report will now show in your My Data page.");
         }
 
         private function sourceSharingChange(event:MouseEvent):void {
@@ -818,7 +791,6 @@ import mx.collections.SortField;
             <mx:ProgressBar indeterminate="true" visible="false" id="loadingBar"/>
             <mx:Image source="@Embed(source='../../../assets/view.png')" toolTip="Search"/>
             <mx:TextInput id="searchInput" change="search()"/>
-            <mx:Button id="buyButton" label="Buy" click="buy()" visible="{_previewMode}"/>
             <mx:Label text="{modeText}" fontSize="14"/>
         </mx:HBox>
         <mx:TabNavigator id="tabNavigator" width="100%" creationPolicy="all" enabled="{!_previewMode}" paddingTop="0"
@@ -831,7 +803,7 @@ import mx.collections.SortField;
                 <mx:Button id="saveAsButton" icon="@Embed(source='../../../assets/save_as.png')" click="saveAs()"
                            toolTip="Save As" enabled="{!_previewMode}"/>
                 <mx:Form paddingTop="0" paddingBottom="0" id="analysisNameForm">
-                    <mx:FormItem label="Analysis Name:">
+                    <mx:FormItem label="Report Name:">
                         <mx:TextInput text="{labelNameField}" id="analysisNameInput"/>
                     </mx:FormItem>
                     <mx:FormItem label="Tags:">
@@ -889,7 +861,7 @@ import mx.collections.SortField;
             <mx:HBox label="Export" icon="@Embed(source='../../../assets/tables_add.png')" paddingLeft="10"
                      paddingTop="10" paddingBottom="10"
                      paddingRight="10">
-                <mx:Button id="createFeedButton" toolTip="Create New Feed" click="createFeed()"
+                <mx:Button id="createFeedButton" toolTip="Create Derived Data Source" click="createFeed()"
                            icon="@Embed(source='../../../assets/data_add.png')"/>
                 <mx:Button id="embedButton" toolTip="Embed" click="embed()"
                            icon="@Embed(source='../../../assets/link.png')"/>

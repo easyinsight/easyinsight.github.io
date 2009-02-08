@@ -1,20 +1,19 @@
 package com.easyinsight.dbservice;
 
-import org.mortbay.jetty.servlet.Context;
-import org.mortbay.jetty.servlet.ServletHolder;
 import org.mortbay.jetty.Server;
-import org.mortbay.jetty.Handler;
 import org.mortbay.jetty.Connector;
+import org.mortbay.jetty.security.Constraint;
+import org.mortbay.jetty.security.ConstraintMapping;
+import org.mortbay.jetty.security.SecurityHandler;
+import org.mortbay.jetty.security.HashUserRealm;
 import org.mortbay.jetty.webapp.WebAppContext;
 import org.mortbay.jetty.nio.SelectChannelConnector;
-import org.mortbay.jetty.handler.ResourceHandler;
-import org.mortbay.jetty.handler.HandlerList;
-import org.mortbay.jetty.handler.DefaultHandler;
-import org.mortbay.jetty.handler.ContextHandlerCollection;
 
-import java.util.Calendar;
-import java.util.Timer;
-import java.util.Date;
+import java.util.*;
+import java.net.URL;
+import java.io.FileInputStream;
+import java.io.File;
+import java.io.IOException;
 
 /**
  * User: James Boe
@@ -26,11 +25,16 @@ public class DBService {
     private Server server;
     private Timer timer;
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
         new DBService().start();
     }
 
-    public DBService() {
+    public DBService() throws IOException {
+        Properties properties = new Properties();
+        properties.load(new FileInputStream(new File("config.properties")));
+        for (Map.Entry<Object, Object> entry : properties.entrySet()) {
+            System.setProperty((String) entry.getKey(), (String) entry.getValue());
+        }
     }
     
     public void start() {
@@ -71,29 +75,28 @@ public class DBService {
         connector.setPort(Integer.getInteger("jetty.port", 4040));
         server.setConnectors(new Connector[]{connector});
 
+        /*Constraint constraint = new Constraint();
+        constraint.setName(Constraint.__BASIC_AUTH);
+        constraint.setRoles(new String[]{"admin"});
+        constraint.setAuthenticate(true);
+
+        ConstraintMapping cm = new ConstraintMapping();
+        cm.setConstraint(constraint);
+        cm.setPathSpec("*//*");
+
+        SecurityHandler sh = new SecurityHandler();
+        sh.setUserRealm(new HashUserRealm("MyRealm","realm.properties"));
+        sh.setConstraintMappings(new ConstraintMapping[]{cm});*/
+
         WebAppContext webapp = new WebAppContext();
         webapp.setContextPath("/");
-        webapp.setWar("web2");
-        //webapp.setDefaultsDescriptor(jetty_home+"/etc/webdefault.xml");
+        webapp.setWar("../web2");
+
+        //webapp.addHandler(sh);
 
         server.setHandler(webapp);
 
         server.start();
         server.join();
-
-        /*ContextHandlerCollection contexts = new ContextHandlerCollection();        
-        server.setHandler(contexts);                        
-        ResourceHandler resourceHandler = new ResourceHandler();
-        resourceHandler.setResourceBase("c:/easyinsight/solutions/dbservice/webcontent");
-        HandlerList handlers = new HandlerList();
-        handlers.setHandlers(new Handler[]{resourceHandler,new DefaultHandler()});
-        Context root = new Context(contexts,"/",Context.SESSIONS);
-        root.addHandler(handlers);
-        Context forceRun = new Context(server,"/forcerun",Context.SESSIONS);
-        forceRun.addServlet(new ServletHolder(new AdminServlet()), "/*");
-        Context dbValidation = new Context(server,"/validateDB",Context.SESSIONS);
-        dbValidation.addServlet(new ServletHolder(new DBValidationServlet()), "/*");
-        Context executeQuery = new Context(server,"/executeQuery",Context.SESSIONS);
-        executeQuery.addServlet(new ServletHolder(new ExecuteQueryServlet()), "/*");*/
     }
 }

@@ -4,5 +4,9 @@ package com.easyinsight.solutions {
 public class InsightDescriptor {
     public var insightID:int;
     public var insightName:String;
+
+    public function InsightDescriptor() {
+        
+    }
 }
 }

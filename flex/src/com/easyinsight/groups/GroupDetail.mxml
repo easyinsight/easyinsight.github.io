@@ -243,7 +243,7 @@ import mx.controls.Alert;
             <mx:Button icon="{connectIcon}" toolTip="Join Group" click="joinGroup()" visible="{joinEnabled}"/>
             <mx:Button icon="{administerIcon}" toolTip="Administer Group" click="administer()" visible="{adminEnabled}"/>
             <mx:Button icon="{addDataSourceIcon}" toolTip="Add Data Source..." visible="{adminEnabled}"/>
-            <mx:Button icon="{addInsightIcon}" toolTip="Add Insight..." visible="{adminEnabled}"/>
+            <mx:Button icon="{addInsightIcon}" toolTip="Add Report..." visible="{adminEnabled}"/>
             <mx:Button icon="{messageIcon}" toolTip="New Message" click="newMessage()" visible="{!joinEnabled}"/>
 			<mx:Button icon="{helpIcon}" toolTip="Help!" click="help()" />
 			<mx:HBox width="100%" horizontalAlign="center">
@@ -290,7 +290,7 @@ import mx.controls.Alert;
 		<mx:HBox width="100%" backgroundColor="#FFFFFF" backgroundAlpha=".1" id="coreHBox">
 			<mx:Spacer width="5%"/>
 			<groups:GroupItemPanel rendererClass="com.easyinsight.genredata.PopularAnalysisItem" width="28%" id="groupInsights"
-				title="Group Insights" groupID="{groupID}" dataOperation="{groupService.getInsights}"
+				title="Group Reports" groupID="{groupID}" dataOperation="{groupService.getInsights}"
 				fullDataOperation="{groupService.getInsights}" fullEventType="{ChildSearchEvent.ANALYSIS_SEARCH}"
 				analysisSearch="onSearchAnalysis(event)"/>
 			<mx:Spacer width="5%"/>

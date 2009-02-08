@@ -1,11 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
-<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml">
+<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" title="New Data Source"
+        creationComplete="setup()">
 	<mx:Script>
 		<![CDATA[
 			import mx.managers.PopUpManager;
+            import mx.validators.Validator;
+
+            private var validators:Array;
+
+            private function setup():void {
+                addEventListener(KeyboardEvent.KEY_UP, keyEvent);
+                focusManager.setFocus(feedName);
+                validators = [ nameValidator ];
+            }
+
+            private function keyEvent(event:KeyboardEvent):void {
+                if (event.keyCode == Keyboard.ENTER) {
+                    create();
+                }
+            }
 			
 			private function create():void {
-				uploadService.createNewDefaultFeed.send(feedName.text);
+                var results:Array = Validator.validateAll(validators);
+                if (results.length == 0) {
+                    uploadService.createNewDefaultFeed.send(feedName.text);                    
+                }
 			}
 			
 			private function cancel():void {
@@ -31,4 +50,5 @@
 			<mx:Button label="Cancel" click="cancel()"/>
 		</mx:FormItem>
 	</mx:Form>
+    <mx:StringValidator source="{feedName}" property="text" minLength="3" id="nameValidator"/>
 </mx:TitleWindow>

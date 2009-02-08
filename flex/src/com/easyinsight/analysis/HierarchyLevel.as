@@ -6,6 +6,10 @@ public class HierarchyLevel {
     public var analysisItem:AnalysisItem;
     public var parentItem:AnalysisItem;
 
+    public function HierarchyLevel() {
+
+    }
+
     public function get display():String {
         return analysisItem.display;
     }

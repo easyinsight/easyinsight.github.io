@@ -423,7 +423,7 @@ public class UserService implements IUserService {
                 userServiceResponse = new UserServiceResponse(false, "User already exists by that name.");
             } else {
                 userServiceResponse = new UserServiceResponse(true, user.getUserID(), user.getAccountID().getAccountID(), user.getName(), null, 50000000, user.getEmail(),
-                        user.getUserName(), encryptedPassword);
+                        user.getUserName(), encryptedPassword, user.isAccountAdmin(), user.isDataSourceCreator(), user.isInsightCreator());
             }
             session.getTransaction().commit();
         } catch (Exception e) {
@@ -446,7 +446,7 @@ public class UserService implements IUserService {
             AccountType accountType = account.accountTypeObject();
             return new UserServiceResponse(true, user.getUserID(), user.getAccountID().getAccountID(), user.getName(),
                                 accountType, account.getMaxSize(), user.getEmail(), user.getUserName(),
-                                user.getPassword());
+                                user.getPassword(), user.isAccountAdmin(), user.isDataSourceCreator(), user.isInsightCreator());
         }
     }
 
@@ -486,7 +486,7 @@ public class UserService implements IUserService {
                         Account account = (Account) accountResults.get(0);
                         AccountType accountType = account.accountTypeObject();
                         userServiceResponse = new UserServiceResponse(true, user.getUserID(), user.getAccountID().getAccountID(), user.getName(),
-                                accountType, account.getMaxSize(), user.getEmail(), user.getUserName(), encryptedPassword);
+                                accountType, account.getMaxSize(), user.getEmail(), user.getUserName(), encryptedPassword, user.isAccountAdmin(), user.isDataSourceCreator(), user.isInsightCreator());
                         // FlexContext.getFlexSession().getRemoteCredentials();
                     } else {
                         userServiceResponse = new UserServiceResponse(false, "Incorrect password, please try again.");
@@ -523,7 +523,7 @@ public class UserService implements IUserService {
                         Account account = (Account) accountResults.get(0);
                         AccountType accountType = account.accountTypeObject();
                         userServiceResponse = new UserServiceResponse(true, user.getUserID(), user.getAccountID().getAccountID(), user.getName(),
-                                accountType, account.getMaxSize(), user.getEmail(), user.getUserName(), encryptedPassword);
+                                accountType, account.getMaxSize(), user.getEmail(), user.getUserName(), encryptedPassword, user.isAccountAdmin(), user.isDataSourceCreator(), user.isInsightCreator());
                         // FlexContext.getFlexSession().getRemoteCredentials();
                     } else {
                         userServiceResponse = new UserServiceResponse(false, "Incorrect password, please try again.");

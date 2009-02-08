@@ -5,5 +5,9 @@ public class GoalTreeDescriptor {
     public var goalTreeName:String;
     public var goalTreeID:int;
     public var role:int;
+
+    public function GoalTreeDescriptor() {
+        
+    }
 }
 }

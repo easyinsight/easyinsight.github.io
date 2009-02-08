@@ -6,7 +6,8 @@
 import com.easyinsight.dbservice.ConfigProgressionEvent;
         import com.easyinsight.dbservice.DatabaseConfiguration;
         import com.easyinsight.dbservice.EIConfiguration;
-        import com.easyinsight.dbservice.PublishQueryWizard;
+        import com.easyinsight.dbservice.EditDBCredentials;
+import com.easyinsight.dbservice.PublishQueryWizard;
 import com.easyinsight.dbservice.QueryConfiguration;
         import com.easyinsight.dbservice.QueryPublishedEvent;
 import com.easyinsight.dbservice.TestQueryResults;
@@ -77,6 +78,16 @@ import mx.managers.PopUpManager;
                 this.dbConfiguration = dbConfiguration;
                 dbService.getTables.send();
             }
+        }
+
+        private function editDBConfig():void {
+            var editDBWindow:EditDBCredentials = new EditDBCredentials();
+            editDBWindow.addEventListener(ConfigProgressionEvent.DB_CONFIGURED, dbConfigured);
+        }
+
+        private function justDBConfigured(event:ConfigProgressionEvent):void {
+            this.dbConfiguration = event.dbConfig;
+            dbService.getTables.send();
         }
 
         private function dbConfigured(event:ConfigProgressionEvent):void {
@@ -177,7 +188,9 @@ import mx.managers.PopUpManager;
         <mx:method name="getColumns" result="gotColumns()"/>
         <mx:method name="queryToEI" result="sentToEI()"/>
     </mx:RemoteObject>
-    <mx:Style source="com/easyinsight/skin/EI.css"/> 
+    <mx:Style source="com/easyinsight/skin/EI.css"/>
+    <mx:VBox width="100%" height="100%">
+        <mx:Image source="@Embed(source='logo.png')"/>
     <mx:TabNavigator width="100%" height="100%" tabWidth="200" id="tabNavigator">
         <mx:VBox label="Database Explorer" width="100%" height="100%" paddingLeft="5" paddingTop="5" paddingRight="5" paddingBottom="5" backgroundColor="0xEBEBEB">
             <mx:HBox width="100%">
@@ -265,6 +278,7 @@ import mx.managers.PopUpManager;
             <dbservice:PublishedQueryList/>    
         </mx:VBox>
     </mx:TabNavigator>
+    </mx:VBox>
     <mx:StringValidator minLength="6" source="{queryArea}" id="queryValidator" property="text"/>
     <mx:StringValidator minLength="3" source="{dataSourceNameInput}" id="dataSourceValidator" property="text"/>
 </mx:Application>

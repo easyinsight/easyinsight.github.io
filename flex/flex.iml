@@ -1,5 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <module relativePaths="true" type="Flex" version="4">
+  <component name="Flex.Build.Configuration">
+    <option name="APPLICATION_ENTRY_POINT" value="flex/src/AdministrationApplication.mxml" />
+    <option name="VERSION" value="2" />
+  </component>
   <component name="NewModuleRootManager" inherit-compiler-output="false">
     <output url="file://$MODULE_DIR$/../../apache-tomcat-6.0.14/webapps/DMS/easyui-debug" />
     <exclude-output />
@@ -16,6 +20,7 @@
           <root url="jar://$MODULE_DIR$/libs/SpringGraph.swc!/" />
           <root url="jar://$MODULE_DIR$/libs/ilog-elixir.swc!/" />
           <root url="jar://$MODULE_DIR$/libs/YahooMap.swc!/" />
+          <root url="jar://$MODULE_DIR$/../../Program Files/Adobe/Flex Builder 3/sdks/3.2.0/frameworks/libs/datavisualization.swc!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />

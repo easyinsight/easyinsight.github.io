@@ -11,6 +11,10 @@ public class InstallSolutionToGoalControls extends HBox {
 
     private var solution:Solution;
 
+    public function InstallSolutionToGoalControls() {
+        
+    }
+
     override public function set data(data:Object):void {
         this.solution = data as Solution;
     }

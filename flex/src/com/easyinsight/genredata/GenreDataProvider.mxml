@@ -261,12 +261,12 @@
 		<mx:HBox width="100%" height="100%" label="Analyses" backgroundColor="#FFFFFF" backgroundAlpha=".1">
 			<mx:Spacer width="5%"/>
 			<genredata:AnalyzableItemPanel rendererClass="com.easyinsight.genredata.PopularAnalysisItem" width="28%" id="topRatedAnalyses"
-				title="Top Rated Analyses" genre="{genre}" dataOperation="{dataProvider.getTopRatedAnalyses}"
+				title="Top Rated Reports" genre="{genre}" dataOperation="{dataProvider.getTopRatedAnalyses}"
 				fullDataOperation="{dataProvider2.getTopRatedAnalyses}" fullEventType="{ChildSearchEvent.ANALYSIS_SEARCH}"
 				analysisSearch="onSearchAnalysis(event)"/>
 			<mx:Spacer width="5%"/>
 			<genredata:AnalyzableItemPanel rendererClass="com.easyinsight.genredata.PopularFeed" width="28%" id="topRatedFeeds"
-				title="Top Rated Feeds" genre="{genre}" dataOperation="{dataProvider.getTopRatedFeeds}"
+				title="Top Rated Data Sources" genre="{genre}" dataOperation="{dataProvider.getTopRatedFeeds}"
 				fullDataOperation="{dataProvider2.getTopRatedFeeds}" fullEventType="{ChildSearchEvent.FEED_SEARCH}"
 				feedSearch="onSearchFeed(event)" />			
 			<mx:Spacer width="5%"/>							
@@ -274,12 +274,12 @@
 		<mx:HBox width="100%" height="100%" label="Feeds" backgroundColor="#FFFFFF" backgroundAlpha=".1">
 			<mx:Spacer width="5%"/>
 			<genredata:AnalyzableItemPanel rendererClass="com.easyinsight.genredata.PopularAnalysisItem" width="28%" id="mostPopularAnalyses"
-				title="Most Popular Analyses" genre="{genre}" dataOperation="{dataProvider.getMostPopularAnalyses}"
+				title="Most Popular Reports" genre="{genre}" dataOperation="{dataProvider.getMostPopularAnalyses}"
 				fullDataOperation="{dataProvider2.getMostPopularAnalyses}" fullEventType="{ChildSearchEvent.ANALYSIS_SEARCH}"
 				analysisSearch="onSearchAnalysis(event)"/>
 			<mx:Spacer width="5%"/>
 			<genredata:AnalyzableItemPanel rendererClass="com.easyinsight.genredata.PopularFeed" width="28%" id="mostPopularFeeds"
-				title="Most Popular Feeds" genre="{genre}" dataOperation="{dataProvider.getMostPopularFeeds}"
+				title="Most Popular Data Sources" genre="{genre}" dataOperation="{dataProvider.getMostPopularFeeds}"
 				fullDataOperation="{dataProvider2.getMostPopularFeeds}" fullEventType="{ChildSearchEvent.FEED_SEARCH}"
 				feedSearch="onSearchFeed(event)"/>
 			<mx:Spacer width="5%"/>				
@@ -287,12 +287,12 @@
 		<mx:HBox width="100%" height="100%" label="Feeds" backgroundColor="#FFFFFF" backgroundAlpha=".1">
 			<mx:Spacer width="5%"/>
 			<genredata:AnalyzableItemPanel rendererClass="com.easyinsight.genredata.PopularAnalysisItem" width="28%" id="mostRecentAnalyses"
-				title="Most Recent Analyses" genre="{genre}" dataOperation="{dataProvider.getMostRecentAnalyses}"
+				title="Most Recent Reports" genre="{genre}" dataOperation="{dataProvider.getMostRecentAnalyses}"
 				fullDataOperation="{dataProvider2.getMostRecentAnalyses}" fullEventType="{ChildSearchEvent.ANALYSIS_SEARCH}"
 				analysisSearch="onSearchAnalysis(event)"/>
 			<mx:Spacer width="5%"/>
 			<genredata:AnalyzableItemPanel rendererClass="com.easyinsight.genredata.PopularFeed" width="28%" id="mostRecentFeeds"
-				title="Most Recent Feeds" genre="{genre}" dataOperation="{dataProvider.getMostRecentFeeds}"
+				title="Most Recent Data Sources" genre="{genre}" dataOperation="{dataProvider.getMostRecentFeeds}"
 				fullDataOperation="{dataProvider2.getMostRecentFeeds}" fullEventType="{ChildSearchEvent.FEED_SEARCH}"
 				feedSearch="onSearchFeed(event)"/>			
 			<mx:Spacer width="5%"/>		

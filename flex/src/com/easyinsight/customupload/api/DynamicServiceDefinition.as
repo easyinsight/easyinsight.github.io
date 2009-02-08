@@ -6,5 +6,9 @@ public class DynamicServiceDefinition {
     public var feedID:int;
     public var serviceID:int;
     public var configuredMethods:ArrayCollection = new ArrayCollection();
+
+    public function DynamicServiceDefinition() {
+        
+    }
 }
 }

@@ -4,5 +4,9 @@ package com.easyinsight.goals {
 public class GoalInsight {
     public var insightID:int;
     public var insightName:String;
+
+    public function GoalInsight() {
+        
+    }
 }
 }

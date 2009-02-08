@@ -71,6 +71,7 @@
 			private function initListeners():void {
 			    addEventListener(KeyboardEvent.KEY_UP, keyHit);
 			    User.getEventNotifier().addEventListener(LoginEvent.LOGIN, onLogin);
+                addEventListener(DeleteDataSourceEvent.DELETE_DATA_SOURCE, onDelete);
 			}
 			
 			private function onLogin(event:LoginEvent):void {
@@ -84,29 +85,33 @@
 			        }
 			    }
 			}
+
+            private function onDelete(event:DeleteDataSourceEvent):void {
+                deleteItem(event.descriptor);
+            }
 			
 			private function deleteItem(selectedItem:Object):void {
 				if (uploadGrid.selectedItem is DataFeedDescriptor) {
 	        		var descriptor:DataFeedDescriptor = uploadGrid.selectedItem as DataFeedDescriptor;
 	        		if (descriptor.role == DataFeedDescriptor.OWNER) {
 	        			if (descriptor.policy.getPolicyType() == UploadPolicy.COMMERCIAL) {
-	        				Alert.show("This feed is currently available for sale in the marketplace.", "Alert",
+	        				Alert.show("This data source is currently available for sale in the marketplace.", "Alert",
 		                		Alert.OK | Alert.CANCEL, this, alertFeedListener, null, Alert.CANCEL);
 	        			} else {
-		        			Alert.show("Are you sure you want to delete this feed?", "Alert",
+		        			Alert.show("Are you sure you want to delete this data source?", "Alert",
 		                		Alert.OK | Alert.CANCEL, this, alertFeedListener, null, Alert.CANCEL);
 		          		} 	
 	        		} else {
 	        			if (descriptor.policy.getPolicyType() == UploadPolicy.COMMERCIAL) {
-	        				Alert.show("Are you sure you want to cancel your subscription to this feed?", "Alert",
+	        				Alert.show("Are you sure you want to cancel your subscription to this data source?", "Alert",
 		                		Alert.OK | Alert.CANCEL, this, alertFeedListener, null, Alert.CANCEL);
 	        			} else {
-	        				Alert.show("Are you sure you want to cancel your subscription to this feed?", "Alert",
+	        				Alert.show("Are you sure you want to cancel your subscription to this data source?", "Alert",
 		                		Alert.OK | Alert.CANCEL, this, alertFeedListener, null, Alert.CANCEL);
 		          		}
 	        		}			        		
 	        	} else {
-	        		Alert.show("Are you sure you want to delete this insight?", "Alert",
+	        		Alert.show("Are you sure you want to delete this report?", "Alert",
 	                	Alert.OK | Alert.CANCEL, this, alertInsightListener, null, Alert.CANCEL);
 	        	}	
 			}
@@ -297,12 +302,12 @@
 		<mx:HBox width="100%" id="uploadBox">	
 			<mx:Button toolTip="Upload data from Excel or CSV..." click="toUpload()" id="uploadButton" icon="{addIcon}" 
 				label="Upload File" labelPlacement="bottom"/>
-			<mx:Button toolTip="Connect to external data source..." click="externalConnect()" id="connectButton" icon="{dataConnectionIcon}"
+			<mx:Button toolTip="Connect to external data..." click="externalConnect()" id="connectButton" icon="{dataConnectionIcon}"
 				label="External Data" labelPlacement="bottom"/>
-			<mx:Button toolTip="Create composite feed..." click="createCompositeFeed()" id="compositeFeedButton" icon="{joinIcon}"
-				label="Combine Feeds" labelPlacement="bottom"/>
-			<mx:Button toolTip="Create empty feed..." click="createEmptyFeed()" id="emptyFeedButton" icon="{addIcon}"
-				label="New Empty Feed" labelPlacement="bottom"/>			
+			<mx:Button toolTip="Create composite data source.." click="createCompositeFeed()" id="compositeFeedButton" icon="{joinIcon}"
+				label="Combine Sources" labelPlacement="bottom"/>
+			<mx:Button toolTip="Create empty data source..." click="createEmptyFeed()" id="emptyFeedButton" icon="{addIcon}"
+				label="New Empty Source" labelPlacement="bottom"/>
             <mx:Button icon="{helpIcon}" label="Help..." labelPlacement="bottom" click="help()"/>
 			<customupload:SpaceUsage id="spaceUsage" descriptors="{displayTreeData}"/>
             <mx:Spacer width="100%"/>
@@ -320,7 +325,7 @@
 			<mx:columns>
 				<mx:AdvancedDataGridColumn headerText="Name" dataField="name"/>
 				<mx:AdvancedDataGridColumn headerText="Size" dataField="size" width="110"/>
-				<mx:AdvancedDataGridColumn width="150" headerText="" dataField="name" itemRenderer="com.easyinsight.listing.MyDataIconControls"/>
+				<mx:AdvancedDataGridColumn width="200" headerText="" dataField="name" itemRenderer="com.easyinsight.listing.MyDataIconControls"/>
 
 			</mx:columns>
 		</mx:AdvancedDataGrid>

@@ -11,6 +11,10 @@ package com.adobe.ac.mxeffects
 		public var lightingStrengthDefault : Number = 7.5;
 		
 		private var _lightingStrength : Number;
+
+        public function Lighting() {
+            
+        }
 		
 		public function get lightingStrength() : Number
 		{

@@ -9,6 +9,10 @@ package com.adobe.ac.util
 	{
 		public var offsetWidth : Number = 200;
 		public var offsetHeight : Number = 200;
+
+        public function SimpleDisplayObjectBoundsUtil() {
+            
+        }
 		
 		public function getBoundsForOffsetRect( target : DisplayObject, offsetRect : Rectangle ) : Rectangle
 		{

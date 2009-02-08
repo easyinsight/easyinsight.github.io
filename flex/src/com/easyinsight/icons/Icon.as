@@ -4,5 +4,9 @@ package com.easyinsight.icons {
 public class Icon {
     public var path:String;
     public var name:String;
+
+    public function Icon() {
+        
+    }
 }
 }

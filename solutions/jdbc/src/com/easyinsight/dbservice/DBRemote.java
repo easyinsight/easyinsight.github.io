@@ -8,6 +8,7 @@ import com.easyinsight.dbservice.validated.BasicAuthValidatingPublishServiceServ
 import java.util.*;
 import java.sql.*;
 import java.sql.Date;
+import java.net.URL;
 
 import flex.messaging.FlexContext;
 
@@ -26,6 +27,7 @@ public class DBRemote {
     private static Map<String, EIConfiguration> eiConfigMap = new HashMap<String, EIConfiguration>();
 
     private MetadataStorage metadataStorage = new MetadataStorage();
+    private String eiHost = System.getProperty("ei.target", "localhost:8080");
 
     public void forceRun(long queryConfigurationID) {
         try {
@@ -135,7 +137,8 @@ public class DBRemote {
 
     public String validateEI(EIConfiguration eiConfiguration) {
         try {
-            BasicAuthUncheckedPublish service = new BasicAuthUncheckedPublishServiceServiceLocator().getBasicAuthUncheckedPublishServicePort();
+            URL url = new URL("http://" + this.eiHost + "/DMS/services/UncheckedPublishBasic");
+            BasicAuthUncheckedPublish service = new BasicAuthUncheckedPublishServiceServiceLocator().getBasicAuthUncheckedPublishServicePort(url);
             ((BasicAuthUncheckedPublishServiceServiceSoapBindingStub)service).setUsername(eiConfiguration.getUserName());
             ((BasicAuthUncheckedPublishServiceServiceSoapBindingStub)service).setPassword(eiConfiguration.getPassword());
             return null;
@@ -275,7 +278,9 @@ public class DBRemote {
             insertStmt.setString(4, queryConfiguration.getName());
             insertStmt.setInt(5, queryConfiguration.getPublishMode());
             insertStmt.execute();
-            BasicAuthUncheckedPublish service = new BasicAuthUncheckedPublishServiceServiceLocator().getBasicAuthUncheckedPublishServicePort();
+
+            URL url = new URL("http://" + this.eiHost + "/DMS/services/UncheckedPublishBasic");
+            BasicAuthUncheckedPublish service = new BasicAuthUncheckedPublishServiceServiceLocator().getBasicAuthUncheckedPublishServicePort(url);
             EIConfiguration eiConfiguration = eiConfigMap.get(FlexContext.getFlexSession().getId());
             ((BasicAuthUncheckedPublishServiceServiceSoapBindingStub)service).setUsername(eiConfiguration.getUserName());
             ((BasicAuthUncheckedPublishServiceServiceSoapBindingStub)service).setPassword(eiConfiguration.getPassword());
@@ -301,7 +306,8 @@ public class DBRemote {
 
     public String queryToEI(QueryConfiguration queryConfiguration) {
         try {
-            BasicAuthUncheckedPublish service = new BasicAuthUncheckedPublishServiceServiceLocator().getBasicAuthUncheckedPublishServicePort();
+            URL url = new URL("http://" + this.eiHost + "/DMS/services/UncheckedPublishBasic");
+            BasicAuthUncheckedPublish service = new BasicAuthUncheckedPublishServiceServiceLocator().getBasicAuthUncheckedPublishServicePort(url);
             EIConfiguration eiConfiguration = eiConfigMap.get(FlexContext.getFlexSession().getId());
             DBConfiguration savedConfiguration = dbConfigMap.get(FlexContext.getFlexSession().getId());
             ((BasicAuthUncheckedPublishServiceServiceSoapBindingStub)service).setUsername(eiConfiguration.getUserName());

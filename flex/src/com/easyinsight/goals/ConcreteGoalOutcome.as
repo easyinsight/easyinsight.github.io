@@ -6,5 +6,9 @@ public class ConcreteGoalOutcome extends GoalOutcome {
     public var endValue:Number;
     public var startValue:Number;
     public var percentChange:Number;
+
+    public function ConcreteGoalOutcome() {
+        super();
+    }
 }
 }

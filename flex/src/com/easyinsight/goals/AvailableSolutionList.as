@@ -5,5 +5,9 @@ import mx.collections.ArrayCollection;
 public class AvailableSolutionList {
     public var tagMatchedSolutions:ArrayCollection;
     public var allSolutions:ArrayCollection;
+
+    public function AvailableSolutionList() {
+        
+    }
 }
 }

@@ -7,6 +7,10 @@ public class AnalysisHierarchyItem extends AnalysisDimension {
     public var hierarchyLevels:ArrayCollection;
     public var hierarchyLevel:HierarchyLevel;
 
+    public function AnalysisHierarchyItem() {
+        super();
+    }
+
     override public function getType():int {
         return super.getType() | AnalysisItemTypes.HIERARCHY;
     }

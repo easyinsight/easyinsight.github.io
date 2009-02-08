@@ -7,5 +7,9 @@ public class AuditMessage {
     public var message:String;
     public var timestamp:Date;
     public var audit:Boolean;
+
+    public function AuditMessage() {
+        
+    }
 }
 }

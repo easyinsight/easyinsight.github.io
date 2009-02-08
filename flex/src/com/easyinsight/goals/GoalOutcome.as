@@ -9,6 +9,10 @@ public class GoalOutcome {
     public static const NEGATIVE:int = 4;
     public static const NO_DATA:int = 5;
 
+    public function GoalOutcome() {
+        
+    }
+
     public var outcomeState:int;
     public var outcomeValue:Number;
 }

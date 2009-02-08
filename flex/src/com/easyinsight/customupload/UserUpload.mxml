@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%"
-	creationComplete="doCreationComplete(event)">
+	creationComplete="doCreationComplete(event)" title="Data Source Creation">
 	<mx:Script>
 		<![CDATA[
 			import mx.controls.Alert;
@@ -10,6 +10,10 @@
                     // Reference to the file on disk (selected by user)
                     [Bindable]
                     public var file:FileReference = new FileReference();
+
+                    [Bindable]
+                    [Embed(source="../../../../assets/excelexample.PNG")]
+                    private var excelImage:Class;
 
                     private var uploadID:Number;
 
@@ -97,38 +101,40 @@
 	<mx:RemoteObject id="uploadService" destination="userUpload">
 		<mx:method name="create" result="created()"/>
 	</mx:RemoteObject>
-	<mx:VBox width="100%" height="100%" id="coreVBox">
-		
-		
-	<mx:Form id="coreForm">
-		<mx:FormItem label="Name:">
-			<mx:TextInput id="feedName"/>
-		</mx:FormItem>
-		<mx:FormItem label="Select a file to upload:" direction="horizontal">
-			<mx:TextInput id="txtPhoto" editable="false" />
-			<mx:Button label="Browse..." click="doBrowse( event )" />
-		</mx:FormItem>
-		<mx:FormItem label="" direction="horizontal">
-			<mx:Button label="Upload" click="doSubmit( event )" id="uploadButton" enabled="false"/>
-		</mx:FormItem>
-		<mx:FormItem label="" direction="horizontal">
-			<mx:HBox horizontalAlign="center">
-				<mx:ProgressBar id="progressBar" visible="false" source="file"/>	
-			</mx:HBox>
-			<mx:Label text="Upload successful!" visible="false" id="successMessage"/>
-		</mx:FormItem>		
-		<mx:FormItem label="" direction="horizontal">
-			<mx:Button label="Finish" click="next()" enabled="false" id="nextButton"/>
-			<mx:Button label="Cancel" click="cancel()"/>
-		</mx:FormItem>
-		<mx:FormItem label="" direction="horizontal" visible="false" id="finishingSection">
-			<mx:HBox horizontalAlign="center">
-				<mx:ProgressBar indeterminate="true"/>	
-			</mx:HBox>
-			<mx:Label text="Creating the data source..."/>
-		</mx:FormItem>		
-	</mx:Form>
-	
-	
-	</mx:VBox>
+	<mx:HBox width="100%" height="100%" id="coreVBox" styleName="TitleWindowContents">
+        <mx:Form id="coreForm" paddingRight="0">
+            <mx:FormItem label="Name:" fontFamily="Tahoma" fontWeight="bold">
+                <mx:TextInput id="feedName" fontFamily="Lucide Grande" fontWeight="normal"/>
+            </mx:FormItem>
+            <mx:FormItem label="Select a file to upload:" direction="horizontal" fontFamily="Tahoma" fontWeight="bold">
+                <mx:TextInput id="txtPhoto" editable="false"  fontFamily="Lucide Grande" fontWeight="normal"/>
+                <mx:Button label="Browse..." click="doBrowse( event )" />
+            </mx:FormItem>
+            <mx:FormItem label="" direction="horizontal">
+                <mx:Button label="Upload" click="doSubmit( event )" id="uploadButton" enabled="false"/>
+            </mx:FormItem>
+            <mx:FormItem label="" direction="vertical">
+                <mx:HBox horizontalAlign="center">
+                    <mx:ProgressBar id="progressBar" visible="false" source="file"/>
+                </mx:HBox>
+                <mx:Label text="Upload successful!" visible="false" id="successMessage" fontFamily="Tahoma" fontWeight="bold"/>
+            </mx:FormItem>
+            <mx:FormItem label="" direction="horizontal">
+                <mx:Button label="Finish" click="next()" enabled="false" id="nextButton"/>
+                <mx:Button label="Cancel" click="cancel()"/>
+            </mx:FormItem>
+            <mx:FormItem label="" direction="vertical" visible="false" id="finishingSection">
+                <mx:HBox horizontalAlign="center">
+                    <mx:ProgressBar indeterminate="true"/>
+                </mx:HBox>
+                <mx:Label text="Creating the data source..." fontFamily="Tahoma" fontWeight="bold"/>
+            </mx:FormItem>
+        </mx:Form>
+	    <mx:VBox>
+            <mx:TextArea text="You can upload Excel (1997-2003) spreadsheets or comma or tab separated text files here. The file should have a header row, with data in the subsequent cells, as shown below:" borderThickness="0"
+                    width="260" height="90" backgroundAlpha="0"/>
+            <mx:Image source="{excelImage}"/>
+            <mx:TextArea width="260" height="50" text="You may experience unexpected results if the data does not match that pattern." borderThickness="0" backgroundAlpha="0"/>
+	    </mx:VBox>
+	</mx:HBox>
 </mx:TitleWindow>

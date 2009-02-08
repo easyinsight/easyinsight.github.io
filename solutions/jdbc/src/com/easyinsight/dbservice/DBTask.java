@@ -5,6 +5,7 @@ import com.easyinsight.dbservice.validated.*;
 import java.util.*;
 import java.sql.*;
 import java.sql.Date;
+import java.net.URL;
 
 /**
  * User: James Boe
@@ -12,13 +13,17 @@ import java.sql.Date;
  * Time: 10:24:35 PM
  */
 public class DBTask extends TimerTask {
+
+    private String eiHost = System.getProperty("ei.target", "localhost:8080");
+
     public void run() {
         try {
             List<QueryConfiguration> queryConfigs = getQueryConfigurations();
             EIConfiguration eiConfiguration = getEIConfiguration();
             DBConfiguration dbConfiguration = getDBConfiguration();
             if (eiConfiguration != null && dbConfiguration != null) {
-                BasicAuthValidatedPublish service = new BasicAuthValidatingPublishServiceServiceLocator().getBasicAuthValidatingPublishServicePort();
+                URL url = new URL("http://" + this.eiHost + "/DMS/services/ValidatedPublishBasic");
+                BasicAuthValidatedPublish service = new BasicAuthValidatingPublishServiceServiceLocator().getBasicAuthValidatingPublishServicePort(url);
                 ((BasicAuthValidatingPublishServiceServiceSoapBindingStub)service).setUsername(eiConfiguration.getUserName());
                 ((BasicAuthValidatingPublishServiceServiceSoapBindingStub)service).setPassword(eiConfiguration.getPassword());
                 for (QueryConfiguration queryConfiguration : queryConfigs) {

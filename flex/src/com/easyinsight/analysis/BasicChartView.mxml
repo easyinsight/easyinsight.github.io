@@ -449,8 +449,8 @@
 	
 		<mx:HBox width="100%" visible="{showDropAreas}" id="dropAreas" verticalAlign="middle">
 		
-			<mx:CheckBox color="#FFFFFF" label="3D" id="threeDCheckbox" visible="{threeDVisible}" selected="{threeDSelected}" click="select3D()"/>
-			<mx:CheckBox color="#FFFFFF" label="Stacked" id="stackedCheckbox" visible="{stackedVisible}" selected="{stackedSelected}" click="selectStacked()"/>
+			<mx:CheckBox color="#000000" label="3D" id="threeDCheckbox" visible="{threeDVisible}" selected="{threeDSelected}" click="select3D()"/>
+			<mx:CheckBox color="#000000" label="Stacked" id="stackedCheckbox" visible="{stackedVisible}" selected="{stackedSelected}" click="selectStacked()"/>
 <!--
 			<mx:Button toolTip="Chart Details..." click="configureChart()" icon="@Embed(source='../../../../assets/table_edit.png')"/>
 -->
@@ -460,7 +460,7 @@
 			<analysis:ListDropAreaGrouping id="measureDropArea" borderStyle="solid" borderThickness="1" 
 				dropAreaType="com.easyinsight.analysis.MeasureDropArea" analysisItems="{availableFields}"/>
 			<mx:Spacer width="30"/>	
-			<mx:Label color="#FFFFFF" text="{limitText}" visible="{limitTextVisible}"/>
+			<mx:Label color="#000000" text="{limitText}" visible="{limitTextVisible}"/>
 		</mx:HBox>
 	</mx:VBox>
 						

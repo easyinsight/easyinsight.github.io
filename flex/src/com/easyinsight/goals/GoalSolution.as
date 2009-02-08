@@ -5,5 +5,9 @@ public class GoalSolution {
     public var solutionID:int;
     public var solutionName:String;
     public var solutionArchiveName:String;
+
+
+    public function GoalSolution() {
+    }
 }
 }

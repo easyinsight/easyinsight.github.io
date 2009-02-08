@@ -17,6 +17,10 @@ package com.adobe.ac.util
 		public var left : Number;
 		public var top : Number;
 		private var concatenatedMatrix : Matrix;
+
+        public function DisplayObjectBounds() {
+            
+        }
 		
 		public function getBounds( targetInstance : DisplayObject, bounds : Rectangle = null ) : void
 		{

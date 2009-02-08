@@ -24,30 +24,37 @@ package com.easyinsight.listing
         
         [Embed(source="../../../../assets/media_play_green.png")]
         public var playIcon:Class;
+
+        [Embed(source="../../../../assets/navigate_cross.png")]
+        public var deleteIcon:Class;
         
         private var refreshButton:Button;
         private var adminButton:Button;
         private var analyzeButton:Button;
+        private var deleteButton:Button;
         
 		public function MyDataIconControls()
 		{
 			super();
 			analyzeButton = new Button();
 			analyzeButton.setStyle("icon", playIcon);
-			analyzeButton.toolTip = "Analyze";
+			analyzeButton.toolTip = "Analyze...";
 			analyzeButton.addEventListener(MouseEvent.CLICK, analyzeCalled);
 			addChild(analyzeButton);			
 			refreshButton = new Button();
 			refreshButton.setStyle("icon", refreshIcon);
-			refreshButton.toolTip = "Refresh";
+			refreshButton.toolTip = "Refresh...";
 			refreshButton.addEventListener(MouseEvent.CLICK, refreshCalled);
 			addChild(refreshButton);
 			adminButton = new Button();
 			adminButton.setStyle("icon", adminIcon);
-			adminButton.toolTip = "Administer";
+			adminButton.toolTip = "Administer...";
 			adminButton.addEventListener(MouseEvent.CLICK, adminCalled);
 			addChild(adminButton);
-			
+			deleteButton = new Button();
+            deleteButton.setStyle("icon", deleteIcon);
+            deleteButton.addEventListener(MouseEvent.CLICK, deleteCalled);
+            addChild(deleteButton);
 			
 			this.setStyle("paddingLeft", 5);
 			this.setStyle("paddingRight", 5);
@@ -66,6 +73,10 @@ package com.easyinsight.listing
 				}
 			}
 		}
+
+        private function deleteCalled(event:MouseEvent):void {
+            dispatchEvent(new DeleteDataSourceEvent(obj));                        
+        }
 		
 		private function analyzeCalled(event:MouseEvent):void {
 			if (obj is DataFeedDescriptor) {

@@ -160,7 +160,7 @@ public class DynamicServiceDefinition {
 
         String path = new File("").getAbsolutePath();
         path = path.substring(0, path.length() - 4);
-        path = path + "/webapps/DMS/web-inf/classes";
+        path = path + "/webapps/DMS/WEB-INF/classes";
 
         int compilationResult = javaCompiler.run(null, null, null, "-cp", path, beanFile.getAbsolutePath(), interfaceFile.getAbsolutePath(), classFile.getAbsolutePath());
         if (compilationResult > 0) {

@@ -6,5 +6,9 @@ public class SolutionContents {
     public var feedDescriptors:ArrayCollection;
     public var goalTreeDescriptors:ArrayCollection;
     public var insightDescriptors:ArrayCollection;
+
+    public function SolutionContents() {
+        
+    }
 }
 }

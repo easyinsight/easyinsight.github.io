@@ -26,6 +26,10 @@ package com.easyinsight.framework
 
 		private var merchants:ArrayCollection = new ArrayCollection();
 		private var storeService:RemoteObject;
+
+        public function User() {
+
+        }
 		
 		static public function initializeUser(name:String, email:String, accountType:AccountType,
 		spaceAllowed:int, accountAdmin:Boolean, dataSourceCreator:Boolean, insightCreator:Boolean):void {
@@ -43,7 +47,7 @@ package com.easyinsight.framework
 			_user.storeService.getMerchants.send();*/
 		}
 
-        public function updateLabels(userName:String, fullName:String, email:String) {
+        public function updateLabels(userName:String, fullName:String, email:String):void {
             this.email = email;
             this.userName = userName;
             this.name = fullName;
@@ -74,7 +78,7 @@ package com.easyinsight.framework
 			return accountType;
 		}
 
-        public function setAccountType(type:AccountType) {
+        public function setAccountType(type:AccountType):void {
             this.accountType = type;
         }
 		

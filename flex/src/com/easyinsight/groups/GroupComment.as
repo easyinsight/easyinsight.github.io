@@ -3,5 +3,9 @@ package com.easyinsight.groups {
 [RemoteClass(alias="com.easyinsight.groups.GroupComment")]
 public class GroupComment extends AuditMessage {
     public var groupID:int;
+
+    public function GroupComment() {
+        
+    }
 }
 }
