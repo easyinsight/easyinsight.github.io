@@ -1,0 +1,373 @@
+<?xml version="1.0" ?>
+<mx:Application xmlns:mx="http://www.adobe.com/2006/mxml"  paddingTop="30" top="0" borderThickness="0" left="0" paddingLeft="15" right="0" paddingRight="15"
+	bottom="0" paddingBottom="30" width="770" height="600" backgroundAlpha="0" creationComplete="setupTimers()">
+    <mx:states>
+        <mx:State name="insight">
+            <mx:SetStyle target="{visibilityButton}" name="backgroundColor" value="#FFFFFF"/>
+            <mx:SetStyle target="{insightButton}" name="backgroundColor" value="#C82027"/>
+            <mx:SetStyle target="{improvementButton}" name="backgroundColor" value="#FFFFFF"/>
+            <mx:SetStyle target="{visibilityLabel}" name="color" value="#000000"/>
+            <mx:SetStyle target="{insightLabel}" name="color" value="#FFFFFF"/>
+            <mx:SetStyle target="{improvementLabel}" name="color" value="#000000"/>
+            <mx:RemoveChild target="{visibilityBox}"/>
+            <mx:AddChild relativeTo="{featureBox}">
+                <mx:VBox height="100%" horizontalAlign="center" id="insightBox" verticalAlign="middle">
+                        <mx:Spacer height="30"/>
+                        <mx:Label text="Sophisticated tools to help you understand your data" fontSize="20" fontFamily="Tahoma" fontWeight="bold"/>
+                        <mx:Spacer height="30"/>
+                    <mx:HBox horizontalAlign="center">
+                        <mx:Image source="{chartPicture}"/>
+
+                    <mx:Grid verticalGap="15" paddingTop="11">
+                            <mx:GridRow>
+                                <mx:GridItem>
+                                    <mx:Image source="{bulletIcon}"/>
+                                </mx:GridItem>
+                                <mx:GridItem>
+                                    <mx:Label text="View data as lists, crosstabs, charts and maps"/>
+                                </mx:GridItem>
+                            </mx:GridRow>
+                            <mx:GridRow>
+                                <mx:GridItem>
+                                    <mx:Image source="{bulletIcon}"/>
+                                </mx:GridItem>
+                                <mx:GridItem>
+                                    <mx:Label text="Easily filter and drill through data"/>
+                                </mx:GridItem>
+                            </mx:GridRow>
+                            <mx:GridRow>
+                                <mx:GridItem>
+                                    <mx:Image source="{bulletIcon}"/>
+                                </mx:GridItem>
+                                <mx:GridItem>
+                                    <mx:Label text="Apply transformations to polish records"/>
+                                </mx:GridItem>
+                            </mx:GridRow>
+                            <mx:GridRow>
+                                <mx:GridItem>
+                                    <mx:Image source="{bulletIcon}"/>
+                                </mx:GridItem>
+                                <mx:GridItem>
+                                    <mx:Label text="Export to Excel or as API data"/>
+                                </mx:GridItem>
+                            </mx:GridRow>
+                            <mx:GridRow>
+                                <mx:GridItem>
+                                    <mx:Image source="{bulletIcon}"/>
+                                </mx:GridItem>
+                                <mx:GridItem>
+                                    <mx:Label text="Keep an eye on the latest data through widgets"/>
+                                </mx:GridItem>
+                            </mx:GridRow>
+                            <mx:GridRow>
+                                <mx:GridItem>
+                                    <mx:Image source="{bulletIcon}"/>
+                                </mx:GridItem>
+                                <mx:GridItem>
+                                    <mx:Label text="Create single reports from disparate data"/>
+                                </mx:GridItem>
+                            </mx:GridRow>
+                            <mx:GridRow>
+                                <mx:GridItem>
+                                    <mx:Image source="{bulletIcon}"/>
+                                </mx:GridItem>
+                                <mx:GridItem>
+                                    <mx:Label text="Collaborate across data problems in real time"/>
+                                </mx:GridItem>
+                            </mx:GridRow>
+                        </mx:Grid>
+                    </mx:HBox>
+                </mx:VBox>
+            </mx:AddChild>
+        </mx:State>
+        <mx:State name="improvement">
+            <mx:RemoveChild target="{visibilityBox}"/>
+            <mx:SetStyle target="{visibilityButton}" name="backgroundColor" value="#FFFFFF"/>
+            <mx:SetStyle target="{insightButton}" name="backgroundColor" value="#FFFFFF"/>
+            <mx:SetStyle target="{improvementButton}" name="backgroundColor" value="#C82027"/>
+            <mx:SetStyle target="{visibilityLabel}" name="color" value="#000000"/>
+            <mx:SetStyle target="{insightLabel}" name="color" value="#000000"/>
+            <mx:SetStyle target="{improvementLabel}" name="color" value="#FFFFFF"/>
+            <mx:AddChild relativeTo="{featureBox}">
+                <mx:VBox width="100%" height="100%" horizontalAlign="center" id="improvementBox">
+                    <mx:TextArea text="(improvement text)" borderThickness="0"
+                            width="620" fontSize="18" height="80" backgroundAlpha="0"/>
+                    <mx:Grid verticalGap="30" horizontalGap="30" height="100%">
+                        <mx:GridRow>
+                            <mx:GridItem>
+                                <mx:VBox horizontalAlign="center">
+                                    <mx:Label text="Upload Excel or CSV" fontSize="14"/>
+                                    <mx:Image source="{excelImage}" width="250" height="92"/>
+                                </mx:VBox>
+                            </mx:GridItem>
+                            <mx:GridItem>
+                                <mx:VBox horizontalAlign="center">
+                                    <mx:Label text="Sophisticated API" fontSize="14"/>
+                                    <mx:Image source="{apiImage}" width="250" height="92"/>
+                                </mx:VBox>
+                            </mx:GridItem>
+                        </mx:GridRow>
+                        <mx:GridRow>
+                            <mx:GridItem>
+                                <mx:VBox horizontalAlign="center">
+                                    <mx:Label text="Simple Database Integration" fontSize="14"/>
+                                    <mx:Image source="{jdbcImage}" width="250" height="92"/>
+                                </mx:VBox>
+                            </mx:GridItem>
+                            <mx:GridItem>
+                                <mx:VBox horizontalAlign="center">
+                                    <mx:Label text="And Many More!" fontSize="14"/>
+                                    <mx:Image source="{apiImage}" width="250" height="92"/>
+                                </mx:VBox>
+                            </mx:GridItem>
+                        </mx:GridRow>
+                    </mx:Grid>
+                </mx:VBox>
+            </mx:AddChild>
+        </mx:State>
+    </mx:states>
+    <mx:transitions>
+        <mx:Transition id="improvementToInsight" fromState="improvement" toState="insight">
+            <mx:Sequence targets="{[improvementBox, insightBox]}">
+                <mx:SetStyleAction target="{visibilityButton}" name="backgroundColor" value="#FFFFFF"/>
+                <mx:SetStyleAction target="{insightButton}" name="backgroundColor" value="#C82027"/>
+                <mx:SetStyleAction target="{improvementButton}" name="backgroundColor" value="#FFFFFF"/>
+                <mx:SetStyleAction target="{visibilityLabel}" name="color" value="#000000"/>
+                <mx:SetStyleAction target="{insightLabel}" name="color" value="#FFFFFF"/>
+                <mx:SetStyleAction target="{improvementLabel}" name="color" value="#000000"/>
+                <mx:Fade target="{improvementBox}" duration="1000" alphaFrom="1.0" alphaTo="0.0"/>
+                <mx:RemoveChildAction/>
+                <mx:AddChildAction/>
+                <mx:Fade target="{insightBox}" duration="1000" alphaFrom="0.0" alphaTo="1.0"/>
+            </mx:Sequence>
+        </mx:Transition>
+        <mx:Transition id="visibilityToInsight" fromState="*" toState="insight">
+            <mx:Sequence targets="{[visibilityBox, insightBox]}">
+                <mx:SetStyleAction target="{visibilityButton}" name="backgroundColor" value="#FFFFFF"/>
+                <mx:SetStyleAction target="{insightButton}" name="backgroundColor" value="#C82027"/>
+                <mx:SetStyleAction target="{improvementButton}" name="backgroundColor" value="#FFFFFF"/>
+                <mx:SetStyleAction target="{visibilityLabel}" name="color" value="#000000"/>
+                <mx:SetStyleAction target="{insightLabel}" name="color" value="#FFFFFF"/>
+                <mx:SetStyleAction target="{improvementLabel}" name="color" value="#000000"/>
+                <mx:Fade target="{visibilityBox}" duration="1000" alphaFrom="1.0" alphaTo="0.0"/>
+                <mx:RemoveChildAction/>
+                <mx:AddChildAction/>
+                <mx:Fade target="{insightBox}" duration="1000" alphaFrom="0.0" alphaTo="1.0"/>
+            </mx:Sequence>
+        </mx:Transition>
+        <mx:Transition id="insightToImprovement" fromState="insight" toState="improvement">
+            <mx:Sequence targets="{[insightBox, improvementBox]}">
+                <mx:SetStyleAction target="{visibilityButton}" name="backgroundColor" value="#FFFFFF"/>
+                <mx:SetStyleAction target="{insightButton}" name="backgroundColor" value="#FFFFFF"/>
+                <mx:SetStyleAction target="{improvementButton}" name="backgroundColor" value="#C82027"/>
+                <mx:SetStyleAction target="{visibilityLabel}" name="color" value="#000000"/>
+                <mx:SetStyleAction target="{insightLabel}" name="color" value="#000000"/>
+                <mx:SetStyleAction target="{improvementLabel}" name="color" value="#FFFFFF"/>
+                <mx:Fade target="{insightBox}" duration="1000" alphaFrom="1.0" alphaTo="0.0"/>
+                <mx:RemoveChildAction/>
+                <mx:AddChildAction/>
+                <mx:Fade target="{improvementBox}" duration="1000" alphaFrom="0.0" alphaTo="1.0"/>
+            </mx:Sequence>
+        </mx:Transition>
+        <mx:Transition id="visibilityToImprovement" fromState="*" toState="improvement">
+            <mx:Sequence targets="{[visibilityBox, improvementBox]}">
+                <mx:SetStyleAction target="{visibilityButton}" name="backgroundColor" value="#FFFFFF"/>
+                <mx:SetStyleAction target="{insightButton}" name="backgroundColor" value="#FFFFFF"/>
+                <mx:SetStyleAction target="{improvementButton}" name="backgroundColor" value="#C82027"/>
+                <mx:SetStyleAction target="{visibilityLabel}" name="color" value="#000000"/>
+                <mx:SetStyleAction target="{insightLabel}" name="color" value="#000000"/>
+                <mx:SetStyleAction target="{improvementLabel}" name="color" value="#FFFFFF"/>
+                <mx:Fade target="{visibilityBox}" duration="1000" alphaFrom="1.0" alphaTo="0.0"/>
+                <mx:RemoveChildAction/>
+                <mx:AddChildAction/>
+                <mx:Fade target="{improvementBox}" duration="1000" alphaFrom="0.0" alphaTo="1.0"/>
+            </mx:Sequence>
+        </mx:Transition>
+        <mx:Transition id="insightToVisibility" fromState="insight" toState="*">
+            <mx:Sequence targets="{[visibilityBox, insightBox]}">
+                <mx:SetStyleAction target="{visibilityButton}" name="backgroundColor" value="#C82027"/>
+                <mx:SetStyleAction target="{insightButton}" name="backgroundColor" value="#FFFFFF"/>
+                <mx:SetStyleAction target="{improvementButton}" name="backgroundColor" value="#FFFFFF"/>
+                <mx:SetStyleAction target="{visibilityLabel}" name="color" value="#FFFFFF"/>
+                <mx:SetStyleAction target="{insightLabel}" name="color" value="#000000"/>
+                <mx:SetStyleAction target="{improvementLabel}" name="color" value="#000000"/>
+                <mx:Fade target="{insightBox}" duration="1000" alphaFrom="1.0" alphaTo="0.0"/>
+                <mx:RemoveChildAction/>
+                <mx:AddChildAction/>
+                <mx:Fade target="{visibilityBox}" duration="1000" alphaFrom="0.0" alphaTo="1.0"/>
+            </mx:Sequence>
+        </mx:Transition>
+        <mx:Transition id="improvementToVisibility" fromState="improvement" toState="*">
+            <mx:Sequence targets="{[visibilityBox, improvementBox]}">
+                <mx:SetStyleAction target="{visibilityButton}" name="backgroundColor" value="#C82027"/>
+                <mx:SetStyleAction target="{insightButton}" name="backgroundColor" value="#FFFFFF"/>
+                <mx:SetStyleAction target="{improvementButton}" name="backgroundColor" value="#FFFFFF"/>
+                <mx:SetStyleAction target="{visibilityLabel}" name="color" value="#FFFFFF"/>
+                <mx:SetStyleAction target="{insightLabel}" name="color" value="#000000"/>
+                <mx:SetStyleAction target="{improvementLabel}" name="color" value="#000000"/>
+                <mx:Fade target="{improvementBox}" duration="1000" alphaFrom="1.0" alphaTo="0.0"/>
+                <mx:RemoveChildAction/>
+                <mx:AddChildAction/>
+                <mx:Fade target="{visibilityBox}" duration="1000" alphaFrom="0.0" alphaTo="1.0"/>
+            </mx:Sequence>
+        </mx:Transition>
+    </mx:transitions>
+    <mx:Script>
+		<![CDATA[
+        import mx.containers.Box;
+        import mx.managers.CursorManager;
+
+        [Bindable]
+        [Embed(source="../assets/bullet_ball_blue.png")]
+        private var bulletIcon:Class;
+
+        [Bindable]
+        [Embed(source="../assets/background2.JPG")]
+        private var background2:Class;
+
+        [Bindable]
+        [Embed(source="../assets/excelexample.PNG")]
+        public var excelImage:Class;
+
+        [Bindable]
+        [Embed(source="../assets/apipic.PNG")]
+        public var apiImage:Class;
+
+        [Bindable]
+        [Embed(source="../assets/dbpic.PNG")]
+        public var jdbcImage:Class;
+
+        [Bindable]
+        [Embed(source="../assets/helpx48.png")]
+        public var helpIcon:Class;
+
+        [Bindable]
+        [Embed(source="../assets/pointer.png")]
+        public var pointerIcon:Class;
+
+        [Bindable]
+        [Embed(source="../assets/chartpic.JPG")]
+        public var chartPicture:Class;
+
+        private var majorTimer : Timer;
+
+        private var minorTimer : Timer;
+
+        private var recentChange:Boolean = false;
+
+        private function setupTimers():void {
+            majorTimer = new Timer(20000);
+            majorTimer.addEventListener(TimerEvent.TIMER, onMajorTimer);
+            majorTimer.start();
+        }
+
+        private function onMajorTimer(event:TimerEvent):void {
+            if (recentChange) {
+                recentChange = false;
+            } else {
+                if (currentState == null || currentState == "") {
+                    currentState = "insight";
+                } else if (currentState == "insight") {
+                    currentState = "improvement";
+                } else {
+                    currentState = "";
+                }
+            }
+        }
+
+        private function onButtonClick(event:MouseEvent):void {
+            recentChange = true;
+            if (event.currentTarget == visibilityButton && currentState != "") {
+                currentState = "";
+            } else if (event.currentTarget == insightButton && currentState != "insight") {
+                currentState = "insight";
+            } else if (event.currentTarget == improvementButton && currentState != "improvement") {
+                currentState = "improvement";
+            }
+        }
+
+        private function onRollOver(event:MouseEvent):void {
+            var box:Box = event.currentTarget as Box;
+            if (box.getStyle("backgroundColor") == "#FFFFFF") {
+                box.setStyle("backgroundColor", "#F08486");
+                CursorManager.setCursor(pointerIcon);
+            }
+        }
+
+        private function onRollOut(event:MouseEvent):void {
+            var box:Box = event.currentTarget as Box;
+            if (box.getStyle("backgroundColor") == "#F08486") {
+                box.setStyle("backgroundColor", "#FFFFFF");
+                CursorManager.removeAllCursors();
+            }
+        }
+                ]]>
+	</mx:Script>
+    <mx:VBox height="100%" width="100%" paddingTop="10" paddingLeft="10" paddingRight="10" paddingBottom="10" borderStyle="solid" borderThickness="2" cornerRadius="15" dropShadowEnabled="true">
+        <mx:VBox width="100%" height="100%" backgroundImage="{background2}" backgroundSize="100%" paddingTop="20">
+            <mx:HBox width="100%" horizontalAlign="center">
+                <mx:Box borderColor="#000000" backgroundColor="#C82027" borderThickness="1" borderStyle="solid" cornerRadius="15" dropShadowEnabled="true"
+                        paddingLeft="15" paddingRight="15" width="190" rollOver="onRollOver(event)" rollOut="onRollOut(event)" click="onButtonClick(event)" id="visibilityButton">
+                    <mx:Box width="100%" height="100%" horizontalAlign="center">
+                        <mx:Label text="Visibility." fontSize="20" color="#000000" fontWeight="bold" fontFamily="Tahoma" id="visibilityLabel"/>
+                    </mx:Box>
+                </mx:Box>
+                <mx:Box borderColor="#000000" backgroundColor="#FFFFFF" borderThickness="1" borderStyle="solid" cornerRadius="15" dropShadowEnabled="true"
+                        paddingLeft="15" paddingRight="15" width="190" rollOver="onRollOver(event)" rollOut="onRollOut(event)" click="onButtonClick(event)" id="insightButton">
+                    <mx:Box width="100%" height="100%" horizontalAlign="center">
+                        <mx:Label text="Insight." fontSize="20" fontWeight="bold" fontFamily="Tahoma" id="insightLabel"/>
+                    </mx:Box>
+                </mx:Box>
+                <mx:Box borderColor="#000000" backgroundColor="#FFFFFF" borderThickness="1" borderStyle="solid" cornerRadius="15" dropShadowEnabled="true"
+                        paddingLeft="15" paddingRight="15" width="190" rollOver="onRollOver(event)" rollOut="onRollOut(event)" click="onButtonClick(event)" id="improvementButton">
+                    <mx:Box width="100%" height="100%" horizontalAlign="center">
+                        <mx:Label text="Improvement." fontSize="20" fontWeight="bold" fontFamily="Tahoma" id="improvementLabel"/>
+                    </mx:Box>
+                </mx:Box>
+            </mx:HBox>
+            <mx:Spacer height="20"/>
+            <mx:Box id="featureBox" height="100%" horizontalAlign="center" width="100%">
+                <mx:VBox height="100%" horizontalAlign="center" verticalAlign="middle" id="visibilityBox">
+                    <mx:VBox verticalGap="0">
+                        <mx:Label text="Get instant visibility into your data" fontSize="20" fontFamily="Tahoma" fontWeight="bold"/>
+                        <mx:Spacer height="15"/>
+                        <mx:Label text="On demand analytics get you running immediately" fontSize="18"/>
+                        <mx:Spacer height="5"/>
+                        <mx:Label text="Plugin solutions enable real time business intelligence" fontSize="18"/>
+                    </mx:VBox>
+                    <mx:Spacer height="15"/>
+                    <mx:Grid verticalGap="30" horizontalGap="30">
+                        <mx:GridRow>
+                            <mx:GridItem>
+                                <mx:VBox horizontalAlign="center">
+                                    <mx:Label text="Upload Excel or CSV" fontSize="14"/>
+                                    <mx:Image source="{excelImage}" width="250" height="92"/>
+                                </mx:VBox>
+                            </mx:GridItem>
+                            <mx:GridItem>
+                                <mx:VBox horizontalAlign="center">
+                                    <mx:Label text="Sophisticated API" fontSize="14"/>
+                                    <mx:Image source="{apiImage}" width="250" height="92"/>
+                                </mx:VBox>
+                            </mx:GridItem>
+                        </mx:GridRow>
+                        <mx:GridRow>
+                            <mx:GridItem>
+                                <mx:VBox horizontalAlign="center">
+                                    <mx:Label text="Simple Database Integration" fontSize="14"/>
+                                    <mx:Image source="{jdbcImage}" width="250" height="92"/>
+                                </mx:VBox>
+                            </mx:GridItem>
+                            <mx:GridItem>
+                                <mx:VBox horizontalAlign="center">
+                                    <mx:Label text="And Many More!" fontSize="14"/>
+                                    <mx:Image source="{apiImage}" width="250" height="92"/>
+                                </mx:VBox>
+                            </mx:GridItem>
+                        </mx:GridRow>
+                    </mx:Grid>
+                </mx:VBox>
+            </mx:Box>
+        </mx:VBox>
+    </mx:VBox>
+</mx:Application>

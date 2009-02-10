@@ -1,0 +1,49 @@
+<?xml version="1.0" ?>
+<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" width="400" height="400" showCloseButton="true" close="PopUpManager.removePopUp(this)">
+    <mx:Script><![CDATA[
+        import mx.managers.PopUpManager;
+        [Bindable]
+        [Embed(source="../../../../assets/arrow_left_blue.png")]
+        private var backArrow:Class;
+
+        [Bindable]
+        [Embed(source="../../../../assets/arrow_right_blue.png")]
+        private var forwardArrow:Class;
+
+        [Bindable]
+        [Embed(source="../../../../assets/index.png")]
+        private var indexIcon:Class;
+
+        [Bindable]
+        [Embed(source="../../../../assets/plasma_tv.png")]
+        private var screenIcon:Class;
+
+        [Bindable]
+        [Embed(source="../../../../assets/blackboard.png")]
+        private var tutorialIcon:Class;
+
+        [Bindable]
+        [Embed(source="../../../../assets/book_blue.png")]
+        private var browseIcon:Class;
+]]></mx:Script>
+    <mx:VBox width="100%" height="100%">
+        <mx:HBox width="100%"  backgroundColor="0xF0F0F0" paddingLeft="5" paddingRight="5" paddingTop="5" paddingBottom="5">
+            <mx:Button icon="{backArrow}"/>
+            <mx:Button icon="{forwardArrow}"/>
+        </mx:HBox>
+        <mx:TabNavigator width="100%" height="100%">
+            <mx:VBox label="Browse" icon="{browseIcon}">
+
+            </mx:VBox>
+            <mx:VBox label="Screencasts" icon="{screenIcon}">
+
+            </mx:VBox>
+            <mx:VBox label="Tutorials" icon="{tutorialIcon}">
+
+            </mx:VBox>
+            <mx:VBox label="Index" icon="{indexIcon}">
+
+            </mx:VBox>
+        </mx:TabNavigator>
+    </mx:VBox>
+</mx:TitleWindow>
