@@ -1,14 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ChartAdapter xmlns="com.easyinsight.analysis.charts.*" xmlns:mx="http://www.adobe.com/2006/mxml" height="100%" width="100%">
+<ChartAdapter xmlns="com.easyinsight.analysis.charts.*" xmlns:mx="http://www.adobe.com/2006/mxml" height="100%" width="100%"
+        creationComplete="setup()">
 	<mx:Script>
 		<![CDATA[
 			import com.easyinsight.analysis.AnalysisItem;
 			import com.easyinsight.filtering.FilterRawData;
 			import mx.charts.ChartItem;
-			import mx.formatters.Formatter;
+            import mx.charts.series.PieSeries;
+import mx.formatters.Formatter;
 			import mx.charts.series.items.PieSeriesItem;
 			import mx.charts.events.ChartItemEvent;
 			import mx.collections.ArrayCollection;
+            import mx.graphics.BitmapFill;
+            import mx.graphics.IFill;
 			[Bindable]
 			private var graphData:ArrayCollection = new ArrayCollection();
 			
@@ -24,6 +28,35 @@
 			private var explodeData:Array = [];
 			
 			private var dimensionItem:AnalysisItem;
+
+            private var bgFills:Array;
+
+            [Bindable]
+            [Embed(source="../../../../../assets/water4.JPG")]
+            private var backgroundDesktop:Class;
+
+            [Bindable]
+            [Embed(source="../../../../../assets/magenta.jpg")]
+            private var magenta:Class;
+
+            [Bindable]
+            [Embed(source="../../../../../assets/darkwater.jpg")]
+            private var darkWater:Class;
+
+			private function setup():void {
+                bgFills = [];
+                for (var i:int = 0; i < 3; i++) {
+                    var bgFill:BitmapFill = new BitmapFill();
+                    bgFill.source = backgroundDesktop;
+                    bgFill.originX = Math.random() * 60;
+                    bgFill.originY = Math.random() * 60;
+                    bgFills.push(bgFill);
+                }
+            }
+
+            private function customFill(element:ChartItem, index:Number):IFill {
+				return bgFills[index % 3];
+			}
 			
 			override public function get chartType():int {
 				return ChartTypes.PIE_2D;

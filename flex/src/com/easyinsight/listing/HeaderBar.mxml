@@ -121,6 +121,7 @@ import mx.collections.ICollectionView;
     <!-- <mx:Button id="btnFlexSpy" label="FlexSpy" click="FlexSpy.show()" /> -->
     <!-- <mx:TextInput id="searchText"/>
 		<mx:Button toolTip="Search" icon="@Embed(source='../../../../assets/view.png')" id="searchButton" click="search(event)"/> -->
+    
     <easyinsight:LoginStatusDisplay id="loginStatusDisplay" horizontalAlign="right"/>
 
 </mx:HBox>

@@ -11,6 +11,7 @@
     </mx:states>
     <mx:Script><![CDATA[
         import mx.managers.PopUpManager;
+        import com.easyinsight.util.ProgressAlert;
 
         [Bindable]
         private var feedID:int;
@@ -78,6 +79,7 @@
             var dynamicServiceDescriptor:DynamicServiceDescriptor = new DynamicServiceDescriptor();
             dynamicServiceDescriptor.dynamicServiceDefinition = dynamicServiceDefinition;
             _dataSourceAPIDescriptor.dynamicServiceDescriptor = dynamicServiceDescriptor;
+            ProgressAlert.alert(this, "Saving...", null, apiService.updateDataSourceAPI);
             apiService.updateDataSourceAPI.send(_dataSourceAPIDescriptor, dynamicServiceDefinition);
         }
 

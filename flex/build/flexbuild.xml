@@ -12,6 +12,13 @@
         </mxmlc>
     </target>
 
+    <target name="compileTest">
+        <mxmlc file="../src/ChartTest.mxml" output="${deployment.path}/ChartTest.swf"
+               static-rsls="true" incremental="true">
+            <load-config filename="../flex-test.xml"/>
+        </mxmlc>
+    </target>
+
     <target name="compileFlexOptimized">
         <mxmlc file="../src/PrimaryWorkspace.mxml" output="${deployment.path}/PrimaryWorkspace.swf"
                static-rsls="false">

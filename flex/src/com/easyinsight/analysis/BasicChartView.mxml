@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<analysis:DataView xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:analysis="com.easyinsight.analysis.*" 
+<analysis:DataView xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:analysis="com.easyinsight.analysis.*"
 	creationComplete="initHandlers()" xmlns:charting="com.easyinsight.charting.*" xmlns:util="com.easyinsight.util.*" xmlns:charts="com.easyinsight.analysis.charts.*">
 	<mx:Script>
 		<![CDATA[
@@ -34,6 +34,10 @@
             private var plotChartAdapterOption:PlotChartAdapterOption = new PlotChartAdapterOption();
             private var bubbleChartAdapterOption:BubbleChartAdapterOption = new BubbleChartAdapterOption();
             private var areaChartAdapterOption:AreaChartAdapterOption = new AreaChartAdapterOption();
+
+            [Bindable]
+            [Embed(source="../../../../assets/background2.JPG")]
+            private var background2:Class;
 
             [Bindable]
             private var stackedVisible:Boolean = false;
@@ -444,7 +448,7 @@
 	<mx:SeriesSlide id="slideIn" duration="1000" direction="right"/>
     <mx:SeriesSlide id="slideOut" duration="1000" direction="left"/>
 	
-	<mx:VBox id="chartVBox" width="100%" height="100%">
+	<mx:VBox width="100%" height="100%">
 		
 	
 		<mx:HBox width="100%" visible="{showDropAreas}" id="dropAreas" verticalAlign="middle">
@@ -462,6 +466,7 @@
 			<mx:Spacer width="30"/>	
 			<mx:Label color="#000000" text="{limitText}" visible="{limitTextVisible}"/>
 		</mx:HBox>
+        <mx:VBox id="chartVBox" width="100%" height="100%"/>
 	</mx:VBox>
 						
 </analysis:DataView>

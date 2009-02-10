@@ -64,7 +64,11 @@
         }
 
         private function onResult(event:ResultEvent):void {
-            currentState = "Done";
+            if (_progressText == null) {
+                PopUpManager.removePopUp(this);
+            } else {
+                currentState = "Done";
+            }
         }
 
         private function onFault(event:FaultEvent):void {
