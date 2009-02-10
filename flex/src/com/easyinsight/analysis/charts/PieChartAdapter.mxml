@@ -31,9 +31,7 @@ import mx.formatters.Formatter;
 
             private var bgFills:Array;
 
-            [Bindable]
-            [Embed(source="../../../../../assets/water4.JPG")]
-            private var backgroundDesktop:Class;
+            
 
             [Bindable]
             [Embed(source="../../../../../assets/magenta.jpg")]

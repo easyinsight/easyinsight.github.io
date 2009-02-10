@@ -6,6 +6,10 @@
 			import com.easyinsight.images.ImageFactory;
 			import com.easyinsight.filtering.FilterRawData;
 			import mx.collections.ArrayCollection;
+
+            [Bindable]
+            [Embed(source="../../../../../assets/water4.JPG")]
+            protected var backgroundDesktop:Class;
 			
 			public function dataChange(dataSet:ArrayCollection, dimensions:Array, measures:Array):void {
 				
@@ -28,6 +32,7 @@
 			}
 		]]>
 	</mx:Script>
+    <mx:Stroke id="s1" color="#2A7E93" weight="2"/>    
 	<mx:Array id="linearGradients">
 		<mx:LinearGradient>
         <mx:entries>

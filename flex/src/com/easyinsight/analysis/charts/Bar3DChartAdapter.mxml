@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ChartAdapter xmlns="com.easyinsight.analysis.charts.*" xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%">
+<ChartAdapter xmlns="com.easyinsight.analysis.charts.*" xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%" creationComplete="setup()">
 	<mx:Metadata>
 		[Event(name="chartSort", type="com.easyinsight.analysis.ChartSortEvent")]
 	</mx:Metadata>
@@ -17,7 +17,8 @@
 			import mx.charts.BarChart;
 			import mx.charts.AxisRenderer;
 			import com.easyinsight.filtering.FilterRawData;
-			import mx.graphics.SolidColor;
+            import mx.graphics.BitmapFill;
+import mx.graphics.SolidColor;
 			import mx.graphics.IFill;
 			import com.easyinsight.analysis.conditions.ConditionRenderer;
 			import mx.charts.chartClasses.IAxis;
@@ -64,6 +65,19 @@
 			private var yAxisTitleRendererFactory:SortableAxisTitleFactory;
 			
 			private var barSeries:BarSeries3D;
+
+            private var bgFills:Array;
+
+			private function setup():void {
+                bgFills = [];
+                for (var i:int = 0; i < 15; i++) {
+                    var bgFill:BitmapFill = new BitmapFill();
+                    bgFill.source = backgroundDesktop;
+                    bgFill.originX = Math.random() * 60;
+                    bgFill.originY = Math.random() * 60;
+                    bgFills.push(bgFill);
+                }
+            }
 			
 			override public function get chartType():int {
 				return ChartTypes.BAR_3D;
@@ -110,6 +124,8 @@
 			        // create the data series
 			        
 					barSeries = new BarSeries3D();
+                    barSeries.setStyle("stroke", s1);
+                    barSeries.fillFunction = customFill;
 					barSeries.xField = xField;
 					barSeries.yField = yField;					
 					barSeries.labelFunction = renderChartLabel;
@@ -186,9 +202,7 @@
 			}
 			
 			private function customFill(element:ChartItem, index:Number):IFill {
-				var item:BarSeriesItem = element as BarSeriesItem;
-				var color:SolidColor = new SolidColor(conditionRenderer.getColor(item.yValue));
-				return color;
+				return bgFills[index % 15];
 			}
 			
 			private function renderAxis(labelValue:Object, previousValue:Object, axis:IAxis):String {

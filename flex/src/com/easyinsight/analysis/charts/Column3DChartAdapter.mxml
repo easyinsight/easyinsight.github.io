@@ -31,10 +31,6 @@ import mx.graphics.SolidColor;
 			import mx.charts.ChartItem;
 			import mx.charts.CategoryAxis;			
 			import mx.collections.ArrayCollection;
-
-            [Bindable]
-            [Embed(source="../../../../../assets/water4.JPG")]
-            private var backgroundDesktop:Class;
 			
 			[Bindable]
 			private var graphData:ArrayCollection = new ArrayCollection();
@@ -254,6 +250,5 @@ import mx.graphics.SolidColor;
 			}
 		]]>
 	</mx:Script>
-    <mx:Stroke id="s1" color="#2A7E93" weight="2"/>
 	<mx:SeriesInterpolate id="interpolateIn" duration="1000"/>
 </ChartAdapter>
