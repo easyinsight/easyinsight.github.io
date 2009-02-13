@@ -27,6 +27,16 @@ public class AnalysisService implements IAnalysisService {
 
     private AnalysisStorage analysisStorage = new AnalysisStorage();
 
+    public Collection<InsightDescriptor> getInsightDescriptors() {
+        long userID = SecurityUtil.getUserID();
+        try {
+            return analysisStorage.getInsightDescriptors(userID);
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        }
+    }
+
     public Collection<WSAnalysisDefinition> getAnalysisDefinitions() {
         long userID = SecurityUtil.getUserID();
         try {
@@ -135,10 +145,10 @@ public class AnalysisService implements IAnalysisService {
         }
     }    
 
-    public void deleteAnalysisDefinition(WSAnalysisDefinition analysisDefinition) {
+    public void deleteAnalysisDefinition(long reportID) {
         long userID = SecurityUtil.getUserID();
-        SecurityUtil.authorizeInsight(analysisDefinition.getAnalysisID());
-        AnalysisDefinition dbAnalysisDef = analysisStorage.getAnalysisDefinition(analysisDefinition.getAnalysisID());
+        SecurityUtil.authorizeInsight(reportID);
+        AnalysisDefinition dbAnalysisDef = analysisStorage.getAnalysisDefinition(reportID);
 
         boolean canDelete = analysisStorage.canUserDelete(userID, dbAnalysisDef);
         if (canDelete) {

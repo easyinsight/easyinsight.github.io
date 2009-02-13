@@ -38,7 +38,7 @@
 		<mx:method name="getMemberGroups" result="gotGroups()"/>
 		<mx:method name="addInsightToGroup" result="addedInsightToGroup()"/>
 	</mx:RemoteObject>
-	<mx:Form>
+	<mx:Form styleName="TitleWindowContents">
 		<mx:FormItem label="Group: ">
 			<mx:ComboBox id="groupBox" dataProvider="{groups}" labelField="name"/>			
 		</mx:FormItem>

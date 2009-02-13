@@ -128,6 +128,12 @@ public class TableDefinitionMetadata {
             try {
                 PreparedStatement dropTableStmt = storageConn.prepareStatement(dropSQL);
                 dropTableStmt.execute();
+            } catch (SQLException se) {
+                if (se.getMessage().contains("Unknown table")) {
+                    LogClass.error("Data source " + feedID + " did not have a storage table. Continuing with delete, screwed up data.");
+                } else {
+                    throw se;
+                }
             } finally {
                 storageConn.close();
             }
@@ -326,26 +332,28 @@ public class TableDefinitionMetadata {
             int i = 1;
             for (Key key : neededKeys) {
                 KeyMetadata keyMetadata = keys.get(key);
-                if (keyMetadata.getType() == Value.DATE) {
-                    long time = dataRS.getDate(i++).getTime();
-                    if (dataRS.wasNull()) {
-                        row.addValue(key, new EmptyValue());
+                if (keyMetadata != null) {
+                    if (keyMetadata.getType() == Value.DATE) {
+                        long time = dataRS.getDate(i++).getTime();
+                        if (dataRS.wasNull()) {
+                            row.addValue(key, new EmptyValue());
+                        } else {
+                            row.addValue(key, new DateValue(new java.util.Date(time)));
+                        }
+                    } else if (keyMetadata.getType() == Value.NUMBER) {
+                        double value = dataRS.getDouble(i++);
+                        if (dataRS.wasNull()) {
+                            row.addValue(key, new EmptyValue());
+                        } else {
+                            row.addValue(key, new NumericValue(value));
+                        }
                     } else {
-                        row.addValue(key, new DateValue(new java.util.Date(time)));
-                    }
-                } else if (keyMetadata.getType() == Value.NUMBER) {
-                    double value = dataRS.getDouble(i++);
-                    if (dataRS.wasNull()) {
-                        row.addValue(key, new EmptyValue());
-                    } else {
-                        row.addValue(key, new NumericValue(value));
-                    }
-                } else {
-                    String value = dataRS.getString(i++);
-                    if (dataRS.wasNull()) {
-                        row.addValue(key, new EmptyValue());
-                    } else {
-                        row.addValue(key, new StringValue(value));
+                        String value = dataRS.getString(i++);
+                        if (dataRS.wasNull()) {
+                            row.addValue(key, new EmptyValue());
+                        } else {
+                            row.addValue(key, new StringValue(value));
+                        }
                     }
                 }
             }

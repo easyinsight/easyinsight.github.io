@@ -1,0 +1,73 @@
+<?xml version="1.0" ?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" creationComplete="setup()" width="100%" height="100%">
+    <mx:Script><![CDATA[
+        import mx.collections.ArrayCollection;
+        import mx.graphics.BitmapFill;
+
+        [Bindable]
+        private var goalHistory:ArrayCollection;
+
+        [Bindable]
+        private var areaFill:BitmapFill;
+
+        [Bindable]
+        private var _startDate:Date;
+
+        [Bindable]
+        private var _endDate:Date;
+
+        [Bindable]
+        [Embed(source="../../../../assets/water4.JPG")]
+        private var areaBackground:Class;
+
+        private var _goalTreeNodeData:GoalTreeNodeData;
+
+        private function setup():void {
+            areaFill = new BitmapFill();
+            areaFill.source = areaBackground;
+            goalService.getGoalValues.send(_goalTreeNodeData.goalTreeNodeID, _startDate, _endDate);
+        }
+
+        public function set startDate(val:Date):void {
+            _startDate = val;
+        }
+
+        public function set endDate(val:Date):void {
+            _endDate = val;
+        }
+
+        public function set goalTreeNodeData(val:GoalTreeNodeData):void {
+            _goalTreeNodeData = val;
+        }
+
+        private function gotValues():void {
+            goalHistory = goalService.getGoalValues.lastResult as ArrayCollection;
+        }
+
+        private function onDatesChanged():void {
+            _startDate = startChooser.selectedDate;
+            _endDate = endChooser.selectedDate;
+            goalService.getGoalValues.send(_goalTreeNodeData.goalTreeNodeID, _startDate, _endDate);
+        }
+        ]]></mx:Script>
+    <mx:RemoteObject destination="goalService" id="goalService">
+        <mx:method name="getGoalValues" result="gotValues()"/>
+    </mx:RemoteObject>
+    <mx:SeriesSlide id="slideIn" duration="1000" direction="up"/>
+    <mx:SeriesSlide id="slideOut" duration="1000" direction="down"/>
+    <mx:VBox width="100%" height="100%">
+        <mx:HBox width="100%" horizontalAlign="center">
+            <mx:DateField id="startChooser" selectedDate="{_startDate}" change="onDatesChanged()"/>
+            <mx:Spacer width="30"/>
+            <mx:DateField id="endChooser" selectedDate="{_endDate}" change="onDatesChanged()"/>            
+        </mx:HBox>
+        <mx:AreaChart dataProvider="{goalHistory}" width="100%" height="100%">
+            <mx:horizontalAxis>
+                <mx:DateTimeAxis/>
+            </mx:horizontalAxis>
+            <mx:series>
+                <mx:AreaSeries yField="value" xField="date" form="curve" areaFill="{areaFill}" showDataEffect="{slideIn}" hideDataEffect="{slideOut}"/>
+            </mx:series>
+        </mx:AreaChart>
+    </mx:VBox>
+</mx:Canvas>

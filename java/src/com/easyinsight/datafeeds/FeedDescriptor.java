@@ -1,7 +1,7 @@
 package com.easyinsight.datafeeds;
 
 import com.easyinsight.userupload.UploadPolicy;
-import com.easyinsight.analysis.WSAnalysisDefinition;
+import com.easyinsight.analysis.InsightDescriptor;
 
 import java.util.List;
 
@@ -17,8 +17,8 @@ public class FeedDescriptor {
     private UploadPolicy policy;
     private long size;
     private int feedType;
-    private List<WSAnalysisDefinition> children;
-    private WSAnalysisDefinition definition;
+    private List<InsightDescriptor> children;
+    //private WSAnalysisDefinition definition;
     private String tagString;
     private String ownerName;
     private String description;
@@ -72,13 +72,13 @@ public class FeedDescriptor {
         this.tagString = tagString;
     }
 
-    public WSAnalysisDefinition getDefinition() {
+    /*public WSAnalysisDefinition getDefinition() {
         return definition;
     }
 
     public void setDefinition(WSAnalysisDefinition definition) {
         this.definition = definition;
-    }
+    }*/
 
     public int getRole() {
         return role;
@@ -88,11 +88,11 @@ public class FeedDescriptor {
         this.role = role;
     }
 
-    public List<WSAnalysisDefinition> getChildren() {
+    public List<InsightDescriptor> getChildren() {
         return children;
     }
 
-    public void setChildren(List<WSAnalysisDefinition> children) {
+    public void setChildren(List<InsightDescriptor> children) {
         this.children = children;
     }
 

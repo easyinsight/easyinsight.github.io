@@ -303,6 +303,7 @@ import mx.collections.SortField;
             this.feedMetadata = feedMetadata;
             availableFields = new ArrayCollection();
             for each (var analysisItem:AnalysisItem in feedMetadata.fields) {
+                if (!feedAdminMode && analysisItem.hidden) continue;                
                 var analysisWrapper:AnalysisItemWrapper = new AnalysisItemWrapper(analysisItem);
                 availableFields.addItem(analysisWrapper);
             }

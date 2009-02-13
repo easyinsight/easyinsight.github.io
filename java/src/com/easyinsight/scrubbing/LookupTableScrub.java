@@ -8,6 +8,8 @@ import java.util.List;
 import java.util.Collection;
 import java.util.ArrayList;
 
+import org.hibernate.annotations.Cascade;
+
 /**
  * User: James Boe
  * Date: Jul 30, 2008
@@ -17,7 +19,8 @@ import java.util.ArrayList;
 @Table(name="lookup_table_scrub")
 @PrimaryKeyJoinColumn(name="data_scrub_id")
 public class LookupTableScrub extends DataScrub {
-    @OneToMany (cascade = CascadeType.ALL)
+    @OneToMany
+    @Cascade({org.hibernate.annotations.CascadeType.ALL, org.hibernate.annotations.CascadeType.DELETE_ORPHAN })
     @JoinColumn(name="data_scrub_id")
     private List<LookupTablePair> lookupTablePairs;
     @OneToOne

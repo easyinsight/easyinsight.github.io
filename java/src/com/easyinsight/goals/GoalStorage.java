@@ -5,21 +5,15 @@ import com.easyinsight.logging.LogClass;
 import com.easyinsight.analysis.*;
 import com.easyinsight.*;
 import com.easyinsight.datafeeds.FeedStorage;
-import com.easyinsight.datafeeds.FeedDescriptor;
 import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.solutions.SolutionService;
 import com.easyinsight.solutions.Solution;
 import com.easyinsight.solutions.SolutionInstallInfo;
-import com.easyinsight.core.Value;
-import com.easyinsight.core.DateValue;
-import com.easyinsight.webservice.google.ListDataResults;
-import com.easyinsight.webservice.google.ListRow;
 import com.easyinsight.security.Roles;
 import com.easyinsight.security.SecurityUtil;
 
 import java.sql.*;
 import java.util.*;
-import java.util.Date;
 
 import org.hibernate.Session;
 
@@ -429,7 +423,35 @@ public class GoalStorage {
                 saveGoalTreeNode(childNode, conn);
             }
         }
+        deleteOldNodes(goalTreeNode, conn);
         return nodeID;
+    }
+
+    private void deleteOldNodes(GoalTreeNode goalTreeNode, Connection conn) throws SQLException {
+        PreparedStatement queryStmt = conn.prepareStatement("SELECT GOAL_TREE_NODE_ID FROM GOAL_TREE_NODE WHERE PARENT_GOAL_TREE_NODE_ID = ?");
+        queryStmt.setLong(1, goalTreeNode.getGoalTreeNodeID());
+        Set<Long> deleteIDs = new HashSet<Long>();
+        ResultSet rs = queryStmt.executeQuery();
+        while (rs.next()) {
+            long childID = rs.getLong(1);
+            boolean found = false;
+            for (GoalTreeNode child : goalTreeNode.getChildren()) {
+                if (child.getGoalTreeNodeID() == childID) {
+                    found = true;
+                    break;
+                }
+            }
+            if (!found) {
+                deleteIDs.add(childID);
+            }
+        }
+        if (!deleteIDs.isEmpty()) {
+            PreparedStatement deleteStmt = conn.prepareStatement("DELETE FROM GOAL_TREE_NODE WHERE GOAL_TREE_NODE_ID = ?");
+            for (long id : deleteIDs) {
+                deleteStmt.setLong(1, id);
+                deleteStmt.executeUpdate();
+            }
+        }
     }
 
     private void saveTags(GoalTreeNode goalTreeNode, Connection conn) throws SQLException {

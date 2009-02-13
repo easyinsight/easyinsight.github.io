@@ -52,7 +52,9 @@ public abstract class AnalysisDefinition implements Cloneable {
     private List<UserToAnalysisBinding> userBindings = new ArrayList<UserToAnalysisBinding>();
 
     @OneToMany(cascade=CascadeType.ALL)
-    @JoinColumn(name="analysis_id", nullable = false)
+    @JoinTable(name="analysis_to_data_scrub",
+        joinColumns = @JoinColumn(name="analysis_id", nullable = false),
+        inverseJoinColumns = @JoinColumn(name="data_scrub_id", nullable = false))
     private List<DataScrub> dataScrubs = new ArrayList<DataScrub>();
 
     @OneToMany(cascade=CascadeType.ALL)

@@ -14,10 +14,7 @@ import com.easyinsight.core.DateValue;
 import com.easyinsight.webservice.google.ListDataResults;
 import com.easyinsight.webservice.google.ListRow;
 
-import java.util.Date;
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.*;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.PreparedStatement;
@@ -46,6 +43,18 @@ public class GoalEvaluationStorage {
     }
 
     public void backPopulateGoalTree(GoalTree goalTree, Connection conn) throws SQLException {
+
+        final Set<Long> validIDs = new HashSet<Long>();
+        GoalTreeVisitor hasDateVisitor = new GoalTreeVisitor() {
+
+            protected void accept(GoalTreeNode goalTreeNode) {
+                if (goalTreeNode.getCoreFeedID() > 0 && goalTreeNode.getFilterDefinition() != null) {
+                    validIDs.add(goalTreeNode.getGoalTreeNodeID());
+                }
+            }
+        };
+
+        hasDateVisitor.visit(goalTree.getRootNode());
         
         final List<GoalValue> goalValues = new ArrayList<GoalValue>();
 
@@ -55,8 +64,10 @@ public class GoalEvaluationStorage {
 
             protected void accept(GoalTreeNode goalTreeNode) {
                 try {
-                    deleteStmt.setLong(1, goalTreeNode.getGoalTreeNodeID());
-                    deleteStmt.executeUpdate();
+                    if (validIDs.contains(goalTreeNode.getGoalTreeNodeID())) {
+                        deleteStmt.setLong(1, goalTreeNode.getGoalTreeNodeID());
+                        deleteStmt.executeUpdate();
+                    }
                 } catch (SQLException e) {
                     LogClass.error(e);
                 }
@@ -68,7 +79,7 @@ public class GoalEvaluationStorage {
         GoalTreeVisitor goalTreeVisitor = new GoalTreeVisitor() {
 
             protected void accept(GoalTreeNode goalTreeNode) {
-                if (goalTreeNode.getCoreFeedID() > 0) {
+                if (goalTreeNode.getCoreFeedID() > 0 && validIDs.contains(goalTreeNode.getGoalTreeNodeID())) {
                     List<Date> dates = getDates(goalTreeNode);
                     for (Date date : dates) {
                         GoalValue goalValue = evaluateGoalTreeNode(goalTreeNode, date);
@@ -106,6 +117,33 @@ public class GoalEvaluationStorage {
         return dates;
     }
 
+    public GoalValue getLatestGoalValue(GoalTreeNode goalTreeNode) throws SQLException {
+        GoalValue goalValue = null;
+        Connection conn = Database.instance().getConnection();
+        try {
+            PreparedStatement findLatestHistoryStmt = conn.prepareStatement("SELECT MAX(evaluation_date) FROM goal_history WHERE goal_tree_node_id = ?");
+            findLatestHistoryStmt.setLong(1, goalTreeNode.getGoalTreeNodeID());
+            ResultSet rs = findLatestHistoryStmt.executeQuery();
+            if (rs.next()) {
+                java.sql.Date date = rs.getDate(1);
+                if (!rs.wasNull()) {
+                    PreparedStatement getValueStmt = conn.prepareStatement("SELECT evaluation_result FROM goal_history WHERE evaluation_date = ? and goal_tree_node_id = ?");
+                    getValueStmt.setDate(1, date);
+                    getValueStmt.setLong(2, goalTreeNode.getGoalTreeNodeID());
+                    ResultSet valueRS = getValueStmt.executeQuery();
+                    if (valueRS.next()) {
+                        goalValue = new GoalValue(goalTreeNode.getGoalTreeNodeID(), date, valueRS.getDouble(1));
+                    } else {
+                        throw new RuntimeException("Couldn't find value for MAX(date), should never happen");
+                    }
+                }
+            }
+        } finally {
+            Database.instance().closeConnection(conn);
+        }
+        return goalValue;
+    }
+
     public GoalValue evaluateGoalTreeNode(GoalTreeNode goalTreeNode, Date date) {
         GoalValue goalValue = null;
         if (goalTreeNode.getCoreFeedID() > 0) {
@@ -132,15 +170,7 @@ public class GoalEvaluationStorage {
         return goalValue;
     }
 
-    public GoalOutcome getEvaluations(long goalTreeNodeID, Date startDate, Date endDate, double goalValue, boolean highIsGood, int importance) {
-        // key here is what's the value at the start date, what's the value at the end date
-        // delta between those two values
-        // outcomes:
-        // end value is > or = goal
-        // end value is < goal
-        //   is delta positive and > epsilon
-        //   is delta ~= epsilon
-        //   is delta negative and < epsilon
+    public List<GoalValue> getGoalValues(long goalTreeNodeID, Date startDate, Date endDate) {
         Connection conn = Database.instance().getConnection();
         try {
             PreparedStatement queryStmt = conn.prepareStatement("SELECT evaluation_result, evaluation_date FROM goal_history " +
@@ -155,26 +185,40 @@ public class GoalEvaluationStorage {
                 Date evaluationDate = new Date(startRS.getDate(2).getTime());
                 goalValues.add(new GoalValue(goalTreeNodeID, evaluationDate, evaluationResult));
             }
-            int resultLength = goalValues.size();
-            if (resultLength >= 2) {
-                for (int i = 1; i < (resultLength - 1); i++) {
-                    goalValues.remove(1);
-                }
-                double endValue = goalValues.get(1).getValue();
-                double startValue = goalValues.get(0).getValue();
-                double delta = endValue - startValue;
-                int outcome = determineOutcome(goalValue, highIsGood, delta, endValue);
-                double percentChange = delta / startValue * 100;
-                double outcomeWeight = (outcome == GoalOutcome.EXCEEDING_GOAL || outcome == GoalOutcome.POSITIVE) ? 1 : (outcome == GoalOutcome.NEUTRAL ? 0 : -1);
-                return new ConcreteGoalOutcome(outcome, goalValue, endValue, startValue, percentChange, outcomeWeight);
-            } else {
-                return new GoalOutcome(GoalOutcome.NO_DATA, 0);
-            }
+            return goalValues;
         } catch (SQLException e) {
             LogClass.error(e);
             throw new RuntimeException(e);
         } finally {
             Database.instance().closeConnection(conn);
+        }
+    }
+
+    public GoalOutcome getEvaluations(long goalTreeNodeID, Date startDate, Date endDate, double goalValue, boolean highIsGood, int importance) {
+        // key here is what's the value at the start date, what's the value at the end date
+        // delta between those two values
+        // outcomes:
+        // end value is > or = goal
+        // end value is < goal
+        //   is delta positive and > epsilon
+        //   is delta ~= epsilon
+        //   is delta negative and < epsilon
+
+        List<GoalValue> goalValues = getGoalValues(goalTreeNodeID, startDate, endDate);
+        int resultLength = goalValues.size();
+        if (resultLength >= 2) {
+            for (int i = 1; i < (resultLength - 1); i++) {
+                goalValues.remove(1);
+            }
+            double endValue = goalValues.get(1).getValue();
+            double startValue = goalValues.get(0).getValue();
+            double delta = endValue - startValue;
+            int outcome = determineOutcome(goalValue, highIsGood, delta, endValue);
+            double percentChange = delta / startValue * 100;
+            double outcomeWeight = (outcome == GoalOutcome.EXCEEDING_GOAL || outcome == GoalOutcome.POSITIVE) ? 1 : (outcome == GoalOutcome.NEUTRAL ? 0 : -1);
+            return new ConcreteGoalOutcome(outcome, goalValue, endValue, startValue, percentChange, outcomeWeight);
+        } else {
+            return new GoalOutcome(GoalOutcome.NO_DATA, 0);
         }
     }
 

@@ -63,7 +63,7 @@ public class StaticFeed extends Feed {
     protected DataSet getUncachedDataSet(List<Key> columns, Integer maxRows, boolean adminMode, InsightRequestMetadata insightRequestMetadata) {
 
         if (columns.size() == 0) {
-            throw new RuntimeException("Attempt made to retrieve a data set with no columns where ID = " + getFeedID());
+            return new DataSet();
         }
 
         if (!adminMode) {

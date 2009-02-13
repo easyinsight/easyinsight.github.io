@@ -47,7 +47,7 @@ import mx.collections.ArrayCollection;
                 accordion.getHeaderAt(2).setStyle("fontWeight", "bold");
                 feedService.searchForSubscribedFeeds.send();
                 solutionService.getSolutions.send();
-                analysisService.getAnalysisDefinitions.send();
+                analysisService.getInsightDescriptors.send();
             }
 			
 			public function set goalTreeNode(goalTreeNode:GoalTreeNode):void {
@@ -63,7 +63,7 @@ import mx.collections.ArrayCollection;
             }
 
             private function gotInsights():void {
-                insights = analysisService.getAnalysisDefinitions.lastResult as ArrayCollection;
+                insights = analysisService.getInsightDescriptors.lastResult as ArrayCollection;
             }
 		]]>
 	</mx:Script>
@@ -74,7 +74,7 @@ import mx.collections.ArrayCollection;
         <mx:method name="getSolutions" result="gotSolutions()"/>
     </mx:RemoteObject>
     <mx:RemoteObject destination="analysisDefinition" id="analysisService">
-        <mx:method name="getAnalysisDefinitions" result="gotInsights()"/>
+        <mx:method name="getInsightDescriptors" result="gotInsights()"/>
     </mx:RemoteObject>
     <mx:VBox height="100%">
         <mx:VBox verticalGap="0" height="100%" width="100%">

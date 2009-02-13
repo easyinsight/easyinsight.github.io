@@ -3,8 +3,7 @@
 	width="100%" height="100%" backgroundColor="#DCE2F8">
 	<mx:Script>
 		<![CDATA[
-import mx.collections.ArrayCollection;
-import mx.controls.Alert;
+            import mx.controls.Alert;
 			import com.easyinsight.analysis.AnalysisCloseEvent;
 			private var _goalTree:GoalTree;
 			[Bindable]
@@ -49,10 +48,14 @@ import mx.controls.Alert;
 			}
 			
 			private function savedGoalTree():void {
+                _goalTree = goalService.createGoalTree.lastResult as GoalTree;
+                rootNode = _goalTree.rootNode;
 				Alert.show("Saved successfully!");
 			}
 
             private function updatedGoalTree():void {
+                _goalTree = goalService.updateGoalTree.lastResult as GoalTree;
+                rootNode = _goalTree.rootNode;
                 Alert.show("Updated successfully!");
 			}
 		]]>

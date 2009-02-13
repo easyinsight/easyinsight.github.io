@@ -16,7 +16,7 @@ import com.easyinsight.analysis.AnalysisMeasure;
         public var analysisMeasure:AnalysisMeasure;
         public var goalValue:Number;
         public var filterDefinition:FilterDefinition;
-        public var highIsGood:Boolean;
+        public var highIsGood:Boolean = true;
 		public var associatedFeeds:ArrayCollection = new ArrayCollection();
 		public var associatedInsights:ArrayCollection = new ArrayCollection();
 		public var associatedSolutions:ArrayCollection = new ArrayCollection();

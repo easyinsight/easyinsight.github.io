@@ -1,16 +1,19 @@
 package com.easyinsight.listing
 {
-	import com.easyinsight.administration.feed.FeedAdministrationWindow;
-	import com.easyinsight.analysis.AnalysisDefinition;
-	import com.easyinsight.customupload.FileFeedUpdateWindow;
+import com.easyinsight.analysis.AnalysisDefinition;
+import com.easyinsight.customupload.FileFeedUpdateWindow;
 	import com.easyinsight.customupload.RefreshWindow;
 	import com.easyinsight.genredata.AnalyzeEvent;
-	
-	import flash.events.MouseEvent;
+	import com.easyinsight.util.ProgressAlert;
+
+import com.easyinsight.solutions.InsightDescriptor;
+import flash.events.MouseEvent;
 	
 	import mx.containers.HBox;
 	import mx.controls.Button;
 	import mx.managers.PopUpManager;
+import mx.rpc.events.ResultEvent;
+import mx.rpc.remoting.RemoteObject;
 
 	public class MyDataIconControls extends HBox
 	{
@@ -32,6 +35,7 @@ package com.easyinsight.listing
         private var adminButton:Button;
         private var analyzeButton:Button;
         private var deleteButton:Button;
+        private var analysisService:RemoteObject;
         
 		public function MyDataIconControls()
 		{
@@ -83,10 +87,19 @@ package com.easyinsight.listing
 				var descriptor:DataFeedDescriptor = obj as DataFeedDescriptor;
 				dispatchEvent(new AnalyzeEvent(new DescriptorAnalyzeSource(descriptor)));
 			} else {
-				var analysisDefinition:AnalysisDefinition = obj as AnalysisDefinition;
-				dispatchEvent(new AnalyzeEvent(new AnalysisDefinitionAnalyzeSource(analysisDefinition)));
-			}	
+				var analysisDefinition:InsightDescriptor = obj as InsightDescriptor;
+                analysisService = new RemoteObject();
+                analysisService.destination = "analysisDefinition";
+                analysisService.openAnalysisDefinition.addEventListener(ResultEvent.RESULT, gotReport);
+                ProgressAlert.alert(this, "Retrieving report...", null, analysisService.openAnalysisDefinition);
+                analysisService.openAnalysisDefinition.send(analysisDefinition.insightID);
+			}
 		}
+
+        private function gotReport(event:ResultEvent):void {
+            var analysisDefinition:AnalysisDefinition = analysisService.openAnalysisDefinition.lastResult as AnalysisDefinition;
+            dispatchEvent(new AnalyzeEvent(new AnalysisDefinitionAnalyzeSource(analysisDefinition)));
+        }
 		
 		private function refreshData(feedDescriptor:DataFeedDescriptor):void {
 			var refreshWindow:RefreshWindow = RefreshWindow(PopUpManager.createPopUp(this.parent.parent.parent, RefreshWindow, true));
@@ -104,7 +117,7 @@ package com.easyinsight.listing
 		private function adminCalled(event:MouseEvent):void {
 			if (obj is DataFeedDescriptor) {
 				var descriptor:DataFeedDescriptor = obj as DataFeedDescriptor;
-				dispatchEvent(new AnalyzeEvent(new FeedAdminAnalyzeSource(descriptor.dataFeedID, descriptor.definition,
+				dispatchEvent(new AnalyzeEvent(new FeedAdminAnalyzeSource(descriptor.dataFeedID,
 					descriptor.name, descriptor.tagString, descriptor.policy, descriptor.description, descriptor.attribution,
 					descriptor.ownerName, descriptor.feedType)));
 			}

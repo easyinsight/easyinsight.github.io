@@ -7,14 +7,24 @@ package com.easyinsight.analysis;
  */
 public class InsightDescriptor {
     private long insightID;
-    private String insightName;
+    private String name;
+    private long dataFeedID;
 
     public InsightDescriptor() {
     }
 
-    public InsightDescriptor(long insightID, String insightName) {
+    public InsightDescriptor(long insightID, String name, long dataFeedID) {
         this.insightID = insightID;
-        this.insightName = insightName;
+        this.name = name;
+        this.dataFeedID = dataFeedID;
+    }
+
+    public long getDataFeedID() {
+        return dataFeedID;
+    }
+
+    public void setDataFeedID(long dataFeedID) {
+        this.dataFeedID = dataFeedID;
     }
 
     public long getInsightID() {
@@ -25,11 +35,11 @@ public class InsightDescriptor {
         this.insightID = insightID;
     }
 
-    public String getInsightName() {
-        return insightName;
+    public String getName() {
+        return name;
     }
 
-    public void setInsightName(String insightName) {
-        this.insightName = insightName;
+    public void setName(String name) {
+        this.name = name;
     }
 }

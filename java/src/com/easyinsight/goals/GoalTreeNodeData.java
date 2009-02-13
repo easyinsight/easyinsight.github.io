@@ -1,8 +1,11 @@
 package com.easyinsight.goals;
 
+import com.easyinsight.logging.LogClass;
+
 import java.util.Date;
 import java.util.List;
 import java.util.ArrayList;
+import java.sql.SQLException;
 
 /**
  * User: James Boe
@@ -30,7 +33,15 @@ public class GoalTreeNodeData extends GoalTreeNode {
     }
 
     public void populateCurrentValue() {
-        this.currentValue = new GoalEvaluationStorage().evaluateGoalTreeNode(this, new Date());
+        GoalValue goalValue = new GoalEvaluationStorage().evaluateGoalTreeNode(this, new Date());
+        if (goalValue == null) {
+            try {
+                goalValue = new GoalEvaluationStorage().getLatestGoalValue(this);
+            } catch (SQLException e) {
+                LogClass.error(e);
+            }
+        }
+        this.currentValue = goalValue;
     }
 
     public void determineOutcome(Date startDate, Date endDate, GoalEvaluationStorage goalEvaluationStorage) {
@@ -64,7 +75,7 @@ public class GoalTreeNodeData extends GoalTreeNode {
                     resultOutcomeState = GoalOutcome.EXCEEDING_GOAL;
                 } else if (resultAverage > .2) {
                     resultOutcomeState = GoalOutcome.POSITIVE;
-                } else if (resultAverage < .2) {
+                } else if (resultAverage < -.2) {
                     resultOutcomeState = GoalOutcome.NEGATIVE;
                 } else {
                     resultOutcomeState = GoalOutcome.NEUTRAL;

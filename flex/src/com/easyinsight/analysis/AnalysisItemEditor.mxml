@@ -135,6 +135,9 @@
             
             [Bindable]
             private var displayName:String;
+
+            [Bindable]
+            private var hidden:Boolean;
             
             public function set fieldNameEditable(fieldNameEditable:Boolean):void {
             	_fieldNameEditable = fieldNameEditable;
@@ -155,6 +158,7 @@
                 }                
                 this.displayName = analysisItem.display;
                 this.key = analysisItem.key;
+                this.hidden = analysisItem.hidden;
             }
             
             private function indexOfType(option:String):int {
@@ -330,6 +334,7 @@
                 }
                 analysisItem.displayName = fieldNameInput.text;
                 analysisItem.key = key;
+                analysisItem.hidden = hiddenCheckbox.selected;
                 //dispatchEvent(new AnalysisItemEditEvent(analysisItem, true));
                 return analysisItem;
                 //PopUpManager.removePopUp(this);
@@ -445,6 +450,9 @@
 		<mx:FormItem label="Field Name: " direction="horizontal" id="fieldNameText">
 			<mx:TextInput id="fieldNameInput" text="{displayName}" editable="{_fieldNameEditable}"/>
 		</mx:FormItem>
+        <mx:FormItem label="Hidden: " direction="horizontal" id="hiddenText">
+            <mx:CheckBox id="hiddenCheckbox" selected="{hidden}"/>
+        </mx:FormItem>
 		<mx:FormItem label="Field Type: " direction="horizontal" id="firstForm">
 			<mx:ComboBox id="aggregationBox" dataProvider="{aggregationTypeObjects}" 
 				close="aggregationTypeChanged(event)" rowCount="9"/>

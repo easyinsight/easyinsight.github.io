@@ -19,7 +19,12 @@
 				this.analysisItems = analysisItems;
 				this.feedID = feedID;
 				this.scrubEditorFactory = new ScrubEditorFactory(analysisItems, feedID);
-			}
+				addEventListener(DataScrubEvent.DELETED_SCRUB, onDelete);
+            }
+
+            private function onDelete(event:DataScrubEvent):void {
+                scrubs.removeItemAt(scrubs.getItemIndex(event.dataScrub));
+            }
 			
 			public function set definition(definition:AnalysisDefinition):void {
 				var textScrubs:ArrayCollection = new ArrayCollection();

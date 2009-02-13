@@ -10,7 +10,6 @@ import java.util.Collection;
 public interface IAnalysisService {
     public Collection<WSAnalysisDefinition> getAnalysisDefinitions();
     public long saveAnalysisDefinition(WSAnalysisDefinition analysisDefinition);
-    public void deleteAnalysisDefinition(WSAnalysisDefinition analysisDefinition);
 
     WSAnalysisDefinition openAnalysisDefinition(long analysisID);
 }

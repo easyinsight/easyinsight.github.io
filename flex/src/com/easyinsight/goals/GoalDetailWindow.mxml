@@ -1,0 +1,126 @@
+<?xml version="1.0" ?>
+<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" backgroundImage="{background2}" backgroundSize="100%"
+                width="400" height="300" showCloseButton="true" close="PopUpManager.removePopUp(this)" title="{_goalTitle}"
+        paddingLeft="5" paddingRight="5" paddingTop="5" paddingBottom="5" left="0" right="0" top="0" bottom="0">
+    <mx:Script><![CDATA[
+        import com.adobe.ac.mxeffects.CubeRotate;
+import mx.collections.ArrayCollection;
+        import mx.containers.HBox;
+        import mx.containers.ViewStack;
+        import mx.controls.ButtonBar;
+        import mx.core.Container;
+import mx.events.FlexEvent;
+        import mx.events.ItemClickEvent;
+        import mx.managers.PopUpManager;
+        import com.easyinsight.dashboard.DataViewPanel;
+
+        [Bindable]
+        [Embed(source="../../../../assets/background2.JPG")]
+        private var background2:Class;
+
+        private var buttonBar:ButtonBar;
+
+        private var _goalTreeNodeData:GoalTreeNodeData;
+        private var _startDate:Date;
+        private var _endDate:Date;
+
+        [Bindable]
+        private var _goalTitle:String;
+
+        private var viewStack:ViewStack;
+
+        public function set goalTreeNodeData(val:GoalTreeNodeData):void {
+            _goalTreeNodeData = val;
+            _goalTitle = _goalTreeNodeData.name;
+        }
+
+        [Bindable]
+        public function get startDate():Date {
+            return _startDate;
+        }
+
+        public function set startDate(val:Date):void {
+            _startDate = val;
+            dispatchEvent(new FlexEvent(FlexEvent.DATA_CHANGE));
+        }
+
+        [Bindable]
+        public function get endDate():Date {
+            return _endDate;
+        }
+
+        public function set endDate(val:Date):void {
+            _endDate = val;
+            dispatchEvent(new FlexEvent(FlexEvent.DATA_CHANGE));
+        }
+
+        private function choseButton(event:ItemClickEvent):void {
+            var item:GoalDetailItem = event.item as GoalDetailItem;
+            if (item.displayObject != viewStack.selectedChild) {
+                var cubeRotate:CubeRotate = new CubeRotate();
+                if (event.index > viewStack.selectedIndex) {
+                    cubeRotate.direction = "RIGHT";
+                } else {
+                    cubeRotate.direction = "LEFT";
+                }
+                cubeRotate.duration = 1000;
+                cubeRotate.target = viewStack.selectedChild;
+                cubeRotate.siblings = [ item.displayObject ];
+                viewStack.selectedChild = item.displayObject as Container;
+                cubeRotate.play();
+            }
+        }
+
+        override protected function createChildren():void {
+            super.createChildren();
+            if (buttonBar == null) {
+                viewStack = new ViewStack();
+                viewStack.percentWidth = 100;
+                viewStack.percentHeight = 100;
+                var goalHistoryView:GoalHistoryView = new GoalHistoryView();
+                goalHistoryView.goalTreeNodeData = _goalTreeNodeData;
+                goalHistoryView.startDate = _startDate;
+                goalHistoryView.endDate = _endDate;
+                var topElements:ArrayCollection = new ArrayCollection();
+                var goalHistoryItem:GoalDetailItem = new GoalDetailItem();
+                goalHistoryItem.label = "Goal History";
+                goalHistoryItem.displayObject = goalHistoryView;
+                topElements.addItem(goalHistoryItem);
+                viewStack.addChild(goalHistoryView);
+
+                for each (var report:GoalInsight in _goalTreeNodeData.associatedInsights) {
+                    var reportItem:GoalDetailItem = new GoalDetailItem();
+                    reportItem.label = report.insightName;
+                    var dataViewPanel:DataViewPanel = new DataViewPanel();
+                    dataViewPanel.analysisID = report.insightID;
+                    reportItem.displayObject = dataViewPanel;
+                    viewStack.addChild(dataViewPanel);
+                    topElements.addItem(reportItem);
+                }
+
+                if (_goalTreeNodeData.associatedFeeds.length > 0) {
+                    var dataSourceItem:GoalDetailItem = new GoalDetailItem();
+                    dataSourceItem.label = "Data Sources";
+                    var goalDetailDataSources:GoalDetailDataSources = new GoalDetailDataSources();
+                    goalDetailDataSources.goalTreeNodeData = _goalTreeNodeData;
+                    dataSourceItem.displayObject = goalDetailDataSources;
+                    viewStack.addChild(goalDetailDataSources);
+                    topElements.addItem(dataSourceItem);
+                }
+
+                if (topElements.length > 1) {
+                    buttonBar = new ButtonBar();
+                    buttonBar.dataProvider = topElements;
+                    buttonBar.addEventListener(ItemClickEvent.ITEM_CLICK, choseButton);
+                    var hBox:HBox = new HBox();
+                    hBox.setStyle("horizontalAlign", "center");
+                    hBox.percentWidth = 100;
+                    hBox.addChild(buttonBar);
+                    coreBox.addChild(hBox);
+                }
+            }
+            coreBox.addChild(viewStack);
+        }
+        ]]></mx:Script>
+    <mx:VBox width="100%" height="100%" id="coreBox"/>
+</mx:TitleWindow>

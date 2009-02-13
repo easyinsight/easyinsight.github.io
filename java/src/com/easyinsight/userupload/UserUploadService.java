@@ -38,26 +38,23 @@ public class UserUploadService implements IUserUploadService {
             List<FeedDescriptor> descriptors = feedStorage.searchForSubscribedFeeds(userID);
             objects.addAll(descriptors);
             AnalysisStorage analysisStorage = new AnalysisStorage();
-            Map<Long, List<WSAnalysisDefinition>> analysisDefinitions = new HashMap<Long, List<WSAnalysisDefinition>>();
-            for (WSAnalysisDefinition analysisDefinition : analysisStorage.getAllDefinitions(userID)) {
-                if (analysisDefinition.isRootDefinition()) {
-                    continue;
-                }
-                List<WSAnalysisDefinition> defList = analysisDefinitions.get(analysisDefinition.getDataFeedID());
+            Map<Long, List<InsightDescriptor>> analysisDefinitions = new HashMap<Long, List<InsightDescriptor>>();
+            for (InsightDescriptor analysisDefinition : analysisStorage.getInsightDescriptors(userID)) {
+                List<InsightDescriptor> defList = analysisDefinitions.get(analysisDefinition.getDataFeedID());
                 if (defList == null) {
-                    defList = new ArrayList<WSAnalysisDefinition>();
+                    defList = new ArrayList<InsightDescriptor>();
                     analysisDefinitions.put(analysisDefinition.getDataFeedID(), defList);
                 }
                 defList.add(analysisDefinition);
             }
             for (FeedDescriptor feedDescriptor : descriptors) {
-                List<WSAnalysisDefinition> analysisDefList = analysisDefinitions.remove(feedDescriptor.getDataFeedID());
+                List<InsightDescriptor> analysisDefList = analysisDefinitions.remove(feedDescriptor.getDataFeedID());
                 if (analysisDefList == null) {
-                    analysisDefList = new ArrayList<WSAnalysisDefinition>();
+                    analysisDefList = new ArrayList<InsightDescriptor>();
                 }
                 feedDescriptor.setChildren(analysisDefList);
             }
-            for (List<WSAnalysisDefinition> defList : analysisDefinitions.values()) {
+            for (List<InsightDescriptor> defList : analysisDefinitions.values()) {
                 objects.addAll(defList);
             }
             return objects;

@@ -224,7 +224,7 @@ public class SolutionService {
             PreparedStatement queryStmt = conn.prepareStatement("SELECT DATA_FEED.DATA_FEED_ID, DATA_FEED.FEED_NAME FROM SOLUTION_TO_FEED, DATA_FEED " +
                     "WHERE SOLUTION_ID = ? AND DATA_FEED.DATA_FEED_ID = SOLUTION_TO_FEED.FEED_ID");
             queryStmt.setLong(1, solutionID);
-            PreparedStatement queryInsightsStmt = conn.prepareStatement("SELECT ANALYSIS_ID, TITLE FROM ANALYSIS WHERE DATA_FEED_ID = ?");
+            PreparedStatement queryInsightsStmt = conn.prepareStatement("SELECT ANALYSIS_ID, TITLE, DATA_FEED_ID FROM ANALYSIS WHERE DATA_FEED_ID = ?");
             ResultSet rs = queryStmt.executeQuery();
             while (rs.next()) {
                 long feedID = rs.getLong(1);
@@ -238,7 +238,7 @@ public class SolutionService {
                 while (insightRS.next()) {
                     long insightID = insightRS.getLong(1);
                     String insightName = insightRS.getString(2);
-                    insightDescriptors.add(new InsightDescriptor(insightID, insightName));
+                    insightDescriptors.add(new InsightDescriptor(insightID, insightName, rs.getLong(3)));
                 }
             }
             PreparedStatement getGoalsStmt = conn.prepareStatement("SELECT goal_tree.goal_tree_id, name FROM solution_to_goal_tree, goal_tree " +
@@ -311,7 +311,7 @@ public class SolutionService {
         feedDescriptor.setName(clonedFeedDefinition.getFeedName());
         feedDescriptor.setFeedType(clonedFeedDefinition.getFeedType().getType());
         userUploadService.createUserFeedLink(userID, clonedFeedDefinition.getDataFeedID(), Roles.OWNER, conn);
-        List<WSAnalysisDefinition> clonedDefs = new ArrayList<WSAnalysisDefinition>();
+        List<InsightDescriptor> clonedDefs = new ArrayList<InsightDescriptor>();
         List<AnalysisDefinition> insights = getInsightsFromFeed(feedID, conn);
         for (AnalysisDefinition insight : insights) {
             if (insight.isRootDefinition()) {
@@ -322,7 +322,7 @@ public class SolutionService {
             clonedInsight.setDataFeedID(clonedFeedDefinition.getDataFeedID());
             clonedInsight.setUserBindings(Arrays.asList(new UserToAnalysisBinding(userID, UserPermission.OWNER)));
             analysisStorage.saveAnalysis(clonedInsight, conn);
-            clonedDefs.add(clonedInsight.createBlazeDefinition());
+            clonedDefs.add(new InsightDescriptor(clonedInsight.getAnalysisID(), clonedInsight.getTitle(), clonedInsight.getDataFeedID()));
             List<FeedDefinition> insightFeeds = getFeedsFromInsight(clonedInsight.getAnalysisID(), conn);
             for (FeedDefinition insightFeed : insightFeeds) {
                 installFeed(userID, conn, copyData, insightFeed.getDataFeedID(), insightFeed);

@@ -135,6 +135,27 @@ public class AnalysisStorage {
         }
     }
 
+    public Collection<InsightDescriptor> getInsightDescriptors(long userID) {
+        Collection<InsightDescriptor> descriptors = new ArrayList<InsightDescriptor>();
+        Connection conn = Database.instance().getConnection();
+        try {
+            PreparedStatement queryStmt = conn.prepareStatement("SELECT analysis.ANALYSIS_ID, TITLE, DATA_FEED_ID FROM ANALYSIS, USER_TO_ANALYSIS WHERE " +
+                    "USER_TO_ANALYSIS.analysis_id = analysis.analysis_id and user_to_analysis.user_id = ? and root_definition = ?");
+            queryStmt.setLong(1, userID);
+            queryStmt.setBoolean(2, false);
+            ResultSet rs = queryStmt.executeQuery();
+            while (rs.next()) {
+                descriptors.add(new InsightDescriptor(rs.getLong(1), rs.getString(2), rs.getLong(3)));
+            }
+        } catch (SQLException e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        } finally {
+            Database.instance().closeConnection(conn);
+        }
+        return descriptors;
+    }
+
     public Collection<WSAnalysisDefinition> getAllDefinitions(long userID) {
         Collection<WSAnalysisDefinition> analysisDefinitionList = new ArrayList<WSAnalysisDefinition>();
         Session session = Database.instance().createSession();

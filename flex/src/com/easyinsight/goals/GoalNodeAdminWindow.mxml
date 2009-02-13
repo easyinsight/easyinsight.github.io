@@ -171,7 +171,7 @@ import com.easyinsight.solutions.Solution;
                 var targetValue:int = int(targetValueInput.text);
                 _goalTreeNode.goalValue = targetValue;
                 var selectedDate:AnalysisItem = availableDateBox.selectedItem as AnalysisItem;
-                if (selectedDate != NONE) {
+                if (datesAvailable && selectedDate != NONE) {
                     var rangeOption:RangeOption = rollingDateBox.selectedItem as RangeOption;
                     var rangeSelection:int = rangeOption.data as int;
                     var rollingFilterDefinition:RollingDateRangeFilterDefinition = new RollingDateRangeFilterDefinition();
@@ -312,10 +312,10 @@ import com.easyinsight.solutions.Solution;
                          paddingLeft="0" paddingRight="0" creationPolicy="all">
             <mx:Canvas width="100%" height="100%" label="Specifications">
                 <mx:Form>
-                    <mx:FormItem label="Name:" fontFamily="Tahoma" fontWeight="bold">
+                    <mx:FormItem label="Name:" fontFamily="Tahoma" fontWeight="bold" width="300">
                         <mx:TextInput id="nameInput" text="{nodeName}" fontFamily="Lucida Grande" fontWeight="normal"/>
                     </mx:FormItem>
-                    <mx:FormItem label="Tags:" fontFamily="Tahoma" fontWeight="bold">
+                    <mx:FormItem label="Tags:" fontFamily="Tahoma" fontWeight="bold" width="300">
                         <mx:TextInput id="tagsInput" text="{nodeTags}" fontFamily="Lucida Grande" fontWeight="normal"/>
                     </mx:FormItem>
                     <mx:FormItem label="Description:" fontFamily="Tahoma" fontWeight="bold">
@@ -329,37 +329,39 @@ import com.easyinsight.solutions.Solution;
                 </mx:Form>
             </mx:Canvas>
             <mx:Canvas width="100%" height="100%" label="Implementation">
-                <mx:Form>
+                <mx:Form paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5">
+                    <!--
                     <mx:FormItem label="">
                         <mx:Button label="Install Solution..." click="chooseSolution()"/>
                     </mx:FormItem>
-                    <mx:FormItem label="Goal Data Source Binding:" direction="horizontal">
-                        <mx:Label text="{feedName}"/>
+                    -->
+                    <mx:FormItem label="Goal Data Source Binding:" direction="horizontal" fontFamily="Tahoma" fontWeight="bold">
+                        <mx:Label text="{feedName}" fontFamily="Lucide Grande" fontWeight="normal"/>
                         <mx:Button icon="{dataSourceIcon}" toolTip="Bind Data Source" click="bindDataSource()"/>
                         <mx:Button icon="{deleteIcon}" toolTip="Clear" click="clear()"/>
                     </mx:FormItem>
                     <mx:FormItem label="" enabled="{insightBound}" direction="horizontal">
                         <mx:Form>
-                            <mx:FormItem label="Measure:">
+                            <mx:FormItem label="Measure:" fontFamily="Tahoma" fontWeight="bold">
                                 <mx:ComboBox dataProvider="{availableItems}" labelField="display"
-                                             id="availableItemBox"/>
+                                             id="availableItemBox" fontFamily="Lucide Grande" fontWeight="normal"/>
                             </mx:FormItem>
-                            <mx:FormItem label="" direction="horizontal">
+                            <mx:FormItem label="" direction="horizontal" fontFamily="Tahoma" fontWeight="bold">
                                 <mx:RadioButtonGroup id="goalGroup"/>
                                 <mx:RadioButton label="Goal of High Values" value="highValuesGoal" group="{goalGroup}"
                                                 id="highValuesGoal" selected="{highValues}"/>
                                 <mx:RadioButton label="Goal of Low Values" value="lowValuesGoal" group="{goalGroup}"
                                                 id="lowValuesGoal" selected="{lowValues}"/>
                             </mx:FormItem>
-                            <mx:FormItem label="Target Value:">
-                                <mx:TextInput id="targetValueInput" text="{targetValue}"/>
+                            <mx:FormItem label="Target Value:" fontFamily="Tahoma" fontWeight="bold">
+                                <mx:TextInput id="targetValueInput" text="{targetValue}" fontFamily="Lucide Grande" fontWeight="normal"/>
                             </mx:FormItem>
-                            <mx:FormItem label="Date Field:" enabled="{datesAvailable}">
+                            <mx:FormItem label="Date Field:" enabled="{datesAvailable}" fontFamily="Tahoma" fontWeight="bold">
                                 <mx:ComboBox dataProvider="{availableDates}" labelField="display" id="availableDateBox"
-                                             close="onDateSelection()"/>
+                                             close="onDateSelection()" fontFamily="Lucide Grande" fontWeight="normal"/>
                             </mx:FormItem>
-                            <mx:FormItem label="Date Range:" enabled="{dateSelected}">
-                                <mx:ComboBox dataProvider="{rangeOptions}" labelField="label" id="rollingDateBox"/>
+                            <mx:FormItem label="Date Range:" enabled="{dateSelected}" fontFamily="Tahoma" fontWeight="bold">
+                                <mx:ComboBox dataProvider="{rangeOptions}" labelField="label" id="rollingDateBox" fontFamily="Lucide Grande" fontWeight="normal"/>
                             </mx:FormItem>
                         </mx:Form>
                     </mx:FormItem>

@@ -10,7 +10,6 @@ package com.easyinsight.listing
 	public class FeedAdminAnalyzeSource implements AnalyzeSource
 	{
 		private var feedID:int;
-		private var analysisDefinition:AnalysisDefinition;
 		private var feedName:String;
 		private var feedTags:String;
 		private var uploadPolicy:UploadPolicy;
@@ -19,10 +18,9 @@ package com.easyinsight.listing
 		private var feedOwnerName:String;
 		private var feedType:int;		
 		
-		public function FeedAdminAnalyzeSource(feedID:int, analysisDefinition:AnalysisDefinition, feedName:String,
+		public function FeedAdminAnalyzeSource(feedID:int, feedName:String,
 			feedTags:String, uploadPolicy:UploadPolicy, feedDescription:String, feedAttribution:String, feedOwnerName:String, feedType:int) {
 			this.feedID = feedID;
-			this.analysisDefinition = analysisDefinition;
 			this.feedName = feedName;
 			this.feedTags = feedTags;
 			this.uploadPolicy = uploadPolicy;
@@ -35,7 +33,6 @@ package com.easyinsight.listing
 		public function createAnalysisPopup():FullScreenPage {
 			var feedAdministrationContainer:FeedAdministrationContainer = new FeedAdministrationContainer();
 			feedAdministrationContainer.feedID = feedID;
-			feedAdministrationContainer.analysisDefinition = analysisDefinition;
 			feedAdministrationContainer.feedAdministrationMode(feedName, feedTags, uploadPolicy, feedDescription, feedOwnerName, feedAttribution, feedType);			
 			return feedAdministrationContainer;
 		}

@@ -54,6 +54,7 @@ package com.easyinsight.analysis.scrub
 			window.feedID = feedID;
 			window.availableFields = fields;
 			window.updateState();
+            PopUpManager.centerPopUp(window);
 		}
 		
 		private function passThrough(event:DataScrubEvent):void {

@@ -1,8 +1,15 @@
 <?xml version="1.0" ?>
 <OrgChartItemRendererBase xmlns="com.easyinsight.goals.*" xmlns:mx="http://www.adobe.com/2006/mxml"
-        borderStyle="solid" borderColor="#CCCCCC" cornerRadius="10">
+        borderStyle="solid" borderColor="#CCCCCC" cornerRadius="10" dropShadowEnabled="true" doubleClickEnabled="true" doubleClick="onDoubleClick()">
     <mx:Script><![CDATA[
+        import com.easyinsight.util.ModelessWindowEvent;
 import ilog.orgchart.OrgChartItem;
+
+        import mx.core.Application;
+        import mx.events.CloseEvent;
+import mx.formatters.NumberFormatter;
+        import mx.managers.PopUpManager;
+
         [Bindable]
         private var trendImage:Class;
         [Bindable]
@@ -19,12 +26,20 @@ import ilog.orgchart.OrgChartItem;
         private var positiveDownIcon:Class;
 
         [Bindable]
+        [Embed(source="../../../../assets/bullet_ball_green.png")]
+        private var positiveIcon:Class;
+
+        [Bindable]
         [Embed(source="../../../../assets/arrow2_up_red.png")]
         private var negativeUpIcon:Class;
 
         [Bindable]
         [Embed(source="../../../../assets/arrow2_down_red.png")]
         private var negativeDownIcon:Class;
+
+        [Bindable]
+        [Embed(source="../../../../assets/bullet_square_glass_red.png")]
+        private var negativeIcon:Class;
 
         [Bindable]
         [Embed(source="../../../../assets/bullet_ball_blue.png")]
@@ -38,18 +53,57 @@ import ilog.orgchart.OrgChartItem;
 
         private var orgChartItem:OrgChartItem;
 
+        private var _startDate:Date;
+
+        private var _endDate:Date;
+
         [Bindable]
         private var goalIcon:String;
 
         [Bindable]
+        private var currentValue:String;
+
+        [Bindable]
         private var iconExists:Boolean;
+
+        [Bindable]
+        private var currentValueExists:Boolean = false;
+
+        private var numberFormatter:NumberFormatter = new NumberFormatter();
 
         override protected function configureLevelOfDetails():void {
             setLevelsOfDetails(layer2, [2]);
         }
 
+        private function onDoubleClick():void {
+            var window:GoalDetailWindow = new GoalDetailWindow();
+            window.goalTreeNodeData = goalTreeNodeData;
+            window.startDate = new Date(new Date().getTime() - (1000 * 60 * 60 * 24 * 7));
+            window.endDate = new Date();
+            window.addEventListener(CloseEvent.CLOSE, onClose);
+            PopUpManager.addPopUp(window, this);
+            var displayObject:DisplayObject = Application.application as DisplayObject;
+            window.x = (displayObject.width / 2) - 200;
+            window.y = (displayObject.height / 2) - 150;
+            dispatchEvent(new ModelessWindowEvent(ModelessWindowEvent.WINDOW_ADDED, window));
+        }
+
+        private function onClose(event:CloseEvent):void {
+            event.currentTarget.removeEventListener(CloseEvent.CLOSE, onClose);
+            dispatchEvent(new ModelessWindowEvent(ModelessWindowEvent.WINDOW_REMOVED, event.currentTarget as DisplayObject));
+        }
+
         override public function get data():Object {
             return this.orgChartItem;
+        }
+
+
+        public function set startDate(val:Date):void {
+            _startDate = val;
+        }
+
+        public function set endDate(val:Date):void {
+            _endDate = val;
         }
 
         override public function set data(value:Object):void {
@@ -57,22 +111,44 @@ import ilog.orgchart.OrgChartItem;
             goalTreeNodeData = orgChartItem.data as GoalTreeNodeData;
             if (goalTreeNodeData != null) {
                 goalIcon = "/DMS/assets/icons/32x32/" + goalTreeNodeData.iconImage;
-                iconExists = goalIcon != null;                                
+                if (goalTreeNodeData.currentValue != null) {
+                    currentValue = numberFormatter.format(goalTreeNodeData.currentValue.value);
+                    currentValueExists = true;
+                }
+                iconExists = goalTreeNodeData.iconImage != null && goalTreeNodeData.iconImage != "";
                 treeName = goalTreeNodeData.name;
-                switch (goalTreeNodeData.goalOutcome.outcomeState) {
-                    case GoalOutcome.EXCEEDING_GOAL:
-                    case GoalOutcome.POSITIVE:
-                        trendImage = goalTreeNodeData.highIsGood ? positiveUpIcon : positiveDownIcon;
-                        break;
-                    case GoalOutcome.NEGATIVE:
-                        trendImage = goalTreeNodeData.highIsGood ? negativeDownIcon : negativeUpIcon;
-                        break;
-                    case GoalOutcome.NEUTRAL:
-                        trendImage = neutralIcon;
-                        break;
-                    case GoalOutcome.NO_DATA:
-                        trendImage = noDataIcon;
-                        break;
+                if (goalTreeNodeData.coreFeedID == 0) {
+                    switch (goalTreeNodeData.goalOutcome.outcomeState) {
+                        case GoalOutcome.EXCEEDING_GOAL:
+                        case GoalOutcome.POSITIVE:
+                            trendImage = positiveIcon;
+                            break;
+                        case GoalOutcome.NEGATIVE:
+                            trendImage = negativeIcon;
+                            break;
+                        case GoalOutcome.NEUTRAL:
+                            trendImage = neutralIcon;
+                            break;
+                        case GoalOutcome.NO_DATA:
+                            trendImage = noDataIcon;
+                            break;
+                    }
+                } else {
+                    switch (goalTreeNodeData.goalOutcome.outcomeState) {
+                        case GoalOutcome.EXCEEDING_GOAL:
+                        case GoalOutcome.POSITIVE:
+                            trendImage = goalTreeNodeData.highIsGood ? positiveUpIcon : positiveDownIcon;
+                            break;
+                        case GoalOutcome.NEGATIVE:
+                            trendImage = goalTreeNodeData.highIsGood ? negativeDownIcon : negativeUpIcon;
+                            break;
+                        case GoalOutcome.NEUTRAL:
+                            trendImage = neutralIcon;
+                            break;
+                        case GoalOutcome.NO_DATA:
+                            trendImage = noDataIcon;
+                            break;
+                    }
                 }
                 if (goalTreeNodeData.goalOutcome is ConcreteGoalOutcome) {
                     var concreteGoalOutcome:ConcreteGoalOutcome = goalTreeNodeData as ConcreteGoalOutcome;
@@ -85,34 +161,37 @@ import ilog.orgchart.OrgChartItem;
         override protected function updateDisplayList(unscaledWidth:Number, unscaledHeight:Number):void {
 
             super.updateDisplayList(unscaledWidth, unscaledHeight);
-                                          
+
             var theData:OrgChartItem = data as OrgChartItem;
 
             if (theData != null) {
 
-              //Have a different style depending on the state of the rendered item.
-              //here the background of the item changes if the item is selected and/or highlighted.
-              var isHightlighted:Boolean = theData.orgChart.isItemHighlighted(theData);
-              var isSelected:Boolean = theData.orgChart.isItemSelected(theData);
+                //Have a different style depending on the state of the rendered item.
+                //here the background of the item changes if the item is selected and/or highlighted.
+                var isHightlighted:Boolean = theData.orgChart.isItemHighlighted(theData);
+                var isSelected:Boolean = theData.orgChart.isItemSelected(theData);
 
-              var color:uint;
-              if (isHightlighted) {
-                color = isSelected ? 0x8695FF: 0xFEFBBA;
-              } else {
-                color = isSelected ? 0x637DFF: 0xEAF1F6;
-              }
+                var color:uint;
+                if (isHightlighted) {
+                    color = isSelected ? 0x8695FF : 0xFEFBBA;
+                } else {
+                    color = isSelected ? 0x637DFF : 0xEAF1F6;
+                }
 
-              setStyle("backgroundColor", color);
+                setStyle("backgroundColor", color);
 
             }
         }
-]]></mx:Script>
+        ]]></mx:Script>
     <mx:VBox id="layer2" verticalAlign="middle" paddingLeft="10"
            paddingRight="10" paddingTop="0" paddingBottom="0" width="180" height="60" horizontalAlign="center">
         <mx:HBox>
             <mx:Image source="{goalIcon}" visible="{iconExists}"/>
+            <mx:Box backgroundColor="#000000" borderStyle="solid" cornerRadius="3" visible="{currentValueExists}" horizontalAlign="center" verticalAlign="middle">
+                <mx:Label text="{currentValue}" fontFamily="Trebuchet MS" fontSize="14" color="#ffffff"/>
+            </mx:Box>
             <mx:Image source="{trendImage}" toolTip="{trendTooltip}"/>
         </mx:HBox>
-        <mx:Label text="{treeName}" fontSize="12"/>
+        <mx:Label text="{treeName}" fontSize="12" maxWidth="160"/>
     </mx:VBox>
 </OrgChartItemRendererBase>

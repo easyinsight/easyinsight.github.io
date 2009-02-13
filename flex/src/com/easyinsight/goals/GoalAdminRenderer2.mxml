@@ -3,16 +3,15 @@
 	borderStyle="solid" borderColor="#CCCCCC" cornerRadius="10" creationComplete="setup()">
 	<mx:Script>
 		<![CDATA[
-        import com.easyinsight.analysis.AnalysisDefinition;
-import com.easyinsight.listing.DataFeedDescriptor;
-import com.easyinsight.solutions.Solution;
-        import mx.binding.utils.BindingUtils;
-import mx.controls.DataGrid;
-import mx.controls.List;
-import mx.core.IUIComponent;
+        import com.easyinsight.listing.DataFeedDescriptor;
+        import com.easyinsight.solutions.InsightDescriptor;
+        import com.easyinsight.solutions.Solution;
+        import mx.controls.DataGrid;
+        import mx.controls.List;
+        import mx.core.IUIComponent;
         import mx.events.FlexEvent;
-import mx.managers.DragManager;
-import mx.managers.PopUpManager;
+        import mx.managers.DragManager;
+        import mx.managers.PopUpManager;
         import mx.events.DragEvent;
         import mx.collections.ArrayCollection;
 
@@ -90,10 +89,10 @@ import mx.managers.PopUpManager;
                 goalFeed.feedID = descriptor.dataFeedID;
                 goalFeed.feedName = descriptor.name;
                 goalTreeNode.associatedFeeds.addItem(goalFeed);
-            } else if (obj is GoalInsight) {
-                var analysisDefinition:AnalysisDefinition = obj as AnalysisDefinition;
+            } else if (obj is InsightDescriptor) {
+                var analysisDefinition:InsightDescriptor = obj as InsightDescriptor;
                 var goalInsight:GoalInsight = new GoalInsight();
-                goalInsight.insightID = analysisDefinition.analysisID;
+                goalInsight.insightID = analysisDefinition.insightID;
                 goalInsight.insightName = analysisDefinition.name;
                 goalTreeNode.associatedInsights.addItem(goalInsight);
             }
@@ -191,7 +190,6 @@ import mx.managers.PopUpManager;
                 }
 
                 setStyle("backgroundColor", color);
-
             }
         }
 

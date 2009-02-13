@@ -446,7 +446,9 @@ public class FeedStorage {
                 feedDefinition.setRatingCount(ratingCount);
                 feedDefinition.setRatingAverage(ratingAverage);
                 feedDefinition.setGenre(genre);
-                feedDefinition.setFields(retrieveFields(feedDefinition.getDataFeedID(), conn));
+                if (!feedType.equals(FeedType.ANALYSIS_BASED)) {
+                    feedDefinition.setFields(retrieveFields(feedDefinition.getDataFeedID(), conn));
+                }
                 feedDefinition.setAnalysisDefinitionID(analysisDefinitionID);
                 feedDefinition.setAttribution(attribution);
                 feedDefinition.setDescription(description);
@@ -568,7 +570,7 @@ public class FeedStorage {
                 if (feedDescriptor.getRole() == Roles.OWNER) {
                     analysisDefinition.setCanSaveDirectly(true);
                 }
-                feedDescriptor.setDefinition(analysisDefinition);
+                //feedDescriptor.setDefinition(analysisDefinition);
             }
             queryStmt.close();
         } catch (SQLException e) {
@@ -594,19 +596,12 @@ public class FeedStorage {
                 String feedName = rs.getString(2);
                 long feedSize = rs.getLong(3);
                 int feedType = rs.getInt(4);
-                long analysisID = rs.getLong(5);
                 String ownerName = rs.getString(6);
                 String description = rs.getString(7);
                 String attribution = rs.getString(8);
                 int userRole = rs.getInt(9);
                 boolean publiclyVisible = rs.getBoolean(10);
                 boolean marketplaceVisible = rs.getBoolean(11);
-                AnalysisDefinition def = new AnalysisStorage().getAnalysisDefinition(analysisID, conn);
-                if (def == null) {
-                    LogClass.error("Could not find core definition for feed " + dataFeedID);
-                    continue;
-                }
-                WSAnalysisDefinition analysisDefinition = def.createBlazeDefinition();
                 FeedDescriptor feedDescriptor = createDescriptor(dataFeedID, feedName, publiclyVisible, marketplaceVisible, userRole, feedSize, feedType, ownerName, description, attribution, conn);
                 Collection<Tag> tags = getTags(dataFeedID, conn);
                 StringBuilder tagStringBuilder = new StringBuilder();
@@ -619,10 +614,6 @@ public class FeedStorage {
                     }
                 }
                 feedDescriptor.setTagString(tagStringBuilder.toString());
-                if (feedDescriptor.getRole() == Roles.OWNER) {
-                    analysisDefinition.setCanSaveDirectly(true);
-                }
-                feedDescriptor.setDefinition(analysisDefinition);
                 descriptorList.add(feedDescriptor);
             }
             queryStmt.close();

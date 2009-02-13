@@ -16,24 +16,17 @@ package com.easyinsight.listing
 		}
 
 		public function createAnalysisPopup():FullScreenPage {
-			
-			
+
+
 			var dataService:DataService = new DataService();
 			dataService.dataFeedID = analysisDefinition.dataFeedID;
 
-			var dataAnalysisContainer:DataAnalysisContainer = new DataAnalysisContainer();													
-			/*var dataAnalysisContainer:DataAnalysisContainer = DataAnalysisContainer(PopUpManager.createPopUp(parent, 
-				DataAnalysisContainer, true));*/
+			var dataAnalysisContainer:DataAnalysisContainer = new DataAnalysisContainer();			
 			dataAnalysisContainer.dataService = dataService;			
 			dataAnalysisContainer.label = analysisDefinition.name;			
 			dataAnalysisContainer.openAnalysis(analysisDefinition);
-			/*BrowserManager.getInstance().setTitle("Easy Insight - " + analysisDefinition.name);
-			var fragmentObject:Object = new Object();
-            fragmentObject.analysisID = analysisDefinition.analysisID;
-            var fragmentString:String = URLUtil.objectToString(fragmentObject);
-			BrowserManager.getInstance().setFragment(fragmentString);*/
 			return dataAnalysisContainer;						
-				
+
 		}
 		
 	}

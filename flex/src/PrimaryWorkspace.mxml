@@ -15,7 +15,6 @@
 		<![CDATA[
 import com.adobe.ac.mxeffects.Flip;
 import mx.core.UIComponent;
-import com.adobe.ac.mxeffects.CubeRotate;
 			import com.easyinsight.FullScreenPage;
 			import com.easyinsight.analysis.DelayedFeedLink;
 			import com.easyinsight.analysis.DelayedDeepLink;
@@ -25,7 +24,6 @@ import com.adobe.ac.mxeffects.CubeRotate;
 			import mx.rpc.events.FaultEvent;
 			import com.easyinsight.LoginDialog;
 			import com.easyinsight.framework.SessionExpirationEvent;
-			import com.easyinsight.images.ImageFactory;
 			import com.easyinsight.framework.UserServiceResponse;
 			import com.easyinsight.analysis.AnalysisCloseEvent;
 			import com.easyinsight.framework.NavigationEvent;
@@ -37,7 +35,6 @@ import com.adobe.ac.mxeffects.CubeRotate;
 			import com.easyinsight.listing.BlogPanel;
             import com.easyinsight.genredata.AnalyzeEvent;
             import com.easyinsight.listing.AnalyzeSource;
-            import com.easyinsight.listing.HeaderBarEvent;
             import com.easyinsight.listing.IPerspective;
             import com.easyinsight.listing.KeywordSearchEvent;
             import com.easyinsight.listing.ListingChangeEvent;
@@ -158,25 +155,6 @@ import com.adobe.ac.mxeffects.CubeRotate;
             	}
             }
             
-            /*private function createAnalysisSource(analysisID:Number):void {
-            	analysisService.openAnalysisIfPossible.send(analysisID);
-            }*/
-            
-            /*private function gotAnalysisDefinition():void {
-            	var insightResponse:InsightResponse = analysisService.openAnalysisIfPossible.lastResult as InsightResponse;
-            	if (insightResponse.successful) {
-            		doAnalyze(new AnalysisDefinitionAnalyzeSource(insightResponse.definition));	
-            	} else {
-            		var loginDialog:LoginDialog = LoginDialog(PopUpManager.createPopUp(this, LoginDialog, true));
-            		loginDialog.addEventListener(LoginEvent.LOGIN, delayedAnalysis);
-                    PopUpManager.centerPopUp(loginDialog);
-            	}            	
-            }                   
-            
-            private function delayedAnalysis(event:LoginEvent):void {
-            	
-            }  */
-            
             private function doAnalyze(analyzeSource:AnalyzeSource):void {
             	if (analyzeSource != null) {
             		var analysisWindow:FullScreenPage = analyzeSource.createAnalysisPopup();
@@ -227,18 +205,13 @@ import com.adobe.ac.mxeffects.CubeRotate;
                 return this.perspective;
             }
 
-            private function analyze():void {
-                var analyzeSource:AnalyzeSource = getCurrentPerspective().analyze();
-                doAnalyze(analyzeSource);
-            }
-
             private function internalAnalyze(event:AnalyzeEvent):void {
                 var analyzeSource:AnalyzeSource = event.analyzeSource;
                 doAnalyze(analyzeSource);
             } 
             
             private function sessionCheck():void {
-            	var authResult:UserServiceResponse = userService.isSessionLoggedIn.lastResult;
+            	var authResult:UserServiceResponse = userService.isSessionLoggedIn.lastResult as UserServiceResponse;
             	if (authResult != null) {
             		User.initializeUser(authResult.name, authResult.email,
                             	authResult.accountType, authResult.spaceAllowed, authResult.accountAdmin,
@@ -257,7 +230,7 @@ import com.adobe.ac.mxeffects.CubeRotate;
 	</mx:RemoteObject>	
 	
 	<mx:VBox width="100%" height="100%" id="coreVBox" paddingLeft="0" verticalGap="0" paddingRight="0">
-		<listing1:HeaderBar keywordSearch="search(event)" triggerAnalyze="analyze()" width="100%" id="headerBar"
+		<listing1:HeaderBar keywordSearch="search(event)" width="100%" id="headerBar"
 			paddingTop="5" paddingBottom="5" paddingLeft="10" paddingRight="10" bottom="0" top="0" 
 			listingChange="changePerspective(event)"/>			
 		<mx:HBox width="100%" height="100%" id="coreSpace" paddingLeft="0" paddingTop="0" top="0" paddingRight="0">

@@ -20,19 +20,21 @@ public class GoalService {
     private GoalStorage goalStorage = new GoalStorage();
     private GoalEvaluationStorage goalEvaluationStorage = new GoalEvaluationStorage();
 
-    public void createGoalTree(GoalTree goalTree) {
+    public GoalTree createGoalTree(GoalTree goalTree) {
         long userID = SecurityUtil.getUserID();
         try {
             goalStorage.addGoalTree(goalTree, userID);
+            return goalTree;
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);
         }
     }    
 
-    public void updateGoalTree(GoalTree goalTree) {
+    public GoalTree updateGoalTree(GoalTree goalTree) {
         try {
             goalStorage.updateGoalTree(goalTree);
+            return goalTree;
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);
@@ -68,12 +70,22 @@ public class GoalService {
         }
     }
 
+    public List<GoalValue> getGoalValues(final long goalTreeNodeID, final Date startDate, final Date endDate) {
+        try {
+            return goalEvaluationStorage.getGoalValues(goalTreeNodeID, startDate, endDate);
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        }
+    }
+
     private GoalTreeNodeData createDataTreeForDates(GoalTree goalTree, final Date startDate, final Date endDate) {
         GoalTreeNodeData dataNode = new GoalTreeNodeDataBuilder().build(goalTree.getRootNode());
         GoalTreeVisitor visitor = new GoalTreeVisitor() {
 
                 protected void accept(GoalTreeNode goalTreeNode) {
                     GoalTreeNodeData data = (GoalTreeNodeData) goalTreeNode;
+                    data.populateCurrentValue();                    
                     data.determineOutcome(startDate, endDate, goalEvaluationStorage);
                 }
             };

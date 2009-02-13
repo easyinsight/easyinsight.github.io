@@ -61,6 +61,27 @@
         </mxmlc>
     </target>
 
+    <target name="compiileHelpModule">
+        <mxmlc file="../src/com/easyinsight/help/TutorialModule.mxml" output="${deployment.path}/TutorialModule.swf"
+               static-rsls="false">
+            <load-config filename="../help-module.xml"/>
+            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
+                <url rsl-url="framework_3.2.0.3958.swz"/>
+                <url rsl-url="framework_3.2.0.3958.swf"/>
+            </runtime-shared-library-path>
+
+            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/datavisualization.swc">
+                <url rsl-url="datavisualization_3.2.0.3958.swz"/>
+                <url rsl-url="datavisualization_3.2.0.3958.swf"/>
+            </runtime-shared-library-path>
+
+            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
+                <url rsl-url="rpc_3.2.0.3958.swz"/>
+                <url rsl-url="rpc_3.2.0.3958.swf"/>
+            </runtime-shared-library-path>
+        </mxmlc>
+    </target>
+
     <target name="compileAdmin">
         <mxmlc file="../src/AdministrationApplication.mxml" output="${deployment.path}/AdministrationApplication.swf"
                static-rsls="true">

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:listing="com.easyinsight.listing.*"
-           implements="com.easyinsight.listing.IPerspective" creationComplete="onCreation()" width="100%" height="100%">
+           implements="com.easyinsight.listing.IPerspective" creationComplete="onCreation()" width="100%" height="100%" doubleClickEnabled="true">
     <mx:states>
         <mx:State name="notLoggedIn">
             <mx:RemoveChild target="{controlsBox}"/>
@@ -12,6 +12,7 @@
     </mx:states>
     <mx:Script>
 		<![CDATA[
+        import mx.events.ListEvent;
 import mx.utils.URLUtil;
 import mx.managers.BrowserManager;
 import com.easyinsight.framework.LoginEvent;
@@ -74,6 +75,13 @@ import com.easyinsight.framework.User;
         private function gotTrees():void {
             goalTrees = goalService.getGoalTrees.lastResult as ArrayCollection;
         }
+
+        private function gridDoubleClick(event:ListEvent):void {
+            if (goalTreesBox.selectedItem != null) {
+                var goalTree:GoalTree = goalTreesBox.selectedItem as GoalTree;
+                dispatchEvent(new AnalyzeEvent(new GoalTreeAdminAnalyzeSource(goalTree)));
+            }
+        }
 		]]>
     </mx:Script>
     <mx:RemoteObject destination="goalService" id="goalService">
@@ -86,12 +94,12 @@ import com.easyinsight.framework.User;
                        label="Add Goal Tree" labelPlacement="bottom"/>
             <mx:Button icon="@Embed('../../../../assets/helpx48.png')" label="Help..." labelPlacement="bottom"/>
         </mx:HBox>
-        <mx:AdvancedDataGrid dataProvider="{goalTrees}" width="100%" id="goalTreesBox">
+        <mx:DataGrid dataProvider="{goalTrees}" width="100%" id="goalTreesBox" itemDoubleClick="gridDoubleClick(event)">
             <mx:columns>
-                <mx:AdvancedDataGridColumn headerText="Name" dataField="goalTreeName"/>
-                <mx:AdvancedDataGridColumn headerText="" dataField="goalTreeName" width="150"
+                <mx:DataGridColumn headerText="Name" dataField="goalTreeName"/>
+                <mx:DataGridColumn headerText="" dataField="goalTreeName" width="150"
                                            itemRenderer="com.easyinsight.goals.MyGoalsControls"/>
             </mx:columns>
-        </mx:AdvancedDataGrid>
+        </mx:DataGrid>
     </mx:VBox>
 </mx:VBox>

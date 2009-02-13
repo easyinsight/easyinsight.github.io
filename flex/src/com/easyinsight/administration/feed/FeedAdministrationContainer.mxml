@@ -5,7 +5,6 @@
 	<mx:Script>
 		<![CDATA[
 import com.easyinsight.analysis.AnalysisHierarchyItem;
-import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.analysis.AnalysisChangedEvent;
 			import mx.events.CloseEvent;
 			import mx.managers.BrowserManager;
@@ -34,9 +33,9 @@ import com.easyinsight.analysis.AnalysisChangedEvent;
             private var feedAttribution:String;
             [Bindable]
 			private var feedOwnerName:String;
-            [Bindable]
-			private var _analysisDefinition:AnalysisDefinition;
 			private var dataAnalysisContainer:DataAnalysisContainer;
+            [Bindable]
+            private var analysisDefinition:AnalysisDefinition;
 			private var feedType:int;
             [Bindable]
 			private var feedDefinition:FeedDefinitionData;
@@ -62,26 +61,26 @@ import com.easyinsight.analysis.AnalysisChangedEvent;
 				this._feedID = feedID;
 			}
 			
-			public function set analysisDefinition(analysisDefinition:AnalysisDefinition):void {
-				this._analysisDefinition = analysisDefinition;
-			}
-			
 			override protected function createChildren():void {
 				super.createChildren();
-				var dataService:DataService = new DataService();
-				dataService.dataFeedID = _feedID;
-				dataAnalysisContainer = new DataAnalysisContainer();	
-				dataAnalysisContainer.dataService = dataService;			
-				dataAnalysisContainer.label = _analysisDefinition.name;
-				dataAnalysisContainer.feedAdministrationMode(feedName, feedTags, feedUploadPolicy, feedDescription, feedOwnerName, feedAttribution);			
-				dataAnalysisContainer.openAnalysis(_analysisDefinition);
-				fieldsBox.addChild(dataAnalysisContainer);
 				feedService.getFeedDefinition.send(_feedID);			
 			}
+
+            private function gotAnalysis():void {
+                this.analysisDefinition = analysisService.openAnalysisDefinition.lastResult as AnalysisDefinition;
+                var dataService:DataService = new DataService();
+				dataService.dataFeedID = _feedID;
+				dataAnalysisContainer = new DataAnalysisContainer();
+				dataAnalysisContainer.dataService = dataService;
+				dataAnalysisContainer.label = analysisDefinition.name;
+				dataAnalysisContainer.feedAdministrationMode(feedName, feedTags, feedUploadPolicy, feedDescription, feedOwnerName, feedAttribution);
+				dataAnalysisContainer.openAnalysis(analysisDefinition);
+				fieldsBox.addChild(dataAnalysisContainer);
+            }
 			
 			private function gotFeedDefinition():void {				
 				this.feedDefinition = feedService.getFeedDefinition.lastResult as FeedDefinitionData;
-				BrowserManager.getInstance().setTitle("Easy Insight - " + feedDefinition.feedName);
+				BrowserManager.getInstance().setTitle("Easy Insight - Data Source Administration - " + feedDefinition.feedName);
 				if (feedType == DataFeedDescriptor.COMPOSITE) {					
 					var compositeFeedDefinition:CompositeFeedDefinition = feedDefinition as CompositeFeedDefinition; 
 					var compositeWorkspace:CompositeWorkspace = new CompositeWorkspace();
@@ -90,15 +89,13 @@ import com.easyinsight.analysis.AnalysisChangedEvent;
                     showImpl = true;
 					this.feedAdminDetail = compositeWorkspace;
 				} else if (feedType == DataFeedDescriptor.GOOGLE) {
-					var google:GoogleFeedAdministration = new GoogleFeedAdministration();
-					this.feedAdminDetail = google;
+					this.feedAdminDetail = new GoogleFeedAdministration();
 				} else if (feedType == DataFeedDescriptor.STATIC || feedType == DataFeedDescriptor.EMPTY) {
-					var fileFeed:FileUploadFeedAdmin = new FileUploadFeedAdmin();
-					this.feedAdminDetail = fileFeed;					
+					this.feedAdminDetail = new FileUploadFeedAdmin();
 				} else if (feedType == DataFeedDescriptor.ANALYSIS) {
-					var analysisBasedFeed:AnalysisBasedFeedAdmin = new AnalysisBasedFeedAdmin();
-					this.feedAdminDetail = analysisBasedFeed;
-				}			
+					this.feedAdminDetail = new AnalysisBasedFeedAdmin();
+				}
+                analysisService.openAnalysisDefinition.send(feedDefinition.analysisDefinitionID);
 			}
 			
 			public function feedAdministrationMode(feedName:String, feedTags:String, uploadPolicy:UploadPolicy,
@@ -190,6 +187,7 @@ import com.easyinsight.analysis.AnalysisChangedEvent;
 	</mx:RemoteObject>
     <mx:RemoteObject id="analysisService" destination="analysisDefinition">
         <mx:method name="saveAnalysisDefinition"/>
+        <mx:method name="openAnalysisDefinition" result="gotAnalysis()"/>
     </mx:RemoteObject>
 	<mx:VBox width="100%" height="100%" paddingLeft="5">
 		<mx:HBox id="buttonBox" paddingLeft="5" paddingTop="5" paddingBottom="5">		
@@ -239,7 +237,7 @@ import com.easyinsight.analysis.AnalysisChangedEvent;
 			<mx:Box label="Data" id="fieldsBox">
 			</mx:Box>
             <mx:Box label="Hierarchies" paddingLeft="10" paddingTop="10" paddingBottom="10" paddingRight="10">
-                <feed:HierarchyAdministration  id="hierarchiesBox" analysisDefinition="{_analysisDefinition}" feedDefinition="{feedDefinition}"/>
+                <feed:HierarchyAdministration  id="hierarchiesBox" analysisDefinition="{analysisDefinition}" feedDefinition="{feedDefinition}"/>
             </mx:Box>
 			<mx:Box label="Impl" paddingLeft="10" paddingTop="10" paddingBottom="10" paddingRight="10" id="implBox">
 				

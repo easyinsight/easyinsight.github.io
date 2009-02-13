@@ -142,7 +142,7 @@
                         </mx:Component>
                     </mx:itemRenderer>
                 </mx:DataGridColumn>
-                <mx:DataGridColumn headerText="Name" dataField="insightName" headerRenderer="com.easyinsight.groups.CustomGroupHeader"/>
+                <mx:DataGridColumn headerText="Name" dataField="name" headerRenderer="com.easyinsight.groups.CustomGroupHeader"/>
             </mx:columns>
         </mx:DataGrid>
         <mx:DataGrid dataProvider="{goalTrees}" visible="{showGoalTrees}">

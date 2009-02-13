@@ -1,0 +1,14 @@
+<?xml version="1.0" ?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%">
+    <mx:Script><![CDATA[
+        import mx.collections.ArrayCollection;
+        private var _goalTreeNodeData:GoalTreeNodeData;
+
+        [Bindable]
+        private var dataSources:ArrayCollection;
+
+        public function set goalTreeNodeData(val:GoalTreeNodeData):void {
+            _goalTreeNodeData = val;
+        }]]></mx:Script>
+    <mx:List dataProvider="{dataSources}" itemRenderer="com.easyinsight.goals.DataSourceLinkButton" height="100%" width="100%"/>
+</mx:Canvas>

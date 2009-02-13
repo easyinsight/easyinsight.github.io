@@ -1,18 +1,41 @@
 <?xml version="1.0" ?>
 <FullScreenPage xmlns="com.easyinsight.*" xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:ilog="ilog.orgchart.*"
-                xmlns:goals="com.easyinsight.goals.*" width="100%" height="100%">
+                xmlns:goals="com.easyinsight.goals.*" width="100%" height="100%" creationComplete="setup()" backgroundColor="#DCE2F8">
     <mx:Script><![CDATA[
 import com.easyinsight.analysis.AnalysisCloseEvent;
+import com.easyinsight.util.ModelessWindowEvent;
+import mx.collections.ArrayCollection;
+import mx.core.IFlexDisplayObject;
+import mx.managers.PopUpManager;
         public var goalTree:GoalTree;
+
+        [Bindable]
+        [Embed(source="../../../../assets/background2.JPG")]
+        private var background2:Class;
 
         [Bindable]
         private var _goalTreeNodes:GoalTreeNode;
 
         [Bindable]
-        private var startDate:Date;
+        public var startDate:Date;
 
         [Bindable]
-        private var endDate:Date;
+        public var endDate:Date;
+
+        private var windows:ArrayCollection = new ArrayCollection();
+
+        private function setup():void {
+            addEventListener(ModelessWindowEvent.WINDOW_REMOVED, onWindowRemove);
+            addEventListener(ModelessWindowEvent.WINDOW_ADDED, onWindowAdd);
+        }
+
+        private function onWindowRemove(event:ModelessWindowEvent):void {
+            windows.removeItemAt(windows.getItemIndex(event.displayObject));
+        }
+
+        private function onWindowAdd(event:ModelessWindowEvent):void {
+            windows.addItem(event.displayObject);
+        }
 
         override protected function createChildren():void {
             super.createChildren();
@@ -35,22 +58,25 @@ import com.easyinsight.analysis.AnalysisCloseEvent;
         }
 
         private function close():void {
+            for each (var displayObject:DisplayObject in windows) {
+                PopUpManager.removePopUp(displayObject as IFlexDisplayObject);
+            }
             dispatchEvent(new AnalysisCloseEvent(this));
         }
         ]]></mx:Script>
     <mx:RemoteObject destination="goalService" id="goalService">
         <mx:method name="createDataTree" result="gotTree()"/>
     </mx:RemoteObject>
-    <mx:HBox id="buttonBox" paddingLeft="5" paddingTop="5" paddingBottom="5">
-			<mx:Button id="wrapButton" icon="@Embed(source='../../../../assets/document_out.png')" click="close()" toolTip="Close"/>
-		</mx:HBox>
-    <mx:VBox width="100%" height="100%">
+    <mx:HBox id="buttonBox" paddingLeft="5" paddingTop="5" paddingBottom="5" width="100%">
+        <mx:Button id="wrapButton" icon="@Embed(source='../../../../assets/document_out.png')" click="close()" toolTip="Close"/>
         <mx:HBox width="100%" horizontalAlign="center">
             <mx:DateField id="startChooser" selectedDate="{startDate}" change="onDatesChanged()"/>
             <mx:Spacer width="200"/>
             <mx:DateField id="endChooser" selectedDate="{endDate}" change="onDatesChanged()"/>
         </mx:HBox>
-        <mx:Box height="100%" width="100%">
+    </mx:HBox>
+    <mx:VBox width="100%" height="100%" paddingRight="15" paddingTop="15" paddingLeft="15" paddingBottom="15">
+        <mx:Canvas height="100%" width="100%" backgroundImage="{background2}" backgroundSize="100%">
             <ilog:OrgChart id="myOrgChart" dataProvider="{_goalTreeNodes}"
                            width="100%" height="100%" minZoomLevel="1" maxZoomLevel="1" allowSelection="false">
                 <ilog:itemRenderer>
@@ -59,7 +85,7 @@ import com.easyinsight.analysis.AnalysisCloseEvent;
                     </mx:Component>
                 </ilog:itemRenderer>
             </ilog:OrgChart>
-        </mx:Box>
+        </mx:Canvas>
     </mx:VBox>
 
 </FullScreenPage>

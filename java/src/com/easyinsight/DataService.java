@@ -76,13 +76,13 @@ public class DataService implements IDataService {
         }
         List<AnalysisItem> items = analysisDefinition.getAllAnalysisItems();
         for (AnalysisItem analysisItem : items) {
-            if (!ids.contains(analysisItem.getAnalysisItemID())) {
+            if (analysisItem.getAnalysisItemID() != 0 && !ids.contains(analysisItem.getAnalysisItemID())) {
                 invalidIDs.add(analysisItem.getAnalysisItemID());
             }
         }
         if (analysisDefinition.getFilterDefinitions() != null) {
             for (FilterDefinition filterDefinition : analysisDefinition.getFilterDefinitions()) {
-                if (!ids.contains(filterDefinition.getField().getAnalysisItemID())) {
+                if (filterDefinition.getField().getAnalysisItemID() != 0 && !ids.contains(filterDefinition.getField().getAnalysisItemID())) {
                     invalidIDs.add(filterDefinition.getField().getAnalysisItemID());
                 }
             }

@@ -28,7 +28,7 @@ package com.easyinsight.listing
 		public var feedType:int;
 		public var children:ArrayCollection;
 		public var role:int;
-		public var definition:AnalysisDefinition;
+		//public var definition:AnalysisDefinition;
 		public var tagString:String;
 		public var attribution:String;
 		public var description:String;
