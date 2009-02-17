@@ -1,42 +1,54 @@
 <?xml version="1.0" encoding="utf-8"?>
-<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml"
-	creationComplete="initHandlers()" xmlns:google="com.easyinsight.google.*">
-	<mx:states>
-		<mx:State name="salesforce">
-			
-		</mx:State>
-		<mx:State name="wesabe">
-			
-		</mx:State>
-	</mx:states>
-	<mx:Script>
+<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:customupload="com.easyinsight.customupload.*"
+                creationComplete="initHandlers()" xmlns:google="com.easyinsight.google.*" title="Connect to External Data Source">
+    <mx:Script>
 		<![CDATA[
-			import mx.managers.PopUpManager;
-            
-            private function initHandlers():void {
-            	
-            }
-            
-            private function onFeedCreation(event:UploadConfigEvent):void {
-            	dispatchEvent(event);
-            	PopUpManager.removePopUp(this);            	
-            }
-            
-            private function cancel(event:UploadConfigEvent):void {
-            	dispatchEvent(event);
-            	PopUpManager.removePopUp(this);
-            }
+        import mx.collections.ArrayCollection;
+        import mx.controls.Alert;
+        import mx.events.ListEvent;
+        import mx.managers.PopUpManager;
+
+        [Bindable]
+        private var dataSourceTypes:ArrayCollection;
+
+        private function initHandlers():void {
+
+        }
+
+        private function onFeedCreation(event:UploadConfigEvent):void {
+            //dispatchEvent(event);
+            PopUpManager.removePopUp(this);
+        }
+
+        private function cancel(event:UploadConfigEvent):void {
+            //dispatchEvent(event);
+            PopUpManager.removePopUp(this);
+        }
+
+        private function onItemClick(event:ListEvent):void {
+            viewStack.selectedIndex = event.rowIndex;
+        }        
 		]]>
-	</mx:Script>
-	<mx:VBox width="100%" height="100%" styleName="TitleWindowContents" backgroundSize="100%">
-		<mx:RadioButtonGroup id="uploadTypeGroup" selectedValue="google"/>
-		<mx:HBox width="100%" horizontalAlign="center" paddingTop="20">
-			<mx:RadioButton groupName="uploadTypeGroup" label="Google Documents" value="google" id="google" fontSize="14"/>
-			<mx:RadioButton groupName="uploadTypeGroup" label="Salesforce.com" value="salesforce" id="salesforce" fontSize="14"/>
-			<mx:RadioButton groupName="uploadTypeGroup" label="Wesabe" value="wesabe" id="wesabe" fontSize="14"/>
-		</mx:HBox>
-		<mx:Canvas id="coreCanvas" width="100%" height="100%">
-			<google:GoogleSpreadsheetSelection userConfigComplete="onFeedCreation(event)" userConfigCancel="cancel(event)"/>
-		</mx:Canvas>
-	</mx:VBox>
+    </mx:Script>
+
+    <mx:HBox width="100%" height="100%" styleName="TitleWindowContents" backgroundSize="100%">
+        <mx:List height="100%" width="100" itemClick="onItemClick(event)">
+            <mx:dataProvider>
+                <mx:ArrayCollection>
+                    <mx:Array>
+                        <mx:String>Google</mx:String>
+                        <mx:String>JIRA</mx:String>
+                    </mx:Array>
+                </mx:ArrayCollection>
+            </mx:dataProvider>
+        </mx:List>
+        <mx:VBox width="100%" height="100%">
+            <mx:ViewStack id="viewStack">
+                <google:GoogleSpreadsheetSelection userConfigComplete="onFeedCreation(event)"
+                                                   userConfigCancel="cancel(event)"/>
+                <customupload:ServerDataSourceCreation dataSourceClass="com.easyinsight.datasources.JiraDataSource" userConfigComplete="onFeedCreation(event)"
+                                                   userConfigCancel="cancel(event)"/>
+            </mx:ViewStack>
+        </mx:VBox>
+    </mx:HBox>
 </mx:TitleWindow>

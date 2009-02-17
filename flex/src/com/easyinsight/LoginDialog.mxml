@@ -24,7 +24,7 @@
                         if (successful) {                            
                             User.initializeUser(authResult.name, authResult.email,
                             	authResult.accountType, authResult.spaceAllowed, authResult.accountAdmin,
-                            authResult.dataSourceCreator, authResult.insightCreator);
+                            authResult.dataSourceCreator, authResult.insightCreator, authResult.userID);
                         	User.getInstance().password = authResult.encryptedPassword;
                         	User.getInstance().userName = authResult.userName;
                             PopUpManager.removePopUp(this);

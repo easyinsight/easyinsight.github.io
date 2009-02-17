@@ -45,7 +45,11 @@ public class Row implements IRow, Serializable {
     }
 
     public void addValue(Key tag, String value) {
-        valueMap.put(tag, new StringValue(value));
+        if (value == null) {
+            valueMap.put(tag, new EmptyValue());
+        } else {
+            valueMap.put(tag, new StringValue(value));
+        }
     }
 
     public Collection<Key> getKeys() {

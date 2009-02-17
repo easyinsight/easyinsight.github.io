@@ -34,6 +34,24 @@ public class GoalTreeNode {
     private String description;
     private String iconImage;
     private List<Integer> newSolutions;
+    private List<Integer> users;
+    private long subTreeID;
+
+    public long getSubTreeID() {
+        return subTreeID;
+    }
+
+    public void setSubTreeID(long subTreeID) {
+        this.subTreeID = subTreeID;
+    }
+
+    public List<Integer> getUsers() {
+        return users;
+    }
+
+    public void setUsers(List<Integer> users) {
+        this.users = users;
+    }
 
     public List<Integer> getNewSolutions() {
         return newSolutions;

@@ -224,6 +224,13 @@ import mx.utils.URLUtil;
 
             private function uploadConfigComplete(event:UploadConfigEvent):void {
                 uploadService.getFeedAnalysisTree.send();
+                if (event.feedID > 0) {
+                    var descriptor:DataFeedDescriptor = new DataFeedDescriptor();
+                    descriptor.dataFeedID = event.feedID;
+                    descriptor.policy = new UploadPolicy();
+                    descriptor.policy.publiclyVisible = false;
+                    dispatchEvent(new AnalyzeEvent(new DescriptorAnalyzeSource(descriptor)));
+                }
             }
 
             private function gotFeedAnalysisTree():void {

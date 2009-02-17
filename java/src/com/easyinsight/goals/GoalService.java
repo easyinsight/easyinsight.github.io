@@ -1,12 +1,12 @@
 package com.easyinsight.goals;
 
-import com.easyinsight.analysis.WSAnalysisDefinition;
 import com.easyinsight.analysis.Tag;
-import com.easyinsight.datafeeds.FeedDescriptor;
 import com.easyinsight.solutions.Solution;
 import com.easyinsight.solutions.SolutionService;
+import com.easyinsight.solutions.SolutionGoalTreeDescriptor;
 import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.logging.LogClass;
+import com.easyinsight.email.UserStub;
 
 import java.util.*;
 
@@ -23,13 +23,26 @@ public class GoalService {
     public GoalTree createGoalTree(GoalTree goalTree) {
         long userID = SecurityUtil.getUserID();
         try {
-            goalStorage.addGoalTree(goalTree, userID);
+            UserStub userStub = new UserStub();
+            userStub.setUserID(userID);
+            goalStorage.addGoalTree(goalTree);
             return goalTree;
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);
         }
-    }    
+    }
+
+    
+
+    public void deleteGoalTree(long goalTreeID) {
+        try {
+            goalStorage.deleteGoalTree(goalTreeID);
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        }
+    }
 
     public GoalTree updateGoalTree(GoalTree goalTree) {
         try {
@@ -41,9 +54,37 @@ public class GoalService {
         }
     }
 
-    public AvailableSolutionList getSolutions(List<Tag> tags) {
+    public AvailableGoalTreeList getGoalTreesForInstall(long goalTreeID) {
+        AvailableGoalTreeList availableGoalTreeList = new AvailableGoalTreeList();
+        List<GoalTreeDescriptor> myTrees = new ArrayList<GoalTreeDescriptor>();
+        List<SolutionGoalTreeDescriptor> solutionTrees;
         try {
-            List<Solution> tagSolutions = new SolutionService().getSolutionsWithTags(tags);
+            List<GoalTreeDescriptor> goalTrees = getGoalTrees();
+            Iterator<GoalTreeDescriptor> iter = goalTrees.iterator();
+            while (iter.hasNext()) {
+                GoalTreeDescriptor descriptor = iter.next();
+                if (descriptor.getGoalTreeID() == goalTreeID) {
+                    iter.remove();
+                }
+            }
+            solutionTrees = new SolutionService().getTreesFromSolutions();
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        }
+        availableGoalTreeList.setMyTrees(myTrees);
+        availableGoalTreeList.setSolutionTrees(solutionTrees);
+        return availableGoalTreeList;
+    }
+
+    public AvailableSolutionList getSolutionsByTags(List<Tag> tags) {
+        try {
+            List<Solution> tagSolutions;
+            if (tags == null) {
+                tagSolutions = new ArrayList<Solution>();
+            } else {
+                tagSolutions = new SolutionService().getSolutionsWithTags(tags);
+            }
             List<Solution> allSolutions = new SolutionService().getSolutions();
             return new AvailableSolutionList(tagSolutions, allSolutions);
         } catch (Exception e) {
@@ -94,26 +135,6 @@ public class GoalService {
         return dataNode;
     }
 
-    public void evaluateGoalTrees() {
-        // needs to trigger on timer of once/day
-
-        // retrieve all goal trees
-
-        // create thread pool to evaluate each goal tree
-    }
-
-
-
-    public void evaluateGoalTree(long goalTreeID) {
-        // if the goal tree has a date in it, retrieve data for the preceding day
-        // otherwise, retrieve all data
-        // retrieval will be a list definition with the single specified AnalysisMeasure
-        // if a date is present in the goal node definition, it will be added as a filter
-        // value from that will be saved as the day's value for the goal tree
-
-        // so we retrieve the value from that definition, save that as the day's value
-    }
-
     public GoalTree getGoalTree(long goalTreeID) {
         try {
             return goalStorage.retrieveGoalTree(goalTreeID);
@@ -132,15 +153,27 @@ public class GoalService {
         }
     }
 
-    public List<WSAnalysisDefinition> getInsights(long goalTreeNodeID) {
-        return null;
+    public void subscribeToGoal(long goalTreeNodeID) {
+        long userID = SecurityUtil.getUserID();
+        try {
+            goalStorage.addUserToGoal(userID, goalTreeNodeID);
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        }
     }
 
-    public List<FeedDescriptor> getFeeds(long goalTreeNodeID) {
-        return null;
-    }
-
-    public List<Solution> getSolutions(long goalTreeNodeID) {
-        return null;
+    public List<GoalTreeNodeData> getGoals() {
+        long userID = SecurityUtil.getUserID();
+        try {
+            Calendar cal = Calendar.getInstance();
+            Date endDate = cal.getTime();
+            cal.add(Calendar.DAY_OF_YEAR, -7);
+            Date startDate = cal.getTime();
+            return goalStorage.getGoalsForUser(userID, startDate, endDate);
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        }
     }
 }

@@ -5,6 +5,10 @@ public class ParameterChoiceBoxFactory implements IFactory {
 
     public var analysisItems:ArrayCollection;
 
+    public function ParameterChoiceBoxFactory() {
+
+    }
+
     public function newInstance():* {
         return new ParameterChoiceBox(analysisItems);
     }

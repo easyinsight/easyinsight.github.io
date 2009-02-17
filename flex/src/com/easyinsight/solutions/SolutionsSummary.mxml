@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:listing="com.easyinsight.listing.*" width="100%" height="100%"
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:listing="com.easyinsight.listing.*"
+         xmlns:util="com.easyinsight.util.*" width="100%" height="100%"
          implements="com.easyinsight.listing.IPerspective"
          backgroundColor="#DCE2F8" doubleClickEnabled="true" creationComplete="initListeners()">
     <mx:states>
@@ -12,13 +13,18 @@
     </mx:states>
     <mx:Script>
 		<![CDATA[
-import com.easyinsight.framework.LoginEvent;
-import mx.utils.URLUtil;
-import com.easyinsight.framework.User;
-import mx.managers.BrowserManager;
+        import com.easyinsight.account.Account;
+        import com.easyinsight.framework.LoginEvent;
+
+        import mx.utils.URLUtil;
+
+        import com.easyinsight.framework.User;
+
+        import mx.managers.BrowserManager;
         import mx.events.ListEvent;
         import mx.managers.PopUpManager;
         import mx.collections.ArrayCollection;
+
         import com.easyinsight.listing.AnalyzeSource;
 
         [Bindable]
@@ -58,12 +64,16 @@ import mx.managers.BrowserManager;
             BrowserManager.getInstance().setFragment(fragmentString);
             var user:User = User.getInstance();
             if (user == null) {
-                currentState="notLoggedIn";
+                currentState = "notLoggedIn";
             } else {
-                if (currentState != "") {
-                    currentState = "";
+                if (User.getInstance().getAccountType() == Account.FREE) {
+                    currentState = "functionalityUnavailable";
+                } else {
+                    if (currentState != "") {
+                        currentState = "";
+                    }
+                    solutionService.getSolutions.send();
                 }
-                solutionService.getSolutions.send();
             }
         }
 
@@ -93,24 +103,29 @@ import mx.managers.BrowserManager;
         <mx:method name="getSolutions" result="gotAllSolutions()"/>
     </mx:RemoteObject>
     <mx:Box width="100%" height="5" backgroundColor="#254BD4" left="0" right="0"/>
-    <mx:VBox width="100%" height="100%" paddingTop="10" paddingLeft="10" paddingRight="10" paddingBottom="10" id="coreContent">
+    <mx:VBox width="100%" height="100%" paddingTop="10" paddingLeft="10" paddingRight="10" paddingBottom="10"
+             id="coreContent">
         <mx:VBox width="100%" height="100%" id="solutionBox">
             <mx:HBox width="100%">
                 <mx:ApplicationControlBar>
                     <mx:Label fontSize="14" text="Available Solutions"/>
                 </mx:ApplicationControlBar>
                 <mx:Spacer width="100%"/>
-                <mx:HBox borderStyle="inset" borderThickness="1" paddingTop="5" paddingBottom="5" paddingLeft="5" paddingRight="5">
+                <mx:HBox borderStyle="inset" borderThickness="1" paddingTop="5" paddingBottom="5" paddingLeft="5"
+                         paddingRight="5">
                     <mx:TextInput id="searchText" keyUp="search()"/>
                     <mx:Button toolTip="Search" icon="@Embed(source='../../../../assets/view.png')" id="searchButton"/>
                 </mx:HBox>
             </mx:HBox>
             <mx:DataGrid dataProvider="{availableSolutions}" width="100%" itemDoubleClick="onDoubleClick(event)">
                 <mx:columns>
-                    <mx:DataGridColumn headerText="Solution Name" dataField="name" headerRenderer="com.easyinsight.groups.CustomGroupHeader"/>
-                    <mx:DataGridColumn headerText="Industry" dataField="industry" width="150" headerRenderer="com.easyinsight.groups.CustomGroupHeader"/>
-                    <mx:DataGridColumn headerText="Author" dataField="author" width="150" headerRenderer="com.easyinsight.groups.CustomGroupHeader"/>
-                    <mx:DataGridColumn headerText="" width="100"
+                    <util:EIDataGridColumn headerText="Solution Name" dataField="name"
+                                           headerRenderer="com.easyinsight.groups.CustomGroupHeader"/>
+                    <util:EIDataGridColumn headerText="Industry" dataField="industry" width="150"
+                                       headerRenderer="com.easyinsight.groups.CustomGroupHeader"/>
+                    <util:EIDataGridColumn headerText="Author" dataField="author" width="150"
+                                       headerRenderer="com.easyinsight.groups.CustomGroupHeader"/>
+                    <util:EIDataGridColumn headerText="" width="100"
                                        itemRenderer="com.easyinsight.solutions.AvailableSolutionIcons"/>
                 </mx:columns>
             </mx:DataGrid>

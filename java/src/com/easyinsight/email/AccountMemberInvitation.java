@@ -19,6 +19,18 @@ public class AccountMemberInvitation {
             "You can access Easy Insight at http://www.easy-insight.com/app\r\n" +
             "Once there and logged in, you can change your password through Account - Change my Password.";
 
+    private static String freeAccountConfirmationText =
+            "You have created a new free account with Easy Insight.\r\n"+
+            "Please click the link below to activate your account:\r\n\r\n"+
+            "{0}";
+
+    private static String individualAccountCreationText =
+            "Welcome to Easy Insight!\r\n\r\n" +
+            "You have created an individual account.";
+
+    private static String professionalAccountCreationText =
+            "";
+
     public void sendAccountEmail(String to, String accountOwner, String userName, String password) {
         String body = MessageFormat.format(groupInviteText, accountOwner, userName, password);
         String subject = "Easy Insight Account Creation";

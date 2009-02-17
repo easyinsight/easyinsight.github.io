@@ -2,7 +2,8 @@
 <mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" creationComplete="setup()" width="100%" height="100%">
     <mx:Script><![CDATA[
         import mx.collections.ArrayCollection;
-        import mx.graphics.BitmapFill;
+        import mx.controls.Alert;
+import mx.graphics.BitmapFill;
 
         [Bindable]
         private var goalHistory:ArrayCollection;
@@ -19,6 +20,10 @@
         [Bindable]
         [Embed(source="../../../../assets/water4.JPG")]
         private var areaBackground:Class;
+
+        [Bindable]
+        [Embed(source="../../../../assets/add.png")]
+        private var addIcon:Class;
 
         private var _goalTreeNodeData:GoalTreeNodeData;
 
@@ -49,9 +54,18 @@
             _endDate = endChooser.selectedDate;
             goalService.getGoalValues.send(_goalTreeNodeData.goalTreeNodeID, _startDate, _endDate);
         }
+
+        private function subscribe():void {
+            goalService.subscribeToGoal.send(_goalTreeNodeData.goalTreeNodeID);
+        }
+
+        private function subscribedToGoal():void {
+            Alert.show("This goal will now show for you in the My Goals page.");
+        }
         ]]></mx:Script>
     <mx:RemoteObject destination="goalService" id="goalService">
         <mx:method name="getGoalValues" result="gotValues()"/>
+        <mx:method name="subscribeToGoal" result="subscribedToGoal()"/>
     </mx:RemoteObject>
     <mx:SeriesSlide id="slideIn" duration="1000" direction="up"/>
     <mx:SeriesSlide id="slideOut" duration="1000" direction="down"/>
@@ -59,7 +73,9 @@
         <mx:HBox width="100%" horizontalAlign="center">
             <mx:DateField id="startChooser" selectedDate="{_startDate}" change="onDatesChanged()"/>
             <mx:Spacer width="30"/>
-            <mx:DateField id="endChooser" selectedDate="{_endDate}" change="onDatesChanged()"/>            
+            <mx:DateField id="endChooser" selectedDate="{_endDate}" change="onDatesChanged()"/>
+            <mx:Spacer width="100%"/>
+            <mx:Button icon="{addIcon}" toolTip="Add this goal to My Goals" click="subscribe()"/>
         </mx:HBox>
         <mx:AreaChart dataProvider="{goalHistory}" width="100%" height="100%">
             <mx:horizontalAxis>

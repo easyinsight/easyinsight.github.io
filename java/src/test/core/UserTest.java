@@ -49,8 +49,6 @@ public class UserTest extends TestCase {
         // 
         User testUser = new User("testuser", "password", "James Boe", "testuser99@gmail.com");
         // create an account
-        AccountTransferObject accountTransferObject = new AccountTransferObject();
-        accountTransferObject.setAccountType(new FreeAccount());
         //long accountID = userService.createAccount(testUser, accountTransferObject);
         //AccountTransferObject retrievedTransferObject = userService.retrieveAccount();
         //retrievedTransferObject.setAccountType(new IndividualAccount());

@@ -79,7 +79,7 @@ public class SalesforceConnection {
         try {
 
             User user = userStorage.retrieveUser();
-            Account account = userStorage.getAccount(user.getAccountID().getAccountID());
+            Account account = userStorage.getAccount(user.getAccount().getAccountID());
 
             long feedID = createCompositeFeed(port);
             SubscriptionLicense license = new SubscriptionLicense();

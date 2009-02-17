@@ -42,7 +42,7 @@ public class User {
 
     @ManyToOne
     @JoinColumn (name="account_id", insertable = false, updatable = false)
-    private Account accountID;
+    private Account account;
 
     public User() {
     }
@@ -98,12 +98,12 @@ public class User {
         this.userName = userName;
     }
 
-    public Account getAccountID() {
-        return accountID;
+    public Account getAccount() {
+        return account;
     }
 
-    public void setAccountID(Account accountID) {
-        this.accountID = accountID;
+    public void setAccount(Account account) {
+        this.account = account;
     }
 
     public String getPassword() {

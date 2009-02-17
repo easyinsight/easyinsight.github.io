@@ -104,10 +104,10 @@
 	<mx:HBox width="100%" height="100%" id="coreVBox" styleName="TitleWindowContents">
         <mx:Form id="coreForm" paddingRight="0">
             <mx:FormItem label="Name:" fontFamily="Tahoma" fontWeight="bold">
-                <mx:TextInput id="feedName" fontFamily="Lucide Grande" fontWeight="normal"/>
+                <mx:TextInput id="feedName"/>
             </mx:FormItem>
             <mx:FormItem label="Select a file to upload:" direction="horizontal" fontFamily="Tahoma" fontWeight="bold">
-                <mx:TextInput id="txtPhoto" editable="false"  fontFamily="Lucide Grande" fontWeight="normal"/>
+                <mx:TextInput id="txtPhoto" editable="false"/>
                 <mx:Button label="Browse..." click="doBrowse( event )" />
             </mx:FormItem>
             <mx:FormItem label="" direction="horizontal">

@@ -1,0 +1,83 @@
+<?xml version="1.0" ?>
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" width="400" horizontalAlign="center">
+    <mx:Metadata>
+		[Event(name="userConfigComplete", type="com.easyinsight.customupload.UploadConfigEvent")]
+		[Event(name="userConfigCancel", type="com.easyinsight.customupload.UploadConfigEvent")]
+	</mx:Metadata>
+    <mx:Script><![CDATA[
+        import com.easyinsight.administration.feed.FeedDefinitionData;
+        import com.easyinsight.datasources.JiraDataSource;
+        import com.easyinsight.framework.Credentials;
+        import com.easyinsight.genredata.AnalyzeEvent;
+        import com.easyinsight.listing.DataFeedDescriptor;
+        import com.easyinsight.listing.DescriptorAnalyzeSource;
+        import mx.controls.Alert;
+        
+        private var _dataSourceClass:Class;
+
+        public function set dataSourceClass(val:Class):void {
+            _dataSourceClass = val;
+        }
+
+        public function get dataSourceDefinition():FeedDefinitionData {
+            var obj:FeedDefinitionData = new _dataSourceClass();
+            return obj;
+        }
+
+        public function get credentials():Credentials {
+            var credentials:Credentials = new Credentials();
+            credentials.userName = userNameInput.text;
+            credentials.password = passwordInput.text;
+            return credentials;
+        }
+
+        private function blah():void {
+            var jira:JiraDataSource;
+        }
+
+        private function validate():void {
+            uploadService.validateCredentials.send(dataSourceDefinition, credentials);
+        }
+
+        private function validated():void {
+            var validation:String = uploadService.validateCredentials.lastResult as String;
+            if (validation == null) {
+                Alert.show("Validation successful!");
+            } else {
+                Alert.show(validation);
+            }
+        }
+
+        private function create():void {
+            uploadService.newExternalDataSource.send(dataSourceDefinition, credentials);
+        }
+
+        private function created():void {
+            var id:int = uploadService.newExternalDataSource.lastResult as int;
+            var descriptor:DataFeedDescriptor = new DataFeedDescriptor();
+            descriptor.dataFeedID = id;
+            descriptor.policy = new UploadPolicy();
+            descriptor.policy.publiclyVisible = false;
+            dispatchEvent(new UploadConfigEvent(UploadConfigEvent.UPLOAD_CONFIG_COMPLETE, id));            
+            dispatchEvent(new AnalyzeEvent(new DescriptorAnalyzeSource(descriptor)));
+        }
+
+        ]]></mx:Script>
+    <mx:RemoteObject destination="userUpload" id="uploadService">
+        <mx:method name="validateCredentials" result="validated()"/>
+        <mx:method name="newExternalDataSource" result="created()"/>
+    </mx:RemoteObject>
+    <mx:Form paddingBottom="0" paddingTop="0" paddingLeft="0" paddingRight="0">
+		<mx:FormItem label="User Name: " direction="horizontal" fontWeight="bold" fontFamily="Tahoma">
+			<mx:TextInput id="userNameInput" fontWeight="normal" fontFamily="Lucida Grande"/>
+		</mx:FormItem>
+		<mx:FormItem label="Password: " direction="horizontal" fontWeight="bold" fontFamily="Tahoma">
+			<mx:TextInput id="passwordInput" displayAsPassword="true"/>
+		</mx:FormItem>
+	</mx:Form>
+    <mx:HBox width="100%" horizontalAlign="center">
+        <mx:Button label="Validate" click="validate()"/>
+        <mx:Button label="Create" click="create()"/>
+        <mx:Button label="Cancel" click="dispatchEvent(new UploadConfigEvent(UploadConfigEvent.UPLOAD_CONFIG_CANCEL))"/>
+    </mx:HBox>
+</mx:VBox>

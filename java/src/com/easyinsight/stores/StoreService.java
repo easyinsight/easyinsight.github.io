@@ -128,7 +128,7 @@ public class StoreService {
         Session session = Database.instance().createSession();
         User creator = new UserService().retrieveUser();
         List<Merchant> merchantResults = new ArrayList<Merchant>();
-        try {
+        /*try {
             session.beginTransaction();
             List merchantObjs = session.createQuery("from Merchant as merchant left join " +
                     "merchant.users as userBinding where userBinding.accountID = ?").
@@ -150,12 +150,12 @@ public class StoreService {
             throw new RuntimeException(e);
         } finally {
             session.close();
-        }
+        }*/
         return merchantResults;
     }
 
     public long createMerchant(Merchant merchant) {
-        Collection<UserMerchantBinding> bindings = new ArrayList<UserMerchantBinding>();
+        /*Collection<UserMerchantBinding> bindings = new ArrayList<UserMerchantBinding>();
         User creator = new UserService().retrieveUser();
         bindings.add(new UserMerchantBinding(creator.getAccountID(), merchant, UserMerchantBindingTypes.OWNER));
         merchant.setUsers(bindings);
@@ -171,11 +171,12 @@ public class StoreService {
         } finally {
             session.close();
         }
-        return merchant.getMerchantID();
+        return merchant.getMerchantID();*/
+        return 0;
     }
 
     public void buy(long feedID, int numberLicenses) {
-        try {
+        /*try {
             UserService userService = new UserService();
             User user = userService.retrieveUser();
             Account account = userService.getAccount(user.getAccountID().getAccountID());
@@ -202,7 +203,8 @@ public class StoreService {
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);
-        }
+        }*/
+        throw new UnsupportedOperationException();
     }
 
     private Merchant getMerchant(long merchantID) {

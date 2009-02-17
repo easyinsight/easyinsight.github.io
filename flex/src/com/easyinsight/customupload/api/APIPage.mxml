@@ -10,9 +10,16 @@
                 <listing:GottaLoginPage/>
             </mx:AddChild>
         </mx:State>
+        <mx:State name="functionalityUnavailable">
+            <mx:RemoveChild target="{apiListing}"/>
+            <mx:AddChild relativeTo="{coreContent}">
+                <api:APIFunctionalityUnavailable/>
+            </mx:AddChild>
+        </mx:State>
     </mx:states>
     <mx:Script><![CDATA[
-        import com.easyinsight.framework.LoginEvent;
+        import com.easyinsight.account.Account;
+import com.easyinsight.framework.LoginEvent;
         import com.easyinsight.framework.User;
         import mx.collections.ArrayCollection;
 import mx.managers.PopUpManager;
@@ -48,6 +55,7 @@ import mx.utils.URLUtil;
         public function analyze():AnalyzeSource {
             return null;
         }
+
         public function gotFocus():void {
             var fragmentObject:Object = new Object();
             fragmentObject.page = "apis";
@@ -58,15 +66,21 @@ import mx.utils.URLUtil;
             if (user == null) {
                 currentState = "notLoggedIn";
             } else {
-                if (currentState != "") {
-                    currentState = "";
+                if (User.getInstance().getAccountType() == Account.FREE) {
+                    currentState = "functionalityUnavailable";
+                } else {
+                    if (currentState != "") {
+                        currentState = "";
+                    }
+                    apiService.getDataSourceAPIs.send();
                 }
-                apiService.getDataSourceAPIs.send();                
             }
         }
+
         public function getDefaultAnalyzeState():Boolean {
             return false;
         }
+
         public function isKeywordSearchInstant():Boolean {
             return false;
         }

@@ -1,6 +1,7 @@
 package com.easyinsight.groups;
 
 import com.easyinsight.email.UserStub;
+import com.easyinsight.datafeeds.FeedConsumer;
 
 /**
  * User: James Boe
@@ -11,6 +12,10 @@ public class GroupUser extends UserStub {
     private int role;
 
     public GroupUser() {
+    }
+
+    public int type() {
+        return FeedConsumer.GROUP;
     }
 
     public GroupUser(long userID, String userName, String email, String fullName, int role) {

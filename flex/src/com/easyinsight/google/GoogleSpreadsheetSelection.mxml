@@ -19,15 +19,10 @@
 	<mx:Script>
 		<![CDATA[
 			import com.easyinsight.customupload.UploadConfigEvent;
-			import com.easyinsight.listing.DescriptorAnalyzeSource;
-			import mx.events.ListEvent;
 			import com.easyinsight.listing.AnalyzeSource;
             import com.easyinsight.genredata.AnalyzeEvent;
             import com.easyinsight.framework.Credentials;
-            import com.easyinsight.framework.NewViewCreationEvent;
-            import com.easyinsight.framework.CancelViewCreationEvent;
             import mx.collections.ArrayCollection;
-            import mx.managers.PopUpManager;
             import com.easyinsight.framework.User;
 
             [Bindable]
@@ -97,7 +92,7 @@
              private function processSpreadsheets():void {
              	connectMessage = "Successfully connected to Google Spreadsheets.";
              	progressBar.visible = false;
-                 var spreadsheets:ArrayCollection = new ArrayCollection(dataService.getAvailableGoogleSpreadsheets.lastResult);
+                 var spreadsheets:ArrayCollection = dataService.getAvailableGoogleSpreadsheets.lastResult as ArrayCollection;
                  this.googleSpreadsheets = spreadsheets;
                  spreadsheetTree.rowCount = spreadsheets.length;
                  gc.refresh();
@@ -114,7 +109,7 @@
              }
 
              private function googleConnectAttempted():void {
-                 var success:Boolean = dataService.testGoogleConnect.lastResult;
+                var success:Boolean = dataService.testGoogleConnect.lastResult as Boolean;
                 if (success) {
                     connectMessage = "Successfully connected to Google Spreadsheets, retrieving available spreadsheets...";
                     dataService.getAvailableGoogleSpreadsheets.send(credentials);

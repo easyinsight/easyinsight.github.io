@@ -1,0 +1,113 @@
+<?xml version="1.0" ?>
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml">
+    <mx:Metadata>
+		[Event(name="userDefined", type="com.easyinsight.account.UserDefinitionEvent")]
+		[Event(name="previousPage", type="com.easyinsight.account.PreviousPageEvent")]
+	</mx:Metadata>
+	<mx:Script>
+		<![CDATA[
+			import mx.validators.Validator;
+			import com.easyinsight.framework.UserTransferObject;
+
+            private var user:UserTransferObject;
+            private var validators:Array;
+
+            private function validatedUser():void {
+            	var result:int = creationService.doesUserExist.lastResult as int;
+                if (result == 0) {
+                	dispatchEvent(new UserDefinitionEvent(user, password.text));
+                } else {
+                	var failureMessage:String = "That user name already exists.";
+                    failureMessageLabel.text = failureMessage;
+                }
+            }
+
+            private function initHandlers():void {
+            	validators = [ emailValidator, userNameValidator, passwordValidator, fullNameValidator ];
+            }
+
+            public function createAccount():void {
+            	var results:Array = Validator.validateAll(validators);
+                if (results.length > 0) {
+                    failureMessageLabel.text = "There are one or more problems with the fields above.";
+            	} else if (email.text != confirmEmail.text) {
+                    failureMessageLabel.text = "Your email addresses do not match.";
+                } else if (password.text != confirmPassword.text) {
+                    failureMessageLabel.text = "Your passwords do not match.";
+                } else {
+            		failureMessageLabel.text = "";
+	                user = new UserTransferObject();
+	                user.userName = userName.text;
+	                user.name = fullName.text;
+	                user.email = email.text;
+                    user.accountAdmin = true;
+                    user.insightCreator = true;
+                    user.dataSourceCreator = true;
+	                creationService.doesUserExist.send(userName.text);
+	            }
+            }
+
+            public function cancel():void {
+                dispatchEvent(new PreviousPageEvent());
+            }
+        ]]>
+	</mx:Script>
+
+    <mx:VBox verticalGap="0" borderThickness="1" borderColor="#D42525" borderStyle="solid" dropShadowEnabled="true">
+        <mx:Box width="100%" height="5" backgroundColor="#D42525" left="0" right="0"/>
+        <mx:Box width="100%" backgroundColor="#DBD9AC" horizontalAlign="center">
+            <mx:Label text="Account Settings: " fontFamily="Tahoma" fontWeight="bold" fontSize="14"/>
+        </mx:Box>
+        <mx:Form width="100%" backgroundColor="0xDCDBD0">
+            <mx:FormItem label="Account Name: " direction="horizontal" fontFamily="Tahoma" fontWeight="bold">
+                <mx:TextInput id="accountName"/>
+            </mx:FormItem>
+            <mx:FormItem label="Number of User Licenses: "  direction="horizontal" fontFamily="Tahoma" fontWeight="bold">
+                <mx:NumericStepper id="licenseNumber" minimum="1" stepSize="1" value="1"/>
+            </mx:FormItem>
+        </mx:Form>
+    </mx:VBox>
+
+    <mx:VBox verticalGap="0" borderThickness="1" borderColor="#D42525" borderStyle="solid" dropShadowEnabled="true">
+        <mx:Box width="100%" height="5" backgroundColor="#D42525" left="0" right="0"/>
+        <mx:Box width="100%" backgroundColor="#DBD9AC" horizontalAlign="center">
+            <mx:Label text="Administrator User Profile: " fontFamily="Tahoma" fontWeight="bold" fontSize="14"/>
+        </mx:Box>
+        <mx:Form width="100%" backgroundColor="0xDCDBD0">
+			<mx:FormItem label="User Name:" direction="horizontal" fontFamily="Tahoma" fontWeight="bold">
+				<mx:TextInput id="userName" fontFamily="Lucida Grande" fontWeight="normal"/>
+			</mx:FormItem>
+			<mx:FormItem label="Password:" direction="horizontal" fontFamily="Tahoma" fontWeight="bold">
+				<mx:TextInput id="password" displayAsPassword="true" fontFamily="Lucida Grande" fontWeight="normal"/>
+			</mx:FormItem>
+            <mx:FormItem label="Confirm Password:" direction="horizontal" fontFamily="Tahoma" fontWeight="bold">
+				<mx:TextInput id="confirmPassword" displayAsPassword="true" fontFamily="Lucida Grande" fontWeight="normal"/>
+			</mx:FormItem>
+			<mx:FormItem label="Administrator Name:" direction="horizontal" fontFamily="Tahoma" fontWeight="bold">
+				<mx:TextInput id="fullName" fontFamily="Lucida Grande" fontWeight="normal"/>
+			</mx:FormItem>
+			<mx:FormItem label="Email Address:" direction="horizontal" fontFamily="Tahoma" fontWeight="bold">
+				<mx:TextInput id="email" fontFamily="Lucida Grande" fontWeight="normal"/>
+			</mx:FormItem>
+            <mx:FormItem label="Confirm Email Address:" direction="horizontal" fontFamily="Tahoma" fontWeight="bold">
+				<mx:TextInput id="confirmEmail" fontFamily="Lucida Grande" fontWeight="normal"/>
+			</mx:FormItem>
+			<mx:FormItem>
+				<mx:HBox>
+					<mx:Button label="Cancel" click="cancel()"/>
+					<mx:Button label="Next" click="createAccount()"/>
+				</mx:HBox>
+			</mx:FormItem>
+			<mx:FormItem label="">
+				<mx:Text text="" id="failureMessageLabel"/>
+			</mx:FormItem>
+		</mx:Form>
+	</mx:VBox>
+	<mx:StringValidator source="{userName}" property="text" id="userNameValidator" minLength="3" maxLength="20"/>
+	<mx:StringValidator source="{password}" property="text" id="passwordValidator" minLength="8" maxLength="20"/>
+	<mx:StringValidator source="{fullName}" property="text" id="fullNameValidator" minLength="3" maxLength="40"/>
+	<mx:EmailValidator source="{email}" property="text" id="emailValidator"/>
+	<mx:RemoteObject id="creationService" destination="login">
+		<mx:method name="doesUserExist" result="validatedUser()"/>
+	</mx:RemoteObject>
+</mx:VBox>

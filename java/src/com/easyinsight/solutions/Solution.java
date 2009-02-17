@@ -24,7 +24,16 @@ public class Solution {
     private boolean installable;
     private boolean copyData;
     private long goalTreeID;
+    private int solutionTier;
     private List<String> tags;
+
+    public int getSolutionTier() {
+        return solutionTier;
+    }
+
+    public void setSolutionTier(int solutionTier) {
+        this.solutionTier = solutionTier;
+    }
 
     public boolean isInstallable() {
         return installable;

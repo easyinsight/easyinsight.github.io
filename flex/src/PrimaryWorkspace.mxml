@@ -51,6 +51,7 @@ import mx.core.UIComponent;
             public var browserManager:IBrowserManager;
 
             private function startWorkspace():void {
+                userService.isSessionLoggedIn.send();                
                 new CommandProcessor();
                 //mx.core.Application.application.setStyle('backgroundImage', ImageFactory.getBackgroundImage());
                 addEventListener(FaultEvent.FAULT, onFault, true);
@@ -61,7 +62,6 @@ import mx.core.UIComponent;
                 browserManager.init("", "Intro");
                 introPanel.gotFocus();
                 User.getEventNotifier().addEventListener(NavigationEvent.NAVIGATION, navigation);
-                userService.isSessionLoggedIn.send();
             }
             
             private function onFault(event:FaultEvent):void {
@@ -215,7 +215,7 @@ import mx.core.UIComponent;
             	if (authResult != null) {
             		User.initializeUser(authResult.name, authResult.email,
                             	authResult.accountType, authResult.spaceAllowed, authResult.accountAdmin,
-                            authResult.dataSourceCreator, authResult.insightCreator);
+                            authResult.dataSourceCreator, authResult.insightCreator, authResult.userID);
                 	User.getInstance().password = authResult.encryptedPassword;
                 	User.getInstance().userName = authResult.userName;
                     User.getEventNotifier().dispatchEvent(new LoginEvent(LoginEvent.LOGIN));

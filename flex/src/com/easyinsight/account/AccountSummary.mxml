@@ -3,8 +3,7 @@
            height="100%" xmlns:account="com.easyinsight.account.*">
     <mx:Script>
 		<![CDATA[
-import com.easyinsight.framework.User;
-import mx.core.Container;
+        import com.easyinsight.framework.User;
         import mx.collections.ArrayCollection;
         import mx.events.ItemClickEvent;
         import com.easyinsight.account.license.LicenseAdministration;
@@ -26,14 +25,14 @@ import mx.core.Container;
             if (account == null) {
                 accountTypeLabel = "";
             } else {
-                switch (account.accountType.getAccountType()) {
-                    case AccountType.FREE:
+                switch (account.accountType) {
+                    case Account.FREE:
                         accountTypeLabel = "Free";
                         break;
-                    case AccountType.INDIVIDUAL:
+                    case Account.INDIVIDUAL:
                         accountTypeLabel = "Individual";
                         break;
-                    case AccountType.COMMERCIAL:
+                    case Account.PROFESSIONAL:
                         accountTypeLabel = "Commercial";
                         break;
                 }
@@ -44,10 +43,10 @@ import mx.core.Container;
         override protected function commitProperties():void {
             super.commitProperties();
             coreBox.removeAllChildren();
-            if (_account.accountType.getAccountType() == AccountType.FREE) {
+            if (_account.accountType == Account.FREE) {
                 // user profile information, option to upgrade, option to cancel
                 toggleOptions = new ArrayCollection([ new AccountOption("Account Settings", new FreeAccountSettings()) ]);
-            } else if (_account.accountType.getAccountType() == AccountType.INDIVIDUAL) {
+            } else if (_account.accountType == Account.INDIVIDUAL) {
                 // user profile information, option to ugprade, option to cancel, billing link, general account settings?
                 toggleOptions = new ArrayCollection([ new AccountOption("Account Settings", new IndividualAccountSettings()) ]);
             } else {

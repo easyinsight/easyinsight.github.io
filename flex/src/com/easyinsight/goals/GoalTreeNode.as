@@ -11,20 +11,29 @@ import com.easyinsight.analysis.AnalysisMeasure;
         public var goalTreeNodeID:int;
 		public var children:ArrayCollection = new ArrayCollection();
 		public var parent:GoalTreeNode;
+        public var subTreeID:int;
+
 		public var coreFeedID:int;
 		public var coreFeedName:String;
+
         public var analysisMeasure:AnalysisMeasure;
         public var goalValue:Number;
         public var filterDefinition:FilterDefinition;
         public var highIsGood:Boolean = true;
+
 		public var associatedFeeds:ArrayCollection = new ArrayCollection();
 		public var associatedInsights:ArrayCollection = new ArrayCollection();
 		public var associatedSolutions:ArrayCollection = new ArrayCollection();
+
 		public var tags:ArrayCollection = new ArrayCollection();
 		public var name:String;
 		public var description:String;
         public var iconImage:String;
+
         public var newSolutions:ArrayCollection = new ArrayCollection();
+        public var users:ArrayCollection;
+
+
         private var _renderer:GoalAdminRenderer2;
 		
 		public function GoalTreeNode()
@@ -51,6 +60,9 @@ import com.easyinsight.analysis.AnalysisMeasure;
             clonedNode.name = this.name;
             clonedNode.description = this.description;
             clonedNode.iconImage = this.iconImage;
+            for each (var goalFeed:GoalFeed in clonedNode.associatedFeeds) {
+                
+            }
             var newChildren:ArrayCollection = new ArrayCollection();
             for each (var childNode:GoalTreeNode in children) {
                 var clonedChild:GoalTreeNode = childNode.clone();

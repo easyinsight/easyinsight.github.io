@@ -14,6 +14,7 @@ public class FeedType {
     public static final FeedType SALESFORCE_SUB = new FeedType(6);
     public static final FeedType WESABE = new FeedType(7);
     public static final FeedType DEFAULT = new FeedType(8);
+    public static final FeedType JIRA = new FeedType(9);
 
     private int type;
 

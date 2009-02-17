@@ -8,7 +8,6 @@ import java.sql.SQLException;
 import com.easyinsight.database.Database;
 import com.easyinsight.users.UserService;
 import com.easyinsight.users.UserServiceResponse;
-import com.easyinsight.userupload.UploadPolicy;
 import com.easyinsight.logging.LogClass;
 
 /**
@@ -48,6 +47,27 @@ public class SecurityUtil {
                 return 0;
         } else {
             return userPrincipal.getUserID();
+        }
+    }
+
+    public static void authorizeAccountTier(int requiredTier) {
+        UserPrincipal userPrincipal = securityProvider.getUserPrincipal();
+        if (userPrincipal == null) {
+            throw new SecurityException();
+        } else {
+            if (userPrincipal.getAccountType() < requiredTier) {
+                throw new SecurityException();
+            }
+        }
+    }
+
+    public static int getAccountTier() {
+        UserPrincipal userPrincipal = securityProvider.getUserPrincipal();
+        if (userPrincipal == null) {
+            Thread.dumpStack();
+            throw new SecurityException();
+        } else {
+            return userPrincipal.getAccountType();
         }
     }
 

@@ -5,10 +5,14 @@
         import mx.managers.PopUpManager;
 
         private var _goalTreeNode:GoalTreeNode;
-        private var _solution:Solution;
+        private var _goalTreeDescriptor:GoalTreeDescriptor;
 
         private function addTree():void {
-            goalService.getGoalTree.send(_solution.goalTreeID);
+            goalService.getGoalTree.send(_goalTreeDescriptor.goalTreeID);
+        }
+
+        private function addInline():void {
+
         }
 
         private function gotGoalTree():void {
@@ -18,19 +22,19 @@
             clonedNode.parent = _goalTreeNode;
             _goalTreeNode.children.addItem(clonedNode);
             var goalSolution:GoalSolution = new GoalSolution();
-            goalSolution.solutionID = _solution.solutionID;
+            /*goalSolution.solutionID = _solution.solutionID;
             goalSolution.solutionName = _solution.name;
             goalSolution.solutionArchiveName = _solution.solutionArchiveName;
             _goalTreeNode.associatedSolutions.addItem(goalSolution);
-            dispatchEvent(new OrganizationChartRefreshEvent());
+            dispatchEvent(new OrganizationChartRefreshEvent());*/
             PopUpManager.removePopUp(this);
         }
 
         private function addSolutionOnly():void {
             var goalSolution:GoalSolution = new GoalSolution();
-            goalSolution.solutionID = _solution.solutionID;
+            /*goalSolution.solutionID = _solution.solutionID;
             goalSolution.solutionName = _solution.name;
-            goalSolution.solutionArchiveName = _solution.solutionArchiveName;
+            goalSolution.solutionArchiveName = _solution.solutionArchiveName;*/
             _goalTreeNode.associatedSolutions.addItem(goalSolution);
             PopUpManager.removePopUp(this);
         }
@@ -40,16 +44,16 @@
         }
 
         public function set solution(val:Solution):void {
-            _solution = val;
+            //_solution = val;
         }]]></mx:Script>
     <mx:RemoteObject destination="goalService" id="goalService">
         <mx:method name="getGoalTree" result="gotGoalTree()"/>
     </mx:RemoteObject>
     <mx:VBox>
-        <mx:Label text="This solution contains a goal tree. Do you wish to add the tree as a child to this goal?"/>
+        <mx:Label text="Do you want to add this goal tree inline or as a sub tree?"/>
         <mx:HBox>
-            <mx:Button label="Yes, Add the Goal Tree" click="addTree()"/>
-            <mx:Button label="No, Just Add the Solution" click="addSolutionOnly()"/>
+            <mx:Button label="Add inline" click="addTree()"/>
+            <mx:Button label="Add as a sub tree" click="addSolutionOnly()"/>
         </mx:HBox>
     </mx:VBox>
 </mx:Canvas>

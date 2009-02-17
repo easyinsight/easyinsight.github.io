@@ -9,6 +9,7 @@ import com.easyinsight.dataset.Crosstab;
 import com.easyinsight.users.Credentials;
 import com.easyinsight.core.Value;
 import com.easyinsight.logging.LogClass;
+import com.easyinsight.benchmark.BenchmarkManager;
 
 import java.util.*;
 
@@ -92,6 +93,7 @@ public class DataService implements IDataService {
 
     public ListDataResults list(WSAnalysisDefinition analysisDefinition, boolean preview, InsightRequestMetadata insightRequestMetadata) {
         try {
+            long startTime = System.currentTimeMillis();
             ListDataResults results;
             Feed feed = feedRegistry.getFeed(analysisDefinition.getDataFeedID());
             Set<Long> ids = validate(analysisDefinition, feed);
@@ -103,6 +105,7 @@ public class DataService implements IDataService {
                 DataSet dataSet = feed.getDataSet(analysisDefinition.getColumnKeys(feed.getFields()), preview ? 5 : null, false, insightRequestMetadata);
                 results = dataSet.toList(analysisDefinition, feed.getFields(), insightRequestMetadata);
             }
+            BenchmarkManager.recordBenchmark("DataService:List", System.currentTimeMillis() - startTime);
             return results;
         } catch (Exception e) {
             LogClass.error(e);
@@ -112,6 +115,7 @@ public class DataService implements IDataService {
 
     public CrossTabDataResults pivot(WSAnalysisDefinition analysisDefinition, boolean preview, InsightRequestMetadata insightRequestMetadata) {
         try {
+            long startTime = System.currentTimeMillis();
             WSCrosstabDefinition crosstabDefinition = (WSCrosstabDefinition) analysisDefinition;
             Feed feed = feedRegistry.getFeed(crosstabDefinition.getDataFeedID());
             Set<Long> ids = validate(analysisDefinition, feed);
@@ -125,6 +129,7 @@ public class DataService implements IDataService {
                 Collection<Map<String, Value>> results = crosstab.outputForm();
                 crossTabDataResults.setResults(results);
             }
+            BenchmarkManager.recordBenchmark("DataService:Crosstab", System.currentTimeMillis() - startTime);
             return crossTabDataResults;
         } catch (Exception e) {
             LogClass.error(e);

@@ -13,11 +13,13 @@ public class UserPrincipal implements Principal, Serializable {
     private String userName;
     private long accountID;
     private long userID;
+    private int accountType;
 
-    public UserPrincipal(String userName, long accountID, long userID) {
+    public UserPrincipal(String userName, long accountID, long userID, int accountType) {
         this.userName = userName;
         this.accountID = accountID;
         this.userID = userID;
+        this.accountType = accountType;
     }
 
     public String getName() {
@@ -34,5 +36,9 @@ public class UserPrincipal implements Principal, Serializable {
 
     public long getUserID() {
         return userID;
+    }
+
+    public int getAccountType() {
+        return accountType;
     }
 }

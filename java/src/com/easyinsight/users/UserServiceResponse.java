@@ -13,7 +13,7 @@ public class UserServiceResponse {
     private String userName;
     private String encryptedPassword;
     private String name;
-    private AccountType accountType;
+    private int accountType;
     private long spaceAllowed;
     private String email;
     private boolean accountAdmin;
@@ -25,7 +25,7 @@ public class UserServiceResponse {
         this.failureMessage = failureMessage;
     }
 
-    public UserServiceResponse(boolean successful, long userID, long accountID, String name, AccountType accountType,
+    public UserServiceResponse(boolean successful, long userID, long accountID, String name, int accountType,
                                long spaceAllowed, String email, String userName, String encryptedPassword, boolean accountAdmin,
                                boolean dataSourceCreator, boolean insightCreator) {
         this.successful = successful;
@@ -109,11 +109,11 @@ public class UserServiceResponse {
         this.accountID = accountID;
     }
 
-    public AccountType getAccountType() {
+    public int getAccountType() {
         return accountType;
     }
 
-    public void setAccountType(AccountType accountType) {
+    public void setAccountType(int accountType) {
         this.accountType = accountType;
     }
 

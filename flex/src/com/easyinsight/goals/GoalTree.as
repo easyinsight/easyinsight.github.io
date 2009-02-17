@@ -13,6 +13,8 @@ package com.easyinsight.goals
 		public var goalTreeID:int;
 		public var milestones:ArrayCollection;
 		public var trackingIntervals:ArrayCollection;
+        public var administrators:ArrayCollection = new ArrayCollection();
+        public var consumers:ArrayCollection = new ArrayCollection();
 		
 		public function GoalTree()
 		{

@@ -13,6 +13,10 @@ import mx.collections.ArrayCollection;
             private var dataSources:ArrayCollection;
             [Bindable]
             private var insights:ArrayCollection;
+            [Bindable]
+            private var goalTrees:ArrayCollection;
+            [Bindable]
+            private var accountTrees:ArrayCollection;
 
             [Bindable]
             private var newSolutions:ArrayCollection;
@@ -46,7 +50,7 @@ import mx.collections.ArrayCollection;
                 accordion.getHeaderAt(2).setStyle("fontfamily", "Tahoma");
                 accordion.getHeaderAt(2).setStyle("fontWeight", "bold");
                 feedService.searchForSubscribedFeeds.send();
-                solutionService.getSolutions.send();
+                goalService.getSolutions.send(null);
                 analysisService.getInsightDescriptors.send();
             }
 			
@@ -59,19 +63,26 @@ import mx.collections.ArrayCollection;
             }
 
             private function gotSolutions():void {
-                solutions = solutionService.getSolutions.lastResult as ArrayCollection;
+                var solutions:AvailableSolutionList = goalService.getSolutions.lastResult as AvailableSolutionList;
             }
 
             private function gotInsights():void {
                 insights = analysisService.getInsightDescriptors.lastResult as ArrayCollection;
+            }
+
+            private function gotGoalTrees():void {
+                var availableTrees:AvailableGoalTreeList = goalService.getGoalTreesForInstall.lastResult as AvailableGoalTreeList;
+                this.accountTrees = availableTrees.myTrees;
+                this.goalTrees = availableTrees.solutionTrees;
             }
 		]]>
 	</mx:Script>
     <mx:RemoteObject destination="feeds" id="feedService">
         <mx:method name="searchForSubscribedFeeds" result="gotFeeds()"/>
     </mx:RemoteObject>
-    <mx:RemoteObject destination="solutionService" id="solutionService">
+    <mx:RemoteObject destination="goalService" id="goalService">
         <mx:method name="getSolutions" result="gotSolutions()"/>
+        <mx:method name="getGoalTreesForInstall" result="gotGoalTrees()"/>
     </mx:RemoteObject>
     <mx:RemoteObject destination="analysisDefinition" id="analysisService">
         <mx:method name="getInsightDescriptors" result="gotInsights()"/>
@@ -82,13 +93,18 @@ import mx.collections.ArrayCollection;
                 <mx:TextArea text="You can drag the below items onto goals to create associations." color="0xFFFFFF" backgroundAlpha="0" borderThickness="0" width="100%" height="57"/>
             </mx:Box>
             <mx:Accordion height="100%" id="accordion" width="100%" headerHeight="18">
+                <mx:VBox label="Goal Trees" width="100%" height="100%" verticalGap="0">
+                    <mx:Box width="100%">
+                        <mx:Label text="My Goal Trees"/>
+                    </mx:Box>
+                    <mx:List dataProvider="{accountTrees}" width="100%" height="100%" labelField="goalTreeName" dragEnabled="true"/>
+                    <mx:Box width="100%">
+                        <mx:Label text="External Goal Trees"/>
+                    </mx:Box>
+                    <mx:List dataProvider="{goalTrees}" width="100%" height="100%" labelField="goalTreeName" dragEnabled="true"/>
+                </mx:VBox>
                 <mx:VBox label="Solutions" width="100%" height="100%">
-                    <mx:DataGrid dataProvider="{solutions}" width="100%" height="100%" dragEnabled="true">
-                        <mx:columns>
-                            <mx:DataGridColumn headerText="" dataField="name" width="30" itemRenderer="com.easyinsight.goals.SolutionGoalTreeIcon"/>
-                            <mx:DataGridColumn headerText="" dataField="name"/>
-                        </mx:columns>
-                    </mx:DataGrid>
+                    <mx:List dataProvider="{solutions}" width="100%" height="100%" labelField="name" dragEnabled="true"/>
                 </mx:VBox>
                 <mx:VBox label="Data Sources" width="100%" height="100%">
                     <mx:List dataProvider="{dataSources}" width="100%" height="100%" labelField="name" dragEnabled="true"/>

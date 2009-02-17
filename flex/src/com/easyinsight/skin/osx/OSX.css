@@ -22,6 +22,18 @@ Application {
     fillColors: #ffffff, #ffffff;
 }
 
+Form {
+    paddingLeft: 5;
+    paddingRight: 5;
+    paddingTop: 5;
+    paddingBottom: 5;
+}
+
+FormItem {
+    fontFamily: "Tahoma";
+    fontWeight: bold;
+}
+
 MenuBar { 
    backgroundAlpha: .9;
    backgroundColor: #ffffff;
@@ -87,12 +99,16 @@ TitleWindow {
 }
 
 TextInput {
+    fontFamily: "Lucida Grande";
+    fontWeight: normal;
 	fontSize: 11;
 	backgroundColor: #FFFFFF;
 }
 
 
-Button { 
+Button {
+    fontFamily: "Lucida Grande";
+    fontWeight: normal;
    cornerRadius: 12;
     highlightAlphas: 1, 0.32;
   fillAlphas: 1, 1, 1, 1;
@@ -195,6 +211,7 @@ ComboBox {
    rollOverColor: #3370ce;
    textRollOverColor: #ffffff;
    themeColor: #3370ce;
+   fontFamily: "Lucida Grande";
    fontWeight: normal;
    fontSize: 11;
 }

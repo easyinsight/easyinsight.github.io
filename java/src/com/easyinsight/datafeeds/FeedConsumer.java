@@ -5,7 +5,11 @@ package com.easyinsight.datafeeds;
  * Date: Oct 3, 2008
  * Time: 6:11:03 PM
  */
-public class FeedConsumer {
+public abstract class FeedConsumer {
+
+    public static final int USER = 1;
+    public static final int GROUP = 2;
+
     private String name;
 
     public FeedConsumer() {
@@ -22,4 +26,6 @@ public class FeedConsumer {
     public void setName(String name) {
         this.name = name;
     }
+
+    public abstract int type();
 }

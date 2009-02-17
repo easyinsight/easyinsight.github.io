@@ -22,6 +22,10 @@ public class UserStub extends FeedConsumer {
         this.email = email;
     }
 
+    public int type() {
+        return FeedConsumer.USER;
+    }
+
     public String getFullName() {
         return fullName;
     }

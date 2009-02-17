@@ -7,6 +7,7 @@ import com.easyinsight.database.Database;
 import com.easyinsight.datafeeds.*;
 import com.easyinsight.datafeeds.file.FileBasedFeedDefinition;
 import com.easyinsight.AnalysisItem;
+import com.easyinsight.core.Key;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.security.Roles;
@@ -500,6 +501,53 @@ public class UserUploadService implements IUserUploadService {
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);
+        }
+    }
+
+    public String validateCredentials(FeedDefinition feedDefinition, Credentials credentials) {
+        try {
+            return feedDefinition.validateCredentials(credentials);
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        }
+    }
+
+    public long newExternalDataSource(FeedDefinition feedDefinition, Credentials credentials) {
+        long userID = SecurityUtil.getUserID();
+        Connection conn = Database.instance().getConnection();
+        TableDefinitionMetadata metadata = null;
+        try {
+            conn.setAutoCommit(false);
+            Map<String, Key> keys = feedDefinition.newDataSourceFields();
+            DataSet dataSet = feedDefinition.getDataSet(credentials, keys);
+            feedDefinition.setFields(feedDefinition.createAnalysisItems(keys));
+            feedDefinition.setOwnerName(new UserService().retrieveUser(conn).getUserName());
+            UploadPolicy uploadPolicy = new UploadPolicy(userID);
+            feedDefinition.setUploadPolicy(uploadPolicy);
+            FeedCreationResult feedCreationResult = new FeedCreation().createFeed(feedDefinition, conn, dataSet, userID);
+            metadata = feedCreationResult.getTableDefinitionMetadata();
+            metadata.commit();
+            conn.commit();
+            return feedCreationResult.getFeedID();
+        } catch (Exception e) {
+            LogClass.error(e);
+            if (metadata != null) {
+                metadata.rollback();
+            }
+            try {
+                conn.rollback();
+            } catch (SQLException e1) {
+                LogClass.error(e1);
+            }
+            throw new RuntimeException(e);
+        } finally {
+            try {
+                conn.setAutoCommit(true);
+            } catch (SQLException e) {
+                LogClass.error(e);
+            }
+            Database.instance().closeConnection(conn);
         }
     }
 }

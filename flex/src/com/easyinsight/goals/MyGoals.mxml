@@ -1,10 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:listing="com.easyinsight.listing.*"
-           implements="com.easyinsight.listing.IPerspective" creationComplete="onCreation()" width="100%" height="100%" doubleClickEnabled="true">
+         xmlns:goals="com.easyinsight.goals.*"
+         implements="com.easyinsight.listing.IPerspective" creationComplete="onCreation()" width="100%" height="100%"
+         doubleClickEnabled="true" verticalGap="0">
     <mx:states>
         <mx:State name="notLoggedIn">
             <mx:RemoveChild target="{controlsBox}"/>
             <mx:RemoveChild target="{goalTreesBox}"/>
+            <mx:RemoveChild target="{myGoalsGrid}"/>
             <mx:AddChild relativeTo="{coreContent}">
                 <listing:GottaLoginPage/>
             </mx:AddChild>
@@ -12,14 +15,25 @@
     </mx:states>
     <mx:Script>
 		<![CDATA[
+        import com.easyinsight.account.Account;
+        import mx.controls.Alert;
+        import mx.events.CloseEvent;
         import mx.events.ListEvent;
-import mx.utils.URLUtil;
-import mx.managers.BrowserManager;
-import com.easyinsight.framework.LoginEvent;
-import com.easyinsight.framework.User;
+        import mx.utils.URLUtil;
+        import mx.managers.BrowserManager;
+
+        import com.easyinsight.framework.LoginEvent;
+        import com.easyinsight.framework.User;
         import com.easyinsight.listing.AnalyzeSource;
         import com.easyinsight.genredata.AnalyzeEvent;
+        import com.easyinsight.util.ProgressAlert;
+
         import mx.collections.ArrayCollection;
+
+        private var deleteID:int;
+
+        [Bindable]
+        private var addGoalTreeAvailable:Boolean = false;
 
         [Bindable]
         private var goalTrees:ArrayCollection;
@@ -41,6 +55,20 @@ import com.easyinsight.framework.User;
 
         private function onCreation():void {
             User.getEventNotifier().addEventListener(LoginEvent.LOGIN, onLogin);
+            addEventListener(DeleteGoalTreeEvent.DELETE_GOAL_TREE, onDelete);
+        }
+
+        private function onDelete(event:DeleteGoalTreeEvent):void {
+            deleteID = event.goalTree.goalTreeID;
+            Alert.show("Are you sure you want to delete the goal tree?", "Alert",
+		                		Alert.OK | Alert.CANCEL, this, alertListener, null, Alert.CANCEL);
+        }
+
+        private function alertListener(event:CloseEvent):void {
+            if (event.detail == Alert.OK) {
+                ProgressAlert.alert(this, "Deleting goal tree...", "Deleted goal tree!", goalService.deleteGoalTree);
+                goalService.deleteGoalTree.send(deleteID);
+            }
         }
 
         private function onLogin(event:LoginEvent):void {
@@ -55,13 +83,22 @@ import com.easyinsight.framework.User;
             BrowserManager.getInstance().setFragment(fragmentString);
             var user:User = User.getInstance();
             if (user == null) {
-                currentState="notLoggedIn";
+                currentState = "notLoggedIn";
             } else {
-                if (currentState != "") {
-                    currentState = "";
+                if (User.getInstance().getAccountType() == Account.FREE) {
+                    currentState = "functionalityUnavailable";
+                } else {
+                    if (currentState != "") {
+                        currentState = "";
+                    }
+                    addGoalTreeAvailable = User.getInstance().getAccountType() >= Account.PROFESSIONAL;
+                    goalService.getGoalTrees.send();
                 }
-                goalService.getGoalTrees.send();                
             }
+        }
+
+        private function deletedTree():void {
+            goalService.getGoalTrees.send();
         }
 
         public function getDefaultAnalyzeState():Boolean {
@@ -79,27 +116,32 @@ import com.easyinsight.framework.User;
         private function gridDoubleClick(event:ListEvent):void {
             if (goalTreesBox.selectedItem != null) {
                 var goalTree:GoalTree = goalTreesBox.selectedItem as GoalTree;
-                dispatchEvent(new AnalyzeEvent(new GoalTreeAdminAnalyzeSource(goalTree)));
+                dispatchEvent(new AnalyzeEvent(new GoalDataAnalyzeSource(goalTree)));
             }
         }
 		]]>
     </mx:Script>
     <mx:RemoteObject destination="goalService" id="goalService">
         <mx:method name="getGoalTrees" result="gotTrees()"/>
+        <mx:method name="deleteGoalTree" result="deletedTree()"/>
     </mx:RemoteObject>
     <mx:Box width="100%" height="5" backgroundColor="#254BD4" left="0" right="0"/>
-    <mx:VBox id="coreContent" height="100%" width="100%" paddingTop="10" paddingBottom="10" paddingLeft="10" paddingRight="10" verticalGap="10">
-        <mx:HBox width="100%" id="controlsBox">
-            <mx:Button toolTip="Add Goal Tree..." click="createGoalTree()" id="uploadButton" icon="{addIcon}"
-                       label="Add Goal Tree" labelPlacement="bottom"/>
-            <mx:Button icon="@Embed('../../../../assets/helpx48.png')" label="Help..." labelPlacement="bottom"/>
-        </mx:HBox>
-        <mx:DataGrid dataProvider="{goalTrees}" width="100%" id="goalTreesBox" itemDoubleClick="gridDoubleClick(event)">
-            <mx:columns>
-                <mx:DataGridColumn headerText="Name" dataField="goalTreeName"/>
-                <mx:DataGridColumn headerText="" dataField="goalTreeName" width="150"
-                                           itemRenderer="com.easyinsight.goals.MyGoalsControls"/>
-            </mx:columns>
-        </mx:DataGrid>
+    <mx:VBox id="coreContent" height="100%" width="100%" backgroundColor="#818285" horizontalAlign="center">
+        <mx:VBox width="1000" height="100%" paddingTop="10" paddingBottom="10" paddingLeft="10"
+             paddingRight="10" verticalGap="10" backgroundColor="#ffffff">
+            <mx:HBox width="100%" id="controlsBox">
+                <mx:Button toolTip="Add Goal Tree..." click="createGoalTree()" id="uploadButton" icon="{addIcon}"
+                           label="Add Goal Tree" labelPlacement="bottom" visible="{addGoalTreeAvailable}"/>
+                <mx:Button icon="@Embed('../../../../assets/helpx48.png')" label="Help..." labelPlacement="bottom"/>
+            </mx:HBox>
+            <mx:DataGrid dataProvider="{goalTrees}" width="100%" id="goalTreesBox" itemDoubleClick="gridDoubleClick(event)">
+                <mx:columns>
+                    <mx:DataGridColumn headerText="Name" dataField="goalTreeName"/>
+                    <mx:DataGridColumn headerText="" dataField="goalTreeName" width="150"
+                                       itemRenderer="com.easyinsight.goals.MyGoalsControls"/>
+                </mx:columns>
+            </mx:DataGrid>
+            <goals:MyGoalsGrid id="myGoalsGrid" width="100%"/>
+        </mx:VBox>
     </mx:VBox>
 </mx:VBox>

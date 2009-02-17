@@ -748,7 +748,7 @@ import mx.collections.SortField;
         }
 
         private function sourceSharingChange(event:MouseEvent):void {
-            if (shareDataSourceSharingCheckbox.enabled) {
+            if (shareDataSourceSharingCheckbox.selected) {
                 marketplaceVisibleCheckbox.selected = false;
                 marketplaceVisibleCheckbox.enabled = false;
                 publiclyVisibleCheckbox.selected = false;

@@ -38,17 +38,17 @@ import com.easyinsight.framework.UserTransferObject;
             dispatchEvent(new AccountCreationConfirmationEvent());
         }
 
-        public function set account(accountType:AccountType):void {
-            switch (accountType.getAccountType()) {
-                case AccountType.FREE:
+        public function set account(accountType:int):void {
+            switch (accountType) {
+                case Account.FREE:
                     this.accountReviewText = "Free";
                     this.accountReviewCost = "Free!";
                     break;
-                case AccountType.INDIVIDUAL:
+                case Account.INDIVIDUAL:
                     this.accountReviewText = "Individual";
                     this.accountReviewCost = "$10/month";
                     break;
-                case AccountType.COMMERCIAL:
+                case Account.PROFESSIONAL:
                     this.accountReviewText = "Professional";
                     this.accountReviewCost = "$25/month";
                     break;

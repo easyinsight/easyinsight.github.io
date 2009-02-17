@@ -31,13 +31,6 @@
                 coreContent.removeAllChildren();
                 retrieveAccountInfo();
             }
-            
-            private function blah():void {
-            	var accountType:AccountType;
-            	var individualAccountType:IndividualAccountType;
-            	var commercialAccountType:CommercialAccountType;
-            	var freeAccountType:FreeAccountType;
-            }
 
             public function gotFocus():void {
             	var user:User = User.getInstance();

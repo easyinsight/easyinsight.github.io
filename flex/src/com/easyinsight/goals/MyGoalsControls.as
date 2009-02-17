@@ -93,7 +93,7 @@ import mx.rpc.remoting.RemoteObject;
 		}
 		
 		private function deleteGoalTree(event:MouseEvent):void {
-
+            dispatchEvent(new DeleteGoalTreeEvent(goalTree));
 		}
 
         private function gotTree(event:ResultEvent):void {

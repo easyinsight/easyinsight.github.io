@@ -96,6 +96,58 @@ public class GoalEvaluationStorage {
         saveGoalEvaluations(goalValues, conn);
     }
 
+    public void evaluateGoalTrees() {
+        Connection conn = Database.instance().getConnection();
+        try {
+            conn.setAutoCommit(false);
+            PreparedStatement getTreesStmt = conn.prepareStatement("SELECT GOAL_TREE_ID FROM GOAL_TREE");
+            ResultSet trees = getTreesStmt.executeQuery();
+            while (trees.next()) {
+                long treeID = trees.getLong(1);
+                GoalTree goalTree = new GoalStorage().retrieveGoalTree(treeID);
+                evaluateGoalTree(goalTree, conn);
+            }
+            conn.commit();
+        } catch (SQLException e) {
+            LogClass.error(e);
+            try {
+                conn.rollback();
+            } catch (SQLException e1) {
+                LogClass.error(e1);
+            }
+        } finally {
+            try {
+                conn.setAutoCommit(true);
+            } catch (SQLException e) {
+                LogClass.error(e);
+            }
+            Database.instance().closeConnection(conn);
+        }
+    }
+
+    public void evaluateGoalTree(GoalTree goalTree, Connection conn) throws SQLException {
+        final List<GoalValue> goalValues = new ArrayList<GoalValue>();
+
+        GoalTreeVisitor goalTreeVisitor = new GoalTreeVisitor() {
+
+            protected void accept(GoalTreeNode goalTreeNode) {
+                if (goalTreeNode.getCoreFeedID() > 0) {
+                    List<Date> dates = getDates(goalTreeNode);
+                    for (Date date : dates) {
+                        GoalValue goalValue = evaluateGoalTreeNode(goalTreeNode, date);
+                        if (goalValue != null) {
+                            goalValues.add(goalValue);
+                        }
+                    }
+                }
+            }
+        };
+
+        goalTreeVisitor.visit(goalTree.getRootNode());
+
+        saveGoalEvaluations(goalValues, conn);
+    }
+
     private List<Date> getDates(GoalTreeNode goalTreeNode) {
         List<Date> dates = new ArrayList<Date>();
         RollingFilterDefinition rollingFilterDefinition = (RollingFilterDefinition) goalTreeNode.getFilterDefinition();

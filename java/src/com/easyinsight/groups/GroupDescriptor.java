@@ -15,6 +15,10 @@ public class GroupDescriptor extends FeedConsumer {
     public GroupDescriptor() {
     }
 
+    public int type() {
+        return FeedConsumer.GROUP;
+    }
+
     public GroupDescriptor(String groupName, long groupID, int groupMembers, String description) {
         super(groupName);
         this.groupID = groupID;

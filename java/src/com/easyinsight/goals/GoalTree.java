@@ -1,5 +1,7 @@
 package com.easyinsight.goals;
 
+import com.easyinsight.datafeeds.FeedConsumer;
+
 import java.util.List;
 import java.util.ArrayList;
 
@@ -16,7 +18,27 @@ public class GoalTree {
 
     private String description;
 
+    private List<FeedConsumer> administrators = new ArrayList<FeedConsumer>();
+
+    private List<FeedConsumer> consumers = new ArrayList<FeedConsumer>();
+
     private long goalTreeID;
+
+    public List<FeedConsumer> getAdministrators() {
+        return administrators;
+    }
+
+    public void setAdministrators(List<FeedConsumer> administrators) {
+        this.administrators = administrators;
+    }
+
+    public List<FeedConsumer> getConsumers() {
+        return consumers;
+    }
+
+    public void setConsumers(List<FeedConsumer> consumers) {
+        this.consumers = consumers;
+    }
 
     public GoalTreeNode getRootNode() {
         return rootNode;

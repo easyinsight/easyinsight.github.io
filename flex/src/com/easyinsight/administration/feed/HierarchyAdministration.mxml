@@ -90,7 +90,7 @@ import com.easyinsight.analysis.AnalysisItem;
         public function set analysisDefinition(val:AnalysisDefinition):void {
             _analysisDefinition = val;
             hierarchies = new ArrayCollection();
-            availableDimensions = new ArrayCollection();
+            //availableDimensions = new ArrayCollection();
             if (_analysisDefinition.hierarchies != null) {
                 for each (var hierarchyItem:AnalysisHierarchyItem in _analysisDefinition.hierarchies) {
                     hierarchies.addItem(hierarchyItem);
@@ -110,10 +110,11 @@ import com.easyinsight.analysis.AnalysisItem;
         ]]></mx:Script>
     <mx:Grid>
         <mx:GridRow>
-            <mx:GridItem/>
+            <mx:GridItem>
+                <mx:Button icon="{cubeAddImage}" toolTip="Create Hierarchy" click="newHierarchy()"/>
+            </mx:GridItem>
             <mx:GridItem>
                 <mx:HBox>
-                    <mx:Button icon="{cubeAddImage}" toolTip="Create Hierarchy" click="newHierarchy()"/>
                     <mx:TileList dataProvider="{hierarchies}" itemRenderer="com.easyinsight.administration.feed.HierarchyTileRenderer" itemClick="onHierarchyClick(event)"/>
                 </mx:HBox>
             </mx:GridItem>

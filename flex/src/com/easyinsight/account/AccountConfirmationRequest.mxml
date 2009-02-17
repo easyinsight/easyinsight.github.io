@@ -42,16 +42,16 @@ import com.easyinsight.framework.UserTransferObject;
 
         public function set account(account:Account):void {
             this._account = account;
-            switch (account.accountType.getAccountType()) {
-                case AccountType.FREE:
+            switch (account.accountType) {
+                case Account.FREE:
                     this.accountReviewText = "Free";
                     this.accountReviewCost = "Free!";
                     break;
-                case AccountType.INDIVIDUAL:
+                case Account.INDIVIDUAL:
                     this.accountReviewText = "Individual";
                     this.accountReviewCost = "$10/month";
                     break;
-                case AccountType.COMMERCIAL:
+                case Account.PROFESSIONAL:
                     this.accountReviewText = "Professional";
                     this.accountReviewCost = "$25/month";
                     break;

@@ -13,21 +13,11 @@ import com.easyinsight.util.RandomTextGenerator;
  * Time: 12:20:16 PM
  */
 public class AccountTransferObject {
-    private AccountType accountType;
-    //private List<UserTransferObject> users = new ArrayList<UserTransferObject>();
+    private int accountType;
     private long accountID;
     private List<SubscriptionLicense> licenses = new ArrayList<SubscriptionLicense>();
     private int maxUsers;
     private long maxSize;
-    //private BillingParty billingParty;
-
-    /*public BillingParty getBillingParty() {
-        return billingParty;
-    }
-
-    public void setBillingParty(BillingParty billingParty) {
-        this.billingParty = billingParty;
-    }*/
 
     public int getMaxUsers() {
         return maxUsers;
@@ -45,21 +35,13 @@ public class AccountTransferObject {
         this.maxSize = maxSize;
     }
 
-    public AccountType getAccountType() {
+    public int getAccountType() {
         return accountType;
     }
 
-    public void setAccountType(AccountType accountType) {
+    public void setAccountType(int accountType) {
         this.accountType = accountType;
     }
-
-    /*public List<UserTransferObject> getUsers() {
-        return users;
-    }
-
-    public void setUsers(List<UserTransferObject> users) {
-        this.users = users;
-    } */
 
     public long getAccountID() {
         return accountID;
@@ -79,7 +61,7 @@ public class AccountTransferObject {
 
     public Account toAccount() {
         Account account = new Account();
-        account.setAccountType(accountType.getAccountType());
+        account.setAccountType(accountType);
         account.setLicenses(licenses);
         account.setAccountID(accountID);
         return account;

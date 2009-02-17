@@ -1,6 +1,5 @@
 package com.easyinsight.framework
 {
-	import com.easyinsight.account.AccountType;
 	import com.easyinsight.store.Merchant;
 	
 	import mx.collections.ArrayCollection;
@@ -12,7 +11,7 @@ package com.easyinsight.framework
 	{
 		private var name:String;
 		private var email:String;
-		private var accountType:AccountType;
+		private var accountType:int;
 		private var credentialsMap:Object = new Object();
 		static private var _user:User;
 		static private var notifier:UserEventNotifier;
@@ -23,6 +22,7 @@ package com.easyinsight.framework
         public var accountAdmin:Boolean;
         public var dataSourceCreator:Boolean;
         public var insightCreator:Boolean;
+        public var userID:int;
 
 		private var merchants:ArrayCollection = new ArrayCollection();
 		private var storeService:RemoteObject;
@@ -31,8 +31,8 @@ package com.easyinsight.framework
 
         }
 		
-		static public function initializeUser(name:String, email:String, accountType:AccountType,
-		spaceAllowed:int, accountAdmin:Boolean, dataSourceCreator:Boolean, insightCreator:Boolean):void {
+		static public function initializeUser(name:String, email:String, accountType:int,
+		spaceAllowed:int, accountAdmin:Boolean, dataSourceCreator:Boolean, insightCreator:Boolean, userID:int):void {
 			_user = new User();
 			_user.name = name;
 			_user.email = email;
@@ -41,6 +41,7 @@ package com.easyinsight.framework
             _user.insightCreator = insightCreator;
 			_user.spaceAllowed = spaceAllowed;
 			_user.accountType = accountType;
+            _user.userID = userID;
 			/*_user.storeService = new RemoteObject();
 			_user.storeService.destination = "store";
 			_user.storeService.getMerchants.addEventListener(ResultEvent.RESULT, _user.gotMerchants);
@@ -74,11 +75,11 @@ package com.easyinsight.framework
 			return notifier;	
 		}
 		
-		public function getAccountType():AccountType {
+		public function getAccountType():int {
 			return accountType;
 		}
 
-        public function setAccountType(type:AccountType):void {
+        public function setAccountType(type:int):void {
             this.accountType = type;
         }
 		

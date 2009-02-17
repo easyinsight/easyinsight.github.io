@@ -4,6 +4,8 @@ import com.easyinsight.userupload.UploadPolicy;
 import com.easyinsight.userupload.CredentialsResponse;
 import com.easyinsight.AnalysisItem;
 import com.easyinsight.AnalysisItemTypes;
+import com.easyinsight.core.Key;
+import com.easyinsight.dataset.DataSet;
 import com.easyinsight.users.Credentials;
 import com.easyinsight.analysis.AnalysisStorage;
 import com.easyinsight.analysis.Tag;
@@ -302,6 +304,10 @@ public class FeedDefinition implements Cloneable {
     public CredentialsResponse refresh(Credentials credentials) {
         throw new UnsupportedOperationException();
     }
+    
+     public DataSet getDataSet(Credentials credentials, Map<String, Key> keys) {
+        throw new UnsupportedOperationException();
+    }
 
     public boolean isPubliclyVisible() {
         return publiclyVisible;
@@ -317,5 +323,17 @@ public class FeedDefinition implements Cloneable {
 
     public void setMarketplaceVisible(boolean marketplaceVisible) {
         this.marketplaceVisible = marketplaceVisible;
+    }
+
+    public String validateCredentials(Credentials credentials) {
+        throw new UnsupportedOperationException();
+    }
+
+    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys) {
+        throw new UnsupportedOperationException();
+    }
+
+    public Map<String, Key> newDataSourceFields() {
+        throw new UnsupportedOperationException();
     }
 }

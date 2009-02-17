@@ -17,6 +17,8 @@ import com.easyinsight.api.dynamic.DynamicServiceDefinition;
 import com.easyinsight.api.dynamic.ConfiguredMethod;
 import com.easyinsight.AnalysisItem;
 import com.easyinsight.goals.GoalTreeDescriptor;
+import com.easyinsight.goals.GoalService;
+import com.easyinsight.goals.GoalTree;
 
 import java.util.*;
 import java.sql.*;
@@ -55,7 +57,7 @@ public class SolutionService {
         Connection conn = Database.instance().getConnection();
         try {
             conn.setAutoCommit(false);
-            PreparedStatement insertSolutionStmt = conn.prepareStatement("INSERT INTO SOLUTION (NAME, DESCRIPTION, INDUSTRY, AUTHOR, COPY_DATA, goal_tree_id) VALUES (?, ?, ?, ?, ?, ?)",
+            PreparedStatement insertSolutionStmt = conn.prepareStatement("INSERT INTO SOLUTION (NAME, DESCRIPTION, INDUSTRY, AUTHOR, COPY_DATA, goal_tree_id, SOLUTION_TIER) VALUES (?, ?, ?, ?, ?, ?, ?)",
                     Statement.RETURN_GENERATED_KEYS);
             insertSolutionStmt.setString(1, solution.getName());
             insertSolutionStmt.setString(2, solution.getDescription());
@@ -67,6 +69,7 @@ public class SolutionService {
             } else {
                 insertSolutionStmt.setLong(6, solution.getGoalTreeID());
             }
+            insertSolutionStmt.setInt(7, solution.getSolutionTier());
             insertSolutionStmt.execute();
             long solutionID = Database.instance().getAutoGenKey(insertSolutionStmt);
             PreparedStatement addRoleStmt = conn.prepareStatement("INSERT INTO USER_TO_SOLUTION (USER_ID, SOLUTION_ID, USER_ROLE) VALUES (?, ?, ?)");
@@ -103,7 +106,7 @@ public class SolutionService {
         Connection conn = Database.instance().getConnection();
         try {
             conn.setAutoCommit(false);
-            PreparedStatement updateSolutionStmt = conn.prepareStatement("UPDATE SOLUTION SET NAME = ?, DESCRIPTION = ?, INDUSTRY = ?, AUTHOR = ?, COPY_DATA = ?, GOAL_TREE_ID = ? WHERE SOLUTION_ID = ?",
+            PreparedStatement updateSolutionStmt = conn.prepareStatement("UPDATE SOLUTION SET NAME = ?, DESCRIPTION = ?, INDUSTRY = ?, AUTHOR = ?, COPY_DATA = ?, GOAL_TREE_ID = ?, SOLUTION_TIER = ? WHERE SOLUTION_ID = ?",
                     Statement.RETURN_GENERATED_KEYS);
             updateSolutionStmt.setString(1, solution.getName());
             updateSolutionStmt.setString(2, solution.getDescription());
@@ -115,7 +118,8 @@ public class SolutionService {
             } else {
                 updateSolutionStmt.setLong(6, solution.getGoalTreeID());
             }
-            updateSolutionStmt.setLong(7, solution.getSolutionID());
+            updateSolutionStmt.setInt(7, solution.getSolutionTier());
+            updateSolutionStmt.setLong(8, solution.getSolutionID());
             updateSolutionStmt.executeUpdate();
             PreparedStatement deleteFeedsStmt = conn.prepareStatement("DELETE FROM SOLUTION_TO_FEED WHERE SOLUTION_ID = ?");
             deleteFeedsStmt.setLong(1, solution.getSolutionID());
@@ -478,11 +482,38 @@ public class SolutionService {
         }
     }
 
+    public List<SolutionGoalTreeDescriptor> getTreesFromSolutions() {
+        int solutionTier = SecurityUtil.getAccountTier();
+        List<SolutionGoalTreeDescriptor> descriptors = new ArrayList<SolutionGoalTreeDescriptor>();
+        Connection conn = Database.instance().getConnection();
+        try {
+            PreparedStatement treeStmt = conn.prepareStatement("SELECT SOLUTION_ID, SOLUTION.NAME, GOAL_TREE.GOAL_TREE_ID, GOAL_TREE.NAME FROM SOLUTION, GOAL_TREE WHERE " +
+                    "SOLUTION.GOAL_TREE_ID = GOAL_TREE.GOAL_TREE_ID AND SOLUTION.SOLUTION_TIER >= ?");
+            treeStmt.setInt(1, solutionTier);
+            ResultSet rs = treeStmt.executeQuery();
+            while (rs.next()) {
+                long solutionID = rs.getLong(1);
+                String solutionName = rs.getString(2);
+                long goalTreeID = rs.getLong(3);
+                String goalTreeName = rs.getString(4);
+                descriptors.add(new SolutionGoalTreeDescriptor(goalTreeID, goalTreeName, 0, solutionID, solutionName));
+            }
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        } finally {
+            Database.instance().closeConnection(conn);
+        }
+        return descriptors;
+    }
+
     public List<Solution> getSolutions() {
+        int accountType = SecurityUtil.getAccountTier();
         List<Solution> solutions = new ArrayList<Solution>();
         Connection conn = Database.instance().getConnection();
         try {
-            PreparedStatement getSolutionsStmt = conn.prepareStatement("SELECT SOLUTION_ID, NAME, DESCRIPTION, INDUSTRY, AUTHOR, COPY_DATA, SOLUTION_ARCHIVE_NAME, GOAL_TREE_ID FROM SOLUTION");
+            PreparedStatement getSolutionsStmt = conn.prepareStatement("SELECT SOLUTION_ID, NAME, DESCRIPTION, INDUSTRY, AUTHOR, COPY_DATA, SOLUTION_ARCHIVE_NAME, GOAL_TREE_ID FROM SOLUTION WHERE SOLUTION_TIER <= ?");
+            getSolutionsStmt.setInt(1, accountType);
             PreparedStatement dataSourceCountStmt = conn.prepareStatement("SELECT COUNT(*) FROM solution_to_feed WHERE solution_id = ?");
             PreparedStatement goalTreeCountStmt = conn.prepareStatement("SELECT COUNT(*) FROM solution_to_goal_tree WHERE solution_id = ?");
             ResultSet rs = getSolutionsStmt.executeQuery();
@@ -629,5 +660,20 @@ public class SolutionService {
             Database.instance().closeConnection(conn);
         }
         return solutions;
+    }
+
+    public void installSubTree(long solutionID) {
+        Connection conn = Database.instance().getConnection();
+        try {
+            GoalService goalService = new GoalService();
+            SolutionService solutionService = new SolutionService();
+            Solution solution = solutionService.getSolution(solutionID, conn);
+            GoalTree goalTree = goalService.getGoalTree(solution.getGoalTreeID());
+            
+        } catch (SQLException e) {
+            LogClass.error(e);
+        } finally {
+            Database.instance().closeConnection(conn);
+        }
     }
 }

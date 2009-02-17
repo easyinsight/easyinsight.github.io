@@ -4,8 +4,11 @@ import com.easyinsight.database.Database;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.analysis.*;
 import com.easyinsight.*;
+import com.easyinsight.groups.GroupDescriptor;
+import com.easyinsight.email.UserStub;
 import com.easyinsight.datafeeds.FeedStorage;
 import com.easyinsight.datafeeds.FeedDefinition;
+import com.easyinsight.datafeeds.FeedConsumer;
 import com.easyinsight.solutions.SolutionService;
 import com.easyinsight.solutions.Solution;
 import com.easyinsight.solutions.SolutionInstallInfo;
@@ -14,6 +17,7 @@ import com.easyinsight.security.SecurityUtil;
 
 import java.sql.*;
 import java.util.*;
+import java.util.Date;
 
 import org.hibernate.Session;
 
@@ -26,7 +30,73 @@ public class GoalStorage {
 
     private GoalEvaluationStorage goalEvaluationStorage = new GoalEvaluationStorage();
 
-    public void setUserRole(long userID, long goalTreeID, int role, Connection conn) throws SQLException {
+    private void populateUsers(GoalTree goalTree, Connection conn) throws SQLException {
+        List<FeedConsumer> administrators = new ArrayList<FeedConsumer>();
+        List<FeedConsumer> consumers = new ArrayList<FeedConsumer>();
+        PreparedStatement getUsersStmt = conn.prepareStatement("SELECT USER.USER_ID, USER_ROLE, USER.email, USER.name, USER.username FROM " +
+                "USER_TO_GOAL_TREE, USER WHERE GOAL_TREE_ID = ? AND USER_TO_GOAL_TREE.USER_ID = USER.USER_ID");
+        getUsersStmt.setLong(1, goalTree.getGoalTreeID());
+        ResultSet userRS = getUsersStmt.executeQuery();
+        while (userRS.next()) {
+            long userID = userRS.getLong(1);
+            int role = userRS.getInt(2);
+            String email = userRS.getString(3);
+            String fullName = userRS.getString(4);
+            String userName = userRS.getString(5);
+            if (role == Roles.OWNER) {
+                administrators.add(new UserStub(userID, userName, email, fullName));
+            } else {
+                consumers.add(new UserStub(userID, userName, email, fullName));
+            }
+        }
+        PreparedStatement getGroupsStmt = conn.prepareStatement("SELECT COMMUNITY_GROUP.COMMUNITY_GROUP_ID, ROLE, COMMUNITY_GROUP.name " +
+                "FROM GOAL_TREE_TO_GROUP, COMMUNITY_GROUP WHERE GOAL_TREE_ID = ? AND " +
+                "COMMUNITY_GROUP.COMMUNITY_GROUP_ID = GOAL_TREE_TO_GROUP.GROUP_ID");
+        getGroupsStmt.setLong(1, goalTree.getGoalTreeID());
+        ResultSet groupRS = getGroupsStmt.executeQuery();
+        while (groupRS.next()) {
+            long groupID = groupRS.getLong(1);
+            int role = groupRS.getInt(2);
+            String name = groupRS.getString(3);
+            if (role == Roles.OWNER) {
+                administrators.add(new GroupDescriptor(name, groupID, 0, null));
+            } else {
+                consumers.add(new GroupDescriptor(name, groupID, 0, null));
+            }
+        }
+        goalTree.setAdministrators(administrators);
+        goalTree.setConsumers(consumers);
+    }
+
+    private void saveUsers(long goalTreeID, List<FeedConsumer> users, int role, Connection conn) throws SQLException {
+        PreparedStatement deleteUsersStmt = conn.prepareStatement("DELETE FROM USER_TO_GOAL_TREE WHERE GOAL_TREE_ID = ? AND USER_ROLE = ?");
+        deleteUsersStmt.setLong(1, goalTreeID);
+        deleteUsersStmt.setInt(2, role);
+        deleteUsersStmt.executeUpdate();
+        PreparedStatement deleteGroupsStmt = conn.prepareStatement("DELETE FROM GOAL_TREE_TO_GROUP WHERE GOAL_TREE_ID = ? AND ROLE = ?");
+        deleteGroupsStmt.setLong(1, goalTreeID);
+        deleteGroupsStmt.setInt(2, role);
+        deleteGroupsStmt.executeUpdate();
+        PreparedStatement addUserStmt = conn.prepareStatement("INSERT INTO USER_TO_GOAL_TREE (USER_ID, goal_tree_id, user_role) VALUES (?, ?, ?)");
+        PreparedStatement addGroupStmt = conn.prepareStatement("INSERT INTO GOAL_TREE_TO_GROUP (GROUP_ID, goal_tree_id, role) VALUES (?, ?, ?)");
+        for (FeedConsumer feedConsumer : users) {
+            if (feedConsumer.type() == FeedConsumer.USER) {
+                UserStub userStub = (UserStub) feedConsumer;
+                addUserStmt.setLong(1, userStub.getUserID());
+                addUserStmt.setLong(2, goalTreeID);
+                addUserStmt.setInt(3, role);
+                addUserStmt.execute();
+            } else if (feedConsumer.type() == FeedConsumer.GROUP) {
+                GroupDescriptor groupDescriptor = (GroupDescriptor) feedConsumer;
+                addGroupStmt.setLong(1, groupDescriptor.getGroupID());
+                addGroupStmt.setLong(2, goalTreeID);
+                addGroupStmt.setInt(3, role);
+                addGroupStmt.execute();
+            }
+        }
+    }
+
+    /*public void setUserRole(long userID, long goalTreeID, int role, Connection conn) throws SQLException {
         PreparedStatement roleExistsStmt = conn.prepareStatement("SELECT USER_TO_GOAL_TREE_ID FROM USER_TO_GOAL_TREE WHERE " +
                 "user_id = ? AND goal_tree_id = ?");
         roleExistsStmt.setLong(1, userID);
@@ -44,7 +114,7 @@ public class GoalStorage {
             insertRoleStmt.setInt(3, role);
             insertRoleStmt.execute();
         }
-    }
+    }*/
 
     public List<GoalTreeDescriptor> getTreesForUser(long userID) {
         List<GoalTreeDescriptor> descriptors = new ArrayList<GoalTreeDescriptor>();
@@ -68,7 +138,7 @@ public class GoalStorage {
         return descriptors;
     }
 
-    public void addGoalTree(GoalTree goalTree, long userID) {
+    public void addGoalTree(GoalTree goalTree) {
         Connection conn = Database.instance().getConnection();
         try {
             conn.setAutoCommit(false);
@@ -84,7 +154,9 @@ public class GoalStorage {
             insertTreeStmt.execute();
             long treeID = Database.instance().getAutoGenKey(insertTreeStmt);
             goalTree.setGoalTreeID(treeID);
-            setUserRole(userID, treeID, Roles.OWNER, conn);
+            saveUsers(treeID, goalTree.getAdministrators(), Roles.OWNER, conn);
+            saveUsers(treeID, goalTree.getConsumers(), Roles.SUBSCRIBER, conn);
+            //setUserRole(userID, treeID, Roles.OWNER, conn);
             goalEvaluationStorage.backPopulateGoalTree(goalTree, conn);
             conn.commit();
         } catch (SQLException e) {
@@ -116,6 +188,8 @@ public class GoalStorage {
             updateTreeStmt.setLong(3, nodeID);
             updateTreeStmt.setLong(4, goalTree.getGoalTreeID());
             updateTreeStmt.executeUpdate();
+            saveUsers(goalTree.getGoalTreeID(), goalTree.getAdministrators(), Roles.OWNER, conn);
+            saveUsers(goalTree.getGoalTreeID(), goalTree.getConsumers(), Roles.SUBSCRIBER, conn);
             goalEvaluationStorage.backPopulateGoalTree(goalTree, conn);
             conn.commit();
         } catch (SQLException e) {
@@ -205,6 +279,7 @@ public class GoalStorage {
             goalTreeNode.setAssociatedInsights(getGoalInsights(nodeID, conn));
             goalTreeNode.setAssociatedSolutions(getGoalSolutions(nodeID, conn));
             goalTreeNode.setTags(getGoalTags(nodeID, conn));
+            goalTreeNode.setUsers(getGoalUsers(nodeID, conn));
             goalTreeNode.setIconImage(iconImage);
             PreparedStatement childQueryStmt = conn.prepareStatement("SELECT GOAL_TREE_NODE_ID FROM GOAL_TREE_NODE WHERE PARENT_GOAL_TREE_NODE_ID = ?");
             childQueryStmt.setLong(1, nodeID);
@@ -238,6 +313,18 @@ public class GoalStorage {
             insights.add(goalInsight);
         }
         return insights;
+    }
+
+    private List<Integer> getGoalUsers(long goalTreeNodeID, Connection conn) throws SQLException {
+        List<Integer> users = new ArrayList<Integer>();
+        PreparedStatement feedQueryStmt = conn.prepareStatement("SELECT USER_ID FROM GOAL_NODE_TO_USER WHERE goal_tree_node_id = ?");
+        feedQueryStmt.setLong(1, goalTreeNodeID);
+        ResultSet rs = feedQueryStmt.executeQuery();
+        while (rs.next()) {
+            int userID = rs.getInt(1);
+            users.add(userID);
+        }
+        return users;
     }
 
     private List<GoalFeed> getGoalFeeds(long goalTreeNodeID, Connection conn) throws SQLException {
@@ -304,6 +391,7 @@ public class GoalStorage {
                 goalTree.setDescription(description);
                 goalTree.setGoalTreeID(goalTreeID);
                 goalTree.setRootNode(rootNode);
+                populateUsers(goalTree, conn);
             }
             conn.commit();
         } catch (SQLException e) {
@@ -418,6 +506,7 @@ public class GoalStorage {
         saveInsights(goalTreeNode, conn);
         saveFeeds(goalTreeNode, conn);
         saveSolutions(goalTreeNode, conn);
+        saveUsers(goalTreeNode, conn);
         if (goalTreeNode.getChildren() != null) {
             for (GoalTreeNode childNode : goalTreeNode.getChildren()) {
                 saveGoalTreeNode(childNode, conn);
@@ -451,6 +540,33 @@ public class GoalStorage {
                 deleteStmt.setLong(1, id);
                 deleteStmt.executeUpdate();
             }
+        }
+    }
+
+    private void saveUsers(GoalTreeNode goalTreeNode, Connection conn) throws SQLException {
+        PreparedStatement clearExistingStmt = conn.prepareStatement("DELETE FROM goal_node_to_user WHERE GOAL_TREE_NODE_ID = ?");
+        clearExistingStmt.setLong(1, goalTreeNode.getGoalTreeNodeID());
+        clearExistingStmt.executeUpdate();
+        PreparedStatement saveUserStmt = conn.prepareStatement("INSERT INTO goal_node_to_user (GOAL_TREE_NODE_ID, user_id) VALUES (?, ?)");
+        for (Integer userID : goalTreeNode.getUsers()) {
+            saveUserStmt.setLong(1, goalTreeNode.getGoalTreeNodeID());
+            saveUserStmt.setLong(2, userID);
+            saveUserStmt.execute();
+        }
+    }
+
+    public void addUserToGoal(long userID, long goalTreeNodeID) {
+        Connection conn = Database.instance().getConnection();
+        try {
+            PreparedStatement saveUserStmt = conn.prepareStatement("INSERT INTO goal_node_to_user (GOAL_TREE_NODE_ID, user_id) VALUES (?, ?)");
+            saveUserStmt.setLong(1, goalTreeNodeID);
+            saveUserStmt.setLong(2, userID);
+            saveUserStmt.execute();
+        } catch (SQLException e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        } finally {
+            Database.instance().closeConnection(conn);
         }
     }
 
@@ -501,6 +617,8 @@ public class GoalStorage {
             saveSolutionLinkStmt.execute();
         }
     }
+
+    // 
 
     private void installSolutions(GoalTree goalTree, final Connection conn) {
         final long userID = SecurityUtil.getUserID();
@@ -555,6 +673,9 @@ public class GoalStorage {
                     }
                     //saveGoalTreeNode(goalTreeNode, conn);
                 }
+                for (GoalFeed goalFeed : goalTreeNode.getAssociatedFeeds()) {
+
+                }
             }
         };
 
@@ -569,6 +690,37 @@ public class GoalStorage {
             }
         }
         return foundItem;
+    }
+
+    public List<GoalTreeNodeData> getGoalsForUser(long userID, final Date startDate, final Date endDate) {
+        List<GoalTreeNodeData> nodes = new ArrayList<GoalTreeNodeData>();
+        Connection conn = Database.instance().getConnection();
+        try {
+            PreparedStatement stmt = conn.prepareStatement("SELECT GOAL_TREE_NODE_ID FROM goal_node_to_user WHERE USER_ID = ?");
+            stmt.setLong(1, userID);
+            ResultSet rs = stmt.executeQuery();
+            while (rs.next()) {
+                long goalTreeNodeID = rs.getLong(1);
+                GoalTreeNode goalTreeNode = retrieveNode(goalTreeNodeID, conn);
+                GoalTreeNodeData dataNode = new GoalTreeNodeDataBuilder().build(goalTreeNode);
+                nodes.add(dataNode);
+                GoalTreeVisitor visitor = new GoalTreeVisitor() {
+
+                        protected void accept(GoalTreeNode goalTreeNode) {
+                            GoalTreeNodeData data = (GoalTreeNodeData) goalTreeNode;
+                            data.populateCurrentValue();
+                            data.determineOutcome(startDate, endDate, goalEvaluationStorage);
+                        }
+                    };
+                visitor.visit(dataNode);
+                dataNode.summarizeOutcomes();
+            }
+        } catch (SQLException e) {
+            LogClass.error(e);
+        } finally {
+            Database.instance().closeConnection(conn);
+        }
+        return nodes;
     }
 
     private static class SolutionElementKey {

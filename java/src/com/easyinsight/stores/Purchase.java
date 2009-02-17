@@ -34,7 +34,7 @@ public class Purchase {
 
     public Purchase(long feedID, User buyer, Merchant merchant, Date purchaseDate) {
         this.feedID = feedID;
-        this.buyerID = buyer.getAccountID().getAccountID();
+        //this.buyerID = buyer.getAccountID().getAccountID();
         this.merchantID = merchant.getMerchantID();
         this.purchaseDate = purchaseDate;
     }

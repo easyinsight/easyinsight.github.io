@@ -194,6 +194,16 @@
           <option name="PRECISION" value="0" />
           <option name="NULLABLE" value="true" />
         </FIELD_ELEMENT>
+        <FIELD_ELEMENT>
+          <option name="NAME" value="account_state" />
+          <option name="SQL_TYPE" value="int" />
+          <option name="JDBC_TYPE" value="4" />
+          <option name="TYPE" />
+          <option name="PRIMARY" value="false" />
+          <option name="LENGTH" value="11" />
+          <option name="PRECISION" value="0" />
+          <option name="NULLABLE" value="false" />
+        </FIELD_ELEMENT>
       </TABLE_DATA>
       <TABLE_DATA>
         <option name="NAME" value="account_to_feed" />
@@ -380,6 +390,62 @@
           <option name="TARGET_COLUMN" value="user_id" />
           <option name="SOURCE_COLUMN" value="user_id" />
           <option name="CASCADE_REMOVE" value="true" />
+          <option name="CASCADE_UPDATE" value="false" />
+        </RELATIONSHIP_ELEMENT>
+      </TABLE_DATA>
+      <TABLE_DATA>
+        <option name="NAME" value="account_user_license" />
+        <option name="SCHEMA" />
+        <option name="CATALOG" value="dms" />
+        <option name="TYPE" value="TABLE" />
+        <FIELD_ELEMENT>
+          <option name="NAME" value="account_user_license_id" />
+          <option name="SQL_TYPE" value="bigint" />
+          <option name="JDBC_TYPE" value="-5" />
+          <option name="TYPE" />
+          <option name="PRIMARY" value="true" />
+          <option name="LENGTH" value="11" />
+          <option name="PRECISION" value="0" />
+          <option name="NULLABLE" value="false" />
+        </FIELD_ELEMENT>
+        <FIELD_ELEMENT>
+          <option name="NAME" value="quantity" />
+          <option name="SQL_TYPE" value="int" />
+          <option name="JDBC_TYPE" value="4" />
+          <option name="TYPE" />
+          <option name="PRIMARY" value="false" />
+          <option name="LENGTH" value="11" />
+          <option name="PRECISION" value="0" />
+          <option name="NULLABLE" value="false" />
+        </FIELD_ELEMENT>
+        <FIELD_ELEMENT>
+          <option name="NAME" value="creation_date" />
+          <option name="SQL_TYPE" value="datetime" />
+          <option name="JDBC_TYPE" value="93" />
+          <option name="TYPE" />
+          <option name="PRIMARY" value="false" />
+          <option name="LENGTH" value="19" />
+          <option name="PRECISION" value="0" />
+          <option name="NULLABLE" value="false" />
+        </FIELD_ELEMENT>
+        <FIELD_ELEMENT>
+          <option name="NAME" value="account_id" />
+          <option name="SQL_TYPE" value="bigint" />
+          <option name="JDBC_TYPE" value="-5" />
+          <option name="TYPE" />
+          <option name="PRIMARY" value="false" />
+          <option name="LENGTH" value="11" />
+          <option name="PRECISION" value="0" />
+          <option name="NULLABLE" value="false" />
+        </FIELD_ELEMENT>
+        <RELATIONSHIP_ELEMENT>
+          <option name="RELATION_NAME" value="account_user_license_ibfk1" />
+          <option name="TARGET_TABLE" value="account" />
+          <option name="TARGET_SCHEMA" />
+          <option name="TARGET_CATALOG" value="dms" />
+          <option name="TARGET_COLUMN" value="account_id" />
+          <option name="SOURCE_COLUMN" value="account_id" />
+          <option name="CASCADE_REMOVE" value="false" />
           <option name="CASCADE_UPDATE" value="false" />
         </RELATIONSHIP_ELEMENT>
       </TABLE_DATA>
@@ -1424,6 +1490,32 @@
           <option name="CASCADE_REMOVE" value="true" />
           <option name="CASCADE_UPDATE" value="false" />
         </RELATIONSHIP_ELEMENT>
+      </TABLE_DATA>
+      <TABLE_DATA>
+        <option name="NAME" value="benchmark" />
+        <option name="SCHEMA" />
+        <option name="CATALOG" value="dms" />
+        <option name="TYPE" value="TABLE" />
+        <FIELD_ELEMENT>
+          <option name="NAME" value="category" />
+          <option name="SQL_TYPE" value="varchar" />
+          <option name="JDBC_TYPE" value="12" />
+          <option name="TYPE" />
+          <option name="PRIMARY" value="false" />
+          <option name="LENGTH" value="40" />
+          <option name="PRECISION" value="0" />
+          <option name="NULLABLE" value="false" />
+        </FIELD_ELEMENT>
+        <FIELD_ELEMENT>
+          <option name="NAME" value="elapsed_time" />
+          <option name="SQL_TYPE" value="int" />
+          <option name="JDBC_TYPE" value="4" />
+          <option name="TYPE" />
+          <option name="PRIMARY" value="false" />
+          <option name="LENGTH" value="11" />
+          <option name="PRECISION" value="0" />
+          <option name="NULLABLE" value="false" />
+        </FIELD_ELEMENT>
       </TABLE_DATA>
       <TABLE_DATA>
         <option name="NAME" value="chart_definition" />
@@ -3962,6 +4054,62 @@
         </RELATIONSHIP_ELEMENT>
       </TABLE_DATA>
       <TABLE_DATA>
+        <option name="NAME" value="goal_node_to_user" />
+        <option name="SCHEMA" />
+        <option name="CATALOG" value="dms" />
+        <option name="TYPE" value="TABLE" />
+        <FIELD_ELEMENT>
+          <option name="NAME" value="goal_node_to_user_id" />
+          <option name="SQL_TYPE" value="bigint" />
+          <option name="JDBC_TYPE" value="-5" />
+          <option name="TYPE" />
+          <option name="PRIMARY" value="true" />
+          <option name="LENGTH" value="11" />
+          <option name="PRECISION" value="0" />
+          <option name="NULLABLE" value="false" />
+        </FIELD_ELEMENT>
+        <FIELD_ELEMENT>
+          <option name="NAME" value="goal_tree_node_id" />
+          <option name="SQL_TYPE" value="bigint" />
+          <option name="JDBC_TYPE" value="-5" />
+          <option name="TYPE" />
+          <option name="PRIMARY" value="false" />
+          <option name="LENGTH" value="11" />
+          <option name="PRECISION" value="0" />
+          <option name="NULLABLE" value="false" />
+        </FIELD_ELEMENT>
+        <FIELD_ELEMENT>
+          <option name="NAME" value="user_id" />
+          <option name="SQL_TYPE" value="bigint" />
+          <option name="JDBC_TYPE" value="-5" />
+          <option name="TYPE" />
+          <option name="PRIMARY" value="false" />
+          <option name="LENGTH" value="11" />
+          <option name="PRECISION" value="0" />
+          <option name="NULLABLE" value="false" />
+        </FIELD_ELEMENT>
+        <RELATIONSHIP_ELEMENT>
+          <option name="RELATION_NAME" value="goal_node_to_user_ibfk1" />
+          <option name="TARGET_TABLE" value="goal_tree_node" />
+          <option name="TARGET_SCHEMA" />
+          <option name="TARGET_CATALOG" value="dms" />
+          <option name="TARGET_COLUMN" value="goal_tree_node_id" />
+          <option name="SOURCE_COLUMN" value="goal_tree_node_id" />
+          <option name="CASCADE_REMOVE" value="false" />
+          <option name="CASCADE_UPDATE" value="false" />
+        </RELATIONSHIP_ELEMENT>
+        <RELATIONSHIP_ELEMENT>
+          <option name="RELATION_NAME" value="goal_node_to_user_ibfk2" />
+          <option name="TARGET_TABLE" value="user" />
+          <option name="TARGET_SCHEMA" />
+          <option name="TARGET_CATALOG" value="dms" />
+          <option name="TARGET_COLUMN" value="user_id" />
+          <option name="SOURCE_COLUMN" value="user_id" />
+          <option name="CASCADE_REMOVE" value="false" />
+          <option name="CASCADE_UPDATE" value="false" />
+        </RELATIONSHIP_ELEMENT>
+      </TABLE_DATA>
+      <TABLE_DATA>
         <option name="NAME" value="goal_tree" />
         <option name="SCHEMA" />
         <option name="CATALOG" value="dms" />
@@ -4364,6 +4512,72 @@
           <option name="TARGET_COLUMN" value="analysis_id" />
           <option name="SOURCE_COLUMN" value="solution_id" />
           <option name="CASCADE_REMOVE" value="true" />
+          <option name="CASCADE_UPDATE" value="false" />
+        </RELATIONSHIP_ELEMENT>
+      </TABLE_DATA>
+      <TABLE_DATA>
+        <option name="NAME" value="goal_tree_to_group" />
+        <option name="SCHEMA" />
+        <option name="CATALOG" value="dms" />
+        <option name="TYPE" value="TABLE" />
+        <FIELD_ELEMENT>
+          <option name="NAME" value="goal_tree_to_group_id" />
+          <option name="SQL_TYPE" value="bigint" />
+          <option name="JDBC_TYPE" value="-5" />
+          <option name="TYPE" />
+          <option name="PRIMARY" value="true" />
+          <option name="LENGTH" value="11" />
+          <option name="PRECISION" value="0" />
+          <option name="NULLABLE" value="false" />
+        </FIELD_ELEMENT>
+        <FIELD_ELEMENT>
+          <option name="NAME" value="goal_tree_id" />
+          <option name="SQL_TYPE" value="bigint" />
+          <option name="JDBC_TYPE" value="-5" />
+          <option name="TYPE" />
+          <option name="PRIMARY" value="false" />
+          <option name="LENGTH" value="11" />
+          <option name="PRECISION" value="0" />
+          <option name="NULLABLE" value="false" />
+        </FIELD_ELEMENT>
+        <FIELD_ELEMENT>
+          <option name="NAME" value="role" />
+          <option name="SQL_TYPE" value="int" />
+          <option name="JDBC_TYPE" value="4" />
+          <option name="TYPE" />
+          <option name="PRIMARY" value="false" />
+          <option name="LENGTH" value="8" />
+          <option name="PRECISION" value="0" />
+          <option name="NULLABLE" value="false" />
+        </FIELD_ELEMENT>
+        <FIELD_ELEMENT>
+          <option name="NAME" value="group_id" />
+          <option name="SQL_TYPE" value="bigint" />
+          <option name="JDBC_TYPE" value="-5" />
+          <option name="TYPE" />
+          <option name="PRIMARY" value="false" />
+          <option name="LENGTH" value="11" />
+          <option name="PRECISION" value="0" />
+          <option name="NULLABLE" value="false" />
+        </FIELD_ELEMENT>
+        <RELATIONSHIP_ELEMENT>
+          <option name="RELATION_NAME" value="goal_tree_to_group_ibfk1" />
+          <option name="TARGET_TABLE" value="goal_tree" />
+          <option name="TARGET_SCHEMA" />
+          <option name="TARGET_CATALOG" value="dms" />
+          <option name="TARGET_COLUMN" value="goal_tree_id" />
+          <option name="SOURCE_COLUMN" value="goal_tree_id" />
+          <option name="CASCADE_REMOVE" value="false" />
+          <option name="CASCADE_UPDATE" value="false" />
+        </RELATIONSHIP_ELEMENT>
+        <RELATIONSHIP_ELEMENT>
+          <option name="RELATION_NAME" value="goal_tree_to_group_ibfk2" />
+          <option name="TARGET_TABLE" value="community_group" />
+          <option name="TARGET_SCHEMA" />
+          <option name="TARGET_CATALOG" value="dms" />
+          <option name="TARGET_COLUMN" value="community_group_id" />
+          <option name="SOURCE_COLUMN" value="group_id" />
+          <option name="CASCADE_REMOVE" value="false" />
           <option name="CASCADE_UPDATE" value="false" />
         </RELATIONSHIP_ELEMENT>
       </TABLE_DATA>
@@ -6266,6 +6480,16 @@
           <option name="PRECISION" value="0" />
           <option name="NULLABLE" value="true" />
         </FIELD_ELEMENT>
+        <FIELD_ELEMENT>
+          <option name="NAME" value="solution_tier" />
+          <option name="SQL_TYPE" value="int" />
+          <option name="JDBC_TYPE" value="4" />
+          <option name="TYPE" />
+          <option name="PRIMARY" value="false" />
+          <option name="LENGTH" value="11" />
+          <option name="PRECISION" value="0" />
+          <option name="NULLABLE" value="false" />
+        </FIELD_ELEMENT>
       </TABLE_DATA>
       <TABLE_DATA>
         <option name="NAME" value="solution_tag" />
@@ -7567,6 +7791,7 @@
       <module fileurl="file://$PROJECT_DIR$/flex/flex.iml" filepath="$PROJECT_DIR$/flex/flex.iml" />
       <module fileurl="file://$PROJECT_DIR$/solutions/jdbc/jdbc.iml" filepath="$PROJECT_DIR$/solutions/jdbc/jdbc.iml" />
       <module fileurl="file://$PROJECT_DIR$/solutions/jdbc/flex/jdbcflex.iml" filepath="$PROJECT_DIR$/solutions/jdbc/flex/jdbcflex.iml" />
+      <module fileurl="file://$PROJECT_DIR$/solutions/jira/jira.iml" filepath="$PROJECT_DIR$/solutions/jira/jira.iml" />
       <module fileurl="file://$PROJECT_DIR$/solutions/tcplugin/tcplugin.iml" filepath="$PROJECT_DIR$/solutions/tcplugin/tcplugin.iml" />
     </modules>
   </component>

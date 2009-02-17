@@ -20,9 +20,9 @@ package com.easyinsight.listing
 		public function DescriptorAnalyzeSource(descriptor:DataFeedDescriptor, preview:Boolean = false)
 		{
 			this.dataFeedDescriptor = descriptor;
-			if (descriptor.policy.getPolicyType() == UploadPolicy.PUBLIC) {
+			if (descriptor.policy.publiclyVisible) {
 				// all is happy...
-			} else if (descriptor.policy.getPolicyType() == UploadPolicy.PRIVATE) {
+			} else {
 				var user:User = User.getInstance();
 				if (user == null) {
 					// must log in and authorize access
@@ -30,15 +30,11 @@ package com.easyinsight.listing
 				} else {
 					// we're all good if it authorized...
 				}
-			} else {
-				this.preview = descriptor.role != DataFeedDescriptor.OWNER && descriptor.role != DataFeedDescriptor.SUBSCRIBER;
-			}			
+			}
 		}
 		
 		private function loggedIn(event:LoginEvent):void {
 			loginRequired = false;
-						
-			//createAnalysisPopup(parentObject);
 		}
 
 		public function createAnalysisPopup():FullScreenPage {

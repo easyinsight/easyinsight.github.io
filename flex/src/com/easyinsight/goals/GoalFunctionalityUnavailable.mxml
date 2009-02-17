@@ -1,0 +1,22 @@
+<?xml version="1.0" ?>
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml">
+    <mx:Script><![CDATA[
+        import com.easyinsight.account.RefreshAccountEvent;
+        import com.easyinsight.account.ChangeAccountTypeWindow;
+        import mx.managers.PopUpManager;
+
+        private function upgradeAccount():void {
+            var window:ChangeAccountTypeWindow = new ChangeAccountTypeWindow();
+            window.addEventListener(RefreshAccountEvent.REFRESH_ACCOUNT, onRefresh);
+            PopUpManager.addPopUp(window, this, true);
+            PopUpManager.centerPopUp(window);
+        }
+
+        private function onRefresh():void {
+        }
+]]></mx:Script>
+    <mx:VBox width="100%" paddingLeft="40" height="100%">
+		<mx:Text text="Sorry, but you need to upgrade your account to take advantage of this functionality." fontSize="20" color="#000000"/>
+        <mx:Button click="upgradeAccount()" label="Upgrade Account!" fontSize="14"/>
+	</mx:VBox>
+</mx:VBox>

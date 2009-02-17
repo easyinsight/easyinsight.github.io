@@ -13,6 +13,17 @@ import java.util.ArrayList;
 @Table(name="account")
 public class Account {
 
+    public static final int FREE = 1;
+    public static final int INDIVIDUAL = 2;
+    public static final int PROFESSIONAL = 3;
+    public static final int ENTERPRISE = 4;
+
+    public static final int INACTIVE = 1;
+    public static final int ACTIVE = 2;
+    public static final int DELINQUENT = 3;
+    public static final int SUSPENDED = 4;
+    public static final int CLOSED = 5;
+
     @Id
     @GeneratedValue(strategy= GenerationType.IDENTITY)
     @Column(name="account_id")
@@ -55,6 +66,9 @@ public class Account {
 
     @Column(name="name")
     private String name;
+
+    @Column(name="account_state")
+    private int accountState;
 
     //private BillingParty billingParty;
 
@@ -118,41 +132,24 @@ public class Account {
         this.users.remove(user);
     }
 
+    public int getAccountState() {
+        return accountState;
+    }
+
+    public void setAccountState(int accountState) {
+        this.accountState = accountState;
+    }
+
     public AccountTransferObject toTransferObject() {
         AccountTransferObject transfer = new AccountTransferObject();
         transfer.setAccountID(accountID);
         List<SubscriptionLicense> subscriptionList = new ArrayList<SubscriptionLicense>(licenses);
         transfer.setLicenses(subscriptionList);
-        List<User> users = new ArrayList<User>();
-        for (User user : this.users) {
-            List<SubscriptionLicense> userLicenses = new ArrayList<SubscriptionLicense>(user.getLicenses());
-            user.setLicenses(userLicenses);
-            user.setAccountID(null);
-            users.add(user);
-        }
         //transfer.setUsers(users);
-        transfer.setAccountType(accountTypeObject());
+        transfer.setAccountType(accountType);
         return transfer;
     }
-
-    public AccountType accountTypeObject() {
-        AccountType accountTypeObject;
-        switch (accountType) {
-            case AccountType.FREE:
-                accountTypeObject = new FreeAccount();
-                break;
-            case AccountType.INDIVIDUAL:
-                accountTypeObject = new IndividualAccount();
-                break;
-            case AccountType.COMMERCIAL:
-                accountTypeObject = new CommercialAccount();
-                break;
-            default:
-                throw new RuntimeException("Unknown account type " + accountType);
-        }
-        return accountTypeObject;
-    }
-
+    
     public long getMaxSize() {
         return maxSize;
     }

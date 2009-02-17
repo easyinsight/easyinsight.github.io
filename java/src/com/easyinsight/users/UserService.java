@@ -81,7 +81,7 @@ public class UserService implements IUserService {
         long accountID = 0;
         if (results.size() > 0) {
             User user = (User) results.get(0);
-            accountID = user.getAccountID().getAccountID();
+            accountID = user.getAccount().getAccountID();
         }
         return accountID;
     }
@@ -142,7 +142,7 @@ public class UserService implements IUserService {
 
     public void updateUserLabels(String userName, String fullName, String email) {
         User user = retrieveUser();
-        if (SecurityUtil.getAccountID() != user.getAccountID().getAccountID()) {
+        if (SecurityUtil.getAccountID() != user.getAccount().getAccountID()) {
             throw new SecurityException();
         }
         user.setUserName(userName);
@@ -200,7 +200,7 @@ public class UserService implements IUserService {
                 throw new RuntimeException("Attempt made to update user who does not exist.");
             }
             user.setAccountAdmin(userTransferObject.isAccountAdmin());
-            user.setAccountID(account);
+            user.setAccount(account);
             user.setDataSourceCreator(userTransferObject.isDataSourceCreator());
             user.setEmail(userTransferObject.getEmail());
             user.setInsightCreator(userTransferObject.isInsightCreator());
@@ -244,7 +244,7 @@ public class UserService implements IUserService {
             Account account = accountTransferObject.toAccount();
             User user = new User();
             user.setAccountAdmin(userTransferObject.isAccountAdmin());
-            user.setAccountID(account);
+            user.setAccount(account);
             user.setDataSourceCreator(userTransferObject.isDataSourceCreator());
             user.setEmail(userTransferObject.getEmail());
             user.setInsightCreator(userTransferObject.isInsightCreator());
@@ -307,7 +307,7 @@ public class UserService implements IUserService {
             session.beginTransaction();
             List accountResults = session.createQuery("from Account where accountID = ?").setLong(0, accountTransferObject.getAccountID()).list();
             Account account = (Account) accountResults.get(0);
-            account.setAccountType(accountTransferObject.getAccountType().getAccountType());
+            account.setAccountType(accountTransferObject.getAccountType());
             session.update(account);
             session.getTransaction().commit();
         } catch (Exception e) {
@@ -334,7 +334,7 @@ public class UserService implements IUserService {
                 User admin = (User) session.createQuery("from User where userID = ?").setLong(0, SecurityUtil.getUserID()).list().get(0);
                 User user = new User();
                 user.setAccountAdmin(userTransferObject.isAccountAdmin());
-                user.setAccountID(account);
+                user.setAccount(account);
                 user.setDataSourceCreator(userTransferObject.isDataSourceCreator());
                 user.setEmail(userTransferObject.getEmail());
                 user.setInsightCreator(userTransferObject.isInsightCreator());
@@ -346,7 +346,7 @@ public class UserService implements IUserService {
                 final String userName = user.getUserName();
                 user.setPassword(PasswordService.getInstance().encrypt(password));
                 account.addUser(user);                
-                user.setAccountID(account);
+                user.setAccount(account);
                 session.update(account);
                 session.getTransaction().commit();
                 new Thread(new Runnable() {
@@ -422,7 +422,7 @@ public class UserService implements IUserService {
             if (results.size() > 0) {
                 userServiceResponse = new UserServiceResponse(false, "User already exists by that name.");
             } else {
-                userServiceResponse = new UserServiceResponse(true, user.getUserID(), user.getAccountID().getAccountID(), user.getName(), null, 50000000, user.getEmail(),
+                userServiceResponse = new UserServiceResponse(true, user.getUserID(), user.getAccount().getAccountID(), user.getName(), user.getAccount().getAccountType(), 50000000, user.getEmail(),
                         user.getUserName(), encryptedPassword, user.isAccountAdmin(), user.isDataSourceCreator(), user.isInsightCreator());
             }
             session.getTransaction().commit();
@@ -442,10 +442,9 @@ public class UserService implements IUserService {
             return null;
         } else {
             User user = retrieveUser();
-            Account account = user.getAccountID();
-            AccountType accountType = account.accountTypeObject();
-            return new UserServiceResponse(true, user.getUserID(), user.getAccountID().getAccountID(), user.getName(),
-                                accountType, account.getMaxSize(), user.getEmail(), user.getUserName(),
+            Account account = user.getAccount();
+            return new UserServiceResponse(true, user.getUserID(), user.getAccount().getAccountID(), user.getName(),
+                                account.getAccountType(), account.getMaxSize(), user.getEmail(), user.getUserName(),
                                 user.getPassword(), user.isAccountAdmin(), user.isDataSourceCreator(), user.isInsightCreator());
         }
     }
@@ -482,11 +481,10 @@ public class UserService implements IUserService {
                     User user = (User) results.get(0);
                     String actualPassword = user.getPassword();
                     if (encryptedPassword.equals(actualPassword)) {
-                        List accountResults = session.createQuery("from Account where accountID = ?").setLong(0, user.getAccountID().getAccountID()).list();
+                        List accountResults = session.createQuery("from Account where accountID = ?").setLong(0, user.getAccount().getAccountID()).list();
                         Account account = (Account) accountResults.get(0);
-                        AccountType accountType = account.accountTypeObject();
-                        userServiceResponse = new UserServiceResponse(true, user.getUserID(), user.getAccountID().getAccountID(), user.getName(),
-                                accountType, account.getMaxSize(), user.getEmail(), user.getUserName(), encryptedPassword, user.isAccountAdmin(), user.isDataSourceCreator(), user.isInsightCreator());
+                        userServiceResponse = new UserServiceResponse(true, user.getUserID(), user.getAccount().getAccountID(), user.getName(),
+                                user.getAccount().getAccountType(), account.getMaxSize(), user.getEmail(), user.getUserName(), encryptedPassword, user.isAccountAdmin(), user.isDataSourceCreator(), user.isInsightCreator());
                         // FlexContext.getFlexSession().getRemoteCredentials();
                     } else {
                         userServiceResponse = new UserServiceResponse(false, "Incorrect password, please try again.");
@@ -519,11 +517,10 @@ public class UserService implements IUserService {
                     String actualPassword = user.getPassword();
                     String encryptedPassword = PasswordService.getInstance().encrypt(password);
                     if (encryptedPassword.equals(actualPassword)) {
-                        List accountResults = session.createQuery("from Account where accountID = ?").setLong(0, user.getAccountID().getAccountID()).list();
+                        List accountResults = session.createQuery("from Account where accountID = ?").setLong(0, user.getAccount().getAccountID()).list();
                         Account account = (Account) accountResults.get(0);
-                        AccountType accountType = account.accountTypeObject();
-                        userServiceResponse = new UserServiceResponse(true, user.getUserID(), user.getAccountID().getAccountID(), user.getName(),
-                                accountType, account.getMaxSize(), user.getEmail(), user.getUserName(), encryptedPassword, user.isAccountAdmin(), user.isDataSourceCreator(), user.isInsightCreator());
+                        userServiceResponse = new UserServiceResponse(true, user.getUserID(), user.getAccount().getAccountID(), user.getName(),
+                                user.getAccount().getAccountType(), account.getMaxSize(), user.getEmail(), user.getUserName(), encryptedPassword, user.isAccountAdmin(), user.isDataSourceCreator(), user.isInsightCreator());
                         // FlexContext.getFlexSession().getRemoteCredentials();
                     } else {
                         userServiceResponse = new UserServiceResponse(false, "Incorrect password, please try again.");
@@ -582,4 +579,14 @@ public class UserService implements IUserService {
         }
         return users;
     }
+
+    public void newFreeAccount() {
+
+    }
+
+    public void activateFreeAccount() {
+        
+    }
+
+    
 }

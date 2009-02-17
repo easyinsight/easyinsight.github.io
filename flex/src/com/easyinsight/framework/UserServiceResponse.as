@@ -1,7 +1,5 @@
 package com.easyinsight.framework
 {
-	import com.easyinsight.account.AccountType;
-	
 	[Bindable]
 	[RemoteClass(alias="com.easyinsight.users.UserServiceResponse")]
 	public class UserServiceResponse
@@ -12,7 +10,7 @@ package com.easyinsight.framework
 		public var accountID:int;
 		public var name:String;
 		public var spaceAllowed:int;
-		public var accountType:AccountType;
+		public var accountType:int;
 		public var email:String;
 		public var userName:String;
 		public var encryptedPassword:String;

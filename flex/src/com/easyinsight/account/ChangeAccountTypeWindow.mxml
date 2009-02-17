@@ -39,7 +39,7 @@ import mx.managers.PopUpManager;
         private var billingInfo:BillingInfo;
 
         [Bindable]
-        private var newAccountType:AccountType;
+        private var newAccountType:int;
 
         private function onBillingInfo(event:BillingInfoDefinitionEvent):void {
             billingInfo = event.billingInfo;
@@ -68,22 +68,22 @@ import mx.managers.PopUpManager;
         }
 
         private function setup():void {
-            var accountType:AccountType = User.getInstance().getAccountType();
-            if (accountType.getAccountType() == AccountType.FREE) {
+            var accountType:int = User.getInstance().getAccountType();
+            if (accountType == Account.FREE) {
                 individualAvailable = true;
                 professionalAvailable = true;
-            } else if (accountType.getAccountType() == AccountType.INDIVIDUAL) {
+            } else if (accountType == Account.INDIVIDUAL) {
                 professionalAvailable = true;
             }
         }
 
         private function upgradeToIndividual():void {
-            newAccountType = new IndividualAccountType();
+            newAccountType = Account.INDIVIDUAL;
             currentState = "BillingInfo";
         }
 
         private function upgradeToProfessional():void {
-            newAccountType = new CommercialAccountType();
+            newAccountType = Account.PROFESSIONAL;
             currentState = "BillingInfo";
         }
         ]]></mx:Script>

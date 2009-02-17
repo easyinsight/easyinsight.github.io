@@ -24,6 +24,13 @@
         <servlet-class>com.easyinsight.DMSServlet</servlet-class>
         <load-on-startup>1</load-on-startup>
     </servlet>
+
+    <servlet>
+        <servlet-name>GoalTask</servlet-name>
+        <display-name>GoalTask</display-name>
+        <servlet-class>com.easyinsight.goals.GoalTaskServlet</servlet-class>
+        <load-on-startup>2</load-on-startup>
+    </servlet>
                
     <servlet>
         <servlet-name>UploadExample</servlet-name>

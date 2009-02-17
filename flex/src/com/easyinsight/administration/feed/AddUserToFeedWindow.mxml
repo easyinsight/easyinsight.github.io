@@ -3,8 +3,6 @@
 	<mx:Script>
 		<![CDATA[
 			import com.easyinsight.administration.sharing.UserStub;
-			import mx.events.ValidationResultEvent;
-			import mx.validators.ValidationResult;
 			import mx.collections.ArrayCollection;
 			import mx.managers.PopUpManager;
 			

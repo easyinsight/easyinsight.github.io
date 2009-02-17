@@ -49,22 +49,22 @@
             private var password:String;
 
 			public function startAccountCreation():void {
-				var accountTypeObj:AccountType;
-            	switch (accountType.selectedValue) {
+				var accountType:int;
+            	switch (accountTypeRadio.selectedValue) {
             		case "free":
-            			accountTypeObj = new FreeAccountType();
+            			accountType = Account.FREE;
     					break;
 					case "individual":
-						accountTypeObj = new IndividualAccountType();
+						accountType = Account.INDIVIDUAL;
 						break;
 					case "professional":
-						accountTypeObj = new CommercialAccountType();
+						accountType = Account.PROFESSIONAL;
 						break;
 					case "enterprise":
 						break;
             	}
 				this.account = new Account();
-				account.accountType = accountTypeObj;
+				account.accountType = accountType;
 				this.currentState = "UserInfo";
 			}
 			
@@ -85,12 +85,12 @@
 			private function postUserInfo(event:UserDefinitionEvent):void {
 				this.user = event.user;
                 this.password = event.password;
-				switch (account.accountType.getAccountType()) {
-					case AccountType.FREE:
+				switch (account.accountType) {
+					case Account.FREE:
 						attemptAccountCreation();
 						break;						
-					case AccountType.INDIVIDUAL:						
-					case AccountType.COMMERCIAL:
+					case Account.INDIVIDUAL:						
+					case Account.PROFESSIONAL:
 						currentState = "BillingSetup";
 						break;
 				}
@@ -141,7 +141,7 @@
 			private function gotUserInfo():void {
 				var user:UserServiceResponse = creationService.authenticate.lastResult as UserServiceResponse;
 				User.initializeUser(user.name, user.email, user.accountType, user.spaceAllowed, user.accountAdmin,
-                            user.dataSourceCreator, user.insightCreator);
+                            user.dataSourceCreator, user.insightCreator, user.userID);
             	User.getInstance().password = user.encryptedPassword;
             	User.getInstance().userName = user.userName;
             	User.getEventNotifier().dispatchEvent(new LoginEvent(LoginEvent.LOGIN));
@@ -156,10 +156,10 @@
 			<mx:Spacer height="30"/>
 			<mx:HBox width="80%" id="box1">
 				<mx:VBox width="50%" backgroundColor="#FFFFFF">
-					<mx:RadioButtonGroup id="accountType" selectedValue="free"/>
-					<mx:RadioButton groupName="accountType" fontSize="12" id="free" value="free" label="Free Account - The quick and free way to start"/>
-					<mx:RadioButton groupName="accountType" fontSize="12" id="individual" value="individual" label="Individual Account - More features, more space, more insight!"/>
-					<mx:RadioButton groupName="accountType" fontSize="12" id="professional" value="professional" label="Professional Account - For the company ready to move ahead"/>
+					<mx:RadioButtonGroup id="accountTypeRadio" selectedValue="free"/>
+					<mx:RadioButton groupName="{accountTypeRadio}" fontSize="12" id="free" value="free" label="Free Account - The quick and free way to start"/>
+					<mx:RadioButton groupName="{accountTypeRadio}" fontSize="12" id="individual" value="individual" label="Individual Account - More features, more space, more insight!"/>
+					<mx:RadioButton groupName="{accountTypeRadio}" fontSize="12" id="professional" value="professional" label="Professional Account - For the company ready to move ahead"/>
 				</mx:VBox>
 				<mx:Spacer width="40"/>
 				<mx:VBox verticalAlign="middle" height="100%">

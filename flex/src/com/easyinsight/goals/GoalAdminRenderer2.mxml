@@ -95,6 +95,9 @@
                 goalInsight.insightID = analysisDefinition.insightID;
                 goalInsight.insightName = analysisDefinition.name;
                 goalTreeNode.associatedInsights.addItem(goalInsight);
+            } else if (obj is GoalTreeDescriptor) {
+                var goalTreeDescriptor:GoalTreeDescriptor = obj as GoalTreeDescriptor;
+
             }
         }
 
