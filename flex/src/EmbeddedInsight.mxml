@@ -12,10 +12,6 @@
 			import com.easyinsight.analysis.CrosstabDefinition;
 			import com.easyinsight.analysis.ChartDefinition;
 			import com.easyinsight.analysis.ListDefinition;
-			import com.easyinsight.account.FreeAccountType;
-			import com.easyinsight.account.CommercialAccountType;
-			import com.easyinsight.account.IndividualAccountType;
-			import com.easyinsight.account.AccountType;
 			import com.easyinsight.analysis.AnalysisDefinition;
 			
 			[Bindable]
@@ -33,10 +29,6 @@
 			}
 			
 			private function blah():void {
-            	var accountType:AccountType;
-            	var individualAccountType:IndividualAccountType;
-            	var commercialAccountType:CommercialAccountType;
-            	var freeAccountType:FreeAccountType;
             	var listDefinition:ListDefinition;
             	var chartDefinition:ChartDefinition;
             	var crosstabDefinition:CrosstabDefinition;
