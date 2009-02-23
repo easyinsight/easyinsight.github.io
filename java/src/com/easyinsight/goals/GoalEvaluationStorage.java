@@ -1,18 +1,15 @@
 package com.easyinsight.goals;
 
-import com.easyinsight.analysis.RollingFilterDefinition;
-import com.easyinsight.analysis.WSListDefinition;
-import com.easyinsight.analysis.InsightRequestMetadata;
-import com.easyinsight.AnalysisDateDimension;
-import com.easyinsight.AnalysisItemTypes;
-import com.easyinsight.AnalysisItem;
-import com.easyinsight.DataService;
+import com.easyinsight.analysis.AnalysisDateDimension;
+import com.easyinsight.analysis.AnalysisItemTypes;
+import com.easyinsight.analysis.AnalysisItem;
+import com.easyinsight.analysis.DataService;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.database.Database;
 import com.easyinsight.core.Value;
 import com.easyinsight.core.DateValue;
-import com.easyinsight.webservice.google.ListDataResults;
-import com.easyinsight.webservice.google.ListRow;
+import com.easyinsight.analysis.*;
+import com.easyinsight.analysis.ListRow;
 
 import java.util.*;
 import java.sql.Connection;

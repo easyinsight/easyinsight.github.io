@@ -9,6 +9,9 @@ import flex.messaging.FlexContext;
  */
 public class DefaultSecurityProvider implements ISecurityProvider {
     public UserPrincipal getUserPrincipal() {
+        if (FlexContext.getFlexSession() == null) {
+            return null;
+        }
         return (UserPrincipal) FlexContext.getFlexSession().getUserPrincipal();
     }
 }

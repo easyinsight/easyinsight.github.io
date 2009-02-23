@@ -1,7 +1,7 @@
 package com.easyinsight.dataengine;
 
-import com.easyinsight.AnalysisItem;
-import com.easyinsight.IDataService;
+import com.easyinsight.analysis.AnalysisItem;
+import com.easyinsight.analysis.IDataService;
 import com.easyinsight.analysis.AnalysisItemResultMetadata;
 
 import java.io.Serializable;

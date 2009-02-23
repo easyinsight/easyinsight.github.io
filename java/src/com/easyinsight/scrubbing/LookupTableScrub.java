@@ -1,7 +1,7 @@
 package com.easyinsight.scrubbing;
 
 import com.easyinsight.core.Key;
-import com.easyinsight.AnalysisItem;
+import com.easyinsight.analysis.AnalysisItem;
 
 import javax.persistence.*;
 import java.util.List;

@@ -3,7 +3,6 @@ package test.core;
 import junit.framework.TestCase;
 import com.easyinsight.database.Database;
 import com.easyinsight.analysis.*;
-import com.easyinsight.*;
 import com.easyinsight.storage.DataRetrieval;
 
 import java.util.List;

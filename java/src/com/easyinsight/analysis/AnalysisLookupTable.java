@@ -1,8 +1,8 @@
 package com.easyinsight.analysis;
 
-import com.easyinsight.AnalysisItem;
-import com.easyinsight.IRow;
-import com.easyinsight.AnalysisItemTypes;
+import com.easyinsight.analysis.AnalysisItem;
+import com.easyinsight.analysis.IRow;
+import com.easyinsight.analysis.AnalysisItemTypes;
 import com.easyinsight.scrubbing.LookupTableScrub;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.core.Value;

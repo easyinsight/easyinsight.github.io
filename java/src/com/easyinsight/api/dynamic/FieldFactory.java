@@ -1,8 +1,8 @@
 package com.easyinsight.api.dynamic;
 
-import com.easyinsight.AnalysisItem;
-import com.easyinsight.AnalysisItemTypes;
-import com.easyinsight.AnalysisMeasure;
+import com.easyinsight.analysis.AnalysisItem;
+import com.easyinsight.analysis.AnalysisItemTypes;
+import com.easyinsight.analysis.AnalysisMeasure;
 import com.easyinsight.core.NamedKey;
 
 import java.text.MessageFormat;

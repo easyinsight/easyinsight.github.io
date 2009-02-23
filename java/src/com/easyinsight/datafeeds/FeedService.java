@@ -3,9 +3,9 @@ package com.easyinsight.datafeeds;
 import com.easyinsight.analysis.*;
 import com.easyinsight.userupload.UserUploadService;
 import com.easyinsight.userupload.UploadPolicy;
-import com.easyinsight.AnalysisItem;
+import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.database.Database;
-import com.easyinsight.storage.TableDefinitionMetadata;
+import com.easyinsight.storage.DataStorage;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.security.*;
 import com.easyinsight.users.SubscriptionLicense;
@@ -52,7 +52,7 @@ public class FeedService implements IDataFeedService {
         try {
             conn.setAutoCommit(false);
             FeedDefinition feedDefinition = getFeedDefinition(feedID);
-            TableDefinitionMetadata metadata = TableDefinitionMetadata.readConnection(feedDefinition, conn);
+            DataStorage metadata = DataStorage.writeConnection(feedDefinition, conn);
             metadata.truncate();
             metadata.commit();
             conn.commit();
@@ -323,7 +323,7 @@ public class FeedService implements IDataFeedService {
             }
         }   */
         Connection conn = Database.instance().getConnection();
-        TableDefinitionMetadata metadata = null;
+        DataStorage metadata = null;
         try {
             conn.setAutoCommit(false);
             String[] tags = tagString.split(" ");
@@ -336,7 +336,7 @@ public class FeedService implements IDataFeedService {
             final long feedID = feedDefinition.getDataFeedID();
             FeedDefinition existingFeed = feedStorage.getFeedDefinitionData(feedDefinition.getDataFeedID());
             List<AnalysisItem> existingFields = existingFeed.getFields();
-            metadata = TableDefinitionMetadata.readConnection(feedDefinition, conn);
+            metadata = DataStorage.writeConnection(feedDefinition, conn);
             feedStorage.updateDataFeedConfiguration(feedDefinition, conn);
             metadata.migrate(existingFields, feedDefinition.getFields());
             FeedRegistry.instance().flushCache(feedID);

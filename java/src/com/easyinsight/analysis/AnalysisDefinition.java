@@ -1,8 +1,8 @@
 package com.easyinsight.analysis;
 
 import com.easyinsight.scrubbing.DataScrub;
-import com.easyinsight.AnalysisItem;
-import com.easyinsight.AnalysisItemTypes;
+import com.easyinsight.analysis.AnalysisItem;
+import com.easyinsight.analysis.AnalysisItemTypes;
 
 import javax.persistence.*;
 import java.util.List;

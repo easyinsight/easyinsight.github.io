@@ -1,6 +1,6 @@
 package com.easyinsight.datafeeds;
 
-import com.easyinsight.storage.TableDefinitionMetadata;
+import com.easyinsight.storage.DataStorage;
 
 /**
  * User: James Boe
@@ -9,18 +9,18 @@ import com.easyinsight.storage.TableDefinitionMetadata;
  */
 public class FeedCreationResult {
     private long feedID;
-    private TableDefinitionMetadata tableDefinitionMetadata;
+    private DataStorage dataStorage;
 
-    public FeedCreationResult(long feedID, TableDefinitionMetadata tableDefinitionMetadata) {
+    public FeedCreationResult(long feedID, DataStorage dataStorage) {
         this.feedID = feedID;
-        this.tableDefinitionMetadata = tableDefinitionMetadata;
+        this.dataStorage = dataStorage;
     }
 
     public long getFeedID() {
         return feedID;
     }
 
-    public TableDefinitionMetadata getTableDefinitionMetadata() {
-        return tableDefinitionMetadata;
+    public DataStorage getTableDefinitionMetadata() {
+        return dataStorage;
     }
 }

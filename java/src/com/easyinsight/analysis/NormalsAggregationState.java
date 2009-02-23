@@ -3,7 +3,7 @@ package com.easyinsight.analysis;
 import com.easyinsight.core.Value;
 import com.easyinsight.core.NumericValue;
 import com.easyinsight.core.EmptyValue;
-import com.easyinsight.Aggregation;
+import com.easyinsight.analysis.Aggregation;
 import cern.jet.stat.Descriptive;
 import cern.colt.list.DoubleArrayList;
 

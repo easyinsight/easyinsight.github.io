@@ -11,7 +11,7 @@ import com.easyinsight.dataset.DataSet;
 import com.easyinsight.core.Key;
 import com.easyinsight.core.DerivedKey;
 import com.easyinsight.core.NamedKey;
-import com.easyinsight.IRow;
+import com.easyinsight.analysis.IRow;
 
 /**
  * User: James Boe

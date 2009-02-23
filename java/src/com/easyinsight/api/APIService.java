@@ -9,7 +9,7 @@ import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.datafeeds.FeedDescriptor;
 import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.security.Roles;
-import com.easyinsight.AnalysisItem;
+import com.easyinsight.analysis.AnalysisItem;
 
 import java.util.List;
 import java.util.ArrayList;

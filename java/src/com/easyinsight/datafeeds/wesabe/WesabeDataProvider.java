@@ -2,7 +2,7 @@ package com.easyinsight.datafeeds.wesabe;
 
 import com.easyinsight.users.Credentials;
 import com.easyinsight.dataset.DataSet;
-import com.easyinsight.IRow;
+import com.easyinsight.analysis.IRow;
 import com.easyinsight.logging.LogClass;
 
 import java.util.Properties;

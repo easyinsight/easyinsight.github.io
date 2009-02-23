@@ -1,6 +1,6 @@
 package com.easyinsight.scrubbing;
 
-import com.easyinsight.IRow;
+import com.easyinsight.analysis.IRow;
 import com.easyinsight.core.Value;
 import com.easyinsight.core.StringValue;
 

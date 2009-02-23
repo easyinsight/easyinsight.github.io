@@ -1,7 +1,7 @@
 package com.easyinsight.analysis;
 
-import com.easyinsight.MaterializedFilterDefinition;
-import com.easyinsight.MaterializedRollingFilterDefinition;
+import com.easyinsight.analysis.MaterializedFilterDefinition;
+import com.easyinsight.analysis.MaterializedRollingFilterDefinition;
 
 /**
  * User: James Boe

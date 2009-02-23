@@ -1,8 +1,7 @@
 package com.easyinsight.analysis;
 
-import com.easyinsight.AnalysisItem;
-import com.easyinsight.Aggregation;
-import com.easyinsight.AnalysisDateDimension;
+import com.easyinsight.analysis.AnalysisItem;
+import com.easyinsight.analysis.AnalysisDateDimension;
 import com.easyinsight.core.Key;
 import com.easyinsight.core.Value;
 

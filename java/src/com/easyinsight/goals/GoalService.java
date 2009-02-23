@@ -33,8 +33,6 @@ public class GoalService {
         }
     }
 
-    
-
     public void deleteGoalTree(long goalTreeID) {
         try {
             goalStorage.deleteGoalTree(goalTreeID);
@@ -67,6 +65,7 @@ public class GoalService {
                     iter.remove();
                 }
             }
+            myTrees.addAll(goalTrees);
             solutionTrees = new SolutionService().getTreesFromSolutions();
         } catch (Exception e) {
             LogClass.error(e);

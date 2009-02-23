@@ -3,11 +3,9 @@ package com.easyinsight.analysis;
 import com.easyinsight.core.Value;
 import com.easyinsight.core.EmptyValue;
 import com.easyinsight.core.NumericValue;
-import com.easyinsight.AnalysisDateDimension;
-import com.easyinsight.AnalysisMeasure;
+import com.easyinsight.analysis.AnalysisDateDimension;
+import com.easyinsight.analysis.AnalysisMeasure;
 
-import java.util.List;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 

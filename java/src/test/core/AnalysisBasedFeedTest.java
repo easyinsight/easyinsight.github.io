@@ -7,10 +7,10 @@ import com.easyinsight.datafeeds.AnalysisBasedFeedDefinition;
 import com.easyinsight.storage.DataRetrieval;
 import com.easyinsight.userupload.*;
 import com.easyinsight.analysis.*;
-import com.easyinsight.AnalysisDimension;
-import com.easyinsight.AnalysisItem;
-import com.easyinsight.DataService;
-import com.easyinsight.webservice.google.ListDataResults;
+import com.easyinsight.analysis.AnalysisDimension;
+import com.easyinsight.analysis.AnalysisItem;
+import com.easyinsight.analysis.DataService;
+import com.easyinsight.analysis.ListDataResults;
 
 import java.util.Arrays;
 import java.util.List;

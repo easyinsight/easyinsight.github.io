@@ -1,7 +1,7 @@
 package test;
 
 import com.easyinsight.dataset.DataSet;
-import com.easyinsight.IRow;
+import com.easyinsight.analysis.IRow;
 
 /**
  * User: James Boe

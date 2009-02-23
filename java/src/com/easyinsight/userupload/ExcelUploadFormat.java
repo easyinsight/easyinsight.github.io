@@ -1,6 +1,6 @@
 package com.easyinsight.userupload;
 
-import com.easyinsight.stream.google.IDataTypeGuesser;
+import com.easyinsight.userupload.IDataTypeGuesser;
 import com.easyinsight.core.*;
 import com.easyinsight.logging.LogClass;
 

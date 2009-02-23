@@ -1,14 +1,14 @@
 package com.easyinsight.datafeeds;
 
-import com.easyinsight.AnalysisItem;
-import com.easyinsight.AnalysisItemTypes;
-import com.easyinsight.IRow;
+import com.easyinsight.analysis.AnalysisItem;
+import com.easyinsight.analysis.AnalysisItemTypes;
+import com.easyinsight.analysis.IRow;
 import com.easyinsight.database.Database;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.core.Key;
 import com.easyinsight.core.Value;
 import com.easyinsight.dataset.DataSet;
-import com.easyinsight.storage.TableDefinitionMetadata;
+import com.easyinsight.storage.DataStorage;
 
 import java.util.*;
 import java.sql.SQLException;
@@ -38,7 +38,7 @@ public class JoinDiscovery {
             for (AnalysisItem analysisItem : sourceFeed.getFields()) {
                 if (analysisItem.hasType(AnalysisItemTypes.DIMENSION)) {
                     List<Key> keys = Arrays.asList(analysisItem.getKey());
-                    TableDefinitionMetadata metadata = TableDefinitionMetadata.readConnection(sourceFeed, conn);
+                    DataStorage metadata = DataStorage.writeConnection(sourceFeed, conn);
                     DataSet dataSet;
                     try {
                         dataSet = metadata.retrieveData(keys, null);
@@ -56,7 +56,7 @@ public class JoinDiscovery {
             for (AnalysisItem analysisItem : targetFeed.getFields()) {
                 if (analysisItem.hasType(AnalysisItemTypes.DIMENSION)) {
                     List<Key> keys = Arrays.asList(analysisItem.getKey());
-                    TableDefinitionMetadata metadata = TableDefinitionMetadata.readConnection(targetFeed, conn);
+                    DataStorage metadata = DataStorage.writeConnection(targetFeed, conn);
                     DataSet dataSet;
                     try {
                         dataSet = metadata.retrieveData(keys, null);

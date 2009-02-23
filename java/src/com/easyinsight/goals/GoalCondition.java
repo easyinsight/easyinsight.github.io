@@ -1,6 +1,6 @@
 package com.easyinsight.goals;
 
-import com.easyinsight.AnalysisItem;
+import com.easyinsight.analysis.AnalysisItem;
 
 /**
  * User: James Boe

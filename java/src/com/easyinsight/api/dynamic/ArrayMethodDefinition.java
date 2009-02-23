@@ -1,6 +1,6 @@
 package com.easyinsight.api.dynamic;
 
-import com.easyinsight.*;
+import com.easyinsight.analysis.*;
 import com.easyinsight.core.NamedKey;
 
 import java.util.List;

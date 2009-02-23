@@ -8,8 +8,7 @@ import com.easyinsight.datafeeds.FeedRegistry;
 import com.easyinsight.datafeeds.FeedService;
 import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.storage.DataRetrieval;
-import com.easyinsight.*;
-import com.easyinsight.webservice.google.ListDataResults;
+import com.easyinsight.analysis.ListDataResults;
 
 import java.util.Arrays;
 import java.util.List;

@@ -1,9 +1,9 @@
 package com.easyinsight.dataset;
 
-import com.easyinsight.stream.google.IDataTypeGuesser;
-import com.easyinsight.stream.google.DataTypeGuesser;
-import com.easyinsight.IRow;
-import com.easyinsight.AnalysisItem;
+import com.easyinsight.userupload.IDataTypeGuesser;
+import com.easyinsight.userupload.DataTypeGuesser;
+import com.easyinsight.analysis.IRow;
+import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.core.Key;
 import com.easyinsight.core.Value;
 import com.easyinsight.core.EmptyValue;

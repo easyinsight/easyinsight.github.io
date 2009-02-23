@@ -18,6 +18,7 @@ import org.apache.cxf.ws.addressing.EndpointReferenceType;
 import org.apache.log4j.Logger;
 import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.security.PasswordService;
+import com.easyinsight.users.UserServiceResponse;
 
 /**
  * User: James Boe
@@ -48,7 +49,9 @@ public class BasicAuthAuthorizationInterceptor extends SoapHeaderInterceptor {
 
         // Verify the password
         try {
-            SecurityUtil.authenticate(policy.getUserName(), PasswordService.getInstance().encrypt(policy.getPassword()));
+            UserServiceResponse response = SecurityUtil.authenticateToResponse(policy.getUserName(), PasswordService.getInstance().encrypt(policy.getPassword()));
+            message.put("accountID", response.getAccountID());
+            message.put("userID", response.getUserID());
         } catch (Exception e) {
             log.warn("Invalid username or password for user: " + policy.getUserName());
             sendErrorResponse(message, HttpURLConnection.HTTP_FORBIDDEN);

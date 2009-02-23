@@ -1,6 +1,6 @@
 package com.easyinsight.userupload;
 
-import com.easyinsight.AnalysisItem;
+import com.easyinsight.analysis.AnalysisItem;
 
 import java.util.List;
 

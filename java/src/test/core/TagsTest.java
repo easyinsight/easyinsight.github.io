@@ -7,8 +7,8 @@ import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.datafeeds.FeedStorage;
 import com.easyinsight.storage.DataRetrieval;
 import com.easyinsight.userupload.*;
-import com.easyinsight.AnalysisMeasure;
-import com.easyinsight.AnalysisDimension;
+import com.easyinsight.analysis.AnalysisMeasure;
+import com.easyinsight.analysis.AnalysisDimension;
 import com.easyinsight.analysis.*;
 
 import java.util.Arrays;

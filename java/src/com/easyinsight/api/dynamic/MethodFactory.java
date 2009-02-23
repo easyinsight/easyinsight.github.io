@@ -1,7 +1,7 @@
 package com.easyinsight.api.dynamic;
 
-import com.easyinsight.AnalysisItem;
-import com.easyinsight.AnalysisItemTypes;
+import com.easyinsight.analysis.AnalysisItem;
+import com.easyinsight.analysis.AnalysisItemTypes;
 
 /**
  * User: James Boe

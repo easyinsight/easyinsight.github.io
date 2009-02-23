@@ -5,17 +5,27 @@ import com.easyinsight.datafeeds.FeedType;
 import com.easyinsight.datafeeds.Feed;
 import com.easyinsight.datafeeds.CredentialsDefinition;
 import com.easyinsight.dataset.DataSet;
-import com.easyinsight.dataset.ColumnSegmentFactory;
-import com.easyinsight.dataset.PersistableDataSetForm;
 import com.easyinsight.users.Credentials;
-import com.easyinsight.storage.DataRetrieval;
-import com.easyinsight.storage.DataRetrievalManager;
-import com.easyinsight.userupload.CredentialsResponse;
+import com.easyinsight.users.Account;
+import com.easyinsight.core.*;
+import com.easyinsight.analysis.AnalysisItem;
+import com.easyinsight.analysis.IRow;
+import com.easyinsight.userupload.IDataTypeGuesser;
+import com.easyinsight.userupload.DataTypeGuesser;
+import com.google.gdata.client.spreadsheet.SpreadsheetService;
+import com.google.gdata.data.spreadsheet.ListFeed;
+import com.google.gdata.data.spreadsheet.ListEntry;
+import com.google.gdata.util.ServiceException;
 
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.util.Map;
+import java.util.List;
+import java.util.HashMap;
+import java.net.URL;
+import java.io.IOException;
 
 /**
  * User: James Boe
@@ -58,6 +68,83 @@ public class GoogleFeedDefinition extends FeedDefinition {
         }
     }
 
+    @Override
+    public Map<String, Key> newDataSourceFields(Credentials credentials) {
+        Map<String, Key> keyMap = new HashMap<String, Key>();
+        if (getDataFeedID() == 0) {
+        } else {
+            for (AnalysisItem field : getFields()) {
+                keyMap.put(field.getKey().toKeyString(), field.getKey());
+            }
+        }
+        return keyMap;
+    }
+
+    @Override
+    public int getRequiredAccountTier() {
+        return Account.FREE;
+    }
+
+    private List<AnalysisItem> populateFields(DataSet dataSet) {
+        IDataTypeGuesser guesser = new DataTypeGuesser();
+        for (IRow row : dataSet.getRows()) {
+            for (Key key : row.getKeys()) {
+                Value value = row.getValue(key);
+                if (value == null) {
+                    value = new EmptyValue();
+                }
+                guesser.addValue(key, value);
+            }
+        }
+        return guesser.createFeedItems();
+    }
+
+    @Override
+    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, DataSet dataSet) {
+        return populateFields(dataSet);
+    }
+
+    @Override
+    public DataSet getDataSet(Credentials credentials, Map<String, Key> keys) {
+        DataSet dataSet;
+        try {
+            SpreadsheetService myService = GoogleSpreadsheetAccess.getOrCreateSpreadsheetService(credentials);
+            URL listFeedUrl = new URL(worksheetURL);
+            ListFeed feed = myService.getFeed(listFeedUrl, ListFeed.class);
+            dataSet = new DataSet();
+            for (ListEntry listEntry : feed.getEntries()) {
+                IRow row = dataSet.createRow();
+                boolean atLeastOneValue = false;
+                for (String tag : listEntry.getCustomElements().getTags()) {
+                    Value value;
+                    String string = listEntry.getCustomElements().getValue(tag);
+                    if (string == null) {
+                        value = new EmptyValue();
+                    } else {
+                        if (string.length() > 0) {
+                            atLeastOneValue = true;
+                        }
+                        value = new StringValue(string);
+                    }
+                    NamedKey key = (NamedKey) keys.get(tag);
+                    if (key == null) {
+                        key = new NamedKey(tag);
+                        keys.put(tag, key);
+                    }
+                    row.addValue(new NamedKey(tag), value);
+                }
+                if (!atLeastOneValue) {
+                    dataSet.removeRow(row);
+                }
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        } catch (ServiceException e) {
+            throw new RuntimeException(e);
+        }
+        return dataSet;
+    }
+
     public FeedType getFeedType() {
         return FeedType.GOOGLE;
     }
@@ -68,13 +155,5 @@ public class GoogleFeedDefinition extends FeedDefinition {
 
     public int getCredentialsDefinition() {
         return CredentialsDefinition.STANDARD_USERNAME_PW;
-    }
-
-    public CredentialsResponse refresh(Credentials credentials) {
-        DataSet dataSet = GoogleDataProvider.createDataSet(credentials, worksheetURL);
-        ColumnSegmentFactory columnSegmentFactory = new ColumnSegmentFactory();
-        PersistableDataSetForm persistable = columnSegmentFactory.createPersistableForm(dataSet, getFields());
-        DataRetrievalManager.instance().storeData(getDataFeedID(), persistable);
-        return new CredentialsResponse(true);
     }
 }

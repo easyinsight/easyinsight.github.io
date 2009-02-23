@@ -1,8 +1,8 @@
 package com.easyinsight.analysis;
 
-import com.easyinsight.MaterializedFilterDefinition;
-import com.easyinsight.AnalysisItem;
-import com.easyinsight.AnalysisItemTypes;
+import com.easyinsight.analysis.MaterializedFilterDefinition;
+import com.easyinsight.analysis.AnalysisItem;
+import com.easyinsight.analysis.AnalysisItemTypes;
 import com.easyinsight.core.Value;
 import com.easyinsight.core.NumericValue;
 import com.easyinsight.core.EmptyValue;

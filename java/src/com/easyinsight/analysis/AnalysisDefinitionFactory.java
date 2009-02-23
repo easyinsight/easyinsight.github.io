@@ -1,7 +1,7 @@
 package com.easyinsight.analysis;
 
-import com.easyinsight.AnalysisTypes;
-import com.easyinsight.AnalysisItemFactory;
+import com.easyinsight.analysis.AnalysisTypes;
+import com.easyinsight.analysis.AnalysisItemFactory;
 
 /**
  * User: James Boe

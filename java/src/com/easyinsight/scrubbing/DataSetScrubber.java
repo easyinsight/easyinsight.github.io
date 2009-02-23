@@ -1,7 +1,7 @@
 package com.easyinsight.scrubbing;
 
 import com.easyinsight.dataset.DataSet;
-import com.easyinsight.IRow;
+import com.easyinsight.analysis.IRow;
 
 import java.util.List;
 import java.util.ArrayList;

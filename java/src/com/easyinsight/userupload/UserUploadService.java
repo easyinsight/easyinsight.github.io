@@ -2,11 +2,12 @@ package com.easyinsight.userupload;
 
 import com.easyinsight.dataset.PersistableDataSetForm;
 import com.easyinsight.dataset.DataSet;
-import com.easyinsight.storage.TableDefinitionMetadata;
+import com.easyinsight.storage.DataStorage;
+import com.easyinsight.storage.StorageLimitException;
 import com.easyinsight.database.Database;
 import com.easyinsight.datafeeds.*;
 import com.easyinsight.datafeeds.file.FileBasedFeedDefinition;
-import com.easyinsight.AnalysisItem;
+import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.core.Key;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.security.SecurityUtil;
@@ -17,6 +18,10 @@ import com.easyinsight.analysis.*;
 import java.io.*;
 import java.util.*;
 import java.sql.*;
+
+import flex.messaging.MessageBroker;
+import flex.messaging.messages.AsyncMessage;
+import flex.messaging.util.UUIDUtils;
 
 /**
  * User: James Boe
@@ -126,7 +131,7 @@ public class UserUploadService implements IUserUploadService {
 
     public long createNewDefaultFeed(String name) {
         Connection conn = Database.instance().getConnection();
-        TableDefinitionMetadata tableDef = null;
+        DataStorage tableDef = null;
         try {
             conn.setAutoCommit(false);
             FeedDefinition feedDefinition = new FeedDefinition();
@@ -167,7 +172,7 @@ public class UserUploadService implements IUserUploadService {
     public UploadResponse create(long uploadID, String name) {
         UploadResponse uploadResponse;
         Connection conn = Database.instance().getConnection();
-        TableDefinitionMetadata tableDef = null;
+        DataStorage tableDef = null;
         try {
             conn.setAutoCommit(false);
             RawUploadData rawUploadData = retrieveRawData(uploadID);
@@ -199,6 +204,16 @@ public class UserUploadService implements IUserUploadService {
             }
             tableDef.commit();
             conn.commit();
+        } catch (StorageLimitException se) {
+            if (tableDef != null) {
+                tableDef.rollback();
+            }
+            try {
+                conn.rollback();
+            } catch (SQLException e1) {
+                LogClass.error(e1);
+            }
+            uploadResponse = new UploadResponse("You have reached your account storage limit.");
         } catch (Exception e) {
             LogClass.error(e);
             if (tableDef != null) {
@@ -284,7 +299,7 @@ public class UserUploadService implements IUserUploadService {
             conn.setAutoCommit(false);
             int role = SecurityUtil.getUserRoleToFeed(dataFeedID);
             if (role == Roles.OWNER) {
-                TableDefinitionMetadata.delete(dataFeedID, conn);
+                DataStorage.delete(dataFeedID, conn);
                 PreparedStatement deleteStmt = conn.prepareStatement("DELETE FROM DATA_FEED WHERE DATA_FEED_ID = ?");
                 deleteStmt.setLong(1, dataFeedID);
                 deleteStmt.executeUpdate();
@@ -438,12 +453,42 @@ public class UserUploadService implements IUserUploadService {
 
     public CredentialsResponse refreshData(long feedID, Credentials credentials) {
         SecurityUtil.authorizeFeed(feedID, Roles.OWNER);
+        Connection conn = Database.instance().getConnection();
+        DataStorage dataStorage = null;
         try {
+            conn.setAutoCommit(false);
             FeedDefinition feedDefinition = getDataFeedConfiguration(feedID);
-            return feedDefinition.refresh(credentials);
+            DataSet dataSet = feedDefinition.getDataSet(credentials, feedDefinition.newDataSourceFields(credentials));
+            dataStorage = DataStorage.writeConnection(feedDefinition, conn);
+            dataStorage.truncate();
+            dataStorage.insertData(dataSet);
+            dataStorage.commit();
+            conn.commit();
+            MessageBroker msgBroker = MessageBroker.getMessageBroker(null);
+            String clientID = UUIDUtils.createUUID();
+            AsyncMessage msg = new AsyncMessage();
+            msg.setDestination("dataUpdates");
+            msg.setHeader(AsyncMessage.SUBTOPIC_HEADER_NAME, String.valueOf(feedID));
+            msg.setMessageId(clientID);
+            msg.setTimestamp(System.currentTimeMillis());
+            msgBroker.routeMessageToService(msg, null);
+            return new CredentialsResponse(true);
         } catch (Exception e) {
             LogClass.error(e);
-            throw new RuntimeException(e);
+            if (dataStorage != null) {
+                dataStorage.rollback();
+            }
+            try {
+                conn.rollback();
+            } catch (SQLException e1) {
+                LogClass.error(e1);
+            }
+            return new CredentialsResponse(false, e.getMessage());
+        } finally {
+            if (dataStorage != null) {
+                dataStorage.closeConnection();
+            }
+            Database.instance().closeConnection(conn);
         }
     }
 
@@ -454,7 +499,7 @@ public class UserUploadService implements IUserUploadService {
             conn.setAutoCommit(false);
             RawUploadData rawUploadData = retrieveRawData(rawDataID);
             FileBasedFeedDefinition feedDefinition = (FileBasedFeedDefinition) getDataFeedConfiguration(feedID);
-            TableDefinitionMetadata metadata = TableDefinitionMetadata.readConnection(feedDefinition, conn);
+            DataStorage metadata = DataStorage.writeConnection(feedDefinition, conn);
             PersistableDataSetForm form = feedDefinition.getUploadFormat().createDataSet(rawUploadData.userData, feedDefinition.getFields());
             if (update) {
                 //DataRetrievalManager.instance().storeData(feedID, form);
@@ -514,14 +559,17 @@ public class UserUploadService implements IUserUploadService {
     }
 
     public long newExternalDataSource(FeedDefinition feedDefinition, Credentials credentials) {
+        if (SecurityUtil.getAccountTier() < feedDefinition.getRequiredAccountTier()) {
+            throw new RuntimeException("You are not allowed to create data sources of this type with your account.");
+        }
         long userID = SecurityUtil.getUserID();
         Connection conn = Database.instance().getConnection();
-        TableDefinitionMetadata metadata = null;
+        DataStorage metadata = null;
         try {
             conn.setAutoCommit(false);
-            Map<String, Key> keys = feedDefinition.newDataSourceFields();
+            Map<String, Key> keys = feedDefinition.newDataSourceFields(credentials);
             DataSet dataSet = feedDefinition.getDataSet(credentials, keys);
-            feedDefinition.setFields(feedDefinition.createAnalysisItems(keys));
+            feedDefinition.setFields(feedDefinition.createAnalysisItems(keys, dataSet));
             feedDefinition.setOwnerName(new UserService().retrieveUser(conn).getUserName());
             UploadPolicy uploadPolicy = new UploadPolicy(userID);
             feedDefinition.setUploadPolicy(uploadPolicy);

@@ -3,6 +3,7 @@ package com.easyinsight.solutions;
 import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.datafeeds.FeedStorage;
 import com.easyinsight.datafeeds.FeedDescriptor;
+import com.easyinsight.datafeeds.FeedConsumer;
 import com.easyinsight.analysis.*;
 import com.easyinsight.database.Database;
 import com.easyinsight.logging.LogClass;
@@ -10,15 +11,14 @@ import com.easyinsight.userupload.UserUploadService;
 import com.easyinsight.userupload.UploadPolicy;
 import com.easyinsight.security.Roles;
 import com.easyinsight.security.SecurityUtil;
-import com.easyinsight.storage.TableDefinitionMetadata;
+import com.easyinsight.storage.DataStorage;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.api.APIService;
 import com.easyinsight.api.dynamic.DynamicServiceDefinition;
 import com.easyinsight.api.dynamic.ConfiguredMethod;
-import com.easyinsight.AnalysisItem;
-import com.easyinsight.goals.GoalTreeDescriptor;
-import com.easyinsight.goals.GoalService;
-import com.easyinsight.goals.GoalTree;
+import com.easyinsight.analysis.AnalysisItem;
+import com.easyinsight.goals.*;
+import com.easyinsight.email.UserStub;
 
 import java.util.*;
 import java.sql.*;
@@ -149,7 +149,7 @@ public class SolutionService {
         }
     }
 
-    public List<Object> installSolution(long solutionID) {
+    public List<SolutionInstallInfo> installSolution(long solutionID) {
         // establish the connection from the account/user to the solution
         // retrieve the feeds for this solution
         // retrieve the insights matching that feed
@@ -159,7 +159,7 @@ public class SolutionService {
         Connection conn = Database.instance().getConnection();
         try {
             conn.setAutoCommit(false);
-            List<Object> objects = installSolution(userID, solution, conn);
+            List<SolutionInstallInfo> objects = installSolution(userID, solution, conn, false);
             conn.commit();
             return objects;
         } catch (Exception e) {
@@ -180,21 +180,42 @@ public class SolutionService {
         }
     }
 
-    public List<Object> installSolution(long userID, Solution solution, Connection conn) throws SQLException, CloneNotSupportedException {
-        List<Object> objects = new ArrayList<Object>(generateFeedsForSolution(solution.getSolutionID(), userID, conn, solution.isCopyData()));
-        PreparedStatement addRoleStmt = conn.prepareStatement("INSERT INTO USER_TO_SOLUTION (USER_ID, SOLUTION_ID, USER_ROLE) VALUES (?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
-        addRoleStmt.setLong(1, userID);
-        addRoleStmt.setLong(2, solution.getSolutionID());
-        addRoleStmt.setInt(3, SolutionRoles.INSTALLER);
-        addRoleStmt.execute();
-        long installLinkID = Database.instance().getAutoGenKey(addRoleStmt);
-        for (Object obj : objects) {
-            if (obj instanceof FeedDescriptor) {
-                FeedDescriptor feedDescriptor = (FeedDescriptor) obj;
+    public List<SolutionInstallInfo> installSolution(long userID, Solution solution, Connection conn, boolean inlineTree) throws SQLException {
+        try {
+            List<SolutionInstallInfo> objects = new ArrayList<SolutionInstallInfo>(generateFeedsForSolution(solution.getSolutionID(), userID, conn, solution.isCopyData()));
+            if (solution.getGoalTreeID() != 0) {
+                GoalTree goalTree = new GoalStorage().retrieveGoalTree(solution.getGoalTreeID(), conn);
+                final Set<Long> dataSourceIDs = new HashSet<Long>();
+                GoalTreeVisitor visitor = new GoalTreeVisitor() {
 
+                    protected void accept(GoalTreeNode goalTreeNode) {
+                        if (goalTreeNode.getCoreFeedID() > 0) {
+                            dataSourceIDs.add(goalTreeNode.getCoreFeedID());
+                        }
+                        for (GoalFeed dataSource : goalTreeNode.getAssociatedFeeds()) {
+                            dataSourceIDs.add(dataSource.getFeedID());
+                        }
+                        /*for (GoalInsight goalInsight : goalTreeNode.getAssociatedInsights()) {
+                            reportIDs.add(goalInsight.getInsightID());
+                        }*/
+                    }
+                };
+                visitor.visit(goalTree.getRootNode());
+                for (Long dataSourceID : dataSourceIDs) {
+                    FeedDefinition feedDefinition = feedStorage.getFeedDefinitionData(dataSourceID, conn);
+                    objects.addAll(installFeed(userID, conn, true, dataSourceID, feedDefinition));
+                }
+                if (!inlineTree) {
+                    GoalTree clonedTree = goalTree.clone();
+                    FeedConsumer feedConsumer = new UserStub(userID, null, null, null);
+                    clonedTree.setAdministrators(Arrays.asList(feedConsumer));
+                    new GoalStorage().installSolutions(clonedTree, conn);
+                }
             }
+            return objects;
+        } catch (CloneNotSupportedException e) {
+            throw new RuntimeException(e);
         }
-        return objects;
     }
 
     public List<FeedDescriptor> getAvailableFeeds() {
@@ -300,22 +321,17 @@ public class SolutionService {
         while (rs.next()) {
             long feedID = rs.getLong(1);
             FeedDefinition feedDefinition = feedStorage.getFeedDefinitionData(feedID, conn);
-            FeedDescriptor feedDescriptor = installFeed(userID, conn, copyData, feedID, feedDefinition);
-            descriptors.add(new SolutionInstallInfo(feedDefinition.getDataFeedID(), feedDescriptor.getDataFeedID()));
+            descriptors.addAll(installFeed(userID, conn, copyData, feedID, feedDefinition));
         }
         return descriptors;
     }
 
-    private FeedDescriptor installFeed(long userID, Connection conn, boolean copyData, long feedID, FeedDefinition feedDefinition) throws CloneNotSupportedException, SQLException {
+    private List<SolutionInstallInfo> installFeed(long userID, Connection conn, boolean copyData, long feedID, FeedDefinition feedDefinition) throws CloneNotSupportedException, SQLException {
+        List<SolutionInstallInfo> infos = new ArrayList<SolutionInstallInfo>();
         FeedDefinition clonedFeedDefinition = cloneFeed(userID, conn, feedDefinition);
         feedStorage.updateDataFeedConfiguration(clonedFeedDefinition, conn);
         buildClonedDataStores(copyData, feedDefinition, clonedFeedDefinition, conn);
-        FeedDescriptor feedDescriptor = new FeedDescriptor();
-        feedDescriptor.setDataFeedID(clonedFeedDefinition.getDataFeedID());
-        feedDescriptor.setName(clonedFeedDefinition.getFeedName());
-        feedDescriptor.setFeedType(clonedFeedDefinition.getFeedType().getType());
         userUploadService.createUserFeedLink(userID, clonedFeedDefinition.getDataFeedID(), Roles.OWNER, conn);
-        List<InsightDescriptor> clonedDefs = new ArrayList<InsightDescriptor>();
         List<AnalysisDefinition> insights = getInsightsFromFeed(feedID, conn);
         for (AnalysisDefinition insight : insights) {
             if (insight.isRootDefinition()) {
@@ -326,27 +342,26 @@ public class SolutionService {
             clonedInsight.setDataFeedID(clonedFeedDefinition.getDataFeedID());
             clonedInsight.setUserBindings(Arrays.asList(new UserToAnalysisBinding(userID, UserPermission.OWNER)));
             analysisStorage.saveAnalysis(clonedInsight, conn);
-            clonedDefs.add(new InsightDescriptor(clonedInsight.getAnalysisID(), clonedInsight.getTitle(), clonedInsight.getDataFeedID()));
+            infos.add(new SolutionInstallInfo(insight.getAnalysisID(), clonedInsight.getAnalysisID(), SolutionInstallInfo.INSIGHT));
             List<FeedDefinition> insightFeeds = getFeedsFromInsight(clonedInsight.getAnalysisID(), conn);
             for (FeedDefinition insightFeed : insightFeeds) {
-                installFeed(userID, conn, copyData, insightFeed.getDataFeedID(), insightFeed);
+                infos.addAll(installFeed(userID, conn, copyData, insightFeed.getDataFeedID(), insightFeed));
             }
         }
-        feedDescriptor.setChildren(clonedDefs);
-        System.out.println("*** created cloned data source " + clonedFeedDefinition.getDataFeedID());
-        return feedDescriptor;
+        infos.add(new SolutionInstallInfo(feedDefinition.getDataFeedID(), clonedFeedDefinition.getDataFeedID(), SolutionInstallInfo.DATA_SOURCE));
+        return infos;
     }
 
     private void buildClonedDataStores(boolean copyData, FeedDefinition feedDefinition, FeedDefinition clonedFeedDefinition, Connection conn) throws SQLException {
         if (copyData) {
-            TableDefinitionMetadata sourceTable = TableDefinitionMetadata.readConnection(feedDefinition, conn);
+            DataStorage sourceTable = DataStorage.writeConnection(feedDefinition, conn);
             DataSet dataSet;
             try {
                 dataSet = sourceTable.retrieveData(null, null);
             } finally {
                 sourceTable.closeConnection();
             }
-            TableDefinitionMetadata clonedTable = TableDefinitionMetadata.readConnection(clonedFeedDefinition, conn);
+            DataStorage clonedTable = DataStorage.writeConnection(clonedFeedDefinition, conn);
             try {
                 clonedTable.createTable();
                 clonedTable.insertData(dataSet);
@@ -359,7 +374,7 @@ public class SolutionService {
                 clonedTable.closeConnection();
             }
         } else {
-            TableDefinitionMetadata clonedTable = TableDefinitionMetadata.readConnection(clonedFeedDefinition, conn);
+            DataStorage clonedTable = DataStorage.writeConnection(clonedFeedDefinition, conn);
             try {
                 clonedTable.createTable();
                 clonedTable.commit();
@@ -488,7 +503,7 @@ public class SolutionService {
         Connection conn = Database.instance().getConnection();
         try {
             PreparedStatement treeStmt = conn.prepareStatement("SELECT SOLUTION_ID, SOLUTION.NAME, GOAL_TREE.GOAL_TREE_ID, GOAL_TREE.NAME FROM SOLUTION, GOAL_TREE WHERE " +
-                    "SOLUTION.GOAL_TREE_ID = GOAL_TREE.GOAL_TREE_ID AND SOLUTION.SOLUTION_TIER >= ?");
+                    "SOLUTION.GOAL_TREE_ID = GOAL_TREE.GOAL_TREE_ID AND SOLUTION.SOLUTION_TIER <= ?");
             treeStmt.setInt(1, solutionTier);
             ResultSet rs = treeStmt.executeQuery();
             while (rs.next()) {

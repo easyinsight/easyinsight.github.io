@@ -3,14 +3,14 @@ package com.easyinsight.api.dynamic;
 import com.easyinsight.datafeeds.FeedStorage;
 import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.dataset.DataSet;
-import com.easyinsight.storage.TableDefinitionMetadata;
+import com.easyinsight.storage.DataStorage;
 import com.easyinsight.storage.IWhere;
 import com.easyinsight.storage.StringWhere;
 import com.easyinsight.core.Key;
 import com.easyinsight.core.Value;
 import com.easyinsight.core.EmptyValue;
-import com.easyinsight.AnalysisItem;
-import com.easyinsight.IRow;
+import com.easyinsight.analysis.AnalysisItem;
+import com.easyinsight.analysis.IRow;
 import com.easyinsight.logging.LogClass;
 
 import java.util.Map;
@@ -45,7 +45,7 @@ public class InboundData {
             }
             row.addValue(key, value);
         }
-        TableDefinitionMetadata metadata = TableDefinitionMetadata.writeConnection(fields, feedDefinition.getDataFeedID());
+        DataStorage metadata = DataStorage.readConnection(fields, feedDefinition.getDataFeedID());
         try {
             metadata.insertData(dataSet);
             metadata.commit();
@@ -79,7 +79,7 @@ public class InboundData {
                 row.addValue(key, value);
             }
         }
-        TableDefinitionMetadata metadata = TableDefinitionMetadata.writeConnection(fields, feedDefinition.getDataFeedID());
+        DataStorage metadata = DataStorage.readConnection(fields, feedDefinition.getDataFeedID());
         try {
             metadata.insertData(dataSet);
             metadata.commit();
@@ -112,7 +112,7 @@ public class InboundData {
                 row.addValue(key, value);
             }
         }
-        TableDefinitionMetadata metadata = TableDefinitionMetadata.writeConnection(fields, feedDefinition.getDataFeedID());
+        DataStorage metadata = DataStorage.readConnection(fields, feedDefinition.getDataFeedID());
         try {
             metadata.truncate();
             metadata.insertData(dataSet);
@@ -150,7 +150,7 @@ public class InboundData {
             Key key = keyMap.get(updateEntry.getKey());
             wheres.add(new StringWhere(key, updateEntry.getValue().toString()));
         }
-        TableDefinitionMetadata metadata = TableDefinitionMetadata.writeConnection(fields, feedDefinition.getDataFeedID());
+        DataStorage metadata = DataStorage.readConnection(fields, feedDefinition.getDataFeedID());
         try {
             metadata.updateData(dataSet, wheres);
             metadata.commit();

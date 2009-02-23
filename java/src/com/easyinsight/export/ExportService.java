@@ -1,8 +1,8 @@
 package com.easyinsight.export;
 
-import com.easyinsight.DataService;
-import com.easyinsight.AnalysisItem;
-import com.easyinsight.AnalysisItemTypes;
+import com.easyinsight.analysis.DataService;
+import com.easyinsight.analysis.AnalysisItem;
+import com.easyinsight.analysis.AnalysisItemTypes;
 import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.database.Database;
 import com.easyinsight.logging.LogClass;
@@ -10,9 +10,9 @@ import com.easyinsight.core.Value;
 import com.easyinsight.core.StringValue;
 import com.easyinsight.core.NumericValue;
 import com.easyinsight.core.DateValue;
-import com.easyinsight.webservice.google.ListDataResults;
-import com.easyinsight.webservice.google.ListRow;
-import com.easyinsight.webservice.google.CrossTabDataResults;
+import com.easyinsight.analysis.ListDataResults;
+import com.easyinsight.analysis.ListRow;
+import com.easyinsight.analysis.CrossTabDataResults;
 import com.easyinsight.analysis.*;
 
 import org.apache.poi.hssf.usermodel.*;

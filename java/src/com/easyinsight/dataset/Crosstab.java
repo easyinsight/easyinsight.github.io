@@ -1,7 +1,7 @@
 package com.easyinsight.dataset;
 
-import com.easyinsight.AnalysisMeasure;
-import com.easyinsight.Aggregation;
+import com.easyinsight.analysis.AnalysisMeasure;
+import com.easyinsight.analysis.Aggregation;
 import com.easyinsight.core.Key;
 import com.easyinsight.core.Value;
 

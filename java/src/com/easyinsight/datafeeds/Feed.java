@@ -2,15 +2,13 @@ package com.easyinsight.datafeeds;
 
 
 import com.easyinsight.dataset.DataSet;
-import com.easyinsight.users.Credentials;
-import com.easyinsight.AnalysisItem;
+import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.analysis.AnalysisItemResultMetadata;
 import com.easyinsight.analysis.WSAnalysisDefinition;
 import com.easyinsight.analysis.InsightRequestMetadata;
 import com.easyinsight.core.Key;
 
 import java.util.List;
-import java.util.Map;
 
 /**
  * User: jboe

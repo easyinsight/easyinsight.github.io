@@ -2,8 +2,6 @@ package com.easyinsight.userupload;
 
 import com.easyinsight.datafeeds.FeedDescriptor;
 import com.easyinsight.datafeeds.FeedDefinition;
-import com.easyinsight.AnalysisItem;
-import com.easyinsight.analysis.TagCloud;
 
 import java.util.List;
 

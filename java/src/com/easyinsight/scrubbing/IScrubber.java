@@ -1,6 +1,6 @@
 package com.easyinsight.scrubbing;
 
-import com.easyinsight.IRow;
+import com.easyinsight.analysis.IRow;
 
 /**
  * User: James Boe

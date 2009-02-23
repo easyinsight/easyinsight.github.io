@@ -1,14 +1,12 @@
 package com.easyinsight.dataengine;
 
-import com.easyinsight.IDataService;
-import com.easyinsight.FeedMetadata;
-import com.easyinsight.AnalysisItem;
+import com.easyinsight.analysis.IDataService;
+import com.easyinsight.analysis.FeedMetadata;
+import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.security.SecurityUtil;
-import com.easyinsight.analysis.WSAnalysisDefinition;
-import com.easyinsight.analysis.AnalysisItemResultMetadata;
-import com.easyinsight.analysis.InsightRequestMetadata;
-import com.easyinsight.webservice.google.ListDataResults;
-import com.easyinsight.webservice.google.CrossTabDataResults;
+import com.easyinsight.analysis.ListDataResults;
+import com.easyinsight.analysis.CrossTabDataResults;
+import com.easyinsight.analysis.*;
 import com.easyinsight.users.Credentials;
 
 /**

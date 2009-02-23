@@ -41,7 +41,7 @@ public class User {
     private boolean insightCreator;
 
     @ManyToOne
-    @JoinColumn (name="account_id", insertable = false, updatable = false)
+    @JoinColumn (name="account_id")
     private Account account;
 
     public User() {

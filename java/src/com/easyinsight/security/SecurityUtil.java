@@ -33,6 +33,16 @@ public class SecurityUtil {
         }
     }
 
+    public static UserServiceResponse authenticateToResponse(String userName, String password) {
+        UserServiceResponse userServiceResponse = new UserService().authenticateWithEncrypted(userName, password);
+        if (userServiceResponse.isSuccessful()) {
+            return userServiceResponse;
+        } else {
+            Thread.dumpStack();
+            throw new SecurityException();
+        }
+    }
+
     public static long getUserID() {
         return getUserID(true);
     }
@@ -74,7 +84,6 @@ public class SecurityUtil {
     public static long getAccountID() {
         UserPrincipal userPrincipal = securityProvider.getUserPrincipal();
         if (userPrincipal == null) {
-            Thread.dumpStack();
             throw new SecurityException();
         } else {
             return userPrincipal.getAccountID();

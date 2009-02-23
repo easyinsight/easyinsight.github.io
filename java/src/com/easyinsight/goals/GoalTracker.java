@@ -1,11 +1,7 @@
 package com.easyinsight.goals;
 
-import com.easyinsight.IDataService;
-import com.easyinsight.analysis.AnalysisService;
+import com.easyinsight.analysis.IDataService;
 import com.easyinsight.analysis.AnalysisStorage;
-import com.easyinsight.analysis.WSAnalysisDefinition;
-
-import java.util.List;
 
 /**
  * User: James Boe

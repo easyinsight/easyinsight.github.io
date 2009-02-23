@@ -1,7 +1,7 @@
 package com.easyinsight.analysis;
 
-import com.easyinsight.AnalysisItem;
-import com.easyinsight.MaterializedFilterDefinition;
+import com.easyinsight.analysis.AnalysisItem;
+import com.easyinsight.analysis.MaterializedFilterDefinition;
 
 import java.io.Serializable;
 

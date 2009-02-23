@@ -1,7 +1,7 @@
 package com.easyinsight.analysis;
 
 import com.easyinsight.core.Value;
-import com.easyinsight.AnalysisItem;
+import com.easyinsight.analysis.AnalysisItem;
 
 /**
  * User: James Boe

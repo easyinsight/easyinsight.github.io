@@ -2,15 +2,11 @@ package com.easyinsight.datafeeds;
 
 import com.easyinsight.userupload.UploadPolicy;
 import com.easyinsight.userupload.CredentialsResponse;
-import com.easyinsight.AnalysisItem;
-import com.easyinsight.AnalysisItemTypes;
+import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.core.Key;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.users.Credentials;
-import com.easyinsight.analysis.AnalysisStorage;
-import com.easyinsight.analysis.Tag;
-import com.easyinsight.analysis.AnalysisHierarchyItem;
-import com.easyinsight.analysis.HierarchyLevel;
+import com.easyinsight.analysis.*;
 
 import java.util.*;
 import java.sql.Connection;
@@ -51,6 +47,10 @@ public class FeedDefinition implements Cloneable {
     private boolean inheritAccountAPISettings;
 
     public FeedDefinition() {
+    }
+
+    public int getRequiredAccountTier() {
+        throw new UnsupportedOperationException();
     }
 
     public boolean isInheritAccountAPISettings() {
@@ -300,10 +300,6 @@ public class FeedDefinition implements Cloneable {
     public int getCredentialsDefinition() {
         return CredentialsDefinition.NO_CREDENTIALS;
     }
-
-    public CredentialsResponse refresh(Credentials credentials) {
-        throw new UnsupportedOperationException();
-    }
     
      public DataSet getDataSet(Credentials credentials, Map<String, Key> keys) {
         throw new UnsupportedOperationException();
@@ -329,11 +325,11 @@ public class FeedDefinition implements Cloneable {
         throw new UnsupportedOperationException();
     }
 
-    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys) {
+    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, DataSet dataSet) {
         throw new UnsupportedOperationException();
     }
 
-    public Map<String, Key> newDataSourceFields() {
+    public Map<String, Key> newDataSourceFields(Credentials credentials) {
         throw new UnsupportedOperationException();
     }
 }

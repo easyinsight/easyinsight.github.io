@@ -23,6 +23,7 @@ public class Account {
     public static final int DELINQUENT = 3;
     public static final int SUSPENDED = 4;
     public static final int CLOSED = 5;
+    public static final int PENDING_BILLING = 6;
 
     @Id
     @GeneratedValue(strategy= GenerationType.IDENTITY)

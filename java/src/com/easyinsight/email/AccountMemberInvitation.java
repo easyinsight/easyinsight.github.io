@@ -22,7 +22,8 @@ public class AccountMemberInvitation {
     private static String freeAccountConfirmationText =
             "You have created a new free account with Easy Insight.\r\n"+
             "Please click the link below to activate your account:\r\n\r\n"+
-            "{0}";
+            "{0}\r\n\r\n"+
+            "This email was sent from an automated account. Please do not reply to this address.";
 
     private static String individualAccountCreationText =
             "Welcome to Easy Insight!\r\n\r\n" +
@@ -36,6 +37,18 @@ public class AccountMemberInvitation {
         String subject = "Easy Insight Account Creation";
         try {
             new GMailConnection().sendSSLMessage(to, subject, body, accountOwner);
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void sendActivationEmail(String to, String activation) {
+        String url = "http://www.easy-insight.com/accounts?activation=" + activation;
+        String body = MessageFormat.format(freeAccountConfirmationText, url);
+        String subject = "Easy Insight Account Activation";
+        try {
+            new GMailConnection().sendSSLMessage(to, subject, body, "donotreply@easy-insight.com");
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);

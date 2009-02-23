@@ -1,7 +1,7 @@
 package com.easyinsight.dataset;
 
 import com.easyinsight.core.Key;
-import com.easyinsight.IRow;
+import com.easyinsight.analysis.IRow;
 
 import java.util.Map;
 import java.util.HashMap;

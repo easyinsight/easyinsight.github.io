@@ -1,11 +1,8 @@
 package com.easyinsight.analysis;
 
-import com.easyinsight.AnalysisItem;
+import com.easyinsight.analysis.AnalysisItem;
 
 import javax.persistence.*;
-import java.util.Set;
-import java.util.List;
-import java.util.ArrayList;
 
 /**
  * User: James Boe

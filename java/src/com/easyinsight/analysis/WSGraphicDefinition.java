@@ -1,6 +1,6 @@
 package com.easyinsight.analysis;
 
-import com.easyinsight.AnalysisItem;
+import com.easyinsight.analysis.AnalysisItem;
 
 import java.util.List;
 import java.util.ArrayList;

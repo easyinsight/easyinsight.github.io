@@ -4,7 +4,7 @@ import com.easyinsight.dataset.DataSet;
 import com.easyinsight.core.StringValue;
 import com.easyinsight.core.NumericValue;
 import com.easyinsight.core.NamedKey;
-import com.easyinsight.IRow;
+import com.easyinsight.analysis.IRow;
 import com.easyinsight.logging.LogClass;
 import com.sforce.soap.enterprise.Soap;
 import com.sforce.soap.enterprise.QueryResult;

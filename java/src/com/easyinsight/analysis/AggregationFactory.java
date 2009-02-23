@@ -1,7 +1,5 @@
 package com.easyinsight.analysis;
 
-import com.easyinsight.*;
-
 /**
  * User: James Boe
  * Date: Oct 17, 2008

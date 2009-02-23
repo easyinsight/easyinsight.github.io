@@ -2,13 +2,13 @@ package com.easyinsight.userupload;
 
 import com.easyinsight.dataset.PersistableDataSetForm;
 import com.easyinsight.dataset.ColumnSegment;
-import com.easyinsight.AnalysisItem;
+import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.core.Key;
 import com.easyinsight.core.NamedKey;
 import com.easyinsight.core.Value;
 import com.easyinsight.core.EmptyValue;
-import com.easyinsight.stream.google.IDataTypeGuesser;
-import com.easyinsight.stream.google.DataTypeGuesser;
+import com.easyinsight.userupload.IDataTypeGuesser;
+import com.easyinsight.userupload.DataTypeGuesser;
 
 import java.util.List;
 import java.util.Map;

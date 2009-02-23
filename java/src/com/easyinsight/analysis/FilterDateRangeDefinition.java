@@ -1,6 +1,6 @@
 package com.easyinsight.analysis;
 
-import com.easyinsight.MaterializedFilterDefinition;
+import com.easyinsight.analysis.MaterializedFilterDefinition;
 
 import java.util.Date;
 

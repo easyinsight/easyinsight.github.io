@@ -3,7 +3,7 @@ package com.easyinsight.datafeeds;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.core.Key;
 import com.easyinsight.core.DerivedKey;
-import com.easyinsight.AnalysisItem;
+import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.analysis.AnalysisItemResultMetadata;
 import com.easyinsight.analysis.InsightRequestMetadata;

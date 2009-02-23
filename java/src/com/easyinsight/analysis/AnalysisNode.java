@@ -3,8 +3,7 @@ package com.easyinsight.analysis;
 import org.jgrapht.DirectedGraph;
 import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.graph.DefaultDirectedGraph;
-import com.easyinsight.AnalysisItem;
-import com.easyinsight.scrubbing.DataScrub;
+import com.easyinsight.analysis.AnalysisItem;
 
 import java.util.List;
 import java.util.ArrayList;

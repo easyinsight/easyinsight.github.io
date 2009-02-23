@@ -1,6 +1,6 @@
 package com.easyinsight.analysis;
 
-import com.easyinsight.Aggregation;
+import com.easyinsight.analysis.Aggregation;
 
 /**
  * User: James Boe

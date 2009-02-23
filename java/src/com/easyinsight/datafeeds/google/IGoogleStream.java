@@ -1,8 +1,10 @@
 package com.easyinsight.datafeeds.google;
 
-import com.easyinsight.webservice.google.Worksheet;
+import com.easyinsight.datafeeds.google.Worksheet;
 import com.easyinsight.users.Credentials;
 import com.easyinsight.datafeeds.FeedDescriptor;
+
+import java.util.List;
 
 /**
  * User: jboe
@@ -13,13 +15,9 @@ public interface IGoogleStream {
 
     // get the available spreadsheets/worksheets
 
-    public Worksheet[] getAvailableGoogleSpreadsheets(Credentials credentials);
+    public List<Worksheet> getAvailableGoogleSpreadsheets(Credentials credentials);
 
     // test a connection
 
     boolean testGoogleConnect(Credentials credentials);
-
-    // create a feed from a worksheet
-
-    FeedDescriptor createFeed(Credentials credentials, String title, String url);
 }

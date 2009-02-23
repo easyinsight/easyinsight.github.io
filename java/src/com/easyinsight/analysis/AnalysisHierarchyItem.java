@@ -1,14 +1,12 @@
 package com.easyinsight.analysis;
 
-import com.easyinsight.AnalysisItemTypes;
-import com.easyinsight.AnalysisDimension;
-import com.easyinsight.AnalysisItem;
+import com.easyinsight.analysis.AnalysisItemTypes;
+import com.easyinsight.analysis.AnalysisDimension;
+import com.easyinsight.analysis.AnalysisItem;
 
 import javax.persistence.*;
 import java.util.List;
 import java.util.ArrayList;
-
-import org.hibernate.annotations.IndexColumn;
 
 /**
  * User: James Boe

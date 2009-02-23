@@ -2,7 +2,7 @@ package com.easyinsight.datafeeds;
 
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.analysis.*;
-import com.easyinsight.AnalysisItem;
+import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.scrubbing.DataScrub;
 import com.easyinsight.core.Key;
 

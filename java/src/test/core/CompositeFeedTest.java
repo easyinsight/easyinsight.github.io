@@ -2,21 +2,13 @@ package test.core;
 
 import junit.framework.TestCase;
 import com.easyinsight.userupload.UserUploadService;
-import com.easyinsight.userupload.UserUploadAnalysis;
-import com.easyinsight.userupload.FlatFileUploadFormat;
-import com.easyinsight.userupload.UploadPolicy;
-import com.easyinsight.analysis.*;
 import com.easyinsight.datafeeds.*;
-import com.easyinsight.AnalysisDimension;
-import com.easyinsight.AnalysisMeasure;
-import com.easyinsight.AnalysisItem;
-import com.easyinsight.core.NamedKey;
+import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.core.Key;
 import com.easyinsight.core.DerivedKey;
 import com.easyinsight.storage.DataRetrieval;
 import com.easyinsight.database.Database;
 
-import java.util.Arrays;
 import java.sql.SQLException;
 
 import test.util.TestUtil;

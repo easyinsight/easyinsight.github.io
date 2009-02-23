@@ -1,8 +1,7 @@
 package com.easyinsight.dataset;
 
 import com.easyinsight.analysis.*;
-import com.easyinsight.webservice.google.ListDataResults;
-import com.easyinsight.*;
+import com.easyinsight.analysis.ListDataResults;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.core.Key;
 import com.easyinsight.core.Value;

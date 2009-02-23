@@ -2,7 +2,7 @@ package com.easyinsight.calculations;
 
 import com.easyinsight.core.Key;
 import com.easyinsight.datafeeds.FeedDefinition;
-import com.easyinsight.AnalysisItem;
+import com.easyinsight.analysis.AnalysisItem;
 
 import java.util.Map;
 import java.util.HashMap;

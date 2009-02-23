@@ -1,7 +1,7 @@
 package com.easyinsight.dataengine;
 
-import com.easyinsight.IDataService;
-import com.easyinsight.DataService;
+import com.easyinsight.analysis.IDataService;
+import com.easyinsight.analysis.DataService;
 import com.easyinsight.logging.LogClass;
 
 import javax.jms.MessageListener;

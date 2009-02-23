@@ -1,9 +1,9 @@
 package com.easyinsight.analysis;
 
-import com.easyinsight.AnalysisMeasure;
-import com.easyinsight.AnalysisDateDimension;
-import com.easyinsight.AnalysisItem;
-import com.easyinsight.AnalysisItemTypes;
+import com.easyinsight.analysis.AnalysisMeasure;
+import com.easyinsight.analysis.AnalysisDateDimension;
+import com.easyinsight.analysis.AnalysisItem;
+import com.easyinsight.analysis.AnalysisItemTypes;
 import com.easyinsight.core.Key;
 
 import javax.persistence.*;

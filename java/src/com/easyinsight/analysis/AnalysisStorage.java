@@ -2,7 +2,7 @@ package com.easyinsight.analysis;
 
 import com.easyinsight.database.Database;
 import com.easyinsight.core.PersistableValue;
-import com.easyinsight.AnalysisItem;
+import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.logging.LogClass;
 

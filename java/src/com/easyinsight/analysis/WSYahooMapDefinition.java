@@ -1,7 +1,7 @@
 package com.easyinsight.analysis;
 
 import com.easyinsight.webservice.ShortAnalysisDefinition;
-import com.easyinsight.AnalysisTypes;
+import com.easyinsight.analysis.AnalysisTypes;
 
 /**
  * User: James Boe

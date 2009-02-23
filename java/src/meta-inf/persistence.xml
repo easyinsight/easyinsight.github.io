@@ -44,11 +44,11 @@
         <class>com.easyinsight.analysis.AnalysisDefinition</class>
         <class>com.easyinsight.analysis.FilterDefinition</class>
         <class>com.easyinsight.analysis.ListDefinition</class>
-        <class>com.easyinsight.AnalysisItem</class>
-        <class>com.easyinsight.AnalysisDimension</class>
-        <class>com.easyinsight.AnalysisRangeDimension</class>
-        <class>com.easyinsight.AnalysisMeasure</class>
-        <class>com.easyinsight.AnalysisDateDimension</class>
+        <class>com.easyinsight.analysis.AnalysisItem</class>
+        <class>com.easyinsight.analysis.AnalysisDimension</class>
+        <class>com.easyinsight.analysis.AnalysisRangeDimension</class>
+        <class>com.easyinsight.analysis.AnalysisMeasure</class>
+        <class>com.easyinsight.analysis.AnalysisDateDimension</class>
         <class>com.easyinsight.analysis.AnalysisField</class>
         <class>com.easyinsight.analysis.UserToAnalysisBinding</class>
 

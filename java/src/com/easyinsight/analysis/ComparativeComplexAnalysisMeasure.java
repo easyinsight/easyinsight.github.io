@@ -1,6 +1,6 @@
 package com.easyinsight.analysis;
 
-import com.easyinsight.AnalysisMeasure;
+import com.easyinsight.analysis.AnalysisMeasure;
 
 /**
  * User: James Boe

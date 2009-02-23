@@ -7,8 +7,6 @@ import javax.persistence.*;
 import java.util.List;
 import java.util.ArrayList;
 
-import com.easyinsight.AnalysisItem;
-
 /**
  * User: James Boe
  * Date: Jul 17, 2008

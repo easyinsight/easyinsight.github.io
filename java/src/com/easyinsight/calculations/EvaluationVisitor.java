@@ -1,7 +1,6 @@
 package com.easyinsight.calculations;
 
-import com.easyinsight.IRow;
-import com.easyinsight.dataset.DataSet;
+import com.easyinsight.analysis.IRow;
 import com.easyinsight.core.Value;
 import com.easyinsight.core.NumericValue;
 import com.easyinsight.core.Key;

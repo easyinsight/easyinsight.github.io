@@ -12,6 +12,9 @@ import com.easyinsight.util.RandomTextGenerator;
 import java.util.List;
 import java.util.ArrayList;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.sql.ResultSet;
 
 import org.hibernate.Session;
 import org.jetbrains.annotations.NotNull;
@@ -228,20 +231,13 @@ public class UserService implements IUserService {
         updateAccount(account);
     } */
 
-    // okay, so creating a user is going to create the user and the account
-    // authenticate is going to return the user and the account ID (NOT the account)
-    // add user to account
-    // remove user from account (delete the user)
-    // upgrade the account
-    // downgrade the account
-    // change the permissions on a user within the context of an account
-    // reassign licenses between users
-
     public long createAccount(UserTransferObject userTransferObject, AccountTransferObject accountTransferObject, String password) {
-        Session session = Database.instance().createSession();
+        Connection conn = Database.instance().getConnection();
+        Session session = Database.instance().createSession(conn);
         try {
-            session.beginTransaction();
+            conn.setAutoCommit(false);
             Account account = accountTransferObject.toAccount();
+            configureNewAccount(account);
             User user = new User();
             user.setAccountAdmin(userTransferObject.isAccountAdmin());
             user.setAccount(account);
@@ -253,14 +249,55 @@ public class UserService implements IUserService {
             user.setPassword(PasswordService.getInstance().encrypt(password));
             account.addUser(user);
             session.save(account);
-            session.getTransaction().commit();
+            user.setAccount(account);
+            session.update(user);
+            if (account.getAccountType() == Account.FREE) {
+                String activationKey = RandomTextGenerator.generateText(12);
+                PreparedStatement insertActivationStmt = conn.prepareStatement("INSERT INTO ACCOUNT_ACTIVATION (ACCOUNT_ID, ACTIVATION_KEY, CREATION_DATE) VALUES (?, ?, ?)");
+                insertActivationStmt.setLong(1, account.getAccountID());
+                insertActivationStmt.setString(2, activationKey);
+                insertActivationStmt.setDate(3, new java.sql.Date(System.currentTimeMillis()));
+                insertActivationStmt.execute();
+                new AccountMemberInvitation().sendActivationEmail(user.getEmail(), activationKey);
+            }
+            conn.commit();
             return account.getAccountID();
         } catch (Exception e) {
             LogClass.error(e);
-            session.getTransaction().rollback();
+            try {
+                conn.rollback();
+            } catch (SQLException e1) {
+                LogClass.error(e1);
+            }
             throw new RuntimeException(e);
         } finally {
             session.close();
+            try {
+                conn.setAutoCommit(true);
+            } catch (SQLException e) {
+                LogClass.error(e);
+            }
+            Database.instance().closeConnection(conn);
+        }
+    }
+
+    private void configureNewAccount(Account account) {
+        if (account.getAccountType() == Account.ENTERPRISE) {
+            account.setAccountState(Account.PENDING_BILLING);
+            account.setMaxUsers(5);
+            account.setMaxSize(1000000000);
+        } else if (account.getAccountType() == Account.PROFESSIONAL) {
+            account.setAccountState(Account.PENDING_BILLING);
+            account.setMaxUsers(1);
+            account.setMaxSize(200000000);
+        } else if (account.getAccountType() == Account.INDIVIDUAL) {
+            account.setAccountState(Account.PENDING_BILLING);
+            account.setMaxUsers(1);
+            account.setMaxSize(20000000);
+        } else if (account.getAccountType() == Account.FREE) {
+            account.setAccountState(Account.INACTIVE);
+            account.setMaxUsers(1);
+            account.setMaxSize(1000000);
         }
     }
 
@@ -580,12 +617,42 @@ public class UserService implements IUserService {
         return users;
     }
 
-    public void newFreeAccount() {
-
-    }
-
-    public void activateFreeAccount() {
-        
+    public boolean activateFreeAccount(String activationID) {
+        boolean activated = false;
+        Connection conn = Database.instance().getConnection();
+        Session session = Database.instance().createSession(conn);
+        try {
+            conn.setAutoCommit(false);
+            PreparedStatement queryStmt = conn.prepareStatement("SELECT ACCOUNT_ID FROM ACCOUNT_ACTIVATION WHERE ACTIVATION_KEY = ?");
+            queryStmt.setString(1, activationID);
+            ResultSet rs = queryStmt.executeQuery();
+            if (rs.next()) {
+                long accountID = rs.getLong(1);
+                List results = session.createQuery("from Account where accountID = ?").setLong(0, accountID).list();
+                Account account = (Account) results.get(0);
+                account.setAccountState(Account.ACTIVE);
+                session.update(account);
+                session.flush();
+                activated = true;
+            }
+            conn.commit();
+        } catch (SQLException e) {
+            LogClass.error(e);
+            try {
+                conn.rollback();
+            } catch (SQLException e1) {
+                LogClass.error(e1);
+            }
+        } finally {
+            session.close();
+            try {
+                conn.setAutoCommit(true);
+            } catch (SQLException e) {
+                LogClass.error(e);
+            }
+            Database.instance().closeConnection(conn);
+        }
+        return activated;
     }
 
     

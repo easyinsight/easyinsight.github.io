@@ -10,7 +10,7 @@ import java.util.ArrayList;
  * Date: Oct 23, 2008
  * Time: 2:44:25 PM
  */
-public class GoalTree {
+public class GoalTree implements Cloneable {
 
     private GoalTreeNode rootNode;
 
@@ -23,6 +23,16 @@ public class GoalTree {
     private List<FeedConsumer> consumers = new ArrayList<FeedConsumer>();
 
     private long goalTreeID;
+
+    private List<Integer> newSolutions = new ArrayList<Integer>();
+
+    public List<Integer> getNewSolutions() {
+        return newSolutions;
+    }
+
+    public void setNewSolutions(List<Integer> newSolutions) {
+        this.newSolutions = newSolutions;
+    }
 
     public List<FeedConsumer> getAdministrators() {
         return administrators;
@@ -70,5 +80,15 @@ public class GoalTree {
 
     public void setGoalTreeID(long goalTreeID) {
         this.goalTreeID = goalTreeID;
+    }
+
+    @Override
+    public GoalTree clone() throws CloneNotSupportedException {
+        GoalTree goalTree = (GoalTree) super.clone();
+        goalTree.setRootNode(rootNode.clone());
+        goalTree.setGoalTreeID(0);
+        goalTree.setAdministrators(new ArrayList<FeedConsumer>());
+        goalTree.setConsumers(new ArrayList<FeedConsumer>());
+        return goalTree;
     }
 }

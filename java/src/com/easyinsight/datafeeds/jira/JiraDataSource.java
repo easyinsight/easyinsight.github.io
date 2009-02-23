@@ -4,15 +4,11 @@ import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.datafeeds.FeedType;
 import com.easyinsight.datafeeds.CredentialsDefinition;
 import com.easyinsight.datafeeds.jira.jiraweb.*;
-import com.easyinsight.userupload.CredentialsResponse;
 import com.easyinsight.users.Credentials;
+import com.easyinsight.users.Account;
 import com.easyinsight.dataset.DataSet;
-import com.easyinsight.dataset.ColumnSegmentFactory;
-import com.easyinsight.dataset.PersistableDataSetForm;
-import com.easyinsight.storage.DataRetrievalManager;
 import com.easyinsight.logging.LogClass;
-import com.easyinsight.*;
-import com.easyinsight.analysis.AggregationTypes;
+import com.easyinsight.analysis.*;
 import com.easyinsight.core.DateValue;
 import com.easyinsight.core.Key;
 import com.easyinsight.core.NamedKey;
@@ -20,6 +16,10 @@ import com.easyinsight.core.NumericValue;
 
 import javax.xml.rpc.ServiceException;
 import java.util.*;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 
 /**
  * User: James Boe
@@ -38,6 +38,10 @@ public class JiraDataSource extends FeedDefinition {
         this.url = url;
     }
 
+    public int getRequiredAccountTier() {
+        return Account.INDIVIDUAL;
+    }
+
     public FeedType getFeedType() {
         return FeedType.JIRA;
     }
@@ -53,7 +57,10 @@ public class JiraDataSource extends FeedDefinition {
     @Override
     public String validateCredentials(Credentials credentials) {
         try {
-            JiraSoapServiceService jiraSoapServiceGetter = new JiraSoapServiceServiceLocator();
+            JiraSoapServiceServiceLocator jiraSoapServiceGetter = new JiraSoapServiceServiceLocator();
+            String localURL = (url.startsWith("http://") ? "" : "http://") + url + (url.endsWith("/") ? "" : "/") + "rpc/soap/jirasoapservice-v2";
+            System.out.println(localURL);
+            jiraSoapServiceGetter.setJirasoapserviceV2EndpointAddress(localURL);
             JiraSoapService jiraSoapService = jiraSoapServiceGetter.getJirasoapserviceV2();
             jiraSoapService.login(credentials.getUserName(), credentials.getPassword());
             return null;
@@ -69,7 +76,8 @@ public class JiraDataSource extends FeedDefinition {
         try {
             String userName = credentials.getUserName();
             String password = credentials.getPassword();
-            JiraSoapServiceService jiraSoapServiceGetter = new JiraSoapServiceServiceLocator();
+            JiraSoapServiceServiceLocator jiraSoapServiceGetter = new JiraSoapServiceServiceLocator();
+            jiraSoapServiceGetter.setJirasoapserviceV2EndpointAddress((url.startsWith("http://") ? "" : "http://") + url + (url.endsWith("/") ? "" : "/") + "rpc/soap/jirasoapservice-v2");
             JiraSoapService jiraSoapService = jiraSoapServiceGetter.getJirasoapserviceV2();
             String token = jiraSoapService.login(userName, password);
             RemoteStatus[] statuses = jiraSoapService.getStatuses(token);
@@ -114,7 +122,7 @@ public class JiraDataSource extends FeedDefinition {
         return dataSet;
     }
 
-    public Map<String, Key> newDataSourceFields() {
+    public Map<String, Key> newDataSourceFields(Credentials credentials) {
         Map<String, Key> keyMap = new HashMap<String, Key>();
         if (getDataFeedID() == 0) {
             keyMap.put("Reporter", new NamedKey("Reporter"));
@@ -132,7 +140,7 @@ public class JiraDataSource extends FeedDefinition {
         return keyMap;
     }
 
-    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys) {
+    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, DataSet dataSet) {
         List<AnalysisItem> analysisItems = new ArrayList<AnalysisItem>();
         analysisItems.add(new AnalysisDimension(keys.get("Reporter"), true));
         analysisItems.add(new AnalysisList(keys.get("Components"), true, ","));
@@ -144,11 +152,24 @@ public class JiraDataSource extends FeedDefinition {
         return analysisItems;
     }
 
-    public CredentialsResponse refresh(Credentials credentials) {
-        DataSet dataSet = new DataSet();
-        ColumnSegmentFactory columnSegmentFactory = new ColumnSegmentFactory();
-        PersistableDataSetForm persistable = columnSegmentFactory.createPersistableForm(dataSet, getFields());
-        DataRetrievalManager.instance().storeData(getDataFeedID(), persistable);
-        return new CredentialsResponse(true);
+    @Override
+    public void customStorage(Connection conn) throws SQLException {
+        PreparedStatement clearStmt = conn.prepareStatement("DELETE FROM JIRA WHERE DATA_FEED_ID = ?");
+        clearStmt.setLong(1, getDataFeedID());
+        clearStmt.executeUpdate();
+        PreparedStatement jiraStmt = conn.prepareStatement("INSERT INTO JIRA (DATA_FEED_ID, URL) VALUES (?, ?)");
+        jiraStmt.setLong(1, getDataFeedID());
+        jiraStmt.setString(2, getUrl());
+        jiraStmt.execute();
+    }
+
+    @Override
+    public void customLoad(Connection conn) throws SQLException {
+        PreparedStatement loadStmt = conn.prepareStatement("SELECT URL FROM JIRA WHERE DATA_FEED_ID = ?");
+        loadStmt.setLong(1, getDataFeedID());
+        ResultSet rs = loadStmt.executeQuery();
+        if (rs.next()) {
+            this.setUrl(rs.getString(1));
+        }
     }
 }

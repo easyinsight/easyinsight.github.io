@@ -1,6 +1,6 @@
 package com.easyinsight.analysis;
 
-import com.easyinsight.AnalysisItemFactory;
+import com.easyinsight.analysis.AnalysisItemFactory;
 
 import javax.persistence.Entity;
 import javax.persistence.Table;

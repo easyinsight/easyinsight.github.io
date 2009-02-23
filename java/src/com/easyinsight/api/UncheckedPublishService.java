@@ -6,10 +6,8 @@ import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.datafeeds.FeedCreationResult;
 import com.easyinsight.datafeeds.FeedCreation;
 import com.easyinsight.datafeeds.FeedStorage;
-import com.easyinsight.users.UserService;
 import com.easyinsight.userupload.UploadPolicy;
-import com.easyinsight.*;
-import com.easyinsight.analysis.AggregationTypes;
+import com.easyinsight.analysis.*;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.database.Database;
 
@@ -32,6 +30,10 @@ public abstract class UncheckedPublishService extends PublishService {
 
     protected abstract String getUserName();
 
+    protected abstract long getAccountID();
+
+    protected abstract long getUserID();
+
     public boolean validateCredentials() {
         // if the user is able to connect to make this call, he's already met the test of valid credentials
         return true;
@@ -41,9 +43,15 @@ public abstract class UncheckedPublishService extends PublishService {
         Connection conn = Database.instance().getConnection();
         try {
             conn.setAutoCommit(false);
-            PreparedStatement stmt = conn.prepareStatement("UPDATE DATA_FEED SET unchecked_api_enabled = ? WHERE API_KEY = ?");
+            Map<Long, Boolean> dataSources = findDataSourceIDsByName(dataSourceKey, conn);
+            if (dataSources.size() == 0) {
+                throw new RuntimeException("It does not appear that " + dataSourceKey + " is a valid data source key.");
+            } else if (dataSources.size() > 1) {
+                throw new RuntimeException("More than one data source was found matching " + dataSourceKey + ".");
+            }
+            PreparedStatement stmt = conn.prepareStatement("UPDATE DATA_FEED SET unchecked_api_enabled = ? WHERE DATA_FEED_ID = ?");
             stmt.setBoolean(1, false);
-            stmt.setString(2, dataSourceKey);
+            stmt.setLong(2, dataSources.keySet().iterator().next());
             int rows = stmt.executeUpdate();
             if (rows != 1) {
                 throw new RuntimeException("It does not appear that " + dataSourceKey + " is a valid data source key.");
@@ -69,22 +77,21 @@ public abstract class UncheckedPublishService extends PublishService {
 
     public String addRow(String dataSourceName, Row row) {
         Connection conn = Database.instance().getConnection();
-        TableDefinitionMetadata tableDefinitionMetadata = null;
+        DataStorage dataStorage = null;
         try {
-            String userName = getUserName();
             conn.setAutoCommit(false);
-            CallData callData = getMetadata(userName, dataSourceName, row, conn);
-            tableDefinitionMetadata = callData.tableDefinitionMetadata;
+            CallData callData = getMetadata(dataSourceName, row, conn);
+            dataStorage = callData.dataStorage;
             DataSet dataSet = toDataSet(row);
-            tableDefinitionMetadata.truncate();
-            tableDefinitionMetadata.insertData(dataSet);
-            tableDefinitionMetadata.commit();
+            dataStorage.truncate();
+            dataStorage.insertData(dataSet);
+            dataStorage.commit();
             conn.commit();
             return callData.apiKey;
         } catch (Exception e) {
             LogClass.error(e);
-            if (tableDefinitionMetadata != null) {
-                tableDefinitionMetadata.rollback();
+            if (dataStorage != null) {
+                dataStorage.rollback();
             }
             try {
                 conn.rollback();
@@ -104,22 +111,21 @@ public abstract class UncheckedPublishService extends PublishService {
 
     public String addRows(String dataSourceName, Row[] rows) {
         Connection conn = Database.instance().getConnection();
-        TableDefinitionMetadata tableDefinitionMetadata = null;
+        DataStorage dataStorage = null;
         try {
-            String userName = getUserName();
             conn.setAutoCommit(false);
-            CallData callData = getMetadata(userName, dataSourceName, rows[0], conn);
-            tableDefinitionMetadata = callData.tableDefinitionMetadata;
+            CallData callData = getMetadata(dataSourceName, rows[0], conn);
+            dataStorage = callData.dataStorage;
             DataSet dataSet = toDataSet(rows);
-            tableDefinitionMetadata.truncate();
-            tableDefinitionMetadata.insertData(dataSet);
-            tableDefinitionMetadata.commit();
+            dataStorage.truncate();
+            dataStorage.insertData(dataSet);
+            dataStorage.commit();
             conn.commit();
             return callData.apiKey;
         } catch (Exception e) {
             LogClass.error(e);
-            if (tableDefinitionMetadata != null) {
-                tableDefinitionMetadata.rollback();
+            if (dataStorage != null) {
+                dataStorage.rollback();
             }
             try {
                 conn.rollback();
@@ -141,22 +147,21 @@ public abstract class UncheckedPublishService extends PublishService {
 
     public String replaceRows(String dataSourceName, Row[] rows) {
         Connection conn = Database.instance().getConnection();
-        TableDefinitionMetadata tableDefinitionMetadata = null;
+        DataStorage dataStorage = null;
         try {
-            String userName = getUserName();
             conn.setAutoCommit(false);
-            CallData callData = getMetadata(userName, dataSourceName, rows[0], conn);
-            tableDefinitionMetadata = callData.tableDefinitionMetadata;
+            CallData callData = getMetadata(dataSourceName, rows[0], conn);
+            dataStorage = callData.dataStorage;
             DataSet dataSet = toDataSet(rows);
-            tableDefinitionMetadata.truncate();
-            tableDefinitionMetadata.insertData(dataSet);
-            tableDefinitionMetadata.commit();
+            dataStorage.truncate();
+            dataStorage.insertData(dataSet);
+            dataStorage.commit();
             conn.commit();
             return callData.apiKey;
         } catch (Exception e) {
             LogClass.error(e);
-            if (tableDefinitionMetadata != null) {
-                tableDefinitionMetadata.rollback();
+            if (dataStorage != null) {
+                dataStorage.rollback();
             }
             try {
                 conn.rollback();
@@ -175,19 +180,19 @@ public abstract class UncheckedPublishService extends PublishService {
     }
 
     private static class CallData {
-        TableDefinitionMetadata tableDefinitionMetadata;
+        DataStorage dataStorage;
         String apiKey;
 
-        private CallData(TableDefinitionMetadata tableDefinitionMetadata, String apiKey) {
-            this.tableDefinitionMetadata = tableDefinitionMetadata;
+        private CallData(DataStorage dataStorage, String apiKey) {
+            this.dataStorage = dataStorage;
             this.apiKey = apiKey;
         }
     }
 
-    private CallData getMetadata(String userName, String dataSourceName, Row row, Connection conn) throws SQLException {
+    private CallData getMetadata(String dataSourceName, Row row, Connection conn) throws SQLException {
         String apiKey;
-        TableDefinitionMetadata tableDefinitionMetadata;
-        Map<Long, Boolean> dataSourceIDs = findDataSourceIDsByName(userName, dataSourceName, conn);
+        DataStorage dataStorage;
+        Map<Long, Boolean> dataSourceIDs = findDataSourceIDsByName(dataSourceName, conn);
         List<AnalysisItem> analysisItems = new ArrayList<AnalysisItem>();
         if (row.getStringPairs() != null) {
             for (StringPair stringPair : row.getStringPairs()) {
@@ -205,19 +210,19 @@ public abstract class UncheckedPublishService extends PublishService {
             }
         }
         if (dataSourceIDs.size() == 0) {
-            long userID = new UserService().getUserStub(userName).getUserID();
+            long userID = getUserID();
             // create new data source
             FeedDefinition feedDefinition = new FeedDefinition();
             feedDefinition.setFeedName(dataSourceName);
-            feedDefinition.setOwnerName(userName);
+            feedDefinition.setOwnerName(getUserName());
             feedDefinition.setUncheckedAPIEnabled(true);
             feedDefinition.setValidatedAPIEnabled(true);
             UploadPolicy uploadPolicy = new UploadPolicy(userID);
             feedDefinition.setUploadPolicy(uploadPolicy);
             feedDefinition.setFields(analysisItems);
-            FeedCreationResult result = new FeedCreation().createFeed(feedDefinition, conn, new DataSet(), userID);
+            FeedCreationResult result = new FeedCreation().createFeed(feedDefinition, conn, new DataSet(), userID, getAccountID());
             apiKey = feedDefinition.getApiKey();
-            tableDefinitionMetadata = result.getTableDefinitionMetadata();
+            dataStorage = result.getTableDefinitionMetadata();
         } else if (dataSourceIDs.size() > 1) {
             throw new RuntimeException("More than one data source was found by that name.");
         } else {
@@ -245,23 +250,23 @@ public abstract class UncheckedPublishService extends PublishService {
             if (newFieldsFound) {
                 feedDefinition.setFields(analysisItems);
                 feedStorage.updateDataFeedConfiguration(feedDefinition, conn);
-                tableDefinitionMetadata = TableDefinitionMetadata.readConnection(feedDefinition, conn);
-                tableDefinitionMetadata.migrate(previousItems, analysisItems, false);
+                dataStorage = DataStorage.writeConnection(feedDefinition, conn, getAccountID());
+                dataStorage.migrate(previousItems, analysisItems, false);
             } else {
-                tableDefinitionMetadata = TableDefinitionMetadata.readConnection(feedDefinition, conn);
+                dataStorage = DataStorage.writeConnection(feedDefinition, conn, getAccountID());
             }
         }
 
-        return new CallData(tableDefinitionMetadata, apiKey);
+        return new CallData(dataStorage, apiKey);
     }
 
-    private Map<Long, Boolean> findDataSourceIDsByName(String userName, String dataSourceName, Connection conn) throws SQLException {
+    private Map<Long, Boolean> findDataSourceIDsByName(String dataSourceName, Connection conn) throws SQLException {
         Map<Long, Boolean> dataSourceIDs = new HashMap<Long, Boolean>();
         PreparedStatement queryStmt = conn.prepareStatement("SELECT DISTINCT DATA_FEED.DATA_FEED_ID, DATA_FEED.UNCHECKED_API_ENABLED" +
                     " FROM UPLOAD_POLICY_USERS, DATA_FEED, user WHERE " +
-                    "UPLOAD_POLICY_USERS.user_id = user.user_id AND user.username = ? AND DATA_FEED.DATA_FEED_ID = UPLOAD_POLICY_USERS.FEED_ID AND (DATA_FEED.FEED_NAME = ? OR " +
+                    "UPLOAD_POLICY_USERS.user_id = user.user_id AND user.user_id = ? AND DATA_FEED.DATA_FEED_ID = UPLOAD_POLICY_USERS.FEED_ID AND (DATA_FEED.FEED_NAME = ? OR " +
                 "DATA_FEED.API_KEY = ?)");
-        queryStmt.setString(1, userName);
+        queryStmt.setLong(1, getUserID());
         queryStmt.setString(2, dataSourceName);
         queryStmt.setString(3, dataSourceName);
         ResultSet rs = queryStmt.executeQuery();
@@ -275,22 +280,21 @@ public abstract class UncheckedPublishService extends PublishService {
 
     public String updateRow(String dataSourceName, Row row, Where where) {
         Connection conn = Database.instance().getConnection();
-        TableDefinitionMetadata tableDefinitionMetadata = null;
+        DataStorage dataStorage = null;
         try {
-            String userName = getUserName();
             List<IWhere> wheres = createWheres(where);
             conn.setAutoCommit(false);
-            CallData callData = getMetadata(userName, dataSourceName, row, conn);
-            tableDefinitionMetadata = callData.tableDefinitionMetadata;
+            CallData callData = getMetadata(dataSourceName, row, conn);
+            dataStorage = callData.dataStorage;
             DataSet dataSet = toDataSet(row);
-            tableDefinitionMetadata.updateData(dataSet, wheres);
-            tableDefinitionMetadata.commit();
+            dataStorage.updateData(dataSet, wheres);
+            dataStorage.commit();
             conn.commit();
             return callData.apiKey;
         } catch (Exception e) {
             LogClass.error(e);
-            if (tableDefinitionMetadata != null) {
-                tableDefinitionMetadata.rollback();
+            if (dataStorage != null) {
+                dataStorage.rollback();
             }
             try {
                 conn.rollback();
@@ -310,23 +314,22 @@ public abstract class UncheckedPublishService extends PublishService {
 
     public String updateRows(String dataSourceName, Row[] rows, Where where) {
         Connection conn = Database.instance().getConnection();
-        TableDefinitionMetadata tableDefinitionMetadata = null;
+        DataStorage dataStorage = null;
         try {
-            String userName = getUserName();
-            List<IWhere> wheres = createWheres(where);            
+            List<IWhere> wheres = createWheres(where);
             conn.setAutoCommit(false);
-            CallData callData = getMetadata(userName, dataSourceName, rows[0], conn);
-            tableDefinitionMetadata = callData.tableDefinitionMetadata;
-            tableDefinitionMetadata = callData.tableDefinitionMetadata;
+            CallData callData = getMetadata(dataSourceName, rows[0], conn);
+            dataStorage = callData.dataStorage;
+            dataStorage = callData.dataStorage;
             DataSet dataSet = toDataSet(rows);
-            tableDefinitionMetadata.updateData(dataSet, wheres);
-            tableDefinitionMetadata.commit();
+            dataStorage.updateData(dataSet, wheres);
+            dataStorage.commit();
             conn.commit();
             return callData.apiKey;
         } catch (Exception e) {
             LogClass.error(e);
-            if (tableDefinitionMetadata != null) {
-                tableDefinitionMetadata.rollback();
+            if (dataStorage != null) {
+                dataStorage.rollback();
             }
             try {
                 conn.rollback();

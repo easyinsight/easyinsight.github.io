@@ -1,10 +1,10 @@
 package com.easyinsight.datafeeds;
 
 import com.easyinsight.dataset.DataSet;
-import com.easyinsight.storage.TableDefinitionMetadata;
-import com.easyinsight.IRow;
-import com.easyinsight.AnalysisItem;
-import com.easyinsight.AnalysisItemTypes;
+import com.easyinsight.storage.DataStorage;
+import com.easyinsight.analysis.IRow;
+import com.easyinsight.analysis.AnalysisItem;
+import com.easyinsight.analysis.AnalysisItemTypes;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.analysis.*;
 import com.easyinsight.core.Key;
@@ -43,7 +43,7 @@ public class StaticFeed extends Feed {
         keySet.add(key);
         DataSet dataSet = dataSetCache.get(keySet);
         if (dataSet == null) {
-            TableDefinitionMetadata source = TableDefinitionMetadata.writeConnection(getFields(), getFeedID());
+            DataStorage source = DataStorage.readConnection(getFields(), getFeedID());
             try {
                 dataSet = source.retrieveData(new ArrayList<Key>(keySet), null);
             } catch (SQLException e) {
@@ -80,7 +80,7 @@ public class StaticFeed extends Feed {
         keySet.addAll(columns);
         DataSet dataSet = dataSetCache.get(keySet);
         if (dataSet == null) {
-            TableDefinitionMetadata source = TableDefinitionMetadata.writeConnection(getFields(), getFeedID());
+            DataStorage source = DataStorage.readConnection(getFields(), getFeedID());
             try {
                 dataSet = source.retrieveData(new ArrayList<Key>(keySet), null);
             } catch (SQLException e) {

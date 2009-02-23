@@ -1,32 +1,20 @@
 package com.easyinsight.api;
 
 import com.easyinsight.database.Database;
-import com.easyinsight.storage.TableDefinitionMetadata;
+import com.easyinsight.storage.DataStorage;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.logging.LogClass;
-import com.easyinsight.*;
-import com.easyinsight.userupload.UploadPolicy;
 import com.easyinsight.datafeeds.FeedDefinition;
-import com.easyinsight.datafeeds.FeedCreationResult;
-import com.easyinsight.datafeeds.FeedCreation;
 import com.easyinsight.datafeeds.FeedStorage;
-import com.easyinsight.users.UserService;
-import com.easyinsight.analysis.AggregationTypes;
 
-import javax.xml.ws.handler.MessageContext;
 import javax.xml.ws.WebServiceContext;
 import javax.annotation.Resource;
 import java.util.List;
 import java.util.ArrayList;
-import java.util.Vector;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-
-import org.apache.ws.security.handler.WSHandlerResult;
-import org.apache.ws.security.WSSecurityEngineResult;
-import org.apache.ws.security.WSUsernameTokenPrincipal;
 
 /**
  * User: James Boe
@@ -46,21 +34,21 @@ public abstract class ValidatingPublishService extends PublishService implements
 
     public void addRow(String dataSourceName, Row row) {
         Connection conn = Database.instance().getConnection();
-        TableDefinitionMetadata tableDefinitionMetadata = null;
+        DataStorage dataStorage = null;
         try {
             String userName = getUserName();
             conn.setAutoCommit(false);
             FeedDefinition feedDefinition = getFeedDefinition(userName, dataSourceName, conn);
             DataTransformation dataTransformation = new DataTransformation(feedDefinition);
-            tableDefinitionMetadata = TableDefinitionMetadata.readConnection(feedDefinition, conn);
+            dataStorage = DataStorage.writeConnection(feedDefinition, conn);
             DataSet dataSet = dataTransformation.toDataSet(row);
-            tableDefinitionMetadata.insertData(dataSet);
-            tableDefinitionMetadata.commit();
+            dataStorage.insertData(dataSet);
+            dataStorage.commit();
             conn.commit();
         } catch (Exception e) {
             LogClass.error(e);
-            if (tableDefinitionMetadata != null) {
-                tableDefinitionMetadata.rollback();
+            if (dataStorage != null) {
+                dataStorage.rollback();
             }
             try {
                 conn.rollback();
@@ -80,21 +68,21 @@ public abstract class ValidatingPublishService extends PublishService implements
 
     public void addRows(String dataSourceKey, Row[] rows) {
         Connection conn = Database.instance().getConnection();
-        TableDefinitionMetadata tableDefinitionMetadata = null;
+        DataStorage dataStorage = null;
         try {
             String userName = getUserName();
             conn.setAutoCommit(false);
             FeedDefinition feedDefinition = getFeedDefinition(userName, dataSourceKey, conn);
             DataTransformation dataTransformation = new DataTransformation(feedDefinition);
-            tableDefinitionMetadata = TableDefinitionMetadata.readConnection(feedDefinition, conn);
+            dataStorage = DataStorage.writeConnection(feedDefinition, conn);
             DataSet dataSet = dataTransformation.toDataSet(rows);
-            tableDefinitionMetadata.insertData(dataSet);
-            tableDefinitionMetadata.commit();
+            dataStorage.insertData(dataSet);
+            dataStorage.commit();
             conn.commit();
         } catch (Exception e) {
             LogClass.error(e);
-            if (tableDefinitionMetadata != null) {
-                tableDefinitionMetadata.rollback();
+            if (dataStorage != null) {
+                dataStorage.rollback();
             }
             try {
                 conn.rollback();
@@ -114,22 +102,22 @@ public abstract class ValidatingPublishService extends PublishService implements
 
     public void replaceRows(String dataSourceKey, Row[] rows) {
         Connection conn = Database.instance().getConnection();
-        TableDefinitionMetadata tableDefinitionMetadata = null;
+        DataStorage dataStorage = null;
         try {
             String userName = getUserName();
             conn.setAutoCommit(false);
             FeedDefinition feedDefinition = getFeedDefinition(userName, dataSourceKey, conn);
             DataTransformation dataTransformation = new DataTransformation(feedDefinition);
-            tableDefinitionMetadata = TableDefinitionMetadata.readConnection(feedDefinition, conn);
+            dataStorage = DataStorage.writeConnection(feedDefinition, conn);
             DataSet dataSet = dataTransformation.toDataSet(rows);
-            tableDefinitionMetadata.truncate();
-            tableDefinitionMetadata.insertData(dataSet);
-            tableDefinitionMetadata.commit();
+            dataStorage.truncate();
+            dataStorage.insertData(dataSet);
+            dataStorage.commit();
             conn.commit();
         } catch (Exception e) {
             LogClass.error(e);
-            if (tableDefinitionMetadata != null) {
-                tableDefinitionMetadata.rollback();
+            if (dataStorage != null) {
+                dataStorage.rollback();
             }
             try {
                 conn.rollback();
@@ -175,21 +163,21 @@ public abstract class ValidatingPublishService extends PublishService implements
 
     public void updateRow(String dataSourceKey, Row row, Where where) {
         Connection conn = Database.instance().getConnection();
-        TableDefinitionMetadata tableDefinitionMetadata = null;
+        DataStorage dataStorage = null;
         try {
             String userName = getUserName();
             conn.setAutoCommit(false);
             FeedDefinition feedDefinition = getFeedDefinition(userName, dataSourceKey, conn);
             DataTransformation dataTransformation = new DataTransformation(feedDefinition);
-            tableDefinitionMetadata = TableDefinitionMetadata.readConnection(feedDefinition, conn);
+            dataStorage = DataStorage.writeConnection(feedDefinition, conn);
             DataSet dataSet = dataTransformation.toDataSet(row);
-            tableDefinitionMetadata.updateData(dataSet, createWheres(where));
-            tableDefinitionMetadata.commit();
+            dataStorage.updateData(dataSet, createWheres(where));
+            dataStorage.commit();
             conn.commit();
         } catch (Exception e) {
             LogClass.error(e);
-            if (tableDefinitionMetadata != null) {
-                tableDefinitionMetadata.rollback();
+            if (dataStorage != null) {
+                dataStorage.rollback();
             }
             try {
                 conn.rollback();
@@ -209,21 +197,21 @@ public abstract class ValidatingPublishService extends PublishService implements
 
     public void updateRows(String dataSourceKey, Row[] rows, Where where) {
         Connection conn = Database.instance().getConnection();
-        TableDefinitionMetadata tableDefinitionMetadata = null;
+        DataStorage dataStorage = null;
         try {
             String userName = getUserName();
             conn.setAutoCommit(false);
             FeedDefinition feedDefinition = getFeedDefinition(userName, dataSourceKey, conn);
             DataTransformation dataTransformation = new DataTransformation(feedDefinition);
-            tableDefinitionMetadata = TableDefinitionMetadata.readConnection(feedDefinition, conn);
+            dataStorage = DataStorage.writeConnection(feedDefinition, conn);
             DataSet dataSet = dataTransformation.toDataSet(rows);
-            tableDefinitionMetadata.updateData(dataSet, createWheres(where));
-            tableDefinitionMetadata.commit();
+            dataStorage.updateData(dataSet, createWheres(where));
+            dataStorage.commit();
             conn.commit();
         } catch (Exception e) {
             LogClass.error(e);
-            if (tableDefinitionMetadata != null) {
-                tableDefinitionMetadata.rollback();
+            if (dataStorage != null) {
+                dataStorage.rollback();
             }
             try {
                 conn.rollback();
@@ -243,19 +231,19 @@ public abstract class ValidatingPublishService extends PublishService implements
 
     public void deleteRows(String dataSourceKey, Where where) {
         Connection conn = Database.instance().getConnection();
-        TableDefinitionMetadata tableDefinitionMetadata = null;
+        DataStorage dataStorage = null;
         try {
             String userName = getUserName();
             conn.setAutoCommit(false);
             FeedDefinition feedDefinition = getFeedDefinition(userName, dataSourceKey, conn);
-            tableDefinitionMetadata = TableDefinitionMetadata.readConnection(feedDefinition, conn);
-            tableDefinitionMetadata.deleteData(createWheres(where));
-            tableDefinitionMetadata.commit();
+            dataStorage = DataStorage.writeConnection(feedDefinition, conn);
+            dataStorage.deleteData(createWheres(where));
+            dataStorage.commit();
             conn.commit();
         } catch (Exception e) {
             LogClass.error(e);
-            if (tableDefinitionMetadata != null) {
-                tableDefinitionMetadata.rollback();
+            if (dataStorage != null) {
+                dataStorage.rollback();
             }
             try {
                 conn.rollback();

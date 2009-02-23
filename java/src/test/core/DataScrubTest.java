@@ -2,24 +2,17 @@ package test.core;
 
 import junit.framework.TestCase;
 import com.easyinsight.analysis.*;
-import com.easyinsight.AnalysisDimension;
-import com.easyinsight.AnalysisItem;
-import com.easyinsight.DataService;
-import com.easyinsight.AnalysisMeasure;
-import com.easyinsight.core.NamedKey;
+import com.easyinsight.analysis.AnalysisDimension;
+import com.easyinsight.analysis.AnalysisItem;
+import com.easyinsight.analysis.DataService;
 import com.easyinsight.storage.DataRetrieval;
 import com.easyinsight.datafeeds.FeedRegistry;
 import com.easyinsight.database.Database;
-import com.easyinsight.webservice.google.ListDataResults;
-import com.easyinsight.webservice.google.ListRow;
-import com.easyinsight.userupload.UserUploadService;
-import com.easyinsight.userupload.UserUploadAnalysis;
-import com.easyinsight.userupload.FlatFileUploadFormat;
-import com.easyinsight.userupload.UploadPolicy;
+import com.easyinsight.analysis.ListDataResults;
+import com.easyinsight.analysis.ListRow;
 
 import java.util.List;
 import java.util.ArrayList;
-import java.util.Arrays;
 
 import test.util.TestUtil;
 

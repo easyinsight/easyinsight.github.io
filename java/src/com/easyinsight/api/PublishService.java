@@ -1,7 +1,7 @@
 package com.easyinsight.api;
 
 import com.easyinsight.dataset.DataSet;
-import com.easyinsight.IRow;
+import com.easyinsight.analysis.IRow;
 import com.easyinsight.storage.IWhere;
 import com.easyinsight.core.StringValue;
 import com.easyinsight.core.NumericValue;
@@ -32,7 +32,7 @@ public abstract class PublishService {
     }
 
     private IRow toRow(Row row) {
-        IRow transformedRow = new com.easyinsight.Row();
+        IRow transformedRow = new com.easyinsight.analysis.Row();
         StringPair[] stringPairs = row.getStringPairs();
         if (stringPairs != null) {
             for (StringPair stringPair : stringPairs) {

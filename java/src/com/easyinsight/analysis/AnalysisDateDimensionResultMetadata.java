@@ -2,9 +2,9 @@ package com.easyinsight.analysis;
 
 import com.easyinsight.core.Value;
 import com.easyinsight.core.DateValue;
-import com.easyinsight.AnalysisItem;
-import com.easyinsight.AnalysisDateDimension;
-import com.easyinsight.AnalysisItemTypes;
+import com.easyinsight.analysis.AnalysisItem;
+import com.easyinsight.analysis.AnalysisDateDimension;
+import com.easyinsight.analysis.AnalysisItemTypes;
 
 import java.util.Date;
 

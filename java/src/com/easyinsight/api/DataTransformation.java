@@ -1,9 +1,9 @@
 package com.easyinsight.api;
 
 import com.easyinsight.datafeeds.FeedDefinition;
-import com.easyinsight.AnalysisItem;
-import com.easyinsight.AnalysisItemTypes;
-import com.easyinsight.IRow;
+import com.easyinsight.analysis.AnalysisItem;
+import com.easyinsight.analysis.AnalysisItemTypes;
+import com.easyinsight.analysis.*;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.core.*;
 
@@ -40,7 +40,7 @@ public class DataTransformation {
     }
 
     public IRow toRow(Row row) {
-        IRow transformedRow = new com.easyinsight.Row();
+        IRow transformedRow = new com.easyinsight.analysis.Row();
         StringPair[] stringPairs = row.getStringPairs();
         if (stringPairs != null) {
             for (StringPair stringPair : stringPairs) {

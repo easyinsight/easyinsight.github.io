@@ -1,8 +1,6 @@
 package com.easyinsight.analysis;
 
-import com.easyinsight.AnalysisItem;
-import com.easyinsight.AnalysisItemTypes;
-import com.easyinsight.AnalysisCalculation;
+import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.dataset.LimitsResults;
 import com.easyinsight.webservice.ShortAnalysisDefinition;

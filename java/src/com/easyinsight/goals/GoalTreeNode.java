@@ -1,17 +1,19 @@
 package com.easyinsight.goals;
 
-import com.easyinsight.AnalysisMeasure;
+import com.easyinsight.analysis.AnalysisMeasure;
 import com.easyinsight.analysis.FilterDefinition;
 import com.easyinsight.analysis.Tag;
+import com.easyinsight.solutions.SolutionGoalTreeDescriptor;
 
 import java.util.List;
+import java.util.ArrayList;
 
 /**
  * User: James Boe
  * Date: Oct 23, 2008
  * Time: 3:02:04 PM
  */
-public class GoalTreeNode {
+public class GoalTreeNode implements Cloneable {
 
     public static final int ABSTRACT_NODE = 0;
     public static final int SPECIFICATION = 1;
@@ -33,9 +35,17 @@ public class GoalTreeNode {
     private String name;
     private String description;
     private String iconImage;
-    private List<Integer> newSolutions;
     private List<Integer> users;
     private long subTreeID;
+    private SolutionGoalTreeDescriptor newSubTree;
+
+    public SolutionGoalTreeDescriptor getNewSubTree() {
+        return newSubTree;
+    }
+
+    public void setNewSubTree(SolutionGoalTreeDescriptor newSubTree) {
+        this.newSubTree = newSubTree;
+    }
 
     public long getSubTreeID() {
         return subTreeID;
@@ -51,14 +61,6 @@ public class GoalTreeNode {
 
     public void setUsers(List<Integer> users) {
         this.users = users;
-    }
-
-    public List<Integer> getNewSolutions() {
-        return newSolutions;
-    }
-
-    public void setNewSolutions(List<Integer> newSolutions) {
-        this.newSolutions = newSolutions;
     }
 
     public String getIconImage() {
@@ -187,5 +189,19 @@ public class GoalTreeNode {
 
     public void setAssociatedSolutions(List<GoalSolution> associatedSolutions) {
         this.associatedSolutions = associatedSolutions;
+    }
+
+    @Override
+    public GoalTreeNode clone() throws CloneNotSupportedException {
+        GoalTreeNode node = (GoalTreeNode) super.clone();
+        node.setGoalTreeNodeID(0);
+        List<GoalTreeNode> cloneChildren = new ArrayList<GoalTreeNode>();
+        for (GoalTreeNode child : getChildren()) {
+            GoalTreeNode clonedChild = child.clone();
+            cloneChildren.add(clonedChild);
+            clonedChild.setParent(node);
+        }
+        node.setChildren(cloneChildren);
+        return node;
     }
 }

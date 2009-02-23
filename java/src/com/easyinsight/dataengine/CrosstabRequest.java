@@ -2,8 +2,8 @@ package com.easyinsight.dataengine;
 
 import com.easyinsight.analysis.WSAnalysisDefinition;
 import com.easyinsight.analysis.InsightRequestMetadata;
-import com.easyinsight.IDataService;
-import com.easyinsight.webservice.google.CrossTabDataResults;
+import com.easyinsight.analysis.CrossTabDataResults;
+import com.easyinsight.analysis.IDataService;
 
 import java.io.Serializable;
 

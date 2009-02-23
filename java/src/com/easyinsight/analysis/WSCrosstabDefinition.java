@@ -1,6 +1,6 @@
 package com.easyinsight.analysis;
 
-import com.easyinsight.AnalysisItem;
+import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.webservice.ShortAnalysisDefinition;
 
 import java.util.List;

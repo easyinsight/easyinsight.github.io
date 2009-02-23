@@ -1,26 +1,11 @@
 package com.easyinsight.datafeeds.google;
 
-import com.easyinsight.webservice.google.Worksheet;
 import com.easyinsight.datafeeds.*;
 import com.easyinsight.users.Credentials;
-import com.easyinsight.userupload.UserUploadService;
-import com.easyinsight.userupload.UploadPolicy;
-import com.easyinsight.userupload.UploadResponse;
-import com.easyinsight.dataset.DataSet;
-import com.easyinsight.dataset.ColumnSegmentFactory;
-import com.easyinsight.dataset.PersistableDataSetForm;
-import com.easyinsight.IRow;
-import com.easyinsight.AnalysisItem;
-import com.easyinsight.stream.google.IDataTypeGuesser;
-import com.easyinsight.stream.google.DataTypeGuesser;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.security.Roles;
-import com.easyinsight.analysis.*;
-import com.easyinsight.core.*;
 import com.easyinsight.database.Database;
-import com.easyinsight.storage.DataRetrievalManager;
-import com.easyinsight.storage.TableDefinitionMetadata;
 import com.google.gdata.util.AuthenticationException;
 import com.google.gdata.util.ServiceException;
 import com.google.gdata.client.spreadsheet.SpreadsheetService;
@@ -43,10 +28,9 @@ import java.sql.ResultSet;
  */
 public class GoogleDataProvider implements IGoogleStream {
 
-    private Map<Credentials, Worksheet[]> cachedSpreadsheetResults = new WeakHashMap<Credentials, Worksheet[]>();
+    private Map<Credentials, List<Worksheet>> cachedSpreadsheetResults = new WeakHashMap<Credentials, List<Worksheet>>();
     
     private static GoogleDataProvider instance = null;
-    private FeedStorage feedStorage = new FeedStorage();
 
     public GoogleDataProvider() {
         instance = this;
@@ -71,9 +55,9 @@ public class GoogleDataProvider implements IGoogleStream {
         return success;
     }
 
-    public FeedDescriptor createFeed(Credentials credentials, String title, String url) {
+    /*public FeedDescriptor createFeed(Credentials credentials, String title, String url) {
         Connection conn = Database.instance().getConnection();
-        TableDefinitionMetadata tableDef = null;
+        DataStorage tableDef = null;
         try {
             GoogleFeedDefinition googleFeedDefinition = new GoogleFeedDefinition();
             googleFeedDefinition.setWorksheetURL(url);
@@ -85,6 +69,7 @@ public class GoogleDataProvider implements IGoogleStream {
             tableDef = result.getTableDefinitionMetadata();
             tableDef.commit();
             FeedDescriptor feedDescriptor = new FeedDescriptor();
+            feedDescriptor.setName(title);
             feedDescriptor.setPolicy(new UploadPolicy(SecurityUtil.getUserID()));
             feedDescriptor.setDataFeedID(googleFeedDefinition.getDataFeedID());
             new UserUploadService().createUserFeedLink(SecurityUtil.getUserID(), googleFeedDefinition.getDataFeedID(), Roles.OWNER);
@@ -112,26 +97,24 @@ public class GoogleDataProvider implements IGoogleStream {
             }
         }
         return guesser.createFeedItems();
-    }
+    }*/
 
-    public Worksheet[] getAvailableGoogleSpreadsheets(Credentials credentials) {
-        Worksheet[] spreadsheetArray = cachedSpreadsheetResults.get(credentials);
-        if (spreadsheetArray == null) {
+    public List<Worksheet> getAvailableGoogleSpreadsheets(Credentials credentials) {
+        List<Worksheet> worksheets = cachedSpreadsheetResults.get(credentials);
+        if (worksheets == null) {
             try {
-                Collection<Worksheet> worksheets = getSpreadsheets(credentials);
-                spreadsheetArray = new Worksheet[worksheets.size()];
-                worksheets.toArray(spreadsheetArray);
-                cachedSpreadsheetResults.put(credentials, spreadsheetArray);
-                return spreadsheetArray;
+                worksheets = getSpreadsheets(credentials);
+                cachedSpreadsheetResults.put(credentials, worksheets);
+                return worksheets;
             } catch (Exception e) {
                 LogClass.error(e);
                 throw new RuntimeException(e);
             }
         }
-        return spreadsheetArray;
+        return worksheets;
     }
 
-    public static DataSet createDataSet(Credentials credentials, String url) {
+    /*public static DataSet createDataSet(Credentials credentials, String url, Map<String, Key> keys) {
         DataSet dataSet;
         try {
             SpreadsheetService myService = GoogleSpreadsheetAccess.getOrCreateSpreadsheetService(credentials);
@@ -164,7 +147,7 @@ public class GoogleDataProvider implements IGoogleStream {
             throw new RuntimeException(e);
         }
         return dataSet;
-    }
+    }*/
 
     private List<Worksheet> getSpreadsheets(Credentials credentials) throws AuthenticationException {
         List<Worksheet> worksheets = new ArrayList<Worksheet>();

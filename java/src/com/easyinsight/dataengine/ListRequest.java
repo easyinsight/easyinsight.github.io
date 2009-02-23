@@ -2,8 +2,8 @@ package com.easyinsight.dataengine;
 
 import com.easyinsight.analysis.WSAnalysisDefinition;
 import com.easyinsight.analysis.InsightRequestMetadata;
-import com.easyinsight.IDataService;
-import com.easyinsight.webservice.google.ListDataResults;
+import com.easyinsight.analysis.IDataService;
+import com.easyinsight.analysis.ListDataResults;
 
 import java.io.Serializable;
 

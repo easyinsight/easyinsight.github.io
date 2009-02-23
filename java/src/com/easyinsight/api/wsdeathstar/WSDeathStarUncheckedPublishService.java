@@ -30,4 +30,12 @@ public class WSDeathStarUncheckedPublishService extends UncheckedPublishService 
         WSUsernameTokenPrincipal principal = (WSUsernameTokenPrincipal) securityResult.getPrincipal();
         return principal.getName();
     }
+
+    protected long getAccountID() {
+        throw new UnsupportedOperationException();
+    }
+
+    protected long getUserID() {
+        throw new UnsupportedOperationException();
+    }
 }

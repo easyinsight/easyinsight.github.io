@@ -1,11 +1,12 @@
 package com.easyinsight.datafeeds;
 
-import com.easyinsight.storage.TableDefinitionMetadata;
+import com.easyinsight.storage.DataStorage;
 import com.easyinsight.analysis.ListDefinition;
 import com.easyinsight.analysis.UserToAnalysisBinding;
 import com.easyinsight.analysis.UserPermission;
 import com.easyinsight.analysis.AnalysisStorage;
 import com.easyinsight.security.Roles;
+import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.database.Database;
@@ -26,9 +27,13 @@ public class FeedCreation {
 
     private FeedStorage feedStorage = new FeedStorage();
 
-    public FeedCreationResult createFeed(FeedDefinition feedDefinition, Connection conn, DataSet dataSet, long userID) throws SQLException {
+     public FeedCreationResult createFeed(FeedDefinition feedDefinition, Connection conn, DataSet dataSet, long userID) throws SQLException {
+        return createFeed(feedDefinition, conn, dataSet, userID, SecurityUtil.getAccountID());    
+     }
+
+    public FeedCreationResult createFeed(FeedDefinition feedDefinition, Connection conn, DataSet dataSet, long userID, long accountID) throws SQLException {
         long feedID = feedStorage.addFeedDefinitionData(feedDefinition, conn);
-        TableDefinitionMetadata tableDef = TableDefinitionMetadata.readConnection(feedDefinition, conn);
+        DataStorage tableDef = DataStorage.writeConnection(feedDefinition, conn, accountID);
         tableDef.createTable();
         tableDef.insertData(dataSet);
         ListDefinition baseDefinition = new ListDefinition();

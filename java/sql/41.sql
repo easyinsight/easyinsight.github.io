@@ -1,4 +1,4 @@
-# alter table account add account_state integer not null default 2;
+alter table account add account_state integer not null default 2;
 
 drop table if exists account_user_license;
 create table account_user_license (
@@ -18,6 +18,6 @@ create table benchmark (
   index (category)
 );
 
-# alter table solution add solution_tier integer not null default 2;
+alter table solution add solution_tier integer not null default 2;
 
 alter table goal_tree_node add sub_tree_id bigint(11) default null;

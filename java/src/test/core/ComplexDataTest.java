@@ -3,9 +3,8 @@ package test.core;
 import junit.framework.TestCase;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.analysis.*;
-import com.easyinsight.*;
 import com.easyinsight.core.NamedKey;
-import com.easyinsight.webservice.google.ListDataResults;
+import com.easyinsight.analysis.ListDataResults;
 
 import java.util.ArrayList;
 import java.util.Arrays;

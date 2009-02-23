@@ -48,7 +48,7 @@
 
     <destination id="data">
         <properties>
-            <source>com.easyinsight.DataService</source>
+            <source>com.easyinsight.analysis.DataService</source>
         </properties>
     </destination>
 

@@ -3,7 +3,6 @@ package com.easyinsight.analysis;
 import com.easyinsight.core.Key;
 import com.easyinsight.core.Value;
 import com.easyinsight.core.DateValue;
-import com.easyinsight.*;
 import com.easyinsight.dataset.DataSet;
 
 import java.util.Map;
