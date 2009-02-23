@@ -1,46 +1,51 @@
 <?xml version="1.0" ?>
-<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" backgroundColor="#DCE2F8" borderThickness="1" cornerRadius="15" dropShadowEnabled="true">
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" backgroundColor="#DCE2F8" borderThickness="1" cornerRadius="15" dropShadowEnabled="true"
+        creationComplete="addTree()">
     <mx:Script><![CDATA[
         import com.easyinsight.solutions.Solution;
+
         import mx.managers.PopUpManager;
 
         private var _goalTreeNode:GoalTreeNode;
         private var _goalTreeDescriptor:GoalTreeDescriptor;
+
+        private var goalTree:GoalTree;
 
         private function addTree():void {
             goalService.getGoalTree.send(_goalTreeDescriptor.goalTreeID);
         }
 
         private function addInline():void {
-
-        }
-
-        private function gotGoalTree():void {
-            var goalTree:GoalTree = goalService.getGoalTree.lastResult as GoalTree;
             var rootNode:GoalTreeNode = goalTree.rootNode;
             var clonedNode:GoalTreeNode = rootNode.clone();
             clonedNode.parent = _goalTreeNode;
             _goalTreeNode.children.addItem(clonedNode);
-            var goalSolution:GoalSolution = new GoalSolution();
-            /*goalSolution.solutionID = _solution.solutionID;
-            goalSolution.solutionName = _solution.name;
-            goalSolution.solutionArchiveName = _solution.solutionArchiveName;
-            _goalTreeNode.associatedSolutions.addItem(goalSolution);
-            dispatchEvent(new OrganizationChartRefreshEvent());*/
+            if (_goalTreeDescriptor is SolutionGoalTreeDescriptor) {
+                dispatchEvent(new SolutionInstallRequiredEvent(SolutionInstallRequiredEvent.SOLUTION_INSTALL, _goalTreeDescriptor as SolutionGoalTreeDescriptor));
+            }
+            dispatchEvent(new OrganizationChartRefreshEvent());
             PopUpManager.removePopUp(this);
         }
 
-        private function addSolutionOnly():void {
-            var goalSolution:GoalSolution = new GoalSolution();
-            /*goalSolution.solutionID = _solution.solutionID;
-            goalSolution.solutionName = _solution.name;
-            goalSolution.solutionArchiveName = _solution.solutionArchiveName;*/
-            _goalTreeNode.associatedSolutions.addItem(goalSolution);
+        private function gotGoalTree():void {
+            goalTree = goalService.getGoalTree.lastResult as GoalTree;
+            coreBox.enabled = true;
+        }
+
+        private function addSubTree():void {
+            _goalTreeNode.subTreeID = _goalTreeDescriptor.goalTreeID;
+            if (_goalTreeDescriptor is SolutionGoalTreeDescriptor) {
+                _goalTreeNode.newSubTree = _goalTreeDescriptor as SolutionGoalTreeDescriptor;
+            }
             PopUpManager.removePopUp(this);
         }
 
         public function set goalTreeNode(val:GoalTreeNode):void {
             _goalTreeNode = val;
+        }
+
+        public function set goalTreeDescriptor(val:GoalTreeDescriptor):void {
+            _goalTreeDescriptor = val;
         }
 
         public function set solution(val:Solution):void {
@@ -49,11 +54,11 @@
     <mx:RemoteObject destination="goalService" id="goalService">
         <mx:method name="getGoalTree" result="gotGoalTree()"/>
     </mx:RemoteObject>
-    <mx:VBox>
+    <mx:VBox id="coreBox" enabled="false">
         <mx:Label text="Do you want to add this goal tree inline or as a sub tree?"/>
-        <mx:HBox>
-            <mx:Button label="Add inline" click="addTree()"/>
-            <mx:Button label="Add as a sub tree" click="addSolutionOnly()"/>
+        <mx:HBox width="100%" horizontalAlign="center">
+            <mx:Button label="Add inline" click="addInline()"/>
+            <mx:Button label="Add as a sub tree" click="addSubTree()"/>
         </mx:HBox>
     </mx:VBox>
 </mx:Canvas>

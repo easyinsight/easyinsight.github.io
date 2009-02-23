@@ -90,8 +90,8 @@
              }
 
              private function processSpreadsheets():void {
-             	connectMessage = "Successfully connected to Google Spreadsheets.";
-             	progressBar.visible = false;
+             	 connectMessage = "Successfully connected to Google Spreadsheets.";
+             	 progressBar.visible = false;
                  var spreadsheets:ArrayCollection = dataService.getAvailableGoogleSpreadsheets.lastResult as ArrayCollection;
                  this.googleSpreadsheets = spreadsheets;
                  spreadsheetTree.rowCount = spreadsheets.length;

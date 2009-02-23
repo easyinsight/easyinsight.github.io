@@ -7,7 +7,7 @@ package com.easyinsight.analysis
 	import mx.formatters.Formatter;
 		
 	[Bindable]
-	[RemoteClass(alias="com.easyinsight.AnalysisItem")]
+	[RemoteClass(alias="com.easyinsight.analysis.AnalysisItem")]
 	public class AnalysisItem
 	{
 		public var key:Key;

@@ -73,7 +73,7 @@ import mx.graphics.SolidColor;
                 bgFills = [];
                 for (var i:int = 0; i < 15; i++) {
                     var bgFill:BitmapFill = new BitmapFill();
-                    bgFill.source = backgroundDesktop;
+                    bgFill.source = standardFill;
                     bgFill.originX = Math.random() * 60;
                     bgFill.originY = Math.random() * 60;
                     bgFills.push(bgFill);

@@ -5,18 +5,14 @@
 	</mx:Metadata>
 	<mx:Script>
 		<![CDATA[
-			import com.easyinsight.analysis.AnalysisItemTypes;
             import com.easyinsight.skin.CustomChartRendererFactory;
-import mx.charts.chartClasses.AxisBase;
 			import com.easyinsight.analysis.SortableAxisTitleFactory;
 			import com.easyinsight.analysis.AnalysisItem;
-			import mx.events.FlexEvent;
-			import mx.controls.TextInput;
+            import mx.events.FlexEvent;
 			import mx.charts.ColumnChart;
 			import mx.charts.AxisRenderer;
 			import com.easyinsight.filtering.FilterRawData;
             import mx.graphics.BitmapFill;
-import mx.graphics.SolidColor;
 			import mx.graphics.IFill;
 			import com.easyinsight.analysis.conditions.ConditionRenderer;
 			import mx.charts.chartClasses.IAxis;
@@ -71,7 +67,7 @@ import mx.graphics.SolidColor;
                 bgFills = [];
                 for (var i:int = 0; i < 15; i++) {
                     var bgFill:BitmapFill = new BitmapFill();
-                    bgFill.source = backgroundDesktop;
+                    bgFill.source = standardFill;
                     bgFill.originX = Math.random() * 60;
                     bgFill.originY = Math.random() * 60;
                     bgFills.push(bgFill);
@@ -101,7 +97,9 @@ import mx.graphics.SolidColor;
 					columnChart.percentHeight = 100;
 					columnChart.percentWidth = 100;
 					columnChart.showDataTips = true;
-					columnChart.selectionMode = "multiple";
+                    if (selectable) {
+					    columnChart.selectionMode = "multiple";
+                    }
 					columnChart.dataProvider = graphData;
 
 					// define the X axis
@@ -111,13 +109,15 @@ import mx.graphics.SolidColor;
 					xAxis.dataProvider = graphData;
 					xAxis.title = xAxisTitle;
 					columnChart.horizontalAxis = xAxis;
-					var axisRenderer:AxisRenderer = new AxisRenderer();
-			        axisRenderer.axis = xAxis;
-			        xAxisTitleRendererFactory = new SortableAxisTitleFactory(xAxisItem, true);
-			        axisRenderer.titleRenderer = xAxisTitleRendererFactory;
-			        //axisRenderer.setStyle("color", "#FFFFFF");
-			        axisRenderer.placement = "bottom";
-			        columnChart.horizontalAxisRenderers = [ axisRenderer ];
+                    if (sortable) {
+                        var axisRenderer:AxisRenderer = new AxisRenderer();
+                        axisRenderer.axis = xAxis;
+                        xAxisTitleRendererFactory = new SortableAxisTitleFactory(xAxisItem, true);
+                        axisRenderer.titleRenderer = xAxisTitleRendererFactory;
+                        //axisRenderer.setStyle("color", "#FFFFFF");
+                        axisRenderer.placement = "bottom";
+                        columnChart.horizontalAxisRenderers = [ axisRenderer ];
+                    }
 
 			        // define the Y axis
 
@@ -125,18 +125,20 @@ import mx.graphics.SolidColor;
 			        yAxis.title = yAxisTitle;
 			        yAxis.labelFunction = renderAxis;
 			        columnChart.verticalAxis = yAxis;
-			        var yAxisRenderer:AxisRenderer = new AxisRenderer();
-			        yAxisRenderer.axis = yAxis;
-			        //yAxisRenderer.setStyle("color", "#FFFFFF");
-			        yAxisTitleRendererFactory = new SortableAxisTitleFactory(yAxisItem, false);
-			        yAxisRenderer.titleRenderer = yAxisTitleRendererFactory;
-			        yAxisRenderer.placement = "left";
-			        columnChart.verticalAxisRenderers = [ yAxisRenderer ];
+                    if (sortable) {
+                        var yAxisRenderer:AxisRenderer = new AxisRenderer();
+                        yAxisRenderer.axis = yAxis;
+                        //yAxisRenderer.setStyle("color", "#FFFFFF");
+                        yAxisTitleRendererFactory = new SortableAxisTitleFactory(yAxisItem, false);
+                        yAxisRenderer.titleRenderer = yAxisTitleRendererFactory;
+                        yAxisRenderer.placement = "left";
+                        columnChart.verticalAxisRenderers = [ yAxisRenderer ];
+                    }
 
 			        // create the data series
 
 					columnSeries = new ColumnSeries();
-                    columnSeries.setStyle("itemRenderer", new CustomChartRendererFactory());
+                    columnSeries.setStyle("itemRenderer", new CustomChartRendererFactory(selectedFill, rolloverFill));
                     columnSeries.setStyle("stroke", s1);
                     columnSeries.fillFunction = customFill;
 					columnSeries.xField = xField;
@@ -169,13 +171,17 @@ import mx.graphics.SolidColor;
 				var newXAxisItem:AnalysisItem = dimensions[0];
 				if (xAxisItem == null || newXAxisItem.key.createString() != xAxisItem.key.createString()) {
 					xAxisItem = newXAxisItem;
-					xAxisTitleRendererFactory.analysisItem = xAxisItem;
+                    if (sortable) {
+					    xAxisTitleRendererFactory.analysisItem = xAxisItem;
+                    }
 				}
 
 				var newYAxisItem:AnalysisItem = measures[0];
 				if (yAxisItem == null || newYAxisItem.key.createString() != yAxisItem.key.createString()) {
 					yAxisItem = newYAxisItem;
-					yAxisTitleRendererFactory.analysisItem = yAxisItem;
+                    if (sortable) {
+					    yAxisTitleRendererFactory.analysisItem = yAxisItem;
+                    }
 				}
 
 				var newXField:String = dimensions[0].key.createString();

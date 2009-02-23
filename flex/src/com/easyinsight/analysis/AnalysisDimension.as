@@ -5,7 +5,7 @@ package com.easyinsight.analysis
 	import mx.formatters.Formatter;
 	
 	[Bindable]
-	[RemoteClass(alias="com.easyinsight.AnalysisDimension")]
+	[RemoteClass(alias="com.easyinsight.analysis.AnalysisDimension")]
 	public class AnalysisDimension extends AnalysisItem
 	{
 		public var group:Boolean;

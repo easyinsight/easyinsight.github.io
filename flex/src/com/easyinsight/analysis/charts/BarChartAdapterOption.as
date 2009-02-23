@@ -25,12 +25,6 @@ package com.easyinsight.analysis.charts
 			return ChartTypes.BAR_FAMILY;
 		}
 		
-		override protected function instantiateChartAdapter(chartType:int):ChartAdapter {
-			var barChartAdaptor:BarChartAdapter = new BarChartAdapter();
-			barChartAdaptor.addEventListener(ChartSortEvent.CHART_SORT, onChartSort);
-			return barChartAdaptor;		
-		}
-		
 		private function onChartSort(event:ChartSortEvent):void {
 			dispatchEvent(event);
 		}
@@ -50,6 +44,9 @@ package com.easyinsight.analysis.charts
 			} else {
 				chartAdapter = new BarChartAdapter();
 			}
+            chartAdapter.rolloverFill = rolloverFill;
+            chartAdapter.selectedFill = selectedFill;
+            chartAdapter.standardFill = standardFill;
 			chartAdapter.addEventListener(ChartSortEvent.CHART_SORT, onChartSort);
 			return chartAdapter;
 		}

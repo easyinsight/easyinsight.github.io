@@ -23,11 +23,6 @@ package com.easyinsight.analysis.charts
 			return ChartTypes.PIE_FAMILY;
 		}
 		
-		override protected function instantiateChartAdapter(chartType:int):ChartAdapter {
-			var pieChartAdapter:PieChartAdapter = new PieChartAdapter();
-			return pieChartAdapter;		
-		}
-		
 		override public function get threeDVisible():Boolean {
 			return true;
 		}

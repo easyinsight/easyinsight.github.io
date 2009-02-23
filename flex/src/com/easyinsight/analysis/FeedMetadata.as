@@ -1,7 +1,7 @@
 package com.easyinsight.analysis
 {
 	[Bindable]
-	[RemoteClass(alias="com.easyinsight.FeedMetadata")]
+	[RemoteClass(alias="com.easyinsight.analysis.FeedMetadata")]
 	public class FeedMetadata
 	{
 		public var fields:Array;	

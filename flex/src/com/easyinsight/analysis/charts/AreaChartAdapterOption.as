@@ -15,11 +15,6 @@ package com.easyinsight.analysis.charts
 			return ChartTypes.AREA_FAMILY;
 		}
 		
-		override protected function instantiateChartAdapter(chartType:int):ChartAdapter {
-			var lineChartAdapter:AreaChartAdapter = new AreaChartAdapter();
-			return lineChartAdapter;		
-		}	
-		
 		override public function get threeDVisible():Boolean {
 			return true;
 		}

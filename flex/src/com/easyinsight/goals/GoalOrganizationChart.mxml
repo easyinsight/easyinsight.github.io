@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:orgchart="ilog.orgchart.*"
         creationComplete="blah()" width="100%" height="100%" xmlns:goals="com.easyinsight.goals.*" doubleClickEnabled="true">
+    <mx:Metadata>
+        [Event(name="solutionInstall", type="com.easyinsight.goals.SolutionInstallRequiredEvent")]
+    </mx:Metadata>
     <mx:Script>
 		<![CDATA[
         import ilog.orgchart.OrgChartEvent;

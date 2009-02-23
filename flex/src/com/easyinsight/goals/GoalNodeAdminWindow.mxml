@@ -160,7 +160,6 @@ import com.easyinsight.solutions.Solution;
             _goalTreeNode.description = descriptionTextArea.text;
             _goalTreeNode.tags = TagCloud.fromString(tagsInput.text);
             _goalTreeNode.iconImage = this.iconFile;
-            _goalTreeNode.newSolutions = newSolutions;
             if (insightBound) {
                 _goalTreeNode.coreFeedID = feedID;
                 _goalTreeNode.coreFeedName = feedName;

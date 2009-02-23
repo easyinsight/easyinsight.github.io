@@ -21,6 +21,7 @@
           <root url="jar://$MODULE_DIR$/libs/ilog-elixir.swc!/" />
           <root url="jar://$MODULE_DIR$/libs/YahooMap.swc!/" />
           <root url="jar://$MODULE_DIR$/../../Program Files/Adobe/Flex Builder 3/sdks/3.2.0/frameworks/libs/datavisualization.swc!/" />
+          <root url="jar://$MODULE_DIR$/libs/ObjectHandles-1.0.0015.swc!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />

@@ -11,7 +11,6 @@
          <path-element>/libs/astra-flex.swc</path-element>
          <path-element>/libs/ilog-elixir.swc</path-element>
          <path-element>/libs/ilog-elixir_rb.swc</path-element>
-         <path-element>/libs/SpringGraph.swc</path-element>
          <path-element>/libs/YahooMap.swc</path-element>
       </library-path>
         <context-root>/DMS</context-root>

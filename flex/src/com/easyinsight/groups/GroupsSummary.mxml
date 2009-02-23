@@ -139,7 +139,7 @@
                 <mx:DataGrid id="myGroupsGrid" dataProvider="{myGroups}" headerStyleName="BlueHeader">
                     <mx:columns>
                         <mx:DataGridColumn dataField="name" headerText="Name" headerRenderer="com.easyinsight.groups.CustomGroupHeader"/>
-                        <mx:DataGridColumn dataField="name" width="50" headerText="" itemRenderer="com.easyinsight.groups.MyGroupsControls"/>
+                        <mx:DataGridColumn dataField="name" width="50" headerText="" sortable="false" itemRenderer="com.easyinsight.groups.MyGroupsControls"/>
                     </mx:columns>
                 </mx:DataGrid>
             </mx:VBox>

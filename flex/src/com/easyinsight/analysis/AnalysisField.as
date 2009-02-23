@@ -1,7 +1,7 @@
 package com.easyinsight.analysis
 {
 	[Bindable]
-	[RemoteClass(alias="com.easyinsight.AnalysisField")]
+	[RemoteClass(alias="com.easyinsight.analysis.AnalysisField")]
 	public class AnalysisField
 	{
 		

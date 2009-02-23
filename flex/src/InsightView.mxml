@@ -15,16 +15,12 @@
 						<mx:Button label="View This Insight" click="viewInsight()"/>
 					</mx:FormItem>
 				</mx:Form>
-				
-				
 			</mx:AddChild>
 		</mx:State>
 		<mx:State name="Insight">
 			<mx:RemoveChild target="{loginForm}"/>
 			<mx:AddChild relativeTo="{coreBox}">
-			
 				<dashboard:WidgetViewPanel analysisDefinition="{analysisDefinition}" returnToList="returnToList()"/>
-				
 			</mx:AddChild>
 		</mx:State>
 	</mx:states>
@@ -121,10 +117,6 @@
 			}	
 			
 			private function blah():void {
-            	var accountType:AccountType;
-            	var individualAccountType:IndividualAccountType;
-            	var commercialAccountType:CommercialAccountType;
-            	var freeAccountType:FreeAccountType;
             	var listDefinition:ListDefinition;
             	var chartDefinition:ChartDefinition;
             	var crosstabDefinition:CrosstabDefinition;

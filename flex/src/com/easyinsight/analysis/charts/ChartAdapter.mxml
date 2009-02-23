@@ -3,33 +3,79 @@
 	paddingTop="10" paddingBottom="10">
 	<mx:Script>
 		<![CDATA[
-			import com.easyinsight.images.ImageFactory;
 			import com.easyinsight.filtering.FilterRawData;
-			import mx.collections.ArrayCollection;
 
-            [Bindable]
-            [Embed(source="../../../../../assets/water4.JPG")]
-            protected var backgroundDesktop:Class;
-			
-			public function dataChange(dataSet:ArrayCollection, dimensions:Array, measures:Array):void {
-				
-			}
-			
-			public function getMaxMeasures():int {
-				return 1;
-			}
-			
-			public function getMaxDimensions():int {
-				return 1;
-			}
-			
-			public function createFilterRawData():FilterRawData {
-				return null;
-			}
-			
-			public function get chartType():int {
-				return 0;
-			}
+        import mx.collections.ArrayCollection;
+
+        private var _standardFill:Class;
+
+        private var _selectedFill:Class;
+
+        private var _rolloverFill:Class;
+
+        private var _selectable:Boolean;
+
+        private var _sortable:Boolean;
+
+        public function get sortable():Boolean {
+            return _sortable;
+        }
+
+        public function set sortable(val:Boolean):void {
+            _sortable = val;
+        }
+
+        public function get selectable():Boolean {
+            return _selectable;
+        }
+
+        public function set selectable(val:Boolean):void {
+            _selectable = val;
+        }
+
+        public function get standardFill():Class {
+            return _standardFill;
+        }
+
+        public function set standardFill(val:Class):void {
+            _standardFill = val;
+        }
+
+        public function get selectedFill():Class {
+            return _selectedFill;
+        }
+
+        public function set selectedFill(val:Class):void {
+            _selectedFill = val;
+        }
+
+        public function get rolloverFill():Class {
+            return _rolloverFill;
+        }
+
+        public function set rolloverFill(val:Class):void {
+            _rolloverFill = val;
+        }
+
+        public function dataChange(dataSet:ArrayCollection, dimensions:Array, measures:Array):void {
+
+        }
+
+        public function getMaxMeasures():int {
+            return 1;
+        }
+
+        public function getMaxDimensions():int {
+            return 1;
+        }
+
+        public function createFilterRawData():FilterRawData {
+            return null;
+        }
+
+        public function get chartType():int {
+            return 0;
+        }
 		]]>
 	</mx:Script>
     <mx:Stroke id="s1" color="#2A7E93" weight="2"/>    

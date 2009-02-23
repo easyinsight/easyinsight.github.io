@@ -224,7 +224,7 @@
             override public function initializeToDefinition():void {
                 if (showingDropAreas && !showDropAreas) {
                 	showingDropAreas = false;
-                    chartVBox.removeChild(dropAreas);
+                    coreBox.removeChild(dropAreas);
                 } else if (!showingDropAreas && showDropAreas) {
 
                 }
@@ -319,7 +319,6 @@
             	this.threeDVisible = chartAdapterOption.threeDVisible;
             	this.stackedVisible = chartAdapterOption.stackedVisible;
             	chartAdapterOption.threeDSelected = threeDCheckbox.selected;
-                //var chartAdapter:ChartAdapter = chartAdapterOption.createChartAdapter(chartType);
                 var chartAdapter:ChartAdapter = chartAdapterOption.chartTypeFromSelections;
                 this.chartAdaptor = chartAdapter;
                 var chartDefinition:ChartDefinition = getAnalysisDefinition() as ChartDefinition;
@@ -448,7 +447,7 @@
 	<mx:SeriesSlide id="slideIn" duration="1000" direction="right"/>
     <mx:SeriesSlide id="slideOut" duration="1000" direction="left"/>
 	
-	<mx:VBox width="100%" height="100%">
+	<mx:VBox width="100%" height="100%" id="coreBox">
 		
 	
 		<mx:HBox width="100%" visible="{showDropAreas}" id="dropAreas" verticalAlign="middle">

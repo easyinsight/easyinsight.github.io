@@ -1,7 +1,9 @@
 <?xml version="1.0" ?>
-<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" creationComplete="setup()">
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" creationComplete="setup()" doubleClickEnabled="true">
     <mx:Script><![CDATA[
-        import mx.collections.ArrayCollection;
+        import com.easyinsight.genredata.AnalyzeEvent;
+import mx.collections.ArrayCollection;
+        import mx.events.ListEvent;
 
         [Bindable]
         private var goals:ArrayCollection;
@@ -9,19 +11,33 @@
         [Bindable]
         private var rowCount:int;
 
+        private var timer:Timer;
+
         private function setup():void {
             goalService.getGoals.send();
+            timer = new Timer(300000);
+            timer.addEventListener(TimerEvent.TIMER, onTimer);
+            timer.start();
+        }
+
+        private function onTimer(event:TimerEvent):void {
+            this.goals = goalService.getGoals.lastResult as ArrayCollection;
         }
 
         private function gotGoals():void {
             this.goals = goalService.getGoals.lastResult as ArrayCollection;
             rowCount = this.goals.length;
         }
+
+        private function onDoubleClick(event:ListEvent):void {
+            var goal:GoalTreeNodeData = goals.getItemAt(event.rowIndex) as GoalTreeNodeData;
+            dispatchEvent(new AnalyzeEvent(new GoalDetailAnalyzeSource(goal)));
+        }
 ]]></mx:Script>
     <mx:RemoteObject destination="goalService" id="goalService">
         <mx:method name="getGoals" result="gotGoals()"/>
     </mx:RemoteObject>
-    <mx:DataGrid dataProvider="{goals}" id="goalsGrid" width="100%" rowCount="{rowCount}">
+    <mx:DataGrid dataProvider="{goals}" id="goalsGrid" width="100%" rowCount="{rowCount}" rowHeight="28" itemDoubleClick="onDoubleClick(event)">
         <mx:columns>
             <mx:DataGridColumn headerText="" dataField="name" itemRenderer="com.easyinsight.goals.GoalIconRenderer" width="30"/>
             <mx:DataGridColumn headerText="Goal Name" dataField="name" headerRenderer="com.easyinsight.groups.CustomGroupHeader"/>
@@ -29,7 +45,8 @@
                                headerRenderer="com.easyinsight.groups.CustomGroupHeader" width="110"/>
             <mx:DataGridColumn headerText="Date" dataField="name" headerRenderer="com.easyinsight.groups.CustomGroupHeader"
                     itemRenderer="com.easyinsight.goals.GoalDateRenderer" width="80"/>
-            <mx:DataGridColumn headerText="" dataField="com.easyinsight.goals.GoalControls" itemRenderer="com.easyinsight.goals.GoalControls" width="30"/>
+            <mx:DataGridColumn headerText="" dataField="com.easyinsight.goals.GoalControls" sortable="false"
+                               itemRenderer="com.easyinsight.goals.GoalControls" width="30"/>
         </mx:columns>
     </mx:DataGrid>
 </mx:VBox>

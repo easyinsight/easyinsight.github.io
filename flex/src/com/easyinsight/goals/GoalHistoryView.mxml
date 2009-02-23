@@ -30,6 +30,10 @@ import mx.graphics.BitmapFill;
         private function setup():void {
             areaFill = new BitmapFill();
             areaFill.source = areaBackground;
+            if (_startDate == null) {
+                _startDate = new Date(new Date().getTime() - 24 * 7 * 1000 * 60 * 60);
+                _endDate = new Date();
+            }
             goalService.getGoalValues.send(_goalTreeNodeData.goalTreeNodeID, _startDate, _endDate);
         }
 

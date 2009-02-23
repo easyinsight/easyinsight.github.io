@@ -1,7 +1,7 @@
 package com.easyinsight.analysis
 {
 	[Bindable]
-	[RemoteClass(alias="com.easyinsight.AnalysisCalculation")]
+	[RemoteClass(alias="com.easyinsight.analysis.AnalysisCalculation")]
 	public class AnalysisCalculation extends AnalysisMeasure
 	{
 		public var calculationString:String;

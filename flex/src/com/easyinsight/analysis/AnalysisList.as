@@ -1,7 +1,7 @@
 package com.easyinsight.analysis
 {
 	[Bindable]
-	[RemoteClass(alias="com.easyinsight.AnalysisList")]
+	[RemoteClass(alias="com.easyinsight.analysis.AnalysisList")]
 	public class AnalysisList extends AnalysisDimension
 	{
 		public var analysisListID:Number;

@@ -8,7 +8,7 @@ package com.easyinsight.analysis
 	import mx.formatters.NumberFormatter;
 	
 	[Bindable]
-	[RemoteClass(alias="com.easyinsight.AnalysisMeasure")]
+	[RemoteClass(alias="com.easyinsight.analysis.AnalysisMeasure")]
 	public class AnalysisMeasure extends AnalysisItem
 	{
 		public var aggregation:int;

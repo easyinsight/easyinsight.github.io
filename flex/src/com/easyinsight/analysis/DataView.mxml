@@ -2,7 +2,6 @@
 <mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%">
 	<mx:Script>
 		<![CDATA[
-			import com.easyinsight.images.ImageFactory;
 			import mx.core.Container;
 			import com.easyinsight.filtering.FilterRawData;
 			import mx.collections.ArrayCollection;

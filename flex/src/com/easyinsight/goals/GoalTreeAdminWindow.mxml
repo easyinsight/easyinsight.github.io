@@ -4,84 +4,92 @@
 	<mx:Script> 
 		<![CDATA[
 import mx.collections.ArrayCollection;
-			[Bindable]
-			private var _goalTreeNode:GoalTreeNode;
 
-            [Bindable]
-            private var solutions:ArrayCollection;
-            [Bindable]
-            private var dataSources:ArrayCollection;
-            [Bindable]
-            private var insights:ArrayCollection;
-            [Bindable]
-            private var goalTrees:ArrayCollection;
-            [Bindable]
-            private var accountTrees:ArrayCollection;
+        [Bindable]
+        private var _goalTreeNode:GoalTreeNode;
 
-            [Bindable]
-            private var newSolutions:ArrayCollection;
+        private var _goalTreeID:int;
 
-            [Bindable]
-            [Embed(source="../../../../assets/component_x16.png")]
-            private var solutionIcon:Class;
+        [Bindable]
+        private var solutions:ArrayCollection;
+        [Bindable]
+        private var dataSources:ArrayCollection;
+        [Bindable]
+        private var insights:ArrayCollection;
+        [Bindable]
+        private var goalTrees:ArrayCollection;
+        [Bindable]
+        private var accountTrees:ArrayCollection;        
 
-            [Bindable]
-            [Embed(source="../../../../assets/data_blue_x16.png")]
-            private var dataSourceIcon:Class;
+        [Bindable]
+        [Embed(source="../../../../assets/component_x16.png")]
+        private var solutionIcon:Class;
 
-            [Bindable]
-            [Embed(source="../../../../assets/chart_pie2.png")]
-            private var reportIcon:Class;
+        [Bindable]
+        [Embed(source="../../../../assets/data_blue_x16.png")]
+        private var dataSourceIcon:Class;
 
-            private function populateData():void {
-                accordion.getHeaderAt(0).setStyle("fontSize", 12);
-                accordion.getHeaderAt(0).setStyle("icon", solutionIcon);
-                accordion.getHeaderAt(0).labelPlacement = "right";
-                accordion.getHeaderAt(0).setStyle("fontfamily", "Tahoma");
-                accordion.getHeaderAt(0).setStyle("fontWeight", "bold");
-                accordion.getHeaderAt(1).setStyle("fontSize", 12);
-                accordion.getHeaderAt(1).setStyle("icon", dataSourceIcon);
-                accordion.getHeaderAt(1).labelPlacement = "right";
-                accordion.getHeaderAt(1).setStyle("fontfamily", "Tahoma");
-                accordion.getHeaderAt(1).setStyle("fontWeight", "bold");
-                accordion.getHeaderAt(2).setStyle("fontSize", 12);
-                accordion.getHeaderAt(2).setStyle("icon", reportIcon);
-                accordion.getHeaderAt(2).labelPlacement = "right";
-                accordion.getHeaderAt(2).setStyle("fontfamily", "Tahoma");
-                accordion.getHeaderAt(2).setStyle("fontWeight", "bold");
-                feedService.searchForSubscribedFeeds.send();
-                goalService.getSolutions.send(null);
-                analysisService.getInsightDescriptors.send();
-            }
-			
-			public function set goalTreeNode(goalTreeNode:GoalTreeNode):void {
-				_goalTreeNode = goalTreeNode;
-			}
+        [Bindable]
+        [Embed(source="../../../../assets/chart_pie2.png")]
+        private var reportIcon:Class;
 
-            private function gotFeeds():void {
-                dataSources = feedService.searchForSubscribedFeeds.lastResult as ArrayCollection;
-            }
+        private function populateData():void {
+            accordion.getHeaderAt(0).setStyle("fontSize", 12);
+            accordion.getHeaderAt(0).setStyle("icon", solutionIcon);
+            accordion.getHeaderAt(0).labelPlacement = "right";
+            accordion.getHeaderAt(0).setStyle("fontfamily", "Tahoma");
+            accordion.getHeaderAt(0).setStyle("fontWeight", "bold");
+            accordion.getHeaderAt(1).setStyle("fontSize", 12);
+            accordion.getHeaderAt(1).setStyle("icon", dataSourceIcon);
+            accordion.getHeaderAt(1).labelPlacement = "right";
+            accordion.getHeaderAt(1).setStyle("fontfamily", "Tahoma");
+            accordion.getHeaderAt(1).setStyle("fontWeight", "bold");
+            accordion.getHeaderAt(2).setStyle("fontSize", 12);
+            accordion.getHeaderAt(2).setStyle("icon", reportIcon);
+            accordion.getHeaderAt(2).labelPlacement = "right";
+            accordion.getHeaderAt(2).setStyle("fontfamily", "Tahoma");
+            accordion.getHeaderAt(2).setStyle("fontWeight", "bold");
+            feedService.searchForSubscribedFeeds.send();
+            solutionService.getSolutions.send();
+            goalService.getGoalTreesForInstall.send(_goalTreeID);
+            analysisService.getInsightDescriptors.send();
+        }
 
-            private function gotSolutions():void {
-                var solutions:AvailableSolutionList = goalService.getSolutions.lastResult as AvailableSolutionList;
-            }
+        public function set goalTreeID(val:int):void {
+            _goalTreeID = val;
+        }
 
-            private function gotInsights():void {
-                insights = analysisService.getInsightDescriptors.lastResult as ArrayCollection;
-            }
+        public function set goalTreeNode(goalTreeNode:GoalTreeNode):void {
+            _goalTreeNode = goalTreeNode;
+        }
 
-            private function gotGoalTrees():void {
-                var availableTrees:AvailableGoalTreeList = goalService.getGoalTreesForInstall.lastResult as AvailableGoalTreeList;
-                this.accountTrees = availableTrees.myTrees;
-                this.goalTrees = availableTrees.solutionTrees;
-            }
+        private function gotFeeds():void {
+            dataSources = feedService.searchForSubscribedFeeds.lastResult as ArrayCollection;
+        }
+
+        private function gotSolutions():void {
+            solutions = solutionService.getSolutions.lastResult as ArrayCollection;
+        }
+
+        private function gotInsights():void {
+            insights = analysisService.getInsightDescriptors.lastResult as ArrayCollection;
+        }
+
+        private function gotGoalTrees():void {
+            var availableTrees:AvailableGoalTreeList = goalService.getGoalTreesForInstall.lastResult as AvailableGoalTreeList;
+            this.accountTrees = availableTrees.myTrees;
+            this.goalTrees = availableTrees.solutionTrees;
+        }
+
 		]]>
 	</mx:Script>
     <mx:RemoteObject destination="feeds" id="feedService">
         <mx:method name="searchForSubscribedFeeds" result="gotFeeds()"/>
     </mx:RemoteObject>
-    <mx:RemoteObject destination="goalService" id="goalService">
+    <mx:RemoteObject destination="solutionService" id="solutionService">
         <mx:method name="getSolutions" result="gotSolutions()"/>
+    </mx:RemoteObject>
+    <mx:RemoteObject destination="goalService" id="goalService">
         <mx:method name="getGoalTreesForInstall" result="gotGoalTrees()"/>
     </mx:RemoteObject>
     <mx:RemoteObject destination="analysisDefinition" id="analysisService">

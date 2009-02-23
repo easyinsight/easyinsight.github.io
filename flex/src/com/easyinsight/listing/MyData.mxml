@@ -14,14 +14,14 @@
 	<mx:Script>
 		<![CDATA[
         import com.easyinsight.analysis.AnalysisDefinition;
-import com.easyinsight.customupload.SimpleFeedWindow;
+            import com.easyinsight.customupload.SimpleFeedWindow;
 			import com.easyinsight.help.MyDataHelp;
 			import com.easyinsight.help.HelpWindow;			
 			import com.easyinsight.customupload.UserUpload;
 			import com.easyinsight.framework.LoginEvent;
 			import com.easyinsight.customupload.UploadExternalSource;
             import com.easyinsight.solutions.InsightDescriptor;
-import mx.utils.URLUtil;
+            import mx.utils.URLUtil;
 			import mx.managers.BrowserManager;
 			import com.easyinsight.customupload.UploadPolicy;
 			import mx.events.ListEvent;
@@ -326,7 +326,7 @@ import mx.utils.URLUtil;
 			<mx:columns>
 				<mx:AdvancedDataGridColumn headerText="Name" dataField="name"/>
 				<mx:AdvancedDataGridColumn headerText="Size" dataField="size" width="110"/>
-				<mx:AdvancedDataGridColumn width="200" headerText="" dataField="name" itemRenderer="com.easyinsight.listing.MyDataIconControls"/>
+				<mx:AdvancedDataGridColumn width="200" headerText="" dataField="name" sortable="false" itemRenderer="com.easyinsight.listing.MyDataIconControls"/>
 			</mx:columns>
 		</mx:AdvancedDataGrid>
 	</mx:VBox>

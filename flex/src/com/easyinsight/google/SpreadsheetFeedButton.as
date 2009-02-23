@@ -1,6 +1,7 @@
 package com.easyinsight.google
 {
-	import com.easyinsight.customupload.UploadConfigEvent;
+import com.easyinsight.administration.feed.GoogleFeedDefinition;
+import com.easyinsight.customupload.UploadConfigEvent;
 	import com.easyinsight.framework.Credentials;
 	import com.easyinsight.framework.User;
 	import com.easyinsight.genredata.AnalyzeEvent;
@@ -47,7 +48,7 @@ package com.easyinsight.google
 			super.commitProperties();
 			if (!setButtonProps) {
 				if (_data.feedDescriptor == null) {				
-					button.toolTip = "Create Feed";
+					button.toolTip = "Create Data Source";
 					button.addEventListener(MouseEvent.CLICK, subscribe);					
 				} else {
 					button.toolTip = "Analyze";
@@ -69,10 +70,13 @@ package com.easyinsight.google
 		public function subscribe(event:Event):void {
 			var credentials:Credentials = User.getInstance().getCredentials("google");
 			remoteService = new RemoteObject();
-			remoteService.destination = "google";
-			remoteService.createFeed.addEventListener(ResultEvent.RESULT, successfulSubscription);
-			remoteService.createFeed.addEventListener(FaultEvent.FAULT, failedSubscription);
-			remoteService.createFeed.send(credentials, _data.spreadsheet + " - " + _data.title, _data.url);
+			remoteService.destination = "userUpload";
+			remoteService.newExternalDataSource.addEventListener(ResultEvent.RESULT, successfulSubscription);
+			remoteService.newExternalDataSource.addEventListener(FaultEvent.FAULT, failedSubscription);
+            var googleDef:GoogleFeedDefinition = new GoogleFeedDefinition();
+            googleDef.feedName = _data.spreadsheet + " - " + _data.title;
+            googleDef.worksheetURL = _data.url;
+			remoteService.newExternalDataSource.send(googleDef, credentials);
 		}
 		
 		private function analyze(event:Event):void {
@@ -81,7 +85,10 @@ package com.easyinsight.google
 		
 		private function successfulSubscription(event:ResultEvent):void {
 			toolTip = "Analyze";			
-			var descriptor:DataFeedDescriptor = remoteService.createFeed.lastResult as DataFeedDescriptor;
+			var id:int = remoteService.newExternalDataSource.lastResult as int;
+            var descriptor:DataFeedDescriptor = new DataFeedDescriptor();
+            descriptor.dataFeedID = id;
+            descriptor.name = _data.spreadsheet + " - " + _data.title;
 			_data.feedDescriptor = descriptor;
 			//this.parent.dispatchEvent(new AnalyzeEvent(new DescriptorAnalyzeSource(descriptor)));
 			this.parent.dispatchEvent(new UploadConfigEvent(UploadConfigEvent.UPLOAD_CONFIG_COMPLETE, descriptor.dataFeedID));

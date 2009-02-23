@@ -32,20 +32,6 @@ package com.easyinsight.analysis.charts
 			return ColumnChartEditWindow;
 		}
 		
-		override protected function instantiateChartAdapter(chartType:int):ChartAdapter {
-			var chartAdapter:ChartAdapter;
-			switch (chartType) {
-				case 0:
-				case ChartTypes.COLUMN_2D:
-					var columnChartAdaptor:ColumnChartAdapter = new ColumnChartAdapter();
-					columnChartAdaptor.addEventListener(ChartSortEvent.CHART_SORT, onChartSort);
-					chartAdapter = columnChartAdaptor;
-					break;		
-			}
-			
-			return chartAdapter;		
-		}
-		
 		private function onChartSort(event:ChartSortEvent):void {
 			dispatchEvent(event);
 		}
@@ -72,6 +58,9 @@ package com.easyinsight.analysis.charts
 				} else {
 					chartAdapter = new ColumnChartAdapter();
 				}
+                chartAdapter.rolloverFill = rolloverFill;
+                chartAdapter.selectedFill = selectedFill;
+                chartAdapter.standardFill = standardFill;
 			}
 			chartAdapter.addEventListener(ChartSortEvent.CHART_SORT, onChartSort);
 			return chartAdapter;

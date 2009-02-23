@@ -1,0 +1,71 @@
+<?xml version="1.0" ?>
+<FullScreenPage xmlns:mx="http://www.adobe.com/2006/mxml" xmlns="com.easyinsight.*"
+                xmlns:goals="com.easyinsight.goals.*">
+    <mx:Script><![CDATA[
+        import com.adobe.ac.mxeffects.CubeRotate;
+import mx.collections.ArrayCollection;
+import mx.containers.HBox;
+        import mx.controls.ButtonBar;
+        import mx.core.Container;
+import mx.events.ItemClickEvent;
+        import com.easyinsight.dashboard.DataViewPanel;
+
+        [Bindable]
+        private var _goalTreeNodeData:GoalTreeNodeData;
+
+        override protected function createChildren():void {
+            super.createChildren();
+
+            var topElements:ArrayCollection = new ArrayCollection();
+            for each (var report:GoalInsight in _goalTreeNodeData.associatedInsights) {
+                var reportItem:GoalDetailItem = new GoalDetailItem();
+                reportItem.label = report.insightName;
+                var dataViewPanel:DataViewPanel = new DataViewPanel();
+                dataViewPanel.analysisID = report.insightID;
+                reportItem.displayObject = dataViewPanel;
+                viewStack.addChild(dataViewPanel);
+                topElements.addItem(reportItem);
+            }
+
+            if (_goalTreeNodeData.associatedFeeds.length > 0) {
+                var dataSourceItem:GoalDetailItem = new GoalDetailItem();
+                dataSourceItem.label = "Data Sources";
+                var goalDetailDataSources:GoalDetailDataSources = new GoalDetailDataSources();
+                goalDetailDataSources.goalTreeNodeData = _goalTreeNodeData;
+                dataSourceItem.displayObject = goalDetailDataSources;
+                viewStack.addChild(goalDetailDataSources);
+                topElements.addItem(dataSourceItem);
+            }
+            buttonBar.dataProvider = topElements;
+        }
+
+        private function choseButton(event:ItemClickEvent):void {
+            var item:GoalDetailItem = event.item as GoalDetailItem;
+            if (item.displayObject != viewStack.selectedChild) {
+                var cubeRotate:CubeRotate = new CubeRotate();
+                if (event.index > viewStack.selectedIndex) {
+                    cubeRotate.direction = "RIGHT";
+                } else {
+                    cubeRotate.direction = "LEFT";
+                }
+                cubeRotate.duration = 1000;
+                cubeRotate.target = viewStack.selectedChild;
+                cubeRotate.siblings = [ item.displayObject ];
+                viewStack.selectedChild = item.displayObject as Container;
+                cubeRotate.play();
+            }
+        }
+
+        public function set goalTreeNodeData(val:GoalTreeNodeData):void {
+            _goalTreeNodeData = val;
+        }]]></mx:Script>
+    <mx:HBox>
+        <mx:VBox>
+            <goals:GoalHistoryView goalTreeNodeData="{_goalTreeNodeData}" width="400" height="300"/>
+        </mx:VBox>
+        <mx:VBox>
+            <mx:ButtonBar id="buttonBar" itemClick="choseButton(event)"/>
+            <mx:ViewStack id="viewStack"/>
+        </mx:VBox>
+    </mx:HBox>
+</FullScreenPage>

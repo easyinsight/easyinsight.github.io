@@ -1,8 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<core:FullScreenPage xmlns:core="com.easyinsight.*" xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%" 
-	xmlns:adobe="http://www.adobe.com/2006/fc" creationComplete="initializeData()" 
+<core:FullScreenPage xmlns:core="com.easyinsight.*" xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%"
+	creationComplete="initializeData()" xmlns:adobe="com.adobe.flex.extras.controls.springgraph.*"
 	implements="com.easyinsight.administration.feed.IFeedAdminDetail"
-    paddingTop="10" paddingLeft="10" paddingRight="10" paddingBottom="10">
+    paddingTop="10" paddingLeft="10" paddingRight="10" paddingBottom="10" backgroundImage="{background2}" backgroundSize="100%">
+    <mx:Metadata>
+        [Event(name="feedChange", type="com.easyinsight.administration.feed.FeedChangeEvent")]
+    </mx:Metadata>
 	<mx:Script>
 		<![CDATA[
 			import com.easyinsight.administration.feed.FeedChangeEvent;
@@ -13,7 +16,8 @@
 			import com.easyinsight.util.NodeSelectionEvent;
 			import com.easyinsight.util.TestEdgeRenderer;
 			import com.easyinsight.util.GraphLine;
-			import mx.managers.PopUpManager;
+            import mx.controls.List;
+            import mx.managers.PopUpManager;
 			import com.adobe.flex.extras.controls.springgraph.Item;
 			import mx.managers.DragManager;
 			import com.adobe.flex.extras.controls.springgraph.SpringGraph;
@@ -21,36 +25,42 @@
 			import mx.events.DragEvent;
 			import com.adobe.flex.extras.controls.springgraph.Graph;
 			import mx.collections.ArrayCollection;
-			
+
+            [Bindable]
+            [Embed(source="../../../../assets/background2.JPG")]
+            private var background2:Class;
+
 			[Bindable]
 			private var allFeeds:ArrayCollection;
-			
+
+            [Bindable]
 			private var graph:Graph = new Graph();
-			
+
 			public var compositeFeedID:int;
-			
+
 			private var initialFeedIDs:ArrayCollection;
-			
+
+
 			[Bindable]
-			private var testEdgeRenderer:TestEdgeRenderer;					
-			
+			private var testEdgeRenderer:TestEdgeRenderer;
+
 			[Bindable]
 			private var edgeCreationAllowed:Boolean = false;
 			[Bindable]
 			private var deletionAllowed:Boolean = false;
-			
+
 			private var definedNodes:ArrayCollection;
 			private var definedEdges:ArrayCollection;
-			
+
 			public function set feeds(feedList:ArrayCollection):void {
 				this.initialFeedIDs = feedList;
 			}
-			
+
 			public function addExistingDef(nodes:ArrayCollection, edges:ArrayCollection):void {
 				definedNodes = nodes;
-				definedEdges = edges;							
+				definedEdges = edges;
 			}
-			
+
 			private function initializeData():void {
 				testEdgeRenderer = new TestEdgeRenderer(s);
 				feedService.searchForSubscribedFeeds.send();
@@ -62,7 +72,7 @@
 				s.addEventListener(EdgeSelectionEvent.EDGE_DESELECTED, edgeDeselected);
 				s.addEventListener(EdgeEditEvent.EDGE_EDIT, onEdgeEdit);
 			}
-			
+
 			private function determineCounts():GraphSelectionState {
 				var state:GraphSelectionState = new GraphSelectionState();
 				for each (var obj:Object in s.getChildren()) {
@@ -70,7 +80,7 @@
 						var graphFeedNode:GraphFeedNode = obj as GraphFeedNode;
 						if (graphFeedNode.isSelected()) {
 							state.pushNode(graphFeedNode);
-						}						
+						}
 					} else if (obj is GraphLine) {
 						var graphLine:GraphLine = obj as GraphLine;
 						if (graphLine.isSelected()) {
@@ -80,7 +90,7 @@
 				}
 				return state;
 			}
-			
+
 			private function onEdgeEdit(edgeEditEvent:EdgeEditEvent):void {
 				var compositeFeedConnection:CompositeFeedConnection = graph.getLinkData(graph.find(edgeEditEvent.sourceID), graph.find(edgeEditEvent.targetID)) as CompositeFeedConnection;
 			 	var decoratedConnection:ConnectionWithInfo = new ConnectionWithInfo();
@@ -94,7 +104,7 @@
 				joinDetailWindow.feedConnection = decoratedConnection;
 				PopUpManager.centerPopUp(joinDetailWindow);
 			}
-			
+
 			private function join():void {
 				/*var state:GraphSelectionState = determineCounts();
 				var firstNode:GraphFeedNode = state.nodeCount[0];
@@ -113,7 +123,7 @@
                 PopUpManager.addPopUp(manualJoinWindow, this, true);
                 PopUpManager.centerPopUp(manualJoinWindow);
 			}
-			
+
 			private function deleteItem():void {
 				var state:GraphSelectionState = determineCounts();
 				for each (var edge:GraphLine in state.edgeCount) {
@@ -136,13 +146,13 @@
 				}
 				dispatchEvent(new FeedChangeEvent());
 			}
-			
+
 			private function updateState():void {
 				var state:GraphSelectionState = determineCounts();
 				updateEdgeCreationAllowed(state);
 				updateDeletionAllowed(state);
 			}
-			
+
 			private function updateEdgeCreationAllowed(state:GraphSelectionState):void {
 				var allowed:Boolean = false;
 				if (state.nodeCount.length == 2 && state.edgeCount.length == 0) {
@@ -152,16 +162,16 @@
 				}
 				edgeCreationAllowed = allowed;
 			}
-			
+
 			private function updateDeletionAllowed(state:GraphSelectionState):void {
 				deletionAllowed = state.edgeCount.length + state.nodeCount.length > 0;
-			} 					
-			
+			}
+
 			private function edgeSelected(event:EdgeSelectionEvent):void {
 				onEdgeSelection(event.graphLine);
 				updateState();
 			}
-			
+
 			private function onSelection(node:GraphFeedNode):void {
 				for each (var obj:Object in s.getChildren()) {
 					if (obj is GraphFeedNode && obj != node) {
@@ -173,11 +183,11 @@
 					}
 				}
 			}
-			
+
 			private function onEdgeSelection(line:GraphLine):void {
 				for each (var obj:Object in s.getChildren()) {
 					if (obj is GraphFeedNode) {
-						var graphFeedNode:GraphFeedNode = obj as GraphFeedNode;						
+						var graphFeedNode:GraphFeedNode = obj as GraphFeedNode;
 						graphFeedNode.clearSelection();
 					} else if (obj is GraphLine && obj != line) {
 						var graphLine:GraphLine = obj as GraphLine;
@@ -185,28 +195,28 @@
 					}
 				}
 			}
-			
+
 			private function edgeDeselected(event:EdgeSelectionEvent):void {
-				updateState();	
+				updateState();
 			}
-			
+
 			private function edgeCtrlSelect(event:EdgeSelectionEvent):void {
 				updateState();
 			}
-			
+
 			private function nodeSelected(event:NodeSelectionEvent):void {
 				onSelection(event.node);
 				updateState();
 			}
-			
+
 			private function nodeDeselected(event:NodeSelectionEvent):void {
 				updateState();
 			}
-			
+
 			private function nodeCtrlSelect(event:NodeSelectionEvent):void {
 				updateState();
 			}
-			
+
 			private function gotFeeds():void {
 				allFeeds = feedService.searchForSubscribedFeeds.lastResult as ArrayCollection;
 				if (initialFeedIDs != null) {
@@ -214,17 +224,17 @@
 				} else {
 					for each (var compositeFeedNode:CompositeFeedNode in definedNodes) {
 						var descriptor:DataFeedDescriptor = findDescriptor(compositeFeedNode.dataFeedID);
-						addDescriptorToGraph(descriptor);
+						addDescriptorToGraph(descriptor, 0, 0);
 					}
 					for each (var compositeFeedConnection:CompositeFeedConnection in definedEdges) {
 						var fromItem:Item = graph.find(String(compositeFeedConnection.sourceFeedID));
 						var toItem:Item = graph.find(String(compositeFeedConnection.targetFeedID));
 						graph.link(fromItem, toItem, compositeFeedConnection);
 					}
-					s.dataProvider = graph;
-				}				
+					//s.dataProvider = graph;
+				}
 			}
-			
+
 			private function findDescriptor(feedID:int):DataFeedDescriptor {
 				for each (var descriptor:DataFeedDescriptor in allFeeds) {
 					if (descriptor.dataFeedID == feedID) {
@@ -233,13 +243,13 @@
 				}
 				return null;
 			}
-			
+
 			private function gotDefine():void {
 				var edges:ArrayCollection = feedService.initialDefine.lastResult as ArrayCollection;
 				var connections:ArrayCollection = new ArrayCollection();
 				for each (var feedDescriptor:DataFeedDescriptor in initialFeedIDs) {
 					//allFeeds.removeItemAt(allFeeds.getItemIndex(feedDescriptor));
-					addDescriptorToGraph(feedDescriptor);										
+					addDescriptorToGraph(feedDescriptor, 0, 0);
 				}
 				for each (var compositeFeedConnection:CompositeFeedConnection in edges) {
 					var decoratedConnection:ConnectionWithInfo = new ConnectionWithInfo();
@@ -249,8 +259,9 @@
 					decoratedConnection.targetFeedName = findDescriptor(compositeFeedConnection.targetFeedID).name;
 					decoratedConnection.targetJoin = compositeFeedConnection.targetJoin;
 					decoratedConnection.targetFeedID = compositeFeedConnection.targetFeedID;
-					connections.addItem(decoratedConnection);					
+					connections.addItem(decoratedConnection);
 				}
+                dispatchEvent(new FeedChangeEvent());
 				if (connections.length > 0) {
 					var summary:JoinDiscoverySummary = JoinDiscoverySummary(PopUpManager.createPopUp(this, JoinDiscoverySummary, true));
 					summary.connections = connections;
@@ -271,18 +282,23 @@
 					var toItem:Item = graph.find(String(compositeFeedConnection.targetFeedID));
 					graph.link(fromItem, toItem, compositeFeedConnection);
 				}
-				s.dataProvider = graph;
+                dispatchEvent(new FeedChangeEvent());
+				//s.dataProvider = graph;
             }
 
-			
-			private function addDescriptorToGraph(descriptor:DataFeedDescriptor):void {
+
+			private function addDescriptorToGraph(descriptor:DataFeedDescriptor, xPosition:int, yPosition:int):void {
 				var item:Item = new Item(String(descriptor.dataFeedID));
 				item.data = new Object();
+                if (xPosition > 0) {
+                    item.initialX = xPosition;
+                    item.initialY = yPosition;
+                }
 				item.data["feedID"] = String(descriptor.dataFeedID);
-				item.data["feedName"] = descriptor.name;				
-				graph.add(item);											
+				item.data["feedName"] = descriptor.name;
+				graph.add(item);
 			}
-			
+
 			private function dragEnterHandler(event:DragEvent):void {
                 var initialList:List = List(event.dragInitiator);
                 var selectedObject:DataFeedDescriptor = DataFeedDescriptor(initialList.selectedItem);
@@ -302,15 +318,17 @@
 					node.dataFeedID = feedID;
 					compositeFeedNodes.addItem(node);
 				}
-				addDescriptorToGraph(selectedObject);
+                var xPosition:int = event.localX - (event.dragSource.dataForFormat("localX") as Number);
+                var yPosition:int = event.localY - (event.dragSource.dataForFormat("localY") as Number);
+				addDescriptorToGraph(selectedObject, xPosition, yPosition);
 				dispatchEvent(new FeedChangeEvent());
-                feedService.initialDefine.send(compositeFeedNodes, new ArrayCollection([ selectedObject ]));                
+                feedService.initialDefine.send(compositeFeedNodes, new ArrayCollection([ selectedObject ]));
             }
-            
+
             private function dragOverHandler(event:DragEvent):void {
-				DragManager.showFeedback(DragManager.MOVE);				
+				DragManager.showFeedback(DragManager.MOVE);
 			}
-			
+
 			public function createNodes():ArrayCollection {
 				var compositeFeedNodes:ArrayCollection = new ArrayCollection();
 				for each (var item:Item in graph.nodes) {
@@ -321,23 +339,23 @@
 				}
 				return compositeFeedNodes;
 			}
-			
+
 			public function createEdges():ArrayCollection {
 				var compositeFeedConnections:ArrayCollection = new ArrayCollection();
-				
+
 				for each (var edgeArray:Array in graph.edges) {
 					var connection:CompositeFeedConnection = graph.getLinkData(edgeArray[0], edgeArray[1]) as CompositeFeedConnection;
 					compositeFeedConnections.addItem(connection);
 				}
-				return compositeFeedConnections;	
+				return compositeFeedConnections;
 			}
-			
+
 			public function updateFeedDefinition(feedDefinition:FeedDefinitionData):void {
 				var compositeFeedDefinition:CompositeFeedDefinition = feedDefinition as CompositeFeedDefinition;
         		compositeFeedDefinition.compositeFeedNodes = createNodes();
         		compositeFeedDefinition.connections = createEdges();
 			}
-			
+
 			public function validate():Boolean {
 				var valid:Boolean = true;
 				var failureMessage:String;
@@ -345,8 +363,8 @@
 					failureMessage = "You must have at least one feed.";
 					valid = false;
 				} else if (graph.nodeCount > 1) {
-					for each (var item:Item in graph.nodes) {						
-						var foundOne:Boolean = graph.neighbors(item.id) != null; 						
+					for each (var item:Item in graph.nodes) {
+						var foundOne:Boolean = graph.neighbors(item.id) != null;
 						if (!foundOne) {
 							failureMessage = "You must connect all feeds.";
 							valid = false;
@@ -367,19 +385,19 @@
 	<mx:RemoteObject destination="feeds" id="feedService">
 		<mx:method name="initialDefine" result="gotDefine()"/>
 		<mx:method name="searchForSubscribedFeeds" result="gotFeeds()"/>
-	</mx:RemoteObject>	
+	</mx:RemoteObject>
 	<mx:HBox width="100%" height="100%">
-		<mx:List dataProvider="{allFeeds}" dragEnabled="true" labelField="name" height="100%" width="150"/>						
+		<mx:List dataProvider="{allFeeds}" dragEnabled="true" labelField="name" height="100%" width="150"/>
 		<mx:VBox width="100%" height="100%">
 			<mx:HBox>
 				<mx:Button id="joinButton" icon="@Embed(source='../../../../assets/graph_edge.png')" click="join()" toolTip="Connect"/>
 				<mx:Button id="deleteButton" icon="@Embed(source='../../../../assets/navigate_cross.png')" click="deleteItem()" toolTip="Delete"/>
 				<mx:Text fontSize="14" id="failureText" visible="false"/>
 			</mx:HBox>
-			<adobe:SpringGraph dragEnter="dragEnterHandler(event)" dragOver="dragOverHandler(event)" 
+			<adobe:SpringGraph dragEnter="dragEnterHandler(event)" dragOver="dragOverHandler(event)"
 				dragDrop="dragDropHandler(event)" id="s" backgroundColor="#777777" lineColor="#6666ff"
 				edgeRenderer="{testEdgeRenderer}" itemRenderer="{ new com.easyinsight.util.GraphFeedNodeFactory() }"
-				width="100%" height="100%"/>
+				width="800" height="600" autoFit="true" dataProvider="{graph}"/>
 		</mx:VBox>
 	</mx:HBox>
 </core:FullScreenPage>

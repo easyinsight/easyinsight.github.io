@@ -30,21 +30,20 @@ import com.easyinsight.analysis.AnalysisMeasure;
 		public var description:String;
         public var iconImage:String;
 
-        public var newSolutions:ArrayCollection = new ArrayCollection();
-        public var users:ArrayCollection;
+        public var users:ArrayCollection = new ArrayCollection();
+        public var newSubTree:SolutionGoalTreeDescriptor;
 
-
-        private var _renderer:GoalAdminRenderer2;
+        private var _renderer:IGoalRenderer;
 		
 		public function GoalTreeNode()
 		{
 		}
 
-        public function getRenderer():GoalAdminRenderer2 {
+        public function getRenderer():IGoalRenderer {
             return _renderer;
         }
 
-        public function setRenderer(val:GoalAdminRenderer2):void {
+        public function setRenderer(val:IGoalRenderer):void {
             _renderer = val;
         }
 

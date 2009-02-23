@@ -138,7 +138,7 @@
                 <mx:columns>
                     <mx:DataGridColumn headerText="Name" dataField="goalTreeName"/>
                     <mx:DataGridColumn headerText="" dataField="goalTreeName" width="150"
-                                       itemRenderer="com.easyinsight.goals.MyGoalsControls"/>
+                                       itemRenderer="com.easyinsight.goals.MyGoalsControls" sortable="false"/>
                 </mx:columns>
             </mx:DataGrid>
             <goals:MyGoalsGrid id="myGoalsGrid" width="100%"/>

@@ -125,7 +125,7 @@
                                        headerRenderer="com.easyinsight.groups.CustomGroupHeader"/>
                     <util:EIDataGridColumn headerText="Author" dataField="author" width="150"
                                        headerRenderer="com.easyinsight.groups.CustomGroupHeader"/>
-                    <util:EIDataGridColumn headerText="" width="100"
+                    <util:EIDataGridColumn headerText="" width="100" sortable="false"
                                        itemRenderer="com.easyinsight.solutions.AvailableSolutionIcons"/>
                 </mx:columns>
             </mx:DataGrid>

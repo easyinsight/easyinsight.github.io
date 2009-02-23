@@ -10,11 +10,36 @@ package com.easyinsight.analysis.charts
 	[Event (name="chartAdapterUpdate", type="com.easyinsight.analysis.charts.ChartAdapterUpdateEvent")]
 	public class ChartAdapterOption extends EventDispatcher
 	{
-		private var _chartAdapter:ChartAdapter;		
+		private var _chartAdapter:ChartAdapter;
 		private var _threeDSelected:Boolean;
-		private var _stackedSelected:Boolean;		
-		
-		public function ChartAdapterOption() {
+		private var _stackedSelected:Boolean;
+
+        [Bindable]
+        [Embed(source="../../../../../assets/water4.JPG")]
+        private var _standardFill:Class;
+
+        [Bindable]
+        [Embed(source="../../../../../assets/magenta.jpg")]
+        private var _selectedFill:Class;
+
+        [Bindable]
+        [Embed(source="../../../../../assets/darkwater.jpg")]
+        private var _rolloverFill:Class;
+
+
+        public function get standardFill():Class {
+            return _standardFill;
+        }
+
+        public function get selectedFill():Class {
+            return _selectedFill;
+        }
+
+        public function get rolloverFill():Class {
+            return _rolloverFill;
+        }
+
+        public function ChartAdapterOption() {
 		}
 		
 		public function get chartFamily():int {
@@ -70,14 +95,6 @@ package com.easyinsight.analysis.charts
 		}
 		
 		public function get icon():Class {
-			return null;
-		}
-		
-		public function createChartAdapter(chartType:int):ChartAdapter {
-			return instantiateChartAdapter(chartType);
-		}
-		
-		protected function instantiateChartAdapter(chartType:int):ChartAdapter {
 			return null;
 		}
 		

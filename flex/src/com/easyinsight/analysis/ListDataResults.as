@@ -3,7 +3,7 @@ package com.easyinsight.analysis
 	import mx.collections.ArrayCollection;
 	
 	[Bindable]
-	[RemoteClass(alias="com.easyinsight.webservice.google.ListDataResults")]
+	[RemoteClass(alias="com.easyinsight.analysis.ListDataResults")]
 	public class ListDataResults
 	{
 		public var headers:Array;

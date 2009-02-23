@@ -31,21 +31,11 @@ import mx.formatters.Formatter;
 
             private var bgFills:Array;
 
-            
-
-            [Bindable]
-            [Embed(source="../../../../../assets/magenta.jpg")]
-            private var magenta:Class;
-
-            [Bindable]
-            [Embed(source="../../../../../assets/darkwater.jpg")]
-            private var darkWater:Class;
-
 			private function setup():void {
                 bgFills = [];
                 for (var i:int = 0; i < 3; i++) {
                     var bgFill:BitmapFill = new BitmapFill();
-                    bgFill.source = backgroundDesktop;
+                    bgFill.source = standardFill;
                     bgFill.originX = Math.random() * 60;
                     bgFill.originY = Math.random() * 60;
                     bgFills.push(bgFill);

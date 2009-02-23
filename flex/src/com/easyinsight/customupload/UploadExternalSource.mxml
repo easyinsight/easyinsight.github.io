@@ -1,27 +1,95 @@
 <?xml version="1.0" encoding="utf-8"?>
 <mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:customupload="com.easyinsight.customupload.*"
-                creationComplete="initHandlers()" xmlns:google="com.easyinsight.google.*" title="Connect to External Data Source">
+                creationComplete="initHandlers()" xmlns:google="com.easyinsight.google.*" title="Connect to External Data Source" width="800" height="600">
+    <mx:states>
+        <mx:State name="Free">
+            <mx:AddChild relativeTo="{coreContent}">
+                <mx:List height="100%" width="100" itemClick="onItemClick(event)">
+                    <mx:dataProvider>
+                        <mx:ArrayCollection>
+                            <mx:Array>
+                                <mx:String>Google</mx:String>
+                            </mx:Array>
+                        </mx:ArrayCollection>
+                    </mx:dataProvider>
+                </mx:List>
+                <mx:VBox width="100%" height="100%">
+                    <mx:ViewStack id="freeStack" width="100%" height="100%">
+                        <google:GoogleSpreadsheetSelection userConfigComplete="onFeedCreation(event)"
+                                                           userConfigCancel="cancel(event)"/>
+                        <!-- <customupload:ServerDataSourceCreation dataSourceClass="com.easyinsight.datasources.JiraDataSource" userConfigComplete="onFeedCreation(event)"
+                                                           userConfigCancel="cancel(event)"/>-->
+                    </mx:ViewStack>
+                </mx:VBox>
+            </mx:AddChild>
+            <mx:SetProperty target="{this}" name="viewStack" value="{freeStack}"/>
+        </mx:State>
+        <mx:State name="Individual">
+            <mx:AddChild relativeTo="{coreContent}">
+                <mx:List height="100%" width="100" itemClick="onItemClick(event)">
+                    <mx:dataProvider>
+                        <mx:ArrayCollection>
+                            <mx:Array>
+                                <mx:String>Google</mx:String>
+                                <mx:String>JIRA</mx:String>
+                            </mx:Array>
+                        </mx:ArrayCollection>
+                    </mx:dataProvider>
+                </mx:List>
+            </mx:AddChild>
+            <mx:AddChild relativeTo="{coreContent}">
+                <mx:VBox width="100%" height="100%">
+                    <mx:ViewStack id="individualStack" width="100%" height="100%">
+                        <google:GoogleSpreadsheetSelection userConfigComplete="onFeedCreation(event)"
+                                                           userConfigCancel="cancel(event)"/>
+
+                        <!-- <customupload:ServerDataSourceCreation dataSourceClass="com.easyinsight.datasources.JiraDataSource" userConfigComplete="onFeedCreation(event)"
+                                                           userConfigCancel="cancel(event)"/>-->
+                        <customupload:JiraDataSourceCreation userConfigComplete="onFeedCreation(event)"
+                                                           userConfigCancel="cancel(event)"/>
+                    </mx:ViewStack>
+                </mx:VBox>
+            </mx:AddChild>
+            <mx:SetProperty target="{this}" name="viewStack" value="{individualStack}"/>
+        </mx:State>
+    </mx:states>
     <mx:Script>
 		<![CDATA[
+        import com.easyinsight.account.Account;
+        import com.easyinsight.framework.User;
+
         import mx.collections.ArrayCollection;
-        import mx.controls.Alert;
+        import mx.containers.ViewStack;
         import mx.events.ListEvent;
         import mx.managers.PopUpManager;
 
         [Bindable]
         private var dataSourceTypes:ArrayCollection;
 
-        private function initHandlers():void {
+        private var _viewStack:ViewStack;
 
+
+        public function get viewStack():ViewStack {
+            return _viewStack;
+        }
+
+        public function set viewStack(val:ViewStack):void {
+            _viewStack = val;
+        }
+
+        private function initHandlers():void {
+            if (User.getInstance().getAccountType() == Account.FREE) {
+                currentState = "Free";
+            } else {
+                currentState = "Individual";
+            }
         }
 
         private function onFeedCreation(event:UploadConfigEvent):void {
-            //dispatchEvent(event);
             PopUpManager.removePopUp(this);
         }
 
         private function cancel(event:UploadConfigEvent):void {
-            //dispatchEvent(event);
             PopUpManager.removePopUp(this);
         }
 
@@ -30,25 +98,5 @@
         }        
 		]]>
     </mx:Script>
-
-    <mx:HBox width="100%" height="100%" styleName="TitleWindowContents" backgroundSize="100%">
-        <mx:List height="100%" width="100" itemClick="onItemClick(event)">
-            <mx:dataProvider>
-                <mx:ArrayCollection>
-                    <mx:Array>
-                        <mx:String>Google</mx:String>
-                        <mx:String>JIRA</mx:String>
-                    </mx:Array>
-                </mx:ArrayCollection>
-            </mx:dataProvider>
-        </mx:List>
-        <mx:VBox width="100%" height="100%">
-            <mx:ViewStack id="viewStack">
-                <google:GoogleSpreadsheetSelection userConfigComplete="onFeedCreation(event)"
-                                                   userConfigCancel="cancel(event)"/>
-                <customupload:ServerDataSourceCreation dataSourceClass="com.easyinsight.datasources.JiraDataSource" userConfigComplete="onFeedCreation(event)"
-                                                   userConfigCancel="cancel(event)"/>
-            </mx:ViewStack>
-        </mx:VBox>
-    </mx:HBox>
+    <mx:HBox width="100%" height="100%" styleName="TitleWindowContents" backgroundSize="100%" id="coreContent"/>
 </mx:TitleWindow>

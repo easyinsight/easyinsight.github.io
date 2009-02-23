@@ -78,7 +78,7 @@ Panel {
 
 TitleWindow {
 	backgroundAlpha: 1; 
-	backgroundColor: #FFFFFF;
+	backgroundColor: #DCE2F8;
 	borderThicknessLeft: 0; 
 	borderThicknessBottom: 0; 
 	borderThicknessRight: 0;
@@ -89,9 +89,14 @@ TitleWindow {
 	paddingBottom: 0;
 }
 
+Alert {
+    backgroundColor: #CDDAF5;
+    color: #000000;
+}
+
 .TitleWindowContents {
-	backgroundAlpha: 0.2;
-	backgroundImage: Embed("appleDesktop.jpg");
+	backgroundAlpha: 1;
+    backgroundColor: #DCE2F8;
 	paddingLeft: 10;
 	paddingTop: 10;
 	paddingRight: 10;

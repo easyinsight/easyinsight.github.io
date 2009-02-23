@@ -3,7 +3,7 @@ package com.easyinsight.google
 	import com.easyinsight.listing.DataFeedDescriptor;
 	
 	[Bindable]
-	[RemoteClass(alias="com.easyinsight.webservice.google.Worksheet")]
+	[RemoteClass(alias="com.easyinsight.datafeeds.google.Worksheet")]
 	public class Worksheet
 	{
 		public var title:String;

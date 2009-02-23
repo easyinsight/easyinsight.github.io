@@ -23,11 +23,6 @@ package com.easyinsight.analysis.charts
 			return ChartTypes.PLOT_FAMILY;
 		}
 		
-		override protected function instantiateChartAdapter(chartType:int):ChartAdapter {
-			var plotChartAdapter:PlotChartAdapter = new PlotChartAdapter();
-			return plotChartAdapter;		
-		}
-		
 		override public function get chartTypeFromSelections():ChartAdapter {
 			var plotChartAdapter:PlotChartAdapter = new PlotChartAdapter();
 			return plotChartAdapter;

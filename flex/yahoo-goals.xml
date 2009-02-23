@@ -1,0 +1,26 @@
+<flex-config xmlns="http://www.adobe.com/2006/flex-config">
+    <compiler>
+        <debug>false</debug>
+        <external-library-path>
+         <path-element>${flexlib}/libs/player/10/playerglobal.swc</path-element>
+      </external-library-path>
+       <library-path>
+         <path-element>${flexlib}/libs/datavisualization.swc</path-element>
+         <path-element>${flexlib}/libs/flex.swc</path-element>
+         <path-element>${flexlib}/libs/framework.swc</path-element>
+         <path-element>${flexlib}/libs/rpc.swc</path-element>
+         <path-element>${flexlib}/libs/utilities.swc</path-element>
+         <path-element>${flexlib}/locale/{locale}</path-element>
+      </library-path>
+        <context-root>/DMS</context-root>
+       <!-- <services>C:\apache-tomcat-6.0.14\webapps\DMS\WEB-INF\flex\services-config.xml</services> -->
+        <services>/blazeds/services-config.xml</services>
+        <source-path>
+         <path-element>/src</path-element>
+      </source-path>
+    </compiler>
+    <file-specs>
+        <path-element>src/YahooWidgetGoals.mxml</path-element>
+    </file-specs>
+    <static-link-runtime-shared-libraries>false</static-link-runtime-shared-libraries>
+</flex-config>

@@ -13,7 +13,8 @@
 			import com.easyinsight.filtering.FilterDefinition;
 			import mx.controls.Alert;
 			import mx.events.ModuleEvent;
-			import mx.modules.IModuleInfo;
+            import mx.messaging.events.MessageEvent;
+            import mx.modules.IModuleInfo;
 			import mx.modules.ModuleManager;	
                    
             import com.easyinsight.analysis.AnalysisDefinition;
@@ -48,33 +49,14 @@
             public function set analysisDefinition(definition:AnalysisDefinition):void {
                 this.definition = definition;
                 if (definition != null) {
-                /*Security.allowDomain("ec2-67-202-40-33.compute-1.amazonaws.com");
-                Security.loadPolicyFile("http://ec2-67-202-40-33.compute-1.amazonaws.com/crossdomain.xml");
-                var loader:URLLoader = new URLLoader();
-                loader.addEventListener(Event.COMPLETE, loadHandler);
-                loader.load(new URLRequest("http://ec2-67-202-40-33.compute-1.amazonaws.com/crossdomain.xml"));*/
-	                /*if (definition.getDataFeedType() == "List") {
-	                	moduleInfo = ModuleManager.getModule("http://ec2-67-202-40-33.compute-1.amazonaws.com/DMS/easyui-debug/com/easyinsight/dashboard/ListViewModule.swf");	
-	                } else if (definition.getDataFeedType() == "Chart") {
-	                	moduleInfo = ModuleManager.getModule("http://ec2-67-202-40-33.compute-1.amazonaws.com/DMS/easyui-debug/com/easyinsight/dashboard/ChartViewModule.swf");
-	                } else if (definition.getDataFeedType() == "Map") {
-	                	moduleInfo = ModuleManager.getModule("http://ec2-67-202-40-33.compute-1.amazonaws.com/DMS/easyui-debug/com/easyinsight/dashboard/MapViewModule.swf");
-	                }*/ 
-	                   
-	                /*if (definition.getDataFeedType() == "List") {
-	                	moduleInfo = ModuleManager.getModule("http://localhost:8080/DMS/easyui-debug/com/easyinsight/dashboard/ListViewModule.swf");	
-	                } else if (definition.getDataFeedType() == "Chart") {
-	                	moduleInfo = ModuleManager.getModule("http://localhost:8080/DMS/easyui-debug/com/easyinsight/dashboard/ChartViewModule.swf");
-	                } else if (definition.getDataFeedType() == "Map") {
-	                	moduleInfo = ModuleManager.getModule("http://localhost:8080/DMS/easyui-debug/com/easyinsight/dashboard/MapViewModule.swf");
-	                } */ 
-	                
+                    defConsumer.subtopic = String(definition.dataFeedID);
+                    defConsumer.subscribe();
 	                if (definition.getDataFeedType() == "List") {
-	                	moduleInfo = ModuleManager.getModule("/DMS/easyui-debug/com/easyinsight/dashboard/ListViewModule.swf");	
+	                	moduleInfo = ModuleManager.getModule("/DMS/easyui-debug/ListViewModule.swf");	
 	                } else if (definition.getDataFeedType() == "Chart") {
-	                	moduleInfo = ModuleManager.getModule("/DMS/easyui-debug/com/easyinsight/dashboard/ChartViewModule.swf");
+	                	moduleInfo = ModuleManager.getModule("/DMS/easyui-debug/ColumnChartViewModule.swf");
 	                } else if (definition.getDataFeedType() == "Map") {
-	                	moduleInfo = ModuleManager.getModule("/DMS/easyui-debug/com/easyinsight/dashboard/MapViewModule.swf");
+	                	moduleInfo = ModuleManager.getModule("/DMS/easyui-debug/MapViewModule.swf");
 	                }                         
 	                
 	                moduleInfo.addEventListener(ModuleEvent.READY, moduleLoadHandler);
@@ -90,6 +72,11 @@
             
             private function returnToList():void {
 				dispatchEvent(new ReturnToListEvent());                    	
+            }
+
+            private function onMessage(event:MessageEvent):void {
+                var view:IView = dataView as IView;
+                view.refreshData();
             }
             
             private function annoyingDependencies():void {
@@ -108,7 +95,8 @@
             }
         ]]>
 	</mx:Script>
-	<mx:ApplicationControlBar width="100%">
+    <mx:Consumer id="defConsumer" destination="dataUpdates" message="onMessage(event)"/>
+	<mx:ApplicationControlBar width="100%" horizontalAlign="center">
 		<mx:LinkButton label="{title}" click="titleClick()" textDecoration="underline"/>
 	</mx:ApplicationControlBar>	
 	<mx:VBox id="coreVBox" height="100%" width="100%">

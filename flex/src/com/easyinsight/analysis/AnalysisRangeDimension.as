@@ -1,7 +1,7 @@
 package com.easyinsight.analysis
 {
 	[Bindable]
-	[RemoteClass(alias="com.easyinsight.AnalysisRangeDimension")]
+	[RemoteClass(alias="com.easyinsight.analysis.AnalysisRangeDimension")]
 	public class AnalysisRangeDimension extends AnalysisDimension
 	{
 		public function AnalysisRangeDimension()

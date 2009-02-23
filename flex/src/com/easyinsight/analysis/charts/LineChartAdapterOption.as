@@ -23,11 +23,6 @@ package com.easyinsight.analysis.charts
 			return ChartTypes.LINE_FAMILY;
 		}
 		
-		override protected function instantiateChartAdapter(chartType:int):ChartAdapter {
-			var lineChartAdapter:LineChartAdapter = new LineChartAdapter();
-			return lineChartAdapter;		
-		}	
-		
 		override public function get threeDVisible():Boolean {
 			return true;
 		}

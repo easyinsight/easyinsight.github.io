@@ -7,33 +7,34 @@ import mx.core.IDataRenderer;
 import mx.graphics.BitmapFill;
 import mx.graphics.IFill;
 import mx.graphics.IStroke;
-import mx.graphics.SolidColor;
 import mx.skins.ProgrammaticSkin;
-import mx.styles.StyleManager;
-import mx.utils.ColorUtil;
-
 
 public class CustomDropShadowRenderer extends ProgrammaticSkin implements IDataRenderer {
 
     private static var rcFill:Rectangle = new Rectangle();
 
-    [Bindable]
-    [Embed(source="../../../../assets/magenta.jpg")]
-    private var magenta:Class;
 
-    [Bindable]
-    [Embed(source="../../../../assets/darkwater.jpg")]
-    private var darkWater:Class;
+    private var _selectedFill:Class;
+
+    private var _rolloverFill:Class;
+
+    public function set selectedFill(val:Class):void {
+        _selectedFill = val;
+        bgFill = new BitmapFill();
+        bgFill.source = _selectedFill;
+    }
+
+    public function set rolloverFill(val:Class):void {
+        _rolloverFill = val;
+        darkWaterFill = new BitmapFill();
+        darkWaterFill.source = _rolloverFill;
+    }
 
     private var bgFill:BitmapFill;
     private var darkWaterFill:BitmapFill;
 
     public function CustomDropShadowRenderer() {
         super();
-        bgFill = new BitmapFill();
-        bgFill.source = magenta;
-        darkWaterFill = new BitmapFill();
-        darkWaterFill.source = darkWater;
     }
 
     /**
@@ -88,7 +89,6 @@ public class CustomDropShadowRenderer extends ProgrammaticSkin implements IDataR
 		else
 		 	fill = GraphicsUtilities.fillFromStyle(getStyle('fill'));
 
-        var color:uint;
 		var adjustedRadius:Number = 0;
 		
 		switch(state)

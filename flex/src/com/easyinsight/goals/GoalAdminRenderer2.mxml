@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <OrgChartItemRendererBase xmlns="com.easyinsight.goals.*" xmlns:mx="http://www.adobe.com/2006/mxml"
-	borderStyle="solid" borderColor="#CCCCCC" cornerRadius="10" creationComplete="setup()">
+	borderStyle="solid" borderColor="#CCCCCC" cornerRadius="10" creationComplete="setup()" implements="com.easyinsight.goals.IGoalRenderer">
 	<mx:Script>
 		<![CDATA[
         import com.easyinsight.listing.DataFeedDescriptor;
@@ -77,12 +77,12 @@
                 obj = dataGrid.selectedItem;
             }
             if (obj is Solution) {
-                var window:GoalTreeDropWindow = new GoalTreeDropWindow();
-                window.goalTreeNode = goalTreeNode;
-                window.solution = obj as Solution;
-                window.addEventListener(OrganizationChartRefreshEvent.ORG_CHART_REFRESH, passThrough);
-                PopUpManager.addPopUp(window, this, true);
-                PopUpManager.centerPopUp(window);
+                var solution:Solution = obj as Solution;
+                var goalSolution:GoalSolution = new GoalSolution();
+                goalSolution.solutionID = solution.solutionID;
+                goalSolution.solutionName = solution.name;
+                goalSolution.solutionArchiveName = solution.solutionArchiveName;
+                goalTreeNode.associatedSolutions.addItem(goalSolution);
             } else if (obj is DataFeedDescriptor) {
                 var descriptor:DataFeedDescriptor = obj as DataFeedDescriptor;
                 var goalFeed:GoalFeed = new GoalFeed();
@@ -97,11 +97,17 @@
                 goalTreeNode.associatedInsights.addItem(goalInsight);
             } else if (obj is GoalTreeDescriptor) {
                 var goalTreeDescriptor:GoalTreeDescriptor = obj as GoalTreeDescriptor;
-
+                var window:GoalTreeDropWindow = new GoalTreeDropWindow();
+                window.goalTreeNode = goalTreeNode;
+                window.goalTreeDescriptor = goalTreeDescriptor;
+                window.addEventListener(OrganizationChartRefreshEvent.ORG_CHART_REFRESH, passThrough);
+                window.addEventListener(SolutionInstallRequiredEvent.SOLUTION_INSTALL, passThrough);
+                PopUpManager.addPopUp(window, this, true);
+                PopUpManager.centerPopUp(window);
             }
         }
 
-        private function passThrough(event:OrganizationChartRefreshEvent):void {
+        private function passThrough(event:Event):void {
             dispatchEvent(event);
         }
 
@@ -207,9 +213,6 @@
         private function goalEdited(event:GoalEditEvent):void {
             var goalTreeNode:GoalTreeNode = orgChartItem.data as GoalTreeNode;
             goalNameInput.text = goalTreeNode.name;
-            if (goalTreeNode.newSolutions.length > 0) {
-                dispatchEvent(new OrganizationChartRefreshEvent());
-            }
         }
 
         private function onDragDrop(event:DragEvent):void {

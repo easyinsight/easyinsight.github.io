@@ -4,7 +4,7 @@ package com.easyinsight.analysis
 	import mx.formatters.Formatter;
 	
 	[Bindable]
-	[RemoteClass(alias="com.easyinsight.AnalysisDateDimension")]
+	[RemoteClass(alias="com.easyinsight.analysis.AnalysisDateDimension")]
 	public class AnalysisDateDimension extends AnalysisDimension
 	{
 		public var dateLevel:int;
