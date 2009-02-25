@@ -1,27 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project relativePaths="false" version="4">
   <component name="ChangeListManager">
-    <list default="true" name="Default" comment="">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/java/web/website/sitemap.html" />
-      <change type="DELETED" beforePath="C:\ei\java\src\com\easyinsight\users\AccountType.java" afterPath="" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/java/web/website/consulting.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/java/sql/43.sql" />
-      <change type="DELETED" beforePath="C:\ei\java\src\com\easyinsight\users\IndividualAccount.java" afterPath="" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/java/src/com/easyinsight/datafeeds/jira/JiraDataSource.java" afterPath="$PROJECT_DIR$/java/src/com/easyinsight/datafeeds/jira/JiraDataSource.java" />
-      <change type="DELETED" beforePath="C:\ei\java\src\com\easyinsight\users\FreeAccount.java" afterPath="" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/java/src/com/easyinsight/users/UserService.java" afterPath="$PROJECT_DIR$/java/src/com/easyinsight/users/UserService.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/java/src/com/easyinsight/datafeeds/FeedDefinition.java" afterPath="$PROJECT_DIR$/java/src/com/easyinsight/datafeeds/FeedDefinition.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/java/web/website/privacy.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/java/web/website/solutions.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/java/src/com/easyinsight/datafeeds/FeedStorage.java" afterPath="$PROJECT_DIR$/java/src/com/easyinsight/datafeeds/FeedStorage.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/java/web/website/product.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/java/web/website/company.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/java/web/website/index2.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/java/sql/create.sql" afterPath="$PROJECT_DIR$/java/sql/create.sql" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/java/web/website/website.css" afterPath="$PROJECT_DIR$/java/web/website/website.css" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/java/src/com/easyinsight/users/Account.java" afterPath="$PROJECT_DIR$/java/src/com/easyinsight/users/Account.java" />
-      <change type="DELETED" beforePath="C:\ei\java\src\com\easyinsight\users\CommercialAccount.java" afterPath="" />
-    </list>
+    <list default="true" name="Default" comment="" />
     <ignored path=".idea/workspace.xml" />
     <ignored path="eiinspections.iws" />
   </component>
