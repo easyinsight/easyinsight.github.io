@@ -591,7 +591,9 @@ public class FeedStorage {
             PreparedStatement queryStmt = conn.prepareStatement("SELECT DISTINCT DATA_FEED.DATA_FEED_ID, DATA_FEED.FEED_NAME, " +
                     "FEED_PERSISTENCE_METADATA.SIZE, DATA_FEED.FEED_TYPE, DATA_FEED.ANALYSIS_ID, OWNER_NAME, DESCRIPTION, ATTRIBUTION, ROLE, PUBLICLY_VISIBLE, MARKETPLACE_VISIBLE" +
                     " FROM UPLOAD_POLICY_USERS, DATA_FEED LEFT JOIN FEED_PERSISTENCE_METADATA ON DATA_FEED.DATA_FEED_ID = FEED_PERSISTENCE_METADATA.FEED_ID WHERE " +
-                    "USER_ID = ? AND DATA_FEED.DATA_FEED_ID = UPLOAD_POLICY_USERS.FEED_ID");
+                    "UPLOAD_POLICY_USERS.USER_ID = ? AND DATA_FEED.DATA_FEED_ID = UPLOAD_POLICY_USERS.FEED_ID");
+            // where account_id = ?
+            PreparedStatement accountStmt = conn.prepareStatement("SELECT ");
             queryStmt.setLong(1, userID);
             ResultSet rs = queryStmt.executeQuery();
             while (rs.next()) {

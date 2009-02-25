@@ -17,6 +17,7 @@ public class Account {
     public static final int INDIVIDUAL = 2;
     public static final int PROFESSIONAL = 3;
     public static final int ENTERPRISE = 4;
+    public static final int ADMINISTRATOR = 5;
 
     public static final int INACTIVE = 1;
     public static final int ACTIVE = 2;

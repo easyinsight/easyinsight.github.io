@@ -20,7 +20,7 @@
     <servlet>
         <servlet-name>DMS</servlet-name>
         <display-name>DMS</display-name>
-        <servlet-class>com.easyinsight.DMSServlet</servlet-class>
+        <servlet-class>com.easyinsight.servlet.DMSServlet</servlet-class>
         <load-on-startup>1</load-on-startup>
     </servlet>
         -->

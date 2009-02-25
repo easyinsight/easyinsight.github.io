@@ -27,15 +27,18 @@ import flex.messaging.FlexContext;
  */
 public class UserService implements IUserService {
 
-    public UserTransferObject upgradeAccount(AccountType toType) {
+    public UserTransferObject upgradeAccount(int toType) {
+        if (toType == Account.ADMINISTRATOR) {
+            throw new SecurityException();
+        }
         long accountID = SecurityUtil.getAccountID();
         Session session = Database.instance().createSession();
         try {
             session.beginTransaction();
             Account account = (Account) session.createQuery("from Account where accountID = ?").setLong(0, accountID).list().get(0);
             User user = (User) session.createQuery("from User where userID = ?").setLong(0, SecurityUtil.getAccountID()).list().get(0);
-            account.setAccountType(toType.getAccountType());
-            if (toType.getAccountType() == AccountType.COMMERCIAL) {
+            account.setAccountType(toType);
+            if (toType == Account.PROFESSIONAL) {
                 user.setAccountAdmin(true);
                 user.setDataSourceCreator(true);
                 user.setInsightCreator(true);
@@ -655,5 +658,24 @@ public class UserService implements IUserService {
         return activated;
     }
 
-    
+    public List<AccountTransferObject> getAccounts() {
+        SecurityUtil.authorizeAccountTier(Account.ADMINISTRATOR);
+        List<AccountTransferObject> accounts = new ArrayList<AccountTransferObject>();
+        Session session = Database.instance().createSession();
+        try {
+            session.beginTransaction();
+            List results = session.createQuery("from Account").list();
+            for (Object obj : results) {
+                Account account = (Account) obj;
+                accounts.add(account.toTransferObject());
+            }
+            session.getTransaction().commit();
+        } catch (Exception e) {
+            LogClass.error(e);
+            session.getTransaction().rollback();
+        } finally {
+            session.close();
+        }
+        return accounts;
+    }
 }

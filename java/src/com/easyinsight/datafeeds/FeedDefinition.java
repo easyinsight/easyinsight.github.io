@@ -24,6 +24,7 @@ public class FeedDefinition implements Cloneable {
     private UploadPolicy uploadPolicy = new UploadPolicy();
     private boolean publiclyVisible;
     private boolean marketplaceVisible;
+    private boolean accountVisible;
     private Long dataFeedID;
     private long size;
     private Date dateCreated;
@@ -51,6 +52,14 @@ public class FeedDefinition implements Cloneable {
 
     public int getRequiredAccountTier() {
         throw new UnsupportedOperationException();
+    }
+
+    public boolean isAccountVisible() {
+        return accountVisible;
+    }
+
+    public void setAccountVisible(boolean accountVisible) {
+        this.accountVisible = accountVisible;
     }
 
     public boolean isInheritAccountAPISettings() {

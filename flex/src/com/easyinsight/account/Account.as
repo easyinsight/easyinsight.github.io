@@ -11,6 +11,13 @@ package com.easyinsight.account
         public static const PROFESSIONAL:int = 3;
         public static const ENTERPRISE:int = 4;
 
+        public static const INACTIVE:int = 1;
+        public static const ACTIVE:int = 2;
+        public static const DELINQUENT:int = 3;
+        public static const SUSPENDED:int = 4;
+        public static const CLOSED:int = 5;
+        public static const PENDING_BILLING:int = 6;
+
 		public var accountType:int;
 		public var accountID:int;
 		public var licenses:ArrayCollection;

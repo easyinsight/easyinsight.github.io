@@ -107,6 +107,11 @@ div.clear {
     width: 1000px;
 }
 
+#logo {
+    position: relative;
+    height: 40px;
+}
+
 body > #allPage {
     height: auto;
     overflow: hidden;

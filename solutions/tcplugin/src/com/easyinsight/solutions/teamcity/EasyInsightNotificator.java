@@ -8,6 +8,7 @@ import jetbrains.buildServer.users.SUser;
 import jetbrains.buildServer.users.NotificatorPropertyKey;
 import jetbrains.buildServer.users.PropertyKey;
 import jetbrains.buildServer.vcs.VcsRoot;
+import jetbrains.buildServer.vcs.SVcsModification;
 
 import java.util.*;
 import java.io.IOException;
@@ -32,14 +33,12 @@ public class EasyInsightNotificator implements Notificator {
     private static final PropertyKey EI_LOGIN_KEY = new NotificatorPropertyKey(TYPE, EI_LOGIN);
     private static final PropertyKey EI_PASSWORD_KEY = new NotificatorPropertyKey(TYPE, EI_PASSWORD);
 
-
     public EasyInsightNotificator(NotificatorRegistry notificatorRegistry) throws IOException {
         List<UserPropertyInfo> userProps = new ArrayList<UserPropertyInfo>();
         userProps.add(new UserPropertyInfo(EI_LOGIN, "Easy Insight ID"));
         userProps.add(new UserPropertyInfo(EI_PASSWORD, "Easy Insight Password"));
         notificatorRegistry.register(this, userProps);
     }
-
 
     public void notifyBuildStarted(SRunningBuild sRunningBuild, Set<SUser> sUsers) {
     }
@@ -74,6 +73,13 @@ public class EasyInsightNotificator implements Notificator {
                     NumberPair testElapsedTime = new NumberPair();
                     testElapsedTime.setKey("Test Elapsed Time");
                     testElapsedTime.setValue(buildStatistics.getTotalDuration());
+                    long duration = sRunningBuild.getFullStatistics().getTotalDuration();
+                    for (SVcsModification change : sRunningBuild.getContainingChanges()) {
+                        change.getUserName();
+                        change.getChanges().size();
+                    }
+                    sRunningBuild.getAgentName();
+                    
                     DatePair datePair = new DatePair();
                     Calendar cal = Calendar.getInstance();
                     cal.setTime(sRunningBuild.getFinishDate());

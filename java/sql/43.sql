@@ -1,0 +1,1 @@
+alter table data_feed add account_visible tinyint(1) default 0;

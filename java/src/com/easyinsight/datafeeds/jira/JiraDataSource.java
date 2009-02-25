@@ -29,6 +29,17 @@ import java.sql.ResultSet;
 public class JiraDataSource extends FeedDefinition {
 
     private String url;
+    public static final String REPORTER = "Reporter";
+    public static final String COMPONENTS = "Components";
+    public static final String DATE_CREATED = "Date Created";
+    public static final String PRIORITY = "Priority";
+    public static final String STATUS = "Status";
+    public static final String ASSIGNEE = "Assignee";
+    public static final String COUNT = "Count";
+    public static final String PROJECT = "Project";
+    public static final String TYPE = "Type";
+    public static final String VERSIONS = "Versions";
+    public static final String UPDATED = "Date Updated";
 
     public String getUrl() {
         return url;
@@ -89,6 +100,10 @@ public class JiraDataSource extends FeedDefinition {
             for (RemotePriority remotePriority : jiraSoapService.getPriorities(token)) {
                 priorityMap.put(remotePriority.getId(), remotePriority.getName());
             }
+            Map<String, String> typeMap = new HashMap<String, String>();
+            for (RemoteIssueType type : jiraSoapService.getIssueTypes(token)) {
+                typeMap.put(type.getId(), type.getName());
+            }
             RemoteIssue[] issues = jiraSoapService.getIssuesFromTextSearch(token, null);
             for (RemoteIssue issue : issues) {
                 String reporter = issue.getReporter();
@@ -106,14 +121,30 @@ public class JiraDataSource extends FeedDefinition {
                 String status = statusMap.get(issue.getStatus());
                 String priority = priorityMap.get(issue.getPriority());
                 String assignee = issue.getAssignee();
+                String type = issue.getType();
+                String versionString = null;
+                RemoteVersion[] versions = issue.getAffectsVersions();
+                if (versions.length > 0) {
+                    StringBuilder versionBuilder = new StringBuilder();
+                    for (RemoteVersion version : versions) {
+                        versionBuilder.append(version.getName());
+                        versionBuilder.append(",");
+                    }
+                    versionString = versionBuilder.substring(0, versionBuilder.length() - 1);    
+                }
+                String project = issue.getProject();
                 IRow row = dataSet.createRow();
-                row.addValue(keys.get("Reporter"), reporter);
-                row.addValue(keys.get("Components"), componentString);
-                row.addValue(keys.get("Date Created"), new DateValue(created.getTime()));
-                row.addValue(keys.get("Priority"), priority);
-                row.addValue(keys.get("Status"), status);
-                row.addValue(keys.get("Assignee"), assignee);
-                row.addValue(keys.get("Count"), new NumericValue(1));
+                row.addValue(keys.get(REPORTER), reporter);
+                row.addValue(keys.get(COMPONENTS), componentString);
+                row.addValue(keys.get(DATE_CREATED), new DateValue(created.getTime()));
+                row.addValue(keys.get(PRIORITY), priority);
+                row.addValue(keys.get(STATUS), status);
+                row.addValue(keys.get(ASSIGNEE), assignee);
+                row.addValue(keys.get(COUNT), new NumericValue(1));
+                row.addValue(keys.get(PROJECT), project);
+                row.addValue(keys.get(VERSIONS), versionString);
+                row.addValue(keys.get(TYPE), typeMap.get(type));
+                row.addValue(keys.get(UPDATED), new DateValue(issue.getUpdated().getTime()));
             }
         } catch (Exception e) {
             LogClass.error(e);
@@ -125,13 +156,17 @@ public class JiraDataSource extends FeedDefinition {
     public Map<String, Key> newDataSourceFields(Credentials credentials) {
         Map<String, Key> keyMap = new HashMap<String, Key>();
         if (getDataFeedID() == 0) {
-            keyMap.put("Reporter", new NamedKey("Reporter"));
-            keyMap.put("Components", new NamedKey("Components"));
-            keyMap.put("Date Created", new NamedKey("Date Created"));
-            keyMap.put("Priority", new NamedKey("Priority"));
-            keyMap.put("Status", new NamedKey("Status"));
-            keyMap.put("Assignee", new NamedKey("Assignee"));
-            keyMap.put("Count", new NamedKey("Count"));
+            keyMap.put(REPORTER, new NamedKey(REPORTER));
+            keyMap.put(COMPONENTS, new NamedKey(COMPONENTS));
+            keyMap.put(DATE_CREATED, new NamedKey(DATE_CREATED));
+            keyMap.put(PRIORITY, new NamedKey(PRIORITY));
+            keyMap.put(STATUS, new NamedKey(STATUS));
+            keyMap.put(ASSIGNEE, new NamedKey(ASSIGNEE));
+            keyMap.put(COUNT, new NamedKey(COUNT));
+            keyMap.put(PROJECT, new NamedKey(PROJECT));
+            keyMap.put(TYPE, new NamedKey(TYPE));
+            keyMap.put(VERSIONS, new NamedKey(VERSIONS));
+            keyMap.put(UPDATED, new NamedKey(UPDATED));
         } else {
             for (AnalysisItem field : getFields()) {
                 keyMap.put(field.getKey().toKeyString(), field.getKey());
@@ -142,13 +177,17 @@ public class JiraDataSource extends FeedDefinition {
 
     public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, DataSet dataSet) {
         List<AnalysisItem> analysisItems = new ArrayList<AnalysisItem>();
-        analysisItems.add(new AnalysisDimension(keys.get("Reporter"), true));
-        analysisItems.add(new AnalysisList(keys.get("Components"), true, ","));
-        analysisItems.add(new AnalysisDateDimension(keys.get("Date Created"), true, AnalysisItemTypes.DAY_LEVEL));
-        analysisItems.add(new AnalysisDimension(keys.get("Priority"), true));
-        analysisItems.add(new AnalysisDimension(keys.get("Status"), true));
-        analysisItems.add(new AnalysisDimension(keys.get("Assignee"), true));
-        analysisItems.add(new AnalysisMeasure(keys.get("Count"), AggregationTypes.SUM));
+        analysisItems.add(new AnalysisDimension(keys.get(REPORTER), true));
+        analysisItems.add(new AnalysisList(keys.get(COMPONENTS), true, ","));
+        analysisItems.add(new AnalysisList(keys.get(VERSIONS), true, ","));
+        analysisItems.add(new AnalysisDateDimension(keys.get(DATE_CREATED), true, AnalysisItemTypes.DAY_LEVEL));
+        analysisItems.add(new AnalysisDateDimension(keys.get(UPDATED), true, AnalysisItemTypes.DAY_LEVEL));
+        analysisItems.add(new AnalysisDimension(keys.get(PRIORITY), true));
+        analysisItems.add(new AnalysisDimension(keys.get(STATUS), true));
+        analysisItems.add(new AnalysisDimension(keys.get(ASSIGNEE), true));
+        analysisItems.add(new AnalysisDimension(keys.get(PROJECT), true));
+        analysisItems.add(new AnalysisDimension(keys.get(TYPE), true));
+        analysisItems.add(new AnalysisMeasure(keys.get(COUNT), AggregationTypes.SUM));
         return analysisItems;
     }
 
