@@ -165,7 +165,7 @@ public class DynamicServiceDefinition {
         String classpath = System.getProperty("java.class.path");
         String[] elements = classpath.split(File.pathSeparator);
         for (String element : elements) {
-            if (element.contains("production")) {
+            if (element.contains("production") || element.contains("classes")) {
                 path = path + File.pathSeparator + element;
             }
         }
