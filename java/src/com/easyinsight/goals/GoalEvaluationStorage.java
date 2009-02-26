@@ -276,7 +276,7 @@ public class GoalEvaluationStorage {
         if (highIsGood) {
             if (endValue >= goalValue) {
                 outcome = GoalOutcome.EXCEEDING_GOAL;
-            } else if (Math.abs(delta) < Math.abs(goalValue * .02)) {
+            } else if (Math.abs(delta) < Math.abs(goalValue * .002)) {
                 outcome = GoalOutcome.NEUTRAL;
             } else if (delta > 0) {
                 outcome = GoalOutcome.POSITIVE;
@@ -286,7 +286,7 @@ public class GoalEvaluationStorage {
         } else {
             if (endValue <= goalValue) {
                 outcome = GoalOutcome.EXCEEDING_GOAL;
-            } else if (Math.abs(delta) < Math.abs(goalValue * .02)) {
+            } else if (Math.abs(delta) < Math.abs(goalValue * .002)) {
                 outcome = GoalOutcome.NEUTRAL;
             } else if (delta < 0) {
                 outcome = GoalOutcome.POSITIVE;

@@ -81,35 +81,35 @@ import mx.collections.ICollectionView;
     <mx:Image source="@Embed('../../../../assets/logo2.png')"/>
     <mx:Spacer width="40"/>
     <listing:ListingOption perspective="{new IntroPanel()}" enableAnalysis="false" displayName="Intro" listingChange="onListingChange(event)" width="50">
-        <mx:Image source="{homeIcon}"/>
+        <mx:Image source="{homeIcon}" id="homeImage"/>
         <mx:Label text="Intro" fontSize="12" fontFamily="Tahoma" fontWeight="bold" color="0x323232"/>
     </listing:ListingOption>
     <listing:ListingOption perspective="{new MyData()}" enableAnalysis="false" displayName="My Data" listingChange="onListingChange(event)">
-        <mx:Image source="{myDataIcon}"/>
+        <mx:Image source="{myDataIcon}" id="myDataImage"/>
         <mx:Label text="My Data" fontSize="12" fontFamily="Tahoma" fontWeight="bold" color="0x323232"/>
     </listing:ListingOption>
     <listing:ListingOption perspective="{new GenreDataProvider()}" enableAnalysis="false" displayName="Marketplace" listingChange="onListingChange(event)">
-        <mx:Image source="{catalogIcon}"/>
+        <mx:Image source="{catalogIcon}" id="catalogImage"/>
         <mx:Label text="Marketplace" fontSize="12" fontFamily="Tahoma" fontWeight="bold" color="0x323232"/>
     </listing:ListingOption>
     <listing:ListingOption perspective="{new GroupsSummary()}" enableAnalysis="false" displayName="Groups" listingChange="onListingChange(event)">
-        <mx:Image source="{groupsIcon}"/>
+        <mx:Image source="{groupsIcon}" id="groupsImage"/>
         <mx:Label text="Groups" fontSize="12" fontFamily="Tahoma" fontWeight="bold" color="0x323232"/>
     </listing:ListingOption>
     <listing:ListingOption perspective="{new SolutionsSummary()}" enableAnalysis="false" displayName="Solutions" listingChange="onListingChange(event)">
-        <mx:Image source="{solutionsIcon}"/>
+        <mx:Image source="{solutionsIcon}" id="solutionsImage"/>
         <mx:Label text="Solutions" fontSize="12" fontFamily="Tahoma" fontWeight="bold" color="0x323232"/>
     </listing:ListingOption>
     <listing:ListingOption perspective="{new MyGoals()}" enableAnalysis="false" displayName="Goals" listingChange="onListingChange(event)">
-        <mx:Image source="{goalsIcon}"/>
+        <mx:Image source="{goalsIcon}" id="goalsImage"/>
         <mx:Label text="Goals" fontSize="12" fontFamily="Tahoma" fontWeight="bold" color="0x323232"/>
     </listing:ListingOption>
     <listing:ListingOption perspective="{new APIPage()}" enableAnalysis="false" displayName="API" listingChange="onListingChange(event)">
-        <mx:Image source="{apiIcon}"/>
+        <mx:Image source="{apiIcon}" id="apiImage"/>
         <mx:Label text="API" fontSize="12" fontFamily="Tahoma" fontWeight="bold" color="0x323232"/>
     </listing:ListingOption>
     <listing:ListingOption perspective="{new AccountBasePage()}" enableAnalysis="false" displayName="Accounts" listingChange="onListingChange(event)">
-        <mx:Image source="{accountIcon}"/>
+        <mx:Image source="{accountIcon}" id="accountImage"/>
         <mx:Label text="Account" fontSize="12" fontFamily="Tahoma" fontWeight="bold" color="0x323232"/>
     </listing:ListingOption>
     <!-- <listing:ListingOption icon="{helpIcon}" perspective="{new Box()}" enableAnalysis="false" displayName="My Account"/> -->

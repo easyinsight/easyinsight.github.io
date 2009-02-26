@@ -23,6 +23,10 @@ public class SecurityUtil {
         SecurityUtil.securityProvider = securityProvider;
     }
 
+    public static ISecurityProvider getSecurityProvider(){
+        return SecurityUtil.securityProvider;
+    }
+
     public static long authenticate(String userName, String password){
         UserServiceResponse userServiceResponse = new UserService().authenticateWithEncrypted(userName, password);
         if (userServiceResponse.isSuccessful()) {

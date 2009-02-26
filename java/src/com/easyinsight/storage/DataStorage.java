@@ -399,6 +399,7 @@ public class DataStorage {
             boolean inWhereClause = false;
             for (IWhere where : wheres) {
                 if (where.getKey().equals(keyMetadata.getKey())) {
+                    where.getKey().setKeyID(keyMetadata.getKey().getKeyID());
                     inWhereClause = true;
                 }
             }
@@ -441,6 +442,7 @@ public class DataStorage {
         String parameters = paramBuilder.toString();
 
         String insertSQL = "INSERT INTO " + getTableName() + " (" + columns + ") VALUES (" + parameters + ")";
+        System.out.println(insertSQL);
         PreparedStatement insertStmt = storageConn.prepareStatement(insertSQL);
 
         StringBuilder whereBuilder = new StringBuilder();
@@ -454,6 +456,7 @@ public class DataStorage {
         }
 
         String updateSQL = "UPDATE " + getTableName() + " SET " + fieldBuilder.toString() + " WHERE " + whereBuilder.toString();
+        System.out.println(updateSQL);
         PreparedStatement updateStmt = storageConn.prepareStatement(updateSQL);
         for (IRow row : dataSet.getRows()) {
             int i = 1;

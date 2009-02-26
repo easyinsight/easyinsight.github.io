@@ -25,7 +25,7 @@ public class FeedDefinition implements Cloneable {
     private boolean publiclyVisible;
     private boolean marketplaceVisible;
     private boolean accountVisible;
-    private Long dataFeedID;
+    private long dataFeedID;
     private long size;
     private Date dateCreated;
     private Date dateUpdated;
@@ -246,11 +246,11 @@ public class FeedDefinition implements Cloneable {
         this.uploadPolicy = uploadPolicy;
     }
 
-    public Long getDataFeedID() {
+    public long getDataFeedID() {
         return dataFeedID;
     }
 
-    public void setDataFeedID(Long dataFeedID) {
+    public void setDataFeedID(long dataFeedID) {
         this.dataFeedID = dataFeedID;
     }
 
@@ -298,7 +298,7 @@ public class FeedDefinition implements Cloneable {
             clonedTags.add(tag);
         }
         feedDefinition.setTags(clonedTags);
-        feedDefinition.setDataFeedID(null);
+        feedDefinition.setDataFeedID(0);
         return feedDefinition;
     }
 

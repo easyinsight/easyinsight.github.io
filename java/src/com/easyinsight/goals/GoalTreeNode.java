@@ -20,7 +20,7 @@ public class GoalTreeNode implements Cloneable {
     public static final int CONCRETE_NODE = 2;
 
     private long goalTreeNodeID;
-    private List<GoalTreeNode> children;
+    private List<GoalTreeNode> children = new ArrayList<GoalTreeNode>();
     private GoalTreeNode parent;
     private long coreFeedID;
     private String coreFeedName;
@@ -28,14 +28,14 @@ public class GoalTreeNode implements Cloneable {
     private double goalValue;
     private boolean highIsGood;
     private FilterDefinition filterDefinition;
-    private List<GoalFeed> associatedFeeds;
-    private List<GoalInsight> associatedInsights;
-    private List<GoalSolution> associatedSolutions;
-    private List<Tag> tags;
+    private List<GoalFeed> associatedFeeds = new ArrayList<GoalFeed>();
+    private List<GoalInsight> associatedInsights = new ArrayList<GoalInsight>();
+    private List<GoalSolution> associatedSolutions = new ArrayList<GoalSolution>();
+    private List<Tag> tags = new ArrayList<Tag>();
     private String name;
     private String description;
     private String iconImage;
-    private List<Integer> users;
+    private List<Integer> users = new ArrayList<Integer>();
     private long subTreeID;
     private SolutionGoalTreeDescriptor newSubTree;
 

@@ -71,9 +71,9 @@ public class GoalTreeNodeData extends GoalTreeNode {
                 }
                 double resultAverage = sumValue / childOutcomes.size();
                 int resultOutcomeState;
-                if (resultAverage >= 1) {
+                /*if (resultAverage >= 1) {
                     resultOutcomeState = GoalOutcome.EXCEEDING_GOAL;
-                } else if (resultAverage > .2) {
+                } else*/ if (resultAverage > .2) {
                     resultOutcomeState = GoalOutcome.POSITIVE;
                 } else if (resultAverage < -.2) {
                     resultOutcomeState = GoalOutcome.NEGATIVE;

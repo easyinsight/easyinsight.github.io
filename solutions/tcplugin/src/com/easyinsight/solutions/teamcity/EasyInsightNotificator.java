@@ -12,6 +12,7 @@ import jetbrains.buildServer.vcs.SVcsModification;
 
 import java.util.*;
 import java.io.IOException;
+import java.io.File;
 
 import org.jetbrains.annotations.NotNull;
 import com.easyinsight.solutions.teamcity.webservice.*;
@@ -51,6 +52,17 @@ public class EasyInsightNotificator implements Notificator {
         for (SUser user : sUsers) {
             String eiUserName = user.getPropertyValue(EI_LOGIN_KEY);
             String eiPassword = user.getPropertyValue(EI_PASSWORD_KEY);
+            SBuildType buildType = sRunningBuild.getBuildType();
+            if (buildType != null) {
+                RunType runType = buildType.getBuildRunner();
+                if (runType != null && runType.getType().equals("IPR")) {
+                    for (List<ArtifactInfo> artifactInfos : sRunningBuild.getDownloadedArtifacts().getArtifacts().values()) {
+                        for (ArtifactInfo artifactInfo : artifactInfos) {
+                            String artifactPath = artifactInfo.getArtifactPath();
+                        }
+                    }
+                }
+            }
             BuildStatistics buildStatistics = sRunningBuild.getFullStatistics();
             if (buildStatistics.getAllTestCount() > 0) {
                 try {
@@ -73,20 +85,55 @@ public class EasyInsightNotificator implements Notificator {
                     NumberPair testElapsedTime = new NumberPair();
                     testElapsedTime.setKey("Test Elapsed Time");
                     testElapsedTime.setValue(buildStatistics.getTotalDuration());
+
+
                     long duration = sRunningBuild.getFullStatistics().getTotalDuration();
+                    NumberPair durationPair = new NumberPair();
+                    durationPair.setKey("Duration");
+                    durationPair.setValue(duration);
+                    System.out.println("provided artifacts size = " + sRunningBuild.getProvidedArtifacts().getArtifacts().size());
+                    File artifactsDirectory = sRunningBuild.getArtifactsDirectory();
+                    System.out.println("downloaded artifacts size = " + sRunningBuild.getDownloadedArtifacts().getArtifacts().size());
+
+                    if (artifactsDirectory.exists()) {
+                        System.out.println("into artifacts directory...");
+                        File file = new File(artifactsDirectory, "coverage.txt");
+                        if (file.exists()) {
+                            System.out.println("coverage data found...");
+                            new CoverageDataParse().parseData(file.getAbsolutePath(), service);
+                        }
+                    }
+
+                    for (List<ArtifactInfo> artifactInfos : sRunningBuild.getProvidedArtifacts().getArtifacts().values()) {
+                        for (ArtifactInfo artifactInfo : artifactInfos) {
+                            System.out.println(artifactInfo.getArtifactPath());
+                            if (artifactInfo.getArtifactPath().endsWith("coverage.txt")) {
+                                new CoverageDataParse().parseData(artifactInfo.getArtifactPath(), service);
+                            }
+                        }
+                    }
+                    for (List<ArtifactInfo> artifactInfos : sRunningBuild.getDownloadedArtifacts().getArtifacts().values()) {
+                        for (ArtifactInfo artifactInfo : artifactInfos) {
+                            System.out.println(artifactInfo.getArtifactPath());
+                            if (artifactInfo.getArtifactPath().endsWith("coverage.txt")) {
+                                new CoverageDataParse().parseData(artifactInfo.getArtifactPath(), service);
+                            }
+                        }
+                    }
                     for (SVcsModification change : sRunningBuild.getContainingChanges()) {
                         change.getUserName();
                         change.getChanges().size();
                     }
-                    sRunningBuild.getAgentName();
+                    StringPair agentPair = new StringPair();
+                    agentPair.setKey("Build Agent");
+                    agentPair.setValue(sRunningBuild.getAgentName());
                     
                     DatePair datePair = new DatePair();
                     Calendar cal = Calendar.getInstance();
-                    cal.setTime(sRunningBuild.getFinishDate());
                     datePair.setKey("Date of Run");
                     datePair.setValue(cal);
-                    row.setStringPairs(new StringPair[] { stringPair} );
-                    row.setNumberPairs(new NumberPair[] { allTestCountPair, failedTestCount, passedTestCount, testElapsedTime} );
+                    row.setStringPairs(new StringPair[] { stringPair, agentPair} );
+                    row.setNumberPairs(new NumberPair[] { allTestCountPair, failedTestCount, passedTestCount, testElapsedTime, durationPair} );
                     row.setDatePairs(new DatePair[] { datePair });
                     service.addRow("teamcity", row);
                 } catch (ServiceException e) {

@@ -23,6 +23,13 @@ import org.hibernate.Session;
  * Time: 6:27:22 PM
  */
 public class APIService {
+
+    private IAPIManager apiManager = APIManager.instance();
+
+    public void setApiManager(IAPIManager apiManager) {
+        this.apiManager = apiManager;
+    }
+
     public long updateDataSourceAPI(DataSourceAPIDescriptor descriptor, DynamicServiceDefinition dynamicServiceDefinition) {
         long dynamicServiceID = 0;
         Connection conn = Database.instance().getConnection();
@@ -37,7 +44,7 @@ public class APIService {
                 }
                 dynamicServiceID = addDynamicServiceDefinition(dynamicServiceDefinition, conn);
                 dynamicServiceDefinition.generateCode(feedDefinition, conn);
-                dynamicServiceDefinition.deploy(conn);
+                dynamicServiceDefinition.deploy(conn, apiManager);
             } else {
                 undeployService(descriptor.getFeedID(), conn);
             }
@@ -282,10 +289,10 @@ public class APIService {
                 addDynamicServiceDefinition(definition, conn);
                 feedDefinition.setDynamicServiceDefinitionID(definition.getServiceID());
             } else {
-                APIManager.instance().undeploy(feedID);
+                apiManager.undeploy(feedID);
             }
             definition.generateCode(feedDefinition, conn);
-            definition.deploy(conn);
+            definition.deploy(conn, apiManager);
             conn.commit();
         } catch (Exception e) {
             LogClass.error(e);
@@ -294,6 +301,7 @@ public class APIService {
             } catch (SQLException e1) {
                 LogClass.error(e1);
             }
+            throw new RuntimeException(e);
         } finally {
             try {
                 conn.setAutoCommit(true);

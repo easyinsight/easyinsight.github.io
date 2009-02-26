@@ -14,6 +14,10 @@ public class TestSecurityProvider implements ISecurityProvider {
 
     private UserPrincipal userPrincipal;
 
+    public long getAccountID() {
+        return userPrincipal.getAccountID();
+    }
+
     public void setUserPrincipal(long userID) {
         User user = new InternalUserService().retrieveUser(userID);
         userPrincipal = new UserPrincipal(user.getUserName(), user.getAccount().getAccountID(), user.getUserID(), user.getAccount().getAccountType());

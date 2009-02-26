@@ -4,6 +4,7 @@ import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.database.Database;
 import com.easyinsight.api.APIManager;
+import com.easyinsight.api.IAPIManager;
 
 import javax.tools.*;
 import java.util.List;
@@ -161,6 +162,13 @@ public class DynamicServiceDefinition {
         String path = new File("").getAbsolutePath();
         path = path.substring(0, path.length() - 4);
         path = path + "/webapps/DMS/WEB-INF/classes";
+        String classpath = System.getProperty("java.class.path");
+        String[] elements = classpath.split(File.pathSeparator);
+        for (String element : elements) {
+            if (element.contains("production")) {
+                path = path + File.pathSeparator + element;
+            }
+        }
 
         int compilationResult = javaCompiler.run(null, null, null, "-cp", path, beanFile.getAbsolutePath(), interfaceFile.getAbsolutePath(), classFile.getAbsolutePath());
         if (compilationResult > 0) {
@@ -201,7 +209,7 @@ public class DynamicServiceDefinition {
         }
     }
 
-    public void deploy(Connection conn) {
+    public void deploy(Connection conn, IAPIManager apiManager) {
         try {
             Statement byteCodeStmt = conn.createStatement();
             ResultSet rs = byteCodeStmt.executeQuery("SELECT INTERFACE_BYTECODE, IMPL_BYTECODE, BEAN_BYTECODE, BEAN_NAME FROM " +
@@ -211,7 +219,7 @@ public class DynamicServiceDefinition {
                 byte[] classBytes = rs.getBytes(2);
                 byte[] beanBytes = rs.getBytes(3);
                 String beanName = rs.getString(4);
-                APIManager.instance().dynamicDeployment(new DynamicDeploymentUnit(new DynamicClassLoader(interfaceBytes, classBytes, beanBytes, beanName, getClass().getClassLoader()), feedID));
+                apiManager.dynamicDeployment(new DynamicDeploymentUnit(new DynamicClassLoader(interfaceBytes, classBytes, beanBytes, beanName, getClass().getClassLoader()), feedID));
             }
         } catch (SQLException e) {
             LogClass.error(e);

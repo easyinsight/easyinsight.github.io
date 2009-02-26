@@ -83,7 +83,6 @@ public abstract class UncheckedPublishService extends PublishService {
             CallData callData = getMetadata(dataSourceName, row, conn);
             dataStorage = callData.dataStorage;
             DataSet dataSet = toDataSet(row);
-            dataStorage.truncate();
             dataStorage.insertData(dataSet);
             dataStorage.commit();
             conn.commit();
@@ -105,6 +104,7 @@ public abstract class UncheckedPublishService extends PublishService {
             } catch (SQLException e) {
                 LogClass.error(e);
             }
+            dataStorage.closeConnection();
             Database.instance().closeConnection(conn);
         }
     }
@@ -117,7 +117,6 @@ public abstract class UncheckedPublishService extends PublishService {
             CallData callData = getMetadata(dataSourceName, rows[0], conn);
             dataStorage = callData.dataStorage;
             DataSet dataSet = toDataSet(rows);
-            dataStorage.truncate();
             dataStorage.insertData(dataSet);
             dataStorage.commit();
             conn.commit();
@@ -139,6 +138,7 @@ public abstract class UncheckedPublishService extends PublishService {
             } catch (SQLException e) {
                 LogClass.error(e);
             }
+            dataStorage.closeConnection();
             Database.instance().closeConnection(conn);
         }
     }
@@ -175,6 +175,7 @@ public abstract class UncheckedPublishService extends PublishService {
             } catch (SQLException e) {
                 LogClass.error(e);
             }
+            dataStorage.closeConnection();
             Database.instance().closeConnection(conn);
         }
     }
@@ -308,6 +309,7 @@ public abstract class UncheckedPublishService extends PublishService {
             } catch (SQLException e) {
                 LogClass.error(e);
             }
+            dataStorage.closeConnection();
             Database.instance().closeConnection(conn);
         }
     }
@@ -343,6 +345,7 @@ public abstract class UncheckedPublishService extends PublishService {
             } catch (SQLException e) {
                 LogClass.error(e);
             }
+            dataStorage.closeConnection();            
             Database.instance().closeConnection(conn);
         }
     }

@@ -62,6 +62,7 @@ public abstract class ValidatingPublishService extends PublishService implements
             } catch (SQLException e) {
                 LogClass.error(e);
             }
+            dataStorage.closeConnection();
             Database.instance().closeConnection(conn);
         }
     }
@@ -96,6 +97,7 @@ public abstract class ValidatingPublishService extends PublishService implements
             } catch (SQLException e) {
                 LogClass.error(e);
             }
+            dataStorage.closeConnection();
             Database.instance().closeConnection(conn);
         }
     }
@@ -131,6 +133,7 @@ public abstract class ValidatingPublishService extends PublishService implements
             } catch (SQLException e) {
                 LogClass.error(e);
             }
+            dataStorage.closeConnection();
             Database.instance().closeConnection(conn);
         }
     }
@@ -191,6 +194,7 @@ public abstract class ValidatingPublishService extends PublishService implements
             } catch (SQLException e) {
                 LogClass.error(e);
             }
+            dataStorage.closeConnection();
             Database.instance().closeConnection(conn);
         }
     }
@@ -225,6 +229,7 @@ public abstract class ValidatingPublishService extends PublishService implements
             } catch (SQLException e) {
                 LogClass.error(e);
             }
+            dataStorage.closeConnection();
             Database.instance().closeConnection(conn);
         }
     }
@@ -257,6 +262,7 @@ public abstract class ValidatingPublishService extends PublishService implements
             } catch (SQLException e) {
                 LogClass.error(e);
             }
+            dataStorage.closeConnection();
             Database.instance().closeConnection(conn);
         }
     }

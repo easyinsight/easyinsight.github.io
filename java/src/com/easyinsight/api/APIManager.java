@@ -29,7 +29,7 @@ import org.apache.ws.security.WSConstants;
  * Date: Aug 28, 2008
  * Time: 12:25:36 PM
  */
-public class APIManager {
+public class APIManager implements IAPIManager {
 
     private static APIManager instance;
 
@@ -88,7 +88,7 @@ public class APIManager {
             ResultSet rs = feedQueryStmt.executeQuery();
             while (rs.next()) {
                 DynamicServiceDefinition definition = new DynamicServiceDefinition(rs.getLong(2), rs.getLong(1));
-                definition.deploy(conn);
+                definition.deploy(conn, this);
             }
         } catch (SQLException e) {
             LogClass.error(e);

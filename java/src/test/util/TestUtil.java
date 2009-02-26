@@ -53,6 +53,9 @@ public class TestUtil {
         UserUploadService userUploadService = new UserUploadService();
         long uploadID = userUploadService.addRawUploadData(userID, "blah.csv", csvText.getBytes());
         UploadResponse uploadResponse = userUploadService.create(uploadID, "Default Test Data Source");
+        if (!uploadResponse.isSuccessful()) {
+            throw new RuntimeException(uploadResponse.getFailureMessage());
+        }
         return uploadResponse.getFeedID();
     }
 }

@@ -488,6 +488,7 @@ public class UserUploadService implements IUserUploadService {
             if (dataStorage != null) {
                 dataStorage.closeConnection();
             }
+            dataStorage.closeConnection();
             Database.instance().closeConnection(conn);
         }
     }
@@ -495,11 +496,12 @@ public class UserUploadService implements IUserUploadService {
     public void updateData(long feedID, long rawDataID, boolean update) {
         SecurityUtil.authorizeFeed(feedID, Roles.OWNER);
         Connection conn = Database.instance().getConnection();
+        DataStorage metadata = null;
         try {
             conn.setAutoCommit(false);
             RawUploadData rawUploadData = retrieveRawData(rawDataID);
             FileBasedFeedDefinition feedDefinition = (FileBasedFeedDefinition) getDataFeedConfiguration(feedID);
-            DataStorage metadata = DataStorage.writeConnection(feedDefinition, conn);
+            metadata = DataStorage.writeConnection(feedDefinition, conn);
             PersistableDataSetForm form = feedDefinition.getUploadFormat().createDataSet(rawUploadData.userData, feedDefinition.getFields());
             if (update) {
                 //DataRetrievalManager.instance().storeData(feedID, form);
@@ -513,6 +515,9 @@ public class UserUploadService implements IUserUploadService {
             conn.commit();
         } catch (Exception e) {
             LogClass.error(e);
+            if (metadata != null) {
+                metadata.rollback();
+            }
             try {
                 conn.rollback();
             } catch (SQLException e1) {
@@ -524,6 +529,9 @@ public class UserUploadService implements IUserUploadService {
                 conn.setAutoCommit(true);
             } catch (SQLException e) {
                 LogClass.error(e);
+            }
+            if (metadata != null) {
+                metadata.closeConnection();
             }
             Database.instance().closeConnection(conn);
         }

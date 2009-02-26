@@ -88,7 +88,8 @@ public class JiraDataSource extends FeedDefinition {
             String userName = credentials.getUserName();
             String password = credentials.getPassword();
             JiraSoapServiceServiceLocator jiraSoapServiceGetter = new JiraSoapServiceServiceLocator();
-            jiraSoapServiceGetter.setJirasoapserviceV2EndpointAddress((url.startsWith("http://") ? "" : "http://") + url + (url.endsWith("/") ? "" : "/") + "rpc/soap/jirasoapservice-v2");
+            String jiraURL = (url.startsWith("http://") ? "" : "http://") + url + (url.endsWith("/") ? "" : "/") + "rpc/soap/jirasoapservice-v2";
+            jiraSoapServiceGetter.setJirasoapserviceV2EndpointAddress(jiraURL);
             JiraSoapService jiraSoapService = jiraSoapServiceGetter.getJirasoapserviceV2();
             String token = jiraSoapService.login(userName, password);
             RemoteStatus[] statuses = jiraSoapService.getStatuses(token);

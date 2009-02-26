@@ -49,15 +49,19 @@ public class FeedService implements IDataFeedService {
 
     public void wipeData(long feedID) {
         Connection conn = Database.instance().getConnection();
+        DataStorage metadata = null;
         try {
             conn.setAutoCommit(false);
             FeedDefinition feedDefinition = getFeedDefinition(feedID);
-            DataStorage metadata = DataStorage.writeConnection(feedDefinition, conn);
+            metadata = DataStorage.writeConnection(feedDefinition, conn);
             metadata.truncate();
             metadata.commit();
             conn.commit();
         } catch (Exception e) {
             LogClass.error(e);
+            if (metadata != null) {
+                metadata.rollback();
+            }
             try {
                 conn.rollback();
             } catch (SQLException e1) {
@@ -69,6 +73,9 @@ public class FeedService implements IDataFeedService {
                 conn.setAutoCommit(true);
             } catch (SQLException e) {
                 LogClass.error(e);
+            }
+            if (metadata != null) {
+                metadata.closeConnection();
             }
             Database.instance().closeConnection(conn);
         }
