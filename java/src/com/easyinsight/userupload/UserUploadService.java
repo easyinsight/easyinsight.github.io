@@ -488,7 +488,6 @@ public class UserUploadService implements IUserUploadService {
             if (dataStorage != null) {
                 dataStorage.closeConnection();
             }
-            dataStorage.closeConnection();
             Database.instance().closeConnection(conn);
         }
     }
