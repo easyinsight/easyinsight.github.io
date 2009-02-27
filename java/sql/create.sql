@@ -668,7 +668,7 @@ CREATE TABLE `data_source_comment` (
 DROP TABLE IF EXISTS `database_version`;
 CREATE TABLE `database_version` (
   `database_version_id` bigint(20) NOT NULL auto_increment,
-  `version` int(11) NOT NULL default '37',
+  `version` int(11) NOT NULL default '43',
   PRIMARY KEY  (`database_version_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=latin1;
 

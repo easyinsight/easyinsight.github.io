@@ -40,6 +40,9 @@ public class Database {
             configuration.setProperty("hibernate.connection.username", userName);
             configuration.setProperty("hibernate.connection.password", password);
             sessionFactory = configuration.buildSessionFactory();
+            Thread thread = new Thread(new KeepAliveThread(this));
+            thread.setDaemon(true);
+            thread.start();
         } catch (Throwable e) {
             LogClass.error(e);
         }

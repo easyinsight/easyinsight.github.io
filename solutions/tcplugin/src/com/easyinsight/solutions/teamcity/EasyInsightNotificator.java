@@ -30,14 +30,18 @@ public class EasyInsightNotificator implements Notificator {
     private static final String TYPE_NAME = "Easy Insight Metrics Notifier";
     private static final String EI_LOGIN = "easyInsightLogin";
     private static final String EI_PASSWORD = "easyInsightPassword";
+    private static final String EI_HOST = "easyInsightHost";
 
     private static final PropertyKey EI_LOGIN_KEY = new NotificatorPropertyKey(TYPE, EI_LOGIN);
     private static final PropertyKey EI_PASSWORD_KEY = new NotificatorPropertyKey(TYPE, EI_PASSWORD);
+    private static final PropertyKey EI_HOST_KEY = new NotificatorPropertyKey(TYPE, EI_HOST);
 
     public EasyInsightNotificator(NotificatorRegistry notificatorRegistry) throws IOException {
         List<UserPropertyInfo> userProps = new ArrayList<UserPropertyInfo>();
         userProps.add(new UserPropertyInfo(EI_LOGIN, "Easy Insight ID"));
         userProps.add(new UserPropertyInfo(EI_PASSWORD, "Easy Insight Password"));
+        userProps.add(new UserPropertyInfo(EI_HOST, "Easy Insight Host"));
+
         notificatorRegistry.register(this, userProps);
     }
 
@@ -66,7 +70,9 @@ public class EasyInsightNotificator implements Notificator {
             BuildStatistics buildStatistics = sRunningBuild.getFullStatistics();
             if (buildStatistics.getAllTestCount() > 0) {
                 try {
-                    UncheckedPublishService service = new BasicAuthUncheckedPublishServiceServiceLocator().getBasicAuthUncheckedPublishServicePort();
+                    BasicAuthUncheckedPublishServiceServiceLocator locator = new BasicAuthUncheckedPublishServiceServiceLocator();
+                    locator.setBasicAuthUncheckedPublishServicePortEndpointAddress(user.getPropertyValue(EI_HOST_KEY));
+                    UncheckedPublishService service = locator.getBasicAuthUncheckedPublishServicePort();
                     ((BasicAuthUncheckedPublishServiceServiceSoapBindingStub)service).setUsername(eiUserName);
                     ((BasicAuthUncheckedPublishServiceServiceSoapBindingStub)service).setPassword(eiPassword);
                     Row row = new Row();
