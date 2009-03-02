@@ -9,7 +9,6 @@ import com.easyinsight.database.Database;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.dataset.ColumnSegmentFactory;
 import com.easyinsight.dataset.PersistableDataSetForm;
-import com.easyinsight.storage.DataRetrievalManager;
 import com.easyinsight.security.Roles;
 import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.analysis.*;
@@ -180,7 +179,7 @@ public class SalesforceConnection {
         opportunitiesFeedDef.setFields(columnSegmentFactory.getFields());
         opportunitiesFeedDef.setFeedName("Salesforce Opportunities");
         long accountsID = feedStorage.addFeedDefinitionData(opportunitiesFeedDef);
-        DataRetrievalManager.instance().storeData(accountsID, persistable);
+        //DataRetrievalManager.instance().storeData(accountsID, persistable);
         CompositeFeedNode opportunities = new CompositeFeedNode();
         opportunities.setDataFeedID(accountsID);
         return opportunities;

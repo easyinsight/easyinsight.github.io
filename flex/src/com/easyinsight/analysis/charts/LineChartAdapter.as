@@ -13,6 +13,8 @@ package com.easyinsight.analysis.charts
 	import mx.charts.chartClasses.IAxis;
 	import mx.charts.series.LineSeries;
 	import mx.collections.ArrayCollection;
+    import mx.collections.Sort;
+    import mx.collections.SortField;
 	
 	public class LineChartAdapter extends ChartAdapter
 	{
@@ -54,7 +56,7 @@ package com.easyinsight.analysis.charts
 		
 		override public function dataChange(dataSet:ArrayCollection, dimensions:Array, measures:Array):void {
 			
-			this.chartData = dataSet;
+			this.chartData = new ArrayCollection(dataSet.toArray());
 			
 			if (measures.length >= 2 || dimensions.length == 2) {
 				
@@ -64,7 +66,9 @@ package com.easyinsight.analysis.charts
 				lineChart.percentHeight = 100;
 				lineChart.percentWidth = 100;
 				lineChart.dataProvider = chartData;
-				lineChart.selectionMode = "multiple";		
+				lineChart.selectionMode = "multiple";
+
+
 			
 				var xAxisDimension:AnalysisItem;
 				if (measures.length >= 2) {
@@ -72,6 +76,36 @@ package com.easyinsight.analysis.charts
 				} else {
 					xAxisDimension = dimensions[1] as AnalysisItem;
 				}
+
+                var sort:Sort = new Sort();
+                var sortField:SortField = new SortField(xAxisDimension.key.createString(), true);
+                sort.fields = [ sortField ];
+                if (chartData.length > 0) {
+                    var firstObj:Object = chartData.getItemAt(0);
+                    var firstVal:Object = firstObj[xAxisDimension.key.createString()];
+                    if (firstVal is Number) {
+                        sortField.numeric = true;
+                    }
+
+                    chartData.sort = sort;
+                    chartData.refresh();
+
+                    if (firstVal is Number) {
+                        var categories:ArrayCollection = new ArrayCollection();
+                        for each (var obj:Object in chartData) {
+                            var valObj:Object = obj[xAxisDimension.key.createString()];
+                            if (categories.getItemIndex(valObj) == -1) {
+                                categories.addItem(valObj);
+                            }
+                            /*if (valObj is Number) {
+                                obj[xAxisDimension.key.createString()] = String(valObj);
+
+                            }*/
+                        }
+                    }
+                }
+
+
 				
 				var xAxis:IAxis;
 				
@@ -88,14 +122,20 @@ package com.easyinsight.analysis.charts
 						case AnalysisItemTypes.DAY_LEVEL:
 							dateAxis.dataUnits = "days";
 							break;
+                        case AnalysisItemTypes.HOUR_LEVEL:
+                            dateAxis.dataUnits = "hours";
+                            break;
+                        case AnalysisItemTypes.MINUTE_LEVEL:
+                            dateAxis.dataUnits = "minutes";
+                            break;
 					}					
 					dateAxis.displayName = dateDimension.display;
 					xAxis = dateAxis;
 				} else {
 					var categoryAxis:CategoryAxis = new CategoryAxis();
-					categoryAxis.categoryField = xAxisDimension.key.createString();
+					//categoryAxis.categoryField = xAxisDimension.key.createString();
 					categoryAxis.displayName = xAxisDimension.display;
-					categoryAxis.dataProvider = chartData;
+					categoryAxis.dataProvider = categories;
 					xAxis = categoryAxis;
 				}
 				

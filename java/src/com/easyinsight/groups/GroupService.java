@@ -7,6 +7,7 @@ import com.easyinsight.analysis.WSAnalysisDefinition;
 import com.easyinsight.datafeeds.FeedDescriptor;
 import com.easyinsight.database.Database;
 import com.easyinsight.audit.AuditMessage;
+import com.easyinsight.users.Account;
 
 import java.util.List;
 import java.util.Date;
@@ -23,6 +24,7 @@ public class GroupService {
     private GroupStorage groupStorage = new GroupStorage();
 
     public long addGroup(Group group) {
+        SecurityUtil.authorizeAccountTier(Account.INDIVIDUAL);
         long userID = SecurityUtil.getUserID();
         try {
             return groupStorage.addGroup(group, userID);
@@ -33,6 +35,7 @@ public class GroupService {
     }
 
     public long addGroupComment(GroupComment groupComment) {
+        SecurityUtil.authorizeGroup(groupComment.getGroupID(), Roles.SUBSCRIBER);
         try {
             groupComment.setUserID(SecurityUtil.getUserID());
             return groupStorage.addGroupComment(groupComment);
@@ -43,6 +46,7 @@ public class GroupService {
     }
 
     public List<AuditMessage> getGroupMessages(long groupID) {
+        SecurityUtil.authorizeGroup(groupID, Roles.SUBSCRIBER);
         try {
             return groupStorage.getGroupMessages(groupID);
         } catch (Exception e) {
@@ -52,6 +56,7 @@ public class GroupService {
     }
 
     public List<GroupUser> getUsers(long groupID) {
+        SecurityUtil.authorizeGroup(groupID, Roles.SUBSCRIBER);
         try {
             return groupStorage.getUsersForGroup(groupID);
         } catch (Exception e) {
@@ -61,6 +66,7 @@ public class GroupService {
     }
 
     public void updateGroup(Group group, List<GroupUser> users) {
+        SecurityUtil.authorizeGroup(group.getGroupID(), Roles.OWNER);
         Connection conn = Database.instance().getConnection();
         try {
             conn.setAutoCommit(false);
@@ -94,6 +100,7 @@ public class GroupService {
     }
 
     public Group getGroup(long groupID) {
+        SecurityUtil.authorizeGroup(groupID, Roles.SUBSCRIBER);
         try {
             Group group = groupStorage.getGroup(groupID);
             List<GroupUser> users = groupStorage.getUsersForGroup(groupID);
@@ -133,6 +140,7 @@ public class GroupService {
     } */
 
     public void addMemberToGroup(long groupID) {
+        SecurityUtil.authorizeGroup(groupID, Roles.OWNER);
         long userID = SecurityUtil.getUserID();
         try {
             Group group = getGroup(groupID);
@@ -152,6 +160,7 @@ public class GroupService {
     }
     
     public void inviteNewUserToGroup(String emailAddress, long groupID) {
+        SecurityUtil.authorizeGroup(groupID, Roles.SUBSCRIBER);
         try {
             String activationID = groupStorage.inviteNewUserToGroup(groupID);
             
@@ -162,6 +171,7 @@ public class GroupService {
     }
 
     public void addFeedToGroup(long feedID, long groupID) {
+        SecurityUtil.authorizeGroup(groupID, Roles.SUBSCRIBER);
         try {
             groupStorage.addFeedToGroup(feedID, groupID, Roles.SUBSCRIBER);
         } catch (Exception e) {
@@ -171,6 +181,7 @@ public class GroupService {
     }
 
     public void addInsightToGroup(long insightID, long groupID) {
+        SecurityUtil.authorizeGroup(groupID, Roles.SUBSCRIBER);
         try {
             groupStorage.addInsightToGroup(insightID, groupID);
         } catch (Exception e) {
@@ -184,6 +195,7 @@ public class GroupService {
     }
 
     public List<WSAnalysisDefinition> getInsights(long groupID) {
+        SecurityUtil.authorizeGroup(groupID, Roles.SUBSCRIBER);
         try {
             return groupStorage.getInsights(groupID);
         } catch (Exception e) {
@@ -193,6 +205,7 @@ public class GroupService {
     }
 
     public List<FeedDescriptor> getFeeds(long groupID) {
+        SecurityUtil.authorizeGroup(groupID, Roles.SUBSCRIBER);
         long userID = SecurityUtil.getUserID();
         try {
             return groupStorage.getFeeds(groupID, userID);

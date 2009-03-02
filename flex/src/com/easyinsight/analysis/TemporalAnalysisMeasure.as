@@ -6,10 +6,10 @@ package com.easyinsight.analysis
 	public class TemporalAnalysisMeasure extends AnalysisMeasure
 	{
 		public var wrappedAggregation:int;
-		public var analysisDimension:AnalysisDateDimension;
+		public var analysisDimension:AnalysisDimension;
 		
 		public function TemporalAnalysisMeasure(aggregation:int=1, wrappedAggregation:int = 1, 
-			analysisDimension:AnalysisDateDimension=null)
+			analysisDimension:AnalysisDimension=null)
 		{
 			super(aggregation);
 			this.wrappedAggregation = wrappedAggregation;

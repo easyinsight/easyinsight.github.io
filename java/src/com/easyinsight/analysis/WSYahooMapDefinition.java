@@ -1,6 +1,5 @@
 package com.easyinsight.analysis;
 
-import com.easyinsight.webservice.ShortAnalysisDefinition;
 import com.easyinsight.analysis.AnalysisTypes;
 
 /**
@@ -22,9 +21,5 @@ public class WSYahooMapDefinition extends WSGraphicDefinition {
 
     public String getDataFeedType() {
         return AnalysisTypes.YAHOO_MAP;
-    }
-
-    public ShortAnalysisDefinition createShortAnalysisDefinition() {
-        throw new UnsupportedOperationException();
     }
 }

@@ -11,7 +11,8 @@ package com.easyinsight.analysis
 	    public static const CORRELATION:int = 7;
 	
 	    public static const DELTA:int = 8;
-		
+	    public static const LAST_VALUE:int = 9;
+
 		public function AggregationTypes()
 		{
 		}

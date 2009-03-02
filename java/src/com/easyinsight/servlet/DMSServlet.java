@@ -2,7 +2,6 @@ package com.easyinsight.servlet;
 
 import com.easyinsight.database.Database;
 import com.easyinsight.datafeeds.FeedRegistry;
-import com.easyinsight.storage.DataRetrieval;
 import com.easyinsight.dataengine.EngineRequestHandler;
 import com.easyinsight.dataengine.DataEngine;
 import com.easyinsight.dataengine.MessagingBroker;
@@ -28,7 +27,6 @@ public class DMSServlet extends HttpServlet {
                 SecurityUtil.setSecurityProvider(new DefaultSecurityProvider());
                 Database.initialize();
                 FeedRegistry.initialize();
-                new DataRetrieval();
                 new MessagingBroker();
                 new EngineRequestHandler();
                 new DataEngine();

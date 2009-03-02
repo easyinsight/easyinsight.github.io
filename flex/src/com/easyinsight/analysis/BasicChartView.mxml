@@ -183,7 +183,7 @@
         				break;
     				case ChartTypes.LINE_FAMILY:
     				case ChartTypes.AREA_FAMILY:
-    					limitNumber = 100;
+    					limitNumber = 1000;
     					break;
             	}
             	limitsMetadata.number = limitNumber;

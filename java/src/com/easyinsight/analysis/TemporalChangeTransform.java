@@ -27,11 +27,24 @@ public class TemporalChangeTransform {
     }
 
     public DataSet blah(DataSet dataSet) {
-        AnalysisDateDimension existingDate = null;
-        for (AnalysisItem analysisItem : allRequestedAnalysisItems) {
-            if (analysisItem.getKey().equals(temporalAnalysisMeasure.getAnalysisDimension().getKey()) && analysisItem.hasType(AnalysisItemTypes.DATE_DIMENSION)) {
-                existingDate = (AnalysisDateDimension) analysisItem;
-                break;
+        AnalysisDimension existingDate = null;
+        if (temporalAnalysisMeasure.getAnalysisDimension().hasType(AnalysisItemTypes.DATE_DIMENSION)) {
+            AnalysisDateDimension sortDim = (AnalysisDateDimension) temporalAnalysisMeasure.getAnalysisDimension();
+            for (AnalysisItem analysisItem : allRequestedAnalysisItems) {
+                if (analysisItem.hasType(AnalysisItemTypes.DATE_DIMENSION)) {
+                    AnalysisDateDimension dimension = (AnalysisDateDimension) analysisItem;
+                    if (analysisItem.getKey().equals(temporalAnalysisMeasure.getAnalysisDimension().getKey()) && dimension.getDateLevel() == sortDim.getDateLevel()) {
+                        existingDate = (AnalysisDateDimension) analysisItem;
+                        break;
+                    }
+                }
+            }
+        } else {
+            for (AnalysisItem analysisItem : allRequestedAnalysisItems) {
+                if (analysisItem.getKey().equals(temporalAnalysisMeasure.getAnalysisDimension().getKey()) && analysisItem.hasType(AnalysisItemTypes.DIMENSION)) {
+                    existingDate = (AnalysisDimension) analysisItem;
+                    break;
+                }
             }
         }
         // first question...
@@ -47,7 +60,7 @@ public class TemporalChangeTransform {
             Map<Key, Value> dimensionKey = new HashMap<Key, Value>();
             for (AnalysisItem analysisItem : allRequestedAnalysisItems) {
                 if (analysisItem.hasType(AnalysisItemTypes.DIMENSION) && !analysisItem.hasType(AnalysisItemTypes.DATE_DIMENSION)) {
-                    AggregateKey aggregateKey = new AggregateKey(analysisItem.getKey(), analysisItem.getType());
+                    AggregateKey aggregateKey = analysisItem.createAggregateKey();
                     dimensionKey.put(aggregateKey, row.getValue(aggregateKey));
                 }
             }
@@ -64,7 +77,7 @@ public class TemporalChangeTransform {
             Map<Key, Value> dimensionKey = new HashMap<Key, Value>();
             for (AnalysisItem analysisItem : allRequestedAnalysisItems) {
                 if (analysisItem.hasType(AnalysisItemTypes.DIMENSION) && !analysisItem.hasType(AnalysisItemTypes.DATE_DIMENSION)) {
-                    AggregateKey aggregateKey = new AggregateKey(analysisItem.getKey(), analysisItem.getType());
+                    AggregateKey aggregateKey = analysisItem.createAggregateKey();
                     dimensionKey.put(aggregateKey, row.getValue(aggregateKey));
                 }
             }
@@ -73,7 +86,7 @@ public class TemporalChangeTransform {
         }
         if (existingDate == null) {
             DateValue latestDate = null;
-            AggregateKey dateKey = new AggregateKey(temporalAnalysisMeasure.getAnalysisDimension().getKey(), temporalAnalysisMeasure.getAnalysisDimension().getType());
+            AggregateKey dateKey = temporalAnalysisMeasure.getAnalysisDimension().createAggregateKey();
             for (IRow row : dataSet.getRows()) {
                 Value value = row.getValue(dateKey);
                 if (value.type() == Value.DATE) {

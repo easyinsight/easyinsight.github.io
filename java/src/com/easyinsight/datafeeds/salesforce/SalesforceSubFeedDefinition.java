@@ -5,7 +5,6 @@ import com.easyinsight.datafeeds.FeedType;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.dataset.ColumnSegmentFactory;
 import com.easyinsight.dataset.PersistableDataSetForm;
-import com.easyinsight.storage.DataRetrieval;
 import com.sforce.soap.enterprise.Soap;
 
 import java.sql.Connection;
@@ -45,7 +44,6 @@ public class SalesforceSubFeedDefinition extends FeedDefinition {
         DataSet dataSet = new SalesforceDataRetrieval().getDataSet(subQueryType, port);
         ColumnSegmentFactory columnSegmentFactory = new ColumnSegmentFactory();
         PersistableDataSetForm persistable = columnSegmentFactory.createPersistableForm(dataSet);
-        DataRetrieval.instance().storeData(getDataFeedID(), persistable);
     }
 
     public void customStorage(Connection conn) throws SQLException {

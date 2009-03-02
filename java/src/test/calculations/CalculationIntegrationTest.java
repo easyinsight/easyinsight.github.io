@@ -7,7 +7,6 @@ import com.easyinsight.dataset.DataSet;
 import com.easyinsight.calculations.*;
 import com.easyinsight.calculations.generated.CalculationsParser;
 import com.easyinsight.calculations.generated.CalculationsLexer;
-import com.easyinsight.storage.DataRetrieval;
 import com.easyinsight.database.Database;
 import com.easyinsight.analysis.*;
 import com.easyinsight.datafeeds.FeedStorage;
@@ -31,7 +30,6 @@ public class CalculationIntegrationTest extends TestCase {
     protected void setUp() throws Exception {
         Database.initialize();
         FeedRegistry.initialize();
-        new DataRetrieval();
     }
 
     public void testIntegration() {
@@ -42,7 +40,7 @@ public class CalculationIntegrationTest extends TestCase {
         // TODO: use this resolver to populate your object tree with Keys for each variable
         // TODO: our target calculation will be ((Revenue + 100) - (Cost Number)) / Units * 12
         //CalculationTreeNode tree = evalString("((Revenue + 100) - (Cost Number)) / Units * 12", resolver);
-        CalculationTreeNode tree = evalString("Revenue - 0 + Cost Number", resolver);
+        CalculationTreeNode tree = evalString("Revenue / Cost Number", resolver);
 
         // Once the object is populated, you can test by doing the following...
 
@@ -56,6 +54,7 @@ public class CalculationIntegrationTest extends TestCase {
 
             ICalculationTreeVisitor visitor = new EvaluationVisitor(row);
             tree.accept(visitor);
+            assertEquals(300.0, visitor.getResult().toDouble(), .1);
             //assertEquals(240.0, visitor.getResult().toDouble());
 
 

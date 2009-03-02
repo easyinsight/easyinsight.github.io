@@ -19,8 +19,8 @@ public class DeltaTemporalAggregation extends TemporalAggregation implements ITe
     private Double previousValue;
     private Map<Integer, Value> values = new HashMap<Integer, Value>();
 
-    public DeltaTemporalAggregation(AnalysisDateDimension sortDate, AnalysisMeasure wrappedMeasure, int newAggregation) {
-        super(sortDate, wrappedMeasure, newAggregation);
+    public DeltaTemporalAggregation(AnalysisDimension sortDate, AnalysisMeasure wrappedMeasure, int newAggregation, boolean requiresReAggregation) {
+        super(sortDate, wrappedMeasure, newAggregation, requiresReAggregation);
     }
 
     public void addValue(Value value, int position) {

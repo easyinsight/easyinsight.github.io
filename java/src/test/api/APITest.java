@@ -127,6 +127,9 @@ public class APITest extends TestCase {
         stringWhere.setValue("value");
         where.setStringWheres(new StringWhere[] { stringWhere });
         service.updateRow("testds1", updateRow, where);
+        stringPair.setValue("value3");
+        com.easyinsight.api.Row newRow = new com.easyinsight.api.Row();
+        newRow.setStringPairs(new StringPair[] { stringPair });
     }
 
     public void testDynamicAPI() {

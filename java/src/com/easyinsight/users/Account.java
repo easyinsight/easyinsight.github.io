@@ -72,6 +72,12 @@ public class Account {
     @Column(name="account_state")
     private int accountState;
 
+    @OneToMany(cascade=CascadeType.ALL)
+    @JoinTable(name="account_to_guest_user",
+        joinColumns = @JoinColumn(name="account_id", nullable = false),
+        inverseJoinColumns = @JoinColumn(name="guest_user_id", nullable = false))
+    private List<GuestUser> guestUsers = new ArrayList<GuestUser>();
+
     //private BillingParty billingParty;
 
     /*public BillingParty getBillingParty() {
@@ -214,5 +220,13 @@ public class Account {
 
     public void setBasicAuthAllowed(boolean basicAuthAllowed) {
         this.basicAuthAllowed = basicAuthAllowed;
+    }
+
+    public List<GuestUser> getGuestUsers() {
+        return guestUsers;
+    }
+
+    public void setGuestUsers(List<GuestUser> guestUsers) {
+        this.guestUsers = guestUsers;
     }
 }

@@ -3,9 +3,6 @@ package com.easyinsight.analysis;
 import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.dataset.LimitsResults;
-import com.easyinsight.webservice.ShortAnalysisDefinition;
-import com.easyinsight.webservice.ShortListDefinition;
-import com.easyinsight.webservice.WSAnalysisItem;
 
 import java.util.*;
 
@@ -63,21 +60,6 @@ public class WSListDefinition extends WSAnalysisDefinition {
         }
         columnList.addAll(getLimitFields());
         return new ArrayList<AnalysisItem>(columnList);
-    }
-
-    public ShortAnalysisDefinition createShortAnalysisDefinition() {
-        ShortAnalysisDefinition shortAnalysisDefinition = new ShortAnalysisDefinition();
-        ShortListDefinition shortListDefinition = new ShortListDefinition();
-        WSAnalysisItem[] wsColumns = new WSAnalysisItem[columns.size()];
-        for (int i = 0; i < columns.size(); i++) {
-            AnalysisItem analysisItem = columns.get(i);
-            WSAnalysisItem wsAnalysisItem = new WSAnalysisItem();
-            wsAnalysisItem.setKeyName(analysisItem.getKey().toKeyString());
-            wsColumns[i] = wsAnalysisItem;
-        }
-        shortListDefinition.setAnalysisItems(wsColumns);
-        shortAnalysisDefinition.setList(shortListDefinition);
-        return shortAnalysisDefinition;
     }
 
     public LimitsResults applyLimits(DataSet dataSet) {

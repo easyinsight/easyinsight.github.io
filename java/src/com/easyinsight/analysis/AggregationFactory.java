@@ -46,6 +46,9 @@ public class AggregationFactory {
                 aggregation = new NormalsAggregation(aggregationState, getAggregation(complexAnalysisMeasure.getWrappedAggregation()));
                 aggregationState.addAggregation(aggregation);
                 break;
+            case AggregationTypes.LAST_VALUE:
+                aggregation = new SumAggregation();
+                break;
             default:
                 throw new RuntimeException("unknown value " + value);
         }

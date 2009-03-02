@@ -9,7 +9,6 @@ import com.easyinsight.users.Credentials;
 import com.easyinsight.dataset.ColumnSegmentFactory;
 import com.easyinsight.dataset.PersistableDataSetForm;
 import com.easyinsight.dataset.DataSet;
-import com.easyinsight.storage.DataRetrievalManager;
 
 /**
  * User: James Boe
@@ -33,7 +32,6 @@ public class WesabeFeedDefinition extends FeedDefinition {
         DataSet dataSet = WesabeDataProvider.refresh(credentials);
         ColumnSegmentFactory columnSegmentFactory = new ColumnSegmentFactory();
         PersistableDataSetForm persistable = columnSegmentFactory.createPersistableForm(dataSet, getFields());
-        DataRetrievalManager.instance().storeData(getDataFeedID(), persistable);
         return new CredentialsResponse(true);
     }
 }

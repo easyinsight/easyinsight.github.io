@@ -121,12 +121,34 @@ public class AnalysisDateDimension extends AnalysisDimension {
             calendar.setTime(tempDate);
             switch (dateLevel) {
                 case AnalysisItemTypes.YEAR_LEVEL:
+                    calendar.set(Calendar.MONTH, 0);
                     calendar.set(Calendar.DAY_OF_YEAR, 1);
+                    calendar.set(Calendar.HOUR_OF_DAY, 0);
+                    calendar.set(Calendar.MINUTE, 0);
+                    calendar.set(Calendar.SECOND, 0);
+                    calendar.set(Calendar.MILLISECOND, 0);
                     break;
                 case AnalysisItemTypes.MONTH_LEVEL:
                     calendar.set(Calendar.DAY_OF_MONTH, 0);
+                    calendar.set(Calendar.HOUR_OF_DAY, 0);
+                    calendar.set(Calendar.MINUTE, 0);
+                    calendar.set(Calendar.SECOND, 0);
+                    calendar.set(Calendar.MILLISECOND, 0);
                     break;
                 case AnalysisItemTypes.DAY_LEVEL:
+                    calendar.set(Calendar.HOUR_OF_DAY, 0);
+                    calendar.set(Calendar.MINUTE, 0);
+                    calendar.set(Calendar.SECOND, 0);
+                    calendar.set(Calendar.MILLISECOND, 0);
+                    break;
+                case AnalysisItemTypes.HOUR_LEVEL:
+                    calendar.set(Calendar.MINUTE, 0);
+                    calendar.set(Calendar.SECOND, 0);
+                    calendar.set(Calendar.MILLISECOND, 0);
+                    break;
+                case AnalysisItemTypes.MINUTE_LEVEL:
+                    calendar.set(Calendar.SECOND, 0);
+                    calendar.set(Calendar.MILLISECOND, 0);
                     break;
                 default:
             }
@@ -158,4 +180,9 @@ public class AnalysisDateDimension extends AnalysisDimension {
         result = 31 * result + dateLevel;
         return result;
     }
+
+    /*@Override
+    public AggregateKey createAggregateKey() {
+        return new AggregateDateKey(getKey(), getType(), getDateLevel());
+    }*/
 }

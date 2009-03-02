@@ -340,7 +340,7 @@ public class DataStorage {
                 KeyMetadata keyMetadata = keys.get(key);
                 if (keyMetadata != null) {
                     if (keyMetadata.getType() == Value.DATE) {
-                        long time = dataRS.getDate(i++).getTime();
+                        long time = dataRS.getTimestamp(i++).getTime();
                         if (dataRS.wasNull()) {
                             row.addValue(key, new EmptyValue());
                         } else {
@@ -504,14 +504,14 @@ public class DataStorage {
                 else {
                     DateValue dateValue = (DateValue) transformedValue;
                     java.util.Date date = dateValue.getDate();
-                    java.sql.Date sqlDate = new java.sql.Date(date.getTime());
-                    insertStmt.setDate(i++, sqlDate);
+                    java.sql.Timestamp sqlDate = new java.sql.Timestamp(date.getTime());
+                    insertStmt.setTimestamp(i++, sqlDate);
                 }
             } else {
                 DateValue dateValue = (DateValue) value;
                 java.util.Date date = dateValue.getDate();
-                java.sql.Date sqlDate = new java.sql.Date(date.getTime());
-                insertStmt.setDate(i++, sqlDate);
+                java.sql.Timestamp sqlDate = new java.sql.Timestamp(date.getTime());
+                insertStmt.setTimestamp(i++, sqlDate);
             }
         } else if (keyMetadata.getType() == Value.NUMBER) {
             Double num = null;

@@ -3,7 +3,6 @@ package test.core;
 import junit.framework.TestCase;
 import com.easyinsight.database.Database;
 import com.easyinsight.analysis.*;
-import com.easyinsight.storage.DataRetrieval;
 
 import java.util.List;
 import java.util.ArrayList;
@@ -20,7 +19,6 @@ public class AnalysisDefinitionStorageTest extends TestCase {
 
     public void setUp() {
         Database.initialize();
-        new DataRetrieval();
     }
 
     public void testListDefinitions() {

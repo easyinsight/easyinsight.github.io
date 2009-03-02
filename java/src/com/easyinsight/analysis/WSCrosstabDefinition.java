@@ -1,7 +1,6 @@
 package com.easyinsight.analysis;
 
 import com.easyinsight.analysis.AnalysisItem;
-import com.easyinsight.webservice.ShortAnalysisDefinition;
 
 import java.util.List;
 import java.util.Collection;
@@ -61,9 +60,5 @@ public class WSCrosstabDefinition extends WSAnalysisDefinition {
         AnalysisItems.addAll(rows);
         AnalysisItems.addAll(measures);
         return AnalysisItems;
-    }
-
-    public ShortAnalysisDefinition createShortAnalysisDefinition() {
-        throw new UnsupportedOperationException();
     }
 }

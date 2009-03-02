@@ -123,7 +123,10 @@
             
             private function save():void {
             	var results:Array = Validator.validateAll(generalValidators);
-            	var detailValidated:Boolean = feedAdminDetail.validate();
+                var detailValidated:Boolean = true;
+                if (feedAdminDetail != null) {
+                    detailValidated = feedAdminDetail.validate();
+                }
             	if (results.length > 0 || !detailValidated) {
             		Alert.show("There are one or more errors which must be fixed before you can save this feed.");
             	} else {

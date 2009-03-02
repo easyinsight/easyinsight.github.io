@@ -64,4 +64,8 @@ public class GMailConnection {
         msg.setContent(message, "text/plain");
         Transport.send(msg);
     }
+
+    public static void main(String[] args) throws MessagingException, UnsupportedEncodingException {
+        new GMailConnection().sendSSLMessage("jboe99@gmail.com", "Testing...", "Blah", "Easy Insight");
+    }
 }

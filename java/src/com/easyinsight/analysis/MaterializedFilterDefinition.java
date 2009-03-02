@@ -2,6 +2,8 @@ package com.easyinsight.analysis;
 
 import com.easyinsight.core.Value;
 
+import java.util.List;
+
 /**
  * User: James Boe
  * Date: Jan 16, 2008
@@ -19,4 +21,12 @@ public abstract class MaterializedFilterDefinition {
     }
 
     public abstract boolean allows(Value value, Value preTransformValue);
+
+    public boolean requiresDataEarly() {
+        return false;
+    }
+
+    public void handleEarlyData(List<IRow> rows) {
+        throw new UnsupportedOperationException();
+    }
 }

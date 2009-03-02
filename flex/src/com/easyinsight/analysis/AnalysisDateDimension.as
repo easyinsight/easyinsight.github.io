@@ -33,6 +33,12 @@ package com.easyinsight.analysis
 				case AnalysisItemTypes.DAY_LEVEL:
 					dateFormatter.formatString = "MM/DD/YYYY";
 					break;
+                case AnalysisItemTypes.HOUR_LEVEL:
+                    dateFormatter.formatString = "MM/DD/YYYY HH:00";
+                    break;
+                case AnalysisItemTypes.MINUTE_LEVEL:
+                    dateFormatter.formatString = "MM/DD/YYYY HH:MM";
+                    break;
 			}
 			return dateFormatter;
 		}

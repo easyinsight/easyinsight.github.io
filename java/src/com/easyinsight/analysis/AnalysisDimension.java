@@ -2,6 +2,8 @@ package com.easyinsight.analysis;
 
 import com.easyinsight.core.Key;
 import com.easyinsight.core.Value;
+import com.easyinsight.core.NumericValue;
+import com.easyinsight.core.StringValue;
 import com.easyinsight.analysis.AnalysisItemResultMetadata;
 import com.easyinsight.analysis.AnalysisDimensionResultMetadata;
 
@@ -84,6 +86,14 @@ public class AnalysisDimension extends AnalysisItem {
     }
 
     public Value transformValue(Value value) {
+        if (value.type() == Value.STRING) {
+            StringValue stringValue = (StringValue) value;
+            try {
+                NumericValue newNumericValue = new NumericValue(Integer.parseInt(stringValue.toString()));
+                value = newNumericValue;
+            } catch (NumberFormatException e) {
+            }
+        }
         return value;
     }
 

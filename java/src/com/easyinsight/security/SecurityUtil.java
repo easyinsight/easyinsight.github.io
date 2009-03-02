@@ -150,6 +150,48 @@ public class SecurityUtil {
         }
     }
 
+    private static int getRoleForGroup(long userID, long groupID) {
+        Connection conn = Database.instance().getConnection();
+        try {
+            PreparedStatement existingLinkQuery = conn.prepareStatement("SELECT BINDING_TYPE FROM GROUP_TO_USER_JOIN WHERE " +
+                    "USER_ID = ? AND GROU_ID = ?");
+            existingLinkQuery.setLong(1, userID);
+            existingLinkQuery.setLong(2, groupID);
+            ResultSet rs = existingLinkQuery.executeQuery();
+            if (rs.next()) {
+                return rs.getInt(1);
+            } else {
+                return Integer.MAX_VALUE;
+            }
+        } catch (SQLException e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        } finally {
+            Database.instance().closeConnection(conn);
+        }
+    }
+
+    private static int getRoleForGoalTree(long userID, long goalTreeID) {
+        Connection conn = Database.instance().getConnection();
+        try {
+            PreparedStatement existingLinkQuery = conn.prepareStatement("SELECT USER_ROLE FROM USER_TO_GOAL_TREE WHERE " +
+                    "USER_ID = ? AND GOAL_TREE_ID = ?");
+            existingLinkQuery.setLong(1, userID);
+            existingLinkQuery.setLong(2, goalTreeID);
+            ResultSet rs = existingLinkQuery.executeQuery();
+            if (rs.next()) {
+                return rs.getInt(1);
+            } else {
+                return Integer.MAX_VALUE;
+            }
+        } catch (SQLException e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        } finally {
+            Database.instance().closeConnection(conn);
+        }
+    }
+
     public static void authorizeInsight(long insightID) {
         boolean publiclyVisible = false;
         boolean feedVisibility = false;
@@ -193,6 +235,28 @@ public class SecurityUtil {
 
     public static void authorizeFeedAccess(long dataFeed) {
         authorizeFeedAccess(dataFeed, false);
+    }
+
+    public static void authorizeGoalTree(long goalTreeID, int requiredRole) {
+        UserPrincipal userPrincipal = securityProvider.getUserPrincipal();
+        if (userPrincipal == null) {
+            throw new SecurityException();
+        }
+        int role = getRoleForGoalTree(userPrincipal.getUserID(), goalTreeID);
+        if (role > requiredRole) {
+            throw new SecurityException();
+        }
+    }
+
+    public static void authorizeGroup(long groupID, int requiredRole) {
+        UserPrincipal userPrincipal = securityProvider.getUserPrincipal();
+        if (userPrincipal == null) {
+            throw new SecurityException();
+        }
+        int role = getRoleForGroup(userPrincipal.getUserID(), groupID);
+        if (role > requiredRole) {
+            throw new SecurityException();
+        }
     }
 
     public static void authorizeFeedAccess(long dataFeed, boolean preview) {

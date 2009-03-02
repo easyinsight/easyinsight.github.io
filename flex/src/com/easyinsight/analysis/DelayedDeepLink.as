@@ -27,7 +27,7 @@ package com.easyinsight.analysis
 		}
 		
 		public function execute():void {
-			analysisService.openAnalysissIfPossible.send(analysisID);
+			analysisService.openAnalysisIfPossible.send(analysisID);
 		}
 
 		private function gotAnalysisDefinition(event:ResultEvent):void {

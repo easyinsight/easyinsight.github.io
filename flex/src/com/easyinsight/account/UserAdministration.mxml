@@ -10,6 +10,8 @@
 
 			[Bindable]
 			private var users:ArrayCollection;
+            [Bindable]
+			private var guestUsers:ArrayCollection;
 
             public function gotFocus():void {
                 usersGrid.addEventListener(RefreshAccountEvent.REFRESH_ACCOUNT, refreshAccount);
@@ -29,6 +31,10 @@
             	var newUserDialog:NewUserDialog = NewUserDialog(PopUpManager.createPopUp(this, NewUserDialog, true));
             	PopUpManager.centerPopUp(newUserDialog);
             }
+
+            private function addGuestUser():void {
+                
+            }
         ]]>
 	</mx:Script>
 	<mx:RemoteObject destination="login" id="userService">
@@ -37,7 +43,8 @@
 	<mx:VBox width="100%" height="100%" horizontalAlign="center">
         <mx:VBox>
 		<mx:HBox width="100%">
-			<mx:Button label="Add User..." click="addUser()"/>			
+			<mx:Button label="Add User" click="addUser()"/>
+			<mx:Button label="Add Guest User" click="addGuestUser()"/>
 		</mx:HBox>
         <mx:VBox id="accountSettingsBox" verticalGap="0" borderThickness="1" borderColor="#D42525" borderStyle="solid" dropShadowEnabled="true">
             <mx:Box width="100%" height="5" backgroundColor="#D42525" left="0" right="0"/>
@@ -45,6 +52,17 @@
                 <mx:Label text="Users" fontFamily="Tahoma" fontWeight="bold" fontSize="14"/>
             </mx:Box>
             <mx:DataGrid dataProvider="{users}" width="100%" id="usersGrid">
+                <mx:columns>
+                    <mx:DataGridColumn dataField="userName" headerText="User Name" headerRenderer="com.easyinsight.groups.CustomGroupHeader"/>
+                    <mx:DataGridColumn dataField="name" headerText="Full Name" headerRenderer="com.easyinsight.groups.CustomGroupHeader"/>
+                    <mx:DataGridColumn dataField="userName" width="100" headerText="" itemRenderer="{userButtonFactory}"/>
+                </mx:columns>
+            </mx:DataGrid>
+            <mx:Spacer height="40"/>
+            <mx:Box width="100%" backgroundColor="#F1EE8D" horizontalAlign="center">
+                <mx:Label text="Users" fontFamily="Tahoma" fontWeight="bold" fontSize="14"/>
+            </mx:Box>
+            <mx:DataGrid dataProvider="{users}" width="100%" id="guestUsersGrid">
                 <mx:columns>
                     <mx:DataGridColumn dataField="userName" headerText="User Name" headerRenderer="com.easyinsight.groups.CustomGroupHeader"/>
                     <mx:DataGridColumn dataField="name" headerText="Full Name" headerRenderer="com.easyinsight.groups.CustomGroupHeader"/>

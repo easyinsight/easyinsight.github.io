@@ -3,7 +3,6 @@ package test.core;
 import junit.framework.TestCase;
 import com.easyinsight.database.Database;
 import com.easyinsight.datafeeds.FeedRegistry;
-import com.easyinsight.storage.DataRetrieval;
 
 /**
  * User: James Boe
@@ -15,7 +14,6 @@ public class GroupTest extends TestCase {
     protected void setUp() throws Exception {
         Database.initialize();
         FeedRegistry.initialize();
-        new DataRetrieval();
     }
 
     public void testGroupStorage() {

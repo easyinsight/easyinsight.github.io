@@ -1,6 +1,5 @@
 package com.easyinsight.analysis;
 
-import com.easyinsight.webservice.ShortAnalysisDefinition;
 import com.easyinsight.analysis.AnalysisTypes;
 
 /**
@@ -31,9 +30,5 @@ public class WSMapDefinition extends WSGraphicDefinition {
 
     public String getDataFeedType() {
         return AnalysisTypes.MAP;
-    }
-
-    public ShortAnalysisDefinition createShortAnalysisDefinition() {
-        throw new UnsupportedOperationException();
     }
 }

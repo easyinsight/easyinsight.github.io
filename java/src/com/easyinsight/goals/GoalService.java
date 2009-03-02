@@ -5,8 +5,10 @@ import com.easyinsight.solutions.Solution;
 import com.easyinsight.solutions.SolutionService;
 import com.easyinsight.solutions.SolutionGoalTreeDescriptor;
 import com.easyinsight.security.SecurityUtil;
+import com.easyinsight.security.Roles;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.email.UserStub;
+import com.easyinsight.users.Account;
 
 import java.util.*;
 
@@ -21,6 +23,7 @@ public class GoalService {
     private GoalEvaluationStorage goalEvaluationStorage = new GoalEvaluationStorage();
 
     public GoalTree createGoalTree(GoalTree goalTree) {
+        SecurityUtil.authorizeAccountTier(Account.PROFESSIONAL);
         long userID = SecurityUtil.getUserID();
         try {
             UserStub userStub = new UserStub();
@@ -34,6 +37,7 @@ public class GoalService {
     }
 
     public void deleteGoalTree(long goalTreeID) {
+        SecurityUtil.authorizeGoalTree(goalTreeID, Roles.OWNER);
         try {
             goalStorage.deleteGoalTree(goalTreeID);
         } catch (Exception e) {
@@ -43,6 +47,7 @@ public class GoalService {
     }
 
     public GoalTree updateGoalTree(GoalTree goalTree) {
+        SecurityUtil.authorizeGoalTree(goalTree.getGoalTreeID(), Roles.OWNER);
         try {
             goalStorage.updateGoalTree(goalTree);
             return goalTree;
@@ -93,6 +98,7 @@ public class GoalService {
     }
 
     public GoalTree createDataTree(long goalTreeID, Date startDate, Date endDate) {
+        SecurityUtil.authorizeGoalTree(goalTreeID, Roles.SUBSCRIBER);
         try {
             if (endDate == null) {
                 Calendar cal = Calendar.getInstance();
@@ -111,6 +117,7 @@ public class GoalService {
     }
 
     public List<GoalValue> getGoalValues(final long goalTreeNodeID, final Date startDate, final Date endDate) {
+        // TODO: secure this
         try {
             return goalEvaluationStorage.getGoalValues(goalTreeNodeID, startDate, endDate);
         } catch (Exception e) {
@@ -135,6 +142,7 @@ public class GoalService {
     }
 
     public GoalTree getGoalTree(long goalTreeID) {
+        SecurityUtil.authorizeGoalTree(goalTreeID, Roles.SUBSCRIBER);
         try {
             return goalStorage.retrieveGoalTree(goalTreeID);
         } catch (Exception e) {
@@ -153,6 +161,7 @@ public class GoalService {
     }
 
     public void subscribeToGoal(long goalTreeNodeID) {
+        // TODO: secure this
         long userID = SecurityUtil.getUserID();
         try {
             goalStorage.addUserToGoal(userID, goalTreeNodeID);

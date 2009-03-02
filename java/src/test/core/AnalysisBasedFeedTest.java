@@ -4,7 +4,6 @@ import junit.framework.TestCase;
 import com.easyinsight.database.Database;
 import com.easyinsight.datafeeds.FeedRegistry;
 import com.easyinsight.datafeeds.AnalysisBasedFeedDefinition;
-import com.easyinsight.storage.DataRetrieval;
 import com.easyinsight.userupload.*;
 import com.easyinsight.analysis.*;
 import com.easyinsight.analysis.AnalysisDimension;
@@ -28,7 +27,6 @@ public class AnalysisBasedFeedTest extends TestCase {
     protected void setUp() throws Exception {
         Database.initialize();
         FeedRegistry.initialize();
-        new DataRetrieval();
     }
 
     public void testAnalysisBasedFeed() {

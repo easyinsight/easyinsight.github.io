@@ -6,7 +6,6 @@ import com.easyinsight.datafeeds.*;
 import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.core.Key;
 import com.easyinsight.core.DerivedKey;
-import com.easyinsight.storage.DataRetrieval;
 import com.easyinsight.database.Database;
 
 import java.sql.SQLException;
@@ -23,7 +22,6 @@ public class CompositeFeedTest extends TestCase {
     protected void setUp() throws Exception {
         Database.initialize();
         FeedRegistry.initialize();
-        new DataRetrieval();
     }
     
     public void testCompositeFeed() throws SQLException {

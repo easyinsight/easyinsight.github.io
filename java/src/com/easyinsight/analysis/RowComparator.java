@@ -20,7 +20,7 @@ public class RowComparator implements Comparator<IRow> {
     private int ascending;
 
     public RowComparator(AnalysisItem field, boolean ascending) {
-        this.field = new AggregateKey(field.getKey(), field.getType());
+        this.field = field.createAggregateKey();
         this.ascending = ascending ? 1 : -1;
     }
 

@@ -79,13 +79,32 @@ public class ListTransform {
                     Aggregation aggregation = (Aggregation) obj;
                     obj = aggregation.getValue();
                 }
-                row.addValue(new AggregateKey(column.getKey(), column.getType()), obj);
+                row.addValue(column.createAggregateKey(), obj);
             }
         }
-
         // for each post processor, run the values through again...
+        boolean postAggregationRequired = false;
         for (TemporalAnalysisMeasure temporalAnalysisMeasure : temporalAnalysisMeasures) {
-            dataSet = new TemporalChangeTransform(temporalAnalysisMeasure, allRequestedAnalysisItems).blah(dataSet);
+            if (temporalAnalysisMeasure.hasBeenApplied()) {
+                continue;
+            }
+            if (temporalAnalysisMeasure.requiresReAggregation()) {
+                postAggregationRequired = true;
+            }
+            TemporalChangeTransform transform = new TemporalChangeTransform(temporalAnalysisMeasure, allRequestedAnalysisItems);
+            dataSet = transform.blah(dataSet);
+            temporalAnalysisMeasure.triggerApplied(true);
+        }
+
+        // we may need to reaggregate...
+
+        if (postAggregationRequired) {
+            List<AnalysisItem> temporalRequestedItems = new ArrayList<AnalysisItem>(columns);
+            for (TemporalAnalysisMeasure temporalAnalysisMeasure : temporalAnalysisMeasures) {
+                temporalRequestedItems.remove(temporalAnalysisMeasure.getAnalysisDimension());
+            }
+            ListTransform listTransform = dataSet.listTransform(allRequestedAnalysisItems, temporalRequestedItems);
+            dataSet = listTransform.aggregate(allRequestedAnalysisItems, derivedItems, temporalRequestedItems);
         }
 
         if (derivedItems != null) {
@@ -94,7 +113,7 @@ public class ListTransform {
                     if (analysisItem.hasType(AnalysisItemTypes.CALCULATION)) {
                         AnalysisCalculation analysisCalculation = (AnalysisCalculation) analysisItem;
                         Value value = analysisCalculation.calculate(dataSet, row);
-                        row.addValue(new AggregateKey(analysisCalculation.getKey(), analysisCalculation.getType()), value);
+                        row.addValue(analysisCalculation.createAggregateKey(), value);
                     } else if (analysisItem.hasType(AnalysisItemTypes.HIERARCHY)) {
                         AnalysisHierarchyItem analysisHierarchy = (AnalysisHierarchyItem) analysisItem;
                         AggregateKey aggregateKey = new AggregateKey(analysisHierarchy.getHierarchyLevel().getAnalysisItem().getKey(), AnalysisItemTypes.DIMENSION);
@@ -103,9 +122,7 @@ public class ListTransform {
                 }
             }
         }
-
-        // now...
-        // measure filtering should be applied AFTER aggregation, not before...
+        
         return dataSet;
     }
 
@@ -115,10 +132,10 @@ public class ListTransform {
         for (IRow row : dataSet.getRows()) {
             int columnCount = 0;
             listRows[rowCount] = new ListRow();
-            Value[] values = new Value[row.getKeys().size()];
+            Value[] values = new Value[columns.size()];
             listRows[rowCount].setValues(values);
             for (AnalysisItem analysisItem : columns) {
-                Key key = new AggregateKey(analysisItem.getKey(), analysisItem.getType());
+                Key key = analysisItem.createAggregateKey();
                 listRows[rowCount].getValues()[columnCount] = row.getValue(key);
                 columnCount++;
             }

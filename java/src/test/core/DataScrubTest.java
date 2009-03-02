@@ -5,7 +5,6 @@ import com.easyinsight.analysis.*;
 import com.easyinsight.analysis.AnalysisDimension;
 import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.analysis.DataService;
-import com.easyinsight.storage.DataRetrieval;
 import com.easyinsight.datafeeds.FeedRegistry;
 import com.easyinsight.database.Database;
 import com.easyinsight.analysis.ListDataResults;
@@ -26,7 +25,6 @@ public class DataScrubTest extends TestCase {
     protected void setUp() throws Exception {
         Database.initialize();
         FeedRegistry.initialize();
-        new DataRetrieval();
     }
 
     public void testScrubbing() {

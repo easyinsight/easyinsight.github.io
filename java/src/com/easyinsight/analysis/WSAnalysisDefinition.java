@@ -3,7 +3,6 @@ package com.easyinsight.analysis;
 import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.dataset.LimitsResults;
-import com.easyinsight.webservice.ShortAnalysisDefinition;
 import com.easyinsight.core.Key;
 import com.easyinsight.scrubbing.DataScrub;
 
@@ -198,8 +197,6 @@ public abstract class WSAnalysisDefinition implements Serializable {
         }
         return new ArrayList<Key>(columnSet);
     }
-
-    public abstract ShortAnalysisDefinition createShortAnalysisDefinition();
 
     public LimitsResults applyLimits(DataSet dataSet) {
         return new LimitsResults(false, dataSet.getRows().size(), dataSet.getRows().size());

@@ -13,7 +13,7 @@ package com.easyinsight.filtering
 		public static const WEEK_TO_NOW:int = 7;
 		public static const MONTH_TO_NOW:int = 8;
 		public static const QUARTER_TO_NOW:int = 9;
-		public static const YEAR_TO_NOW:int = 10;
+		public static const YEAR_TO_NOW:int = 10;        
 		
 		public var interval:int;
 		

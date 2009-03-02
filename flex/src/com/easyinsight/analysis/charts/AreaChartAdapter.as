@@ -90,6 +90,12 @@ package com.easyinsight.analysis.charts
 						case AnalysisItemTypes.DAY_LEVEL:
 							dateAxis.dataUnits = "days";
 							break;
+                        case AnalysisItemTypes.HOUR_LEVEL:
+                            dateAxis.dataUnits = "hours";
+                            break;
+                        case AnalysisItemTypes.MINUTE_LEVEL:
+                            dateAxis.dataUnits = "minutes";
+                            break;
 					}					
 					dateAxis.displayName = dateDimension.display;
 					xAxis = dateAxis;

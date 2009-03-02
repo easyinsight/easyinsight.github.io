@@ -195,4 +195,8 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
     public List<AnalysisItem> getDerivedItems() {
         return new ArrayList<AnalysisItem>();
     }
+
+    public AggregateKey createAggregateKey() {
+        return new AggregateKey(getKey(), getType());
+    }
 }

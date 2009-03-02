@@ -13,14 +13,20 @@ import com.easyinsight.core.Key;
  */
 public abstract class TemporalAggregation implements ITemporalAggregation {
 
-    private AnalysisDateDimension sortDate;
+    private AnalysisDimension sortDate;
     private AnalysisMeasure wrappedMeasure;
     private int newAggregation;
+    private boolean requiresReAggregation;
 
-    protected TemporalAggregation(AnalysisDateDimension sortDate, AnalysisMeasure wrappedMeasure, int newAggregation) {
+    protected TemporalAggregation(AnalysisDimension sortDate, AnalysisMeasure wrappedMeasure, int newAggregation, boolean requiresReAggregation) {
         this.sortDate = sortDate;
         this.wrappedMeasure = wrappedMeasure;
         this.newAggregation = newAggregation;
+        this.requiresReAggregation = requiresReAggregation;
+    }
+
+    public boolean isRequiresReAggregation() {
+        return requiresReAggregation;
     }
 
     public AnalysisItem getSortItem() {

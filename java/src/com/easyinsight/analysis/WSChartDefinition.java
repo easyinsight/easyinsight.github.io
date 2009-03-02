@@ -1,6 +1,5 @@
 package com.easyinsight.analysis;
 
-import com.easyinsight.webservice.ShortAnalysisDefinition;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.dataset.LimitsResults;
 import com.easyinsight.analysis.AnalysisMeasure;
@@ -50,10 +49,6 @@ public class WSChartDefinition extends WSGraphicDefinition {
 
     public String getDataFeedType() {
         return "Chart";
-    }
-
-    public ShortAnalysisDefinition createShortAnalysisDefinition() {
-        throw new UnsupportedOperationException();
     }
 
     public LimitsResults applyLimits(DataSet dataSet) {

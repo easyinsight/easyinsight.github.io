@@ -86,7 +86,7 @@ public class DataSet implements Serializable {
         return rows.toString();
     }
 
-    private ListTransform listTransform(List<AnalysisItem> columns, List<AnalysisItem> allItems) {
+    public ListTransform listTransform(List<AnalysisItem> columns, List<AnalysisItem> allItems) {
         Collection<AnalysisDimension> ourDimensions = new ArrayList<AnalysisDimension>();
         for (AnalysisItem column : columns) {
             if (column.hasType(AnalysisItemTypes.DIMENSION)) {
@@ -103,13 +103,20 @@ public class DataSet implements Serializable {
         ListTransform listTransform = new ListTransform(allItems);
         for (IRow row : rows) {
             Map<Key, Value> compositeDimensionKey = new HashMap<Key, Value>();
-            for (AnalysisDimension dimension : ourDimensions) {                
-                compositeDimensionKey.put(dimension.getKey(), row.getValue(dimension.getKey()));
+            for (AnalysisDimension dimension : ourDimensions) {
+                Value dimensionValue = row.getValue(dimension.getKey());
+                if (dimensionValue == null || dimensionValue.type() == Value.EMPTY) {
+                    dimensionValue = row.getValue(dimension.createAggregateKey());
+                }
+                compositeDimensionKey.put(dimension.getKey(), dimensionValue);
             }
             for (AnalysisItem column : paredDownColumns) {
                 if (column.hasType(AnalysisItemTypes.MEASURE)) {
                     AnalysisMeasure measure = (AnalysisMeasure) column;
                     Value value = row.getValue(measure.getKey());
+                    if (value == null || value.type() == Value.EMPTY) {
+                        value = row.getValue(measure.createAggregateKey());
+                    }
                     if (value != null) {
                         listTransform.groupData(compositeDimensionKey, measure, value);
                     }
@@ -118,6 +125,9 @@ public class DataSet implements Serializable {
                     Value transformedValue = compositeDimensionKey.get(analysisDimension.getKey());
                     if (transformedValue == null) {
                         transformedValue = row.getValue(analysisDimension.getKey());
+                    }
+                    if (transformedValue == null || transformedValue.type() == Value.EMPTY) {
+                        transformedValue = row.getValue(analysisDimension.createAggregateKey());
                     }
                     if (transformedValue != null) {
                         listTransform.groupData(compositeDimensionKey, (AnalysisDimension) column, transformedValue);
@@ -246,7 +256,11 @@ public class DataSet implements Serializable {
                         filters = new ArrayList<MaterializedFilterDefinition>();
                         filterMap.put(filterDefinition.getField(), filters);
                     }
-                    filters.add(filterDefinition.materialize(insightRequestMetadata));
+                    MaterializedFilterDefinition materializedFilterDefinition = filterDefinition.materialize(insightRequestMetadata);
+                    filters.add(materializedFilterDefinition);
+                    if (materializedFilterDefinition.requiresDataEarly()) {
+                        materializedFilterDefinition.handleEarlyData(getRows());
+                    }
                 }
             }
         }
@@ -295,13 +309,18 @@ public class DataSet implements Serializable {
 
         for (IRow row : rows) {
             boolean rowValid = true;
-            Map<Key, Value> valueMap = new HashMap<Key, Value>(row.getValues());
+            //Map<Key, Value> valueMap = new HashMap<Key, Value>(row.getValues());
+            Map<Key, Value> valueMap;
+            if (analysisItems.isEmpty())
+                valueMap = new HashMap<Key, Value>(row.getValues());
+            else
+                valueMap = new HashMap<Key, Value>();
             for (AnalysisItem analysisItem : analysisItems) {
                 Value value = row.getValue(analysisItem.getKey());
                 Value preFilterValue = analysisItem.renameMeLater(value);
                 Value transformedValue = analysisItem.transformValue(value);
 
-                valueMap.put(analysisItem.getKey(), transformedValue);
+                valueMap.put(analysisItem.createAggregateKey(), transformedValue);
 
                 Collection<MaterializedFilterDefinition> filterDefinitions = filterMap.get(analysisItem);
                 if (filterDefinitions != null) {
@@ -338,7 +357,7 @@ public class DataSet implements Serializable {
         for (IRow row : rows) {
             boolean rowValid = true;
             for (AnalysisItem analysisItem : filterMap.keySet()) {
-                Value value = row.getValue(new AggregateKey(analysisItem.getKey(), analysisItem.getType()));
+                Value value = row.getValue(analysisItem.createAggregateKey());
                 Value preFilterValue = analysisItem.renameMeLater(value);
                 Value transformedValue = analysisItem.transformValue(value);
 

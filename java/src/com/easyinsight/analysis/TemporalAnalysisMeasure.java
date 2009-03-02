@@ -21,15 +21,17 @@ import java.util.ArrayList;
 public class TemporalAnalysisMeasure extends AnalysisMeasure {
     @OneToOne(cascade = CascadeType.MERGE)
     @JoinColumn(name="analysis_item_id")
-    private AnalysisDateDimension analysisDimension;
+    private AnalysisDimension analysisDimension;
     @Column(name="wrapped_aggregation")
     private int wrappedAggregation;
 
-    public AnalysisDateDimension getAnalysisDimension() {
+    private transient boolean applied;
+
+    public AnalysisDimension getAnalysisDimension() {
         return analysisDimension;
     }
 
-    public void setAnalysisDimension(AnalysisDateDimension analysisDimension) {
+    public void setAnalysisDimension(AnalysisDimension analysisDimension) {
         this.analysisDimension = analysisDimension;
     }
 
@@ -53,10 +55,23 @@ public class TemporalAnalysisMeasure extends AnalysisMeasure {
         List<AnalysisItem> items = new ArrayList<AnalysisItem>();
         items.add(new AnalysisMeasure(this.getKey(), wrappedAggregation));
         boolean foundDateDim = false;
-        for (AnalysisItem analysisItem : insightItems) {
-            if (analysisItem.getKey().equals(analysisDimension.getKey())) {
-                foundDateDim = true;
-                break;
+        if (getAnalysisDimension().hasType(AnalysisItemTypes.DATE_DIMENSION)) {
+            AnalysisDateDimension sortDim = (AnalysisDateDimension) getAnalysisDimension();
+            for (AnalysisItem analysisItem : insightItems) {
+                if (analysisItem.hasType(AnalysisItemTypes.DATE_DIMENSION)) {
+                    AnalysisDateDimension dimension = (AnalysisDateDimension) analysisItem;
+                    if (analysisItem.getKey().equals(getAnalysisDimension().getKey()) && dimension.getDateLevel() == sortDim.getDateLevel()) {
+                        foundDateDim = true;
+                        break;
+                    }
+                }
+            }
+        } else {
+            for (AnalysisItem analysisItem : insightItems) {
+                if (analysisItem.getKey().equals(getAnalysisDimension().getKey()) && analysisItem.hasType(AnalysisItemTypes.DIMENSION)) {
+                    foundDateDim = true;
+                    break;
+                }
             }
         }
         if (!foundDateDim) {
@@ -65,11 +80,30 @@ public class TemporalAnalysisMeasure extends AnalysisMeasure {
         return items;
     }
 
+    public boolean hasBeenApplied() {
+        return applied;
+    }
+
+    public void triggerApplied(boolean applied) {
+        this.applied = applied;
+    }
+
+    public boolean requiresReAggregation() {
+        if (getAggregation() == AggregationTypes.DELTA) {
+            return false;
+        } else {
+            return true;
+        }
+    }
+
     public ITemporalAggregation createAggregation() {
         ITemporalAggregation aggregation;
         switch (getAggregation()) {
             case AggregationTypes.DELTA:
-                aggregation = new DeltaTemporalAggregation(analysisDimension, new AnalysisMeasure(this.getKey(), wrappedAggregation), AggregationTypes.DELTA);
+                aggregation = new DeltaTemporalAggregation(analysisDimension, new AnalysisMeasure(this.getKey(), wrappedAggregation), AggregationTypes.DELTA, false);
+                break;
+            case AggregationTypes.LAST_VALUE:
+                aggregation = new LastValueTemporalAggregation(analysisDimension, new AnalysisMeasure(this.getKey(), wrappedAggregation), AggregationTypes.LAST_VALUE, true);
                 break;
             default:
                 throw new RuntimeException("Unknown temporal aggregation type " + getAggregation());

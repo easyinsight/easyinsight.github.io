@@ -35,6 +35,18 @@ public class ExportService {
     public static final String CURRENCY_STYLE = "currency";
     public static final String GENERIC_STYLE = "generic";
 
+    public void addOrUpdateSchedule(ReportSchedule reportSchedule) {
+        
+    }
+
+    public ReportSchedule getSchedule(long reportID) {
+        return null;
+    }
+
+    public void deleteSchedule(long scheduleID) {
+        
+    }
+
     public long exportToExcel(WSAnalysisDefinition analysisDefinition) {
         long exportID;
         try {

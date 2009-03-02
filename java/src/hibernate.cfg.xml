@@ -114,6 +114,7 @@
         <mapping class="com.easyinsight.core.DerivedKey"/>
         <mapping class="com.easyinsight.users.Account"/>
         <mapping class="com.easyinsight.users.SubscriptionLicense"/>
+        <mapping class="com.easyinsight.users.GuestUser"/>
     </session-factory>
 
 </hibernate-configuration>
