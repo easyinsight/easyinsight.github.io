@@ -227,12 +227,12 @@
         </copy>
     </target>
 
-    <target name="compileFlex" depends="compileJava">
-        <mxmlc file="${teamcity.build.checkoutDir}/flex/src/PrimaryWorkspace.mxml"
+    <target name="compileFlex" depends="compileJava, compileFlexOptimized, compileIntro">
+        <!-- <mxmlc file="${teamcity.build.checkoutDir}/flex/src/PrimaryWorkspace.mxml"
                output="${flex.path}/PrimaryWorkspace.swf"
                static-rsls="true">
             <load-config filename="${teamcity.build.checkoutDir}/flex/flex-config.xml"/>
-        </mxmlc>
+        </mxmlc> -->
         <mxmlc file="${teamcity.build.checkoutDir}/flex/src/com/easyinsight/dashboard/ListViewModule.mxml"
                output="${flex.path}/ListViewModule.swf"
                static-rsls="true">
@@ -246,8 +246,48 @@
         <mxmlc file="${teamcity.build.checkoutDir}/flex/src/EmbeddedInsight.mxml"
                output="${flex.path}/EmbeddedInsight.swf" static-rsls="true">
             <load-config filename="${teamcity.build.checkoutDir}/flex/embedded-insight.xml"/>
+        </mxmlc>
+    </target>
 
+    <target name="compileFlexOptimized">
+        <mxmlc file="../src/PrimaryWorkspace.mxml" output="${flex.path}/PrimaryWorkspace.swf"
+               static-rsls="false">
+            <load-config filename="${teamcity.build.checkoutDir}/flex/core-optimized-config.xml"/>
+            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
+                <url rsl-url="framework_3.2.0.3958.swz"/>
+                <url rsl-url="framework_3.2.0.3958.swf"/>
+            </runtime-shared-library-path>
 
+            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/datavisualization.swc">
+                <url rsl-url="datavisualization_3.2.0.3958.swz"/>
+                <url rsl-url="datavisualization_3.2.0.3958.swf"/>
+            </runtime-shared-library-path>
+
+            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
+                <url rsl-url="rpc_3.2.0.3958.swz"/>
+                <url rsl-url="rpc_3.2.0.3958.swf"/>
+            </runtime-shared-library-path>
+        </mxmlc>
+    </target>
+
+    <target name="compileIntro">
+        <mxmlc file="../src/IntroApplication.mxml" output="${flex.path}/IntroApplication.swf"
+               static-rsls="false">
+            <load-config filename="${teamcity.build.checkoutDir}/flex/intro-config.xml"/>
+            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
+                <url rsl-url="framework_3.2.0.3958.swz"/>
+                <url rsl-url="framework_3.2.0.3958.swf"/>
+            </runtime-shared-library-path>
+
+            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/datavisualization.swc">
+                <url rsl-url="datavisualization_3.2.0.3958.swz"/>
+                <url rsl-url="datavisualization_3.2.0.3958.swf"/>
+            </runtime-shared-library-path>
+
+            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
+                <url rsl-url="rpc_3.2.0.3958.swz"/>
+                <url rsl-url="rpc_3.2.0.3958.swf"/>
+            </runtime-shared-library-path>
         </mxmlc>
     </target>
 
