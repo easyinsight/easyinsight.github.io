@@ -57,7 +57,7 @@ public class AdminService {
                 }
             }
             MBeanServer platformServer = ManagementFactory.getPlatformMBeanServer();
-            FlexClientManagerControlMBean mb = JMX.newMBeanProxy(platformServer, new ObjectName("flex.runtime.DMS:type=MessageBroker.FlexClientManager,MessageBroker=MessageBroker1,id=FlexClientManager"),
+            FlexClientManagerControlMBean mb = JMX.newMBeanProxy(platformServer, new ObjectName("flex.runtime.app:type=MessageBroker.FlexClientManager,MessageBroker=MessageBroker1,id=FlexClientManager"),
                     FlexClientManagerControlMBean.class);
             healthInfo.setClientCount(mb.getFlexClientCount());
             return healthInfo;

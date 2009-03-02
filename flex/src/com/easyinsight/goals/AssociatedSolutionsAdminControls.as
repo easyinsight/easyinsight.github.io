@@ -45,7 +45,7 @@ public class AssociatedSolutionsAdminControls extends HBox{
     }
 
     private function downloadFiles():void {
-        var request:URLRequest = new URLRequest("/DMS/DownloadServlet");
+        var request:URLRequest = new URLRequest("/app/DownloadServlet");
         request.method = URLRequestMethod.GET;
         var vars:URLVariables = new URLVariables();
 

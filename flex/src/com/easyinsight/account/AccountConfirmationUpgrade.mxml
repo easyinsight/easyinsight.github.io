@@ -46,11 +46,15 @@ import com.easyinsight.framework.UserTransferObject;
                     break;
                 case Account.INDIVIDUAL:
                     this.accountReviewText = "Individual";
-                    this.accountReviewCost = "$10/month";
+                    this.accountReviewCost = "Free for current beta";
                     break;
                 case Account.PROFESSIONAL:
                     this.accountReviewText = "Professional";
-                    this.accountReviewCost = "$25/month";
+                    this.accountReviewCost = "Free for current beta";
+                    break;
+                case Account.ENTERPRISE:
+                    this.accountReviewText = "Enterprise";
+                    this.accountReviewCost = "Free for current beta";
                     break;
             }
         }

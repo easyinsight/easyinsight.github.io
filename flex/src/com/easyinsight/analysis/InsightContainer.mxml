@@ -43,11 +43,11 @@
             }  
             
             private function netvibes():void {
-            	flash.net.navigateToURL(new URLRequest("http://www.netvibes.com/subscribe.php?module=UWA&moduleUrl=http://localhost:8080/DMS/HelloWorld.html"));
+            	flash.net.navigateToURL(new URLRequest("http://www.netvibes.com/subscribe.php?module=UWA&moduleUrl=http://localhost:8080/app/HelloWorld.html"));
             }   
             
             private function igoogle():void {
-            	flash.net.navigateToURL(new URLRequest("http://www.google.com/ig/add?moduleurl=http%3A%2F%2Fwww.netvibes.com%2Fapi%2Fuwa%2Fcompile%2Fgoogle.php%3FmoduleUrl%3Dhttp%253A%252F%252Flocalhost%253A8080%252FDMS%252FHelloWorld.html"));
+            	flash.net.navigateToURL(new URLRequest("http://www.google.com/ig/add?moduleurl=http%3A%2F%2Fwww.netvibes.com%2Fapi%2Fuwa%2Fcompile%2Fgoogle.php%3FmoduleUrl%3Dhttp%253A%252F%252Flocalhost%253A8080%252Fapp%252FHelloWorld.html"));
             }   
 		]]>
 	</mx:Script>		

@@ -43,7 +43,7 @@ package com.easyinsight.solutions
 		
 		private function archiveCalled(event:MouseEvent):void {
 			//fileReference = new FileReference();
-			var request:URLRequest = new URLRequest("/DMS/DownloadServlet");
+			var request:URLRequest = new URLRequest("/app/DownloadServlet");
 			request.method = URLRequestMethod.GET;
 			var vars:URLVariables = new URLVariables();
 

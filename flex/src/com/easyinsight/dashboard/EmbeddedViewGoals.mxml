@@ -20,7 +20,7 @@
             private function onCreation():void {
                 //defConsumer.subtopic = String(definition.dataFeedID);
                 //defConsumer.subscribe();
-                moduleInfo = ModuleManager.getModule("/DMS/easyui-debug/MyGoalsModule.swf");
+                moduleInfo = ModuleManager.getModule("/app/easyui-debug/MyGoalsModule.swf");
                 moduleInfo.addEventListener(ModuleEvent.READY, moduleLoadHandler);
                 moduleInfo.addEventListener(ModuleEvent.ERROR, moduleFailureHandler);
                 moduleInfo.load();

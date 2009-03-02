@@ -10,16 +10,20 @@
 			
 			private function setup():void {
 				comparisons = new ArrayCollection( [
-					new AccountComparisonIcon("Drag and Drop Analysis", true, true, true),
-					new AccountComparisonIcon("Intuitive Charting", true, true, true),
-					new AccountComparisonIcon("Public Sharing", true, true, true),
-                    new AccountComparisonIcon("Yahoo Map Mashups", false, true, true),                        
-					new AccountComparisonIcon("Powerful APIs", false, true, true),
-                    new AccountComparisonIcon("Solution Access", false, false, true),
-                    new AccountComparisonIcon("Goal Trees", false, false, true),
-					new AccountComparisonRow("Maximum Users", "1", "1", "Unlimited"),
-					new AccountComparisonRow("Available Space", "100 KB", "Starting at 10 MB", "Starting at 1 GB"),
-					new AccountComparisonRow("Monthly Cost", "FREE!", "$10", "$75/user"),
+					new AccountComparisonIcon("Drag and Drop Analysis", true, true, true, true),
+					new AccountComparisonIcon("Intuitive Charting", true, true, true, true),
+					new AccountComparisonIcon("Share your Data", true, true, true, true),
+					new AccountComparisonIcon("Powerful APIs", false, true, true, true),
+                    new AccountComparisonIcon("Development Solutions", false, true, true, true),
+                    new AccountComparisonIcon("Database Solution", false, false, true, true),
+                    new AccountComparisonIcon("Template Goal Trees", false, true, true, true),
+                    new AccountComparisonIcon("Custom Goal Trees", false, false, true, true),
+                    new AccountComparisonIcon("Lean Templates", false, false, false, true),
+                    new AccountComparisonIcon("Six Sigma Templates", false, false, false, true),
+                    new AccountComparisonIcon("Balanced Scorecard Templates", false, false, false, true),
+					new AccountComparisonRow("Maximum Users", "1", "1", "Unlimited", "Unlimited"),
+					new AccountComparisonRow("Available Space", "1 MB", "20 MB", "200 MB", "1 GB"),
+					new AccountComparisonRow("Monthly Cost", "FREE!", "Free for beta phase", "Free for beta phase", "Free for beta phase"),
 					] );
 				trace(comparisons.length);
 			}
@@ -27,8 +31,9 @@
 	</mx:Script>
 	<mx:columns>
 		<mx:DataGridColumn headerText="" dataField="comparisonRowName" width="220"/>
-		<mx:DataGridColumn headerText="Free" dataField="free" width="120" itemRenderer="{new AccountComparisonFactory('free')}" headerRenderer="com.easyinsight.groups.CustomGroupHeader"/>
-		<mx:DataGridColumn headerText="Individual" dataField="individual" width="120" itemRenderer="{new AccountComparisonFactory('individual')}" headerRenderer="com.easyinsight.groups.CustomGroupHeader"/>
-		<mx:DataGridColumn headerText="Professional" dataField="professional" width="120"  itemRenderer="{new AccountComparisonFactory('professional')}" headerRenderer="com.easyinsight.groups.CustomGroupHeader"/>
+		<mx:DataGridColumn headerText="Free" dataField="free" width="160" itemRenderer="{new AccountComparisonFactory('free')}" headerRenderer="com.easyinsight.groups.CustomGroupHeader"/>
+		<mx:DataGridColumn headerText="Individual" dataField="individual" width="160" itemRenderer="{new AccountComparisonFactory('individual')}" headerRenderer="com.easyinsight.groups.CustomGroupHeader"/>
+		<mx:DataGridColumn headerText="Professional" dataField="professional" width="160"  itemRenderer="{new AccountComparisonFactory('professional')}" headerRenderer="com.easyinsight.groups.CustomGroupHeader"/>
+		<mx:DataGridColumn headerText="Enterprise" dataField="enterprise" width="160"  itemRenderer="{new AccountComparisonFactory('enterprise')}" headerRenderer="com.easyinsight.groups.CustomGroupHeader"/>
 	</mx:columns>
 </mx:DataGrid>

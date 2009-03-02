@@ -127,7 +127,7 @@ import com.easyinsight.solutions.Solution;
             this.nodeDescription = goalTreeNode.description;
             this.nodeTags = TagCloud.toString(goalTreeNode.tags);
             if (goalTreeNode.iconImage != null && "" != goalTreeNode.iconImage) {
-                this.iconPath = "/DMS/assets/icons/32x32/" + goalTreeNode.iconImage;
+                this.iconPath = "/app/assets/icons/32x32/" + goalTreeNode.iconImage;
                 this.iconFile = goalTreeNode.iconImage;
             }
             associatedSolutions = goalTreeNode.associatedSolutions;
@@ -265,7 +265,7 @@ import com.easyinsight.solutions.Solution;
         }
 
         private function iconSelected(event:IconSelectionEvent):void {
-            this.iconPath = "/DMS/assets/icons/32x32/" + event.icon.path;
+            this.iconPath = "/app/assets/icons/32x32/" + event.icon.path;
             this.iconFile = event.icon.path;
         }
 

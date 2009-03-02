@@ -28,7 +28,7 @@
           <root url="file://$MODULE_DIR$/java/web" relative="/" />
         </webroots>
         <building>
-          <setting name="EXPLODED_URL" value="file://$MODULE_DIR$/../apache-tomcat-6.0.14/webapps/DMS" />
+          <setting name="EXPLODED_URL" value="file://$MODULE_DIR$/../apache-tomcat-6.0.14/webapps/app" />
           <setting name="EXPLODED_ENABLED" value="true" />
           <setting name="JAR_URL" value="file://" />
           <setting name="JAR_ENABLED" value="false" />

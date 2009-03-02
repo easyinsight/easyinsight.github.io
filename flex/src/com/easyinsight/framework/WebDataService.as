@@ -31,7 +31,7 @@ package com.easyinsight.framework
 		{
 			this.analysisID = analysisID;
 			webService = new WebService();
-			webService.wsdl = "http://ec2-72-44-53-122.compute-1.amazonaws.com:8080/DMS/services/InsightAPIService?wsdl";
+			webService.wsdl = "http://ec2-72-44-53-122.compute-1.amazonaws.com:8080/app/services/InsightAPIService?wsdl";
 			webService.list.addEventListener(ResultEvent.RESULT, processListData);
 			webService.loadWSDL();
 		}

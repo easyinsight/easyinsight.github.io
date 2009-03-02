@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%" xmlns:account="com.easyinsight.account.*">
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%" xmlns:account="com.easyinsight.account.*" top="0">
 	<mx:Metadata>
 		[Event(name="accountCreated", type="com.easyinsight.account.AccountWizardResultEvent")]
 	</mx:Metadata>
@@ -13,13 +13,13 @@
         <mx:State name="ProAccountUserInfo">
 			<mx:RemoveChild target="{initialContent}"/>
 			<mx:AddChild relativeTo="{coreContent}">
-				<account:LoginCreation userDefined="postUserInfo(event)" previousPage="onPreviousPage(event)"/>
+				<account:ProfessionalAccountLoginCreation userDefined="postUserInfo(event)" previousPage="onPreviousPage(event)"/>
 			</mx:AddChild>
 		</mx:State>
-		<mx:State name="BillingSetup">
+        <mx:State name="TermsOfService">
 			<mx:RemoveChild target="{initialContent}"/>
 			<mx:AddChild relativeTo="{coreContent}">
-				<account:BillingInfoSetup billingInfoDefined="postBillingInfo(event)" previousPage="onPreviousPage(event)"/>
+				<account:TermsOfService tosAccepted="tosAccepted()" previousPage="onPreviousPage(event)"/>
 			</mx:AddChild>
 		</mx:State>
 		<mx:State name="ConfirmCreation">
@@ -73,6 +73,7 @@
 						accountType = Account.PROFESSIONAL;
 						break;
 					case "enterprise":
+                        accountType = Account.ENTERPRISE;
 						break;
             	}
 				this.account = new Account();
@@ -87,13 +88,18 @@
 			private function onPreviousPage(event:PreviousPageEvent):void {
 				switch (this.currentState) {
 					case "UserInfo":
+                    case "ProAccountUserInfo":
 						currentState = "";
 						break;
-					case "BillingSetup":
-						currentState = "UserInfo";
+					case "TermsOfService":
+                        if (account.accountType == Account.FREE || account.accountType == Account.INDIVIDUAL) {
+						    currentState = "UserInfo";
+                        } else {
+                            this.currentState = "ProAccountUserInfo";
+                        }
 						break;
 					case "ConfirmCreation":
-						currentState = "BillingSetup";
+						currentState = "TermsOfService";
 						break;					
 				}
 			}
@@ -101,20 +107,21 @@
 			private function postUserInfo(event:UserDefinitionEvent):void {
 				this.user = event.user;
                 this.password = event.password;
-				switch (account.accountType) {
+                currentState = "TermsOfService";
+				/*switch (account.accountType) {
 					case Account.FREE:
 						attemptAccountCreation();
 						break;						
 					case Account.INDIVIDUAL:						
 					case Account.PROFESSIONAL:
-						currentState = "BillingSetup";
+
 						break;
-				}
+				}*/
 			}
-			
-			private function postBillingInfo(event:BillingInfoDefinitionEvent):void {
-				currentState = "ConfirmCreation";
-			}
+
+            private function tosAccepted():void {
+                currentState = "ConfirmCreation";
+            }
 			
 			private function accountConfirmed(event:AccountCreationConfirmationEvent):void {
 				attemptAccountCreation();
@@ -127,9 +134,9 @@
 			private function createdAccount():void {
 				var resultID:int = creationService.createAccount.lastResult as int;
 
-                if (account.accountType == Account.FREE) {
+                /*if (account.accountType == Account.FREE) {
                     currentState = "FreeActivation";
-                } else {
+                } else {*/
                     account.accountID = resultID;
                     if (creationService.channelSet == null) {
                         creationService.channelSet = ServerConfig.getChannelSet(creationService.destination);
@@ -153,7 +160,7 @@
                             }
                         }
                     ));
-                }
+                //}
 				//creationService.authenticate.send(user.userName, user.password);
 				//dispatchEvent(new AccountWizardResultEvent(AccountWizardResultEvent.ACCOUNT_CREATED, account));
 				
@@ -170,17 +177,18 @@
 			}		
 		]]>
 	</mx:Script>
-	<mx:VBox width="100%" height="100%" id="coreContent" backgroundColor="#FFFFFF" backgroundAlpha=".7" paddingLeft="15" 
-		paddingTop="15" paddingBottom="15" paddingRight="15">
+	<mx:VBox width="100%" height="100%" id="coreContent" backgroundAlpha="1" paddingTop="0">
 		<mx:VBox width="100%" height="100%" id="initialContent" horizontalAlign="center">
+            <mx:Spacer height="15"/>
             <account:NoAccountText id="noAccountText" width="80%"/>
-			<mx:Spacer height="30"/>
+            <mx:TextArea fontWeight="bold" width="80%" borderStyle="none" editable="false" text="Important Beta Note: For the current phase of application testing, all account types are available without subscription fee. Once Easy Insight determines that the current phase is complete, account tiers other than Free will require subscription fees."/>
 			<mx:HBox width="80%" id="box1">
 				<mx:VBox width="50%" backgroundColor="#FFFFFF">
 					<mx:RadioButtonGroup id="accountTypeRadio" selectedValue="free"/>
 					<mx:RadioButton group="{accountTypeRadio}" fontSize="12" id="free" value="free" label="Free Account - The quick and free way to start" selected="true"/>
 					<mx:RadioButton group="{accountTypeRadio}" fontSize="12" id="individual" value="individual" label="Individual Account - More features, more space, more insight!"/>
 					<mx:RadioButton group="{accountTypeRadio}" fontSize="12" id="professional" value="professional" label="Professional Account - For the company ready to move ahead"/>
+                    <mx:RadioButton group="{accountTypeRadio}" fontSize="12" id="enterprise" value="enterprise" label="Enterprise Account - For the company ready to move ahead"/>
 				</mx:VBox>
 				<mx:Spacer width="40"/>
 				<mx:VBox verticalAlign="middle" height="100%">

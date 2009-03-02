@@ -10,11 +10,12 @@ package com.easyinsight.account
 		}
 		
 		public function AccountComparisonRow(label:String, free:String,
-			individual:String, professional:String) {
+			individual:String, professional:String, enterprise:String) {
 			this._comparisonRowName = label;
 			properties["free"] = free;
 			properties["individual"] = individual;
-			properties["professional"] = professional;						
+			properties["professional"] = professional;
+            properties["enterprise"] = enterprise;
 		}
 
 		public function getText(field:String):String {

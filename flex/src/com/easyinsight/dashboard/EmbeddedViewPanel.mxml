@@ -52,11 +52,11 @@
                     defConsumer.subtopic = String(definition.dataFeedID);
                     defConsumer.subscribe();
 	                if (definition.getDataFeedType() == "List") {
-	                	moduleInfo = ModuleManager.getModule("/DMS/easyui-debug/ListViewModule.swf");	
+	                	moduleInfo = ModuleManager.getModule("/app/easyui-debug/ListViewModule.swf");
 	                } else if (definition.getDataFeedType() == "Chart") {
-	                	moduleInfo = ModuleManager.getModule("/DMS/easyui-debug/ColumnChartViewModule.swf");
+	                	moduleInfo = ModuleManager.getModule("/app/easyui-debug/ColumnChartViewModule.swf");
 	                } else if (definition.getDataFeedType() == "Map") {
-	                	moduleInfo = ModuleManager.getModule("/DMS/easyui-debug/MapViewModule.swf");
+	                	moduleInfo = ModuleManager.getModule("/app/easyui-debug/MapViewModule.swf");
 	                }                         
 	                
 	                moduleInfo.addEventListener(ModuleEvent.READY, moduleLoadHandler);

@@ -23,7 +23,7 @@ public class IconButton extends VBox {
 
     override public function set data(val:Object):void {
         _iconFile = val as Icon;
-        if (imageField != null) imageField.load("/DMS/assets/icons/32x32/" + _iconFile.path);
+        if (imageField != null) imageField.load("/app/assets/icons/32x32/" + _iconFile.path);
         if (labelField != null) labelField.text = _iconFile.name;
     }
 

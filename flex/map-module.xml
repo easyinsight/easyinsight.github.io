@@ -12,8 +12,8 @@
             <path-element>/libs/ilog-elixir.swc</path-element>
             <path-element>/libs/ilog-elixir_rb.swc</path-element>
         </library-path>
-        <context-root>/DMS</context-root>
-       <!-- <services>C:\apache-tomcat-6.0.14\webapps\DMS\WEB-INF\flex\services-config.xml</services> -->
+        <context-root>/app</context-root>
+       <!-- <services>C:\apache-tomcat-6.0.14\webapps\app\WEB-INF\flex\services-config.xml</services> -->
         <services>/blazeds/services-config.xml</services>
         <source-path>
          <path-element>/src</path-element>

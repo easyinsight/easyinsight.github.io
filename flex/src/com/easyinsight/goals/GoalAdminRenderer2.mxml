@@ -125,7 +125,7 @@
                     rootNode = false;
                 }
                 _goalName = goalTreeNode.name;
-                goalIcon = "/DMS/assets/icons/16x16/" + goalTreeNode.iconImage;
+                goalIcon = "/app/assets/icons/16x16/" + goalTreeNode.iconImage;
                 goalIconExists = goalTreeNode.iconImage != null && goalTreeNode.iconImage != "";
                 nodeText = "This goal is derived from the results of its children.";
                 nodeText = "This goal is bound to a data source.";

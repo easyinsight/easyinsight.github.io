@@ -110,7 +110,7 @@ import mx.formatters.NumberFormatter;
             this.orgChartItem = value as OrgChartItem;
             goalTreeNodeData = orgChartItem.data as GoalTreeNodeData;
             if (goalTreeNodeData != null) {
-                goalIcon = "/DMS/assets/icons/32x32/" + goalTreeNodeData.iconImage;
+                goalIcon = "/app/assets/icons/32x32/" + goalTreeNodeData.iconImage;
                 if (goalTreeNodeData.currentValue != null) {
                     currentValue = numberFormatter.format(goalTreeNodeData.currentValue.value);
                     currentValueExists = true;

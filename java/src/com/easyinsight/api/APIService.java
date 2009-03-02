@@ -106,7 +106,7 @@ public class APIService {
                 if (serviceRS.next()) {
                     long serviceID = serviceRS.getLong(1);
                     if (serviceID > 0) {
-                        String wsdl = "http://localhost:8080/DMS/services/s" + feedID + "?wsdl";
+                        String wsdl = "http://www.easy-insight.com/app/services/s" + feedID + "?wsdl";
                         descriptor = new DynamicServiceDescriptor(feedID, name, wsdl, serviceID, getDynamicServiceDefinition(feedID, conn, session));
                     }
                 }
@@ -167,7 +167,7 @@ public class APIService {
                 long serviceID = rs.getLong(1);
                 long feedID = rs.getLong(2);
                 String feedName = rs.getString(3);
-                String wsdl = "http://localhost:8080/DMS/services/s" + feedID + "?wsdl";
+                String wsdl = "http://www.easy-insight.com/app/services/s" + feedID + "?wsdl";
                 dynamicServiceDescriptors.add(new DynamicServiceDescriptor(feedID, feedName, wsdl, serviceID, getDynamicServiceDefinition(feedID, conn, session)));
             }
         } catch (SQLException e) {

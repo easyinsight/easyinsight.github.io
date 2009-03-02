@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<mx:Box xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%" horizontalAlign="center">
+<mx:Box xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%" horizontalAlign="center"
+        paddingLeft="15"
+		paddingTop="15" paddingBottom="15" paddingRight="15">
 	<mx:Metadata>
 		[Event(name="accountCreationConfirmed", type="com.easyinsight.account.AccountCreationConfirmationEvent")]
 		[Event(name="previousPage", type="com.easyinsight.account.PreviousPageEvent")]
@@ -49,11 +51,15 @@ import com.easyinsight.framework.UserTransferObject;
                     break;
                 case Account.INDIVIDUAL:
                     this.accountReviewText = "Individual";
-                    this.accountReviewCost = "$10/month";
+                    this.accountReviewCost = "Free for current beta";
                     break;
                 case Account.PROFESSIONAL:
                     this.accountReviewText = "Professional";
-                    this.accountReviewCost = "$25/month";
+                    this.accountReviewCost = "Free for current beta";
+                    break;
+                case Account.ENTERPRISE:
+                    this.accountReviewText = "Enterprise";
+                    this.accountReviewCost = "Free for current beta";
                     break;
             }
         }

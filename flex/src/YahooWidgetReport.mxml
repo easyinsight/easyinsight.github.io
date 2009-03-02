@@ -171,7 +171,7 @@
 		<mx:method name="openAnalysisDefinition" result="gotAnalysisDefinition()"/>
 	</mx:RemoteObject>
 	<!--
-	<mx:WebService id="insightService" wsdl="http://ec2-72-44-53-122.compute-1.amazonaws.com:8080/DMS/services/InsightAPIService?wsdl">
+	<mx:WebService id="insightService" wsdl="http://ec2-72-44-53-122.compute-1.amazonaws.com:8080/app/services/InsightAPIService?wsdl">
 		<mx:operation name="list" result="gotList()"/>
 	</mx:WebService>
 	-->

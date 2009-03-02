@@ -12,7 +12,7 @@ import java.util.ArrayList;
 public class IconService {
     
     public List<Icon> getIcons() {
-        File iconFolder = new File("../webapps/DMS/assets/icons/32x32");
+        File iconFolder = new File("../webapps/app/assets/icons/32x32");
         File[] iconFiles = iconFolder.listFiles();
         List<Icon> icons = new ArrayList<Icon>(); 
         for (File iconFile : iconFiles) {

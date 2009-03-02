@@ -44,7 +44,7 @@ public class NewAccountInvitation {
             "I''ve invited you to join a group named {0} on Easy Insight. Click the link below to join the group.";
 
     public void sendFeedInvitation(String to, String feedName, String feedID, String from) {
-        String feedURL = "http://easy-insight.com/DMS/#feedID=" + feedID;
+        String feedURL = "http://www.easy-insight.com/app/#feedID=" + feedID;
         String body = MessageFormat.format(invitationText, feedName, feedURL);
         String subject = feedName + " (Easy Insight)";
         try {
@@ -74,7 +74,7 @@ public class NewAccountInvitation {
     public void sendAnalysisInvitation(String to, String analysisName, String analysisID, String messageText, String from) {
         // so we generate an invite ID...
         // 
-        String feedURL = "http://easy-insight.com/DMS/#analysisID=" + analysisID + "?inviteID=";
+        String feedURL = "http://www.easy-insight.com/app/#analysisID=" + analysisID + "?inviteID=";
         String body = MessageFormat.format(messageText, analysisName, feedURL);
         String subject = analysisName + " (Easy Insight)";
         try {

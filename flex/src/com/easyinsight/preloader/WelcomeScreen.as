@@ -14,12 +14,13 @@ public class WelcomeScreen extends Loader {
     private var moveRate:Number = 1;
     private var timeAutoClose:int = 500;
     public var ready:Boolean = false;
+    public var makeVisible:Boolean = false;
 
     public function WelcomeScreen()
     {
         this.visible = false;
-        this.alpha = 0;
-        
+        this.alpha = 1;
+
         timer = new Timer(1);
         timer.addEventListener(TimerEvent.TIMER, updateView);
         timer.start();
@@ -30,19 +31,29 @@ public class WelcomeScreen extends Loader {
 
     public function updateView(event:TimerEvent):void
     {
-        if (this.alpha < 1)    this.alpha = this.alpha + this.fadeInRate;
-        this.stage.addChild(this);
-        this.x = this.stage.stageWidth / 2 - this.width / 2;
-        this.y = this.stage.stageHeight / 2 - this.height / 2;
-        this.visible = true;
-        if (this.ready && timer.currentCount > this.timeAutoClose) closeScreen();
+        //if (this.alpha < 1)    this.alpha = this.alpha + this.fadeInRate;
+        //if (this.alpha < 1)    this.alpha = this.alpha + this.fadeInRate;
+        //if (!visible) {
+            this.stage.addChild(this);
+            this.x = this.stage.stageWidth / 2 - this.width / 2;
+            this.y = this.stage.stageHeight / 2 - this.height / 2;
+        if (!makeVisible) {
+            makeVisible = true;
+        } else {
+            this.visible = true;
+        }
+        //}
+        if (this.ready) closeScreen();
+       // if (this.ready && timer.currentCount > this.timeAutoClose) closeScreen();
     }
 
     public function closeScreen():void
     {
-        timer.removeEventListener(TimerEvent.TIMER, updateView);
+        timer.stop();
+        this.parent.removeChild(this);
+        /*timer.removeEventListener(TimerEvent.TIMER, updateView);
         timer.removeEventListener(MouseEvent.MOUSE_DOWN, mouseDown);
-        timer.addEventListener(TimerEvent.TIMER, closeScreenFade);
+        timer.addEventListener(TimerEvent.TIMER, closeScreenFade);*/
     }
 
     public function closeScreenFade(event:TimerEvent):void

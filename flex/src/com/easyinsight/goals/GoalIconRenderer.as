@@ -22,7 +22,7 @@ public class GoalIconRenderer extends HBox{
     override public function set data(val:Object):void {
         this._goalTreeNodeData = val as GoalTreeNodeData;
         if (this._goalTreeNodeData.iconImage != null) {
-            image.load("/DMS/assets/icons/16x16/" + this._goalTreeNodeData.iconImage);
+            image.load("/app/assets/icons/16x16/" + this._goalTreeNodeData.iconImage);
         }
     }
 

@@ -77,7 +77,7 @@
                     {
                         // Specify the endpoint for the upload operation
                         // Create an object to hold additional data fields
-                        var request:URLRequest = new URLRequest( "/DMS/UploadExample" );
+                        var request:URLRequest = new URLRequest( "/app/UploadExample" );
                         var vars:URLVariables = new URLVariables();
 
                         // Set the data fields as appropriate

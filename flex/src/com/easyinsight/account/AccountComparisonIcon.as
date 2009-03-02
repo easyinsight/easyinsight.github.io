@@ -17,12 +17,13 @@ package com.easyinsight.account
 		}
         
 		public function AccountComparisonIcon(label:String, free:Boolean,
-			individual:Boolean, professional:Boolean)
+			individual:Boolean, professional:Boolean, enterprise:Boolean)
 		{
 			this._comparisonRowName = label;
 			if (free) properties["free"] = listIcon;
 			if (individual) properties["individual"] = listIcon;
 			if (professional) properties["professional"] = listIcon;
+            if (enterprise) properties["enterprise"] = listIcon;
 		}
 		
 		public function getImage(key:String):Class {

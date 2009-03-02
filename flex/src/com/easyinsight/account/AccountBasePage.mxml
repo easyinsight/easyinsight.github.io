@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%" implements="com.easyinsight.listing.IPerspective"
-	xmlns:listing="com.easyinsight.listing.*" xmlns:account="com.easyinsight.account.*" backgroundColor="0xFFFFFF" creationComplete="setupListeners()">
+	xmlns:listing="com.easyinsight.listing.*" xmlns:account="com.easyinsight.account.*" backgroundColor="0xFFFFFF" creationComplete="setupListeners()" paddingTop="0" top="0"
+        verticalGap="0">
 	<mx:states>
 		<mx:State name="loggedIn">
 			<mx:RemoveChild target="{accountWizard}"/>
@@ -82,7 +83,7 @@
 		<mx:method name="retrieveAccount" result="gotAccountInfo()"/>
 	</mx:RemoteObject>
     <mx:Box width="100%" height="5" backgroundColor="#D42525" left="0" right="0"/>
-	<mx:VBox id="coreContent" width="100%" height="100%">
+	<mx:VBox id="coreContent" width="100%" height="100%" paddingTop="0" top="0">
 		<account:AccountCreationWizard id="accountWizard" accountCreated="accountCreated(event)"/>		
 	</mx:VBox>
 </mx:VBox>

@@ -1,4 +1,5 @@
 package com.easyinsight.account {
+import flash.events.Event;
 public class TermsOfServiceEvent extends Event{
 
     public static const TERMS_OF_SERVICE_ACCEPTED:String = "tosAccepted";
@@ -7,6 +8,8 @@ public class TermsOfServiceEvent extends Event{
         super(TERMS_OF_SERVICE_ACCEPTED);
     }
 
-
+    override public function clone():Event {
+        return new TermsOfServiceEvent();
+    }
 }
 }

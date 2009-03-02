@@ -101,7 +101,7 @@ public class AppWatchdog {
             while ((ze = zin.getNextEntry()) != null) {
                 System.out.println("Unzipping " + ze.getName());
                 if (ze.isDirectory()) {
-                    File directory = new File("../webapps/DMS/" + ze.getName());
+                    File directory = new File("../webapps/app/" + ze.getName());
                     if (!directory.exists()) {
                         if (!directory.mkdir()) {
                             throw new RuntimeException("couldn't create directory " + directory.getAbsolutePath());
@@ -109,7 +109,7 @@ public class AppWatchdog {
                     }
                 } else {
                     byte[] buffer = new byte[8192];
-                    FileOutputStream fout = new FileOutputStream("../webapps/DMS/" + ze.getName());
+                    FileOutputStream fout = new FileOutputStream("../webapps/app/" + ze.getName());
                     BufferedOutputStream bufOS = new BufferedOutputStream(fout, 8192);
                     int nBytes;
                     while ((nBytes = zin.read(buffer)) != -1) {

@@ -54,19 +54,19 @@
                 loader.addEventListener(Event.COMPLETE, loadHandler);
                 loader.load(new URLRequest("http://ec2-67-202-40-33.compute-1.amazonaws.com/crossdomain.xml"));*/
 	                if (definition.getDataFeedType() == "List") {
-	                	moduleInfo = ModuleManager.getModule("http://ec2-67-202-40-33.compute-1.amazonaws.com/DMS/easyui-debug/com/easyinsight/dashboard/ListViewModule.swf");	
+	                	moduleInfo = ModuleManager.getModule("http://ec2-67-202-40-33.compute-1.amazonaws.com/app/easyui-debug/com/easyinsight/dashboard/ListViewModule.swf");
 	                } else if (definition.getDataFeedType() == "Chart") {
-	                	moduleInfo = ModuleManager.getModule("http://ec2-67-202-40-33.compute-1.amazonaws.com/DMS/easyui-debug/com/easyinsight/dashboard/ChartViewModule.swf");
+	                	moduleInfo = ModuleManager.getModule("http://ec2-67-202-40-33.compute-1.amazonaws.com/app/easyui-debug/com/easyinsight/dashboard/ChartViewModule.swf");
 	                } else if (definition.getDataFeedType() == "Map") {
-	                	moduleInfo = ModuleManager.getModule("http://ec2-67-202-40-33.compute-1.amazonaws.com/DMS/easyui-debug/com/easyinsight/dashboard/MapViewModule.swf");
+	                	moduleInfo = ModuleManager.getModule("http://ec2-67-202-40-33.compute-1.amazonaws.com/app/easyui-debug/com/easyinsight/dashboard/MapViewModule.swf");
 	                } 
 	                /*   
 	                if (definition.getDataFeedType() == "List") {
-	                	moduleInfo = ModuleManager.getModule("http://localhost:8080/DMS/easyui-debug/com/easyinsight/dashboard/ListViewModule.swf");	
+	                	moduleInfo = ModuleManager.getModule("http://localhost:8080/app/easyui-debug/com/easyinsight/dashboard/ListViewModule.swf");
 	                } else if (definition.getDataFeedType() == "Chart") {
-	                	moduleInfo = ModuleManager.getModule("http://localhost:8080/DMS/easyui-debug/com/easyinsight/dashboard/ChartViewModule.swf");
+	                	moduleInfo = ModuleManager.getModule("http://localhost:8080/app/easyui-debug/com/easyinsight/dashboard/ChartViewModule.swf");
 	                } else if (definition.getDataFeedType() == "Map") {
-	                	moduleInfo = ModuleManager.getModule("http://localhost:8080/DMS/easyui-debug/com/easyinsight/dashboard/MapViewModule.swf");
+	                	moduleInfo = ModuleManager.getModule("http://localhost:8080/app/easyui-debug/com/easyinsight/dashboard/MapViewModule.swf");
 	                } */                          
 	                
 	                moduleInfo.addEventListener(ModuleEvent.READY, moduleLoadHandler);

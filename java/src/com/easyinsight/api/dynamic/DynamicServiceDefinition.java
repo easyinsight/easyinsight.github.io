@@ -161,7 +161,7 @@ public class DynamicServiceDefinition {
 
         String path = new File("").getAbsolutePath();
         path = path.substring(0, path.length() - 4);
-        path = path + "/webapps/DMS/WEB-INF/classes";
+        path = path + "/webapps/app/WEB-INF/classes";
         String classpath = System.getProperty("java.class.path");
         String[] elements = classpath.split(File.pathSeparator);
         for (String element : elements) {

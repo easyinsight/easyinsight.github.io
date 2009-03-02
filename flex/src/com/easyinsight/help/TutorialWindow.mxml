@@ -44,7 +44,7 @@ import mx.managers.PopUpManager;
         }
 
         private function loadModule():void {
-            moduleInfo = ModuleManager.getModule("/DMS/easyui-debug/TutorialModule.swf");
+            moduleInfo = ModuleManager.getModule("/app/easyui-debug/TutorialModule.swf");
             moduleInfo.addEventListener(ModuleEvent.READY, moduleLoadHandler);
             moduleInfo.load();
         }

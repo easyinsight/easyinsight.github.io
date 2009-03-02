@@ -50,7 +50,7 @@
 			}
 			
 			private function updateURL():void {
-				url = "<object width=\""+canvasWidth+"\" height=\""+canvasHeight+"\"><param name=\"movie\" value=\"EmbeddedInsight.swf\" /><param name=\"quality\" value=\"high\" /><param name=\"bgcolor\" value=\"#869ca7\" /><param name=\"allowScriptAccess\" value=\"always\" /><param name=\"flashvars\" value=\"analysisID="+_analysisID+"\"/><embed src=\"http://ec2-67-202-40-33.compute-1.amazonaws.com/DMS/easyui-debug/EmbeddedInsight.swf\" quality=\"high\" bgcolor=\"#869ca7\" width=\""+canvasWidth+"\" height=\""+canvasHeight+"\" name=\"EmbeddedInsight\" align=\"middle\" play=\"true\" loop=\"false\" quality=\"high\" flashvars=\"analysisID=8\" allowScriptAccess=\"always\" type=\"application/x-shockwave-flash\" pluginspage=\"http://www.adobe.com/go/getflashplayer\"></embed></object>";
+				url = "<object width=\""+canvasWidth+"\" height=\""+canvasHeight+"\"><param name=\"movie\" value=\"EmbeddedInsight.swf\" /><param name=\"quality\" value=\"high\" /><param name=\"bgcolor\" value=\"#869ca7\" /><param name=\"allowScriptAccess\" value=\"always\" /><param name=\"flashvars\" value=\"analysisID="+_analysisID+"\"/><embed src=\"http://ec2-67-202-40-33.compute-1.amazonaws.com/app/easyui-debug/EmbeddedInsight.swf\" quality=\"high\" bgcolor=\"#869ca7\" width=\""+canvasWidth+"\" height=\""+canvasHeight+"\" name=\"EmbeddedInsight\" align=\"middle\" play=\"true\" loop=\"false\" quality=\"high\" flashvars=\"analysisID=8\" allowScriptAccess=\"always\" type=\"application/x-shockwave-flash\" pluginspage=\"http://www.adobe.com/go/getflashplayer\"></embed></object>";
 			}
 			
 			private function changeSize():void {
