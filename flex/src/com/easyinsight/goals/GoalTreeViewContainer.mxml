@@ -27,6 +27,7 @@ import mx.managers.PopUpManager;
         private function setup():void {
             addEventListener(ModelessWindowEvent.WINDOW_REMOVED, onWindowRemove);
             addEventListener(ModelessWindowEvent.WINDOW_ADDED, onWindowAdd);
+            _goalTreeNodes = goalTree.rootNode;
         }
 
         private function onWindowRemove(event:ModelessWindowEvent):void {
@@ -45,7 +46,7 @@ import mx.managers.PopUpManager;
 
         override protected function commitProperties():void {
             //goalTree = goalService.createDataTree.lastResult as GoalTree;
-            _goalTreeNodes = goalTree.rootNode;
+
             //myOrgChart.dataProvider = _goalTreeNodes;
         }
 

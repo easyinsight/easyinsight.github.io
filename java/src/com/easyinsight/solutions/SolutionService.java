@@ -22,6 +22,7 @@ import com.easyinsight.email.UserStub;
 
 import java.util.*;
 import java.sql.*;
+import java.io.ByteArrayInputStream;
 
 import org.hibernate.Session;
 
@@ -40,11 +41,14 @@ public class SolutionService {
         Connection conn = Database.instance().getConnection();
         try {
             PreparedStatement updateArchiveStmt = conn.prepareStatement("UPDATE SOLUTION SET ARCHIVE = ?, SOLUTION_ARCHIVE_NAME = ? WHERE SOLUTION_ID = ?");
-            updateArchiveStmt.setBytes(1, archive);
+            ByteArrayInputStream bais = new ByteArrayInputStream(archive);
+            
+            updateArchiveStmt.setBinaryStream(1, bais, archive.length);
+            //updateArchiveStmt.setBytes(1, archive);
             updateArchiveStmt.setString(2, solutionArchiveName);
             updateArchiveStmt.setLong(3, solutionID);
             updateArchiveStmt.executeUpdate();
-        } catch (Exception e) {
+        } catch (Throwable e) {
             LogClass.error(e);
             throw new RuntimeException(e);
         } finally {

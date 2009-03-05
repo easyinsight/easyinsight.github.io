@@ -204,6 +204,16 @@
           <option name="PRECISION" value="0" />
           <option name="NULLABLE" value="false" />
         </FIELD_ELEMENT>
+        <FIELD_ELEMENT>
+          <option name="NAME" value="group_id" />
+          <option name="SQL_TYPE" value="bigint" />
+          <option name="JDBC_TYPE" value="-5" />
+          <option name="TYPE" />
+          <option name="PRIMARY" value="false" />
+          <option name="LENGTH" value="11" />
+          <option name="PRECISION" value="0" />
+          <option name="NULLABLE" value="true" />
+        </FIELD_ELEMENT>
       </TABLE_DATA>
       <TABLE_DATA>
         <option name="NAME" value="account_activation" />
@@ -5216,6 +5226,16 @@
           <option name="PRECISION" value="0" />
           <option name="NULLABLE" value="false" />
         </FIELD_ELEMENT>
+        <FIELD_ELEMENT>
+          <option name="NAME" value="state" />
+          <option name="SQL_TYPE" value="int" />
+          <option name="JDBC_TYPE" value="4" />
+          <option name="TYPE" />
+          <option name="PRIMARY" value="false" />
+          <option name="LENGTH" value="11" />
+          <option name="PRECISION" value="0" />
+          <option name="NULLABLE" value="false" />
+        </FIELD_ELEMENT>
         <RELATIONSHIP_ELEMENT>
           <option name="RELATION_NAME" value="guest_user_ibfk1" />
           <option name="TARGET_TABLE" value="user" />
@@ -8079,6 +8099,19 @@
     <option name="MAXIMUM_HEAP_SIZE" value="128" />
   </component>
   <component name="Encoding" useUTFGuessing="true" native2AsciiForPropertiesFiles="false" />
+  <component name="FacetAutodetectingManager">
+    <autodetection-disabled>
+      <facet-type id="web">
+        <modules>
+          <module name="website">
+            <files>
+              <file url="file://$PROJECT_DIR$/website/web/WEB-INF/web.xml" />
+            </files>
+          </module>
+        </modules>
+      </facet-type>
+    </autodetection-disabled>
+  </component>
   <component name="IdProvider" IDEtalkID="9CCFD791CF041E312FAD5F67D24DB07B" />
   <component name="InspectionProjectProfileManager">
     <option name="PROJECT_PROFILE" value="Project Default" />
@@ -8141,6 +8174,7 @@
       <module fileurl="file://$PROJECT_DIR$/solutions/jdbc/flex/jdbcflex.iml" filepath="$PROJECT_DIR$/solutions/jdbc/flex/jdbcflex.iml" />
       <module fileurl="file://$PROJECT_DIR$/solutions/jira/jira.iml" filepath="$PROJECT_DIR$/solutions/jira/jira.iml" />
       <module fileurl="file://$PROJECT_DIR$/solutions/tcplugin/tcplugin.iml" filepath="$PROJECT_DIR$/solutions/tcplugin/tcplugin.iml" />
+      <module fileurl="file://$PROJECT_DIR$/website/website.iml" filepath="$PROJECT_DIR$/website/website.iml" />
     </modules>
   </component>
   <component name="ProjectRootManager" version="2" languageLevel="JDK_1_5" assert-keyword="true" jdk-15="true" project-jdk-name="1.6" project-jdk-type="JavaSDK">

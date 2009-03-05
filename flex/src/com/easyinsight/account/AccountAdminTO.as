@@ -3,8 +3,8 @@ package com.easyinsight.account
 	import mx.collections.ArrayCollection;
 	
 	[Bindable]
-	[RemoteClass(alias="com.easyinsight.users.AccountTransferObject")]
-	public class Account
+	[RemoteClass(alias="com.easyinsight.users.AccountAdminTO")]
+	public class AccountAdminTO
 	{
         public static const FREE:int = 1;
         public static const INDIVIDUAL:int = 2;
@@ -24,9 +24,12 @@ package com.easyinsight.account
 		public var accountID:int;
 		public var licenses:ArrayCollection;
         public var maxUsers:int;
+        public var adminUsers:ArrayCollection;
+        public var consultants:ArrayCollection;
         public var maxSize:int;
         public var name:String;
         public var accountState:int;
+        public var groupID:int;
         public var uncheckedAPIEnabled:Boolean;
         public var validatedAPIEnabled:Boolean;
         public var uncheckedAPIAllowed:Boolean;
@@ -34,7 +37,7 @@ package com.easyinsight.account
         public var dynamicAPIAllowed:Boolean;
         public var basicAuthAllowed:Boolean;
 		
-		public function Account()
+		public function AccountAdminTO()
 		{
 		}
 

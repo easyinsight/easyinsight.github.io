@@ -22,7 +22,7 @@ public class DBTask extends TimerTask {
             EIConfiguration eiConfiguration = getEIConfiguration();
             DBConfiguration dbConfiguration = getDBConfiguration();
             if (eiConfiguration != null && dbConfiguration != null) {
-                URL url = new URL("http://" + this.eiHost + "/DMS/services/ValidatedPublishBasic");
+                URL url = new URL("http://" + this.eiHost + "/app/services/ValidatedPublishBasic");
                 BasicAuthValidatedPublish service = new BasicAuthValidatingPublishServiceServiceLocator().getBasicAuthValidatingPublishServicePort(url);
                 ((BasicAuthValidatingPublishServiceServiceSoapBindingStub)service).setUsername(eiConfiguration.getUserName());
                 ((BasicAuthValidatingPublishServiceServiceSoapBindingStub)service).setPassword(eiConfiguration.getPassword());

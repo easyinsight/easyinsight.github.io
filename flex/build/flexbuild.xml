@@ -243,6 +243,13 @@
         </mxmlc>
     </target>
 
+    <target name="compileAccountAdmin">
+        <mxmlc file="../src/AccountManagement.mxml" output="${deployment.path}/AccountManagement.swf"
+               static-rsls="true">
+            <load-config filename="../account-administration.xml"/>
+        </mxmlc>
+    </target>
+
     <target name="compileRIA">
         <mxmlc file="../src/PrimaryWorkspace.mxml" output="${deployment.path}/PrimaryWorkspace.swf"
                static-rsls="true">

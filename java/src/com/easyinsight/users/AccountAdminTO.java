@@ -1,18 +1,15 @@
 package com.easyinsight.users;
 
-import org.hibernate.Session;
-
 import java.util.List;
 import java.util.ArrayList;
 
-import com.easyinsight.util.RandomTextGenerator;
 
 /**
  * User: James Boe
  * Date: Jun 24, 2008
  * Time: 12:20:16 PM
  */
-public class AccountTransferObject {
+public class AccountAdminTO {
     private int accountType;
     private long accountID;
     private List<SubscriptionLicense> licenses = new ArrayList<SubscriptionLicense>();
@@ -20,12 +17,31 @@ public class AccountTransferObject {
     private long maxSize;
     private String name;
     private int accountState;
+    private long groupID;
+    private List<UserTransferObject> adminUsers = new ArrayList<UserTransferObject>();
     private boolean uncheckedAPIEnabled;
     private boolean validatedAPIEnabled;
     private boolean uncheckedAPIAllowed;
     private boolean validatedAPIAllowed;
     private boolean dynamicAPIAllowed;
     private boolean basicAuthAllowed;
+    private List<ConsultantTO> consultants = new ArrayList<ConsultantTO>();
+
+    public List<UserTransferObject> getAdminUsers() {
+        return adminUsers;
+    }
+
+    public void setAdminUsers(List<UserTransferObject> adminUsers) {
+        this.adminUsers = adminUsers;
+    }
+
+    public long getGroupID() {
+        return groupID;
+    }
+
+    public void setGroupID(long groupID) {
+        this.groupID = groupID;
+    }
 
     public boolean isUncheckedAPIEnabled() {
         return uncheckedAPIEnabled;
@@ -136,12 +152,27 @@ public class AccountTransferObject {
         account.setAccountType(accountType);
         account.setLicenses(licenses);
         account.setAccountID(accountID);
+        if (groupID != 0) {
+            account.setGroupID(groupID);
+        }
         account.setName(name);
+        account.setMaxSize(maxSize);
+        account.setMaxUsers(maxUsers);
+        account.setAccountState(accountState);
         account.setBasicAuthAllowed(basicAuthAllowed);
         account.setUncheckedAPIAllowed(uncheckedAPIAllowed);
         account.setUncheckedAPIEnabled(uncheckedAPIEnabled);
         account.setValidatedAPIAllowed(validatedAPIAllowed);
         account.setValidatedAPIEnabled(validatedAPIEnabled);
+        account.setDynamicAPIAllowed(dynamicAPIAllowed);
         return account;
+    }
+
+    public List<ConsultantTO> getConsultants() {
+        return consultants;
+    }
+
+    public void setConsultants(List<ConsultantTO> consultants) {
+        this.consultants = consultants;
     }
 }

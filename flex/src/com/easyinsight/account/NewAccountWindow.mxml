@@ -1,0 +1,66 @@
+<?xml version="1.0" ?>
+<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml">
+    <mx:Script><![CDATA[
+        import com.easyinsight.framework.UserTransferObject;
+import mx.collections.ArrayCollection;
+        import mx.managers.PopUpManager;
+
+        private function create():void {
+            var user:UserTransferObject = new UserTransferObject();
+            user.accountAdmin = true;
+            user.dataSourceCreator = true;
+            user.insightCreator = true;
+            user.userName = userNameInput.text;
+            user.email = emailInput.text;
+            user.name = fullNameInput.text;
+            var account:Account = new Account();
+            account.name = accountNameInput.text;
+            account.accountType = accountTypeComboBox.selectedIndex + 1;
+            userService.eiNewBizAccount.send(account, user);
+        }
+
+        private function created():void {
+            dispatchEvent(new RefreshAccountsListEvent());
+            PopUpManager.removePopUp(this);
+        }
+        ]]></mx:Script>
+    <mx:RemoteObject destination="login" id="userService">
+        <mx:method name="eiPrepareBizAccount" result="created()"/>
+        <mx:method name="eiNewBizAccount" result="created()"/>
+    </mx:RemoteObject>
+    <mx:VBox styleName="TitleWindowContents">
+        <mx:Form>
+            <mx:FormItem label="Account Name:">
+                <mx:TextInput id="accountNameInput"/>
+            </mx:FormItem>
+            <mx:FormItem label="Account Type:">
+                <mx:ComboBox id="accountTypeComboBox">
+                    <mx:dataProvider>
+                        <mx:ArrayCollection>
+                            <mx:Array>
+                                <mx:String>Free</mx:String>
+                                <mx:String>Individual</mx:String>
+                                <mx:String>Professional</mx:String>
+                                <mx:String>Enterprise</mx:String>
+                                <mx:String>Administration</mx:String>
+                            </mx:Array>
+                        </mx:ArrayCollection>
+                    </mx:dataProvider>
+                </mx:ComboBox>
+            </mx:FormItem>
+            <mx:FormItem label="User Name:">
+                <mx:TextInput id="userNameInput"/>
+            </mx:FormItem>
+            <mx:FormItem label="Full Name:">
+                <mx:TextInput id="fullNameInput"/>
+            </mx:FormItem>
+            <mx:FormItem label="Email Address:">
+                <mx:TextInput id="emailInput"/>
+            </mx:FormItem>
+        </mx:Form>
+        <mx:HBox width="100%" horizontalAlign="center">
+            <mx:Button label="Apply" click="create()"/>
+            <mx:Button label="Close" click="PopUpManager.removePopUp(this)"/>
+        </mx:HBox>
+    </mx:VBox>
+</mx:TitleWindow>

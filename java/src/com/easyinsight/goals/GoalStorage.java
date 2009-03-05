@@ -166,6 +166,7 @@ public class GoalStorage {
             } catch (SQLException e1) {
                 LogClass.error(e1);
             }
+            throw new RuntimeException(e);
         } finally {
             try {
                 conn.setAutoCommit(true);

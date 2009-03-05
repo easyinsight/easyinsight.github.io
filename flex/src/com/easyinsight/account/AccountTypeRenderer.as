@@ -3,7 +3,7 @@ import mx.containers.HBox;
 import mx.controls.Label;
 public class AccountTypeRenderer extends HBox{
 
-    private var account:Account;
+    private var account:AccountAdminTO;
     private var typeLabel:Label;
 
     public function AccountTypeRenderer() {
@@ -19,7 +19,7 @@ public class AccountTypeRenderer extends HBox{
     }
 
     override public function set data(val:Object):void {
-        this.account = val as Account;
+        this.account = val as AccountAdminTO;
         switch (account.accountType) {
             case Account.FREE:
                 typeLabel.text = "Free";

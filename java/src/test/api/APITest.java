@@ -132,6 +132,24 @@ public class APITest extends TestCase {
         newRow.setStringPairs(new StringPair[] { stringPair });
     }
 
+    public void testDatesAdd() {
+        long userID = TestUtil.getIndividualTestUser();
+        TestUncheckedPublish service = new TestUncheckedPublish(userID, SecurityUtil.getSecurityProvider().getUserPrincipal().getAccountID());
+        Calendar cal = Calendar.getInstance();
+        cal.set(Calendar.MONTH, 1);
+        cal.set(Calendar.DAY_OF_MONTH, 5);
+        com.easyinsight.api.Row yesterdayRow = new com.easyinsight.api.Row();
+        DatePair datePair = new DatePair();
+        datePair.setKey("date");
+        datePair.setValue(cal.getTime());
+        NumberPair numberPair = new NumberPair();
+        numberPair.setKey("number");
+        numberPair.setValue(10);
+        yesterdayRow.setNumberPairs(new NumberPair[] { numberPair });
+        yesterdayRow.setDatePairs(new DatePair[] { datePair });
+        
+    }
+
     public void testDynamicAPI() {
         long userID = TestUtil.getIndividualTestUser();
         long dataSourceID = TestUtil.createDefaultTestDataSource(userID);

@@ -3,6 +3,7 @@ package com.easyinsight.groups;
 import com.easyinsight.analysis.Tag;
 
 import java.util.List;
+import java.util.ArrayList;
 
 /**
  * User: James Boe
@@ -10,13 +11,13 @@ import java.util.List;
  * Time: 3:59:33 PM
  */
 public class Group {
-   private long groupID;
+    private long groupID;
     private String name;
     private boolean publiclyVisible;
     private boolean publiclyJoinable;
     private String description;
     private List<Tag> tags;
-    private List<GroupUser> groupUsers;
+    private List<GroupUser> groupUsers = new ArrayList<GroupUser>();
 
     public List<GroupUser> getGroupUsers() {
         return groupUsers;

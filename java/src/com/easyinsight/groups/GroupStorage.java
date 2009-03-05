@@ -58,21 +58,26 @@ public class GroupStorage {
         }
     }
 
+    public long addGroup(Group group, long userID, Connection conn) throws SQLException {
+        PreparedStatement insertGroupStmt = conn.prepareStatement("INSERT INTO COMMUNITY_GROUP " +
+                    "(NAME, DESCRIPTION, PUBLICLY_JOINABLE, PUBLICLY_VISIBLE)" +
+                    "VALUES (?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
+        insertGroupStmt.setString(1, group.getName());
+        insertGroupStmt.setString(2, group.getDescription());
+        insertGroupStmt.setBoolean(3, group.isPubliclyJoinable());
+        insertGroupStmt.setBoolean(4, group.isPubliclyVisible());
+        insertGroupStmt.execute();
+        long groupID = Database.instance().getAutoGenKey(insertGroupStmt);
+        addUserToGroup(userID, groupID, GroupToUserBinding.OWNER, conn);
+        saveTags(group.getTags(), groupID, conn);
+        return groupID;
+    }
+
     public long addGroup(Group group, long userID) {
         Connection conn = Database.instance().getConnection();
         try {
             conn.setAutoCommit(false);
-            PreparedStatement insertGroupStmt = conn.prepareStatement("INSERT INTO COMMUNITY_GROUP " +
-                    "(NAME, DESCRIPTION, PUBLICLY_JOINABLE, PUBLICLY_VISIBLE)" +
-                    "VALUES (?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
-            insertGroupStmt.setString(1, group.getName());
-            insertGroupStmt.setString(2, group.getDescription());
-            insertGroupStmt.setBoolean(3, group.isPubliclyJoinable());
-            insertGroupStmt.setBoolean(4, group.isPubliclyVisible());
-            insertGroupStmt.execute();
-            long groupID = Database.instance().getAutoGenKey(insertGroupStmt);
-            addUserToGroup(userID, groupID, GroupToUserBinding.OWNER, conn);
-            saveTags(group.getTags(), groupID, conn);
+            long groupID = addGroup(group, userID, conn);
             conn.commit();
             return groupID;
         } catch (Exception e) {

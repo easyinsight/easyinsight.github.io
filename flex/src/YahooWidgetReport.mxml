@@ -90,7 +90,7 @@
                     	authResult.accountType, authResult.spaceAllowed, authResult.accountAdmin,
                             authResult.dataSourceCreator, authResult.insightCreator, authResult.userID);
                 	User.getInstance().password = authResult.encryptedPassword;
-                	User.getInstance().userNa'me = authResult.userName;
+                	User.getInstance().userName = authResult.userName;
                 	ExternalInterface.call("widget.setValue", "userName", userName.text);
                 	ExternalInterface.call("widget.setValue", "password", password.text);
                 	if (selectedAnalysisID > 0) {

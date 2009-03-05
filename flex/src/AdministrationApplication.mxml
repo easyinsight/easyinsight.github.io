@@ -1,90 +1,152 @@
 <?xml version="1.0" encoding="utf-8"?>
-<mx:Application xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" 
-	xmlns:genres="com.easyinsight.administration.genres.*" creationComplete="setup()" xmlns:system="com.easyinsight.administration.system.*">
-	<mx:Script>
+<mx:Application xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:account="com.easyinsight.account.*"
+                xmlns:solutions="com.easyinsight.solutions.*" layout="absolute"
+                xmlns:genres="com.easyinsight.administration.genres.*" creationComplete="setup()"
+                xmlns:system="com.easyinsight.administration.system.*">
+    <mx:states>
+        <mx:State name="loggedIn">
+            <mx:RemoveChild target="{loginForm}"/>
+            <mx:AddChild relativeTo="{coreBox}">
+                <mx:TabNavigator width="100%" height="100%">
+                    <mx:VBox width="100%" height="100%" label="System Health">
+                        <system:HealthInfoDisplay/>
+                        <mx:Button label="Thread Dump" click="dumpThreads()"/>
+                        <mx:Button label="Create Solution..." click="createSolution()"/>
+                        <mx:Button label="Update Solution Archive..." click="updateArchive()"/>
+                    </mx:VBox>
+                    <mx:VBox width="100%" height="100%" label="Solutions">
+                        <solutions:SolutionAdministration width="100%" height="100%"/>
+                    </mx:VBox>
+                    <mx:VBox width="100%" height="100%" label="Accounts">
+                        <account:AccountAdministration width="100%" height="100%"/>
+                    </mx:VBox>
+                </mx:TabNavigator>
+
+            </mx:AddChild>
+        </mx:State>
+    </mx:states>
+    <mx:Script>
 		<![CDATA[
-			import com.easyinsight.solutions.UpdateSolutionArchiveWindow;
-			import mx.managers.PopUpManager;
-			import com.easyinsight.solutions.CreateSolutionWindow;
-			import com.easyinsight.framework.Permission;
-			import com.easyinsight.framework.UserServiceResponse;
-			import mx.collections.ArrayCollection;
-			import com.easyinsight.framework.User;
-			import com.easyinsight.listing.IPerspective;
-			
-			private function setup():void {
-				//var user:User = User.getInstance();
-				//if (user == null) {
-				//	currentState = 'notLoggedIn';					
-				//}				
-			}					
-			
-			/*private function tabChanged():void {
-				var perspective:IPerspective = coreTabNavigator.selectedChild as IPerspective;
-				perspective.gotFocus();
-			}
-			
-			private function signon():void {
-				authService.authenticate.send(userName.text, password.text);
-				tabChanged();
-			}*/
-			
-			private function handleAuthentication():void {
-				/*var authResult:UserServiceResponse = authService.authenticate.lastResult as UserServiceResponse;
-                var successful:Boolean = authResult.successful;
-                if (successful) {
-                	var permissionObj:Object = new Object();
-                	var permissions:ArrayCollection = authResult.permissions;
-                	if (permissions != null) {
-						for (var i:int = 0; i < permissions.length; i++) {
-							var permission:Permission = permissions.getItemAt(i) as Permission;
-							permissionObj[permission.name] = permission;
-						}
-					}
-					if (permissionObj["Administrator"] == null) {
-						failureMessageLabel.text = "You do not have administration access.";
-					} else {
-						currentState = "";
-					}	
-                } else {
-                	failureMessageLabel.text = authResult.failureMessage;
-                }*/
-			}
-			
-			private function dumpThreads():void {
-				adminService.threadDump.send();
-			}
-			
-			private function createSolution():void {
-            	var window:CreateSolutionWindow = CreateSolutionWindow(PopUpManager.createPopUp(this, CreateSolutionWindow, true));
-            	PopUpManager.centerPopUp(window);
+        import com.easyinsight.solutions.UpdateSolutionArchiveWindow;
+
+        import mx.managers.PopUpManager;
+
+        import com.easyinsight.solutions.CreateSolutionWindow;
+        import com.easyinsight.framework.User;
+        import com.easyinsight.framework.UserServiceResponse;
+
+        import mx.messaging.config.ServerConfig;
+        import mx.rpc.AsyncResponder;
+        import mx.rpc.AsyncToken;
+        import mx.rpc.events.FaultEvent;
+        import mx.rpc.events.ResultEvent;
+
+        private function handleAuthentication():void {
+            var authResult:UserServiceResponse = authService.authenticate.lastResult as UserServiceResponse;
+            var successful:Boolean = authResult.successful;
+            if (successful) {
+                User.initializeUser(authResult.name, authResult.email,
+                        authResult.accountType, authResult.spaceAllowed, authResult.accountAdmin,
+                        authResult.dataSourceCreator, authResult.insightCreator, authResult.userID);
+                User.getInstance().password = authResult.encryptedPassword;
+                User.getInstance().userName = authResult.userName;
+                currentState = "loggedIn";
+            } else {
+                failureMessageLabel.text = authResult.failureMessage;
             }
-            
-            private function updateArchive():void {
-            	var window:UpdateSolutionArchiveWindow = UpdateSolutionArchiveWindow(PopUpManager.createPopUp(this, UpdateSolutionArchiveWindow, true));
-            	PopUpManager.centerPopUp(window);
+        }
+
+        private function login():void {
+            if (authService.channelSet == null) {
+                authService.channelSet = ServerConfig.getChannelSet(authService.destination);
             }
+            var token:AsyncToken = authService.channelSet.login(userName.text, password.text);
+            token.addResponder(new AsyncResponder(
+                    function (event:ResultEvent, token:Object = null):void {
+                        switch (event.result) {
+                            case "success":
+                                authService.authenticate.send(userName.text, password.text);
+                                break;
+                            default:
+                                trace(event.result);
+                        }
+                    },
+                    function (event:FaultEvent, token:Object = null):void {
+                        switch (event.fault.faultCode) {
+                            case "Client.Authentication":
+                            default:
+                                var failureMessage:String = event.fault.faultString;
+                                failureMessageLabel.text = failureMessage;
+                        }
+                    }
+                    ));
+        }
+
+        private function setup():void {
+            authService.isSessionLoggedIn.send();
+            //var user:User = User.getInstance();
+            //if (user == null) {
+            //	currentState = 'notLoggedIn';
+            //}
+        }
+
+        private function dumpThreads():void {
+            adminService.threadDump.send();
+        }
+
+        private function createSolution():void {
+            var window:CreateSolutionWindow = CreateSolutionWindow(PopUpManager.createPopUp(this, CreateSolutionWindow, true));
+            PopUpManager.centerPopUp(window);
+        }
+
+        private function updateArchive():void {
+            var window:UpdateSolutionArchiveWindow = UpdateSolutionArchiveWindow(PopUpManager.createPopUp(this, UpdateSolutionArchiveWindow, true));
+            PopUpManager.centerPopUp(window);
+        }
+
+        private function sessionCheck():void {
+            var authResult:UserServiceResponse = authService.isSessionLoggedIn.lastResult as UserServiceResponse;
+            if (authResult != null) {
+                User.initializeUser(authResult.name, authResult.email,
+                            authResult.accountType, authResult.spaceAllowed, authResult.accountAdmin,
+                        authResult.dataSourceCreator, authResult.insightCreator, authResult.userID);
+                User.getInstance().password = authResult.encryptedPassword;
+                User.getInstance().userName = authResult.userName;
+                currentState = "loggedIn";
+            }
+        }
 		]]>
-	</mx:Script>
-	<mx:RemoteObject id="authService" destination="login">
-		<mx:method name="authenticate" result="handleAuthentication()"/>
-	</mx:RemoteObject>
-	<mx:RemoteObject id="adminService" destination="admin">
-		<mx:method name="threadDump"/>
-	</mx:RemoteObject>
-	
-	<mx:VBox>
-		<system:HealthInfoDisplay/>
-		<mx:Button label="Thread Dump" click="dumpThreads()"/>
-		<mx:Button label="Create Solution..." click="createSolution()"/>
-		<mx:Button label="Update Solution Archive..." click="updateArchive()"/>	
-	</mx:VBox>
-	
-	<!-- <mx:Canvas id="coreCanvas" width="100%" height="100%">
+    </mx:Script>
+    <mx:RemoteObject id="authService" destination="login">
+        <mx:method name="authenticate" result="handleAuthentication()"/>
+        <mx:method name="isSessionLoggedIn" result="sessionCheck()"/>
+    </mx:RemoteObject>
+    <mx:RemoteObject id="adminService" destination="admin">
+        <mx:method name="threadDump"/>
+    </mx:RemoteObject>
+    <mx:Style source="com/easyinsight/skin/osx/OSX.css"/>
+    <mx:VBox id="coreBox" width="100%" height="100%" horizontalAlign="center">
+        <mx:Form id="loginForm">
+            <mx:FormItem label="User Name: ">
+                <mx:TextInput id="userName"/>
+            </mx:FormItem>
+            <mx:FormItem label="Password: ">
+                <mx:TextInput id="password" displayAsPassword="true"/>
+            </mx:FormItem>
+            <mx:FormItem label="">
+                <mx:Label id="failureMessageLabel"/>
+            </mx:FormItem>
+            <mx:FormItem label="">
+                <mx:Button label="Log In" click="login()"/>
+            </mx:FormItem>
+        </mx:Form>
+    </mx:VBox>
+
+    <!-- <mx:Canvas id="coreCanvas" width="100%" height="100%">
 		<mx:TabNavigator id="coreTabNavigator" width="100%" creationPolicy="all" tabChildrenChange="tabChanged()">
 			<genres:GenreAdministrationPanel label="Catalog" id="catalogAdmin"/>
 			<mx:HBox label="System Health" id="systemHealth"/>
 		</mx:TabNavigator>	
-	</mx:Canvas>-->	
-	
+	</mx:Canvas>-->
+
 </mx:Application>

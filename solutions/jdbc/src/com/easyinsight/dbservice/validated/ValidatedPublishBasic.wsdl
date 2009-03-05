@@ -308,7 +308,7 @@
   </wsdl:binding>
   <wsdl:service name="BasicAuthValidatingPublishServiceService">
     <wsdl:port binding="tns:BasicAuthValidatingPublishServiceServiceSoapBinding" name="BasicAuthValidatingPublishServicePort">
-      <soap:address location="http://localhost:8080/DMS/services/ValidatedPublishBasic" />
+      <soap:address location="http://localhost:8080/app/services/ValidatedPublishBasic" />
     </wsdl:port>
   </wsdl:service>
 </wsdl:definitions>

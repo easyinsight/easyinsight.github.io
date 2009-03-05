@@ -31,7 +31,7 @@ import mx.collections.ArrayCollection;
 
         private function onDoubleClick(event:ListEvent):void {
             var goal:GoalTreeNodeData = goals.getItemAt(event.rowIndex) as GoalTreeNodeData;
-            dispatchEvent(new AnalyzeEvent(new GoalDetailAnalyzeSource(goal)));
+            //dispatchEvent(new AnalyzeEvent(new GoalDetailAnalyzeSource(goal)));
         }
 ]]></mx:Script>
     <mx:RemoteObject destination="goalService" id="goalService">

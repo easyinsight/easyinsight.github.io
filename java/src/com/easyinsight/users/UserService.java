@@ -4,10 +4,13 @@ import com.easyinsight.database.Database;
 import com.easyinsight.security.PasswordService;
 import com.easyinsight.security.UserPrincipal;
 import com.easyinsight.security.SecurityUtil;
+import com.easyinsight.security.Roles;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.email.UserStub;
 import com.easyinsight.email.AccountMemberInvitation;
 import com.easyinsight.util.RandomTextGenerator;
+import com.easyinsight.groups.Group;
+import com.easyinsight.groups.GroupStorage;
 
 import java.util.List;
 import java.util.ArrayList;
@@ -90,6 +93,22 @@ public class UserService implements IUserService {
             accountID = user.getAccount().getAccountID();
         }
         return accountID;
+    }
+
+    public boolean doesAccountExist(String accountName) {
+        Session session = Database.instance().createSession();
+        List results;
+        try {
+            session.beginTransaction();
+            results = session.createQuery("from Account where name = ?").setString(0, accountName).list();
+            session.getTransaction().commit();
+        } catch (Exception e) {
+            session.getTransaction().rollback();
+            throw new RuntimeException(e);
+        } finally {
+            session.close();
+        }
+        return (results.size() > 0);
     }
 
     public User retrieveUser() {
@@ -241,20 +260,21 @@ public class UserService implements IUserService {
             conn.setAutoCommit(false);
             Account account = accountTransferObject.toAccount();
             configureNewAccount(account);
-            User user = new User();
-            user.setAccountAdmin(userTransferObject.isAccountAdmin());
-            user.setAccount(account);
-            user.setDataSourceCreator(userTransferObject.isDataSourceCreator());
-            user.setEmail(userTransferObject.getEmail());
-            user.setInsightCreator(userTransferObject.isInsightCreator());
-            user.setName(userTransferObject.getName());
-            user.setUserName(userTransferObject.getUserName());
-            user.setPassword(PasswordService.getInstance().encrypt(password));
+            User user = createInitialUser(userTransferObject, password, account);
             account.addUser(user);
             session.save(account);
             user.setAccount(account);
             session.update(user);
-            if (account.getAccountType() == Account.FREE) {
+            if (account.getAccountType() == Account.PROFESSIONAL || account.getAccountType() == Account.ENTERPRISE) {
+                Group group = new Group();
+                group.setName(account.getName());
+                group.setPubliclyVisible(false);
+                group.setPubliclyJoinable(false);
+                group.setDescription("This group was automatically created to act as a location for exposing data to all users in the account.");
+                account.setGroupID(new GroupStorage().addGroup(group, user.getUserID(), conn));
+                session.update(account);
+            }
+            /*if (account.getAccountType() == Account.FREE) {
                 String activationKey = RandomTextGenerator.generateText(12);
                 PreparedStatement insertActivationStmt = conn.prepareStatement("INSERT INTO ACCOUNT_ACTIVATION (ACCOUNT_ID, ACTIVATION_KEY, CREATION_DATE) VALUES (?, ?, ?)");
                 insertActivationStmt.setLong(1, account.getAccountID());
@@ -262,7 +282,7 @@ public class UserService implements IUserService {
                 insertActivationStmt.setDate(3, new java.sql.Date(System.currentTimeMillis()));
                 insertActivationStmt.execute();
                 new AccountMemberInvitation().sendActivationEmail(user.getEmail(), activationKey);
-            }
+            }*/
             conn.commit();
             return account.getAccountID();
         } catch (Exception e) {
@@ -284,21 +304,34 @@ public class UserService implements IUserService {
         }
     }
 
+    private User createInitialUser(UserTransferObject userTransferObject, String password, Account account) {
+        User user = new User();
+        user.setAccountAdmin(userTransferObject.isAccountAdmin());
+        user.setAccount(account);
+        user.setDataSourceCreator(userTransferObject.isDataSourceCreator());
+        user.setEmail(userTransferObject.getEmail());
+        user.setInsightCreator(userTransferObject.isInsightCreator());
+        user.setName(userTransferObject.getName());
+        user.setUserName(userTransferObject.getUserName());
+        user.setPassword(PasswordService.getInstance().encrypt(password));
+        return user;
+    }
+
     private void configureNewAccount(Account account) {
         if (account.getAccountType() == Account.ENTERPRISE) {
-            account.setAccountState(Account.PENDING_BILLING);
+            account.setAccountState(Account.BETA);
             account.setMaxUsers(5);
             account.setMaxSize(1000000000);
         } else if (account.getAccountType() == Account.PROFESSIONAL) {
-            account.setAccountState(Account.PENDING_BILLING);
+            account.setAccountState(Account.BETA);
             account.setMaxUsers(1);
             account.setMaxSize(200000000);
         } else if (account.getAccountType() == Account.INDIVIDUAL) {
-            account.setAccountState(Account.PENDING_BILLING);
+            account.setAccountState(Account.BETA);
             account.setMaxUsers(1);
             account.setMaxSize(20000000);
         } else if (account.getAccountType() == Account.FREE) {
-            account.setAccountState(Account.INACTIVE);
+            account.setAccountState(Account.ACTIVE);
             account.setMaxUsers(1);
             account.setMaxSize(1000000);
         }
@@ -341,6 +374,27 @@ public class UserService implements IUserService {
         }
     }
 
+    public void adminUpdate(AccountAdminTO accountTO) {
+        SecurityUtil.authorizeAccountTier(Account.ADMINISTRATOR);
+        Session session = Database.instance().createSession();
+        try {
+            session.beginTransaction();
+            List accountResults = session.createQuery("from Account where accountID = ?").setLong(0, accountTO.getAccountID()).list();
+            Account account = (Account) accountResults.get(0);
+            Account updatedAccount = accountTO.toAccount();
+            updatedAccount.setUsers(account.getUsers());
+            updatedAccount.setLicenses(account.getLicenses());
+            session.update(updatedAccount);
+            session.getTransaction().commit();
+        } catch (Exception e) {
+            LogClass.error(e);
+            session.getTransaction().rollback();
+            throw new RuntimeException(e);
+        } finally {
+            session.close();
+        }
+    }
+
     public void updateAccount(AccountTransferObject accountTransferObject) {
         Session session = Database.instance().createSession();
         try {
@@ -359,6 +413,273 @@ public class UserService implements IUserService {
         }
     }
 
+    public List<ConsultantTO> getConsultants() {
+        List<ConsultantTO> consultants = new ArrayList<ConsultantTO>();
+        long accountID = SecurityUtil.getAccountID();
+        Session session = Database.instance().createSession();
+        try {
+            session.getTransaction().begin();
+            List results = session.createQuery("from Account where accountID = ?").setLong(0, accountID).list();
+            Account account = (Account) results.get(0);
+            for (Consultant consultant : account.getGuestUsers()) {
+                consultants.add(consultant.toConsultantTO());
+            }
+            session.getTransaction().commit();
+        } catch (Exception e) {
+            LogClass.error(e);
+            session.getTransaction().rollback();
+            throw new RuntimeException(e);
+        } finally {
+            session.close();
+        }
+        return consultants;
+    }
+
+    public UserCreationResponse addConsultant(UserTransferObject userTransferObject) {
+        long accountID = SecurityUtil.getAccountID();
+        Session session = Database.instance().createSession();
+        try {
+            session.getTransaction().begin();
+            List results = session.createQuery("from Account where accountID = ?").setLong(0, accountID).list();
+            Account account = (Account) results.get(0);
+            User user = userTransferObject.toUser();
+            user.setAccount(account);
+            Consultant consultant = new Consultant();
+            consultant.setUser(user);
+            consultant.setState(Consultant.PENDING_EI_APPROVAL);
+            session.save(consultant);
+            session.getTransaction().commit();
+        } catch (Exception e) {
+            LogClass.error(e);
+            session.getTransaction().rollback();
+            throw new RuntimeException(e);
+        } finally {
+            session.close();
+        }
+        return null;
+    }
+
+    public List<EIConsultant> getPendingConsultants() {
+        List<EIConsultant> consultants = new ArrayList<EIConsultant>();
+        Session session = Database.instance().createSession();
+        try {
+            session.getTransaction().begin();
+            List results = session.createQuery("from Consultant where state = ?").setInteger(0, Consultant.PENDING_EI_APPROVAL).list();
+            for (Object obj : results) {
+                Consultant consultant = (Consultant) obj;
+                EIConsultant eiConsultant = consultant.toEIConsultant();
+                Account account = consultant.getUser().getAccount();
+                eiConsultant.setAccountName(account.getName());
+                eiConsultant.setAccountID(account.getAccountID());
+                consultants.add(eiConsultant);
+            }
+            session.getTransaction().commit();
+        } catch (Exception e) {
+            LogClass.error(e);
+            session.getTransaction().rollback();
+            throw new RuntimeException(e);
+        } finally {
+            session.close();
+        }
+        return consultants;
+    }
+
+    public void eiApproveConsultant(long consultantID) {
+        SecurityUtil.authorizeAccountTier(Account.ADMINISTRATOR);
+        Session session = Database.instance().createSession();
+        try {
+            session.getTransaction().begin();
+            List results = session.createQuery("from Consultant where guestUserID = ?").setLong(0, consultantID).list();
+            Consultant consultant = (Consultant) results.get(0);
+            consultant.setState(Consultant.ACTIVE);
+            session.update(consultant);
+            session.getTransaction().commit();
+        } catch (Exception e) {
+            LogClass.error(e);
+            session.getTransaction().rollback();
+            throw new RuntimeException(e);
+        } finally {
+            session.close();
+        }
+    }
+
+    public void deactivateConsultant(long consultantID) {
+        Session session = Database.instance().createSession();
+        try {
+            session.getTransaction().begin();
+            List results = session.createQuery("from Consultant where guestUserID = ?").setLong(0, consultantID).list();
+            Consultant consultant = (Consultant) results.get(0);
+            consultant.setState(Consultant.DISABLED);
+            session.update(consultant);
+            session.getTransaction().commit();
+        } catch (Exception e) {
+            LogClass.error(e);
+            session.getTransaction().rollback();
+            throw new RuntimeException(e);
+        } finally {
+            session.close();
+        }
+    }
+
+    public void removeConsultant(long consultantID) {
+        Session session = Database.instance().createSession();
+        try {
+            session.getTransaction().begin();
+            List results = session.createQuery("from Consultant where guestUserID = ?").setLong(0, consultantID).list();
+            Consultant consultant = (Consultant) results.get(0);
+            session.delete(consultant);
+            session.getTransaction().commit();
+        } catch (Exception e) {
+            LogClass.error(e);
+            session.getTransaction().rollback();
+            throw new RuntimeException(e);
+        } finally {
+            session.close();
+        }
+    }
+
+    public void eiNewBizAccount(AccountTransferObject accountTransferObject, UserTransferObject initialUser) {
+        SecurityUtil.authorizeAccountTier(Account.ADMINISTRATOR);
+        Connection conn = Database.instance().getConnection();
+        Session session = Database.instance().createSession(conn);
+        try {
+            conn.setAutoCommit(false);
+            Account account = accountTransferObject.toAccount();
+            configureNewAccount(account);
+            account.setAccountState(Account.PREPARING);
+            initialUser.setAccountAdmin(true);
+            initialUser.setDataSourceCreator(true);
+            initialUser.setInsightCreator(true);
+            String password = RandomTextGenerator.generateText(12);
+            User user = createInitialUser(initialUser, password, account);
+            account.addUser(user);
+            session.save(account);
+            user.setAccount(account);
+            session.update(user);
+            /*user.setAccount(account);
+            */
+            if (account.getAccountType() == Account.PROFESSIONAL || account.getAccountType() == Account.ENTERPRISE) {
+                Group group = new Group();
+                group.setName(account.getName());
+                group.setPubliclyVisible(false);
+                group.setPubliclyJoinable(false);
+                group.setDescription("This group was automatically created to act as a location for exposing data to all users in the account.");
+                account.setGroupID(new GroupStorage().addGroup(group, user.getUserID(), conn));
+                session.update(account);
+            }
+            conn.commit();
+            new AccountMemberInvitation().newProAccount(user.getEmail(), user.getUserName(), password);
+        } catch (Exception e) {
+            LogClass.error(e);
+            try {
+                conn.rollback();
+            } catch (SQLException e1) {
+                LogClass.error(e1);
+            }
+            throw new RuntimeException(e);
+        } finally {
+            session.close();
+            try {
+                conn.setAutoCommit(true);
+            } catch (SQLException e) {
+                LogClass.error(e);
+            }
+            Database.instance().closeConnection(conn);
+        }
+    }
+
+    public void eiPrepareBizAccount(AccountTransferObject accountTransferObject, UserTransferObject initialConsultant, String consultantPassword) {
+        SecurityUtil.authorizeAccountTier(Account.ADMINISTRATOR);
+        Connection conn = Database.instance().getConnection();
+        Session session = Database.instance().createSession(conn);
+        try {
+            conn.setAutoCommit(false);
+            Account account = accountTransferObject.toAccount();
+            configureNewAccount(account);
+            account.setAccountState(Account.PREPARING);
+            initialConsultant.setAccountAdmin(true);
+            initialConsultant.setDataSourceCreator(true);
+            initialConsultant.setInsightCreator(true);
+            User user = createInitialUser(initialConsultant, consultantPassword, account);
+            Consultant consultant = new Consultant();
+            consultant.setUser(user);
+            consultant.setState(Consultant.ACTIVE);
+            session.save(consultant);
+            account.getGuestUsers().add(consultant);
+            session.save(account);
+            user.setAccount(account);
+            session.update(user);
+            if (account.getAccountType() == Account.PROFESSIONAL || account.getAccountType() == Account.ENTERPRISE) {
+                Group group = new Group();
+                group.setName(account.getName());
+                group.setPubliclyVisible(false);
+                group.setPubliclyJoinable(false);
+                group.setDescription("This group was automatically created to act as a location for exposing data to all users in the account.");
+                account.setGroupID(new GroupStorage().addGroup(group, user.getUserID(), conn));
+                session.update(account);
+            }
+            conn.commit();
+        } catch (Exception e) {
+            LogClass.error(e);
+            try {
+                conn.rollback();
+            } catch (SQLException e1) {
+                LogClass.error(e1);
+            }
+            throw new RuntimeException(e);
+        } finally {
+            session.close();
+            try {
+                conn.setAutoCommit(true);
+            } catch (SQLException e) {
+                LogClass.error(e);
+            }
+            Database.instance().closeConnection(conn);
+        }
+    }
+
+    public void eiActivateBizAccount(long accountID, UserTransferObject adminUser, boolean preserveConsultants) {
+        SecurityUtil.authorizeAccountTier(Account.ADMINISTRATOR);
+        Session session = Database.instance().createSession();
+        try {
+            session.getTransaction().begin();
+            List results = session.createQuery("from Account where accountID = ?").setLong(0, accountID).list();
+            Account account = (Account) results.get(0);
+            if (preserveConsultants) {
+                for (Consultant consultant : account.getGuestUsers()) {
+                    consultant.getUser().setAccountAdmin(false);
+                    consultant.getUser().setDataSourceCreator(false);
+                    consultant.getUser().setInsightCreator(false);
+                }
+            } else {
+                for (Consultant consultant : account.getGuestUsers()) {
+                    session.delete(consultant);
+                }
+                account.setGuestUsers(new ArrayList<Consultant>());
+            }
+            String password = RandomTextGenerator.generateText(12);
+            User user = createInitialUser(adminUser, password, account);
+            user.setAccount(account);
+            account.addUser(user);
+            session.save(user);
+            session.update(account);
+            session.getTransaction().commit();
+            if (preserveConsultants && account.getGuestUsers().size() > 0) {
+                Consultant consultant = account.getGuestUsers().get(0);
+                new AccountMemberInvitation().newProAccountWithConsultant(user.getEmail(), user.getUserName(), password, consultant.getUser().getName(),
+                        consultant.getUser().getEmail());
+            } else {
+                new AccountMemberInvitation().newProAccount(user.getEmail(), user.getUserName(), password);
+            }
+        } catch (Exception e) {
+            LogClass.error(e);
+            session.getTransaction().rollback();
+            throw new RuntimeException(e);
+        } finally {
+            session.close();
+        }
+    }
+
     public UserCreationResponse addUserToAccount(UserTransferObject userTransferObject) {
         long accountID = SecurityUtil.getAccountID();
         UserCreationResponse userCreationResponse;
@@ -367,19 +688,14 @@ public class UserService implements IUserService {
             userCreationResponse = new UserCreationResponse("A user already exists by that name.");
         } else {
             Session session = Database.instance().createSession();
+            Account account;
             try {
                 session.beginTransaction();
                 List results = session.createQuery("from Account where accountID = ?").setLong(0, accountID).list();
-                Account account = (Account) results.get(0);
+                account = (Account) results.get(0);
                 User admin = (User) session.createQuery("from User where userID = ?").setLong(0, SecurityUtil.getUserID()).list().get(0);
-                User user = new User();
-                user.setAccountAdmin(userTransferObject.isAccountAdmin());
+                User user = userTransferObject.toUser();
                 user.setAccount(account);
-                user.setDataSourceCreator(userTransferObject.isDataSourceCreator());
-                user.setEmail(userTransferObject.getEmail());
-                user.setInsightCreator(userTransferObject.isInsightCreator());
-                user.setName(userTransferObject.getName());
-                user.setUserName(userTransferObject.getUserName());
                 final String password = RandomTextGenerator.generateText(12);
                 final String adminName = admin.getName();
                 final String userEmail = user.getEmail();
@@ -401,6 +717,9 @@ public class UserService implements IUserService {
                 throw new RuntimeException(e);
             } finally {
                 session.close();
+            }
+            if (account.getAccountType() == Account.PROFESSIONAL || account.getAccountType() == Account.ENTERPRISE) {
+                new GroupStorage().addUserToGroup(userCreationResponse.getUserID(), account.getGroupID(), userTransferObject.isAccountAdmin() ? Roles.OWNER : Roles.SUBSCRIBER);
             }
         }
         return userCreationResponse;
@@ -658,16 +977,16 @@ public class UserService implements IUserService {
         return activated;
     }
 
-    public List<AccountTransferObject> getAccounts() {
+    public List<AccountAdminTO> getAccounts() {
         SecurityUtil.authorizeAccountTier(Account.ADMINISTRATOR);
-        List<AccountTransferObject> accounts = new ArrayList<AccountTransferObject>();
+        List<AccountAdminTO> accounts = new ArrayList<AccountAdminTO>();
         Session session = Database.instance().createSession();
         try {
             session.beginTransaction();
             List results = session.createQuery("from Account").list();
             for (Object obj : results) {
                 Account account = (Account) obj;
-                accounts.add(account.toTransferObject());
+                accounts.add(account.toAdminTO());
             }
             session.getTransaction().commit();
         } catch (Exception e) {

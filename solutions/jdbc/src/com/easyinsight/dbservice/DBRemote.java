@@ -137,7 +137,7 @@ public class DBRemote {
 
     public String validateEI(EIConfiguration eiConfiguration) {
         try {
-            URL url = new URL("http://" + this.eiHost + "/DMS/services/UncheckedPublishBasic");
+            URL url = new URL("http://" + this.eiHost + "/app/services/UncheckedPublishBasic");
             BasicAuthUncheckedPublish service = new BasicAuthUncheckedPublishServiceServiceLocator().getBasicAuthUncheckedPublishServicePort(url);
             ((BasicAuthUncheckedPublishServiceServiceSoapBindingStub)service).setUsername(eiConfiguration.getUserName());
             ((BasicAuthUncheckedPublishServiceServiceSoapBindingStub)service).setPassword(eiConfiguration.getPassword());
@@ -279,7 +279,7 @@ public class DBRemote {
             insertStmt.setInt(5, queryConfiguration.getPublishMode());
             insertStmt.execute();
 
-            URL url = new URL("http://" + this.eiHost + "/DMS/services/UncheckedPublishBasic");
+            URL url = new URL("http://" + this.eiHost + "/app/services/UncheckedPublishBasic");
             BasicAuthUncheckedPublish service = new BasicAuthUncheckedPublishServiceServiceLocator().getBasicAuthUncheckedPublishServicePort(url);
             EIConfiguration eiConfiguration = eiConfigMap.get(FlexContext.getFlexSession().getId());
             ((BasicAuthUncheckedPublishServiceServiceSoapBindingStub)service).setUsername(eiConfiguration.getUserName());
@@ -306,7 +306,7 @@ public class DBRemote {
 
     public String queryToEI(QueryConfiguration queryConfiguration) {
         try {
-            URL url = new URL("http://" + this.eiHost + "/DMS/services/UncheckedPublishBasic");
+            URL url = new URL("http://" + this.eiHost + "/app/services/UncheckedPublishBasic");
             BasicAuthUncheckedPublish service = new BasicAuthUncheckedPublishServiceServiceLocator().getBasicAuthUncheckedPublishServicePort(url);
             EIConfiguration eiConfiguration = eiConfigMap.get(FlexContext.getFlexSession().getId());
             DBConfiguration savedConfiguration = dbConfigMap.get(FlexContext.getFlexSession().getId());

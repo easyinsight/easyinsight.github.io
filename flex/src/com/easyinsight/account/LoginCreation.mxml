@@ -8,49 +8,57 @@
 	<mx:Script>
 		<![CDATA[
 			import mx.validators.Validator;
-			import com.easyinsight.framework.UserTransferObject;
-            
-            private var user:UserTransferObject;
-            private var validators:Array;                  
-            
-            private function validatedUser():void {
-            	var result:int = creationService.doesUserExist.lastResult as int;            	
-                if (result == 0) {
-                	dispatchEvent(new UserDefinitionEvent(user, password.text));
-                } else {
-                	var failureMessage:String = "That user name already exists.";
-                    failureMessageLabel.text = failureMessage;
-                }	
-            }
-            
-            private function initHandlers():void {
-            	validators = [ emailValidator, userNameValidator, passwordValidator, fullNameValidator ];
-            }
 
-            public function createAccount():void {
-            	var results:Array = Validator.validateAll(validators);
-                if (results.length > 0) {
-                    failureMessageLabel.text = "There are one or more problems with the fields above.";
-            	} else if (email.text != confirmEmail.text) {
-                    failureMessageLabel.text = "Your email addresses do not match.";
-                } else if (password.text != confirmPassword.text) {
-                    failureMessageLabel.text = "Your passwords do not match.";
-                } else {
-            		failureMessageLabel.text = "";
-	                user = new UserTransferObject();
-	                user.userName = userName.text;
-	                user.name = fullName.text;
-	                user.email = email.text;
-                    user.accountAdmin = true;
-                    user.insightCreator = true;
-                    user.dataSourceCreator = true;
-	                creationService.doesUserExist.send(userName.text);
-	            }
-            }
+        import com.easyinsight.framework.UserTransferObject;
 
-            public function cancel():void {
-                dispatchEvent(new PreviousPageEvent());
+        private var _account:Account;
+        private var user:UserTransferObject;
+        private var validators:Array;
+
+
+        public function set account(val:Account):void {
+            _account = val;
+        }
+
+        private function validatedUser():void {
+            var result:int = creationService.doesUserExist.lastResult as int;
+            if (result == 0) {
+                dispatchEvent(new UserDefinitionEvent(user, password.text));
+            } else {
+                var failureMessage:String = "That user name already exists.";
+                failureMessageLabel.text = failureMessage;
             }
+        }
+
+        private function initHandlers():void {
+            validators = [ emailValidator, userNameValidator, passwordValidator, fullNameValidator ];
+        }
+
+        public function createAccount():void {
+            var results:Array = Validator.validateAll(validators);
+            if (results.length > 0) {
+                failureMessageLabel.text = "There are one or more problems with the fields above.";
+            } else if (email.text != confirmEmail.text) {
+                failureMessageLabel.text = "Your email addresses do not match.";
+            } else if (password.text != confirmPassword.text) {
+                failureMessageLabel.text = "Your passwords do not match.";
+            } else {
+                failureMessageLabel.text = "";
+                user = new UserTransferObject();
+                user.userName = userName.text;
+                user.name = fullName.text;
+                user.email = email.text;
+                user.accountAdmin = true;
+                user.insightCreator = true;
+                user.dataSourceCreator = true;
+                _account.name = userName.text;
+                creationService.doesUserExist.send(userName.text);
+            }
+        }
+
+        public function cancel():void {
+            dispatchEvent(new PreviousPageEvent());
+        }
         ]]>
 	</mx:Script>
     <mx:VBox id="userProfileBox" verticalGap="0" borderThickness="1" borderColor="#D42525" borderStyle="solid" dropShadowEnabled="true">

@@ -9,49 +9,66 @@
 	<mx:Script>
 		<![CDATA[
 			import mx.validators.Validator;
-			import com.easyinsight.framework.UserTransferObject;
 
-            private var user:UserTransferObject;
-            private var validators:Array;
+        import com.easyinsight.framework.UserTransferObject;
 
-            private function validatedUser():void {
-            	var result:int = creationService.doesUserExist.lastResult as int;
-                if (result == 0) {
-                	dispatchEvent(new UserDefinitionEvent(user, password.text));
-                } else {
-                	var failureMessage:String = "That user name already exists.";
-                    failureMessageLabel.text = failureMessage;
-                }
+        private var user:UserTransferObject;
+        private var _account:Account;
+        private var validators:Array;
+
+
+        public function set account(val:Account):void {
+            _account = val;
+        }
+
+        private function validatedUser():void {
+            var result:int = creationService.doesUserExist.lastResult as int;
+            if (result == 0) {
+                creationService.doesAccountExist.send(_account.name);
+            } else {
+                failureMessageLabel.text =  "That user name already exists.";
             }
+        }
 
-            private function initHandlers():void {
-            	validators = [ emailValidator, userNameValidator, passwordValidator, fullNameValidator ];
+        private function validatedAccount():void {
+            var result:Boolean = creationService.doesAccountExist.lastResult as Boolean;
+            if (result) {
+                failureMessageLabel.text = "That account name already exists.";
+            } else {
+                dispatchEvent(new UserDefinitionEvent(user, password.text));
             }
+        }
 
-            public function createAccount():void {
-            	var results:Array = Validator.validateAll(validators);
-                if (results.length > 0) {
-                    failureMessageLabel.text = "There are one or more problems with the fields above.";
-            	} else if (email.text != confirmEmail.text) {
-                    failureMessageLabel.text = "Your email addresses do not match.";
-                } else if (password.text != confirmPassword.text) {
-                    failureMessageLabel.text = "Your passwords do not match.";
-                } else {
-            		failureMessageLabel.text = "";
-	                user = new UserTransferObject();
-	                user.userName = userName.text;
-	                user.name = fullName.text;
-	                user.email = email.text;
-                    user.accountAdmin = true;
-                    user.insightCreator = true;
-                    user.dataSourceCreator = true;
-	                creationService.doesUserExist.send(userName.text);
-	            }
-            }
+        private function initHandlers():void {
+            validators = [ emailValidator, userNameValidator, passwordValidator, fullNameValidator ];
+        }
 
-            public function cancel():void {
-                dispatchEvent(new PreviousPageEvent());
+        public function createAccount():void {
+            var results:Array = Validator.validateAll(validators);
+            if (results.length > 0) {
+                failureMessageLabel.text = "There are one or more problems with the fields above.";
+            } else if (email.text != confirmEmail.text) {
+                failureMessageLabel.text = "Your email addresses do not match.";
+            } else if (password.text != confirmPassword.text) {
+                failureMessageLabel.text = "Your passwords do not match.";
+            } else {
+                failureMessageLabel.text = "";
+                user = new UserTransferObject();
+                user.userName = userName.text;
+                user.name = fullName.text;
+                user.email = email.text;
+                user.accountAdmin = true;
+                user.insightCreator = true;
+                user.dataSourceCreator = true;
+                _account.name = accountName.text;
+                _account.maxUsers = licenseNumber.value;
+                creationService.doesUserExist.send(userName.text);
             }
+        }
+
+        public function cancel():void {
+            dispatchEvent(new PreviousPageEvent());
+        }
         ]]>
 	</mx:Script>
 
@@ -111,5 +128,6 @@
 	<mx:EmailValidator source="{email}" property="text" id="emailValidator"/>
 	<mx:RemoteObject id="creationService" destination="login">
 		<mx:method name="doesUserExist" result="validatedUser()"/>
+		<mx:method name="doesAccountExist" result="validatedAccount()"/>
 	</mx:RemoteObject>
 </mx:VBox>

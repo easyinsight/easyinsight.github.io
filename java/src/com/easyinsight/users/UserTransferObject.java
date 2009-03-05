@@ -93,4 +93,15 @@ public class UserTransferObject {
     public void setLicenses(List<SubscriptionLicense> licenses) {
         this.licenses = licenses;
     }
+
+    public User toUser() {
+        User user = new User();
+        user.setAccountAdmin(isAccountAdmin());
+        user.setDataSourceCreator(isDataSourceCreator());
+        user.setEmail(getEmail());
+        user.setInsightCreator(isInsightCreator());
+        user.setName(getName());
+        user.setUserName(getUserName());
+        return user;
+    }
 }

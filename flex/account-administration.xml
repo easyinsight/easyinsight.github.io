@@ -37,7 +37,7 @@
       </source-path>
     </compiler>
     <file-specs>
-        <path-element>src/AdministrationApplication.mxml</path-element>
+        <path-element>src/AccountManagement.mxml</path-element>
     </file-specs>
     <static-link-runtime-shared-libraries>false</static-link-runtime-shared-libraries>
 </flex-config>

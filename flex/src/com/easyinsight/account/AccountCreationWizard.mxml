@@ -7,13 +7,13 @@
 		<mx:State name="UserInfo">
 			<mx:RemoveChild target="{initialContent}"/>			
 			<mx:AddChild relativeTo="{coreContent}">
-				<account:LoginCreation userDefined="postUserInfo(event)" previousPage="onPreviousPage(event)"/>
+				<account:LoginCreation userDefined="postUserInfo(event)" previousPage="onPreviousPage(event)" account="{account}"/>
 			</mx:AddChild>
 		</mx:State>
         <mx:State name="ProAccountUserInfo">
 			<mx:RemoveChild target="{initialContent}"/>
 			<mx:AddChild relativeTo="{coreContent}">
-				<account:ProfessionalAccountLoginCreation userDefined="postUserInfo(event)" previousPage="onPreviousPage(event)"/>
+				<account:ProfessionalAccountLoginCreation userDefined="postUserInfo(event)" previousPage="onPreviousPage(event)" account="{account}"/>
 			</mx:AddChild>
 		</mx:State>
         <mx:State name="TermsOfService">

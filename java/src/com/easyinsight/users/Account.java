@@ -25,6 +25,8 @@ public class Account {
     public static final int SUSPENDED = 4;
     public static final int CLOSED = 5;
     public static final int PENDING_BILLING = 6;
+    public static final int PREPARING = 7;
+    public static final int BETA = 8;
 
     @Id
     @GeneratedValue(strategy= GenerationType.IDENTITY)
@@ -38,6 +40,9 @@ public class Account {
     @OneToMany (cascade = CascadeType.ALL)
     @JoinColumn(name="account_id")
     private List<SubscriptionLicense> licenses = new ArrayList<SubscriptionLicense>();
+
+    @Column(name="group_id")
+    private Long groupID;
 
     @Column(name="account_type")
     private int accountType;
@@ -76,7 +81,7 @@ public class Account {
     @JoinTable(name="account_to_guest_user",
         joinColumns = @JoinColumn(name="account_id", nullable = false),
         inverseJoinColumns = @JoinColumn(name="guest_user_id", nullable = false))
-    private List<GuestUser> guestUsers = new ArrayList<GuestUser>();
+    private List<Consultant> guestUsers = new ArrayList<Consultant>();
 
     //private BillingParty billingParty;
 
@@ -155,6 +160,51 @@ public class Account {
         transfer.setLicenses(subscriptionList);
         //transfer.setUsers(users);
         transfer.setAccountType(accountType);
+        transfer.setMaxSize(maxSize);
+        transfer.setName(name);
+        transfer.setMaxUsers(maxUsers);
+        transfer.setAccountState(accountState);
+        transfer.setBasicAuthAllowed(basicAuthAllowed);
+        transfer.setUncheckedAPIAllowed(uncheckedAPIAllowed);
+        transfer.setUncheckedAPIEnabled(uncheckedAPIEnabled);
+        transfer.setValidatedAPIAllowed(validatedAPIAllowed);
+        transfer.setValidatedAPIEnabled(validatedAPIEnabled);
+        transfer.setDynamicAPIAllowed(dynamicAPIAllowed);
+        return transfer;
+    }
+
+    public AccountAdminTO toAdminTO() {
+        AccountAdminTO transfer = new AccountAdminTO();
+        transfer.setAccountID(accountID);
+        List<SubscriptionLicense> subscriptionList = new ArrayList<SubscriptionLicense>(licenses);
+        transfer.setLicenses(subscriptionList);
+        //transfer.setUsers(users);
+        transfer.setAccountType(accountType);
+        transfer.setMaxSize(maxSize);
+        transfer.setName(name);
+        transfer.setMaxUsers(maxUsers);
+        if (groupID != null) {
+            transfer.setGroupID(groupID);
+        }
+        List<UserTransferObject> adminUsers = new ArrayList<UserTransferObject>();
+        for (User user : getUsers()) {
+            if (user.isAccountAdmin()) {
+                adminUsers.add(user.toUserTransferObject());
+            }
+        }
+        List<ConsultantTO> consultants = new ArrayList<ConsultantTO>();
+        for (Consultant consultant : getGuestUsers()) {
+            consultants.add(consultant.toConsultantTO());
+        }
+        transfer.setConsultants(consultants);
+        transfer.setAdminUsers(adminUsers);
+        transfer.setAccountState(accountState);
+        transfer.setBasicAuthAllowed(basicAuthAllowed);
+        transfer.setUncheckedAPIAllowed(uncheckedAPIAllowed);
+        transfer.setUncheckedAPIEnabled(uncheckedAPIEnabled);
+        transfer.setValidatedAPIAllowed(validatedAPIAllowed);
+        transfer.setValidatedAPIEnabled(validatedAPIEnabled);
+        transfer.setDynamicAPIAllowed(dynamicAPIAllowed);
         return transfer;
     }
     
@@ -222,11 +272,19 @@ public class Account {
         this.basicAuthAllowed = basicAuthAllowed;
     }
 
-    public List<GuestUser> getGuestUsers() {
+    public List<Consultant> getGuestUsers() {
         return guestUsers;
     }
 
-    public void setGuestUsers(List<GuestUser> guestUsers) {
+    public void setGuestUsers(List<Consultant> guestUsers) {
         this.guestUsers = guestUsers;
+    }
+
+    public Long getGroupID() {
+        return groupID;
+    }
+
+    public void setGroupID(Long groupID) {
+        this.groupID = groupID;
     }
 }

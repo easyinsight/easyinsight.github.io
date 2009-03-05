@@ -154,7 +154,7 @@ public class SecurityUtil {
         Connection conn = Database.instance().getConnection();
         try {
             PreparedStatement existingLinkQuery = conn.prepareStatement("SELECT BINDING_TYPE FROM GROUP_TO_USER_JOIN WHERE " +
-                    "USER_ID = ? AND GROU_ID = ?");
+                    "USER_ID = ? AND GROUP_ID = ?");
             existingLinkQuery.setLong(1, userID);
             existingLinkQuery.setLong(2, groupID);
             ResultSet rs = existingLinkQuery.executeQuery();

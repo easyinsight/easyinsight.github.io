@@ -8,10 +8,7 @@ import java.net.URL;
 import java.io.FileInputStream;
 import java.io.File;
 import java.io.IOException;
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.sql.ResultSet;
-import java.sql.PreparedStatement;
+import java.sql.*;
 
 /**
  * User: James Boe
@@ -38,6 +35,72 @@ public class DatabaseManager {
         return dbMap.get(databaseID);
     }
 
+    public void defineDateTable(Database database) throws SQLException {
+        Connection conn = database.getConnection();
+        try {
+            conn.setAutoCommit(false);
+            ResultSet tableRS = conn.getMetaData().getTables(null, null, "DATE_DIMENSION", null);
+            if (!tableRS.next()) {
+                PreparedStatement dbStmt = conn.prepareStatement("CREATE TABLE DATE_DIMENSION (DATE_DIMENSION_ID BIGINT(11) AUTO_INCREMENT NOT NULL," +
+                        "DIM_DATE DATE NOT NULL, DIM_DAY_OF_MONTH INTEGER NOT NULL, DIM_MONTH INTEGER NOT NULL, " +
+                        "DIM_QUARTER_OF_YEAR INTEGER NOT NULL, DIM_YEAR INTEGER NOT NULL, DIM_WEEK_OF_YEAR INTEGER NOT NULL," +
+                        "DIM_DAY_OF_WEEK INTEGER NOT NULL, PRIMARY KEY (DATE_DIMENSION_ID), INDEX (DIM_DATE), INDEX(DIM_DAY_OF_MONTH)," +
+                        "INDEX(DIM_QUARTER_OF_YEAR), INDEX(DIM_YEAR), INDEX(DIM_WEEK_OF_YEAR), INDEX(DIM_DAY_OF_WEEK))");
+                dbStmt.execute();
+                PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO DATE_DIMENSION (DIM_DATE, DIM_DAY_OF_MONTH," +
+                        "DIM_MONTH, DIM_QUARTER_OF_YEAR, DIM_YEAR, DIM_WEEK_OF_YEAR, DIM_DAY_OF_WEEK) VALUES (?, ?, ?, ?, ?, ?, ?)");
+                Calendar cal = Calendar.getInstance();
+                cal.add(Calendar.YEAR, -100);
+                for (int i = 0; i < 15; i++) {
+                    cal.add(Calendar.YEAR, 1);
+                    for (int j = 0; j < ((cal.get(Calendar.YEAR) % 4 == 0) ? 366 : 365); j++) {
+                        cal.set(Calendar.DAY_OF_YEAR, j);
+                        insertStmt.setDate(1, new java.sql.Date(cal.getTime().getTime()));
+                        insertStmt.setInt(2, cal.get(Calendar.DAY_OF_MONTH));
+                        insertStmt.setInt(3, cal.get(Calendar.MONTH));
+                        int quarterOfYear;
+                        switch (cal.get(Calendar.MONTH)) {
+                            case Calendar.JANUARY:
+                            case Calendar.FEBRUARY:
+                            case Calendar.MARCH:
+                                quarterOfYear = 0;
+                                break;
+                            case Calendar.APRIL:
+                            case Calendar.MAY:
+                            case Calendar.JUNE:
+                                quarterOfYear = 1;
+                                break;
+                            case Calendar.JULY:
+                            case Calendar.AUGUST:
+                            case Calendar.SEPTEMBER:
+                                quarterOfYear = 2;
+                                break;
+                            case Calendar.OCTOBER:
+                            case Calendar.NOVEMBER:
+                            case Calendar.DECEMBER:
+                            default:
+                                quarterOfYear = 3;
+                                break;
+                        }
+                        insertStmt.setInt(4, quarterOfYear);
+                        insertStmt.setInt(5, cal.get(Calendar.YEAR));
+                        insertStmt.setInt(6, cal.get(Calendar.WEEK_OF_YEAR));
+                        insertStmt.setInt(7, cal.get(Calendar.DAY_OF_WEEK));
+                        insertStmt.execute();
+                    }
+                }
+            }
+            conn.commit();
+        } catch (SQLException e) {
+            LogClass.error(e);
+            conn.rollback();            
+            throw new RuntimeException(e);
+        } finally {
+            conn.setAutoCommit(false);
+            database.closeConnection(conn);
+        }
+    }
+
     private void loadAvailableDatabases() {
         try {
             URL url = getClass().getClassLoader().getResource("eiconfig.properties");
@@ -53,10 +116,14 @@ public class DatabaseManager {
                     String user = properties.getProperty(dbID + ".storage.username");
                     String password = properties.getProperty(dbID + ".storage.password");
                     Database database = Database.create(host, port, databaseName, user, password);
+                    defineDateTable(database);
                     dbMap.put(dbID, database);
                 }
             }
         } catch (IOException e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        } catch (SQLException e) {
             LogClass.error(e);
             throw new RuntimeException(e);
         }

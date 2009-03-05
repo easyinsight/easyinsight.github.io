@@ -573,7 +573,7 @@ public class DataStorage {
         for (KeyMetadata keyMetadata : keys.values()) {
             sqlBuilder.append(getColumnDefinitionSQL(keyMetadata.getKey(), keyMetadata.getType()));
             sqlBuilder.append(",");
-        }                                                         
+        }
         String primaryKey = getTableName() + "_ID";
         sqlBuilder.append(primaryKey);
         sqlBuilder.append(" BIGINT NOT NULL AUTO_INCREMENT,");
@@ -588,6 +588,13 @@ public class DataStorage {
                 sqlBuilder.append(")");
                 sqlBuilder.append(",");
             }
+            if (keyMetadata.getType() == Value.DATE) {
+                sqlBuilder.append("INDEX (");
+                String column = "datedim_" + keyMetadata.getKey().getKeyID() + "_id";
+                sqlBuilder.append(column);
+                sqlBuilder.append(")");
+                sqlBuilder.append(",");
+            }
         }
         if (sqlBuilder.charAt(sqlBuilder.length() - 1) == ',') sqlBuilder.deleteCharAt(sqlBuilder.length() - 1);
         sqlBuilder.append(" )");
@@ -597,7 +604,7 @@ public class DataStorage {
     private String getColumnDefinitionSQL(Key key, int type) {
         String column;
         if (type == Value.DATE) {
-            column = "k" + key.getKeyID() + " DATETIME";
+            column = "k" + key.getKeyID() + " DATETIME, datedim_" + key.getKeyID() + "_id BIGINT(11)";
         } else if (type == Value.NUMBER) {
             column = "k" + key.getKeyID() + " DOUBLE";
         } else {

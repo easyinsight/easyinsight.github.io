@@ -158,7 +158,7 @@ import mx.managers.PopUpManager;
             this.dataSourceAPIKey = key;
             publishAvailable = true;
             var eiQueryWindow:EIQueryWindow = new EIQueryWindow();
-            eiQueryWindow.link = "http://www.easy-insight.com/DMS/#feedKey= " + key;
+            eiQueryWindow.link = "http://www.easy-insight.com/app/#feedKey= " + key;
             PopUpManager.addPopUp(eiQueryWindow, this);
             PopUpManager.centerPopUp(eiQueryWindow);
         }

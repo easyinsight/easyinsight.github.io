@@ -1,0 +1,134 @@
+<?xml version="1.0" ?>
+<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml">
+    <mx:states>
+        <mx:State name="PreparingAccount">
+            <mx:AddChild relativeTo="{actionsBox}">
+                <mx:Button label="Activate" click="activate()"/>
+            </mx:AddChild>
+        </mx:State>
+    </mx:states>
+    <mx:Script><![CDATA[
+        import mx.collections.ArrayCollection;
+        import mx.managers.PopUpManager;
+
+        [Bindable]
+        private var consultants:ArrayCollection;
+        [Bindable]
+        private var adminUsers:ArrayCollection;
+
+        private var _accountAdminTO:AccountAdminTO;
+
+        public function set accountAdminTO(val:AccountAdminTO):void {
+            _accountAdminTO = val;
+        }
+
+        override protected function commitProperties():void {
+            super.commitProperties();
+            accountNameInput.text = _accountAdminTO.name;
+            accountTypeComboBox.selectedIndex = _accountAdminTO.accountType - 1;
+            adminUsers = _accountAdminTO.adminUsers;
+            consultants = _accountAdminTO.consultants;
+        }
+
+        private function addConsultant():void {
+           
+        }
+
+        private function addAdminUser():void {
+        }
+
+        private function activate():void {
+            accountStatusComboBox.selectedIndex = Account.BETA - 1;
+            userService.eiActivateBizAccount.send(_accountAdminTO.accountID);
+        }
+
+        private function create():void {
+            
+            _accountAdminTO.name = accountNameInput.text;
+            _accountAdminTO.accountType = accountTypeComboBox.selectedIndex + 1;
+            _accountAdminTO.accountState = accountStatusComboBox.selectedIndex + 1;
+
+        }
+
+        private function statusChange():void {
+            if (accountStatusComboBox.selectedIndex + 1 == Account.PREPARING) {
+                currentState = "PreparingAccount";
+            } else {
+                currentState = "";
+            }
+        }
+
+        private function created():void {
+            dispatchEvent(new RefreshAccountsListEvent());
+            PopUpManager.removePopUp(this);
+        }
+        ]]></mx:Script>
+    <mx:RemoteObject destination="login" id="userService">
+        <mx:method name="eiActivateBizAccount" result="created()"/>
+        <mx:method name="adminUpdate" result="created()"/>
+    </mx:RemoteObject>
+    <mx:VBox styleName="TitleWindowContents">
+        <mx:Form>
+            <mx:FormItem label="Account Name:">
+                <mx:TextInput id="accountNameInput"/>
+            </mx:FormItem>
+            <mx:FormItem label="Account Type:">
+                <mx:ComboBox id="accountTypeComboBox">
+                    <mx:dataProvider>
+                        <mx:ArrayCollection>
+                            <mx:Array>
+                                <mx:String>Free</mx:String>
+                                <mx:String>Individual</mx:String>
+                                <mx:String>Professional</mx:String>
+                                <mx:String>Enterprise</mx:String>
+                                <mx:String>Administration</mx:String>
+                            </mx:Array>
+                        </mx:ArrayCollection>
+                    </mx:dataProvider>
+                </mx:ComboBox>
+            </mx:FormItem>
+        </mx:Form>
+        <mx:HBox>
+            <mx:ComboBox id="accountStatusComboBox" change="statusChange()">
+                <mx:dataProvider>
+                    <mx:ArrayCollection>
+                        <mx:Array>
+                            <mx:String>Inactive</mx:String>
+                            <mx:String>Active</mx:String>
+                            <mx:String>Delinquent</mx:String>
+                            <mx:String>Suspended</mx:String>
+                            <mx:String>Closed</mx:String>
+                            <mx:String>Pending Billing</mx:String>
+                            <mx:String>Preparing</mx:String>
+                            <mx:String>Beta</mx:String>
+                        </mx:Array>
+                    </mx:ArrayCollection>
+                </mx:dataProvider>
+            </mx:ComboBox>
+            <mx:Box id="actionsBox"/>
+        </mx:HBox>
+        <mx:HBox>
+            <mx:Label text="Administators"/>
+            <mx:Button label="Add Admin User" click="addAdminUser()"/>
+        </mx:HBox>
+        <mx:DataGrid dataProvider="{adminUsers}">
+            <mx:columns>
+                <mx:DataGridColumn dataField="name" headerText="Name"/>
+                <mx:DataGridColumn dataField="email" headerText="Email Address"/>
+            </mx:columns>
+        </mx:DataGrid>
+        <mx:HBox>
+            <mx:Label text="Consultants"/>
+            <mx:Button label="Add Consultant" click="addConsultant()"/>
+        </mx:HBox>
+        <mx:DataGrid dataProvider="{consultants}">
+            <mx:columns>
+                <mx:DataGridColumn dataField="name" headerText="Name"/>
+            </mx:columns>
+        </mx:DataGrid>
+        <mx:HBox width="100%" horizontalAlign="center">
+            <mx:Button label="Apply" click="create()"/>
+            <mx:Button label="Close" click="PopUpManager.removePopUp(this)"/>
+        </mx:HBox>
+    </mx:VBox>
+</mx:TitleWindow>
