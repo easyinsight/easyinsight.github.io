@@ -6,36 +6,37 @@ import com.easyinsight.core.Value;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.List;
-import java.util.ArrayList;
+import java.util.Arrays;
 
 /**
  * User: James Boe
-* Date: Nov 10, 2008
-* Time: 6:27:32 PM
-*/
-public class NumericWhere implements IWhere {
-    private Key key;
-    private double value;
-    private Comparison comparison;
+ * Date: Mar 6, 2009
+ * Time: 11:24:10 AM
+ */
+public class DayWhere implements IWhere {
 
-    public NumericWhere(Key key, double value, Comparison comparison) {
+    private Key key;
+    private int year;
+    private int dayOfYear;
+
+    public DayWhere(Key key, int year, int dayOfYear) {
         this.key = key;
-        this.value = value;
-        this.comparison = comparison;
+        this.year = year;
+        this.dayOfYear = dayOfYear;
     }
 
     public String createWhereSQL() {
-        String comparator = comparison.createComparison();
-        return "k" + key.getKeyID() + " " + comparator + " ?";
+        return "datedim_" + key.getKeyID() + "_id = date_dimension.date_dimension_id AND date_dimension.dim_year = ? AND date_dimension.dim_day_of_year = ?";
     }
 
     public int setValue(PreparedStatement preparedStatement, int position) throws SQLException {
-        preparedStatement.setDouble(position, value);
-        return position + 1;
+        preparedStatement.setInt(position, year);
+        preparedStatement.setInt(position + 1, dayOfYear);
+        return position + 2;
     }
 
     public List<String> getExtraTables() {
-        return new ArrayList<String>();    
+        return Arrays.asList("date_dimension");
     }
 
     public Key getKey() {

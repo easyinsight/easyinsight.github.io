@@ -1,9 +1,13 @@
 package com.easyinsight.storage;
 
 import com.easyinsight.core.Key;
+import com.easyinsight.core.Value;
+import com.easyinsight.core.StringValue;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.List;
+import java.util.ArrayList;
 
 /**
  * User: James Boe
@@ -23,11 +27,24 @@ public class StringWhere implements IWhere {
         return "k" + key.getKeyID() + " = ?";
     }
 
-    public void setValue(PreparedStatement preparedStatement, int position) throws SQLException {
+    public int setValue(PreparedStatement preparedStatement, int position) throws SQLException {
         preparedStatement.setString(position, value);
+        return position + 1;
+    }
+
+    public List<String> getExtraTables() {
+        return new ArrayList<String>();
     }
 
     public Key getKey() {
         return key;
+    }
+
+    public boolean hasConcreteValue() {
+        return true;
+    }
+
+    public Value getConcreteValue() {
+        return new StringValue(value);
     }
 }

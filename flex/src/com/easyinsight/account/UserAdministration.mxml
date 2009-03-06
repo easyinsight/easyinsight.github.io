@@ -33,6 +33,7 @@
             
             private function addUser():void {
             	var newUserDialog:NewUserDialog = NewUserDialog(PopUpManager.createPopUp(this, NewUserDialog, true));
+                newUserDialog.addEventListener(RefreshAccountEvent.REFRESH_ACCOUNT, refreshAccount);
             	PopUpManager.centerPopUp(newUserDialog);
             }
 
@@ -65,7 +66,7 @@
             </mx:DataGrid>
             <mx:Spacer height="40"/>
             <mx:Box width="100%" backgroundColor="#F1EE8D" horizontalAlign="center">
-                <mx:Label text="Users" fontFamily="Tahoma" fontWeight="bold" fontSize="14"/>
+                <mx:Label text="Consultants" fontFamily="Tahoma" fontWeight="bold" fontSize="14"/>
             </mx:Box>
             <mx:DataGrid dataProvider="{consultants}" width="100%" id="guestUsersGrid">
                 <mx:columns>

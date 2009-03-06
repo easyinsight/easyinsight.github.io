@@ -13,6 +13,7 @@ package com.easyinsight.solutions
 		public var solutionArchiveName:String;
         public var goalTreeID:int;
         public var installable:Boolean;
+        public var solutionTier:int;
 		
 		public function Solution()
 		{

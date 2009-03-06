@@ -229,6 +229,7 @@
                     descriptor.dataFeedID = event.feedID;
                     descriptor.policy = new UploadPolicy();
                     descriptor.policy.publiclyVisible = false;
+                    descriptor.name = event.name;
                     dispatchEvent(new AnalyzeEvent(new DescriptorAnalyzeSource(descriptor)));
                 }
             }

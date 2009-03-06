@@ -31,6 +31,7 @@ public class DataStorage {
     private Connection coreDBConn;
     private boolean committed = false;
     private FeedPersistenceMetadata metadata;
+    private static DateDimCache dateDimCache = new DateDimCache();
 
     public static DataStorage readConnection(List<AnalysisItem> fields, long feedID) {
         DataStorage dataStorage = new DataStorage();
@@ -373,8 +374,10 @@ public class DataStorage {
         Iterator<KeyMetadata> keyIter = keys.values().iterator();
         while (keyIter.hasNext()) {
             KeyMetadata keyMetadata = keyIter.next();
-            columnBuilder.append("k").append(keyMetadata.key.getKeyID());
-            paramBuilder.append("?");
+            columnBuilder.append(keyMetadata.createInsertClause());
+            //columnBuilder.append("k").append(keyMetadata.key.getKeyID());
+            //paramBuilder.append("?");
+            paramBuilder.append(keyMetadata.createInsertQuestionMarks());
             if (keyIter.hasNext()) {
                 columnBuilder.append(",");
                 paramBuilder.append(",");
@@ -396,57 +399,28 @@ public class DataStorage {
         StringBuilder fieldBuilder = new StringBuilder();
         List<KeyMetadata> updateKeys = new ArrayList<KeyMetadata>();
         for (KeyMetadata keyMetadata : keys.values()) {
-            boolean inWhereClause = false;
+            //boolean inWhereClause = false;
             for (IWhere where : wheres) {
                 if (where.getKey().equals(keyMetadata.getKey())) {
                     where.getKey().setKeyID(keyMetadata.getKey().getKeyID());
-                    inWhereClause = true;
+                    //inWhereClause = true;
                 }
             }
-            if (!inWhereClause) {
+            //if (!inWhereClause) {
                 updateKeys.add(keyMetadata);
-            }
+            //}
         }
         Iterator<KeyMetadata> keyIter = updateKeys.iterator();
         while (keyIter.hasNext()) {
             KeyMetadata keyMetadata = keyIter.next();
-            fieldBuilder.append("k").append(keyMetadata.key.getKeyID());
-            fieldBuilder.append(" = ?");
+            fieldBuilder.append(keyMetadata.createUpdateClause());
             if (keyIter.hasNext()) {
                 fieldBuilder.append(",");
             }
         }
 
-        StringBuilder columnBuilder = new StringBuilder();
-        StringBuilder paramBuilder = new StringBuilder();
-        keyIter = keys.values().iterator();
-        while (keyIter.hasNext()) {
-            KeyMetadata keyMetadata = keyIter.next();
-            columnBuilder.append("k").append(keyMetadata.key.getKeyID());
-            paramBuilder.append("?");
-            columnBuilder.append(",");
-            paramBuilder.append(",");
-        }
-        Iterator<IWhere> whereIter = wheres.iterator();
-        while (whereIter.hasNext()) {
-            IWhere where = whereIter.next();
-            columnBuilder.append("k");
-            columnBuilder.append(where.getKey().getKeyID());
-            paramBuilder.append("?");
-            if (whereIter.hasNext()) {
-                columnBuilder.append(",");
-                paramBuilder.append(",");    
-            }
-        }
-        String columns = columnBuilder.toString();
-        String parameters = paramBuilder.toString();
-
-        String insertSQL = "INSERT INTO " + getTableName() + " (" + columns + ") VALUES (" + parameters + ")";
-        System.out.println(insertSQL);
-        PreparedStatement insertStmt = storageConn.prepareStatement(insertSQL);
-
         StringBuilder whereBuilder = new StringBuilder();
-        whereIter = wheres.iterator();
+        Iterator<IWhere> whereIter = wheres.iterator();
         while (whereIter.hasNext()) {
             IWhere where = whereIter.next();
             whereBuilder.append(where.createWhereSQL());
@@ -454,8 +428,14 @@ public class DataStorage {
                 whereBuilder.append(",");
             }
         }
-
-        String updateSQL = "UPDATE " + getTableName() + " SET " + fieldBuilder.toString() + " WHERE " + whereBuilder.toString();
+        StringBuilder tableBuilder = new StringBuilder();
+        for (IWhere where : wheres) {
+            for (String extraTable : where.getExtraTables()) {
+                tableBuilder.append(extraTable).append(",");
+            }
+        }
+        tableBuilder.append(getTableName());
+        String updateSQL = "UPDATE " + tableBuilder.toString() + " SET " + fieldBuilder.toString() + " WHERE " + whereBuilder.toString();
         System.out.println(updateSQL);
         PreparedStatement updateStmt = storageConn.prepareStatement(updateSQL);
         for (IRow row : dataSet.getRows()) {
@@ -464,19 +444,13 @@ public class DataStorage {
                 i = setValue(updateStmt, row, i, keyMetadata);
             }
             for (IWhere where : wheres) {
-                where.setValue(updateStmt, i++);
+                i = where.setValue(updateStmt, i);
             }
 
             int rows = updateStmt.executeUpdate();
             if (rows == 0) {
-                i = 1;
-                for (KeyMetadata keyMetadata : keys.values()) {
-                    i = setValue(insertStmt, row, i, keyMetadata);
-                }
-                for (IWhere where : wheres) {
-                    where.setValue(insertStmt, i);
-                }
-                insertStmt.execute();                
+                dataSet.mergeWheres(wheres);
+                insertData(dataSet);
             }
         }
     }
@@ -494,6 +468,7 @@ public class DataStorage {
             }
             insertStmt.setNull(i++, sqlType);
         } else if (keyMetadata.getType() == Value.DATE) {
+            java.util.Date date = null;
             if (value.type() != Value.DATE) {
                 AnalysisItem analysisItem = keyMetadata.getAnalysisItem();
                 AnalysisDateDimension analysisDateDimension = (AnalysisDateDimension) analysisItem;
@@ -503,15 +478,21 @@ public class DataStorage {
                     insertStmt.setNull(i++, Types.DATE);
                 else {
                     DateValue dateValue = (DateValue) transformedValue;
-                    java.util.Date date = dateValue.getDate();
+                    date = dateValue.getDate();
                     java.sql.Timestamp sqlDate = new java.sql.Timestamp(date.getTime());
                     insertStmt.setTimestamp(i++, sqlDate);
                 }
             } else {
                 DateValue dateValue = (DateValue) value;
-                java.util.Date date = dateValue.getDate();
+                date = dateValue.getDate();
                 java.sql.Timestamp sqlDate = new java.sql.Timestamp(date.getTime());
                 insertStmt.setTimestamp(i++, sqlDate);
+            }
+            if (date == null) {
+                insertStmt.setNull(i++, Types.BIGINT);
+            } else {
+                long id = dateDimCache.getDateDimID(date, storageConn);
+                insertStmt.setLong(i++, id);
             }
         } else if (keyMetadata.getType() == Value.NUMBER) {
             Double num = null;
@@ -650,6 +631,30 @@ public class DataStorage {
 
         public void setAnalysisItem(AnalysisItem analysisItem) {
             this.analysisItem = analysisItem;
+        }
+
+        public String createInsertClause() {
+            if (type == Value.DATE) {
+                return "k" + key.getKeyID() + ", datedim_" + key.getKeyID() + "_id";
+            } else {
+                return "k" + key.getKeyID();
+            }
+        }
+
+        public String createUpdateClause() {
+            if (type == Value.DATE) {
+                return "k" + key.getKeyID() + " = ?, datedim_" + key.getKeyID() + "_id = ?";
+            } else {
+                return "k" + key.getKeyID() + " = ?";
+            }
+        }
+
+        public String createInsertQuestionMarks() {
+            if (type == Value.DATE) {
+                return "?, ?";
+            } else {
+                return "?";
+            }
         }
     }
 

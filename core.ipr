@@ -8160,7 +8160,11 @@
   <component name="ProjectDetails">
     <option name="projectName" value="core" />
   </component>
-  <component name="ProjectFileVersion" converted="true" />
+  <component name="ProjectFileVersion" converted="true">
+    <converter id="javaee-modules" />
+    <converter id="ror-modules" />
+    <converter id="SelenaRunConfToDiana" />
+  </component>
   <component name="ProjectKey">
     <option name="state" value="https://wush.net/svn/easyinsight/code/core.ipr" />
   </component>

@@ -16,12 +16,12 @@ public class AccountMemberInvitation {
             "Your login information is the following:\r\n\r\n"+
             "User Name: {1}\r\n" +
             "Password: {2}\r\n\r\n" +
-            "You can access Easy Insight at http://www.easy-insight.com/app\r\n" +
+            "You can access Easy Insight at http://www.easy-insight.com/app/#page=welcome\r\n" +
             "Once there and logged in, you can change your password through Account - Change my Password.";
 
     private static String newProAccountText =
             "A new professional account for your organization has been created on Easy Insight.\r\nYou can access the application at\r\n\r\n" +
-            "http://www.easy-insight.com/app\r\n\r\n"+
+            "http://www.easy-insight.com/app/#page=welcome\r\n\r\n"+
             "Your administrator user credentials are:\r\n\r\n"+
             "User Name: {0}\r\n"+
             "Password:  {1}\r\n\r\n"+
@@ -30,7 +30,7 @@ public class AccountMemberInvitation {
 
     private static String newConsultantProAccountText =
             "A new professional account for your organization has been created on Easy Insight.\r\nYou can access the application at\r\n\r\n" +
-            "http://www.easy-insight.com/app\r\n\r\n"+
+            "http://www.easy-insight.com/app/#page=welcome\r\n\r\n"+
             "Your administrator user credentials are:\r\n\r\n"+
             "User Name: {0}\r\n"+
             "Password:  {1}\r\n\r\n"+

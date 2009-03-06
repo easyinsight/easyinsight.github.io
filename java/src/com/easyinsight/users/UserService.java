@@ -540,51 +540,59 @@ public class UserService implements IUserService {
 
     public void eiNewBizAccount(AccountTransferObject accountTransferObject, UserTransferObject initialUser) {
         SecurityUtil.authorizeAccountTier(Account.ADMINISTRATOR);
-        Connection conn = Database.instance().getConnection();
-        Session session = Database.instance().createSession(conn);
+        Session session = Database.instance().createSession();
+        Account account;
+        User user;
         try {
-            conn.setAutoCommit(false);
-            Account account = accountTransferObject.toAccount();
+            session.getTransaction().begin();
+            account = accountTransferObject.toAccount();
             configureNewAccount(account);
             account.setAccountState(Account.PREPARING);
             initialUser.setAccountAdmin(true);
             initialUser.setDataSourceCreator(true);
             initialUser.setInsightCreator(true);
             String password = RandomTextGenerator.generateText(12);
-            User user = createInitialUser(initialUser, password, account);
+            user = createInitialUser(initialUser, password, account);
             account.addUser(user);
             session.save(account);
             user.setAccount(account);
             session.update(user);
-            /*user.setAccount(account);
-            */
-            if (account.getAccountType() == Account.PROFESSIONAL || account.getAccountType() == Account.ENTERPRISE) {
-                Group group = new Group();
-                group.setName(account.getName());
-                group.setPubliclyVisible(false);
-                group.setPubliclyJoinable(false);
-                group.setDescription("This group was automatically created to act as a location for exposing data to all users in the account.");
-                account.setGroupID(new GroupStorage().addGroup(group, user.getUserID(), conn));
-                session.update(account);
-            }
-            conn.commit();
+            session.getTransaction().commit();
             new AccountMemberInvitation().newProAccount(user.getEmail(), user.getUserName(), password);
         } catch (Exception e) {
             LogClass.error(e);
-            try {
-                conn.rollback();
-            } catch (SQLException e1) {
-                LogClass.error(e1);
-            }
+            session.getTransaction().rollback();
             throw new RuntimeException(e);
         } finally {
             session.close();
-            try {
-                conn.setAutoCommit(true);
-            } catch (SQLException e) {
-                LogClass.error(e);
-            }
+        }
+        long groupID;
+        Connection conn = Database.instance().getConnection();
+        try {
+            Group group = new Group();
+            group.setName(account.getName());
+            group.setPubliclyVisible(false);
+            group.setPubliclyJoinable(false);
+            group.setDescription("This group was automatically created to act as a location for exposing data to all users in the account.");
+            groupID = new GroupStorage().addGroup(group, user.getUserID(), conn);
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        } finally {
             Database.instance().closeConnection(conn);
+        }
+        session = Database.instance().createSession();
+        try {
+            session.getTransaction().begin();
+            account.setGroupID(groupID);
+            session.update(account);
+            session.getTransaction().commit();
+        } catch (Exception e) {
+            LogClass.error(e);
+            session.getTransaction().rollback();
+            throw new RuntimeException(e);
+        } finally {
+            session.close();
         }
     }
 
@@ -689,12 +697,13 @@ public class UserService implements IUserService {
         } else {
             Session session = Database.instance().createSession();
             Account account;
+            User user;
             try {
                 session.beginTransaction();
                 List results = session.createQuery("from Account where accountID = ?").setLong(0, accountID).list();
                 account = (Account) results.get(0);
                 User admin = (User) session.createQuery("from User where userID = ?").setLong(0, SecurityUtil.getUserID()).list().get(0);
-                User user = userTransferObject.toUser();
+                user = userTransferObject.toUser();
                 user.setAccount(account);
                 final String password = RandomTextGenerator.generateText(12);
                 final String adminName = admin.getName();
@@ -710,7 +719,7 @@ public class UserService implements IUserService {
                         new AccountMemberInvitation().sendAccountEmail(userEmail, adminName, userName, password);
                     }
                 }).start();
-                userCreationResponse = new UserCreationResponse(userTransferObject.getUserID());
+                userCreationResponse = new UserCreationResponse(user.getUserID());
             } catch (Exception e) {
                 LogClass.error(e);
                 session.getTransaction().rollback();
@@ -719,7 +728,11 @@ public class UserService implements IUserService {
                 session.close();
             }
             if (account.getAccountType() == Account.PROFESSIONAL || account.getAccountType() == Account.ENTERPRISE) {
-                new GroupStorage().addUserToGroup(userCreationResponse.getUserID(), account.getGroupID(), userTransferObject.isAccountAdmin() ? Roles.OWNER : Roles.SUBSCRIBER);
+                try {
+                    new GroupStorage().addUserToGroup(user.getUserID(), account.getGroupID(), userTransferObject.isAccountAdmin() ? Roles.OWNER : Roles.SUBSCRIBER);
+                } catch (Exception e) {
+                    LogClass.error(e);
+                }
             }
         }
         return userCreationResponse;
@@ -842,6 +855,45 @@ public class UserService implements IUserService {
                     if (encryptedPassword.equals(actualPassword)) {
                         List accountResults = session.createQuery("from Account where accountID = ?").setLong(0, user.getAccount().getAccountID()).list();
                         Account account = (Account) accountResults.get(0);
+                        userServiceResponse = new UserServiceResponse(true, user.getUserID(), user.getAccount().getAccountID(), user.getName(),
+                                user.getAccount().getAccountType(), account.getMaxSize(), user.getEmail(), user.getUserName(), encryptedPassword, user.isAccountAdmin(), user.isDataSourceCreator(), user.isInsightCreator());
+                        // FlexContext.getFlexSession().getRemoteCredentials();
+                    } else {
+                        userServiceResponse = new UserServiceResponse(false, "Incorrect password, please try again.");
+                    }
+                } else {
+                    userServiceResponse = new UserServiceResponse(false, "Incorrect user name, please try again.");
+                }
+                session.getTransaction().commit();
+            } finally {
+                session.close();
+            }
+            return userServiceResponse;
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        }
+    }
+
+    @NotNull
+    public UserServiceResponse authenticateAdmin(String userName, String password) {
+        try {
+            UserServiceResponse userServiceResponse;
+            Session session = Database.instance().createSession();
+            List results;
+            try {
+                session.getTransaction().begin();
+                results = session.createQuery("from User where userName = ?").setString(0, userName).list();
+                if (results.size() > 0) {
+                    User user = (User) results.get(0);
+                    String actualPassword = user.getPassword();
+                    String encryptedPassword = PasswordService.getInstance().encrypt(password);
+                    if (encryptedPassword.equals(actualPassword)) {
+                        List accountResults = session.createQuery("from Account where accountID = ?").setLong(0, user.getAccount().getAccountID()).list();
+                        Account account = (Account) accountResults.get(0);
+                        if (account.getAccountType() != Account.ADMINISTRATOR) {
+                            throw new SecurityException();
+                        }
                         userServiceResponse = new UserServiceResponse(true, user.getUserID(), user.getAccount().getAccountID(), user.getName(),
                                 user.getAccount().getAccountType(), account.getMaxSize(), user.getEmail(), user.getUserName(), encryptedPassword, user.isAccountAdmin(), user.isDataSourceCreator(), user.isInsightCreator());
                         // FlexContext.getFlexSession().getRemoteCredentials();

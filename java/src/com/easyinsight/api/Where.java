@@ -11,6 +11,7 @@ public class Where {
     private StringWhere[] stringWheres;
     private NumberWhere[] numberWheres;
     private DateWhere[] dateWheres;
+    private DayWhere[] dayWheres;
 
     public StringWhere[] getStringWheres() {
         return stringWheres;
@@ -34,5 +35,13 @@ public class Where {
 
     public void setDateWheres(DateWhere[] dateWheres) {
         this.dateWheres = dateWheres;
+    }
+
+    public DayWhere[] getDayWheres() {
+        return dayWheres;
+    }
+
+    public void setDayWheres(DayWhere[] dayWheres) {
+        this.dayWheres = dayWheres;
     }
 }

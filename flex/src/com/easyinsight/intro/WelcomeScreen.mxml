@@ -1,0 +1,16 @@
+<?xml version="1.0" ?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:account="com.easyinsight.account.*"
+           implements="com.easyinsight.listing.IPerspective" width="100%" height="100%">
+    <mx:Script><![CDATA[
+        public function gotFocus():void {
+        }
+
+        public function getDefaultAnalyzeState():Boolean {
+            return false;
+        }
+
+        public function isKeywordSearchInstant():Boolean {
+            return false;
+        }]]></mx:Script>
+    <account:AccountCreated/>
+</mx:Canvas>

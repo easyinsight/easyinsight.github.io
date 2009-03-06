@@ -14,6 +14,7 @@
 	<mx:Script>
 		<![CDATA[
 import com.adobe.ac.mxeffects.Flip;
+import com.easyinsight.intro.WelcomeScreen;
 import mx.core.UIComponent;
 			import com.easyinsight.FullScreenPage;
 			import com.easyinsight.analysis.DelayedFeedLink;
@@ -148,7 +149,9 @@ import mx.core.UIComponent;
 									break;
 								case "account":
 									navigation(new NavigationEvent("My Account"));
-									break;        						
+									break;
+                                case "welcome":
+                                    navigation(new NavigationEvent(null, new WelcomeScreen()));
             				}
             			}
             		}

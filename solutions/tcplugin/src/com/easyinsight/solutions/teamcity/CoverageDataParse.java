@@ -15,7 +15,7 @@ import java.util.List;
  * Time: 4:01:01 PM
  */
 public class CoverageDataParse {
-    public void parseData(String path, UncheckedPublishService service) {
+    public void parseData(String path, BasicAuthUncheckedPublish service) {
         try {
             File file = new File(path);
             FileReader fileReader = new FileReader(file);
@@ -23,14 +23,9 @@ public class CoverageDataParse {
             fileReader.read(buf);
             String contents = new String(buf);
             String[] lines = contents.split("\r\n");
-            String topLine = lines[5];
-
-            String packageLine = lines[9];
-            String classLine = lines[10];
-            String methodLine = lines[11];
-            String executableFiles = lines[12];
-            String executableLines = lines[13];
+            
             List<Row> rows = new ArrayList<Row>();
+            Calendar cal = Calendar.getInstance();
             for (int i = 18; i < lines.length; i++) {
                 String line = lines[i];
                 System.out.println(line);
@@ -87,7 +82,6 @@ public class CoverageDataParse {
                     StringPair namePair = new StringPair();
                     namePair.setKey("Package Name");
                     namePair.setValue(name);
-                    Calendar cal = Calendar.getInstance();
                     Row row = new Row();
                     DatePair datePair = new DatePair();
                     datePair.setKey("Date of Run");
@@ -100,7 +94,12 @@ public class CoverageDataParse {
                 }
                 Row[] rowArray = new Row[rows.size()];
                 rows.toArray(rowArray);
-                service.addRows("teamcitycoverage", rowArray);
+                DayWhere dayWhere = new DayWhere();
+                dayWhere.setKey("Date of Run");
+                dayWhere.setDayOfYear(cal.get(Calendar.DAY_OF_YEAR));
+                Where where = new Where();
+                where.setDayWheres(new DayWhere[] { dayWhere });
+                service.updateRows("teamcitycoverage", rowArray, where);
             }
         } catch (IOException e) {
             e.printStackTrace();

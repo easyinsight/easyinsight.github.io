@@ -4,6 +4,7 @@ import jetbrains.buildServer.notification.Notificator;
 import jetbrains.buildServer.notification.NotificatorRegistry;
 import jetbrains.buildServer.serverSide.*;
 import jetbrains.buildServer.Build;
+import jetbrains.buildServer.tests.TestInfo;
 import jetbrains.buildServer.users.SUser;
 import jetbrains.buildServer.users.NotificatorPropertyKey;
 import jetbrains.buildServer.users.PropertyKey;
@@ -72,7 +73,7 @@ public class EasyInsightNotificator implements Notificator {
                 try {
                     BasicAuthUncheckedPublishServiceServiceLocator locator = new BasicAuthUncheckedPublishServiceServiceLocator();
                     locator.setBasicAuthUncheckedPublishServicePortEndpointAddress(user.getPropertyValue(EI_HOST_KEY));
-                    UncheckedPublishService service = locator.getBasicAuthUncheckedPublishServicePort();
+                    BasicAuthUncheckedPublish service = locator.getBasicAuthUncheckedPublishServicePort();
                     ((BasicAuthUncheckedPublishServiceServiceSoapBindingStub)service).setUsername(eiUserName);
                     ((BasicAuthUncheckedPublishServiceServiceSoapBindingStub)service).setPassword(eiPassword);
                     Row row = new Row();
@@ -138,10 +139,16 @@ public class EasyInsightNotificator implements Notificator {
                     Calendar cal = Calendar.getInstance();
                     datePair.setKey("Date of Run");
                     datePair.setValue(cal);
+                    DayWhere dayWhere = new DayWhere();
+                    dayWhere.setKey("Date of Run");
+                    dayWhere.setDayOfYear(cal.get(Calendar.DAY_OF_YEAR));
+                    dayWhere.setYear(cal.get(Calendar.YEAR));
                     row.setStringPairs(new StringPair[] { stringPair, agentPair} );
                     row.setNumberPairs(new NumberPair[] { allTestCountPair, failedTestCount, passedTestCount, testElapsedTime, durationPair} );
                     row.setDatePairs(new DatePair[] { datePair });
-                    service.addRow("teamcity", row);
+                    Where where = new Where();
+                    where.setDayWheres(new DayWhere[] { dayWhere });
+                    service.updateRow("teamcity", row, where);
                 } catch (ServiceException e) {
                     e.printStackTrace();
                 } catch (java.rmi.RemoteException e) {

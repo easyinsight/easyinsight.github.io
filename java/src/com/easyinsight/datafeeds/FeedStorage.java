@@ -33,9 +33,8 @@ public class FeedStorage {
         insertDataFeedStmt = conn.prepareStatement("INSERT INTO DATA_FEED (FEED_NAME, FEED_TYPE, PUBLICLY_VISIBLE, FEED_SIZE, " +
                     "CREATE_DATE, UPDATE_DATE, FEED_VIEWS, FEED_RATING_COUNT, FEED_RATING_AVERAGE, DESCRIPTION," +
                     "ATTRIBUTION, OWNER_NAME, DYNAMIC_SERVICE_DEFINITION_ID, ANALYSIS_ID, MARKETPLACE_VISIBLE, " +
-                "API_KEY, UNCHECKED_API_BASIC_AUTH, UNCHECKED_API_ENABLED, validated_api_basic_auth, validated_api_enabled, INHERIT_ACCOUNT_API_SETTINGS," +
-                "ACCOUNT_VISIBLE) " +
-                        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                "API_KEY, UNCHECKED_API_BASIC_AUTH, UNCHECKED_API_ENABLED, validated_api_basic_auth, validated_api_enabled, INHERIT_ACCOUNT_API_SETTINGS) " +
+                        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                         Statement.RETURN_GENERATED_KEYS);
         insertDataFeedStmt.setString(1, feedDefinition.getFeedName());
         insertDataFeedStmt.setInt(2, feedDefinition.getFeedType().getType());
@@ -71,7 +70,6 @@ public class FeedStorage {
         insertDataFeedStmt.setBoolean(19, feedDefinition.isValidatedAPIUsingBasicAuth());
         insertDataFeedStmt.setBoolean(20, feedDefinition.isValidatedAPIEnabled());
         insertDataFeedStmt.setBoolean(21, feedDefinition.isInheritAccountAPISettings());
-        insertDataFeedStmt.setBoolean(22, feedDefinition.isAccountVisible());
         insertDataFeedStmt.execute();
         long feedID = Database.instance().getAutoGenKey(insertDataFeedStmt);
         feedDefinition.setDataFeedID(feedID);
@@ -342,7 +340,7 @@ public class FeedStorage {
     public void updateDataFeedConfiguration(FeedDefinition feedDefinition, Connection conn) throws SQLException {
         PreparedStatement updateDataFeedStmt = conn.prepareStatement("UPDATE DATA_FEED SET FEED_NAME = ?, FEED_TYPE = ?, PUBLICLY_VISIBLE = ?, GENRE = ?, " +
                         "FEED_SIZE = ?, ANALYSIS_ID = ?, DESCRIPTION = ?, ATTRIBUTION = ?, OWNER_NAME = ?, DYNAMIC_SERVICE_DEFINITION_ID = ?, MARKETPLACE_VISIBLE = ?," +
-                "API_KEY = ?, validated_api_enabled = ?, unchecked_api_enabled = ?, account_visible = ?  WHERE DATA_FEED_ID = ?");
+                "API_KEY = ?, validated_api_enabled = ?, unchecked_api_enabled = ? WHERE DATA_FEED_ID = ?");
         feedDefinition.setDateUpdated(new Date());
         updateDataFeedStmt.setString(1, feedDefinition.getFeedName());
         updateDataFeedStmt.setInt(2, feedDefinition.getFeedType().getType());
@@ -362,7 +360,6 @@ public class FeedStorage {
         updateDataFeedStmt.setBoolean(13, feedDefinition.isValidatedAPIEnabled());
         updateDataFeedStmt.setBoolean(14, feedDefinition.isUncheckedAPIEnabled());
         updateDataFeedStmt.setLong(15, feedDefinition.getDataFeedID());
-        updateDataFeedStmt.setBoolean(16, feedDefinition.isAccountVisible());
         int rows = updateDataFeedStmt.executeUpdate();
         if (rows != 1) {
             throw new RuntimeException("Could not locate row to update");
@@ -402,8 +399,8 @@ public class FeedStorage {
         try {
             PreparedStatement queryFeedStmt = conn.prepareStatement("SELECT FEED_NAME, FEED_TYPE, PUBLICLY_VISIBLE, GENRE, CREATE_DATE," +
                     "UPDATE_DATE, FEED_VIEWS, FEED_RATING_COUNT, FEED_RATING_AVERAGE, FEED_SIZE, ANALYSIS_ID," +
-                    "ATTRIBUTION, DESCRIPTION, OWNER_NAME, DYNAMIC_SERVICE_DEFINITION_ID, MARKETPLACE_VISIBLE, API_KEY, unchecked_api_enabled, validated_api_enabled," +
-                    "ACCOUNT_VISIBLE FROM DATA_FEED WHERE " +
+                    "ATTRIBUTION, DESCRIPTION, OWNER_NAME, DYNAMIC_SERVICE_DEFINITION_ID, MARKETPLACE_VISIBLE, API_KEY, unchecked_api_enabled, validated_api_enabled " +
+                    "FROM DATA_FEED WHERE " +
                     "DATA_FEED_ID = ?");
             queryFeedStmt.setLong(1, identifier);
             ResultSet rs = queryFeedStmt.executeQuery();
@@ -463,7 +460,6 @@ public class FeedStorage {
                 feedDefinition.setApiKey(rs.getString(17));
                 feedDefinition.setUncheckedAPIEnabled(rs.getBoolean(18));
                 feedDefinition.setValidatedAPIEnabled(rs.getBoolean(19));
-                feedDefinition.setAccountVisible(rs.getBoolean(20));
                 feedDefinition.setTags(getTags(feedDefinition.getDataFeedID(), conn));
                 feedDefinition.customLoad(conn);
             } else {

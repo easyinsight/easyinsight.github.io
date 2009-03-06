@@ -44,17 +44,20 @@ public class DatabaseManager {
                 PreparedStatement dbStmt = conn.prepareStatement("CREATE TABLE DATE_DIMENSION (DATE_DIMENSION_ID BIGINT(11) AUTO_INCREMENT NOT NULL," +
                         "DIM_DATE DATE NOT NULL, DIM_DAY_OF_MONTH INTEGER NOT NULL, DIM_MONTH INTEGER NOT NULL, " +
                         "DIM_QUARTER_OF_YEAR INTEGER NOT NULL, DIM_YEAR INTEGER NOT NULL, DIM_WEEK_OF_YEAR INTEGER NOT NULL," +
-                        "DIM_DAY_OF_WEEK INTEGER NOT NULL, PRIMARY KEY (DATE_DIMENSION_ID), INDEX (DIM_DATE), INDEX(DIM_DAY_OF_MONTH)," +
-                        "INDEX(DIM_QUARTER_OF_YEAR), INDEX(DIM_YEAR), INDEX(DIM_WEEK_OF_YEAR), INDEX(DIM_DAY_OF_WEEK))");
+                        "DIM_DAY_OF_WEEK INTEGER NOT NULL, DIM_DAY_OF_YEAR INTEGER NOT NULL, PRIMARY KEY (DATE_DIMENSION_ID), INDEX (DIM_DATE), INDEX(DIM_DAY_OF_MONTH)," +
+                        "INDEX(DIM_QUARTER_OF_YEAR), INDEX(DIM_YEAR, DIM_DAY_OF_YEAR), INDEX(DIM_WEEK_OF_YEAR), INDEX(DIM_DAY_OF_WEEK), INDEX(DIM_DAY_OF_YEAR))");
                 dbStmt.execute();
                 PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO DATE_DIMENSION (DIM_DATE, DIM_DAY_OF_MONTH," +
-                        "DIM_MONTH, DIM_QUARTER_OF_YEAR, DIM_YEAR, DIM_WEEK_OF_YEAR, DIM_DAY_OF_WEEK) VALUES (?, ?, ?, ?, ?, ?, ?)");
+                        "DIM_MONTH, DIM_QUARTER_OF_YEAR, DIM_YEAR, DIM_WEEK_OF_YEAR, DIM_DAY_OF_WEEK, DIM_DAY_OF_YEAR) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
                 Calendar cal = Calendar.getInstance();
-                cal.add(Calendar.YEAR, -100);
-                for (int i = 0; i < 15; i++) {
-                    cal.add(Calendar.YEAR, 1);
+                cal.add(Calendar.YEAR, -3);
+                for (int i = 0; i < 6; i++) {
+                    cal.set(Calendar.DAY_OF_YEAR, 1);
+                    int year = cal.get(Calendar.YEAR);
+                    int newYear = year + 1;
+                    cal.set(Calendar.YEAR, newYear);
                     for (int j = 0; j < ((cal.get(Calendar.YEAR) % 4 == 0) ? 366 : 365); j++) {
-                        cal.set(Calendar.DAY_OF_YEAR, j);
+                        cal.set(Calendar.DAY_OF_YEAR, j + 1);
                         insertStmt.setDate(1, new java.sql.Date(cal.getTime().getTime()));
                         insertStmt.setInt(2, cal.get(Calendar.DAY_OF_MONTH));
                         insertStmt.setInt(3, cal.get(Calendar.MONTH));
@@ -86,6 +89,7 @@ public class DatabaseManager {
                         insertStmt.setInt(5, cal.get(Calendar.YEAR));
                         insertStmt.setInt(6, cal.get(Calendar.WEEK_OF_YEAR));
                         insertStmt.setInt(7, cal.get(Calendar.DAY_OF_WEEK));
+                        insertStmt.setInt(8, cal.get(Calendar.DAY_OF_YEAR));
                         insertStmt.execute();
                     }
                 }

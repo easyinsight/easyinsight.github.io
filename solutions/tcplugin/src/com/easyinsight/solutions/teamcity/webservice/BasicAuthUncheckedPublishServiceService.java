@@ -10,7 +10,7 @@ package com.easyinsight.solutions.teamcity.webservice;
 public interface BasicAuthUncheckedPublishServiceService extends javax.xml.rpc.Service {
     public java.lang.String getBasicAuthUncheckedPublishServicePortAddress();
 
-    public com.easyinsight.solutions.teamcity.webservice.UncheckedPublishService getBasicAuthUncheckedPublishServicePort() throws javax.xml.rpc.ServiceException;
+    public com.easyinsight.solutions.teamcity.webservice.BasicAuthUncheckedPublish getBasicAuthUncheckedPublishServicePort() throws javax.xml.rpc.ServiceException;
 
-    public com.easyinsight.solutions.teamcity.webservice.UncheckedPublishService getBasicAuthUncheckedPublishServicePort(java.net.URL portAddress) throws javax.xml.rpc.ServiceException;
+    public com.easyinsight.solutions.teamcity.webservice.BasicAuthUncheckedPublish getBasicAuthUncheckedPublishServicePort(java.net.URL portAddress) throws javax.xml.rpc.ServiceException;
 }

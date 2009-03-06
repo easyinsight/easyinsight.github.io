@@ -452,13 +452,12 @@ public class GroupStorage {
         Connection conn = Database.instance().getConnection();
         try {
             PreparedStatement queryStmt = conn.prepareStatement("SELECT DATA_FEED.DATA_FEED_ID, FEED_NAME, " +
-                    "DATA_FEED.FEED_TYPE, OWNER_NAME, DESCRIPTION, ATTRIBUTION, UPLOAD_POLICY_GROUPS.ROLE, UPLOAD_POLICY_USERS.ROLE, PUBLICLY_VISIBLE, MARKETPLACE_VISIBLE " +
-                    "FROM UPLOAD_POLICY_GROUPS, DATA_FEED LEFT OUTER JOIN UPLOAD_POLICY_USERS ON " +
-                    "DATA_FEED.DATA_FEED_ID = UPLOAD_POLICY_USERS.FEED_ID WHERE UPLOAD_POLICY_USERS.USER_ID = ? AND " +
+                    "DATA_FEED.FEED_TYPE, OWNER_NAME, DESCRIPTION, ATTRIBUTION, UPLOAD_POLICY_GROUPS.ROLE, PUBLICLY_VISIBLE, MARKETPLACE_VISIBLE " +
+                    "FROM UPLOAD_POLICY_GROUPS, DATA_FEED WHERE " +
                     "UPLOAD_POLICY_GROUPS.GROUP_ID = ? AND " +
                     "UPLOAD_POLICY_GROUPS.FEED_ID = DATA_FEED.DATA_FEED_ID");
-            queryStmt.setLong(1, userID);
-            queryStmt.setLong(2, groupID);
+            PreparedStatement getUserRoleStmt = conn.prepareStatement("SELECT ROLE FROM UPLOAD_POLICY_USERS WHERE USER_ID = ? AND FEED_ID = ?");
+            queryStmt.setLong(1, groupID);
             ResultSet rs = queryStmt.executeQuery();
             while (rs.next()) {
                 long feedID = rs.getLong(1);
@@ -468,9 +467,17 @@ public class GroupStorage {
                 String description = rs.getString(5);
                 String attribution = rs.getString(6);
                 int groupRole = rs.getInt(7);
-                int userRole = rs.getInt(8);
-                boolean publiclyVisible = rs.getBoolean(9);
-                boolean marketplaceVisible = rs.getBoolean(10);
+                boolean publiclyVisible = rs.getBoolean(8);
+                boolean marketplaceVisible = rs.getBoolean(9);
+
+                getUserRoleStmt.setLong(1, userID);
+                getUserRoleStmt.setLong(2, feedID);
+                ResultSet userRS = getUserRoleStmt.executeQuery();
+                int userRole = Integer.MAX_VALUE;
+                if (userRS.next()) {
+                    userRole = userRS.getInt(1);
+                }
+
                 int role = Math.min(groupRole, userRole);
                 FeedDescriptor feedDescriptor = createDescriptor(feedID, name, publiclyVisible, marketplaceVisible, role, 0, feedType, ownerName, description, attribution, conn);
                 descriptors.add(feedDescriptor);

@@ -83,10 +83,10 @@
 		]]>
 	</mx:Script>
 	<mx:Form styleName="TitleWindowContents">
-		<mx:FormItem label="User Name:" direction="horizontal">
+		<mx:FormItem label="User ID:" direction="horizontal">
 			<mx:TextInput id="userNameInput" text="{userName}"/>
 		</mx:FormItem>
-		<mx:FormItem label="Your Name:" direction="horizontal">
+		<mx:FormItem label="Full Name:" direction="horizontal">
 			<mx:TextInput id="fullNameInput" text="{fullName}"/>
 		</mx:FormItem>
 		<mx:FormItem label="Email Address:" direction="horizontal">

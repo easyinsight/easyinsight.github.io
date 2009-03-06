@@ -22,7 +22,7 @@ public class BasicAuthUncheckedPublishServiceServiceLocator extends org.apache.a
     }
 
     // Use to get a proxy class for BasicAuthUncheckedPublishServicePort
-    private java.lang.String BasicAuthUncheckedPublishServicePort_address = "http://5.8.213.194:8080/DMS/services/UncheckedPublishBasic";
+    private java.lang.String BasicAuthUncheckedPublishServicePort_address = "http://localhost:8080/app/services/UncheckedPublishBasic";
 
     public java.lang.String getBasicAuthUncheckedPublishServicePortAddress() {
         return BasicAuthUncheckedPublishServicePort_address;
@@ -39,7 +39,7 @@ public class BasicAuthUncheckedPublishServiceServiceLocator extends org.apache.a
         BasicAuthUncheckedPublishServicePortWSDDServiceName = name;
     }
 
-    public com.easyinsight.solutions.teamcity.webservice.UncheckedPublishService getBasicAuthUncheckedPublishServicePort() throws javax.xml.rpc.ServiceException {
+    public com.easyinsight.solutions.teamcity.webservice.BasicAuthUncheckedPublish getBasicAuthUncheckedPublishServicePort() throws javax.xml.rpc.ServiceException {
        java.net.URL endpoint;
         try {
             endpoint = new java.net.URL(BasicAuthUncheckedPublishServicePort_address);
@@ -50,7 +50,7 @@ public class BasicAuthUncheckedPublishServiceServiceLocator extends org.apache.a
         return getBasicAuthUncheckedPublishServicePort(endpoint);
     }
 
-    public com.easyinsight.solutions.teamcity.webservice.UncheckedPublishService getBasicAuthUncheckedPublishServicePort(java.net.URL portAddress) throws javax.xml.rpc.ServiceException {
+    public com.easyinsight.solutions.teamcity.webservice.BasicAuthUncheckedPublish getBasicAuthUncheckedPublishServicePort(java.net.URL portAddress) throws javax.xml.rpc.ServiceException {
         try {
             com.easyinsight.solutions.teamcity.webservice.BasicAuthUncheckedPublishServiceServiceSoapBindingStub _stub = new com.easyinsight.solutions.teamcity.webservice.BasicAuthUncheckedPublishServiceServiceSoapBindingStub(portAddress, this);
             _stub.setPortName(getBasicAuthUncheckedPublishServicePortWSDDServiceName());
@@ -72,7 +72,7 @@ public class BasicAuthUncheckedPublishServiceServiceLocator extends org.apache.a
      */
     public java.rmi.Remote getPort(Class serviceEndpointInterface) throws javax.xml.rpc.ServiceException {
         try {
-            if (com.easyinsight.solutions.teamcity.webservice.UncheckedPublishService.class.isAssignableFrom(serviceEndpointInterface)) {
+            if (com.easyinsight.solutions.teamcity.webservice.BasicAuthUncheckedPublish.class.isAssignableFrom(serviceEndpointInterface)) {
                 com.easyinsight.solutions.teamcity.webservice.BasicAuthUncheckedPublishServiceServiceSoapBindingStub _stub = new com.easyinsight.solutions.teamcity.webservice.BasicAuthUncheckedPublishServiceServiceSoapBindingStub(new java.net.URL(BasicAuthUncheckedPublishServicePort_address), this);
                 _stub.setPortName(getBasicAuthUncheckedPublishServicePortWSDDServiceName());
                 return _stub;

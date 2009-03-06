@@ -121,15 +121,25 @@ public class APITest extends TestCase {
         newNumberPair.setKey("number");
         newNumberPair.setValue(10);
         updateRow.setNumberPairs(new NumberPair[] { newNumberPair });
+        updateRow.setDatePairs(new DatePair[] { datePair });
+        stringPair = new StringPair();
+        stringPair.setKey("string");
+        stringPair.setValue("value");
+        updateRow.setStringPairs(new StringPair[] { stringPair });
         Where where = new Where();
         StringWhere stringWhere = new StringWhere();
         stringWhere.setKey("string");
         stringWhere.setValue("value");
         where.setStringWheres(new StringWhere[] { stringWhere });
         service.updateRow("testds1", updateRow, where);
-        stringPair.setValue("value3");
-        com.easyinsight.api.Row newRow = new com.easyinsight.api.Row();
-        newRow.setStringPairs(new StringPair[] { stringPair });
+        DayWhere dayWhere = new DayWhere();
+        dayWhere.setKey("date");
+        Calendar cal = Calendar.getInstance();
+        dayWhere.setYear(cal.get(Calendar.YEAR));
+        dayWhere.setDayOfYear(cal.get(Calendar.DAY_OF_YEAR));
+        where = new Where();
+        where.setDayWheres(new DayWhere[] { dayWhere} );
+        service.updateRow("testds1", updateRow, where);
     }
 
     public void testDatesAdd() {

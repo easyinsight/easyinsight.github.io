@@ -227,7 +227,7 @@
         </copy>
     </target>
 
-    <target name="compileFlex" depends="compileJava, compileFlexOptimized, compileIntro">
+    <target name="compileFlex" depends="compileJava, compileFlexOptimized, compileIntro, compileAdmin">
         <!-- <mxmlc file="${teamcity.build.checkoutDir}/flex/src/PrimaryWorkspace.mxml"
                output="${flex.path}/PrimaryWorkspace.swf"
                static-rsls="true">
@@ -246,6 +246,13 @@
         <mxmlc file="${teamcity.build.checkoutDir}/flex/src/EmbeddedInsight.mxml"
                output="${flex.path}/EmbeddedInsight.swf" static-rsls="true">
             <load-config filename="${teamcity.build.checkoutDir}/flex/embedded-insight.xml"/>
+        </mxmlc>
+    </target>
+
+    <target name="compileAdmin">
+        <mxmlc file="${teamcity.build.checkoutDir}/src/AdministrationApplication.mxml" output="${flex.path}/AdministrationApplication.swf"
+               static-rsls="true">
+            <load-config filename="${teamcity.build.checkoutDir}/administration-app.xml"/>
         </mxmlc>
     </target>
 

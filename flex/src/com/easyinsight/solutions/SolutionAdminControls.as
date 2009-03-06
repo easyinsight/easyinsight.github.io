@@ -1,0 +1,69 @@
+package com.easyinsight.solutions {
+import flash.events.MouseEvent;
+import mx.containers.HBox;
+import mx.controls.Button;
+import mx.managers.PopUpManager;
+public class SolutionAdminControls extends HBox{
+
+    [Embed(source="../../../../assets/gear.png")]
+    private var uploadIcon:Class;
+
+    [Embed(source="../../../../assets/pencil.png")]
+    private var editIcon:Class;
+
+    [Embed(source="../../../../assets/navigate_cross.png")]
+    private var deleteIcon:Class;
+
+    private var uploadButton:Button;
+    private var editButton:Button;
+    private var deleteButton:Button;
+
+    private var solution:Solution;
+
+    public function SolutionAdminControls() {
+        super();
+        uploadButton = new Button();
+        uploadButton.setStyle("icon", uploadIcon);
+        uploadButton.addEventListener(MouseEvent.CLICK, updateArchive);
+        editButton = new Button();
+        editButton.setStyle("icon", editIcon);
+        editButton.addEventListener(MouseEvent.CLICK, editSolution);
+        deleteButton = new Button();
+        deleteButton.setStyle("icon", deleteIcon);
+        deleteButton.addEventListener(MouseEvent.CLICK, deleteSolution);
+        this.percentWidth = 100;
+        setStyle("horizontalAlign", "center");
+    }
+
+    override protected function createChildren():void {
+        super.createChildren();
+        addChild(editButton);
+        addChild(uploadButton);
+        addChild(deleteButton);
+    }
+
+    private function editSolution(event:MouseEvent):void {
+        var window:CreateSolutionWindow = new CreateSolutionWindow();
+        window.solution = solution;
+        PopUpManager.addPopUp(window, this.parent.parent, true);
+        PopUpManager.centerPopUp(window);
+    }
+
+    override public function set data(val:Object):void {
+        this.solution = val as Solution;
+    }
+
+    override public function get data():Object {
+        return this.solution;
+    }
+
+    private function deleteSolution(event:MouseEvent):void {
+
+    }
+
+    private function updateArchive(event:MouseEvent):void {
+        var window:UpdateSolutionArchiveWindow = UpdateSolutionArchiveWindow(PopUpManager.createPopUp(this, UpdateSolutionArchiveWindow, true));
+        PopUpManager.centerPopUp(window);
+    }
+}
+}

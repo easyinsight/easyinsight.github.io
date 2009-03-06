@@ -6,6 +6,7 @@ import com.easyinsight.logging.LogClass;
 import com.easyinsight.core.Key;
 import com.easyinsight.core.Value;
 import com.easyinsight.scrubbing.DataSetScrubber;
+import com.easyinsight.storage.IWhere;
 
 import java.util.*;
 import java.io.Serializable;
@@ -397,5 +398,15 @@ public class DataSet implements Serializable {
 
     public void subset(int number) {
         rows = rows.subList(0, Math.min(rows.size(), number));
+    }
+
+    public void mergeWheres(List<IWhere> wheres) {
+        for (IRow row : rows) {
+            for (IWhere where : wheres) {
+                if (where.hasConcreteValue()) {
+                    row.addValue(where.getKey(), where.getConcreteValue());
+                }
+            }
+        }
     }
 }

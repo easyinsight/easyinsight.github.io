@@ -91,7 +91,7 @@ import com.easyinsight.customupload.UploadConfigEvent;
             descriptor.name = _data.spreadsheet + " - " + _data.title;
 			_data.feedDescriptor = descriptor;
 			//this.parent.dispatchEvent(new AnalyzeEvent(new DescriptorAnalyzeSource(descriptor)));
-			this.parent.dispatchEvent(new UploadConfigEvent(UploadConfigEvent.UPLOAD_CONFIG_COMPLETE, descriptor.dataFeedID));
+			this.parent.dispatchEvent(new UploadConfigEvent(UploadConfigEvent.UPLOAD_CONFIG_COMPLETE, descriptor.dataFeedID, descriptor.name));
 		}
 		
 		private function failedSubscription(event:FaultEvent):void {

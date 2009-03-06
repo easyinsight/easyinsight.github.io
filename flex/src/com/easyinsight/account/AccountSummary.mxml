@@ -55,7 +55,7 @@
                     // space allocation, user licensing?, ssl configuration, ip range configuration
                     // core user administration...add user, remove user, change user privileges
                     toggleOptions = new ArrayCollection([ new AccountOption("My Profile", new ProfessionalMyProfile()),
-                        new AccountOption("Account Administration", new AccountAdministration()),
+                        //new AccountOption("Account Administration", new UserAccountAdministration()),
                         new AccountOption("User Administration", new UserAdministration())]);
                     showToggle = true;
                 } else {

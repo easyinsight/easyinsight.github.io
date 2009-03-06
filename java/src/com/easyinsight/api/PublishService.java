@@ -74,6 +74,12 @@ public abstract class PublishService {
                 wheres.add(new com.easyinsight.storage.DateWhere(new NamedKey(dateWhere.getKey()), dateWhere.getValue(), dateWhere.getComparison().createStorageComparison()));
             }
         }
+        DayWhere[] dayWheres = where.getDayWheres();
+        if (dayWheres != null) {
+            for (DayWhere dayWhere : dayWheres) {
+                wheres.add(new com.easyinsight.storage.DayWhere(new NamedKey(dayWhere.getKey()), dayWhere.getYear(), dayWhere.getDayOfYear()));
+            }
+        }
         return wheres;
     }
 }

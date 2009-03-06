@@ -34,7 +34,7 @@
                     private function created():void {
                     	var uploadResponse:UploadResponse = uploadService.create.lastResult as UploadResponse;
                     	if (uploadResponse.successful) {
-                    		dispatchEvent(new UploadConfigEvent(UploadConfigEvent.UPLOAD_CONFIG_COMPLETE, uploadResponse.feedID));
+                    		dispatchEvent(new UploadConfigEvent(UploadConfigEvent.UPLOAD_CONFIG_COMPLETE, uploadResponse.feedID, feedName.text));
                         	PopUpManager.removePopUp(this);
                     	} else {
                     		Alert.show(uploadResponse.failureMessage);

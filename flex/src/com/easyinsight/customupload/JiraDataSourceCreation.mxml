@@ -54,7 +54,7 @@
             descriptor.name = "JIRA";
             descriptor.policy = new UploadPolicy();
             descriptor.policy.publiclyVisible = false;
-            dispatchEvent(new UploadConfigEvent(UploadConfigEvent.UPLOAD_CONFIG_COMPLETE, id));            
+            dispatchEvent(new UploadConfigEvent(UploadConfigEvent.UPLOAD_CONFIG_COMPLETE, id, descriptor.name));            
             dispatchEvent(new AnalyzeEvent(new DescriptorAnalyzeSource(descriptor)));
         }
 

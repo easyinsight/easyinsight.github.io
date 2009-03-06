@@ -25,7 +25,9 @@
             private var tags:String;
             [Bindable]
             private var goalTrees:ArrayCollection;
-			
+            [Bindable]
+            private var solutionTier:int;
+
 			public function set solution(solution:Solution):void {
 				this._solution = solution;
 				nameText = this._solution.name;
@@ -33,6 +35,7 @@
                 author = this._solution.author;
                 industry = this._solution.industry;
                 includeData = this._solution.copyData;
+                solutionTier = this._solution.solutionTier - 1;
 				if (solution.solutionID > 0) {
 					solutionService.getDescriptorsForSolution.send(solution.solutionID);
 				}
@@ -115,18 +118,32 @@
 		<mx:FormItem label="Author: ">
 			<mx:TextInput id="authorInput" text="{author}"/>
 		</mx:FormItem>
-        <mx:FormItem label="Include Feed Data: ">
+        <mx:FormItem label="Required Account Tier: ">
+			<mx:ComboBox id="accountTierBox" selectedIndex="{solutionTier}">
+                <mx:dataProvider>
+                    <mx:ArrayCollection>
+                        <mx:Array>
+                            <mx:String>Free</mx:String>
+                            <mx:String>Individual</mx:String>
+                            <mx:String>Professional</mx:String>
+                            <mx:String>Enterprise</mx:String>
+                        </mx:Array>
+                    </mx:ArrayCollection>
+                </mx:dataProvider>
+			</mx:ComboBox>
+		</mx:FormItem>
+        <mx:FormItem label="Include Data Source Data: ">
             <mx:CheckBox id="includeDataCheckbox" selected="{includeData}"/>
         </mx:FormItem>
         <mx:FormItem label="Associate Goal Tree: ">
             <mx:ComboBox id="goalTreeComboBox" dataProvider="{goalTrees}" labelField="goalTreeName"/>
         </mx:FormItem>
-		<mx:FormItem label="Feeds: ">
+		<mx:FormItem label="Data Sources: ">
 			<mx:VBox>
-				<mx:Button label="Add Feed..." click="addFeed()"/>
+				<mx:Button label="Add Data Source..." click="addFeed()"/>
 				<mx:DataGrid dataProvider="{includedFeeds}">
 					<mx:columns>
-						<mx:DataGridColumn headerText="Feed Name" dataField="name"/>
+						<mx:DataGridColumn headerText="Data Source Name" dataField="name"/>
 						<mx:DataGridColumn headerText="" dataField="name" itemRenderer="com.easyinsight.solutions.SolutionFeedIcons"/>
 					</mx:columns>
 				</mx:DataGrid>

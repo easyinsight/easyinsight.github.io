@@ -11,8 +11,6 @@
                     <mx:VBox width="100%" height="100%" label="System Health">
                         <system:HealthInfoDisplay/>
                         <mx:Button label="Thread Dump" click="dumpThreads()"/>
-                        <mx:Button label="Create Solution..." click="createSolution()"/>
-                        <mx:Button label="Update Solution Archive..." click="updateArchive()"/>
                     </mx:VBox>
                     <mx:VBox width="100%" height="100%" label="Solutions">
                         <solutions:SolutionAdministration width="100%" height="100%"/>
@@ -27,7 +25,8 @@
     </mx:states>
     <mx:Script>
 		<![CDATA[
-        import com.easyinsight.solutions.UpdateSolutionArchiveWindow;
+        import com.easyinsight.account.Account;
+import com.easyinsight.solutions.UpdateSolutionArchiveWindow;
 
         import mx.managers.PopUpManager;
 
@@ -42,7 +41,7 @@
         import mx.rpc.events.ResultEvent;
 
         private function handleAuthentication():void {
-            var authResult:UserServiceResponse = authService.authenticate.lastResult as UserServiceResponse;
+            var authResult:UserServiceResponse = authService.authenticateAdmin.lastResult as UserServiceResponse;
             var successful:Boolean = authResult.successful;
             if (successful) {
                 User.initializeUser(authResult.name, authResult.email,
@@ -65,7 +64,7 @@
                     function (event:ResultEvent, token:Object = null):void {
                         switch (event.result) {
                             case "success":
-                                authService.authenticate.send(userName.text, password.text);
+                                authService.authenticateAdmin.send(userName.text, password.text);
                                 break;
                             default:
                                 trace(event.result);
@@ -94,19 +93,11 @@
             adminService.threadDump.send();
         }
 
-        private function createSolution():void {
-            var window:CreateSolutionWindow = CreateSolutionWindow(PopUpManager.createPopUp(this, CreateSolutionWindow, true));
-            PopUpManager.centerPopUp(window);
-        }
-
-        private function updateArchive():void {
-            var window:UpdateSolutionArchiveWindow = UpdateSolutionArchiveWindow(PopUpManager.createPopUp(this, UpdateSolutionArchiveWindow, true));
-            PopUpManager.centerPopUp(window);
-        }
+        
 
         private function sessionCheck():void {
             var authResult:UserServiceResponse = authService.isSessionLoggedIn.lastResult as UserServiceResponse;
-            if (authResult != null) {
+            if (authResult != null && authResult.accountType == Account.ENTERPRISE + 1) {
                 User.initializeUser(authResult.name, authResult.email,
                             authResult.accountType, authResult.spaceAllowed, authResult.accountAdmin,
                         authResult.dataSourceCreator, authResult.insightCreator, authResult.userID);
@@ -118,7 +109,7 @@
 		]]>
     </mx:Script>
     <mx:RemoteObject id="authService" destination="login">
-        <mx:method name="authenticate" result="handleAuthentication()"/>
+        <mx:method name="authenticateAdmin" result="handleAuthentication()"/>
         <mx:method name="isSessionLoggedIn" result="sessionCheck()"/>
     </mx:RemoteObject>
     <mx:RemoteObject id="adminService" destination="admin">

@@ -104,7 +104,9 @@ public abstract class UncheckedPublishService extends PublishService {
             } catch (SQLException e) {
                 LogClass.error(e);
             }
-            dataStorage.closeConnection();
+            if (dataStorage != null) {
+                dataStorage.closeConnection();
+            }
             Database.instance().closeConnection(conn);
         }
     }
@@ -138,7 +140,9 @@ public abstract class UncheckedPublishService extends PublishService {
             } catch (SQLException e) {
                 LogClass.error(e);
             }
-            dataStorage.closeConnection();
+            if (dataStorage != null) {
+                dataStorage.closeConnection();
+            }
             Database.instance().closeConnection(conn);
         }
     }
@@ -175,7 +179,9 @@ public abstract class UncheckedPublishService extends PublishService {
             } catch (SQLException e) {
                 LogClass.error(e);
             }
-            dataStorage.closeConnection();
+            if (dataStorage != null) {
+                dataStorage.closeConnection();
+            }
             Database.instance().closeConnection(conn);
         }
     }
@@ -309,7 +315,9 @@ public abstract class UncheckedPublishService extends PublishService {
             } catch (SQLException e) {
                 LogClass.error(e);
             }
-            dataStorage.closeConnection();
+            if (dataStorage != null) {
+                dataStorage.closeConnection();
+            }
             Database.instance().closeConnection(conn);
         }
     }
@@ -345,7 +353,9 @@ public abstract class UncheckedPublishService extends PublishService {
             } catch (SQLException e) {
                 LogClass.error(e);
             }
-            dataStorage.closeConnection();            
+            if (dataStorage != null) {
+                dataStorage.closeConnection();
+            }
             Database.instance().closeConnection(conn);
         }
     }
