@@ -37,7 +37,7 @@ package com.easyinsight.analysis
                     dateFormatter.formatString = "MM/DD/YYYY HH:00";
                     break;
                 case AnalysisItemTypes.MINUTE_LEVEL:
-                    dateFormatter.formatString = "MM/DD/YYYY HH:MM";
+                    dateFormatter.formatString = "MM/DD/YYYY HH:NN";
                     break;
 			}
 			return dateFormatter;
