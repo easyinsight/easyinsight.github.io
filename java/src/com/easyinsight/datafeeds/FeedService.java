@@ -8,6 +8,7 @@ import com.easyinsight.database.Database;
 import com.easyinsight.storage.DataStorage;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.security.*;
+import com.easyinsight.security.SecurityException;
 import com.easyinsight.users.SubscriptionLicense;
 
 import java.util.*;
@@ -37,7 +38,25 @@ public class FeedService implements IDataFeedService {
                 long userID = SecurityUtil.getUserID();
                 FeedDescriptor feedDescriptor = feedStorage.getFeedDescriptor(userID, feedID);
                 feedResponse = new FeedResponse(true, feedDescriptor);
-            } catch (com.easyinsight.security.SecurityException e) {
+            } catch (SecurityException e) {
+                feedResponse = new FeedResponse(false, null);
+            }
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        }
+        return feedResponse;
+    }
+
+    public FeedResponse openFeedByAPIKey(String apiKey) {
+        FeedResponse feedResponse;
+        try {
+            try {
+                long userID = SecurityUtil.getUserID();
+                long feedID = feedStorage.getFeedForAPIKey(userID, apiKey);
+                FeedDescriptor feedDescriptor = feedStorage.getFeedDescriptor(userID, feedID);
+                feedResponse = new FeedResponse(true, feedDescriptor);
+            } catch (SecurityException e) {
                 feedResponse = new FeedResponse(false, null);
             }
         } catch (Exception e) {

@@ -10,6 +10,8 @@ package com.easyinsight.solutions.dbservice.webservice;
 public class Where  implements java.io.Serializable {
     private com.easyinsight.solutions.dbservice.webservice.DateWhere[] dateWheres;
 
+    private com.easyinsight.solutions.dbservice.webservice.DayWhere[] dayWheres;
+
     private com.easyinsight.solutions.dbservice.webservice.NumberWhere[] numberWheres;
 
     private com.easyinsight.solutions.dbservice.webservice.StringWhere[] stringWheres;
@@ -19,9 +21,11 @@ public class Where  implements java.io.Serializable {
 
     public Where(
            com.easyinsight.solutions.dbservice.webservice.DateWhere[] dateWheres,
+           com.easyinsight.solutions.dbservice.webservice.DayWhere[] dayWheres,
            com.easyinsight.solutions.dbservice.webservice.NumberWhere[] numberWheres,
            com.easyinsight.solutions.dbservice.webservice.StringWhere[] stringWheres) {
            this.dateWheres = dateWheres;
+           this.dayWheres = dayWheres;
            this.numberWheres = numberWheres;
            this.stringWheres = stringWheres;
     }
@@ -52,6 +56,34 @@ public class Where  implements java.io.Serializable {
 
     public void setDateWheres(int i, com.easyinsight.solutions.dbservice.webservice.DateWhere _value) {
         this.dateWheres[i] = _value;
+    }
+
+
+    /**
+     * Gets the dayWheres value for this Where.
+     * 
+     * @return dayWheres
+     */
+    public com.easyinsight.solutions.dbservice.webservice.DayWhere[] getDayWheres() {
+        return dayWheres;
+    }
+
+
+    /**
+     * Sets the dayWheres value for this Where.
+     * 
+     * @param dayWheres
+     */
+    public void setDayWheres(com.easyinsight.solutions.dbservice.webservice.DayWhere[] dayWheres) {
+        this.dayWheres = dayWheres;
+    }
+
+    public com.easyinsight.solutions.dbservice.webservice.DayWhere getDayWheres(int i) {
+        return this.dayWheres[i];
+    }
+
+    public void setDayWheres(int i, com.easyinsight.solutions.dbservice.webservice.DayWhere _value) {
+        this.dayWheres[i] = _value;
     }
 
 
@@ -125,6 +157,9 @@ public class Where  implements java.io.Serializable {
             ((this.dateWheres==null && other.getDateWheres()==null) || 
              (this.dateWheres!=null &&
               java.util.Arrays.equals(this.dateWheres, other.getDateWheres()))) &&
+            ((this.dayWheres==null && other.getDayWheres()==null) || 
+             (this.dayWheres!=null &&
+              java.util.Arrays.equals(this.dayWheres, other.getDayWheres()))) &&
             ((this.numberWheres==null && other.getNumberWheres()==null) || 
              (this.numberWheres!=null &&
               java.util.Arrays.equals(this.numberWheres, other.getNumberWheres()))) &&
@@ -147,6 +182,17 @@ public class Where  implements java.io.Serializable {
                  i<java.lang.reflect.Array.getLength(getDateWheres());
                  i++) {
                 java.lang.Object obj = java.lang.reflect.Array.get(getDateWheres(), i);
+                if (obj != null &&
+                    !obj.getClass().isArray()) {
+                    _hashCode += obj.hashCode();
+                }
+            }
+        }
+        if (getDayWheres() != null) {
+            for (int i=0;
+                 i<java.lang.reflect.Array.getLength(getDayWheres());
+                 i++) {
+                java.lang.Object obj = java.lang.reflect.Array.get(getDayWheres(), i);
                 if (obj != null &&
                     !obj.getClass().isArray()) {
                     _hashCode += obj.hashCode();
@@ -189,6 +235,14 @@ public class Where  implements java.io.Serializable {
         elemField.setFieldName("dateWheres");
         elemField.setXmlName(new javax.xml.namespace.QName("", "dateWheres"));
         elemField.setXmlType(new javax.xml.namespace.QName("http://basicauth.api.easyinsight.com/", "dateWhere"));
+        elemField.setMinOccurs(0);
+        elemField.setNillable(true);
+        elemField.setMaxOccursUnbounded(true);
+        typeDesc.addFieldDesc(elemField);
+        elemField = new org.apache.axis.description.ElementDesc();
+        elemField.setFieldName("dayWheres");
+        elemField.setXmlName(new javax.xml.namespace.QName("", "dayWheres"));
+        elemField.setXmlType(new javax.xml.namespace.QName("http://basicauth.api.easyinsight.com/", "dayWhere"));
         elemField.setMinOccurs(0);
         elemField.setNillable(true);
         elemField.setMaxOccursUnbounded(true);

@@ -28,4 +28,12 @@ public class WSDeathStarValidatingPublishService extends ValidatingPublishServic
         WSUsernameTokenPrincipal principal = (WSUsernameTokenPrincipal) securityResult.getPrincipal();
         return principal.getName();
     }
+
+    protected long getAccountID() {
+        throw new UnsupportedOperationException();
+    }
+
+    protected long getUserID() {
+        throw new UnsupportedOperationException();
+    }
 }

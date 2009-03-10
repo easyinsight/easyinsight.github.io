@@ -98,7 +98,7 @@ import mx.collections.ArrayCollection;
     <mx:VBox height="100%">
         <mx:VBox verticalGap="0" height="100%" width="100%">
             <mx:Box width="100%" backgroundColor="#3B56AF" horizontalAlign="center">
-                <mx:TextArea text="You can drag the below items onto goals to create associations." color="0xFFFFFF" backgroundAlpha="0" borderThickness="0" width="100%" height="57"/>
+                <mx:TextArea editable="false" text="You can drag the below items onto goals to create associations." color="0xFFFFFF" backgroundAlpha="0" borderThickness="0" width="100%" height="57"/>
             </mx:Box>
             <mx:Accordion height="100%" id="accordion" width="100%" headerHeight="18">
                 <mx:VBox label="Goal Trees" width="100%" height="100%" verticalGap="0">

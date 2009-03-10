@@ -10,6 +10,15 @@ import com.easyinsight.audit.AuditMessage;
 public class GroupComment extends AuditMessage {
     private long groupID;
     private long groupCommentID;
+    private String groupName;
+
+    public String getGroupName() {
+        return groupName;
+    }
+
+    public void setGroupName(String groupName) {
+        this.groupName = groupName;
+    }
 
     public long getGroupCommentID() {
         return groupCommentID;

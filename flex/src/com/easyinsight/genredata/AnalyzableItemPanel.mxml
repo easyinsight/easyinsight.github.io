@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%">
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" width="300" height="100%">
 	<mx:Metadata>
 		[Event(name="feedSearch", type="com.easyinsight.genredata.ChildSearchEvent")]
 		[Event(name="analysisSearch", type="com.easyinsight.genredata.ChildSearchEvent")]
@@ -92,7 +92,7 @@
                     }
                 ]]>
 	</mx:Script>
-	<mx:ApplicationControlBar width="100%">
+	<mx:ApplicationControlBar width="100%" horizontalAlign="center">
 		<mx:LinkButton label="{title}" click="titleClick()" textDecoration="underline"/>
 	</mx:ApplicationControlBar>
 	<mx:List id="popularList" dataProvider="{popularListData}" labelField="name" width="100%" height="100%"

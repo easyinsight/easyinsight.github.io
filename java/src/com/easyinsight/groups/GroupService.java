@@ -11,6 +11,7 @@ import com.easyinsight.users.Account;
 
 import java.util.List;
 import java.util.Date;
+import java.util.ArrayList;
 import java.sql.Connection;
 import java.sql.SQLException;
 
@@ -45,10 +46,30 @@ public class GroupService {
         }
     }
 
-    public List<AuditMessage> getGroupMessages(long groupID) {
+    public List<AuditMessage> getGroupMessagesForUser(Date startDate, Date endDate) {
+        List<AuditMessage> messages = new ArrayList<AuditMessage>();
+        try {
+            List<GroupDescriptor> groups = getMemberGroups();
+            for (GroupDescriptor groupDescriptor : groups) {
+                messages.addAll(getGroupMessages(groupDescriptor.getGroupID(), startDate, endDate));
+            }
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        }
+        return messages;        
+    }
+
+    public List<AuditMessage> getGroupMessages(long groupID, Date startDate, Date endDate) {
         SecurityUtil.authorizeGroup(groupID, Roles.SUBSCRIBER);
         try {
-            return groupStorage.getGroupMessages(groupID);
+            if (startDate == null) {
+                startDate = new Date(0);
+            }
+            if (endDate == null) {
+                endDate = new Date();
+            }
+            return groupStorage.getGroupMessages(groupID, startDate, endDate, 0);
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);
@@ -71,7 +92,7 @@ public class GroupService {
         try {
             conn.setAutoCommit(false);
             groupStorage.updateGroup(group, conn);
-            groupStorage.addGroupAudit(new GroupAuditMessage(SecurityUtil.getUserID(), new Date(), "Group updated", group.getGroupID()), conn);
+            groupStorage.addGroupAudit(new GroupAuditMessage(SecurityUtil.getUserID(), new Date(), "Group updated", group.getGroupID(), null), conn);
             List<GroupUser> existingUsers = getUsers(group.getGroupID());
             existingUsers.removeAll(users);
             for (GroupUser user : existingUsers) {

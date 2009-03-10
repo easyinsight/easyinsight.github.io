@@ -28,6 +28,10 @@ public abstract class ValidatingPublishService extends PublishService implements
 
     protected abstract String getUserName();
 
+    protected abstract long getAccountID();
+
+    protected abstract long getUserID();
+
     public boolean validateCredentials() {
         return true;
     }
@@ -40,7 +44,7 @@ public abstract class ValidatingPublishService extends PublishService implements
             conn.setAutoCommit(false);
             FeedDefinition feedDefinition = getFeedDefinition(userName, dataSourceName, conn);
             DataTransformation dataTransformation = new DataTransformation(feedDefinition);
-            dataStorage = DataStorage.writeConnection(feedDefinition, conn);
+            dataStorage = DataStorage.writeConnection(feedDefinition, conn, getAccountID());
             DataSet dataSet = dataTransformation.toDataSet(row);
             dataStorage.insertData(dataSet);
             dataStorage.commit();
@@ -62,7 +66,9 @@ public abstract class ValidatingPublishService extends PublishService implements
             } catch (SQLException e) {
                 LogClass.error(e);
             }
-            dataStorage.closeConnection();
+            if (dataStorage != null) {
+                dataStorage.closeConnection();
+            }
             Database.instance().closeConnection(conn);
         }
     }
@@ -75,7 +81,7 @@ public abstract class ValidatingPublishService extends PublishService implements
             conn.setAutoCommit(false);
             FeedDefinition feedDefinition = getFeedDefinition(userName, dataSourceKey, conn);
             DataTransformation dataTransformation = new DataTransformation(feedDefinition);
-            dataStorage = DataStorage.writeConnection(feedDefinition, conn);
+            dataStorage = DataStorage.writeConnection(feedDefinition, conn, getAccountID());
             DataSet dataSet = dataTransformation.toDataSet(rows);
             dataStorage.insertData(dataSet);
             dataStorage.commit();
@@ -97,7 +103,9 @@ public abstract class ValidatingPublishService extends PublishService implements
             } catch (SQLException e) {
                 LogClass.error(e);
             }
-            dataStorage.closeConnection();
+            if (dataStorage != null) {
+                dataStorage.closeConnection();
+            }
             Database.instance().closeConnection(conn);
         }
     }
@@ -110,7 +118,7 @@ public abstract class ValidatingPublishService extends PublishService implements
             conn.setAutoCommit(false);
             FeedDefinition feedDefinition = getFeedDefinition(userName, dataSourceKey, conn);
             DataTransformation dataTransformation = new DataTransformation(feedDefinition);
-            dataStorage = DataStorage.writeConnection(feedDefinition, conn);
+            dataStorage = DataStorage.writeConnection(feedDefinition, conn, getAccountID());
             DataSet dataSet = dataTransformation.toDataSet(rows);
             dataStorage.truncate();
             dataStorage.insertData(dataSet);
@@ -133,7 +141,9 @@ public abstract class ValidatingPublishService extends PublishService implements
             } catch (SQLException e) {
                 LogClass.error(e);
             }
-            dataStorage.closeConnection();
+            if (dataStorage != null) {
+                dataStorage.closeConnection();
+            }
             Database.instance().closeConnection(conn);
         }
     }
@@ -172,7 +182,7 @@ public abstract class ValidatingPublishService extends PublishService implements
             conn.setAutoCommit(false);
             FeedDefinition feedDefinition = getFeedDefinition(userName, dataSourceKey, conn);
             DataTransformation dataTransformation = new DataTransformation(feedDefinition);
-            dataStorage = DataStorage.writeConnection(feedDefinition, conn);
+            dataStorage = DataStorage.writeConnection(feedDefinition, conn, getAccountID());
             DataSet dataSet = dataTransformation.toDataSet(row);
             dataStorage.updateData(dataSet, createWheres(where));
             dataStorage.commit();
@@ -194,7 +204,9 @@ public abstract class ValidatingPublishService extends PublishService implements
             } catch (SQLException e) {
                 LogClass.error(e);
             }
-            dataStorage.closeConnection();
+            if (dataStorage != null) {
+                dataStorage.closeConnection();
+            }
             Database.instance().closeConnection(conn);
         }
     }
@@ -207,7 +219,7 @@ public abstract class ValidatingPublishService extends PublishService implements
             conn.setAutoCommit(false);
             FeedDefinition feedDefinition = getFeedDefinition(userName, dataSourceKey, conn);
             DataTransformation dataTransformation = new DataTransformation(feedDefinition);
-            dataStorage = DataStorage.writeConnection(feedDefinition, conn);
+            dataStorage = DataStorage.writeConnection(feedDefinition, conn, getAccountID());
             DataSet dataSet = dataTransformation.toDataSet(rows);
             dataStorage.updateData(dataSet, createWheres(where));
             dataStorage.commit();
@@ -229,7 +241,9 @@ public abstract class ValidatingPublishService extends PublishService implements
             } catch (SQLException e) {
                 LogClass.error(e);
             }
-            dataStorage.closeConnection();
+            if (dataStorage != null) {
+                dataStorage.closeConnection();
+            }
             Database.instance().closeConnection(conn);
         }
     }
@@ -241,7 +255,7 @@ public abstract class ValidatingPublishService extends PublishService implements
             String userName = getUserName();
             conn.setAutoCommit(false);
             FeedDefinition feedDefinition = getFeedDefinition(userName, dataSourceKey, conn);
-            dataStorage = DataStorage.writeConnection(feedDefinition, conn);
+            dataStorage = DataStorage.writeConnection(feedDefinition, conn, getAccountID());
             dataStorage.deleteData(createWheres(where));
             dataStorage.commit();
             conn.commit();
@@ -262,7 +276,9 @@ public abstract class ValidatingPublishService extends PublishService implements
             } catch (SQLException e) {
                 LogClass.error(e);
             }
-            dataStorage.closeConnection();
+            if (dataStorage != null) {
+                dataStorage.closeConnection();
+            }
             Database.instance().closeConnection(conn);
         }
     }

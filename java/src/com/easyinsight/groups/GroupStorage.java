@@ -33,7 +33,7 @@ public class GroupStorage {
             insertCommentStmt.setLong(1, groupComment.getGroupID());
             insertCommentStmt.setLong(2, groupComment.getUserID());
             insertCommentStmt.setString(3, groupComment.getMessage());
-            insertCommentStmt.setDate(4, new java.sql.Date(new Date().getTime()));
+            insertCommentStmt.setTimestamp(4, new java.sql.Timestamp(new Date().getTime()));
             insertCommentStmt.execute();
             return Database.instance().getAutoGenKey(insertCommentStmt);
         } catch (Exception e) {
@@ -50,7 +50,7 @@ public class GroupStorage {
             insertCommentStmt.setLong(1, groupAuditMessage.getGroupID());
             insertCommentStmt.setLong(2, groupAuditMessage.getUserID());
             insertCommentStmt.setString(3, groupAuditMessage.getMessage());
-            insertCommentStmt.setDate(4, new java.sql.Date(new Date().getTime()));
+            insertCommentStmt.setTimestamp(4, new java.sql.Timestamp(new Date().getTime()));
             insertCommentStmt.execute();
         } catch (Exception e) {
             LogClass.error(e);
@@ -142,7 +142,6 @@ public class GroupStorage {
                 throw new RuntimeException("Update failed");
             }
             saveTags(group.getTags(), group.getGroupID(), conn);
-            conn.commit();
         } catch (Exception e) {
             LogClass.error(e);
             try {
@@ -151,7 +150,6 @@ public class GroupStorage {
                 LogClass.error(e1);
             }
             throw new RuntimeException(e);
-        } finally {
         }
     }
 
@@ -407,7 +405,7 @@ public class GroupStorage {
                 insertFeedStmt.setLong(3, owner);
                 insertFeedStmt.execute();
             }
-            addGroupAudit(new GroupAuditMessage(SecurityUtil.getUserID(), new Date(), "Added data source", groupID), conn);
+            addGroupAudit(new GroupAuditMessage(SecurityUtil.getUserID(), new Date(), "Added data source", groupID, null), conn);
         } catch (SQLException e) {
             LogClass.error(e);
             throw new RuntimeException(e);
@@ -549,21 +547,27 @@ public class GroupStorage {
         return null;  //To change body of created methods use File | Settings | File Templates.
     }
 
-    public List<AuditMessage> getGroupMessages(long groupID) throws SQLException {
+    public List<AuditMessage> getGroupMessages(long groupID, Date startDate, Date endDate, int limit) throws SQLException {
         List<AuditMessage> groupComments = new ArrayList<AuditMessage>();
         Connection conn = Database.instance().getConnection();
         try {
-            PreparedStatement queryStmt = conn.prepareStatement("SELECT comment, username, group_comment.user_id, time_created, group_comment_id " +
-                    "FROM group_comment, user WHERE group_id = ? and " +
-                    "group_comment.user_id = user.user_id ORDER BY time_created desc");
+            PreparedStatement queryStmt = conn.prepareStatement("SELECT comment, username, group_comment.user_id, time_created, group_comment_id, community_group.name " +
+                    "FROM group_comment, user, community_group WHERE group_id = ? and group_comment.group_id = community_group.community_group_id AND " +
+                    "group_comment.user_id = user.user_id AND time_created >= ? AND time_created <= ? ORDER BY time_created desc");
+            if (limit > 0) {
+                queryStmt.setMaxRows(limit);
+            }
             queryStmt.setLong(1, groupID);
+            queryStmt.setTimestamp(2, new Timestamp(startDate.getTime()));
+            queryStmt.setTimestamp(3, new Timestamp(endDate.getTime()));
             ResultSet rs = queryStmt.executeQuery();
             while (rs.next()) {
                 String comment = rs.getString(1);
                 String userName = rs.getString(2);
                 long userID = rs.getLong(3);
-                Date timeCreated = new Date(rs.getDate(4).getTime());
+                Date timeCreated = new Date(rs.getTimestamp(4).getTime());
                 long groupCommentID = rs.getLong(5);
+                String groupName = rs.getString(6);
                 GroupComment groupComment = new GroupComment();
                 groupComment.setAudit(false);
                 groupComment.setMessage(comment);
@@ -571,24 +575,32 @@ public class GroupStorage {
                 groupComment.setUserName(userName);
                 groupComment.setGroupCommentID(groupCommentID);
                 groupComment.setTimestamp(timeCreated);
+                groupComment.setGroupName(groupName);
                 groupComments.add(groupComment);
             }
-            PreparedStatement queryAuditStmt = conn.prepareStatement("SELECT comment, username, group_audit_message.user_id, audit_time, group_audit_message_id " +
-                    "FROM group_audit_message, user WHERE group_id = ? and " +
-                    "group_audit_message.user_id = user.user_id ORDER BY audit_time desc");
+            PreparedStatement queryAuditStmt = conn.prepareStatement("SELECT comment, username, group_audit_message.user_id, audit_time, community_group.name " +
+                    "FROM group_audit_message, user, community_group WHERE group_id = ? and group_audit_message.group_id = community_group.community_group_id AND " +
+                    "group_audit_message.user_id = user.user_id AND audit_time >= ? AND audit_time <= ?  ORDER BY audit_time desc");
             queryAuditStmt.setLong(1, groupID);
+            if (limit > 0) {
+                queryAuditStmt.setMaxRows(limit);
+            }
+            queryAuditStmt.setTimestamp(2, new Timestamp(startDate.getTime()));
+            queryAuditStmt.setTimestamp(3, new Timestamp(endDate.getTime()));
             ResultSet auditRS = queryAuditStmt.executeQuery();
             while (auditRS.next()) {
                 String comment = auditRS.getString(1);
                 String userName = auditRS.getString(2);
                 long userID = auditRS.getLong(3);
-                Date timeCreated = new Date(auditRS.getDate(4).getTime());
+                Date timeCreated = new Date(auditRS.getTimestamp(4).getTime());
+                String groupName = auditRS.getString(5);
                 GroupAuditMessage groupAuditMessage = new GroupAuditMessage();
                 groupAuditMessage.setAudit(true);
                 groupAuditMessage.setMessage(comment);
                 groupAuditMessage.setUserID(userID);
                 groupAuditMessage.setUserName(userName);
                 groupAuditMessage.setTimestamp(timeCreated);
+                groupAuditMessage.setGroupName(groupName);
                 groupComments.add(groupAuditMessage);
             }
         } finally {

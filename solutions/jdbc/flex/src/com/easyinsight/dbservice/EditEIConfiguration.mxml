@@ -1,15 +1,7 @@
 <?xml version="1.0" ?>
-<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:dbservice="com.easyinsight.dbservice.*">
-    <mx:states>
-        <mx:State name="dbConfig">
-            <mx:RemoveChild target="{coreForm}"/>
-            <mx:AddChild relativeTo="{coreBox}">
-                <dbservice:DBSettings dbConfigured="onDBConfigured(event)"/>
-            </mx:AddChild>
-        </mx:State>
-    </mx:states>
+<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml">
     <mx:Script><![CDATA[
-        import mx.managers.PopUpManager;
+     import mx.managers.PopUpManager;
 
         [Bindable]
         private var eiUserName:String;
@@ -33,13 +25,8 @@
             }
         }
 
-        private function onDBConfigured(event:ConfigProgressionEvent):void {
-            dispatchEvent(new ConfigProgressionEvent(event.dbConfig, eiConfig));
-            PopUpManager.removePopUp(this);
-        }
-
         private function assigned():void {
-            currentState = "dbConfig";
+            PopUpManager.removePopUp(this);
         }
 
         private function validate():void {
@@ -73,8 +60,8 @@
                 <mx:Button label="Validate" click="validate()"/>
                 <mx:Label text="{validationResult}"/>
             </mx:FormItem>
-            <mx:FormItem>
-                <mx:Button label="To Database Configuration" click="next()"/>
+            <mx:FormItem direction="horizontal">
+                <mx:Button label="Save" click="next()"/>
                 <mx:Button label="Cancel" click="PopUpManager.removePopUp(this)"/>
             </mx:FormItem>
         </mx:Form>

@@ -45,7 +45,7 @@ import mx.controls.Alert;
 	        public var addDataSourceIcon:Class;
 
             [Bindable]
-	        [Embed(source="../../../../assets/chart_area_x64.png")]
+	        [Embed(source="../../../../assets/chart_pie2_48x48.png")]
 	        public var addInsightIcon:Class;
 
             [Bindable]
@@ -125,20 +125,12 @@ import mx.controls.Alert;
 
             public function gotFocus():void {
             	groupService.getGroup.send(groupID);
-            	groupService.getGroupMessages.send(groupID);
+            	groupService.getGroupMessages.send(groupID, null, null);
             	groupInsights.refreshData();
             	groupFeeds.refreshData();
             }
 
             public function lostFocus():void {
-            }
-
-            public function getDefaultAnalyzeState():Boolean {
-                return false;
-            }
-
-            public function isKeywordSearchInstant():Boolean {
-                return false;
             }
             
             private function backToGroupList():void {
@@ -246,11 +238,6 @@ import mx.controls.Alert;
             <mx:Button icon="{addInsightIcon}" toolTip="Add Report..." visible="{adminEnabled}"/>
             <mx:Button icon="{messageIcon}" toolTip="New Message" click="newMessage()" visible="{!joinEnabled}"/>
 			<mx:Button icon="{helpIcon}" toolTip="Help!" click="help()" />
-			<mx:HBox width="100%" horizontalAlign="center">
-                <mx:ApplicationControlBar>
-                    <mx:Label fontSize="16" text="{groupName}"/>
-                </mx:ApplicationControlBar>
-		    </mx:HBox>
 		</mx:HBox>
         <mx:Spacer height="20"/>
 		<mx:HBox width="100%">
@@ -261,8 +248,11 @@ import mx.controls.Alert;
                 <mx:Label text="Group Attributes"/>
             </mx:Box>
             <mx:Form paddingTop="0" paddingLeft="0" paddingRight="0" paddingBottom="0" backgroundColor="#F5CDAF">
+                <mx:FormItem label="Name:" fontFamily="Tahoma" fontWeight="bold">
+                    <mx:Label text="{groupName}" fontFamily="Lucida Grande" fontWeight="normal"/>
+                </mx:FormItem>
                 <mx:FormItem label="Description:" fontFamily="Tahoma" fontWeight="bold">
-                    <mx:TextArea text="{description}" fontFamily="Lucida Grande" fontWeight="normal"/>
+                    <mx:TextArea editable="false" text="{description}" fontFamily="Lucida Grande" fontWeight="normal" height="100"/>
                 </mx:FormItem>
                 <mx:FormItem label="{ownerLabel}" fontFamily="Tahoma" fontWeight="bold">
                     <mx:Label htmlText="{ownerText}" fontFamily="Lucida Grande" fontWeight="normal"/>
@@ -287,18 +277,16 @@ import mx.controls.Alert;
 			</mx:DataGrid>
 			-->
 		</mx:VBox>
-		<mx:HBox width="100%" backgroundColor="#FFFFFF" backgroundAlpha=".1" id="coreHBox">
-			<mx:Spacer width="5%"/>
-			<groups:GroupItemPanel rendererClass="com.easyinsight.genredata.PopularAnalysisItem" width="28%" id="groupInsights"
+		<mx:HBox width="100%" backgroundColor="#FFFFFF" backgroundAlpha=".1" id="coreHBox" horizontalAlign="center">
+			<groups:GroupItemPanel rendererClass="com.easyinsight.genredata.PopularAnalysisItem" width="400" id="groupInsights"
 				title="Group Reports" groupID="{groupID}" dataOperation="{groupService.getInsights}"
 				fullDataOperation="{groupService.getInsights}" fullEventType="{ChildSearchEvent.ANALYSIS_SEARCH}"
 				analysisSearch="onSearchAnalysis(event)"/>
-			<mx:Spacer width="5%"/>
-			<groups:GroupItemPanel rendererClass="com.easyinsight.genredata.PopularFeed" width="28%" id="groupFeeds"
+			<mx:Spacer width="50"/>
+			<groups:GroupItemPanel rendererClass="com.easyinsight.genredata.PopularFeed" width="400" id="groupFeeds"
 				title="Group Data Sources" groupID="{groupID}" dataOperation="{groupService.getFeeds}"
 				fullDataOperation="{groupService.getFeeds}" fullEventType="{ChildSearchEvent.FEED_SEARCH}"
 				feedSearch="onSearchFeed(event)" />			
-			<mx:Spacer width="5%"/>							
 		</mx:HBox>
 	</mx:VBox>
 </mx:VBox>

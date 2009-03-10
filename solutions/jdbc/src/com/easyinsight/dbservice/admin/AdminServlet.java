@@ -18,7 +18,6 @@ public class AdminServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest httpServletRequest, HttpServletResponse resp) throws ServletException, IOException {
-        System.out.println(httpServletRequest.getParameter("eiaction"));
         resp.setContentType("text/html");
         PrintWriter out = resp.getWriter();
 
@@ -41,7 +40,6 @@ public class AdminServlet extends HttpServlet {
         out.println("this is the result of the POST...");
         out.println("</body>");
         out.println("</HTML>");*/
-        System.out.println("...");
         if ("forcerun".equals(httpServletRequest.getParameter("eiaction"))) {
             new DBTask().run();
         }

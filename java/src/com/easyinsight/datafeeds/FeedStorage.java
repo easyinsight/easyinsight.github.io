@@ -672,4 +672,25 @@ public class FeedStorage {
         uploadPolicy.setViewers(viewers);
         return uploadPolicy;
     }
+
+    public long getFeedForAPIKey(long userID, String apiKey) {
+        Connection conn = Database.instance().getConnection();
+        try {
+            PreparedStatement queryStmt = conn.prepareStatement("SELECT DISTINCT DATA_FEED.DATA_FEED_ID" +
+                        " FROM UPLOAD_POLICY_USERS, DATA_FEED WHERE " +
+                        "UPLOAD_POLICY_USERS.user_id = ? AND DATA_FEED.DATA_FEED_ID = UPLOAD_POLICY_USERS.FEED_ID AND DATA_FEED.API_KEY = ?");
+            queryStmt.setLong(1, userID);
+            queryStmt.setString(2, apiKey);
+            ResultSet rs = queryStmt.executeQuery();
+            if (rs.next()) {
+                return rs.getLong(1);
+            }
+        } catch (SQLException se) {
+            LogClass.error(se);
+            throw new RuntimeException(se);
+        } finally {
+            Database.instance().closeConnection(conn);
+        }
+        throw new RuntimeException("No data source found for API key " + apiKey);
+    }
 }

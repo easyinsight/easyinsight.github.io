@@ -1,9 +1,13 @@
 package com.easyinsight.dbservice;
 
 import com.easyinsight.solutions.dbservice.webservice.*;
-import com.easyinsight.dbservice.validated.BasicAuthValidatedPublish;
-import com.easyinsight.dbservice.validated.BasicAuthValidatingPublishServiceServiceLocator;
-import com.easyinsight.dbservice.validated.BasicAuthValidatingPublishServiceServiceSoapBindingStub;
+import com.easyinsight.solutions.dbservice.webservice.DatePair;
+import com.easyinsight.solutions.dbservice.webservice.NumberPair;
+import com.easyinsight.solutions.dbservice.webservice.Row;
+import com.easyinsight.solutions.dbservice.webservice.StringPair;
+import com.easyinsight.solutions.dbservice.webservice.Where;
+import com.easyinsight.solutions.dbservice.webservice.DayWhere;
+import com.easyinsight.dbservice.validated.*;
 
 import java.util.*;
 import java.sql.*;
@@ -22,12 +26,12 @@ import javax.xml.rpc.ServiceException;
 public class DBRemote {
 
     public static final String MYSQL = "MySQL";
+    public static final String GENERIC = "Generic";
 
     private static Map<String, DBConfiguration> dbConfigMap = new HashMap<String, DBConfiguration>();
     private static Map<String, EIConfiguration> eiConfigMap = new HashMap<String, EIConfiguration>();
 
-    private MetadataStorage metadataStorage = new MetadataStorage();
-    private String eiHost = System.getProperty("ei.target", "localhost:8080");
+    private String eiHost = System.getProperty("ei.target", "www.easy-insight.com");
 
     public void forceRun(long queryConfigurationID) {
         try {
@@ -55,6 +59,8 @@ public class DBRemote {
                 String type = rs.getString(1);
                 if (MYSQL.equals(type)) {
                     dbConfiguration = new MySQLConfiguration();
+                } else if (GENERIC.equals(type)) {
+                    dbConfiguration = new GenericDBConfiguration();
                 }
                 if (dbConfiguration != null) {
                     dbConfiguration.load(conn);
@@ -141,9 +147,13 @@ public class DBRemote {
             BasicAuthUncheckedPublish service = new BasicAuthUncheckedPublishServiceServiceLocator().getBasicAuthUncheckedPublishServicePort(url);
             ((BasicAuthUncheckedPublishServiceServiceSoapBindingStub)service).setUsername(eiConfiguration.getUserName());
             ((BasicAuthUncheckedPublishServiceServiceSoapBindingStub)service).setPassword(eiConfiguration.getPassword());
-            return null;
+            if (service.validateCredentials()) {
+                return null;
+            } else {
+                return "Invalid credentials.";
+            }
         } catch (Exception e) {
-            return e.getMessage();
+            return "Invalid credentials.";
         }
     }
 
@@ -305,18 +315,53 @@ public class DBRemote {
     }
 
     public String queryToEI(QueryConfiguration queryConfiguration) {
+        String apiKey = null;
         try {
             URL url = new URL("http://" + this.eiHost + "/app/services/UncheckedPublishBasic");
             BasicAuthUncheckedPublish service = new BasicAuthUncheckedPublishServiceServiceLocator().getBasicAuthUncheckedPublishServicePort(url);
             EIConfiguration eiConfiguration = eiConfigMap.get(FlexContext.getFlexSession().getId());
+            if (eiConfiguration == null) {
+                eiConfiguration = getEIConfiguration();
+            }
             DBConfiguration savedConfiguration = dbConfigMap.get(FlexContext.getFlexSession().getId());
+            if (savedConfiguration == null) {
+                savedConfiguration = getDBConfiguration();
+            }
             ((BasicAuthUncheckedPublishServiceServiceSoapBindingStub)service).setUsername(eiConfiguration.getUserName());
             ((BasicAuthUncheckedPublishServiceServiceSoapBindingStub)service).setPassword(eiConfiguration.getPassword());
             String dataSourceKey = queryConfiguration.getDataSource();
             Connection conn = savedConfiguration.getConnection();
             try {
                 Row[] rows = createRows(queryConfiguration.getQuery(), conn);
-                return service.replaceRows(dataSourceKey, rows);
+                if (queryConfiguration.getPublishMode() == QueryConfiguration.ADD) {
+                    apiKey = service.addRows(dataSourceKey, rows);
+                } else if (queryConfiguration.getPublishMode() == QueryConfiguration.REPLACE) {
+                    apiKey = service.replaceRows(dataSourceKey, rows);
+                } else if (queryConfiguration.getPublishMode() == QueryConfiguration.ADD_EXCLUSIVE_TODAY) {
+                    Calendar cal = Calendar.getInstance();
+                    DatePair datePair = new DatePair();
+                    datePair.setKey("Date");
+                    datePair.setValue(cal);
+                    DayWhere dayWhere = new DayWhere();
+                    dayWhere.setKey("Date");
+                    dayWhere.setDayOfYear(cal.get(Calendar.DAY_OF_YEAR));
+                    dayWhere.setYear(cal.get(Calendar.YEAR));
+                    for (Row row : rows) {
+                        DatePair[] datePairs = row.getDatePairs();
+                        if (datePairs == null) {
+                            datePairs = new DatePair[] { datePair };
+                        } else {
+                            List<DatePair> datePairList = new ArrayList<DatePair>(Arrays.asList(datePairs));
+                            datePairList.add(datePair);
+                            datePairs = new DatePair[datePairList.size()];
+                            datePairList.toArray(datePairs);
+                        }
+                        row.setDatePairs(datePairs);
+                    }
+                    Where where = new Where();
+                    where.setDayWheres(new DayWhere[] { dayWhere });
+                    apiKey = service.updateRows(dataSourceKey, rows, where);
+                }
             } finally {
                 conn.close();
             }
@@ -324,6 +369,7 @@ public class DBRemote {
             e.printStackTrace();
             throw new RuntimeException(e);
         }
+        return apiKey;
     }
 
     private Connection getConnection() {
@@ -441,7 +487,6 @@ public class DBRemote {
                     stringPair.setValue("");
                     stringPairs.add(stringPair);
                 }
-                System.out.println(columnName + " - " + object);
             }
             StringPair[] stringPairArray = new StringPair[stringPairs.size()];
             stringPairs.toArray(stringPairArray);

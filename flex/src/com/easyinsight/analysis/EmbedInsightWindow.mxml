@@ -79,7 +79,7 @@
 			<mx:RadioButton label="Customize" groupName="modesGroup" id="customizeMode" value="customizeMode"/>
 		</mx:HBox>
 		<mx:HBox id="quickBox">			
-			<mx:TextArea text="{url}" width="400" height="50" wordWrap="true" id="firstTextArea"/>
+			<mx:TextArea editable="false" text="{url}" width="400" height="50" wordWrap="true" id="firstTextArea"/>
 			<mx:Button label="Copy to Clipboard" click="copyToClipboard()"/>
 		</mx:HBox>
 		<mx:Button label="Close" click="PopUpManager.removePopUp(this)"/>

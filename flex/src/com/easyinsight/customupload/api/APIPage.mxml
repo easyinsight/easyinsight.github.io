@@ -2,7 +2,7 @@
 <mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:api="com.easyinsight.customupload.api.*"
          xmlns:listing="com.easyinsight.listing.*"
          implements="com.easyinsight.listing.IPerspective" width="100%" height="100%"
-         creationComplete="setupListeners()">
+         creationComplete="setupListeners()" verticalGap="0">
     <mx:states>
         <mx:State name="notLoggedIn">
             <mx:RemoveChild target="{apiListing}"/>
@@ -131,9 +131,10 @@ import mx.utils.URLUtil;
 		<mx:method name="getDeployedServices" result="gotDeployedServices()"/>
 		<mx:method name="getDataSourceAPIs" result="gotAPIs()"/>
 	</mx:RemoteObject>
-    <mx:Box width="100%" height="5" backgroundColor="#254BD4" left="0" right="0"/>
-    <mx:VBox id="coreContent" height="100%" width="100%" paddingTop="10" paddingLeft="10" paddingRight="10"
-             paddingBottom="10" verticalGap="10">
+    <mx:Box width="100%" height="5" backgroundColor="#D42525" left="0" right="0"/>
+    <mx:VBox width="100%" height="100%" backgroundColor="#818285" horizontalAlign="center">
+        <mx:VBox id="coreContent" height="100%" width="1000" paddingTop="10" paddingLeft="10" paddingRight="10"
+             paddingBottom="10" verticalGap="10" backgroundColor="#FFFFFF">
         <mx:Box paddingLeft="10" paddingTop="10" paddingRight="10" paddingBottom="10" width="100%" height="100%" verticalGap="10" id="apiListing">			
 		<mx:HBox width="100%">
             <mx:Button icon="{helpIcon}" toolTip="Help!" click="help()" />
@@ -178,5 +179,5 @@ import mx.utils.URLUtil;
         </mx:HBox>
 	</mx:Box>
     </mx:VBox>
-
+    </mx:VBox>
 </mx:VBox>

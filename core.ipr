@@ -79,6 +79,8 @@
       <option name="TABLE_PATTERN" value="" />
       <option name="UUID" value="8c92e1a8-62f9-4e17-8bcd-38d889c74b8c" />
       <option name="NAME" value="DataSource" />
+      <option name="DATABASE_PRODUCT_NAME" />
+      <option name="DATABASE_PRODUCT_VERSION" />
       <TABLE_DATA>
         <option name="NAME" value="account" />
         <option name="SCHEMA" />
@@ -8099,6 +8101,9 @@
     <option name="MAXIMUM_HEAP_SIZE" value="128" />
   </component>
   <component name="Encoding" useUTFGuessing="true" native2AsciiForPropertiesFiles="false" />
+  <component name="EntryPointsManager">
+    <entry_points version="2.0" />
+  </component>
   <component name="FacetAutodetectingManager">
     <autodetection-disabled>
       <facet-type id="web">

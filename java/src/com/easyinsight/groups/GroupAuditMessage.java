@@ -11,10 +11,12 @@ import java.util.Date;
  */
 public class GroupAuditMessage extends AuditMessage {
     private long groupID;
+    private String groupName;
 
-    public GroupAuditMessage(long userID, Date timestamp, String message, long groupID) {
+    public GroupAuditMessage(long userID, Date timestamp, String message, long groupID, String groupName) {
         super(userID, timestamp, message);
         this.groupID = groupID;
+        this.groupName = groupName;
     }
 
     public GroupAuditMessage() {
@@ -26,5 +28,13 @@ public class GroupAuditMessage extends AuditMessage {
 
     public void setGroupID(long groupID) {
         this.groupID = groupID;
+    }
+
+    public String getGroupName() {
+        return groupName;
+    }
+
+    public void setGroupName(String groupName) {
+        this.groupName = groupName;
     }
 }

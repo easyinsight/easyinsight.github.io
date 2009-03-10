@@ -14,6 +14,7 @@
 	<mx:Script>
 		<![CDATA[
 import com.adobe.ac.mxeffects.Flip;
+import com.easyinsight.analysis.DelayedAPIKeyLink;
 import com.easyinsight.intro.WelcomeScreen;
 import mx.core.UIComponent;
 			import com.easyinsight.FullScreenPage;
@@ -104,56 +105,62 @@ import mx.core.UIComponent;
         			deepAnalysisLink.execute(); 
             	} else {
             		var feedID:String = o.feedID;
-            		trace(feedID);
             		if (feedID != null) {
             			var deepFeedLink:DelayedFeedLink = new DelayedFeedLink(Number(feedID));
             			deepFeedLink.addEventListener(AnalyzeEvent.ANALYZE, internalAnalyze);
             			deepFeedLink.execute();            			
             		} else {
-            			var page:String = o.page;
-            			if (page != null) {
-            				if (currentState == "Analysis") {
-            					currentState = "";
-				            	dataAnalysis.removeEventListener(AnalysisCloseEvent.ANALYSIS_CLOSE, analysisClosed);
-				            	dataAnalysis = null;	
-            				}
-            				switch (page) {
-            					case "myData":
-            						navigation(new NavigationEvent("My Data"));
-            						break;
-                                case "myGoals":
-                                    navigation(new NavigationEvent("Goals"));
-                                    break;
-        						case "marketplace":        							
-        							navigation(new NavigationEvent("Marketplace"));        							
-        							break;
-    							case "groups":
-    								navigation(new NavigationEvent("Groups"));
-    								break;
-								case "groupDetail":
-									break;
-								case "intro":
-									navigation(new NavigationEvent(null, PageFactory.getIntroPanel()));
-									break;
-								case "faq":
-									navigation(new NavigationEvent(null, PageFactory.getFAQPanel()));									
-									break;
-								case "companyInfo":
-									navigation(new NavigationEvent(null, PageFactory.getCompanyInfoPanel()));
-									break;
-								case "blog":
-									navigation(new NavigationEvent(null, PageFactory.getBlogPanel()));
-									break;
-								case "solutions":
-									navigation(new NavigationEvent("Solutions"));
-									break;
-								case "account":
-									navigation(new NavigationEvent("My Account"));
-									break;
-                                case "welcome":
-                                    navigation(new NavigationEvent(null, new WelcomeScreen()));
-            				}
-            			}
+                        var feedKey:String = o.feedKey;
+                        if (feedKey != null) {
+                            var deepAPILink:DelayedAPIKeyLink = new DelayedAPIKeyLink(feedKey);
+                            deepAPILink.addEventListener(AnalyzeEvent.ANALYZE, internalAnalyze);
+                            deepAPILink.execute();
+                        } else {
+                            var page:String = o.page;
+                            if (page != null) {
+                                if (currentState == "Analysis") {
+                                    currentState = "";
+                                    dataAnalysis.removeEventListener(AnalysisCloseEvent.ANALYSIS_CLOSE, analysisClosed);
+                                    dataAnalysis = null;
+                                }
+                                switch (page) {
+                                    case "myData":
+                                        navigation(new NavigationEvent("My Data"));
+                                        break;
+                                    case "myGoals":
+                                        navigation(new NavigationEvent("Goals"));
+                                        break;
+                                    case "marketplace":
+                                        navigation(new NavigationEvent("Marketplace"));
+                                        break;
+                                    case "groups":
+                                        navigation(new NavigationEvent("Groups"));
+                                        break;
+                                    case "groupDetail":
+                                        break;
+                                    case "intro":
+                                        navigation(new NavigationEvent(null, PageFactory.getIntroPanel()));
+                                        break;
+                                    case "faq":
+                                        navigation(new NavigationEvent(null, PageFactory.getFAQPanel()));
+                                        break;
+                                    case "companyInfo":
+                                        navigation(new NavigationEvent(null, PageFactory.getCompanyInfoPanel()));
+                                        break;
+                                    case "blog":
+                                        navigation(new NavigationEvent(null, PageFactory.getBlogPanel()));
+                                        break;
+                                    case "solutions":
+                                        navigation(new NavigationEvent("Solutions"));
+                                        break;
+                                    case "account":
+                                        navigation(new NavigationEvent("My Account"));
+                                        break;
+                                    case "welcome":
+                                        navigation(new NavigationEvent(null, new WelcomeScreen()));
+                                }
+                            }
+                        }
             		}
             	}
             }

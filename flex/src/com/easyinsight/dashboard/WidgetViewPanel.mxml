@@ -14,7 +14,7 @@
 			import mx.controls.Alert;
 			import mx.events.ModuleEvent;
 			import mx.modules.IModuleInfo;
-			import mx.modules.ModuleManager;	
+			import mx.modules.ModuleManager;
                    
             import com.easyinsight.analysis.AnalysisDefinition;
             

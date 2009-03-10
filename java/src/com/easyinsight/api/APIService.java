@@ -7,6 +7,7 @@ import com.easyinsight.api.dynamic.ConfiguredMethod;
 import com.easyinsight.datafeeds.FeedStorage;
 import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.datafeeds.FeedDescriptor;
+import com.easyinsight.datafeeds.FeedType;
 import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.security.Roles;
 import com.easyinsight.analysis.AnalysisItem;
@@ -89,10 +90,12 @@ public class APIService {
             PreparedStatement queryStmt = conn.prepareStatement("SELECT DATA_FEED.DATA_FEED_ID, FEED_NAME," +
                     "data_feed.unchecked_api_enabled, data_feed.validated_api_enabled, data_feed.api_key FROM DATA_FEED, UPLOAD_POLICY_USERS " +
                     "WHERE UPLOAD_POLICY_USERS.FEED_ID = DATA_FEED.DATA_FEED_ID AND " +
-                    "UPLOAD_POLICY_USERS.USER_ID = ? AND UPLOAD_POLICY_USERS.ROLE = ?");
+                    "UPLOAD_POLICY_USERS.USER_ID = ? AND UPLOAD_POLICY_USERS.ROLE = ? AND (DATA_FEED.FEED_TYPE = ? OR DATA_FEED.FEED_TYPE = ?)");
             PreparedStatement serviceStmt = conn.prepareStatement("SELECT dynamic_service_descriptor_id FROM dynamic_service_descriptor WHERE feed_id = ?");
             queryStmt.setLong(1, userID);
             queryStmt.setInt(2, Roles.OWNER);
+            queryStmt.setInt(3, FeedType.DEFAULT.getType());
+            queryStmt.setInt(4, FeedType.STATIC.getType());
             ResultSet rs = queryStmt.executeQuery();
             while (rs.next()) {
                 long feedID = rs.getLong(1);

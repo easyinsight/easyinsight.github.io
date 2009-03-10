@@ -9,6 +9,7 @@ public class QueryConfiguration {
 
     public static final int ADD = 1;
     public static final int REPLACE = 2;
+    public static final int ADD_EXCLUSIVE_TODAY = 3;
 
     private String query;
     private String dataSource;

@@ -188,6 +188,13 @@ public class BasicAuthUncheckedPublishServiceServiceSoapBindingStub extends org.
             cachedSerFactories.add(beansf);
             cachedDeserFactories.add(beandf);
 
+            qName = new javax.xml.namespace.QName("http://basicauth.api.easyinsight.com/", "dayWhere");
+            cachedSerQNames.add(qName);
+            cls = com.easyinsight.solutions.dbservice.webservice.DayWhere.class;
+            cachedSerClasses.add(cls);
+            cachedSerFactories.add(beansf);
+            cachedDeserFactories.add(beandf);
+
             qName = new javax.xml.namespace.QName("http://basicauth.api.easyinsight.com/", "numberPair");
             cachedSerQNames.add(qName);
             cls = com.easyinsight.solutions.dbservice.webservice.NumberPair.class;

@@ -20,4 +20,14 @@ public class BasicAuthValidatingPublishService extends ValidatingPublishService 
         WrappedMessageContext wrappedContext = (WrappedMessageContext) context.getMessageContext();
         return (String) wrappedContext.get("javax.xml.ws.security.auth.username");
     }
+
+    protected long getAccountID() {
+        WrappedMessageContext wrappedContext = (WrappedMessageContext) context.getMessageContext();
+        return (Long) wrappedContext.get("accountID");
+    }
+
+    protected long getUserID() {
+        WrappedMessageContext wrappedContext = (WrappedMessageContext) context.getMessageContext();
+        return (Long) wrappedContext.get("userID");
+    }
 }

@@ -572,7 +572,7 @@ import mx.collections.SortField;
         }
 
         private function refresh():void {
-
+            dataView.requestData();
         }
 
         private function newTextReplaceScrub():void {
@@ -828,6 +828,9 @@ import mx.collections.SortField;
             <mx:HBox label="Data" icon="@Embed(source='../../../assets/data_table.png')" paddingLeft="10"
                      paddingTop="10" paddingBottom="10"
                      paddingRight="10" width="100%" height="100%">
+                <mx:Button id="refreshButton" toolTip="Refresh Data"
+                           icon="@Embed(source='../../../assets/refresh.png')"
+                           click="refresh()"/>
                 <mx:Button id="calculationButton" toolTip="Create Calculation"
                            icon="@Embed(source='../../../assets/text_formula.png')"
                            click="createCalculation()"/>

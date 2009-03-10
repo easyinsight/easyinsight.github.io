@@ -22,8 +22,8 @@
                     new AccountComparisonIcon("Six Sigma Templates", false, false, false, true),
                     new AccountComparisonIcon("Balanced Scorecard Templates", false, false, false, true),
 					new AccountComparisonRow("Maximum Users", "1", "1", "Unlimited", "Unlimited"),
-					new AccountComparisonRow("Available Space", "1 MB", "20 MB", "200 MB", "1 GB"),
-					new AccountComparisonRow("Monthly Cost", "FREE!", "Free for beta phase", "Free for beta phase", "Free for beta phase"),
+					new AccountComparisonRow("Available Space", "1 MB", "20 MB", "200 MB", "1 GB")
+					//new AccountComparisonRow("Monthly Cost", "FREE!", "Free for beta phase", "Free for beta phase", "Free for beta phase"),
 					] );
 				trace(comparisons.length);
 			}

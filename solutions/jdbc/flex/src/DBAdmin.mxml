@@ -1,12 +1,14 @@
 <?xml version="1.0" ?>
 <mx:Application xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:dbservice="com.easyinsight.dbservice.*"
-        creationComplete="setup()" doubleClickEnabled="true">
+        creationComplete="setup()" doubleClickEnabled="true" paddingTop="0" top="0" borderThickness="0" left="0" paddingLeft="0" right="0" paddingRight="0"
+	bottom="0" paddingBottom="0">
     <mx:Script><![CDATA[
         import com.easyinsight.dbservice.Column;
 import com.easyinsight.dbservice.ConfigProgressionEvent;
         import com.easyinsight.dbservice.DatabaseConfiguration;
         import com.easyinsight.dbservice.EIConfiguration;
         import com.easyinsight.dbservice.EditDBCredentials;
+        import com.easyinsight.dbservice.EditEIConfiguration;
 import com.easyinsight.dbservice.PublishQueryWizard;
 import com.easyinsight.dbservice.QueryConfiguration;
         import com.easyinsight.dbservice.QueryPublishedEvent;
@@ -67,6 +69,12 @@ import mx.managers.PopUpManager;
             }
         }
 
+        private function editEIConfig():void {
+            var editEIWindow:EditEIConfiguration = new EditEIConfiguration();
+            PopUpManager.addPopUp(editEIWindow, this, true);
+            PopUpManager.centerPopUp(editEIWindow);
+        }
+
         private function gotDBConfiguration():void {
             var dbConfiguration:DatabaseConfiguration = dbService.getDBConfiguration.lastResult as DatabaseConfiguration;
             if (dbConfiguration == null) {
@@ -83,6 +91,8 @@ import mx.managers.PopUpManager;
         private function editDBConfig():void {
             var editDBWindow:EditDBCredentials = new EditDBCredentials();
             editDBWindow.addEventListener(ConfigProgressionEvent.DB_CONFIGURED, dbConfigured);
+            PopUpManager.addPopUp(editDBWindow, this, true);
+            PopUpManager.centerPopUp(editDBWindow);
         }
 
         private function justDBConfigured(event:ConfigProgressionEvent):void {
@@ -120,6 +130,7 @@ import mx.managers.PopUpManager;
                 var queryConfiguration:QueryConfiguration = new QueryConfiguration();
                 queryConfiguration.query = queryArea.text;
                 queryConfiguration.dataSource = dataSourceNameInput.text;
+                queryConfiguration.publishMode = int(applyDataGroup.selectedValue);
                 queryConfiguration.adHoc = true;
                 dbService.testQuery.send(queryConfiguration);
             }
@@ -148,6 +159,7 @@ import mx.managers.PopUpManager;
                 var queryConfiguration:QueryConfiguration = new QueryConfiguration();
                 queryConfiguration.query = queryArea.text;
                 queryConfiguration.dataSource = dataSourceNameInput.text;
+                queryConfiguration.publishMode = int(applyDataGroup.selectedValue);
                 queryConfiguration.adHoc = true;
                 dbService.queryToEI.send(queryConfiguration);
             }
@@ -158,7 +170,7 @@ import mx.managers.PopUpManager;
             this.dataSourceAPIKey = key;
             publishAvailable = true;
             var eiQueryWindow:EIQueryWindow = new EIQueryWindow();
-            eiQueryWindow.link = "http://www.easy-insight.com/app/#feedKey= " + key;
+            eiQueryWindow.link = "http://www.easy-insight.com/app/#feedKey=" + key;
             PopUpManager.addPopUp(eiQueryWindow, this);
             PopUpManager.centerPopUp(eiQueryWindow);
         }
@@ -166,7 +178,7 @@ import mx.managers.PopUpManager;
         private function publish():void {
             var publishWizard:PublishQueryWizard = new PublishQueryWizard();
             publishWizard.query = queryArea.text;
-            publishWizard.mode = applyDataGroup.selectedValue == "replaceExisting" ? 2 : 1;
+            publishWizard.mode = int(applyDataGroup.selectedValue);
             publishWizard.dataSource = dataSourceAPIKey;
             publishWizard.addEventListener(QueryPublishedEvent.QUERY_PUBLISHED, onQueryPublish);
             PopUpManager.addPopUp(publishWizard, this);
@@ -201,14 +213,15 @@ import mx.managers.PopUpManager;
                     <mx:Form paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5" backgroundColor="#88A5D0" width="100%">
                         <mx:FormItem label="How to Apply Data:">
                             <mx:RadioButtonGroup id="applyDataGroup"/>
-                            <mx:RadioButton group="{applyDataGroup}" label="Replace Any Existing Data" value="replaceExisting" selected="true"/>
-                            <mx:RadioButton group="{applyDataGroup}" label="Append Onto Any Existing Data" value="addToData"/>
+                            <mx:RadioButton group="{applyDataGroup}" label="Replace All Existing Data" value="1" selected="true"/>
+                            <mx:RadioButton group="{applyDataGroup}" label="Append Onto Any Existing Data" value="2"/>
+                            <mx:RadioButton group="{applyDataGroup}" label="Replace Today's Data" value="3"/>
                         </mx:FormItem>
                         <mx:FormItem label="">
-                            <mx:Button label="Change EI Credentials"/>
+                            <mx:Button label="Change EI Credentials" click="editEIConfig()"/>
                         </mx:FormItem>
                         <mx:FormItem label="">
-                            <mx:Button label="Change DB Configuration"/>
+                            <mx:Button label="Change DB Configuration" click="editDBConfig()"/>
                         </mx:FormItem>
                     </mx:Form>
                 </mx:VBox>
@@ -252,7 +265,7 @@ import mx.managers.PopUpManager;
                     <mx:Spacer height="20"/>
                 </mx:Box>
                 <mx:HBox width="100%">
-                    <mx:TextArea width="100%" height="100" fontSize="11" id="queryArea"/>
+                    <mx:TextArea width="100%" height="50" fontSize="11" id="queryArea"/>
                     <mx:VBox verticalAlign="middle" height="100%">
                         <mx:Button label="Test Query" click="runQuery()"/>
                     </mx:VBox>
@@ -263,7 +276,7 @@ import mx.managers.PopUpManager;
                         <mx:Box backgroundColor="#3370ce" width="100%">
                             <mx:Label text="First Five Rows of Query Results" color="#FFFFFF"/>
                         </mx:Box>
-                        <mx:DataGrid dataProvider="{testResults}" visible="{testResultsExist}"/>
+                        <mx:DataGrid dataProvider="{testResults}" visible="{testResultsExist}" rowCount="5"/>
                     </mx:VBox>
                 </mx:VBox>
             </mx:VBox>

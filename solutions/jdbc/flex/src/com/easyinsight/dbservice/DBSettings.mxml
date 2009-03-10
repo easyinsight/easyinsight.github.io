@@ -9,6 +9,11 @@
                 <dbservice:MySQLPanel id="mysqlPanel"/>
             </mx:AddChild>
         </mx:State>
+        <mx:State name="Generic JDBC" enterState="assignPanel(event, genericPanel)">
+            <mx:AddChild relativeTo="{coreBox}">
+                <dbservice:GenericJDBCWindow id="genericPanel"/>
+            </mx:AddChild>
+        </mx:State>
     </mx:states>
     <mx:Script><![CDATA[
 import mx.controls.Alert;
@@ -21,7 +26,7 @@ import mx.rpc.events.FaultEvent;
         private var validationNote:String;
 
         [Bindable]
-        private var databases:ArrayCollection = new ArrayCollection([ "[ Select a Database ]", "MySQL"]);
+        private var databases:ArrayCollection = new ArrayCollection([ "[ Select a Database ]", "MySQL", "Generic JDBC"]);
 
         private function assignPanel(event:Event, settings:IDatabaseSettings):void {
             currentPanel = settings;
@@ -45,7 +50,11 @@ import mx.rpc.events.FaultEvent;
         }
 
         private function done():void {
-            dbService.assignDB.send(currentPanel.createSettings());
+            if (currentPanel == null) {
+                dispatchEvent(new ConfigProgressionEvent(null));
+            } else {
+                dbService.assignDB.send(currentPanel.createSettings());
+            }
         }
 
         private function gotValidation():void {

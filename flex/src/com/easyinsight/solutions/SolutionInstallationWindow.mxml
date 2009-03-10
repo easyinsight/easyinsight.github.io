@@ -112,7 +112,7 @@
 				<mx:Label text="{solutionName}"/>		
 			</mx:FormItem>
 			<mx:FormItem label="Description:">
-				<mx:TextArea text="{description}" id="descriptionBox" width="400" height="100"/>		
+				<mx:TextArea text="{description}" id="descriptionBox" width="400" height="100" editable="false" />		
 			</mx:FormItem>
 		</mx:Form>
         <mx:Label text="Installing this solution will add the following objects to your account:"/>

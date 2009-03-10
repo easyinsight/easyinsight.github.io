@@ -1,13 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 <mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:listing="com.easyinsight.listing.*"
-         xmlns:util="com.easyinsight.util.*" width="100%" height="100%"
+         xmlns:util="com.easyinsight.util.*" xmlns:solutions="com.easyinsight.solutions.*" width="100%" height="100%"
          implements="com.easyinsight.listing.IPerspective"
-         backgroundColor="#DCE2F8" doubleClickEnabled="true" creationComplete="initListeners()">
+         backgroundColor="#DCE2F8" doubleClickEnabled="true" creationComplete="initListeners()"
+         paddingTop="0" paddingLeft="0" paddingRight="0" paddingBottom="0" verticalGap="0">
     <mx:states>
         <mx:State name="notLoggedIn">
-            <mx:RemoveChild target="{solutionBox}"/>
+            <mx:RemoveChild target="{solutionGrid}"/>
+            <mx:RemoveChild target="{controlsBox}"/>
+            <mx:RemoveChild target="{infoBox}"/>
             <mx:AddChild relativeTo="{coreContent}">
                 <listing:GottaLoginPage/>
+            </mx:AddChild>
+        </mx:State>
+        <mx:State name="functionalityUnavailable">
+            <mx:RemoveChild target="{solutionGrid}"/>
+            <mx:RemoveChild target="{controlsBox}"/>
+            <mx:RemoveChild target="{infoBox}"/>
+            <mx:AddChild relativeTo="{coreContent}">
+                <solutions:SolutionFunctionalityUnavailable/>
             </mx:AddChild>
         </mx:State>
     </mx:states>
@@ -25,7 +36,13 @@
         import mx.managers.PopUpManager;
         import mx.collections.ArrayCollection;
 
-        import com.easyinsight.listing.AnalyzeSource;
+        [Bindable]
+        [Embed(source="../../../../assets/component_blue_add.png")]
+        private var installIcon:Class;
+
+        [Bindable]
+        [Embed(source="../../../../assets/gear.png")]
+        private var archiveIcon:Class;
 
         [Bindable]
         [Embed(source="../../../../assets/help.png")]
@@ -52,10 +69,6 @@
             PopUpManager.centerPopUp(window);
         }
 
-        public function analyze():AnalyzeSource {
-            return null;
-        }
-
         public function gotFocus():void {
             var fragmentObject:Object = new Object();
             fragmentObject.page = "solutions";
@@ -80,14 +93,6 @@
         public function lostFocus():void {
         }
 
-        public function getDefaultAnalyzeState():Boolean {
-            return false;
-        }
-
-        public function isKeywordSearchInstant():Boolean {
-            return false;
-        }
-
         private function gotAllSolutions():void {
             this.availableSolutions = solutionService.getSolutions.lastResult as ArrayCollection;
             this.availableRowCount = this.availableSolutions.length;
@@ -103,30 +108,56 @@
         <mx:method name="getSolutions" result="gotAllSolutions()"/>
     </mx:RemoteObject>
     <mx:Box width="100%" height="5" backgroundColor="#254BD4" left="0" right="0"/>
-    <mx:VBox width="100%" height="100%" paddingTop="10" paddingLeft="10" paddingRight="10" paddingBottom="10"
-             id="coreContent">
-        <mx:VBox width="100%" height="100%" id="solutionBox">
-            <mx:HBox width="100%">
-                <mx:ApplicationControlBar>
-                    <mx:Label fontSize="14" text="Available Solutions"/>
-                </mx:ApplicationControlBar>
-                <mx:Spacer width="100%"/>
+    <mx:VBox width="100%" height="100%" backgroundColor="#818285" horizontalAlign="center">
+        <mx:VBox width="1000" height="100%" id="coreContent" backgroundColor="#FFFFFF" paddingTop="10" paddingLeft="10"
+                 paddingRight="10" paddingBottom="10">
+            <mx:HBox width="100%" id="infoBox">
+                <mx:TextArea
+                        text="Solutions give you the ability to rapidly collect data from a variety of sources, leverage prebuilt data sources and reports, and get started on tracking goals right away. The solutions available below are dependant on your account type--business focused solutions are only available to Professional or higher, while SOA and process improvement solutions are only available to Enterprise accounts."
+                        width="100%" height="90" borderStyle="none" editable="false"/>
+                <mx:Grid>
+                    <mx:GridRow verticalAlign="middle">
+                        <mx:GridItem>
+                            <mx:Image source="{archiveIcon}"/>
+                        </mx:GridItem>
+                        <mx:GridItem>
+                            <mx:Label text="This solution has client files you can download" fontSize="13"/>
+                        </mx:GridItem>
+                    </mx:GridRow>
+                    <mx:GridRow verticalAlign="middle">
+                        <mx:GridItem>
+                            <mx:Image source="{installIcon}"/>
+                        </mx:GridItem>
+                        <mx:GridItem>
+                            <mx:Label text="This solution has data sources, reports, and/or goal trees you can copy"
+                                      fontSize="13"/>
+                        </mx:GridItem>
+                    </mx:GridRow>
+                </mx:Grid>
+            </mx:HBox>
+            <mx:HBox width="100%" id="controlsBox">
+                <mx:HBox width="100%" horizontalAlign="center">
+                    <mx:ApplicationControlBar>
+                        <mx:Label fontSize="14" text="Available Solutions"/>
+                    </mx:ApplicationControlBar>
+                </mx:HBox>
                 <mx:HBox borderStyle="inset" borderThickness="1" paddingTop="5" paddingBottom="5" paddingLeft="5"
                          paddingRight="5">
                     <mx:TextInput id="searchText" keyUp="search()"/>
                     <mx:Button toolTip="Search" icon="@Embed(source='../../../../assets/view.png')" id="searchButton"/>
                 </mx:HBox>
             </mx:HBox>
-            <mx:DataGrid dataProvider="{availableSolutions}" width="100%" itemDoubleClick="onDoubleClick(event)">
+            <mx:DataGrid dataProvider="{availableSolutions}" width="100%" height="100%"
+                         itemDoubleClick="onDoubleClick(event)" id="solutionGrid">
                 <mx:columns>
                     <util:EIDataGridColumn headerText="Solution Name" dataField="name"
                                            headerRenderer="com.easyinsight.groups.CustomGroupHeader"/>
                     <util:EIDataGridColumn headerText="Industry" dataField="industry" width="150"
-                                       headerRenderer="com.easyinsight.groups.CustomGroupHeader"/>
+                                           headerRenderer="com.easyinsight.groups.CustomGroupHeader"/>
                     <util:EIDataGridColumn headerText="Author" dataField="author" width="150"
-                                       headerRenderer="com.easyinsight.groups.CustomGroupHeader"/>
+                                           headerRenderer="com.easyinsight.groups.CustomGroupHeader"/>
                     <util:EIDataGridColumn headerText="" width="100" sortable="false"
-                                       itemRenderer="com.easyinsight.solutions.AvailableSolutionIcons"/>
+                                           itemRenderer="com.easyinsight.solutions.AvailableSolutionIcons"/>
                 </mx:columns>
             </mx:DataGrid>
         </mx:VBox>

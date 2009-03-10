@@ -22,7 +22,7 @@ public class BasicAuthUncheckedPublishServiceServiceLocator extends org.apache.a
     }
 
     // Use to get a proxy class for BasicAuthUncheckedPublishServicePort
-    private java.lang.String BasicAuthUncheckedPublishServicePort_address = "http://localhost:8080/DMS/services/UncheckedPublishBasic";
+    private java.lang.String BasicAuthUncheckedPublishServicePort_address = "http://localhost:8080/app/services/UncheckedPublishBasic";
 
     public java.lang.String getBasicAuthUncheckedPublishServicePortAddress() {
         return BasicAuthUncheckedPublishServicePort_address;

@@ -20,7 +20,7 @@ import mx.managers.PopUpManager;
         <mx:method name="addConsultant" result="addedConsultant()"/>
     </mx:RemoteObject>
     <mx:VBox styleName="TitleWindowContents">
-        <mx:TextArea text="You can add Easy Insight consultants to your account to assist with application configuration, report and goal tree creation, and so on. You will need to contact your account manager at Easy Insight or consulting@easy-insight.com to arrange the actual statement of work. Once that is done, you can add the agreed upon consultants below."/>
+        <mx:TextArea editable="false" text="You can add Easy Insight consultants to your account to assist with application configuration, report and goal tree creation, and so on. You will need to contact your account manager at Easy Insight or consulting@easy-insight.com to arrange the actual statement of work. Once that is done, you can add the agreed upon consultants below."/>
         <mx:Form>
             <mx:FormItem label="User Name:">
                 <mx:TextInput id="userNameInput"/>

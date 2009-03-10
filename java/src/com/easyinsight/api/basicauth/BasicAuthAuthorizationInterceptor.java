@@ -19,6 +19,7 @@ import org.apache.log4j.Logger;
 import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.security.PasswordService;
 import com.easyinsight.users.UserServiceResponse;
+import com.easyinsight.users.Account;
 
 /**
  * User: James Boe
@@ -50,8 +51,13 @@ public class BasicAuthAuthorizationInterceptor extends SoapHeaderInterceptor {
         // Verify the password
         try {
             UserServiceResponse response = SecurityUtil.authenticateToResponse(policy.getUserName(), PasswordService.getInstance().encrypt(policy.getPassword()));
-            message.put("accountID", response.getAccountID());
-            message.put("userID", response.getUserID());
+            if (response.getAccountType() < Account.INDIVIDUAL) {
+                log.warn("Free user " + response.getUserName() + " attempted to use API");
+                sendErrorResponse(message, HttpURLConnection.HTTP_UNAUTHORIZED);
+            } else {
+                message.put("accountID", response.getAccountID());
+                message.put("userID", response.getUserID());
+            }
         } catch (Exception e) {
             log.warn("Invalid username or password for user: " + policy.getUserName());
             sendErrorResponse(message, HttpURLConnection.HTTP_FORBIDDEN);

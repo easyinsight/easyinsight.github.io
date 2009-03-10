@@ -6,6 +6,7 @@ import java.sql.*;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Arrays;
 import java.rmi.RemoteException;
 
 /**
@@ -31,6 +32,30 @@ public class QueryValidatedPublish {
                 service.addRows(dataSourceKey, rows);
             } else if (queryConfiguration.getPublishMode() == QueryConfiguration.REPLACE) {
                 service.replaceRows(dataSourceKey, rows);
+            } else if (queryConfiguration.getPublishMode() == QueryConfiguration.ADD_EXCLUSIVE_TODAY) {
+                Calendar cal = Calendar.getInstance();
+                DatePair datePair = new DatePair();
+                datePair.setKey("Date");
+                datePair.setValue(cal);
+                DayWhere dayWhere = new DayWhere();
+                dayWhere.setKey("Date");
+                dayWhere.setDayOfYear(cal.get(Calendar.DAY_OF_YEAR));
+                dayWhere.setYear(cal.get(Calendar.YEAR));
+                for (Row row : rows) {
+                    DatePair[] datePairs = row.getDatePairs();
+                    if (datePairs == null) {
+                        datePairs = new DatePair[] { datePair };
+                    } else {
+                        List<DatePair> datePairList = new ArrayList<DatePair>(Arrays.asList(datePairs));
+                        datePairList.add(datePair);
+                        datePairs = new DatePair[datePairList.size()];
+                        datePairList.toArray(datePairs);
+                    }
+                    row.setDatePairs(datePairs);
+                }
+                Where where = new Where();
+                where.setDayWheres(new DayWhere[] { dayWhere });
+                service.updateRows(dataSourceKey, rows, where);
             }
         } finally {
             conn.close();
@@ -77,7 +102,6 @@ public class QueryValidatedPublish {
                     stringPair.setValue("");
                     stringPairs.add(stringPair);
                 }
-                System.out.println(columnName + " - " + object);
             }
             StringPair[] stringPairArray = new StringPair[stringPairs.size()];
             stringPairs.toArray(stringPairArray);

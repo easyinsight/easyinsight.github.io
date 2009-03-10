@@ -36,6 +36,7 @@ import mx.controls.Alert;
         <mx:method name="getQueryConfigurations" result="gotQueries()"/>
         <mx:method name="deleteQueryConfiguration" result="deletedQuery()"/>
     </mx:RemoteObject>
+    <mx:Button label="Refresh" click="setup()"/>
     <mx:DataGrid dataProvider="{queries}" width="630" id="queryGrid">
         <mx:columns>
             <mx:DataGridColumn dataField="name" headerText="Name" width="100"/>

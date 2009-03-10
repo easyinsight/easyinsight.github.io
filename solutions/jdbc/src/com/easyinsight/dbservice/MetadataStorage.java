@@ -22,6 +22,8 @@ public class MetadataStorage {
                 String type = rs.getString(1);
                 if (DBRemote.MYSQL.equals(type)) {
                     dbConfiguration = new MySQLConfiguration();
+                } else if (DBRemote.GENERIC.equals(type)) {
+                    dbConfiguration = new GenericDBConfiguration();
                 }
                 if (dbConfiguration != null) {
                     dbConfiguration.load(conn);

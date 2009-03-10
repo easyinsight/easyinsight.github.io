@@ -74,7 +74,7 @@
                     </mx:GridItem>
                     <mx:GridItem width="100%">
                         <mx:HBox verticalAlign="middle" width="100%">
-                            <mx:TextArea borderStyle="none" backgroundAlpha="0" width="100%" text="Upload data files, connect to external data, manage your sources, create new reports"/>
+                            <mx:TextArea editable="false" borderStyle="none" backgroundAlpha="0" width="100%" text="Upload data files, connect to external data, manage your sources, create new reports"/>
                         </mx:HBox>
                     </mx:GridItem>
                 </mx:GridRow>
@@ -87,7 +87,7 @@
                     </mx:GridItem>
                     <mx:GridItem width="100%">
                         <mx:HBox verticalAlign="middle" width="100%">
-                        <mx:TextArea borderStyle="none" backgroundAlpha="0" width="100%" text="Collaborate with others to understand problems, share your insights"/>
+                        <mx:TextArea editable="false" borderStyle="none" backgroundAlpha="0" width="100%" text="Collaborate with others to understand problems, share your insights"/>
                     </mx:HBox>
                     </mx:GridItem>
                 </mx:GridRow>
@@ -101,7 +101,7 @@
                     <mx:GridItem width="10%">
                     <mx:HBox verticalAlign="middle" width="100%">
 
-                        <mx:TextArea borderStyle="none" backgroundAlpha="0" width="100%" text="Track your progress to meet key goals, solve end to end business problems"/>
+                        <mx:TextArea editable="false" borderStyle="none" backgroundAlpha="0" width="100%" text="Track your progress to meet key goals, solve end to end business problems"/>
                     </mx:HBox>
                     </mx:GridItem>
                 </mx:GridRow>
@@ -117,7 +117,7 @@
                     </mx:GridItem>
                     <mx:GridItem width="100%">
                         <mx:HBox verticalAlign="middle" width="100%">
-                            <mx:TextArea borderStyle="none" backgroundAlpha="0" width="100%" text="Explore data sets that others have published, find interesting data to add to your own"/>
+                            <mx:TextArea editable="false" borderStyle="none" backgroundAlpha="0" width="100%" text="Explore data sets that others have published, find interesting data to add to your own"/>
                         </mx:HBox>
                     </mx:GridItem>
                 </mx:GridRow>
@@ -130,7 +130,7 @@
                         </mx:GridItem>
                     <mx:GridItem width="100%">
                     <mx:HBox verticalAlign="middle" width="100%">
-                        <mx:TextArea borderStyle="none" backgroundAlpha="0" width="100%" text="Install solutions to rapidly gather data from a variety of sources"/>
+                        <mx:TextArea editable="false" borderStyle="none" backgroundAlpha="0" width="100%" text="Install solutions to rapidly gather data from a variety of sources"/>
                     </mx:HBox>
                     </mx:GridItem>
                 </mx:GridRow>
@@ -143,7 +143,7 @@
                         </mx:GridItem>
                     <mx:GridItem width="100%">
                     <mx:HBox verticalAlign="middle" width="100%">
-                        <mx:TextArea borderStyle="none" backgroundAlpha="0" width="100%" text="Publish data through a variety of powerful APIs to meet any use case"/>
+                        <mx:TextArea editable="false" borderStyle="none" backgroundAlpha="0" width="100%" text="Publish data through a variety of powerful APIs to meet any use case"/>
                     </mx:HBox>
                     </mx:GridItem>
                 </mx:GridRow>

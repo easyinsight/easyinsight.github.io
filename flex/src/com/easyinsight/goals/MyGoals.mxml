@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:listing="com.easyinsight.listing.*"
-         xmlns:goals="com.easyinsight.goals.*"
+         xmlns:goals="com.easyinsight.goals.*" xmlns:util="com.easyinsight.util.*"
          implements="com.easyinsight.listing.IPerspective" creationComplete="onCreation()" width="100%" height="100%"
          doubleClickEnabled="true" verticalGap="0">
     <mx:states>
@@ -12,10 +12,57 @@
                 <listing:GottaLoginPage/>
             </mx:AddChild>
         </mx:State>
+        <mx:State name="functionalityUnavailable">
+            <mx:RemoveChild target="{controlsBox}"/>
+            <mx:RemoveChild target="{goalTreesBox}"/>
+            <mx:RemoveChild target="{myGoalsGrid}"/>
+            <mx:AddChild relativeTo="{coreContent}">
+                <goals:GoalFunctionalityUnavailable/>
+            </mx:AddChild>
+        </mx:State>
+        <mx:State name="noGoalsIndividual">
+            <mx:RemoveChild target="{goalTreesBox}"/>
+            <mx:RemoveChild target="{myGoalsGrid}"/>
+            <mx:AddChild relativeTo="{coreContent}">
+                <mx:VBox width="100%">
+                    <mx:HBox width="100%">
+                        <mx:Image source="{screenshot}"/>
+                        <mx:VBox height="100%" width="100%" verticalAlign="middle">
+                            <mx:TextArea editable="false" text="Goals provide you with a broad strategic view of your improvement on key metrics. Starting with a high level overall goal, you repeatedly subdivide into the various lower level goals that will bring you closer to achieving that overall goal."
+                                    borderStyle="none" width="100%" fontSize="14" height="120"/>
+                        </mx:VBox>
+                    </mx:HBox>
+                    <mx:HBox width="100%" paddingLeft="30" paddingRight="30">
+                        <mx:TextArea editable="false"  text="You can import goal trees from solutions with your account level. Customization or other advanced manipulation of goal trees requires that you upgrade your account level."
+                                width="100%" borderStyle="none" fontSize="14"/>
+                    </mx:HBox>
+                </mx:VBox>
+            </mx:AddChild>
+        </mx:State>
+        <mx:State name="noGoalsPro">
+            <mx:RemoveChild target="{goalTreesBox}"/>
+            <mx:RemoveChild target="{myGoalsGrid}"/>
+            <mx:AddChild relativeTo="{coreContent}">
+                <mx:VBox width="100%" verticalGap="15">
+                    <mx:HBox width="100%" horizontalGap="10">
+                        <mx:Image source="{screenshot}"/>
+                        <mx:VBox height="100%" width="100%" verticalAlign="middle">
+                            <mx:TextArea editable="false"  text="Goals provide you with a broad strategic view of your improvement on key metrics. Starting with a high level overall goal, you repeatedly subdivide into the various lower level goals that will bring you closer to achieving that overall goal."
+                                    borderStyle="none" width="100%" fontSize="14" height="150"/>
+                        </mx:VBox>
+                    </mx:HBox>
+                    <mx:HBox width="100%" paddingLeft="30" paddingRight="30">
+                        <mx:TextArea editable="false"  text="You can start by importing goal trees from solutions or by clicking Create New Goal... above. From there, you can customize the tree, altering template goals to match your specific scenarios, drag in additional trees to rapidly build out a tree, and associating relevant data sources and reports to goals."
+                            width="100%" borderStyle="none" fontSize="14" height="60"/>
+                    </mx:HBox>
+                </mx:VBox>
+            </mx:AddChild>
+        </mx:State>
     </mx:states>
     <mx:Script>
 		<![CDATA[
         import com.easyinsight.account.Account;
+
         import mx.controls.Alert;
         import mx.events.CloseEvent;
         import mx.events.ListEvent;
@@ -35,6 +82,8 @@
         [Bindable]
         private var addGoalTreeAvailable:Boolean = false;
 
+        private var fileRef:FileReference;
+
         [Bindable]
         private var goalTrees:ArrayCollection;
 
@@ -44,6 +93,14 @@
         [Bindable]
         [Embed(source="../../../../assets/branch_add.png")]
         public var addIcon:Class;
+
+        [Bindable]
+        [Embed(source="../../../../assets/document_gear.png")]
+        public var downloadYahooWidget:Class;
+
+        [Bindable]
+        [Embed(source="../../../../assets/goalsscreenshot.JPG")]
+        public var screenshot:Class;
 
         private function createGoalTree():void {
             dispatchEvent(new AnalyzeEvent(new GoalTreeAdminAnalyzeSource(null)));
@@ -61,7 +118,7 @@
         private function onDelete(event:DeleteGoalTreeEvent):void {
             deleteID = event.goalTree.goalTreeID;
             Alert.show("Are you sure you want to delete the goal tree?", "Alert",
-		                		Alert.OK | Alert.CANCEL, this, alertListener, null, Alert.CANCEL);
+                    Alert.OK | Alert.CANCEL, this, alertListener, null, Alert.CANCEL);
         }
 
         private function alertListener(event:CloseEvent):void {
@@ -111,6 +168,13 @@
 
         private function gotTrees():void {
             goalTrees = goalService.getGoalTrees.lastResult as ArrayCollection;
+            if (goalTrees.length == 0) {
+                if (User.getInstance().getAccountType() == Account.INDIVIDUAL) {
+                    currentState = "noGoalsIndividual";
+                } else {
+                    currentState = "noGoalsPro";
+                }
+            }
         }
 
         private function gridDoubleClick(event:ListEvent):void {
@@ -119,6 +183,34 @@
                 dispatchEvent(new AnalyzeEvent(new GoalDataAnalyzeSource(goalTree)));
             }
         }
+
+        private function downloadWidget():void {
+
+            fileRef = new FileReference();
+
+            var request:URLRequest = new URLRequest("/app/assets/goalswidget.widget");
+            request.method = URLRequestMethod.GET;
+
+            fileRef = new FileReference();
+            fileRef.addEventListener(Event.CANCEL, doEvent);
+            fileRef.addEventListener(Event.COMPLETE, complete);
+            fileRef.addEventListener(Event.OPEN, doEvent);
+            fileRef.addEventListener(Event.SELECT, doEvent);
+            fileRef.addEventListener(HTTPStatusEvent.HTTP_STATUS, doEvent);
+            fileRef.addEventListener(IOErrorEvent.IO_ERROR, doEvent);
+            fileRef.addEventListener(ProgressEvent.PROGRESS, doEvent);
+            fileRef.addEventListener(SecurityErrorEvent.SECURITY_ERROR, doEvent);
+
+            fileRef.download(request, "goalswidget.widget");
+        }
+
+        private function complete(event:Event):void {
+			Alert.show("This downloaded widget will allow you to see your monitored goals. You can add it to your widgets by selecting Open Widget... from your Yahoo Widgets dock.");
+            fileRef = null;
+		}
+
+        private function doEvent(event:Event):void {
+        }
 		]]>
     </mx:Script>
     <mx:RemoteObject destination="goalService" id="goalService">
@@ -126,19 +218,22 @@
         <mx:method name="deleteGoalTree" result="deletedTree()"/>
     </mx:RemoteObject>
     <mx:Box width="100%" height="5" backgroundColor="#254BD4" left="0" right="0"/>
-    <mx:VBox id="coreContent" height="100%" width="100%" backgroundColor="#818285" horizontalAlign="center">
+    <mx:VBox height="100%" width="100%" backgroundColor="#818285" horizontalAlign="center">
         <mx:VBox width="1000" height="100%" paddingTop="10" paddingBottom="10" paddingLeft="10"
-             paddingRight="10" verticalGap="10" backgroundColor="#ffffff">
+                 paddingRight="10" verticalGap="10" backgroundColor="#ffffff" id="coreContent">
             <mx:HBox width="100%" id="controlsBox">
                 <mx:Button toolTip="Add Goal Tree..." click="createGoalTree()" id="uploadButton" icon="{addIcon}"
                            label="Add Goal Tree" labelPlacement="bottom" visible="{addGoalTreeAvailable}"/>
+                <mx:Button toolTip="Download Yahoo Widget for Goal Display..." click="downloadWidget()" id="downloadYahooWidgetButton" icon="{downloadYahooWidget}"
+                           label="Yahoo Widget" labelPlacement="bottom"/>
                 <mx:Button icon="@Embed('../../../../assets/helpx48.png')" label="Help..." labelPlacement="bottom"/>
             </mx:HBox>
-            <mx:DataGrid dataProvider="{goalTrees}" width="100%" id="goalTreesBox" itemDoubleClick="gridDoubleClick(event)">
+            <mx:DataGrid dataProvider="{goalTrees}" width="100%" id="goalTreesBox"
+                         itemDoubleClick="gridDoubleClick(event)">
                 <mx:columns>
-                    <mx:DataGridColumn headerText="Name" dataField="goalTreeName"/>
-                    <mx:DataGridColumn headerText="" dataField="goalTreeName" width="150"
-                                       itemRenderer="com.easyinsight.goals.MyGoalsControls" sortable="false"/>
+                    <util:EIDataGridColumn headerText="Goal Tree Name" dataField="goalTreeName"/>
+                    <util:EIDataGridColumn headerText="" dataField="goalTreeName" width="150"
+                                           itemRenderer="com.easyinsight.goals.MyGoalsControls" sortable="false"/>
                 </mx:columns>
             </mx:DataGrid>
             <goals:MyGoalsGrid id="myGoalsGrid" width="100%"/>

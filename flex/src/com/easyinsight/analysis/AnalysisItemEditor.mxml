@@ -92,7 +92,7 @@
 			</mx:AddChild>
 			<mx:AddChild relativeTo="{firstForm}" position="after" creationPolicy="all">
 				<mx:FormItem label="Date Format:" direction="vertical">
-					<mx:TextArea borderStyle="none" borderThickness="0" fontSize="10" width="300" 
+					<mx:TextArea editable="false" borderStyle="none" borderThickness="0" fontSize="10" width="300" 
 						text="The date format is specified by a pattern string. Within the pattern, letters are interpreted as the components of the date string. The following pattern letters are supported:"/>
 					<mx:DataGrid fontSize="10" rowCount="3">
 						<mx:ArrayCollection>

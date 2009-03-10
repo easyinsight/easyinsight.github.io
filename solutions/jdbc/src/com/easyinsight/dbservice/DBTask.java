@@ -14,7 +14,7 @@ import java.net.URL;
  */
 public class DBTask extends TimerTask {
 
-    private String eiHost = System.getProperty("ei.target", "localhost:8080");
+    private String eiHost = System.getProperty("ei.target", "www.easy-insight.com");
 
     public void run() {
         try {
@@ -46,6 +46,8 @@ public class DBTask extends TimerTask {
                 String type = rs.getString(1);
                 if (DBRemote.MYSQL.equals(type)) {
                     dbConfiguration = new MySQLConfiguration();
+                } else if (DBRemote.GENERIC.equals(type)) {
+                    dbConfiguration = new GenericDBConfiguration();
                 }
                 if (dbConfiguration != null) {
                     dbConfiguration.load(conn);

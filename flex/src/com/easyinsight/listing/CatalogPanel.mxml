@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<mx:Box xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%" xmlns:listing="com.easyinsight.listing.*"
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%" xmlns:listing="com.easyinsight.listing.*"
 	implements="com.easyinsight.listing.IPerspective" xmlns:genredata="com.easyinsight.genredata.*">
 	<mx:Metadata>
 		[Event(name="headerBarUpdate", type="com.easyinsight.listing.HeaderBarEvent")]
@@ -66,4 +66,4 @@
 	</mx:ViewStack>
 	-->
 						
-</mx:Box>
+</mx:Canvas>

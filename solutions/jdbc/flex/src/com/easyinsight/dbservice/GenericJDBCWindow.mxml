@@ -1,5 +1,6 @@
 <?xml version="1.0" ?>
-<mx:Form xmlns:mx="http://www.adobe.com/2006/mxml">
+<mx:Form xmlns:mx="http://www.adobe.com/2006/mxml"
+        implements="com.easyinsight.dbservice.IDatabaseSettings">
     <mx:Metadata>
         [Event(name="databaseValidation", type="com.easyinsight.dbservice.DBValidationEvent")]
     </mx:Metadata>
@@ -9,14 +10,20 @@
 
         [Bindable]
         private var _jdbcDriver:String;
-]]></mx:Script>
+
+        public function createSettings():DatabaseConfiguration {
+            var genericDBConfiguration:GenericDBConfiguration = new GenericDBConfiguration();
+            genericDBConfiguration.driver = driverInput.text;
+            genericDBConfiguration.jdbcURL = jdbcURLInput.text;
+            return genericDBConfiguration;
+        }]]></mx:Script>
     <mx:FormItem label="">
-        <mx:Label text="You'll need to add your database driver to the /lib/drivers directory."/>
+        <mx:Label text="You'll need to add your database driver to the /lib directory."/>
     </mx:FormItem>
     <mx:FormItem label="Database Driver: ">
-        <mx:TextInput id="databaseHostInput" text="{_jdbcDriver}"/>
+        <mx:TextInput id="driverInput" text="{_jdbcDriver}"/>
     </mx:FormItem>
     <mx:FormItem label="JDBC Connect String: ">
-        <mx:TextInput id="databasePortInput" text="{_jdbcString}"/>
+        <mx:TextInput id="jdbcURLInput" text="{_jdbcString}"/>
     </mx:FormItem>
 </mx:Form>
