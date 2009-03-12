@@ -58,6 +58,7 @@ package com.easyinsight.analysis.charts
 				} else {
 					chartAdapter = new ColumnChartAdapter();
 				}
+                chartAdapter.sortable = true;                
                 chartAdapter.rolloverFill = rolloverFill;
                 chartAdapter.selectedFill = selectedFill;
                 chartAdapter.standardFill = standardFill;

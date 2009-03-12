@@ -15,8 +15,6 @@ public interface IGoogleStream {
 
     // get the available spreadsheets/worksheets
 
-    public List<Worksheet> getAvailableGoogleSpreadsheets(Credentials credentials);
-
     // test a connection
 
     boolean testGoogleConnect(Credentials credentials);

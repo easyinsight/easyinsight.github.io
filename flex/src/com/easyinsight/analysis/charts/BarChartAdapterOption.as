@@ -47,6 +47,7 @@ package com.easyinsight.analysis.charts
             chartAdapter.rolloverFill = rolloverFill;
             chartAdapter.selectedFill = selectedFill;
             chartAdapter.standardFill = standardFill;
+            chartAdapter.sortable = true;
 			chartAdapter.addEventListener(ChartSortEvent.CHART_SORT, onChartSort);
 			return chartAdapter;
 		}

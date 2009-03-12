@@ -1,7 +1,6 @@
 package com.easyinsight.goals;
 
 import com.easyinsight.analysis.AnalysisDateDimension;
-import com.easyinsight.analysis.AnalysisItemTypes;
 import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.analysis.DataService;
 import com.easyinsight.logging.LogClass;
@@ -149,7 +148,7 @@ public class GoalEvaluationStorage {
         List<Date> dates = new ArrayList<Date>();
         RollingFilterDefinition rollingFilterDefinition = (RollingFilterDefinition) goalTreeNode.getFilterDefinition();
         AnalysisDateDimension dateItem = (AnalysisDateDimension) rollingFilterDefinition.getField();
-        dateItem.setDateLevel(AnalysisItemTypes.DAY_LEVEL);
+        dateItem.setDateLevel(AnalysisDateDimension.DAY_LEVEL);
         WSListDefinition dateDefinition = new WSListDefinition();
         dateDefinition.setDataFeedID(goalTreeNode.getCoreFeedID());
         List<AnalysisItem> analysisItems = new ArrayList<AnalysisItem>();

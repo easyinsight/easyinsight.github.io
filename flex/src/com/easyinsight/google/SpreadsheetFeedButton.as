@@ -47,13 +47,15 @@ import com.easyinsight.customupload.UploadConfigEvent;
 		override protected function commitProperties():void {
 			super.commitProperties();
 			if (!setButtonProps) {
-				if (_data.feedDescriptor == null) {				
-					button.toolTip = "Create Data Source";
-					button.addEventListener(MouseEvent.CLICK, subscribe);					
-				} else {
-					button.toolTip = "Analyze";
-					button.addEventListener(MouseEvent.CLICK, analyze);
-				}		
+                if (_data != null) {
+                    if (_data.feedDescriptor == null) {
+                        button.toolTip = "Create Data Source";
+                        button.addEventListener(MouseEvent.CLICK, subscribe);
+                    } else {
+                        button.toolTip = "Analyze";
+                        button.addEventListener(MouseEvent.CLICK, analyze);
+                    }
+                }
 			}
 		}							
 

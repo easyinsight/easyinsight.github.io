@@ -2,7 +2,6 @@ package test.core;
 
 import junit.framework.TestCase;
 import com.easyinsight.userupload.UserUploadService;
-import com.easyinsight.userupload.UploadResponse;
 import com.easyinsight.storage.DataStorage;
 import com.easyinsight.datafeeds.FeedStorage;
 import com.easyinsight.datafeeds.FeedDefinition;
@@ -45,7 +44,7 @@ public class DateTimeTest extends TestCase {
         FeedStorage feedStorage = new FeedStorage();
         FeedDefinition feedDefinition = feedStorage.getFeedDefinitionData(dataSourceID);
         feedDefinition.setFields(Arrays.asList(new AnalysisDimension("c", true), new AnalysisMeasure("m", AggregationTypes.SUM),
-                new AnalysisDateDimension("d", true, AnalysisItemTypes.YEAR_LEVEL)));
+                new AnalysisDateDimension("d", true, AnalysisDateDimension.YEAR_LEVEL)));
         new FeedService().updateFeedDefinition(feedDefinition, "");
 
         Calendar cal = Calendar.getInstance();
@@ -116,31 +115,31 @@ public class DateTimeTest extends TestCase {
         DataService dataService = new DataService();
         WSListDefinition yearDefinition = new WSListDefinition();
         yearDefinition.setDataFeedID(dataSourceID);
-        yearDefinition.setColumns(getColumns(AnalysisItemTypes.YEAR_LEVEL, dataSourceID));
+        yearDefinition.setColumns(getColumns(AnalysisDateDimension.YEAR_LEVEL, dataSourceID));
         ListDataResults yearResults = dataService.list(yearDefinition, new InsightRequestMetadata());
         validateResults(yearResults, 1);
 
         WSListDefinition monthDefinition = new WSListDefinition();
         monthDefinition.setDataFeedID(dataSourceID);
-        monthDefinition.setColumns(getColumns(AnalysisItemTypes.MONTH_LEVEL, dataSourceID));
+        monthDefinition.setColumns(getColumns(AnalysisDateDimension.MONTH_LEVEL, dataSourceID));
         ListDataResults monthResults = dataService.list(monthDefinition, new InsightRequestMetadata());
         validateResults(monthResults, 2);
 
         WSListDefinition dayDefinition = new WSListDefinition();
         dayDefinition.setDataFeedID(dataSourceID);
-        dayDefinition.setColumns(getColumns(AnalysisItemTypes.DAY_LEVEL, dataSourceID));
+        dayDefinition.setColumns(getColumns(AnalysisDateDimension.DAY_LEVEL, dataSourceID));
         ListDataResults dayResults = dataService.list(dayDefinition, new InsightRequestMetadata());
         validateResults(dayResults, 3);
 
         WSListDefinition hourDefinition = new WSListDefinition();
         hourDefinition.setDataFeedID(dataSourceID);
-        hourDefinition.setColumns(getColumns(AnalysisItemTypes.HOUR_LEVEL, dataSourceID));
+        hourDefinition.setColumns(getColumns(AnalysisDateDimension.HOUR_LEVEL, dataSourceID));
         ListDataResults hourResults = dataService.list(hourDefinition, new InsightRequestMetadata());
         validateResults(hourResults, 4);
 
         WSListDefinition minuteDefinition = new WSListDefinition();
         minuteDefinition.setDataFeedID(dataSourceID);
-        minuteDefinition.setColumns(getColumns(AnalysisItemTypes.MINUTE_LEVEL, dataSourceID));
+        minuteDefinition.setColumns(getColumns(AnalysisDateDimension.MINUTE_LEVEL, dataSourceID));
         ListDataResults minuteResults = dataService.list(minuteDefinition, new InsightRequestMetadata());
         validateResults(minuteResults, 5);
     }
@@ -152,7 +151,7 @@ public class DateTimeTest extends TestCase {
         WSListDefinition noDimDefinition = new WSListDefinition();
         noDimDefinition.setDataFeedID(dataSourceID);
         TemporalAnalysisMeasure measure = new TemporalAnalysisMeasure();
-        AnalysisDateDimension dim = new AnalysisDateDimension(TestUtil.createKey("d", dataSourceID), true, AnalysisItemTypes.MINUTE_LEVEL);
+        AnalysisDateDimension dim = new AnalysisDateDimension(TestUtil.createKey("d", dataSourceID), true, AnalysisDateDimension.MINUTE_LEVEL);
         measure.setAnalysisDimension(dim);
         measure.setWrappedAggregation(AggregationTypes.SUM);
         measure.setAggregation(AggregationTypes.LAST_VALUE);
@@ -170,7 +169,7 @@ public class DateTimeTest extends TestCase {
         WSListDefinition dateDimDefinition = new WSListDefinition();
         dateDimDefinition.setDataFeedID(dataSourceID);
         dateDimDefinition.setColumns(Arrays.asList(new AnalysisDimension(TestUtil.createKey("c", dataSourceID), true),
-                new AnalysisDateDimension(TestUtil.createKey("d", dataSourceID), true, AnalysisItemTypes.DAY_LEVEL), measure));
+                new AnalysisDateDimension(TestUtil.createKey("d", dataSourceID), true, AnalysisDateDimension.DAY_LEVEL), measure));
         measure.triggerApplied(false);
         ListDataResults results = dataService.list(dateDimDefinition, new InsightRequestMetadata());
         //assertEquals(2, results.getRows().length);
@@ -194,7 +193,7 @@ public class DateTimeTest extends TestCase {
         FeedStorage feedStorage = new FeedStorage();
         FeedDefinition feedDefinition = feedStorage.getFeedDefinitionData(dataSourceID);
         feedDefinition.setFields(Arrays.asList(new AnalysisDimension("c", true), new AnalysisMeasure("m", AggregationTypes.SUM),
-                new AnalysisDateDimension("d", true, AnalysisItemTypes.YEAR_LEVEL)));
+                new AnalysisDateDimension("d", true, AnalysisDateDimension.YEAR_LEVEL)));
         new FeedService().updateFeedDefinition(feedDefinition, "");
 
         Calendar cal = Calendar.getInstance();

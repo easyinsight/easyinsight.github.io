@@ -40,7 +40,7 @@ public class DataTypeGuesser implements IDataTypeGuesser {
                     } catch (NumberFormatException e) {
                         SimpleDateFormat dateFormat = guessDate(stringValue.getValue());
                         if (dateFormat != null) {
-                            newGuess = new AnalysisDateDimension(tag, true, AnalysisItemTypes.YEAR_LEVEL, dateFormat.toPattern());
+                            newGuess = new AnalysisDateDimension(tag, true, AnalysisDateDimension.YEAR_LEVEL, dateFormat.toPattern());
                         } else {
                             newGuess = new AnalysisDimension(tag, true);
                         }
@@ -51,7 +51,7 @@ public class DataTypeGuesser implements IDataTypeGuesser {
             } else {
                 switch (value.type()) {
                     case Value.DATE:
-                        newGuess = new AnalysisDateDimension(tag, true, AnalysisItemTypes.YEAR_LEVEL);
+                        newGuess = new AnalysisDateDimension(tag, true, AnalysisDateDimension.YEAR_LEVEL);
                         break;
                     case Value.NUMBER:
                         newGuess = new AnalysisMeasure(tag, AggregationTypes.SUM);

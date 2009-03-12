@@ -1,8 +1,6 @@
 package com.easyinsight.analysis;
 
 import com.easyinsight.core.*;
-import com.easyinsight.analysis.AnalysisItemResultMetadata;
-import com.easyinsight.analysis.AnalysisDateDimensionResultMetadata;
 
 import javax.persistence.Entity;
 import javax.persistence.Table;
@@ -29,6 +27,17 @@ public class AnalysisDateDimension extends AnalysisDimension {
     private String customDateFormat;
     private transient DateFormat cachedDateFormat;
     private static DateFormat defaultDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+    
+    public static final int YEAR_LEVEL = 1;
+    public static final int MONTH_LEVEL = 2;
+    public static final int DAY_LEVEL = 3;
+    public static final int HOUR_LEVEL = 4;
+    public static final int MINUTE_LEVEL = 5;
+    public static final int WEEK_LEVEL = 7;
+    public static final int MONTH_FLAT = 8;
+    public static final int DAY_OF_YEAR_FLAT = 9;
+    public static final int DAY_OF_WEEK_FLAT = 10;
+    public static final int WEEK_OF_YEAR_FLAT = 11;
 
     public AnalysisDateDimension(Key key, boolean group, int dateLevel) {
         super(key, group);
@@ -116,48 +125,72 @@ public class AnalysisDateDimension extends AnalysisDimension {
             }
         } catch (ParseException e) {
         }
+        Value resultValue = null;
         if (tempDate != null) {
             Calendar calendar = Calendar.getInstance();
             calendar.setTime(tempDate);
-            switch (dateLevel) {
-                case AnalysisItemTypes.YEAR_LEVEL:
-                    calendar.set(Calendar.MONTH, 0);
-                    calendar.set(Calendar.DAY_OF_YEAR, 1);
-                    calendar.set(Calendar.HOUR_OF_DAY, 0);
-                    calendar.set(Calendar.MINUTE, 0);
-                    calendar.set(Calendar.SECOND, 0);
-                    calendar.set(Calendar.MILLISECOND, 0);
-                    break;
-                case AnalysisItemTypes.MONTH_LEVEL:
-                    calendar.set(Calendar.DAY_OF_MONTH, 0);
-                    calendar.set(Calendar.HOUR_OF_DAY, 0);
-                    calendar.set(Calendar.MINUTE, 0);
-                    calendar.set(Calendar.SECOND, 0);
-                    calendar.set(Calendar.MILLISECOND, 0);
-                    break;
-                case AnalysisItemTypes.DAY_LEVEL:
-                    calendar.set(Calendar.HOUR_OF_DAY, 0);
-                    calendar.set(Calendar.MINUTE, 0);
-                    calendar.set(Calendar.SECOND, 0);
-                    calendar.set(Calendar.MILLISECOND, 0);
-                    break;
-                case AnalysisItemTypes.HOUR_LEVEL:
-                    calendar.set(Calendar.MINUTE, 0);
-                    calendar.set(Calendar.SECOND, 0);
-                    calendar.set(Calendar.MILLISECOND, 0);
-                    break;
-                case AnalysisItemTypes.MINUTE_LEVEL:
-                    calendar.set(Calendar.SECOND, 0);
-                    calendar.set(Calendar.MILLISECOND, 0);
-                    break;
-                default:
+            if (dateLevel < WEEK_LEVEL) {
+                switch (dateLevel) {
+                    case YEAR_LEVEL:
+                        calendar.set(Calendar.MONTH, 0);
+                        calendar.set(Calendar.DAY_OF_YEAR, 1);
+                        calendar.set(Calendar.HOUR_OF_DAY, 0);
+                        calendar.set(Calendar.MINUTE, 0);
+                        calendar.set(Calendar.SECOND, 0);
+                        calendar.set(Calendar.MILLISECOND, 0);
+                        break;
+                    case MONTH_LEVEL:
+                        calendar.set(Calendar.DAY_OF_MONTH, 0);
+                        calendar.set(Calendar.HOUR_OF_DAY, 0);
+                        calendar.set(Calendar.MINUTE, 0);
+                        calendar.set(Calendar.SECOND, 0);
+                        calendar.set(Calendar.MILLISECOND, 0);
+                        break;
+                    case DAY_LEVEL:
+                        calendar.set(Calendar.HOUR_OF_DAY, 0);
+                        calendar.set(Calendar.MINUTE, 0);
+                        calendar.set(Calendar.SECOND, 0);
+                        calendar.set(Calendar.MILLISECOND, 0);
+                        break;
+                    case HOUR_LEVEL:
+                        calendar.set(Calendar.MINUTE, 0);
+                        calendar.set(Calendar.SECOND, 0);
+                        calendar.set(Calendar.MILLISECOND, 0);
+                        break;
+                    case MINUTE_LEVEL:
+                        calendar.set(Calendar.SECOND, 0);
+                        calendar.set(Calendar.MILLISECOND, 0);
+                        break;
+                    default:
+                        throw new RuntimeException();
+                }
+                finalDate = calendar.getTime();
+                resultValue = new DateValue(finalDate);
+            } else if (dateLevel == WEEK_LEVEL) {
+                int weekOfYear = calendar.get(Calendar.WEEK_OF_YEAR);
+                resultValue = new StringValue(weekOfYear + " - " + calendar.get(Calendar.YEAR));
+            } else {
+                switch (dateLevel) {
+                    case MONTH_FLAT:
+                        resultValue = new NumericValue(calendar.get(Calendar.MONTH));
+                        break;
+                    case DAY_OF_YEAR_FLAT:
+                        resultValue = new NumericValue(calendar.get(Calendar.DAY_OF_YEAR));
+                        break;
+                    case DAY_OF_WEEK_FLAT:
+                        resultValue = new NumericValue(calendar.get(Calendar.DAY_OF_WEEK));
+                        break;
+                    case WEEK_OF_YEAR_FLAT:
+                        resultValue = new NumericValue(calendar.get(Calendar.WEEK_OF_YEAR));
+                        break;
+                    default:
+                        throw new RuntimeException();
+                }
             }
-            finalDate = calendar.getTime();
-
-            return new DateValue(finalDate);
         } else {
-            return new EmptyValue();
+            resultValue = new EmptyValue();
         }
+        return resultValue;
     }
 
     public AnalysisItemResultMetadata createResultMetadata() {

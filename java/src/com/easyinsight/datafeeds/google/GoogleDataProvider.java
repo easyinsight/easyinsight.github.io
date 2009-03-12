@@ -28,7 +28,7 @@ import java.sql.ResultSet;
  */
 public class GoogleDataProvider implements IGoogleStream {
 
-    private Map<Credentials, List<Worksheet>> cachedSpreadsheetResults = new WeakHashMap<Credentials, List<Worksheet>>();
+    private Map<Credentials, List<Spreadsheet>> cachedSpreadsheetResults = new WeakHashMap<Credentials, List<Spreadsheet>>();
     
     private static GoogleDataProvider instance = null;
 
@@ -99,8 +99,8 @@ public class GoogleDataProvider implements IGoogleStream {
         return guesser.createFeedItems();
     }*/
 
-    public List<Worksheet> getAvailableGoogleSpreadsheets(Credentials credentials) {
-        List<Worksheet> worksheets = cachedSpreadsheetResults.get(credentials);
+    public List<Spreadsheet> getAvailableGoogleSpreadsheets(Credentials credentials) {
+        List<Spreadsheet> worksheets = cachedSpreadsheetResults.get(credentials);
         if (worksheets == null) {
             try {
                 worksheets = getSpreadsheets(credentials);
@@ -149,8 +149,8 @@ public class GoogleDataProvider implements IGoogleStream {
         return dataSet;
     }*/
 
-    private List<Worksheet> getSpreadsheets(Credentials credentials) throws AuthenticationException {
-        List<Worksheet> worksheets = new ArrayList<Worksheet>();
+    private List<Spreadsheet> getSpreadsheets(Credentials credentials) throws AuthenticationException {
+        List<Spreadsheet> worksheets = new ArrayList<Spreadsheet>();
         Connection conn = Database.instance().getConnection();
         try {
             PreparedStatement existsStmt = conn.prepareStatement("SELECT DATA_FEED.DATA_FEED_ID, WORKSHEETURL FROM GOOGLE_FEED, DATA_FEED, UPLOAD_POLICY_USERS " +
@@ -173,6 +173,7 @@ public class GoogleDataProvider implements IGoogleStream {
             SpreadsheetFeed spreadsheetFeed = myService.getFeed(feedUrl, SpreadsheetFeed.class);
             for (SpreadsheetEntry entry : spreadsheetFeed.getEntries()) {
                 List<WorksheetEntry> worksheetEntries = entry.getWorksheets();
+                List<Worksheet> worksheetList = new ArrayList<Worksheet>();
                 for (WorksheetEntry worksheetEntry : worksheetEntries) {
                     String title = worksheetEntry.getTitle().getPlainText();
                     Worksheet worksheet = new Worksheet();
@@ -181,8 +182,12 @@ public class GoogleDataProvider implements IGoogleStream {
                     String url = worksheetEntry.getListFeedUrl().toString();
                     worksheet.setUrl(url);
                     worksheet.setFeedDescriptor(worksheetToFeedMap.get(url));
-                    worksheets.add(worksheet);
+                    worksheetList.add(worksheet);
                 }
+                Spreadsheet spreadsheet = new Spreadsheet();
+                spreadsheet.setTitle(entry.getTitle().getPlainText());
+                spreadsheet.setChildren(worksheetList);
+                worksheets.add(spreadsheet);
             }
         } catch (IOException e) {
             throw new RuntimeException(e);

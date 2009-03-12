@@ -3,11 +3,13 @@ package com.easyinsight.servlet;
 import org.apache.cxf.transport.servlet.CXFServlet;
 import org.apache.cxf.Bus;
 import org.apache.cxf.BusFactory;
+import org.apache.cxf.transports.http.QueryHandlerRegistry;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 
 import com.easyinsight.logging.LogClass;
+import com.easyinsight.api.EIWSDLQueryHandler;
 
 /**
  * User: James Boe
@@ -25,5 +27,9 @@ public class EICXFServlet extends CXFServlet {
         super.init(servletConfig);
         Bus bus = getBus();
         BusFactory.setDefaultBus(bus);
+        QueryHandlerRegistry registry = bus.getExtension(QueryHandlerRegistry.class);
+        EIWSDLQueryHandler handler = new EIWSDLQueryHandler();
+        handler.setBus(bus);
+        registry.registerHandler(handler, 0);
     }
 }

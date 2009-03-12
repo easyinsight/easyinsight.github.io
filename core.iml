@@ -71,10 +71,6 @@
             <attribute name="method" value="1" />
             <attribute name="URI" value="/WEB-INF/lib" />
           </containerElement>
-          <containerElement type="library" name="axis" level="module">
-            <attribute name="method" value="1" />
-            <attribute name="URI" value="/WEB-INF/lib" />
-          </containerElement>
         </packaging>
       </configuration>
     </facet>
@@ -179,13 +175,11 @@
     <orderEntry type="module-library">
       <library name="axis">
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/solutions/tcplugin/lib/axis/commons-discovery-0.2.jar!/" />
-          <root url="jar://$MODULE_DIR$/solutions/tcplugin/lib/axis/jaxrpc.jar!/" />
-          <root url="jar://$MODULE_DIR$/solutions/tcplugin/lib/axis/saaj.jar!/" />
-          <root url="jar://$MODULE_DIR$/solutions/tcplugin/lib/axis/wsdl4j-1.5.1.jar!/" />
+          <root url="file://$MODULE_DIR$/java/lib/axis" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />
+        <jarDirectory url="file://$MODULE_DIR$/java/lib/axis" recursive="false" />
       </library>
     </orderEntry>
   </component>

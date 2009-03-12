@@ -2,10 +2,8 @@ package test.api;
 
 import junit.framework.TestCase;
 import com.easyinsight.api.*;
-import com.easyinsight.api.dynamic.DynamicServiceDefinition;
 import com.easyinsight.database.Database;
 import com.easyinsight.datafeeds.FeedRegistry;
-import com.easyinsight.datafeeds.FeedStorage;
 import com.easyinsight.analysis.*;
 import com.easyinsight.security.SecurityUtil;
 import test.util.TestUtil;
@@ -65,7 +63,7 @@ public class APITest extends TestCase {
         def.setDataFeedID(dataSourceID);
         List<AnalysisItem> items = Arrays.asList(new AnalysisItem[] { new AnalysisDimension(TestUtil.createKey("string", dataSourceID), true),
                 new AnalysisMeasure(TestUtil.createKey("number", dataSourceID), AggregationTypes.SUM),
-            new AnalysisDateDimension(TestUtil.createKey("date", dataSourceID), true, AnalysisItemTypes.DAY_LEVEL) });
+            new AnalysisDateDimension(TestUtil.createKey("date", dataSourceID), true, AnalysisDateDimension.DAY_LEVEL) });
         def.setColumns(items);
         return def;
     }

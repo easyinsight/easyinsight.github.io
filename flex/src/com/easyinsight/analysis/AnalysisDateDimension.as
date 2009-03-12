@@ -1,7 +1,9 @@
 package com.easyinsight.analysis
 {
-	import mx.formatters.DateFormatter;
+import com.easyinsight.analysis.formatter.DimensionValueFormatter;
+import mx.formatters.DateFormatter;
 	import mx.formatters.Formatter;
+import mx.formatters.NumberFormatter;
 	
 	[Bindable]
 	[RemoteClass(alias="com.easyinsight.analysis.AnalysisDateDimension")]
@@ -22,25 +24,35 @@ package com.easyinsight.analysis
 		}
 		
 		override public function getFormatter():Formatter {
-			var dateFormatter:DateFormatter = new DateFormatter();
-			switch (this.dateLevel) {
-				case AnalysisItemTypes.YEAR_LEVEL:
-					dateFormatter.formatString = "YYYY";
-					break;
-				case AnalysisItemTypes.MONTH_LEVEL:
-					dateFormatter.formatString = "MM/YYYY";
-					break;
-				case AnalysisItemTypes.DAY_LEVEL:
-					dateFormatter.formatString = "MM/DD/YYYY";
-					break;
-                case AnalysisItemTypes.HOUR_LEVEL:
-                    dateFormatter.formatString = "MM/DD/YYYY HH:00";
-                    break;
-                case AnalysisItemTypes.MINUTE_LEVEL:
-                    dateFormatter.formatString = "MM/DD/YYYY HH:NN";
-                    break;
-			}
-			return dateFormatter;
+            var formatter:Formatter;
+            if (dateLevel < AnalysisItemTypes.WEEK_LEVEL) {
+                var dateFormatter:DateFormatter = new DateFormatter();
+                switch (this.dateLevel) {
+                    case AnalysisItemTypes.YEAR_LEVEL:
+                        dateFormatter.formatString = "YYYY";
+                        break;
+                    case AnalysisItemTypes.MONTH_LEVEL:
+                        dateFormatter.formatString = "MM/YYYY";
+                        break;
+                    case AnalysisItemTypes.DAY_LEVEL:
+                        dateFormatter.formatString = "MM/DD/YYYY";
+                        break;
+                    case AnalysisItemTypes.HOUR_LEVEL:
+                        dateFormatter.formatString = "MM/DD/YYYY HH:00";
+                        break;
+                    case AnalysisItemTypes.MINUTE_LEVEL:
+                        dateFormatter.formatString = "MM/DD/YYYY HH:NN";
+                        break;
+                }
+                formatter = dateFormatter;
+            } else if (dateLevel == AnalysisItemTypes.WEEK_LEVEL) {
+                formatter = new DimensionValueFormatter();
+            } else {
+                var numberFormatter:NumberFormatter = new NumberFormatter();
+			    numberFormatter.precision = 0;
+			    formatter = numberFormatter;
+            }
+			return formatter;
 		}
 	}
 }

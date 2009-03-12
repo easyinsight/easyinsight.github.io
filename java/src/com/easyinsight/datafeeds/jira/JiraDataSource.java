@@ -181,8 +181,8 @@ public class JiraDataSource extends FeedDefinition {
         analysisItems.add(new AnalysisDimension(keys.get(REPORTER), true));
         analysisItems.add(new AnalysisList(keys.get(COMPONENTS), true, ","));
         analysisItems.add(new AnalysisList(keys.get(VERSIONS), true, ","));
-        analysisItems.add(new AnalysisDateDimension(keys.get(DATE_CREATED), true, AnalysisItemTypes.DAY_LEVEL));
-        analysisItems.add(new AnalysisDateDimension(keys.get(UPDATED), true, AnalysisItemTypes.DAY_LEVEL));
+        analysisItems.add(new AnalysisDateDimension(keys.get(DATE_CREATED), true, AnalysisDateDimension.DAY_LEVEL));
+        analysisItems.add(new AnalysisDateDimension(keys.get(UPDATED), true, AnalysisDateDimension.DAY_LEVEL));
         analysisItems.add(new AnalysisDimension(keys.get(PRIORITY), true));
         analysisItems.add(new AnalysisDimension(keys.get(STATUS), true));
         analysisItems.add(new AnalysisDimension(keys.get(ASSIGNEE), true));

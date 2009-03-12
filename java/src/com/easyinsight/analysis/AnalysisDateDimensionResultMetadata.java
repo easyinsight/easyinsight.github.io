@@ -4,7 +4,6 @@ import com.easyinsight.core.Value;
 import com.easyinsight.core.DateValue;
 import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.analysis.AnalysisDateDimension;
-import com.easyinsight.analysis.AnalysisItemTypes;
 
 import java.util.Date;
 
@@ -35,7 +34,7 @@ public class AnalysisDateDimensionResultMetadata extends AnalysisItemResultMetad
 
     public void addValue(AnalysisItem analysisItem, Value value) {
         AnalysisDateDimension dateDim = (AnalysisDateDimension) analysisItem;
-        dateDim.setDateLevel(AnalysisItemTypes.DAY_LEVEL);
+        dateDim.setDateLevel(AnalysisDateDimension.DAY_LEVEL);
         value = analysisItem.transformValue(value);
         if (value.type() == Value.DATE) {
             DateValue dateValue = (DateValue) value;

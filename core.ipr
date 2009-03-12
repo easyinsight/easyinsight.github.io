@@ -8178,6 +8178,7 @@
       <module fileurl="file://$PROJECT_DIR$/ant/ant.iml" filepath="$PROJECT_DIR$/ant/ant.iml" />
       <module fileurl="file://$PROJECT_DIR$/build/build.iml" filepath="$PROJECT_DIR$/build/build.iml" />
       <module fileurl="file://$PROJECT_DIR$/core.iml" filepath="$PROJECT_DIR$/core.iml" />
+      <module fileurl="file://$PROJECT_DIR$/dataprovider/dataprovider.iml" filepath="$PROJECT_DIR$/dataprovider/dataprovider.iml" />
       <module fileurl="file://$PROJECT_DIR$/flex/flex.iml" filepath="$PROJECT_DIR$/flex/flex.iml" />
       <module fileurl="file://$PROJECT_DIR$/solutions/jdbc/jdbc.iml" filepath="$PROJECT_DIR$/solutions/jdbc/jdbc.iml" />
       <module fileurl="file://$PROJECT_DIR$/solutions/jdbc/flex/jdbcflex.iml" filepath="$PROJECT_DIR$/solutions/jdbc/flex/jdbcflex.iml" />

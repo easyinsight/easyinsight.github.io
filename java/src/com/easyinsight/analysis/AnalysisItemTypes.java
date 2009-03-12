@@ -18,10 +18,4 @@ public interface AnalysisItemTypes {
     public static final int TEMPORAL_MEASURE = 512;
     public static final int COMPLEX_MEASURE = 1024;
     public static final int HIERARCHY = 2048;
-
-    public static final int YEAR_LEVEL = 1;
-    public static final int MONTH_LEVEL = 2;
-    public static final int DAY_LEVEL = 3;
-    public static final int HOUR_LEVEL = 4;
-    public static final int MINUTE_LEVEL = 5;
 }

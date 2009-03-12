@@ -45,7 +45,7 @@ public class StaticFeed extends Feed {
         if (dataSet == null) {
             DataStorage source = DataStorage.readConnection(getFields(), getFeedID());
             try {
-                dataSet = source.retrieveData(new ArrayList<Key>(keySet), null);
+                dataSet = source.retrieveData(new ArrayList<Key>(keySet), null, null);
             } catch (SQLException e) {
                 LogClass.error(e);
                 throw new RuntimeException(e);
@@ -82,7 +82,7 @@ public class StaticFeed extends Feed {
         if (dataSet == null) {
             DataStorage source = DataStorage.readConnection(getFields(), getFeedID());
             try {
-                dataSet = source.retrieveData(new ArrayList<Key>(keySet), null);
+                dataSet = source.retrieveData(new ArrayList<Key>(keySet), null, null);
             } catch (SQLException e) {
                 LogClass.error(e);
                 throw new RuntimeException(e);

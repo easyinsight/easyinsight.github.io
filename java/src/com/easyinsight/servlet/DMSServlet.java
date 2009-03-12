@@ -27,9 +27,6 @@ public class DMSServlet extends HttpServlet {
                 SecurityUtil.setSecurityProvider(new DefaultSecurityProvider());
                 Database.initialize();
                 FeedRegistry.initialize();
-                new MessagingBroker();
-                new EngineRequestHandler();
-                new DataEngine();
                 new APIManager().start();
             }
             LogClass.info("Started the server.");
@@ -44,12 +41,5 @@ public class DMSServlet extends HttpServlet {
     public void destroy() {
         LogClass.info("Shutting down...");
         super.destroy();
-        try {
-            EngineRequestHandler.instance().stop();
-            MessagingBroker.instance().stop();
-        } catch (Exception e) {
-            LogClass.error(e);
-        }
-        //System.exit(0);
     }
 }

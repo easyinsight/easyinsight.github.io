@@ -41,7 +41,7 @@ public class JoinDiscovery {
                     DataStorage metadata = DataStorage.writeConnection(sourceFeed, conn);
                     DataSet dataSet;
                     try {
-                        dataSet = metadata.retrieveData(keys, null);
+                        dataSet = metadata.retrieveData(keys, null, null);
                     } finally {
                         metadata.closeConnection();
                     }
@@ -59,7 +59,7 @@ public class JoinDiscovery {
                     DataStorage metadata = DataStorage.writeConnection(targetFeed, conn);
                     DataSet dataSet;
                     try {
-                        dataSet = metadata.retrieveData(keys, null);
+                        dataSet = metadata.retrieveData(keys, null, null);
                     } finally {
                         metadata.closeConnection();
                     }

@@ -79,13 +79,19 @@
 		<mx:State name="Date">
 			<mx:AddChild relativeTo="{firstForm}" position="after" creationPolicy="all">
 				<mx:FormItem label="Date Level:" direction="horizontal">
-					<mx:ComboBox id="dateBox">
+					<mx:ComboBox id="dateBox" rowCount="10">
 						<mx:ArrayCollection>
 							<mx:Object label="Year" data="{AnalysisItemTypes.YEAR_LEVEL}"/>
 							<mx:Object label="Month - Year" data="{AnalysisItemTypes.MONTH_LEVEL}"/>
 							<mx:Object label="Day - Month - Year" data="{AnalysisItemTypes.DAY_LEVEL}"/>							
 							<mx:Object label="Day - Month - Year - Hour" data="{AnalysisItemTypes.HOUR_LEVEL}"/>
 							<mx:Object label="Day - Month - Year - Hour - Minute" data="{AnalysisItemTypes.MINUTE_LEVEL}"/>
+
+                            <mx:Object label="Week - Year" data="{AnalysisItemTypes.WEEK_LEVEL}"/>
+							<mx:Object label="Month" data="{AnalysisItemTypes.MONTH_FLAT}"/>
+							<mx:Object label="Day of Year" data="{AnalysisItemTypes.DAY_OF_YEAR_FLAT}"/>
+							<mx:Object label="Day of Week" data="{AnalysisItemTypes.DAY_OF_WEEK_FLAT}"/>
+							<mx:Object label="Week of Year" data="{AnalysisItemTypes.WEEK_OF_YEAR_FLAT}"/>
 						</mx:ArrayCollection>
 					</mx:ComboBox>
 				</mx:FormItem>	

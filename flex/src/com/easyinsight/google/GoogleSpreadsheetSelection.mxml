@@ -95,7 +95,6 @@
                  var spreadsheets:ArrayCollection = dataService.getAvailableGoogleSpreadsheets.lastResult as ArrayCollection;
                  this.googleSpreadsheets = spreadsheets;
                  spreadsheetTree.rowCount = spreadsheets.length;
-                 gc.refresh();
                  spreadsheetTree.visible = true;
              }
 
@@ -168,30 +167,15 @@
 			</mx:VBox>
 		</mx:HBox>		
 		<mx:AdvancedDataGrid width="100%" height="100%"
-			id="spreadsheetTree" initialize="gc.refresh()" rowHeight="28" fontSize="12" rowCount="5" visible="false" showEffect="{wipeIn}"
+			id="spreadsheetTree" rowHeight="28" fontSize="12" rowCount="5" visible="false" showEffect="{wipeIn}"
 			defaultLeafIcon="{worksheetIcon}" folderOpenIcon="{spreadsheetIcon}" folderClosedIcon="{spreadsheetIcon}">
-			<mx:dataProvider>
-				<mx:GroupingCollection id="gc" source="{googleSpreadsheets}">
-					<mx:grouping>
-						<mx:Grouping>
-							<mx:GroupingField name="spreadsheet"/>
-						</mx:Grouping>
-					</mx:grouping>
-				</mx:GroupingCollection>
-			</mx:dataProvider>
+            <mx:dataProvider>
+	            <mx:HierarchicalData source="{googleSpreadsheets}"/>
+	        </mx:dataProvider>
 			<mx:columns>
-				<mx:AdvancedDataGridColumn headerText="Spreadsheet" dataField="spreadsheet"/>
-				<mx:AdvancedDataGridColumn headerText="Worksheet" dataField="title"/>
-				<mx:AdvancedDataGridColumn id="spFeed" width="80" headerText="" dataField="title"/>
+				<mx:AdvancedDataGridColumn headerText="Name" dataField="title" headerRenderer="com.easyinsight.groups.CustomGroupHeader"/>
+				<mx:AdvancedDataGridColumn id="spFeed" width="80" sortable="false" headerText="" dataField="url" itemRenderer="com.easyinsight.google.SpreadsheetFeedButton"/>
 			</mx:columns>
-			<mx:rendererProviders>
-        <mx:AdvancedDataGridRendererProvider 
-            column="{spFeed}"
-            depth="2" 
-            columnSpan="1" 
-            renderer="com.easyinsight.google.SpreadsheetFeedButton"/>
-    </mx:rendererProviders>
-		
 		</mx:AdvancedDataGrid>
 	</mx:VBox>
 </mx:Canvas>

@@ -268,7 +268,21 @@ public class DataStorage {
                 if (previousKeys.isEmpty()) {
                     existing = new DataSet();
                 } else {
-                    existing = retrieveData(previousKeys, previousVersion);
+                    Map<Key, KeyMetadata> keyMetadatas = new HashMap<Key, KeyMetadata>();
+                    for (AnalysisItem analysisItem : previousItems) {
+                        if (analysisItem.isDerived()) {
+                            continue;
+                        }
+                        Key key = analysisItem.getKey();
+                        if (analysisItem.hasType(AnalysisItemTypes.DATE_DIMENSION)) {
+                            keyMetadatas.put(key, new KeyMetadata(key, Value.DATE, analysisItem));
+                        } else if (analysisItem.hasType(AnalysisItemTypes.MEASURE)) {
+                            keyMetadatas.put(key, new KeyMetadata(key, Value.NUMBER, analysisItem));
+                        } else {
+                            keyMetadatas.put(key, new KeyMetadata(key, Value.STRING, analysisItem));
+                        }
+                    }
+                    existing = retrieveData(previousKeys, keyMetadatas, previousVersion);
                     //existing = new DataSet();
                 }
             }
@@ -310,7 +324,10 @@ public class DataStorage {
         truncateStmt.execute();
     }
 
-    public DataSet retrieveData(List<Key> neededKeys, Integer version) throws SQLException {
+    public DataSet retrieveData(List<Key> neededKeys, Map<Key, KeyMetadata> keys, Integer version) throws SQLException {
+        if (keys == null) {
+            keys = this.keys;
+        }
         if (version == null) {
             version = this.version;
         }
@@ -472,7 +489,7 @@ public class DataStorage {
             if (value.type() != Value.DATE) {
                 AnalysisItem analysisItem = keyMetadata.getAnalysisItem();
                 AnalysisDateDimension analysisDateDimension = (AnalysisDateDimension) analysisItem;
-                analysisDateDimension.setDateLevel(AnalysisItemTypes.DAY_LEVEL);
+                analysisDateDimension.setDateLevel(AnalysisDateDimension.DAY_LEVEL);
                 Value transformedValue = analysisItem.transformValue(value);
                 if (transformedValue.type() == Value.EMPTY)
                     insertStmt.setNull(i++, Types.DATE);

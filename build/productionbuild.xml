@@ -168,6 +168,9 @@
                 <fileset dir="../java/lib/cxf2">
                     <include name="*.jar"/>
                 </fileset>
+                <fileset dir="../java/lib/axis">
+                    <include name="*.jar"/>
+                </fileset>
                 <fileset dir="../java/lib/blazeds">
                     <include name="*.jar"/>
                 </fileset>

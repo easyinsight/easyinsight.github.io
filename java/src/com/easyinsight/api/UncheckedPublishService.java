@@ -213,7 +213,7 @@ public abstract class UncheckedPublishService extends PublishService {
         }
         if (row.getDatePairs() != null) {
             for (DatePair datePair : row.getDatePairs()) {
-                analysisItems.add(new AnalysisDateDimension(datePair.getKey(), true, AnalysisItemTypes.DAY_LEVEL));
+                analysisItems.add(new AnalysisDateDimension(datePair.getKey(), true, AnalysisDateDimension.DAY_LEVEL));
             }
         }
         if (dataSourceIDs.size() == 0) {

@@ -1,12 +1,5 @@
 package com.easyinsight.analysis
 {
-	import com.easyinsight.analysis.options.AverageOption;
-	import com.easyinsight.analysis.options.CountOption;
-	import com.easyinsight.analysis.options.MaxOption;
-	import com.easyinsight.analysis.options.MinOption;
-	import com.easyinsight.analysis.options.SumOption;
-	
-	import mx.collections.ArrayCollection;
 	import mx.controls.ComboBox;
 	
 	public class MeasureDropArea extends DropArea
@@ -29,5 +22,21 @@ package com.easyinsight.analysis
 		override protected function getNoDataLabel():String {
 			return "Drop Measure Here";
 		}
+
+        override public function set analysisItem(analysisItem:AnalysisItem):void {
+
+            if (analysisItem != null) {
+                if (!analysisItem.hasType(AnalysisItemTypes.MEASURE)) {
+                    var analysisMeasure:AnalysisMeasure = new AnalysisMeasure();
+                    analysisMeasure.key = analysisItem.key;
+                    analysisMeasure.displayName = analysisItem.displayName;
+                    analysisMeasure.aggregation = AggregationTypes.SUM;
+                    analysisItem = analysisMeasure;
+                }
+            }
+            
+            super.analysisItem = analysisItem;
+
+        }
 	}
 }
