@@ -21,14 +21,14 @@ public class KeepAliveThread implements Runnable {
 
     public void run() {
         while (true) {
-            Connection conn = Database.instance().getConnection();
+            Connection conn = database.getConnection();
             try {
                 PreparedStatement stmt = conn.prepareStatement("SHOW TABLES");
                 stmt.executeQuery();
             } catch (SQLException e) {
                 LogClass.error(e);
             } finally {
-                Database.instance().closeConnection(conn);
+                database.closeConnection(conn);
             }
             try {
                 Thread.sleep(1000 * 60 * 60);
