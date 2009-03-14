@@ -48,6 +48,7 @@ public abstract class PublishService {
         DatePair[] datePairs = row.getDatePairs();
         if (datePairs != null) {
             for (DatePair datePair : datePairs) {
+                System.out.println("Date Pair date = " + datePair.getValue());
                 transformedRow.addValue(datePair.getKey(), new DateValue(datePair.getValue()));
             }
         }
@@ -77,6 +78,7 @@ public abstract class PublishService {
         DayWhere[] dayWheres = where.getDayWheres();
         if (dayWheres != null) {
             for (DayWhere dayWhere : dayWheres) {
+                System.out.println("Updating day " + dayWhere.getDayOfYear() + " - " + dayWhere.getYear());
                 wheres.add(new com.easyinsight.storage.DayWhere(new NamedKey(dayWhere.getKey()), dayWhere.getYear(), dayWhere.getDayOfYear()));
             }
         }

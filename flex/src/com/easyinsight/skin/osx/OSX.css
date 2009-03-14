@@ -110,6 +110,13 @@ TextInput {
 	backgroundColor: #FFFFFF;
 }
 
+TextArea {
+    fontFamily: "Lucida Grande";
+    fontWeight: normal;
+	fontSize: 11;
+	backgroundColor: #FFFFFF;
+    borderStyle: none
+}
 
 Button {
     fontFamily: "Lucida Grande";

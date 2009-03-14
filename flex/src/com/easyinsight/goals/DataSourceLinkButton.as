@@ -1,6 +1,8 @@
 package com.easyinsight.goals {
 import com.easyinsight.analysis.AnalysisDefinition;
+import com.easyinsight.framework.ModuleAnalyzeSource;
 import com.easyinsight.genredata.AnalyzeEvent;
+import com.easyinsight.genredata.ModuleAnalyzeEvent;
 import com.easyinsight.listing.AnalysisDefinitionAnalyzeSource;
 import com.easyinsight.listing.AnalyzeSource;
 import flash.events.MouseEvent;
@@ -30,8 +32,8 @@ public class DataSourceLinkButton extends HBox{
 
     private function gotReport(event:ResultEvent):void {
         var def:AnalysisDefinition = analysisService.openAnalysisDefinition.lastResult as AnalysisDefinition;
-        var analyzeSource:AnalyzeSource = new AnalysisDefinitionAnalyzeSource(def);
-        dispatchEvent(new AnalyzeEvent(analyzeSource));
+        var analyzeSource:ModuleAnalyzeSource = new AnalysisDefinitionAnalyzeSource(def);
+        dispatchEvent(new ModuleAnalyzeEvent(analyzeSource));
     }
 
     override protected function createChildren():void {

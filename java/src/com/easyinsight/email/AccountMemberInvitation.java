@@ -28,6 +28,11 @@ public class AccountMemberInvitation {
             "Once logged in, you can change your password through Account - Change my Password.\r\n" +
             "Tutorials are available through the Help button on each application page to help you get started.\r\n\r\nWelcome to Easy Insight!";
 
+    private static String resetPasswordText =
+            "Your password has been reset:\r\n\r\n" +
+            "User Name: {0}\r\n"+
+            "Password:  {1}";
+
     private static String newConsultantProAccountText =
             "A new professional account for your organization has been created on Easy Insight.\r\nYou can access the application at\r\n\r\n" +
             "http://www.easy-insight.com/app/#page=welcome\r\n\r\n"+
@@ -57,6 +62,17 @@ public class AccountMemberInvitation {
     public void newProAccount(String to, String userName, String password) {
         String body = MessageFormat.format(newProAccountText, userName, password);
         String subject = "Easy Insight Account Creation";
+        try {
+            new GMailConnection().sendSSLMessage(to, subject, body, "accounts@easy-insight.com");
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void resetPassword(String to, String userName, String password) {
+        String body = MessageFormat.format(resetPasswordText, userName, password);
+        String subject = "Easy Insight Password Reset";
         try {
             new GMailConnection().sendSSLMessage(to, subject, body, "accounts@easy-insight.com");
         } catch (Exception e) {

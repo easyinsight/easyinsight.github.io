@@ -1,5 +1,8 @@
 <?xml version="1.0" ?>
 <mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" addedToStage="setup()" creationComplete="setupListeners()">
+    <mx:Metadata>
+        [Event(name="openInEditor", type="com.easyinsight.dbservice.OpenInEditorEvent")]
+    </mx:Metadata>
     <mx:Script><![CDATA[
         import mx.collections.ArrayCollection;
 import mx.controls.Alert;
@@ -9,11 +12,12 @@ import mx.controls.Alert;
         private var queries:ArrayCollection;
 
         private function setupListeners():void {
-            queryGrid.addEventListener(DeleteQueryEvent.DELETE_QUERY, deleteQuery);
+            queryGrid.addEventListener(DeleteQueryEvent.DELETE_QUERY, deleteQueryConfiguration);
         }
 
-        private function deleteQuery(event:DeleteQueryEvent):void {
-            dbService.deleteQueryConfiguration.send(event.queryConfiguration.queryConfigurationID);
+        private function deleteQueryConfiguration(event:DeleteQueryEvent):void {
+            dbService.deleteQuery.send(event.queryConfiguration.queryConfigurationID);
+            setup();
         }
 
         private function deletedQuery():void {
@@ -34,7 +38,7 @@ import mx.controls.Alert;
 ]]></mx:Script>
     <mx:RemoteObject id="dbService" destination="dbremote" fault="onFault(event)">
         <mx:method name="getQueryConfigurations" result="gotQueries()"/>
-        <mx:method name="deleteQueryConfiguration" result="deletedQuery()"/>
+        <mx:method name="deleteQuery" result="deletedQuery()"/>
     </mx:RemoteObject>
     <mx:Button label="Refresh" click="setup()"/>
     <mx:DataGrid dataProvider="{queries}" width="630" id="queryGrid">

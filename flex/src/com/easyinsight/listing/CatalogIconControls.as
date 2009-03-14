@@ -5,7 +5,8 @@ package com.easyinsight.listing
 	import com.easyinsight.framework.User;
 	import com.easyinsight.genredata.AnalyzeEvent;
 	
-	import flash.events.Event;
+import com.easyinsight.genredata.ModuleAnalyzeEvent;
+import flash.events.Event;
 	import flash.events.MouseEvent;
 	import flash.net.URLRequest;
 	import flash.net.navigateToURL;
@@ -100,7 +101,7 @@ package com.easyinsight.listing
 		}
 		
 		private function analyze(event:MouseEvent):void {
-			dispatchEvent(new AnalyzeEvent(new DescriptorAnalyzeSource(this.feedDescriptor, preview)));
+			dispatchEvent(new ModuleAnalyzeEvent(new DescriptorAnalyzeSource(this.feedDescriptor)));
 		}
 		
 		override public function get data():Object {

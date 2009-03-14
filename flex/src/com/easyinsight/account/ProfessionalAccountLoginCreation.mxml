@@ -22,11 +22,11 @@
         }
 
         private function validatedUser():void {
-            var result:int = creationService.doesUserExist.lastResult as int;
-            if (result == 0) {
+            var result:String = creationService.doesUserExist.lastResult as String;
+            if (result == null) {
                 creationService.doesAccountExist.send(_account.name);
             } else {
-                failureMessageLabel.text =  "That user name already exists.";
+                failureMessageLabel.text = result;
             }
         }
 
@@ -62,7 +62,7 @@
                 user.dataSourceCreator = true;
                 _account.name = accountName.text;
                 _account.maxUsers = licenseNumber.value;
-                creationService.doesUserExist.send(userName.text);
+                creationService.doesUserExist.send(userName.text, email.text);
             }
         }
 

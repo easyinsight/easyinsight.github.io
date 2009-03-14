@@ -99,7 +99,6 @@ package com.easyinsight.filtering
 			deleteButton.addEventListener(MouseEvent.CLICK, deleteSelf);
 			deleteButton.setStyle("icon", deleteIcon);
 			deleteButton.toolTip = "Delete";
-			deleteButton.enabled = false;
 			addChild(deleteButton);
 			
 			

@@ -57,7 +57,15 @@ public class PublishedQueryEdits extends HBox{
     }
 
     private function onEdit(event:MouseEvent):void {
+        var queryEditWindow:QueryEditWindow = new QueryEditWindow();
+        queryEditWindow.queryConfiguration = queryConfiguration;
+        queryEditWindow.addEventListener(OpenInEditorEvent.OPEN_IN_EDITOR, openInEditor);
+        PopUpManager.addPopUp(queryEditWindow, this.parent.parent, true);
+        PopUpManager.centerPopUp(queryEditWindow);
+    }
 
+    private function openInEditor(event:OpenInEditorEvent):void {
+        dispatchEvent(event);
     }
 
     private function onDelete(event:MouseEvent):void {

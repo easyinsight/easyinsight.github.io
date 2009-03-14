@@ -24,7 +24,8 @@
     </listing:states>
     <mx:Script>
 		<![CDATA[
-			import mx.utils.URLUtil;
+        import com.easyinsight.framework.ModuleAnalyzeSource;
+import mx.utils.URLUtil;
         import mx.managers.BrowserManager;
         import mx.rpc.events.FaultEvent;
         import mx.controls.Alert;
@@ -32,7 +33,6 @@
 
         import com.easyinsight.listing.HeaderBarEvent;
         import com.easyinsight.listing.CatalogNavigationEvent;
-        import com.easyinsight.listing.AnalyzeSource;
         import com.easyinsight.dashboard.DataViewPanel;
         import com.easyinsight.analysis.AnalysisDefinition;
 
@@ -69,7 +69,7 @@
             dispatchEvent(new HeaderBarEvent(true, false));
         }
 
-        override public function analyze():AnalyzeSource {
+        override public function analyze():ModuleAnalyzeSource {
             if (currentState == "SearchState") {
                 return catalogListing.analyze();
             } else if (currentState == "AnalysisSearchState") {

@@ -28,7 +28,11 @@
         </copy>
         <copy flatten="false" todir="${jdbc.out.path}/bin">
             <fileset dir="../bin">
-                <include name="**/*"/>
+                <include name="cpappend.bat"/>
+                <include name="config.properties"/>
+                <include name="shutdown.bat"/>
+                <include name="startup.bat"/>
+                <include name="startup.sh"/>
             </fileset>
         </copy>
     </target>
@@ -41,7 +45,7 @@
         </copy>
     </target>
 
-    <target name="jdbcsolution" depends="compileJava, buildFlex, copyLibs, copyWeb">
+    <target name="jdbcsolution" depends="clean, compileJava, buildFlex, copyLibs, copyWeb">
         <zip destfile="../out/dbsolution.zip" basedir="${jdbc.out.path}"/>
     </target>
 

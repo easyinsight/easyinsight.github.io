@@ -21,6 +21,7 @@ import java.sql.ResultSet;
 
 import org.hibernate.Session;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import flex.messaging.FlexContext;
 
 /**
@@ -29,6 +30,30 @@ import flex.messaging.FlexContext;
  * Time: 5:34:56 PM
  */
 public class UserService implements IUserService {
+
+    public String resetPassword(String emailAddress) {
+        String message;
+        Session session = Database.instance().createSession();
+        try {
+            session.getTransaction().begin();
+            List results = session.createQuery("from User where email = ?").setString(0, emailAddress).list();
+            if (results.size() == 0) {
+                message = "No user was found by that email address.";
+            } else {
+                User user = (User) results.get(0);
+                String password = RandomTextGenerator.generateText(12);
+                user.setPassword(password);
+
+            }
+            session.getTransaction().commit();
+        } catch (Exception e) {
+            LogClass.error(e);
+            session.getTransaction().rollback();
+        } finally {
+            session.close();
+        }
+        return message;
+    }
 
     public UserTransferObject upgradeAccount(int toType) {
         if (toType == Account.ADMINISTRATOR) {
@@ -74,12 +99,22 @@ public class UserService implements IUserService {
         }
     }
 
-    public long doesUserExist(String userName) {
+    @Nullable
+    public String doesUserExist(String userName, String email) {
         Session session = Database.instance().createSession();
+        String message = null;
         List results;
         try {
             session.beginTransaction();
             results = session.createQuery("from User where userName = ?").setString(0, userName).list();
+            if (results.size() > 0) {
+                message = "A user already exists by that name.";
+            } else {
+                results = session.createQuery("from User where email = ?").setString(0, email).list();
+                if (results.size() > 0) {
+                    message = "That email address is already used.";
+                }
+            }
             session.getTransaction().commit();
         } catch (Exception e) {
             session.getTransaction().rollback();
@@ -87,12 +122,7 @@ public class UserService implements IUserService {
         } finally {
             session.close();
         }
-        long accountID = 0;
-        if (results.size() > 0) {
-            User user = (User) results.get(0);
-            accountID = user.getAccount().getAccountID();
-        }
-        return accountID;
+        return message;
     }
 
     public boolean doesAccountExist(String accountName) {
@@ -437,26 +467,34 @@ public class UserService implements IUserService {
 
     public UserCreationResponse addConsultant(UserTransferObject userTransferObject) {
         long accountID = SecurityUtil.getAccountID();
-        Session session = Database.instance().createSession();
-        try {
-            session.getTransaction().begin();
-            List results = session.createQuery("from Account where accountID = ?").setLong(0, accountID).list();
-            Account account = (Account) results.get(0);
-            User user = userTransferObject.toUser();
-            user.setAccount(account);
-            Consultant consultant = new Consultant();
-            consultant.setUser(user);
-            consultant.setState(Consultant.PENDING_EI_APPROVAL);
-            session.save(consultant);
-            session.getTransaction().commit();
-        } catch (Exception e) {
-            LogClass.error(e);
-            session.getTransaction().rollback();
-            throw new RuntimeException(e);
-        } finally {
-            session.close();
+        String message = doesUserExist(userTransferObject.getUserName(), userTransferObject.getEmail());
+        UserCreationResponse userCreationResponse;
+        if (message != null) {
+            userCreationResponse = new UserCreationResponse(message);
+        } else {
+            Session session = Database.instance().createSession();
+            try {
+                session.getTransaction().begin();
+                List results = session.createQuery("from Account where accountID = ?").setLong(0, accountID).list();
+                Account account = (Account) results.get(0);
+                User user = userTransferObject.toUser();
+                user.setAccount(account);
+                session.save(user);
+                Consultant consultant = new Consultant();
+                consultant.setUser(user);
+                consultant.setState(Consultant.PENDING_EI_APPROVAL);
+                session.save(consultant);
+                session.getTransaction().commit();
+                userCreationResponse = new UserCreationResponse(user.getUserID());
+            } catch (Exception e) {
+                LogClass.error(e);
+                session.getTransaction().rollback();
+                throw new RuntimeException(e);
+            } finally {
+                session.close();
+            }
         }
-        return null;
+        return userCreationResponse;
     }
 
     public List<EIConsultant> getPendingConsultants() {
@@ -691,9 +729,9 @@ public class UserService implements IUserService {
     public UserCreationResponse addUserToAccount(UserTransferObject userTransferObject) {
         long accountID = SecurityUtil.getAccountID();
         UserCreationResponse userCreationResponse;
-        long exists = doesUserExist(userTransferObject.getUserName());
-        if (exists > 0) {
-            userCreationResponse = new UserCreationResponse("A user already exists by that name.");
+        String message = doesUserExist(userTransferObject.getUserName(), userTransferObject.getEmail());
+        if (message != null) {
+            userCreationResponse = new UserCreationResponse(message);
         } else {
             Session session = Database.instance().createSession();
             Account account;

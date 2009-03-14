@@ -41,6 +41,7 @@ public class QueryValidatedPublish {
                 dayWhere.setKey("Date");
                 dayWhere.setDayOfYear(cal.get(Calendar.DAY_OF_YEAR));
                 dayWhere.setYear(cal.get(Calendar.YEAR));
+                System.out.println("sending with " + cal.getTime());
                 for (Row row : rows) {
                     DatePair[] datePairs = row.getDatePairs();
                     if (datePairs == null) {

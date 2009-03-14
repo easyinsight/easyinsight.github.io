@@ -21,12 +21,11 @@
         }
 
         private function validatedUser():void {
-            var result:int = creationService.doesUserExist.lastResult as int;
-            if (result == 0) {
+            var result:String = creationService.doesUserExist.lastResult as String;
+            if (result == null) {
                 dispatchEvent(new UserDefinitionEvent(user, password.text));
             } else {
-                var failureMessage:String = "That user name already exists.";
-                failureMessageLabel.text = failureMessage;
+                failureMessageLabel.text = result;
             }
         }
 
@@ -52,7 +51,7 @@
                 user.insightCreator = true;
                 user.dataSourceCreator = true;
                 _account.name = userName.text;
-                creationService.doesUserExist.send(userName.text);
+                creationService.doesUserExist.send(userName.text, email.text);
             }
         }
 

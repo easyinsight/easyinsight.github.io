@@ -156,7 +156,7 @@ public abstract class ValidatingPublishService extends PublishService implements
             throw new RuntimeException("More than one data source was found by that API key--this should never happen.");
         } else {
             FeedStorage feedStorage = new FeedStorage();
-            return feedStorage.getFeedDefinitionData(dataSourceIDs.get(0));
+            return feedStorage.getFeedDefinitionData(dataSourceIDs.get(0), conn);
         }
     }
 

@@ -38,7 +38,10 @@
             }
 
             private function addGuestUser():void {
-                
+                var window:AddGuestUserWindow = new AddGuestUserWindow();
+                window.addEventListener(RefreshAccountEvent.REFRESH_ACCOUNT, refreshAccount);
+                PopUpManager.addPopUp(window, this, true);
+                PopUpManager.centerPopUp(window);
             }
         ]]>
 	</mx:Script>
@@ -49,8 +52,8 @@
 	<mx:VBox width="100%" height="100%" horizontalAlign="center">
         <mx:VBox>
 		<mx:HBox width="100%">
-			<mx:Button label="Add User" click="addUser()"/>
-			<mx:Button label="Add Consultant" click="addGuestUser()"/>
+			<mx:Button label="Add User..." click="addUser()"/>
+			<!-- <mx:Button label="Add Consultant" click="addGuestUser()"/> -->
 		</mx:HBox>
         <mx:VBox id="accountSettingsBox" verticalGap="0" borderThickness="1" borderColor="#D42525" borderStyle="solid" dropShadowEnabled="true">
             <mx:Box width="100%" height="5" backgroundColor="#D42525" left="0" right="0"/>
@@ -64,6 +67,7 @@
                     <mx:DataGridColumn dataField="userName" width="100" headerText="" itemRenderer="{userButtonFactory}"/>
                 </mx:columns>
             </mx:DataGrid>
+            <!--
             <mx:Spacer height="40"/>
             <mx:Box width="100%" backgroundColor="#F1EE8D" horizontalAlign="center">
                 <mx:Label text="Consultants" fontFamily="Tahoma" fontWeight="bold" fontSize="14"/>
@@ -75,6 +79,7 @@
                     <mx:DataGridColumn dataField="userName" width="100" headerText="" itemRenderer="{userButtonFactory}"/>
                 </mx:columns>
             </mx:DataGrid>
+            -->
         </mx:VBox>
             </mx:VBox>
 	</mx:VBox>

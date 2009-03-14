@@ -39,8 +39,8 @@ public class DBService {
     
     public void start() {
         try {
-            startWebServer();
             startTasks();
+            startWebServer();
         } catch (Exception e) {
             e.printStackTrace();
             throw new RuntimeException(e);
@@ -66,7 +66,8 @@ public class DBService {
         cal.add(Calendar.DAY_OF_YEAR, 1);
         Date midnight = cal.getTime();
         timer = new Timer();
-        timer.schedule(new DBTask(), midnight, 24 * 60 * 60 * 1000);
+        //timer.schedule(new DBTask(), midnight, 24 * 60 * 60 * 1000);
+        timer.schedule(new DBTask(), new Date(), 60000);
     }
 
     private void startWebServer() throws Exception {

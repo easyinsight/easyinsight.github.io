@@ -362,6 +362,7 @@ public class DataStorage {
                         if (dataRS.wasNull()) {
                             row.addValue(key, new EmptyValue());
                         } else {
+                            System.out.println("LoadedDateVal " + new java.util.Date(time));
                             row.addValue(key, new DateValue(new java.util.Date(time)));
                         }
                     } else if (keyMetadata.getType() == Value.NUMBER) {

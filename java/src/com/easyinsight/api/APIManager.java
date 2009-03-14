@@ -50,12 +50,8 @@ public class APIManager implements IAPIManager {
 
     private void createdValidatedSOAPAPI() {        
         ValidatingPublishService basicAuthPublishService = new BasicAuthValidatingPublishService();
-        //EndpointImpl basicAuthEndpoint = (EndpointImpl) Endpoint.publish("/ValidatedPublishBasic", basicAuthPublishService);
-        Endpoint endpoint = Endpoint.create(basicAuthPublishService);
-        endpoint.publish("/ValidatedPublishBasic");
-        //basicAuthEndpoint.setWsdlLocation("http://www.easy-insight.com/app/services/ValidatedPublishBasic?wsdl");
-        //basicAuthEndpoint.setPublishedEndpointUrl("http://www.easy-insight.com/app/services/ValidatedPublishBasic?wsdl");
-        //configureBasicAuth(basicAuthEndpoint);
+        EndpointImpl basicAuthEndpoint = (EndpointImpl) Endpoint.publish("/ValidatedPublishBasic", basicAuthPublishService);
+        configureBasicAuth(basicAuthEndpoint);
         ValidatingPublishService wsDeathStarPublishService = new WSDeathStarValidatingPublishService();
         EndpointImpl wsDeathStarEndpoint = (EndpointImpl) Endpoint.publish("/ValidatedPublishWSS", wsDeathStarPublishService);
         configureWSDeathStar(wsDeathStarEndpoint);
@@ -64,7 +60,6 @@ public class APIManager implements IAPIManager {
     private void createUncheckedSOAPAPI() {
         UncheckedPublishService basicAuthPublishService = new BasicAuthUncheckedPublishService();
         EndpointImpl basicAuthEndpoint = (EndpointImpl) Endpoint.publish("/UncheckedPublishBasic", basicAuthPublishService);
-        basicAuthEndpoint.setBindingUri("http://www.easy-insight.com/app/services/UncheckedPublishBasic?wsdl");
         configureBasicAuth(basicAuthEndpoint);
         UncheckedPublishService wsDeathStarPublishService = new WSDeathStarUncheckedPublishService();
         EndpointImpl wsDeathStarEndpoint = (EndpointImpl) Endpoint.publish("/UncheckedPublishWSS", wsDeathStarPublishService);

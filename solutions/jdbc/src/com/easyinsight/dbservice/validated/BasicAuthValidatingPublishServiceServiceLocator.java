@@ -22,7 +22,7 @@ public class BasicAuthValidatingPublishServiceServiceLocator extends org.apache.
     }
 
     // Use to get a proxy class for BasicAuthValidatingPublishServicePort
-    private java.lang.String BasicAuthValidatingPublishServicePort_address = "http://localhost:8080/app/services/ValidatedPublishBasic";
+    private java.lang.String BasicAuthValidatingPublishServicePort_address = "http://www.easy-insight.com/app/services/ValidatedPublishBasic";
 
     public java.lang.String getBasicAuthValidatingPublishServicePortAddress() {
         return BasicAuthValidatingPublishServicePort_address;

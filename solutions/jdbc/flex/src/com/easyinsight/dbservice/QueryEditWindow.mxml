@@ -9,9 +9,27 @@
         [Bindable]
         private var query:String;
 
-        private function publish():void {
+        [Bindable]
+        private var queryName:String;
+
+        [Bindable]
+        private var operation:int;
+
+        private var _queryConfiguration:QueryConfiguration;
+
+        public function set queryConfiguration(val:QueryConfiguration):void {
+            _queryConfiguration = val;
+            query = _queryConfiguration.query;
+            queryName = _queryConfiguration.name;
+            dataSource = _queryConfiguration.dataSource;
+            operation = _queryConfiguration.publishMode;
         }
-]]></mx:Script>
+
+        private function publish():void {
+            dispatchEvent(new OpenInEditorEvent(_queryConfiguration));
+            PopUpManager.removePopUp(this);
+        }
+        ]]></mx:Script>
     <mx:VBox>
         <mx:VBox verticalGap="0" borderThickness="5" borderColor="#8296D2" borderStyle="solid" dropShadowEnabled="true" cornerRadius="15"
             paddingLeft="10" paddingBottom="10" paddingRight="10" paddingTop="10" backgroundColor="#E9ECF2">
@@ -23,13 +41,19 @@
             </mx:Box>
             <mx:Form width="100%" paddingBottom="5" paddingRight="5" paddingTop="5" paddingLeft="5">
                 <mx:FormItem label="Query Name:" fontFamily="Tahoma" fontWeight="bold">
-                    <mx:TextInput id="nameInput" fontFamily="Lucida Grande" fontWeight="normal"/>
+                    <mx:TextInput id="nameInput" fontFamily="Lucida Grande" fontWeight="normal" editable="false" text="{queryName}"/>
                 </mx:FormItem>
                 <mx:FormItem label="Data Source API Key: " fontFamily="Tahoma" fontWeight="bold">
                     <mx:Label text="{dataSource}" fontFamily="Lucida Grande" fontWeight="normal"/>
                 </mx:FormItem>
+                 <mx:FormItem label="How to Apply Data:">
+                    <mx:RadioButtonGroup id="applyDataGroup" selectedValue="{operation}" enabled="false"/>
+                    <mx:RadioButton group="{applyDataGroup}" label="Replace All Existing Data" value="1"/>
+                    <mx:RadioButton group="{applyDataGroup}" label="Append Onto Any Existing Data" value="2"/>
+                    <mx:RadioButton group="{applyDataGroup}" label="Replace Today's Data" value="3"/>
+                </mx:FormItem>
                 <mx:FormItem label="Query: " fontFamily="Tahoma" fontWeight="bold">
-                    <mx:TextArea text="{query}" fontFamily="Lucida Grande" fontWeight="normal" backgroundAlpha="0" width="300" height="80"/>
+                    <mx:TextArea text="{query}" fontFamily="Lucida Grande" fontWeight="normal" backgroundAlpha="0" width="300" height="80" editable="false"/>
                 </mx:FormItem>
             </mx:Form>
             <mx:HBox width="100%" horizontalAlign="center">

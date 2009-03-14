@@ -113,7 +113,7 @@ public class AnalysisDateDimension extends AnalysisDimension {
             }
         }
         Date tempDate = null;
-        Date finalDate = null;
+        Date finalDate;
         try {
             if (value.type() == Value.STRING) {
                 StringValue stringValue = (StringValue) value;
@@ -125,10 +125,11 @@ public class AnalysisDateDimension extends AnalysisDimension {
             }
         } catch (ParseException e) {
         }
-        Value resultValue = null;
+        Value resultValue;
         if (tempDate != null) {
             Calendar calendar = Calendar.getInstance();
             calendar.setTime(tempDate);
+            System.out.println("calendar time now = " + calendar.getTime());
             if (dateLevel < WEEK_LEVEL) {
                 switch (dateLevel) {
                     case YEAR_LEVEL:
@@ -151,6 +152,7 @@ public class AnalysisDateDimension extends AnalysisDimension {
                         calendar.set(Calendar.MINUTE, 0);
                         calendar.set(Calendar.SECOND, 0);
                         calendar.set(Calendar.MILLISECOND, 0);
+                        System.out.println("and after setting day level calendar time now = " + calendar.getTime());
                         break;
                     case HOUR_LEVEL:
                         calendar.set(Calendar.MINUTE, 0);

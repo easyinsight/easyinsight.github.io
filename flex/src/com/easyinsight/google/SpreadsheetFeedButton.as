@@ -5,7 +5,8 @@ import com.easyinsight.customupload.UploadConfigEvent;
 	import com.easyinsight.framework.Credentials;
 	import com.easyinsight.framework.User;
 	import com.easyinsight.genredata.AnalyzeEvent;
-	import com.easyinsight.listing.DataFeedDescriptor;
+import com.easyinsight.genredata.ModuleAnalyzeEvent;
+import com.easyinsight.listing.DataFeedDescriptor;
 	import com.easyinsight.listing.DescriptorAnalyzeSource;
 	
 	import flash.events.Event;
@@ -82,7 +83,7 @@ import com.easyinsight.customupload.UploadConfigEvent;
 		}
 		
 		private function analyze(event:Event):void {
-			this.parent.dispatchEvent(new AnalyzeEvent(new DescriptorAnalyzeSource(_data.feedDescriptor)));
+			this.parent.dispatchEvent(new ModuleAnalyzeEvent(new DescriptorAnalyzeSource(_data.feedDescriptor)));
 		}
 		
 		private function successfulSubscription(event:ResultEvent):void {

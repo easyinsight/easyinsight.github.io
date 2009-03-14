@@ -4,7 +4,8 @@ import com.easyinsight.analysis.AnalysisDefinition;
 import com.easyinsight.customupload.FileFeedUpdateWindow;
 	import com.easyinsight.customupload.RefreshWindow;
 	import com.easyinsight.genredata.AnalyzeEvent;
-	import com.easyinsight.util.ProgressAlert;
+import com.easyinsight.genredata.ModuleAnalyzeEvent;
+import com.easyinsight.util.ProgressAlert;
 
 import com.easyinsight.solutions.InsightDescriptor;
 import flash.events.MouseEvent;
@@ -85,7 +86,7 @@ import mx.rpc.remoting.RemoteObject;
 		private function analyzeCalled(event:MouseEvent):void {
 			if (obj is DataFeedDescriptor) {
 				var descriptor:DataFeedDescriptor = obj as DataFeedDescriptor;
-				dispatchEvent(new AnalyzeEvent(new DescriptorAnalyzeSource(descriptor)));
+				dispatchEvent(new ModuleAnalyzeEvent(new DescriptorAnalyzeSource(descriptor)));
 			} else {
 				var analysisDefinition:InsightDescriptor = obj as InsightDescriptor;
                 analysisService = new RemoteObject();
@@ -98,7 +99,7 @@ import mx.rpc.remoting.RemoteObject;
 
         private function gotReport(event:ResultEvent):void {
             var analysisDefinition:AnalysisDefinition = analysisService.openAnalysisDefinition.lastResult as AnalysisDefinition;
-            dispatchEvent(new AnalyzeEvent(new AnalysisDefinitionAnalyzeSource(analysisDefinition)));
+            dispatchEvent(new ModuleAnalyzeEvent(new AnalysisDefinitionAnalyzeSource(analysisDefinition)));
         }
 		
 		private function refreshData(feedDescriptor:DataFeedDescriptor):void {
@@ -117,7 +118,7 @@ import mx.rpc.remoting.RemoteObject;
 		private function adminCalled(event:MouseEvent):void {
 			if (obj is DataFeedDescriptor) {
 				var descriptor:DataFeedDescriptor = obj as DataFeedDescriptor;
-				dispatchEvent(new AnalyzeEvent(new FeedAdminAnalyzeSource(descriptor.dataFeedID,
+				dispatchEvent(new ModuleAnalyzeEvent(new FeedAdminAnalyzeSource(descriptor.dataFeedID,
 					descriptor.name, descriptor.tagString, descriptor.policy, descriptor.description, descriptor.attribution,
 					descriptor.ownerName, descriptor.feedType)));
 			}

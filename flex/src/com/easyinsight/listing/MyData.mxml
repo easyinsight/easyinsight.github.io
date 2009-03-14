@@ -15,7 +15,9 @@
 		<![CDATA[
         import com.easyinsight.analysis.AnalysisDefinition;
             import com.easyinsight.customupload.SimpleFeedWindow;
-			import com.easyinsight.help.MyDataHelp;
+        import com.easyinsight.framework.ModuleAnalyzeSource;
+        import com.easyinsight.genredata.ModuleAnalyzeEvent;
+import com.easyinsight.help.MyDataHelp;
 			import com.easyinsight.help.HelpWindow;			
 			import com.easyinsight.customupload.UserUpload;
 			import com.easyinsight.framework.LoginEvent;
@@ -150,11 +152,11 @@
             }
             
             private function gridDoubleClick(event:ListEvent):void {
-            	var analyzeSource:AnalyzeSource = null;
+            	var analyzeSource:ModuleAnalyzeSource = null;
 				var selectedObject:Object = event.currentTarget.selectedItem;
 				if (selectedObject is DataFeedDescriptor) {
                 	analyzeSource = new DescriptorAnalyzeSource(selectedObject as DataFeedDescriptor);
-                    dispatchEvent(new AnalyzeEvent(analyzeSource));
+                    dispatchEvent(new ModuleAnalyzeEvent(analyzeSource));
                 } else {
                     ProgressAlert.alert(this, "Retrieving report...", null, analysisService.openAnalysisDefinition);
                     analysisService.openAnalysisDefinition.send(InsightDescriptor(selectedObject).insightID);
@@ -163,8 +165,8 @@
 
             private function openedReport():void {
                 var analysisDefinition:AnalysisDefinition = analysisService.openAnalysisDefinition.lastResult as AnalysisDefinition;
-                var analyzeSource:AnalyzeSource = new AnalysisDefinitionAnalyzeSource(analysisDefinition);
-                dispatchEvent(new AnalyzeEvent(analyzeSource));
+                var analyzeSource:ModuleAnalyzeSource = new AnalysisDefinitionAnalyzeSource(analysisDefinition);
+                dispatchEvent(new ModuleAnalyzeEvent(analyzeSource));
             }
             
             public function gotFocus():void {
@@ -230,7 +232,7 @@
                     descriptor.policy = new UploadPolicy();
                     descriptor.policy.publiclyVisible = false;
                     descriptor.name = event.name;
-                    dispatchEvent(new AnalyzeEvent(new DescriptorAnalyzeSource(descriptor)));
+                    dispatchEvent(new ModuleAnalyzeEvent(new DescriptorAnalyzeSource(descriptor)));
                 }
             }
 

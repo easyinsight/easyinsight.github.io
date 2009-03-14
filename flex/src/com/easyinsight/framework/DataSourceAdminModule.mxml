@@ -1,0 +1,96 @@
+<?xml version="1.0" ?>
+<mx:Module xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:easyinsight="com.easyinsight.*"
+           xmlns:feed="com.easyinsight.administration.feed.*" width="100%" height="100%">
+    <mx:Script><![CDATA[
+        import com.easyinsight.analysis.AnalysisCloseEvent;
+
+        import com.easyinsight.customupload.UploadPolicy;
+
+        private var _feedID:int;
+        private var _feedName:String;
+        private var _feedTags:String;
+        private var _uploadPolicy:UploadPolicy;
+        private var _feedDescription:String;
+        private var _feedAttribution:String;
+        private var _feedOwnerName:String;
+        private var _feedType:int;
+
+
+        public function set feedID(val:int):void {
+            _feedID = val;
+        }
+
+        public function set feedName(val:String):void {
+            _feedName = val;
+        }
+
+        public function set feedTags(val:String):void {
+            _feedTags = val;
+        }
+
+        public function set uploadPolicy(val:UploadPolicy):void {
+            _uploadPolicy = val;
+        }
+
+        public function set feedDescription(val:String):void {
+            _feedDescription = val;
+        }
+
+        public function set feedAttribution(val:String):void {
+            _feedAttribution = val;
+        }
+
+        public function set feedOwnerName(val:String):void {
+            _feedOwnerName = val;
+        }
+
+        public function set feedType(val:int):void {
+            _feedType = val;
+        }
+
+
+        public function get feedID():int {
+            return _feedID;
+        }
+
+        public function get feedName():String {
+            return _feedName;
+        }
+
+        public function get feedTags():String {
+            return _feedTags;
+        }
+
+        public function get uploadPolicy():UploadPolicy {
+            return _uploadPolicy;
+        }
+
+        public function get feedDescription():String {
+            return _feedDescription;
+        }
+
+        public function get feedAttribution():String {
+            return _feedAttribution;
+        }
+
+        public function get feedOwnerName():String {
+            return _feedOwnerName;
+        }
+
+        public function get feedType():int {
+            return _feedType;
+        }
+
+        override protected function commitProperties():void {
+            super.commitProperties();
+            adminContainer.feedID = feedID;
+            adminContainer.feedAdministrationMode(feedName, feedTags, uploadPolicy, feedDescription, feedOwnerName, feedAttribution, feedType);
+        }
+
+        private function onClose(event:AnalysisCloseEvent):void {
+            dispatchEvent(event);
+        }
+
+        ]]></mx:Script>
+    <feed:FeedAdministrationContainer id="adminContainer"/>
+</mx:Module>

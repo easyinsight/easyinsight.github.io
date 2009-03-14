@@ -7,7 +7,7 @@
 
     <target name="compileFlex">
         <mxmlc file="../src/PrimaryWorkspace.mxml" output="${deployment.path}/PrimaryWorkspace.swf"
-               static-rsls="true" incremental="true">
+               static-rsls="true" incremental="true" link-report="link-report.xml">
             <load-config filename="../flex-config.xml"/>
         </mxmlc>
     </target>
@@ -24,18 +24,18 @@
                static-rsls="false">
             <load-config filename="../core-optimized-config.xml"/>
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
-                <url rsl-url="framework_3.2.0.3958.swz"/>
-                <url rsl-url="framework_3.2.0.3958.swf"/>
+                <url rsl-url="framework_3.3.0.4852.swz"/>
+                <url rsl-url="framework_3.3.0.4852.swf"/>
             </runtime-shared-library-path>
 
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/datavisualization.swc">
-                <url rsl-url="datavisualization_3.2.0.3958.swz"/>
-                <url rsl-url="datavisualization_3.2.0.3958.swf"/>
+                <url rsl-url="datavisualization_3.3.0.4852.swz"/>
+                <url rsl-url="datavisualization_3.3.0.4852.swf"/>
             </runtime-shared-library-path>
 
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
-                <url rsl-url="rpc_3.2.0.3958.swz"/>
-                <url rsl-url="rpc_3.2.0.3958.swf"/>
+                <url rsl-url="rpc_3.3.0.4852.swz"/>
+                <url rsl-url="rpc_3.3.0.4852.swf"/>
             </runtime-shared-library-path>
         </mxmlc>
     </target>
@@ -45,18 +45,18 @@
                static-rsls="false">
             <load-config filename="../intro-config.xml"/>
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
-                <url rsl-url="framework_3.2.0.3958.swz"/>
-                <url rsl-url="framework_3.2.0.3958.swf"/>
+                <url rsl-url="framework_3.3.0.4852.swz"/>
+                <url rsl-url="framework_3.3.0.4852.swf"/>
             </runtime-shared-library-path>
 
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/datavisualization.swc">
-                <url rsl-url="datavisualization_3.2.0.3958.swz"/>
-                <url rsl-url="datavisualization_3.2.0.3958.swf"/>
+                <url rsl-url="datavisualization_3.3.0.4852.swz"/>
+                <url rsl-url="datavisualization_3.3.0.4852.swf"/>
             </runtime-shared-library-path>
 
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
-                <url rsl-url="rpc_3.2.0.3958.swz"/>
-                <url rsl-url="rpc_3.2.0.3958.swf"/>
+                <url rsl-url="rpc_3.3.0.4852.swz"/>
+                <url rsl-url="rpc_3.3.0.4852.swf"/>
             </runtime-shared-library-path>
         </mxmlc>
     </target>
@@ -66,18 +66,18 @@
                static-rsls="false">
             <load-config filename="../list-module.xml"/>
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
-                <url rsl-url="framework_3.2.0.3958.swz"/>
-                <url rsl-url="framework_3.2.0.3958.swf"/>
+                <url rsl-url="framework_3.3.0.4852.swz"/>
+                <url rsl-url="framework_3.3.0.4852.swf"/>
             </runtime-shared-library-path>
 
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/datavisualization.swc">
-                <url rsl-url="datavisualization_3.2.0.3958.swz"/>
-                <url rsl-url="datavisualization_3.2.0.3958.swf"/>
+                <url rsl-url="datavisualization_3.3.0.4852.swz"/>
+                <url rsl-url="datavisualization_3.3.0.4852.swf"/>
             </runtime-shared-library-path>
 
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
-                <url rsl-url="rpc_3.2.0.3958.swz"/>
-                <url rsl-url="rpc_3.2.0.3958.swf"/>
+                <url rsl-url="rpc_3.3.0.4852.swz"/>
+                <url rsl-url="rpc_3.3.0.4852.swf"/>
             </runtime-shared-library-path>
         </mxmlc>
     </target>
@@ -87,18 +87,18 @@
                static-rsls="false">
             <load-config filename="../chart-module.xml"/>
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
-                <url rsl-url="framework_3.2.0.3958.swz"/>
-                <url rsl-url="framework_3.2.0.3958.swf"/>
+                <url rsl-url="framework_3.3.0.4852.swz"/>
+                <url rsl-url="framework_3.3.0.4852.swf"/>
             </runtime-shared-library-path>
 
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/datavisualization.swc">
-                <url rsl-url="datavisualization_3.2.0.3958.swz"/>
-                <url rsl-url="datavisualization_3.2.0.3958.swf"/>
+                <url rsl-url="datavisualization_3.3.0.4852.swz"/>
+                <url rsl-url="datavisualization_3.3.0.4852.swf"/>
             </runtime-shared-library-path>
 
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
-                <url rsl-url="rpc_3.2.0.3958.swz"/>
-                <url rsl-url="rpc_3.2.0.3958.swf"/>
+                <url rsl-url="rpc_3.3.0.4852.swz"/>
+                <url rsl-url="rpc_3.3.0.4852.swf"/>
             </runtime-shared-library-path>
         </mxmlc>
     </target>
@@ -108,18 +108,18 @@
                static-rsls="false">
             <load-config filename="../map-module.xml"/>
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
-                <url rsl-url="framework_3.2.0.3958.swz"/>
-                <url rsl-url="framework_3.2.0.3958.swf"/>
+                <url rsl-url="framework_3.3.0.4852.swz"/>
+                <url rsl-url="framework_3.3.0.4852.swf"/>
             </runtime-shared-library-path>
 
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/datavisualization.swc">
-                <url rsl-url="datavisualization_3.2.0.3958.swz"/>
-                <url rsl-url="datavisualization_3.2.0.3958.swf"/>
+                <url rsl-url="datavisualization_3.3.0.4852.swz"/>
+                <url rsl-url="datavisualization_3.3.0.4852.swf"/>
             </runtime-shared-library-path>
 
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
-                <url rsl-url="rpc_3.2.0.3958.swz"/>
-                <url rsl-url="rpc_3.2.0.3958.swf"/>
+                <url rsl-url="rpc_3.3.0.4852.swz"/>
+                <url rsl-url="rpc_3.3.0.4852.swf"/>
             </runtime-shared-library-path>
         </mxmlc>
     </target>
@@ -129,19 +129,65 @@
                static-rsls="false">
             <load-config filename="../goals-module.xml"/>
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
-                <url rsl-url="framework_3.2.0.3958.swz"/>
-                <url rsl-url="framework_3.2.0.3958.swf"/>
+                <url rsl-url="framework_3.3.0.4852.swz"/>
+                <url rsl-url="framework_3.3.0.4852.swf"/>
             </runtime-shared-library-path>
 
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/datavisualization.swc">
-                <url rsl-url="datavisualization_3.2.0.3958.swz"/>
-                <url rsl-url="datavisualization_3.2.0.3958.swf"/>
+                <url rsl-url="datavisualization_3.3.0.4852.swz"/>
+                <url rsl-url="datavisualization_3.3.0.4852.swf"/>
             </runtime-shared-library-path>
 
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
-                <url rsl-url="rpc_3.2.0.3958.swz"/>
-                <url rsl-url="rpc_3.2.0.3958.swf"/>
+                <url rsl-url="rpc_3.3.0.4852.swz"/>
+                <url rsl-url="rpc_3.3.0.4852.swf"/>
             </runtime-shared-library-path>
+        </mxmlc>
+    </target>
+
+    <target name="compileDataAnalysis">
+        <mxmlc file="../src/com/easyinsight/framework/DataAnalysisModule.mxml" output="${deployment.path}/DataAnalysisModule.swf"
+               static-rsls="false">
+            <load-config filename="../data-analysis-container.xml"/>
+
+            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
+                <url rsl-url="framework_3.3.0.4852.swz"/>
+                <url rsl-url="framework_3.3.0.4852.swf"/>
+            </runtime-shared-library-path>
+
+            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/datavisualization.swc">
+                <url rsl-url="datavisualization_3.3.0.4852.swz"/>
+                <url rsl-url="datavisualization_3.3.0.4852.swf"/>
+            </runtime-shared-library-path>
+
+            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
+                <url rsl-url="rpc_3.3.0.4852.swz"/>
+                <url rsl-url="rpc_3.3.0.4852.swf"/>
+            </runtime-shared-library-path>
+
+        </mxmlc>
+    </target>
+
+    <target name="compileDataSourceAdmin">
+        <mxmlc file="../src/com/easyinsight/framework/DataSourceAdminModule.mxml" output="${deployment.path}/DataSourceAdminModule.swf"
+               static-rsls="false">
+            <load-config filename="../data-source-admin.xml"/>
+
+            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
+                <url rsl-url="framework_3.3.0.4852.swz"/>
+                <url rsl-url="framework_3.3.0.4852.swf"/>
+            </runtime-shared-library-path>
+
+            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/datavisualization.swc">
+                <url rsl-url="datavisualization_3.3.0.4852.swz"/>
+                <url rsl-url="datavisualization_3.3.0.4852.swf"/>
+            </runtime-shared-library-path>
+
+            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
+                <url rsl-url="rpc_3.3.0.4852.swz"/>
+                <url rsl-url="rpc_3.3.0.4852.swf"/>
+            </runtime-shared-library-path>
+
         </mxmlc>
     </target>
 
@@ -150,18 +196,18 @@
                static-rsls="false">
             <load-config filename="../embedded-insight.xml"/>
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
-                <url rsl-url="framework_3.2.0.3958.swz"/>
-                <url rsl-url="framework_3.2.0.3958.swf"/>
+                <url rsl-url="framework_3.3.0.4852.swz"/>
+                <url rsl-url="framework_3.3.0.4852.swf"/>
             </runtime-shared-library-path>
 
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/datavisualization.swc">
-                <url rsl-url="datavisualization_3.2.0.3958.swz"/>
-                <url rsl-url="datavisualization_3.2.0.3958.swf"/>
+                <url rsl-url="datavisualization_3.3.0.4852.swz"/>
+                <url rsl-url="datavisualization_3.3.0.4852.swf"/>
             </runtime-shared-library-path>
 
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
-                <url rsl-url="rpc_3.2.0.3958.swz"/>
-                <url rsl-url="rpc_3.2.0.3958.swf"/>
+                <url rsl-url="rpc_3.3.0.4852.swz"/>
+                <url rsl-url="rpc_3.3.0.4852.swf"/>
             </runtime-shared-library-path>
         </mxmlc>
     </target>
@@ -171,18 +217,18 @@
                static-rsls="false">
             <load-config filename="../yahoo-report.xml"/>
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
-                <url rsl-url="framework_3.2.0.3958.swz"/>
-                <url rsl-url="framework_3.2.0.3958.swf"/>
+                <url rsl-url="framework_3.3.0.4852.swz"/>
+                <url rsl-url="framework_3.3.0.4852.swf"/>
             </runtime-shared-library-path>
 
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/datavisualization.swc">
-                <url rsl-url="datavisualization_3.2.0.3958.swz"/>
-                <url rsl-url="datavisualization_3.2.0.3958.swf"/>
+                <url rsl-url="datavisualization_3.3.0.4852.swz"/>
+                <url rsl-url="datavisualization_3.3.0.4852.swf"/>
             </runtime-shared-library-path>
 
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
-                <url rsl-url="rpc_3.2.0.3958.swz"/>
-                <url rsl-url="rpc_3.2.0.3958.swf"/>
+                <url rsl-url="rpc_3.3.0.4852.swz"/>
+                <url rsl-url="rpc_3.3.0.4852.swf"/>
             </runtime-shared-library-path>
         </mxmlc>
     </target>
@@ -192,18 +238,18 @@
                static-rsls="false">
             <load-config filename="../yahoo-goals.xml"/>
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
-                <url rsl-url="framework_3.2.0.3958.swz"/>
-                <url rsl-url="framework_3.2.0.3958.swf"/>
+                <url rsl-url="framework_3.3.0.4852.swz"/>
+                <url rsl-url="framework_3.3.0.4852.swf"/>
             </runtime-shared-library-path>
 
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/datavisualization.swc">
-                <url rsl-url="datavisualization_3.2.0.3958.swz"/>
-                <url rsl-url="datavisualization_3.2.0.3958.swf"/>
+                <url rsl-url="datavisualization_3.3.0.4852.swz"/>
+                <url rsl-url="datavisualization_3.3.0.4852.swf"/>
             </runtime-shared-library-path>
 
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
-                <url rsl-url="rpc_3.2.0.3958.swz"/>
-                <url rsl-url="rpc_3.2.0.3958.swf"/>
+                <url rsl-url="rpc_3.3.0.4852.swz"/>
+                <url rsl-url="rpc_3.3.0.4852.swf"/>
             </runtime-shared-library-path>
         </mxmlc>
     </target>
@@ -220,18 +266,18 @@
                static-rsls="false">
             <load-config filename="../help-module.xml"/>
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
-                <url rsl-url="framework_3.2.0.3958.swz"/>
-                <url rsl-url="framework_3.2.0.3958.swf"/>
+                <url rsl-url="framework_3.3.0.4852.swz"/>
+                <url rsl-url="framework_3.3.0.4852.swf"/>
             </runtime-shared-library-path>
 
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/datavisualization.swc">
-                <url rsl-url="datavisualization_3.2.0.3958.swz"/>
-                <url rsl-url="datavisualization_3.2.0.3958.swf"/>
+                <url rsl-url="datavisualization_3.3.0.4852.swz"/>
+                <url rsl-url="datavisualization_3.3.0.4852.swf"/>
             </runtime-shared-library-path>
 
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
-                <url rsl-url="rpc_3.2.0.3958.swz"/>
-                <url rsl-url="rpc_3.2.0.3958.swf"/>
+                <url rsl-url="rpc_3.3.0.4852.swz"/>
+                <url rsl-url="rpc_3.3.0.4852.swf"/>
             </runtime-shared-library-path>
         </mxmlc>
     </target>

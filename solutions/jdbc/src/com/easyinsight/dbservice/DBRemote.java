@@ -182,6 +182,9 @@ public class DBRemote {
         List<String> tables = new ArrayList<String>();
         try {
             DBConfiguration savedConfiguration = dbConfigMap.get(FlexContext.getFlexSession().getId());
+            if (savedConfiguration == null) {
+                savedConfiguration = getDBConfiguration();
+            }
             Connection conn = savedConfiguration.getConnection();
             try {
                 ResultSet tableRS = conn.getMetaData().getTables(null, null, "", new String[] {"TABLE", "VIEW"});
@@ -202,6 +205,9 @@ public class DBRemote {
         List<Column> columns = new ArrayList<Column>();
         try {
             DBConfiguration savedConfiguration = dbConfigMap.get(FlexContext.getFlexSession().getId());
+            if (savedConfiguration == null) {
+                savedConfiguration = getDBConfiguration();
+            }
             Connection conn = savedConfiguration.getConnection();
             try {
                 ResultSet tableRS = conn.getMetaData().getTables(null, null, table, new String[] {"TABLE", "VIEW"});

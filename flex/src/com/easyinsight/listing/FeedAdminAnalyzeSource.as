@@ -1,13 +1,12 @@
 package com.easyinsight.listing
 {
-	import com.easyinsight.FullScreenPage;
-	import com.easyinsight.administration.feed.FeedAdministrationContainer;
-	import com.easyinsight.analysis.AnalysisDefinition;
-	import com.easyinsight.customupload.UploadPolicy;
+import com.easyinsight.administration.feed.FeedAdministrationContainer;
+import com.easyinsight.customupload.UploadPolicy;
 	
-	import mx.managers.BrowserManager;
+    import com.easyinsight.framework.ModuleAnalyzeSource;
+import flash.display.DisplayObject;
 
-	public class FeedAdminAnalyzeSource implements AnalyzeSource
+	public class FeedAdminAnalyzeSource extends ModuleAnalyzeSource
 	{
 		private var feedID:int;
 		private var feedName:String;
@@ -30,12 +29,28 @@ package com.easyinsight.listing
 			this.feedType = feedType;
 		}
 
-		public function createAnalysisPopup():FullScreenPage {
-			var feedAdministrationContainer:FeedAdministrationContainer = new FeedAdministrationContainer();
-			feedAdministrationContainer.feedID = feedID;
-			feedAdministrationContainer.feedAdministrationMode(feedName, feedTags, uploadPolicy, feedDescription, feedOwnerName, feedAttribution, feedType);			
-			return feedAdministrationContainer;
-		}
-		
+        override public function createDirect():DisplayObject {
+            var feedAdminContainer:FeedAdministrationContainer = new FeedAdministrationContainer();
+            feedAdminContainer.feedID = feedID;
+            feedAdminContainer.feedAdministrationMode(feedName, feedTags, uploadPolicy, feedDescription, feedOwnerName, feedAttribution, feedType);
+            return feedAdminContainer;
+        }
+
+        override protected function getModuleName():String {
+            return "/app/easyui-debug/DataSourceAdminModule.swf";
+        }
+
+        override protected function applyProperties(val:Object):void {
+            super.applyProperties(val);
+            val["feedName"] = feedName;
+            val["feedID"] = feedID;
+            val["feedTags"] = feedTags;
+            val["uploadPolicy"] = uploadPolicy;
+            val["feedDescription"] = feedDescription;
+            val["feedOwnerName"] = feedOwnerName;
+            val["feedAttribution"] = feedAttribution;
+            val["feedType"] = feedType;
+        }
+
 	}
 }

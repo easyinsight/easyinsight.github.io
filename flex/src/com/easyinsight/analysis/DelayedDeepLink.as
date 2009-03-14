@@ -2,8 +2,8 @@ package com.easyinsight.analysis
 {
 	import com.easyinsight.LoginDialog;
 	import com.easyinsight.framework.LoginEvent;
-	import com.easyinsight.genredata.AnalyzeEvent;
-	import com.easyinsight.listing.AnalysisDefinitionAnalyzeSource;
+import com.easyinsight.genredata.ModuleAnalyzeEvent;
+import com.easyinsight.listing.AnalysisDefinitionAnalyzeSource;
 	
 	import flash.display.DisplayObject;
 	import flash.events.EventDispatcher;
@@ -33,7 +33,7 @@ package com.easyinsight.analysis
 		private function gotAnalysisDefinition(event:ResultEvent):void {
         	var insightResponse:InsightResponse = analysisService.openAnalysisIfPossible.lastResult as InsightResponse;
         	if (insightResponse.successful) {
-        		dispatchEvent(new AnalyzeEvent(new AnalysisDefinitionAnalyzeSource(insightResponse.definition)));	
+        		dispatchEvent(new ModuleAnalyzeEvent(new AnalysisDefinitionAnalyzeSource(insightResponse.definition)));
         	} else {
         		var loginDialog:LoginDialog = LoginDialog(PopUpManager.createPopUp(Application.application as DisplayObject, LoginDialog, true));
         		loginDialog.addEventListener(LoginEvent.LOGIN, delayedAnalysis);

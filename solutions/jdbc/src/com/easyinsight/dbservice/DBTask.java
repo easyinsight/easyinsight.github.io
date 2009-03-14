@@ -28,6 +28,7 @@ public class DBTask extends TimerTask {
                 ((BasicAuthValidatingPublishServiceServiceSoapBindingStub)service).setPassword(eiConfiguration.getPassword());
                 for (QueryConfiguration queryConfiguration : queryConfigs) {
                     QueryValidatedPublish publish = new QueryValidatedPublish(queryConfiguration, service);
+                    System.out.println("Running " + queryConfiguration.getName());
                     publish.execute(dbConfiguration);
                 }
             }

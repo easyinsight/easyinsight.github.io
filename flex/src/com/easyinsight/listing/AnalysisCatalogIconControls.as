@@ -5,7 +5,8 @@ package com.easyinsight.listing
 	import com.easyinsight.framework.User;
 	import com.easyinsight.genredata.AnalyzeEvent;
 	
-	import flash.events.MouseEvent;
+import com.easyinsight.genredata.ModuleAnalyzeEvent;
+import flash.events.MouseEvent;
 	
 	import mx.containers.HBox;
 	import mx.controls.Alert;
@@ -55,7 +56,7 @@ package com.easyinsight.listing
 		}
 		
 		private function analyze(event:MouseEvent):void {
-			dispatchEvent(new AnalyzeEvent(new AnalysisDefinitionAnalyzeSource(this.analysisDefinition)));
+			dispatchEvent(new ModuleAnalyzeEvent(new AnalysisDefinitionAnalyzeSource(this.analysisDefinition)));
 		}
 		
 		public function subscribe(event:MouseEvent):void {

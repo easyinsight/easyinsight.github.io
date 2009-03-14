@@ -9,7 +9,8 @@
         import com.easyinsight.datasources.JiraDataSource;
         import com.easyinsight.framework.Credentials;
         import com.easyinsight.genredata.AnalyzeEvent;
-        import com.easyinsight.listing.DataFeedDescriptor;
+        import com.easyinsight.genredata.ModuleAnalyzeEvent;
+import com.easyinsight.listing.DataFeedDescriptor;
         import com.easyinsight.listing.DescriptorAnalyzeSource;
         import mx.controls.Alert;
 
@@ -55,7 +56,7 @@
             descriptor.policy = new UploadPolicy();
             descriptor.policy.publiclyVisible = false;
             dispatchEvent(new UploadConfigEvent(UploadConfigEvent.UPLOAD_CONFIG_COMPLETE, id, descriptor.name));            
-            dispatchEvent(new AnalyzeEvent(new DescriptorAnalyzeSource(descriptor)));
+            dispatchEvent(new ModuleAnalyzeEvent(new DescriptorAnalyzeSource(descriptor)));
         }
 
         ]]></mx:Script>

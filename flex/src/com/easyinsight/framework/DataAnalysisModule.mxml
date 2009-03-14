@@ -1,0 +1,32 @@
+<?xml version="1.0" ?>
+<mx:Module xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:easyinsight="com.easyinsight.*" width="100%" height="100%">
+    <mx:Script><![CDATA[
+        import com.easyinsight.analysis.AnalysisCloseEvent;
+import mx.managers.BrowserManager;
+        private var _dataSourceID:int;
+        private var _headerName:String;
+
+        public function set dataSourceID(val:int):void {
+            _dataSourceID = val;
+        }
+
+        public function set headerName(val:String):void {
+            _headerName = val;
+        }
+
+        override protected function commitProperties():void {
+            super.commitProperties();
+            var dataService:DataService = new DataService();
+            dataService.dataFeedID = _dataSourceID;
+            dataAnalysisContainer.dataService = dataService;
+            dataAnalysisContainer.addEventListener(AnalysisCloseEvent.ANALYSIS_CLOSE, onClose);
+            BrowserManager.getInstance().setTitle("Easy Insight - " + _headerName);
+        }
+
+        private function onClose(event:AnalysisCloseEvent):void {
+            dispatchEvent(event);
+        }
+
+        ]]></mx:Script>
+    <easyinsight:DataAnalysisContainer id="dataAnalysisContainer"/>
+</mx:Module>

@@ -7,14 +7,16 @@
 	<mx:Script>
 		<![CDATA[
 			import com.easyinsight.analysis.AnalysisDefinition;
-			import mx.events.ListEvent;
+            import com.easyinsight.framework.ModuleAnalyzeSource;
+            import com.easyinsight.genredata.ModuleAnalyzeEvent;
+import mx.events.ListEvent;
 			import com.easyinsight.genredata.AnalyzeEvent;
 			import mx.events.ItemClickEvent;
 			import mx.collections.ArrayCollection;
 			[Bindable]
             public var analysisDefinitions:ArrayCollection;            
 			
-			public function analyze():AnalyzeSource {
+			public function analyze():ModuleAnalyzeSource {
                 var analysisDefinition:AnalysisDefinition = null;
                 if (analysisDefinitionGrid.selectedItem != null) {
                     analysisDefinition = analysisDefinitionGrid.selectedItem as AnalysisDefinition;
@@ -25,7 +27,7 @@
                         analysisDefinition = analysisDefinitions.getItemAt(0) as AnalysisDefinition;
                     }
                 }
-                var analyzeSource:AnalyzeSource = null;
+                var analyzeSource:ModuleAnalyzeSource = null;
                 if (analysisDefinition != null) {
                     analyzeSource = new AnalysisDefinitionAnalyzeSource(analysisDefinition);
                 }
@@ -38,7 +40,7 @@
 			
 			private function gridDoubleClick(event:ListEvent):void {
 				var analysisDefinition:AnalysisDefinition = event.currentTarget.selectedItem as AnalysisDefinition;
-				dispatchEvent(new AnalyzeEvent(new AnalysisDefinitionAnalyzeSource(analysisDefinition)));
+				dispatchEvent(new ModuleAnalyzeEvent(new AnalysisDefinitionAnalyzeSource(analysisDefinition)));
 			}
 		]]>
 	</mx:Script>

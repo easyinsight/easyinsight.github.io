@@ -1,16 +1,15 @@
 package com.easyinsight.analysis
 {
-	import com.easyinsight.FullScreenPage;
-	
-	import flash.events.Event;
+import flash.display.DisplayObject;
+import flash.events.Event;
 
 	public class AnalysisCloseEvent extends Event
 	{
 		public static var ANALYSIS_CLOSE:String = "analysisClose";
 		public var analysisDefinition:AnalysisDefinition;
-		public var dataAnalysisContainer:FullScreenPage;
+		public var dataAnalysisContainer:DisplayObject;
 		
-		public function AnalysisCloseEvent(dataAnalysisContainer:FullScreenPage, analysisDefinition:AnalysisDefinition = null)
+		public function AnalysisCloseEvent(dataAnalysisContainer:DisplayObject, analysisDefinition:AnalysisDefinition = null)
 		{
 			super(ANALYSIS_CLOSE);
 			this.dataAnalysisContainer = dataAnalysisContainer;

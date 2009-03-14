@@ -13,15 +13,16 @@
 	</mx:states>
 	<mx:Script>
 		<![CDATA[
-import com.adobe.ac.mxeffects.Flip;
 import com.easyinsight.analysis.DelayedAPIKeyLink;
+import com.easyinsight.framework.FullScreenModuleEvent;
+import com.easyinsight.framework.ModuleAnalyzeSource;
+import com.easyinsight.genredata.ModuleAnalyzeEvent;
 import com.easyinsight.intro.WelcomeScreen;
-import mx.core.UIComponent;
 			import com.easyinsight.FullScreenPage;
 			import com.easyinsight.analysis.DelayedFeedLink;
 			import com.easyinsight.analysis.DelayedDeepLink;
 			import com.easyinsight.listing.PageFactory;
-			import mx.messaging.ChannelSet;
+import mx.messaging.ChannelSet;
 			import mx.messaging.config.ServerConfig;
 			import mx.rpc.events.FaultEvent;
 			import com.easyinsight.LoginDialog;
@@ -34,7 +35,6 @@ import mx.core.UIComponent;
 			import mx.managers.IBrowserManager;
 			import mx.events.BrowserChangeEvent;
 			import mx.managers.BrowserManager;
-			import com.easyinsight.listing.BlogPanel;
             import com.easyinsight.genredata.AnalyzeEvent;
             import com.easyinsight.listing.AnalyzeSource;
             import com.easyinsight.listing.IPerspective;
@@ -48,16 +48,14 @@ import mx.core.UIComponent;
             private var perspective:IPerspective;
             
             [Bindable]
-            private var dataAnalysis:FullScreenPage; 
+            private var dataAnalysis:DisplayObject;
             
             public var browserManager:IBrowserManager;
 
             private function startWorkspace():void {
                 userService.isSessionLoggedIn.send();                
                 new CommandProcessor();
-                //mx.core.Application.application.setStyle('backgroundImage', ImageFactory.getBackgroundImage());
                 addEventListener(FaultEvent.FAULT, onFault, true);
-                //mx.core.Application.application.addEventListener(SessionExpirationEvent.SESSION_EXPIRATION, sessionExpired);
                 this.perspective = introPanel;
                 browserManager = BrowserManager.getInstance();
                 browserManager.addEventListener(BrowserChangeEvent.BROWSER_URL_CHANGE, parseURL);
@@ -101,19 +99,19 @@ import mx.core.UIComponent;
             	if (analysisID != null) {
         			//createAnalysisSource(Number(analysisID));
         			var deepAnalysisLink:DelayedDeepLink = new DelayedDeepLink(Number(analysisID));
-        			deepAnalysisLink.addEventListener(AnalyzeEvent.ANALYZE, internalAnalyze);
+        			deepAnalysisLink.addEventListener(ModuleAnalyzeEvent.MODULE_ANALYZE, internalAnalyze);
         			deepAnalysisLink.execute(); 
             	} else {
             		var feedID:String = o.feedID;
             		if (feedID != null) {
             			var deepFeedLink:DelayedFeedLink = new DelayedFeedLink(Number(feedID));
-            			deepFeedLink.addEventListener(AnalyzeEvent.ANALYZE, internalAnalyze);
+            			deepFeedLink.addEventListener(ModuleAnalyzeEvent.MODULE_ANALYZE, internalAnalyze);
             			deepFeedLink.execute();            			
             		} else {
                         var feedKey:String = o.feedKey;
                         if (feedKey != null) {
                             var deepAPILink:DelayedAPIKeyLink = new DelayedAPIKeyLink(feedKey);
-                            deepAPILink.addEventListener(AnalyzeEvent.ANALYZE, internalAnalyze);
+                            deepAPILink.addEventListener(ModuleAnalyzeEvent.MODULE_ANALYZE, internalAnalyze);
                             deepAPILink.execute();
                         } else {
                             var page:String = o.page;
@@ -173,7 +171,7 @@ import mx.core.UIComponent;
             		currentState = "Analysis";
             	}
             }
-            
+
             private function analysisClosed(event:AnalysisCloseEvent):void {
             	currentState = "";
             	event.dataAnalysisContainer.removeEventListener(AnalysisCloseEvent.ANALYSIS_CLOSE, analysisClosed);
@@ -184,19 +182,9 @@ import mx.core.UIComponent;
             private function changePerspective(event:ListingChangeEvent):void {
             	if (event.perspective != null) {
                     if (this.perspective != null) {
-                        var effect:Flip = new Flip();
-                        effect.target = this.perspective;
-                        effect.siblings = [ event.perspective ];
-                        //effect.direction = "RIGHT";
-                        effect.duration = 1000;
                         var existingDispatcher:EventDispatcher = this.perspective as EventDispatcher;
                         existingDispatcher.removeEventListener(AnalyzeEvent.ANALYZE, internalAnalyze);
-                        var uiComponent:UIComponent = this.perspective as UIComponent;
-                        //uiComponent.setStyle("removedEffect", effect);
-                    }
-                    if (this.perspective is BlogPanel) {
-                        var blogPanel:BlogPanel = this.perspective as BlogPanel;
-                        blogPanel.lostFocus();
+                        existingDispatcher.removeEventListener(ModuleAnalyzeEvent.MODULE_ANALYZE, internalModuleAnalyze);
                     }
                     coreSpace.removeChildAt(0);
                     this.perspective = event.perspective;
@@ -204,6 +192,7 @@ import mx.core.UIComponent;
                     perspective.gotFocus();
                     var dispatcher:EventDispatcher = perspective as EventDispatcher;
                     dispatcher.addEventListener(AnalyzeEvent.ANALYZE, internalAnalyze);
+                    dispatcher.addEventListener(ModuleAnalyzeEvent.MODULE_ANALYZE, internalModuleAnalyze);
                 }
             }
 
@@ -218,7 +207,23 @@ import mx.core.UIComponent;
             private function internalAnalyze(event:AnalyzeEvent):void {
                 var analyzeSource:AnalyzeSource = event.analyzeSource;
                 doAnalyze(analyzeSource);
-            } 
+            }
+
+            private function internalModuleAnalyze(event:ModuleAnalyzeEvent):void {
+                var moduleAnalyzeSource:ModuleAnalyzeSource = event.analyzeSource;
+                var analysisWindow:DisplayObject = moduleAnalyzeSource.createDirect();
+                analysisWindow.addEventListener(AnalysisCloseEvent.ANALYSIS_CLOSE, analysisClosed);
+                dataAnalysis = analysisWindow;
+                currentState = "Analysis";
+                /*moduleAnalyzeSource.addEventListener(FullScreenModuleEvent.MODULE_LOADED, moduleLoaded);
+                moduleAnalyzeSource.startModuleLoading();*/
+            }
+
+            private function moduleLoaded(event:FullScreenModuleEvent):void {
+                dataAnalysis = event.val;
+                dataAnalysis.addEventListener(AnalysisCloseEvent.ANALYSIS_CLOSE, analysisClosed);
+                currentState = "Analysis";
+            }
             
             private function sessionCheck():void {
             	var authResult:UserServiceResponse = userService.isSessionLoggedIn.lastResult as UserServiceResponse;

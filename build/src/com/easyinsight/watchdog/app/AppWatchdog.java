@@ -125,7 +125,7 @@ public class AppWatchdog {
             }
             zin.close();
             File file = new File("eiconfig.properties");
-            File target = new File("../webapps/DMS/WEB-INF/classes/eiconfig.properties");
+            File target = new File("../webapps/app/WEB-INF/classes/eiconfig.properties");
             target.delete();
             FileReader reader = new FileReader(file);
             FileWriter writer = new FileWriter(target);

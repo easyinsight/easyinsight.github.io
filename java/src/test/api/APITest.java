@@ -61,9 +61,9 @@ public class APITest extends TestCase {
     private WSListDefinition getDefinition(long dataSourceID) {
         WSListDefinition def = new WSListDefinition();
         def.setDataFeedID(dataSourceID);
-        List<AnalysisItem> items = Arrays.asList(new AnalysisItem[] { new AnalysisDimension(TestUtil.createKey("string", dataSourceID), true),
+        List<AnalysisItem> items = Arrays.asList(new AnalysisDimension(TestUtil.createKey("string", dataSourceID), true),
                 new AnalysisMeasure(TestUtil.createKey("number", dataSourceID), AggregationTypes.SUM),
-            new AnalysisDateDimension(TestUtil.createKey("date", dataSourceID), true, AnalysisDateDimension.DAY_LEVEL) });
+                new AnalysisDateDimension(TestUtil.createKey("date", dataSourceID), true, AnalysisDateDimension.DAY_LEVEL));
         def.setColumns(items);
         return def;
     }
@@ -140,7 +140,7 @@ public class APITest extends TestCase {
         service.updateRow("testds1", updateRow, where);
     }
 
-    public void testDatesAdd() {
+    public void testDatesAdd() throws SQLException {
         long userID = TestUtil.getIndividualTestUser();
         TestUncheckedPublish service = new TestUncheckedPublish(userID, SecurityUtil.getSecurityProvider().getUserPrincipal().getAccountID());
         Calendar cal = Calendar.getInstance();
@@ -155,7 +155,31 @@ public class APITest extends TestCase {
         numberPair.setValue(10);
         yesterdayRow.setNumberPairs(new NumberPair[] { numberPair });
         yesterdayRow.setDatePairs(new DatePair[] { datePair });
-        
+        DayWhere dayWhere = new DayWhere();
+        dayWhere.setKey("date");
+        dayWhere.setDayOfYear(cal.get(Calendar.DAY_OF_YEAR));
+        dayWhere.setYear(cal.get(Calendar.YEAR));
+        Where where = new Where();
+        where.setDayWheres(new DayWhere[] { dayWhere });
+        service.updateRow("testds4", yesterdayRow, where);
+        cal.add(Calendar.MINUTE, 1);
+        datePair.setValue(cal.getTime());
+        service.updateRow("testds4", yesterdayRow, where);
+        cal.add(Calendar.DAY_OF_YEAR, 1);
+        datePair.setValue(cal.getTime());
+        dayWhere.setDayOfYear(cal.get(Calendar.DAY_OF_YEAR));
+        dayWhere.setYear(cal.get(Calendar.YEAR));
+        service.updateRow("testds4", yesterdayRow, where);
+        cal.add(Calendar.MINUTE, 1);
+        datePair.setValue(cal.getTime());
+        String apiKey = service.updateRow("testds4", yesterdayRow, where);
+        long id = getDataSource(apiKey);
+        WSListDefinition listDef = new WSListDefinition();
+        listDef.setDataFeedID(id);
+        listDef.setColumns(Arrays.asList(new AnalysisMeasure(TestUtil.createKey("number", id), AggregationTypes.SUM),
+                new AnalysisDateDimension(TestUtil.createKey("date", id), true, AnalysisDateDimension.DAY_LEVEL)));
+        ListDataResults results = new DataService().list(listDef, new InsightRequestMetadata());
+        assertEquals(results.getRows().length, 2);
     }
 
     public void testDynamicAPI() {
