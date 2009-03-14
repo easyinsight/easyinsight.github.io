@@ -133,11 +133,12 @@
 			
 			private function createdAccount():void {
 				var resultID:int = creationService.createAccount.lastResult as int;
+                currentState = "FreeActivation";
 
                 /*if (account.accountType == Account.FREE) {
                     currentState = "FreeActivation";
                 } else {*/
-                    account.accountID = resultID;
+                    /*account.accountID = resultID;
                     if (creationService.channelSet == null) {
                         creationService.channelSet = ServerConfig.getChannelSet(creationService.destination);
                     }
@@ -159,7 +160,7 @@
                                     trace("this shouldn't happen...");
                             }
                         }
-                    ));
+                    ));*/
                 //}
 				//creationService.authenticate.send(user.userName, user.password);
 				//dispatchEvent(new AccountWizardResultEvent(AccountWizardResultEvent.ACCOUNT_CREATED, account));

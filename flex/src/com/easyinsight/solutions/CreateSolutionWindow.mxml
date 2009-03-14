@@ -50,6 +50,7 @@
                 _solution.author = authorInput.text;
                 _solution.industry = industryInput.text;
                 _solution.copyData = includeDataCheckbox.selected;
+                _solution.solutionTier = accountTierBox.selectedIndex + 1;
                 if (goalTreeComboBox.selectedIndex > 0) {
                     _solution.goalTreeID = goalTreeComboBox.selectedItem.goalTreeID;
                 }

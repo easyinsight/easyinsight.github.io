@@ -12,7 +12,7 @@
             PopUpManager.centerPopUp(window);
         }
 
-        private function onRefresh():void {
+        private function onRefresh(event:Event):void {
         }
 ]]></mx:Script>
     <mx:VBox width="100%" paddingLeft="40" height="100%">

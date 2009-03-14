@@ -79,14 +79,14 @@
             if (user == null) {
                 currentState = "notLoggedIn";
             } else {
-                if (User.getInstance().getAccountType() == Account.FREE) {
+                /*if (User.getInstance().getAccountType() == Account.FREE) {
                     currentState = "functionalityUnavailable";
-                } else {
+                } else {*/
                     if (currentState != "") {
                         currentState = "";
                     }
                     solutionService.getSolutions.send();
-                }
+                //}
             }
         }
 

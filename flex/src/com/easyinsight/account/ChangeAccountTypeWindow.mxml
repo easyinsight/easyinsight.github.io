@@ -5,12 +5,6 @@
         [Event(name="refreshAccount", type="com.easyinsight.account.RefreshAccountEvent")]
     </mx:Metadata>
     <mx:states>
-        <mx:State name="BillingInfo">
-            <mx:RemoveChild target="{upgradeBox}"/>
-            <mx:AddChild relativeTo="{coreContent}">
-                <account:BillingInfoSetup billingInfoDefined="onBillingInfo(event)" previousPage="backFromBilling()" creationComplete="PopUpManager.centerPopUp(this)"/>
-            </mx:AddChild>
-        </mx:State>
         <mx:State name="Confirmation">
             <mx:RemoveChild target="{upgradeBox}"/>
             <mx:AddChild relativeTo="{coreContent}">
@@ -47,7 +41,7 @@ import mx.managers.PopUpManager;
         }
 
         private function backFromConfirm():void {
-            currentState = "BillingInfo";
+            currentState = "";
         }
 
         private function onConfirm():void {
@@ -79,7 +73,7 @@ import mx.managers.PopUpManager;
 
         private function upgradeToIndividual():void {
             newAccountType = Account.INDIVIDUAL;
-            currentState = "BillingInfo";
+            currentState = "Confirmation";
         }
 
         private function upgradeToProfessional():void {
@@ -143,6 +137,7 @@ import mx.managers.PopUpManager;
                         </mx:HBox>
                     </mx:VBox>
                 </mx:VBox>
+                <!--
                 <mx:VBox borderThickness="1" borderStyle="solid" cornerRadius="15" dropShadowEnabled="true"
                          visible="{professionalAvailable}" backgroundColor="#8296D2" paddingBottom="10" paddingRight="10"
                         paddingLeft="10" paddingTop="10">
@@ -189,7 +184,7 @@ import mx.managers.PopUpManager;
                                     fontSize="14" fontWeight="bold" fontFamily="Tahoma"/>
                         </mx:HBox>
                     </mx:VBox>
-                </mx:VBox>
+                </mx:VBox> -->
             </mx:HBox>
             <mx:HBox width="100%" horizontalAlign="center">
                 <mx:Button label="Cancel" click="PopUpManager.removePopUp(this)"/>

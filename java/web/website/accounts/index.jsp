@@ -35,7 +35,7 @@
     <div id="centerPage">
         <%
             String activationID = request.getParameter("activation");
-            boolean result = new UserService().activateFreeAccount(activationID);
+            boolean result = new UserService().activateAccount(activationID);
             if (result) {
                 out.println("Your account is now active!");
             } else {

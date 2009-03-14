@@ -31,7 +31,7 @@ import flex.messaging.FlexContext;
  */
 public class UserService implements IUserService {
 
-    public String resetPassword(String emailAddress) {
+    /*public String resetPassword(String emailAddress) {
         String message;
         Session session = Database.instance().createSession();
         try {
@@ -53,7 +53,7 @@ public class UserService implements IUserService {
             session.close();
         }
         return message;
-    }
+    }*/
 
     public UserTransferObject upgradeAccount(int toType) {
         if (toType == Account.ADMINISTRATOR) {
@@ -304,7 +304,7 @@ public class UserService implements IUserService {
                 account.setGroupID(new GroupStorage().addGroup(group, user.getUserID(), conn));
                 session.update(account);
             }
-            /*if (account.getAccountType() == Account.FREE) {
+            if (account.getAccountType() == Account.FREE || account.getAccountType() == Account.INDIVIDUAL) {
                 String activationKey = RandomTextGenerator.generateText(12);
                 PreparedStatement insertActivationStmt = conn.prepareStatement("INSERT INTO ACCOUNT_ACTIVATION (ACCOUNT_ID, ACTIVATION_KEY, CREATION_DATE) VALUES (?, ?, ?)");
                 insertActivationStmt.setLong(1, account.getAccountID());
@@ -312,7 +312,7 @@ public class UserService implements IUserService {
                 insertActivationStmt.setDate(3, new java.sql.Date(System.currentTimeMillis()));
                 insertActivationStmt.execute();
                 new AccountMemberInvitation().sendActivationEmail(user.getEmail(), activationKey);
-            }*/
+            }
             conn.commit();
             return account.getAccountID();
         } catch (Exception e) {
@@ -585,7 +585,7 @@ public class UserService implements IUserService {
             session.getTransaction().begin();
             account = accountTransferObject.toAccount();
             configureNewAccount(account);
-            account.setAccountState(Account.PREPARING);
+            account.setAccountState(Account.ACTIVE);
             initialUser.setAccountAdmin(true);
             initialUser.setDataSourceCreator(true);
             initialUser.setInsightCreator(true);
@@ -708,6 +708,7 @@ public class UserService implements IUserService {
             user.setAccount(account);
             account.addUser(user);
             session.save(user);
+            account.setAccountState(Account.ACTIVE);
             session.update(account);
             session.getTransaction().commit();
             if (preserveConsultants && account.getGuestUsers().size() > 0) {
@@ -893,9 +894,12 @@ public class UserService implements IUserService {
                     if (encryptedPassword.equals(actualPassword)) {
                         List accountResults = session.createQuery("from Account where accountID = ?").setLong(0, user.getAccount().getAccountID()).list();
                         Account account = (Account) accountResults.get(0);
-                        userServiceResponse = new UserServiceResponse(true, user.getUserID(), user.getAccount().getAccountID(), user.getName(),
+                        if (account.getAccountState() == Account.ACTIVE) {
+                            userServiceResponse = new UserServiceResponse(true, user.getUserID(), user.getAccount().getAccountID(), user.getName(),
                                 user.getAccount().getAccountType(), account.getMaxSize(), user.getEmail(), user.getUserName(), encryptedPassword, user.isAccountAdmin(), user.isDataSourceCreator(), user.isInsightCreator());
-                        // FlexContext.getFlexSession().getRemoteCredentials();
+                        } else {
+                            userServiceResponse = new UserServiceResponse(false, "Your account is not active.");
+                        }
                     } else {
                         userServiceResponse = new UserServiceResponse(false, "Incorrect password, please try again.");
                     }
@@ -1029,7 +1033,7 @@ public class UserService implements IUserService {
         return users;
     }
 
-    public boolean activateFreeAccount(String activationID) {
+    public boolean activateAccount(String activationID) {
         boolean activated = false;
         Connection conn = Database.instance().getConnection();
         Session session = Database.instance().createSession(conn);

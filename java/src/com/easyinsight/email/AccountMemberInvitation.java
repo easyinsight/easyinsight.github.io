@@ -47,7 +47,7 @@ public class AccountMemberInvitation {
             "as well as any further questions or support issues you may have.\r\n\r\nWelcome to Easy Insight!";
 
     private static String freeAccountConfirmationText =
-            "You have created a new free account with Easy Insight.\r\n"+
+            "You have created a new account with Easy Insight.\r\n"+
             "Please click the link below to activate your account:\r\n\r\n"+
             "{0}\r\n\r\n"+
             "This email was sent from an automated account. Please do not reply to this address.";
@@ -104,7 +104,7 @@ public class AccountMemberInvitation {
     }
 
     public void sendActivationEmail(String to, String activation) {
-        String url = "http://www.easy-insight.com/accounts?activation=" + activation;
+        String url = "http://www.easy-insight.com/app/#activationID=" + activation;
         String body = MessageFormat.format(freeAccountConfirmationText, url);
         String subject = "Easy Insight Account Activation";
         try {

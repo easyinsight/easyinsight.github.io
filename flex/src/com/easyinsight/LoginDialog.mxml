@@ -16,6 +16,12 @@
                 </mx:Form>
             </mx:AddChild>
         </mx:State>
+        <mx:State name="Activated">
+            <mx:RemoveChild target="{noAccount}"/>
+            <mx:AddChild relativeTo="{activationBox}">
+                <mx:Label text="Your account has been activated! You can now log in: "/>
+            </mx:AddChild>
+        </mx:State>
     </mx:states>
     <mx:Script>
 		<![CDATA[
@@ -32,7 +38,21 @@
 
         import mx.managers.PopUpManager;
 
+        private var _showActivation:Boolean;
+
+        public function set showActivation(val:Boolean):void {
+            _showActivation = val;
+        }
+
         private function resetPassword():void {
+        }
+
+
+        override protected function createChildren():void {
+            super.createChildren();
+            if (_showActivation) {
+                currentState = "Activated";
+            }
         }
 
         private function handleAuthentication():void {
@@ -97,6 +117,7 @@
                 ]]>
 	</mx:Script>
     <mx:VBox styleName="TitleWindowContents" id="coreBox">
+        <mx:Box id="activationBox"/>
         <mx:Form id="loginForm">
             <mx:FormItem label="User Name:" direction="horizontal">
                 <mx:TextInput id="userName"/>
@@ -108,7 +129,7 @@
                 <mx:Button label="Sign In" click="signon()"/>
                 <mx:Button label="Cancel" click="cancel()"/>
             </mx:FormItem>
-            <mx:FormItem label="Don't have an account yet?">
+            <mx:FormItem label="Don't have an account yet?" id="noAccount">
                 <mx:Button label="Create Account" click="createNewAccount()"/>
             </mx:FormItem>
             <!--

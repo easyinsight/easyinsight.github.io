@@ -877,10 +877,12 @@ import mx.collections.SortField;
                            icon="@Embed(source='../../../assets/camera.png')" click="exportPNG()"/>
                 <mx:Button id="excelButton" toolTip="Export to Excel"
                            icon="@Embed(source='../../../assets/table.png')" click="exportExcel()"/>
+                <!--
                 <mx:Button id="netvibesButton" toolTip="Add to netvibes"
                            icon="@Embed(source='../../../assets/uwa-netvibes.png')" click="netvibes()"/>
                 <mx:Button id="igoogleButton" toolTip="Add to iGoogle"
                            icon="@Embed(source='../../../assets/uwa-google.png')" click="igoogle()"/>
+                           -->
             </mx:HBox>
         </mx:TabNavigator>
 

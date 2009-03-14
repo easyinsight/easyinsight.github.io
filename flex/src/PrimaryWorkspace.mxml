@@ -92,6 +92,20 @@ import mx.messaging.ChannelSet;
                     changePerspective(new ListingChangeEvent(event.targetPerspective));
                 }
             }
+
+            private function activated():void {
+                var loginDialog:LoginDialog = new LoginDialog();
+                loginDialog.showActivation = true;
+                PopUpManager.addPopUp(loginDialog, this, true);
+                PopUpManager.centerPopUp(loginDialog);
+                User.getEventNotifier().addEventListener(LoginEvent.LOGIN, onLogin);
+                //navigation(new NavigationEvent(null, new WelcomeScreen()));
+            }
+
+            private function onLogin(event:LoginEvent):void {
+                User.getEventNotifier().removeEventListener(LoginEvent.LOGIN, onLogin);
+                navigation(new NavigationEvent("Intro"));
+            }
             
             private function parseURL(event:Event):void {
             	var o:Object = URLUtil.stringToObject(browserManager.fragment);
@@ -114,48 +128,44 @@ import mx.messaging.ChannelSet;
                             deepAPILink.addEventListener(ModuleAnalyzeEvent.MODULE_ANALYZE, internalAnalyze);
                             deepAPILink.execute();
                         } else {
-                            var page:String = o.page;
-                            if (page != null) {
-                                if (currentState == "Analysis") {
-                                    currentState = "";
-                                    dataAnalysis.removeEventListener(AnalysisCloseEvent.ANALYSIS_CLOSE, analysisClosed);
-                                    dataAnalysis = null;
-                                }
-                                switch (page) {
-                                    case "myData":
-                                        navigation(new NavigationEvent("My Data"));
-                                        break;
-                                    case "myGoals":
-                                        navigation(new NavigationEvent("Goals"));
-                                        break;
-                                    case "marketplace":
-                                        navigation(new NavigationEvent("Marketplace"));
-                                        break;
-                                    case "groups":
-                                        navigation(new NavigationEvent("Groups"));
-                                        break;
-                                    case "groupDetail":
-                                        break;
-                                    case "intro":
-                                        navigation(new NavigationEvent(null, PageFactory.getIntroPanel()));
-                                        break;
-                                    case "faq":
-                                        navigation(new NavigationEvent(null, PageFactory.getFAQPanel()));
-                                        break;
-                                    case "companyInfo":
-                                        navigation(new NavigationEvent(null, PageFactory.getCompanyInfoPanel()));
-                                        break;
-                                    case "blog":
-                                        navigation(new NavigationEvent(null, PageFactory.getBlogPanel()));
-                                        break;
-                                    case "solutions":
-                                        navigation(new NavigationEvent("Solutions"));
-                                        break;
-                                    case "account":
-                                        navigation(new NavigationEvent("My Account"));
-                                        break;
-                                    case "welcome":
-                                        navigation(new NavigationEvent(null, new WelcomeScreen()));
+                            var activationString:String = o.activationID;
+                            if (activationString != null) {
+                                userService.activateAccount.send(activationString);
+                            } else {
+                                var page:String = o.page;
+                                if (page != null) {
+                                    if (currentState == "Analysis") {
+                                        currentState = "";
+                                        dataAnalysis.removeEventListener(AnalysisCloseEvent.ANALYSIS_CLOSE, analysisClosed);
+                                        dataAnalysis = null;
+                                    }
+                                    switch (page) {
+                                        case "myData":
+                                            navigation(new NavigationEvent("My Data"));
+                                            break;
+                                        case "myGoals":
+                                            navigation(new NavigationEvent("Goals"));
+                                            break;
+                                        case "marketplace":
+                                            navigation(new NavigationEvent("Marketplace"));
+                                            break;
+                                        case "groups":
+                                            navigation(new NavigationEvent("Groups"));
+                                            break;
+                                        case "groupDetail":
+                                            break;
+                                        case "intro":
+                                            navigation(new NavigationEvent("Intro"));
+                                            break;
+                                        case "solutions":
+                                            navigation(new NavigationEvent("Solutions"));
+                                            break;
+                                        case "account":
+                                            navigation(new NavigationEvent("My Account"));
+                                            break;
+                                        case "welcome":
+                                            navigation(new NavigationEvent(null, new WelcomeScreen()));
+                                    }
                                 }
                             }
                         }
@@ -242,7 +252,8 @@ import mx.messaging.ChannelSet;
 
 	<mx:RemoteObject id="userService" destination="login">
 		<mx:method name="isSessionLoggedIn" result="sessionCheck()"/>
-	</mx:RemoteObject>	
+		<mx:method name="activateAccount" result="activated()"/>
+	</mx:RemoteObject>
 	
 	<mx:VBox width="100%" height="100%" id="coreVBox" paddingLeft="0" verticalGap="0" paddingRight="0">
 		<listing1:HeaderBar keywordSearch="search(event)" width="100%" id="headerBar"
