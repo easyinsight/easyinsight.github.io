@@ -2,9 +2,7 @@ package com.easyinsight.analysis;
 
 import com.easyinsight.analysis.AnalysisItem;
 
-import java.util.List;
-import java.util.Collection;
-import java.util.ArrayList;
+import java.util.*;
 
 /**
  * User: James Boe
@@ -54,8 +52,8 @@ public class WSCrosstabDefinition extends WSAnalysisDefinition {
         return "Crosstab";
     }
 
-    public List<AnalysisItem> getAllAnalysisItems() {
-        List<AnalysisItem> AnalysisItems = new ArrayList<AnalysisItem>();
+    public Set<AnalysisItem> getAllAnalysisItems() {
+        Set<AnalysisItem> AnalysisItems = new HashSet<AnalysisItem>();
         AnalysisItems.addAll(columns);
         AnalysisItems.addAll(rows);
         AnalysisItems.addAll(measures);

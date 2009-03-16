@@ -535,11 +535,11 @@ import mx.collections.SortField;
         }
 
         private function createFeed():void {
-            var feedCreationWindow:AnalysisBasedFeedCreationWindow = AnalysisBasedFeedCreationWindow(PopUpManager.
-                    createPopUp(this, AnalysisBasedFeedCreationWindow, true));
             if (getAnalysisDefinition().analysisID == 0) {
                 save();
             } else {
+                var feedCreationWindow:AnalysisBasedFeedCreationWindow = AnalysisBasedFeedCreationWindow(PopUpManager.
+                    createPopUp(this, AnalysisBasedFeedCreationWindow, true));
                 feedCreationWindow.analysisDefinition = getAnalysisDefinition();
                 PopUpManager.centerPopUp(feedCreationWindow);
             }

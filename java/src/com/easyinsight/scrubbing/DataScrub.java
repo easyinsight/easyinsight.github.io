@@ -34,7 +34,7 @@ public abstract class DataScrub implements Serializable {
     }
     public abstract IScrubber createScrubber();
 
-    public Collection<Key> createNeededKeys(List<AnalysisItem> analysisItems) {
+    public Collection<Key> createNeededKeys(Collection<AnalysisItem> analysisItems) {
         return new ArrayList<Key>();
     }
 

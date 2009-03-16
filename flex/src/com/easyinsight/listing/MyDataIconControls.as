@@ -70,6 +70,7 @@ import mx.rpc.remoting.RemoteObject;
 				var feedDescriptor:DataFeedDescriptor = obj as DataFeedDescriptor;
 				switch (feedDescriptor.feedType) {
 					case DataFeedDescriptor.STATIC:
+					case DataFeedDescriptor.EMPTY:
 						fileData(feedDescriptor);
 						break;
 					default:

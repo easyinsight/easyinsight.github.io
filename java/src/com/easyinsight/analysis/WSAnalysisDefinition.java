@@ -1,6 +1,5 @@
 package com.easyinsight.analysis;
 
-import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.dataset.LimitsResults;
 import com.easyinsight.core.Key;
@@ -163,11 +162,11 @@ public abstract class WSAnalysisDefinition implements Serializable {
         this.dataFeedID = dataFeedID;
     }
 
-    public abstract List<AnalysisItem> getAllAnalysisItems();
+    public abstract Set<AnalysisItem> getAllAnalysisItems();
 
     public List<Key> getColumnKeys(List<AnalysisItem> allItems) {
         Set<Key> columnSet = new HashSet<Key>();
-        List<AnalysisItem> analysisItems = getAllAnalysisItems();
+        Set<AnalysisItem> analysisItems = getAllAnalysisItems();
         for (AnalysisItem analysisItem : analysisItems) {
             List<AnalysisItem> items = analysisItem.getAnalysisItems(allItems, analysisItems);
             for (AnalysisItem item : items) {

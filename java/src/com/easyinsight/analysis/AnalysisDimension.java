@@ -10,6 +10,7 @@ import com.easyinsight.analysis.AnalysisDimensionResultMetadata;
 import javax.persistence.*;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Collection;
 
 /**
  * User: James Boe
@@ -50,7 +51,7 @@ public class AnalysisDimension extends AnalysisItem {
         this.analysisDimensionID = analysisDimensionID;
     }
 
-    public List<AnalysisItem> getAnalysisItems(List<AnalysisItem> allItems, List<AnalysisItem> insightItems) {
+    public List<AnalysisItem> getAnalysisItems(List<AnalysisItem> allItems, Collection<AnalysisItem> insightItems) {
         List<AnalysisItem> analysisItems = new ArrayList<AnalysisItem>();
         analysisItems.add(this);
         if (keyDimension != null) {

@@ -6,6 +6,7 @@ import javax.persistence.Entity;
 import javax.persistence.Table;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.io.Serializable;
 
 import com.easyinsight.core.Key;
@@ -186,7 +187,7 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
         throw new UnsupportedOperationException();
     }
 
-    public List<AnalysisItem> getAnalysisItems(List<AnalysisItem> allItems, List<AnalysisItem> insightItems) {
+    public List<AnalysisItem> getAnalysisItems(List<AnalysisItem> allItems, Collection<AnalysisItem> insightItems) {
         List<AnalysisItem> items = new ArrayList<AnalysisItem>();
         items.add(this);
         return items;

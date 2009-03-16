@@ -41,12 +41,12 @@ public abstract class WSGraphicDefinition extends WSAnalysisDefinition {
         this.dimensions = dimensions;
     }
 
-    public List<AnalysisItem> getAllAnalysisItems() {
+    public Set<AnalysisItem> getAllAnalysisItems() {
         Set<AnalysisItem> columnList = new HashSet<AnalysisItem>();
         for (AnalysisItem item : measures) {
             columnList.add(item);
         }
         columnList.addAll(dimensions);
-        return new ArrayList<AnalysisItem>(columnList);
+        return columnList;
     }
 }

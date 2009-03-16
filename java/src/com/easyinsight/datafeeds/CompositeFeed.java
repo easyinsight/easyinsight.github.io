@@ -44,7 +44,7 @@ public class CompositeFeed extends Feed {
         try {
             DataSet dataSet = getDataSet(columns, insightRequestMetadata);
             if (!admin) {
-                dataSet = dataSet.nextStep(getAnalysisDefinition(), getFields(), insightRequestMetadata);
+                dataSet = dataSet.nextStep(getAnalysisDefinition(), new HashSet<AnalysisItem>(getFields()), insightRequestMetadata);
             }
             return dataSet;
         } catch (Exception e) {

@@ -6,6 +6,9 @@ import java.util.*;
 import java.sql.*;
 import java.sql.Date;
 import java.net.URL;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 
 /**
  * User: James Boe
@@ -67,27 +70,52 @@ public class DBTask extends TimerTask {
         return dbConfiguration;
     }
 
+    private Properties getProperties() {
+        try {
+            File file = new File("override.properties");
+            if (file.exists()) {
+                Properties properties = new Properties();
+                properties.load(new FileInputStream(new File("config.properties")));
+                return properties;
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        return null;
+    }
+
     public EIConfiguration getEIConfiguration() {
         EIConfiguration eiConfiguration = null;
-        Connection conn = getConnection();
-        try {
-            PreparedStatement configStmt = conn.prepareStatement("SELECT USERNAME, PASSWORD FROM EI_CONFIG");
-            ResultSet rs = configStmt.executeQuery();
-            if (rs.next()) {
-                String userName = rs.getString(1);
-                String password = new StringEncrypter(StringEncrypter.DES_ENCRYPTION_SCHEME).decrypt(rs.getString(2));
-                eiConfiguration = new EIConfiguration();
-                eiConfiguration.setUserName(userName);
-                eiConfiguration.setPassword(password);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw new RuntimeException(e);
-        } finally {
+        Properties properties = getProperties();
+        if (properties.getProperty("ei.user") != null) {
             try {
-                conn.close();
-            } catch (SQLException e) {
+                eiConfiguration = new EIConfiguration();
+                eiConfiguration.setUserName(properties.getProperty("ei.user"));
+                eiConfiguration.setPassword(new StringEncrypter(StringEncrypter.DES_ENCRYPTION_SCHEME).decrypt(properties.getProperty("ei.password")));
+            } catch (StringEncrypter.EncryptionException e) {
+                throw new RuntimeException(e);
+            }
+        } else {
+            Connection conn = getConnection();
+            try {
+                PreparedStatement configStmt = conn.prepareStatement("SELECT USERNAME, PASSWORD FROM EI_CONFIG");
+                ResultSet rs = configStmt.executeQuery();
+                if (rs.next()) {
+                    String userName = rs.getString(1);
+                    String password = new StringEncrypter(StringEncrypter.DES_ENCRYPTION_SCHEME).decrypt(rs.getString(2));
+                    eiConfiguration = new EIConfiguration();
+                    eiConfiguration.setUserName(userName);
+                    eiConfiguration.setPassword(password);
+                }
+            } catch (Exception e) {
                 e.printStackTrace();
+                throw new RuntimeException(e);
+            } finally {
+                try {
+                    conn.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
             }
         }
         return eiConfiguration;

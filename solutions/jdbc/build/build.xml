@@ -33,6 +33,8 @@
                 <include name="shutdown.bat"/>
                 <include name="startup.bat"/>
                 <include name="startup.sh"/>
+                <include name="configure.bat"/>
+                <include name="configure.sh"/>
             </fileset>
         </copy>
     </target>

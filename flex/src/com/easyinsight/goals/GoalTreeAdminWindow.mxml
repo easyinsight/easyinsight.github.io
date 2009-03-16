@@ -26,6 +26,10 @@ import mx.collections.ArrayCollection;
         private var solutionIcon:Class;
 
         [Bindable]
+        [Embed(source="../../../../assets/branchx16.png")]
+        private var goalIcon:Class;
+
+        [Bindable]
         [Embed(source="../../../../assets/data_blue_x16.png")]
         private var dataSourceIcon:Class;
 
@@ -35,20 +39,25 @@ import mx.collections.ArrayCollection;
 
         private function populateData():void {
             accordion.getHeaderAt(0).setStyle("fontSize", 12);
-            accordion.getHeaderAt(0).setStyle("icon", solutionIcon);
+            accordion.getHeaderAt(0).setStyle("icon", goalIcon);
             accordion.getHeaderAt(0).labelPlacement = "right";
             accordion.getHeaderAt(0).setStyle("fontfamily", "Tahoma");
             accordion.getHeaderAt(0).setStyle("fontWeight", "bold");
             accordion.getHeaderAt(1).setStyle("fontSize", 12);
-            accordion.getHeaderAt(1).setStyle("icon", dataSourceIcon);
+            accordion.getHeaderAt(1).setStyle("icon", solutionIcon);
             accordion.getHeaderAt(1).labelPlacement = "right";
             accordion.getHeaderAt(1).setStyle("fontfamily", "Tahoma");
             accordion.getHeaderAt(1).setStyle("fontWeight", "bold");
             accordion.getHeaderAt(2).setStyle("fontSize", 12);
-            accordion.getHeaderAt(2).setStyle("icon", reportIcon);
+            accordion.getHeaderAt(2).setStyle("icon", dataSourceIcon);
             accordion.getHeaderAt(2).labelPlacement = "right";
             accordion.getHeaderAt(2).setStyle("fontfamily", "Tahoma");
             accordion.getHeaderAt(2).setStyle("fontWeight", "bold");
+            accordion.getHeaderAt(3).setStyle("fontSize", 12);
+            accordion.getHeaderAt(3).labelPlacement = "right";
+            accordion.getHeaderAt(3).setStyle("fontfamily", "Tahoma");
+            accordion.getHeaderAt(3).setStyle("fontWeight", "bold");
+            accordion.getHeaderAt(3).setStyle("icon", reportIcon);
             feedService.searchForSubscribedFeeds.send();
             solutionService.getSolutions.send();
             goalService.getGoalTreesForInstall.send(_goalTreeID);

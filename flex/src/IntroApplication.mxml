@@ -90,7 +90,7 @@
             <mx:AddChild relativeTo="{featureBox}">
                 <mx:VBox width="100%" height="100%" horizontalAlign="center" id="improvementBox">
                     <mx:Label text="Set goals to validate your work and ensure constant improvement" width="620" fontSize="18"/>
-                    <mx:Label text="Apply solutions to solve end to end busines problems" width="620" fontSize="18"/>
+                    <mx:Label text="Apply solutions to solve end to end business problems" width="620" fontSize="18"/>
                     <mx:Label text="Leverage proven methodologies such as Lean and Six Sigma" width="620" fontSize="18"/>
                      <mx:Image source="{goalPicture}"/>
                 </mx:VBox>

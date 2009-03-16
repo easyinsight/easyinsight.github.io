@@ -30,7 +30,13 @@ package com.easyinsight.administration.feed
 		public var ratingSource:String;
 		public var dataPersisted:Boolean;
 		public var publiclyVisible:Boolean;
-		public var marketplaceVisible:Boolean;		
+		public var marketplaceVisible:Boolean;
+        public var apiKey:String;
+        public var uncheckedAPIEnabled:Boolean;
+        public var uncheckedAPIUsingBasicAuth:Boolean;
+        public var validatedAPIEnabled:Boolean;
+        public var validatedAPIUsingBasicAuth:Boolean;
+        public var inheritAccountAPISettings:Boolean;
 		
 		public function FeedDefinitionData()
 		{

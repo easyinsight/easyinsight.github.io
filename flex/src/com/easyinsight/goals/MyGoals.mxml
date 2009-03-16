@@ -236,7 +236,7 @@
                                            itemRenderer="com.easyinsight.goals.MyGoalsControls" sortable="false"/>
                 </mx:columns>
             </mx:DataGrid>
-            <goals:MyGoalsGrid id="myGoalsGrid" width="100%"/>
+            <goals:MyGoalsGrid id="myGoalsGrid" width="100%" height="100%"/>
         </mx:VBox>
     </mx:VBox>
 </mx:VBox>

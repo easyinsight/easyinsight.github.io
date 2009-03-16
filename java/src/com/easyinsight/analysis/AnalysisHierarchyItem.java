@@ -7,6 +7,7 @@ import com.easyinsight.analysis.AnalysisItem;
 import javax.persistence.*;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Collection;
 
 /**
  * User: James Boe
@@ -39,7 +40,7 @@ public class AnalysisHierarchyItem extends AnalysisDimension {
         this.hierarchyLevel = hierarchyLevel;
     }
 
-    public List<AnalysisItem> getAnalysisItems(List<AnalysisItem> allItems, List<AnalysisItem> insightItems) {
+    public List<AnalysisItem> getAnalysisItems(List<AnalysisItem> allItems, Collection<AnalysisItem> insightItems) {
         List<AnalysisItem> analysisItems = new ArrayList<AnalysisItem>();
         //analysisItems.add(this);
         analysisItems.add(hierarchyLevel.getAnalysisItem());

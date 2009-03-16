@@ -220,7 +220,7 @@ public class DataSet implements Serializable {
     }
 
     public ListDataResults toList(WSAnalysisDefinition listDefinition, List<AnalysisItem> underlyingFields, InsightRequestMetadata insightRequestMetadata) {
-        List<AnalysisItem> allRequestedAnalysisItems = listDefinition.getAllAnalysisItems();
+        List<AnalysisItem> allRequestedAnalysisItems = new ArrayList<AnalysisItem>(listDefinition.getAllAnalysisItems());
         Set<AnalysisItem> allNeededAnalysisItems = new LinkedHashSet<AnalysisItem>();
         List<AnalysisItem> derivedItems = new ArrayList<AnalysisItem>();
         for (AnalysisItem item : allRequestedAnalysisItems) {
@@ -228,7 +228,7 @@ public class DataSet implements Serializable {
             derivedItems.addAll(item.getDerivedItems());
         }
         List<AnalysisItem> neededItemList = new ArrayList<AnalysisItem>(allNeededAnalysisItems);
-        DataSet dataSet = nextStep(listDefinition, neededItemList, insightRequestMetadata);
+        DataSet dataSet = nextStep(listDefinition, allNeededAnalysisItems, insightRequestMetadata);
         ListTransform listTransform = dataSet.listTransform(neededItemList, allRequestedAnalysisItems);
         DataSet aggregatedData = listTransform.aggregate(neededItemList, derivedItems, allRequestedAnalysisItems);
         aggregatedData = aggregatedData.filter(listDefinition, insightRequestMetadata);
@@ -240,13 +240,13 @@ public class DataSet implements Serializable {
         return listDataResults;
     }
 
-    public DataSet nextStep(WSAnalysisDefinition analysisDefinition, List<AnalysisItem> neededItems, InsightRequestMetadata insightRequestMetadata) {
+    public DataSet nextStep(WSAnalysisDefinition analysisDefinition, Set<AnalysisItem> neededItems, InsightRequestMetadata insightRequestMetadata) {
 
         if (analysisDefinition.getDataScrubs() != null && !analysisDefinition.getDataScrubs().isEmpty()) {
             new DataSetScrubber().scrub(this, analysisDefinition.getDataScrubs());
         }
 
-        Collection<AnalysisItem> analysisItems = new ArrayList<AnalysisItem>();
+        Collection<AnalysisItem> analysisItems = new HashSet<AnalysisItem>();
         Map<AnalysisItem, Collection<MaterializedFilterDefinition>> filterMap = new HashMap<AnalysisItem, Collection<MaterializedFilterDefinition>>();
         if (analysisDefinition.getFilterDefinitions() != null) {
             for (FilterDefinition filterDefinition : analysisDefinition.getFilterDefinitions()) {
@@ -318,6 +318,9 @@ public class DataSet implements Serializable {
                 valueMap = new HashMap<Key, Value>();
             for (AnalysisItem analysisItem : analysisItems) {
                 Value value = row.getValue(analysisItem.getKey());
+                if (value == null || value.type() == Value.EMPTY) {
+                    value = row.getValue(analysisItem.createAggregateKey());
+                }
                 Value preFilterValue = analysisItem.renameMeLater(value);
                 Value transformedValue = analysisItem.transformValue(value);
 

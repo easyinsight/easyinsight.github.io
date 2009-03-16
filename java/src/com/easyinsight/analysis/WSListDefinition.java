@@ -53,13 +53,13 @@ public class WSListDefinition extends WSAnalysisDefinition {
         return "List";
     }
 
-    public List<AnalysisItem> getAllAnalysisItems() {
+    public Set<AnalysisItem> getAllAnalysisItems() {
         Set<AnalysisItem> columnList = new HashSet<AnalysisItem>();
         for (AnalysisItem item : columns) {
             columnList.add(item);
         }
         columnList.addAll(getLimitFields());
-        return new ArrayList<AnalysisItem>(columnList);
+        return columnList;
     }
 
     public LimitsResults applyLimits(DataSet dataSet) {

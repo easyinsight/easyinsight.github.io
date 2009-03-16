@@ -63,7 +63,7 @@ public class AccountMemberInvitation {
         String body = MessageFormat.format(newProAccountText, userName, password);
         String subject = "Easy Insight Account Creation";
         try {
-            new GMailConnection().sendSSLMessage(to, subject, body, "accounts@easy-insight.com");
+            new GMailConnection().sendSSLMessage(to, subject, body, "donotreply@easy-insight.com");
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);

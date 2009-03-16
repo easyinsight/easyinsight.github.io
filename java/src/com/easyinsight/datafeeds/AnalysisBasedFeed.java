@@ -38,6 +38,7 @@ public class AnalysisBasedFeed extends Feed {
         Feed feed = FeedRegistry.instance().getFeed(analysisDefinition.getDataFeedID());
 
         Set<Key> columnSet = new HashSet<Key>(columns);
+        Set<AnalysisItem> analysisItemSet = new HashSet<AnalysisItem>();
         // TODO: is this right?
         if (analysisDefinition.getFilterDefinitions() != null) {
             for (FilterDefinition filterDefinition : analysisDefinition.getFilterDefinitions()) {
@@ -45,7 +46,15 @@ public class AnalysisBasedFeed extends Feed {
                 for (AnalysisItem item : items) {
                     if (item.getAnalysisItemID() != 0) {
                         columnSet.add(item.getKey());
+                        analysisItemSet.add(item);
                     }
+                }
+            }
+        }
+        for (Key column : columns) {
+            for (AnalysisItem item : getFields()) {
+                if (item.getKey().equals(column)) {
+                    analysisItemSet.add(item);
                 }
             }
         }
@@ -57,6 +66,6 @@ public class AnalysisBasedFeed extends Feed {
 
         DataSet dataSet = feed.getDataSet(new ArrayList<Key>(columnSet), maxRows, false, insightRequestMetadata);
 
-        return dataSet.nextStep(analysisDefinition, getFields(), insightRequestMetadata);
+        return dataSet.nextStep(analysisDefinition, analysisItemSet, insightRequestMetadata);
     }    
 }

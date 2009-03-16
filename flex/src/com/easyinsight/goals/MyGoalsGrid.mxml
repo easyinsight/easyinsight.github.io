@@ -37,7 +37,7 @@ import mx.collections.ArrayCollection;
     <mx:RemoteObject destination="goalService" id="goalService">
         <mx:method name="getGoals" result="gotGoals()"/>
     </mx:RemoteObject>
-    <mx:DataGrid dataProvider="{goals}" id="goalsGrid" width="100%" rowCount="{rowCount}" rowHeight="28" itemDoubleClick="onDoubleClick(event)">
+    <mx:DataGrid dataProvider="{goals}" id="goalsGrid" width="100%" height="100%" rowCount="{rowCount}" rowHeight="28" itemDoubleClick="onDoubleClick(event)">
         <mx:columns>
             <mx:DataGridColumn headerText="" dataField="name" itemRenderer="com.easyinsight.goals.GoalIconRenderer" width="30"/>
             <mx:DataGridColumn headerText="Goal Name" dataField="name" headerRenderer="com.easyinsight.groups.CustomGroupHeader"/>

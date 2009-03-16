@@ -1,7 +1,5 @@
 package com.easyinsight.analysis;
 
-import com.easyinsight.analysis.CrossTabDataResults;
-import com.easyinsight.analysis.ListDataResults;
 import com.easyinsight.datafeeds.*;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.dataset.Crosstab;
@@ -74,7 +72,7 @@ public class DataService implements IDataService {
         for (AnalysisItem analysisItem : feed.getFields()) {
             ids.add(analysisItem.getKey().getKeyID());
         }
-        List<AnalysisItem> items = analysisDefinition.getAllAnalysisItems();
+        Set<AnalysisItem> items = analysisDefinition.getAllAnalysisItems();
         for (AnalysisItem analysisItem : items) {
             if (analysisItem.getKey().getKeyID() != 0 && !ids.contains(analysisItem.getKey().getKeyID())) {
                 invalidIDs.add(analysisItem.getKey().getKeyID());

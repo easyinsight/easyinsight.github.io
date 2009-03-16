@@ -151,10 +151,13 @@ public class DataStorage {
         PreparedStatement countStmt = storageConn.prepareStatement("SHOW TABLE STATUS LIKE ?");
         countStmt.setString(1, getTableName());
         ResultSet countRS = countStmt.executeQuery();
-        countRS.next();
-        long dataLength = countRS.getLong("Data_length");
-        long indexLength = countRS.getLong("Index_length");
-        return dataLength + indexLength;
+        if (countRS.next()) {
+            long dataLength = countRS.getLong("Data_length");
+            long indexLength = countRS.getLong("Index_length");
+            return dataLength + indexLength;
+        } else {
+            return 0;
+        }
     }
 
     public void createTable() throws SQLException {

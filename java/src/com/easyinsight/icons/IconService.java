@@ -3,6 +3,8 @@ package com.easyinsight.icons;
 import java.io.File;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 
 /**
  * User: James Boe
@@ -26,6 +28,12 @@ public class IconService {
                 icons.add(icon);
             }
         }
+        Collections.sort(icons, new Comparator<Icon>() {
+
+            public int compare(Icon o1, Icon o2) {
+                return o1.getName().compareTo(o2.getName());
+            }
+        });
         return icons;
     }
 }

@@ -9,6 +9,7 @@ import com.easyinsight.core.Key;
 import javax.persistence.*;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Collection;
 
 /**
  * User: James Boe
@@ -51,7 +52,7 @@ public class TemporalAnalysisMeasure extends AnalysisMeasure {
         return super.getType() | AnalysisItemTypes.TEMPORAL_MEASURE;
     }
 
-    public List<AnalysisItem> getAnalysisItems(List<AnalysisItem> allItems, List<AnalysisItem> insightItems) {
+    public List<AnalysisItem> getAnalysisItems(List<AnalysisItem> allItems, Collection<AnalysisItem> insightItems) {
         List<AnalysisItem> items = new ArrayList<AnalysisItem>();
         items.add(new AnalysisMeasure(this.getKey(), wrappedAggregation));
         boolean foundDateDim = false;

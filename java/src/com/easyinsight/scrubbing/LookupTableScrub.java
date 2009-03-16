@@ -58,7 +58,7 @@ public class LookupTableScrub extends DataScrub {
         return new LookupTableScrubber(this);
     }
 
-    public Collection<Key> createNeededKeys(List<AnalysisItem> analysisItems) {
+    public Collection<Key> createNeededKeys(Collection<AnalysisItem> analysisItems) {
         Collection<Key> keys = new ArrayList<Key>();        
         for (AnalysisItem analysisItem : analysisItems) {
             if (analysisItem.getKey().getKeyID().equals(targetKey.getKeyID())) {

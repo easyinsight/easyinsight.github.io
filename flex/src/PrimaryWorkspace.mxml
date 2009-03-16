@@ -113,19 +113,19 @@ import mx.messaging.ChannelSet;
             	if (analysisID != null) {
         			//createAnalysisSource(Number(analysisID));
         			var deepAnalysisLink:DelayedDeepLink = new DelayedDeepLink(Number(analysisID));
-        			deepAnalysisLink.addEventListener(ModuleAnalyzeEvent.MODULE_ANALYZE, internalAnalyze);
+        			deepAnalysisLink.addEventListener(ModuleAnalyzeEvent.MODULE_ANALYZE, internalModuleAnalyze);
         			deepAnalysisLink.execute(); 
             	} else {
             		var feedID:String = o.feedID;
             		if (feedID != null) {
             			var deepFeedLink:DelayedFeedLink = new DelayedFeedLink(Number(feedID));
-            			deepFeedLink.addEventListener(ModuleAnalyzeEvent.MODULE_ANALYZE, internalAnalyze);
+            			deepFeedLink.addEventListener(ModuleAnalyzeEvent.MODULE_ANALYZE, internalModuleAnalyze);
             			deepFeedLink.execute();            			
             		} else {
                         var feedKey:String = o.feedKey;
                         if (feedKey != null) {
                             var deepAPILink:DelayedAPIKeyLink = new DelayedAPIKeyLink(feedKey);
-                            deepAPILink.addEventListener(ModuleAnalyzeEvent.MODULE_ANALYZE, internalAnalyze);
+                            deepAPILink.addEventListener(ModuleAnalyzeEvent.MODULE_ANALYZE, internalModuleAnalyze);
                             deepAPILink.execute();
                         } else {
                             var activationString:String = o.activationID;
