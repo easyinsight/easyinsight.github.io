@@ -5,9 +5,10 @@
 		<mx:State name="installComplete">
 			<mx:RemoveChild target="{buttonBox}"/>
 			<mx:RemoveChild target="{coreForm}"/>
+			<mx:RemoveChild target="{objectGrids}"/>
 			<mx:AddChild relativeTo="{coreBox}">
 				<mx:VBox width="100%" height="100%">
-					<solutions:SolutionDetail solution="{_solution}" treeData="{installResult}"/>
+                    <mx:Label text="The objects you've installed will now be available under My Data and Goals." fontSize="14"/>
 					<mx:HBox width="100%" horizontalAlign="center">
 						<mx:Button label="Close" click="cancel()"/>
 					</mx:HBox>					
@@ -62,6 +63,13 @@
             [Bindable]
             private var showGoalTrees:Boolean;
 
+            [Bindable]
+            private var dataSourceCount:int;
+            [Bindable]
+            private var goalCount:int;
+            [Bindable]
+            private var reportCount:int;
+
             private function setup():void {
                 solutionService.getSolutionContents.send(_solution.solutionID);
             }
@@ -84,11 +92,14 @@
             private function gotContents():void {
                 var solutionContents:SolutionContents = solutionService.getSolutionContents.lastResult as SolutionContents;
                 dataSources = solutionContents.feedDescriptors;
+                dataSourceCount = dataSources.length;
                 showDataSources = dataSources.length > 0;
                 insights = solutionContents.insightDescriptors;
                 showInsights = insights.length > 0;
+                reportCount = insights.length;
                 goalTrees = solutionContents.goalTreeDescriptors;
                 showGoalTrees = goalTrees.length > 0;
+                goalCount = goalTrees.length;
             }
 			
 			private function installedSolution():void {
@@ -106,18 +117,20 @@
 		width="100%" height="100%">
 		<mx:HBox width="100%" horizontalAlign="center">
 			<mx:Label fontSize="14" text="Solution Summary"/>
-		</mx:HBox>		
-		<mx:Form id="coreForm" paddingTop="0" paddingBottom="0" paddingLeft="0" paddingRight="0">
-			<mx:FormItem label="Solution Name:">
-				<mx:Label text="{solutionName}"/>		
-			</mx:FormItem>
-			<mx:FormItem label="Description:">
-				<mx:TextArea text="{description}" id="descriptionBox" width="400" height="100" editable="false" />		
-			</mx:FormItem>
-		</mx:Form>
-        <mx:Label text="Installing this solution will add the following objects to your account:"/>
-        <mx:HBox>
-        <mx:DataGrid dataProvider="{dataSources}" visible="{showDataSources}">
+		</mx:HBox>
+        <mx:VBox width="100%" horizontalAlign="center" id="coreForm">
+            <mx:Form paddingTop="0" paddingBottom="0" paddingLeft="0" paddingRight="0">
+                <mx:FormItem label="Solution Name:">
+                    <mx:Label text="{solutionName}"/>
+                </mx:FormItem>
+                <mx:FormItem label="Description:">
+                    <mx:TextArea text="{description}" id="descriptionBox" width="400" height="100" editable="false" />
+                </mx:FormItem>
+            </mx:Form>
+            <mx:Label text="Installing this solution will add the following objects to your account:" fontSize="14"/>
+        </mx:VBox>
+        <mx:HBox id="objectGrids">
+        <mx:DataGrid dataProvider="{dataSources}" visible="{showDataSources}" width="200" rowCount="{dataSourceCount}" rowHeight="28">
             <mx:columns>
                 <mx:DataGridColumn headerText="" dataField="name" width="50">
                     <mx:itemRenderer>
@@ -131,7 +144,7 @@
                 <mx:DataGridColumn headerText="Name" dataField="name" headerRenderer="com.easyinsight.groups.CustomGroupHeader"/>
             </mx:columns>
         </mx:DataGrid>
-        <mx:DataGrid dataProvider="{insights}" visible="{showInsights}">
+        <mx:DataGrid dataProvider="{insights}" visible="{showInsights}" width="200" rowCount="{reportCount}" rowHeight="28">
             <mx:columns>
                 <mx:DataGridColumn headerText="" dataField="name" width="50">
                     <mx:itemRenderer>
@@ -145,7 +158,7 @@
                 <mx:DataGridColumn headerText="Name" dataField="name" headerRenderer="com.easyinsight.groups.CustomGroupHeader"/>
             </mx:columns>
         </mx:DataGrid>
-        <mx:DataGrid dataProvider="{goalTrees}" visible="{showGoalTrees}">
+        <mx:DataGrid dataProvider="{goalTrees}" visible="{showGoalTrees}"  width="200" rowCount="{goalCount}" rowHeight="28">
             <mx:columns>
                 <mx:DataGridColumn headerText="" dataField="name" width="50">
                     <mx:itemRenderer>

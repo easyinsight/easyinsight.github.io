@@ -232,7 +232,11 @@ import com.easyinsight.help.MyDataHelp;
                     descriptor.policy = new UploadPolicy();
                     descriptor.policy.publiclyVisible = false;
                     descriptor.name = event.name;
-                    dispatchEvent(new ModuleAnalyzeEvent(new DescriptorAnalyzeSource(descriptor)));
+                    if (event.startInAdmin) {
+                        dispatchEvent(new ModuleAnalyzeEvent(new FeedAdminAnalyzeSource(descriptor.dataFeedID)));
+                    } else {
+                        dispatchEvent(new ModuleAnalyzeEvent(new DescriptorAnalyzeSource(descriptor)));
+                   }
                 }
             }
 

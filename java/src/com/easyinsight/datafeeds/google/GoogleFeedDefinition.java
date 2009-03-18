@@ -44,9 +44,12 @@ public class GoogleFeedDefinition extends FeedDefinition {
     }
 
     public void customStorage(Connection conn) throws SQLException {
+        PreparedStatement clearStmt = conn.prepareStatement("DELETE FROM GOOGLE_FEED WHERE DATA_FEED_ID = ? ");
         PreparedStatement insertGoogleStmt = conn.prepareStatement("INSERT INTO GOOGLE_FEED (DATA_FEED_ID, WORKSHEETURL) " +
                 "VALUES (?, ?)");
         try {
+            clearStmt.setLong(1, getDataFeedID());
+            clearStmt.executeUpdate();
             insertGoogleStmt.setLong(1, getDataFeedID());
             insertGoogleStmt.setString(2, worksheetURL);
             insertGoogleStmt.execute();

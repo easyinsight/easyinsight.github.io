@@ -71,6 +71,10 @@
             <attribute name="method" value="1" />
             <attribute name="URI" value="/WEB-INF/lib" />
           </containerElement>
+          <containerElement type="library" name="axis" level="module">
+            <attribute name="method" value="1" />
+            <attribute name="URI" value="/WEB-INF/lib" />
+          </containerElement>
         </packaging>
       </configuration>
     </facet>

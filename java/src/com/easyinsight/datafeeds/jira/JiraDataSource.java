@@ -212,4 +212,11 @@ public class JiraDataSource extends FeedDefinition {
             this.setUrl(rs.getString(1));
         }
     }
+
+    @Override
+    public FeedDefinition clone() throws CloneNotSupportedException {
+        JiraDataSource jiraDataSource = (JiraDataSource) super.clone();
+        jiraDataSource.setUrl("");
+        return jiraDataSource;
+    }
 }

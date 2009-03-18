@@ -6,7 +6,8 @@ package com.easyinsight.analysis
 	import mx.collections.ArrayCollection;
 	import mx.containers.HBox;
 	import mx.controls.Button;
-	import mx.managers.PopUpManager;
+import mx.core.Application;
+import mx.managers.PopUpManager;
 
     import com.easyinsight.administration.feed.DeleteAnalysisItemEvent;
 
@@ -70,12 +71,8 @@ package com.easyinsight.analysis
 			analysisItemEditor.analysisItems = this._analysisItems;
 			analysisItemEditor.addEventListener(AnalysisItemEditEvent.ANALYSIS_ITEM_EDIT, analysisItemEdited);
 			PopUpManager.addPopUp(analysisItemEditor, this.parent, true);
-			var point:Point = new Point();
-			point.x = 0;
-			point.y = 0;
-			point = this.localToGlobal(point);
-			analysisItemEditor.x = point.x + 25;
-			analysisItemEditor.y = point.y + 25;
+			analysisItemEditor.x = Application.application.width / 2 - 100;
+			analysisItemEditor.y = Application.application.height / 2 - 100;
 		}
 		
 		private function analysisItemEdited(event:AnalysisItemEditEvent):void {

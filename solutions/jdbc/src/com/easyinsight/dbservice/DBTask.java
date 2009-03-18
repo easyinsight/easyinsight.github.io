@@ -86,36 +86,25 @@ public class DBTask extends TimerTask {
 
     public EIConfiguration getEIConfiguration() {
         EIConfiguration eiConfiguration = null;
-        Properties properties = getProperties();
-        if (properties.getProperty("ei.user") != null) {
-            try {
+        Connection conn = getConnection();
+        try {
+            PreparedStatement configStmt = conn.prepareStatement("SELECT USERNAME, PASSWORD FROM EI_CONFIG");
+            ResultSet rs = configStmt.executeQuery();
+            if (rs.next()) {
+                String userName = rs.getString(1);
+                String password = new StringEncrypter(StringEncrypter.DES_ENCRYPTION_SCHEME).decrypt(rs.getString(2));
                 eiConfiguration = new EIConfiguration();
-                eiConfiguration.setUserName(properties.getProperty("ei.user"));
-                eiConfiguration.setPassword(new StringEncrypter(StringEncrypter.DES_ENCRYPTION_SCHEME).decrypt(properties.getProperty("ei.password")));
-            } catch (StringEncrypter.EncryptionException e) {
-                throw new RuntimeException(e);
+                eiConfiguration.setUserName(userName);
+                eiConfiguration.setPassword(password);
             }
-        } else {
-            Connection conn = getConnection();
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException(e);
+        } finally {
             try {
-                PreparedStatement configStmt = conn.prepareStatement("SELECT USERNAME, PASSWORD FROM EI_CONFIG");
-                ResultSet rs = configStmt.executeQuery();
-                if (rs.next()) {
-                    String userName = rs.getString(1);
-                    String password = new StringEncrypter(StringEncrypter.DES_ENCRYPTION_SCHEME).decrypt(rs.getString(2));
-                    eiConfiguration = new EIConfiguration();
-                    eiConfiguration.setUserName(userName);
-                    eiConfiguration.setPassword(password);
-                }
-            } catch (Exception e) {
+                conn.close();
+            } catch (SQLException e) {
                 e.printStackTrace();
-                throw new RuntimeException(e);
-            } finally {
-                try {
-                    conn.close();
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
             }
         }
         return eiConfiguration;

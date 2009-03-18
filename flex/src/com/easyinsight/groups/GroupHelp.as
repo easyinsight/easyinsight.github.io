@@ -19,7 +19,7 @@ package com.easyinsight.groups
 		}
 		
 		override protected function createScreencastArray():Array {
-			return [ new Screencast("Uploading an Excel spreadsheet", "assets/screencasts/demo.swf") ];
+			return [  ];
 		}
 		
 		override protected function getDetail():String {

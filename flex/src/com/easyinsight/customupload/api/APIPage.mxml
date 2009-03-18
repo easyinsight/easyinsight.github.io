@@ -164,7 +164,7 @@ import mx.utils.URLUtil;
                 <mx:Box width="100%" backgroundColor="#F6A76B" horizontalAlign="center">
                     <mx:Label text="Data Sources and their API Configurations"/>
                 </mx:Box>
-                <mx:DataGrid dataProvider="{apis}" width="700" height="100%" selectable="false" id="servicesGrid">
+                <mx:DataGrid dataProvider="{apis}" width="700" height="100%" selectable="false" id="servicesGrid" rowHeight="28">
                     <mx:columns>
                         <mx:DataGridColumn headerText="Data Source Name" dataField="name" headerRenderer="com.easyinsight.groups.CustomGroupHeader"/>
                         <mx:DataGridColumn headerText="API Key" width="120" dataField="apiKey" headerRenderer="com.easyinsight.groups.CustomGroupHeader"/>

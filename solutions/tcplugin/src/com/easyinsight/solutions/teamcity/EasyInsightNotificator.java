@@ -4,7 +4,6 @@ import jetbrains.buildServer.notification.Notificator;
 import jetbrains.buildServer.notification.NotificatorRegistry;
 import jetbrains.buildServer.serverSide.*;
 import jetbrains.buildServer.Build;
-import jetbrains.buildServer.tests.TestInfo;
 import jetbrains.buildServer.users.SUser;
 import jetbrains.buildServer.users.NotificatorPropertyKey;
 import jetbrains.buildServer.users.PropertyKey;
@@ -98,22 +97,17 @@ public class EasyInsightNotificator implements Notificator {
                     NumberPair durationPair = new NumberPair();
                     durationPair.setKey("Duration");
                     durationPair.setValue(duration);
-                    System.out.println("provided artifacts size = " + sRunningBuild.getProvidedArtifacts().getArtifacts().size());
                     File artifactsDirectory = sRunningBuild.getArtifactsDirectory();
-                    System.out.println("downloaded artifacts size = " + sRunningBuild.getDownloadedArtifacts().getArtifacts().size());
 
                     if (artifactsDirectory.exists()) {
-                        System.out.println("into artifacts directory...");
                         File file = new File(artifactsDirectory, "coverage.txt");
                         if (file.exists()) {
-                            System.out.println("coverage data found...");
                             new CoverageDataParse().parseData(file.getAbsolutePath(), service);
                         }
                     }
 
                     for (List<ArtifactInfo> artifactInfos : sRunningBuild.getProvidedArtifacts().getArtifacts().values()) {
                         for (ArtifactInfo artifactInfo : artifactInfos) {
-                            System.out.println(artifactInfo.getArtifactPath());
                             if (artifactInfo.getArtifactPath().endsWith("coverage.txt")) {
                                 new CoverageDataParse().parseData(artifactInfo.getArtifactPath(), service);
                             }
@@ -121,7 +115,6 @@ public class EasyInsightNotificator implements Notificator {
                     }
                     for (List<ArtifactInfo> artifactInfos : sRunningBuild.getDownloadedArtifacts().getArtifacts().values()) {
                         for (ArtifactInfo artifactInfo : artifactInfos) {
-                            System.out.println(artifactInfo.getArtifactPath());
                             if (artifactInfo.getArtifactPath().endsWith("coverage.txt")) {
                                 new CoverageDataParse().parseData(artifactInfo.getArtifactPath(), service);
                             }

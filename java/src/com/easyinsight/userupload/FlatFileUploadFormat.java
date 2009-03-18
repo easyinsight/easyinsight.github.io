@@ -110,6 +110,9 @@ public class FlatFileUploadFormat extends UploadFormat {
     }
 
     public void persist(Connection conn, long feedID) throws SQLException {
+        PreparedStatement clearStmt = conn.prepareStatement("DELETE FROM FLAT_FILE_UPLOAD_FORMAT WHERE FEED_ID = ?");
+        clearStmt.setLong(1, feedID);
+        clearStmt.executeUpdate();
         PreparedStatement insertFormatStmt = conn.prepareStatement("INSERT INTO FLAT_FILE_UPLOAD_FORMAT (FEED_ID, DELIMITER_PATTERN," +
                 "DELIMITER_ESCAPE) VALUES (?, ?, ?)");
         insertFormatStmt.setLong(1, feedID);

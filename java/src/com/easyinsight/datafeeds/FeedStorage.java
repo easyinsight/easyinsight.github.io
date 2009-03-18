@@ -368,6 +368,7 @@ public class FeedStorage {
         savePolicy(conn, feedDefinition.getDataFeedID(), feedDefinition.getUploadPolicy());
         saveFields(feedDefinition.getDataFeedID(), conn, feedDefinition.getFields());
         saveTags(feedDefinition.getDataFeedID(), conn, feedDefinition.getTags());
+        feedDefinition.customStorage(conn);
     }
 
     public void updateDataFeedConfiguration(FeedDefinition feedDefinition) {

@@ -3,6 +3,8 @@
 	<mx:Script>
 		<![CDATA[
 			import com.easyinsight.framework.NavigationEvent;
+            import com.easyinsight.help.ScreencastWindow;
+            import mx.managers.PopUpManager;
 			
 			[Bindable]
             [Embed(source="../../../../assets/headericons/chart_area.png")]
@@ -54,6 +56,14 @@
 
             private function toGoals():void {
             	dispatchEvent(new NavigationEvent("My Goals"));
+            }
+
+            private function lesson1():void {
+                var window:ScreencastWindow = new ScreencastWindow();
+                window.screencastSource = "../assets/lesson1/training.mp4";
+                PopUpManager.addPopUp(window, this);
+                window.x = 300;
+                window.y = 200;
             }
 		]]>
 	</mx:Script>
@@ -152,6 +162,26 @@
             <mx:Spacer height="30"/>
             <mx:HBox width="100%" horizontalAlign="center">
                 <mx:Label fontSize="16" color="#000000" text="The tutorials below can help you get started with a little more guidance."/>
+            </mx:HBox>
+            <mx:HBox width="100%" paddingLeft="20" paddingRight="20" horizontalAlign="center" horizontalGap="40">
+                <mx:VBox horizontalAlign="center">
+                    <mx:Image source="../assets/lesson1/FirstFrame.png" width="256" height="192" click="lesson1()"/>
+                    <mx:HBox>
+                        <mx:Label text="Creating a data source" fontSize="14"/>
+                    </mx:HBox>
+                </mx:VBox>
+                <mx:VBox horizontalAlign="center">
+                    <mx:Image source="../assets/lesson1/FirstFrame.png" width="256" height="192" click="lesson1()"/>
+                    <mx:HBox>
+                        <mx:Label text="Running the database solution" fontSize="14"/>
+                    </mx:HBox>
+                </mx:VBox>
+                <mx:VBox horizontalAlign="center">
+                    <mx:Image source="../assets/lesson1/FirstFrame.png" width="256" height="192" click="lesson1()"/>
+                    <mx:HBox>
+                        <mx:Label text="Using the API" fontSize="14"/>
+                    </mx:HBox>
+                </mx:VBox>
             </mx:HBox>
         </mx:VBox>
     </mx:HBox>

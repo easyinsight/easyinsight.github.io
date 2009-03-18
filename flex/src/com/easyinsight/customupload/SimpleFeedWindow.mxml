@@ -33,7 +33,7 @@
 			
 			private function createdFeed():void {
 				var feedID:int = uploadService.createNewDefaultFeed.lastResult as int;
-				dispatchEvent(new UploadConfigEvent(UploadConfigEvent.UPLOAD_CONFIG_COMPLETE, feedID));
+				dispatchEvent(new UploadConfigEvent(UploadConfigEvent.UPLOAD_CONFIG_COMPLETE, feedID, feedName.text, true));
 				PopUpManager.removePopUp(this);
 			}
 		]]>

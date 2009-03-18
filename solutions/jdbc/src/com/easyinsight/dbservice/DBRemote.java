@@ -232,7 +232,7 @@ public class DBRemote {
     public void deleteQuery(long queryConfigurationID) {
         Connection conn = getConnection();
         try {
-            PreparedStatement deleteStmt = conn.prepareStatement("DELETE FROM QUERY_CONFIGURATION WHERE QUERY_CONFIGURATION_ID = ?");
+            PreparedStatement deleteStmt = conn.prepareStatement("DELETE FROM QUERY_CONFIG WHERE QUERY_CONFIG_ID = ?");
             deleteStmt.setLong(1, queryConfigurationID);
             deleteStmt.executeUpdate();
         } catch (Exception e) {
@@ -269,6 +269,7 @@ public class DBRemote {
                         Object object = rs.getObject(i + 1);
                         map.put(columnName, object == null ? "" : object.toString());
                     }
+                    
                     results.add(map);
                 }
                 testQueryResults = new TestQueryResults();

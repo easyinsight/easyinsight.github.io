@@ -89,6 +89,13 @@
                     implBox.label = "Composite Details";
                     showImpl = true;
 					this.feedAdminDetail = compositeWorkspace;
+                } else if (feedType == DataFeedDescriptor.JIRA) {
+                    var jiraConfig:JiraConfig = new JiraConfig();
+                    jiraConfig.feedDefinition = this.feedDefinition;
+                    implBox.addChild(jiraConfig);
+                    implBox.label = "JIRA Configuration";
+                    showImpl = true;
+                    this.feedAdminDetail = jiraConfig;
 				} else {
                     tabNav.removeChild(implBox);
                 }
@@ -100,20 +107,16 @@
 				} else if (feedType == DataFeedDescriptor.ANALYSIS) {
 					this.feedAdminDetail = new AnalysisBasedFeedAdmin();
 				}*/
+                this.feedAdminMode = true;
+            	this.feedName = feedDefinition.feedName;
+                this.feedTags = TagCloud.toString(feedDefinition.tags);
+            	this.feedUploadPolicy = feedDefinition.uploadPolicy;
+            	this.feedDescription = feedDefinition.description;
+            	this.feedOwnerName = feedDefinition.ownerName;
+            	this.feedAttribution = feedDefinition.attribution;
+            	this.feedType = feedDefinition.getFeedType();
                 analysisService.openAnalysisDefinition.send(feedDefinition.analysisDefinitionID);
-			}
-
-			public function feedAdministrationMode(feedName:String, feedTags:String, uploadPolicy:UploadPolicy,
-            	feedDescription:String, feedOwnerName:String, feedAttribution:String, feedType:int):void {
-            	this.feedAdminMode = true;
-            	this.feedName = feedName;
-            	this.feedTags = feedTags;
-            	this.feedUploadPolicy = uploadPolicy;
-            	this.feedDescription = feedDescription;
-            	this.feedOwnerName = feedOwnerName;
-            	this.feedAttribution = feedAttribution;
-            	this.feedType = feedType;           	
-            }	
+			}	
             
             private function onChange(event:AnalysisChangedEvent):void {
                 if (event.metadata) {
@@ -216,19 +219,19 @@
 					</mx:HBox>
 					<mx:Form>						
 						<mx:FormItem label="Name:" paddingTop="20">
-							<mx:TextInput id="feedNameInput" text="{feedName}"/>
+							<mx:TextInput id="feedNameInput" text="{feedName}" change="dispatchEvent(new AnalysisChangedEvent())"/>
 						</mx:FormItem>
 						<mx:FormItem label="Tags:">
-							<mx:TextInput id="feedTagsInput" text="{feedTags}"/>
+							<mx:TextInput id="feedTagsInput" text="{feedTags}" change="dispatchEvent(new AnalysisChangedEvent())"/>
 						</mx:FormItem>
 						<mx:FormItem label="Description:">
-							<mx:TextArea id="feedDescriptionTextArea" width="300" height="100" text="{feedDescription}"/>
+							<mx:TextArea id="feedDescriptionTextArea" width="300" height="100" text="{feedDescription}" change="dispatchEvent(new AnalysisChangedEvent())"/>
 						</mx:FormItem>
 						<mx:FormItem label="Attribution:">
-							<mx:TextInput id="feedAttributionInput" text="{feedAttribution}"/>
+							<mx:TextInput id="feedAttributionInput" text="{feedAttribution}" change="dispatchEvent(new AnalysisChangedEvent())"/>
 						</mx:FormItem>
 						<mx:FormItem label="Owner Name:" paddingBottom="20">
-							<mx:TextInput id="feedOwnerNameInput" text="{feedOwnerName}"/>
+							<mx:TextInput id="feedOwnerNameInput" text="{feedOwnerName}" change="dispatchEvent(new AnalysisChangedEvent())"/>
 						</mx:FormItem>
 						<mx:FormItem label="Delete All Data:">
 							<mx:Button label="Clear Feed Data" click="clearFeedData()"/>

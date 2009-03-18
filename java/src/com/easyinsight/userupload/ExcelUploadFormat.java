@@ -1,6 +1,5 @@
 package com.easyinsight.userupload;
 
-import com.easyinsight.userupload.IDataTypeGuesser;
 import com.easyinsight.core.*;
 import com.easyinsight.logging.LogClass;
 
@@ -166,6 +165,9 @@ public class ExcelUploadFormat extends UploadFormat {
     }
 
     public void persist(Connection conn, long feedID) throws SQLException {
+        PreparedStatement clearStmt = conn.prepareStatement("DELETE FROM EXCEL_UPLOAD_FORMAT WHERE FEED_ID = ?");
+        clearStmt.setLong(1, feedID);
+        clearStmt.executeUpdate();
         PreparedStatement insertFormatStmt = conn.prepareStatement("INSERT INTO EXCEL_UPLOAD_FORMAT (FEED_ID) VALUES (?)");
         insertFormatStmt.setLong(1, feedID);
         insertFormatStmt.execute();
@@ -220,7 +222,11 @@ public class ExcelUploadFormat extends UploadFormat {
             List<String> rowList = new ArrayList<String>();
             for (Iterator<HSSFCell> cit = (Iterator<HSSFCell>)row.cellIterator(); cit.hasNext(); ) {
                 HSSFCell cell = cit.next();
-                rowList.add(cell.toString().trim());
+                String header = cell.toString().trim();
+                if ("".equals(header)) {
+                    continue;
+                }
+                rowList.add(header);
             }
             String[] rows = new String[rowList.size()];
             rowList.toArray(rows);

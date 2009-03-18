@@ -46,7 +46,6 @@ package com.easyinsight.help
 				if (screencastList == null) {
 					screencastList = new List();
 					screencastList.percentWidth = 100;
-					screencastList.itemRenderer = new ScreencastListRendererFactory();
 					screencastList.dataProvider = screencasts;
 					screencastList.rowCount = screencasts.length;							
 				}
@@ -75,10 +74,7 @@ package com.easyinsight.help
 		}
 		
 		protected function createScreencastArray():Array {
-			return [ new Screencast("Uploading an Excel spreadsheet", "assets/screencasts/demo.swf"),
-					 new Screencast("Pulling in data from Google Spreadsheets", "assets/screencasts/demo.swf"),
-					 new Screencast("Combining multiple feeds", "assets/screencasts/demo.swf"),
-					 new Screencast("Leveraging the power of the Easy Insight APIs", "assets/screencasts/demo.swf") ];
+			return [  ];
 		}
 		
 		protected function getDetail():String {

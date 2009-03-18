@@ -119,9 +119,7 @@ import mx.rpc.remoting.RemoteObject;
 		private function adminCalled(event:MouseEvent):void {
 			if (obj is DataFeedDescriptor) {
 				var descriptor:DataFeedDescriptor = obj as DataFeedDescriptor;
-				dispatchEvent(new ModuleAnalyzeEvent(new FeedAdminAnalyzeSource(descriptor.dataFeedID,
-					descriptor.name, descriptor.tagString, descriptor.policy, descriptor.description, descriptor.attribution,
-					descriptor.ownerName, descriptor.feedType)));
+				dispatchEvent(new ModuleAnalyzeEvent(new FeedAdminAnalyzeSource(descriptor.dataFeedID)));
 			}
 		}
 		
