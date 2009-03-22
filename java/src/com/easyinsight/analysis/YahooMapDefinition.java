@@ -1,11 +1,10 @@
 package com.easyinsight.analysis;
 
-import com.easyinsight.analysis.AnalysisItemFactory;
-
 import javax.persistence.Entity;
 import javax.persistence.Table;
 import javax.persistence.Column;
 import javax.persistence.PrimaryKeyJoinColumn;
+import java.util.ArrayList;
 
 /**
  * User: James Boe
@@ -30,8 +29,6 @@ public class YahooMapDefinition extends GraphicDefinition {
 
     protected WSAnalysisDefinition createWSDefinition() {
         WSYahooMapDefinition wsMapDefinition = new WSYahooMapDefinition();
-        wsMapDefinition.setDimensions(AnalysisItemFactory.fromAnalysisFields(getDimensions()));
-        wsMapDefinition.setMeasures(AnalysisItemFactory.fromAnalysisFields(getMeasures()));
         wsMapDefinition.setYahooMapDefinitionID(yahooMapDefinitionID);
         return wsMapDefinition;
     }

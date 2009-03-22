@@ -3,6 +3,7 @@ package test.core;
 import junit.framework.TestCase;
 import com.easyinsight.database.Database;
 import com.easyinsight.analysis.*;
+import com.easyinsight.analysis.definitions.WSColumnChartDefinition;
 
 import java.util.List;
 import java.util.ArrayList;
@@ -81,7 +82,7 @@ public class AnalysisDefinitionStorageTest extends TestCase {
     public void testChartDefinitions() {
         long userID = TestUtil.getIndividualTestUser();
         long dataFeedID = TestUtil.createDefaultTestDataSource(userID);
-        WSChartDefinition chartDefinition = new WSChartDefinition();
+        WSChartDefinition chartDefinition = new WSColumnChartDefinition();
         chartDefinition.setName("Chart Test");
         chartDefinition.setDataFeedID(dataFeedID);
         List<FilterDefinition> filters = new ArrayList<FilterDefinition>();
@@ -95,11 +96,9 @@ public class AnalysisDefinitionStorageTest extends TestCase {
         AnalysisDimension myDimension = new AnalysisDimension(TestUtil.createKey("Customer", dataFeedID), true);
         List<AnalysisItem> rows = new ArrayList<AnalysisItem>();
         rows.add(myDimension);
-        chartDefinition.setDimensions(rows);        
         AnalysisMeasure measure = new AnalysisMeasure(TestUtil.createKey("Revenue", dataFeedID), AggregationTypes.SUM);
         List<AnalysisItem> measures = new ArrayList<AnalysisItem>();
         measures.add(measure);
-        chartDefinition.setMeasures(measures);
         AnalysisService analysisService = new AnalysisService();
         long analysisID = analysisService.saveAnalysisDefinition(chartDefinition);
         WSAnalysisDefinition wsAnalysisDefinition = analysisService.openAnalysisDefinition(analysisID);

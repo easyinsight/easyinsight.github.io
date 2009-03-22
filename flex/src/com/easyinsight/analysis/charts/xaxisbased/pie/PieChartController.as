@@ -1,0 +1,28 @@
+package com.easyinsight.analysis.charts.xaxisbased.pie {
+import com.easyinsight.analysis.DataViewFactory;
+import com.easyinsight.analysis.EmbeddedViewFactory;
+import com.easyinsight.analysis.IReportController;
+import com.easyinsight.analysis.charts.xaxisbased.XAxisControlBar;
+import com.easyinsight.analysis.service.ListDataService;
+public class PieChartController implements IReportController {
+    public function PieChartController() {
+    }
+
+    public function createDataView():DataViewFactory {
+        var factory:DataViewFactory = new DataViewFactory();
+        factory.reportDataService = ListDataService;
+        factory.reportControlBar = XAxisControlBar;
+        factory.reportRenderer = "PieChartModule.swf";
+        factory.newDefinition = PieChartDefinition;
+        return factory;
+    }
+
+    public function createEmbeddedView():EmbeddedViewFactory {
+        var factory:EmbeddedViewFactory = new EmbeddedViewFactory();
+        factory.reportDataService = ListDataService;
+        factory.reportRenderer = "PieChartModule.swf";
+        factory.newDefinition = PieChartDefinition;
+        return factory;
+    }
+}
+}

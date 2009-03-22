@@ -6,7 +6,6 @@ package com.easyinsight.analysis
 	
 	import mx.collections.ArrayCollection;
 	import mx.containers.HBox;
-	import mx.events.FlexEvent;
 	
 	public class ListDropAreaGrouping extends HBox
 	{		
@@ -22,7 +21,7 @@ package com.easyinsight.analysis
 		
 		public function ListDropAreaGrouping() {
 			super();
-			addEventListener(FlexEvent.CREATION_COMPLETE, initializeState);
+			//addEventListener(FlexEvent.CREATION_COMPLETE, initializeState);
 		}
 
         public function invalidateItems(items:ArrayCollection):void {
@@ -94,7 +93,14 @@ package com.easyinsight.analysis
 			//newDropAreaCheck();
 		}
 
-	    private function initializeState(event:Event):void {
+
+        override protected function createChildren():void {
+            super.createChildren();
+            var dropArea:DropArea = createDropArea();
+            addChild(dropArea);
+        }
+
+        private function initializeState(event:Event):void {
 	    	// create one GenericDropArea
 	    	if (this.getChildren().length == 0) {
 		    	var dropArea:DropArea = createDropArea();
@@ -186,7 +192,7 @@ package com.easyinsight.analysis
 	   		dropArea.addEventListener(DropAreaUpdateEvent.DROP_AREA_UPDATE, dropAreaUpdated);
 	    	dropArea.addEventListener(DropAreaAddedEvent.DROP_AREA_ADD, dropAreaFilledIn);
 	    	dropArea.addEventListener(DropAreaDeletionEvent.DROP_AREA_DELETE, deleteOccurred);
-	    	var targetLocation:int = position == -1 ? dropAreas.length - 1 : position; 
+	    	var targetLocation:int = position == -1 ? dropAreas.length - 1 : position;
 	    	dropAreas.addItemAt(dropArea, targetLocation);
 	    	addChildAt(dropArea, targetLocation);
             if (getCurrentElements() == _maxElements) {

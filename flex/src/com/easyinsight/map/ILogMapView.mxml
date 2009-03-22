@@ -36,8 +36,7 @@
 	<mx:Script>
 		<![CDATA[
 			import com.easyinsight.analysis.YahooMapDefinition;
-			import mx.binding.utils.BindingUtils;
-			import com.easyinsight.analysis.MapDefinition;
+            import com.easyinsight.analysis.list.ListDefinition;
 			import com.easyinsight.analysis.GraphicDefinition;
 			import ilog.maps.MapBase;
 			import com.easyinsight.analysis.conditions.ConditionRenderer;
@@ -50,7 +49,6 @@
 			import com.easyinsight.analysis.CrosstabDefinition;
 			import com.easyinsight.analysis.MapDefinition;
 			import com.easyinsight.analysis.AnalysisItemUpdateEvent;
-			import com.easyinsight.analysis.ListDefinition;
 			import com.easyinsight.analysis.AnalysisDefinition;
 			
 			[Bindable]

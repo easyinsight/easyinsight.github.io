@@ -1,6 +1,6 @@
 package com.easyinsight.framework
 {
-	import flash.events.Event;
+    import flash.events.Event;
 
 	public class DataServiceLoadingEvent extends Event
 	{
@@ -11,6 +11,10 @@ package com.easyinsight.framework
 		{
 			super(type);
 		}
-		
-	}
+
+
+        override public function clone():Event {
+            return new DataServiceLoadingEvent(type);
+        }
+    }
 }

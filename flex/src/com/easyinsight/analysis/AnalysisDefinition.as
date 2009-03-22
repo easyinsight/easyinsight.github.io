@@ -35,6 +35,20 @@ package com.easyinsight.analysis
 		public function getDataFeedType():String {
 			return null;
 		}
+
+        public function populate(fields:ArrayCollection):void {
+            
+        }
+
+        protected function findItems(fields:ArrayCollection, type:int):ArrayCollection {
+            var measures:ArrayCollection = new ArrayCollection();
+            for each (var field:AnalysisItem in fields) {
+                if (field.hasType(type)) {
+                    measures.addItem(field);
+                }
+            }
+            return measures;
+        }
 		
 		public function getLabel():String {
 			return null;
@@ -43,5 +57,9 @@ package com.easyinsight.analysis
 		public function getFields():ArrayCollection {
 			return null;
 		}
+
+        public function get controller():String {
+            return "com.easyinsight.analysis.list.ListController";
+        }
 	}
 }

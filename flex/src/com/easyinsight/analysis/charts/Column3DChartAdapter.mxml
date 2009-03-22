@@ -5,23 +5,14 @@
 	</mx:Metadata>
 	<mx:Script>
 		<![CDATA[
-        import com.easyinsight.skin.CustomChartRendererFactory;
-import ilog.charts3d.charts3dClasses.Series3D;
+            import ilog.charts3d.charts3dClasses.Series3D;
 			import ilog.charts3d.series.ColumnSet3D;
-			import ilog.charts3d.AxisRenderer3D;
 			import ilog.charts3d.series.ColumnSeries3D;
 			import ilog.charts3d.ColumnChart3D;
-			import com.easyinsight.analysis.AnalysisItemTypes;
-			import mx.charts.chartClasses.AxisBase;
-			import com.easyinsight.analysis.SortableAxisTitleFactory;
 			import com.easyinsight.analysis.AnalysisItem;
 			import mx.events.FlexEvent;
-			import mx.controls.TextInput;
-			import mx.charts.ColumnChart;
-			import mx.charts.AxisRenderer;
 			import com.easyinsight.filtering.FilterRawData;
-        import mx.graphics.BitmapFill;
-import mx.graphics.SolidColor;
+            import mx.graphics.BitmapFill;
 			import mx.graphics.IFill;
 			import com.easyinsight.analysis.conditions.ConditionRenderer;
 			import mx.charts.chartClasses.IAxis;

@@ -16,14 +16,7 @@
         <servlet-class>com.easyinsight.dbservice.admin.InternalDBServlet</servlet-class>
         <load-on-startup>1</load-on-startup>
     </servlet>
-    <!--
-    <servlet>
-        <servlet-name>DMS</servlet-name>
-        <display-name>DMS</display-name>
-        <servlet-class>com.easyinsight.servlet.DMSServlet</servlet-class>
-        <load-on-startup>1</load-on-startup>
-    </servlet>
-        -->
+    
     <!-- MessageBroker Servlet -->
     <servlet>
         <servlet-name>MessageBrokerServlet</servlet-name>

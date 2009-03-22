@@ -3,7 +3,8 @@
 	creationComplete="initHandlers()">
 	<mx:Script>
 		<![CDATA[
-			import mx.olap.OLAPCube;
+        import com.easyinsight.analysis.list.ListDefinition;
+import mx.olap.OLAPCube;
 			import mx.collections.ArrayCollection;
 			import mx.binding.utils.BindingUtils;
 			import mx.controls.dataGridClasses.DataGridColumn;

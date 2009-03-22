@@ -1,0 +1,90 @@
+<?xml version="1.0" ?>
+<mx:Module xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:analysis="com.easyinsight.analysis.*" implements="com.easyinsight.analysis.IReportRenderer"
+        width="100%" height="100%">
+    <mx:Script>
+		<![CDATA[
+        import com.easyinsight.analysis.AnalysisDefinition;
+        import com.easyinsight.analysis.AnalysisItem;
+        import com.easyinsight.filtering.FilterRawData;
+
+        import mx.charts.ChartItem;
+        import mx.charts.series.PieSeries;
+        import mx.formatters.Formatter;
+        import mx.charts.series.items.PieSeriesItem;
+        import mx.charts.events.ChartItemEvent;
+        import mx.collections.ArrayCollection;
+
+        [Bindable]
+        private var graphData:ArrayCollection = new ArrayCollection();
+
+        [Bindable]
+        private var dimension:String;
+
+        [Bindable]
+        private var measureName:String;
+
+        private var measureFormatter:Formatter;
+
+        [Bindable]
+        private var explodeData:Array = [];
+
+        private var dimensionItem:AnalysisItem;
+
+        public function renderReport(dataSet:ArrayCollection, analysisDefinition:AnalysisDefinition, clientProcessorMap:Object):void {
+            var pieChartDef:PieChartDefinition = analysisDefinition as PieChartDefinition;
+            graphData = dataSet;
+            this.measureFormatter = pieChartDef.measure.getFormatter();
+            measureName = pieChartDef.measure.qualifiedName();
+            dimension = pieChartDef.xaxis.qualifiedName();
+            this.dimensionItem = pieChartDef.xaxis;
+        }
+
+        private function chartSelection(event:ChartItemEvent):void {
+            for (var j:int = 0; j < graphData.length; j++) {
+                var graphObj:Object = graphData.getItemAt(j);
+                var explode:Boolean = false;
+                for (var i:int = 0; i < pieChart.selectedChartItems.length; i++) {
+                    var obj:PieSeriesItem = pieChart.selectedChartItems[i];
+                    if (obj.item == graphObj) {
+                        explode = true;
+                    }
+                }
+                if (explode) {
+                    explodeData[j] = .2;
+                } else {
+                    explodeData[j] = 0;
+                }
+            }
+            var pieChartSeries:PieSeries = pieChart.series[0] as PieSeries;
+            pieChartSeries.perWedgeExplodeRadius = explodeData;
+        }
+
+        private function renderPieLabel(data:Object, field:String, index:Number, percentValue:Number):String {
+            return data[dimension] + ": " + '\n' + this.measureFormatter.format(data[measureName]);
+        }
+
+        public function createFilterRawData():FilterRawData {
+            var filterRawData:FilterRawData = new FilterRawData();
+            for (var i:int = 0; i < pieChart.selectedChartItems.length; i++) {
+                var obj:ChartItem = pieChart.selectedChartItems[i];
+                filterRawData.addPair(dimensionItem, obj.item[dimensionItem.key.createString()]);
+            }
+            return filterRawData;
+        }
+
+        public function updateExportMetadata():void {
+        }
+		]]>
+	</mx:Script>
+    <mx:HBox width="100%" height="100%">
+        <mx:PieChart id="pieChart" dataProvider="{graphData}" selectionMode="multiple" height="100%" width="100%"
+					paddingLeft="0" paddingRight="0" paddingTop="0" paddingBottom="0">
+            <mx:series>
+                <mx:PieSeries field="{measureName}" nameField="{dimension}" labelPosition="insideWithCallout"
+                    labelFunction="renderPieLabel">
+                </mx:PieSeries>
+            </mx:series>
+        </mx:PieChart>
+        <mx:Legend dataProvider="{pieChart}" height="100%"/>
+    </mx:HBox>
+</mx:Module>

@@ -1,6 +1,7 @@
-package com.easyinsight.analysis
+package com.easyinsight.analysis.list
 {
-	import mx.collections.ArrayCollection;
+import com.easyinsight.analysis.*;
+import mx.collections.ArrayCollection;
 	
 	[Bindable]
 	[RemoteClass(alias="com.easyinsight.analysis.WSListDefinition")]
@@ -26,5 +27,13 @@ package com.easyinsight.analysis
 		override public function getFields():ArrayCollection {
 			return columns;
 		}
-	}
+
+        override public function populate(fields:ArrayCollection):void {
+            columns = fields;
+        }
+
+        override public function get controller():String {
+            return "com.easyinsight.analysis.list.ListController";
+        }
+    }
 }

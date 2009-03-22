@@ -1,13 +1,13 @@
 package com.easyinsight.analysis;
 
 import com.easyinsight.scrubbing.DataScrub;
-import com.easyinsight.analysis.AnalysisItem;
-import com.easyinsight.analysis.AnalysisItemTypes;
+
+import java.util.*;
+
+import org.hibernate.annotations.CollectionOfElements;
+import org.hibernate.annotations.MapKey;
 
 import javax.persistence.*;
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Date;
 
 /**
  * User: jboe
@@ -57,7 +57,7 @@ public abstract class AnalysisDefinition implements Cloneable {
         inverseJoinColumns = @JoinColumn(name="data_scrub_id", nullable = false))
     private List<DataScrub> dataScrubs = new ArrayList<DataScrub>();
 
-    @OneToMany(cascade=CascadeType.ALL)
+    @OneToMany(cascade= CascadeType.ALL)
     @JoinTable(name="analysis_to_tag",
         joinColumns = @JoinColumn(name="analysis_id", nullable = false),
         inverseJoinColumns = @JoinColumn(name="analysis_tags_id", nullable = false))
@@ -92,6 +92,21 @@ public abstract class AnalysisDefinition implements Cloneable {
 
     @Column(name="feed_visibility")
     private boolean visibleAtFeedLevel;
+
+    @OneToMany(cascade = CascadeType.ALL)
+    @MapKey(columns = @Column(name = "structure_key"))
+    @JoinTable(name = "report_structure",
+                joinColumns = @JoinColumn(name = "analysis_id"),
+                inverseJoinColumns = @JoinColumn(name = "analysis_item_id"))
+    private Map<String, AnalysisItem> reportStructure;
+
+    public Map<String, AnalysisItem> getReportStructure() {
+        return reportStructure;
+    }
+
+    public void setReportStructure(Map<String, AnalysisItem> reportStructure) {
+        this.reportStructure = reportStructure;
+    }
 
     public boolean isVisibleAtFeedLevel() {
         return visibleAtFeedLevel;
@@ -266,6 +281,11 @@ public abstract class AnalysisDefinition implements Cloneable {
         for (AnalysisItem analysisItem : addedItems) {
             addedItems.add(analysisItem.clone());
         }
+        Map<String, AnalysisItem> clonedStructure = new HashMap<String, AnalysisItem>();
+        for (Map.Entry<String, AnalysisItem> entry : clonedStructure.entrySet()) {
+            clonedStructure.put(entry.getKey(), entry.getValue().clone());
+        }
+        analysisDefinition.setReportStructure(clonedStructure);
         analysisDefinition.setAddedItems(addedItems);
         analysisDefinition.setUserBindings(new ArrayList<UserToAnalysisBinding>());
         List<Tag> clonedTags = new ArrayList<Tag>();
@@ -293,6 +313,7 @@ public abstract class AnalysisDefinition implements Cloneable {
         analysisDefinition.setFilterDefinitions(FilterDefinitionConverter.fromPersistableFilters(filterDefinitions));
         analysisDefinition.setPolicy(analysisPolicy);
         analysisDefinition.setRootDefinition(rootDefinition);
+        analysisDefinition.populateFromReportStructure(reportStructure);
         List<DataScrub> newScrubs = new ArrayList<DataScrub>();
         for (DataScrub dataScrub : dataScrubs) {
             dataScrub.hateHibernate();
@@ -315,13 +336,14 @@ public abstract class AnalysisDefinition implements Cloneable {
         return analysisDefinition;
     }
 
-    protected void processItems(List<AnalysisItem> analysisItems) {
+    protected List<AnalysisItem> processItems(List<AnalysisItem> analysisItems) {
         for (AnalysisItem analysisItem : analysisItems) {
             if (analysisItem.hasType(AnalysisItemTypes.HIERARCHY)) {
                 AnalysisHierarchyItem analysisHierarchyItem = (AnalysisHierarchyItem) analysisItem;
                 analysisHierarchyItem.setHierarchyLevels(new ArrayList<HierarchyLevel>(analysisHierarchyItem.getHierarchyLevels()));
             }
         }
+        return analysisItems;
     }
 
     protected abstract WSAnalysisDefinition createWSDefinition();

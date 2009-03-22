@@ -2,7 +2,8 @@
 <mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" title="List Configuration" xmlns:analysis="com.easyinsight.analysis.*">
 	<mx:Script>
 		<![CDATA[
-			import mx.collections.ArrayCollection;
+        import com.easyinsight.analysis.list.ListDefinition;
+import mx.collections.ArrayCollection;
 			import mx.managers.PopUpManager;
 		
 			private var definition:ListDefinition;

@@ -79,8 +79,8 @@
       <option name="TABLE_PATTERN" value="" />
       <option name="UUID" value="8c92e1a8-62f9-4e17-8bcd-38d889c74b8c" />
       <option name="NAME" value="DataSource" />
-      <option name="DATABASE_PRODUCT_NAME" />
-      <option name="DATABASE_PRODUCT_VERSION" />
+      <option name="DATABASE_PRODUCT_NAME" value="MySQL" />
+      <option name="DATABASE_PRODUCT_VERSION" value="5.0.45-community-nt" />
       <TABLE_DATA>
         <option name="NAME" value="account" />
         <option name="SCHEMA" />
@@ -781,6 +781,16 @@
           <option name="TYPE" />
           <option name="PRIMARY" value="false" />
           <option name="LENGTH" value="4" />
+          <option name="PRECISION" value="0" />
+          <option name="NULLABLE" value="true" />
+        </FIELD_ELEMENT>
+        <FIELD_ELEMENT>
+          <option name="NAME" value="report_structure_id" />
+          <option name="SQL_TYPE" value="bigint" />
+          <option name="JDBC_TYPE" value="-5" />
+          <option name="TYPE" />
+          <option name="PRIMARY" value="false" />
+          <option name="LENGTH" value="11" />
           <option name="PRECISION" value="0" />
           <option name="NULLABLE" value="true" />
         </FIELD_ELEMENT>
@@ -6709,6 +6719,72 @@
           <option name="TARGET_CATALOG" value="dms" />
           <option name="TARGET_COLUMN" value="analysis_id" />
           <option name="SOURCE_COLUMN" value="analysis_id" />
+          <option name="CASCADE_REMOVE" value="true" />
+          <option name="CASCADE_UPDATE" value="false" />
+        </RELATIONSHIP_ELEMENT>
+      </TABLE_DATA>
+      <TABLE_DATA>
+        <option name="NAME" value="report_structure" />
+        <option name="SCHEMA" />
+        <option name="CATALOG" value="dms" />
+        <option name="TYPE" value="TABLE" />
+        <FIELD_ELEMENT>
+          <option name="NAME" value="report_structure_id" />
+          <option name="SQL_TYPE" value="bigint" />
+          <option name="JDBC_TYPE" value="-5" />
+          <option name="TYPE" />
+          <option name="PRIMARY" value="true" />
+          <option name="LENGTH" value="11" />
+          <option name="PRECISION" value="0" />
+          <option name="NULLABLE" value="false" />
+        </FIELD_ELEMENT>
+        <FIELD_ELEMENT>
+          <option name="NAME" value="structure_key" />
+          <option name="SQL_TYPE" value="varchar" />
+          <option name="JDBC_TYPE" value="12" />
+          <option name="TYPE" />
+          <option name="PRIMARY" value="false" />
+          <option name="LENGTH" value="20" />
+          <option name="PRECISION" value="0" />
+          <option name="NULLABLE" value="false" />
+        </FIELD_ELEMENT>
+        <FIELD_ELEMENT>
+          <option name="NAME" value="analysis_id" />
+          <option name="SQL_TYPE" value="bigint" />
+          <option name="JDBC_TYPE" value="-5" />
+          <option name="TYPE" />
+          <option name="PRIMARY" value="false" />
+          <option name="LENGTH" value="11" />
+          <option name="PRECISION" value="0" />
+          <option name="NULLABLE" value="false" />
+        </FIELD_ELEMENT>
+        <FIELD_ELEMENT>
+          <option name="NAME" value="analysis_item_id" />
+          <option name="SQL_TYPE" value="bigint" />
+          <option name="JDBC_TYPE" value="-5" />
+          <option name="TYPE" />
+          <option name="PRIMARY" value="false" />
+          <option name="LENGTH" value="11" />
+          <option name="PRECISION" value="0" />
+          <option name="NULLABLE" value="false" />
+        </FIELD_ELEMENT>
+        <RELATIONSHIP_ELEMENT>
+          <option name="RELATION_NAME" value="report_structure_ibfk1" />
+          <option name="TARGET_TABLE" value="analysis" />
+          <option name="TARGET_SCHEMA" />
+          <option name="TARGET_CATALOG" value="dms" />
+          <option name="TARGET_COLUMN" value="analysis_id" />
+          <option name="SOURCE_COLUMN" value="analysis_id" />
+          <option name="CASCADE_REMOVE" value="true" />
+          <option name="CASCADE_UPDATE" value="false" />
+        </RELATIONSHIP_ELEMENT>
+        <RELATIONSHIP_ELEMENT>
+          <option name="RELATION_NAME" value="report_structure_ibfk2" />
+          <option name="TARGET_TABLE" value="analysis_item" />
+          <option name="TARGET_SCHEMA" />
+          <option name="TARGET_CATALOG" value="dms" />
+          <option name="TARGET_COLUMN" value="analysis_item_id" />
+          <option name="SOURCE_COLUMN" value="analysis_item_id" />
           <option name="CASCADE_REMOVE" value="true" />
           <option name="CASCADE_UPDATE" value="false" />
         </RELATIONSHIP_ELEMENT>

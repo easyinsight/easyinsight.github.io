@@ -14,7 +14,8 @@
 			import com.easyinsight.analysis.charts.ChartAdapterUpdateEvent;
 			import com.easyinsight.analysis.charts.ChartAdapterOption;
 			import com.easyinsight.analysis.charts.ChartAdapter;
-			import com.easyinsight.filtering.FilterRawData;
+            import com.easyinsight.analysis.list.ListDefinition;
+import com.easyinsight.filtering.FilterRawData;
 			import mx.collections.Sort;
             import mx.collections.SortField;
             import mx.collections.ArrayCollection;

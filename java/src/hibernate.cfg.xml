@@ -90,6 +90,7 @@
         <mapping class="com.easyinsight.analysis.UserToAnalysisBinding"/>
         <mapping class="com.easyinsight.analysis.LimitsMetadata"/>
         <mapping class="com.easyinsight.analysis.ListLimitsMetadata"/>
+        
         <mapping class="com.easyinsight.scrubbing.DataScrub"/>
         <mapping class="com.easyinsight.scrubbing.LookupTableScrub"/>
         <mapping class="com.easyinsight.scrubbing.LookupTablePair"/>

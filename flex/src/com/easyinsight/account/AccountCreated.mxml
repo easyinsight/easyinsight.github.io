@@ -4,7 +4,8 @@
 		<![CDATA[
 			import com.easyinsight.framework.NavigationEvent;
             import com.easyinsight.help.ScreencastWindow;
-            import mx.managers.PopUpManager;
+            import mx.managers.CursorManager;
+import mx.managers.PopUpManager;
 			
 			[Bindable]
             [Embed(source="../../../../assets/headericons/chart_area.png")]
@@ -33,6 +34,10 @@
             [Bindable]
             [Embed(source="../../../../assets/headericons/application_enterprise.png")]
             private var apiIcon:Class;
+
+            [Bindable]
+            [Embed(source="../../../../assets/media_play.png")]
+            private var pointerIcon:Class;
 			
 			private function toMarketplace():void {
             	dispatchEvent(new NavigationEvent("Marketplace"));
@@ -163,21 +168,27 @@
             <mx:HBox width="100%" horizontalAlign="center">
                 <mx:Label fontSize="16" color="#000000" text="The tutorials below can help you get started with a little more guidance."/>
             </mx:HBox>
+            <mx:Spacer height="30"/>
             <mx:HBox width="100%" paddingLeft="20" paddingRight="20" horizontalAlign="center" horizontalGap="40">
                 <mx:VBox horizontalAlign="center">
-                    <mx:Image source="../assets/lesson1/FirstFrame.png" width="256" height="192" click="lesson1()"/>
+                    <mx:Image source="../assets/lesson1/FirstFrame.png" width="256" height="192" click="lesson1()" rollOver="CursorManager.setCursor(pointerIcon);"
+                            rollOut="CursorManager.removeAllCursors()"/>
                     <mx:HBox>
                         <mx:Label text="Creating a data source" fontSize="14"/>
                     </mx:HBox>
                 </mx:VBox>
                 <mx:VBox horizontalAlign="center">
-                    <mx:Image source="../assets/lesson1/FirstFrame.png" width="256" height="192" click="lesson1()"/>
+                    <mx:Box width="256" height="192" backgroundColor="#000000" horizontalAlign="center"  verticalAlign="middle">
+                        <mx:Label text="Coming soon..." fontSize="16" color="#FFFFFF"/>
+                    </mx:Box>
                     <mx:HBox>
                         <mx:Label text="Running the database solution" fontSize="14"/>
                     </mx:HBox>
                 </mx:VBox>
                 <mx:VBox horizontalAlign="center">
-                    <mx:Image source="../assets/lesson1/FirstFrame.png" width="256" height="192" click="lesson1()"/>
+                    <mx:Box width="256" height="192" backgroundColor="#000000" horizontalAlign="center"  verticalAlign="middle">
+                        <mx:Label text="Coming soon..." fontSize="16" color="#FFFFFF"/>
+                    </mx:Box>
                     <mx:HBox>
                         <mx:Label text="Using the API" fontSize="14"/>
                     </mx:HBox>

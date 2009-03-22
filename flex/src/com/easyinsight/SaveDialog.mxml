@@ -3,10 +3,7 @@
 	creationComplete="addEventListener(KeyboardEvent.KEY_UP, keyHit); focusManager.setFocus(analysisName)">
 	<mx:Script>
 		<![CDATA[
-			import com.easyinsight.analysis.ListDefinition;
                     import com.easyinsight.analysis.SavedAnalysisEvent;
-                    import com.easyinsight.analysis.CrosstabDefinition;
-                    import com.easyinsight.analysis.ChartDefinition;
                     import mx.managers.PopUpManager;
                     import com.easyinsight.analysis.AnalysisDefinition;
 

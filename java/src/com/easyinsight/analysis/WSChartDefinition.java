@@ -2,16 +2,13 @@ package com.easyinsight.analysis;
 
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.dataset.LimitsResults;
-import com.easyinsight.analysis.AnalysisMeasure;
 
 /**
  * User: James Boe
  * Date: Jan 11, 2008
  * Time: 9:10:35 PM
  */
-public class WSChartDefinition extends WSGraphicDefinition {
-    private int chartType;
-    private int chartFamily;
+public abstract class WSChartDefinition extends WSGraphicDefinition {
     private Long chartDefinitionID;
     private LimitsMetadata limitsMetadata;
 
@@ -23,21 +20,9 @@ public class WSChartDefinition extends WSGraphicDefinition {
         this.chartDefinitionID = chartDefinitionID;
     }
 
-    public int getChartType() {
-        return chartType;
-    }
+    public abstract int getChartType();
 
-    public void setChartType(int chartType) {
-        this.chartType = chartType;
-    }
-
-    public int getChartFamily() {
-        return chartFamily;
-    }
-
-    public void setChartFamily(int chartFamily) {
-        this.chartFamily = chartFamily;
-    }
+    public abstract int getChartFamily();
 
     public LimitsMetadata getLimitsMetadata() {
         return limitsMetadata;
@@ -52,7 +37,7 @@ public class WSChartDefinition extends WSGraphicDefinition {
     }
 
     public LimitsResults applyLimits(DataSet dataSet) {
-        LimitsResults limitsResults;
+        /*LimitsResults limitsResults;
         if (limitsMetadata != null) {
             int count = dataSet.getRows().size();
             limitsResults = new LimitsResults(count > limitsMetadata.getNumber(), count, limitsMetadata.getNumber());             
@@ -62,6 +47,8 @@ public class WSChartDefinition extends WSGraphicDefinition {
         } else {
             limitsResults = super.applyLimits(dataSet);
         }
-        return limitsResults;
-    }
+        return limitsResults;*/
+        // TODO: fix
+        return super.applyLimits(dataSet);
+    }    
 }

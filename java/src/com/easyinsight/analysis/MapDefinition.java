@@ -1,8 +1,7 @@
 package com.easyinsight.analysis;
 
-import com.easyinsight.analysis.AnalysisItemFactory;
-
 import javax.persistence.*;
+import java.util.ArrayList;
 
 /**
  * User: James Boe
@@ -39,8 +38,6 @@ public class MapDefinition extends GraphicDefinition {
 
     protected WSAnalysisDefinition createWSDefinition() {
         WSMapDefinition wsMapDefinition = new WSMapDefinition();
-        wsMapDefinition.setDimensions(AnalysisItemFactory.fromAnalysisFields(getDimensions()));
-        wsMapDefinition.setMeasures(AnalysisItemFactory.fromAnalysisFields(getMeasures()));
         wsMapDefinition.setMapType(mapType);
         wsMapDefinition.setMapDefinitionID(mapDefinitionID);
         return wsMapDefinition;

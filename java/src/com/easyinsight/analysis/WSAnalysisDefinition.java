@@ -8,6 +8,8 @@ import com.easyinsight.scrubbing.DataScrub;
 import java.util.*;
 import java.io.Serializable;
 
+import org.jetbrains.annotations.Nullable;
+
 /**
  * User: James Boe
  * Date: Jan 10, 2008
@@ -203,5 +205,45 @@ public abstract class WSAnalysisDefinition implements Serializable {
 
     public List<AnalysisItem> getLimitFields() {
         return new ArrayList<AnalysisItem>();
+    }
+
+    public Map<String, AnalysisItem> createStructure() {
+        Map<String, AnalysisItem> structure = new HashMap<String, AnalysisItem>();
+        createReportStructure(structure);
+        return structure;
+    }
+
+    protected abstract void createReportStructure(Map<String, AnalysisItem> structure);
+
+    public abstract void populateFromReportStructure(Map<String, AnalysisItem> structure);
+
+    @Nullable
+    protected AnalysisItem firstItem(String key, Map<String, AnalysisItem> structure) {
+        String compositeKey = key + "-" + 0;
+        return structure.get(compositeKey);
+    }
+
+    protected List<AnalysisItem> items(String key, Map<String, AnalysisItem> structure) {
+        List<AnalysisItem> items = new ArrayList<AnalysisItem>();
+        boolean found = true;
+        int i = 0;
+        while (found) {
+            String compositeKey = key + "-" + i;
+            AnalysisItem value = structure.get(compositeKey);
+            if (value == null) {
+                found = false;
+            } else {
+                items.add(value);
+            }
+            i++;
+        }
+        return items;
+    }
+
+    protected void addItems(String key, List<AnalysisItem> items, Map<String, AnalysisItem> structure) {
+        for (int i = 0; i < items.size(); i++) {
+            String compositeKey = key + "-" + i;
+            structure.put(compositeKey, items.get(i));
+        }
     }
 }

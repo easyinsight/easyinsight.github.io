@@ -11,9 +11,9 @@ import java.util.*;
  */
 public class WSCrosstabDefinition extends WSAnalysisDefinition {
 
-    private Collection<AnalysisItem> columns;
-    private Collection<AnalysisItem> rows;
-    private Collection<AnalysisItem> measures;
+    private List<AnalysisItem> columns;
+    private List<AnalysisItem> rows;
+    private List<AnalysisItem> measures;
     private Long crosstabDefinitionID;
 
     public Long getCrosstabDefinitionID() {
@@ -24,27 +24,27 @@ public class WSCrosstabDefinition extends WSAnalysisDefinition {
         this.crosstabDefinitionID = crosstabDefinitionID;
     }
 
-    public Collection<AnalysisItem> getColumns() {
+    public List<AnalysisItem> getColumns() {
         return columns;
     }
 
-    public void setColumns(Collection<AnalysisItem> columns) {
+    public void setColumns(List<AnalysisItem> columns) {
         this.columns = columns;
     }
 
-    public Collection<AnalysisItem> getRows() {
+    public List<AnalysisItem> getRows() {
         return rows;
     }
 
-    public void setRows(Collection<AnalysisItem> rows) {
+    public void setRows(List<AnalysisItem> rows) {
         this.rows = rows;
     }
 
-    public Collection<AnalysisItem> getMeasures() {
+    public List<AnalysisItem> getMeasures() {
         return measures;
     }
 
-    public void setMeasures(Collection<AnalysisItem> measures) {
+    public void setMeasures(List<AnalysisItem> measures) {
         this.measures = measures;
     }
 
@@ -58,5 +58,17 @@ public class WSCrosstabDefinition extends WSAnalysisDefinition {
         AnalysisItems.addAll(rows);
         AnalysisItems.addAll(measures);
         return AnalysisItems;
+    }
+
+    protected void createReportStructure(Map<String, AnalysisItem> structure) {
+        addItems("column", getColumns(), structure);
+        addItems("row", getRows(), structure);
+        addItems("measure", getMeasures(), structure);
+    }
+
+    public void populateFromReportStructure(Map<String, AnalysisItem> structure) {
+        setColumns(items("column", structure));
+        setRows(items("row", structure));
+        setMeasures(items("measure", structure));
     }
 }

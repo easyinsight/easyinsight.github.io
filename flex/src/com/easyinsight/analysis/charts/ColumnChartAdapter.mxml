@@ -5,7 +5,8 @@
 	</mx:Metadata>
 	<mx:Script>
 		<![CDATA[
-            import com.easyinsight.skin.CustomChartRendererFactory;
+        import com.easyinsight.analysis.ColumnChartDefinition;
+import com.easyinsight.skin.CustomChartRendererFactory;
 			import com.easyinsight.analysis.SortableAxisTitleFactory;
 			import com.easyinsight.analysis.AnalysisItem;
             import mx.events.FlexEvent;
@@ -155,20 +156,20 @@
 				}
 			}
 
-			override public function dataChange(dataSet:ArrayCollection, dimensions:Array, measures:Array):void {
+			public function onChange(dataSet:ArrayCollection, definition:ColumnChartDefinition):void {
 
 				createChart();
 
-				if (measures.length == 1) {
-					measureFormatter = measures[0].getFormatter();
-					var conditionRenderer:ConditionRenderer = measures[0].createClientRenderer();
-					if (conditionRenderer.hasCustomColor()) {
-						customColors = true;
-						this.conditionRenderer = conditionRenderer;
-					}
-				}
+                var columnChartDef:ColumnChartDefinition = definition as ColumnChartDefinition;
 
-				var newXAxisItem:AnalysisItem = dimensions[0];
+                measureFormatter = columnChartDef.measure.getFormatter();
+                var conditionRenderer:ConditionRenderer = columnChartDef.measure..createClientRenderer();
+                if (conditionRenderer.hasCustomColor()) {
+                    customColors = true;
+                    this.conditionRenderer = conditionRenderer;
+                }
+
+				var newXAxisItem:AnalysisItem = columnChartDef.xAxis;
 				if (xAxisItem == null || newXAxisItem.key.createString() != xAxisItem.key.createString()) {
 					xAxisItem = newXAxisItem;
                     if (sortable) {
@@ -176,7 +177,7 @@
                     }
 				}
 
-				var newYAxisItem:AnalysisItem = measures[0];
+				var newYAxisItem:AnalysisItem = columnChartDef.measure;
 				if (yAxisItem == null || newYAxisItem.key.createString() != yAxisItem.key.createString()) {
 					yAxisItem = newYAxisItem;
                     if (sortable) {
@@ -184,27 +185,27 @@
                     }
 				}
 
-				var newXField:String = dimensions[0].key.createString();
+				var newXField:String = newXAxisItem.key.createString();
 				if (newXField != xField) {
 					xField = newXField;
 					xAxis.categoryField = xField;
 					columnSeries.xField = xField;
 				}
 
-				var newXAxisTitle:String = dimensions[0].display;
+				var newXAxisTitle:String = newXAxisItem.display;
 				if (newXAxisTitle != xAxisTitle) {
 					xAxisTitle = newXAxisTitle;
 					xAxis.title = xAxisTitle;
 					columnSeries.displayName = xAxisTitle;
 				}
 
-				var newYField:String = measures[0].key.createString();
+				var newYField:String = newYAxisItem.key.createString();
 				if (newYField != yField) {
 					yField = newYField;
 					columnSeries.yField = yField;
 				}
 
-				var newYAxisTitle:String = measures[0].display;
+				var newYAxisTitle:String = newYAxisItem.display;
 				if (newYAxisTitle != yAxisTitle) {
 					yAxisTitle = newYAxisTitle;
 					yAxis.title = yAxisTitle;

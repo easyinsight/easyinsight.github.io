@@ -7,7 +7,20 @@
 		<![CDATA[
 			import com.easyinsight.analysis.AnalysisStateChangeEvent;
 			import com.easyinsight.analysis.charts.ChartTypes;
-			import mx.events.MenuEvent;
+            import com.easyinsight.analysis.charts.bubble.BubbleChartController;
+            import com.easyinsight.analysis.charts.plot.PlotChartController;
+            import com.easyinsight.analysis.charts.twoaxisbased.area.Area3DChartController;
+            import com.easyinsight.analysis.charts.twoaxisbased.area.AreaChartController;
+            import com.easyinsight.analysis.charts.twoaxisbased.line.Line3DChartController;
+            import com.easyinsight.analysis.charts.twoaxisbased.line.LineChartController;
+            import com.easyinsight.analysis.charts.xaxisbased.column.Column3DChartController;
+            import com.easyinsight.analysis.charts.xaxisbased.column.ColumnChartController;
+            import com.easyinsight.analysis.charts.xaxisbased.pie.Pie3DChartController;
+            import com.easyinsight.analysis.charts.xaxisbased.pie.PieChartController;
+            import com.easyinsight.analysis.charts.yaxisbased.bar.Bar3DChartController;
+            import com.easyinsight.analysis.charts.yaxisbased.bar.BarChartController;
+            import com.easyinsight.analysis.maps.MapController;
+import mx.events.MenuEvent;
 			
 			[Bindable]
             [Embed(source="../../../../assets/table.png")]
@@ -40,32 +53,63 @@
 			
 			private function itemClickHandler(event:MenuEvent):void {
                 event.currentTarget.label= event.label;
-                var state:String = event.item.@state;
-                var subStateString:String = event.item.@subState;
-                var subState:int = subStateString == "" ? 0 : int(subStateString);
-                dispatchEvent(new AnalysisStateChangeEvent(state, subState)); 
+                var controllerClassName:String = event.item.@controller;
+                var controllerClass:Class = Class(getDefinitionByName(controllerClassName));
+                var controller:IReportController = new controllerClass();
+                dispatchEvent(new AnalysisStateChangeEvent(controller)); 
             }
             
             public function set selectedLabel(selectedLabel:String):void {
             	p2.label = selectedLabel;          	
             }
+
+            private function blah():void {
+                var columnChartController:ColumnChartController;
+                var column3DChartController:Column3DChartController;
+                var barChartController:BarChartController;
+                var bar3DChartController:Bar3DChartController;
+                var pieChartController:PieChartController;
+                var pie3DChartController:Pie3DChartController;
+                var lineChartController:LineChartController;
+                var line3DChartController:Line3DChartController;
+                var areaChartController:AreaChartController;
+                var area3DChartController:Area3DChartController;
+                var plotChartController:PlotChartController;
+                var bubble3DChartController:BubbleChartController;
+                var mapController:MapController;
+            }
 		]]>
 	</mx:Script>
 	  <mx:XMLList id="all">
         <node label="Grid        " icon="{crosstabIcon}">
-        	<node label="List" state="" icon="{listIcon}"/>
+        	<node label="List" icon="{listIcon}" controller="com.easyinsight.analysis.list.ListController"/>
         	<node label="Crosstab" state="Crosstab" icon="{crosstabIcon}"/>
         </node>
         <node label="Chart" icon="">
-        	<node label="Column" state="BasicChart" subState="{ChartTypes.COLUMN_FAMILY}" icon=""/>
-        	<node label="Bar" state="BasicChart" subState="{ChartTypes.BAR_FAMILY}" icon=""/>
-        	<node label="Line" state="BasicChart" subState="{ChartTypes.LINE_FAMILY}" icon=""/>
-        	<node label="Pie" state="BasicChart" subState="{ChartTypes.PIE_FAMILY}" icon=""/>
-        	<node label="Plot" state="BasicChart" subState="{ChartTypes.PLOT_FAMILY}" icon=""/>
-        	<node label="Bubble" state="BasicChart" subState="{ChartTypes.BUBBLE_FAMILY}" icon=""/>
-        	<node label="Area" state="BasicChart" subState="{ChartTypes.AREA_FAMILY}" icon=""/>
+        	<node label="Column">
+                <node label="2D Column" icon="" controller="com.easyinsight.analysis.charts.xaxisbased.column.ColumnChartController"/>
+                <node label="3D Column" icon="" controller="com.easyinsight.analysis.charts.xaxisbased.column.Column3DChartController"/>
+            </node>
+        	<node label="Bar" icon="">
+                <node label="2D Bar" icon="" controller="com.easyinsight.analysis.charts.yaxisbased.bar.BarChartController"/>
+                <node label="3D Bar" icon="" controller="com.easyinsight.analysis.charts.yaxisbased.bar.Bar3DChartController"/>
+            </node>
+            <node label="Line" icon="">
+                <node label="2D Line" icon="" controller="com.easyinsight.analysis.charts.twoaxisbased.line.LineChartController"/>
+                <node label="3D Line" icon="" controller="com.easyinsight.analysis.charts.twoaxisbased.line.Line3DChartController"/>
+            </node>
+            <node label="Pie" icon="">
+                <node label="2D Pie" icon="" controller="com.easyinsight.analysis.charts.xaxisbased.pie.PieChartController"/>
+                <node label="3D Pie" icon="" controller="com.easyinsight.analysis.charts.xaxisbased.pie.Pie3DChartController"/>
+            </node>
+        	<node label="Plot" icon="" controller="com.easyinsight.analysis.charts.plot.PlotChartController"/>
+        	<node label="Bubble" icon="" controller="com.easyinsight.analysis.charts.bubble.BubbleChartController"/>
+            <node label="Area" icon="">
+                <node label="2D Area" icon="" controller="com.easyinsight.analysis.charts.twoaxisbased.area.AreaChartController"/>
+                <node label="3D Area" icon="" controller="com.easyinsight.analysis.charts.twoaxisbased.area.Area3DChartController"/>
+            </node>
         </node>
-        <node label="Map" icon="" state="ILogMap"/>
+        <node label="Map" icon="" controller="com.easyinsight.analysis.maps.MapController"/>
         <node label="Split" icon="" state="Split"/>
     </mx:XMLList>
     <mx:XMLList id="splitSource">        

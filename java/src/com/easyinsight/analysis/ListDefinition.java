@@ -1,7 +1,6 @@
 package com.easyinsight.analysis;
 
 import javax.persistence.*;
-import java.util.List;
 import java.util.ArrayList;
 
 /**
@@ -18,13 +17,13 @@ public class ListDefinition extends AnalysisDefinition {
     @Column(name="list_definition_id")
     private Long listDefinitionID;
 
-    @OneToMany(cascade=CascadeType.ALL)
+    /*@OneToMany(cascade=CascadeType.ALL)
     //@JoinColumn(name="analysis_id", nullable = false)
     //private List<ListField> columns;
     @JoinTable(name="analysis_to_analysis_item",
         joinColumns = @JoinColumn(name="analysis_id"),
         inverseJoinColumns = @JoinColumn(name="analysis_item_id"))
-    private List<AnalysisItem> columns;
+    private List<AnalysisItem> columns;    */
 
     @OneToOne(cascade=CascadeType.ALL)
     @JoinColumn(name="list_limits_metadata_id")
@@ -49,7 +48,7 @@ public class ListDefinition extends AnalysisDefinition {
         this.listLimitsMetadata = listLimitsMetadata;
     }
 
-    public List<AnalysisItem> getColumns() {
+    /*public List<AnalysisItem> getColumns() {
         return columns;
     }
 
@@ -58,7 +57,7 @@ public class ListDefinition extends AnalysisDefinition {
             columns = new ArrayList<AnalysisItem>();
         }
         this.columns = new ArrayList<AnalysisItem>(columns);
-    }
+    }*/
 
     public boolean isShowRowNumbers() {
         return showRowNumbers;
@@ -70,8 +69,6 @@ public class ListDefinition extends AnalysisDefinition {
 
     public WSAnalysisDefinition createWSDefinition() {
         WSListDefinition listDefinition = new WSListDefinition();
-        processItems(columns);
-        listDefinition.setColumns(new ArrayList<AnalysisItem>(columns));
         listDefinition.setListDefinitionID(listDefinitionID);
         listDefinition.setListLimitsMetadata(listLimitsMetadata);
         listDefinition.setShowLineNumbers(showRowNumbers);
@@ -81,11 +78,6 @@ public class ListDefinition extends AnalysisDefinition {
     public AnalysisDefinition clone() throws CloneNotSupportedException {
         ListDefinition listDefinition = (ListDefinition) super.clone();
         listDefinition.setListDefinitionID(null);
-        List<AnalysisItem> newColumns = new ArrayList<AnalysisItem>();
-        for (AnalysisItem analysisItem : columns) {
-            newColumns.add(analysisItem.clone());
-        }
-        listDefinition.setColumns(newColumns);
         if (listLimitsMetadata != null) {
             listDefinition.getListLimitsMetadata().setLimitsMetadataID(0);
         }

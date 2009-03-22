@@ -9,45 +9,6 @@
                      xmlns:feed="com.easyinsight.administration.feed.*"
                      xmlns:analysis1="com.easyinsight.administration.analysis.*"  backgroundImage="{background2}" backgroundSize="100%"
                      paddingTop="10" paddingLeft="10" paddingRight="10" paddingBottom="10" backgroundColor="#DCE2F8">
-    <core:states>
-        <mx:State name="BasicChart">
-            <mx:RemoveChild target="{listView}"/>
-            <mx:AddChild relativeTo="{dataControlVBox}" creationPolicy="all">
-                <analysis:BasicChartView dataService="{dataService}" id="chartView"
-                                         analysisDefinition="{analysisDefinition}">
-                </analysis:BasicChartView>
-            </mx:AddChild>
-
-        </mx:State>
-        <mx:State name="Crosstab">
-            <mx:RemoveChild target="{listView}"/>
-            <mx:AddChild relativeTo="{dataControlVBox}" creationPolicy="all">
-                <ns1:CrosstabView id="crosstabView" dataService="{dataService}"
-                                  analysisDefinition="{analysisDefinition}"/>
-            </mx:AddChild>
-        </mx:State>
-        <mx:State name="YahooMap">
-            <mx:RemoveChild target="{listView}"/>
-            <mx:AddChild relativeTo="{dataControlVBox}" creationPolicy="all">
-                <map:YahooMapView id="yahooMapView" dataService="{dataService}"
-                                  analysisDefinition="{analysisDefinition}"/>
-            </mx:AddChild>
-        </mx:State>
-        <mx:State name="ILogMap">
-            <mx:RemoveChild target="{listView}"/>
-            <mx:AddChild relativeTo="{dataControlVBox}" creationPolicy="all">
-                <map:ILogMapView id="ilogMap" dataService="{dataService}" analysisDefinition="{analysisDefinition}"/>
-            </mx:AddChild>
-        </mx:State>
-        <mx:State name="Split">
-            <mx:RemoveChild target="{listView}"/>
-            <mx:AddChild relativeTo="{dataControlVBox}" creationPolicy="all">
-                <analysis:SplitDataView id="splitView" dataService="{dataService}"
-                                        analysisDefinition="{analysisDefinition}"
-                                        analysisDefinitionChange="onAnalysisDefinitionChange(event)"/>
-            </mx:AddChild>
-        </mx:State>
-    </core:states>
     <mx:Script>
 		<![CDATA[
 import com.easyinsight.administration.feed.DeleteAnalysisItemEvent;
@@ -55,7 +16,10 @@ import com.easyinsight.analysis.AnalysisChangedEvent;
         import com.easyinsight.analysis.ChildFilterCreationEvent;
         import com.easyinsight.analysis.AnalysisDefinitionChangeEvent;
         import com.easyinsight.analysis.AnalysisStateChangeEvent;
-        import com.easyinsight.analysis.scrub.LookupTableScrubListWindow;
+import com.easyinsight.analysis.DataViewFactory;
+import com.easyinsight.analysis.IReportController;
+import com.easyinsight.analysis.list.ListController;
+import com.easyinsight.analysis.scrub.LookupTableScrubListWindow;
         import com.easyinsight.analysis.scrub.TextReplaceScrubListWindow;
         import com.easyinsight.analysis.NewBlankFeedWindow;
         import com.easyinsight.analysis.scrub.LookupTableScrubWindow;
@@ -158,7 +122,7 @@ import mx.collections.SortField;
         private var feedMetadata:FeedMetadata;
 
         [Bindable]
-        private var dataView:DataView;
+        private var dataView:DataViewFactory;
 
         private var commandProcessor:CommandProcessor;
 
@@ -207,7 +171,7 @@ import mx.collections.SortField;
             }
             dataView.availableFields = availableFields;
             Alert.show("The underlying data to this data source has been changed, so some fields may have been removed from your filters or report.");
-            dataView.requestData();
+            dataView.retrieveData();
         }
 
         public function commandStateChange(newState:String):void {
@@ -219,68 +183,35 @@ import mx.collections.SortField;
         }
 
         private function onAnalysisStateChange(event:AnalysisStateChangeEvent):void {
-            if (currentState != event.newState) {
-                currentState = event.newState;
-                if (event.newState == "") {
-                    dataView = listView;
-                } else if (event.newState == "BasicChart") {
-                    dataView = chartView;
-                } else if (event.newState == "Crosstab") {
-                    dataView = crosstabView;
-                } else if (event.newState == "YahooMap") {
-                    dataView = yahooMapView;
-                } else if (event.newState == "ILogMap") {
-                    dataView = ilogMap;
-                } else if (event.newState == "Split") {
-                    dataView = splitView;
-                }
-                dataView.availableFields = availableFields;
-                // converting the analysis definition
-                analysisDefinition = dataView.fromExistingDefinition(analysisDefinition);
-                dataView.analysisDefinition = analysisDefinition;
-                dataView.initializeToDefinition();
-            }
-            //this.subState = event.subState;
-            this.dataView.subState = event.subState;
+            var controller:IReportController = event.controller;
+            loadController(controller);
         }
 
-
-        private function onAnalysisDefinitionChange(event:AnalysisDefinitionChangeEvent):void {
-            var analysisDefinition:AnalysisDefinition = event.analysisDefinition;
-            this.analysisDefinition = analysisDefinition;
-            if (analysisDefinition.getDataFeedType() == "Crosstab") {
-                selectedMode = 2;
-                this.currentState = "Crosstab";
-                dataView = crosstabView;
-            } else if (analysisDefinition.getDataFeedType() == "List") {
-                selectedMode = 0;
-                this.currentState = "";
-                dataView = listView;
-            } else if (analysisDefinition.getDataFeedType() == "Chart") {
-                selectedMode = 1;
-                this.currentState = "BasicChart";
-                dataView = chartView;
-            } else if (analysisDefinition.getDataFeedType() == "Map") {
-                selectedMode = 4;
-                this.currentState = "ILogMap";
-                dataView = ilogMap;
-            } else if (analysisDefinition.getDataFeedType() == "Yahoo Map") {
-                selectedMode = 3;
-                this.currentState = "YahooMap";
-                dataView = yahooMapView;
+        private function loadController(controller:IReportController):void {
+            var dataViewFactory:DataViewFactory = controller.createDataView();
+            if (dataView != null) {
+                dataView.removeEventListener(DataServiceLoadingEvent.LOADING_STARTED, startLoading);
+                dataView.removeEventListener(DataServiceLoadingEvent.LOADING_STOPPED, stopLoading);
+                dataControlVBox.removeChild(dataView);
             }
-            dataView.analysisDefinition = analysisDefinition;
-            dataView.availableFields = availableFields;
-            analysisState.selectedLabel = analysisDefinition.getLabel();
-            dataView.initializeToDefinition();
+            if (analysisDefinition == null) {
+                this.analysisDefinition = dataViewFactory.createNewDefinition();
+                analysisDefinition.canSaveDirectly = true;
+                analysisDefinition.dataFeedID = dataService.dataFeedID;
+            } else {
+                analysisDefinition = dataViewFactory.fromExistingDefinition(analysisDefinition);
+                dataViewFactory.analysisDefinition = analysisDefinition;
+            }
+            dataView = dataViewFactory;
+            dataView.addEventListener(DataServiceLoadingEvent.LOADING_STARTED, startLoading);
+            dataView.addEventListener(DataServiceLoadingEvent.LOADING_STOPPED, stopLoading);
+            dataControlVBox.addChild(dataViewFactory);
+            dataViewFactory.retrieveData();
         }
 
         public function newAnalysis():void {
-            dataView = listView;
-            this.analysisDefinition = dataView.createNewDefinition();
-            analysisDefinition.canSaveDirectly = true;
-            dataView.analysisDefinition = this.analysisDefinition;
-            this.analysisDefinition.dataFeedID = dataService.dataFeedID;
+            var controller:IReportController = new ListController();
+            loadController(controller);
         }
 
         public function getAnalysisDefinition():AnalysisDefinition {
@@ -322,32 +253,9 @@ import mx.collections.SortField;
                 BrowserManager.getInstance().setFragment(fragmentString);
             } else {
                 //this.title = analysisDefinition.name;
-                if (analysisDefinition.getDataFeedType() == "Crosstab") {
-                    selectedMode = 2;
-                    //outputTypeSelector.selectedIndex = 2;
-                    this.currentState = "Crosstab";
-                    dataView = crosstabView;
-                } else if (analysisDefinition.getDataFeedType() == "List") {
-                    selectedMode = 0;
-                    //outputTypeSelector.selectedIndex = 0;
-                    this.currentState = "";
-                    dataView = listView;
-                } else if (analysisDefinition.getDataFeedType() == "Chart") {
-                    selectedMode = 1;
-                    //outputTypeSelector.selectedIndex = 1;
-                    this.currentState = "BasicChart";
-                    dataView = chartView;
-                } else if (analysisDefinition.getDataFeedType() == "Map") {
-                    selectedMode = 4;
-                    //outputTypeSelector.selectedIndex = 4;
-                    this.currentState = "ILogMap";
-                    dataView = ilogMap;
-                } else if (analysisDefinition.getDataFeedType() == "Yahoo Map") {
-                    selectedMode = 3;
-                    //outputTypeSelector.selectedIndex = 3;
-                    this.currentState = "YahooMap";
-                    dataView = yahooMapView;
-                }
+                var controllerClass:Class = Class(getDefinitionByName(analysisDefinition.controller));
+                var controller:IReportController = new controllerClass();
+                loadController(controller);
 
                 analysisState.selectedLabel = analysisDefinition.getLabel();
 
@@ -376,7 +284,6 @@ import mx.collections.SortField;
                 var feedFragmentString:String = URLUtil.objectToString(feedFragmentObject);
                 BrowserManager.getInstance().setFragment(feedFragmentString);
                 createFilterBoxes(analysisDefinition.filterDefinitions.toArray());
-                dataView.initializeToDefinition();
             }
             dataView.availableFields = availableFields;
         }
@@ -463,7 +370,7 @@ import mx.collections.SortField;
         private function transformsUpdated(event:TransformsUpdatedEvent):void {
             dispatchEvent(new AnalysisChangedEvent());
             analysisDefinition.filterDefinitions = event.filterDefinitions;
-            dataView.requestData();
+            dataView.retrieveData();
         }
 
         private function search():void {
@@ -572,11 +479,11 @@ import mx.collections.SortField;
         private function bought(event:ResultEvent):void {
             this._previewMode = false;
             this.dataService.previewMode = false;
-            dataView.requestData();
+            dataView.retrieveData();
         }
 
         private function refresh():void {
-            dataView.requestData();
+            dataView.retrieveData();
         }
 
         private function newTextReplaceScrub():void {
@@ -614,18 +521,18 @@ import mx.collections.SortField;
         private function scrubAdded(event:DataScrubEvent):void {
             dispatchEvent(new AnalysisChangedEvent());
             getAnalysisDefinition().dataScrubs.addItem(event.dataScrub);
-            dataView.requestData();
+            dataView.retrieveData();
         }
 
         private function scrubUpdated(event:DataScrubEvent):void {
             dispatchEvent(new AnalysisChangedEvent());
-            dataView.requestData();
+            dataView.retrieveData();
         }
 
         private function scrubDeleted(event:DataScrubEvent):void {
             dispatchEvent(new AnalysisChangedEvent());
             getAnalysisDefinition().dataScrubs.removeItemAt(getAnalysisDefinition().dataScrubs.getItemIndex(event.dataScrub));
-            dataView.requestData();
+            dataView.retrieveData();
         }
 
         private function createCalculation():void {
@@ -659,7 +566,7 @@ import mx.collections.SortField;
 
         private function exportExcel():void {
             dataView.updateExportMetadata();
-            new ExcelCreator().exportExcel(dataView.getAnalysisDefinition());
+            new ExcelCreator().exportExcel(analysisDefinition);
         }
 
         public function cleanup():void {
@@ -922,9 +829,7 @@ import mx.collections.SortField;
                     </mx:DataGrid>
                 </mx:VBox>
             </mx:VBox>
-            <mx:VBox width="100%" height="100%" id="dataControlVBox">
-                <analysis:ListView dataService="{dataService}" id="listView" analysisDefinition="{analysisDefinition}"/>
-            </mx:VBox>
+            <mx:VBox width="100%" height="100%" id="dataControlVBox"/>
         </mx:HDividedBox>
     </mx:VBox>
     <mx:StringValidator id="analysisNameValidator" source="{analysisNameInput}" property="text" minLength="3"

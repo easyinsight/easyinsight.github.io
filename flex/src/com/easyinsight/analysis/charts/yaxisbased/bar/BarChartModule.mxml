@@ -1,0 +1,252 @@
+<?xml version="1.0" ?>
+<mx:Module xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:analysis="com.easyinsight.analysis.*" implements="com.easyinsight.analysis.IReportRenderer"
+        width="100%" height="100%">
+    <mx:Script><![CDATA[
+        import com.easyinsight.analysis.AnalysisDefinition;
+
+        import com.easyinsight.analysis.AnalysisItem;
+        import com.easyinsight.analysis.SortableAxisTitleFactory;
+        import com.easyinsight.analysis.conditions.ConditionRenderer;
+
+        import com.easyinsight.filtering.FilterRawData;
+        import com.easyinsight.skin.CustomChartRendererFactory;
+
+        import mx.binding.utils.BindingUtils;
+        import mx.charts.AxisRenderer;
+        import mx.charts.CategoryAxis;
+        import mx.charts.ChartItem;
+        import mx.charts.BarChart;
+        import mx.charts.LinearAxis;
+        import mx.charts.chartClasses.IAxis;
+        import mx.charts.chartClasses.Series;
+        import mx.charts.series.BarSeries;
+        import mx.charts.series.items.BarSeriesItem;
+        import mx.collections.ArrayCollection;
+        import mx.events.FlexEvent;
+        import mx.formatters.Formatter;
+        import mx.graphics.BitmapFill;
+        import mx.graphics.IFill;
+
+        [Bindable]
+        private var graphData:ArrayCollection = new ArrayCollection();
+
+        [Bindable]
+        private var xAxisTitle:String = "";
+
+        [Bindable]
+        private var yAxisTitle:String = "";
+
+        [Bindable]
+        private var xAxisItem:AnalysisItem;
+        [Bindable]
+        private var yAxisItem:AnalysisItem;
+
+        private var xField:String;
+        [Bindable]
+        private var _yField:String;
+
+        private var measureFormatter:Formatter;
+
+        private var customColors:Boolean = false;
+        private var conditionRenderer:ConditionRenderer;
+
+        private var barChart:BarChart;
+
+        private var xAxis:LinearAxis;
+        private var yAxis:CategoryAxis;
+
+        private var xAxisTitleRendererFactory:SortableAxisTitleFactory;
+
+        private var yAxisTitleRendererFactory:SortableAxisTitleFactory;
+
+        private var barSeries:BarSeries;
+
+        private var bgFills:Array;
+
+        private var sortable:Boolean = true;
+        private var selectable:Boolean = true;
+
+        [Bindable]
+        [Embed(source="../../../../../../../assets/water4.JPG")]
+        private var standardFill:Class;
+
+        [Bindable]
+        [Embed(source="../../../../../../../assets/magenta.jpg")]
+        private var selectedFill:Class;
+
+        [Bindable]
+        [Embed(source="../../../../../../../assets/darkwater.jpg")]
+        private var rolloverFill:Class;
+
+        [Bindable]
+        public function get yField():String {
+            return _yField;
+        }
+
+        public function set yField(val:String):void {
+            _yField = val;
+            dispatchEvent(new FlexEvent(FlexEvent.DATA_CHANGE));
+        }
+
+        override protected function createChildren():void {
+            super.createChildren();
+            bgFills = [];
+            for (var i:int = 0; i < 15; i++) {
+                var bgFill:BitmapFill = new BitmapFill();
+                bgFill.source = standardFill;
+                bgFill.originX = Math.random() * 60;
+                bgFill.originY = Math.random() * 60;
+                bgFills.push(bgFill);
+            }
+        }
+
+        private function createChart():void {
+            if (barChart == null) {
+
+                // define the chart itself
+
+                barChart = new BarChart();
+                barChart.percentHeight = 100;
+                barChart.percentWidth = 100;
+                barChart.showDataTips = true;
+                if (selectable) {
+                    barChart.selectionMode = "multiple";
+                }
+                barChart.dataProvider = graphData;
+
+                // define the X axis
+
+                yAxis = new CategoryAxis();
+                BindingUtils.bindProperty(yAxis, "categoryField", this, "yField");
+                //xAxis.categoryField = xField;
+                yAxis.dataProvider = graphData;
+                yAxis.title = yAxisTitle;
+                barChart.verticalAxis = yAxis;
+                var axisRenderer:AxisRenderer = new AxisRenderer();
+                axisRenderer.axis = yAxis;
+                yAxisTitleRendererFactory = new SortableAxisTitleFactory(yAxisItem, false);
+                axisRenderer.titleRenderer = yAxisTitleRendererFactory;
+                axisRenderer.placement = "left";
+                barChart.verticalAxisRenderers = [ axisRenderer ];
+
+                // define the Y axis
+
+                xAxis = new LinearAxis();
+                xAxis.title = xAxisTitle;
+                xAxis.labelFunction = renderAxis;
+                barChart.horizontalAxis = xAxis;
+                var xAxisRenderer:AxisRenderer = new AxisRenderer();
+                xAxisRenderer.axis = xAxis;
+                xAxisTitleRendererFactory = new SortableAxisTitleFactory(xAxisItem, true);
+                xAxisRenderer.titleRenderer = xAxisTitleRendererFactory;
+                xAxisRenderer.placement = "bottom";
+                barChart.horizontalAxisRenderers = [ xAxisRenderer ];
+
+                // create the data series
+
+                barSeries = new BarSeries();
+                barSeries.setStyle("itemRenderer", new CustomChartRendererFactory(selectedFill, rolloverFill));
+                barSeries.setStyle("stroke", s1);
+                barSeries.fillFunction = customFill;
+                barSeries.xField = xField;
+                barSeries.yField = yField;
+                barSeries.labelFunction = renderChartLabel;
+                barSeries.dataProvider = graphData;
+                barSeries.displayName = yAxisTitle;
+                barSeries.setStyle("showDataEffect", interpolateIn);
+                //barSeries.setStyle("fills", standardBlue);
+                var mySeries:Array = new Array();
+                barChart.series = mySeries;
+                mySeries.push(barSeries);
+                addChild(barChart);
+            }
+        }
+
+        private function renderChartLabel(element:ChartItem, series:Series):String {
+            var barSeriesItem:BarSeriesItem = element as BarSeriesItem;
+            return measureFormatter.format(barSeriesItem.xNumber);
+        }
+
+        private function customFill(element:ChartItem, index:Number):IFill {
+            return bgFills[index % 15];
+        }
+
+        private function renderAxis(labelValue:Object, previousValue:Object, axis:IAxis):String {
+            return measureFormatter.format(labelValue);
+        }
+
+        public function createFilterRawData():FilterRawData {
+            var filterRawData:FilterRawData = new FilterRawData();
+            for (var i:int = 0; i < barChart.selectedChartItems.length; i++) {
+                var obj:ChartItem = barChart.selectedChartItems[i];
+                filterRawData.addPair(xAxisItem, obj.item[xAxisItem.key.createString()]);
+            }
+            return filterRawData;
+        }
+
+        public function renderReport(dataSet:ArrayCollection, analysisDefinition:AnalysisDefinition, clientProcessorMap:Object):void {
+            var barChartDef:BarChartDefinition = analysisDefinition as BarChartDefinition;
+
+            yField = barChartDef.yaxis.qualifiedName();
+            createChart();
+
+            measureFormatter = barChartDef.measure.getFormatter();
+            var conditionRenderer:ConditionRenderer = barChartDef.measure.createClientRenderer();
+            if (conditionRenderer.hasCustomColor()) {
+                customColors = true;
+                this.conditionRenderer = conditionRenderer;
+            }
+
+            var newXAxisItem:AnalysisItem = barChartDef.measure;
+            if (xAxisItem == null || newXAxisItem.qualifiedName() != xAxisItem.qualifiedName()) {
+                xAxisItem = newXAxisItem;
+                if (sortable) {
+                    xAxisTitleRendererFactory.analysisItem = xAxisItem;
+                }
+            }
+
+            var newYAxisItem:AnalysisItem = barChartDef.yaxis;
+            if (yAxisItem == null || newYAxisItem.qualifiedName() != yAxisItem.qualifiedName()) {
+                yAxisItem = newYAxisItem;
+                if (sortable) {
+                    yAxisTitleRendererFactory.analysisItem = yAxisItem;
+                }
+            }
+
+            var newXField:String = newXAxisItem.qualifiedName();
+            if (newXField != xField) {
+                xField = newXField;
+                barSeries.xField = xField;
+            }
+
+            var newXAxisTitle:String = newXAxisItem.display;
+            if (newXAxisTitle != xAxisTitle) {
+                xAxisTitle = newXAxisTitle;
+                xAxis.title = xAxisTitle;
+            }
+
+            var newYField:String = newYAxisItem.qualifiedName();
+            if (newYField != yField) {
+                yField = newYField;
+                yAxis.categoryField = yField;
+                barSeries.yField = yField;
+            }
+
+            var newYAxisTitle:String = newYAxisItem.display;
+            if (newYAxisTitle != yAxisTitle) {
+                yAxisTitle = newYAxisTitle;
+                yAxis.title = yAxisTitle;
+                barSeries.displayName = yAxisTitle;
+            }
+
+            barChart.dataProvider = dataSet;
+            barSeries.dataProvider = dataSet;
+            yAxis.dataProvider = dataSet;
+            graphData = dataSet;
+        }
+
+        public function updateExportMetadata():void {
+        }]]></mx:Script>
+    <mx:Stroke id="s1" color="#2A7E93" weight="2"/>
+    <mx:SeriesInterpolate id="interpolateIn" duration="1000"/>
+</mx:Module>

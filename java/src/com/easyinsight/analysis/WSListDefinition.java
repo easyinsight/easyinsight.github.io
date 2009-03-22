@@ -1,6 +1,5 @@
 package com.easyinsight.analysis;
 
-import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.dataset.LimitsResults;
 
@@ -60,6 +59,14 @@ public class WSListDefinition extends WSAnalysisDefinition {
         }
         columnList.addAll(getLimitFields());
         return columnList;
+    }
+
+    protected void createReportStructure(Map<String, AnalysisItem> structure) {
+        addItems("", getColumns(), structure);
+    }
+
+    public void populateFromReportStructure(Map<String, AnalysisItem> structure) {
+        setColumns(items("", structure));
     }
 
     public LimitsResults applyLimits(DataSet dataSet) {

@@ -7,25 +7,14 @@
 	</mx:Metadata> 
 	<mx:Script>
 		<![CDATA[
-        import com.easyinsight.genredata.ModuleAnalyzeEvent;
-import com.easyinsight.map.YahooMapView;
-        import com.easyinsight.map.ILogMapView;
+        import com.easyinsight.analysis.EmbeddedViewFactory;
+        import com.easyinsight.analysis.IReportController;
 
         import mx.controls.Label;
         import mx.rpc.events.FaultEvent;
 
-        import com.easyinsight.listing.AnalysisDefinitionAnalyzeSource;
-        import com.easyinsight.analysis.AnalysisDefinitionLoadedEvent;
-
         import mx.managers.PopUpManager;
-        import mx.collections.ArrayCollection;
 
-        import com.easyinsight.analysis.FeedMetadata;
-        import com.easyinsight.analysis.ListView;
-        import com.easyinsight.analysis.CrosstabView;
-        import com.easyinsight.analysis.BasicChartView;
-        import com.easyinsight.analysis.DataView;
-        import com.easyinsight.framework.DataService;
         import com.easyinsight.analysis.AnalysisDefinition;
 
         private var definition:AnalysisDefinition;
@@ -33,7 +22,6 @@ import com.easyinsight.map.YahooMapView;
         private var showReturnToList:Boolean;
         [Bindable]
         private var title:String;
-        private var dataView:DataView;
         private var _analysisID:int;
 
         private var titleFunction:Function;
@@ -48,34 +36,16 @@ import com.easyinsight.map.YahooMapView;
 
         private function gotAnalysisDefinition():void {
             this.analysisDefinition = analysisService.openAnalysisDefinition.lastResult as AnalysisDefinition;
+            var controllerClass:Class = Class(getDefinitionByName(this.definition.controller));
+            var controller:IReportController = new controllerClass();
+            var dataViewFactory:EmbeddedViewFactory = controller.createEmbeddedView();
+            dataViewFactory.analysisDefinition = definition;
+            coreVBox.addChild(dataViewFactory);
+            dataViewFactory.retrieveData();
         }
 
         public function set analysisDefinition(definition:AnalysisDefinition):void {
             this.definition = definition;
-            var dataService:DataService = new DataService();
-            dataService.dataFeedID = definition.dataFeedID;
-            var dataView:DataView;
-            if (definition.getDataFeedType() == "Crosstab") {
-                dataView = new CrosstabView();
-            } else if (definition.getDataFeedType() == "Chart") {
-                dataView = new BasicChartView();
-            } else if (definition.getDataFeedType() == "Map") {
-                dataView = new ILogMapView();
-            } else if (definition.getDataFeedType() == "Yahoo Map") {
-                dataView = new YahooMapView();
-            } else {
-                dataView = new ListView();
-            }
-            dataView.visible = false;
-            dataView.showDropAreas = false;
-            dataView.dataService = dataService;
-            dataView.analysisDefinition = definition;
-            this.dataView = dataView;
-            coreVBox.addChild(dataView);
-            dataView.initializeToDefinition();            
-            //dataView.initializeToDefinition();
-            this.title = definition.name;
-            dataService.reloadInitialContent(this, handleFeedMetadata);
         }
 
 
@@ -84,31 +54,11 @@ import com.easyinsight.map.YahooMapView;
             analysisService.openAnalysisDefinition.send(_analysisID);
         }
 
-        private function handleFeedMetadata(feedMetadata:FeedMetadata):void {
-            dataView.availableFields = new ArrayCollection(feedMetadata.fields);
-            dataView.visible = true;
-        }
-
         private function closeThis():void {
             PopUpManager.removePopUp(this);
         }
 
-        private function search():void {
-            trace("searching");
-        }
-
-        private function analyze():void {
-            dispatchEvent(new AnalysisDefinitionLoadedEvent(definition));
-        }
-
-        private function blah():void {
-            /*if (dataView != null) {
-             coreVBox.addChild(dataView);
-             }*/
-        }
-
         private function titleClick():void {
-            dispatchEvent(new ModuleAnalyzeEvent(new AnalysisDefinitionAnalyzeSource(definition)));
         }
 
         private function failure(event:FaultEvent):void {
@@ -130,7 +80,7 @@ import com.easyinsight.map.YahooMapView;
 		<mx:LinkButton label="{title}" click="titleClick()" textDecoration="underline"/>
 		<mx:Button label="Return" click="returnToList()" visible="{showReturnToList}"/>
 	</mx:ApplicationControlBar>	
-	<mx:VBox id="coreVBox" height="100%" width="100%" creationComplete="blah()">
+	<mx:VBox id="coreVBox" height="100%" width="100%">
 		<!-- <mx:HBox width="100%">
 			<mx:Label text="Search:"/>
 			<mx:TextInput change="search()" id="searchInput"/>

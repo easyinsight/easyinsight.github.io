@@ -21,9 +21,9 @@
 
     <target name="compileFlexOptimized">
         <mxmlc file="../src/PrimaryWorkspace.mxml" output="${deployment.path}/PrimaryWorkspace.swf"
-               static-rsls="true">
+               static-rsls="false">
             <load-config filename="../core-optimized-config.xml"/>
-            <!--<runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
+            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
                 <url rsl-url="framework_3.3.0.4852.swz"/>
                 <url rsl-url="framework_3.3.0.4852.swf"/>
             </runtime-shared-library-path>
@@ -36,7 +36,7 @@
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
                 <url rsl-url="rpc_3.3.0.4852.swz"/>
                 <url rsl-url="rpc_3.3.0.4852.swf"/>
-            </runtime-shared-library-path>-->
+            </runtime-shared-library-path>
         </mxmlc>
     </target>
 
@@ -293,6 +293,300 @@
         <mxmlc file="../src/PrimaryWorkspace.mxml" output="${deployment.path}/PrimaryWorkspace.swf"
                static-rsls="true">
             <load-config filename="../riatest-core-config.xml"/>
+        </mxmlc>
+    </target>
+
+    <target name="module.list">
+        <mxmlc file="../src/com/easyinsight/analysis/list/ListModule.mxml" output="${deployment.path}/ListModule.swf"
+               static-rsls="false">
+            <load-config filename="../modules/list-module.xml"/>
+            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
+                <url rsl-url="framework_3.3.0.4852.swz"/>
+                <url rsl-url="framework_3.3.0.4852.swf"/>
+            </runtime-shared-library-path>
+
+            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/datavisualization.swc">
+                <url rsl-url="datavisualization_3.3.0.4852.swz"/>
+                <url rsl-url="datavisualization_3.3.0.4852.swf"/>
+            </runtime-shared-library-path>
+
+            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
+                <url rsl-url="rpc_3.3.0.4852.swz"/>
+                <url rsl-url="rpc_3.3.0.4852.swf"/>
+            </runtime-shared-library-path>
+        </mxmlc>
+    </target>
+
+    <target name="module.columnchart">
+        <mxmlc file="../src/com/easyinsight/analysis/charts/xaxisbased/column/ColumnChartModule.mxml" output="${deployment.path}/ColumnChartModule.swf"
+               static-rsls="false">
+            <load-config filename="../modules/column-chart-module.xml"/>
+            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
+                <url rsl-url="framework_3.3.0.4852.swz"/>
+                <url rsl-url="framework_3.3.0.4852.swf"/>
+            </runtime-shared-library-path>
+
+            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/datavisualization.swc">
+                <url rsl-url="datavisualization_3.3.0.4852.swz"/>
+                <url rsl-url="datavisualization_3.3.0.4852.swf"/>
+            </runtime-shared-library-path>
+
+            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
+                <url rsl-url="rpc_3.3.0.4852.swz"/>
+                <url rsl-url="rpc_3.3.0.4852.swf"/>
+            </runtime-shared-library-path>
+        </mxmlc>
+    </target>
+
+    <target name="module.column3dchart">
+        <mxmlc file="../src/com/easyinsight/analysis/charts/xaxisbased/column/Column3DChartModule.mxml" output="${deployment.path}/Column3DChartModule.swf"
+               static-rsls="false">
+            <load-config filename="../modules/column-3d-chart-module.xml"/>
+            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
+                <url rsl-url="framework_3.3.0.4852.swz"/>
+                <url rsl-url="framework_3.3.0.4852.swf"/>
+            </runtime-shared-library-path>
+
+            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/datavisualization.swc">
+                <url rsl-url="datavisualization_3.3.0.4852.swz"/>
+                <url rsl-url="datavisualization_3.3.0.4852.swf"/>
+            </runtime-shared-library-path>
+
+            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
+                <url rsl-url="rpc_3.3.0.4852.swz"/>
+                <url rsl-url="rpc_3.3.0.4852.swf"/>
+            </runtime-shared-library-path>
+        </mxmlc>
+    </target>
+
+    <target name="module.piechart">
+        <mxmlc file="../src/com/easyinsight/analysis/charts/xaxisbased/pie/PieChartModule.mxml" output="${deployment.path}/PieChartModule.swf"
+               static-rsls="false">
+            <load-config filename="../modules/pie-chart-module.xml"/>
+            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
+                <url rsl-url="framework_3.3.0.4852.swz"/>
+                <url rsl-url="framework_3.3.0.4852.swf"/>
+            </runtime-shared-library-path>
+
+            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/datavisualization.swc">
+                <url rsl-url="datavisualization_3.3.0.4852.swz"/>
+                <url rsl-url="datavisualization_3.3.0.4852.swf"/>
+            </runtime-shared-library-path>
+
+            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
+                <url rsl-url="rpc_3.3.0.4852.swz"/>
+                <url rsl-url="rpc_3.3.0.4852.swf"/>
+            </runtime-shared-library-path>
+        </mxmlc>
+    </target>
+
+    <target name="module.pie3dchart">
+        <mxmlc file="../src/com/easyinsight/analysis/charts/xaxisbased/pie/Pie3DChartModule.mxml" output="${deployment.path}/Pie3DChartModule.swf"
+               static-rsls="false">
+            <load-config filename="../modules/pie-3d-chart-module.xml"/>
+            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
+                <url rsl-url="framework_3.3.0.4852.swz"/>
+                <url rsl-url="framework_3.3.0.4852.swf"/>
+            </runtime-shared-library-path>
+
+            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/datavisualization.swc">
+                <url rsl-url="datavisualization_3.3.0.4852.swz"/>
+                <url rsl-url="datavisualization_3.3.0.4852.swf"/>
+            </runtime-shared-library-path>
+
+            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
+                <url rsl-url="rpc_3.3.0.4852.swz"/>
+                <url rsl-url="rpc_3.3.0.4852.swf"/>
+            </runtime-shared-library-path>
+        </mxmlc>
+    </target>
+
+    <target name="module.barchart">
+        <mxmlc file="../src/com/easyinsight/analysis/charts/yaxisbased/bar/BarChartModule.mxml" output="${deployment.path}/BarChartModule.swf"
+               static-rsls="false">
+            <load-config filename="../modules/bar-chart-module.xml"/>
+            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
+                <url rsl-url="framework_3.3.0.4852.swz"/>
+                <url rsl-url="framework_3.3.0.4852.swf"/>
+            </runtime-shared-library-path>
+
+            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/datavisualization.swc">
+                <url rsl-url="datavisualization_3.3.0.4852.swz"/>
+                <url rsl-url="datavisualization_3.3.0.4852.swf"/>
+            </runtime-shared-library-path>
+
+            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
+                <url rsl-url="rpc_3.3.0.4852.swz"/>
+                <url rsl-url="rpc_3.3.0.4852.swf"/>
+            </runtime-shared-library-path>
+        </mxmlc>
+    </target>
+
+    <target name="module.bar3dchart">
+        <mxmlc file="../src/com/easyinsight/analysis/charts/yaxisbased/bar/Bar3DChartModule.mxml" output="${deployment.path}/Bar3DChartModule.swf"
+               static-rsls="false">
+            <load-config filename="../modules/bar-3d-chart-module.xml"/>
+            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
+                <url rsl-url="framework_3.3.0.4852.swz"/>
+                <url rsl-url="framework_3.3.0.4852.swf"/>
+            </runtime-shared-library-path>
+
+            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/datavisualization.swc">
+                <url rsl-url="datavisualization_3.3.0.4852.swz"/>
+                <url rsl-url="datavisualization_3.3.0.4852.swf"/>
+            </runtime-shared-library-path>
+
+            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
+                <url rsl-url="rpc_3.3.0.4852.swz"/>
+                <url rsl-url="rpc_3.3.0.4852.swf"/>
+            </runtime-shared-library-path>
+        </mxmlc>
+    </target>
+
+    <target name="module.areachart">
+        <mxmlc file="../src/com/easyinsight/analysis/charts/twoaxisbased/area/AreaChartModule.mxml" output="${deployment.path}/AreaChartModule.swf"
+               static-rsls="false">
+            <load-config filename="../modules/area-chart-module.xml"/>
+            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
+                <url rsl-url="framework_3.3.0.4852.swz"/>
+                <url rsl-url="framework_3.3.0.4852.swf"/>
+            </runtime-shared-library-path>
+
+            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/datavisualization.swc">
+                <url rsl-url="datavisualization_3.3.0.4852.swz"/>
+                <url rsl-url="datavisualization_3.3.0.4852.swf"/>
+            </runtime-shared-library-path>
+
+            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
+                <url rsl-url="rpc_3.3.0.4852.swz"/>
+                <url rsl-url="rpc_3.3.0.4852.swf"/>
+            </runtime-shared-library-path>
+        </mxmlc>
+    </target>
+
+    <target name="module.area3dchart">
+        <mxmlc file="../src/com/easyinsight/analysis/charts/twoaxisbased/area/Area3DChartModule.mxml" output="${deployment.path}/Area3DChartModule.swf"
+               static-rsls="false">
+            <load-config filename="../modules/area-3d-chart-module.xml"/>
+            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
+                <url rsl-url="framework_3.3.0.4852.swz"/>
+                <url rsl-url="framework_3.3.0.4852.swf"/>
+            </runtime-shared-library-path>
+
+            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/datavisualization.swc">
+                <url rsl-url="datavisualization_3.3.0.4852.swz"/>
+                <url rsl-url="datavisualization_3.3.0.4852.swf"/>
+            </runtime-shared-library-path>
+
+            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
+                <url rsl-url="rpc_3.3.0.4852.swz"/>
+                <url rsl-url="rpc_3.3.0.4852.swf"/>
+            </runtime-shared-library-path>
+        </mxmlc>
+    </target>
+
+    <target name="module.linechart">
+        <mxmlc file="../src/com/easyinsight/analysis/charts/twoaxisbased/line/LineChartModule.mxml" output="${deployment.path}/LineChartModule.swf"
+               static-rsls="false">
+            <load-config filename="../modules/line-chart-module.xml"/>
+            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
+                <url rsl-url="framework_3.3.0.4852.swz"/>
+                <url rsl-url="framework_3.3.0.4852.swf"/>
+            </runtime-shared-library-path>
+
+            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/datavisualization.swc">
+                <url rsl-url="datavisualization_3.3.0.4852.swz"/>
+                <url rsl-url="datavisualization_3.3.0.4852.swf"/>
+            </runtime-shared-library-path>
+
+            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
+                <url rsl-url="rpc_3.3.0.4852.swz"/>
+                <url rsl-url="rpc_3.3.0.4852.swf"/>
+            </runtime-shared-library-path>
+        </mxmlc>
+    </target>
+
+    <target name="module.line3dchart">
+        <mxmlc file="../src/com/easyinsight/analysis/charts/twoaxisbased/line/Line3DChartModule.mxml" output="${deployment.path}/Line3DChartModule.swf"
+               static-rsls="false">
+            <load-config filename="../modules/line-3d-chart-module.xml"/>
+            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
+                <url rsl-url="framework_3.3.0.4852.swz"/>
+                <url rsl-url="framework_3.3.0.4852.swf"/>
+            </runtime-shared-library-path>
+
+            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/datavisualization.swc">
+                <url rsl-url="datavisualization_3.3.0.4852.swz"/>
+                <url rsl-url="datavisualization_3.3.0.4852.swf"/>
+            </runtime-shared-library-path>
+
+            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
+                <url rsl-url="rpc_3.3.0.4852.swz"/>
+                <url rsl-url="rpc_3.3.0.4852.swf"/>
+            </runtime-shared-library-path>
+        </mxmlc>
+    </target>
+
+    <target name="module.bubblechart">
+        <mxmlc file="../src/com/easyinsight/analysis/charts/bubble/BubbleChartModule.mxml" output="${deployment.path}/BubbleChartModule.swf"
+               static-rsls="false">
+            <load-config filename="../modules/bubble-chart-module.xml"/>
+            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
+                <url rsl-url="framework_3.3.0.4852.swz"/>
+                <url rsl-url="framework_3.3.0.4852.swf"/>
+            </runtime-shared-library-path>
+
+            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/datavisualization.swc">
+                <url rsl-url="datavisualization_3.3.0.4852.swz"/>
+                <url rsl-url="datavisualization_3.3.0.4852.swf"/>
+            </runtime-shared-library-path>
+
+            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
+                <url rsl-url="rpc_3.3.0.4852.swz"/>
+                <url rsl-url="rpc_3.3.0.4852.swf"/>
+            </runtime-shared-library-path>
+        </mxmlc>
+    </target>
+
+    <target name="module.plotchart">
+        <mxmlc file="../src/com/easyinsight/analysis/charts/plot/PlotChartModule.mxml" output="${deployment.path}/PlotChartModule.swf"
+               static-rsls="false">
+            <load-config filename="../modules/plot-chart-module.xml"/>
+            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
+                <url rsl-url="framework_3.3.0.4852.swz"/>
+                <url rsl-url="framework_3.3.0.4852.swf"/>
+            </runtime-shared-library-path>
+
+            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/datavisualization.swc">
+                <url rsl-url="datavisualization_3.3.0.4852.swz"/>
+                <url rsl-url="datavisualization_3.3.0.4852.swf"/>
+            </runtime-shared-library-path>
+
+            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
+                <url rsl-url="rpc_3.3.0.4852.swz"/>
+                <url rsl-url="rpc_3.3.0.4852.swf"/>
+            </runtime-shared-library-path>
+        </mxmlc>
+    </target>
+
+    <target name="module.map">
+        <mxmlc file="../src/com/easyinsight/analysis/maps/MapModule.mxml" output="${deployment.path}/MapModule.swf"
+               static-rsls="false">
+            <load-config filename="../modules/map-module.xml"/>
+            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
+                <url rsl-url="framework_3.3.0.4852.swz"/>
+                <url rsl-url="framework_3.3.0.4852.swf"/>
+            </runtime-shared-library-path>
+
+            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/datavisualization.swc">
+                <url rsl-url="datavisualization_3.3.0.4852.swz"/>
+                <url rsl-url="datavisualization_3.3.0.4852.swf"/>
+            </runtime-shared-library-path>
+
+            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
+                <url rsl-url="rpc_3.3.0.4852.swz"/>
+                <url rsl-url="rpc_3.3.0.4852.swf"/>
+            </runtime-shared-library-path>
         </mxmlc>
     </target>
 </project>

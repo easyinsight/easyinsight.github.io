@@ -6,7 +6,8 @@
 			import com.easyinsight.analysis.MapDefinition;
 			import com.easyinsight.analysis.YahooMapDefinition;
 			import com.easyinsight.analysis.GraphicDefinition;
-			import com.yahoo.maps.api.markers.Marker;
+            import com.easyinsight.analysis.list.ListDefinition;
+import com.yahoo.maps.api.markers.Marker;
 			import com.yahoo.maps.webservices.geocoder.GeocoderResult;
 			import com.yahoo.maps.api.YahooMapEvent;
 			import com.yahoo.maps.webservices.geocoder.events.GeocoderEvent;
@@ -20,7 +21,6 @@
 			import com.easyinsight.analysis.CrosstabDefinition;
 			import com.easyinsight.analysis.ChartDefinition;
 			import com.easyinsight.analysis.AnalysisItemUpdateEvent;
-			import com.easyinsight.analysis.ListDefinition;
 			import com.easyinsight.analysis.AnalysisDefinition;
 			
 			[Bindable]
