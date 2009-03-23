@@ -1,8 +1,10 @@
 package com.easyinsight.analysis.list {
 
+import com.easyinsight.analysis.AnalysisChangedEvent;
 import com.easyinsight.analysis.AnalysisDefinition;
 import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.analysis.AnalysisItemUpdateEvent;
+import com.easyinsight.analysis.CustomChangeEvent;
 import com.easyinsight.analysis.IReportControlBar;
 import com.easyinsight.analysis.ListDropArea;
 import com.easyinsight.analysis.ListDropAreaGrouping;
@@ -59,6 +61,14 @@ public class ListControlBar extends HBox implements IReportControlBar {
     public function addItem(analysisItem:com.easyinsight.analysis.AnalysisItem):void {
         listViewGrouping.addAnalysisItem(analysisItem);
         dispatchEvent(new ReportDataEvent(ReportDataEvent.REQUEST_DATA));
+        dispatchEvent(new AnalysisChangedEvent(false));
+    }
+
+    public function onCustomChangeEvent(event:CustomChangeEvent):void {
+        if (event is ColumnReorderEvent) {
+            var columnReorderEvent:ColumnReorderEvent = event as ColumnReorderEvent;
+            listViewGrouping.reorder(columnReorderEvent.columns);
+        }
     }
 }
 }

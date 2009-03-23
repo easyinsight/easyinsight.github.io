@@ -77,6 +77,7 @@ public class DataViewFactory extends VBox {
         _controlBar = createReportControlBar();
         _controlBar.analysisItems = _availableFields;
         _controlBar.addEventListener(ReportDataEvent.REQUEST_DATA, onDataRequest);
+        _controlBar.addEventListener(CustomChangeEvent.CUSTOM_CHANGE, customChangeFromControlBar);
         _controlBar.analysisDefinition = _analysisDefinition;
         addChild(_controlBar as DisplayObject);
 
@@ -117,11 +118,20 @@ public class DataViewFactory extends VBox {
         _reportRenderer = moduleInfo.factory.create() as IReportRenderer;
         _reportRenderer.addEventListener(ReportRendererEvent.ADD_ITEM, onItemAdded);
         _reportRenderer.addEventListener(ReportRendererEvent.FORCE_RENDER, forceRender);
+        _reportRenderer.addEventListener(CustomChangeEvent.CUSTOM_CHANGE, customChangeFromRenderer);
         addChild(_reportRenderer as DisplayObject);
         if (pendingRequest) {
             pendingRequest = false;
             retrieveData();
         }
+    }
+
+    private function customChangeFromControlBar(event:CustomChangeEvent):void {
+        _reportRenderer.onCustomChangeEvent(event);
+    }
+
+    private function customChangeFromRenderer(event:CustomChangeEvent):void {
+        _controlBar.onCustomChangeEvent(event);
     }
 
     private function forceRender(event:ReportRendererEvent):void {

@@ -10,5 +10,7 @@ public interface IReportControlBar {
     function isDataValid():Boolean;
 
     function addItem(analysisItem:com.easyinsight.analysis.AnalysisItem):void;
+
+    function onCustomChangeEvent(event:CustomChangeEvent):void;
 }
 }

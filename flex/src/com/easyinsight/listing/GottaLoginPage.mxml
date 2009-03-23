@@ -72,7 +72,7 @@
             }
             
             private function toAccount():void {
-            	User.getEventNotifier().dispatchEvent(new NavigationEvent("My Account"));
+            	User.getEventNotifier().dispatchEvent(new NavigationEvent(NavigationEvent.ACCOUNTS));
         	}
         ]]>
 	</mx:Script>

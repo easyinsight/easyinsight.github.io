@@ -19,7 +19,8 @@
             import com.easyinsight.analysis.charts.xaxisbased.pie.PieChartController;
             import com.easyinsight.analysis.charts.yaxisbased.bar.Bar3DChartController;
             import com.easyinsight.analysis.charts.yaxisbased.bar.BarChartController;
-            import com.easyinsight.analysis.maps.MapController;
+            import com.easyinsight.analysis.crosstab.CrosstabController;
+import com.easyinsight.analysis.maps.MapController;
 import mx.events.MenuEvent;
 			
 			[Bindable]
@@ -77,13 +78,14 @@ import mx.events.MenuEvent;
                 var plotChartController:PlotChartController;
                 var bubble3DChartController:BubbleChartController;
                 var mapController:MapController;
+                var crosstabController:CrosstabController;
             }
 		]]>
 	</mx:Script>
 	  <mx:XMLList id="all">
         <node label="Grid        " icon="{crosstabIcon}">
         	<node label="List" icon="{listIcon}" controller="com.easyinsight.analysis.list.ListController"/>
-        	<node label="Crosstab" state="Crosstab" icon="{crosstabIcon}"/>
+        	<node label="Crosstab" controller="com.easyinsight.analysis.crosstab.CrosstabController" icon="{crosstabIcon}"/>
         </node>
         <node label="Chart" icon="">
         	<node label="Column">

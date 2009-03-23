@@ -2,7 +2,8 @@
 <mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="400" height="300">
 	<mx:Script>
 		<![CDATA[
-			import mx.controls.olapDataGridClasses.OLAPDataGridItemRendererProvider;
+        import com.easyinsight.analysis.crosstab.CrosstabDefinition;
+import mx.controls.olapDataGridClasses.OLAPDataGridItemRendererProvider;
 			import mx.olap.IOLAPAxisPosition;
 			import com.easyinsight.analysis.conditions.ConditionRenderer;
 			import mx.collections.ICollectionView;
@@ -49,7 +50,7 @@
 				this.renderer = analysisMeasure.createClientRenderer();
 				this.cube = new OLAPCube();						
 				cube.dataProvider = normalize(data);
-				//grid.itemRenderer = new AnalysisCellRendererFactory(analysisMeasure.key.createString(), analysisMeasure, renderer);
+				//grid.itemRenderer = new AnalysisCellRendererFactory(analysisMeasure.qualifiedName(), analysisMeasure, renderer);
 				var provider:OLAPDataGridItemRendererProvider = new OLAPDataGridItemRendererProvider();
 				provider.formatter = analysisMeasure.getFormatter();
 				provider.type = OLAPDataGrid.OLAP_DIMENSION;
@@ -59,8 +60,9 @@
 				dimensionList.addItem(createDimension(crosstabDefinition.columns, "column"));
 				dimensionList.addItem(createDimension(crosstabDefinition.rows, "row"));
 				var olapMeasure:OLAPMeasure = new OLAPMeasure();
-				olapMeasure.name = analysisMeasure.key.createString();
-				olapMeasure.dataField = analysisMeasure.key.createString();			    
+				olapMeasure.name = analysisMeasure.qualifiedName();
+				olapMeasure.displayName = analysisMeasure.display;
+				olapMeasure.dataField = analysisMeasure.qualifiedName();
 				olapMeasure.aggregator = "SUM";
 				var measures:IList = new ArrayCollection();
 				measures.addItem(olapMeasure);
@@ -75,7 +77,7 @@
 				for each (var object:Object in data) {
 					var newObject:Object = new Object();
 					for each (var columnItem:AnalysisItem in _crosstabDefinition.columns) {
-						var key:String = columnItem.key.createString(); 
+						var key:String = columnItem.qualifiedName();
 						var existingValue:Value = object[key];
 						if (existingValue != null) {
 							var value:Object = existingValue.getValue();
@@ -84,7 +86,7 @@
 						} 
 					}
 					for each (var rowItem:AnalysisItem in _crosstabDefinition.rows) {
-						var rowKey:String = rowItem.key.createString(); 
+						var rowKey:String = rowItem.qualifiedName();
 						var rowExistingValue:Value = object[rowKey];
 						if (rowExistingValue != null) {
 							var rowValue:Object = rowExistingValue.getValue();
@@ -93,7 +95,7 @@
 						} 
 					}
 					for each (var measureItem:AnalysisItem in _crosstabDefinition.measures) {
-						var measureKey:String = measureItem.key.createString(); 
+						var measureKey:String = measureItem.qualifiedName();
 						var measureExistingValue:Value = object[measureKey];
 						if (measureExistingValue != null) {
 							var measureValue:Object = measureExistingValue.getValue();
@@ -118,10 +120,11 @@
 					var analysisItem:AnalysisItem = items[columnIndex] as AnalysisItem;
 					var olapAttribute:OLAPAttribute = new OLAPAttribute();
 					elements[columnIndex] = olapAttribute;
-					olapAttribute.name = analysisItem.key.createString();
-					olapAttribute.dataField = analysisItem.key.createString();
+					olapAttribute.name = analysisItem.qualifiedName();
+                    olapAttribute.displayName = analysisItem.displayName;
+					olapAttribute.dataField = analysisItem.qualifiedName();
 					var olapLevel:OLAPLevel = new OLAPLevel();
-					olapLevel.attributeName = analysisItem.key.createString();
+					olapLevel.attributeName = analysisItem.qualifiedName();
 					columnHierarchyLevelsList.addItem(olapLevel);					
 				}
 				columnHierarchy.elements = columnHierarchyLevelsList.toArray();
@@ -165,7 +168,7 @@
 				for (var columnIndex:int = 0; columnIndex < items.length; columnIndex++) {
 					var attributeSet:OLAPSet = new OLAPSet();
 					var analysisItem:AnalysisItem = items[columnIndex] as AnalysisItem;
-					attributeSet.addElements(cube.findDimension(dimensionName).findAttribute(analysisItem.key.createString()).children);
+					attributeSet.addElements(cube.findDimension(dimensionName).findAttribute(analysisItem.qualifiedName()).children);
 					if (olapSet == null) {
 						olapSet = attributeSet;
 					} else {

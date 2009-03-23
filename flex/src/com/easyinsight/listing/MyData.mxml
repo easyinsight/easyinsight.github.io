@@ -332,7 +332,7 @@ import com.easyinsight.help.MyDataHelp;
 	        </mx:dataProvider>
 			<mx:columns>
 				<mx:AdvancedDataGridColumn headerText="Name" dataField="name"/>
-				<mx:AdvancedDataGridColumn headerText="Size" dataField="size" width="110"/>
+				<mx:AdvancedDataGridColumn headerText="Size" dataField="size" width="110" itemRenderer="com.easyinsight.listing.SizeRenderer"/>
 				<mx:AdvancedDataGridColumn width="200" headerText="" dataField="name" sortable="false" itemRenderer="com.easyinsight.listing.MyDataIconControls"/>
 			</mx:columns>
 		</mx:AdvancedDataGrid>

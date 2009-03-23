@@ -140,12 +140,6 @@ public class DataSet implements Serializable {
         return listTransform;
     }
 
-    public Crosstab toCrosstab(WSCrosstabDefinition crosstabDefinition, InsightRequestMetadata insightRequestMetadata) {
-        DataSet dataSet = nextStep(crosstabDefinition, crosstabDefinition.getAllAnalysisItems(), insightRequestMetadata);
-        return dataSet.crosstab(crosstabDefinition.getRows(),
-                crosstabDefinition.getColumns(), crosstabDefinition.getMeasures());
-    }
-
     private Crosstab crosstab(Collection<AnalysisItem> crosstabRows, Collection<AnalysisItem> columns, Collection<AnalysisItem> measures) {
         Crosstab crosstab = new Crosstab();
         // it's only two dimensional, so...
@@ -217,6 +211,11 @@ public class DataSet implements Serializable {
 
     public void addRow(IRow row) {
         rows.add(row);
+    }
+
+    public Crosstab toCrosstab(WSCrosstabDefinition crosstabDefinition, InsightRequestMetadata insightRequestMetadata) {
+        DataSet dataSet = nextStep(crosstabDefinition, crosstabDefinition.getAllAnalysisItems(), insightRequestMetadata);
+        return dataSet.crosstab(crosstabDefinition.getRows(), crosstabDefinition.getColumns(), crosstabDefinition.getMeasures());
     }
 
     public ListDataResults toList(WSAnalysisDefinition listDefinition, List<AnalysisItem> underlyingFields, InsightRequestMetadata insightRequestMetadata) {

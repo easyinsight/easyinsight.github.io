@@ -9,6 +9,7 @@
         import com.easyinsight.analysis.AnalysisItemTypes;
         import com.easyinsight.analysis.AnalysisMeasure;
 
+        import com.easyinsight.analysis.CustomChangeEvent;
         import com.easyinsight.filtering.FilterRawData;
 
         import mx.charts.CategoryAxis;
@@ -121,36 +122,36 @@
             lineChart.horizontalAxis = xAxis;
 
             var mySeries:Array = new Array();
-           var analysisMeasure:AnalysisMeasure = lineChartDef.measure as AnalysisMeasure;
-					var uniques:ArrayCollection = new ArrayCollection();
+            var analysisMeasure:AnalysisMeasure = lineChartDef.measure as AnalysisMeasure;
+            var uniques:ArrayCollection = new ArrayCollection();
 
-					var seriesData:Object = new Object();
-					for (var i:int = 0; i < dataSet.length; i++) {
-						var object:Object = dataSet.getItemAt(i);
-						var dimensionValue:String = object[lineChartDef.yaxis.qualifiedName()];
-						var newSeriesData:ArrayCollection = seriesData[dimensionValue];
-						if (newSeriesData == null) {
-							newSeriesData = new ArrayCollection();
-							seriesData[dimensionValue] = newSeriesData;
-						}
-						var newObject:Object = new Object();
-						newObject[lineChartDef.xaxis.qualifiedName()] = object[lineChartDef.xaxis.qualifiedName()];
-						newObject[dimensionValue] = object[analysisMeasure.qualifiedName()];
-						newSeriesData.addItem(newObject);
-						//allItems.addItem(newObject);
-						if (!uniques.contains(dimensionValue)) {
-							uniques.addItem(dimensionValue);
-						}
-					}
-					for (i = 0; i < uniques.length; i++) {
-						var key:String = uniques.getItemAt(i) as String;
-						var uniqueLineSeries:LineSeries = new LineSeries();
-						uniqueLineSeries.xField = lineChartDef.xaxis.qualifiedName();
-						uniqueLineSeries.yField = key;
-						uniqueLineSeries.displayName = key;
-						uniqueLineSeries.dataProvider = seriesData[key];
-						mySeries.push(uniqueLineSeries);
-					}
+            var seriesData:Object = new Object();
+            for (var i:int = 0; i < dataSet.length; i++) {
+                var object:Object = dataSet.getItemAt(i);
+                var dimensionValue:String = object[lineChartDef.yaxis.qualifiedName()];
+                var newSeriesData:ArrayCollection = seriesData[dimensionValue];
+                if (newSeriesData == null) {
+                    newSeriesData = new ArrayCollection();
+                    seriesData[dimensionValue] = newSeriesData;
+                }
+                var newObject:Object = new Object();
+                newObject[lineChartDef.xaxis.qualifiedName()] = object[lineChartDef.xaxis.qualifiedName()];
+                newObject[dimensionValue] = object[analysisMeasure.qualifiedName()];
+                newSeriesData.addItem(newObject);
+                //allItems.addItem(newObject);
+                if (!uniques.contains(dimensionValue)) {
+                    uniques.addItem(dimensionValue);
+                }
+            }
+            for (i = 0; i < uniques.length; i++) {
+                var key:String = uniques.getItemAt(i) as String;
+                var uniqueLineSeries:LineSeries = new LineSeries();
+                uniqueLineSeries.xField = lineChartDef.xaxis.qualifiedName();
+                uniqueLineSeries.yField = key;
+                uniqueLineSeries.displayName = key;
+                uniqueLineSeries.dataProvider = seriesData[key];
+                mySeries.push(uniqueLineSeries);
+            }
 
             lineChart.series = mySeries;
 
@@ -160,12 +161,14 @@
         }
 
 
-
         public function createFilterRawData():FilterRawData {
             return null;
         }
 
         public function updateExportMetadata():void {
+        }
+
+        public function onCustomChangeEvent(event:CustomChangeEvent):void {
         }]]></mx:Script>
     <mx:HBox width="100%" height="100%" id="hbox"/>
 </mx:Module>

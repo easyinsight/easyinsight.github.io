@@ -5,6 +5,7 @@
 		<![CDATA[
         import com.easyinsight.analysis.AnalysisDefinition;
         import com.easyinsight.analysis.AnalysisItem;
+        import com.easyinsight.analysis.CustomChangeEvent;
         import com.easyinsight.filtering.FilterRawData;
 
         import mx.charts.ChartItem;
@@ -73,6 +74,9 @@
         }
 
         public function updateExportMetadata():void {
+        }
+
+        public function onCustomChangeEvent(event:CustomChangeEvent):void {
         }
 		]]>
 	</mx:Script>

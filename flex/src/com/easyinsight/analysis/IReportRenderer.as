@@ -7,5 +7,6 @@ public interface IReportRenderer {
     function addEventListener(type:String, listener:Function, useCapture:Boolean = false, priority:int = 0,
                 useWeakReference:Boolean = false):void;
     function updateExportMetadata():void;
+    function onCustomChangeEvent(event:CustomChangeEvent):void;
 }
 }

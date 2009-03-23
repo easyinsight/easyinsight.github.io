@@ -2,19 +2,21 @@
 <mx:Module xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:analysis="com.easyinsight.analysis.*" implements="com.easyinsight.analysis.IReportRenderer"
         width="100%" height="100%">
     <mx:Script><![CDATA[
-        import com.easyinsight.analysis.AnalysisCellRendererFactory;
+        import com.easyinsight.analysis.AnalysisCellRenderer;
+import com.easyinsight.analysis.AnalysisCellRendererFactory;
         import com.easyinsight.analysis.AnalysisDefinition;
         import com.easyinsight.analysis.AnalysisItem;
         import com.easyinsight.analysis.AnalysisItemWrapper;
-import com.easyinsight.analysis.ListViewHeaderRendererFactory;
+        import com.easyinsight.analysis.CustomChangeEvent;
+        import com.easyinsight.analysis.ListViewHeaderRendererFactory;
         import com.easyinsight.analysis.ReportRendererEvent;
-import com.easyinsight.filtering.FilterRawData;
+        import com.easyinsight.filtering.FilterRawData;
 
         import mx.collections.ArrayCollection;
         import mx.collections.Sort;
         import mx.controls.AdvancedDataGrid;
-import mx.controls.DataGrid;
-import mx.controls.advancedDataGridClasses.AdvancedDataGridColumn;
+        import mx.controls.DataGrid;
+        import mx.controls.advancedDataGridClasses.AdvancedDataGridColumn;
         import mx.events.DragEvent;
         import mx.events.IndexChangedEvent;
         import mx.managers.DragManager;
@@ -77,8 +79,11 @@ import mx.controls.advancedDataGridClasses.AdvancedDataGridColumn;
                 }
                 columnHeaderObject.dataField = keyString;
                 columnHeaderObject.headerRenderer = new ListViewHeaderRendererFactory(myHeader.display);
-                columnHeaderObject.itemRenderer = new AnalysisCellRendererFactory(keyString, myHeader,
-                        clientProcessorMap[keyString]);
+                /*columnHeaderObject.itemRenderer = new AnalysisCellRendererFactory(keyString, myHeader,
+                        clientProcessorMap[keyString]);*/
+                var factory:ClassFactory = new ClassFactory(AnalysisCellRenderer);
+                factory.properties = { analysisItem: myHeader, renderer: clientProcessorMap[keyString] }; 
+                columnHeaderObject.itemRenderer = factory;
                 columns[k + initColumn] = columnHeaderObject;
             }
             dataGrid.columns = columns;
@@ -139,7 +144,12 @@ import mx.controls.advancedDataGridClasses.AdvancedDataGridColumn;
         }
 
         private function headersShifted(event:IndexChangedEvent):void {
-
+            var keys:Array = [];
+            for (var i:int = 0; i < dataGrid.columns.length; i++) {
+                var column:AdvancedDataGridColumn = dataGrid.columns[i];
+                keys[i] = column.dataField;
+            }
+            dispatchEvent(new ColumnReorderEvent(keys));
         }
 
         public function createFilterRawData():FilterRawData {
@@ -161,6 +171,9 @@ import mx.controls.advancedDataGridClasses.AdvancedDataGridColumn;
         }
 
         public function updateExportMetadata():void {
+        }
+
+        public function onCustomChangeEvent(event:CustomChangeEvent):void {
         }]]></mx:Script>
     <analysis:ListViewGrid id="dataGrid" dataProvider="{myDataSet}" width="100%" height="100%"
                            dragEnter="dragEnterHandler(event)"

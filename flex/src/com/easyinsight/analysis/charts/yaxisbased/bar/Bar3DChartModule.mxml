@@ -4,6 +4,7 @@
     <mx:Script>
 		<![CDATA[
         import com.easyinsight.analysis.AnalysisDefinition;
+        import com.easyinsight.analysis.CustomChangeEvent;
         import com.easyinsight.filtering.FilterRawData;
 
         import ilog.charts3d.series.BarSeries3D;
@@ -242,6 +243,9 @@
         }
 
         public function updateExportMetadata():void {
+        }
+
+        public function onCustomChangeEvent(event:CustomChangeEvent):void {
         }
 		]]>
 	</mx:Script>

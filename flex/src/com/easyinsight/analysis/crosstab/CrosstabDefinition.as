@@ -1,5 +1,6 @@
-package com.easyinsight.analysis
+package com.easyinsight.analysis.crosstab
 {
+import com.easyinsight.analysis.*;
 	[Bindable]
 	[RemoteClass(alias="com.easyinsight.analysis.WSCrosstabDefinition")]
 	public class CrosstabDefinition extends AnalysisDefinition

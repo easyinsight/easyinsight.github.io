@@ -205,6 +205,7 @@ import mx.collections.SortField;
             dataView = dataViewFactory;
             dataView.addEventListener(DataServiceLoadingEvent.LOADING_STARTED, startLoading);
             dataView.addEventListener(DataServiceLoadingEvent.LOADING_STOPPED, stopLoading);
+            dataView.addEventListener(AnalysisChangedEvent.ANALYSIS_CHANGED, onAnalysisChanged);
             dataControlVBox.addChild(dataViewFactory);
             dataViewFactory.retrieveData();
         }

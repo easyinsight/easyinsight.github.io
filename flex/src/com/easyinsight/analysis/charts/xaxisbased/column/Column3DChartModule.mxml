@@ -3,17 +3,25 @@
         width="100%" height="100%">
     <mx:Script><![CDATA[
         import com.easyinsight.analysis.AnalysisDefinition;
-import ilog.charts3d.charts3dClasses.Series3D;
+        import com.easyinsight.analysis.CustomChangeEvent;
+
+        import ilog.charts3d.charts3dClasses.Series3D;
         import ilog.charts3d.series.ColumnSet3D;
         import ilog.charts3d.series.ColumnSeries3D;
         import ilog.charts3d.ColumnChart3D;
+
         import com.easyinsight.analysis.AnalysisItem;
+
         import mx.binding.utils.BindingUtils;
-import mx.events.FlexEvent;
+        import mx.events.FlexEvent;
+
         import com.easyinsight.filtering.FilterRawData;
+
         import mx.graphics.BitmapFill;
         import mx.graphics.IFill;
+
         import com.easyinsight.analysis.conditions.ConditionRenderer;
+
         import mx.charts.chartClasses.IAxis;
         import mx.charts.LinearAxis;
         import mx.formatters.Formatter;
@@ -117,11 +125,11 @@ import mx.events.FlexEvent;
                 columnChart.horizontalAxis = xAxis;
                 if (sortable) {
                     /*var axisRenderer:AxisRenderer = new AxisRenderer();
-                    axisRenderer.axis = xAxis;
-                    xAxisTitleRendererFactory = new SortableAxisTitleFactory(xAxisItem, true);
-                    axisRenderer.titleRenderer = xAxisTitleRendererFactory;
-                    //axisRenderer.setStyle("color", "#FFFFFF");
-                    axisRenderer.placement = "bottom";*/
+                     axisRenderer.axis = xAxis;
+                     xAxisTitleRendererFactory = new SortableAxisTitleFactory(xAxisItem, true);
+                     axisRenderer.titleRenderer = xAxisTitleRendererFactory;
+                     //axisRenderer.setStyle("color", "#FFFFFF");
+                     axisRenderer.placement = "bottom";*/
                     //columnChart.horizontalAxisRenderers = [ axisRenderer ];
                 }
 
@@ -133,11 +141,11 @@ import mx.events.FlexEvent;
                 columnChart.verticalAxis = yAxis;
                 if (sortable) {
                     /*var yAxisRenderer:AxisRenderer = new AxisRenderer();
-                    yAxisRenderer.axis = yAxis;
-                    //yAxisRenderer.setStyle("color", "#FFFFFF");
-                    yAxisTitleRendererFactory = new SortableAxisTitleFactory(yAxisItem, false);
-                    yAxisRenderer.titleRenderer = yAxisTitleRendererFactory;
-                    yAxisRenderer.placement = "left";*/
+                     yAxisRenderer.axis = yAxis;
+                     //yAxisRenderer.setStyle("color", "#FFFFFF");
+                     yAxisTitleRendererFactory = new SortableAxisTitleFactory(yAxisItem, false);
+                     yAxisRenderer.titleRenderer = yAxisTitleRendererFactory;
+                     yAxisRenderer.placement = "left";*/
                     //columnChart.verticalAxisRenderers = [ yAxisRenderer ];
                 }
 
@@ -201,16 +209,16 @@ import mx.events.FlexEvent;
             if (xAxisItem == null || newXAxisItem.qualifiedName() != xAxisItem.qualifiedName()) {
                 xAxisItem = newXAxisItem;
                 /*if (sortable) {
-                    xAxisTitleRendererFactory.analysisItem = xAxisItem;
-                }*/
+                 xAxisTitleRendererFactory.analysisItem = xAxisItem;
+                 }*/
             }
 
             var newYAxisItem:AnalysisItem = columnChartDef.measure;
             if (yAxisItem == null || newYAxisItem.qualifiedName() != yAxisItem.qualifiedName()) {
                 yAxisItem = newYAxisItem;
                 /*if (sortable) {
-                    yAxisTitleRendererFactory.analysisItem = yAxisItem;
-                }*/
+                 yAxisTitleRendererFactory.analysisItem = yAxisItem;
+                 }*/
             }
 
             var newXField:String = newXAxisItem.qualifiedName();
@@ -245,6 +253,9 @@ import mx.events.FlexEvent;
         }
 
         public function updateExportMetadata():void {
+        }
+
+        public function onCustomChangeEvent(event:CustomChangeEvent):void {
         }]]></mx:Script>
     <mx:Stroke id="s1" color="#2A7E93" weight="2"/>
     <mx:SeriesInterpolate id="interpolateIn" duration="1000"/>

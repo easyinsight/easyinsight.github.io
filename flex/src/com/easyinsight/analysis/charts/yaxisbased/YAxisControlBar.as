@@ -1,6 +1,7 @@
 package com.easyinsight.analysis.charts.yaxisbased {
 import com.easyinsight.analysis.AnalysisDefinition;
 import com.easyinsight.analysis.AnalysisItemUpdateEvent;
+import com.easyinsight.analysis.CustomChangeEvent;
 import com.easyinsight.analysis.DimensionDropArea;
 import com.easyinsight.analysis.IReportControlBar;
 import com.easyinsight.analysis.ListDropAreaGrouping;
@@ -62,6 +63,9 @@ public class YAxisControlBar extends HBox implements IReportControlBar  {
     }
 
     public function addItem(analysisItem:com.easyinsight.analysis.AnalysisItem):void {
+    }
+
+    public function onCustomChangeEvent(event:CustomChangeEvent):void {
     }
 }
 }

@@ -296,6 +296,10 @@
         </mxmlc>
     </target>
 
+    <target name="modules1" depends="module.area3dchart, module.areachart, module.bar3dchart, module.barchart, module.bubblechart"/>
+    <target name="modules2" depends="module.column3dchart, module.columnchart, module.line3dchart, module.list, module.map"/>
+    <target name="modules3" depends="module.pie3dchart, module.piechart, module.plotchart"/>
+
     <target name="module.list">
         <mxmlc file="../src/com/easyinsight/analysis/list/ListModule.mxml" output="${deployment.path}/ListModule.swf"
                static-rsls="false">
@@ -573,6 +577,27 @@
         <mxmlc file="../src/com/easyinsight/analysis/maps/MapModule.mxml" output="${deployment.path}/MapModule.swf"
                static-rsls="false">
             <load-config filename="../modules/map-module.xml"/>
+            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
+                <url rsl-url="framework_3.3.0.4852.swz"/>
+                <url rsl-url="framework_3.3.0.4852.swf"/>
+            </runtime-shared-library-path>
+
+            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/datavisualization.swc">
+                <url rsl-url="datavisualization_3.3.0.4852.swz"/>
+                <url rsl-url="datavisualization_3.3.0.4852.swf"/>
+            </runtime-shared-library-path>
+
+            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
+                <url rsl-url="rpc_3.3.0.4852.swz"/>
+                <url rsl-url="rpc_3.3.0.4852.swf"/>
+            </runtime-shared-library-path>
+        </mxmlc>
+    </target>
+
+    <target name="module.crosstab">
+        <mxmlc file="../src/com/easyinsight/analysis/crosstab/CrosstabModule.mxml" output="${deployment.path}/CrosstabModule.swf"
+               static-rsls="false">
+            <load-config filename="../modules/crosstab-module.xml"/>
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
                 <url rsl-url="framework_3.3.0.4852.swz"/>
                 <url rsl-url="framework_3.3.0.4852.swf"/>

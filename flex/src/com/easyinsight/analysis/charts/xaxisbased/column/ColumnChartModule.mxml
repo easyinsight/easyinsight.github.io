@@ -5,6 +5,7 @@
         import com.easyinsight.analysis.AnalysisDefinition;
 
         import com.easyinsight.analysis.AnalysisItem;
+        import com.easyinsight.analysis.CustomChangeEvent;
         import com.easyinsight.analysis.SortableAxisTitleFactory;
         import com.easyinsight.analysis.conditions.ConditionRenderer;
 
@@ -252,6 +253,9 @@
         }
 
         public function updateExportMetadata():void {
+        }
+
+        public function onCustomChangeEvent(event:CustomChangeEvent):void {
         }]]></mx:Script>
     <mx:Stroke id="s1" color="#2A7E93" weight="2"/>
     <mx:SeriesInterpolate id="interpolateIn" duration="1000"/>
