@@ -218,6 +218,27 @@ import mx.controls.Alert;
             private function addedComment():void {
                 groupService.getGroupMessages.send(_group.groupID);
             }
+
+            private function addReport():void {
+                var window:AddReportToGroupWindow = new AddReportToGroupWindow();
+                window.groupID = _group.groupID;
+                window.addEventListener(GroupRefreshEvent.GROUP_REFRESH, onGroupRefresh);
+                PopUpManager.addPopUp(window, this, true);
+                PopUpManager.centerPopUp(window);
+            }
+
+            private function addDataSource():void {
+                var window:AddDataSourceToGroupWindow = new AddDataSourceToGroupWindow();
+                window.groupID = _group.groupID;
+                window.addEventListener(GroupRefreshEvent.GROUP_REFRESH, onGroupRefresh);
+                PopUpManager.addPopUp(window, this, true);
+                PopUpManager.centerPopUp(window);
+            }
+
+            private function onGroupRefresh(event:GroupRefreshEvent):void {
+                groupInsights.refreshData();
+                groupFeeds.refreshData();
+            }
 		]]>		
 	</mx:Script>
 	<mx:RemoteObject destination="groupService" id="groupService">
@@ -234,8 +255,8 @@ import mx.controls.Alert;
 			<mx:Button label="Back to Group List" click="backToGroupList()"/>
             <mx:Button icon="{connectIcon}" toolTip="Join Group" click="joinGroup()" visible="{joinEnabled}"/>
             <mx:Button icon="{administerIcon}" toolTip="Administer Group" click="administer()" visible="{adminEnabled}"/>
-            <mx:Button icon="{addDataSourceIcon}" toolTip="Add Data Source..." visible="{adminEnabled}"/>
-            <mx:Button icon="{addInsightIcon}" toolTip="Add Report..." visible="{adminEnabled}"/>
+            <mx:Button icon="{addDataSourceIcon}" toolTip="Add Data Source..." click="addDataSource()" visible="{adminEnabled}"/>
+            <mx:Button icon="{addInsightIcon}" toolTip="Add Report..." click="addReport()" visible="{adminEnabled}"/>
             <mx:Button icon="{messageIcon}" toolTip="New Message" click="newMessage()" visible="{!joinEnabled}"/>
 			<mx:Button icon="{helpIcon}" toolTip="Help!" click="help()" />
 		</mx:HBox>

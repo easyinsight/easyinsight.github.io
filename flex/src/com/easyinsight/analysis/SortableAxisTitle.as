@@ -9,20 +9,38 @@ package com.easyinsight.analysis
 		private var myText:Label;
 		private var value:Object;
 		private var sortButton:ChartSortButton;
-		private var analysisItem:AnalysisItem;
-		private var axisDirection:Boolean;
-		
-		public function SortableAxisTitle(analysisItem:AnalysisItem, horizontal:Boolean)
+		private var _analysisItem:AnalysisItem;
+		private var _axisDirection:Boolean;
+
+
+        public function get analysisItem():AnalysisItem {
+            return _analysisItem;
+        }
+
+        public function set analysisItem(val:AnalysisItem):void {
+            _analysisItem = val;
+            if (sortButton != null) {
+                sortButton.analysisItem = val;
+            }
+        }
+
+        public function get axisDirection():Boolean {
+            return _axisDirection;
+        }
+
+        public function set axisDirection(val:Boolean):void {
+            _axisDirection = val;
+        }
+
+        public function SortableAxisTitle()
 		{
 			super();
-			this.axisDirection = horizontal;
 			//if (horizontal) {
 				direction = "horizontal";
 			//} else {
 			//	direction = "vertical";
 			//}
 			setStyle("color", "#000000");
-			this.analysisItem = analysisItem;
 			this.horizontalScrollPolicy = "off";
 			this.verticalScrollPolicy = "off";
 		}
@@ -44,7 +62,10 @@ package com.easyinsight.analysis
 			myText.setStyle("color", "#000000");
 			myText.setStyle("fontSize", 14);			
 			addChild(myText);
-			sortButton = new ChartSortButton(analysisItem);
+			sortButton = new ChartSortButton();
+            if (analysisItem != null) {
+                sortButton.analysisItem = analysisItem;
+            }
 			addChild(sortButton);
 		}
 		

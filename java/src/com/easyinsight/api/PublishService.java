@@ -3,10 +3,7 @@ package com.easyinsight.api;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.analysis.IRow;
 import com.easyinsight.storage.IWhere;
-import com.easyinsight.core.StringValue;
-import com.easyinsight.core.NumericValue;
-import com.easyinsight.core.DateValue;
-import com.easyinsight.core.NamedKey;
+import com.easyinsight.core.*;
 
 import java.util.List;
 import java.util.ArrayList;
@@ -36,7 +33,7 @@ public abstract class PublishService {
         StringPair[] stringPairs = row.getStringPairs();
         if (stringPairs != null) {
             for (StringPair stringPair : stringPairs) {
-                transformedRow.addValue(stringPair.getKey(), new StringValue(stringPair.getValue()));
+                transformedRow.addValue(stringPair.getKey(), stringPair.getValue() == null ? new EmptyValue() : new StringValue(stringPair.getValue()));
             }
         }
         NumberPair[] numberPairs = row.getNumberPairs();
@@ -49,7 +46,7 @@ public abstract class PublishService {
         if (datePairs != null) {
             for (DatePair datePair : datePairs) {
                 System.out.println("Date Pair date = " + datePair.getValue());
-                transformedRow.addValue(datePair.getKey(), new DateValue(datePair.getValue()));
+                transformedRow.addValue(datePair.getKey(), datePair.getValue() == null ? new EmptyValue() : new DateValue(datePair.getValue()));
             }
         }
         return transformedRow;

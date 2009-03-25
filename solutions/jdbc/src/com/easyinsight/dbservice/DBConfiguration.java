@@ -1,5 +1,7 @@
 package com.easyinsight.dbservice;
 
+import org.w3c.dom.Node;
+
 import java.sql.Connection;
 import java.sql.SQLException;
 
@@ -16,4 +18,7 @@ public abstract class DBConfiguration {
     public abstract String getType();
 
     public abstract void load(Connection conn) throws SQLException, StringEncrypter.EncryptionException;
+    public abstract String toXML(StringEncrypter stringEncrypter) throws StringEncrypter.EncryptionException;
+
+    public abstract void loadFromXML(Node node, StringEncrypter stringEncrypter) throws StringEncrypter.EncryptionException;
 }

@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute"
+	creationComplete="analysisService.getInsightDescriptors.send()">
+	<mx:Script>
+		<![CDATA[			
+        import com.easyinsight.solutions.InsightDescriptor;
+
+        import mx.managers.PopUpManager;
+        import mx.collections.ArrayCollection;
+
+        [Bindable]
+        private var descriptors:ArrayCollection;
+
+        private var _groupID:int;
+
+
+        public function set groupID(val:int):void {
+            _groupID = val;
+        }
+
+        private function gotReports():void {
+            descriptors = analysisService.getInsightDescriptors.lastResult as ArrayCollection;
+        }
+
+        private function chose():void {
+            var descriptor:InsightDescriptor = feedBox.selectedItem as InsightDescriptor;
+            groupService.addInsightToGroup.send(descriptor.insightID, _groupID);
+        }
+
+        private function addedReportToGroup():void {
+            dispatchEvent(new GroupRefreshEvent());
+            PopUpManager.removePopUp(this);
+        }
+
+        private function cancel():void {
+            PopUpManager.removePopUp(this);
+        }
+		]]>
+	</mx:Script>
+    <mx:RemoteObject destination="groupService" id="groupService">
+		<mx:method name="addInsightToGroup" result="addedReportToGroup()"/>
+	</mx:RemoteObject>
+	<mx:RemoteObject destination="analysisDefinition" id="analysisService">
+		<mx:method name="getInsightDescriptors" result="gotReports()"/>
+	</mx:RemoteObject>
+	<mx:Form styleName="TitleWindowContents">
+		<mx:FormItem label="Choose a Report:">
+			<mx:ComboBox id="feedBox" dataProvider="{descriptors}" selectedIndex="0" labelField="name"/>		
+		</mx:FormItem>
+		<mx:FormItem label="" direction="horizontal">
+			<mx:Button label="OK" click="chose()"/>
+			<mx:Button label="Cancel" click="cancel()"/>			
+		</mx:FormItem>
+	</mx:Form>
+</mx:TitleWindow>

@@ -418,7 +418,7 @@ public class GroupStorage {
         Connection conn = Database.instance().getConnection();
         try {
             PreparedStatement existingLinkQuery = conn.prepareStatement("SELECT GROUP_TO_INSIGHT_ID FROM GROUP_TO_INSIGHT WHERE " +
-                    "GROUP_ID = ? AND FEED_ID = ?");
+                    "GROUP_ID = ? AND INSIGHT_ID = ?");
             existingLinkQuery.setLong(1, groupID);
             existingLinkQuery.setLong(2, feedID);
             ResultSet existingRS = existingLinkQuery.executeQuery();
@@ -430,7 +430,7 @@ public class GroupStorage {
                 updateLinkStmt.setLong(2, existingID);
                 updateLinkStmt.executeUpdate();
             } else {
-                PreparedStatement insertFeedStmt = conn.prepareStatement("INSERT INTO GROUP_TO_INSIGHT (GROUP_ID, FEED_ID, ROLE) " +
+                PreparedStatement insertFeedStmt = conn.prepareStatement("INSERT INTO GROUP_TO_INSIGHT (GROUP_ID, INSIGHT_ID, ROLE) " +
                         "VALUES (?, ?, ?)");
                 insertFeedStmt.setLong(1, groupID);
                 insertFeedStmt.setLong(2, feedID);

@@ -13,6 +13,9 @@ import java.util.*;
 import java.sql.*;
 import java.sql.Date;
 import java.net.URL;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 
 import flex.messaging.FlexContext;
 
@@ -509,5 +512,46 @@ public class DBRemote {
         Row[] rowArray = new Row[rows.size()];
         rows.toArray(rowArray);
         return rowArray;
+    }
+
+    public void exportConfiguration() throws StringEncrypter.EncryptionException, IOException {
+        StringEncrypter stringEncrypter = new StringEncrypter(StringEncrypter.DES_ENCRYPTION_SCHEME);
+        DBConfiguration dbConfiguration = getDBConfiguration();
+        EIConfiguration eiConfiguration = getEIConfiguration();
+        List<QueryConfiguration> queryConfigurations = getQueryConfigurations();
+        StringBuilder xmlBuilder = new StringBuilder();
+        xmlBuilder.append("<config>\r\n");
+        xmlBuilder.append("\t<database type=\"");
+        xmlBuilder.append(dbConfiguration.getType());
+        xmlBuilder.append("\">\r\n");
+        xmlBuilder.append(dbConfiguration.toXML(stringEncrypter));
+        xmlBuilder.append("\t</database>\r\n");
+        xmlBuilder.append("\t<ei>\r\n");
+        xmlBuilder.append("\t\t<username>");
+        xmlBuilder.append(eiConfiguration.getUserName());
+        xmlBuilder.append("</username>\r\n");
+        xmlBuilder.append("\t\t<password><![CDATA[");
+        xmlBuilder.append(stringEncrypter.encrypt(eiConfiguration.getPassword()));
+        xmlBuilder.append("]]></password>\r\n");
+        xmlBuilder.append("\t</ei>\r\n");
+        xmlBuilder.append("\t<queries>\r\n");
+        for (QueryConfiguration queryConfiguration : queryConfigurations) {
+            xmlBuilder.append("\t\t<query");
+            xmlBuilder.append(" name=\"");
+            xmlBuilder.append(queryConfiguration.getName());
+            xmlBuilder.append("\" datasource=\"");
+            xmlBuilder.append(queryConfiguration.getDataSource());
+            xmlBuilder.append("\" publishmode=\"");
+            xmlBuilder.append(queryConfiguration.getPublishMode());
+            xmlBuilder.append("\"><![CDATA[");
+            xmlBuilder.append(queryConfiguration.getQuery());
+            xmlBuilder.append("]]></query>\r\n");
+        }
+        xmlBuilder.append("\t</queries>\r\n");
+        xmlBuilder.append("</config>");
+        File outputFile = new File("eiconfig.xml");
+        FileWriter fw = new FileWriter(outputFile);
+        fw.write(xmlBuilder.toString());
+        fw.close();
     }
 }

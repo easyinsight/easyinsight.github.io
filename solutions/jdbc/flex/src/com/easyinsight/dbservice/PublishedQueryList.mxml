@@ -35,12 +35,24 @@ import mx.controls.Alert;
         private function gotQueries():void {
             this.queries = dbService.getQueryConfigurations.lastResult as ArrayCollection;
         }
+
+        private function exportConfig():void {
+            dbService.exportConfiguration.send();
+        }
+
+        private function exported():void {
+            Alert.show("Configuration exported.");
+        }
 ]]></mx:Script>
     <mx:RemoteObject id="dbService" destination="dbremote" fault="onFault(event)">
         <mx:method name="getQueryConfigurations" result="gotQueries()"/>
         <mx:method name="deleteQuery" result="deletedQuery()"/>
+        <mx:method name="exportConfiguration" result="exported()"/>
     </mx:RemoteObject>
-    <mx:Button label="Refresh" click="setup()"/>
+    <mx:HBox>
+        <mx:Button label="Refresh" click="setup()"/>
+        <mx:Button label="Export Configuration" click="exportConfig()"/>
+    </mx:HBox>
     <mx:DataGrid dataProvider="{queries}" width="630" id="queryGrid">
         <mx:columns>
             <mx:DataGridColumn dataField="name" headerText="Name" width="100"/>

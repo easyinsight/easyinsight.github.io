@@ -3,7 +3,6 @@
         width="100%" height="100%">
     <mx:Script><![CDATA[
         import com.easyinsight.analysis.AnalysisCellRenderer;
-import com.easyinsight.analysis.AnalysisCellRendererFactory;
         import com.easyinsight.analysis.AnalysisDefinition;
         import com.easyinsight.analysis.AnalysisItem;
         import com.easyinsight.analysis.AnalysisItemWrapper;

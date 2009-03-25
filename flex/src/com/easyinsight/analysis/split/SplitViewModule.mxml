@@ -1,0 +1,194 @@
+<?xml version="1.0" ?>
+<mx:Module xmlns:mx="http://www.adobe.com/2006/mxml" implements="com.easyinsight.analysis.IReportRenderer">
+    <mx:Script><![CDATA[
+        import com.easyinsight.analysis.AnalysisDefinition;
+        import com.easyinsight.analysis.AnalysisItem;
+import com.easyinsight.analysis.AnalysisStateChangeEvent;
+import com.easyinsight.analysis.CustomChangeEvent;
+        import com.easyinsight.analysis.DataViewFactory;
+        import com.easyinsight.analysis.IReportController;
+import com.easyinsight.filtering.FilterRawData;
+
+        import com.easyinsight.filtering.FilterValueDefinition;
+        import com.easyinsight.framework.DataServiceLoadingEvent;
+        import mx.collections.ArrayCollection;
+        import mx.containers.VBox;
+import mx.controls.AdvancedDataGrid;
+import mx.events.DragEvent;
+        import mx.managers.DragManager;
+
+        [Bindable]
+        [Embed(source="../../../../../assets/bullet_square_green.png")]
+        private var maximizeIcon:Class;
+
+        [Bindable]
+        [Embed(source="../../../../../assets/pencil.png")]
+        private var editIcon:Class;
+
+        private var sourceView:DataViewFactory;
+        private var targetView:DataViewFactory;
+
+        private var sourceReport:AnalysisDefinition;
+        private var targetReport:AnalysisDefinition;
+
+        private var joinItem:AnalysisItem;
+        private var filterValueDefinition:FilterValueDefinition;
+
+        private function maximizeSource():void {
+        }
+
+        private function targetEnterHandler(event:DragEvent):void {
+            if (event.dragInitiator is AdvancedDataGrid) {
+                var target:VBox = VBox(event.currentTarget);
+                DragManager.acceptDragDrop(target);
+            }
+        }
+
+        private function targetDropHandler(event:DragEvent):void {
+
+        }
+
+        private function dragOverHandler(event:DragEvent):void {
+
+        }
+
+        private function onJoinDragEnter(event:DragEvent):void {
+        }
+
+        private function onJoinDragDrop(event:DragEvent):void {
+        }
+
+        private function editJoin():void {
+        }
+
+        private function maximizeTarget():void {
+        }
+
+        private function sourceStateChange(event:AnalysisStateChangeEvent):void {
+
+            
+        }
+
+        private function createSourceDataViewFactory(controllerClassName:String):void {
+            if (sourceView != null) {
+                sourceBox.removeChild(sourceView);
+            }
+            var controllerClass:Class = Class(getDefinitionByName(controllerClassName));
+            var controller:IReportController = new controllerClass();
+            var dataView:DataViewFactory = controller.createDataView();
+            if (sourceReport == null) {
+                this.sourceReport = dataView.createNewDefinition();
+                sourceReport.canSaveDirectly = true;
+                sourceReport.dataFeedID = dataService.dataFeedID;
+            } else {
+                sourceReport = dataView.fromExistingDefinition(sourceReport);
+                dataView.analysisDefinition = sourceReport;
+            }
+            dataView.addEventListener(DataServiceLoadingEvent.LOADING_STARTED, startLoading);
+            dataView.addEventListener(DataServiceLoadingEvent.LOADING_STOPPED, stopLoading);
+            sourceBox.addChild(sourceView);
+            sourceView.retrieveData();
+        }
+
+        private function createTargetDataViewFactory(controllerClassName:String):void {
+            if (targetView != null) {
+                targetBox.removeChild(targetView);
+            }
+            var controllerClass:Class = Class(getDefinitionByName(controllerClassName));
+            var controller:IReportController = new controllerClass();
+            var dataView:DataViewFactory = controller.createDataView();
+            if (targetReport == null) {
+                this.targetReport = dataView.createNewDefinition();
+                targetReport.canSaveDirectly = true;
+                targetReport.dataFeedID = dataService.dataFeedID;
+            } else {
+                targetReport = dataView.fromExistingDefinition(targetReport);
+                dataView.analysisDefinition = targetReport;
+            }
+            dataView.addEventListener(DataServiceLoadingEvent.LOADING_STARTED, startLoading);
+            dataView.addEventListener(DataServiceLoadingEvent.LOADING_STOPPED, stopLoading);
+            targetBox.addChild(targetView);
+            targetView.retrieveData();
+        }
+
+        private function startLoading(event:DataServiceLoadingEvent):void {
+            dispatchEvent(event);
+        }
+
+        private function stopLoading(event:DataServiceLoadingEvent):void {
+            dispatchEvent(event);
+        }
+
+        private function targetStateChange(event:AnalysisStateChangeEvent):void {
+
+        }
+
+        public function renderReport(dataSet:ArrayCollection, analysisDefinition:AnalysisDefinition, clientProcessorMap:Object):void {
+            if (sourceView == null) {
+                var splitDefinition:SplitDefinition = analysisDefinition as SplitDefinition;
+                var sourceDefinition:AnalysisDefinition = splitDefinition.sourceDefinition;
+                var sourceControllerClassName:String = sourceDefinition.controller;
+                createSourceDataViewFactory(sourceControllerClassName);
+                var targetDefinition:AnalysisDefinition = splitDefinition.targetDefinition;
+                var targetControllerClassName:String = targetDefinition.controller;
+                createTargetDataViewFactory(targetControllerClassName);
+            } else {
+                sourceView.retrieveData();
+                targetView.retrieveData();
+            }
+        }
+
+        private function updateReports():void {
+
+        }
+
+        public function createFilterRawData():FilterRawData {
+            return null;
+        }
+
+        public function updateExportMetadata():void {
+        }
+
+        public function onCustomChangeEvent(event:CustomChangeEvent):void {
+        }]]></mx:Script>
+    <mx:VDividedBox height="100%" width="100%">
+		<mx:VBox height="50%" width="100%">
+            <mx:ApplicationControlBar width="100%">
+                <mx:Label text="Filter by this Field: " fontSize="14"/>
+                <mx:Box borderThickness="1" borderStyle="inset">
+                    <mx:Label text="Drop Filter Field Here" dragEnter="onJoinDragEnter(event)" dragDrop="onJoinDragDrop(event)"
+                        dragOver="dragOverHandler(event)" fontSize="14"/>
+                </mx:Box>
+            </mx:ApplicationControlBar>
+			<mx:HBox width="100%">
+				<mx:DataGrid>
+                    
+				</mx:DataGrid>
+                <mx:DataGrid>
+
+				</mx:DataGrid>
+			</mx:HBox>
+            <mx:Box width="100%" height="100%" id="sourceBox"/>
+		</mx:VBox>
+		<mx:VBox height="50%" width="100%" dragEnter="targetEnterHandler(event)" dragDrop="targetDropHandler(event)"
+			dragOver="dragOverHandler(event)">
+			<mx:ApplicationControlBar width="100%">
+				<mx:Label text="Filter by this Field: " fontSize="14"/>
+				<mx:Box borderThickness="1" borderStyle="inset">
+					<mx:Label text="Drop Filter Field Here" dragEnter="onJoinDragEnter(event)" dragDrop="onJoinDragDrop(event)"
+						dragOver="dragOverHandler(event)" fontSize="14"/>
+				</mx:Box>
+				<mx:Button icon="{editIcon}" toolTip="Edit" click="editJoin()"/>
+				<mx:Spacer width="50"/>
+				<mx:Label text="Drag Rows From the List Above into the Pane Below" fontSize="14"/>
+			</mx:ApplicationControlBar>
+			<mx:HBox width="100%">
+				<AnalysisStatePopupButton analysisStateChange="targetStateChange(event)" id="targetState" mode="splitTarget"/>
+				<mx:HBox width="100%" horizontalAlign="right">
+					<mx:Button icon="{maximizeIcon}" toolTip="Maximize" click="maximizeTarget()"/>
+				</mx:HBox>
+			</mx:HBox>
+            <mx:Box width="100%" height="100%" id="targetBox"/>
+		</mx:VBox>
+	</mx:VDividedBox>
+</mx:Module>

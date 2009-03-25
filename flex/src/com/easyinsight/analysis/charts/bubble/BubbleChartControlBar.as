@@ -9,6 +9,7 @@ import com.easyinsight.analysis.MeasureDropArea;
 import com.easyinsight.analysis.ReportDataEvent;
 import mx.collections.ArrayCollection;
 import mx.containers.HBox;
+import mx.controls.Label;
 public class BubbleChartControlBar extends HBox implements IReportControlBar  {
 
     private var dimensionGrouping:ListDropAreaGrouping;
@@ -35,13 +36,33 @@ public class BubbleChartControlBar extends HBox implements IReportControlBar  {
         zmeasureGrouping.maxElements = 1;
         zmeasureGrouping.dropAreaType = MeasureDropArea;
         zmeasureGrouping.addEventListener(AnalysisItemUpdateEvent.ANALYSIS_LIST_UPDATE, requestListData);
+        setStyle("verticalAlign", "middle");
     }
 
     override protected function createChildren():void {
         super.createChildren();
+        var groupingLabel:Label = new Label();
+        groupingLabel.text = "Grouping:";
+        groupingLabel.setStyle("fontSize", 14);
+        addChild(groupingLabel);
         addChild(dimensionGrouping);
-        addChild(xmeasureGrouping);
+
+        var yMeasureLabel:Label = new Label();
+        yMeasureLabel.text = "Y Axis Measure:";
+        yMeasureLabel.setStyle("fontSize", 14);
+        addChild(yMeasureLabel);
         addChild(ymeasureGrouping);
+        
+        var xMeasureLabel:Label = new Label();
+        xMeasureLabel.text = "X Axis Measure:";
+        xMeasureLabel.setStyle("fontSize", 14);
+        addChild(xMeasureLabel);
+        addChild(xmeasureGrouping);
+
+        var zMeasureLabel:Label = new Label();
+        zMeasureLabel.text = "Radius Measure:";
+        zMeasureLabel.setStyle("fontSize", 14);
+        addChild(zMeasureLabel);
         addChild(zmeasureGrouping);
          if (xAxisDefinition.dimension != null) {
             dimensionGrouping.addAnalysisItem(xAxisDefinition.dimension);

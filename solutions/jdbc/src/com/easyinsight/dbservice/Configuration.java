@@ -2,13 +2,12 @@ package com.easyinsight.dbservice;
 
 import flex.messaging.FlexContext;
 
-import java.io.InputStreamReader;
-import java.io.BufferedReader;
-import java.io.IOException;
+import java.io.*;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.DriverManager;
+import java.util.List;
 
 /**
  * User: James Boe
@@ -41,15 +40,39 @@ public class Configuration {
             dbConfiguration.setUserName(dbUserName);
             dbConfiguration.setPassword(dbPassword);
             System.out.println("Saving...");
-            assignDB(dbConfiguration);
             EIConfiguration eiConfiguration = new EIConfiguration();
             eiConfiguration.setUserName(userName);
             eiConfiguration.setPassword(password);
-            assignEI(eiConfiguration);
-            System.out.println("Saved.");
-        } catch (IOException e) {
+            exportConfiguration(dbConfiguration, eiConfiguration);
+            System.out.println("Saved. Copy the new eicredentials.xml file into the bin directory of your application server.");
+        } catch (Exception e) {
             e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
         }
+    }
+
+    public static void exportConfiguration(DBConfiguration dbConfiguration, EIConfiguration eiConfiguration) throws StringEncrypter.EncryptionException, IOException {
+        StringEncrypter stringEncrypter = new StringEncrypter(StringEncrypter.DES_ENCRYPTION_SCHEME);
+
+        StringBuilder xmlBuilder = new StringBuilder();
+        xmlBuilder.append("<config>\r\n");
+        xmlBuilder.append("\t<database type=\"");
+        xmlBuilder.append(dbConfiguration.getType());
+        xmlBuilder.append("\">\r\n");
+        xmlBuilder.append(dbConfiguration.toXML(stringEncrypter));
+        xmlBuilder.append("\t</database>\r\n");
+        xmlBuilder.append("\t<ei>\r\n");
+        xmlBuilder.append("\t\t<username>");
+        xmlBuilder.append(eiConfiguration.getUserName());
+        xmlBuilder.append("</username>\r\n");
+        xmlBuilder.append("\t\t<password><![CDATA[");
+        xmlBuilder.append(stringEncrypter.encrypt(eiConfiguration.getPassword()));
+        xmlBuilder.append("]]></password>\r\n");
+        xmlBuilder.append("\t</ei>\r\n");
+        xmlBuilder.append("</config>");
+        File outputFile = new File("eicredentials.xml");
+        FileWriter fw = new FileWriter(outputFile);
+        fw.write(xmlBuilder.toString());
+        fw.close();
     }
 
     private static Connection getConnection() {

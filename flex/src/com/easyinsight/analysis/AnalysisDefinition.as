@@ -43,8 +43,10 @@ package com.easyinsight.analysis
         protected function findItems(fields:ArrayCollection, type:int):ArrayCollection {
             var measures:ArrayCollection = new ArrayCollection();
             for each (var field:AnalysisItem in fields) {
-                if (field.hasType(type)) {
-                    measures.addItem(field);
+                if (field != null) {
+                    if (field.hasType(type)) {
+                        measures.addItem(field);
+                    }
                 }
             }
             return measures;

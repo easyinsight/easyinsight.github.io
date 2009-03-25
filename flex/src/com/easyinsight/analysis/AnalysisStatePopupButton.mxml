@@ -20,8 +20,8 @@
             import com.easyinsight.analysis.charts.yaxisbased.bar.Bar3DChartController;
             import com.easyinsight.analysis.charts.yaxisbased.bar.BarChartController;
             import com.easyinsight.analysis.crosstab.CrosstabController;
-import com.easyinsight.analysis.maps.MapController;
-import mx.events.MenuEvent;
+            import com.easyinsight.analysis.maps.MapController;
+            import mx.events.MenuEvent;
 			
 			[Bindable]
             [Embed(source="../../../../assets/table.png")]
@@ -53,11 +53,13 @@ import mx.events.MenuEvent;
             }
 			
 			private function itemClickHandler(event:MenuEvent):void {
-                event.currentTarget.label= event.label;
-                var controllerClassName:String = event.item.@controller;
-                var controllerClass:Class = Class(getDefinitionByName(controllerClassName));
-                var controller:IReportController = new controllerClass();
-                dispatchEvent(new AnalysisStateChangeEvent(controller)); 
+                if (event.item != null && event.item.@controller != null) {
+                    event.currentTarget.label= event.label;
+                    var controllerClassName:String = event.item.@controller;
+                    var controllerClass:Class = Class(getDefinitionByName(controllerClassName));
+                    var controller:IReportController = new controllerClass();
+                    dispatchEvent(new AnalysisStateChangeEvent(controller));
+                }
             }
             
             public function set selectedLabel(selectedLabel:String):void {

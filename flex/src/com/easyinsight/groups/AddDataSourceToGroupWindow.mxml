@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute"
+	creationComplete="feedService.searchForSubscribedFeeds.send()">
+	<mx:Script>
+		<![CDATA[
+			import mx.managers.PopUpManager;
+			import com.easyinsight.listing.DataFeedDescriptor;
+			import mx.collections.ArrayCollection;
+			[Bindable]
+			private var descriptors:ArrayCollection;
+
+            private var _groupID:int;
+
+
+            public function set groupID(val:int):void {
+                _groupID = val;
+            }
+
+			private function gotFeeds():void {
+				descriptors = feedService.searchForSubscribedFeeds.lastResult as ArrayCollection;
+			}
+
+			private function chose():void {
+				var descriptor:DataFeedDescriptor = feedBox.selectedItem as DataFeedDescriptor;
+                groupService.addFeedToGroup.send(descriptor.dataFeedID, _groupID);
+			}
+
+            private function addedDataSource():void {
+                dispatchEvent(new GroupRefreshEvent());
+                PopUpManager.removePopUp(this);
+            }
+
+			private function cancel():void {
+				PopUpManager.removePopUp(this);
+			}
+		]]>
+	</mx:Script>
+    <mx:RemoteObject destination="groupService" id="groupService">
+		<mx:method name="addFeedToGroup" result="addedDataSource()"/>
+	</mx:RemoteObject>
+	<mx:RemoteObject destination="feeds" id="feedService">
+		<mx:method name="searchForSubscribedFeeds" result="gotFeeds()"/>
+	</mx:RemoteObject>
+	<mx:Form styleName="TitleWindowContents">
+		<mx:FormItem label="Choose a Data Source:">
+			<mx:ComboBox id="feedBox" dataProvider="{descriptors}" selectedIndex="0" labelField="name"/>
+		</mx:FormItem>
+		<mx:FormItem label="" direction="horizontal">
+			<mx:Button label="OK" click="chose()"/>
+			<mx:Button label="Cancel" click="cancel()"/>
+		</mx:FormItem>
+	</mx:Form>
+</mx:TitleWindow>

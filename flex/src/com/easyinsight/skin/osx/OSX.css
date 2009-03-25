@@ -358,3 +358,15 @@ DateChooser {
     backgroundColor: #ffffff;
     fontSize: 12;    
 }
+
+.axisTitles {
+    fontSize: 14;
+}
+
+CartesianChart {
+    axisTitleStyleName:axisTitles;
+}
+
+CartesianChart3D {
+    axisTitleStyleName:axisTitles;
+}

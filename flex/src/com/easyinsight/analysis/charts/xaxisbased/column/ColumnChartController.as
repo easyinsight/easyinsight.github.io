@@ -6,6 +6,7 @@ import com.easyinsight.analysis.service.ListDataService;
 import com.easyinsight.analysis.charts.xaxisbased.XAxisControlBar;
 
 public class ColumnChartController implements IReportController {
+    
     public function ColumnChartController() {
     }
 

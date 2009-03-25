@@ -28,7 +28,7 @@
 			[Bindable]
             [Embed(source="../../../../assets/bullet_square_green.png")]
             private var maximizeIcon:Class;
-            
+
             [Bindable]
             [Embed(source="../../../../assets/pencil.png")]
             private var editIcon:Class;

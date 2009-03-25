@@ -39,8 +39,35 @@
         </copy>
     </target>
 
+    <target name="copyWarContents">
+        <mkdir dir="${jdbc.out.path}/web3"/>
+        <copy flatten="false" todir="${jdbc.out.path}">
+            <fileset dir="../web3">
+                <include name="**/*"/>
+            </fileset>
+        </copy>
+    </target>
+
+    <target name="jdbcwar" depends="clean, compileJava, buildFlex, copyLibsWar, copyWarContents">
+        <war destfile="../out/dbsolution.war" basedir="${jdbc.out.path}" webxml="${jdbc.out.path}/WEB-INF/web.xml"/>
+    </target>
+
     <target name="copyLibs">
         <copy flatten="true" todir="${jdbc.out.path}/lib">
+            <fileset dir="../lib">
+                <include name="**/*"/>
+            </fileset>
+        </copy>
+    </target>
+
+    <target name="copyLibsWar">
+        <mkdir dir="${jdbc.out.path}/WEB-INF/lib"/>
+        <copy todir="${jdbc.out.path}/WEB-INF/lib" >
+            <fileset dir="${jdbc.out.path}/lib">
+                <include name="**/*"/>
+            </fileset>
+        </copy>
+        <copy flatten="true" todir="${jdbc.out.path}/WEB-INF/lib">
             <fileset dir="../lib">
                 <include name="**/*"/>
             </fileset>

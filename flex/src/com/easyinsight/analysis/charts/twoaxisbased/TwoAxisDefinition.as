@@ -21,15 +21,15 @@ public class TwoAxisDefinition extends ChartDefinition{
         }
         var dimensions:ArrayCollection = findItems(fields, AnalysisItemTypes.DIMENSION);
         if (dimensions.length > 0) {
-            xaxis = dimensions.getItemAt(0) as AnalysisItem;
+            yaxis = dimensions.getItemAt(0) as AnalysisItem;
             if (dimensions.length > 1) {
-                yaxis = dimensions.getItemAt(1) as AnalysisItem;
+                xaxis = dimensions.getItemAt(1) as AnalysisItem;
             }
         }
     }
 
     override public function getFields():ArrayCollection {
-        return new ArrayCollection([ xaxis, yaxis, measure]);
+        return new ArrayCollection([ yaxis, xaxis, measure]);
     }
 }
 }

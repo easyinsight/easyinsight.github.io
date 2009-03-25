@@ -12,7 +12,6 @@
         import mx.charts.chartClasses.IAxis;
         import mx.formatters.Formatter;
         import mx.charts.HitData;
-        import mx.charts.renderers.DiamondItemRenderer;
         import mx.collections.ArrayCollection;
 
         [Bindable]
@@ -23,6 +22,8 @@
 
         [Bindable]
         private var measure1:String = "";
+        [Bindable]
+        private var measure1Name:String = "";
 
         private var measure1Formatter:Formatter;
 
@@ -30,13 +31,17 @@
 
         [Bindable]
         private var measure2:String = "";
+        [Bindable]
+        private var measure2Name:String = "";
 
         private var measure2Formatter:Formatter;
 
         public function renderReport(dataSet:ArrayCollection, analysisDefinition:AnalysisDefinition, clientProcessorMap:Object):void {
             var plotChartDef:PlotChartDefinition = analysisDefinition as PlotChartDefinition;
             measure1 = plotChartDef.xaxisMeasure.qualifiedName();
+            measure1Name = plotChartDef.xaxisMeasure.display;
             measure2 = plotChartDef.yaxisMeasure.qualifiedName();
+            measure2Name = plotChartDef.yaxisMeasure.display;
             measure1Formatter = plotChartDef.xaxisMeasure.getFormatter();
             measure2Formatter = plotChartDef.yaxisMeasure.getFormatter();
             dimension = plotChartDef.dimension.qualifiedName();
@@ -88,7 +93,7 @@
 	<mx:PlotChart id="plotChart" dataProvider="{graphData}" width="100%" height="100%" showDataTips="true" dataTipFunction="dtFunc"
 		selectionMode="multiple">
 		<mx:horizontalAxis>
-			<mx:LinearAxis labelFunction="renderXAxis" baseAtZero="false" title="{measure1}" id="xAxis"/>
+			<mx:LinearAxis labelFunction="renderXAxis" baseAtZero="false" title="{measure1Name}" id="xAxis"/>
 		</mx:horizontalAxis>
 		<mx:horizontalAxisRenderers>
 			<mx:AxisRenderer axis="{xAxis}">
@@ -96,7 +101,7 @@
 			</mx:AxisRenderer>
 		</mx:horizontalAxisRenderers>
 		<mx:verticalAxis>
-			<mx:LinearAxis labelFunction="renderYAxis" baseAtZero="false" title="{measure2}" id="yAxis"/>
+			<mx:LinearAxis labelFunction="renderYAxis" baseAtZero="false" title="{measure2Name}" id="yAxis"/>
 		</mx:verticalAxis>
 		<mx:verticalAxisRenderers>
 			<mx:AxisRenderer axis="{yAxis}">

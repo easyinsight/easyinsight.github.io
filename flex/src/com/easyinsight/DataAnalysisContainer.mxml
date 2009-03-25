@@ -422,6 +422,12 @@ import mx.collections.SortField;
 
         private function saved():void {
             analysisDefinition.analysisID = analysisService.saveAnalysisDefinition.lastResult as int;
+            var feedFragmentObject:Object = new Object();
+            if (!feedAdminMode) {
+                feedFragmentObject.analysisID = String(analysisDefinition.analysisID);
+                var feedFragmentString:String = URLUtil.objectToString(feedFragmentObject);
+                BrowserManager.getInstance().setFragment(feedFragmentString);
+            }
             this.analysisChanged = false;
         }
 
@@ -693,10 +699,10 @@ import mx.collections.SortField;
     </mx:RemoteObject>
     <mx:VBox height="100%" width="100%">
         <mx:HBox id="buttonBox">
-            <mx:Button id="undoButton" icon="@Embed(source='../../../assets/undo.png')" click="undo()" toolTip="Undo"/>
-            <mx:Button id="redoButton" icon="@Embed(source='../../../assets/redo.png')" click="redo()" toolTip="Redo"/>
             <mx:Button id="wrapButton" icon="@Embed(source='../../../assets/document_out.png')" click="close()"
                        toolTip="Close"/>
+            <mx:Button id="undoButton" icon="@Embed(source='../../../assets/undo.png')" click="undo()" toolTip="Undo"/>
+            <mx:Button id="redoButton" icon="@Embed(source='../../../assets/redo.png')" click="redo()" toolTip="Redo"/>
             <mx:Button id="subscribeToFeedButton" icon="@Embed(source='../../../assets/folder_into.png')"
                        click="subscribeToFeed()" toolTip="Add Data Source to My Data" visible="{canSubscribeToFeed}"/>
             <mx:Button id="groupAddFeedButton" icon="@Embed(source='../../../assets/users_into.png')"

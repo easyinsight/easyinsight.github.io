@@ -9,6 +9,7 @@ import com.easyinsight.analysis.MeasureDropArea;
 import com.easyinsight.analysis.ReportDataEvent;
 import mx.collections.ArrayCollection;
 import mx.containers.HBox;
+import mx.controls.Label;
 public class YAxisControlBar extends HBox implements IReportControlBar  {
 
     private var yAxisGrouping:ListDropAreaGrouping;
@@ -25,11 +26,20 @@ public class YAxisControlBar extends HBox implements IReportControlBar  {
         measureGrouping.maxElements = 1;
         measureGrouping.dropAreaType = MeasureDropArea;
         measureGrouping.addEventListener(AnalysisItemUpdateEvent.ANALYSIS_LIST_UPDATE, requestListData);
+        setStyle("verticalAlign", "middle");
     }
 
     override protected function createChildren():void {
         super.createChildren();
+        var groupingLabel:Label = new Label();
+        groupingLabel.text = "Y Axis Grouping:";
+        groupingLabel.setStyle("fontSize", 14);
+        addChild(groupingLabel);
         addChild(yAxisGrouping);
+        var measureLabel:Label = new Label();
+        measureLabel.text = "X Axis Measure:";
+        measureLabel.setStyle("fontSize", 14);
+        addChild(measureLabel);
         addChild(measureGrouping);
          if (yAxisDefinition.yaxis != null) {
             yAxisGrouping.addAnalysisItem(yAxisDefinition.yaxis);

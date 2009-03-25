@@ -1,5 +1,7 @@
 package com.easyinsight.dbservice;
 
+import org.w3c.dom.Node;
+
 import java.sql.*;
 import java.util.Properties;
 import java.text.MessageFormat;
@@ -16,6 +18,15 @@ public class MySQLConfiguration extends DBConfiguration {
     private String userName;
     private String password;
     private String connectionString = "jdbc:mysql://{0}:{1}/{2}?user={3}&password={4}";
+    private String xmlString = "<mysql host=\"{0}\" port=\"{1}\" databaseName=\"{2}\" userName=\"{3}\"><![CDATA[{4}]]></mysql>";
+
+    public void loadFromXML(Node node, StringEncrypter stringEncrypter) throws StringEncrypter.EncryptionException {
+        this.host = node.getAttributes().getNamedItem("host").getNodeValue();
+        this.port = node.getAttributes().getNamedItem("port").getNodeValue();
+        this.databaseName = node.getAttributes().getNamedItem("databaseName").getNodeValue();
+        this.userName = node.getAttributes().getNamedItem("userName").getNodeValue();
+        this.password = stringEncrypter.decrypt(node.getFirstChild().getNodeValue());
+    }
 
     public String getUserName() {
         return userName;
@@ -98,6 +109,10 @@ public class MySQLConfiguration extends DBConfiguration {
         } else {
             throw new RuntimeException("No MySQL record found!");
         }
+    }
+
+    public String toXML(StringEncrypter stringEncrypter) throws StringEncrypter.EncryptionException {
+        return MessageFormat.format(xmlString, host, port, databaseName, userName, stringEncrypter.encrypt(password));
     }
 
     public String getDatabaseName() {

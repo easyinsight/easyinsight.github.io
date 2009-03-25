@@ -4,7 +4,13 @@ import com.easyinsight.analysis.EmbeddedViewFactory;
 import com.easyinsight.analysis.IReportController;
 import com.easyinsight.analysis.charts.xaxisbased.XAxisControlBar;
 import com.easyinsight.analysis.service.ListDataService;
+import mx.charts.renderers.WedgeItemRenderer;
+
+
 public class PieChartController implements IReportController {
+
+    private var wedgeItemRenderer:WedgeItemRenderer;
+
     public function PieChartController() {
     }
 

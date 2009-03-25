@@ -1,12 +1,14 @@
 <?xml version="1.0" ?>
 <mx:Module xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:analysis="com.easyinsight.analysis.*" implements="com.easyinsight.analysis.IReportRenderer"
-        width="100%" height="100%">
+        width="100%" height="100%" creationComplete="setupListeners()">
     <mx:Script><![CDATA[
         import com.easyinsight.analysis.AnalysisDefinition;
 
         import com.easyinsight.analysis.AnalysisItem;
-        import com.easyinsight.analysis.CustomChangeEvent;
-        import com.easyinsight.analysis.SortableAxisTitleFactory;
+        import com.easyinsight.analysis.ChartSortButton;
+        import com.easyinsight.analysis.ChartSortEvent;
+import com.easyinsight.analysis.CustomChangeEvent;
+        import com.easyinsight.analysis.SortableAxisTitle;
         import com.easyinsight.analysis.conditions.ConditionRenderer;
 
         import com.easyinsight.filtering.FilterRawData;
@@ -23,7 +25,9 @@
         import mx.charts.series.BarSeries;
         import mx.charts.series.items.BarSeriesItem;
         import mx.collections.ArrayCollection;
-        import mx.events.FlexEvent;
+        import mx.collections.Sort;
+import mx.collections.SortField;
+import mx.events.FlexEvent;
         import mx.formatters.Formatter;
         import mx.graphics.BitmapFill;
         import mx.graphics.IFill;
@@ -56,9 +60,9 @@
         private var xAxis:LinearAxis;
         private var yAxis:CategoryAxis;
 
-        private var xAxisTitleRendererFactory:SortableAxisTitleFactory;
+        private var xAxisTitleRendererFactory:ClassFactory;
 
-        private var yAxisTitleRendererFactory:SortableAxisTitleFactory;
+        private var yAxisTitleRendererFactory:ClassFactory;
 
         private var barSeries:BarSeries;
 
@@ -87,6 +91,21 @@
         public function set yField(val:String):void {
             _yField = val;
             dispatchEvent(new FlexEvent(FlexEvent.DATA_CHANGE));
+        }
+
+        private function onChartSort(event:ChartSortEvent):void {
+           if (event.sortState == ChartSortButton.ASCENDING ||
+               event.sortState == ChartSortButton.DESCENDING) {
+               var sort:Sort = new Sort();
+               sort.fields = [ new SortField(event.analysisItem.qualifiedName(), false,
+                   event.sortState == ChartSortButton.DESCENDING) ];
+               graphData.sort = sort;
+               graphData.refresh();
+           }
+       }
+
+        private function setupListeners():void {
+            addEventListener(ChartSortEvent.CHART_SORT, onChartSort);
         }
 
         override protected function createChildren():void {
@@ -125,7 +144,8 @@
                 barChart.verticalAxis = yAxis;
                 var axisRenderer:AxisRenderer = new AxisRenderer();
                 axisRenderer.axis = yAxis;
-                yAxisTitleRendererFactory = new SortableAxisTitleFactory(yAxisItem, false);
+                yAxisTitleRendererFactory = new ClassFactory(SortableAxisTitle);
+                yAxisTitleRendererFactory.properties = { analysisItem: yAxisItem, axisDirection: false};
                 axisRenderer.titleRenderer = yAxisTitleRendererFactory;
                 axisRenderer.placement = "left";
                 barChart.verticalAxisRenderers = [ axisRenderer ];
@@ -138,7 +158,8 @@
                 barChart.horizontalAxis = xAxis;
                 var xAxisRenderer:AxisRenderer = new AxisRenderer();
                 xAxisRenderer.axis = xAxis;
-                xAxisTitleRendererFactory = new SortableAxisTitleFactory(xAxisItem, true);
+                xAxisTitleRendererFactory = new ClassFactory(SortableAxisTitle);
+                xAxisTitleRendererFactory.properties = { analysisItem: xAxisItem, axisDirection: true};
                 xAxisRenderer.titleRenderer = xAxisTitleRendererFactory;
                 xAxisRenderer.placement = "bottom";
                 barChart.horizontalAxisRenderers = [ xAxisRenderer ];
@@ -202,7 +223,8 @@
             if (xAxisItem == null || newXAxisItem.qualifiedName() != xAxisItem.qualifiedName()) {
                 xAxisItem = newXAxisItem;
                 if (sortable) {
-                    xAxisTitleRendererFactory.analysisItem = xAxisItem;
+                    xAxisTitleRendererFactory = new ClassFactory(SortableAxisTitle);
+                    xAxisTitleRendererFactory.properties = { analysisItem: xAxisItem, axisDirection: true};
                 }
             }
 
@@ -210,7 +232,8 @@
             if (yAxisItem == null || newYAxisItem.qualifiedName() != yAxisItem.qualifiedName()) {
                 yAxisItem = newYAxisItem;
                 if (sortable) {
-                    yAxisTitleRendererFactory.analysisItem = yAxisItem;
+                    yAxisTitleRendererFactory = new ClassFactory(SortableAxisTitle);
+                    yAxisTitleRendererFactory.properties = { analysisItem: yAxisItem, axisDirection: false};
                 }
             }
 

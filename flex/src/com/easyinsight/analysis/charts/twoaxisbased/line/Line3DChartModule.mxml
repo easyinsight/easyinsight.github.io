@@ -61,6 +61,7 @@
             lineChart.percentWidth = 100;
             lineChart.dataProvider = chartData;
             lineChart.selectionMode = "multiple";
+            lineChart.showDataTips = true;            
 
             var xAxisDimension:AnalysisItem = lineChartDef.xaxis;
 
@@ -130,6 +131,9 @@
             for (var i:int = 0; i < dataSet.length; i++) {
                 var object:Object = dataSet.getItemAt(i);
                 var dimensionValue:String = object[lineChartDef.yaxis.qualifiedName()];
+                if (dimensionValue == null || dimensionValue == "") {
+                    dimensionValue = "[ No Value ]";
+                }
                 var newSeriesData:ArrayCollection = seriesData[dimensionValue];
                 if (newSeriesData == null) {
                     newSeriesData = new ArrayCollection();
@@ -148,6 +152,9 @@
                 var key:String = uniques.getItemAt(i) as String;
                 var uniqueLineSeries:LineSeries3D = new LineSeries3D();
                 uniqueLineSeries.xField = lineChartDef.xaxis.qualifiedName();
+                if (key == null || key == "") {
+                    key = "[ No Value ]";
+                }
                 uniqueLineSeries.yField = key;
                 uniqueLineSeries.displayName = key;
                 uniqueLineSeries.dataProvider = seriesData[key];

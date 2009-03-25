@@ -10,6 +10,7 @@ package com.easyinsight.analysis
 	{
 		public var group:Boolean;
 		public var analysisDimensionID:int;
+        public var keyDimension:AnalysisDimension;
 		
 		public function AnalysisDimension(group:Boolean = true)
 		{

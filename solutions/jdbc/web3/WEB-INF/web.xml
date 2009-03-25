@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE web-app PUBLIC "-//Sun Microsystems, Inc.//DTD Web Application 2.3//EN" "http://java.sun.com/dtd/web-app_2_3.dtd">
+<web-app>
+
+    <display-name>dbsolution</display-name>
+    <description>dbsolution</description>
+
+    <servlet>
+        <servlet-name>JDBC</servlet-name>
+        <display-name>JDBC</display-name>
+        <servlet-class>com.easyinsight.dbservice.admin.InternalDBServlet</servlet-class>
+        <load-on-startup>1</load-on-startup>
+    </servlet>
+
+    <servlet>
+        <servlet-name>Timer</servlet-name>
+        <display-name>Timer</display-name>
+        <servlet-class>com.easyinsight.dbservice.DBServiceServlet</servlet-class>
+        <load-on-startup>1</load-on-startup>
+    </servlet>
+
+    <welcome-file-list>
+        <welcome-file>index.html</welcome-file>
+        <welcome-file>index.htm</welcome-file>
+    </welcome-file-list>
+
+</web-app>

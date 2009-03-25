@@ -4,14 +4,14 @@ package com.easyinsight.analysis
 	
 	import flash.events.MouseEvent;
 	import flash.net.URLRequest;
-	
-import mx.controls.Alert;
+
+import mx.controls.Label;
 import mx.controls.listClasses.IListItemRenderer;
 	import mx.core.UITextField;
 import mx.events.FlexEvent;
 import mx.formatters.Formatter;
 
-	public class AnalysisCellRenderer extends UITextField implements IListItemRenderer	
+	public class AnalysisCellRenderer extends Label implements IListItemRenderer
 	{
 		private var _data:Object;
 		private var URL:String;
@@ -44,7 +44,7 @@ import mx.formatters.Formatter;
             _renderer = val;
         }
 
-        public function validateProperties():void {
+        /*public function validateProperties():void {
 			validateNow();
 		}
 
@@ -54,9 +54,9 @@ import mx.formatters.Formatter;
 
 		public function validateDisplayList():void {
 			validateNow();
-		}
+		}*/
 			
-		public function set data(value:Object):void {
+		override public function set data(value:Object):void {
 			_data = value;
 			if (value != null) {
                 var field:String = analysisItem.qualifiedName();
@@ -72,10 +72,11 @@ import mx.formatters.Formatter;
                     //Alert.show("retrieving " + field + " produced " + objVal + " gave us formatted text = " + this.text);
 					if (renderer.hasCustomColor()) {
 						var color:uint = renderer.getColor(objVal);
-						this.textColor = color;
+                        setStyle("color", color);
+						//this.textColor = color;
 						//defaultLabel.textColor = color;
 					} else {
-                        this.textColor = 0x000000;
+                        //this.textColor = 0x000000;
                     }
 				}
 			} else {
@@ -88,7 +89,7 @@ import mx.formatters.Formatter;
             dispatchEvent(new FlexEvent(FlexEvent.DATA_CHANGE));
 		}
 			
-			public function get data():Object {
+			override public function get data():Object {
 				return _data;
 			}
 			

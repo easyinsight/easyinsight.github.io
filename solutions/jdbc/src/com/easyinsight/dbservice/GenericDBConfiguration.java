@@ -1,6 +1,9 @@
 package com.easyinsight.dbservice;
 
+import org.w3c.dom.Node;
+
 import java.sql.*;
+import java.text.MessageFormat;
 
 /**
  * User: James Boe
@@ -8,6 +11,8 @@ import java.sql.*;
  * Time: 10:16:17 AM
  */
 public class GenericDBConfiguration extends DBConfiguration {
+
+    private String xmlString = "<generic driver=\"{0}\" jdbcURL=\"{1}\"/>";
 
     private String driver;
     private String jdbcURL;
@@ -31,6 +36,14 @@ public class GenericDBConfiguration extends DBConfiguration {
     public Connection getConnection() throws ClassNotFoundException, SQLException {
         Class.forName(driver);
         return DriverManager.getConnection(jdbcURL);
+    }
+
+    public String toXML(StringEncrypter stringEncrypter) throws StringEncrypter.EncryptionException {
+        return MessageFormat.format(xmlString, driver, jdbcURL);
+    }
+
+    public void loadFromXML(Node node, StringEncrypter stringEncrypter) throws StringEncrypter.EncryptionException {
+        //To change body of implemented methods use File | Settings | File Templates.
     }
 
     public String validate() {

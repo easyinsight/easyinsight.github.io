@@ -1,5 +1,6 @@
-package com.easyinsight.analysis
+package com.easyinsight.analysis.split
 {
+import com.easyinsight.analysis.*;
 	public class SplitDefinition extends AnalysisDefinition
 	{
 		public var sourceDefinition:AnalysisDefinition;

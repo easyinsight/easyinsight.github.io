@@ -11,7 +11,7 @@ package com.easyinsight.analysis
 		public static var DESCENDING:int = 2;
 		
 		private var sortState:int = NONE;
-		private var analysisItem:AnalysisItem;
+		private var _analysisItem:AnalysisItem;
 		
 		[Embed(source="../../../../assets/sort_up_down.png")]
         public var noneIcon:Class;
@@ -22,10 +22,8 @@ package com.easyinsight.analysis
         [Embed(source="../../../../assets/sort_descending.png")]
         public var sortDownIcon:Class;
 		
-		public function ChartSortButton(analysisItem:AnalysisItem) {
+		public function ChartSortButton() {
 			super();
-			this.analysisItem = analysisItem;
-			this.sortState = this.analysisItem.sort;
 			if (sortState == NONE) {
 				setStyle("icon", noneIcon);	
 			} else if (sortState == ASCENDING) {
@@ -34,10 +32,14 @@ package com.easyinsight.analysis
 				this.setStyle("icon", sortDownIcon);
 			}
 			addEventListener(MouseEvent.CLICK, sortClick);
-			
 		}
-		
-		private function sortClick(event:MouseEvent):void {
+
+        public function set analysisItem(val:AnalysisItem):void {
+            _analysisItem = val;
+            this.sortState = val.sort;
+        }
+
+        private function sortClick(event:MouseEvent):void {
 			if (sortState == NONE) {
 				sortState = ASCENDING;
 				this.setStyle("icon", sortUpIcon);				
@@ -48,8 +50,8 @@ package com.easyinsight.analysis
 				sortState = NONE;
 				this.setStyle("icon", noneIcon);
 			}
-			analysisItem.sort = sortState;
-			dispatchEvent(new ChartSortEvent(analysisItem, sortState));
+			_analysisItem.sort = sortState;
+			dispatchEvent(new ChartSortEvent(_analysisItem, sortState));
 		}
 	}
 }

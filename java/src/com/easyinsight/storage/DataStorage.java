@@ -406,7 +406,8 @@ public class DataStorage {
         }
         String columns = columnBuilder.toString();
         String parameters = paramBuilder.toString();
-        PreparedStatement insertStmt = storageConn.prepareStatement("INSERT INTO " + getTableName() + " (" + columns + ") VALUES (" + parameters + ")");
+        String insertSQL = "INSERT INTO " + getTableName() + " (" + columns + ") VALUES (" + parameters + ")";
+        PreparedStatement insertStmt = storageConn.prepareStatement(insertSQL);
         for (IRow row : dataSet.getRows()) {
             int i = 1;
             for (KeyMetadata keyMetadata : keys.values()) {
@@ -488,6 +489,9 @@ public class DataStorage {
                 sqlType = Types.VARCHAR;
             }
             insertStmt.setNull(i++, sqlType);
+            if (keyMetadata.getType() == Value.DATE) {
+                insertStmt.setNull(i++, Types.BIGINT);
+            }
         } else if (keyMetadata.getType() == Value.DATE) {
             java.util.Date date = null;
             if (value.type() != Value.DATE) {

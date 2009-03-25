@@ -11,7 +11,6 @@
         import ilog.charts3d.series.BarSet3D;
         import ilog.charts3d.BarChart3D;
 
-        import com.easyinsight.analysis.SortableAxisTitleFactory;
         import com.easyinsight.analysis.AnalysisItem;
 
         import mx.binding.utils.BindingUtils;
@@ -71,9 +70,9 @@
         private var xAxis:LinearAxis;
         private var yAxis:CategoryAxis;
 
-        private var xAxisTitleRendererFactory:SortableAxisTitleFactory;
+        private var xAxisTitleRendererFactory:ClassFactory;
 
-        private var yAxisTitleRendererFactory:SortableAxisTitleFactory;
+        private var yAxisTitleRendererFactory:ClassFactory;
 
         private var barSeries:BarSeries3D;
 
@@ -176,7 +175,7 @@
             if (xAxisItem == null || newXAxisItem.qualifiedName() != xAxisItem.qualifiedName()) {
                 xAxisItem = newXAxisItem;
                 if (sortable) {
-                    xAxisTitleRendererFactory.analysisItem = xAxisItem;
+                    //xAxisTitleRendererFactory.analysisItem = xAxisItem;
                 }
             }
 
@@ -184,7 +183,7 @@
             if (yAxisItem == null || newYAxisItem.qualifiedName() != yAxisItem.qualifiedName()) {
                 yAxisItem = newYAxisItem;
                 if (sortable) {
-                    yAxisTitleRendererFactory.analysisItem = yAxisItem;
+                    //yAxisTitleRendererFactory.analysisItem = yAxisItem;
                 }
             }
 

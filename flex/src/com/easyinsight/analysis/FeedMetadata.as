@@ -6,6 +6,7 @@ package com.easyinsight.analysis
 	{
 		public var fields:Array;	
 		public var dataFeedID:int;
+        public var version:int;
 		
 		public function FeedMetadata()
 			{
