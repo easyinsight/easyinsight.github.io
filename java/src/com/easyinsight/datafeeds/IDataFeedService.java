@@ -9,6 +9,4 @@ public interface IDataFeedService {
     List<FeedDescriptor> searchForSubscribedFeeds();
 
     List<FeedDescriptor> searchForAvailableFeeds(String keyword, String genreKey);
-
-    InitialAnalysis getInitialAnalysisSetup(long dataFeedID);
 }

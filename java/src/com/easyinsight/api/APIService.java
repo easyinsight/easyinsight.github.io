@@ -32,6 +32,7 @@ public class APIService {
     }
 
     public long updateDataSourceAPI(DataSourceAPIDescriptor descriptor, DynamicServiceDefinition dynamicServiceDefinition) {
+        SecurityUtil.authorizeFeed(descriptor.getFeedID(), Roles.OWNER);
         long dynamicServiceID = 0;
         Connection conn = Database.instance().getConnection();
         Session session = Database.instance().createSession(conn);
@@ -184,6 +185,7 @@ public class APIService {
     }
 
     public DynamicServiceDefinition getDynamicServiceDefinition(long feedID, Connection conn, Session session) {
+        SecurityUtil.authorizeFeed(feedID, Roles.OWNER);
         try {
             PreparedStatement queryStmt = conn.prepareStatement("SELECT DYNAMIC_SERVICE_DESCRIPTOR_ID FROM " +
                     "DYNAMIC_SERVICE_DESCRIPTOR WHERE FEED_ID = ?");
@@ -226,6 +228,7 @@ public class APIService {
     }
 
     public DynamicServiceDefinition getDynamicServiceDefinition(long feedID) {
+        SecurityUtil.authorizeFeed(feedID, Roles.OWNER);
         Connection conn = Database.instance().getConnection();
         Session session = Database.instance().createSession(conn);
         try {
@@ -236,17 +239,8 @@ public class APIService {
         }
     }
 
-    private void addDynamicServiceDefinition(DynamicServiceDefinition definition) {
-        Connection conn = Database.instance().getConnection();
-        try {
-            addDynamicServiceDefinition(definition, conn);
-        } finally {
-            Database.instance().closeConnection(conn);
-        }
-    }
-
     public long addDynamicServiceDefinition(DynamicServiceDefinition definition, Connection conn) {
-
+        SecurityUtil.authorizeFeed(definition.getFeedID(), Roles.OWNER);
         try {
             PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO DYNAMIC_SERVICE_DESCRIPTOR (FEED_ID) VALUES (?)",
                     Statement.RETURN_GENERATED_KEYS);
@@ -278,6 +272,7 @@ public class APIService {
     }
 
     public void deployService(long feedID) {
+        SecurityUtil.authorizeFeed(feedID, Roles.OWNER);
         Connection conn = Database.instance().getConnection();
         Session session = Database.instance().createSession(conn);
         try {
@@ -316,6 +311,7 @@ public class APIService {
     }
 
     public void deployServiceDefinition(DynamicServiceDefinition dynamicServiceDefinition) {
+        SecurityUtil.authorizeFeed(dynamicServiceDefinition.getFeedID(), Roles.OWNER);
         try {
             Connection conn = Database.instance().getConnection();
             Session session = Database.instance().createSession(conn);
@@ -351,6 +347,7 @@ public class APIService {
     }
 
     public void undeployService(long feedID, Connection conn) {
+        SecurityUtil.authorizeFeed(feedID, Roles.OWNER);
         FeedStorage feedStorage = new FeedStorage();
         FeedDefinition feedDefinition = feedStorage.getFeedDefinitionData(feedID, conn);
         try {
@@ -369,7 +366,6 @@ public class APIService {
     }
 
     public void undeployService(long feedID) {
-
         Connection conn = Database.instance().getConnection();
         try {
             conn.setAutoCommit(false);

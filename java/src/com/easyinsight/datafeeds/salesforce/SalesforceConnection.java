@@ -5,6 +5,7 @@ import com.easyinsight.datafeeds.*;
 import com.easyinsight.userupload.UserUploadService;
 import com.easyinsight.userupload.CredentialsResponse;
 import com.easyinsight.userupload.UploadPolicy;
+import com.easyinsight.userupload.UserUploadInternalService;
 import com.easyinsight.database.Database;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.dataset.ColumnSegmentFactory;
@@ -85,7 +86,7 @@ public class SalesforceConnection {
             license.setFeedID(feedID);
             account.getLicenses().add(license);
             user.getLicenses().add(license);
-            new UserUploadService().createUserFeedLink(userID, feedID, Roles.OWNER);
+            new UserUploadInternalService().createUserFeedLink(userID, feedID, Roles.OWNER);
 
             FeedDescriptor feedDescriptor = new FeedDescriptor();
             feedDescriptor.setDataFeedID(feedID);

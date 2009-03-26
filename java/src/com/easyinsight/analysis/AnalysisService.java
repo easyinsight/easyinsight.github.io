@@ -166,6 +166,7 @@ public class AnalysisService implements IAnalysisService {
     }
 
     public void subscribeToAnalysis(long analysisID) {
+        SecurityUtil.authorizeInsight(analysisID);
         try {
             long userID = SecurityUtil.getUserID();
             AnalysisDefinition analysisDefinition = analysisStorage.getAnalysisDefinition(analysisID);

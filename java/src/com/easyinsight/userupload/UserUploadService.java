@@ -71,6 +71,7 @@ public class UserUploadService implements IUserUploadService {
     }    
 
     public FeedDefinition getDataFeedConfiguration(long dataFeedID) {
+        SecurityUtil.authorizeFeed(dataFeedID, Roles.SUBSCRIBER);
         try {
             //SecurityUtil.authorizeFeed(dataFeedID, Roles.OWNER);
             return feedStorage.getFeedDefinitionData(dataFeedID);
@@ -249,7 +250,7 @@ public class UserUploadService implements IUserUploadService {
         feedDefinition.setUploadPolicy(uploadPolicy);
         feedDefinition.setFields(fields);
         feedStorage.addFeedDefinitionData(feedDefinition);
-        createUserFeedLink(rawUploadData.accountID, feedDefinition.getDataFeedID(), Roles.OWNER);
+        new UserUploadInternalService().createUserFeedLink(rawUploadData.accountID, feedDefinition.getDataFeedID(), Roles.OWNER);
         return feedDefinition;
     }
     
@@ -354,9 +355,10 @@ public class UserUploadService implements IUserUploadService {
 
     public long createAnalysisBasedFeed(AnalysisBasedFeedDefinition definition) {
         long userID = SecurityUtil.getUserID();
+        SecurityUtil.authorizeInsight(definition.getAnalysisDefinitionID());
         try {
             long feedID = feedStorage.addFeedDefinitionData(definition);
-            createUserFeedLink(userID, feedID, Roles.OWNER);
+            new UserUploadInternalService().createUserFeedLink(userID, feedID, Roles.OWNER);
             return feedID;
         } catch (Exception e) {
             LogClass.error(e);
@@ -365,9 +367,10 @@ public class UserUploadService implements IUserUploadService {
     }
 
     public void subscribe(long dataFeedID) {
+        SecurityUtil.authorizeFeed(dataFeedID, Roles.SUBSCRIBER);
         long userID = SecurityUtil.getUserID();
         try {
-            createUserFeedLink(userID, dataFeedID, Roles.SUBSCRIBER);
+            new UserUploadInternalService().createUserFeedLink(userID, dataFeedID, Roles.SUBSCRIBER);
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);
@@ -390,43 +393,6 @@ public class UserUploadService implements IUserUploadService {
         } catch (SQLException e) {
             LogClass.error(e);
             throw new RuntimeException(e);
-        } finally {
-            Database.instance().closeConnection(conn);
-        }
-    }
-
-    public void createUserFeedLink(long userID, long dataFeedID, int owner, Connection conn) {
-        try {
-            PreparedStatement existingLinkQuery = conn.prepareStatement("SELECT UPLOAD_POLICY_USERS_ID FROM UPLOAD_POLICY_USERS WHERE " +
-                    "USER_ID = ? AND FEED_ID = ?");
-            existingLinkQuery.setLong(1, userID);
-            existingLinkQuery.setLong(2, dataFeedID);
-            ResultSet existingRS = existingLinkQuery.executeQuery();
-            if (existingRS.next()) {
-                long existingID = existingRS.getLong(1);
-                PreparedStatement updateLinkStmt = conn.prepareStatement("UPDATE UPLOAD_POLICY_USERS SET ROLE = ? WHERE " +
-                        "UPLOAD_POLICY_USERS_ID = ?");
-                updateLinkStmt.setLong(1, owner);
-                updateLinkStmt.setLong(2, existingID);
-                updateLinkStmt.executeUpdate();
-            } else {
-                PreparedStatement insertFeedStmt = conn.prepareStatement("INSERT INTO UPLOAD_POLICY_USERS (USER_ID, FEED_ID, ROLE) " +
-                        "VALUES (?, ?, ?)");
-                insertFeedStmt.setLong(1, userID);
-                insertFeedStmt.setLong(2, dataFeedID);
-                insertFeedStmt.setLong(3, owner);
-                insertFeedStmt.execute();
-            }
-        } catch (SQLException e) {
-            LogClass.error(e);
-            throw new RuntimeException(e);
-        }
-    }
-
-    public void createUserFeedLink(long userID, long dataFeedID, int owner) {
-        Connection conn = Database.instance().getConnection();
-        try {
-            createUserFeedLink(userID, dataFeedID, owner, conn);
         } finally {
             Database.instance().closeConnection(conn);
         }

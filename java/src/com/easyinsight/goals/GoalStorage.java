@@ -146,7 +146,7 @@ public class GoalStorage {
                 throw new RuntimeException("You must have a root node on a goal tree.");
             }
             installSolutions(goalTree, conn);
-            long nodeID = saveGoalTreeNode(goalTree.getRootNode(), conn);
+            long nodeID = saveGoalTreeNode(goalTree.getRootNode(), conn, goalTree.getGoalTreeID());
             PreparedStatement insertTreeStmt = conn.prepareStatement("INSERT INTO GOAL_TREE (NAME, DESCRIPTION, ROOT_NODE) VALUES (?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
             insertTreeStmt.setString(1, goalTree.getName());
             insertTreeStmt.setString(2, goalTree.getDescription());
@@ -182,7 +182,7 @@ public class GoalStorage {
         try {
             conn.setAutoCommit(false);
             installSolutions(goalTree, conn);            
-            long nodeID = saveGoalTreeNode(goalTree.getRootNode(), conn);
+            long nodeID = saveGoalTreeNode(goalTree.getRootNode(), conn, goalTree.getGoalTreeID());
             PreparedStatement updateTreeStmt = conn.prepareStatement("UPDATE GOAL_TREE SET NAME = ?, DESCRIPTION = ?, ROOT_NODE = ? WHERE GOAL_TREE_ID = ?");
             updateTreeStmt.setString(1, goalTree.getName());
             updateTreeStmt.setString(2, goalTree.getDescription());
@@ -420,12 +420,12 @@ public class GoalStorage {
         return goalTree;
     }
 
-    private long saveGoalTreeNode(GoalTreeNode goalTreeNode, Connection conn) throws SQLException {
+    private long saveGoalTreeNode(GoalTreeNode goalTreeNode, Connection conn, long goalTreeID) throws SQLException {
         long nodeID;
         if (goalTreeNode.getGoalTreeNodeID() == 0) {
             if (goalTreeNode.getAnalysisMeasure() == null) {
-                PreparedStatement insertNodeStmt = conn.prepareStatement("INSERT INTO GOAL_TREE_NODE (PARENT_GOAL_TREE_NODE_ID, NAME, DESCRIPTION, ICON_IMAGE) " +
-                        "VALUES (?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
+                PreparedStatement insertNodeStmt = conn.prepareStatement("INSERT INTO GOAL_TREE_NODE (PARENT_GOAL_TREE_NODE_ID, NAME, DESCRIPTION, ICON_IMAGE, GOAL_TREE_ID) " +
+                        "VALUES (?, ?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
                 if (goalTreeNode.getParent() == null) {
                     insertNodeStmt.setNull(1, Types.BIGINT);
                 } else {
@@ -434,6 +434,7 @@ public class GoalStorage {
                 insertNodeStmt.setString(2, goalTreeNode.getName());
                 insertNodeStmt.setString(3, goalTreeNode.getDescription());
                 insertNodeStmt.setString(4, goalTreeNode.getIconImage());
+                insertNodeStmt.setLong(5, goalTreeID);
                 insertNodeStmt.execute();
                 nodeID = Database.instance().getAutoGenKey(insertNodeStmt);
                 goalTreeNode.setGoalTreeNodeID(nodeID);
@@ -517,7 +518,7 @@ public class GoalStorage {
         saveUsers(goalTreeNode, conn);
         if (goalTreeNode.getChildren() != null) {
             for (GoalTreeNode childNode : goalTreeNode.getChildren()) {
-                saveGoalTreeNode(childNode, conn);
+                saveGoalTreeNode(childNode, conn, goalTreeID);
             }
         }
         deleteOldNodes(goalTreeNode, conn);

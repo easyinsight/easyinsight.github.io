@@ -1,5 +1,8 @@
 package com.easyinsight.icons;
 
+import com.easyinsight.security.SecurityUtil;
+import com.easyinsight.users.Account;
+
 import java.io.File;
 import java.util.List;
 import java.util.ArrayList;
@@ -14,6 +17,7 @@ import java.util.Comparator;
 public class IconService {
     
     public List<Icon> getIcons() {
+        SecurityUtil.authorizeAccountTier(Account.INDIVIDUAL);
         File iconFolder = new File("../webapps/app/assets/icons/32x32");
         File[] iconFiles = iconFolder.listFiles();
         List<Icon> icons = new ArrayList<Icon>(); 

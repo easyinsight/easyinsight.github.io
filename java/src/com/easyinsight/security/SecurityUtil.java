@@ -189,6 +189,42 @@ public class SecurityUtil {
         }
     }
 
+    public static void authorizeGoal(long goalID, int requiredRole) {
+        long userID = getUserID();
+        int role;
+        Connection conn = Database.instance().getConnection();
+        try {
+            PreparedStatement existingLinkQuery = conn.prepareStatement("SELECT USER_ROLE FROM USER_TO_GOAL_TREE, GOAL_TREE_NODE WHERE " +
+                    "GOAL_TREE_NODE.goal_tree_id = USER_TO_GOAL_TREE.GOAL_TREE_ID and " +
+                    "USER_ID = ? AND GOAL_TREE_NODE_ID = ?");
+            existingLinkQuery.setLong(1, userID);
+            existingLinkQuery.setLong(2, goalID);
+            ResultSet rs = existingLinkQuery.executeQuery();
+            if (rs.next()) {
+                role = rs.getInt(1);
+            } else {
+                PreparedStatement groupQueryStmt = conn.prepareStatement("select role from group_to_goal_tree_join, group_to_user_join, GOAL_TREE_NODE where " +
+                        "group_to_user_join.group_id = group_to_goal_tree_join.group_id and group_to_user_join.user_id = ? and group_to_goal_tree_join.goal_tree_id = goal_tree_node.goal_tree_id and " +
+                        "goal_tree_node.goal_tree_node_id = ?");
+                groupQueryStmt.setLong(1, userID);
+                groupQueryStmt.setLong(2, goalID);
+                if (rs.next()) {
+                    role = rs.getInt(1);
+                } else {
+                    role = Integer.MAX_VALUE;
+                }
+            }
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        } finally {
+            Database.instance().closeConnection(conn);
+        }
+        if (role > requiredRole) {
+            throw new SecurityException();
+        }
+    }
+
     private static int getRoleForGoalTree(long userID, long goalTreeID) {
         Connection conn = Database.instance().getConnection();
         try {
@@ -200,7 +236,16 @@ public class SecurityUtil {
             if (rs.next()) {
                 return rs.getInt(1);
             } else {
-                return Integer.MAX_VALUE;
+                PreparedStatement groupQueryStmt = conn.prepareStatement("select role from group_to_goal_tree_join, group_to_user_join where " +
+                        "group_to_user_join.group_id = group_to_goal_tree_join.group_id and group_to_user_join.user_id = ? and group_to_goal_tree_join.goal_tree_id = ?");
+                groupQueryStmt.setLong(1, userID);
+                groupQueryStmt.setLong(2, goalTreeID);
+                ResultSet groupRS = groupQueryStmt.executeQuery();
+                if (groupRS.next()) {
+                    return groupRS.getInt(1);
+                } else {
+                    return Integer.MAX_VALUE;
+                }
             }
         } catch (SQLException e) {
             LogClass.error(e);
@@ -251,10 +296,6 @@ public class SecurityUtil {
         }
     }
 
-    public static void authorizeFeedAccess(long dataFeed) {
-        authorizeFeedAccess(dataFeed, false);
-    }
-
     public static void authorizeGoalTree(long goalTreeID, int requiredRole) {
         UserPrincipal userPrincipal = securityProvider.getUserPrincipal();
         if (userPrincipal == null) {
@@ -277,7 +318,7 @@ public class SecurityUtil {
         }
     }
 
-    public static void authorizeFeedAccess(long dataFeed, boolean preview) {
+    public static void authorizeFeedAccess(long dataFeed) {
         // retrieve feed policy
         boolean publiclyVisible = false;
         Connection conn = Database.instance().getConnection();

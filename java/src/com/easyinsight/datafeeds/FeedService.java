@@ -1,8 +1,8 @@
 package com.easyinsight.datafeeds;
 
 import com.easyinsight.analysis.*;
-import com.easyinsight.userupload.UserUploadService;
 import com.easyinsight.userupload.UploadPolicy;
+import com.easyinsight.userupload.UserUploadInternalService;
 import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.database.Database;
 import com.easyinsight.storage.DataStorage;
@@ -73,6 +73,7 @@ public class FeedService implements IDataFeedService {
     }
 
     public void wipeData(long feedID) {
+        SecurityUtil.authorizeFeed(feedID, Roles.OWNER);
         Connection conn = Database.instance().getConnection();
         DataStorage metadata = null;
         try {
@@ -239,15 +240,6 @@ public class FeedService implements IDataFeedService {
         }
     }
 
-    public InitialAnalysis getInitialAnalysisSetup(long dataFeedID) {
-        try {
-            return feedStorage.getFeedDefinitionData(dataFeedID).initialAnalysisDefinition();
-        } catch (Exception e) {
-            LogClass.error(e);
-            throw new RuntimeException(e);
-        }
-    }
-
     public List<WSAnalysisDefinition> getMostPopularAnalyses(String genre,  int cutoff) {
         try {
             return analysisStorage.getMostPopularAnalyses(genre, cutoff);
@@ -305,6 +297,7 @@ public class FeedService implements IDataFeedService {
             new CompositeFeedNodeVisitor() {
 
                 protected void accept(CompositeFeedNode compositeFeedNode) throws SQLException {
+                    SecurityUtil.authorizeFeed(compositeFeedNode.getDataFeedID(), Roles.SUBSCRIBER);
                     FeedDefinition feedDefinition = feedStorage.getFeedDefinitionData(compositeFeedNode.getDataFeedID());
                     containedInfo.feedItems.addAll(feedDefinition.getFields());
                 }
@@ -318,7 +311,7 @@ public class FeedService implements IDataFeedService {
             new AnalysisStorage().saveAnalysis(baseDefinition);
             feedDef.setAnalysisDefinitionID(baseDefinition.getAnalysisID());
             feedStorage.updateDataFeedConfiguration(feedDef);
-            new UserUploadService().createUserFeedLink(userID, feedID, Roles.OWNER);
+            new UserUploadInternalService().createUserFeedLink(userID, feedID, Roles.OWNER);
             return feedID;
         } catch (Exception e) {
             LogClass.error(e);
@@ -327,6 +320,7 @@ public class FeedService implements IDataFeedService {
     }
 
     public void updateCompositeFeed(List<CompositeFeedNode> compositeFeedNodes, List<CompositeFeedConnection> edges, long feedID) {
+        SecurityUtil.authorizeFeed(feedID, Roles.OWNER);
         try {
             CompositeFeedDefinition compositeFeed = (CompositeFeedDefinition) getFeedDefinition(feedID);
             compositeFeed.setCompositeFeedNodes(compositeFeedNodes);
@@ -339,21 +333,7 @@ public class FeedService implements IDataFeedService {
     }
 
     public void updateFeedDefinition(FeedDefinition feedDefinition, String tagString, WSAnalysisDefinition baseDefinition) {
-        /*final Map<Long, UserFeedLink> userMap = new HashMap<Long, UserFeedLink>();
-        if (feedDefinition.getUploadPolicy().getUploadPolicy() == UploadPolicy.PRIVATE) {
-            PrivateUploadPolicy privatePolicy = (PrivateUploadPolicy) feedDefinition.getUploadPolicy();
-            List<UserFeedLink> userFeedLinks = privatePolicy.getUserFeedLinks();
-            for (UserFeedLink userFeedLink : userFeedLinks) {
-                userMap.put(userFeedLink.getUserID(), userFeedLink);
-            }
-            if (feedDefinition.getUploadPolicy().getUploadPolicy() == UploadPolicy.PRIVATE) {
-                PrivateUploadPolicy existingPolicy = (PrivateUploadPolicy) feedDefinition.getUploadPolicy();
-                List<UserFeedLink> existingLinks = existingPolicy.getUserFeedLinks();
-                for (UserFeedLink userFeedLink : existingLinks) {
-                    userMap.remove(userFeedLink.getUserID());
-                }
-            }
-        }   */
+        SecurityUtil.authorizeFeed(feedDefinition.getDataFeedID(), Roles.OWNER);
         Connection conn = Database.instance().getConnection();
         DataStorage metadata = null;
         try {
@@ -367,7 +347,6 @@ public class FeedService implements IDataFeedService {
                 tagList.add(new Tag(tagName));
             }
             feedDefinition.setTags(tagList);
-            final String feedName = feedDefinition.getFeedName();
             final long feedID = feedDefinition.getDataFeedID();
             FeedDefinition existingFeed = feedStorage.getFeedDefinitionData(feedDefinition.getDataFeedID());
             List<AnalysisItem> existingFields = existingFeed.getFields();
@@ -413,6 +392,7 @@ public class FeedService implements IDataFeedService {
     }
 
     public FeedDefinition getFeedDefinition(long dataFeedID) {
+        SecurityUtil.authorizeFeed(dataFeedID, Roles.SHARER);
         try {
             //SecurityUtil.authorizeFeed(dataFeedID, Roles.OWNER);
             return feedStorage.getFeedDefinitionData(dataFeedID);

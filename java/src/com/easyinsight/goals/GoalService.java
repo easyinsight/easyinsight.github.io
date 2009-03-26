@@ -117,7 +117,7 @@ public class GoalService {
     }
 
     public List<GoalValue> getGoalValues(final long goalTreeNodeID, final Date startDate, final Date endDate) {
-        // TODO: secure this
+        SecurityUtil.authorizeGoal(goalTreeNodeID, Roles.SUBSCRIBER);
         try {
             return goalEvaluationStorage.getGoalValues(goalTreeNodeID, startDate, endDate);
         } catch (Exception e) {
@@ -161,7 +161,7 @@ public class GoalService {
     }
 
     public void subscribeToGoal(long goalTreeNodeID) {
-        // TODO: secure this
+        SecurityUtil.authorizeGoal(goalTreeNodeID, Roles.SUBSCRIBER);
         long userID = SecurityUtil.getUserID();
         try {
             goalStorage.addUserToGoal(userID, goalTreeNodeID);

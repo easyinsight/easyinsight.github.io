@@ -9,6 +9,7 @@ import com.easyinsight.database.Database;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.userupload.UserUploadService;
 import com.easyinsight.userupload.UploadPolicy;
+import com.easyinsight.userupload.UserUploadInternalService;
 import com.easyinsight.security.Roles;
 import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.storage.DataStorage;
@@ -336,7 +337,7 @@ public class SolutionService {
         FeedDefinition clonedFeedDefinition = cloneFeed(userID, conn, feedDefinition);
         feedStorage.updateDataFeedConfiguration(clonedFeedDefinition, conn);
         buildClonedDataStores(copyData, feedDefinition, clonedFeedDefinition, conn);
-        userUploadService.createUserFeedLink(userID, clonedFeedDefinition.getDataFeedID(), Roles.OWNER, conn);
+        new UserUploadInternalService().createUserFeedLink(userID, clonedFeedDefinition.getDataFeedID(), Roles.OWNER, conn);
         List<AnalysisDefinition> insights = getInsightsFromFeed(feedID, conn);
         for (AnalysisDefinition insight : insights) {
             if (insight.isRootDefinition()) {

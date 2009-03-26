@@ -4,6 +4,7 @@ import com.easyinsight.analysis.DataService;
 import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.analysis.AnalysisItemTypes;
 import com.easyinsight.security.SecurityUtil;
+import com.easyinsight.security.Roles;
 import com.easyinsight.database.Database;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.core.Value;
@@ -48,6 +49,7 @@ public class ExportService {
     }
 
     public long exportToExcel(WSAnalysisDefinition analysisDefinition) {
+        SecurityUtil.authorizeFeed(analysisDefinition.getDataFeedID(), Roles.SUBSCRIBER);
         long exportID;
         try {
             if (analysisDefinition instanceof WSListDefinition) {
