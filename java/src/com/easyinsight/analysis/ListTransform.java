@@ -136,7 +136,7 @@ public class ListTransform {
             listRows[rowCount].setValues(values);
             for (AnalysisItem analysisItem : columns) {
                 Key key = analysisItem.createAggregateKey();
-                listRows[rowCount].getValues()[columnCount] = row.getValue(key);
+                listRows[rowCount].getValues()[columnCount] = analysisItem.polishValue(row.getValue(key));
                 columnCount++;
             }
             rowCount++;

@@ -39,13 +39,15 @@ import com.easyinsight.listing.DescriptorAnalyzeSource;
 
 		private function gotFeed(event:ResultEvent):void {
         	var feedResponse:FeedResponse = feedService.openFeedByAPIKey.lastResult as FeedResponse;
-        	if (feedResponse.successful) {
+        	if (feedResponse.status == FeedResponse.SUCCESS) {
         		dispatchEvent(new ModuleAnalyzeEvent(new DescriptorAnalyzeSource(feedResponse.feedDescriptor)));
-        	} else {
-        		var loginDialog:LoginDialog = LoginDialog(PopUpManager.createPopUp(Application.application as DisplayObject, LoginDialog, true));
+            } else if (feedResponse.status == FeedResponse.NEED_LOGIN) {
+                var loginDialog:LoginDialog = LoginDialog(PopUpManager.createPopUp(Application.application as DisplayObject, LoginDialog, true));
         		loginDialog.addEventListener(LoginEvent.LOGIN, delayedFeed);
                 PopUpManager.centerPopUp(loginDialog);
-        	}        	            
+        	} else {
+        		// tried to access a data source they don't have rights to, silently fail
+        	}
         }  
         
         private function delayedFeed(event:LoginEvent):void {

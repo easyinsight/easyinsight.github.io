@@ -119,7 +119,16 @@ public class SecurityUtil {
             if (rs.next()) {
                 return rs.getInt(1);
             } else {
-                return Integer.MAX_VALUE;
+                PreparedStatement groupQueryStmt = conn.prepareStatement("select role from group_to_insight, group_to_user_join where " +
+                        "group_to_user_join.group_id = group_to_insight.group_id and group_to_user_join.user_id = ? and group_to_insight.insight_id = ?");
+                groupQueryStmt.setLong(1, userID);
+                groupQueryStmt.setLong(2, insightID);
+                ResultSet groupRS = groupQueryStmt.executeQuery();
+                if (groupRS.next()) {
+                    return groupRS.getInt(1);
+                } else {
+                    return Integer.MAX_VALUE;
+                }
             }
         } catch (SQLException e) {
             LogClass.error(e);
@@ -140,7 +149,16 @@ public class SecurityUtil {
             if (rs.next()) {
                 return rs.getInt(1);
             } else {
-                return Integer.MAX_VALUE;
+                PreparedStatement groupQueryStmt = conn.prepareStatement("select role from upload_policy_groups, group_to_user_join where " +
+                        "group_to_user_join.group_id = upload_policy_groups.group_id and group_to_user_join.user_id = ? and upload_policy_groups.feed_id = ?");
+                groupQueryStmt.setLong(1, userID);
+                groupQueryStmt.setLong(2, feedID);
+                ResultSet groupRS = groupQueryStmt.executeQuery();
+                if (groupRS.next()) {
+                    return groupRS.getInt(1);
+                } else {
+                    return Integer.MAX_VALUE;
+                }
             }
         } catch (SQLException e) {
             LogClass.error(e);
@@ -282,7 +300,7 @@ public class SecurityUtil {
         if (!publiclyVisible) {
             UserPrincipal userPrincipal = securityProvider.getUserPrincipal();
             if (userPrincipal == null) {
-                throw new SecurityException();
+                throw new SecurityException(SecurityException.LOGIN_REQUIRED);
             }
             int role = getRole(userPrincipal.getUserID(), dataFeed);
             if (role > Roles.SUBSCRIBER) {

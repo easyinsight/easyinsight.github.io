@@ -9,6 +9,20 @@
                      xmlns:feed="com.easyinsight.administration.feed.*"
                      xmlns:analysis1="com.easyinsight.administration.analysis.*"  backgroundImage="{background2}" backgroundSize="100%"
                      paddingTop="10" paddingLeft="10" paddingRight="10" paddingBottom="10" backgroundColor="#DCE2F8">
+    <core:states>
+        <mx:State name="NotLoggedIn">
+            <mx:RemoveChild target="{subscribeToFeedButton}"/>
+            <mx:RemoveChild target="{groupAddFeedButton}"/>
+            <mx:RemoveChild target="{subscribeToInsightButton}"/>
+            <mx:RemoveChild target="{groupAddInsightButton}"/>
+            <mx:RemoveChild target="{saveButton}"/>
+            <mx:RemoveChild target="{saveAsButton}"/>
+            <mx:RemoveChild target="{sharingSettingsBox}"/>
+            <mx:RemoveChild target="{createFeedButton}"/>
+            <mx:SetProperty target="{analysisNameInput}" name="editable" value="false"/>
+            <mx:SetProperty target="{analysisTagsInput}" name="editable" value="false"/>
+        </mx:State>
+    </core:states>
     <mx:Script>
 		<![CDATA[
 import com.easyinsight.administration.feed.DeleteAnalysisItemEvent;
@@ -30,6 +44,7 @@ import com.easyinsight.analysis.scrub.LookupTableScrubListWindow;
         import com.easyinsight.analysis.UserCapabilities;
         import com.easyinsight.administration.feed.TagCloud;
 import com.easyinsight.framework.InvalidFieldsEvent;
+import com.easyinsight.framework.LoginEvent;
 import mx.collections.SortField;
         import mx.collections.Sort;
         import mx.validators.Validator;
@@ -64,7 +79,6 @@ import mx.collections.SortField;
         import com.easyinsight.filtering.FilterDefinition;
         import com.easyinsight.filtering.FilterRawData;
         import com.easyinsight.analysis.FeedMetadata;
-        import com.easyinsight.analysis.DataView;
 
         import mx.collections.ArrayCollection;
         import com.easyinsight.analysis.AnalysisDefinition;
@@ -189,6 +203,7 @@ import mx.collections.SortField;
 
         private function loadController(controller:IReportController):void {
             var dataViewFactory:DataViewFactory = controller.createDataView();
+            dataViewFactory.availableFields = availableFields;
             if (dataView != null) {
                 dataView.removeEventListener(DataServiceLoadingEvent.LOADING_STARTED, startLoading);
                 dataView.removeEventListener(DataServiceLoadingEvent.LOADING_STOPPED, stopLoading);
@@ -229,7 +244,16 @@ import mx.collections.SortField;
             analysisPolicy = analysisDefinition.policy;
         }
 
+        private function onLogin(event:LoginEvent):void {
+            currentState = "";
+            User.getEventNotifier().removeEventListener(LoginEvent.LOGIN, onLogin);
+        }
+
         private function onMetadataReceipt(feedMetadata:FeedMetadata):void {
+            if (User.getInstance() == null) {
+                currentState = "NotLoggedIn";
+                User.getEventNotifier().addEventListener(LoginEvent.LOGIN, onLogin);
+            }
             dataService.addEventListener(InvalidFieldsEvent.INVALID_FIELDS, onInvalidFields);
             this.analysisValidators = [ analysisNameValidator ];
             this.feedMetadata = feedMetadata;
@@ -649,6 +673,7 @@ import mx.collections.SortField;
 
         private function gotUserCapabilitiesForInsight():void {
             var userCapabilities:UserCapabilities = analysisService.getUserCapabilitiesForInsight.lastResult as UserCapabilities;
+
             canSubscribeToFeed = userCapabilities.feedRole > 3;
             canSubscribeToInsight = userCapabilities.analysisRole > 3;
             canAddFeedToGroup = userCapabilities.groupMember == true;
@@ -708,9 +733,9 @@ import mx.collections.SortField;
             <mx:Button id="groupAddFeedButton" icon="@Embed(source='../../../assets/users_into.png')"
                        click="addFeedToGroup()" toolTip="Add Data Source to Group" visible="{canAddFeedToGroup}"/>
             <mx:Button id="subscribeToInsightButton" icon="@Embed(source='../../../assets/folder_into.png')"
-                       click="subscribeToInsight()" toolTip="Add Insight to My Data" visible="{canSubscribeToInsight}"/>
+                       click="subscribeToInsight()" toolTip="Add Report to My Data" visible="{canSubscribeToInsight}"/>
             <mx:Button id="groupAddInsightButton" icon="@Embed(source='../../../assets/users_into.png')"
-                       click="addInsightToGroup()" toolTip="Add Insight to Group" visible="{canAddInsightToGroup}"/>
+                       click="addInsightToGroup()" toolTip="Add Report to Group" visible="{canAddInsightToGroup}"/>
             <mx:ProgressBar indeterminate="true" visible="false" id="loadingBar"/>
             <mx:Image source="@Embed(source='../../../assets/view.png')" toolTip="Search"/>
             <mx:TextInput id="searchInput" change="search()"/>
@@ -733,7 +758,7 @@ import mx.collections.SortField;
                         <mx:TextInput text="{tags}" id="analysisTagsInput"/>
                     </mx:FormItem>
                 </mx:Form>
-                <mx:VBox>
+                <mx:VBox id="sharingSettingsBox">
                     <mx:CheckBox label="Use Data Source Sharing Settings"
                                  id="shareDataSourceSharingCheckbox" selected="{shareDataSourceSharing}"
                                  click="sourceSharingChange(event)"/>

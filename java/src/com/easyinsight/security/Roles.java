@@ -9,4 +9,5 @@ public interface Roles {
     public static final int OWNER = 1;
     public static final int SHARER = 2;
     public static final int SUBSCRIBER = 3;
+    public static final int NONE = 4;
 }

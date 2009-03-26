@@ -32,4 +32,8 @@ public class PersistableNumericValue extends PersistableValue {
     public void setNumberValue(double numberValue) {
         this.numberValue = numberValue;
     }
+
+    public Value toValue() {
+        return new NumericValue(numberValue);
+    }
 }

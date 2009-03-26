@@ -6,7 +6,10 @@
 		<![CDATA[
             import com.easyinsight.analysis.AnalysisHierarchyItem;
             import com.easyinsight.analysis.AnalysisChangedEvent;
-			import mx.events.CloseEvent;
+            import com.easyinsight.customupload.ExcelUploadFormat;
+            import com.easyinsight.customupload.FlatFileUploadFormat;
+            import com.easyinsight.util.ProgressAlert;
+import mx.events.CloseEvent;
 			import mx.managers.BrowserManager;
 			import mx.validators.Validator;
 			import mx.controls.Alert;
@@ -147,11 +150,11 @@
 	            	feedDefinition.description = feedDescriptionTextArea.text;
 	            	feedDefinition.attribution = feedAttributionInput.text;
 	            	feedDefinition.ownerName = feedOwnerNameInput.text;
-                    analysisService.saveAnalysisDefinition.send(analysisDefinition);
                     if (feedAdminDetail != null) {
 	            	    feedAdminDetail.updateFeedDefinition(feedDefinition);
                     }
-	    			feedService.updateFeedDefinition.send(feedDefinition, feedTagsInput.text);
+                    ProgressAlert.alert(this, "Updating data source...", "Updated data source!", feedService.updateFeedDefinition);
+	    			feedService.updateFeedDefinition.send(feedDefinition, feedTagsInput.text, analysisDefinition);
 	    			this.unsavedChanges = false;
             	}
             }
@@ -173,10 +176,6 @@
                 }
             }
             
-            private function updatedFeed():void {
-            	Alert.show("Saved successfully!");
-            }
-            
             private function clearFeedData():void {
             	Alert.show("Are you sure you want to clear all stored data for this feed?", "Alert",
 		                		Alert.OK | Alert.CANCEL, this, alertFeedListener, null, Alert.CANCEL);
@@ -191,11 +190,16 @@
             private function wipedData():void {
             	Alert.show("All data cleared!");
             }
+
+            private function blah():void {
+                var excelUploadFormat:ExcelUploadFormat;
+                var flatFileUploadFormat:FlatFileUploadFormat;
+            }
 		]]>
 	</mx:Script>
 	<mx:RemoteObject id="feedService" destination="feeds">
 		<mx:method name="getFeedDefinition" result="gotFeedDefinition()"/>
-		<mx:method name="updateFeedDefinition" result="updatedFeed()"/>
+		<mx:method name="updateFeedDefinition"/>
 		<mx:method name="wipeData" result="wipedData()"/>
 	</mx:RemoteObject>
     <mx:RemoteObject id="analysisService" destination="analysisDefinition">

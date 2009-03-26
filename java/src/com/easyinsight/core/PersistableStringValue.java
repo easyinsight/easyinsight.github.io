@@ -31,4 +31,8 @@ public class PersistableStringValue extends PersistableValue {
     public void setValue(String value) {
         this.value = value;
     }
+
+    public Value toValue() {
+        return new StringValue(value);
+    }
 }

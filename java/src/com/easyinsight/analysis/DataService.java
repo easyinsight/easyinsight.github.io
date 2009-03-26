@@ -7,6 +7,8 @@ import com.easyinsight.users.Credentials;
 import com.easyinsight.core.Value;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.benchmark.BenchmarkManager;
+import com.easyinsight.security.SecurityUtil;
+import com.easyinsight.security.Roles;
 
 import java.util.*;
 
@@ -23,6 +25,7 @@ public class DataService implements IDataService {
 
     public AnalysisItemResultMetadata getAnalysisItemMetadata(long feedID, AnalysisItem analysisItem) {
         try {
+            SecurityUtil.authorizeFeed(feedID, Roles.SUBSCRIBER);
             Feed feed = feedRegistry.getFeed(feedID);
             return feed.getMetadata(analysisItem);
         } catch (Exception e) {
@@ -33,6 +36,7 @@ public class DataService implements IDataService {
 
     public FeedMetadata getFeedMetadata(long feedID, boolean preview) {
         try {
+            SecurityUtil.authorizeFeed(feedID, Roles.SUBSCRIBER);
             Feed feed = feedRegistry.getFeed(feedID);
             Collection<AnalysisItem> feedItems = feed.getFields();
             // need to apply renames from the com.easyinsight.analysis definition here?
@@ -90,6 +94,7 @@ public class DataService implements IDataService {
 
     public ListDataResults list(WSAnalysisDefinition analysisDefinition, boolean preview, InsightRequestMetadata insightRequestMetadata) {
         try {
+            SecurityUtil.authorizeFeed(analysisDefinition.getDataFeedID(), Roles.SUBSCRIBER);
             long startTime = System.currentTimeMillis();
             ListDataResults results;
             Feed feed = feedRegistry.getFeed(analysisDefinition.getDataFeedID());
@@ -112,6 +117,7 @@ public class DataService implements IDataService {
 
     public CrossTabDataResults pivot(WSAnalysisDefinition analysisDefinition, boolean preview, InsightRequestMetadata insightRequestMetadata) {
         try {
+            SecurityUtil.authorizeFeed(analysisDefinition.getDataFeedID(), Roles.SUBSCRIBER);
             long startTime = System.currentTimeMillis();
             WSCrosstabDefinition crosstabDefinition = (WSCrosstabDefinition) analysisDefinition;
             Feed feed = feedRegistry.getFeed(crosstabDefinition.getDataFeedID());

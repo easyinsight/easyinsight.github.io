@@ -49,7 +49,13 @@ public class StringValue extends Value implements Serializable {
 
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (o == null) {
+            return false;
+        }
+        if (o instanceof EmptyValue) {
+            return value.equals("");
+        }
+        if (getClass() != o.getClass()) return false;
 
         StringValue that = (StringValue) o;
 

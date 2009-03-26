@@ -33,7 +33,7 @@ public class AnalysisDefinitionStorageTest extends TestCase {
         AnalysisDimension analysisDimension = new AnalysisDimension(TestUtil.createKey("Product", dataSourceID), true);
         filter.setField(analysisDimension);
         filter.setInclusive(true);
-        filter.setFilteredValues(Arrays.asList("WidgetX"));
+        filter.setFilteredValues(TestUtil.objectList("WidgetX"));
         filters.add(filter);
         listDefinition.setFilterDefinitions(filters);
         AnalysisDimension myDimension = new AnalysisDimension(TestUtil.createKey("Customer", dataSourceID), true);
@@ -62,7 +62,7 @@ public class AnalysisDefinitionStorageTest extends TestCase {
         AnalysisDimension analysisDimension = new AnalysisDimension(TestUtil.createKey("Product", dataFeedID), true);
         filter.setField(analysisDimension);
         filter.setInclusive(true);
-        filter.setFilteredValues(Arrays.asList("WidgetX"));
+        filter.setFilteredValues(TestUtil.objectList("WidgetX"));
         filters.add(filter);
         crosstabDefinition.setFilterDefinitions(filters);
         AnalysisItem myDimension = new AnalysisDimension(TestUtil.createKey("Product", dataFeedID), true);
@@ -90,7 +90,7 @@ public class AnalysisDefinitionStorageTest extends TestCase {
         AnalysisDimension analysisDimension = new AnalysisDimension(TestUtil.createKey("Product", dataFeedID), true);
         filter.setField(analysisDimension);
         filter.setInclusive(true);
-        filter.setFilteredValues(Arrays.asList("WidgetX"));
+        filter.setFilteredValues(TestUtil.objectList("WidgetX"));
         filters.add(filter);
         chartDefinition.setFilterDefinitions(filters);
         AnalysisDimension myDimension = new AnalysisDimension(TestUtil.createKey("Customer", dataFeedID), true);

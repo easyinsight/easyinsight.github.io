@@ -14,4 +14,7 @@ import javax.persistence.PrimaryKeyJoinColumn;
 @Table(name="empty_value")
 @PrimaryKeyJoinColumn(name="value_id")
 public class PersistableEmptyValue extends PersistableValue {
+    public Value toValue() {
+        return new EmptyValue();
+    }
 }

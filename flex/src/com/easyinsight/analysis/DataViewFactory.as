@@ -147,11 +147,15 @@ public class DataViewFactory extends VBox {
     }
 
     public function fromExistingDefinition(existingDefinition:AnalysisDefinition):AnalysisDefinition {
-        var newDef:AnalysisDefinition = new _newDefinition();
-        var fields:ArrayCollection = existingDefinition.getFields();
-        newDef.populate(fields);
-        copyStandardData(existingDefinition, newDef);
-        return newDef;
+        if (existingDefinition is _newDefinition) {
+            return existingDefinition;
+        } else {
+            var newDef:AnalysisDefinition = new _newDefinition();
+            var fields:ArrayCollection = existingDefinition.getFields();
+            newDef.populate(fields);
+            copyStandardData(existingDefinition, newDef);
+            return newDef;
+        }
     }
 
     private function copyStandardData(source:AnalysisDefinition, target:AnalysisDefinition):void {

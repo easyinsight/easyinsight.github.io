@@ -32,13 +32,15 @@ import com.easyinsight.listing.AnalysisDefinitionAnalyzeSource;
 
 		private function gotAnalysisDefinition(event:ResultEvent):void {
         	var insightResponse:InsightResponse = analysisService.openAnalysisIfPossible.lastResult as InsightResponse;
-        	if (insightResponse.successful) {
+        	if (insightResponse.status == InsightResponse.SUCCESS) {
         		dispatchEvent(new ModuleAnalyzeEvent(new AnalysisDefinitionAnalyzeSource(insightResponse.definition)));
-        	} else {
+        	} else if (insightResponse.status == InsightResponse.NEED_LOGIN) {
         		var loginDialog:LoginDialog = LoginDialog(PopUpManager.createPopUp(Application.application as DisplayObject, LoginDialog, true));
         		loginDialog.addEventListener(LoginEvent.LOGIN, delayedAnalysis);
                 PopUpManager.centerPopUp(loginDialog);
-        	}        	            
+        	} else {
+                // silently fail, user trying to spoof an ID
+            }
         }  
         
         private function delayedAnalysis(event:LoginEvent):void {

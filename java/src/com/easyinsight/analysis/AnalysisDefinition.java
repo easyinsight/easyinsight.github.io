@@ -1,6 +1,7 @@
 package com.easyinsight.analysis;
 
 import com.easyinsight.scrubbing.DataScrub;
+import com.easyinsight.security.SecurityUtil;
 
 import java.util.*;
 
@@ -328,12 +329,22 @@ public abstract class AnalysisDefinition implements Cloneable {
             }
             analysisDefinition.setHierarchies(hierarchies);
         }
+        analysisDefinition.setCanSaveDirectly(isOwner(SecurityUtil.getUserID(false)));
         analysisDefinition.setDataScrubs(newScrubs);
         analysisDefinition.setTagCloud(new ArrayList<Tag>(getTags()));
         analysisDefinition.setMarketplaceVisible(marketplaceVisible);
         analysisDefinition.setPubliclyVisible(publiclyVisible);
         analysisDefinition.setVisibleAtFeedLevel(visibleAtFeedLevel);
         return analysisDefinition;
+    }
+
+    private boolean isOwner(Long userID) {
+        for (UserToAnalysisBinding binding : getUserBindings()) {
+            if (binding.getUserID() == userID && binding.getRelationshipType() == UserPermission.OWNER) {
+                return true;
+            }
+        }
+        return false;
     }
 
     protected List<AnalysisItem> processItems(List<AnalysisItem> analysisItems) {

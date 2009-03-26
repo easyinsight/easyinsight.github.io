@@ -33,4 +33,8 @@ public class PersistableDateValue extends PersistableValue {
     public void setDateValue(Date dateValue) {
         this.dateValue = dateValue;
     }
+
+    public Value toValue() {
+        return new DateValue(dateValue);
+    }
 }

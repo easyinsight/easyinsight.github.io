@@ -45,7 +45,7 @@ public class DateTimeTest extends TestCase {
         FeedDefinition feedDefinition = feedStorage.getFeedDefinitionData(dataSourceID);
         feedDefinition.setFields(Arrays.asList(new AnalysisDimension("c", true), new AnalysisMeasure("m", AggregationTypes.SUM),
                 new AnalysisDateDimension("d", true, AnalysisDateDimension.YEAR_LEVEL)));
-        new FeedService().updateFeedDefinition(feedDefinition, "");
+        new FeedService().updateFeedDefinition(feedDefinition, "", null);
 
         Calendar cal = Calendar.getInstance();
         cal.set(Calendar.YEAR, 2009);
@@ -194,7 +194,7 @@ public class DateTimeTest extends TestCase {
         FeedDefinition feedDefinition = feedStorage.getFeedDefinitionData(dataSourceID);
         feedDefinition.setFields(Arrays.asList(new AnalysisDimension("c", true), new AnalysisMeasure("m", AggregationTypes.SUM),
                 new AnalysisDateDimension("d", true, AnalysisDateDimension.YEAR_LEVEL)));
-        new FeedService().updateFeedDefinition(feedDefinition, "");
+        new FeedService().updateFeedDefinition(feedDefinition, "", null);
 
         Calendar cal = Calendar.getInstance();
         cal.set(Calendar.YEAR, 2009);

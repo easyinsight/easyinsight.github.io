@@ -55,7 +55,7 @@ public class AnalysisBasedFeedTest extends TestCase {
         AnalysisDimension analysisDimension = new AnalysisDimension(TestUtil.createKey("Product", dataFeedID), true);
         filter.setField(analysisDimension);
         filter.setInclusive(true);
-        filter.setFilteredValues(Arrays.asList("WidgetX"));
+        filter.setFilteredValues(TestUtil.objectList("WidgetX"));
         filters.add(filter);
         listDefinition.setFilterDefinitions(filters);
         AnalysisDimension myDimension = new AnalysisDimension(TestUtil.createKey("Product", dataFeedID), true);

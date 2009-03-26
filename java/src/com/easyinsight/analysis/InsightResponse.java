@@ -6,23 +6,28 @@ package com.easyinsight.analysis;
  * Time: 12:55:35 PM
  */
 public class InsightResponse {
-    private boolean successful;
+
+    public static final int SUCCESS = 1;
+    public static final int NEED_LOGIN = 2;
+    public static final int REJECTED = 3;
+
+    private int status;
     private WSAnalysisDefinition definition;
 
     public InsightResponse() {
     }
 
-    public InsightResponse(boolean successful, WSAnalysisDefinition definition) {
-        this.successful = successful;
+    public InsightResponse(int status, WSAnalysisDefinition definition) {
+        this.status = status;
         this.definition = definition;
     }
 
-    public boolean isSuccessful() {
-        return successful;
+    public int getStatus() {
+        return status;
     }
 
-    public void setSuccessful(boolean successful) {
-        this.successful = successful;
+    public void setStatus(int status) {
+        this.status = status;
     }
 
     public WSAnalysisDefinition getDefinition() {

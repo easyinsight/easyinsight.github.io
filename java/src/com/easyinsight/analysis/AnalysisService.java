@@ -197,9 +197,12 @@ public class AnalysisService implements IAnalysisService {
                 SecurityUtil.authorizeInsight(analysisID);
                 addAnalysisView(analysisID);
                 AnalysisDefinition analysisDefinition = analysisStorage.getAnalysisDefinition(analysisID);
-                insightResponse = new InsightResponse(true, analysisDefinition.createBlazeDefinition());
+                insightResponse = new InsightResponse(InsightResponse.SUCCESS, analysisDefinition.createBlazeDefinition());
             } catch (SecurityException e) {
-                insightResponse = new InsightResponse(false, null);
+                if (e.getReason() == InsightResponse.NEED_LOGIN)
+                    insightResponse = new InsightResponse(InsightResponse.NEED_LOGIN, null);
+                else
+                    insightResponse = new InsightResponse(InsightResponse.REJECTED, null);
             }
         } catch (Exception e) {
             LogClass.error(e);
@@ -209,6 +212,9 @@ public class AnalysisService implements IAnalysisService {
     }
 
     public UserCapabilities getUserCapabilitiesForFeed(long feedID) {
+        if (SecurityUtil.getUserID(false) == 0) {
+            return new UserCapabilities(Roles.NONE, Roles.NONE, false);
+        }
         long userID = SecurityUtil.getUserID();
         int feedRole = Integer.MAX_VALUE;
         boolean groupMember = false;
@@ -238,6 +244,9 @@ public class AnalysisService implements IAnalysisService {
     }
 
     public UserCapabilities getUserCapabilitiesForInsight(long feedID, long insightID) {
+        if (SecurityUtil.getUserID(false) == 0) {
+            return new UserCapabilities(Roles.NONE, Roles.NONE, false);
+        }
         UserCapabilities userCapabilities = getUserCapabilitiesForFeed(feedID);
         long userID = SecurityUtil.getUserID();
         Connection conn = Database.instance().getConnection();

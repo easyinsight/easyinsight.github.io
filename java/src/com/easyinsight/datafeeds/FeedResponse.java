@@ -6,15 +6,20 @@ package com.easyinsight.datafeeds;
  * Time: 4:46:18 PM
  */
 public class FeedResponse {
-    private boolean successful;
+
+    public static final int SUCCESS = 1;
+    public static final int NEED_LOGIN = 2;
+    public static final int REJECTED = 3;
+
+    private int status;
     private FeedDescriptor feedDescriptor;
 
-    public boolean isSuccessful() {
-        return successful;
+    public int getStatus() {
+        return status;
     }
 
-    public void setSuccessful(boolean successful) {
-        this.successful = successful;
+    public void setStatus(int status) {
+        this.status = status;
     }
 
     public FeedDescriptor getFeedDescriptor() {
@@ -28,8 +33,8 @@ public class FeedResponse {
     public FeedResponse() {
     }
 
-    public FeedResponse(boolean successful, FeedDescriptor feedDescriptor) {
-        this.successful = successful;
+    public FeedResponse(int status, FeedDescriptor feedDescriptor) {
+        this.status = status;
         this.feedDescriptor = feedDescriptor;
     }
 }

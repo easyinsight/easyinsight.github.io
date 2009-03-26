@@ -2,6 +2,7 @@ package com.easyinsight.analysis;
 
 import com.easyinsight.core.PersistableValue;
 import com.easyinsight.core.PersistableStringValue;
+import com.easyinsight.core.Value;
 
 import javax.persistence.*;
 import java.util.Set;
@@ -45,10 +46,9 @@ public class PersistableValueFilterDefinition extends PersistableFilterDefinitio
         FilterValueDefinition filterDefinition = new FilterValueDefinition();
         filterDefinition.setField(getField());
         filterDefinition.setInclusive(inclusive);
-        List<String> values = new ArrayList<String>();
+        List<Object> values = new ArrayList<Object>();
         for (PersistableValue filterDefinitionValue : filterValues) {
-            PersistableStringValue stringVal = (PersistableStringValue) filterDefinitionValue;
-            values.add(stringVal.getValue());
+            values.add(filterDefinitionValue.toValue());
         }
         filterDefinition.setFilteredValues(values);
         return filterDefinition;

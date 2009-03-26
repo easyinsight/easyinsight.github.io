@@ -10,7 +10,7 @@ import javax.persistence.*;
 @Entity
 @Table(name="value")
 @Inheritance(strategy= InheritanceType.JOINED)
-public class PersistableValue {
+public abstract class PersistableValue {
     @Id @GeneratedValue(strategy=GenerationType.IDENTITY)
     @Column(name="value_id")
     private Long valueID;
@@ -22,4 +22,6 @@ public class PersistableValue {
     public void setValueID(long valueID) {
         this.valueID = valueID;
     }
+
+    public abstract Value toValue();
 }

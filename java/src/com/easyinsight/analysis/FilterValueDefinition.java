@@ -1,15 +1,11 @@
 package com.easyinsight.analysis;
 
-import com.easyinsight.analysis.MaterializedFilterDefinition;
-import com.easyinsight.analysis.AnalysisItem;
-import com.easyinsight.core.PersistableValueFactory;
-import com.easyinsight.core.PersistableValue;
-import com.easyinsight.core.Value;
-import com.easyinsight.core.StringValue;
+import com.easyinsight.core.*;
 
 import java.util.List;
 import java.util.Set;
 import java.util.HashSet;
+import java.util.Date;
 
 /**
  * User: James Boe
@@ -18,12 +14,12 @@ import java.util.HashSet;
  */
 public class FilterValueDefinition extends FilterDefinition {
     private boolean inclusive;
-    private List<String> filteredValues;
+    private List<Object> filteredValues;
 
     public FilterValueDefinition() {        
     }
 
-    public FilterValueDefinition(AnalysisItem field, boolean inclusive, List<String> filteredValues) {
+    public FilterValueDefinition(AnalysisItem field, boolean inclusive, List<Object> filteredValues) {
         super(field);
         this.inclusive = inclusive;
         this.filteredValues = filteredValues;
@@ -37,11 +33,11 @@ public class FilterValueDefinition extends FilterDefinition {
         this.inclusive = inclusive;
     }
 
-     public List<String> getFilteredValues() {
+     public List<Object> getFilteredValues() {
         return filteredValues;
     }
 
-    public void setFilteredValues(List<String> filteredValues) {
+    public void setFilteredValues(List<Object> filteredValues) {
         this.filteredValues = filteredValues;
     }
 
@@ -51,8 +47,20 @@ public class FilterValueDefinition extends FilterDefinition {
         persistableFilterDefinition.setApplyBeforeAggregation(isApplyBeforeAggregation());
         persistableFilterDefinition.setField(getField());
         Set<Value> valueSet = new HashSet<Value>();
-        for (String stringValue : filteredValues) {
-            valueSet.add(new StringValue(stringValue));
+        for (Object valueObject : filteredValues) {
+            Value value;
+            if (valueObject instanceof Value) {
+                value = (Value) valueObject;
+            } else if (valueObject instanceof String) {
+                value = new StringValue((String) valueObject);
+            } else if (valueObject instanceof Number) {
+                value = new NumericValue((Number) valueObject);
+            } else if (valueObject instanceof Date) {
+                value = new DateValue((Date) valueObject);
+            } else {
+                throw new RuntimeException("Unexpected value class " + valueObject.getClass().getName());
+            }
+            valueSet.add(value);
         }
         Set<PersistableValue> filterDefinitionValues = PersistableValueFactory.fromValue(valueSet);
         persistableFilterDefinition.setFilterValues(filterDefinitionValues);
@@ -60,6 +68,20 @@ public class FilterValueDefinition extends FilterDefinition {
     }
 
     public MaterializedFilterDefinition materialize(InsightRequestMetadata insightRequestMetadata) {
-        return new MaterializedValueFilterDefinition(getField(), filteredValues, inclusive);
+        Set<Value> valueSet = new HashSet<Value>();
+        for (Object valueObject : filteredValues) {
+            Value value;
+            if (valueObject instanceof String) {
+                value = new StringValue((String) valueObject);
+            } else if (valueObject instanceof Number) {
+                value = new NumericValue((Number) valueObject);
+            } else if (valueObject instanceof Date) {
+                value = new DateValue((Date) valueObject);
+            } else {
+                throw new RuntimeException("Unexpected value class " + valueObject.getClass().getName());
+            }
+            valueSet.add(value);
+        }
+        return new MaterializedValueFilterDefinition(getField(), valueSet, inclusive);
     }
 }

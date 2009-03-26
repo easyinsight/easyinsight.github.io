@@ -12,8 +12,6 @@ import java.io.Serializable;
 import com.easyinsight.core.Key;
 import com.easyinsight.core.NamedKey;
 import com.easyinsight.core.Value;
-import com.easyinsight.analysis.FormattingConfiguration;
-import com.easyinsight.analysis.AnalysisItemResultMetadata;
 
 /**
  * User: James Boe
@@ -129,6 +127,10 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
 
     public void handleEarlyData(List<IRow> rows) {
         throw new UnsupportedOperationException();
+    }
+
+    public Value polishValue(Value value) {
+        return value;
     }
 
     public AnalysisItemResultMetadata createResultMetadata() {

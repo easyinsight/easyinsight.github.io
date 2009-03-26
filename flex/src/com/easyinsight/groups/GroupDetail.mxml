@@ -1,6 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%" implements="com.easyinsight.listing.IPerspective"
 	xmlns:groups="com.easyinsight.groups.*" xmlns:discussion="com.easyinsight.discussion.*">
+    <mx:states>
+        <mx:State name="Discussion">
+            <mx:RemoveChild target="{groupAttributesBox}"/>
+        </mx:State>
+    </mx:states>
+    <mx:transitions>
+        <mx:Transition id="toDiscussion" fromState="*" toState="Discussion">
+            <mx:Sequence targets="{[groupAttributesBox, discussionBox]}">
+                <mx:RemoveChildAction/>
+                <mx:Resize target="{discussionBox}"/>
+            </mx:Sequence>
+        </mx:Transition>
+    </mx:transitions>
 	<!--
 	<mx:states>
 		<mx:State name="SearchState">
@@ -19,9 +32,9 @@
 	-->
 	<mx:Script>
 		<![CDATA[
-import com.easyinsight.discussion.MessagePostedEvent;
-import com.easyinsight.discussion.NewMessageWindow;
-import mx.controls.Alert;
+            import com.easyinsight.discussion.MessagePostedEvent;
+            import com.easyinsight.discussion.NewMessageWindow;
+            import mx.controls.Alert;
 			import mx.managers.PopUpManager;
 			import com.easyinsight.help.HelpWindow;
 			import com.easyinsight.framework.User;
@@ -263,7 +276,7 @@ import mx.controls.Alert;
         <mx:Spacer height="20"/>
 		<mx:HBox width="100%">
 
-		<mx:VBox verticalGap="0">
+		<mx:VBox verticalGap="0" id="groupAttributesBox">
             <mx:Box width="100%" height="5" backgroundColor="#D42525" left="0" right="0"/>
             <mx:Box width="100%" backgroundColor="#F6A76B" horizontalAlign="center">
                 <mx:Label text="Group Attributes"/>
@@ -284,7 +297,7 @@ import mx.controls.Alert;
             </mx:Form>
 		</mx:VBox>
 
-        <mx:VBox width="100%" verticalGap="0">
+        <mx:VBox width="100%" verticalGap="0" id="discussionBox">
             <discussion:DiscussionPanel dataProvider="{messages}" width="100%"/>
         </mx:VBox>		
 

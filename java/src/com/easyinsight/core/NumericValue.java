@@ -18,8 +18,8 @@ public class NumericValue extends Value implements Serializable {
     public NumericValue() {
     }
 
-    public NumericValue(Integer value) {
-        this.value = new Double(value);
+    public NumericValue(Number value) {
+        this.value = value.doubleValue();
     }
 
     @Override

@@ -5026,6 +5026,62 @@
         </RELATIONSHIP_ELEMENT>
       </TABLE_DATA>
       <TABLE_DATA>
+        <option name="NAME" value="group_to_goal_tree_join" />
+        <option name="SCHEMA" />
+        <option name="CATALOG" value="dms" />
+        <option name="TYPE" value="TABLE" />
+        <FIELD_ELEMENT>
+          <option name="NAME" value="group_to_goal_tree_join_id" />
+          <option name="SQL_TYPE" value="bigint" />
+          <option name="JDBC_TYPE" value="-5" />
+          <option name="TYPE" />
+          <option name="PRIMARY" value="true" />
+          <option name="LENGTH" value="20" />
+          <option name="PRECISION" value="0" />
+          <option name="NULLABLE" value="false" />
+        </FIELD_ELEMENT>
+        <FIELD_ELEMENT>
+          <option name="NAME" value="group_id" />
+          <option name="SQL_TYPE" value="bigint" />
+          <option name="JDBC_TYPE" value="-5" />
+          <option name="TYPE" />
+          <option name="PRIMARY" value="false" />
+          <option name="LENGTH" value="20" />
+          <option name="PRECISION" value="0" />
+          <option name="NULLABLE" value="true" />
+        </FIELD_ELEMENT>
+        <FIELD_ELEMENT>
+          <option name="NAME" value="goal_tree_id" />
+          <option name="SQL_TYPE" value="bigint" />
+          <option name="JDBC_TYPE" value="-5" />
+          <option name="TYPE" />
+          <option name="PRIMARY" value="false" />
+          <option name="LENGTH" value="20" />
+          <option name="PRECISION" value="0" />
+          <option name="NULLABLE" value="true" />
+        </FIELD_ELEMENT>
+        <RELATIONSHIP_ELEMENT>
+          <option name="RELATION_NAME" value="group_to_goal_tree_join_ibfk_1" />
+          <option name="TARGET_TABLE" value="goal_tree" />
+          <option name="TARGET_SCHEMA" />
+          <option name="TARGET_CATALOG" value="dms" />
+          <option name="TARGET_COLUMN" value="goal_tree_id" />
+          <option name="SOURCE_COLUMN" value="goal_tree_id" />
+          <option name="CASCADE_REMOVE" value="true" />
+          <option name="CASCADE_UPDATE" value="false" />
+        </RELATIONSHIP_ELEMENT>
+        <RELATIONSHIP_ELEMENT>
+          <option name="RELATION_NAME" value="group_to_goal_tree_join_ibfk_2" />
+          <option name="TARGET_TABLE" value="community_group" />
+          <option name="TARGET_SCHEMA" />
+          <option name="TARGET_CATALOG" value="dms" />
+          <option name="TARGET_COLUMN" value="community_group_id" />
+          <option name="SOURCE_COLUMN" value="group_id" />
+          <option name="CASCADE_REMOVE" value="true" />
+          <option name="CASCADE_UPDATE" value="false" />
+        </RELATIONSHIP_ELEMENT>
+      </TABLE_DATA>
+      <TABLE_DATA>
         <option name="NAME" value="group_to_insight" />
         <option name="SCHEMA" />
         <option name="CATALOG" value="dms" />

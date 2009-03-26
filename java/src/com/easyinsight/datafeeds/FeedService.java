@@ -37,9 +37,12 @@ public class FeedService implements IDataFeedService {
                 SecurityUtil.authorizeFeedAccess(feedID);
                 long userID = SecurityUtil.getUserID();
                 FeedDescriptor feedDescriptor = feedStorage.getFeedDescriptor(userID, feedID);
-                feedResponse = new FeedResponse(true, feedDescriptor);
+                feedResponse = new FeedResponse(FeedResponse.SUCCESS, feedDescriptor);
             } catch (SecurityException e) {
-                feedResponse = new FeedResponse(false, null);
+                if (e.getReason() == SecurityException.LOGIN_REQUIRED)
+                    feedResponse = new FeedResponse(FeedResponse.NEED_LOGIN, null);
+                else
+                    feedResponse = new FeedResponse(FeedResponse.REJECTED, null);
             }
         } catch (Exception e) {
             LogClass.error(e);
@@ -55,9 +58,12 @@ public class FeedService implements IDataFeedService {
                 long userID = SecurityUtil.getUserID();
                 long feedID = feedStorage.getFeedForAPIKey(userID, apiKey);
                 FeedDescriptor feedDescriptor = feedStorage.getFeedDescriptor(userID, feedID);
-                feedResponse = new FeedResponse(true, feedDescriptor);
+                feedResponse = new FeedResponse(FeedResponse.SUCCESS, feedDescriptor);
             } catch (SecurityException e) {
-                feedResponse = new FeedResponse(false, null);
+                if (e.getReason() == SecurityException.LOGIN_REQUIRED)
+                    feedResponse = new FeedResponse(FeedResponse.NEED_LOGIN, null);
+                else
+                    feedResponse = new FeedResponse(FeedResponse.REJECTED, null);
             }
         } catch (Exception e) {
             LogClass.error(e);
@@ -332,7 +338,7 @@ public class FeedService implements IDataFeedService {
         }
     }
 
-    public void updateFeedDefinition(FeedDefinition feedDefinition, String tagString) {
+    public void updateFeedDefinition(FeedDefinition feedDefinition, String tagString, WSAnalysisDefinition baseDefinition) {
         /*final Map<Long, UserFeedLink> userMap = new HashMap<Long, UserFeedLink>();
         if (feedDefinition.getUploadPolicy().getUploadPolicy() == UploadPolicy.PRIVATE) {
             PrivateUploadPolicy privatePolicy = (PrivateUploadPolicy) feedDefinition.getUploadPolicy();
@@ -352,6 +358,9 @@ public class FeedService implements IDataFeedService {
         DataStorage metadata = null;
         try {
             conn.setAutoCommit(false);
+            if (baseDefinition != null) {
+                new AnalysisStorage().saveAnalysis(AnalysisDefinitionFactory.fromWSDefinition(baseDefinition), conn);
+            }
             String[] tags = tagString.split(" ");
             List<Tag> tagList = new ArrayList<Tag>();
             for (String tagName : tags) {

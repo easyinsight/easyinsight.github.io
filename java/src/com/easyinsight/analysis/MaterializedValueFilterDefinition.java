@@ -1,16 +1,8 @@
 package com.easyinsight.analysis;
 
-import com.easyinsight.analysis.MaterializedFilterDefinition;
-import com.easyinsight.analysis.AnalysisItem;
-import com.easyinsight.analysis.AnalysisItemTypes;
 import com.easyinsight.core.Value;
-import com.easyinsight.core.NumericValue;
-import com.easyinsight.core.EmptyValue;
-import com.easyinsight.core.StringValue;
 
 import java.util.Set;
-import java.util.List;
-import java.util.HashSet;
 
 /**
  * User: James Boe
@@ -21,27 +13,10 @@ public class MaterializedValueFilterDefinition extends MaterializedFilterDefinit
     private Set<Value> values;
     private boolean inclusive;
 
-    public MaterializedValueFilterDefinition(AnalysisItem key, List<String> possibleValues, boolean inclusive) {
+    public MaterializedValueFilterDefinition(AnalysisItem key, Set<Value> possibleValues, boolean inclusive) {
         super(key);
         this.inclusive = inclusive;
-        values = new HashSet<Value>();
-        for (String value : possibleValues) {
-            if (key.hasType(AnalysisItemTypes.MEASURE)) {
-                NumericValue numericValue = new NumericValue();
-                numericValue.setValue(value);
-                values.add(numericValue);
-            } else if (key.hasType(AnalysisItemTypes.DATE_DIMENSION)) {
-
-            } else {
-                if ("".equals(value)) {
-                    values.add(new EmptyValue());
-                } else {
-                    StringValue stringValue = new StringValue();
-                    stringValue.setValue(value);
-                    values.add(stringValue);
-                }
-            }
-        }
+        values = possibleValues;
     }
 
     public boolean isInclusive() {

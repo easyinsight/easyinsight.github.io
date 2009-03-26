@@ -13,6 +13,7 @@ import com.easyinsight.email.UserStub;
 import com.easyinsight.security.Roles;
 import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.audit.AuditMessage;
+import com.easyinsight.goals.GoalTreeDescriptor;
 
 import java.util.*;
 import java.util.Date;
@@ -354,6 +355,26 @@ public class GroupStorage {
         return analysisDefs; 
     }
 
+    public List<GoalTreeDescriptor> getGoalTrees(long groupID) {
+        List<GoalTreeDescriptor> goalTrees = new ArrayList<GoalTreeDescriptor>();
+        Connection conn = Database.instance().getConnection();
+        try {
+            PreparedStatement queryStmt = conn.prepareStatement("SELECT GOAL_TREE.GOAL_TREE_ID, GOAL_TREE.name FROM GROUP_TO_GOAL_TREE_JOIN, GOAL_TREE WHERE GROUP_ID = ? AND " +
+                    "GOAL_TREE_ID = GOAL_TREE.goal_tree_id");
+            queryStmt.setLong(1, groupID);
+            ResultSet rs = queryStmt.executeQuery();
+            while (rs.next()) {
+                goalTrees.add(new GoalTreeDescriptor(rs.getLong(1), rs.getString(2), Roles.OWNER));
+            }
+        } catch (SQLException e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        } finally {
+            Database.instance().closeConnection(conn);
+        }
+        return goalTrees;
+    }
+
     public String inviteNewUserToGroup(long groupID) {
         Connection conn = Database.instance().getConnection();
         try {
@@ -435,6 +456,29 @@ public class GroupStorage {
                 insertFeedStmt.setLong(1, groupID);
                 insertFeedStmt.setLong(2, feedID);
                 insertFeedStmt.setLong(3, Roles.SUBSCRIBER);
+                insertFeedStmt.execute();
+            }
+        } catch (SQLException e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        } finally {
+            Database.instance().closeConnection(conn);
+        }
+    }
+
+    public void addGoalTreeToGroup(long goalTreeID, long groupID) {
+        Connection conn = Database.instance().getConnection();
+        try {
+            PreparedStatement existingLinkQuery = conn.prepareStatement("SELECT GROUP_TO_GOAL_TREE_JOIN_ID FROM GROUP_TO_GOAL_TREE_JOIN WHERE " +
+                    "GROUP_ID = ? AND GOAL_TREE_ID = ?");
+            existingLinkQuery.setLong(1, groupID);
+            existingLinkQuery.setLong(2, goalTreeID);
+            ResultSet existingRS = existingLinkQuery.executeQuery();
+            if (!existingRS.next()) {
+                PreparedStatement insertFeedStmt = conn.prepareStatement("INSERT INTO GROUP_TO_GOAL_TREE_JOIN (GROUP_ID, GOAL_TREE_ID) " +
+                        "VALUES (?, ?)");
+                insertFeedStmt.setLong(1, groupID);
+                insertFeedStmt.setLong(2, goalTreeID);
                 insertFeedStmt.execute();
             }
         } catch (SQLException e) {

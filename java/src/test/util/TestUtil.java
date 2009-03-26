@@ -7,6 +7,10 @@ import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.userupload.UserUploadService;
 import com.easyinsight.userupload.UploadResponse;
 
+import java.util.List;
+import java.util.ArrayList;
+import java.util.Arrays;
+
 /**
  * User: James Boe
  * Date: Jun 12, 2008
@@ -18,6 +22,12 @@ public class TestUtil {
 
     public static Key createKey(String name, long feedID) {
         return keyStorage.retrieveKey(feedID, name);
+    }
+
+    public static List<Object> objectList(Object... objects) {
+        List<Object> objectList = new ArrayList<Object>();
+        objectList.addAll(Arrays.asList(objects));
+        return objectList;
     }
 
     /**
