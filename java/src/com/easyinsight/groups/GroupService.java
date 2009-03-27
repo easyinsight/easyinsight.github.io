@@ -1,17 +1,21 @@
 package com.easyinsight.groups;
 
-import com.easyinsight.security.SecurityUtil;
-import com.easyinsight.security.Roles;
+import com.easyinsight.security.*;
+import com.easyinsight.security.SecurityException;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.analysis.WSAnalysisDefinition;
 import com.easyinsight.datafeeds.FeedDescriptor;
 import com.easyinsight.database.Database;
 import com.easyinsight.audit.AuditMessage;
 import com.easyinsight.users.Account;
+import com.easyinsight.goals.GoalTreeDescriptor;
+import com.easyinsight.goals.GoalTreeNodeData;
+import com.easyinsight.goals.GoalStorage;
 
 import java.util.List;
 import java.util.Date;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.sql.Connection;
 import java.sql.SQLException;
 
@@ -23,6 +27,25 @@ import java.sql.SQLException;
 public class GroupService {
 
     private GroupStorage groupStorage = new GroupStorage();
+
+    public GroupResponse openGroupIfPossible(long groupID) {
+        GroupResponse groupResponse;
+        try {
+            try {
+                SecurityUtil.authorizeGroup(groupID, Roles.SHARER);
+                groupResponse = new GroupResponse(GroupResponse.SUCCESS, groupID);
+            } catch (com.easyinsight.security.SecurityException e) {
+                if (e.getReason() == SecurityException.LOGIN_REQUIRED)
+                    groupResponse = new GroupResponse(GroupResponse.NEED_LOGIN, 0);
+                else
+                    groupResponse = new GroupResponse(GroupResponse.REJECTED, 0);
+            }
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        }
+        return groupResponse;
+    }
 
     public long addGroup(Group group) {
         SecurityUtil.authorizeAccountTier(Account.INDIVIDUAL);
@@ -193,6 +216,7 @@ public class GroupService {
 
     public void addFeedToGroup(long feedID, long groupID) {
         SecurityUtil.authorizeGroup(groupID, Roles.SUBSCRIBER);
+        SecurityUtil.authorizeFeed(feedID, Roles.SUBSCRIBER);
         try {
             groupStorage.addFeedToGroup(feedID, groupID, Roles.SUBSCRIBER);
         } catch (Exception e) {
@@ -205,6 +229,28 @@ public class GroupService {
         SecurityUtil.authorizeGroup(groupID, Roles.SUBSCRIBER);
         try {
             groupStorage.addInsightToGroup(insightID, groupID);
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void addGoalTreeToGroup(long goalTreeID, long groupID) {
+        SecurityUtil.authorizeGroup(groupID, Roles.SUBSCRIBER);
+        SecurityUtil.authorizeGoalTree(goalTreeID, Roles.SUBSCRIBER);
+        try {
+            groupStorage.addGoalTreeToGroup(goalTreeID, groupID);
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void addGoalToGroup(long goalID, long groupID) {
+        SecurityUtil.authorizeGroup(groupID, Roles.SUBSCRIBER);
+        SecurityUtil.authorizeGoal(goalID, Roles.SUBSCRIBER);
+        try {
+            groupStorage.addGoalToGroup(goalID, groupID);
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);
@@ -230,6 +276,30 @@ public class GroupService {
         long userID = SecurityUtil.getUserID();
         try {
             return groupStorage.getFeeds(groupID, userID);
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        }
+    }
+
+    public List<GoalTreeDescriptor> getGoalTrees(long groupID) {
+        SecurityUtil.authorizeGroup(groupID, Roles.SUBSCRIBER);
+        try {
+            return groupStorage.getGoalTrees(groupID);
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        }
+    }
+
+    public List<GoalTreeNodeData> getGoals(long groupID) {
+        SecurityUtil.authorizeGroup(groupID, Roles.SUBSCRIBER);
+        try {
+            Calendar cal = Calendar.getInstance();
+            Date endDate = cal.getTime();
+            cal.add(Calendar.DAY_OF_YEAR, -7);
+            Date startDate = cal.getTime();
+            return new GoalStorage().getGoalsForGroup(groupID, startDate, endDate);
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);

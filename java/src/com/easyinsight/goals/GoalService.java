@@ -184,4 +184,23 @@ public class GoalService {
             throw new RuntimeException(e);
         }
     }
+
+    public List<GoalDescriptor> getGoalsForTree(long treeID) {
+        final List<GoalDescriptor> nodes = new ArrayList<GoalDescriptor>();
+        SecurityUtil.authorizeGoalTree(treeID, Roles.SUBSCRIBER);
+        try {
+            GoalTree goalTree = goalStorage.retrieveGoalTree(treeID);
+            GoalTreeVisitor visitor = new GoalTreeVisitor() {
+
+                protected void accept(GoalTreeNode goalTreeNode) {
+                    nodes.add(new GoalDescriptor(goalTreeNode.getName(), goalTreeNode.getGoalTreeNodeID()));
+                }
+            };
+            visitor.visit(goalTree.getRootNode());
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        }
+        return nodes;
+    }
 }

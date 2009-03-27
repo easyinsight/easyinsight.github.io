@@ -17,6 +17,7 @@ import com.easyinsight.analysis.DelayedAPIKeyLink;
 import com.easyinsight.framework.FullScreenModuleEvent;
 import com.easyinsight.framework.ModuleAnalyzeSource;
 import com.easyinsight.genredata.ModuleAnalyzeEvent;
+import com.easyinsight.groups.DelayedGroupLink;
 import com.easyinsight.intro.WelcomeScreen;
 			import com.easyinsight.FullScreenPage;
 			import com.easyinsight.analysis.DelayedFeedLink;
@@ -128,43 +129,49 @@ import mx.messaging.ChannelSet;
                             deepAPILink.addEventListener(ModuleAnalyzeEvent.MODULE_ANALYZE, internalModuleAnalyze);
                             deepAPILink.execute();
                         } else {
-                            var activationString:String = o.activationID;
-                            if (activationString != null) {
-                                userService.activateAccount.send(activationString);
+                            var groupID:String = o.groupID;
+                            if (groupID != null) {
+                                var groupLink:DelayedGroupLink = new DelayedGroupLink(Number(groupID));
+                                groupLink.execute();
                             } else {
-                                var page:String = o.page;
-                                if (page != null) {
-                                    if (currentState == "Analysis") {
-                                        currentState = "";
-                                        dataAnalysis.removeEventListener(AnalysisCloseEvent.ANALYSIS_CLOSE, analysisClosed);
-                                        dataAnalysis = null;
-                                    }
-                                    switch (page) {
-                                        case "myData":
-                                            navigation(new NavigationEvent("My Data"));
-                                            break;
-                                        case "myGoals":
-                                            navigation(new NavigationEvent("Goals"));
-                                            break;
-                                        case "marketplace":
-                                            navigation(new NavigationEvent("Marketplace"));
-                                            break;
-                                        case "groups":
-                                            navigation(new NavigationEvent("Groups"));
-                                            break;
-                                        case "groupDetail":
-                                            break;
-                                        case "intro":
-                                            navigation(new NavigationEvent("Intro"));
-                                            break;
-                                        case "solutions":
-                                            navigation(new NavigationEvent("Solutions"));
-                                            break;
-                                        case "account":
-                                            navigation(new NavigationEvent("My Account"));
-                                            break;
-                                        case "welcome":
-                                            navigation(new NavigationEvent(null, new WelcomeScreen()));
+                                var activationString:String = o.activationID;
+                                if (activationString != null) {
+                                    userService.activateAccount.send(activationString);
+                                } else {
+                                    var page:String = o.page;
+                                    if (page != null) {
+                                        if (currentState == "Analysis") {
+                                            currentState = "";
+                                            dataAnalysis.removeEventListener(AnalysisCloseEvent.ANALYSIS_CLOSE, analysisClosed);
+                                            dataAnalysis = null;
+                                        }
+                                        switch (page) {
+                                            case "myData":
+                                                navigation(new NavigationEvent("My Data"));
+                                                break;
+                                            case "myGoals":
+                                                navigation(new NavigationEvent("Goals"));
+                                                break;
+                                            case "marketplace":
+                                                navigation(new NavigationEvent("Marketplace"));
+                                                break;
+                                            case "groups":
+                                                navigation(new NavigationEvent("Groups"));
+                                                break;
+                                            case "groupDetail":
+                                                break;
+                                            case "intro":
+                                                navigation(new NavigationEvent("Intro"));
+                                                break;
+                                            case "solutions":
+                                                navigation(new NavigationEvent("Solutions"));
+                                                break;
+                                            case "account":
+                                                navigation(new NavigationEvent("My Account"));
+                                                break;
+                                            case "welcome":
+                                                navigation(new NavigationEvent(null, new WelcomeScreen()));
+                                        }
                                     }
                                 }
                             }

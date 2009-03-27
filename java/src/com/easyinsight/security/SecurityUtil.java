@@ -203,13 +203,13 @@ public class SecurityUtil {
             if (rs.next()) {
                 role = rs.getInt(1);
             } else {
-                PreparedStatement groupQueryStmt = conn.prepareStatement("select role from group_to_goal_tree_join, group_to_user_join, GOAL_TREE_NODE where " +
+                PreparedStatement groupQueryStmt = conn.prepareStatement("select group_to_goal_tree_join_id from group_to_goal_tree_join, group_to_user_join, GOAL_TREE_NODE where " +
                         "group_to_user_join.group_id = group_to_goal_tree_join.group_id and group_to_user_join.user_id = ? and group_to_goal_tree_join.goal_tree_id = goal_tree_node.goal_tree_id and " +
                         "goal_tree_node.goal_tree_node_id = ?");
                 groupQueryStmt.setLong(1, userID);
                 groupQueryStmt.setLong(2, goalID);
                 if (rs.next()) {
-                    role = rs.getInt(1);
+                    role = Roles.SUBSCRIBER;
                 } else {
                     role = Integer.MAX_VALUE;
                 }
@@ -236,13 +236,13 @@ public class SecurityUtil {
             if (rs.next()) {
                 return rs.getInt(1);
             } else {
-                PreparedStatement groupQueryStmt = conn.prepareStatement("select role from group_to_goal_tree_join, group_to_user_join where " +
+                PreparedStatement groupQueryStmt = conn.prepareStatement("select group_to_goal_tree_join_id from group_to_goal_tree_join, group_to_user_join where " +
                         "group_to_user_join.group_id = group_to_goal_tree_join.group_id and group_to_user_join.user_id = ? and group_to_goal_tree_join.goal_tree_id = ?");
                 groupQueryStmt.setLong(1, userID);
                 groupQueryStmt.setLong(2, goalTreeID);
                 ResultSet groupRS = groupQueryStmt.executeQuery();
                 if (groupRS.next()) {
-                    return groupRS.getInt(1);
+                    return Roles.SUBSCRIBER;
                 } else {
                     return Integer.MAX_VALUE;
                 }

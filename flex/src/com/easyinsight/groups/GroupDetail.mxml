@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%" implements="com.easyinsight.listing.IPerspective"
-	xmlns:groups="com.easyinsight.groups.*" xmlns:discussion="com.easyinsight.discussion.*">
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*" width="100%" height="100%"
+         implements="com.easyinsight.listing.IPerspective"
+         xmlns:groups="com.easyinsight.groups.*" xmlns:discussion="com.easyinsight.discussion.*">
     <mx:states>
         <mx:State name="Discussion">
             <mx:RemoveChild target="{groupAttributesBox}"/>
@@ -14,7 +15,7 @@
             </mx:Sequence>
         </mx:Transition>
     </mx:transitions>
-	<!--
+    <!--
 	<mx:states>
 		<mx:State name="SearchState">
 			<mx:RemoveChild target="{coreHBox}"/>			
@@ -30,297 +31,403 @@
 		</mx:State>
 	</mx:states>
 	-->
-	<mx:Script>
+    <mx:Script>
 		<![CDATA[
-            import com.easyinsight.discussion.MessagePostedEvent;
-            import com.easyinsight.discussion.NewMessageWindow;
-            import mx.controls.Alert;
-			import mx.managers.PopUpManager;
-			import com.easyinsight.help.HelpWindow;
-			import com.easyinsight.framework.User;
-			import com.easyinsight.listing.HeaderBarEvent;
-			import mx.collections.ArrayCollection;
-			import com.easyinsight.genredata.ChildSearchEvent;
-			import com.easyinsight.listing.CatalogNavigationEvent;
-			import com.easyinsight.listing.AnalyzeSource;
-			import com.easyinsight.framework.NavigationEvent;
-			
-			[Bindable]
-	        [Embed(source="../../../../assets/helpx48.png")]
-	        public var helpIcon:Class;
+        import com.easyinsight.discussion.MessagePostedEvent;
+        import com.easyinsight.discussion.NewMessageWindow;
 
-            [Bindable]
-	        [Embed(source="../../../../assets/message.png")]
-	        public var messageIcon:Class;
+        import mx.controls.Alert;
+        import mx.managers.BrowserManager;
+import mx.managers.PopUpManager;
 
-            [Bindable]
-	        [Embed(source="../../../../assets/data_add_x64.png")]
-	        public var addDataSourceIcon:Class;
+        import com.easyinsight.help.HelpWindow;
+        import com.easyinsight.framework.User;
+        import com.easyinsight.listing.HeaderBarEvent;
 
-            [Bindable]
-	        [Embed(source="../../../../assets/chart_pie2_48x48.png")]
-	        public var addInsightIcon:Class;
+        import mx.collections.ArrayCollection;
 
-            [Bindable]
-	        [Embed(source="../../../../assets/earth_connection.png")]
-	        public var connectIcon:Class;
+        import com.easyinsight.genredata.ChildSearchEvent;
+        import com.easyinsight.listing.CatalogNavigationEvent;
+        import com.easyinsight.listing.AnalyzeSource;
+        import com.easyinsight.framework.NavigationEvent;
+        import mx.utils.URLUtil;
 
-            [Bindable]
-	        [Embed(source="../../../../assets/earth_edit.png")]
-	        public var administerIcon:Class;
-			
-			[Bindable]
-			public var groupID:int;
-			[Bindable]
-			public var description:String;
+        [Bindable]
+        [Embed(source="../../../../assets/helpx48.png")]
+        public var helpIcon:Class;
 
-			[Bindable]
-			private var hasDescription:Boolean = false;
-						
-			[Bindable]
-			private var groupName:String;
-			
-			[Bindable]
-			private var recentChanges:ArrayCollection;
+        [Bindable]
+        [Embed(source="../../../../assets/message.png")]
+        public var messageIcon:Class;
 
-            [Bindable]
-            private var messages:ArrayCollection; 
-			
-			[Bindable]
-			private var recentChangesRowCount:int;
+        [Bindable]
+        [Embed(source="../../../../assets/data_add_x64.png")]
+        public var addDataSourceIcon:Class;
 
-            [Bindable]
-            private var groupUsers:ArrayCollection;
-			
-			[Bindable]
-			private var ownerLabel:String = "Group Owner:";
+        [Bindable]
+        [Embed(source="../../../../assets/chart_pie2_48x48.png")]
+        public var addInsightIcon:Class;
 
-            [Bindable]
-            private var adminEnabled:Boolean = false;
+        [Bindable]
+        [Embed(source="../../../../assets/branch_add.png")]
+        public var addGoalTreeIcon:Class;
 
-            [Bindable]
-            private var joinEnabled:Boolean = false;
+        [Bindable]
+        [Embed(source="../../../../assets/arrow2_up_green_x48.png")]
+        public var addGoalIcon:Class;
 
-            [Bindable]
-            private var ownerText:String;
+        [Bindable]
+        [Embed(source="../../../../assets/earth_connection.png")]
+        public var connectIcon:Class;
 
-            [Bindable]
-            private var numberMembersText:String;
-			
-			private var _group:Group;
-		
-			public function search(keyword:String = null):void {
+        [Bindable]
+        [Embed(source="../../../../assets/earth_edit.png")]
+        public var administerIcon:Class;
 
+        [Bindable]
+        public var groupID:int;
+        [Bindable]
+        public var description:String;
+
+        [Bindable]
+        private var hasDescription:Boolean = false;
+
+        [Bindable]
+        private var groupName:String;
+
+        [Bindable]
+        private var recentChanges:ArrayCollection;
+
+        [Bindable]
+        private var messages:ArrayCollection;
+
+        [Bindable]
+        private var recentChangesRowCount:int;
+
+        [Bindable]
+        private var groupUsers:ArrayCollection;
+
+        [Bindable]
+        private var ownerLabel:String = "Group Owner:";
+
+        [Bindable]
+        private var adminEnabled:Boolean = false;
+
+        [Bindable]
+        private var joinEnabled:Boolean = false;
+
+        [Bindable]
+        private var ownerText:String;
+
+        [Bindable]
+        private var numberMembersText:String;
+
+        [Bindable]
+        private var goals:ArrayCollection;
+
+        [Bindable]
+        private var goalTrees:ArrayCollection;
+
+        private var _group:Group;
+
+        public function search(keyword:String = null):void {
+
+        }
+
+        private function onSearchAnalysis(event:ChildSearchEvent):void {
+            var analysisDefs:ArrayCollection = event.items;
+            //currentState = "AnalysisSearchState";
+            //analysisCatalogListing.analysisDefinitions = analysisDefs;
+            dispatchEvent(new HeaderBarEvent(true, false));
+        }
+
+        private function onSearchFeed(event:ChildSearchEvent):void {
+            var dataProviderDescriptors:ArrayCollection = event.items;
+            //currentState = "SearchState";
+            //catalogListing.dataFeeds = dataProviderDescriptors;
+            dispatchEvent(new HeaderBarEvent(true, false));
+        }
+
+        private function navigateToHome(event:CatalogNavigationEvent):void {
+            currentState = "";
+            dispatchEvent(new HeaderBarEvent(false, false));
+        }
+
+        public function analyze():AnalyzeSource {
+            return null;
+        }
+
+        public function gotFocus():void {
+            var fragmentObject:Object = new Object();
+            fragmentObject.groupID = String(groupID);
+            var fragmentString:String = URLUtil.objectToString(fragmentObject);
+            BrowserManager.getInstance().setFragment(fragmentString);
+            groupService.getGroup.send(groupID);
+            groupService.getGroupMessages.send(groupID, null, null);
+            groupService.getGoalTrees.send(groupID);
+            groupService.getGoals.send(groupID);
+            groupInsights.refreshData();
+            groupFeeds.refreshData();
+        }
+
+        public function lostFocus():void {
+        }
+
+        private function backToGroupList():void {
+            User.getEventNotifier().dispatchEvent(new NavigationEvent("Groups"));
+        }
+
+        private function gotGroupDetails():void {
+            var group:Group = groupService.getGroup.lastResult as Group;
+            this.description = group.description;
+            if (description != null && description.length > 0) {
+                hasDescription = true;
             }
-            
-            private function onSearchAnalysis(event:ChildSearchEvent):void {
-				var analysisDefs:ArrayCollection = event.items;
-                //currentState = "AnalysisSearchState";
-                //analysisCatalogListing.analysisDefinitions = analysisDefs;
-                dispatchEvent(new HeaderBarEvent(true, false));
-            }
-
-            private function onSearchFeed(event:ChildSearchEvent):void {
-                var dataProviderDescriptors:ArrayCollection = event.items;
-                //currentState = "SearchState";
-                //catalogListing.dataFeeds = dataProviderDescriptors;
-                dispatchEvent(new HeaderBarEvent(true, false));
-            }
-
-            private function navigateToHome(event:CatalogNavigationEvent):void {
-                currentState = "";
-                dispatchEvent(new HeaderBarEvent(false, false));
-            }
-
-            public function analyze():AnalyzeSource {
-                return null;
-            }
-
-            public function gotFocus():void {
-            	groupService.getGroup.send(groupID);
-            	groupService.getGroupMessages.send(groupID, null, null);
-            	groupInsights.refreshData();
-            	groupFeeds.refreshData();
-            }
-
-            public function lostFocus():void {
-            }
-            
-            private function backToGroupList():void {
-            	User.getEventNotifier().dispatchEvent(new NavigationEvent("Groups"));
-            }
-            
-            private function gotGroupDetails():void {
-            	var group:Group = groupService.getGroup.lastResult as Group;
-            	this.description = group.description;
-            	if (description != null && description.length > 0) {
-            		hasDescription = true;
-            	}  
-            	this.groupName = group.name;
-                ownerText = "";
-                var secondUser:Boolean = false;
-                var foundUser:Boolean = false;
-                for each (var groupUser:GroupUser in group.groupUsers) {
-                    if (groupUser.role == GroupUser.OWNER) {
-                        if (secondUser) {
-                            ownerText += ", ";
-                        }
-                        ownerText += "<b>" + groupUser.name + "</b>";
-                        if (groupUser.name == User.getInstance().userName) {
-                            adminEnabled = true;
-                        }
+            this.groupName = group.name;
+            ownerText = "";
+            var secondUser:Boolean = false;
+            var foundUser:Boolean = false;
+            for each (var groupUser:GroupUser in group.groupUsers) {
+                if (groupUser.role == GroupUser.OWNER) {
+                    if (secondUser) {
+                        ownerText += ", ";
                     }
+                    ownerText += "<b>" + groupUser.name + "</b>";
                     if (groupUser.name == User.getInstance().userName) {
-                        foundUser = true;
+                        adminEnabled = true;
                     }
                 }
-                if (!foundUser) {
-                    joinEnabled = true;
+                if (groupUser.name == User.getInstance().userName) {
+                    foundUser = true;
                 }
-                if (secondUser && ownerText != "") {
-                    ownerLabel = "Group Owners:";
-                }
-                numberMembersText = group.groupUsers.length > 1 ? (group.groupUsers.length + " members") : (group.groupUsers.length + " member");
-            	this._group = group;          	
             }
-            
-            private function help():void {
-	        	HelpWindow.createHelpWindow(GroupHelp, this);
-	     	}
-	     	
-	     	private function groupUpdated(event:GroupCreatedEvent):void {
-	     		gotFocus();
-	     	}          
-	        
-	        private function administer():void {
-	        	var window:GroupAdministration = GroupAdministration(PopUpManager.createPopUp(this, GroupAdministration, true));
-	        	window.group = _group;
-	        	window.addEventListener(GroupCreatedEvent.GROUP_UPDATED, groupUpdated);
-	        	PopUpManager.centerPopUp(window);
-	        }
+            if (!foundUser) {
+                joinEnabled = true;
+            }
+            if (secondUser && ownerText != "") {
+                ownerLabel = "Group Owners:";
+            }
+            numberMembersText = group.groupUsers.length > 1 ? (group.groupUsers.length + " members") : (group.groupUsers.length + " member");
+            this._group = group;
+        }
 
-            private function joinGroup():void {
-                groupService.addMemberToGroup.send(_group.groupID);
-            }
+        private function help():void {
+            HelpWindow.createHelpWindow(GroupHelp, this);
+        }
 
-            private function addedToGroup():void {
-                numberMembersText = (_group.groupUsers.length) + _group.groupUsers.length + " members";
-                joinEnabled = false;
-                Alert.show("You are now a member of this group.");
-            }
+        private function groupUpdated(event:GroupCreatedEvent):void {
+            gotFocus();
+        }
 
-            private function gotGroupMessages():void {
-                this.messages = groupService.getGroupMessages.lastResult as ArrayCollection;
-            }
+        private function administer():void {
+            var window:GroupAdministration = GroupAdministration(PopUpManager.createPopUp(this, GroupAdministration, true));
+            window.group = _group;
+            window.addEventListener(GroupCreatedEvent.GROUP_UPDATED, groupUpdated);
+            PopUpManager.centerPopUp(window);
+        }
 
-            private function newMessage():void {
-                var newMessageWindow:NewMessageWindow = new NewMessageWindow();
-                newMessageWindow.addEventListener(MessagePostedEvent.MESSAGE_POSTED, onMessagePost);
-                PopUpManager.addPopUp(newMessageWindow, this);
-                PopUpManager.centerPopUp(newMessageWindow);
-            }
+        private function joinGroup():void {
+            groupService.addMemberToGroup.send(_group.groupID);
+        }
 
-            private function onMessagePost(event:MessagePostedEvent):void {
-                var groupComment:GroupComment = new GroupComment();
-                groupComment.message = event.message;
-                groupComment.timestamp = new Date();
-                groupComment.groupID = _group.groupID;
-                groupService.addGroupComment.send(groupComment);
-            }
+        private function addedToGroup():void {
+            numberMembersText = (_group.groupUsers.length) + _group.groupUsers.length + " members";
+            joinEnabled = false;
+            Alert.show("You are now a member of this group.");
+        }
 
-            private function addedComment():void {
-                groupService.getGroupMessages.send(_group.groupID);
-            }
+        private function gotGroupMessages():void {
+            this.messages = groupService.getGroupMessages.lastResult as ArrayCollection;
+        }
 
-            private function addReport():void {
-                var window:AddReportToGroupWindow = new AddReportToGroupWindow();
-                window.groupID = _group.groupID;
-                window.addEventListener(GroupRefreshEvent.GROUP_REFRESH, onGroupRefresh);
-                PopUpManager.addPopUp(window, this, true);
-                PopUpManager.centerPopUp(window);
-            }
+        private function newMessage():void {
+            var newMessageWindow:NewMessageWindow = new NewMessageWindow();
+            newMessageWindow.addEventListener(MessagePostedEvent.MESSAGE_POSTED, onMessagePost);
+            PopUpManager.addPopUp(newMessageWindow, this);
+            PopUpManager.centerPopUp(newMessageWindow);
+        }
 
-            private function addDataSource():void {
-                var window:AddDataSourceToGroupWindow = new AddDataSourceToGroupWindow();
-                window.groupID = _group.groupID;
-                window.addEventListener(GroupRefreshEvent.GROUP_REFRESH, onGroupRefresh);
-                PopUpManager.addPopUp(window, this, true);
-                PopUpManager.centerPopUp(window);
-            }
+        private function onMessagePost(event:MessagePostedEvent):void {
+            var groupComment:GroupComment = new GroupComment();
+            groupComment.message = event.message;
+            groupComment.timestamp = new Date();
+            groupComment.groupID = _group.groupID;
+            groupService.addGroupComment.send(groupComment);
+        }
 
-            private function onGroupRefresh(event:GroupRefreshEvent):void {
-                groupInsights.refreshData();
-                groupFeeds.refreshData();
-            }
+        private function addedComment():void {
+            groupService.getGroupMessages.send(_group.groupID);
+        }
+
+        private function addReport():void {
+            var window:AddReportToGroupWindow = new AddReportToGroupWindow();
+            window.groupID = _group.groupID;
+            window.addEventListener(GroupRefreshEvent.GROUP_REFRESH, onGroupRefresh);
+            PopUpManager.addPopUp(window, this, true);
+            PopUpManager.centerPopUp(window);
+        }
+
+        private function addDataSource():void {
+            var window:AddDataSourceToGroupWindow = new AddDataSourceToGroupWindow();
+            window.groupID = _group.groupID;
+            window.addEventListener(GroupRefreshEvent.GROUP_REFRESH, onGroupRefresh);
+            PopUpManager.addPopUp(window, this, true);
+            PopUpManager.centerPopUp(window);
+        }
+
+        private function onGroupRefresh(event:GroupRefreshEvent):void {
+            groupInsights.refreshData();
+            groupFeeds.refreshData();
+            groupService.getGoalTrees.send(groupID);
+            groupService.getGoals.send(groupID);
+        }
+
+        private function addGoalTree():void {
+            var window:AddGoalTreeToGroupWindow = new AddGoalTreeToGroupWindow();
+            window.groupID = _group.groupID;
+            window.addEventListener(GroupRefreshEvent.GROUP_REFRESH, onGroupRefresh);
+            PopUpManager.addPopUp(window, this, true);
+            PopUpManager.centerPopUp(window);
+        }
+
+        private function gotGoalTrees():void {
+            goalTrees = groupService.getGoalTrees.lastResult as ArrayCollection;
+        }
+
+        private function gotGoals():void {
+            goals = groupService.getGoals.lastResult as ArrayCollection;
+        }
+
+        private function addGoal():void {
+            var window:AddGoalToGroupWindow = new AddGoalToGroupWindow();
+            window.groupID = _group.groupID;
+            window.addEventListener(GroupRefreshEvent.GROUP_REFRESH, onGroupRefresh);
+            PopUpManager.addPopUp(window, this, true);
+            PopUpManager.centerPopUp(window);
+        }
 		]]>		
-	</mx:Script>
-	<mx:RemoteObject destination="groupService" id="groupService">
-		<mx:method name="getGroup" result="gotGroupDetails()"/>
-		<mx:method name="getGroupMessages" result="gotGroupMessages()"/>
-		<mx:method name="addMemberToGroup" result="addedToGroup()"/>
-		<mx:method name="addGroupComment" result="addedComment()"/>
-		<mx:method name="getInsights"/>
-		<mx:method name="getFeeds"/>
-	</mx:RemoteObject>
+    </mx:Script>
+    <mx:RemoteObject destination="groupService" id="groupService">
+        <mx:method name="getGroup" result="gotGroupDetails()"/>
+        <mx:method name="getGroupMessages" result="gotGroupMessages()"/>
+        <mx:method name="addMemberToGroup" result="addedToGroup()"/>
+        <mx:method name="addGroupComment" result="addedComment()"/>
+        <mx:method name="getInsights"/>
+        <mx:method name="getFeeds"/>
+        <mx:method name="getGoalTrees" result="gotGoalTrees()"/>
+        <mx:method name="getGoals" result="gotGoals()"/>
+    </mx:RemoteObject>
     <mx:Box width="100%" height="5" backgroundColor="#D42525" left="0" right="0"/>
-	<mx:VBox width="100%" height="100%" id="primaryCanvas" paddingTop="10" paddingLeft="10" paddingRight="10" paddingBottom="10">
-		<mx:HBox width="100%">
-			<mx:Button label="Back to Group List" click="backToGroupList()"/>
-            <mx:Button icon="{connectIcon}" toolTip="Join Group" click="joinGroup()" visible="{joinEnabled}"/>
-            <mx:Button icon="{administerIcon}" toolTip="Administer Group" click="administer()" visible="{adminEnabled}"/>
-            <mx:Button icon="{addDataSourceIcon}" toolTip="Add Data Source..." click="addDataSource()" visible="{adminEnabled}"/>
-            <mx:Button icon="{addInsightIcon}" toolTip="Add Report..." click="addReport()" visible="{adminEnabled}"/>
-            <mx:Button icon="{messageIcon}" toolTip="New Message" click="newMessage()" visible="{!joinEnabled}"/>
-			<mx:Button icon="{helpIcon}" toolTip="Help!" click="help()" />
-		</mx:HBox>
+    <mx:VBox width="100%" height="100%" id="primaryCanvas" paddingTop="10" paddingLeft="10" paddingRight="10"
+             paddingBottom="10">
+        <mx:HBox width="100%">
+            <mx:Button label="Back to Group List" click="backToGroupList()"/>
+            <mx:Button icon="{connectIcon}" toolTip="Join Group" click="joinGroup()" visible="{joinEnabled}" label="Join Group..." labelPlacement="bottom"/>
+            <mx:Button icon="{administerIcon}" toolTip="Administer Group" click="administer()"
+                       visible="{adminEnabled}" label="Group Admin..." labelPlacement="bottom"/>
+            <mx:Button icon="{addDataSourceIcon}" toolTip="Add Data Source..." click="addDataSource()"
+                       visible="{adminEnabled}"  label="Add Data Source..." labelPlacement="bottom"/>
+            <mx:Button icon="{addInsightIcon}" toolTip="Add Report..." click="addReport()" visible="{adminEnabled}"
+                     label="Add Report..." labelPlacement="bottom"/>
+            <mx:Button icon="{addGoalTreeIcon}" toolTip="Add Goal Tree..." click="addGoalTree()" visible="{adminEnabled}"
+                     label="Add Goal Tree..." labelPlacement="bottom"/>
+            <mx:Button icon="{addGoalIcon}" toolTip="Add Goal..." click="addGoal()" visible="{adminEnabled}"
+                     label="Add Goal..." labelPlacement="bottom"/>
+            <mx:Button icon="{messageIcon}" toolTip="New Comment..." click="newMessage()" visible="{!joinEnabled}"
+                     label="Add Comment..." labelPlacement="bottom"/>
+            <mx:Button icon="{helpIcon}" toolTip="Help!" click="help()"
+                     label="Help..." labelPlacement="bottom"/>
+        </mx:HBox>
         <mx:Spacer height="20"/>
-		<mx:HBox width="100%">
+        <mx:HBox width="100%">
 
-		<mx:VBox verticalGap="0" id="groupAttributesBox">
-            <mx:Box width="100%" height="5" backgroundColor="#D42525" left="0" right="0"/>
-            <mx:Box width="100%" backgroundColor="#F6A76B" horizontalAlign="center">
-                <mx:Label text="Group Attributes"/>
-            </mx:Box>
-            <mx:Form paddingTop="0" paddingLeft="0" paddingRight="0" paddingBottom="0" backgroundColor="#F5CDAF">
-                <mx:FormItem label="Name:" fontFamily="Tahoma" fontWeight="bold">
-                    <mx:Label text="{groupName}" fontFamily="Lucida Grande" fontWeight="normal"/>
-                </mx:FormItem>
-                <mx:FormItem label="Description:" fontFamily="Tahoma" fontWeight="bold">
-                    <mx:TextArea editable="false" text="{description}" fontFamily="Lucida Grande" fontWeight="normal" height="100"/>
-                </mx:FormItem>
-                <mx:FormItem label="{ownerLabel}" fontFamily="Tahoma" fontWeight="bold">
-                    <mx:Label htmlText="{ownerText}" fontFamily="Lucida Grande" fontWeight="normal"/>
-                </mx:FormItem>
-                <mx:FormItem label="Number of Members:" fontFamily="Tahoma" fontWeight="bold">
-                    <mx:Label text="{numberMembersText}" fontFamily="Lucida Grande" fontWeight="normal"/>
-                </mx:FormItem>
-            </mx:Form>
-		</mx:VBox>
+            <mx:VBox verticalGap="0" id="groupAttributesBox">
+                <mx:Box width="100%" height="5" backgroundColor="#D42525" left="0" right="0"/>
+                <mx:Box width="100%" backgroundColor="#F6A76B" horizontalAlign="center">
+                    <mx:Label text="Group Attributes"/>
+                </mx:Box>
+                <mx:Form paddingTop="0" paddingLeft="0" paddingRight="0" paddingBottom="0" backgroundColor="#F5CDAF">
+                    <mx:FormItem label="Name:" fontFamily="Tahoma" fontWeight="bold">
+                        <mx:Label text="{groupName}" fontFamily="Lucida Grande" fontWeight="normal"/>
+                    </mx:FormItem>
+                    <mx:FormItem label="Description:" fontFamily="Tahoma" fontWeight="bold">
+                        <mx:TextArea editable="false" text="{description}" fontFamily="Lucida Grande"
+                                     fontWeight="normal" height="100"/>
+                    </mx:FormItem>
+                    <mx:FormItem label="{ownerLabel}" fontFamily="Tahoma" fontWeight="bold">
+                        <mx:Label htmlText="{ownerText}" fontFamily="Lucida Grande" fontWeight="normal"/>
+                    </mx:FormItem>
+                    <mx:FormItem label="Number of Members:" fontFamily="Tahoma" fontWeight="bold">
+                        <mx:Label text="{numberMembersText}" fontFamily="Lucida Grande" fontWeight="normal"/>
+                    </mx:FormItem>
+                </mx:Form>
+            </mx:VBox>
 
-        <mx:VBox width="100%" verticalGap="0" id="discussionBox">
-            <discussion:DiscussionPanel dataProvider="{messages}" width="100%"/>
-        </mx:VBox>		
+            <mx:VBox width="100%" verticalGap="0" id="discussionBox">
+                <discussion:DiscussionPanel dataProvider="{messages}" width="100%"/>
+            </mx:VBox>
 
-		</mx:HBox>
-		<mx:VBox>
-			<!--
+        </mx:HBox>
+        <mx:VBox>
+            <!--
 			<mx:DataGrid dataProvider="{recentChanges}" rowCount="{recentChangesRowCount}">
 				<mx:columns>
 					<mx:DataGridColumn headerText="" dataFielditemRenderer=""
 				</mx:columns>
 			</mx:DataGrid>
 			-->
-		</mx:VBox>
-		<mx:HBox width="100%" backgroundColor="#FFFFFF" backgroundAlpha=".1" id="coreHBox" horizontalAlign="center">
-			<groups:GroupItemPanel rendererClass="com.easyinsight.genredata.PopularAnalysisItem" width="400" id="groupInsights"
-				title="Group Reports" groupID="{groupID}" dataOperation="{groupService.getInsights}"
-				fullDataOperation="{groupService.getInsights}" fullEventType="{ChildSearchEvent.ANALYSIS_SEARCH}"
-				analysisSearch="onSearchAnalysis(event)"/>
-			<mx:Spacer width="50"/>
-			<groups:GroupItemPanel rendererClass="com.easyinsight.genredata.PopularFeed" width="400" id="groupFeeds"
-				title="Group Data Sources" groupID="{groupID}" dataOperation="{groupService.getFeeds}"
-				fullDataOperation="{groupService.getFeeds}" fullEventType="{ChildSearchEvent.FEED_SEARCH}"
-				feedSearch="onSearchFeed(event)" />			
-		</mx:HBox>
-	</mx:VBox>
+        </mx:VBox>
+        <mx:HBox width="100%">
+            <mx:HBox width="100%" backgroundColor="#FFFFFF" backgroundAlpha=".1" id="coreHBox" horizontalAlign="center">
+                <mx:Spacer width="8%"/>
+                <groups:GroupItemPanel rendererClass="com.easyinsight.genredata.PopularAnalysisItem" width="40%"
+                                       id="groupInsights"
+                                       title="Group Reports" groupID="{groupID}" dataOperation="{groupService.getInsights}"
+                                       fullDataOperation="{groupService.getInsights}"
+                                       fullEventType="{ChildSearchEvent.ANALYSIS_SEARCH}"
+                                       analysisSearch="onSearchAnalysis(event)"/>
+                <mx:Spacer width="4%"/>
+                <groups:GroupItemPanel rendererClass="com.easyinsight.genredata.PopularFeed" width="40%" id="groupFeeds"
+                                       title="Group Data Sources" groupID="{groupID}"
+                                       dataOperation="{groupService.getFeeds}"
+                                       fullDataOperation="{groupService.getFeeds}"
+                                       fullEventType="{ChildSearchEvent.FEED_SEARCH}"
+                                       feedSearch="onSearchFeed(event)"/>
+                <mx:Spacer width="8%"/>
+            </mx:HBox>
+            <mx:VBox width="600">
+                <mx:VBox verticalGap="0" width="100%">
+                    <mx:Box width="100%" height="5" backgroundColor="#D42525" left="0" right="0"/>
+                    <mx:Box width="100%" backgroundColor="#F6A76B" horizontalAlign="center">
+                        <mx:Label text="Goal Trees"/>
+                    </mx:Box>
+                    <mx:DataGrid dataProvider="{goalTrees}" width="100%" id="goalTreesBox">
+                        <mx:columns>
+                            <util:EIDataGridColumn headerText="Goal Tree Name" dataField="goalTreeName"/>
+                            <util:EIDataGridColumn headerText="" dataField="goalTreeName" width="50"
+                                                   itemRenderer="com.easyinsight.groups.GroupGoalsControls" sortable="false"/>
+                        </mx:columns>
+                    </mx:DataGrid>
+                </mx:VBox>
+                <mx:VBox verticalGap="0" width="100%">
+                    <mx:Box width="100%" height="5" backgroundColor="#D42525" left="0" right="0"/>
+                    <mx:Box width="100%" backgroundColor="#F6A76B" horizontalAlign="center">
+                        <mx:Label text="Goals"/>
+                    </mx:Box>
+                    <mx:DataGrid dataProvider="{goals}" id="goalsGrid" width="100%" rowHeight="28">
+                        <mx:columns>
+                            <mx:DataGridColumn headerText="" dataField="name" itemRenderer="com.easyinsight.goals.GoalIconRenderer" width="30"/>
+                            <mx:DataGridColumn headerText="Goal Name" dataField="name" headerRenderer="com.easyinsight.groups.CustomGroupHeader"/>
+                            <mx:DataGridColumn headerText="Latest Value" dataField="name" itemRenderer="com.easyinsight.goals.GoalValueRenderer"
+                                               headerRenderer="com.easyinsight.groups.CustomGroupHeader" width="110"/>
+                            <mx:DataGridColumn headerText="Date" dataField="name" headerRenderer="com.easyinsight.groups.CustomGroupHeader"
+                                    itemRenderer="com.easyinsight.goals.GoalDateRenderer" width="80"/>
+                            <!--<mx:DataGridColumn headerText="" dataField="com.easyinsight.goals.GoalControls" sortable="false"
+                                               itemRenderer="com.easyinsight.goals.GoalControls" width="30"/>-->
+                        </mx:columns>
+                    </mx:DataGrid>
+                </mx:VBox>
+            </mx:VBox>
+        </mx:HBox>
+    </mx:VBox>
 </mx:VBox>
