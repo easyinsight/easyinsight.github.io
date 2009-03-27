@@ -1091,4 +1091,35 @@ public class UserService implements IUserService {
         }
         return accounts;
     }
+
+    public AccountStats getAccountStats() {
+        long accountID = SecurityUtil.getAccountID();
+        long usedSize = 0;
+        long maxSize = 0;
+        Connection conn = Database.instance().getConnection();
+        try {
+            PreparedStatement queryUsedStmt = conn.prepareStatement("select sum(feed_persistence_metadata.size) from feed_persistence_metadata, " +
+                    "upload_policy_users, user where feed_persistence_metadata.feed_id = upload_policy_users.feed_id and user.user_id = upload_policy_users.user_id and user.account_id = ?");
+            queryUsedStmt.setLong(1, accountID);
+            ResultSet rs = queryUsedStmt.executeQuery();
+            if (rs.next()) {
+                usedSize = rs.getLong(1);
+            }
+            PreparedStatement accountStmt = conn.prepareStatement("SELECT max_size from account WHERE account_id = ?");
+            accountStmt.setLong(1, accountID);
+            ResultSet spaceRS = accountStmt.executeQuery();
+            if (spaceRS.next()) {
+                maxSize = spaceRS.getLong(1);
+            }
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        } finally {
+            Database.instance().closeConnection(conn);
+        }
+        AccountStats accountStats = new AccountStats();
+        accountStats.setMaxSpace(maxSize);
+        accountStats.setUsedSpace(usedSize);
+        return accountStats;
+    }
 }

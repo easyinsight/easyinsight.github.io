@@ -683,7 +683,7 @@ public class DataStorage {
         }
     }
 
-    public static void addOrUpdateMetadata(long dataFeedID, FeedPersistenceMetadata metadata, Connection conn) {
+    private static void addOrUpdateMetadata(long dataFeedID, FeedPersistenceMetadata metadata, Connection conn) {
         try {
             if (metadata.getMetadataID() > 0) {
                 PreparedStatement updateStmt = conn.prepareStatement("UPDATE FEED_PERSISTENCE_METADATA SET SIZE = ?, VERSION = ?, DATABASE_NAME = ? WHERE " +

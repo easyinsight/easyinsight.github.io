@@ -201,10 +201,9 @@ public class UserUploadService implements IUserUploadService {
                 FeedCreationResult result = new FeedCreation().createFeed(feedDefinition, conn, dataSet.toDataSet(), rawUploadData.accountID);
                 tableDef = result.getTableDefinitionMetadata();
                 uploadResponse = new UploadResponse(result.getFeedID(), feedDefinition.getAnalysisDefinitionID());
-                tableDef.commit();                
+                tableDef.commit();
+                conn.commit();
             }
-            tableDef.commit();
-            conn.commit();
         } catch (StorageLimitException se) {
             if (tableDef != null) {
                 tableDef.rollback();

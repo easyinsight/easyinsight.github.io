@@ -1,0 +1,22 @@
+<?xml version="1.0" ?>
+<mx:HBox xmlns:mx="http://www.adobe.com/2006/mxml" creationComplete="userService.getAccountStats.send()">
+    <mx:Script><![CDATA[
+        [Bindable]
+        private var spaceUsed:String;
+
+        [Bindable]
+        private var availableSpace:String;
+
+        private function gotStats():void {
+            var accountStats:AccountStats = userService.getAccountStats.lastResult as AccountStats;
+            spaceUsed = String(accountStats.usedSpace) + " MB";
+            availableSpace = String(accountStats.maxSpace) + " MB";
+        }
+        ]]></mx:Script>
+    <mx:RemoteObject destination="login" id="userService">
+        <mx:method name="getAccountStats" result="gotStats()"/>
+    </mx:RemoteObject>
+    <mx:Label text="{spaceUsed}" fontFamily="Lucida Grande" fontWeight="normal"/>
+    <mx:Label text=" / "/>
+    <mx:Label text="{availableSpace}" fontFamily="Lucida Grande" fontWeight="normal"/>
+</mx:HBox>

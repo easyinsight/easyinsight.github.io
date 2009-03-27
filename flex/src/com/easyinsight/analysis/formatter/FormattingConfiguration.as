@@ -2,7 +2,6 @@ package com.easyinsight.analysis.formatter
 {
 	import mx.formatters.CurrencyFormatter;
 	import mx.formatters.Formatter;
-	import mx.formatters.NumberFormatter;
 	
 	[Bindable]
 	[RemoteClass(alias="com.easyinsight.analysis.FormattingConfiguration")]	
@@ -25,7 +24,7 @@ package com.easyinsight.analysis.formatter
 			var formatter:Formatter;
 			switch (formattingType) {
 				case NUMBER:
-					var numberFormatter:NumberFormatter = new NumberFormatter();
+					var numberFormatter:FlexibleNumberFormatter = new FlexibleNumberFormatter();
 					numberFormatter.precision = 2;
 					formatter = numberFormatter;
 					break;
@@ -37,7 +36,7 @@ package com.easyinsight.analysis.formatter
 				case PERCENTAGE:
 				case TEXT_UOM:
 				default:
-					var defaultFormatter:NumberFormatter = new NumberFormatter();
+					var defaultFormatter:FlexibleNumberFormatter = new FlexibleNumberFormatter();
 					defaultFormatter.precision = 2;
 					formatter = defaultFormatter;
 					break;				

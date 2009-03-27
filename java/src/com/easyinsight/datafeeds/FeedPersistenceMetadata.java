@@ -13,6 +13,15 @@ public class FeedPersistenceMetadata {
     private long size;
     private int version;
     private String database;
+    private boolean head;
+
+    public boolean isHead() {
+        return head;
+    }
+
+    public void setHead(boolean head) {
+        this.head = head;
+    }
 
     public String getDatabase() {
         return database;

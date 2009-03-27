@@ -1,10 +1,14 @@
 <?xml version="1.0" ?>
-<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:customupload="com.easyinsight.customupload.*" creationComplete="initProperties()"
-        width="100%" height="100%">
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:customupload="com.easyinsight.customupload.*"
+         xmlns:account="com.easyinsight.account.*" creationComplete="initProperties()"
+         width="100%" height="100%">
     <mx:Script><![CDATA[
-import mx.managers.PopUpManager;
-import com.easyinsight.framework.User;
-import mx.collections.ArrayCollection;
+        import mx.managers.PopUpManager;
+
+        import com.easyinsight.framework.User;
+
+        import mx.collections.ArrayCollection;
+
         [Bindable]
         private var dataSources:ArrayCollection;
         [Bindable]
@@ -13,6 +17,7 @@ import mx.collections.ArrayCollection;
         private var fullName:String;
         [Bindable]
         private var email:String;
+
 
         [Bindable]
         [Embed(source="../../../../assets/pencil.png")]
@@ -50,52 +55,56 @@ import mx.collections.ArrayCollection;
         private function onRefresh(event:RefreshAccountEvent):void {
             dispatchEvent(event);
         }
-]]></mx:Script>
+        ]]></mx:Script>
     <mx:HBox width="100%" horizontalAlign="center">
-    <mx:VBox verticalGap="0" borderThickness="5" borderColor="#8296D2" borderStyle="solid" dropShadowEnabled="true" cornerRadius="15"
-            paddingLeft="10" paddingBottom="10" paddingRight="10" paddingTop="10" backgroundColor="#E9ECF2">
-        <mx:Box width="100%"  horizontalAlign="center" paddingTop="5" paddingLeft="5" paddingBottom="5" paddingRight="5">
-            <mx:Label text="Account Attributes" fontFamily="Tahoma" fontWeight="bold" fontSize="14"/>
-        </mx:Box>
-        <mx:Form width="100%">
-            <mx:FormItem label="Account Type: " fontFamily="Tahoma" fontWeight="bold">
-                <mx:Label text="Individual" fontFamily="Lucida Grande" fontWeight="normal"/>
-            </mx:FormItem>
-            <mx:FormItem label="Account Space Usage: " fontFamily="Tahoma" fontWeight="bold">
-                <customupload:SpaceUsage id="spaceUsage" descriptors="{dataSources}"/>
-            </mx:FormItem>
-            <mx:FormItem label="">
-                <mx:Button label="Manage Billing..."/>
-            </mx:FormItem>
-            <mx:FormItem label="">
-                <mx:Button label="Upgrade Account to Professional..." click="upgradeAccount()"/>
-            </mx:FormItem>
-            <mx:FormItem>
-                <mx:Button label="Cancel Account..."/>
-            </mx:FormItem>
-        </mx:Form>
-    </mx:VBox>
-    <mx:Spacer width="40"/>
-    <mx:VBox id="userProfileBox" verticalGap="0" borderThickness="5" borderColor="#8296D2" borderStyle="solid" dropShadowEnabled="true" cornerRadius="15"
-            paddingLeft="10" paddingBottom="10" paddingRight="10" paddingTop="10" backgroundColor="#E9ECF2">
-        <!-- <mx:Box width="100%" height="5" backgroundColor="#D42525" left="0" right="0"/> -->
-        <mx:Box width="100%"  horizontalAlign="center" paddingTop="5" paddingLeft="5" paddingBottom="5" paddingRight="5">
-            <mx:Label text="User Profile" fontFamily="Tahoma" fontWeight="bold" fontSize="14"/>
-            <mx:Spacer height="5"/>
-            <mx:Button label="Edit Profile..." click="editProfile()"/>
-            <mx:Button label="Change Password..." click="editPassword()"/>
-        </mx:Box>
-        <mx:Form width="100%" paddingBottom="5" paddingRight="5" paddingTop="5" paddingLeft="5">
-            <mx:FormItem label="User Name: " fontFamily="Tahoma" fontWeight="bold">
-                <mx:TextInput text="{userName}" fontFamily="Lucida Grande" fontWeight="normal" editable="false"/>
-            </mx:FormItem>
-            <mx:FormItem label="Full Name: " fontFamily="Tahoma" fontWeight="bold" direction="horizontal">
-                <mx:TextInput text="{fullName}" fontFamily="Lucida Grande" fontWeight="normal" editable="false"/>
-            </mx:FormItem>
-            <mx:FormItem label="Email Address: " fontFamily="Tahoma" fontWeight="bold" direction="horizontal">
-                <mx:TextInput text="{email}" fontFamily="Lucida Grande" fontWeight="normal" editable="false"/>
-            </mx:FormItem>
-        </mx:Form>
-    </mx:VBox>
+        <mx:VBox verticalGap="0" borderThickness="5" borderColor="#8296D2" borderStyle="solid" dropShadowEnabled="true"
+                 cornerRadius="15"
+                 paddingLeft="10" paddingBottom="10" paddingRight="10" paddingTop="10" backgroundColor="#E9ECF2">
+            <mx:Box width="100%" horizontalAlign="center" paddingTop="5" paddingLeft="5" paddingBottom="5"
+                    paddingRight="5">
+                <mx:Label text="Account Attributes" fontFamily="Tahoma" fontWeight="bold" fontSize="14"/>
+            </mx:Box>
+            <mx:Form width="100%">
+                <mx:FormItem label="Account Type: " fontFamily="Tahoma" fontWeight="bold">
+                    <mx:Label text="Individual" fontFamily="Lucida Grande" fontWeight="normal"/>
+                </mx:FormItem>
+                <mx:FormItem label="Account Space Used: " fontFamily="Tahoma" fontWeight="bold">
+                    <account:AvailableSpace/>
+                </mx:FormItem>
+                <mx:FormItem label="">
+                    <mx:Button label="Manage Billing..."/>
+                </mx:FormItem>
+                <mx:FormItem label="">
+                    <mx:Button label="Upgrade Account to Professional..." click="upgradeAccount()"/>
+                </mx:FormItem>
+                <mx:FormItem>
+                    <mx:Button label="Cancel Account..."/>
+                </mx:FormItem>
+            </mx:Form>
+        </mx:VBox>
+        <mx:Spacer width="40"/>
+        <mx:VBox id="userProfileBox" verticalGap="0" borderThickness="5" borderColor="#8296D2" borderStyle="solid"
+                 dropShadowEnabled="true" cornerRadius="15"
+                 paddingLeft="10" paddingBottom="10" paddingRight="10" paddingTop="10" backgroundColor="#E9ECF2">
+            <!-- <mx:Box width="100%" height="5" backgroundColor="#D42525" left="0" right="0"/> -->
+            <mx:Box width="100%" horizontalAlign="center" paddingTop="5" paddingLeft="5" paddingBottom="5"
+                    paddingRight="5">
+                <mx:Label text="User Profile" fontFamily="Tahoma" fontWeight="bold" fontSize="14"/>
+                <mx:Spacer height="5"/>
+                <mx:Button label="Edit Profile..." click="editProfile()"/>
+                <mx:Button label="Change Password..." click="editPassword()"/>
+            </mx:Box>
+            <mx:Form width="100%" paddingBottom="5" paddingRight="5" paddingTop="5" paddingLeft="5">
+                <mx:FormItem label="User Name: " fontFamily="Tahoma" fontWeight="bold">
+                    <mx:TextInput text="{userName}" fontFamily="Lucida Grande" fontWeight="normal" editable="false"/>
+                </mx:FormItem>
+                <mx:FormItem label="Full Name: " fontFamily="Tahoma" fontWeight="bold" direction="horizontal">
+                    <mx:TextInput text="{fullName}" fontFamily="Lucida Grande" fontWeight="normal" editable="false"/>
+                </mx:FormItem>
+                <mx:FormItem label="Email Address: " fontFamily="Tahoma" fontWeight="bold" direction="horizontal">
+                    <mx:TextInput text="{email}" fontFamily="Lucida Grande" fontWeight="normal" editable="false"/>
+                </mx:FormItem>
+            </mx:Form>
+        </mx:VBox>
     </mx:HBox>
 </mx:VBox>
