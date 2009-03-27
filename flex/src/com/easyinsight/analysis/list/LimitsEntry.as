@@ -1,5 +1,6 @@
-package com.easyinsight.analysis
+package com.easyinsight.analysis.list
 {
+import com.easyinsight.analysis.*;
 	public class LimitsEntry
 	{
 		private var _name:String;

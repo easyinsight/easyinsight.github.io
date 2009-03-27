@@ -2,6 +2,7 @@ package com.easyinsight.analysis.charts.bubble {
 import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.analysis.AnalysisItemTypes;
 import com.easyinsight.analysis.ChartDefinition;
+import com.easyinsight.analysis.charts.ChartTypes;
 import mx.collections.ArrayCollection;
 [Bindable]
 [RemoteClass(alias="com.easyinsight.analysis.definitions.WSBubbleChartDefinition")]
@@ -42,6 +43,14 @@ public class BubbleChartDefinition extends ChartDefinition{
 
     override public function get controller():String {
         return "com.easyinsight.analysis.charts.bubble.BubbleChartController";
+    }
+
+    override public function getChartType():int {
+        return ChartTypes.BUBBLE;
+    }
+
+    override public function getChartFamily():int {
+        return ChartTypes.BUBBLE_FAMILY;
     }
 }
 }

@@ -63,5 +63,9 @@ package com.easyinsight.analysis
         public function get controller():String {
             return "com.easyinsight.analysis.list.ListController";
         }
+
+        public function createDefaultLimits():void {
+            
+        }
 	}
 }

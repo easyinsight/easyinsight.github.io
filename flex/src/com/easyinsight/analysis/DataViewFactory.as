@@ -98,12 +98,14 @@ public class DataViewFactory extends VBox {
         } else {
             if (_controlBar.isDataValid()) {
                 _analysisDefinition = _controlBar.createAnalysisDefinition();
+                _analysisDefinition.createDefaultLimits();
                 _dataService.retrieveData(_analysisDefinition);
             }
         }
     }
 
     private function gotData(event:DataServiceEvent):void {
+        _controlBar.onDataReceipt(event);
         _reportRenderer.renderReport(event.dataSet, _analysisDefinition, event.clientProcessorMap);
     }
 
@@ -128,7 +130,7 @@ public class DataViewFactory extends VBox {
 
     private function customChangeFromControlBar(event:CustomChangeEvent):void {
         _reportRenderer.onCustomChangeEvent(event);
-    }
+    }    
 
     private function customChangeFromRenderer(event:CustomChangeEvent):void {
         _controlBar.onCustomChangeEvent(event);

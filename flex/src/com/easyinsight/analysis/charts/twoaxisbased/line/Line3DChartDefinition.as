@@ -1,4 +1,5 @@
 package com.easyinsight.analysis.charts.twoaxisbased.line {
+import com.easyinsight.analysis.charts.ChartTypes;
 import com.easyinsight.analysis.charts.twoaxisbased.TwoAxisDefinition;
 [Bindable]
 [RemoteClass(alias="com.easyinsight.analysis.definitions.WS3DLineChartDefinition")]
@@ -13,6 +14,14 @@ public class Line3DChartDefinition extends TwoAxisDefinition{
 
     override public function get controller():String {
         return "com.easyinsight.analysis.charts.twoaxisbased.line.Line3DChartController";
+    }
+
+    override public function getChartType():int {
+        return ChartTypes.LINE_3D;
+    }
+
+    override public function getChartFamily():int {
+        return ChartTypes.LINE_FAMILY;
     }
 }
 }

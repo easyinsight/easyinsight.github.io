@@ -1,7 +1,6 @@
 package com.easyinsight.datafeeds;
 
 import com.easyinsight.userupload.UploadPolicy;
-import com.easyinsight.userupload.CredentialsResponse;
 import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.core.Key;
 import com.easyinsight.dataset.DataSet;

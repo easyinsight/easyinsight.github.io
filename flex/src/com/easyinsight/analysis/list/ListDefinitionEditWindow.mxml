@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:analysis="com.easyinsight.analysis.list.*"
+                title="List Configuration">
+    <mx:Script>
+		<![CDATA[
+        import com.easyinsight.analysis.AnalysisItem;
+        import com.easyinsight.analysis.AnalysisItemTypes;
+        import com.easyinsight.analysis.AnalysisItemUpdateEvent;
+        import com.easyinsight.analysis.AnalysisItemWrapper;
+        import com.easyinsight.analysis.ListLimitsMetadata;
+
+        import mx.collections.ArrayCollection;
+        import mx.managers.PopUpManager;
+
+        private var definition:ListDefinition;
+
+        [Bindable]
+        private var rowNumbersSelected:Boolean;
+
+        [Bindable]
+        private var availableFields:ArrayCollection;
+
+        [Bindable]
+        private var limitsEnabled:Boolean;
+
+        [Bindable]
+        private var customLimitEnabled:Boolean;
+
+        public function set listDefinition(listDefinition:ListDefinition):void {
+            this.definition = listDefinition;
+            rowNumbersSelected = this.definition.showLineNumbers;
+            var existingLimits:ListLimitsMetadata = listDefinition.listLimitsMetadata;
+            if (existingLimits != null) {
+                limitsEnabled = true;
+                fieldSelectionBox.selectedItem = existingLimits.analysisItem;
+                var matchedEntry:LimitsEntry = null;
+                for each (var limitsEntry:LimitsEntry in limitsBox.dataProvider) {
+                    if (limitsEntry.number == existingLimits.number && limitsEntry.top == existingLimits.top) {
+                        matchedEntry = limitsEntry;
+                    }
+                }
+                if (matchedEntry == null) {
+                    customLimitEnabled = true;
+                    if (existingLimits.top) {
+                        matchedEntry = topN;
+                    } else {
+                        matchedEntry = bottomN;
+                    }
+                    customLimitInput.text = String(existingLimits.number);
+                }
+                limitsBox.selectedItem = matchedEntry;
+            }
+        }
+
+        public function set fields(fields:ArrayCollection):void {
+            availableFields = new ArrayCollection();
+            for each (var wrapper:AnalysisItemWrapper in fields) {
+                if (wrapper.analysisItem.hasType(AnalysisItemTypes.MEASURE) ||
+                    wrapper.analysisItem.hasType(AnalysisItemTypes.DATE)) {
+                    availableFields.addItem(wrapper.analysisItem);
+                }
+            }
+            fieldSelectionBox.selectedItem = availableFields.getItemAt(0);
+        }
+
+        public function save():void {
+            definition.showLineNumbers = rowNumbersOn.selected;
+            var limitsMetadata:ListLimitsMetadata;
+            if (limitsEnabled) {
+                limitsMetadata = new ListLimitsMetadata();
+                limitsMetadata.analysisItem = fieldSelectionBox.selectedItem as AnalysisItem;
+                var limitsEntry:LimitsEntry = limitsBox.selectedItem as LimitsEntry;
+                if (limitsEntry == topN || limitsEntry == bottomN) {
+                    limitsEntry.number = Number(customLimitInput.text);
+                }
+                limitsEntry.toLimitsMetadata(limitsMetadata);
+            }
+            definition.listLimitsMetadata = limitsMetadata;
+            dispatchEvent(new AnalysisItemUpdateEvent());
+            PopUpManager.removePopUp(this);
+        }
+
+        public function cancel():void {
+            PopUpManager.removePopUp(this);
+        }
+
+        private function limitsEnabledCheck():void {
+            limitsEnabled = limitsEnabledCheckbox.selected;
+        }
+
+        private function limitValueChanged():void {
+            var limitsEntry:LimitsEntry = limitsBox.selectedItem as LimitsEntry;
+            customLimitEnabled = (limitsEntry == topN || limitsEntry == bottomN);
+        }
+		]]>
+    </mx:Script>
+    <mx:Form styleName="TitleWindowContents">
+        <mx:FormItem label="Row Numbers: " direction="horizontal">
+            <mx:CheckBox id="rowNumbersOn" selected="{rowNumbersSelected}"/>
+        </mx:FormItem>
+        <mx:FormItem label="Limits: " direction="horizontal">
+            <mx:Form paddingTop="0" paddingLeft="0" paddingRight="0" paddingBottom="0">
+                <mx:FormItem direction="horizontal" label="Enabled: ">
+                    <mx:CheckBox id="limitsEnabledCheckbox" click="limitsEnabledCheck()" selected="{limitsEnabled}"/>
+                </mx:FormItem>
+                <mx:FormItem direction="horizontal" label="Field: " enabled="{limitsEnabled}">
+                    <mx:ComboBox id="fieldSelectionBox" dataProvider="{availableFields}" labelField="display"/>
+                </mx:FormItem>
+                <mx:FormItem label="Threshold: " direction="horizontal">
+                    <mx:ComboBox id="limitsBox" enabled="{limitsEnabled}" close="limitValueChanged()" labelField="name">
+                        <analysis:LimitsEntry name="Top 5" number="5" top="true"/>
+                        <analysis:LimitsEntry name="Top 10" number="10" top="true"/>
+                        <analysis:LimitsEntry id="topN" name="Top N" top="true"/>
+                        <analysis:LimitsEntry name="Bottom 5" number="5" top="false"/>
+                        <analysis:LimitsEntry name="Bottom 10" number="10" top="false"/>
+                        <analysis:LimitsEntry id="bottomN" name="Bottom N" top="true"/>
+                    </mx:ComboBox>
+                    <mx:TextInput id="customLimitInput" enabled="{customLimitEnabled}"/>
+                </mx:FormItem>
+            </mx:Form>
+        </mx:FormItem>
+
+        <mx:FormItem label="" direction="horizontal">
+            <mx:Button label="Save" click="save()"/>
+            <mx:Button label="Cancel" click="cancel()"/>
+        </mx:FormItem>
+    </mx:Form>
+</mx:TitleWindow>

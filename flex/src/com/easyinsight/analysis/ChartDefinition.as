@@ -15,7 +15,17 @@ package com.easyinsight.analysis
 	
 		public function ChartDefinition()
 		{
+            chartType = getChartType();
+            chartFamily = getChartFamily();
 		}
+
+        public function getChartType():int {
+            return 0;
+        }
+
+        public function getChartFamily():int {
+            return 0;
+        }
 		
 		override public function getDataFeedType():String {
 			return "Chart";
@@ -64,6 +74,31 @@ package com.easyinsight.analysis
 			}
 			return selected;
 		}
+
+
+        override public function createDefaultLimits():void {
+            var limitsMetadata:LimitsMetadata = new LimitsMetadata();
+            var limitNumber:int;
+            switch (chartFamily) {
+                case ChartTypes.COLUMN_FAMILY:
+                case ChartTypes.BAR_FAMILY:
+                case ChartTypes.PIE_FAMILY:
+                    limitNumber = 15;
+                    break;
+                case ChartTypes.PLOT_FAMILY:
+                case ChartTypes.BUBBLE_FAMILY:
+                    limitNumber = 100;
+                    break;
+                case ChartTypes.LINE_FAMILY:
+                case ChartTypes.AREA_FAMILY:
+                    limitNumber = 1000;
+                    break;
+            }
+            limitsMetadata.number = limitNumber;
+            limitsMetadata.top = true;
+            this.limitsMetadata = limitsMetadata;
+        }
+
 		
 		public function get stackedSelected():Boolean {
 			var selected:Boolean = false;

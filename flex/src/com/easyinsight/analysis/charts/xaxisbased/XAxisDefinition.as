@@ -2,10 +2,11 @@ package com.easyinsight.analysis.charts.xaxisbased {
 import com.easyinsight.analysis.AnalysisDefinition;
 import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.analysis.AnalysisItemTypes;
+import com.easyinsight.analysis.ChartDefinition;
 import mx.collections.ArrayCollection;
 [Bindable]
 [RemoteClass(alias="com.easyinsight.analysis.definitions.WSXAxisChartDefinition")]
-public class XAxisDefinition extends AnalysisDefinition{
+public class XAxisDefinition extends ChartDefinition{
 
     public var measure:AnalysisItem;
     public var xaxis:AnalysisItem;

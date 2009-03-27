@@ -13,17 +13,16 @@
 	</mx:states>
 	<mx:Script>
 		<![CDATA[
-import com.easyinsight.analysis.DelayedAPIKeyLink;
-import com.easyinsight.framework.FullScreenModuleEvent;
-import com.easyinsight.framework.ModuleAnalyzeSource;
-import com.easyinsight.genredata.ModuleAnalyzeEvent;
-import com.easyinsight.groups.DelayedGroupLink;
-import com.easyinsight.intro.WelcomeScreen;
+            import com.easyinsight.analysis.DelayedAPIKeyLink;
+            import com.easyinsight.framework.FullScreenModuleEvent;
+            import com.easyinsight.framework.ModuleAnalyzeSource;
+            import com.easyinsight.genredata.ModuleAnalyzeEvent;
+            import com.easyinsight.groups.DelayedGroupLink;
+            import com.easyinsight.intro.WelcomeScreen;
 			import com.easyinsight.FullScreenPage;
 			import com.easyinsight.analysis.DelayedFeedLink;
 			import com.easyinsight.analysis.DelayedDeepLink;
-			import com.easyinsight.listing.PageFactory;
-import mx.messaging.ChannelSet;
+            import mx.messaging.ChannelSet;
 			import mx.messaging.config.ServerConfig;
 			import mx.rpc.events.FaultEvent;
 			import com.easyinsight.LoginDialog;

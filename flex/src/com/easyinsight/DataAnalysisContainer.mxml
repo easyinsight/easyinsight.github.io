@@ -25,15 +25,14 @@
     </core:states>
     <mx:Script>
 		<![CDATA[
-import com.easyinsight.administration.feed.DeleteAnalysisItemEvent;
-import com.easyinsight.analysis.AnalysisChangedEvent;
+        import com.easyinsight.administration.feed.DeleteAnalysisItemEvent;
+        import com.easyinsight.analysis.AnalysisChangedEvent;
         import com.easyinsight.analysis.ChildFilterCreationEvent;
-        import com.easyinsight.analysis.AnalysisDefinitionChangeEvent;
         import com.easyinsight.analysis.AnalysisStateChangeEvent;
-import com.easyinsight.analysis.DataViewFactory;
-import com.easyinsight.analysis.IReportController;
-import com.easyinsight.analysis.list.ListController;
-import com.easyinsight.analysis.scrub.LookupTableScrubListWindow;
+        import com.easyinsight.analysis.DataViewFactory;
+        import com.easyinsight.analysis.IReportController;
+        import com.easyinsight.analysis.list.ListController;
+        import com.easyinsight.analysis.scrub.LookupTableScrubListWindow;
         import com.easyinsight.analysis.scrub.TextReplaceScrubListWindow;
         import com.easyinsight.analysis.NewBlankFeedWindow;
         import com.easyinsight.analysis.scrub.LookupTableScrubWindow;
@@ -43,13 +42,14 @@ import com.easyinsight.analysis.scrub.LookupTableScrubListWindow;
         import com.easyinsight.analysis.AddInsightToGroupWindow;
         import com.easyinsight.analysis.UserCapabilities;
         import com.easyinsight.administration.feed.TagCloud;
-import com.easyinsight.framework.InvalidFieldsEvent;
-import com.easyinsight.framework.LoginEvent;
-import mx.collections.SortField;
+        import com.easyinsight.framework.InvalidFieldsEvent;
+        import com.easyinsight.framework.LoginEvent;
+
+        import mx.collections.SortField;
         import mx.collections.Sort;
         import mx.validators.Validator;
+
         import com.easyinsight.analysis.AnalysisItemWrapper;
-        import com.easyinsight.customupload.UploadPolicy;
         import com.easyinsight.administration.feed.FeedPolicy;
         import com.easyinsight.administration.feed.FeedDefinitionData;
         import com.easyinsight.analysis.AnalysisCloseEvent;
@@ -62,30 +62,37 @@ import mx.collections.SortField;
         import com.easyinsight.analysis.scrub.TextReplaceScrubWindow;
         import com.easyinsight.util.ProgressAlert;
         import com.easyinsight.commands.CommandEvent;
+
         import mx.utils.URLUtil;
         import mx.managers.BrowserManager;
         import mx.controls.Alert;
         import mx.events.CloseEvent;
+
         import com.easyinsight.commands.CommandProcessor;
         import com.easyinsight.framework.DataServiceLoadingEvent;
         import com.easyinsight.framework.DataService;
         import com.easyinsight.analysis.feed.AnalysisBasedFeedCreationWindow;
         import com.easyinsight.analysis.SavedAnalysisEvent;
         import com.easyinsight.framework.User;
+
         import mx.rpc.events.ResultEvent;
+
         import com.easyinsight.filtering.TransformsUpdatedEvent;
         import com.easyinsight.feedassembly.CompositeFeedCreatedEvent;
+
         import mx.managers.PopUpManager;
+
         import com.easyinsight.filtering.FilterDefinition;
         import com.easyinsight.filtering.FilterRawData;
         import com.easyinsight.analysis.FeedMetadata;
 
         import mx.collections.ArrayCollection;
+
         import com.easyinsight.analysis.AnalysisDefinition;
 
-[Bindable]
-            [Embed(source="../../../assets/background2.JPG")]
-            private var background2:Class;
+        [Bindable]
+        [Embed(source="../../../assets/background2.JPG")]
+        private var background2:Class;
 
         [Bindable]
         [Embed(source="../../../assets/table.png")]
@@ -259,7 +266,7 @@ import mx.collections.SortField;
             this.feedMetadata = feedMetadata;
             availableFields = new ArrayCollection();
             for each (var analysisItem:AnalysisItem in feedMetadata.fields) {
-                if (!feedAdminMode && analysisItem.hidden) continue;                
+                if (!feedAdminMode && analysisItem.hidden) continue;
                 var analysisWrapper:AnalysisItemWrapper = new AnalysisItemWrapper(analysisItem);
                 availableFields.addItem(analysisWrapper);
             }
@@ -285,10 +292,10 @@ import mx.collections.SortField;
                 analysisState.selectedLabel = analysisDefinition.getLabel();
 
                 /*if (analysisDefinition.addedItems != null) {
-                    for each (var analysisField:AnalysisItem in analysisDefinition.addedItems) {
-                        availableFields.addItem(new AnalysisItemWrapper(analysisField));
-                    }
-                }*/
+                 for each (var analysisField:AnalysisItem in analysisDefinition.addedItems) {
+                 availableFields.addItem(new AnalysisItemWrapper(analysisField));
+                 }
+                 }*/
 
                 if (analysisDefinition.hierarchies != null) {
                     for each (var hierarchyField:AnalysisItem in analysisDefinition.hierarchies) {
@@ -300,7 +307,7 @@ import mx.collections.SortField;
                 publiclyVisible = analysisDefinition.publiclyVisible;
                 marketplaceVisible = analysisDefinition.marketplaceVisible;
 
-                var feedFragmentObject:Object = new Object();                
+                var feedFragmentObject:Object = new Object();
                 if (feedAdminMode) {
                     feedFragmentObject.adminID = String(analysisDefinition.dataFeedID);
                 } else {
@@ -439,8 +446,7 @@ import mx.collections.SortField;
             }
         }
 
-        public function feedAdministrationMode(feedName:String, feedTags:String, uploadPolicy:UploadPolicy,
-                                               feedDescription:String, feedOwnerName:String, feedAttribution:String):void {
+        public function feedAdministrationMode():void {
             this.feedAdminMode = true;
         }
 
@@ -481,7 +487,7 @@ import mx.collections.SortField;
                 save();
             } else {
                 var feedCreationWindow:AnalysisBasedFeedCreationWindow = AnalysisBasedFeedCreationWindow(PopUpManager.
-                    createPopUp(this, AnalysisBasedFeedCreationWindow, true));
+                        createPopUp(this, AnalysisBasedFeedCreationWindow, true));
                 feedCreationWindow.analysisDefinition = getAnalysisDefinition();
                 PopUpManager.centerPopUp(feedCreationWindow);
             }
@@ -608,7 +614,7 @@ import mx.collections.SortField;
         private function close():void {
             if (analysisChanged) {
                 Alert.show("You have unsaved changes. Are you sure you want to exit?", "Alert",
-		                		Alert.OK | Alert.CANCEL, null, alertListener, null, Alert.CANCEL);
+                        Alert.OK | Alert.CANCEL, null, alertListener, null, Alert.CANCEL);
             } else {
                 cleanup();
                 dispatchEvent(new AnalysisCloseEvent(this));
@@ -659,7 +665,7 @@ import mx.collections.SortField;
         private function gotUserCapabilitiesForFeed():void {
             var userCapabilities:UserCapabilities = analysisService.getUserCapabilitiesForFeed.lastResult as UserCapabilities;
             canSubscribeToFeed = userCapabilities.feedRole > 3;
-            canAddFeedToGroup = userCapabilities.groupMember == true;
+            canAddFeedToGroup = userCapabilities.groupMember;
         }
 
         private function onFieldDelete(event:DeleteAnalysisItemEvent):void {
@@ -676,8 +682,8 @@ import mx.collections.SortField;
 
             canSubscribeToFeed = userCapabilities.feedRole > 3;
             canSubscribeToInsight = userCapabilities.analysisRole > 3;
-            canAddFeedToGroup = userCapabilities.groupMember == true;
-            canAddInsightToGroup = userCapabilities.groupMember == true;
+            canAddFeedToGroup = userCapabilities.groupMember;
+            canAddInsightToGroup = userCapabilities.groupMember;
         }
 
         private function subscribedToFeed():void {

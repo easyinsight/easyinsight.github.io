@@ -1,4 +1,5 @@
 package com.easyinsight.analysis.charts.yaxisbased.bar {
+import com.easyinsight.analysis.charts.ChartTypes;
 import com.easyinsight.analysis.charts.yaxisbased.YAxisDefinition;
 [Bindable]
 [RemoteClass(alias="com.easyinsight.analysis.definitions.WSBarChartDefinition")]
@@ -13,6 +14,14 @@ public class BarChartDefinition extends YAxisDefinition{
 
     override public function get controller():String {
         return "com.easyinsight.analysis.charts.yaxisbased.bar.BarChartController";
+    }
+
+    override public function getChartType():int {
+        return ChartTypes.BAR_2D;
+    }
+
+    override public function getChartFamily():int {
+        return ChartTypes.BAR_FAMILY;
     }
 }
 }

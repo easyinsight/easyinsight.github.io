@@ -5,17 +5,28 @@ import com.easyinsight.analysis.AnalysisDefinition;
 import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.analysis.AnalysisItemUpdateEvent;
 import com.easyinsight.analysis.CustomChangeEvent;
+import com.easyinsight.analysis.DataServiceEvent;
 import com.easyinsight.analysis.IReportControlBar;
 import com.easyinsight.analysis.ListDropArea;
 import com.easyinsight.analysis.ListDropAreaGrouping;
 import com.easyinsight.analysis.ReportDataEvent;
+import flash.events.MouseEvent;
+import mx.binding.utils.BindingUtils;
 import mx.collections.ArrayCollection;
 import mx.containers.HBox;
+import mx.controls.Button;
+import mx.controls.Label;
+import mx.events.FlexEvent;
+import mx.managers.PopUpManager;
 
 public class ListControlBar extends HBox implements IReportControlBar {
 
     private var listViewGrouping:ListDropAreaGrouping;
     private var listDefinition:ListDefinition;
+    private var availableFields:ArrayCollection;
+
+    [Embed(source="../../../../../assets/table_edit.png")]
+    public var tableEditIcon:Class;
 
     public function ListControlBar() {
         super();
@@ -27,6 +38,11 @@ public class ListControlBar extends HBox implements IReportControlBar {
 
     override protected function createChildren():void {
         super.createChildren();
+        var listEditButton:Button = new Button();
+        listEditButton.setStyle("icon", tableEditIcon);
+        listEditButton.toolTip = "Edit List Properties...";
+        listEditButton.addEventListener(MouseEvent.CLICK, editList);
+        addChild(listEditButton);
         addChild(listViewGrouping);
         var columns:ArrayCollection = listDefinition.columns;
         if (columns != null) {
@@ -34,6 +50,37 @@ public class ListControlBar extends HBox implements IReportControlBar {
                 var column:AnalysisItem = columns.getItemAt(i) as AnalysisItem;
                 listViewGrouping.addAnalysisItem(column);
             }
+        }
+        var limitLabel:Label = new Label();
+        BindingUtils.bindProperty(limitLabel, "text", this, "limitText");
+        addChild(limitLabel);
+    }
+
+    private function editList(event:MouseEvent):void {
+        var listWindow:ListDefinitionEditWindow = ListDefinitionEditWindow(PopUpManager.createPopUp(this, ListDefinitionEditWindow, true));
+        listWindow.fields = availableFields;
+        listWindow.listDefinition = listDefinition;
+        listWindow.addEventListener(AnalysisItemUpdateEvent.ANALYSIS_LIST_UPDATE, requestListData);
+        PopUpManager.centerPopUp(listWindow);
+    }
+
+    private var _limitText:String;
+
+    [Bindable]
+    public function get limitText():String {
+        return _limitText;
+    }
+
+    public function set limitText(val:String):void {
+        _limitText = val;
+        dispatchEvent(new FlexEvent(FlexEvent.DATA_CHANGE));
+    }
+
+    public function onDataReceipt(event:DataServiceEvent):void {
+        if (event.limitedResults) {
+            limitText = "Showing " + event.limitResults + " of " + event.maxResults + " results";
+        } else {
+            limitText = "";
         }
     }
 
@@ -55,6 +102,7 @@ public class ListControlBar extends HBox implements IReportControlBar {
     }
 
     public function set analysisItems(analysisItems:ArrayCollection):void {
+        availableFields = analysisItems;
         listViewGrouping.analysisItems = analysisItems;
     }
 

@@ -223,7 +223,6 @@ import mx.events.FlexEvent;
             if (xAxisItem == null || newXAxisItem.qualifiedName() != xAxisItem.qualifiedName()) {
                 xAxisItem = newXAxisItem;
                 if (sortable) {
-                    xAxisTitleRendererFactory = new ClassFactory(SortableAxisTitle);
                     xAxisTitleRendererFactory.properties = { analysisItem: xAxisItem, axisDirection: true};
                 }
             }
@@ -232,7 +231,6 @@ import mx.events.FlexEvent;
             if (yAxisItem == null || newYAxisItem.qualifiedName() != yAxisItem.qualifiedName()) {
                 yAxisItem = newYAxisItem;
                 if (sortable) {
-                    yAxisTitleRendererFactory = new ClassFactory(SortableAxisTitle);
                     yAxisTitleRendererFactory.properties = { analysisItem: yAxisItem, axisDirection: false};
                 }
             }

@@ -2,6 +2,7 @@ package com.easyinsight.analysis.charts.plot {
 import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.analysis.AnalysisItemTypes;
 import com.easyinsight.analysis.ChartDefinition;
+import com.easyinsight.analysis.charts.ChartTypes;
 import mx.collections.ArrayCollection;
 [Bindable]
 [RemoteClass(alias="com.easyinsight.analysis.definitions.WSPlotChartDefinition")]
@@ -38,6 +39,14 @@ public class PlotChartDefinition extends ChartDefinition{
 
     override public function get controller():String {
         return "com.easyinsight.analysis.charts.plot.PlotChartController";
+    }
+
+    override public function getChartType():int {
+        return ChartTypes.PLOT;
+    }
+
+    override public function getChartFamily():int {
+        return ChartTypes.PLOT_FAMILY;
     }
 }
 }

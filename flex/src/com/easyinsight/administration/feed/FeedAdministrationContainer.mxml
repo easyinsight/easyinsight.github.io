@@ -76,7 +76,7 @@ import mx.events.CloseEvent;
 				dataAnalysisContainer = new DataAnalysisContainer();
 				dataAnalysisContainer.dataService = dataService;
 				dataAnalysisContainer.label = analysisDefinition.name;
-				dataAnalysisContainer.feedAdministrationMode(feedName, feedTags, feedUploadPolicy, feedDescription, feedOwnerName, feedAttribution);
+				dataAnalysisContainer.feedAdministrationMode();
 				dataAnalysisContainer.openAnalysis(analysisDefinition);
 				fieldsBox.addChild(dataAnalysisContainer);
             }
