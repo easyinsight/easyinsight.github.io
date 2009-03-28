@@ -212,7 +212,7 @@ import mx.events.CloseEvent;
 			<mx:Button id="wrapButton" icon="@Embed(source='../../../../../assets/document_out.png')" click="close()" toolTip="Close"/>
 			<mx:Label fontSize="14" color="#FFFFFF"/>						
 		</mx:HBox>
-		<mx:TabNavigator width="100%" height="100%" creationPolicy="all" paddingTop="0" paddingBottom="0" 
+		<mx:TabNavigator width="100%" height="100%" paddingTop="0" paddingBottom="0" 
 			paddingLeft="0" paddingRight="0" resizeToContent="true" id="tabNav">
 			<mx:HBox label="General" paddingLeft="10" paddingTop="10" paddingBottom="10" paddingRight="10">
 				<mx:VBox>

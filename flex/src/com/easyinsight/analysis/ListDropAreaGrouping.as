@@ -36,6 +36,16 @@ package com.easyinsight.analysis
             }
         }
 
+        public function rollup(analysisHierarchyItem:AnalysisHierarchyItem):void {
+            for (var i:int = 0; i < dropAreas.length; i++) {
+                var dropArea:DropArea = dropAreas.getItemAt(i) as DropArea;
+                var analysisItem:AnalysisItem = dropArea.analysisItem;
+                if (analysisItem == analysisHierarchyItem) {
+
+                }
+            }
+        }
+
         public function drilldown(field:String):void {
             for (var i:int = 0; i < dropAreas.length; i++) {
                 var dropArea:DropArea = dropAreas.getItemAt(i) as DropArea;

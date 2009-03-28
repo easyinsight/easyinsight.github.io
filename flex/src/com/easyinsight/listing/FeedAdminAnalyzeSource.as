@@ -19,14 +19,5 @@ import flash.display.DisplayObject;
             return feedAdminContainer;
         }
 
-        override protected function getModuleName():String {
-            return "/app/easyui-debug/DataSourceAdminModule.swf";
-        }
-
-        override protected function applyProperties(val:Object):void {
-            super.applyProperties(val);
-
-        }
-
 	}
 }

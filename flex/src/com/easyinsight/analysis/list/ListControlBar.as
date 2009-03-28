@@ -28,12 +28,16 @@ public class ListControlBar extends HBox implements IReportControlBar {
     [Embed(source="../../../../../assets/table_edit.png")]
     public var tableEditIcon:Class;
 
+    [Embed(source="../../../../../assets/find.png")]
+    public var findIcon:Class;
+
     public function ListControlBar() {
         super();
         listViewGrouping = new ListDropAreaGrouping();
         listViewGrouping.unlimited = true;
         listViewGrouping.dropAreaType = ListDropArea;
         listViewGrouping.addEventListener(AnalysisItemUpdateEvent.ANALYSIS_LIST_UPDATE, requestListData);
+        setStyle("verticalAlign", "middle");
     }
 
     override protected function createChildren():void {
@@ -43,6 +47,11 @@ public class ListControlBar extends HBox implements IReportControlBar {
         listEditButton.toolTip = "Edit List Properties...";
         listEditButton.addEventListener(MouseEvent.CLICK, editList);
         addChild(listEditButton);
+        var findButton:Button = new Button();
+        findButton.setStyle("icon", findIcon);
+        findButton.toolTip = "Search Keyword...";
+        findButton.addEventListener(MouseEvent.CLICK, startFind);
+        addChild(findButton);
         addChild(listViewGrouping);
         var columns:ArrayCollection = listDefinition.columns;
         if (columns != null) {
@@ -54,6 +63,10 @@ public class ListControlBar extends HBox implements IReportControlBar {
         var limitLabel:Label = new Label();
         BindingUtils.bindProperty(limitLabel, "text", this, "limitText");
         addChild(limitLabel);
+    }
+
+    private function startFind(event:MouseEvent):void {
+        dispatchEvent(new EnableKeywordEvent());
     }
 
     private function editList(event:MouseEvent):void {

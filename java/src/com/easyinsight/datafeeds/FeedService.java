@@ -10,10 +10,13 @@ import com.easyinsight.logging.LogClass;
 import com.easyinsight.security.*;
 import com.easyinsight.security.SecurityException;
 import com.easyinsight.users.SubscriptionLicense;
+import com.easyinsight.core.EIDescriptor;
 
 import java.util.*;
 import java.sql.SQLException;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 
 /**
  * User: jboe
@@ -30,7 +33,25 @@ public class FeedService implements IDataFeedService {
         // this goes into a different data provider        
     }
 
-    
+    public List<EIDescriptor> getDescriptors() {
+        List<EIDescriptor> descriptorList = new ArrayList<EIDescriptor>();
+        Connection conn = Database.instance().getConnection();
+        try {
+            PreparedStatement queryDataSources = conn.prepareStatement("SELECT FEED_NAME, DATA_FEED.DATA_FEED_ID FROM DATA_FEED, UPLOAD_POLICY_USERS WHERE " +
+                    "DATA_FEED.DATA_FEED_ID = UPLOAD_POLICY_USERS.FEED_ID AND UPLOAD_POLICY_USERS.user_id = ?");
+            queryDataSources.setLong(1, SecurityUtil.getUserID());
+            ResultSet queryRS = queryDataSources.executeQuery();
+            while (queryRS.next()) {
+                descriptorList.add(new EIDescriptor(EIDescriptor.DATA_SOURCE, queryRS.getString(1), queryRS.getLong(2)));
+            }
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        } finally {
+            Database.instance().closeConnection(conn);
+        }
+        return descriptorList;
+    }
 
     public FeedResponse openFeedIfPossible(long feedID) {
         FeedResponse feedResponse;

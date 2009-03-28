@@ -121,11 +121,21 @@ public class DataViewFactory extends VBox {
         _reportRenderer.addEventListener(ReportRendererEvent.ADD_ITEM, onItemAdded);
         _reportRenderer.addEventListener(ReportRendererEvent.FORCE_RENDER, forceRender);
         _reportRenderer.addEventListener(CustomChangeEvent.CUSTOM_CHANGE, customChangeFromRenderer);
+        _reportRenderer.addEventListener(HierarchyDrilldownEvent.DRILLDOWN, drilldown);
+        _reportRenderer.addEventListener(HierarchyRollupEvent.HIERARCHY_ROLLUP, onRollup);
         addChild(_reportRenderer as DisplayObject);
         if (pendingRequest) {
             pendingRequest = false;
             retrieveData();
         }
+    }
+
+    private function onRollup(event:HierarchyRollupEvent):void {
+        
+    }
+
+    private function drilldown(event:HierarchyDrilldownEvent):void {
+        
     }
 
     private function customChangeFromControlBar(event:CustomChangeEvent):void {
@@ -190,9 +200,6 @@ public class DataViewFactory extends VBox {
     }
 
     public function updateExportMetadata():void {
-    }
-
-    public function search(keyword:String):void {
     }
 
     public function getCoreView():DisplayObject {

@@ -1,15 +1,22 @@
 package com.easyinsight.analysis
 {
 	import com.easyinsight.analysis.conditions.ConditionRenderer;
-	
-	import flash.events.MouseEvent;
+
+import com.easyinsight.analysis.list.ListKeywordController;
+import com.easyinsight.analysis.list.ListKeywordEvent;
+import com.easyinsight.filtering.FilterRawData;
+    import flash.events.ContextMenuEvent;
+    import flash.events.MouseEvent;
 	import flash.net.URLRequest;
 
+    import flash.system.System;
+    import flash.ui.ContextMenu;
+    import flash.ui.ContextMenuItem;
+import mx.controls.Alert;
 import mx.controls.Label;
-import mx.controls.listClasses.IListItemRenderer;
-	import mx.core.UITextField;
-import mx.events.FlexEvent;
-import mx.formatters.Formatter;
+    import mx.controls.listClasses.IListItemRenderer;
+    import mx.events.FlexEvent;
+    import mx.formatters.Formatter;
 
 	public class AnalysisCellRenderer extends Label implements IListItemRenderer
 	{
@@ -18,15 +25,123 @@ import mx.formatters.Formatter;
 		private static const emptyText:String = "";
 		private var _analysisItem:AnalysisItem;
 		private var _renderer:ConditionRenderer;
+        private var linkShowing:Boolean = false;
+        private var linkable:Boolean = false;
+
+        private var defaultBackground:uint;
+
+        [Bindable]
+        private var listContextMenu:ContextMenu;
+
 		//private var defaultLabel:Label;
 		//private var linkButton:LinkButton;
 		
 		public function AnalysisCellRenderer() {
 			super();
-			/*this.renderer = renderer;
-			this.analysisItem = analysisItem;*/
-			//horizontalScrollPolicy = ScrollPolicy.OFF;
+            addEventListener(MouseEvent.MOUSE_OVER, onMouseOver);
+            addEventListener(MouseEvent.MOUSE_OUT, onMouseOut);
+            addEventListener(MouseEvent.CLICK, onClick);
+            var drilldownContextItem:ContextMenuItem = new ContextMenuItem("Drilldown", true);
+            drilldownContextItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, onDrilldown);
+            var rollupContextItem:ContextMenuItem = new ContextMenuItem("Rollup", true);
+            rollupContextItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, onRollup);
+            var copyContextItem:ContextMenuItem = new ContextMenuItem("Copy Cell", true);
+            copyContextItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, copySelected);
+            //dataSet.addEventListener(KeyboardEvent.KEY_UP, keyboardHandler);
+            contextMenu = new ContextMenu();
+            contextMenu.hideBuiltInItems();
+            contextMenu.customItems = [ drilldownContextItem, rollupContextItem, copyContextItem ];
 		}
+
+        private function onListKeywordEvent(event:ListKeywordEvent):void {
+            if (event.keyword.length > 1) {
+                var field:String = analysisItem.qualifiedName();
+                var objVal:String = String(data[field]);
+                if (!event.caseSensitive) {
+                    objVal = objVal.toLowerCase();
+                }
+                var match:Boolean = false;
+                if (event.wholeWords) {
+                    match = objVal == event.keyword;
+                } else {
+                    match = objVal.indexOf(event.keyword) != -1;
+                }
+                if (match) {
+                    if (getStyle("fontWeight") != "bold") {
+                        setStyle("fontWeight", "bold");
+                    }
+                } else {
+                    if (getStyle("fontWeight") == "bold") {
+                        setStyle("fontWeight", "normal");
+                    }
+                }
+            } else {
+                if (getStyle("fontWeight") == "bold") {
+                    setStyle("fontWeight", "normal");
+                }
+            }
+        }
+
+        private function onDrilldown(event:ContextMenuEvent):void {
+            drill();
+        }
+
+        private function copySelected(event:ContextMenuEvent):void {
+            var field:String = analysisItem.qualifiedName();
+            var formatter:Formatter = analysisItem.getFormatter();
+            var objVal:Object = data[field];
+            var text:String;
+            if (objVal == null) {
+                text = "";
+            } else {
+                text = formatter.format(objVal);
+            }
+            System.setClipboard(text);
+        }
+
+        private function onMouseOver(event:MouseEvent):void {
+            if (linkable && event.ctrlKey && !linkShowing) {
+                setStyle("textDecoration", "underline");
+                linkShowing = true;
+            }
+        }
+
+        private function onMouseOut(event:MouseEvent):void {
+            if (linkShowing) {
+                setStyle("textDecoration", "none");
+                linkShowing = false;
+            }
+        }
+
+        private function onRollup(event:ContextMenuEvent):void {
+            var hierarchyItem:AnalysisHierarchyItem = _analysisItem as AnalysisHierarchyItem;
+            var index:int = hierarchyItem.hierarchyLevels.getItemIndex(hierarchyItem.hierarchyLevel);
+            if (index > 0) {
+                hierarchyItem.hierarchyLevel = hierarchyItem.hierarchyLevels.getItemAt(index - 1) as HierarchyLevel;
+                dispatchEvent(new HierarchyRollupEvent(hierarchyItem.hierarchyLevel.analysisItem));
+            }
+        }
+
+        private function drill():void {
+            var hierarchyItem:AnalysisHierarchyItem = _analysisItem as AnalysisHierarchyItem;
+            var index:int = hierarchyItem.hierarchyLevels.getItemIndex(hierarchyItem.hierarchyLevel);
+            if (index < (hierarchyItem.hierarchyLevels.length - 1)) {
+                var dataField:String = _analysisItem.qualifiedName();
+                var dataString:String = data[dataField];
+                var filterRawData:FilterRawData = new FilterRawData();
+                filterRawData.addPair(hierarchyItem.hierarchyLevel.analysisItem, dataString);
+                hierarchyItem.hierarchyLevel = hierarchyItem.hierarchyLevels.getItemAt(index + 1) as HierarchyLevel;
+                dispatchEvent(new HierarchyDrilldownEvent(HierarchyDrilldownEvent.DRILLDOWN, filterRawData));
+            }
+        }
+
+        private function onClick(event:MouseEvent):void {
+            if (linkable && event.ctrlKey) {
+                if (_analysisItem is AnalysisHierarchyItem) {
+                    drill();
+                }
+            }
+        }
 
         public function get analysisItem():AnalysisItem {
             return _analysisItem;
@@ -34,6 +149,7 @@ import mx.formatters.Formatter;
 
         public function set analysisItem(val:AnalysisItem):void {
             _analysisItem = val;
+            linkable = val.hasType(AnalysisItemTypes.HIERARCHY);
         }
 
         public function get renderer():ConditionRenderer {

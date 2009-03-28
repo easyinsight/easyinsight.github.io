@@ -19,10 +19,6 @@ import mx.managers.BrowserManager;
 			this.admin = admin;
 		}
 
-        override protected function getModuleName():String {
-            return "/app/easyui-debug/DataAnalysisModule.swf";
-        }
-
         override public function createDirect():DisplayObject {
             var dataAnalysisContainer:DataAnalysisContainer = new DataAnalysisContainer();
             var dataService:DataService = new DataService();
@@ -32,26 +28,5 @@ import mx.managers.BrowserManager;
             dataAnalysisContainer.openAnalysis(analysisDefinition);
             return dataAnalysisContainer;
         }
-
-        override protected function applyProperties(val:Object):void {
-            super.applyProperties(val);
-            val["dataSourceID"] = analysisDefinition.dataFeedID;
-            val["headerName"] = analysisDefinition.name;
-        }
-
-		/*public function createAnalysisPopup():FullScreenPage {
-
-
-			var dataService:DataService = new DataService();
-			dataService.dataFeedID = analysisDefinition.dataFeedID;
-
-			var dataAnalysisContainer:DataAnalysisContainer = new DataAnalysisContainer();			
-			dataAnalysisContainer.dataService = dataService;			
-			dataAnalysisContainer.label = analysisDefinition.name;			
-			dataAnalysisContainer.openAnalysis(analysisDefinition);
-			return dataAnalysisContainer;						
-
-		}*/
-		
 	}
 }

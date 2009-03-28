@@ -27,10 +27,11 @@
 		<![CDATA[
         import com.easyinsight.administration.feed.DeleteAnalysisItemEvent;
         import com.easyinsight.analysis.AnalysisChangedEvent;
-        import com.easyinsight.analysis.ChildFilterCreationEvent;
+        import com.easyinsight.analysis.HierarchyDrilldownEvent;
         import com.easyinsight.analysis.AnalysisStateChangeEvent;
         import com.easyinsight.analysis.DataViewFactory;
-        import com.easyinsight.analysis.IReportController;
+        import com.easyinsight.analysis.HierarchyRollupEvent;
+import com.easyinsight.analysis.IReportController;
         import com.easyinsight.analysis.list.ListController;
         import com.easyinsight.analysis.scrub.LookupTableScrubListWindow;
         import com.easyinsight.analysis.scrub.TextReplaceScrubListWindow;
@@ -342,7 +343,8 @@
             addEventListener(DeleteAnalysisItemEvent.DELETE_ANALYSIS_ITEM, onFieldDelete);
             addEventListener(CommandEvent.COMMAND, onCommand);
             addEventListener(KeyboardEvent.KEY_UP, onKey);
-            addEventListener(ChildFilterCreationEvent.CHILD_FILTER_INCLUDE, childFilterCreation);
+            addEventListener(HierarchyDrilldownEvent.DRILLDOWN, childFilterCreation);
+            addEventListener(HierarchyRollupEvent.HIERARCHY_ROLLUP, onRollup);
             dataService.addEventListener(DataServiceLoadingEvent.LOADING_STARTED, startLoading);
             dataService.addEventListener(DataServiceLoadingEvent.LOADING_STOPPED, stopLoading);
             transformContainer.addEventListener(TransformsUpdatedEvent.UPDATED_TRANSFORMS, transformsUpdated);
@@ -354,8 +356,12 @@
             dataService.reloadInitialContent(this, onMetadataReceipt);
         }
 
-        private function childFilterCreation(event:ChildFilterCreationEvent):void {
-            transformContainer.processRawFilterData(event.filterRawData, event.type == ChildFilterCreationEvent.CHILD_FILTER_INCLUDE);
+        private function onRollup(event:HierarchyRollupEvent):void {
+            transformContainer.clearFilter(event.analysisItem);
+        }
+
+        private function childFilterCreation(event:HierarchyDrilldownEvent):void {
+            transformContainer.processRawFilterData(event.filterRawData, event.type == HierarchyDrilldownEvent.DRILLDOWN);
         }
 
         private function onKey(event:KeyboardEvent):void {
@@ -403,10 +409,6 @@
             dispatchEvent(new AnalysisChangedEvent());
             analysisDefinition.filterDefinitions = event.filterDefinitions;
             dataView.retrieveData();
-        }
-
-        private function search():void {
-            dataView.search(searchInput.text.toLowerCase());
         }
 
         private function closeWindow():void {
@@ -743,9 +745,6 @@
             <mx:Button id="groupAddInsightButton" icon="@Embed(source='../../../assets/users_into.png')"
                        click="addInsightToGroup()" toolTip="Add Report to Group" visible="{canAddInsightToGroup}"/>
             <mx:ProgressBar indeterminate="true" visible="false" id="loadingBar"/>
-            <mx:Image source="@Embed(source='../../../assets/view.png')" toolTip="Search"/>
-            <mx:TextInput id="searchInput" change="search()"/>
-            <mx:Label text="{modeText}" fontSize="14"/>
         </mx:HBox>
         <mx:TabNavigator id="tabNavigator" width="100%" creationPolicy="all" enabled="{!_previewMode}" paddingTop="0"
                          paddingBottom="0"

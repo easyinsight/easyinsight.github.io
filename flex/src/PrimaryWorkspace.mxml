@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<mx:Application xmlns:mx="http://www.adobe.com/2006/mxml" creationComplete="startWorkspace()" xmlns:local="*" 
+<mx:Application xmlns:mx="http://www.adobe.com/2006/mxml" creationComplete="startWorkspace()" xmlns:local="*" applicationComplete="applicationListeners()"
 	xmlns:listing="listing.*" xmlns:customupload="customupload.*" xmlns:genredata="genredata.*"
 	xmlns:intro="intro.*" xmlns:listing1="com.easyinsight.listing.*" xmlns:intro1="com.easyinsight.intro.*" 
 	historyManagementEnabled="false" paddingTop="0" top="0" borderThickness="0" left="0" paddingLeft="0" right="0" paddingRight="0"
@@ -22,7 +22,11 @@
 			import com.easyinsight.FullScreenPage;
 			import com.easyinsight.analysis.DelayedFeedLink;
 			import com.easyinsight.analysis.DelayedDeepLink;
-            import mx.messaging.ChannelSet;
+            import com.easyinsight.listing.DataFeedDescriptor;
+import com.easyinsight.listing.DescriptorAnalyzeSource;
+import com.easyinsight.quicksearch.QuickSearchEvent;
+import com.easyinsight.quicksearch.QuickSearchWindow;
+import mx.messaging.ChannelSet;
 			import mx.messaging.config.ServerConfig;
 			import mx.rpc.events.FaultEvent;
 			import com.easyinsight.LoginDialog;
@@ -62,6 +66,31 @@
                 browserManager.init("", "Intro");
                 introPanel.gotFocus();
                 User.getEventNotifier().addEventListener(NavigationEvent.NAVIGATION, navigation);
+            }
+
+            private function applicationListeners():void {
+                stage.addEventListener(KeyboardEvent.KEY_DOWN, onKeyDown);
+            }
+
+            private function onKeyDown(event:KeyboardEvent):void {
+                if (event.ctrlKey && event.keyCode == 78) {
+                    var window:QuickSearchWindow = new QuickSearchWindow();
+                    window.addEventListener(QuickSearchEvent.QUICK_SEARCH, onQuickSearch);
+                    window.addEventListener(QuickSearchEvent.QUICK_SEARCH_CANCEL, onQuickSearch);
+                    PopUpManager.addPopUp(window, this, false);
+                    PopUpManager.centerPopUp(window);
+                }
+            }
+
+            private function onQuickSearch(event:QuickSearchEvent):void {
+                event.currentTarget.removeEventListener(QuickSearchEvent.QUICK_SEARCH, onQuickSearch);
+                event.currentTarget.removeEventListener(QuickSearchEvent.QUICK_SEARCH_CANCEL, onQuickSearch);
+                if (event.type == QuickSearchEvent.QUICK_SEARCH) {
+                    var descriptor:DataFeedDescriptor = new DataFeedDescriptor();
+                    descriptor.name = event.eiDescriptor.name;
+                    descriptor.dataFeedID = event.eiDescriptor.id;
+                    internalModuleAnalyze(new ModuleAnalyzeEvent(new DescriptorAnalyzeSource(descriptor)));
+                }
             }
             
             private function onFault(event:FaultEvent):void {
@@ -226,6 +255,10 @@
             }
 
             private function internalModuleAnalyze(event:ModuleAnalyzeEvent):void {
+                if (currentState == "Analysis") {
+                    dataAnalysis.removeEventListener(AnalysisCloseEvent.ANALYSIS_CLOSE, analysisClosed);
+                    currentState = "";
+                }
                 var moduleAnalyzeSource:ModuleAnalyzeSource = event.analyzeSource;
                 var analysisWindow:DisplayObject = moduleAnalyzeSource.createDirect();
                 analysisWindow.addEventListener(AnalysisCloseEvent.ANALYSIS_CLOSE, analysisClosed);

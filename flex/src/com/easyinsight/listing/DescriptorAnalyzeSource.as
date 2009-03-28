@@ -20,25 +20,6 @@ import mx.rpc.remoting.RemoteObject;
 		public function DescriptorAnalyzeSource(descriptor:DataFeedDescriptor)
 		{
 			this.dataFeedDescriptor = descriptor;
-			if (descriptor.policy.publiclyVisible) {
-				// all is happy...
-			} else {
-				var user:User = User.getInstance();
-				if (user == null) {
-					// must log in and authorize access
-					loginRequired = true;
-				} else {
-					// we're all good if it authorized...
-				}
-			}
-		}
-
-        override protected function getModuleName():String {
-            return "/app/easyui-debug/DataAnalysisModule.swf";
-        }
-		
-		private function loggedIn(event:LoginEvent):void {
-			loginRequired = false;
 		}
 
         override public function createDirect():DisplayObject {
@@ -49,38 +30,5 @@ import mx.rpc.remoting.RemoteObject;
             BrowserManager.getInstance().setTitle("Easy Insight - " + dataFeedDescriptor.name);
             return dataAnalysisContainer;
         }
-
-
-        override protected function applyProperties(val:Object):void {
-            super.applyProperties(val);
-            val["dataSourceID"] = dataFeedDescriptor.dataFeedID;
-            val["headerName"] = dataFeedDescriptor.name;
-        }
-
-        /*public function createAnalysisPopup():FullScreenPage {
-			//this.parentObject = parent;
-			if (loginRequired) {
-				//var loginDialog:LoginDialog = LoginDialog(PopUpManager.createPopUp(parent, LoginDialog, true));
-				//loginDialog.addEventListener(LoginEvent.LOGIN, loggedIn);
-				//PopUpManager.centerPopUp(loginDialog);
-				return null;	
-			} else {
-				//var canvas:MDICanvas = parent as MDICanvas;
-				var dataService:DataService = new DataService();
-				dataService.dataFeedID = dataFeedDescriptor.dataFeedID;										
-				var dataAnalysisContainer:DataAnalysisContainer = new DataAnalysisContainer();												
-				dataAnalysisContainer.dataService = dataService;
-				//dataAnalysisContainer.title = "New Insight";
-				dataAnalysisContainer.previewMode = preview;
-				
-				var feedService:RemoteObject = new RemoteObject();
-				feedService.destination = "feeds";
-				feedService.addView.send(dataFeedDescriptor.dataFeedID);
-				
-				BrowserManager.getInstance().setTitle("Easy Insight - " + dataFeedDescriptor.name);
-				
-				return dataAnalysisContainer;
-			}										
-		}		*/
 	}
 }

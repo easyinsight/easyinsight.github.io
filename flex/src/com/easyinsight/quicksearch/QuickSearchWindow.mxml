@@ -1,0 +1,86 @@
+<?xml version="1.0" ?>
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:yahoo="http://www.yahoo.com/astra/2006/mxml" creationComplete="setupListeners()"
+        borderThickness="1" borderColor="0x000000" borderStyle="solid" dropShadowEnabled="true" backgroundColor="0xECE9D8">
+    <mx:Script><![CDATA[
+        import mx.collections.ArrayCollection;
+        import mx.managers.PopUpManager;
+
+        [Bindable]
+        private var descriptors:ArrayCollection;
+
+        private var error:Boolean = false;
+
+        private var descriptorMap:Object = new Object();
+
+        private var keyRun:Boolean = false;
+
+        private function setupListeners():void {
+            focusManager.setFocus(searchInput);
+            stage.addEventListener(KeyboardEvent.KEY_DOWN, onKeyDown);
+            searchInput.addEventListener(KeyboardEvent.KEY_DOWN, onKeyDown);
+            feedService.getDescriptors.send();
+        }
+
+        private function onKeyDown(event:KeyboardEvent):void {
+            if (!keyRun && event.keyCode == Keyboard.ESCAPE) {
+                keyRun = true;
+                stage.removeEventListener(KeyboardEvent.KEY_DOWN, onKeyDown);
+                dispatchEvent(new QuickSearchEvent(QuickSearchEvent.QUICK_SEARCH_CANCEL));
+                PopUpManager.removePopUp(this);
+            } else if (event.keyCode == Keyboard.ENTER) {
+                var descriptor:EIDescriptor = descriptorMap[searchInput.text];
+                if (descriptor == null) {
+                    error = true;
+                    searchInput.setStyle("color", "red");
+                    noMatchesLabel.setStyle("color", "red");
+                } else {
+                    if (!keyRun) {
+                        keyRun = true;
+                        dispatchEvent(new QuickSearchEvent(QuickSearchEvent.QUICK_SEARCH, descriptor));
+                        PopUpManager.removePopUp(this);
+                    }
+                }
+            }
+        }
+
+        private function onCompletionClose():void {
+            var descriptor:EIDescriptor = descriptorMap[searchInput.text];
+            if (descriptor != null && !keyRun) {
+                keyRun = true;
+                stage.removeEventListener(KeyboardEvent.KEY_DOWN, onKeyDown);
+                dispatchEvent(new QuickSearchEvent(QuickSearchEvent.QUICK_SEARCH, descriptor));
+                PopUpManager.removePopUp(this);
+            }
+        }
+
+        private function gotDescriptors():void {
+            descriptors = feedService.getDescriptors.lastResult as ArrayCollection;
+            for each (var descriptor:EIDescriptor in descriptors) {
+                descriptorMap[descriptor.name] = descriptor;
+            }
+            searchInput.enabled = true;
+        }
+
+        private function onChange():void {
+            if (error) {
+                searchInput.setStyle("color", 0x000000);
+                noMatchesLabel.setStyle("color", 0x000000);
+            }
+            if (searchInput.text == "") {
+                noMatchesLabel.visible = false;
+            } else {
+                var descriptor:EIDescriptor = descriptorMap[searchInput.text];
+                noMatchesLabel.visible = descriptor == null;
+            }
+        }
+        ]]></mx:Script>
+    <mx:RemoteObject destination="feeds" id="feedService">
+        <mx:method name="getDescriptors" result="gotDescriptors()"/>
+    </mx:RemoteObject>
+    <yahoo:AutoCompleteManager id="autoCompleteManager" target="{searchInput}" dataProvider="{descriptors}" labelField="name" minCharsForCompletion="1" close="onCompletionClose()"/>
+    <mx:HBox verticalAlign="middle">
+        <mx:Label text="Enter name:" fontWeight="bold" fontFamily="Tahoma" fontSize="13"/>
+        <mx:Label text="(no matches found)" id="noMatchesLabel" visible="false"/>
+    </mx:HBox>
+    <mx:TextInput id="searchInput" width="100%" enabled="false" change="onChange()"/>
+</mx:VBox>
