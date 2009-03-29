@@ -298,12 +298,6 @@ import com.easyinsight.analysis.IReportController;
                  }
                  }*/
 
-                if (analysisDefinition.hierarchies != null) {
-                    for each (var hierarchyField:AnalysisItem in analysisDefinition.hierarchies) {
-                        availableFields.addItem(new AnalysisItemWrapper(hierarchyField));
-                    }
-                }
-
                 shareDataSourceSharing = analysisDefinition.visibleAtFeedLevel;
                 publiclyVisible = analysisDefinition.publiclyVisible;
                 marketplaceVisible = analysisDefinition.marketplaceVisible;

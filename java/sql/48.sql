@@ -48,7 +48,6 @@ CREATE TABLE map_report (
   map_type int(11) default NULL,
   PRIMARY KEY  (map_report_id),
   KEY report_state_id (report_state_id),
-  KEY graphic_definition_id (graphic_definition_id),
   CONSTRAINT map_report_ibfk_1 FOREIGN KEY (report_state_id) REFERENCES report_state (report_state_id) ON DELETE CASCADE
 );
 

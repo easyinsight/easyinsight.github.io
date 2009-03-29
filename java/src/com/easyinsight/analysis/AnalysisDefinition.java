@@ -39,12 +39,6 @@ public class AnalysisDefinition implements Cloneable {
         joinColumns = @JoinColumn(name="analysis_id", nullable = false),
         inverseJoinColumns = @JoinColumn(name="analysis_item_id", nullable = false))
     private List<AnalysisItem> addedItems = new ArrayList<AnalysisItem>();
-
-    @OneToMany(cascade=CascadeType.ALL)
-    @JoinTable(name="analysis_to_hierarchy_join",
-        joinColumns = @JoinColumn(name="analysis_id", nullable = false),
-        inverseJoinColumns = @JoinColumn(name="analysis_item_id", nullable = false))
-    private List<AnalysisItem> hierarchies = new ArrayList<AnalysisItem>();
     
     @OneToMany(cascade=CascadeType.ALL)
     @JoinColumn(name="analysis_id", nullable = false)
@@ -149,14 +143,6 @@ public class AnalysisDefinition implements Cloneable {
 
     public void setDateCreated(Date dateCreated) {
         this.dateCreated = dateCreated;
-    }
-
-    public List<AnalysisItem> getHierarchies() {
-        return hierarchies;
-    }
-
-    public void setHierarchies(List<AnalysisItem> hierarchies) {
-        this.hierarchies = hierarchies;
     }
 
     public Date getDateUpdated() {
@@ -338,15 +324,6 @@ public class AnalysisDefinition implements Cloneable {
         for (DataScrub dataScrub : dataScrubs) {
             dataScrub.hateHibernate();
             newScrubs.add(dataScrub);
-        }
-        if (getHierarchies() != null) {
-            List<AnalysisItem> hierarchies = new ArrayList<AnalysisItem>();
-            for (AnalysisItem analysisItem : getHierarchies()) {
-                AnalysisHierarchyItem analysisHierarchyItem = (AnalysisHierarchyItem) analysisItem;
-                analysisHierarchyItem.setHierarchyLevels(new ArrayList<HierarchyLevel>(analysisHierarchyItem.getHierarchyLevels()));
-                hierarchies.add(analysisHierarchyItem);
-            }
-            analysisDefinition.setHierarchies(hierarchies);
         }
         analysisDefinition.setCanSaveDirectly(isOwner(SecurityUtil.getUserID(false)));
         analysisDefinition.setDataScrubs(newScrubs);

@@ -1,10 +1,7 @@
 package com.easyinsight.datafeeds;
 
 import com.easyinsight.storage.DataStorage;
-import com.easyinsight.analysis.ListDefinition;
-import com.easyinsight.analysis.UserToAnalysisBinding;
-import com.easyinsight.analysis.UserPermission;
-import com.easyinsight.analysis.AnalysisStorage;
+import com.easyinsight.analysis.*;
 import com.easyinsight.security.Roles;
 import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.dataset.DataSet;
@@ -36,9 +33,10 @@ public class FeedCreation {
         DataStorage tableDef = DataStorage.writeConnection(feedDefinition, conn, accountID);
         tableDef.createTable();
         tableDef.insertData(dataSet);
-        ListDefinition baseDefinition = new ListDefinition();
+        AnalysisDefinition baseDefinition = new AnalysisDefinition();
         baseDefinition.setDataFeedID(feedID);
         baseDefinition.setRootDefinition(true);
+        baseDefinition.setAnalysisDefinitionState(new ListDefinitionState());
         baseDefinition.setUserBindings(Arrays.asList(new UserToAnalysisBinding(userID, UserPermission.OWNER)));
         new AnalysisStorage().saveAnalysis(baseDefinition, conn);
         feedDefinition.setAnalysisDefinitionID(baseDefinition.getAnalysisID());

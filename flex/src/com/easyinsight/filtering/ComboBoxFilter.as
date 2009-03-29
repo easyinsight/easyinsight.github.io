@@ -130,7 +130,13 @@ package com.easyinsight.filtering
 			if (_filterDefinition.filteredValues.length == 0) {
 				_filterDefinition.filteredValues.addItem(strings.getItemAt(0));
 			}
-			selectedValue = _filterDefinition.filteredValues.getItemAt(0) as String;							
+            var filterObj:Object = _filterDefinition.filteredValues.getItemAt(0);
+            if (filterObj is Value) {
+                selectedValue = String(filterObj.getValue());
+            } else {
+                selectedValue = filterObj as String;
+            }
+			//selectedValue = _filterDefinition.filteredValues.getItemAt(0) as String;
 			comboBox.selectedItem = selectedValue;
 			comboBox.enabled = true;
 			deleteButton.enabled = true;

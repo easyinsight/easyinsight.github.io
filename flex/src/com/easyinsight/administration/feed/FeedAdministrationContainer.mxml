@@ -137,11 +137,12 @@ import mx.events.CloseEvent;
             		Alert.show("There are one or more errors which must be fixed before you can save this feed.");
             	} else {
                     var analysisDefinition:AnalysisDefinition = dataAnalysisContainer.getAnalysisDefinition();
-                    analysisDefinition.hierarchies = hierarchiesBox.getHierarchies();
-	            	var analysisItems:ArrayCollection = dataAnalysisContainer.getAnalysisItems();
-                    for each (var analysisItem:AnalysisHierarchyItem in analysisDefinition.hierarchies) {
-                        if (analysisItem.analysisItemID == 0) {
-                            analysisItems.addItem(analysisItem);
+                    var analysisItems:ArrayCollection = dataAnalysisContainer.getAnalysisItems();                    
+                    if (hierarchiesBox != null) {
+                        for each (var analysisItem:AnalysisHierarchyItem in hierarchiesBox.getHierarchies()) {
+                            if (analysisItem.analysisItemID == 0) {
+                                analysisItems.addItem(analysisItem);
+                            }
                         }
                     }
 	            	feedDefinition.fields = analysisItems;
@@ -254,7 +255,7 @@ import mx.events.CloseEvent;
 			<mx:Box label="Data" id="fieldsBox">
 			</mx:Box>
             <mx:Box label="Hierarchies" paddingLeft="10" paddingTop="10" paddingBottom="10" paddingRight="10">
-                <feed:HierarchyAdministration  id="hierarchiesBox" analysisDefinition="{analysisDefinition}" feedDefinition="{feedDefinition}"/>
+                <feed:HierarchyAdministration  id="hierarchiesBox" feedDefinition="{feedDefinition}"/>
             </mx:Box>
 			<mx:Box label="Impl" paddingLeft="10" paddingTop="10" paddingBottom="10" paddingRight="10" id="implBox" visible="{showImpl}">
 				

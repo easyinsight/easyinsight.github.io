@@ -20,7 +20,6 @@ package com.easyinsight.analysis
 		public var ratingCount:int;
 		public var ratingAverage:Number = 0;
 		public var addedItems:ArrayCollection;
-		public var hierarchies:ArrayCollection;
 		public var rootDefinition:Boolean;
 		public var canSaveDirectly:Boolean;
 		public var visibleAtFeedLevel:Boolean;

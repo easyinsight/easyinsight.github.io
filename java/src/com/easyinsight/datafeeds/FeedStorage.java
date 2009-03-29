@@ -190,15 +190,19 @@ public class FeedStorage {
             Session session = Database.instance().createSession(conn);
             try {
                 for (AnalysisItem analysisItem : analysisItems) {
-                    if (analysisItem.getKey().getKeyID() != null && analysisItem.getKey().getKeyID() == 0) {
-                        analysisItem.getKey().setKeyID(null);
+                    if (analysisItem.getKey().getKeyID() == 0) {
+                        session.save(analysisItem.getKey());
+                    } else {
+                        session.merge(analysisItem.getKey());
                     }
-                    session.saveOrUpdate(analysisItem.getKey());
                 }
                 for (AnalysisItem analysisItem : analysisItems) {
+                    session.saveOrUpdate(analysisItem);
+                }
+                /*for (AnalysisItem analysisItem : analysisItems) {
                     analysisItem.resetIDs();
                     session.save(analysisItem);
-                }
+                }*/
                 session.flush();
             } catch (Exception e) {
                 LogClass.error(e);
@@ -258,9 +262,8 @@ public class FeedStorage {
         }
         queryFieldsStmt.close();
         List<AnalysisItem> analysisItems = new ArrayList<AnalysisItem>();
-        Session session = Database.instance().createSession();
+        Session session = Database.instance().createSession(conn);
         try {
-            session.beginTransaction();
             for (Long analysisItemID : analysisItemIDs) {
                 List items = session.createQuery("from AnalysisItem where analysisItemID = ?").setLong(0, analysisItemID).list();
                 if (items.size() > 0) {
@@ -272,10 +275,8 @@ public class FeedStorage {
                     analysisItems.add(analysisItem);
                 }
             }
-            session.getTransaction().commit();
         } catch (Exception e) {
             LogClass.error(e);
-            session.getTransaction().rollback();
             throw new RuntimeException(e);
         } finally {
             session.close();

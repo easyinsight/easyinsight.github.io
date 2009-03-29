@@ -180,7 +180,6 @@ public class DataViewFactory extends VBox {
         target.filterDefinitions = source.filterDefinitions;
         target.policy = source.policy;
         target.addedItems = source.addedItems;
-        target.hierarchies = source.hierarchies;
         target.viewCount = source.viewCount;
         target.ratingCount = source.ratingCount;
         target.ratingAverage = source.ratingAverage;

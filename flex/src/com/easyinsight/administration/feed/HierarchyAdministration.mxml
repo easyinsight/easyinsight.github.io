@@ -1,14 +1,12 @@
 <?xml version="1.0" ?>
 <mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml">
     <mx:Script><![CDATA[
-import com.easyinsight.analysis.AnalysisDefinition;
 import mx.events.ListEvent;
 import com.easyinsight.analysis.HierarchyLevel;
 import mx.controls.List;
 import mx.managers.DragManager;
 import mx.events.DragEvent;
 import com.easyinsight.analysis.NamedKey;
-import com.easyinsight.analysis.Hierarchy;
 import com.easyinsight.analysis.AnalysisHierarchyItem;
 import com.easyinsight.analysis.AnalysisItemTypes;
 import com.easyinsight.analysis.AnalysisItem;
@@ -19,8 +17,6 @@ import com.easyinsight.analysis.AnalysisItem;
         [Bindable]
         private var hierarchies:ArrayCollection;
 
-        private var _analysisDefinition:AnalysisDefinition;
-
         [Bindable]
         [Embed(source="../../../../../assets/cubes_blue_add.png")]
         private var cubeAddImage:Class;
@@ -30,7 +26,9 @@ import com.easyinsight.analysis.AnalysisItem;
         override protected function commitProperties():void {
             super.commitProperties();
             for each (var analysisItem:AnalysisItem in _feedDefinition.fields) {
-                if (analysisItem.hasType(AnalysisItemTypes.DIMENSION)) {
+                if (analysisItem.hasType(AnalysisItemTypes.HIERARCHY)) {
+                    hierarchies.addItem(analysisItem);
+                } else if (analysisItem.hasType(AnalysisItemTypes.DIMENSION)) {
                     availableDimensions.addItem(analysisItem);
                 }
             }
@@ -88,17 +86,6 @@ import com.easyinsight.analysis.AnalysisItem;
 
         public function set feedDefinition(val:FeedDefinitionData):void {
             _feedDefinition = val;
-        }
-
-        public function set analysisDefinition(val:AnalysisDefinition):void {
-            _analysisDefinition = val;
-            hierarchies = new ArrayCollection();
-            //availableDimensions = new ArrayCollection();
-            if (_analysisDefinition.hierarchies != null) {
-                for each (var hierarchyItem:AnalysisHierarchyItem in _analysisDefinition.hierarchies) {
-                    hierarchies.addItem(hierarchyItem);
-                }
-            }
         }
 
         private function onHierarchyClick(event:ListEvent):void {

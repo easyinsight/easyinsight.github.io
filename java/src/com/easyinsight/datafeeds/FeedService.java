@@ -327,10 +327,11 @@ public class FeedService implements IDataFeedService {
             }.visit(feedDef);
             feedDef.populateFields();
             long feedID = feedStorage.addFeedDefinitionData(feedDef);
-            ListDefinition baseDefinition = new ListDefinition();
+            AnalysisDefinition baseDefinition = new AnalysisDefinition();
             baseDefinition.setDataFeedID(feedID);
             baseDefinition.setRootDefinition(true);
             baseDefinition.setUserBindings(Arrays.asList(new UserToAnalysisBinding(SecurityUtil.getUserID(), UserPermission.OWNER)));
+            baseDefinition.setAnalysisDefinitionState(new ListDefinitionState());
             new AnalysisStorage().saveAnalysis(baseDefinition);
             feedDef.setAnalysisDefinitionID(baseDefinition.getAnalysisID());
             feedStorage.updateDataFeedConfiguration(feedDef);

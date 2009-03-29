@@ -15,17 +15,17 @@ public abstract class Key implements Comparable<Key>, Serializable {
     @Id
     @GeneratedValue(strategy=GenerationType.IDENTITY)
     @Column(name="item_key_id")
-    private Long keyID;
+    private long keyID;
 
 
 
     
 
-    public Long getKeyID() {
+    public long getKeyID() {
         return keyID;
     }
 
-    public void setKeyID(Long keyID) {
+    public void setKeyID(long keyID) {
         this.keyID = keyID;
     }
 

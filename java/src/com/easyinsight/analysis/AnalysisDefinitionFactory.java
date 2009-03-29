@@ -39,7 +39,6 @@ public class AnalysisDefinitionFactory {
         analysisDefinition.setAnalysisDefinitionState(analysisDefinitionState);
         analysisDefinition.setReportStructure(wsAnalysisDefinition.createStructure());
         analysisDefinition.setDataScrubs(wsAnalysisDefinition.getDataScrubs());
-        analysisDefinition.setHierarchies(wsAnalysisDefinition.getHierarchies());
         analysisDefinition.setAddedItems(wsAnalysisDefinition.getAddedItems());
         analysisDefinition.setFilterDefinitions(FilterDefinitionConverter.fromFilters(wsAnalysisDefinition.getFilterDefinitions()));
         analysisDefinition.setAnalysisID(wsAnalysisDefinition.getAnalysisID());

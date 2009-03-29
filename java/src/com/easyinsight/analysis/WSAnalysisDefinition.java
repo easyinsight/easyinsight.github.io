@@ -25,7 +25,6 @@ public abstract class WSAnalysisDefinition implements Serializable {
     private String genre;
     private List<Tag> tagCloud = new ArrayList<Tag>();
     private List<AnalysisItem> addedItems = new ArrayList<AnalysisItem>();
-    private List<AnalysisItem> hierarchies = new ArrayList<AnalysisItem>();
     private boolean rootDefinition;
     private boolean canSaveDirectly;
     private boolean publiclyVisible;
@@ -104,14 +103,6 @@ public abstract class WSAnalysisDefinition implements Serializable {
 
     public void setGenre(String genre) {
         this.genre = genre;
-    }
-
-    public List<AnalysisItem> getHierarchies() {
-        return hierarchies;
-    }
-
-    public void setHierarchies(List<AnalysisItem> hierarchies) {
-        this.hierarchies = hierarchies;
     }
 
     public int getPolicy() {
