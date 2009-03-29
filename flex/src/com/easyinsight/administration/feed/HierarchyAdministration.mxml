@@ -1,21 +1,21 @@
 <?xml version="1.0" ?>
 <mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml">
     <mx:Script><![CDATA[
-import mx.events.ListEvent;
-import com.easyinsight.analysis.HierarchyLevel;
-import mx.controls.List;
-import mx.managers.DragManager;
-import mx.events.DragEvent;
-import com.easyinsight.analysis.NamedKey;
-import com.easyinsight.analysis.AnalysisHierarchyItem;
-import com.easyinsight.analysis.AnalysisItemTypes;
-import com.easyinsight.analysis.AnalysisItem;
+        import mx.events.ListEvent;
+        import com.easyinsight.analysis.HierarchyLevel;
+        import mx.controls.List;
+        import mx.managers.DragManager;
+        import mx.events.DragEvent;
+        import com.easyinsight.analysis.NamedKey;
+        import com.easyinsight.analysis.AnalysisHierarchyItem;
+        import com.easyinsight.analysis.AnalysisItemTypes;
+        import com.easyinsight.analysis.AnalysisItem;
         import mx.collections.ArrayCollection;
 
         [Bindable]
         private var availableDimensions:ArrayCollection = new ArrayCollection();
         [Bindable]
-        private var hierarchies:ArrayCollection;
+        private var hierarchies:ArrayCollection = new ArrayCollection();
 
         [Bindable]
         [Embed(source="../../../../../assets/cubes_blue_add.png")]

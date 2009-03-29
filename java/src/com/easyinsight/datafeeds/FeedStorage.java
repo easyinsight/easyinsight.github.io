@@ -197,13 +197,18 @@ public class FeedStorage {
                     }
                 }
                 for (AnalysisItem analysisItem : analysisItems) {
-                    session.saveOrUpdate(analysisItem);
+                    if (analysisItem.getAnalysisItemID() == 0) {
+                        session.save(analysisItem);
+                    } else {
+                        session.merge(analysisItem);
+                    }
+                    //session.saveOrUpdate(analysisItem);
                 }
                 /*for (AnalysisItem analysisItem : analysisItems) {
                     analysisItem.resetIDs();
                     session.save(analysisItem);
                 }*/
-                session.flush();
+                //session.flush();
             } catch (Exception e) {
                 LogClass.error(e);
                 throw new RuntimeException(e);

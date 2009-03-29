@@ -62,4 +62,9 @@ public class AnalysisHierarchyItem extends AnalysisDimension {
     public AnalysisItemResultMetadata createResultMetadata() {
         return hierarchyLevel.getAnalysisItem().createResultMetadata();
     }
+
+    @Override
+    public boolean isDerived() {
+        return true;
+    }
 }

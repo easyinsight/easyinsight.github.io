@@ -198,4 +198,9 @@ public class AnalysisCalculation extends AnalysisMeasure {
         items.add(this);
         return items;
     }
+
+    @Override
+    public boolean isDerived() {
+        return true;
+    }
 }
