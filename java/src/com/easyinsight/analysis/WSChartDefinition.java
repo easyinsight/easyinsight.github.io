@@ -12,16 +12,7 @@ import java.util.Map;
  * Time: 9:10:35 PM
  */
 public abstract class WSChartDefinition extends WSGraphicDefinition {
-    private Long chartDefinitionID;
     private LimitsMetadata limitsMetadata;
-
-    public Long getChartDefinitionID() {
-        return chartDefinitionID;
-    }
-
-    public void setChartDefinitionID(Long chartDefinitionID) {
-        this.chartDefinitionID = chartDefinitionID;
-    }
 
     public abstract int getChartType();
 

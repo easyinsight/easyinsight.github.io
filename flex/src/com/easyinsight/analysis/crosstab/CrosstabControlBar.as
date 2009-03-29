@@ -124,9 +124,9 @@ public class CrosstabControlBar extends HBox implements IReportControlBar {
     }
 
     public function createAnalysisDefinition():AnalysisDefinition {
-        xAxisDefinition.columns = columnGrouping.getListColumns();
-        xAxisDefinition.measures = measureGrouping.getListColumns();
-        xAxisDefinition.rows = rowGrouping.getListColumns();
+        xAxisDefinition.columns = new ArrayCollection(columnGrouping.getListColumns());
+        xAxisDefinition.measures = new ArrayCollection(measureGrouping.getListColumns());
+        xAxisDefinition.rows = new ArrayCollection(rowGrouping.getListColumns());
         return xAxisDefinition;
     }
 

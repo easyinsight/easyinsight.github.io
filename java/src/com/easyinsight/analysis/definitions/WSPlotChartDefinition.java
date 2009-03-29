@@ -1,8 +1,8 @@
 package com.easyinsight.analysis.definitions;
 
 import com.easyinsight.analysis.AnalysisItem;
-import com.easyinsight.analysis.ChartDefinition;
 import com.easyinsight.analysis.WSChartDefinition;
+import com.easyinsight.analysis.ChartDefinitionState;
 
 import java.util.Map;
 import java.util.Arrays;
@@ -64,10 +64,10 @@ public class WSPlotChartDefinition extends WSChartDefinition {
     }
 
     public int getChartType() {
-        return ChartDefinition.PLOT_TYPE;
+        return ChartDefinitionState.PLOT_TYPE;
     }
 
     public int getChartFamily() {
-        return ChartDefinition.PLOT_FAMILY;
+        return ChartDefinitionState.PLOT_FAMILY;
     }
 }

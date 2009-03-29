@@ -5,7 +5,6 @@ import com.easyinsight.security.SecurityUtil;
 
 import java.util.*;
 
-import org.hibernate.annotations.CollectionOfElements;
 import org.hibernate.annotations.MapKey;
 
 import javax.persistence.*;
@@ -17,8 +16,7 @@ import javax.persistence.*;
  */
 @Entity
 @Table(name="analysis")
-@Inheritance(strategy=InheritanceType.JOINED)
-public abstract class AnalysisDefinition implements Cloneable {
+public class AnalysisDefinition implements Cloneable {
     @Column(name="title")
     private String title;
     @Id @GeneratedValue(strategy=GenerationType.IDENTITY)
@@ -64,6 +62,10 @@ public abstract class AnalysisDefinition implements Cloneable {
         inverseJoinColumns = @JoinColumn(name="analysis_tags_id", nullable = false))
     private List<Tag> tags = new ArrayList<Tag>();
 
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name="report_state_id")
+    private AnalysisDefinitionState analysisDefinitionState;
+
     @Column(name="policy")
     private int analysisPolicy;
 
@@ -100,6 +102,14 @@ public abstract class AnalysisDefinition implements Cloneable {
                 joinColumns = @JoinColumn(name = "analysis_id"),
                 inverseJoinColumns = @JoinColumn(name = "analysis_item_id"))
     private Map<String, AnalysisItem> reportStructure;
+
+    public AnalysisDefinitionState getAnalysisDefinitionState() {
+        return analysisDefinitionState;
+    }
+
+    public void setAnalysisDefinitionState(AnalysisDefinitionState analysisDefinitionState) {
+        this.analysisDefinitionState = analysisDefinitionState;
+    }
 
     public Map<String, AnalysisItem> getReportStructure() {
         return reportStructure;
@@ -303,8 +313,17 @@ public abstract class AnalysisDefinition implements Cloneable {
         return analysisDefinition;
     }
 
+    private AnalysisDefinitionState migrationHandler() {
+        return new ListDefinitionState();
+    }
+
     public WSAnalysisDefinition createBlazeDefinition() {
-        WSAnalysisDefinition analysisDefinition = createWSDefinition();
+        WSAnalysisDefinition analysisDefinition;
+        AnalysisDefinitionState analysisDefinitionState = this.analysisDefinitionState;
+        if (analysisDefinitionState == null) {
+            analysisDefinitionState = migrationHandler();
+        }
+        analysisDefinition = analysisDefinitionState.createWSDefinition();
         analysisDefinition.setAnalysisID(analysisID);
         analysisDefinition.setDataFeedID(dataFeedID);
         if (getAddedItems() != null) {
@@ -356,6 +375,4 @@ public abstract class AnalysisDefinition implements Cloneable {
         }
         return analysisItems;
     }
-
-    protected abstract WSAnalysisDefinition createWSDefinition();
 }

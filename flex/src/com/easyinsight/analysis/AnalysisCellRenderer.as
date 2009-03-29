@@ -53,35 +53,6 @@ import mx.controls.Label;
             contextMenu.customItems = [ drilldownContextItem, rollupContextItem, copyContextItem ];
 		}
 
-        private function onListKeywordEvent(event:ListKeywordEvent):void {
-            if (event.keyword.length > 1) {
-                var field:String = analysisItem.qualifiedName();
-                var objVal:String = String(data[field]);
-                if (!event.caseSensitive) {
-                    objVal = objVal.toLowerCase();
-                }
-                var match:Boolean = false;
-                if (event.wholeWords) {
-                    match = objVal == event.keyword;
-                } else {
-                    match = objVal.indexOf(event.keyword) != -1;
-                }
-                if (match) {
-                    if (getStyle("fontWeight") != "bold") {
-                        setStyle("fontWeight", "bold");
-                    }
-                } else {
-                    if (getStyle("fontWeight") == "bold") {
-                        setStyle("fontWeight", "normal");
-                    }
-                }
-            } else {
-                if (getStyle("fontWeight") == "bold") {
-                    setStyle("fontWeight", "normal");
-                }
-            }
-        }
-
         private function onDrilldown(event:ContextMenuEvent):void {
             drill();
         }

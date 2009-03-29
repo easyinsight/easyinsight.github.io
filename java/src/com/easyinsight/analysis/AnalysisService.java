@@ -148,7 +148,7 @@ public class AnalysisService implements IAnalysisService {
     public void deleteAnalysisDefinition(long reportID) {
         long userID = SecurityUtil.getUserID();
         SecurityUtil.authorizeInsight(reportID);
-        AnalysisDefinition dbAnalysisDef = analysisStorage.getAnalysisDefinition(reportID);
+        AnalysisDefinition dbAnalysisDef = analysisStorage.getPersistableReport(reportID);
 
         boolean canDelete = analysisStorage.canUserDelete(userID, dbAnalysisDef);
         if (canDelete) {
@@ -169,7 +169,7 @@ public class AnalysisService implements IAnalysisService {
         SecurityUtil.authorizeInsight(analysisID);
         try {
             long userID = SecurityUtil.getUserID();
-            AnalysisDefinition analysisDefinition = analysisStorage.getAnalysisDefinition(analysisID);
+            AnalysisDefinition analysisDefinition = analysisStorage.getPersistableReport(analysisID);
             UserToAnalysisBinding binding = new UserToAnalysisBinding(userID, Roles.SUBSCRIBER);
             analysisDefinition.getUserBindings().add(binding);
             analysisStorage.saveAnalysis(analysisDefinition);
@@ -183,8 +183,7 @@ public class AnalysisService implements IAnalysisService {
         try {
             SecurityUtil.authorizeInsight(analysisID);
             addAnalysisView(analysisID);
-            AnalysisDefinition analysisDefinition = analysisStorage.getAnalysisDefinition(analysisID);
-            return analysisDefinition.createBlazeDefinition();
+            return analysisStorage.getAnalysisDefinition(analysisID);
         } catch (Exception e) {
             LogClass.error(e);
             return null;
@@ -197,8 +196,8 @@ public class AnalysisService implements IAnalysisService {
             try {
                 SecurityUtil.authorizeInsight(analysisID);
                 addAnalysisView(analysisID);
-                AnalysisDefinition analysisDefinition = analysisStorage.getAnalysisDefinition(analysisID);
-                insightResponse = new InsightResponse(InsightResponse.SUCCESS, analysisDefinition.createBlazeDefinition());
+                WSAnalysisDefinition analysisDefinition = analysisStorage.getAnalysisDefinition(analysisID);
+                insightResponse = new InsightResponse(InsightResponse.SUCCESS, analysisDefinition);
             } catch (SecurityException e) {
                 if (e.getReason() == InsightResponse.NEED_LOGIN)
                     insightResponse = new InsightResponse(InsightResponse.NEED_LOGIN, null);

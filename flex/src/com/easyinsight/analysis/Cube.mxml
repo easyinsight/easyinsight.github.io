@@ -108,7 +108,7 @@ import mx.controls.olapDataGridClasses.OLAPDataGridItemRendererProvider;
 				return newData;
 			}
 			
-			private function createDimension(items:Array, dimensionName:String):OLAPDimension {
+			private function createDimension(items:ArrayCollection, dimensionName:String):OLAPDimension {
 				var columnDimension:OLAPDimension = new OLAPDimension();
 				columnDimension.name = dimensionName;
 				var elements:Array = [];				
@@ -117,7 +117,7 @@ import mx.controls.olapDataGridClasses.OLAPDataGridItemRendererProvider;
 				columnHierarchy.hasAll = true;
 				var columnHierarchyLevelsList:IList = new ArrayCollection();
 				for (var columnIndex:int = 0; columnIndex < items.length; columnIndex++) {
-					var analysisItem:AnalysisItem = items[columnIndex] as AnalysisItem;
+					var analysisItem:AnalysisItem = items.getItemAt(columnIndex) as AnalysisItem;
 					var olapAttribute:OLAPAttribute = new OLAPAttribute();
 					elements[columnIndex] = olapAttribute;
 					olapAttribute.name = analysisItem.qualifiedName();
@@ -163,11 +163,11 @@ import mx.controls.olapDataGridClasses.OLAPDataGridItemRendererProvider;
 	            grid.dataProvider = result as OLAPResult;            
 	        }       
 			
-			private function createOLAPSet(items:Array, dimensionName:String):OLAPSet {
+			private function createOLAPSet(items:ArrayCollection, dimensionName:String):OLAPSet {
 				var olapSet:OLAPSet = null;
 				for (var columnIndex:int = 0; columnIndex < items.length; columnIndex++) {
 					var attributeSet:OLAPSet = new OLAPSet();
-					var analysisItem:AnalysisItem = items[columnIndex] as AnalysisItem;
+					var analysisItem:AnalysisItem = items.getItemAt(columnIndex) as AnalysisItem;
 					attributeSet.addElements(cube.findDimension(dimensionName).findAttribute(analysisItem.qualifiedName()).children);
 					if (olapSet == null) {
 						olapSet = attributeSet;

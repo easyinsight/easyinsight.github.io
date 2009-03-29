@@ -4,28 +4,32 @@ import javax.persistence.*;
 
 /**
  * User: James Boe
- * Date: Jan 11, 2008
- * Time: 9:47:07 AM
+ * Date: Mar 28, 2009
+ * Time: 5:23:55 PM
  */
 @Entity
-@Table(name="list_definition")
-@PrimaryKeyJoinColumn(name="analysis_id")
-public class ListDefinition extends AnalysisDefinition {
+@PrimaryKeyJoinColumn(name="report_state_id")
+@Table(name="list_report")
+public class ListDefinitionState extends AnalysisDefinitionState {
 
-    /*@OneToMany(cascade=CascadeType.ALL)
-    //@JoinColumn(name="analysis_id", nullable = false)
-    //private List<ListField> columns;
-    @JoinTable(name="analysis_to_analysis_item",
-        joinColumns = @JoinColumn(name="analysis_id"),
-        inverseJoinColumns = @JoinColumn(name="analysis_item_id"))
-    private List<AnalysisItem> columns;    */
+    @GeneratedValue(strategy=GenerationType.IDENTITY)
+    @Column(name="list_report_id")
+    private long definitionID;
 
-    @OneToOne(cascade=CascadeType.ALL)
+    @OneToOne(cascade= CascadeType.ALL)
     @JoinColumn(name="list_limits_metadata_id")
     private ListLimitsMetadata listLimitsMetadata;
 
     @Column(name="show_row_numbers")
     private boolean showRowNumbers = false;
+
+    public long getDefinitionID() {
+        return definitionID;
+    }
+
+    public void setDefinitionID(long definitionID) {
+        this.definitionID = definitionID;
+    }
 
     public ListLimitsMetadata getListLimitsMetadata() {
         return listLimitsMetadata;
@@ -34,17 +38,6 @@ public class ListDefinition extends AnalysisDefinition {
     public void setListLimitsMetadata(ListLimitsMetadata listLimitsMetadata) {
         this.listLimitsMetadata = listLimitsMetadata;
     }
-
-    /*public List<AnalysisItem> getColumns() {
-        return columns;
-    }
-
-    public void setColumns(List<AnalysisItem> columns) {
-        if (columns == null) {
-            columns = new ArrayList<AnalysisItem>();
-        }
-        this.columns = new ArrayList<AnalysisItem>(columns);
-    }*/
 
     public boolean isShowRowNumbers() {
         return showRowNumbers;
@@ -61,8 +54,8 @@ public class ListDefinition extends AnalysisDefinition {
         return listDefinition;
     }
 
-    public AnalysisDefinition clone() throws CloneNotSupportedException {
-        ListDefinition listDefinition = (ListDefinition) super.clone();
+    public ListDefinitionState clone() throws CloneNotSupportedException {
+        ListDefinitionState listDefinition = (ListDefinitionState) super.clone();
         if (listLimitsMetadata != null) {
             listDefinition.getListLimitsMetadata().setLimitsMetadataID(0);
         }

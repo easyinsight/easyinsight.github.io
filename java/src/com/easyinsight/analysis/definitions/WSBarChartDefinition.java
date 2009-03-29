@@ -1,13 +1,6 @@
 package com.easyinsight.analysis.definitions;
 
-import com.easyinsight.analysis.WSChartDefinition;
-import com.easyinsight.analysis.AnalysisItem;
-import com.easyinsight.analysis.ChartDefinition;
-
-import java.util.Map;
-import java.util.Arrays;
-import java.util.Set;
-import java.util.HashSet;
+import com.easyinsight.analysis.ChartDefinitionState;
 
 /**
  * User: James Boe
@@ -17,10 +10,10 @@ import java.util.HashSet;
 public class WSBarChartDefinition extends WSYAxisDefinition {
 
     public int getChartType() {
-        return ChartDefinition.BAR_2D;
+        return ChartDefinitionState.BAR_2D;
     }
 
     public int getChartFamily() {
-        return ChartDefinition.BAR_FAMILY;
+        return ChartDefinitionState.BAR_FAMILY;
     }
 }

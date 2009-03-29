@@ -2,7 +2,7 @@ package com.easyinsight.analysis.definitions;
 
 import com.easyinsight.analysis.WSChartDefinition;
 import com.easyinsight.analysis.AnalysisItem;
-import com.easyinsight.analysis.ChartDefinition;
+import com.easyinsight.analysis.ChartDefinitionState;
 
 import java.util.Map;
 import java.util.Arrays;
@@ -76,10 +76,10 @@ public class WSBubbleChartDefinition extends WSChartDefinition {
     }
 
     public int getChartType() {
-        return ChartDefinition.BUBBLE_TYPE;
+        return ChartDefinitionState.BUBBLE_TYPE;
     }
 
     public int getChartFamily() {
-        return ChartDefinition.BUBBLE_FAMILY;
+        return ChartDefinitionState.BUBBLE_FAMILY;
     }
 }

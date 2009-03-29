@@ -350,7 +350,7 @@ public class GroupStorage {
         AnalysisStorage analysisStorage = new AnalysisStorage();
         List<WSAnalysisDefinition> analysisDefs = new ArrayList<WSAnalysisDefinition>();
         for (Long analysisID : analysisIDs) {
-            analysisDefs.add(analysisStorage.getAnalysisDefinition(analysisID).createBlazeDefinition());
+            analysisDefs.add(analysisStorage.getAnalysisDefinition(analysisID));
         }
         return analysisDefs; 
     }

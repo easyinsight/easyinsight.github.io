@@ -1,8 +1,5 @@
 package com.easyinsight.analysis;
 
-import com.easyinsight.analysis.AnalysisTypes;
-import com.easyinsight.analysis.AnalysisItemFactory;
-
 /**
  * User: James Boe
  * Date: Jan 10, 2008
@@ -11,40 +8,35 @@ import com.easyinsight.analysis.AnalysisItemFactory;
 public class AnalysisDefinitionFactory {
 
     public static AnalysisDefinition fromWSDefinition(WSAnalysisDefinition wsAnalysisDefinition) {
-        AnalysisDefinition analysisDefinition;
+        AnalysisDefinitionState analysisDefinitionState;
         if (wsAnalysisDefinition.getDataFeedType().equals(AnalysisTypes.CROSSTAB)) {
             WSCrosstabDefinition wsCrosstabDefinition = (WSCrosstabDefinition) wsAnalysisDefinition;
-            CrosstabDefinition crosstabDefinition = new CrosstabDefinition();
+            CrosstabDefinitionState crosstabDefinition = new CrosstabDefinitionState();
             crosstabDefinition.setCrosstabDefinitionID(wsCrosstabDefinition.getCrosstabDefinitionID());
-            analysisDefinition = crosstabDefinition;
+            analysisDefinitionState = crosstabDefinition;
         } else if (wsAnalysisDefinition.getDataFeedType().equals(AnalysisTypes.LIST)) {
             WSListDefinition wsListDefinition = (WSListDefinition) wsAnalysisDefinition;
-            ListDefinition listDefinition = new ListDefinition();
-            listDefinition.setListDefinitionID(wsListDefinition.getListDefinitionID());
+            ListDefinitionState listDefinition = new ListDefinitionState();
             listDefinition.setShowRowNumbers(wsListDefinition.isShowLineNumbers());
             listDefinition.setListLimitsMetadata(wsListDefinition.getListLimitsMetadata());
-            analysisDefinition = listDefinition;
+            analysisDefinitionState = listDefinition;
         } else if (wsAnalysisDefinition.getDataFeedType().equals(AnalysisTypes.CHART)) {
             WSChartDefinition wsChart = (WSChartDefinition) wsAnalysisDefinition;
-            ChartDefinition chartDefinition = new ChartDefinition();
+            ChartDefinitionState chartDefinition = new ChartDefinitionState();
             chartDefinition.setChartFamily(wsChart.getChartFamily());
             chartDefinition.setChartType(wsChart.getChartType());
-            chartDefinition.setChartDefinitionID(wsChart.getChartDefinitionID());
-            analysisDefinition = chartDefinition;
+            analysisDefinitionState = chartDefinition;
         } else if (wsAnalysisDefinition.getDataFeedType().equals(AnalysisTypes.MAP)) {
             WSMapDefinition wsMap = (WSMapDefinition) wsAnalysisDefinition;
-            MapDefinition mapDefinition = new MapDefinition();
+            MapDefinitionState mapDefinition = new MapDefinitionState();
             mapDefinition.setMapType(wsMap.getMapType());
             mapDefinition.setMapDefinitionID(wsMap.getMapDefinitionID());
-            analysisDefinition = mapDefinition;
-        } else if (wsAnalysisDefinition.getDataFeedType().equals(AnalysisTypes.YAHOO_MAP)) {
-            WSYahooMapDefinition wsMap = (WSYahooMapDefinition) wsAnalysisDefinition;
-            YahooMapDefinition mapDefinition = new YahooMapDefinition();
-            mapDefinition.setYahooMapDefinitionID(wsMap.getYahooMapDefinitionID());
-            analysisDefinition = mapDefinition;
+            analysisDefinitionState = mapDefinition;
         } else {
             throw new RuntimeException("Unknown data feed type " + wsAnalysisDefinition.getDataFeedType());
         }
+        AnalysisDefinition analysisDefinition = new AnalysisDefinition();
+        analysisDefinition.setAnalysisDefinitionState(analysisDefinitionState);
         analysisDefinition.setReportStructure(wsAnalysisDefinition.createStructure());
         analysisDefinition.setDataScrubs(wsAnalysisDefinition.getDataScrubs());
         analysisDefinition.setHierarchies(wsAnalysisDefinition.getHierarchies());

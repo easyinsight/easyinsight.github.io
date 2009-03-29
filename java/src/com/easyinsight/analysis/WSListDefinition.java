@@ -11,7 +11,6 @@ import java.util.*;
  * Time: 10:19:11 AM
  */
 public class WSListDefinition extends WSAnalysisDefinition {
-    private Long listDefinitionID;
     private List<AnalysisItem> columns;
     private boolean showLineNumbers = false;
     private ListLimitsMetadata listLimitsMetadata;
@@ -22,14 +21,6 @@ public class WSListDefinition extends WSAnalysisDefinition {
 
     public void setListLimitsMetadata(ListLimitsMetadata listLimitsMetadata) {
         this.listLimitsMetadata = listLimitsMetadata;
-    }
-
-    public Long getListDefinitionID() {
-        return listDefinitionID;
-    }
-
-    public void setListDefinitionID(Long listDefinitionID) {
-        this.listDefinitionID = listDefinitionID;
     }
 
     public List<AnalysisItem> getColumns() {

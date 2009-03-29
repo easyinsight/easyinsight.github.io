@@ -7,7 +7,6 @@ import com.easyinsight.datafeeds.FeedConsumer;
 import com.easyinsight.analysis.*;
 import com.easyinsight.database.Database;
 import com.easyinsight.logging.LogClass;
-import com.easyinsight.userupload.UserUploadService;
 import com.easyinsight.userupload.UploadPolicy;
 import com.easyinsight.userupload.UserUploadInternalService;
 import com.easyinsight.security.Roles;
@@ -36,7 +35,6 @@ public class SolutionService {
 
     private FeedStorage feedStorage = new FeedStorage();
     private AnalysisStorage analysisStorage = new AnalysisStorage();
-    private UserUploadService userUploadService = new UserUploadService();
 
     public void addSolutionArchive(byte[] archive, long solutionID, String solutionArchiveName) {
         Connection conn = Database.instance().getConnection();
@@ -398,7 +396,7 @@ public class SolutionService {
         FeedDefinition clonedFeedDefinition = feedDefinition.clone();
         clonedFeedDefinition.setUploadPolicy(new UploadPolicy(userID));
         feedStorage.addFeedDefinitionData(clonedFeedDefinition, conn);
-        AnalysisDefinition rootInsight = analysisStorage.getAnalysisDefinition(feedDefinition.getAnalysisDefinitionID(), conn);
+        AnalysisDefinition rootInsight = analysisStorage.getPersistableReport(feedDefinition.getAnalysisDefinitionID(), conn);
         AnalysisDefinition clonedRootInsight = rootInsight.clone();
         clonedRootInsight.setUserBindings(Arrays.asList(new UserToAnalysisBinding(userID, UserPermission.OWNER)));
         analysisStorage.saveAnalysis(clonedRootInsight, conn);
@@ -446,7 +444,7 @@ public class SolutionService {
         queryStmt.setLong(1, feedID);
         ResultSet rs = queryStmt.executeQuery();
         while (rs.next()) {
-            analyses.add(AnalysisDefinitionFactory.fromWSDefinition(analysisStorage.getAnalysisDefinition(rs.getLong(1), conn).createBlazeDefinition()));
+            analyses.add(AnalysisDefinitionFactory.fromWSDefinition(analysisStorage.getAnalysisDefinition(rs.getLong(1), conn)));
         }
         return analyses;
     }

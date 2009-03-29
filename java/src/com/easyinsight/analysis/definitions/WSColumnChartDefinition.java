@@ -1,13 +1,6 @@
 package com.easyinsight.analysis.definitions;
 
-import com.easyinsight.analysis.WSChartDefinition;
-import com.easyinsight.analysis.AnalysisItem;
-import com.easyinsight.analysis.ChartDefinition;
-
-import java.util.Map;
-import java.util.Arrays;
-import java.util.Set;
-import java.util.HashSet;
+import com.easyinsight.analysis.ChartDefinitionState;
 
 /**
  * User: James Boe
@@ -17,10 +10,10 @@ import java.util.HashSet;
 public class WSColumnChartDefinition extends WSXAxisDefinition {
 
     public int getChartType() {
-        return ChartDefinition.COLUMN_2D;
+        return ChartDefinitionState.COLUMN_2D;
     }
 
     public int getChartFamily() {
-        return ChartDefinition.COLUMN_FAMILY;
+        return ChartDefinitionState.COLUMN_FAMILY;
     }
 }

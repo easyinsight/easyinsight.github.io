@@ -554,11 +554,7 @@ public class FeedStorage {
                 boolean publiclyVisible = rs.getBoolean(7);
                 boolean marketplaceVisible = rs.getBoolean(8);
                 long analysisID = rs.getLong(9);
-                AnalysisDefinition def = new AnalysisStorage().getAnalysisDefinition(analysisID, conn);
-                if (def == null) {
-                    LogClass.error("Could not find core definition for feed " + feedID);
-                }
-                WSAnalysisDefinition analysisDefinition = def.createBlazeDefinition();
+                WSAnalysisDefinition analysisDefinition = new AnalysisStorage().getAnalysisDefinition(analysisID, conn);
                 feedDescriptor = createDescriptor(feedID, feedName, publiclyVisible, marketplaceVisible, role, 0, feedType, ownerName, description, attribution, conn);
                 Collection<Tag> tags = getTags(feedID, conn);
                 StringBuilder tagStringBuilder = new StringBuilder();

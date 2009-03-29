@@ -2,7 +2,6 @@ package com.easyinsight.analysis;
 
 import com.easyinsight.database.Database;
 import com.easyinsight.core.PersistableValue;
-import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.logging.LogClass;
 
@@ -22,15 +21,15 @@ import org.hibernate.Query;
  */
 public class AnalysisStorage {
 
-    public AnalysisDefinition getAnalysisDefinition(long analysisID) {
-        AnalysisDefinition analysisDefinition = null;
+    public WSAnalysisDefinition getAnalysisDefinition(long analysisID) {
+        WSAnalysisDefinition analysisDefinition = null;
         Session session = Database.instance().createSession();
         try {
             session.beginTransaction();
             List results = session.createQuery("from AnalysisDefinition where analysisID = ?").setLong(0, analysisID).list();
             if (results.size() > 0) {
-                analysisDefinition = (AnalysisDefinition) results.get(0);
-                iHateHibernate(analysisDefinition);
+                AnalysisDefinition savedReport = (AnalysisDefinition) results.get(0);
+                analysisDefinition = savedReport.createBlazeDefinition();
             }
             session.getTransaction().commit();
         } catch (Exception e) {
@@ -43,7 +42,48 @@ public class AnalysisStorage {
         return analysisDefinition;
     }
 
-    public AnalysisDefinition getAnalysisDefinition(long analysisID, Connection conn) {
+    public AnalysisDefinition getPersistableReport(long analysisID) {
+        AnalysisDefinition analysisDefinition = null;
+        Session session = Database.instance().createSession();
+        try {
+            session.beginTransaction();
+            List results = session.createQuery("from AnalysisDefinition where analysisID = ?").setLong(0, analysisID).list();
+            if (results.size() > 0) {
+                analysisDefinition = (AnalysisDefinition) results.get(0);
+            }
+            session.getTransaction().commit();
+        } catch (Exception e) {
+            LogClass.error(e);
+            session.getTransaction().rollback();
+            throw new RuntimeException(e);
+        } finally {
+            session.close();
+        }
+        return analysisDefinition;
+    }
+
+    public WSAnalysisDefinition getAnalysisDefinition(long analysisID, Connection conn) {
+        WSAnalysisDefinition analysisDefinition = null;
+        Session session = Database.instance().createSession(conn);
+        try {
+            session.beginTransaction();
+            List results = session.createQuery("from AnalysisDefinition where analysisID = ?").setLong(0, analysisID).list();
+            if (results.size() > 0) {
+                AnalysisDefinition savedReport = (AnalysisDefinition) results.get(0);
+                analysisDefinition = savedReport.createBlazeDefinition();
+            }
+            session.getTransaction().commit();
+        } catch (Exception e) {
+            LogClass.error(e);
+            session.getTransaction().rollback();
+            throw new RuntimeException(e);
+        } finally {
+            session.close();
+        }
+        return analysisDefinition;
+    }
+
+    public AnalysisDefinition getPersistableReport(long analysisID, Connection conn) {
         AnalysisDefinition analysisDefinition = null;
         Session session = Database.instance().createSession(conn);
         try {
@@ -51,7 +91,6 @@ public class AnalysisStorage {
             List results = session.createQuery("from AnalysisDefinition where analysisID = ?").setLong(0, analysisID).list();
             if (results.size() > 0) {
                 analysisDefinition = (AnalysisDefinition) results.get(0);
-                iHateHibernate(analysisDefinition);
             }
             session.getTransaction().commit();
         } catch (Exception e) {
@@ -108,7 +147,7 @@ public class AnalysisStorage {
         if (analysisDefinition.getAnalysisID() == null)
             session.save(analysisDefinition);
         else
-            session.merge(analysisDefinition);
+            session.merge(analysisDefinition);        
         session.flush();
     }
 
@@ -125,13 +164,6 @@ public class AnalysisStorage {
             throw new RuntimeException(e);
         } finally {
             session.close();
-        }
-    }
-
-    private void iHateHibernate(AnalysisDefinition analysisDefinition) {
-        analysisDefinition.createBlazeDefinition();
-        for (UserToAnalysisBinding binding : analysisDefinition.getUserBindings()) {
-            
         }
     }
 

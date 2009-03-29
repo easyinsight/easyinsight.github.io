@@ -4,11 +4,16 @@
     <mx:Script><![CDATA[
         import com.easyinsight.analysis.AnalysisDefinition;
 
-        import com.easyinsight.analysis.AnalysisItem;
+        import com.easyinsight.analysis.AnalysisHierarchyItem;
+import com.easyinsight.analysis.AnalysisItem;
         import com.easyinsight.analysis.ChartSortButton;
         import com.easyinsight.analysis.ChartSortEvent;
         import com.easyinsight.analysis.CustomChangeEvent;
-        import com.easyinsight.analysis.SortableAxisTitle;
+        import com.easyinsight.analysis.HierarchyDrilldownEvent;
+import com.easyinsight.analysis.HierarchyLevel;
+        import com.easyinsight.analysis.HierarchyRollupEvent;
+import com.easyinsight.analysis.SortableAxisTitle;
+        import com.easyinsight.analysis.charts.ChartDrilldownEvent;
 import com.easyinsight.analysis.conditions.ConditionRenderer;
 
         import com.easyinsight.filtering.FilterRawData;
@@ -22,12 +27,13 @@ import com.easyinsight.analysis.conditions.ConditionRenderer;
         import mx.charts.LinearAxis;
         import mx.charts.chartClasses.IAxis;
         import mx.charts.chartClasses.Series;
-        import mx.charts.series.ColumnSeries;
+        import mx.charts.events.ChartItemEvent;
+import mx.charts.series.ColumnSeries;
         import mx.charts.series.items.ColumnSeriesItem;
         import mx.collections.ArrayCollection;
         import mx.collections.Sort;
         import mx.collections.SortField;
-import mx.events.FlexEvent;
+        import mx.events.FlexEvent;
         import mx.formatters.Formatter;
         import mx.graphics.BitmapFill;
         import mx.graphics.IFill;
@@ -99,14 +105,9 @@ import mx.events.FlexEvent;
 
         override protected function createChildren():void {
             super.createChildren();
-            bgFills = [];
-            for (var i:int = 0; i < 15; i++) {
-                var bgFill:BitmapFill = new BitmapFill();
-                bgFill.source = standardFill;
-                bgFill.originX = Math.random() * 60;
-                bgFill.originY = Math.random() * 60;
-                bgFills.push(bgFill);
-            }
+            var bgFill:BitmapFill = new BitmapFill();
+            bgFill.source = standardFill;
+            bgFills = [ bgFill ];
         }
 
         private function onChartSort(event:ChartSortEvent):void {
@@ -120,6 +121,44 @@ import mx.events.FlexEvent;
            }
        }
 
+        private function onDrill(chartItem:ChartItem):void {
+            if (xAxisItem is AnalysisHierarchyItem) {
+               var data:Object = chartItem.item;
+               var hierarchyItem:AnalysisHierarchyItem = xAxisItem as AnalysisHierarchyItem;
+               var index:int = hierarchyItem.hierarchyLevels.getItemIndex(hierarchyItem.hierarchyLevel);
+               if (index < (hierarchyItem.hierarchyLevels.length - 1)) {
+                   var dataField:String = hierarchyItem.qualifiedName();
+                   var dataString:String = data[dataField];
+                   var filterRawData:FilterRawData = new FilterRawData();
+                   filterRawData.addPair(hierarchyItem.hierarchyLevel.analysisItem, dataString);
+                   hierarchyItem.hierarchyLevel = hierarchyItem.hierarchyLevels.getItemAt(index + 1) as HierarchyLevel;
+                   dispatchEvent(new HierarchyDrilldownEvent(HierarchyDrilldownEvent.DRILLDOWN, filterRawData));
+               }
+           }
+        }
+
+        private function onRollup(chartItem:ChartItem):void {
+            if (xAxisItem is AnalysisHierarchyItem) {
+                var hierarchyItem:AnalysisHierarchyItem = xAxisItem as AnalysisHierarchyItem;
+                var index:int = hierarchyItem.hierarchyLevels.getItemIndex(hierarchyItem.hierarchyLevel);
+                if (index > 0) {
+                    hierarchyItem.hierarchyLevel = hierarchyItem.hierarchyLevels.getItemAt(index - 1) as HierarchyLevel;
+                    dispatchEvent(new HierarchyRollupEvent(hierarchyItem.hierarchyLevel.analysisItem));
+                }
+            }
+        }
+
+       private function drilldown(event:ChartItemEvent):void {
+           onDrill(event.hitData.chartItem);
+       }
+
+        private function drilldownEvent(event:ChartDrilldownEvent):void {
+            if (event.type == ChartDrilldownEvent.ROLLUP) {
+                onRollup(event.chartItem);
+            } else {
+                onDrill(event.chartItem);
+            }
+        }
 
         private function createChart():void {
             if (columnChart == null) {
@@ -127,6 +166,9 @@ import mx.events.FlexEvent;
                 // define the chart itself
 
                 columnChart = new ColumnChart();
+                columnChart.addEventListener(ChartItemEvent.ITEM_CLICK, drilldown);
+                columnChart.addEventListener(ChartDrilldownEvent.DRILLDOWN, drilldownEvent);
+                columnChart.addEventListener(ChartDrilldownEvent.ROLLUP, drilldownEvent);
                 columnChart.percentHeight = 100;
                 columnChart.percentWidth = 100;
                 columnChart.showDataTips = true;
@@ -199,7 +241,7 @@ import mx.events.FlexEvent;
         }
 
         private function customFill(element:ChartItem, index:Number):IFill {
-            return bgFills[index % 15];
+            return bgFills[0];
         }
 
         private function renderAxis(labelValue:Object, previousValue:Object, axis:IAxis):String {

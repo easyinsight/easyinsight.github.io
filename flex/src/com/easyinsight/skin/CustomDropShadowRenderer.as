@@ -1,15 +1,20 @@
 package com.easyinsight.skin {
+import com.easyinsight.analysis.charts.ChartDrilldownEvent;
 import flash.display.Graphics;
+import flash.events.ContextMenuEvent;
 import flash.geom.Rectangle;
+import flash.ui.ContextMenu;
+import flash.ui.ContextMenuItem;
 import mx.charts.ChartItem;
 import mx.charts.chartClasses.GraphicsUtilities;
 import mx.core.IDataRenderer;
+import mx.core.UIComponent;
 import mx.graphics.BitmapFill;
 import mx.graphics.IFill;
 import mx.graphics.IStroke;
 import mx.skins.ProgrammaticSkin;
 
-public class CustomDropShadowRenderer extends ProgrammaticSkin implements IDataRenderer {
+public class CustomDropShadowRenderer extends UIComponent implements IDataRenderer {
 
     private static var rcFill:Rectangle = new Rectangle();
 
@@ -35,6 +40,21 @@ public class CustomDropShadowRenderer extends ProgrammaticSkin implements IDataR
 
     public function CustomDropShadowRenderer() {
         super();
+        contextMenu = new ContextMenu();
+        contextMenu.hideBuiltInItems();
+        var drilldownContextItem:ContextMenuItem = new ContextMenuItem("Drilldown", true);
+        drilldownContextItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, onDrilldown);
+        var rollupContextItem:ContextMenuItem = new ContextMenuItem("Rollup", true);
+        rollupContextItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, onRollup);
+        contextMenu.customItems = [ drilldownContextItem, rollupContextItem ];
+    }
+
+    private function onDrilldown(event:ContextMenuEvent):void {
+        dispatchEvent(new ChartDrilldownEvent(ChartDrilldownEvent.DRILLDOWN, _data as ChartItem));
+    }
+
+    private function onRollup(event:ContextMenuEvent):void {
+        dispatchEvent(new ChartDrilldownEvent(ChartDrilldownEvent.ROLLUP, _data as ChartItem));
     }
 
     /**

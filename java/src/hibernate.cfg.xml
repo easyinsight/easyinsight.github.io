@@ -61,11 +61,6 @@
         <mapping class="com.easyinsight.analysis.PersistableDateRangeFilterDefinition"/>
         <mapping class="com.easyinsight.analysis.PersistableRollingFilterDefinition"/>
         <mapping class="com.easyinsight.analysis.FilterDefinitionValue"/>
-        <mapping class="com.easyinsight.analysis.ListDefinition"/>
-        <mapping class="com.easyinsight.analysis.CrosstabDefinition"/>
-        <mapping class="com.easyinsight.analysis.ChartDefinition"/>
-        <mapping class="com.easyinsight.analysis.MapDefinition"/>
-        <mapping class="com.easyinsight.analysis.YahooMapDefinition"/>
         <mapping class="com.easyinsight.analysis.AnalysisItem"/>
         <mapping class="com.easyinsight.analysis.AnalysisDimension"/>
         <mapping class="com.easyinsight.analysis.AnalysisRangeDimension"/>
@@ -90,7 +85,12 @@
         <mapping class="com.easyinsight.analysis.UserToAnalysisBinding"/>
         <mapping class="com.easyinsight.analysis.LimitsMetadata"/>
         <mapping class="com.easyinsight.analysis.ListLimitsMetadata"/>
-        
+        <mapping class="com.easyinsight.analysis.ListDefinitionState"/>
+        <mapping class="com.easyinsight.analysis.ChartDefinitionState"/>
+        <mapping class="com.easyinsight.analysis.AnalysisDefinitionState"/>
+        <mapping class="com.easyinsight.analysis.MapDefinitionState"/>
+        <mapping class="com.easyinsight.analysis.CrosstabDefinitionState"/>
+
         <mapping class="com.easyinsight.scrubbing.DataScrub"/>
         <mapping class="com.easyinsight.scrubbing.LookupTableScrub"/>
         <mapping class="com.easyinsight.scrubbing.LookupTablePair"/>

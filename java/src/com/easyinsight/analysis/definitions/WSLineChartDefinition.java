@@ -1,6 +1,6 @@
 package com.easyinsight.analysis.definitions;
 
-import com.easyinsight.analysis.ChartDefinition;
+import com.easyinsight.analysis.ChartDefinitionState;
 
 /**
  * User: James Boe
@@ -9,10 +9,10 @@ import com.easyinsight.analysis.ChartDefinition;
  */
 public class WSLineChartDefinition extends WSTwoAxisDefinition {
     public int getChartType() {
-        return ChartDefinition.LINE_2D;
+        return ChartDefinitionState.LINE_2D;
     }
 
     public int getChartFamily() {
-        return ChartDefinition.LINE_FAMILY;
+        return ChartDefinitionState.LINE_FAMILY;
     }
 }

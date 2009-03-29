@@ -8,11 +8,11 @@
 			<mx:RemoveChild target="{loginForm}"/>
 			<mx:AddChild relativeTo="{coreBox}">
 				<mx:Form>
-					<mx:FormItem label="Insight: ">
-						<mx:ComboBox id="insightChooser" dataProvider="{stubs}" close="insightChosen()" labelField="name"/>
+					<mx:FormItem label="Report: ">
+						<mx:ComboBox id="insightChooser" dataProvider="{stubs}" labelField="name"/>
 					</mx:FormItem>
 					<mx:FormItem label="">
-						<mx:Button label="View This Insight" click="viewInsight()"/>
+						<mx:Button label="View This Report" click="viewInsight()"/>
 					</mx:FormItem>
 				</mx:Form>
 			</mx:AddChild>
@@ -20,18 +20,31 @@
 		<mx:State name="Insight">
 			<mx:RemoveChild target="{loginForm}"/>
 			<mx:AddChild relativeTo="{coreBox}">
-                <dashboard:EmbeddedViewPanel id="panel" analysisDefinition="{analysisDefinition}"/>
+                <dashboard:DataViewPanel id="panel" analysisID="{analysisID}"/>
 			</mx:AddChild>
 		</mx:State>
 	</mx:states>
 	<mx:Script>
 		<![CDATA[
-			import com.easyinsight.analysis.YahooMapDefinition;
-			import com.easyinsight.analysis.MapDefinition;
-			import com.easyinsight.analysis.CrosstabDefinition;
-			import com.easyinsight.analysis.ChartDefinition;
-			import com.easyinsight.analysis.ListDefinition;
-			import mx.rpc.events.ResultEvent;
+        import com.easyinsight.analysis.charts.bubble.BubbleChartController;
+import com.easyinsight.analysis.charts.plot.PlotChartController;
+import com.easyinsight.analysis.charts.twoaxisbased.area.Area3DChartController;
+        import com.easyinsight.analysis.charts.twoaxisbased.area.AreaChartController;
+        import com.easyinsight.analysis.charts.twoaxisbased.line.Line3DChartController;
+        import com.easyinsight.analysis.charts.twoaxisbased.line.LineChartController;
+        import com.easyinsight.analysis.charts.xaxisbased.column.Column3DChartController;
+import com.easyinsight.analysis.charts.xaxisbased.column.Column3DChartDefinition;
+        import com.easyinsight.analysis.charts.xaxisbased.column.ColumnChartController;
+import com.easyinsight.analysis.charts.xaxisbased.column.ColumnChartDefinition;
+        import com.easyinsight.analysis.charts.xaxisbased.pie.Pie3DChartController;
+        import com.easyinsight.analysis.charts.xaxisbased.pie.PieChartController;
+        import com.easyinsight.analysis.charts.yaxisbased.bar.Bar3DChartController;
+        import com.easyinsight.analysis.charts.yaxisbased.bar.BarChartController;
+import com.easyinsight.analysis.crosstab.CrosstabController;
+import com.easyinsight.analysis.list.ListController;
+import com.easyinsight.analysis.list.ListDefinition;
+        import com.easyinsight.analysis.maps.MapController;
+import mx.rpc.events.ResultEvent;
 			import mx.messaging.config.ServerConfig;
 			import mx.rpc.AsyncToken;
 			import mx.rpc.AsyncResponder;
@@ -74,12 +87,22 @@
 				addEventListener(KeyboardEvent.KEY_UP, onKeyUp);
 			}
 
-			private function blah():void {
-            	var listDefinition:ListDefinition;
-            	var chartDefinition:ChartDefinition;
-            	var crosstabDefinition:CrosstabDefinition;
-            	var mapDefinition:MapDefinition;
-            	var yahooMapDefinition:YahooMapDefinition;
+            private function blah():void {
+                var def1:ListController;
+                var def2:ColumnChartController;
+                var def3:Column3DChartController;
+                var def4:BarChartController;
+                var def5:Bar3DChartController;
+                var def6:PieChartController;
+                var def7:Pie3DChartController;
+                var def8:LineChartController;
+                var def9:Line3DChartController;
+                var def10:AreaChartController;
+                var def11:Area3DChartController;
+                var def12:MapController;
+                var def13:CrosstabController;
+                var def14:BubbleChartController;
+                var def15:PlotChartController;
             }
 
 			private function handleAuthentication():void {
@@ -101,8 +124,7 @@
                 	}
                     //_loginContainer.dispatchEvent(new LoginEvent());
                 } else {
-                    var failureMessage:String = authResult.failureMessage;
-                    failureMessageLabel.text = failureMessage;
+                    failureMessageLabel.text = authResult.failureMessage;
                 }
             }
 
@@ -142,24 +164,11 @@
 				currentState = "GettingInsight";
             }
 
-            private function insightChosen():void {
-
-            }
-
             private function viewInsight():void {
             	var insight:WidgetAnalysisStub = insightChooser.selectedItem as WidgetAnalysisStub;
+                this.analysisID = insight.analysisID;
             	ExternalInterface.call("widget.setValue", "insightCombo", insight.analysisID);
-            	analysisService.openAnalysisDefinition.send(insight.analysisID);
-            }
-
-            private function gotAnalysisDefinition():void {
-            	var analysisDefinition:AnalysisDefinition = analysisService.openAnalysisDefinition.lastResult as AnalysisDefinition;
-            	if (analysisDefinition == null) {
-            		analysisService.getWidgetAnalyses.send();
-            	} else {
-	            	this.analysisDefinition = analysisDefinition;
-	            	currentState = "Insight";
-	            }
+                currentState = "Insight";
             }
 		]]>
 	</mx:Script>
@@ -168,7 +177,6 @@
 	</mx:RemoteObject>
 	<mx:RemoteObject id="analysisService" destination="analysisDefinition">
 		<mx:method name="getWidgetAnalyses" result="gotAnalyses()"/>
-		<mx:method name="openAnalysisDefinition" result="gotAnalysisDefinition()"/>
 	</mx:RemoteObject>
 	<!--
 	<mx:WebService id="insightService" wsdl="http://ec2-72-44-53-122.compute-1.amazonaws.com:8080/app/services/InsightAPIService?wsdl">

@@ -14,7 +14,7 @@ public class EmbeddedViewFactory extends VBox {
     private var _reportRendererModule:String;
     private var _newDefinition:Class;
     private var _reportDataService:Class;
-    
+
     private var _analysisDefinition:AnalysisDefinition;
     private var _availableFields:ArrayCollection;
 
@@ -22,6 +22,8 @@ public class EmbeddedViewFactory extends VBox {
 
     private var _reportRenderer:IReportRenderer;
     private var _dataService:IReportDataService;
+
+    private var pendingRequest:Boolean = false;
 
     public function EmbeddedViewFactory() {
         this.percentHeight = 100;
@@ -73,7 +75,12 @@ public class EmbeddedViewFactory extends VBox {
     }
 
     public function retrieveData():void {
-        _dataService.retrieveData(_analysisDefinition);
+        if (_reportRenderer == null) {
+            pendingRequest = true;
+        } else {
+            _analysisDefinition.createDefaultLimits();
+            _dataService.retrieveData(_analysisDefinition);
+        }
     }
 
     private function gotData(event:DataServiceEvent):void {
@@ -86,15 +93,37 @@ public class EmbeddedViewFactory extends VBox {
         moduleInfo.addEventListener(ModuleEvent.ERROR, reportFailureHandler);
         moduleInfo.load();
     }
-            
+
     private function reportLoadHandler(event:ModuleEvent):void {
         _reportRenderer = moduleInfo.factory.create() as IReportRenderer;
+        _reportRenderer.addEventListener(ReportRendererEvent.FORCE_RENDER, forceRender);
+        _reportRenderer.addEventListener(HierarchyDrilldownEvent.DRILLDOWN, drilldown);
+        _reportRenderer.addEventListener(HierarchyRollupEvent.HIERARCHY_ROLLUP, onRollup);
         addChild(_reportRenderer as DisplayObject);
+        if (pendingRequest) {
+            pendingRequest = false;
+            retrieveData();
+        }
+    }
+
+    private function onRollup(event:HierarchyRollupEvent):void {
+
+    }
+
+    private function drilldown(event:HierarchyDrilldownEvent):void {
+
+    }
+
+    private function customChangeFromControlBar(event:CustomChangeEvent):void {
+        _reportRenderer.onCustomChangeEvent(event);
+    }
+
+    private function forceRender(event:ReportRendererEvent):void {
+        retrieveData();
     }
 
     private function reportFailureHandler(event:ModuleEvent):void {
         Alert.show(event.errorText);
     }
-
     }
 }
