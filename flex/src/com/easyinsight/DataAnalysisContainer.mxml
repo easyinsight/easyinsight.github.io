@@ -31,7 +31,7 @@
         import com.easyinsight.analysis.AnalysisStateChangeEvent;
         import com.easyinsight.analysis.DataViewFactory;
         import com.easyinsight.analysis.HierarchyRollupEvent;
-import com.easyinsight.analysis.IReportController;
+        import com.easyinsight.analysis.IReportController;
         import com.easyinsight.analysis.list.ListController;
         import com.easyinsight.analysis.scrub.LookupTableScrubListWindow;
         import com.easyinsight.analysis.scrub.TextReplaceScrubListWindow;
@@ -178,6 +178,9 @@ import com.easyinsight.analysis.IReportController;
 
         private var analysisChanged:Boolean = false;
 
+        [Bindable]
+        private var _reportID:int;
+
         public function set previewMode(previewMode:Boolean):void {
             this._previewMode = previewMode;
             this.dataService.previewMode = previewMode;
@@ -240,6 +243,10 @@ import com.easyinsight.analysis.IReportController;
 
         public function getAnalysisDefinition():AnalysisDefinition {
             return analysisDefinition;
+        }
+
+        public function set reportID(val:int):void {
+            _reportID = val;
         }
 
         public function openAnalysis(analysisDefinition:AnalysisDefinition):void {
@@ -313,6 +320,7 @@ import com.easyinsight.analysis.IReportController;
                 createFilterBoxes(analysisDefinition.filterDefinitions.toArray());
             }
             dataView.availableFields = availableFields;
+            stopLoading(null);
         }
 
         public function getAnalysisItems():ArrayCollection {
@@ -342,6 +350,26 @@ import com.easyinsight.analysis.IReportController;
             dataService.addEventListener(DataServiceLoadingEvent.LOADING_STARTED, startLoading);
             dataService.addEventListener(DataServiceLoadingEvent.LOADING_STOPPED, stopLoading);
             transformContainer.addEventListener(TransformsUpdatedEvent.UPDATED_TRANSFORMS, transformsUpdated);
+            startLoading(null);
+            if (_reportID > 0) {
+                analysisService.openAnalysisDefinition.send(_reportID);
+            } else {
+                initializeState();
+            }
+        }
+
+        private function gotReport():void {
+            this.analysisDefinition = analysisService.openAnalysisDefinition.lastResult as AnalysisDefinition;
+            if (!feedAdminMode) {
+                BrowserManager.getInstance().setTitle("Easy Insight - " + this.analysisDefinition.name);
+            }
+            labelNameField = this.analysisDefinition.name;
+            tags = TagCloud.toString(this.analysisDefinition.tagCloud);
+            analysisPolicy = this.analysisDefinition.policy;
+            initializeState();
+        }
+
+        private function initializeState():void {
             if (analysisDefinition != null) {
                 analysisService.getUserCapabilitiesForInsight.send(dataService.dataFeedID, analysisDefinition.analysisID);
             } else {
@@ -717,6 +745,7 @@ import com.easyinsight.analysis.IReportController;
     </mx:Script>
     <mx:RemoteObject id="analysisService" destination="analysisDefinition">
         <mx:method name="saveAnalysisDefinition" result="saved()"/>
+        <mx:method name="openAnalysisDefinition" result="gotReport()"/>
         <mx:method name="getUserCapabilitiesForFeed" result="gotUserCapabilitiesForFeed()"/>
         <mx:method name="getUserCapabilitiesForInsight" result="gotUserCapabilitiesForInsight()"/>
         <mx:method name="subscribeToAnalysis" result="subscribedToInsight()"/>

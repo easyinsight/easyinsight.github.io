@@ -1,5 +1,6 @@
 package com.easyinsight.analysis
 {
+import com.easyinsight.solutions.InsightDescriptor;
 	[Bindable]
 	[RemoteClass(alias="com.easyinsight.analysis.InsightResponse")]
 	public class InsightResponse
@@ -9,8 +10,8 @@ package com.easyinsight.analysis
         public static const REJECTED:int = 3;
         
 		public var status:int;
-		public var definition:AnalysisDefinition;
-		
+		public var insightDescriptor:InsightDescriptor;
+
 		public function InsightResponse()
 		{
 		}

@@ -2,7 +2,7 @@ package com.easyinsight.analysis;
 
 import com.easyinsight.database.Database;
 import com.easyinsight.core.PersistableValue;
-import com.easyinsight.security.SecurityUtil;
+import com.easyinsight.core.InsightDescriptor;
 import com.easyinsight.logging.LogClass;
 
 import java.util.*;
@@ -208,21 +208,15 @@ public class AnalysisStorage {
         return analysisDefinitionList;
     }
 
-    public List<WSAnalysisDefinition> getMostPopularAnalyses(String genre, int maxResults) {
-        Long userID = null;
-        try {
-            userID = SecurityUtil.getUserID(false);
-        } catch (SecurityException se) {
-            // ignore
-        }
+    public List<InsightDescriptor> getMostPopularAnalyses(String genre, int maxResults) {
         Connection conn = Database.instance().getConnection();
 
-        List<WSAnalysisDefinition> analysisList = new ArrayList<WSAnalysisDefinition>();
+        List<InsightDescriptor> analysisList = new ArrayList<InsightDescriptor>();
         Session session = Database.instance().createSession(conn);
         try {
             PreparedStatement analysisQueryStmt;
             if (genre == null) {
-                analysisQueryStmt = conn.prepareStatement("SELECT DISTINCT ANALYSIS.ANALYSIS_ID FROM ANALYSIS, DATA_FEED " +
+                analysisQueryStmt = conn.prepareStatement("SELECT DISTINCT ANALYSIS.ANALYSIS_ID, ANALYSIS.TITLE, ANALYSIS.DATA_FEED_ID FROM ANALYSIS, DATA_FEED " +
                         " WHERE ANALYSIS.DATA_FEED_ID = DATA_FEED.DATA_FEED_ID AND " +
                         "((DATA_FEED.MARKETPLACE_VISIBLE = ? AND ANALYSIS.FEED_VISIBILITY = ?) OR ANALYSIS.MARKETPLACE_VISIBLE = ?) AND " +
                         "ANALYSIS.ROOT_DEFINITION = ? ORDER BY ANALYSIS.VIEWS DESC LIMIT " + maxResults);
@@ -231,7 +225,7 @@ public class AnalysisStorage {
                 analysisQueryStmt.setBoolean(3, true);
                 analysisQueryStmt.setBoolean(4, false);
             } else {
-                analysisQueryStmt = conn.prepareStatement("SELECT DISTINCT ANALYSIS.ANALYSIS_ID FROM ANALYSIS, DATA_FEED, " +
+                analysisQueryStmt = conn.prepareStatement("SELECT DISTINCT ANALYSIS.ANALYSIS_ID, ANALYSIS.TITLE, ANALYSIS.DATA_FEED_ID FROM ANALYSIS, DATA_FEED, " +
                         "FEED_TO_TAG, ANALYSIS_TAGS, ANALYSIS_TO_TAG WHERE ANALYSIS.DATA_FEED_ID = DATA_FEED.DATA_FEED_ID AND " +
                         "((DATA_FEED.MARKETPLACE_VISIBLE = ? AND ANALYSIS.FEED_VISIBILITY = ?) OR ANALYSIS.MARKETPLACE_VISIBLE = ?) AND " +
                         "((FEED_TO_TAG.FEED_ID = DATA_FEED.DATA_FEED_ID AND FEED_TO_TAG.ANALYSIS_TAGS_ID = ANALYSIS_TAGS.ANALYSIS_TAGS_ID AND ANALYSIS_TAGS.TAG = ?) OR " +
@@ -247,11 +241,9 @@ public class AnalysisStorage {
             ResultSet analysisRS = analysisQueryStmt.executeQuery();
             while (analysisRS.next()) {
                 long analysisID = analysisRS.getLong(1);
-                AnalysisDefinition analysisDefinition = (AnalysisDefinition) session.createQuery("from AnalysisDefinition as analysisDefinition where analysisDefinition.analysisID = ?").setLong(0, analysisID).list().get(0);
-                boolean owner = isOwner(userID, analysisDefinition);
-                WSAnalysisDefinition wsAnalysisDefinition = analysisDefinition.createBlazeDefinition();
-                wsAnalysisDefinition.setCanSaveDirectly(owner);
-                analysisList.add(wsAnalysisDefinition);
+                String title = analysisRS.getString(2);
+                long dataSourceID = analysisRS.getLong(3);
+                analysisList.add(new InsightDescriptor(analysisID, title, dataSourceID));
             }
         } catch (Exception e) {
             LogClass.error(e);
@@ -262,21 +254,16 @@ public class AnalysisStorage {
         return analysisList;
     }
 
-    public List<WSAnalysisDefinition> getBestRatedAnalyses(String genre, int maxResults) {
-        Long userID = null;
-        try {
-            userID = SecurityUtil.getUserID(false);
-        } catch (SecurityException se) {
-            // ignore
-        }
+    public List<InsightDescriptor> getBestRatedAnalyses(String genre, int maxResults) {
+
         Connection conn = Database.instance().getConnection();
 
-        List<WSAnalysisDefinition> analysisList = new ArrayList<WSAnalysisDefinition>();
+        List<InsightDescriptor> analysisList = new ArrayList<InsightDescriptor>();
         Session session = Database.instance().createSession(conn);
         try {
             PreparedStatement analysisQueryStmt;
             if (genre == null) {
-                analysisQueryStmt = conn.prepareStatement("SELECT ANALYSIS.ANALYSIS_ID FROM ANALYSIS, DATA_FEED " +
+                analysisQueryStmt = conn.prepareStatement("SELECT ANALYSIS.ANALYSIS_ID, ANALYSIS.TITLE, ANALYSIS.DATA_FEED_ID FROM ANALYSIS, DATA_FEED " +
                         " WHERE ANALYSIS.DATA_FEED_ID = DATA_FEED.DATA_FEED_ID AND " +
                         "((DATA_FEED.MARKETPLACE_VISIBLE = ? AND ANALYSIS.FEED_VISIBILITY = ?) OR ANALYSIS.MARKETPLACE_VISIBLE = ?) AND " +
                         "ANALYSIS.ROOT_DEFINITION = ? ORDER BY ANALYSIS.VIEWS DESC LIMIT " + maxResults);
@@ -285,7 +272,7 @@ public class AnalysisStorage {
                 analysisQueryStmt.setBoolean(3, true);
                 analysisQueryStmt.setBoolean(4, false);
             } else {
-                analysisQueryStmt = conn.prepareStatement("SELECT DISTINCT ANALYSIS.ANALYSIS_ID FROM ANALYSIS, DATA_FEED, " +
+                analysisQueryStmt = conn.prepareStatement("SELECT DISTINCT ANALYSIS.ANALYSIS_ID, ANALYSIS.TITLE, ANALYSIS.DATA_FEED_ID FROM ANALYSIS, DATA_FEED, " +
                         "FEED_TO_TAG, ANALYSIS_TAGS, ANALYSIS_TO_TAG WHERE ANALYSIS.DATA_FEED_ID = DATA_FEED.DATA_FEED_ID AND " +
                         "((DATA_FEED.MARKETPLACE_VISIBLE = ? AND ANALYSIS.FEED_VISIBILITY = ?) OR ANALYSIS.MARKETPLACE_VISIBLE = ?) AND " +
                         "((FEED_TO_TAG.FEED_ID = DATA_FEED.DATA_FEED_ID AND FEED_TO_TAG.ANALYSIS_TAGS_ID = ANALYSIS_TAGS.ANALYSIS_TAGS_ID AND ANALYSIS_TAGS.TAG = ?) OR " +
@@ -301,11 +288,9 @@ public class AnalysisStorage {
             ResultSet analysisRS = analysisQueryStmt.executeQuery();
             while (analysisRS.next()) {
                 long analysisID = analysisRS.getLong(1);
-                AnalysisDefinition analysisDefinition = (AnalysisDefinition) session.createQuery("from AnalysisDefinition as analysisDefinition where analysisDefinition.analysisID = ?").setLong(0, analysisID).list().get(0);
-                boolean owner = isOwner(userID, analysisDefinition);
-                WSAnalysisDefinition wsAnalysisDefinition = analysisDefinition.createBlazeDefinition();
-                wsAnalysisDefinition.setCanSaveDirectly(owner);
-                analysisList.add(wsAnalysisDefinition);
+                String title = analysisRS.getString(2);
+                long dataSourceID = analysisRS.getLong(3);
+                analysisList.add(new InsightDescriptor(analysisID, title, dataSourceID));
             }
         } catch (Exception e) {
             LogClass.error(e);
@@ -316,21 +301,16 @@ public class AnalysisStorage {
         return analysisList;
     }
 
-    public List<WSAnalysisDefinition> getMostRecentAnalyses(String genre, int maxResults) {
-        Long userID = null;
-        try {
-            userID = SecurityUtil.getUserID(false);
-        } catch (SecurityException se) {
-            // ignore
-        }
+    public List<InsightDescriptor> getMostRecentAnalyses(String genre, int maxResults) {
+
         Connection conn = Database.instance().getConnection();
 
-        List<WSAnalysisDefinition> analysisList = new ArrayList<WSAnalysisDefinition>();
+        List<InsightDescriptor> analysisList = new ArrayList<InsightDescriptor>();
         Session session = Database.instance().createSession(conn);
         try {
             PreparedStatement analysisQueryStmt;
             if (genre == null) {
-                analysisQueryStmt = conn.prepareStatement("SELECT ANALYSIS.ANALYSIS_ID FROM ANALYSIS, DATA_FEED " +
+                analysisQueryStmt = conn.prepareStatement("SELECT ANALYSIS.ANALYSIS_ID, ANALYSIS.TITLE, ANALYSIS.DATA_FEED_ID FROM ANALYSIS, DATA_FEED " +
                         " WHERE ANALYSIS.DATA_FEED_ID = DATA_FEED.DATA_FEED_ID AND " +
                         "((DATA_FEED.MARKETPLACE_VISIBLE = ? AND ANALYSIS.FEED_VISIBILITY = ?) OR ANALYSIS.MARKETPLACE_VISIBLE = ?) AND " +
                         "ANALYSIS.ROOT_DEFINITION = ? ORDER BY ANALYSIS.VIEWS DESC LIMIT " + maxResults);
@@ -339,7 +319,7 @@ public class AnalysisStorage {
                 analysisQueryStmt.setBoolean(3, true);
                 analysisQueryStmt.setBoolean(4, false);
             } else {
-                analysisQueryStmt = conn.prepareStatement("SELECT DISTINCT ANALYSIS.ANALYSIS_ID FROM ANALYSIS, DATA_FEED, " +
+                analysisQueryStmt = conn.prepareStatement("SELECT DISTINCT ANALYSIS.ANALYSIS_ID, ANALYSIS.TITLE, ANALYSIS.DATA_FEED_ID FROM ANALYSIS, DATA_FEED, " +
                         "FEED_TO_TAG, ANALYSIS_TAGS, ANALYSIS_TO_TAG WHERE ANALYSIS.DATA_FEED_ID = DATA_FEED.DATA_FEED_ID AND " +
                         "((DATA_FEED.MARKETPLACE_VISIBLE = ? AND ANALYSIS.FEED_VISIBILITY = ?) OR ANALYSIS.MARKETPLACE_VISIBLE = ?) AND " +
                         "((FEED_TO_TAG.FEED_ID = DATA_FEED.DATA_FEED_ID AND FEED_TO_TAG.ANALYSIS_TAGS_ID = ANALYSIS_TAGS.ANALYSIS_TAGS_ID AND ANALYSIS_TAGS.TAG = ?) OR " +
@@ -355,11 +335,9 @@ public class AnalysisStorage {
             ResultSet analysisRS = analysisQueryStmt.executeQuery();
             while (analysisRS.next()) {
                 long analysisID = analysisRS.getLong(1);
-                AnalysisDefinition analysisDefinition = (AnalysisDefinition) session.createQuery("from AnalysisDefinition as analysisDefinition where analysisDefinition.analysisID = ?").setLong(0, analysisID).list().get(0);
-                boolean owner = isOwner(userID, analysisDefinition);
-                WSAnalysisDefinition wsAnalysisDefinition = analysisDefinition.createBlazeDefinition();
-                wsAnalysisDefinition.setCanSaveDirectly(owner);
-                analysisList.add(wsAnalysisDefinition);
+                String title = analysisRS.getString(2);
+                long dataSourceID = analysisRS.getLong(3);
+                analysisList.add(new InsightDescriptor(analysisID, title, dataSourceID));
             }
         } catch (Exception e) {
             LogClass.error(e);
@@ -424,8 +402,8 @@ public class AnalysisStorage {
         }
     }
 
-    public List<WSAnalysisDefinition> getAllDefinitions(String genre) {
-        List<WSAnalysisDefinition> analysisList = new ArrayList<WSAnalysisDefinition>();
+    public List<InsightDescriptor> getAllDefinitions(String genre) {
+        List<InsightDescriptor> analysisList = new ArrayList<InsightDescriptor>();
         Session session = Database.instance().createSession();
         try {
             session.beginTransaction();
@@ -440,7 +418,7 @@ public class AnalysisStorage {
             Iterator iter = query.iterate();
             while (iter.hasNext()) {
                 AnalysisDefinition analysisDefinition = (AnalysisDefinition) iter.next();
-                analysisList.add(analysisDefinition.createBlazeDefinition());
+                analysisList.add(new InsightDescriptor(analysisDefinition.getAnalysisID(), analysisDefinition.getTitle(), analysisDefinition.getDataFeedID()));
             }
             session.getTransaction().commit();
         } catch (Exception e) {

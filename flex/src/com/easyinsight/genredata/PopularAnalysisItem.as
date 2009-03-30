@@ -1,8 +1,7 @@
 package com.easyinsight.genredata
 {
-	import com.easyinsight.analysis.AnalysisDefinition;
-	
-	import flash.events.MouseEvent;
+    import com.easyinsight.solutions.InsightDescriptor;
+    import flash.events.MouseEvent;
 	
 	import com.easyinsight.listing.AnalysisDefinitionAnalyzeSource;
 	
@@ -10,7 +9,7 @@ package com.easyinsight.genredata
 
 	public class PopularAnalysisItem extends LinkButton
 	{
-		private var _data:AnalysisDefinition;
+		private var _data:InsightDescriptor;
 		
 		public function PopularAnalysisItem()
 		{
@@ -19,7 +18,7 @@ package com.easyinsight.genredata
 		}
 		
 		override public function set data(value:Object):void {						
-			_data = value as AnalysisDefinition;
+			_data = value as InsightDescriptor;
 			if (_data != null) {
 				this.label = _data.name;
 			}			

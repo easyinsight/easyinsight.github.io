@@ -24,8 +24,11 @@
     </listing:states>
     <mx:Script>
 		<![CDATA[
-        import com.easyinsight.framework.ModuleAnalyzeSource;
-import mx.utils.URLUtil;
+        import com.easyinsight.analysis.AnalysisDefinition;
+import com.easyinsight.framework.ModuleAnalyzeSource;
+        import com.easyinsight.listing.AnalysisDefinitionAnalyzeSource;
+import com.easyinsight.solutions.InsightDescriptor;
+        import mx.utils.URLUtil;
         import mx.managers.BrowserManager;
         import mx.rpc.events.FaultEvent;
         import mx.controls.Alert;
@@ -34,7 +37,6 @@ import mx.utils.URLUtil;
         import com.easyinsight.listing.HeaderBarEvent;
         import com.easyinsight.listing.CatalogNavigationEvent;
         import com.easyinsight.dashboard.DataViewPanel;
-        import com.easyinsight.analysis.AnalysisDefinition;
 
         import mx.collections.ArrayCollection;
         import mx.containers.Canvas;
@@ -55,10 +57,18 @@ import mx.utils.URLUtil;
             dispatchEvent(new HeaderBarEvent(true, false));
         }
 
+        public function titleClick(definition:AnalysisDefinition):void {
+            var insightDescriptor:InsightDescriptor = new InsightDescriptor();
+            insightDescriptor.id = definition.analysisID;
+            insightDescriptor.name = definition.name;
+            insightDescriptor.dataFeedID = definition.dataFeedID;
+            dispatchEvent(new ModuleAnalyzeEvent(new AnalysisDefinitionAnalyzeSource(insightDescriptor)));
+        }
+
         private function onSearchAnalysis(event:ChildSearchEvent):void {
             var analysisDefs:ArrayCollection = event.items;
             currentState = "AnalysisSearchState";
-            analysisCatalogListing.analysisDefinitions = analysisDefs;
+            analysisCatalogListing.insightDescriptors = analysisDefs;
             dispatchEvent(new HeaderBarEvent(true, false));
         }
 
@@ -85,20 +95,20 @@ import mx.utils.URLUtil;
         }
 
         override public function gotFocus():void {
+            var pageString:String;
+            if (genre == null) {
+                BrowserManager.getInstance().setTitle("Easy Insight - Marketplace");
+                pageString = "Marketplace";
+            } else {
+                BrowserManager.getInstance().setTitle("Easy Insight - " + genre);
+                pageString = genre;
+            }
+            var fragmentObject:Object = new Object();
+            fragmentObject.page = "marketplace";
+            var fragmentString:String = URLUtil.objectToString(fragmentObject);
+            BrowserManager.getInstance().setFragment(fragmentString);
             if (lastGenre != genre) {
-                lastGenre = genre;
-                var pageString:String;
-                if (genre == null) {
-                    BrowserManager.getInstance().setTitle("Easy Insight - Marketplace");
-                    pageString = "Marketplace";
-                } else {
-                    BrowserManager.getInstance().setTitle("Easy Insight - " + genre);
-                    pageString = genre;
-                }
-                var fragmentObject:Object = new Object();
-                fragmentObject.page = "marketplace";
-                var fragmentString:String = URLUtil.objectToString(fragmentObject);
-                BrowserManager.getInstance().setFragment(fragmentString);
+                lastGenre = genre;                
             }
             dataProvider.getHeadlineAnalysesForGenre.send(genre);
             topRatedAnalyses.refreshData();
@@ -126,9 +136,11 @@ import mx.utils.URLUtil;
 
         private function refreshHeadlineAnalyses():void {
             if (analysisDefinitions.length > 0) {
-                var analysisDefinition:AnalysisDefinition = analysisDefinitions.getItemAt(currentIndex) as AnalysisDefinition;
+                var analysisDefinition:InsightDescriptor = analysisDefinitions.getItemAt(currentIndex) as InsightDescriptor;
                 var dataViewPanel:DataViewPanel = new DataViewPanel();
-                dataViewPanel.analysisDefinition = analysisDefinition;
+                dataViewPanel.analysisID = analysisDefinition.id;
+                dataViewPanel.titleClickFunction = titleClick;
+                dataViewPanel.titleFunctionCaller = this;
                 centerLBox.removeAllChildren();
                 centerLBox.addChild(dataViewPanel);
             }
@@ -137,9 +149,11 @@ import mx.utils.URLUtil;
                 if (rightIndex == analysisDefinitions.length) {
                     rightIndex = 0;
                 }
-                var analysisDefinition2:AnalysisDefinition = analysisDefinitions.getItemAt(rightIndex) as AnalysisDefinition;
+                var analysisDefinition2:InsightDescriptor = analysisDefinitions.getItemAt(rightIndex) as InsightDescriptor;
                 var dataViewPanel2:DataViewPanel = new DataViewPanel();
-                dataViewPanel2.analysisDefinition = analysisDefinition2;
+                dataViewPanel2.analysisID = analysisDefinition2.id;
+                dataViewPanel2.titleClickFunction = titleClick;
+                dataViewPanel2.titleFunctionCaller = this;
                 centerRBox.removeAllChildren();
                 centerRBox.addChild(dataViewPanel2);
             }

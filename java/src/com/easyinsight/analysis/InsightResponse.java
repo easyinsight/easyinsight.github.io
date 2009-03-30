@@ -1,5 +1,7 @@
 package com.easyinsight.analysis;
 
+import com.easyinsight.core.InsightDescriptor;
+
 /**
  * User: James Boe
  * Date: Sep 13, 2008
@@ -12,14 +14,14 @@ public class InsightResponse {
     public static final int REJECTED = 3;
 
     private int status;
-    private WSAnalysisDefinition definition;
+    private InsightDescriptor insightDescriptor;
 
     public InsightResponse() {
     }
 
-    public InsightResponse(int status, WSAnalysisDefinition definition) {
+    public InsightResponse(int status, InsightDescriptor insightDescriptor) {
         this.status = status;
-        this.definition = definition;
+        this.insightDescriptor = insightDescriptor;
     }
 
     public int getStatus() {
@@ -30,11 +32,11 @@ public class InsightResponse {
         this.status = status;
     }
 
-    public WSAnalysisDefinition getDefinition() {
-        return definition;
+    public InsightDescriptor getInsightDescriptor() {
+        return insightDescriptor;
     }
 
-    public void setDefinition(WSAnalysisDefinition definition) {
-        this.definition = definition;
+    public void setInsightDescriptor(InsightDescriptor insightDescriptor) {
+        this.insightDescriptor = insightDescriptor;
     }
 }

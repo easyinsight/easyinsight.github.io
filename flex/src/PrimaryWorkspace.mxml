@@ -22,10 +22,14 @@
 			import com.easyinsight.FullScreenPage;
 			import com.easyinsight.analysis.DelayedFeedLink;
 			import com.easyinsight.analysis.DelayedDeepLink;
-            import com.easyinsight.listing.DataFeedDescriptor;
+            import com.easyinsight.listing.AnalysisDefinitionAnalyzeSource;
+import com.easyinsight.listing.DataFeedDescriptor;
 import com.easyinsight.listing.DescriptorAnalyzeSource;
+            import com.easyinsight.quicksearch.EIDescriptor;
 import com.easyinsight.quicksearch.QuickSearchEvent;
 import com.easyinsight.quicksearch.QuickSearchWindow;
+            import com.easyinsight.solutions.DataSourceDescriptor;
+import com.easyinsight.solutions.InsightDescriptor;
 import mx.messaging.ChannelSet;
 			import mx.messaging.config.ServerConfig;
 			import mx.rpc.events.FaultEvent;
@@ -86,10 +90,15 @@ import mx.messaging.ChannelSet;
                 event.currentTarget.removeEventListener(QuickSearchEvent.QUICK_SEARCH, onQuickSearch);
                 event.currentTarget.removeEventListener(QuickSearchEvent.QUICK_SEARCH_CANCEL, onQuickSearch);
                 if (event.type == QuickSearchEvent.QUICK_SEARCH) {
-                    var descriptor:DataFeedDescriptor = new DataFeedDescriptor();
-                    descriptor.name = event.eiDescriptor.name;
-                    descriptor.dataFeedID = event.eiDescriptor.id;
-                    internalModuleAnalyze(new ModuleAnalyzeEvent(new DescriptorAnalyzeSource(descriptor)));
+                    if (event.eiDescriptor.getType() == EIDescriptor.DATA_SOURCE) {
+                        var eiDescriptor:DataSourceDescriptor = event.eiDescriptor as DataSourceDescriptor;
+                        var descriptor:DataFeedDescriptor = new DataFeedDescriptor();
+                        descriptor.name = eiDescriptor.name;
+                        descriptor.dataFeedID = eiDescriptor.id;
+                        internalModuleAnalyze(new ModuleAnalyzeEvent(new DescriptorAnalyzeSource(descriptor)));
+                    } else if (event.eiDescriptor.getType() == EIDescriptor.REPORT) {
+                        internalModuleAnalyze(new ModuleAnalyzeEvent(new AnalysisDefinitionAnalyzeSource(event.eiDescriptor as InsightDescriptor)));
+                    }
                 }
             }
             

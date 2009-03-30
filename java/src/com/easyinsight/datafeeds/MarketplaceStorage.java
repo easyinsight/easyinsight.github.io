@@ -3,9 +3,9 @@ package com.easyinsight.datafeeds;
 import com.easyinsight.database.Database;
 import com.easyinsight.userupload.UploadPolicy;
 import com.easyinsight.logging.LogClass;
-import com.easyinsight.analysis.WSAnalysisDefinition;
 import com.easyinsight.analysis.AnalysisStorage;
 import com.easyinsight.analysis.Tag;
+import com.easyinsight.core.InsightDescriptor;
 import com.easyinsight.security.Roles;
 import com.easyinsight.email.UserStub;
 import com.easyinsight.groups.GroupDescriptor;
@@ -140,7 +140,7 @@ public class MarketplaceStorage {
 
     
 
-    public List<WSAnalysisDefinition> getAnalysisDefinitionsForGenre(String genre) {
+    public List<InsightDescriptor> getAnalysisDefinitionsForGenre(String genre) {
         return new AnalysisStorage().getMostPopularAnalyses(genre, 4);
     }
 

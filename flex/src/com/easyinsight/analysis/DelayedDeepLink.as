@@ -33,7 +33,7 @@ import com.easyinsight.listing.AnalysisDefinitionAnalyzeSource;
 		private function gotAnalysisDefinition(event:ResultEvent):void {
         	var insightResponse:InsightResponse = analysisService.openAnalysisIfPossible.lastResult as InsightResponse;
         	if (insightResponse.status == InsightResponse.SUCCESS) {
-        		dispatchEvent(new ModuleAnalyzeEvent(new AnalysisDefinitionAnalyzeSource(insightResponse.definition)));
+        		dispatchEvent(new ModuleAnalyzeEvent(new AnalysisDefinitionAnalyzeSource(insightResponse.insightDescriptor)));
         	} else if (insightResponse.status == InsightResponse.NEED_LOGIN) {
         		var loginDialog:LoginDialog = LoginDialog(PopUpManager.createPopUp(Application.application as DisplayObject, LoginDialog, true));
         		loginDialog.addEventListener(LoginEvent.LOGIN, delayedAnalysis);

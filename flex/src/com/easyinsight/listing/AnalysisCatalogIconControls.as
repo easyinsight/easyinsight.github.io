@@ -1,12 +1,11 @@
 package com.easyinsight.listing
 {
 	import com.easyinsight.LoginDialog;
-	import com.easyinsight.analysis.AnalysisDefinition;
 	import com.easyinsight.framework.User;
-	import com.easyinsight.genredata.AnalyzeEvent;
-	
-import com.easyinsight.genredata.ModuleAnalyzeEvent;
-import flash.events.MouseEvent;
+
+    import com.easyinsight.genredata.ModuleAnalyzeEvent;
+    import com.easyinsight.solutions.InsightDescriptor;
+    import flash.events.MouseEvent;
 	
 	import mx.containers.HBox;
 	import mx.controls.Alert;
@@ -27,7 +26,7 @@ import flash.events.MouseEvent;
         private var playButton:Button;
         private var subscribeButton:Button;
         
-        private var analysisDefinition:AnalysisDefinition;
+        private var insightDescriptor:InsightDescriptor;
 		
 		public function AnalysisCatalogIconControls()
 		{
@@ -47,16 +46,16 @@ import flash.events.MouseEvent;
 		}
 		
 		override public function set data(value:Object):void {
-			this.analysisDefinition = value as AnalysisDefinition;
+			this.insightDescriptor = value as InsightDescriptor;
 			
 		}
 		
 		override public function get data():Object {
-			return this.analysisDefinition;			
+			return this.insightDescriptor;
 		}
 		
 		private function analyze(event:MouseEvent):void {
-			dispatchEvent(new ModuleAnalyzeEvent(new AnalysisDefinitionAnalyzeSource(this.analysisDefinition)));
+			dispatchEvent(new ModuleAnalyzeEvent(new AnalysisDefinitionAnalyzeSource(this.insightDescriptor)));
 		}
 		
 		public function subscribe(event:MouseEvent):void {
@@ -65,10 +64,10 @@ import flash.events.MouseEvent;
 				var loginContainer:LoginDialog = LoginDialog(PopUpManager.createPopUp(this, LoginDialog, true));
 			} else {
 				var remoteService:RemoteObject = new RemoteObject();
-				remoteService.destination = "analysisDefinition";
+				remoteService.destination = "insightDescriptor";
 				remoteService.subscribeToAnalysis.addEventListener(ResultEvent.RESULT, successfulSubscription);
 				remoteService.subscribeAnalysis.addEventListener(FaultEvent.FAULT, failedSubscription);
-				remoteService.subscribeToAnalysis.send(analysisDefinition.analysisID);
+				remoteService.subscribeToAnalysis.send(insightDescriptor.id);
 			}
 		}
 		

@@ -92,7 +92,7 @@
             } else if (obj is InsightDescriptor) {
                 var analysisDefinition:InsightDescriptor = obj as InsightDescriptor;
                 var goalInsight:GoalInsight = new GoalInsight();
-                goalInsight.insightID = analysisDefinition.insightID;
+                goalInsight.insightID = analysisDefinition.id;
                 goalInsight.insightName = analysisDefinition.name;
                 goalTreeNode.associatedInsights.addItem(goalInsight);
             } else if (obj is GoalTreeDescriptor) {

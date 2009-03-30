@@ -1,7 +1,7 @@
 package com.easyinsight.datafeeds;
 
 import com.easyinsight.userupload.UploadPolicy;
-import com.easyinsight.analysis.InsightDescriptor;
+import com.easyinsight.core.InsightDescriptor;
 
 import java.util.List;
 

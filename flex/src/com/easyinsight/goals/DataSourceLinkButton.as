@@ -1,20 +1,15 @@
 package com.easyinsight.goals {
-import com.easyinsight.analysis.AnalysisDefinition;
 import com.easyinsight.framework.ModuleAnalyzeSource;
-import com.easyinsight.genredata.AnalyzeEvent;
 import com.easyinsight.genredata.ModuleAnalyzeEvent;
-import com.easyinsight.listing.AnalysisDefinitionAnalyzeSource;
-import com.easyinsight.listing.AnalyzeSource;
+import com.easyinsight.listing.DataFeedDescriptor;
+import com.easyinsight.listing.DescriptorAnalyzeSource;
 import flash.events.MouseEvent;
 import mx.containers.HBox;
 import mx.controls.LinkButton;
-import mx.rpc.events.ResultEvent;
-import mx.rpc.remoting.RemoteObject;
 public class DataSourceLinkButton extends HBox{
 
     private var linkButton:LinkButton;
     private var goalDataSource:GoalFeed;
-    private var analysisService:RemoteObject;
 
     public function DataSourceLinkButton() {
         super();
@@ -25,14 +20,10 @@ public class DataSourceLinkButton extends HBox{
     }
 
     private function onClick(event:MouseEvent):void {
-        analysisService = new RemoteObject();
-        analysisService.destination = "analysisDefinition";
-        analysisService.openAnalysisDefinition.addEventListener(ResultEvent.RESULT, gotReport);
-    }
-
-    private function gotReport(event:ResultEvent):void {
-        var def:AnalysisDefinition = analysisService.openAnalysisDefinition.lastResult as AnalysisDefinition;
-        var analyzeSource:ModuleAnalyzeSource = new AnalysisDefinitionAnalyzeSource(def);
+        var descriptor:DataFeedDescriptor = new DataFeedDescriptor();
+        descriptor.name = goalDataSource.feedName;
+        descriptor.dataFeedID = goalDataSource.feedID;
+        var analyzeSource:ModuleAnalyzeSource = new DescriptorAnalyzeSource(descriptor);
         dispatchEvent(new ModuleAnalyzeEvent(analyzeSource));
     }
 

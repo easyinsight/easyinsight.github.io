@@ -13,16 +13,11 @@ public class EIDescriptor {
     public static final int GOAL_TREE = 4;
     public static final int SOLUTION = 5;
 
-    private int type;
     private String name;
     private long id;
 
     public int getType() {
-        return type;
-    }
-
-    public void setType(int type) {
-        this.type = type;
+        throw new UnsupportedOperationException();
     }
 
     public String getName() {
@@ -44,8 +39,7 @@ public class EIDescriptor {
     public EIDescriptor() {
     }
 
-    public EIDescriptor(int type, String name, long id) {
-        this.type = type;
+    public EIDescriptor(String name, long id) {
         this.name = name;
         this.id = id;
     }

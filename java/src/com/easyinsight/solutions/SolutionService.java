@@ -19,6 +19,7 @@ import com.easyinsight.api.dynamic.ConfiguredMethod;
 import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.goals.*;
 import com.easyinsight.email.UserStub;
+import com.easyinsight.core.InsightDescriptor;
 
 import java.util.*;
 import java.sql.*;

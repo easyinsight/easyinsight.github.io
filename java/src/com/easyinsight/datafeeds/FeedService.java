@@ -11,6 +11,8 @@ import com.easyinsight.security.*;
 import com.easyinsight.security.SecurityException;
 import com.easyinsight.users.SubscriptionLicense;
 import com.easyinsight.core.EIDescriptor;
+import com.easyinsight.core.InsightDescriptor;
+import com.easyinsight.core.DataSourceDescriptor;
 
 import java.util.*;
 import java.sql.SQLException;
@@ -42,7 +44,14 @@ public class FeedService implements IDataFeedService {
             queryDataSources.setLong(1, SecurityUtil.getUserID());
             ResultSet queryRS = queryDataSources.executeQuery();
             while (queryRS.next()) {
-                descriptorList.add(new EIDescriptor(EIDescriptor.DATA_SOURCE, queryRS.getString(1), queryRS.getLong(2)));
+                descriptorList.add(new DataSourceDescriptor(queryRS.getString(1), queryRS.getLong(2)));
+            }
+            PreparedStatement getInsightsStmt = conn.prepareStatement("SELECT ANALYSIS.ANALYSIS_ID, TITLE, DATA_FEED_ID FROM ANALYSIS, user_to_analysis WHERE " +
+                    "ANALYSIS.ANALYSIS_ID = USER_TO_ANALYSIS.ANALYSIS_ID AND USER_TO_ANALYSIS.user_id = ?");
+            getInsightsStmt.setLong(1, SecurityUtil.getUserID());
+            ResultSet reportRS = getInsightsStmt.executeQuery();
+            while (reportRS.next()) {
+                descriptorList.add(new InsightDescriptor(reportRS.getLong(1), reportRS.getString(2), reportRS.getLong(3)));
             }
         } catch (Exception e) {
             LogClass.error(e);
@@ -263,7 +272,7 @@ public class FeedService implements IDataFeedService {
         }
     }
 
-    public List<WSAnalysisDefinition> getMostPopularAnalyses(String genre,  int cutoff) {
+    public List<InsightDescriptor> getMostPopularAnalyses(String genre,  int cutoff) {
         try {
             return analysisStorage.getMostPopularAnalyses(genre, cutoff);
         } catch (Exception e) {
@@ -272,7 +281,7 @@ public class FeedService implements IDataFeedService {
         }
     }
 
-    public List<WSAnalysisDefinition> getTopRatedAnalyses(String genre, int cutoff) {
+    public List<InsightDescriptor> getTopRatedAnalyses(String genre, int cutoff) {
         try {
             return analysisStorage.getBestRatedAnalyses(genre, cutoff);
         } catch (Exception e) {
@@ -281,7 +290,7 @@ public class FeedService implements IDataFeedService {
         }
     }
 
-    public List<WSAnalysisDefinition> getMostRecentAnalyses(String genre, int cutoff) {
+    public List<InsightDescriptor> getMostRecentAnalyses(String genre, int cutoff) {
         try {
             return analysisStorage.getMostRecentAnalyses(genre, cutoff);
         } catch (Exception e) {
@@ -290,7 +299,7 @@ public class FeedService implements IDataFeedService {
         }
     }
 
-    public List<WSAnalysisDefinition> getHeadlineAnalysesForGenre(String genre) {
+    public List<InsightDescriptor> getHeadlineAnalysesForGenre(String genre) {
         try {
             return marketplaceStorage.getAnalysisDefinitionsForGenre(genre);
         } catch (Exception e) {
@@ -299,7 +308,7 @@ public class FeedService implements IDataFeedService {
         }
     }
 
-    public List<WSAnalysisDefinition> getAllAnalysesForGenre(String genre) {
+    public List<InsightDescriptor> getAllAnalysesForGenre(String genre) {
         try {
             return analysisStorage.getAllDefinitions(genre);
         } catch (Exception e) {

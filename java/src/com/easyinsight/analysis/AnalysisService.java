@@ -7,6 +7,7 @@ import com.easyinsight.security.*;
 import com.easyinsight.security.SecurityException;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.database.Database;
+import com.easyinsight.core.InsightDescriptor;
 
 import java.util.*;
 import java.sql.Connection;
@@ -196,8 +197,9 @@ public class AnalysisService implements IAnalysisService {
             try {
                 SecurityUtil.authorizeInsight(analysisID);
                 addAnalysisView(analysisID);
-                WSAnalysisDefinition analysisDefinition = analysisStorage.getAnalysisDefinition(analysisID);
-                insightResponse = new InsightResponse(InsightResponse.SUCCESS, analysisDefinition);
+                AnalysisDefinition analysisDefinition = analysisStorage.getPersistableReport(analysisID);
+                insightResponse = new InsightResponse(InsightResponse.SUCCESS, new InsightDescriptor(analysisID, analysisDefinition.getTitle(),
+                        analysisDefinition.getDataFeedID()));
             } catch (SecurityException e) {
                 if (e.getReason() == InsightResponse.NEED_LOGIN)
                     insightResponse = new InsightResponse(InsightResponse.NEED_LOGIN, null);

@@ -24,7 +24,7 @@
 
         private function chose():void {
             var descriptor:InsightDescriptor = feedBox.selectedItem as InsightDescriptor;
-            groupService.addInsightToGroup.send(descriptor.insightID, _groupID);
+            groupService.addInsightToGroup.send(descriptor.id, _groupID);
         }
 
         private function addedReportToGroup():void {

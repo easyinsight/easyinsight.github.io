@@ -23,8 +23,10 @@
         <mxmlc file="../src/PrimaryWorkspace.mxml" output="${deployment.path}/PrimaryWorkspace.swf"
                static-rsls="false">
             <load-config filename="../core-optimized-config.xml"/>
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
+            <runtime-shared-library-path>
+                <path-element>${FLEX_HOME}/frameworks/libs/framework.swc</path-element>
                 <url rsl-url="framework_3.3.0.4852.swz"/>
+                
                 <url rsl-url="framework_3.3.0.4852.swf"/>
             </runtime-shared-library-path>
 

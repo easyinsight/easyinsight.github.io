@@ -9,6 +9,7 @@ import com.easyinsight.datafeeds.*;
 import com.easyinsight.datafeeds.file.FileBasedFeedDefinition;
 import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.core.Key;
+import com.easyinsight.core.InsightDescriptor;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.security.Roles;

@@ -1,31 +1,30 @@
 package com.easyinsight.listing
 {
 import com.easyinsight.DataAnalysisContainer;
-import com.easyinsight.administration.feed.FeedAdministrationContainer;
-import com.easyinsight.analysis.AnalysisCloseEvent;
-import com.easyinsight.analysis.AnalysisDefinition;
 import com.easyinsight.framework.DataService;
 import com.easyinsight.framework.ModuleAnalyzeSource;
+import com.easyinsight.solutions.InsightDescriptor;
 import flash.display.DisplayObject;
 import mx.managers.BrowserManager;
 
 	public class AnalysisDefinitionAnalyzeSource extends ModuleAnalyzeSource
 	{
-		private var analysisDefinition:AnalysisDefinition;
+		private var insightDescriptor:InsightDescriptor;
 		private var admin:Boolean;
 		
-		public function AnalysisDefinitionAnalyzeSource(analysisDefinition:AnalysisDefinition, admin:Boolean = false) {
-			this.analysisDefinition = analysisDefinition;
+		public function AnalysisDefinitionAnalyzeSource(insightDescriptor:InsightDescriptor, admin:Boolean = false) {
+			this.insightDescriptor = insightDescriptor;
 			this.admin = admin;
 		}
 
         override public function createDirect():DisplayObject {
             var dataAnalysisContainer:DataAnalysisContainer = new DataAnalysisContainer();
             var dataService:DataService = new DataService();
-            dataService.dataFeedID = analysisDefinition.dataFeedID;
+            dataService.dataFeedID = insightDescriptor.dataFeedID;
             dataAnalysisContainer.dataService = dataService;
-            BrowserManager.getInstance().setTitle("Easy Insight - " + analysisDefinition.name);
-            dataAnalysisContainer.openAnalysis(analysisDefinition);
+            BrowserManager.getInstance().setTitle("Easy Insight - " + insightDescriptor.name);
+            dataAnalysisContainer.reportID = insightDescriptor.id;
+            //dataAnalysisContainer.openAnalysis(analysisDefinition);
             return dataAnalysisContainer;
         }
 	}

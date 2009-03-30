@@ -2,7 +2,7 @@ package com.easyinsight.solutions;
 
 import com.easyinsight.datafeeds.FeedDescriptor;
 import com.easyinsight.goals.GoalTreeDescriptor;
-import com.easyinsight.analysis.InsightDescriptor;
+import com.easyinsight.core.InsightDescriptor;
 
 import java.util.List;
 
