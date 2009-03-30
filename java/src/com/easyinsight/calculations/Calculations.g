@@ -20,7 +20,7 @@ tokens
 @header { package com.easyinsight.calculations.generated; }
 @lexer::header { package com.easyinsight.calculations.generated; }
 
-expr	:	term ((Add^ | Subtract^) term)* EOF;
+expr	:	term ((Add^ | Subtract^) term)* EOF!;
 
 term	:	unaryOperator ((Multiply^ | Divide^) unaryOperator)*;
 

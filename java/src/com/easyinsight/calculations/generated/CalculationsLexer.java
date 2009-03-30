@@ -1,4 +1,4 @@
-// $ANTLR 3.0.1 C:\\Users\\Alan\\Documents\\Intellij\\EasyInsight\\Java\\src\\com\\easyinsight\\calculations\\Calculations.g 2008-12-20 15:01:29
+// $ANTLR 3.1.2 C:\\Users\\abaldwin\\Documents\\EasyInsight\\code\\java\\src\\com\\easyinsight\\calculations\\Calculations.g 2009-03-30 17:46:54
  package com.easyinsight.calculations.generated; 
 
 import org.antlr.runtime.*;
@@ -15,7 +15,6 @@ public class CalculationsLexer extends Lexer {
     public static final int Exp=13;
     public static final int Decimal=14;
     public static final int Digit=19;
-    public static final int Tokens=26;
     public static final int EOF=-1;
     public static final int Add=7;
     public static final int Divide=10;
@@ -31,183 +30,210 @@ public class CalculationsLexer extends Lexer {
     public static final int Comma=11;
     public static final int SpecialChars=20;
     public static final int Integer=17;
+
+    // delegates
+    // delegators
+
     public CalculationsLexer() {;} 
     public CalculationsLexer(CharStream input) {
-        super(input);
+        this(input, new RecognizerSharedState());
     }
-    public String getGrammarFileName() { return "C:\\Users\\Alan\\Documents\\Intellij\\EasyInsight\\Java\\src\\com\\easyinsight\\calculations\\Calculations.g"; }
+    public CalculationsLexer(CharStream input, RecognizerSharedState state) {
+        super(input,state);
 
-    // $ANTLR start OpenParen
+    }
+    public String getGrammarFileName() { return "C:\\Users\\abaldwin\\Documents\\EasyInsight\\code\\java\\src\\com\\easyinsight\\calculations\\Calculations.g"; }
+
+    // $ANTLR start "OpenParen"
     public final void mOpenParen() throws RecognitionException {
         try {
             int _type = OpenParen;
-            // C:\\Users\\Alan\\Documents\\Intellij\\EasyInsight\\Java\\src\\com\\easyinsight\\calculations\\Calculations.g:4:11: ( '(' )
-            // C:\\Users\\Alan\\Documents\\Intellij\\EasyInsight\\Java\\src\\com\\easyinsight\\calculations\\Calculations.g:4:13: '('
+            int _channel = DEFAULT_TOKEN_CHANNEL;
+            // C:\\Users\\abaldwin\\Documents\\EasyInsight\\code\\java\\src\\com\\easyinsight\\calculations\\Calculations.g:5:11: ( '(' )
+            // C:\\Users\\abaldwin\\Documents\\EasyInsight\\code\\java\\src\\com\\easyinsight\\calculations\\Calculations.g:5:13: '('
             {
             match('('); 
 
             }
 
-            this.type = _type;
+            state.type = _type;
+            state.channel = _channel;
         }
         finally {
         }
     }
-    // $ANTLR end OpenParen
+    // $ANTLR end "OpenParen"
 
-    // $ANTLR start CloseParen
+    // $ANTLR start "CloseParen"
     public final void mCloseParen() throws RecognitionException {
         try {
             int _type = CloseParen;
-            // C:\\Users\\Alan\\Documents\\Intellij\\EasyInsight\\Java\\src\\com\\easyinsight\\calculations\\Calculations.g:5:12: ( ')' )
-            // C:\\Users\\Alan\\Documents\\Intellij\\EasyInsight\\Java\\src\\com\\easyinsight\\calculations\\Calculations.g:5:14: ')'
+            int _channel = DEFAULT_TOKEN_CHANNEL;
+            // C:\\Users\\abaldwin\\Documents\\EasyInsight\\code\\java\\src\\com\\easyinsight\\calculations\\Calculations.g:6:12: ( ')' )
+            // C:\\Users\\abaldwin\\Documents\\EasyInsight\\code\\java\\src\\com\\easyinsight\\calculations\\Calculations.g:6:14: ')'
             {
             match(')'); 
 
             }
 
-            this.type = _type;
+            state.type = _type;
+            state.channel = _channel;
         }
         finally {
         }
     }
-    // $ANTLR end CloseParen
+    // $ANTLR end "CloseParen"
 
-    // $ANTLR start Add
+    // $ANTLR start "Add"
     public final void mAdd() throws RecognitionException {
         try {
             int _type = Add;
-            // C:\\Users\\Alan\\Documents\\Intellij\\EasyInsight\\Java\\src\\com\\easyinsight\\calculations\\Calculations.g:6:5: ( '+' )
-            // C:\\Users\\Alan\\Documents\\Intellij\\EasyInsight\\Java\\src\\com\\easyinsight\\calculations\\Calculations.g:6:7: '+'
+            int _channel = DEFAULT_TOKEN_CHANNEL;
+            // C:\\Users\\abaldwin\\Documents\\EasyInsight\\code\\java\\src\\com\\easyinsight\\calculations\\Calculations.g:7:5: ( '+' )
+            // C:\\Users\\abaldwin\\Documents\\EasyInsight\\code\\java\\src\\com\\easyinsight\\calculations\\Calculations.g:7:7: '+'
             {
             match('+'); 
 
             }
 
-            this.type = _type;
+            state.type = _type;
+            state.channel = _channel;
         }
         finally {
         }
     }
-    // $ANTLR end Add
+    // $ANTLR end "Add"
 
-    // $ANTLR start Subtract
+    // $ANTLR start "Subtract"
     public final void mSubtract() throws RecognitionException {
         try {
             int _type = Subtract;
-            // C:\\Users\\Alan\\Documents\\Intellij\\EasyInsight\\Java\\src\\com\\easyinsight\\calculations\\Calculations.g:7:10: ( '-' )
-            // C:\\Users\\Alan\\Documents\\Intellij\\EasyInsight\\Java\\src\\com\\easyinsight\\calculations\\Calculations.g:7:12: '-'
+            int _channel = DEFAULT_TOKEN_CHANNEL;
+            // C:\\Users\\abaldwin\\Documents\\EasyInsight\\code\\java\\src\\com\\easyinsight\\calculations\\Calculations.g:8:10: ( '-' )
+            // C:\\Users\\abaldwin\\Documents\\EasyInsight\\code\\java\\src\\com\\easyinsight\\calculations\\Calculations.g:8:12: '-'
             {
             match('-'); 
 
             }
 
-            this.type = _type;
+            state.type = _type;
+            state.channel = _channel;
         }
         finally {
         }
     }
-    // $ANTLR end Subtract
+    // $ANTLR end "Subtract"
 
-    // $ANTLR start Multiply
+    // $ANTLR start "Multiply"
     public final void mMultiply() throws RecognitionException {
         try {
             int _type = Multiply;
-            // C:\\Users\\Alan\\Documents\\Intellij\\EasyInsight\\Java\\src\\com\\easyinsight\\calculations\\Calculations.g:8:10: ( '*' )
-            // C:\\Users\\Alan\\Documents\\Intellij\\EasyInsight\\Java\\src\\com\\easyinsight\\calculations\\Calculations.g:8:12: '*'
+            int _channel = DEFAULT_TOKEN_CHANNEL;
+            // C:\\Users\\abaldwin\\Documents\\EasyInsight\\code\\java\\src\\com\\easyinsight\\calculations\\Calculations.g:9:10: ( '*' )
+            // C:\\Users\\abaldwin\\Documents\\EasyInsight\\code\\java\\src\\com\\easyinsight\\calculations\\Calculations.g:9:12: '*'
             {
             match('*'); 
 
             }
 
-            this.type = _type;
+            state.type = _type;
+            state.channel = _channel;
         }
         finally {
         }
     }
-    // $ANTLR end Multiply
+    // $ANTLR end "Multiply"
 
-    // $ANTLR start Divide
+    // $ANTLR start "Divide"
     public final void mDivide() throws RecognitionException {
         try {
             int _type = Divide;
-            // C:\\Users\\Alan\\Documents\\Intellij\\EasyInsight\\Java\\src\\com\\easyinsight\\calculations\\Calculations.g:9:8: ( '/' )
-            // C:\\Users\\Alan\\Documents\\Intellij\\EasyInsight\\Java\\src\\com\\easyinsight\\calculations\\Calculations.g:9:10: '/'
+            int _channel = DEFAULT_TOKEN_CHANNEL;
+            // C:\\Users\\abaldwin\\Documents\\EasyInsight\\code\\java\\src\\com\\easyinsight\\calculations\\Calculations.g:10:8: ( '/' )
+            // C:\\Users\\abaldwin\\Documents\\EasyInsight\\code\\java\\src\\com\\easyinsight\\calculations\\Calculations.g:10:10: '/'
             {
             match('/'); 
 
             }
 
-            this.type = _type;
+            state.type = _type;
+            state.channel = _channel;
         }
         finally {
         }
     }
-    // $ANTLR end Divide
+    // $ANTLR end "Divide"
 
-    // $ANTLR start Comma
+    // $ANTLR start "Comma"
     public final void mComma() throws RecognitionException {
         try {
             int _type = Comma;
-            // C:\\Users\\Alan\\Documents\\Intellij\\EasyInsight\\Java\\src\\com\\easyinsight\\calculations\\Calculations.g:10:7: ( ',' )
-            // C:\\Users\\Alan\\Documents\\Intellij\\EasyInsight\\Java\\src\\com\\easyinsight\\calculations\\Calculations.g:10:9: ','
+            int _channel = DEFAULT_TOKEN_CHANNEL;
+            // C:\\Users\\abaldwin\\Documents\\EasyInsight\\code\\java\\src\\com\\easyinsight\\calculations\\Calculations.g:11:7: ( ',' )
+            // C:\\Users\\abaldwin\\Documents\\EasyInsight\\code\\java\\src\\com\\easyinsight\\calculations\\Calculations.g:11:9: ','
             {
             match(','); 
 
             }
 
-            this.type = _type;
+            state.type = _type;
+            state.channel = _channel;
         }
         finally {
         }
     }
-    // $ANTLR end Comma
+    // $ANTLR end "Comma"
 
-    // $ANTLR start Dot
+    // $ANTLR start "Dot"
     public final void mDot() throws RecognitionException {
         try {
             int _type = Dot;
-            // C:\\Users\\Alan\\Documents\\Intellij\\EasyInsight\\Java\\src\\com\\easyinsight\\calculations\\Calculations.g:11:5: ( '.' )
-            // C:\\Users\\Alan\\Documents\\Intellij\\EasyInsight\\Java\\src\\com\\easyinsight\\calculations\\Calculations.g:11:7: '.'
+            int _channel = DEFAULT_TOKEN_CHANNEL;
+            // C:\\Users\\abaldwin\\Documents\\EasyInsight\\code\\java\\src\\com\\easyinsight\\calculations\\Calculations.g:12:5: ( '.' )
+            // C:\\Users\\abaldwin\\Documents\\EasyInsight\\code\\java\\src\\com\\easyinsight\\calculations\\Calculations.g:12:7: '.'
             {
             match('.'); 
 
             }
 
-            this.type = _type;
+            state.type = _type;
+            state.channel = _channel;
         }
         finally {
         }
     }
-    // $ANTLR end Dot
+    // $ANTLR end "Dot"
 
-    // $ANTLR start Exp
+    // $ANTLR start "Exp"
     public final void mExp() throws RecognitionException {
         try {
             int _type = Exp;
-            // C:\\Users\\Alan\\Documents\\Intellij\\EasyInsight\\Java\\src\\com\\easyinsight\\calculations\\Calculations.g:12:5: ( '^' )
-            // C:\\Users\\Alan\\Documents\\Intellij\\EasyInsight\\Java\\src\\com\\easyinsight\\calculations\\Calculations.g:12:7: '^'
+            int _channel = DEFAULT_TOKEN_CHANNEL;
+            // C:\\Users\\abaldwin\\Documents\\EasyInsight\\code\\java\\src\\com\\easyinsight\\calculations\\Calculations.g:13:5: ( '^' )
+            // C:\\Users\\abaldwin\\Documents\\EasyInsight\\code\\java\\src\\com\\easyinsight\\calculations\\Calculations.g:13:7: '^'
             {
             match('^'); 
 
             }
 
-            this.type = _type;
+            state.type = _type;
+            state.channel = _channel;
         }
         finally {
         }
     }
-    // $ANTLR end Exp
+    // $ANTLR end "Exp"
 
-    // $ANTLR start Decimal
+    // $ANTLR start "Decimal"
     public final void mDecimal() throws RecognitionException {
         try {
             int _type = Decimal;
-            // C:\\Users\\Alan\\Documents\\Intellij\\EasyInsight\\Java\\src\\com\\easyinsight\\calculations\\Calculations.g:40:9: ( UInteger ( Dot UInteger )? ( 'E' Integer )? )
-            // C:\\Users\\Alan\\Documents\\Intellij\\EasyInsight\\Java\\src\\com\\easyinsight\\calculations\\Calculations.g:40:11: UInteger ( Dot UInteger )? ( 'E' Integer )?
+            int _channel = DEFAULT_TOKEN_CHANNEL;
+            // C:\\Users\\abaldwin\\Documents\\EasyInsight\\code\\java\\src\\com\\easyinsight\\calculations\\Calculations.g:40:9: ( UInteger ( Dot UInteger )? ( 'E' Integer )? )
+            // C:\\Users\\abaldwin\\Documents\\EasyInsight\\code\\java\\src\\com\\easyinsight\\calculations\\Calculations.g:40:11: UInteger ( Dot UInteger )? ( 'E' Integer )?
             {
             mUInteger(); 
-            // C:\\Users\\Alan\\Documents\\Intellij\\EasyInsight\\Java\\src\\com\\easyinsight\\calculations\\Calculations.g:40:20: ( Dot UInteger )?
+            // C:\\Users\\abaldwin\\Documents\\EasyInsight\\code\\java\\src\\com\\easyinsight\\calculations\\Calculations.g:40:20: ( Dot UInteger )?
             int alt1=2;
             int LA1_0 = input.LA(1);
 
@@ -216,7 +242,7 @@ public class CalculationsLexer extends Lexer {
             }
             switch (alt1) {
                 case 1 :
-                    // C:\\Users\\Alan\\Documents\\Intellij\\EasyInsight\\Java\\src\\com\\easyinsight\\calculations\\Calculations.g:40:21: Dot UInteger
+                    // C:\\Users\\abaldwin\\Documents\\EasyInsight\\code\\java\\src\\com\\easyinsight\\calculations\\Calculations.g:40:21: Dot UInteger
                     {
                     mDot(); 
                     mUInteger(); 
@@ -226,7 +252,7 @@ public class CalculationsLexer extends Lexer {
 
             }
 
-            // C:\\Users\\Alan\\Documents\\Intellij\\EasyInsight\\Java\\src\\com\\easyinsight\\calculations\\Calculations.g:40:36: ( 'E' Integer )?
+            // C:\\Users\\abaldwin\\Documents\\EasyInsight\\code\\java\\src\\com\\easyinsight\\calculations\\Calculations.g:40:36: ( 'E' Integer )?
             int alt2=2;
             int LA2_0 = input.LA(1);
 
@@ -235,7 +261,7 @@ public class CalculationsLexer extends Lexer {
             }
             switch (alt2) {
                 case 1 :
-                    // C:\\Users\\Alan\\Documents\\Intellij\\EasyInsight\\Java\\src\\com\\easyinsight\\calculations\\Calculations.g:40:37: 'E' Integer
+                    // C:\\Users\\abaldwin\\Documents\\EasyInsight\\code\\java\\src\\com\\easyinsight\\calculations\\Calculations.g:40:37: 'E' Integer
                     {
                     match('E'); 
                     mInteger(); 
@@ -248,22 +274,24 @@ public class CalculationsLexer extends Lexer {
 
             }
 
-            this.type = _type;
+            state.type = _type;
+            state.channel = _channel;
         }
         finally {
         }
     }
-    // $ANTLR end Decimal
+    // $ANTLR end "Decimal"
 
-    // $ANTLR start Variable
+    // $ANTLR start "Variable"
     public final void mVariable() throws RecognitionException {
         try {
             int _type = Variable;
-            // C:\\Users\\Alan\\Documents\\Intellij\\EasyInsight\\Java\\src\\com\\easyinsight\\calculations\\Calculations.g:42:9: ( Character ( Character | Digit | SpecialChars | VariableWhitespace )* )
-            // C:\\Users\\Alan\\Documents\\Intellij\\EasyInsight\\Java\\src\\com\\easyinsight\\calculations\\Calculations.g:42:11: Character ( Character | Digit | SpecialChars | VariableWhitespace )*
+            int _channel = DEFAULT_TOKEN_CHANNEL;
+            // C:\\Users\\abaldwin\\Documents\\EasyInsight\\code\\java\\src\\com\\easyinsight\\calculations\\Calculations.g:42:9: ( Character ( Character | Digit | SpecialChars | VariableWhitespace )* )
+            // C:\\Users\\abaldwin\\Documents\\EasyInsight\\code\\java\\src\\com\\easyinsight\\calculations\\Calculations.g:42:11: Character ( Character | Digit | SpecialChars | VariableWhitespace )*
             {
             mCharacter(); 
-            // C:\\Users\\Alan\\Documents\\Intellij\\EasyInsight\\Java\\src\\com\\easyinsight\\calculations\\Calculations.g:42:21: ( Character | Digit | SpecialChars | VariableWhitespace )*
+            // C:\\Users\\abaldwin\\Documents\\EasyInsight\\code\\java\\src\\com\\easyinsight\\calculations\\Calculations.g:42:21: ( Character | Digit | SpecialChars | VariableWhitespace )*
             loop3:
             do {
                 int alt3=2;
@@ -276,17 +304,16 @@ public class CalculationsLexer extends Lexer {
 
                 switch (alt3) {
             	case 1 :
-            	    // C:\\Users\\Alan\\Documents\\Intellij\\EasyInsight\\Java\\src\\com\\easyinsight\\calculations\\Calculations.g:
+            	    // C:\\Users\\abaldwin\\Documents\\EasyInsight\\code\\java\\src\\com\\easyinsight\\calculations\\Calculations.g:
             	    {
             	    if ( input.LA(1)=='\t'||input.LA(1)==' '||(input.LA(1)>='0' && input.LA(1)<='9')||(input.LA(1)>='A' && input.LA(1)<='Z')||input.LA(1)=='_'||(input.LA(1)>='a' && input.LA(1)<='z') ) {
             	        input.consume();
 
             	    }
             	    else {
-            	        MismatchedSetException mse =
-            	            new MismatchedSetException(null,input);
-            	        recover(mse);    throw mse;
-            	    }
+            	        MismatchedSetException mse = new MismatchedSetException(null,input);
+            	        recover(mse);
+            	        throw mse;}
 
 
             	    }
@@ -300,21 +327,23 @@ public class CalculationsLexer extends Lexer {
 
             }
 
-            this.type = _type;
+            state.type = _type;
+            state.channel = _channel;
         }
         finally {
         }
     }
-    // $ANTLR end Variable
+    // $ANTLR end "Variable"
 
-    // $ANTLR start HideWhiteSpace
+    // $ANTLR start "HideWhiteSpace"
     public final void mHideWhiteSpace() throws RecognitionException {
         try {
             int _type = HideWhiteSpace;
-            // C:\\Users\\Alan\\Documents\\Intellij\\EasyInsight\\Java\\src\\com\\easyinsight\\calculations\\Calculations.g:47:2: ( ( Whitespace )* )
-            // C:\\Users\\Alan\\Documents\\Intellij\\EasyInsight\\Java\\src\\com\\easyinsight\\calculations\\Calculations.g:47:4: ( Whitespace )*
+            int _channel = DEFAULT_TOKEN_CHANNEL;
+            // C:\\Users\\abaldwin\\Documents\\EasyInsight\\code\\java\\src\\com\\easyinsight\\calculations\\Calculations.g:47:2: ( ( Whitespace )* )
+            // C:\\Users\\abaldwin\\Documents\\EasyInsight\\code\\java\\src\\com\\easyinsight\\calculations\\Calculations.g:47:4: ( Whitespace )*
             {
-            // C:\\Users\\Alan\\Documents\\Intellij\\EasyInsight\\Java\\src\\com\\easyinsight\\calculations\\Calculations.g:47:4: ( Whitespace )*
+            // C:\\Users\\abaldwin\\Documents\\EasyInsight\\code\\java\\src\\com\\easyinsight\\calculations\\Calculations.g:47:4: ( Whitespace )*
             loop4:
             do {
                 int alt4=2;
@@ -327,7 +356,7 @@ public class CalculationsLexer extends Lexer {
 
                 switch (alt4) {
             	case 1 :
-            	    // C:\\Users\\Alan\\Documents\\Intellij\\EasyInsight\\Java\\src\\com\\easyinsight\\calculations\\Calculations.g:47:4: Whitespace
+            	    // C:\\Users\\abaldwin\\Documents\\EasyInsight\\code\\java\\src\\com\\easyinsight\\calculations\\Calculations.g:47:4: Whitespace
             	    {
             	    mWhitespace(); 
 
@@ -339,24 +368,25 @@ public class CalculationsLexer extends Lexer {
                 }
             } while (true);
 
-              channel = HIDDEN; 
+              _channel = HIDDEN; 
 
             }
 
-            this.type = _type;
+            state.type = _type;
+            state.channel = _channel;
         }
         finally {
         }
     }
-    // $ANTLR end HideWhiteSpace
+    // $ANTLR end "HideWhiteSpace"
 
-    // $ANTLR start Integer
+    // $ANTLR start "Integer"
     public final void mInteger() throws RecognitionException {
         try {
-            // C:\\Users\\Alan\\Documents\\Intellij\\EasyInsight\\Java\\src\\com\\easyinsight\\calculations\\Calculations.g:49:18: ( ( Add | Subtract )? UInteger )
-            // C:\\Users\\Alan\\Documents\\Intellij\\EasyInsight\\Java\\src\\com\\easyinsight\\calculations\\Calculations.g:49:20: ( Add | Subtract )? UInteger
+            // C:\\Users\\abaldwin\\Documents\\EasyInsight\\code\\java\\src\\com\\easyinsight\\calculations\\Calculations.g:49:18: ( ( Add | Subtract )? UInteger )
+            // C:\\Users\\abaldwin\\Documents\\EasyInsight\\code\\java\\src\\com\\easyinsight\\calculations\\Calculations.g:49:20: ( Add | Subtract )? UInteger
             {
-            // C:\\Users\\Alan\\Documents\\Intellij\\EasyInsight\\Java\\src\\com\\easyinsight\\calculations\\Calculations.g:49:20: ( Add | Subtract )?
+            // C:\\Users\\abaldwin\\Documents\\EasyInsight\\code\\java\\src\\com\\easyinsight\\calculations\\Calculations.g:49:20: ( Add | Subtract )?
             int alt5=2;
             int LA5_0 = input.LA(1);
 
@@ -365,17 +395,16 @@ public class CalculationsLexer extends Lexer {
             }
             switch (alt5) {
                 case 1 :
-                    // C:\\Users\\Alan\\Documents\\Intellij\\EasyInsight\\Java\\src\\com\\easyinsight\\calculations\\Calculations.g:
+                    // C:\\Users\\abaldwin\\Documents\\EasyInsight\\code\\java\\src\\com\\easyinsight\\calculations\\Calculations.g:
                     {
                     if ( input.LA(1)=='+'||input.LA(1)=='-' ) {
                         input.consume();
 
                     }
                     else {
-                        MismatchedSetException mse =
-                            new MismatchedSetException(null,input);
-                        recover(mse);    throw mse;
-                    }
+                        MismatchedSetException mse = new MismatchedSetException(null,input);
+                        recover(mse);
+                        throw mse;}
 
 
                     }
@@ -391,13 +420,13 @@ public class CalculationsLexer extends Lexer {
         finally {
         }
     }
-    // $ANTLR end Integer
+    // $ANTLR end "Integer"
 
-    // $ANTLR start Digit
+    // $ANTLR start "Digit"
     public final void mDigit() throws RecognitionException {
         try {
-            // C:\\Users\\Alan\\Documents\\Intellij\\EasyInsight\\Java\\src\\com\\easyinsight\\calculations\\Calculations.g:52:2: ( '0' .. '9' )
-            // C:\\Users\\Alan\\Documents\\Intellij\\EasyInsight\\Java\\src\\com\\easyinsight\\calculations\\Calculations.g:52:4: '0' .. '9'
+            // C:\\Users\\abaldwin\\Documents\\EasyInsight\\code\\java\\src\\com\\easyinsight\\calculations\\Calculations.g:52:2: ( '0' .. '9' )
+            // C:\\Users\\abaldwin\\Documents\\EasyInsight\\code\\java\\src\\com\\easyinsight\\calculations\\Calculations.g:52:4: '0' .. '9'
             {
             matchRange('0','9'); 
 
@@ -407,15 +436,15 @@ public class CalculationsLexer extends Lexer {
         finally {
         }
     }
-    // $ANTLR end Digit
+    // $ANTLR end "Digit"
 
-    // $ANTLR start UInteger
+    // $ANTLR start "UInteger"
     public final void mUInteger() throws RecognitionException {
         try {
-            // C:\\Users\\Alan\\Documents\\Intellij\\EasyInsight\\Java\\src\\com\\easyinsight\\calculations\\Calculations.g:54:2: ( ( Digit )+ )
-            // C:\\Users\\Alan\\Documents\\Intellij\\EasyInsight\\Java\\src\\com\\easyinsight\\calculations\\Calculations.g:54:4: ( Digit )+
+            // C:\\Users\\abaldwin\\Documents\\EasyInsight\\code\\java\\src\\com\\easyinsight\\calculations\\Calculations.g:54:2: ( ( Digit )+ )
+            // C:\\Users\\abaldwin\\Documents\\EasyInsight\\code\\java\\src\\com\\easyinsight\\calculations\\Calculations.g:54:4: ( Digit )+
             {
-            // C:\\Users\\Alan\\Documents\\Intellij\\EasyInsight\\Java\\src\\com\\easyinsight\\calculations\\Calculations.g:54:4: ( Digit )+
+            // C:\\Users\\abaldwin\\Documents\\EasyInsight\\code\\java\\src\\com\\easyinsight\\calculations\\Calculations.g:54:4: ( Digit )+
             int cnt6=0;
             loop6:
             do {
@@ -429,7 +458,7 @@ public class CalculationsLexer extends Lexer {
 
                 switch (alt6) {
             	case 1 :
-            	    // C:\\Users\\Alan\\Documents\\Intellij\\EasyInsight\\Java\\src\\com\\easyinsight\\calculations\\Calculations.g:54:4: Digit
+            	    // C:\\Users\\abaldwin\\Documents\\EasyInsight\\code\\java\\src\\com\\easyinsight\\calculations\\Calculations.g:54:4: Digit
             	    {
             	    mDigit(); 
 
@@ -452,23 +481,22 @@ public class CalculationsLexer extends Lexer {
         finally {
         }
     }
-    // $ANTLR end UInteger
+    // $ANTLR end "UInteger"
 
-    // $ANTLR start VariableWhitespace
+    // $ANTLR start "VariableWhitespace"
     public final void mVariableWhitespace() throws RecognitionException {
         try {
-            // C:\\Users\\Alan\\Documents\\Intellij\\EasyInsight\\Java\\src\\com\\easyinsight\\calculations\\Calculations.g:57:2: ( ( '\\t' | ' ' ) )
-            // C:\\Users\\Alan\\Documents\\Intellij\\EasyInsight\\Java\\src\\com\\easyinsight\\calculations\\Calculations.g:57:4: ( '\\t' | ' ' )
+            // C:\\Users\\abaldwin\\Documents\\EasyInsight\\code\\java\\src\\com\\easyinsight\\calculations\\Calculations.g:57:2: ( ( '\\t' | ' ' ) )
+            // C:\\Users\\abaldwin\\Documents\\EasyInsight\\code\\java\\src\\com\\easyinsight\\calculations\\Calculations.g:57:4: ( '\\t' | ' ' )
             {
             if ( input.LA(1)=='\t'||input.LA(1)==' ' ) {
                 input.consume();
 
             }
             else {
-                MismatchedSetException mse =
-                    new MismatchedSetException(null,input);
-                recover(mse);    throw mse;
-            }
+                MismatchedSetException mse = new MismatchedSetException(null,input);
+                recover(mse);
+                throw mse;}
 
 
             }
@@ -477,23 +505,22 @@ public class CalculationsLexer extends Lexer {
         finally {
         }
     }
-    // $ANTLR end VariableWhitespace
+    // $ANTLR end "VariableWhitespace"
 
-    // $ANTLR start Whitespace
+    // $ANTLR start "Whitespace"
     public final void mWhitespace() throws RecognitionException {
         try {
-            // C:\\Users\\Alan\\Documents\\Intellij\\EasyInsight\\Java\\src\\com\\easyinsight\\calculations\\Calculations.g:60:2: ( ( VariableWhitespace | '\\r' | '\\n' | '\\u000C' ) )
-            // C:\\Users\\Alan\\Documents\\Intellij\\EasyInsight\\Java\\src\\com\\easyinsight\\calculations\\Calculations.g:60:4: ( VariableWhitespace | '\\r' | '\\n' | '\\u000C' )
+            // C:\\Users\\abaldwin\\Documents\\EasyInsight\\code\\java\\src\\com\\easyinsight\\calculations\\Calculations.g:60:2: ( ( VariableWhitespace | '\\r' | '\\n' | '\\u000C' ) )
+            // C:\\Users\\abaldwin\\Documents\\EasyInsight\\code\\java\\src\\com\\easyinsight\\calculations\\Calculations.g:60:4: ( VariableWhitespace | '\\r' | '\\n' | '\\u000C' )
             {
             if ( (input.LA(1)>='\t' && input.LA(1)<='\n')||(input.LA(1)>='\f' && input.LA(1)<='\r')||input.LA(1)==' ' ) {
                 input.consume();
 
             }
             else {
-                MismatchedSetException mse =
-                    new MismatchedSetException(null,input);
-                recover(mse);    throw mse;
-            }
+                MismatchedSetException mse = new MismatchedSetException(null,input);
+                recover(mse);
+                throw mse;}
 
 
             }
@@ -502,13 +529,13 @@ public class CalculationsLexer extends Lexer {
         finally {
         }
     }
-    // $ANTLR end Whitespace
+    // $ANTLR end "Whitespace"
 
-    // $ANTLR start LowerCase
+    // $ANTLR start "LowerCase"
     public final void mLowerCase() throws RecognitionException {
         try {
-            // C:\\Users\\Alan\\Documents\\Intellij\\EasyInsight\\Java\\src\\com\\easyinsight\\calculations\\Calculations.g:63:2: ( 'a' .. 'z' )
-            // C:\\Users\\Alan\\Documents\\Intellij\\EasyInsight\\Java\\src\\com\\easyinsight\\calculations\\Calculations.g:63:4: 'a' .. 'z'
+            // C:\\Users\\abaldwin\\Documents\\EasyInsight\\code\\java\\src\\com\\easyinsight\\calculations\\Calculations.g:63:2: ( 'a' .. 'z' )
+            // C:\\Users\\abaldwin\\Documents\\EasyInsight\\code\\java\\src\\com\\easyinsight\\calculations\\Calculations.g:63:4: 'a' .. 'z'
             {
             matchRange('a','z'); 
 
@@ -518,13 +545,13 @@ public class CalculationsLexer extends Lexer {
         finally {
         }
     }
-    // $ANTLR end LowerCase
+    // $ANTLR end "LowerCase"
 
-    // $ANTLR start UpperCase
+    // $ANTLR start "UpperCase"
     public final void mUpperCase() throws RecognitionException {
         try {
-            // C:\\Users\\Alan\\Documents\\Intellij\\EasyInsight\\Java\\src\\com\\easyinsight\\calculations\\Calculations.g:66:2: ( 'A' .. 'Z' )
-            // C:\\Users\\Alan\\Documents\\Intellij\\EasyInsight\\Java\\src\\com\\easyinsight\\calculations\\Calculations.g:66:4: 'A' .. 'Z'
+            // C:\\Users\\abaldwin\\Documents\\EasyInsight\\code\\java\\src\\com\\easyinsight\\calculations\\Calculations.g:66:2: ( 'A' .. 'Z' )
+            // C:\\Users\\abaldwin\\Documents\\EasyInsight\\code\\java\\src\\com\\easyinsight\\calculations\\Calculations.g:66:4: 'A' .. 'Z'
             {
             matchRange('A','Z'); 
 
@@ -534,23 +561,22 @@ public class CalculationsLexer extends Lexer {
         finally {
         }
     }
-    // $ANTLR end UpperCase
+    // $ANTLR end "UpperCase"
 
-    // $ANTLR start Character
+    // $ANTLR start "Character"
     public final void mCharacter() throws RecognitionException {
         try {
-            // C:\\Users\\Alan\\Documents\\Intellij\\EasyInsight\\Java\\src\\com\\easyinsight\\calculations\\Calculations.g:69:2: ( LowerCase | UpperCase )
-            // C:\\Users\\Alan\\Documents\\Intellij\\EasyInsight\\Java\\src\\com\\easyinsight\\calculations\\Calculations.g:
+            // C:\\Users\\abaldwin\\Documents\\EasyInsight\\code\\java\\src\\com\\easyinsight\\calculations\\Calculations.g:69:2: ( LowerCase | UpperCase )
+            // C:\\Users\\abaldwin\\Documents\\EasyInsight\\code\\java\\src\\com\\easyinsight\\calculations\\Calculations.g:
             {
             if ( (input.LA(1)>='A' && input.LA(1)<='Z')||(input.LA(1)>='a' && input.LA(1)<='z') ) {
                 input.consume();
 
             }
             else {
-                MismatchedSetException mse =
-                    new MismatchedSetException(null,input);
-                recover(mse);    throw mse;
-            }
+                MismatchedSetException mse = new MismatchedSetException(null,input);
+                recover(mse);
+                throw mse;}
 
 
             }
@@ -559,13 +585,13 @@ public class CalculationsLexer extends Lexer {
         finally {
         }
     }
-    // $ANTLR end Character
+    // $ANTLR end "Character"
 
-    // $ANTLR start SpecialChars
+    // $ANTLR start "SpecialChars"
     public final void mSpecialChars() throws RecognitionException {
         try {
-            // C:\\Users\\Alan\\Documents\\Intellij\\EasyInsight\\Java\\src\\com\\easyinsight\\calculations\\Calculations.g:73:2: ( '_' )
-            // C:\\Users\\Alan\\Documents\\Intellij\\EasyInsight\\Java\\src\\com\\easyinsight\\calculations\\Calculations.g:73:4: '_'
+            // C:\\Users\\abaldwin\\Documents\\EasyInsight\\code\\java\\src\\com\\easyinsight\\calculations\\Calculations.g:73:2: ( '_' )
+            // C:\\Users\\abaldwin\\Documents\\EasyInsight\\code\\java\\src\\com\\easyinsight\\calculations\\Calculations.g:73:4: '_'
             {
             match('_'); 
 
@@ -575,210 +601,92 @@ public class CalculationsLexer extends Lexer {
         finally {
         }
     }
-    // $ANTLR end SpecialChars
+    // $ANTLR end "SpecialChars"
 
     public void mTokens() throws RecognitionException {
-        // C:\\Users\\Alan\\Documents\\Intellij\\EasyInsight\\Java\\src\\com\\easyinsight\\calculations\\Calculations.g:1:8: ( OpenParen | CloseParen | Add | Subtract | Multiply | Divide | Comma | Dot | Exp | Decimal | Variable | HideWhiteSpace )
+        // C:\\Users\\abaldwin\\Documents\\EasyInsight\\code\\java\\src\\com\\easyinsight\\calculations\\Calculations.g:1:8: ( OpenParen | CloseParen | Add | Subtract | Multiply | Divide | Comma | Dot | Exp | Decimal | Variable | HideWhiteSpace )
         int alt7=12;
-        switch ( input.LA(1) ) {
-        case '(':
-            {
-            alt7=1;
-            }
-            break;
-        case ')':
-            {
-            alt7=2;
-            }
-            break;
-        case '+':
-            {
-            alt7=3;
-            }
-            break;
-        case '-':
-            {
-            alt7=4;
-            }
-            break;
-        case '*':
-            {
-            alt7=5;
-            }
-            break;
-        case '/':
-            {
-            alt7=6;
-            }
-            break;
-        case ',':
-            {
-            alt7=7;
-            }
-            break;
-        case '.':
-            {
-            alt7=8;
-            }
-            break;
-        case '^':
-            {
-            alt7=9;
-            }
-            break;
-        case '0':
-        case '1':
-        case '2':
-        case '3':
-        case '4':
-        case '5':
-        case '6':
-        case '7':
-        case '8':
-        case '9':
-            {
-            alt7=10;
-            }
-            break;
-        case 'A':
-        case 'B':
-        case 'C':
-        case 'D':
-        case 'E':
-        case 'F':
-        case 'G':
-        case 'H':
-        case 'I':
-        case 'J':
-        case 'K':
-        case 'L':
-        case 'M':
-        case 'N':
-        case 'O':
-        case 'P':
-        case 'Q':
-        case 'R':
-        case 'S':
-        case 'T':
-        case 'U':
-        case 'V':
-        case 'W':
-        case 'X':
-        case 'Y':
-        case 'Z':
-        case 'a':
-        case 'b':
-        case 'c':
-        case 'd':
-        case 'e':
-        case 'f':
-        case 'g':
-        case 'h':
-        case 'i':
-        case 'j':
-        case 'k':
-        case 'l':
-        case 'm':
-        case 'n':
-        case 'o':
-        case 'p':
-        case 'q':
-        case 'r':
-        case 's':
-        case 't':
-        case 'u':
-        case 'v':
-        case 'w':
-        case 'x':
-        case 'y':
-        case 'z':
-            {
-            alt7=11;
-            }
-            break;
-        default:
-            alt7=12;}
-
+        alt7 = dfa7.predict(input);
         switch (alt7) {
             case 1 :
-                // C:\\Users\\Alan\\Documents\\Intellij\\EasyInsight\\Java\\src\\com\\easyinsight\\calculations\\Calculations.g:1:10: OpenParen
+                // C:\\Users\\abaldwin\\Documents\\EasyInsight\\code\\java\\src\\com\\easyinsight\\calculations\\Calculations.g:1:10: OpenParen
                 {
                 mOpenParen(); 
 
                 }
                 break;
             case 2 :
-                // C:\\Users\\Alan\\Documents\\Intellij\\EasyInsight\\Java\\src\\com\\easyinsight\\calculations\\Calculations.g:1:20: CloseParen
+                // C:\\Users\\abaldwin\\Documents\\EasyInsight\\code\\java\\src\\com\\easyinsight\\calculations\\Calculations.g:1:20: CloseParen
                 {
                 mCloseParen(); 
 
                 }
                 break;
             case 3 :
-                // C:\\Users\\Alan\\Documents\\Intellij\\EasyInsight\\Java\\src\\com\\easyinsight\\calculations\\Calculations.g:1:31: Add
+                // C:\\Users\\abaldwin\\Documents\\EasyInsight\\code\\java\\src\\com\\easyinsight\\calculations\\Calculations.g:1:31: Add
                 {
                 mAdd(); 
 
                 }
                 break;
             case 4 :
-                // C:\\Users\\Alan\\Documents\\Intellij\\EasyInsight\\Java\\src\\com\\easyinsight\\calculations\\Calculations.g:1:35: Subtract
+                // C:\\Users\\abaldwin\\Documents\\EasyInsight\\code\\java\\src\\com\\easyinsight\\calculations\\Calculations.g:1:35: Subtract
                 {
                 mSubtract(); 
 
                 }
                 break;
             case 5 :
-                // C:\\Users\\Alan\\Documents\\Intellij\\EasyInsight\\Java\\src\\com\\easyinsight\\calculations\\Calculations.g:1:44: Multiply
+                // C:\\Users\\abaldwin\\Documents\\EasyInsight\\code\\java\\src\\com\\easyinsight\\calculations\\Calculations.g:1:44: Multiply
                 {
                 mMultiply(); 
 
                 }
                 break;
             case 6 :
-                // C:\\Users\\Alan\\Documents\\Intellij\\EasyInsight\\Java\\src\\com\\easyinsight\\calculations\\Calculations.g:1:53: Divide
+                // C:\\Users\\abaldwin\\Documents\\EasyInsight\\code\\java\\src\\com\\easyinsight\\calculations\\Calculations.g:1:53: Divide
                 {
                 mDivide(); 
 
                 }
                 break;
             case 7 :
-                // C:\\Users\\Alan\\Documents\\Intellij\\EasyInsight\\Java\\src\\com\\easyinsight\\calculations\\Calculations.g:1:60: Comma
+                // C:\\Users\\abaldwin\\Documents\\EasyInsight\\code\\java\\src\\com\\easyinsight\\calculations\\Calculations.g:1:60: Comma
                 {
                 mComma(); 
 
                 }
                 break;
             case 8 :
-                // C:\\Users\\Alan\\Documents\\Intellij\\EasyInsight\\Java\\src\\com\\easyinsight\\calculations\\Calculations.g:1:66: Dot
+                // C:\\Users\\abaldwin\\Documents\\EasyInsight\\code\\java\\src\\com\\easyinsight\\calculations\\Calculations.g:1:66: Dot
                 {
                 mDot(); 
 
                 }
                 break;
             case 9 :
-                // C:\\Users\\Alan\\Documents\\Intellij\\EasyInsight\\Java\\src\\com\\easyinsight\\calculations\\Calculations.g:1:70: Exp
+                // C:\\Users\\abaldwin\\Documents\\EasyInsight\\code\\java\\src\\com\\easyinsight\\calculations\\Calculations.g:1:70: Exp
                 {
                 mExp(); 
 
                 }
                 break;
             case 10 :
-                // C:\\Users\\Alan\\Documents\\Intellij\\EasyInsight\\Java\\src\\com\\easyinsight\\calculations\\Calculations.g:1:74: Decimal
+                // C:\\Users\\abaldwin\\Documents\\EasyInsight\\code\\java\\src\\com\\easyinsight\\calculations\\Calculations.g:1:74: Decimal
                 {
                 mDecimal(); 
 
                 }
                 break;
             case 11 :
-                // C:\\Users\\Alan\\Documents\\Intellij\\EasyInsight\\Java\\src\\com\\easyinsight\\calculations\\Calculations.g:1:82: Variable
+                // C:\\Users\\abaldwin\\Documents\\EasyInsight\\code\\java\\src\\com\\easyinsight\\calculations\\Calculations.g:1:82: Variable
                 {
                 mVariable(); 
 
                 }
                 break;
             case 12 :
-                // C:\\Users\\Alan\\Documents\\Intellij\\EasyInsight\\Java\\src\\com\\easyinsight\\calculations\\Calculations.g:1:91: HideWhiteSpace
+                // C:\\Users\\abaldwin\\Documents\\EasyInsight\\code\\java\\src\\com\\easyinsight\\calculations\\Calculations.g:1:91: HideWhiteSpace
                 {
                 mHideWhiteSpace(); 
 
@@ -790,6 +698,69 @@ public class CalculationsLexer extends Lexer {
     }
 
 
+    protected DFA7 dfa7 = new DFA7(this);
+    static final String DFA7_eotS =
+        "\1\14\14\uffff";
+    static final String DFA7_eofS =
+        "\15\uffff";
+    static final String DFA7_minS =
+        "\1\50\14\uffff";
+    static final String DFA7_maxS =
+        "\1\172\14\uffff";
+    static final String DFA7_acceptS =
+        "\1\uffff\1\1\1\2\1\3\1\4\1\5\1\6\1\7\1\10\1\11\1\12\1\13\1\14";
+    static final String DFA7_specialS =
+        "\15\uffff}>";
+    static final String[] DFA7_transitionS = {
+            "\1\1\1\2\1\5\1\3\1\7\1\4\1\10\1\6\12\12\7\uffff\32\13\3\uffff"+
+            "\1\11\2\uffff\32\13",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            ""
+    };
+
+    static final short[] DFA7_eot = DFA.unpackEncodedString(DFA7_eotS);
+    static final short[] DFA7_eof = DFA.unpackEncodedString(DFA7_eofS);
+    static final char[] DFA7_min = DFA.unpackEncodedStringToUnsignedChars(DFA7_minS);
+    static final char[] DFA7_max = DFA.unpackEncodedStringToUnsignedChars(DFA7_maxS);
+    static final short[] DFA7_accept = DFA.unpackEncodedString(DFA7_acceptS);
+    static final short[] DFA7_special = DFA.unpackEncodedString(DFA7_specialS);
+    static final short[][] DFA7_transition;
+
+    static {
+        int numStates = DFA7_transitionS.length;
+        DFA7_transition = new short[numStates][];
+        for (int i=0; i<numStates; i++) {
+            DFA7_transition[i] = DFA.unpackEncodedString(DFA7_transitionS[i]);
+        }
+    }
+
+    class DFA7 extends DFA {
+
+        public DFA7(BaseRecognizer recognizer) {
+            this.recognizer = recognizer;
+            this.decisionNumber = 7;
+            this.eot = DFA7_eot;
+            this.eof = DFA7_eof;
+            this.min = DFA7_min;
+            this.max = DFA7_max;
+            this.accept = DFA7_accept;
+            this.special = DFA7_special;
+            this.transition = DFA7_transition;
+        }
+        public String getDescription() {
+            return "1:1: Tokens : ( OpenParen | CloseParen | Add | Subtract | Multiply | Divide | Comma | Dot | Exp | Decimal | Variable | HideWhiteSpace );";
+        }
+    }
  
 
 }
