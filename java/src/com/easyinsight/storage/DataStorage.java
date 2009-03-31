@@ -364,12 +364,11 @@ public class DataStorage {
                 KeyMetadata keyMetadata = keys.get(key);
                 if (keyMetadata != null) {
                     if (keyMetadata.getType() == Value.DATE) {
-                        long time = dataRS.getTimestamp(i++).getTime();
+                        Timestamp time = dataRS.getTimestamp(i++);
                         if (dataRS.wasNull()) {
                             row.addValue(key, new EmptyValue());
                         } else {
-                            System.out.println("LoadedDateVal " + new java.util.Date(time));
-                            row.addValue(key, new DateValue(new java.util.Date(time)));
+                            row.addValue(key, new DateValue(new java.util.Date(time.getTime())));
                         }
                     } else if (keyMetadata.getType() == Value.NUMBER) {
                         double value = dataRS.getDouble(i++);
