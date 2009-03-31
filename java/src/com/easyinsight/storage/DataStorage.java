@@ -242,6 +242,9 @@ public class DataStorage {
         List<FieldMigration> fieldMigrations = new ArrayList<FieldMigration>();
         boolean newFieldsFound = false;
         for (AnalysisItem newItem : newItems) {
+            if (newItem.isDerived()) {
+                continue;
+            }
             boolean newKey = true;
             for (AnalysisItem previousItem : previousItems) {
                 if (newItem.getKey().equals(previousItem.getKey())) {
@@ -510,8 +513,12 @@ public class DataStorage {
             } else {
                 DateValue dateValue = (DateValue) value;
                 date = dateValue.getDate();
-                java.sql.Timestamp sqlDate = new java.sql.Timestamp(date.getTime());
-                insertStmt.setTimestamp(i++, sqlDate);
+                if (date == null) {
+                    insertStmt.setNull(i++, Types.DATE);
+                } else {
+                    java.sql.Timestamp sqlDate = new java.sql.Timestamp(date.getTime());
+                    insertStmt.setTimestamp(i++, sqlDate);
+                }
             }
             if (date == null) {
                 insertStmt.setNull(i++, Types.BIGINT);
