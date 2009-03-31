@@ -32,6 +32,7 @@
                             <mx:Array>
                                 <mx:String>Google</mx:String>
                                 <mx:String>JIRA</mx:String>
+                                <mx:String>BaseCamp</mx:String>
                             </mx:Array>
                         </mx:ArrayCollection>
                     </mx:dataProvider>
@@ -46,6 +47,8 @@
                         <!-- <customupload:ServerDataSourceCreation dataSourceClass="com.easyinsight.datasources.JiraDataSource" userConfigComplete="onFeedCreation(event)"
                                                            userConfigCancel="cancel(event)"/>-->
                         <customupload:JiraDataSourceCreation userConfigComplete="onFeedCreation(event)"
+                                                           userConfigCancel="cancel(event)"/>
+                        <customupload:BaseCampDataSourceCreation userConfigComplete="onFeedCreation(event)"
                                                            userConfigCancel="cancel(event)"/>
                     </mx:ViewStack>
                 </mx:VBox>

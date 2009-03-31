@@ -62,10 +62,6 @@ public class JiraDataSource extends ServerDataSourceDefinition {
         return CredentialsDefinition.STANDARD_USERNAME_PW;
     }
 
-    public FeedDefinition ddl() {
-        return new JiraDataSource();
-    }
-
     @Override
     public String validateCredentials(Credentials credentials) {
         try {

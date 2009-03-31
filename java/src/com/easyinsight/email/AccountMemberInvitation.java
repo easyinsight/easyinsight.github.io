@@ -108,7 +108,7 @@ public class AccountMemberInvitation {
         String body = MessageFormat.format(freeAccountConfirmationText, url);
         String subject = "Easy Insight Account Activation";
         try {
-            new GMailConnection().sendSSLMessage(to, subject, body, "donotreply@easy-insight.com");
+//            new GMailConnection().sendSSLMessage(to, subject, body, "donotreply@easy-insight.com");
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);

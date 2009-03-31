@@ -8,6 +8,7 @@ import com.easyinsight.datafeeds.salesforce.SalesforceFeedDefinition;
 import com.easyinsight.datafeeds.salesforce.SalesforceSubFeedDefinition;
 import com.easyinsight.datafeeds.file.FileBasedFeedDefinition;
 import com.easyinsight.datafeeds.jira.JiraDataSource;
+import com.easyinsight.datafeeds.basecamp.BaseCampDataSource;
 import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.analysis.AnalysisItemTypes;
 import com.easyinsight.email.UserStub;
@@ -430,7 +431,10 @@ public class FeedStorage {
                     feedDefinition = new FeedDefinition();
                 } else if (feedType.equals(FeedType.JIRA)) {
                     feedDefinition = new JiraDataSource();
-                } else {
+                } else if (feedType.equals(FeedType.BASECAMP)) {
+                    feedDefinition = new BaseCampDataSource();
+                }
+                else {
                     throw new RuntimeException("Couldn't identify type");
                 }
                 String genre = rs.getString(4);
