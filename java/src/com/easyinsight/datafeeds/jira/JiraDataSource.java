@@ -3,6 +3,7 @@ package com.easyinsight.datafeeds.jira;
 import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.datafeeds.FeedType;
 import com.easyinsight.datafeeds.CredentialsDefinition;
+import com.easyinsight.datafeeds.ServerDataSourceDefinition;
 import com.easyinsight.datafeeds.jira.jiraweb.*;
 import com.easyinsight.users.Credentials;
 import com.easyinsight.users.Account;
@@ -26,7 +27,7 @@ import java.sql.ResultSet;
  * Date: Feb 15, 2009
  * Time: 8:38:08 PM
  */
-public class JiraDataSource extends FeedDefinition {
+public class JiraDataSource extends ServerDataSourceDefinition {
 
     private String url;
     public static final String REPORTER = "Reporter";
