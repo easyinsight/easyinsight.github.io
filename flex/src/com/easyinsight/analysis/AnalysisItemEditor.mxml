@@ -61,6 +61,14 @@
 	
 		<mx:State name="Grouping">
             <mx:AddChild relativeTo="{firstForm}" position="after" creationPolicy="all">
+                <mx:FormItem label="Grouping: " visible="{useKeyDimensionSelected}">
+					<mx:ComboBox dataProvider="{dimensionFields}" id="dimensionKeyComboBox" labelField="display"/>
+				</mx:FormItem>
+            </mx:AddChild>
+            <mx:AddChild relativeTo="{firstForm}" position="after" creationPolicy="all">
+                <mx:CheckBox label="Use Another Grouping as Key: " id="useKeyDimension" selected="{useKeyDimensionSelected}" click="useKeyDimensionSelected = useKeyDimension.selected"/>
+            </mx:AddChild>
+            <mx:AddChild relativeTo="{firstForm}" position="after" creationPolicy="all">
                 <mx:FormItem label="Group: ">
                     <mx:CheckBox id="groupCheckbox"/>
                 </mx:FormItem>
@@ -121,7 +129,7 @@
 	</mx:states>
 	<mx:Script>
 		<![CDATA[
-			import com.easyinsight.analysis.conditions.MeasureConditionRange;
+        import com.easyinsight.analysis.conditions.MeasureConditionRange;
 
         import mx.events.DropdownEvent;
 
@@ -145,6 +153,9 @@
 
         [Bindable]
         private var dimensionFields:ArrayCollection = new ArrayCollection();
+
+        [Bindable]
+        private var useKeyDimensionSelected:Boolean = false;
 
         [Bindable]
         private var displayName:String;
@@ -283,6 +294,9 @@
                 case "Grouping":
                     var analysisDimension:AnalysisDimension = new AnalysisDimension();
                     analysisDimension.group = groupCheckbox.selected;
+                    if (useKeyDimension.selected) {
+                        analysisDimension.keyDimension = dimensionKeyComboBox.selectedItem as AnalysisDimension;
+                    }
                     analysisItem = analysisDimension;
                     break;
                 case "Range":
@@ -398,9 +412,21 @@
                 case "Delta":
                 case "Last Value":
                     currentState = "TemporalMeasure";
+                    if (startingAnalysisItem is TemporalAnalysisMeasure) {
+                        var temporalAnalysisMeasure:TemporalAnalysisMeasure = startingAnalysisItem as TemporalAnalysisMeasure;
+                        if (temporalAnalysisMeasure.wrappedAggregation > 0) {
+                            temporalWrappedAggregations.selectedIndex = temporalAnalysisMeasure.wrappedAggregation - 1;
+                        }
+                    }
                     break;
                 case "Normality":
                     currentState = "ComplexMeasure";
+                    if (startingAnalysisItem is ComplexAnalysisMeasure) {
+                        var complexAnalysisMeasure:ComplexAnalysisMeasure = startingAnalysisItem as ComplexAnalysisMeasure;
+                        if (complexAnalysisMeasure.wrappedAggregation > 0) {
+                            complexWrappedAggregations.selectedIndex = complexAnalysisMeasure.wrappedAggregation - 1;
+                        }
+                    }
                     break;
                 case "Calculation":
                     currentState = "Calculation";
@@ -419,6 +445,8 @@
                     if (startingAnalysisItem is AnalysisDimension) {
                         var analysisDimension:AnalysisDimension = startingAnalysisItem as AnalysisDimension;
                         groupCheckbox.selected = analysisDimension.group;
+                        useKeyDimensionSelected = analysisDimension.keyDimension != null;
+                        dimensionKeyComboBox.selectedItem = analysisDimension.keyDimension;
                     }
                     break;
                 case "Range":

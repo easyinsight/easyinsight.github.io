@@ -25,16 +25,15 @@
     <mx:Script>
 		<![CDATA[
         import com.easyinsight.analysis.AnalysisDefinition;
-import com.easyinsight.framework.ModuleAnalyzeSource;
+        import com.easyinsight.framework.ModuleAnalyzeSource;
         import com.easyinsight.listing.AnalysisDefinitionAnalyzeSource;
-import com.easyinsight.solutions.InsightDescriptor;
+        import com.easyinsight.solutions.InsightDescriptor;
         import mx.utils.URLUtil;
         import mx.managers.BrowserManager;
         import mx.rpc.events.FaultEvent;
         import mx.controls.Alert;
         import mx.rpc.events.ResultEvent;
 
-        import com.easyinsight.listing.HeaderBarEvent;
         import com.easyinsight.listing.CatalogNavigationEvent;
         import com.easyinsight.dashboard.DataViewPanel;
 
@@ -54,7 +53,6 @@ import com.easyinsight.solutions.InsightDescriptor;
             var dataProviderDescriptors:ArrayCollection = dataProvider.searchForAvailableFeeds.lastResult as ArrayCollection;
             currentState = "SearchState";
             catalogListing.dataFeeds = dataProviderDescriptors;
-            dispatchEvent(new HeaderBarEvent(true, false));
         }
 
         public function titleClick(definition:AnalysisDefinition):void {
@@ -69,14 +67,12 @@ import com.easyinsight.solutions.InsightDescriptor;
             var analysisDefs:ArrayCollection = event.items;
             currentState = "AnalysisSearchState";
             analysisCatalogListing.insightDescriptors = analysisDefs;
-            dispatchEvent(new HeaderBarEvent(true, false));
         }
 
         private function onSearchFeed(event:ChildSearchEvent):void {
             var dataProviderDescriptors:ArrayCollection = event.items;
             currentState = "SearchState";
             catalogListing.dataFeeds = dataProviderDescriptors;
-            dispatchEvent(new HeaderBarEvent(true, false));
         }
 
         override public function analyze():ModuleAnalyzeSource {
@@ -91,7 +87,6 @@ import com.easyinsight.solutions.InsightDescriptor;
 
         private function navigateToHome(event:CatalogNavigationEvent):void {
             currentState = "";
-            dispatchEvent(new HeaderBarEvent(false, false));
         }
 
         override public function gotFocus():void {

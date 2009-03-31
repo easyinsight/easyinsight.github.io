@@ -34,7 +34,7 @@ public class MapControlBar extends HBox implements IReportControlBar {
         measureGrouping.addEventListener(AnalysisItemUpdateEvent.ANALYSIS_LIST_UPDATE, requestListData);
         mapComboBox = new ComboBox();
         mapComboBox.dataProvider = new ArrayCollection([
-                 {label:"USA", data:MapDefinition.USA}, {label:"World", data:MapDefinition.WORLD},
+                  {label:"World", data:MapDefinition.WORLD},{ label:"USA", data:MapDefinition.USA}, 
                     {label:"Europe", data:MapDefinition.EUROPE}, {label:"Asia", data:MapDefinition.ASIA},
                     {label:"Americas", data:MapDefinition.AMERICAS}, {label:"Middle East", data:MapDefinition.MIDDLE_EAST}
         ]);
@@ -44,6 +44,7 @@ public class MapControlBar extends HBox implements IReportControlBar {
 
     private function onMapTypeChange(event:ListEvent):void {
         mapDefinition.mapType = mapComboBox.selectedItem.data;
+        dispatchEvent(new MapTypeEvent(mapComboBox.selectedItem.data));
         dispatchEvent(new ReportDataEvent(ReportDataEvent.REQUEST_DATA));
     }
 

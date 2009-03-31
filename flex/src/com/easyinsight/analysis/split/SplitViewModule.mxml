@@ -34,6 +34,8 @@ import mx.events.DragEvent;
         private var joinItem:AnalysisItem;
         private var filterValueDefinition:FilterValueDefinition;
 
+        private var dataSourceID:int;
+
         private function maximizeSource():void {
         }
 
@@ -79,7 +81,7 @@ import mx.events.DragEvent;
             if (sourceReport == null) {
                 this.sourceReport = dataView.createNewDefinition();
                 sourceReport.canSaveDirectly = true;
-                sourceReport.dataFeedID = dataService.dataFeedID;
+                sourceReport.dataFeedID = dataSourceID;
             } else {
                 sourceReport = dataView.fromExistingDefinition(sourceReport);
                 dataView.analysisDefinition = sourceReport;
@@ -100,7 +102,7 @@ import mx.events.DragEvent;
             if (targetReport == null) {
                 this.targetReport = dataView.createNewDefinition();
                 targetReport.canSaveDirectly = true;
-                targetReport.dataFeedID = dataService.dataFeedID;
+                targetReport.dataFeedID = dataSourceID;
             } else {
                 targetReport = dataView.fromExistingDefinition(targetReport);
                 dataView.analysisDefinition = targetReport;

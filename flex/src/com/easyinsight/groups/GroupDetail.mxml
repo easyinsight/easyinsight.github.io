@@ -1,10 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
-<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*" width="100%" height="100%"
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*"
+         xmlns:listing="com.easyinsight.listing.*" width="100%" height="100%"
          implements="com.easyinsight.listing.IPerspective"
          xmlns:groups="com.easyinsight.groups.*" xmlns:discussion="com.easyinsight.discussion.*">
     <mx:states>
         <mx:State name="Discussion">
             <mx:RemoveChild target="{groupAttributesBox}"/>
+        </mx:State>
+        <mx:State name="SearchState">
+            <mx:RemoveChild target="{sourcesBox}"/>
+            <mx:AddChild relativeTo="{primaryCanvas}">
+                <listing:CatalogListing id="catalogListing" returnToStore="navigateToHome(event)"/>
+            </mx:AddChild>
+        </mx:State>
+        <mx:State name="AnalysisSearchState">
+            <mx:RemoveChild target="{sourcesBox}"/>
+            <mx:AddChild relativeTo="{primaryCanvas}">
+                <listing:CatalogAnalysisListing id="analysisCatalogListing" returnToStore="navigateToHome(event)"/>
+            </mx:AddChild>
         </mx:State>
     </mx:states>
     <mx:transitions>
@@ -15,22 +28,6 @@
             </mx:Sequence>
         </mx:Transition>
     </mx:transitions>
-    <!--
-	<mx:states>
-		<mx:State name="SearchState">
-			<mx:RemoveChild target="{coreHBox}"/>			
-			<mx:AddChild relativeTo="{primaryCanvas}">
-				<listing:CatalogListing id="catalogListing" returnToStore="navigateToHome(event)"/>
-			</mx:AddChild>
-		</mx:State>
-		<mx:State name="AnalysisSearchState">
-			<mx:RemoveChild target="{coreHBox}"/>			
-			<mx:AddChild relativeTo="{primaryCanvas}">
-				<listing:CatalogAnalysisListing id="analysisCatalogListing" returnToStore="navigateToHome(event)"/>
-			</mx:AddChild>
-		</mx:State>
-	</mx:states>
-	-->
     <mx:Script>
 		<![CDATA[
         import com.easyinsight.discussion.MessagePostedEvent;
@@ -38,11 +35,10 @@
 
         import mx.controls.Alert;
         import mx.managers.BrowserManager;
-import mx.managers.PopUpManager;
+        import mx.managers.PopUpManager;
 
         import com.easyinsight.help.HelpWindow;
         import com.easyinsight.framework.User;
-        import com.easyinsight.listing.HeaderBarEvent;
 
         import mx.collections.ArrayCollection;
 
@@ -50,6 +46,7 @@ import mx.managers.PopUpManager;
         import com.easyinsight.listing.CatalogNavigationEvent;
         import com.easyinsight.listing.AnalyzeSource;
         import com.easyinsight.framework.NavigationEvent;
+
         import mx.utils.URLUtil;
 
         [Bindable]
@@ -130,27 +127,20 @@ import mx.managers.PopUpManager;
 
         private var _group:Group;
 
-        public function search(keyword:String = null):void {
-
-        }
-
         private function onSearchAnalysis(event:ChildSearchEvent):void {
             var analysisDefs:ArrayCollection = event.items;
-            //currentState = "AnalysisSearchState";
-            //analysisCatalogListing.analysisDefinitions = analysisDefs;
-            dispatchEvent(new HeaderBarEvent(true, false));
+            currentState = "AnalysisSearchState";
+            analysisCatalogListing.insightDescriptors = analysisDefs;
         }
 
         private function onSearchFeed(event:ChildSearchEvent):void {
             var dataProviderDescriptors:ArrayCollection = event.items;
-            //currentState = "SearchState";
-            //catalogListing.dataFeeds = dataProviderDescriptors;
-            dispatchEvent(new HeaderBarEvent(true, false));
+            currentState = "SearchState";
+            catalogListing.dataFeeds = dataProviderDescriptors;
         }
 
         private function navigateToHome(event:CatalogNavigationEvent):void {
             currentState = "";
-            dispatchEvent(new HeaderBarEvent(false, false));
         }
 
         public function analyze():AnalyzeSource {
@@ -170,9 +160,6 @@ import mx.managers.PopUpManager;
             groupFeeds.refreshData();
         }
 
-        public function lostFocus():void {
-        }
-
         private function backToGroupList():void {
             User.getEventNotifier().dispatchEvent(new NavigationEvent("Groups"));
         }
@@ -184,6 +171,7 @@ import mx.managers.PopUpManager;
                 hasDescription = true;
             }
             this.groupName = group.name;
+            BrowserManager.getInstance().setTitle("Easy Insight - " + groupName);
             ownerText = "";
             var secondUser:Boolean = false;
             var foundUser:Boolean = false;
@@ -307,6 +295,10 @@ import mx.managers.PopUpManager;
         }
 		]]>		
     </mx:Script>
+    <mx:RemoteObject destination="groupService" id="groupService2">
+        <mx:method name="getInsights"/>
+        <mx:method name="getFeeds"/>
+    </mx:RemoteObject>
     <mx:RemoteObject destination="groupService" id="groupService">
         <mx:method name="getGroup" result="gotGroupDetails()"/>
         <mx:method name="getGroupMessages" result="gotGroupMessages()"/>
@@ -322,21 +314,23 @@ import mx.managers.PopUpManager;
              paddingBottom="10">
         <mx:HBox width="100%">
             <mx:Button label="Back to Group List" click="backToGroupList()"/>
-            <mx:Button icon="{connectIcon}" toolTip="Join Group" click="joinGroup()" visible="{joinEnabled}" label="Join Group..." labelPlacement="bottom"/>
+            <mx:Button icon="{connectIcon}" toolTip="Join Group" click="joinGroup()" visible="{joinEnabled}"
+                       label="Join Group..." labelPlacement="bottom"/>
             <mx:Button icon="{administerIcon}" toolTip="Administer Group" click="administer()"
                        visible="{adminEnabled}" label="Group Admin..." labelPlacement="bottom"/>
             <mx:Button icon="{addDataSourceIcon}" toolTip="Add Data Source..." click="addDataSource()"
-                       visible="{adminEnabled}"  label="Add Data Source..." labelPlacement="bottom"/>
+                       visible="{adminEnabled}" label="Add Data Source..." labelPlacement="bottom"/>
             <mx:Button icon="{addInsightIcon}" toolTip="Add Report..." click="addReport()" visible="{adminEnabled}"
-                     label="Add Report..." labelPlacement="bottom"/>
-            <mx:Button icon="{addGoalTreeIcon}" toolTip="Add Goal Tree..." click="addGoalTree()" visible="{adminEnabled}"
-                     label="Add Goal Tree..." labelPlacement="bottom"/>
+                       label="Add Report..." labelPlacement="bottom"/>
+            <mx:Button icon="{addGoalTreeIcon}" toolTip="Add Goal Tree..." click="addGoalTree()"
+                       visible="{adminEnabled}"
+                       label="Add Goal Tree..." labelPlacement="bottom"/>
             <mx:Button icon="{addGoalIcon}" toolTip="Add Goal..." click="addGoal()" visible="{adminEnabled}"
-                     label="Add Goal..." labelPlacement="bottom"/>
+                       label="Add Goal..." labelPlacement="bottom"/>
             <mx:Button icon="{messageIcon}" toolTip="New Comment..." click="newMessage()" visible="{!joinEnabled}"
-                     label="Add Comment..." labelPlacement="bottom"/>
+                       label="Add Comment..." labelPlacement="bottom"/>
             <mx:Button icon="{helpIcon}" toolTip="Help!" click="help()"
-                     label="Help..." labelPlacement="bottom"/>
+                       label="Help..." labelPlacement="bottom"/>
         </mx:HBox>
         <mx:Spacer height="20"/>
         <mx:HBox width="100%">
@@ -377,20 +371,21 @@ import mx.managers.PopUpManager;
 			</mx:DataGrid>
 			-->
         </mx:VBox>
-        <mx:HBox width="100%">
+        <mx:HBox width="100%" id="sourcesBox">
             <mx:HBox width="100%" backgroundColor="#FFFFFF" backgroundAlpha=".1" id="coreHBox" horizontalAlign="center">
                 <mx:Spacer width="8%"/>
                 <groups:GroupItemPanel rendererClass="com.easyinsight.genredata.PopularAnalysisItem" width="40%"
                                        id="groupInsights"
-                                       title="Group Reports" groupID="{groupID}" dataOperation="{groupService.getInsights}"
-                                       fullDataOperation="{groupService.getInsights}"
+                                       title="Group Reports" groupID="{groupID}"
+                                       dataOperation="{groupService.getInsights}"
+                                       fullDataOperation="{groupService2.getInsights}"
                                        fullEventType="{ChildSearchEvent.ANALYSIS_SEARCH}"
                                        analysisSearch="onSearchAnalysis(event)"/>
                 <mx:Spacer width="4%"/>
                 <groups:GroupItemPanel rendererClass="com.easyinsight.genredata.PopularFeed" width="40%" id="groupFeeds"
                                        title="Group Data Sources" groupID="{groupID}"
                                        dataOperation="{groupService.getFeeds}"
-                                       fullDataOperation="{groupService.getFeeds}"
+                                       fullDataOperation="{groupService2.getFeeds}"
                                        fullEventType="{ChildSearchEvent.FEED_SEARCH}"
                                        feedSearch="onSearchFeed(event)"/>
                 <mx:Spacer width="8%"/>
@@ -405,7 +400,8 @@ import mx.managers.PopUpManager;
                         <mx:columns>
                             <util:EIDataGridColumn headerText="Goal Tree Name" dataField="goalTreeName"/>
                             <util:EIDataGridColumn headerText="" dataField="goalTreeName" width="50"
-                                                   itemRenderer="com.easyinsight.groups.GroupGoalsControls" sortable="false"/>
+                                                   itemRenderer="com.easyinsight.groups.GroupGoalsControls"
+                                                   sortable="false"/>
                         </mx:columns>
                     </mx:DataGrid>
                 </mx:VBox>
@@ -416,12 +412,16 @@ import mx.managers.PopUpManager;
                     </mx:Box>
                     <mx:DataGrid dataProvider="{goals}" id="goalsGrid" width="100%" rowHeight="28">
                         <mx:columns>
-                            <mx:DataGridColumn headerText="" dataField="name" itemRenderer="com.easyinsight.goals.GoalIconRenderer" width="30"/>
-                            <mx:DataGridColumn headerText="Goal Name" dataField="name" headerRenderer="com.easyinsight.groups.CustomGroupHeader"/>
-                            <mx:DataGridColumn headerText="Latest Value" dataField="name" itemRenderer="com.easyinsight.goals.GoalValueRenderer"
+                            <mx:DataGridColumn headerText="" dataField="name"
+                                               itemRenderer="com.easyinsight.goals.GoalIconRenderer" width="30"/>
+                            <mx:DataGridColumn headerText="Goal Name" dataField="name"
+                                               headerRenderer="com.easyinsight.groups.CustomGroupHeader"/>
+                            <mx:DataGridColumn headerText="Latest Value" dataField="name"
+                                               itemRenderer="com.easyinsight.goals.GoalValueRenderer"
                                                headerRenderer="com.easyinsight.groups.CustomGroupHeader" width="110"/>
-                            <mx:DataGridColumn headerText="Date" dataField="name" headerRenderer="com.easyinsight.groups.CustomGroupHeader"
-                                    itemRenderer="com.easyinsight.goals.GoalDateRenderer" width="80"/>
+                            <mx:DataGridColumn headerText="Date" dataField="name"
+                                               headerRenderer="com.easyinsight.groups.CustomGroupHeader"
+                                               itemRenderer="com.easyinsight.goals.GoalDateRenderer" width="80"/>
                             <!--<mx:DataGridColumn headerText="" dataField="com.easyinsight.goals.GoalControls" sortable="false"
                                                itemRenderer="com.easyinsight.goals.GoalControls" width="30"/>-->
                         </mx:columns>

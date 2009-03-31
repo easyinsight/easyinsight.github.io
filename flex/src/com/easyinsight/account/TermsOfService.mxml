@@ -1,5 +1,5 @@
 <?xml version="1.0" ?>
-<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" horizontalAlign="center"
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%" horizontalAlign="center"
         paddingLeft="15"
 		paddingTop="15" paddingBottom="15" paddingRight="15">
     <mx:Metadata>
@@ -15,7 +15,7 @@
             dispatchEvent(new TermsOfServiceEvent());
         }
 ]]></mx:Script>
-    <mx:TextArea width="800" height="500" editable="false">
+    <mx:TextArea width="800" height="100%" editable="false">
             <mx:htmlText><![CDATA[
 1. Your relationship with Easy Insight
 

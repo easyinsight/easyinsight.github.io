@@ -6,91 +6,87 @@
 	</mx:Metadata> 
 	<mx:Script>
 		<![CDATA[
-			import com.easyinsight.framework.User;
-                    import mx.rpc.events.FaultEvent;
-                    import mx.controls.Alert;
-                    import mx.rpc.events.ResultEvent;
-                    import mx.rpc.remoting.Operation;
-                    import mx.collections.ArrayCollection;
-                    [Bindable]
-                    private var popularListData:ArrayCollection;
+            import mx.rpc.events.FaultEvent;
+            import mx.controls.Alert;
+            import mx.rpc.events.ResultEvent;
+            import mx.rpc.remoting.Operation;
+            import mx.collections.ArrayCollection;
+            [Bindable]
+            private var popularListData:ArrayCollection;
 
-                    private var itemRendererClass:Class;
+            private var itemRendererClass:Class;
 
-                    protected var operation:Operation;
+            protected var operation:Operation;
 
-                    protected var fullListOperation:Operation;
+            protected var fullListOperation:Operation;
 
-                    [Bindable]
-                    private var _genre:String;
+            [Bindable]
+            private var _genre:String;
 
-                    private var _title:String;
+            private var _title:String;
 
-                    private var _fullEventType:String;
-                    
-                    [Bindable]
-                    private var rendererFactory:IFactory;                                                                              
+            private var _fullEventType:String;
 
-                    public function set genre(genreName:String):void {
-                        this._genre = genreName;
-                    }
+            [Bindable]
+            private var rendererFactory:IFactory;
 
-                    public function set rendererClass(renderClass:Class):void {
-                    	
-                    	rendererFactory = new PopularItemFactory(renderClass);                        
-                    }
+            public function set genre(genreName:String):void {
+                this._genre = genreName;
+            }
 
-                    public function set fullEventType(fullEventType:String):void {
-                        this._fullEventType = fullEventType;
-                    }
+            public function set rendererClass(renderClass:Class):void {
+                rendererFactory = new PopularItemFactory(renderClass);
+            }
 
-                    public function set dataOperation(operation:Operation):void {
-                        this.operation = operation;
-                        this.operation.addEventListener(ResultEvent.RESULT, gotData);
-                        //this.operation.addEventListener(FaultEvent.FAULT, failure);
-                    }
+            public function set fullEventType(fullEventType:String):void {
+                this._fullEventType = fullEventType;
+            }
 
-                    public function set fullDataOperation(operation:Operation):void {
-                        this.fullListOperation = operation;
-                        this.fullListOperation.addEventListener(ResultEvent.RESULT, gotFullData);
-                        //this.operation.addEventListener(FaultEvent.FAULT, failure);
-                    }
+            public function set dataOperation(operation:Operation):void {
+                this.operation = operation;
+                this.operation.addEventListener(ResultEvent.RESULT, gotData);
+                //this.operation.addEventListener(FaultEvent.FAULT, failure);
+            }
 
-                    private function gotFullData(event:ResultEvent):void {
-                        trace("got full data!");
-                        dispatchEvent(new ChildSearchEvent(_fullEventType, fullListOperation.lastResult as ArrayCollection));
-                    }
+            public function set fullDataOperation(operation:Operation):void {
+                this.fullListOperation = operation;
+                this.fullListOperation.addEventListener(ResultEvent.RESULT, gotFullData);
+                //this.operation.addEventListener(FaultEvent.FAULT, failure);
+            }
 
-                    public function refreshData():void {
-                        this.operation.send(_genre, 5);
-                    }
+            private function gotFullData(event:ResultEvent):void {
+                dispatchEvent(new ChildSearchEvent(_fullEventType, fullListOperation.lastResult as ArrayCollection));
+            }
 
-                    private function gotData(event:ResultEvent):void {
-                        trace("got normal data");
-                        popularListData = operation.lastResult as ArrayCollection;
-                    }
+            public function refreshData():void {
+                this.operation.send(_genre, 5);
+            }
 
-                    private function failure(event:FaultEvent):void {
-                        Alert.show(event.fault.message);
-                    }
+            private function gotData(event:ResultEvent):void {
+                popularListData = operation.lastResult as ArrayCollection;
+            }
 
-                    protected function getItemRenderer():IFactory {
-                        return rendererFactory;
-                    }
+            private function failure(event:FaultEvent):void {
+                Alert.show(event.fault.message);
+            }
 
-                    [Bindable]
-                    public function set title(title:String):void {
-                        this._title = title;
-                    }
+            protected function getItemRenderer():IFactory {
+                return rendererFactory;
+            }
 
-                    public function get title():String {
-                        return this._title;
-                    }
+            [Bindable]
+            public function set title(title:String):void {
+                this._title = title;
+            }
 
-                    protected function titleClick():void {
-                        this.fullListOperation.send(_genre, 100);
-                    }
-                ]]>
+            public function get title():String {
+                return this._title;
+            }
+
+            protected function titleClick():void {
+                this.fullListOperation.send(_genre, 100);
+            }
+        ]]>
 	</mx:Script>
 	<mx:ApplicationControlBar width="100%" horizontalAlign="center">
 		<mx:LinkButton label="{title}" click="titleClick()" textDecoration="underline"/>
