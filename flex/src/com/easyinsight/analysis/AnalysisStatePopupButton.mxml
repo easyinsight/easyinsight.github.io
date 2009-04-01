@@ -5,22 +5,7 @@
 	</mx:Metadata>
 	<mx:Script>
 		<![CDATA[
-			import com.easyinsight.analysis.AnalysisStateChangeEvent;
 			import com.easyinsight.analysis.charts.ChartTypes;
-            import com.easyinsight.analysis.charts.bubble.BubbleChartController;
-            import com.easyinsight.analysis.charts.plot.PlotChartController;
-            import com.easyinsight.analysis.charts.twoaxisbased.area.Area3DChartController;
-            import com.easyinsight.analysis.charts.twoaxisbased.area.AreaChartController;
-            import com.easyinsight.analysis.charts.twoaxisbased.line.Line3DChartController;
-            import com.easyinsight.analysis.charts.twoaxisbased.line.LineChartController;
-            import com.easyinsight.analysis.charts.xaxisbased.column.Column3DChartController;
-            import com.easyinsight.analysis.charts.xaxisbased.column.ColumnChartController;
-            import com.easyinsight.analysis.charts.xaxisbased.pie.Pie3DChartController;
-            import com.easyinsight.analysis.charts.xaxisbased.pie.PieChartController;
-            import com.easyinsight.analysis.charts.yaxisbased.bar.Bar3DChartController;
-            import com.easyinsight.analysis.charts.yaxisbased.bar.BarChartController;
-            import com.easyinsight.analysis.crosstab.CrosstabController;
-            import com.easyinsight.analysis.maps.MapController;
             import mx.events.MenuEvent;
 			
 			[Bindable]
@@ -62,25 +47,9 @@
                 }
             }
             
-            public function set selectedLabel(selectedLabel:String):void {
-            	p2.label = selectedLabel;          	
-            }
+            public function set selectedLabel(controller:String):void {
 
-            private function blah():void {
-                var columnChartController:ColumnChartController;
-                var column3DChartController:Column3DChartController;
-                var barChartController:BarChartController;
-                var bar3DChartController:Bar3DChartController;
-                var pieChartController:PieChartController;
-                var pie3DChartController:Pie3DChartController;
-                var lineChartController:LineChartController;
-                var line3DChartController:Line3DChartController;
-                var areaChartController:AreaChartController;
-                var area3DChartController:Area3DChartController;
-                var plotChartController:PlotChartController;
-                var bubble3DChartController:BubbleChartController;
-                var mapController:MapController;
-                var crosstabController:CrosstabController;
+            	//p2.label = selectedLabel;          	
             }
 		]]>
 	</mx:Script>
@@ -114,6 +83,7 @@
             </node>
         </node>
         <node label="Map" icon="" controller="com.easyinsight.analysis.maps.MapController"/>
+        <node label="Gauge" icon="" controller="com.easyinsight.analysis.gauge.GaugeController"/>
         <node label="Split" icon="" state="Split"/>
     </mx:XMLList>
     <mx:XMLList id="splitSource">        

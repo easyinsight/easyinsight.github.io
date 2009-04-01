@@ -90,6 +90,7 @@
         <mapping class="com.easyinsight.analysis.AnalysisDefinitionState"/>
         <mapping class="com.easyinsight.analysis.MapDefinitionState"/>
         <mapping class="com.easyinsight.analysis.CrosstabDefinitionState"/>
+        <mapping class="com.easyinsight.analysis.gauge.GaugeDefinitionState"/>
 
         <mapping class="com.easyinsight.scrubbing.DataScrub"/>
         <mapping class="com.easyinsight.scrubbing.LookupTableScrub"/>

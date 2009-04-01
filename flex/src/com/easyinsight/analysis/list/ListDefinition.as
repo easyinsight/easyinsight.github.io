@@ -14,14 +14,6 @@ import mx.collections.ArrayCollection;
 		
 		public function ListDefinition()
 		{
-		}		
-		
-		override public function getDataFeedType():String {
-			return "List";
-		}
-		
-		override public function getLabel():String {
-			return "List";
 		}
 		
 		override public function getFields():ArrayCollection {
@@ -32,8 +24,9 @@ import mx.collections.ArrayCollection;
             columns = fields;
         }
 
-        override public function get controller():String {
-            return "com.easyinsight.analysis.list.ListController";
+
+        override public function get type():int {
+            return AnalysisDefinition.LIST;
         }
     }
 }

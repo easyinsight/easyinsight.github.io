@@ -14,6 +14,7 @@ import com.easyinsight.solutions.SolutionInstallInfo;
 import com.easyinsight.solutions.SolutionElementKey;
 import com.easyinsight.security.Roles;
 import com.easyinsight.security.SecurityUtil;
+import com.easyinsight.core.InsightDescriptor;
 
 import java.sql.*;
 import java.util.*;
@@ -299,18 +300,16 @@ public class GoalStorage {
         }
     }
 
-    private List<GoalInsight> getGoalInsights(long goalTreeNodeID, Connection conn) throws SQLException {
-        List<GoalInsight> insights = new ArrayList<GoalInsight>();
-        PreparedStatement insightQueryStmt = conn.prepareStatement("SELECT INSIGHT_ID, TITLE FROM GOAL_TREE_NODE_TO_INSIGHT, ANALYSIS WHERE goal_tree_node_id = ? AND " +
+    private List<InsightDescriptor> getGoalInsights(long goalTreeNodeID, Connection conn) throws SQLException {
+        List<InsightDescriptor> insights = new ArrayList<InsightDescriptor>();
+        PreparedStatement insightQueryStmt = conn.prepareStatement("SELECT INSIGHT_ID, TITLE FROM GOAL_TREE_NODE_TO_INSIGHT, ANALYSIS, DATA_FEED_ID, REPORT_TYPE WHERE goal_tree_node_id = ? AND " +
                 "goal_tree_node_to_insight.insight_id = analysis.analysis_id");
         insightQueryStmt.setLong(1, goalTreeNodeID);
         ResultSet rs = insightQueryStmt.executeQuery();
         while (rs.next()) {
             long insightID = rs.getLong(1);
             String name = rs.getString(2);
-            GoalInsight goalInsight = new GoalInsight();
-            goalInsight.setInsightID(insightID);
-            goalInsight.setInsightName(name);
+            InsightDescriptor goalInsight = new InsightDescriptor(insightID, name, rs.getLong(3), rs.getInt(4));
             insights.add(goalInsight);
         }
         return insights;
@@ -598,9 +597,9 @@ public class GoalStorage {
         clearExistingStmt.setLong(1, goalTreeNode.getGoalTreeNodeID());
         clearExistingStmt.executeUpdate();
         PreparedStatement saveInsightLinkStmt = conn.prepareStatement("INSERT INTO GOAL_TREE_NODE_TO_INSIGHT (GOAL_TREE_NODE_ID, INSIGHT_ID) VALUES (?, ?)");
-        for (GoalInsight goalInsight : goalTreeNode.getAssociatedInsights()) {
+        for (InsightDescriptor goalInsight : goalTreeNode.getAssociatedInsights()) {
             saveInsightLinkStmt.setLong(1, goalTreeNode.getGoalTreeNodeID());
-            saveInsightLinkStmt.setLong(2, goalInsight.getInsightID());
+            saveInsightLinkStmt.setLong(2, goalInsight.getId());
             saveInsightLinkStmt.execute();
         }
     }
@@ -687,10 +686,10 @@ public class GoalStorage {
                         goalFeed.setFeedID(newID);
                     }
                 }
-                for (GoalInsight goalInsight : goalTreeNode.getAssociatedInsights()) {
-                    Long newID = installedObjectMap.get(new SolutionElementKey(SolutionElementKey.INSIGHT, goalInsight.getInsightID()));
+                for (InsightDescriptor goalInsight : goalTreeNode.getAssociatedInsights()) {
+                    Long newID = installedObjectMap.get(new SolutionElementKey(SolutionElementKey.INSIGHT, goalInsight.getId()));
                     if (newID != null) {
-                        goalInsight.setInsightID(newID);
+                        goalInsight.setId(newID);
                     }
                 }
             }

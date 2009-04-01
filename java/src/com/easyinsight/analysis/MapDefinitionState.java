@@ -37,6 +37,7 @@ public class MapDefinitionState extends AnalysisDefinitionState {
     public WSAnalysisDefinition createWSDefinition() {
         WSMapDefinition wsMapDefinition = new WSMapDefinition();
         wsMapDefinition.setMapType(mapType);
+        wsMapDefinition.setReportType(WSAnalysisDefinition.MAP);
         wsMapDefinition.setMapDefinitionID(mapDefinitionID);
         return wsMapDefinition;
     }

@@ -26,55 +26,6 @@ package com.easyinsight.analysis
         public function getChartFamily():int {
             return 0;
         }
-		
-		override public function getDataFeedType():String {
-			return "Chart";
-		}
-		
-		override public function getLabel():String {
-			var label:String;
-			switch (chartFamily) {
-				case ChartTypes.BAR_FAMILY:
-					label = "Bar";
-					break;
-				case ChartTypes.COLUMN_FAMILY:
-					label = "Column";
-					break;
-				case ChartTypes.LINE_FAMILY:
-					label = "Line";
-					break;
-				case ChartTypes.PLOT_FAMILY:
-					label = "Plot";
-					break;
-				case ChartTypes.PIE_FAMILY:
-					label = "Pie";
-					break;
-			}
-			return label;
-		}
-		
-		public function get threeDSelected():Boolean {
-			var selected:Boolean = false;
-			switch (chartFamily) {
-				case ChartTypes.COLUMN_FAMILY:
-					selected = chartType == ChartTypes.COLUMN_3D || chartType == ChartTypes.COLUMN_3D_STACKED;
-					break;
-				case ChartTypes.BAR_FAMILY:
-					selected = chartType == ChartTypes.BAR_3D || chartType == ChartTypes.BAR_3D_STACKED;
-					break;
-				case ChartTypes.PIE_FAMILY:
-					selected = chartType == ChartTypes.PIE_3D;
-					break;
-				case ChartTypes.AREA_FAMILY:
-					selected = chartType == ChartTypes.AREA_3D;
-					break;
-				case ChartTypes.LINE_FAMILY:
-					selected = chartType == ChartTypes.LINE_3D;
-					break;
-			}
-			return selected;
-		}
-
 
         override public function createDefaultLimits():void {
             var limitsMetadata:LimitsMetadata = new LimitsMetadata();

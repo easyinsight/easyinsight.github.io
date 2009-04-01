@@ -7,6 +7,7 @@
 	</mx:Metadata> 
 	<mx:Script>
 		<![CDATA[
+        import com.easyinsight.analysis.ControllerLookup;
         import com.easyinsight.analysis.EmbeddedViewFactory;
         import com.easyinsight.analysis.IReportController;
 
@@ -15,17 +16,24 @@
 
         import mx.managers.PopUpManager;
 
-        import com.easyinsight.analysis.AnalysisDefinition;
-
-        private var definition:AnalysisDefinition;
         [Bindable]
         private var showReturnToList:Boolean;
         [Bindable]
         private var title:String;
         private var _analysisID:int;
+        private var _reportType:int;
+        private var _reportName:String;
 
         private var _titleFunction:Function;
         private var _titleFunctionCaller:Object;
+
+        public function set reportType(val:int):void {
+            _reportType = val;
+        }
+
+        public function set reportName(val:String):void {
+            _reportName = val;
+        }
 
         public function set titleClickFunction(functionName:Function):void {
             _titleFunction = functionName;
@@ -39,25 +47,14 @@
             this._analysisID = analysisID;
         }
 
-        private function gotAnalysisDefinition():void {
-            this.definition = analysisService.openAnalysisDefinition.lastResult as AnalysisDefinition;
-            this.title = this.definition.name;
-            var controllerClass:Class = Class(getDefinitionByName(this.definition.controller));
-            var controller:IReportController = new controllerClass();
-            var dataViewFactory:EmbeddedViewFactory = controller.createEmbeddedView();
-            dataViewFactory.analysisDefinition = definition;
-            coreVBox.addChild(dataViewFactory);
-            dataViewFactory.retrieveData();
-        }
-
-        public function set analysisDefinition(definition:AnalysisDefinition):void {
-            this.definition = definition;
-        }
-
-
         override protected function createChildren():void {
             super.createChildren();
-            analysisService.openAnalysisDefinition.send(_analysisID);
+            var controllerClass:Class = ControllerLookup.controllerForType(_reportType);
+            var controller:IReportController = new controllerClass();
+            var dataViewFactory:EmbeddedViewFactory = controller.createEmbeddedView();
+            dataViewFactory.reportID = _analysisID;
+            coreVBox.addChild(dataViewFactory);
+            dataViewFactory.retrieveData();
         }
 
         private function closeThis():void {
@@ -65,7 +62,7 @@
         }
 
         private function titleClick():void {
-            _titleFunction.call(_titleFunctionCaller, definition);
+            //_titleFunction.call(_titleFunctionCaller, definition);
         }
 
         private function failure(event:FaultEvent):void {
@@ -80,9 +77,6 @@
         }
                 ]]>
 	</mx:Script>
-	<mx:RemoteObject id="analysisService" destination="analysisDefinition">
-		<mx:method name="openAnalysisDefinition" result="gotAnalysisDefinition()" fault="failure(event)"/>
-	</mx:RemoteObject>
 	<mx:ApplicationControlBar width="100%" horizontalAlign="center">
 		<mx:LinkButton label="{title}" click="titleClick()" textDecoration="underline"/>
 		<mx:Button label="Return" click="returnToList()" visible="{showReturnToList}"/>

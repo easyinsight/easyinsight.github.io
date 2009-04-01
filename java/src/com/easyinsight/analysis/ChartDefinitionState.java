@@ -84,39 +84,51 @@ public class ChartDefinitionState extends AnalysisDefinitionState {
         switch (chartType) {
             case ChartDefinitionState.COLUMN_2D:
                 wsChartDefinition = new WSColumnChartDefinition();
+                wsChartDefinition.setReportType(WSAnalysisDefinition.COLUMN);
                 break;
             case ChartDefinitionState.COLUMN_3D:
                 wsChartDefinition = new WS3DColumnChartDefinition();
+                wsChartDefinition.setReportType(WSAnalysisDefinition.COLUMN3D);
                 break;
             case ChartDefinitionState.BAR_2D:
                 wsChartDefinition = new WSBarChartDefinition();
+                wsChartDefinition.setReportType(WSAnalysisDefinition.BAR);
                 break;
             case ChartDefinitionState.BAR_3D:
                 wsChartDefinition = new WS3DBarChartDefinition();
+                wsChartDefinition.setReportType(WSAnalysisDefinition.BAR3D);
                 break;
             case ChartDefinitionState.PIE_2D:
                 wsChartDefinition = new WSPieChartDefinition();
+                wsChartDefinition.setReportType(WSAnalysisDefinition.PIE);
                 break;
             case ChartDefinitionState.PIE_3D:
                 wsChartDefinition = new WS3DPieChartDefinition();
+                wsChartDefinition.setReportType(WSAnalysisDefinition.PIE3D);
                 break;
             case ChartDefinitionState.LINE_2D:
                 wsChartDefinition = new WSLineChartDefinition();
+                wsChartDefinition.setReportType(WSAnalysisDefinition.LINE);
                 break;
             case ChartDefinitionState.LINE_3D:
                 wsChartDefinition = new WS3DLineChartDefinition();
+                wsChartDefinition.setReportType(WSAnalysisDefinition.LINE3D);
                 break;
             case ChartDefinitionState.AREA_2D:
                 wsChartDefinition = new WSAreaChartDefinition();
+                wsChartDefinition.setReportType(WSAnalysisDefinition.AREA);
                 break;
             case ChartDefinitionState.AREA_3D:
                 wsChartDefinition = new WS3DAreaChartDefinition();
+                wsChartDefinition.setReportType(WSAnalysisDefinition.AREA3D);
                 break;
             case ChartDefinitionState.PLOT_TYPE:
                 wsChartDefinition = new WSPlotChartDefinition();
+                wsChartDefinition.setReportType(WSAnalysisDefinition.PLOT);
                 break;
             case ChartDefinitionState.BUBBLE_TYPE:
                 wsChartDefinition = new WSBubbleChartDefinition();
+                wsChartDefinition.setReportType(WSAnalysisDefinition.BUBBLE);
                 break;
             default:
                 throw new UnsupportedOperationException();

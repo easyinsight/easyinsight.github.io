@@ -1,5 +1,6 @@
 package com.easyinsight.analysis {
 
+import com.easyinsight.analysis.service.EmbeddedDataService;
 import com.easyinsight.framework.DataServiceLoadingEvent;
 import flash.display.DisplayObject;
 import mx.collections.ArrayCollection;
@@ -15,13 +16,13 @@ public class EmbeddedViewFactory extends VBox {
     private var _newDefinition:Class;
     private var _reportDataService:Class;
 
-    private var _analysisDefinition:AnalysisDefinition;
+    private var _reportID:int;
     private var _availableFields:ArrayCollection;
 
     private var moduleInfo:IModuleInfo;
 
     private var _reportRenderer:IReportRenderer;
-    private var _dataService:IReportDataService;
+    private var _dataService:IEmbeddedDataService = new EmbeddedDataService();
 
     private var pendingRequest:Boolean = false;
 
@@ -34,13 +35,8 @@ public class EmbeddedViewFactory extends VBox {
         _availableFields = val;
     }
 
-    public function set analysisDefinition(val:AnalysisDefinition):void {
-        _analysisDefinition = val;
-    }
-
-
-    public function get analysisDefinition():AnalysisDefinition {
-        return _analysisDefinition;
+    public function set reportID(val:int):void {
+        _reportID = val;
     }
 
     public function set reportDataService(val:Class):void {
@@ -61,7 +57,7 @@ public class EmbeddedViewFactory extends VBox {
         _dataService = new _reportDataService();
         _dataService.addEventListener(DataServiceLoadingEvent.LOADING_STARTED, dataLoadingEvent);
         _dataService.addEventListener(DataServiceLoadingEvent.LOADING_STOPPED, dataLoadingEvent);
-        _dataService.addEventListener(DataServiceEvent.DATA_RETURNED, gotData);
+        _dataService.addEventListener(EmbeddedDataServiceEvent.DATA_RETURNED, gotData);
 
         loadReportRenderer();
     }
@@ -78,13 +74,12 @@ public class EmbeddedViewFactory extends VBox {
         if (_reportRenderer == null) {
             pendingRequest = true;
         } else {
-            _analysisDefinition.createDefaultLimits();
-            _dataService.retrieveData(_analysisDefinition);
+            _dataService.retrieveData(_reportID);
         }
     }
 
-    private function gotData(event:DataServiceEvent):void {
-        _reportRenderer.renderReport(event.dataSet, _analysisDefinition, event.clientProcessorMap);
+    private function gotData(event:EmbeddedDataServiceEvent):void {
+        _reportRenderer.renderReport(event.dataSet, event.analysisDefinition, event.clientProcessorMap);
     }
 
     private function loadReportRenderer():void {

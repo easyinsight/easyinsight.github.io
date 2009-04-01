@@ -24,7 +24,9 @@ public class CrosstabDefinitionState extends AnalysisDefinitionState {
     }
 
     public WSAnalysisDefinition createWSDefinition() {
-        return new WSCrosstabDefinition();
+        WSCrosstabDefinition crosstab = new WSCrosstabDefinition();
+        crosstab.setReportType(WSAnalysisDefinition.CROSSTAB);
+        return crosstab;
     }
 
     public AnalysisDefinitionState clone() throws CloneNotSupportedException {

@@ -51,7 +51,7 @@ public class FeedService implements IDataFeedService {
             getInsightsStmt.setLong(1, SecurityUtil.getUserID());
             ResultSet reportRS = getInsightsStmt.executeQuery();
             while (reportRS.next()) {
-                descriptorList.add(new InsightDescriptor(reportRS.getLong(1), reportRS.getString(2), reportRS.getLong(3)));
+                descriptorList.add(new InsightDescriptor(reportRS.getLong(1), reportRS.getString(2), reportRS.getLong(3), reportRS.getInt(4)));
             }
         } catch (Exception e) {
             LogClass.error(e);

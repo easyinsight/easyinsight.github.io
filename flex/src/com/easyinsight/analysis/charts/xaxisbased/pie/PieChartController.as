@@ -25,7 +25,6 @@ public class PieChartController implements IReportController {
 
     public function createEmbeddedView():EmbeddedViewFactory {
         var factory:EmbeddedViewFactory = new EmbeddedViewFactory();
-        factory.reportDataService = ListDataService;
         factory.reportRenderer = "PieChartModule.swf";
         factory.newDefinition = PieChartDefinition;
         return factory;

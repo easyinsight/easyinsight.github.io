@@ -22,8 +22,7 @@ public class HierarchyLevel implements Serializable {
     @OneToOne
     @JoinColumn(name="analysis_item_id")
     private AnalysisItem analysisItem;
-    @ManyToOne
-    @IndexColumn(name="level", base=0)
+    @ManyToOne    
     @JoinColumn(name="parent_item_id")
     private AnalysisItem parentItem;
 

@@ -1,4 +1,5 @@
 package com.easyinsight.analysis.charts.plot {
+import com.easyinsight.analysis.AnalysisDefinition;
 import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.analysis.AnalysisItemTypes;
 import com.easyinsight.analysis.ChartDefinition;
@@ -33,12 +34,8 @@ public class PlotChartDefinition extends ChartDefinition{
         return new ArrayCollection([ dimension, xaxisMeasure, yaxisMeasure ]);
     }
 
-    override public function getLabel():String {
-        return "Plot";
-    }
-
-    override public function get controller():String {
-        return "com.easyinsight.analysis.charts.plot.PlotChartController";
+    override public function get type():int {
+        return AnalysisDefinition.PLOT;
     }
 
     override public function getChartType():int {

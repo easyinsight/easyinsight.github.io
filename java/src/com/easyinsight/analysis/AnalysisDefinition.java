@@ -27,6 +27,9 @@ public class AnalysisDefinition implements Cloneable {
 
     @Column(name="root_definition")
     private boolean rootDefinition;
+
+    @Column(name="report_type")
+    private int reportType;
     
     @OneToMany(cascade=CascadeType.ALL)
     @JoinTable(name="analysis_to_filter_join",
@@ -96,6 +99,14 @@ public class AnalysisDefinition implements Cloneable {
                 joinColumns = @JoinColumn(name = "analysis_id"),
                 inverseJoinColumns = @JoinColumn(name = "analysis_item_id"))
     private Map<String, AnalysisItem> reportStructure;
+
+    public int getReportType() {
+        return reportType;
+    }
+
+    public void setReportType(int reportType) {
+        this.reportType = reportType;
+    }
 
     public AnalysisDefinitionState getAnalysisDefinitionState() {
         return analysisDefinitionState;
@@ -310,6 +321,7 @@ public class AnalysisDefinition implements Cloneable {
             analysisDefinitionState = migrationHandler();
         }
         analysisDefinition = analysisDefinitionState.createWSDefinition();
+        analysisDefinition.setReportType(reportType);        
         analysisDefinition.setAnalysisID(analysisID);
         analysisDefinition.setDataFeedID(dataFeedID);
         if (getAddedItems() != null) {
@@ -319,6 +331,12 @@ public class AnalysisDefinition implements Cloneable {
         analysisDefinition.setFilterDefinitions(FilterDefinitionConverter.fromPersistableFilters(filterDefinitions));
         analysisDefinition.setPolicy(analysisPolicy);
         analysisDefinition.setRootDefinition(rootDefinition);
+        for (AnalysisItem analysisItem : reportStructure.values()) {
+            if (analysisItem.hasType(AnalysisItemTypes.HIERARCHY)) {
+                AnalysisHierarchyItem analysisHierarchyItem = (AnalysisHierarchyItem) analysisItem;
+                analysisHierarchyItem.setHierarchyLevels(new ArrayList<HierarchyLevel>(analysisHierarchyItem.getHierarchyLevels()));
+            }
+        }
         analysisDefinition.populateFromReportStructure(reportStructure);
         List<DataScrub> newScrubs = new ArrayList<DataScrub>();
         for (DataScrub dataScrub : dataScrubs) {

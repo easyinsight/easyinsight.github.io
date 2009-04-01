@@ -17,8 +17,6 @@
                     <mx:ViewStack id="freeStack" width="100%" height="100%">
                         <google:GoogleSpreadsheetSelection userConfigComplete="onFeedCreation(event)"
                                                            userConfigCancel="cancel(event)"/>
-                        <!-- <customupload:ServerDataSourceCreation dataSourceClass="com.easyinsight.datasources.JiraDataSource" userConfigComplete="onFeedCreation(event)"
-                                                           userConfigCancel="cancel(event)"/>-->
                     </mx:ViewStack>
                 </mx:VBox>
             </mx:AddChild>
@@ -43,9 +41,6 @@
                     <mx:ViewStack id="individualStack" width="100%" height="100%">
                         <google:GoogleSpreadsheetSelection userConfigComplete="onFeedCreation(event)"
                                                            userConfigCancel="cancel(event)"/>
-
-                        <!-- <customupload:ServerDataSourceCreation dataSourceClass="com.easyinsight.datasources.JiraDataSource" userConfigComplete="onFeedCreation(event)"
-                                                           userConfigCancel="cancel(event)"/>-->
                         <customupload:JiraDataSourceCreation userConfigComplete="onFeedCreation(event)"
                                                            userConfigCancel="cancel(event)"/>
                         <customupload:BaseCampDataSourceCreation userConfigComplete="onFeedCreation(event)"

@@ -14,14 +14,10 @@ import mx.collections.ArrayCollection;
 		public function CrosstabDefinition()
 		{			
 		}
-		
-		override public function getDataFeedType():String {
-			return "Crosstab";
-		}
-		
-		override public function getLabel():String {
-			return "Crosstab";
-		}
+
+        override public function get type():int {
+            return AnalysisDefinition.CROSSTAB;
+        }
 
         override public function getFields():ArrayCollection {
             var fields:ArrayCollection = new ArrayCollection();
@@ -49,10 +45,6 @@ import mx.collections.ArrayCollection;
                     this.rows = new ArrayCollection ([ dimensions.getItemAt(1) as AnalysisItem ]);
                 }
             }
-        }
-
-        override public function get controller():String {
-            return "com.easyinsight.analysis.crosstab.CrosstabController";
         }
 	}
 }

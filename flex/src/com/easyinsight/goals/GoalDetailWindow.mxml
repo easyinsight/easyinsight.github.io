@@ -4,6 +4,7 @@
         paddingLeft="5" paddingRight="5" paddingTop="5" paddingBottom="5" left="0" right="0" top="0" bottom="0">
     <mx:Script><![CDATA[
         import com.adobe.ac.mxeffects.CubeRotate;
+        import com.easyinsight.solutions.InsightDescriptor;
 import mx.collections.ArrayCollection;
         import mx.containers.HBox;
         import mx.containers.ViewStack;
@@ -88,11 +89,13 @@ import mx.events.FlexEvent;
                 topElements.addItem(goalHistoryItem);
                 viewStack.addChild(goalHistoryView);
 
-                for each (var report:GoalInsight in _goalTreeNodeData.associatedInsights) {
+                for each (var report:InsightDescriptor in _goalTreeNodeData.associatedInsights) {
                     var reportItem:GoalDetailItem = new GoalDetailItem();
-                    reportItem.label = report.insightName;
+                    reportItem.label = report.name;
                     var dataViewPanel:DataViewPanel = new DataViewPanel();
-                    dataViewPanel.analysisID = report.insightID;
+                    dataViewPanel.analysisID = report.id;
+                    dataViewPanel.reportType = report.reportType;
+                    dataViewPanel.reportName = report.name;
                     reportItem.displayObject = dataViewPanel;
                     viewStack.addChild(dataViewPanel);
                     topElements.addItem(reportItem);

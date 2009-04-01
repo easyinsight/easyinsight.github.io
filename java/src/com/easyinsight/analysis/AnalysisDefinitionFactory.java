@@ -1,5 +1,7 @@
 package com.easyinsight.analysis;
 
+import com.easyinsight.analysis.gauge.GaugeDefinitionState;
+
 /**
  * User: James Boe
  * Date: Jan 10, 2008
@@ -32,11 +34,19 @@ public class AnalysisDefinitionFactory {
             mapDefinition.setMapType(wsMap.getMapType());
             mapDefinition.setMapDefinitionID(wsMap.getMapDefinitionID());
             analysisDefinitionState = mapDefinition;
+        } else if (wsAnalysisDefinition.getDataFeedType().equals(AnalysisTypes.GAUGE)) {
+            WSGaugeDefinition wsGauge = (WSGaugeDefinition) wsAnalysisDefinition;
+            GaugeDefinitionState gaugeDefinition = new GaugeDefinitionState();
+            gaugeDefinition.setGaugeType(wsGauge.getGaugeType());
+            gaugeDefinition.setMaxValue(wsGauge.getMaxValue());
+            gaugeDefinition.setGaugeDefinitionID(wsGauge.getGaugeDefinitionID());
+            analysisDefinitionState = gaugeDefinition;
         } else {
             throw new RuntimeException("Unknown data feed type " + wsAnalysisDefinition.getDataFeedType());
         }
         AnalysisDefinition analysisDefinition = new AnalysisDefinition();
         analysisDefinition.setAnalysisDefinitionState(analysisDefinitionState);
+        analysisDefinition.setReportType(wsAnalysisDefinition.getReportType());
         analysisDefinition.setReportStructure(wsAnalysisDefinition.createStructure());
         analysisDefinition.setDataScrubs(wsAnalysisDefinition.getDataScrubs());
         analysisDefinition.setAddedItems(wsAnalysisDefinition.getAddedItems());

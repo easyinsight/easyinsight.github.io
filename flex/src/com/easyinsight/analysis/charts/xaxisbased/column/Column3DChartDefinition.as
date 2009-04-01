@@ -1,6 +1,7 @@
 package com.easyinsight.analysis.charts.xaxisbased.column {
 import com.easyinsight.analysis.charts.ChartTypes;
 import com.easyinsight.analysis.charts.xaxisbased.XAxisDefinition;
+import com.easyinsight.analysis.AnalysisDefinition;
 [Bindable]
 [RemoteClass(alias="com.easyinsight.analysis.definitions.WS3DColumnChartDefinition")]
 public class Column3DChartDefinition extends XAxisDefinition{
@@ -8,12 +9,8 @@ public class Column3DChartDefinition extends XAxisDefinition{
         super();
     }
 
-    override public function getLabel():String {
-        return "3D Column";
-    }
-
-    override public function get controller():String {
-        return "com.easyinsight.analysis.charts.xaxisbased.column.Column3DChartController";
+    override public function get type():int {
+        return AnalysisDefinition.COLUMN3D;
     }
 
     override public function getChartType():int {

@@ -7,7 +7,8 @@
         import com.easyinsight.analysis.AnalysisDefinition;
         import com.easyinsight.analysis.CustomChangeEvent;
 
-        import ilog.charts3d.charts3dClasses.Series3D;
+        import com.easyinsight.analysis.charts.Chart3DVisuals;
+import ilog.charts3d.charts3dClasses.Series3D;
         import ilog.charts3d.series.ColumnSet3D;
         import ilog.charts3d.series.ColumnSeries3D;
         import ilog.charts3d.ColumnChart3D;
@@ -79,6 +80,8 @@
         [Embed(source="../../../../../../../assets/darkwater.jpg")]
         private var rolloverFill:Class;
 
+        private var visuals:Chart3DVisuals = new Chart3DVisuals();
+
         [Bindable]
         public function get xField():String {
             return _xField;
@@ -132,9 +135,10 @@
                 columnChart.percentHeight = 100;
                 columnChart.percentWidth = 100;
                 columnChart.showDataTips = true;
-                if (selectable) {
+                visuals.chart = columnChart;
+                /*if (selectable) {
                     columnChart.selectionMode = "multiple";
-                }
+                }*/
                 columnChart.dataProvider = graphData;
 
                 // define the X axis

@@ -1,4 +1,5 @@
 package com.easyinsight.analysis.charts.bubble {
+import com.easyinsight.analysis.AnalysisDefinition;
 import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.analysis.AnalysisItemTypes;
 import com.easyinsight.analysis.ChartDefinition;
@@ -37,12 +38,8 @@ public class BubbleChartDefinition extends ChartDefinition{
         return new ArrayCollection([ dimension, xaxisMeasure, yaxisMeasure, zaxisMeasure]);
     }
 
-    override public function getLabel():String {
-        return "Bubble";
-    }
-
-    override public function get controller():String {
-        return "com.easyinsight.analysis.charts.bubble.BubbleChartController";
+    override public function get type():int {
+        return AnalysisDefinition.BUBBLE;
     }
 
     override public function getChartType():int {

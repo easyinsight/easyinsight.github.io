@@ -1,10 +1,11 @@
 package com.easyinsight.goals {
+import com.easyinsight.solutions.InsightDescriptor;
 import flash.events.MouseEvent;
 import mx.containers.HBox;
 import mx.controls.Button;
 public class AssociatedInsightsAdminControls extends HBox{
 
-    private var goalInsight:GoalInsight;
+    private var goalInsight:InsightDescriptor;
 
     [Bindable]
     [Embed(source="../../../../assets/navigate_cross.png")]
@@ -32,7 +33,7 @@ public class AssociatedInsightsAdminControls extends HBox{
     }
 
     override public function set data(val:Object):void {
-        goalInsight = val as GoalInsight;
+        goalInsight = val as InsightDescriptor;
     }
 
     override public function get data():Object {

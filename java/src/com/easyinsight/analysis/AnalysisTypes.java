@@ -11,4 +11,5 @@ public interface AnalysisTypes {
     public static final String CHART = "Chart";
     public static final String MAP = "Map";
     public static final String YAHOO_MAP = "YahooMap";
+    public static final String GAUGE = "Gauge";
 }

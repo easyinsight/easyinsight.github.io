@@ -34,39 +34,8 @@ package com.easyinsight.listing
 		
 		override public function set data(value:Object):void {						
 			_data = value as AnalysisDefinition;
-			var iconClass:Class;
-			switch (_data.getDataFeedType()) {
-				case "Chart":
-					var chartDef:ChartDefinition = _data as ChartDefinition;
-					switch (chartDef.chartType) {
-						case "Column":
-							iconClass = columnChartIcon;
-							toolTip = "Column Chart";
-							break;
-						case "Bar":
-							iconClass = barChartIcon;
-							toolTip = "Bar Chart";
-							break;
-						case "Pie":
-							iconClass = pieChartIcon;
-							toolTip = "Pie Chart";
-							break;
-						case "Moveable":
-							iconClass = lineChartIcon;
-							toolTip = "Line Chart";
-							break;							
-					}
-					break;
-				case "List":
-					iconClass = listIcon;
-					toolTip = "List";
-					break;
-				case "Crosstab":
-					iconClass = crosstabIcon;
-					toolTip = "Crosstab";
-					break;
-			}
-			this.source = iconClass;
+            this.source = columnChartIcon;
+            this.toolTip = "Report";
 		}
 		
 		override public function get data():Object {

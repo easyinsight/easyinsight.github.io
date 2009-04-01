@@ -10,7 +10,8 @@
         import com.easyinsight.analysis.AnalysisMeasure;
 
         import com.easyinsight.analysis.CustomChangeEvent;
-        import com.easyinsight.filtering.FilterRawData;
+        import com.easyinsight.analysis.charts.Chart3DVisuals;
+import com.easyinsight.filtering.FilterRawData;
 
         import ilog.charts3d.LineChart3D;
         import ilog.charts3d.series.LineSeries3D;
@@ -29,6 +30,8 @@
         private var lineChart:LineChart3D;
 
         private var legend:Legend;
+        
+        private var visuals:Chart3DVisuals = new Chart3DVisuals();
 
         override protected function createChildren():void {
             super.createChildren();
@@ -59,6 +62,7 @@
             lineChart = new LineChart3D();
             lineChart.percentHeight = 100;
             lineChart.percentWidth = 100;
+            visuals.chart = lineChart;
             lineChart.dataProvider = chartData;
             lineChart.selectionMode = "multiple";
             lineChart.showDataTips = true;            

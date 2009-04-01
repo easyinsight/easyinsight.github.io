@@ -4,6 +4,7 @@ import com.easyinsight.quicksearch.EIDescriptor;
 [RemoteClass(alias="com.easyinsight.core.InsightDescriptor")]
 public class InsightDescriptor extends EIDescriptor {
     public var dataFeedID:int;
+    public var reportType:int;
 
     public function InsightDescriptor() {
         

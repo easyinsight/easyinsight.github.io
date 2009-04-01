@@ -21,7 +21,6 @@ public class BarChartController implements IReportController {
 
     public function createEmbeddedView():EmbeddedViewFactory {
         var factory:EmbeddedViewFactory = new EmbeddedViewFactory();
-        factory.reportDataService = ListDataService;
         factory.reportRenderer = "BarChartModule.swf";
         factory.newDefinition = BarChartDefinition;
         return factory;

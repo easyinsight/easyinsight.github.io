@@ -1,4 +1,5 @@
 package com.easyinsight.analysis.charts.twoaxisbased.line {
+import com.easyinsight.analysis.AnalysisDefinition;
 import com.easyinsight.analysis.charts.ChartTypes;
 import com.easyinsight.analysis.charts.twoaxisbased.TwoAxisDefinition;
 [Bindable]
@@ -8,12 +9,8 @@ public class Line3DChartDefinition extends TwoAxisDefinition{
         super();
     }
 
-    override public function getLabel():String {
-        return "3D Line";
-    }
-
-    override public function get controller():String {
-        return "com.easyinsight.analysis.charts.twoaxisbased.line.Line3DChartController";
+    override public function get type():int {
+        return AnalysisDefinition.LINE3D;
     }
 
     override public function getChartType():int {

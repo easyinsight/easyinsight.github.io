@@ -206,7 +206,9 @@ import mx.controls.DataGrid;
         }
 
         private function globalListeners():void {
-            stage.addEventListener(KeyboardEvent.KEY_DOWN, stageKeyDown);
+            if (stage != null) {
+                stage.addEventListener(KeyboardEvent.KEY_DOWN, stageKeyDown);                
+            }
         }
 
         private function stageKeyDown(event:KeyboardEvent):void {

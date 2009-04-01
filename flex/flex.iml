@@ -15,13 +15,11 @@
     <orderEntry type="module-library">
       <library name="flex libs">
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/libs/ilog-elixir_rb.swc!/" />
           <root url="jar://$MODULE_DIR$/libs/astra-flex.swc!/" />
-          <root url="jar://$MODULE_DIR$/libs/SpringGraph.swc!/" />
-          <root url="jar://$MODULE_DIR$/libs/ilog-elixir.swc!/" />
           <root url="jar://$MODULE_DIR$/libs/YahooMap.swc!/" />
           <root url="jar://$MODULE_DIR$/../../Program Files/Adobe/Flex Builder 3/sdks/3.2.0/frameworks/libs/datavisualization.swc!/" />
-          <root url="jar://$MODULE_DIR$/libs/ObjectHandles-1.0.0015.swc!/" />
+          <root url="jar://$MODULE_DIR$/libs/ilog-elixir_rb.swc!/" />
+          <root url="jar://$MODULE_DIR$/libs/ilog-elixir.swc!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />

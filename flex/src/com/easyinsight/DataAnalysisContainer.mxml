@@ -27,7 +27,8 @@
 		<![CDATA[
         import com.easyinsight.administration.feed.DeleteAnalysisItemEvent;
         import com.easyinsight.analysis.AnalysisChangedEvent;
-        import com.easyinsight.analysis.HierarchyDrilldownEvent;
+        import com.easyinsight.analysis.ControllerLookup;
+import com.easyinsight.analysis.HierarchyDrilldownEvent;
         import com.easyinsight.analysis.AnalysisStateChangeEvent;
         import com.easyinsight.analysis.DataViewFactory;
         import com.easyinsight.analysis.HierarchyRollupEvent;
@@ -293,11 +294,12 @@
                 BrowserManager.getInstance().setFragment(fragmentString);
             } else {
                 //this.title = analysisDefinition.name;
-                var controllerClass:Class = Class(getDefinitionByName(analysisDefinition.controller));
+                var controllerClass:Class = ControllerLookup.controllerForType(analysisDefinition.type);
                 var controller:IReportController = new controllerClass();
                 loadController(controller);
 
-                analysisState.selectedLabel = analysisDefinition.getLabel();
+                // TODO: repair
+                //analysisState.selectedLabel = analysisDefinition.getLabel();
 
                 /*if (analysisDefinition.addedItems != null) {
                  for each (var analysisField:AnalysisItem in analysisDefinition.addedItems) {

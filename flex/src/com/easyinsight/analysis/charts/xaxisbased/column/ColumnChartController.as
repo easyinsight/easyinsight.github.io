@@ -21,7 +21,6 @@ public class ColumnChartController implements IReportController {
 
     public function createEmbeddedView():EmbeddedViewFactory {
         var factory:EmbeddedViewFactory = new EmbeddedViewFactory();
-        factory.reportDataService = ListDataService;
         factory.reportRenderer = "ColumnChartModule.swf";
         factory.newDefinition = ColumnChartDefinition;
         return factory;

@@ -1,6 +1,7 @@
 package com.easyinsight.analysis.charts.twoaxisbased.area {
 import com.easyinsight.analysis.charts.ChartTypes;
 import com.easyinsight.analysis.charts.twoaxisbased.TwoAxisDefinition;
+import com.easyinsight.analysis.AnalysisDefinition;
 [Bindable]
 [RemoteClass(alias="com.easyinsight.analysis.definitions.WSAreaChartDefinition")]
 public class AreaChartDefinition extends TwoAxisDefinition{
@@ -8,12 +9,8 @@ public class AreaChartDefinition extends TwoAxisDefinition{
         super();
     }
 
-    override public function getLabel():String {
-        return "2D Area";
-    }
-
-    override public function get controller():String {
-        return "com.easyinsight.analysis.charts.twoaxisbased.area.AreaChartController";
+    override public function get type():int {
+        return AnalysisDefinition.AREA;
     }
 
     override public function getChartType():int {

@@ -18,7 +18,6 @@ public class MapController implements IReportController {
 
     public function createEmbeddedView():EmbeddedViewFactory {
         var factory:EmbeddedViewFactory = new EmbeddedViewFactory();
-        factory.reportDataService = ListDataService;
         factory.reportRenderer = "MapModule.swf";
         factory.newDefinition = MapDefinition;
         return factory;

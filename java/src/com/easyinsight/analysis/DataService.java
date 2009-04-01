@@ -92,6 +92,33 @@ public class DataService implements IDataService {
         return invalidIDs;
     }
 
+    public EmbeddedDataResults getEmbeddedResults(long reportID) {
+        try {
+            // TODO: check cache for report ID
+            WSAnalysisDefinition analysisDefinition = new AnalysisService().openAnalysisDefinition(reportID);
+            long startTime = System.currentTimeMillis();
+            EmbeddedDataResults results;
+            Feed feed = feedRegistry.getFeed(analysisDefinition.getDataFeedID());
+            Set<Long> ids = validate(analysisDefinition, feed);
+            if (ids.size() > 0) {
+                throw new RuntimeException("Report is no longer valid.");
+            } else {
+                InsightRequestMetadata insightRequestMetadata = new InsightRequestMetadata();
+                DataSet dataSet = feed.getDataSet(analysisDefinition.getColumnKeys(feed.getFields()), null, false, insightRequestMetadata);
+                ListDataResults listDataResults = dataSet.toList(analysisDefinition, feed.getFields(), insightRequestMetadata);
+                results = new EmbeddedDataResults();
+                results.setDefinition(analysisDefinition);
+                results.setHeaders(listDataResults.getHeaders());
+                results.setRows(listDataResults.getRows());
+            }
+            BenchmarkManager.recordBenchmark("DataService:List", System.currentTimeMillis() - startTime);
+            return results;
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        }
+    }
+
     public ListDataResults list(WSAnalysisDefinition analysisDefinition, boolean preview, InsightRequestMetadata insightRequestMetadata) {
         try {
             SecurityUtil.authorizeFeed(analysisDefinition.getDataFeedID(), Roles.SUBSCRIBER);

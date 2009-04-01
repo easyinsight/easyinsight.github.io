@@ -22,14 +22,6 @@ import mx.collections.ArrayCollection;
 		{
 			super();
 		}
-	
-		override public function getDataFeedType():String {
-			return "Map";
-		}	
-		
-		override public function getLabel():String {
-			return "Country and State";
-		}
 
         override public function populate(fields:ArrayCollection):void {
             var measures:ArrayCollection = findItems(fields, AnalysisItemTypes.MEASURE);
@@ -40,6 +32,11 @@ import mx.collections.ArrayCollection;
             if (dimensions.length > 0) {
                 geography = dimensions.getItemAt(0) as AnalysisItem;
             }
+        }
+
+
+        override public function get type():int {
+            return AnalysisDefinition.MAP;
         }
 
         override public function getFields():ArrayCollection {

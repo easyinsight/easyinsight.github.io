@@ -804,6 +804,16 @@
           <option name="PRECISION" value="0" />
           <option name="NULLABLE" value="true" />
         </FIELD_ELEMENT>
+        <FIELD_ELEMENT>
+          <option name="NAME" value="report_type" />
+          <option name="SQL_TYPE" value="int" />
+          <option name="JDBC_TYPE" value="4" />
+          <option name="TYPE" />
+          <option name="PRIMARY" value="false" />
+          <option name="LENGTH" value="11" />
+          <option name="PRECISION" value="0" />
+          <option name="NULLABLE" value="false" />
+        </FIELD_ELEMENT>
         <RELATIONSHIP_ELEMENT>
           <option name="RELATION_NAME" value="analysis_ibfk_1" />
           <option name="TARGET_TABLE" value="data_feed" />
@@ -4252,6 +4262,62 @@
           <option name="PRECISION" value="0" />
           <option name="NULLABLE" value="true" />
         </FIELD_ELEMENT>
+      </TABLE_DATA>
+      <TABLE_DATA>
+        <option name="NAME" value="gauge_report" />
+        <option name="SCHEMA" />
+        <option name="CATALOG" value="dms" />
+        <option name="TYPE" value="TABLE" />
+        <FIELD_ELEMENT>
+          <option name="NAME" value="gauge_report_id" />
+          <option name="SQL_TYPE" value="bigint" />
+          <option name="JDBC_TYPE" value="-5" />
+          <option name="TYPE" />
+          <option name="PRIMARY" value="true" />
+          <option name="LENGTH" value="20" />
+          <option name="PRECISION" value="0" />
+          <option name="NULLABLE" value="false" />
+        </FIELD_ELEMENT>
+        <FIELD_ELEMENT>
+          <option name="NAME" value="report_state_id" />
+          <option name="SQL_TYPE" value="bigint" />
+          <option name="JDBC_TYPE" value="-5" />
+          <option name="TYPE" />
+          <option name="PRIMARY" value="false" />
+          <option name="LENGTH" value="20" />
+          <option name="PRECISION" value="0" />
+          <option name="NULLABLE" value="true" />
+        </FIELD_ELEMENT>
+        <FIELD_ELEMENT>
+          <option name="NAME" value="gauge_type" />
+          <option name="SQL_TYPE" value="int" />
+          <option name="JDBC_TYPE" value="4" />
+          <option name="TYPE" />
+          <option name="PRIMARY" value="false" />
+          <option name="LENGTH" value="11" />
+          <option name="PRECISION" value="0" />
+          <option name="NULLABLE" value="false" />
+        </FIELD_ELEMENT>
+        <FIELD_ELEMENT>
+          <option name="NAME" value="max_value" />
+          <option name="SQL_TYPE" value="int" />
+          <option name="JDBC_TYPE" value="4" />
+          <option name="TYPE" />
+          <option name="PRIMARY" value="false" />
+          <option name="LENGTH" value="11" />
+          <option name="PRECISION" value="0" />
+          <option name="NULLABLE" value="false" />
+        </FIELD_ELEMENT>
+        <RELATIONSHIP_ELEMENT>
+          <option name="RELATION_NAME" value="gauge_report_ibfk_1" />
+          <option name="TARGET_TABLE" value="report_state" />
+          <option name="TARGET_SCHEMA" />
+          <option name="TARGET_CATALOG" value="dms" />
+          <option name="TARGET_COLUMN" value="report_state_id" />
+          <option name="SOURCE_COLUMN" value="report_state_id" />
+          <option name="CASCADE_REMOVE" value="true" />
+          <option name="CASCADE_UPDATE" value="false" />
+        </RELATIONSHIP_ELEMENT>
       </TABLE_DATA>
       <TABLE_DATA>
         <option name="NAME" value="goal_history" />

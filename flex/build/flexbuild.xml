@@ -7,7 +7,7 @@
 
     <target name="compileFlex">
         <mxmlc file="../src/PrimaryWorkspace.mxml" output="${deployment.path}/PrimaryWorkspace.swf"
-               static-rsls="true" incremental="true" link-report="link-report.xml">
+               static-rsls="true" incremental="false" link-report="link-report.xml">
             <load-config filename="../flex-config.xml"/>
         </mxmlc>
     </target>
@@ -600,6 +600,27 @@
         <mxmlc file="../src/com/easyinsight/analysis/crosstab/CrosstabModule.mxml" output="${deployment.path}/CrosstabModule.swf"
                static-rsls="false">
             <load-config filename="../modules/crosstab-module.xml"/>
+            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
+                <url rsl-url="framework_3.3.0.4852.swz"/>
+                <url rsl-url="framework_3.3.0.4852.swf"/>
+            </runtime-shared-library-path>
+
+            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/datavisualization.swc">
+                <url rsl-url="datavisualization_3.3.0.4852.swz"/>
+                <url rsl-url="datavisualization_3.3.0.4852.swf"/>
+            </runtime-shared-library-path>
+
+            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
+                <url rsl-url="rpc_3.3.0.4852.swz"/>
+                <url rsl-url="rpc_3.3.0.4852.swf"/>
+            </runtime-shared-library-path>
+        </mxmlc>
+    </target>
+
+    <target name="module.gauge">
+        <mxmlc file="../src/com/easyinsight/analysis/gauge/GaugeModule.mxml" output="${deployment.path}/GaugeModule.swf"
+               static-rsls="false">
+            <load-config filename="../modules/gauge-module.xml"/>
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
                 <url rsl-url="framework_3.3.0.4852.swz"/>
                 <url rsl-url="framework_3.3.0.4852.swf"/>

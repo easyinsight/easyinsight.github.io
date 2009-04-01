@@ -16,13 +16,31 @@ import org.jetbrains.annotations.Nullable;
  * Time: 7:35:07 PM
  */
 public abstract class WSAnalysisDefinition implements Serializable {
+
+    public static final int LIST = 1;
+    public static final int CROSSTAB = 2;
+    public static final int MAP = 3;
+    public static final int COLUMN = 4;
+    public static final int COLUMN3D = 5;
+    public static final int BAR = 6;
+    public static final int BAR3D = 7;
+    public static final int PIE = 8;
+    public static final int PIE3D = 9;
+    public static final int LINE = 10;
+    public static final int LINE3D = 11;
+    public static final int AREA = 12;
+    public static final int AREA3D = 13;
+    public static final int PLOT = 14;
+    public static final int BUBBLE = 15;
+    public static final int GAUGE = 16;
+
     private String name;
     private long analysisID;
     private long dataFeedID;
+    private int reportType;
     private List<FilterDefinition> filterDefinitions;
     private List<DataScrub> dataScrubs;
     private int policy;
-    private String genre;
     private List<Tag> tagCloud = new ArrayList<Tag>();
     private List<AnalysisItem> addedItems = new ArrayList<AnalysisItem>();
     private boolean rootDefinition;
@@ -30,6 +48,25 @@ public abstract class WSAnalysisDefinition implements Serializable {
     private boolean publiclyVisible;
     private boolean marketplaceVisible;
     private boolean visibleAtFeedLevel;
+
+    public int getReportType() {
+        return reportType;
+    }
+
+    public void setReportType(int reportType) {
+        this.reportType = reportType;
+    }
+
+    /**
+     * Clears out collections to the minimum necessary for data display. Do not use this
+     * if you're returning the report definition for the report editor.
+     */
+    public void optimizeSize() {
+        filterDefinitions = null;
+        dataScrubs = null;
+        tagCloud = null;
+        addedItems = null;
+    }
 
     public boolean isVisibleAtFeedLevel() {
         return visibleAtFeedLevel;
@@ -95,14 +132,6 @@ public abstract class WSAnalysisDefinition implements Serializable {
 
     public void setTagCloud(List<Tag> tagCloud) {
         this.tagCloud = tagCloud;
-    }
-
-    public String getGenre() {
-        return genre;
-    }
-
-    public void setGenre(String genre) {
-        this.genre = genre;
     }
 
     public int getPolicy() {

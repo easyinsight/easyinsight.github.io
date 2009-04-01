@@ -8,7 +8,7 @@ import ilog.charts3d.ColumnChart3D;
 
 public class Column3DChartController implements IReportController {
 
-    private var blah:ColumnChart3D;
+    private var blah:ColumnChart3D;        
     
     public function Column3DChartController() {
     }
@@ -24,7 +24,6 @@ public class Column3DChartController implements IReportController {
 
     public function createEmbeddedView():EmbeddedViewFactory {
         var factory:EmbeddedViewFactory = new EmbeddedViewFactory();
-        factory.reportDataService = ListDataService;
         factory.reportRenderer = "Column3DChartModule.swf";
         factory.newDefinition = Column3DChartDefinition;
         return factory;

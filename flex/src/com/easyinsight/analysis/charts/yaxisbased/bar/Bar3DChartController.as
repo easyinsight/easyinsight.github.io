@@ -20,7 +20,6 @@ public class Bar3DChartController implements IReportController {
 
     public function createEmbeddedView():EmbeddedViewFactory {
         var factory:EmbeddedViewFactory = new EmbeddedViewFactory();
-        factory.reportDataService = ListDataService;
         factory.reportRenderer = "Bar3DChartModule.swf";
         factory.newDefinition = Bar3DChartDefinition;
         return factory;

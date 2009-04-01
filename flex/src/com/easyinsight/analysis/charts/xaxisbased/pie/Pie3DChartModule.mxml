@@ -2,12 +2,13 @@
 <mx:Module xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:analysis="com.easyinsight.analysis.*"
            xmlns:ilog="http://www.ilog.com/2007/ilog/flex"
            implements="com.easyinsight.analysis.IReportRenderer"
-           width="100%" height="100%">
+           width="100%" height="100%" creationComplete="onCreation()">
     <mx:Script>
 		<![CDATA[
         import com.easyinsight.analysis.AnalysisDefinition;
         import com.easyinsight.analysis.AnalysisItem;
         import com.easyinsight.analysis.CustomChangeEvent;
+        import com.easyinsight.analysis.charts.Chart3DVisuals;
         import com.easyinsight.filtering.FilterRawData;
 
         import mx.charts.ChartItem;
@@ -16,6 +17,12 @@
         import mx.charts.series.items.PieSeriesItem;
         import mx.charts.events.ChartItemEvent;
         import mx.collections.ArrayCollection;
+
+        private function onCreation():void {
+            visuals.chart = pieChart;
+        }
+
+        private var visuals:Chart3DVisuals = new Chart3DVisuals();
 
         [Bindable]
         private var graphData:ArrayCollection = new ArrayCollection();

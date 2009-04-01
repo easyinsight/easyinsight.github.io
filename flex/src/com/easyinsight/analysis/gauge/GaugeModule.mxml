@@ -1,0 +1,37 @@
+<?xml version="1.0" ?>
+<mx:Module xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:black="ilog.gauges.controls.black.*" width="100%"
+           height="100%" implements="com.easyinsight.analysis.IReportRenderer">
+    <mx:Script><![CDATA[
+        import com.easyinsight.analysis.AnalysisDefinition;
+        import com.easyinsight.analysis.CustomChangeEvent;
+        import com.easyinsight.filtering.FilterRawData;
+
+        import mx.collections.ArrayCollection;
+
+        [Bindable]
+        private var value:Number = 0;
+
+        [Bindable]
+        private var maxValue:int = 100;
+
+        public function renderReport(dataSet:ArrayCollection, analysisDefinition:AnalysisDefinition, clientProcessorMap:Object):void {
+            var gaugeDefinition:GaugeDefinition = analysisDefinition as GaugeDefinition;
+            if (dataSet.length > 0) {
+                var row:Object = dataSet.getItemAt(0);
+                value = Number(row[gaugeDefinition.measure.qualifiedName()]);
+                maxValue = gaugeDefinition.maxValue;
+            }
+        }
+
+        public function createFilterRawData():FilterRawData {
+            return null;
+        }
+
+        public function updateExportMetadata():void {
+        }
+
+        public function onCustomChangeEvent(event:CustomChangeEvent):void {
+        }]]></mx:Script>
+    <black:BlackCircularGauge width="100%" height="100%" value="{value}" minimum="0" maximum="{maxValue}" startAngle="210"
+        endAngle="330" showTrack="true" trackMinimum="0" trackMaximum="100"/>
+</mx:Module>

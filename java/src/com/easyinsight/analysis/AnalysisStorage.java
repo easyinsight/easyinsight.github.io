@@ -164,13 +164,13 @@ public class AnalysisStorage {
         Collection<InsightDescriptor> descriptors = new ArrayList<InsightDescriptor>();
         Connection conn = Database.instance().getConnection();
         try {
-            PreparedStatement queryStmt = conn.prepareStatement("SELECT analysis.ANALYSIS_ID, TITLE, DATA_FEED_ID FROM ANALYSIS, USER_TO_ANALYSIS WHERE " +
+            PreparedStatement queryStmt = conn.prepareStatement("SELECT analysis.ANALYSIS_ID, TITLE, DATA_FEED_ID, REPORT_TYPE FROM ANALYSIS, USER_TO_ANALYSIS WHERE " +
                     "USER_TO_ANALYSIS.analysis_id = analysis.analysis_id and user_to_analysis.user_id = ? and root_definition = ?");
             queryStmt.setLong(1, userID);
             queryStmt.setBoolean(2, false);
             ResultSet rs = queryStmt.executeQuery();
             while (rs.next()) {
-                descriptors.add(new InsightDescriptor(rs.getLong(1), rs.getString(2), rs.getLong(3)));
+                descriptors.add(new InsightDescriptor(rs.getLong(1), rs.getString(2), rs.getLong(3), rs.getInt(4)));
             }
         } catch (SQLException e) {
             LogClass.error(e);
@@ -243,7 +243,7 @@ public class AnalysisStorage {
                 long analysisID = analysisRS.getLong(1);
                 String title = analysisRS.getString(2);
                 long dataSourceID = analysisRS.getLong(3);
-                analysisList.add(new InsightDescriptor(analysisID, title, dataSourceID));
+                analysisList.add(new InsightDescriptor(analysisID, title, dataSourceID, analysisRS.getInt(4)));
             }
         } catch (Exception e) {
             LogClass.error(e);
@@ -290,7 +290,7 @@ public class AnalysisStorage {
                 long analysisID = analysisRS.getLong(1);
                 String title = analysisRS.getString(2);
                 long dataSourceID = analysisRS.getLong(3);
-                analysisList.add(new InsightDescriptor(analysisID, title, dataSourceID));
+                analysisList.add(new InsightDescriptor(analysisID, title, dataSourceID, analysisRS.getInt(4)));
             }
         } catch (Exception e) {
             LogClass.error(e);
@@ -337,7 +337,7 @@ public class AnalysisStorage {
                 long analysisID = analysisRS.getLong(1);
                 String title = analysisRS.getString(2);
                 long dataSourceID = analysisRS.getLong(3);
-                analysisList.add(new InsightDescriptor(analysisID, title, dataSourceID));
+                analysisList.add(new InsightDescriptor(analysisID, title, dataSourceID, analysisRS.getInt(4)));
             }
         } catch (Exception e) {
             LogClass.error(e);
@@ -418,7 +418,7 @@ public class AnalysisStorage {
             Iterator iter = query.iterate();
             while (iter.hasNext()) {
                 AnalysisDefinition analysisDefinition = (AnalysisDefinition) iter.next();
-                analysisList.add(new InsightDescriptor(analysisDefinition.getAnalysisID(), analysisDefinition.getTitle(), analysisDefinition.getDataFeedID()));
+                analysisList.add(new InsightDescriptor(analysisDefinition.getAnalysisID(), analysisDefinition.getTitle(), analysisDefinition.getDataFeedID(), analysisDefinition.getReportType()));
             }
             session.getTransaction().commit();
         } catch (Exception e) {

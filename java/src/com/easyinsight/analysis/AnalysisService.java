@@ -199,7 +199,7 @@ public class AnalysisService implements IAnalysisService {
                 addAnalysisView(analysisID);
                 AnalysisDefinition analysisDefinition = analysisStorage.getPersistableReport(analysisID);
                 insightResponse = new InsightResponse(InsightResponse.SUCCESS, new InsightDescriptor(analysisID, analysisDefinition.getTitle(),
-                        analysisDefinition.getDataFeedID()));
+                        analysisDefinition.getDataFeedID(), analysisDefinition.getReportType()));
             } catch (SecurityException e) {
                 if (e.getReason() == InsightResponse.NEED_LOGIN)
                     insightResponse = new InsightResponse(InsightResponse.NEED_LOGIN, null);

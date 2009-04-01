@@ -91,10 +91,7 @@
                 goalTreeNode.associatedFeeds.addItem(goalFeed);
             } else if (obj is InsightDescriptor) {
                 var analysisDefinition:InsightDescriptor = obj as InsightDescriptor;
-                var goalInsight:GoalInsight = new GoalInsight();
-                goalInsight.insightID = analysisDefinition.id;
-                goalInsight.insightName = analysisDefinition.name;
-                goalTreeNode.associatedInsights.addItem(goalInsight);
+                goalTreeNode.associatedInsights.addItem(analysisDefinition);
             } else if (obj is GoalTreeDescriptor) {
                 var goalTreeDescriptor:GoalTreeDescriptor = obj as GoalTreeDescriptor;
                 var window:GoalTreeDropWindow = new GoalTreeDropWindow();

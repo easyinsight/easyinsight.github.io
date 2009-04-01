@@ -253,7 +253,7 @@ public class SolutionService {
             PreparedStatement queryStmt = conn.prepareStatement("SELECT DATA_FEED.DATA_FEED_ID, DATA_FEED.FEED_NAME FROM SOLUTION_TO_FEED, DATA_FEED " +
                     "WHERE SOLUTION_ID = ? AND DATA_FEED.DATA_FEED_ID = SOLUTION_TO_FEED.FEED_ID");
             queryStmt.setLong(1, solutionID);
-            PreparedStatement queryInsightsStmt = conn.prepareStatement("SELECT ANALYSIS_ID, TITLE, DATA_FEED_ID FROM ANALYSIS WHERE DATA_FEED_ID = ? AND ROOT_DEFINITION = ?");
+            PreparedStatement queryInsightsStmt = conn.prepareStatement("SELECT ANALYSIS_ID, TITLE, DATA_FEED_ID, REPORT_TYPE FROM ANALYSIS WHERE DATA_FEED_ID = ? AND ROOT_DEFINITION = ?");
             ResultSet rs = queryStmt.executeQuery();
             while (rs.next()) {
                 long feedID = rs.getLong(1);
@@ -268,7 +268,7 @@ public class SolutionService {
                 while (insightRS.next()) {
                     long insightID = insightRS.getLong(1);
                     String insightName = insightRS.getString(2);
-                    insightDescriptors.add(new InsightDescriptor(insightID, insightName, insightRS.getLong(3)));
+                    insightDescriptors.add(new InsightDescriptor(insightID, insightName, insightRS.getLong(3), insightRS.getInt(4)));
                 }
             }
             PreparedStatement getGoalsStmt = conn.prepareStatement("SELECT goal_tree.goal_tree_id, name FROM solution_to_goal_tree, goal_tree " +

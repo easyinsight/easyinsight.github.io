@@ -4,6 +4,7 @@ import com.easyinsight.analysis.AnalysisMeasure;
 import com.easyinsight.analysis.FilterDefinition;
 import com.easyinsight.analysis.Tag;
 import com.easyinsight.solutions.SolutionGoalTreeDescriptor;
+import com.easyinsight.core.InsightDescriptor;
 
 import java.util.List;
 import java.util.ArrayList;
@@ -29,7 +30,7 @@ public class GoalTreeNode implements Cloneable {
     private boolean highIsGood;
     private FilterDefinition filterDefinition;
     private List<GoalFeed> associatedFeeds = new ArrayList<GoalFeed>();
-    private List<GoalInsight> associatedInsights = new ArrayList<GoalInsight>();
+    private List<InsightDescriptor> associatedInsights = new ArrayList<InsightDescriptor>();
     private List<GoalSolution> associatedSolutions = new ArrayList<GoalSolution>();
     private List<Tag> tags = new ArrayList<Tag>();
     private String name;
@@ -175,11 +176,11 @@ public class GoalTreeNode implements Cloneable {
         this.associatedFeeds = associatedFeeds;
     }
 
-    public List<GoalInsight> getAssociatedInsights() {
+    public List<InsightDescriptor> getAssociatedInsights() {
         return associatedInsights;
     }
 
-    public void setAssociatedInsights(List<GoalInsight> associatedInsights) {
+    public void setAssociatedInsights(List<InsightDescriptor> associatedInsights) {
         this.associatedInsights = associatedInsights;
     }
 

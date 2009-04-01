@@ -5,7 +5,8 @@
 		<![CDATA[
         import com.easyinsight.analysis.AnalysisDefinition;
         import com.easyinsight.analysis.CustomChangeEvent;
-        import com.easyinsight.filtering.FilterRawData;
+        import com.easyinsight.analysis.charts.Chart3DVisuals;
+import com.easyinsight.filtering.FilterRawData;
 
         import ilog.charts3d.series.BarSeries3D;
         import ilog.charts3d.series.BarSet3D;
@@ -49,6 +50,8 @@
         [Bindable]
         private var xField:String;
         private var _yField:String;
+
+        private var visuals:Chart3DVisuals = new Chart3DVisuals();
 
         [Bindable]
         public function get yField():String {
@@ -112,6 +115,7 @@
                 barChart.percentWidth = 100;
                 barChart.showDataTips = true;
                 barChart.dataProvider = graphData;
+                visuals.chart = barChart;
 
                 // define the X axis
 

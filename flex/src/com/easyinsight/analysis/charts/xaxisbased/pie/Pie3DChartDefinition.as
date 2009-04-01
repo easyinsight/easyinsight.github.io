@@ -1,6 +1,8 @@
 package com.easyinsight.analysis.charts.xaxisbased.pie {
 import com.easyinsight.analysis.charts.ChartTypes;
 import com.easyinsight.analysis.charts.xaxisbased.XAxisDefinition;
+import com.easyinsight.analysis.AnalysisDefinition;
+
 [Bindable]
 [RemoteClass(alias="com.easyinsight.analysis.definitions.WS3DPieChartDefinition")]
 public class Pie3DChartDefinition extends XAxisDefinition{
@@ -8,12 +10,8 @@ public class Pie3DChartDefinition extends XAxisDefinition{
         super();
     }
 
-    override public function getLabel():String {
-        return "3D Pie";
-    }
-
-    override public function get controller():String {
-        return "com.easyinsight.analysis.charts.xaxisbased.pie.Pie3DChartController";
+    override public function get type():int {
+        return AnalysisDefinition.PIE3D;
     }
 
     override public function getChartType():int {
