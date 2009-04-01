@@ -7,7 +7,7 @@
 
     <target name="compileFlex">
         <mxmlc file="../src/PrimaryWorkspace.mxml" output="${deployment.path}/PrimaryWorkspace.swf"
-               static-rsls="true" incremental="false" link-report="link-report.xml">
+               static-rsls="true" incremental="true" link-report="link-report.xml">
             <load-config filename="../flex-config.xml"/>
         </mxmlc>
     </target>

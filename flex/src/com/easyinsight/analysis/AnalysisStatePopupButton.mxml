@@ -7,22 +7,6 @@
 		<![CDATA[
 			import com.easyinsight.analysis.charts.ChartTypes;
             import mx.events.MenuEvent;
-			
-			[Bindable]
-            [Embed(source="../../../../assets/table.png")]
-            public var listIcon:Class;
-
-            [Bindable]
-            [Embed(source="../../../../assets/table2_selection_block.png")]
-            public var crosstabIcon:Class;
-
-            [Bindable]
-            [Embed(source="../../../../assets/chart_pie2.png")]
-            public var graphIcon:Class;
-            
-            [Bindable]
-            [Embed(source="../../../../assets/earth.png")]
-            public var yahooMapIcon:Class;
             
             [Bindable]
             private var xmlList:XMLList;
@@ -40,68 +24,78 @@
 			private function itemClickHandler(event:MenuEvent):void {
                 if (event.item != null && event.item.@controller != null) {
                     event.currentTarget.label= event.label;
-                    var controllerClassName:String = event.item.@controller;
-                    var controllerClass:Class = Class(getDefinitionByName(controllerClassName));
+                    var controllerClass:Class = ControllerLookup.controllerForType(event.item.@type);
                     var controller:IReportController = new controllerClass();
                     dispatchEvent(new AnalysisStateChangeEvent(controller));
                 }
             }
             
-            public function set selectedLabel(controller:String):void {
+            public function set selectedLabel(type:int):void {
+                setLabel(all, type);
+            	//p2.label = selectedLabel;
+            }
 
-            	//p2.label = selectedLabel;          	
+            private function setLabel(parent:XMLList, type:int):void {
+                var nodes:XMLList = parent.children();
+                for (var i:int = 0; i < nodes.length(); i++) {
+                    var node:XMLList = XMLList(nodes[i]);
+                    if (node.@type == type) {
+                        p2.label = node.@label;     
+                    }
+                    setLabel(node, type);
+                }
             }
 		]]>
 	</mx:Script>
 	  <mx:XMLList id="all">
-        <node label="Grid        " icon="{crosstabIcon}">
-        	<node label="List" icon="{listIcon}" controller="com.easyinsight.analysis.list.ListController"/>
-        	<node label="Crosstab" controller="com.easyinsight.analysis.crosstab.CrosstabController" icon="{crosstabIcon}"/>
+        <node label="Grid        ">
+        	<node label="List" type="{AnalysisDefinition.LIST}"/>
+        	<node label="Crosstab" type="{AnalysisDefinition.CROSSTAB}"/>
         </node>
         <node label="Chart" icon="">
         	<node label="Column">
-                <node label="2D Column" icon="" controller="com.easyinsight.analysis.charts.xaxisbased.column.ColumnChartController"/>
-                <node label="3D Column" icon="" controller="com.easyinsight.analysis.charts.xaxisbased.column.Column3DChartController"/>
+                <node label="2D Column" type="{AnalysisDefinition.COLUMN}"/>
+                <node label="3D Column" type="{AnalysisDefinition.COLUMN3D}"/>
             </node>
         	<node label="Bar" icon="">
-                <node label="2D Bar" icon="" controller="com.easyinsight.analysis.charts.yaxisbased.bar.BarChartController"/>
-                <node label="3D Bar" icon="" controller="com.easyinsight.analysis.charts.yaxisbased.bar.Bar3DChartController"/>
+                <node label="2D Bar" type="{AnalysisDefinition.BAR}"/>
+                <node label="3D Bar" type="{AnalysisDefinition.BAR3D}"/>
             </node>
             <node label="Line" icon="">
-                <node label="2D Line" icon="" controller="com.easyinsight.analysis.charts.twoaxisbased.line.LineChartController"/>
-                <node label="3D Line" icon="" controller="com.easyinsight.analysis.charts.twoaxisbased.line.Line3DChartController"/>
+                <node label="2D Line" type="{AnalysisDefinition.LINE}"/>
+                <node label="3D Line" type="{AnalysisDefinition.LINE3D}"/>
             </node>
             <node label="Pie" icon="">
-                <node label="2D Pie" icon="" controller="com.easyinsight.analysis.charts.xaxisbased.pie.PieChartController"/>
-                <node label="3D Pie" icon="" controller="com.easyinsight.analysis.charts.xaxisbased.pie.Pie3DChartController"/>
+                <node label="2D Pie" type="{AnalysisDefinition.PIE}"/>
+                <node label="3D Pie" type="{AnalysisDefinition.PIE3D}"/>
             </node>
-        	<node label="Plot" icon="" controller="com.easyinsight.analysis.charts.plot.PlotChartController"/>
-        	<node label="Bubble" icon="" controller="com.easyinsight.analysis.charts.bubble.BubbleChartController"/>
             <node label="Area" icon="">
-                <node label="2D Area" icon="" controller="com.easyinsight.analysis.charts.twoaxisbased.area.AreaChartController"/>
-                <node label="3D Area" icon="" controller="com.easyinsight.analysis.charts.twoaxisbased.area.Area3DChartController"/>
+                <node label="2D Area" type="{AnalysisDefinition.AREA}"/>
+                <node label="3D Area" type="{AnalysisDefinition.AREA3D}"/>
             </node>
+        	<node label="Plot" type="{AnalysisDefinition.PLOT}"/>
+        	<node label="Bubble" type="{AnalysisDefinition.BUBBLE}"/>
         </node>
-        <node label="Map" icon="" controller="com.easyinsight.analysis.maps.MapController"/>
-        <node label="Gauge" icon="" controller="com.easyinsight.analysis.gauge.GaugeController"/>
-        <node label="Split" icon="" state="Split"/>
+        <node label="Map" type="{AnalysisDefinition.MAP}"/>
+        <!--<node label="Gauge" type="{AnalysisDefinition.LIST}"/>
+        <node label="Split" state="Split"/>-->
     </mx:XMLList>
     <mx:XMLList id="splitSource">        
-    	<node label="List" state="" icon="{listIcon}"/>        	        
+    	<node label="List" state=""/>
     </mx:XMLList>
     <mx:XMLList id="splitTarget">
         <node label="Grid" icon="">
-        	<node label="Crosstab" state="Crosstab" icon="{crosstabIcon}"/>
+        	<node label="Crosstab" state="Crosstab"/>
         </node>
         <node label="Chart" icon="">
-        	<node label="Column" state="BasicChart" subState="{ChartTypes.COLUMN_FAMILY}" icon=""/>
-        	<node label="Bar" state="BasicChart" subState="{ChartTypes.BAR_FAMILY}" icon=""/>
-        	<node label="Line" state="BasicChart" subState="{ChartTypes.LINE_FAMILY}" icon=""/>
-        	<node label="Pie" state="BasicChart" subState="{ChartTypes.PIE_FAMILY}" icon=""/>
+        	<node label="Column" state="BasicChart" subState="{ChartTypes.COLUMN_FAMILY}"/>
+        	<node label="Bar" state="BasicChart" subState="{ChartTypes.BAR_FAMILY}"/>
+        	<node label="Line" state="BasicChart" subState="{ChartTypes.LINE_FAMILY}"/>
+        	<node label="Pie" state="BasicChart" subState="{ChartTypes.PIE_FAMILY}"/>
         </node>
         <node label="Map" icon="">
-        	<node label="Country and State" state="ILogMap" icon=""/>
-        	<node label="Satellite and Street" state="YahooMap" icon=""/>
+        	<node label="Country and State" state="ILogMap"/>
+        	<node label="Satellite and Street" state="YahooMap"/>
         </node>        
     </mx:XMLList>
     <mx:PopUpMenuButton id="p2" 

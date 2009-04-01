@@ -298,8 +298,7 @@ import com.easyinsight.analysis.HierarchyDrilldownEvent;
                 var controller:IReportController = new controllerClass();
                 loadController(controller);
 
-                // TODO: repair
-                //analysisState.selectedLabel = analysisDefinition.getLabel();
+                analysisState.selectedLabel = analysisDefinition.type;
 
                 /*if (analysisDefinition.addedItems != null) {
                  for each (var analysisField:AnalysisItem in analysisDefinition.addedItems) {

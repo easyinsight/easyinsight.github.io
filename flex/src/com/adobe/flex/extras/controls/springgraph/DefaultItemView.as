@@ -20,6 +20,10 @@ package com.adobe.flex.extras.controls.springgraph
 		public function get data(): Object {
 			return _data;
 		}
+
+        public function DefaultItemView() {
+            
+        }
 		
 		public function set data(d: Object): void {
 			_data = d;

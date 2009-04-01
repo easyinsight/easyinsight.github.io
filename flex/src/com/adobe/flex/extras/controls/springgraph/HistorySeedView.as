@@ -25,6 +25,10 @@ package com.adobe.flex.extras.controls.springgraph
 		private var gotX: Boolean = false;
 		private var firstX: Number;
 
+        public function HistorySeedView() {
+            
+        }
+
 		// todo: only lock these x/y values if we are in autoFit mode
 	    override public function set x(value:Number):void
 	    {
