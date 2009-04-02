@@ -70,6 +70,7 @@ public class APIManager implements IAPIManager {
         org.apache.cxf.endpoint.Endpoint endpoint = endpointImpl.getServer().getEndpoint();
         BasicAuthAuthorizationInterceptor basicAuthInterceptor = new BasicAuthAuthorizationInterceptor();
         endpoint.getInInterceptors().add(basicAuthInterceptor);
+        endpoint.getInInterceptors().add(new MessageThrottlingInterceptor());
     }
 
     private void configureWSDeathStar(EndpointImpl endpointImpl) {
@@ -80,6 +81,7 @@ public class APIManager implements IAPIManager {
         securityInProps.put(WSHandlerConstants.PW_CALLBACK_CLASS, APIPasswordCallback.class.getName());
         WSS4JInInterceptor wssIn = new WSS4JInInterceptor(securityInProps);
         endpoint.getInInterceptors().add(wssIn);
+        endpoint.getInInterceptors().add(new MessageThrottlingInterceptor());
     }
 
     private void go() {

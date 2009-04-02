@@ -83,6 +83,10 @@ public class Account {
         inverseJoinColumns = @JoinColumn(name="guest_user_id", nullable = false))
     private List<Consultant> guestUsers = new ArrayList<Consultant>();
 
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JoinColumn(name="account_id")
+    private List<BandwidthUsage> historicBandwidthUsage = new ArrayList<BandwidthUsage>();
+
     //private BillingParty billingParty;
 
     /*public BillingParty getBillingParty() {

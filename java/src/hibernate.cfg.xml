@@ -117,6 +117,7 @@
         <mapping class="com.easyinsight.users.Account"/>
         <mapping class="com.easyinsight.users.SubscriptionLicense"/>
         <mapping class="com.easyinsight.users.Consultant"/>
+        <mapping class="com.easyinsight.users.BandwidthUsage" />
     </session-factory>
 
 </hibernate-configuration>
