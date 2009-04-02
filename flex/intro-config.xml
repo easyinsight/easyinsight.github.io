@@ -19,5 +19,5 @@
     <file-specs>
         <path-element>src/IntroApplication.mxml</path-element>
     </file-specs>
-    <static-link-runtime-shared-libraries>false</static-link-runtime-shared-libraries>
+    <static-link-runtime-shared-libraries>true</static-link-runtime-shared-libraries>
 </flex-config>
