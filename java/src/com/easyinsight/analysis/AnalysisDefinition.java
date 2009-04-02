@@ -332,10 +332,11 @@ public class AnalysisDefinition implements Cloneable {
         analysisDefinition.setPolicy(analysisPolicy);
         analysisDefinition.setRootDefinition(rootDefinition);
         for (AnalysisItem analysisItem : reportStructure.values()) {
-            if (analysisItem.hasType(AnalysisItemTypes.HIERARCHY)) {
+            analysisItem.afterLoad();
+            /*if (analysisItem.hasType(AnalysisItemTypes.HIERARCHY)) {
                 AnalysisHierarchyItem analysisHierarchyItem = (AnalysisHierarchyItem) analysisItem;
                 analysisHierarchyItem.setHierarchyLevels(new ArrayList<HierarchyLevel>(analysisHierarchyItem.getHierarchyLevels()));
-            }
+            }*/
         }
         analysisDefinition.populateFromReportStructure(reportStructure);
         List<DataScrub> newScrubs = new ArrayList<DataScrub>();
@@ -361,7 +362,7 @@ public class AnalysisDefinition implements Cloneable {
         return false;
     }
 
-    protected List<AnalysisItem> processItems(List<AnalysisItem> analysisItems) {
+    /*protected List<AnalysisItem> processItems(List<AnalysisItem> analysisItems) {
         for (AnalysisItem analysisItem : analysisItems) {
             if (analysisItem.hasType(AnalysisItemTypes.HIERARCHY)) {
                 AnalysisHierarchyItem analysisHierarchyItem = (AnalysisHierarchyItem) analysisItem;
@@ -369,5 +370,5 @@ public class AnalysisDefinition implements Cloneable {
             }
         }
         return analysisItems;
-    }
+    }*/
 }

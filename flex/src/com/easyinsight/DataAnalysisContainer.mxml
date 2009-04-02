@@ -180,6 +180,9 @@ import com.easyinsight.analysis.HierarchyDrilldownEvent;
         private var analysisChanged:Boolean = false;
 
         [Bindable]
+        private var dataSourceName:String;
+
+        [Bindable]
         private var _reportID:int;
 
         public function set previewMode(previewMode:Boolean):void {
@@ -198,14 +201,6 @@ import com.easyinsight.analysis.HierarchyDrilldownEvent;
             dataView.availableFields = availableFields;
             Alert.show("The underlying data to this data source has been changed, so some fields may have been removed from your filters or report.");
             dataView.retrieveData();
-        }
-
-        public function commandStateChange(newState:String):void {
-
-        }
-
-        public function revertCommandStateChange(newState:String, previousAnalysisDefinition:AnalysisDefinition):void {
-
         }
 
         private function onAnalysisStateChange(event:AnalysisStateChangeEvent):void {
@@ -273,6 +268,7 @@ import com.easyinsight.analysis.HierarchyDrilldownEvent;
             dataService.addEventListener(InvalidFieldsEvent.INVALID_FIELDS, onInvalidFields);
             this.analysisValidators = [ analysisNameValidator ];
             this.feedMetadata = feedMetadata;
+            dataSourceName = this.feedMetadata.dataSourceName;
             availableFields = new ArrayCollection();
             for each (var analysisItem:AnalysisItem in feedMetadata.fields) {
                 if (!feedAdminMode && analysisItem.hidden) continue;
@@ -874,6 +870,10 @@ import com.easyinsight.analysis.HierarchyDrilldownEvent;
 			-->
 
                 <mx:VBox height="100%" width="100%" verticalGap="0" borderThickness="1" borderColor="#DCE2F8" borderStyle="solid" dropShadowEnabled="true">
+                    <mx:Box width="100%" height="5" backgroundColor="#10319A" left="0" right="0"/>
+                    <mx:Box width="100%" backgroundColor="#3B56AF" horizontalAlign="center">
+                        <mx:Label text="{dataSourceName}" color="0xFFFFFF"/>
+                    </mx:Box>
                     <mx:DataGrid dataProvider="{availableFields}" width="100%" height="100%" dragEnabled="true"
                                  id="Measure" backgroundColor="#FFFFFF"
                                  alternatingItemColors="#FFFFFF" fontSize="12" rowHeight="28">

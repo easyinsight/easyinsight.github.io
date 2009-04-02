@@ -22,9 +22,16 @@ public class HierarchyLevel implements Serializable {
     @OneToOne
     @JoinColumn(name="analysis_item_id")
     private AnalysisItem analysisItem;
-    @ManyToOne    
-    @JoinColumn(name="parent_item_id")
-    private AnalysisItem parentItem;
+    @Column(name="position")
+    private int position;
+
+    public int getPosition() {
+        return position;
+    }
+
+    public void setPosition(int position) {
+        this.position = position;
+    }
 
     public long getHierarchyLevelID() {
         return hierarchyLevelID;
@@ -40,13 +47,5 @@ public class HierarchyLevel implements Serializable {
 
     public void setAnalysisItem(AnalysisItem analysisItem) {
         this.analysisItem = analysisItem;
-    }
-
-    public AnalysisItem getParentItem() {
-        return parentItem;
-    }
-
-    public void setParentItem(AnalysisItem parentItem) {
-        this.parentItem = parentItem;
     }
 }

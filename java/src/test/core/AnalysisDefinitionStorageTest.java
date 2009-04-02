@@ -4,12 +4,19 @@ import junit.framework.TestCase;
 import com.easyinsight.database.Database;
 import com.easyinsight.analysis.*;
 import com.easyinsight.analysis.definitions.WSColumnChartDefinition;
+import com.easyinsight.datafeeds.FeedStorage;
+import com.easyinsight.datafeeds.FeedDefinition;
+import com.easyinsight.core.NamedKey;
+import com.easyinsight.core.Key;
 
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.sql.Connection;
+import java.sql.SQLException;
 
 import test.util.TestUtil;
+import org.hibernate.Session;
 
 /**
  * User: James Boe
@@ -20,6 +27,44 @@ public class AnalysisDefinitionStorageTest extends TestCase {
 
     public void setUp() {
         Database.initialize();
+    }
+
+    public void testHierarchies() throws SQLException {
+        long userID = TestUtil.getIndividualTestUser();
+        long dataSourceID = TestUtil.createDefaultTestDataSource(userID);
+        FeedDefinition feedDefinition = new FeedStorage().getFeedDefinitionData(dataSourceID);
+        HierarchyLevel topLevel = new HierarchyLevel();
+        topLevel.setPosition(0);
+        topLevel.setAnalysisItem(findAnalysisItem("Product", feedDefinition));
+        HierarchyLevel bottomLevel = new HierarchyLevel();
+        bottomLevel.setPosition(1);
+        bottomLevel.setAnalysisItem(findAnalysisItem("Customer", feedDefinition));
+        AnalysisHierarchyItem analysisHierarchyItem = new AnalysisHierarchyItem();
+        analysisHierarchyItem.setHierarchyLevels(Arrays.asList(topLevel, bottomLevel));
+        analysisHierarchyItem.setHierarchyLevel(topLevel);
+        Key key = new NamedKey("Blah");
+        analysisHierarchyItem.setKey(key);
+        /*Connection conn = Database.instance().getConnection();
+        conn.setAutoCommit(false);
+        Session session = Database.instance().createSession(conn);
+        session.save(key);
+        session.save(analysisHierarchyItem);
+        session.flush();
+        conn.commit();*/
+        feedDefinition.getFields().add(analysisHierarchyItem);
+        new FeedStorage().updateDataFeedConfiguration(feedDefinition);
+        feedDefinition = new FeedStorage().getFeedDefinitionData(dataSourceID);
+        AnalysisHierarchyItem loadedItem = (AnalysisHierarchyItem) findAnalysisItem("Blah", feedDefinition);
+        assertEquals(2, loadedItem.getHierarchyLevels().size());
+    }
+
+    private AnalysisItem findAnalysisItem(String name, FeedDefinition feedDefinition) {
+        for (AnalysisItem analysisItem : feedDefinition.getFields()) {
+            if (analysisItem.getKey().toDisplayName().equals(name)) {
+                return analysisItem;
+            }
+        }
+        throw new RuntimeException("Could not find " + name + " in " + feedDefinition.getFeedName());
     }
 
     public void testListDefinitions() {

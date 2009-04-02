@@ -1104,8 +1104,74 @@
           <option name="PRECISION" value="0" />
           <option name="NULLABLE" value="false" />
         </FIELD_ELEMENT>
+        <FIELD_ELEMENT>
+          <option name="NAME" value="hierarchy_levels_id" />
+          <option name="SQL_TYPE" value="bigint" />
+          <option name="JDBC_TYPE" value="-5" />
+          <option name="TYPE" />
+          <option name="PRIMARY" value="false" />
+          <option name="LENGTH" value="20" />
+          <option name="PRECISION" value="0" />
+          <option name="NULLABLE" value="true" />
+        </FIELD_ELEMENT>
         <RELATIONSHIP_ELEMENT>
           <option name="RELATION_NAME" value="analysis_hierarchy_item_ibfk2" />
+          <option name="TARGET_TABLE" value="analysis_item" />
+          <option name="TARGET_SCHEMA" />
+          <option name="TARGET_CATALOG" value="dms" />
+          <option name="TARGET_COLUMN" value="analysis_item_id" />
+          <option name="SOURCE_COLUMN" value="analysis_item_id" />
+          <option name="CASCADE_REMOVE" value="false" />
+          <option name="CASCADE_UPDATE" value="false" />
+        </RELATIONSHIP_ELEMENT>
+      </TABLE_DATA>
+      <TABLE_DATA>
+        <option name="NAME" value="analysis_hierarchy_item_to_hierarchy_level" />
+        <option name="SCHEMA" />
+        <option name="CATALOG" value="dms" />
+        <option name="TYPE" value="TABLE" />
+        <FIELD_ELEMENT>
+          <option name="NAME" value="analysis_hierarchy_item_to_hierarchy_level_id" />
+          <option name="SQL_TYPE" value="bigint" />
+          <option name="JDBC_TYPE" value="-5" />
+          <option name="TYPE" />
+          <option name="PRIMARY" value="true" />
+          <option name="LENGTH" value="20" />
+          <option name="PRECISION" value="0" />
+          <option name="NULLABLE" value="false" />
+        </FIELD_ELEMENT>
+        <FIELD_ELEMENT>
+          <option name="NAME" value="analysis_item_id" />
+          <option name="SQL_TYPE" value="bigint" />
+          <option name="JDBC_TYPE" value="-5" />
+          <option name="TYPE" />
+          <option name="PRIMARY" value="false" />
+          <option name="LENGTH" value="20" />
+          <option name="PRECISION" value="0" />
+          <option name="NULLABLE" value="false" />
+        </FIELD_ELEMENT>
+        <FIELD_ELEMENT>
+          <option name="NAME" value="hierarchy_level_id" />
+          <option name="SQL_TYPE" value="bigint" />
+          <option name="JDBC_TYPE" value="-5" />
+          <option name="TYPE" />
+          <option name="PRIMARY" value="false" />
+          <option name="LENGTH" value="20" />
+          <option name="PRECISION" value="0" />
+          <option name="NULLABLE" value="false" />
+        </FIELD_ELEMENT>
+        <RELATIONSHIP_ELEMENT>
+          <option name="RELATION_NAME" value="analysis_hierarchy_item_to_hierarchy_level_ibfk1" />
+          <option name="TARGET_TABLE" value="hierarchy_level" />
+          <option name="TARGET_SCHEMA" />
+          <option name="TARGET_CATALOG" value="dms" />
+          <option name="TARGET_COLUMN" value="hierarchy_level_id" />
+          <option name="SOURCE_COLUMN" value="hierarchy_level_id" />
+          <option name="CASCADE_REMOVE" value="false" />
+          <option name="CASCADE_UPDATE" value="false" />
+        </RELATIONSHIP_ELEMENT>
+        <RELATIONSHIP_ELEMENT>
+          <option name="RELATION_NAME" value="analysis_hierarchy_item_to_hierarchy_level_ibfk2" />
           <option name="TARGET_TABLE" value="analysis_item" />
           <option name="TARGET_SCHEMA" />
           <option name="TARGET_CATALOG" value="dms" />
@@ -1641,6 +1707,52 @@
           <option name="TARGET_CATALOG" value="dms" />
           <option name="TARGET_COLUMN" value="analysis_tags_id" />
           <option name="SOURCE_COLUMN" value="analysis_tags_id" />
+          <option name="CASCADE_REMOVE" value="true" />
+          <option name="CASCADE_UPDATE" value="false" />
+        </RELATIONSHIP_ELEMENT>
+      </TABLE_DATA>
+      <TABLE_DATA>
+        <option name="NAME" value="basecamp" />
+        <option name="SCHEMA" />
+        <option name="CATALOG" value="dms" />
+        <option name="TYPE" value="TABLE" />
+        <FIELD_ELEMENT>
+          <option name="NAME" value="basecamp_id" />
+          <option name="SQL_TYPE" value="bigint" />
+          <option name="JDBC_TYPE" value="-5" />
+          <option name="TYPE" />
+          <option name="PRIMARY" value="true" />
+          <option name="LENGTH" value="20" />
+          <option name="PRECISION" value="0" />
+          <option name="NULLABLE" value="false" />
+        </FIELD_ELEMENT>
+        <FIELD_ELEMENT>
+          <option name="NAME" value="data_feed_id" />
+          <option name="SQL_TYPE" value="bigint" />
+          <option name="JDBC_TYPE" value="-5" />
+          <option name="TYPE" />
+          <option name="PRIMARY" value="false" />
+          <option name="LENGTH" value="11" />
+          <option name="PRECISION" value="0" />
+          <option name="NULLABLE" value="false" />
+        </FIELD_ELEMENT>
+        <FIELD_ELEMENT>
+          <option name="NAME" value="url" />
+          <option name="SQL_TYPE" value="varchar" />
+          <option name="JDBC_TYPE" value="12" />
+          <option name="TYPE" />
+          <option name="PRIMARY" value="false" />
+          <option name="LENGTH" value="255" />
+          <option name="PRECISION" value="0" />
+          <option name="NULLABLE" value="false" />
+        </FIELD_ELEMENT>
+        <RELATIONSHIP_ELEMENT>
+          <option name="RELATION_NAME" value="basecamp_ibfk1" />
+          <option name="TARGET_TABLE" value="data_feed" />
+          <option name="TARGET_SCHEMA" />
+          <option name="TARGET_CATALOG" value="dms" />
+          <option name="TARGET_COLUMN" value="data_feed_id" />
+          <option name="SOURCE_COLUMN" value="data_feed_id" />
           <option name="CASCADE_REMOVE" value="true" />
           <option name="CASCADE_UPDATE" value="false" />
         </RELATIONSHIP_ELEMENT>
@@ -5611,22 +5723,22 @@
           <option name="NULLABLE" value="true" />
         </FIELD_ELEMENT>
         <FIELD_ELEMENT>
-          <option name="NAME" value="parent_item_id" />
-          <option name="SQL_TYPE" value="bigint" />
-          <option name="JDBC_TYPE" value="-5" />
-          <option name="TYPE" />
-          <option name="PRIMARY" value="false" />
-          <option name="LENGTH" value="20" />
-          <option name="PRECISION" value="0" />
-          <option name="NULLABLE" value="true" />
-        </FIELD_ELEMENT>
-        <FIELD_ELEMENT>
           <option name="NAME" value="analysis_item_id" />
           <option name="SQL_TYPE" value="bigint" />
           <option name="JDBC_TYPE" value="-5" />
           <option name="TYPE" />
           <option name="PRIMARY" value="false" />
           <option name="LENGTH" value="20" />
+          <option name="PRECISION" value="0" />
+          <option name="NULLABLE" value="false" />
+        </FIELD_ELEMENT>
+        <FIELD_ELEMENT>
+          <option name="NAME" value="position" />
+          <option name="SQL_TYPE" value="int" />
+          <option name="JDBC_TYPE" value="4" />
+          <option name="TYPE" />
+          <option name="PRIMARY" value="false" />
+          <option name="LENGTH" value="11" />
           <option name="PRECISION" value="0" />
           <option name="NULLABLE" value="false" />
         </FIELD_ELEMENT>
@@ -5640,6 +5752,22 @@
           <option name="CASCADE_REMOVE" value="false" />
           <option name="CASCADE_UPDATE" value="false" />
         </RELATIONSHIP_ELEMENT>
+      </TABLE_DATA>
+      <TABLE_DATA>
+        <option name="NAME" value="hierarchy_levels" />
+        <option name="SCHEMA" />
+        <option name="CATALOG" value="dms" />
+        <option name="TYPE" value="TABLE" />
+        <FIELD_ELEMENT>
+          <option name="NAME" value="hierarchy_levels_id" />
+          <option name="SQL_TYPE" value="bigint" />
+          <option name="JDBC_TYPE" value="-5" />
+          <option name="TYPE" />
+          <option name="PRIMARY" value="true" />
+          <option name="LENGTH" value="20" />
+          <option name="PRECISION" value="0" />
+          <option name="NULLABLE" value="false" />
+        </FIELD_ELEMENT>
       </TABLE_DATA>
       <TABLE_DATA>
         <option name="NAME" value="icon" />

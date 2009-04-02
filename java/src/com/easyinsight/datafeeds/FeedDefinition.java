@@ -274,6 +274,7 @@ public class FeedDefinition implements Cloneable {
         feed.setFeedID(getDataFeedID());
         feed.setFields(getFields());
         feed.setAnalysisDefinition(new AnalysisStorage().getAnalysisDefinition(analysisDefinitionID));
+        feed.setName(getFeedName());
         return feed;
     }
 

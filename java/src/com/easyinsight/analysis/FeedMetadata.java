@@ -10,7 +10,16 @@ import java.io.Serializable;
 public class FeedMetadata implements Serializable {
     private AnalysisItem[] fields;
     private long dataFeedID;
+    private String dataSourceName;
     private int version;
+
+    public String getDataSourceName() {
+        return dataSourceName;
+    }
+
+    public void setDataSourceName(String dataSourceName) {
+        this.dataSourceName = dataSourceName;
+    }
 
     public int getVersion() {
         return version;

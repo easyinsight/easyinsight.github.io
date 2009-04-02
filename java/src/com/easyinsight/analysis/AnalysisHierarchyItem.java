@@ -1,11 +1,7 @@
 package com.easyinsight.analysis;
 
-import org.hibernate.annotations.IndexColumn;
-
 import javax.persistence.*;
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Collection;
+import java.util.*;
 
 /**
  * User: James Boe
@@ -16,17 +12,51 @@ import java.util.Collection;
 @Table(name="analysis_hierarchy_item")
 @PrimaryKeyJoinColumn(name="analysis_item_id")
 public class AnalysisHierarchyItem extends AnalysisDimension {
+    @GeneratedValue(strategy=GenerationType.IDENTITY)
+    @Column(name="analysis_hierarchy_item_id")
+    private long analysisHierarchyItemID;
     @OneToOne (cascade = CascadeType.ALL)
     @JoinColumn(name="hierarchy_level_id")
     private HierarchyLevel hierarchyLevel;
-    @OneToMany (mappedBy = "parentItem", cascade = CascadeType.ALL)
-    private List<HierarchyLevel> hierarchyLevels;
+    @OneToMany(cascade=CascadeType.ALL)
+    @JoinTable(name="analysis_hierarchy_item_to_hierarchy_level",
+        joinColumns = @JoinColumn(name="analysis_item_id", nullable = false),
+        inverseJoinColumns = @JoinColumn(name="hierarchy_level_id", nullable = false))
+    private Collection<HierarchyLevel> hierarchyLevels;
 
-    public List<HierarchyLevel> getHierarchyLevels() {
+    public long getAnalysisHierarchyItemID() {
+        return analysisHierarchyItemID;
+    }
+
+    public void setAnalysisHierarchyItemID(long analysisHierarchyItemID) {
+        this.analysisHierarchyItemID = analysisHierarchyItemID;
+    }
+
+    public void beforeSave() {
+        int i = 0;
+        for (HierarchyLevel hierarchyLevel : hierarchyLevels) {
+            hierarchyLevel.setPosition(i++);
+        }
+    }
+
+    public void afterLoad() {
+        if (hierarchyLevels != null) {
+            List<HierarchyLevel> hierarchyLevelList = new ArrayList<HierarchyLevel>(hierarchyLevels);
+            Collections.sort(hierarchyLevelList, new Comparator<HierarchyLevel>() {
+
+                public int compare(HierarchyLevel o1, HierarchyLevel o2) {
+                    return new Integer(o1.getPosition()).compareTo(o2.getPosition());
+                }
+            });
+            hierarchyLevels = hierarchyLevelList;
+        }
+    }
+
+    public Collection<HierarchyLevel> getHierarchyLevels() {
         return hierarchyLevels;
     }
 
-    public void setHierarchyLevels(List<HierarchyLevel> hierarchyLevels) {
+    public void setHierarchyLevels(Collection<HierarchyLevel> hierarchyLevels) {
         this.hierarchyLevels = hierarchyLevels;
     }
 

@@ -17,6 +17,7 @@ package com.easyinsight.listing
 		public static const SALESFORCE_SUB:int = 6;
 		public static const EMPTY:int = 8;
 		public static const JIRA:int = 9;
+		public static const BASECAMP:int = 10;
 
 		public static const OWNER:int = 1;
 		public static const SUBSCRIBER:int = 3;

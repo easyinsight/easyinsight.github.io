@@ -130,6 +130,11 @@ public class AnalysisStorage {
                 }
             }
         }
+        if (analysisDefinition.getReportStructure() != null) {
+            for (AnalysisItem analysisItem : analysisDefinition.getReportStructure().values()) {
+                analysisItem.beforeSave();
+            }
+        }
         if (analysisDefinition.getAddedItems() != null) {
             for (AnalysisItem analysisItem : analysisDefinition.getAddedItems()) {
                 if (analysisItem.getKey().getKeyID() == 0) {

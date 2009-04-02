@@ -302,7 +302,7 @@ public class GoalStorage {
 
     private List<InsightDescriptor> getGoalInsights(long goalTreeNodeID, Connection conn) throws SQLException {
         List<InsightDescriptor> insights = new ArrayList<InsightDescriptor>();
-        PreparedStatement insightQueryStmt = conn.prepareStatement("SELECT INSIGHT_ID, TITLE FROM GOAL_TREE_NODE_TO_INSIGHT, ANALYSIS, DATA_FEED_ID, REPORT_TYPE WHERE goal_tree_node_id = ? AND " +
+        PreparedStatement insightQueryStmt = conn.prepareStatement("SELECT INSIGHT_ID, TITLE, DATA_FEED_ID, REPORT_TYPE  FROM GOAL_TREE_NODE_TO_INSIGHT, ANALYSIS WHERE goal_tree_node_id = ? AND " +
                 "goal_tree_node_to_insight.insight_id = analysis.analysis_id");
         insightQueryStmt.setLong(1, goalTreeNodeID);
         ResultSet rs = insightQueryStmt.executeQuery();

@@ -10,7 +10,6 @@ import com.easyinsight.datafeeds.file.FileBasedFeedDefinition;
 import com.easyinsight.datafeeds.jira.JiraDataSource;
 import com.easyinsight.datafeeds.basecamp.BaseCampDataSource;
 import com.easyinsight.analysis.AnalysisItem;
-import com.easyinsight.analysis.AnalysisItemTypes;
 import com.easyinsight.email.UserStub;
 import com.easyinsight.groups.GroupDescriptor;
 import com.easyinsight.logging.LogClass;
@@ -21,6 +20,7 @@ import java.util.*;
 import java.util.Date;
 
 import org.hibernate.Session;
+import org.hibernate.FlushMode;
 
 /**
  * User: jboe
@@ -190,6 +190,7 @@ public class FeedStorage {
         if (analysisItems != null) {
             Session session = Database.instance().createSession(conn);
             try {
+                //session.getTransaction().begin();
                 for (AnalysisItem analysisItem : analysisItems) {
                     if (analysisItem.getKey().getKeyID() == 0) {
                         session.save(analysisItem.getKey());
@@ -198,6 +199,7 @@ public class FeedStorage {
                     }
                 }
                 for (AnalysisItem analysisItem : analysisItems) {
+                    analysisItem.beforeSave();
                     if (analysisItem.getAnalysisItemID() == 0) {
                         session.save(analysisItem);
                     } else {
@@ -209,7 +211,8 @@ public class FeedStorage {
                     analysisItem.resetIDs();
                     session.save(analysisItem);
                 }*/
-                //session.flush();
+                session.flush();
+                //session.getTransaction().commit();
             } catch (Exception e) {
                 LogClass.error(e);
                 throw new RuntimeException(e);
@@ -274,10 +277,11 @@ public class FeedStorage {
                 List items = session.createQuery("from AnalysisItem where analysisItemID = ?").setLong(0, analysisItemID).list();
                 if (items.size() > 0) {
                     AnalysisItem analysisItem = (AnalysisItem) items.get(0);
-                    if (analysisItem.hasType(AnalysisItemTypes.HIERARCHY)) {
+                    /*if (analysisItem.hasType(AnalysisItemTypes.HIERARCHY)) {
                         AnalysisHierarchyItem analysisHierarchyItem = (AnalysisHierarchyItem) analysisItem;
                         analysisHierarchyItem.setHierarchyLevels(new ArrayList<HierarchyLevel>(analysisHierarchyItem.getHierarchyLevels()));
-                    }
+                    }*/
+                    analysisItem.afterLoad();
                     analysisItems.add(analysisItem);
                 }
             }

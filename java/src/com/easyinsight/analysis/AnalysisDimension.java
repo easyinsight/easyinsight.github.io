@@ -22,10 +22,6 @@ public class AnalysisDimension extends AnalysisItem {
     @Column(name="group_by")
     private boolean group;
 
-    @GeneratedValue(strategy=GenerationType.IDENTITY)
-    @Column(name="analysis_dimension_id")
-    private long analysisDimensionID;
-
     @OneToOne(cascade=CascadeType.MERGE)
     @JoinColumn(name="key_dimension_id")
     private AnalysisDimension keyDimension;
@@ -39,14 +35,6 @@ public class AnalysisDimension extends AnalysisItem {
 
     public void setKeyDimension(AnalysisDimension keyDimension) {
         this.keyDimension = keyDimension;
-    }
-
-    public long getAnalysisDimensionID() {
-        return analysisDimensionID;
-    }
-
-    public void setAnalysisDimensionID(long analysisDimensionID) {
-        this.analysisDimensionID = analysisDimensionID;
     }
 
     public List<AnalysisItem> getAnalysisItems(List<AnalysisItem> allItems, Collection<AnalysisItem> insightItems) {
@@ -97,24 +85,30 @@ public class AnalysisDimension extends AnalysisItem {
 
     public void resetIDs() {
         super.resetIDs();
-        this.analysisDimensionID = 0;
     }
 
     public AnalysisDimension clone() {
         AnalysisDimension clonedItem = (AnalysisDimension) super.clone();
-        clonedItem.setAnalysisDimensionID(0);
         return clonedItem;
     }
 
+    @Override
     public boolean equals(Object o) {
-        return this == o || o instanceof AnalysisDimension && super.equals(o);
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+
+        AnalysisDimension that = (AnalysisDimension) o;
+
+        return group == that.group;
 
     }
 
+    @Override
     public int hashCode() {
         int result = super.hashCode();
         result = 31 * result + (group ? 1 : 0);
-        result = 31 * result + (int) (analysisDimensionID ^ (analysisDimensionID >>> 32));
+        result = 31 * result + (keyDimension != null ? keyDimension.hashCode() : 0);
         return result;
     }
 }

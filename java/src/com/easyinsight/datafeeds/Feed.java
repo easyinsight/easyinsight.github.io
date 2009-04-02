@@ -20,6 +20,15 @@ public abstract class Feed {
     private List<AnalysisItem> fields;
     private WSAnalysisDefinition analysisDefinition;
     private int version;
+    private String name;
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
 
     public int getVersion() {
         return version;
@@ -63,12 +72,4 @@ public abstract class Feed {
     }
 
     protected abstract DataSet getUncachedDataSet(List<Key> columns, Integer maxRows, boolean admin, InsightRequestMetadata insightRequestMetadata);
-
-    public boolean hasKey(Key key) {
-        boolean hasKey = false;
-        for (AnalysisItem analysisItem : fields) {
-            
-        }
-        return hasKey;
-    }
 }

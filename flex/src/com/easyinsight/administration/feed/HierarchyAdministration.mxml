@@ -75,7 +75,6 @@
                         if (analysisItem.display == newItem.display) {
                             var hierarchyLevel:HierarchyLevel = new HierarchyLevel();
                             hierarchyLevel.analysisItem = newItem;
-                            hierarchyLevel.parentItem = hierarchyAdminBox.analysisHierarchyItem;
                             data.removeItemAt(i);
                             data.addItemAt(hierarchyLevel, i);
                         }

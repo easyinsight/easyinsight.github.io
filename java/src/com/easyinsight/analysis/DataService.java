@@ -50,6 +50,7 @@ public class DataService implements IDataService {
             AnalysisItem[] feedItemArray = new AnalysisItem[sortedList.size()];
             sortedList.toArray(feedItemArray);
             FeedMetadata feedMetadata = new FeedMetadata();
+            feedMetadata.setDataSourceName(feed.getName());
             feedMetadata.setFields(feedItemArray);
             feedMetadata.setDataFeedID(feedID);
             feedMetadata.setVersion(feed.getVersion());

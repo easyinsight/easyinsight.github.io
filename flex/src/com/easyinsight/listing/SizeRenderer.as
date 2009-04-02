@@ -12,7 +12,13 @@ public class SizeRenderer extends Label{
         _data = value;
         if (_data is DataFeedDescriptor) {
             var descriptor:DataFeedDescriptor = _data as DataFeedDescriptor;
-            this.text = String(descriptor.size); 
+            if (descriptor.feedType == DataFeedDescriptor.ANALYSIS || descriptor.feedType == DataFeedDescriptor.COMPOSITE) {
+                this.text = "( Derived )";
+            } else {
+                this.text = String(descriptor.size);
+            }
+        } else {
+            this.text = "";
         }
     }
 
