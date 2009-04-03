@@ -79,8 +79,6 @@
       <option name="TABLE_PATTERN" value="" />
       <option name="UUID" value="8c92e1a8-62f9-4e17-8bcd-38d889c74b8c" />
       <option name="NAME" value="DataSource" />
-      <option name="DATABASE_PRODUCT_NAME" value="MySQL" />
-      <option name="DATABASE_PRODUCT_VERSION" value="5.0.45-community-nt" />
       <TABLE_DATA>
         <option name="NAME" value="account" />
         <option name="SCHEMA" />
@@ -1104,16 +1102,6 @@
           <option name="PRECISION" value="0" />
           <option name="NULLABLE" value="false" />
         </FIELD_ELEMENT>
-        <FIELD_ELEMENT>
-          <option name="NAME" value="hierarchy_levels_id" />
-          <option name="SQL_TYPE" value="bigint" />
-          <option name="JDBC_TYPE" value="-5" />
-          <option name="TYPE" />
-          <option name="PRIMARY" value="false" />
-          <option name="LENGTH" value="20" />
-          <option name="PRECISION" value="0" />
-          <option name="NULLABLE" value="true" />
-        </FIELD_ELEMENT>
         <RELATIONSHIP_ELEMENT>
           <option name="RELATION_NAME" value="analysis_hierarchy_item_ibfk2" />
           <option name="TARGET_TABLE" value="analysis_item" />
@@ -1707,6 +1695,62 @@
           <option name="TARGET_CATALOG" value="dms" />
           <option name="TARGET_COLUMN" value="analysis_tags_id" />
           <option name="SOURCE_COLUMN" value="analysis_tags_id" />
+          <option name="CASCADE_REMOVE" value="true" />
+          <option name="CASCADE_UPDATE" value="false" />
+        </RELATIONSHIP_ELEMENT>
+      </TABLE_DATA>
+      <TABLE_DATA>
+        <option name="NAME" value="bandwidth_usage" />
+        <option name="SCHEMA" />
+        <option name="CATALOG" value="dms" />
+        <option name="TYPE" value="TABLE" />
+        <FIELD_ELEMENT>
+          <option name="NAME" value="bandwidth_usage_id" />
+          <option name="SQL_TYPE" value="bigint" />
+          <option name="JDBC_TYPE" value="-5" />
+          <option name="TYPE" />
+          <option name="PRIMARY" value="true" />
+          <option name="LENGTH" value="20" />
+          <option name="PRECISION" value="0" />
+          <option name="NULLABLE" value="false" />
+        </FIELD_ELEMENT>
+        <FIELD_ELEMENT>
+          <option name="NAME" value="account_id" />
+          <option name="SQL_TYPE" value="bigint" />
+          <option name="JDBC_TYPE" value="-5" />
+          <option name="TYPE" />
+          <option name="PRIMARY" value="false" />
+          <option name="LENGTH" value="20" />
+          <option name="PRECISION" value="0" />
+          <option name="NULLABLE" value="true" />
+        </FIELD_ELEMENT>
+        <FIELD_ELEMENT>
+          <option name="NAME" value="used_bandwidth" />
+          <option name="SQL_TYPE" value="bigint" />
+          <option name="JDBC_TYPE" value="-5" />
+          <option name="TYPE" />
+          <option name="PRIMARY" value="false" />
+          <option name="LENGTH" value="20" />
+          <option name="PRECISION" value="0" />
+          <option name="NULLABLE" value="false" />
+        </FIELD_ELEMENT>
+        <FIELD_ELEMENT>
+          <option name="NAME" value="bandwidth_date" />
+          <option name="SQL_TYPE" value="date" />
+          <option name="JDBC_TYPE" value="91" />
+          <option name="TYPE" />
+          <option name="PRIMARY" value="false" />
+          <option name="LENGTH" value="10" />
+          <option name="PRECISION" value="0" />
+          <option name="NULLABLE" value="false" />
+        </FIELD_ELEMENT>
+        <RELATIONSHIP_ELEMENT>
+          <option name="RELATION_NAME" value="bandwidth_usage_ibfk_1" />
+          <option name="TARGET_TABLE" value="account" />
+          <option name="TARGET_SCHEMA" />
+          <option name="TARGET_CATALOG" value="dms" />
+          <option name="TARGET_COLUMN" value="account_id" />
+          <option name="SOURCE_COLUMN" value="account_id" />
           <option name="CASCADE_REMOVE" value="true" />
           <option name="CASCADE_UPDATE" value="false" />
         </RELATIONSHIP_ELEMENT>
@@ -5723,22 +5767,22 @@
           <option name="NULLABLE" value="true" />
         </FIELD_ELEMENT>
         <FIELD_ELEMENT>
-          <option name="NAME" value="analysis_item_id" />
+          <option name="NAME" value="parent_item_id" />
           <option name="SQL_TYPE" value="bigint" />
           <option name="JDBC_TYPE" value="-5" />
           <option name="TYPE" />
           <option name="PRIMARY" value="false" />
           <option name="LENGTH" value="20" />
           <option name="PRECISION" value="0" />
-          <option name="NULLABLE" value="false" />
+          <option name="NULLABLE" value="true" />
         </FIELD_ELEMENT>
         <FIELD_ELEMENT>
-          <option name="NAME" value="position" />
-          <option name="SQL_TYPE" value="int" />
-          <option name="JDBC_TYPE" value="4" />
+          <option name="NAME" value="analysis_item_id" />
+          <option name="SQL_TYPE" value="bigint" />
+          <option name="JDBC_TYPE" value="-5" />
           <option name="TYPE" />
           <option name="PRIMARY" value="false" />
-          <option name="LENGTH" value="11" />
+          <option name="LENGTH" value="20" />
           <option name="PRECISION" value="0" />
           <option name="NULLABLE" value="false" />
         </FIELD_ELEMENT>
@@ -5752,22 +5796,6 @@
           <option name="CASCADE_REMOVE" value="false" />
           <option name="CASCADE_UPDATE" value="false" />
         </RELATIONSHIP_ELEMENT>
-      </TABLE_DATA>
-      <TABLE_DATA>
-        <option name="NAME" value="hierarchy_levels" />
-        <option name="SCHEMA" />
-        <option name="CATALOG" value="dms" />
-        <option name="TYPE" value="TABLE" />
-        <FIELD_ELEMENT>
-          <option name="NAME" value="hierarchy_levels_id" />
-          <option name="SQL_TYPE" value="bigint" />
-          <option name="JDBC_TYPE" value="-5" />
-          <option name="TYPE" />
-          <option name="PRIMARY" value="true" />
-          <option name="LENGTH" value="20" />
-          <option name="PRECISION" value="0" />
-          <option name="NULLABLE" value="false" />
-        </FIELD_ELEMENT>
       </TABLE_DATA>
       <TABLE_DATA>
         <option name="NAME" value="icon" />
@@ -8765,6 +8793,35 @@
               <file url="file://$PROJECT_DIR$/website/web/WEB-INF/web.xml" />
             </files>
           </module>
+          <module name="core">
+            <files>
+              <file url="file://$PROJECT_DIR$/java/web/WEB-INF/web.xml" />
+            </files>
+          </module>
+          <module name="jdbc">
+            <files>
+              <file url="file://$PROJECT_DIR$/solutions/jdbc/web2/WEB-INF/web.xml" />
+              <file url="file://$PROJECT_DIR$/solutions/jdbc/web3/WEB-INF/web.xml" />
+            </files>
+          </module>
+        </modules>
+      </facet-type>
+      <facet-type id="hibernate">
+        <modules>
+          <module name="core">
+            <files>
+              <file url="file://$PROJECT_DIR$/java/src/hibernate.cfg.xml" />
+            </files>
+          </module>
+        </modules>
+      </facet-type>
+      <facet-type id="jpa">
+        <modules>
+          <module name="core">
+            <files>
+              <file url="file://$PROJECT_DIR$/java/src/meta-inf/persistence.xml" />
+            </files>
+          </module>
         </modules>
       </facet-type>
     </autodetection-disabled>
@@ -8824,11 +8881,8 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/ant/ant.iml" filepath="$PROJECT_DIR$/ant/ant.iml" />
-      <module fileurl="file://$PROJECT_DIR$/solutions/antsolution/antsolution.iml" filepath="$PROJECT_DIR$/solutions/antsolution/antsolution.iml" />
       <module fileurl="file://$PROJECT_DIR$/build/build.iml" filepath="$PROJECT_DIR$/build/build.iml" />
       <module fileurl="file://$PROJECT_DIR$/core.iml" filepath="$PROJECT_DIR$/core.iml" />
-      <module fileurl="file://$PROJECT_DIR$/dataprovider/dataprovider.iml" filepath="$PROJECT_DIR$/dataprovider/dataprovider.iml" />
-      <module fileurl="file://$PROJECT_DIR$/solutions/dbheadless/dbheadless.iml" filepath="$PROJECT_DIR$/solutions/dbheadless/dbheadless.iml" />
       <module fileurl="file://$PROJECT_DIR$/flex/flex.iml" filepath="$PROJECT_DIR$/flex/flex.iml" />
       <module fileurl="file://$PROJECT_DIR$/solutions/jdbc/jdbc.iml" filepath="$PROJECT_DIR$/solutions/jdbc/jdbc.iml" />
       <module fileurl="file://$PROJECT_DIR$/solutions/jdbc/flex/jdbcflex.iml" filepath="$PROJECT_DIR$/solutions/jdbc/flex/jdbcflex.iml" />
@@ -8867,7 +8921,6 @@
   </component>
   <component name="VcsDirectoryMappings">
     <mapping directory="" vcs="svn" />
-    <mapping directory="$PROJECT_DIR$/flex" vcs="svn" />
     <mapping directory="$PROJECT_DIR$/solutions/jdbcjava" vcs="svn" />
   </component>
   <component name="WebServicesPlugin" addRequiredLibraries="true" />
