@@ -163,3 +163,11 @@ body > #allPage {
     width: 120px;
     float:left;
 }
+
+#centerPage {
+	margin: 1em;	
+}
+
+#centerPage p {
+	text-indent: 1.5em;
+}

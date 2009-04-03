@@ -7,7 +7,8 @@
     </adapters>
 
     <default-channels>
-        <channel ref="my-amf"/>
+        <channel ref="my-amf" />
+        <channel ref="my-secure-amf" />
     </default-channels>
 
     <destination id="google">
@@ -53,7 +54,7 @@
     </destination>
 
     <!-- <destination id="login" channels="my-secure-amf"> -->
-    <destination id="login">
+    <destination id="login" channels="my-secure-amf">
         <properties>
             <source>com.easyinsight.users.UserService</source>
         </properties>
