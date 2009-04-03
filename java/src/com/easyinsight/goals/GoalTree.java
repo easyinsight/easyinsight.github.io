@@ -26,6 +26,16 @@ public class GoalTree implements Cloneable {
 
     private List<Integer> newSolutions = new ArrayList<Integer>();
 
+    private List<GoalTreeMilestone> milestones = new ArrayList<GoalTreeMilestone>();
+
+    public List<GoalTreeMilestone> getMilestones() {
+        return milestones;
+    }
+
+    public void setMilestones(List<GoalTreeMilestone> milestones) {
+        this.milestones = milestones;
+    }
+
     public List<Integer> getNewSolutions() {
         return newSolutions;
     }

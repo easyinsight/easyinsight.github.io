@@ -1,13 +1,15 @@
 package com.easyinsight.analysis
 {
-import com.easyinsight.commands.CommandEvent;
-	[Event(name="itemDrop", type="com.easyinsight.analysis.AnalysisListUpdateEvent")]
 	import com.easyinsight.commands.CommandEvent;
-	
-	import flash.events.KeyboardEvent;
+
+import com.easyinsight.filtering.FilterRawData;
+import flash.events.ContextMenuEvent;
+import flash.events.KeyboardEvent;
 	import flash.events.MouseEvent;
 	import flash.geom.Point;
-	import flash.ui.Keyboard;
+import flash.ui.ContextMenu;
+import flash.ui.ContextMenuItem;
+import flash.ui.Keyboard;
 	
 	import mx.collections.ArrayCollection;
 	import mx.containers.HBox;
@@ -53,9 +55,19 @@ import com.easyinsight.commands.CommandEvent;
 			editButton.visible = false;
 			addChild(editButton);
 			this.setStyle("borderStyle", "solid");
-			this.setStyle("borderThickness", 1);					
+			this.setStyle("borderThickness", 1);
+            var deleteContextItem:ContextMenuItem = new ContextMenuItem("Delete Field", true);
+            deleteContextItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, onDelete);
+            //dataSet.addEventListener(KeyboardEvent.KEY_UP, keyboardHandler);
+            contextMenu = new ContextMenu();
+            contextMenu.hideBuiltInItems();
+            contextMenu.customItems = [ deleteContextItem ];
 		}
-		
+
+        private function onDelete(event:ContextMenuEvent):void {
+            deletion();
+        }
+
 		override protected function measure():void {
 			super.measure();
 			if (editButton.visible) {
@@ -147,9 +159,7 @@ import com.easyinsight.commands.CommandEvent;
 		
 		protected function dragEnterHandler(event:DragEvent):void {
 			if (event.dragInitiator is DataGrid) {
-				var initialList:DataGrid = DataGrid(event.dragInitiator);	
 				var targetCanvas:DropArea = DropArea(event.currentTarget);
-				var selectedObject:AnalysisItemWrapper = AnalysisItemWrapper(initialList.selectedItem);
 				setStyle("borderColor", "green");
 				DragManager.acceptDragDrop(targetCanvas);
 			}	

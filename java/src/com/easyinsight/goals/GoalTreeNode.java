@@ -37,8 +37,17 @@ public class GoalTreeNode implements Cloneable {
     private String description;
     private String iconImage;
     private List<Integer> users = new ArrayList<Integer>();
+    private GoalTreeMilestone milestone;
     private long subTreeID;
     private SolutionGoalTreeDescriptor newSubTree;
+
+    public GoalTreeMilestone getMilestone() {
+        return milestone;
+    }
+
+    public void setMilestone(GoalTreeMilestone milestone) {
+        this.milestone = milestone;
+    }
 
     public SolutionGoalTreeDescriptor getNewSubTree() {
         return newSubTree;

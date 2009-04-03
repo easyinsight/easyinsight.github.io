@@ -313,6 +313,7 @@ public class UserService implements IUserService {
                 insertActivationStmt.execute();
                 new AccountMemberInvitation().sendActivationEmail(user.getEmail(), activationKey);
             }
+            session.flush();
             conn.commit();
             return account.getAccountID();
         } catch (Exception e) {
@@ -664,6 +665,7 @@ public class UserService implements IUserService {
                 account.setGroupID(new GroupStorage().addGroup(group, user.getUserID(), conn));
                 session.update(account);
             }
+            session.flush();
             conn.commit();
         } catch (Exception e) {
             LogClass.error(e);

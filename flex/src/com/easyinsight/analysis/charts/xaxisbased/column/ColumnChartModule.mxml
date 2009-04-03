@@ -217,7 +217,7 @@ import mx.charts.series.ColumnSeries;
                 // create the data series
 
                 columnSeries = new ColumnSeries();
-                columnSeries.setStyle("itemRenderer", new CustomChartRendererFactory(selectedFill, rolloverFill));
+                columnSeries.setStyle("itemRenderer", new CustomChartRendererFactory(selectedFill, rolloverFill, xAxisItem));
                 columnSeries.setStyle("stroke", s1);
                 columnSeries.fillFunction = customFill;
                 BindingUtils.bindProperty(columnSeries, "xField", this, "xField");
@@ -314,6 +314,7 @@ import mx.charts.series.ColumnSeries;
             }
 
             columnChart.dataProvider = dataSet;
+            columnSeries.setStyle("itemRenderer", new CustomChartRendererFactory(selectedFill, rolloverFill, xAxisItem));
             columnSeries.dataProvider = dataSet;
             xAxis.dataProvider = dataSet;
             graphData = dataSet;

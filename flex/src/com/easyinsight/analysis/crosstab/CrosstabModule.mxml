@@ -9,9 +9,11 @@
         import mx.collections.ArrayCollection;
 
         public function renderReport(data:ArrayCollection, analysisDefinition:AnalysisDefinition, clientProcessorMap:Object):void {
-            var crosstabDefinition:CrosstabDefinition = analysisDefinition as CrosstabDefinition;
-            var cube:Cube = new Cube();
-            cube.populate(crosstabDefinition, data, dataSet);
+            if (data.length > 0) {
+                var crosstabDefinition:CrosstabDefinition = analysisDefinition as CrosstabDefinition;
+                var cube:Cube = new Cube();
+                cube.populate(crosstabDefinition, data, dataSet);
+            }
         }
 
         public function createFilterRawData():FilterRawData {

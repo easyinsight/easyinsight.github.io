@@ -458,6 +458,7 @@ public class GoalStorage {
                         PersistableFilterDefinition persistableFilterDefinition = goalTreeNode.getFilterDefinition().toPersistableFilterDefinition();
                         session.save(persistableFilterDefinition);
                         insertNodeStmt.setLong(7, persistableFilterDefinition.getFilterId());
+                        session.flush();
                     } finally {
                         session.close();
                     }

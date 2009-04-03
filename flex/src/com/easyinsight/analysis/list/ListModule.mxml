@@ -30,7 +30,7 @@
         import mx.collections.Sort;
         import mx.controls.AdvancedDataGrid;
         import mx.controls.Alert;
-import mx.controls.DataGrid;
+        import mx.controls.DataGrid;
         import mx.controls.advancedDataGridClasses.AdvancedDataGridColumn;
         import mx.events.DragEvent;
         import mx.events.FlexEvent;
@@ -138,7 +138,7 @@ import mx.controls.DataGrid;
         }
 
         private function rowColor(item:Object, color:uint):uint {
-            if(hits.getItemIndex(item) > -1)
+            if (hits.getItemIndex(item) > -1)
                 return 0xEBEF80;
             return color;
         }
@@ -193,7 +193,7 @@ import mx.controls.DataGrid;
                 columnHeaderObject.dataField = keyString;
                 columnHeaderObject.headerRenderer = new ListViewHeaderRendererFactory(myHeader.display);
                 /*columnHeaderObject.itemRenderer = new AnalysisCellRendererFactory(keyString, myHeader,
-                        clientProcessorMap[keyString]);*/
+                 clientProcessorMap[keyString]);*/
                 var factory:ClassFactory = new ClassFactory(AnalysisCellRenderer);
                 factory.properties = { analysisItem: myHeader, renderer: clientProcessorMap[keyString] };
                 columnHeaderObject.itemRenderer = factory;
@@ -207,7 +207,7 @@ import mx.controls.DataGrid;
 
         private function globalListeners():void {
             if (stage != null) {
-                stage.addEventListener(KeyboardEvent.KEY_DOWN, stageKeyDown);                
+                stage.addEventListener(KeyboardEvent.KEY_DOWN, stageKeyDown);
             }
         }
 
@@ -313,6 +313,9 @@ import mx.controls.DataGrid;
             if (event is EnableKeywordEvent) {
                 currentState = "keywordSearch";
             }
+        }
+
+        public function clearContents():void {
         }]]></mx:Script>
     <mx:VBox width="100%" height="100%">
         <mx:Box id="topBar" width="100%"/>

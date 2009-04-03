@@ -125,6 +125,7 @@ public class AnalysisService implements IAnalysisService {
             AnalysisDefinition analysisDefinition = AnalysisDefinitionFactory.fromWSDefinition(wsAnalysisDefinition);
             analysisDefinition.setUserBindings(bindings);
             analysisStorage.saveAnalysis(analysisDefinition, session);
+            session.flush();
             conn.commit();
             return analysisDefinition.getAnalysisID();
         } catch (Exception e) {

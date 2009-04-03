@@ -1,12 +1,17 @@
 <?xml version="1.0" ?>
 <mx:Module xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:analysis="com.easyinsight.analysis.*" implements="com.easyinsight.analysis.IReportRenderer"
-        width="100%" height="100%">
+        width="100%" height="100%" creationComplete="setupListeners()">
     <mx:Script>
 		<![CDATA[
         import com.easyinsight.analysis.AnalysisDefinition;
-        import com.easyinsight.analysis.AnalysisItem;
+        import com.easyinsight.analysis.AnalysisHierarchyItem;
+import com.easyinsight.analysis.AnalysisItem;
         import com.easyinsight.analysis.CustomChangeEvent;
-        import com.easyinsight.filtering.FilterRawData;
+        import com.easyinsight.analysis.HierarchyDrilldownEvent;
+import com.easyinsight.analysis.HierarchyLevel;
+        import com.easyinsight.analysis.HierarchyRollupEvent;
+        import com.easyinsight.analysis.charts.ChartDrilldownEvent;
+import com.easyinsight.filtering.FilterRawData;
 
         import mx.charts.ChartItem;
         import mx.charts.series.PieSeries;
@@ -31,13 +36,22 @@
 
         private var dimensionItem:AnalysisItem;
 
+        private function setupListeners():void {
+            pieChart.addEventListener(ChartDrilldownEvent.DRILLDOWN, drilldownEvent);
+            pieChart.addEventListener(ChartDrilldownEvent.ROLLUP, drilldownEvent);
+            legend.addEventListener(ChartDrilldownEvent.ROLLUP, drilldownEvent);
+            legend.addEventListener(ChartDrilldownEvent.VALUE_DRILLDOWN, drilldownEvent);
+        }
+
         public function renderReport(dataSet:ArrayCollection, analysisDefinition:AnalysisDefinition, clientProcessorMap:Object):void {
             var pieChartDef:PieChartDefinition = analysisDefinition as PieChartDefinition;
             graphData = dataSet;
-            this.measureFormatter = pieChartDef.measure.getFormatter();
-            measureName = pieChartDef.measure.qualifiedName();
-            dimension = pieChartDef.xaxis.qualifiedName();
-            this.dimensionItem = pieChartDef.xaxis;
+            if (dataSet.length > 0) {
+                this.measureFormatter = pieChartDef.measure.getFormatter();
+                measureName = pieChartDef.measure.qualifiedName();
+                dimension = pieChartDef.xaxis.qualifiedName();
+                this.dimensionItem = pieChartDef.xaxis;
+            }
         }
 
         private function chartSelection(event:ChartItemEvent):void {
@@ -73,6 +87,58 @@
             return filterRawData;
         }
 
+        private function onDrill(chartItem:ChartItem):void {
+            if (dimensionItem is AnalysisHierarchyItem) {
+               var data:Object = chartItem.item;
+               var hierarchyItem:AnalysisHierarchyItem = dimensionItem as AnalysisHierarchyItem;
+               var index:int = hierarchyItem.hierarchyLevels.getItemIndex(hierarchyItem.hierarchyLevel);
+               if (index < (hierarchyItem.hierarchyLevels.length - 1)) {
+                   var dataField:String = hierarchyItem.qualifiedName();
+                   var dataString:String = data[dataField];
+                   var filterRawData:FilterRawData = new FilterRawData();
+                   filterRawData.addPair(hierarchyItem.hierarchyLevel.analysisItem, dataString);
+                   hierarchyItem.hierarchyLevel = hierarchyItem.hierarchyLevels.getItemAt(index + 1) as HierarchyLevel;
+                   dispatchEvent(new HierarchyDrilldownEvent(HierarchyDrilldownEvent.DRILLDOWN, filterRawData));
+               }
+           }
+        }
+
+        private function onValueDrill(value:String):void {
+            var hierarchyItem:AnalysisHierarchyItem = dimensionItem as AnalysisHierarchyItem;
+            var index:int = hierarchyItem.hierarchyLevels.getItemIndex(hierarchyItem.hierarchyLevel);
+            if (index < (hierarchyItem.hierarchyLevels.length - 1)) {
+                var filterRawData:FilterRawData = new FilterRawData();
+                filterRawData.addPair(hierarchyItem.hierarchyLevel.analysisItem, value);
+                hierarchyItem.hierarchyLevel = hierarchyItem.hierarchyLevels.getItemAt(index + 1) as HierarchyLevel;
+                dispatchEvent(new HierarchyDrilldownEvent(HierarchyDrilldownEvent.DRILLDOWN, filterRawData));
+            }
+        }
+
+        private function onRollup(chartItem:ChartItem):void {
+            if (dimensionItem is AnalysisHierarchyItem) {
+                var hierarchyItem:AnalysisHierarchyItem = dimensionItem as AnalysisHierarchyItem;
+                var index:int = hierarchyItem.hierarchyLevels.getItemIndex(hierarchyItem.hierarchyLevel);
+                if (index > 0) {
+                    hierarchyItem.hierarchyLevel = hierarchyItem.hierarchyLevels.getItemAt(index - 1) as HierarchyLevel;
+                    dispatchEvent(new HierarchyRollupEvent(hierarchyItem.hierarchyLevel.analysisItem));
+                }
+            }
+        }
+
+       private function drilldown(event:ChartItemEvent):void {
+           onDrill(event.hitData.chartItem);
+       }
+
+        private function drilldownEvent(event:ChartDrilldownEvent):void {
+            if (event.type == ChartDrilldownEvent.ROLLUP) {
+                onRollup(event.chartItem);
+            } else if (event.type == ChartDrilldownEvent.VALUE_DRILLDOWN) {
+                onValueDrill(event.value);
+            } else {
+                onDrill(event.chartItem);
+            }
+        }
+
         public function updateExportMetadata():void {
         }
 
@@ -82,13 +148,13 @@
 	</mx:Script>
     <mx:HBox width="100%" height="100%">
         <mx:PieChart id="pieChart" dataProvider="{graphData}" selectionMode="multiple" height="100%" width="100%"
-					paddingLeft="0" paddingRight="0" paddingTop="0" paddingBottom="0">
+					paddingLeft="0" paddingRight="0" paddingTop="0" paddingBottom="0" itemClick="drilldown(event)">
             <mx:series>
                 <mx:PieSeries field="{measureName}" nameField="{dimension}" labelPosition="insideWithCallout"
-                    labelFunction="renderPieLabel">
+                    labelFunction="renderPieLabel" itemRenderer="com.easyinsight.analysis.charts.xaxisbased.pie.EIWedgeItemRenderer">
                 </mx:PieSeries>
             </mx:series>
         </mx:PieChart>
-        <mx:Legend dataProvider="{pieChart}" height="100%"/>
+        <mx:Legend id="legend" dataProvider="{pieChart}" height="100%" legendItemClass="com.easyinsight.analysis.charts.EILegendItem"/>
     </mx:HBox>
 </mx:Module>

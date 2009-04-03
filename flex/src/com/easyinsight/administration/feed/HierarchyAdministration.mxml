@@ -110,10 +110,15 @@
         </mx:GridRow>
         <mx:GridRow>
             <mx:GridItem>
-                <mx:List dataProvider="{availableDimensions}" labelField="display" dragEnabled="true" dragMoveEnabled="false" dragComplete="onDragComplete(event)"/>
+                <mx:List dataProvider="{availableDimensions}" labelField="display" dragEnabled="true" dragMoveEnabled="false" dragComplete="onDragComplete(event)" width="200"/>
             </mx:GridItem>
             <mx:GridItem>
-                <mx:Box width="100%" height="100%" horizontalAlign="center" verticalAlign="middle" id="workspace"/>
+                <mx:VBox width="100%" height="100%">
+                    <mx:HBox width="100%">
+                        <mx:Label text="Drag groupings from the left onto the list below to create your hierarchy."/>
+                    </mx:HBox>
+                    <mx:Box width="100%" height="100%" horizontalAlign="center" verticalAlign="middle" id="workspace"/>
+                </mx:VBox>
             </mx:GridItem>
         </mx:GridRow>
     </mx:Grid>

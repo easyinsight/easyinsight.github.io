@@ -2,8 +2,6 @@ package com.easyinsight.analysis
 {
 	import com.easyinsight.analysis.conditions.ConditionRenderer;
 
-import com.easyinsight.analysis.list.ListKeywordController;
-import com.easyinsight.analysis.list.ListKeywordEvent;
 import com.easyinsight.filtering.FilterRawData;
     import flash.events.ContextMenuEvent;
     import flash.events.MouseEvent;
@@ -12,7 +10,6 @@ import com.easyinsight.filtering.FilterRawData;
     import flash.system.System;
     import flash.ui.ContextMenu;
     import flash.ui.ContextMenuItem;
-import mx.controls.Alert;
 import mx.controls.Label;
     import mx.controls.listClasses.IListItemRenderer;
     import mx.events.FlexEvent;
@@ -41,17 +38,41 @@ import mx.controls.Label;
             addEventListener(MouseEvent.MOUSE_OVER, onMouseOver);
             addEventListener(MouseEvent.MOUSE_OUT, onMouseOut);
             addEventListener(MouseEvent.CLICK, onClick);
-            var drilldownContextItem:ContextMenuItem = new ContextMenuItem("Drilldown", true);
+            /*var drilldownContextItem:ContextMenuItem = new ContextMenuItem("Drilldown", true);
             drilldownContextItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, onDrilldown);
             var rollupContextItem:ContextMenuItem = new ContextMenuItem("Rollup", true);
             rollupContextItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, onRollup);
-            var copyContextItem:ContextMenuItem = new ContextMenuItem("Copy Cell", true);
-            copyContextItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, copySelected);
+
             //dataSet.addEventListener(KeyboardEvent.KEY_UP, keyboardHandler);
             contextMenu = new ContextMenu();
             contextMenu.hideBuiltInItems();
-            contextMenu.customItems = [ drilldownContextItem, rollupContextItem, copyContextItem ];
+            contextMenu.customItems = [ drilldownContextItem, rollupContextItem, copyContextItem ];*/
 		}
+
+        override protected function commitProperties():void {
+            super.commitProperties();
+            if (analysisItem is AnalysisHierarchyItem) {
+                var hierarchy:AnalysisHierarchyItem = _analysisItem as AnalysisHierarchyItem;
+                var index:int = hierarchy.hierarchyLevels.getItemIndex(hierarchy.hierarchyLevel);
+                var items:Array = [];
+                if (index < (hierarchy.hierarchyLevels.length - 1)) {
+                    var drilldownContextItem:ContextMenuItem = new ContextMenuItem("Drilldown", true);
+                    drilldownContextItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, onDrilldown);
+                    items.push(drilldownContextItem);
+                }
+                if (index > 0) {
+                    var rollupContextItem:ContextMenuItem = new ContextMenuItem("Rollup", true);
+                    rollupContextItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, onRollup);
+                    items.push(rollupContextItem);
+                }
+                contextMenu = new ContextMenu();
+                contextMenu.hideBuiltInItems();
+                var copyContextItem:ContextMenuItem = new ContextMenuItem("Copy Cell", true);
+                copyContextItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, copySelected);
+                items.push(copyContextItem);
+                contextMenu.customItems = items;
+            }
+        }
 
         private function onDrilldown(event:ContextMenuEvent):void {
             drill();

@@ -434,6 +434,7 @@ public class SolutionService {
             clonedDefinition.setConfiguredMethods(clonedConfiguredMethods);
             apiService.addDynamicServiceDefinition(clonedDefinition, conn);
             clonedFeedDefinition.setDynamicServiceDefinitionID(clonedDefinition.getServiceID());
+            session.flush();
         } finally {
             session.close();
         }

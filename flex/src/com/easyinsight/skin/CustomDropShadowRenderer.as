@@ -1,4 +1,6 @@
 package com.easyinsight.skin {
+import com.easyinsight.analysis.AnalysisHierarchyItem;
+import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.analysis.charts.ChartDrilldownEvent;
 import flash.display.Graphics;
 import flash.events.ContextMenuEvent;
@@ -12,7 +14,6 @@ import mx.core.UIComponent;
 import mx.graphics.BitmapFill;
 import mx.graphics.IFill;
 import mx.graphics.IStroke;
-import mx.skins.ProgrammaticSkin;
 
 public class CustomDropShadowRenderer extends UIComponent implements IDataRenderer {
 
@@ -22,6 +23,12 @@ public class CustomDropShadowRenderer extends UIComponent implements IDataRender
     private var _selectedFill:Class;
 
     private var _rolloverFill:Class;
+
+    private var _analysisItem:AnalysisItem;
+
+    public function set analysisItem(val:AnalysisItem):void {
+        _analysisItem = val;
+    }
 
     public function set selectedFill(val:Class):void {
         _selectedFill = val;
@@ -40,13 +47,6 @@ public class CustomDropShadowRenderer extends UIComponent implements IDataRender
 
     public function CustomDropShadowRenderer() {
         super();
-        contextMenu = new ContextMenu();
-        contextMenu.hideBuiltInItems();
-        var drilldownContextItem:ContextMenuItem = new ContextMenuItem("Drilldown", true);
-        drilldownContextItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, onDrilldown);
-        var rollupContextItem:ContextMenuItem = new ContextMenuItem("Rollup", true);
-        rollupContextItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, onRollup);
-        contextMenu.customItems = [ drilldownContextItem, rollupContextItem ];
     }
 
     private function onDrilldown(event:ContextMenuEvent):void {
@@ -84,7 +84,30 @@ public class CustomDropShadowRenderer extends UIComponent implements IDataRender
 		_data = value;
 	}
 
-	//--------------------------------------------------------------------------
+
+    override protected function commitProperties():void {
+        super.commitProperties();
+        contextMenu = new ContextMenu();
+        contextMenu.hideBuiltInItems();
+        if (_analysisItem is AnalysisHierarchyItem) {
+            var hierarchy:AnalysisHierarchyItem = _analysisItem as AnalysisHierarchyItem;
+            var index:int = hierarchy.hierarchyLevels.getItemIndex(hierarchy.hierarchyLevel);
+            var items:Array = [];
+            if (index < (hierarchy.hierarchyLevels.length - 1)) {
+                var drilldownContextItem:ContextMenuItem = new ContextMenuItem("Drilldown", true);
+                drilldownContextItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, onDrilldown);
+                items.push(drilldownContextItem);
+            }
+            if (index > 0) {
+                var rollupContextItem:ContextMenuItem = new ContextMenuItem("Rollup", true);
+                rollupContextItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, onRollup);
+                items.push(rollupContextItem);
+            }
+            contextMenu.customItems = items;
+        }
+    }
+
+    //--------------------------------------------------------------------------
     //
     //  Overridden methods
     //

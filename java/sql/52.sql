@@ -11,6 +11,6 @@ CREATE TABLE analysis_hierarchy_item_to_hierarchy_level (
 );
 
 
-# ALTER TABLE hierarchy_level add position integer not null default 0;
+ALTER TABLE hierarchy_level add position integer not null default 0;
 
-# ALTER TABLE hierarchy_level drop parent_item_id;
+ALTER TABLE hierarchy_level drop parent_item_id;

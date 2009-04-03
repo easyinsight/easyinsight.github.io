@@ -51,6 +51,7 @@ public class APIService {
                 undeployService(descriptor.getFeedID(), conn);
             }
             saveDataSourceAPI(descriptor, conn);
+            session.flush();
             conn.commit();
         } catch (Exception e) {
             LogClass.error(e);
@@ -291,6 +292,7 @@ public class APIService {
             }
             definition.generateCode(feedDefinition, conn);
             definition.deploy(conn, apiManager);
+            session.flush();
             conn.commit();
         } catch (Exception e) {
             LogClass.error(e);
@@ -322,6 +324,7 @@ public class APIService {
                     undeployService(dynamicServiceDefinition.getFeedID(), conn);
                 }
                 addDynamicServiceDefinition(dynamicServiceDefinition, conn);
+                session.flush();
                 conn.commit();
             } catch (SQLException e) {
                 LogClass.error(e);

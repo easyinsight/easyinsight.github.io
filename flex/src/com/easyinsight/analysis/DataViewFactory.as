@@ -96,10 +96,12 @@ public class DataViewFactory extends VBox {
         if (_reportRenderer == null) {
             pendingRequest = true;
         } else {
+            _analysisDefinition = _controlBar.createAnalysisDefinition();
             if (_controlBar.isDataValid()) {
-                _analysisDefinition = _controlBar.createAnalysisDefinition();
                 _analysisDefinition.createDefaultLimits();
                 _dataService.retrieveData(_analysisDefinition);
+            } else {
+                _reportRenderer.renderReport(new ArrayCollection(), _analysisDefinition, new Object());
             }
         }
     }
