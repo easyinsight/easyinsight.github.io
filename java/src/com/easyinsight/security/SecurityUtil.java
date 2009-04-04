@@ -9,6 +9,7 @@ import com.easyinsight.database.Database;
 import com.easyinsight.users.UserService;
 import com.easyinsight.users.UserServiceResponse;
 import com.easyinsight.logging.LogClass;
+import com.easyinsight.logging.SecurityLogger;
 
 /**
  * User: James Boe
@@ -33,6 +34,7 @@ public class SecurityUtil {
             return userServiceResponse.getUserID();
         } else {
             Thread.dumpStack();
+            SecurityLogger.error("Unsuccessful login, user: " + userName);
             throw new SecurityException();
         }
     }
@@ -43,6 +45,7 @@ public class SecurityUtil {
             return userServiceResponse;
         } else {
             Thread.dumpStack();
+            SecurityLogger.error("Unsuccessful login, user: " + userName);
             throw new SecurityException();
         }
     }
@@ -55,6 +58,7 @@ public class SecurityUtil {
         UserPrincipal userPrincipal = securityProvider.getUserPrincipal();
         if (userPrincipal == null) {
             if (required) {
+                SecurityLogger.error("Could not retrieve user principal.");
                 throw new SecurityException();
             }
             else
@@ -67,9 +71,11 @@ public class SecurityUtil {
     public static void authorizeAccountTier(int requiredTier) {
         UserPrincipal userPrincipal = securityProvider.getUserPrincipal();
         if (userPrincipal == null) {
+            SecurityLogger.error("Could not retrieve user principal.");
             throw new SecurityException();
         } else {
             if (userPrincipal.getAccountType() < requiredTier) {
+                SecurityLogger.error("User " + userPrincipal.getUserName() + " could not access tier - " + requiredTier + "; their tier is " + userPrincipal.getAccountType());
                 throw new SecurityException();
             }
         }
@@ -79,6 +85,7 @@ public class SecurityUtil {
         UserPrincipal userPrincipal = securityProvider.getUserPrincipal();
         if (userPrincipal == null) {
             Thread.dumpStack();
+            SecurityLogger.error("Could not retrieve user principal.");
             throw new SecurityException();
         } else {
             return userPrincipal.getAccountType();
