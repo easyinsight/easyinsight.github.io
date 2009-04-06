@@ -43,7 +43,7 @@ public class StaticFeed extends Feed {
         DataStorage source = DataStorage.readConnection(getFields(), getFeedID());
         DataSet dataSet;
         try {
-            dataSet = source.retrieveData(queryList, null, null, 0);
+            dataSet = source.retrieveData(queryList, null, null, null, null);
         } catch (SQLException e) {
             LogClass.error(e);
             throw new RuntimeException(e);
@@ -58,14 +58,14 @@ public class StaticFeed extends Feed {
     }
 
     @Override
-        public DataSet getAggregateDataSet(Set<AnalysisItem> analysisItems, Collection<FilterDefinition> filters, InsightRequestMetadata insightRequestMetadata, List<AnalysisItem> allAnalysisItems, boolean adminMode, Collection<Key> additionalNeededKeys) {
+    public DataSet getAggregateDataSet(Set<AnalysisItem> analysisItems, Collection<FilterDefinition> filters, InsightRequestMetadata insightRequestMetadata, List<AnalysisItem> allAnalysisItems, boolean adminMode, Collection<Key> additionalNeededKeys) {
         if (analysisItems.size() == 0) {
             return new DataSet();
         }
         DataSet dataSet;
         DataStorage source = DataStorage.readConnection(getFields(), getFeedID());
         try {
-            dataSet = source.retrieveData(analysisItems, filters, additionalNeededKeys, null);
+            dataSet = source.retrieveData(analysisItems, filters, additionalNeededKeys, null, insightRequestMetadata);
         } catch (SQLException e) {
             LogClass.error(e);
             throw new RuntimeException(e);

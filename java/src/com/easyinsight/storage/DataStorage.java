@@ -11,7 +11,11 @@ import com.easyinsight.datafeeds.FeedPersistenceMetadata;
 import com.easyinsight.core.*;
 
 import java.util.*;
+import java.util.Date;
 import java.sql.*;
+
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * User: James Boe
@@ -29,6 +33,13 @@ public class DataStorage {
     private boolean committed = false;
     private FeedPersistenceMetadata metadata;
     private static DateDimCache dateDimCache = new DateDimCache();
+
+    /**
+     * Creates a read only connection for retrieving data.
+     * @param fields the analysis items you want to retrieve
+     * @param feedID the ID of the data source
+     * @return a DataStorage object for making read calls
+     */
 
     public static DataStorage readConnection(List<AnalysisItem> fields, long feedID) {
         DataStorage dataStorage = new DataStorage();
@@ -67,6 +78,14 @@ public class DataStorage {
         }
         return dataStorage;
     }
+
+    /**
+     * Creates a DataStorage object for write purposes.
+     * @param feedDefinition the definition of the data source
+     * @param conn a connection with an existing transaction open
+     * @return the new DataStorage object for writing
+     * @throws java.sql.SQLException if something goes wrong
+     */
 
     public static DataStorage writeConnection(FeedDefinition feedDefinition, Connection conn) throws SQLException {
         return writeConnection(feedDefinition, conn, SecurityUtil.getAccountID());
@@ -285,7 +304,7 @@ public class DataStorage {
                             keyMetadatas.put(key, new KeyMetadata(key, Value.STRING, analysisItem));
                         }
                     }
-                    existing = retrieveData(previousKeys, null, null, 0, keyMetadatas, previousVersion);
+                    existing = retrieveData(previousKeys, null, null, 0, keyMetadatas, previousVersion, null);
                     //existing = new DataSet();
                 }
             }
@@ -322,105 +341,89 @@ public class DataStorage {
         }
     }
 
+    /**
+     * Clears out all data in the data source.
+     * @throws java.sql.SQLException if something goes wrong
+     */
+
     public void truncate() throws SQLException {
         PreparedStatement truncateStmt = storageConn.prepareStatement("TRUNCATE " + getTableName());
         truncateStmt.execute();
     }
 
-    public DataSet retrieveData(Collection<AnalysisItem> reportItems, Collection<FilterDefinition> filters, Collection<Key> additionalKeys, Integer limit) throws SQLException {
-        return retrieveData(reportItems, filters, additionalKeys, limit, keys, version);
+    /**
+     * Retrieves the requested data set from the database.
+     * @param reportItems the analysis items you're looking to retrieve
+     * @param filters any filter definitions you want to constrain data by
+     * @param additionalKeys any additional keys not associated to analysis items, like data scrubs or composite connections
+     * @param limit optional limit on result set
+     * @return the created data set
+     * @throws java.sql.SQLException if something goes wrong
+     */
+
+    public DataSet retrieveData(@NotNull Collection<AnalysisItem> reportItems, @Nullable Collection<FilterDefinition> filters, @Nullable Collection<Key> additionalKeys, @Nullable Integer limit) throws SQLException {
+        return retrieveData(reportItems, filters, additionalKeys, limit, keys, version, null);
     }
 
+    /**
+     * Retrieves the requested data set from the database.
+     * @param reportItems the analysis items you're looking to retrieve
+     * @param filters any filter definitions you want to constrain data by
+     * @param additionalKeys any additional keys not associated to analysis items, like data scrubs or composite connections
+     * @param limit optional limit on result set
+     * @param insightRequestMetadata the request metadata
+     * @return the created data set
+     * @throws java.sql.SQLException if something goes wrong
+     */
+
     public DataSet retrieveData(Collection<AnalysisItem> reportItems, Collection<FilterDefinition> filters, Collection<Key> additionalKeys, Integer limit,
-                                Map<Key, KeyMetadata> keys, int version) throws SQLException {
+                                InsightRequestMetadata insightRequestMetadata) throws SQLException {
+        return retrieveData(reportItems, filters, additionalKeys, limit, keys, version, insightRequestMetadata);
+    }
+
+    private DataSet retrieveData(@NotNull Collection<AnalysisItem> reportItems, @Nullable Collection<FilterDefinition> filters, @Nullable Collection<Key> additionalKeys, @Nullable Integer limit,
+                                @NotNull Map<Key, KeyMetadata> keys, int version, @Nullable InsightRequestMetadata insightRequestMetadata) throws SQLException {
+        if (insightRequestMetadata == null) {
+            insightRequestMetadata = new InsightRequestMetadata();
+            insightRequestMetadata.setNow(new Date());
+        }
+        filters = eligibleFilters(filters);
         StringBuilder queryBuilder = new StringBuilder();
         StringBuilder selectBuilder = new StringBuilder();
         StringBuilder fromBuilder = new StringBuilder();
         StringBuilder whereBuilder = new StringBuilder();
         StringBuilder groupByBuilder = new StringBuilder();
         Collection<Key> groupByItems = new HashSet<Key>();
-        for (AnalysisItem analysisItem : reportItems) {
-            if (analysisItem.isDerived()) {
-                throw new RuntimeException("Attempt made to query a derived analysis item");
-            }
-            String columnName = analysisItem.toKeySQL();
-            if (analysisItem.hasType(AnalysisItemTypes.MEASURE)) {
-                AnalysisMeasure analysisMeasure = (AnalysisMeasure) analysisItem;
-                if (analysisMeasure.hasType(AggregationTypes.SUM)) {
-                    columnName = "SUM(" + columnName + ")";
-                } else if (analysisMeasure.hasType(AggregationTypes.AVERAGE)) {
-                    columnName = "AVG(" + columnName + ")";
-                } else if (analysisMeasure.hasType(AggregationTypes.COUNT)) {
-                    columnName = "COUNT(" + columnName + ")";
-                } else if (analysisMeasure.hasType(AggregationTypes.MAX)) {
-                    columnName = "MAX(" + columnName + ")";
-                } else if (analysisMeasure.hasType(AggregationTypes.MIN)) {
-                    columnName = "MIN(" + columnName + ")";
-                } else {
-                    groupByItems.add(analysisItem.getKey());
-                }
-            } else {
-                groupByItems.add(analysisItem.getKey());
-            }
-            selectBuilder.append(columnName);
-            selectBuilder.append(",");
-        }
-        if (additionalKeys != null) {
-            for (Key key : additionalKeys) {
-                String columnName = key.toSQL();
-                selectBuilder.append(columnName);
-                selectBuilder.append(",");
-                groupByItems.add(key);
-            }
-        }
+        createSelectClause(reportItems, selectBuilder, groupByItems);
+        addAdditionalKeysToSelect(additionalKeys, selectBuilder, groupByItems);
         selectBuilder = selectBuilder.deleteCharAt(selectBuilder.length() - 1);
-        String tableName = "df" + feedID + "v" + version;
-        fromBuilder.append(tableName);
-        if (filters != null && filters.size() > 0) {
-            Iterator<FilterDefinition> filterIter = filters.iterator();
-            while (filterIter.hasNext()) {
-                FilterDefinition filterDefinition = filterIter.next();
-                whereBuilder.append(filterDefinition.toQuerySQL());
-                if (filterIter.hasNext()) {
-                    whereBuilder.append(" AND ");
-                }
-            }
-        }
-        if (groupByItems.size() > 0) {
-            for (Key key : groupByItems) {
-                String columnName = key.toSQL();
-                groupByBuilder.append(columnName);
-                groupByBuilder.append(",");
-            }
-            groupByBuilder = groupByBuilder.deleteCharAt(groupByBuilder.length() - 1);
-        }
-        queryBuilder.append("SELECT ");
-        queryBuilder.append(selectBuilder.toString());
-        queryBuilder.append(" FROM ");
-        queryBuilder.append(fromBuilder.toString());
-        if (filters != null && filters.size() > 0) {
-            queryBuilder.append(" WHERE ");
-            queryBuilder.append(whereBuilder.toString());
-        }
-        if (groupByItems.size() > 0) {
-            queryBuilder.append(" GROUP BY ");
-            queryBuilder.append(groupByBuilder.toString());
-        }
-        if (limit != null) {
-            queryBuilder.append(" LIMIT " + limit);
-        }
+        createFromClause(version, fromBuilder);
+        createWhereClause(filters, whereBuilder);
+        groupByBuilder = createGroupByClause(groupByBuilder, groupByItems);
+        createSQL(filters, limit, queryBuilder, selectBuilder, fromBuilder, whereBuilder, groupByBuilder, groupByItems);
         System.out.println("sql = " + queryBuilder.toString());
         PreparedStatement queryStmt = storageConn.prepareStatement(queryBuilder.toString());
-        if (filters != null && filters.size() > 0) {
-            int i = 1;
-            for (FilterDefinition filterDefinition : filters) {
-                KeyMetadata keyMetadata = keys.get(filterDefinition.getField().getKey());
-                int type = keyMetadata.type;
-                filterDefinition.populatePreparedStatement(queryStmt, i, type);
-            }
-        }
+        populateParameters(filters, keys, queryStmt, insightRequestMetadata);
         DataSet dataSet = new DataSet();
         ResultSet dataRS = queryStmt.executeQuery();
+        processQueryResults(reportItems, keys, dataSet, dataRS);
+        return dataSet;
+    }
+
+    @NotNull
+    private Collection<FilterDefinition> eligibleFilters(@Nullable Collection<FilterDefinition> filters) {
+        Collection<FilterDefinition> eligibleFilters = new ArrayList<FilterDefinition>();
+        if (filters != null) {
+            for (FilterDefinition filterDefinition : eligibleFilters) {
+                if (filterDefinition.isApplyBeforeAggregation()) {
+                    eligibleFilters.add(filterDefinition);
+                }
+            }
+        }
+        return eligibleFilters;
+    }
+
+    private void processQueryResults(@NotNull Collection<AnalysisItem> reportItems, @NotNull Map<Key, KeyMetadata> keys, @NotNull DataSet dataSet, @NotNull ResultSet dataRS) throws SQLException {
         while (dataRS.next()) {
             IRow row = dataSet.createRow();
             int i = 1;
@@ -453,69 +456,107 @@ public class DataStorage {
                 }
             }
         }
-        return dataSet;
     }
 
-    /*public DataSet retrieveData(List<Key> neededKeys, Map<Key, KeyMetadata> keys, Integer version) throws SQLException {
-        if (keys == null) {
-            keys = this.keys;
-        }
-        if (version == null) {
-            version = this.version;
-        }
-        if (neededKeys == null) {
-            neededKeys = new ArrayList<Key>(keys.keySet());
-        }
-        StringBuilder selectBuilder = new StringBuilder();
-        Iterator<Key> keyIter = neededKeys.iterator();
-        while (keyIter.hasNext()) {
-            Key key = keyIter.next();
-            selectBuilder.append("k").append(key.getKeyID());
-            if (keyIter.hasNext()) {
-                selectBuilder.append(",");
+    private void populateParameters(@NotNull Collection<FilterDefinition> filters, @NotNull Map<Key, KeyMetadata> keys, @NotNull PreparedStatement queryStmt, @NotNull InsightRequestMetadata insightRequestMetadata) throws SQLException {
+        if (filters.size() > 0) {
+            int i = 1;
+            for (FilterDefinition filterDefinition : filters) {
+                KeyMetadata keyMetadata = keys.get(filterDefinition.getField().getKey());
+                int type = keyMetadata.type;
+                filterDefinition.populatePreparedStatement(queryStmt, i, type, insightRequestMetadata);
             }
         }
-        StringBuilder fromBuilder = new StringBuilder();
-        String tableName = "df" + feedID + "v" + version;
-        fromBuilder.append(tableName);
-        String sql = "SELECT " + selectBuilder.toString() + " FROM " + fromBuilder.toString();
-        System.out.println(sql);
-        PreparedStatement queryStmt = storageConn.prepareStatement(sql);
-        DataSet dataSet = new DataSet();
-        ResultSet dataRS = queryStmt.executeQuery();
-        while (dataRS.next()) {
-            IRow row = dataSet.createRow();
-            int i = 1;
-            for (Key key : neededKeys) {
-                KeyMetadata keyMetadata = keys.get(key);
-                if (keyMetadata != null) {
-                    if (keyMetadata.getType() == Value.DATE) {
-                        Timestamp time = dataRS.getTimestamp(i++);
-                        if (dataRS.wasNull()) {
-                            row.addValue(key, new EmptyValue());
-                        } else {
-                            row.addValue(key, new DateValue(new java.util.Date(time.getTime())));
-                        }
-                    } else if (keyMetadata.getType() == Value.NUMBER) {
-                        double value = dataRS.getDouble(i++);
-                        if (dataRS.wasNull()) {
-                            row.addValue(key, new EmptyValue());
-                        } else {
-                            row.addValue(key, new NumericValue(value));
-                        }
-                    } else {
-                        String value = dataRS.getString(i++);
-                        if (dataRS.wasNull()) {
-                            row.addValue(key, new EmptyValue());
-                        } else {
-                            row.addValue(key, new StringValue(value));
-                        }
-                    }
+    }
+
+    private void createSQL(@NotNull Collection<FilterDefinition> filters, @Nullable Integer limit, @NotNull StringBuilder queryBuilder, @NotNull StringBuilder selectBuilder,
+                           @NotNull StringBuilder fromBuilder, @NotNull StringBuilder whereBuilder, @NotNull StringBuilder groupByBuilder, @NotNull Collection<Key> groupByItems) {
+        queryBuilder.append("SELECT ");
+        queryBuilder.append(selectBuilder.toString());
+        queryBuilder.append(" FROM ");
+        queryBuilder.append(fromBuilder.toString());
+        if (filters.size() > 0) {
+            queryBuilder.append(" WHERE ");
+            queryBuilder.append(whereBuilder.toString());
+        }
+        if (groupByItems.size() > 0) {
+            queryBuilder.append(" GROUP BY ");
+            queryBuilder.append(groupByBuilder.toString());
+        }
+        if (limit != null) {
+            queryBuilder.append(" LIMIT ").append(limit);
+        }
+    }
+
+    private StringBuilder createGroupByClause(StringBuilder groupByBuilder, Collection<Key> groupByItems) {
+        if (groupByItems.size() > 0) {
+            for (Key key : groupByItems) {
+                String columnName = key.toSQL();
+                groupByBuilder.append(columnName);
+                groupByBuilder.append(",");
+            }
+            groupByBuilder = groupByBuilder.deleteCharAt(groupByBuilder.length() - 1);
+        }
+        return groupByBuilder;
+    }
+
+    private void createWhereClause(Collection<FilterDefinition> filters, StringBuilder whereBuilder) {
+        if (filters != null && filters.size() > 0) {
+            Iterator<FilterDefinition> filterIter = filters.iterator();
+            while (filterIter.hasNext()) {
+                FilterDefinition filterDefinition = filterIter.next();
+                whereBuilder.append(filterDefinition.toQuerySQL());
+                if (filterIter.hasNext()) {
+                    whereBuilder.append(" AND ");
                 }
             }
         }
-        return dataSet;
-    }*/
+    }
+
+    private void createFromClause(int version, StringBuilder fromBuilder) {
+        String tableName = "df" + feedID + "v" + version;
+        fromBuilder.append(tableName);
+    }
+
+    private void addAdditionalKeysToSelect(Collection<Key> additionalKeys, StringBuilder selectBuilder, Collection<Key> groupByItems) {
+        if (additionalKeys != null) {
+            for (Key key : additionalKeys) {
+                String columnName = key.toSQL();
+                selectBuilder.append(columnName);
+                selectBuilder.append(",");
+                groupByItems.add(key);
+            }
+        }
+    }
+
+    private void createSelectClause(Collection<AnalysisItem> reportItems, StringBuilder selectBuilder, Collection<Key> groupByItems) {
+        for (AnalysisItem analysisItem : reportItems) {
+            if (analysisItem.isDerived()) {
+                throw new RuntimeException("Attempt made to query a derived analysis item");
+            }
+            String columnName = analysisItem.toKeySQL();
+            if (analysisItem.hasType(AnalysisItemTypes.MEASURE)) {
+                AnalysisMeasure analysisMeasure = (AnalysisMeasure) analysisItem;
+                if (analysisMeasure.hasType(AggregationTypes.SUM)) {
+                    columnName = "SUM(" + columnName + ")";
+                } else if (analysisMeasure.hasType(AggregationTypes.AVERAGE)) {
+                    columnName = "AVG(" + columnName + ")";
+                } else if (analysisMeasure.hasType(AggregationTypes.COUNT)) {
+                    columnName = "COUNT(" + columnName + ")";
+                } else if (analysisMeasure.hasType(AggregationTypes.MAX)) {
+                    columnName = "MAX(" + columnName + ")";
+                } else if (analysisMeasure.hasType(AggregationTypes.MIN)) {
+                    columnName = "MIN(" + columnName + ")";
+                } else {
+                    groupByItems.add(analysisItem.getKey());
+                }
+            } else {
+                groupByItems.add(analysisItem.getKey());
+            }
+            selectBuilder.append(columnName);
+            selectBuilder.append(",");
+        }
+    }
 
     public void insertData(DataSet dataSet) throws SQLException {
         StringBuilder columnBuilder = new StringBuilder();

@@ -37,30 +37,6 @@ public class AnalysisBasedFeed extends Feed {
 
         Feed feed = FeedRegistry.instance().getFeed(analysisDefinition.getDataFeedID());
 
-        /*Set<Key> columnSet = new HashSet<Key>(columns);
-        Set<AnalysisItem> analysisItemSet = new HashSet<AnalysisItem>();
-        // TODO: is this right?
-        if (analysisDefinition.getFilterDefinitions() != null) {
-            for (FilterDefinition filterDefinition : analysisDefinition.getFilterDefinitions()) {
-                List<AnalysisItem> items = filterDefinition.getField().getAnalysisItems(feed.getFields(), feed.getFields());
-                for (AnalysisItem item : items) {
-                    if (item.getAnalysisItemID() != 0) {
-                        columnSet.add(item.getKey());
-                        analysisItemSet.add(item);
-                    }
-                }
-            }
-        }
-        for (Key column : columns) {
-            for (AnalysisItem item : getFields()) {
-                if (item.getKey().equals(column)) {
-                    analysisItemSet.add(item);
-                }
-            }
-        }*/
-
-        /*Collection<AnalysisItem> analysisItems = report.getColumnItems(allAnalysisItems);
-        Collection<FilterDefinition> filters = report.getFilterDefinitions();*/
         if (analysisDefinition.getFilterDefinitions() != null) {
             if (filters == null) {
                 filters = new ArrayList<FilterDefinition>();
@@ -80,40 +56,6 @@ public class AnalysisBasedFeed extends Feed {
 
     protected DataSet getUncachedDataSet(List<Key> columns, Integer maxRows, boolean admin, InsightRequestMetadata insightRequestMetadata) {
 
-       /* WSAnalysisDefinition analysisDefinition = getAnalysisDefinition();
-
-        Feed feed = FeedRegistry.instance().getFeed(analysisDefinition.getDataFeedID());
-
-        Set<Key> columnSet = new HashSet<Key>(columns);
-        Set<AnalysisItem> analysisItemSet = new HashSet<AnalysisItem>();
-        // TODO: is this right?
-        if (analysisDefinition.getFilterDefinitions() != null) {
-            for (FilterDefinition filterDefinition : analysisDefinition.getFilterDefinitions()) {
-                List<AnalysisItem> items = filterDefinition.getField().getAnalysisItems(feed.getFields(), feed.getFields());
-                for (AnalysisItem item : items) {
-                    if (item.getAnalysisItemID() != 0) {
-                        columnSet.add(item.getKey());
-                        analysisItemSet.add(item);
-                    }
-                }
-            }
-        }
-        for (Key column : columns) {
-            for (AnalysisItem item : getFields()) {
-                if (item.getKey().equals(column)) {
-                    analysisItemSet.add(item);
-                }
-            }
-        }
-        if (analysisDefinition.getDataScrubs() != null) {
-            for (DataScrub dataScrub : analysisDefinition.getDataScrubs()) {
-                columnSet.addAll(dataScrub.createNeededKeys(feed.getFields()));
-            }
-        }
-
-        DataSet dataSet = feed.getDataSet(new ArrayList<Key>(columnSet), maxRows, false, insightRequestMetadata);
-
-        return dataSet.nextStep(analysisDefinition, analysisItemSet, insightRequestMetadata);*/
         throw new UnsupportedOperationException();
     }    
 }

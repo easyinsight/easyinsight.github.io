@@ -33,6 +33,10 @@ public class MaterializedRollingFilterDefinition extends MaterializedFilterDefin
             now = new Date();
         }
         this.now = now;
+        limitDate = findStartDate(interval, now);
+    }
+
+    public static long findStartDate(int interval, Date now) {
         Calendar cal = Calendar.getInstance();
         cal.setTime(now);
         switch (interval) {
@@ -84,7 +88,7 @@ public class MaterializedRollingFilterDefinition extends MaterializedFilterDefin
                 cal.setTimeInMillis(cal.getTimeInMillis() - (60L * 60L * 1000L * 24L * 7L * 365L));
                 break;
         }
-        limitDate = cal.getTimeInMillis();
+        return cal.getTimeInMillis();
     }
 
     public boolean allows(Value value, Value preTransformValue) {

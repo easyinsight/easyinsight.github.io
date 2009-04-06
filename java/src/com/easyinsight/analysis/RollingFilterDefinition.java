@@ -5,6 +5,7 @@ import com.easyinsight.analysis.MaterializedRollingFilterDefinition;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.Date;
 
 /**
  * User: James Boe
@@ -37,13 +38,19 @@ public class RollingFilterDefinition extends FilterDefinition {
     }
 
     public String toQuerySQL() {
-        // TODO: implement
         StringBuilder queryBuilder = new StringBuilder();
+        queryBuilder.append(getField().toKeySQL());
+        queryBuilder.append(" >= ? AND ");
+        queryBuilder.append(getField().toKeySQL());
+        queryBuilder.append(" <= ?");
         return queryBuilder.toString();
     }
 
-    public int populatePreparedStatement(PreparedStatement preparedStatement, int start, int type) throws SQLException {
-        // TODO: implement
+    public int populatePreparedStatement(PreparedStatement preparedStatement, int start, int type, InsightRequestMetadata insightRequestMetadata) throws SQLException {
+        Date now = insightRequestMetadata.getNow();
+        long startTime = MaterializedRollingFilterDefinition.findStartDate(interval, now);
+        preparedStatement.setTimestamp(start++, new java.sql.Timestamp(startTime));
+        preparedStatement.setTimestamp(start++, new java.sql.Timestamp(now.getTime()));
         return start;
     }
 }

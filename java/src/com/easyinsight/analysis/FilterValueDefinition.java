@@ -72,7 +72,7 @@ public class FilterValueDefinition extends FilterDefinition {
 
     public String toQuerySQL() {
         StringBuilder queryBuilder = new StringBuilder();
-        String columnName = "k" + getField().getKey().getKeyID();
+        String columnName = getField().toKeySQL();
         queryBuilder.append(columnName);
         queryBuilder.append(" in (");
         for (int i = 0; i < getFilteredValues().size(); i++) {
@@ -83,7 +83,7 @@ public class FilterValueDefinition extends FilterDefinition {
         return queryBuilder.toString();
     }
 
-    public int populatePreparedStatement(PreparedStatement preparedStatement, int start, int type) throws SQLException {
+    public int populatePreparedStatement(PreparedStatement preparedStatement, int start, int type, InsightRequestMetadata insightRequestMetadata) throws SQLException {
         Set<Value> valueSet = new HashSet<Value>();
         for (Object valueObject : filteredValues) {
             Value value;

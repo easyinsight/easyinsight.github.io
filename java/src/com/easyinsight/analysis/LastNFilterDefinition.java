@@ -39,7 +39,7 @@ public class LastNFilterDefinition extends FilterDefinition {
         return queryBuilder.toString();
     }
 
-    public int populatePreparedStatement(PreparedStatement preparedStatement, int start, int type) throws SQLException {
+    public int populatePreparedStatement(PreparedStatement preparedStatement, int start, int type, InsightRequestMetadata insightRequestMetadata) throws SQLException {
         // TODO: implement
         return start;
     }

@@ -51,5 +51,5 @@ public abstract class FilterDefinition implements Serializable {
 
     public abstract String toQuerySQL();
 
-    public abstract int populatePreparedStatement(PreparedStatement preparedStatement, int start, int type) throws SQLException;
+    public abstract int populatePreparedStatement(PreparedStatement preparedStatement, int start, int type, InsightRequestMetadata insightRequestMetadata) throws SQLException;
 }

@@ -53,9 +53,9 @@ public class FilterDateRangeDefinition extends FilterDefinition {
         return queryBuilder.toString();
     }
 
-    public int populatePreparedStatement(PreparedStatement preparedStatement, int start, int type) throws SQLException {
-        preparedStatement.setDate(start++, new java.sql.Date(startDate.getTime()));
-        preparedStatement.setDate(start++, new java.sql.Date(endDate.getTime()));
+    public int populatePreparedStatement(PreparedStatement preparedStatement, int start, int type, InsightRequestMetadata insightRequestMetadata) throws SQLException {
+        preparedStatement.setTimestamp(start++, new java.sql.Timestamp(startDate.getTime()));
+        preparedStatement.setTimestamp(start++, new java.sql.Timestamp(endDate.getTime()));
         return start;
     }
 }

@@ -1,7 +1,5 @@
 package com.easyinsight.analysis;
 
-import com.easyinsight.analysis.MaterializedFilterDefinition;
-
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
@@ -63,13 +61,18 @@ public class FilterRangeDefinition extends FilterDefinition {
     }
 
     public String toQuerySQL() {
-        // TODO: implement
         StringBuilder queryBuilder = new StringBuilder();
+        String columnName = "k" + getField().getKey().getKeyID();
+        queryBuilder.append(columnName);
+        queryBuilder.append(" >= ? AND ");
+        queryBuilder.append(columnName);
+        queryBuilder.append(" <= ?");
         return queryBuilder.toString();
     }
 
-    public int populatePreparedStatement(PreparedStatement preparedStatement, int start, int type) throws SQLException {
-        // TODO: implement
+    public int populatePreparedStatement(PreparedStatement preparedStatement, int start, int type, InsightRequestMetadata insightRequestMetadata) throws SQLException {
+        preparedStatement.setDouble(start++, startValue);
+        preparedStatement.setDouble(start++, endValue);
         return start;
     }
 }
