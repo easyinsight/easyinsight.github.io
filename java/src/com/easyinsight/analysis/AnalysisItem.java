@@ -210,4 +210,11 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
     public void afterLoad() {
         
     }
+
+    public String toKeySQL() {
+        if (isDerived()) {
+            throw new RuntimeException("Attempt made to retrieve SQL for a derived analysis item.");
+        }
+        return getKey().toSQL();
+    }
 }

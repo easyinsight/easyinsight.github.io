@@ -13,7 +13,6 @@ import com.easyinsight.core.NumericValue;
 import com.easyinsight.core.DateValue;
 import com.easyinsight.analysis.ListDataResults;
 import com.easyinsight.analysis.ListRow;
-import com.easyinsight.analysis.CrossTabDataResults;
 import com.easyinsight.analysis.*;
 
 import org.apache.poi.hssf.usermodel.*;
@@ -25,6 +24,8 @@ import java.sql.PreparedStatement;
 import java.sql.Statement;
 import java.util.Map;
 import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * User: James Boe
@@ -52,25 +53,13 @@ public class ExportService {
         SecurityUtil.authorizeFeed(analysisDefinition.getDataFeedID(), Roles.SUBSCRIBER);
         long exportID;
         try {
-            if (analysisDefinition instanceof WSListDefinition) {
-                WSListDefinition listDefinition = (WSListDefinition) analysisDefinition;
-                ListDataResults listDataResults = new DataService().list(listDefinition, new InsightRequestMetadata());
-                HSSFWorkbook workbook = createWorkbookFromList(listDefinition, listDataResults);
-                ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                workbook.write(baos);
-                byte[] bytes = baos.toByteArray();
-                baos.close();
-                exportID = saveBytes(bytes);
-            } else {
-                WSCrosstabDefinition crosstabDefinition = (WSCrosstabDefinition) analysisDefinition;
-                CrossTabDataResults results = new DataService().pivot(crosstabDefinition, new InsightRequestMetadata());
-                HSSFWorkbook workbook = createWorkbookFromCrosstab(results);
-                ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                workbook.write(baos);
-                byte[] bytes = baos.toByteArray();
-                baos.close();
-                exportID = saveBytes(bytes);
-            }
+            ListDataResults listDataResults = new DataService().list(analysisDefinition, new InsightRequestMetadata());
+            HSSFWorkbook workbook = createWorkbookFromList(analysisDefinition, listDataResults);
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            workbook.write(baos);
+            byte[] bytes = baos.toByteArray();
+            baos.close();
+            exportID = saveBytes(bytes);
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);
@@ -78,11 +67,7 @@ public class ExportService {
         return exportID;
     }
 
-    private HSSFWorkbook createWorkbookFromCrosstab(CrossTabDataResults results) {
-        throw new UnsupportedOperationException();
-    }
-
-    private HSSFWorkbook createWorkbookFromList(WSListDefinition listDefinition, ListDataResults listDataResults) {
+    private HSSFWorkbook createWorkbookFromList(WSAnalysisDefinition listDefinition, ListDataResults listDataResults) {
         HSSFWorkbook workbook = new HSSFWorkbook();
         Map<String, HSSFCellStyle> styleMap = new HashMap<String, HSSFCellStyle>();
         HSSFCellStyle currencyStyle = workbook.createCellStyle();
@@ -94,13 +79,16 @@ public class ExportService {
         workbook.setSheetName(0, "Data");
         HSSFRow headerRow = sheet.createRow(0);
         Map<AnalysisItem, Short> positionMap = new HashMap<AnalysisItem, Short>();
-        for (short i = 0; i < listDefinition.getColumns().size(); i++) {
-            AnalysisItem analysisItem = listDefinition.getColumns().get(i);
+        List<AnalysisItem> items = new ArrayList<AnalysisItem>(listDefinition.getAllAnalysisItems().size());
+        for (short i = 0; i < items.size(); i++) {
+            AnalysisItem analysisItem = items.get(i);
             positionMap.put(analysisItem, i);
         }
         for (AnalysisItem analysisItem : listDataResults.getHeaders()) {
             short headerPosition = positionMap.get(analysisItem);
-            sheet.setColumnWidth(headerPosition, (short) (analysisItem.getWidth() / 10 * 256));
+            if (analysisItem.getWidth() > 0) {
+                sheet.setColumnWidth(headerPosition, (short) (analysisItem.getWidth() / 10 * 256));
+            }
             HSSFCell headerCell = headerRow.createCell(headerPosition);
             String displayName;
             if (analysisItem.getDisplayName() == null) {

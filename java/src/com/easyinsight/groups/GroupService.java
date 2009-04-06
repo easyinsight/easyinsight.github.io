@@ -11,6 +11,7 @@ import com.easyinsight.users.Account;
 import com.easyinsight.goals.GoalTreeDescriptor;
 import com.easyinsight.goals.GoalTreeNodeData;
 import com.easyinsight.goals.GoalStorage;
+import com.easyinsight.core.InsightDescriptor;
 
 import java.util.List;
 import java.util.Date;
@@ -261,7 +262,7 @@ public class GroupService {
         throw new UnsupportedOperationException();
     }
 
-    public List<WSAnalysisDefinition> getInsights(long groupID) {
+    public List<InsightDescriptor> getInsights(long groupID) {
         SecurityUtil.authorizeGroup(groupID, Roles.SUBSCRIBER);
         try {
             return groupStorage.getInsights(groupID);

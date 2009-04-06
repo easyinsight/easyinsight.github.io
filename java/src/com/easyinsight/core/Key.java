@@ -17,9 +17,9 @@ public abstract class Key implements Comparable<Key>, Serializable {
     @Column(name="item_key_id")
     private long keyID;
 
+    public abstract String toSQL();
 
-
-    
+    public abstract Key toBaseKey();
 
     public long getKeyID() {
         return keyID;

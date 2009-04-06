@@ -32,6 +32,7 @@ import com.easyinsight.analysis.AnalysisMeasure;
 
         public var users:ArrayCollection = new ArrayCollection();
         public var newSubTree:SolutionGoalTreeDescriptor;
+        public var milestone:GoalTreeMilestone;
 
         private var _renderer:IGoalRenderer;
 		

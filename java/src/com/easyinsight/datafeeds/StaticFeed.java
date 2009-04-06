@@ -32,37 +32,55 @@ public class StaticFeed extends Feed {
     public AnalysisItemResultMetadata getMetadata(AnalysisItem analysisItem) {
         // this would change to return the data from our contained analysis definition
         AnalysisItemResultMetadata metadata = analysisItem.createResultMetadata();
-        Key key;
+        AnalysisItem queryItem;
         if (analysisItem.hasType(AnalysisItemTypes.HIERARCHY)) {
             AnalysisHierarchyItem analysisHierarchyItem = (AnalysisHierarchyItem) analysisItem;
-            key = analysisHierarchyItem.getHierarchyLevel().getAnalysisItem().getKey();
+            queryItem = analysisHierarchyItem.getHierarchyLevel().getAnalysisItem();
         } else {
-            key = analysisItem.getKey();
+            queryItem = analysisItem;
         }
-        Set<Key> keySet = new HashSet<Key>();
-        keySet.add(key);
-        DataSet dataSet = dataSetCache.get(keySet);
-        if (dataSet == null) {
-            DataStorage source = DataStorage.readConnection(getFields(), getFeedID());
-            try {
-                dataSet = source.retrieveData(new ArrayList<Key>(keySet), null, null);
-            } catch (SQLException e) {
-                LogClass.error(e);
-                throw new RuntimeException(e);
-            } finally {
-                source.closeConnection();
-            }
+        List<AnalysisItem> queryList = Arrays.asList( queryItem);
+        DataStorage source = DataStorage.readConnection(getFields(), getFeedID());
+        DataSet dataSet;
+        try {
+            dataSet = source.retrieveData(queryList, null, null, 0);
+        } catch (SQLException e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        } finally {
+            source.closeConnection();
         }
         for (IRow row : dataSet.getRows()) {
-            Value value = row.getValue(key);
+            Value value = row.getValue(queryItem.getKey());
             metadata.addValue(analysisItem, value);
         }
         return metadata;
     }
 
+    @Override
+        public DataSet getAggregateDataSet(Set<AnalysisItem> analysisItems, Collection<FilterDefinition> filters, InsightRequestMetadata insightRequestMetadata, List<AnalysisItem> allAnalysisItems, boolean adminMode, Collection<Key> additionalNeededKeys) {
+        if (analysisItems.size() == 0) {
+            return new DataSet();
+        }
+        DataSet dataSet;
+        DataStorage source = DataStorage.readConnection(getFields(), getFeedID());
+        try {
+            dataSet = source.retrieveData(analysisItems, filters, additionalNeededKeys, null);
+        } catch (SQLException e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        } finally {
+            source.closeConnection();
+        }
+        if (!adminMode) {
+            dataSet = dataSet.nextStep(getAnalysisDefinition(), getAnalysisDefinition().getAllAnalysisItems(), insightRequestMetadata);
+        }
+        return dataSet;
+    }
+
     protected DataSet getUncachedDataSet(List<Key> columns, Integer maxRows, boolean adminMode, InsightRequestMetadata insightRequestMetadata) {
 
-        if (columns.size() == 0) {
+        /*if (columns.size() == 0) {
             return new DataSet();
         }
 
@@ -95,6 +113,7 @@ public class StaticFeed extends Feed {
         if (!adminMode) {
             dataSet = dataSet.nextStep(getAnalysisDefinition(), getAnalysisDefinition().getAllAnalysisItems(), insightRequestMetadata);
         }
-        return dataSet;
+        return dataSet;*/
+        throw new UnsupportedOperationException();
     }
 }

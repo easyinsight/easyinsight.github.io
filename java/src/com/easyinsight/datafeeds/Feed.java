@@ -2,13 +2,12 @@ package com.easyinsight.datafeeds;
 
 
 import com.easyinsight.dataset.DataSet;
-import com.easyinsight.analysis.AnalysisItem;
-import com.easyinsight.analysis.AnalysisItemResultMetadata;
-import com.easyinsight.analysis.WSAnalysisDefinition;
-import com.easyinsight.analysis.InsightRequestMetadata;
+import com.easyinsight.analysis.*;
 import com.easyinsight.core.Key;
 
 import java.util.List;
+import java.util.Collection;
+import java.util.Set;
 
 /**
  * User: jboe
@@ -66,10 +65,12 @@ public abstract class Feed {
 
     public abstract AnalysisItemResultMetadata getMetadata(AnalysisItem analysisItem);
 
-    public DataSet getDataSet(List<Key> columns, Integer maxRows, boolean admin, InsightRequestMetadata insightRequestMetadata) {
+    public abstract DataSet getAggregateDataSet(Set<AnalysisItem> analysisItems, Collection<FilterDefinition> filters, InsightRequestMetadata insightRequestMetadata, List<AnalysisItem> allAnalysisItems, boolean adminMode, Collection<Key> additionalNeededKeys);
+
+    /*public DataSet getDataSet(List<Key> columns, Integer maxRows, boolean admin, InsightRequestMetadata insightRequestMetadata) {
         // okay, credentials may be necessary here...
         return getUncachedDataSet(columns, maxRows, admin, insightRequestMetadata);
-    }
+    }*/
 
     protected abstract DataSet getUncachedDataSet(List<Key> columns, Integer maxRows, boolean admin, InsightRequestMetadata insightRequestMetadata);
 }

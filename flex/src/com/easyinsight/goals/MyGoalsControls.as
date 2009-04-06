@@ -1,5 +1,6 @@
 package com.easyinsight.goals
 {
+import com.easyinsight.util.ProgressAlert;
 import mx.events.FlexEvent;
 import mx.binding.utils.BindingUtils;
 import mx.rpc.events.ResultEvent;
@@ -78,6 +79,7 @@ import mx.rpc.remoting.RemoteObject;
 			goalService = new RemoteObject();
             goalService.destination = "goalService";
             goalService.createDataTree.addEventListener(ResultEvent.RESULT, gotDataTree);
+            ProgressAlert.alert(this.parent.parent, "Retrieving goal tree...", null, goalService.createDataTree);
             goalService.createDataTree.send(goalTree.goalTreeID, null, null);
 		}
 
@@ -89,6 +91,7 @@ import mx.rpc.remoting.RemoteObject;
             goalService = new RemoteObject();
             goalService.destination = "goalService";
             goalService.getGoalTree.addEventListener(ResultEvent.RESULT, gotTree);
+            ProgressAlert.alert(this.parent.parent, "Retrieving goal tree...", null, goalService.getGoalTree);
             goalService.getGoalTree.send(goalTree.goalTreeID);
 		}
 		

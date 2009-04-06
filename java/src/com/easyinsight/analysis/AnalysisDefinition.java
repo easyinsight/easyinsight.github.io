@@ -281,7 +281,7 @@ public class AnalysisDefinition implements Cloneable {
         analysisDefinition.setAnalysisID(null);
         List<PersistableFilterDefinition> filterDefinitions = new ArrayList<PersistableFilterDefinition>();
         for (PersistableFilterDefinition persistableFilterDefinition : this.filterDefinitions) {
-            persistableFilterDefinition.setFilterId(null);
+            persistableFilterDefinition.setFilterId(0);
             filterDefinitions.add(persistableFilterDefinition);
         }
         analysisDefinition.setFilterDefinitions(filterDefinitions);

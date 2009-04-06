@@ -1,0 +1,73 @@
+<?xml version="1.0" ?>
+<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml">
+    <mx:Script><![CDATA[
+        import mx.managers.PopUpManager;
+
+        [Bindable]
+        private var milestoneName:String;
+
+        [Bindable]
+        private var milestoneDate:Date;
+
+        [Bindable]
+        private var saveLabel:String;
+
+        private var _goalTreeMilestone:GoalTreeMilestone;
+
+        public function set goalTreeMilestone(val:GoalTreeMilestone):void {
+            _goalTreeMilestone = val;
+        }
+
+        override protected function commitProperties():void {
+            super.commitProperties();
+            if (_goalTreeMilestone != null) {
+                milestoneName = _goalTreeMilestone.milestoneName;
+                milestoneDate = _goalTreeMilestone.milestoneDate;
+                saveLabel = "Update";
+            } else {
+                saveLabel = "Create";
+            }
+        }
+
+        private function saveMilestone():void {
+            var create:Boolean = false;
+            if (_goalTreeMilestone == null) {
+                _goalTreeMilestone = new GoalTreeMilestone();
+                create = true;
+            }
+            _goalTreeMilestone.milestoneName = nameInput.text;
+            _goalTreeMilestone.milestoneDate = dateInput.selectedDate;
+            if (create) {
+                goalService.saveMilestone.send(_goalTreeMilestone);
+            } else {
+                goalService.updateMilestone.send(_goalTreeMilestone);
+            }
+        }
+
+        private function savedMilestone():void {
+            dispatchEvent(new MilestoneRefreshEvent());
+            PopUpManager.removePopUp(this);
+        }
+
+        private function updatedMilestone():void {
+            dispatchEvent(new MilestoneRefreshEvent());
+            PopUpManager.removePopUp(this);
+        }
+        ]]></mx:Script>
+    <mx:RemoteObject destination="goalService" id="goalService">
+        <mx:method name="saveMilestone" result="savedMilestone()"/>
+        <mx:method name="updateMilestone" result="updatedMilestone()"/>
+    </mx:RemoteObject>
+    <mx:Form styleName="TitleWindowContents">
+        <mx:FormItem label="Milestone Name:">
+            <mx:TextInput id="nameInput" text="{milestoneName}"/>
+        </mx:FormItem>
+        <mx:FormItem label="Milestone Date:">
+            <mx:DateChooser id="dateInput" selectedDate="{milestoneDate}"/>
+        </mx:FormItem>
+        <mx:FormItem label="" direction="horizontal">
+            <mx:Button label="{saveLabel}" click="saveMilestone()"/>
+            <mx:Button label="Cancel" click="PopUpManager.removePopUp(this)"/>
+        </mx:FormItem>
+    </mx:Form>
+</mx:TitleWindow>

@@ -12,6 +12,16 @@ public class GoalTreeMilestone {
     private long milestoneID;
     private String milestoneName;
 
+    public GoalTreeMilestone() {
+    }
+
+    public GoalTreeMilestone(Date milestoneDate, long milestoneID, String milestoneName) {
+
+        this.milestoneDate = milestoneDate;
+        this.milestoneID = milestoneID;
+        this.milestoneName = milestoneName;
+    }
+
     public Date getMilestoneDate() {
         return milestoneDate;
     }

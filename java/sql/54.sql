@@ -1,0 +1,10 @@
+alter table composite_connection drop foreign key composite_connection_ibfk1;
+alter table composite_connection drop foreign key composite_connection_ibfk2;
+alter table composite_connection drop foreign key composite_connection_ibfk3;
+alter table composite_connection drop foreign key composite_connection_ibfk4;
+alter table composite_connection drop foreign key composite_connection_ibfk5;
+alter table composite_connection add foreign key (composite_feed_id) references composite_feed (composite_feed_id) on delete cascade;
+alter table composite_connection add foreign key (source_feed_node_id) references data_feed (data_feed_id) on delete cascade;
+alter table composite_connection add foreign key (target_feed_node_id) references data_feed (data_feed_id) on delete cascade;
+alter table composite_connection add foreign key (source_join) references item_key (item_key_id) on delete cascade;
+alter table composite_connection add foreign key (target_join) references item_key (item_key_id) on delete cascade;

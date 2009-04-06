@@ -3,10 +3,8 @@ package com.easyinsight.datafeeds;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.core.Key;
 import com.easyinsight.core.DerivedKey;
-import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.logging.LogClass;
-import com.easyinsight.analysis.AnalysisItemResultMetadata;
-import com.easyinsight.analysis.InsightRequestMetadata;
+import com.easyinsight.analysis.*;
 
 import java.util.*;
 
@@ -40,10 +38,10 @@ public class CompositeFeed extends Feed {
         throw new RuntimeException();
     }
 
-    protected DataSet getUncachedDataSet(List<Key> columns, Integer maxRows, boolean admin, InsightRequestMetadata insightRequestMetadata) {
+    public DataSet getAggregateDataSet(Set<AnalysisItem> analysisItems, Collection<FilterDefinition> filters, InsightRequestMetadata insightRequestMetadata, List<AnalysisItem> allAnalysisItems, boolean adminMode, Collection<Key> additionalNeededKeys) {
         try {
-            DataSet dataSet = getDataSet(columns, insightRequestMetadata);
-            if (!admin) {
+            DataSet dataSet = getDataSet(analysisItems, insightRequestMetadata);
+            if (!adminMode) {
                 dataSet = dataSet.nextStep(getAnalysisDefinition(), new HashSet<AnalysisItem>(getFields()), insightRequestMetadata);
             }
             return dataSet;
@@ -53,7 +51,22 @@ public class CompositeFeed extends Feed {
         }
     }
 
-    private DataSet getDataSet(List<Key> keys, InsightRequestMetadata insightRequestMetadata) {
+
+    protected DataSet getUncachedDataSet(List<Key> columns, Integer maxRows, boolean admin, InsightRequestMetadata insightRequestMetadata) {
+        /*try {
+            DataSet dataSet = getDataSet(columns, insightRequestMetadata);
+            if (!admin) {
+                dataSet = dataSet.nextStep(getAnalysisDefinition(), new HashSet<AnalysisItem>(getFields()), insightRequestMetadata);
+            }
+            return dataSet;
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        }*/
+        throw new UnsupportedOperationException();
+    }
+
+    private DataSet getDataSet(Set<AnalysisItem> analysisItems, InsightRequestMetadata insightRequestMetadata) {
 
         Map<Long, QueryStateNode> queryNodeMap = new HashMap<Long, QueryStateNode>();
 
@@ -81,10 +94,10 @@ public class CompositeFeed extends Feed {
         Iterator<QueryStateNode> graphIterator = new BreadthFirstIterator<QueryStateNode, Edge>(graph);
         while (graphIterator.hasNext()) {
             QueryStateNode queryStateNode = graphIterator.next();
-            for (Key key : keys) {
-                if (queryStateNode.handles(key)) {
+            for (AnalysisItem analysisItem : analysisItems) {
+                if (queryStateNode.handles(analysisItem.getKey())) {
                     neededNodes.put(queryStateNode.feedID, queryStateNode);
-                    queryStateNode.addKey(key);
+                    queryStateNode.addItem(analysisItem);
                 }
             }
         }
@@ -172,6 +185,10 @@ public class CompositeFeed extends Feed {
     private static class QueryStateNode {
         private long feedID;
         private Set<Key> neededKeys = new HashSet<Key>();
+        private Set<AnalysisItem> neededItems = new HashSet<AnalysisItem>();
+        private List<AnalysisItem> allAnalysisItems = new ArrayList<AnalysisItem>();
+        private Collection<FilterDefinition> filters = new ArrayList<FilterDefinition>();
+        private Set<Key> additionalKeys = new HashSet<Key>();
         private DataSet myDataSet;
 
         private QueryStateNode(long feedID) {
@@ -183,9 +200,20 @@ public class CompositeFeed extends Feed {
             return (feedID == derivedKey.getFeedID());
         }
 
-        public void addKey(Key key) {
-            neededKeys.add(key);
+        public void addItem(AnalysisItem analysisItem) {
+            neededItems.add(analysisItem);
+            neededKeys.add(analysisItem.getKey());
         }
+
+        public void addKey(Key key) {
+            if (!neededKeys.contains(key)) {
+                additionalKeys.add(key);
+            }
+        }
+
+        /*public void addKey(Key key) {
+            neededKeys.add(key);
+        }*/
 
         public void produceDataSet(InsightRequestMetadata insightRequestMetadata) {
             Feed feed = FeedRegistry.instance().getFeed(feedID);
@@ -198,7 +226,7 @@ public class CompositeFeed extends Feed {
                     columnSet.put(key, key);
                 }
             }
-            DataSet dataSet = feed.getDataSet(new ArrayList<Key>(columnSet.keySet()), null, false, insightRequestMetadata);
+            DataSet dataSet = feed.getAggregateDataSet(neededItems, filters, insightRequestMetadata, allAnalysisItems, false, additionalKeys);
             for (Map.Entry<Key, Key> entry : columnSet.entrySet()) {
                 if (entry.getValue() != null) {
                     dataSet.replaceKey(entry.getKey(), entry.getValue());

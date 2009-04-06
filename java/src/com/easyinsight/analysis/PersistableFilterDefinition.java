@@ -16,7 +16,7 @@ public abstract class PersistableFilterDefinition {
     @Id
     @GeneratedValue(strategy= GenerationType.IDENTITY)
     @Column(name="filter_id")
-    private Long filterId;
+    private long filterId;
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name="analysis_item_id")
     private AnalysisItem field;
@@ -32,11 +32,11 @@ public abstract class PersistableFilterDefinition {
         this.applyBeforeAggregation = applyBeforeAggregation;
     }
 
-    public Long getFilterId() {
+    public long getFilterId() {
         return filterId;
     }
 
-    public void setFilterId(Long filterId) {
+    public void setFilterId(long filterId) {
         this.filterId = filterId;
     }
 
@@ -51,6 +51,6 @@ public abstract class PersistableFilterDefinition {
     public abstract FilterDefinition toFilterDefinition();
 
     public void resetIDs() {
-        this.filterId = null;
+        this.filterId = 0;
     }
 }

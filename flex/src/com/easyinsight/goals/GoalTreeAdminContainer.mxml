@@ -5,93 +5,93 @@
 		<![CDATA[
         import com.easyinsight.administration.sharing.UserStub;
         import com.easyinsight.framework.User;
+        import com.easyinsight.util.ProgressAlert;
         import mx.collections.ArrayCollection;
-import mx.controls.Alert;
-			import com.easyinsight.analysis.AnalysisCloseEvent;
-            [Bindable]
-			private var _goalTree:GoalTree;
-			[Bindable]
-			private var goalTreeName:String;
-            [Bindable]
-            private var goalTreeID:int;
-			[Bindable]
-			private var goalTreeDescription:String;
-			[Bindable]
-			private var rootNode:GoalTreeNode;
-            [Bindable]
-            private var newSolutions:ArrayCollection = new ArrayCollection();
-			
-			public function set goalTree(goalTree:GoalTree):void {
-				this._goalTree = goalTree;
-			}
+        import com.easyinsight.analysis.AnalysisCloseEvent;
+        [Bindable]
+        private var _goalTree:GoalTree;
+        [Bindable]
+        private var goalTreeName:String;
+        [Bindable]
+        private var goalTreeID:int;
+        [Bindable]
+        private var goalTreeDescription:String;
+        [Bindable]
+        private var rootNode:GoalTreeNode;
+        [Bindable]
+        private var newSolutions:ArrayCollection = new ArrayCollection();
 
-            private function onCreation():void {
-                addEventListener(SolutionInstallRequiredEvent.SOLUTION_INSTALL, onNewSolution);
+        public function set goalTree(goalTree:GoalTree):void {
+            this._goalTree = goalTree;
+        }
+
+        private function onCreation():void {
+            addEventListener(SolutionInstallRequiredEvent.SOLUTION_INSTALL, onNewSolution);
+        }
+
+        override protected function commitProperties():void {
+            if (_goalTree == null) {
+                _goalTree = new GoalTree();
+                _goalTree.rootNode = new GoalTreeNode();
+                var userStub:UserStub = new UserStub();
+                userStub.userID = User.getInstance().userID;
+                _goalTree.administrators.addItem(userStub);
             }
-			
-			override protected function commitProperties():void {
-				if (_goalTree == null) {
-					_goalTree = new GoalTree();
-					_goalTree.rootNode = new GoalTreeNode();
-                    var userStub:UserStub = new UserStub();
-                    userStub.userID = User.getInstance().userID;
-                    _goalTree.administrators.addItem(userStub);
-				}
-                goalTreeID = _goalTree.goalTreeID;
-				rootNode = _goalTree.rootNode;
-				goalTreeName = _goalTree.name;
-				goalTreeDescription = _goalTree.description;
-			}
+            goalTreeID = _goalTree.goalTreeID;
+            rootNode = _goalTree.rootNode;
+            goalTreeName = _goalTree.name;
+            goalTreeDescription = _goalTree.description;
+        }
 
-            private function onNewSolution(event:SolutionInstallRequiredEvent):void {
-                newSolutions.addItem(event.solutionDescriptor.solutionID);
+        private function onNewSolution(event:SolutionInstallRequiredEvent):void {
+            newSolutions.addItem(event.solutionDescriptor.solutionID);
+        }
+
+        override protected function createChildren():void {
+            super.createChildren();
+
+        }
+
+        private function save():void {
+            _goalTree.name = nameInput.text;
+            _goalTree.description = descriptionTextArea.text;
+            _goalTree.newSolutions = newSolutions;
+            goalsPolicy.updateContents();
+            if (_goalTree.goalTreeID == 0) {
+                ProgressAlert.alert(this, "Saving goal tree...", "Saved successfully!", goalService.createGoalTree);
+                goalService.createGoalTree.send(_goalTree);
+            } else {
+                ProgressAlert.alert(this, "Updating goal tree...", "Updated successfully!", goalService.updateGoalTree);
+                goalService.updateGoalTree.send(_goalTree);
             }
-			
-			override protected function createChildren():void {
-				super.createChildren();
-				
-			}
-			
-			private function save():void {
-				_goalTree.name = nameInput.text;
-                _goalTree.description = descriptionTextArea.text;
-                _goalTree.newSolutions = newSolutions;
-                goalsPolicy.updateContents();
-                if (_goalTree.goalTreeID == 0) {
-                    goalService.createGoalTree.send(_goalTree);
-                } else {
-                    goalService.updateGoalTree.send(_goalTree);
-                }
-			}
-			
-			private function close():void {
-				dispatchEvent(new AnalysisCloseEvent(this));
-			}
-			
-			private function savedGoalTree():void {
-                _goalTree = goalService.createGoalTree.lastResult as GoalTree;
-                newSolutions = new ArrayCollection();
-                rootNode = _goalTree.rootNode;
-                goalTreeID = _goalTree.goalTreeID;
-				Alert.show("Saved successfully!");
-			}
+        }
 
-            private function updatedGoalTree():void {
-                _goalTree = goalService.updateGoalTree.lastResult as GoalTree;
-                newSolutions = new ArrayCollection();
-                rootNode = _goalTree.rootNode;
-                Alert.show("Updated successfully!");
-			}
-		]]>
+        private function close():void {
+            dispatchEvent(new AnalysisCloseEvent(this));
+        }
+
+        private function savedGoalTree():void {
+            _goalTree = goalService.createGoalTree.lastResult as GoalTree;
+            newSolutions = new ArrayCollection();
+            rootNode = _goalTree.rootNode;
+            goalTreeID = _goalTree.goalTreeID;
+        }
+
+        private function updatedGoalTree():void {
+            _goalTree = goalService.updateGoalTree.lastResult as GoalTree;
+            newSolutions = new ArrayCollection();
+            rootNode = _goalTree.rootNode;
+        }
+    ]]>
 	</mx:Script>
 	<mx:RemoteObject destination="goalService" id="goalService">
 		<mx:method name="createGoalTree" result="savedGoalTree()"/>
 		<mx:method name="updateGoalTree" result="updatedGoalTree()"/>
 	</mx:RemoteObject>
 	<mx:VBox  width="100%" height="100%" paddingLeft="10" paddingTop="10" paddingRight="10" paddingBottom="10">
-		<mx:HBox id="buttonBox" paddingLeft="5" paddingTop="5" paddingBottom="5">		
+		<mx:HBox id="buttonBox" paddingLeft="5" paddingTop="5" paddingBottom="5">
+            <mx:Button id="wrapButton" icon="@Embed(source='../../../../assets/document_out.png')" click="close()" toolTip="Close"/>
 			<mx:Button id="saveButton" icon="@Embed(source='../../../../assets/floppy_disk.png')" click="save()" toolTip="Save"/>
-			<mx:Button id="wrapButton" icon="@Embed(source='../../../../assets/document_out.png')" click="close()" toolTip="Close"/>
 		</mx:HBox>
         <mx:TabNavigator width="100%" height="100%" paddingTop="0" paddingBottom="0"
 			paddingLeft="0" paddingRight="0" resizeToContent="true">

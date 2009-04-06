@@ -219,6 +219,39 @@ public abstract class WSAnalysisDefinition implements Serializable {
         return new ArrayList<Key>(columnSet);
     }
 
+    public Set<AnalysisItem> getColumnItems(List<AnalysisItem> allItems) {
+        Set<AnalysisItem> columnSet = new HashSet<AnalysisItem>();
+        Set<AnalysisItem> analysisItems = getAllAnalysisItems();
+        for (AnalysisItem analysisItem : analysisItems) {
+            List<AnalysisItem> items = analysisItem.getAnalysisItems(allItems, analysisItems);
+            for (AnalysisItem item : items) {
+                //if (item.getAnalysisItemID()) {
+                    columnSet.add(item);
+                //}
+            }
+        }
+        if (getFilterDefinitions() != null) {
+            for (FilterDefinition filterDefinition : getFilterDefinitions()) {
+                List<AnalysisItem> items = filterDefinition.getField().getAnalysisItems(allItems, analysisItems);
+                for (AnalysisItem item : items) {
+                    //if (item.getAnalysisItemID() != 0) {
+                        columnSet.add(item);
+                    //}
+                }
+                //columnSet.add(filterDefinition.getField().getKey());
+            }
+        }
+        /*if (getDataScrubs() != null) {
+            for (DataScrub dataScrub : getDataScrubs()) {
+                columnSet.addAll(dataScrub.createNeededKeys(analysisItems));
+            }
+        }*/
+        for (AnalysisItem analysisItem : getLimitFields()) {
+            columnSet.add(analysisItem);
+        }
+        return columnSet;
+    }
+
     public LimitsResults applyLimits(DataSet dataSet) {
         return new LimitsResults(false, dataSet.getRows().size(), dataSet.getRows().size());
     }

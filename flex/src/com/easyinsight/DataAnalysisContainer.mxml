@@ -185,6 +185,8 @@ import com.easyinsight.analysis.HierarchyDrilldownEvent;
         [Bindable]
         private var _reportID:int;
 
+        private var loading:Boolean = false;
+
         public function set previewMode(previewMode:Boolean):void {
             this._previewMode = previewMode;
             this.dataService.previewMode = previewMode;
@@ -317,6 +319,7 @@ import com.easyinsight.analysis.HierarchyDrilldownEvent;
                 createFilterBoxes(analysisDefinition.filterDefinitions.toArray());
             }
             dataView.availableFields = availableFields;
+            loading = false;
             stopLoading(null);
         }
 
@@ -337,6 +340,7 @@ import com.easyinsight.analysis.HierarchyDrilldownEvent;
         }
 
         public function initializeForWorksheet():void {
+            loading = true;
             commandProcessor = new CommandProcessor();
             addEventListener(AnalysisChangedEvent.ANALYSIS_CHANGED, onAnalysisChanged);
             addEventListener(DeleteAnalysisItemEvent.DELETE_ANALYSIS_ITEM, onFieldDelete);
@@ -406,6 +410,7 @@ import com.easyinsight.analysis.HierarchyDrilldownEvent;
 
         private function createFilter():void {
             var filterRawData:FilterRawData = dataView.createFilterRawData();
+            dispatchEvent(new AnalysisChangedEvent());
             transformContainer.processRawFilterData(filterRawData, true);
         }
 
@@ -425,7 +430,6 @@ import com.easyinsight.analysis.HierarchyDrilldownEvent;
         }
 
         private function transformsUpdated(event:TransformsUpdatedEvent):void {
-            dispatchEvent(new AnalysisChangedEvent());
             analysisDefinition.filterDefinitions = event.filterDefinitions;
             dataView.retrieveData();
         }

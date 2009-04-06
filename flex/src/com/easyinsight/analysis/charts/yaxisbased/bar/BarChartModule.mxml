@@ -215,7 +215,7 @@ import mx.events.FlexEvent;
                 // create the data series
 
                 barSeries = new BarSeries();
-                barSeries.setStyle("itemRenderer", new CustomChartRendererFactory(selectedFill, rolloverFill));
+                //barSeries.setStyle("itemRenderer", new CustomChartRendererFactory(selectedFill, rolloverFill));
                 barSeries.setStyle("stroke", s1);
                 barSeries.fillFunction = customFill;
                 barSeries.xField = xField;

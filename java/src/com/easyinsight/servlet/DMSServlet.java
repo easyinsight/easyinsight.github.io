@@ -6,6 +6,7 @@ import com.easyinsight.api.APIManager;
 import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.security.DefaultSecurityProvider;
 import com.easyinsight.logging.LogClass;
+import com.easyinsight.storage.DatabaseManager;
 
 import javax.servlet.http.HttpServlet;
 import javax.servlet.ServletConfig;
@@ -23,6 +24,7 @@ public class DMSServlet extends HttpServlet {
             if (Database.instance() == null) {
                 SecurityUtil.setSecurityProvider(new DefaultSecurityProvider());
                 Database.initialize();
+                DatabaseManager.instance();
                 FeedRegistry.initialize();
                 new APIManager().start();
             }

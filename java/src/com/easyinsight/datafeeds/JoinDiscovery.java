@@ -36,46 +36,50 @@ public class JoinDiscovery {
             potentialJoins = new ArrayList<CompositeFeedConnection>();
             Map<Key, Value[]> valueMap = new HashMap<Key, Value[]>();
             for (AnalysisItem analysisItem : sourceFeed.getFields()) {
-                if (analysisItem.hasType(AnalysisItemTypes.DIMENSION)) {
-                    List<Key> keys = Arrays.asList(analysisItem.getKey());
-                    DataStorage metadata = DataStorage.writeConnection(sourceFeed, conn);
-                    DataSet dataSet;
-                    try {
-                        dataSet = metadata.retrieveData(keys, null, null);
-                    } finally {
-                        metadata.closeConnection();
+                if (!analysisItem.isDerived()) {
+                    if (analysisItem.hasType(AnalysisItemTypes.DIMENSION)) {
+                        List<AnalysisItem> keys = Arrays.asList(analysisItem);
+                        DataStorage metadata = DataStorage.writeConnection(sourceFeed, conn);
+                        DataSet dataSet;
+                        try {
+                            dataSet = metadata.retrieveData(keys, null, null, 3);
+                        } finally {
+                            metadata.closeConnection();
+                        }
+                        Value[] subset = new Value[Math.min(dataSet.getRows().size(), 3)];
+                        for (int i = 0; i < Math.min(dataSet.getRows().size(), 3); i++) {
+                            IRow row = dataSet.getRow(i);
+                            subset[i] = row.getValue(analysisItem.getKey());
+                        }
+                        valueMap.put(analysisItem.getKey(), subset);
                     }
-                    Value[] subset = new Value[Math.min(dataSet.getRows().size(), 3)];
-                    for (int i = 0; i < Math.min(dataSet.getRows().size(), 3); i++) {
-                        IRow row = dataSet.getRow(i);
-                        subset[i] = row.getValue(analysisItem.getKey());
-                    }
-                    valueMap.put(analysisItem.getKey(), subset);
                 }
             }
             for (AnalysisItem analysisItem : targetFeed.getFields()) {
-                if (analysisItem.hasType(AnalysisItemTypes.DIMENSION)) {
-                    List<Key> keys = Arrays.asList(analysisItem.getKey());
-                    DataStorage metadata = DataStorage.writeConnection(targetFeed, conn);
-                    DataSet dataSet;
-                    try {
-                        dataSet = metadata.retrieveData(keys, null, null);
-                    } finally {
-                        metadata.closeConnection();
-                    }
-                    Set<Value> valueSet = new HashSet<Value>();
-                    for (IRow row : dataSet.getRows()) {
-                        valueSet.add(row.getValue(analysisItem.getKey()));
-                    }
-                    for (Map.Entry<Key, Value[]> entry : valueMap.entrySet()) {
-                        boolean matched = true;
-                        for (Value sourceValue : entry.getValue()) {
-                            if (!valueSet.contains(sourceValue)) {
-                                matched = false;
-                            }
+                if (!analysisItem.isDerived()) {
+                    if (analysisItem.hasType(AnalysisItemTypes.DIMENSION)) {
+                        List<AnalysisItem> keys = Arrays.asList(analysisItem);
+                        DataStorage metadata = DataStorage.writeConnection(targetFeed, conn);
+                        DataSet dataSet;
+                        try {
+                            dataSet = metadata.retrieveData(keys, null, null, 3);
+                        } finally {
+                            metadata.closeConnection();
                         }
-                        if (matched) {
-                            potentialJoins.add(new CompositeFeedConnection(sourceFeed.getDataFeedID(), targetFeed.getDataFeedID(), entry.getKey(), analysisItem.getKey()));
+                        Set<Value> valueSet = new HashSet<Value>();
+                        for (IRow row : dataSet.getRows()) {
+                            valueSet.add(row.getValue(analysisItem.getKey()));
+                        }
+                        for (Map.Entry<Key, Value[]> entry : valueMap.entrySet()) {
+                            boolean matched = true;
+                            for (Value sourceValue : entry.getValue()) {
+                                if (!valueSet.contains(sourceValue)) {
+                                    matched = false;
+                                }
+                            }
+                            if (matched) {
+                                potentialJoins.add(new CompositeFeedConnection(sourceFeed.getDataFeedID(), targetFeed.getDataFeedID(), entry.getKey(), analysisItem.getKey()));
+                            }
                         }
                     }
                 }

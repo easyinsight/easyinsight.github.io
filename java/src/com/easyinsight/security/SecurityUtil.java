@@ -33,7 +33,6 @@ public class SecurityUtil {
         if (userServiceResponse.isSuccessful()) {
             return userServiceResponse.getUserID();
         } else {
-            Thread.dumpStack();
             SecurityLogger.error("Unsuccessful login, user: " + userName);
             throw new SecurityException();
         }
@@ -44,7 +43,6 @@ public class SecurityUtil {
         if (userServiceResponse.isSuccessful()) {
             return userServiceResponse;
         } else {
-            Thread.dumpStack();
             SecurityLogger.error("Unsuccessful login, user: " + userName);
             throw new SecurityException();
         }
@@ -84,7 +82,6 @@ public class SecurityUtil {
     public static int getAccountTier() {
         UserPrincipal userPrincipal = securityProvider.getUserPrincipal();
         if (userPrincipal == null) {
-            Thread.dumpStack();
             SecurityLogger.error("Could not retrieve user principal.");
             throw new SecurityException();
         } else {
@@ -105,7 +102,6 @@ public class SecurityUtil {
         long userID = getUserID();
         int existingRole = getRole(userID, feedID);
         if (existingRole > requestedRole) {
-            Thread.dumpStack();
             throw new SecurityException();
         }
     }
@@ -113,6 +109,30 @@ public class SecurityUtil {
     public static int getUserRoleToFeed(long feedID) {
         long userID = getUserID();
         return getRole(userID, feedID);
+    }
+
+    public static void authorizeMilestone(long milestoneID) {
+        long accountID = getAccountID();
+        Connection conn = Database.instance().getConnection();
+        try {
+            PreparedStatement queryStmt = conn.prepareStatement("SELECT ACCOUNT_ID FROM MILESTONE WHERE MILESTONE_ID = ?");
+            queryStmt.setLong(1, milestoneID);
+            ResultSet rs = queryStmt.executeQuery();
+            if (rs.next()) {
+                if (rs.getLong(1) != accountID) {
+                    SecurityLogger.error("Invalid attempt for milestone " + milestoneID + ".");
+                    throw new SecurityException();
+                }
+            } else {
+                SecurityLogger.error("Invalid attempt for milestone " + milestoneID + ".");
+                throw new SecurityException();
+            }
+        } catch (SQLException e) {
+            LogClass.error(e);
+            throw new SecurityException();
+        } finally {
+            Database.instance().closeConnection(conn);
+        }
     }
 
     private static int getInsightRole(long userID, long insightID) {
@@ -336,7 +356,6 @@ public class SecurityUtil {
             if (rs.next()) {
                 publiclyVisible = rs.getBoolean(1);
             } else {
-                Thread.dumpStack();
                 throw new SecurityException();
             }
         } catch (SQLException e) {

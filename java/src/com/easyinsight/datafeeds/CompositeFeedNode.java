@@ -1,8 +1,11 @@
 package com.easyinsight.datafeeds;
 
+import com.easyinsight.database.Database;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.sql.Statement;
 
 /**
  * User: James Boe
@@ -29,10 +32,12 @@ public class CompositeFeedNode {
 
     public void store(Connection conn, Long compositeFeedID) throws SQLException {
         PreparedStatement insertNodeStmt = conn.prepareStatement("INSERT INTO COMPOSITE_NODE (DATA_FEED_ID, COMPOSITE_FEED_ID) " +
-                "VALUES (?, ?)");
+                "VALUES (?, ?)", Statement.RETURN_GENERATED_KEYS);
         insertNodeStmt.setLong(1, dataFeedID);
         insertNodeStmt.setLong(2, compositeFeedID);
         insertNodeStmt.execute();
+        long id = Database.instance().getAutoGenKey(insertNodeStmt);
         insertNodeStmt.close();
+        
     }
 }

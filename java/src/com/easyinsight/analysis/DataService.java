@@ -2,9 +2,7 @@ package com.easyinsight.analysis;
 
 import com.easyinsight.datafeeds.*;
 import com.easyinsight.dataset.DataSet;
-import com.easyinsight.dataset.Crosstab;
 import com.easyinsight.users.Credentials;
-import com.easyinsight.core.Value;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.benchmark.BenchmarkManager;
 import com.easyinsight.security.SecurityUtil;
@@ -105,7 +103,9 @@ public class DataService implements IDataService {
                 throw new RuntimeException("Report is no longer valid.");
             } else {
                 InsightRequestMetadata insightRequestMetadata = new InsightRequestMetadata();
-                DataSet dataSet = feed.getDataSet(analysisDefinition.getColumnKeys(feed.getFields()), null, false, insightRequestMetadata);
+                Set<AnalysisItem> analysisItems = analysisDefinition.getColumnItems(feed.getFields());
+                Collection<FilterDefinition> filters = analysisDefinition.getFilterDefinitions();
+                DataSet dataSet = feed.getAggregateDataSet(analysisItems, filters, insightRequestMetadata, feed.getFields(), false, null);
                 ListDataResults listDataResults = dataSet.toList(analysisDefinition, feed.getFields(), insightRequestMetadata);
                 results = new EmbeddedDataResults();
                 results.setDefinition(analysisDefinition);
@@ -132,36 +132,13 @@ public class DataService implements IDataService {
                 results.setInvalidAnalysisItemIDs(ids);
                 results.setFeedMetadata(getFeedMetadata(analysisDefinition.getDataFeedID(), false));
             } else {
-                DataSet dataSet = feed.getDataSet(analysisDefinition.getColumnKeys(feed.getFields()), preview ? 5 : null, false, insightRequestMetadata);
+                Set<AnalysisItem> analysisItems = analysisDefinition.getColumnItems(feed.getFields());
+                Collection<FilterDefinition> filters = analysisDefinition.getFilterDefinitions();
+                DataSet dataSet = feed.getAggregateDataSet(analysisItems, filters, insightRequestMetadata, feed.getFields(), false, null);
                 results = dataSet.toList(analysisDefinition, feed.getFields(), insightRequestMetadata);
             }
             BenchmarkManager.recordBenchmark("DataService:List", System.currentTimeMillis() - startTime);
             return results;
-        } catch (Exception e) {
-            LogClass.error(e);
-            throw new RuntimeException(e);
-        }
-    }
-
-    public CrossTabDataResults pivot(WSAnalysisDefinition analysisDefinition, boolean preview, InsightRequestMetadata insightRequestMetadata) {
-        try {
-            SecurityUtil.authorizeFeed(analysisDefinition.getDataFeedID(), Roles.SUBSCRIBER);
-            long startTime = System.currentTimeMillis();
-            WSCrosstabDefinition crosstabDefinition = (WSCrosstabDefinition) analysisDefinition;
-            Feed feed = feedRegistry.getFeed(crosstabDefinition.getDataFeedID());
-            Set<Long> ids = validate(analysisDefinition, feed);
-            CrossTabDataResults crossTabDataResults = new CrossTabDataResults();
-            if (ids.size() > 0) {
-                crossTabDataResults.setInvalidAnalysisItemIDs(ids);
-                crossTabDataResults.setFeedMetadata(getFeedMetadata(analysisDefinition.getDataFeedID(), false));
-            } else {
-                DataSet dataSet = feed.getDataSet(analysisDefinition.getColumnKeys(feed.getFields()), preview ? 5 : null, false, insightRequestMetadata);
-                Crosstab crosstab = dataSet.toCrosstab(crosstabDefinition, insightRequestMetadata);
-                Collection<Map<String, Value>> results = crosstab.outputForm();
-                crossTabDataResults.setResults(results);
-            }
-            BenchmarkManager.recordBenchmark("DataService:Crosstab", System.currentTimeMillis() - startTime);
-            return crossTabDataResults;
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);
@@ -174,9 +151,5 @@ public class DataService implements IDataService {
 
     public ListDataResults list(WSAnalysisDefinition analysisDefinition, InsightRequestMetadata insightRequestMetadata) {
         return list(analysisDefinition, false, insightRequestMetadata);
-    }
-
-    public CrossTabDataResults pivot(WSAnalysisDefinition analysisDefinition, InsightRequestMetadata insightRequestMetadata) {
-        return pivot(analysisDefinition, false, insightRequestMetadata);
     }
 }

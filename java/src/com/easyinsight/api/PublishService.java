@@ -45,7 +45,6 @@ public abstract class PublishService {
         DatePair[] datePairs = row.getDatePairs();
         if (datePairs != null) {
             for (DatePair datePair : datePairs) {
-                System.out.println("Date Pair date = " + datePair.getValue());
                 transformedRow.addValue(datePair.getKey(), datePair.getValue() == null ? new EmptyValue() : new DateValue(datePair.getValue()));
             }
         }

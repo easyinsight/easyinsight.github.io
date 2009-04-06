@@ -14,6 +14,7 @@ import com.easyinsight.security.Roles;
 import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.audit.AuditMessage;
 import com.easyinsight.goals.GoalTreeDescriptor;
+import com.easyinsight.core.InsightDescriptor;
 
 import java.util.*;
 import java.util.Date;
@@ -330,16 +331,21 @@ public class GroupStorage {
         }
     }
 
-    public List<WSAnalysisDefinition> getInsights(long groupID) {
-        List<Long> analysisIDs = new ArrayList<Long>();
+    public List<InsightDescriptor> getInsights(long groupID) {
+        List<InsightDescriptor> analysisIDs = new ArrayList<InsightDescriptor>();
         Connection conn = Database.instance().getConnection();
         try {
-            PreparedStatement queryStmt = conn.prepareStatement("SELECT INSIGHT_ID FROM GROUP_TO_INSIGHT WHERE GROUP_ID = ?");
+            PreparedStatement queryStmt = conn.prepareStatement("SELECT INSIGHT_ID, ANALYSIS.TITLE, ANALYSIS.DATA_FEED_ID, " +
+                    "ANALYSIS.REPORT_TYPE FROM GROUP_TO_INSIGHT, ANALYSIS WHERE GROUP_ID = ? AND " +
+                    "ANALYSIS.ANALYSIS_ID = GROUP_TO_INSIGHT.INSIGHT_ID");
             queryStmt.setLong(1, groupID);
             ResultSet rs = queryStmt.executeQuery();
             while (rs.next()) {
                 long analysisID = rs.getLong(1);
-                analysisIDs.add(analysisID);
+                String title = rs.getString(2);
+                long dataSourceID = rs.getLong(3);
+                int reportType = rs.getInt(4);
+                analysisIDs.add(new InsightDescriptor(analysisID, title, dataSourceID, reportType));
             }
         } catch (SQLException e) {
             LogClass.error(e);
@@ -347,12 +353,7 @@ public class GroupStorage {
         } finally {
             Database.instance().closeConnection(conn);
         }
-        AnalysisStorage analysisStorage = new AnalysisStorage();
-        List<WSAnalysisDefinition> analysisDefs = new ArrayList<WSAnalysisDefinition>();
-        for (Long analysisID : analysisIDs) {
-            analysisDefs.add(analysisStorage.getAnalysisDefinition(analysisID));
-        }
-        return analysisDefs; 
+        return analysisIDs;
     }
 
     public List<GoalTreeDescriptor> getGoalTrees(long groupID) {

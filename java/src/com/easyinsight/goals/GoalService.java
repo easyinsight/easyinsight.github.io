@@ -36,6 +36,46 @@ public class GoalService {
         }
     }
 
+    public void deleteMilestone(long milestoneID) {
+        SecurityUtil.authorizeMilestone(milestoneID);
+        try {
+            goalStorage.deleteMilestone(milestoneID);
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        }
+    }
+
+    public long saveMilestone(GoalTreeMilestone goalTreeMilestone) {
+        long accountID = SecurityUtil.getAccountID();
+        try {
+            return goalStorage.addMilestone(goalTreeMilestone, accountID);
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        }
+    }
+
+    public List<GoalTreeMilestone> getMilestones() {
+        long accountID = SecurityUtil.getAccountID();
+        try {
+            return goalStorage.getMilestones(accountID);
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void updateMilestone(GoalTreeMilestone goalTreeMilestone) {
+        SecurityUtil.authorizeMilestone(goalTreeMilestone.getMilestoneID());
+        try {
+            goalStorage.updateMilestone(goalTreeMilestone);
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        }
+    }
+
     public void deleteGoalTree(long goalTreeID) {
         SecurityUtil.authorizeGoalTree(goalTreeID, Roles.OWNER);
         try {

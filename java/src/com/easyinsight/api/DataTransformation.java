@@ -85,7 +85,6 @@ public class DataTransformation {
                     throw new RuntimeException("Field " + datePair.getKey() + " was passed as a DatePair value when Easy Insight was expecting a " +
                         (type == Value.NUMBER ? "NumberPair." : "StringPair."));
                 }
-                System.out.println("Date Pair date = " + datePair.getValue());
                 if (datePair.getValue() == null) {
                     transformedRow.addValue(datePair.getKey(), new EmptyValue());
                 } else {

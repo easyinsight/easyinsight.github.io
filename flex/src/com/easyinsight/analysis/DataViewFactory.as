@@ -26,6 +26,8 @@ public class DataViewFactory extends VBox {
     private var _reportRenderer:IReportRenderer;
     private var _dataService:IReportDataService;
 
+    private var _loadingDisplay:LoadingModuleDisplay;
+
     private var pendingRequest:Boolean = false;
 
     public function DataViewFactory() {
@@ -101,7 +103,7 @@ public class DataViewFactory extends VBox {
                 _analysisDefinition.createDefaultLimits();
                 _dataService.retrieveData(_analysisDefinition);
             } else {
-                _reportRenderer.renderReport(new ArrayCollection(), _analysisDefinition, new Object());
+                //_reportRenderer.renderReport(new ArrayCollection(), _analysisDefinition, new Object());
             }
         }
     }
@@ -115,6 +117,9 @@ public class DataViewFactory extends VBox {
         moduleInfo = ModuleManager.getModule("/app/easyui-debug/" + _reportRendererModule);
         moduleInfo.addEventListener(ModuleEvent.READY, reportLoadHandler);
         moduleInfo.addEventListener(ModuleEvent.ERROR, reportFailureHandler);
+        _loadingDisplay = new LoadingModuleDisplay();
+        _loadingDisplay.moduleInfo = moduleInfo;
+        addChild(_loadingDisplay);
         moduleInfo.load();
     }
             
@@ -125,6 +130,10 @@ public class DataViewFactory extends VBox {
         _reportRenderer.addEventListener(CustomChangeEvent.CUSTOM_CHANGE, customChangeFromRenderer);
         _reportRenderer.addEventListener(HierarchyDrilldownEvent.DRILLDOWN, drilldown);
         _reportRenderer.addEventListener(HierarchyRollupEvent.HIERARCHY_ROLLUP, onRollup);
+        if (_loadingDisplay != null) {
+            removeChild(_loadingDisplay);
+            _loadingDisplay = null;
+        }
         addChild(_reportRenderer as DisplayObject);
         if (pendingRequest) {
             pendingRequest = false;

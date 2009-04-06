@@ -1,12 +1,6 @@
 <?xml version="1.0"?>
 <!DOCTYPE cross-domain-policy SYSTEM "http://www.adobe.com/xml/dtds/cross-domain-policy.dtd">
 <cross-domain-policy>
- <allow-access-to domain="us.maps3.yimg.com" />
- <allow-access-to domain="us.maps2.yimg.com" />
- <allow-access-to domain="us.maps1.yimg.com" />
- <allow-access-from domain="us.maps3.yimg.com" />
- <allow-access-from domain="us.maps2.yimg.com" />
- <allow-access-from domain="us.maps1.yimg.com" />
- <allow-access-to domain="*.nvmodules.netvibes.com"/>
- <allow-access-from domain="*.nvmodules.netvibes.com"/>
+ <allow-access-from domain="*"/>
+ <allow-access-to domain="*"/>
 </cross-domain-policy>

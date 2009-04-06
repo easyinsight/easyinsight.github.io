@@ -1,9 +1,6 @@
 package com.easyinsight.storage;
 
-import com.easyinsight.analysis.AnalysisItem;
-import com.easyinsight.analysis.AnalysisItemTypes;
-import com.easyinsight.analysis.IRow;
-import com.easyinsight.analysis.AnalysisDateDimension;
+import com.easyinsight.analysis.*;
 import com.easyinsight.security.Roles;
 import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.logging.LogClass;
@@ -265,9 +262,9 @@ public class DataStorage {
             int previousVersion = metadata.getVersion();
             this.version = previousVersion + 1;
             this.metadata.setVersion(this.version);
-            List<Key> previousKeys = new ArrayList<Key>();
+            List<AnalysisItem> previousKeys = new ArrayList<AnalysisItem>();
             for (AnalysisItem previousItem : previousItems) {
-                previousKeys.add(previousItem.getKey());
+                previousKeys.add(previousItem);
             }
             DataSet existing = null;
             if (migrateData) {
@@ -288,7 +285,7 @@ public class DataStorage {
                             keyMetadatas.put(key, new KeyMetadata(key, Value.STRING, analysisItem));
                         }
                     }
-                    existing = retrieveData(previousKeys, keyMetadatas, previousVersion);
+                    existing = retrieveData(previousKeys, null, null, 0, keyMetadatas, previousVersion);
                     //existing = new DataSet();
                 }
             }
@@ -330,7 +327,136 @@ public class DataStorage {
         truncateStmt.execute();
     }
 
-    public DataSet retrieveData(List<Key> neededKeys, Map<Key, KeyMetadata> keys, Integer version) throws SQLException {
+    public DataSet retrieveData(Collection<AnalysisItem> reportItems, Collection<FilterDefinition> filters, Collection<Key> additionalKeys, Integer limit) throws SQLException {
+        return retrieveData(reportItems, filters, additionalKeys, limit, keys, version);
+    }
+
+    public DataSet retrieveData(Collection<AnalysisItem> reportItems, Collection<FilterDefinition> filters, Collection<Key> additionalKeys, Integer limit,
+                                Map<Key, KeyMetadata> keys, int version) throws SQLException {
+        StringBuilder queryBuilder = new StringBuilder();
+        StringBuilder selectBuilder = new StringBuilder();
+        StringBuilder fromBuilder = new StringBuilder();
+        StringBuilder whereBuilder = new StringBuilder();
+        StringBuilder groupByBuilder = new StringBuilder();
+        Collection<Key> groupByItems = new HashSet<Key>();
+        for (AnalysisItem analysisItem : reportItems) {
+            if (analysisItem.isDerived()) {
+                throw new RuntimeException("Attempt made to query a derived analysis item");
+            }
+            String columnName = analysisItem.toKeySQL();
+            if (analysisItem.hasType(AnalysisItemTypes.MEASURE)) {
+                AnalysisMeasure analysisMeasure = (AnalysisMeasure) analysisItem;
+                if (analysisMeasure.hasType(AggregationTypes.SUM)) {
+                    columnName = "SUM(" + columnName + ")";
+                } else if (analysisMeasure.hasType(AggregationTypes.AVERAGE)) {
+                    columnName = "AVG(" + columnName + ")";
+                } else if (analysisMeasure.hasType(AggregationTypes.COUNT)) {
+                    columnName = "COUNT(" + columnName + ")";
+                } else if (analysisMeasure.hasType(AggregationTypes.MAX)) {
+                    columnName = "MAX(" + columnName + ")";
+                } else if (analysisMeasure.hasType(AggregationTypes.MIN)) {
+                    columnName = "MIN(" + columnName + ")";
+                } else {
+                    groupByItems.add(analysisItem.getKey());
+                }
+            } else {
+                groupByItems.add(analysisItem.getKey());
+            }
+            selectBuilder.append(columnName);
+            selectBuilder.append(",");
+        }
+        if (additionalKeys != null) {
+            for (Key key : additionalKeys) {
+                String columnName = key.toSQL();
+                selectBuilder.append(columnName);
+                selectBuilder.append(",");
+                groupByItems.add(key);
+            }
+        }
+        selectBuilder = selectBuilder.deleteCharAt(selectBuilder.length() - 1);
+        String tableName = "df" + feedID + "v" + version;
+        fromBuilder.append(tableName);
+        if (filters != null && filters.size() > 0) {
+            Iterator<FilterDefinition> filterIter = filters.iterator();
+            while (filterIter.hasNext()) {
+                FilterDefinition filterDefinition = filterIter.next();
+                whereBuilder.append(filterDefinition.toQuerySQL());
+                if (filterIter.hasNext()) {
+                    whereBuilder.append(" AND ");
+                }
+            }
+        }
+        if (groupByItems.size() > 0) {
+            for (Key key : groupByItems) {
+                String columnName = key.toSQL();
+                groupByBuilder.append(columnName);
+                groupByBuilder.append(",");
+            }
+            groupByBuilder = groupByBuilder.deleteCharAt(groupByBuilder.length() - 1);
+        }
+        queryBuilder.append("SELECT ");
+        queryBuilder.append(selectBuilder.toString());
+        queryBuilder.append(" FROM ");
+        queryBuilder.append(fromBuilder.toString());
+        if (filters != null && filters.size() > 0) {
+            queryBuilder.append(" WHERE ");
+            queryBuilder.append(whereBuilder.toString());
+        }
+        if (groupByItems.size() > 0) {
+            queryBuilder.append(" GROUP BY ");
+            queryBuilder.append(groupByBuilder.toString());
+        }
+        if (limit != null) {
+            queryBuilder.append(" LIMIT " + limit);
+        }
+        System.out.println("sql = " + queryBuilder.toString());
+        PreparedStatement queryStmt = storageConn.prepareStatement(queryBuilder.toString());
+        if (filters != null && filters.size() > 0) {
+            int i = 1;
+            for (FilterDefinition filterDefinition : filters) {
+                KeyMetadata keyMetadata = keys.get(filterDefinition.getField().getKey());
+                int type = keyMetadata.type;
+                filterDefinition.populatePreparedStatement(queryStmt, i, type);
+            }
+        }
+        DataSet dataSet = new DataSet();
+        ResultSet dataRS = queryStmt.executeQuery();
+        while (dataRS.next()) {
+            IRow row = dataSet.createRow();
+            int i = 1;
+            for (AnalysisItem analysisItem : reportItems) {
+                Key key = analysisItem.getKey().toBaseKey();
+                KeyMetadata keyMetadata = keys.get(key);
+                if (keyMetadata != null) {
+                    if (keyMetadata.getType() == Value.DATE) {
+                        Timestamp time = dataRS.getTimestamp(i++);
+                        if (dataRS.wasNull()) {
+                            row.addValue(key, new EmptyValue());
+                        } else {
+                            row.addValue(key, new DateValue(new java.util.Date(time.getTime())));
+                        }
+                    } else if (keyMetadata.getType() == Value.NUMBER) {
+                        double value = dataRS.getDouble(i++);
+                        if (dataRS.wasNull()) {
+                            row.addValue(key, new EmptyValue());
+                        } else {
+                            row.addValue(key, new NumericValue(value));
+                        }
+                    } else {
+                        String value = dataRS.getString(i++);
+                        if (dataRS.wasNull()) {
+                            row.addValue(key, new EmptyValue());
+                        } else {
+                            row.addValue(key, new StringValue(value));
+                        }
+                    }
+                }
+            }
+        }
+        return dataSet;
+    }
+
+    /*public DataSet retrieveData(List<Key> neededKeys, Map<Key, KeyMetadata> keys, Integer version) throws SQLException {
         if (keys == null) {
             keys = this.keys;
         }
@@ -389,7 +515,7 @@ public class DataStorage {
             }
         }
         return dataSet;
-    }
+    }*/
 
     public void insertData(DataSet dataSet) throws SQLException {
         StringBuilder columnBuilder = new StringBuilder();
@@ -595,7 +721,7 @@ public class DataStorage {
         for (KeyMetadata keyMetadata : keys.values()) {
             if (keyMetadata.getType() == Value.STRING || keyMetadata.getType() == Value.DATE) {
                 sqlBuilder.append("INDEX (");
-                String column = "k" + keyMetadata.getKey().getKeyID();
+                String column = keyMetadata.getKey().toSQL();
                 sqlBuilder.append(column);
                 sqlBuilder.append(")");
                 sqlBuilder.append(",");
@@ -666,17 +792,17 @@ public class DataStorage {
 
         public String createInsertClause() {
             if (type == Value.DATE) {
-                return "k" + key.getKeyID() + ", datedim_" + key.getKeyID() + "_id";
+                return key.toSQL() + ", datedim_" + key.getKeyID() + "_id";
             } else {
-                return "k" + key.getKeyID();
+                return key.toSQL();
             }
         }
 
         public String createUpdateClause() {
             if (type == Value.DATE) {
-                return "k" + key.getKeyID() + " = ?, datedim_" + key.getKeyID() + "_id = ?";
+                return key.toSQL() + " = ?, datedim_" + key.getKeyID() + "_id = ?";
             } else {
-                return "k" + key.getKeyID() + " = ?";
+                return key.toSQL() + " = ?";
             }
         }
 

@@ -89,7 +89,12 @@ import com.easyinsight.solutions.Solution;
         [Bindable]
         private var associatedReports:ArrayCollection = new ArrayCollection();
 
+        [Bindable]
+        private var milestones:ArrayCollection;
+
         private static const NONE:AnalysisItem = new AnalysisItem();
+
+        private static const NO_MILESTONE:String = "No Milestone";
 
         private function setupData():void {
             rangeOptions = new ArrayCollection();
@@ -107,6 +112,23 @@ import com.easyinsight.solutions.Solution;
             addEventListener(DeleteAssociationEvent.DELETE_DATA_SOURCE, deleteDataSource);
             addEventListener(DeleteAssociationEvent.DELETE_REPORT, deleteReport);
             addEventListener(DeleteAssociationEvent.DELETE_SOLUTION, deleteSolution);
+            goalService.getMilestones.send();
+        }
+
+        private function gotMilestones():void {
+            var milestoneColl:ArrayCollection = goalService.getMilestones.lastResult as ArrayCollection;
+            milestoneColl.addItemAt(NO_MILESTONE, 0);
+            milestones = milestoneColl;
+            if (_goalTreeNode != null && _goalTreeNode.milestone != null) {
+                for each (var obj:Object in milestoneColl) {
+                    if (obj is GoalTreeMilestone) {
+                        var milestone:GoalTreeMilestone = obj as GoalTreeMilestone;
+                        if (milestone.milestoneID == _goalTreeNode.milestone.milestoneID) {
+                            milestoneBox.selectedItem = milestone;
+                        }
+                    }
+                }
+            }
         }
 
         private function deleteDataSource(event:DeleteAssociationEvent):void {
@@ -177,6 +199,9 @@ import com.easyinsight.solutions.Solution;
                     rollingFilterDefinition.field = selectedDate;
                     rollingFilterDefinition.interval = rangeSelection;
                     _goalTreeNode.filterDefinition = rollingFilterDefinition;
+                }
+                if (milestoneBox.selectedItem != NO_MILESTONE) {
+                    _goalTreeNode.milestone = milestoneBox.selectedItem as GoalTreeMilestone;
                 }
             }
             dispatchEvent(new GoalEditEvent());
@@ -305,6 +330,7 @@ import com.easyinsight.solutions.Solution;
     </mx:RemoteObject>
     <mx:RemoteObject destination="goalService" id="goalService">
         <mx:method name="getGoalTree" result="gotGoalTree()"/>
+        <mx:method name="getMilestones" result="gotMilestones()"/>
     </mx:RemoteObject>
     <mx:VBox styleName="TitleWindowContents" width="100%" height="100%">
         <mx:TabNavigator width="100%" height="100%" paddingTop="0" paddingBottom="0"
@@ -360,7 +386,10 @@ import com.easyinsight.solutions.Solution;
                                              close="onDateSelection()" fontFamily="Lucide Grande" fontWeight="normal"/>
                             </mx:FormItem>
                             <mx:FormItem label="Date Range:" enabled="{dateSelected}" fontFamily="Tahoma" fontWeight="bold">
-                                <mx:ComboBox dataProvider="{rangeOptions}" labelField="label" id="rollingDateBox" fontFamily="Lucide Grande" fontWeight="normal"/>
+                                <mx:ComboBox dataProvider="{rangeOptions}" labelField="label" id="rollingDateBox" fontFamily="Lucida Grande" fontWeight="normal"/>
+                            </mx:FormItem>
+                            <mx:FormItem label="Target Milestone:" fontFamily="Tahoma" fontWeight="bold">
+                                <mx:ComboBox dataProvider="{milestones}" labelField="milestoneName" id="milestoneBox" fontFamily="Lucida Grande" fontWeight="normal"/>
                             </mx:FormItem>
                         </mx:Form>
                     </mx:FormItem>

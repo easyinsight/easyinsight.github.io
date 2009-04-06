@@ -1,5 +1,8 @@
 package com.easyinsight.analysis;
 
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+
 /**
  * User: James Boe
  * Date: Feb 27, 2009
@@ -19,6 +22,7 @@ public class LastNFilterDefinition extends FilterDefinition {
 
     public PersistableFilterDefinition toPersistableFilterDefinition() {
         PersistableLastNFilterDefinition filter = new PersistableLastNFilterDefinition();
+        filter.setFilterId(getFilterID());
         filter.setField(getField());
         filter.setApplyBeforeAggregation(isApplyBeforeAggregation());
         filter.setLimit(limit);
@@ -27,5 +31,16 @@ public class LastNFilterDefinition extends FilterDefinition {
 
     public MaterializedFilterDefinition materialize(InsightRequestMetadata insightRequestMetadata) {
         return new MaterializedLastNFilterDefinition(getField(), limit);
+    }
+
+    public String toQuerySQL() {
+        // TODO: implement
+        StringBuilder queryBuilder = new StringBuilder();
+        return queryBuilder.toString();
+    }
+
+    public int populatePreparedStatement(PreparedStatement preparedStatement, int start, int type) throws SQLException {
+        // TODO: implement
+        return start;
     }
 }

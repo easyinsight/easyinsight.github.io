@@ -46,6 +46,7 @@ public class PersistableValueFilterDefinition extends PersistableFilterDefinitio
         FilterValueDefinition filterDefinition = new FilterValueDefinition();
         filterDefinition.setField(getField());
         filterDefinition.setInclusive(inclusive);
+        filterDefinition.setFilterID(getFilterId());
         List<Object> values = new ArrayList<Object>();
         for (PersistableValue filterDefinitionValue : filterValues) {
             values.add(filterDefinitionValue.toValue());

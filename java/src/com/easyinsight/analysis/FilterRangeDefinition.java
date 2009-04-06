@@ -2,6 +2,9 @@ package com.easyinsight.analysis;
 
 import com.easyinsight.analysis.MaterializedFilterDefinition;
 
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+
 /**
  * User: James Boe
  * Date: Jul 8, 2008
@@ -47,6 +50,7 @@ public class FilterRangeDefinition extends FilterDefinition {
 
     public PersistableFilterDefinition toPersistableFilterDefinition() {
         PersistableRangeFilterDefinition range = new PersistableRangeFilterDefinition();
+        range.setFilterId(getFilterID());
         range.setField(getField());
         range.setApplyBeforeAggregation(isApplyBeforeAggregation());
         range.setLowValue(startValueDefined ? startValue : null);
@@ -56,5 +60,16 @@ public class FilterRangeDefinition extends FilterDefinition {
 
     public MaterializedFilterDefinition materialize(InsightRequestMetadata insightRequestMetadata) {
         return new MaterializedFilterRangeDefinition(getField(), startValueDefined ? startValue : null, endValueDefined ? endValue : null);
+    }
+
+    public String toQuerySQL() {
+        // TODO: implement
+        StringBuilder queryBuilder = new StringBuilder();
+        return queryBuilder.toString();
+    }
+
+    public int populatePreparedStatement(PreparedStatement preparedStatement, int start, int type) throws SQLException {
+        // TODO: implement
+        return start;
     }
 }

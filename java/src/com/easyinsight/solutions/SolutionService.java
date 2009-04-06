@@ -362,7 +362,7 @@ public class SolutionService {
             DataStorage sourceTable = DataStorage.writeConnection(feedDefinition, conn);
             DataSet dataSet;
             try {
-                dataSet = sourceTable.retrieveData(null, null, null);
+                dataSet = sourceTable.retrieveData(feedDefinition.getFields(), null, null, null);
             } finally {
                 sourceTable.closeConnection();
             }

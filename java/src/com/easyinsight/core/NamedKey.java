@@ -32,6 +32,16 @@ public class NamedKey extends Key {
         this.name = name;
     }
 
+    @Override
+    public String toSQL() {
+        return "k" + getKeyID();
+    }
+
+    @Override
+    public Key toBaseKey() {
+        return this;
+    }
+
     public String toDisplayName() {
         return name;
     }

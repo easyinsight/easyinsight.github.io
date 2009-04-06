@@ -1,0 +1,57 @@
+<?xml version="1.0" ?>
+<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*"
+                creationComplete="setup()">
+    <mx:Script><![CDATA[
+        import mx.collections.ArrayCollection;
+        import mx.managers.PopUpManager;
+
+        [Bindable]
+        private var _milestones:ArrayCollection;
+
+        private function setup():void {
+            addEventListener(DeleteMilestoneEvent.DELETE_MILESTONE, deleteMilestone);
+            goalService.getMilestones.send();
+        }
+
+        private function addMilestone():void {
+            var window:MilestoneEditWindow = new MilestoneEditWindow();
+            window.addEventListener(MilestoneRefreshEvent.MILESTONE_REFRESH, refreshMilestones);
+            PopUpManager.addPopUp(window, this, true);
+            PopUpManager.centerPopUp(window);
+        }
+
+        private function refreshMilestones(event:MilestoneRefreshEvent):void {
+            event.currentTarget.removeEventListener(MilestoneRefreshEvent.MILESTONE_REFRESH, refreshMilestones);
+            goalService.getMilestones.send();
+        }
+
+        private function gotMilestones():void {
+            _milestones = goalService.getMilestones.lastResult as ArrayCollection;
+        }
+
+        private function deleteMilestone(event:DeleteMilestoneEvent):void {
+            goalService.deleteMilestone.send(event.milestone.milestoneID);
+            _milestones.removeItemAt(_milestones.getItemIndex(event.milestone));
+        }
+        ]]></mx:Script>
+    <mx:RemoteObject destination="goalService" id="goalService">
+        <mx:method name="getMilestones" result="gotMilestones()"/>
+        <mx:method name="deleteMilestone"/>
+    </mx:RemoteObject>
+    <mx:VBox styleName="TitleWindowContents">
+        <mx:HBox>
+            <mx:Button label="Add Milestone..." click="addMilestone()"/>
+        </mx:HBox>
+        <mx:DataGrid dataProvider="{_milestones}">
+            <mx:columns>
+                <util:EIDataGridColumn dataField="milestoneName" headerText="Name" width="200"/>
+                <util:EIDataGridColumn dataField="milestoneDate" headerText="Target Date" width="200"/>
+                <util:EIDataGridColumn dataField="milestoneName" headerText="" sortable="false"
+                                       itemRenderer="com.easyinsight.goals.MilestoneControls" width="100"/>
+            </mx:columns>
+        </mx:DataGrid>
+        <mx:HBox width="100%" horizontalAlign="center">
+            <mx:Button label="Close" click="PopUpManager.removePopUp(this)"/>
+        </mx:HBox>
+    </mx:VBox>
+</mx:TitleWindow>

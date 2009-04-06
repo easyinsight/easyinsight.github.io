@@ -41,6 +41,16 @@ public class DerivedKey extends Key {
         this.feedID = feedID;
     }
 
+    @Override
+    public String toSQL() {
+        return getParentKey().toSQL();
+    }
+
+    @Override
+    public Key toBaseKey() {
+        return getParentKey().toBaseKey();
+    }
+
     public String toDisplayName() {
         return getParentKey().toDisplayName();
     }

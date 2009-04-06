@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.HashSet;
 import java.util.Date;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 
 /**
  * User: James Boe
@@ -43,6 +45,7 @@ public class FilterValueDefinition extends FilterDefinition {
 
     public PersistableFilterDefinition toPersistableFilterDefinition() {
         PersistableValueFilterDefinition persistableFilterDefinition = new PersistableValueFilterDefinition();
+        persistableFilterDefinition.setFilterId(getFilterID());
         persistableFilterDefinition.setInclusive(inclusive);
         persistableFilterDefinition.setApplyBeforeAggregation(isApplyBeforeAggregation());
         persistableFilterDefinition.setField(getField());
@@ -65,6 +68,50 @@ public class FilterValueDefinition extends FilterDefinition {
         Set<PersistableValue> filterDefinitionValues = PersistableValueFactory.fromValue(valueSet);
         persistableFilterDefinition.setFilterValues(filterDefinitionValues);
         return persistableFilterDefinition;
+    }
+
+    public String toQuerySQL() {
+        StringBuilder queryBuilder = new StringBuilder();
+        String columnName = "k" + getField().getKey().getKeyID();
+        queryBuilder.append(columnName);
+        queryBuilder.append(" in (");
+        for (int i = 0; i < getFilteredValues().size(); i++) {
+            queryBuilder.append("?,");
+        }
+        queryBuilder = queryBuilder.deleteCharAt(queryBuilder.length() - 1);
+        queryBuilder.append(")");
+        return queryBuilder.toString();
+    }
+
+    public int populatePreparedStatement(PreparedStatement preparedStatement, int start, int type) throws SQLException {
+        Set<Value> valueSet = new HashSet<Value>();
+        for (Object valueObject : filteredValues) {
+            Value value;
+            if (valueObject instanceof Value) {
+                value = (Value) valueObject;
+            } else if (valueObject instanceof String) {
+                value = new StringValue((String) valueObject);
+            } else if (valueObject instanceof Number) {
+                value = new NumericValue((Number) valueObject);
+            } else if (valueObject instanceof Date) {
+                value = new DateValue((Date) valueObject);
+            } else {
+                throw new RuntimeException("Unexpected value class " + valueObject.getClass().getName());
+            }
+            valueSet.add(value);
+        }
+        if (type == Value.NUMBER) {
+            for (Value value : valueSet) {
+                preparedStatement.setDouble(start++, value.toDouble());
+            }
+        } else if (type == Value.DATE) {
+            // TODO: ???
+        } else if (type == Value.STRING) {
+            for (Value value : valueSet) {
+                preparedStatement.setString(start++, value.toString());
+            }
+        }
+        return start;
     }
 
     public MaterializedFilterDefinition materialize(InsightRequestMetadata insightRequestMetadata) {
