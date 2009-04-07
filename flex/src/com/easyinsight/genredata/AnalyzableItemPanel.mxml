@@ -34,8 +34,17 @@
                 this._genre = genreName;
             }
 
-            public function set rendererClass(renderClass:Class):void {
-                rendererFactory = new PopularItemFactory(renderClass);
+            public function set rendererClass(renderClass:IFactory):void {
+                rendererFactory = renderClass;
+                /*if (renderClass is Class) {
+                    rendererFactory = new PopularItemFactory(renderClass as Class);
+                } else if (renderClass is IFactory) {
+                    rendererFactory = renderClass as IFactory;
+                } else if (renderClass is String) {
+                    var rendererClassName:String = String(renderClass);
+                    var rendererClass:Class = Class(getDefinitionByName(rendererClassName));
+                    rendererFactory = new PopularItemFactory(rendererClass);
+                }*/
             }
 
             public function set fullEventType(fullEventType:String):void {

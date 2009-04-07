@@ -51,6 +51,8 @@ import mx.controls.Label;
 
         override protected function commitProperties():void {
             super.commitProperties();
+            contextMenu = new ContextMenu();
+            contextMenu.hideBuiltInItems();
             if (analysisItem is AnalysisHierarchyItem) {
                 var hierarchy:AnalysisHierarchyItem = _analysisItem as AnalysisHierarchyItem;
                 var index:int = hierarchy.hierarchyLevels.getItemIndex(hierarchy.hierarchyLevel);

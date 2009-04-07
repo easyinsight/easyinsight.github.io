@@ -404,6 +404,66 @@ public class GroupStorage {
         }
     }
 
+    public void removeDataSourceFromGroup(long dataSourceID, long groupID) {
+        Connection conn = Database.instance().getConnection();
+        try {
+            PreparedStatement deleteStmt = conn.prepareStatement("DELETE FROM UPLOAD_POLICY_GROUPS WHERE FEED_ID = ? AND GROUP_ID = ?");
+            deleteStmt.setLong(1, dataSourceID);
+            deleteStmt.setLong(2, groupID);
+            deleteStmt.executeUpdate();
+        } catch (SQLException e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        } finally {
+            Database.instance().closeConnection(conn);
+        }
+    }
+
+    public void removeReportFromGroup(long dataSourceID, long groupID) {
+        Connection conn = Database.instance().getConnection();
+        try {
+            PreparedStatement deleteStmt = conn.prepareStatement("DELETE FROM GROUP_TO_INSIGHT WHERE INSIGHT_ID = ? AND GROUP_ID = ?");
+            deleteStmt.setLong(1, dataSourceID);
+            deleteStmt.setLong(2, groupID);
+            deleteStmt.executeUpdate();
+        } catch (SQLException e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        } finally {
+            Database.instance().closeConnection(conn);
+        }
+    }
+
+    public void removeGoalTreeFromGroup(long dataSourceID, long groupID) {
+        Connection conn = Database.instance().getConnection();
+        try {
+            PreparedStatement deleteStmt = conn.prepareStatement("DELETE FROM GROUP_TO_GOAL_TREE_JOIN WHERE GOAL_TREE_ID = ? AND GROUP_ID = ?");
+            deleteStmt.setLong(1, dataSourceID);
+            deleteStmt.setLong(2, groupID);
+            deleteStmt.executeUpdate();
+        } catch (SQLException e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        } finally {
+            Database.instance().closeConnection(conn);
+        }
+    }
+
+    public void removeGoalFromGroup(long dataSourceID, long groupID) {
+        Connection conn = Database.instance().getConnection();
+        try {
+            PreparedStatement deleteStmt = conn.prepareStatement("DELETE FROM GROUP_TO_GOAL_TREE_NODE_JOIN WHERE goal_tree_node_id = ? AND GROUP_ID = ?");
+            deleteStmt.setLong(1, dataSourceID);
+            deleteStmt.setLong(2, groupID);
+            deleteStmt.executeUpdate();
+        } catch (SQLException e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        } finally {
+            Database.instance().closeConnection(conn);
+        }
+    }
+
     public void addFeedToGroup(long feedID, long groupID, int owner) {
         Connection conn = Database.instance().getConnection();
         try {

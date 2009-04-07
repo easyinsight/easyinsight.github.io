@@ -3,7 +3,6 @@ package com.easyinsight.groups;
 import com.easyinsight.security.*;
 import com.easyinsight.security.SecurityException;
 import com.easyinsight.logging.LogClass;
-import com.easyinsight.analysis.WSAnalysisDefinition;
 import com.easyinsight.datafeeds.FeedDescriptor;
 import com.easyinsight.database.Database;
 import com.easyinsight.audit.AuditMessage;
@@ -33,7 +32,7 @@ public class GroupService {
         GroupResponse groupResponse;
         try {
             try {
-                SecurityUtil.authorizeGroup(groupID, Roles.SHARER);
+                SecurityUtil.authorizeGroup(groupID, Roles.SUBSCRIBER);
                 groupResponse = new GroupResponse(GroupResponse.SUCCESS, groupID);
             } catch (com.easyinsight.security.SecurityException e) {
                 if (e.getReason() == SecurityException.LOGIN_REQUIRED)
@@ -215,9 +214,49 @@ public class GroupService {
         }
     }
 
+    public void removeDataSourceFromGroup(long dataSourceID, long groupID) {
+        SecurityUtil.authorizeGroup(groupID, Roles.OWNER);
+        try {
+            groupStorage.removeDataSourceFromGroup(dataSourceID, groupID);
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void removeReportFromGroup(long reportID, long groupID) {
+        SecurityUtil.authorizeGroup(groupID, Roles.OWNER);
+        try {
+            groupStorage.removeReportFromGroup(reportID, groupID);
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void removeGoalTreeFromGroup(long goalTreeID, long groupID) {
+        SecurityUtil.authorizeGroup(groupID, Roles.OWNER);
+        try {
+            groupStorage.removeGoalTreeFromGroup(goalTreeID, groupID);
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void removeGoalFromGroup(long goalID, long groupID) {
+         SecurityUtil.authorizeGroup(groupID, Roles.OWNER);
+        try {
+            groupStorage.removeGoalFromGroup(goalID, groupID);
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        }
+    }
+
     public void addFeedToGroup(long feedID, long groupID) {
         SecurityUtil.authorizeGroup(groupID, Roles.SUBSCRIBER);
-        SecurityUtil.authorizeFeed(feedID, Roles.SUBSCRIBER);
+        SecurityUtil.authorizeFeed(feedID, Roles.SHARER);
         try {
             groupStorage.addFeedToGroup(feedID, groupID, Roles.SUBSCRIBER);
         } catch (Exception e) {
@@ -227,7 +266,8 @@ public class GroupService {
     }
 
     public void addInsightToGroup(long insightID, long groupID) {
-        SecurityUtil.authorizeGroup(groupID, Roles.SUBSCRIBER);
+        SecurityUtil.authorizeGroup(groupID, Roles.SHARER);
+        SecurityUtil.authorizeInsight(insightID);
         try {
             groupStorage.addInsightToGroup(insightID, groupID);
         } catch (Exception e) {
@@ -237,7 +277,7 @@ public class GroupService {
     }
 
     public void addGoalTreeToGroup(long goalTreeID, long groupID) {
-        SecurityUtil.authorizeGroup(groupID, Roles.SUBSCRIBER);
+        SecurityUtil.authorizeGroup(groupID, Roles.SHARER);
         SecurityUtil.authorizeGoalTree(goalTreeID, Roles.SUBSCRIBER);
         try {
             groupStorage.addGoalTreeToGroup(goalTreeID, groupID);
@@ -248,7 +288,7 @@ public class GroupService {
     }
 
     public void addGoalToGroup(long goalID, long groupID) {
-        SecurityUtil.authorizeGroup(groupID, Roles.SUBSCRIBER);
+        SecurityUtil.authorizeGroup(groupID, Roles.SHARER);
         SecurityUtil.authorizeGoal(goalID, Roles.SUBSCRIBER);
         try {
             groupStorage.addGoalToGroup(goalID, groupID);

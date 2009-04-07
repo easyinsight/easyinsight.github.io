@@ -2,7 +2,8 @@
 <mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*"
          xmlns:listing="com.easyinsight.listing.*" width="100%" height="100%"
          implements="com.easyinsight.listing.IPerspective"
-         xmlns:groups="com.easyinsight.groups.*" xmlns:discussion="com.easyinsight.discussion.*">
+         xmlns:groups="com.easyinsight.groups.*" xmlns:discussion="com.easyinsight.discussion.*"
+        creationComplete="setup()">
     <mx:states>
         <mx:State name="Discussion">
             <mx:RemoveChild target="{groupAttributesBox}"/>
@@ -127,6 +128,22 @@
 
         private var _group:Group;
 
+        [Bindable]
+        private var reportItemFactory:ClassFactory = new ClassFactory(GroupReportItem);
+        [Bindable]
+        private var dataSourceItemFactory:ClassFactory = new ClassFactory(GroupDataSourceItem);
+        [Bindable]
+        private var goalTreeFactory:ClassFactory = new ClassFactory(GoalTreeNameRenderer);
+        [Bindable]
+        private var goalFactory:ClassFactory = new ClassFactory(GoalNameRenderer);
+
+        private function setup():void {
+            addEventListener(RemoveItemFromGroupEvent.REMOVE_DATA_SOURCE_FROM_GROUP, removeFromGroup);
+            addEventListener(RemoveItemFromGroupEvent.REMOVE_REPORT_FROM_GROUP, removeFromGroup);
+            addEventListener(RemoveItemFromGroupEvent.REMOVE_GOAL_TREE_FROM_GROUP, removeFromGroup);
+            addEventListener(RemoveItemFromGroupEvent.REMOVE_GOAL_FROM_GROUP, removeFromGroup);
+        }
+
         private function onSearchAnalysis(event:ChildSearchEvent):void {
             var analysisDefs:ArrayCollection = event.items;
             currentState = "AnalysisSearchState";
@@ -189,6 +206,14 @@
                     foundUser = true;
                 }
             }
+            reportItemFactory = new ClassFactory(GroupReportItem);
+            reportItemFactory.properties = { admin: adminEnabled };
+            dataSourceItemFactory = new ClassFactory(GroupDataSourceItem);
+            dataSourceItemFactory.properties = { admin: adminEnabled };
+            goalTreeFactory = new ClassFactory(GoalTreeNameRenderer);
+            goalTreeFactory.properties = { admin: adminEnabled };
+            goalFactory = new ClassFactory(GoalNameRenderer);
+            goalFactory.properties = { admin: adminEnabled };
             if (!foundUser) {
                 joinEnabled = true;
             }
@@ -293,6 +318,25 @@
             PopUpManager.addPopUp(window, this, true);
             PopUpManager.centerPopUp(window);
         }
+
+        private function removeFromGroup(event:RemoveItemFromGroupEvent):void {
+            if (event.type == RemoveItemFromGroupEvent.REMOVE_DATA_SOURCE_FROM_GROUP) {
+                groupService.removeDataSourceFromGroup.send(event.id, groupID);
+            } else if (event.type == RemoveItemFromGroupEvent.REMOVE_REPORT_FROM_GROUP) {
+                groupService.removeReportFromGroup.send(event.id, groupID);
+            } else if (event.type == RemoveItemFromGroupEvent.REMOVE_GOAL_TREE_FROM_GROUP) {
+                groupService.removeGoalTreeFromGroup.send(event.id, groupID);
+            } else if (event.type == RemoveItemFromGroupEvent.REMOVE_GOAL_FROM_GROUP) {
+                groupService.removeGoalFromGroup.send(event.id, groupID);
+            }
+        }
+
+        private function removed():void {
+            groupInsights.refreshData();
+            groupFeeds.refreshData();
+            groupService.getGoalTrees.send(groupID);
+            groupService.getGoals.send(groupID);
+        }
 		]]>		
     </mx:Script>
     <mx:RemoteObject destination="groupService" id="groupService2">
@@ -308,6 +352,10 @@
         <mx:method name="getFeeds"/>
         <mx:method name="getGoalTrees" result="gotGoalTrees()"/>
         <mx:method name="getGoals" result="gotGoals()"/>
+        <mx:method name="removeReportFromGroup" result="removed()"/>
+        <mx:method name="removeDataSourceFromGroup" result="removed()"/>
+        <mx:method name="removeGoalTreeFromGroup" result="removed()"/>
+        <mx:method name="removeGoalFromGroup" result="removed()"/>
     </mx:RemoteObject>
     <mx:Box width="100%" height="5" backgroundColor="#D42525" left="0" right="0"/>
     <mx:VBox width="100%" height="100%" id="primaryCanvas" paddingTop="10" paddingLeft="10" paddingRight="10"
@@ -374,7 +422,7 @@
         <mx:HBox width="100%" id="sourcesBox">
             <mx:HBox width="100%" backgroundColor="#FFFFFF" backgroundAlpha=".1" id="coreHBox" horizontalAlign="center">
                 <mx:Spacer width="8%"/>
-                <groups:GroupItemPanel rendererClass="com.easyinsight.genredata.PopularAnalysisItem" width="40%"
+                <groups:GroupItemPanel rendererClass="{reportItemFactory}" width="40%"
                                        id="groupInsights"
                                        title="Group Reports" groupID="{groupID}"
                                        dataOperation="{groupService.getInsights}"
@@ -382,7 +430,7 @@
                                        fullEventType="{ChildSearchEvent.ANALYSIS_SEARCH}"
                                        analysisSearch="onSearchAnalysis(event)"/>
                 <mx:Spacer width="4%"/>
-                <groups:GroupItemPanel rendererClass="com.easyinsight.genredata.PopularFeed" width="40%" id="groupFeeds"
+                <groups:GroupItemPanel rendererClass="{dataSourceItemFactory}" width="40%" id="groupFeeds"
                                        title="Group Data Sources" groupID="{groupID}"
                                        dataOperation="{groupService.getFeeds}"
                                        fullDataOperation="{groupService2.getFeeds}"
@@ -398,7 +446,8 @@
                     </mx:Box>
                     <mx:DataGrid dataProvider="{goalTrees}" width="100%" id="goalTreesBox">
                         <mx:columns>
-                            <util:EIDataGridColumn headerText="Goal Tree Name" dataField="goalTreeName"/>
+                            <util:EIDataGridColumn headerText="Goal Tree Name" dataField="goalTreeName"
+                                    itemRenderer="{goalTreeFactory}"/>
                             <util:EIDataGridColumn headerText="" dataField="goalTreeName" width="50"
                                                    itemRenderer="com.easyinsight.groups.GroupGoalsControls"
                                                    sortable="false"/>
@@ -415,7 +464,8 @@
                             <mx:DataGridColumn headerText="" dataField="name"
                                                itemRenderer="com.easyinsight.goals.GoalIconRenderer" width="30"/>
                             <mx:DataGridColumn headerText="Goal Name" dataField="name"
-                                               headerRenderer="com.easyinsight.groups.CustomGroupHeader"/>
+                                               headerRenderer="com.easyinsight.groups.CustomGroupHeader"
+                                               itemRenderer="{goalFactory}"/>
                             <mx:DataGridColumn headerText="Latest Value" dataField="name"
                                                itemRenderer="com.easyinsight.goals.GoalValueRenderer"
                                                headerRenderer="com.easyinsight.groups.CustomGroupHeader" width="110"/>
