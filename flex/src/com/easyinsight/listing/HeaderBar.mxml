@@ -55,7 +55,7 @@ import mx.collections.ICollectionView;
         private var helpIcon:Class;
 
         [Bindable]
-        [Embed(source="../../../../assets/logo2.png")]
+        [Embed(source="../../../../assets/logo2.PNG")]
         private var logo:Class;
 
         // import com.flexspy.FlexSpy;
