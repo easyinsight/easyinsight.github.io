@@ -54,6 +54,10 @@ import mx.collections.ICollectionView;
         [Embed(source="../../../../assets/headericons/help.png")]
         private var helpIcon:Class;
 
+        [Bindable]
+        [Embed(source="../../../../assets/logo2.png")]
+        private var logo:Class;
+
         // import com.flexspy.FlexSpy;
 
         private function onListingChange(event:ListingChangeEvent):void {
@@ -78,7 +82,7 @@ import mx.collections.ICollectionView;
         }
 		]]>
     </mx:Script>
-    <mx:Image source="@Embed('../../../../assets/logo2.png')"/>
+    <mx:Image source="{logo}"/>
     <mx:Spacer width="40"/>
     <listing:ListingOption perspective="{new IntroPanel()}" enableAnalysis="false" displayName="Intro" listingChange="onListingChange(event)" width="50">
         <mx:Image source="{homeIcon}" id="homeImage"/>
