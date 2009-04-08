@@ -162,8 +162,7 @@
         <javac destdir="${webapp.path}/WEB-INF/classes"
                optimize="off"
                debug="on" failonerror="false"
-               srcdir="../java/src"
-               excludes="**/*.smap">
+               srcdir="../java/src">
             <classpath>
                 <fileset dir="../java/lib/cxf2">
                     <include name="*.jar"/>
@@ -191,7 +190,7 @@
                 </fileset>
             </classpath>
             <include name="**"/>
-            <exclude name="tags/**"/>
+            <exclude name="**/test/**"/>
         </javac>
         <copy flatten="true" todir="${webapp.path}/WEB-INF/lib">
             <fileset dir="../java/lib">
@@ -205,7 +204,8 @@
         </copy>
         <copy todir="${webapp.path}/WEB-INF/classes">
             <fileset dir="../java/src">
-                <include name="**/*"/>
+                <include name="**/*.properties"/>
+                <include name="**/*.xml"/>
             </fileset>
         </copy>
         <copy todir="${webapp.path}/META-INF">
