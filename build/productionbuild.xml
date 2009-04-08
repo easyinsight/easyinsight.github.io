@@ -261,22 +261,8 @@
 
     <target name="compileFlexOptimized">
         <mxmlc file="${teamcity.build.checkoutDir}/flex/src/PrimaryWorkspace.mxml" output="${flex.path}/PrimaryWorkspace.swf"
-               static-rsls="false">
+               static-rsls="true">
             <load-config filename="${teamcity.build.checkoutDir}/flex/core-optimized-config.xml"/>
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
-                <url rsl-url="framework_3.2.0.3958.swz"/>
-                <url rsl-url="framework_3.2.0.3958.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/datavisualization.swc">
-                <url rsl-url="datavisualization_3.2.0.3958.swz"/>
-                <url rsl-url="datavisualization_3.2.0.3958.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
-                <url rsl-url="rpc_3.2.0.3958.swz"/>
-                <url rsl-url="rpc_3.2.0.3958.swf"/>
-            </runtime-shared-library-path>
         </mxmlc>
     </target>
 
