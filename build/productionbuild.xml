@@ -43,7 +43,7 @@
                    databasePassword="${database.password}"/>
     </target>
 
-    <target name="tests" depends="migration">
+    <target name="tests">
         <delete dir="${test.path}/classes"/>
         <mkdir dir="${test.path}/classes"/>
         <delete dir="${reports.tests}"/>
