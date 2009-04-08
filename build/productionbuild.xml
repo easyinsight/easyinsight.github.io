@@ -80,7 +80,7 @@
                 </fileset>
             </classpath>
             <include name="**"/>
-            <exclude name="tags/**"/>
+            <exclude name="**/test/apithrottling/**"/>
         </javac>
         <junit printsummary="yes" haltonfailure="no">
             <classpath>
