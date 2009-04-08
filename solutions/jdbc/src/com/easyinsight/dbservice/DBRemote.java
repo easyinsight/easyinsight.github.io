@@ -13,9 +13,11 @@ import java.util.*;
 import java.sql.*;
 import java.sql.Date;
 import java.net.URL;
+import java.net.MalformedURLException;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.text.MessageFormat;
 
 import flex.messaging.FlexContext;
 
@@ -30,6 +32,7 @@ public class DBRemote {
 
     public static final String MYSQL = "MySQL";
     public static final String GENERIC = "Generic";
+    public static final String ENDPOINT = "https://{0}/app/services/UncheckedPublishBasic";
 
     private static Map<String, DBConfiguration> dbConfigMap = new HashMap<String, DBConfiguration>();
     private static Map<String, EIConfiguration> eiConfigMap = new HashMap<String, EIConfiguration>();
@@ -146,8 +149,8 @@ public class DBRemote {
 
     public String validateEI(EIConfiguration eiConfiguration) {
         try {
-            URL url = new URL("http://" + this.eiHost + "/app/services/UncheckedPublishBasic");
-            BasicAuthUncheckedPublish service = new BasicAuthUncheckedPublishServiceServiceLocator().getBasicAuthUncheckedPublishServicePort(url);
+
+            BasicAuthUncheckedPublish service = new BasicAuthUncheckedPublishServiceServiceLocator().getBasicAuthUncheckedPublishServicePort(getURL());
             ((BasicAuthUncheckedPublishServiceServiceSoapBindingStub)service).setUsername(eiConfiguration.getUserName());
             ((BasicAuthUncheckedPublishServiceServiceSoapBindingStub)service).setPassword(eiConfiguration.getPassword());
             if (service.validateCredentials()) {
@@ -298,9 +301,8 @@ public class DBRemote {
             insertStmt.setString(4, queryConfiguration.getName());
             insertStmt.setInt(5, queryConfiguration.getPublishMode());
             insertStmt.execute();
-
-            URL url = new URL("http://" + this.eiHost + "/app/services/UncheckedPublishBasic");
-            BasicAuthUncheckedPublish service = new BasicAuthUncheckedPublishServiceServiceLocator().getBasicAuthUncheckedPublishServicePort(url);
+            
+            BasicAuthUncheckedPublish service = new BasicAuthUncheckedPublishServiceServiceLocator().getBasicAuthUncheckedPublishServicePort(getURL());
             EIConfiguration eiConfiguration = eiConfigMap.get(FlexContext.getFlexSession().getId());
             ((BasicAuthUncheckedPublishServiceServiceSoapBindingStub)service).setUsername(eiConfiguration.getUserName());
             ((BasicAuthUncheckedPublishServiceServiceSoapBindingStub)service).setPassword(eiConfiguration.getPassword());
@@ -327,8 +329,7 @@ public class DBRemote {
     public String queryToEI(QueryConfiguration queryConfiguration) {
         String apiKey = null;
         try {
-            URL url = new URL("http://" + this.eiHost + "/app/services/UncheckedPublishBasic");
-            BasicAuthUncheckedPublish service = new BasicAuthUncheckedPublishServiceServiceLocator().getBasicAuthUncheckedPublishServicePort(url);
+            BasicAuthUncheckedPublish service = new BasicAuthUncheckedPublishServiceServiceLocator().getBasicAuthUncheckedPublishServicePort(getURL());
             EIConfiguration eiConfiguration = eiConfigMap.get(FlexContext.getFlexSession().getId());
             if (eiConfiguration == null) {
                 eiConfiguration = getEIConfiguration();
@@ -553,5 +554,9 @@ public class DBRemote {
         FileWriter fw = new FileWriter(outputFile);
         fw.write(xmlBuilder.toString());
         fw.close();
+    }
+
+    private URL getURL() throws MalformedURLException {
+        return new URL(MessageFormat.format(ENDPOINT, this.eiHost));
     }
 }

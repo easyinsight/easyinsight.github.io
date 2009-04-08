@@ -9,6 +9,7 @@ import java.net.URL;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.text.MessageFormat;
 
 /**
  * User: James Boe
@@ -38,7 +39,7 @@ public class DBTask extends TimerTask {
             EIConfiguration eiConfiguration = storage.getEIConfiguration();
             DBConfiguration dbConfiguration = storage.getDBConfiguration();
             if (eiConfiguration != null && dbConfiguration != null) {
-                URL url = new URL("http://" + this.eiHost + "/app/services/ValidatedPublishBasic");
+                URL url = new URL(MessageFormat.format(DBRemote.ENDPOINT, eiHost));
                 BasicAuthValidatedPublish service = new BasicAuthValidatingPublishServiceServiceLocator().getBasicAuthValidatingPublishServicePort(url);
                 ((BasicAuthValidatingPublishServiceServiceSoapBindingStub)service).setUsername(eiConfiguration.getUserName());
                 ((BasicAuthValidatingPublishServiceServiceSoapBindingStub)service).setPassword(eiConfiguration.getPassword());
