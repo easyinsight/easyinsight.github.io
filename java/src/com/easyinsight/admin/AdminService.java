@@ -6,10 +6,12 @@ import com.easyinsight.logging.LogClass;
 import javax.management.ObjectName;
 import javax.management.MBeanServer;
 import javax.management.JMX;
+import javax.management.MalformedObjectNameException;
 import java.lang.management.ManagementFactory;
 import java.lang.management.ThreadMXBean;
 import java.lang.management.ThreadInfo;
 import java.lang.management.GarbageCollectorMXBean;
+import java.io.IOException;
 
 import flex.management.runtime.messaging.client.FlexClientManagerControlMBean;
 
@@ -29,6 +31,20 @@ public class AdminService {
             LogClass.debug(threadInfo.toString());
         }
     }
+
+    public static final String MAX_MEMORY = "Max Memory";
+    public static final String TOTAL_MEMORY = "Allocated Memory";
+    public static final String FREE_UNALLOCATED = "Free Unallocated Memory";
+    public static final String FREE_MEMORY = "Free Memory";
+    public static final String CURRENT_MEMORY = "Current Memory";
+    public static final String THREAD_COUNT = "Thread Count";
+    public static final String SYSTEM_LOAD = "System Load Average";
+    public static final String COMPILATION_TIME = "Compilation Time";
+    public static final String MINOR_COLLECTION_COUNT = "Minor Collection Count";
+    public static final String MINOR_COLLECTION_TIME = "Minor Collection Time";
+    public static final String MAJOR_COLLECTION_COUNT = "Major Collection Count";
+    public static final String MAJOR_COLLECTION_TIME = "Major Collection Time";
+    public static final String CLIENT_COUNT = "Client Count";
 
     public HealthInfo getHealthInfo() {
         try {
@@ -57,9 +73,13 @@ public class AdminService {
                 }
             }
             MBeanServer platformServer = ManagementFactory.getPlatformMBeanServer();
-            FlexClientManagerControlMBean mb = JMX.newMBeanProxy(platformServer, new ObjectName("flex.runtime.app:type=MessageBroker.FlexClientManager,MessageBroker=MessageBroker1,id=FlexClientManager"),
-                    FlexClientManagerControlMBean.class);
-            healthInfo.setClientCount(mb.getFlexClientCount());
+            try {
+                FlexClientManagerControlMBean mb = JMX.newMBeanProxy(platformServer, new ObjectName("flex.runtime.app:type=MessageBroker.FlexClientManager,MessageBroker=MessageBroker1,id=FlexClientManager"),
+                        FlexClientManagerControlMBean.class);
+                healthInfo.setClientCount(mb.getFlexClientCount());
+            } catch (Exception e) {
+                LogClass.error(e);
+            }
             return healthInfo;
         } catch (Exception e) {
             LogClass.error(e);
@@ -67,7 +87,8 @@ public class AdminService {
         }
     }
 
-    public static void main(String[] args) {
-
+    private void publishInternally() {
+        HealthInfo healthInfo = getHealthInfo();
+        
     }
 }

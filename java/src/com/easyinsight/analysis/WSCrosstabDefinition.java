@@ -1,7 +1,5 @@
 package com.easyinsight.analysis;
 
-import com.easyinsight.analysis.AnalysisItem;
-
 import java.util.*;
 
 /**
@@ -14,13 +12,13 @@ public class WSCrosstabDefinition extends WSAnalysisDefinition {
     private List<AnalysisItem> columns;
     private List<AnalysisItem> rows;
     private List<AnalysisItem> measures;
-    private Long crosstabDefinitionID;
+    private long crosstabDefinitionID;
 
-    public Long getCrosstabDefinitionID() {
+    public long getCrosstabDefinitionID() {
         return crosstabDefinitionID;
     }
 
-    public void setCrosstabDefinitionID(Long crosstabDefinitionID) {
+    public void setCrosstabDefinitionID(long crosstabDefinitionID) {
         this.crosstabDefinitionID = crosstabDefinitionID;
     }
 
