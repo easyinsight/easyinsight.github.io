@@ -24,6 +24,9 @@ public class GoalService {
 
     public GoalTree createGoalTree(GoalTree goalTree) {
         SecurityUtil.authorizeAccountTier(Account.PROFESSIONAL);
+        if (goalTree.getAdministrators() == null || goalTree.getAdministrators().size() == 0) {
+            throw new RuntimeException("At least one administrator must be defined.");
+        }
         long userID = SecurityUtil.getUserID();
         try {
             UserStub userStub = new UserStub();

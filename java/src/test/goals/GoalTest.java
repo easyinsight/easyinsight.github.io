@@ -5,15 +5,15 @@ import com.easyinsight.database.Database;
 import com.easyinsight.datafeeds.FeedRegistry;
 import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.datafeeds.FeedStorage;
+import com.easyinsight.datafeeds.FeedConsumer;
 import com.easyinsight.goals.*;
 import com.easyinsight.userupload.UserUploadService;
 import com.easyinsight.userupload.UploadResponse;
 import com.easyinsight.analysis.*;
+import com.easyinsight.email.UserStub;
 import test.util.TestUtil;
 
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Date;
+import java.util.*;
 import java.sql.Connection;
 
 /**
@@ -71,6 +71,10 @@ public class GoalTest extends TestCase {
         dataNode.setName("Data Node");
         rootNode.setChildren(Arrays.asList(dataNode));
         goalTree.setRootNode(rootNode);
+        UserStub user = new UserStub(userID, null, null, null);
+        List<FeedConsumer> admins = new ArrayList<FeedConsumer>();
+        admins.add(user);
+        goalTree.setAdministrators(admins);
         GoalTree savedTree = goalService.createGoalTree(goalTree);
         long goalTreeID = savedTree.getGoalTreeID();
         Calendar cal = Calendar.getInstance();
