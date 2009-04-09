@@ -540,7 +540,7 @@ public class GoalStorage {
                 goalTreeNode.setGoalTreeNodeID(nodeID);
             } else {
                 PreparedStatement insertNodeStmt = conn.prepareStatement("INSERT INTO GOAL_TREE_NODE (PARENT_GOAL_TREE_NODE_ID, NAME, DESCRIPTION," +
-                        "FEED_ID, GOAL_VALUE, ANALYSIS_MEASURE_ID, FILTER_ID, high_is_good, ICON_IMAGE, GOAL_MILESTONE_ID) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
+                        "FEED_ID, GOAL_VALUE, ANALYSIS_MEASURE_ID, FILTER_ID, high_is_good, ICON_IMAGE, GOAL_MILESTONE_ID, GOAL_TREE_ID) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
                 if (goalTreeNode.getParent() == null) {
                     insertNodeStmt.setNull(1, Types.BIGINT);
                 } else {
@@ -571,6 +571,7 @@ public class GoalStorage {
                 } else {
                     insertNodeStmt.setLong(10, goalTreeNode.getMilestone().getMilestoneID());
                 }
+                insertNodeStmt.setLong(11, goalTreeID);
                 insertNodeStmt.execute();
                 nodeID = Database.instance().getAutoGenKey(insertNodeStmt);
                 goalTreeNode.setGoalTreeNodeID(nodeID);
