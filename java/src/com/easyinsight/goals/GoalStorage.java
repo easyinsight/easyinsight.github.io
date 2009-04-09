@@ -233,14 +233,17 @@ public class GoalStorage {
                 throw new RuntimeException("You must have a root node on a goal tree.");
             }
             installSolutions(goalTree, conn);
-            long nodeID = saveGoalTreeNode(goalTree.getRootNode(), conn, goalTree.getGoalTreeID());
-            PreparedStatement insertTreeStmt = conn.prepareStatement("INSERT INTO GOAL_TREE (NAME, DESCRIPTION, ROOT_NODE) VALUES (?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
+            PreparedStatement insertTreeStmt = conn.prepareStatement("INSERT INTO GOAL_TREE (NAME, DESCRIPTION) VALUES (?, ?)", Statement.RETURN_GENERATED_KEYS);
             insertTreeStmt.setString(1, goalTree.getName());
             insertTreeStmt.setString(2, goalTree.getDescription());
-            insertTreeStmt.setLong(3, nodeID);
             insertTreeStmt.execute();
             long treeID = Database.instance().getAutoGenKey(insertTreeStmt);
             goalTree.setGoalTreeID(treeID);
+            long nodeID = saveGoalTreeNode(goalTree.getRootNode(), conn, goalTree.getGoalTreeID());
+            PreparedStatement updateStmt = conn.prepareStatement("UPDATE GOAL_TREE SET ROOT_NODE = ? WHERE GOAL_TREE_ID = ?");
+            updateStmt.setLong(1, nodeID);
+            updateStmt.setLong(2, treeID);
+            updateStmt.executeUpdate();
             saveUsers(treeID, goalTree.getAdministrators(), Roles.OWNER, conn);
             saveUsers(treeID, goalTree.getConsumers(), Roles.SUBSCRIBER, conn);
             //setUserRole(userID, treeID, Roles.OWNER, conn);
