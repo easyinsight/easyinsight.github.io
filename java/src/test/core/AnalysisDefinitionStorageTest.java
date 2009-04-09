@@ -127,7 +127,7 @@ public class AnalysisDefinitionStorageTest extends TestCase {
     public void testChartDefinitions() {
         long userID = TestUtil.getIndividualTestUser();
         long dataFeedID = TestUtil.createDefaultTestDataSource(userID);
-        WSChartDefinition chartDefinition = new WSColumnChartDefinition();
+        WSColumnChartDefinition chartDefinition = new WSColumnChartDefinition();
         chartDefinition.setName("Chart Test");
         chartDefinition.setDataFeedID(dataFeedID);
         List<FilterDefinition> filters = new ArrayList<FilterDefinition>();
@@ -139,11 +139,9 @@ public class AnalysisDefinitionStorageTest extends TestCase {
         filters.add(filter);
         chartDefinition.setFilterDefinitions(filters);
         AnalysisDimension myDimension = new AnalysisDimension(TestUtil.createKey("Customer", dataFeedID), true);
-        List<AnalysisItem> rows = new ArrayList<AnalysisItem>();
-        rows.add(myDimension);
         AnalysisMeasure measure = new AnalysisMeasure(TestUtil.createKey("Revenue", dataFeedID), AggregationTypes.SUM);
-        List<AnalysisItem> measures = new ArrayList<AnalysisItem>();
-        measures.add(measure);
+        chartDefinition.setMeasure(measure);
+        chartDefinition.setXaxis(myDimension);
         AnalysisService analysisService = new AnalysisService();
         long analysisID = analysisService.saveAnalysisDefinition(chartDefinition);
         WSAnalysisDefinition wsAnalysisDefinition = analysisService.openAnalysisDefinition(analysisID);
