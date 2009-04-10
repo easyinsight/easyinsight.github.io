@@ -10,13 +10,14 @@ import com.easyinsight.analysis.*;
 import java.util.*;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.io.Serializable;
 
 /**
  * User: James Boe
  * Date: Jan 29, 2008
  * Time: 10:57:24 PM
  */
-public class FeedDefinition implements Cloneable {
+public class FeedDefinition implements Cloneable, Serializable {
     private String feedName;
     private String genre;
     private List<AnalysisItem> fields;

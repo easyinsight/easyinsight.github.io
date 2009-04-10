@@ -12,18 +12,16 @@ import com.easyinsight.core.Value;
 
 import java.util.*;
 import java.sql.SQLException;
+import java.io.Serializable;
 
 /**
  * User: James Boe
  * Date: Apr 26, 2008
  * Time: 8:07:57 PM
  */
-public class StaticFeed extends Feed {
-
+public class StaticFeed extends Feed implements Serializable {
 
     //private Map<Key, ColumnSegment> cache = new WeakHashMap<Key, ColumnSegment>();
-
-    private Map<Set<Key>, DataSet> dataSetCache = new WeakHashMap<Set<Key>, DataSet>();
 
     public FeedType getDataFeedType() {
         return FeedType.STATIC;

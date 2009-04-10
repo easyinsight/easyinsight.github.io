@@ -20,7 +20,8 @@ import java.util.*;
 import java.util.Date;
 
 import org.hibernate.Session;
-import org.hibernate.FlushMode;
+import org.apache.jcs.JCS;
+import org.apache.jcs.access.exception.CacheException;
 
 /**
  * User: jboe
@@ -28,6 +29,19 @@ import org.hibernate.FlushMode;
  * Time: 10:46:24 PM
  */
 public class FeedStorage {
+
+    private JCS feedCache = getCache("feedDefinitions");
+    private JCS apiKeyCache = getCache("apiKeys");
+
+    private JCS getCache(String cacheName) {
+
+        try {
+            return JCS.getInstance(cacheName);
+        } catch (Exception e) {
+            LogClass.error(e);
+        }
+        return null;
+    }
 
     public long addFeedDefinitionData(FeedDefinition feedDefinition, Connection conn) throws SQLException {
         PreparedStatement insertDataFeedStmt;
@@ -305,18 +319,28 @@ public class FeedStorage {
             ResultSet rs = getViewCountStmt.executeQuery();
             if (rs.next()) {
                 int feedViews = rs.getInt(1);
-                updateViewsStmt.setInt(1, feedViews + 1);
+                int newFeedViews = feedViews + 1;
+                updateViewsStmt.setInt(1, newFeedViews);
                 updateViewsStmt.setLong(2, feedID);
                 updateViewsStmt.executeUpdate();
+
+                // update views in feedCache
+                FeedDefinition f = (FeedDefinition) feedCache.get(feedID);
+                if(f != null) {
+                    f.setViewCount(newFeedViews);
+                    feedCache.remove(feedID);
+                    feedCache.put(feedID, feedCache);
+                }
             }
-            getViewCountStmt.close();
-            updateViewsStmt.close();
         } catch (SQLException e) {
             LogClass.error(e);
             throw new RuntimeException(e);
+        } catch (CacheException e) {
+            LogClass.error(e);
         } finally {
             Database.instance().closeConnection(conn);
         }
+
     }
 
     public void rateFeed(long feedID, long accountID, int rating) {
@@ -349,6 +373,11 @@ public class FeedStorage {
     }
 
     public void updateDataFeedConfiguration(FeedDefinition feedDefinition, Connection conn) throws SQLException {
+        try {
+            feedCache.remove(feedDefinition.getDataFeedID());
+        } catch (CacheException e) {
+            LogClass.error(e);
+        }
         PreparedStatement updateDataFeedStmt = conn.prepareStatement("UPDATE DATA_FEED SET FEED_NAME = ?, FEED_TYPE = ?, PUBLICLY_VISIBLE = ?, GENRE = ?, " +
                         "FEED_SIZE = ?, ANALYSIS_ID = ?, DESCRIPTION = ?, ATTRIBUTION = ?, OWNER_NAME = ?, DYNAMIC_SERVICE_DEFINITION_ID = ?, MARKETPLACE_VISIBLE = ?," +
                 "API_KEY = ?, validated_api_enabled = ?, unchecked_api_enabled = ? WHERE DATA_FEED_ID = ?");
@@ -408,6 +437,9 @@ public class FeedStorage {
 
     public FeedDefinition getFeedDefinitionData(long identifier, Connection conn) {
         FeedDefinition feedDefinition;
+        feedDefinition = (FeedDefinition) feedCache.get(identifier);
+        if(feedDefinition != null)
+            return feedDefinition;
         try {
             PreparedStatement queryFeedStmt = conn.prepareStatement("SELECT FEED_NAME, FEED_TYPE, PUBLICLY_VISIBLE, GENRE, CREATE_DATE," +
                     "UPDATE_DATE, FEED_VIEWS, FEED_RATING_COUNT, FEED_RATING_AVERAGE, FEED_SIZE, ANALYSIS_ID," +
@@ -485,6 +517,13 @@ public class FeedStorage {
             LogClass.error(e);
             throw new RuntimeException(e);
         }
+
+        try {
+            feedCache.put(identifier, feedDefinition);
+        } catch (CacheException e) {
+            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+        }
+        
         return feedDefinition;
     }
 
@@ -504,47 +543,6 @@ public class FeedStorage {
                                             long size, int feedType, String ownerName, String description, String attribution, Connection conn) throws SQLException {
         UploadPolicy uploadPolicy = createUploadPolicy(conn, dataFeedID, publiclyVisible, marketplaceVisible);
         return new FeedDescriptor(feedName, dataFeedID, uploadPolicy, size, feedType, userRole != null ? userRole : 0, ownerName, description, attribution);
-    }
-
-    public List<BriefFeedInfo> getBriefFeedInfo(List<Integer> feedIDs) {
-        Set<Integer> feedIDSet = new HashSet<Integer>(feedIDs);
-        List<BriefFeedInfo> briefFeedInfos = new ArrayList<BriefFeedInfo>();
-        if (feedIDs.isEmpty()) return briefFeedInfos;
-        Connection conn = Database.instance().getConnection();
-        PreparedStatement feedStmt = null;
-        try {
-            StringBuilder queryBuilder = new StringBuilder();
-            queryBuilder.append("SELECT DATA_FEED_ID, FEED_NAME FROM DATA_FEED WHERE DATA_FEED_ID IN (");
-            Iterator<Integer> iter = feedIDSet.iterator();
-            while (iter.hasNext()) {
-                Integer feedID = iter.next();
-                queryBuilder.append(feedID);
-                if (iter.hasNext()) {
-                    queryBuilder.append(",");
-                }
-            }
-            queryBuilder.append(")");
-            feedStmt = conn.prepareStatement(queryBuilder.toString());
-            ResultSet rs = feedStmt.executeQuery();
-            while (rs.next()) {
-                long feedID = rs.getLong(1);
-                String feedName = rs.getString(2);
-                briefFeedInfos.add(new BriefFeedInfo(feedName, feedID));
-            }
-        } catch (SQLException e) {
-            LogClass.error(e);
-            throw new RuntimeException(e);
-        } finally {
-            if (feedStmt != null) {
-                try {
-                    feedStmt.close();
-                } catch (SQLException e) {
-                    LogClass.error(e);
-                }
-            }
-            Database.instance().closeConnection(conn);
-        }
-        return briefFeedInfos;
     }
 
     public FeedDescriptor getFeedDescriptor(long accountID, long feedID) {
@@ -684,6 +682,7 @@ public class FeedStorage {
 
     public long getFeedForAPIKey(long userID, String apiKey) {
         Connection conn = Database.instance().getConnection();
+        long feedID;
         try {
             PreparedStatement queryStmt = conn.prepareStatement("SELECT DISTINCT DATA_FEED.DATA_FEED_ID" +
                         " FROM UPLOAD_POLICY_USERS, DATA_FEED WHERE " +
@@ -692,14 +691,64 @@ public class FeedStorage {
             queryStmt.setString(2, apiKey);
             ResultSet rs = queryStmt.executeQuery();
             if (rs.next()) {
-                return rs.getLong(1);
+                feedID = rs.getLong(1);
+                apiKeyCache.put(new FeedApiKey(apiKey, userID), feedID);
+                return feedID;
             }
         } catch (SQLException se) {
             LogClass.error(se);
             throw new RuntimeException(se);
+        } catch (CacheException e) {
+            LogClass.error(e);
         } finally {
             Database.instance().closeConnection(conn);
         }
         throw new RuntimeException("No data source found for API key " + apiKey);
+    }
+
+    private class FeedApiKey {
+        private String APIKey;
+        private long userID;
+
+        public FeedApiKey(String APIKey, long userID) {
+            this.APIKey = APIKey;
+            this.userID = userID;
+        }
+
+        public long getUserID() {
+            return userID;
+        }
+
+        public void setUserID(long userID) {
+            this.userID = userID;
+        }
+
+        public String getAPIKey() {
+            return APIKey;
+        }
+
+        public void setAPIKey(String APIKey) {
+            this.APIKey = APIKey;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+
+            FeedApiKey that = (FeedApiKey) o;
+
+            if (userID != that.userID) return false;
+            if (!APIKey.equals(that.APIKey)) return false;
+
+            return true;
+        }
+
+        @Override
+        public int hashCode() {
+            int result = APIKey.hashCode();
+            result = 31 * result + (int) (userID ^ (userID >>> 32));
+            return result;
+        }
     }
 }

@@ -9,15 +9,29 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.ResultSet;
 
+import org.apache.jcs.JCS;
+import org.apache.jcs.access.exception.CacheException;
+
 /**
  * User: jboe
  * Date: Jan 3, 2008
  * Time: 3:37:02 PM
  */
 public class FeedRegistry {
-    private Map<Long, Feed> dataFeedMap = new WeakHashMap<Long, Feed>();
     private FeedStorage feedStorage = new FeedStorage();
     private static FeedRegistry instance;
+
+    private JCS cache = getCache();
+
+    private JCS getCache() {
+
+        try {
+            return JCS.getInstance("feeds");
+        } catch (Exception e) {
+            LogClass.error(e);
+        }
+        return null;
+    }
 
     public static void initialize() {
         instance = new FeedRegistry();
@@ -28,15 +42,29 @@ public class FeedRegistry {
     }
 
     public void flushCache(long feedID) {
-        dataFeedMap.remove(feedID);        
+        try {
+            if(cache != null)
+                cache.remove(feedID);
+        }
+        catch(CacheException ce) {
+            LogClass.error(ce);
+        }
     }
 
     public Feed getFeed(long identifier) {
-        Feed feed = dataFeedMap.get(identifier);
+        Feed feed = null;
+        if(cache != null)
+            feed = (Feed) cache.get(identifier);
         if (feed == null || (getLatestVersion(identifier) != feed.getVersion())) {
             FeedDefinition feedDefinition = feedStorage.getFeedDefinitionData(identifier);
             feed = feedDefinition.createFeed();
-            dataFeedMap.put(identifier, feed);
+            try {
+                if(cache != null)
+                    cache.put(identifier, feed);
+            }
+            catch(CacheException e) {
+                LogClass.error(e);
+            }
         }
         return feed;
     }
@@ -57,11 +85,5 @@ public class FeedRegistry {
             Database.instance().closeConnection(conn);
         }
         return version;
-    }
-
-    public long addDataFeed(Feed feed) {
-        //feedStorage.addDataFeed(dataFeed);
-        dataFeedMap.put(feed.getFeedID(), feed);
-        return feed.getFeedID();
     }
 }

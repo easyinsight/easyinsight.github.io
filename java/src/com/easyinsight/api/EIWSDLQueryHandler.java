@@ -63,8 +63,16 @@ import java.util.Collection;
  	                if (SOAPBindingUtil.isSOAPAddress(el)) {
  	                    SoapAddress add = SOAPBindingUtil.getSoapAddress(el);
                          String existingURI = add.getLocationURI();
-                         int index = existingURI.indexOf("8080");
-                         String newURI = "http://www.easy-insight.com" + existingURI.substring(index + 4);
+
+                         int indexHttp = existingURI.indexOf("8080");
+                         int indexHttps = existingURI.indexOf("8443");
+                         String newURI;
+                         if(indexHttp != -1)
+                            newURI = "http://www.easy-insight.com";
+                         else
+                            newURI = "https://www.easy-insight.com";
+                         newURI = newURI + existingURI.substring(indexHttps + 4);
+
                         add.setLocationURI(newURI);
 	              }
  	            }
