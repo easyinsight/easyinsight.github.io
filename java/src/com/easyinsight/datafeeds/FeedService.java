@@ -156,15 +156,6 @@ public class FeedService implements IDataFeedService {
         }
     }
 
-    public List<BriefFeedInfo> getBriefFeedInfo(List<Integer> feedIDs) {
-        try {
-            return feedStorage.getBriefFeedInfo(feedIDs);
-        } catch (Exception e) {
-            LogClass.error(e);
-            throw new RuntimeException(e);
-        }
-    }
-
     public List<FeedDefinition> getFeedDefinitions(List<SubscriptionLicense> licenses) {
         List<FeedDefinition> descriptorList = new ArrayList<FeedDefinition>();
         for (SubscriptionLicense license : licenses) {
