@@ -1,0 +1,88 @@
+<?xml version="1.0" ?>
+<mx:Module xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:ilog="ilog.treemap.*"
+           implements="com.easyinsight.analysis.IReportRenderer" width="100%" height="100%">
+    <mx:states>
+        <mx:State name="hasData">
+            <mx:AddChild relativeTo="{box}">
+                <ilog:TreeMap id="treeMap" width="100%" height="100%" areaField="area" labelField="label" colorField="color" algorithm="squarified" colorScheme="div-red-green"
+                    dataProvider="{resultData}" labelThreshold="2"/>
+            </mx:AddChild>
+        </mx:State>
+    </mx:states>
+    <mx:Script><![CDATA[
+        import com.easyinsight.analysis.AnalysisDefinition;
+        import com.easyinsight.analysis.AnalysisHierarchyItem;
+import com.easyinsight.analysis.AnalysisMeasure;
+        import com.easyinsight.analysis.CustomChangeEvent;
+        import com.easyinsight.analysis.HierarchyLevel;
+        import com.easyinsight.filtering.FilterRawData;
+
+        import mx.collections.ArrayCollection;
+
+        [Bindable]
+        private var resultData:ArrayCollection;
+
+        private function handleLevel(level:HierarchyLevel, levels:ArrayCollection, row:Object, measure1:AnalysisMeasure, measure2:AnalysisMeasure, masterResult:Object):Object {
+            var value:Object = row[level.analysisItem.qualifiedName()];
+            var key:String = String(value);
+            var result:Object = masterResult[key];
+            var newResult:Boolean = false;
+            if (result == null) {
+                result = new Object();
+                masterResult[key] = result;
+                result.label = String(value);
+                result.children = new ArrayCollection();
+                newResult = true;
+            }
+            var index:int = levels.getItemIndex(level);
+            if (index < (levels.length - 1)) {
+                var nextLevel:HierarchyLevel = levels.getItemAt(index + 1) as HierarchyLevel;
+                var returnResult:Object = handleLevel(nextLevel, levels, row, measure1, measure2, result);
+                if (returnResult != null) {
+                    result.children.addItem(returnResult);
+                }
+            } else {
+                var measure1Value:Object = row[measure1.qualifiedName()];
+                var measure2Value:Object = row[measure2.qualifiedName()];
+                result.area = measure1Value;
+                result.color = measure2Value;
+            }
+            if (newResult) {
+                return result;
+            } else {
+                return null;
+            }
+        }
+
+        public function renderReport(dataSet:ArrayCollection, analysisDefinition:AnalysisDefinition, clientProcessorMap:Object):void {
+            var treeDefinition:TreeMapDefinition = analysisDefinition as TreeMapDefinition;
+            if (dataSet.length > 0) {
+                var hierarchy:AnalysisHierarchyItem = treeDefinition.hierarchy as AnalysisHierarchyItem;
+                var results:ArrayCollection = new ArrayCollection();
+                var masterResult:Object = new Object();
+                for each (var row:Object in dataSet) {
+                    handleLevel(hierarchy.hierarchyLevels.getItemAt(0) as HierarchyLevel, hierarchy.hierarchyLevels, row,
+                            treeDefinition.measure1 as AnalysisMeasure, treeDefinition.measure2 as AnalysisMeasure, masterResult);
+                }
+                for each (var obj:Object in masterResult) {
+                    results.addItem(obj);
+                }
+                resultData = results;
+                currentState = "hasData";
+            } else {
+                currentState = "";
+                resultData = dataSet;                
+            }
+        }
+
+        public function createFilterRawData():FilterRawData {
+            return null;
+        }
+
+        public function updateExportMetadata():void {
+        }
+
+        public function onCustomChangeEvent(event:CustomChangeEvent):void {
+        }]]></mx:Script>
+    <mx:Box width="100%" id="box" height="100%"/>
+</mx:Module>

@@ -51,6 +51,7 @@
         <node label="Grid        ">
         	<node label="List" type="{AnalysisDefinition.LIST}"/>
         	<node label="Crosstab" type="{AnalysisDefinition.CROSSTAB}"/>
+        	<node label="Tree" type="{AnalysisDefinition.TREE}"/>
         </node>
         <node label="Chart" icon="">
         	<node label="Column">
@@ -77,8 +78,9 @@
         	<node label="Bubble" type="{AnalysisDefinition.BUBBLE}"/>
         </node>
         <node label="Map" type="{AnalysisDefinition.MAP}"/>
-        <!--<node label="Gauge" type="{AnalysisDefinition.LIST}"/>
-        <node label="Split" state="Split"/>-->
+        <node label="Tree Map" type="{AnalysisDefinition.TREEMAP}"/>
+        <node label="Gauge" type="{AnalysisDefinition.GAUGE}"/>
+        <!-- <node label="Split" state="Split"/>-->
     </mx:XMLList>
     <mx:XMLList id="splitSource">        
     	<node label="List" state=""/>

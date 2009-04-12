@@ -22,6 +22,8 @@ package com.easyinsight.analysis
         public static const PLOT:int = 14;
         public static const BUBBLE:int = 15;
         public static const GAUGE:int = 16;
+        public static const TREE:int = 17;
+        public static const TREEMAP:int = 18;
 
 		public var dataFeedID:int;
 		public var name:String;

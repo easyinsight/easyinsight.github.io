@@ -130,15 +130,18 @@ public class AnalysisStorage {
                 }
             }
         }
-        if (analysisDefinition.getReportStructure() != null) {
-            for (AnalysisItem analysisItem : analysisDefinition.getReportStructure().values()) {
-                analysisItem.beforeSave();
-            }
-        }
         if (analysisDefinition.getAddedItems() != null) {
             for (AnalysisItem analysisItem : analysisDefinition.getAddedItems()) {
                 if (analysisItem.getKey().getKeyID() == 0) {
                     session.save(analysisItem.getKey());
+                }
+            }
+        }
+        if (analysisDefinition.getReportStructure() != null) {
+            for (AnalysisItem analysisItem : analysisDefinition.getReportStructure().values()) {
+                analysisItem.beforeSave();
+                if (analysisItem.getAnalysisItemID() == 0) {
+                    session.save(analysisItem);
                 }
             }
         }
@@ -476,7 +479,7 @@ public class AnalysisStorage {
     }
 
     public void deleteAnalysisDefinition(AnalysisDefinition analysisDefinition) {
-        Session session = Database.instance().createSession();
+        Session session = Database.instance().createSession();      
         try {
             session.beginTransaction();
             session.delete(analysisDefinition);

@@ -15,6 +15,8 @@ import com.easyinsight.analysis.crosstab.CrosstabController;
 import com.easyinsight.analysis.gauge.GaugeController;
 import com.easyinsight.analysis.list.ListController;
 import com.easyinsight.analysis.maps.MapController;
+import com.easyinsight.analysis.tree.TreeController;
+import com.easyinsight.analysis.treemap.TreeMapController;
 
 public class ControllerLookup {
 
@@ -71,6 +73,12 @@ public class ControllerLookup {
                 break;
             case AnalysisDefinition.GAUGE:
                 controller = GaugeController;
+                break;
+            case AnalysisDefinition.TREEMAP:
+                controller = TreeMapController;
+                break;
+            case AnalysisDefinition.TREE:
+                controller = TreeController;
                 break;
         }
         return controller;

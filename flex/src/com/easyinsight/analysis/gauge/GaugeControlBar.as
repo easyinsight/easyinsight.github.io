@@ -1,6 +1,5 @@
 package com.easyinsight.analysis.gauge {
 import com.easyinsight.analysis.AnalysisDefinition;
-import com.easyinsight.analysis.AnalysisDefinition;
 import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.analysis.AnalysisItemUpdateEvent;
 import com.easyinsight.analysis.CustomChangeEvent;
@@ -9,6 +8,7 @@ import com.easyinsight.analysis.IReportControlBar;
 import com.easyinsight.analysis.MeasureDropArea;
 import com.easyinsight.analysis.ReportDataEvent;
 import com.easyinsight.map.MapDropAreaGrouping;
+import flash.events.Event;
 import mx.collections.ArrayCollection;
 import mx.containers.HBox;
 import mx.controls.ComboBox;
@@ -47,6 +47,15 @@ public class GaugeControlBar extends HBox implements IReportControlBar {
         maxValueLabel.text = "Max Value: ";
         addChild(maxValueLabel);
         addChild(maxValueInput);
+        maxValueInput.addEventListener(Event.CHANGE, onMaxValueChange);
+        if (gaugeDefinition.measure != null) {
+            measureGrouping.addAnalysisItem(gaugeDefinition.measure);
+        }
+        maxValueInput.text = String(gaugeDefinition.maxValue);
+    }
+
+    private function onMaxValueChange(event:Event):void {
+        dispatchEvent(new ReportDataEvent(ReportDataEvent.REQUEST_DATA));
     }
 
     private function requestListData(event:AnalysisItemUpdateEvent):void {
@@ -59,6 +68,7 @@ public class GaugeControlBar extends HBox implements IReportControlBar {
 
     public function createAnalysisDefinition():AnalysisDefinition {
         gaugeDefinition.measure = measureGrouping.getListColumns()[0];
+        gaugeDefinition.maxValue = int(maxValueInput.text);
         return gaugeDefinition;
     }
 
@@ -67,7 +77,8 @@ public class GaugeControlBar extends HBox implements IReportControlBar {
     }
 
     public function isDataValid():Boolean {
-        return (measureGrouping.getListColumns().length > 0 && maxValueInput.text.length > 0);
+        var value:int = int(maxValueInput.text);
+        return (measureGrouping.getListColumns().length > 0 && value > 0);
     }
 
     public function addItem(analysisItem:AnalysisItem):void {

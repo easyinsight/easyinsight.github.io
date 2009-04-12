@@ -41,6 +41,16 @@ public class AnalysisDefinitionFactory {
             gaugeDefinition.setMaxValue(wsGauge.getMaxValue());
             gaugeDefinition.setGaugeDefinitionID(wsGauge.getGaugeDefinitionID());
             analysisDefinitionState = gaugeDefinition;
+        } else if (wsAnalysisDefinition.getDataFeedType().equals(AnalysisTypes.TREEMAP)) {
+            WSTreeMapDefinition wsTree = (WSTreeMapDefinition) wsAnalysisDefinition;
+            TreeMapDefinitionState treeMapDefinitionState = new TreeMapDefinitionState();
+            treeMapDefinitionState.setTreemapDefinitionID(wsTree.getTreeMapDefinitionID());
+            analysisDefinitionState = treeMapDefinitionState;
+        } else if (wsAnalysisDefinition.getDataFeedType().equals(AnalysisTypes.TREE)) {
+            WSTreeDefinition wsTree = (WSTreeDefinition) wsAnalysisDefinition;
+            TreeDefinitionState treeDefinitionState = new TreeDefinitionState();
+            treeDefinitionState.setTreeDefinitionID(wsTree.getTreeDefinitionID());
+            analysisDefinitionState = treeDefinitionState;
         } else {
             throw new RuntimeException("Unknown data feed type " + wsAnalysisDefinition.getDataFeedType());
         }

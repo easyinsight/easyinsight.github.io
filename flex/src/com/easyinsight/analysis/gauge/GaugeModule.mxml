@@ -1,6 +1,7 @@
 <?xml version="1.0" ?>
 <mx:Module xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:black="ilog.gauges.controls.black.*" width="100%"
            height="100%" implements="com.easyinsight.analysis.IReportRenderer">
+
     <mx:Script><![CDATA[
         import com.easyinsight.analysis.AnalysisDefinition;
         import com.easyinsight.analysis.CustomChangeEvent;
@@ -18,8 +19,15 @@
             var gaugeDefinition:GaugeDefinition = analysisDefinition as GaugeDefinition;
             if (dataSet.length > 0) {
                 var row:Object = dataSet.getItemAt(0);
-                value = Number(row[gaugeDefinition.measure.qualifiedName()]);
                 maxValue = gaugeDefinition.maxValue;
+                value = Math.min(maxValue, Number(row[gaugeDefinition.measure.qualifiedName()]));                
+                /*gauge.value = value;
+                gauge.maximum = maxValue;*/
+                gauge.visible = true;
+                //currentState = "hasData";
+            } else {
+                currentState = "";
+                value = 0;
             }
         }
 
@@ -32,6 +40,16 @@
 
         public function onCustomChangeEvent(event:CustomChangeEvent):void {
         }]]></mx:Script>
+    <!--<mx:Box id="box"/>
+    <black:BlackCircularGauge width="100%" height="100%"
+        value="20"
+        orientation="clockwise"
+        startAngle="210"
+        endAngle="330"
+        minimum="0"
+        maximum="100"
+        majorTickInterval="10"
+        minorTickInterval="1" />-->
     <black:BlackCircularGauge width="100%" height="100%" value="{value}" minimum="0" maximum="{maxValue}" startAngle="210"
-        endAngle="330" showTrack="true" trackMinimum="0" trackMaximum="100"/>
+                    endAngle="330" orientation="clockwise" id="gauge" visible="false" trackMinimum="0" trackMaximum="{maxValue}"/>
 </mx:Module>

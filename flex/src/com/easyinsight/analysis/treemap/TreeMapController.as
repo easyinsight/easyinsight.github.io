@@ -1,30 +1,29 @@
-package com.easyinsight.analysis.gauge {
+package com.easyinsight.analysis.treemap {
 import com.easyinsight.analysis.DataViewFactory;
 import com.easyinsight.analysis.EmbeddedViewFactory;
 import com.easyinsight.analysis.IReportController;
 import com.easyinsight.analysis.service.ListDataService;
-import ilog.gauges.controls.black.BlackCircularGauge;
-public class GaugeController implements IReportController {
+import ilog.treemap.TreeMap;
+public class TreeMapController implements IReportController {
 
-    public var gauge:BlackCircularGauge;
+    private var treeMap:TreeMap;
 
-    public function GaugeController() {
+    public function TreeMapController() {
     }
 
     public function createDataView():DataViewFactory {
         var factory:DataViewFactory = new DataViewFactory();
         factory.reportDataService = ListDataService;
-        factory.reportControlBar = GaugeControlBar;
-        factory.reportRenderer = "GaugeModule.swf";
-        factory.newDefinition = GaugeDefinition;
+        factory.reportControlBar = TreeMapControlBar;
+        factory.reportRenderer = "TreeMapModule.swf";
+        factory.newDefinition = TreeMapDefinition;
         return factory;
     }
 
     public function createEmbeddedView():EmbeddedViewFactory {
         var factory:EmbeddedViewFactory = new EmbeddedViewFactory();
-        factory.reportDataService = ListDataService;
-        factory.reportRenderer = "GaugeModule.swf";
-        factory.newDefinition = GaugeDefinition;
+        factory.reportRenderer = "TreeMapModule.swf";
+        factory.newDefinition = TreeMapDefinition;
         return factory;
     }
 }
