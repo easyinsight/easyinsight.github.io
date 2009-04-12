@@ -538,15 +538,15 @@ public class DataStorage {
             String columnName = analysisItem.toKeySQL();
             if (analysisItem.hasType(AnalysisItemTypes.MEASURE)) {
                 AnalysisMeasure analysisMeasure = (AnalysisMeasure) analysisItem;
-                if (analysisMeasure.hasType(AggregationTypes.SUM)) {
+                if (analysisMeasure.getAggregation() == AggregationTypes.SUM) {
                     columnName = "SUM(" + columnName + ")";
-                } else if (analysisMeasure.hasType(AggregationTypes.AVERAGE)) {
+                } else if (analysisMeasure.getAggregation() == AggregationTypes.AVERAGE) {
                     columnName = "AVG(" + columnName + ")";
-                } else if (analysisMeasure.hasType(AggregationTypes.COUNT)) {
+                } else if (analysisMeasure.getAggregation() == AggregationTypes.COUNT) {
                     columnName = "COUNT(" + columnName + ")";
-                } else if (analysisMeasure.hasType(AggregationTypes.MAX)) {
+                } else if (analysisMeasure.getAggregation() == AggregationTypes.MAX) {
                     columnName = "MAX(" + columnName + ")";
-                } else if (analysisMeasure.hasType(AggregationTypes.MIN)) {
+                } else if (analysisMeasure.getAggregation() == AggregationTypes.MIN) {
                     columnName = "MIN(" + columnName + ")";
                 } else {
                     groupByItems.add(analysisItem.getKey());
