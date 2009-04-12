@@ -371,6 +371,7 @@ public class FeedStorage {
     public void updateDataFeedConfiguration(FeedDefinition feedDefinition, Connection conn) throws SQLException {
         try {
             feedCache.remove(feedDefinition.getDataFeedID());
+            LogClass.info("Removed " + feedDefinition.getDataFeedID() + " from feed cache.");
         } catch (CacheException e) {
             LogClass.error(e);
         }
@@ -427,9 +428,12 @@ public class FeedStorage {
     public FeedDefinition getFeedDefinitionData(long identifier, Connection conn) {
         FeedDefinition feedDefinition;
         feedDefinition = (FeedDefinition) feedCache.get(identifier);
-        if(feedDefinition != null)
+        if(feedDefinition != null) {
+            LogClass.info("Cache hit for feed id " + identifier);
             return feedDefinition;
+        }
         try {
+            LogClass.info("Cache miss for feed id " + identifier);
             PreparedStatement queryFeedStmt = conn.prepareStatement("SELECT FEED_NAME, FEED_TYPE, PUBLICLY_VISIBLE, GENRE, CREATE_DATE," +
                     "UPDATE_DATE, FEED_VIEWS, FEED_RATING_COUNT, FEED_RATING_AVERAGE, FEED_SIZE, ANALYSIS_ID," +
                     "ATTRIBUTION, DESCRIPTION, OWNER_NAME, DYNAMIC_SERVICE_DEFINITION_ID, MARKETPLACE_VISIBLE, API_KEY, unchecked_api_enabled, validated_api_enabled," +
@@ -681,8 +685,14 @@ public class FeedStorage {
 
     public long getFeedForAPIKey(long userID, String apiKey) {
         Connection conn = Database.instance().getConnection();
-        long feedID;
+        Long feedID;
+        feedID = (Long) apiKeyCache.get(new FeedApiKey(apiKey, userID));
+        if(feedID != null) {
+            LogClass.info("Cache hit for API key: " + apiKey + " & User id: " + userID);
+            return feedID;
+        }
         try {
+            LogClass.info("Cache miss for API key: " + apiKey + " & User id: " + userID);
             PreparedStatement queryStmt = conn.prepareStatement("SELECT DISTINCT DATA_FEED.DATA_FEED_ID" +
                         " FROM UPLOAD_POLICY_USERS, DATA_FEED WHERE " +
                         "UPLOAD_POLICY_USERS.user_id = ? AND DATA_FEED.DATA_FEED_ID = UPLOAD_POLICY_USERS.FEED_ID AND DATA_FEED.API_KEY = ?");
