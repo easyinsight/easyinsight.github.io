@@ -30,6 +30,8 @@ public class HierarchyAdminBox extends VBox {
         list.dragEnabled = true;
         list.dropEnabled = true;
         list.dragMoveEnabled = true;
+        list.width = 200;
+        list.percentHeight = 100;
         BindingUtils.bindProperty(list, "dataProvider", this, "levels");
         list.labelField = "display";
         addChild(list);
@@ -40,6 +42,8 @@ public class HierarchyAdminBox extends VBox {
         hBox.addChild(nameInput);
         nameInput.addEventListener(Event.CHANGE, onNameChange);
         addChild(hBox);
+        setStyle("horizontalAlign", "center");
+        this.percentWidth = 100;
     }
 
     private function onNameChange(event:Event):void {

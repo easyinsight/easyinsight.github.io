@@ -2,7 +2,6 @@
 <mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml">
     <mx:Script><![CDATA[
         import com.easyinsight.framework.UserTransferObject;
-import mx.collections.ArrayCollection;
         import mx.managers.PopUpManager;
 
         private function create():void {
@@ -25,7 +24,6 @@ import mx.collections.ArrayCollection;
         }
         ]]></mx:Script>
     <mx:RemoteObject destination="login" id="userService">
-        <mx:method name="eiPrepareBizAccount" result="created()"/>
         <mx:method name="eiNewBizAccount" result="created()"/>
     </mx:RemoteObject>
     <mx:VBox styleName="TitleWindowContents">

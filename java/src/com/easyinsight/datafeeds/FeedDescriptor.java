@@ -4,6 +4,7 @@ import com.easyinsight.userupload.UploadPolicy;
 import com.easyinsight.core.InsightDescriptor;
 
 import java.util.List;
+import java.util.Date;
 
 /**
  * User: jboe
@@ -18,17 +19,18 @@ public class FeedDescriptor {
     private long size;
     private int feedType;
     private List<InsightDescriptor> children;
-    //private WSAnalysisDefinition definition;
     private String tagString;
     private String ownerName;
     private String description;
     private String attribution;
+    private Date lastDataTime;
 
     public FeedDescriptor() {
     }
 
     public FeedDescriptor(String name, long dataFeedID,
-                          UploadPolicy policy, long size, int feedType, Integer role, String ownerName, String description, String attribution) {
+                          UploadPolicy policy, long size, int feedType, Integer role, String ownerName, String description, String attribution,
+                          Date lastDataTime) {
         this.name = name;
         this.dataFeedID = dataFeedID;
         this.policy = policy;
@@ -38,6 +40,15 @@ public class FeedDescriptor {
         this.ownerName = ownerName;
         this.description = description;
         this.attribution = attribution;
+        this.lastDataTime = lastDataTime;
+    }
+
+    public Date getLastDataTime() {
+        return lastDataTime;
+    }
+
+    public void setLastDataTime(Date lastDataTime) {
+        this.lastDataTime = lastDataTime;
     }
 
     public String getOwnerName() {

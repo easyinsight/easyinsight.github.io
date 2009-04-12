@@ -76,9 +76,9 @@ public class Database {
         return sessionFactory.openStatelessSession();
     }
 
-    public Connection getConnection() {
+    public EIConnection getConnection() {
         try {
-            return dataSource.getConnection();
+            return new EIConnection(dataSource.getConnection());
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -107,6 +107,14 @@ public class Database {
        new PoolableConnectionFactory(connectionFactory,connectionPool,null,null,false,true);
 
         return new PoolingDataSource(connectionPool);
+    }
+
+    public void shutdown() {
+        try {
+            connectionPool.close();
+        } catch (Exception e) {
+            LogClass.error(e);
+        }
     }
 
     public long getAutoGenKey(Statement stmt) {

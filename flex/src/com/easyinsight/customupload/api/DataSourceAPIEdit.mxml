@@ -26,13 +26,13 @@
         [Bindable]
         private var validatedAPIEnabled:Boolean;
         [Bindable]
-        private var uncheckedBasicWSDL:String = "http://www.easy-insight.com/app/services/UncheckedPublishBasic?wsdl";
+        private var uncheckedBasicWSDL:String = "https://www.easy-insight.com/app/services/UncheckedPublishBasic?wsdl";
         [Bindable]
-        private var uncheckedWSSWSDL:String = "http://www.easy-insight.com/app/services/UncheckedPublishWSS?wsdl";
+        private var uncheckedWSSWSDL:String = "https://www.easy-insight.com/app/services/UncheckedPublishWSS?wsdl";
         [Bindable]
-        private var validatedBasicWSDL:String = "http://www.easy-insight.com/app/services/ValidatedPublishBasic?wsdl";
+        private var validatedBasicWSDL:String = "https://www.easy-insight.com/app/services/ValidatedPublishBasic?wsdl";
         [Bindable]
-        private var validatedWSSWSDL:String = "http://www.easy-insight.com/app/services/ValidatedPublishWSS?wsdl";
+        private var validatedWSSWSDL:String = "https://www.easy-insight.com/app/services/ValidatedPublishWSS?wsdl";
 
         private var _dataSourceAPIDescriptor:DataSourceAPIDescriptor;
 

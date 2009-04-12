@@ -46,8 +46,27 @@ public class FeedDefinition implements Cloneable, Serializable {
     private boolean validatedAPIEnabled;
     private boolean validatedAPIUsingBasicAuth;
     private boolean inheritAccountAPISettings;
+    private long refreshDataInterval;
+
+    private Credentials cachedCredentials;
 
     public FeedDefinition() {
+    }
+
+    public long getRefreshDataInterval() {
+        return refreshDataInterval;
+    }
+
+    public void setRefreshDataInterval(long refreshDataInterval) {
+        this.refreshDataInterval = refreshDataInterval;
+    }
+
+    public Credentials getCachedCredentials() {
+        return cachedCredentials;
+    }
+
+    public void setCachedCredentials(Credentials cachedCredentials) {
+        this.cachedCredentials = cachedCredentials;
     }
 
     public int getRequiredAccountTier() {

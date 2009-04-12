@@ -59,6 +59,8 @@ public class AdminService {
             healthInfo.setFreeMemory(freeMemory);
             long currentMemory = maxMemory - freeMemory;
             healthInfo.setCurrentMemory(currentMemory);
+            healthInfo.setMaxMemory(maxMemory);
+            healthInfo.setServer("");
             ThreadMXBean threadMXBean = ManagementFactory.getThreadMXBean();
             healthInfo.setThreadCount(threadMXBean.getThreadCount());
             healthInfo.setSystemLoadAverage(ManagementFactory.getOperatingSystemMXBean().getSystemLoadAverage());
@@ -85,10 +87,5 @@ public class AdminService {
             LogClass.error(e);
             throw new RuntimeException(e);
         }
-    }
-
-    private void publishInternally() {
-        HealthInfo healthInfo = getHealthInfo();
-        
     }
 }

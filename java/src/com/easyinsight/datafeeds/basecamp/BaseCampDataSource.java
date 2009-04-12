@@ -4,6 +4,7 @@ import org.apache.commons.httpclient.*;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.auth.AuthScope;
 import org.apache.ws.security.util.XmlSchemaDateFormat;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 import java.sql.Connection;
@@ -19,7 +20,6 @@ import com.easyinsight.datafeeds.FeedType;
 import com.easyinsight.datafeeds.CredentialsDefinition;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.core.Key;
-import com.easyinsight.core.NamedKey;
 import com.easyinsight.core.NumericValue;
 import com.easyinsight.core.DateValue;
 import com.easyinsight.analysis.*;
@@ -143,7 +143,7 @@ public class BaseCampDataSource extends ServerDataSourceDefinition {
                     String todoListPrivacy = "true".equalsIgnoreCase(queryField(todoListNode, "private/text()")) ? "private" : "public";
                     String milestoneIdToRetrieve = queryField(todoListNode, "milestone-id/text()");
                     Nodes milestoneNodes = milestoneList.query("/milestones/milestone[id/text()=" + milestoneIdToRetrieve + "]");
-                    Node milestoneNode = null;
+                    Node milestoneNode;
                     String milestoneName = null;
                     Date milestoneDeadline = null;
                     if(milestoneNodes.size() > 0) {
@@ -228,39 +228,12 @@ public class BaseCampDataSource extends ServerDataSourceDefinition {
             return null;
     }
 
-    public Map<String, Key> newDataSourceFields(com.easyinsight.users.Credentials credentials) {
-        Map<String, Key> keyMap = new HashMap<String, Key>();
-        if (getDataFeedID() == 0) {
-            keyMap.put(ITEMID, new NamedKey(ITEMID));
-            keyMap.put(CREATORNAME, new NamedKey(CREATORNAME));
-            keyMap.put(CREATORID, new NamedKey(CREATORID));
-            keyMap.put(RESPONSIBLEPARTYNAME, new NamedKey(RESPONSIBLEPARTYNAME));
-            keyMap.put(RESPONSIBLEPARTYID, new NamedKey(RESPONSIBLEPARTYID));
-            keyMap.put(CONTENT, new NamedKey(CONTENT));
-            keyMap.put(COMPLETED, new NamedKey(COMPLETED));
-            keyMap.put(CREATEDDATE, new NamedKey(CREATEDDATE));
-            keyMap.put(COMPLETEDDATE, new NamedKey(COMPLETEDDATE));
-
-            keyMap.put(TODOLISTNAME, new NamedKey(TODOLISTNAME));
-            keyMap.put(MILESTONENAME, new NamedKey(MILESTONENAME));
-            keyMap.put(DEADLINE, new NamedKey(DEADLINE));
-
-            keyMap.put(PROJECTNAME, new NamedKey(PROJECTNAME));
-            keyMap.put(PROJECTSTATUS, new NamedKey(PROJECTSTATUS));
-            keyMap.put(PROJECTID, new NamedKey(PROJECTID));
-            keyMap.put(TODOLISTDESC, new NamedKey(TODOLISTDESC));
-            keyMap.put(TODOLISTID, new NamedKey(TODOLISTID));
-            keyMap.put(TODOLISTPRIVATE, new NamedKey(TODOLISTPRIVATE));
-            keyMap.put(COMPLETERNAME, new NamedKey(COMPLETERNAME));
-            keyMap.put(COMPLETERID, new NamedKey(COMPLETERID));
-            keyMap.put(COUNT, new NamedKey(COUNT));
-            
-        } else {
-            for (AnalysisItem field : getFields()) {
-                keyMap.put(field.getKey().toKeyString(), field.getKey());
-            }
-        }
-        return keyMap;
+    @NotNull
+    protected List<String> getKeys() {
+        return Arrays.asList(ITEMID, CREATORNAME, CREATORID, RESPONSIBLEPARTYNAME,
+                RESPONSIBLEPARTYID, CONTENT, COMPLETED, CREATEDDATE, COMPLETEDDATE,
+                TODOLISTNAME, MILESTONENAME, DEADLINE, PROJECTNAME, PROJECTSTATUS,
+                PROJECTID, TODOLISTDESC, TODOLISTID, COMPLETERNAME, COMPLETERID, COUNT);
     }
 
     public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, DataSet dataSet) {

@@ -27,6 +27,7 @@ package com.easyinsight.listing
 		public var genre:String;
 		public var policy:UploadPolicy;
 		public var size:int;
+        public var lastDataTime:Date;
 		public var feedType:int;
 		public var children:ArrayCollection;
 		public var role:int;

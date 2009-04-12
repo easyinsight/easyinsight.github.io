@@ -308,7 +308,7 @@ public class FeedService implements IDataFeedService {
         }
     }
 
-    public long createCompositeFeed(List<CompositeFeedNode> compositeFeedNodes, List<CompositeFeedConnection> edges, String feedName) {
+    public CompositeFeedDefinition createCompositeFeed(List<CompositeFeedNode> compositeFeedNodes, List<CompositeFeedConnection> edges, String feedName) {
         long userID = SecurityUtil.getUserID();
         try {
             CompositeFeedDefinition feedDef = new CompositeFeedDefinition();
@@ -336,7 +336,7 @@ public class FeedService implements IDataFeedService {
             feedDef.setAnalysisDefinitionID(baseDefinition.getAnalysisID());
             feedStorage.updateDataFeedConfiguration(feedDef);
             new UserUploadInternalService().createUserFeedLink(userID, feedID, Roles.OWNER);
-            return feedID;
+            return feedDef;
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);

@@ -635,57 +635,6 @@ public class UserService implements IUserService {
         }
     }
 
-    public void eiPrepareBizAccount(AccountTransferObject accountTransferObject, UserTransferObject initialConsultant, String consultantPassword) {
-        SecurityUtil.authorizeAccountTier(Account.ADMINISTRATOR);
-        Connection conn = Database.instance().getConnection();
-        Session session = Database.instance().createSession(conn);
-        try {
-            conn.setAutoCommit(false);
-            Account account = accountTransferObject.toAccount();
-            configureNewAccount(account);
-            account.setAccountState(Account.PREPARING);
-            initialConsultant.setAccountAdmin(true);
-            initialConsultant.setDataSourceCreator(true);
-            initialConsultant.setInsightCreator(true);
-            User user = createInitialUser(initialConsultant, consultantPassword, account);
-            Consultant consultant = new Consultant();
-            consultant.setUser(user);
-            consultant.setState(Consultant.ACTIVE);
-            session.save(consultant);
-            account.getGuestUsers().add(consultant);
-            session.save(account);
-            user.setAccount(account);
-            session.update(user);
-            if (account.getAccountType() == Account.PROFESSIONAL || account.getAccountType() == Account.ENTERPRISE) {
-                Group group = new Group();
-                group.setName(account.getName());
-                group.setPubliclyVisible(false);
-                group.setPubliclyJoinable(false);
-                group.setDescription("This group was automatically created to act as a location for exposing data to all users in the account.");
-                account.setGroupID(new GroupStorage().addGroup(group, user.getUserID(), conn));
-                session.update(account);
-            }
-            session.flush();
-            conn.commit();
-        } catch (Exception e) {
-            LogClass.error(e);
-            try {
-                conn.rollback();
-            } catch (SQLException e1) {
-                LogClass.error(e1);
-            }
-            throw new RuntimeException(e);
-        } finally {
-            session.close();
-            try {
-                conn.setAutoCommit(true);
-            } catch (SQLException e) {
-                LogClass.error(e);
-            }
-            Database.instance().closeConnection(conn);
-        }
-    }
-
     public void eiActivateBizAccount(long accountID, UserTransferObject adminUser, boolean preserveConsultants) {
         SecurityUtil.authorizeAccountTier(Account.ADMINISTRATOR);
         Session session = Database.instance().createSession();
@@ -1098,6 +1047,10 @@ public class UserService implements IUserService {
         long accountID = SecurityUtil.getAccountID();
         long usedSize = 0;
         long maxSize = 0;
+        int currentUsers = 0;
+        int maxUsers = 0;
+        long usedAPI = 0;
+        long maxAPI = Account.getMaxCount(SecurityUtil.getAccountTier());
         Connection conn = Database.instance().getConnection();
         try {
             PreparedStatement queryUsedStmt = conn.prepareStatement("select sum(feed_persistence_metadata.size) from feed_persistence_metadata, " +
@@ -1107,11 +1060,25 @@ public class UserService implements IUserService {
             if (rs.next()) {
                 usedSize = rs.getLong(1);
             }
-            PreparedStatement accountStmt = conn.prepareStatement("SELECT max_size from account WHERE account_id = ?");
+            PreparedStatement usersStmt = conn.prepareStatement("SELECT count(user_id) from user where account_id = ?");
+            usersStmt.setLong(1, accountID);
+            ResultSet usersRS = usersStmt.executeQuery();
+            if (usersRS.next()) {
+                currentUsers = usersRS.getInt(1);
+            }
+            PreparedStatement apiTodayStmt = conn.prepareStatement("SELECT used_bandwidth from bandwidth_usage where account_id = ? AND bandwidth_date = ?");
+            apiTodayStmt.setLong(1, accountID);
+            apiTodayStmt.setDate(2, new java.sql.Date(System.currentTimeMillis()));
+            ResultSet apiRS = apiTodayStmt.executeQuery();
+            if (apiRS.next()) {
+                usedAPI = apiRS.getLong(1);
+            }
+            PreparedStatement accountStmt = conn.prepareStatement("SELECT max_size, max_users from account WHERE account_id = ?");
             accountStmt.setLong(1, accountID);
             ResultSet spaceRS = accountStmt.executeQuery();
             if (spaceRS.next()) {
                 maxSize = spaceRS.getLong(1);
+                maxUsers = spaceRS.getInt(2);
             }
         } catch (Exception e) {
             LogClass.error(e);
@@ -1122,6 +1089,10 @@ public class UserService implements IUserService {
         AccountStats accountStats = new AccountStats();
         accountStats.setMaxSpace(maxSize);
         accountStats.setUsedSpace(usedSize);
+        accountStats.setCurrentUsers(currentUsers);
+        accountStats.setMaxSpace(maxUsers);
+        accountStats.setApiUsedToday(usedAPI);
+        accountStats.setApiMaxToday(maxAPI);
         return accountStats;
     }
 }

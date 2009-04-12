@@ -50,6 +50,41 @@
             </mx:AddChild>
             <mx:SetProperty target="{this}" name="viewStack" value="{individualStack}"/>
         </mx:State>
+        <mx:State name="Administration">
+            <mx:AddChild relativeTo="{coreContent}">
+                <mx:VBox height="100%" horizontalAlign="center" width="200">
+                    <mx:Label text="Available Data Sources" fontFamily="Tahoma" fontSize="14" fontWeight="bold"/>
+                    <mx:List height="100%" width="100%" itemClick="onItemClick(event)">
+                        <mx:dataProvider>
+                            <mx:ArrayCollection>
+                                <mx:Array>
+                                    <mx:String>Google</mx:String>
+                                    <mx:String>JIRA</mx:String>
+                                    <mx:String>BaseCamp</mx:String>
+                                    <mx:String>Admin Server Stats</mx:String>
+                                </mx:Array>
+                            </mx:ArrayCollection>
+                        </mx:dataProvider>
+                    </mx:List>
+                </mx:VBox>
+            </mx:AddChild>
+            <mx:AddChild relativeTo="{coreContent}">
+                <mx:VBox width="100%" height="100%">
+                    <mx:ViewStack id="adminStack" width="100%" height="100%">
+                        <google:GoogleSpreadsheetSelection userConfigComplete="onFeedCreation(event)"
+                                                           userConfigCancel="cancel(event)"/>
+                        <customupload:JiraDataSourceCreation userConfigComplete="onFeedCreation(event)"
+                                                           userConfigCancel="cancel(event)"/>
+                        <customupload:BaseCampDataSourceCreation userConfigComplete="onFeedCreation(event)"
+                                                           userConfigCancel="cancel(event)"/>
+                        <customupload:NoCredentialsDataSourceCreation userConfigComplete="onFeedCreation(event)"
+                                                           userConfigCancel="cancel(event)"
+                                                           dataSourceClass="com.easyinsight.administration.feed.AdminStatsDataSource"/>
+                    </mx:ViewStack>
+                </mx:VBox>
+            </mx:AddChild>
+            <mx:SetProperty target="{this}" name="viewStack" value="{adminStack}"/>
+        </mx:State>
     </mx:states>
     <mx:Script>
 		<![CDATA[
@@ -78,6 +113,8 @@
         private function initHandlers():void {
             if (User.getInstance().getAccountType() == Account.FREE) {
                 currentState = "Free";
+            } else if (User.getInstance().getAccountType() == Account.ADMINISTRATOR) {
+                currentState = "Administration";
             } else {
                 currentState = "Individual";
             }

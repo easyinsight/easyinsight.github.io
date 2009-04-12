@@ -20,8 +20,6 @@ public class ConfigLoader {
     private String databaseName;
     private String databaseUserName;
     private String databasePassword;
-    private String awsKey;
-    private String awsSecretKey;
 
     private static ConfigLoader instance;
 
@@ -52,14 +50,6 @@ public class ConfigLoader {
         return databasePassword;
     }
 
-    public String getAwsKey() {
-        return awsKey;
-    }
-
-    public String getAwsSecretKey() {
-        return awsSecretKey;
-    }
-
     private ConfigLoader() {
         try {
             URL url = getClass().getClassLoader().getResource("eiconfig.properties");
@@ -70,8 +60,6 @@ public class ConfigLoader {
             databaseName = (String) properties.get("database.name");
             databaseUserName = (String) properties.get("database.username");
             databasePassword = (String) properties.get("database.password");
-            awsKey = (String) properties.get("aws.key");
-            awsSecretKey = (String) properties.get("aws.secret.key");
         } catch (IOException e) {
             LogClass.error(e);
             throw new RuntimeException(e);

@@ -69,7 +69,7 @@ public class MarketplaceStorage {
         if (rs.wasNull()) {
             role = null;
         }
-        return createDescriptor(dataFeedID, feedName, true, true, role, 0, feedType, ownerName, description, attribution, conn);
+        return createDescriptor(dataFeedID, feedName, true, true, role, 0, feedType, ownerName, description, attribution, conn, null);
     }
 
     private List<FeedDescriptor> getFeeds(long accountID, String keyword, int cutoff, String sortClause) {
@@ -100,9 +100,9 @@ public class MarketplaceStorage {
     }
 
     private FeedDescriptor createDescriptor(long dataFeedID, String feedName, boolean publiclyVisible, boolean marketplaceVisible, Integer userRole,
-                                            long size, int feedType, String ownerName, String description, String attribution, Connection conn) throws SQLException {
+                                            long size, int feedType, String ownerName, String description, String attribution, Connection conn, Date lastDataTime) throws SQLException {
         UploadPolicy uploadPolicy = createUploadPolicy(conn, dataFeedID, publiclyVisible, marketplaceVisible);
-        return new FeedDescriptor(feedName, dataFeedID, uploadPolicy, size, feedType, userRole != null ? userRole : 0, ownerName, description, attribution);
+        return new FeedDescriptor(feedName, dataFeedID, uploadPolicy, size, feedType, userRole != null ? userRole : 0, ownerName, description, attribution, lastDataTime);
     }
 
 

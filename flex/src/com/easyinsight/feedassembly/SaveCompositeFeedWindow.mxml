@@ -1,39 +1,49 @@
 <?xml version="1.0" ?>
 <mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" title="Save Insight"
-	creationComplete="addEventListener(KeyboardEvent.KEY_UP, keyHit); focusManager.setFocus(dataSourceName)">
+	creationComplete="addEventListener(KeyboardEvent.KEY_UP, keyHit); focusManager.setFocus(dataSourceName); validators = [ nameValidator ]">
 	<mx:Script>
 		<![CDATA[
-                    import mx.collections.ArrayCollection;
-                    import com.easyinsight.analysis.SavedAnalysisEvent;
-                    import mx.managers.PopUpManager;
-                    import com.easyinsight.analysis.AnalysisDefinition;
+        import com.easyinsight.util.ProgressAlert;
+        import mx.collections.ArrayCollection;
+        import mx.controls.Alert;
+        import mx.managers.PopUpManager;
+        import com.easyinsight.analysis.AnalysisDefinition;
+        import mx.validators.Validator;
 
-                    [Bindable]
-                    public var analysisDefinition:AnalysisDefinition;
+        [Bindable]
+        public var analysisDefinition:AnalysisDefinition;
 
-                    public var compositeFeedNodes:ArrayCollection;
-                    public var compositeFeedConnections:ArrayCollection;
+        public var compositeFeedNodes:ArrayCollection;
+        public var compositeFeedConnections:ArrayCollection;
 
-                    private function save():void {
-                        feedService.createCompositeFeed(compositeFeedNodes, compositeFeedConnections, dataSourceName.text);
-                    }
+        private var validators:Array;
 
-                    private function keyHit(event:KeyboardEvent):void {
-                    	if (event.keyCode == Keyboard.ENTER) {
-                    		save();
-                    	}
-                    }
+        private function save():void {
+            var results:Array = Validator.validateAll(validators);
+            if (results.length == 0) {
+                ProgressAlert.alert(this, "Saving...", "Saved!", feedService.createCompositeFeed);
+                feedService.createCompositeFeed(compositeFeedNodes, compositeFeedConnections, dataSourceName.text);
+            } else {
+                Alert.show("You must enter a name of at least three characters for the data source.");
+            }
+        }
 
-                    private function cancel():void {
-                        PopUpManager.removePopUp(this);
-                    }
+        private function keyHit(event:KeyboardEvent):void {
+            if (event.keyCode == Keyboard.ENTER) {
+                save();
+            }
+        }
 
-                    private function saved():void {
-                    	var feedID:int = feedService.createCompositeFeed.lastResult as int;
-                        dispatchEvent(new CompositeFeedSaveEvent(feedID));
-                        PopUpManager.removePopUp(this);
-                    }
-                ]]>
+        private function cancel():void {
+            PopUpManager.removePopUp(this);
+        }
+
+        private function saved():void {
+            var feedDefinition:CompositeFeedDefinition = feedService.createCompositeFeed.lastResult as CompositeFeedDefinition;
+            dispatchEvent(new CompositeFeedSaveEvent(feedDefinition));
+            PopUpManager.removePopUp(this);
+        }
+    ]]>
 	</mx:Script>
 	<mx:VBox styleName="TitleWindowContents" width="100%" height="100%">
 		<mx:Form>
@@ -46,7 +56,7 @@
 			</mx:FormItem>
 		</mx:Form>
 	</mx:VBox>
-	<mx:StringValidator source="{dataSourceName}" property="text" minLength="3"/> 
+	<mx:StringValidator source="{dataSourceName}" property="text" minLength="3" id="nameValidator"/>
 	<mx:RemoteObject destination="feeds" id="feedService">
 		<mx:method name="createCompositeFeed" result="saved()"/>
 	</mx:RemoteObject>

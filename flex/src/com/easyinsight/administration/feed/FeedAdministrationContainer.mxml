@@ -42,6 +42,10 @@ import mx.events.CloseEvent;
 			private var feedType:int;
             [Bindable]
 			private var feedDefinition:FeedDefinitionData;
+            [Bindable]
+            private var showRefreshInterval:Boolean;
+            [Bindable]
+            private var refreshInterval:int;
 			
 			private var unsavedChanges:Boolean = false;
 
@@ -118,6 +122,8 @@ import mx.events.CloseEvent;
             	this.feedOwnerName = feedDefinition.ownerName;
             	this.feedAttribution = feedDefinition.attribution;
             	this.feedType = feedDefinition.getFeedType();
+                this.showRefreshInterval = feedDefinition.canRefresh();
+                this.refreshInterval = feedDefinition.refreshDataInterval;
                 analysisService.openAnalysisDefinition.send(feedDefinition.analysisDefinitionID);
 			}	
             
@@ -151,6 +157,7 @@ import mx.events.CloseEvent;
 	            	feedDefinition.description = feedDescriptionTextArea.text;
 	            	feedDefinition.attribution = feedAttributionInput.text;
 	            	feedDefinition.ownerName = feedOwnerNameInput.text;
+                    feedDefinition.refreshDataInterval = refreshIntervalStepper.value;
                     if (feedAdminDetail != null) {
 	            	    feedAdminDetail.updateFeedDefinition(feedDefinition);
                     }
@@ -239,8 +246,11 @@ import mx.events.CloseEvent;
 							<mx:TextInput id="feedOwnerNameInput" text="{feedOwnerName}" change="dispatchEvent(new AnalysisChangedEvent())"/>
 						</mx:FormItem>
 						<mx:FormItem label="Delete All Data:">
-							<mx:Button label="Clear Feed Data" click="clearFeedData()"/>
-						</mx:FormItem>																	
+							<mx:Button label="Clear Data Source Data" click="clearFeedData()"/>
+						</mx:FormItem>
+                        <mx:FormItem label="Refresh Interval (Hours):" visible="{showRefreshInterval}" direction="horizontal">
+                            <mx:NumericStepper id="refreshIntervalStepper" value="{refreshInterval}"/>
+                        </mx:FormItem>
 					</mx:Form>
 				</mx:VBox>
 				<mx:VBox>

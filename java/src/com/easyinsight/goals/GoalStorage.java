@@ -1,6 +1,7 @@
 package com.easyinsight.goals;
 
 import com.easyinsight.database.Database;
+import com.easyinsight.database.EIConnection;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.analysis.*;
 import com.easyinsight.groups.GroupDescriptor;
@@ -226,7 +227,7 @@ public class GoalStorage {
     }
 
     public void addGoalTree(GoalTree goalTree) {
-        Connection conn = Database.instance().getConnection();
+        EIConnection conn = Database.instance().getConnection();
         try {
             conn.setAutoCommit(false);
             if (goalTree.getRootNode() == null) {
@@ -251,24 +252,16 @@ public class GoalStorage {
             conn.commit();
         } catch (SQLException e) {
             LogClass.error(e);
-            try {
-                conn.rollback();
-            } catch (SQLException e1) {
-                LogClass.error(e1);
-            }
+            conn.rollback();
             throw new RuntimeException(e);
         } finally {
-            try {
-                conn.setAutoCommit(true);
-            } catch (SQLException e) {
-                LogClass.error(e);
-            }
+            conn.setAutoCommit(true);
             Database.instance().closeConnection(conn);
         }
     }
 
     public void updateGoalTree(GoalTree goalTree) {
-        Connection conn = Database.instance().getConnection();
+        EIConnection conn = Database.instance().getConnection();
         try {
             conn.setAutoCommit(false);
             installSolutions(goalTree, conn);            
@@ -285,24 +278,16 @@ public class GoalStorage {
             conn.commit();
         } catch (SQLException e) {
             LogClass.error(e);
-            try {
-                conn.rollback();
-            } catch (SQLException e1) {
-                LogClass.error(e1);
-            }
+            conn.rollback();
             throw new RuntimeException(e);
         } finally {
-            try {
-                conn.setAutoCommit(true);
-            } catch (SQLException e) {
-                LogClass.error(e);
-            }
+            conn.setAutoCommit(true);
             Database.instance().closeConnection(conn);
         }
     }
 
     public void deleteGoalTree(long goalTreeID) {
-        Connection conn = Database.instance().getConnection();
+        EIConnection conn = Database.instance().getConnection();
         try {
             conn.setAutoCommit(false);
             PreparedStatement deleteStmt = conn.prepareStatement("DELETE FROM GOAL_TREE WHERE GOAL_TREE_ID = ?");
@@ -311,17 +296,9 @@ public class GoalStorage {
             conn.commit();
         } catch (SQLException e) {
             LogClass.error(e);
-            try {
-                conn.rollback();
-            } catch (SQLException e1) {
-                LogClass.error(e1);
-            }
+            conn.rollback();
         } finally {
-            try {
-                conn.setAutoCommit(true);
-            } catch (SQLException e) {
-                LogClass.error(e);
-            }
+            conn.setAutoCommit(true);
             Database.instance().closeConnection(conn);
         }
     }

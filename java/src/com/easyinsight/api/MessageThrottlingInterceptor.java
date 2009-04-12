@@ -37,11 +37,6 @@ import com.easyinsight.users.Account;
  */
 public class MessageThrottlingInterceptor extends AbstractPhaseInterceptor {
 
-    public static final long INDIVIDUAL_MAX = 50000000;
-    public static final long PROFESSIONAL_MAX = 200000000;
-    public static final long ENTERPRISE_MAX = 1000000000;
-    public static final long ADMINISTRATOR_MAX = Long.MAX_VALUE;
-
     public MessageThrottlingInterceptor() {
         super(Phase.RECEIVE);
     }
@@ -84,7 +79,7 @@ public class MessageThrottlingInterceptor extends AbstractPhaseInterceptor {
 
                 s.save(bu);
                 s.getTransaction().commit();
-                if(bandwidthUsage > getMaxCount(account.getAccountType())) {
+                if(bandwidthUsage > Account.getMaxCount(account.getAccountType())) {
                     throw new Fault(new Exception("Exceeded your limit."));
                 }
             }
@@ -104,21 +99,6 @@ public class MessageThrottlingInterceptor extends AbstractPhaseInterceptor {
         public UserServiceResponse getAccount(Message message) {
             AuthorizationPolicy policy = message.get(AuthorizationPolicy.class);
             return SecurityUtil.authenticateToResponse(policy.getUserName(), PasswordService.getInstance().encrypt(policy.getPassword()));
-        }
-
-        public long getMaxCount(int tier) {
-            switch(tier) {
-                case Account.INDIVIDUAL:
-                    return INDIVIDUAL_MAX;
-                case Account.PROFESSIONAL:
-                    return PROFESSIONAL_MAX;
-                case Account.ENTERPRISE:
-                    return ENTERPRISE_MAX;
-                case Account.ADMINISTRATOR:
-                    return ADMINISTRATOR_MAX;
-                default:
-                    throw new RuntimeException("Users that aren't Individual, Professional, Enterprise, or Administrator tier should not be accessing the API.");
-            }
         }
     }
 }

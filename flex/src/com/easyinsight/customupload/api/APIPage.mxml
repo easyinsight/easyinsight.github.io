@@ -117,11 +117,11 @@ import mx.utils.URLUtil;
         }
 
         private function viewValidatedWSDL():void {
-            flash.net.navigateToURL(new URLRequest("http://www.easy-insight.com/app/services/ValidatedPublishBasic?wsdl"), "_blank");
+            flash.net.navigateToURL(new URLRequest("https://www.easy-insight.com/app/services/ValidatedPublishBasic?wsdl"), "_blank");
         }
 
         private function viewUncheckedWSDL():void {
-            flash.net.navigateToURL(new URLRequest("http://www.easy-insight.com/app/services/UncheckedPublishBasic?wsdl"), "_blank");
+            flash.net.navigateToURL(new URLRequest("https://www.easy-insight.com/app/services/UncheckedPublishBasic?wsdl"), "_blank");
         }
 
         private function search():void {

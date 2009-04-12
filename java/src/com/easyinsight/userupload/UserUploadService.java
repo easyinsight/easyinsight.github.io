@@ -20,10 +20,6 @@ import java.io.*;
 import java.util.*;
 import java.sql.*;
 
-import flex.messaging.MessageBroker;
-import flex.messaging.messages.AsyncMessage;
-import flex.messaging.util.UUIDUtils;
-
 /**
  * User: James Boe
  * Date: Jan 26, 2008
@@ -419,42 +415,12 @@ public class UserUploadService implements IUserUploadService {
 
     public CredentialsResponse refreshData(long feedID, Credentials credentials) {
         SecurityUtil.authorizeFeed(feedID, Roles.OWNER);
-        Connection conn = Database.instance().getConnection();
-        DataStorage dataStorage = null;
         try {
-            conn.setAutoCommit(false);
-            FeedDefinition feedDefinition = getDataFeedConfiguration(feedID);
-            DataSet dataSet = feedDefinition.getDataSet(credentials, feedDefinition.newDataSourceFields(credentials));
-            dataStorage = DataStorage.writeConnection(feedDefinition, conn);
-            dataStorage.truncate();
-            dataStorage.insertData(dataSet);
-            dataStorage.commit();
-            conn.commit();
-            MessageBroker msgBroker = MessageBroker.getMessageBroker(null);
-            String clientID = UUIDUtils.createUUID();
-            AsyncMessage msg = new AsyncMessage();
-            msg.setDestination("dataUpdates");
-            msg.setHeader(AsyncMessage.SUBTOPIC_HEADER_NAME, String.valueOf(feedID));
-            msg.setMessageId(clientID);
-            msg.setTimestamp(System.currentTimeMillis());
-            msgBroker.routeMessageToService(msg, null);
-            return new CredentialsResponse(true);
+            ServerDataSourceDefinition feedDefinition = (ServerDataSourceDefinition) getDataFeedConfiguration(feedID);
+            return feedDefinition.refreshData(credentials, SecurityUtil.getAccountID());
         } catch (Exception e) {
             LogClass.error(e);
-            if (dataStorage != null) {
-                dataStorage.rollback();
-            }
-            try {
-                conn.rollback();
-            } catch (SQLException e1) {
-                LogClass.error(e1);
-            }
-            return new CredentialsResponse(false, e.getMessage());
-        } finally {
-            if (dataStorage != null) {
-                dataStorage.closeConnection();
-            }
-            Database.instance().closeConnection(conn);
+            throw new RuntimeException(e);
         }
     }
 

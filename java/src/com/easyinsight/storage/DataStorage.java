@@ -189,6 +189,7 @@ public class DataStorage {
     public void commit() throws SQLException {
         long size = calculateSize();
         metadata.setSize(size);
+        metadata.setLastData(new Date());
         if (coreDBConn == null) {
             Connection conn = Database.instance().getConnection();
             try {
@@ -859,20 +860,23 @@ public class DataStorage {
     private static void addOrUpdateMetadata(long dataFeedID, FeedPersistenceMetadata metadata, Connection conn) {
         try {
             if (metadata.getMetadataID() > 0) {
-                PreparedStatement updateStmt = conn.prepareStatement("UPDATE FEED_PERSISTENCE_METADATA SET SIZE = ?, VERSION = ?, DATABASE_NAME = ? WHERE " +
+                PreparedStatement updateStmt = conn.prepareStatement("UPDATE FEED_PERSISTENCE_METADATA SET SIZE = ?, VERSION = ?, DATABASE_NAME = ?," +
+                        "LAST_DATA_TIME = ? WHERE " +
                         "FEED_PERSISTENCE_METADATA_ID = ?");
                 updateStmt.setLong(1, metadata.getSize());
                 updateStmt.setLong(2, metadata.getVersion());
                 updateStmt.setString(3, metadata.getDatabase());
-                updateStmt.setLong(4, metadata.getMetadataID());
+                updateStmt.setTimestamp(4, new Timestamp(metadata.getLastData().getTime()));
+                updateStmt.setLong(5, metadata.getMetadataID());
                 updateStmt.executeUpdate();
             } else {
                 PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO FEED_PERSISTENCE_METADATA (FEED_ID, " +
-                        "VERSION, SIZE, DATABASE_NAME) VALUES (?, ?, ?, ?)");
+                        "VERSION, SIZE, DATABASE_NAME, LAST_DATA_TIME) VALUES (?, ?, ?, ?, ?)");
                 insertStmt.setLong(1, dataFeedID);
                 insertStmt.setInt(2, metadata.getVersion());
                 insertStmt.setLong(3, metadata.getSize());
                 insertStmt.setString(4, metadata.getDatabase());
+                insertStmt.setTimestamp(5, new Timestamp(metadata.getLastData().getTime()));
                 insertStmt.execute();
             }
         } catch (SQLException e) {
@@ -894,6 +898,7 @@ public class DataStorage {
         try {
             FeedPersistenceMetadata metadata = new FeedPersistenceMetadata();
             metadata.setVersion(1);
+            metadata.setLastData(new Date());
             metadata.setDatabase(DatabaseManager.instance().chooseDatabase(conn));
             return metadata;
         } catch (SQLException e) {

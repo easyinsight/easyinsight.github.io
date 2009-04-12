@@ -2,9 +2,8 @@ package com.easyinsight.groups;
 
 import org.hibernate.Session;
 import com.easyinsight.database.Database;
+import com.easyinsight.database.EIConnection;
 import com.easyinsight.analysis.Tag;
-import com.easyinsight.analysis.WSAnalysisDefinition;
-import com.easyinsight.analysis.AnalysisStorage;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.datafeeds.FeedDescriptor;
 import com.easyinsight.datafeeds.FeedConsumer;
@@ -76,7 +75,7 @@ public class GroupStorage {
     }
 
     public long addGroup(Group group, long userID) {
-        Connection conn = Database.instance().getConnection();
+        EIConnection conn = Database.instance().getConnection();
         try {
             conn.setAutoCommit(false);
             long groupID = addGroup(group, userID, conn);
@@ -84,18 +83,10 @@ public class GroupStorage {
             return groupID;
         } catch (Exception e) {
             LogClass.error(e);
-            try {
-                conn.rollback();
-            } catch (SQLException e1) {
-                LogClass.error(e1);
-            }
+            conn.rollback();
             throw new RuntimeException(e);
         } finally {
-            try {
-                conn.setAutoCommit(true);
-            } catch (SQLException e) {
-                LogClass.error(e);
-            }
+            conn.setAutoCommit(true);
             Database.instance().closeConnection(conn);
         }
     }
@@ -605,7 +596,7 @@ public class GroupStorage {
                 }
 
                 int role = Math.min(groupRole, userRole);
-                FeedDescriptor feedDescriptor = createDescriptor(feedID, name, publiclyVisible, marketplaceVisible, role, 0, feedType, ownerName, description, attribution, conn);
+                FeedDescriptor feedDescriptor = createDescriptor(feedID, name, publiclyVisible, marketplaceVisible, role, 0, feedType, ownerName, description, attribution, conn, null);
                 descriptors.add(feedDescriptor);
             }
         } catch (SQLException e) {
@@ -661,9 +652,9 @@ public class GroupStorage {
     }
 
     private FeedDescriptor createDescriptor(long dataFeedID, String feedName, boolean publiclyVisible, boolean marketplaceVisible, Integer userRole,
-                                            long size, int feedType, String ownerName, String description, String attribution, Connection conn) throws SQLException {
+                                            long size, int feedType, String ownerName, String description, String attribution, Connection conn, Date lastDataTime) throws SQLException {
         UploadPolicy uploadPolicy = createUploadPolicy(conn, dataFeedID, publiclyVisible, marketplaceVisible);
-        return new FeedDescriptor(feedName, dataFeedID, uploadPolicy, size, feedType, userRole != null ? userRole : 0, ownerName, description, attribution);
+        return new FeedDescriptor(feedName, dataFeedID, uploadPolicy, size, feedType, userRole != null ? userRole : 0, ownerName, description, attribution, lastDataTime);
     }
 
 

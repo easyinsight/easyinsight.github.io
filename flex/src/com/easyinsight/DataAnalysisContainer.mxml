@@ -689,8 +689,10 @@ import com.easyinsight.analysis.HierarchyDrilldownEvent;
 
         private function gotUserCapabilitiesForFeed():void {
             var userCapabilities:UserCapabilities = analysisService.getUserCapabilitiesForFeed.lastResult as UserCapabilities;
-            canSubscribeToFeed = userCapabilities.feedRole > 3;
-            canAddFeedToGroup = userCapabilities.groupMember;
+            if (!feedAdminMode) {
+                canSubscribeToFeed = userCapabilities.feedRole > 3;
+                canAddFeedToGroup = userCapabilities.groupMember;
+            }
         }
 
         private function onFieldDelete(event:DeleteAnalysisItemEvent):void {

@@ -11,6 +11,7 @@ public class UserStub extends FeedConsumer {
     private long userID;
     private String fullName;
     private String email;
+    private long accountID;
 
     public UserStub() {
     }
@@ -24,6 +25,14 @@ public class UserStub extends FeedConsumer {
 
     public int type() {
         return FeedConsumer.USER;
+    }
+
+    public long getAccountID() {
+        return accountID;
+    }
+
+    public void setAccountID(long accountID) {
+        this.accountID = accountID;
     }
 
     public String getFullName() {

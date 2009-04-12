@@ -10,6 +10,7 @@ package com.easyinsight.account
         public static const INDIVIDUAL:int = 2;
         public static const PROFESSIONAL:int = 3;
         public static const ENTERPRISE:int = 4;
+        public static const ADMINISTRATOR:int = 5;
 
         public static const INACTIVE:int = 1;
         public static const ACTIVE:int = 2;

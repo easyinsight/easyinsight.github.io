@@ -2,6 +2,7 @@ package com.easyinsight.datafeeds;
 
 import java.util.Map;
 import java.util.HashMap;
+import java.util.Date;
 
 /**
  * User: James Boe
@@ -12,8 +13,17 @@ public class FeedPersistenceMetadata {
     private long metadataID;
     private long size;
     private int version;
+    private Date lastData;
     private String database;
     private boolean head;
+
+    public Date getLastData() {
+        return lastData;
+    }
+
+    public void setLastData(Date lastData) {
+        this.lastData = lastData;
+    }
 
     public boolean isHead() {
         return head;

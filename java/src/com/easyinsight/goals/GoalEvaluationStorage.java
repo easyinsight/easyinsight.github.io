@@ -5,6 +5,7 @@ import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.analysis.DataService;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.database.Database;
+import com.easyinsight.database.EIConnection;
 import com.easyinsight.core.Value;
 import com.easyinsight.core.DateValue;
 import com.easyinsight.analysis.*;
@@ -93,7 +94,7 @@ public class GoalEvaluationStorage {
     }
 
     public void evaluateGoalTrees() {
-        Connection conn = Database.instance().getConnection();
+        EIConnection conn = Database.instance().getConnection();
         try {
             conn.setAutoCommit(false);
             PreparedStatement getTreesStmt = conn.prepareStatement("SELECT GOAL_TREE_ID FROM GOAL_TREE");
@@ -106,17 +107,9 @@ public class GoalEvaluationStorage {
             conn.commit();
         } catch (SQLException e) {
             LogClass.error(e);
-            try {
-                conn.rollback();
-            } catch (SQLException e1) {
-                LogClass.error(e1);
-            }
+            conn.rollback();
         } finally {
-            try {
-                conn.setAutoCommit(true);
-            } catch (SQLException e) {
-                LogClass.error(e);
-            }
+            conn.setAutoCommit(true);
             Database.instance().closeConnection(conn);
         }
     }

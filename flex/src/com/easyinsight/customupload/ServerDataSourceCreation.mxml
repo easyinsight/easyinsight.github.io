@@ -6,9 +6,8 @@
 	</mx:Metadata>
     <mx:Script><![CDATA[
         import com.easyinsight.administration.feed.FeedDefinitionData;
-        import com.easyinsight.datasources.JiraDataSource;
         import com.easyinsight.framework.Credentials;
-        import com.easyinsight.genredata.AnalyzeEvent;
+        import com.easyinsight.genredata.ModuleAnalyzeEvent;
         import com.easyinsight.listing.DataFeedDescriptor;
         import com.easyinsight.listing.DescriptorAnalyzeSource;
         import mx.controls.Alert;
@@ -20,8 +19,7 @@
         }
 
         public function get dataSourceDefinition():FeedDefinitionData {
-            var obj:FeedDefinitionData = new _dataSourceClass();
-            return obj;
+            return new _dataSourceClass();
         }
 
         public function get credentials():Credentials {
@@ -29,10 +27,6 @@
             credentials.userName = userNameInput.text;
             credentials.password = passwordInput.text;
             return credentials;
-        }
-
-        private function blah():void {
-            var jira:JiraDataSource;
         }
 
         private function validate():void {
@@ -59,7 +53,7 @@
             descriptor.policy = new UploadPolicy();
             descriptor.policy.publiclyVisible = false;
             dispatchEvent(new UploadConfigEvent(UploadConfigEvent.UPLOAD_CONFIG_COMPLETE, id));            
-            dispatchEvent(new AnalyzeEvent(new DescriptorAnalyzeSource(descriptor)));
+            dispatchEvent(new ModuleAnalyzeEvent(new DescriptorAnalyzeSource(descriptor)));
         }
 
         ]]></mx:Script>

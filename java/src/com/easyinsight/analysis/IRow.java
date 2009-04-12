@@ -5,6 +5,7 @@ import com.easyinsight.core.Value;
 
 import java.util.Collection;
 import java.util.Map;
+import java.util.Date;
 
 /**
  * User: jboe
@@ -21,6 +22,10 @@ public interface IRow {
     void addValue(Key tag, String value);
     
     void addValue(String tag, Value value);
+
+    void addValue(Key tag, Number value);
+
+    void addValue(Key tag, Date value);
 
     IRow merge(IRow row);
 

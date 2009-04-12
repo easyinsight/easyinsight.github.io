@@ -37,6 +37,7 @@ package com.easyinsight.administration.feed
         public var validatedAPIEnabled:Boolean;
         public var validatedAPIUsingBasicAuth:Boolean;
         public var inheritAccountAPISettings:Boolean;
+        public var refreshDataInterval:int;
 		
 		public function FeedDefinitionData()
 		{
@@ -51,6 +52,11 @@ package com.easyinsight.administration.feed
 			var googleDef:GoogleFeedDefinition;
 			var fileDef:FileBasedFeedDefinition;
 			var compositeDef:CompositeFeedDefinition;
+			var adminDef:AdminStatsDataSource;
 		}
+
+        public function canRefresh():Boolean {
+            return false;
+        }
 	}
 }

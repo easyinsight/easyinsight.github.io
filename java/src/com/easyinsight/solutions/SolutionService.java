@@ -6,6 +6,7 @@ import com.easyinsight.datafeeds.FeedDescriptor;
 import com.easyinsight.datafeeds.FeedConsumer;
 import com.easyinsight.analysis.*;
 import com.easyinsight.database.Database;
+import com.easyinsight.database.EIConnection;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.userupload.UploadPolicy;
 import com.easyinsight.userupload.UserUploadInternalService;
@@ -58,7 +59,7 @@ public class SolutionService {
 
     public void addSolution(Solution solution, List<Integer> feedIDs) {
         long userID = SecurityUtil.getUserID();
-        Connection conn = Database.instance().getConnection();
+        EIConnection conn = Database.instance().getConnection();
         try {
             conn.setAutoCommit(false);
             PreparedStatement insertSolutionStmt = conn.prepareStatement("INSERT INTO SOLUTION (NAME, DESCRIPTION, INDUSTRY, AUTHOR, COPY_DATA, goal_tree_id, SOLUTION_TIER) VALUES (?, ?, ?, ?, ?, ?, ?)",
@@ -90,24 +91,16 @@ public class SolutionService {
             conn.commit();
         } catch (Exception e) {
             LogClass.error(e);
-            try {
-                conn.rollback();
-            } catch (SQLException e1) {
-                LogClass.error(e1);
-            }
+            conn.rollback();
             throw new RuntimeException(e);
         } finally {
-            try {
-                conn.setAutoCommit(false);
-            } catch (SQLException e) {
-                LogClass.error(e);
-            }
+            conn.setAutoCommit(false);
             Database.instance().closeConnection(conn);
         }
     }
 
     public void updateSolution(Solution solution, List<Integer> feedIDs) {
-        Connection conn = Database.instance().getConnection();
+        EIConnection conn = Database.instance().getConnection();
         try {
             conn.setAutoCommit(false);
             PreparedStatement updateSolutionStmt = conn.prepareStatement("UPDATE SOLUTION SET NAME = ?, DESCRIPTION = ?, INDUSTRY = ?, AUTHOR = ?, COPY_DATA = ?, GOAL_TREE_ID = ?, SOLUTION_TIER = ? WHERE SOLUTION_ID = ?",
@@ -137,18 +130,10 @@ public class SolutionService {
             conn.commit();
         } catch (Exception e) {
             LogClass.error(e);
-            try {
-                conn.rollback();
-            } catch (SQLException e1) {
-                LogClass.error(e1);
-            }
+            conn.rollback();
             throw new RuntimeException(e);
         } finally {
-            try {
-                conn.setAutoCommit(true);
-            } catch (SQLException e) {
-                LogClass.error(e);
-            }
+            conn.setAutoCommit(true);
             Database.instance().closeConnection(conn);
         }
     }
@@ -160,7 +145,7 @@ public class SolutionService {
         // clone the feed/insights
         long userID = SecurityUtil.getUserID();
         Solution solution = getSolution(solutionID);
-        Connection conn = Database.instance().getConnection();
+        EIConnection conn = Database.instance().getConnection();
         try {
             conn.setAutoCommit(false);
             List<SolutionInstallInfo> objects = installSolution(userID, solution, conn, false);
@@ -168,18 +153,10 @@ public class SolutionService {
             return objects;
         } catch (Exception e) {
             LogClass.error(e);
-            try {
-                conn.rollback();
-            } catch (SQLException e1) {
-                LogClass.error(e1);
-            }
+            conn.rollback();
             throw new RuntimeException(e);
         } finally {
-            try {
-                conn.setAutoCommit(true);
-            } catch (SQLException e) {
-                LogClass.error(e);
-            }
+            conn.setAutoCommit(true);
             Database.instance().closeConnection(conn);
         }
     }

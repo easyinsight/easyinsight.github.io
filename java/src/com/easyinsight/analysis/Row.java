@@ -5,6 +5,7 @@ import com.easyinsight.core.*;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Collection;
+import java.util.Date;
 import java.io.Serializable;
 
 /**
@@ -34,6 +35,14 @@ public class Row implements IRow, Serializable {
 
     public void addValue(String tag, Value value) {
         addValue(new NamedKey(tag), value);
+    }
+
+    public void addValue(Key tag, Date value) {
+        addValue(tag, new DateValue(value));
+    }
+
+    public void addValue(Key tag, Number value) {
+        addValue(tag, new NumericValue(value));
     }
 
     public void addValue(Key tag, Value value) {

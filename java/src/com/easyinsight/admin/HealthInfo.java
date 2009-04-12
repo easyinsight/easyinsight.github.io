@@ -8,6 +8,7 @@ package com.easyinsight.admin;
 public class HealthInfo {
     private long currentMemory;
     private long freeMemory;
+    private long maxMemory;
     private int threadCount;
     private int activeDBConnections;
     private int idleDBConnections;
@@ -19,6 +20,23 @@ public class HealthInfo {
     private double systemLoadAverage;
     private long compilationTime;
     private int clientCount;
+    private String server;
+
+    public String getServer() {
+        return server;
+    }
+
+    public void setServer(String server) {
+        this.server = server;
+    }
+
+    public long getMaxMemory() {
+        return maxMemory;
+    }
+
+    public void setMaxMemory(long maxMemory) {
+        this.maxMemory = maxMemory;
+    }
 
     public int getClientCount() {
         return clientCount;

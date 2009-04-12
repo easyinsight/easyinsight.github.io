@@ -12,7 +12,6 @@ import com.easyinsight.logging.LogClass;
 import com.easyinsight.analysis.*;
 import com.easyinsight.core.DateValue;
 import com.easyinsight.core.Key;
-import com.easyinsight.core.NamedKey;
 import com.easyinsight.core.NumericValue;
 
 import javax.xml.rpc.ServiceException;
@@ -21,6 +20,8 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+
+import org.jetbrains.annotations.NotNull;
 
 /**
  * User: James Boe
@@ -151,26 +152,10 @@ public class JiraDataSource extends ServerDataSourceDefinition {
         return dataSet;
     }
 
-    public Map<String, Key> newDataSourceFields(Credentials credentials) {
-        Map<String, Key> keyMap = new HashMap<String, Key>();
-        if (getDataFeedID() == 0) {
-            keyMap.put(REPORTER, new NamedKey(REPORTER));
-            keyMap.put(COMPONENTS, new NamedKey(COMPONENTS));
-            keyMap.put(DATE_CREATED, new NamedKey(DATE_CREATED));
-            keyMap.put(PRIORITY, new NamedKey(PRIORITY));
-            keyMap.put(STATUS, new NamedKey(STATUS));
-            keyMap.put(ASSIGNEE, new NamedKey(ASSIGNEE));
-            keyMap.put(COUNT, new NamedKey(COUNT));
-            keyMap.put(PROJECT, new NamedKey(PROJECT));
-            keyMap.put(TYPE, new NamedKey(TYPE));
-            keyMap.put(VERSIONS, new NamedKey(VERSIONS));
-            keyMap.put(UPDATED, new NamedKey(UPDATED));
-        } else {
-            for (AnalysisItem field : getFields()) {
-                keyMap.put(field.getKey().toKeyString(), field.getKey());
-            }
-        }
-        return keyMap;
+    @NotNull
+    protected List<String> getKeys() {
+        return Arrays.asList(REPORTER, COMPONENTS, DATE_CREATED, PRIORITY, STATUS,
+                ASSIGNEE, COUNT, PROJECT, TYPE, VERSIONS, UPDATED);
     }
 
     public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, DataSet dataSet) {
