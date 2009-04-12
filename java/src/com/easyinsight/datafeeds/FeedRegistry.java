@@ -59,6 +59,7 @@ public class FeedRegistry {
             LogClass.info("Cache miss for feed id: " + identifier);
             FeedDefinition feedDefinition = feedStorage.getFeedDefinitionData(identifier);
             feed = feedDefinition.createFeed();
+            feed.setVersion(getLatestVersion(identifier));
             try {
                 if(cache != null)
                     cache.put(identifier, feed);
