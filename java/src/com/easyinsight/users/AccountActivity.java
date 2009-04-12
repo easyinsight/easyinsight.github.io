@@ -89,32 +89,7 @@ public class AccountActivity {
 
     // if downgraded, what did it get downgraded to...
 
-    public static void main(String[] args) {
-        Calendar testCal = Calendar.getInstance();
-        testCal.set(Calendar.MONTH, 2);
-        testCal.set(Calendar.DAY_OF_MONTH, 1);
-        List<AccountActivity> accountActivities = new ArrayList<AccountActivity>();
-        accountActivities.add(new AccountActivity(Account.INDIVIDUAL, testCal.getTime(), 1, 1));
-        testCal.set(Calendar.MONTH, 2);
-        testCal.set(Calendar.DAY_OF_MONTH, 15);
-        accountActivities.add(new AccountActivity(Account.PROFESSIONAL, testCal.getTime(), 1, 1));
-        Calendar cal = Calendar.getInstance();
-        ListIterator<AccountActivity> iter = accountActivities.listIterator(accountActivities.size());
-        List<BillingWindow> billingWindows = new ArrayList<BillingWindow>();
-        int previousActivityLength = 0;
-        while (iter.hasPrevious()) {
-            AccountActivity previous = iter.previous();
-            cal.setTime(previous.timestamp);
-            int dayOfMonth = cal.get(Calendar.DAY_OF_MONTH);
-            int days = cal.getActualMaximum(Calendar.DAY_OF_MONTH) - (dayOfMonth - 1) - previousActivityLength;
-            billingWindows.add(new BillingWindow(days, previous.accountType, previous.userLicenses));
-            previousActivityLength = days;
-        }
-
-        double cost = calculateCost(billingWindows, cal);
-
-        System.out.println("cost = " + cost);
-    }
+    
 
     private static double calculateCost(List<BillingWindow> billingWindows, Calendar cal) {
         double sum = 0;
