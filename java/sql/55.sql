@@ -1,10 +1,10 @@
-# alter table goal_tree change root_node root_node bigint(20) default null;
+alter table goal_tree change root_node root_node bigint(20) default null;
 
-# alter table data_feed add refresh_interval bigint(20) default null;
+alter table data_feed add refresh_interval bigint(20) default null;
 
-# update data_feed set refresh_interval = 0;
+update data_feed set refresh_interval = 0;
 
-# alter table feed_persistence_metadata add last_data_time datetime default null;
+alter table feed_persistence_metadata add last_data_time datetime default null;
 
 drop table if exists account_activity;
 create table account_activity (
