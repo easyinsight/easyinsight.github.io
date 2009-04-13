@@ -16,13 +16,14 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.io.Serializable;
 
 /**
  * User: James Boe
  * Date: Apr 28, 2008
  * Time: 6:45:32 PM
  */
-public abstract class UploadFormat {
+public abstract class UploadFormat implements Serializable {
 
     public static final int VERTICAL_HEADERS = 1;
     public static final int HORIZONTAL_HEADERS = 2;

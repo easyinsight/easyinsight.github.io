@@ -8,13 +8,14 @@ import com.easyinsight.core.Key;
 import java.util.List;
 import java.util.Collection;
 import java.util.Set;
+import java.io.Serializable;
 
 /**
  * User: jboe
  * Date: Jan 3, 2008
  * Time: 11:46:38 AM
  */
-public abstract class Feed {
+public abstract class Feed implements Serializable {
     private long feedID;
     private List<AnalysisItem> fields;
     private WSAnalysisDefinition analysisDefinition;
