@@ -429,11 +429,11 @@ public class FeedStorage {
         FeedDefinition feedDefinition;
         feedDefinition = (FeedDefinition) feedCache.get(identifier);
         if(feedDefinition != null) {
-            LogClass.info("Cache hit for feed id " + identifier);
+            LogClass.info("Cache hit for feed id: " + identifier);
             return feedDefinition;
         }
         try {
-            LogClass.info("Cache miss for feed id " + identifier);
+            LogClass.info("Cache miss for feed id: " + identifier);
             PreparedStatement queryFeedStmt = conn.prepareStatement("SELECT FEED_NAME, FEED_TYPE, PUBLICLY_VISIBLE, GENRE, CREATE_DATE," +
                     "UPDATE_DATE, FEED_VIEWS, FEED_RATING_COUNT, FEED_RATING_AVERAGE, FEED_SIZE, ANALYSIS_ID," +
                     "ATTRIBUTION, DESCRIPTION, OWNER_NAME, DYNAMIC_SERVICE_DEFINITION_ID, MARKETPLACE_VISIBLE, API_KEY, unchecked_api_enabled, validated_api_enabled," +

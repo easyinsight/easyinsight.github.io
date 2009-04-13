@@ -5,13 +5,14 @@ import com.easyinsight.email.UserStub;
 
 import java.util.List;
 import java.util.ArrayList;
+import java.io.Serializable;
 
 /**
  * User: James Boe
  * Date: Apr 29, 2008
  * Time: 2:34:50 PM
  */
-public class UploadPolicy {
+public class UploadPolicy implements Serializable {
     public static final int PUBLIC = 1;
     public static final int PRIVATE = 2;
     public static final int COMMERCIAL = 3;
