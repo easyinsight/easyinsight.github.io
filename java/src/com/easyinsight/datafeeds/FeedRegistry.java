@@ -55,7 +55,8 @@ public class FeedRegistry {
         Feed feed = null;
         if(cache != null)
             feed = (Feed) cache.get(identifier);
-        if (feed == null || (getLatestVersion(identifier) != feed.getVersion())) {
+
+        if (feed == null || !isLatestVersion(feed, identifier)) {
             LogClass.info("Cache miss for feed id: " + identifier);
             FeedDefinition feedDefinition = feedStorage.getFeedDefinitionData(identifier);
             feed = feedDefinition.createFeed();
@@ -71,6 +72,15 @@ public class FeedRegistry {
         else
             LogClass.info("Cache hit for feed id: " + identifier);
         return feed;
+    }
+
+    private boolean isLatestVersion(Feed feed, long identifier) {
+        if(feed == null)
+            return false;
+        LogClass.info("Feed version: " + feed.getVersion());
+        int latestVersion = getLatestVersion(identifier);
+        LogClass.info("Latest version: " + latestVersion);
+        return feed.getVersion() == latestVersion;
     }
 
     private int getLatestVersion(long identifier) {
