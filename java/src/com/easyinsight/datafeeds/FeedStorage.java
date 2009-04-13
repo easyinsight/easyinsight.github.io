@@ -20,6 +20,7 @@ import com.easyinsight.security.Roles;
 import java.sql.*;
 import java.util.*;
 import java.util.Date;
+import java.io.Serializable;
 
 import org.hibernate.Session;
 import org.apache.jcs.JCS;
@@ -715,7 +716,7 @@ public class FeedStorage {
         throw new RuntimeException("No data source found for API key " + apiKey);
     }
 
-    private class FeedApiKey {
+    private class FeedApiKey implements Serializable {
         private String APIKey;
         private long userID;
 
