@@ -48,7 +48,8 @@
                 toggleOptions = new ArrayCollection([ new AccountOption("Account Settings", new FreeAccountSettings()) ]);
             } else if (_account.accountType == Account.INDIVIDUAL) {
                 // user profile information, option to ugprade, option to cancel, billing link, general account settings?
-                toggleOptions = new ArrayCollection([ new AccountOption("Account Settings", new IndividualAccountSettings()) ]);
+                toggleOptions = new ArrayCollection([ new AccountOption("Account Settings", new IndividualAccountSettings()),
+                    new AccountOption("API Settings", new IndividualAPIAdmin())]);
             } else {
                 if (User.getInstance().accountAdmin) {
                     // user profile
@@ -56,10 +57,12 @@
                     // core user administration...add user, remove user, change user privileges
                     toggleOptions = new ArrayCollection([ new AccountOption("My Profile", new ProfessionalMyProfile()),
                         //new AccountOption("Account Administration", new UserAccountAdministration()),
-                        new AccountOption("User Administration", new UserAdministration())]);
+                        new AccountOption("User Administration", new UserAdministration()),
+                        new AccountOption("API Administration", new APIAccountAdmin())]);
                     showToggle = true;
                 } else {
-                    toggleOptions = new ArrayCollection([ new AccountOption("My Profile", new ProfessionalMyProfile())]);
+                    toggleOptions = new ArrayCollection([ new AccountOption("My Profile", new ProfessionalMyProfile()),
+                    new AccountOption("My API Settings", new APIUserAdmin())]);
                 }
             }
             coreBox.addChild(toggleOptions.getItemAt(0).container);

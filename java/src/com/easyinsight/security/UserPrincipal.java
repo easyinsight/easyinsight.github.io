@@ -14,12 +14,18 @@ public class UserPrincipal implements Principal, Serializable {
     private long accountID;
     private long userID;
     private int accountType;
+    private boolean accountAdmin;
 
-    public UserPrincipal(String userName, long accountID, long userID, int accountType) {
+    public UserPrincipal(String userName, long accountID, long userID, int accountType, boolean accountAdmin) {
         this.userName = userName;
         this.accountID = accountID;
         this.userID = userID;
         this.accountType = accountType;
+        this.accountAdmin = accountAdmin;
+    }
+
+    public boolean isAccountAdmin() {
+        return accountAdmin;
     }
 
     public String getName() {

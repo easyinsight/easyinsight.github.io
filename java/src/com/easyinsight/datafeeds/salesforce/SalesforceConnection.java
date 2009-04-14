@@ -78,14 +78,10 @@ public class SalesforceConnection {
 
         try {
 
-            User user = userStorage.retrieveUser();
-            Account account = userStorage.getAccount(user.getAccount().getAccountID());
+            //User user = userStorage.retrieveUser();
+            //Account account = userStorage.getAccount(user.getAccount().getAccountID());
 
             long feedID = createCompositeFeed(port);
-            SubscriptionLicense license = new SubscriptionLicense();
-            license.setFeedID(feedID);
-            account.getLicenses().add(license);
-            user.getLicenses().add(license);
             new UserUploadInternalService().createUserFeedLink(userID, feedID, Roles.OWNER);
 
             FeedDescriptor feedDescriptor = new FeedDescriptor();

@@ -8,21 +8,15 @@ import org.jetbrains.annotations.NotNull;
  * Time: 8:11:37 PM
  */
 public interface IUserService {
-    @NotNull
-    public UserServiceResponse createUser(User user);
+    //@NotNull
+    //public UserServiceResponse createUser(User user);
 
     @NotNull
     UserServiceResponse authenticate(String userName, String password);
 
-    public void deleteUser(User user);
-
-    User retrieveUser();
-
     //public void updateUser(String userName, String fullName, String email);
 
-    void createAccount(Account testAccount);
+    //void createAccount(Account testAccount);
 
-    void removeUser(Account testAccount, User newUser);
-
-    void deleteAccount(Account testAccount);    
+    //void removeUser(Account testAccount, User newUser);
 }

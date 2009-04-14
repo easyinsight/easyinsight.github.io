@@ -4,12 +4,16 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.List;
 
 import com.easyinsight.database.Database;
 import com.easyinsight.users.UserService;
 import com.easyinsight.users.UserServiceResponse;
+import com.easyinsight.users.User;
+import com.easyinsight.users.Account;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.logging.SecurityLogger;
+import org.hibernate.Session;
 
 /**
  * User: James Boe
@@ -28,6 +32,16 @@ public class SecurityUtil {
         return SecurityUtil.securityProvider;
     }
 
+    public static boolean isAccountAdmin() {
+        return getSecurityProvider().getUserPrincipal().isAccountAdmin();
+    }
+
+    public static void authorizeAccountAdmin() {
+        if (!isAccountAdmin()) {
+            throw new SecurityException();
+        }
+    }
+
     public static long authenticate(String userName, String password){
         UserServiceResponse userServiceResponse = new UserService().authenticateWithEncrypted(userName, password);
         if (userServiceResponse.isSuccessful()) {
@@ -36,6 +50,42 @@ public class SecurityUtil {
             SecurityLogger.error("Unsuccessful login, user: " + userName);
             throw new SecurityException();
         }
+    }
+
+    public static UserServiceResponse authenticateKeys(String key, String secretKey) {
+        UserServiceResponse userServiceResponse;
+        if (key == null || secretKey == null) {
+            throw new SecurityException();
+        }
+        Session session = Database.instance().createSession();
+        try {
+            session.getTransaction().begin();
+            List results = session.createQuery("from User where userKey = ?").setString(0, key).list();
+            if (results.size() > 0) {
+                User user = (User) results.get(0);
+                if (!secretKey.equals(user.getUserSecretKey())) {
+                    throw new SecurityException();
+                }
+                Account account = user.getAccount();
+                userServiceResponse = new UserServiceResponse(true, user.getUserID(), user.getAccount().getAccountID(), user.getName(),
+                                user.getAccount().getAccountType(), account.getMaxSize(), user.getEmail(), user.getUserName(), null, user.isAccountAdmin(), user.isDataSourceCreator(), user.isInsightCreator());
+            } else {
+               /* results = session.createQuery("from Account where accountKey = ?").setString(0, key).list();
+                if (results.size() > 0) {
+                    
+                } else {
+                    throw new SecurityException();
+                }*/
+                throw new SecurityException();
+            }
+            session.getTransaction().commit();
+        } catch (Exception e) {
+            session.getTransaction().rollback();
+            throw new RuntimeException(e);
+        } finally {
+            session.close();
+        }
+        return userServiceResponse;
     }
 
     public static UserServiceResponse authenticateToResponse(String userName, String password) {

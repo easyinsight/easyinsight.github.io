@@ -20,6 +20,8 @@ import java.io.*;
 import java.util.*;
 import java.sql.*;
 
+import org.hibernate.Session;
+
 /**
  * User: James Boe
  * Date: Jan 26, 2008
@@ -134,7 +136,7 @@ public class UserUploadService implements IUserUploadService {
             conn.setAutoCommit(false);
             FeedDefinition feedDefinition = new FeedDefinition();
             feedDefinition.setFeedName(name);
-            feedDefinition.setOwnerName(new UserService().retrieveUser(conn).getUserName());
+            feedDefinition.setOwnerName(retrieveUser(conn).getUserName());
             UploadPolicy uploadPolicy = new UploadPolicy(SecurityUtil.getUserID());
             feedDefinition.setUploadPolicy(uploadPolicy);
             feedDefinition.setFields(new ArrayList<AnalysisItem>());
@@ -191,7 +193,7 @@ public class UserUploadService implements IUserUploadService {
                 FileBasedFeedDefinition feedDefinition = new FileBasedFeedDefinition();
                 feedDefinition.setUploadFormat(uploadFormat);
                 feedDefinition.setFeedName(name);
-                feedDefinition.setOwnerName(new UserService().retrieveUser(conn).getUserName());
+                feedDefinition.setOwnerName(retrieveUser(conn).getUserName());
                 UploadPolicy uploadPolicy = new UploadPolicy(rawUploadData.accountID);
                 feedDefinition.setUploadPolicy(uploadPolicy);
                 feedDefinition.setFields(fields);
@@ -509,7 +511,7 @@ public class UserUploadService implements IUserUploadService {
             Map<String, Key> keys = feedDefinition.newDataSourceFields(credentials);
             DataSet dataSet = feedDefinition.getDataSet(credentials, keys);
             feedDefinition.setFields(feedDefinition.createAnalysisItems(keys, dataSet));
-            feedDefinition.setOwnerName(new UserService().retrieveUser(conn).getUserName());
+            feedDefinition.setOwnerName(retrieveUser(conn).getUserName());
             UploadPolicy uploadPolicy = new UploadPolicy(userID);
             feedDefinition.setUploadPolicy(uploadPolicy);
             FeedCreationResult feedCreationResult = new FeedCreation().createFeed(feedDefinition, conn, dataSet, userID);
@@ -535,6 +537,33 @@ public class UserUploadService implements IUserUploadService {
                 LogClass.error(e);
             }
             Database.instance().closeConnection(conn);
+        }
+    }
+
+    private User retrieveUser(Connection conn) {
+        long userID = SecurityUtil.getUserID();
+        try {
+            User user = null;
+            Session session = Database.instance().createSession(conn);
+            List results;
+            try {
+                session.beginTransaction();
+                results = session.createQuery("from User where userID = ?").setLong(0, userID).list();
+                session.getTransaction().commit();
+            } catch (Exception e) {
+                session.getTransaction().rollback();
+                throw new RuntimeException(e);
+            } finally {
+                session.close();
+            }
+            if (results.size() > 0) {
+                user = (User) results.get(0);
+                user.setLicenses(new ArrayList<SubscriptionLicense>());
+            }
+            return user;
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
         }
     }
 }

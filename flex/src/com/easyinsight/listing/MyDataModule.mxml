@@ -1,0 +1,12 @@
+<?xml version="1.0" ?>
+<mx:Module xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:listing="com.easyinsight.listing.*" width="100%"
+           height="100%" implements="com.easyinsight.listing.IPerspective">
+    <mx:Script><![CDATA[
+
+    public function gotFocus():void {
+        delegate.gotFocus();
+    }
+    
+    ]]></mx:Script>
+    <listing:MyData id="delegate"/>
+</mx:Module>

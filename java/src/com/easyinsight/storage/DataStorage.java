@@ -284,7 +284,9 @@ public class DataStorage {
             this.metadata.setVersion(this.version);
             List<AnalysisItem> previousKeys = new ArrayList<AnalysisItem>();
             for (AnalysisItem previousItem : previousItems) {
-                previousKeys.add(previousItem);
+                if (!previousItem.isDerived()) {
+                    previousKeys.add(previousItem);
+                }
             }
             DataSet existing = null;
             if (migrateData) {
@@ -617,7 +619,7 @@ public class DataStorage {
             IWhere where = whereIter.next();
             whereBuilder.append(where.createWhereSQL());
             if (whereIter.hasNext()) {
-                whereBuilder.append(",");
+                whereBuilder.append(" AND ");
             }
         }
         StringBuilder tableBuilder = new StringBuilder();
@@ -627,11 +629,18 @@ public class DataStorage {
             }
         }
         tableBuilder.append(getTableName());
-        String updateSQL = "UPDATE " + tableBuilder.toString() + " SET " + fieldBuilder.toString() + " WHERE " + whereBuilder.toString();
+        String updateSQL = "DELETE " + getTableName() + " FROM " + tableBuilder.toString() + " WHERE " + whereBuilder.toString();
         System.out.println(updateSQL);
         PreparedStatement updateStmt = storageConn.prepareStatement(updateSQL);
+        int i = 1;
+        for (IWhere where : wheres) {
+            i = where.setValue(updateStmt, i);
+        }
+        updateStmt.executeUpdate();
+        dataSet.mergeWheres(wheres);
+        insertData(dataSet);        
         for (IRow row : dataSet.getRows()) {
-            int i = 1;
+            /*int i = 1;
             for (KeyMetadata keyMetadata : updateKeys) {
                 i = setValue(updateStmt, row, i, keyMetadata);
             }
@@ -640,10 +649,8 @@ public class DataStorage {
             }
 
             int rows = updateStmt.executeUpdate();
-            if (rows == 0) {
-                dataSet.mergeWheres(wheres);
-                insertData(dataSet);
-            }
+            if (rows == 0) {*/
+            //}
         }
     }
 
@@ -718,10 +725,14 @@ public class DataStorage {
                 DateValue dateValue = (DateValue) value;
                 string = dateValue.getDate().toString();
             }
-            if (string.length() > 253) {
-                string = string.substring(0, 253);
+            if (string == null) {
+                insertStmt.setNull(i++, Types.VARCHAR);
+            } else {
+                if (string.length() > 253) {
+                    string = string.substring(0, 253);
+                }
+                insertStmt.setString(i++, string);
             }
-            insertStmt.setString(i++, string);
         }
         return i;
     }

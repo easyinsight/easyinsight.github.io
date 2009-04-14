@@ -82,6 +82,12 @@ public class Account {
     @Column(name="account_state")
     private int accountState;
 
+    @Column(name="account_key")
+    private String accountKey;
+
+    @Column(name="account_secret_key")
+    private String accountSecretKey;
+
     @OneToMany(cascade=CascadeType.ALL)
     @JoinTable(name="account_to_guest_user",
         joinColumns = @JoinColumn(name="account_id", nullable = false),
@@ -120,6 +126,22 @@ public class Account {
 
     public void addLicense(SubscriptionLicense subscriptionLicense) {
         this.licenses.add(subscriptionLicense);
+    }
+
+    public String getAccountKey() {
+        return accountKey;
+    }
+
+    public void setAccountKey(String accountKey) {
+        this.accountKey = accountKey;
+    }
+
+    public String getAccountSecretKey() {
+        return accountSecretKey;
+    }
+
+    public void setAccountSecretKey(String accountSecretKey) {
+        this.accountSecretKey = accountSecretKey;
     }
 
     public int getAccountType() {

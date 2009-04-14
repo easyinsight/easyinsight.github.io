@@ -40,6 +40,11 @@ public class User {
     @Column(name="insight_creator")
     private boolean insightCreator;
 
+    @Column(name="user_key")
+    private String userKey;
+    @Column(name="user_secret_key")
+    private String userSecretKey;
+
     @ManyToOne
     @JoinColumn (name="account_id")
     private Account account;
@@ -64,6 +69,22 @@ public class User {
         userTransferObject.setDataSourceCreator(dataSourceCreator);
         userTransferObject.setInsightCreator(insightCreator);
         return userTransferObject;
+    }
+
+    public String getUserKey() {
+        return userKey;
+    }
+
+    public void setUserKey(String userKey) {
+        this.userKey = userKey;
+    }
+
+    public String getUserSecretKey() {
+        return userSecretKey;
+    }
+
+    public void setUserSecretKey(String userSecretKey) {
+        this.userSecretKey = userSecretKey;
     }
 
     public long getUserID() {

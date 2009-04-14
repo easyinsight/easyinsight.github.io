@@ -1,0 +1,103 @@
+<?xml version="1.0" ?>
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" creationComplete="retrieveData()" width="100%" height="100%">
+    <mx:Script><![CDATA[
+        import com.easyinsight.util.ProgressAlert;
+        [Bindable]
+        private var uncheckedEnabled:Boolean;
+
+        [Bindable]
+        private var validatedEnabled:Boolean;
+
+        [Bindable]
+        private var dynamicEnabled:Boolean;
+
+        [Bindable]
+        private var apiKey:String;
+
+        [Bindable]
+        private var apiSecretKey:String;
+
+        [Bindable]
+        private var showingSecretKey:Boolean;
+
+        private var accountAPISettings:AccountAPISettings;
+
+        [Bindable]
+        private var secretKeyButton:String = "Show Secret Key";
+
+        private function showSecretKey():void {
+            if (showingSecretKey) {
+                showingSecretKey = false;
+                secretKeyButton = "Show Secret Key";
+            } else {
+                showingSecretKey = true;
+                secretKeyButton = "Hide Secret Key";
+            }
+        }
+
+        private function retrieveData():void {
+            userService.getAccountAPISettings.send();            
+        }
+
+        private function saveChanges():void {
+            accountAPISettings.dynamicAPIEnabled = dynamicAPICheckbox.selected;
+            accountAPISettings.uncheckedAPIEnabled = uncheckedAPICheckbox.selected;
+            accountAPISettings.validatedAPIEnabled = validatedAPICheckbox.selected;
+            ProgressAlert.alert(this, "Saving API settings...", "Saved API settings!", userService.saveAccountAPISettings);
+            userService.saveAccountAPISettings.send(accountAPISettings);
+        }
+
+        private function gotSettings():void {
+            accountAPISettings = userService.getAccountAPISettings.lastResult as AccountAPISettings;
+            dynamicEnabled = accountAPISettings.dynamicAPIEnabled;
+            validatedEnabled = accountAPISettings.validatedAPIEnabled;
+            uncheckedEnabled = accountAPISettings.uncheckedAPIEnabled;
+            apiKey = accountAPISettings.accountKey;
+            apiSecretKey = accountAPISettings.accountSecretKey;
+        }
+
+        private function copyKeyToClipboard():void {
+            System.setClipboard(apiKey);
+        }
+
+        private function copySecretKeyToClipboard():void {
+            System.setClipboard(apiSecretKey);
+        }
+        ]]></mx:Script>
+    <mx:RemoteObject destination="login" id="userService">
+        <mx:method name="getAccountAPISettings" result="gotSettings()"/>
+        <mx:method name="saveAccountAPISettings"/>
+    </mx:RemoteObject>
+    <mx:VBox width="100%" height="100%" horizontalAlign="center">
+        <mx:VBox id="accountSettingsBox" verticalGap="0" borderThickness="1" borderColor="#D42525" borderStyle="solid" dropShadowEnabled="true"
+                paddingLeft="20" paddingRight="20" paddingTop="20" paddingBottom="20">
+            <mx:Box width="100%" height="5" backgroundColor="#D42525" left="0" right="0"/>
+            <mx:Box width="100%" backgroundColor="#F1EE8D" horizontalAlign="center">
+                <mx:Label text="API Configuration" fontFamily="Tahoma" fontWeight="bold" fontSize="14"/>
+            </mx:Box>
+            <mx:Form>
+                <mx:FormItem label="Unchecked API Enabled: ">
+                    <mx:CheckBox id="uncheckedAPICheckbox" selected="{uncheckedEnabled}"/>
+                </mx:FormItem>
+                <mx:FormItem label="Validated API Enabled: ">
+                    <mx:CheckBox id="validatedAPICheckbox" selected="{validatedEnabled}"/>
+                </mx:FormItem>
+                <mx:FormItem label="Dynamic API Enabled: ">
+                    <mx:CheckBox id="dynamicAPICheckbox" selected="{dynamicEnabled}"/>
+                </mx:FormItem>
+                <mx:FormItem label="API Key: " direction="horizontal">
+                    <mx:Text text="{apiKey}"/>
+                    <mx:Button label="Copy to Clipboard" click="copyKeyToClipboard()"/>
+                </mx:FormItem>
+                <mx:FormItem label="API Secret Key: " direction="horizontal">
+                    <mx:Button label="{secretKeyButton}" click="showSecretKey()"/>
+                    <mx:Text text="{apiSecretKey}" visible="{showingSecretKey}"/>
+                    <mx:Button label="Copy to Clipboard" click="copySecretKeyToClipboard()" visible="{showingSecretKey}"/>
+                </mx:FormItem>
+            </mx:Form>
+            <mx:HBox width="100%" horizontalAlign="center">
+                <mx:Button label="Save Changes" click="saveChanges()"/>
+            </mx:HBox>
+        </mx:VBox>
+    </mx:VBox>
+</mx:VBox>

@@ -3,10 +3,7 @@ import com.easyinsight.analysis.DataViewFactory;
 import com.easyinsight.analysis.EmbeddedViewFactory;
 import com.easyinsight.analysis.IReportController;
 import com.easyinsight.analysis.service.ListDataService;
-import ilog.treemap.TreeMap;
 public class TreeMapController implements IReportController {
-
-    private var treeMap:TreeMap;
 
     public function TreeMapController() {
     }

@@ -37,7 +37,9 @@ public class EasyInsightLoginCommand implements LoginCommand {
             session.setAttribute("accountID", userServiceResponse.getAccountID());
             session.setAttribute("userName", userServiceResponse.getUserName());
             session.setAttribute("accountType", userServiceResponse.getAccountType());
-            return new UserPrincipal(userName, userServiceResponse.getAccountID(), userServiceResponse.getUserID(), userServiceResponse.getAccountType());
+            session.setAttribute("accountAdmin", userServiceResponse.isAccountAdmin());
+            return new UserPrincipal(userName, userServiceResponse.getAccountID(), userServiceResponse.getUserID(), userServiceResponse.getAccountType(),
+                    userServiceResponse.isAccountAdmin());
         } else {
             return null;
         }

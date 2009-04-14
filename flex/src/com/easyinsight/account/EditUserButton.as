@@ -55,7 +55,7 @@ import mx.containers.HBox;
         }
 
         private function onDelete(event:MouseEvent):void {
-            
+            dispatchEvent(new DeleteUserEvent(user.userID));
         }
 
         override protected function createChildren():void {

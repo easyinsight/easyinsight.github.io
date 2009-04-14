@@ -50,7 +50,12 @@ public class BasicAuthAuthorizationInterceptor extends SoapHeaderInterceptor {
 
         // Verify the password
         try {
-            UserServiceResponse response = SecurityUtil.authenticateToResponse(policy.getUserName(), PasswordService.getInstance().encrypt(policy.getPassword()));
+            UserServiceResponse response;
+            try {
+                response = SecurityUtil.authenticateToResponse(policy.getUserName(), PasswordService.getInstance().encrypt(policy.getPassword()));
+            } catch (SecurityException e) {
+                response = SecurityUtil.authenticateKeys(policy.getUserName(), policy.getPassword());
+            }
             if (response.getAccountType() < Account.INDIVIDUAL) {
                 log.warn("Free user " + response.getUserName() + " attempted to use API");
                 sendErrorResponse(message, HttpURLConnection.HTTP_UNAUTHORIZED);

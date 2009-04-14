@@ -126,7 +126,7 @@ public class StoreService {
 
     public Collection<Merchant> getMerchants() {
         Session session = Database.instance().createSession();
-        User creator = new UserService().retrieveUser();
+        //User creator = new UserService().retrieveUser();
         List<Merchant> merchantResults = new ArrayList<Merchant>();
         /*try {
             session.beginTransaction();
