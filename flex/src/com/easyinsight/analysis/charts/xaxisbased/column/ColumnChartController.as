@@ -4,8 +4,11 @@ import com.easyinsight.analysis.EmbeddedViewFactory;
 import com.easyinsight.analysis.IReportController;
 import com.easyinsight.analysis.service.ListDataService;
 import com.easyinsight.analysis.charts.xaxisbased.XAxisControlBar;
+import mx.charts.ColumnChart;
 
 public class ColumnChartController implements IReportController {
+
+    private var chart:ColumnChart;
     
     public function ColumnChartController() {
     }

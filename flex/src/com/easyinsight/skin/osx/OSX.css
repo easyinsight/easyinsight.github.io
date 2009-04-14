@@ -361,10 +361,17 @@ DateChooser {
 
 .axisTitles {
     fontSize: 14;
+    fontFamily: "Tahoma";
+}
+
+OLAPDataGrid {
+    fontFamily: "Tahoma";
 }
 
 CartesianChart {
     axisTitleStyleName:axisTitles;
+    fontFamily: "Tahoma";
+    fontSize: 14;
 }
 
 CartesianChart3D {

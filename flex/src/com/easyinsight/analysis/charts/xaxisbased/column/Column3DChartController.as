@@ -4,11 +4,10 @@ import com.easyinsight.analysis.EmbeddedViewFactory;
 import com.easyinsight.analysis.IReportController;
 import com.easyinsight.analysis.charts.xaxisbased.XAxisControlBar;
 import com.easyinsight.analysis.service.ListDataService;
-import ilog.charts3d.ColumnChart3D;
 
 public class Column3DChartController implements IReportController {
 
-    private var blah:ColumnChart3D;        
+    // private var blah:ColumnChart3D;
     
     public function Column3DChartController() {
     }

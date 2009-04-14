@@ -1,104 +1,35 @@
 <?xml version="1.0" encoding="utf-8"?>
-<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:analysis="analysis.*" alpha="1" backgroundAlpha=".1" 
-	width="100%" height="100%" backgroundColor="#FFFFFF">
-	<mx:Metadata>
-		[Event(name="simpleAnalyze", type="com.easyinsight.dashboard.SimpleAnalyzeEvent")]		
-	</mx:Metadata> 
-	<mx:Script>
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:analysis="analysis.*"
+         xmlns:dashboard="com.easyinsight.dashboard.*" alpha="1" backgroundAlpha=".1"
+         width="100%" height="100%" backgroundColor="#FFFFFF">
+    <mx:Metadata>
+        [Event(name="simpleAnalyze", type="com.easyinsight.dashboard.SimpleAnalyzeEvent")]
+    </mx:Metadata>
+    <mx:Script>
 		<![CDATA[
-			import mx.core.ScrollControlBase;
-			import com.easyinsight.filtering.FilterRangeDefinition;
-			import com.easyinsight.filtering.FilterDateRangeDefinition;
-			import com.easyinsight.filtering.FilterValueDefinition;
-			import com.easyinsight.filtering.FilterDefinition;
-			import mx.controls.Alert;
-			import mx.events.ModuleEvent;
-            import mx.messaging.events.MessageEvent;
-            import mx.modules.IModuleInfo;
-			import mx.modules.ModuleManager;	
-                   
-            import com.easyinsight.analysis.AnalysisDefinition;
-            
-            import com.easyinsight.analysis.AnalysisItem;
-			import com.easyinsight.analysis.AnalysisCalculation;
-			import com.easyinsight.analysis.AnalysisList;
-			import com.easyinsight.analysis.AnalysisRangeDimension;
-			import com.easyinsight.analysis.AnalysisDateDimension;
-			import com.easyinsight.analysis.AnalysisDimension;
-			import com.easyinsight.analysis.AnalysisMeasure;
-			
-			
+        import mx.messaging.events.MessageEvent;
 
-            private var definition:AnalysisDefinition;
-            [Bindable]
-            private var title:String;
-            private var dataView:DisplayObject;
-            
-            private var moduleInfo:IModuleInfo;
-            
-            private function moduleLoadHandler(event:ModuleEvent):void {
-            	var viewFactory:IViewFactory = moduleInfo.factory.create() as IViewFactory;
-            	this.dataView = viewFactory.createDisplay(definition);
-            	coreVBox.addChild(dataView);
-            }
-            
-            private function moduleFailureHandler(event:ModuleEvent):void {
-            	Alert.show(event.errorText);
-            }
+        [Bindable]
+        private var _analysisID:int;
+        [Bindable]
+        private var title:String;
+        private var dataView:DisplayObject;
 
-            public function set analysisDefinition(definition:AnalysisDefinition):void {
-                this.definition = definition;
-                if (definition != null) {
-                    defConsumer.subtopic = String(definition.dataFeedID);
-                    defConsumer.subscribe();
-	                if (definition.getDataFeedType() == "List") {
-	                	moduleInfo = ModuleManager.getModule("/app/easyui-debug/ListViewModule.swf");
-	                } else if (definition.getDataFeedType() == "Chart") {
-	                	moduleInfo = ModuleManager.getModule("/app/easyui-debug/ColumnChartViewModule.swf");
-	                } else if (definition.getDataFeedType() == "Map") {
-	                	moduleInfo = ModuleManager.getModule("/app/easyui-debug/MapViewModule.swf");
-	                }                         
-	                
-	                moduleInfo.addEventListener(ModuleEvent.READY, moduleLoadHandler);
-	                moduleInfo.addEventListener(ModuleEvent.ERROR, moduleFailureHandler);
-	                moduleInfo.load();
-	                this.title = definition.name;
-	            }          
-            }
-            
-            private function titleClick():void {
-                dispatchEvent(new SimpleAnalyzeEvent(definition.analysisID));
-            }
-            
-            private function returnToList():void {
-				dispatchEvent(new ReturnToListEvent());                    	
-            }
+        public function set analysisID(val:int):void {
+            _analysisID = val;
+        }
 
-            private function onMessage(event:MessageEvent):void {
-                var view:IView = dataView as IView;
-                view.refreshData();
-            }
-            
-            private function annoyingDependencies():void {
-            	var analysisMeasure:AnalysisMeasure;
-            	var analysisDimension:AnalysisDimension;
-            	var analysisDateDimension:AnalysisDateDimension;
-            	var analysisRangeDimension:AnalysisRangeDimension;
-            	var analysisList:AnalysisList;
-            	var analysisCalc:AnalysisCalculation;
-            	var analysisItem:AnalysisItem;
-            	var filterDefinition:FilterDefinition;
-            	var filterValueDefinition:FilterValueDefinition;
-            	var filterDateDefinition:FilterDateRangeDefinition;
-            	var filterRangeDefinition:FilterRangeDefinition;
-            	var scrollControlBase:ScrollControlBase;
-            }
+        private function returnToList():void {
+            dispatchEvent(new ReturnToListEvent());
+        }
+
+        private function onMessage(event:MessageEvent):void {
+            panel.refreshData();
+        }
         ]]>
-	</mx:Script>
+    </mx:Script>
     <mx:Consumer id="defConsumer" destination="dataUpdates" message="onMessage(event)"/>
-	<mx:ApplicationControlBar width="100%" horizontalAlign="center">
-		<mx:LinkButton label="{title}" click="titleClick()" textDecoration="underline"/>
-	</mx:ApplicationControlBar>	
-	<mx:VBox id="coreVBox" height="100%" width="100%">
-	</mx:VBox>
+    <mx:VBox id="coreVBox" height="100%" width="100%">
+        <dashboard:DataViewPanel id="panel" analysisID="{_analysisID}"/>
+    </mx:VBox>
 </mx:VBox>

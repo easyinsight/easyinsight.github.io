@@ -4,10 +4,10 @@
 	paddingTop="0" top="0" borderThickness="0" left="0" paddingLeft="0" right="0" paddingRight="0"
 	bottom="0" paddingBottom="0">
 	<mx:states>
-		<mx:State name="GettingInsight">
+		<mx:State name="GettingReport">
 			<mx:RemoveChild target="{loginForm}"/>
 			<mx:AddChild relativeTo="{coreBox}">
-				<mx:Form>
+				<mx:Form enterState="onGettingReports()">
 					<mx:FormItem label="Report: ">
 						<mx:ComboBox id="insightChooser" dataProvider="{stubs}" labelField="name"/>
 					</mx:FormItem>
@@ -17,7 +17,7 @@
 				</mx:Form>
 			</mx:AddChild>
 		</mx:State>
-		<mx:State name="Insight">
+		<mx:State name="Report">
 			<mx:RemoveChild target="{loginForm}"/>
 			<mx:AddChild relativeTo="{coreBox}">
                 <dashboard:DataViewPanel id="panel" analysisID="{analysisID}"/>
@@ -26,21 +26,6 @@
 	</mx:states>
 	<mx:Script>
 		<![CDATA[
-            import com.easyinsight.analysis.charts.bubble.BubbleChartController;
-            import com.easyinsight.analysis.charts.plot.PlotChartController;
-            import com.easyinsight.analysis.charts.twoaxisbased.area.Area3DChartController;
-            import com.easyinsight.analysis.charts.twoaxisbased.area.AreaChartController;
-            import com.easyinsight.analysis.charts.twoaxisbased.line.Line3DChartController;
-            import com.easyinsight.analysis.charts.twoaxisbased.line.LineChartController;
-            import com.easyinsight.analysis.charts.xaxisbased.column.Column3DChartController;
-            import com.easyinsight.analysis.charts.xaxisbased.column.ColumnChartController;
-            import com.easyinsight.analysis.charts.xaxisbased.pie.Pie3DChartController;
-            import com.easyinsight.analysis.charts.xaxisbased.pie.PieChartController;
-            import com.easyinsight.analysis.charts.yaxisbased.bar.Bar3DChartController;
-            import com.easyinsight.analysis.charts.yaxisbased.bar.BarChartController;
-            import com.easyinsight.analysis.crosstab.CrosstabController;
-            import com.easyinsight.analysis.list.ListController;
-            import com.easyinsight.analysis.maps.MapController;
             import mx.rpc.events.ResultEvent;
 			import mx.messaging.config.ServerConfig;
 			import mx.rpc.AsyncToken;
@@ -48,7 +33,6 @@
 			import mx.rpc.events.FaultEvent;
 			import mx.collections.ArrayCollection;
 
-			import com.easyinsight.analysis.AnalysisDefinition;
 			import com.easyinsight.dashboard.WidgetAnalysisStub;
 			import com.easyinsight.framework.User;
 			import com.easyinsight.framework.UserServiceResponse;
@@ -57,19 +41,7 @@
 			[Bindable]
 			private var analysisID:Number;
 			[Bindable]
-			private var phase1:String;
-			[Bindable]
-			private var phase2:String;
-			[Bindable]
-			private var phase3:String;
-
-			[Bindable]
 			private var stubs:ArrayCollection;
-
-			[Bindable]
-			private var analysisDefinition:AnalysisDefinition;
-
-			private var selectedAnalysisID:Number;
 
 			private function onKeyUp(event:KeyboardEvent):void {
 				if (event.keyCode == Keyboard.ENTER) {
@@ -82,25 +54,37 @@
 			private function onCreationComplete():void {
 				focusManager.setFocus(userName);
 				addEventListener(KeyboardEvent.KEY_UP, onKeyUp);
-			}
 
-            private function blah():void {
-                var def1:ListController;
-                var def2:ColumnChartController;
-                var def3:Column3DChartController;
-                var def4:BarChartController;
-                var def5:Bar3DChartController;
-                var def6:PieChartController;
-                var def7:Pie3DChartController;
-                var def8:LineChartController;
-                var def9:Line3DChartController;
-                var def10:AreaChartController;
-                var def11:Area3DChartController;
-                var def12:MapController;
-                var def13:CrosstabController;
-                var def14:BubbleChartController;
-                var def15:PlotChartController;
-            }
+                // TODO: problems still with the widget here
+                /*
+                    These calls are standard Javascript external invokes with the UWA interface. In the case of Yahoo
+                    widgets, they don't do anything right now.
+                 */
+                var userNameJS:String = ExternalInterface.call("widget.getValue", "userName");
+				var passwordJS:String = ExternalInterface.call("widget.getValue", "password");
+				var analysisIDString:String = ExternalInterface.call("widget.getValue", "insightCombo");
+
+				// are user credentials already set in preferences?
+
+				if (userNameJS != null && "" != userNameJS && passwordJS != null && "" != passwordJS) {
+
+					// is a report already chosen?
+
+					if (analysisIDString != null && "" != analysisIDString) {
+						analysisID = Number(analysisID);
+					}
+					userName.text = userNameJS;
+					password.text = passwordJS;
+					login();
+				} else {
+					if (authService.channelSet == null) {
+	            		authService.channelSet = ServerConfig.getChannelSet(authService.destination);
+	            	}
+	            	if (authService.channelSet.connected) {
+                        // TODO: handle things correctly if a session already exists
+	            	}
+				}
+			}
 
 			private function handleAuthentication():void {
                 var authResult:UserServiceResponse= authService.authenticate.lastResult as UserServiceResponse;
@@ -111,15 +95,16 @@
                             authResult.dataSourceCreator, authResult.insightCreator, authResult.userID);
                 	User.getInstance().password = authResult.encryptedPassword;
                 	User.getInstance().userName = authResult.userName;
+                    /*
+                        Set the username and password at this point through the standard UWA javascript mechanisms.
+                     */
                 	ExternalInterface.call("widget.setValue", "userName", userName.text);
                 	ExternalInterface.call("widget.setValue", "password", password.text);
-                	if (selectedAnalysisID > 0) {
-		            	ExternalInterface.call("widget.setValue", "insightCombo", selectedAnalysisID);
-		            	analysisService.openAnalysisDefinition.send(selectedAnalysisID);
+                	if (analysisID > 0) {
+		            	currentState = "Report";
                 	} else {
-                		analysisService.getWidgetAnalyses.send();
+                		currentState = "GettingReport";
                 	}
-                    //_loginContainer.dispatchEvent(new LoginEvent());
                 } else {
                     failureMessageLabel.text = authResult.failureMessage;
                 }
@@ -153,20 +138,23 @@
             			}
             		}
         		));
+            }
 
+            private function onGettingReports():void {
+                analysisService.getWidgetAnalyses.send();
             }
 
             private function gotAnalyses():void {
             	this.stubs = analysisService.getWidgetAnalyses.lastResult as ArrayCollection;
-				currentState = "GettingInsight";
+				currentState = "GettingReport";
             }
 
             private function viewInsight():void {
             	var insight:WidgetAnalysisStub = insightChooser.selectedItem as WidgetAnalysisStub;
                 this.analysisID = insight.analysisID;
             	ExternalInterface.call("widget.setValue", "insightCombo", insight.analysisID);
-                currentState = "Insight";
-            }
+                currentState = "Report";
+            }                                                  
 		]]>
 	</mx:Script>
 	<mx:RemoteObject id="authService" destination="login">
@@ -175,11 +163,6 @@
 	<mx:RemoteObject id="analysisService" destination="analysisDefinition">
 		<mx:method name="getWidgetAnalyses" result="gotAnalyses()"/>
 	</mx:RemoteObject>
-	<!--
-	<mx:WebService id="insightService" wsdl="http://ec2-72-44-53-122.compute-1.amazonaws.com:8080/app/services/InsightAPIService?wsdl">
-		<mx:operation name="list" result="gotList()"/>
-	</mx:WebService>
-	-->
 	<mx:Style source="com/easyinsight/skin/osx/OSX.css"/>
 	<mx:VBox id="coreBox" width="100%" height="100%">
 		<mx:Form id="loginForm">
@@ -196,13 +179,5 @@
 				<mx:Button label="Log In" click="login()"/>
 			</mx:FormItem>
 		</mx:Form>
-		<!--
-		<dashboard:WidgetViewPanel id="widgetView"/>
-
-		<mx:Label text="{phase1}"/>
-		<mx:Label text="{phase2}"/>
-		<mx:Label text="{phase3}"/>
-	-->
 	</mx:VBox>
-
 </mx:Application>

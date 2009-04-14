@@ -1,20 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:analysis="analysis.*" alpha="1" backgroundAlpha=".1" 
-	width="100%" height="100%" backgroundColor="#FFFFFF">
+	width="100%" height="100%" backgroundColor="#FFFFFF" implements="com.easyinsight.dashboard.IView">
 	<mx:Metadata>
 		[Event(name="analyze", type="com.easyinsight.genredata.AnalyzeEvent")]
 		[Event(name="returnToList", type="com.easyinsight.dashboard.ReturnToListEvent")]
 	</mx:Metadata> 
 	<mx:Script>
 		<![CDATA[
-        import com.easyinsight.analysis.ControllerLookup;
+        import com.easyinsight.analysis.EmbeddedControllerLookup;
         import com.easyinsight.analysis.EmbeddedViewFactory;
-        import com.easyinsight.analysis.IReportController;
+        import com.easyinsight.analysis.IEmbeddedReportController;
 
         import mx.controls.Label;
         import mx.rpc.events.FaultEvent;
-
-        import mx.managers.PopUpManager;
 
         [Bindable]
         private var showReturnToList:Boolean;
@@ -26,6 +24,8 @@
 
         private var _titleFunction:Function;
         private var _titleFunctionCaller:Object;
+
+        private var dataViewFactory:EmbeddedViewFactory;
 
         public function set reportType(val:int):void {
             _reportType = val;
@@ -49,16 +49,12 @@
 
         override protected function createChildren():void {
             super.createChildren();
-            var controllerClass:Class = ControllerLookup.controllerForType(_reportType);
-            var controller:IReportController = new controllerClass();
+            var controllerClass:Class = EmbeddedControllerLookup.controllerForType(_reportType);
+            var controller:IEmbeddedReportController = new controllerClass();
             var dataViewFactory:EmbeddedViewFactory = controller.createEmbeddedView();
             dataViewFactory.reportID = _analysisID;
             coreVBox.addChild(dataViewFactory);
             dataViewFactory.retrieveData();
-        }
-
-        private function closeThis():void {
-            PopUpManager.removePopUp(this);
         }
 
         private function titleClick():void {
@@ -75,6 +71,10 @@
         private function returnToList():void {
             dispatchEvent(new ReturnToListEvent());
         }
+
+        public function refreshData():void {
+            dataViewFactory.retrieveData();
+        }
                 ]]>
 	</mx:Script>
 	<mx:ApplicationControlBar width="100%" horizontalAlign="center">
@@ -82,10 +82,5 @@
 		<mx:Button label="Return" click="returnToList()" visible="{showReturnToList}"/>
 	</mx:ApplicationControlBar>	
 	<mx:VBox id="coreVBox" height="100%" width="100%">
-		<!-- <mx:HBox width="100%">
-			<mx:Label text="Search:"/>
-			<mx:TextInput change="search()" id="searchInput"/>
-			<mx:Button label="Analyze" click="analyze()"/>	
-		</mx:HBox> -->
 	</mx:VBox>
 </mx:VBox>

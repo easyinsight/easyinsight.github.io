@@ -4,43 +4,15 @@
 	            bottom="0" paddingBottom="0" backgroundColor="#FFFFFF">
 	<mx:Script>
 		<![CDATA[
-			import com.easyinsight.filtering.FilterRangeDefinition;
-			import com.easyinsight.filtering.FilterDateRangeDefinition;
-			import com.easyinsight.filtering.FilterValueDefinition;
-			import com.easyinsight.filtering.FilterDefinition;
-			import com.easyinsight.analysis.YahooMapDefinition;
-			import com.easyinsight.analysis.MapDefinition;
-			import com.easyinsight.analysis.CrosstabDefinition;
-			import com.easyinsight.analysis.ChartDefinition;
-			import com.easyinsight.analysis.ListDefinition;
-			import com.easyinsight.analysis.AnalysisDefinition;
+            [Bindable]
+            private var analysisID:int;
 			
 			private function handleFlashVars():void {
-				var analysisID:int = int(Application.application.parameters.analysisID);
-				analysisService.openAnalysisDefinition.send(analysisID);
+				this.analysisID = int(Application.application.parameters.analysisID);
 			}
-			
-			private function gotAnalysisDefinition():void {				
-				panel.analysisDefinition = analysisService.openAnalysisDefinition.lastResult as AnalysisDefinition; 	
-			}
-			
-			private function blah():void {
-            	var listDefinition:ListDefinition;
-            	var chartDefinition:ChartDefinition;
-            	var crosstabDefinition:CrosstabDefinition;
-            	var mapDefinition:MapDefinition;
-            	var yahooMapDefinition:YahooMapDefinition;
-            	var filterDefinition:FilterDefinition;
-            	var filterValueDefinition:FilterValueDefinition;
-            	var filterDateDefinition:FilterDateRangeDefinition;
-            	var filterRangeDefinition:FilterRangeDefinition;
-            }
 		]]>
 	</mx:Script>
-	<mx:RemoteObject id="analysisService" destination="analysisDefinition">		
-		<mx:method name="openAnalysisDefinition" result="gotAnalysisDefinition()"/>
-	</mx:RemoteObject>
 	<mx:VBox width="100%" height="100%">		
-		<dashboard:EmbeddedViewPanel id="panel"/>
+		<dashboard:EmbeddedViewPanel id="panel" analysisID="{analysisID}"/>
 	</mx:VBox>
 </mx:Application>
