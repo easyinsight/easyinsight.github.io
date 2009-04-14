@@ -57,9 +57,10 @@ package com.easyinsight.framework
 		}
 		
 		public function processFeedMetadata(resultEvent:ResultEvent):void {
-			var call:Object = resultEvent.token;
 			var feedMetadata:FeedMetadata = dataRemoteSource.getFeedMetadata.lastResult as FeedMetadata;
 			onMetadata.call(onMetadataCaller, feedMetadata);
+            this.onMetadata = null;
+            this.onMetadataCaller = null;
 			dispatchEvent(new DataServiceLoadingEvent(DataServiceLoadingEvent.LOADING_STOPPED));	
 		}					
 		

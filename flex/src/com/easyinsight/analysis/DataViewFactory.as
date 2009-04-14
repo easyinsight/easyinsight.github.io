@@ -86,6 +86,23 @@ public class DataViewFactory extends VBox {
         loadReportRenderer();
     }
 
+    public function cleanup():void {
+        _dataService.removeEventListener(DataServiceLoadingEvent.LOADING_STARTED, dataLoadingEvent);
+        _dataService.removeEventListener(DataServiceLoadingEvent.LOADING_STOPPED, dataLoadingEvent);
+        _dataService.removeEventListener(DataServiceEvent.DATA_RETURNED, gotData);
+        _controlBar.removeEventListener(ReportDataEvent.REQUEST_DATA, onDataRequest);
+        _controlBar.removeEventListener(CustomChangeEvent.CUSTOM_CHANGE, customChangeFromControlBar);
+        if (_reportRenderer != null) {
+            _reportRenderer.removeEventListener(ReportRendererEvent.ADD_ITEM, onItemAdded);
+            _reportRenderer.removeEventListener(ReportRendererEvent.FORCE_RENDER, forceRender);
+            _reportRenderer.removeEventListener(CustomChangeEvent.CUSTOM_CHANGE, customChangeFromRenderer);
+            _reportRenderer.removeEventListener(HierarchyDrilldownEvent.DRILLDOWN, drilldown);
+            _reportRenderer.removeEventListener(HierarchyRollupEvent.HIERARCHY_ROLLUP, onRollup);
+            removeChild(_reportRenderer as DisplayObject);
+        }
+        moduleInfo = null;
+    }
+
     private function dataLoadingEvent(event:DataServiceLoadingEvent):void {
         dispatchEvent(event);
     }
@@ -124,7 +141,10 @@ public class DataViewFactory extends VBox {
     }
             
     private function reportLoadHandler(event:ModuleEvent):void {
+        moduleInfo.removeEventListener(ModuleEvent.READY, reportLoadHandler);
+        moduleInfo.removeEventListener(ModuleEvent.ERROR, reportFailureHandler);
         _reportRenderer = moduleInfo.factory.create() as IReportRenderer;
+        //moduleInfo = null;
         _reportRenderer.addEventListener(ReportRendererEvent.ADD_ITEM, onItemAdded);
         _reportRenderer.addEventListener(ReportRendererEvent.FORCE_RENDER, forceRender);
         _reportRenderer.addEventListener(CustomChangeEvent.CUSTOM_CHANGE, customChangeFromRenderer);
@@ -132,6 +152,7 @@ public class DataViewFactory extends VBox {
         _reportRenderer.addEventListener(HierarchyRollupEvent.HIERARCHY_ROLLUP, onRollup);
         if (_loadingDisplay != null) {
             removeChild(_loadingDisplay);
+            _loadingDisplay.moduleInfo = null;
             _loadingDisplay = null;
         }
         addChild(_reportRenderer as DisplayObject);
@@ -166,6 +187,8 @@ public class DataViewFactory extends VBox {
     }
 
     private function reportFailureHandler(event:ModuleEvent):void {
+        moduleInfo.removeEventListener(ModuleEvent.READY, reportLoadHandler);
+        moduleInfo.removeEventListener(ModuleEvent.ERROR, reportFailureHandler);
         Alert.show(event.errorText);
     }
 

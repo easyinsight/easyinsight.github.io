@@ -216,6 +216,7 @@ import com.easyinsight.analysis.HierarchyDrilldownEvent;
             if (dataView != null) {
                 dataView.removeEventListener(DataServiceLoadingEvent.LOADING_STARTED, startLoading);
                 dataView.removeEventListener(DataServiceLoadingEvent.LOADING_STOPPED, stopLoading);
+                dataView.removeEventListener(AnalysisChangedEvent.ANALYSIS_CHANGED, onAnalysisChanged);
                 dataControlVBox.removeChild(dataView);
             }
             if (analysisDefinition == null) {
@@ -267,7 +268,6 @@ import com.easyinsight.analysis.HierarchyDrilldownEvent;
                 currentState = "NotLoggedIn";
                 User.getEventNotifier().addEventListener(LoginEvent.LOGIN, onLogin);
             }
-            dataService.addEventListener(InvalidFieldsEvent.INVALID_FIELDS, onInvalidFields);
             this.analysisValidators = [ analysisNameValidator ];
             this.feedMetadata = feedMetadata;
             dataSourceName = this.feedMetadata.dataSourceName;
@@ -297,12 +297,6 @@ import com.easyinsight.analysis.HierarchyDrilldownEvent;
                 loadController(controller);
 
                 analysisState.selectedLabel = analysisDefinition.type;
-
-                /*if (analysisDefinition.addedItems != null) {
-                 for each (var analysisField:AnalysisItem in analysisDefinition.addedItems) {
-                 availableFields.addItem(new AnalysisItemWrapper(analysisField));
-                 }
-                 }*/
 
                 shareDataSourceSharing = analysisDefinition.visibleAtFeedLevel;
                 publiclyVisible = analysisDefinition.publiclyVisible;
@@ -350,6 +344,7 @@ import com.easyinsight.analysis.HierarchyDrilldownEvent;
             addEventListener(HierarchyRollupEvent.HIERARCHY_ROLLUP, onRollup);
             dataService.addEventListener(DataServiceLoadingEvent.LOADING_STARTED, startLoading);
             dataService.addEventListener(DataServiceLoadingEvent.LOADING_STOPPED, stopLoading);
+            dataService.addEventListener(InvalidFieldsEvent.INVALID_FIELDS, onInvalidFields);
             transformContainer.addEventListener(TransformsUpdatedEvent.UPDATED_TRANSFORMS, transformsUpdated);
             startLoading(null);
             if (_reportID > 0) {
@@ -634,6 +629,20 @@ import com.easyinsight.analysis.HierarchyDrilldownEvent;
         public function cleanup():void {
             removeEventListener(CommandEvent.COMMAND, onCommand);
             removeEventListener(KeyboardEvent.KEY_UP, onKey);
+            removeEventListener(AnalysisChangedEvent.ANALYSIS_CHANGED, onAnalysisChanged);
+            removeEventListener(DeleteAnalysisItemEvent.DELETE_ANALYSIS_ITEM, onFieldDelete);
+            removeEventListener(HierarchyDrilldownEvent.DRILLDOWN, childFilterCreation);
+            removeEventListener(HierarchyRollupEvent.HIERARCHY_ROLLUP, onRollup);
+            dataService.removeEventListener(DataServiceLoadingEvent.LOADING_STARTED, startLoading);
+            dataService.removeEventListener(DataServiceLoadingEvent.LOADING_STOPPED, stopLoading);
+            dataService.removeEventListener(InvalidFieldsEvent.INVALID_FIELDS, onInvalidFields);
+            transformContainer.removeEventListener(TransformsUpdatedEvent.UPDATED_TRANSFORMS, transformsUpdated);
+            if (dataView != null) {
+                dataView.removeEventListener(DataServiceLoadingEvent.LOADING_STARTED, startLoading);
+                dataView.removeEventListener(DataServiceLoadingEvent.LOADING_STOPPED, stopLoading);
+                dataView.removeEventListener(AnalysisChangedEvent.ANALYSIS_CHANGED, onAnalysisChanged);
+                dataView.cleanup();
+            }
         }
 
         private function close():void {

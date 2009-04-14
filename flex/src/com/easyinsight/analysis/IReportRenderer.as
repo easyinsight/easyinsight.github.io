@@ -6,6 +6,7 @@ public interface IReportRenderer {
     function createFilterRawData():FilterRawData;
     function addEventListener(type:String, listener:Function, useCapture:Boolean = false, priority:int = 0,
                 useWeakReference:Boolean = false):void;
+    function removeEventListener(type:String, listener:Function, useCapture:Boolean = false):void;
     function updateExportMetadata():void;
     function onCustomChangeEvent(event:CustomChangeEvent):void;
 }

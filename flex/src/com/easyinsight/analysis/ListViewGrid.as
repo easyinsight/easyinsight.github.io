@@ -1,6 +1,8 @@
 package com.easyinsight.analysis {
 import flash.display.Sprite;
 
+import flash.utils.Dictionary;
+
 import mx.collections.ArrayCollection;
 import mx.controls.AdvancedDataGrid;
 
@@ -12,6 +14,12 @@ public class ListViewGrid extends AdvancedDataGrid {
     override public function findString(str:String):Boolean {
         return false;
     }
+
+    override public function set columns(value:Array):void {
+        super.columns = value;
+        itemRendererToFactoryMap = new Dictionary(false);
+    }
+
 
     /**
      * A user-defined function that will return the correct color of the
