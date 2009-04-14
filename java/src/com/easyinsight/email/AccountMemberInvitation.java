@@ -63,7 +63,7 @@ public class AccountMemberInvitation {
         String body = MessageFormat.format(newProAccountText, userName, password);
         String subject = "Easy Insight Account Creation";
         try {
-            new GMailConnection().sendSSLMessage(to, subject, body, "donotreply@easy-insight.com");
+            new AuthSMTPConnection().sendSSLMessage(to, subject, body, "donotreply@easy-insight.com");
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);
@@ -74,7 +74,7 @@ public class AccountMemberInvitation {
         String body = MessageFormat.format(resetPasswordText, userName, password);
         String subject = "Easy Insight Password Reset";
         try {
-            new GMailConnection().sendSSLMessage(to, subject, body, "accounts@easy-insight.com");
+            new AuthSMTPConnection().sendSSLMessage(to, subject, body, "accounts@easy-insight.com");
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);
@@ -85,7 +85,7 @@ public class AccountMemberInvitation {
         String body = MessageFormat.format(newProAccountText, userName, password, consultant, consultantEMail);
         String subject = "Easy Insight Account Creation";
         try {
-            new GMailConnection().sendSSLMessage(to, subject, body, "accounts@easy-insight.com");
+            new AuthSMTPConnection().sendSSLMessage(to, subject, body, "accounts@easy-insight.com");
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);
@@ -96,7 +96,7 @@ public class AccountMemberInvitation {
         String body = MessageFormat.format(groupInviteText, accountOwner, userName, password);
         String subject = "Easy Insight Account Creation";
         try {
-            new GMailConnection().sendSSLMessage(to, subject, body, accountOwner);
+            new AuthSMTPConnection().sendSSLMessage(to, subject, body, accountOwner);
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);
@@ -108,7 +108,7 @@ public class AccountMemberInvitation {
         String body = MessageFormat.format(freeAccountConfirmationText, url);
         String subject = "Easy Insight Account Activation";
         try {
-//            new GMailConnection().sendSSLMessage(to, subject, body, "donotreply@easy-insight.com");
+            new AuthSMTPConnection().sendSSLMessage(to, subject, body, "donotreply@easy-insight.com");
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);
