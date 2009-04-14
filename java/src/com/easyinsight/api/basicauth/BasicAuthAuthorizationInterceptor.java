@@ -112,8 +112,9 @@ public class BasicAuthAuthorizationInterceptor extends SoapHeaderInterceptor {
 
     private void close(Message outMessage) throws IOException {
         OutputStream os = outMessage.getContent(OutputStream.class);
+        os.write(0);
         os.flush();
-        os.close();
+        //os.close();
     }
 
 }
