@@ -14,7 +14,7 @@ public class EmbeddedViewFactory extends VBox {
 
     private var _reportRendererModule:String;
     private var _newDefinition:Class;
-    private var _reportDataService:Class;
+    private var _reportDataService:Class = EmbeddedDataService;
 
     private var _reportID:int;
     private var _availableFields:ArrayCollection;

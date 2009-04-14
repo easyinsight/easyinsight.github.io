@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:analysis="analysis.*" alpha="1" backgroundAlpha=".1" 
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" alpha="1" backgroundAlpha=".1"
 	width="100%" height="100%" backgroundColor="#FFFFFF" implements="com.easyinsight.dashboard.IView">
 	<mx:Metadata>
 		[Event(name="analyze", type="com.easyinsight.genredata.AnalyzeEvent")]
@@ -20,6 +20,7 @@
         private var title:String;
         private var _analysisID:int;
         private var _reportType:int;
+        [Bindable]
         private var _reportName:String;
 
         private var _titleFunction:Function;
@@ -78,7 +79,7 @@
                 ]]>
 	</mx:Script>
 	<mx:ApplicationControlBar width="100%" horizontalAlign="center">
-		<mx:LinkButton label="{title}" click="titleClick()" textDecoration="underline"/>
+		<mx:LinkButton label="{_reportName}" click="titleClick()" textDecoration="underline"/>
 		<mx:Button label="Return" click="returnToList()" visible="{showReturnToList}"/>
 	</mx:ApplicationControlBar>	
 	<mx:VBox id="coreVBox" height="100%" width="100%">

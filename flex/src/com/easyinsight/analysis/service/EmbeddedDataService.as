@@ -50,7 +50,7 @@ public class EmbeddedDataService extends EventDispatcher implements IEmbeddedDat
             }
             data.addItem(endObject);
         }
-        dispatchEvent(new EmbeddedDataServiceEvent(DataServiceEvent.DATA_RETURNED, data, listData.definition, clientProcessorMap));
+        dispatchEvent(new EmbeddedDataServiceEvent(EmbeddedDataServiceEvent.DATA_RETURNED, data, listData.definition, clientProcessorMap));
         dispatchEvent(new DataServiceLoadingEvent(DataServiceLoadingEvent.LOADING_STOPPED));
     }
 

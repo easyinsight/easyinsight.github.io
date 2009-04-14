@@ -7,7 +7,7 @@
 		<mx:State name="GettingReport">
 			<mx:RemoveChild target="{loginForm}"/>
 			<mx:AddChild relativeTo="{coreBox}">
-				<mx:Form enterState="onGettingReports()">
+				<mx:Form>
 					<mx:FormItem label="Report: ">
 						<mx:ComboBox id="insightChooser" dataProvider="{stubs}" labelField="name"/>
 					</mx:FormItem>
@@ -20,20 +20,21 @@
 		<mx:State name="Report">
 			<mx:RemoveChild target="{loginForm}"/>
 			<mx:AddChild relativeTo="{coreBox}">
-                <dashboard:DataViewPanel id="panel" analysisID="{analysisID}"/>
+                <dashboard:DataViewPanel id="panel" analysisID="{analysisID}" reportType="{reportType}" reportName="{reportName}"/>
 			</mx:AddChild>
 		</mx:State>
 	</mx:states>
 	<mx:Script>
 		<![CDATA[
-            import mx.rpc.events.ResultEvent;
+            import com.easyinsight.solutions.InsightDescriptor;
+
+        import mx.rpc.events.ResultEvent;
 			import mx.messaging.config.ServerConfig;
 			import mx.rpc.AsyncToken;
 			import mx.rpc.AsyncResponder;
 			import mx.rpc.events.FaultEvent;
 			import mx.collections.ArrayCollection;
 
-			import com.easyinsight.dashboard.WidgetAnalysisStub;
 			import com.easyinsight.framework.User;
 			import com.easyinsight.framework.UserServiceResponse;
 
@@ -42,6 +43,10 @@
 			private var analysisID:Number;
 			[Bindable]
 			private var stubs:ArrayCollection;
+            [Bindable]
+            private var reportType:int;
+            [Bindable]
+            private var reportName:String;
 
 			private function onKeyUp(event:KeyboardEvent):void {
 				if (event.keyCode == Keyboard.ENTER) {
@@ -63,6 +68,8 @@
                 var userNameJS:String = ExternalInterface.call("widget.getValue", "userName");
 				var passwordJS:String = ExternalInterface.call("widget.getValue", "password");
 				var analysisIDString:String = ExternalInterface.call("widget.getValue", "insightCombo");
+				var reportNameString:String = ExternalInterface.call("widget.getValue", "reportName");
+				var reportTypeString:String = ExternalInterface.call("widget.getValue", "reportType");
 
 				// are user credentials already set in preferences?
 
@@ -72,6 +79,8 @@
 
 					if (analysisIDString != null && "" != analysisIDString) {
 						analysisID = Number(analysisID);
+                        reportName = reportNameString;
+                        reportType = int(reportTypeString);
 					}
 					userName.text = userNameJS;
 					password.text = passwordJS;
@@ -103,6 +112,7 @@
                 	if (analysisID > 0) {
 		            	currentState = "Report";
                 	} else {
+                        onGettingReports();
                 		currentState = "GettingReport";
                 	}
                 } else {
@@ -150,9 +160,13 @@
             }
 
             private function viewInsight():void {
-            	var insight:WidgetAnalysisStub = insightChooser.selectedItem as WidgetAnalysisStub;
-                this.analysisID = insight.analysisID;
-            	ExternalInterface.call("widget.setValue", "insightCombo", insight.analysisID);
+            	var insight:InsightDescriptor = insightChooser.selectedItem as InsightDescriptor;
+                this.analysisID = insight.id;
+                this.reportName = insight.name;
+                this.reportType = insight.reportType;
+            	ExternalInterface.call("widget.setValue", "insightCombo", insight.id);
+            	ExternalInterface.call("widget.setValue", "reportName", insight.name);
+            	ExternalInterface.call("widget.setValue", "reportType", insight.reportType);
                 currentState = "Report";
             }                                                  
 		]]>
