@@ -55,17 +55,25 @@ public class AnalysisService implements IAnalysisService {
         }
     }
 
-    public List<WidgetAnalysisStub> getWidgetAnalyses() {
-        Collection<WSAnalysisDefinition> defs = getAnalysisDefinitions();
-        List<WidgetAnalysisStub> stubs = new ArrayList<WidgetAnalysisStub>();
-        for (WSAnalysisDefinition def : defs) {
-            WidgetAnalysisStub stub = new WidgetAnalysisStub();
-            stub.setAnalysisID(def.getAnalysisID());
-            stub.setName(def.getName());
-            stubs.add(stub);
+    public List<InsightDescriptor> getWidgetAnalyses() {
+        List<InsightDescriptor> descriptorList = new ArrayList<InsightDescriptor>();
+        Connection conn = Database.instance().getConnection();
+        try {
+            PreparedStatement getInsightsStmt = conn.prepareStatement("SELECT ANALYSIS.ANALYSIS_ID, TITLE, DATA_FEED_ID, REPORT_TYPE FROM ANALYSIS, user_to_analysis WHERE " +
+                    "ANALYSIS.ANALYSIS_ID = USER_TO_ANALYSIS.ANALYSIS_ID AND USER_TO_ANALYSIS.user_id = ? AND analysis.root_definition = ?");
+            getInsightsStmt.setLong(1, SecurityUtil.getUserID());
+            getInsightsStmt.setBoolean(2, false);
+            ResultSet reportRS = getInsightsStmt.executeQuery();
+            while (reportRS.next()) {
+                descriptorList.add(new InsightDescriptor(reportRS.getLong(1), reportRS.getString(2), reportRS.getLong(3), reportRS.getInt(4)));
+            }
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        } finally {
+            Database.instance().closeConnection(conn);
         }
-        return stubs;
-        //return new ArrayList<WidgetAnalysisStub>();
+        return descriptorList;
     }
 
     public String validateCalculation(String calculationString) {
