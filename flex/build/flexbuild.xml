@@ -202,7 +202,7 @@
 
     <target name="compileYahooWidget">
         <mxmlc file="../src/YahooWidgetReport.mxml" output="${deployment.path}/YahooWidgetReport.swf"
-               static-rsls="false">
+               static-rsls="false" incremental="true">
             <load-config filename="../yahoo-report.xml"/>
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
                 <url rsl-url="framework_3.3.0.4852.swz"/>
