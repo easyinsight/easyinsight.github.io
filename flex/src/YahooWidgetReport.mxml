@@ -1,216 +1,229 @@
 <?xml version="1.0" ?>
-<mx:Application xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:dashboard="com.easyinsight.dashboard.*" width="100%" height="100%"
-	creationComplete="onCreationComplete()" backgroundAlpha=".2" backgroundSize="100%"
-	paddingTop="0" top="0" borderThickness="0" left="0" paddingLeft="0" right="0" paddingRight="0"
-	bottom="0" paddingBottom="0">
-	<mx:states>
-		<mx:State name="GettingReport">
-			<mx:RemoveChild target="{loginForm}"/>
-			<mx:AddChild relativeTo="{coreBox}">
-				<mx:Form>
-					<mx:FormItem label="Report: ">
-						<mx:ComboBox id="insightChooser" dataProvider="{stubs}" labelField="name"/>
-					</mx:FormItem>
-					<mx:FormItem label="">
-						<mx:Button label="View This Report" click="viewInsight()"/>
-					</mx:FormItem>
-				</mx:Form>
-			</mx:AddChild>
-		</mx:State>
-		<mx:State name="Report">
-			<mx:RemoveChild target="{loginForm}"/>
-			<mx:AddChild relativeTo="{coreBox}">
-                <dashboard:DataViewPanel id="panel" analysisID="{analysisID}" reportType="{reportType}" reportName="{reportName}" prefix="https://www.easy-insight.com"/>
-			</mx:AddChild>
-		</mx:State>
-	</mx:states>
-	<mx:Script>
+<mx:Application xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:dashboard="com.easyinsight.dashboard.*" width="100%"
+                height="100%"
+                creationComplete="onCreationComplete()" backgroundAlpha=".2" backgroundSize="100%"
+                paddingTop="0" top="0" borderThickness="0" left="0" paddingLeft="0" right="0" paddingRight="0"
+                bottom="0" paddingBottom="0">
+    <mx:states>
+        <mx:State name="LoginState">
+            <mx:AddChild relativeTo="{coreBox}">
+                <mx:Form id="loginForm" enterState="onEnterLoginState()">
+                    <mx:FormItem label="User Name: ">
+                        <mx:TextInput id="userName"/>
+                    </mx:FormItem>
+                    <mx:FormItem label="Password: ">
+                        <mx:TextInput id="password" displayAsPassword="true"/>
+                    </mx:FormItem>
+                    <mx:FormItem label="">
+                        <mx:Label id="failureMessageLabel" text="{failureMessageText}"/>
+                    </mx:FormItem>
+                    <mx:FormItem label="">
+                        <mx:Button label="Log In" click="login(userName.text, password.text)"/>
+                    </mx:FormItem>
+                </mx:Form>
+            </mx:AddChild>
+        </mx:State>
+        <mx:State name="GettingReport">
+            <mx:AddChild relativeTo="{coreBox}">
+                <mx:Form>
+                    <mx:FormItem label="Report: ">
+                        <mx:ComboBox id="insightChooser" dataProvider="{stubs}" labelField="name"/>
+                    </mx:FormItem>
+                    <mx:FormItem label="">
+                        <mx:Button label="View This Report" click="viewInsight()"/>
+                    </mx:FormItem>
+                </mx:Form>
+            </mx:AddChild>
+        </mx:State>
+        <mx:State name="Report">
+            <mx:AddChild relativeTo="{coreBox}">
+                <dashboard:DataViewPanel id="panel" analysisID="{analysisID}" reportType="{reportType}"
+                                         reportName="{reportName}" prefix="https://www.easy-insight.com"/>
+            </mx:AddChild>
+        </mx:State>
+    </mx:states>
+    <mx:Script>
 		<![CDATA[
             import com.easyinsight.analysis.AnalysisDateDimension;
         import com.easyinsight.analysis.AnalysisDimension;
-            import com.easyinsight.analysis.AnalysisHierarchyItem;
-            import com.easyinsight.analysis.AnalysisList;
-            import com.easyinsight.analysis.AnalysisMeasure;
-            import com.easyinsight.analysis.AnalysisRangeDimension;
-            import com.easyinsight.analysis.ComplexAnalysisMeasure;
-            import com.easyinsight.analysis.TemporalAnalysisMeasure;
-            import com.easyinsight.solutions.InsightDescriptor;
+        import com.easyinsight.analysis.AnalysisHierarchyItem;
+        import com.easyinsight.analysis.AnalysisList;
+        import com.easyinsight.analysis.AnalysisMeasure;
+        import com.easyinsight.analysis.AnalysisRangeDimension;
+        import com.easyinsight.analysis.ComplexAnalysisMeasure;
+        import com.easyinsight.analysis.TemporalAnalysisMeasure;
+        import com.easyinsight.solutions.InsightDescriptor;
 
         import mx.rpc.events.ResultEvent;
-			import mx.messaging.config.ServerConfig;
-			import mx.rpc.AsyncToken;
-			import mx.rpc.AsyncResponder;
-			import mx.rpc.events.FaultEvent;
-			import mx.collections.ArrayCollection;
+        import mx.messaging.config.ServerConfig;
+        import mx.rpc.AsyncToken;
+        import mx.rpc.AsyncResponder;
+        import mx.rpc.events.FaultEvent;
+        import mx.collections.ArrayCollection;
 
-			import com.easyinsight.framework.User;
-			import com.easyinsight.framework.UserServiceResponse;
+        import com.easyinsight.framework.User;
+        import com.easyinsight.framework.UserServiceResponse;
 
+        [Bindable]
+        private var failureMessageText:String;
 
-			[Bindable]
-			private var analysisID:Number;
-			[Bindable]
-			private var stubs:ArrayCollection;
-            [Bindable]
-            private var reportType:int;
-            [Bindable]
-            private var reportName:String;
+        [Bindable]
+        private var analysisID:Number;
+        [Bindable]
+        private var stubs:ArrayCollection;
+        [Bindable]
+        private var reportType:int;
+        [Bindable]
+        private var reportName:String;
 
-			private function onKeyUp(event:KeyboardEvent):void {
-				if (event.keyCode == Keyboard.ENTER) {
-					if (currentState == null || currentState == "") {
-						login();
-					}
-				}
-			}
+        private function onEnterLoginState(): void {
+            focusManager.setFocus(userName);
+        }
 
-			private function onCreationComplete():void {
-				focusManager.setFocus(userName);
-				addEventListener(KeyboardEvent.KEY_UP, onKeyUp);
-
-                // TODO: problems still with the widget here
-                /*
-                    These calls are standard Javascript external invokes with the UWA interface. In the case of Yahoo
-                    widgets, they don't do anything right now.
-                 */
-                var userNameJS:String = ExternalInterface.call("widget.getValue", "userName");
-				var passwordJS:String = ExternalInterface.call("widget.getValue", "password");
-				var analysisIDString:String = ExternalInterface.call("widget.getValue", "insightCombo");
-				var reportNameString:String = ExternalInterface.call("widget.getValue", "reportName");
-				var reportTypeString:String = ExternalInterface.call("widget.getValue", "reportType");
-
-				// are user credentials already set in preferences?
-
-				if (userNameJS != null && "" != userNameJS && passwordJS != null && "" != passwordJS) {
-
-					// is a report already chosen?
-
-					if (analysisIDString != null && "" != analysisIDString) {
-						analysisID = Number(analysisID);
-                        reportName = reportNameString;
-                        reportType = int(reportTypeString);
-					}
-					userName.text = userNameJS;
-					password.text = passwordJS;
-					login();
-				} else {
-					if (authService.channelSet == null) {
-	            		authService.channelSet = ServerConfig.getChannelSet(authService.destination);
-	            	}
-	            	if (authService.channelSet.connected) {
-                        // TODO: handle things correctly if a session already exists
-	            	}
-				}
-			}
-
-			private function handleAuthentication():void {
-                var authResult:UserServiceResponse= authService.authenticate.lastResult as UserServiceResponse;
-                var successful:Boolean = authResult.successful;
-                if (successful) {
-                    User.initializeUser(authResult.name, authResult.email,
-                    	authResult.accountType, authResult.spaceAllowed, authResult.accountAdmin,
-                            authResult.dataSourceCreator, authResult.insightCreator, authResult.userID);
-                	User.getInstance().password = authResult.encryptedPassword;
-                	User.getInstance().userName = authResult.userName;
-                    /*
-                        Set the username and password at this point through the standard UWA javascript mechanisms.
-                     */
-                	ExternalInterface.call("widget.setValue", "userName", userName.text);
-                	ExternalInterface.call("widget.setValue", "password", password.text);
-                	if (analysisID > 0) {
-		            	currentState = "Report";
-                	} else {
-                        onGettingReports();
-                		currentState = "GettingReport";
-                	}
-                } else {
-                    failureMessageLabel.text = authResult.failureMessage;
+        private function onKeyUp(event:KeyboardEvent):void {
+            if (event.keyCode == Keyboard.ENTER) {
+                if (currentState == "LoginState") {
+                    login(userName.text, password.text);
                 }
             }
+        }
 
-            private function returnToList():void {
-            	analysisService.getWidgetAnalyses.send();
+        private function onCreationComplete():void {
+
+            addEventListener(KeyboardEvent.KEY_UP, onKeyUp);
+
+            // TODO: problems still with the widget here
+            /*
+             These calls are standard Javascript external invokes with the UWA interface. In the case of Yahoo
+             widgets, they don't do anything right now.
+             */
+            var userNameJS:String = ExternalInterface.call("widget.getValue", "userName");
+            var passwordJS:String = ExternalInterface.call("widget.getValue", "password");
+            var analysisIDString:String = ExternalInterface.call("widget.getValue", "insightCombo");
+            var reportNameString:String = ExternalInterface.call("widget.getValue", "reportName");
+            var reportTypeString:String = ExternalInterface.call("widget.getValue", "reportType");
+
+            // are user credentials already set in preferences?
+
+            if (userNameJS != null && "" != userNameJS && passwordJS != null && "" != passwordJS) {
+
+                // is a report already chosen?
+
+                if (analysisIDString != null && "" != analysisIDString) {
+                    analysisID = Number(analysisIDString);
+                    reportName = reportNameString;
+                    reportType = int(reportTypeString);
+                }
+                login(userNameJS, passwordJS);
+            } else {
+                if (authService.channelSet == null) {
+                    currentState = "LoginState";
+                    authService.channelSet = ServerConfig.getChannelSet(authService.destination);
+                }
+                if (authService.channelSet.connected) {
+                    // TODO: handle things correctly if a session already exists
+                }
             }
+        }
 
-            private function login():void {
-            	if (authService.channelSet == null) {
-            		authService.channelSet = ServerConfig.getChannelSet(authService.destination);
-            	}
-            	var token:AsyncToken = authService.channelSet.login(userName.text, password.text);
-            	token.addResponder(new AsyncResponder(
-            		function (event:ResultEvent, token:Object = null):void {
-            			switch (event.result) {
-            				case "success":
-            					authService.authenticate.send(userName.text, password.text);
-            					break;
-        					default:
-        						trace(event.result);
-            			}
-            		},
-            		function (event:FaultEvent, token:Object = null):void {
-            			switch (event.fault.faultCode) {
-            				case "Client.Authentication":
-            				default:
-            					var failureMessage:String = event.fault.faultString;
-                    			failureMessageLabel.text = failureMessage;
-            			}
-            		}
-        		));
+        private function handleAuthentication():void {
+            var authResult:UserServiceResponse = authService.authenticate.lastResult as UserServiceResponse;
+            var successful:Boolean = authResult.successful;
+            if (successful) {
+                User.initializeUser(authResult.name, authResult.email,
+                        authResult.accountType, authResult.spaceAllowed, authResult.accountAdmin,
+                        authResult.dataSourceCreator, authResult.insightCreator, authResult.userID);
+                User.getInstance().password = authResult.encryptedPassword;
+                User.getInstance().userName = authResult.userName;
+                /*
+                 Set the username and password at this point through the standard UWA javascript mechanisms.
+                 */
+                if (currentState == "LoginState") {
+                    ExternalInterface.call("widget.setValue", "userName", userName.text);
+                    ExternalInterface.call("widget.setValue", "password", password.text);
+                }
+
+                if (analysisID > 0) {
+                    currentState = "Report";
+                } else {
+                    onGettingReports();
+                    currentState = "GettingReport";
+                }
+            } else {
+                currentState = "LoginState";
+                failureMessageText = authResult.failureMessage;
             }
+        }
 
-            private function dependancies():void {
-                var analysisDate:AnalysisDateDimension;
-                var dim:AnalysisDimension;
-                var measure:AnalysisMeasure;
-                var temporal:TemporalAnalysisMeasure;
-                var complex:ComplexAnalysisMeasure;
-                var range:AnalysisRangeDimension;
-                var list:AnalysisList;
-                var hierarchy:AnalysisHierarchyItem;
+        private function returnToList():void {
+            analysisService.getWidgetAnalyses.send();
+        }
+
+        private function login(usernameStr:String, passwordStr:String):void {
+            if (authService.channelSet == null) {
+                authService.channelSet = ServerConfig.getChannelSet(authService.destination);
             }
+            var token:AsyncToken = authService.channelSet.login(usernameStr, passwordStr);
+            token.addResponder(new AsyncResponder(
+                    function (event:ResultEvent, token:Object = null):void {
+                        switch (event.result) {
+                            case "success":
+                                authService.authenticate.send(usernameStr, passwordStr);
+                                break;
+                            default:
+                                trace(event.result);
+                        }
+                    },
+                    function (event:FaultEvent, token:Object = null):void {
+                        switch (event.fault.faultCode) {
+                            case "Client.Authentication":
+                            default:
+                                var failureMessage:String = event.fault.faultString;
+                                failureMessageLabel.text = failureMessage;
+                        }
+                    }
+                    ));
+        }
 
-            private function onGettingReports():void {
-                analysisService.getWidgetAnalyses.send();
-            }
+        private function dependancies():void {
+            var analysisDate:AnalysisDateDimension;
+            var dim:AnalysisDimension;
+            var measure:AnalysisMeasure;
+            var temporal:TemporalAnalysisMeasure;
+            var complex:ComplexAnalysisMeasure;
+            var range:AnalysisRangeDimension;
+            var list:AnalysisList;
+            var hierarchy:AnalysisHierarchyItem;
+        }
 
-            private function gotAnalyses():void {
-            	this.stubs = analysisService.getWidgetAnalyses.lastResult as ArrayCollection;
-				currentState = "GettingReport";
-            }
+        private function onGettingReports():void {
+            analysisService.getWidgetAnalyses.send();
+        }
 
-            private function viewInsight():void {
-            	var insight:InsightDescriptor = insightChooser.selectedItem as InsightDescriptor;
-                this.analysisID = insight.id;
-                this.reportName = insight.name;
-                this.reportType = insight.reportType;
-            	ExternalInterface.call("widget.setValue", "insightCombo", insight.id);
-            	ExternalInterface.call("widget.setValue", "reportName", insight.name);
-            	ExternalInterface.call("widget.setValue", "reportType", insight.reportType);
-                currentState = "Report";
-            }                                                  
+        private function gotAnalyses():void {
+            this.stubs = analysisService.getWidgetAnalyses.lastResult as ArrayCollection;
+            currentState = "GettingReport";
+        }
+
+        private function viewInsight():void {
+            var insight:InsightDescriptor = insightChooser.selectedItem as InsightDescriptor;
+            this.analysisID = insight.id;
+            this.reportName = insight.name;
+            this.reportType = insight.reportType;
+            ExternalInterface.call("widget.setValue", "insightCombo", insight.id);
+            ExternalInterface.call("widget.setValue", "reportName", insight.name);
+            ExternalInterface.call("widget.setValue", "reportType", insight.reportType);
+            currentState = "Report";
+        }
 		]]>
 	</mx:Script>
-	<mx:RemoteObject id="authService" destination="login">
-		<mx:method name="authenticate" result="handleAuthentication()"/>
-	</mx:RemoteObject>
-	<mx:RemoteObject id="analysisService" destination="analysisDefinition">
-		<mx:method name="getWidgetAnalyses" result="gotAnalyses()"/>
-	</mx:RemoteObject>
-	<mx:Style source="com/easyinsight/skin/osx/OSX.css"/>
-	<mx:VBox id="coreBox" width="100%" height="100%">
-		<mx:Form id="loginForm">
-			<mx:FormItem label="User Name: ">
-				<mx:TextInput id="userName"/>
-			</mx:FormItem>
-			<mx:FormItem label="Password: ">
-				<mx:TextInput id="password" displayAsPassword="true"/>
-			</mx:FormItem>
-			<mx:FormItem label="">
-				<mx:Label id="failureMessageLabel"/>
-			</mx:FormItem>
-			<mx:FormItem label="">
-				<mx:Button label="Log In" click="login()"/>
-			</mx:FormItem>
-		</mx:Form>
-	</mx:VBox>
+    <mx:RemoteObject id="authService" destination="login">
+        <mx:method name="authenticate" result="handleAuthentication()"/>
+    </mx:RemoteObject>
+    <mx:RemoteObject id="analysisService" destination="analysisDefinition">
+        <mx:method name="getWidgetAnalyses" result="gotAnalyses()"/>
+    </mx:RemoteObject>
+    <mx:Style source="com/easyinsight/skin/osx/OSX.css"/>
+    <mx:VBox id="coreBox" width="100%" height="100%">
+    </mx:VBox>
 </mx:Application>

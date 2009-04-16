@@ -20,6 +20,8 @@
         <preference name="userName" type="text" label="User Name" defaultValue=""/>
         <preference name="password" type="password" label="Password" defaultValue=""/>
         <preference name="insightCombo" type="hidden" label="Insight" defaultValue="" />
+        <preference name="reportName" type="hidden" label="Report Name" defaultValue="" />
+        <preference name="reportType" type="hidden" label="Report Type" defaultValue="" />
     </widget:preferences>
 
 
@@ -33,10 +35,10 @@
           var contentHtml = '';
 
           contentHtml += '<div style="margin: 0 auto;text-align:center;">';
-          contentHtml += '<object type="application/x-shockwave-flash" data="http://ec2-67-202-40-33.compute-1.amazonaws.com/DMS/easyui-debug/InsightView.swf" allowScriptAccess="always" width="550" height="450" class="flash">';
-          contentHtml += '<param name="movie" value="http://ec2-67-202-40-33.compute-1.amazonaws.com/DMS/easyui-debug/InsightView.swf" />';
+          contentHtml += '<object type="application/x-shockwave-flash" data="https://www.easy-insight.com/app/easyui-debug/YahooWidgetReport.swf" allowScriptAccess="always" width="550" height="450" class="flash">';
+          contentHtml += '<param name="movie" value="https://www.easy-insight.com/app/easyui-debug/YahooWidgetReport.swf" />';
           //contentHtml += '<param name="wmode" value="opaque" />';
-          contentHtml += '<embed type="application/x-shockwave-flash" allowScriptAccess="always" allowNetworking="all" src="ec2-67-202-40-33.compute-1.amazonaws.com/DMS/easyui-debug/InsightView.swf" width="550" height="450"></embed>';
+          contentHtml += '<embed type="application/x-shockwave-flash" allowScriptAccess="always" allowNetworking="all" src="https://www.easy-insight.com/easyui-debug/YahooWidgetReport.swf" width="550" height="450"></embed>';
           contentHtml += '</object>';
           contentHtml += '</div>';
 
@@ -50,7 +52,7 @@
   var flash = elements[0];
   if (flash) {
     flash.width = 1;
-    flash.width = widget.body.getDimensions().width - 10;
+    flash.width = widget.body.getDimensions().width - 15;
     flash.height = Math.round(flash.width * 3/4);
   }
 }
