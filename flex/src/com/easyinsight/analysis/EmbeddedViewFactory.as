@@ -19,6 +19,8 @@ public class EmbeddedViewFactory extends VBox {
     private var _reportID:int;
     private var _availableFields:ArrayCollection;
 
+    private var _prefix:String = "";
+
     private var moduleInfo:IModuleInfo;
 
     private var _reportRenderer:IReportRenderer;
@@ -29,6 +31,10 @@ public class EmbeddedViewFactory extends VBox {
     public function EmbeddedViewFactory() {
         this.percentHeight = 100;
         this.percentWidth = 100;
+    }
+
+    public function set prefix(val:String):void {
+        _prefix = val;
     }
 
     public function set availableFields(val:ArrayCollection):void {
@@ -83,7 +89,7 @@ public class EmbeddedViewFactory extends VBox {
     }
 
     private function loadReportRenderer():void {
-        moduleInfo = ModuleManager.getModule("/app/easyui-debug/" + _reportRendererModule);
+        moduleInfo = ModuleManager.getModule(_prefix + "/app/easyui-debug/" + _reportRendererModule);
         moduleInfo.addEventListener(ModuleEvent.READY, reportLoadHandler);
         moduleInfo.addEventListener(ModuleEvent.ERROR, reportFailureHandler);
         moduleInfo.load();

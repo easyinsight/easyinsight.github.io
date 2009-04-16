@@ -20,7 +20,7 @@
 		<mx:State name="Report">
 			<mx:RemoveChild target="{loginForm}"/>
 			<mx:AddChild relativeTo="{coreBox}">
-                <dashboard:DataViewPanel id="panel" analysisID="{analysisID}" reportType="{reportType}" reportName="{reportName}"/>
+                <dashboard:DataViewPanel id="panel" analysisID="{analysisID}" reportType="{reportType}" reportName="{reportName}" prefix="https://www.easy-insight.com"/>
 			</mx:AddChild>
 		</mx:State>
 	</mx:states>
