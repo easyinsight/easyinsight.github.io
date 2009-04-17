@@ -18,6 +18,7 @@ import com.easyinsight.analysis.*;
 
 import java.io.*;
 import java.util.*;
+import java.util.Date;
 import java.sql.*;
 
 import org.hibernate.Session;
@@ -509,7 +510,7 @@ public class UserUploadService implements IUserUploadService {
         try {
             conn.setAutoCommit(false);
             Map<String, Key> keys = feedDefinition.newDataSourceFields(credentials);
-            DataSet dataSet = feedDefinition.getDataSet(credentials, keys);
+            DataSet dataSet = feedDefinition.getDataSet(credentials, keys, new Date());
             feedDefinition.setFields(feedDefinition.createAnalysisItems(keys, dataSet));
             feedDefinition.setOwnerName(retrieveUser(conn).getUserName());
             UploadPolicy uploadPolicy = new UploadPolicy(userID);

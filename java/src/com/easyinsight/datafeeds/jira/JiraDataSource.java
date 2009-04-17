@@ -80,7 +80,7 @@ public class JiraDataSource extends ServerDataSourceDefinition {
         }
     }
 
-    public DataSet getDataSet(Credentials credentials, Map<String, Key> keys) {
+    public DataSet getDataSet(Credentials credentials, Map<String, Key> keys, Date now) {
         DataSet dataSet = new DataSet();
         try {
             String userName = credentials.getUserName();

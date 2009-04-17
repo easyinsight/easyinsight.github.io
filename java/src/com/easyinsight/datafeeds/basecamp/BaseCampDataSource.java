@@ -115,7 +115,7 @@ public class BaseCampDataSource extends ServerDataSourceDefinition {
         return doc;
     }
 
-    public DataSet getDataSet(com.easyinsight.users.Credentials credentials, Map<String, Key> keys) {
+    public DataSet getDataSet(com.easyinsight.users.Credentials credentials, Map<String, Key> keys, Date now) {
         DateFormat df = new XmlSchemaDateFormat();
         DateFormat deadlineFormat = new SimpleDateFormat(XMLDATEFORMAT);
 

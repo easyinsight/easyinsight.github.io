@@ -330,7 +330,7 @@ public class FeedDefinition implements Cloneable, Serializable {
         return CredentialsDefinition.NO_CREDENTIALS;
     }
     
-     public DataSet getDataSet(Credentials credentials, Map<String, Key> keys) {
+     public DataSet getDataSet(Credentials credentials, Map<String, Key> keys, Date now) {
         throw new UnsupportedOperationException();
     }
 

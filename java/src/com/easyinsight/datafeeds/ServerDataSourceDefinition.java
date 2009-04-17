@@ -49,9 +49,10 @@ public abstract class ServerDataSourceDefinition extends FeedDefinition {
      * Retrieves the actual data of the data source
      * @param credentials the credentials required for cnonection to the external source
      * @param keys the keys defined earlier by the getKeys() call
+     * @param now
      * @return the data set
      */
-    public abstract DataSet getDataSet(Credentials credentials, Map<String, Key> keys);
+    public abstract DataSet getDataSet(Credentials credentials, Map<String, Key> keys, Date now);
 
     /**
      * Retrieves the analysis items for the data source, defining such traits as dimensions, measures, dates, and so on. Use
@@ -110,7 +111,7 @@ public abstract class ServerDataSourceDefinition extends FeedDefinition {
         DataStorage dataStorage = null;
         try {
             conn.setAutoCommit(false);
-            DataSet dataSet = getDataSet(credentials, newDataSourceFields(credentials));
+            DataSet dataSet = getDataSet(credentials, newDataSourceFields(credentials), now);
             dataStorage = DataStorage.writeConnection(this, conn, accountID);
             addData(dataStorage, dataSet);
             dataStorage.commit();

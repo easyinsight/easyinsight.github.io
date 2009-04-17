@@ -118,7 +118,7 @@ public class GoalService {
             Iterator<GoalTreeDescriptor> iter = goalTrees.iterator();
             while (iter.hasNext()) {
                 GoalTreeDescriptor descriptor = iter.next();
-                if (descriptor.getGoalTreeID() == goalTreeID) {
+                if (descriptor.getId() == goalTreeID) {
                     iter.remove();
                 }
             }

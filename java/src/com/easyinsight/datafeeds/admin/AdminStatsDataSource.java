@@ -57,7 +57,7 @@ public class AdminStatsDataSource extends ServerDataSourceDefinition {
         return null;
     }
 
-    public DataSet getDataSet(Credentials credentials, Map<String, Key> keys) {
+    public DataSet getDataSet(Credentials credentials, Map<String, Key> keys, Date now) {
         HealthInfo healthInfo = new AdminService().getHealthInfo();
         DataSet dataSet = new DataSet();
         IRow row = dataSet.createRow();

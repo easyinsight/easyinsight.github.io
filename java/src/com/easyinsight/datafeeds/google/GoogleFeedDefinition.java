@@ -24,6 +24,7 @@ import java.sql.ResultSet;
 import java.util.Map;
 import java.util.List;
 import java.util.HashMap;
+import java.util.Date;
 import java.net.URL;
 import java.io.IOException;
 
@@ -108,7 +109,7 @@ public class GoogleFeedDefinition extends FeedDefinition {
     }
 
     @Override
-    public DataSet getDataSet(Credentials credentials, Map<String, Key> keys) {
+    public DataSet getDataSet(Credentials credentials, Map<String, Key> keys, Date now) {
         DataSet dataSet;
         try {
             SpreadsheetService myService = GoogleSpreadsheetAccess.getOrCreateSpreadsheetService(credentials);

@@ -1,39 +1,21 @@
 package com.easyinsight.goals;
 
+import com.easyinsight.core.EIDescriptor;
+
 /**
  * User: James Boe
  * Date: Jan 2, 2009
  * Time: 1:29:33 PM
  */
-public class GoalTreeDescriptor {
-    private long goalTreeID;
-    private String goalTreeName;
+public class GoalTreeDescriptor extends EIDescriptor {
     private int role;
 
     public GoalTreeDescriptor() {
     }
 
-    public GoalTreeDescriptor(long goalTreeID, String goalTreeName, int role) {
-
-        this.goalTreeID = goalTreeID;
-        this.goalTreeName = goalTreeName;
+    public GoalTreeDescriptor(long id, String name, int role) {
+        super(name, id);
         this.role = role;
-    }
-
-    public long getGoalTreeID() {
-        return goalTreeID;
-    }
-
-    public void setGoalTreeID(long goalTreeID) {
-        this.goalTreeID = goalTreeID;
-    }
-
-    public String getGoalTreeName() {
-        return goalTreeName;
-    }
-
-    public void setGoalTreeName(String goalTreeName) {
-        this.goalTreeName = goalTreeName;
     }
 
     public int getRole() {
