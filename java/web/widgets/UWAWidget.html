@@ -19,9 +19,9 @@
     <widget:preferences>
         <preference name="userName" type="text" label="User Name" defaultValue=""/>
         <preference name="password" type="password" label="Password" defaultValue=""/>
-        <preference name="insightCombo" type="hidden" label="Insight" defaultValue="" />
-        <preference name="reportName" type="hidden" label="Report Name" defaultValue="" />
-        <preference name="reportType" type="hidden" label="Report Type" defaultValue="" />
+        <preference name="insightCombo" type="text" label="Insight" defaultValue="" />
+        <preference name="reportName" type="text" label="Report Name" defaultValue="" />
+        <preference name="reportType" type="text" label="Report Type" defaultValue="" />
     </widget:preferences>
 
 
@@ -63,7 +63,7 @@
           }
 
           if(widget.getValue("reportType") == null || widget.getValue("reportType") == "" && keyPairs != null && keyPairs["reportType"] != null) {
-              widget.setValue("insightCombo", unescape(keyPairs["reportType"]));
+              widget.setValue("reportType", unescape(keyPairs["reportType"]));
           }
 
           contentHtml += '<div style="margin: 0 auto;text-align:center;">';

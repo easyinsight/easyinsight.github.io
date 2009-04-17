@@ -103,17 +103,20 @@
             var reportNameString:String = ExternalInterface.call("widget.getValue", "reportName");
             var reportTypeString:String = ExternalInterface.call("widget.getValue", "reportType");
 
+            // is report already set up?
+                if (analysisIDString != null && "" != analysisIDString) {
+                    analysisID = Number(analysisIDString);
+                    reportName = reportNameString;
+                    reportType = int(reportTypeString);
+                }
+
             // are user credentials already set in preferences?
 
             if (userNameJS != null && "" != userNameJS && passwordJS != null && "" != passwordJS) {
 
                 // is a report already chosen?
 
-                if (analysisIDString != null && "" != analysisIDString) {
-                    analysisID = Number(analysisIDString);
-                    reportName = reportNameString;
-                    reportType = int(reportTypeString);
-                }
+
                 login(userNameJS, passwordJS);
             } else {
                 if (authService.channelSet == null) {
