@@ -11,7 +11,7 @@ import java.util.Map;
  * Date: Jan 11, 2008
  * Time: 9:10:35 PM
  */
-public abstract class WSChartDefinition extends WSGraphicDefinition {
+public abstract class WSChartDefinition extends WSAnalysisDefinition {
     private LimitsMetadata limitsMetadata;
 
     public abstract int getChartType();

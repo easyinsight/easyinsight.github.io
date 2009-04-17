@@ -10,6 +10,7 @@ import com.easyinsight.core.DateValue;
 import com.easyinsight.analysis.*;
 import com.easyinsight.admin.AdminService;
 import com.easyinsight.admin.HealthInfo;
+import com.easyinsight.storage.DataStorage;
 
 import java.util.*;
 import java.sql.Connection;
@@ -109,5 +110,9 @@ public class AdminStatsDataSource extends ServerDataSourceDefinition {
     }
 
     public void customLoad(Connection conn) throws SQLException {
+    }
+
+    protected void addData(DataStorage dataStorage, DataSet dataSet) throws SQLException {
+        dataStorage.insertData(dataSet);
     }
 }

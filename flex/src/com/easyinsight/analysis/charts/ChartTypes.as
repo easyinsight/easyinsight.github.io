@@ -32,6 +32,8 @@ package com.easyinsight.analysis.charts
         public static const BUBBLE:int = 14;
         public static const PLOT:int = 15;
 
+        public static const MM_LINE:int = 16;
+
 		public function ChartTypes()
 		{
 		}

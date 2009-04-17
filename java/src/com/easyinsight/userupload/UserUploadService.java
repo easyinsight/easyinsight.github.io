@@ -419,7 +419,7 @@ public class UserUploadService implements IUserUploadService {
         SecurityUtil.authorizeFeed(feedID, Roles.OWNER);
         try {
             ServerDataSourceDefinition feedDefinition = (ServerDataSourceDefinition) getDataFeedConfiguration(feedID);
-            return feedDefinition.refreshData(credentials, SecurityUtil.getAccountID());
+            return feedDefinition.refreshData(credentials, SecurityUtil.getAccountID(), null);
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);

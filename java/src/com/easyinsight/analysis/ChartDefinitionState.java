@@ -47,6 +47,7 @@ public class ChartDefinitionState extends AnalysisDefinitionState {
     public static final int AREA_3D = 13;
     public static final int BUBBLE_TYPE = 14;
     public static final int PLOT_TYPE = 15;
+    public static final int MULTI_MEASURE_LINE_2D = 16;
 
     public long getDefinitionID() {
         return definitionID;

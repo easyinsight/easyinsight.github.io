@@ -123,7 +123,7 @@ import mx.events.CloseEvent;
             	this.feedAttribution = feedDefinition.attribution;
             	this.feedType = feedDefinition.getFeedType();
                 this.showRefreshInterval = feedDefinition.canRefresh();
-                this.refreshInterval = feedDefinition.refreshDataInterval;
+                this.refreshInterval = feedDefinition.refreshDataInterval / (1000 * 60 * 60);
                 analysisService.openAnalysisDefinition.send(feedDefinition.analysisDefinitionID);
 			}	
             
@@ -157,7 +157,7 @@ import mx.events.CloseEvent;
 	            	feedDefinition.description = feedDescriptionTextArea.text;
 	            	feedDefinition.attribution = feedAttributionInput.text;
 	            	feedDefinition.ownerName = feedOwnerNameInput.text;
-                    feedDefinition.refreshDataInterval = refreshIntervalStepper.value;
+                    feedDefinition.refreshDataInterval = refreshIntervalStepper.value * 1000 * 60 * 60;
                     if (feedAdminDetail != null) {
 	            	    feedAdminDetail.updateFeedDefinition(feedDefinition);
                     }
@@ -249,7 +249,7 @@ import mx.events.CloseEvent;
 							<mx:Button label="Clear Data Source Data" click="clearFeedData()"/>
 						</mx:FormItem>
                         <mx:FormItem label="Refresh Interval (Hours):" visible="{showRefreshInterval}" direction="horizontal">
-                            <mx:NumericStepper id="refreshIntervalStepper" value="{refreshInterval}"/>
+                            <mx:NumericStepper id="refreshIntervalStepper" value="{refreshInterval}"/>                            
                         </mx:FormItem>
 					</mx:Form>
 				</mx:VBox>

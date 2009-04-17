@@ -4,7 +4,7 @@ import com.easyinsight.analysis.*;
 import mx.collections.ArrayCollection;
 	[Bindable]
 	[RemoteClass(alias="com.easyinsight.analysis.WSMapDefinition")]
-	public class MapDefinition extends GraphicDefinition
+	public class MapDefinition extends AnalysisDefinition
 	{
 		public static const USA:int = 1;
 		public static const WORLD:int = 2;

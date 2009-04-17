@@ -10,7 +10,7 @@ import java.util.HashSet;
  * Date: Jul 17, 2008
  * Time: 7:45:16 PM
  */
-public class WSYahooMapDefinition extends WSGraphicDefinition {
+public class WSYahooMapDefinition extends WSAnalysisDefinition {
 
     private long yahooMapDefinitionID;
 

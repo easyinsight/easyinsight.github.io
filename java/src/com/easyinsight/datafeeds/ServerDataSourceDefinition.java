@@ -13,6 +13,7 @@ import com.easyinsight.logging.LogClass;
 import java.util.Map;
 import java.util.List;
 import java.util.HashMap;
+import java.util.Date;
 import java.sql.Connection;
 import java.sql.SQLException;
 
@@ -33,6 +34,8 @@ public abstract class ServerDataSourceDefinition extends FeedDefinition {
      * @return the required account tier
      */
     public abstract int getRequiredAccountTier();
+
+    
 
     /**
      * The FeedType constant associated with this data source, used for loading purposes
@@ -97,25 +100,22 @@ public abstract class ServerDataSourceDefinition extends FeedDefinition {
         return keyMap;
     }
 
-    public CredentialsResponse refreshData(Credentials credentials, long accountID) {
+    protected void addData(DataStorage dataStorage, DataSet dataSet) throws SQLException {
+        dataStorage.truncate();
+        dataStorage.insertData(dataSet);
+    }
+
+    public CredentialsResponse refreshData(Credentials credentials, long accountID, Date now) {
         Connection conn = Database.instance().getConnection();
         DataStorage dataStorage = null;
         try {
             conn.setAutoCommit(false);
             DataSet dataSet = getDataSet(credentials, newDataSourceFields(credentials));
             dataStorage = DataStorage.writeConnection(this, conn, accountID);
-            dataStorage.truncate();
-            dataStorage.insertData(dataSet);
+            addData(dataStorage, dataSet);
             dataStorage.commit();
             conn.commit();
-            MessageBroker msgBroker = MessageBroker.getMessageBroker(null);
-            String clientID = UUIDUtils.createUUID();
-            AsyncMessage msg = new AsyncMessage();
-            msg.setDestination("dataUpdates");
-            msg.setHeader(AsyncMessage.SUBTOPIC_HEADER_NAME, String.valueOf(getDataFeedID()));
-            msg.setMessageId(clientID);
-            msg.setTimestamp(System.currentTimeMillis());
-            msgBroker.routeMessageToService(msg, null);
+            notifyOfDataUpdate();
             return new CredentialsResponse(true);
         } catch (Exception e) {
             LogClass.error(e);
@@ -134,5 +134,16 @@ public abstract class ServerDataSourceDefinition extends FeedDefinition {
             }
             Database.instance().closeConnection(conn);
         }
+    }
+
+    private void notifyOfDataUpdate() {
+        MessageBroker msgBroker = MessageBroker.getMessageBroker(null);
+        String clientID = UUIDUtils.createUUID();
+        AsyncMessage msg = new AsyncMessage();
+        msg.setDestination("dataUpdates");
+        msg.setHeader(AsyncMessage.SUBTOPIC_HEADER_NAME, String.valueOf(getDataFeedID()));
+        msg.setMessageId(clientID);
+        msg.setTimestamp(System.currentTimeMillis());
+        msgBroker.routeMessageToService(msg, null);
     }
 }

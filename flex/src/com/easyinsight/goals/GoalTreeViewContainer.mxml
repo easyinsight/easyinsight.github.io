@@ -2,19 +2,27 @@
 <FullScreenPage xmlns="com.easyinsight.*" xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:ilog="ilog.orgchart.*"
                 xmlns:goals="com.easyinsight.goals.*" width="100%" height="100%" creationComplete="setup()" backgroundColor="#DCE2F8">
     <mx:Script><![CDATA[
-import com.easyinsight.analysis.AnalysisCloseEvent;
-import com.easyinsight.util.ModelessWindowEvent;
-import mx.collections.ArrayCollection;
-import mx.core.IFlexDisplayObject;
-import mx.managers.PopUpManager;
-        public var goalTree:GoalTree;
+        import com.easyinsight.analysis.AnalysisCloseEvent;
+        import com.easyinsight.util.ModelessWindowEvent;
+
+        import com.easyinsight.util.ProgressAlert;
+
+        import mx.collections.ArrayCollection;
+        import mx.core.IFlexDisplayObject;
+        import mx.managers.BrowserManager;
+        import mx.managers.PopUpManager;
+        import mx.utils.URLUtil;
 
         [Bindable]
         [Embed(source="../../../../assets/background2.JPG")]
         private var background2:Class;
 
+        private var _goalTreeID:int;
+
         [Bindable]
         private var _goalTreeNodes:GoalTreeNode;
+
+        private var goalTree:GoalTree;
 
         [Bindable]
         public var startDate:Date;
@@ -24,10 +32,19 @@ import mx.managers.PopUpManager;
 
         private var windows:ArrayCollection = new ArrayCollection();
 
+        public function set goalTreeID(val:int):void {
+            _goalTreeID = val;
+        }
+
         private function setup():void {
             addEventListener(ModelessWindowEvent.WINDOW_REMOVED, onWindowRemove);
             addEventListener(ModelessWindowEvent.WINDOW_ADDED, onWindowAdd);
-            _goalTreeNodes = goalTree.rootNode;
+            var feedFragmentObject:Object = new Object();
+            feedFragmentObject.goalTreeID = String(_goalTreeID);
+            var feedFragmentString:String = URLUtil.objectToString(feedFragmentObject);
+            BrowserManager.getInstance().setFragment(feedFragmentString);
+            ProgressAlert.alert(this, "Retrieving latest goal data", null, goalService.createDataTree);
+            goalService.createDataTree.send(_goalTreeID, startChooser.selectedDate, endChooser.selectedDate);
         }
 
         private function onWindowRemove(event:ModelessWindowEvent):void {
@@ -51,7 +68,8 @@ import mx.managers.PopUpManager;
         }
 
         private function onDatesChanged():void {
-            goalService.createDataTree.send(goalTree.goalTreeID, startChooser.selectedDate, endChooser.selectedDate);
+            ProgressAlert.alert(this, "Retrieving latest goal data", null, goalService.createDataTree);
+            goalService.createDataTree.send(_goalTreeID, startChooser.selectedDate, endChooser.selectedDate);
         }
 
         private function gotTree():void {

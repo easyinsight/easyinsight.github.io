@@ -408,6 +408,9 @@ public class FeedStorage {
         saveFields(feedDefinition.getDataFeedID(), conn, feedDefinition.getFields());
         saveTags(feedDefinition.getDataFeedID(), conn, feedDefinition.getTags());
         feedDefinition.customStorage(conn);
+        if (feedDefinition.getRefreshDataInterval() > 0) {
+
+        }
     }
 
     public void updateDataFeedConfiguration(FeedDefinition feedDefinition) {

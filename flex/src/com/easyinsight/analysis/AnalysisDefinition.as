@@ -24,6 +24,7 @@ package com.easyinsight.analysis
         public static const GAUGE:int = 16;
         public static const TREE:int = 17;
         public static const TREEMAP:int = 18;
+        public static const MMLINE:int = 19;
 
 		public var dataFeedID:int;
 		public var name:String;

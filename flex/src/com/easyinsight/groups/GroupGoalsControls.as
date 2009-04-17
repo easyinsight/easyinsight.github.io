@@ -2,8 +2,6 @@ package com.easyinsight.groups
 {
     import com.easyinsight.goals.*;
 
-    import mx.rpc.events.ResultEvent;
-    import mx.rpc.remoting.RemoteObject;
 	import com.easyinsight.genredata.AnalyzeEvent;
 	
 	import flash.events.MouseEvent;
@@ -18,8 +16,6 @@ package com.easyinsight.groups
         
         private var goalTree:GoalTreeDescriptor;
 
-        private var goalService:RemoteObject;
-        
 		public function GroupGoalsControls()
 		{
 			super();
@@ -41,14 +37,7 @@ package com.easyinsight.groups
 		}
 		
 		private function viewGoalTree(event:MouseEvent):void {
-			goalService = new RemoteObject();
-            goalService.destination = "goalService";
-            goalService.createDataTree.addEventListener(ResultEvent.RESULT, gotDataTree);
-            goalService.createDataTree.send(goalTree.goalTreeID, null, null);
+            dispatchEvent(new AnalyzeEvent(new GoalDataAnalyzeSource(goalTree.goalTreeID)));
 		}
-
-        private function gotDataTree(event:ResultEvent):void {
-            dispatchEvent(new AnalyzeEvent(new GoalDataAnalyzeSource(goalService.createDataTree.lastResult as GoalTree))); 
-        }
 	}
 }

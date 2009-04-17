@@ -5,17 +5,17 @@ package com.easyinsight.goals
 
 	public class GoalTreeAdminAnalyzeSource implements AnalyzeSource
 	{
-		private var goalTree:GoalTree;
+		private var goalTreeID:int;
 		
-		public function GoalTreeAdminAnalyzeSource(goalTree:GoalTree)
+		public function GoalTreeAdminAnalyzeSource(goalTreeID:int)
 		{
-			this.goalTree = goalTree;
+			this.goalTreeID = goalTreeID;
 		}
 
 		public function createAnalysisPopup():FullScreenPage
 		{
 			var goalTreeAdminContainer:GoalTreeAdminContainer = new GoalTreeAdminContainer();
-			goalTreeAdminContainer.goalTree = goalTree;
+			goalTreeAdminContainer.goalTreeID = goalTreeID;
 			return goalTreeAdminContainer;
 		}
 		

@@ -6,14 +6,17 @@
         import com.easyinsight.administration.sharing.UserStub;
         import com.easyinsight.framework.User;
         import com.easyinsight.util.ProgressAlert;
+
         import mx.collections.ArrayCollection;
+
         import com.easyinsight.analysis.AnalysisCloseEvent;
+
         [Bindable]
         private var _goalTree:GoalTree;
         [Bindable]
         private var goalTreeName:String;
         [Bindable]
-        private var goalTreeID:int;
+        private var _goalTreeID:int;
         [Bindable]
         private var goalTreeDescription:String;
         [Bindable]
@@ -21,23 +24,31 @@
         [Bindable]
         private var newSolutions:ArrayCollection = new ArrayCollection();
 
-        public function set goalTree(goalTree:GoalTree):void {
-            this._goalTree = goalTree;
+        public function set goalTreeID(val:int):void {
+            _goalTreeID = val;
         }
 
         private function onCreation():void {
             addEventListener(SolutionInstallRequiredEvent.SOLUTION_INSTALL, onNewSolution);
         }
 
-        override protected function commitProperties():void {
-            if (_goalTree == null) {
+        override protected function createChildren():void {
+            super.createChildren();
+            if (_goalTreeID == 0) {
                 _goalTree = new GoalTree();
                 _goalTree.rootNode = new GoalTreeNode();
                 var userStub:UserStub = new UserStub();
                 userStub.userID = User.getInstance().userID;
                 _goalTree.administrators.addItem(userStub);
+                rootNode = _goalTree.rootNode;
+            } else {
+                ProgressAlert.alert(this, "Retrieving goal tree...", null, goalService.getGoalTree);
+                goalService.getGoalTree.send(_goalTreeID);
             }
-            goalTreeID = _goalTree.goalTreeID;
+        }
+
+        private function gotGoalTree():void {
+            _goalTree = goalService.getGoalTree.lastResult as GoalTree;
             rootNode = _goalTree.rootNode;
             goalTreeName = _goalTree.name;
             goalTreeDescription = _goalTree.description;
@@ -45,11 +56,6 @@
 
         private function onNewSolution(event:SolutionInstallRequiredEvent):void {
             newSolutions.addItem(event.solutionDescriptor.solutionID);
-        }
-
-        override protected function createChildren():void {
-            super.createChildren();
-
         }
 
         private function save():void {
@@ -87,6 +93,7 @@
 	<mx:RemoteObject destination="goalService" id="goalService">
 		<mx:method name="createGoalTree" result="savedGoalTree()"/>
 		<mx:method name="updateGoalTree" result="updatedGoalTree()"/>
+		<mx:method name="getGoalTree" result="gotGoalTree()"/>
 	</mx:RemoteObject>
 	<mx:VBox  width="100%" height="100%" paddingLeft="10" paddingTop="10" paddingRight="10" paddingBottom="10">
 		<mx:HBox id="buttonBox" paddingLeft="5" paddingTop="5" paddingBottom="5">
@@ -127,7 +134,7 @@
 				</mx:VBox>
             </mx:HBox>
             <mx:Canvas width="100%" height="100%" label="Tree">
-                <goals:GoalTreeAdminWindow goalTreeNode="{rootNode}" goalTreeID="{goalTreeID}"/>
+                <goals:GoalTreeAdminWindow goalTreeNode="{rootNode}" goalTreeID="{_goalTreeID}"/>
             </mx:Canvas>
         </mx:TabNavigator>
 	</mx:VBox>

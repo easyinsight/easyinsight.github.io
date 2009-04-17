@@ -106,7 +106,7 @@ import mx.utils.URLUtil;
         public var screenshot:Class;
 
         private function createGoalTree():void {
-            dispatchEvent(new AnalyzeEvent(new GoalTreeAdminAnalyzeSource(null)));
+            dispatchEvent(new AnalyzeEvent(new GoalTreeAdminAnalyzeSource(0)));
         }
 
         public function analyze():AnalyzeSource {
@@ -182,8 +182,8 @@ import mx.utils.URLUtil;
 
         private function gridDoubleClick(event:ListEvent):void {
             if (goalTreesBox.selectedItem != null) {
-                var goalTree:GoalTree = goalTreesBox.selectedItem as GoalTree;
-                dispatchEvent(new AnalyzeEvent(new GoalDataAnalyzeSource(goalTree)));
+                var goalTree:GoalTreeDescriptor = goalTreesBox.selectedItem as GoalTreeDescriptor;
+                dispatchEvent(new AnalyzeEvent(new GoalTreeAdminAnalyzeSource(goalTree.goalTreeID)));
             }
         }
 

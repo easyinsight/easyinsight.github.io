@@ -7,7 +7,7 @@ import java.util.*;
  * Date: Jul 17, 2008
  * Time: 7:45:24 PM
  */
-public class WSTreeDefinition extends WSGraphicDefinition {
+public class WSTreeDefinition extends WSAnalysisDefinition {
 
     private long treeDefinitionID;
 

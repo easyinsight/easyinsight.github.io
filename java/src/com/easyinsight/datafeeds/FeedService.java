@@ -13,12 +13,16 @@ import com.easyinsight.users.SubscriptionLicense;
 import com.easyinsight.core.EIDescriptor;
 import com.easyinsight.core.InsightDescriptor;
 import com.easyinsight.core.DataSourceDescriptor;
+import com.easyinsight.scheduler.DataSourceTaskGenerator;
+import com.easyinsight.goals.GoalTreeDescriptor;
 
 import java.util.*;
 import java.sql.SQLException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+
+import org.hibernate.Session;
 
 /**
  * User: jboe
@@ -53,6 +57,13 @@ public class FeedService implements IDataFeedService {
             while (reportRS.next()) {
                 descriptorList.add(new InsightDescriptor(reportRS.getLong(1), reportRS.getString(2), reportRS.getLong(3), reportRS.getInt(4)));
             }
+            /*PreparedStatement getGoalTreeStmt = conn.prepareStatement("SELECT GOAL_TREE.GOAL_TREE_ID, GOAL_TREE.name FROM GOAL_TREE, USER_TO_GOAL_TREE " +
+                    "WHERE GOAL_TREE.goal_tree_id = user_to_goal_tree.goal_tree_id and user_to_goal_tree.user_id = ?");
+            getGoalTreeStmt.setLong(1, SecurityUtil.getUserID());
+            ResultSet goalTreeRS = getGoalTreeStmt.executeQuery();
+            while (goalTreeRS.next()) {
+                descriptorList.add(new GoalTreeDescriptor());
+            }*/
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);
@@ -373,10 +384,38 @@ public class FeedService implements IDataFeedService {
             feedDefinition.setTags(tagList);
             final long feedID = feedDefinition.getDataFeedID();
             FeedDefinition existingFeed = feedStorage.getFeedDefinitionData(feedDefinition.getDataFeedID());
+            boolean newTaskGen = false;
+            if (existingFeed.getRefreshDataInterval() != feedDefinition.getRefreshDataInterval()) {
+                newTaskGen = feedDefinition.getRefreshDataInterval() > 0;
+                if (existingFeed.getRefreshDataInterval() > 0) {
+                    // nuke the existing generator
+                    Session session = Database.instance().createSession(conn);
+                    try {
+                        List results = session.createQuery("from DataSourceTaskGenerator where dataSourceID = ?").setLong(0, existingFeed.getDataFeedID()).list();
+                        if (results.size() > 0) {
+                            session.delete(results.get(0));
+                        }
+                    } finally {
+                        session.close();
+                    }
+                }
+            }
             List<AnalysisItem> existingFields = existingFeed.getFields();
             metadata = DataStorage.writeConnection(feedDefinition, conn);
             feedStorage.updateDataFeedConfiguration(feedDefinition, conn);
             metadata.migrate(existingFields, feedDefinition.getFields());
+            if (newTaskGen) {
+                Session session = Database.instance().createSession(conn);
+                try {
+                    DataSourceTaskGenerator generator = new DataSourceTaskGenerator();
+                    generator.setStartTaskDate(new Date());
+                    generator.setDataSourceID(feedDefinition.getDataFeedID());
+                    generator.setTaskInterval((int) feedDefinition.getRefreshDataInterval());
+                    session.save(generator);
+                } finally {
+                    session.close();
+                }
+            }
             FeedRegistry.instance().flushCache(feedID);
             metadata.commit();
             conn.commit();

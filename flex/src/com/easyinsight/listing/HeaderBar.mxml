@@ -9,7 +9,6 @@
     </mx:Metadata>
     <mx:Script>
 		<![CDATA[
-import mx.collections.ICollectionView;
         import com.easyinsight.goals.MyGoals;
         import com.easyinsight.solutions.SolutionsSummary;
         import com.easyinsight.groups.GroupsSummary;

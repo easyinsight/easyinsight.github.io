@@ -4,7 +4,7 @@ package com.easyinsight.analysis
 	
 	[Bindable]
 	[RemoteClass(alias="com.easyinsight.analysis.WSChartDefinition")]
-	public class ChartDefinition extends GraphicDefinition
+	public class ChartDefinition extends AnalysisDefinition
 	{
 		public var chartType:int;
 		public var chartFamily:int;

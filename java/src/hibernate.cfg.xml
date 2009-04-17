@@ -99,6 +99,11 @@
         <mapping class="com.easyinsight.scrubbing.LookupTablePair"/>
         <mapping class="com.easyinsight.scrubbing.TextReplaceScrub"/>
 
+        <mapping class="com.easyinsight.scheduler.TaskGenerator"/>
+        <mapping class="com.easyinsight.scheduler.DataSourceTaskGenerator"/>
+        <mapping class="com.easyinsight.scheduler.ScheduledTask"/>
+        <mapping class="com.easyinsight.scheduler.DataSourceScheduledTask"/>
+
         <mapping class="com.easyinsight.core.PersistableValue"/>
         <mapping class="com.easyinsight.core.PersistableStringValue"/>
         <mapping class="com.easyinsight.core.PersistableDateValue"/>

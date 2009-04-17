@@ -1,10 +1,7 @@
 package com.easyinsight.goals
 {
-import com.easyinsight.util.ProgressAlert;
-import mx.events.FlexEvent;
-import mx.binding.utils.BindingUtils;
-import mx.rpc.events.ResultEvent;
-import mx.rpc.remoting.RemoteObject;
+    import mx.events.FlexEvent;
+    import mx.binding.utils.BindingUtils;
 	import com.easyinsight.genredata.AnalyzeEvent;
 	
 	import flash.events.MouseEvent;
@@ -27,8 +24,6 @@ import mx.rpc.remoting.RemoteObject;
 
         private var _admin:Boolean = false;
 
-        private var goalService:RemoteObject;
-        
 		public function MyGoalsControls()
 		{
 			super();
@@ -76,31 +71,15 @@ import mx.rpc.remoting.RemoteObject;
 		}
 		
 		private function viewGoalTree(event:MouseEvent):void {
-			goalService = new RemoteObject();
-            goalService.destination = "goalService";
-            goalService.createDataTree.addEventListener(ResultEvent.RESULT, gotDataTree);
-            ProgressAlert.alert(this.parent.parent, "Retrieving goal tree...", null, goalService.createDataTree);
-            goalService.createDataTree.send(goalTree.goalTreeID, null, null);
+            dispatchEvent(new AnalyzeEvent(new GoalDataAnalyzeSource(goalTree.goalTreeID)));
 		}
-
-        private function gotDataTree(event:ResultEvent):void {
-            dispatchEvent(new AnalyzeEvent(new GoalDataAnalyzeSource(goalService.createDataTree.lastResult as GoalTree))); 
-        }
 		
 		private function adminGoalTree(event:MouseEvent):void {
-            goalService = new RemoteObject();
-            goalService.destination = "goalService";
-            goalService.getGoalTree.addEventListener(ResultEvent.RESULT, gotTree);
-            ProgressAlert.alert(this.parent.parent, "Retrieving goal tree...", null, goalService.getGoalTree);
-            goalService.getGoalTree.send(goalTree.goalTreeID);
+            dispatchEvent(new AnalyzeEvent(new GoalTreeAdminAnalyzeSource(goalTree.goalTreeID)));
 		}
 		
 		private function deleteGoalTree(event:MouseEvent):void {
             dispatchEvent(new DeleteGoalTreeEvent(goalTree));
 		}
-
-        private function gotTree(event:ResultEvent):void {
-            dispatchEvent(new AnalyzeEvent(new GoalTreeAdminAnalyzeSource(goalService.getGoalTree.lastResult as GoalTree)));
-        }
 	}
 }

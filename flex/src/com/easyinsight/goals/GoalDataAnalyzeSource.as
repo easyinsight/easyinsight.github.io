@@ -3,17 +3,17 @@ import com.easyinsight.listing.AnalyzeSource;
 import com.easyinsight.FullScreenPage;
 public class GoalDataAnalyzeSource implements AnalyzeSource
 	{
-		private var goalTree:GoalTree;
+		private var goalTreeID:int;
 
-		public function GoalDataAnalyzeSource(goalTree:GoalTree)
+		public function GoalDataAnalyzeSource(goalTreeID:int)
 		{
-			this.goalTree = goalTree;
+			this.goalTreeID = goalTreeID;
 		}
 
 		public function createAnalysisPopup():FullScreenPage
 		{
 			var goalTreeAdminContainer:GoalTreeViewContainer = new GoalTreeViewContainer();
-			goalTreeAdminContainer.goalTree = goalTree;
+			goalTreeAdminContainer.goalTreeID = goalTreeID;
 			return goalTreeAdminContainer;
 		}
 

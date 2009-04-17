@@ -5,6 +5,7 @@ import com.easyinsight.analysis.charts.twoaxisbased.area.Area3DChartController;
 import com.easyinsight.analysis.charts.twoaxisbased.area.AreaChartController;
 import com.easyinsight.analysis.charts.twoaxisbased.line.Line3DChartController;
 import com.easyinsight.analysis.charts.twoaxisbased.line.LineChartController;
+import com.easyinsight.analysis.charts.twoaxisbased.line.MultiMeasureLineChartController;
 import com.easyinsight.analysis.charts.xaxisbased.column.Column3DChartController;
 import com.easyinsight.analysis.charts.xaxisbased.column.ColumnChartController;
 import com.easyinsight.analysis.charts.xaxisbased.pie.Pie3DChartController;
@@ -79,6 +80,9 @@ public class ControllerLookup {
                 break;
             case AnalysisDefinition.TREE:
                 controller = TreeController;
+                break;
+            case AnalysisDefinition.MMLINE:
+                controller = MultiMeasureLineChartController;
                 break;
         }
         return controller;

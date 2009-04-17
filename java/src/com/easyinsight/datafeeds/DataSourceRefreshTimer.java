@@ -49,7 +49,7 @@ public class DataSourceRefreshTimer extends TimerTask {
                         dataSourceUser = (UserStub) owner;
                     }
                 }
-                dataSource.refreshData(null, dataSourceUser.getAccountID());
+                dataSource.refreshData(null, dataSourceUser.getAccountID(), null);
             }
         } catch (Exception e) {
             LogClass.error(e);

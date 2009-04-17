@@ -6,6 +6,7 @@ import com.easyinsight.analysis.AnalysisItemResultMetadata;
 import com.easyinsight.analysis.AnalysisMeasureResultMetadata;
 
 import javax.persistence.*;
+import java.util.List;
 
 /**
  * User: James Boe
@@ -25,7 +26,10 @@ public class AnalysisMeasure extends AnalysisItem {
 
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name="measure_condition_range_id")
-    private MeasureConditionRange measureConditionRange;    
+    private MeasureConditionRange measureConditionRange;
+
+    /*@OneToMany(cascade = CascadeType.ALL)
+    private List<PersistableFilterDefinition> filters;*/
 
     public AnalysisMeasure() {
     }

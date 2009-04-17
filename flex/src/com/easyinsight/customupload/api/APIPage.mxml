@@ -1,6 +1,6 @@
 <?xml version="1.0" ?>
 <mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:api="com.easyinsight.customupload.api.*"
-         xmlns:listing="com.easyinsight.listing.*"
+         xmlns:listing="com.easyinsight.listing.*" xmlns:util="com.easyinsight.util.*"
          implements="com.easyinsight.listing.IPerspective" width="100%" height="100%"
          creationComplete="setupListeners()" verticalGap="0">
     <mx:states>
@@ -19,12 +19,14 @@
     </mx:states>
     <mx:Script><![CDATA[
         import com.easyinsight.account.Account;
-import com.easyinsight.framework.LoginEvent;
+        import com.easyinsight.framework.LoginEvent;
         import com.easyinsight.framework.User;
+
         import mx.collections.ArrayCollection;
-import mx.managers.PopUpManager;
-import mx.utils.URLUtil;
+        import mx.managers.PopUpManager;
+        import mx.utils.URLUtil;
         import mx.managers.BrowserManager;
+
         import com.easyinsight.listing.AnalyzeSource;
 
         [Bindable]
@@ -108,7 +110,7 @@ import mx.utils.URLUtil;
 
         private function help():void {
             var helpWindow:DynamicServiceHelpWindow = DynamicServiceHelpWindow(PopUpManager.createPopUp(this,
-                DynamicServiceHelpWindow, true));
+                    DynamicServiceHelpWindow, true));
             PopUpManager.centerPopUp(helpWindow);
         }
 
@@ -128,56 +130,70 @@ import mx.utils.URLUtil;
         }
         ]]></mx:Script>
     <mx:RemoteObject destination="apiService" id="apiService">
-		<mx:method name="getDeployedServices" result="gotDeployedServices()"/>
-		<mx:method name="getDataSourceAPIs" result="gotAPIs()"/>
-	</mx:RemoteObject>
+        <mx:method name="getDeployedServices" result="gotDeployedServices()"/>
+        <mx:method name="getDataSourceAPIs" result="gotAPIs()"/>
+    </mx:RemoteObject>
     <mx:Box width="100%" height="5" backgroundColor="#D42525" left="0" right="0"/>
     <mx:VBox width="100%" height="100%" backgroundColor="#818285" horizontalAlign="center">
         <mx:VBox id="coreContent" height="100%" width="1000" paddingTop="10" paddingLeft="10" paddingRight="10"
-             paddingBottom="10" verticalGap="10" backgroundColor="#FFFFFF">
-        <mx:Box paddingLeft="10" paddingTop="10" paddingRight="10" paddingBottom="10" width="100%" height="100%" verticalGap="10" id="apiListing">			
-		<mx:HBox width="100%">
-            <mx:Button icon="{helpIcon}" toolTip="Help!" click="help()" />
-            <mx:Spacer width="100%"/>
-            <mx:HBox borderStyle="inset" borderThickness="1" paddingTop="5" paddingBottom="5" paddingLeft="5" paddingRight="5">
-                <mx:TextInput id="searchText" keyUp="search()"/>
-			    <mx:Button toolTip="Search" icon="@Embed(source='../../../../../assets/view.png')" id="searchButton"/>
-            </mx:HBox>
-		</mx:HBox>
-        <mx:HBox width="100%" height="100%" verticalGap="0">
-            <mx:VBox verticalGap="0">
-                <mx:Box width="100%" height="5" backgroundColor="#D42525" left="0" right="0"/>
-                <mx:Box width="100%" backgroundColor="#F6A76B" horizontalAlign="center">
-                    <mx:Label text="Standard Web Service APIs"/>
-                </mx:Box>
-                <mx:Form paddingTop="0" paddingLeft="0" paddingRight="0" paddingBottom="0" backgroundColor="#F5CDAF">
-                    <mx:FormItem label="Validated Publish" fontFamily="Tahoma" fontWeight="bold" direction="vertical">
-                        <mx:LinkButton textDecoration="underline" label="View WSDL" fontFamily="Lucida Grande" fontWeight="normal" click="viewValidatedWSDL()"/>
-                    </mx:FormItem>
-                    <mx:FormItem label="Unchecked Publish" fontFamily="Tahoma" fontWeight="bold" direction="vertical">
-                        <mx:LinkButton textDecoration="underline" label="View WSDL" fontFamily="Lucida Grande" fontWeight="normal" click="viewUncheckedWSDL()"/>
-                    </mx:FormItem>
-                </mx:Form>
-            </mx:VBox>
-            <mx:VBox verticalGap="0" height="100%">
-                <mx:Box width="100%" height="5" backgroundColor="#D42525" left="0" right="0"/>
-                <mx:Box width="100%" backgroundColor="#F6A76B" horizontalAlign="center">
-                    <mx:Label text="Data Sources and their API Configurations"/>
-                </mx:Box>
-                <mx:DataGrid dataProvider="{apis}" width="700" height="100%" selectable="false" id="servicesGrid" rowHeight="28">
-                    <mx:columns>
-                        <mx:DataGridColumn headerText="Data Source Name" dataField="name" headerRenderer="com.easyinsight.groups.CustomGroupHeader"/>
-                        <mx:DataGridColumn headerText="API Key" width="120" dataField="apiKey" headerRenderer="com.easyinsight.groups.CustomGroupHeader"/>
-                        <mx:DataGridColumn headerText="Unchecked API" dataField="uncheckedEnabled" headerRenderer="com.easyinsight.groups.CustomGroupHeader"
-                                itemRenderer="com.easyinsight.customupload.api.UncheckedAPICheckbox" width="120"/>
-                        <mx:DataGridColumn headerText="Validated API" dataField="validatedEnabled" headerRenderer="com.easyinsight.groups.CustomGroupHeader"
-                                itemRenderer="com.easyinsight.customupload.api.ValidatedAPICheckbox" width="120"/>
-                        <mx:DataGridColumn headerText="" width="60" dataField="feedName" itemRenderer="{factory}" sortable="false"/>
-                    </mx:columns>
-                </mx:DataGrid>
-            </mx:VBox>
-        </mx:HBox>
-	</mx:Box>
-    </mx:VBox>
+                 paddingBottom="10" verticalGap="10" backgroundColor="#FFFFFF">
+            <mx:Box paddingLeft="10" paddingTop="10" paddingRight="10" paddingBottom="10" width="100%" height="100%"
+                    verticalGap="10" id="apiListing">
+                <mx:HBox width="100%">
+                    <mx:Button icon="{helpIcon}" toolTip="Help!" click="help()"/>
+                    <mx:Spacer width="100%"/>
+                    <mx:HBox borderStyle="inset" borderThickness="1" paddingTop="5" paddingBottom="5" paddingLeft="5"
+                             paddingRight="5">
+                        <mx:TextInput id="searchText" keyUp="search()"/>
+                        <mx:Button toolTip="Search" icon="@Embed(source='../../../../../assets/view.png')"
+                                   id="searchButton"/>
+                    </mx:HBox>
+                </mx:HBox>
+                <mx:HBox width="100%" height="100%" verticalGap="0">
+                    <mx:VBox verticalGap="0">
+                        <mx:Box width="100%" height="5" backgroundColor="#D42525" left="0" right="0"/>
+                        <mx:Box width="100%" backgroundColor="#F6A76B" horizontalAlign="center">
+                            <mx:Label text="Standard Web Service APIs"/>
+                        </mx:Box>
+                        <mx:Form paddingTop="0" paddingLeft="0" paddingRight="0" paddingBottom="0"
+                                 backgroundColor="#F5CDAF">
+                            <mx:FormItem label="Validated Publish" fontFamily="Tahoma" fontWeight="bold"
+                                         direction="vertical">
+                                <mx:LinkButton textDecoration="underline" label="View WSDL" fontFamily="Lucida Grande"
+                                               fontWeight="normal" click="viewValidatedWSDL()"/>
+                            </mx:FormItem>
+                            <mx:FormItem label="Unchecked Publish" fontFamily="Tahoma" fontWeight="bold"
+                                         direction="vertical">
+                                <mx:LinkButton textDecoration="underline" label="View WSDL" fontFamily="Lucida Grande"
+                                               fontWeight="normal" click="viewUncheckedWSDL()"/>
+                            </mx:FormItem>
+                        </mx:Form>
+                    </mx:VBox>
+                    <mx:VBox verticalGap="0" height="100%">
+                        <mx:Box width="100%" height="5" backgroundColor="#D42525" left="0" right="0"/>
+                        <mx:Box width="100%" backgroundColor="#F6A76B" horizontalAlign="center">
+                            <mx:Label text="Data Sources and their API Configurations"/>
+                        </mx:Box>
+                        <mx:DataGrid dataProvider="{apis}" width="700" height="100%" selectable="false"
+                                     id="servicesGrid" rowHeight="28">
+                            <mx:columns>
+                                <util:EIDataGridColumn headerText="Data Source Name" dataField="name"/>
+                                <util:EIDataGridColumn headerText="API Key" width="120" dataField="apiKey"/>
+                                <util:EIDataGridColumn headerText="" width="50" dataField="apiKey" sortable="false"
+                                        itemRenderer="com.easyinsight.customupload.api.CopyAPIButton"/>
+                                <util:EIDataGridColumn headerText="Unchecked API" dataField="uncheckedEnabled"
+                                                   headerRenderer="com.easyinsight.groups.CustomGroupHeader"
+                                                   width="120"/>
+                                <util:EIDataGridColumn headerText="Validated API" dataField="validatedEnabled"
+                                                   headerRenderer="com.easyinsight.groups.CustomGroupHeader"
+                                                   width="120"/>
+                                <util:EIDataGridColumn headerText="" width="60" dataField="feedName"
+                                                   itemRenderer="{factory}" sortable="false"/>
+                            </mx:columns>
+                        </mx:DataGrid>
+                    </mx:VBox>
+                </mx:HBox>
+            </mx:Box>
+        </mx:VBox>
     </mx:VBox>
 </mx:VBox>

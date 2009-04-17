@@ -24,7 +24,6 @@ import mx.managers.BrowserManager;
             dataAnalysisContainer.dataService = dataService;
             BrowserManager.getInstance().setTitle("Easy Insight - " + insightDescriptor.name);
             dataAnalysisContainer.reportID = insightDescriptor.id;
-            //dataAnalysisContainer.openAnalysis(analysisDefinition);
             return dataAnalysisContainer;
         }
 	}

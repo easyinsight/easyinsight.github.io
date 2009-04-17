@@ -10,7 +10,7 @@ import java.util.HashSet;
  * Date: Jul 17, 2008
  * Time: 7:45:24 PM
  */
-public class WSMapDefinition extends WSGraphicDefinition {
+public class WSMapDefinition extends WSAnalysisDefinition {
 
     private long mapDefinitionID;
     private int mapType;

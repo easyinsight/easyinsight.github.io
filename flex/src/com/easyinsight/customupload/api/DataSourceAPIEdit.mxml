@@ -14,6 +14,10 @@
         import com.easyinsight.util.ProgressAlert;
 
         [Bindable]
+        [Embed(source="../../../../../assets/clipboard.png")]
+        private var copyIcon:Class;
+
+        [Bindable]
         private var feedID:int;
         [Bindable]
         private var dataSourceName:String;
@@ -117,8 +121,9 @@
             <mx:FormItem label="Data Source Name" fontFamily="Tahoma" fontWeight="bold">
                 <mx:Label text="{dataSourceName}" fontFamily="Lucida Grande" fontWeight="normal"/>
             </mx:FormItem>
-            <mx:FormItem label="Data Source API Key" fontFamily="Tahoma" fontWeight="bold">
-                <mx:Label text="{dataSourceAPIKey}" fontFamily="Lucida Grande" fontWeight="normal"/>
+            <mx:FormItem label="Data Source API Key" fontFamily="Tahoma" fontWeight="bold" direction="horizontal">
+                <mx:Text text="{dataSourceAPIKey}" fontFamily="Lucida Grande" fontWeight="normal"/>
+                <mx:Button icon="{copyIcon}" click="System.setClipboard(dataSourceAPIKey)" toolTip="Copy API Key to Clipboard"/>
             </mx:FormItem>
         </mx:Form>
         <mx:Spacer height="20"/>

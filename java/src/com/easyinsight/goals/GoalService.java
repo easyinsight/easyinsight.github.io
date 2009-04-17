@@ -22,6 +22,15 @@ public class GoalService {
     private GoalStorage goalStorage = new GoalStorage();
     private GoalEvaluationStorage goalEvaluationStorage = new GoalEvaluationStorage();
 
+    public boolean canAccessGoalTree(long goalTreeID) {
+        try {
+            SecurityUtil.authorizeGoalTree(goalTreeID, Roles.SUBSCRIBER);
+            return true;
+        } catch (SecurityException e) {
+            return false;
+        }
+    }
+
     public GoalTree createGoalTree(GoalTree goalTree) {
         SecurityUtil.authorizeAccountTier(Account.PROFESSIONAL);
         if (goalTree.getAdministrators() == null || goalTree.getAdministrators().size() == 0) {
