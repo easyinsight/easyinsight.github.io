@@ -33,6 +33,46 @@
         // or when the preferences are validated
         widget.onLoad = function() {
           var contentHtml = '';
+            var queryString = window.location.search;
+          if(queryString.length > 1)
+            queryString = queryString.substring(1, queryString.length);
+            var keyPairs = parseQueryString(queryString);
+            if(keyPairs["insightCombo"] == null && keyPairs["reportName"] == null && keyPairs["reportType"] == null) {
+                var realUrl;
+                if(keyPairs["uwaUrl"] != null) {
+                    realUrl = unescape(keyPairs["uwaUrl"]);
+                }
+                if(keyPairs["moduleUrl"] != null) {
+                    realUrl = unescape(keyPairs["moduleUrl"]);
+                }
+                alert(realUrl);
+                if(realUrl != null) {
+                    var qs = realUrl.split("?");
+                    if(qs.length == 2) {
+                        qs = qs[1];
+                        keyPairs = parseQueryString(qs);
+                    }
+                }
+            }
+
+          alert('a');
+
+          if(widget.getValue("insightCombo") == null || widget.getValue("insightCombo") == "" && keyPairs != null && keyPairs["insightCombo"] != null) {
+              widget.setValue("insightCombo", unescape(keyPairs["insightCombo"]));
+          }
+
+          alert('b');
+
+          if(widget.getValue("reportName") == null || widget.getValue("reportName") == "" && keyPairs != null && keyPairs["reportName"] != null) {
+              widget.setValue("reportName", unescape(keyPairs["reportName"]));
+          }
+
+            alert('c');
+
+          if(widget.getValue("reportType") == null || widget.getValue("reportType") == "" && keyPairs != null && keyPairs["reportType"] != null) {
+              widget.setValue("insightCombo", unescape(keyPairs["reportType"]));
+          }
+            alert('d');
 
           contentHtml += '<div style="margin: 0 auto;text-align:center;">';
           contentHtml += '<object type="application/x-shockwave-flash" data="https://www.easy-insight.com/app/easyui-debug/YahooWidgetReport.swf" allowScriptAccess="always" width="550" height="450" class="flash">';
@@ -56,6 +96,19 @@
     flash.height = Math.round(flash.width * 3/4);
   }
 }
+
+        function parseQueryString(str) {
+            var queryVals = str.split("&");
+            var keyPairs = new Array();
+            for(var i = 0;i < queryVals.length;i++) {
+                var splitter = queryVals[i].split("=");
+                if(splitter.length == 2) {
+                    keyPairs[splitter[0]] = splitter[1];
+                    alert(splitter[0] + ":" + keyPairs[splitter[0]]);
+                }
+            }
+            return keyPairs;
+        }
     </script>
 
 </head>
