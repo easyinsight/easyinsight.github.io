@@ -11,6 +11,7 @@ import com.easyinsight.datafeeds.file.FileBasedFeedDefinition;
 import com.easyinsight.datafeeds.jira.JiraDataSource;
 import com.easyinsight.datafeeds.basecamp.BaseCampDataSource;
 import com.easyinsight.datafeeds.admin.AdminStatsDataSource;
+import com.easyinsight.datafeeds.gnip.GnipDataSource;
 import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.email.UserStub;
 import com.easyinsight.groups.GroupDescriptor;
@@ -322,7 +323,9 @@ public class FeedStorage {
                 updateViewsStmt.executeUpdate();
 
                 // update views in feedCache
-                FeedDefinition f = (FeedDefinition) feedCache.get(feedID);
+                FeedDefinition f = null;
+                if(feedCache != null)
+                    f = (FeedDefinition) feedCache.get(feedID);
                 if(f != null) {
                     f.setViewCount(newFeedViews);
                     feedCache.remove(feedID);
@@ -371,7 +374,8 @@ public class FeedStorage {
 
     public void updateDataFeedConfiguration(FeedDefinition feedDefinition, Connection conn) throws SQLException {
         try {
-            feedCache.remove(feedDefinition.getDataFeedID());
+            if(feedCache != null)
+                feedCache.remove(feedDefinition.getDataFeedID());
             LogClass.info("Removed " + feedDefinition.getDataFeedID() + " from feed cache.");
         } catch (CacheException e) {
             LogClass.error(e);
@@ -430,8 +434,9 @@ public class FeedStorage {
     }
 
     public FeedDefinition getFeedDefinitionData(long identifier, Connection conn) {
-        FeedDefinition feedDefinition;
-        feedDefinition = (FeedDefinition) feedCache.get(identifier);
+        FeedDefinition feedDefinition = null;
+        if(feedCache != null)
+            feedDefinition = (FeedDefinition) feedCache.get(identifier);
         if(feedDefinition != null) {
             LogClass.info("Cache hit for feed id: " + identifier);
             return feedDefinition;
@@ -469,7 +474,10 @@ public class FeedStorage {
                     feedDefinition = new BaseCampDataSource();
                 } else if (feedType.equals(FeedType.ADMIN_STATS)) {
                     feedDefinition = new AdminStatsDataSource();
-                } else {
+                } else if (feedType.equals(FeedType.GNIP)) {
+                    feedDefinition = new GnipDataSource();
+                }
+                else {
                     throw new RuntimeException("Couldn't identify type");
                 }
                 String genre = rs.getString(4);
@@ -519,7 +527,8 @@ public class FeedStorage {
         }
 
         try {
-            feedCache.put(identifier, feedDefinition);
+            if(feedCache != null)
+                feedCache.put(identifier, feedDefinition);
         } catch (CacheException e) {
             e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
         }
@@ -689,8 +698,9 @@ public class FeedStorage {
 
     public long getFeedForAPIKey(long userID, String apiKey) {
         Connection conn = Database.instance().getConnection();
-        Long feedID;
-        feedID = (Long) apiKeyCache.get(new FeedApiKey(apiKey, userID));
+        Long feedID = null;
+        if(apiKeyCache != null)
+            feedID = (Long) apiKeyCache.get(new FeedApiKey(apiKey, userID));
         if(feedID != null) {
             LogClass.info("Cache hit for API key: " + apiKey + " & User id: " + userID);
             return feedID;
@@ -705,7 +715,8 @@ public class FeedStorage {
             ResultSet rs = queryStmt.executeQuery();
             if (rs.next()) {
                 feedID = rs.getLong(1);
-                apiKeyCache.put(new FeedApiKey(apiKey, userID), feedID);
+                if(apiKeyCache != null)
+                    apiKeyCache.put(new FeedApiKey(apiKey, userID), feedID);
                 return feedID;
             }
         } catch (SQLException se) {

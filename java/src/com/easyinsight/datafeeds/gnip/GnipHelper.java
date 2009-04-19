@@ -38,6 +38,12 @@ public class GnipHelper {
         this.password = password;
     }
 
+    public void testConnection() throws GnipException {
+        Config c = new Config(username, password);
+        GnipConnection g = new GnipConnection(c);
+        g.getPublishers(PublisherScope.GNIP);
+    }
+
     public void createFilter(Publisher p, String filterName, List<Rule> rules) throws GnipException {
         Config c = new Config(username, password);
         Filter f = new Filter(filterName);
@@ -53,10 +59,10 @@ public class GnipHelper {
         createFilter(p, filterName, rules);
     }
 
-    public Activities getActivities(Publisher p, String filterName, DateTime bucketId) throws GnipException {
+    public Activities getActivities(GnipFilter gf, DateTime bucketId) throws GnipException {
         Config c = new Config(username, password);
         GnipConnection g = new GnipConnection(c);
-        return g.getActivities(p, new Filter(filterName), bucketId);
+        return g.getActivities(new Publisher(gf.getScope(), gf.getPublisherName()), new Filter(gf.getFilterName()), bucketId);
     }
 
     

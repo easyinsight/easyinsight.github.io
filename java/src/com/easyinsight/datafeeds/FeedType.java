@@ -17,6 +17,7 @@ public class FeedType {
     public static final FeedType JIRA = new FeedType(9);
     public static final FeedType BASECAMP = new FeedType(10);
     public static final FeedType ADMIN_STATS = new FeedType(11);
+    public static final FeedType GNIP = new FeedType(12);
 
     private int type;
 
