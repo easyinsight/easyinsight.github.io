@@ -37,7 +37,7 @@ package com.easyinsight.groups
 		}
 		
 		private function viewGoalTree(event:MouseEvent):void {
-            dispatchEvent(new AnalyzeEvent(new GoalDataAnalyzeSource(goalTree.goalTreeID)));
+            dispatchEvent(new AnalyzeEvent(new GoalDataAnalyzeSource(goalTree.id)));
 		}
 	}
 }

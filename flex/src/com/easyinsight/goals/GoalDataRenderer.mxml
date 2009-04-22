@@ -2,6 +2,7 @@
 <OrgChartItemRendererBase xmlns="com.easyinsight.goals.*" xmlns:mx="http://www.adobe.com/2006/mxml"
         borderStyle="solid" borderColor="#CCCCCC" cornerRadius="10" dropShadowEnabled="true" doubleClickEnabled="true" doubleClick="onDoubleClick()">
     <mx:Script><![CDATA[
+        import com.easyinsight.genredata.AnalyzeEvent;
         import com.easyinsight.util.ModelessWindowEvent;
 import ilog.orgchart.OrgChartItem;
 
@@ -49,6 +50,10 @@ import mx.formatters.NumberFormatter;
         [Embed(source="../../../../assets/bullet_square_grey.png")]
         private var noDataIcon:Class;
 
+        [Bindable]
+        [Embed(source="../../../../assets/branchx16.png")]
+        private var subTreeIcon:Class;
+
         private var goalTreeNodeData:GoalTreeNodeData;
 
         private var orgChartItem:OrgChartItem;
@@ -56,6 +61,9 @@ import mx.formatters.NumberFormatter;
         private var _startDate:Date;
 
         private var _endDate:Date;
+
+        [Bindable]
+        private var subTreePresent:Boolean;
 
         [Bindable]
         private var goalIcon:String;
@@ -117,6 +125,7 @@ import mx.formatters.NumberFormatter;
                 }
                 iconExists = goalTreeNodeData.iconImage != null && goalTreeNodeData.iconImage != "";
                 treeName = goalTreeNodeData.name;
+                subTreePresent = goalTreeNodeData.subTreeID > 0;
                 if (goalTreeNodeData.coreFeedID == 0) {
                     switch (goalTreeNodeData.goalOutcome.outcomeState) {
                         case GoalOutcome.EXCEEDING_GOAL:
@@ -182,6 +191,10 @@ import mx.formatters.NumberFormatter;
 
             }
         }
+
+        private function navigateToSubTree():void {
+            dispatchEvent(new AnalyzeEvent(new GoalDataAnalyzeSource(goalTreeNodeData.subTreeID)));
+        }
         ]]></mx:Script>
     <mx:VBox id="layer2" verticalAlign="middle" paddingLeft="10"
            paddingRight="10" paddingTop="0" paddingBottom="0" width="180" height="60" horizontalAlign="center">
@@ -191,6 +204,7 @@ import mx.formatters.NumberFormatter;
                 <mx:Label text="{currentValue}" fontFamily="Trebuchet MS" fontSize="14" color="#ffffff"/>
             </mx:Box>
             <mx:Image source="{trendImage}" toolTip="{trendTooltip}"/>
+            <mx:Button icon="{subTreeIcon}" toolTip="Navigate into Sub Tree" click="navigateToSubTree()" visible="{subTreePresent}"/>
         </mx:HBox>
         <mx:Label text="{treeName}" fontSize="12" maxWidth="160"/>
     </mx:VBox>

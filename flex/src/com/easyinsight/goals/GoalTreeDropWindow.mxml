@@ -12,7 +12,7 @@
         private var goalTree:GoalTree;
 
         private function addTree():void {
-            goalService.getGoalTree.send(_goalTreeDescriptor.goalTreeID);
+            goalService.getGoalTree.send(_goalTreeDescriptor.id);
         }
 
         private function addInline():void {
@@ -33,10 +33,12 @@
         }
 
         private function addSubTree():void {
-            _goalTreeNode.subTreeID = _goalTreeDescriptor.goalTreeID;
+            _goalTreeNode.subTreeID = _goalTreeDescriptor.id;
+            _goalTreeNode.subTreeName = _goalTreeDescriptor.name;
             if (_goalTreeDescriptor is SolutionGoalTreeDescriptor) {
                 _goalTreeNode.newSubTree = _goalTreeDescriptor as SolutionGoalTreeDescriptor;
             }
+            dispatchEvent(new SubTreeInstallEvent(SubTreeInstallEvent.SUB_TREE_INSTALL, _goalTreeDescriptor.id));
             PopUpManager.removePopUp(this);
         }
 

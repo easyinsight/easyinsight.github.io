@@ -22,7 +22,7 @@
 
 			private function chose():void {
 				var descriptor:GoalTreeDescriptor = feedBox.selectedItem as GoalTreeDescriptor;
-                groupService.addGoalTreeToGroup.send(descriptor.goalTreeID, _groupID);
+                groupService.addGoalTreeToGroup.send(descriptor.id, _groupID);
 			}
 
             private function addedGoalTree():void {

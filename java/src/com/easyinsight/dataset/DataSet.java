@@ -213,17 +213,15 @@ public class DataSet implements Serializable {
         rows.add(row);
     }
 
-    public Crosstab toCrosstab(WSCrosstabDefinition crosstabDefinition, InsightRequestMetadata insightRequestMetadata) {
-        DataSet dataSet = nextStep(crosstabDefinition, crosstabDefinition.getAllAnalysisItems(), insightRequestMetadata);
-        return dataSet.crosstab(crosstabDefinition.getRows(), crosstabDefinition.getColumns(), crosstabDefinition.getMeasures());
-    }
-
     public ListDataResults toList(WSAnalysisDefinition listDefinition, List<AnalysisItem> underlyingFields, InsightRequestMetadata insightRequestMetadata) {
         List<AnalysisItem> allRequestedAnalysisItems = new ArrayList<AnalysisItem>(listDefinition.getAllAnalysisItems());
         Set<AnalysisItem> allNeededAnalysisItems = new LinkedHashSet<AnalysisItem>();
         List<AnalysisItem> derivedItems = new ArrayList<AnalysisItem>();
         for (AnalysisItem item : allRequestedAnalysisItems) {
             allNeededAnalysisItems.addAll(item.getAnalysisItems(underlyingFields, allRequestedAnalysisItems));
+            if (item.isVirtual()) {
+                allNeededAnalysisItems.add(item);
+            }
             derivedItems.addAll(item.getDerivedItems());
         }
         List<AnalysisItem> neededItemList = new ArrayList<AnalysisItem>(allNeededAnalysisItems);
@@ -269,7 +267,7 @@ public class DataSet implements Serializable {
 
         preProcessData(analysisItems);
 
-        return transformDataSet(analysisItems, filterMap);
+        return transformDataSet(analysisItems, analysisDefinition.getAllAnalysisItems(), filterMap);
     }
 
     private void preProcessData(Collection<AnalysisItem> analysisItems) {
@@ -280,7 +278,7 @@ public class DataSet implements Serializable {
         }
     }
 
-    private DataSet transformDataSet(Collection<AnalysisItem> analysisItems, Map<AnalysisItem, Collection<MaterializedFilterDefinition>> filterMap) {
+    private DataSet transformDataSet(Collection<AnalysisItem> analysisItems, Collection<AnalysisItem> reportItems, Map<AnalysisItem, Collection<MaterializedFilterDefinition>> filterMap) {
         DataSet resultDataSet = new DataSet();
 
         // Perform any one to many calculations.
@@ -303,6 +301,12 @@ public class DataSet implements Serializable {
                 }
                 rows = tempRows;
             }
+        }
+
+        // identify virtual dimensions from analysis items
+        Collection<VirtualDimension> virtualDimensions = identifyVirtualDimensions(analysisItems);
+        for (VirtualDimension virtualDimension : virtualDimensions) {
+            rows = virtualDimension.createDimensions(rows, analysisItems);
         }
 
         // Allow each analysis item to perform its necessary transformValue(), then filter against the resulting value.
@@ -340,6 +344,17 @@ public class DataSet implements Serializable {
             }
         } 
         return resultDataSet;
+    }
+
+    private Collection<VirtualDimension> identifyVirtualDimensions(Collection<AnalysisItem> analysisItems) {
+        Map<Long, VirtualDimension> map = new HashMap<Long, VirtualDimension>();
+        for (AnalysisItem analysisItem : analysisItems) {
+            if (analysisItem.getVirtualDimension() != null) {
+                VirtualDimension virtualDimension = analysisItem.getVirtualDimension();
+                map.put(virtualDimension.getVirtualDimensionID(), virtualDimension);
+            }
+        }
+        return map.values();
     }
 
     public DataSet filter(WSAnalysisDefinition analysisDefinition, InsightRequestMetadata insightRequestMetadata) {

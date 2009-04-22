@@ -10,6 +10,7 @@ import com.easyinsight.userupload.UploadPolicy;
 import com.easyinsight.analysis.*;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.database.Database;
+import com.easyinsight.database.EIConnection;
 
 import java.util.List;
 import java.util.ArrayList;
@@ -28,8 +29,6 @@ import java.sql.ResultSet;
 
 public abstract class UncheckedPublishService extends PublishService {
 
-    protected abstract String getUserName();
-
     protected abstract long getAccountID();
 
     protected abstract long getUserID();
@@ -40,7 +39,7 @@ public abstract class UncheckedPublishService extends PublishService {
     }
 
     public void disableUnchecked(String dataSourceKey) {
-        Connection conn = Database.instance().getConnection();
+        EIConnection conn = Database.instance().getConnection();
         try {
             conn.setAutoCommit(false);
             Map<Long, Boolean> dataSources = findDataSourceIDsByName(dataSourceKey, conn);
@@ -59,24 +58,16 @@ public abstract class UncheckedPublishService extends PublishService {
             conn.commit();
         } catch (Exception e) {
             LogClass.error(e);
-            try {
-                conn.rollback();
-            } catch (SQLException e1) {
-                LogClass.error(e1);
-            }
+            conn.rollback();
             throw new RuntimeException(e);
         } finally {
-            try {
-                conn.setAutoCommit(true);
-            } catch (SQLException e) {
-                LogClass.error(e);
-            }
+            conn.setAutoCommit(true);
             Database.instance().closeConnection(conn);
         }
     }
 
     public String addRow(String dataSourceName, Row row) {
-        Connection conn = Database.instance().getConnection();
+        EIConnection conn = Database.instance().getConnection();
         DataStorage dataStorage = null;
         try {
             conn.setAutoCommit(false);
@@ -92,18 +83,10 @@ public abstract class UncheckedPublishService extends PublishService {
             if (dataStorage != null) {
                 dataStorage.rollback();
             }
-            try {
-                conn.rollback();
-            } catch (SQLException e1) {
-                LogClass.error(e1);
-            }
+            conn.rollback();
             throw new RuntimeException(e);
         } finally {
-            try {
-                conn.setAutoCommit(true);
-            } catch (SQLException e) {
-                LogClass.error(e);
-            }
+            conn.setAutoCommit(true);
             if (dataStorage != null) {
                 dataStorage.closeConnection();
             }
@@ -112,7 +95,7 @@ public abstract class UncheckedPublishService extends PublishService {
     }
 
     public String addRows(String dataSourceName, Row[] rows) {
-        Connection conn = Database.instance().getConnection();
+        EIConnection conn = Database.instance().getConnection();
         DataStorage dataStorage = null;
         try {
             conn.setAutoCommit(false);
@@ -128,18 +111,10 @@ public abstract class UncheckedPublishService extends PublishService {
             if (dataStorage != null) {
                 dataStorage.rollback();
             }
-            try {
-                conn.rollback();
-            } catch (SQLException e1) {
-                LogClass.error(e1);
-            }
+            conn.rollback();
             throw new RuntimeException(e);
         } finally {
-            try {
-                conn.setAutoCommit(true);
-            } catch (SQLException e) {
-                LogClass.error(e);
-            }
+            conn.setAutoCommit(true);
             if (dataStorage != null) {
                 dataStorage.closeConnection();
             }
@@ -150,7 +125,7 @@ public abstract class UncheckedPublishService extends PublishService {
     
 
     public String replaceRows(String dataSourceName, Row[] rows) {
-        Connection conn = Database.instance().getConnection();
+        EIConnection conn = Database.instance().getConnection();
         DataStorage dataStorage = null;
         try {
             conn.setAutoCommit(false);
@@ -167,18 +142,10 @@ public abstract class UncheckedPublishService extends PublishService {
             if (dataStorage != null) {
                 dataStorage.rollback();
             }
-            try {
-                conn.rollback();
-            } catch (SQLException e1) {
-                LogClass.error(e1);
-            }
+            conn.rollback();
             throw new RuntimeException(e);
         } finally {
-            try {
-                conn.setAutoCommit(true);
-            } catch (SQLException e) {
-                LogClass.error(e);
-            }
+            conn.setAutoCommit(true);
             if (dataStorage != null) {
                 dataStorage.closeConnection();
             }
@@ -221,7 +188,6 @@ public abstract class UncheckedPublishService extends PublishService {
             // create new data source
             FeedDefinition feedDefinition = new FeedDefinition();
             feedDefinition.setFeedName(dataSourceName);
-            feedDefinition.setOwnerName(getUserName());
             feedDefinition.setUncheckedAPIEnabled(true);
             feedDefinition.setValidatedAPIEnabled(true);
             UploadPolicy uploadPolicy = new UploadPolicy(userID);
@@ -286,7 +252,7 @@ public abstract class UncheckedPublishService extends PublishService {
 
 
     public String updateRow(String dataSourceName, Row row, Where where) {
-        Connection conn = Database.instance().getConnection();
+        EIConnection conn = Database.instance().getConnection();
         DataStorage dataStorage = null;
         try {
             List<IWhere> wheres = createWheres(where);
@@ -303,18 +269,10 @@ public abstract class UncheckedPublishService extends PublishService {
             if (dataStorage != null) {
                 dataStorage.rollback();
             }
-            try {
-                conn.rollback();
-            } catch (SQLException e1) {
-                LogClass.error(e1);
-            }
+            conn.rollback();
             throw new RuntimeException(e);
         } finally {
-            try {
-                conn.setAutoCommit(true);
-            } catch (SQLException e) {
-                LogClass.error(e);
-            }
+            conn.setAutoCommit(true);
             if (dataStorage != null) {
                 dataStorage.closeConnection();
             }
@@ -323,7 +281,7 @@ public abstract class UncheckedPublishService extends PublishService {
     }
 
     public String updateRows(String dataSourceName, Row[] rows, Where where) {
-        Connection conn = Database.instance().getConnection();
+        EIConnection conn = Database.instance().getConnection();
         DataStorage dataStorage = null;
         try {
             List<IWhere> wheres = createWheres(where);
@@ -341,18 +299,10 @@ public abstract class UncheckedPublishService extends PublishService {
             if (dataStorage != null) {
                 dataStorage.rollback();
             }
-            try {
-                conn.rollback();
-            } catch (SQLException e1) {
-                LogClass.error(e1);
-            }
+            conn.rollback();
             throw new RuntimeException(e);
         } finally {
-            try {
-                conn.setAutoCommit(true);
-            } catch (SQLException e) {
-                LogClass.error(e);
-            }
+            conn.setAutoCommit(true);
             if (dataStorage != null) {
                 dataStorage.closeConnection();
             }

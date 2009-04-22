@@ -6,6 +6,7 @@
         [Event(name="keywordSearch", type="com.easyinsight.listing.KeywordSearchEvent")]
         [Event(name="triggerAnalyze", type="com.easyinsight.listing.TriggerAnalyzeEvent")]
         [Event(name="listingChange", type="com.easyinsight.listing.ListingChangeEvent")]
+        [Event(name="launchQuickSearch", type="com.easyinsight.listing.LaunchQuickSearchEvent")]
     </mx:Metadata>
     <mx:Script>
 		<![CDATA[
@@ -16,6 +17,10 @@
         import com.easyinsight.customupload.api.APIPage;
         import com.easyinsight.genredata.GenreDataProvider;
         import com.easyinsight.intro.IntroPanel;
+
+        [Bindable]
+        [Embed(source="../../../../assets/find.png")]
+        private var findIcon:Class;
 
         [Bindable]
         [Embed(source="../../../../assets/headericons/house.png")]
@@ -56,8 +61,6 @@
         [Bindable]
         [Embed(source="../../../../assets/logo2.PNG")]
         private var logo:Class;
-
-        // import com.flexspy.FlexSpy;
 
         private function onListingChange(event:ListingChangeEvent):void {
             dispatchEvent(event);
@@ -115,16 +118,10 @@
         <mx:Image source="{accountIcon}" id="accountImage"/>
         <mx:Label text="Account" fontSize="12" fontFamily="Tahoma" fontWeight="bold" color="0x323232"/>
     </listing:ListingOption>
-    <!-- <listing:ListingOption icon="{helpIcon}" perspective="{new Box()}" enableAnalysis="false" displayName="My Account"/> -->
 
-    <!--
-		<mx:Button label="Analyze" click="analyze()" id="analyzeButton" enabled="false" fontSize="16"/>
-		-->
     <mx:Spacer width="100%"/>
-    <!-- <mx:Button id="btnFlexSpy" label="FlexSpy" click="FlexSpy.show()" /> -->
-    <!-- <mx:TextInput id="searchText"/>
-		<mx:Button toolTip="Search" icon="@Embed(source='../../../../assets/view.png')" id="searchButton" click="search(event)"/> -->
-    
+    <mx:Button icon="{findIcon}" click="dispatchEvent(new LaunchQuickSearchEvent())" toolTip="Search (Ctrl+N)"/>
+        
     <easyinsight:LoginStatusDisplay id="loginStatusDisplay" horizontalAlign="right"/>
 
 </mx:HBox>

@@ -11,7 +11,7 @@ public class FrontScreen extends Canvas {
 
     private var perspective:IPerspective;
     private var moduleInfo:IModuleInfo;
-    private var moduleName:String;
+    private var _moduleName:String;
 
     private var _loadingDisplay:LoadingModuleDisplay;
 
@@ -19,8 +19,17 @@ public class FrontScreen extends Canvas {
         super();
     }
 
+    public function set moduleName(val:String):void {
+        _moduleName = val;
+    }
+
+    override protected function createChildren():void {
+        super.createChildren();
+        loadReportRenderer();
+    }
+
     private function loadReportRenderer():void {
-        moduleInfo = ModuleManager.getModule("/app/easyui-debug/" + moduleName);
+        moduleInfo = ModuleManager.getModule("/app/easyui-debug/" + _moduleName);
         moduleInfo.addEventListener(ModuleEvent.READY, reportLoadHandler);
         moduleInfo.addEventListener(ModuleEvent.ERROR, reportFailureHandler);
         _loadingDisplay = new LoadingModuleDisplay();
@@ -35,7 +44,7 @@ public class FrontScreen extends Canvas {
             removeChild(_loadingDisplay);
             _loadingDisplay = null;
         }
-        addChild(perspective as DisplayObject);
+        dispatchEvent(new ModulePageEvent(perspective, this));
     }
 
     private function reportFailureHandler(event:ModuleEvent):void {

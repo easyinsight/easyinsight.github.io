@@ -1,0 +1,40 @@
+<?xml version="1.0" ?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" backgroundColor="#FFFFFF" borderThickness="1" borderStyle="solid"
+        cornerRadius="8" dropShadowEnabled="true" backgroundAlpha=".8">
+    <mx:Script><![CDATA[
+        import mx.managers.PopUpManager;
+
+        [Bindable]
+        [Embed(source="../../../../assets/navigate_cross.png")]
+        private var deleteIcon:Class;
+
+        [Bindable]
+        private var _subTreeName:String;
+
+        private var _goalTreeNode:GoalTreeNode;
+
+        private function deleteAssociation():void {
+            _goalTreeNode.subTreeID = 0;
+            dispatchEvent(new SubTreeInstallEvent(SubTreeInstallEvent.SUB_TREE_UNINSTALL, 0));
+            PopUpManager.removePopUp(this);
+        }
+
+        public function set goalTreeNode(val:GoalTreeNode):void {
+            _goalTreeNode = val;
+        }
+
+        public function set subTreeName(val:String):void {
+            _subTreeName = val;
+        }]]></mx:Script>
+    <mx:Form>
+        <mx:FormItem label="Associated Sub Tree:">
+            <mx:Label text="{_subTreeName}"/>
+        </mx:FormItem>
+        <mx:FormItem label="Delete Association">
+            <mx:Button icon="{deleteIcon}" click="deleteAssociation()"/>
+        </mx:FormItem>
+        <mx:FormItem label="">
+            <mx:Button label="Close" click="PopUpManager.removePopUp(this)"/>
+        </mx:FormItem>
+    </mx:Form>
+</mx:Canvas>

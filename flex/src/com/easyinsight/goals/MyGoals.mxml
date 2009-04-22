@@ -119,7 +119,7 @@ import mx.utils.URLUtil;
         }
 
         private function onDelete(event:DeleteGoalTreeEvent):void {
-            deleteID = event.goalTree.goalTreeID;
+            deleteID = event.goalTree.id;
             Alert.show("Are you sure you want to delete the goal tree?", "Alert",
                     Alert.OK | Alert.CANCEL, this, alertListener, null, Alert.CANCEL);
         }
@@ -183,7 +183,7 @@ import mx.utils.URLUtil;
         private function gridDoubleClick(event:ListEvent):void {
             if (goalTreesBox.selectedItem != null) {
                 var goalTree:GoalTreeDescriptor = goalTreesBox.selectedItem as GoalTreeDescriptor;
-                dispatchEvent(new AnalyzeEvent(new GoalTreeAdminAnalyzeSource(goalTree.goalTreeID)));
+                dispatchEvent(new AnalyzeEvent(new GoalTreeAdminAnalyzeSource(goalTree.id)));
             }
         }
 
@@ -243,7 +243,7 @@ import mx.utils.URLUtil;
                 <mx:DataGrid dataProvider="{goalTrees}" width="100%" id="goalTreesBox"
                          itemDoubleClick="gridDoubleClick(event)">
                     <mx:columns>
-                        <util:EIDataGridColumn headerText="Goal Tree Name" dataField="goalTreeName"/>
+                        <util:EIDataGridColumn headerText="Goal Tree Name" dataField="name"/>
                         <util:EIDataGridColumn headerText="" dataField="goalTreeName" width="150"
                                                itemRenderer="com.easyinsight.goals.MyGoalsControls" sortable="false"/>
                     </mx:columns>

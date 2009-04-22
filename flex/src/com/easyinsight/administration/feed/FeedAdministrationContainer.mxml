@@ -9,7 +9,7 @@
             import com.easyinsight.customupload.ExcelUploadFormat;
             import com.easyinsight.customupload.FlatFileUploadFormat;
             import com.easyinsight.util.ProgressAlert;
-import mx.events.CloseEvent;
+            import mx.events.CloseEvent;
 			import mx.managers.BrowserManager;
 			import mx.validators.Validator;
 			import mx.controls.Alert;
@@ -151,6 +151,20 @@ import mx.events.CloseEvent;
                             }
                         }
                     }
+                    if (virtualBox != null) {
+                        virtualBox.save();
+                        for each (var dimension:VirtualDimension in virtualBox.getVirtualDimensions()) {
+                            for each (var transform:VirtualTransform in dimension.virtualTransforms) {
+                                if (transform.transformDimension.analysisItemID == 0) {
+                                    analysisItems.addItem(transform.transformDimension);
+                                }
+                            }
+                            if (dimension.defaultTransform.transformDimension.analysisItemID == 0) {
+                                analysisItems.addItem(dimension.defaultTransform.transformDimension);
+                            }
+                        }
+                        feedDefinition.virtualDimensions = virtualBox.getVirtualDimensions();
+                    }
 	            	feedDefinition.fields = analysisItems;
 	            	feedDefinition.feedName = feedNameInput.text;
 	            	feedDefinition.uploadPolicy = feedPolicy.uploadPolicy;
@@ -266,6 +280,9 @@ import mx.events.CloseEvent;
 			</mx:Box>
             <mx:Box label="Hierarchies" paddingLeft="10" paddingTop="10" paddingBottom="10" paddingRight="10">
                 <feed:HierarchyAdministration  id="hierarchiesBox" feedDefinition="{feedDefinition}"/>
+            </mx:Box>
+            <mx:Box label="Virtual Groupings" paddingLeft="10" paddingTop="10" paddingBottom="10" paddingRight="10">
+                <feed:VirtualDimensionAdministration id="virtualBox" feedDefinition="{feedDefinition}"/>
             </mx:Box>
 			<mx:Box label="Impl" paddingLeft="10" paddingTop="10" paddingBottom="10" paddingRight="10" id="implBox" visible="{showImpl}">
 				

@@ -25,17 +25,34 @@ public abstract class TaskGenerator {
     private Date lastTaskDate;
     @Column(name="start_task_date")
     private Date startTaskDate;
+    @Column(name="requires_backfill")
+    private boolean requiresBackfill;
 
     public List<ScheduledTask> generateTasks(Date now) {
         List<ScheduledTask> tasks = new ArrayList<ScheduledTask>();
         Date initDate = findStartTaskDate();
-        for (long startTime = initDate.getTime() + taskInterval; startTime < now.getTime(); startTime += taskInterval) {
+        if (isRequiresBackfill()) {
+            for (long startTime = initDate.getTime() + taskInterval; startTime < now.getTime(); startTime += taskInterval) {
+                tasks.add(createTask(startTime));
+            }
+        } else {
+            long startTime;
+            for (startTime = initDate.getTime() + taskInterval; startTime < now.getTime(); startTime += taskInterval) {
+            }
             tasks.add(createTask(startTime));
-        }        
+        }
         return tasks;
     }
 
     protected abstract ScheduledTask createTask(long time);
+
+    public boolean isRequiresBackfill() {
+        return requiresBackfill;
+    }
+
+    public void setRequiresBackfill(boolean requiresBackfill) {
+        this.requiresBackfill = requiresBackfill;
+    }
 
     public long getTaskGeneratorID() {
         return taskGeneratorID;

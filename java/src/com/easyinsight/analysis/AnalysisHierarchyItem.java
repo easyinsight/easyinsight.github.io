@@ -40,6 +40,7 @@ public class AnalysisHierarchyItem extends AnalysisDimension {
     }
 
     public void afterLoad() {
+        super.afterLoad();
         if (hierarchyLevels != null) {
             List<HierarchyLevel> hierarchyLevelList = new ArrayList<HierarchyLevel>(hierarchyLevels);
             Collections.sort(hierarchyLevelList, new Comparator<HierarchyLevel>() {

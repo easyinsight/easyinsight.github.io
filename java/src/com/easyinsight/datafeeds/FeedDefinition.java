@@ -47,6 +47,7 @@ public class FeedDefinition implements Cloneable, Serializable {
     private boolean validatedAPIUsingBasicAuth;
     private boolean inheritAccountAPISettings;
     private long refreshDataInterval;
+    private List<VirtualDimension> virtualDimensions;
 
     private Credentials cachedCredentials;
 
@@ -71,6 +72,14 @@ public class FeedDefinition implements Cloneable, Serializable {
 
     public int getRequiredAccountTier() {
         throw new UnsupportedOperationException();
+    }
+
+    public List<VirtualDimension> getVirtualDimensions() {
+        return virtualDimensions;
+    }
+
+    public void setVirtualDimensions(List<VirtualDimension> virtualDimensions) {
+        this.virtualDimensions = virtualDimensions;
     }
 
     public boolean isAccountVisible() {

@@ -39,7 +39,11 @@ public class AnalysisDimension extends AnalysisItem {
 
     public List<AnalysisItem> getAnalysisItems(List<AnalysisItem> allItems, Collection<AnalysisItem> insightItems) {
         List<AnalysisItem> analysisItems = new ArrayList<AnalysisItem>();
-        analysisItems.add(this);
+        if (getVirtualDimension() != null) {
+            analysisItems.add(getVirtualDimension().getBaseDimension());
+        } else {
+            analysisItems.add(this);
+        }
         if (keyDimension != null) {
             analysisItems.add(keyDimension);
         }

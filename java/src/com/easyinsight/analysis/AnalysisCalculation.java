@@ -203,4 +203,8 @@ public class AnalysisCalculation extends AnalysisMeasure {
     public boolean isDerived() {
         return true;
     }
+
+    public boolean isCalculated() {
+        return true;
+    }
 }

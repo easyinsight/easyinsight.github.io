@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <mx:Application xmlns:mx="http://www.adobe.com/2006/mxml" creationComplete="startWorkspace()" xmlns:local="*" applicationComplete="applicationListeners()"
-	xmlns:listing="listing.*" xmlns:customupload="customupload.*" xmlns:genredata="genredata.*"
-	xmlns:intro="intro.*" xmlns:listing1="com.easyinsight.listing.*" xmlns:intro1="com.easyinsight.intro.*" 
+	xmlns:listing="com.easyinsight.listing.*"
+	xmlns:listing1="com.easyinsight.listing.*" xmlns:intro1="com.easyinsight.intro.*"
 	historyManagementEnabled="false" paddingTop="0" top="0" borderThickness="0" left="0" paddingLeft="0" right="0" paddingRight="0"
 	bottom="0" paddingBottom="0" preloader="com.easyinsight.preloader.EIProgressBar">
 	<mx:states>
@@ -24,15 +24,13 @@
 			import com.easyinsight.analysis.DelayedFeedLink;
 			import com.easyinsight.analysis.DelayedDeepLink;
             import com.easyinsight.listing.AnalysisDefinitionAnalyzeSource;
-import com.easyinsight.listing.DataFeedDescriptor;
-import com.easyinsight.listing.DescriptorAnalyzeSource;
+            import com.easyinsight.listing.DataFeedDescriptor;
+            import com.easyinsight.listing.DescriptorAnalyzeSource;
             import com.easyinsight.quicksearch.EIDescriptor;
-import com.easyinsight.quicksearch.QuickSearchEvent;
-import com.easyinsight.quicksearch.QuickSearchWindow;
+            import com.easyinsight.quicksearch.QuickSearchEvent;
+            import com.easyinsight.quicksearch.QuickSearchWindow;
             import com.easyinsight.solutions.DataSourceDescriptor;
-import com.easyinsight.solutions.InsightDescriptor;
-import mx.messaging.ChannelSet;
-			import mx.messaging.config.ServerConfig;
+            import com.easyinsight.solutions.InsightDescriptor;
 			import mx.rpc.events.FaultEvent;
 			import com.easyinsight.LoginDialog;
 			import com.easyinsight.framework.SessionExpirationEvent;
@@ -79,12 +77,16 @@ import mx.messaging.ChannelSet;
 
             private function onKeyDown(event:KeyboardEvent):void {
                 if (event.ctrlKey && event.keyCode == 78) {
-                    var window:QuickSearchWindow = new QuickSearchWindow();
-                    window.addEventListener(QuickSearchEvent.QUICK_SEARCH, onQuickSearch);
-                    window.addEventListener(QuickSearchEvent.QUICK_SEARCH_CANCEL, onQuickSearch);
-                    PopUpManager.addPopUp(window, this, false);
-                    PopUpManager.centerPopUp(window);
+                    launchQuickSearchWindow();
                 }
+            }
+
+            private function launchQuickSearchWindow():void {
+                var window:QuickSearchWindow = new QuickSearchWindow();
+                window.addEventListener(QuickSearchEvent.QUICK_SEARCH, onQuickSearch);
+                window.addEventListener(QuickSearchEvent.QUICK_SEARCH_CANCEL, onQuickSearch);
+                PopUpManager.addPopUp(window, this, false);
+                PopUpManager.centerPopUp(window);
             }
 
             private function onQuickSearch(event:QuickSearchEvent):void {
@@ -104,19 +106,7 @@ import mx.messaging.ChannelSet;
             }
             
             private function onFault(event:FaultEvent):void {
-            	var fatal:Boolean = false;
-            	if (event.fault.faultString.indexOf("com.easyinsight.security.SecurityException") != -1) {
-            		var channelSet:ChannelSet = ServerConfig.getChannelSet("login");
-            		if (channelSet.authenticated) {
-            			// session expired
-            			fatal = true;
-            			ExternalInterface.call("window.location.reload()");
-                        trace("blah");
-            		}            		
-            	}
-            	if (!fatal) {
-            		Alert.show(event.fault.name, "A server error occurred.");
-            	}
+                Alert.show(event.fault.name, "A server error occurred.");
             }
             
             private function sessionExpired(event:SessionExpirationEvent):void {
@@ -225,8 +215,17 @@ import mx.messaging.ChannelSet;
             }
             
             private function doAnalyze(analyzeSource:AnalyzeSource):void {
+                if (currentState == "Analysis") {
+                    dataAnalysis.removeEventListener(AnalyzeEvent.ANALYZE, internalAnalyze);
+                    dataAnalysis.removeEventListener(ModuleAnalyzeEvent.MODULE_ANALYZE, internalModuleAnalyze);
+                    dataAnalysis.removeEventListener(AnalysisCloseEvent.ANALYSIS_CLOSE, analysisClosed);
+                    currentState = "";
+                    validateNow();
+                }
             	if (analyzeSource != null) {
             		var analysisWindow:FullScreenPage = analyzeSource.createAnalysisPopup();
+                    analysisWindow.addEventListener(AnalyzeEvent.ANALYZE, internalAnalyze);
+                    analysisWindow.addEventListener(ModuleAnalyzeEvent.MODULE_ANALYZE, internalModuleAnalyze);
             		analysisWindow.addEventListener(AnalysisCloseEvent.ANALYSIS_CLOSE, analysisClosed);
             		dataAnalysis = analysisWindow;
             		currentState = "Analysis";
@@ -236,6 +235,8 @@ import mx.messaging.ChannelSet;
             private function analysisClosed(event:AnalysisCloseEvent):void {
             	currentState = "";
             	event.dataAnalysisContainer.removeEventListener(AnalysisCloseEvent.ANALYSIS_CLOSE, analysisClosed);
+                event.dataAnalysisContainer.removeEventListener(AnalyzeEvent.ANALYZE, internalAnalyze);
+                event.dataAnalysisContainer.removeEventListener(ModuleAnalyzeEvent.MODULE_ANALYZE, internalModuleAnalyze);
             	dataAnalysis = null;
             	this.perspective.gotFocus();
             }
@@ -271,17 +272,22 @@ import mx.messaging.ChannelSet;
             }
 
             private function internalModuleAnalyze(event:ModuleAnalyzeEvent):void {
+                // add a core container, nest everything else
+                // 
                 if (currentState == "Analysis") {
+                    dataAnalysis.removeEventListener(AnalyzeEvent.ANALYZE, internalAnalyze);
+                    dataAnalysis.removeEventListener(ModuleAnalyzeEvent.MODULE_ANALYZE, internalModuleAnalyze);
                     dataAnalysis.removeEventListener(AnalysisCloseEvent.ANALYSIS_CLOSE, analysisClosed);
                     currentState = "";
+                    validateNow();
                 }
                 var moduleAnalyzeSource:ModuleAnalyzeSource = event.analyzeSource;
                 var analysisWindow:DisplayObject = moduleAnalyzeSource.createDirect();
                 analysisWindow.addEventListener(AnalysisCloseEvent.ANALYSIS_CLOSE, analysisClosed);
+                analysisWindow.addEventListener(AnalyzeEvent.ANALYZE, internalAnalyze);
+                analysisWindow.addEventListener(ModuleAnalyzeEvent.MODULE_ANALYZE, internalModuleAnalyze);
                 dataAnalysis = analysisWindow;
                 currentState = "Analysis";
-                /*moduleAnalyzeSource.addEventListener(FullScreenModuleEvent.MODULE_LOADED, moduleLoaded);
-                moduleAnalyzeSource.startModuleLoading();*/
             }
 
             private function moduleLoaded(event:FullScreenModuleEvent):void {
@@ -313,7 +319,7 @@ import mx.messaging.ChannelSet;
 	<mx:VBox width="100%" height="100%" id="coreVBox" paddingLeft="0" verticalGap="0" paddingRight="0">
 		<listing1:HeaderBar keywordSearch="search(event)" width="100%" id="headerBar"
 			paddingTop="5" paddingBottom="5" paddingLeft="10" paddingRight="10" bottom="0" top="0" 
-			listingChange="changePerspective(event)"/>			
+			listingChange="changePerspective(event)" launchQuickSearch="launchQuickSearchWindow()"/>			
 		<mx:HBox width="100%" height="100%" id="coreSpace" paddingLeft="0" paddingTop="0" top="0" paddingRight="0">
 									
 				<intro1:IntroPanel id="introPanel" width="100%" height="100%" paddingTop="0" navigation="navigation(event)"/>

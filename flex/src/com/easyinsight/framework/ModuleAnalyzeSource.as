@@ -14,6 +14,10 @@ public class ModuleAnalyzeSource extends EventDispatcher {
     public function ModuleAnalyzeSource() {
     }
 
+    // create the FrontScreen
+    // configure with the module name we're assigned to
+    // 
+
     public function createDirect():DisplayObject {
         return null;
     }

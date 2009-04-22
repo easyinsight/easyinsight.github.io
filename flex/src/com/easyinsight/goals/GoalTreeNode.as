@@ -12,6 +12,7 @@ import com.easyinsight.analysis.AnalysisMeasure;
 		public var children:ArrayCollection = new ArrayCollection();
 		public var parent:GoalTreeNode;
         public var subTreeID:int;
+        public var subTreeName:String;
 
 		public var coreFeedID:int;
 		public var coreFeedName:String;

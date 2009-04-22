@@ -13,6 +13,7 @@ package com.easyinsight.analysis
     	public static const TEMPORAL_MEASURE:int = 512;
     	public static const COMPLEX_MEASURE:int = 1024;
         public static const HIERARCHY:int = 2048;
+        public static const SIX_SIGMA_MEASURE:int = 4096;
 		
 		public static const YEAR_LEVEL:int = 1;
 		public static const MONTH_LEVEL:int = 2;

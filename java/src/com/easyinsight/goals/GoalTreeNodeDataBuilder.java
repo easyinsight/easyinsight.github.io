@@ -25,6 +25,9 @@ public class GoalTreeNodeDataBuilder {
         goalTreeNodeData.setHighIsGood(goalTreeNode.isHighIsGood());
         goalTreeNodeData.setName(goalTreeNode.getName());
         goalTreeNodeData.setTags(goalTreeNode.getTags());
+        goalTreeNodeData.setSubTreeID(goalTreeNode.getSubTreeID());
+        goalTreeNodeData.setSubTreeName(goalTreeNode.getSubTreeName());
+        goalTreeNodeData.setMilestone(goalTreeNode.getMilestone());
         List<GoalTreeNode> newChildren = new ArrayList<GoalTreeNode>();
         for (GoalTreeNode child : goalTreeNode.getChildren()) {
             GoalTreeNodeData childData = build(child);

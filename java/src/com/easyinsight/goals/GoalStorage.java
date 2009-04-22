@@ -307,6 +307,8 @@ public class GoalStorage {
         PreparedStatement queryNodeStmt = conn.prepareStatement("SELECT FEED_ID, GOAL_VALUE, ANALYSIS_MEASURE_ID, FILTER_ID, " +
                 "NAME, DESCRIPTION, high_is_good, ICON_IMAGE, GOAL_MILESTONE_ID FROM " +
                 "GOAL_TREE_NODE WHERE GOAL_TREE_NODE_ID = ?");
+        PreparedStatement querySubTreeStmt = conn.prepareStatement("SELECT SUB_TREE_ID, GOAL_TREE.NAME FROM GOAL_TREE_NODE, GOAL_TREE WHERE " +
+                "GOAL_TREE_NODE.SUB_TREE_ID = GOAL_TREE.GOAL_TREE_ID AND GOAL_TREE_NODE.GOAL_TREE_NODE_ID = ?");
         queryNodeStmt.setLong(1, nodeID);
         ResultSet nodeRS = queryNodeStmt.executeQuery();
         if (nodeRS.next()) {
@@ -367,6 +369,14 @@ public class GoalStorage {
                 children.add(childNode);
             }
             goalTreeNode.setChildren(children);
+            querySubTreeStmt.setLong(1, nodeID);
+            ResultSet subTreeRS = querySubTreeStmt.executeQuery();
+            if (subTreeRS.next()) {
+                long subTreeID = subTreeRS.getLong(1);
+                String subTreeName = subTreeRS.getString(2);
+                goalTreeNode.setSubTreeID(subTreeID);
+                goalTreeNode.setSubTreeName(subTreeName);
+            }
             return goalTreeNode;
         } else {
             throw new RuntimeException("Could not find node " + nodeID);
@@ -496,8 +506,8 @@ public class GoalStorage {
         long nodeID;
         if (goalTreeNode.getGoalTreeNodeID() == 0) {
             if (goalTreeNode.getAnalysisMeasure() == null) {
-                PreparedStatement insertNodeStmt = conn.prepareStatement("INSERT INTO GOAL_TREE_NODE (PARENT_GOAL_TREE_NODE_ID, NAME, DESCRIPTION, ICON_IMAGE, GOAL_TREE_ID, GOAL_MILESTONE_ID) " +
-                        "VALUES (?, ?, ?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
+                PreparedStatement insertNodeStmt = conn.prepareStatement("INSERT INTO GOAL_TREE_NODE (PARENT_GOAL_TREE_NODE_ID, NAME, DESCRIPTION, ICON_IMAGE, GOAL_TREE_ID, GOAL_MILESTONE_ID, SUB_TREE_ID) " +
+                        "VALUES (?, ?, ?, ?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
                 if (goalTreeNode.getParent() == null) {
                     insertNodeStmt.setNull(1, Types.BIGINT);
                 } else {
@@ -512,12 +522,17 @@ public class GoalStorage {
                 } else {
                     insertNodeStmt.setLong(6, goalTreeNode.getMilestone().getMilestoneID());
                 }
+                if (goalTreeNode.getSubTreeID() == 0) {
+                    insertNodeStmt.setNull(7, Types.BIGINT);
+                } else {
+                    insertNodeStmt.setLong(7, goalTreeNode.getSubTreeID());
+                }
                 insertNodeStmt.execute();
                 nodeID = Database.instance().getAutoGenKey(insertNodeStmt);
                 goalTreeNode.setGoalTreeNodeID(nodeID);
             } else {
                 PreparedStatement insertNodeStmt = conn.prepareStatement("INSERT INTO GOAL_TREE_NODE (PARENT_GOAL_TREE_NODE_ID, NAME, DESCRIPTION," +
-                        "FEED_ID, GOAL_VALUE, ANALYSIS_MEASURE_ID, FILTER_ID, high_is_good, ICON_IMAGE, GOAL_MILESTONE_ID, GOAL_TREE_ID) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
+                        "FEED_ID, GOAL_VALUE, ANALYSIS_MEASURE_ID, FILTER_ID, high_is_good, ICON_IMAGE, GOAL_MILESTONE_ID, GOAL_TREE_ID, SUB_TREE_ID) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
                 if (goalTreeNode.getParent() == null) {
                     insertNodeStmt.setNull(1, Types.BIGINT);
                 } else {
@@ -549,6 +564,11 @@ public class GoalStorage {
                     insertNodeStmt.setLong(10, goalTreeNode.getMilestone().getMilestoneID());
                 }
                 insertNodeStmt.setLong(11, goalTreeID);
+                if (goalTreeNode.getSubTreeID() == 0) {
+                    insertNodeStmt.setNull(12, Types.BIGINT);
+                } else {
+                    insertNodeStmt.setLong(12, goalTreeNode.getSubTreeID());
+                }
                 insertNodeStmt.execute();
                 nodeID = Database.instance().getAutoGenKey(insertNodeStmt);
                 goalTreeNode.setGoalTreeNodeID(nodeID);
@@ -556,7 +576,7 @@ public class GoalStorage {
         } else {
             nodeID = goalTreeNode.getGoalTreeNodeID();
             PreparedStatement updateNodeStmt = conn.prepareStatement("UPDATE GOAL_TREE_NODE SET PARENT_GOAL_TREE_NODE_ID = ?, NAME = ?, DESCRIPTION = ?, FEED_ID = ?," +
-                    "GOAL_VALUE = ?, ANALYSIS_MEASURE_ID = ?, FILTER_ID = ?, HIGH_IS_GOOD = ?, ICON_IMAGE = ?, GOAL_TREE_ID = ?, GOAL_MILESTONE_ID = ? WHERE GOAL_TREE_NODE_ID = ?");
+                    "GOAL_VALUE = ?, ANALYSIS_MEASURE_ID = ?, FILTER_ID = ?, HIGH_IS_GOOD = ?, ICON_IMAGE = ?, GOAL_TREE_ID = ?, GOAL_MILESTONE_ID = ?, SUB_TREE_ID = ? WHERE GOAL_TREE_NODE_ID = ?");
             if (goalTreeNode.getParent() == null) {
                 updateNodeStmt.setNull(1, Types.BIGINT);
             } else {
@@ -588,7 +608,12 @@ public class GoalStorage {
                 } else {
                     updateNodeStmt.setLong(11, goalTreeNode.getMilestone().getMilestoneID());
                 }
-                updateNodeStmt.setLong(12, goalTreeNode.getGoalTreeNodeID());
+                if (goalTreeNode.getSubTreeID() == 0) {
+                    updateNodeStmt.setNull(12, Types.BIGINT);
+                } else {
+                    updateNodeStmt.setLong(12, goalTreeNode.getSubTreeID());
+                }
+                updateNodeStmt.setLong(13, goalTreeNode.getGoalTreeNodeID());
             } else {
                 updateNodeStmt.setNull(5, Types.BIGINT);
                 updateNodeStmt.setNull(4, Types.BIGINT);
@@ -602,7 +627,12 @@ public class GoalStorage {
                 } else {
                     updateNodeStmt.setLong(11, goalTreeNode.getMilestone().getMilestoneID());
                 }
-                updateNodeStmt.setLong(12, goalTreeNode.getGoalTreeNodeID());
+                if (goalTreeNode.getSubTreeID() == 0) {
+                    updateNodeStmt.setNull(12, Types.BIGINT);
+                } else {
+                    updateNodeStmt.setLong(12, goalTreeNode.getSubTreeID());
+                }
+                updateNodeStmt.setLong(13, goalTreeNode.getGoalTreeNodeID());
             }
             updateNodeStmt.executeUpdate();
         }
@@ -855,5 +885,25 @@ public class GoalStorage {
             Database.instance().closeConnection(conn);
         }
         return nodes;
+    }
+
+    public void decorateDataTree(GoalTree goalTree) {
+        Connection conn = Database.instance().getConnection();
+        try {
+            PreparedStatement queryStmt = conn.prepareStatement("SELECT GOAL_TREE.GOAL_TREE_ID, GOAL_TREE.NAME FROM " +
+                    "GOAL_TREE, GOAL_TREE_NODE WHERE GOAL_TREE_NODE.SUB_TREE_ID = ? AND GOAL_TREE_NODE.GOAL_TREE_ID = GOAL_TREE.GOAL_TREE_ID");
+            queryStmt.setLong(1, goalTree.getGoalTreeID());
+            List<GoalTreeDescriptor> descriptors = new ArrayList<GoalTreeDescriptor>();
+            ResultSet subTreeRS = queryStmt.executeQuery();
+            while (subTreeRS.next()) {
+                descriptors.add(new GoalTreeDescriptor(subTreeRS.getLong(1), subTreeRS.getString(2), Roles.SUBSCRIBER));
+            }
+            goalTree.setSubTreeParents(descriptors);
+        } catch (SQLException e) {
+            LogClass.error(e);
+        } finally {
+            Database.instance().closeConnection(conn);
+        }
+
     }
 }

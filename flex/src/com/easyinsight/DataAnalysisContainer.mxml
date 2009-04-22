@@ -33,6 +33,7 @@ import com.easyinsight.analysis.HierarchyDrilldownEvent;
         import com.easyinsight.analysis.DataViewFactory;
         import com.easyinsight.analysis.HierarchyRollupEvent;
         import com.easyinsight.analysis.IReportController;
+        import com.easyinsight.analysis.QuickDataSourceAPIWindow;
         import com.easyinsight.analysis.list.ListController;
         import com.easyinsight.analysis.scrub.LookupTableScrubListWindow;
         import com.easyinsight.analysis.scrub.TextReplaceScrubListWindow;
@@ -525,6 +526,13 @@ import com.easyinsight.analysis.HierarchyDrilldownEvent;
             return item["icon"];
         }
 
+        private function showAPIInfo():void {
+            var window:QuickDataSourceAPIWindow = new QuickDataSourceAPIWindow();
+            window.dataSourceID = dataService.dataFeedID;
+            PopUpManager.addPopUp(window, this);
+            PopUpManager.centerPopUp(window);
+        }
+
         private function undo():void {
             commandProcessor.undo();
         }
@@ -820,6 +828,8 @@ import com.easyinsight.analysis.HierarchyDrilldownEvent;
                 <mx:Button id="newFieldButton" toolTip="Create Blank Field"
                            icon="@Embed(source='../../../assets/document_add.png')"
                            click="createBlankField()"/>
+                <mx:Button id="apiButton" toolTip="Show API Info for this Data Source"
+                           icon="@Embed(source='../../../assets/app_enterprise_x16.png')" click="showAPIInfo()"/>
                 <analysis:ResultLimitComboBox limits="{limits}"/>
             </mx:HBox>
             <filtering:TransformContainer id="transformContainer" paddingLeft="10" paddingTop="10" paddingBottom="10"

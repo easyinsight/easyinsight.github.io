@@ -93,6 +93,9 @@
         <mapping class="com.easyinsight.analysis.gauge.GaugeDefinitionState"/>
         <mapping class="com.easyinsight.analysis.TreeMapDefinitionState"/>
         <mapping class="com.easyinsight.analysis.TreeDefinitionState"/>
+        <mapping class="com.easyinsight.analysis.SixSigmaMeasure"/>
+        <mapping class="com.easyinsight.analysis.VirtualDimension"/>
+        <mapping class="com.easyinsight.analysis.VirtualTransform"/>
 
         <mapping class="com.easyinsight.scrubbing.DataScrub"/>
         <mapping class="com.easyinsight.scrubbing.LookupTableScrub"/>

@@ -28,13 +28,12 @@ public class Scheduler {
     private ThreadPoolExecutor executor;
     private Timer timer;
     private boolean running = false;
-    private LinkedBlockingQueue<Runnable> tasks = new LinkedBlockingQueue<Runnable>();
     private Thread thread;
 
     // simplest level...
 
     public Scheduler() {
-        executor = new ThreadPoolExecutor(5, 5, 5000, TimeUnit.MILLISECONDS, tasks);
+        executor = new ThreadPoolExecutor(5, 5, 5000, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<Runnable>());
         timer = new Timer();        
     }
 

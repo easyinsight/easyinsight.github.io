@@ -1,6 +1,7 @@
 package com.easyinsight.api;
 
 import com.easyinsight.database.Database;
+import com.easyinsight.database.EIConnection;
 import com.easyinsight.storage.DataStorage;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.logging.LogClass;
@@ -37,12 +38,12 @@ public abstract class ValidatingPublishService extends PublishService implements
     }
 
     public void addRow(String dataSourceName, Row row) {
-        Connection conn = Database.instance().getConnection();
+        EIConnection conn = Database.instance().getConnection();
         DataStorage dataStorage = null;
         try {
-            String userName = getUserName();
+            long userID = getUserID();
             conn.setAutoCommit(false);
-            FeedDefinition feedDefinition = getFeedDefinition(userName, dataSourceName, conn);
+            FeedDefinition feedDefinition = getFeedDefinition(userID, dataSourceName, conn);
             DataTransformation dataTransformation = new DataTransformation(feedDefinition);
             dataStorage = DataStorage.writeConnection(feedDefinition, conn, getAccountID());
             DataSet dataSet = dataTransformation.toDataSet(row);
@@ -54,18 +55,10 @@ public abstract class ValidatingPublishService extends PublishService implements
             if (dataStorage != null) {
                 dataStorage.rollback();
             }
-            try {
-                conn.rollback();
-            } catch (SQLException e1) {
-                LogClass.error(e1);
-            }
+            conn.rollback();
             throw new RuntimeException(e);
         } finally {
-            try {
-                conn.setAutoCommit(true);
-            } catch (SQLException e) {
-                LogClass.error(e);
-            }
+            conn.setAutoCommit(true);
             if (dataStorage != null) {
                 dataStorage.closeConnection();
             }
@@ -74,12 +67,11 @@ public abstract class ValidatingPublishService extends PublishService implements
     }
 
     public void addRows(String dataSourceKey, Row[] rows) {
-        Connection conn = Database.instance().getConnection();
+        EIConnection conn = Database.instance().getConnection();
         DataStorage dataStorage = null;
         try {
-            String userName = getUserName();
             conn.setAutoCommit(false);
-            FeedDefinition feedDefinition = getFeedDefinition(userName, dataSourceKey, conn);
+            FeedDefinition feedDefinition = getFeedDefinition(getUserID(), dataSourceKey, conn);
             DataTransformation dataTransformation = new DataTransformation(feedDefinition);
             dataStorage = DataStorage.writeConnection(feedDefinition, conn, getAccountID());
             DataSet dataSet = dataTransformation.toDataSet(rows);
@@ -91,18 +83,10 @@ public abstract class ValidatingPublishService extends PublishService implements
             if (dataStorage != null) {
                 dataStorage.rollback();
             }
-            try {
-                conn.rollback();
-            } catch (SQLException e1) {
-                LogClass.error(e1);
-            }
+            conn.rollback();
             throw new RuntimeException(e);
         } finally {
-            try {
-                conn.setAutoCommit(true);
-            } catch (SQLException e) {
-                LogClass.error(e);
-            }
+            conn.setAutoCommit(true);
             if (dataStorage != null) {
                 dataStorage.closeConnection();
             }
@@ -111,12 +95,11 @@ public abstract class ValidatingPublishService extends PublishService implements
     }
 
     public void replaceRows(String dataSourceKey, Row[] rows) {
-        Connection conn = Database.instance().getConnection();
+        EIConnection conn = Database.instance().getConnection();
         DataStorage dataStorage = null;
         try {
-            String userName = getUserName();
             conn.setAutoCommit(false);
-            FeedDefinition feedDefinition = getFeedDefinition(userName, dataSourceKey, conn);
+            FeedDefinition feedDefinition = getFeedDefinition(getUserID(), dataSourceKey, conn);
             DataTransformation dataTransformation = new DataTransformation(feedDefinition);
             dataStorage = DataStorage.writeConnection(feedDefinition, conn, getAccountID());
             DataSet dataSet = dataTransformation.toDataSet(rows);
@@ -129,18 +112,10 @@ public abstract class ValidatingPublishService extends PublishService implements
             if (dataStorage != null) {
                 dataStorage.rollback();
             }
-            try {
-                conn.rollback();
-            } catch (SQLException e1) {
-                LogClass.error(e1);
-            }
+            conn.rollback();
             throw new RuntimeException(e);
         } finally {
-            try {
-                conn.setAutoCommit(true);
-            } catch (SQLException e) {
-                LogClass.error(e);
-            }
+            conn.setAutoCommit(true);
             if (dataStorage != null) {
                 dataStorage.closeConnection();
             }
@@ -148,8 +123,8 @@ public abstract class ValidatingPublishService extends PublishService implements
         }
     }
 
-    private FeedDefinition getFeedDefinition(String userName, String dataSourceKey, Connection conn) throws SQLException {
-        List<Long> dataSourceIDs = findDataSourceIDsByName(userName, dataSourceKey, conn);
+    private FeedDefinition getFeedDefinition(long userID, String dataSourceKey, Connection conn) throws SQLException {
+        List<Long> dataSourceIDs = findDataSourceIDsByName(userID, dataSourceKey, conn);
         if (dataSourceIDs.size() == 0) {
             throw new RuntimeException("No data source was found by that API key.");
         } else if (dataSourceIDs.size() > 1) {
@@ -160,12 +135,12 @@ public abstract class ValidatingPublishService extends PublishService implements
         }
     }
 
-    private List<Long> findDataSourceIDsByName(String userName, String dataSourceName, Connection conn) throws SQLException {
+    private List<Long> findDataSourceIDsByName(long userID, String dataSourceName, Connection conn) throws SQLException {
         List<Long> dataSourceIDs = new ArrayList<Long>();
         PreparedStatement queryStmt = conn.prepareStatement("SELECT DISTINCT DATA_FEED.DATA_FEED_ID" +
-                    " FROM UPLOAD_POLICY_USERS, DATA_FEED, user WHERE " +
-                    "UPLOAD_POLICY_USERS.user_id = user.user_id AND user.username = ? AND DATA_FEED.DATA_FEED_ID = UPLOAD_POLICY_USERS.FEED_ID AND DATA_FEED.API_KEY = ?");
-        queryStmt.setString(1, userName);
+                    " FROM UPLOAD_POLICY_USERS, DATA_FEED WHERE " +
+                    "UPLOAD_POLICY_USERS.user_id = ? AND DATA_FEED.DATA_FEED_ID = UPLOAD_POLICY_USERS.FEED_ID AND DATA_FEED.API_KEY = ?");
+        queryStmt.setLong(1, userID);
         queryStmt.setString(2, dataSourceName);
         ResultSet rs = queryStmt.executeQuery();
         while (rs.next()) {
@@ -175,12 +150,11 @@ public abstract class ValidatingPublishService extends PublishService implements
     }
 
     public void updateRow(String dataSourceKey, Row row, Where where) {
-        Connection conn = Database.instance().getConnection();
+        EIConnection conn = Database.instance().getConnection();
         DataStorage dataStorage = null;
         try {
-            String userName = getUserName();
             conn.setAutoCommit(false);
-            FeedDefinition feedDefinition = getFeedDefinition(userName, dataSourceKey, conn);
+            FeedDefinition feedDefinition = getFeedDefinition(getUserID(), dataSourceKey, conn);
             DataTransformation dataTransformation = new DataTransformation(feedDefinition);
             dataStorage = DataStorage.writeConnection(feedDefinition, conn, getAccountID());
             DataSet dataSet = dataTransformation.toDataSet(row);
@@ -192,18 +166,10 @@ public abstract class ValidatingPublishService extends PublishService implements
             if (dataStorage != null) {
                 dataStorage.rollback();
             }
-            try {
-                conn.rollback();
-            } catch (SQLException e1) {
-                LogClass.error(e1);
-            }
+            conn.rollback();
             throw new RuntimeException(e);
         } finally {
-            try {
-                conn.setAutoCommit(true);
-            } catch (SQLException e) {
-                LogClass.error(e);
-            }
+            conn.setAutoCommit(true);
             if (dataStorage != null) {
                 dataStorage.closeConnection();
             }
@@ -212,12 +178,11 @@ public abstract class ValidatingPublishService extends PublishService implements
     }
 
     public void updateRows(String dataSourceKey, Row[] rows, Where where) {
-        Connection conn = Database.instance().getConnection();
+        EIConnection conn = Database.instance().getConnection();
         DataStorage dataStorage = null;
         try {
-            String userName = getUserName();
             conn.setAutoCommit(false);
-            FeedDefinition feedDefinition = getFeedDefinition(userName, dataSourceKey, conn);
+            FeedDefinition feedDefinition = getFeedDefinition(getUserID(), dataSourceKey, conn);
             DataTransformation dataTransformation = new DataTransformation(feedDefinition);
             dataStorage = DataStorage.writeConnection(feedDefinition, conn, getAccountID());
             DataSet dataSet = dataTransformation.toDataSet(rows);
@@ -229,18 +194,10 @@ public abstract class ValidatingPublishService extends PublishService implements
             if (dataStorage != null) {
                 dataStorage.rollback();
             }
-            try {
-                conn.rollback();
-            } catch (SQLException e1) {
-                LogClass.error(e1);
-            }
+            conn.rollback();
             throw new RuntimeException(e);
         } finally {
-            try {
-                conn.setAutoCommit(true);
-            } catch (SQLException e) {
-                LogClass.error(e);
-            }
+            conn.setAutoCommit(true);
             if (dataStorage != null) {
                 dataStorage.closeConnection();
             }
@@ -249,12 +206,11 @@ public abstract class ValidatingPublishService extends PublishService implements
     }
 
     public void deleteRows(String dataSourceKey, Where where) {
-        Connection conn = Database.instance().getConnection();
+        EIConnection conn = Database.instance().getConnection();
         DataStorage dataStorage = null;
         try {
-            String userName = getUserName();
             conn.setAutoCommit(false);
-            FeedDefinition feedDefinition = getFeedDefinition(userName, dataSourceKey, conn);
+            FeedDefinition feedDefinition = getFeedDefinition(getUserID(), dataSourceKey, conn);
             dataStorage = DataStorage.writeConnection(feedDefinition, conn, getAccountID());
             dataStorage.deleteData(createWheres(where));
             dataStorage.commit();
@@ -264,18 +220,10 @@ public abstract class ValidatingPublishService extends PublishService implements
             if (dataStorage != null) {
                 dataStorage.rollback();
             }
-            try {
-                conn.rollback();
-            } catch (SQLException e1) {
-                LogClass.error(e1);
-            }
+            conn.rollback();
             throw new RuntimeException(e);
         } finally {
-            try {
-                conn.setAutoCommit(true);
-            } catch (SQLException e) {
-                LogClass.error(e);
-            }
+            conn.setAutoCommit(true);
             if (dataStorage != null) {
                 dataStorage.closeConnection();
             }

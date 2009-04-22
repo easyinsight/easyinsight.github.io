@@ -56,6 +56,7 @@
                     // space allocation, user licensing?, ssl configuration, ip range configuration
                     // core user administration...add user, remove user, change user privileges
                     toggleOptions = new ArrayCollection([ new AccountOption("My Profile", new ProfessionalMyProfile()),
+                            new AccountOption("My API Settings", new APIUserAdmin()),
                         //new AccountOption("Account Administration", new UserAccountAdministration()),
                         new AccountOption("User Administration", new UserAdministration()),
                         new AccountOption("API Administration", new APIAccountAdmin())]);

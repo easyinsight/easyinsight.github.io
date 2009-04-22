@@ -83,6 +83,46 @@ public class APIService {
         }
     }
 
+    public DataSourceAPIDescriptor getAPIDescriptor(long dataSourceID) {
+        DataSourceAPIDescriptor apiDescriptor = null;
+        SecurityUtil.authorizeFeed(dataSourceID, Roles.OWNER);
+        Connection conn = Database.instance().getConnection();
+        Session session = Database.instance().createSession(conn);
+        try {
+            PreparedStatement queryStmt = conn.prepareStatement("SELECT DATA_FEED.DATA_FEED_ID, FEED_NAME," +
+                    "data_feed.unchecked_api_enabled, data_feed.validated_api_enabled, data_feed.api_key FROM DATA_FEED WHERE " +
+                    "DATA_FEED_ID = ?");
+            PreparedStatement serviceStmt = conn.prepareStatement("SELECT dynamic_service_descriptor_id FROM dynamic_service_descriptor WHERE feed_id = ?");
+            queryStmt.setLong(1, dataSourceID);
+            ResultSet rs = queryStmt.executeQuery();
+            if (rs.next()) {
+                long feedID = rs.getLong(1);
+                String name = rs.getString(2);
+                boolean uncheckedEnabled = rs.getBoolean(3);
+                boolean validatedEnabled = rs.getBoolean(4);
+                String apiKey = rs.getString(5);
+                serviceStmt.setLong(1, feedID);
+                DynamicServiceDescriptor descriptor = null;
+                ResultSet serviceRS = serviceStmt.executeQuery();
+                if (serviceRS.next()) {
+                    long serviceID = serviceRS.getLong(1);
+                    if (serviceID > 0) {
+                        String wsdl = "http://www.easy-insight.com/app/services/s" + feedID + "?wsdl";
+                        descriptor = new DynamicServiceDescriptor(feedID, name, wsdl, serviceID, getDynamicServiceDefinition(feedID, conn, session));
+                    }
+                }
+                apiDescriptor = new DataSourceAPIDescriptor(feedID, name, uncheckedEnabled, validatedEnabled, descriptor, apiKey);
+            }
+        } catch (SQLException e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        } finally {
+            session.close();
+            Database.instance().closeConnection(conn);
+        }
+        return apiDescriptor;
+    }
+
     public List<DataSourceAPIDescriptor> getDataSourceAPIs() {
         List<DataSourceAPIDescriptor> apis = new ArrayList<DataSourceAPIDescriptor>();
         long userID = SecurityUtil.getUserID();

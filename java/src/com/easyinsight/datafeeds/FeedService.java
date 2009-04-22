@@ -57,12 +57,12 @@ public class FeedService implements IDataFeedService {
             while (reportRS.next()) {
                 descriptorList.add(new InsightDescriptor(reportRS.getLong(1), reportRS.getString(2), reportRS.getLong(3), reportRS.getInt(4)));
             }
-            PreparedStatement getGoalTreeStmt = conn.prepareStatement("SELECT GOAL_TREE.GOAL_TREE_ID, GOAL_TREE.name FROM GOAL_TREE, USER_TO_GOAL_TREE " +
+            PreparedStatement getGoalTreeStmt = conn.prepareStatement("SELECT GOAL_TREE.GOAL_TREE_ID, GOAL_TREE.name, USER_TO_GOAL_TREE.user_role FROM GOAL_TREE, USER_TO_GOAL_TREE " +
                     "WHERE GOAL_TREE.goal_tree_id = user_to_goal_tree.goal_tree_id and user_to_goal_tree.user_id = ?");
             getGoalTreeStmt.setLong(1, SecurityUtil.getUserID());
             ResultSet goalTreeRS = getGoalTreeStmt.executeQuery();
             while (goalTreeRS.next()) {
-                descriptorList.add(new GoalTreeDescriptor());
+                descriptorList.add(new GoalTreeDescriptor(goalTreeRS.getLong(1), goalTreeRS.getString(2), goalTreeRS.getInt(3)));
             }
         } catch (Exception e) {
             LogClass.error(e);

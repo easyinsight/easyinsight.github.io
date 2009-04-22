@@ -22,6 +22,7 @@ public class CopyAPIButton extends HBox{
         copyButton = new Button();
         copyButton.toolTip = "Copy API Key to Clipboard";
         copyButton.addEventListener(MouseEvent.CLICK, onClick);
+        copyButton.setStyle("icon", copyIcon);
     }
 
     private function onClick(event:MouseEvent):void {

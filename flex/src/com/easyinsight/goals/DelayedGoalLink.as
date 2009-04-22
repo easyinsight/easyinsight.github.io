@@ -25,7 +25,7 @@ package com.easyinsight.goals
         private function gotGoalTree(event:ResultEvent):void {
             var result:Boolean = goalService.canAccessGoalTree.lastResult as Boolean;
             if (result) {                                 
-                dispatchEvent(new AnalyzeEvent(GoalDataAnalyzeSource(goalTreeID)));
+                dispatchEvent(new AnalyzeEvent(new GoalDataAnalyzeSource(goalTreeID)));
             }
         }
 	}

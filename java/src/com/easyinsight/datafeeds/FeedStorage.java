@@ -96,7 +96,7 @@ public class FeedStorage {
         feedDefinition.setDataFeedID(feedID);
         savePolicy(conn, feedID, feedDefinition.getUploadPolicy());
         feedDefinition.setDataFeedID(feedID);
-        saveFields(feedID, conn, feedDefinition.getFields());
+        saveFields(feedID, conn, feedDefinition.getFields(), feedDefinition.getVirtualDimensions());
         saveTags(feedID, conn, feedDefinition.getTags());
         feedDefinition.customStorage(conn);
         return feedID;
@@ -194,15 +194,39 @@ public class FeedStorage {
         }
     }
 
-    private void saveFields(long feedID, Connection conn, List<AnalysisItem> analysisItems) throws SQLException {
+    private void saveFields(long feedID, Connection conn, List<AnalysisItem> analysisItems, List<VirtualDimension> virtualDimensions) throws SQLException {
         PreparedStatement deleteStmt = conn.prepareStatement("DELETE FROM FEED_TO_ANALYSIS_ITEM WHERE FEED_ID = ?");
+        PreparedStatement virtualStmt = conn.prepareStatement("DELETE FROM DATA_SOURCE_TO_VIRTUAL_DIMENSION WHERE DATA_SOURCE_ID = ?");
         deleteStmt.setLong(1, feedID);
         deleteStmt.executeUpdate();
         deleteStmt.close();
+        virtualStmt.setLong(1, feedID);
+        virtualStmt.executeUpdate();
+        virtualStmt.close();
         if (analysisItems != null) {
             Session session = Database.instance().createSession(conn);
             try {
                 //session.getTransaction().begin();
+                for (VirtualDimension virtualDimension : virtualDimensions) {
+                    AnalysisDimension dim = virtualDimension.getDefaultTransform().getTransformDimension();
+                    if (dim.getAnalysisItemID() == 0) {
+                        for (AnalysisItem analysisItem : analysisItems) {
+                            if (analysisItem.getKey().equals(dim.getKey())) {
+                                virtualDimension.getDefaultTransform().setTransformDimension((AnalysisDimension) analysisItem);
+                            }
+                        }
+                    }
+                    for (VirtualTransform transform : virtualDimension.getVirtualTransforms()) {
+                        AnalysisDimension transformDim = transform.getTransformDimension();
+                        if (transformDim.getAnalysisItemID() == 0) {
+                            for (AnalysisItem analysisItem : analysisItems) {
+                                if (analysisItem.getKey().equals(transformDim.getKey())) {
+                                    transform.setTransformDimension((AnalysisDimension) analysisItem);
+                                }
+                            }
+                        }
+                    }
+                }
                 for (AnalysisItem analysisItem : analysisItems) {
                     if (analysisItem.getKey().getKeyID() == 0) {
                         session.save(analysisItem.getKey());
@@ -218,6 +242,10 @@ public class FeedStorage {
                         session.merge(analysisItem);
                     }
                     //session.saveOrUpdate(analysisItem);
+                }
+                for (VirtualDimension remoteDimension : virtualDimensions) {
+                    remoteDimension.fromRemote();
+                    session.saveOrUpdate(remoteDimension);
                 }
                 /*for (AnalysisItem analysisItem : analysisItems) {
                     analysisItem.resetIDs();
@@ -239,6 +267,14 @@ public class FeedStorage {
                 insertLinkStmt.execute();
             }
             insertLinkStmt.close();
+            PreparedStatement virtualLinkStmt = conn.prepareStatement("INSERT INTO DATA_SOURCE_TO_VIRTUAL_DIMENSION (DATA_SOURCE_ID, VIRTUAL_DIMENSION_ID) " +
+                    "VALUES (?, ?)");
+            for (VirtualDimension virtualDimension : virtualDimensions) {
+                virtualLinkStmt.setLong(1, feedID);
+                virtualLinkStmt.setLong(2, virtualDimension.getVirtualDimensionID());
+                virtualLinkStmt.execute();
+            }
+            virtualLinkStmt.close();
         }
     }
 
@@ -271,6 +307,60 @@ public class FeedStorage {
             session.close();
         }
         return tags;
+    }
+
+    public void retrieveFields(FeedDefinition feedDefinition, Connection conn) throws SQLException {
+        long feedID = feedDefinition.getDataFeedID();
+        PreparedStatement queryFieldsStmt = conn.prepareStatement("SELECT ANALYSIS_ITEM_ID FROM FEED_TO_ANALYSIS_ITEM WHERE FEED_ID = ?");
+        PreparedStatement queryVirtualDimStmt = conn.prepareStatement("SELECT VIRTUAL_DIMENSION_ID FROM data_source_to_virtual_dimension WHERE " +
+                "DATA_SOURCE_ID = ?");
+        queryFieldsStmt.setLong(1, feedID);
+        Set<Long> analysisItemIDs = new HashSet<Long>();
+        ResultSet rs = queryFieldsStmt.executeQuery();
+        while (rs.next()) {
+            analysisItemIDs.add(rs.getLong(1));
+        }
+        queryFieldsStmt.close();
+        queryVirtualDimStmt.setLong(1, feedID);
+        Set<Long> virtualIDSet = new HashSet<Long>();
+        ResultSet virtualRS = queryVirtualDimStmt.executeQuery();
+        while (virtualRS.next()) {
+            virtualIDSet.add(virtualRS.getLong(1));
+        }
+        List<AnalysisItem> analysisItems = new ArrayList<AnalysisItem>();
+        List<VirtualDimension> virtualDimensions = new ArrayList<VirtualDimension>();
+        Session session = Database.instance().createSession(conn);
+        try {
+            for (Long analysisItemID : analysisItemIDs) {
+                List items = session.createQuery("from AnalysisItem where analysisItemID = ?").setLong(0, analysisItemID).list();
+                if (items.size() > 0) {
+                    AnalysisItem analysisItem = (AnalysisItem) items.get(0);
+                    /*if (analysisItem.hasType(AnalysisItemTypes.HIERARCHY)) {
+                        AnalysisHierarchyItem analysisHierarchyItem = (AnalysisHierarchyItem) analysisItem;
+                        analysisHierarchyItem.setHierarchyLevels(new ArrayList<HierarchyLevel>(analysisHierarchyItem.getHierarchyLevels()));
+                    }*/
+                    analysisItems.add(analysisItem);
+                }
+            }
+            for (Long virtualID : virtualIDSet) {
+                List items = session.createQuery("from VirtualDimension where virtualDimensionID = ?").setLong(0, virtualID).list();
+                if (items.size() > 0) {
+                    VirtualDimension dim = (VirtualDimension) items.get(0);
+                    dim.toRemote();
+                    virtualDimensions.add(dim);
+                }
+            }
+            for (AnalysisItem item : analysisItems) {
+                item.afterLoad();                
+            }
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        } finally {
+            session.close();
+        }
+        feedDefinition.setFields(analysisItems);
+        feedDefinition.setVirtualDimensions(virtualDimensions);
     }
 
     public List<AnalysisItem> retrieveFields(long feedID, Connection conn) throws SQLException {
@@ -409,7 +499,7 @@ public class FeedStorage {
         }
         updateDataFeedStmt.close();
         savePolicy(conn, feedDefinition.getDataFeedID(), feedDefinition.getUploadPolicy());
-        saveFields(feedDefinition.getDataFeedID(), conn, feedDefinition.getFields());
+        saveFields(feedDefinition.getDataFeedID(), conn, feedDefinition.getFields(), feedDefinition.getVirtualDimensions());
         saveTags(feedDefinition.getDataFeedID(), conn, feedDefinition.getTags());
         feedDefinition.customStorage(conn);
         if (feedDefinition.getRefreshDataInterval() > 0) {
@@ -504,7 +594,7 @@ public class FeedStorage {
                 feedDefinition.setRatingAverage(ratingAverage);
                 feedDefinition.setGenre(genre);
                 if (!feedType.equals(FeedType.ANALYSIS_BASED)) {
-                    feedDefinition.setFields(retrieveFields(feedDefinition.getDataFeedID(), conn));
+                    retrieveFields(feedDefinition, conn);
                 }
                 feedDefinition.setAnalysisDefinitionID(analysisDefinitionID);
                 feedDefinition.setAttribution(attribution);
@@ -530,7 +620,7 @@ public class FeedStorage {
             if(feedCache != null)
                 feedCache.put(identifier, feedDefinition);
         } catch (CacheException e) {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            LogClass.error(e);
         }
         
         return feedDefinition;

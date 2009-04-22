@@ -159,6 +159,7 @@ public class GoalService {
                 startDate = cal.getTime();
             }
             GoalTree goalTree = getGoalTree(goalTreeID);
+            goalStorage.decorateDataTree(goalTree);
             GoalTreeNodeData data = createDataTreeForDates(goalTree, startDate, endDate);
             goalTree.setRootNode(data);
             return goalTree;

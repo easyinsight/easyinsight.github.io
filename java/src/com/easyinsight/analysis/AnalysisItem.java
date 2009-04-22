@@ -12,6 +12,7 @@ import java.io.Serializable;
 import com.easyinsight.core.Key;
 import com.easyinsight.core.NamedKey;
 import com.easyinsight.core.Value;
+import com.easyinsight.dataset.DataSet;
 
 /**
  * User: James Boe
@@ -48,6 +49,10 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
     @Column(name="width")
     private int width;
 
+    @OneToOne(cascade = CascadeType.MERGE)
+    @JoinColumn(name="virtual_dimension_id")
+    private VirtualDimension virtualDimension;
+
     public AnalysisItem() {
     }
 
@@ -57,6 +62,14 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
 
     public AnalysisItem(Key key) {
         this.key = key;
+    }
+
+    public VirtualDimension getVirtualDimension() {
+        return virtualDimension;
+    }
+
+    public void setVirtualDimension(VirtualDimension virtualDimension) {
+        this.virtualDimension = virtualDimension;
     }
 
     public int getWidth() {
@@ -182,11 +195,14 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
     }
 
     public boolean isDerived() {
+        if (virtualDimension != null) {
+            return true;
+        }
         return false;
     }
 
-    public List<AnalysisItem> getParentItems(List<AnalysisItem> allFeedItems) {
-        throw new UnsupportedOperationException();
+    public boolean isVirtual() {
+        return virtualDimension != null;
     }
 
     public List<AnalysisItem> getAnalysisItems(List<AnalysisItem> allItems, Collection<AnalysisItem> insightItems) {
@@ -208,7 +224,11 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
     }
 
     public void afterLoad() {
-        
+        if (virtualDimension != null) {
+            for (VirtualTransform transform : virtualDimension.getVirtualTransforms()) {
+                transform.toRemote();
+            }
+        }
     }
 
     public String toKeySQL() {
@@ -216,5 +236,13 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
             throw new RuntimeException("Attempt made to retrieve SQL for a derived analysis item.");
         }
         return getKey().toSQL();
+    }
+
+    public Value calculate(DataSet dataSet, IRow row) {
+        throw new UnsupportedOperationException();
+    }
+
+    public boolean isCalculated() {
+        return false;
     }
 }

@@ -71,11 +71,11 @@ package com.easyinsight.goals
 		}
 		
 		private function viewGoalTree(event:MouseEvent):void {
-            dispatchEvent(new AnalyzeEvent(new GoalDataAnalyzeSource(goalTree.goalTreeID)));
+            dispatchEvent(new AnalyzeEvent(new GoalDataAnalyzeSource(goalTree.id)));
 		}
 		
 		private function adminGoalTree(event:MouseEvent):void {
-            dispatchEvent(new AnalyzeEvent(new GoalTreeAdminAnalyzeSource(goalTree.goalTreeID)));
+            dispatchEvent(new AnalyzeEvent(new GoalTreeAdminAnalyzeSource(goalTree.id)));
 		}
 		
 		private function deleteGoalTree(event:MouseEvent):void {

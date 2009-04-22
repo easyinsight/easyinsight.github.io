@@ -32,7 +32,7 @@ public class GoalTreeNameRenderer extends HBox{
     }
 
     private function deleteGoalTree(event:ContextMenuEvent):void {
-        dispatchEvent(new RemoveItemFromGroupEvent(RemoveItemFromGroupEvent.REMOVE_GOAL_TREE_FROM_GROUP, goalTree.goalTreeID));
+        dispatchEvent(new RemoveItemFromGroupEvent(RemoveItemFromGroupEvent.REMOVE_GOAL_TREE_FROM_GROUP, goalTree.id));
     }
 
     public function set admin(val:Boolean):void {
@@ -41,7 +41,7 @@ public class GoalTreeNameRenderer extends HBox{
 
     override public function set data(value:Object):void {
         this.goalTree = value as GoalTreeDescriptor;
-        nameLabel.text = goalTree.goalTreeName;
+        nameLabel.text = goalTree.name;
     }
 
     override public function get data():Object {

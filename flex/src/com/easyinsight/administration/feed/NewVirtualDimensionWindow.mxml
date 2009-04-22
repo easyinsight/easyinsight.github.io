@@ -1,0 +1,62 @@
+<?xml version="1.0" ?>
+<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml">
+    <mx:Script><![CDATA[
+        import com.easyinsight.analysis.AnalysisDimension;
+
+        import com.easyinsight.analysis.NamedKey;
+
+        import mx.collections.ArrayCollection;
+        import mx.managers.PopUpManager;
+
+        private var _dataSourceID:int;
+
+        [Bindable]
+        private var _groupings:ArrayCollection;
+
+
+        public function set dataSourceID(val:int):void {
+            _dataSourceID = val;
+        }
+
+        public function set groupings(val:ArrayCollection):void {
+            _groupings = val;
+        }
+
+
+
+        private function onGroupingChange():void {
+        }
+
+        private function save():void {
+            var dimension:VirtualDimension = new VirtualDimension();
+            dimension.name = dimensionInput.text;
+            dimension.baseDimension = groupingBox.selectedItem as AnalysisDimension;
+            var defaultTransform:VirtualTransform = new VirtualTransform();
+            defaultTransform.transformDimension = new AnalysisDimension();
+            defaultTransform.transformDimension.virtualDimension = dimension;
+            defaultTransform.transformDimension.group = true;
+            var defaultKey:NamedKey = new NamedKey();
+            defaultKey.name = "( Default )";
+            defaultTransform.transformDimension.key = defaultKey;
+            dimension.defaultTransform = defaultTransform;
+            dispatchEvent(new NewVirtualDimensionEvent(dimension));
+            PopUpManager.removePopUp(this);
+        }
+        ]]></mx:Script>
+
+    <mx:Form>
+        <mx:Form>
+            <mx:FormItem label="Base Grouping:">
+                <mx:ComboBox dataProvider="{_groupings}" change="onGroupingChange()" id="groupingBox"
+                        labelField="display"/>
+            </mx:FormItem>
+            <mx:FormItem label="Virtual Grouping Name:">
+                <mx:TextInput id="dimensionInput"/>
+            </mx:FormItem>
+            <mx:FormItem label="" direction="horizontal">
+                <mx:Button click="save()" label="Create"/>
+                <mx:Button click="PopUpManager.removePopUp(this)" label="Cancel"/>
+            </mx:FormItem>
+        </mx:Form>
+    </mx:Form>
+</mx:TitleWindow>

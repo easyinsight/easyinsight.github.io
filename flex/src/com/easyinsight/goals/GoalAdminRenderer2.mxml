@@ -33,6 +33,10 @@
         [Embed(source="../../../../assets/pencil.png")]
         private var chartIcon:Class;
 
+        [Bindable]
+        [Embed(source="../../../../assets/branchx16.png")]
+        private var subTreeIcon:Class;
+
         private var orgChartItem:OrgChartItem;
 
         [Bindable]
@@ -50,6 +54,8 @@
         [Bindable]
         private var rootNode:Boolean = true;
 
+        [Bindable]
+        private var subTreePresent:Boolean = false;
 
         public function set goalName(val:String):void {
             _goalName = val;
@@ -99,9 +105,14 @@
                 window.goalTreeDescriptor = goalTreeDescriptor;
                 window.addEventListener(OrganizationChartRefreshEvent.ORG_CHART_REFRESH, passThrough);
                 window.addEventListener(SolutionInstallRequiredEvent.SOLUTION_INSTALL, passThrough);
+                window.addEventListener(SubTreeInstallEvent.SUB_TREE_INSTALL, subTreeInstall);
                 PopUpManager.addPopUp(window, this, true);
                 PopUpManager.centerPopUp(window);
             }
+        }
+
+        private function subTreeInstall(event:SubTreeInstallEvent):void {
+            subTreePresent = true;
         }
 
         private function passThrough(event:Event):void {
@@ -127,6 +138,7 @@
                 nodeText = "This goal is derived from the results of its children.";
                 nodeText = "This goal is bound to a data source.";
                 nodeText = "This goal is derived from its children.";
+                subTreePresent = goalTreeNode.subTreeID > 0;
             }
         }
 
@@ -222,6 +234,20 @@
             goalTreeNode.name = goalNameInput.text;
             goalNameInput.setFocus();
         }
+
+        private function subTreeConfiguration():void {
+            var goalTreeNode:GoalTreeNode = orgChartItem.data as GoalTreeNode;
+            var window:SubTreeConfigWindow = new SubTreeConfigWindow();
+            window.addEventListener(SubTreeInstallEvent.SUB_TREE_INSTALL, uninstall);
+            window.goalTreeNode = goalTreeNode;
+            window.subTreeName = goalTreeNode.subTreeName;
+            PopUpManager.addPopUp(window, this);
+            PopUpManager.centerPopUp(window);
+        }
+
+        private function uninstall(event:SubTreeInstallEvent):void {
+            subTreePresent = false;
+        }
 		]]>
 	</mx:Script>
 	<mx:VBox id="layer2" verticalAlign="middle" paddingLeft="10" 
@@ -230,6 +256,7 @@
             <mx:HBox horizontalAlign="center" width="100%">
                 <mx:Image id="iconImage" source="{goalIcon}" visible="{goalIconExists}"/>
             </mx:HBox>
+            <mx:Button icon="{subTreeIcon}" toolTip="Navigate into Sub Tree" click="subTreeConfiguration()" visible="{subTreePresent}"/>
         </mx:HBox>
         <mx:HBox>
             <mx:TextInput id="goalNameInput" text="{_goalName}" fontSize="10" height="20" width="120" editable="false"/>

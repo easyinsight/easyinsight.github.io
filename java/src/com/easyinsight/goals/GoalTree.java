@@ -28,6 +28,16 @@ public class GoalTree implements Cloneable {
 
     private List<GoalTreeMilestone> milestones = new ArrayList<GoalTreeMilestone>();
 
+    private List<GoalTreeDescriptor> subTreeParents = new ArrayList<GoalTreeDescriptor>();
+
+    public List<GoalTreeDescriptor> getSubTreeParents() {
+        return subTreeParents;
+    }
+
+    public void setSubTreeParents(List<GoalTreeDescriptor> subTreeParents) {
+        this.subTreeParents = subTreeParents;
+    }
+
     public List<GoalTreeMilestone> getMilestones() {
         return milestones;
     }

@@ -38,6 +38,7 @@ package com.easyinsight.administration.feed
         public var validatedAPIUsingBasicAuth:Boolean;
         public var inheritAccountAPISettings:Boolean;
         public var refreshDataInterval:int;
+        public var virtualDimensions:ArrayCollection;
 		
 		public function FeedDefinitionData()
 		{

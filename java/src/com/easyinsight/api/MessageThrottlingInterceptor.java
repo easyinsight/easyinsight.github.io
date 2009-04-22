@@ -4,26 +4,14 @@ import org.apache.cxf.phase.AbstractPhaseInterceptor;
 import org.apache.cxf.phase.Phase;
 import org.apache.cxf.message.Message;
 import org.apache.cxf.interceptor.Fault;
-import org.apache.cxf.binding.soap.interceptor.AbstractSoapInterceptor;
-import org.apache.cxf.binding.soap.SoapMessage;
 import org.apache.cxf.configuration.security.AuthorizationPolicy;
-import org.w3c.dom.bootstrap.DOMImplementationRegistry;
-import static org.w3c.dom.bootstrap.DOMImplementationRegistry.*;
-import org.w3c.dom.ls.DOMImplementationLS;
-import org.w3c.dom.ls.LSSerializer;
-import org.w3c.dom.Node;
 import org.hibernate.Session;
-import org.hibernate.Transaction;
 
-import javax.servlet.ServletRequest;
-import javax.wsdl.Input;
 import java.io.InputStream;
-import java.io.IOException;
 import java.util.List;
 import java.util.Date;
 
 import com.easyinsight.security.SecurityUtil;
-import com.easyinsight.security.PasswordService;
 import com.easyinsight.database.Database;
 import com.easyinsight.users.BandwidthUsage;
 import com.easyinsight.users.UserServiceResponse;
@@ -98,7 +86,7 @@ public class MessageThrottlingInterceptor extends AbstractPhaseInterceptor {
 
         public UserServiceResponse getAccount(Message message) {
             AuthorizationPolicy policy = message.get(AuthorizationPolicy.class);
-            return SecurityUtil.authenticateToResponse(policy.getUserName(), PasswordService.getInstance().encrypt(policy.getPassword()));
+            return SecurityUtil.authenticateKeys(policy.getUserName(), policy.getPassword());
         }
     }
 }

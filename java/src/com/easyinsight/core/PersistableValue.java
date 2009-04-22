@@ -13,7 +13,7 @@ import javax.persistence.*;
 public abstract class PersistableValue {
     @Id @GeneratedValue(strategy=GenerationType.IDENTITY)
     @Column(name="value_id")
-    private Long valueID;
+    private long valueID;
 
     public long getValueID() {
         return valueID;

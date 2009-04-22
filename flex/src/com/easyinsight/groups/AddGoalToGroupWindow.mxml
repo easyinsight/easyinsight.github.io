@@ -32,7 +32,7 @@
                 var object:Object = feedBox.selectedItem as GoalTreeDescriptor;
                 if (object is GoalTreeDescriptor) {
 				    var descriptor:GoalTreeDescriptor = feedBox.selectedItem as GoalTreeDescriptor;
-                    goalService.getGoalsForTree.send(descriptor.goalTreeID);
+                    goalService.getGoalsForTree.send(descriptor.id);
                 } else {
                     goals = new ArrayCollection();
                 }
