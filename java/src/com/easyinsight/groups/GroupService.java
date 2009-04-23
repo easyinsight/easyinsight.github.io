@@ -347,26 +347,6 @@ public class GroupService {
         }
     }
 
-    public List<GroupDescriptor> getMemberGroupsNotIncludingFeed(long feedID) {
-        long userID = SecurityUtil.getUserID();
-        try {
-            return groupStorage.getGroupsForUserExcludingFeed(userID, feedID);
-        } catch (Exception e) {
-            LogClass.error(e);
-            throw new RuntimeException(e);
-        }
-    }
-
-    public List<GroupDescriptor> getMemberGroupsNotIncludingInsight(long insightID) {
-        long userID = SecurityUtil.getUserID();
-        try {
-            return groupStorage.getGroupsForUserExcludingInsight(userID, insightID);
-        } catch (Exception e) {
-            LogClass.error(e);
-            throw new RuntimeException(e);
-        }
-    }
-
     public List<GroupDescriptor> getMemberGroups() {
         long userID = SecurityUtil.getUserID();
         try {

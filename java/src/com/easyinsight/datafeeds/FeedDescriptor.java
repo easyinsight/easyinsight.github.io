@@ -15,7 +15,7 @@ public class FeedDescriptor {
     private String name;
     private long dataFeedID;
     private int role;
-    private UploadPolicy policy;
+    //private UploadPolicy policy;
     private long size;
     private int feedType;
     private List<InsightDescriptor> children;
@@ -28,12 +28,10 @@ public class FeedDescriptor {
     public FeedDescriptor() {
     }
 
-    public FeedDescriptor(String name, long dataFeedID,
-                          UploadPolicy policy, long size, int feedType, Integer role, String ownerName, String description, String attribution,
+    public FeedDescriptor(String name, long dataFeedID, long size, int feedType, Integer role, String ownerName, String description, String attribution,
                           Date lastDataTime) {
         this.name = name;
         this.dataFeedID = dataFeedID;
-        this.policy = policy;
         this.size = size;
         this.feedType = feedType;
         this.role = role;
@@ -121,14 +119,6 @@ public class FeedDescriptor {
 
     public void setSize(long size) {
         this.size = size;
-    }
-
-    public UploadPolicy getPolicy() {
-        return policy;
-    }
-
-    public void setPolicy(UploadPolicy policy) {
-        this.policy = policy;
     }
 
     public String getName() {

@@ -52,8 +52,8 @@ import com.easyinsight.listing.DataFeedDescriptor;
             var descriptor:DataFeedDescriptor = new DataFeedDescriptor();
             descriptor.dataFeedID = id;
             descriptor.name = "BaseCamp";
-            descriptor.policy = new UploadPolicy();
-            descriptor.policy.publiclyVisible = false;
+            /*descriptor.policy = new UploadPolicy();
+            descriptor.policy.publiclyVisible = false;*/
             dispatchEvent(new UploadConfigEvent(UploadConfigEvent.UPLOAD_CONFIG_COMPLETE, id, descriptor.name));            
             dispatchEvent(new ModuleAnalyzeEvent(new DescriptorAnalyzeSource(descriptor)));
         }

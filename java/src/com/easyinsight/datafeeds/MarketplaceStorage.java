@@ -1,14 +1,10 @@
 package com.easyinsight.datafeeds;
 
 import com.easyinsight.database.Database;
-import com.easyinsight.userupload.UploadPolicy;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.analysis.AnalysisStorage;
 import com.easyinsight.analysis.Tag;
 import com.easyinsight.core.InsightDescriptor;
-import com.easyinsight.security.Roles;
-import com.easyinsight.email.UserStub;
-import com.easyinsight.groups.GroupDescriptor;
 
 import java.util.*;
 import java.sql.Connection;
@@ -58,7 +54,7 @@ public class MarketplaceStorage {
         return preparedStatement;
     }
 
-    private FeedDescriptor fromResultSet(ResultSet rs, Connection conn) throws SQLException {
+    private FeedDescriptor fromResultSet(ResultSet rs) throws SQLException {
         long dataFeedID = rs.getLong(1);
         String feedName = rs.getString(2);
         int feedType = rs.getInt(3);
@@ -69,7 +65,7 @@ public class MarketplaceStorage {
         if (rs.wasNull()) {
             role = null;
         }
-        return createDescriptor(dataFeedID, feedName, true, true, role, 0, feedType, ownerName, description, attribution, conn, null);
+        return createDescriptor(dataFeedID, feedName, role, 0, feedType, ownerName, description, attribution, null);
     }
 
     private List<FeedDescriptor> getFeeds(long accountID, String keyword, int cutoff, String sortClause) {
@@ -79,7 +75,7 @@ public class MarketplaceStorage {
             PreparedStatement queryStmt = getStatement(conn, accountID, keyword, cutoff, sortClause);
             ResultSet rs = queryStmt.executeQuery();
             while (rs.next()) {
-                FeedDescriptor feedDescriptor = fromResultSet(rs, conn);
+                FeedDescriptor feedDescriptor = fromResultSet(rs);
                 descriptorList.add(feedDescriptor);
             }
             queryStmt.close();
@@ -99,10 +95,9 @@ public class MarketplaceStorage {
         return getFeeds(accountID, keyword, 0, null);
     }
 
-    private FeedDescriptor createDescriptor(long dataFeedID, String feedName, boolean publiclyVisible, boolean marketplaceVisible, Integer userRole,
-                                            long size, int feedType, String ownerName, String description, String attribution, Connection conn, Date lastDataTime) throws SQLException {
-        UploadPolicy uploadPolicy = createUploadPolicy(conn, dataFeedID, publiclyVisible, marketplaceVisible);
-        return new FeedDescriptor(feedName, dataFeedID, uploadPolicy, size, feedType, userRole != null ? userRole : 0, ownerName, description, attribution, lastDataTime);
+    private FeedDescriptor createDescriptor(long dataFeedID, String feedName, Integer userRole,
+                                            long size, int feedType, String ownerName, String description, String attribution, Date lastDataTime) throws SQLException {
+        return new FeedDescriptor(feedName, dataFeedID, size, feedType, userRole != null ? userRole : 0, ownerName, description, attribution, lastDataTime);
     }
 
 
@@ -142,49 +137,6 @@ public class MarketplaceStorage {
 
     public List<InsightDescriptor> getAnalysisDefinitionsForGenre(String genre) {
         return new AnalysisStorage().getMostPopularAnalyses(genre, 4);
-    }
-
-    private UploadPolicy createUploadPolicy(Connection conn, long feedID, boolean publiclyVisible, boolean marketplaceVisible) throws SQLException {
-        UploadPolicy uploadPolicy = new UploadPolicy();
-        uploadPolicy.setPubliclyVisible(publiclyVisible);
-        uploadPolicy.setMarketplaceVisible(marketplaceVisible);
-        List<FeedConsumer> owners = new ArrayList<FeedConsumer>();
-        List<FeedConsumer> viewers = new ArrayList<FeedConsumer>();
-        PreparedStatement policyUserStmt = conn.prepareStatement("SELECT USER.USER_ID, ROLE, USER.NAME, USER.USERNAME, USER.EMAIL FROM UPLOAD_POLICY_USERS, USER WHERE FEED_ID = ? AND " +
-                "UPLOAD_POLICY_USERS.USER_ID = USER.USER_ID");
-        policyUserStmt.setLong(1, feedID);
-        ResultSet usersRS = policyUserStmt.executeQuery();
-        while (usersRS.next()) {
-            long userID = usersRS.getLong(1);
-            int role = usersRS.getInt(2);
-            String name = usersRS.getString(3);
-            String userName = usersRS.getString(4);
-            String email = usersRS.getString(5);
-            UserStub userStub = new UserStub(userID, userName, email, name);
-            if (role == Roles.OWNER) {
-                owners.add(userStub);
-            } else {
-                viewers.add(userStub);
-            }
-        }
-        PreparedStatement policyGroupsStmt = conn.prepareStatement("SELECT COMMUNITY_GROUP.NAME, COMMUNITY_GROUP.COMMUNITY_GROUP_ID, ROLE FROM UPLOAD_POLICY_GROUPS, COMMUNITY_GROUP WHERE FEED_ID = ? AND " +
-                "UPLOAD_POLICY_GROUPS.GROUP_ID = COMMUNITY_GROUP.COMMUNITY_GROUP_ID");
-        policyGroupsStmt.setLong(1, feedID);
-        ResultSet groupsRS = policyGroupsStmt.executeQuery();
-        while (groupsRS.next()) {
-            String groupName = groupsRS.getString(1);
-            long groupID = groupsRS.getLong(2);
-            int role = groupsRS.getInt(3);
-            GroupDescriptor groupDescriptor = new GroupDescriptor(groupName, groupID, 0, null);
-            if (role == Roles.OWNER) {
-                owners.add(groupDescriptor);
-            } else {
-                viewers.add(groupDescriptor);
-            }
-        }
-        uploadPolicy.setOwners(owners);
-        uploadPolicy.setViewers(viewers);
-        return uploadPolicy;
     }
 
     public List<FeedDescriptor> getRecentFeeds(int cutoff, long accountID, String genreKey) {

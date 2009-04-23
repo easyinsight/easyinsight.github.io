@@ -638,10 +638,9 @@ public class FeedStorage {
 
     }
 
-    private FeedDescriptor createDescriptor(long dataFeedID, String feedName, boolean publiclyVisible, boolean marketplaceVisible, Integer userRole,
-                                            long size, int feedType, String ownerName, String description, String attribution, Date lastDataTime, Connection conn) throws SQLException {
-        UploadPolicy uploadPolicy = createUploadPolicy(conn, dataFeedID, publiclyVisible, marketplaceVisible);
-        return new FeedDescriptor(feedName, dataFeedID, uploadPolicy, size, feedType, userRole != null ? userRole : 0, ownerName, description, attribution, lastDataTime);
+    private FeedDescriptor createDescriptor(long dataFeedID, String feedName, Integer userRole,
+                                            long size, int feedType, String ownerName, String description, String attribution, Date lastDataTime) throws SQLException {
+        return new FeedDescriptor(feedName, dataFeedID, size, feedType, userRole != null ? userRole : 0, ownerName, description, attribution, lastDataTime);
     }
 
     public FeedDescriptor getFeedDescriptor(long accountID, long feedID) {
@@ -662,11 +661,9 @@ public class FeedStorage {
                 String description = rs.getString(4);
                 String attribution = rs.getString(5);
                 int role = rs.getInt(6);
-                boolean publiclyVisible = rs.getBoolean(7);
-                boolean marketplaceVisible = rs.getBoolean(8);
                 long analysisID = rs.getLong(9);
                 WSAnalysisDefinition analysisDefinition = new AnalysisStorage().getAnalysisDefinition(analysisID, conn);
-                feedDescriptor = createDescriptor(feedID, feedName, publiclyVisible, marketplaceVisible, role, 0, feedType, ownerName, description, attribution, null, conn);
+                feedDescriptor = createDescriptor(feedID, feedName, role, 0, feedType, ownerName, description, attribution, null);
                 Collection<Tag> tags = getTags(feedID, conn);
                 StringBuilder tagStringBuilder = new StringBuilder();
                 Iterator<Tag> tagIter = tags.iterator();
@@ -711,25 +708,12 @@ public class FeedStorage {
                 String description = rs.getString(7);
                 String attribution = rs.getString(8);
                 int userRole = rs.getInt(9);
-                boolean publiclyVisible = rs.getBoolean(10);
-                boolean marketplaceVisible = rs.getBoolean(11);
                 Timestamp lastTime = rs.getTimestamp(12);
                 Date lastDataTime = null;
                 if (lastTime != null) {
                     lastDataTime = new Date(lastTime.getTime());
                 }
-                FeedDescriptor feedDescriptor = createDescriptor(dataFeedID, feedName, publiclyVisible, marketplaceVisible, userRole, feedSize, feedType, ownerName, description, attribution, lastDataTime, conn);
-                Collection<Tag> tags = getTags(dataFeedID, conn);
-                StringBuilder tagStringBuilder = new StringBuilder();
-                Iterator<Tag> tagIter = tags.iterator();
-                while (tagIter.hasNext()) {
-                    Tag tag = tagIter.next();
-                    tagStringBuilder.append(tag.getTagName());
-                    if (tagIter.hasNext()){
-                        tagStringBuilder.append(" ");
-                    }
-                }
-                feedDescriptor.setTagString(tagStringBuilder.toString());
+                FeedDescriptor feedDescriptor = createDescriptor(dataFeedID, feedName, userRole, feedSize, feedType, ownerName, description, attribution, lastDataTime);
                 descriptorList.add(feedDescriptor);
             }
             queryStmt.close();
@@ -852,8 +836,7 @@ public class FeedStorage {
 
             FeedApiKey that = (FeedApiKey) o;
 
-            if (userID != that.userID) return false;
-            return APIKey.equals(that.APIKey);
+            return userID == that.userID && APIKey.equals(that.APIKey);
 
         }
 

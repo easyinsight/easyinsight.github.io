@@ -6,9 +6,6 @@ import com.easyinsight.database.EIConnection;
 import com.easyinsight.analysis.Tag;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.datafeeds.FeedDescriptor;
-import com.easyinsight.datafeeds.FeedConsumer;
-import com.easyinsight.userupload.UploadPolicy;
-import com.easyinsight.email.UserStub;
 import com.easyinsight.security.Roles;
 import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.audit.AuditMessage;
@@ -584,9 +581,6 @@ public class GroupStorage {
                 String description = rs.getString(5);
                 String attribution = rs.getString(6);
                 int groupRole = rs.getInt(7);
-                boolean publiclyVisible = rs.getBoolean(8);
-                boolean marketplaceVisible = rs.getBoolean(9);
-
                 getUserRoleStmt.setLong(1, userID);
                 getUserRoleStmt.setLong(2, feedID);
                 ResultSet userRS = getUserRoleStmt.executeQuery();
@@ -596,7 +590,7 @@ public class GroupStorage {
                 }
 
                 int role = Math.min(groupRole, userRole);
-                FeedDescriptor feedDescriptor = createDescriptor(feedID, name, publiclyVisible, marketplaceVisible, role, 0, feedType, ownerName, description, attribution, conn, null);
+                FeedDescriptor feedDescriptor = createDescriptor(feedID, name, role, 0, feedType, ownerName, description, attribution, null);
                 descriptors.add(feedDescriptor);
             }
         } catch (SQLException e) {
@@ -608,62 +602,9 @@ public class GroupStorage {
         return descriptors; 
     }
 
-    private UploadPolicy createUploadPolicy(Connection conn, long feedID, boolean publiclyVisible, boolean marketplaceVisible) throws SQLException {
-        UploadPolicy uploadPolicy = new UploadPolicy();
-        uploadPolicy.setPubliclyVisible(publiclyVisible);
-        uploadPolicy.setMarketplaceVisible(marketplaceVisible);
-        List<FeedConsumer> owners = new ArrayList<FeedConsumer>();
-        List<FeedConsumer> viewers = new ArrayList<FeedConsumer>();
-        PreparedStatement policyUserStmt = conn.prepareStatement("SELECT USER.USER_ID, ROLE, USER.NAME, USER.USERNAME, USER.EMAIL FROM UPLOAD_POLICY_USERS, USER WHERE FEED_ID = ? AND " +
-                "UPLOAD_POLICY_USERS.USER_ID = USER.USER_ID");
-        policyUserStmt.setLong(1, feedID);
-        ResultSet usersRS = policyUserStmt.executeQuery();
-        while (usersRS.next()) {
-            long userID = usersRS.getLong(1);
-            int role = usersRS.getInt(2);
-            String name = usersRS.getString(3);
-            String userName = usersRS.getString(4);
-            String email = usersRS.getString(5);
-            UserStub userStub = new UserStub(userID, userName, email, name);
-            if (role == Roles.OWNER) {
-                owners.add(userStub);
-            } else {
-                viewers.add(userStub);
-            }
-        }
-        PreparedStatement policyGroupsStmt = conn.prepareStatement("SELECT COMMUNITY_GROUP.NAME, COMMUNITY_GROUP.COMMUNITY_GROUP_ID, ROLE FROM UPLOAD_POLICY_GROUPS, COMMUNITY_GROUP WHERE FEED_ID = ? AND " +
-                "UPLOAD_POLICY_GROUPS.GROUP_ID = COMMUNITY_GROUP.COMMUNITY_GROUP_ID");
-        policyGroupsStmt.setLong(1, feedID);
-        ResultSet groupsRS = policyGroupsStmt.executeQuery();
-        while (groupsRS.next()) {
-            String groupName = groupsRS.getString(1);
-            long groupID = groupsRS.getLong(2);
-            int role = groupsRS.getInt(3);
-            GroupDescriptor groupDescriptor = new GroupDescriptor(groupName, groupID, 0, null);
-            if (role == Roles.OWNER) {
-                owners.add(groupDescriptor);
-            } else {
-                viewers.add(groupDescriptor);
-            }
-        }
-        uploadPolicy.setOwners(owners);
-        uploadPolicy.setViewers(viewers);
-        return uploadPolicy;
-    }
-
-    private FeedDescriptor createDescriptor(long dataFeedID, String feedName, boolean publiclyVisible, boolean marketplaceVisible, Integer userRole,
-                                            long size, int feedType, String ownerName, String description, String attribution, Connection conn, Date lastDataTime) throws SQLException {
-        UploadPolicy uploadPolicy = createUploadPolicy(conn, dataFeedID, publiclyVisible, marketplaceVisible);
-        return new FeedDescriptor(feedName, dataFeedID, uploadPolicy, size, feedType, userRole != null ? userRole : 0, ownerName, description, attribution, lastDataTime);
-    }
-
-
-    public List<GroupDescriptor> getGroupsForUserExcludingFeed(long userID, long feedID) {
-        return null;  //To change body of created methods use File | Settings | File Templates.
-    }
-
-    public List<GroupDescriptor> getGroupsForUserExcludingInsight(long userID, long insightID) {
-        return null;  //To change body of created methods use File | Settings | File Templates.
+    private FeedDescriptor createDescriptor(long dataFeedID, String feedName, Integer userRole,
+                                            long size, int feedType, String ownerName, String description, String attribution, Date lastDataTime) throws SQLException {
+        return new FeedDescriptor(feedName, dataFeedID, size, feedType, userRole != null ? userRole : 0, ownerName, description, attribution, lastDataTime);
     }
 
     public List<AuditMessage> getGroupMessages(long groupID, Date startDate, Date endDate, int limit) throws SQLException {

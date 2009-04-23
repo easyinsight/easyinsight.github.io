@@ -86,7 +86,6 @@ public class SalesforceConnection {
 
             FeedDescriptor feedDescriptor = new FeedDescriptor();
             feedDescriptor.setDataFeedID(feedID);
-            feedDescriptor.setPolicy(new UploadPolicy(userID));
             return new SalesforceCreationResponse(feedDescriptor, true);
         } catch (Exception e) {
             LogClass.error(e);
@@ -199,7 +198,6 @@ public class SalesforceConnection {
                     long feedID = rs.getLong(1);
                     feedDescriptor = new FeedDescriptor();
                     feedDescriptor.setDataFeedID(feedID);
-                    feedDescriptor.setPolicy(new UploadPolicy(userID));
                 }
             } catch (SQLException e) {
                 LogClass.error(e);

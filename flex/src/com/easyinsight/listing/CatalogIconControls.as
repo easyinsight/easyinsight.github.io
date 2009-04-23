@@ -74,7 +74,7 @@ import flash.events.Event;
 			this.feedDescriptor = value as DataFeedDescriptor;
 			this.preview = (feedDescriptor.role != DataFeedDescriptor.OWNER && feedDescriptor.role != DataFeedDescriptor.SUBSCRIBER);
 			if (feedDescriptor.role != DataFeedDescriptor.OWNER && feedDescriptor.role != DataFeedDescriptor.SUBSCRIBER) {
-				var buyable:Boolean = (feedDescriptor.role != DataFeedDescriptor.OWNER && feedDescriptor.role != DataFeedDescriptor.SUBSCRIBER && 
+				/*var buyable:Boolean = (feedDescriptor.role != DataFeedDescriptor.OWNER && feedDescriptor.role != DataFeedDescriptor.SUBSCRIBER &&
 					feedDescriptor.policy.getPolicyType() == UploadPolicy.COMMERCIAL);
 				if (buyable) {
 					addChild(buyButton);
@@ -85,14 +85,14 @@ import flash.events.Event;
 						//removeChild(subscribeButton);
 					}		
 					//subscribeButton.visible = false;		
-				} else {								
+				} else {*/
 					addChild(subscribeButton);
 					subscribeShowing = true;
 					if (buyShowing) {
 						buyShowing = false;
 						//removeChild(buyButton);
 					}
-				}
+				//}
 			}					 		
 		}
 		

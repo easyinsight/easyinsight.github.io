@@ -28,23 +28,27 @@ public class Database {
     private SessionFactory sessionFactory;
     private static Database instance;
     private GenericObjectPool connectionPool;
+    private boolean addHibernate;
 
     private String urlTemplate = "jdbc:mysql://{0}:{1}/{2}";
 
-    private Database(String host, String port, String databaseName, String userName, String password) {
+    private Database(String host, String port, String databaseName, String userName, String password, boolean addHibernate) {
         dataSource = setupDataSource(host, port, databaseName, userName, password);
-        try {
-            AnnotationConfiguration configuration = new AnnotationConfiguration().configure();
-            String url = MessageFormat.format(urlTemplate, host, port, databaseName);
-            configuration.setProperty("hibernate.connection.url", url);
-            configuration.setProperty("hibernate.connection.username", userName);
-            configuration.setProperty("hibernate.connection.password", password);
-            sessionFactory = configuration.buildSessionFactory();
-            Thread thread = new Thread(new KeepAliveThread(this));
-            thread.setDaemon(true);
-            thread.start();
-        } catch (Throwable e) {
-            LogClass.error(e);
+        this.addHibernate = addHibernate;
+        if (addHibernate) {
+            try {
+                AnnotationConfiguration configuration = new AnnotationConfiguration().configure();
+                String url = MessageFormat.format(urlTemplate, host, port, databaseName);
+                configuration.setProperty("hibernate.connection.url", url);
+                configuration.setProperty("hibernate.connection.username", userName);
+                configuration.setProperty("hibernate.connection.password", password);
+                sessionFactory = configuration.buildSessionFactory();
+                Thread thread = new Thread(new KeepAliveThread(this));
+                thread.setDaemon(true);
+                thread.start();
+            } catch (Throwable e) {
+                LogClass.error(e);
+            }
         }
     }
 
@@ -53,26 +57,35 @@ public class Database {
     }
 
     public static Database create(String host, String port, String databaseName, String userName, String password) {
-        return new Database(host, port, databaseName, userName, password);
+        return new Database(host, port, databaseName, userName, password, false);
     }
 
     public static void initialize() {
         if (instance == null) {
             instance = new Database(ConfigLoader.instance().getDatabaseHost(), ConfigLoader.instance().getDatabasePort(),
                 ConfigLoader.instance().getDatabaseName(), ConfigLoader.instance().getDatabaseUserName(),
-                ConfigLoader.instance().getDatabasePassword());
+                ConfigLoader.instance().getDatabasePassword(), true);
         }
     }
 
     public Session createSession() {
+        if (!addHibernate) {
+            throw new UnsupportedOperationException("This is a storage database, with no Hibernate.");
+        }
         return sessionFactory.openSession();
     }
 
     public Session createSession(Connection conn) {
+        if (!addHibernate) {
+            throw new UnsupportedOperationException("This is a storage database, with no Hibernate.");
+        }
         return sessionFactory.openSession(conn);
     }
 
     public StatelessSession createStatelessSession() {
+        if (!addHibernate) {
+            throw new UnsupportedOperationException("This is a storage database, with no Hibernate.");
+        }
         return sessionFactory.openStatelessSession();
     }
 
@@ -112,6 +125,9 @@ public class Database {
     public void shutdown() {
         try {
             connectionPool.close();
+            if (sessionFactory != null) {
+                sessionFactory.close();
+            }
         } catch (Exception e) {
             LogClass.error(e);
         }
