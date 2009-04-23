@@ -227,6 +227,9 @@
                 <fileset dir="../java/lib/google">
                     <include name="*.jar"/>
                 </fileset>
+                <fileset dir="../java/lib/gnip">
+                    <include name="*.jar"/>
+                </fileset>
                 <fileset dir="../java/lib/excel">
                     <include name="*.jar"/>
                 </fileset>
