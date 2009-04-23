@@ -113,10 +113,6 @@
             // are user credentials already set in preferences?
 
             if (userNameJS != null && "" != userNameJS && passwordJS != null && "" != passwordJS) {
-
-                // is a report already chosen?
-
-
                 login(userNameJS, passwordJS);
             } else {
                 if (authService.channelSet == null) {

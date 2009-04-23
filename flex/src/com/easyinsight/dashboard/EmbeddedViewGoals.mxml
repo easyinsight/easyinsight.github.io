@@ -14,13 +14,20 @@
 			import mx.modules.ModuleManager;	
                    
             private var dataView:DisplayObject;
+
+        private var _prefix:String = "";
+
             
             private var moduleInfo:IModuleInfo;
+
+        public function set prefix(value:String) {
+            _prefix = value;
+        }
 
             private function onCreation():void {
                 //defConsumer.subtopic = String(definition.dataFeedID);
                 //defConsumer.subscribe();
-                moduleInfo = ModuleManager.getModule("/app/easyui-debug/MyGoalsModule.swf");
+                moduleInfo = ModuleManager.getModule(_prefix + "/app/easyui-debug/MyGoalsModule.swf");
                 moduleInfo.addEventListener(ModuleEvent.READY, moduleLoadHandler);
                 moduleInfo.addEventListener(ModuleEvent.ERROR, moduleFailureHandler);
                 moduleInfo.load();
@@ -31,7 +38,7 @@
             	this.dataView = viewFactory.createDisplayObject();
             	coreVBox.addChild(dataView);
             }
-            
+
             private function moduleFailureHandler(event:ModuleEvent):void {
             	Alert.show(event.errorText);
             }
