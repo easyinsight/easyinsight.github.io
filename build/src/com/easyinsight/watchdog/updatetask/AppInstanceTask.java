@@ -34,6 +34,8 @@ import java.security.SignatureException;
  */
 public class AppInstanceTask extends Task {
 
+    private static final String APP_AMI = "ami-595dba30";
+
     private static final String HMAC_SHA1_ALGORITHM = "HmacSHA1";
     private static String hmacString = "Action{0}AWSAccessKeyId{1}SignatureVersion1Timestamp{2}Version2006-10-01";
     private static String queryString = "https://ec2.amazonaws.com?Action={0}&AWSAccessKeyId={1}&SignatureVersion=1&Timestamp={2}&" +
@@ -97,14 +99,19 @@ public class AppInstanceTask extends Task {
                         for (int j = 0; j < itemNode.getChildNodes().getLength(); j++) {
                             Node propertyNode = itemNode.getChildNodes().item(j);
                             if ("instancesSet".equals(propertyNode.getNodeName())) {
-                                Node infoNode = propertyNode.getChildNodes().item(1);
-                                String state = infoNode.getChildNodes().item(5).getChildNodes().item(3).getFirstChild().getNodeValue();
-                                if ("running".equals(state)) {
-                                    String amiID = infoNode.getChildNodes().item(3).getFirstChild().getNodeValue();
-                                    System.out.println(amiID);
-                                    if ("ami-27cc2b4e".equals(amiID)) {
-                                        String dns = infoNode.getChildNodes().item(7).getFirstChild().getNodeValue();
-                                        instances.add(dns);
+                                for(int k = 0;k < propertyNode.getChildNodes().getLength();k++) {
+                                    Node infoNode = propertyNode.getChildNodes().item(k);
+                                    if(infoNode.hasChildNodes()) {
+                                        String state = infoNode.getChildNodes().item(5).getChildNodes().item(3).getFirstChild().getNodeValue();
+                                        if ("running".equals(state)) {
+                                            String amiID = infoNode.getChildNodes().item(3).getFirstChild().getNodeValue();
+                                            System.out.println(amiID);
+                                            if (APP_AMI.equals(amiID)) {
+                                                String dns = infoNode.getChildNodes().item(7).getFirstChild().getNodeValue();
+                                                System.out.println(dns);
+                                                instances.add(dns);
+                                            }
+                                        }
                                     }
                                 }
                             }
