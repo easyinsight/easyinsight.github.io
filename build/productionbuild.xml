@@ -187,6 +187,9 @@
                 <fileset dir="../java/lib/excel">
                     <include name="*.jar"/>
                 </fileset>
+                <fileset dir="../java/lib/gnip">
+                    <include name="*.jar"/>
+                </fileset>
             </classpath>
             <include name="**"/>
         </javac>
