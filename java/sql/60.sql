@@ -1,6 +1,6 @@
-# alter table task_generator add requires_backfill tinyint(4);
+alter table task_generator add requires_backfill tinyint(4);
 
-# alter table account_activity add account_state integer;
+alter table account_activity add account_state integer;
 
 drop table if exists virtual_transform;
 create table virtual_transform (
