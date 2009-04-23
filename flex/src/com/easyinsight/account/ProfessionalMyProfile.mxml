@@ -27,7 +27,18 @@
         }
 
         private function editProfile():void {
+            var editor:UserProfileEditor = new UserProfileEditor();
+            editor.userNameText = userName;
+            editor.fullNameText = fullName;
+            editor.emailText = email;
+            editor.addEventListener(RefreshAccountEvent.REFRESH_ACCOUNT, onProfileEdit);
+            PopUpManager.addPopUp(editor, this, true);
+            PopUpManager.centerPopUp(editor);
+        }
 
+        private function onProfileEdit(event:RefreshAccountEvent):void {
+            event.currentTarget.removeEventListener(RefreshAccountEvent.REFRESH_ACCOUNT, onProfileEdit);
+            initProperties();
         }
 
         private function editPassword():void {

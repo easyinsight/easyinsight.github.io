@@ -53,6 +53,7 @@
         }
 
         private function onRefresh(event:RefreshAccountEvent):void {
+            event.currentTarget.removeEventListener(RefreshAccountEvent.REFRESH_ACCOUNT, onRefresh);
             dispatchEvent(event);
         }
         ]]></mx:Script>

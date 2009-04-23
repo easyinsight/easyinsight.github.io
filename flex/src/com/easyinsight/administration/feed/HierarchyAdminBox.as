@@ -14,11 +14,14 @@ import mx.controls.TextInput;
 import mx.controls.List;
 import com.easyinsight.analysis.AnalysisHierarchyItem;
 import mx.containers.VBox;
+import mx.validators.StringValidator;
+
 public class HierarchyAdminBox extends VBox {
     private var _analysisHierarchyItem:AnalysisHierarchyItem;
     private var nameInput:TextInput;
     private var _levels:ArrayCollection;
     public var list:List;
+    private var validators:Array;
     
     public function HierarchyAdminBox() {
         nameInput = new TextInput();
@@ -44,6 +47,11 @@ public class HierarchyAdminBox extends VBox {
         addChild(hBox);
         setStyle("horizontalAlign", "center");
         this.percentWidth = 100;
+        var validator:StringValidator = new StringValidator();
+        validator.source = nameInput;
+        validator.property = "text";
+        validator.minLength = 3;
+        validators = [ validator ];
     }
 
     private function onNameChange(event:Event):void {

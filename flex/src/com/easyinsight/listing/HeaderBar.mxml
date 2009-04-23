@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <mx:HBox xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:local="*" xmlns:listing="com.easyinsight.listing.*"
-         width="100%" borderStyle="none" xmlns:easyinsight="com.easyinsight.*" horizontalGap="25" verticalAlign="middle" backgroundColor="0xF0F0F0">
+         width="100%" borderStyle="none" xmlns:easyinsight="com.easyinsight.*" horizontalGap="25" verticalAlign="middle" backgroundColor="0xF0F0F0"
+        creationComplete="setup()">
     <mx:Metadata>
         [Event(name="keywordSearch", type="com.easyinsight.listing.KeywordSearchEvent")]
         [Event(name="triggerAnalyze", type="com.easyinsight.listing.TriggerAnalyzeEvent")]
@@ -10,6 +11,8 @@
     </mx:Metadata>
     <mx:Script>
 		<![CDATA[
+        import com.easyinsight.framework.LoginEvent;
+        import com.easyinsight.framework.User;
         import com.easyinsight.goals.MyGoals;
         import com.easyinsight.solutions.SolutionsSummary;
         import com.easyinsight.groups.GroupsSummary;
@@ -17,6 +20,15 @@
         import com.easyinsight.customupload.api.APIPage;
         import com.easyinsight.genredata.GenreDataProvider;
         import com.easyinsight.intro.IntroPanel;
+
+        private function setup():void {
+            User.getEventNotifier().addEventListener(LoginEvent.LOGIN, loginEvent);
+            User.getEventNotifier().addEventListener(LoginEvent.LOGOUT, loginEvent);
+        }
+
+        private function loginEvent(event:LoginEvent):void {
+            loggedIn = event.type == LoginEvent.LOGIN;
+        }
 
         [Bindable]
         [Embed(source="../../../../assets/find.png")]
@@ -61,6 +73,8 @@
         [Bindable]
         [Embed(source="../../../../assets/logo2.PNG")]
         private var logo:Class;
+
+        private var loggedIn:Boolean = false;
 
         private function onListingChange(event:ListingChangeEvent):void {
             dispatchEvent(event);
@@ -120,7 +134,7 @@
     </listing:ListingOption>
 
     <mx:Spacer width="100%"/>
-    <mx:Button icon="{findIcon}" click="dispatchEvent(new LaunchQuickSearchEvent())" toolTip="Search (Ctrl+N)"/>
+    <mx:Button icon="{findIcon}" click="dispatchEvent(new LaunchQuickSearchEvent())" toolTip="Search (Ctrl+N)" visible="{loggedIn}"/>
         
     <easyinsight:LoginStatusDisplay id="loginStatusDisplay" horizontalAlign="right"/>
 

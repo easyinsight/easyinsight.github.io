@@ -2,7 +2,6 @@
 <mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" creationComplete="initHandlers()">
 	<mx:Script>
 		<![CDATA[
-			import mx.events.ItemClickEvent;
 			import mx.managers.PopUpManager;
 			import com.easyinsight.customupload.UploadPolicy;
 			import mx.collections.ArrayCollection;

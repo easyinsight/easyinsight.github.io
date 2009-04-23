@@ -53,7 +53,6 @@ import com.easyinsight.analysis.HierarchyDrilldownEvent;
         import mx.validators.Validator;
 
         import com.easyinsight.analysis.AnalysisItemWrapper;
-        import com.easyinsight.administration.feed.FeedPolicy;
         import com.easyinsight.administration.feed.FeedDefinitionData;
         import com.easyinsight.analysis.AnalysisCloseEvent;
         import com.easyinsight.analysis.PNGCreator;
@@ -163,8 +162,6 @@ import com.easyinsight.analysis.HierarchyDrilldownEvent;
         private var canAddFeedToGroup:Boolean;
 
         private var analysisValidators:Array;
-
-        private var feedPolicy:FeedPolicy;
 
         [Bindable]
         private var marketplaceVisible:Boolean;

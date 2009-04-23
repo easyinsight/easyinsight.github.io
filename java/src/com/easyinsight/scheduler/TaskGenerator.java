@@ -33,18 +33,26 @@ public abstract class TaskGenerator {
         Date initDate = findStartTaskDate();
         if (isRequiresBackfill()) {
             for (long startTime = initDate.getTime() + taskInterval; startTime < now.getTime(); startTime += taskInterval) {
-                tasks.add(createTask(startTime));
+                tasks.add(defineTask(startTime));
             }
         } else {
             long startTime;
             for (startTime = initDate.getTime() + taskInterval; startTime < now.getTime(); startTime += taskInterval) {
             }
-            tasks.add(createTask(startTime));
+            tasks.add(defineTask(startTime));
         }
         return tasks;
     }
 
-    protected abstract ScheduledTask createTask(long time);
+    private ScheduledTask defineTask(long time) {
+        ScheduledTask task = createTask();
+        task.setStatus(ScheduledTask.SCHEDULED);
+        task.setExecutionDate(new Date(time));
+        task.setTaskGeneratorID(getTaskGeneratorID());
+        return task;
+    }
+
+    protected abstract ScheduledTask createTask();
 
     public boolean isRequiresBackfill() {
         return requiresBackfill;

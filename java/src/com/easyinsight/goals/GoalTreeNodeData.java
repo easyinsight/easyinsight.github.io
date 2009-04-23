@@ -33,15 +33,11 @@ public class GoalTreeNodeData extends GoalTreeNode {
     }
 
     public void populateCurrentValue() {
-        GoalValue goalValue = new GoalEvaluationStorage().evaluateGoalTreeNode(this, new Date());
-        if (goalValue == null) {
-            try {
-                goalValue = new GoalEvaluationStorage().getLatestGoalValue(this);
-            } catch (SQLException e) {
-                LogClass.error(e);
-            }
+        try {
+            this.currentValue = new GoalEvaluationStorage().getLatestGoalValue(this);
+        } catch (SQLException e) {
+            LogClass.error(e);
         }
-        this.currentValue = goalValue;
     }
 
     public void determineOutcome(Date startDate, Date endDate, GoalEvaluationStorage goalEvaluationStorage) {

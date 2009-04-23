@@ -1,8 +1,7 @@
 <?xml version="1.0" ?>
 <mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" creationComplete="setup()" doubleClickEnabled="true">
     <mx:Script><![CDATA[
-        import com.easyinsight.genredata.AnalyzeEvent;
-import mx.collections.ArrayCollection;
+        import mx.collections.ArrayCollection;
         import mx.events.ListEvent;
 
         [Bindable]

@@ -1,20 +1,31 @@
 <?xml version="1.0" encoding="utf-8"?>
 <mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" title="Save Insight" 
-	creationComplete="addEventListener(KeyboardEvent.KEY_UP, keyHit); focusManager.setFocus(analysisName)">
+	creationComplete="addEventListener(KeyboardEvent.KEY_UP, keyHit); focusManager.setFocus(analysisName);
+	validators = [nameValidator]">
 	<mx:Script>
 		<![CDATA[
                     import com.easyinsight.analysis.SavedAnalysisEvent;
+                    import com.easyinsight.util.ProgressAlert;
+
                     import mx.managers.PopUpManager;
                     import com.easyinsight.analysis.AnalysisDefinition;
+
+                    import mx.validators.Validator;
 
                     [Bindable]
                     public var analysisDefinition:AnalysisDefinition;
 
+                    private var validators:Array;
+
                     private function save():void {
-                        analysisDefinition.name = analysisName.text;
-                        analysisService.saveAnalysisDefinition(analysisDefinition);
-                        dispatchEvent(new SavedAnalysisEvent(analysisName.text));
-                        PopUpManager.removePopUp(this);
+                        var results:Array = Validator.validateAll(validators);
+                        if (results.length == 0) {
+                            analysisDefinition.name = analysisName.text;
+                            ProgressAlert.alert(this, "Saving report...", null, analysisService.saveAnalysisDefinition);
+                            analysisService.saveAnalysisDefinition(analysisDefinition);
+                            dispatchEvent(new SavedAnalysisEvent(analysisName.text));
+                            PopUpManager.removePopUp(this);
+                        }
                     }
                     
                     private function keyHit(event:KeyboardEvent):void {
@@ -35,7 +46,7 @@
 	</mx:Script>
 	<mx:VBox styleName="TitleWindowContents" width="100%" height="100%">			
 		<mx:Form>
-			<mx:FormItem label="Insight Name:" direction="horizontal">
+			<mx:FormItem label="Report Name:" direction="horizontal">
 				<mx:TextInput id="analysisName"/>				
 			</mx:FormItem>
 			<mx:FormItem label="" direction="horizontal">
@@ -44,7 +55,7 @@
 			</mx:FormItem>		
 		</mx:Form>		
 	</mx:VBox>
-	<mx:StringValidator source="{analysisName}" property="text" minLength="3"/> 
+	<mx:StringValidator source="{analysisName}" property="text" minLength="3" id="nameValidator"/>
 	<mx:RemoteObject id="analysisService" destination="analysisDefinition">
 		<mx:method name="saveAnalysisDefinition" result="saved()"/>
 	</mx:RemoteObject>

@@ -1,17 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%"
 	initialize="initHandlers()" backgroundAlpha=".95" backgroundColor="#FFFFFF">
-	<mx:states>
-		<mx:State name="security">
-			
-		</mx:State>
-	</mx:states>
 	<mx:Script>
 		<![CDATA[
         import com.easyinsight.framework.User;
-import mx.events.ItemClickEvent;
 
-        import com.easyinsight.framework.UserTransferObject;
+        import com.easyinsight.util.ProgressAlert;
 
         import mx.managers.PopUpManager;
         import mx.validators.Validator;
@@ -50,19 +44,11 @@ import mx.events.ItemClickEvent;
         private function save():void {
             var results:Array = Validator.validateAll(validators);
             if (results.length > 0) {
-                var failureMessage:String = "There are one or more problems with the fields above.";
-                failureMessageLabel.text = failureMessage;
+                failureMessageLabel.text = "There are one or more problems with the fields above.";
             } else {
                 failureMessageLabel.text = "";
+                ProgressAlert.alert(this, "Updating your profile...", null, creationService.updateUserLabels);
                 creationService.updateUserLabels.send(userName.text, fullName.text, email.text);
-            }
-        }
-
-        private function onItemClick(event:ItemClickEvent):void {
-            if (event.label == "Profile") {
-                currentState = "";
-            } else if (event.label == "Security") {
-                currentState = "security";
             }
         }
 
@@ -75,20 +61,6 @@ import mx.events.ItemClickEvent;
 	</mx:Script>
 	
 	<mx:VBox width="100%" height="100%" styleName="TitleWindowContents">
-        <!--
-		<mx:HBox width="100%">
-            <mx:ToggleButtonBar itemClick="onItemClick(event)" visible="{_securityConfigurable}">
-                <mx:dataProvider>
-                    <mx:Array>
-                        <mx:String>Profile</mx:String>
-                        <mx:String>Security</mx:String>
-                    </mx:Array>
-                </mx:dataProvider>
-            </mx:ToggleButtonBar>
-			<mx:Button label="Profile" id="profileButton" click="currentState=''" styleName="blueButton"/>
-			<mx:Button label="Security" id="securityButton" click="currentState='security'"/>
-		</mx:HBox>
-				-->
 		<mx:Form>
 			<mx:FormItem label="User ID:" direction="horizontal" fontFamily="Tahoma" fontWeight="bold">
 				<mx:TextInput id="userName" text="{_userNameText}" fontFamily="Lucida Grande" fontWeight="normal"/>

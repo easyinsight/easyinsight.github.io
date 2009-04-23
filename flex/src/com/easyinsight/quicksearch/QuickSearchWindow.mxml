@@ -24,6 +24,10 @@ import mx.managers.PopUpManager;
         private var dataSourceIcon:Class;
 
         [Bindable]
+        [Embed(source="../../../../assets/branchx16.png")]
+        private var goalTreeIcon:Class;
+
+        [Bindable]
         private var factory:ClassFactory;
 
         private function setupListeners():void {
@@ -73,6 +77,8 @@ import mx.managers.PopUpManager;
                 descriptorMap[descriptor.name] = descriptor;
                 if (descriptor.getType() == EIDescriptor.DATA_SOURCE) {
                     descriptor.icon = dataSourceIcon;
+                } else if (descriptor.getType() == EIDescriptor.GOAL_TREE) {
+                    descriptor.icon = goalTreeIcon;
                 } else {
                     descriptor.icon = reportIcon;
                 }

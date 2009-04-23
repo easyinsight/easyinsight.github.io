@@ -27,12 +27,9 @@ public class DataSourceTaskGenerator extends TaskGenerator {
         this.dataSourceID = dataSourceID;
     }
 
-    protected ScheduledTask createTask(long time) {
+    protected ScheduledTask createTask() {
         DataSourceScheduledTask dataSourceScheduledTask = new DataSourceScheduledTask();
         dataSourceScheduledTask.setDataSourceID(dataSourceID);
-        dataSourceScheduledTask.setStatus(ScheduledTask.SCHEDULED);
-        dataSourceScheduledTask.setExecutionDate(new Date(time));
-        dataSourceScheduledTask.setTaskGeneratorID(getTaskGeneratorID());
         return dataSourceScheduledTask;
     }
 }
