@@ -124,20 +124,25 @@ public class AppWatchdog {
                 zin.closeEntry();
             }
             zin.close();
-            File file = new File("eiconfig.properties");
-            File target = new File("../webapps/app/WEB-INF/classes/eiconfig.properties");
-            target.delete();
-            FileReader reader = new FileReader(file);
-            FileWriter writer = new FileWriter(target);
-            int byteSymbol;
-            while ((byteSymbol = reader.read()) != -1) {
-                writer.write(byteSymbol);
-            }
-            writer.close();
-            reader.close();
+            copyFile("eiconfig.properties", "../webapps/app/WEB-INF/classes/eiconfig.properties");
+            copyFile("cache.ccf", "../webapps/app/WEB-INF/classes/cache.ccf");
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    private void copyFile(String fileName, String targetName) throws IOException {
+        File file = new File(fileName);
+        File target = new File(targetName);
+        target.delete();
+        FileReader reader = new FileReader(file);
+        FileWriter writer = new FileWriter(target);
+        int byteSymbol;
+        while ((byteSymbol = reader.read()) != -1) {
+            writer.write(byteSymbol);
+        }
+        writer.close();
+        reader.close();
     }
 
     public static void main(String[] args) throws IOException {
