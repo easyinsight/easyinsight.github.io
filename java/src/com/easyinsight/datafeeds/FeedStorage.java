@@ -207,21 +207,23 @@ public class FeedStorage {
             Session session = Database.instance().createSession(conn);
             try {
                 //session.getTransaction().begin();
-                for (VirtualDimension virtualDimension : virtualDimensions) {
-                    AnalysisDimension dim = virtualDimension.getDefaultTransform().getTransformDimension();
-                    if (dim.getAnalysisItemID() == 0) {
-                        for (AnalysisItem analysisItem : analysisItems) {
-                            if (analysisItem.getKey().equals(dim.getKey())) {
-                                virtualDimension.getDefaultTransform().setTransformDimension((AnalysisDimension) analysisItem);
+                if (virtualDimensions != null) {
+                    for (VirtualDimension virtualDimension : virtualDimensions) {
+                        AnalysisDimension dim = virtualDimension.getDefaultTransform().getTransformDimension();
+                        if (dim.getAnalysisItemID() == 0) {
+                            for (AnalysisItem analysisItem : analysisItems) {
+                                if (analysisItem.getKey().equals(dim.getKey())) {
+                                    virtualDimension.getDefaultTransform().setTransformDimension((AnalysisDimension) analysisItem);
+                                }
                             }
                         }
-                    }
-                    for (VirtualTransform transform : virtualDimension.getVirtualTransforms()) {
-                        AnalysisDimension transformDim = transform.getTransformDimension();
-                        if (transformDim.getAnalysisItemID() == 0) {
-                            for (AnalysisItem analysisItem : analysisItems) {
-                                if (analysisItem.getKey().equals(transformDim.getKey())) {
-                                    transform.setTransformDimension((AnalysisDimension) analysisItem);
+                        for (VirtualTransform transform : virtualDimension.getVirtualTransforms()) {
+                            AnalysisDimension transformDim = transform.getTransformDimension();
+                            if (transformDim.getAnalysisItemID() == 0) {
+                                for (AnalysisItem analysisItem : analysisItems) {
+                                    if (analysisItem.getKey().equals(transformDim.getKey())) {
+                                        transform.setTransformDimension((AnalysisDimension) analysisItem);
+                                    }
                                 }
                             }
                         }
@@ -243,9 +245,11 @@ public class FeedStorage {
                     }
                     //session.saveOrUpdate(analysisItem);
                 }
-                for (VirtualDimension remoteDimension : virtualDimensions) {
-                    remoteDimension.fromRemote();
-                    session.saveOrUpdate(remoteDimension);
+                if (virtualDimensions != null) {
+                    for (VirtualDimension remoteDimension : virtualDimensions) {
+                        remoteDimension.fromRemote();
+                        session.saveOrUpdate(remoteDimension);
+                    }
                 }
                 /*for (AnalysisItem analysisItem : analysisItems) {
                     analysisItem.resetIDs();

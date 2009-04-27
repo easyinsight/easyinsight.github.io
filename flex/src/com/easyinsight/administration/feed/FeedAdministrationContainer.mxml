@@ -263,7 +263,7 @@
 							<mx:Button label="Clear Data Source Data" click="clearFeedData()"/>
 						</mx:FormItem>
                         <mx:FormItem label="Refresh Interval (Hours):" visible="{showRefreshInterval}" direction="horizontal">
-                            <mx:NumericStepper id="refreshIntervalStepper" value="{refreshInterval}"/>                            
+                            <mx:NumericStepper id="refreshIntervalStepper" value="{refreshInterval}"/>
                         </mx:FormItem>
 					</mx:Form>
 				</mx:VBox>
