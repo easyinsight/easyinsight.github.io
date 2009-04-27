@@ -1,4 +1,10 @@
 <flex-config xmlns="http://www.adobe.com/2006/flex-config">
+    <licenses>
+        <license>
+            <product>flexbuilder3</product>
+            <serial-number>137740010947538714629349</serial-number>
+        </license>
+    </licenses>
     <compiler>
         <debug>true</debug>
         <external-library-path>
