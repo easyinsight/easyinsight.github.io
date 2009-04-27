@@ -202,3 +202,7 @@ body > #allPage {
 #centerPage p {
 	text-indent: 1.5em;
 }
+
+#centerPage ol {
+	list-style-type: decimal;
+}
