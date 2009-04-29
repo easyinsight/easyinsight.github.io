@@ -153,6 +153,7 @@
                     }
                     addGoalTreeAvailable = User.getInstance().getAccountType() >= Account.PROFESSIONAL;
                     goalService.getGoalTrees.send();
+                    myGoalsGrid.gotFocus();
                 }
             }
         }
@@ -243,8 +244,7 @@
                            label="Add Goal Tree" labelPlacement="bottom" visible="{addGoalTreeAvailable}"/>
                 <mx:Button toolTip="Manage Milestones..." click="manageMilestones()" id="milestonesButton" icon="{calendarIcon}"
                            label="Milestones" labelPlacement="bottom"/>
-
-                <mx:Button icon="@Embed('../../../../assets/helpx48.png')" label="Help..." labelPlacement="bottom"/>
+                <!--<mx:Button icon="@Embed('../../../../assets/helpx48.png')" label="Help..." labelPlacement="bottom"/>-->
             </mx:HBox>
             <mx:VDividedBox width="100%" height="100%" id="dataBoxes">
                 <mx:DataGrid dataProvider="{goalTrees}" width="100%" id="goalTreesBox"

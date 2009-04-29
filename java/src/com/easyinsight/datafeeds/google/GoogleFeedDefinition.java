@@ -1,9 +1,6 @@
 package com.easyinsight.datafeeds.google;
 
-import com.easyinsight.datafeeds.FeedDefinition;
-import com.easyinsight.datafeeds.FeedType;
-import com.easyinsight.datafeeds.Feed;
-import com.easyinsight.datafeeds.CredentialsDefinition;
+import com.easyinsight.datafeeds.*;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.users.Credentials;
 import com.easyinsight.users.Account;
@@ -28,12 +25,14 @@ import java.util.Date;
 import java.net.URL;
 import java.io.IOException;
 
+import org.jetbrains.annotations.NotNull;
+
 /**
  * User: James Boe
  * Date: May 14, 2008
  * Time: 2:28:56 PM
  */
-public class GoogleFeedDefinition extends FeedDefinition {
+public class GoogleFeedDefinition extends ServerDataSourceDefinition {
     private String worksheetURL;
 
     public String getWorksheetURL() {
@@ -70,6 +69,11 @@ public class GoogleFeedDefinition extends FeedDefinition {
         } finally {
             getAnalysisStmt.close();
         }
+    }
+
+    @NotNull
+    protected List<String> getKeys() {
+        throw new UnsupportedOperationException();
     }
 
     @Override
@@ -159,5 +163,9 @@ public class GoogleFeedDefinition extends FeedDefinition {
 
     public int getCredentialsDefinition() {
         return CredentialsDefinition.STANDARD_USERNAME_PW;
+    }
+
+    public String validateCredentials(Credentials credentials) {
+        return null;
     }
 }

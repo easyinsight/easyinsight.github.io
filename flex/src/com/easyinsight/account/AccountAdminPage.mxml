@@ -1,0 +1,15 @@
+<?xml version="1.0" ?>
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:account="com.easyinsight.account.*" width="100%" height="100%">
+    <mx:VBox width="100%" height="100%" horizontalAlign="center">
+        <mx:VBox id="accountSettingsBox" verticalGap="0" borderThickness="1" borderColor="#D42525" borderStyle="solid"
+                 dropShadowEnabled="true">
+            <mx:Box width="100%" height="5" backgroundColor="#D42525" left="0" right="0"/>
+            <account:AccountInfoDisplay/>
+            <mx:Form>
+                <mx:FormItem label="Account Space Used: " fontFamily="Tahoma" fontWeight="bold">
+                    <account:AvailableSpace/>
+                </mx:FormItem>
+            </mx:Form>
+        </mx:VBox>
+    </mx:VBox>
+</mx:VBox>

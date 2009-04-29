@@ -44,6 +44,7 @@ public abstract class ScheduledTask implements Runnable {
         EIConnection conn = Database.instance().getConnection();
         try {
             conn.setAutoCommit(false);
+            LogClass.info("Executing " + getClass().getName() + " with execution date = " + executionDate);
             execute(executionDate, conn);
             setStatus(COMPLETED);
         } catch (Exception e) {

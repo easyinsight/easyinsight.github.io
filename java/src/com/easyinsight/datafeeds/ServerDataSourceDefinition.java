@@ -86,7 +86,7 @@ public abstract class ServerDataSourceDefinition extends FeedDefinition {
     @NotNull
     protected abstract List<String> getKeys();
 
-    public final Map<String, Key> newDataSourceFields(Credentials credentials) {
+    public Map<String, Key> newDataSourceFields(Credentials credentials) {
         Map<String, Key> keyMap = new HashMap<String, Key>();
         if (getDataFeedID() == 0) {
             List<String> keys = getKeys();

@@ -51,7 +51,7 @@ public class GoalTest extends TestCase {
     }
 
     public void testGoalCreation() {
-        long userID = TestUtil.getIndividualTestUser();
+        long userID = TestUtil.getProUser();
         long dataSourceID = createDefaultTestDataSource(userID);
         GoalService goalService = new GoalService();
         GoalTree goalTree = new GoalTree();

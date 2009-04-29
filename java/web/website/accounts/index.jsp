@@ -1,4 +1,4 @@
-<%@ page import="com.easyinsight.users.UserService" %>
+<%@ page import="com.easyinsight.users.UserAccountAdminService" %>
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
         "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -35,7 +35,7 @@
     <div id="centerPage">
         <%
             String activationID = request.getParameter("activation");
-            boolean result = new UserService().activateAccount(activationID);
+            boolean result = new UserAccountAdminService().activateAccount(activationID);
             if (result) {
                 out.println("Your account is now active!");
             } else {

@@ -315,7 +315,7 @@
 				label="Combine Sources" labelPlacement="bottom"/>
 			<mx:Button toolTip="Create empty data source..." click="createEmptyFeed()" id="emptyFeedButton" icon="{addIcon}"
 				label="New Empty Source" labelPlacement="bottom"/>
-            <mx:Button icon="{helpIcon}" label="Help..." labelPlacement="bottom" click="help()"/>
+            <!--<mx:Button icon="{helpIcon}" label="Help..." labelPlacement="bottom" click="help()"/>-->
 			<customupload:SpaceUsage id="spaceUsage" descriptors="{displayTreeData}"/>
             <mx:Spacer width="100%"/>
             <mx:HBox borderStyle="inset" borderThickness="1" paddingTop="5" paddingBottom="5" paddingLeft="5" paddingRight="5">

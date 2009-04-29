@@ -103,6 +103,11 @@
         <mapping class="com.easyinsight.scheduler.DataSourceTaskGenerator"/>
         <mapping class="com.easyinsight.scheduler.ScheduledTask"/>
         <mapping class="com.easyinsight.scheduler.DataSourceScheduledTask"/>
+        <mapping class="com.easyinsight.users.AccountTimeTask"/>
+        <mapping class="com.easyinsight.users.AccountTimeScheduler"/>
+        <mapping class="com.easyinsight.users.AccountBillingTask"/>
+        <mapping class="com.easyinsight.database.VolumeSnapshotTask"/>
+        <mapping class="com.easyinsight.database.DatabaseVolumeScheduler"/>
 
         <mapping class="com.easyinsight.core.PersistableValue"/>
         <mapping class="com.easyinsight.core.PersistableStringValue"/>

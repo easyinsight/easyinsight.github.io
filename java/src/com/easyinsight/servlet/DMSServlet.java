@@ -1,6 +1,7 @@
 package com.easyinsight.servlet;
 
 import com.easyinsight.database.Database;
+import com.easyinsight.database.migration.Migrations;
 import com.easyinsight.datafeeds.FeedRegistry;
 import com.easyinsight.api.APIManager;
 import com.easyinsight.security.SecurityUtil;
@@ -30,6 +31,8 @@ public class DMSServlet extends HttpServlet {
             if (Database.instance() == null) {
                 SecurityUtil.setSecurityProvider(new DefaultSecurityProvider());
                 Database.initialize();
+                //new Migrations().migrate();
+                // create schedulers...
                 DatabaseManager.instance();
                 FeedRegistry.initialize();
                 new APIManager().start();

@@ -37,9 +37,13 @@ public abstract class TaskGenerator {
             }
         } else {
             long startTime;
+            int i = 0;
             for (startTime = initDate.getTime() + taskInterval; startTime < now.getTime(); startTime += taskInterval) {
+                i++;
             }
-            tasks.add(defineTask(startTime));
+            if (i > 0) {
+                tasks.add(defineTask(startTime));
+            }
         }
         return tasks;
     }

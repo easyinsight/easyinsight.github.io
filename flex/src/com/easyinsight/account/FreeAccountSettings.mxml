@@ -76,6 +76,7 @@
                     <mx:Button label="Cancel Account..."/>
                 </mx:FormItem>
             </mx:Form>
+            <account:AccountInfoDisplay/>
         </mx:VBox>
         <mx:Spacer width="40"/>
         <mx:VBox id="userProfileBox" verticalGap="0" borderThickness="1" borderColor="#D42525" borderStyle="solid"

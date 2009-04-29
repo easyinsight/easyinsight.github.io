@@ -64,7 +64,7 @@
             System.setClipboard(apiSecretKey);
         }
         ]]></mx:Script>
-    <mx:RemoteObject destination="login" id="userService">
+    <mx:RemoteObject destination="accountAdmin" id="userService">
         <mx:method name="getAccountAPISettings" result="gotSettings()"/>
         <mx:method name="saveAccountAPISettings"/>
     </mx:RemoteObject>

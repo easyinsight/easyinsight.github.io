@@ -6,15 +6,9 @@
         import com.easyinsight.framework.User;
         import mx.collections.ArrayCollection;
         import mx.events.ItemClickEvent;
-        import com.easyinsight.account.license.LicenseAdministration;
-        import mx.managers.PopUpManager;
         private var _account:Account;
         [Bindable]
-        private var accountTypeLabel:String;
-        [Bindable]
         private var accountName:String;
-        [Bindable]
-        private var dataSources:ArrayCollection;
         [Bindable]
         private var showToggle:Boolean = false;
         [Bindable]
@@ -23,19 +17,7 @@
         public function set account(account:Account):void {
             this._account = account;
             if (account == null) {
-                accountTypeLabel = "";
             } else {
-                switch (account.accountType) {
-                    case Account.FREE:
-                        accountTypeLabel = "Free";
-                        break;
-                    case Account.INDIVIDUAL:
-                        accountTypeLabel = "Individual";
-                        break;
-                    case Account.PROFESSIONAL:
-                        accountTypeLabel = "Commercial";
-                        break;
-                }
                 this.accountName = User.getInstance().userName;
             }
         }
@@ -51,14 +33,14 @@
                 toggleOptions = new ArrayCollection([ new AccountOption("Account Settings", new IndividualAccountSettings()),
                     new AccountOption("API Settings", new IndividualAPIAdmin())]);
             } else {
-                if (User.getInstance().accountAdmin) {
+                if (User.getInstance() != null && User.getInstance().accountAdmin) {
                     // user profile
                     // space allocation, user licensing?, ssl configuration, ip range configuration
                     // core user administration...add user, remove user, change user privileges
-                    toggleOptions = new ArrayCollection([ new AccountOption("My Profile", new ProfessionalMyProfile()),
+                    toggleOptions = new ArrayCollection([ new AccountOption("Account Administration", new AccountAdminPage()),
+                        new AccountOption("User Administration", new UserAdministration()),                            
+                        new AccountOption("My Profile", new ProfessionalMyProfile()),
                             new AccountOption("My API Settings", new APIUserAdmin()),
-                        //new AccountOption("Account Administration", new UserAccountAdministration()),
-                        new AccountOption("User Administration", new UserAdministration()),
                         new AccountOption("API Administration", new APIAccountAdmin())]);
                     showToggle = true;
                 } else {
@@ -67,11 +49,6 @@
                 }
             }
             coreBox.addChild(toggleOptions.getItemAt(0).container);
-        }
-
-        private function licenseAdmin():void {
-            var licenseAdmin:LicenseAdministration = LicenseAdministration(PopUpManager.createPopUp(this, LicenseAdministration, true));
-            PopUpManager.centerPopUp(licenseAdmin);
         }
 
         private function choseButton(event:ItemClickEvent):void {

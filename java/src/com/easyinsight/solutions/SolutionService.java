@@ -57,7 +57,7 @@ public class SolutionService {
         }
     }
 
-    public void addSolution(Solution solution, List<Integer> feedIDs) {
+    public long addSolution(Solution solution, List<Integer> feedIDs) {
         long userID = SecurityUtil.getUserID();
         EIConnection conn = Database.instance().getConnection();
         try {
@@ -89,6 +89,7 @@ public class SolutionService {
                 addFeedStmt.execute();
             }
             conn.commit();
+            return solutionID;
         } catch (Exception e) {
             LogClass.error(e);
             conn.rollback();
@@ -374,8 +375,7 @@ public class SolutionService {
         FeedDefinition clonedFeedDefinition = feedDefinition.clone();
         clonedFeedDefinition.setUploadPolicy(new UploadPolicy(userID));
         feedStorage.addFeedDefinitionData(clonedFeedDefinition, conn);
-        AnalysisDefinition rootInsight = analysisStorage.getPersistableReport(feedDefinition.getAnalysisDefinitionID(), conn);
-        AnalysisDefinition clonedRootInsight = rootInsight.clone();
+        AnalysisDefinition clonedRootInsight = analysisStorage.cloneReport(feedDefinition.getAnalysisDefinitionID(), conn);
         clonedRootInsight.setUserBindings(Arrays.asList(new UserToAnalysisBinding(userID, UserPermission.OWNER)));
         analysisStorage.saveAnalysis(clonedRootInsight, conn);
         clonedFeedDefinition.setAnalysisDefinitionID(clonedRootInsight.getAnalysisID());

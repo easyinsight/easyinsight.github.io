@@ -44,10 +44,6 @@
         private var archiveIcon:Class;
 
         [Bindable]
-        [Embed(source="../../../../assets/help.png")]
-        public var helpIcon:Class;
-
-        [Bindable]
         private var availableSolutions:ArrayCollection;
 
         [Bindable]

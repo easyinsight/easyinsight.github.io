@@ -273,10 +273,12 @@ public class FeedStorage {
             insertLinkStmt.close();
             PreparedStatement virtualLinkStmt = conn.prepareStatement("INSERT INTO DATA_SOURCE_TO_VIRTUAL_DIMENSION (DATA_SOURCE_ID, VIRTUAL_DIMENSION_ID) " +
                     "VALUES (?, ?)");
-            for (VirtualDimension virtualDimension : virtualDimensions) {
-                virtualLinkStmt.setLong(1, feedID);
-                virtualLinkStmt.setLong(2, virtualDimension.getVirtualDimensionID());
-                virtualLinkStmt.execute();
+            if (virtualDimensions != null) {
+                for (VirtualDimension virtualDimension : virtualDimensions) {
+                    virtualLinkStmt.setLong(1, feedID);
+                    virtualLinkStmt.setLong(2, virtualDimension.getVirtualDimensionID());
+                    virtualLinkStmt.execute();
+                }
             }
             virtualLinkStmt.close();
         }

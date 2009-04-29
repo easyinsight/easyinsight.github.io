@@ -18,6 +18,7 @@ import nu.xom.*;
 import com.easyinsight.datafeeds.ServerDataSourceDefinition;
 import com.easyinsight.datafeeds.FeedType;
 import com.easyinsight.datafeeds.CredentialsDefinition;
+import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.core.Key;
 import com.easyinsight.core.NumericValue;
@@ -294,6 +295,13 @@ public class BaseCampDataSource extends ServerDataSourceDefinition {
 
     public void setUrl(String url) {
         this.url = url;
+    }
+
+    @Override
+    public FeedDefinition clone() throws CloneNotSupportedException {
+        BaseCampDataSource dataSource = (BaseCampDataSource) super.clone();
+        dataSource.setUrl("");
+        return dataSource;
     }
 
     private class BaseCampLoginException extends Exception {

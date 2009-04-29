@@ -24,6 +24,8 @@ import com.easyinsight.config.ConfigLoader;
  */
 public class Database {
 
+    public static final int CURRENT_VERSION = 61;
+
     private DataSource dataSource;
     private SessionFactory sessionFactory;
     private static Database instance;

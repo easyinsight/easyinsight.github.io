@@ -51,14 +51,6 @@
             gotFocus();
         }
 
-        public function search(keyword:String = null):void {
-
-        }
-
-        private function searchKeyUp(event:KeyboardEvent):void {
-
-        }
-
         public function gotFocus():void {
             var fragmentObject:Object = new Object();
             fragmentObject.page = "groups";
@@ -125,7 +117,7 @@
                            click="createNewGroup()" labelPlacement="bottom" visible="{individualOrHigherAccount}"/>
                 <mx:Button icon="@Embed('../../../../assets/earth_new.png')" label="Join a Public Group..."
                            click="joinPublicGroup()" labelPlacement="bottom"/>
-                <mx:Button icon="@Embed('../../../../assets/helpx48.png')" label="Help..." labelPlacement="bottom"/>
+                <!--<mx:Button icon="@Embed('../../../../assets/helpx48.png')" label="Help..." labelPlacement="bottom"/>-->
             </mx:HBox>
             <mx:VBox width="100%" id="bodyBox">
                 <mx:HBox width="100%">

@@ -1,6 +1,8 @@
 <?xml version="1.0" ?>
 <mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" creationComplete="setup()" doubleClickEnabled="true">
     <mx:Script><![CDATA[
+        import com.easyinsight.framework.User;
+
         import mx.collections.ArrayCollection;
         import mx.events.ListEvent;
 
@@ -12,15 +14,20 @@
 
         private var timer:Timer;
 
-        private function setup():void {
+        public function gotFocus():void {
             goalService.getGoals.send();
+        }
+
+        private function setup():void {
             timer = new Timer(300000);
             timer.addEventListener(TimerEvent.TIMER, onTimer);
             timer.start();
         }
 
         private function onTimer(event:TimerEvent):void {
-            this.goals = goalService.getGoals.lastResult as ArrayCollection;
+            if (User.getInstance() != null) {
+                this.goals = goalService.getGoals.lastResult as ArrayCollection;
+            }
         }
 
         private function gotGoals():void {

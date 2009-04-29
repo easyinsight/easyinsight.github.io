@@ -24,7 +24,7 @@
             userService.getAccounts.send();
         }
 ]]></mx:Script>
-    <mx:RemoteObject destination="login" id="userService">
+    <mx:RemoteObject destination="eiAdmin" id="userService">
         <mx:method name="getAccounts" result="gotAccounts()"/>
     </mx:RemoteObject>
     <mx:Button label="New Account" click="newAccount()"/>

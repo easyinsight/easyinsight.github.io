@@ -8,9 +8,10 @@ package com.easyinsight.account
 	{
         public static const FREE:int = 1;
         public static const INDIVIDUAL:int = 2;
-        public static const PROFESSIONAL:int = 3;
-        public static const ENTERPRISE:int = 4;
-        public static const ADMINISTRATOR:int = 5;
+        public static const GROUP:int = 3;
+        public static const PROFESSIONAL:int = 4;
+        public static const ENTERPRISE:int = 5;
+        public static const ADMINISTRATOR:int = 6;
 
         public static const INACTIVE:int = 1;
         public static const ACTIVE:int = 2;
@@ -20,6 +21,7 @@ package com.easyinsight.account
         public static const PENDING_BILLING:int = 6;
         public static const PREPARING:int = 7;
         public static const BETA:int = 8;
+        public static const TRIAL:int = 9;
 
 		public var accountType:int;
 		public var accountID:int;

@@ -81,7 +81,7 @@ import mx.managers.PopUpManager;
             currentState = "BillingInfo";
         }
         ]]></mx:Script>
-    <mx:RemoteObject id="userService" destination="login">
+    <mx:RemoteObject id="userService" destination="accountAdmin">
         <mx:method name="upgradeAccount" result="upgradedAccount()"/>
     </mx:RemoteObject>
     <mx:VBox id="coreContent">

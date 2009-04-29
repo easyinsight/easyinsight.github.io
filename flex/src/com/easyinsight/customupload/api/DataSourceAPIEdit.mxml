@@ -1,6 +1,6 @@
 <?xml version="1.0" ?>
 <mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:api="com.easyinsight.customupload.api.*">
-    <mx:states>
+    <!--<mx:states>
         <mx:State name="dynamicService">
             <mx:RemoveChild target="{noDynamicServiceLabel}"/>
             <mx:RemoveChild target="{defineDynamicServiceButton}"/>
@@ -8,7 +8,7 @@
                 <api:DynamicServiceEditWindow feedID="{feedID}" dynamicServiceDefinition="{dynamicServiceDefinition}"/>
             </mx:AddChild>
         </mx:State>
-    </mx:states>
+    </mx:states>--> 
     <mx:Script><![CDATA[
         import mx.managers.PopUpManager;
         import com.easyinsight.util.ProgressAlert;
@@ -73,7 +73,7 @@
             uncheckedAPIEnabled = _dataSourceAPIDescriptor.uncheckedEnabled;
             validatedAPIEnabled = _dataSourceAPIDescriptor.validatedEnabled;
             if (dynamicServiceDefinition != null) {
-                currentState = "dynamicService";
+                //currentState = "dynamicService";
             }
         }
 
@@ -138,13 +138,13 @@
                         <mx:Button icon="{helpIcon}"/>
                     </mx:HBox>
                 </mx:GridItem>
-                <mx:GridItem>
+                <!--<mx:GridItem>
                     <mx:HBox width="100%">
                         <mx:VRule height="24"/>
                         <mx:Label text="WS-Security" fontFamily="Tahoma" fontWeight="bold"/>
                         <mx:Button icon="{helpIcon}"/>
                     </mx:HBox>
-                </mx:GridItem>
+                </mx:GridItem>-->
             </mx:GridRow>
             <mx:GridRow borderThickness="1">
                 <mx:GridItem>
@@ -157,12 +157,12 @@
                         <mx:LinkButton textDecoration="underline" label="View WSDL" fontFamily="Lucida Grande" fontWeight="normal" click="viewUncheckedBasicWSDL()"/>
                     </mx:HBox>
                 </mx:GridItem>
-                <mx:GridItem>
+                <!--<mx:GridItem>
                     <mx:HBox width="100%" visible="{uncheckedAPIEnabled}">
                         <mx:VRule height="24"/>
                         <mx:LinkButton textDecoration="underline" label="View WSDL" fontFamily="Lucida Grande" fontWeight="normal" click="viewUncheckedWSSWSDL()"/>
                     </mx:HBox>
-                </mx:GridItem>
+                </mx:GridItem>-->
             </mx:GridRow>
             <mx:GridRow borderThickness="1">
                 <mx:GridItem>
@@ -175,21 +175,21 @@
                         <mx:LinkButton textDecoration="underline" label="View WSDL" fontFamily="Lucida Grande" fontWeight="normal" click="viewValidatedBasicWSDL()"/>
                     </mx:HBox>
                 </mx:GridItem>
-                <mx:GridItem>
+                <!--<mx:GridItem>
                     <mx:HBox width="100%" visible="{validatedAPIEnabled}">
                         <mx:VRule height="24"/>
                         <mx:LinkButton textDecoration="underline" label="View WSDL" fontFamily="Lucida Grande" fontWeight="normal" click="viewValidatedWSSWSDL()"/>
                     </mx:HBox>
-                </mx:GridItem>
+                </mx:GridItem>-->
             </mx:GridRow>
         </mx:Grid>
         <mx:Spacer height="20"/>
-        <mx:HBox width="100%" id="dynamicServiceItem">
+        <!--<mx:HBox width="100%" id="dynamicServiceItem">
             <mx:Label text="There is no dynamic API currently defined for this data source."
                       id="noDynamicServiceLabel"/>
             <mx:Button label="Define dynamic API" id="defineDynamicServiceButton" click="defineDynamicService()"/>
         </mx:HBox>
-        <mx:Spacer height="20"/>
+        <mx:Spacer height="20"/>-->
         <mx:HBox width="100%" horizontalAlign="center">
             <mx:Button label="Save" click="save()"/>
             <mx:Button label="Cancel" click="cancel()"/>

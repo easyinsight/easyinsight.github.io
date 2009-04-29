@@ -23,6 +23,33 @@ public class AccountActivity {
     private int userLicenses;
     private int activityID;
     private String activityNotes;
+    private long maxSize;
+    private int maxUsers;
+    private int accountState;
+
+    public long getMaxSize() {
+        return maxSize;
+    }
+
+    public void setMaxSize(long maxSize) {
+        this.maxSize = maxSize;
+    }
+
+    public int getMaxUsers() {
+        return maxUsers;
+    }
+
+    public void setMaxUsers(int maxUsers) {
+        this.maxUsers = maxUsers;
+    }
+
+    public int getAccountState() {
+        return accountState;
+    }
+
+    public void setAccountState(int accountState) {
+        this.accountState = accountState;
+    }
 
     public int getAccountType() {
         return accountType;
@@ -76,12 +103,15 @@ public class AccountActivity {
 
     }
 
-    public AccountActivity(int accountType, Date timestamp, long accountID, int userLicenses, int activityID, String activityNotes) {
+    public AccountActivity(int accountType, Date timestamp, long accountID, int userLicenses, int activityID, String activityNotes, long maxSize, int maxUsers, int accountState) {
         this.accountType = accountType;
         this.timestamp = timestamp;
         this.accountID = accountID;
         this.userLicenses = userLicenses;
         this.activityID = activityID;
         this.activityNotes = activityNotes;
+        this.maxSize = maxSize;
+        this.maxUsers = maxUsers;
+        this.accountState = accountState;
     }
 }

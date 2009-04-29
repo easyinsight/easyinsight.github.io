@@ -289,7 +289,7 @@ public class AnalysisDefinition implements Cloneable {
         for (AnalysisItem analysisItem : addedItems) {
             addedItems.add(analysisItem.clone());
         }
-        Map<String, AnalysisItem> clonedStructure = new HashMap<String, AnalysisItem>();
+        Map<String, AnalysisItem> clonedStructure = new HashMap<String, AnalysisItem>(getReportStructure());
         for (Map.Entry<String, AnalysisItem> entry : clonedStructure.entrySet()) {
             clonedStructure.put(entry.getKey(), entry.getValue().clone());
         }

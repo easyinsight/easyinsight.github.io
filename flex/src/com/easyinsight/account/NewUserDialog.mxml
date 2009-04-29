@@ -114,7 +114,7 @@
 	<mx:StringValidator source="{userNameInput}" property="text" id="userNameValidator" minLength="3" maxLength="20"/>
 	<mx:StringValidator source="{fullNameInput}" property="text" id="fullNameValidator" minLength="3" maxLength="40"/>
 	<mx:EmailValidator source="{emailInput}" property="text" id="emailValidator"/>
-	<mx:RemoteObject id="creationService" destination="login">
+	<mx:RemoteObject id="creationService" destination="accountAdmin">
 		<mx:method name="addUserToAccount" result="created()"/>		
 		<mx:method name="updateUser" result="updated()"/>
 	</mx:RemoteObject>

@@ -376,6 +376,9 @@ public class FeedService implements IDataFeedService {
             if (baseDefinition != null) {
                 new AnalysisStorage().saveAnalysis(AnalysisDefinitionFactory.fromWSDefinition(baseDefinition), conn);
             }
+            if (tagString == null) {
+                tagString = "";
+            }
             String[] tags = tagString.split(" ");
             List<Tag> tagList = new ArrayList<Tag>();
             for (String tagName : tags) {

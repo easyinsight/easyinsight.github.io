@@ -6,10 +6,13 @@ import com.easyinsight.users.*;
 import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.userupload.UserUploadService;
 import com.easyinsight.userupload.UploadResponse;
+import com.easyinsight.database.Database;
 
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Arrays;
+
+import org.hibernate.Session;
 
 /**
  * User: James Boe
@@ -42,7 +45,14 @@ public class TestUtil {
             UserTransferObject initialUser = new UserTransferObject("testuser", 0, "James Boe", "testuser99@gmail.com", null);
             AccountTransferObject account = new AccountTransferObject();
             account.setAccountType(Account.INDIVIDUAL);
-            userService.createAccount(initialUser, account, "password");
+            long accountID = userService.createAccount(initialUser, account, "password");
+            Session session = Database.instance().createSession();
+            session.beginTransaction();
+            Account accountObj = (Account) session.createQuery("from Account where accountID = ?").setLong(0, accountID).list().get(0);
+            accountObj.setMaxSize(50000000000L);
+            session.update(accountObj);
+            session.getTransaction().commit();
+            session.close();
             userID = userService.getUserStub("testuser").getUserID();
         } else {
             userID = user.getUserID();
@@ -50,6 +60,58 @@ public class TestUtil {
         TestSecurityProvider testSecurityProvider = new TestSecurityProvider();
         testSecurityProvider.setUserPrincipal(userID);
         SecurityUtil.setSecurityProvider(testSecurityProvider);        
+        return userID;
+    }
+
+    public static long getProUser() {
+        UserService userService = new UserService();
+        User user = new InternalUserService().retrieveUser("prouser");
+        long userID;
+        if (user == null) {
+            UserTransferObject initialUser = new UserTransferObject("prouser", 0, "James Boe", "prouser@gmail.com", null);
+            AccountTransferObject account = new AccountTransferObject();
+            account.setAccountType(Account.PROFESSIONAL);
+            long accountID = userService.createAccount(initialUser, account, "password");
+            Session session = Database.instance().createSession();
+            session.beginTransaction();
+            Account accountObj = (Account) session.createQuery("from Account where accountID = ?").setLong(0, accountID).list().get(0);
+            accountObj.setMaxSize(50000000000L);
+            session.update(accountObj);
+            session.getTransaction().commit();
+            session.close();
+            userID = userService.getUserStub("prouser").getUserID();
+        } else {
+            userID = user.getUserID();
+        }
+        TestSecurityProvider testSecurityProvider = new TestSecurityProvider();
+        testSecurityProvider.setUserPrincipal(userID);
+        SecurityUtil.setSecurityProvider(testSecurityProvider);
+        return userID;
+    }
+
+    public static long getIndividualAdminUser() {
+        UserService userService = new UserService();
+        User user = new InternalUserService().retrieveUser("adminuser");
+        long userID;
+        if (user == null) {
+            UserTransferObject initialUser = new UserTransferObject("adminuser", 0, "James Boe", "adminuser99@gmail.com", null);
+            AccountTransferObject account = new AccountTransferObject();
+            account.setAccountType(Account.ADMINISTRATOR);
+            long accountID = userService.createAccount(initialUser, account, "password");
+            Session session = Database.instance().createSession();
+            session.beginTransaction();
+            Account accountObj = (Account) session.createQuery("from Account where accountID = ?").setLong(0, accountID).list().get(0);
+            accountObj.setMaxSize(50000000000L);
+            session.update(accountObj);
+            session.getTransaction().commit();
+            session.close();
+            userID = userService.getUserStub("adminuser").getUserID();
+        } else {
+            userID = user.getUserID();
+        }
+        TestSecurityProvider testSecurityProvider = new TestSecurityProvider();
+        testSecurityProvider.setUserPrincipal(userID);
+        SecurityUtil.setSecurityProvider(testSecurityProvider);
         return userID;
     }
 

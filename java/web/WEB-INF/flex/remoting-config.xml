@@ -53,9 +53,21 @@
     </destination>
 
     <!-- <destination id="login" channels="my-secure-amf"> -->
-    <destination id="login" channels="my-secure-amf">
+    <destination id="login">
         <properties>
             <source>com.easyinsight.users.UserService</source>
+        </properties>
+    </destination>
+
+    <destination id="accountAdmin">
+        <properties>
+            <source>com.easyinsight.users.UserAccountAdminService</source>
+        </properties>
+    </destination>
+
+    <destination id="eiAdmin">
+        <properties>
+            <source>com.easyinsight.users.EIAccountManagementService</source>
         </properties>
     </destination>
 

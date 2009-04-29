@@ -54,7 +54,7 @@
             }
         ]]>
 	</mx:Script>
-	<mx:RemoteObject destination="login" id="userService">
+	<mx:RemoteObject destination="accountAdmin" id="userService">
 		<mx:method name="getUsers" result="gotUsers()"/>
         <mx:method name="getConsultants" result="gotConsultants()"/>
         <mx:method name="deleteUser" result="deletedUser()"/>

@@ -23,7 +23,7 @@
             PopUpManager.removePopUp(this);
         }
         ]]></mx:Script>
-    <mx:RemoteObject destination="login" id="userService">
+    <mx:RemoteObject destination="eiAdmin" id="userService">
         <mx:method name="eiNewBizAccount" result="created()"/>
     </mx:RemoteObject>
     <mx:VBox styleName="TitleWindowContents">

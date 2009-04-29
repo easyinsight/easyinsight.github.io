@@ -40,7 +40,7 @@
             apiAvailable = numberFormatter.format(accountStats.apiMaxToday / 1000000) + "MB";
         }
         ]]></mx:Script>
-    <mx:RemoteObject destination="login" id="userService">
+    <mx:RemoteObject destination="accountAdmin" id="userService">
         <mx:method name="getAccountStats" result="gotStats()"/>
     </mx:RemoteObject>
     <mx:Form>

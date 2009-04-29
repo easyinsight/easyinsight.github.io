@@ -65,10 +65,7 @@
                 </mx:FormItem>
                 <mx:FormItem label="Email Address: " fontFamily="Tahoma" fontWeight="bold" direction="horizontal">
                     <mx:TextInput text="{email}" fontFamily="Lucida Grande" fontWeight="normal" editable="false"/>
-                </mx:FormItem>
-                <mx:FormItem label="Account Space Used: " fontFamily="Tahoma" fontWeight="bold">
-                    <account:AvailableSpace/>
-                </mx:FormItem>
+                </mx:FormItem>                
             </mx:Form>
         </mx:VBox>
     </mx:HBox>

@@ -21,7 +21,7 @@ public interface IUncheckedPublishService {
     String replaceRows(@WebParam(name="dataSourceName") String dataSourceName,
                             @WebParam(name="rows") Row[] rows);
 
-    String addRow(@WebParam(name="dataSourceName") String dataSourceName, Row row);
+    String addRow(@WebParam(name="dataSourceName") String dataSourceName, @WebParam(name="row") Row row);
 
     String addRows(@WebParam(name="dataSourceName") String dataSourceName,
                  @WebParam(name="rows") Row[] rows);

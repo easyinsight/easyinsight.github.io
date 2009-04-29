@@ -15,9 +15,10 @@ public class Account {
 
     public static final int FREE = 1;
     public static final int INDIVIDUAL = 2;
-    public static final int PROFESSIONAL = 3;
-    public static final int ENTERPRISE = 4;
-    public static final int ADMINISTRATOR = 5;
+    public static final int GROUP = 3;
+    public static final int PROFESSIONAL = 4;
+    public static final int ENTERPRISE = 5;
+    public static final int ADMINISTRATOR = 6;
 
     public static final int INACTIVE = 1;
     public static final int ACTIVE = 2;
@@ -27,6 +28,7 @@ public class Account {
     public static final int PENDING_BILLING = 6;
     public static final int PREPARING = 7;
     public static final int BETA = 8;
+    public static final int TRIAL = 9;
 
     public static final long INDIVIDUAL_MAX = 50000000;
     public static final long PROFESSIONAL_MAX = 200000000;

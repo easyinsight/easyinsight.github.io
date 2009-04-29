@@ -18,6 +18,7 @@
             import com.easyinsight.framework.ModuleAnalyzeSource;
             import com.easyinsight.genredata.ModuleAnalyzeEvent;
             import com.easyinsight.goals.DelayedGoalLink;
+            import com.easyinsight.goals.GoalDataAnalyzeSource;
             import com.easyinsight.groups.DelayedGroupLink;
             import com.easyinsight.intro.WelcomeScreen;
 			import com.easyinsight.FullScreenPage;
@@ -101,12 +102,14 @@
                         internalModuleAnalyze(new ModuleAnalyzeEvent(new DescriptorAnalyzeSource(descriptor)));
                     } else if (event.eiDescriptor.getType() == EIDescriptor.REPORT) {
                         internalModuleAnalyze(new ModuleAnalyzeEvent(new AnalysisDefinitionAnalyzeSource(event.eiDescriptor as InsightDescriptor)));
+                    } else if (event.eiDescriptor.getType() == EIDescriptor.GOAL_TREE) {
+                        internalAnalyze(new AnalyzeEvent(new GoalDataAnalyzeSource(event.eiDescriptor.id)));
                     }
                 }
             }
             
             private function onFault(event:FaultEvent):void {
-                Alert.show(event.fault.name, "A server error occurred.");
+                Alert.show(event.fault.name, "Sorry, but we encountered a server error in trying to complete the operation.");
             }
             
             private function sessionExpired(event:SessionExpirationEvent):void {
@@ -169,7 +172,7 @@
                                 } else {
                                     var activationString:String = o.activationID;
                                     if (activationString != null) {
-                                        userService.activateAccount.send(activationString);
+                                        accountService.activateAccount.send(activationString);
                                     } else {
                                         var page:String = o.page;
                                         if (page != null) {
@@ -313,8 +316,12 @@
 
 	<mx:RemoteObject id="userService" destination="login">
 		<mx:method name="isSessionLoggedIn" result="sessionCheck()"/>
-		<mx:method name="activateAccount" result="activated()"/>
 	</mx:RemoteObject>
+    <mx:RemoteObject id="accountService" destination="accountAdmin">
+	    <mx:method name="activateAccount" result="activated()"/>
+	</mx:RemoteObject>
+
+
 	
 	<mx:VBox width="100%" height="100%" id="coreVBox" paddingLeft="0" verticalGap="0" paddingRight="0">
 		<listing1:HeaderBar keywordSearch="search(event)" width="100%" id="headerBar"

@@ -41,7 +41,7 @@ import com.easyinsight.solutions.UpdateSolutionArchiveWindow;
         import mx.rpc.events.ResultEvent;
 
         private function handleAuthentication():void {
-            var authResult:UserServiceResponse = authService.authenticateAdmin.lastResult as UserServiceResponse;
+            var authResult:UserServiceResponse = authAdminService.authenticateAdmin.lastResult as UserServiceResponse;
             var successful:Boolean = authResult.successful;
             if (successful) {
                 User.initializeUser(authResult.name, authResult.email,
@@ -64,7 +64,7 @@ import com.easyinsight.solutions.UpdateSolutionArchiveWindow;
                     function (event:ResultEvent, token:Object = null):void {
                         switch (event.result) {
                             case "success":
-                                authService.authenticateAdmin.send(userName.text, password.text);
+                                authAdminService.authenticateAdmin.send(userName.text, password.text);
                                 break;
                             default:
                                 trace(event.result);
@@ -109,8 +109,10 @@ import com.easyinsight.solutions.UpdateSolutionArchiveWindow;
 		]]>
     </mx:Script>
     <mx:RemoteObject id="authService" destination="login">
-        <mx:method name="authenticateAdmin" result="handleAuthentication()"/>
         <mx:method name="isSessionLoggedIn" result="sessionCheck()"/>
+    </mx:RemoteObject>
+    <mx:RemoteObject id="authAdminService" destination="eiAdmin">
+        <mx:method name="authenticateAdmin" result="handleAuthentication()"/>
     </mx:RemoteObject>
     <mx:RemoteObject id="adminService" destination="admin">
         <mx:method name="threadDump"/>

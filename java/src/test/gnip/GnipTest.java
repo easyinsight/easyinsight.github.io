@@ -32,7 +32,7 @@ public class GnipTest extends TestCase {
     public void testGnipData() {
         Database.initialize();
         FeedRegistry.initialize();
-        TestUtil.getIndividualTestUser();
+        TestUtil.getProUser();
         UserUploadService uploadService = new UserUploadService();
         Credentials c = new Credentials();
 

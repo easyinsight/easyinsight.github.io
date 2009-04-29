@@ -19,6 +19,9 @@ import org.hibernate.Query;
  */
 public class Scheduler {
 
+    public static final String[] taskClassArray = { "com.easyinsight.users.AccountTimeScheduler",
+        "com.easyinsight.database.DatabaseVolumeScheduler"};
+
     public static final int TASK_LIMIT = 5;
 
     public static final int ONE_MINUTE = 60000;
@@ -47,6 +50,7 @@ public class Scheduler {
             }
         }, new Date(nextMinute), ONE_MINUTE);
         launchThread();
+        assignDefaultGenerators();
     }
 
     public void stop() {
@@ -87,6 +91,7 @@ public class Scheduler {
                         List<ScheduledTask> tasks = taskGenerator.generateTasks(now);
                         taskGenerator.setLastTaskDate(now);
                         for (ScheduledTask task : tasks) {
+                            LogClass.info("Scheduling " + task.getClass().getName() + " for execution on " + task.getExecutionDate());
                             session.save(task);
                         }
                     }
@@ -176,5 +181,31 @@ public class Scheduler {
             session.close();
         }
         return results;
+    }
+
+    public void assignDefaultGenerators() {
+        Set<String> taskClasses = new HashSet<String>(Arrays.asList(taskClassArray));
+        Session session = Database.instance().createSession();
+        try {
+            session.getTransaction().begin();
+            List<TaskGenerator> generators = session.createQuery("from TaskGenerator").list();
+            for (TaskGenerator generator : generators) {
+                taskClasses.remove(generator.getClass().getName());
+            }
+            for (String taskClass : taskClasses) {
+                TaskGenerator taskGenerator = (TaskGenerator) Class.forName(taskClass).newInstance();
+                taskGenerator.setRequiresBackfill(false);
+                taskGenerator.setStartTaskDate(new Date());                
+                session.save(taskGenerator);
+            }
+            session.getTransaction().commit();
+        } catch (Exception e) {
+            LogClass.error(e);
+            session.getTransaction().rollback();
+            throw new RuntimeException(e);
+        } finally {
+            session.close();
+        }
+
     }
 }
