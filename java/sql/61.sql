@@ -19,7 +19,7 @@ alter table data_source_audit_message drop foreign key data_source_audit_message
 alter table data_source_audit_message add constraint data_source_audit_message_ibfk2 foreign key (user_id) references user (user_id) on delete cascade;
 
 alter table user add unique (email);
-alter table user add unique (name);
+alter table user add unique (username);
 
 alter table account_activation add unique (activation_key);
 
