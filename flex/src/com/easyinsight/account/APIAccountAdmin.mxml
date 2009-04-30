@@ -47,6 +47,15 @@
             userService.saveAccountAPISettings.send(accountAPISettings);
         }
 
+        private function regenerated():void {
+            accountAPISettings = userService.regenerateSecretKey.lastResult as AccountAPISettings;
+            dynamicEnabled = accountAPISettings.dynamicAPIEnabled;
+            validatedEnabled = accountAPISettings.validatedAPIEnabled;
+            uncheckedEnabled = accountAPISettings.uncheckedAPIEnabled;
+            apiKey = accountAPISettings.accountKey;
+            apiSecretKey = accountAPISettings.accountSecretKey;
+        }
+
         private function gotSettings():void {
             accountAPISettings = userService.getAccountAPISettings.lastResult as AccountAPISettings;
             dynamicEnabled = accountAPISettings.dynamicAPIEnabled;
@@ -67,6 +76,7 @@
     <mx:RemoteObject destination="accountAdmin" id="userService">
         <mx:method name="getAccountAPISettings" result="gotSettings()"/>
         <mx:method name="saveAccountAPISettings"/>
+        <mx:method name="regenerateSecretKey" result="regenerated()"/>
     </mx:RemoteObject>
     <mx:VBox width="100%" height="100%" horizontalAlign="center">
         <mx:VBox id="accountSettingsBox" verticalGap="0" borderThickness="1" borderColor="#D42525" borderStyle="solid" dropShadowEnabled="true"
@@ -90,6 +100,7 @@
                     <mx:Button label="Copy to Clipboard" click="copyKeyToClipboard()"/>
                 </mx:FormItem>
                 <mx:FormItem label="API Secret Key: " direction="horizontal">
+                    <mx:Button label="Regenerate Secret Key" click="userService.regenerateSecretKey.send()"/>
                     <mx:Button label="{secretKeyButton}" click="showSecretKey()"/>
                     <mx:Text text="{apiSecretKey}" visible="{showingSecretKey}"/>
                     <mx:Button label="Copy to Clipboard" click="copySecretKeyToClipboard()" visible="{showingSecretKey}"/>

@@ -31,6 +31,29 @@ import flex.messaging.FlexContext;
  */
 public class UserService implements IUserService {
 
+    public AccountAPISettings regenerateSecretKey() {
+        long userID = SecurityUtil.getUserID();
+        Session session = Database.instance().createSession();
+        try {
+            session.getTransaction().begin();
+            User user = (User) session.createQuery("from User where userID = ?").setLong(0, userID).list().get(0);
+            String accountSecretKey = RandomTextGenerator.generateText(16);
+            user.setUserSecretKey(accountSecretKey);
+            session.save(user);
+            AccountAPISettings settings = new AccountAPISettings(user.getUserKey(), user.getUserSecretKey(),
+                    user.getAccount().isUncheckedAPIEnabled(), user.getAccount().isValidatedAPIEnabled(),
+                    user.getAccount().isDynamicAPIAllowed());
+            session.getTransaction().commit();
+            return settings;
+        } catch (Exception e) {
+            LogClass.error(e);
+            session.getTransaction().rollback();
+            throw new RuntimeException(e);
+        } finally {
+            session.close();
+        }
+    }
+
     public String remindPassword(String emailAddress) {
         String message;
         Session session = Database.instance().createSession();

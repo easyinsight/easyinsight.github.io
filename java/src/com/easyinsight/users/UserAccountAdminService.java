@@ -28,6 +28,28 @@ import java.sql.SQLException;
  */
 public class UserAccountAdminService {
 
+    public AccountAPISettings regenerateSecretKey() {
+        long accountID = SecurityUtil.getAccountID();
+        Session session = Database.instance().createSession();
+        try {
+            session.getTransaction().begin();
+            Account account = (Account) session.createQuery("from Account where accountID = ?").setLong(0, accountID).list().get(0);
+            String accountSecretKey = RandomTextGenerator.generateText(16);
+            account.setAccountSecretKey(accountSecretKey);
+            session.save(account);
+            AccountAPISettings settings = new AccountAPISettings(account.getAccountKey(), account.getAccountSecretKey(),
+                    account.isUncheckedAPIEnabled(), account.isValidatedAPIEnabled(), account.isDynamicAPIAllowed());
+            session.getTransaction().commit();
+            return settings;
+        } catch (Exception e) {
+            LogClass.error(e);
+            session.getTransaction().rollback();
+            throw new RuntimeException(e);
+        } finally {
+            session.close();
+        }
+    }
+
     public List<UserTransferObject> getUsers() {
         List<UserTransferObject> users = new ArrayList<UserTransferObject>();
         long accountID = SecurityUtil.getAccountID();
