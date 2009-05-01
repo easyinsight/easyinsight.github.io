@@ -1,0 +1,28 @@
+<project default="swfanalysis" basedir="." name="SWFAnalysis">
+
+    <property name="swfanalysis.out.path" value="../out/swfanalysis/"/>
+    <property name="swfanalysis.archive.path" value="${swfanalysis.out.path}/watchdog"/>
+
+    <target name="swfanalysis">
+        <mkdir dir="${swfanalysis.archive.path}"/>
+        <javac destdir="${swfanalysis.archive.path}"
+               optimize="off"
+               debug="on" failonerror="false"
+               srcdir="../src"
+               excludes="**/*.smap">
+            <classpath>
+                <fileset dir="../lib">
+                    <include name="*.jar"/>
+                </fileset>
+            </classpath>
+            <include name="**"/>
+            <exclude name="tags/**"/>
+        </javac>
+        <unzip dest="${swfanalysis.archive.path}">
+            <fileset dir="../lib">
+                <include name="*.jar"/>
+            </fileset>
+        </unzip>
+        <jar destfile="${swfanalysis.out.path}/swfanalysis.jar" baseDir="${swfanalysis.archive.path}"/>
+    </target>
+</project>
