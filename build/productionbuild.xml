@@ -8,7 +8,6 @@
     <taskdef name="StartInstances" classname="com.easyinsight.watchdog.updatetask.StartAppInstanceTask"/>
     <taskdef name="UpdateDB" classname="com.easyinsight.database.ant.DatabaseUpdateTask"/>
 
-    <taskdef resource="ei.tasks" classpath="${flex.sdk.dir}/ant/lib/swfanalysis.jar"/>
     <taskdef name="SWFAnalysis" classname="com.easyinsight.swfanalysis.SWFAnalysis"/>
     <taskdef name="SWFSize" classname="com.easyinsight.swfanalysis.ArtifactSize"/>
 
