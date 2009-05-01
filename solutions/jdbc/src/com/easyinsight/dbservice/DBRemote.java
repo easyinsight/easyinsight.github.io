@@ -21,8 +21,6 @@ import java.text.MessageFormat;
 
 import flex.messaging.FlexContext;
 
-import javax.xml.rpc.ServiceException;
-
 /**
  * User: James Boe
  * Date: Jan 31, 2009
@@ -32,7 +30,8 @@ public class DBRemote {
 
     public static final String MYSQL = "MySQL";
     public static final String GENERIC = "Generic";
-    public static final String ENDPOINT = "https://{0}/app/services/UncheckedPublishBasic";
+    public static final String UNCHECKED_ENDPOINT = "https://{0}/app/services/UncheckedPublishBasic";
+    public static final String VALIDATED_ENDPOINT = "https://{0}/app/services/ValidatedPublishBasic";
 
     private static Map<String, DBConfiguration> dbConfigMap = new HashMap<String, DBConfiguration>();
     private static Map<String, EIConfiguration> eiConfigMap = new HashMap<String, EIConfiguration>();
@@ -41,10 +40,11 @@ public class DBRemote {
 
     public void forceRun(long queryConfigurationID) {
         try {
+            URL url = new URL(MessageFormat.format(DBRemote.VALIDATED_ENDPOINT, eiHost));
             EIConfiguration eiConfiguration = getEIConfiguration();
             DBConfiguration dbConfiguration = getDBConfiguration();
             QueryConfiguration queryConfiguration = getQueryConfiguration(queryConfigurationID);
-            BasicAuthValidatedPublish service = new BasicAuthValidatingPublishServiceServiceLocator().getBasicAuthValidatingPublishServicePort();
+            BasicAuthValidatedPublish service = new BasicAuthValidatingPublishServiceServiceLocator().getBasicAuthValidatingPublishServicePort(url);
             ((BasicAuthValidatingPublishServiceServiceSoapBindingStub)service).setUsername(eiConfiguration.getUserName());
             ((BasicAuthValidatingPublishServiceServiceSoapBindingStub)service).setPassword(eiConfiguration.getPassword());
             QueryValidatedPublish publish = new QueryValidatedPublish(queryConfiguration, service);
@@ -557,6 +557,6 @@ public class DBRemote {
     }
 
     private URL getURL() throws MalformedURLException {
-        return new URL(MessageFormat.format(ENDPOINT, this.eiHost));
+        return new URL(MessageFormat.format(UNCHECKED_ENDPOINT, this.eiHost));
     }
 }

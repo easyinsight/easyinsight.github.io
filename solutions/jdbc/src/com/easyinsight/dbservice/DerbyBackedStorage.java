@@ -71,8 +71,8 @@ public class DerbyBackedStorage implements IStorage {
             String dbURL = "jdbc:derby:eijdbc";
             return DriverManager.getConnection(dbURL);
         } catch (SQLException e) {
-            e.printStackTrace();
-            throw new RuntimeException(e);
+            System.out.println("No internal database found.");
+            throw new NoDatabaseException();
         }
     }
 

@@ -72,11 +72,14 @@ public class XMLBackedStorage implements IStorage {
                 Node node = nodes.item(i);
                 if (node.getNodeName().equals("ei")) {
                     String eiUserName = node.getChildNodes().item(1).getFirstChild().getNodeValue();
-                    System.out.println("ei user name = " + eiUserName);
                     eiConfiguration.setUserName(eiUserName);
-                    System.out.println("value = " + node.getChildNodes().item(3).getFirstChild().getNodeValue());
-                    String eiPassword = stringEncrypter.decrypt(node.getChildNodes().item(3).getFirstChild().getNodeValue());
-                    System.out.println("ei password = " + eiPassword);
+                    Node secretKeyNode = node.getChildNodes().item(3);
+                    String eiPassword;
+                    if ("secretKey".equals(secretKeyNode.getNodeName())) {
+                        eiPassword = secretKeyNode.getFirstChild().getNodeValue();
+                    } else {
+                        eiPassword = stringEncrypter.decrypt(secretKeyNode.getFirstChild().getNodeValue());
+                    }
                     eiConfiguration.setPassword(eiPassword);
                 }
             }

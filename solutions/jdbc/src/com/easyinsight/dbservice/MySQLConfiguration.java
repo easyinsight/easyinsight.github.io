@@ -3,7 +3,6 @@ package com.easyinsight.dbservice;
 import org.w3c.dom.Node;
 
 import java.sql.*;
-import java.util.Properties;
 import java.text.MessageFormat;
 
 /**
@@ -25,7 +24,12 @@ public class MySQLConfiguration extends DBConfiguration {
         this.port = node.getAttributes().getNamedItem("port").getNodeValue();
         this.databaseName = node.getAttributes().getNamedItem("databaseName").getNodeValue();
         this.userName = node.getAttributes().getNamedItem("userName").getNodeValue();
-        this.password = stringEncrypter.decrypt(node.getFirstChild().getNodeValue());
+        Node attributeItem = node.getAttributes().getNamedItem("password");
+        if (attributeItem != null) {
+            this.password = attributeItem.getFirstChild().getNodeValue();
+        } else {
+            this.password = stringEncrypter.decrypt(node.getFirstChild().getNodeValue());
+        }
     }
 
     public String getUserName() {

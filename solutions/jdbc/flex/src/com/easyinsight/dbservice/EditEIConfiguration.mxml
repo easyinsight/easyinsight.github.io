@@ -50,10 +50,10 @@
     </mx:RemoteObject>
     <mx:Box width="100%" height="100%" id="coreBox" styleName="TitleWindowContents">
         <mx:Form id="coreForm">
-            <mx:FormItem label="Easy Insight User Name:">
+            <mx:FormItem label="Easy Insight Key:">
                 <mx:TextInput id="eiUserNameInput" text="{eiUserName}"/>
             </mx:FormItem>
-            <mx:FormItem label="Easy Insight Password:">
+            <mx:FormItem label="Easy Insight Secret Key:">
                 <mx:TextInput id="eiPasswordInput" displayAsPassword="true" text="{eiPassword}"/>
             </mx:FormItem>
             <mx:FormItem>
