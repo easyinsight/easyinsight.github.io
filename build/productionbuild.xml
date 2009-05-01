@@ -302,7 +302,7 @@
     
     <target name="compileFlexOptimized">
         <mxmlc file="${teamcity.build.checkoutDir}/flex/src/PrimaryWorkspace.mxml" output="${flex.path}/PrimaryWorkspace.swf"
-               static-rsls="false" link-report="{basedir}/optimized.txt">
+               static-rsls="false" link-report="${basedir}/optimized.txt">
             <load-config filename="${teamcity.build.checkoutDir}/flex/core-optimized-config.xml"/>
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
                 <url rsl-url="framework_3.3.0.4852.swz"/>
