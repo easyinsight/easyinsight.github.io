@@ -19,7 +19,7 @@
     <property name="watchdog.out.path" value="../java/out/watchdog/"/>
     <property name="watchdog.archive.path" value="${watchdog.out.path}/watchdog"/>
 
-    <property name="code.path" value="../java/out/code/"/>
+    <property name="code.path" value="../java/out/code"/>
     <property name="webapp.path" value="${code.path}/webapp"/>
     <property name="flex.path" value="${webapp.path}/easyui-debug"/>
 
