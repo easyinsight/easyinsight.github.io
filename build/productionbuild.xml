@@ -327,7 +327,7 @@
 
     <target name="compileIntro">
         <mxmlc file="${teamcity.build.checkoutDir}/flex/src/IntroApplication.mxml" output="${flex.path}/IntroApplication.swf"
-               static-rsls="false" link-report="intro.txt">
+               static-rsls="false" link-report="${basedir}/intro.txt">
             <load-config filename="${teamcity.build.checkoutDir}/flex/intro-config.xml"/>
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
                 <url rsl-url="framework_3.3.0.4852.swz"/>
@@ -352,7 +352,7 @@
 
     <target name="compileEmbeddedInsight">
         <mxmlc file="${teamcity.build.checkoutDir}/flex/src/EmbeddedInsight.mxml" output="${flex.path}/EmbeddedInsight.swf"
-               static-rsls="true" link-report="embedded.txt">
+               static-rsls="true" link-report="${basedir}/embedded.txt">
             <load-config filename="${teamcity.build.checkoutDir}/flex/embedded-insight.xml"/>
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
                 <url rsl-url="framework_3.3.0.4852.swz"/>
@@ -377,7 +377,7 @@
 
     <target name="compileYahooWidget">
         <mxmlc file="${teamcity.build.checkoutDir}/flex/src/YahooWidgetReport.mxml" output="${flex.path}/YahooWidgetReport.swf"
-               static-rsls="false" link-report="yahoo.txt">
+               static-rsls="false" link-report="${basedir}/yahoo.txt">
             <load-config filename="${teamcity.build.checkoutDir}/flex/yahoo-report.xml"/>
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
                 <url rsl-url="framework_3.3.0.4852.swz"/>
@@ -402,7 +402,7 @@
 
     <target name="compileYahooGoals">
         <mxmlc file="${teamcity.build.checkoutDir}/flex/src/YahooWidgetGoals.mxml" output="${flex.path}/YahooWidgetGoals.swf"
-               static-rsls="false" link-report="yahoo-goals.txt">
+               static-rsls="false" link-report="${basedir}/yahoo-goals.txt">
             <load-config filename="${teamcity.build.checkoutDir}/flex/yahoo-goals.xml"/>
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
                 <url rsl-url="framework_3.3.0.4852.swz"/>
@@ -439,7 +439,7 @@
 
     <target name="module.list">
         <mxmlc file="${teamcity.build.checkoutDir}/flex/src/com/easyinsight/analysis/list/ListModule.mxml" output="${flex.path}/ListModule.swf"
-               static-rsls="false" link-report="list.txt">
+               static-rsls="false" link-report="${basedir}/list.txt">
             <load-config filename="${teamcity.build.checkoutDir}/flex/modules/list-module.xml"/>
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
                 <url rsl-url="framework_3.3.0.4852.swz"/>
@@ -464,7 +464,7 @@
 
     <target name="module.columnchart">
         <mxmlc file="${teamcity.build.checkoutDir}/flex/src/com/easyinsight/analysis/charts/xaxisbased/column/ColumnChartModule.mxml" output="${flex.path}/ColumnChartModule.swf"
-               static-rsls="false" link-report="column.txt">
+               static-rsls="false" link-report="${basedir}/column.txt">
             <load-config filename="${teamcity.build.checkoutDir}/flex/modules/column-chart-module.xml"/>
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
                 <url rsl-url="framework_3.3.0.4852.swz"/>
@@ -489,7 +489,7 @@
 
     <target name="module.column3dchart">
         <mxmlc file="${teamcity.build.checkoutDir}/flex/src/com/easyinsight/analysis/charts/xaxisbased/column/Column3DChartModule.mxml" output="${flex.path}/Column3DChartModule.swf"
-               static-rsls="false" link-report="column3d.txt">
+               static-rsls="false" link-report="${basedir}/column3d.txt">
             <load-config filename="${teamcity.build.checkoutDir}/flex/modules/column-3d-chart-module.xml"/>
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
                 <url rsl-url="framework_3.3.0.4852.swz"/>
@@ -514,7 +514,7 @@
 
     <target name="module.piechart">
         <mxmlc file="${teamcity.build.checkoutDir}/flex/src/com/easyinsight/analysis/charts/xaxisbased/pie/PieChartModule.mxml" output="${flex.path}/PieChartModule.swf"
-               static-rsls="false" link-report="pie.txt">
+               static-rsls="false" link-report="${basedir}/pie.txt">
             <load-config filename="${teamcity.build.checkoutDir}/flex/modules/pie-chart-module.xml"/>
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
                 <url rsl-url="framework_3.3.0.4852.swz"/>
@@ -539,7 +539,7 @@
 
     <target name="module.pie3dchart">
         <mxmlc file="${teamcity.build.checkoutDir}/flex/src/com/easyinsight/analysis/charts/xaxisbased/pie/Pie3DChartModule.mxml" output="${flex.path}/Pie3DChartModule.swf"
-               static-rsls="false" link-report="pie3d.txt">
+               static-rsls="false" link-report="${basedir}/pie3d.txt">
             <load-config filename="${teamcity.build.checkoutDir}/flex/modules/pie-3d-chart-module.xml"/>
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
                 <url rsl-url="framework_3.3.0.4852.swz"/>
@@ -564,7 +564,7 @@
 
     <target name="module.barchart">
         <mxmlc file="${teamcity.build.checkoutDir}/flex/src/com/easyinsight/analysis/charts/yaxisbased/bar/BarChartModule.mxml" output="${flex.path}/BarChartModule.swf"
-               static-rsls="false" link-report="bar.txt">
+               static-rsls="false" link-report="${basedir}/bar.txt">
             <load-config filename="${teamcity.build.checkoutDir}/flex/modules/bar-chart-module.xml"/>
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
                 <url rsl-url="framework_3.3.0.4852.swz"/>
@@ -589,7 +589,7 @@
 
     <target name="module.bar3dchart">
         <mxmlc file="${teamcity.build.checkoutDir}/flex/src/com/easyinsight/analysis/charts/yaxisbased/bar/Bar3DChartModule.mxml" output="${flex.path}/Bar3DChartModule.swf"
-               static-rsls="false" link-report="bar3d.txt">
+               static-rsls="false" link-report="${basedir}/bar3d.txt">
             <load-config filename="${teamcity.build.checkoutDir}/flex/modules/bar-3d-chart-module.xml"/>
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
                 <url rsl-url="framework_3.3.0.4852.swz"/>
@@ -614,7 +614,7 @@
 
     <target name="module.areachart">
         <mxmlc file="${teamcity.build.checkoutDir}/flex/src/com/easyinsight/analysis/charts/twoaxisbased/area/AreaChartModule.mxml" output="${flex.path}/AreaChartModule.swf"
-               static-rsls="false" link-report="area.txt">
+               static-rsls="false" link-report="${basedir}/area.txt">
             <load-config filename="${teamcity.build.checkoutDir}/flex/modules/area-chart-module.xml"/>
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
                 <url rsl-url="framework_3.3.0.4852.swz"/>
@@ -639,7 +639,7 @@
 
     <target name="module.area3dchart">
         <mxmlc file="${teamcity.build.checkoutDir}/flex/src/com/easyinsight/analysis/charts/twoaxisbased/area/Area3DChartModule.mxml" output="${flex.path}/Area3DChartModule.swf"
-               static-rsls="false" link-report="area3d.txt">
+               static-rsls="false" link-report="${basedir}/area3d.txt">
             <load-config filename="${teamcity.build.checkoutDir}/flex/modules/area-3d-chart-module.xml"/>
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
                 <url rsl-url="framework_3.3.0.4852.swz"/>
@@ -664,7 +664,7 @@
 
     <target name="module.linechart">
         <mxmlc file="${teamcity.build.checkoutDir}/flex/src/com/easyinsight/analysis/charts/twoaxisbased/line/LineChartModule.mxml" output="${flex.path}/LineChartModule.swf"
-               static-rsls="false" link-report="line.txt">
+               static-rsls="false" link-report="${basedir}/line.txt">
             <load-config filename="${teamcity.build.checkoutDir}/flex/modules/line-chart-module.xml"/>
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
                 <url rsl-url="framework_3.3.0.4852.swz"/>
@@ -689,7 +689,7 @@
 
     <target name="module.line3dchart">
         <mxmlc file="${teamcity.build.checkoutDir}/flex/src/com/easyinsight/analysis/charts/twoaxisbased/line/Line3DChartModule.mxml" output="${flex.path}/Line3DChartModule.swf"
-               static-rsls="false" link-report="line3d.txt">
+               static-rsls="false" link-report="${basedir}/line3d.txt">
             <load-config filename="${teamcity.build.checkoutDir}/flex/modules/line-3d-chart-module.xml"/>
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
                 <url rsl-url="framework_3.3.0.4852.swz"/>
@@ -714,7 +714,7 @@
 
     <target name="module.bubblechart">
         <mxmlc file="${teamcity.build.checkoutDir}/flex/src/com/easyinsight/analysis/charts/bubble/BubbleChartModule.mxml" output="${flex.path}/BubbleChartModule.swf"
-               static-rsls="false" link-report="bubble.txt">
+               static-rsls="false" link-report="${basedir}/bubble.txt">
             <load-config filename="${teamcity.build.checkoutDir}/flex/modules/bubble-chart-module.xml"/>
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
                 <url rsl-url="framework_3.3.0.4852.swz"/>
@@ -739,7 +739,7 @@
 
     <target name="module.plotchart">
         <mxmlc file="${teamcity.build.checkoutDir}/flex/src/com/easyinsight/analysis/charts/plot/PlotChartModule.mxml" output="${flex.path}/PlotChartModule.swf"
-               static-rsls="false" link-report="plot.txt">
+               static-rsls="false" link-report="${basedir}/plot.txt">
             <load-config filename="${teamcity.build.checkoutDir}/flex/modules/plot-chart-module.xml"/>
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
                 <url rsl-url="framework_3.3.0.4852.swz"/>
@@ -764,7 +764,7 @@
 
     <target name="module.map">
         <mxmlc file="${teamcity.build.checkoutDir}/flex/src/com/easyinsight/analysis/maps/MapModule.mxml" output="${flex.path}/MapModule.swf"
-               static-rsls="false" link-report="map.txt">
+               static-rsls="false" link-report="${basedir}/map.txt">
             <load-config filename="${teamcity.build.checkoutDir}/flex/modules/map-module.xml"/>
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
                 <url rsl-url="framework_3.3.0.4852.swz"/>
@@ -789,7 +789,7 @@
 
     <target name="module.crosstab">
         <mxmlc file="${teamcity.build.checkoutDir}/flex/src/com/easyinsight/analysis/crosstab/CrosstabModule.mxml" output="${flex.path}/CrosstabModule.swf"
-               static-rsls="false" link-report="crosstab.txt">
+               static-rsls="false" link-report="${basedir}/crosstab.txt">
             <load-config filename="${teamcity.build.checkoutDir}/flex/modules/crosstab-module.xml"/>
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
                 <url rsl-url="framework_3.3.0.4852.swz"/>
@@ -814,7 +814,7 @@
 
     <target name="module.gauge">
         <mxmlc file="${teamcity.build.checkoutDir}/flex/src/com/easyinsight/analysis/gauge/GaugeModule.mxml" output="${flex.path}/GaugeModule.swf"
-               static-rsls="false" link-report="gauge.txt">
+               static-rsls="false" link-report="${basedir}/gauge.txt">
             <load-config filename="${teamcity.build.checkoutDir}/flex/modules/gauge-module.xml"/>
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
                 <url rsl-url="framework_3.3.0.4852.swz"/>
@@ -839,7 +839,7 @@
 
     <target name="module.treemap">
         <mxmlc file="${teamcity.build.checkoutDir}/flex/src/com/easyinsight/analysis/treemap/TreeMapModule.mxml" output="${flex.path}/TreeMapModule.swf"
-               static-rsls="false" link-report="treemap.txt">
+               static-rsls="false" link-report="${basedir}/treemap.txt">
             <load-config filename="${teamcity.build.checkoutDir}/flex/modules/treemap-module.xml"/>
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
                 <url rsl-url="framework_3.3.0.4852.swz"/>
@@ -864,7 +864,7 @@
 
     <target name="module.tree">
         <mxmlc file="${teamcity.build.checkoutDir}/flex/src/com/easyinsight/analysis/tree/TreeModule.mxml" output="${flex.path}/TreeModule.swf"
-               static-rsls="false" link-report="tree.txt">
+               static-rsls="false" link-report="${basedir}/tree.txt">
             <load-config filename="${teamcity.build.checkoutDir}/flex/modules/tree-module.xml"/>
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
                 <url rsl-url="framework_3.3.0.4852.swz"/>
