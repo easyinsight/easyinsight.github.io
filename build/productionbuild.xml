@@ -8,6 +8,10 @@
     <taskdef name="StartInstances" classname="com.easyinsight.watchdog.updatetask.StartAppInstanceTask"/>
     <taskdef name="UpdateDB" classname="com.easyinsight.database.ant.DatabaseUpdateTask"/>
 
+    <taskdef resource="ei.tasks" classpath="${flex.sdk.dir}/ant/lib/swfanalysis.jar"/>
+    <taskdef name="SWFAnalysis" classname="com.easyinsight.swfanalysis.SWFAnalysis"/>
+    <taskdef name="SWFSize" classname="com.easyinsight.swfanalysis.ArtifactSize"/>
+
     <taskdef name="migration" classname="com.easyinsight.database.ant.DatabaseMigrationTask"/>
 
     <property name="FLEX_HOME" value="${flex.sdk.dir}"/>
@@ -21,6 +25,11 @@
 
     <property name="test.path" value="../java/out/test"/>
     <property name="reports.tests" value="../java/out/test/reports"/>
+
+    <property name="ei.key" value="xrnnCqtaFhZN"/>
+    <property name="ei.secret.key" value="IzxHGLKiErchVLdo"/>
+    <property name="size.api.key" value="RhHnvgiymUfx"/>
+    <property name="analysis.api.key" value="wuOecBUjyUKd"/>
 
     <target name="shutdownInstances">
         <StopInstances userName="einsight" password="eJAqp0Q~j!n>L"/>
@@ -311,13 +320,35 @@
                 <url rsl-url="rpc_3.3.0.4852.swf"/>
             </runtime-shared-library-path>
         </mxmlc>
+        <SWFSize artifactPath="${deployment.path}/PrimaryWorkspace.swf" key="${ei.key}" secretKey="${ei.secret.key}" component="PrimaryWorkspace"
+                sizeAPIKey="${size.api.key}"/>
+        <SWFAnalysis linkReportPath="optimized.txt" key="${ei.key}" secretKey="${ei.secret.key}" component="PrimaryWorkspace"
+                classAnalysisAPIKey="${analysis.api.key}" packageFilter="com.easyinsight"/>
     </target>
 
     <target name="compileIntro">
         <mxmlc file="${teamcity.build.checkoutDir}/flex/src/IntroApplication.mxml" output="${flex.path}/IntroApplication.swf"
-               static-rsls="true">
+               static-rsls="false" link-report="intro.txt">
             <load-config filename="${teamcity.build.checkoutDir}/flex/intro-config.xml"/>
+            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
+                <url rsl-url="framework_3.3.0.4852.swz"/>
+                <url rsl-url="framework_3.3.0.4852.swf"/>
+            </runtime-shared-library-path>
+
+            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/datavisualization.swc">
+                <url rsl-url="datavisualization_3.3.0.4852.swz"/>
+                <url rsl-url="datavisualization_3.3.0.4852.swf"/>
+            </runtime-shared-library-path>
+
+            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
+                <url rsl-url="rpc_3.3.0.4852.swz"/>
+                <url rsl-url="rpc_3.3.0.4852.swf"/>
+            </runtime-shared-library-path>
         </mxmlc>
+        <SWFSize artifactPath="${deployment.path}/IntroApplication.swf" key="${ei.key}" secretKey="${ei.secret.key}" component="IntroApplication"
+                sizeAPIKey="${size.api.key}"/>
+        <SWFAnalysis linkReportPath="intro.txt" key="${ei.key}" secretKey="${ei.secret.key}" component="IntroApplication"
+                classAnalysisAPIKey="${analysis.api.key}" packageFilter="com.easyinsight"/>
     </target>    
 
     <target name="compileEmbeddedInsight">
@@ -338,6 +369,10 @@
                 <url rsl-url="rpc_3.3.0.4852.swz"/>
                 <url rsl-url="rpc_3.3.0.4852.swf"/>
             </runtime-shared-library-path>
+        <SWFSize artifactPath="${deployment.path}/EmbeddedInsight.swf" key="${ei.key}" secretKey="${ei.secret.key}" component="EmbeddedInsight"
+            sizeAPIKey="${size.api.key}"/>
+        <SWFAnalysis linkReportPath="embedded.txt" key="${ei.key}" secretKey="${ei.secret.key}" component="IntroApplication"
+                classAnalysisAPIKey="${analysis.api.key}" packageFilter="com.easyinsight"/>
         </mxmlc>
     </target>
 
@@ -360,11 +395,15 @@
                 <url rsl-url="rpc_3.3.0.4852.swf"/>
             </runtime-shared-library-path>
         </mxmlc>
+        <SWFSize artifactPath="${deployment.path}/YahooWidgetReport.swf" key="${ei.key}" secretKey="${ei.secret.key}" component="YahooWidgetReport"
+            sizeAPIKey="${size.api.key}"/>
+        <SWFAnalysis linkReportPath="yahoo.txt" key="${ei.key}" secretKey="${ei.secret.key}" component="YahooWidgetReport"
+                classAnalysisAPIKey="${analysis.api.key}" packageFilter="com.easyinsight"/>
     </target>
 
     <target name="compileYahooGoals">
         <mxmlc file="${teamcity.build.checkoutDir}/flex/src/YahooWidgetGoals.mxml" output="${flex.path}/YahooWidgetGoals.swf"
-               static-rsls="false">
+               static-rsls="false" link-report="yahoo-goals.txt">
             <load-config filename="${teamcity.build.checkoutDir}/flex/yahoo-goals.xml"/>
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
                 <url rsl-url="framework_3.3.0.4852.swz"/>
@@ -381,27 +420,10 @@
                 <url rsl-url="rpc_3.3.0.4852.swf"/>
             </runtime-shared-library-path>
         </mxmlc>
-    </target>
-
-    <target name="compiileHelpModule">
-        <mxmlc file="${teamcity.build.checkoutDir}/flex/src/com/easyinsight/help/TutorialModule.mxml" output="${flex.path}/TutorialModule.swf"
-               static-rsls="false">
-            <load-config filename="${teamcity.build.checkoutDir}/flex/help-module.xml"/>
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
-                <url rsl-url="framework_3.3.0.4852.swz"/>
-                <url rsl-url="framework_3.3.0.4852.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/datavisualization.swc">
-                <url rsl-url="datavisualization_3.3.0.4852.swz"/>
-                <url rsl-url="datavisualization_3.3.0.4852.swf"/>
-            </runtime-shared-library-path>
-
-            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
-                <url rsl-url="rpc_3.3.0.4852.swz"/>
-                <url rsl-url="rpc_3.3.0.4852.swf"/>
-            </runtime-shared-library-path>
-        </mxmlc>
+        <SWFSize artifactPath="${deployment.path}/YahooWidgetGoals.swf" key="${ei.key}" secretKey="${ei.secret.key}" component="YahooWidgetGoals"
+            sizeAPIKey="${size.api.key}"/>
+        <SWFAnalysis linkReportPath="yahoo-goals.txt" key="${ei.key}" secretKey="${ei.secret.key}" component="YahooWidgetGoals"
+                classAnalysisAPIKey="${analysis.api.key}" packageFilter="com.easyinsight"/>
     </target>
 
     <target name="compileAdmin">
@@ -418,7 +440,7 @@
 
     <target name="module.list">
         <mxmlc file="${teamcity.build.checkoutDir}/flex/src/com/easyinsight/analysis/list/ListModule.mxml" output="${flex.path}/ListModule.swf"
-               static-rsls="false">
+               static-rsls="false" link-report="list.txt">
             <load-config filename="${teamcity.build.checkoutDir}/flex/modules/list-module.xml"/>
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
                 <url rsl-url="framework_3.3.0.4852.swz"/>
@@ -435,11 +457,15 @@
                 <url rsl-url="rpc_3.3.0.4852.swf"/>
             </runtime-shared-library-path>
         </mxmlc>
+        <SWFSize artifactPath="${deployment.path}/ListModule.swf" key="${ei.key}" secretKey="${ei.secret.key}" component="ListModule"
+            sizeAPIKey="${size.api.key}"/>
+        <SWFAnalysis linkReportPath="list.txt" key="${ei.key}" secretKey="${ei.secret.key}" component="ListModule"
+                classAnalysisAPIKey="${analysis.api.key}" packageFilter="com.easyinsight"/>
     </target>
 
     <target name="module.columnchart">
         <mxmlc file="${teamcity.build.checkoutDir}/flex/src/com/easyinsight/analysis/charts/xaxisbased/column/ColumnChartModule.mxml" output="${flex.path}/ColumnChartModule.swf"
-               static-rsls="false">
+               static-rsls="false" link-report="column.txt">
             <load-config filename="${teamcity.build.checkoutDir}/flex/modules/column-chart-module.xml"/>
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
                 <url rsl-url="framework_3.3.0.4852.swz"/>
@@ -456,11 +482,15 @@
                 <url rsl-url="rpc_3.3.0.4852.swf"/>
             </runtime-shared-library-path>
         </mxmlc>
+        <SWFSize artifactPath="${deployment.path}/ColumnChartModule.swf" key="${ei.key}" secretKey="${ei.secret.key}" component="ColumnChartModule"
+            sizeAPIKey="${size.api.key}"/>
+        <SWFAnalysis linkReportPath="column.txt" key="${ei.key}" secretKey="${ei.secret.key}" component="ColumnChartModule"
+                classAnalysisAPIKey="${analysis.api.key}" packageFilter="com.easyinsight"/>
     </target>
 
     <target name="module.column3dchart">
         <mxmlc file="${teamcity.build.checkoutDir}/flex/src/com/easyinsight/analysis/charts/xaxisbased/column/Column3DChartModule.mxml" output="${flex.path}/Column3DChartModule.swf"
-               static-rsls="false">
+               static-rsls="false" link-report="column3d.txt">
             <load-config filename="${teamcity.build.checkoutDir}/flex/modules/column-3d-chart-module.xml"/>
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
                 <url rsl-url="framework_3.3.0.4852.swz"/>
@@ -477,13 +507,17 @@
                 <url rsl-url="rpc_3.3.0.4852.swf"/>
             </runtime-shared-library-path>
         </mxmlc>
+        <SWFSize artifactPath="${deployment.path}/Column3DChartModule.swf" key="${ei.key}" secretKey="${ei.secret.key}" component="Column3DChartModule"
+            sizeAPIKey="${size.api.key}"/>
+        <SWFAnalysis linkReportPath="column3d.txt" key="${ei.key}" secretKey="${ei.secret.key}" component="Column3DChartModule"
+                classAnalysisAPIKey="${analysis.api.key}" packageFilter="com.easyinsight"/>
     </target>
 
     <target name="module.piechart">
         <mxmlc file="${teamcity.build.checkoutDir}/flex/src/com/easyinsight/analysis/charts/xaxisbased/pie/PieChartModule.mxml" output="${flex.path}/PieChartModule.swf"
-               static-rsls="true">
+               static-rsls="false" link-report="pie.txt">
             <load-config filename="${teamcity.build.checkoutDir}/flex/modules/pie-chart-module.xml"/>
-            <!--<runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
+            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
                 <url rsl-url="framework_3.3.0.4852.swz"/>
                 <url rsl-url="framework_3.3.0.4852.swf"/>
             </runtime-shared-library-path>
@@ -496,13 +530,17 @@
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
                 <url rsl-url="rpc_3.3.0.4852.swz"/>
                 <url rsl-url="rpc_3.3.0.4852.swf"/>
-            </runtime-shared-library-path>-->
+            </runtime-shared-library-path>
         </mxmlc>
+        <SWFSize artifactPath="${deployment.path}/PieChartModule.swf" key="${ei.key}" secretKey="${ei.secret.key}" component="PieChartModule"
+            sizeAPIKey="${size.api.key}"/>
+        <SWFAnalysis linkReportPath="pie.txt" key="${ei.key}" secretKey="${ei.secret.key}" component="PieChartModule"
+                classAnalysisAPIKey="${analysis.api.key}" packageFilter="com.easyinsight"/>
     </target>
 
     <target name="module.pie3dchart">
         <mxmlc file="${teamcity.build.checkoutDir}/flex/src/com/easyinsight/analysis/charts/xaxisbased/pie/Pie3DChartModule.mxml" output="${flex.path}/Pie3DChartModule.swf"
-               static-rsls="false">
+               static-rsls="false" link-report="pie3d.txt">
             <load-config filename="${teamcity.build.checkoutDir}/flex/modules/pie-3d-chart-module.xml"/>
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
                 <url rsl-url="framework_3.3.0.4852.swz"/>
@@ -519,11 +557,15 @@
                 <url rsl-url="rpc_3.3.0.4852.swf"/>
             </runtime-shared-library-path>
         </mxmlc>
+        <SWFSize artifactPath="${deployment.path}/Pie3DChartModule.swf" key="${ei.key}" secretKey="${ei.secret.key}" component="Pie3DChartModule"
+            sizeAPIKey="${size.api.key}"/>
+        <SWFAnalysis linkReportPath="pie3d.txt" key="${ei.key}" secretKey="${ei.secret.key}" component="Pie3DChartModule"
+                classAnalysisAPIKey="${analysis.api.key}" packageFilter="com.easyinsight"/>
     </target>
 
     <target name="module.barchart">
         <mxmlc file="${teamcity.build.checkoutDir}/flex/src/com/easyinsight/analysis/charts/yaxisbased/bar/BarChartModule.mxml" output="${flex.path}/BarChartModule.swf"
-               static-rsls="false">
+               static-rsls="false" link-report="bar.txt">
             <load-config filename="${teamcity.build.checkoutDir}/flex/modules/bar-chart-module.xml"/>
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
                 <url rsl-url="framework_3.3.0.4852.swz"/>
@@ -540,11 +582,15 @@
                 <url rsl-url="rpc_3.3.0.4852.swf"/>
             </runtime-shared-library-path>
         </mxmlc>
+        <SWFSize artifactPath="${deployment.path}/BarChartModule.swf" key="${ei.key}" secretKey="${ei.secret.key}" component="BarChartModule"
+            sizeAPIKey="${size.api.key}"/>
+        <SWFAnalysis linkReportPath="bar.txt" key="${ei.key}" secretKey="${ei.secret.key}" component="BarChartModule"
+                classAnalysisAPIKey="${analysis.api.key}" packageFilter="com.easyinsight"/>
     </target>
 
     <target name="module.bar3dchart">
         <mxmlc file="${teamcity.build.checkoutDir}/flex/src/com/easyinsight/analysis/charts/yaxisbased/bar/Bar3DChartModule.mxml" output="${flex.path}/Bar3DChartModule.swf"
-               static-rsls="false">
+               static-rsls="false" link-report="bar3d.txt">
             <load-config filename="${teamcity.build.checkoutDir}/flex/modules/bar-3d-chart-module.xml"/>
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
                 <url rsl-url="framework_3.3.0.4852.swz"/>
@@ -561,11 +607,15 @@
                 <url rsl-url="rpc_3.3.0.4852.swf"/>
             </runtime-shared-library-path>
         </mxmlc>
+        <SWFSize artifactPath="${deployment.path}/Bar3DChartModule.swf" key="${ei.key}" secretKey="${ei.secret.key}" component="Bar3DChartModule"
+            sizeAPIKey="${size.api.key}"/>
+        <SWFAnalysis linkReportPath="bar3d.txt" key="${ei.key}" secretKey="${ei.secret.key}" component="Bar3DChartModule"
+                classAnalysisAPIKey="${analysis.api.key}" packageFilter="com.easyinsight"/>
     </target>
 
     <target name="module.areachart">
         <mxmlc file="${teamcity.build.checkoutDir}/flex/src/com/easyinsight/analysis/charts/twoaxisbased/area/AreaChartModule.mxml" output="${flex.path}/AreaChartModule.swf"
-               static-rsls="false">
+               static-rsls="false" link-report="area.txt">
             <load-config filename="${teamcity.build.checkoutDir}/flex/modules/area-chart-module.xml"/>
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
                 <url rsl-url="framework_3.3.0.4852.swz"/>
@@ -582,11 +632,15 @@
                 <url rsl-url="rpc_3.3.0.4852.swf"/>
             </runtime-shared-library-path>
         </mxmlc>
+        <SWFSize artifactPath="${deployment.path}/AreaChartModule.swf" key="${ei.key}" secretKey="${ei.secret.key}" component="AreaChartModule"
+            sizeAPIKey="${size.api.key}"/>
+        <SWFAnalysis linkReportPath="area.txt" key="${ei.key}" secretKey="${ei.secret.key}" component="AreaChartModule"
+                classAnalysisAPIKey="${analysis.api.key}" packageFilter="com.easyinsight"/>
     </target>
 
     <target name="module.area3dchart">
         <mxmlc file="${teamcity.build.checkoutDir}/flex/src/com/easyinsight/analysis/charts/twoaxisbased/area/Area3DChartModule.mxml" output="${flex.path}/Area3DChartModule.swf"
-               static-rsls="false">
+               static-rsls="false" link-report="area3d.txt">
             <load-config filename="${teamcity.build.checkoutDir}/flex/modules/area-3d-chart-module.xml"/>
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
                 <url rsl-url="framework_3.3.0.4852.swz"/>
@@ -603,11 +657,15 @@
                 <url rsl-url="rpc_3.3.0.4852.swf"/>
             </runtime-shared-library-path>
         </mxmlc>
+        <SWFSize artifactPath="${deployment.path}/Area3DChartModule.swf" key="${ei.key}" secretKey="${ei.secret.key}" component="Area3DChartModule"
+            sizeAPIKey="${size.api.key}"/>
+        <SWFAnalysis linkReportPath="area3d.txt" key="${ei.key}" secretKey="${ei.secret.key}" component="Area3DChartModule"
+                classAnalysisAPIKey="${analysis.api.key}" packageFilter="com.easyinsight"/>
     </target>
 
     <target name="module.linechart">
         <mxmlc file="${teamcity.build.checkoutDir}/flex/src/com/easyinsight/analysis/charts/twoaxisbased/line/LineChartModule.mxml" output="${flex.path}/LineChartModule.swf"
-               static-rsls="false">
+               static-rsls="false" link-report="line.txt">
             <load-config filename="${teamcity.build.checkoutDir}/flex/modules/line-chart-module.xml"/>
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
                 <url rsl-url="framework_3.3.0.4852.swz"/>
@@ -624,11 +682,15 @@
                 <url rsl-url="rpc_3.3.0.4852.swf"/>
             </runtime-shared-library-path>
         </mxmlc>
+        <SWFSize artifactPath="${deployment.path}/LineChartModule.swf" key="${ei.key}" secretKey="${ei.secret.key}" component="LineChartModule"
+            sizeAPIKey="${size.api.key}"/>
+        <SWFAnalysis linkReportPath="line.txt" key="${ei.key}" secretKey="${ei.secret.key}" component="LineChartModule"
+                classAnalysisAPIKey="${analysis.api.key}" packageFilter="com.easyinsight"/>
     </target>
 
     <target name="module.line3dchart">
         <mxmlc file="${teamcity.build.checkoutDir}/flex/src/com/easyinsight/analysis/charts/twoaxisbased/line/Line3DChartModule.mxml" output="${flex.path}/Line3DChartModule.swf"
-               static-rsls="false">
+               static-rsls="false" link-report="line3d.txt">
             <load-config filename="${teamcity.build.checkoutDir}/flex/modules/line-3d-chart-module.xml"/>
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
                 <url rsl-url="framework_3.3.0.4852.swz"/>
@@ -645,11 +707,15 @@
                 <url rsl-url="rpc_3.3.0.4852.swf"/>
             </runtime-shared-library-path>
         </mxmlc>
+        <SWFSize artifactPath="${deployment.path}/Line3DChartModule.swf" key="${ei.key}" secretKey="${ei.secret.key}" component="Line3DChartModule"
+            sizeAPIKey="${size.api.key}"/>
+        <SWFAnalysis linkReportPath="line3d.txt" key="${ei.key}" secretKey="${ei.secret.key}" component="Line3DChartModule"
+                classAnalysisAPIKey="${analysis.api.key}" packageFilter="com.easyinsight"/>
     </target>
 
     <target name="module.bubblechart">
         <mxmlc file="${teamcity.build.checkoutDir}/flex/src/com/easyinsight/analysis/charts/bubble/BubbleChartModule.mxml" output="${flex.path}/BubbleChartModule.swf"
-               static-rsls="false">
+               static-rsls="false" link-report="bubble.txt">
             <load-config filename="${teamcity.build.checkoutDir}/flex/modules/bubble-chart-module.xml"/>
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
                 <url rsl-url="framework_3.3.0.4852.swz"/>
@@ -666,11 +732,15 @@
                 <url rsl-url="rpc_3.3.0.4852.swf"/>
             </runtime-shared-library-path>
         </mxmlc>
+        <SWFSize artifactPath="${deployment.path}/BubbleChartModule.swf" key="${ei.key}" secretKey="${ei.secret.key}" component="BubbleChartModule"
+            sizeAPIKey="${size.api.key}"/>
+        <SWFAnalysis linkReportPath="bubble.txt" key="${ei.key}" secretKey="${ei.secret.key}" component="BubbleChartModule"
+                classAnalysisAPIKey="${analysis.api.key}" packageFilter="com.easyinsight"/>
     </target>
 
     <target name="module.plotchart">
         <mxmlc file="${teamcity.build.checkoutDir}/flex/src/com/easyinsight/analysis/charts/plot/PlotChartModule.mxml" output="${flex.path}/PlotChartModule.swf"
-               static-rsls="false">
+               static-rsls="false" link-report="plot.txt">
             <load-config filename="${teamcity.build.checkoutDir}/flex/modules/plot-chart-module.xml"/>
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
                 <url rsl-url="framework_3.3.0.4852.swz"/>
@@ -687,11 +757,15 @@
                 <url rsl-url="rpc_3.3.0.4852.swf"/>
             </runtime-shared-library-path>
         </mxmlc>
+        <SWFSize artifactPath="${deployment.path}/PlotChartModule.swf" key="${ei.key}" secretKey="${ei.secret.key}" component="PlotChartModule"
+            sizeAPIKey="${size.api.key}"/>
+        <SWFAnalysis linkReportPath="plot.txt" key="${ei.key}" secretKey="${ei.secret.key}" component="PlotChartModule"
+                classAnalysisAPIKey="${analysis.api.key}" packageFilter="com.easyinsight"/>
     </target>
 
     <target name="module.map">
         <mxmlc file="${teamcity.build.checkoutDir}/flex/src/com/easyinsight/analysis/maps/MapModule.mxml" output="${flex.path}/MapModule.swf"
-               static-rsls="false">
+               static-rsls="false" link-report="map.txt">
             <load-config filename="${teamcity.build.checkoutDir}/flex/modules/map-module.xml"/>
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
                 <url rsl-url="framework_3.3.0.4852.swz"/>
@@ -708,11 +782,15 @@
                 <url rsl-url="rpc_3.3.0.4852.swf"/>
             </runtime-shared-library-path>
         </mxmlc>
+        <SWFSize artifactPath="${deployment.path}/MapModule.swf" key="${ei.key}" secretKey="${ei.secret.key}" component="MapModule"
+            sizeAPIKey="${size.api.key}"/>
+        <SWFAnalysis linkReportPath="map.txt" key="${ei.key}" secretKey="${ei.secret.key}" component="MapModule"
+                classAnalysisAPIKey="${analysis.api.key}" packageFilter="com.easyinsight"/>
     </target>
 
     <target name="module.crosstab">
         <mxmlc file="${teamcity.build.checkoutDir}/flex/src/com/easyinsight/analysis/crosstab/CrosstabModule.mxml" output="${flex.path}/CrosstabModule.swf"
-               static-rsls="false">
+               static-rsls="false" link-report="crosstab.txt">
             <load-config filename="${teamcity.build.checkoutDir}/flex/modules/crosstab-module.xml"/>
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
                 <url rsl-url="framework_3.3.0.4852.swz"/>
@@ -729,11 +807,15 @@
                 <url rsl-url="rpc_3.3.0.4852.swf"/>
             </runtime-shared-library-path>
         </mxmlc>
+        <SWFSize artifactPath="${deployment.path}/CrosstabModule.swf" key="${ei.key}" secretKey="${ei.secret.key}" component="CrosstabModule"
+            sizeAPIKey="${size.api.key}"/>
+        <SWFAnalysis linkReportPath="crosstab.txt" key="${ei.key}" secretKey="${ei.secret.key}" component="CrosstabModule"
+                classAnalysisAPIKey="${analysis.api.key}" packageFilter="com.easyinsight"/>
     </target>
 
     <target name="module.gauge">
         <mxmlc file="${teamcity.build.checkoutDir}/flex/src/com/easyinsight/analysis/gauge/GaugeModule.mxml" output="${flex.path}/GaugeModule.swf"
-               static-rsls="false">
+               static-rsls="false" link-report="gauge.txt">
             <load-config filename="${teamcity.build.checkoutDir}/flex/modules/gauge-module.xml"/>
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
                 <url rsl-url="framework_3.3.0.4852.swz"/>
@@ -750,11 +832,15 @@
                 <url rsl-url="rpc_3.3.0.4852.swf"/>
             </runtime-shared-library-path>
         </mxmlc>
+        <SWFSize artifactPath="${deployment.path}/GaugeModule.swf" key="${ei.key}" secretKey="${ei.secret.key}" component="GaugeModule"
+            sizeAPIKey="${size.api.key}"/>
+        <SWFAnalysis linkReportPath="gauge.txt" key="${ei.key}" secretKey="${ei.secret.key}" component="GaugeModule"
+                classAnalysisAPIKey="${analysis.api.key}" packageFilter="com.easyinsight"/>
     </target>
 
     <target name="module.treemap">
         <mxmlc file="${teamcity.build.checkoutDir}/flex/src/com/easyinsight/analysis/treemap/TreeMapModule.mxml" output="${flex.path}/TreeMapModule.swf"
-               static-rsls="false">
+               static-rsls="false" link-report="treemap.txt">
             <load-config filename="${teamcity.build.checkoutDir}/flex/modules/treemap-module.xml"/>
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
                 <url rsl-url="framework_3.3.0.4852.swz"/>
@@ -771,11 +857,15 @@
                 <url rsl-url="rpc_3.3.0.4852.swf"/>
             </runtime-shared-library-path>
         </mxmlc>
+        <SWFSize artifactPath="${deployment.path}/TreeMapModule.swf" key="${ei.key}" secretKey="${ei.secret.key}" component="TreeMapModule"
+            sizeAPIKey="${size.api.key}"/>
+        <SWFAnalysis linkReportPath="treemap.txt" key="${ei.key}" secretKey="${ei.secret.key}" component="TreeMapModule"
+                classAnalysisAPIKey="${analysis.api.key}" packageFilter="com.easyinsight"/>
     </target>
 
     <target name="module.tree">
         <mxmlc file="${teamcity.build.checkoutDir}/flex/src/com/easyinsight/analysis/tree/TreeModule.mxml" output="${flex.path}/TreeModule.swf"
-               static-rsls="false">
+               static-rsls="false" link-report="tree.txt">
             <load-config filename="${teamcity.build.checkoutDir}/flex/modules/tree-module.xml"/>
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
                 <url rsl-url="framework_3.3.0.4852.swz"/>
@@ -792,6 +882,10 @@
                 <url rsl-url="rpc_3.3.0.4852.swf"/>
             </runtime-shared-library-path>
         </mxmlc>
+        <SWFSize artifactPath="${deployment.path}/TreeModule.swf" key="${ei.key}" secretKey="${ei.secret.key}" component="TreeModule"
+            sizeAPIKey="${size.api.key}"/>
+        <SWFAnalysis linkReportPath="tree.txt" key="${ei.key}" secretKey="${ei.secret.key}" component="TreeModule"
+                classAnalysisAPIKey="${analysis.api.key}" packageFilter="com.easyinsight"/>
     </target>
 
     <target name="upload">
