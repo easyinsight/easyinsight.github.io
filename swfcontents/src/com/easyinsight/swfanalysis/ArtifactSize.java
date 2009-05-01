@@ -2,7 +2,7 @@ package com.easyinsight.swfanalysis;
 
 import org.apache.tools.ant.Task;
 import org.apache.tools.ant.BuildException;
-import com.easyinsight.dbservice.validated.*;
+import com.easyinsight.validated.*;
 
 import java.util.Calendar;
 import java.io.File;

@@ -11,7 +11,7 @@ import javax.xml.parsers.DocumentBuilder;
 import java.io.File;
 import java.util.*;
 
-import com.easyinsight.dbservice.validated.*;
+import com.easyinsight.validated.*;
 
 /**
  * User: James Boe
