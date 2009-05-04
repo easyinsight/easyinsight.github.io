@@ -386,7 +386,7 @@ public class FeedService implements IDataFeedService {
             }
             feedDefinition.setTags(tagList);
             final long feedID = feedDefinition.getDataFeedID();
-            FeedDefinition existingFeed = feedStorage.getFeedDefinitionData(feedDefinition.getDataFeedID());
+            FeedDefinition existingFeed = feedStorage.getFeedDefinitionData(feedDefinition.getDataFeedID(), conn, false);
             boolean newTaskGen = false;
             if (existingFeed.getRefreshDataInterval() != feedDefinition.getRefreshDataInterval()) {
                 newTaskGen = feedDefinition.getRefreshDataInterval() > 0;

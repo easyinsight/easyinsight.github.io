@@ -530,8 +530,12 @@ public class FeedStorage {
     }
 
     public FeedDefinition getFeedDefinitionData(long identifier, Connection conn) {
+        return getFeedDefinitionData(identifier, conn, true);
+    }
+
+    public FeedDefinition getFeedDefinitionData(long identifier, Connection conn, boolean cache) {
         FeedDefinition feedDefinition = null;
-        if(feedCache != null)
+        if(feedCache != null && cache)
             feedDefinition = (FeedDefinition) feedCache.get(identifier);
         if(feedDefinition != null) {
             LogClass.info("Cache hit for feed id: " + identifier);
@@ -628,7 +632,7 @@ public class FeedStorage {
         } catch (CacheException e) {
             LogClass.error(e);
         }
-        
+
         return feedDefinition;
     }
 
