@@ -118,7 +118,7 @@ public class Scheduler {
             lockStmt.setString(1, SCHEDULE_LOCK);
             lockStmt.executeUpdate();
         } catch (SQLException e) {
-            // we didn't get lock
+            LogClass.error(e);
         } finally {
             Database.instance().closeConnection(conn);
         }
@@ -132,8 +132,7 @@ public class Scheduler {
             lockStmt.execute();
             locked = true;
         } catch (SQLException e) {
-            // we didn't get lock
-            LogClass.error(e);
+            LogClass.debug("Failed to obtain distributed lock, assuming another app server has it.");
         } finally {
             Database.instance().closeConnection(conn);
         }
