@@ -3,6 +3,8 @@
 	borderStyle="solid" borderColor="#CCCCCC" cornerRadius="10" creationComplete="setup()" implements="com.easyinsight.goals.IGoalRenderer">
 	<mx:Script>
 		<![CDATA[
+        import com.easyinsight.icons.IconSelectionEvent;
+        import com.easyinsight.icons.IconSelectionWindow;
         import com.easyinsight.listing.DataFeedDescriptor;
         import com.easyinsight.solutions.InsightDescriptor;
         import com.easyinsight.solutions.Solution;
@@ -48,6 +50,8 @@
         [Bindable]
         private var _goalName:String;
 
+        public var blah:String;
+
         [Bindable]
         private var nodeText:String;
 
@@ -56,6 +60,7 @@
 
         [Bindable]
         private var subTreePresent:Boolean = false;
+
 
         public function set goalName(val:String):void {
             _goalName = val;
@@ -66,6 +71,11 @@
             this.addEventListener(DragEvent.DRAG_ENTER, dragEnterHandler);
 			this.addEventListener(DragEvent.DRAG_DROP, dragDropHandler);
 			this.addEventListener(DragEvent.DRAG_OVER, dragOverHandler);
+            this.addEventListener(MouseEvent.CLICK, onClick);
+        }
+
+        private function onClick(event:MouseEvent):void {
+            focusManager.setFocus(goalNameInput);
         }
 
         private function dragEnterHandler(event:DragEvent):void {
@@ -132,13 +142,31 @@
                 if (goalTreeNode.parent == null) {
                     rootNode = false;
                 }
-                _goalName = goalTreeNode.name;
+                _goalName = goalTreeNode.name == null ? "" : new String(goalTreeNode.name);
                 goalIcon = "/app/assets/icons/16x16/" + goalTreeNode.iconImage;
                 goalIconExists = goalTreeNode.iconImage != null && goalTreeNode.iconImage != "";
                 nodeText = "This goal is derived from the results of its children.";
                 nodeText = "This goal is bound to a data source.";
                 nodeText = "This goal is derived from its children.";
                 subTreePresent = goalTreeNode.subTreeID > 0;
+                contextMenu = new ContextMenu();
+                contextMenu.hideBuiltInItems();
+                var items:Array = [];
+                var editItem:ContextMenuItem = new ContextMenuItem("Edit Goal", true);
+                editItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, editNode);
+                items.push(editItem);
+                var createChildItem:ContextMenuItem = new ContextMenuItem("Create Child", true);
+                createChildItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, addChildNode);
+                items.push(createChildItem);
+                if (goalTreeNode.parent != null || (goalTreeNode.children != null && goalTreeNode.children.length > 0)) {
+                    var deleteItem:ContextMenuItem = new ContextMenuItem("Delete Goal", true);
+                    deleteItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, deleteSelf);
+                    items.push(deleteItem);
+                }
+                var newParentItem:ContextMenuItem = new ContextMenuItem("Insert New Parent", true);
+                newParentItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, newParent);
+                items.push(newParentItem);
+                contextMenu.customItems = items;
             }
         }
 
@@ -146,7 +174,7 @@
             return this.orgChartItem;
         }
 
-        private function deleteSelf(event:MouseEvent):void {
+        private function deleteSelf(event:ContextMenuEvent):void {
             var goalTreeNode:GoalTreeNode = orgChartItem.data as GoalTreeNode;
             var parent:GoalTreeNode = goalTreeNode.parent;
             parent.children.removeItemAt(parent.children.getItemIndex(goalTreeNode));
@@ -159,7 +187,16 @@
             dispatchEvent(new OrganizationChartRefreshEvent());
         }
 
-        private function addChildNode(event:MouseEvent):void {
+        private function newParent(event:ContextMenuEvent):void {
+            dispatchEvent(new GoalParentEvent(orgChartItem.data as GoalTreeNode));
+        }
+
+        private function copyNode():void {
+            //var goalTreeNode:GoalTreeNode = getSelectedNode();
+
+        }
+
+        private function addChildNode(event:ContextMenuEvent):void {
             var goalTreeNode:GoalTreeNode = orgChartItem.data as GoalTreeNode;
             if (goalTreeNode.children == null) {
                 goalTreeNode.children = new ArrayCollection();
@@ -211,9 +248,31 @@
             }
         }
 
-        private function editNode(event:MouseEvent):void {
+        private function assignIcon():void {
+            var iconWindow:IconSelectionWindow = IconSelectionWindow(PopUpManager.createPopUp(this, IconSelectionWindow, true));
+            iconWindow.addEventListener(IconSelectionEvent.ICON_SELECTION, iconSelected);
+            iconWindow.addEventListener(IconSelectionEvent.ICON_REMOVED, iconRemoved);
+            iconWindow.x = 300;
+            iconWindow.y = 300;
+        }
+
+        private function iconSelected(event:IconSelectionEvent):void {
+            var goalTreeNode:GoalTreeNode = orgChartItem.data as GoalTreeNode;
+            goalTreeNode.iconImage = event.icon.path;
+            goalIcon = "/app/assets/icons/32x32/" + event.icon.path;
+        }
+
+        private function iconRemoved(event:IconSelectionEvent):void {
+            var goalTreeNode:GoalTreeNode = orgChartItem.data as GoalTreeNode;
+            goalTreeNode.iconImage = null;
+            goalIcon = null;
+        }
+
+        private function editNode(event:Event):void {
+            var goalTreeNode:GoalTreeNode = orgChartItem.data as GoalTreeNode;
+            goalTreeNode.updateName();
             var goalNodeWindow:GoalNodeAdminWindow = new GoalNodeAdminWindow();
-            goalNodeWindow.goalTreeNode = orgChartItem.data as GoalTreeNode;
+            goalNodeWindow.goalTreeNode = goalTreeNode;
             goalNodeWindow.addEventListener(GoalEditEvent.GOAL_EDIT, goalEdited);
             PopUpManager.addPopUp(goalNodeWindow, this.parent.parent);
             PopUpManager.centerPopUp(goalNodeWindow);
@@ -231,8 +290,8 @@
 
         private function onNameChange():void {
             var goalTreeNode:GoalTreeNode = orgChartItem.data as GoalTreeNode;
-            goalTreeNode.name = goalNameInput.text;
-            goalNameInput.setFocus();
+            goalTreeNode.setBlah(goalNameInput.text);
+            //goalNameInput.setFocus();
         }
 
         private function subTreeConfiguration():void {
@@ -251,15 +310,17 @@
 		]]>
 	</mx:Script>
 	<mx:VBox id="layer2" verticalAlign="middle" paddingLeft="10" 
-           paddingRight="10" paddingTop="0" paddingBottom="0" width="140" height="60" horizontalAlign="center">
+           paddingRight="10" paddingTop="0" paddingBottom="0" width="140" height="60" horizontalAlign="center" mouseChildren="true">
 		<mx:HBox width="100%">
             <mx:HBox horizontalAlign="center" width="100%">
-                <mx:Image id="iconImage" source="{goalIcon}" visible="{goalIconExists}"/>
+                <mx:Box borderStyle="solid" borderThickness="1" click="assignIcon()" toolTip="Click to assign or change icon...">
+                    <mx:Image id="iconImage" source="{goalIcon}" visible="{goalIconExists}"/>
+                </mx:Box>
             </mx:HBox>
             <mx:Button icon="{subTreeIcon}" toolTip="Navigate into Sub Tree" click="subTreeConfiguration()" visible="{subTreePresent}"/>
         </mx:HBox>
         <mx:HBox>
-            <mx:TextInput id="goalNameInput" text="{_goalName}" fontSize="10" height="20" width="120" editable="false"/>
+            <mx:TextInput id="goalNameInput" text="{_goalName}" fontSize="10" height="20" width="120" editable="true" change="onNameChange()"/>
         </mx:HBox>
 	</mx:VBox>
 </OrgChartItemRendererBase>

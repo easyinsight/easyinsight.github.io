@@ -28,8 +28,11 @@ import com.easyinsight.analysis.AnalysisMeasure;
 
 		public var tags:ArrayCollection = new ArrayCollection();
 		public var name:String;
+		public var tempName:String;
 		public var description:String;
         public var iconImage:String;
+
+        private var _blah:String;
 
         public var users:ArrayCollection = new ArrayCollection();
         public var newSubTree:SolutionGoalTreeDescriptor;
@@ -40,6 +43,16 @@ import com.easyinsight.analysis.AnalysisMeasure;
 		public function GoalTreeNode()
 		{
 		}
+
+        public function setBlah(blah:String):void {
+            _blah = blah;
+        }
+
+        public function updateName():void {
+            if (_blah != null) {
+                name = _blah;
+            }
+        }
 
         public function getRenderer():IGoalRenderer {
             return _renderer;

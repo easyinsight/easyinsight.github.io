@@ -2,8 +2,7 @@
 <mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" creationComplete="setupData()" width="600" height="400">
     <mx:Script>
 		<![CDATA[
-import com.easyinsight.solutions.Solution;
-        import com.easyinsight.icons.IconSelectionEvent;
+        import com.easyinsight.solutions.Solution;
         import com.easyinsight.filtering.FilterDefinition;
         import com.easyinsight.analysis.AnalysisMeasure;
         import com.easyinsight.filtering.RollingDateRangeFilterDefinition;
@@ -11,7 +10,6 @@ import com.easyinsight.solutions.Solution;
         import com.easyinsight.analysis.AnalysisItemTypes;
         import com.easyinsight.analysis.AnalysisItem;
         import com.easyinsight.administration.feed.TagCloud;
-        import com.easyinsight.icons.IconSelectionWindow;
 
         import mx.managers.PopUpManager;
         import mx.collections.ArrayCollection;
@@ -185,12 +183,9 @@ import com.easyinsight.solutions.Solution;
             if (insightBound) {
                 _goalTreeNode.coreFeedID = feedID;
                 _goalTreeNode.coreFeedName = feedName;
-                var analysisItem:AnalysisMeasure = availableItemBox.selectedItem as AnalysisMeasure;
-                _goalTreeNode.analysisMeasure = analysisItem;
-                var highGoal:Boolean = highValuesGoal.selected;
-                _goalTreeNode.highIsGood = highGoal;
-                var targetValue:int = int(targetValueInput.text);
-                _goalTreeNode.goalValue = targetValue;
+                _goalTreeNode.analysisMeasure = availableItemBox.selectedItem as AnalysisMeasure;
+                _goalTreeNode.highIsGood = highValuesGoal.selected;
+                _goalTreeNode.goalValue = int(targetValueInput.text);
                 var selectedDate:AnalysisItem = availableDateBox.selectedItem as AnalysisItem;
                 if (datesAvailable && selectedDate != NONE) {
                     var rangeOption:RangeOption = rollingDateBox.selectedItem as RangeOption;
@@ -281,22 +276,7 @@ import com.easyinsight.solutions.Solution;
                 }
                 dateSelected = true;
             }
-        }
-
-        private function addIcon():void {
-            var iconWindow:IconSelectionWindow = IconSelectionWindow(PopUpManager.createPopUp(this, IconSelectionWindow, true));
-            iconWindow.addEventListener(IconSelectionEvent.ICON_SELECTION, iconSelected);
-            PopUpManager.centerPopUp(iconWindow);
-        }
-
-        private function iconSelected(event:IconSelectionEvent):void {
-            this.iconPath = "/app/assets/icons/32x32/" + event.icon.path;
-            this.iconFile = event.icon.path;
-        }
-
-        private function removeIcon():void {
-            this.iconPath = null;
-        }
+        }        
 
         private function installSolution(event:GoalSolutionInstallEvent):void {
             var solution:Solution = event.solution;
@@ -345,11 +325,6 @@ import com.easyinsight.solutions.Solution;
                     </mx:FormItem>
                     <mx:FormItem label="Description:" fontFamily="Tahoma" fontWeight="bold">
                         <mx:TextArea id="descriptionTextArea" width="300" height="100" text="{nodeDescription}" fontFamily="Lucida Grande" fontWeight="normal"/>
-                    </mx:FormItem>
-                    <mx:FormItem label="Icon:" direction="horizontal" fontFamily="Tahoma" fontWeight="bold">
-                        <mx:Image source="{iconPath}"/>
-                        <mx:Button label="Add or Change Icon..." click="addIcon()" fontFamily="Lucida Grande" fontWeight="normal"/>
-                        <mx:Button icon="{deleteIcon}" toolTip="Remove Icon" click="removeIcon()" fontFamily="Lucida Grande" fontWeight="normal"/>
                     </mx:FormItem>
                 </mx:Form>
             </mx:Canvas>

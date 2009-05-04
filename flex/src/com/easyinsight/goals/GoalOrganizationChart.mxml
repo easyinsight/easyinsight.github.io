@@ -7,12 +7,8 @@
     <mx:Script>
 		<![CDATA[
         import ilog.orgchart.OrgChartEvent;
-import ilog.orgchart.OrgChartItem;
-import mx.collections.ArrayCollection;
+        import mx.collections.ArrayCollection;
         import mx.managers.PopUpManager;
-
-        //[Bindable]
-        //private var _goalTreeNodes:ArrayCollection;
 
         [Bindable]
         private var _goalTreeNodes:GoalTreeNode;
@@ -45,6 +41,7 @@ import mx.collections.ArrayCollection;
 
         private function blah():void {
             myOrgChart.addEventListener(OrganizationChartRefreshEvent.ORG_CHART_REFRESH, orgRefresh);
+            myOrgChart.addEventListener(GoalParentEvent.ASSIGN_PARENT, newParent);
             myOrgChart.dataProvider = _goalTreeNodes;
         }
 
@@ -64,8 +61,8 @@ import mx.collections.ArrayCollection;
             return myOrgChart.selectedItems[0];
         }
 
-        private function newParent():void {
-            var node:GoalTreeNode = getSelectedNode();
+        private function newParent(event:GoalParentEvent):void {
+            var node:GoalTreeNode = event.goal;
             var newParent:GoalTreeNode = new GoalTreeNode();
             var children:ArrayCollection = new ArrayCollection();
             children.addItem(node);
@@ -121,10 +118,11 @@ import mx.collections.ArrayCollection;
 		]]>
     </mx:Script>
     <mx:HBox width="100%" backgroundColor="#BDC5E2" paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5">
-        <mx:Button icon="{addNodeIcon}" click="newNode()" toolTip="New Child" enabled="{itemSelected}"/>
+        <mx:Label text="Right click on the goals in the tree below to manipulate the tree structure. Double click on a goal to edit its properties."/>
+        <!--<mx:Button icon="{addNodeIcon}" click="newNode()" toolTip="New Child" enabled="{itemSelected}"/>
         <mx:Button icon="{newParentIcon}" click="newParent()" toolTip="New Parent" enabled="{itemSelected}"/>
         <mx:Button icon="{copyNodeIcon}" click="copyNode()" toolTip="Copy Goal" enabled="{itemSelected}"/>
-        <mx:Button icon="{deleteNodeIcon}" click="deleteNode()" toolTip="Delete Goal" enabled="{itemSelected}"/>
+        <mx:Button icon="{deleteNodeIcon}" click="deleteNode()" toolTip="Delete Goal" enabled="{itemSelected}"/>-->
     </mx:HBox>
     <mx:Canvas height="100%" width="100%">
         <orgchart:OrgChart id="myOrgChart"

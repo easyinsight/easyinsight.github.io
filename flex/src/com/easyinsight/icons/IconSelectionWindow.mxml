@@ -37,6 +37,10 @@ import mx.managers.PopUpManager;
         private function cancel():void {
             PopUpManager.removePopUp(this);
         }
+
+        private function removeIcon():void {
+            dispatchEvent(new IconSelectionEvent(IconSelectionEvent.ICON_REMOVED, null));
+        }
         ]]></mx:Script>
     <mx:RemoteObject id="iconService" destination="icons">
         <mx:method name="getIcons" result="gotIcons()"/>
@@ -47,6 +51,7 @@ import mx.managers.PopUpManager;
     </mx:HBox>
     <mx:TileList id="iconList" width="500" height="400" rowHeight="90" columnWidth="80" dataProvider="{icons}" itemRenderer="com.easyinsight.icons.IconButton"/>
     <mx:HBox width="100%" horizontalAlign="right">
+        <mx:Button label="No Icon" click="removeIcon()"/>
         <mx:Button label="Cancel" click="cancel()"/>
     </mx:HBox>
 </mx:TitleWindow>

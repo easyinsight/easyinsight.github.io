@@ -18,7 +18,7 @@ public class IconButton extends VBox {
     }
 
     private function clicked(event:MouseEvent):void {
-        dispatchEvent(new IconSelectionEvent(_iconFile));
+        dispatchEvent(new IconSelectionEvent(IconSelectionEvent.ICON_SELECTION, _iconFile));
     }
 
     override public function set data(val:Object):void {

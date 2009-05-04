@@ -19,7 +19,7 @@ package com.easyinsight.goals
 		}
 		
 		public function execute():void {
-			goalService.openAnalysisIfPossible.send(goalTreeID);
+			goalService.canAccessGoalTree.send(goalTreeID);
 		}
 
         private function gotGoalTree(event:ResultEvent):void {

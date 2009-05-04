@@ -35,7 +35,7 @@
 		<mx:method name="getDataFeedConfiguration" result="gotFeedDetails()"/>
 	</mx:RemoteObject>
 	<mx:Form styleName="TitleWindowContents">
-		<mx:FormItem label="Choose a Feed:">
+		<mx:FormItem label="Choose a Data Source:">
 			<mx:ComboBox id="feedBox" dataProvider="{descriptors}" selectedIndex="0" labelField="name"/>
 		</mx:FormItem>
 		<mx:FormItem label="" direction="horizontal">

@@ -58,11 +58,21 @@
             newSolutions.addItem(event.solutionDescriptor.solutionID);
         }
 
+        private function process(rootNode:GoalTreeNode):void {
+            rootNode.updateName();
+            if (rootNode.children != null) {
+                for each (var node:GoalTreeNode in rootNode.children) {
+                    process(node);
+                }
+            }
+        }
+
         private function save():void {
             _goalTree.name = nameInput.text;
             _goalTree.description = descriptionTextArea.text;
             _goalTree.newSolutions = newSolutions;
             goalsPolicy.updateContents();
+            process(_goalTree.rootNode);
             if (_goalTree.goalTreeID == 0) {
                 ProgressAlert.alert(this, "Saving goal tree...", "Saved successfully!", goalService.createGoalTree);
                 goalService.createGoalTree.send(_goalTree);

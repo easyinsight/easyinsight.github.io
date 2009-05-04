@@ -248,7 +248,7 @@ package ilog.orgchart
    *
    *  @includeExample examples/OrgChartExample.mxml -noswf
    */
-  public class OrgChart extends UIComponent implements IFocusManagerComponent
+  public class OrgChart extends UIComponent
   {
 
     private static var classConstructed:Boolean = initStyles();
@@ -767,7 +767,7 @@ package ilog.orgchart
       addEventListener(MouseEvent.MOUSE_WHEEL, mouseWheelHandler);
       addEventListener(MouseEvent.MOUSE_DOWN, mouseDownHandler);
       addEventListener(MouseEvent.MOUSE_UP, mouseUpHandler);
-      addEventListener(KeyboardEvent.KEY_DOWN, keyEventHandler);
+      //addEventListener(KeyboardEvent.KEY_DOWN, keyEventHandler);
 
     }
 
@@ -1727,7 +1727,7 @@ package ilog.orgchart
      * Forces a refresh of an item to reflect the visual changes.
      */
     private function invalidateItemRendererDisplayList(item:IListItemRenderer):void {
-      if (item == null) {
+      /*if (item == null) {
         return;
       }
       if (item is IFlexDisplayObject) {
@@ -1737,7 +1737,7 @@ package ilog.orgchart
         }
       } else if (item is UITextField) {
         UITextField(item).validateNow();
-      }
+      }*/
     }
 
     /**
