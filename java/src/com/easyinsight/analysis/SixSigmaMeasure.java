@@ -4,11 +4,20 @@ import com.easyinsight.core.Value;
 import com.easyinsight.core.NumericValue;
 import com.easyinsight.dataset.DataSet;
 
+import javax.persistence.*;
+import java.util.List;
+import java.util.Collection;
+import java.util.Arrays;
+import java.util.ArrayList;
+
 /**
  * User: James Boe
  * Date: Apr 20, 2009
  * Time: 9:57:19 AM
  */
+@Entity
+@Table(name="six_sigma_measure")
+@PrimaryKeyJoinColumn(name="analysis_item_id")
 public class SixSigmaMeasure extends AnalysisMeasure {
 
     public static final int DEFECTS_PER_MILLION_OPPS = 1;
@@ -16,10 +25,15 @@ public class SixSigmaMeasure extends AnalysisMeasure {
     public static final int YIELD_PERCENTAGE = 3;
     public static final int PROCESS_SIGMA = 4;
 
+    @Column(name="sigma_type")
     private int sigmaType;
 
+    @OneToOne
+    @JoinColumn(name="defects_measure_id")
     private AnalysisMeasure totalDefectsMeasure;
 
+    @OneToOne
+    @JoinColumn(name="opportunities_measure_id")
     private AnalysisMeasure totalOpportunitiesMeasure;
 
     public int getSigmaType() {
@@ -48,6 +62,13 @@ public class SixSigmaMeasure extends AnalysisMeasure {
 
     public boolean isCalculated() {
         return true;
+    }
+
+    @Override
+    public List<AnalysisItem> getAnalysisItems(List<AnalysisItem> allItems, Collection<AnalysisItem> insightItems) {
+        List<AnalysisItem> objectList = new ArrayList<AnalysisItem>();
+        objectList.addAll(Arrays.asList(totalDefectsMeasure, totalOpportunitiesMeasure));
+        return objectList;
     }
 
     public Value calculate(DataSet dataSet, IRow row) {
@@ -116,5 +137,12 @@ public class SixSigmaMeasure extends AnalysisMeasure {
     @Override
     public boolean isDerived() {
         return true;
+    }
+
+    @Override
+    public List<AnalysisItem> getDerivedItems() {
+        List<AnalysisItem> items = new ArrayList<AnalysisItem>();
+        items.add(this);
+        return items;
     }
 }

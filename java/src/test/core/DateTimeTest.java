@@ -34,7 +34,7 @@ public class DateTimeTest extends TestCase {
         FeedRegistry.initialize();
     }
 
-    public static long createDefaultTestDataSource(long userID) throws SQLException {
+    public static long createDefaultTestDataSource() throws SQLException {
         UserUploadService userUploadService = new UserUploadService();
 
         //IRow row3 = dataSet.createRow();
@@ -110,8 +110,8 @@ public class DateTimeTest extends TestCase {
     }
 
     public void testTimeUnits() throws SQLException {
-        long userID = TestUtil.getIndividualTestUser();
-        long dataSourceID = createDefaultTestDataSource(userID);
+        TestUtil.getIndividualTestUser();
+        long dataSourceID = createDefaultTestDataSource();
         DataService dataService = new DataService();
         WSListDefinition yearDefinition = new WSListDefinition();
         yearDefinition.setDataFeedID(dataSourceID);
