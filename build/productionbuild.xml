@@ -93,7 +93,7 @@
             <include name="**"/>
             <exclude name="**/test/apithrottling/**"/>
         </javac>
-        <junit printsummary="yes" haltonfailure="no">
+        <junit printsummary="yes" haltonfailure="no" maxmemory="256m">
             <classpath>
                 <pathelement location="${test.path}/classes"/>
                 <pathelement location="../java/src"/>
