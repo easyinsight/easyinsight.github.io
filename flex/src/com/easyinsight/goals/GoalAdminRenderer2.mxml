@@ -259,7 +259,7 @@
         private function iconSelected(event:IconSelectionEvent):void {
             var goalTreeNode:GoalTreeNode = orgChartItem.data as GoalTreeNode;
             goalTreeNode.iconImage = event.icon.path;
-            goalIcon = "/app/assets/icons/32x32/" + event.icon.path;
+            goalIcon = "/app/assets/icons/16x16/" + event.icon.path;
         }
 
         private function iconRemoved(event:IconSelectionEvent):void {

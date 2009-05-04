@@ -376,4 +376,6 @@ CartesianChart {
 
 CartesianChart3D {
     axisTitleStyleName:axisTitles;
+    fontFamily: "Tahoma";
+    fontSize: 14;
 }
