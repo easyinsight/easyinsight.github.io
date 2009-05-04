@@ -579,7 +579,7 @@ public class GoalStorage {
         } else {
             nodeID = goalTreeNode.getGoalTreeNodeID();
             PreparedStatement updateNodeStmt = conn.prepareStatement("UPDATE GOAL_TREE_NODE SET PARENT_GOAL_TREE_NODE_ID = ?, NAME = ?, DESCRIPTION = ?, FEED_ID = ?," +
-                    "GOAL_VALUE = ?, ANALYSIS_MEASURE_ID = ?, FILTER_ID = ?, HIGH_IS_GOOD = ?, ICON_IMAGE = ?, GOAL_TREE_ID = ?, GOAL_MILESTONE_ID = ?, SUB_TREE_ID = ? WHERE GOAL_TREE_NODE_ID = ?");
+                    "GOAL_VALUE = ?, ANALYSIS_MEASURE_ID = ?, FILTER_ID = ?, HIGH_IS_GOOD = ?, ICON_IMAGE = ?, GOAL_TREE_ID = ?, GOAL_MILESTONE_ID = ?, SUB_TREE_ID = ?, ICON_IMAGE = ? WHERE GOAL_TREE_NODE_ID = ?");
             if (goalTreeNode.getParent() == null) {
                 updateNodeStmt.setNull(1, Types.BIGINT);
             } else {
@@ -616,7 +616,8 @@ public class GoalStorage {
                 } else {
                     updateNodeStmt.setLong(12, goalTreeNode.getSubTreeID());
                 }
-                updateNodeStmt.setLong(13, goalTreeNode.getGoalTreeNodeID());
+                updateNodeStmt.setString(13, goalTreeNode.getIconImage());
+                updateNodeStmt.setLong(14, goalTreeNode.getGoalTreeNodeID());
             } else {
                 updateNodeStmt.setNull(5, Types.BIGINT);
                 updateNodeStmt.setNull(4, Types.BIGINT);
@@ -635,7 +636,8 @@ public class GoalStorage {
                 } else {
                     updateNodeStmt.setLong(12, goalTreeNode.getSubTreeID());
                 }
-                updateNodeStmt.setLong(13, goalTreeNode.getGoalTreeNodeID());
+                updateNodeStmt.setString(13, goalTreeNode.getIconImage());
+                updateNodeStmt.setLong(14, goalTreeNode.getGoalTreeNodeID());
             }
             updateNodeStmt.executeUpdate();
         }
