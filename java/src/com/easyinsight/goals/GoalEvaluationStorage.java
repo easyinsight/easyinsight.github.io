@@ -211,6 +211,37 @@ public class GoalEvaluationStorage {
         return goalValue;
     }
 
+    // given a start value, a end value, a start date, and an end date
+
+    private List<GoalValue> calculateSlope(long goalTreeNodeID, double startValue, double endValue, Date startDate, Date endDate, int interval) {
+        List<GoalValue> values = new ArrayList<GoalValue>();
+        long timeDelta = endDate.getTime() - startDate.getTime();
+        long intervals = timeDelta / interval;
+        double valueDelta = endValue - startValue;
+        double perIntervalChange = valueDelta / intervals;
+        for (int i = 0; i < intervals; i++) {
+            Date intervalDate = new Date(startDate.getTime() + (i * interval));
+            double intervalValue = startValue + perIntervalChange * i;
+            values.add(new GoalValue(goalTreeNodeID, intervalDate, intervalValue));
+        }
+        return values;
+    }
+
+    public List<GoalValue> calculateSlope(GoalTreeNode node, Date startDate, Date endDate) {
+        GoalTreeMilestone milestone = node.getMilestone();
+        Date milestoneEndDate = milestone.getMilestoneDate();
+        double milestoneValue = node.getGoalValue();
+        double startValue = 0;
+        List<GoalValue> values = calculateSlope(node.getGoalTreeNodeID(), startValue, milestoneValue, startDate, milestoneEndDate, 60 * 60 * 24 * 1000);
+        List<GoalValue> rangedValues = new ArrayList<GoalValue>();
+        for (GoalValue goalValue : values) {
+            if (goalValue.getDate().getTime() >= startDate.getTime() && goalValue.getDate().getTime() <= endDate.getTime()) {
+                rangedValues.add(goalValue);
+            }
+        }
+        return rangedValues;
+    }
+
     public List<GoalValue> getGoalValues(long goalTreeNodeID, Date startDate, Date endDate) {
         Connection conn = Database.instance().getConnection();
         try {

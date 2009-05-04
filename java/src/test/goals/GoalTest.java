@@ -15,6 +15,9 @@ import test.util.TestUtil;
 
 import java.util.*;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.sql.ResultSet;
 
 /**
  * User: James Boe
@@ -50,7 +53,7 @@ public class GoalTest extends TestCase {
         throw new RuntimeException();
     }
 
-    public void testGoalCreation() {
+    public void testGoalCreation() throws SQLException {
         long userID = TestUtil.getProUser();
         long dataSourceID = createDefaultTestDataSource(userID);
         GoalService goalService = new GoalService();
@@ -90,5 +93,20 @@ public class GoalTest extends TestCase {
         assertEquals(goalValue.getValue(), 600, .1);
         GoalOutcome goalOutcome = data.getGoalOutcome();
         assertEquals(GoalOutcome.POSITIVE, goalOutcome.getOutcomeState());
+        goalService.subscribeToGoal(data.getGoalTreeNodeID());
+        List<GoalTreeNodeData> datas = goalService.getGoals();
+        assertEquals(datas.size(), 1);
+        assertEquals(datas.get(0).getCurrentValue().getValue(), 600, .1);
+        new GoalService().deleteGoalTree(goalTreeID);
+        assertEquals(goalService.getGoals().size(), 0);        
+        Connection conn = Database.instance().getConnection();
+        try {
+            PreparedStatement queryStmt = conn.prepareStatement("SELECT * FROM GOAL_TREE_NODE WHERE GOAL_TREE_ID = ?");
+            queryStmt.setLong(1, goalTreeID);
+            ResultSet rs = queryStmt.executeQuery();
+            assertFalse(rs.next());
+        } finally {
+            Database.instance().closeConnection(conn);
+        }
     }
 }

@@ -290,6 +290,9 @@ public class GoalStorage {
         EIConnection conn = Database.instance().getConnection();
         try {
             conn.setAutoCommit(false);
+            PreparedStatement deleteNodeStmt = conn.prepareStatement("DELETE FROM GOAL_TREE_NODE WHERE GOAL_TREE_ID = ?");
+            deleteNodeStmt.setLong(1, goalTreeID);
+            deleteNodeStmt.executeUpdate();
             PreparedStatement deleteStmt = conn.prepareStatement("DELETE FROM GOAL_TREE WHERE GOAL_TREE_ID = ?");
             deleteStmt.setLong(1, goalTreeID);
             deleteStmt.executeUpdate();

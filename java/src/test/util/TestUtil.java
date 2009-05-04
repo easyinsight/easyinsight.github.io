@@ -11,6 +11,9 @@ import com.easyinsight.database.Database;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 
 import org.hibernate.Session;
 
@@ -65,6 +68,16 @@ public class TestUtil {
 
     public static long getProUser() {
         UserService userService = new UserService();
+        Connection conn = Database.instance().getConnection();
+        try {
+            PreparedStatement deleteStmt = conn.prepareStatement("DELETE ACCOUNT FROM USER, ACCOUNT WHERE USERNAME = ? AND USER.account_id = ACCOUNT.ACCOUNT_ID");
+            deleteStmt.setString(1, "prouser");
+            deleteStmt.executeUpdate();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        } finally {
+            Database.instance().closeConnection(conn);
+        }
         User user = new InternalUserService().retrieveUser("prouser");
         long userID;
         if (user == null) {
