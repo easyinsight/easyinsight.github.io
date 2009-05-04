@@ -125,7 +125,7 @@ public class DatabaseManager {
                     String databaseName = properties.getProperty(dbID + ".storage.name");
                     String user = properties.getProperty(dbID + ".storage.username");
                     String password = properties.getProperty(dbID + ".storage.password");
-                    Database database = Database.create(host, port, databaseName, user, password);
+                    Database database = Database.create(host, port, databaseName, user, password, dbID);
                     defineDateTable(database);
                     dbMap.put(dbID, database);
                 }

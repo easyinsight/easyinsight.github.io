@@ -30,12 +30,14 @@ public class Database {
     private SessionFactory sessionFactory;
     private static Database instance;
     private GenericObjectPool connectionPool;
+    private String id;
     private boolean addHibernate;
 
     private String urlTemplate = "jdbc:mysql://{0}:{1}/{2}";
 
-    private Database(String host, String port, String databaseName, String userName, String password, boolean addHibernate) {
+    private Database(String host, String port, String databaseName, String userName, String password, boolean addHibernate, String id) {
         dataSource = setupDataSource(host, port, databaseName, userName, password);
+        this.id = id;
         this.addHibernate = addHibernate;
         if (addHibernate) {
             try {
@@ -54,19 +56,23 @@ public class Database {
         }
     }
 
+    public String getID() {
+        return this.id;
+    }
+
     public static Database instance() {
         return instance;
     }
 
-    public static Database create(String host, String port, String databaseName, String userName, String password) {
-        return new Database(host, port, databaseName, userName, password, false);
+    public static Database create(String host, String port, String databaseName, String userName, String password, String id) {
+        return new Database(host, port, databaseName, userName, password, false, id);
     }
 
     public static void initialize() {
         if (instance == null) {
             instance = new Database(ConfigLoader.instance().getDatabaseHost(), ConfigLoader.instance().getDatabasePort(),
                 ConfigLoader.instance().getDatabaseName(), ConfigLoader.instance().getDatabaseUserName(),
-                ConfigLoader.instance().getDatabasePassword(), true);
+                ConfigLoader.instance().getDatabasePassword(), true, "Core");
         }
     }
 

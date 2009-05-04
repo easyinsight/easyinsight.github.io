@@ -580,12 +580,17 @@ public class DataStorage {
         String parameters = paramBuilder.toString();
         String insertSQL = "INSERT INTO " + getTableName() + " (" + columns + ") VALUES (" + parameters + ")";
         PreparedStatement insertStmt = storageConn.prepareStatement(insertSQL);
-        for (IRow row : dataSet.getRows()) {
-            int i = 1;
-            for (KeyMetadata keyMetadata : keys.values()) {
-                i = setValue(insertStmt, row, i, keyMetadata);
+        try {
+            for (IRow row : dataSet.getRows()) {
+                int i = 1;
+                for (KeyMetadata keyMetadata : keys.values()) {
+                    i = setValue(insertStmt, row, i, keyMetadata);
+                }
+                insertStmt.execute();
             }
-            insertStmt.execute();
+        } catch (SQLException e) {
+            LogClass.error("Failure on persistence where SQL = " + insertSQL + ", database = " + database.getID());
+            throw e;
         }
     }
 
