@@ -24,12 +24,12 @@ public class JiraTest extends TestCase {
     public void testJiraDataSourceCreation() {
         TestUtil.getIndividualTestUser();
         JiraDataSource jiraDataSource = new JiraDataSource();
-        jiraDataSource.setUrl("http://5.92.30.62:8686");
+        jiraDataSource.setUrl("http://ec2-67-202-6-200.compute-1.amazonaws.com:8080");
         UserUploadService uploadService = new UserUploadService();
         Credentials credentials = new Credentials();
-        credentials.setUserName("testuser");
-        credentials.setPassword("password");
-        //long dataSourceID = uploadService.newExternalDataSource(jiraDataSource, credentials);
+        credentials.setUserName("apiuser");
+        credentials.setPassword("e@symone$");
+        long dataSourceID = uploadService.newExternalDataSource(jiraDataSource, credentials);
         
     }
 }
