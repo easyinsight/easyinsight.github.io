@@ -16,9 +16,9 @@
 
             private var itemRendererClass:Class;
 
-            protected var operation:Operation;
+            public var operation:Operation;
 
-            protected var fullListOperation:Operation;
+            public var fullListOperation:Operation;
 
             [Bindable]
             private var _genre:String;

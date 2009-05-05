@@ -3,7 +3,9 @@
         paddingTop="10" paddingLeft="10" paddingRight="10" paddingBottom="10">
 	<mx:Script> 
 		<![CDATA[
-import mx.collections.ArrayCollection;
+import com.easyinsight.util.ProgressAlert;
+
+        import mx.collections.ArrayCollection;
 
         [Bindable]
         private var _goalTreeNode:GoalTreeNode;
@@ -58,6 +60,8 @@ import mx.collections.ArrayCollection;
             accordion.getHeaderAt(3).setStyle("fontfamily", "Tahoma");
             accordion.getHeaderAt(3).setStyle("fontWeight", "bold");
             accordion.getHeaderAt(3).setStyle("icon", reportIcon);
+            ProgressAlert.alert(this, "Retrieving possible data...", null, feedService.searchForSubscribedFeeds,
+                    solutionService.getSolutions, goalService.getGoalTreesForInstall, analysisService.getInsightDescriptors);
             feedService.searchForSubscribedFeeds.send();
             solutionService.getSolutions.send();
             goalService.getGoalTreesForInstall.send(_goalTreeID);

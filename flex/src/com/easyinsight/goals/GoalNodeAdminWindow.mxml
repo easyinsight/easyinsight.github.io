@@ -404,8 +404,8 @@
                             </mx:Box>
                             <mx:DataGrid width="100%" height="100%" dataProvider="{associatedReports}">
                                 <mx:columns>
-                                    <mx:DataGridColumn headerText="Name" dataField="insightName" headerRenderer="com.easyinsight.groups.CustomGroupHeader"/>
-                                    <mx:DataGridColumn headerText="" dataField="insightName" sortable="false" width="50"
+                                    <mx:DataGridColumn headerText="Name" dataField="name" headerRenderer="com.easyinsight.groups.CustomGroupHeader"/>
+                                    <mx:DataGridColumn headerText="" dataField="name" sortable="false" width="50"
                                                        itemRenderer="com.easyinsight.goals.AssociatedInsightsAdminControls"/>
                                 </mx:columns>
                             </mx:DataGrid>

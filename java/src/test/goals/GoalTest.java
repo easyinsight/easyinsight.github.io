@@ -87,6 +87,12 @@ public class GoalTest extends TestCase {
         Date startDate = cal.getTime();
         cal.set(Calendar.DAY_OF_MONTH, 30);
         Date endDate = cal.getTime();
+        GoalTreeMilestone milestone = new GoalTreeMilestone();
+        milestone.setMilestoneName("Milestone");
+        milestone.setMilestoneDate(cal.getTime());
+        goalService.saveMilestone(milestone);
+        dataNode.setMilestone(milestone);
+        goalService.updateGoalTree(goalTree);
         GoalTree dataTree = goalService.createDataTree(goalTreeID, startDate, endDate);
         GoalTreeNodeData data = (GoalTreeNodeData) dataTree.getRootNode().getChildren().get(0);
         GoalValue goalValue = data.getCurrentValue();
@@ -97,6 +103,7 @@ public class GoalTest extends TestCase {
         List<GoalTreeNodeData> datas = goalService.getGoals();
         assertEquals(datas.size(), 1);
         assertEquals(datas.get(0).getCurrentValue().getValue(), 600, .1);
+        System.out.println("slope = " + new GoalEvaluationStorage().calculateSlope(data.getGoalTreeNodeID(), startDate, endDate));
         new GoalService().deleteGoalTree(goalTreeID);
         assertEquals(goalService.getGoals().size(), 0);        
         Connection conn = Database.instance().getConnection();

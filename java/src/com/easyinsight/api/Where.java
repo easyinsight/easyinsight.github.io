@@ -1,6 +1,6 @@
 package com.easyinsight.api;
 
-import com.easyinsight.api.NumberWhere;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * User: James Boe
@@ -13,6 +13,7 @@ public class Where {
     private DateWhere[] dateWheres;
     private DayWhere[] dayWheres;
 
+    @Nullable
     public StringWhere[] getStringWheres() {
         return stringWheres;
     }
@@ -21,6 +22,7 @@ public class Where {
         this.stringWheres = stringWheres;
     }
 
+    @Nullable
     public NumberWhere[] getNumberWheres() {
         return numberWheres;
     }
@@ -29,6 +31,7 @@ public class Where {
         this.numberWheres = numberWheres;
     }
 
+    @Nullable
     public DateWhere[] getDateWheres() {
         return dateWheres;
     }
@@ -37,6 +40,7 @@ public class Where {
         this.dateWheres = dateWheres;
     }
 
+    @Nullable
     public DayWhere[] getDayWheres() {
         return dayWheres;
     }

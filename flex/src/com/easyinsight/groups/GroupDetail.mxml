@@ -34,6 +34,8 @@
         import com.easyinsight.discussion.MessagePostedEvent;
         import com.easyinsight.discussion.NewMessageWindow;
 
+        import com.easyinsight.util.ProgressAlert;
+
         import mx.controls.Alert;
         import mx.managers.BrowserManager;
         import mx.managers.PopUpManager;
@@ -169,6 +171,8 @@
             fragmentObject.groupID = String(groupID);
             var fragmentString:String = URLUtil.objectToString(fragmentObject);
             BrowserManager.getInstance().setFragment(fragmentString);
+            ProgressAlert.alert(this, "Retrieving group data...", null, groupService.getGroup, groupService.getGroupMessages,
+                    groupService.getGoalTrees, groupService.getGoals, groupInsights.operation, groupFeeds.operation);
             groupService.getGroup.send(groupID);
             groupService.getGroupMessages.send(groupID, null, null);
             groupService.getGoalTrees.send(groupID);
@@ -289,6 +293,8 @@
         }
 
         private function onGroupRefresh(event:GroupRefreshEvent):void {
+            ProgressAlert.alert(this, "Refreshing group data...", null, groupInsights.operation, groupFeeds.operation,
+                    groupService.getGoalTrees, groupService.getGoals);
             groupInsights.refreshData();
             groupFeeds.refreshData();
             groupService.getGoalTrees.send(groupID);
@@ -332,6 +338,8 @@
         }
 
         private function removed():void {
+            ProgressAlert.alert(this, "Retrieving group data...", null, groupInsights.operation, groupFeeds.operation,
+                    groupService.getGoalTrees, groupService.getGoals);
             groupInsights.refreshData();
             groupFeeds.refreshData();
             groupService.getGoalTrees.send(groupID);

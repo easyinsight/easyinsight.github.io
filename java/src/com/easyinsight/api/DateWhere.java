@@ -1,5 +1,7 @@
 package com.easyinsight.api;
 
+import org.jetbrains.annotations.Nullable;
+
 import java.util.Date;
 
 /**
@@ -12,6 +14,7 @@ public class DateWhere {
     private Comparison comparison;
     private Date value;
 
+    @Nullable    
     public String getKey() {
         return key;
     }
@@ -20,6 +23,7 @@ public class DateWhere {
         this.key = key;
     }
 
+    @Nullable
     public Comparison getComparison() {
         return comparison;
     }
@@ -28,6 +32,7 @@ public class DateWhere {
         this.comparison = comparison;
     }
 
+    @Nullable
     public Date getValue() {
         return value;
     }

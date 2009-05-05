@@ -14,6 +14,7 @@ import java.util.ArrayList;
  * Time: 2:34:49 PM
  */
 public abstract class PublishService {
+
     protected final DataSet toDataSet(Row row) {
         DataSet dataSet = new DataSet();
         dataSet.addRow(toRow(row));
@@ -33,18 +34,27 @@ public abstract class PublishService {
         StringPair[] stringPairs = row.getStringPairs();
         if (stringPairs != null) {
             for (StringPair stringPair : stringPairs) {
+                if (stringPair.getKey() == null) {
+                    throw new ServiceRuntimeException("StringPair with value " + stringPair.getValue() + " had no key--key is a required field.");
+                }
                 transformedRow.addValue(stringPair.getKey(), stringPair.getValue() == null ? new EmptyValue() : new StringValue(stringPair.getValue()));
             }
         }
         NumberPair[] numberPairs = row.getNumberPairs();
         if (numberPairs != null) {
             for (NumberPair numberPair : numberPairs) {
+                if (numberPair.getKey() == null) {
+                    throw new ServiceRuntimeException("NumberPair with value " + numberPair.getValue() + " had no key--key is a required field.");
+                }
                 transformedRow.addValue(numberPair.getKey(), new NumericValue(numberPair.getValue()));
             }
         }
         DatePair[] datePairs = row.getDatePairs();
         if (datePairs != null) {
             for (DatePair datePair : datePairs) {
+                if (datePair.getKey() == null) {
+                    throw new ServiceRuntimeException("DatePair with value " + datePair.getValue() + " had no key--key is a required field.");
+                }
                 transformedRow.addValue(datePair.getKey(), datePair.getValue() == null ? new EmptyValue() : new DateValue(datePair.getValue()));
             }
         }
@@ -56,25 +66,45 @@ public abstract class PublishService {
         StringWhere[] stringWheres = where.getStringWheres();
         if (stringWheres != null) {
             for (StringWhere stringWhere : stringWheres) {
+                if (stringWhere.getKey() == null) {
+                    throw new ServiceRuntimeException("StringWhere with value " + stringWhere.getValue() + " had no key--key is a required field.");
+                }
                 wheres.add(new com.easyinsight.storage.StringWhere(new NamedKey(stringWhere.getKey()), stringWhere.getValue()));
             }
         }
         NumberWhere[] numberWheres = where.getNumberWheres();
         if (numberWheres != null) {
             for (NumberWhere numberWhere : numberWheres) {
+                if (numberWhere.getKey() == null) {
+                    throw new ServiceRuntimeException("NumberWhere with value " + numberWhere.getValue() + " had no key--key is a required field.");
+                }
+                if (numberWhere.getComparison() == null) {
+                    throw new ServiceRuntimeException("NumberWhere with key " + numberWhere.getKey() + " had no comparison--comparison is a required field.");
+                }
                 wheres.add(new com.easyinsight.storage.NumericWhere(new NamedKey(numberWhere.getKey()), numberWhere.getValue(), numberWhere.getComparison().createStorageComparison()));
             }
         }
         DateWhere[] dateWheres = where.getDateWheres();
         if (dateWheres != null) {
             for (DateWhere dateWhere : dateWheres) {
+                if (dateWhere.getKey() == null) {
+                    throw new ServiceRuntimeException("DateWhere with value " + dateWhere.getValue() + " had no key--key is a required field.");
+                }
+                if (dateWhere.getComparison() == null) {
+                    throw new ServiceRuntimeException("DateWhere with key " + dateWhere.getKey() + " had no comparison--comparison is a required field.");
+                }
                 wheres.add(new com.easyinsight.storage.DateWhere(new NamedKey(dateWhere.getKey()), dateWhere.getValue(), dateWhere.getComparison().createStorageComparison()));
             }
         }
         DayWhere[] dayWheres = where.getDayWheres();
         if (dayWheres != null) {
             for (DayWhere dayWhere : dayWheres) {
-                System.out.println("Updating day " + dayWhere.getDayOfYear() + " - " + dayWhere.getYear());
+                if (dayWhere.getKey() == null) {
+                    throw new ServiceRuntimeException("DayWhere with value " + dayWhere.getDayOfYear() + " had no key--key is a required field.");
+                }
+                if (dayWhere.getYear() == 0) {
+                    throw new ServiceRuntimeException("DayWhere with key " + dayWhere.getKey() + " was set to year 0.");
+                }
                 wheres.add(new com.easyinsight.storage.DayWhere(new NamedKey(dayWhere.getKey()), dayWhere.getYear(), dayWhere.getDayOfYear()));
             }
         }

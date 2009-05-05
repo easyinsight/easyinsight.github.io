@@ -1,5 +1,7 @@
 package com.easyinsight.api;
 
+import org.jetbrains.annotations.Nullable;
+
 /**
  * User: James Boe
  * Date: Jan 15, 2009
@@ -10,6 +12,7 @@ public class Row {
     private NumberPair[] numberPairs;
     private DatePair[] datePairs;
 
+    @Nullable
     public StringPair[] getStringPairs() {
         return stringPairs;
     }
@@ -18,6 +21,7 @@ public class Row {
         this.stringPairs = stringPairs;
     }
 
+    @Nullable
     public NumberPair[] getNumberPairs() {
         return numberPairs;
     }
@@ -26,6 +30,7 @@ public class Row {
         this.numberPairs = numberPairs;
     }
 
+    @Nullable
     public DatePair[] getDatePairs() {
         return datePairs;
     }

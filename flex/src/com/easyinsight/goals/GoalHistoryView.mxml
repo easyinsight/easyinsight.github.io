@@ -3,7 +3,7 @@
     <mx:Script><![CDATA[
         import mx.collections.ArrayCollection;
         import mx.controls.Alert;
-import mx.graphics.BitmapFill;
+        import mx.graphics.BitmapFill;
 
         [Bindable]
         private var goalHistory:ArrayCollection;
@@ -27,6 +27,12 @@ import mx.graphics.BitmapFill;
 
         private var _goalTreeNodeData:GoalTreeNodeData;
 
+        [Bindable]
+        private var showSlope:Boolean;
+
+        [Bindable]
+        private var slopeData:ArrayCollection;
+
         private function setup():void {
             areaFill = new BitmapFill();
             areaFill.source = areaBackground;
@@ -35,6 +41,14 @@ import mx.graphics.BitmapFill;
                 _endDate = new Date();
             }
             goalService.getGoalValues.send(_goalTreeNodeData.goalTreeNodeID, _startDate, _endDate);
+            if (_goalTreeNodeData.milestone != null) {
+                goalService.calculateSlope.send(_goalTreeNodeData.goalTreeNodeID, _startDate, _endDate);
+            }
+        }
+
+        private function gotSlope():void {
+            slopeData = goalService.calculateSlope.lastResult as ArrayCollection;
+            showSlope = true;
         }
 
         public function set startDate(val:Date):void {
@@ -69,6 +83,7 @@ import mx.graphics.BitmapFill;
         ]]></mx:Script>
     <mx:RemoteObject destination="goalService" id="goalService">
         <mx:method name="getGoalValues" result="gotValues()"/>
+        <mx:method name="calculateSlope" result="gotSlope()"/>
         <mx:method name="subscribeToGoal" result="subscribedToGoal()"/>
     </mx:RemoteObject>
     <mx:SeriesSlide id="slideIn" duration="1000" direction="up"/>
@@ -87,6 +102,7 @@ import mx.graphics.BitmapFill;
             </mx:horizontalAxis>
             <mx:series>
                 <mx:AreaSeries yField="value" xField="date" form="curve" areaFill="{areaFill}" showDataEffect="{slideIn}" hideDataEffect="{slideOut}"/>
+                <!--<mx:LineSeries yField="value" xField="date" form="segment" visible="{showSlope}" dataProvider="{slopeData}"/>-->
             </mx:series>
         </mx:AreaChart>
     </mx:VBox>

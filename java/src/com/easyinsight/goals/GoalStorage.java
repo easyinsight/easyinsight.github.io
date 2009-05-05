@@ -306,7 +306,7 @@ public class GoalStorage {
         }
     }
 
-    private GoalTreeNode retrieveNode(long nodeID, Connection conn) throws SQLException {
+    GoalTreeNode retrieveNode(long nodeID, Connection conn) throws SQLException {
         PreparedStatement queryNodeStmt = conn.prepareStatement("SELECT FEED_ID, GOAL_VALUE, ANALYSIS_MEASURE_ID, FILTER_ID, " +
                 "NAME, DESCRIPTION, high_is_good, ICON_IMAGE, GOAL_MILESTONE_ID FROM " +
                 "GOAL_TREE_NODE WHERE GOAL_TREE_NODE_ID = ?");

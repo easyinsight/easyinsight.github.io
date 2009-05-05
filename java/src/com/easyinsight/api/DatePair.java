@@ -1,5 +1,7 @@
 package com.easyinsight.api;
 
+import org.jetbrains.annotations.Nullable;
+
 import java.util.Date;
 
 /**
@@ -11,6 +13,7 @@ public class DatePair {
     private String key;
     private Date value;
 
+    @Nullable    
     public String getKey() {
         return key;
     }
@@ -19,6 +22,7 @@ public class DatePair {
         this.key = key;
     }
 
+    @Nullable    
     public Date getValue() {
         return value;
     }

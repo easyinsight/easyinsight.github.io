@@ -11,6 +11,10 @@
 
         import com.easyinsight.analysis.AnalysisCloseEvent;
 
+        import mx.controls.Alert;
+        import mx.events.CloseEvent;
+        import mx.validators.Validator;
+
         [Bindable]
         private var _goalTree:GoalTree;
         [Bindable]
@@ -24,21 +28,33 @@
         [Bindable]
         private var newSolutions:ArrayCollection = new ArrayCollection();
 
+        private var validators:Array;
+
+        private var changed:Boolean = false;
+
         public function set goalTreeID(val:int):void {
             _goalTreeID = val;
         }
 
         private function onCreation():void {
             addEventListener(SolutionInstallRequiredEvent.SOLUTION_INSTALL, onNewSolution);
+            addEventListener(GoalTreeChangedEvent.GOAL_TREE_CHANGED, onTreeChanged);
+            validators = [ nameValidator ];
+        }
+
+        private function onTreeChanged(event:GoalTreeChangedEvent):void {
+            changed = true;
         }
 
         override protected function createChildren():void {
             super.createChildren();
             if (_goalTreeID == 0) {
+                changed = true;
                 _goalTree = new GoalTree();
                 _goalTree.rootNode = new GoalTreeNode();
                 var userStub:UserStub = new UserStub();
                 userStub.userID = User.getInstance().userID;
+                userStub.name = User.getInstance().userName;
                 _goalTree.administrators.addItem(userStub);
                 rootNode = _goalTree.rootNode;
             } else {
@@ -68,25 +84,45 @@
         }
 
         private function save():void {
-            _goalTree.name = nameInput.text;
-            _goalTree.description = descriptionTextArea.text;
-            _goalTree.newSolutions = newSolutions;
-            goalsPolicy.updateContents();
-            process(_goalTree.rootNode);
-            if (_goalTree.goalTreeID == 0) {
-                ProgressAlert.alert(this, "Saving goal tree...", "Saved successfully!", goalService.createGoalTree);
-                goalService.createGoalTree.send(_goalTree);
+            var results:Array = Validator.validateAll(validators);
+            if (results.length == 0) {
+                _goalTree.name = nameInput.text;
+                _goalTree.description = descriptionTextArea.text;
+                _goalTree.newSolutions = newSolutions;
+                goalsPolicy.updateContents();
+                process(_goalTree.rootNode);
+                if (_goalTree.goalTreeID == 0) {
+                    ProgressAlert.alert(this, "Saving goal tree...", "Saved successfully!", goalService.createGoalTree);
+                    goalService.createGoalTree.send(_goalTree);
+                } else {
+                    ProgressAlert.alert(this, "Updating goal tree...", "Updated successfully!", goalService.updateGoalTree);
+                    goalService.updateGoalTree.send(_goalTree);
+                }
             } else {
-                ProgressAlert.alert(this, "Updating goal tree...", "Updated successfully!", goalService.updateGoalTree);
-                goalService.updateGoalTree.send(_goalTree);
+                if (tabNavigator.selectedIndex > 0) {
+                    tabNavigator.selectedIndex = 0;
+                    Alert.show("You have one or more errors you must fix.");
+                }
             }
         }
 
         private function close():void {
-            dispatchEvent(new AnalysisCloseEvent(this));
+            if (changed) {
+                Alert.show("You have unsaved changes. Are you sure you want to exit?", "Alert",
+                        Alert.OK | Alert.CANCEL, null, alertListener, null, Alert.CANCEL);
+            } else {
+                dispatchEvent(new AnalysisCloseEvent(this));
+            }
+        }
+
+        private function alertListener(event:CloseEvent):void {
+            if (event.detail == Alert.OK) {
+                dispatchEvent(new AnalysisCloseEvent(this));
+            }
         }
 
         private function savedGoalTree():void {
+            changed = false;
             _goalTree = goalService.createGoalTree.lastResult as GoalTree;
             newSolutions = new ArrayCollection();
             rootNode = _goalTree.rootNode;
@@ -94,6 +130,7 @@
         }
 
         private function updatedGoalTree():void {
+            changed = false;
             _goalTree = goalService.updateGoalTree.lastResult as GoalTree;
             newSolutions = new ArrayCollection();
             rootNode = _goalTree.rootNode;
@@ -111,7 +148,7 @@
 			<mx:Button id="saveButton" icon="@Embed(source='../../../../assets/floppy_disk.png')" click="save()" toolTip="Save"/>
 		</mx:HBox>
         <mx:TabNavigator width="100%" height="100%" paddingTop="0" paddingBottom="0"
-			paddingLeft="0" paddingRight="0" resizeToContent="true">
+			paddingLeft="0" paddingRight="0" resizeToContent="true" id="tabNavigator">
             <mx:HBox width="100%" height="100%" label="General">
                 <mx:VBox>
 					<mx:HBox width="100%" horizontalAlign="center">
@@ -148,4 +185,5 @@
             </mx:Canvas>
         </mx:TabNavigator>
 	</mx:VBox>
+    <mx:StringValidator id="nameValidator" source="{nameInput}" property="text" minLength="3" maxLength="30"/>
 </FullScreenPage>

@@ -256,4 +256,13 @@ public class GoalService {
         }
         return nodes;
     }
+
+    public List<GoalValue> calculateSlope(long goalID, Date startDate, Date endDate) {
+        try {
+            return goalEvaluationStorage.calculateSlope(goalID, startDate, endDate);
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        }
+    }
 }

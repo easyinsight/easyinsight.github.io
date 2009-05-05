@@ -1,6 +1,6 @@
 package com.easyinsight.api;
 
-import com.easyinsight.api.Comparison;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * User: James Boe
@@ -12,6 +12,7 @@ public class NumberWhere {
     private Comparison comparison;
     private double value;
 
+    @Nullable
     public String getKey() {
         return key;
     }
@@ -20,6 +21,7 @@ public class NumberWhere {
         this.key = key;
     }
 
+    @Nullable
     public Comparison getComparison() {
         return comparison;
     }

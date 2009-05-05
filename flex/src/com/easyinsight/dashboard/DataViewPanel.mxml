@@ -21,6 +21,8 @@
         private var _analysisID:int;
         private var _reportType:int;
         [Bindable]
+        private var _dataSourceID:int;
+        [Bindable]
         private var _reportName:String;
 
         private var _prefix:String = "";
@@ -29,6 +31,10 @@
         private var _titleFunctionCaller:Object;
 
         private var dataViewFactory:EmbeddedViewFactory;
+
+        public function set dataSourceID(val:int):void {
+            _dataSourceID = val;
+        }
 
         public function set prefix(val:String):void {
             _prefix = val;
@@ -66,7 +72,9 @@
         }
 
         private function titleClick():void {
-            //_titleFunction.call(_titleFunctionCaller, definition);
+            if (_titleFunction != null) {
+                _titleFunction.call(_titleFunctionCaller, _analysisID, _reportName, _reportType, _dataSourceID);
+            }
         }
 
         private function failure(event:FaultEvent):void {

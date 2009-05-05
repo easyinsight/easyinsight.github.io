@@ -3,6 +3,7 @@
         borderStyle="solid" borderColor="#CCCCCC" cornerRadius="10" dropShadowEnabled="true" doubleClickEnabled="true" doubleClick="onDoubleClick()">
     <mx:Script><![CDATA[
         import com.easyinsight.genredata.AnalyzeEvent;
+        import com.easyinsight.genredata.ModuleAnalyzeEvent;
         import com.easyinsight.util.ModelessWindowEvent;
 import ilog.orgchart.OrgChartItem;
 
@@ -88,12 +89,17 @@ import mx.formatters.NumberFormatter;
             window.goalTreeNodeData = goalTreeNodeData;
             window.startDate = new Date(new Date().getTime() - (1000 * 60 * 60 * 24 * 7));
             window.endDate = new Date();
+            window.addEventListener(ModuleAnalyzeEvent.MODULE_ANALYZE, onAnalyze);
             window.addEventListener(CloseEvent.CLOSE, onClose);
             PopUpManager.addPopUp(window, this);
             var displayObject:DisplayObject = Application.application as DisplayObject;
             window.x = (displayObject.width / 2) - 200;
             window.y = (displayObject.height / 2) - 150;
             dispatchEvent(new ModelessWindowEvent(ModelessWindowEvent.WINDOW_ADDED, window));
+        }
+
+        private function onAnalyze(event:ModuleAnalyzeEvent):void {
+            dispatchEvent(event);
         }
 
         private function onClose(event:CloseEvent):void {

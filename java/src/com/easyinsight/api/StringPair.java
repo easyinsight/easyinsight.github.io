@@ -1,5 +1,7 @@
 package com.easyinsight.api;
 
+import org.jetbrains.annotations.Nullable;
+
 /**
  * User: James Boe
  * Date: Aug 28, 2008
@@ -9,6 +11,7 @@ public class StringPair {
     private String key;
     private String value;
 
+    @Nullable    
     public String getKey() {
         return key;
     }
@@ -17,6 +20,7 @@ public class StringPair {
         this.key = key;
     }
 
+    @Nullable    
     public String getValue() {
         return value;
     }

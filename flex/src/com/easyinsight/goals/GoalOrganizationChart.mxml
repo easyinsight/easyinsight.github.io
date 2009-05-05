@@ -47,6 +47,7 @@
 
         private function orgRefresh(event:OrganizationChartRefreshEvent):void {            
             myOrgChart.dataProvider = _goalTreeNodes;
+            dispatchEvent(new GoalTreeChangedEvent());
         }
 
         private function newNode():void {
@@ -113,7 +114,7 @@
         }
 
         private function goalEdited(event:GoalEditEvent):void {
-
+            dispatchEvent(new GoalTreeChangedEvent());
         }
 		]]>
     </mx:Script>

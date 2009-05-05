@@ -50,13 +50,20 @@ public abstract class ValidatingPublishService extends PublishService implements
             dataStorage.insertData(dataSet);
             dataStorage.commit();
             conn.commit();
+        } catch (ServiceRuntimeException sre) {
+            LogClass.debug(sre.getMessage());
+            if (dataStorage != null) {
+                dataStorage.rollback();
+            }
+            conn.rollback();
+            throw sre;
         } catch (Exception e) {
             LogClass.error(e);
             if (dataStorage != null) {
                 dataStorage.rollback();
             }
             conn.rollback();
-            throw new RuntimeException(e);
+            throw new ServiceRuntimeException("An internal error occurred on attempting to process the provided data. The error has been logged for our engineers to examine.");
         } finally {
             conn.setAutoCommit(true);
             if (dataStorage != null) {
@@ -78,13 +85,20 @@ public abstract class ValidatingPublishService extends PublishService implements
             dataStorage.insertData(dataSet);
             dataStorage.commit();
             conn.commit();
+        } catch (ServiceRuntimeException sre) {
+            LogClass.debug(sre.getMessage());
+            if (dataStorage != null) {
+                dataStorage.rollback();
+            }
+            conn.rollback();
+            throw sre;
         } catch (Exception e) {
             LogClass.error(e);
             if (dataStorage != null) {
                 dataStorage.rollback();
             }
             conn.rollback();
-            throw new RuntimeException(e);
+            throw new ServiceRuntimeException("An internal error occurred on attempting to process the provided data. The error has been logged for our engineers to examine.");
         } finally {
             conn.setAutoCommit(true);
             if (dataStorage != null) {
@@ -107,13 +121,20 @@ public abstract class ValidatingPublishService extends PublishService implements
             dataStorage.insertData(dataSet);
             dataStorage.commit();
             conn.commit();
+        } catch (ServiceRuntimeException sre) {
+            LogClass.debug(sre.getMessage());
+            if (dataStorage != null) {
+                dataStorage.rollback();
+            }
+            conn.rollback();
+            throw sre;
         } catch (Exception e) {
             LogClass.error(e);
             if (dataStorage != null) {
                 dataStorage.rollback();
             }
             conn.rollback();
-            throw new RuntimeException(e);
+            throw new ServiceRuntimeException("An internal error occurred on attempting to process the provided data. The error has been logged for our engineers to examine.");
         } finally {
             conn.setAutoCommit(true);
             if (dataStorage != null) {
@@ -126,9 +147,9 @@ public abstract class ValidatingPublishService extends PublishService implements
     private FeedDefinition getFeedDefinition(long userID, String dataSourceKey, Connection conn) throws SQLException {
         List<Long> dataSourceIDs = findDataSourceIDsByName(userID, dataSourceKey, conn);
         if (dataSourceIDs.size() == 0) {
-            throw new RuntimeException("No data source was found by that API key.");
+            throw new ServiceRuntimeException("No data source was found by that API key.");
         } else if (dataSourceIDs.size() > 1) {
-            throw new RuntimeException("More than one data source was found by that API key--this should never happen.");
+            throw new ServiceRuntimeException("More than one data source was found by that API key--this should never happen.");
         } else {
             FeedStorage feedStorage = new FeedStorage();
             return feedStorage.getFeedDefinitionData(dataSourceIDs.get(0), conn);
@@ -161,13 +182,20 @@ public abstract class ValidatingPublishService extends PublishService implements
             dataStorage.updateData(dataSet, createWheres(where));
             dataStorage.commit();
             conn.commit();
+        } catch (ServiceRuntimeException sre) {
+            LogClass.debug(sre.getMessage());
+            if (dataStorage != null) {
+                dataStorage.rollback();
+            }
+            conn.rollback();
+            throw sre;
         } catch (Exception e) {
             LogClass.error(e);
             if (dataStorage != null) {
                 dataStorage.rollback();
             }
             conn.rollback();
-            throw new RuntimeException(e);
+            throw new ServiceRuntimeException("An internal error occurred on attempting to process the provided data. The error has been logged for our engineers to examine.");
         } finally {
             conn.setAutoCommit(true);
             if (dataStorage != null) {
@@ -189,13 +217,20 @@ public abstract class ValidatingPublishService extends PublishService implements
             dataStorage.updateData(dataSet, createWheres(where));
             dataStorage.commit();
             conn.commit();
+        } catch (ServiceRuntimeException sre) {
+            LogClass.debug(sre.getMessage());
+            if (dataStorage != null) {
+                dataStorage.rollback();
+            }
+            conn.rollback();
+            throw sre;
         } catch (Exception e) {
             LogClass.error(e);
             if (dataStorage != null) {
                 dataStorage.rollback();
             }
             conn.rollback();
-            throw new RuntimeException(e);
+            throw new ServiceRuntimeException("An internal error occurred on attempting to process the provided data. The error has been logged for our engineers to examine.");
         } finally {
             conn.setAutoCommit(true);
             if (dataStorage != null) {
@@ -215,13 +250,20 @@ public abstract class ValidatingPublishService extends PublishService implements
             dataStorage.deleteData(createWheres(where));
             dataStorage.commit();
             conn.commit();
+        } catch (ServiceRuntimeException sre) {
+            LogClass.debug(sre.getMessage());
+            if (dataStorage != null) {
+                dataStorage.rollback();
+            }
+            conn.rollback();
+            throw sre;
         } catch (Exception e) {
             LogClass.error(e);
             if (dataStorage != null) {
                 dataStorage.rollback();
             }
             conn.rollback();
-            throw new RuntimeException(e);
+            throw new ServiceRuntimeException("An internal error occurred on attempting to process the provided data. The error has been logged for our engineers to examine.");
         } finally {
             conn.setAutoCommit(true);
             if (dataStorage != null) {

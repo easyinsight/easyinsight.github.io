@@ -24,6 +24,7 @@
         </mx:State>
     </mx:states>
     <mx:Script><![CDATA[
+        import mx.collections.ArrayCollection;
         import mx.events.FlexEvent;
         import mx.managers.PopUpManager;
         import mx.rpc.events.FaultEvent;
@@ -35,18 +36,28 @@
         [Bindable]
         private var errorText:String;
 
-        private var _operation:Operation;
+        //private var _operation:Operation;
+
+        private var _operations:ArrayCollection;
+
+        private var opCount:int;
+
+        private var failed:Boolean;
 
         private function cancel():void {
-            _operation.removeEventListener(ResultEvent.RESULT, onResult);
-            _operation.removeEventListener(FaultEvent.FAULT, onFault);
+            for each (var operation:Operation in _operations) {
+                operation.removeEventListener(ResultEvent.RESULT, onResult);
+                operation.removeEventListener(FaultEvent.FAULT, onFault);
+            }
             PopUpManager.removePopUp(this);
         }
 
-        public function set operation(val:Operation):void {
-            _operation = val;
-            _operation.addEventListener(ResultEvent.RESULT, onResult);
-            _operation.addEventListener(FaultEvent.FAULT, onFault);
+        public function set operations(val:ArrayCollection):void {
+            for each (var operation:Operation in val) {
+                operation.addEventListener(ResultEvent.RESULT, onResult);
+                operation.addEventListener(FaultEvent.FAULT, onFault);
+            }
+            _operations = val;
         }
 
         [Bindable]
@@ -54,25 +65,29 @@
             return _completeText;
         }
 
-        public static function alert(parent:DisplayObject, progressText:String, completeText:String, operation:Operation):ProgressAlert {
+        public static function alert(parent:DisplayObject, progressText:String, completeText:String, ... operations):ProgressAlert {
             var alert:ProgressAlert = new ProgressAlert();
             alert.progressText = progressText;
             alert.completeText = completeText;
-            alert.operation = operation;
+            alert.operations = new ArrayCollection(operations);
             PopUpManager.addPopUp(alert, parent, true);
             PopUpManager.centerPopUp(alert);
             return alert;
         }
 
         private function onResult(event:ResultEvent):void {
-            if (_completeText == null) {
-                PopUpManager.removePopUp(this);
-            } else {
-                currentState = "Done";
+            opCount++;
+            if (!failed && opCount == _operations.length) {
+                if (_completeText == null) {
+                    PopUpManager.removePopUp(this);
+                } else {
+                    currentState = "Done";
+                }
             }
         }
 
         private function onFault(event:FaultEvent):void {
+            failed = true;
             errorText = event.fault.faultString;
             currentState = "Failure";
         }

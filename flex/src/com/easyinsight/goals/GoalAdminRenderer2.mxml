@@ -39,6 +39,14 @@
         [Embed(source="../../../../assets/branchx16.png")]
         private var subTreeIcon:Class;
 
+        [Bindable]
+        [Embed(source="../../../../assets/data_blue_x16.png")]
+        private var bindingIcon:Class;
+
+        [Bindable]
+        [Embed(source="../../../../assets/chart_pie2.png")]
+        private var associationIcon:Class;
+
         private var orgChartItem:OrgChartItem;
 
         [Bindable]
@@ -61,6 +69,11 @@
         [Bindable]
         private var subTreePresent:Boolean = false;
 
+        [Bindable]
+        private var showBinding:Boolean = false;
+
+        [Bindable]
+        private var showAssociations:Boolean = false;
 
         public function set goalName(val:String):void {
             _goalName = val;
@@ -119,6 +132,10 @@
                 PopUpManager.addPopUp(window, this, true);
                 PopUpManager.centerPopUp(window);
             }
+            showBinding = goalTreeNode.coreFeedID > 0;
+            showAssociations = goalTreeNode.associatedFeeds.length > 0 || goalTreeNode.associatedInsights.length > 0 ||
+                               goalTreeNode.associatedSolutions.length > 0;
+            dispatchEvent(new GoalTreeChangedEvent());
         }
 
         private function subTreeInstall(event:SubTreeInstallEvent):void {
@@ -145,10 +162,11 @@
                 _goalName = goalTreeNode.name == null ? "" : new String(goalTreeNode.name);
                 goalIcon = "/app/assets/icons/16x16/" + goalTreeNode.iconImage;
                 goalIconExists = goalTreeNode.iconImage != null && goalTreeNode.iconImage != "";
-                nodeText = "This goal is derived from the results of its children.";
                 nodeText = "This goal is bound to a data source.";
-                nodeText = "This goal is derived from its children.";
                 subTreePresent = goalTreeNode.subTreeID > 0;
+                showBinding = goalTreeNode.coreFeedID > 0;
+                showAssociations = goalTreeNode.associatedFeeds.length > 0 || goalTreeNode.associatedInsights.length > 0 ||
+                                   goalTreeNode.associatedSolutions.length > 0;
                 contextMenu = new ContextMenu();
                 contextMenu.hideBuiltInItems();
                 var items:Array = [];
@@ -279,18 +297,19 @@
         }
 
         private function goalEdited(event:GoalEditEvent):void {
+            event.currentTarget.removeEventListener(GoalEditEvent.GOAL_EDIT, goalEdited);
             var goalTreeNode:GoalTreeNode = orgChartItem.data as GoalTreeNode;
             goalNameInput.text = goalTreeNode.name;
-        }
-
-        private function onDragDrop(event:DragEvent):void {
-            // if the drag source is a solution with a goal tree...
-            // add that tree as a child to this node
+            showBinding = goalTreeNode.coreFeedID > 0;
+            showAssociations = goalTreeNode.associatedFeeds.length > 0 || goalTreeNode.associatedInsights.length > 0 ||
+                               goalTreeNode.associatedSolutions.length > 0;
+            dispatchEvent(new GoalTreeChangedEvent());
         }
 
         private function onNameChange():void {
             var goalTreeNode:GoalTreeNode = orgChartItem.data as GoalTreeNode;
             goalTreeNode.setBlah(goalNameInput.text);
+            dispatchEvent(new GoalTreeChangedEvent());
             //goalNameInput.setFocus();
         }
 
@@ -316,8 +335,10 @@
                 <mx:Box borderStyle="solid" borderThickness="1" click="assignIcon()" toolTip="Click to assign or change icon...">
                     <mx:Image id="iconImage" source="{goalIcon}" visible="{goalIconExists}"/>
                 </mx:Box>
+                <mx:Image source="{bindingIcon}" toolTip="{nodeText}" visible="{showBinding}"/>
+                <mx:Image source="{associationIcon}" toolTip="Additional entities are associated to this goal." visible="{showAssociations}"/>
+                <mx:Image source="{subTreeIcon}" toolTip="Navigate into Sub Tree" click="subTreeConfiguration()" visible="{subTreePresent}"/>
             </mx:HBox>
-            <mx:Button icon="{subTreeIcon}" toolTip="Navigate into Sub Tree" click="subTreeConfiguration()" visible="{subTreePresent}"/>
         </mx:HBox>
         <mx:HBox>
             <mx:TextInput id="goalNameInput" text="{_goalName}" fontSize="10" height="20" width="120" editable="true" change="onNameChange()"/>

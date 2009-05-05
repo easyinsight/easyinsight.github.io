@@ -17,7 +17,6 @@ import org.apache.cxf.transport.Conduit;
 import org.apache.cxf.ws.addressing.EndpointReferenceType;
 import org.apache.log4j.Logger;
 import com.easyinsight.security.SecurityUtil;
-import com.easyinsight.security.PasswordService;
 import com.easyinsight.users.UserServiceResponse;
 import com.easyinsight.users.Account;
 

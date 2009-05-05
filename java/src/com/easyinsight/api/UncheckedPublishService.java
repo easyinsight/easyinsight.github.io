@@ -44,9 +44,9 @@ public abstract class UncheckedPublishService extends PublishService {
             conn.setAutoCommit(false);
             Map<Long, Boolean> dataSources = findDataSourceIDsByName(dataSourceKey, conn);
             if (dataSources.size() == 0) {
-                throw new RuntimeException("It does not appear that " + dataSourceKey + " is a valid data source key.");
+                throw new ServiceRuntimeException("It does not appear that " + dataSourceKey + " is a valid data source key.");
             } else if (dataSources.size() > 1) {
-                throw new RuntimeException("More than one data source was found matching " + dataSourceKey + ".");
+                throw new ServiceRuntimeException("More than one data source was found matching " + dataSourceKey + ".");
             }
             PreparedStatement stmt = conn.prepareStatement("UPDATE DATA_FEED SET unchecked_api_enabled = ? WHERE DATA_FEED_ID = ?");
             stmt.setBoolean(1, false);
@@ -78,13 +78,20 @@ public abstract class UncheckedPublishService extends PublishService {
             dataStorage.commit();
             conn.commit();
             return callData.apiKey;
+        } catch (ServiceRuntimeException sre) {
+            LogClass.debug(sre.getMessage());
+            if (dataStorage != null) {
+                dataStorage.rollback();
+            }
+            conn.rollback();
+            throw sre;
         } catch (Exception e) {
             LogClass.error(e);
             if (dataStorage != null) {
                 dataStorage.rollback();
             }
             conn.rollback();
-            throw new RuntimeException(e);
+            throw new ServiceRuntimeException("An internal error occurred on attempting to process the provided data. The error has been logged for our engineers to examine.");
         } finally {
             conn.setAutoCommit(true);
             if (dataStorage != null) {
@@ -106,13 +113,20 @@ public abstract class UncheckedPublishService extends PublishService {
             dataStorage.commit();
             conn.commit();
             return callData.apiKey;
+        } catch (ServiceRuntimeException sre) {
+            LogClass.debug(sre.getMessage());
+            if (dataStorage != null) {
+                dataStorage.rollback();
+            }
+            conn.rollback();
+            throw sre;
         } catch (Exception e) {
             LogClass.error(e);
             if (dataStorage != null) {
                 dataStorage.rollback();
             }
             conn.rollback();
-            throw new RuntimeException(e);
+            throw new ServiceRuntimeException("An internal error occurred on attempting to process the provided data. The error has been logged for our engineers to examine.");
         } finally {
             conn.setAutoCommit(true);
             if (dataStorage != null) {
@@ -137,13 +151,20 @@ public abstract class UncheckedPublishService extends PublishService {
             dataStorage.commit();
             conn.commit();
             return callData.apiKey;
+        } catch (ServiceRuntimeException sre) {
+            LogClass.debug(sre.getMessage());
+            if (dataStorage != null) {
+                dataStorage.rollback();
+            }
+            conn.rollback();
+            throw sre;
         } catch (Exception e) {
             LogClass.error(e);
             if (dataStorage != null) {
                 dataStorage.rollback();
             }
             conn.rollback();
-            throw new RuntimeException(e);
+            throw new ServiceRuntimeException("An internal error occurred on attempting to process the provided data. The error has been logged for our engineers to examine.");
         } finally {
             conn.setAutoCommit(true);
             if (dataStorage != null) {
@@ -187,6 +208,12 @@ public abstract class UncheckedPublishService extends PublishService {
             long userID = getUserID();
             // create new data source
             FeedDefinition feedDefinition = new FeedDefinition();
+            if (dataSourceName == null || dataSourceName.length() < 3) {
+                throw new ServiceRuntimeException("The data source name must be at least three characters.");
+            }
+            if (dataSourceName.length() > 30) {
+                throw new ServiceRuntimeException("The data source name must be less than thirty characters.");
+            }
             feedDefinition.setFeedName(dataSourceName);
             feedDefinition.setUncheckedAPIEnabled(true);
             feedDefinition.setValidatedAPIEnabled(true);
@@ -197,11 +224,11 @@ public abstract class UncheckedPublishService extends PublishService {
             apiKey = feedDefinition.getApiKey();
             dataStorage = result.getTableDefinitionMetadata();
         } else if (dataSourceIDs.size() > 1) {
-            throw new RuntimeException("More than one data source was found by that name.");
+            throw new ServiceRuntimeException("More than one data source was found by that name.");
         } else {
             Map.Entry<Long, Boolean> entry = dataSourceIDs.entrySet().iterator().next();
             if (!entry.getValue()) {
-                throw new RuntimeException("This data source does not allow use of the unchecked API.");
+                throw new ServiceRuntimeException("This data source does not allow use of the unchecked API.");
             }
             FeedStorage feedStorage = new FeedStorage();
             FeedDefinition feedDefinition = feedStorage.getFeedDefinitionData(entry.getKey());
@@ -264,13 +291,20 @@ public abstract class UncheckedPublishService extends PublishService {
             dataStorage.commit();
             conn.commit();
             return callData.apiKey;
+        } catch (ServiceRuntimeException sre) {
+            LogClass.debug(sre.getMessage());
+            if (dataStorage != null) {
+                dataStorage.rollback();
+            }
+            conn.rollback();
+            throw sre;
         } catch (Exception e) {
             LogClass.error(e);
             if (dataStorage != null) {
                 dataStorage.rollback();
             }
             conn.rollback();
-            throw new RuntimeException(e);
+            throw new ServiceRuntimeException("An internal error occurred on attempting to process the provided data. The error has been logged for our engineers to examine.");
         } finally {
             conn.setAutoCommit(true);
             if (dataStorage != null) {
@@ -294,13 +328,20 @@ public abstract class UncheckedPublishService extends PublishService {
             dataStorage.commit();
             conn.commit();
             return callData.apiKey;
+        } catch (ServiceRuntimeException sre) {
+            LogClass.debug(sre.getMessage());
+            if (dataStorage != null) {
+                dataStorage.rollback();
+            }
+            conn.rollback();
+            throw sre;
         } catch (Exception e) {
             LogClass.error(e);
             if (dataStorage != null) {
                 dataStorage.rollback();
             }
             conn.rollback();
-            throw new RuntimeException(e);
+            throw new ServiceRuntimeException("An internal error occurred on attempting to process the provided data. The error has been logged for our engineers to examine.");
         } finally {
             conn.setAutoCommit(true);
             if (dataStorage != null) {

@@ -227,19 +227,25 @@ public class GoalEvaluationStorage {
         return values;
     }
 
-    public List<GoalValue> calculateSlope(GoalTreeNode node, Date startDate, Date endDate) {
-        GoalTreeMilestone milestone = node.getMilestone();
-        Date milestoneEndDate = milestone.getMilestoneDate();
-        double milestoneValue = node.getGoalValue();
-        double startValue = 0;
-        List<GoalValue> values = calculateSlope(node.getGoalTreeNodeID(), startValue, milestoneValue, startDate, milestoneEndDate, 60 * 60 * 24 * 1000);
-        List<GoalValue> rangedValues = new ArrayList<GoalValue>();
-        for (GoalValue goalValue : values) {
-            if (goalValue.getDate().getTime() >= startDate.getTime() && goalValue.getDate().getTime() <= endDate.getTime()) {
-                rangedValues.add(goalValue);
+    public List<GoalValue> calculateSlope(long goalID, Date startDate, Date endDate) throws SQLException {
+        Connection conn = Database.instance().getConnection();
+        try {
+            GoalTreeNode node = new GoalStorage().retrieveNode(goalID, conn);
+            GoalTreeMilestone milestone = node.getMilestone();
+            Date milestoneEndDate = milestone.getMilestoneDate();
+            double milestoneValue = node.getGoalValue();
+            double startValue = 0;
+            List<GoalValue> values = calculateSlope(node.getGoalTreeNodeID(), startValue, milestoneValue, startDate, milestoneEndDate, 60 * 60 * 24 * 1000);
+            List<GoalValue> rangedValues = new ArrayList<GoalValue>();
+            for (GoalValue goalValue : values) {
+                if (goalValue.getDate().getTime() >= startDate.getTime() && goalValue.getDate().getTime() <= endDate.getTime()) {
+                    rangedValues.add(goalValue);
+                }
             }
+            return rangedValues;
+        } finally {
+            Database.instance().closeConnection(conn);
         }
-        return rangedValues;
     }
 
     public List<GoalValue> getGoalValues(long goalTreeNodeID, Date startDate, Date endDate) {

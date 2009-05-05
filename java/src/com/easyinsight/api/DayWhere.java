@@ -1,5 +1,7 @@
 package com.easyinsight.api;
 
+import org.jetbrains.annotations.Nullable;
+
 /**
  * User: James Boe
  * Date: Mar 6, 2009
@@ -10,6 +12,7 @@ public class DayWhere {
     private int year;
     private int dayOfYear;
 
+    @Nullable
     public String getKey() {
         return key;
     }
