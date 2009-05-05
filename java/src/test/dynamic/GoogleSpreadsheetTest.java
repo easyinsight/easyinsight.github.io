@@ -4,6 +4,7 @@ import junit.framework.TestCase;
 import com.easyinsight.database.Database;
 import com.easyinsight.datafeeds.google.GoogleSpreadsheetAccess;
 import com.easyinsight.datafeeds.google.GoogleFeedDefinition;
+import com.easyinsight.datafeeds.google.GoogleDataProvider;
 import com.easyinsight.users.Credentials;
 import com.easyinsight.userupload.UserUploadService;
 import com.google.gdata.client.spreadsheet.SpreadsheetService;
@@ -36,6 +37,9 @@ public class GoogleSpreadsheetTest extends TestCase {
         Credentials credentials = new Credentials();
         credentials.setUserName("easyinsight99");
         credentials.setPassword("analyze123");
+        GoogleDataProvider googleDataProvider = new GoogleDataProvider();
+        assertTrue(googleDataProvider.testGoogleConnect(credentials));
+        googleDataProvider.getAvailableGoogleSpreadsheets(credentials);
         URL feedUrl = new URL("http://spreadsheets.google.com/feeds/spreadsheets/private/full");
         SpreadsheetService myService = GoogleSpreadsheetAccess.getOrCreateSpreadsheetService(credentials);
         SpreadsheetFeed spreadsheetFeed = myService.getFeed(feedUrl, SpreadsheetFeed.class);

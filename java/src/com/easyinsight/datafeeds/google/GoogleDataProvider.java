@@ -55,50 +55,6 @@ public class GoogleDataProvider implements IGoogleStream {
         return success;
     }
 
-    /*public FeedDescriptor createFeed(Credentials credentials, String title, String url) {
-        Connection conn = Database.instance().getConnection();
-        DataStorage tableDef = null;
-        try {
-            GoogleFeedDefinition googleFeedDefinition = new GoogleFeedDefinition();
-            googleFeedDefinition.setWorksheetURL(url);
-            DataSet dataSet = createDataSet(credentials, url);
-            googleFeedDefinition.setFeedName(title);
-            googleFeedDefinition.setFields(populateFields(dataSet));
-            googleFeedDefinition.setUploadPolicy(new UploadPolicy(SecurityUtil.getUserID()));
-            FeedCreationResult result = new FeedCreation().createFeed(googleFeedDefinition, conn, dataSet, SecurityUtil.getUserID());
-            tableDef = result.getTableDefinitionMetadata();
-            tableDef.commit();
-            FeedDescriptor feedDescriptor = new FeedDescriptor();
-            feedDescriptor.setName(title);
-            feedDescriptor.setPolicy(new UploadPolicy(SecurityUtil.getUserID()));
-            feedDescriptor.setDataFeedID(googleFeedDefinition.getDataFeedID());
-            new UserUploadService().createUserFeedLink(SecurityUtil.getUserID(), googleFeedDefinition.getDataFeedID(), Roles.OWNER);
-            return feedDescriptor;
-        } catch (Exception e) {
-            LogClass.error(e);
-            if (tableDef != null) {
-                tableDef.rollback();
-            }
-            throw new RuntimeException(e);
-        } finally {
-            Database.instance().closeConnection(conn);
-        }
-    }
-
-    private List<AnalysisItem> populateFields(DataSet dataSet) {
-        IDataTypeGuesser guesser = new DataTypeGuesser();
-        for (IRow row : dataSet.getRows()) {
-            for (Key key : row.getKeys()) {
-                Value value = row.getValue(key);
-                if (value == null) {
-                    value = new EmptyValue();
-                }
-                guesser.addValue(key, value);
-            }
-        }
-        return guesser.createFeedItems();
-    }*/
-
     public List<Spreadsheet> getAvailableGoogleSpreadsheets(Credentials credentials) {
         List<Spreadsheet> worksheets = cachedSpreadsheetResults.get(credentials);
         if (worksheets == null) {
@@ -113,41 +69,6 @@ public class GoogleDataProvider implements IGoogleStream {
         }
         return worksheets;
     }
-
-    /*public static DataSet createDataSet(Credentials credentials, String url, Map<String, Key> keys) {
-        DataSet dataSet;
-        try {
-            SpreadsheetService myService = GoogleSpreadsheetAccess.getOrCreateSpreadsheetService(credentials);
-            URL listFeedUrl = new URL(url);
-            ListFeed feed = myService.getFeed(listFeedUrl, ListFeed.class);
-            dataSet = new DataSet();
-            for (ListEntry listEntry : feed.getEntries()) {
-                IRow row = dataSet.createRow();
-                boolean atLeastOneValue = false;
-                for (String tag : listEntry.getCustomElements().getTags()) {
-                    Value value;
-                    String string = listEntry.getCustomElements().getValue(tag);
-                    if (string == null) {
-                        value = new EmptyValue();
-                    } else {
-                        if (string.length() > 0) {
-                            atLeastOneValue = true;
-                        }
-                        value = new StringValue(string);
-                    }
-                    row.addValue(new NamedKey(tag), value);
-                }
-                if (!atLeastOneValue) {
-                    dataSet.removeRow(row);
-                }
-            }
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        } catch (ServiceException e) {
-            throw new RuntimeException(e);
-        }
-        return dataSet;
-    }*/
 
     private List<Spreadsheet> getSpreadsheets(Credentials credentials) throws AuthenticationException {
         List<Spreadsheet> worksheets = new ArrayList<Spreadsheet>();
@@ -200,11 +121,5 @@ public class GoogleDataProvider implements IGoogleStream {
             Database.instance().closeConnection(conn);
         }
         return worksheets;
-    }
-
-    public static void main(String[] args) {
-        Pattern pattern = Pattern.compile("[0-9]{4}-[0-9]{2}-[0-9]{2}");
-        Matcher matcher = pattern.matcher("     3 months Ending 2008-07-26");
-        System.out.println(matcher.find());
     }
 }

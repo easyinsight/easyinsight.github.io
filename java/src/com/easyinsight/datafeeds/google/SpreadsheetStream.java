@@ -36,26 +36,4 @@ public class SpreadsheetStream extends DynamicFeed {
     public FeedType getDataFeedType() {
         return FeedType.GOOGLE;
     }
-
-    public void refresh(Credentials credentials) {
-        DataSet dataSet;
-        try {
-            SpreadsheetService myService = GoogleSpreadsheetAccess.getOrCreateSpreadsheetService(credentials);
-            URL listFeedUrl = new URL(this.worksheetURL);
-            ListFeed feed = myService.getFeed(listFeedUrl, ListFeed.class);
-            dataSet = new DataSet();
-            for (ListEntry listEntry : feed.getEntries()) {
-                IRow row = dataSet.createRow();
-                for (String tag : listEntry.getCustomElements().getTags()) {
-                    String value = listEntry.getCustomElements().getValue(tag);
-                    row.addValue(new NamedKey(tag), value);
-                }
-            }
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        } catch (ServiceException e) {
-            throw new RuntimeException(e);
-        }
-        
-    }
 }
