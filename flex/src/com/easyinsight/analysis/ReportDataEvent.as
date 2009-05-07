@@ -4,8 +4,11 @@ public class ReportDataEvent extends Event{
 
     public static const REQUEST_DATA:String = "requestData";
 
-    public function ReportDataEvent(type:String) {
+    public var reload:Boolean = false;
+
+    public function ReportDataEvent(type:String, reload:Boolean = true) {
         super(type);
+        this.reload = reload;
     }
 
     override public function clone():Event {

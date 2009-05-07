@@ -961,4 +961,21 @@ public class DataStorage {
         deleteStmt.setLong(1, feedID);
         deleteStmt.executeUpdate();
     }
+
+    public void allData(List<IWhere> wheres) {
+        StringBuilder sqlBuilder = new StringBuilder();
+        sqlBuilder.append("SELECT ");
+        for (Map.Entry<Key, KeyMetadata> keyEntry : keys.entrySet()) {
+
+        }
+        sqlBuilder.append(" FROM ");
+        sqlBuilder.append(getTableName());
+        sqlBuilder.append(" WHERE ");
+        for (IWhere where : wheres) {
+            sqlBuilder.append(where.createWhereSQL());
+            sqlBuilder.append(",");
+        }
+        sqlBuilder.deleteCharAt(sqlBuilder.length() - 1);
+        sqlBuilder.append(" LIMIT 10");
+    }
 }

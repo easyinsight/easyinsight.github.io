@@ -95,6 +95,7 @@ public class SolutionTest extends TestCase {
                 assertEquals(1, results.getRows().length);
             }
         }
+        List<Solution> solutions = solutionService.getSolutions();
     }
 
     public void testDynamicSources() {

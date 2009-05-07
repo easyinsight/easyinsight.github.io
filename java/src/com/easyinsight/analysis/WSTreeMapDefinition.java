@@ -13,6 +13,15 @@ import java.util.HashSet;
 public class WSTreeMapDefinition extends WSAnalysisDefinition {
 
     private long treeMapDefinitionID;
+    private int colorScheme;
+
+    public int getColorScheme() {
+        return colorScheme;
+    }
+
+    public void setColorScheme(int colorScheme) {
+        this.colorScheme = colorScheme;
+    }
 
     public long getTreeMapDefinitionID() {
         return treeMapDefinitionID;

@@ -157,10 +157,6 @@ public class GoogleFeedDefinition extends ServerDataSourceDefinition {
         return FeedType.GOOGLE;
     }
 
-    public Feed createFeedObject() {
-        return new SpreadsheetStream(worksheetURL);
-    }
-
     public int getCredentialsDefinition() {
         return CredentialsDefinition.STANDARD_USERNAME_PW;
     }

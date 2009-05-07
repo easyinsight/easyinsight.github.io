@@ -3,6 +3,19 @@ package test.core;
 import junit.framework.TestCase;
 import com.easyinsight.database.Database;
 import com.easyinsight.datafeeds.FeedRegistry;
+import com.easyinsight.groups.Group;
+import com.easyinsight.groups.GroupToUserBinding;
+import com.easyinsight.groups.GroupService;
+import com.easyinsight.groups.GroupUser;
+import com.easyinsight.users.InternalUserService;
+import com.easyinsight.analysis.Tag;
+import com.easyinsight.analysis.TagCloud;
+import com.easyinsight.security.Roles;
+
+import java.util.Arrays;
+import java.util.List;
+
+import test.util.TestUtil;
 
 /**
  * User: James Boe
@@ -17,34 +30,36 @@ public class GroupTest extends TestCase {
     }
 
     public void testGroupStorage() {
-        /*long userID = TestUtil.getIndividualTestUser();
+        long userID = TestUtil.getIndividualTestUser();
         GroupService groupService = new GroupService();
         Group group = new Group();
         group.setName("Test Group");
         group.setDescription("Test Description");
         group.setPubliclyJoinable(false);
         group.setPubliclyVisible(false);
-        TagCloud tagCloud = new TagCloud();
         List<Tag> tagList = Arrays.asList(new Tag("Test"), new Tag("Group"));
-        tagCloud.setTags(tagList);
-        group.setTagCloud(tagCloud);
-        GroupToUserBinding groupToUserBinding = new GroupToUserBinding();
-        groupToUserBinding.setUser(new InternalUserService().retrieveUser(userID));
-        groupToUserBinding.setGroup(group);
-        List<GroupToUserBinding> userList = Arrays.asList( groupToUserBinding );
-        group.setUsers(userList);
-        List<Long> feeds = Arrays.asList(5L, 10L, 15L);
-        group.setFeeds(feeds);
+        group.setTags(tagList);
+        GroupUser groupUser = new GroupUser(userID, null, null, null, Roles.OWNER);
+        group.setGroupUsers(Arrays.asList(groupUser));
         long groupID = groupService.addGroup(group);
+        /*groupService.addFeedToGroup(0, groupID);
+        groupService.addGoalToGroup(0, groupID);
+        groupService.addGoalTreeToGroup(0, groupID);
+        groupService.addGroupComment(null);
+        groupService.addMemberToGroup(groupID);
+        groupService.addInsightToGroup(0, groupID);*/
+        groupService.getFeeds(groupID);
+        groupService.getGoals(groupID);
+        groupService.getGoalTrees(groupID);
+        groupService.getGroupMessages(groupID, null, null);
+        groupService.getInsights(groupID);
+        groupService.getMemberGroups();
+        groupService.getPublicGroups();
+        groupService.getUsers(groupID);
         Group retrievedGroup = groupService.getGroup(groupID);
         assertEquals(group.getName(), retrievedGroup.getName());
         assertEquals(group.getDescription(), retrievedGroup.getDescription());
         assertEquals(group.isPubliclyJoinable(), retrievedGroup.isPubliclyJoinable());
         assertEquals(group.isPubliclyVisible(), retrievedGroup.isPubliclyVisible());
-        assertNotNull(retrievedGroup.getTagCloud());
-        assertNotNull(retrievedGroup.getTagCloud().getTags());
-        assertEquals(tagList, retrievedGroup.getTagCloud().getTags());
-        assertEquals(userList.size(), retrievedGroup.getUsers().size());
-        assertEquals(feeds, retrievedGroup.getFeeds());*/
     }
 }

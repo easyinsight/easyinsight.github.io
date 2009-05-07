@@ -1,6 +1,7 @@
 package com.easyinsight.analysis.tree {
 import com.easyinsight.analysis.AnalysisDefinition;
 import com.easyinsight.analysis.AnalysisItem;
+import com.easyinsight.analysis.AnalysisItemTypes;
 import com.easyinsight.analysis.AnalysisItemUpdateEvent;
 import com.easyinsight.analysis.CustomChangeEvent;
 import com.easyinsight.analysis.DataServiceEvent;
@@ -76,7 +77,12 @@ public class TreeControlBar extends HBox implements IReportControlBar {
     }
 
     public function addItem(analysisItem:AnalysisItem):void {
-
+        if (analysisItem.hasType(AnalysisItemTypes.HIERARCHY)) {
+            hierarchyGrouping.addAnalysisItem(analysisItem);
+        } else {
+            itemGrouping.addAnalysisItem(analysisItem);
+        }
+        dispatchEvent(new ReportDataEvent(ReportDataEvent.REQUEST_DATA));
     }
 
     public function onCustomChangeEvent(event:CustomChangeEvent):void {

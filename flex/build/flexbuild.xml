@@ -2,6 +2,15 @@
     <property file="local.build.properties"/>
     <taskdef resource="flexTasks.tasks" classpath="${flex.sdk.dir}/ant/lib/flexTasks.jar"/>    
 
+    <taskdef resource="ei.tasks" classpath="${flex.sdk.dir}/ant/lib/swfanalysis.jar"/>
+    <taskdef name="SWFAnalysis" classname="com.easyinsight.swfanalysis.SWFAnalysis"/>
+    <taskdef name="SWFSize" classname="com.easyinsight.swfanalysis.ArtifactSize"/>
+
+    <property name="ei.key" value="xrnnCqtaFhZN"/>
+    <property name="ei.secret.key" value="IzxHGLKiErchVLdo"/>
+    <property name="size.api.key" value="RhHnvgiymUfx"/>
+
+    <property name="analysis.api.key" value="wuOecBUjyUKd"/>
 
     <property name="FLEX_HOME" value="${flex.sdk.dir}"/>
 
@@ -31,6 +40,10 @@
                 <url rsl-url="rpc_3.3.0.4852.swf"/>
             </runtime-shared-library-path>
         </mxmlc>
+        <SWFSize artifactPath="${deployment.path}/PrimaryWorkspace.swf" key="${ei.key}" secretKey="${ei.secret.key}" component="PrimaryWorkspace"
+                sizeAPIKey="${size.api.key}"/>
+        <SWFAnalysis linkReportPath="optimized.txt" key="${ei.key}" secretKey="${ei.secret.key}" component="PrimaryWorkspace"
+                classAnalysisAPIKey="${analysis.api.key}" packageFilter="com.easyinsight"/>
     </target>
 
     <target name="compileIntro">
@@ -345,9 +358,9 @@
 
     <target name="module.piechart">
         <mxmlc file="../src/com/easyinsight/analysis/charts/xaxisbased/pie/PieChartModule.mxml" output="${deployment.path}/PieChartModule.swf"
-               static-rsls="true">
+               static-rsls="false">
             <load-config filename="../modules/pie-chart-module.xml"/>
-            <!--<runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
+            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
                 <url rsl-url="framework_3.3.0.4852.swz"/>
                 <url rsl-url="framework_3.3.0.4852.swf"/>
             </runtime-shared-library-path>
@@ -360,7 +373,7 @@
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
                 <url rsl-url="rpc_3.3.0.4852.swz"/>
                 <url rsl-url="rpc_3.3.0.4852.swf"/>
-            </runtime-shared-library-path>-->
+            </runtime-shared-library-path>
         </mxmlc>
     </target>
 

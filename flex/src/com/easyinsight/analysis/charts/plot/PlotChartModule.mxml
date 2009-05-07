@@ -38,14 +38,16 @@
 
         public function renderReport(dataSet:ArrayCollection, analysisDefinition:AnalysisDefinition, clientProcessorMap:Object):void {
             var plotChartDef:PlotChartDefinition = analysisDefinition as PlotChartDefinition;
-            measure1 = plotChartDef.xaxisMeasure.qualifiedName();
-            measure1Name = plotChartDef.xaxisMeasure.display;
-            measure2 = plotChartDef.yaxisMeasure.qualifiedName();
-            measure2Name = plotChartDef.yaxisMeasure.display;
-            measure1Formatter = plotChartDef.xaxisMeasure.getFormatter();
-            measure2Formatter = plotChartDef.yaxisMeasure.getFormatter();
-            dimension = plotChartDef.dimension.qualifiedName();
-            dimensionItem = plotChartDef.dimension;
+            if (dataSet.length > 0) {
+                measure1 = plotChartDef.xaxisMeasure.qualifiedName();
+                measure1Name = plotChartDef.xaxisMeasure.display;
+                measure2 = plotChartDef.yaxisMeasure.qualifiedName();
+                measure2Name = plotChartDef.yaxisMeasure.display;
+                measure1Formatter = plotChartDef.xaxisMeasure.getFormatter();
+                measure2Formatter = plotChartDef.yaxisMeasure.getFormatter();
+                dimension = plotChartDef.dimension.qualifiedName();
+                dimensionItem = plotChartDef.dimension;
+            }
             graphData = dataSet;
         }
 

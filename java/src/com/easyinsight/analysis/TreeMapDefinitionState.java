@@ -15,6 +15,17 @@ public class TreeMapDefinitionState extends AnalysisDefinitionState {
     @Column(name="treemap_report_id")
     private long treemapDefinitionID;
 
+    @Column(name="color_scheme")
+    private int colorScheme;
+
+    public int getColorScheme() {
+        return colorScheme;
+    }
+
+    public void setColorScheme(int colorScheme) {
+        this.colorScheme = colorScheme;
+    }
+
     public long getTreemapDefinitionID() {
         return treemapDefinitionID;
     }
@@ -26,6 +37,7 @@ public class TreeMapDefinitionState extends AnalysisDefinitionState {
     public WSAnalysisDefinition createWSDefinition() {
         WSTreeMapDefinition wsTreeMapDefinition = new WSTreeMapDefinition();
         wsTreeMapDefinition.setTreeMapDefinitionID(treemapDefinitionID);
+        wsTreeMapDefinition.setColorScheme(colorScheme);
         return wsTreeMapDefinition;
     }
 }

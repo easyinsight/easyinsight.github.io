@@ -1,6 +1,7 @@
 package com.easyinsight.analysis.gauge {
 import com.easyinsight.analysis.AnalysisDefinition;
 import com.easyinsight.analysis.AnalysisItem;
+import com.easyinsight.analysis.AnalysisItemTypes;
 import com.easyinsight.analysis.AnalysisItemUpdateEvent;
 import com.easyinsight.analysis.CustomChangeEvent;
 import com.easyinsight.analysis.DataServiceEvent;
@@ -9,6 +10,7 @@ import com.easyinsight.analysis.MeasureDropArea;
 import com.easyinsight.analysis.ReportDataEvent;
 import com.easyinsight.map.MapDropAreaGrouping;
 import flash.events.Event;
+
 import mx.collections.ArrayCollection;
 import mx.containers.HBox;
 import mx.controls.ComboBox;
@@ -28,17 +30,24 @@ public class GaugeControlBar extends HBox implements IReportControlBar {
         measureGrouping.addEventListener(AnalysisItemUpdateEvent.ANALYSIS_LIST_UPDATE, requestListData);
         maxValueInput = new TextInput();
         gaugeTypeBox = new ComboBox();
-        gaugeTypeBox.dataProvider = new ArrayCollection( [{label: "Circular Gauge", type: 1}, {label: "Horizontal Gauge", type: 2}]);
+        gaugeTypeBox.dataProvider = new ArrayCollection( [{label: "Circular Gauge", type: GaugeDefinition.CIRCULAR_GAUGE},
+            {label: "Horizontal Gauge", type: GaugeDefinition.HORIZONTAL_GAUGE}]);
+        gaugeTypeBox.addEventListener(Event.CHANGE, onChange);
         setStyle("verticalAlign", "middle");
     }
 
+    private function onChange(event:Event):void {
+        var type:int = int(gaugeTypeBox.selectedItem.type);
+        dispatchEvent(new GaugeTypeEvent(type));
+        dispatchEvent(new ReportDataEvent(ReportDataEvent.REQUEST_DATA, false));
+    }
 
     override protected function createChildren():void {
         super.createChildren();
-        var gaugeLabel:Label = new Label();
+        /*var gaugeLabel:Label = new Label();
         gaugeLabel.text = "Gauge Type: ";
         addChild(gaugeLabel);
-        addChild(gaugeTypeBox);
+        addChild(gaugeTypeBox);*/
         var measureLabel:Label = new Label();
         measureLabel.text = "Measure: ";
         addChild(measureLabel);
@@ -55,7 +64,7 @@ public class GaugeControlBar extends HBox implements IReportControlBar {
     }
 
     private function onMaxValueChange(event:Event):void {
-        dispatchEvent(new ReportDataEvent(ReportDataEvent.REQUEST_DATA));
+        dispatchEvent(new ReportDataEvent(ReportDataEvent.REQUEST_DATA, false));
     }
 
     private function requestListData(event:AnalysisItemUpdateEvent):void {
@@ -68,6 +77,7 @@ public class GaugeControlBar extends HBox implements IReportControlBar {
 
     public function createAnalysisDefinition():AnalysisDefinition {
         gaugeDefinition.measure = measureGrouping.getListColumns()[0];
+        gaugeDefinition.gaugeType = GaugeDefinition.CIRCULAR_GAUGE;
         gaugeDefinition.maxValue = int(maxValueInput.text);
         return gaugeDefinition;
     }
@@ -82,7 +92,10 @@ public class GaugeControlBar extends HBox implements IReportControlBar {
     }
 
     public function addItem(analysisItem:AnalysisItem):void {
-
+        if (analysisItem.hasType(AnalysisItemTypes.MEASURE)) {
+            measureGrouping.addAnalysisItem(analysisItem);
+        }
+        dispatchEvent(new ReportDataEvent(ReportDataEvent.REQUEST_DATA));
     }
 
     public function onCustomChangeEvent(event:CustomChangeEvent):void {

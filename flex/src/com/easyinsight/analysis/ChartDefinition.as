@@ -8,6 +8,9 @@ package com.easyinsight.analysis
 	{
 		public var chartType:int;
 		public var chartFamily:int;
+
+        public var rotationAngle:Number;
+        public var elevationAngle:Number;
 				
 		public var chartDefinitionID:Number;
 		

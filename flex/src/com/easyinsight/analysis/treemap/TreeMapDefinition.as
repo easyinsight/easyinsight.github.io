@@ -6,6 +6,11 @@ import mx.collections.ArrayCollection;
 [Bindable]
 [RemoteClass(alias="com.easyinsight.analysis.WSTreeMapDefinition")]
 public class TreeMapDefinition extends AnalysisDefinition{
+
+    public static const DEPTH:int = 1;
+    public static const DIV:int = 2;
+    public static const QUALITATIVE:int = 3;
+
     public function TreeMapDefinition() {
         super();
     }
@@ -14,6 +19,7 @@ public class TreeMapDefinition extends AnalysisDefinition{
     public var measure2:AnalysisItem;
     public var hierarchy:AnalysisItem;
     public var treeMapDefinitionID:int;
+    public var colorScheme:int;
 
     override public function get type():int {
         return AnalysisDefinition.TREEMAP;

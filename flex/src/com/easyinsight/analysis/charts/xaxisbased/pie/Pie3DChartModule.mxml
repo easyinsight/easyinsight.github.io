@@ -20,6 +20,7 @@
 
         private function onCreation():void {
             visuals.chart = pieChart;
+            visuals.addEventListener(CustomChangeEvent.CUSTOM_CHANGE, onCustomChange);
         }
 
         private var visuals:Chart3DVisuals = new Chart3DVisuals();
@@ -40,13 +41,23 @@
 
         private var dimensionItem:AnalysisItem;
 
+        private function onCustomChange(event:CustomChangeEvent):void {
+            dispatchEvent(event);
+        }
+
         public function renderReport(dataSet:ArrayCollection, analysisDefinition:AnalysisDefinition, clientProcessorMap:Object):void {
             var pieChartDef:Pie3DChartDefinition = analysisDefinition as Pie3DChartDefinition;
+            if (pieChartDef.elevationAngle > 0) {
+                visuals.elevationAngle = pieChartDef.elevationAngle;
+                visuals.rotationAngle = pieChartDef.rotationAngle;
+            }
             graphData = dataSet;
-            this.measureFormatter = pieChartDef.measure.getFormatter();
-            measureName = pieChartDef.measure.qualifiedName();
-            dimension = pieChartDef.xaxis.qualifiedName();
-            this.dimensionItem = pieChartDef.xaxis;
+            if (dataSet.length > 0) {
+                this.measureFormatter = pieChartDef.measure.getFormatter();
+                measureName = pieChartDef.measure.qualifiedName();
+                dimension = pieChartDef.xaxis.qualifiedName();
+                this.dimensionItem = pieChartDef.xaxis;
+            }
         }
 
         private function chartSelection(event:ChartItemEvent):void {

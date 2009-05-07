@@ -1,5 +1,7 @@
 package com.easyinsight.analysis.charts.xaxisbased {
 import com.easyinsight.analysis.AnalysisDefinition;
+import com.easyinsight.analysis.AnalysisItem;
+import com.easyinsight.analysis.AnalysisItemTypes;
 import com.easyinsight.analysis.AnalysisItemUpdateEvent;
 import com.easyinsight.analysis.CustomChangeEvent;
 import com.easyinsight.analysis.DataServiceEvent;
@@ -8,10 +10,11 @@ import com.easyinsight.analysis.IReportControlBar;
 import com.easyinsight.analysis.ListDropAreaGrouping;
 import com.easyinsight.analysis.MeasureDropArea;
 import com.easyinsight.analysis.ReportDataEvent;
+import com.easyinsight.analysis.charts.ChartRotationEvent;
+
 import mx.binding.utils.BindingUtils;
 import mx.collections.ArrayCollection;
 import mx.containers.HBox;
-import mx.controls.Alert;
 import mx.controls.Label;
 import mx.events.FlexEvent;
 public class XAxisControlBar extends HBox implements IReportControlBar  {
@@ -99,10 +102,21 @@ public class XAxisControlBar extends HBox implements IReportControlBar  {
         measureGrouping.analysisItems = analysisItems;
     }
 
-    public function addItem(analysisItem:com.easyinsight.analysis.AnalysisItem):void {
+    public function addItem(analysisItem:AnalysisItem):void {
+        if (analysisItem.hasType(AnalysisItemTypes.MEASURE)) {
+            measureGrouping.addAnalysisItem(analysisItem);
+        } else if (analysisItem.hasType(AnalysisItemTypes.DIMENSION)) {
+            xAxisGrouping.addAnalysisItem(analysisItem);
+        }
+        dispatchEvent(new ReportDataEvent(ReportDataEvent.REQUEST_DATA));
     }
 
     public function onCustomChangeEvent(event:CustomChangeEvent):void {
+        if (event is ChartRotationEvent) {
+            var chartEvent:ChartRotationEvent = event as ChartRotationEvent;
+            xAxisDefinition.elevationAngle = chartEvent.elevation;
+            xAxisDefinition.rotationAngle = chartEvent.rotation;
+        }
     }
 }
 }

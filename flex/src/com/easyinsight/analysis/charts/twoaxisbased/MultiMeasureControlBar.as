@@ -1,6 +1,7 @@
 package com.easyinsight.analysis.charts.twoaxisbased {
 import com.easyinsight.analysis.AnalysisDefinition;
 import com.easyinsight.analysis.AnalysisItem;
+import com.easyinsight.analysis.AnalysisItemTypes;
 import com.easyinsight.analysis.AnalysisItemUpdateEvent;
 import com.easyinsight.analysis.CustomChangeEvent;
 import com.easyinsight.analysis.DataServiceEvent;
@@ -101,6 +102,14 @@ public class MultiMeasureControlBar extends HBox implements IReportControlBar {
     }
 
     public function addItem(analysisItem:com.easyinsight.analysis.AnalysisItem):void {
+        if (analysisItem.hasType(AnalysisItemTypes.MEASURE)) {
+            if (!xAxisDefinition.measures.contains(analysisItem)) {
+                measureGrouping.addAnalysisItem(analysisItem);
+            }
+        } else if (analysisItem.hasType(AnalysisItemTypes.DIMENSION)) {
+            xAxisGrouping.addAnalysisItem(analysisItem);
+        }
+        dispatchEvent(new ReportDataEvent(ReportDataEvent.REQUEST_DATA));
     }
 
     public function onCustomChangeEvent(event:CustomChangeEvent):void {

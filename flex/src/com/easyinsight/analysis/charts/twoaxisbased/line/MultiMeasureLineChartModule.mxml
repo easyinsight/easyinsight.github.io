@@ -62,77 +62,80 @@
             lineChart.showDataTips = true;
             lineChart.selectionMode = "multiple";
 
-            var xAxisDimension:AnalysisItem = lineChartDef.xaxis;
-
-            var sort:Sort = new Sort();
-            var sortField:SortField = new SortField(xAxisDimension.qualifiedName(), true);
-            sort.fields = [ sortField ];
             if (chartData.length > 0) {
-                var firstObj:Object = chartData.getItemAt(0);
-                var firstVal:Object = firstObj[xAxisDimension.qualifiedName()];
-                if (firstVal is Number) {
-                    sortField.numeric = true;
-                }
 
-                chartData.sort = sort;
-                chartData.refresh();
+                var xAxisDimension:AnalysisItem = lineChartDef.xaxis;
 
-                if (firstVal is Number) {
-                    var categories:ArrayCollection = new ArrayCollection();
-                    for each (var obj:Object in chartData) {
-                        var valObj:Object = obj[xAxisDimension.qualifiedName()];
-                        if (categories.getItemIndex(valObj) == -1) {
-                            categories.addItem(valObj);
+                var sort:Sort = new Sort();
+                var sortField:SortField = new SortField(xAxisDimension.qualifiedName(), true);
+                sort.fields = [ sortField ];
+                if (chartData.length > 0) {
+                    var firstObj:Object = chartData.getItemAt(0);
+                    var firstVal:Object = firstObj[xAxisDimension.qualifiedName()];
+                    if (firstVal is Number) {
+                        sortField.numeric = true;
+                    }
+
+                    chartData.sort = sort;
+                    chartData.refresh();
+
+                    if (firstVal is Number) {
+                        var categories:ArrayCollection = new ArrayCollection();
+                        for each (var obj:Object in chartData) {
+                            var valObj:Object = obj[xAxisDimension.qualifiedName()];
+                            if (categories.getItemIndex(valObj) == -1) {
+                                categories.addItem(valObj);
+                            }
                         }
                     }
                 }
-            }
 
 
-            var xAxis:IAxis;
+                var xAxis:IAxis;
 
-            if (xAxisDimension.hasType(AnalysisItemTypes.DATE)) {
-                var dateDimension:AnalysisDateDimension = xAxisDimension as AnalysisDateDimension;
-                var dateAxis:DateTimeAxis = new DateTimeAxis();
-                switch (dateDimension.dateLevel) {
-                    case AnalysisItemTypes.YEAR_LEVEL:
-                        dateAxis.dataUnits = "years";
-                        break;
-                    case AnalysisItemTypes.MONTH_LEVEL:
-                        dateAxis.dataUnits = "months";
-                        break;
-                    case AnalysisItemTypes.DAY_LEVEL:
-                        dateAxis.dataUnits = "days";
-                        break;
-                    case AnalysisItemTypes.HOUR_LEVEL:
-                        dateAxis.dataUnits = "hours";
-                        break;
-                    case AnalysisItemTypes.MINUTE_LEVEL:
-                        dateAxis.dataUnits = "minutes";
-                        break;
+                if (xAxisDimension.hasType(AnalysisItemTypes.DATE)) {
+                    var dateDimension:AnalysisDateDimension = xAxisDimension as AnalysisDateDimension;
+                    var dateAxis:DateTimeAxis = new DateTimeAxis();
+                    switch (dateDimension.dateLevel) {
+                        case AnalysisItemTypes.YEAR_LEVEL:
+                            dateAxis.dataUnits = "years";
+                            break;
+                        case AnalysisItemTypes.MONTH_LEVEL:
+                            dateAxis.dataUnits = "months";
+                            break;
+                        case AnalysisItemTypes.DAY_LEVEL:
+                            dateAxis.dataUnits = "days";
+                            break;
+                        case AnalysisItemTypes.HOUR_LEVEL:
+                            dateAxis.dataUnits = "hours";
+                            break;
+                        case AnalysisItemTypes.MINUTE_LEVEL:
+                            dateAxis.dataUnits = "minutes";
+                            break;
+                    }
+                    dateAxis.displayName = dateDimension.display;
+                    xAxis = dateAxis;
+                } else {
+                    var categoryAxis:CategoryAxis = new CategoryAxis();
+                    categoryAxis.displayName = xAxisDimension.display;
+                    categoryAxis.dataProvider = categories;
+                    xAxis = categoryAxis;
                 }
-                dateAxis.displayName = dateDimension.display;
-                xAxis = dateAxis;
-            } else {
-                var categoryAxis:CategoryAxis = new CategoryAxis();
-                categoryAxis.displayName = xAxisDimension.display;
-                categoryAxis.dataProvider = categories;
-                xAxis = categoryAxis;
+
+                lineChart.horizontalAxis = xAxis;
+
+                var mySeries:Array = new Array();
+                for each (var analysisMeasure:AnalysisMeasure in lineChartDef.measures) {
+                    var uniqueLineSeries:LineSeries = new LineSeries();
+                    uniqueLineSeries.xField = lineChartDef.xaxis.qualifiedName();
+                    uniqueLineSeries.yField = analysisMeasure.qualifiedName();
+                    uniqueLineSeries.displayName = analysisMeasure.display;
+                    uniqueLineSeries.dataProvider = dataSet;
+                    mySeries.push(uniqueLineSeries);
+                }
+
+                lineChart.series = mySeries;
             }
-
-            lineChart.horizontalAxis = xAxis;
-
-            var mySeries:Array = new Array();
-            for each (var analysisMeasure:AnalysisMeasure in lineChartDef.measures) {
-                var uniqueLineSeries:LineSeries = new LineSeries();
-                uniqueLineSeries.xField = lineChartDef.xaxis.qualifiedName();
-                uniqueLineSeries.yField = analysisMeasure.qualifiedName();
-                uniqueLineSeries.displayName = analysisMeasure.display;
-                uniqueLineSeries.dataProvider = dataSet;
-                mySeries.push(uniqueLineSeries);
-            }
-
-            lineChart.series = mySeries;
 
             legend.dataProvider = lineChart;
             legend.direction = "vertical";

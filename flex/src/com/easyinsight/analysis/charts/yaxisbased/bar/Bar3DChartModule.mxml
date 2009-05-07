@@ -1,6 +1,6 @@
 <?xml version="1.0" ?>
 <mx:Module xmlns:mx="http://www.adobe.com/2006/mxml" implements="com.easyinsight.analysis.IReportRenderer"
-        width="100%" height="100%">
+        width="100%" height="100%" creationComplete="onCreation()">
     <mx:Script>
 		<![CDATA[
         import com.easyinsight.analysis.AnalysisDefinition;
@@ -61,6 +61,14 @@ import com.easyinsight.filtering.FilterRawData;
         public function set yField(val:String):void {
             _yField = val;
             dispatchEvent(new FlexEvent(FlexEvent.DATA_CHANGE));
+        }
+
+        private function onCreation():void {
+            visuals.addEventListener(CustomChangeEvent.CUSTOM_CHANGE, onCustomChange);
+        }
+
+        private function onCustomChange(event:CustomChangeEvent):void {
+            dispatchEvent(event);
         }
 
         private var measureFormatter:Formatter;
@@ -165,61 +173,70 @@ import com.easyinsight.filtering.FilterRawData;
         public function renderReport(dataSet:ArrayCollection, analysisDefinition:AnalysisDefinition, clientProcessorMap:Object):void {
             var barChartDef:Bar3DChartDefinition = analysisDefinition as Bar3DChartDefinition;
 
-            yField = barChartDef.yaxis.qualifiedName();
-            createChart();
 
-            measureFormatter = barChartDef.measure.getFormatter();
-            var conditionRenderer:ConditionRenderer = barChartDef.measure.createClientRenderer();
-            if (conditionRenderer.hasCustomColor()) {
-                customColors = true;
-                this.conditionRenderer = conditionRenderer;
-            }
+            if (dataSet.length > 0) {
+                yField = barChartDef.yaxis.qualifiedName();
+                createChart();
 
-            var newXAxisItem:AnalysisItem = barChartDef.measure;
-            if (xAxisItem == null || newXAxisItem.qualifiedName() != xAxisItem.qualifiedName()) {
-                xAxisItem = newXAxisItem;
-                if (sortable) {
-                    //xAxisTitleRendererFactory.analysisItem = xAxisItem;
+                if (barChartDef.elevationAngle > 0) {
+                    visuals.elevationAngle = barChartDef.elevationAngle;
+                    visuals.rotationAngle = barChartDef.rotationAngle;
                 }
-            }
 
-            var newYAxisItem:AnalysisItem = barChartDef.yaxis;
-            if (yAxisItem == null || newYAxisItem.qualifiedName() != yAxisItem.qualifiedName()) {
-                yAxisItem = newYAxisItem;
-                if (sortable) {
-                    //yAxisTitleRendererFactory.analysisItem = yAxisItem;
+                measureFormatter = barChartDef.measure.getFormatter();
+                var conditionRenderer:ConditionRenderer = barChartDef.measure.createClientRenderer();
+                if (conditionRenderer.hasCustomColor()) {
+                    customColors = true;
+                    this.conditionRenderer = conditionRenderer;
                 }
-            }
 
-            var newXField:String = newXAxisItem.qualifiedName();
-            if (newXField != xField) {
-                xField = newXField;
-                barSeries.xField = xField;
-            }
+                var newXAxisItem:AnalysisItem = barChartDef.measure;
+                if (xAxisItem == null || newXAxisItem.qualifiedName() != xAxisItem.qualifiedName()) {
+                    xAxisItem = newXAxisItem;
+                    if (sortable) {
+                        //xAxisTitleRendererFactory.analysisItem = xAxisItem;
+                    }
+                }
 
-            var newXAxisTitle:String = newXAxisItem.display;
-            if (newXAxisTitle != xAxisTitle) {
-                xAxisTitle = newXAxisTitle;
-                xAxis.title = xAxisTitle;
-            }
+                var newYAxisItem:AnalysisItem = barChartDef.yaxis;
+                if (yAxisItem == null || newYAxisItem.qualifiedName() != yAxisItem.qualifiedName()) {
+                    yAxisItem = newYAxisItem;
+                    if (sortable) {
+                        //yAxisTitleRendererFactory.analysisItem = yAxisItem;
+                    }
+                }
 
-            var newYField:String = newYAxisItem.qualifiedName();
-            if (newYField != yField) {
-                yField = newYField;
-                yAxis.categoryField = yField;
-                barSeries.yField = yField;
-            }
+                var newXField:String = newXAxisItem.qualifiedName();
+                if (newXField != xField) {
+                    xField = newXField;
+                    barSeries.xField = xField;
+                }
 
-            var newYAxisTitle:String = newYAxisItem.display;
-            if (newYAxisTitle != yAxisTitle) {
-                yAxisTitle = newYAxisTitle;
-                yAxis.title = yAxisTitle;
-                barSeries.displayName = yAxisTitle;
-            }
+                var newXAxisTitle:String = newXAxisItem.display;
+                if (newXAxisTitle != xAxisTitle) {
+                    xAxisTitle = newXAxisTitle;
+                    xAxis.title = xAxisTitle;
+                }
 
-            barChart.dataProvider = dataSet;
+                var newYField:String = newYAxisItem.qualifiedName();
+                if (newYField != yField) {
+                    yField = newYField;
+                    yAxis.categoryField = yField;
+                    barSeries.yField = yField;
+                }
+
+                var newYAxisTitle:String = newYAxisItem.display;
+                if (newYAxisTitle != yAxisTitle) {
+                    yAxisTitle = newYAxisTitle;
+                    yAxis.title = yAxisTitle;
+                    barSeries.displayName = yAxisTitle;
+                }
+                barChart.dataProvider = dataSet;
             barSeries.dataProvider = dataSet;
             yAxis.dataProvider = dataSet;
+            }
+
+
             graphData = dataSet;
         }
 

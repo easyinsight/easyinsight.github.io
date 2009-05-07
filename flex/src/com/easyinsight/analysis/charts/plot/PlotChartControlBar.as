@@ -1,5 +1,7 @@
 package com.easyinsight.analysis.charts.plot {
 import com.easyinsight.analysis.AnalysisDefinition;
+import com.easyinsight.analysis.AnalysisItem;
+import com.easyinsight.analysis.AnalysisItemTypes;
 import com.easyinsight.analysis.AnalysisItemUpdateEvent;
 import com.easyinsight.analysis.CustomChangeEvent;
 import com.easyinsight.analysis.DataServiceEvent;
@@ -115,6 +117,16 @@ public class PlotChartControlBar extends HBox implements IReportControlBar  {
     }
 
     public function addItem(analysisItem:com.easyinsight.analysis.AnalysisItem):void {
+        if (analysisItem.hasType(AnalysisItemTypes.MEASURE)) {
+            if (xAxisDefinition.xaxisMeasure == null || xAxisDefinition.yaxisMeasure != null) {
+                xmeasureGrouping.addAnalysisItem(analysisItem);
+            } else if (xAxisDefinition.yaxisMeasure == null) {
+                ymeasureGrouping.addAnalysisItem(analysisItem);
+            }
+        } else if (analysisItem.hasType(AnalysisItemTypes.DIMENSION)) {
+            dimensionGrouping.addAnalysisItem(analysisItem);
+        }
+        dispatchEvent(new ReportDataEvent(ReportDataEvent.REQUEST_DATA));
     }
 
     public function onCustomChangeEvent(event:CustomChangeEvent):void {

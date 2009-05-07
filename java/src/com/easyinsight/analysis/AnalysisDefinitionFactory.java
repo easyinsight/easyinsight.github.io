@@ -25,6 +25,8 @@ public class AnalysisDefinitionFactory {
         } else if (wsAnalysisDefinition.getDataFeedType().equals(AnalysisTypes.CHART)) {
             WSChartDefinition wsChart = (WSChartDefinition) wsAnalysisDefinition;
             ChartDefinitionState chartDefinition = new ChartDefinitionState();
+            chartDefinition.setElevationAngle(wsChart.getElevationAngle());
+            chartDefinition.setRotationAngle(wsChart.getRotationAngle());
             chartDefinition.setChartFamily(wsChart.getChartFamily());
             chartDefinition.setChartType(wsChart.getChartType());
             analysisDefinitionState = chartDefinition;
@@ -45,6 +47,7 @@ public class AnalysisDefinitionFactory {
             WSTreeMapDefinition wsTree = (WSTreeMapDefinition) wsAnalysisDefinition;
             TreeMapDefinitionState treeMapDefinitionState = new TreeMapDefinitionState();
             treeMapDefinitionState.setTreemapDefinitionID(wsTree.getTreeMapDefinitionID());
+            treeMapDefinitionState.setColorScheme(wsTree.getColorScheme());
             analysisDefinitionState = treeMapDefinitionState;
         } else if (wsAnalysisDefinition.getDataFeedType().equals(AnalysisTypes.TREE)) {
             WSTreeDefinition wsTree = (WSTreeDefinition) wsAnalysisDefinition;

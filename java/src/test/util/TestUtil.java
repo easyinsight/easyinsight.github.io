@@ -42,6 +42,16 @@ public class TestUtil {
      */
     public static long getIndividualTestUser() {
         UserService userService = new UserService();
+        Connection conn = Database.instance().getConnection();
+        try {
+            PreparedStatement deleteStmt = conn.prepareStatement("DELETE ACCOUNT FROM USER, ACCOUNT WHERE USERNAME = ? AND USER.account_id = ACCOUNT.ACCOUNT_ID");
+            deleteStmt.setString(1, "testuser");
+            deleteStmt.executeUpdate();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        } finally {
+            Database.instance().closeConnection(conn);
+        }
         User user = new InternalUserService().retrieveUser("testuser");
         long userID;
         if (user == null) {
@@ -104,6 +114,16 @@ public class TestUtil {
 
     public static long getIndividualAdminUser() {
         UserService userService = new UserService();
+        Connection conn = Database.instance().getConnection();
+        try {
+            PreparedStatement deleteStmt = conn.prepareStatement("DELETE ACCOUNT FROM USER, ACCOUNT WHERE USERNAME = ? AND USER.account_id = ACCOUNT.ACCOUNT_ID");
+            deleteStmt.setString(1, "adminuser");
+            deleteStmt.executeUpdate();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        } finally {
+            Database.instance().closeConnection(conn);
+        }
         User user = new InternalUserService().retrieveUser("adminuser");
         long userID;
         if (user == null) {

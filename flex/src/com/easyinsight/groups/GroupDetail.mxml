@@ -202,6 +202,7 @@
                         ownerText += ", ";
                     }
                     ownerText += "<b>" + groupUser.name + "</b>";
+                    ownerText += ",";
                     if (groupUser.name == User.getInstance().userName) {
                         adminEnabled = true;
                     }
@@ -210,6 +211,7 @@
                     foundUser = true;
                 }
             }
+            ownerText = ownerText.substring(0, ownerText.length - 1);
             reportItemFactory = new ClassFactory(GroupReportItem);
             reportItemFactory.properties = { admin: adminEnabled };
             dataSourceItemFactory = new ClassFactory(GroupDataSourceItem);

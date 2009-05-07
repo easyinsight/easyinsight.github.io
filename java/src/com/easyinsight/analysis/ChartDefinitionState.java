@@ -24,6 +24,12 @@ public class ChartDefinitionState extends AnalysisDefinitionState {
     @Column(name="chart_type")
     private int chartType;
 
+    @Column(name="rotation_angle")
+    private double rotationAngle;
+
+    @Column(name="elevation_angle")
+    private double elevationAngle;
+
     public static final int COLUMN_FAMILY = 1;
     public static final int BAR_FAMILY = 2;
     public static final int PIE_FAMILY = 3;
@@ -48,6 +54,22 @@ public class ChartDefinitionState extends AnalysisDefinitionState {
     public static final int BUBBLE_TYPE = 14;
     public static final int PLOT_TYPE = 15;
     public static final int MULTI_MEASURE_LINE_2D = 16;
+
+    public double getRotationAngle() {
+        return rotationAngle;
+    }
+
+    public void setRotationAngle(double rotationAngle) {
+        this.rotationAngle = rotationAngle;
+    }
+
+    public double getElevationAngle() {
+        return elevationAngle;
+    }
+
+    public void setElevationAngle(double elevationAngle) {
+        this.elevationAngle = elevationAngle;
+    }
 
     public long getDefinitionID() {
         return definitionID;
@@ -134,7 +156,8 @@ public class ChartDefinitionState extends AnalysisDefinitionState {
             default:
                 throw new UnsupportedOperationException();
         }
-
+        wsChartDefinition.setRotationAngle(rotationAngle);
+        wsChartDefinition.setElevationAngle(elevationAngle);
         return wsChartDefinition;
     }
 }

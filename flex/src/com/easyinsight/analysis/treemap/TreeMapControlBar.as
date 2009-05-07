@@ -1,7 +1,7 @@
 package com.easyinsight.analysis.treemap {
 import com.easyinsight.analysis.AnalysisDefinition;
-import com.easyinsight.analysis.AnalysisDefinition;
 import com.easyinsight.analysis.AnalysisItem;
+import com.easyinsight.analysis.AnalysisItemTypes;
 import com.easyinsight.analysis.AnalysisItemUpdateEvent;
 import com.easyinsight.analysis.CustomChangeEvent;
 import com.easyinsight.analysis.DataServiceEvent;
@@ -10,8 +10,12 @@ import com.easyinsight.analysis.IReportControlBar;
 import com.easyinsight.analysis.ListDropAreaGrouping;
 import com.easyinsight.analysis.MeasureDropArea;
 import com.easyinsight.analysis.ReportDataEvent;
+
+import flash.events.Event;
+
 import mx.collections.ArrayCollection;
 import mx.containers.HBox;
+import mx.controls.ComboBox;
 import mx.controls.Label;
 
 public class TreeMapControlBar extends HBox implements IReportControlBar {
@@ -19,9 +23,13 @@ public class TreeMapControlBar extends HBox implements IReportControlBar {
     private var hierarchyGrouping:ListDropAreaGrouping;
     private var areaMeasureGrouping:ListDropAreaGrouping;
     private var colorMeasureGrouping:ListDropAreaGrouping;
+    private var colorSchemeBox:ComboBox;
     private var mapDefinition:TreeMapDefinition;
 
     public function TreeMapControlBar() {
+        colorSchemeBox = new ComboBox();
+        colorSchemeBox.addEventListener(Event.CHANGE, onSchemeChange);
+        colorSchemeBox.dataProvider = new ArrayCollection([ "Depth", "Div-Red-Green", "Qualitative" ]);
         hierarchyGrouping = new ListDropAreaGrouping();
         hierarchyGrouping.maxElements = 1;
         hierarchyGrouping.dropAreaType = HierarchyDropArea;
@@ -34,10 +42,16 @@ public class TreeMapControlBar extends HBox implements IReportControlBar {
         colorMeasureGrouping.maxElements = 1;
         colorMeasureGrouping.dropAreaType = MeasureDropArea;
         colorMeasureGrouping.addEventListener(AnalysisItemUpdateEvent.ANALYSIS_LIST_UPDATE, requestListData);
+        setStyle("verticalAlign", "middle");
+    }
+
+    private function onSchemeChange(event:Event):void {
+        dispatchEvent(new ReportDataEvent(ReportDataEvent.REQUEST_DATA, false));
     }
 
     override protected function createChildren():void {
         super.createChildren();
+        addChild(colorSchemeBox);
         var groupingLabel:Label = new Label();
         groupingLabel.text = "Hierarchy:";
         groupingLabel.setStyle("fontSize", 14);
@@ -77,6 +91,7 @@ public class TreeMapControlBar extends HBox implements IReportControlBar {
         mapDefinition.hierarchy = hierarchyGrouping.getListColumns()[0];
         mapDefinition.measure1 = areaMeasureGrouping.getListColumns()[0];
         mapDefinition.measure2 = colorMeasureGrouping.getListColumns()[0];
+        mapDefinition.colorScheme = colorSchemeBox.selectedIndex + 1;
         return mapDefinition;
     }
 
@@ -92,7 +107,16 @@ public class TreeMapControlBar extends HBox implements IReportControlBar {
     }
 
     public function addItem(analysisItem:AnalysisItem):void {
-
+        if (analysisItem.hasType(AnalysisItemTypes.HIERARCHY)) {
+            hierarchyGrouping.addAnalysisItem(analysisItem);
+        } else if (analysisItem.hasType(AnalysisItemTypes.MEASURE)) {
+            if (areaMeasureGrouping.getListColumns().length == 0) {
+                areaMeasureGrouping.addAnalysisItem(analysisItem);
+            } else {
+                colorMeasureGrouping.addAnalysisItem(analysisItem);
+            }
+        }
+        dispatchEvent(new ReportDataEvent(ReportDataEvent.REQUEST_DATA));
     }
 
     public function onCustomChangeEvent(event:CustomChangeEvent):void {

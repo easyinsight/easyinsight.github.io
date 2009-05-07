@@ -1,5 +1,7 @@
 package com.easyinsight.analysis.charts.bubble {
 import com.easyinsight.analysis.AnalysisDefinition;
+import com.easyinsight.analysis.AnalysisItem;
+import com.easyinsight.analysis.AnalysisItemTypes;
 import com.easyinsight.analysis.AnalysisItemUpdateEvent;
 import com.easyinsight.analysis.CustomChangeEvent;
 import com.easyinsight.analysis.DataServiceEvent;
@@ -133,6 +135,18 @@ public class BubbleChartControlBar extends HBox implements IReportControlBar  {
     }
 
     public function addItem(analysisItem:com.easyinsight.analysis.AnalysisItem):void {
+        if (analysisItem.hasType(AnalysisItemTypes.MEASURE)) {
+            if (xAxisDefinition.xaxisMeasure == null || (xAxisDefinition.yaxisMeasure != null &&
+                    xAxisDefinition.zaxisMeasure != null)) {
+                xmeasureGrouping.addAnalysisItem(analysisItem);
+            } else if (xAxisDefinition.yaxisMeasure == null) {
+                ymeasureGrouping.addAnalysisItem(analysisItem);
+            } else if (xAxisDefinition.zaxisMeasure == null) {
+                zmeasureGrouping.addAnalysisItem(analysisItem);
+            }
+        } else if (analysisItem.hasType(AnalysisItemTypes.DIMENSION)) {
+            dimensionGrouping.addAnalysisItem(analysisItem);
+        }
     }
 
     public function onCustomChangeEvent(event:CustomChangeEvent):void {

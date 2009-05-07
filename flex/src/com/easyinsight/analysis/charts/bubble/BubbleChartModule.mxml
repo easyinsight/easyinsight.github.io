@@ -43,16 +43,18 @@
 
         public function renderReport(dataSet:ArrayCollection, analysisDefinition:AnalysisDefinition, clientProcessorMap:Object):void {
             var plotChartDef:BubbleChartDefinition = analysisDefinition as BubbleChartDefinition;
-            measure1 = plotChartDef.xaxisMeasure.qualifiedName();
-            measure1Name = plotChartDef.xaxisMeasure.display;
-            measure2 = plotChartDef.yaxisMeasure.qualifiedName();
-            measure2Name = plotChartDef.yaxisMeasure.display;
-            measure3 = plotChartDef.zaxisMeasure.qualifiedName();
-            measure1Formatter = plotChartDef.xaxisMeasure.getFormatter();
-            measure2Formatter = plotChartDef.yaxisMeasure.getFormatter();
-            measure3Formatter = plotChartDef.zaxisMeasure.getFormatter();
-            dimension = plotChartDef.dimension.qualifiedName();
-            dimensionItem = plotChartDef.dimension;
+            if (dataSet.length > 0) {
+                measure1 = plotChartDef.xaxisMeasure.qualifiedName();
+                measure1Name = plotChartDef.xaxisMeasure.display;
+                measure2 = plotChartDef.yaxisMeasure.qualifiedName();
+                measure2Name = plotChartDef.yaxisMeasure.display;
+                measure3 = plotChartDef.zaxisMeasure.qualifiedName();
+                measure1Formatter = plotChartDef.xaxisMeasure.getFormatter();
+                measure2Formatter = plotChartDef.yaxisMeasure.getFormatter();
+                measure3Formatter = plotChartDef.zaxisMeasure.getFormatter();
+                dimension = plotChartDef.dimension.qualifiedName();
+                dimensionItem = plotChartDef.dimension;
+            }
             graphData = dataSet;
         }
 

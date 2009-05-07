@@ -1,10 +1,11 @@
 package com.easyinsight.analysis.charts {
 import flash.display.DisplayObject;
+import flash.events.EventDispatcher;
 import flash.events.MouseEvent;
 
 import mx.core.Application;
 
-public class Chart3DVisuals {
+public class Chart3DVisuals extends EventDispatcher {
 
     private var _rotationAngle:Number = 43.50;
     private var _elevationAngle:Number = 31.50;
@@ -75,6 +76,7 @@ public class Chart3DVisuals {
     }
 
     private function upListener(e:MouseEvent):void {
+        dispatchEvent(new ChartRotationEvent(elevationAngle, rotationAngle));
         _chart.addEventListener(MouseEvent.MOUSE_DOWN, downListener);
         Application.application.removeEventListener(MouseEvent.MOUSE_UP, upListener);
         _chart.removeEventListener(MouseEvent.MOUSE_MOVE, moveListener);

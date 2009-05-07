@@ -257,61 +257,65 @@ import mx.events.FlexEvent;
         public function renderReport(dataSet:ArrayCollection, analysisDefinition:AnalysisDefinition, clientProcessorMap:Object):void {
             var barChartDef:BarChartDefinition = analysisDefinition as BarChartDefinition;
 
-            yField = barChartDef.yaxis.qualifiedName();
-            createChart();
+            if (dataSet.length > 0) {
 
-            measureFormatter = barChartDef.measure.getFormatter();
-            var conditionRenderer:ConditionRenderer = barChartDef.measure.createClientRenderer();
-            if (conditionRenderer.hasCustomColor()) {
-                customColors = true;
-                this.conditionRenderer = conditionRenderer;
-            }
+                yField = barChartDef.yaxis.qualifiedName();
+                createChart();
 
-            var newXAxisItem:AnalysisItem = barChartDef.measure;
-            if (xAxisItem == null || newXAxisItem.qualifiedName() != xAxisItem.qualifiedName()) {
-                xAxisItem = newXAxisItem;
-                if (sortable) {
-                    xAxisTitleRendererFactory.properties = { analysisItem: xAxisItem, axisDirection: true};
+                measureFormatter = barChartDef.measure.getFormatter();
+                var conditionRenderer:ConditionRenderer = barChartDef.measure.createClientRenderer();
+                if (conditionRenderer.hasCustomColor()) {
+                    customColors = true;
+                    this.conditionRenderer = conditionRenderer;
                 }
-            }
 
-            var newYAxisItem:AnalysisItem = barChartDef.yaxis;
-            if (yAxisItem == null || newYAxisItem.qualifiedName() != yAxisItem.qualifiedName()) {
-                yAxisItem = newYAxisItem;
-                if (sortable) {
-                    yAxisTitleRendererFactory.properties = { analysisItem: yAxisItem, axisDirection: false};
+                var newXAxisItem:AnalysisItem = barChartDef.measure;
+                if (xAxisItem == null || newXAxisItem.qualifiedName() != xAxisItem.qualifiedName()) {
+                    xAxisItem = newXAxisItem;
+                    if (sortable) {
+                        xAxisTitleRendererFactory.properties = { analysisItem: xAxisItem, axisDirection: true};
+                    }
                 }
-            }
 
-            var newXField:String = newXAxisItem.qualifiedName();
-            if (newXField != xField) {
-                xField = newXField;
-                barSeries.xField = xField;
-            }
+                var newYAxisItem:AnalysisItem = barChartDef.yaxis;
+                if (yAxisItem == null || newYAxisItem.qualifiedName() != yAxisItem.qualifiedName()) {
+                    yAxisItem = newYAxisItem;
+                    if (sortable) {
+                        yAxisTitleRendererFactory.properties = { analysisItem: yAxisItem, axisDirection: false};
+                    }
+                }
 
-            var newXAxisTitle:String = newXAxisItem.display;
-            if (newXAxisTitle != xAxisTitle) {
-                xAxisTitle = newXAxisTitle;
-                xAxis.title = xAxisTitle;
-            }
+                var newXField:String = newXAxisItem.qualifiedName();
+                if (newXField != xField) {
+                    xField = newXField;
+                    barSeries.xField = xField;
+                }
 
-            var newYField:String = newYAxisItem.qualifiedName();
-            if (newYField != yField) {
-                yField = newYField;
-                yAxis.categoryField = yField;
-                barSeries.yField = yField;
-            }
+                var newXAxisTitle:String = newXAxisItem.display;
+                if (newXAxisTitle != xAxisTitle) {
+                    xAxisTitle = newXAxisTitle;
+                    xAxis.title = xAxisTitle;
+                }
 
-            var newYAxisTitle:String = newYAxisItem.display;
-            if (newYAxisTitle != yAxisTitle) {
-                yAxisTitle = newYAxisTitle;
-                yAxis.title = yAxisTitle;
-                barSeries.displayName = yAxisTitle;
-            }
+                var newYField:String = newYAxisItem.qualifiedName();
+                if (newYField != yField) {
+                    yField = newYField;
+                    yAxis.categoryField = yField;
+                    barSeries.yField = yField;
+                }
 
-            barChart.dataProvider = dataSet;
+                var newYAxisTitle:String = newYAxisItem.display;
+                if (newYAxisTitle != yAxisTitle) {
+                    yAxisTitle = newYAxisTitle;
+                    yAxis.title = yAxisTitle;
+                    barSeries.displayName = yAxisTitle;
+                }
+
+                barChart.dataProvider = dataSet;
             barSeries.dataProvider = dataSet;
             yAxis.dataProvider = dataSet;
+            }
+
             graphData = dataSet;
         }
 

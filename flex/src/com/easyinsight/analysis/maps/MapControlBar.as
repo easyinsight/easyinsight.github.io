@@ -1,5 +1,7 @@
 package com.easyinsight.analysis.maps {
 import com.easyinsight.analysis.AnalysisDefinition;
+import com.easyinsight.analysis.AnalysisItem;
+import com.easyinsight.analysis.AnalysisItemTypes;
 import com.easyinsight.analysis.AnalysisItemUpdateEvent;
 import com.easyinsight.analysis.CustomChangeEvent;
 import com.easyinsight.analysis.DataServiceEvent;
@@ -107,7 +109,13 @@ public class MapControlBar extends HBox implements IReportControlBar {
         return (xAxisGrouping.getListColumns().length > 0 && measureGrouping.getListColumns().length > 0);
     }
 
-    public function addItem(analysisItem:com.easyinsight.analysis.AnalysisItem):void {
+    public function addItem(analysisItem:AnalysisItem):void {
+        if (analysisItem.hasType(AnalysisItemTypes.MEASURE)) {
+            measureGrouping.addAnalysisItem(analysisItem);
+        } else if (analysisItem.hasType(AnalysisItemTypes.DIMENSION)) {
+            xAxisGrouping.addAnalysisItem(analysisItem);
+        }
+        dispatchEvent(new ReportDataEvent(ReportDataEvent.REQUEST_DATA));
     }
 
     public function onCustomChangeEvent(event:CustomChangeEvent):void {

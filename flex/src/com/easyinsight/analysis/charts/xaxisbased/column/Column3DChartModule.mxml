@@ -2,13 +2,14 @@
 <mx:Module xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:analysis="com.easyinsight.analysis.*"
            xmlns:ilog="ilog.charts3d.*" xmlns:ilog2="ilog.charts3d.series.*"
            implements="com.easyinsight.analysis.IReportRenderer"
-           width="100%" height="100%">
+           width="100%" height="100%" creationComplete="onCreation()">
     <mx:Script><![CDATA[
         import com.easyinsight.analysis.AnalysisDefinition;
         import com.easyinsight.analysis.CustomChangeEvent;
 
         import com.easyinsight.analysis.charts.Chart3DVisuals;
-import ilog.charts3d.charts3dClasses.Series3D;
+
+        import ilog.charts3d.charts3dClasses.Series3D;
         import ilog.charts3d.series.ColumnSet3D;
         import ilog.charts3d.series.ColumnSeries3D;
         import ilog.charts3d.ColumnChart3D;
@@ -80,8 +81,6 @@ import ilog.charts3d.charts3dClasses.Series3D;
         [Embed(source="../../../../../../../assets/darkwater.jpg")]
         private var rolloverFill:Class;
 
-        private var visuals:Chart3DVisuals = new Chart3DVisuals();
-
         [Bindable]
         public function get xField():String {
             return _xField;
@@ -92,14 +91,22 @@ import ilog.charts3d.charts3dClasses.Series3D;
             dispatchEvent(new FlexEvent(FlexEvent.DATA_CHANGE));
         }
 
+        private var visuals:Chart3DVisuals = new Chart3DVisuals();
+
+        private function onCreation():void {
+            visuals.addEventListener(CustomChangeEvent.CUSTOM_CHANGE, onCustomChange);
+        }
+
+        private function onCustomChange(event:CustomChangeEvent):void {
+            dispatchEvent(event);
+        }
+
         override protected function createChildren():void {
             super.createChildren();
             bgFills = [];
             for (var i:int = 0; i < 15; i++) {
                 var bgFill:BitmapFill = new BitmapFill();
                 bgFill.source = standardFill;
-                bgFill.originX = Math.random() * 60;
-                bgFill.originY = Math.random() * 60;
                 bgFills.push(bgFill);
             }
         }
@@ -136,6 +143,7 @@ import ilog.charts3d.charts3dClasses.Series3D;
                 columnChart.percentWidth = 100;
                 columnChart.showDataTips = true;
                 visuals.chart = columnChart;
+
                 /*if (selectable) {
                     columnChart.selectionMode = "multiple";
                 }*/
@@ -223,60 +231,67 @@ import ilog.charts3d.charts3dClasses.Series3D;
         public function renderReport(dataSet:ArrayCollection, analysisDefinition:AnalysisDefinition, clientProcessorMap:Object):void {
             var columnChartDef:Column3DChartDefinition = analysisDefinition as Column3DChartDefinition;
 
-            xField = columnChartDef.xaxis.qualifiedName();
-            createChart();
+            if (dataSet.length > 0) {
+                xField = columnChartDef.xaxis.qualifiedName();
+                createChart();
 
-            measureFormatter = columnChartDef.measure.getFormatter();
-            var conditionRenderer:ConditionRenderer = columnChartDef.measure.createClientRenderer();
-            if (conditionRenderer.hasCustomColor()) {
-                customColors = true;
-                this.conditionRenderer = conditionRenderer;
+                if (columnChartDef.elevationAngle > 0) {
+                    visuals.elevationAngle = columnChartDef.elevationAngle;
+                    visuals.rotationAngle = columnChartDef.rotationAngle;
+                }
+
+                measureFormatter = columnChartDef.measure.getFormatter();
+                var conditionRenderer:ConditionRenderer = columnChartDef.measure.createClientRenderer();
+                if (conditionRenderer.hasCustomColor()) {
+                    customColors = true;
+                    this.conditionRenderer = conditionRenderer;
+                }
+
+                var newXAxisItem:AnalysisItem = columnChartDef.xaxis;
+                if (xAxisItem == null || newXAxisItem.qualifiedName() != xAxisItem.qualifiedName()) {
+                    xAxisItem = newXAxisItem;
+                    /*if (sortable) {
+                     xAxisTitleRendererFactory.analysisItem = xAxisItem;
+                     }*/
+                }
+
+                var newYAxisItem:AnalysisItem = columnChartDef.measure;
+                if (yAxisItem == null || newYAxisItem.qualifiedName() != yAxisItem.qualifiedName()) {
+                    yAxisItem = newYAxisItem;
+                    /*if (sortable) {
+                     yAxisTitleRendererFactory.analysisItem = yAxisItem;
+                     }*/
+                }
+
+                var newXField:String = newXAxisItem.qualifiedName();
+                if (newXField != xField) {
+                    xAxis.categoryField = xField;
+                    columnSeries.xField = xField;
+                }
+
+                var newXAxisTitle:String = newXAxisItem.display;
+                if (newXAxisTitle != xAxisTitle) {
+                    xAxisTitle = newXAxisTitle;
+                    //xAxis.title = xAxisTitle;
+                    columnSeries.displayName = xAxisTitle;
+                }
+
+                var newYField:String = newYAxisItem.qualifiedName();
+                if (newYField != yField) {
+                    yField = newYField;
+                    columnSeries.yField = yField;
+                }
+
+                var newYAxisTitle:String = newYAxisItem.display;
+                if (newYAxisTitle != yAxisTitle) {
+                    yAxisTitle = newYAxisTitle;
+                    //yAxis.title = yAxisTitle;
+                }
+                columnChart.dataProvider = dataSet;
+                columnSeries.dataProvider = dataSet;
+                xAxis.dataProvider = dataSet;
             }
 
-            var newXAxisItem:AnalysisItem = columnChartDef.xaxis;
-            if (xAxisItem == null || newXAxisItem.qualifiedName() != xAxisItem.qualifiedName()) {
-                xAxisItem = newXAxisItem;
-                /*if (sortable) {
-                 xAxisTitleRendererFactory.analysisItem = xAxisItem;
-                 }*/
-            }
-
-            var newYAxisItem:AnalysisItem = columnChartDef.measure;
-            if (yAxisItem == null || newYAxisItem.qualifiedName() != yAxisItem.qualifiedName()) {
-                yAxisItem = newYAxisItem;
-                /*if (sortable) {
-                 yAxisTitleRendererFactory.analysisItem = yAxisItem;
-                 }*/
-            }
-
-            var newXField:String = newXAxisItem.qualifiedName();
-            if (newXField != xField) {
-                xAxis.categoryField = xField;
-                columnSeries.xField = xField;
-            }
-
-            var newXAxisTitle:String = newXAxisItem.display;
-            if (newXAxisTitle != xAxisTitle) {
-                xAxisTitle = newXAxisTitle;
-                //xAxis.title = xAxisTitle;
-                columnSeries.displayName = xAxisTitle;
-            }
-
-            var newYField:String = newYAxisItem.qualifiedName();
-            if (newYField != yField) {
-                yField = newYField;
-                columnSeries.yField = yField;
-            }
-
-            var newYAxisTitle:String = newYAxisItem.display;
-            if (newYAxisTitle != yAxisTitle) {
-                yAxisTitle = newYAxisTitle;
-                //yAxis.title = yAxisTitle;
-            }
-
-            columnChart.dataProvider = dataSet;
-            columnSeries.dataProvider = dataSet;
-            xAxis.dataProvider = dataSet;
             graphData = dataSet;
         }
 

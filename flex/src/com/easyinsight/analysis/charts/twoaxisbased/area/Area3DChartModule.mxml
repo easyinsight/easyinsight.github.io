@@ -1,6 +1,6 @@
 <?xml version="1.0" ?>
 <mx:Module xmlns:mx="http://www.adobe.com/2006/mxml" implements="com.easyinsight.analysis.IReportRenderer"
-        width="100%" height="100%">
+        width="100%" height="100%" creationComplete="onCreation()">
     <mx:Script><![CDATA[
 
         import com.easyinsight.analysis.AnalysisDateDimension;
@@ -33,6 +33,14 @@ import com.easyinsight.filtering.FilterRawData;
         
         private var visuals:Chart3DVisuals = new Chart3DVisuals();
 
+        private function onCreation():void {
+            visuals.addEventListener(CustomChangeEvent.CUSTOM_CHANGE, onCustomChange);
+        }
+
+        private function onCustomChange(event:CustomChangeEvent):void {
+            dispatchEvent(event);
+        }
+
         override protected function createChildren():void {
             super.createChildren();
             if (areaChart == null) {
@@ -60,112 +68,122 @@ import com.easyinsight.filtering.FilterRawData;
             hbox.removeChild(areaChart);
 
             areaChart = new AreaChart3D();
-            areaChart.percentHeight = 100;
-            areaChart.percentWidth = 100;
-            visuals.chart = areaChart;
-            areaChart.dataProvider = chartData;
-            areaChart.selectionMode = "multiple";
-            areaChart.showDataTips = true;
+                areaChart.percentHeight = 100;
+                areaChart.percentWidth = 100;
+                visuals.chart = areaChart;
+                areaChart.dataProvider = chartData;
+                areaChart.selectionMode = "multiple";
+                areaChart.showDataTips = true;
 
-            var xAxisDimension:AnalysisItem = areaChartDef.xaxis;
-
-            var sort:Sort = new Sort();
-            var sortField:SortField = new SortField(areaChartDef.measure.qualifiedName(), true);
-            sort.fields = [ sortField ];
-            if (chartData.length > 0) {
-                var firstObj:Object = chartData.getItemAt(0);
-                var firstVal:Object = firstObj[areaChartDef.measure.qualifiedName()];
-                if (firstVal is Number) {
-                    sortField.numeric = true;
+            if (dataSet.length > 0) {
+                if (areaChartDef.elevationAngle > 0) {
+                    visuals.elevationAngle = areaChartDef.elevationAngle;
+                    visuals.rotationAngle = areaChartDef.rotationAngle;
                 }
 
-                chartData.sort = sort;
-                chartData.refresh();
 
-                if (firstVal is Number) {
-                    var categories:ArrayCollection = new ArrayCollection();
-                    for each (var obj:Object in chartData) {
-                        var valObj:Object = obj[xAxisDimension.qualifiedName()];
-                        if (categories.getItemIndex(valObj) == -1) {
-                            categories.addItem(valObj);
+
+
+                var xAxisDimension:AnalysisItem = areaChartDef.xaxis;
+
+                var sort:Sort = new Sort();
+                var sortField:SortField = new SortField(areaChartDef.measure.qualifiedName(), true);
+                sort.fields = [ sortField ];
+                if (chartData.length > 0) {
+                    var firstObj:Object = chartData.getItemAt(0);
+                    var firstVal:Object = firstObj[areaChartDef.measure.qualifiedName()];
+                    if (firstVal is Number) {
+                        sortField.numeric = true;
+                    }
+
+                    chartData.sort = sort;
+                    chartData.refresh();
+
+                    if (firstVal is Number) {
+                        var categories:ArrayCollection = new ArrayCollection();
+                        for each (var obj:Object in chartData) {
+                            var valObj:Object = obj[xAxisDimension.qualifiedName()];
+                            if (categories.getItemIndex(valObj) == -1) {
+                                categories.addItem(valObj);
+                            }
                         }
                     }
                 }
+
+
+                var xAxis:IAxis;
+
+                if (xAxisDimension.hasType(AnalysisItemTypes.DATE)) {
+                    var dateDimension:AnalysisDateDimension = xAxisDimension as AnalysisDateDimension;
+                    var dateAxis:DateTimeAxis = new DateTimeAxis();
+                    switch (dateDimension.dateLevel) {
+                        case AnalysisItemTypes.YEAR_LEVEL:
+                            dateAxis.dataUnits = "years";
+                            break;
+                        case AnalysisItemTypes.MONTH_LEVEL:
+                            dateAxis.dataUnits = "months";
+                            break;
+                        case AnalysisItemTypes.DAY_LEVEL:
+                            dateAxis.dataUnits = "days";
+                            break;
+                        case AnalysisItemTypes.HOUR_LEVEL:
+                            dateAxis.dataUnits = "hours";
+                            break;
+                        case AnalysisItemTypes.MINUTE_LEVEL:
+                            dateAxis.dataUnits = "minutes";
+                            break;
+                    }
+                    dateAxis.displayName = dateDimension.display;
+                    xAxis = dateAxis;
+                } else {
+                    var categoryAxis:CategoryAxis = new CategoryAxis();
+                    categoryAxis.displayName = xAxisDimension.display;
+                    categoryAxis.dataProvider = categories;
+                    xAxis = categoryAxis;
+                }
+
+                areaChart.horizontalAxis = xAxis;
+
+                var mySeries:Array = new Array();
+                var analysisMeasure:AnalysisMeasure = areaChartDef.measure as AnalysisMeasure;
+                var uniques:ArrayCollection = new ArrayCollection();
+
+                var seriesData:Object = new Object();
+                for (var i:int = 0; i < dataSet.length; i++) {
+                    var object:Object = dataSet.getItemAt(i);
+                    var dimensionValue:String = object[areaChartDef.yaxis.qualifiedName()];
+                    if (dimensionValue == null || dimensionValue == "") {
+                        dimensionValue = "[ No Value ]";
+                    }
+                    var newSeriesData:ArrayCollection = seriesData[dimensionValue];
+                    if (newSeriesData == null) {
+                        newSeriesData = new ArrayCollection();
+                        seriesData[dimensionValue] = newSeriesData;
+                    }
+                    var newObject:Object = new Object();
+                    newObject[areaChartDef.xaxis.qualifiedName()] = object[areaChartDef.xaxis.qualifiedName()];
+                    newObject[dimensionValue] = object[analysisMeasure.qualifiedName()];
+                    newSeriesData.addItem(newObject);
+                    //allItems.addItem(newObject);
+                    if (!uniques.contains(dimensionValue)) {
+                        uniques.addItem(dimensionValue);
+                    }
+                }
+                for (i = 0; i < uniques.length; i++) {
+                    var key:String = uniques.getItemAt(i) as String;
+                    var uniqueLineSeries:AreaSeries3D = new AreaSeries3D();
+                    uniqueLineSeries.xField = areaChartDef.xaxis.qualifiedName();
+                    if (key == null || key == "") {
+                        key = "[ No Value ]";
+                    }
+                    uniqueLineSeries.yField = key;
+                    uniqueLineSeries.displayName = key;
+                    uniqueLineSeries.dataProvider = seriesData[key];
+                    mySeries.push(uniqueLineSeries);
+                }
+
+                areaChart.series = mySeries;
             }
-
-
-            var xAxis:IAxis;
-
-            if (xAxisDimension.hasType(AnalysisItemTypes.DATE)) {
-                var dateDimension:AnalysisDateDimension = xAxisDimension as AnalysisDateDimension;
-                var dateAxis:DateTimeAxis = new DateTimeAxis();
-                switch (dateDimension.dateLevel) {
-                    case AnalysisItemTypes.YEAR_LEVEL:
-                        dateAxis.dataUnits = "years";
-                        break;
-                    case AnalysisItemTypes.MONTH_LEVEL:
-                        dateAxis.dataUnits = "months";
-                        break;
-                    case AnalysisItemTypes.DAY_LEVEL:
-                        dateAxis.dataUnits = "days";
-                        break;
-                    case AnalysisItemTypes.HOUR_LEVEL:
-                        dateAxis.dataUnits = "hours";
-                        break;
-                    case AnalysisItemTypes.MINUTE_LEVEL:
-                        dateAxis.dataUnits = "minutes";
-                        break;
-                }
-                dateAxis.displayName = dateDimension.display;
-                xAxis = dateAxis;
-            } else {
-                var categoryAxis:CategoryAxis = new CategoryAxis();
-                categoryAxis.displayName = xAxisDimension.display;
-                categoryAxis.dataProvider = categories;
-                xAxis = categoryAxis;
-            }
-
-            areaChart.horizontalAxis = xAxis;
-
-            var mySeries:Array = new Array();
-            var analysisMeasure:AnalysisMeasure = areaChartDef.measure as AnalysisMeasure;
-            var uniques:ArrayCollection = new ArrayCollection();
-
-            var seriesData:Object = new Object();
-            for (var i:int = 0; i < dataSet.length; i++) {
-                var object:Object = dataSet.getItemAt(i);
-                var dimensionValue:String = object[areaChartDef.yaxis.qualifiedName()];
-                if (dimensionValue == null || dimensionValue == "") {
-                    dimensionValue = "[ No Value ]";
-                }
-                var newSeriesData:ArrayCollection = seriesData[dimensionValue];
-                if (newSeriesData == null) {
-                    newSeriesData = new ArrayCollection();
-                    seriesData[dimensionValue] = newSeriesData;
-                }
-                var newObject:Object = new Object();
-                newObject[areaChartDef.xaxis.qualifiedName()] = object[areaChartDef.xaxis.qualifiedName()];
-                newObject[dimensionValue] = object[analysisMeasure.qualifiedName()];
-                newSeriesData.addItem(newObject);
-                //allItems.addItem(newObject);
-                if (!uniques.contains(dimensionValue)) {
-                    uniques.addItem(dimensionValue);
-                }
-            }
-            for (i = 0; i < uniques.length; i++) {
-                var key:String = uniques.getItemAt(i) as String;
-                var uniqueLineSeries:AreaSeries3D = new AreaSeries3D();
-                uniqueLineSeries.xField = areaChartDef.xaxis.qualifiedName();
-                if (key == null || key == "") {
-                    key = "[ No Value ]";
-                }
-                uniqueLineSeries.yField = key;
-                uniqueLineSeries.displayName = key;
-                uniqueLineSeries.dataProvider = seriesData[key];
-                mySeries.push(uniqueLineSeries);
-            }
-
-            areaChart.series = mySeries;
 
             legend.dataProvider = areaChart;
             legend.direction = "vertical";

@@ -70,15 +70,6 @@
         <mapping class="com.easyinsight.analysis.AnalysisHierarchyItem"/>
         <mapping class="com.easyinsight.analysis.Hierarchy"/>
         <mapping class="com.easyinsight.analysis.HierarchyLevel"/>
-        <mapping class="com.easyinsight.analysis.AnalysisField"/>
-        <mapping class="com.easyinsight.analysis.ListField"/>
-        <mapping class="com.easyinsight.analysis.ChartField"/>
-        <mapping class="com.easyinsight.analysis.CrosstabField"/>
-        <mapping class="com.easyinsight.analysis.CrosstabColumnField"/>
-        <mapping class="com.easyinsight.analysis.CrosstabRowField"/>
-        <mapping class="com.easyinsight.analysis.CrosstabMeasureField"/>
-        <mapping class="com.easyinsight.analysis.ChartDimensionField"/>
-        <mapping class="com.easyinsight.analysis.ChartMeasureField"/>
         <mapping class="com.easyinsight.analysis.UserToAnalysisBinding"/>
         <mapping class="com.easyinsight.analysis.LimitsMetadata"/>
         <mapping class="com.easyinsight.analysis.ListLimitsMetadata"/>

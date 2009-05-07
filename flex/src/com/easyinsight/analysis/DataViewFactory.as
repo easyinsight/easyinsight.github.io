@@ -18,6 +18,9 @@ public class DataViewFactory extends VBox {
     private var _reportDataService:Class;
     
     private var _analysisDefinition:AnalysisDefinition;
+
+    private var _lastData:ArrayCollection;
+    private var _lastClientProcessorMap:Object;
     private var _availableFields:ArrayCollection;
 
     private var moduleInfo:IModuleInfo;
@@ -108,7 +111,12 @@ public class DataViewFactory extends VBox {
     }
 
     private function onDataRequest(event:ReportDataEvent):void {
-        retrieveData();
+        if (event.reload || _lastData == null) {
+            retrieveData();
+        } else {
+            _analysisDefinition = _controlBar.createAnalysisDefinition();
+            _reportRenderer.renderReport(_lastData, _analysisDefinition, _lastClientProcessorMap);
+        }
     }
 
     public function retrieveData():void {
@@ -120,13 +128,15 @@ public class DataViewFactory extends VBox {
                 _analysisDefinition.createDefaultLimits();
                 _dataService.retrieveData(_analysisDefinition);
             } else {
-                //_reportRenderer.renderReport(new ArrayCollection(), _analysisDefinition, new Object());
+                _reportRenderer.renderReport(new ArrayCollection(), _analysisDefinition, new Object());
             }
         }
     }
 
     private function gotData(event:DataServiceEvent):void {
         _controlBar.onDataReceipt(event);
+        _lastData = event.dataSet;
+        _lastClientProcessorMap = event.clientProcessorMap;
         _reportRenderer.renderReport(event.dataSet, _analysisDefinition, event.clientProcessorMap);
     }
 
@@ -237,5 +247,9 @@ public class DataViewFactory extends VBox {
 
     public function getCoreView():DisplayObject {
         return _reportRenderer as DisplayObject;
+    }
+
+    public function addItem(analysisItem:AnalysisItem):void {
+        _controlBar.addItem(analysisItem);
     }}
 }

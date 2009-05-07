@@ -14,9 +14,28 @@ import java.util.Map;
 public abstract class WSChartDefinition extends WSAnalysisDefinition {
     private LimitsMetadata limitsMetadata;
 
+    private double rotationAngle;
+    private double elevationAngle;
+
     public abstract int getChartType();
 
     public abstract int getChartFamily();
+
+    public double getRotationAngle() {
+        return rotationAngle;
+    }
+
+    public void setRotationAngle(double rotationAngle) {
+        this.rotationAngle = rotationAngle;
+    }
+
+    public double getElevationAngle() {
+        return elevationAngle;
+    }
+
+    public void setElevationAngle(double elevationAngle) {
+        this.elevationAngle = elevationAngle;
+    }
 
     public LimitsMetadata getLimitsMetadata() {
         return limitsMetadata;

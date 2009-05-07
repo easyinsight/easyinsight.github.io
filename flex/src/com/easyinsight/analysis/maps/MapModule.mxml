@@ -127,18 +127,20 @@
                 }
             }
             graphData = new ArrayCollection();
-            var renderer:ConditionRenderer = createRenderer(dataSet, mapDefinition);
-            for (var i:int = 0; i < dataSet.length; i++) {
-                var row:Object = dataSet.getItemAt(i);
-                var dimensionValue:String = row[mapDefinition.geography.qualifiedName()];
-                var measureValue:Object = row[mapDefinition.measure.qualifiedName()];
+            if (dataSet.length > 0) {
+                var renderer:ConditionRenderer = createRenderer(dataSet, mapDefinition);
+                for (var i:int = 0; i < dataSet.length; i++) {
+                    var row:Object = dataSet.getItemAt(i);
+                    var dimensionValue:String = row[mapDefinition.geography.qualifiedName()];
+                    var measureValue:Object = row[mapDefinition.measure.qualifiedName()];
 
-                var location:String = MapLocationLookup.instance().getLocation(dimensionValue, String(mapType));
-                if (location != null) {
-                    var mapFeature:MapFeature = map.getFeature(location);
-                    if (mapFeature != null) {
-                        var color:uint = renderer.getColor(measureValue);
-                        mapFeature.setStyle(MapBase.FILL, color);
+                    var location:String = MapLocationLookup.instance().getLocation(dimensionValue, String(mapType));
+                    if (location != null) {
+                        var mapFeature:MapFeature = map.getFeature(location);
+                        if (mapFeature != null) {
+                            var color:uint = renderer.getColor(measureValue);
+                            mapFeature.setStyle(MapBase.FILL, color);
+                        }
                     }
                 }
             }
