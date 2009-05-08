@@ -107,7 +107,7 @@ public class BaseCampDataSource extends ServerDataSourceDefinition {
             doc = builder.build(restMethod.getResponseBodyAsStream());
         }
         catch (nu.xom.ParsingException e) {
-                throw new BaseCampLoginException();
+                throw new BaseCampLoginException("Invalid username/password.");
         }
         catch (Throwable e) {
             LogClass.error(e);
@@ -305,7 +305,13 @@ public class BaseCampDataSource extends ServerDataSourceDefinition {
     }
 
     private class BaseCampLoginException extends Exception {
+        private BaseCampLoginException() {
+        }
 
+        private BaseCampLoginException(String message) {
+
+            super(message);
+        }
     }
 
 }

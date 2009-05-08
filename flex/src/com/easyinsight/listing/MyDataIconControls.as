@@ -1,17 +1,26 @@
 package com.easyinsight.listing
 {
-    import com.easyinsight.customupload.FileFeedUpdateWindow;
-	import com.easyinsight.customupload.RefreshWindow;
-    import com.easyinsight.genredata.ModuleAnalyzeEvent;
+import com.easyinsight.administration.feed.CredentialsResponse;
+import com.easyinsight.administration.feed.ServerDataSourceDefinition;
+import com.easyinsight.analysis.CredentialsDefinition;
+import com.easyinsight.customupload.FileFeedUpdateWindow;
+import com.easyinsight.customupload.RefreshWindow;
+import com.easyinsight.customupload.UploadConfigEvent;
+import com.easyinsight.framework.GenericFaultHandler;
+import com.easyinsight.genredata.ModuleAnalyzeEvent;
 
     import com.easyinsight.solutions.InsightDescriptor;
     import flash.events.MouseEvent;
 	
 	import mx.containers.HBox;
-	import mx.controls.Button;
+import mx.controls.Alert;
+import mx.controls.Button;
 	import mx.managers.PopUpManager;
+import mx.rpc.events.FaultEvent;
+import mx.rpc.events.ResultEvent;
+import mx.rpc.remoting.RemoteObject;
 
-	public class MyDataIconControls extends HBox
+public class MyDataIconControls extends HBox
 	{
 		private var obj:Object;
 		
@@ -26,6 +35,8 @@ package com.easyinsight.listing
 
         [Embed(source="../../../../assets/navigate_cross.png")]
         public var deleteIcon:Class;
+
+        private var userUploadSource:RemoteObject
         
         private var refreshButton:Button;
         private var adminButton:Button;
@@ -53,6 +64,7 @@ package com.easyinsight.listing
 			deleteButton = new Button();
             deleteButton.setStyle("icon", deleteIcon);
             deleteButton.addEventListener(MouseEvent.CLICK, deleteCalled);
+
             addChild(deleteButton);
 			
 			this.setStyle("paddingLeft", 5);
@@ -89,10 +101,33 @@ package com.easyinsight.listing
 		}
 
 		private function refreshData(feedDescriptor:DataFeedDescriptor):void {
+            if(feedDescriptor.hasSavedCredentials) {
+                userUploadSource = new RemoteObject();
+                userUploadSource.destination = "userUpload";
+                userUploadSource.refreshData.addEventListener(ResultEvent.RESULT, completedRefresh);
+                userUploadSource.refreshData.addEventListener(FaultEvent.FAULT, GenericFaultHandler.genericFault);
+                userUploadSource.refreshData.send(feedDescriptor.dataFeedID, null, false);
+                return;
+            }
+
 			var refreshWindow:RefreshWindow = RefreshWindow(PopUpManager.createPopUp(this.parent.parent.parent, RefreshWindow, true));
 			refreshWindow.feedID = feedDescriptor.dataFeedID;
+            refreshWindow.addEventListener(UploadConfigEvent.UPLOAD_CONFIG_COMPLETE, passEvent);
 			PopUpManager.centerPopUp(refreshWindow);
 		}
+
+    private function passEvent(event:UploadConfigEvent):void {
+        dispatchEvent(event);
+    }
+
+
+
+    private function completedRefresh(event:ResultEvent):void {
+        var credentialsResponse:CredentialsResponse = userUploadSource.refreshData.lastResult as CredentialsResponse;
+        if(!credentialsResponse.successful)
+            Alert.show(credentialsResponse.failureMessage, "Error");
+        dispatchEvent(new UploadConfigEvent(UploadConfigEvent.UPLOAD_CONFIG_COMPLETE));
+    }
 		
 		private function fileData(feedDescriptor:DataFeedDescriptor):void {
 			var feedUpdateWindow:FileFeedUpdateWindow = FileFeedUpdateWindow(PopUpManager.createPopUp(this.parent.parent.parent, FileFeedUpdateWindow, true));

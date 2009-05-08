@@ -2,6 +2,9 @@ package com.easyinsight.administration.feed {
 [Bindable]
 [RemoteClass(alias="com.easyinsight.datafeeds.ServerDataSourceDefinition")]
 public class ServerDataSourceDefinition extends FeedDefinitionData{
+
+    public var credentialsDefinition:int;
+    
     public function ServerDataSourceDefinition() {
         super();
     }

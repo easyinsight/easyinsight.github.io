@@ -2,7 +2,7 @@ package com.easyinsight.administration.feed
 {
 	[Bindable]
 	[RemoteClass(alias="com.easyinsight.datafeeds.google.GoogleFeedDefinition")]
-	public class GoogleFeedDefinition extends FeedDefinitionData
+	public class GoogleFeedDefinition extends ServerDataSourceDefinition
 	{
 		public var worksheetURL:String;
 		

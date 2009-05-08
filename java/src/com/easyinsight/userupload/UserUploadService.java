@@ -15,6 +15,7 @@ import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.security.Roles;
 import com.easyinsight.users.*;
 import com.easyinsight.analysis.*;
+import com.easyinsight.PasswordStorage;
 
 import java.io.*;
 import java.util.*;
@@ -416,10 +417,25 @@ public class UserUploadService implements IUserUploadService {
         }
     }
 
-    public CredentialsResponse refreshData(long feedID, Credentials credentials) {
+    public CredentialsResponse refreshData(long feedID, Credentials credentials, boolean saveCredentials) {
         SecurityUtil.authorizeFeed(feedID, Roles.OWNER);
         try {
             ServerDataSourceDefinition feedDefinition = (ServerDataSourceDefinition) getDataFeedConfiguration(feedID);
+            if(saveCredentials) {
+                Connection conn = Database.instance().getConnection();
+                try {
+                    PasswordStorage.setPasswordCredentials(credentials.getUserName(), credentials.getPassword(), feedID, conn);
+                }
+                finally {
+                    try {
+                        conn.close();
+                    }
+                    catch (Exception e) {
+                        LogClass.error(e);
+                    }
+
+                }
+            }
             return feedDefinition.refreshData(credentials, SecurityUtil.getAccountID(), null);
         } catch (Exception e) {
             LogClass.error(e);

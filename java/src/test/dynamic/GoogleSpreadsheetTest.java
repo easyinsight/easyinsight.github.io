@@ -56,6 +56,6 @@ public class GoogleSpreadsheetTest extends TestCase {
         definition.setWorksheetURL(url);
         UserUploadService userUploadService = new UserUploadService();
         long dataSourceID = userUploadService.newExternalDataSource(definition, credentials);
-        userUploadService.refreshData(dataSourceID, credentials);
+        userUploadService.refreshData(dataSourceID, credentials, false);
     }
 }

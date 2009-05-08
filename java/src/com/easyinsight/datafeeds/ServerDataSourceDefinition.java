@@ -27,7 +27,11 @@ import flex.messaging.util.UUIDUtils;
  * Date: Mar 30, 2009
  * Time: 8:50:59 PM
  */
-public abstract class ServerDataSourceDefinition extends FeedDefinition {    
+public abstract class ServerDataSourceDefinition extends FeedDefinition {
+
+    private String username;
+    private String password;
+    private String sessionId;
 
     /**
      * The account tier (matching constants on Account) required to see this data source in Connect External
@@ -43,6 +47,8 @@ public abstract class ServerDataSourceDefinition extends FeedDefinition {
      */
     public abstract FeedType getFeedType();
     public abstract int getCredentialsDefinition();
+    public void setCredentialsDefinition(int i) { }
+
     public abstract String validateCredentials(Credentials credentials);
 
     /**
@@ -111,6 +117,13 @@ public abstract class ServerDataSourceDefinition extends FeedDefinition {
         DataStorage dataStorage = null;
         try {
             conn.setAutoCommit(false);
+            if(credentials == null) {
+                if(this.getCredentialsDefinition() == CredentialsDefinition.STANDARD_USERNAME_PW) {
+                    credentials = new Credentials();
+                    credentials.setUserName(getUsername());
+                    credentials.setPassword(retrievePassword());
+                }
+            }
             DataSet dataSet = getDataSet(credentials, newDataSourceFields(credentials), now);
             dataStorage = DataStorage.writeConnection(this, conn, accountID);
             addData(dataStorage, dataSet);
@@ -146,5 +159,36 @@ public abstract class ServerDataSourceDefinition extends FeedDefinition {
         msg.setMessageId(clientID);
         msg.setTimestamp(System.currentTimeMillis());
         msgBroker.routeMessageToService(msg, null);
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    // This is not a getter so that we don't pass the value on to the client
+
+    public String retrievePassword() {
+        return password;
+    }
+
+    public String getPassword() {
+        return null;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+
+    public String getSessionId() {
+        return sessionId;
+    }
+
+    public void setSessionId(String sessionId) {
+        this.sessionId = sessionId;
     }
 }

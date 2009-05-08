@@ -39,6 +39,10 @@ package com.easyinsight.administration.feed
         public var inheritAccountAPISettings:Boolean;
         public var refreshDataInterval:int;
         public var virtualDimensions:ArrayCollection = new ArrayCollection();
+
+        public var username:String;
+        public var password:String;
+        public var sessionId:String;
 		
 		public function FeedDefinitionData()
 		{

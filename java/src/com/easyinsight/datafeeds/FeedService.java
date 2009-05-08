@@ -15,6 +15,7 @@ import com.easyinsight.core.InsightDescriptor;
 import com.easyinsight.core.DataSourceDescriptor;
 import com.easyinsight.scheduler.DataSourceTaskGenerator;
 import com.easyinsight.goals.GoalTreeDescriptor;
+import com.easyinsight.PasswordStorage;
 
 import java.util.*;
 import java.sql.SQLException;
@@ -401,6 +402,32 @@ public class FeedService implements IDataFeedService {
                     } finally {
                         session.close();
                     }
+                }
+            }
+            if(feedDefinition instanceof ServerDataSourceDefinition) {
+                ServerDataSourceDefinition serverSource = (ServerDataSourceDefinition) feedDefinition;
+                if(serverSource.getCredentialsDefinition() == CredentialsDefinition.STANDARD_USERNAME_PW){
+                    if(serverSource.getUsername() != null && serverSource.retrievePassword() != null) {
+                            PasswordStorage.setPasswordCredentials(serverSource.getUsername(), serverSource.retrievePassword(), serverSource.getDataFeedID(), conn);
+                    }
+                    else if(serverSource.getUsername() == null && serverSource.getPassword() == null) {
+                        PreparedStatement deleteStmt = conn.prepareStatement("DELETE FROM password_storage WHERE data_feed_id = ?");
+                        deleteStmt.setLong(1, serverSource.getDataFeedID());
+                        deleteStmt.execute();
+                    }
+                }
+                else if(serverSource.getCredentialsDefinition() == CredentialsDefinition.SALESFORCE) {
+                    PreparedStatement updateStatement = conn.prepareStatement("UPDATE session_id_storage SET session_id = ? WHERE data_feed_id = ?");
+                    updateStatement.setString(1, serverSource.getSessionId());
+                    updateStatement.setLong(2, serverSource.getDataFeedID());
+
+                    PreparedStatement insertStatement = conn.prepareStatement("INSERT INTO session_id_storage(data_feed_id, session_id) VALUES (?,?)");
+                    insertStatement.setLong(1, serverSource.getDataFeedID());
+                    insertStatement.setString(2, serverSource.getSessionId());
+
+                    int rows = updateStatement.executeUpdate();
+                    if (rows == 0)
+                        insertStatement.execute();
                 }
             }
             List<AnalysisItem> existingFields = existingFeed.getFields();

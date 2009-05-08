@@ -2,10 +2,49 @@
 <FullScreenPage xmlns="com.easyinsight.*" xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%" 
 	xmlns:feed="com.easyinsight.administration.feed.*" paddingTop="10" paddingLeft="10" paddingRight="10" paddingBottom="10"
         creationComplete="setupListeners()" backgroundColor="#DCE2F8">
+    <states>
+        <mx:State name="RefreshedDataSource">
+            <mx:AddChild relativeTo="{clearDataFormItem}" position="after">
+                <mx:FormItem id="refreshIntervalFormItem" label="Refresh Interval (Hours):" direction="horizontal">
+                    <mx:NumericStepper id="refreshIntervalStepper" value="{refreshInterval}"/>
+                </mx:FormItem>
+            </mx:AddChild>
+        </mx:State>
+        <mx:State name="SessionIdCredentialDataSource" basedOn="RefreshedDataSource">
+            <mx:AddChild relativeTo="{clearDataFormItem}" position="after">
+                <mx:FormItem label="Use this session ID:">
+                    <mx:CheckBox id="saveSessionIdCheckbox" />
+                </mx:FormItem>
+            </mx:AddChild>
+            <mx:AddChild relativeTo="{clearDataFormItem}" position="after">
+                <mx:FormItem label="Session ID:">
+                    <mx:TextInput id="sessionIdInput" text="{sessionIdInputText}" />
+                </mx:FormItem>
+            </mx:AddChild>
+        </mx:State>
+        <mx:State name="PasswordCredentialDataSource" basedOn="RefreshedDataSource" enterState="checkCheckbox()">
+            <mx:AddChild relativeTo="{clearDataFormItem}" position="after">
+                <mx:FormItem label="Use these Credentials:">
+                    <mx:CheckBox id="saveCredentialsCheckbox" />
+                </mx:FormItem>
+            </mx:AddChild>            
+            <mx:AddChild relativeTo="{clearDataFormItem}" position="after">
+                <mx:FormItem label="Password:">
+                    <mx:TextInput id="passwordInput" displayAsPassword="true" text="{passwordInputText}" />
+                </mx:FormItem>
+            </mx:AddChild>
+            <mx:AddChild relativeTo="{clearDataFormItem}" position="after">
+                <mx:FormItem label="User Name:">
+                    <mx:TextInput id="usernameInput" text="{usernameInputText}"/>
+                </mx:FormItem>
+            </mx:AddChild>
+        </mx:State>
+    </states>
 	<mx:Script>
 		<![CDATA[
             import com.easyinsight.analysis.AnalysisHierarchyItem;
             import com.easyinsight.analysis.AnalysisChangedEvent;
+            import com.easyinsight.analysis.CredentialsDefinition;
             import com.easyinsight.customupload.ExcelUploadFormat;
             import com.easyinsight.customupload.FlatFileUploadFormat;
             import com.easyinsight.util.ProgressAlert;
@@ -23,7 +62,8 @@
 			import com.easyinsight.framework.DataService;
 			import com.easyinsight.customupload.UploadPolicy;
 
-			private var feedAdminMode:Boolean = false;
+
+            private var feedAdminMode:Boolean = false;
 			[Bindable]                                  
             private var feedName:String;
             [Bindable]
@@ -43,9 +83,13 @@
             [Bindable]
 			private var feedDefinition:FeedDefinitionData;
             [Bindable]
-            private var showRefreshInterval:Boolean;
-            [Bindable]
             private var refreshInterval:int;
+            [Bindable]
+            private var usernameInputText:String;
+            [Bindable]
+            private var passwordInputText:String;
+            [Bindable]
+            private var sessionIdInputText:String;
 			
 			private var unsavedChanges:Boolean = false;
 
@@ -122,8 +166,24 @@
             	this.feedOwnerName = feedDefinition.ownerName;
             	this.feedAttribution = feedDefinition.attribution;
             	this.feedType = feedDefinition.getFeedType();
-                this.showRefreshInterval = feedDefinition.canRefresh();
+
                 this.refreshInterval = feedDefinition.refreshDataInterval / (1000 * 60 * 60);
+                this.sessionIdInputText = feedDefinition.sessionId;
+                this.usernameInputText = feedDefinition.username;
+
+                if(feedDefinition.canRefresh()) {
+                    if(feedDefinition is ServerDataSourceDefinition) {
+                        var serverDataSource:ServerDataSourceDefinition = feedDefinition as ServerDataSourceDefinition;
+                        if(serverDataSource.credentialsDefinition == CredentialsDefinition.NO_CREDENTIALS)
+                            this.currentState = "RefreshedDataSource";
+                        else if(serverDataSource.credentialsDefinition == CredentialsDefinition.SALESFORCE)
+                            this.currentState = "SessionIdCredentialDataSource";
+                        else if(serverDataSource.credentialsDefinition == CredentialsDefinition.STANDARD_USERNAME_PW)
+                            this.currentState = "PasswordCredentialDataSource";
+
+                    }
+                }
+                
                 analysisService.openAnalysisDefinition.send(feedDefinition.analysisDefinitionID);
 			}	
             
@@ -171,7 +231,23 @@
 	            	feedDefinition.description = feedDescriptionTextArea.text;
 	            	feedDefinition.attribution = feedAttributionInput.text;
 	            	feedDefinition.ownerName = feedOwnerNameInput.text;
-                    feedDefinition.refreshDataInterval = refreshIntervalStepper.value * 1000 * 60 * 60;
+                    if(refreshIntervalStepper != null)
+                        feedDefinition.refreshDataInterval = refreshIntervalStepper.value * 1000 * 60 * 60;
+                    if(saveCredentialsCheckbox != null) {
+                        if(saveCredentialsCheckbox.selected) {
+                            if(usernameInput.text != "" && passwordInput.text != "") {
+                                feedDefinition.username = usernameInput.text;
+                                feedDefinition.password = passwordInput.text;
+                            }
+                        }
+                        else {
+                            feedDefinition.username = null;
+                            feedDefinition.password = null;
+                        }
+                    }
+                    if(saveSessionIdCheckbox != null && saveSessionIdCheckbox.selected) {
+                        feedDefinition.sessionId = sessionIdInput.text;
+                    }
                     if (feedAdminDetail != null) {
 	            	    feedAdminDetail.updateFeedDefinition(feedDefinition);
                     }
@@ -217,8 +293,14 @@
                 var excelUploadFormat:ExcelUploadFormat;
                 var flatFileUploadFormat:FlatFileUploadFormat;
             }
+
+            private function checkCheckbox():void {
+                if(this.feedDefinition.username != null)
+                    saveCredentialsCheckbox.selected = true;    
+            }
 		]]>
 	</mx:Script>
+
 	<mx:RemoteObject id="feedService" destination="feeds">
 		<mx:method name="getFeedDefinition" result="gotFeedDefinition()"/>
 		<mx:method name="updateFeedDefinition"/>
@@ -259,12 +341,11 @@
 						<mx:FormItem label="Owner Name:" paddingBottom="20">
 							<mx:TextInput id="feedOwnerNameInput" text="{feedOwnerName}" change="dispatchEvent(new AnalysisChangedEvent())"/>
 						</mx:FormItem>
-						<mx:FormItem label="Delete All Data:">
+						<mx:FormItem id="clearDataFormItem" label="Delete All Data:">
 							<mx:Button label="Clear Data Source Data" click="clearFeedData()"/>
 						</mx:FormItem>
-                        <mx:FormItem label="Refresh Interval (Hours):" visible="{showRefreshInterval}" direction="horizontal">
-                            <mx:NumericStepper id="refreshIntervalStepper" value="{refreshInterval}"/>
-                        </mx:FormItem>
+
+
 					</mx:Form>
 				</mx:VBox>
 				<mx:VBox>

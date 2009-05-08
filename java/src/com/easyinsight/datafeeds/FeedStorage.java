@@ -17,6 +17,8 @@ import com.easyinsight.email.UserStub;
 import com.easyinsight.groups.GroupDescriptor;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.security.Roles;
+import com.easyinsight.PasswordStorage;
+import com.easyinsight.users.Credentials;
 
 import java.sql.*;
 import java.util.*;
@@ -26,6 +28,8 @@ import java.io.Serializable;
 import org.hibernate.Session;
 import org.apache.jcs.JCS;
 import org.apache.jcs.access.exception.CacheException;
+
+import javax.resource.spi.security.PasswordCredential;
 
 /**
  * User: jboe
@@ -45,6 +49,15 @@ public class FeedStorage {
             LogClass.error(e);
         }
         return null;
+    }
+
+    public void removeFeed(long feedId) {
+        try {
+            feedCache.remove(feedId);
+        }
+        catch(Exception e) {
+            LogClass.error(e);
+        }
     }
 
     public long addFeedDefinitionData(FeedDefinition feedDefinition, Connection conn) throws SQLException {
@@ -281,6 +294,23 @@ public class FeedStorage {
                 }
             }
             virtualLinkStmt.close();
+        }
+    }
+
+    public void setPasswordCredentials(Connection conn, ServerDataSourceDefinition ds) throws SQLException {
+        Credentials c = PasswordStorage.getPasswordCredentials(ds.getDataFeedID(), conn);
+        if(c != null) {
+            ds.setUsername(c.getUserName());
+            ds.setPassword(c.getPassword());
+        }
+    }
+
+    public void setSessionIdCredentials(Connection conn, ServerDataSourceDefinition ds) throws SQLException {
+        PreparedStatement selectStmt = conn.prepareStatement("SELECT session_id from session_id_storage WHERE data_feed_id = ?");
+        selectStmt.setLong(1, ds.getDataFeedID());
+        ResultSet rs = selectStmt.executeQuery();
+        if(rs.next()) {
+            ds.setSessionId(rs.getString(1));
         }
     }
 
@@ -617,6 +647,14 @@ public class FeedStorage {
                 feedDefinition.setRefreshDataInterval(rs.getLong(20));
                 feedDefinition.setTags(getTags(feedDefinition.getDataFeedID(), conn));
                 feedDefinition.customLoad(conn);
+                if(feedDefinition instanceof ServerDataSourceDefinition) {
+                    ServerDataSourceDefinition ds = (ServerDataSourceDefinition) feedDefinition;
+                    if(ds.getCredentialsDefinition() == CredentialsDefinition.SALESFORCE)
+                        setSessionIdCredentials(conn, ds);
+                    else if(ds.getCredentialsDefinition() == CredentialsDefinition.STANDARD_USERNAME_PW) {
+                        setPasswordCredentials(conn, ds);
+                    }
+                }
             } else {
                 throw new RuntimeException("Could not find data source " + identifier);
             }
@@ -724,6 +762,8 @@ public class FeedStorage {
                     lastDataTime = new Date(lastTime.getTime());
                 }
                 FeedDescriptor feedDescriptor = createDescriptor(dataFeedID, feedName, userRole, feedSize, feedType, ownerName, description, attribution, lastDataTime);
+                
+                feedDescriptor.setHasSavedCredentials(PasswordStorage.getPasswordCredentials(dataFeedID, conn) != null);
                 descriptorList.add(feedDescriptor);
             }
             queryStmt.close();

@@ -25,6 +25,8 @@ public class FeedDescriptor {
     private String attribution;
     private Date lastDataTime;
 
+    private boolean hasSavedCredentials;
+
     public FeedDescriptor() {
     }
 
@@ -80,14 +82,6 @@ public class FeedDescriptor {
     public void setTagString(String tagString) {
         this.tagString = tagString;
     }
-
-    /*public WSAnalysisDefinition getDefinition() {
-        return definition;
-    }
-
-    public void setDefinition(WSAnalysisDefinition definition) {
-        this.definition = definition;
-    }*/
 
     public int getRole() {
         return role;
@@ -152,4 +146,12 @@ public class FeedDescriptor {
     public void setAnalyzeable(boolean analyzeable) {
         this.analyzeable = analyzeable;
     }*/
+
+    public boolean isHasSavedCredentials() {
+        return hasSavedCredentials;
+    }
+
+    public void setHasSavedCredentials(boolean hasSavedCredentials) {
+        this.hasSavedCredentials = hasSavedCredentials;
+    }
 }
