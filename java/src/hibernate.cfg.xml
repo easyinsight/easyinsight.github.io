@@ -27,6 +27,8 @@
         <property name="c3p0.maxStatements">50</property>
         <property name="c3p0.minPoolSize">1</property>
 
+        <property name="testConnectionOnCheckout">true</property>
+        <property name="preferredTestQuery">select 1</property>
 
 
         <!-- JDBC connection pool (use the built-in) -->
@@ -44,7 +46,7 @@
         <property name="cache.provider_class">org.hibernate.cache.NoCacheProvider</property>
 
         <!-- Echo all executed SQL to stdout -->
-        <property name="show_sql">true</property>
+        <property name="show_sql">false</property>
 
         <mapping class="com.easyinsight.users.User"/>
         <mapping class="com.easyinsight.users.Permission"/>
