@@ -40,4 +40,9 @@ public class EmptyValue extends Value {
     public int hashCode() {
         return blah.hashCode();
     }
+
+    @Override
+    public String toString() {
+        return "";
+    }
 }

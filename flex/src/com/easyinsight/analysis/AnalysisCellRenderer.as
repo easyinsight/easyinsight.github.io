@@ -2,6 +2,7 @@ package com.easyinsight.analysis
 {
 	import com.easyinsight.analysis.conditions.ConditionRenderer;
 
+import com.easyinsight.detail.DataDetailEvent;
 import com.easyinsight.filtering.FilterRawData;
     import flash.events.ContextMenuEvent;
     import flash.events.MouseEvent;
@@ -53,10 +54,10 @@ import mx.controls.Label;
             super.commitProperties();
             contextMenu = new ContextMenu();
             contextMenu.hideBuiltInItems();
+            var items:Array = [];
             if (analysisItem is AnalysisHierarchyItem) {
                 var hierarchy:AnalysisHierarchyItem = _analysisItem as AnalysisHierarchyItem;
                 var index:int = hierarchy.hierarchyLevels.getItemIndex(hierarchy.hierarchyLevel);
-                var items:Array = [];
                 if (index < (hierarchy.hierarchyLevels.length - 1)) {
                     var drilldownContextItem:ContextMenuItem = new ContextMenuItem("Drilldown", true);
                     drilldownContextItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, onDrilldown);
@@ -67,13 +68,14 @@ import mx.controls.Label;
                     rollupContextItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, onRollup);
                     items.push(rollupContextItem);
                 }
-                contextMenu = new ContextMenu();
-                contextMenu.hideBuiltInItems();
-                var copyContextItem:ContextMenuItem = new ContextMenuItem("Copy Cell", true);
-                copyContextItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, copySelected);
-                items.push(copyContextItem);
-                contextMenu.customItems = items;
             }
+            var copyContextItem:ContextMenuItem = new ContextMenuItem("Copy Cell", true);
+            copyContextItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, copySelected);
+            items.push(copyContextItem);
+            var detailsItem:ContextMenuItem = new ContextMenuItem("View Individual Rows", true);
+            detailsItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, details);
+            items.push(detailsItem);
+            contextMenu.customItems = items;
         }
 
         private function onDrilldown(event:ContextMenuEvent):void {
@@ -127,6 +129,14 @@ import mx.controls.Label;
                 hierarchyItem.hierarchyLevel = hierarchyItem.hierarchyLevels.getItemAt(index + 1) as HierarchyLevel;
                 dispatchEvent(new HierarchyDrilldownEvent(HierarchyDrilldownEvent.DRILLDOWN, filterRawData));
             }
+        }
+
+        private function details(event:ContextMenuEvent):void {
+            var dataField:String = _analysisItem.qualifiedName();
+            var dataString:String = data[dataField];
+            var filterRawData:FilterRawData = new FilterRawData();
+            filterRawData.addPair(_analysisItem, dataString);
+            dispatchEvent(new DataDetailEvent(filterRawData));
         }
 
         private function onClick(event:MouseEvent):void {

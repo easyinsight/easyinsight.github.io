@@ -74,4 +74,6 @@ public abstract class Feed implements Serializable {
     }*/
 
     protected abstract DataSet getUncachedDataSet(List<Key> columns, Integer maxRows, boolean admin, InsightRequestMetadata insightRequestMetadata);
+
+    public abstract DataSet getDetails(Collection<FilterDefinition> filters);
 }

@@ -280,6 +280,15 @@ import com.easyinsight.commands.CommandEvent;
 		private function filterDeleted(event:FilterDeletionEvent):void {
             dispatchEvent(new CommandEvent(new FilterDeleteCommand(this, event.getFilter())));
 		}
+
+        public function createSimpleFilter(filterRawData:FilterRawData):FilterDefinition {
+            var key:AnalysisItem = filterRawData.getKeys().getItemAt(0) as AnalysisItem;
+            var filterValueDefinition:FilterValueDefinition = new FilterValueDefinition();
+            filterValueDefinition.field = key;
+            filterValueDefinition.filteredValues = filterRawData.getValues(key);
+            filterValueDefinition.inclusive = true;
+            return filterValueDefinition;
+        }
 		
 		public function processRawFilterData(filterRawData:FilterRawData, includeFilter:Boolean):void {
 			for (var i:int = 0; i < filterRawData.getKeys().length; i++) {

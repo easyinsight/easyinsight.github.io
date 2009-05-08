@@ -9,7 +9,7 @@ import java.io.Serializable;
  * Time: 11:22:35 AM
  */
 public class InsightRequestMetadata implements Serializable {
-    private Date now;
+    private Date now = new Date();
     private int version;
 
     public int getVersion() {

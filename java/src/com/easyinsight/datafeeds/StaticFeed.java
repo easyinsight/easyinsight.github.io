@@ -55,6 +55,20 @@ public class StaticFeed extends Feed implements Serializable {
         return metadata;
     }
 
+    public DataSet getDetails(Collection<FilterDefinition> filters) {
+        DataSet dataSet;
+        DataStorage source = DataStorage.readConnection(getFields(), getFeedID());
+        try {
+            dataSet = source.allData(filters);
+        } catch (SQLException e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        } finally {
+            source.closeConnection();
+        }
+        return dataSet;
+    }
+
     @Override
     public DataSet getAggregateDataSet(Set<AnalysisItem> analysisItems, Collection<FilterDefinition> filters, InsightRequestMetadata insightRequestMetadata, List<AnalysisItem> allAnalysisItems, boolean adminMode, Collection<Key> additionalNeededKeys) {
         if (analysisItems.size() == 0) {

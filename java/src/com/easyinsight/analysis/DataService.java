@@ -7,6 +7,8 @@ import com.easyinsight.logging.LogClass;
 import com.easyinsight.benchmark.BenchmarkManager;
 import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.security.Roles;
+import com.easyinsight.core.Key;
+import com.easyinsight.core.Value;
 
 import java.util.*;
 
@@ -151,5 +153,29 @@ public class DataService implements IDataService {
 
     public ListDataResults list(WSAnalysisDefinition analysisDefinition, InsightRequestMetadata insightRequestMetadata) {
         return list(analysisDefinition, false, insightRequestMetadata);
+    }
+
+    public List<Map<String, Object>> getAllData(long dataSourceID, List<FilterDefinition> filterDefinitions) {
+        List<Map<String, Object>> objList = new ArrayList<Map<String, Object>>();
+        try {
+            Feed feed = feedRegistry.getFeed(dataSourceID);
+            DataSet dataSet = feed.getDetails(filterDefinitions);
+            for (IRow row : dataSet.getRows()) {
+                Map<String, Object> map = new HashMap<String, Object>();
+                for (Key key : row.getKeys()) {
+                    Value value = row.getValue(key);
+                    if (value == null) {
+                        map.put(key.toDisplayName(), "");
+                    } else {
+                        map.put(key.toDisplayName(), value.toString());
+                    }
+                }
+                objList.add(map);
+            }
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        }
+        return objList;
     }
 }

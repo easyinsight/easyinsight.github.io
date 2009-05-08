@@ -57,5 +57,9 @@ public class AnalysisBasedFeed extends Feed {
     protected DataSet getUncachedDataSet(List<Key> columns, Integer maxRows, boolean admin, InsightRequestMetadata insightRequestMetadata) {
 
         throw new UnsupportedOperationException();
-    }    
+    }
+
+    public DataSet getDetails(Collection<FilterDefinition> filters) {
+        return null;  //To change body of implemented methods use File | Settings | File Templates.
+    }
 }

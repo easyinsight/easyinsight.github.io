@@ -45,6 +45,8 @@ import com.easyinsight.analysis.HierarchyDrilldownEvent;
         import com.easyinsight.analysis.AddInsightToGroupWindow;
         import com.easyinsight.analysis.UserCapabilities;
         import com.easyinsight.administration.feed.TagCloud;
+        import com.easyinsight.detail.DataDetailEvent;
+        import com.easyinsight.detail.DetailBook;
         import com.easyinsight.framework.InvalidFieldsEvent;
         import com.easyinsight.framework.LoginEvent;
 
@@ -341,6 +343,7 @@ import com.easyinsight.analysis.HierarchyDrilldownEvent;
             addEventListener(KeyboardEvent.KEY_UP, onKey);
             addEventListener(HierarchyDrilldownEvent.DRILLDOWN, childFilterCreation);
             addEventListener(HierarchyRollupEvent.HIERARCHY_ROLLUP, onRollup);
+            addEventListener(DataDetailEvent.DATA_DETAIL, toDetails);
             dataService.addEventListener(DataServiceLoadingEvent.LOADING_STARTED, startLoading);
             dataService.addEventListener(DataServiceLoadingEvent.LOADING_STOPPED, stopLoading);
             dataService.addEventListener(InvalidFieldsEvent.INVALID_FIELDS, onInvalidFields);
@@ -379,6 +382,21 @@ import com.easyinsight.analysis.HierarchyDrilldownEvent;
 
         private function childFilterCreation(event:HierarchyDrilldownEvent):void {
             transformContainer.processRawFilterData(event.filterRawData, event.type == HierarchyDrilldownEvent.DRILLDOWN);
+        }
+
+        private function toDetails(event:DataDetailEvent):void {
+            var filter:FilterDefinition = transformContainer.createSimpleFilter(event.filterRawData);
+            var filters:ArrayCollection = transformContainer.getFilterDefinitions();
+            var allFilters:ArrayCollection = new ArrayCollection(filters.toArray());
+            allFilters.addItem(filter);
+            detailService.getAllData.send(dataService.dataFeedID, allFilters);
+        }
+
+        private function gotDetailData():void {
+            var window:DetailBook = new DetailBook();
+            window.details = detailService.getAllData.lastResult as ArrayCollection;
+            PopUpManager.addPopUp(window, this);
+            PopUpManager.centerPopUp(window);
         }
 
         private function onKey(event:KeyboardEvent):void {
@@ -776,6 +794,9 @@ import com.easyinsight.analysis.HierarchyDrilldownEvent;
     </mx:RemoteObject>
     <mx:RemoteObject id="userUploadService" destination="userUpload">
         <mx:method name="subscribe" result="subscribedToFeed()"/>
+    </mx:RemoteObject>
+    <mx:RemoteObject id="detailService" destination="data">
+        <mx:method name="getAllData" result="gotDetailData()"/>
     </mx:RemoteObject>
     <mx:VBox height="100%" width="100%">
         <mx:HBox id="buttonBox">

@@ -66,6 +66,10 @@ public class CompositeFeed extends Feed {
         throw new UnsupportedOperationException();
     }
 
+    public DataSet getDetails(Collection<FilterDefinition> filters) {
+        return null;  //To change body of implemented methods use File | Settings | File Templates.
+    }
+
     private DataSet getDataSet(Set<AnalysisItem> analysisItems, InsightRequestMetadata insightRequestMetadata) {
 
         Map<Long, QueryStateNode> queryNodeMap = new HashMap<Long, QueryStateNode>();

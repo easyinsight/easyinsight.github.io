@@ -962,20 +962,65 @@ public class DataStorage {
         deleteStmt.executeUpdate();
     }
 
-    public void allData(List<IWhere> wheres) {
+    public DataSet allData(Collection<FilterDefinition> filters) throws SQLException {
+        InsightRequestMetadata insightRequestMetadata = new InsightRequestMetadata();
         StringBuilder sqlBuilder = new StringBuilder();
         sqlBuilder.append("SELECT ");
         for (Map.Entry<Key, KeyMetadata> keyEntry : keys.entrySet()) {
-
+            sqlBuilder.append(keyEntry.getKey().toSQL());
+            sqlBuilder.append(",");
         }
+        sqlBuilder.deleteCharAt(sqlBuilder.length() - 1);
         sqlBuilder.append(" FROM ");
         sqlBuilder.append(getTableName());
         sqlBuilder.append(" WHERE ");
-        for (IWhere where : wheres) {
-            sqlBuilder.append(where.createWhereSQL());
+        for (FilterDefinition filterDefinition : filters) {
+            sqlBuilder.append(filterDefinition.toQuerySQL());
             sqlBuilder.append(",");
         }
         sqlBuilder.deleteCharAt(sqlBuilder.length() - 1);
         sqlBuilder.append(" LIMIT 10");
+        DataSet dataSet = new DataSet();
+        PreparedStatement queryStmt = storageConn.prepareStatement(sqlBuilder.toString());
+        int position = 1;
+        for (FilterDefinition filterDefinition : filters) {
+            KeyMetadata keyMetadata = keys.get(filterDefinition.getField().getKey());
+            int type = keyMetadata.type;
+            filterDefinition.populatePreparedStatement(queryStmt, position, type, insightRequestMetadata);
+        }
+        System.out.println(sqlBuilder.toString());
+        ResultSet dataRS = queryStmt.executeQuery();
+        while (dataRS.next()) {
+            int i = 1;            
+            IRow row = dataSet.createRow();
+            for (Map.Entry<Key, KeyMetadata> keyEntry : keys.entrySet()) {
+                Key key = keyEntry.getKey();
+                System.out.println("retrieving " + key.toSQL());
+                KeyMetadata keyMetadata = keyEntry.getValue();
+                if (keyMetadata.getType() == Value.DATE) {
+                    Timestamp time = dataRS.getTimestamp(i++);
+                    if (dataRS.wasNull()) {
+                        row.addValue(key, new EmptyValue());
+                    } else {
+                        row.addValue(key, new DateValue(new Date(time.getTime())));
+                    }
+                } else if (keyMetadata.getType() == Value.NUMBER) {
+                    double value = dataRS.getDouble(i++);
+                    if (dataRS.wasNull()) {
+                        row.addValue(key, new EmptyValue());
+                    } else {
+                        row.addValue(key, new NumericValue(value));
+                    }
+                } else {
+                    String value = dataRS.getString(i++);
+                    if (dataRS.wasNull()) {
+                        row.addValue(key, new EmptyValue());
+                    } else {
+                        row.addValue(key, new StringValue(value));
+                    }
+                }
+            }
+        }
+        return dataSet;
     }
 }
