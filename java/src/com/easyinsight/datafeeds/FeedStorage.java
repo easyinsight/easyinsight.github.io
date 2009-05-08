@@ -29,8 +29,6 @@ import org.hibernate.Session;
 import org.apache.jcs.JCS;
 import org.apache.jcs.access.exception.CacheException;
 
-import javax.resource.spi.security.PasswordCredential;
-
 /**
  * User: jboe
  * Date: Jan 3, 2008
