@@ -120,6 +120,8 @@ public class Database {
         connectionPool.setMinIdle(5);
         connectionPool.setMaxActive(20);
 
+        connectionPool.setTestOnBorrow(true);
+
         String url = MessageFormat.format(urlTemplate, host, port, databaseName);
 
         ConnectionFactory connectionFactory =
