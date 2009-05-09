@@ -106,6 +106,7 @@
 
             private function setupListeners():void {
                 addEventListener(AnalysisChangedEvent.ANALYSIS_CHANGED, onChange);
+                addEventListener(DeleteHierarchyEvent.DELETE_HIERARCHY, onHierarchyDelete);
             }
 			
 			public function set feedID(feedID:int):void {
@@ -191,6 +192,10 @@
                 if (event.metadata) {
             	    this.unsavedChanges = true;
                 }
+            }
+
+            private function onHierarchyDelete(event:DeleteHierarchyEvent):void {
+                dataAnalysisContainer.deleteItem(event.hierarchy);
             }
             
             private function save():void {

@@ -318,6 +318,17 @@ import com.easyinsight.analysis.HierarchyDrilldownEvent;
             stopLoading(null);
         }
 
+        public function deleteItem(item:AnalysisItem):void {
+            var index:int = 0;
+            for each (var wrapper:AnalysisItemWrapper in availableFields) {
+                if (wrapper.analysisItem.analysisItemID == item.analysisItemID) {
+                    break;
+                }
+                index++;
+            }
+            availableFields.removeItemAt(index);
+        }
+
         public function getAnalysisItems():ArrayCollection {
             var analysisItems:ArrayCollection = new ArrayCollection();
             for each (var analysisItemWrapper:AnalysisItemWrapper in availableFields) {

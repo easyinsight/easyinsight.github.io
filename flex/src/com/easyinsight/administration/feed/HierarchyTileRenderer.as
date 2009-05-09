@@ -1,5 +1,11 @@
 package com.easyinsight.administration.feed {
 import com.easyinsight.analysis.NamedKey;
+
+import flash.events.ContextMenuEvent;
+import flash.ui.ContextMenu;
+
+import flash.ui.ContextMenuItem;
+
 import mx.binding.utils.BindingUtils;
 import mx.events.FlexEvent;
 import mx.controls.Label;
@@ -21,6 +27,15 @@ public class HierarchyTileRenderer extends VBox {
     public function HierarchyTileRenderer() {
         nameLabel = new Label();
         setStyle("horizontalAlign", "center");
+        contextMenu = new ContextMenu();
+        contextMenu.hideBuiltInItems();
+        var deleteContextItem:ContextMenuItem = new ContextMenuItem("Delete Hierarchy", true);
+        deleteContextItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, deleteHierarchy);
+        contextMenu.customItems = [ deleteContextItem ];
+    }
+
+    private function deleteHierarchy(event:ContextMenuEvent):void {
+        dispatchEvent(new DeleteHierarchyEvent(analysisHierarchyItem));
     }
 
     override protected function createChildren():void {

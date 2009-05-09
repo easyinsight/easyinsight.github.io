@@ -1,5 +1,5 @@
 <?xml version="1.0" ?>
-<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml">
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" creationComplete="setup()">
     <mx:Script><![CDATA[
         import mx.events.ListEvent;
         import com.easyinsight.analysis.HierarchyLevel;
@@ -28,6 +28,14 @@
         private var hierarchyTileLabel:String;
 
         private var _feedDefinition:FeedDefinitionData;
+
+        private function setup():void {
+            addEventListener(DeleteHierarchyEvent.DELETE_HIERARCHY, onDelete);
+        }
+
+        private function onDelete(event:DeleteHierarchyEvent):void {
+            hierarchies.removeItemAt(hierarchies.getItemIndex(event.hierarchy));
+        }
 
         override protected function commitProperties():void {
             super.commitProperties();
