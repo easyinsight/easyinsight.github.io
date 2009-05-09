@@ -46,6 +46,7 @@
                 } else {
                     toggleOptions = new ArrayCollection([ new AccountOption("My Profile", new ProfessionalMyProfile()),
                     new AccountOption("My API Settings", new APIUserAdmin())]);
+                    showToggle = true;
                 }
             }
             coreBox.addChild(toggleOptions.getItemAt(0).container);
