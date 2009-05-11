@@ -27,10 +27,9 @@ public class Database {
 
     public static final int CURRENT_VERSION = 61;
 
-    private DataSource dataSource;
+    private ComboPooledDataSource dataSource;
     private SessionFactory sessionFactory;
     private static Database instance;
-    private GenericObjectPool connectionPool;
     private String id;
     private boolean addHibernate;
 
@@ -115,7 +114,7 @@ public class Database {
         }
     }
 
-    private DataSource setupDataSource(String host, String port, String databaseName, String userName, String password) {
+    private ComboPooledDataSource setupDataSource(String host, String port, String databaseName, String userName, String password) {
         /*connectionPool = new GenericObjectPool(null);
 
         connectionPool.setMinIdle(5);
@@ -141,6 +140,7 @@ public class Database {
 
     public void shutdown() {
         try {
+            dataSource.close();
             //connectionPool.close();
             if (sessionFactory != null) {
                 sessionFactory.close();
@@ -164,10 +164,20 @@ public class Database {
     }
 
     public int getActiveConnections() {
-        return connectionPool.getNumActive();
+        try {
+            return dataSource.getNumConnections();
+        } catch (SQLException e) {
+            LogClass.error(e);
+            return -1;
+        }
     }
 
     public int getIdleConnections() {
-        return connectionPool.getNumIdle();
+        try {
+            return dataSource.getNumIdleConnectionsAllUsers();
+        } catch (SQLException e) {
+            LogClass.error(e);
+            return -1;
+        }
     }
 }
