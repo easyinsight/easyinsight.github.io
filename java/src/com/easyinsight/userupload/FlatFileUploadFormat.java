@@ -1,7 +1,6 @@
 package com.easyinsight.userupload;
 
 import com.easyinsight.dataset.ColumnSegment;
-import com.easyinsight.userupload.IDataTypeGuesser;
 import com.easyinsight.core.*;
 
 import java.util.*;
@@ -47,7 +46,7 @@ public class FlatFileUploadFormat extends UploadFormat {
         GridData gridData = new GridData();
 
         String csvResults = new String(data);
-        String[] csvLines = csvResults.split("\n");
+        String[] csvLines = csvResults.split("\r\n|\r|\n");
         String headerLine = csvLines[0];
         Pattern pattern = Pattern.compile("\\" + delimiter);
 

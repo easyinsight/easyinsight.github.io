@@ -16,6 +16,7 @@ import java.text.MessageFormat;
 
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.config.ConfigLoader;
+import com.mchange.v2.c3p0.ComboPooledDataSource;
 
 /**
  * User: jboe
@@ -115,26 +116,32 @@ public class Database {
     }
 
     private DataSource setupDataSource(String host, String port, String databaseName, String userName, String password) {
-        connectionPool = new GenericObjectPool(null);
+        /*connectionPool = new GenericObjectPool(null);
 
         connectionPool.setMinIdle(5);
         connectionPool.setMaxActive(20);
 
-        connectionPool.setTestOnBorrow(true);
+        connectionPool.setTestOnBorrow(true);*/
 
         String url = MessageFormat.format(urlTemplate, host, port, databaseName);
 
-        ConnectionFactory connectionFactory =
+        /*ConnectionFactory connectionFactory =
         	new DriverManagerConnectionFactory(url, userName, password);
 
-       new PoolableConnectionFactory(connectionFactory,connectionPool,null,null,false,true);
+       new PoolableConnectionFactory(connectionFactory,connectionPool,null,null,false,true);*/
 
-        return new PoolingDataSource(connectionPool);
+        ComboPooledDataSource source = new ComboPooledDataSource();
+        source.setJdbcUrl(url);
+        source.setUser(userName);
+        source.setPassword(password);
+        return source;
+
+        //return new PoolingDataSource(connectionPool);
     }
 
     public void shutdown() {
         try {
-            connectionPool.close();
+            //connectionPool.close();
             if (sessionFactory != null) {
                 sessionFactory.close();
             }

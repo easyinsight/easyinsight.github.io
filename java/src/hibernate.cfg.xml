@@ -15,7 +15,7 @@
         <property name="hibernate.dbcp.maxActive">10</property>
                           -->
 
-        <property name="c3p0.acquireRetryAttempts">30</property>
+        <!--<property name="c3p0.acquireRetryAttempts">30</property>
 
         <property name="c3p0.acquireIncrement">1</property>
 
@@ -23,12 +23,15 @@
 
         <property name="c3p0.initialPoolSize">20</property>
         <property name="c3p0.maxPoolSize">100</property>
-        <!-- <property name="c3p0.maxIdleTime">3000</property> -->
+        --><!-- <property name="c3p0.maxIdleTime">3000</property> --><!--
         <property name="c3p0.maxStatements">50</property>
-        <property name="c3p0.minPoolSize">1</property>
+        <property name="c3p0.minPoolSize">1</property>-->
 
         <property name="testConnectionOnCheckout">true</property>
         <property name="preferredTestQuery">select 1</property>
+
+        <property name="connection.provider_class">org.hibernate.connection.C3P0ConnectionProvider</property>
+
 
 
         <!-- JDBC connection pool (use the built-in) -->
