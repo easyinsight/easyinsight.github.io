@@ -1,13 +1,10 @@
 package com.easyinsight.database;
 
-import org.apache.commons.dbcp.*;
-import org.apache.commons.pool.impl.GenericObjectPool;
 import org.hibernate.SessionFactory;
 import org.hibernate.Session;
 import org.hibernate.StatelessSession;
 import org.hibernate.cfg.AnnotationConfiguration;
 
-import javax.sql.DataSource;
 import java.sql.SQLException;
 import java.sql.Connection;
 import java.sql.Statement;
