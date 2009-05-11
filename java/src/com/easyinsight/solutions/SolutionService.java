@@ -38,6 +38,21 @@ public class SolutionService {
     private FeedStorage feedStorage = new FeedStorage();
     private AnalysisStorage analysisStorage = new AnalysisStorage();
 
+    public Solution retrieveSolution(long solutionID) {
+        long tier = SecurityUtil.getAccountTier();
+        try {
+            Solution solution = getSolution(solutionID);
+            if (solution.getSolutionTier() > tier) {
+                return null;
+            } else {
+                return solution;
+            }
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        }
+    }
+
     public void addSolutionArchive(byte[] archive, long solutionID, String solutionArchiveName) {
         Connection conn = Database.instance().getConnection();
         try {
