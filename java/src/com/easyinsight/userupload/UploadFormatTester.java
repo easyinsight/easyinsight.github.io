@@ -17,9 +17,10 @@ public class UploadFormatTester {
     private static String escapedPatterns[] = new String [] { ",", "\\|", " ", "\t"};
 
     public UploadFormat determineFormat(byte[] data) {
-        UploadFormat uploadFormat = isFlatFile(data);
+        UploadFormat uploadFormat;
+        uploadFormat = isExcel(data);
         if (uploadFormat == null) {
-            uploadFormat = isExcel(data);
+            uploadFormat = isFlatFile(data);
         }
         return uploadFormat;
     }
