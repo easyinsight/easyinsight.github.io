@@ -226,6 +226,9 @@ public class ExcelUploadFormat extends UploadFormat {
                 if ("".equals(header)) {
                     continue;
                 }
+                if (header.length() > 100) {
+                    header = header.substring(0, 100).trim();
+                }
                 rowList.add(header);
             }
             String[] rows = new String[rowList.size()];
@@ -237,7 +240,14 @@ public class ExcelUploadFormat extends UploadFormat {
             for (; rit.hasNext(); ) {
                 HSSFRow row = rit.next();
                 HSSFCell cell = row.getCell(0);
-                rowList.add(cell.toString().trim());
+                String header = cell.toString().trim();
+                if ("".equals(header)) {
+                    continue;
+                }
+                if (header.length() > 100) {
+                    header = header.substring(0, 100).trim();
+                }
+                rowList.add(header);
             }
             String[] rows = new String[rowList.size()];
             rowList.toArray(rows);
