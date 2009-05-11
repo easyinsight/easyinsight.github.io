@@ -134,6 +134,9 @@
                 var analysisDefinition:InsightDescriptor = analysisDefinitions.getItemAt(currentIndex) as InsightDescriptor;
                 var dataViewPanel:DataViewPanel = new DataViewPanel();
                 dataViewPanel.analysisID = analysisDefinition.id;
+                dataViewPanel.reportType = analysisDefinition.reportType;
+                dataViewPanel.dataSourceID = analysisDefinition.dataFeedID;
+                dataViewPanel.reportName = analysisDefinition.name;
                 dataViewPanel.titleClickFunction = titleClick;
                 dataViewPanel.titleFunctionCaller = this;
                 centerLBox.removeAllChildren();
@@ -147,6 +150,9 @@
                 var analysisDefinition2:InsightDescriptor = analysisDefinitions.getItemAt(rightIndex) as InsightDescriptor;
                 var dataViewPanel2:DataViewPanel = new DataViewPanel();
                 dataViewPanel2.analysisID = analysisDefinition2.id;
+                dataViewPanel2.reportType = analysisDefinition.reportType;
+                dataViewPanel2.dataSourceID = analysisDefinition.dataFeedID;
+                dataViewPanel2.reportName = analysisDefinition.name;
                 dataViewPanel2.titleClickFunction = titleClick;
                 dataViewPanel2.titleFunctionCaller = this;
                 centerRBox.removeAllChildren();

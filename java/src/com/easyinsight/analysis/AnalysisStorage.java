@@ -245,7 +245,7 @@ public class AnalysisStorage {
         try {
             PreparedStatement analysisQueryStmt;
             if (genre == null) {
-                analysisQueryStmt = conn.prepareStatement("SELECT DISTINCT ANALYSIS.ANALYSIS_ID, ANALYSIS.TITLE, ANALYSIS.DATA_FEED_ID FROM ANALYSIS, DATA_FEED " +
+                analysisQueryStmt = conn.prepareStatement("SELECT DISTINCT ANALYSIS.ANALYSIS_ID, ANALYSIS.TITLE, ANALYSIS.DATA_FEED_ID, ANALYSIS.REPORT_TYPE FROM ANALYSIS, DATA_FEED " +
                         " WHERE ANALYSIS.DATA_FEED_ID = DATA_FEED.DATA_FEED_ID AND " +
                         "((DATA_FEED.MARKETPLACE_VISIBLE = ? AND ANALYSIS.FEED_VISIBILITY = ?) OR ANALYSIS.MARKETPLACE_VISIBLE = ?) AND " +
                         "ANALYSIS.ROOT_DEFINITION = ? ORDER BY ANALYSIS.VIEWS DESC LIMIT " + maxResults);
@@ -254,7 +254,7 @@ public class AnalysisStorage {
                 analysisQueryStmt.setBoolean(3, true);
                 analysisQueryStmt.setBoolean(4, false);
             } else {
-                analysisQueryStmt = conn.prepareStatement("SELECT DISTINCT ANALYSIS.ANALYSIS_ID, ANALYSIS.TITLE, ANALYSIS.DATA_FEED_ID FROM ANALYSIS, DATA_FEED, " +
+                analysisQueryStmt = conn.prepareStatement("SELECT DISTINCT ANALYSIS.ANALYSIS_ID, ANALYSIS.TITLE, ANALYSIS.DATA_FEED_ID, ANALYSIS.REPORT_TYPE FROM ANALYSIS, DATA_FEED, " +
                         "FEED_TO_TAG, ANALYSIS_TAGS, ANALYSIS_TO_TAG WHERE ANALYSIS.DATA_FEED_ID = DATA_FEED.DATA_FEED_ID AND " +
                         "((DATA_FEED.MARKETPLACE_VISIBLE = ? AND ANALYSIS.FEED_VISIBILITY = ?) OR ANALYSIS.MARKETPLACE_VISIBLE = ?) AND " +
                         "((FEED_TO_TAG.FEED_ID = DATA_FEED.DATA_FEED_ID AND FEED_TO_TAG.ANALYSIS_TAGS_ID = ANALYSIS_TAGS.ANALYSIS_TAGS_ID AND ANALYSIS_TAGS.TAG = ?) OR " +
@@ -292,7 +292,7 @@ public class AnalysisStorage {
         try {
             PreparedStatement analysisQueryStmt;
             if (genre == null) {
-                analysisQueryStmt = conn.prepareStatement("SELECT ANALYSIS.ANALYSIS_ID, ANALYSIS.TITLE, ANALYSIS.DATA_FEED_ID FROM ANALYSIS, DATA_FEED " +
+                analysisQueryStmt = conn.prepareStatement("SELECT ANALYSIS.ANALYSIS_ID, ANALYSIS.TITLE, ANALYSIS.DATA_FEED_ID, ANALYSIS.REPORT_TYPE FROM ANALYSIS, DATA_FEED " +
                         " WHERE ANALYSIS.DATA_FEED_ID = DATA_FEED.DATA_FEED_ID AND " +
                         "((DATA_FEED.MARKETPLACE_VISIBLE = ? AND ANALYSIS.FEED_VISIBILITY = ?) OR ANALYSIS.MARKETPLACE_VISIBLE = ?) AND " +
                         "ANALYSIS.ROOT_DEFINITION = ? ORDER BY ANALYSIS.VIEWS DESC LIMIT " + maxResults);
@@ -301,7 +301,7 @@ public class AnalysisStorage {
                 analysisQueryStmt.setBoolean(3, true);
                 analysisQueryStmt.setBoolean(4, false);
             } else {
-                analysisQueryStmt = conn.prepareStatement("SELECT DISTINCT ANALYSIS.ANALYSIS_ID, ANALYSIS.TITLE, ANALYSIS.DATA_FEED_ID FROM ANALYSIS, DATA_FEED, " +
+                analysisQueryStmt = conn.prepareStatement("SELECT DISTINCT ANALYSIS.ANALYSIS_ID, ANALYSIS.TITLE, ANALYSIS.DATA_FEED_ID, ANALYSIS.REPORT_TYPE FROM ANALYSIS, DATA_FEED, " +
                         "FEED_TO_TAG, ANALYSIS_TAGS, ANALYSIS_TO_TAG WHERE ANALYSIS.DATA_FEED_ID = DATA_FEED.DATA_FEED_ID AND " +
                         "((DATA_FEED.MARKETPLACE_VISIBLE = ? AND ANALYSIS.FEED_VISIBILITY = ?) OR ANALYSIS.MARKETPLACE_VISIBLE = ?) AND " +
                         "((FEED_TO_TAG.FEED_ID = DATA_FEED.DATA_FEED_ID AND FEED_TO_TAG.ANALYSIS_TAGS_ID = ANALYSIS_TAGS.ANALYSIS_TAGS_ID AND ANALYSIS_TAGS.TAG = ?) OR " +
