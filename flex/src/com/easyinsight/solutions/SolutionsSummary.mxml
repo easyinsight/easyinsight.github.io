@@ -107,7 +107,7 @@
                 <mx:TextArea
                         text="Solutions give you the ability to rapidly collect data from a variety of sources, leverage prebuilt data sources and reports, and get started on tracking goals right away. The solutions available below are dependant on your account type--business focused solutions are only available to Professional or higher, while SOA and process improvement solutions are only available to Enterprise accounts."
                         width="100%" height="90" borderStyle="none" editable="false" selectable="false"/>
-                <mx:Grid>
+                <!--<mx:Grid>
                     <mx:GridRow verticalAlign="middle">
                         <mx:GridItem>
                             <mx:Image source="{archiveIcon}"/>
@@ -125,7 +125,7 @@
                                       fontSize="13"/>
                         </mx:GridItem>
                     </mx:GridRow>
-                </mx:Grid>
+                </mx:Grid>-->
             </mx:HBox>
             <mx:HBox width="100%" id="controlsBox">
                 <mx:HBox width="100%" horizontalAlign="center">
@@ -148,7 +148,7 @@
                                            headerRenderer="com.easyinsight.groups.CustomGroupHeader"/>
                     <util:EIDataGridColumn headerText="Author" dataField="author" width="150"
                                            headerRenderer="com.easyinsight.groups.CustomGroupHeader"/>
-                    <util:EIDataGridColumn headerText="" width="100" sortable="false"
+                    <util:EIDataGridColumn headerText="" width="50" sortable="false"
                                            itemRenderer="com.easyinsight.solutions.AvailableSolutionIcons"/>
                 </mx:columns>
             </mx:DataGrid>

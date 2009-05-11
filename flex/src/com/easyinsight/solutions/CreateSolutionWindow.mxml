@@ -27,6 +27,8 @@
             private var goalTrees:ArrayCollection;
             [Bindable]
             private var solutionTier:int;
+            [Bindable]
+            private var archiveName:String;
 
 			public function set solution(solution:Solution):void {
 				this._solution = solution;
@@ -36,6 +38,7 @@
                 industry = this._solution.industry;
                 includeData = this._solution.copyData;
                 solutionTier = this._solution.solutionTier - 1;
+                archiveName = _solution.solutionArchiveName;
 				if (solution.solutionID > 0) {
 					solutionService.getDescriptorsForSolution.send(solution.solutionID);
 				}
@@ -46,7 +49,7 @@
 					_solution = new Solution();
 				}
                 _solution.name = nameInput.text;
-                _solution.description = descriptionInput.text;
+                _solution.description = descriptionInput.htmlText;
                 _solution.author = authorInput.text;
                 _solution.industry = industryInput.text;
                 _solution.copyData = includeDataCheckbox.selected;
@@ -90,7 +93,7 @@
             private function gotGoalTrees():void {
                 var goalTrees:ArrayCollection = goalService.getGoalTrees.lastResult as ArrayCollection;
                 var treesWithNoneOption:ArrayCollection = new ArrayCollection(goalTrees.source);
-                treesWithNoneOption.addItem({goalTreeName: "[ No Selection ]"});
+                treesWithNoneOption.addItemAt({name: "[ No Selection ]"}, 0);
                 this.goalTrees = treesWithNoneOption;
             }
 		]]>
@@ -103,56 +106,64 @@
     <mx:RemoteObject destination="goalService" id="goalService">
         <mx:method name="getGoalTrees" result="gotGoalTrees()"/>
     </mx:RemoteObject>
-	<mx:Form>
-		<mx:FormItem label="Name: ">
-			<mx:TextInput id="nameInput" text="{nameText}"/>
-		</mx:FormItem>
-		<mx:FormItem label="Description: ">
-			<mx:TextArea id="descriptionInput" text="{descriptionText}"/>
-		</mx:FormItem>
-        <mx:FormItem label="Tags: ">
-			<mx:TextInput id="tagsInput" text="{tags}"/>
-		</mx:FormItem>
-		<mx:FormItem label="Industry: ">
-			<mx:TextInput id="industryInput" text="{industry}"/>
-		</mx:FormItem>
-		<mx:FormItem label="Author: ">
-			<mx:TextInput id="authorInput" text="{author}"/>
-		</mx:FormItem>
-        <mx:FormItem label="Required Account Tier: ">
-			<mx:ComboBox id="accountTierBox" selectedIndex="{solutionTier}">
-                <mx:dataProvider>
-                    <mx:ArrayCollection>
-                        <mx:Array>
-                            <mx:String>Free</mx:String>
-                            <mx:String>Individual</mx:String>
-                            <mx:String>Professional</mx:String>
-                            <mx:String>Enterprise</mx:String>
-                        </mx:Array>
-                    </mx:ArrayCollection>
-                </mx:dataProvider>
-			</mx:ComboBox>
-		</mx:FormItem>
-        <mx:FormItem label="Include Data Source Data: ">
-            <mx:CheckBox id="includeDataCheckbox" selected="{includeData}"/>
-        </mx:FormItem>
-        <mx:FormItem label="Associate Goal Tree: ">
-            <mx:ComboBox id="goalTreeComboBox" dataProvider="{goalTrees}" labelField="goalTreeName"/>
-        </mx:FormItem>
-		<mx:FormItem label="Data Sources: ">
-			<mx:VBox>
-				<mx:Button label="Add Data Source..." click="addFeed()"/>
-				<mx:DataGrid dataProvider="{includedFeeds}">
-					<mx:columns>
-						<mx:DataGridColumn headerText="Data Source Name" dataField="name"/>
-						<mx:DataGridColumn headerText="" dataField="name" itemRenderer="com.easyinsight.solutions.SolutionFeedIcons"/>
-					</mx:columns>
-				</mx:DataGrid>
-			</mx:VBox>
-		</mx:FormItem>
-		<mx:FormItem label="" direction="horizontal">
-			<mx:Button label="Save" click="save()"/>
-			<mx:Button label="Cancel" click="cancel()"/>
-		</mx:FormItem>
-	</mx:Form>
+    <mx:HBox>
+        <mx:Form>
+            <mx:FormItem label="Name: ">
+                <mx:TextInput id="nameInput" text="{nameText}"/>
+            </mx:FormItem>
+            <mx:FormItem label="Tags: ">
+                <mx:TextInput id="tagsInput" text="{tags}"/>
+            </mx:FormItem>
+            <mx:FormItem label="Industry: ">
+                <mx:TextInput id="industryInput" text="{industry}"/>
+            </mx:FormItem>
+            <mx:FormItem label="Archive Name: ">
+                <mx:Label text="{archiveName}"/>
+            </mx:FormItem>
+            <mx:FormItem label="Author: ">
+                <mx:TextInput id="authorInput" text="{author}"/>
+            </mx:FormItem>
+            <mx:FormItem label="Required Account Tier: ">
+                <mx:ComboBox id="accountTierBox" selectedIndex="{solutionTier}">
+                    <mx:dataProvider>
+                        <mx:ArrayCollection>
+                            <mx:Array>
+                                <mx:String>Free</mx:String>
+                                <mx:String>Individual</mx:String>
+                                <mx:String>Group</mx:String>
+                                <mx:String>Professional</mx:String>
+                                <mx:String>Enterprise</mx:String>
+                            </mx:Array>
+                        </mx:ArrayCollection>
+                    </mx:dataProvider>
+                </mx:ComboBox>
+            </mx:FormItem>
+            <mx:FormItem label="Include Data Source Data: ">
+                <mx:CheckBox id="includeDataCheckbox" selected="{includeData}"/>
+            </mx:FormItem>
+            <mx:FormItem label="Associate Goal Tree: ">
+                <mx:ComboBox id="goalTreeComboBox" dataProvider="{goalTrees}" labelField="name"/>
+            </mx:FormItem>
+            <mx:FormItem label="Data Sources: ">
+                <mx:VBox>
+                    <mx:Button label="Add Data Source..." click="addFeed()"/>
+                    <mx:DataGrid dataProvider="{includedFeeds}">
+                        <mx:columns>
+                            <mx:DataGridColumn headerText="Data Source Name" dataField="name"/>
+                            <mx:DataGridColumn headerText="" dataField="name" itemRenderer="com.easyinsight.solutions.SolutionFeedIcons"/>
+                        </mx:columns>
+                    </mx:DataGrid>
+                </mx:VBox>
+            </mx:FormItem>
+            <mx:FormItem label="" direction="horizontal">
+                <mx:Button label="Save" click="save()"/>
+                <mx:Button label="Cancel" click="cancel()"/>
+            </mx:FormItem>
+        </mx:Form>
+        <mx:Form height="100%" width="500">
+            <mx:FormItem label="Description: " height="100%" width="100%">
+                <mx:RichTextEditor id="descriptionInput" htmlText="{descriptionText}" height="100%" width="100%"/>
+            </mx:FormItem>
+        </mx:Form>
+    </mx:HBox>
 </mx:TitleWindow>

@@ -1,18 +1,55 @@
 <?xml version="1.0" encoding="utf-8"?>
-<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%">
+<FullScreenPage xmlns="com.easyinsight.*" xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%"
+        paddingLeft="10" paddingBottom="10" paddingTop="10" paddingRight="10" creationComplete="onCreation()"
+        backgroundImage="{background2}" backgroundSize="100%">
 	<mx:Script>
 		<![CDATA[
-			import mx.controls.Alert;
+			import com.easyinsight.analysis.AnalysisCloseEvent;
+
+            import com.easyinsight.util.FileAlert;
+
+            import mx.controls.Alert;
 			import com.easyinsight.framework.User;
 			import mx.collections.ArrayCollection;
+            import mx.managers.BrowserManager;
+            import mx.managers.PopUpManager;
+            import mx.utils.URLUtil;
+
+            [Bindable]
+            [Embed(source="../../../../assets/document_out.png")]
+            private var closeIcon:Class;
+
+            [Bindable]
+            [Embed(source="../../../../assets/component_x16.png")]
+            private var installIcon:Class;
+
+            [Bindable]
+            [Embed(source="../../../../assets/gear.png")]
+            private var archiveIcon:Class;
+
+            [Bindable]
+            [Embed(source="../../../../assets/background2.JPG")]
+            private var background2:Class;
 			
 			[Bindable]
 			private var description:String;
 			
 			private var _solution:Solution;
+
+            [Bindable]
+            private var solutionName:String;
+            [Bindable]
+            private var solutionIndustry:String;
+            [Bindable]
+            private var solutionAuthor:String;
+
+            [Bindable]
+            private var solutionDescription:String;
 			
 			[Bindable]
 			private var solutionFileName:String;
+
+            private var solutionID:int;
 			
 			[Bindable]
 			private var displayTreeData:ArrayCollection;
@@ -21,18 +58,25 @@
 			
 			[Bindable]
 			private var downloadAvailable:Boolean = true;
+
+            [Bindable]
+			private var installAvailable:Boolean = true;
 						
 			[Bindable]
 			[Embed(source="../../../../assets/data_blue_x16.png")]
         	public var listIcon:Class;
         	
-        	[Bindable]
-        	[Embed(source="../../../../assets/gear.png")]
-        	public var archiveIcon:Class;
-                
             [Bindable]
 	        [Embed(source="../../../../assets/chart_column.png")]
 	        public var crosstabIcon:Class;
+
+            private function onCreation():void {
+                var fragmentObject:Object = new Object();
+                fragmentObject.solutionID = String(solutionID);
+                var fragmentString:String = URLUtil.objectToString(fragmentObject);
+                BrowserManager.getInstance().setFragment(fragmentString);
+                BrowserManager.getInstance().setTitle("Easy Insight - " + solutionName);
+            }
 	        
 	        public function set treeData(data:ArrayCollection):void {
 	        	this.displayTreeData = data;
@@ -41,10 +85,16 @@
 	        public function set solution(solution:Solution):void {
 	        	this._solution = solution;
 	        	description = solution.description;
+                solutionID = solution.solutionID;
 	        	solutionFileName = solution.solutionArchiveName;
+                solutionName = solution.name;
+                solutionAuthor = solution.author;
+                solutionIndustry = solution.industry;
+                solutionDescription = solution.description;
 	        	if (solution.solutionArchiveName == null || solution.solutionArchiveName == "") {
 	        		downloadAvailable = false;
 	        	}
+                installAvailable = solution.installable;
 	        }
 	        
 	        private function iconFunction(item:Object, depth:int):Class {            	
@@ -72,13 +122,20 @@
 	            fileRef.addEventListener(IOErrorEvent.IO_ERROR, doEvent);
 	            fileRef.addEventListener(ProgressEvent.PROGRESS, doEvent);
 	            fileRef.addEventListener(SecurityErrorEvent.SECURITY_ERROR, doEvent);
-	
+
+                FileAlert.alert(this, "Downloading...", null, fileRef);
 	            fileRef.download(request, _solution.solutionArchiveName); 
 			}
 			
 			private function doEvent(event:Event):void {
 				trace(event);
 			}
+
+            private function install():void {
+                var window:SolutionInstallationWindow = SolutionInstallationWindow(PopUpManager.createPopUp(this.parent, SolutionInstallationWindow, true));
+                window.solution = this._solution;
+                PopUpManager.centerPopUp(window);
+            }
 			
 			private function complete(event:Event):void {
 				Alert.show("Solution files copied!");
@@ -86,25 +143,66 @@
 		]]>
 	</mx:Script>
 	<mx:VBox width="100%" height="100%">
-		<mx:ApplicationControlBar visible="{downloadAvailable}">
-			<mx:Label text="Files Downloadable for this Solution"/>
-		</mx:ApplicationControlBar>
-		<mx:HBox visible="{downloadAvailable}">
-			<mx:Label text="File: "/>
-			<mx:Label text="{solutionFileName}"/>
-			<mx:Button icon="{archiveIcon}" click="download()" toolTip="Download File"/>
-		</mx:HBox>
-		<mx:ApplicationControlBar>
-			<mx:Label text="Data Sources and Insights Installed with this Solution"/>
-		</mx:ApplicationControlBar>
-		<mx:AdvancedDataGrid width="100%" height="100%" id="uploadGrid" selectable="false" fontSize="12"
-			groupIconFunction="iconFunction" defaultLeafIcon="{crosstabIcon}">
-			<mx:dataProvider>
-	            <mx:HierarchicalData source="{displayTreeData}"/>
-	        </mx:dataProvider>
-			<mx:columns>				
-				<mx:AdvancedDataGridColumn headerText="Name" dataField="name"/>										
-			</mx:columns>
-		</mx:AdvancedDataGrid>
+        <mx:HBox>
+            <mx:Button icon="{closeIcon}" toolTip="Close" click="dispatchEvent(new AnalysisCloseEvent(this))"/>
+            <mx:Button icon="{installIcon}" toolTip="Install" click="install()" visible="{installAvailable}"/>
+            <mx:Button icon="{archiveIcon}" toolTip="Download" visible="{downloadAvailable}" click="download()"/>
+        </mx:HBox>
+        <mx:HBox>
+            <mx:VBox verticalGap="0">
+                <mx:Box backgroundColor="#254BD4" height="5" width="100%"/>
+                <mx:Box width="100%" horizontalAlign="center" backgroundColor="#C7CBF0">
+                    <mx:Label text="Solution Summary"/>
+                </mx:Box>
+                <mx:Form>
+                    <mx:FormItem label="Name:">
+                        <mx:Label text="{solutionName}"/>
+                    </mx:FormItem>
+                    <mx:FormItem label="Industry:">
+                        <mx:Label text="{solutionIndustry}"/>
+                    </mx:FormItem>
+                    <mx:FormItem label="Author:">
+                        <mx:Label text="{solutionAuthor}"/>
+                    </mx:FormItem>
+                </mx:Form>
+            </mx:VBox>
+            <mx:Spacer width="50"/>
+            <mx:VBox verticalGap="0">
+                <mx:Box backgroundColor="#254BD4" height="5" width="100%"/>
+                <mx:Box width="100%" horizontalAlign="center" backgroundColor="#C7CBF0">
+                    <mx:Label text="Files Downloadable for this Solution"/>
+                </mx:Box>
+                <mx:HBox visible="{downloadAvailable}">
+                    <mx:Label text="File: "/>
+                    <mx:Label text="{solutionFileName}"/>
+                    <mx:Button icon="{archiveIcon}" click="download()" toolTip="Download File"/>
+                </mx:HBox>
+            </mx:VBox>
+        </mx:HBox>
+        <mx:HBox height="100%">
+            <mx:VBox width="300" verticalGap="0">
+                <mx:Box backgroundColor="#254BD4" height="5" width="100%"/>
+                <mx:Box width="100%" horizontalAlign="center" backgroundColor="#C7CBF0">
+                    <mx:Label text="Included Data Sources and Reports"/>
+                </mx:Box>
+                <mx:AdvancedDataGrid id="uploadGrid" selectable="false" fontSize="12"
+                    groupIconFunction="iconFunction" defaultLeafIcon="{crosstabIcon}" width="100%" visible="{installAvailable}">
+                    <mx:dataProvider>
+                        <mx:HierarchicalData source="{displayTreeData}"/>
+                    </mx:dataProvider>
+                    <mx:columns>
+                        <mx:AdvancedDataGridColumn headerText="Name" dataField="name"/>
+                    </mx:columns>
+                </mx:AdvancedDataGrid>
+            </mx:VBox>
+            <mx:Spacer width="50"/>
+            <mx:VBox width="500" verticalGap="0" height="100%">
+                <mx:Box backgroundColor="#254BD4" height="5" width="100%"/>
+                <mx:Box width="100%" horizontalAlign="center" backgroundColor="#C7CBF0">
+                    <mx:Label text="Documentation"/>
+                </mx:Box>
+                <mx:TextArea height="100%" width="100%" backgroundAlpha="0" borderStyle="none" selectable="false" htmlText="{solutionDescription}" borderThickness="0"/>
+            </mx:VBox>
+        </mx:HBox>
 	</mx:VBox>
-</mx:Canvas>
+</FullScreenPage>

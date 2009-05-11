@@ -23,10 +23,14 @@
     <mx:RemoteObject id="solutionService" destination="solutionService">
         <mx:method name="getSolutions" result="gotSolutions()"/>
     </mx:RemoteObject>
-    <mx:Button label="Add Solution..." click="createSolution()"/>
-    <mx:DataGrid dataProvider="{solutions}" width="100%">
+    <mx:HBox>
+        <mx:Button label="Add Solution..." click="createSolution()"/>
+        <mx:Button label="Refresh" click="refreshData()"/>        
+    </mx:HBox>
+    <mx:DataGrid dataProvider="{solutions}" width="100%" height="100%">
         <mx:columns>
             <mx:DataGridColumn dataField="name" headerText="Name"/>
+            <mx:DataGridColumn dataField="solutionArchiveName" headerText="Archive" width="120"/>
             <mx:DataGridColumn dataField="name" width="100" sortable="false" headerText="" itemRenderer="com.easyinsight.solutions.SolutionAdminControls"/>
         </mx:columns>
     </mx:DataGrid>

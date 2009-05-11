@@ -37,9 +37,6 @@
 			private var _solution:Solution;
 			
 			[Bindable]
-			private var description:String;
-			
-			[Bindable]
 			private var solutionName:String;
 
             [Bindable]
@@ -77,7 +74,6 @@
 			public function set solution(solution:Solution):void {
 				this._solution = solution;
 				solutionName = solution.name;
-				description = solution.description;
 			}
 			
 			private function install():void {
@@ -122,9 +118,6 @@
             <mx:Form paddingTop="0" paddingBottom="0" paddingLeft="0" paddingRight="0">
                 <mx:FormItem label="Solution Name:">
                     <mx:Label text="{solutionName}"/>
-                </mx:FormItem>
-                <mx:FormItem label="Description:">
-                    <mx:TextArea text="{description}" id="descriptionBox" width="400" height="100" editable="false" />
                 </mx:FormItem>
             </mx:Form>
             <mx:Label text="Installing this solution will add the following objects to your account:" fontSize="14"/>
