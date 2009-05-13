@@ -5,6 +5,7 @@ import com.easyinsight.dataset.DataSet;
 import com.easyinsight.storage.DataStorage;
 import com.easyinsight.storage.StorageLimitException;
 import com.easyinsight.database.Database;
+import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.*;
 import com.easyinsight.datafeeds.file.FileBasedFeedDefinition;
 import com.easyinsight.analysis.AnalysisItem;
@@ -422,18 +423,12 @@ public class UserUploadService implements IUserUploadService {
         try {
             ServerDataSourceDefinition feedDefinition = (ServerDataSourceDefinition) getDataFeedConfiguration(feedID);
             if(saveCredentials) {
-                Connection conn = Database.instance().getConnection();
+                EIConnection conn = Database.instance().getConnection();
                 try {
                     PasswordStorage.setPasswordCredentials(credentials.getUserName(), credentials.getPassword(), feedID, conn);
                 }
                 finally {
-                    try {
-                        conn.close();
-                    }
-                    catch (Exception e) {
-                        LogClass.error(e);
-                    }
-
+                    Database.instance().closeConnection(conn);
                 }
             }
             return feedDefinition.refreshData(credentials, SecurityUtil.getAccountID(), new Date());
