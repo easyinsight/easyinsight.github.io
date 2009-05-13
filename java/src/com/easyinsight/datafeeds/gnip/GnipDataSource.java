@@ -12,6 +12,7 @@ import java.sql.ResultSet;
 import com.easyinsight.datafeeds.ServerDataSourceDefinition;
 import com.easyinsight.datafeeds.FeedType;
 import com.easyinsight.datafeeds.CredentialsDefinition;
+import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.core.Key;
 import com.easyinsight.core.NumericValue;
@@ -247,4 +248,10 @@ public class GnipDataSource extends ServerDataSourceDefinition {
         dataStorage.insertData(dataSet);
     }
 
+    @Override
+    public FeedDefinition clone() throws CloneNotSupportedException {
+        GnipDataSource gnipDataSource = (GnipDataSource) super.clone();
+        gnipDataSource.setFilters(new ArrayList<GnipFilter>());
+        return gnipDataSource;
+    }
 }
