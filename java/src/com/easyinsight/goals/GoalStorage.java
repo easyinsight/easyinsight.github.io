@@ -182,6 +182,8 @@ public class GoalStorage {
                 addGroupStmt.execute();
             }
         }
+        addUserStmt.close();
+        addGroupStmt.close();
     }
 
     /*public void setUserRole(long userID, long goalTreeID, int role, Connection conn) throws SQLException {
@@ -533,6 +535,7 @@ public class GoalStorage {
                 insertNodeStmt.execute();
                 nodeID = Database.instance().getAutoGenKey(insertNodeStmt);
                 goalTreeNode.setGoalTreeNodeID(nodeID);
+                insertNodeStmt.close();
             } else {
                 PreparedStatement insertNodeStmt = conn.prepareStatement("INSERT INTO GOAL_TREE_NODE (PARENT_GOAL_TREE_NODE_ID, NAME, DESCRIPTION," +
                         "FEED_ID, GOAL_VALUE, ANALYSIS_MEASURE_ID, FILTER_ID, high_is_good, ICON_IMAGE, GOAL_MILESTONE_ID, GOAL_TREE_ID, SUB_TREE_ID) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
@@ -575,6 +578,7 @@ public class GoalStorage {
                 insertNodeStmt.execute();
                 nodeID = Database.instance().getAutoGenKey(insertNodeStmt);
                 goalTreeNode.setGoalTreeNodeID(nodeID);
+                insertNodeStmt.close();
             }
         } else {
             nodeID = goalTreeNode.getGoalTreeNodeID();
@@ -640,6 +644,7 @@ public class GoalStorage {
                 updateNodeStmt.setLong(14, goalTreeNode.getGoalTreeNodeID());
             }
             updateNodeStmt.executeUpdate();
+            updateNodeStmt.close();
         }
         saveTags(goalTreeNode, conn);
         saveInsights(goalTreeNode, conn);
@@ -679,7 +684,9 @@ public class GoalStorage {
                 deleteStmt.setLong(1, id);
                 deleteStmt.executeUpdate();
             }
+            deleteStmt.close();
         }
+        queryStmt.close();
     }
 
     private void saveUsers(GoalTreeNode goalTreeNode, Connection conn) throws SQLException {
@@ -692,6 +699,7 @@ public class GoalStorage {
             saveUserStmt.setLong(2, userID);
             saveUserStmt.execute();
         }
+        saveUserStmt.close();
     }
 
     public void addUserToGoal(long userID, long goalTreeNodeID) {
@@ -719,6 +727,7 @@ public class GoalStorage {
             saveTagStmt.setString(2, tag.getTagName());
             saveTagStmt.execute();
         }
+        saveTagStmt.close();
     }
 
     private void saveInsights(GoalTreeNode goalTreeNode, Connection conn) throws SQLException {

@@ -436,7 +436,7 @@ public class UserUploadService implements IUserUploadService {
 
                 }
             }
-            return feedDefinition.refreshData(credentials, SecurityUtil.getAccountID(), null);
+            return feedDefinition.refreshData(credentials, SecurityUtil.getAccountID(), new Date());
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);
