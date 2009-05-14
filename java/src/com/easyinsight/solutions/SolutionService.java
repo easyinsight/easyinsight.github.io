@@ -21,6 +21,7 @@ import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.goals.*;
 import com.easyinsight.email.UserStub;
 import com.easyinsight.core.InsightDescriptor;
+import com.easyinsight.users.Account;
 
 import java.util.*;
 import java.sql.*;
@@ -216,10 +217,13 @@ public class SolutionService {
     }
 
     public List<FeedDescriptor> getAvailableFeeds() {
+        SecurityUtil.authorizeAccountTier(Account.ADMINISTRATOR);
         List<FeedDescriptor> feedDescriptors = new ArrayList<FeedDescriptor>();
         Connection conn = Database.instance().getConnection();
         try {
-            PreparedStatement queryStmt = conn.prepareStatement("SELECT DATA_FEED.DATA_FEED_ID, DATA_FEED.FEED_NAME FROM DATA_FEED");
+            PreparedStatement queryStmt = conn.prepareStatement("SELECT DATA_FEED.DATA_FEED_ID, DATA_FEED.FEED_NAME FROM DATA_FEED, UPLOAD_POLICY_USERS WHERE " +
+                    "UPLOAD_POLICY_USERS.USER_ID = ? AND DATA_FEED.DATA_FEED_ID = UPLOAD_POLICY_USERS.FEED_ID");
+            queryStmt.setLong(1, SecurityUtil.getUserID());
             ResultSet rs = queryStmt.executeQuery();
             while (rs.next()) {
                 long feedID = rs.getLong(1);
