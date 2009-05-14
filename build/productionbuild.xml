@@ -435,7 +435,7 @@
 
     <target name="modules1" depends="module.area3dchart, module.areachart, module.bar3dchart, module.barchart, module.bubblechart"/>
     <target name="modules2" depends="module.column3dchart, module.columnchart, module.line3dchart, module.list, module.map"/>
-    <target name="modules3" depends="module.pie3dchart, module.piechart, module.plotchart"/>
+    <target name="modules3" depends="module.pie3dchart, module.piechart, module.plotchart, module.linechart"/>
     <target name="modules4" depends="module.gauge, module.crosstab, module.tree, module.treemap"/>
 
     <target name="module.list">
