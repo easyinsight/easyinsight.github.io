@@ -5,6 +5,7 @@ import com.easyinsight.core.Key;
 import com.easyinsight.core.DerivedKey;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.analysis.*;
+import com.easyinsight.pipeline.DerivedDataSourcePipeline;
 
 import java.util.*;
 
@@ -42,28 +43,13 @@ public class CompositeFeed extends Feed {
         try {
             DataSet dataSet = getDataSet(analysisItems, insightRequestMetadata);
             if (!adminMode) {
-                dataSet = dataSet.nextStep(getAnalysisDefinition(), new HashSet<AnalysisItem>(getFields()), insightRequestMetadata);
+                dataSet = new DerivedDataSourcePipeline().setup(getAnalysisDefinition(), this, insightRequestMetadata).toDataSet(dataSet);
             }
             return dataSet;
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);
         }
-    }
-
-
-    protected DataSet getUncachedDataSet(List<Key> columns, Integer maxRows, boolean admin, InsightRequestMetadata insightRequestMetadata) {
-        /*try {
-            DataSet dataSet = getDataSet(columns, insightRequestMetadata);
-            if (!admin) {
-                dataSet = dataSet.nextStep(getAnalysisDefinition(), new HashSet<AnalysisItem>(getFields()), insightRequestMetadata);
-            }
-            return dataSet;
-        } catch (Exception e) {
-            LogClass.error(e);
-            throw new RuntimeException(e);
-        }*/
-        throw new UnsupportedOperationException();
     }
 
     public DataSet getDetails(Collection<FilterDefinition> filters) {

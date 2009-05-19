@@ -9,6 +9,8 @@ import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.security.Roles;
 import com.easyinsight.core.Key;
 import com.easyinsight.core.Value;
+import com.easyinsight.pipeline.Pipeline;
+import com.easyinsight.pipeline.StandardReportPipeline;
 
 import java.util.*;
 
@@ -108,7 +110,9 @@ public class DataService implements IDataService {
                 Set<AnalysisItem> analysisItems = analysisDefinition.getColumnItems(feed.getFields());
                 Collection<FilterDefinition> filters = analysisDefinition.getFilterDefinitions();
                 DataSet dataSet = feed.getAggregateDataSet(analysisItems, filters, insightRequestMetadata, feed.getFields(), false, null);
-                ListDataResults listDataResults = dataSet.toList(analysisDefinition, feed.getFields(), insightRequestMetadata);
+                Pipeline pipeline = new StandardReportPipeline();
+                pipeline.setup(analysisDefinition, feed, insightRequestMetadata);
+                ListDataResults listDataResults = pipeline.toList(dataSet);
                 results = new EmbeddedDataResults();
                 results.setDefinition(analysisDefinition);
                 results.setHeaders(listDataResults.getHeaders());
@@ -128,17 +132,20 @@ public class DataService implements IDataService {
             long startTime = System.currentTimeMillis();
             ListDataResults results;
             Feed feed = feedRegistry.getFeed(analysisDefinition.getDataFeedID());
-            Set<Long> ids = validate(analysisDefinition, feed);
+            /*Set<Long> ids = validate(analysisDefinition, feed);
             if (ids.size() > 0) {
                 results = new ListDataResults();
                 results.setInvalidAnalysisItemIDs(ids);
                 results.setFeedMetadata(getFeedMetadata(analysisDefinition.getDataFeedID(), false));
-            } else {
+            } else {*/
                 Set<AnalysisItem> analysisItems = analysisDefinition.getColumnItems(feed.getFields());
                 Collection<FilterDefinition> filters = analysisDefinition.getFilterDefinitions();
                 DataSet dataSet = feed.getAggregateDataSet(analysisItems, filters, insightRequestMetadata, feed.getFields(), false, null);
-                results = dataSet.toList(analysisDefinition, feed.getFields(), insightRequestMetadata);
-            }
+                //results = dataSet.toList(analysisDefinition, feed.getFields(), insightRequestMetadata);
+                Pipeline pipeline = new StandardReportPipeline();
+                pipeline.setup(analysisDefinition, feed, insightRequestMetadata);
+                results = pipeline.toList(dataSet);
+           // }
             BenchmarkManager.recordBenchmark("DataService:List", System.currentTimeMillis() - startTime);
             return results;
         } catch (Exception e) {

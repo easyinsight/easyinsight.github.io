@@ -158,20 +158,29 @@ public class AnalysisService implements IAnalysisService {
     public void deleteAnalysisDefinition(long reportID) {
         long userID = SecurityUtil.getUserID();
         SecurityUtil.authorizeInsight(reportID);
-        AnalysisDefinition dbAnalysisDef = analysisStorage.getPersistableReport(reportID);
-
-        boolean canDelete = analysisStorage.canUserDelete(userID, dbAnalysisDef);
-        if (canDelete) {
-            analysisStorage.deleteAnalysisDefinition(dbAnalysisDef);
-        } else {
-            Iterator<UserToAnalysisBinding> bindingIter = dbAnalysisDef.getUserBindings().iterator();
-            while (bindingIter.hasNext()) {
-                UserToAnalysisBinding binding = bindingIter.next();
-                if (binding.getUserID() == userID) {
-                    bindingIter.remove();
+        Session session = Database.instance().createSession();
+        try {
+            session.getTransaction().begin();
+            AnalysisDefinition dbAnalysisDef = analysisStorage.getPersistableReport(reportID, session);
+            boolean canDelete = analysisStorage.canUserDelete(userID, dbAnalysisDef);
+            if (canDelete) {
+                session.delete(dbAnalysisDef);
+            } else {
+                Iterator<UserToAnalysisBinding> bindingIter = dbAnalysisDef.getUserBindings().iterator();
+                while (bindingIter.hasNext()) {
+                    UserToAnalysisBinding binding = bindingIter.next();
+                    if (binding.getUserID() == userID) {
+                        bindingIter.remove();
+                    }
                 }
+                analysisStorage.saveAnalysis(dbAnalysisDef, session);
             }
-            analysisStorage.saveAnalysis(dbAnalysisDef);
+            session.getTransaction().commit();
+        } catch (Exception e) {
+            LogClass.error(e);
+            session.getTransaction().rollback();
+        } finally {
+            session.close();
         }
     }
 

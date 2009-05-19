@@ -20,7 +20,7 @@ public class MaterializedFilterRangeDefinition extends MaterializedFilterDefinit
         this.highValue = highValue == null ? Double.MAX_VALUE : highValue;
     }
 
-    public boolean allows(Value value, Value preTransformValue) {
+    public boolean allows(Value value) {
         boolean allowed = false;
         if (value.type() == Value.NUMBER) {
             Double doubleValue = value.toDouble();

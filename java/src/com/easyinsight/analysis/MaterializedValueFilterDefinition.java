@@ -23,7 +23,7 @@ public class MaterializedValueFilterDefinition extends MaterializedFilterDefinit
         return inclusive;
     }
 
-    public boolean allows(Value value, Value preTransformValue) {
+    public boolean allows(Value value) {
         boolean allows;
         allows = values.contains(value);
         if (!inclusive) allows = !allows;

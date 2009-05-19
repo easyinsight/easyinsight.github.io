@@ -1,7 +1,5 @@
 package com.easyinsight.analysis;
 
-import com.easyinsight.analysis.MaterializedFilterDefinition;
-import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.core.Value;
 import com.easyinsight.core.DateValue;
 
@@ -23,10 +21,10 @@ public class MaterializedFilterDateRangeDefinition extends MaterializedFilterDef
         this.highValue = highValue;
     }
 
-    public boolean allows(Value value, Value preTransformValue) {
+    public boolean allows(Value value) {
         boolean allowed = false;        
-        if (preTransformValue.type() == Value.DATE) {
-            DateValue dateValue = (DateValue) preTransformValue;
+        if (value.type() == Value.DATE) {
+            DateValue dateValue = (DateValue) value;
             allowed = dateValue.getDate().compareTo(lowValue) >= 0 && dateValue.getDate().compareTo(highValue) <= 0;            
         }
         return allowed;

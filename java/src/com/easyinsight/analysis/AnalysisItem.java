@@ -7,6 +7,7 @@ import javax.persistence.Table;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Map;
 import java.io.Serializable;
 
 import com.easyinsight.core.Key;
@@ -170,14 +171,11 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
         this.formattingConfiguration = formattingConfiguration;
     }
 
-    public AnalysisItem clone() {
-        try {
-            AnalysisItem clonedItem = (AnalysisItem) super.clone();
-            clonedItem.setAnalysisItemID(0);
-            return clonedItem;
-        } catch (CloneNotSupportedException e) {
-            throw new RuntimeException(e);
-        }
+    public AnalysisItem clone() throws CloneNotSupportedException {
+        AnalysisItem clonedItem = (AnalysisItem) super.clone();
+        clonedItem.setAnalysisItemID(0);
+        clonedItem.setFormattingConfiguration(formattingConfiguration.clone());
+        return clonedItem;
     }
 
     public boolean equals(Object o) {
@@ -195,14 +193,15 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
     }
 
     public boolean isDerived() {
-        if (virtualDimension != null) {
-            return true;
-        }
-        return false;
+        return virtualDimension != null;
     }
 
     public boolean isVirtual() {
         return virtualDimension != null;
+    }
+
+    public void updateIDs(Map<Long, AnalysisItem> replacementMap) {
+        
     }
 
     public List<AnalysisItem> getAnalysisItems(List<AnalysisItem> allItems, Collection<AnalysisItem> insightItems) {
@@ -244,5 +243,8 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
 
     public boolean isCalculated() {
         return false;
+    }
+
+    public void applyDimensionChanges(IRow row) {
     }
 }

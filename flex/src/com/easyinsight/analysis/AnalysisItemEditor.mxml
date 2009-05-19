@@ -1,133 +1,157 @@
 <?xml version="1.0" encoding="utf-8"?>
-<mx:Box xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%" 
-	xmlns:analysis="com.easyinsight.analysis.*"
-	creationComplete="initStuff()" creationPolicy="all" xmlns:formatter="com.easyinsight.analysis.formatter.*">
-	<mx:states>
-		
-		<mx:State name="Measure">			
-			<mx:AddChild relativeTo="{firstForm}" position="after" creationPolicy="all">
-				<analysis:ColorSelection id="measureRangeSelection"/>
-			</mx:AddChild>
-			<mx:AddChild relativeTo="{firstForm}" position="after" creationPolicy="all">
-				<mx:FormItem label="Formatting: ">								
-					<formatter:FormattingSetup id="formattingSetup"/>
-				</mx:FormItem>
-			</mx:AddChild>
-		</mx:State>
-		
-		<mx:State name="ComplexMeasure">
-			<mx:AddChild relativeTo="{firstForm}" position="after" creationPolicy="all">
-				<mx:FormItem label="Wrapped Aggregation: ">
-					<mx:ComboBox dataProvider="{measureObjects}" id="complexWrappedAggregations"/>
-				</mx:FormItem>
-			</mx:AddChild>	
-		</mx:State>
-		
-		<mx:State name="TemporalMeasure">
-			<mx:AddChild relativeTo="{firstForm}" position="after" creationPolicy="all">
-				<mx:FormItem label="Wrapped Aggregation: ">
-					<mx:ComboBox dataProvider="{measureObjects}" id="temporalWrappedAggregations"/>
-				</mx:FormItem>
-			</mx:AddChild>
-			<mx:AddChild relativeTo="{firstForm}" position="after" creationPolicy="all">
-				<mx:FormItem label="Date Level:" direction="horizontal" enabled="{dimensionIsDate}">
-					<mx:ComboBox id="temporalDateBox">
-						<mx:ArrayCollection>
-							<mx:Object label="Year" data="{AnalysisItemTypes.YEAR_LEVEL}"/>
-							<mx:Object label="Month - Year" data="{AnalysisItemTypes.MONTH_LEVEL}"/>
-							<mx:Object label="Day - Month - Year" data="{AnalysisItemTypes.DAY_LEVEL}"/>							
-						</mx:ArrayCollection>
-					</mx:ComboBox>
-				</mx:FormItem>
-			</mx:AddChild>	
-			<mx:AddChild relativeTo="{firstForm}" position="after" creationPolicy="all">
-				<mx:FormItem label="Grouping: ">
-					<mx:ComboBox dataProvider="{dimensionFields}" id="dimensionComboBox" labelField="display" change="onDimensionChange()"/>
-				</mx:FormItem>				
-			</mx:AddChild>				
-		</mx:State>
-		
-		<mx:State name="Calculation">
-			<mx:RemoveChild target="{aggregationBox}"/>
-			<mx:AddChild relativeTo="{firstForm}" position="after" creationPolicy="all">
-				<analysis:ColorSelection id="calcMeasureRangeSelection"/>
-			</mx:AddChild>
-			<mx:AddChild relativeTo="{firstForm}" position="after" creationPolicy="all">
-				<mx:FormItem label="Formatting: ">								
-					<formatter:FormattingSetup id="calcFormattingSetup"/>
-				</mx:FormItem>
-			</mx:AddChild>
-		</mx:State>
-	
-		<mx:State name="Grouping">
+<mx:Box xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%"
+        xmlns:analysis="com.easyinsight.analysis.*"
+        creationComplete="initStuff()" creationPolicy="all" xmlns:formatter="com.easyinsight.analysis.formatter.*">
+    <mx:states>
+
+        <mx:State name="Measure">
             <mx:AddChild relativeTo="{firstForm}" position="after" creationPolicy="all">
-                <mx:FormItem label="Grouping: " visible="{useKeyDimensionSelected}">
-					<mx:ComboBox dataProvider="{dimensionFields}" id="dimensionKeyComboBox" labelField="display"/>
-				</mx:FormItem>
+                <analysis:ColorSelection id="measureRangeSelection"/>
             </mx:AddChild>
             <mx:AddChild relativeTo="{firstForm}" position="after" creationPolicy="all">
-                <mx:CheckBox label="Use Another Grouping as Key: " id="useKeyDimension" selected="{useKeyDimensionSelected}" click="useKeyDimensionSelected = useKeyDimension.selected"/>
+                <mx:FormItem label="Formatting: ">
+                    <formatter:FormattingSetup id="formattingSetup"/>
+                </mx:FormItem>
+            </mx:AddChild>
+        </mx:State>
+
+        <mx:State name="ComplexMeasure">
+            <mx:AddChild relativeTo="{firstForm}" position="after" creationPolicy="all">
+                <mx:FormItem label="Wrapped Aggregation: ">
+                    <mx:ComboBox dataProvider="{measureObjects}" id="complexWrappedAggregations"/>
+                </mx:FormItem>
+            </mx:AddChild>
+        </mx:State>
+
+        <mx:State name="TemporalMeasure">
+            <mx:AddChild relativeTo="{firstForm}" position="after" creationPolicy="all">
+                <mx:FormItem label="Wrapped Aggregation: ">
+                    <mx:ComboBox dataProvider="{measureObjects}" id="temporalWrappedAggregations"/>
+                </mx:FormItem>
+            </mx:AddChild>
+            <mx:AddChild relativeTo="{firstForm}" position="after" creationPolicy="all">
+                <mx:FormItem label="Date Level:" direction="horizontal" enabled="{dimensionIsDate}">
+                    <mx:ComboBox id="temporalDateBox">
+                        <mx:ArrayCollection>
+                            <mx:Object label="Year" data="{AnalysisItemTypes.YEAR_LEVEL}"/>
+                            <mx:Object label="Month - Year" data="{AnalysisItemTypes.MONTH_LEVEL}"/>
+                            <mx:Object label="Day - Month - Year" data="{AnalysisItemTypes.DAY_LEVEL}"/>
+                        </mx:ArrayCollection>
+                    </mx:ComboBox>
+                </mx:FormItem>
+            </mx:AddChild>
+            <mx:AddChild relativeTo="{firstForm}" position="after" creationPolicy="all">
+                <mx:FormItem label="Grouping: ">
+                    <mx:ComboBox dataProvider="{dimensionFields}" id="dimensionComboBox" labelField="display"
+                                 change="onDimensionChange()"/>
+                </mx:FormItem>
+            </mx:AddChild>
+        </mx:State>
+
+        <mx:State name="Calculation">
+            <mx:RemoveChild target="{aggregationBox}"/>
+            <mx:AddChild relativeTo="{firstForm}" position="after" creationPolicy="all">
+                <analysis:ColorSelection id="calcMeasureRangeSelection"/>
+            </mx:AddChild>
+            <mx:AddChild relativeTo="{firstForm}" position="after" creationPolicy="all">
+                <mx:FormItem label="Formatting: ">
+                    <formatter:FormattingSetup id="calcFormattingSetup"/>
+                </mx:FormItem>
+            </mx:AddChild>
+        </mx:State>
+
+        <mx:State name="Grouping">
+            <mx:AddChild relativeTo="{firstForm}" position="after" creationPolicy="all">
+                <mx:FormItem label="Grouping: " visible="{useKeyDimensionSelected}">
+                    <mx:ComboBox dataProvider="{dimensionFields}" id="dimensionKeyComboBox" labelField="display"/>
+                </mx:FormItem>
+            </mx:AddChild>
+            <mx:AddChild relativeTo="{firstForm}" position="after" creationPolicy="all">
+                <mx:CheckBox label="Use Another Grouping as Key: " id="useKeyDimension"
+                             selected="{useKeyDimensionSelected}"
+                             click="useKeyDimensionSelected = useKeyDimension.selected"/>
             </mx:AddChild>
             <mx:AddChild relativeTo="{firstForm}" position="after" creationPolicy="all">
                 <mx:FormItem label="Group: ">
                     <mx:CheckBox id="groupCheckbox"/>
                 </mx:FormItem>
             </mx:AddChild>
-		</mx:State>
-		<mx:State name="Range">
-			
-		</mx:State>
-		<mx:State name="List">
-			<mx:AddChild relativeTo="{firstForm}" position="after" creationPolicy="all">
-				<mx:FormItem label="Expanded:" direction="horizontal">
-					<mx:CheckBox id="listExpanded"/>
-				</mx:FormItem>
-			</mx:AddChild>
-		</mx:State>
-		<mx:State name="Date">
-			<mx:AddChild relativeTo="{firstForm}" position="after" creationPolicy="all">
-				<mx:FormItem label="Date Level:" direction="horizontal">
-					<mx:ComboBox id="dateBox" rowCount="10">
-						<mx:ArrayCollection>
-							<mx:Object label="Year" data="{AnalysisItemTypes.YEAR_LEVEL}"/>
-							<mx:Object label="Month - Year" data="{AnalysisItemTypes.MONTH_LEVEL}"/>
-							<mx:Object label="Day - Month - Year" data="{AnalysisItemTypes.DAY_LEVEL}"/>							
-							<mx:Object label="Day - Month - Year - Hour" data="{AnalysisItemTypes.HOUR_LEVEL}"/>
-							<mx:Object label="Day - Month - Year - Hour - Minute" data="{AnalysisItemTypes.MINUTE_LEVEL}"/>
+        </mx:State>
+        <mx:State name="Range">
+
+        </mx:State>
+        <mx:State name="List">
+            <mx:AddChild relativeTo="{firstForm}" position="after" creationPolicy="all">
+                <mx:FormItem label="Expanded:" direction="horizontal">
+                    <mx:CheckBox id="listExpanded"/>
+                </mx:FormItem>
+            </mx:AddChild>
+        </mx:State>
+        <mx:State name="Date">
+            <mx:AddChild relativeTo="{firstForm}" position="after" creationPolicy="all">
+                <mx:FormItem label="Date Level:" direction="horizontal">
+                    <mx:ComboBox id="dateBox" rowCount="10">
+                        <mx:ArrayCollection>
+                            <mx:Object label="Year" data="{AnalysisItemTypes.YEAR_LEVEL}"/>
+                            <mx:Object label="Month - Year" data="{AnalysisItemTypes.MONTH_LEVEL}"/>
+                            <mx:Object label="Day - Month - Year" data="{AnalysisItemTypes.DAY_LEVEL}"/>
+                            <mx:Object label="Day - Month - Year - Hour" data="{AnalysisItemTypes.HOUR_LEVEL}"/>
+                            <mx:Object label="Day - Month - Year - Hour - Minute"
+                                       data="{AnalysisItemTypes.MINUTE_LEVEL}"/>
 
                             <mx:Object label="Week - Year" data="{AnalysisItemTypes.WEEK_LEVEL}"/>
-							<mx:Object label="Month" data="{AnalysisItemTypes.MONTH_FLAT}"/>
-							<mx:Object label="Day of Year" data="{AnalysisItemTypes.DAY_OF_YEAR_FLAT}"/>
-							<mx:Object label="Day of Week" data="{AnalysisItemTypes.DAY_OF_WEEK_FLAT}"/>
-							<mx:Object label="Week of Year" data="{AnalysisItemTypes.WEEK_OF_YEAR_FLAT}"/>
-						</mx:ArrayCollection>
-					</mx:ComboBox>
-				</mx:FormItem>	
-			</mx:AddChild>
-			<mx:AddChild relativeTo="{firstForm}" position="after" creationPolicy="all">
-				<mx:FormItem label="Date Format:" direction="vertical">
-					<mx:TextArea editable="false" borderStyle="none" borderThickness="0" fontSize="10" width="300" 
-						text="The date format is specified by a pattern string. Within the pattern, letters are interpreted as the components of the date string. The following pattern letters are supported:"/>
-					<mx:DataGrid fontSize="10" rowCount="3">
-						<mx:ArrayCollection>
-							<mx:Array>
-								<mx:Object letter="y" meaning="Year" example="2008; 08"/>
-								<mx:Object letter="M" meaning="Month in Year" example="July; Jul; 07"/>
-								<mx:Object letter="d" meaning="Day in month" example="10"/>
-							</mx:Array>
-						</mx:ArrayCollection>
-						<mx:columns>											
-							<mx:DataGridColumn dataField="letter" width="48" headerText="Letter"/>
-							<mx:DataGridColumn dataField="meaning" headerText="Date Component"/>
-							<mx:DataGridColumn dataField="example" headerText="Examples"/>
-						</mx:columns>
-					</mx:DataGrid>
-					<mx:TextInput id="dateFormat" text="yyyy-MM-dd"/>
-				</mx:FormItem>
-			</mx:AddChild>	
-		</mx:State>
-	</mx:states>
-	<mx:Script>
+                            <mx:Object label="Month" data="{AnalysisItemTypes.MONTH_FLAT}"/>
+                            <mx:Object label="Day of Year" data="{AnalysisItemTypes.DAY_OF_YEAR_FLAT}"/>
+                            <mx:Object label="Day of Week" data="{AnalysisItemTypes.DAY_OF_WEEK_FLAT}"/>
+                            <mx:Object label="Week of Year" data="{AnalysisItemTypes.WEEK_OF_YEAR_FLAT}"/>
+                        </mx:ArrayCollection>
+                    </mx:ComboBox>
+                </mx:FormItem>
+            </mx:AddChild>
+            <mx:AddChild relativeTo="{firstForm}" position="after" creationPolicy="all">
+                <mx:FormItem label="Date Format:" direction="vertical">
+                    <mx:TextArea editable="false" borderStyle="none" borderThickness="0" fontSize="10" width="300"
+                                 text="The date format is specified by a pattern string. Within the pattern, letters are interpreted as the components of the date string. The following pattern letters are supported:"/>
+                    <mx:DataGrid fontSize="10" rowCount="3">
+                        <mx:ArrayCollection>
+                            <mx:Array>
+                                <mx:Object letter="y" meaning="Year" example="2008; 08"/>
+                                <mx:Object letter="M" meaning="Month in Year" example="July; Jul; 07"/>
+                                <mx:Object letter="d" meaning="Day in month" example="10"/>
+                            </mx:Array>
+                        </mx:ArrayCollection>
+                        <mx:columns>
+                            <mx:DataGridColumn dataField="letter" width="48" headerText="Letter"/>
+                            <mx:DataGridColumn dataField="meaning" headerText="Date Component"/>
+                            <mx:DataGridColumn dataField="example" headerText="Examples"/>
+                        </mx:columns>
+                    </mx:DataGrid>
+                    <mx:TextInput id="dateFormat" text="yyyy-MM-dd"/>
+                </mx:FormItem>
+            </mx:AddChild>
+        </mx:State>
+        <mx:State name="Step">
+            <mx:AddChild relativeTo="{firstForm}" position="after" creationPolicy="all">
+                <mx:FormItem label="Start Date: ">
+                    <mx:ComboBox dataProvider="{dateFields}" id="startDateComboBox" labelField="display"
+                                 change="onDimensionChange()"/>
+                </mx:FormItem>
+            </mx:AddChild>
+            <mx:AddChild relativeTo="{firstForm}" position="after" creationPolicy="all">
+                <mx:FormItem label="End Date: ">
+                    <mx:ComboBox dataProvider="{dateFields}" id="endDateComboBox" labelField="display"
+                                 change="onDimensionChange()"/>
+                </mx:FormItem>
+            </mx:AddChild>
+            <mx:AddChild relativeTo="{firstForm}" position="after" creationPolicy="all">
+                <mx:FormItem label="Correlation Dimension: ">
+                    <mx:ComboBox dataProvider="{dimensionFields}" id="correlationComboBox" labelField="display"
+                                 change="onDimensionChange()"/>
+                </mx:FormItem>
+            </mx:AddChild>
+        </mx:State>
+    </mx:states>
+    <mx:Script>
 		<![CDATA[
         import com.easyinsight.analysis.conditions.MeasureConditionRange;
 
@@ -153,6 +177,8 @@
 
         [Bindable]
         private var dimensionFields:ArrayCollection = new ArrayCollection();
+        [Bindable]
+        private var dateFields:ArrayCollection = new ArrayCollection();
 
         [Bindable]
         private var useKeyDimensionSelected:Boolean = false;
@@ -171,6 +197,9 @@
             for each (var analysisItemWrapper:AnalysisItemWrapper in analysisItems) {
                 if (analysisItemWrapper.analysisItem.hasType(AnalysisItemTypes.DIMENSION)) {
                     dimensionFields.addItem(analysisItemWrapper.analysisItem);
+                }
+                if (analysisItemWrapper.analysisItem.hasType(AnalysisItemTypes.DATE)) {
+                    dateFields.addItem(analysisItemWrapper.analysisItem);
                 }
             }
         }
@@ -250,7 +279,7 @@
         }
 
         protected function getComplexOptions():ArrayCollection {
-            return new ArrayCollection(["Delta", "Last Value", "Normality"]);
+            return new ArrayCollection(["Delta", "Last Value", "Normality", "Step"]);
         }
 
         public function save():AnalysisItem {
@@ -307,6 +336,13 @@
                     break;
                 case "Date":
                     analysisItem = new AnalysisDateDimension(dateBox.selectedItem.data, dateFormat.text);
+                    break;
+                case "Step":
+                    var analysisStep:AnalysisStep = new AnalysisStep();
+                    analysisStep.startDate = startDateComboBox.selectedItem as AnalysisDateDimension;
+                    analysisStep.endDate = endDateComboBox.selectedItem as AnalysisDateDimension;
+                    analysisStep.correlationDimension = correlationComboBox.selectedItem as AnalysisDimension;
+                    analysisItem = analysisStep;
                     break;
                 case "ComplexMeasure":
                     var complexAggregationType:int;
@@ -367,7 +403,7 @@
                                 sortDim = existingDim;
                             }
                             analysisItem = new TemporalAnalysisMeasure(aggregationBox.selectedLabel == "Delta" ? AggregationTypes.DELTA :
-                                    AggregationTypes.LAST_VALUE, temporalAggregationType,
+                                                                       AggregationTypes.LAST_VALUE, temporalAggregationType,
                                     sortDim);
                             break;
                     }
@@ -455,6 +491,9 @@
                 case "List":
                     currentState = "List";
                     break;
+                case "Step":
+                    currentState = "Step";
+                    break;
                 case "Date":
                     currentState = "Date";
                     if (startingAnalysisItem is AnalysisDateDimension) {
@@ -490,28 +529,28 @@
         }
         ]]>
 	</mx:Script>
-	<mx:VBox>
-		<mx:ToggleButtonBar id="toggleBar" itemClick="toggleClick()">
-			<mx:dataProvider>
+    <mx:VBox>
+        <mx:ToggleButtonBar id="toggleBar" itemClick="toggleClick()">
+            <mx:dataProvider>
                 <mx:Array>
                     <mx:String>Grouping</mx:String>
                     <mx:String>Number</mx:String>
-                    <mx:String>Complex</mx:String>                    
+                    <mx:String>Complex</mx:String>
                 </mx:Array>
             </mx:dataProvider>
-		</mx:ToggleButtonBar>	
-	</mx:VBox>
-	<mx:Form id="coreForm">
-		<mx:FormItem label="Field Name: " direction="horizontal" id="fieldNameText">
-			<mx:TextInput id="fieldNameInput" text="{displayName}" editable="{_fieldNameEditable}"/>
-		</mx:FormItem>
+        </mx:ToggleButtonBar>
+    </mx:VBox>
+    <mx:Form id="coreForm">
+        <mx:FormItem label="Field Name: " direction="horizontal" id="fieldNameText">
+            <mx:TextInput id="fieldNameInput" text="{displayName}" editable="{_fieldNameEditable}"/>
+        </mx:FormItem>
         <mx:FormItem label="Hidden: " direction="horizontal" id="hiddenText">
             <mx:CheckBox id="hiddenCheckbox" selected="{hidden}"/>
         </mx:FormItem>
-		<mx:FormItem label="Field Type: " direction="horizontal" id="firstForm">
-			<mx:ComboBox id="aggregationBox" dataProvider="{aggregationTypeObjects}" 
-				close="aggregationTypeChanged(event)" rowCount="9"/>
-		</mx:FormItem>						
-	</mx:Form>
-	<mx:StringValidator id="nameValidator" source="{fieldNameInput}" property="text" minLength="3"/>
+        <mx:FormItem label="Field Type: " direction="horizontal" id="firstForm">
+            <mx:ComboBox id="aggregationBox" dataProvider="{aggregationTypeObjects}"
+                         close="aggregationTypeChanged(event)" rowCount="9"/>
+        </mx:FormItem>
+    </mx:Form>
+    <mx:StringValidator id="nameValidator" source="{fieldNameInput}" property="text" minLength="3"/>
 </mx:Box>

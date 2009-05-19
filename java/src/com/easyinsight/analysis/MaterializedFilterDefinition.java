@@ -20,7 +20,7 @@ public abstract class MaterializedFilterDefinition {
         return key;
     }
 
-    public abstract boolean allows(Value value, Value preTransformValue);
+    public abstract boolean allows(Value value);
 
     public boolean requiresDataEarly() {
         return false;

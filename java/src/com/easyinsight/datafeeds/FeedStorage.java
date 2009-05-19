@@ -64,8 +64,8 @@ public class FeedStorage {
                     "CREATE_DATE, UPDATE_DATE, FEED_VIEWS, FEED_RATING_COUNT, FEED_RATING_AVERAGE, DESCRIPTION," +
                     "ATTRIBUTION, OWNER_NAME, DYNAMIC_SERVICE_DEFINITION_ID, ANALYSIS_ID, MARKETPLACE_VISIBLE, " +
                 "API_KEY, UNCHECKED_API_BASIC_AUTH, UNCHECKED_API_ENABLED, validated_api_basic_auth, validated_api_enabled, INHERIT_ACCOUNT_API_SETTINGS," +
-                "REFRESH_INTERVAL) " +
-                        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                "REFRESH_INTERVAL, CURRENT_VERSION) " +
+                        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                         Statement.RETURN_GENERATED_KEYS);
         insertDataFeedStmt.setString(1, feedDefinition.getFeedName());
         insertDataFeedStmt.setInt(2, feedDefinition.getFeedType().getType());
@@ -102,6 +102,7 @@ public class FeedStorage {
         insertDataFeedStmt.setBoolean(20, feedDefinition.isValidatedAPIEnabled());
         insertDataFeedStmt.setBoolean(21, feedDefinition.isInheritAccountAPISettings());
         insertDataFeedStmt.setLong(22, feedDefinition.getRefreshDataInterval());
+        insertDataFeedStmt.setInt(23, 1);
         insertDataFeedStmt.execute();
         long feedID = Database.instance().getAutoGenKey(insertDataFeedStmt);
         feedDefinition.setDataFeedID(feedID);
@@ -171,6 +172,13 @@ public class FeedStorage {
                 addGroupStmt.execute();
             }
         }
+    }
+
+    public void updateVersion(FeedDefinition feedDefinition, int version, Connection conn) throws SQLException {
+        PreparedStatement updateVersionStmt = conn.prepareStatement("UPDATE DATA_FEED SET CURRENT_VERSION = ? WHERE DATA_FEED_ID = ?");
+        updateVersionStmt.setInt(1, version);
+        updateVersionStmt.setLong(2, feedDefinition.getDataFeedID());
+        updateVersionStmt.executeUpdate();
     }
 
     private void saveTags(long feedID, Connection conn, Collection<Tag> tags) throws SQLException {

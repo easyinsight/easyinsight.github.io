@@ -123,29 +123,5 @@ public class ListTransform {
         }
         
         return dataSet;
-    }
-
-    public ListDataResults toListDataResults(List<AnalysisItem> columns, DataSet dataSet) {
-        ListRow[] listRows = new ListRow[dataSet.getRows().size()];
-        int rowCount = 0;
-        for (IRow row : dataSet.getRows()) {
-            int columnCount = 0;
-            listRows[rowCount] = new ListRow();
-            Value[] values = new Value[columns.size()];
-            listRows[rowCount].setValues(values);
-            for (AnalysisItem analysisItem : columns) {
-                Key key = analysisItem.createAggregateKey();
-                listRows[rowCount].getValues()[columnCount] = analysisItem.polishValue(row.getValue(key));
-                columnCount++;
-            }
-            rowCount++;
-        }
-        ListDataResults listDataResults = new ListDataResults();
-        List<AnalysisItem> allColumns = new ArrayList<AnalysisItem>(columns);
-        AnalysisItem[] headers = new AnalysisItem[allColumns.size()];
-        allColumns.toArray(headers);
-        listDataResults.setHeaders(headers);
-        listDataResults.setRows(listRows);
-        return listDataResults;
-    }
+    }    
 }

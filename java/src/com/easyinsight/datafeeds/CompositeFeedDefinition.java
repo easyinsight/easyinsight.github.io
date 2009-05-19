@@ -165,7 +165,12 @@ public class CompositeFeedDefinition extends FeedDefinition {
         protected void accept(CompositeFeedNode compositeFeedNode) throws SQLException {
             List<AnalysisItem> analysisItemList = retrieveFields(compositeFeedNode.getDataFeedID());
             for (AnalysisItem analysisItem : analysisItemList) {
-                AnalysisItem clonedItem = analysisItem.clone();
+                AnalysisItem clonedItem = null;
+                try {
+                    clonedItem = analysisItem.clone();
+                } catch (CloneNotSupportedException e) {
+                    throw new RuntimeException(e);
+                }
                 Key key = analysisItem.getKey();
                 DerivedKey derivedKey = new DerivedKey();
                 derivedKey.setFeedID(compositeFeedNode.getDataFeedID());

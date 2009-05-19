@@ -5,10 +5,7 @@ import com.easyinsight.core.NumericValue;
 import com.easyinsight.dataset.DataSet;
 
 import javax.persistence.*;
-import java.util.List;
-import java.util.Collection;
-import java.util.Arrays;
-import java.util.ArrayList;
+import java.util.*;
 
 /**
  * User: James Boe
@@ -35,6 +32,13 @@ public class SixSigmaMeasure extends AnalysisMeasure {
     @OneToOne
     @JoinColumn(name="opportunities_measure_id")
     private AnalysisMeasure totalOpportunitiesMeasure;
+
+    @Override
+    public void updateIDs(Map<Long, AnalysisItem> replacementMap) {
+        super.updateIDs(replacementMap);
+        totalDefectsMeasure = (AnalysisMeasure) replacementMap.get(totalDefectsMeasure.getAnalysisItemID());
+        totalOpportunitiesMeasure = (AnalysisMeasure) replacementMap.get(totalOpportunitiesMeasure.getAnalysisItemID());
+    }
 
     public int getSigmaType() {
         return sigmaType;

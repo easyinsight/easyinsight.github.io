@@ -287,7 +287,8 @@ public class AnalysisDefinition implements Cloneable {
         analysisDefinition.setFilterDefinitions(filterDefinitions);
         List<AnalysisItem> addedItems = new ArrayList<AnalysisItem>();
         for (AnalysisItem analysisItem : addedItems) {
-            addedItems.add(analysisItem.clone());
+            AnalysisItem clonedItem = analysisItem.clone();
+            addedItems.add(clonedItem);
         }
         Map<String, AnalysisItem> clonedStructure = new HashMap<String, AnalysisItem>(getReportStructure());
         for (Map.Entry<String, AnalysisItem> entry : clonedStructure.entrySet()) {

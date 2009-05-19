@@ -10,7 +10,7 @@ import java.io.Serializable;
  */
 @Entity
 @Table(name="measure_condition")
-public class MeasureCondition implements Serializable {
+public class MeasureCondition implements Serializable, Cloneable {
     @Column(name="low_color")
     private int lowColor;
     @Column(name="low_value")
@@ -24,6 +24,13 @@ public class MeasureCondition implements Serializable {
     @GeneratedValue(strategy= GenerationType.IDENTITY)
     @Column(name="measure_condition_id")
     private int measureConditionID;
+
+    @Override
+    public MeasureCondition clone() throws CloneNotSupportedException {
+        MeasureCondition measureCondition = (MeasureCondition) super.clone();
+        measureCondition.setMeasureConditionID(0);
+        return measureCondition;
+    }
 
     public int getMeasureConditionID() {
         return measureConditionID;

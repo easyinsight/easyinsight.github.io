@@ -127,7 +127,7 @@
             </mx:FormItem>
             <mx:FormItem label="" direction="vertical">
                 <mx:HBox horizontalAlign="center">
-                    <mx:ProgressBar id="progressBar" visible="false" source="file"/>
+                    <mx:ProgressBar id="progressBar" visible="false" source="{file}"/>
                 </mx:HBox>
                 <mx:Label text="Upload successful!" visible="false" id="successMessage" fontFamily="Tahoma" fontWeight="bold"/>
             </mx:FormItem>

@@ -12,9 +12,6 @@ import java.util.*;
 @Table(name="analysis_hierarchy_item")
 @PrimaryKeyJoinColumn(name="analysis_item_id")
 public class AnalysisHierarchyItem extends AnalysisDimension {
-    @GeneratedValue(strategy=GenerationType.IDENTITY)
-    @Column(name="analysis_hierarchy_item_id")
-    private long analysisHierarchyItemID;
     @OneToOne (cascade = CascadeType.ALL)
     @JoinColumn(name="hierarchy_level_id")
     private HierarchyLevel hierarchyLevel;
@@ -23,14 +20,6 @@ public class AnalysisHierarchyItem extends AnalysisDimension {
         joinColumns = @JoinColumn(name="analysis_item_id", nullable = false),
         inverseJoinColumns = @JoinColumn(name="hierarchy_level_id", nullable = false))
     private Collection<HierarchyLevel> hierarchyLevels;
-
-    public long getAnalysisHierarchyItemID() {
-        return analysisHierarchyItemID;
-    }
-
-    public void setAnalysisHierarchyItemID(long analysisHierarchyItemID) {
-        this.analysisHierarchyItemID = analysisHierarchyItemID;
-    }
 
     public void beforeSave() {
         int i = 0;
@@ -90,6 +79,26 @@ public class AnalysisHierarchyItem extends AnalysisDimension {
     @Override
     public AnalysisItemResultMetadata createResultMetadata() {
         return hierarchyLevel.getAnalysisItem().createResultMetadata();
+    }
+
+    @Override
+    public AnalysisDimension clone() throws CloneNotSupportedException {
+        AnalysisHierarchyItem analysisHierarchyItem = (AnalysisHierarchyItem) super.clone();
+        List<HierarchyLevel> levels = new ArrayList<HierarchyLevel>();
+        for (HierarchyLevel hierarchyLevel : analysisHierarchyItem.hierarchyLevels) {
+            levels.add(hierarchyLevel.clone());
+        }
+        analysisHierarchyItem.setHierarchyLevel(levels.get(0));
+        analysisHierarchyItem.setHierarchyLevels(levels);
+        return analysisHierarchyItem;
+    }
+
+    public void updateIDs(Map<Long, AnalysisItem> replacementMap) {
+        super.updateIDs(replacementMap);
+        for (HierarchyLevel hierarchyLevel : hierarchyLevels) {
+            AnalysisItem replacementItem = replacementMap.get(hierarchyLevel.getAnalysisItem().getAnalysisItemID());
+            hierarchyLevel.setAnalysisItem(replacementItem);
+        }
     }
 
     @Override

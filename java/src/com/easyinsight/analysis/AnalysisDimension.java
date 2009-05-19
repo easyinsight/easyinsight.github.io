@@ -9,6 +9,7 @@ import javax.persistence.*;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Map;
 
 /**
  * User: James Boe
@@ -91,9 +92,12 @@ public class AnalysisDimension extends AnalysisItem {
         super.resetIDs();
     }
 
-    public AnalysisDimension clone() {
-        AnalysisDimension clonedItem = (AnalysisDimension) super.clone();
-        return clonedItem;
+    @Override
+    public void updateIDs(Map<Long, AnalysisItem> replacementMap) {
+        super.updateIDs(replacementMap);
+        if (getKeyDimension() != null) {
+            setKeyDimension((AnalysisDimension) replacementMap.get(getKeyDimension().getAnalysisItemID()));
+        }
     }
 
     @Override

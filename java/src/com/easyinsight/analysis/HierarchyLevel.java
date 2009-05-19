@@ -14,7 +14,7 @@ import org.hibernate.annotations.IndexColumn;
  */
 @Entity
 @Table(name="hierarchy_level")
-public class HierarchyLevel implements Serializable {
+public class HierarchyLevel implements Serializable, Cloneable {
     @Id
     @GeneratedValue(strategy= GenerationType.IDENTITY)
     @Column(name="hierarchy_level_id")
@@ -47,5 +47,12 @@ public class HierarchyLevel implements Serializable {
 
     public void setAnalysisItem(AnalysisItem analysisItem) {
         this.analysisItem = analysisItem;
+    }
+
+    @Override
+    public HierarchyLevel clone() throws CloneNotSupportedException {
+        HierarchyLevel hierarchyLevel = (HierarchyLevel) super.clone();
+        hierarchyLevel.setHierarchyLevelID(hierarchyLevelID);
+        return hierarchyLevel;
     }
 }

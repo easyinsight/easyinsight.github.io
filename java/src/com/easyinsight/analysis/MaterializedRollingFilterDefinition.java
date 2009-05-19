@@ -91,10 +91,10 @@ public class MaterializedRollingFilterDefinition extends MaterializedFilterDefin
         return cal.getTimeInMillis();
     }
 
-    public boolean allows(Value value, Value preTransformValue) {
+    public boolean allows(Value value) {
         boolean allowed = false;
-        if (preTransformValue.type() == Value.DATE) {
-            DateValue dateValue = (DateValue) preTransformValue;
+        if (value.type() == Value.DATE) {
+            DateValue dateValue = (DateValue) value;
             allowed = limitDate < dateValue.getDate().getTime() && dateValue.getDate().getTime() <= now.getTime();
         }
         return allowed;

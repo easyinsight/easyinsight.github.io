@@ -15,6 +15,8 @@ import java.util.Date;
 public interface IRow {
     Value getValue(Key rowName);
 
+    Value getValue(AnalysisItem analysisItem);
+
     void addValue(Key tag, Value value);
 
     void addValue(String tag, String value);
@@ -36,4 +38,6 @@ public interface IRow {
     Map<Key, Value> getValues();
 
     void replaceKey(Key existingKey, Key newKey);
+
+    void removeValue(Key key);
 }

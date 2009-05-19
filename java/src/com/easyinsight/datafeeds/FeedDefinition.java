@@ -318,8 +318,14 @@ public class FeedDefinition implements Cloneable, Serializable {
     public FeedDefinition clone() throws CloneNotSupportedException {
         FeedDefinition feedDefinition = (FeedDefinition) super.clone();
         List<AnalysisItem> clonedFields = new ArrayList<AnalysisItem>();
+        Map<Long, AnalysisItem> replacementMap = new HashMap<Long, AnalysisItem>();
         for (AnalysisItem analysisItem : fields) {
-            clonedFields.add(analysisItem.clone());
+            AnalysisItem clonedItem = analysisItem.clone();
+            clonedFields.add(clonedItem);
+            replacementMap.put(analysisItem.getAnalysisItemID(), clonedItem);
+        }
+        for (AnalysisItem analysisItem : replacementMap.values()) {
+            analysisItem.updateIDs(replacementMap);
         }
         feedDefinition.setFields(clonedFields);
         List<Tag> clonedTags = new ArrayList<Tag>();

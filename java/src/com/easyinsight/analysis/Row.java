@@ -33,6 +33,17 @@ public class Row implements IRow, Serializable {
         return value;
     }
 
+    public Value getValue(AnalysisItem analysisItem) {
+        Value value = valueMap.get(analysisItem.getKey());
+        if (value == null) {
+            value = valueMap.get(analysisItem.createAggregateKey());
+        }
+        if (value == null) {
+            value = new EmptyValue();
+        }
+        return value;
+    }
+
     public void addValue(String tag, Value value) {
         addValue(new NamedKey(tag), value);
     }
@@ -78,6 +89,10 @@ public class Row implements IRow, Serializable {
         if (existing != null) {
             valueMap.put(newKey, existing);
         }
+    }
+
+    public void removeValue(Key key) {
+        valueMap.remove(key);
     }
 
     public IRow merge(IRow row) {

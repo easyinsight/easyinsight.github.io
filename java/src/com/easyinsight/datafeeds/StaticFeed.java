@@ -9,6 +9,7 @@ import com.easyinsight.logging.LogClass;
 import com.easyinsight.analysis.*;
 import com.easyinsight.core.Key;
 import com.easyinsight.core.Value;
+import com.easyinsight.pipeline.DerivedDataSourcePipeline;
 
 import java.util.*;
 import java.sql.SQLException;
@@ -85,47 +86,8 @@ public class StaticFeed extends Feed implements Serializable {
             source.closeConnection();
         }
         if (!adminMode) {
-            dataSet = dataSet.nextStep(getAnalysisDefinition(), getAnalysisDefinition().getAllAnalysisItems(), insightRequestMetadata);
+            dataSet = new DerivedDataSourcePipeline().setup(getAnalysisDefinition(), this, insightRequestMetadata).toDataSet(dataSet);
         }
         return dataSet;
-    }
-
-    protected DataSet getUncachedDataSet(List<Key> columns, Integer maxRows, boolean adminMode, InsightRequestMetadata insightRequestMetadata) {
-
-        /*if (columns.size() == 0) {
-            return new DataSet();
-        }
-
-        if (!adminMode) {
-            Set<Key> columnSet = new HashSet<Key>(columns);
-            if (getAnalysisDefinition().getFilterDefinitions() != null) {
-                for (FilterDefinition filterDefinition : getAnalysisDefinition().getFilterDefinitions()) {
-                    columnSet.add(filterDefinition.getField().getKey());
-                }
-            }
-            columns = new ArrayList<Key>(columnSet);
-        }
-
-        Set<Key> keySet = new HashSet<Key>();
-        keySet.addAll(columns);
-        DataSet dataSet = dataSetCache.get(keySet);
-        if (dataSet == null) {
-            DataStorage source = DataStorage.readConnection(getFields(), getFeedID());
-            try {
-                dataSet = source.retrieveData(new ArrayList<Key>(keySet), null, null);
-            } catch (SQLException e) {
-                LogClass.error(e);
-                throw new RuntimeException(e);
-            } finally {
-                source.closeConnection();
-            }
-            dataSetCache.put(keySet, dataSet);
-        }
-
-        if (!adminMode) {
-            dataSet = dataSet.nextStep(getAnalysisDefinition(), getAnalysisDefinition().getAllAnalysisItems(), insightRequestMetadata);
-        }
-        return dataSet;*/
-        throw new UnsupportedOperationException();
     }
 }

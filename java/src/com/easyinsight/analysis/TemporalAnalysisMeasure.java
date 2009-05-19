@@ -10,6 +10,7 @@ import javax.persistence.*;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Map;
 
 /**
  * User: James Boe
@@ -27,6 +28,12 @@ public class TemporalAnalysisMeasure extends AnalysisMeasure {
     private int wrappedAggregation;
 
     private transient boolean applied;
+
+    @Override
+    public void updateIDs(Map<Long, AnalysisItem> replacementMap) {
+        super.updateIDs(replacementMap);
+        analysisDimension = (AnalysisDimension) replacementMap.get(analysisDimension.getAnalysisItemID());
+    }
 
     public AnalysisDimension getAnalysisDimension() {
         return analysisDimension;

@@ -250,11 +250,11 @@ public class DataStorage {
         }
     }
 
-    public void migrate(List<AnalysisItem> previousItems, List<AnalysisItem> newItems) throws SQLException {
-        migrate(previousItems, newItems, true);
+    public int migrate(List<AnalysisItem> previousItems, List<AnalysisItem> newItems) throws SQLException {
+        return migrate(previousItems, newItems, true);
     }
 
-    public void migrate(List<AnalysisItem> previousItems, List<AnalysisItem> newItems, boolean migrateData) throws SQLException {
+    public int migrate(List<AnalysisItem> previousItems, List<AnalysisItem> newItems, boolean migrateData) throws SQLException {
         // did any items change in a way that requires us to migrate...
         List<FieldMigration> fieldMigrations = new ArrayList<FieldMigration>();
         boolean newFieldsFound = false;
@@ -343,6 +343,7 @@ public class DataStorage {
             PreparedStatement dropTableStmt = storageConn.prepareStatement(dropSQL);
             dropTableStmt.execute();
         }
+        return this.version;
     }
 
     /**
@@ -418,7 +419,7 @@ public class DataStorage {
     private Collection<FilterDefinition> eligibleFilters(@Nullable Collection<FilterDefinition> filters) {
         Collection<FilterDefinition> eligibleFilters = new ArrayList<FilterDefinition>();
         if (filters != null) {
-            for (FilterDefinition filterDefinition : eligibleFilters) {
+            for (FilterDefinition filterDefinition : filters) {
                 if (filterDefinition.isApplyBeforeAggregation()) {
                     eligibleFilters.add(filterDefinition);
                 }

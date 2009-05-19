@@ -5,7 +5,6 @@ import com.easyinsight.analysis.ListDataResults;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.core.Key;
 import com.easyinsight.core.Value;
-import com.easyinsight.scrubbing.DataSetScrubber;
 import com.easyinsight.storage.IWhere;
 
 import java.util.*;
@@ -19,7 +18,6 @@ import java.io.Serializable;
 public class DataSet implements Serializable {
 
     private List<IRow> rows;
-    //private List<FeedItem> fields;
 
     public DataSet() {
         rows = new ArrayList<IRow>();
@@ -29,19 +27,15 @@ public class DataSet implements Serializable {
         rows = new ArrayList<IRow>(rowSize);
     }
 
+    public DataSet(List<IRow> rows) {
+        this.rows = rows;
+    }
+
     public void replaceKey(Key existingKey, Key newKey) {
         for (IRow row : rows) {
             row.replaceKey(existingKey, newKey);
         }
     }
-    
-    /*public List<FeedItem> getFields() {
-        return fields;
-    }
-
-    public void setFields(List<FeedItem> fields) {
-        this.fields = fields;
-    }*/
 
     public IRow createRow() {
         IRow row = new Row();
@@ -63,29 +57,13 @@ public class DataSet implements Serializable {
         return rows.get(index);
     }
 
-    /*public PersistableDataSetForm toPersistableForm() {
-        String[] keys = new String[fields.size()];
-        int i = 0;
-        String[][] valueArrayMap = new String[keys.length][rows.size()];
-        for (FeedItem feedItem : fields) {
-            keys[i] = feedItem.getKey();
-            int j = 0;
-            for (IRow row : rows) {
-                String value = row.getValue(feedItem.getKey());
-                valueArrayMap[i][j++] = value;
-            }
-            i++;
-        }
-        return new PersistableDataSetForm(keys, valueArrayMap);
-    }*/
-
     public List<IRow> getRows() {
         return rows;
     }
 
     public String toString() {
         return rows.toString();
-    }
+    }    
 
     public ListTransform listTransform(List<AnalysisItem> columns, List<AnalysisItem> allItems) {
         Collection<AnalysisDimension> ourDimensions = new ArrayList<AnalysisDimension>();
@@ -140,32 +118,6 @@ public class DataSet implements Serializable {
         return listTransform;
     }
 
-    private Crosstab crosstab(Collection<AnalysisItem> crosstabRows, Collection<AnalysisItem> columns, Collection<AnalysisItem> measures) {
-        Crosstab crosstab = new Crosstab();
-        // it's only two dimensional, so...
-        // for each row, find the value
-        //  for each value, add its column
-        // starting with a list form...
-
-        // from each row, extract the row value, column value, and measure value fields
-        for (IRow row : rows) {
-            DataKey dataKey = new DataKey();
-            for (AnalysisItem analysisItem : crosstabRows) {
-                Value value = row.getValue(analysisItem.getKey());
-                dataKey.addRowKeyPair(analysisItem.getKey(), value);
-            }
-            for (AnalysisItem analysisItem : columns) {
-                Value value = row.getValue(analysisItem.getKey());
-                dataKey.addColumnKeyPair(analysisItem.getKey(), value);
-            }
-            for (AnalysisItem measure : measures) {
-                crosstab.addData(dataKey, (AnalysisMeasure) measure, row.getValue(measure.getKey()));
-            }
-        }
-
-        return crosstab;
-    }
-
     public DataSet merge(DataSet dataSet, Key myJoinDimension, Key fromJoinDimension) {
         Map<Value, List<IRow>> index = new HashMap<Value, List<IRow>>();
         Collection<IRow> unjoinedRows = new ArrayList<IRow>();
@@ -213,205 +165,33 @@ public class DataSet implements Serializable {
         rows.add(row);
     }
 
-    public ListDataResults toList(WSAnalysisDefinition listDefinition, List<AnalysisItem> underlyingFields, InsightRequestMetadata insightRequestMetadata) {
-        List<AnalysisItem> allRequestedAnalysisItems = new ArrayList<AnalysisItem>(listDefinition.getAllAnalysisItems());
-        Set<AnalysisItem> allNeededAnalysisItems = new LinkedHashSet<AnalysisItem>();
-        List<AnalysisItem> derivedItems = new ArrayList<AnalysisItem>();
-        for (AnalysisItem item : allRequestedAnalysisItems) {
-            allNeededAnalysisItems.addAll(item.getAnalysisItems(underlyingFields, allRequestedAnalysisItems));
-            if (item.isVirtual()) {
-                allNeededAnalysisItems.add(item);
+    public ListDataResults toListDataResults(List<AnalysisItem> columns) {
+        ListRow[] listRows = new ListRow[getRows().size()];
+        int rowCount = 0;
+        for (IRow row : getRows()) {
+            int columnCount = 0;
+            listRows[rowCount] = new ListRow();
+            Value[] values = new Value[columns.size()];
+            listRows[rowCount].setValues(values);
+            for (AnalysisItem analysisItem : columns) {
+                Key key = analysisItem.createAggregateKey();
+                listRows[rowCount].getValues()[columnCount] = analysisItem.polishValue(row.getValue(key));
+                columnCount++;
             }
-            derivedItems.addAll(item.getDerivedItems());
+            rowCount++;
         }
-        List<AnalysisItem> neededItemList = new ArrayList<AnalysisItem>(allNeededAnalysisItems);
-        DataSet dataSet = nextStep(listDefinition, allNeededAnalysisItems, insightRequestMetadata);
-        ListTransform listTransform = dataSet.listTransform(neededItemList, allRequestedAnalysisItems);
-        DataSet aggregatedData = listTransform.aggregate(neededItemList, derivedItems, allRequestedAnalysisItems);
-        aggregatedData = aggregatedData.filter(listDefinition, insightRequestMetadata);
-        LimitsResults limitsResults = listDefinition.applyLimits(aggregatedData);
-        ListDataResults listDataResults = listTransform.toListDataResults(allRequestedAnalysisItems, aggregatedData);
-        listDataResults.setLimitedResults(limitsResults.isLimitedResults());
-        listDataResults.setLimitResults(limitsResults.getLimitResults());
-        listDataResults.setMaxResults(limitsResults.getMaxResults());
+        ListDataResults listDataResults = new ListDataResults();
+        List<AnalysisItem> allColumns = new ArrayList<AnalysisItem>(columns);
+        AnalysisItem[] headers = new AnalysisItem[allColumns.size()];
+        allColumns.toArray(headers);
+        listDataResults.setHeaders(headers);
+        listDataResults.setRows(listRows);
         return listDataResults;
-    }
-
-    public DataSet nextStep(WSAnalysisDefinition analysisDefinition, Set<AnalysisItem> neededItems, InsightRequestMetadata insightRequestMetadata) {
-
-        if (analysisDefinition.getDataScrubs() != null && !analysisDefinition.getDataScrubs().isEmpty()) {
-            new DataSetScrubber().scrub(this, analysisDefinition.getDataScrubs());
-        }
-
-        Collection<AnalysisItem> analysisItems = new HashSet<AnalysisItem>();
-        Map<AnalysisItem, Collection<MaterializedFilterDefinition>> filterMap = new HashMap<AnalysisItem, Collection<MaterializedFilterDefinition>>();
-        if (analysisDefinition.getFilterDefinitions() != null) {
-            for (FilterDefinition filterDefinition : analysisDefinition.getFilterDefinitions()) {
-                if (filterDefinition.isApplyBeforeAggregation()) {
-                    analysisItems.add(filterDefinition.getField());
-                    Collection<MaterializedFilterDefinition> filters = filterMap.get(filterDefinition.getField());
-                    if (filters == null) {
-                        filters = new ArrayList<MaterializedFilterDefinition>();
-                        filterMap.put(filterDefinition.getField(), filters);
-                    }
-                    MaterializedFilterDefinition materializedFilterDefinition = filterDefinition.materialize(insightRequestMetadata);
-                    filters.add(materializedFilterDefinition);
-                    if (materializedFilterDefinition.requiresDataEarly()) {
-                        materializedFilterDefinition.handleEarlyData(getRows());
-                    }
-                }
-            }
-        }
-        analysisItems.addAll(analysisDefinition.getLimitFields());
-        analysisItems.addAll(neededItems);
-
-        preProcessData(analysisItems);
-
-        return transformDataSet(analysisItems, analysisDefinition.getAllAnalysisItems(), filterMap);
-    }
-
-    private void preProcessData(Collection<AnalysisItem> analysisItems) {
-        for (AnalysisItem analysisItem : analysisItems) {
-            if (analysisItem.requiresDataEarly()) {
-                analysisItem.handleEarlyData(getRows());
-            }
-        }
-    }
-
-    private DataSet transformDataSet(Collection<AnalysisItem> analysisItems, Collection<AnalysisItem> reportItems, Map<AnalysisItem, Collection<MaterializedFilterDefinition>> filterMap) {
-        DataSet resultDataSet = new DataSet();
-
-        // Perform any one to many calculations.
-
-        List<IRow> rows = new ArrayList<IRow>(getRows());
-        for (AnalysisItem analysisItem : analysisItems) {
-            if (analysisItem.isMultipleTransform()) {
-                List<IRow> tempRows = new ArrayList<IRow>();
-                for (IRow row : rows) {
-                    Value value = row.getValue(analysisItem.getKey());
-                    Value[] transformedValues = analysisItem.transformToMultiple(value);
-                    Map<Key, Value> existingContents = row.getValues();
-                    for (Value multipleVal : transformedValues) {
-                        Map<Key, Value> newRowContents = new HashMap<Key, Value>(existingContents);
-                        newRowContents.put(analysisItem.getKey(), multipleVal);
-                        IRow tempRow = new Row();
-                        tempRow.addValues(newRowContents);
-                        tempRows.add(tempRow);
-                    }
-                }
-                rows = tempRows;
-            }
-        }
-
-        // identify virtual dimensions from analysis items
-        Collection<VirtualDimension> virtualDimensions = identifyVirtualDimensions(analysisItems);
-        for (VirtualDimension virtualDimension : virtualDimensions) {
-            rows = virtualDimension.createDimensions(rows, analysisItems);
-        }
-
-        // Allow each analysis item to perform its necessary transformValue(), then filter against the resulting value.
-
-        for (IRow row : rows) {
-            boolean rowValid = true;
-            //Map<Key, Value> valueMap = new HashMap<Key, Value>(row.getValues());
-            Map<Key, Value> valueMap;
-            if (analysisItems.isEmpty())
-                valueMap = new HashMap<Key, Value>(row.getValues());
-            else
-                valueMap = new HashMap<Key, Value>();
-            for (AnalysisItem analysisItem : analysisItems) {
-                Value value = row.getValue(analysisItem.getKey());
-                if (value == null || value.type() == Value.EMPTY) {
-                    value = row.getValue(analysisItem.createAggregateKey());
-                }
-                Value preFilterValue = analysisItem.renameMeLater(value);
-                Value transformedValue = analysisItem.transformValue(value);
-
-                valueMap.put(analysisItem.createAggregateKey(), transformedValue);
-
-                Collection<MaterializedFilterDefinition> filterDefinitions = filterMap.get(analysisItem);
-                if (filterDefinitions != null) {
-                    for (MaterializedFilterDefinition filter : filterDefinitions) {
-                        if (!filter.allows(transformedValue, preFilterValue)) {
-                            rowValid = false;
-                        }
-                    }
-                }
-            }
-            if (rowValid) {
-                IRow newRow = resultDataSet.createRow();
-                newRow.addValues(valueMap);
-            }
-        } 
-        return resultDataSet;
-    }
-
-    private Collection<VirtualDimension> identifyVirtualDimensions(Collection<AnalysisItem> analysisItems) {
-        Map<Long, VirtualDimension> map = new HashMap<Long, VirtualDimension>();
-        for (AnalysisItem analysisItem : analysisItems) {
-            if (analysisItem.getVirtualDimension() != null) {
-                VirtualDimension virtualDimension = analysisItem.getVirtualDimension();
-                map.put(virtualDimension.getVirtualDimensionID(), virtualDimension);
-            }
-        }
-        return map.values();
-    }
-
-    public DataSet filter(WSAnalysisDefinition analysisDefinition, InsightRequestMetadata insightRequestMetadata) {
-        Map<AnalysisItem, Collection<MaterializedFilterDefinition>> filterMap = new HashMap<AnalysisItem, Collection<MaterializedFilterDefinition>>();
-        if (analysisDefinition.getFilterDefinitions() != null) {
-            for (FilterDefinition filterDefinition : analysisDefinition.getFilterDefinitions()) {
-                if (!filterDefinition.isApplyBeforeAggregation()) {
-                    Collection<MaterializedFilterDefinition> filters = filterMap.get(filterDefinition.getField());
-                    if (filters == null) {
-                        filters = new ArrayList<MaterializedFilterDefinition>();
-                        filterMap.put(filterDefinition.getField(), filters);
-                    }
-                    filters.add(filterDefinition.materialize(insightRequestMetadata));
-                }
-            }
-        }
-        DataSet resultDataSet = new DataSet();
-        for (IRow row : rows) {
-            boolean rowValid = true;
-            for (AnalysisItem analysisItem : filterMap.keySet()) {
-                Value value = row.getValue(analysisItem.createAggregateKey());
-                Value preFilterValue = analysisItem.renameMeLater(value);
-                Value transformedValue = analysisItem.transformValue(value);
-
-                Collection<MaterializedFilterDefinition> filterDefinitions = filterMap.get(analysisItem);
-                if (filterDefinitions != null) {
-                    for (MaterializedFilterDefinition filter : filterDefinitions) {
-                        if (!filter.allows(transformedValue, preFilterValue)) {
-                            rowValid = false;
-                        }
-                    }
-                }
-            }
-            if (rowValid) {
-                IRow newRow = resultDataSet.createRow();
-                newRow.addValues(row.getValues());
-            }
-        }
-        return resultDataSet;
-    }
-
-    public void applyCalculations(List<AnalysisCalculation> analysisCalculations) {
-        for (AnalysisCalculation calculation : analysisCalculations) {
-            calculation.preHandleData(this);
-        }
-        for (IRow row : rows) {
-            for (AnalysisCalculation calculation : analysisCalculations) {
-                Value value = calculation.createValue(row);
-                row.addValue(calculation.getKey(), value);
-            }
-        }
     }
 
     public void sort(AnalysisItem analysisItem, boolean descending) {
         Collections.sort(rows, new RowComparator(analysisItem, !descending));
     }
-
 
     public void subset(int number) {
         rows = rows.subList(0, Math.min(rows.size(), number));

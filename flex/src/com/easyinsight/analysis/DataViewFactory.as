@@ -155,20 +155,22 @@ public class DataViewFactory extends VBox {
         moduleInfo.removeEventListener(ModuleEvent.ERROR, reportFailureHandler);
         _reportRenderer = moduleInfo.factory.create() as IReportRenderer;
         //moduleInfo = null;
-        _reportRenderer.addEventListener(ReportRendererEvent.ADD_ITEM, onItemAdded);
-        _reportRenderer.addEventListener(ReportRendererEvent.FORCE_RENDER, forceRender);
-        _reportRenderer.addEventListener(CustomChangeEvent.CUSTOM_CHANGE, customChangeFromRenderer);
-        _reportRenderer.addEventListener(HierarchyDrilldownEvent.DRILLDOWN, drilldown);
-        _reportRenderer.addEventListener(HierarchyRollupEvent.HIERARCHY_ROLLUP, onRollup);
-        if (_loadingDisplay != null) {
-            removeChild(_loadingDisplay);
-            _loadingDisplay.moduleInfo = null;
-            _loadingDisplay = null;
-        }
-        addChild(_reportRenderer as DisplayObject);
-        if (pendingRequest) {
-            pendingRequest = false;
-            retrieveData();
+        if (_reportRenderer != null) {
+            _reportRenderer.addEventListener(ReportRendererEvent.ADD_ITEM, onItemAdded);
+            _reportRenderer.addEventListener(ReportRendererEvent.FORCE_RENDER, forceRender);
+            _reportRenderer.addEventListener(CustomChangeEvent.CUSTOM_CHANGE, customChangeFromRenderer);
+            _reportRenderer.addEventListener(HierarchyDrilldownEvent.DRILLDOWN, drilldown);
+            _reportRenderer.addEventListener(HierarchyRollupEvent.HIERARCHY_ROLLUP, onRollup);
+            if (_loadingDisplay != null) {
+                removeChild(_loadingDisplay);
+                _loadingDisplay.moduleInfo = null;
+                _loadingDisplay = null;
+            }
+            addChild(_reportRenderer as DisplayObject);
+            if (pendingRequest) {
+                pendingRequest = false;
+                retrieveData();
+            }
         }
     }
 

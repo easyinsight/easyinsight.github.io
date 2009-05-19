@@ -91,6 +91,15 @@ public class AnalysisMeasure extends AnalysisItem {
         return new AnalysisMeasureResultMetadata();
     }
 
+    @Override
+    public AnalysisItem clone() throws CloneNotSupportedException {
+        AnalysisMeasure analysisMeasure = (AnalysisMeasure) super.clone();
+        if (analysisMeasure.getMeasureConditionRange() != null) {
+            analysisMeasure.setMeasureConditionRange(analysisMeasure.getMeasureConditionRange().clone());
+        }
+        return analysisMeasure;
+    }
+
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof AnalysisMeasure)) return false;
@@ -99,7 +108,6 @@ public class AnalysisMeasure extends AnalysisItem {
         AnalysisMeasure that = (AnalysisMeasure) o;
 
         return aggregation == that.aggregation;
-
     }
 
     public int hashCode() {

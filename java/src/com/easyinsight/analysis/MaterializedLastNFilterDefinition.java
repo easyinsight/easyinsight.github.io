@@ -19,7 +19,7 @@ public class MaterializedLastNFilterDefinition extends MaterializedFilterDefinit
         this.limit = limit - 1;
     }
 
-    public boolean allows(Value value, Value preTransformValue) {
+    public boolean allows(Value value) {
         // need the maximum value...
         return (value.toDouble() >= this.max);
     }

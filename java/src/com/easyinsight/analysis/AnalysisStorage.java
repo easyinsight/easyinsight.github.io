@@ -108,18 +108,24 @@ public class AnalysisStorage {
         AnalysisDefinition analysisDefinition = null;
         Session session = Database.instance().createSession(conn);
         try {
-            session.beginTransaction();
             List results = session.createQuery("from AnalysisDefinition where analysisID = ?").setLong(0, analysisID).list();
             if (results.size() > 0) {
                 analysisDefinition = (AnalysisDefinition) results.get(0);
             }
-            session.getTransaction().commit();
         } catch (Exception e) {
             LogClass.error(e);
-            session.getTransaction().rollback();
             throw new RuntimeException(e);
         } finally {
             session.close();
+        }
+        return analysisDefinition;
+    }
+
+    public AnalysisDefinition getPersistableReport(long analysisID, Session session) {
+        AnalysisDefinition analysisDefinition = null;
+        List results = session.createQuery("from AnalysisDefinition where analysisID = ?").setLong(0, analysisID).list();
+        if (results.size() > 0) {
+            analysisDefinition = (AnalysisDefinition) results.get(0);
         }
         return analysisDefinition;
     }
@@ -509,6 +515,15 @@ public class AnalysisStorage {
             LogClass.error(e);
             session.getTransaction().rollback();
             throw new RuntimeException(e);
+        } finally {
+            session.close();
+        }
+    }
+
+    public void deleteAnalysisDefinition(AnalysisDefinition analysisDefinition, Connection conn) {
+        Session session = Database.instance().createSession(conn);
+        try {
+            session.delete(analysisDefinition);
         } finally {
             session.close();
         }

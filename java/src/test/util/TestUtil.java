@@ -6,7 +6,14 @@ import com.easyinsight.users.*;
 import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.userupload.UserUploadService;
 import com.easyinsight.userupload.UploadResponse;
+import com.easyinsight.userupload.UploadPolicy;
 import com.easyinsight.database.Database;
+import com.easyinsight.dataset.DataSet;
+import com.easyinsight.storage.DataStorage;
+import com.easyinsight.datafeeds.FeedDefinition;
+import com.easyinsight.datafeeds.FeedCreationResult;
+import com.easyinsight.datafeeds.FeedCreation;
+import com.easyinsight.analysis.AnalysisItem;
 
 import java.util.List;
 import java.util.ArrayList;
@@ -36,8 +43,28 @@ public class TestUtil {
         return objectList;
     }
 
+    public static long createTestDataSource(DataSet dataSet, List<AnalysisItem> analysisItems) throws SQLException {
+        Connection conn = Database.instance().getConnection();
+        conn.setAutoCommit(false);
+        FeedDefinition feedDefinition = new FeedDefinition();
+        feedDefinition.setFeedName("Test");
+        feedDefinition.setOwnerName("Test User");
+        UploadPolicy uploadPolicy = new UploadPolicy(SecurityUtil.getUserID());
+        feedDefinition.setUploadPolicy(uploadPolicy);
+        feedDefinition.setFields(analysisItems);
+        FeedCreationResult result = new FeedCreation().createFeed(feedDefinition, conn, new DataSet(), SecurityUtil.getUserID());
+        DataStorage dataStorage = result.getTableDefinitionMetadata();
+        dataStorage.insertData(dataSet);
+        dataStorage.commit();
+        conn.commit();
+        conn.setAutoCommit(true);
+        Database.instance().closeConnection(conn);
+        return feedDefinition.getDataFeedID();
+    }
+
     /**
      * Looks for a user called testuser and creates if it doesn't exist with an individual account type.
+     *
      * @return the user ID
      */
     public static long getIndividualTestUser() {
@@ -72,7 +99,7 @@ public class TestUtil {
         }
         TestSecurityProvider testSecurityProvider = new TestSecurityProvider();
         testSecurityProvider.setUserPrincipal(userID);
-        SecurityUtil.setSecurityProvider(testSecurityProvider);        
+        SecurityUtil.setSecurityProvider(testSecurityProvider);
         return userID;
     }
 
@@ -150,6 +177,7 @@ public class TestUtil {
 
     /**
      * Creates a default data source with five fields--Customer, Product, Revenue, Units, and When
+     *
      * @param userID user to associate the data source to
      * @return the ID of the data source
      */

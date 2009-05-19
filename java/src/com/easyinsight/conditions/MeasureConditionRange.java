@@ -10,7 +10,7 @@ import java.io.Serializable;
  */
 @Entity
 @Table(name="measure_condition_range")
-public class MeasureConditionRange implements Serializable {
+public class MeasureConditionRange implements Serializable, Cloneable {
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name="low_measure_condition_id")
     private MeasureCondition lowCondition;
@@ -23,6 +23,15 @@ public class MeasureConditionRange implements Serializable {
     @Id @GeneratedValue(strategy= GenerationType.IDENTITY)
     @Column(name="measure_condition_range_id")
     private long measureConditionRangeID;
+
+    @Override
+    public MeasureConditionRange clone() throws CloneNotSupportedException {
+        MeasureConditionRange measureConditionRange = (MeasureConditionRange) super.clone();
+        measureConditionRange.setMeasureConditionRangeID(0);
+        measureConditionRange.setLowCondition(lowCondition.clone());
+        measureConditionRange.setHighCondition(highCondition.clone());
+        return measureConditionRange;
+    }
 
     public long getMeasureConditionRangeID() {
         return measureConditionRangeID;

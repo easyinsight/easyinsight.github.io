@@ -1,11 +1,7 @@
 package com.easyinsight.analysis;
 
-import com.easyinsight.core.Value;
-import com.easyinsight.core.NumericValue;
-
 import javax.persistence.*;
 import java.io.Serializable;
-import java.text.NumberFormat;
 
 /**
  * User: James Boe
@@ -14,7 +10,7 @@ import java.text.NumberFormat;
  */
 @Entity
 @Table(name="formatting_configuration")
-public class FormattingConfiguration implements Serializable {
+public class FormattingConfiguration implements Serializable, Cloneable {
 
     public static final int NUMBER = 1;
     public static final int CURRENCY = 2;
@@ -28,6 +24,12 @@ public class FormattingConfiguration implements Serializable {
     private int formattingType;
     @Column(name="text_uom")
     private String textUom;
+
+    public FormattingConfiguration clone() throws CloneNotSupportedException {
+        FormattingConfiguration formattingConfiguration = (FormattingConfiguration) super.clone();
+        formattingConfiguration.setFormattingConfigurationID(formattingConfigurationID);
+        return formattingConfiguration;
+    }
 
     public long getFormattingConfigurationID() {
         return formattingConfigurationID;

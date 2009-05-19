@@ -5,6 +5,7 @@ import com.easyinsight.analysis.*;
 import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.scrubbing.DataScrub;
 import com.easyinsight.core.Key;
+import com.easyinsight.pipeline.DerivedDataSourcePipeline;
 
 import java.util.*;
 
@@ -51,12 +52,7 @@ public class AnalysisBasedFeed extends Feed {
         }
         DataSet dataSet = feed.getAggregateDataSet(analysisItems, filters, insightRequestMetadata, allAnalysisItems, adminMode, additionalKeys);
 
-        return dataSet.nextStep(analysisDefinition, analysisItems, insightRequestMetadata);
-    }
-
-    protected DataSet getUncachedDataSet(List<Key> columns, Integer maxRows, boolean admin, InsightRequestMetadata insightRequestMetadata) {
-
-        throw new UnsupportedOperationException();
+        return new DerivedDataSourcePipeline().setup(getAnalysisDefinition(), this, insightRequestMetadata).toDataSet(dataSet);
     }
 
     public DataSet getDetails(Collection<FilterDefinition> filters) {

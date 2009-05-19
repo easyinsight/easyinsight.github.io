@@ -50,7 +50,7 @@ public class AnalysisRangeDimension extends AnalysisDimension {
     public void handleEarlyData(List<IRow> rows) {
         Collection<Double> doubleValues = new ArrayList<Double>();
         for (IRow row : rows) {
-            Value value = row.getValue(getKey());
+            Value value = row.getValue(this);
             Double doubleValue = value.toDouble();
             if (doubleValue != null) {
                 doubleValues.add(doubleValue);

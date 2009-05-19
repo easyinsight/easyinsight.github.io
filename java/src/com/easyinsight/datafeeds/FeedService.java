@@ -433,7 +433,8 @@ public class FeedService implements IDataFeedService {
             List<AnalysisItem> existingFields = existingFeed.getFields();
             metadata = DataStorage.writeConnection(feedDefinition, conn);
             feedStorage.updateDataFeedConfiguration(feedDefinition, conn);
-            metadata.migrate(existingFields, feedDefinition.getFields());
+            int version = metadata.migrate(existingFields, feedDefinition.getFields());
+            feedStorage.updateVersion(feedDefinition, version, conn);
             if (newTaskGen) {
                 Session session = Database.instance().createSession(conn);
                 try {

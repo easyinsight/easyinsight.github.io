@@ -19,4 +19,5 @@ public interface AnalysisItemTypes {
     public static final int COMPLEX_MEASURE = 1024;
     public static final int HIERARCHY = 2048;
     public static final int SIX_SIGMA_MEASURE = 4096;
+    public static final int STEP = 8192;
 }
