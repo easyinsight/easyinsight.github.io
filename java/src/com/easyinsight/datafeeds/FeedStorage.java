@@ -381,7 +381,7 @@ public class FeedStorage {
                         AnalysisHierarchyItem analysisHierarchyItem = (AnalysisHierarchyItem) analysisItem;
                         analysisHierarchyItem.setHierarchyLevels(new ArrayList<HierarchyLevel>(analysisHierarchyItem.getHierarchyLevels()));
                     }*/
-                    analysisItems.add(analysisItem);
+                    analysisItems.add((AnalysisItem) Database.deproxy(analysisItem));
                 }
             }
             for (Long virtualID : virtualIDSet) {

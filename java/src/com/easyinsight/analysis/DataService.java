@@ -138,13 +138,19 @@ public class DataService implements IDataService {
                 results.setInvalidAnalysisItemIDs(ids);
                 results.setFeedMetadata(getFeedMetadata(analysisDefinition.getDataFeedID(), false));
             } else {*/
-                Set<AnalysisItem> analysisItems = analysisDefinition.getColumnItems(feed.getFields());
-                Collection<FilterDefinition> filters = analysisDefinition.getFilterDefinitions();
-                DataSet dataSet = feed.getAggregateDataSet(analysisItems, filters, insightRequestMetadata, feed.getFields(), false, null);
-                //results = dataSet.toList(analysisDefinition, feed.getFields(), insightRequestMetadata);
-                Pipeline pipeline = new StandardReportPipeline();
-                pipeline.setup(analysisDefinition, feed, insightRequestMetadata);
-                results = pipeline.toList(dataSet);
+            Set<AnalysisItem> analysisItems = analysisDefinition.getColumnItems(feed.getFields());
+            Set<AnalysisItem> validQueryItems = new HashSet<AnalysisItem>();
+            for (AnalysisItem analysisItem : analysisItems) {
+                if (analysisItem.getAnalysisItemID() > 0) {
+                    validQueryItems.add(analysisItem);
+                }
+            }
+            Collection<FilterDefinition> filters = analysisDefinition.getFilterDefinitions();
+            DataSet dataSet = feed.getAggregateDataSet(validQueryItems, filters, insightRequestMetadata, feed.getFields(), false, null);
+            //results = dataSet.toList(analysisDefinition, feed.getFields(), insightRequestMetadata);
+            Pipeline pipeline = new StandardReportPipeline();
+            pipeline.setup(analysisDefinition, feed, insightRequestMetadata);
+            results = pipeline.toList(dataSet);
            // }
             BenchmarkManager.recordBenchmark("DataService:List", System.currentTimeMillis() - startTime);
             return results;

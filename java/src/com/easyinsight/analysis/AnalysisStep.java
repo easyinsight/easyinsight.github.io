@@ -6,6 +6,9 @@ import org.hibernate.Hibernate;
 import javax.persistence.*;
 import java.util.*;
 
+import com.easyinsight.core.Key;
+import com.easyinsight.database.Database;
+
 /**
  * User: James Boe
  * Date: May 18, 2009
@@ -25,6 +28,16 @@ public class AnalysisStep extends AnalysisDateDimension {
     @JoinColumn(name = "correlation_dimension_id")
     private AnalysisDimension correlationDimension;
 
+    public AnalysisStep() {
+    }
+
+    public AnalysisStep(Key key, boolean group, int dateLevel, AnalysisDateDimension startDate, AnalysisDateDimension endDate, AnalysisDimension correlationDimension) {
+        super(key, group, dateLevel);
+        this.startDate = startDate;
+        this.endDate = endDate;
+        this.correlationDimension = correlationDimension;
+    }
+
     public int getType() {
         return super.getType() | AnalysisItemTypes.STEP;
     }
@@ -33,27 +46,20 @@ public class AnalysisStep extends AnalysisDateDimension {
         return startDate;
     }
 
-    public static Object deproxy(Object obj) {
-        Hibernate.initialize(obj);
-
-        if (obj == null) {
-            return null;
-        }
-
-        if (HibernateProxy.class.isInstance(obj)) {
-            HibernateProxy proxy = (HibernateProxy) obj;
-            return proxy.getHibernateLazyInitializer().getImplementation();
-        }
-
-        return obj;
+    @Override
+    public void updateIDs(Map<Long, AnalysisItem> replacementMap) {
+        super.updateIDs(replacementMap);
+        setStartDate((AnalysisDateDimension) replacementMap.get(startDate.getAnalysisItemID()));
+        setEndDate((AnalysisDateDimension) replacementMap.get(endDate.getAnalysisItemID()));
+        setCorrelationDimension((AnalysisDimension) replacementMap.get(correlationDimension.getAnalysisItemID()));
     }
 
     @Override
     public void afterLoad() {
         super.afterLoad();
-        setStartDate((AnalysisDateDimension) deproxy(getStartDate()));
-        setEndDate((AnalysisDateDimension) deproxy(getEndDate()));
-        setCorrelationDimension((AnalysisDimension) deproxy(getCorrelationDimension()));
+        setStartDate((AnalysisDateDimension) Database.deproxy(getStartDate()));
+        setEndDate((AnalysisDateDimension) Database.deproxy(getEndDate()));
+        setCorrelationDimension((AnalysisDimension) Database.deproxy(getCorrelationDimension()));
     }
 
     public void setStartDate(AnalysisDateDimension startDate) {

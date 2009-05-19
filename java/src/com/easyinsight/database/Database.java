@@ -3,6 +3,8 @@ package com.easyinsight.database;
 import org.hibernate.SessionFactory;
 import org.hibernate.Session;
 import org.hibernate.StatelessSession;
+import org.hibernate.Hibernate;
+import org.hibernate.proxy.HibernateProxy;
 import org.hibernate.cfg.AnnotationConfiguration;
 
 import java.sql.SQLException;
@@ -176,5 +178,20 @@ public class Database {
             LogClass.error(e);
             return -1;
         }
+    }
+
+    public static Object deproxy(Object obj) {
+        Hibernate.initialize(obj);
+
+        if (obj == null) {
+            return null;
+        }
+
+        if (HibernateProxy.class.isInstance(obj)) {
+            HibernateProxy proxy = (HibernateProxy) obj;
+            return proxy.getHibernateLazyInitializer().getImplementation();
+        }
+
+        return obj;
     }
 }

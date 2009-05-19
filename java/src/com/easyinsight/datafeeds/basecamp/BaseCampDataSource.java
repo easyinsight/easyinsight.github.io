@@ -64,6 +64,8 @@ public class BaseCampDataSource extends ServerDataSourceDefinition {
     public static final String COMPLETERNAME = "Completer";
     public static final String COMPLETERID = "Completer ID";
 
+    public static final String ITEMCYCLE = "Item Cycle";
+
     private String url;
 
     public int getRequiredAccountTier() {
@@ -234,20 +236,23 @@ public class BaseCampDataSource extends ServerDataSourceDefinition {
         return Arrays.asList(ITEMID, CREATORNAME, CREATORID, RESPONSIBLEPARTYNAME,
                 RESPONSIBLEPARTYID, CONTENT, COMPLETED, CREATEDDATE, COMPLETEDDATE,
                 TODOLISTNAME, MILESTONENAME, DEADLINE, PROJECTNAME, PROJECTSTATUS,
-                PROJECTID, TODOLISTDESC, TODOLISTID, TODOLISTPRIVATE, COMPLETERNAME, COMPLETERID, COUNT);
+                PROJECTID, TODOLISTDESC, TODOLISTID, TODOLISTPRIVATE, COMPLETERNAME, COMPLETERID, COUNT, ITEMCYCLE);
     }
 
     public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, DataSet dataSet) {
         List<AnalysisItem> analysisItems = new ArrayList<AnalysisItem>();
-        analysisItems.add(new AnalysisDimension(keys.get(ITEMID), true));
+        AnalysisDimension itemDim = new AnalysisDimension(keys.get(ITEMID), true);
+        analysisItems.add(itemDim);
         analysisItems.add(new AnalysisDimension(keys.get(CREATORNAME), true));
         analysisItems.add(new AnalysisDimension(keys.get(CREATORID), true));
         analysisItems.add(new AnalysisDimension(keys.get(RESPONSIBLEPARTYNAME), true));
         analysisItems.add(new AnalysisDimension(keys.get(RESPONSIBLEPARTYID), true));
         analysisItems.add(new AnalysisDimension(keys.get(CONTENT), true));
         analysisItems.add(new AnalysisDimension(keys.get(COMPLETED), true));
-        analysisItems.add(new AnalysisDateDimension(keys.get(CREATEDDATE), true, AnalysisDateDimension.DAY_LEVEL));
-        analysisItems.add(new AnalysisDateDimension(keys.get(COMPLETEDDATE), true, AnalysisDateDimension.DAY_LEVEL));
+        AnalysisDateDimension createdDim = new AnalysisDateDimension(keys.get(CREATEDDATE), true, AnalysisDateDimension.DAY_LEVEL);
+        analysisItems.add(createdDim);
+        AnalysisDateDimension completedDim = new AnalysisDateDimension(keys.get(COMPLETEDDATE), true, AnalysisDateDimension.DAY_LEVEL);
+        analysisItems.add(completedDim);
         analysisItems.add(new AnalysisDimension(keys.get(TODOLISTNAME), true));
         analysisItems.add(new AnalysisDimension(keys.get(MILESTONENAME), true));
         analysisItems.add(new AnalysisDateDimension(keys.get(DEADLINE), true, AnalysisDateDimension.DAY_LEVEL));
@@ -259,7 +264,7 @@ public class BaseCampDataSource extends ServerDataSourceDefinition {
         analysisItems.add(new AnalysisDimension(keys.get(TODOLISTPRIVATE), true));
         analysisItems.add(new AnalysisDimension(keys.get(COMPLETERNAME), true));
         analysisItems.add(new AnalysisDimension(keys.get(COMPLETERID), true));
-
+        analysisItems.add(new AnalysisStep(keys.get(ITEMCYCLE), true, AnalysisDateDimension.DAY_LEVEL, createdDim, completedDim, itemDim));
         analysisItems.add(new AnalysisMeasure(keys.get(COUNT), AggregationTypes.SUM));
         return analysisItems;
     }
