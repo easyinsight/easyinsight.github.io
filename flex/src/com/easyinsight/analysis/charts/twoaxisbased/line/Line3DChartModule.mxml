@@ -16,10 +16,15 @@ import com.easyinsight.filtering.FilterRawData;
         import ilog.charts3d.LineChart3D;
         import ilog.charts3d.series.LineSeries3D;
 
+        import ilog.charts3d.series.items.LineSeries3DItem;
+
         import mx.charts.CategoryAxis;
         import mx.charts.DateTimeAxis;
+        import mx.charts.HitData;
         import mx.charts.Legend;
         import mx.charts.chartClasses.IAxis;
+        import mx.charts.series.LineSeries;
+        import mx.charts.series.items.LineSeriesItem;
         import mx.collections.ArrayCollection;
         import mx.collections.Sort;
         import mx.collections.SortField;
@@ -28,6 +33,9 @@ import com.easyinsight.filtering.FilterRawData;
         private var chartData:ArrayCollection;
 
         private var lineChart:LineChart3D;
+
+        private var xAxisItem:AnalysisItem;
+        private var measureItem:AnalysisItem;
 
         private var legend:Legend;
         
@@ -39,6 +47,15 @@ import com.easyinsight.filtering.FilterRawData;
 
         private function onCustomChange(event:CustomChangeEvent):void {
             dispatchEvent(event);
+        }
+
+        private function dataTipFunction(hitData:HitData):String {
+            var string:String;
+            var lineSeries:LineSeries3D = hitData.element as LineSeries3D;
+            var lineSeriesItem:LineSeries3DItem = hitData.chartItem as LineSeries3DItem;
+            string = lineSeries.displayName + "\n" +
+                     xAxisItem.getFormatter().format(lineSeriesItem.xValue) + "\n" + measureItem.getFormatter().format(lineSeriesItem.yValue);
+            return string;
         }
 
         override protected function createChildren():void {
@@ -78,6 +95,7 @@ import com.easyinsight.filtering.FilterRawData;
             lineChart = new LineChart3D();
             lineChart.percentHeight = 100;
             lineChart.percentWidth = 100;
+            lineChart.dataTipFunction = dataTipFunction;
             visuals.chart = lineChart;
             lineChart.dataProvider = chartData;
             lineChart.selectionMode = "multiple";
@@ -86,6 +104,9 @@ import com.easyinsight.filtering.FilterRawData;
             if (dataSet.length > 0) {
 
                 var xAxisDimension:AnalysisItem = lineChartDef.xaxis;
+
+                xAxisItem = xAxisDimension;
+                measureItem = lineChartDef.measure;
 
                 var sort:Sort = new Sort();
                 var sortField:SortField = new SortField(xAxisDimension.qualifiedName(), true);

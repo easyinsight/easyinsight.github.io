@@ -14,10 +14,12 @@
 
         import mx.charts.CategoryAxis;
         import mx.charts.DateTimeAxis;
+        import mx.charts.HitData;
         import mx.charts.Legend;
         import mx.charts.AreaChart;
         import mx.charts.chartClasses.IAxis;
         import mx.charts.series.AreaSeries;
+        import mx.charts.series.items.AreaSeriesItem;
         import mx.collections.ArrayCollection;
         import mx.collections.Sort;
         import mx.collections.SortField;
@@ -27,7 +29,19 @@
 
         private var areaChart:AreaChart;
 
+        private var xAxisItem:AnalysisItem;
+        private var measureItem:AnalysisItem;
+
         private var legend:Legend;
+
+        private function dataTipFunction(hitData:HitData):String {
+            var string:String;
+            var lineSeries:AreaSeries = hitData.element as AreaSeries;
+            var lineSeriesItem:AreaSeriesItem = hitData.chartItem as AreaSeriesItem;
+            string = lineSeries.displayName + "\n" +
+                     xAxisItem.getFormatter().format(lineSeriesItem.xValue) + "\n" + measureItem.getFormatter().format(lineSeriesItem.yValue);
+            return string;
+        }
 
         override protected function createChildren():void {
             super.createChildren();
@@ -56,7 +70,8 @@
             hbox.removeChild(areaChart);
 
             areaChart = new AreaChart();
-            areaChart.showDataTips = true;            
+            areaChart.showDataTips = true;
+            areaChart.dataTipFunction = dataTipFunction;
             areaChart.percentHeight = 100;
             areaChart.percentWidth = 100;
             areaChart.dataProvider = chartData;
@@ -65,6 +80,9 @@
             if (dataSet.length > 0) {
 
                 var xAxisDimension:AnalysisItem = areaChartDef.xaxis;
+
+                xAxisItem = xAxisDimension;
+                measureItem = areaChartDef.measure;
 
                 var sort:Sort = new Sort();
                 var sortField:SortField = new SortField(xAxisDimension.qualifiedName(), true);

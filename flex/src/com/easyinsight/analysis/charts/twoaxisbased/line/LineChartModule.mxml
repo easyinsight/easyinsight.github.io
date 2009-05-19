@@ -14,10 +14,12 @@
 
         import mx.charts.CategoryAxis;
         import mx.charts.DateTimeAxis;
+        import mx.charts.HitData;
         import mx.charts.Legend;
         import mx.charts.LineChart;
         import mx.charts.chartClasses.IAxis;
         import mx.charts.series.LineSeries;
+        import mx.charts.series.items.LineSeriesItem;
         import mx.collections.ArrayCollection;
         import mx.collections.Sort;
         import mx.collections.SortField;
@@ -26,6 +28,9 @@
         private var chartData:ArrayCollection;
 
         private var lineChart:LineChart;
+
+        private var xAxisItem:AnalysisItem;
+        private var measureItem:AnalysisItem;
 
         private var legend:Legend;
 
@@ -47,6 +52,15 @@
             hbox.addChild(legend);
         }
 
+        private function dataTipFunction(hitData:HitData):String {
+            var string:String;
+            var lineSeries:LineSeries = hitData.element as LineSeries;
+            var lineSeriesItem:LineSeriesItem = hitData.chartItem as LineSeriesItem;
+            string = lineSeries.displayName + "\n" +
+                     xAxisItem.getFormatter().format(lineSeriesItem.xValue) + "\n" + measureItem.getFormatter().format(lineSeriesItem.yValue);
+            return string;
+        }
+
         public function renderReport(dataSet:ArrayCollection, analysisDefinition:AnalysisDefinition, clientProcessorMap:Object):void {
 
             var lineChartDef:LineChartDefinition = analysisDefinition as LineChartDefinition;
@@ -61,6 +75,7 @@
             lineChart.dataProvider = chartData;
             lineChart.showDataTips = true;
             lineChart.selectionMode = "multiple";
+            lineChart.dataTipFunction = dataTipFunction;
 
             if (dataSet.length > 0) {
                 var xAxisDimension:AnalysisItem = lineChartDef.xaxis;
@@ -91,7 +106,7 @@
 
 
                 var xAxis:IAxis;
-
+                xAxisItem = xAxisDimension;
                 if (xAxisDimension.hasType(AnalysisItemTypes.DATE)) {
                     var dateDimension:AnalysisDateDimension = xAxisDimension as AnalysisDateDimension;
                     var dateAxis:DateTimeAxis = new DateTimeAxis();
@@ -125,6 +140,7 @@
 
                 var mySeries:Array = new Array();
                 var analysisMeasure:AnalysisMeasure = lineChartDef.measure as AnalysisMeasure;
+                measureItem = analysisMeasure;
                 var uniques:ArrayCollection = new ArrayCollection();
 
                 var seriesData:Object = new Object();

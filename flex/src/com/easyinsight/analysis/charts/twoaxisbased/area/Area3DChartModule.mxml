@@ -16,8 +16,11 @@ import com.easyinsight.filtering.FilterRawData;
         import ilog.charts3d.AreaChart3D;
         import ilog.charts3d.series.AreaSeries3D;
 
+        import ilog.charts3d.series.items.AreaSeries3DItem;
+
         import mx.charts.CategoryAxis;
         import mx.charts.DateTimeAxis;
+        import mx.charts.HitData;
         import mx.charts.Legend;
         import mx.charts.chartClasses.IAxis;
         import mx.collections.ArrayCollection;
@@ -29,9 +32,21 @@ import com.easyinsight.filtering.FilterRawData;
 
         private var areaChart:AreaChart3D;
 
+        private var xAxisItem:AnalysisItem;
+        private var measureItem:AnalysisItem;
+
         private var legend:Legend;
         
         private var visuals:Chart3DVisuals = new Chart3DVisuals();
+
+        private function dataTipFunction(hitData:HitData):String {
+            var string:String;
+            var lineSeries:AreaSeries3D = hitData.element as AreaSeries3D;
+            var lineSeriesItem:AreaSeries3DItem = hitData.chartItem as AreaSeries3DItem;
+            string = lineSeries.displayName + "\n" +
+                     xAxisItem.getFormatter().format(lineSeriesItem.xValue) + "\n" + measureItem.getFormatter().format(lineSeriesItem.yValue);
+            return string;
+        }
 
         private function onCreation():void {
             visuals.addEventListener(CustomChangeEvent.CUSTOM_CHANGE, onCustomChange);
@@ -74,6 +89,7 @@ import com.easyinsight.filtering.FilterRawData;
                 areaChart.dataProvider = chartData;
                 areaChart.selectionMode = "multiple";
                 areaChart.showDataTips = true;
+            areaChart.dataTipFunction = dataTipFunction;
 
             if (dataSet.length > 0) {
                 if (areaChartDef.elevationAngle > 0) {
@@ -85,6 +101,9 @@ import com.easyinsight.filtering.FilterRawData;
 
 
                 var xAxisDimension:AnalysisItem = areaChartDef.xaxis;
+
+                xAxisItem = xAxisDimension;
+                measureItem = areaChartDef.measure;
 
                 var sort:Sort = new Sort();
                 var sortField:SortField = new SortField(areaChartDef.measure.qualifiedName(), true);
