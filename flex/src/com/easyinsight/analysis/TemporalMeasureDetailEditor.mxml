@@ -1,0 +1,113 @@
+<?xml version="1.0" ?>
+<analysis:AnalysisItemDetailEditor xmlns:mx="http://www.adobe.com/2006/mxml"
+                                   xmlns:analysis="com.easyinsight.analysis.*" xmlns:util="com.easyinsight.util.*">
+    <mx:Script><![CDATA[
+        [Bindable]
+        private var dimensionIsDate:Boolean;
+
+        [Bindable]
+        private var dateLevel:int;
+
+        [Bindable]
+        private var grouping:AnalysisDimension;
+
+        [Bindable]
+        private var wrappedAggregation:String;
+
+        private function onDimensionChange():void {
+            var analysisItem:AnalysisItem = dimensionComboBox.selectedItem as AnalysisItem;
+            dimensionIsDate = analysisItem is AnalysisDateDimension;
+        }
+
+        override public function createAnalysisItem(aggregation:String):AnalysisItem {
+            var measure:TemporalAnalysisMeasure = new TemporalAnalysisMeasure();
+            measure.aggregation = aggregation == "Delta" ? AggregationTypes.DELTA : AggregationTypes.LAST_VALUE;
+            return measure;
+        }
+
+        override public function set analysisItem(val:AnalysisItem):void {
+            super.analysisItem = val;
+            if (val is TemporalAnalysisMeasure) {
+                var measure:TemporalAnalysisMeasure = val as TemporalAnalysisMeasure;
+                grouping = measure.analysisDimension;
+                if (grouping != null && grouping.hasType(AnalysisItemTypes.DATE)) {
+                    dimensionIsDate = true;
+                    var dateDim:AnalysisDateDimension = grouping as AnalysisDateDimension;
+                    dateLevel = dateDim.dateLevel - 1;
+                }
+                var measureString:String;
+                switch (measure.wrappedAggregation) {
+                    case AggregationTypes.SUM:
+                        measureString = "Sum";
+                        break;
+                    case AggregationTypes.AVERAGE:
+                        measureString = "Average";
+                        break;
+                    case AggregationTypes.MIN:
+                        measureString = "Min";
+                        break;
+                    case AggregationTypes.MAX:
+                        measureString = "Max";
+                        break;
+                    case AggregationTypes.COUNT:
+                        measureString = "Count";
+                        break;
+                }
+                wrappedAggregation = measureString;
+            }
+        }
+
+        override public function save(analysisItem:AnalysisItem):void {
+            super.save(analysisItem);
+            var measure:TemporalAnalysisMeasure = analysisItem as TemporalAnalysisMeasure;
+            measure.analysisDimension = dimensionComboBox.selectedItem as AnalysisDimension;
+            var temporalAggregationType:int;
+            switch (temporalWrappedAggregations.selectedLabel) {
+                case "Sum":
+                    temporalAggregationType = AggregationTypes.SUM;
+                    break;
+                case "Average":
+                    temporalAggregationType = AggregationTypes.AVERAGE;
+                    break;
+                case "Max":
+                    temporalAggregationType = AggregationTypes.MAX;
+                    break;
+                case "Min":
+                    temporalAggregationType = AggregationTypes.MIN;
+                    break;
+                case "Count":
+                    temporalAggregationType = AggregationTypes.COUNT;
+                    break;
+            }
+            var existingDim:AnalysisDimension = dimensionComboBox.selectedItem as AnalysisDimension;
+            var sortDim:AnalysisDimension;
+            if (dimensionIsDate) {
+                var existingDateDim:AnalysisDateDimension = existingDim as AnalysisDateDimension;
+                var dateDim:AnalysisDateDimension = new AnalysisDateDimension(temporalDateBox.selectedItem.data,
+                        existingDateDim.customDateFormat);
+                dateDim.key = existingDim.key;
+                sortDim = dateDim;
+            } else {
+                sortDim = existingDim;
+            }
+            measure.wrappedAggregation = temporalAggregationType;
+            measure.analysisDimension = sortDim;
+        }
+        ]]></mx:Script>
+    <mx:FormItem label="Wrapped Aggregation: ">
+        <mx:ComboBox dataProvider="{measureObjects}" id="temporalWrappedAggregations" selectedItem="{wrappedAggregation}"/>
+    </mx:FormItem>
+    <mx:FormItem label="Date Level:" direction="horizontal" enabled="{dimensionIsDate}">
+        <mx:ComboBox id="temporalDateBox" selectedIndex="{dateLevel}">
+            <mx:ArrayCollection>
+                <mx:Object label="Year" data="{AnalysisItemTypes.YEAR_LEVEL}"/>
+                <mx:Object label="Month - Year" data="{AnalysisItemTypes.MONTH_LEVEL}"/>
+                <mx:Object label="Day - Month - Year" data="{AnalysisItemTypes.DAY_LEVEL}"/>
+            </mx:ArrayCollection>
+        </mx:ComboBox>
+    </mx:FormItem>
+    <mx:FormItem label="Grouping: ">
+        <util:AnalysisItemComboBox dataProvider="{dimensionFields}" id="dimensionComboBox" labelField="display"
+                                   change="onDimensionChange()" selectedValue="{grouping}"/>
+    </mx:FormItem>
+</analysis:AnalysisItemDetailEditor>

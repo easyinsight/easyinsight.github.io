@@ -9,7 +9,9 @@ package com.easyinsight.analysis.options
 		public static const MAX:String = "Max";
 		public static const NORMALS:String = "Normality";
 		public static const DELTA:String = "Delta";
-		
+		public static const LASTVALUE:String = "Last Value";
+
+		public static const STEP:String = "Step";
 		public static const GROUPING:String = "Grouping";
 		public static const RANGE:String = "Range";
 		public static const DATE:String = "Date";

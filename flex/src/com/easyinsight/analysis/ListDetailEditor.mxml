@@ -1,0 +1,29 @@
+<?xml version="1.0" ?>
+<analysis:AnalysisItemDetailEditor xmlns:mx="http://www.adobe.com/2006/mxml"
+                                   xmlns:analysis="com.easyinsight.analysis.*">
+    <mx:Script><![CDATA[
+
+        [Bindable]
+        private var expanded:Boolean;
+
+        override public function createAnalysisItem(aggregation:String):AnalysisItem {
+            return new AnalysisList();
+        }
+
+        override public function set analysisItem(val:AnalysisItem):void {
+            super.analysisItem = val;
+            if (val is AnalysisList) {
+                var list:AnalysisList = val as AnalysisList;
+                expanded = list.expanded;
+            }
+        }
+
+        override public function save(analysisItem:AnalysisItem):void {
+            super.save(analysisItem);
+            var list:AnalysisList = analysisItem as AnalysisList;
+            list.expanded = expandedBox.selected;
+        }]]></mx:Script>
+    <mx:FormItem label="Expanded:">
+        <mx:CheckBox selected="{expanded}" id="expandedBox"/>
+    </mx:FormItem>
+</analysis:AnalysisItemDetailEditor>

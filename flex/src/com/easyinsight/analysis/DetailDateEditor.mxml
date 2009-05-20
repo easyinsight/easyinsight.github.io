@@ -1,0 +1,68 @@
+<?xml version="1.0" ?>
+<analysis:AnalysisItemDetailEditor xmlns:mx="http://www.adobe.com/2006/mxml"
+                                   xmlns:analysis="com.easyinsight.analysis.*">
+    <mx:Script><![CDATA[
+        [Bindable]
+        private var dateLevel:int;
+
+        [Bindable]
+        private var dateFormatEntry:String = "yyyy-MM-dd";
+
+        override public function createAnalysisItem(aggregation:String):AnalysisItem {
+            return new AnalysisDateDimension();
+        }
+
+        override public function set analysisItem(val:AnalysisItem):void {
+            super.analysisItem = val;
+            if (val is AnalysisDateDimension) {
+                var date:AnalysisDateDimension = val as AnalysisDateDimension;
+                dateLevel = date.dateLevel - 1;
+                dateFormatEntry = date.customDateFormat;
+            }
+        }
+
+        override public function save(analysisItem:AnalysisItem):void {
+            super.save(analysisItem);
+            var date:AnalysisDateDimension = analysisItem as AnalysisDateDimension;
+            date.dateLevel = dateBox.selectedItem.data;
+            date.customDateFormat = dateFormat.text;
+        }
+        ]]></mx:Script>
+    <mx:FormItem label="Date Level:" direction="horizontal">
+        <mx:ComboBox id="dateBox" rowCount="10" selectedIndex="{dateLevel}">
+            <mx:ArrayCollection>
+                <mx:Object label="Year" data="{AnalysisItemTypes.YEAR_LEVEL}"/>
+                <mx:Object label="Month - Year" data="{AnalysisItemTypes.MONTH_LEVEL}"/>
+                <mx:Object label="Day - Month - Year" data="{AnalysisItemTypes.DAY_LEVEL}"/>
+                <mx:Object label="Day - Month - Year - Hour" data="{AnalysisItemTypes.HOUR_LEVEL}"/>
+                <mx:Object label="Day - Month - Year - Hour - Minute"
+                           data="{AnalysisItemTypes.MINUTE_LEVEL}"/>
+
+                <mx:Object label="Week - Year" data="{AnalysisItemTypes.WEEK_LEVEL}"/>
+                <mx:Object label="Month" data="{AnalysisItemTypes.MONTH_FLAT}"/>
+                <mx:Object label="Day of Year" data="{AnalysisItemTypes.DAY_OF_YEAR_FLAT}"/>
+                <mx:Object label="Day of Week" data="{AnalysisItemTypes.DAY_OF_WEEK_FLAT}"/>
+                <mx:Object label="Week of Year" data="{AnalysisItemTypes.WEEK_OF_YEAR_FLAT}"/>
+            </mx:ArrayCollection>
+        </mx:ComboBox>
+    </mx:FormItem>
+    <mx:FormItem label="Date Format:" direction="vertical">
+        <mx:TextArea editable="false" borderStyle="none" borderThickness="0" fontSize="10" width="300"
+                     text="The date format is specified by a pattern string. Within the pattern, letters are interpreted as the components of the date string. The following pattern letters are supported:"/>
+        <mx:DataGrid fontSize="10" rowCount="3">
+            <mx:ArrayCollection>
+                <mx:Array>
+                    <mx:Object letter="y" meaning="Year" example="2008; 08"/>
+                    <mx:Object letter="M" meaning="Month in Year" example="July; Jul; 07"/>
+                    <mx:Object letter="d" meaning="Day in month" example="10"/>
+                </mx:Array>
+            </mx:ArrayCollection>
+            <mx:columns>
+                <mx:DataGridColumn dataField="letter" width="48" headerText="Letter"/>
+                <mx:DataGridColumn dataField="meaning" headerText="Date Component"/>
+                <mx:DataGridColumn dataField="example" headerText="Examples"/>
+            </mx:columns>
+        </mx:DataGrid>
+        <mx:TextInput id="dateFormat" text="{dateFormatEntry}"/>
+    </mx:FormItem>
+</analysis:AnalysisItemDetailEditor>

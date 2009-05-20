@@ -1,0 +1,9 @@
+<?xml version="1.0" ?>
+<analysis:AnalysisItemDetailEditor xmlns:mx="http://www.adobe.com/2006/mxml"
+                                   xmlns:analysis="com.easyinsight.analysis.*">
+    <mx:Script><![CDATA[
+
+        override public function createAnalysisItem(aggregation:String):AnalysisItem {
+            return new AnalysisRangeDimension();
+        }]]></mx:Script>
+</analysis:AnalysisItemDetailEditor>

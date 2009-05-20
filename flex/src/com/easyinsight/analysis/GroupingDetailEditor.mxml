@@ -1,0 +1,47 @@
+<?xml version="1.0" ?>
+<analysis:AnalysisItemDetailEditor xmlns:mx="http://www.adobe.com/2006/mxml"
+                                   xmlns:analysis="com.easyinsight.analysis.*" xmlns:util="com.easyinsight.util.*">
+    <mx:Script><![CDATA[
+        [Bindable]
+        private var useKeyDimensionSelected:Boolean;
+
+        [Bindable]
+        private var keyDimension:AnalysisDimension;
+
+        [Bindable]
+        private var group:Boolean;
+
+        override public function createAnalysisItem(aggregation:String):AnalysisItem {
+            return new AnalysisDimension();
+        }
+
+        override public function set analysisItem(val:AnalysisItem):void {
+            super.analysisItem = val;
+            if (val is AnalysisDimension) {
+                var analysisDimension:AnalysisDimension = val as AnalysisDimension;
+                useKeyDimensionSelected = analysisDimension.keyDimension != null;
+                keyDimension = analysisDimension.keyDimension;
+                group = analysisDimension.group;
+            }
+        }
+
+        override public function save(analysisItem:AnalysisItem):void {
+            super.save(analysisItem);
+            var analysisDimension:AnalysisDimension = analysisItem as AnalysisDimension;
+            analysisDimension.group = groupCheckbox.selected;
+            if (useKeyDimension.selected) {
+                analysisDimension.keyDimension = dimensionKeyComboBox.selectedItem as AnalysisDimension;
+            }
+        }
+        ]]></mx:Script>
+    <mx:FormItem label="Grouping: " visible="{useKeyDimensionSelected}">
+        <util:AnalysisItemComboBox dataProvider="{dimensionFields}" id="dimensionKeyComboBox" labelField="display"
+                selectedValue="{keyDimension}"/>
+    </mx:FormItem>
+    <mx:CheckBox label="Use Another Grouping as Key: " id="useKeyDimension"
+                 selected="{useKeyDimensionSelected}"
+                 click="useKeyDimensionSelected = useKeyDimension.selected"/>
+    <mx:FormItem label="Group: ">
+        <mx:CheckBox id="groupCheckbox" selected="{group}"/>
+    </mx:FormItem>
+</analysis:AnalysisItemDetailEditor>

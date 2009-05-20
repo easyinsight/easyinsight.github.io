@@ -5,156 +5,75 @@
     <mx:states>
 
         <mx:State name="Measure">
-            <mx:AddChild relativeTo="{firstForm}" position="after" creationPolicy="all">
-                <analysis:ColorSelection id="measureRangeSelection"/>
-            </mx:AddChild>
-            <mx:AddChild relativeTo="{firstForm}" position="after" creationPolicy="all">
-                <mx:FormItem label="Formatting: ">
-                    <formatter:FormattingSetup id="formattingSetup"/>
-                </mx:FormItem>
+            <mx:AddChild relativeTo="{firstForm}" position="after">
+                <analysis:MeasureItemDetailEditor addedToStage="detailEditor = measureDetailEditor" id="measureDetailEditor"
+                        dimensionFields="{dimensionFields}" dateDimensionFields="{dateFields}"
+                        measureObjects="{measureObjects}" analysisItem="{startingAnalysisItem}"/>
             </mx:AddChild>
         </mx:State>
 
         <mx:State name="ComplexMeasure">
             <mx:AddChild relativeTo="{firstForm}" position="after" creationPolicy="all">
-                <mx:FormItem label="Wrapped Aggregation: ">
-                    <mx:ComboBox dataProvider="{measureObjects}" id="complexWrappedAggregations"/>
-                </mx:FormItem>
+                <analysis:ComplexMeasureDetailEditor addedToStage="detailEditor = complexDetailEditor" id="complexDetailEditor"
+                        dimensionFields="{dimensionFields}" dateDimensionFields="{dateFields}"
+                        measureObjects="{measureObjects}" analysisItem="{startingAnalysisItem}"/>
             </mx:AddChild>
         </mx:State>
 
         <mx:State name="TemporalMeasure">
             <mx:AddChild relativeTo="{firstForm}" position="after" creationPolicy="all">
-                <mx:FormItem label="Wrapped Aggregation: ">
-                    <mx:ComboBox dataProvider="{measureObjects}" id="temporalWrappedAggregations"/>
-                </mx:FormItem>
-            </mx:AddChild>
-            <mx:AddChild relativeTo="{firstForm}" position="after" creationPolicy="all">
-                <mx:FormItem label="Date Level:" direction="horizontal" enabled="{dimensionIsDate}">
-                    <mx:ComboBox id="temporalDateBox">
-                        <mx:ArrayCollection>
-                            <mx:Object label="Year" data="{AnalysisItemTypes.YEAR_LEVEL}"/>
-                            <mx:Object label="Month - Year" data="{AnalysisItemTypes.MONTH_LEVEL}"/>
-                            <mx:Object label="Day - Month - Year" data="{AnalysisItemTypes.DAY_LEVEL}"/>
-                        </mx:ArrayCollection>
-                    </mx:ComboBox>
-                </mx:FormItem>
-            </mx:AddChild>
-            <mx:AddChild relativeTo="{firstForm}" position="after" creationPolicy="all">
-                <mx:FormItem label="Grouping: ">
-                    <mx:ComboBox dataProvider="{dimensionFields}" id="dimensionComboBox" labelField="display"
-                                 change="onDimensionChange()"/>
-                </mx:FormItem>
+                <analysis:TemporalMeasureDetailEditor addedToStage="detailEditor = temporalDetailEditor" id="temporalDetailEditor"
+                        dimensionFields="{dimensionFields}" dateDimensionFields="{dateFields}"
+                        measureObjects="{measureObjects}" analysisItem="{startingAnalysisItem}"/>
             </mx:AddChild>
         </mx:State>
 
         <mx:State name="Calculation">
-            <mx:RemoveChild target="{aggregationBox}"/>
             <mx:AddChild relativeTo="{firstForm}" position="after" creationPolicy="all">
-                <analysis:ColorSelection id="calcMeasureRangeSelection"/>
-            </mx:AddChild>
-            <mx:AddChild relativeTo="{firstForm}" position="after" creationPolicy="all">
-                <mx:FormItem label="Formatting: ">
-                    <formatter:FormattingSetup id="calcFormattingSetup"/>
-                </mx:FormItem>
+                <analysis:CalculationDetailEditor addedToStage="detailEditor = calculationDetailEditor" id="calculationDetailEditor"
+                        dimensionFields="{dimensionFields}" dateDimensionFields="{dateFields}"
+                        measureObjects="{measureObjects}" analysisItem="{startingAnalysisItem}"/>
             </mx:AddChild>
         </mx:State>
 
         <mx:State name="Grouping">
             <mx:AddChild relativeTo="{firstForm}" position="after" creationPolicy="all">
-                <mx:FormItem label="Grouping: " visible="{useKeyDimensionSelected}">
-                    <mx:ComboBox dataProvider="{dimensionFields}" id="dimensionKeyComboBox" labelField="display"/>
-                </mx:FormItem>
-            </mx:AddChild>
-            <mx:AddChild relativeTo="{firstForm}" position="after" creationPolicy="all">
-                <mx:CheckBox label="Use Another Grouping as Key: " id="useKeyDimension"
-                             selected="{useKeyDimensionSelected}"
-                             click="useKeyDimensionSelected = useKeyDimension.selected"/>
-            </mx:AddChild>
-            <mx:AddChild relativeTo="{firstForm}" position="after" creationPolicy="all">
-                <mx:FormItem label="Group: ">
-                    <mx:CheckBox id="groupCheckbox"/>
-                </mx:FormItem>
+                <analysis:GroupingDetailEditor addedToStage="detailEditor = groupingDetailEditor" id="groupingDetailEditor"
+                        dimensionFields="{dimensionFields}" dateDimensionFields="{dateFields}"
+                        measureObjects="{measureObjects}" analysisItem="{startingAnalysisItem}"/>
             </mx:AddChild>
         </mx:State>
         <mx:State name="Range">
-
+            <mx:AddChild relativeTo="{firstForm}" position="after" creationPolicy="all">
+                <analysis:RangeDetailEditor addedToStage="detailEditor = rangeDetailEditor" id="rangeDetailEditor"
+                        dimensionFields="{dimensionFields}" dateDimensionFields="{dateFields}"
+                        measureObjects="{measureObjects}" analysisItem="{startingAnalysisItem}"/>
+            </mx:AddChild>
         </mx:State>
         <mx:State name="List">
             <mx:AddChild relativeTo="{firstForm}" position="after" creationPolicy="all">
-                <mx:FormItem label="Expanded:" direction="horizontal">
-                    <mx:CheckBox id="listExpanded"/>
-                </mx:FormItem>
+                <analysis:ListDetailEditor addedToStage="detailEditor = listDetailEditor" id="listDetailEditor"
+                        dimensionFields="{dimensionFields}" dateDimensionFields="{dateFields}"
+                        measureObjects="{measureObjects}" analysisItem="{startingAnalysisItem}"/>
             </mx:AddChild>
         </mx:State>
         <mx:State name="Date">
             <mx:AddChild relativeTo="{firstForm}" position="after" creationPolicy="all">
-                <mx:FormItem label="Date Level:" direction="horizontal">
-                    <mx:ComboBox id="dateBox" rowCount="10">
-                        <mx:ArrayCollection>
-                            <mx:Object label="Year" data="{AnalysisItemTypes.YEAR_LEVEL}"/>
-                            <mx:Object label="Month - Year" data="{AnalysisItemTypes.MONTH_LEVEL}"/>
-                            <mx:Object label="Day - Month - Year" data="{AnalysisItemTypes.DAY_LEVEL}"/>
-                            <mx:Object label="Day - Month - Year - Hour" data="{AnalysisItemTypes.HOUR_LEVEL}"/>
-                            <mx:Object label="Day - Month - Year - Hour - Minute"
-                                       data="{AnalysisItemTypes.MINUTE_LEVEL}"/>
-
-                            <mx:Object label="Week - Year" data="{AnalysisItemTypes.WEEK_LEVEL}"/>
-                            <mx:Object label="Month" data="{AnalysisItemTypes.MONTH_FLAT}"/>
-                            <mx:Object label="Day of Year" data="{AnalysisItemTypes.DAY_OF_YEAR_FLAT}"/>
-                            <mx:Object label="Day of Week" data="{AnalysisItemTypes.DAY_OF_WEEK_FLAT}"/>
-                            <mx:Object label="Week of Year" data="{AnalysisItemTypes.WEEK_OF_YEAR_FLAT}"/>
-                        </mx:ArrayCollection>
-                    </mx:ComboBox>
-                </mx:FormItem>
-            </mx:AddChild>
-            <mx:AddChild relativeTo="{firstForm}" position="after" creationPolicy="all">
-                <mx:FormItem label="Date Format:" direction="vertical">
-                    <mx:TextArea editable="false" borderStyle="none" borderThickness="0" fontSize="10" width="300"
-                                 text="The date format is specified by a pattern string. Within the pattern, letters are interpreted as the components of the date string. The following pattern letters are supported:"/>
-                    <mx:DataGrid fontSize="10" rowCount="3">
-                        <mx:ArrayCollection>
-                            <mx:Array>
-                                <mx:Object letter="y" meaning="Year" example="2008; 08"/>
-                                <mx:Object letter="M" meaning="Month in Year" example="July; Jul; 07"/>
-                                <mx:Object letter="d" meaning="Day in month" example="10"/>
-                            </mx:Array>
-                        </mx:ArrayCollection>
-                        <mx:columns>
-                            <mx:DataGridColumn dataField="letter" width="48" headerText="Letter"/>
-                            <mx:DataGridColumn dataField="meaning" headerText="Date Component"/>
-                            <mx:DataGridColumn dataField="example" headerText="Examples"/>
-                        </mx:columns>
-                    </mx:DataGrid>
-                    <mx:TextInput id="dateFormat" text="yyyy-MM-dd"/>
-                </mx:FormItem>
+                <analysis:DetailDateEditor addedToStage="detailEditor = dateDetailEditor" id="dateDetailEditor"
+                        dimensionFields="{dimensionFields}" dateDimensionFields="{dateFields}"
+                        measureObjects="{measureObjects}" analysisItem="{startingAnalysisItem}"/>
             </mx:AddChild>
         </mx:State>
         <mx:State name="Step">
             <mx:AddChild relativeTo="{firstForm}" position="after" creationPolicy="all">
-                <mx:FormItem label="Start Date: ">
-                    <mx:ComboBox dataProvider="{dateFields}" id="startDateComboBox" labelField="display"
-                                 change="onDimensionChange()"/>
-                </mx:FormItem>
-            </mx:AddChild>
-            <mx:AddChild relativeTo="{firstForm}" position="after" creationPolicy="all">
-                <mx:FormItem label="End Date: ">
-                    <mx:ComboBox dataProvider="{dateFields}" id="endDateComboBox" labelField="display"
-                                 change="onDimensionChange()"/>
-                </mx:FormItem>
-            </mx:AddChild>
-            <mx:AddChild relativeTo="{firstForm}" position="after" creationPolicy="all">
-                <mx:FormItem label="Correlation Dimension: ">
-                    <mx:ComboBox dataProvider="{dimensionFields}" id="correlationComboBox" labelField="display"
-                                 change="onDimensionChange()"/>
-                </mx:FormItem>
+                <analysis:StepDetailEditor addedToStage="detailEditor = stepDetailEditor" id="stepDetailEditor"
+                        dimensionFields="{dimensionFields}" dateDimensionFields="{dateFields}"
+                        measureObjects="{measureObjects}" analysisItem="{startingAnalysisItem}"/>
             </mx:AddChild>
         </mx:State>
     </mx:states>
     <mx:Script>
 		<![CDATA[
-        import com.easyinsight.analysis.conditions.MeasureConditionRange;
-
         import mx.events.DropdownEvent;
 
         import com.easyinsight.analysis.options.OptionFactory;
@@ -163,22 +82,26 @@
 
         [Bindable]
         private var aggregationTypeObjects:ArrayCollection;
-        [Bindable]
-        private var dimensionIsDate:Boolean;
+
         [Bindable]
         private var measureObjects:ArrayCollection;
+        [Bindable]
+        private var dimensionFields:ArrayCollection = new ArrayCollection();
+        [Bindable]
+        private var dateFields:ArrayCollection = new ArrayCollection();
+
+        private var detailEditor:AnalysisItemDetailEditor;
+
         private var aggregationTypeMap:Object;
         private var _aggregationType:String = "Sum";
+        [Bindable]
         private var startingAnalysisItem:AnalysisItem;
         private var key:Key;
 
         [Bindable]
         private var _fieldNameEditable:Boolean = true;
 
-        [Bindable]
-        private var dimensionFields:ArrayCollection = new ArrayCollection();
-        [Bindable]
-        private var dateFields:ArrayCollection = new ArrayCollection();
+
 
         [Bindable]
         private var useKeyDimensionSelected:Boolean = false;
@@ -202,11 +125,6 @@
                     dateFields.addItem(analysisItemWrapper.analysisItem);
                 }
             }
-        }
-
-        private function onDimensionChange():void {
-            var analysisItem:AnalysisItem = dimensionComboBox.selectedItem as AnalysisItem;
-            dimensionIsDate = analysisItem is AnalysisDateDimension;
         }
 
         public function set analysisItem(analysisItem:AnalysisItem):void {
@@ -283,138 +201,17 @@
         }
 
         public function save():AnalysisItem {
-            var analysisItem:AnalysisItem;
-            switch (currentState) {
-                case "Calculation":
-                    var analysisCalculation:AnalysisCalculation = startingAnalysisItem as AnalysisCalculation;
-                    var calcMeasureConditionRange:MeasureConditionRange = calcMeasureRangeSelection.createMeasureConditionRange();
-                    if (calcMeasureConditionRange != null) {
-                        analysisCalculation.measureConditionRange = calcMeasureConditionRange;
-                    }
-                    analysisCalculation.formattingConfiguration = calcFormattingSetup.formattingConfiguration;
-                    analysisItem = analysisCalculation;
-                    break;
-                case "Measure":
-                    var analysisMeasure:AnalysisMeasure;
-                    switch (aggregationBox.selectedLabel) {
-                        case "Sum":
-                            analysisMeasure = new AnalysisMeasure(AggregationTypes.SUM);
-                            break;
-                        case "Average":
-                            analysisMeasure = new AnalysisMeasure(AggregationTypes.AVERAGE);
-                            break;
-                        case "Max":
-                            analysisMeasure = new AnalysisMeasure(AggregationTypes.MAX);
-                            break;
-                        case "Min":
-                            analysisMeasure = new AnalysisMeasure(AggregationTypes.MIN);
-                            break;
-                        case "Count":
-                            analysisMeasure = new AnalysisMeasure(AggregationTypes.COUNT);
-                            break;
-                    }
-                    var measureConditionRange:MeasureConditionRange = measureRangeSelection.createMeasureConditionRange();
-                    if (measureConditionRange != null) {
-                        analysisMeasure.measureConditionRange = measureRangeSelection.createMeasureConditionRange();
-                    }
-                    analysisMeasure.formattingConfiguration = formattingSetup.formattingConfiguration;
-                    analysisItem = analysisMeasure;
-                    break;
-                case "Grouping":
-                    var analysisDimension:AnalysisDimension = new AnalysisDimension();
-                    analysisDimension.group = groupCheckbox.selected;
-                    if (useKeyDimension.selected) {
-                        analysisDimension.keyDimension = dimensionKeyComboBox.selectedItem as AnalysisDimension;
-                    }
-                    analysisItem = analysisDimension;
-                    break;
-                case "Range":
-                    analysisItem = new AnalysisRangeDimension();
-                    break;
-                case "List":
-                    analysisItem = new AnalysisList(listExpanded.selected);
-                    break;
-                case "Date":
-                    analysisItem = new AnalysisDateDimension(dateBox.selectedItem.data, dateFormat.text);
-                    break;
-                case "Step":
-                    var analysisStep:AnalysisStep = new AnalysisStep();
-                    analysisStep.startDate = startDateComboBox.selectedItem as AnalysisDateDimension;
-                    analysisStep.endDate = endDateComboBox.selectedItem as AnalysisDateDimension;
-                    analysisStep.correlationDimension = correlationComboBox.selectedItem as AnalysisDimension;
-                    analysisItem = analysisStep;
-                    break;
-                case "ComplexMeasure":
-                    var complexAggregationType:int;
-                    switch (complexWrappedAggregations.selectedLabel) {
-                        case "Sum":
-                            complexAggregationType = AggregationTypes.SUM;
-                            break;
-                        case "Average":
-                            complexAggregationType = AggregationTypes.AVERAGE;
-                            break;
-                        case "Max":
-                            complexAggregationType = AggregationTypes.MAX;
-                            break;
-                        case "Min":
-                            complexAggregationType = AggregationTypes.MIN;
-                            break;
-                        case "Count":
-                            complexAggregationType = AggregationTypes.COUNT;
-                            break;
-                    }
-                    switch (aggregationBox.selectedLabel) {
-                        case "Normality":
-                            analysisItem = new ComplexAnalysisMeasure(AggregationTypes.NORMALS, complexAggregationType);
-                            break;
-                    }
-                    break;
-                case "TemporalMeasure":
-                    var temporalAggregationType:int;
-                    switch (temporalWrappedAggregations.selectedLabel) {
-                        case "Sum":
-                            temporalAggregationType = AggregationTypes.SUM;
-                            break;
-                        case "Average":
-                            temporalAggregationType = AggregationTypes.AVERAGE;
-                            break;
-                        case "Max":
-                            temporalAggregationType = AggregationTypes.MAX;
-                            break;
-                        case "Min":
-                            temporalAggregationType = AggregationTypes.MIN;
-                            break;
-                        case "Count":
-                            temporalAggregationType = AggregationTypes.COUNT;
-                            break;
-                    }
-                    switch (aggregationBox.selectedLabel) {
-                        case "Delta":
-                        case "Last Value":
-                            var existingDim:AnalysisDimension = dimensionComboBox.selectedItem as AnalysisDimension;
-                            var sortDim:AnalysisDimension;
-                            if (dimensionIsDate) {
-                                var existingDateDim:AnalysisDateDimension = existingDim as AnalysisDateDimension;
-                                var dateDim:AnalysisDateDimension = new AnalysisDateDimension(temporalDateBox.selectedItem.data,
-                                        existingDateDim.customDateFormat);
-                                dateDim.key = existingDim.key;
-                                sortDim = dateDim;
-                            } else {
-                                sortDim = existingDim;
-                            }
-                            analysisItem = new TemporalAnalysisMeasure(aggregationBox.selectedLabel == "Delta" ? AggregationTypes.DELTA :
-                                                                       AggregationTypes.LAST_VALUE, temporalAggregationType,
-                                    sortDim);
-                            break;
-                    }
-                    break;
+            var existingType:int = startingAnalysisItem.getType();
+            var analysisItem:AnalysisItem = detailEditor.createAnalysisItem(aggregationBox.selectedItem as String);
+            if (analysisItem.getType() == existingType) {
+                analysisItem.analysisItemID = startingAnalysisItem.analysisItemID;
             }
             analysisItem.displayName = fieldNameInput.text;
             analysisItem.key = key;
             analysisItem.hidden = hiddenCheckbox.selected;
-            //dispatchEvent(new AnalysisItemEditEvent(analysisItem, true));
+
+            detailEditor.save(analysisItem);
             return analysisItem;
-            //PopUpManager.removePopUp(this);
         }
 
         protected function getDefaultStart():String {
@@ -435,55 +232,19 @@
                 case "Min":
                 case "Count":
                     currentState = "Measure";
-                    if (startingAnalysisItem is AnalysisMeasure) {
-                        var analysisMeasure:AnalysisMeasure = startingAnalysisItem as AnalysisMeasure;
-                        if (analysisMeasure.measureConditionRange != null) {
-                            measureRangeSelection.measureConditionRange = analysisMeasure.measureConditionRange;
-                        }
-                        if (analysisMeasure.formattingConfiguration != null) {
-                            formattingSetup.formattingConfiguration = analysisMeasure.formattingConfiguration;
-                        }
-                    }
                     break;
                 case "Delta":
                 case "Last Value":
                     currentState = "TemporalMeasure";
-                    if (startingAnalysisItem is TemporalAnalysisMeasure) {
-                        var temporalAnalysisMeasure:TemporalAnalysisMeasure = startingAnalysisItem as TemporalAnalysisMeasure;
-                        if (temporalAnalysisMeasure.wrappedAggregation > 0) {
-                            temporalWrappedAggregations.selectedIndex = temporalAnalysisMeasure.wrappedAggregation - 1;
-                        }
-                    }
                     break;
                 case "Normality":
                     currentState = "ComplexMeasure";
-                    if (startingAnalysisItem is ComplexAnalysisMeasure) {
-                        var complexAnalysisMeasure:ComplexAnalysisMeasure = startingAnalysisItem as ComplexAnalysisMeasure;
-                        if (complexAnalysisMeasure.wrappedAggregation > 0) {
-                            complexWrappedAggregations.selectedIndex = complexAnalysisMeasure.wrappedAggregation - 1;
-                        }
-                    }
                     break;
                 case "Calculation":
                     currentState = "Calculation";
-                    if (startingAnalysisItem is AnalysisCalculation) {
-                        var analysisCalculation:AnalysisCalculation = startingAnalysisItem as AnalysisCalculation;
-                        if (analysisCalculation.measureConditionRange != null) {
-                            calcMeasureRangeSelection.measureConditionRange = analysisCalculation.measureConditionRange;
-                        }
-                        if (analysisCalculation.formattingConfiguration != null) {
-                            calcFormattingSetup.formattingConfiguration = analysisCalculation.formattingConfiguration;
-                        }
-                    }
                     break;
                 case "Grouping":
                     currentState = "Grouping";
-                    if (startingAnalysisItem is AnalysisDimension) {
-                        var analysisDimension:AnalysisDimension = startingAnalysisItem as AnalysisDimension;
-                        groupCheckbox.selected = analysisDimension.group;
-                        useKeyDimensionSelected = analysisDimension.keyDimension != null;
-                        dimensionKeyComboBox.selectedItem = analysisDimension.keyDimension;
-                    }
                     break;
                 case "Range":
                     currentState = "Range";
@@ -496,23 +257,6 @@
                     break;
                 case "Date":
                     currentState = "Date";
-                    if (startingAnalysisItem is AnalysisDateDimension) {
-                        var analysisDateDimension:AnalysisDateDimension = startingAnalysisItem as AnalysisDateDimension;
-                        switch (analysisDateDimension.dateLevel) {
-                            case AnalysisItemTypes.YEAR_LEVEL:
-                                dateBox.selectedIndex = 0;
-                                break;
-                            case AnalysisItemTypes.MONTH_LEVEL:
-                                dateBox.selectedIndex = 1;
-                                break;
-                            case AnalysisItemTypes.DAY_LEVEL:
-                                dateBox.selectedIndex = 2;
-                                break;
-                        }
-                        dateFormat.text = analysisDateDimension.customDateFormat;
-                    } else {
-                        dateBox.selectedIndex = 0;
-                    }
                     break;
             }
         }

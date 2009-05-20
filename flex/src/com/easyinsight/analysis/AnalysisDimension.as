@@ -8,7 +8,7 @@ package com.easyinsight.analysis
 	[RemoteClass(alias="com.easyinsight.analysis.AnalysisDimension")]
 	public class AnalysisDimension extends AnalysisItem
 	{
-		public var group:Boolean;
+		public var group:Boolean = true;
 		public var analysisDimensionID:int;
         public var keyDimension:AnalysisDimension;
 		

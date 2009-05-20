@@ -1,0 +1,45 @@
+<?xml version="1.0" ?>
+<analysis:AnalysisItemDetailEditor xmlns:mx="http://www.adobe.com/2006/mxml"
+                                   xmlns:analysis="com.easyinsight.analysis.*" xmlns:util="com.easyinsight.util.*">
+    <mx:Script><![CDATA[
+        [Bindable]
+        private var startDate:AnalysisDateDimension;
+        [Bindable]
+        private var endDate:AnalysisDateDimension;
+        [Bindable]
+        private var correlationDimension:AnalysisDimension;
+
+        override public function createAnalysisItem(aggregation:String):AnalysisItem {
+            return new AnalysisStep();
+        }
+
+        override public function set analysisItem(val:AnalysisItem):void {
+            super.analysisItem = val;
+            if (val is AnalysisStep) {
+                var step:AnalysisStep = val as AnalysisStep;
+                startDate = step.startDate;
+                endDate = step.endDate;
+                correlationDimension = step.correlationDimension;
+            }
+        }
+
+        override public function save(analysisItem:AnalysisItem):void {
+            super.save(analysisItem);
+            var step:AnalysisStep = analysisItem as AnalysisStep;
+            step.startDate = startDateComboBox.selectedItem as AnalysisDateDimension;
+            step.endDate = endDateComboBox.selectedItem as AnalysisDateDimension;
+            step.correlationDimension = correlationComboBox.selectedItem as AnalysisDimension;
+        }]]></mx:Script>
+    <mx:FormItem label="Start Date: ">
+        <util:AnalysisItemComboBox dataProvider="{dateDimensionFields}" id="startDateComboBox" labelField="display"
+                selectedValue="{startDate}"/>
+    </mx:FormItem>
+    <mx:FormItem label="End Date: ">
+        <util:AnalysisItemComboBox dataProvider="{dateDimensionFields}" id="endDateComboBox" labelField="display"
+                selectedValue="{endDate}"/>
+    </mx:FormItem>
+    <mx:FormItem label="Correlation Dimension: ">
+        <util:AnalysisItemComboBox dataProvider="{dimensionFields}" id="correlationComboBox" labelField="display"
+                selectedValue="{correlationDimension}"/>
+    </mx:FormItem>
+</analysis:AnalysisItemDetailEditor>

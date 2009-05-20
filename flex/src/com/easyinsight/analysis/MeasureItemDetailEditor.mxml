@@ -1,0 +1,60 @@
+<?xml version="1.0" ?>
+<analysis:AnalysisItemDetailEditor xmlns:mx="http://www.adobe.com/2006/mxml"
+                                   xmlns:analysis="com.easyinsight.analysis.*"
+                                   xmlns:formatter="com.easyinsight.analysis.formatter.*">
+    <mx:Script><![CDATA[
+        import com.easyinsight.analysis.conditions.MeasureConditionRange;
+        import com.easyinsight.analysis.formatter.FormattingConfiguration;
+
+        [Bindable]
+        private var measureConditionRange:MeasureConditionRange;
+
+        [Bindable]
+        private var formattingConfiguration:FormattingConfiguration;
+
+        override public function createAnalysisItem(aggregation:String):AnalysisItem {
+            var analysisMeasure:AnalysisMeasure;
+            switch (aggregation) {
+                case "Sum":
+                    analysisMeasure = new AnalysisMeasure(AggregationTypes.SUM);
+                    break;
+                case "Average":
+                    analysisMeasure = new AnalysisMeasure(AggregationTypes.AVERAGE);
+                    break;
+                case "Max":
+                    analysisMeasure = new AnalysisMeasure(AggregationTypes.MAX);
+                    break;
+                case "Min":
+                    analysisMeasure = new AnalysisMeasure(AggregationTypes.MIN);
+                    break;
+                case "Count":
+                    analysisMeasure = new AnalysisMeasure(AggregationTypes.COUNT);
+                    break;
+            }
+            return analysisMeasure;
+        }
+
+        override public function save(analysisItem:AnalysisItem):void {
+            var analysisMeasure:AnalysisMeasure = analysisItem as AnalysisMeasure;
+            var measureConditionRange:MeasureConditionRange = measureRangeSelection.createMeasureConditionRange();
+            if (measureConditionRange != null) {
+                analysisMeasure.measureConditionRange = measureRangeSelection.createMeasureConditionRange();
+            }
+            analysisMeasure.formattingConfiguration = formattingSetup.formattingConfiguration;
+        }
+
+        override public function set analysisItem(val:AnalysisItem):void {
+            super.analysisItem = val;
+            if (val is AnalysisMeasure) {
+                var analysisMeasure:AnalysisMeasure = val as AnalysisMeasure;
+                measureConditionRange = analysisMeasure.measureConditionRange;
+                formattingConfiguration = analysisMeasure.formattingConfiguration;
+            }
+        }]]></mx:Script>
+    <mx:FormItem label="">
+        <analysis:ColorSelection id="measureRangeSelection" measureConditionRange="{measureConditionRange}"/>
+    </mx:FormItem>
+    <mx:FormItem label="Formatting: ">
+        <formatter:FormattingSetup id="formattingSetup" formattingConfiguration="{formattingConfiguration}"/>
+    </mx:FormItem>
+</analysis:AnalysisItemDetailEditor>

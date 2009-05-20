@@ -29,9 +29,13 @@ package com.easyinsight.analysis.options
 					option = OptionTypeNames.NORMALS;
 				} else if (analysisMeasure.aggregation == AggregationTypes.DELTA) {
 					option = OptionTypeNames.DELTA;
+				} else if (analysisMeasure.aggregation == AggregationTypes.LAST_VALUE) {
+					option = OptionTypeNames.LASTVALUE;
 				}
 			} else {
-				if (analysisItem.hasType(AnalysisItemTypes.DATE)) {
+                if (analysisItem.hasType(AnalysisItemTypes.STEP)) {
+					option = OptionTypeNames.STEP;
+				} else if (analysisItem.hasType(AnalysisItemTypes.DATE)) {
 					option = OptionTypeNames.DATE;
 				} else if (analysisItem.hasType(AnalysisItemTypes.RANGE)) {
 					option = OptionTypeNames.RANGE;

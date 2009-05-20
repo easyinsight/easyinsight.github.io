@@ -11,5 +11,9 @@ public class AnalysisStep extends AnalysisDateDimension{
         super();
         dateLevel = AnalysisItemTypes.DAY_LEVEL;
     }
+
+    override public function getType():int {
+        return super.getType() | AnalysisItemTypes.STEP;
+    }
 }
 }
