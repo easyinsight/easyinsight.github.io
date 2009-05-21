@@ -215,7 +215,7 @@ public class SecurityUtil {
         }
     }
 
-    private static int getRole(long userID, long feedID) {
+    public static int getRole(long userID, long feedID) {
         Connection conn = Database.instance().getConnection();
         try {
             PreparedStatement existingLinkQuery = conn.prepareStatement("SELECT ROLE FROM UPLOAD_POLICY_USERS WHERE " +

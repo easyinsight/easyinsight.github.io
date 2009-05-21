@@ -8,6 +8,7 @@ package com.easyinsight.analysis
 		public var dataFeedID:int;
         public var version:int;
         public var dataSourceName:String;
+        public var dataSourceAdmin:Boolean;
 		
 		public function FeedMetadata()
 			{

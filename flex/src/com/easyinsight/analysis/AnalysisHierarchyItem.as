@@ -1,5 +1,9 @@
 package com.easyinsight.analysis {
+import com.easyinsight.HierarchyComboBox;
+
 import mx.collections.ArrayCollection;
+import mx.core.UIComponent;
+
 [Bindable]
 [RemoteClass(alias="com.easyinsight.analysis.AnalysisHierarchyItem")]
 public class AnalysisHierarchyItem extends AnalysisDimension {
@@ -14,6 +18,13 @@ public class AnalysisHierarchyItem extends AnalysisDimension {
 
     override public function getType():int {
         return super.getType() | AnalysisItemTypes.HIERARCHY;
+    }
+
+    override public function createDropItemElement(dropArea:DropArea):UIComponent {
+        var hierarchyComboBox:HierarchyComboBox = new HierarchyComboBox();
+        hierarchyComboBox.hierarchy = this;
+        hierarchyComboBox.dropArea = dropArea;
+        return hierarchyComboBox;
     }
 }
 }

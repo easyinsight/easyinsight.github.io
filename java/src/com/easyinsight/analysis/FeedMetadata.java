@@ -12,6 +12,15 @@ public class FeedMetadata implements Serializable {
     private long dataFeedID;
     private String dataSourceName;
     private int version;
+    private boolean dataSourceAdmin;
+
+    public boolean isDataSourceAdmin() {
+        return dataSourceAdmin;
+    }
+
+    public void setDataSourceAdmin(boolean dataSourceAdmin) {
+        this.dataSourceAdmin = dataSourceAdmin;
+    }
 
     public String getDataSourceName() {
         return dataSourceName;

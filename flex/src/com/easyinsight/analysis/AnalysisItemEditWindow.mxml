@@ -12,7 +12,7 @@
 			
 			private var _editorClass:Class;
 			
-			private var editor:AnalysisItemEditor;
+			private var editor:IAnalysisItemEditor;
 			
 			public function set analysisItem(analysisItem:AnalysisItem):void {
 				_analysisItem = analysisItem;
@@ -32,7 +32,7 @@
 				editor = new _editorClass();
 				editor.analysisItem = _analysisItem;
 				editor.analysisItems = _analysisItems;
-				editorFormItem.addChildAt(editor, 0);
+				editorFormItem.addChildAt(editor as DisplayObject, 0);
 			}
 			
 			private function cancel():void {

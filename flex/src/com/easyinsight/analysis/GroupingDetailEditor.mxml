@@ -34,14 +34,14 @@
             }
         }
         ]]></mx:Script>
-    <mx:FormItem label="Grouping: " visible="{useKeyDimensionSelected}">
-        <util:AnalysisItemComboBox dataProvider="{dimensionFields}" id="dimensionKeyComboBox" labelField="display"
-                selectedValue="{keyDimension}"/>
+    <mx:FormItem label="Group: ">
+        <mx:CheckBox id="groupCheckbox" selected="{group}"/>
     </mx:FormItem>
     <mx:CheckBox label="Use Another Grouping as Key: " id="useKeyDimension"
                  selected="{useKeyDimensionSelected}"
                  click="useKeyDimensionSelected = useKeyDimension.selected"/>
-    <mx:FormItem label="Group: ">
-        <mx:CheckBox id="groupCheckbox" selected="{group}"/>
+    <mx:FormItem label="Grouping: " visible="{useKeyDimensionSelected}">
+        <util:AnalysisItemComboBox dataProvider="{dimensionFields}" id="dimensionKeyComboBox" labelField="display"
+                selectedValue="{keyDimension}"/>
     </mx:FormItem>
 </analysis:AnalysisItemDetailEditor>

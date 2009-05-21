@@ -51,10 +51,10 @@
                 formattingConfiguration = analysisMeasure.formattingConfiguration;
             }
         }]]></mx:Script>
-    <mx:FormItem label="">
-        <analysis:ColorSelection id="measureRangeSelection" measureConditionRange="{measureConditionRange}"/>
-    </mx:FormItem>
     <mx:FormItem label="Formatting: ">
         <formatter:FormattingSetup id="formattingSetup" formattingConfiguration="{formattingConfiguration}"/>
+    </mx:FormItem>
+    <mx:FormItem label="">
+        <analysis:ColorSelection id="measureRangeSelection" measureConditionRange="{measureConditionRange}"/>
     </mx:FormItem>
 </analysis:AnalysisItemDetailEditor>

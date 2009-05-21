@@ -1,8 +1,4 @@
 package com.easyinsight.administration.feed {
-import com.easyinsight.analysis.AnalysisItem;
-import mx.managers.DragManager;
-import mx.events.DragEvent;
-import com.easyinsight.analysis.HierarchyLevel;
 import mx.binding.utils.BindingUtils;
 import mx.events.FlexEvent;
 import mx.collections.ArrayCollection;
@@ -62,9 +58,15 @@ public class HierarchyAdminBox extends VBox {
     public function set analysisHierarchyItem(val:AnalysisHierarchyItem):void {
         _analysisHierarchyItem = val;
         nameInput.text = _analysisHierarchyItem.key.createString();
-        levels = _analysisHierarchyItem.hierarchyLevels;
+        if (list != null) {
+            list.dataProvider = val.hierarchyLevels;
+        }
     }
 
+    override protected function commitProperties():void {
+        super.commitProperties();
+        levels = _analysisHierarchyItem.hierarchyLevels;
+    }
 
     public function get analysisHierarchyItem():AnalysisHierarchyItem {
         return _analysisHierarchyItem;

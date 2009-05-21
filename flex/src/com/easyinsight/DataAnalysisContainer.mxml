@@ -27,6 +27,8 @@
 		<![CDATA[
         import com.easyinsight.administration.feed.DeleteAnalysisItemEvent;
         import com.easyinsight.analysis.AnalysisChangedEvent;
+        import com.easyinsight.analysis.AnalysisItemEditEvent;
+        import com.easyinsight.analysis.AnalysisItemEditWindow;
         import com.easyinsight.analysis.ControllerLookup;
 import com.easyinsight.analysis.HierarchyDrilldownEvent;
         import com.easyinsight.analysis.AnalysisStateChangeEvent;
@@ -49,6 +51,9 @@ import com.easyinsight.analysis.HierarchyDrilldownEvent;
         import com.easyinsight.detail.DetailBook;
         import com.easyinsight.framework.InvalidFieldsEvent;
         import com.easyinsight.framework.LoginEvent;
+
+        import com.easyinsight.genredata.ModuleAnalyzeEvent;
+        import com.easyinsight.listing.FeedAdminAnalyzeSource;
 
         import mx.collections.SortField;
         import mx.collections.Sort;
@@ -144,6 +149,9 @@ import com.easyinsight.analysis.HierarchyDrilldownEvent;
 
         [Bindable]
         private var _previewMode:Boolean = false;
+
+        [Bindable]
+        private var admin:Boolean;
 
         private var feedMetadata:FeedMetadata;
 
@@ -264,6 +272,23 @@ import com.easyinsight.analysis.HierarchyDrilldownEvent;
             User.getEventNotifier().removeEventListener(LoginEvent.LOGIN, onLogin);
         }
 
+        private function goAdmin():void {
+            if (analysisChanged) {
+                Alert.show("You have unsaved changes. Are you sure you want to go to data source administration?", "Alert",
+                        Alert.OK | Alert.CANCEL, null, adminAlertListener, null, Alert.CANCEL);
+            } else {
+                cleanup();
+                dispatchEvent(new ModuleAnalyzeEvent(new FeedAdminAnalyzeSource(dataService.dataFeedID)));
+            }
+        }
+
+        private function adminAlertListener(event:CloseEvent):void {
+            if (event.detail == Alert.OK) {
+                cleanup();
+                dispatchEvent(new ModuleAnalyzeEvent(new FeedAdminAnalyzeSource(dataService.dataFeedID)));
+            }
+        }
+
         private function onMetadataReceipt(feedMetadata:FeedMetadata):void {
             if (User.getInstance() == null) {
                 currentState = "NotLoggedIn";
@@ -271,6 +296,7 @@ import com.easyinsight.analysis.HierarchyDrilldownEvent;
             }
             this.analysisValidators = [ analysisNameValidator ];
             this.feedMetadata = feedMetadata;
+            this.admin = feedMetadata.dataSourceAdmin;
             dataSourceName = this.feedMetadata.dataSourceName;
             availableFields = new ArrayCollection();
             for each (var analysisItem:AnalysisItem in feedMetadata.fields) {
@@ -628,9 +654,24 @@ import com.easyinsight.analysis.HierarchyDrilldownEvent;
         }
 
         private function createCalculation():void {
-            var calcWindow:CalculationWindow = CalculationWindow(PopUpManager.createPopUp(this, CalculationWindow));
-            calcWindow.addEventListener(AnalysisItemCreationEvent.ANALYSIS_ITEM_CREATED, newFieldCreated);
-            PopUpManager.centerPopUp(calcWindow);
+            var window:AnalysisItemEditWindow = new AnalysisItemEditWindow();
+            window.editorClass = CalculationWindow;
+            window.addEventListener(AnalysisItemEditEvent.ANALYSIS_ITEM_EDIT, onNewItem);
+            PopUpManager.addPopUp(window, this);
+            PopUpManager.centerPopUp(window);
+        }
+
+        private function onNewItem(event:AnalysisItemEditEvent):void {
+            dispatchEvent(new AnalysisChangedEvent());
+            availableFields.addItem(new AnalysisItemWrapper(event.analysisItem));
+            var sort:Sort = new Sort();
+            sort.fields = [ new SortField("displayName", false) ];
+            availableFields.sort = sort;
+            availableFields.refresh();
+            if (getAnalysisDefinition().addedItems == null) {
+                getAnalysisDefinition().addedItems = new ArrayCollection();
+            }
+            getAnalysisDefinition().addedItems.addItem(event.analysisItem);
         }
 
         private function createBlankField():void {
@@ -815,6 +856,8 @@ import com.easyinsight.analysis.HierarchyDrilldownEvent;
                        toolTip="Close"/>
             <mx:Button id="undoButton" icon="@Embed(source='../../../assets/undo.png')" click="undo()" toolTip="Undo"/>
             <mx:Button id="redoButton" icon="@Embed(source='../../../assets/redo.png')" click="redo()" toolTip="Redo"/>
+            <mx:Button id="adminButton" icon="@Embed(source='../../../assets/businessman_edit.png')" click="goAdmin()" toolTip="Adminster"
+                    visible="{admin}"/>
             <mx:Button id="subscribeToFeedButton" icon="@Embed(source='../../../assets/folder_into.png')"
                        click="subscribeToFeed()" toolTip="Add Data Source to My Data" visible="{canSubscribeToFeed}"/>
             <mx:Button id="groupAddFeedButton" icon="@Embed(source='../../../assets/users_into.png')"

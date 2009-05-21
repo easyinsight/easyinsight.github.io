@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <mx:Box xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%"
         xmlns:analysis="com.easyinsight.analysis.*"
-        creationComplete="initStuff()" creationPolicy="all" xmlns:formatter="com.easyinsight.analysis.formatter.*">
+        creationComplete="initStuff()" creationPolicy="all" xmlns:formatter="com.easyinsight.analysis.formatter.*"
+        implements="com.easyinsight.analysis.IAnalysisItemEditor">
     <mx:states>
 
         <mx:State name="Measure">

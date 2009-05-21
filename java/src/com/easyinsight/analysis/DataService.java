@@ -37,8 +37,11 @@ public class DataService implements IDataService {
     }
 
     public FeedMetadata getFeedMetadata(long feedID, boolean preview) {
+        int role = SecurityUtil.getRole(SecurityUtil.getUserID(), feedID);
+        if (role > Roles.SUBSCRIBER) {
+            throw new SecurityException();
+        }
         try {
-            SecurityUtil.authorizeFeed(feedID, Roles.SUBSCRIBER);
             Feed feed = feedRegistry.getFeed(feedID);
             Collection<AnalysisItem> feedItems = feed.getFields();
             // need to apply renames from the com.easyinsight.analysis definition here?
@@ -56,6 +59,7 @@ public class DataService implements IDataService {
             feedMetadata.setFields(feedItemArray);
             feedMetadata.setDataFeedID(feedID);
             feedMetadata.setVersion(feed.getVersion());
+            feedMetadata.setDataSourceAdmin(role == Roles.OWNER);
             return feedMetadata;
         } catch (Exception e) {
             LogClass.error(e);

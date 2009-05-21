@@ -4,8 +4,10 @@ import com.easyinsight.administration.feed.VirtualDimension;
 import com.easyinsight.analysis.conditions.ConditionRenderer;
 	import com.easyinsight.analysis.conditions.NoConditionRenderer;
 	import com.easyinsight.analysis.formatter.FormattingConfiguration;
-	
-	import mx.formatters.Formatter;
+
+import mx.controls.Label;
+import mx.core.UIComponent;
+import mx.formatters.Formatter;
 		
 	[Bindable]
 	[RemoteClass(alias="com.easyinsight.analysis.AnalysisItem")]
@@ -23,6 +25,12 @@ import com.easyinsight.analysis.conditions.ConditionRenderer;
 		public function AnalysisItem() {
 			super();
 		}
+
+        public function createDropItemElement(dropArea:DropArea):UIComponent {
+            var dropAreaLabel:Label = new Label();
+            dropAreaLabel.text = display;
+            return dropAreaLabel;
+        }
 		
 		public function get display():String {
 			if (displayName != null) {
