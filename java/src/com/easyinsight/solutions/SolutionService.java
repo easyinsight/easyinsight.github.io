@@ -359,7 +359,13 @@ public class SolutionService {
             DataStorage sourceTable = DataStorage.writeConnection(feedDefinition, conn);
             DataSet dataSet;
             try {
-                dataSet = sourceTable.retrieveData(feedDefinition.getFields(), null, null, null, null);
+                Set<AnalysisItem> validQueryItems = new HashSet<AnalysisItem>();
+                for (AnalysisItem analysisItem : feedDefinition.getFields()) {
+                    if (!analysisItem.isDerived()) {
+                        validQueryItems.add(analysisItem);
+                    }
+                }
+                dataSet = sourceTable.retrieveData(validQueryItems, null, null, null, null);
             } finally {
                 sourceTable.closeConnection();
             }

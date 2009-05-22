@@ -222,6 +222,10 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
         
     }
 
+    public boolean isValid() {
+        return true;
+    }
+
     public void afterLoad() {
         if (virtualDimension != null) {
             for (VirtualTransform transform : virtualDimension.getVirtualTransforms()) {

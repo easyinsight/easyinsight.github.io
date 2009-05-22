@@ -221,11 +221,6 @@
             return analysisItem;
         }
 
-        protected function getDefaultStart():String {
-            return null;
-        }
-
-
         private function aggregationTypeChanged(event:DropdownEvent):void {
             var newAggregationType:String = event.currentTarget.selectedLabel;
             aggregationChange(newAggregationType);

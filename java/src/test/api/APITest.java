@@ -72,9 +72,9 @@ public class APITest extends TestCase {
         long dataSourceID = getDataSource(apiKey);
         DataService dataService = new DataService();
         ListDataResults listResults = dataService.list(getDefinition(dataSourceID), new InsightRequestMetadata());
-        assertEquals(listResults.getRows().length, 1);
+        assertEquals(1, listResults.getRows().length);
         ListRow row = listResults.getRows()[0];
-        assertEquals(row.getValues().length, 3);
+        assertEquals(3, row.getValues().length);
     }
 
     private void validateAddRowsResults(String apiKey) throws SQLException {
@@ -83,7 +83,7 @@ public class APITest extends TestCase {
         ListDataResults listResults = dataService.list(getDefinition(dataSourceID), new InsightRequestMetadata());
         assertEquals(listResults.getRows().length, 2);
         ListRow row = listResults.getRows()[0];
-        assertEquals(row.getValues().length, 3);
+        assertEquals(3, row.getValues().length);
     }
 
     private void validateUpdateRowResults(String apiKey) throws SQLException {

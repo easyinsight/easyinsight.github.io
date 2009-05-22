@@ -36,8 +36,12 @@ public class SixSigmaMeasure extends AnalysisMeasure {
     @Override
     public void updateIDs(Map<Long, AnalysisItem> replacementMap) {
         super.updateIDs(replacementMap);
-        totalDefectsMeasure = (AnalysisMeasure) replacementMap.get(totalDefectsMeasure.getAnalysisItemID());
-        totalOpportunitiesMeasure = (AnalysisMeasure) replacementMap.get(totalOpportunitiesMeasure.getAnalysisItemID());
+        if (totalDefectsMeasure != null) {
+            totalDefectsMeasure = (AnalysisMeasure) replacementMap.get(totalDefectsMeasure.getAnalysisItemID());
+        }
+        if (totalOpportunitiesMeasure != null) {
+            totalOpportunitiesMeasure = (AnalysisMeasure) replacementMap.get(totalOpportunitiesMeasure.getAnalysisItemID());
+        }
     }
 
     public int getSigmaType() {
@@ -148,5 +152,10 @@ public class SixSigmaMeasure extends AnalysisMeasure {
         List<AnalysisItem> items = new ArrayList<AnalysisItem>();
         items.add(this);
         return items;
+    }
+
+    @Override
+    public boolean isValid() {
+        return getTotalDefectsMeasure() != null && getTotalOpportunitiesMeasure() != null;
     }
 }

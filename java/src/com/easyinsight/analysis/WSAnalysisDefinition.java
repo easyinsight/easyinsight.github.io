@@ -223,11 +223,13 @@ public abstract class WSAnalysisDefinition implements Serializable {
         Set<AnalysisItem> columnSet = new HashSet<AnalysisItem>();
         Set<AnalysisItem> analysisItems = getAllAnalysisItems();
         for (AnalysisItem analysisItem : analysisItems) {
-            List<AnalysisItem> items = analysisItem.getAnalysisItems(allItems, analysisItems);
-            for (AnalysisItem item : items) {
-                //if (item.getAnalysisItemID()) {
-                    columnSet.add(item);
-                //}
+            if (analysisItem.isValid()) {
+                List<AnalysisItem> items = analysisItem.getAnalysisItems(allItems, analysisItems);
+                for (AnalysisItem item : items) {
+                    //if (item.getAnalysisItemID()) {
+                        columnSet.add(item);
+                    //}
+                }
             }
         }
         if (getFilterDefinitions() != null) {

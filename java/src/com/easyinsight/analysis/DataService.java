@@ -145,7 +145,7 @@ public class DataService implements IDataService {
             Set<AnalysisItem> analysisItems = analysisDefinition.getColumnItems(feed.getFields());
             Set<AnalysisItem> validQueryItems = new HashSet<AnalysisItem>();
             for (AnalysisItem analysisItem : analysisItems) {
-                if (analysisItem.getAnalysisItemID() > 0) {
+                if (!analysisItem.isDerived()) {
                     validQueryItems.add(analysisItem);
                 }
             }

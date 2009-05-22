@@ -33,9 +33,11 @@ public abstract class Pipeline {
             }
         }
         for (AnalysisItem item : allRequestedAnalysisItems) {
-            allNeededAnalysisItems.addAll(item.getAnalysisItems(dataSource.getFields(), allRequestedAnalysisItems));
-            if (item.isVirtual()) {
-                allNeededAnalysisItems.add(item);
+            if (item.isValid()) {
+                allNeededAnalysisItems.addAll(item.getAnalysisItems(dataSource.getFields(), allRequestedAnalysisItems));
+                if (item.isVirtual()) {
+                    allNeededAnalysisItems.add(item);
+                }
             }
         }
         allNeededAnalysisItems.addAll(report.getLimitFields());

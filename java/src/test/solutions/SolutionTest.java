@@ -19,6 +19,7 @@ import com.easyinsight.analysis.definitions.WSColumnChartDefinition;
 import com.easyinsight.database.Database;
 import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.users.Credentials;
+import com.easyinsight.core.NamedKey;
 import test.util.TestUtil;
 
 import java.util.Arrays;
@@ -43,8 +44,22 @@ public class SolutionTest extends TestCase {
         long dataSourceID = uploadService.createNewDefaultFeed("Default Data Source");
         FeedDefinition feedDefinition = new FeedStorage().getFeedDefinitionData(dataSourceID);
         AnalysisDimension customer = new AnalysisDimension("customer", true);
+        AnalysisDimension region = new AnalysisDimension("region", true);
         AnalysisMeasure amount = new AnalysisMeasure("amount", AggregationTypes.SUM);
-        feedDefinition.setFields(Arrays.asList(customer, amount));
+        AnalysisRangeDimension range = new AnalysisRangeDimension(new NamedKey("Range"), true);
+        AnalysisList list = new AnalysisList(new NamedKey("List"), true, ",");
+        AnalysisDateDimension startDate = new AnalysisDateDimension("Start", true, AnalysisDateDimension.DAY_LEVEL);
+        AnalysisDateDimension endDate = new AnalysisDateDimension("End", true, AnalysisDateDimension.DAY_LEVEL);
+        AnalysisStep step = new AnalysisStep(new NamedKey("Step"), true, AnalysisDateDimension.DAY_LEVEL, startDate, endDate, customer);
+        AnalysisHierarchyItem hierarchyItem = new AnalysisHierarchyItem();
+        HierarchyLevel regionLevel = new HierarchyLevel();
+        regionLevel.setAnalysisItem(region);
+        HierarchyLevel customerLevel = new HierarchyLevel();
+        customerLevel.setAnalysisItem(customer);
+        hierarchyItem.setHierarchyLevel(customerLevel);
+        hierarchyItem.setHierarchyLevels(Arrays.asList(regionLevel, customerLevel));
+        hierarchyItem.setKey(new NamedKey("Hierarchy"));
+        feedDefinition.setFields(Arrays.asList(customer, amount, region, range, list, startDate, endDate, step));
         new FeedService().updateFeedDefinition(feedDefinition, null, null);
         ValidatingPublishService validatingPublishService = new ValidatingPublishService() {
 

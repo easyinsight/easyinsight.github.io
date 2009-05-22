@@ -1,8 +1,5 @@
 package com.easyinsight.analysis;
 
-import org.hibernate.proxy.HibernateProxy;
-import org.hibernate.Hibernate;
-
 import javax.persistence.*;
 import java.util.*;
 
@@ -49,17 +46,29 @@ public class AnalysisStep extends AnalysisDateDimension {
     @Override
     public void updateIDs(Map<Long, AnalysisItem> replacementMap) {
         super.updateIDs(replacementMap);
-        setStartDate((AnalysisDateDimension) replacementMap.get(startDate.getAnalysisItemID()));
-        setEndDate((AnalysisDateDimension) replacementMap.get(endDate.getAnalysisItemID()));
-        setCorrelationDimension((AnalysisDimension) replacementMap.get(correlationDimension.getAnalysisItemID()));
+        if (startDate != null) {
+            setStartDate((AnalysisDateDimension) replacementMap.get(startDate.getAnalysisItemID()));
+        }
+        if (endDate != null) {
+            setEndDate((AnalysisDateDimension) replacementMap.get(endDate.getAnalysisItemID()));
+        }
+        if (correlationDimension != null) {
+            setCorrelationDimension((AnalysisDimension) replacementMap.get(correlationDimension.getAnalysisItemID()));
+        }
     }
 
     @Override
     public void afterLoad() {
         super.afterLoad();
-        setStartDate((AnalysisDateDimension) Database.deproxy(getStartDate()));
-        setEndDate((AnalysisDateDimension) Database.deproxy(getEndDate()));
-        setCorrelationDimension((AnalysisDimension) Database.deproxy(getCorrelationDimension()));
+        if (startDate != null) {
+            setStartDate((AnalysisDateDimension) Database.deproxy(getStartDate()));
+        }
+        if (endDate != null) {
+            setEndDate((AnalysisDateDimension) Database.deproxy(getEndDate()));
+        }
+        if (correlationDimension != null) {
+            setCorrelationDimension((AnalysisDimension) Database.deproxy(getCorrelationDimension()));
+        }
     }
 
     public void setStartDate(AnalysisDateDimension startDate) {
@@ -91,10 +100,20 @@ public class AnalysisStep extends AnalysisDateDimension {
     public List<AnalysisItem> getAnalysisItems(List<AnalysisItem> allItems, Collection<AnalysisItem> insightItems) {
         List<AnalysisItem> items = new ArrayList<AnalysisItem>();
         items.add(startDate);
-        startDate.setDateLevel(AnalysisDateDimension.DAY_LEVEL);
+        startDate.setDateLevel(getDateLevel());
         items.add(endDate);
-        endDate.setDateLevel(AnalysisDateDimension.DAY_LEVEL);
+        endDate.setDateLevel(getDateLevel());
         items.add(correlationDimension);
         return items;
+    }
+
+    @Override
+    public boolean isDerived() {
+        return true;
+    }
+
+    @Override
+    public boolean isValid() {
+        return startDate != null && endDate != null && correlationDimension != null;
     }
 }

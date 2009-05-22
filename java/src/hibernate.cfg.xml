@@ -8,7 +8,7 @@
     <session-factory>
 
         <!-- Database connection settings -->
-        <property name="connection.driver_class">org.gjt.mm.mysql.Driver</property>
+        <property name="connection.driver_class">com.mysql.jdbc.Driver</property>
                       <!--
         <property name="hibernate.dbcp.maxWait">20000</property>
         <property name="hibernate.dbcp.maxIdle">5</property>
