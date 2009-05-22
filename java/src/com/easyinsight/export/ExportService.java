@@ -79,7 +79,7 @@ public class ExportService {
         workbook.setSheetName(0, "Data");
         HSSFRow headerRow = sheet.createRow(0);
         Map<AnalysisItem, Short> positionMap = new HashMap<AnalysisItem, Short>();
-        List<AnalysisItem> items = new ArrayList<AnalysisItem>(listDefinition.getAllAnalysisItems().size());
+        List<AnalysisItem> items = new ArrayList<AnalysisItem>(listDefinition.getAllAnalysisItems());
         for (short i = 0; i < items.size(); i++) {
             AnalysisItem analysisItem = items.get(i);
             positionMap.put(analysisItem, i);
