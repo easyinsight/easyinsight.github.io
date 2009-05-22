@@ -10,11 +10,22 @@ public class AnalysisItemDetailEditor extends Form {
     private var _dimensionFields:ArrayCollection;
     private var _dateDimensionFields:ArrayCollection;
     private var _measureObjects:ArrayCollection;
+    private var _measureFields:ArrayCollection;
 
     public function AnalysisItemDetailEditor() {
         super();
     }
 
+    [Bindable]
+    public function get measureFields():ArrayCollection {
+        return _measureFields;
+    }
+
+    public function set measureFields(value:ArrayCollection):void {
+        if (_measureFields == value) return;
+        _measureFields = value;
+        dispatchEvent(new FlexEvent(FlexEvent.DATA_CHANGE));
+    }
 
     [Bindable]
     public function get measureObjects():ArrayCollection {

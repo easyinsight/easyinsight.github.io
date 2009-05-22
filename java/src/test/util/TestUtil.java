@@ -57,6 +57,7 @@ public class TestUtil {
         dataStorage.insertData(dataSet);
         dataStorage.commit();
         conn.commit();
+        dataStorage.closeConnection();
         conn.setAutoCommit(true);
         Database.instance().closeConnection(conn);
         return feedDefinition.getDataFeedID();

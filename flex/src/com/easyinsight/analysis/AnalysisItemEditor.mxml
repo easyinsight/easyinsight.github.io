@@ -21,17 +21,17 @@
             </mx:AddChild>
         </mx:State>
 
-        <mx:State name="TemporalMeasure">
+        <mx:State name="SixSigmaMeasure">
             <mx:AddChild relativeTo="{firstForm}" position="after" creationPolicy="all">
-                <analysis:TemporalMeasureDetailEditor addedToStage="detailEditor = temporalDetailEditor" id="temporalDetailEditor"
-                        dimensionFields="{dimensionFields}" dateDimensionFields="{dateFields}"
+                <analysis:SixSigmaDetailEditor addedToStage="detailEditor = sigmaDetailEditor" id="sigmaDetailEditor"
+                        dimensionFields="{dimensionFields}" dateDimensionFields="{dateFields}" measureFields="{measureFields}"
                         measureObjects="{measureObjects}" analysisItem="{startingAnalysisItem}"/>
             </mx:AddChild>
         </mx:State>
 
-        <mx:State name="Calculation">
+        <mx:State name="TemporalMeasure">
             <mx:AddChild relativeTo="{firstForm}" position="after" creationPolicy="all">
-                <analysis:CalculationDetailEditor addedToStage="detailEditor = calculationDetailEditor" id="calculationDetailEditor"
+                <analysis:TemporalMeasureDetailEditor addedToStage="detailEditor = temporalDetailEditor" id="temporalDetailEditor"
                         dimensionFields="{dimensionFields}" dateDimensionFields="{dateFields}"
                         measureObjects="{measureObjects}" analysisItem="{startingAnalysisItem}"/>
             </mx:AddChild>
@@ -44,6 +44,7 @@
                         measureObjects="{measureObjects}" analysisItem="{startingAnalysisItem}"/>
             </mx:AddChild>
         </mx:State>
+
         <mx:State name="Range">
             <mx:AddChild relativeTo="{firstForm}" position="after" creationPolicy="all">
                 <analysis:RangeDetailEditor addedToStage="detailEditor = rangeDetailEditor" id="rangeDetailEditor"
@@ -90,6 +91,8 @@
         private var dimensionFields:ArrayCollection = new ArrayCollection();
         [Bindable]
         private var dateFields:ArrayCollection = new ArrayCollection();
+        [Bindable]
+        private var measureFields:ArrayCollection = new ArrayCollection();
 
         private var detailEditor:AnalysisItemDetailEditor;
 
@@ -124,6 +127,9 @@
                 }
                 if (analysisItemWrapper.analysisItem.hasType(AnalysisItemTypes.DATE)) {
                     dateFields.addItem(analysisItemWrapper.analysisItem);
+                }
+                if (analysisItemWrapper.analysisItem.hasType(AnalysisItemTypes.MEASURE)) {
+                    measureFields.addItem(analysisItemWrapper.analysisItem);
                 }
             }
         }
@@ -198,7 +204,7 @@
         }
 
         protected function getComplexOptions():ArrayCollection {
-            return new ArrayCollection(["Delta", "Last Value", "Normality", "Step"]);
+            return new ArrayCollection(["Delta", "Last Value", "Normality", "Step", "Six Sigma"]);
         }
 
         public function save():AnalysisItem {
@@ -258,6 +264,9 @@
                     break;
                 case "Date":
                     currentState = "Date";
+                    break;
+                case "Six Sigma":
+                    currentState = "SixSigmaMeasure";
                     break;
             }
         }

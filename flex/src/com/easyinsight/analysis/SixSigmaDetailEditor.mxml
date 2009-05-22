@@ -1,0 +1,56 @@
+<?xml version="1.0" ?>
+<analysis:AnalysisItemDetailEditor xmlns:mx="http://www.adobe.com/2006/mxml"
+                                   xmlns:analysis="com.easyinsight.analysis.*" xmlns:util="com.easyinsight.util.*">
+    <mx:Script><![CDATA[
+        [Bindable]
+        private var defects:AnalysisMeasure;
+        [Bindable]
+        private var opportunities:AnalysisMeasure;
+        [Bindable]
+        private var sigmaType:int;
+
+        override public function createAnalysisItem(aggregation:String):AnalysisItem {
+            return new SixSigmaMeasure();
+        }
+
+        override public function set analysisItem(val:AnalysisItem):void {
+            super.analysisItem = val;
+            if (val is SixSigmaMeasure) {
+                var sigma:SixSigmaMeasure = val as SixSigmaMeasure;
+                sigmaType = sigma.sigmaType - 1;
+                defects = sigma.totalDefectsMeasure;
+                opportunities = sigma.totalOpportunitiesMeasure;
+            }
+        }
+
+        override public function save(analysisItem:AnalysisItem):void {
+            super.save(analysisItem);
+            var sigma:SixSigmaMeasure = analysisItem as SixSigmaMeasure;
+            sigma.totalDefectsMeasure = defectsComboBox.selectedItem as AnalysisMeasure;
+            sigma.totalOpportunitiesMeasure = opportunitiesComboBox.selectedItem as AnalysisMeasure;
+            sigma.sigmaType = sigmaTypeComboBox.selectedIndex + 1;
+        }
+        ]]></mx:Script>
+    <mx:FormItem label="Defects Measure: ">
+        <util:AnalysisItemComboBox dataProvider="{measureFields}" id="defectsComboBox" labelField="display"
+                                   selectedValue="{defects}"/>
+    </mx:FormItem>
+    <mx:FormItem label="Opportunities Measure: ">
+        <util:AnalysisItemComboBox dataProvider="{measureFields}" id="opportunitiesComboBox" labelField="display"
+                                   selectedValue="{opportunities}"/>
+    </mx:FormItem>
+    <mx:FormItem label="Six Sigma Type: ">
+        <mx:ComboBox id="sigmaTypeComboBox" selectedIndex="{sigmaType}" rowCount="4">
+            <mx:dataProvider>
+                <mx:ArrayCollection>
+                    <mx:Array>
+                        <mx:String>Defects per Million Opportunities</mx:String>
+                        <mx:String>Defect Percentage</mx:String>
+                        <mx:String>Yield Percentage</mx:String>
+                        <mx:String>Process Sigma</mx:String>
+                    </mx:Array>
+                </mx:ArrayCollection>
+            </mx:dataProvider>
+        </mx:ComboBox>
+    </mx:FormItem>
+</analysis:AnalysisItemDetailEditor>

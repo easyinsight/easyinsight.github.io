@@ -52,7 +52,7 @@ public class AnalysisDefinitionFactory {
         } else if (wsAnalysisDefinition.getDataFeedType().equals(AnalysisTypes.TREEMAP)) {
             WSTreeMapDefinition wsTree = (WSTreeMapDefinition) wsAnalysisDefinition;
             TreeMapDefinitionState treeMapDefinitionState = new TreeMapDefinitionState();
-            treeMapDefinitionState.setTreemapDefinitionID(wsTree.getTreeMapDefinitionID());
+            //treeMapDefinitionState.setTreemapDefinitionID(wsTree.getTreeMapDefinitionID());
             treeMapDefinitionState.setColorScheme(wsTree.getColorScheme());
             analysisDefinitionState = treeMapDefinitionState;
         } else if (wsAnalysisDefinition.getDataFeedType().equals(AnalysisTypes.TREE)) {

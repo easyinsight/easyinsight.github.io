@@ -15,7 +15,9 @@ package com.easyinsight.analysis.options
 			var option:String;
 			if (analysisItem.hasType(AnalysisItemTypes.MEASURE)) {
 				var analysisMeasure:AnalysisMeasure = analysisItem as AnalysisMeasure;
-				if (analysisMeasure.aggregation == AggregationTypes.SUM) {
+                if (analysisMeasure.hasType(AnalysisItemTypes.SIX_SIGMA_MEASURE)) {
+                    option = OptionTypeNames.SIXSIGMA;
+                } else if (analysisMeasure.aggregation == AggregationTypes.SUM) {
 					option = OptionTypeNames.SUM;
 				} else if (analysisMeasure.aggregation == AggregationTypes.AVERAGE) {
 					option = OptionTypeNames.AVERAGE;

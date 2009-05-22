@@ -13,10 +13,12 @@ import com.easyinsight.analysis.ReportDataEvent;
 
 import flash.events.Event;
 
+import mx.binding.utils.BindingUtils;
 import mx.collections.ArrayCollection;
 import mx.containers.HBox;
 import mx.controls.ComboBox;
 import mx.controls.Label;
+import mx.events.FlexEvent;
 
 public class TreeMapControlBar extends HBox implements IReportControlBar {
 
@@ -24,12 +26,14 @@ public class TreeMapControlBar extends HBox implements IReportControlBar {
     private var areaMeasureGrouping:ListDropAreaGrouping;
     private var colorMeasureGrouping:ListDropAreaGrouping;
     private var colorSchemeBox:ComboBox;
+    private var _colorScheme:int = 0;
     private var mapDefinition:TreeMapDefinition;
 
     public function TreeMapControlBar() {
         colorSchemeBox = new ComboBox();
         colorSchemeBox.addEventListener(Event.CHANGE, onSchemeChange);
         colorSchemeBox.dataProvider = new ArrayCollection([ "Depth", "Div-Red-Green", "Qualitative" ]);
+        BindingUtils.bindProperty(colorSchemeBox, "selectedIndex", this, "colorScheme");
         hierarchyGrouping = new ListDropAreaGrouping();
         hierarchyGrouping.maxElements = 1;
         hierarchyGrouping.dropAreaType = HierarchyDropArea;
@@ -43,6 +47,18 @@ public class TreeMapControlBar extends HBox implements IReportControlBar {
         colorMeasureGrouping.dropAreaType = MeasureDropArea;
         colorMeasureGrouping.addEventListener(AnalysisItemUpdateEvent.ANALYSIS_LIST_UPDATE, requestListData);
         setStyle("verticalAlign", "middle");
+    }
+
+
+    [Bindable]
+    public function get colorScheme():int {
+        return _colorScheme;
+    }
+
+    public function set colorScheme(value:int):void {
+        if (_colorScheme == value) return;
+        _colorScheme = value;
+        dispatchEvent(new FlexEvent(FlexEvent.DATA_CHANGE));
     }
 
     private function onSchemeChange(event:Event):void {
@@ -85,6 +101,7 @@ public class TreeMapControlBar extends HBox implements IReportControlBar {
 
     public function set analysisDefinition(analysisDefinition:AnalysisDefinition):void {
         mapDefinition = analysisDefinition as TreeMapDefinition;
+        colorScheme = mapDefinition.colorScheme - 1;
     }
 
     public function createAnalysisDefinition():AnalysisDefinition {

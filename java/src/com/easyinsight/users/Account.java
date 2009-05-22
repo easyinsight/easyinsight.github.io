@@ -325,6 +325,8 @@ public class Account {
         switch(tier) {
             case Account.INDIVIDUAL:
                 return INDIVIDUAL_MAX;
+            case Account.GROUP:
+                return PROFESSIONAL_MAX;
             case Account.PROFESSIONAL:
                 return PROFESSIONAL_MAX;
             case Account.ENTERPRISE:

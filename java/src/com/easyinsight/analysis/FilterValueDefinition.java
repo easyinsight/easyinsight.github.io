@@ -110,8 +110,25 @@ public class FilterValueDefinition extends FilterDefinition {
             for (Value value : valueSet) {
                 preparedStatement.setString(start++, value.toString());
             }
+        } else if (type == Value.EMPTY) {
+            for (Value value : valueSet) {
+                preparedStatement.setString(start++, value.toString());
+            }
         }
         return start;
+    }
+
+    @Override
+    public boolean validForQuery() {
+        if (!inclusive) return false;
+        if (filteredValues.size() == 1) {
+            Object value = filteredValues.get(0);
+            if (value instanceof String) {
+                String string = (String) value;
+                return !"".equals(string);
+            }
+        }
+        return filteredValues.size() > 0;
     }
 
     public MaterializedFilterDefinition materialize(InsightRequestMetadata insightRequestMetadata) {

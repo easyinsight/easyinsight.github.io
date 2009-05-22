@@ -221,7 +221,7 @@ public class DataStorage {
         } catch (SQLException e) {
             LogClass.error(e);
         }
-        Database.instance().closeConnection(storageConn);
+        database.closeConnection(storageConn);
         storageConn = null;
     }
 
@@ -420,7 +420,7 @@ public class DataStorage {
         Collection<FilterDefinition> eligibleFilters = new ArrayList<FilterDefinition>();
         if (filters != null) {
             for (FilterDefinition filterDefinition : filters) {
-                if (filterDefinition.isApplyBeforeAggregation()) {
+                if (filterDefinition.isApplyBeforeAggregation() && filterDefinition.validForQuery()) {
                     eligibleFilters.add(filterDefinition);
                 }
             }
@@ -469,7 +469,7 @@ public class DataStorage {
             for (FilterDefinition filterDefinition : filters) {
                 KeyMetadata keyMetadata = keys.get(filterDefinition.getField().getKey());
                 int type = keyMetadata.type;
-                filterDefinition.populatePreparedStatement(queryStmt, i, type, insightRequestMetadata);
+                i = filterDefinition.populatePreparedStatement(queryStmt, i, type, insightRequestMetadata);
             }
         }
     }
