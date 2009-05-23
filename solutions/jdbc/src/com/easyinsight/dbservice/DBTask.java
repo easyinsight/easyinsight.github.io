@@ -19,10 +19,10 @@ public class DBTask extends TimerTask {
     public DBTask() {
         String storageMechanism = System.getProperty("ei.storage", "xml");
         if ("database".equals(storageMechanism)) {
-            System.out.println("Using jdbc storage...");
+            LogClass.info("Using jdbc storage...");
             storage = new DerbyBackedStorage();
         } else {
-            System.out.println("Using xml storage...");
+            LogClass.info("Using xml storage...");
             storage = new XMLBackedStorage();
         }
         run();
@@ -37,13 +37,12 @@ public class DBTask extends TimerTask {
                 DBConfiguration dbConfiguration = storage.getDBConfiguration();
                 if (eiConfiguration != null && dbConfiguration != null) {
                     URL url = new URL(MessageFormat.format(DBRemote.VALIDATED_ENDPOINT, eiHost));
-                    System.out.println("url = " + url.toString());
                     BasicAuthValidatedPublish service = new BasicAuthValidatingPublishServiceServiceLocator().getBasicAuthValidatingPublishServicePort(url);
                     ((BasicAuthValidatingPublishServiceServiceSoapBindingStub)service).setUsername(eiConfiguration.getUserName());
                     ((BasicAuthValidatingPublishServiceServiceSoapBindingStub)service).setPassword(eiConfiguration.getPassword());
                     for (QueryConfiguration queryConfiguration : queryConfigs) {
                         QueryValidatedPublish publish = new QueryValidatedPublish(queryConfiguration, service);
-                        System.out.println("Running " + queryConfiguration.getName());
+                        LogClass.info("Running " + queryConfiguration.getName());
                         publish.execute(dbConfiguration);
                     }
                 }
@@ -51,7 +50,7 @@ public class DBTask extends TimerTask {
                 // ignore
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            LogClass.error(e);
         }
     }
 

@@ -1,5 +1,7 @@
 package com.easyinsight.dbservice.admin;
 
+import com.easyinsight.dbservice.LogClass;
+
 import javax.servlet.http.HttpServlet;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
@@ -18,23 +20,23 @@ public class InternalDBServlet extends HttpServlet {
             String dbURL = "jdbc:derby:eijdbc";
             Connection conn;
             try {
-                System.out.println("Checking internal database...");
+                LogClass.info("Checking internal database...");
                 conn = DriverManager.getConnection(dbURL);
                 Statement queryVersionStmt = conn.createStatement();
                 ResultSet versionRS = queryVersionStmt.executeQuery("SELECT DATABASE_VERSION FROM DATABASE_VERSION");
                 versionRS.next();
                 int version = versionRS.getInt(1);
-                System.out.println("Checking database version...");
+                LogClass.info("Checking database version...");
                 applyMigrations(version);
             } catch (SQLException e) {
-                System.out.println("No internal database found, creating new..");
+                LogClass.info("No internal database found, creating new..");
                 dbURL = "jdbc:derby:eijdbc;create=true";
                 conn = DriverManager.getConnection(dbURL);
                 conn.setAutoCommit(false);
                 try {
                     newDatabase(conn);
                     conn.commit();
-                    System.out.println("Created new internal database.");
+                    LogClass.info("Created new internal database.");
                 } catch (SQLException e1) {
                     conn.rollback();
                     throw e1;
@@ -44,13 +46,13 @@ public class InternalDBServlet extends HttpServlet {
             }
             conn.close();
         } catch (Exception e) {
-            e.printStackTrace();
+            LogClass.error(e);
             throw new ServletException(e);
         }
     }
 
     private void applyMigrations(int version) {
-        System.out.println("Up to date.");
+        LogClass.info("Up to date.");
     }
 
     private void newDatabase(Connection conn) throws SQLException {

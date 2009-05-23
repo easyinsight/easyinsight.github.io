@@ -42,7 +42,7 @@ public class DBService {
             startTasks();
             startWebServer();
         } catch (Exception e) {
-            e.printStackTrace();
+            LogClass.error(e);
             throw new RuntimeException(e);
         }
     }

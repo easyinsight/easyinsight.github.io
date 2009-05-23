@@ -28,13 +28,13 @@ public class DerbyBackedStorage implements IStorage {
                 }
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            LogClass.error(e);
             throw new RuntimeException(e);
         } finally {
             try {
                 conn.close();
             } catch (SQLException e) {
-                e.printStackTrace();
+                LogClass.error(e);
             }
         }
         return dbConfiguration;
@@ -54,13 +54,13 @@ public class DerbyBackedStorage implements IStorage {
                 eiConfiguration.setPassword(password);
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            LogClass.error(e);
             throw new RuntimeException(e);
         } finally {
             try {
                 conn.close();
             } catch (SQLException e) {
-                e.printStackTrace();
+                LogClass.error(e);
             }
         }
         return eiConfiguration;
@@ -71,7 +71,7 @@ public class DerbyBackedStorage implements IStorage {
             String dbURL = "jdbc:derby:eijdbc";
             return DriverManager.getConnection(dbURL);
         } catch (SQLException e) {
-            System.out.println("No internal database found.");
+            LogClass.info("No internal database found.");
             throw new NoDatabaseException();
         }
     }
@@ -99,13 +99,13 @@ public class DerbyBackedStorage implements IStorage {
                 queryConfigurations.add(queryConfiguration);
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            LogClass.error(e);
             throw new RuntimeException(e);
         } finally {
             try {
                 conn.close();
             } catch (SQLException e) {
-                e.printStackTrace();
+                LogClass.error(e);
             }
         }
         return queryConfigurations;

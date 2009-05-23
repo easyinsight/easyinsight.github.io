@@ -30,13 +30,13 @@ public class MetadataStorage {
                 }
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            LogClass.error(e);
             throw new RuntimeException(e);
         } finally {
             try {
                 conn.close();
             } catch (SQLException e) {
-                e.printStackTrace();
+                LogClass.error(e);
             }
         }
         return dbConfiguration;
@@ -56,13 +56,13 @@ public class MetadataStorage {
                 eiConfiguration.setPassword(password);
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            LogClass.error(e);
             throw new RuntimeException(e);
         } finally {
             try {
                 conn.close();
             } catch (SQLException e) {
-                e.printStackTrace();
+                LogClass.error(e);
             }
         }
         return eiConfiguration;
@@ -73,7 +73,7 @@ public class MetadataStorage {
             String dbURL = "jdbc:derby:eijdbc";
             return DriverManager.getConnection(dbURL);
         } catch (SQLException e) {
-            e.printStackTrace();
+            LogClass.error(e);
             throw new RuntimeException(e);
         }
     }
@@ -101,13 +101,13 @@ public class MetadataStorage {
                 queryConfigurations.add(queryConfiguration);
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            LogClass.error(e);
             throw new RuntimeException(e);
         } finally {
             try {
                 conn.close();
             } catch (SQLException e) {
-                e.printStackTrace();
+                LogClass.error(e);
             }
         }
         return queryConfigurations;

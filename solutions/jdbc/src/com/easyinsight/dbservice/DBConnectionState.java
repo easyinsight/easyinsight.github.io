@@ -42,7 +42,7 @@ public class DBConnectionState {
             eiPassword = (String) properties.get("ei.password");
             dataSourceKey = (String) properties.get("datasource.key");
         } catch (IOException e) {
-            e.printStackTrace();
+            LogClass.error(e);
             throw new RuntimeException(e);
         }
     }

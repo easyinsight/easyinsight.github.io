@@ -50,7 +50,7 @@ public class DBRemote {
             QueryValidatedPublish publish = new QueryValidatedPublish(queryConfiguration, service);
             publish.execute(dbConfiguration);
         } catch (Exception e) {
-            e.printStackTrace();
+            LogClass.error(e);
             throw new RuntimeException(e);
         }
     }
@@ -74,13 +74,13 @@ public class DBRemote {
                 }
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            LogClass.error(e);
             throw new RuntimeException(e);
         } finally {
             try {
                 conn.close();
             } catch (SQLException e) {
-                e.printStackTrace();
+                LogClass.error(e);
             }
         }
         return dbConfiguration;
@@ -101,13 +101,13 @@ public class DBRemote {
                 eiConfigMap.put(FlexContext.getFlexSession().getId(), eiConfiguration);
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            LogClass.error(e);
             throw new RuntimeException(e);
         } finally {
             try {
                 conn.close();
             } catch (SQLException e) {
-                e.printStackTrace();
+                LogClass.error(e);
             }
         }
         return eiConfiguration;
@@ -130,7 +130,7 @@ public class DBRemote {
             dbConfiguration.save(conn);
             conn.commit();
         } catch (Exception e) {
-            e.printStackTrace();
+            LogClass.error(e);
             try {
                 conn.rollback();
             } catch (SQLException e1) {
@@ -142,7 +142,7 @@ public class DBRemote {
                 conn.setAutoCommit(true);
                 conn.close();
             } catch (SQLException e) {
-                e.printStackTrace();
+                LogClass.error(e);
             }
         }
     }
@@ -173,13 +173,13 @@ public class DBRemote {
             insertUserStmt.setString(2, new StringEncrypter(StringEncrypter.DES_ENCRYPTION_SCHEME).encrypt(eiConfiguration.getPassword()));
             insertUserStmt.execute();
         } catch (Exception e) {
-            e.printStackTrace();
+            LogClass.error(e);
             throw new RuntimeException(e);
         } finally {
             try {
                 conn.close();
             } catch (SQLException e) {
-                e.printStackTrace();
+                LogClass.error(e);
             }
         }
     }
@@ -201,7 +201,7 @@ public class DBRemote {
                 conn.close();
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            LogClass.error(e);
             throw new RuntimeException(e);
         }
         return tables;
@@ -229,7 +229,7 @@ public class DBRemote {
                 conn.close();
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            LogClass.error(e);
             throw new RuntimeException(e);
         }
         return columns;
@@ -242,13 +242,13 @@ public class DBRemote {
             deleteStmt.setLong(1, queryConfigurationID);
             deleteStmt.executeUpdate();
         } catch (Exception e) {
-            e.printStackTrace();
+            LogClass.error(e);
             throw new RuntimeException(e);
         } finally {
             try {
                 conn.close();
             } catch (SQLException e) {
-                e.printStackTrace();
+                LogClass.error(e);
             }
         }
     }
@@ -285,7 +285,7 @@ public class DBRemote {
             }
             return testQueryResults;
         } catch (Exception e) {
-            e.printStackTrace();
+            LogClass.error(e);
             throw new RuntimeException(e);
         }
     }
@@ -309,7 +309,7 @@ public class DBRemote {
             service.disableUnchecked(queryConfiguration.getDataSource());
             conn.commit();
         } catch (Exception e) {
-            e.printStackTrace();
+            LogClass.error(e);
             try {
                 conn.rollback();
             } catch (SQLException e1) {
@@ -321,7 +321,7 @@ public class DBRemote {
                 conn.setAutoCommit(true);
                 conn.close();
             } catch (SQLException e) {
-                e.printStackTrace();
+                LogClass.error(e);
             }
         }
     }
@@ -377,7 +377,7 @@ public class DBRemote {
                 conn.close();
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            LogClass.error(e);
             throw new RuntimeException(e);
         }
         return apiKey;
@@ -388,7 +388,7 @@ public class DBRemote {
             String dbURL = "jdbc:derby:eijdbc";
             return DriverManager.getConnection(dbURL);
         } catch (SQLException e) {
-            e.printStackTrace();
+            LogClass.error(e);
             throw new RuntimeException(e);
         }
     }
@@ -412,13 +412,13 @@ public class DBRemote {
                 throw new RuntimeException();
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            LogClass.error(e);
             throw new RuntimeException(e);
         } finally {
             try {
                 conn.close();
             } catch (SQLException e) {
-                e.printStackTrace();
+                LogClass.error(e);
             }
         }
     }
@@ -446,13 +446,13 @@ public class DBRemote {
                 queryConfigurations.add(queryConfiguration);
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            LogClass.error(e);
             throw new RuntimeException(e);
         } finally {
             try {
                 conn.close();
             } catch (SQLException e) {
-                e.printStackTrace();
+                LogClass.error(e);
             }
         }
         return queryConfigurations;

@@ -21,7 +21,7 @@ public class XMLBackedStorage implements IStorage {
         try {
             return DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(file);
         } catch (Exception e) {
-            e.printStackTrace();
+            LogClass.error(e);
             throw new RuntimeException(e);
         }
     }
@@ -31,7 +31,7 @@ public class XMLBackedStorage implements IStorage {
         try {
             return DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(file);
         } catch (Exception e) {
-            e.printStackTrace();
+            LogClass.error(e);
             throw new RuntimeException(e);
         }
     }
@@ -85,7 +85,7 @@ public class XMLBackedStorage implements IStorage {
             }
             return eiConfiguration;
         } catch (StringEncrypter.EncryptionException e) {
-            e.printStackTrace();
+            LogClass.error(e);
             throw new RuntimeException(e);
         }
     }
@@ -111,15 +111,8 @@ public class XMLBackedStorage implements IStorage {
             }
             return dbConfiguration;
         } catch (StringEncrypter.EncryptionException e) {
-            e.printStackTrace();
+            LogClass.error(e);
             throw new RuntimeException(e);
         }
-    }
-
-    public static void main(String[] args) {
-        new XMLBackedStorage().getEIConfiguration();        
-        DBConfiguration dBConfiguration = new XMLBackedStorage().getDBConfiguration();
-        List<QueryConfiguration> queryList = new XMLBackedStorage().getQueryConfigurations();
-        System.out.println(queryList.size());
     }
 }
