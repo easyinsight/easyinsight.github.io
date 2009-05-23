@@ -84,6 +84,7 @@ public class StepTest extends TestCase {
         analysisStep.setEndDate(endedDate);
         analysisStep.setGroup(true);
         analysisStep.setKey(new NamedKey("Step"));
+        analysisStep.setDateLevel(AnalysisDateDimension.DAY_LEVEL);
 
         DataSet dataSet = new DataSet();
         IRow rowA = dataSet.createRow();
