@@ -43,6 +43,7 @@ public class StepTest extends TestCase {
         analysisStep.setEndDate(endedDate);
         analysisStep.setGroup(true);
         analysisStep.setKey(new NamedKey("Step"));
+        analysisStep.setDateLevel(AnalysisDateDimension.DAY_LEVEL);
 
         WSListDefinition listDefinition = new WSListDefinition();
         listDefinition.setColumns(Arrays.asList(analysisStep, count));
