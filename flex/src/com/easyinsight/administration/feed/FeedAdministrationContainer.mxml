@@ -205,7 +205,7 @@
                     detailValidated = feedAdminDetail.validate();
                 }
             	if (results.length > 0 || !detailValidated) {
-            		Alert.show("There are one or more errors which must be fixed before you can save this feed.");
+            		Alert.show("There are one or more errors which must be fixed before you can save this data source.");
             	} else {
                     //var analysisDefinition:AnalysisDefinition = dataAnalysisContainer.getAnalysisDefinition();
                     var analysisItems:ArrayCollection = fieldAdministration.createFields();                    

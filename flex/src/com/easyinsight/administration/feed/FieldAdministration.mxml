@@ -149,12 +149,10 @@
                 }
                 if (found) {
                     index++;
+                    baseName = baseName + " " + index;
                 } else {
                     valid = true;
                 }
-            }
-            if (index > 0) {
-                baseName = baseName + " " + index;
             }
             var key:NamedKey = new NamedKey();
             key.name = baseName;
