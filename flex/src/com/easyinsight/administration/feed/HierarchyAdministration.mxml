@@ -92,7 +92,7 @@
                     var item:Object = data.getItemAt(i);
                     if (item is AnalysisItem) {
                         var analysisItem:AnalysisItem = item as AnalysisItem;
-                        if (analysisItem.display == newItem.display) {
+                        if (analysisItem.qualifiedName() == newItem.qualifiedName()) {
                             var hierarchyLevel:HierarchyLevel = new HierarchyLevel();
                             hierarchyLevel.analysisItem = newItem;
                             data.removeItemAt(i);

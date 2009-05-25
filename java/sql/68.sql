@@ -4,8 +4,8 @@ alter table time_based_analysis_measure add constraint time_based_analysis_measu
 alter table upload_policy_groups add constraint upload_policy_groups_ibfk1 foreign key (feed_id) references data_feed (data_feed_id) on delete cascade;
 alter table upload_policy_groups add constraint upload_policy_groups_ibfk2 foreign key (group_id) references community_group (community_group_id) on delete cascade;
 
-delete upload_policy_users from upload_policy_users left join data_feed on upload_policy_users.feed_id = data_feed.data_feed_id where data_feed.data_feed_id is null;
-delete upload_policy_users from upload_policy_users left join user on upload_policy_users.user_id = user.user_id where user.user_id is null;
+# delete upload_policy_users from upload_policy_users left join data_feed on upload_policy_users.feed_id = data_feed.data_feed_id where data_feed.data_feed_id is null;
+# delete upload_policy_users from upload_policy_users left join user on upload_policy_users.user_id = user.user_id where user.user_id is null;
 
 alter table upload_policy_users add constraint upload_policy_users_ibfk1 foreign key (feed_id) references data_feed (data_feed_id) on delete cascade;
 alter table upload_policy_users add constraint upload_policy_users_ibfk2 foreign key (user_id) references user (user_id) on delete cascade;
@@ -16,10 +16,10 @@ alter table analysis_to_data_scrub change data_scrub_id data_scrub_id bigint(20)
 alter table analysis_to_data_scrub add constraint analysis_to_data_scrub_ibfk1 foreign key (analysis_id) references analysis_item (analysis_item_id) on delete cascade;
 alter table analysis_to_data_scrub add constraint analysis_to_data_scrub_ibfk2 foreign key (data_scrub_id) references data_scrub (data_scrub_id) on delete cascade;
 
-truncate data_scrub;
-truncate lookup_table_scrub;
-truncate lookup_table_scrub_pair;
-truncate text_replace_scrub;
+# truncate data_scrub;
+# truncate lookup_table_scrub;
+# truncate lookup_table_scrub_pair;
+# truncate text_replace_scrub;
 
 alter table lookup_table_scrub change data_scrub_id data_scrub_id bigint(20) not null;
 alter table lookup_table_scrub change source_key source_key bigint(20) not null;

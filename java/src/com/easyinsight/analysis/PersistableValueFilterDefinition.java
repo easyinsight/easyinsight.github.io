@@ -8,6 +8,7 @@ import javax.persistence.*;
 import java.util.Set;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.HashSet;
 
 /**
  * User: James Boe
@@ -25,6 +26,17 @@ public class PersistableValueFilterDefinition extends PersistableFilterDefinitio
                joinColumns=@JoinColumn(name="filter_id"),
                inverseJoinColumns=@JoinColumn(name="value_id"))
     private Set<PersistableValue> filterValues;
+
+    @Override
+    public PersistableFilterDefinition clone() throws CloneNotSupportedException {
+        PersistableValueFilterDefinition filter = (PersistableValueFilterDefinition) super.clone();
+        Set<PersistableValue> values = new HashSet<PersistableValue>();
+        for (PersistableValue value : filterValues) {
+            values.add(value.clone());
+        }
+        filter.setFilterValues(values);
+        return filter;
+    }
 
     public Set<PersistableValue> getFilterValues() {
         return filterValues;

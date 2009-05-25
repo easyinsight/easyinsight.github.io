@@ -3,7 +3,8 @@
 	creationComplete="addEventListener(KeyboardEvent.KEY_UP, keyHit); focusManager.setFocus(analysisName);
 	validators = [nameValidator]">
 	<mx:Script>
-		<![CDATA[
+		<![CDATA[                    
+                    import com.easyinsight.analysis.AnalysisUtil;
                     import com.easyinsight.analysis.SavedAnalysisEvent;
                     import com.easyinsight.util.ProgressAlert;
 
@@ -20,10 +21,8 @@
                     private function save():void {
                         var results:Array = Validator.validateAll(validators);
                         if (results.length == 0) {
-                            analysisDefinition.name = analysisName.text;
-                            ProgressAlert.alert(this, "Saving report...", null, analysisService.saveAnalysisDefinition);
-                            analysisService.saveAnalysisDefinition(analysisDefinition);
-                            dispatchEvent(new SavedAnalysisEvent(analysisName.text));
+                            ProgressAlert.alert(this, "Saving report...", null, analysisService.saveAs);
+                            analysisService.saveAs(analysisDefinition.analysisID, analysisName.text);
                             PopUpManager.removePopUp(this);
                         }
                     }
@@ -39,7 +38,9 @@
                     }
 
                     private function saved():void {
-                    	analysisDefinition.analysisID = analysisService.saveAnalysisDefinition.lastResult as int;
+                        var savedDef:AnalysisDefinition = analysisService.saveAs.lastResult as AnalysisDefinition;
+                        AnalysisUtil.updateReport(analysisDefinition, savedDef);
+                        dispatchEvent(new SavedAnalysisEvent(analysisName.text));                        
                         PopUpManager.removePopUp(this);
                     }
                 ]]>
@@ -57,6 +58,6 @@
 	</mx:VBox>
 	<mx:StringValidator source="{analysisName}" property="text" minLength="3" id="nameValidator"/>
 	<mx:RemoteObject id="analysisService" destination="analysisDefinition">
-		<mx:method name="saveAnalysisDefinition" result="saved()"/>
+		<mx:method name="saveAs" result="saved()"/>
 	</mx:RemoteObject>
 </mx:TitleWindow>

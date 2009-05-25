@@ -207,7 +207,7 @@
                 <mx:Button icon="{archiveIcon}" toolTip="Download" visible="{downloadAvailable}" click="download()"/>
             </mx:HBox>
             <mx:HBox>
-                <mx:VBox width="300">
+                <mx:VBox width="400">
                     <mx:VBox verticalGap="0" width="100%">
                         <mx:Box backgroundColor="#254BD4" height="5" width="100%"/>
                         <mx:Box width="100%" horizontalAlign="center" backgroundColor="#C7CBF0">
@@ -224,7 +224,6 @@
                                 <mx:Label text="{solutionAuthor}"/>
                             </mx:FormItem>
                             <mx:FormItem label="Downloadable File:" direction="horizontal" visible="{downloadAvailable}">
-                                <mx:Label text="File: "/>
                                 <mx:Label text="{solutionFileName}"/>
                                 <mx:Button icon="{archiveIcon}" click="download()" toolTip="Download File"/>
                             </mx:FormItem>

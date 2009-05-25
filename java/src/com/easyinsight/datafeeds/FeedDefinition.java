@@ -301,7 +301,21 @@ public class FeedDefinition implements Cloneable, Serializable {
     public Feed createFeed() {
         Feed feed = createFeedObject();
         feed.setFeedID(getDataFeedID());
-        feed.setFields(getFields());
+        Map<Long, AnalysisItem> replacementMap = new HashMap<Long, AnalysisItem>();
+        List<AnalysisItem> clones = new ArrayList<AnalysisItem>();
+        for (AnalysisItem field : getFields()) {
+            try {
+                AnalysisItem clone = field.clone();
+                clones.add(clone);
+                replacementMap.put(field.getAnalysisItemID(), clone);
+            } catch (CloneNotSupportedException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        for (AnalysisItem clone : clones) {
+            clone.updateIDs(replacementMap);
+        }
+        feed.setFields(clones);
         feed.setAnalysisDefinition(new AnalysisStorage().getAnalysisDefinition(analysisDefinitionID));
         feed.setName(getFeedName());
         return feed;

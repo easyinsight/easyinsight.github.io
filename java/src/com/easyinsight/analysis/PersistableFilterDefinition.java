@@ -3,6 +3,7 @@ package com.easyinsight.analysis;
 import com.easyinsight.analysis.AnalysisItem;
 
 import javax.persistence.*;
+import java.util.Map;
 
 /**
  * User: James Boe
@@ -12,7 +13,7 @@ import javax.persistence.*;
 @Entity
 @Table(name="filter")
 @Inheritance(strategy=InheritanceType.JOINED)
-public abstract class PersistableFilterDefinition {
+public abstract class PersistableFilterDefinition implements Cloneable {
     @Id
     @GeneratedValue(strategy= GenerationType.IDENTITY)
     @Column(name="filter_id")
@@ -23,6 +24,12 @@ public abstract class PersistableFilterDefinition {
 
     @Column(name="apply_before_aggregation")
     private boolean applyBeforeAggregation;
+
+    public PersistableFilterDefinition clone() throws CloneNotSupportedException {
+        PersistableFilterDefinition filter = (PersistableFilterDefinition) super.clone();
+        filter.setFilterId(0);
+        return filter;
+    }
 
     public boolean isApplyBeforeAggregation() {
         return applyBeforeAggregation;
@@ -52,5 +59,9 @@ public abstract class PersistableFilterDefinition {
 
     public void resetIDs() {
         this.filterId = 0;
+    }
+
+    public void updateIDs(Map<Long, AnalysisItem> replacementMap) {
+        setField(replacementMap.get(field.getAnalysisItemID()));
     }
 }

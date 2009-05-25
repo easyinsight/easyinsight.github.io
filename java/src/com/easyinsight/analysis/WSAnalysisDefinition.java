@@ -38,6 +38,7 @@ public abstract class WSAnalysisDefinition implements Serializable {
     private long analysisID;
     private long dataFeedID;
     private int reportType;
+    private long reportStateID;
     private List<FilterDefinition> filterDefinitions;
     private List<DataScrub> dataScrubs;
     private int policy;
@@ -48,6 +49,14 @@ public abstract class WSAnalysisDefinition implements Serializable {
     private boolean publiclyVisible;
     private boolean marketplaceVisible;
     private boolean visibleAtFeedLevel;
+
+    public long getReportStateID() {
+        return reportStateID;
+    }
+
+    public void setReportStateID(long reportStateID) {
+        this.reportStateID = reportStateID;
+    }
 
     public int getReportType() {
         return reportType;

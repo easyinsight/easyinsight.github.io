@@ -82,13 +82,13 @@ public class SolutionTest extends TestCase {
         listDefinition.setName("List");
         listDefinition.setColumns(Arrays.asList(getItem("customer", feedDefinition), getItem("amount", feedDefinition)));
         listDefinition.setDataFeedID(dataSourceID);
-        long listID = new AnalysisService().saveAnalysisDefinition(listDefinition);
+        long listID = new AnalysisService().saveAnalysisDefinition(listDefinition).getAnalysisID();
         WSColumnChartDefinition chartDefinition = new WSColumnChartDefinition();
         chartDefinition.setName("ColumnChart");
         chartDefinition.setDataFeedID(dataSourceID);
         chartDefinition.setMeasure(getItem("amount", feedDefinition));
         chartDefinition.setXaxis(getItem("customer", feedDefinition));
-        long chartID = new AnalysisService().saveAnalysisDefinition(chartDefinition);
+        long chartID = new AnalysisService().saveAnalysisDefinition(chartDefinition).getAnalysisID();
         Solution solution = new Solution();
         solution.setName("Blah");
         solution.setCopyData(true);

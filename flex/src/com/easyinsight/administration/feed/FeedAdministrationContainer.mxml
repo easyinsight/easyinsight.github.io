@@ -42,7 +42,6 @@
     </states>
 	<mx:Script>
 		<![CDATA[
-            import com.easyinsight.analysis.AnalysisHierarchyItem;
             import com.easyinsight.analysis.AnalysisChangedEvent;
             import com.easyinsight.analysis.CredentialsDefinition;
             import com.easyinsight.customupload.ExcelUploadFormat;
@@ -58,8 +57,6 @@
 			import com.easyinsight.analysis.AnalysisCloseEvent;
 			import mx.collections.ArrayCollection;
 			import com.easyinsight.analysis.AnalysisDefinition;
-			import com.easyinsight.DataAnalysisContainer;
-			import com.easyinsight.framework.DataService;
 			import com.easyinsight.customupload.UploadPolicy;
 
 
@@ -76,7 +73,6 @@
             private var feedAttribution:String;
             [Bindable]
 			private var feedOwnerName:String;
-			private var dataAnalysisContainer:DataAnalysisContainer;
             [Bindable]
             private var analysisDefinition:AnalysisDefinition;
 			private var feedType:int;
@@ -90,6 +86,9 @@
             private var passwordInputText:String;
             [Bindable]
             private var sessionIdInputText:String;
+
+            [Bindable]
+            private var haveFeed:Boolean = false;
 			
 			private var unsavedChanges:Boolean = false;
 
@@ -118,7 +117,7 @@
 				feedService.getFeedDefinition.send(_feedID);			
 			}
 
-            private function gotAnalysis():void {
+            /*private function gotAnalysis():void {
                 this.analysisDefinition = analysisService.openAnalysisDefinition.lastResult as AnalysisDefinition;
                 var dataService:DataService = new DataService();
 				dataService.dataFeedID = _feedID;
@@ -128,7 +127,7 @@
 				dataAnalysisContainer.feedAdministrationMode();
 				dataAnalysisContainer.openAnalysis(analysisDefinition);
 				fieldsBox.addChild(dataAnalysisContainer);
-            }
+            }*/
 			
 			private function gotFeedDefinition():void {				
 				this.feedDefinition = feedService.getFeedDefinition.lastResult as FeedDefinitionData;
@@ -184,8 +183,9 @@
 
                     }
                 }
+                haveFeed = true;
                 
-                analysisService.openAnalysisDefinition.send(feedDefinition.analysisDefinitionID);
+                //analysisService.openAnalysisDefinition.send(feedDefinition.analysisDefinitionID);
 			}	
             
             private function onChange(event:AnalysisChangedEvent):void {
@@ -195,7 +195,7 @@
             }
 
             private function onHierarchyDelete(event:DeleteHierarchyEvent):void {
-                dataAnalysisContainer.deleteItem(event.hierarchy);
+                //dataAnalysisContainer.deleteItem(event.hierarchy);
             }
             
             private function save():void {
@@ -207,15 +207,15 @@
             	if (results.length > 0 || !detailValidated) {
             		Alert.show("There are one or more errors which must be fixed before you can save this feed.");
             	} else {
-                    var analysisDefinition:AnalysisDefinition = dataAnalysisContainer.getAnalysisDefinition();
-                    var analysisItems:ArrayCollection = dataAnalysisContainer.getAnalysisItems();                    
-                    if (hierarchiesBox != null) {
+                    //var analysisDefinition:AnalysisDefinition = dataAnalysisContainer.getAnalysisDefinition();
+                    var analysisItems:ArrayCollection = fieldAdministration.createFields();                    
+                    /*if (hierarchiesBox != null) {
                         for each (var analysisItem:AnalysisHierarchyItem in hierarchiesBox.getHierarchies()) {
                             if (analysisItem.analysisItemID == 0) {
                                 analysisItems.addItem(analysisItem);
                             }
                         }
-                    }
+                    }*/
                     if (virtualBox != null) {
                         virtualBox.save();
                         for each (var dimension:VirtualDimension in virtualBox.getVirtualDimensions()) {
@@ -267,14 +267,14 @@
                     Alert.show("You have unsaved changes. Are you sure you want to exit?", "Alert",
 		                		Alert.OK | Alert.CANCEL, null, alertListener, null, Alert.CANCEL);
                 } else {
-                    dataAnalysisContainer.cleanup();
+               //     dataAnalysisContainer.cleanup();
                     dispatchEvent(new AnalysisCloseEvent(this));
                 }
             }
 
             private function alertListener(event:CloseEvent):void {
                 if (event.detail == Alert.OK) {
-                    dataAnalysisContainer.cleanup();
+                 //   dataAnalysisContainer.cleanup();
                     dispatchEvent(new AnalysisCloseEvent(this));
                 }
             }
@@ -311,10 +311,10 @@
 		<mx:method name="updateFeedDefinition"/>
 		<mx:method name="wipeData" result="wipedData()"/>
 	</mx:RemoteObject>
-    <mx:RemoteObject id="analysisService" destination="analysisDefinition">
+    <!--<mx:RemoteObject id="analysisService" destination="analysisDefinition">
         <mx:method name="saveAnalysisDefinition"/>
         <mx:method name="openAnalysisDefinition" result="gotAnalysis()"/>
-    </mx:RemoteObject>
+    </mx:RemoteObject>-->
 	<mx:VBox width="100%" height="100%" paddingLeft="5">
 		<mx:HBox id="buttonBox" paddingLeft="5" paddingTop="5" paddingBottom="5">		
 			<mx:Button id="saveButton" icon="@Embed(source='../../../../../assets/floppy_disk.png')" click="save()" toolTip="Save"/>
@@ -322,7 +322,7 @@
 			<mx:Label fontSize="14" color="#FFFFFF"/>						
 		</mx:HBox>
 		<mx:TabNavigator width="100%" height="100%" paddingTop="0" paddingBottom="0" 
-			paddingLeft="0" paddingRight="0" resizeToContent="true" id="tabNav">
+			paddingLeft="0" paddingRight="0" resizeToContent="true" id="tabNav" enabled="{haveFeed}">
 			<mx:HBox label="General" paddingLeft="10" paddingTop="10" paddingBottom="10" paddingRight="10">
 				<mx:VBox>
 					<mx:HBox width="100%" horizontalAlign="center">										
@@ -362,11 +362,18 @@
 					<feed:FeedSharing id="feedPolicy" paddingTop="15" paddingLeft="45" uploadPolicy="{feedUploadPolicy}"/>								
 				</mx:VBox>										
 			</mx:HBox>
-			<mx:Box label="Data" id="fieldsBox">
-			</mx:Box>
-            <mx:Box label="Hierarchies" paddingLeft="10" paddingTop="10" paddingBottom="10" paddingRight="10">
-                <feed:HierarchyAdministration  id="hierarchiesBox" feedDefinition="{feedDefinition}"/>
+            <mx:Box label="Fields">
+                <feed:FieldAdministration feedDefinition="{feedDefinition}" id="fieldAdministration"/>
             </mx:Box>
+			<!--<mx:Box label="Data" id="fieldsBox">
+			</mx:Box>-->
+            <!-- we should have...
+                Fields
+                Data Maintenance    
+            -->
+            <!--<mx:Box label="Hierarchies" paddingLeft="10" paddingTop="10" paddingBottom="10" paddingRight="10">
+                <feed:HierarchyAdministration  id="hierarchiesBox" feedDefinition="{feedDefinition}"/>
+            </mx:Box>-->
             <mx:Box label="Virtual Groupings" paddingLeft="10" paddingTop="10" paddingBottom="10" paddingRight="10">
                 <feed:VirtualDimensionAdministration id="virtualBox" feedDefinition="{feedDefinition}"/>
             </mx:Box>

@@ -13,11 +13,15 @@ import com.easyinsight.storage.DataStorage;
 import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.datafeeds.FeedCreationResult;
 import com.easyinsight.datafeeds.FeedCreation;
+import com.easyinsight.datafeeds.FeedRegistry;
 import com.easyinsight.analysis.AnalysisItem;
+import com.easyinsight.analysis.FeedMetadata;
+import com.easyinsight.analysis.DataService;
 
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.NoSuchElementException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -41,6 +45,16 @@ public class TestUtil {
         List<Object> objectList = new ArrayList<Object>();
         objectList.addAll(Arrays.asList(objects));
         return objectList;
+    }
+
+    public static AnalysisItem getItem(long feedID, String name) {
+        FeedMetadata feedMetadata = new DataService().getFeedMetadata(feedID, false);
+        for (AnalysisItem field : feedMetadata.getFields()) {
+            if (name.equals(field.getKey().toKeyString())) {
+                return field;
+            }
+        }
+        throw new NoSuchElementException();
     }
 
     public static long createTestDataSource(DataSet dataSet, List<AnalysisItem> analysisItems) throws SQLException {

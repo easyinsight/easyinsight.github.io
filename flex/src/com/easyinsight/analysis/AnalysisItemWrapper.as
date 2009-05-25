@@ -1,6 +1,10 @@
 package com.easyinsight.analysis
 {
-	public class AnalysisItemWrapper
+import flash.events.EventDispatcher;
+
+import mx.events.FlexEvent;
+
+public class AnalysisItemWrapper extends EventDispatcher
 	{
 		private var _analysisItem:AnalysisItem;
 		private var _displayName:String;
@@ -9,10 +13,15 @@ package com.easyinsight.analysis
 			this._analysisItem = analysisItem;
 			this._displayName = analysisItem.display;
 		}
+
+        public function get keyName():String {
+            return _analysisItem.key.createString();
+        }
 		
 		[Bindable]
 		public function set displayName(displayName:String):void {
 			this._displayName = displayName;
+            dispatchEvent(new FlexEvent(FlexEvent.DATA_CHANGE));
 		}
 
 		public function get displayName():String {

@@ -57,6 +57,7 @@ public class ListDefinitionState extends AnalysisDefinitionState {
 
     public ListDefinitionState clone() throws CloneNotSupportedException {
         ListDefinitionState listDefinition = (ListDefinitionState) super.clone();
+        listDefinition.setDefinitionID(0);
         if (listLimitsMetadata != null) {
             listDefinition.getListLimitsMetadata().setLimitsMetadataID(0);
         }

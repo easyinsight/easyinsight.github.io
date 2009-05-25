@@ -29,6 +29,7 @@
         import com.easyinsight.analysis.AnalysisChangedEvent;
         import com.easyinsight.analysis.AnalysisItemEditEvent;
         import com.easyinsight.analysis.AnalysisItemEditWindow;
+        import com.easyinsight.analysis.AnalysisUtil;
         import com.easyinsight.analysis.ControllerLookup;
 import com.easyinsight.analysis.HierarchyDrilldownEvent;
         import com.easyinsight.analysis.AnalysisStateChangeEvent;
@@ -140,9 +141,6 @@ import com.easyinsight.analysis.HierarchyDrilldownEvent;
 
         [Bindable]
         private var tags:String;
-
-        [Bindable]
-        private var feedAdminMode:Boolean = false;
 
         [Bindable]
         private var analysisPolicy:int;
@@ -258,9 +256,7 @@ import com.easyinsight.analysis.HierarchyDrilldownEvent;
         }
 
         public function openAnalysis(analysisDefinition:AnalysisDefinition):void {
-            if (!feedAdminMode) {
-                BrowserManager.getInstance().setTitle("Easy Insight - " + analysisDefinition.name);
-            }
+            BrowserManager.getInstance().setTitle("Easy Insight - " + analysisDefinition.name);
             this.analysisDefinition = analysisDefinition;
             labelNameField = analysisDefinition.name;
             tags = TagCloud.toString(analysisDefinition.tagCloud);
@@ -300,16 +296,11 @@ import com.easyinsight.analysis.HierarchyDrilldownEvent;
             dataSourceName = this.feedMetadata.dataSourceName;
             availableFields = new ArrayCollection();
             for each (var analysisItem:AnalysisItem in feedMetadata.fields) {
-                if (!feedAdminMode && analysisItem.hidden) continue;
+                if (analysisItem.hidden) continue;
                 var analysisWrapper:AnalysisItemWrapper = new AnalysisItemWrapper(analysisItem);
                 availableFields.addItem(analysisWrapper);
             }
 
-            if (feedAdminMode) {
-                modeText = "You are currently in data source administration mode.";
-                tabNavigator.removeChild(metadataBox);
-                buttonBox.removeChild(wrapButton);
-            }
             // see, this is where we need to do validation...
             if (analysisDefinition == null) {
                 newAnalysis();
@@ -330,14 +321,23 @@ import com.easyinsight.analysis.HierarchyDrilldownEvent;
                 marketplaceVisible = analysisDefinition.marketplaceVisible;
 
                 var feedFragmentObject:Object = new Object();
-                if (feedAdminMode) {
-                    feedFragmentObject.adminID = String(analysisDefinition.dataFeedID);
-                } else {
-                    feedFragmentObject.analysisID = String(analysisDefinition.analysisID);
-                }
+                feedFragmentObject.analysisID = String(analysisDefinition.analysisID);
                 var feedFragmentString:String = URLUtil.objectToString(feedFragmentObject);
                 BrowserManager.getInstance().setFragment(feedFragmentString);
                 createFilterBoxes(analysisDefinition.filterDefinitions.toArray());
+
+                // add the fields which are specifically added in the context of the report, such as
+                // calculations and hierarchies
+                if (analysisDefinition.addedItems != null) {
+                    for each (var item:AnalysisItem in analysisDefinition.addedItems) {
+                        var addedWrapper:AnalysisItemWrapper = new AnalysisItemWrapper(item);
+                        availableFields.addItem(addedWrapper);
+                    }
+                    var sort:Sort = new Sort();
+                    sort.fields = [ new SortField("displayName", false) ];
+                    availableFields.sort = sort;
+                    availableFields.refresh();
+                }
             }
             dataView.availableFields = availableFields;
             loading = false;
@@ -395,9 +395,7 @@ import com.easyinsight.analysis.HierarchyDrilldownEvent;
 
         private function gotReport():void {
             this.analysisDefinition = analysisService.openAnalysisDefinition.lastResult as AnalysisDefinition;
-            if (!feedAdminMode) {
-                BrowserManager.getInstance().setTitle("Easy Insight - " + this.analysisDefinition.name);
-            }
+            BrowserManager.getInstance().setTitle("Easy Insight - " + this.analysisDefinition.name);
             labelNameField = this.analysisDefinition.name;
             tags = TagCloud.toString(this.analysisDefinition.tagCloud);
             analysisPolicy = this.analysisDefinition.policy;
@@ -494,12 +492,7 @@ import com.easyinsight.analysis.HierarchyDrilldownEvent;
                 PopUpManager.centerPopUp(loginDialog);
             } else {
                 if (getAnalysisDefinition().canSaveDirectly) {
-                    var valid:Boolean;
-                    if (feedAdminMode) {
-                        valid = true;
-                    } else {
-                        valid = Validator.validateAll(analysisValidators).length == 0;
-                    }
+                    var valid:Boolean = Validator.validateAll(analysisValidators).length == 0;
                     if (valid) {
                         dataView.updateExportMetadata();
                         analysisDefinition.name = analysisNameInput.text;
@@ -520,18 +513,13 @@ import com.easyinsight.analysis.HierarchyDrilldownEvent;
             }
         }
 
-        public function feedAdministrationMode():void {
-            this.feedAdminMode = true;
-        }
-
         private function saved():void {
-            analysisDefinition.analysisID = analysisService.saveAnalysisDefinition.lastResult as int;
+            var savedDef:AnalysisDefinition = analysisService.saveAnalysisDefinition.lastResult as AnalysisDefinition;
+            AnalysisUtil.updateReport(analysisDefinition, savedDef);
             var feedFragmentObject:Object = new Object();
-            if (!feedAdminMode) {
-                feedFragmentObject.analysisID = String(analysisDefinition.analysisID);
-                var feedFragmentString:String = URLUtil.objectToString(feedFragmentObject);
-                BrowserManager.getInstance().setFragment(feedFragmentString);
-            }
+            feedFragmentObject.analysisID = String(analysisDefinition.analysisID);
+            var feedFragmentString:String = URLUtil.objectToString(feedFragmentObject);
+            BrowserManager.getInstance().setFragment(feedFragmentString);
             this.analysisChanged = false;
         }
 
@@ -552,8 +540,13 @@ import com.easyinsight.analysis.HierarchyDrilldownEvent;
 
         private function savedAnalysis(event:SavedAnalysisEvent):void {
             //title = event.title;
+            analysisNameInput.text = event.title;
+            var feedFragmentObject:Object = new Object();
+            feedFragmentObject.analysisID = String(analysisDefinition.analysisID);
+            var feedFragmentString:String = URLUtil.objectToString(feedFragmentObject);
+            BrowserManager.getInstance().setFragment(feedFragmentString);
+            BrowserManager.getInstance().setTitle("Easy Insight - " + event.title);
             this.analysisChanged = false;
-            Alert.show("Saved successfully!");
         }
 
         private function createFeed():void {
@@ -774,10 +767,8 @@ import com.easyinsight.analysis.HierarchyDrilldownEvent;
 
         private function gotUserCapabilitiesForFeed():void {
             var userCapabilities:UserCapabilities = analysisService.getUserCapabilitiesForFeed.lastResult as UserCapabilities;
-            if (!feedAdminMode) {
-                canSubscribeToFeed = userCapabilities.feedRole > 3;
-                canAddFeedToGroup = userCapabilities.groupMember;
-            }
+            canSubscribeToFeed = userCapabilities.feedRole > 3;
+            canAddFeedToGroup = userCapabilities.groupMember;
         }
 
         private function onFieldDelete(event:DeleteAnalysisItemEvent):void {
@@ -985,10 +976,6 @@ import com.easyinsight.analysis.HierarchyDrilldownEvent;
                                                itemRenderer="com.easyinsight.analysis.AnalysisItemTypeRenderer"
                                                width="32"/>
                             <mx:DataGridColumn dataField="displayName" headerText=""/>
-                            <mx:DataGridColumn dataField="displayName"
-                                               itemRenderer="com.easyinsight.analysis.BaseFieldEditButton"
-                                               rendererIsEditor="true" editorDataField="displayName" width="100"
-                                               headerText="" visible="{feedAdminMode}"/>
                         </mx:columns>
                     </mx:DataGrid>
                 </mx:VBox>

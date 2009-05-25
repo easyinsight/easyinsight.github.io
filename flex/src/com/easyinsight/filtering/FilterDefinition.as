@@ -13,7 +13,8 @@ package com.easyinsight.filtering
 		public static const LAST_N:int = 5;
 
 		public var field:AnalysisItem;
-		public var applyBeforeAggregation:Boolean = true;		
+		public var applyBeforeAggregation:Boolean = true;
+        public var filterID:int;
 		
 		public function FilterDefinition()
 			{

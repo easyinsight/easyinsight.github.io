@@ -1,9 +1,12 @@
 package com.easyinsight.analysis {
 import mx.events.FlexEvent;
+
 import flash.events.Event;
+
 import mx.binding.utils.BindingUtils;
 import mx.controls.Image;
 import mx.containers.HBox;
+
 public class AnalysisItemTypeRenderer extends HBox {
     [Bindable]
     [Embed(source="../../../../assets/calendar.png")]
@@ -21,6 +24,16 @@ public class AnalysisItemTypeRenderer extends HBox {
     [Embed(source="../../../../assets/cubes_x16.png")]
     public var hierarchyIcon:Class;
 
+    [Bindable]
+    [Embed(source="../../../../assets/text_formula.png")]
+    public var calculationIcon:Class;
+
+
+    [Bindable]
+    [Embed(source="../../../../assets/graph_edge_curved.png")]
+    public var cycleIcon:Class;
+
+
     private var typeIcon:Image;
 
     private var _typeSource:Class = groupingIcon;
@@ -37,6 +50,7 @@ public class AnalysisItemTypeRenderer extends HBox {
     public function get typeSource():Class {
         return _typeSource;
     }
+
     public function set typeSource(val:Class):void {
         _typeSource = val;
         dispatchEvent(new FlexEvent(FlexEvent.DATA_CHANGE));
@@ -58,10 +72,16 @@ public class AnalysisItemTypeRenderer extends HBox {
 
     override public function set data(obj:Object):void {
         this.analysisItemWrapper = obj as AnalysisItemWrapper;
-        if (analysisItemWrapper.analysisItem.hasType(AnalysisItemTypes.MEASURE)) {
+        if (analysisItemWrapper.analysisItem.hasType(AnalysisItemTypes.CALCULATION)) {
+            typeSource = calculationIcon;
+            this.toolTip = "Calculation";
+        } else if (analysisItemWrapper.analysisItem.hasType(AnalysisItemTypes.MEASURE)) {
             //typeIcon.source = measureIcon;
             typeSource = measureIcon;
             this.toolTip = "Measure";
+        } else if (analysisItemWrapper.analysisItem.hasType(AnalysisItemTypes.STEP)) {
+            typeSource = cycleIcon;
+            this.toolTip = "Cycle";
         } else if (analysisItemWrapper.analysisItem.hasType(AnalysisItemTypes.DATE)) {
             //typeIcon.source = dateIcon;
             typeSource = dateIcon;

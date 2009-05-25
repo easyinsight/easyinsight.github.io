@@ -63,7 +63,7 @@ public class AnalysisBasedFeedTest extends TestCase {
         analysisFields.add(myDimension);
         listDefinition.setColumns(analysisFields);
         AnalysisService analysisService = new AnalysisService();
-        return analysisService.saveAnalysisDefinition(listDefinition);
+        return analysisService.saveAnalysisDefinition(listDefinition).getAnalysisID();
     }
 
     private WSListDefinition createAnalysisList(long dataFeedID, long rootFeedID) {

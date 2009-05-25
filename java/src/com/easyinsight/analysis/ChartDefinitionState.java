@@ -88,7 +88,7 @@ public class ChartDefinitionState extends AnalysisDefinitionState {
     }
 
     @Override
-    protected Object clone() throws CloneNotSupportedException {
+    public AnalysisDefinitionState clone() throws CloneNotSupportedException {
         ChartDefinitionState chartDefinitionState = (ChartDefinitionState) super.clone();
         chartDefinitionState.definitionID = 0;
         return chartDefinitionState;

@@ -19,6 +19,13 @@ public abstract class AnalysisDefinitionState implements Cloneable {
 
     public abstract WSAnalysisDefinition createWSDefinition();
 
+    @Override
+    public AnalysisDefinitionState clone() throws CloneNotSupportedException {
+        AnalysisDefinitionState state = (AnalysisDefinitionState) super.clone();
+        state.setId(0);
+        return state;
+    }
+
     public long getId() {
         return id;
     }

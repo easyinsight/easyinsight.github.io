@@ -24,7 +24,7 @@ import org.hibernate.Session;
  * Date: Jan 10, 2008
  * Time: 7:32:24 PM
  */
-public class AnalysisService implements IAnalysisService {
+public class AnalysisService {
 
     private AnalysisStorage analysisStorage = new AnalysisStorage();
 
@@ -35,6 +35,30 @@ public class AnalysisService implements IAnalysisService {
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);
+        }
+    }
+
+    public WSAnalysisDefinition saveAs(long reportID, String newName) {
+        SecurityUtil.authorizeInsight(reportID);
+        Session session = Database.instance().createSession();
+        try {
+            session.getTransaction().begin();
+            AnalysisDefinition analysisDefinition = analysisStorage.getPersistableReport(reportID, session);
+            AnalysisDefinition clone = analysisDefinition.clone();
+            clone.setTitle(newName);
+            List<UserToAnalysisBinding> bindings = new ArrayList<UserToAnalysisBinding>();
+            bindings.add(new UserToAnalysisBinding(SecurityUtil.getUserID(), UserPermission.OWNER));
+            clone.setUserBindings(bindings);
+            analysisStorage.saveAnalysis(clone, session);
+            WSAnalysisDefinition returnDef = clone.createBlazeDefinition();
+            session.getTransaction().commit();
+            return returnDef;
+        } catch (Exception e) {
+            LogClass.error(e);
+            session.getTransaction().rollback();
+            throw new RuntimeException(e);
+        } finally {
+            session.close();
         }
     }
 
@@ -99,7 +123,7 @@ public class AnalysisService implements IAnalysisService {
         analysisStorage.rateAnalysis(analysisID, accountID, rating);
     }
 
-    public long saveAnalysisDefinition(WSAnalysisDefinition wsAnalysisDefinition) {
+    public WSAnalysisDefinition saveAnalysisDefinition(WSAnalysisDefinition wsAnalysisDefinition) {
         long userID = SecurityUtil.getUserID();
         if (wsAnalysisDefinition.getAnalysisID() > 0) {
             SecurityUtil.authorizeInsight(wsAnalysisDefinition.getAnalysisID());
@@ -135,7 +159,7 @@ public class AnalysisService implements IAnalysisService {
             analysisStorage.saveAnalysis(analysisDefinition, session);
             session.flush();
             conn.commit();
-            return analysisDefinition.getAnalysisID();
+            return analysisDefinition.createBlazeDefinition();
         } catch (Exception e) {
             LogClass.error(e);
             try {

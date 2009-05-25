@@ -33,7 +33,6 @@ public class AnalysisStorage {
             }
             session.getTransaction().commit();
         } catch (Exception e) {
-            LogClass.error(e);
             session.getTransaction().rollback();
             throw new RuntimeException(e);
         } finally {
@@ -53,7 +52,6 @@ public class AnalysisStorage {
             }
             session.getTransaction().commit();
         } catch (Exception e) {
-            LogClass.error(e);
             session.getTransaction().rollback();
             throw new RuntimeException(e);
         } finally {
@@ -74,7 +72,6 @@ public class AnalysisStorage {
             }
             session.getTransaction().commit();
         } catch (Exception e) {
-            LogClass.error(e);
             session.getTransaction().rollback();
             throw new RuntimeException(e);
         } finally {
@@ -95,7 +92,6 @@ public class AnalysisStorage {
             }
             session.getTransaction().commit();
         } catch (Exception e) {
-            LogClass.error(e);
             session.getTransaction().rollback();
             throw new RuntimeException(e);
         } finally {
@@ -113,7 +109,6 @@ public class AnalysisStorage {
                 analysisDefinition = (AnalysisDefinition) results.get(0);
             }
         } catch (Exception e) {
-            LogClass.error(e);
             throw new RuntimeException(e);
         } finally {
             session.close();
@@ -208,7 +203,6 @@ public class AnalysisStorage {
                 descriptors.add(new InsightDescriptor(rs.getLong(1), rs.getString(2), rs.getLong(3), rs.getInt(4)));
             }
         } catch (SQLException e) {
-            LogClass.error(e);
             throw new RuntimeException(e);
         } finally {
             Database.instance().closeConnection(conn);
@@ -234,7 +228,6 @@ public class AnalysisStorage {
             }
             session.getTransaction().commit();
         } catch (Exception e) {
-            LogClass.error(e);
             session.getTransaction().rollback();
             throw new RuntimeException(e);
         } finally {

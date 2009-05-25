@@ -86,7 +86,7 @@ public class AnalysisDefinitionStorageTest extends TestCase {
         analysisFields.add(myDimension);
         listDefinition.setColumns(analysisFields);
         AnalysisService analysisService = new AnalysisService();
-        long analysisID = analysisService.saveAnalysisDefinition(listDefinition);
+        long analysisID = analysisService.saveAnalysisDefinition(listDefinition).getAnalysisID();
         System.out.println("analysis ID = " + analysisID);
         WSListDefinition retrievedDefinition = (WSListDefinition) analysisService.openAnalysisDefinition(analysisID);
         assertNotNull(retrievedDefinition.getFilterDefinitions());
@@ -118,7 +118,7 @@ public class AnalysisDefinitionStorageTest extends TestCase {
         crosstabDefinition.setMeasures(Arrays.asList(measure));
         AnalysisService analysisService = new AnalysisService();
         //WSAnalysisDefinition wsAnalysisDefinition = analysisService.openAnalysisDefinition(crosstabDefinition.getAnalysisID());
-        long crosstabID = analysisService.saveAnalysisDefinition(crosstabDefinition);
+        long crosstabID = analysisService.saveAnalysisDefinition(crosstabDefinition).getAnalysisID();
         WSCrosstabDefinition retrievedDefinition = (WSCrosstabDefinition) analysisService.openAnalysisDefinition(crosstabID);
         assertEquals(1, retrievedDefinition.getFilterDefinitions().size());
         assertEquals(3, retrievedDefinition.getAllAnalysisItems().size());
@@ -143,9 +143,9 @@ public class AnalysisDefinitionStorageTest extends TestCase {
         chartDefinition.setMeasure(measure);
         chartDefinition.setXaxis(myDimension);
         AnalysisService analysisService = new AnalysisService();
-        long analysisID = analysisService.saveAnalysisDefinition(chartDefinition);
+        long analysisID = analysisService.saveAnalysisDefinition(chartDefinition).getAnalysisID();
         WSAnalysisDefinition wsAnalysisDefinition = analysisService.openAnalysisDefinition(analysisID);
-        long chartID = analysisService.saveAnalysisDefinition(wsAnalysisDefinition);
+        long chartID = analysisService.saveAnalysisDefinition(wsAnalysisDefinition).getAnalysisID();
         WSChartDefinition retrievedDefinition = (WSChartDefinition) analysisService.openAnalysisDefinition(chartID);
         assertEquals(1, retrievedDefinition.getFilterDefinitions().size());
         assertEquals(2, retrievedDefinition.getAllAnalysisItems().size());

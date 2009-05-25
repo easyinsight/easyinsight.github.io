@@ -279,21 +279,42 @@ public class AnalysisDefinition implements Cloneable {
     public AnalysisDefinition clone() throws CloneNotSupportedException {
         AnalysisDefinition analysisDefinition = (AnalysisDefinition) super.clone();
         analysisDefinition.setAnalysisID(null);
+        Map<Long, AnalysisItem> replacementMap = new HashMap<Long, AnalysisItem>();
         List<PersistableFilterDefinition> filterDefinitions = new ArrayList<PersistableFilterDefinition>();
         for (PersistableFilterDefinition persistableFilterDefinition : this.filterDefinitions) {
-            persistableFilterDefinition.setFilterId(0);
-            filterDefinitions.add(persistableFilterDefinition);
+            filterDefinitions.add(persistableFilterDefinition.clone());
+            replacementMap.put(persistableFilterDefinition.getField().getAnalysisItemID(),  persistableFilterDefinition.getField().clone());
         }
         analysisDefinition.setFilterDefinitions(filterDefinitions);
         List<AnalysisItem> addedItems = new ArrayList<AnalysisItem>();
         for (AnalysisItem analysisItem : addedItems) {
-            AnalysisItem clonedItem = analysisItem.clone();
-            addedItems.add(clonedItem);
+            AnalysisItem clonedItem;
+            if (replacementMap.get(analysisItem.getAnalysisItemID()) == null) {
+                clonedItem = analysisItem.clone();
+                replacementMap.put(analysisItem.getAnalysisItemID(), clonedItem);
+            } else {
+                clonedItem = replacementMap.get(analysisItem.getAnalysisItemID());
+            }
+            addedItems.add(clonedItem);                
         }
         Map<String, AnalysisItem> clonedStructure = new HashMap<String, AnalysisItem>(getReportStructure());
         for (Map.Entry<String, AnalysisItem> entry : clonedStructure.entrySet()) {
-            clonedStructure.put(entry.getKey(), entry.getValue().clone());
+            if (replacementMap.get(entry.getValue().getAnalysisItemID()) == null) {
+                AnalysisItem clonedItem = entry.getValue().clone();
+                replacementMap.put(entry.getValue().getAnalysisItemID(), clonedItem);
+                clonedStructure.put(entry.getKey(), clonedItem);
+            } else {
+                clonedStructure.put(entry.getKey(), replacementMap.get(entry.getValue().getAnalysisItemID())); 
+            }
         }
+
+        for (AnalysisItem analysisItem : replacementMap.values()) {
+            analysisItem.updateIDs(replacementMap);
+        }
+        for (PersistableFilterDefinition filter : filterDefinitions) {
+            filter.updateIDs(replacementMap);
+        }
+        analysisDefinition.setAnalysisDefinitionState(analysisDefinitionState.clone());
         analysisDefinition.setReportStructure(clonedStructure);
         analysisDefinition.setAddedItems(addedItems);
         analysisDefinition.setUserBindings(new ArrayList<UserToAnalysisBinding>());
@@ -322,6 +343,7 @@ public class AnalysisDefinition implements Cloneable {
             analysisDefinitionState = migrationHandler();
         }
         analysisDefinition = analysisDefinitionState.createWSDefinition();
+        analysisDefinition.setReportStateID(analysisDefinitionState.getId());
         analysisDefinition.setReportType(reportType);        
         analysisDefinition.setAnalysisID(analysisID);
         analysisDefinition.setDataFeedID(dataFeedID);
@@ -341,9 +363,11 @@ public class AnalysisDefinition implements Cloneable {
         }
         analysisDefinition.populateFromReportStructure(reportStructure);
         List<DataScrub> newScrubs = new ArrayList<DataScrub>();
-        for (DataScrub dataScrub : dataScrubs) {
-            dataScrub.hateHibernate();
-            newScrubs.add(dataScrub);
+        if (dataScrubs != null) {
+            for (DataScrub dataScrub : dataScrubs) {
+                dataScrub.hateHibernate();
+                newScrubs.add(dataScrub);
+            }
         }
         analysisDefinition.setCanSaveDirectly(isOwner(SecurityUtil.getUserID(false)));
         analysisDefinition.setDataScrubs(newScrubs);

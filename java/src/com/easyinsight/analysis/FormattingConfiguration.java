@@ -27,7 +27,7 @@ public class FormattingConfiguration implements Serializable, Cloneable {
 
     public FormattingConfiguration clone() throws CloneNotSupportedException {
         FormattingConfiguration formattingConfiguration = (FormattingConfiguration) super.clone();
-        formattingConfiguration.setFormattingConfigurationID(formattingConfigurationID);
+        formattingConfiguration.setFormattingConfigurationID(0);
         return formattingConfiguration;
     }
 

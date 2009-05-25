@@ -28,4 +28,11 @@ public class TreeDefinitionState extends AnalysisDefinitionState {
         wsTreeDefinition.setTreeDefinitionID(treeDefinitionID);
         return wsTreeDefinition;
     }
+
+    @Override
+    public AnalysisDefinitionState clone() throws CloneNotSupportedException {
+        TreeDefinitionState state = (TreeDefinitionState) super.clone();
+        state.setTreeDefinitionID(0);
+        return state;
+    }
 }

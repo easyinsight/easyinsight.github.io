@@ -91,9 +91,13 @@ public class DropArea extends HBox
         this._analysisItems = analysisItems;
     }
 
+    protected function supportsDrilldown():Boolean {
+        return true;
+    }
+
     private function editEvent(event:MouseEvent):void {
         var analysisItemEditor:AnalysisItemEditWindow = new AnalysisItemEditWindow();
-        if (analysisItem.hasType(AnalysisItemTypes.HIERARCHY)) {
+        if (analysisItem.hasType(AnalysisItemTypes.HIERARCHY) && supportsDrilldown()) {
             analysisItemEditor.editorClass = HierarchyWindow;
         } else if (analysisItem.hasType(AnalysisItemTypes.CALCULATION)) {
             analysisItemEditor.editorClass = CalculationWindow;

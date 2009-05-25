@@ -61,6 +61,7 @@ public class HierarchyAdminBox extends VBox {
         if (list != null) {
             list.dataProvider = val.hierarchyLevels;
         }
+        invalidateProperties();
     }
 
     override protected function commitProperties():void {
@@ -71,6 +72,7 @@ public class HierarchyAdminBox extends VBox {
     public function get analysisHierarchyItem():AnalysisHierarchyItem {
         return _analysisHierarchyItem;
     }
+    [Bindable]
     public function get levels():ArrayCollection {
         return _levels;
     }

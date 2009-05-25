@@ -52,7 +52,7 @@ public class TagsTest extends TestCase {
         tagCloud.setTags(tags);
         listDefinition.setTagCloud(tags);
         AnalysisService analysisService = new AnalysisService();
-        long savedID = analysisService.saveAnalysisDefinition(listDefinition);
+        long savedID = analysisService.saveAnalysisDefinition(listDefinition).getAnalysisID();
         WSAnalysisDefinition retrievedDefinition = analysisService.openAnalysisDefinition(savedID);
         assertEquals(2, retrievedDefinition.getTagCloud().size());
     }

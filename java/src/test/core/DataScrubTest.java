@@ -54,7 +54,7 @@ public class DataScrubTest extends TestCase {
          //       new DataScrub(TestUtil.createKey("Product", dataFeedID), "WidgetY", "Widget Y"));
         //listDefinition.setDataScrubs(dataScrubs);
         AnalysisService analysisService = new AnalysisService();
-        long analysisID = analysisService.saveAnalysisDefinition(listDefinition);
+        long analysisID = analysisService.saveAnalysisDefinition(listDefinition).getAnalysisID();
         return (WSListDefinition) analysisService.openAnalysisDefinition(analysisID);
     }
 }

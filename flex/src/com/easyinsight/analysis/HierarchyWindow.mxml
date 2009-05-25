@@ -17,6 +17,9 @@
         }
 
         public function save():AnalysisItem {
+            var list:List = hierarchyAdmin.list;
+            _hierarchy.hierarchyLevels = ArrayCollection(list.dataProvider);
+            _hierarchy.hierarchyLevel = _hierarchy.hierarchyLevels.getItemAt(0) as HierarchyLevel;
             return _hierarchy;
         }
 

@@ -21,7 +21,7 @@ import java.util.*;
  * Time: 1:16:37 PM
  */
 
-public class DataService implements IDataService {
+public class DataService {
 
     private FeedRegistry feedRegistry = FeedRegistry.instance();
 

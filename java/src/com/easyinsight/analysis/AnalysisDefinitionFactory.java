@@ -63,6 +63,7 @@ public class AnalysisDefinitionFactory {
         } else {
             throw new RuntimeException("Unknown data feed type " + wsAnalysisDefinition.getDataFeedType());
         }
+        analysisDefinitionState.setId(wsAnalysisDefinition.getReportStateID());
         AnalysisDefinition analysisDefinition = new AnalysisDefinition();
         analysisDefinition.setAnalysisDefinitionState(analysisDefinitionState);
         analysisDefinition.setReportType(wsAnalysisDefinition.getReportType());

@@ -10,6 +10,10 @@ package com.easyinsight.analysis
 		{
 			super();		
 		}
+
+        override protected function supportsDrilldown():Boolean {
+            return false;
+        }
 		
 		override public function getDropAreaType():String {
 			return "Hierarchy";

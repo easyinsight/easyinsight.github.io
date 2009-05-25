@@ -56,4 +56,11 @@ public class GaugeDefinitionState extends AnalysisDefinitionState {
         wsGaugeDefinition.setMaxValue(maxValue);
         return wsGaugeDefinition;
     }
+
+    @Override
+    public AnalysisDefinitionState clone() throws CloneNotSupportedException {
+        GaugeDefinitionState state = (GaugeDefinitionState) super.clone();
+        state.setGaugeDefinitionID(0);
+        return state;
+    }
 }

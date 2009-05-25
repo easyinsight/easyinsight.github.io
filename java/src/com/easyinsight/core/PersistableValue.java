@@ -10,7 +10,7 @@ import javax.persistence.*;
 @Entity
 @Table(name="value")
 @Inheritance(strategy= InheritanceType.JOINED)
-public abstract class PersistableValue {
+public abstract class PersistableValue implements Cloneable {
     @Id @GeneratedValue(strategy=GenerationType.IDENTITY)
     @Column(name="value_id")
     private long valueID;
@@ -24,4 +24,11 @@ public abstract class PersistableValue {
     }
 
     public abstract Value toValue();
+
+    @Override
+    public PersistableValue clone() throws CloneNotSupportedException {
+        PersistableValue persistableValue = (PersistableValue) super.clone();
+        persistableValue.setValueID(0);
+        return persistableValue;
+    }
 }

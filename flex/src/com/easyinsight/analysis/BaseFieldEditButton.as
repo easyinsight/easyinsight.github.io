@@ -20,7 +20,7 @@ import mx.managers.PopUpManager;
 		private var deleteButton:Button;
 
 		[Bindable]
-		[Embed(source="../../../../assets/pencil.png")]
+		[Embed(source="../../../../assets/clipboard.png")]
         public var editIcon:Class;
 
         [Bindable]
@@ -38,8 +38,8 @@ import mx.managers.PopUpManager;
 			if (button == null) {
 				button = new Button();
 				button.setStyle("icon", editIcon);
-				button.toolTip = "Edit...";
-				button.addEventListener(MouseEvent.CLICK, editItem);
+				button.toolTip = "Copy...";
+				//button.addEventListener(MouseEvent.CLICK, editItem);
 			}
             addChild(button);
             if (deleteButton == null) {
