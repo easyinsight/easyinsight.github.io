@@ -46,6 +46,8 @@
             import com.easyinsight.analysis.CredentialsDefinition;
             import com.easyinsight.customupload.ExcelUploadFormat;
             import com.easyinsight.customupload.FlatFileUploadFormat;
+            import com.easyinsight.genredata.ModuleAnalyzeEvent;
+            import com.easyinsight.listing.DescriptorAnalyzeSource;
             import com.easyinsight.util.ProgressAlert;
             import mx.events.CloseEvent;
 			import mx.managers.BrowserManager;
@@ -261,6 +263,28 @@
 	    			this.unsavedChanges = false;
             	}
             }
+
+            private function toReport():void {
+                if (unsavedChanges) {
+                    Alert.show("You have unsaved changes. Are you sure you want to exit?", "Alert",
+		                		Alert.OK | Alert.CANCEL, null, alertListener, null, Alert.CANCEL);
+                } else {
+                    var descriptor:DataFeedDescriptor = new DataFeedDescriptor();
+                    descriptor.name = feedDefinition.feedName;
+                    descriptor.dataFeedID = feedDefinition.dataFeedID;
+                    dispatchEvent(new ModuleAnalyzeEvent(new DescriptorAnalyzeSource(descriptor)));
+                }
+            }
+
+            private function toReportListener(event:CloseEvent):void {
+                if (event.detail == Alert.OK) {
+                 //   dataAnalysisContainer.cleanup();
+                    var descriptor:DataFeedDescriptor = new DataFeedDescriptor();
+                    descriptor.name = feedDefinition.feedName;
+                    descriptor.dataFeedID = feedDefinition.dataFeedID;
+                    dispatchEvent(new ModuleAnalyzeEvent(new DescriptorAnalyzeSource(descriptor)));
+                }
+            }
             
             private function close():void {
                 if (unsavedChanges) {
@@ -316,10 +340,11 @@
         <mx:method name="openAnalysisDefinition" result="gotAnalysis()"/>
     </mx:RemoteObject>-->
 	<mx:VBox width="100%" height="100%" paddingLeft="5">
-		<mx:HBox id="buttonBox" paddingLeft="5" paddingTop="5" paddingBottom="5">		
+		<mx:HBox id="buttonBox" paddingLeft="5" paddingTop="5" paddingBottom="5">
+            <mx:Button id="wrapButton" icon="@Embed(source='../../../../../assets/document_out.png')" click="close()" toolTip="Close"/>            
 			<mx:Button id="saveButton" icon="@Embed(source='../../../../../assets/floppy_disk.png')" click="save()" toolTip="Save"/>
-			<mx:Button id="wrapButton" icon="@Embed(source='../../../../../assets/document_out.png')" click="close()" toolTip="Close"/>
-			<mx:Label fontSize="14" color="#FFFFFF"/>						
+			<mx:Button icon="@Embed(source='../../../../../assets/media_play_green.png')" click="toReport()" toolTip="Jump to Report Editor"/>
+			<mx:Label fontSize="14" color="#FFFFFF"/>
 		</mx:HBox>
 		<mx:TabNavigator width="100%" height="100%" paddingTop="0" paddingBottom="0" 
 			paddingLeft="0" paddingRight="0" resizeToContent="true" id="tabNav" enabled="{haveFeed}">
@@ -349,8 +374,6 @@
 						<mx:FormItem id="clearDataFormItem" label="Delete All Data:">
 							<mx:Button label="Clear Data Source Data" click="clearFeedData()"/>
 						</mx:FormItem>
-
-
 					</mx:Form>
 				</mx:VBox>
 				<mx:VBox>

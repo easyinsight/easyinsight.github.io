@@ -488,7 +488,7 @@ public class DataStorage {
             queryBuilder.append(" GROUP BY ");
             queryBuilder.append(groupByBuilder.toString());
         }
-        if (limit != null) {
+        if (limit != null && limit > 0) {
             queryBuilder.append(" LIMIT ").append(limit);
         }
     }
