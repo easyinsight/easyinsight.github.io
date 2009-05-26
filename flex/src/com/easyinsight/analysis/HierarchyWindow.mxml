@@ -27,6 +27,14 @@
             _hierarchy = analysisItem as AnalysisHierarchyItem;
         }
 
+        override protected function commitProperties():void {
+            super.commitProperties();
+            if (_hierarchy == null) {
+                _hierarchy = new AnalysisHierarchyItem();
+                _hierarchy.key = new NamedKey();
+            }
+        }
+
         public function set analysisItems(analysisItems:ArrayCollection):void {
             availableDimensions = new ArrayCollection();
             for each (var analysisItemWrapper:AnalysisItemWrapper in analysisItems) {

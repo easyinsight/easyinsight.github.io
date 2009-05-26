@@ -15,9 +15,9 @@
             <mx:RemoveChild target="{progressBox}"/>
             <mx:AddChild relativeTo="{coreBox}">
                 <mx:VBox horizontalAlign="center">
-                    <mx:TextArea borderStyle="none" backgroundAlpha="0" fontWeight="bold" width="200" height="200" 
+                    <mx:Label fontWeight="bold"
                                  text="Sorry, but we encountered the following error in trying to complete the operation:" fontSize="14" fontFamily="Tahoma"/>
-                    <mx:Label text="{errorText}"/>
+                    <mx:TextArea borderStyle="none" backgroundAlpha="0" text="{errorText}" width="400" height="200"/>
                     <mx:Button label="Cancel" click="cancel()"/>
                 </mx:VBox>
             </mx:AddChild>

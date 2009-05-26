@@ -1,5 +1,7 @@
 package com.easyinsight.analysis;
 
+import org.hibernate.Session;
+
 import javax.persistence.*;
 import java.util.*;
 
@@ -104,5 +106,14 @@ public class AnalysisHierarchyItem extends AnalysisDimension {
     @Override
     public boolean isDerived() {
         return true;
+    }
+
+    public void reportSave(Session session) {
+        super.reportSave(session);
+        for (HierarchyLevel hierarchyLevel : hierarchyLevels) {
+            if (hierarchyLevel.getAnalysisItem().getAnalysisItemID() == 0) {
+                session.save(hierarchyLevel.getAnalysisItem());
+            }
+        }
     }
 }

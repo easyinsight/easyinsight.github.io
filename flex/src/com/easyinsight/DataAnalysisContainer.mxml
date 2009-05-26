@@ -35,6 +35,7 @@ import com.easyinsight.analysis.HierarchyDrilldownEvent;
         import com.easyinsight.analysis.AnalysisStateChangeEvent;
         import com.easyinsight.analysis.DataViewFactory;
         import com.easyinsight.analysis.HierarchyRollupEvent;
+        import com.easyinsight.analysis.HierarchyWindow;
         import com.easyinsight.analysis.IReportController;
         import com.easyinsight.analysis.QuickDataSourceAPIWindow;
         import com.easyinsight.analysis.list.ListController;
@@ -667,6 +668,15 @@ import com.easyinsight.analysis.HierarchyDrilldownEvent;
             getAnalysisDefinition().addedItems.addItem(event.analysisItem);
         }
 
+        private function createHierarchy():void {
+            var window:AnalysisItemEditWindow = new AnalysisItemEditWindow();
+            window.editorClass = HierarchyWindow;
+            window.analysisItems = availableFields;
+            window.addEventListener(AnalysisItemEditEvent.ANALYSIS_ITEM_EDIT, onNewItem);
+            PopUpManager.addPopUp(window, this);
+            PopUpManager.centerPopUp(window);
+        }
+
         private function createBlankField():void {
             var window:NewBlankFeedWindow = NewBlankFeedWindow(PopUpManager.createPopUp(this, NewBlankFeedWindow));
             window.addEventListener(AnalysisItemCreationEvent.ANALYSIS_ITEM_CREATED, newFieldCreated);
@@ -898,6 +908,8 @@ import com.easyinsight.analysis.HierarchyDrilldownEvent;
                 <mx:Button id="newFieldButton" toolTip="Create Blank Field"
                            icon="@Embed(source='../../../assets/document_add.png')"
                            click="createBlankField()"/>
+                <mx:Button icon="@Embed(source='../../../assets/cubes_blue_add.png')"
+                               toolTip="Add Hierarchy..." click="createHierarchy()"/>
                 <mx:Button id="apiButton" toolTip="Show API Info for this Data Source"
                            icon="@Embed(source='../../../assets/app_enterprise_x16.png')" click="showAPIInfo()"/>
                 <analysis:ResultLimitComboBox limits="{limits}"/>

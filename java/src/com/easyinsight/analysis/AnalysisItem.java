@@ -14,6 +14,7 @@ import com.easyinsight.core.Key;
 import com.easyinsight.core.NamedKey;
 import com.easyinsight.core.Value;
 import com.easyinsight.dataset.DataSet;
+import org.hibernate.Session;
 
 /**
  * User: James Boe
@@ -250,5 +251,9 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
     }
 
     public void applyDimensionChanges(IRow row) {
+    }
+
+    public void reportSave(Session session) {
+
     }
 }

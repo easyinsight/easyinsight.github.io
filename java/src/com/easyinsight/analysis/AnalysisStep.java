@@ -5,6 +5,7 @@ import java.util.*;
 
 import com.easyinsight.core.Key;
 import com.easyinsight.database.Database;
+import org.hibernate.Session;
 
 /**
  * User: James Boe
@@ -115,5 +116,13 @@ public class AnalysisStep extends AnalysisDateDimension {
     @Override
     public boolean isValid() {
         return startDate != null && endDate != null && correlationDimension != null;
+    }
+
+    @Override
+    public void reportSave(Session session) {
+        super.reportSave(session);
+        session.saveOrUpdate(startDate);
+        session.saveOrUpdate(endDate);
+        session.saveOrUpdate(correlationDimension);
     }
 }

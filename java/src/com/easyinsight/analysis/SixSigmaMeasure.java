@@ -7,6 +7,8 @@ import com.easyinsight.dataset.DataSet;
 import javax.persistence.*;
 import java.util.*;
 
+import org.hibernate.Session;
+
 /**
  * User: James Boe
  * Date: Apr 20, 2009
@@ -157,5 +159,14 @@ public class SixSigmaMeasure extends AnalysisMeasure {
     @Override
     public boolean isValid() {
         return getTotalDefectsMeasure() != null && getTotalOpportunitiesMeasure() != null;
+    }
+
+    public void reportSave(Session session) {
+        if (totalDefectsMeasure.getAnalysisItemID() == 0) {
+            session.save(totalDefectsMeasure);
+        }
+        if (totalOpportunitiesMeasure.getAnalysisItemID() == 0) {
+            session.save(totalOpportunitiesMeasure);
+        }
     }
 }

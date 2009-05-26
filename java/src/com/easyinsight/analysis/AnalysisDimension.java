@@ -11,6 +11,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
 
+import org.hibernate.Session;
+
 /**
  * User: James Boe
  * Date: Jan 20, 2008
@@ -118,5 +120,11 @@ public class AnalysisDimension extends AnalysisItem {
         result = 31 * result + (group ? 1 : 0);
         result = 31 * result + (keyDimension != null ? keyDimension.hashCode() : 0);
         return result;
+    }
+
+    public void reportSave(Session session) {
+        if (keyDimension != null && keyDimension.getAnalysisItemID() == 0) {
+            session.save(keyDimension);
+        }
     }
 }
