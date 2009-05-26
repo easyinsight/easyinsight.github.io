@@ -996,7 +996,6 @@ public class DataStorage {
             IRow row = dataSet.createRow();
             for (Map.Entry<Key, KeyMetadata> keyEntry : keys.entrySet()) {
                 Key key = keyEntry.getKey();
-                System.out.println("retrieving " + key.toSQL());
                 KeyMetadata keyMetadata = keyEntry.getValue();
                 if (keyMetadata.getType() == Value.DATE) {
                     Timestamp time = dataRS.getTimestamp(i++);

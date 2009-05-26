@@ -30,20 +30,21 @@ public abstract class TaskGenerator {
 
     public List<ScheduledTask> generateTasks(Date now) {
         List<ScheduledTask> tasks = new ArrayList<ScheduledTask>();
+        // we run at 10:02
+        // lastTime is going to be 10:00
+        // if
+        long lastTime = now.getTime() / taskInterval * taskInterval;
         Date initDate = findStartTaskDate();
-        if (isRequiresBackfill()) {
-            for (long startTime = initDate.getTime() + taskInterval; startTime < now.getTime(); startTime += taskInterval) {
-                tasks.add(defineTask(startTime));
-            }
-        } else {
-            long startTime;
-            int i = 0;
-            for (startTime = initDate.getTime() + taskInterval; startTime < now.getTime(); startTime += taskInterval) {
-                i++;
-            }
-            if (i > 0) {
-                tasks.add(defineTask(startTime));
-            }
+        long lastValidTime = initDate.getTime() / taskInterval * taskInterval;
+        while (lastValidTime < lastTime) {
+            tasks.add(defineTask(lastValidTime + taskInterval));
+            lastValidTime += taskInterval;
+        }
+        if (!isRequiresBackfill() && tasks.size() > 0) {
+            tasks = tasks.subList(tasks.size() - 1, tasks.size());
+        }
+        if (tasks.size() > 0) {
+            setLastTaskDate(new Date(lastTime));
         }
         return tasks;
     }

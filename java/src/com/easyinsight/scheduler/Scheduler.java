@@ -89,10 +89,12 @@ public class Scheduler {
                     List<TaskGenerator> taskGenerators = retrieveTaskGenerators(session);
                     for (TaskGenerator taskGenerator : taskGenerators) {
                         List<ScheduledTask> tasks = taskGenerator.generateTasks(now);
-                        taskGenerator.setLastTaskDate(now);
                         for (ScheduledTask task : tasks) {
                             LogClass.info("Scheduling " + task.getClass().getName() + " for execution on " + task.getExecutionDate());
                             session.save(task);
+                        }
+                        if (!tasks.isEmpty()) {
+                            taskGenerator.setLastTaskDate(now);                            
                         }
                     }
                     session.getTransaction().commit();
