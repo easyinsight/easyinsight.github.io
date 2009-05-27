@@ -46,6 +46,7 @@
             import com.easyinsight.analysis.CredentialsDefinition;
             import com.easyinsight.customupload.ExcelUploadFormat;
             import com.easyinsight.customupload.FlatFileUploadFormat;
+            import com.easyinsight.customupload.IServerDataSourceCreation;
             import com.easyinsight.genredata.ModuleAnalyzeEvent;
             import com.easyinsight.listing.DescriptorAnalyzeSource;
             import com.easyinsight.util.ProgressAlert;
@@ -142,6 +143,11 @@
                     implBox.label = "Composite Details";
                     showImpl = true;
 					this.feedAdminDetail = compositeWorkspace;
+                /*} else if (feedDefinition is ServerDataSourceDefinition) {
+                    var sds:ServerDataSourceDefinition = feedDefinition as ServerDataSourceDefinition;
+                    var configClass:Class = sds.configClass();
+                    var sdsEditor:IServerDataSourceCreation = new configClass();
+                    sdsEditor.dataSourceDefinition =*/
                 } else if (feedType == DataFeedDescriptor.JIRA) {
                     var jiraConfig:JiraConfig = new JiraConfig();
                     jiraConfig.feedDefinition = this.feedDefinition;
@@ -388,15 +394,6 @@
             <mx:Box label="Fields">
                 <feed:FieldAdministration feedDefinition="{feedDefinition}" id="fieldAdministration"/>
             </mx:Box>
-			<!--<mx:Box label="Data" id="fieldsBox">
-			</mx:Box>-->
-            <!-- we should have...
-                Fields
-                Data Maintenance    
-            -->
-            <!--<mx:Box label="Hierarchies" paddingLeft="10" paddingTop="10" paddingBottom="10" paddingRight="10">
-                <feed:HierarchyAdministration  id="hierarchiesBox" feedDefinition="{feedDefinition}"/>
-            </mx:Box>-->
             <mx:Box label="Virtual Groupings" paddingLeft="10" paddingTop="10" paddingBottom="10" paddingRight="10">
                 <feed:VirtualDimensionAdministration id="virtualBox" feedDefinition="{feedDefinition}"/>
             </mx:Box>

@@ -23,7 +23,7 @@ public class AssociatedInsightsAdminControls extends HBox{
         deleteButton.addEventListener(MouseEvent.CLICK, deleteAssociation);
     }
 
-    private function deleteAssociation():void {
+    private function deleteAssociation(event:MouseEvent):void {
         dispatchEvent(new DeleteAssociationEvent(DeleteAssociationEvent.DELETE_REPORT, goalInsight));
     }
 

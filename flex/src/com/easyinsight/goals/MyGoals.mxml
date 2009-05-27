@@ -76,6 +76,10 @@
 
         import mx.collections.ArrayCollection;
 
+        private function onGoalDetail(event:GoalDetailEvent):void {
+            dispatchEvent(new AnalyzeEvent(new GoalDetailAnalyzeSource(event.goalTreeNodeData)));
+        }
+
         private var deleteID:int;
 
         [Bindable]
@@ -264,7 +268,7 @@
                         <mx:Button id="netvibesButton" toolTip="Add to Netvibes"
                            icon="@Embed(source='../../../../assets/uwa-netvibes.png')" click="netvibes()" />
                     </mx:HBox>
-                    <goals:MyGoalsGrid id="myGoalsGrid" width="100%" height="100%"/>
+                    <goals:MyGoalsGrid id="myGoalsGrid" width="100%" height="100%" goalDetailNav="onGoalDetail(event)"/>
                 </mx:VBox>
                 </mx:VDividedBox>
         </mx:VBox>

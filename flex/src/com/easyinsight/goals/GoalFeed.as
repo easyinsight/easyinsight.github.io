@@ -5,7 +5,7 @@ public class GoalFeed {
     public var feedID:int;
     public var feedName:String;
 
-    public function GoalFeed() {
+    public function GoalFeed() {     
         
     }
 }

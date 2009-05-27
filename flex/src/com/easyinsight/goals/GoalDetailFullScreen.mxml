@@ -1,12 +1,19 @@
 <?xml version="1.0" ?>
 <FullScreenPage xmlns:mx="http://www.adobe.com/2006/mxml" xmlns="com.easyinsight.*"
-                xmlns:goals="com.easyinsight.goals.*">
+                xmlns:goals="com.easyinsight.goals.*" width="100%" height="100%">
     <mx:Script><![CDATA[
         import com.adobe.ac.mxeffects.CubeRotate;
-import mx.collections.ArrayCollection;
+        import com.easyinsight.analysis.AnalysisCloseEvent;
+        import com.easyinsight.solutions.InsightDescriptor;
+
+        import mx.collections.ArrayCollection;
         import mx.core.Container;
-import mx.events.ItemClickEvent;
+        import mx.events.ItemClickEvent;
         import com.easyinsight.dashboard.DataViewPanel;
+
+        private function close():void {
+            dispatchEvent(new AnalysisCloseEvent(this));
+        }
 
         [Bindable]
         private var _goalTreeNodeData:GoalTreeNodeData;
@@ -15,11 +22,14 @@ import mx.events.ItemClickEvent;
             super.createChildren();
 
             var topElements:ArrayCollection = new ArrayCollection();
-            for each (var report:GoalInsight in _goalTreeNodeData.associatedInsights) {
+            for each (var report:InsightDescriptor in _goalTreeNodeData.associatedInsights) {
                 var reportItem:GoalDetailItem = new GoalDetailItem();
-                reportItem.label = report.insightName;
+                reportItem.label = report.name;
                 var dataViewPanel:DataViewPanel = new DataViewPanel();
-                dataViewPanel.analysisID = report.insightID;
+                dataViewPanel.analysisID = report.id;
+                dataViewPanel.reportName = report.name;
+                dataViewPanel.reportType = report.reportType;
+                dataViewPanel.dataSourceID = report.dataFeedID;
                 reportItem.displayObject = dataViewPanel;
                 viewStack.addChild(dataViewPanel);
                 topElements.addItem(reportItem);
@@ -57,13 +67,13 @@ import mx.events.ItemClickEvent;
         public function set goalTreeNodeData(val:GoalTreeNodeData):void {
             _goalTreeNodeData = val;
         }]]></mx:Script>
-    <mx:HBox>
-        <mx:VBox>
-            <goals:GoalHistoryView goalTreeNodeData="{_goalTreeNodeData}" width="400" height="300"/>
-        </mx:VBox>
-        <mx:VBox>
+    <mx:VBox width="100%" height="100%">
+        <mx:HBox>
+            <mx:Button id="wrapButton" icon="@Embed(source='../../../../assets/document_out.png')" click="close()" toolTip="Close"/>
+        </mx:HBox>
+        <mx:HBox width="100%" horizontalAlign="center">
             <mx:ButtonBar id="buttonBar" itemClick="choseButton(event)"/>
-            <mx:ViewStack id="viewStack"/>
-        </mx:VBox>
-    </mx:HBox>
+        </mx:HBox>
+        <mx:ViewStack id="viewStack" width="100%" height="100%"/>
+    </mx:VBox>
 </FullScreenPage>

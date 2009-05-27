@@ -1,5 +1,8 @@
 <?xml version="1.0" ?>
 <mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" creationComplete="setup()" doubleClickEnabled="true">
+    <mx:Metadata>
+        [Event(name="goalDetailNav", type="com.easyinsight.goals.GoalDetailEvent")]
+    </mx:Metadata>
     <mx:Script><![CDATA[
         import com.easyinsight.framework.User;
 
@@ -37,6 +40,7 @@
 
         private function onDoubleClick(event:ListEvent):void {
             var goal:GoalTreeNodeData = goals.getItemAt(event.rowIndex) as GoalTreeNodeData;
+            dispatchEvent(new GoalDetailEvent(goal));
             //dispatchEvent(new AnalyzeEvent(new GoalDetailAnalyzeSource(goal)));
         }
 ]]></mx:Script>

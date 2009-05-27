@@ -35,10 +35,10 @@
         }
         ]]></mx:Script>
     <mx:Form>
-        <mx:FormItem label="Basecamp URL: " direction="horizontal" fontWeight="bold" fontFamily="Tahoma">
+        <mx:FormItem label="Basecamp Path: " direction="horizontal" fontWeight="bold" fontFamily="Tahoma">
 			<mx:TextInput id="urlInput" fontWeight="normal" fontFamily="Lucida Grande"/>
 		</mx:FormItem>
-        <mx:FormItem label="Example: http://demohost:8080" fontSize="10"/>
+        <mx:FormItem label="Example: easyinsight for easyinsight.basecamphq.com" fontSize="10"/>
 		<mx:FormItem label="User Name: " direction="horizontal" fontWeight="bold" fontFamily="Tahoma">
 			<mx:TextInput id="userNameInput" fontWeight="normal" fontFamily="Lucida Grande"/>
 		</mx:FormItem>

@@ -34,7 +34,8 @@ public class DataSourceLinkButton extends HBox{
 
     override public function set data(val:Object):void {
         this.goalDataSource = val as GoalFeed;
-        linkButton.label = goalDataSource.feedName;
+        var name:String = goalDataSource.feedName;
+        linkButton.label =  name;
     }
 
     override public function get data():Object {

@@ -2,10 +2,16 @@
 <mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%">
     <mx:Script><![CDATA[
         import mx.collections.ArrayCollection;
+
         private var _goalTreeNodeData:GoalTreeNodeData;
 
         [Bindable]
         private var dataSources:ArrayCollection;
+
+        override protected function commitProperties():void {
+            super.commitProperties();
+            dataSources = _goalTreeNodeData.associatedFeeds;
+        }
 
         public function set goalTreeNodeData(val:GoalTreeNodeData):void {
             _goalTreeNodeData = val;
