@@ -4,16 +4,11 @@
 	<mx:Script>
 		<![CDATA[
 
-            import com.easyinsight.analysis.AnalysisItem;
-
-        import mx.collections.ArrayCollection;
         import mx.collections.ArrayCollection;
         import mx.controls.DataGrid;
         import mx.managers.DragManager;
         import mx.controls.List;
         import mx.events.DragEvent;
-        import mx.events.ValidationResultEvent;
-        import mx.managers.PopUpManager;
 
         [Bindable]
         private var failureMessage:String;
@@ -32,6 +27,8 @@
                 var namedKey:NamedKey = new NamedKey();
                 namedKey.name = nameInput.text;
                 analysisCalculation.key = namedKey;
+            } else {
+                analysisCalculation.displayName = nameInput.text;
             }
             analysisCalculation.calculationString = calculationInput.text;
             return analysisCalculation;
@@ -103,7 +100,7 @@
 	<!--<mx:RemoteObject destination="analysisDefinition" id="analysisService">
 		<mx:method name="validateCalculation" result="validatedCalculation()"/>
 	</mx:RemoteObject>-->
-	<mx:HBox styleName="TitleWindowContents">
+	<mx:HBox>
 		<mx:VBox>
 			<mx:Label text="Available Functions"/>
 			<mx:Tree labelField="@label" width="300">
