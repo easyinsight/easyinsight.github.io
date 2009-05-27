@@ -47,6 +47,6 @@ public class DataSourceScheduledTask extends ScheduledTask {
         if (dataSourceUser == null) {
             throw new RuntimeException();
         }
-        dataSource.refreshData(null, dataSourceUser.getAccountID(), now);
+        dataSource.refreshData(null, dataSourceUser.getAccountID(), now, conn);
     }
 }

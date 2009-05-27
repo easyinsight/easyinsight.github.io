@@ -1,0 +1,118 @@
+<?xml version="1.0" ?>
+<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml">
+    <mx:Script><![CDATA[
+        import com.easyinsight.administration.feed.ServerDataSourceDefinition;
+
+        import mx.controls.Alert;
+        import mx.managers.PopUpManager;
+
+        private var _dataSourceClass:Class;
+        private var dataSourceCreation:IServerDataSourceCreation;
+        private var _dataSourceID:int;
+        private var _dataSourceDefinition:ServerDataSourceDefinition;
+
+        [Bindable]
+        private var ready:Boolean;
+
+        [Bindable]
+        private var credentialsSaved:Boolean;
+
+        override protected function createChildren():void {
+            super.createChildren();
+            if (_dataSourceDefinition == null) {
+                feedService.getFeedDefinition.send(_dataSourceID);
+            } else {
+                ready = true;
+                dataSourceCreation = new _dataSourceClass();
+                coreContent.addChild(dataSourceCreation as DisplayObject);
+            }
+        }
+
+        private function gotDataSource():void {
+            dataSourceDefinition = feedService.getFeedDefinition.lastResult as ServerDataSourceDefinition;
+            ready = true;
+            var configClass:Class = dataSourceDefinition.configClass();
+            dataSourceCreation = new configClass();
+            coreContent.addChild(dataSourceCreation as DisplayObject);
+        }
+
+        public function set dataSourceID(value:int):void {
+            _dataSourceID = value;
+        }
+
+        public function get dataSourceDefinition():ServerDataSourceDefinition {
+            return _dataSourceDefinition;
+        }
+
+        public function set dataSourceDefinition(value:ServerDataSourceDefinition):void {
+            _dataSourceDefinition = value;
+        }
+
+        private function validate():void {
+            progressBar.visible = true;
+            dataSourceCreation.updateDataSource(dataSourceDefinition);
+            uploadService.validateCredentials.send(dataSourceDefinition, dataSourceCreation.credentials);
+        }
+
+        private function validated():void {
+            progressBar.visible = false;
+            var validation:String = uploadService.validateCredentials.lastResult as String;
+            if (validation == null) {
+                Alert.show("Validation successful!");
+            } else {
+                Alert.show(validation);
+            }
+        }
+
+        private function create():void {
+            progressBar.visible = true;
+            dataSourceDefinition.refreshDataInterval = refreshStepper.value * 1000 * 60 * 60;
+            dataSourceCreation.updateDataSource(dataSourceDefinition);
+            feedService.updateFeedDefinition.send(dataSourceDefinition, "", null);
+        }
+
+        private function created():void {
+            uploadService.refreshData.send(dataSourceDefinition.dataFeedID, dataSourceCreation.credentials, credentialsSaved);
+        }
+
+        private function refreshed():void {
+            PopUpManager.removePopUp(this);
+        }
+
+        public function set dataSourceClass(value:Class):void {
+            _dataSourceClass = value;
+        }
+
+        private function credentialClick():void {
+            credentialsSaved = !credentialsSaved;
+            if (!credentialsSaved) {
+                refreshStepper.value = 0;
+            }
+        }
+        ]]></mx:Script>
+    <mx:RemoteObject destination="userUpload" id="uploadService">
+        <mx:method name="validateCredentials" result="validated()"/>
+        <mx:method name="refreshData" result="refreshed()"/>
+    </mx:RemoteObject>
+    <mx:RemoteObject destination="feeds" id="feedService">
+        <mx:method name="updateFeedDefinition" result="created()"/>
+        <mx:method name="getFeedDefinition" result="gotDataSource()"/>
+    </mx:RemoteObject>
+    <mx:Form>
+        <mx:Box id="coreContent"/>
+        <mx:FormItem label="" direction="vertical">
+            <mx:ProgressBar id="progressBar" indeterminate="true" visible="false"/>
+        </mx:FormItem>
+        <mx:FormItem label="Save Credentials:" enabled="{ready}">
+            <mx:CheckBox id="saveCredentialsCheckbox" click="credentialClick()"/>
+        </mx:FormItem>
+        <mx:FormItem label="Hourly Refresh:" enabled="{credentialsSaved}">
+            <mx:NumericStepper id="refreshStepper"/>
+        </mx:FormItem>
+        <mx:FormItem label="" direction="horizontal">
+            <mx:Button label="Validate" click="validate()" enabled="{ready}"/>
+            <mx:Button label="Create" click="create()" enabled="{ready}"/>
+            <mx:Button label="Cancel" click="PopUpManager.removePopUp(this)"/>
+        </mx:FormItem>
+	</mx:Form>
+</mx:TitleWindow>

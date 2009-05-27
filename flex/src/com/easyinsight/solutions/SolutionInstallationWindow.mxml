@@ -18,7 +18,9 @@
 	</mx:states>
 	<mx:Script>
 		<![CDATA[
-			import mx.collections.ArrayCollection;
+			import com.easyinsight.customupload.ConfigureDataSource;
+
+        import mx.collections.ArrayCollection;
 			import mx.managers.PopUpManager;
 
             [Bindable]
@@ -100,6 +102,14 @@
 			
 			private function installedSolution():void {
 				installResult = solutionService.installSolution.lastResult as ArrayCollection;
+                for each (var solutionInstallInfo:SolutionInstallInfo in installResult) {
+                    if (solutionInstallInfo.type == SolutionInstallInfo.DATA_SOURCE) {
+                        var configWindow:ConfigureDataSource = new ConfigureDataSource();
+                        configWindow.dataSourceID = solutionInstallInfo.newID;
+                        PopUpManager.addPopUp(configWindow, this, true);
+                        PopUpManager.centerPopUp(configWindow);
+                    }
+                }
 				currentState = "installComplete";			
 				dispatchEvent(new SolutionEvent(SolutionEvent.SOLUTION_INSTALLED, _solution.solutionID));
 			}

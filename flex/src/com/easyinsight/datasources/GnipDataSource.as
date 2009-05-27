@@ -3,6 +3,8 @@ import com.easyinsight.administration.feed.FeedDefinitionData;
 
 import com.easyinsight.administration.feed.ServerDataSourceDefinition;
 
+import com.easyinsight.customupload.GnipDataSourceCreation;
+
 import mx.collections.ArrayCollection;
 
 [Bindable]
@@ -14,6 +16,14 @@ public class GnipDataSource extends ServerDataSourceDefinition{
     public function GnipDataSource() {
         super();
         this.feedName = "Gnip";
+    }
+
+    override public function configClass():Class {
+        return GnipDataSourceCreation;
+    }
+
+    override public function canRefresh():Boolean {
+        return true;
     }
 }
 }

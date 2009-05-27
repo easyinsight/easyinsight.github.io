@@ -1,5 +1,5 @@
 <?xml version="1.0" ?>
-<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%">
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%" implements="com.easyinsight.customupload.IServerDataSourceCreation">
     <mx:Metadata>
 		[Event(name="userConfigComplete", type="com.easyinsight.customupload.UploadConfigEvent")]
 		[Event(name="userConfigCancel", type="com.easyinsight.customupload.UploadConfigEvent")]
@@ -8,15 +8,9 @@
         import com.easyinsight.administration.feed.FeedDefinitionData;
         import com.easyinsight.datasources.JiraDataSource;
         import com.easyinsight.framework.Credentials;
-        import com.easyinsight.genredata.ModuleAnalyzeEvent;
-import com.easyinsight.listing.DataFeedDescriptor;
-        import com.easyinsight.listing.DescriptorAnalyzeSource;
-        import mx.controls.Alert;
 
         public function get dataSourceDefinition():FeedDefinitionData {
-            var obj:JiraDataSource = new JiraDataSource();
-            obj.url = urlInput.text;
-            return obj;
+            return new JiraDataSource();
         }
 
         public function get credentials():Credentials {
@@ -26,45 +20,12 @@ import com.easyinsight.listing.DataFeedDescriptor;
             return credentials;
         }
 
-        private function validate():void {
-            progressBar.visible = true;
-            uploadService.validateCredentials.send(dataSourceDefinition, credentials);
-        }
-
-        private function validated():void {
-            progressBar.visible = false;
-            var validation:String = uploadService.validateCredentials.lastResult as String;
-            if (validation == null) {
-                Alert.show("Validation successful!");
-            } else {
-                Alert.show(validation);
-            }
-        }
-
-        private function create():void {
-            progressBar.visible = true;
-            uploadService.newExternalDataSource.send(dataSourceDefinition, credentials);
-        }
-
-        private function created():void {
-            progressBar.visible = false;
-            var id:int = uploadService.newExternalDataSource.lastResult as int;
-            var descriptor:DataFeedDescriptor = new DataFeedDescriptor();
-            descriptor.dataFeedID = id;
-            descriptor.name = "JIRA";
-            /*descriptor.policy = new UploadPolicy();
-            descriptor.policy.publiclyVisible = false;*/
-            dispatchEvent(new UploadConfigEvent(UploadConfigEvent.UPLOAD_CONFIG_COMPLETE, id, descriptor.name));            
-            dispatchEvent(new ModuleAnalyzeEvent(new DescriptorAnalyzeSource(descriptor)));
-        }
-
-        ]]></mx:Script>
-    <mx:RemoteObject destination="userUpload" id="uploadService">
-        <mx:method name="validateCredentials" result="validated()"/>
-        <mx:method name="newExternalDataSource" result="created()"/>
-    </mx:RemoteObject>
+        public function updateDataSource(feedDefinition:FeedDefinitionData):void {
+            var source:JiraDataSource = feedDefinition as JiraDataSource;
+            source.url = urlInput.text;
+        }]]></mx:Script>
     <mx:Form>
-        <mx:FormItem label="URL: " direction="horizontal" fontWeight="bold" fontFamily="Tahoma">
+        <mx:FormItem label="JIRA URL: " direction="horizontal" fontWeight="bold" fontFamily="Tahoma">
 			<mx:TextInput id="urlInput" fontWeight="normal" fontFamily="Lucida Grande"/>
 		</mx:FormItem>
         <mx:FormItem label="Example: http://demohost:8080" fontSize="10"/>
@@ -74,13 +35,5 @@ import com.easyinsight.listing.DataFeedDescriptor;
 		<mx:FormItem label="Password: " direction="horizontal" fontWeight="bold" fontFamily="Tahoma">
 			<mx:TextInput id="passwordInput" displayAsPassword="true"/>
 		</mx:FormItem>
-        <mx:FormItem label="" direction="vertical">
-            <mx:ProgressBar id="progressBar" indeterminate="true" visible="false"/>
-        </mx:FormItem>
-        <mx:FormItem label="" direction="horizontal">
-            <mx:Button label="Validate" click="validate()"/>
-            <mx:Button label="Create" click="create()"/>
-            <mx:Button label="Cancel" click="dispatchEvent(new UploadConfigEvent(UploadConfigEvent.UPLOAD_CONFIG_CANCEL))"/>
-        </mx:FormItem>
 	</mx:Form>
 </mx:VBox>

@@ -12,5 +12,9 @@ public class ServerDataSourceDefinition extends FeedDefinitionData{
     override public function canRefresh():Boolean {
         return true;
     }
+
+    public function configClass():Class {
+        return null;
+    }
 }
 }

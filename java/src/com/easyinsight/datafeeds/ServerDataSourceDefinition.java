@@ -114,9 +114,27 @@ public abstract class ServerDataSourceDefinition extends FeedDefinition {
 
     public CredentialsResponse refreshData(Credentials credentials, long accountID, Date now) {
         Connection conn = Database.instance().getConnection();
-        DataStorage dataStorage = null;
         try {
             conn.setAutoCommit(false);
+            refreshData(credentials, accountID, now, conn);
+            conn.commit();
+            return new CredentialsResponse(true);
+        } catch (Exception e) {
+            LogClass.error(e);
+            try {
+                conn.rollback();
+            } catch (SQLException e1) {
+                LogClass.error(e1);
+            }
+            return new CredentialsResponse(false, e.getMessage());
+        } finally {
+            Database.instance().closeConnection(conn);
+        }
+    }
+
+    public void refreshData(Credentials credentials, long accountID, Date now, Connection conn) throws Exception {
+        DataStorage dataStorage = null;
+        try {
             if(credentials == null) {
                 if(this.getCredentialsDefinition() == CredentialsDefinition.STANDARD_USERNAME_PW) {
                     credentials = new Credentials();
@@ -128,25 +146,16 @@ public abstract class ServerDataSourceDefinition extends FeedDefinition {
             dataStorage = DataStorage.writeConnection(this, conn, accountID);
             addData(dataStorage, dataSet);
             dataStorage.commit();
-            conn.commit();
             notifyOfDataUpdate();
-            return new CredentialsResponse(true);
         } catch (Exception e) {
-            LogClass.error(e);
             if (dataStorage != null) {
                 dataStorage.rollback();
             }
-            try {
-                conn.rollback();
-            } catch (SQLException e1) {
-                LogClass.error(e1);
-            }
-            return new CredentialsResponse(false, e.getMessage());
+            throw e;
         } finally {
             if (dataStorage != null) {
                 dataStorage.closeConnection();
             }
-            Database.instance().closeConnection(conn);
         }
     }
 

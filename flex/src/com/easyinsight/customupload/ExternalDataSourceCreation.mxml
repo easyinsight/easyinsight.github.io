@@ -1,0 +1,80 @@
+<?xml version="1.0" ?>
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml">
+    <mx:Metadata>
+		[Event(name="userConfigComplete", type="com.easyinsight.customupload.UploadConfigEvent")]
+		[Event(name="userConfigCancel", type="com.easyinsight.customupload.UploadConfigEvent")]
+	</mx:Metadata>
+    <mx:Script><![CDATA[
+        import com.easyinsight.administration.feed.FeedDefinitionData;
+        import com.easyinsight.genredata.ModuleAnalyzeEvent;
+        import com.easyinsight.listing.DataFeedDescriptor;
+        import com.easyinsight.listing.DescriptorAnalyzeSource;
+
+        import mx.controls.Alert;
+
+        private var _dataSourceClass:Class;
+        private var dataSourceCreation:IServerDataSourceCreation;
+
+        public function set dataSourceClass(value:Class):void {
+            _dataSourceClass = value;
+        }
+
+        override protected function createChildren():void {
+            super.createChildren();
+            dataSourceCreation = new _dataSourceClass();
+            coreContent.addChild(dataSourceCreation as DisplayObject);
+        }
+
+        public function get dataSourceDefinition():FeedDefinitionData {
+            var obj:FeedDefinitionData = dataSourceCreation.dataSourceDefinition;
+            dataSourceCreation.updateDataSource(obj);
+            return obj;
+        }
+
+        private function validate():void {
+            progressBar.visible = true;
+            uploadService.validateCredentials.send(dataSourceDefinition, dataSourceCreation.credentials);
+        }
+
+        private function validated():void {
+            progressBar.visible = false;
+            var validation:String = uploadService.validateCredentials.lastResult as String;
+            if (validation == null) {
+                Alert.show("Validation successful!");
+            } else {
+                Alert.show(validation);
+            }
+        }
+
+        private function create():void {
+            progressBar.visible = true;
+            uploadService.newExternalDataSource.send(dataSourceDefinition, dataSourceCreation.credentials);
+        }
+
+        private function created():void {
+            progressBar.visible = false;
+            var id:int = uploadService.newExternalDataSource.lastResult as int;
+            var descriptor:DataFeedDescriptor = new DataFeedDescriptor();
+            descriptor.dataFeedID = id;
+            descriptor.name = "BaseCamp";
+            dispatchEvent(new UploadConfigEvent(UploadConfigEvent.UPLOAD_CONFIG_COMPLETE, id, descriptor.name));
+            dispatchEvent(new ModuleAnalyzeEvent(new DescriptorAnalyzeSource(descriptor)));
+        }
+
+        ]]></mx:Script>
+    <mx:RemoteObject destination="userUpload" id="uploadService">
+        <mx:method name="validateCredentials" result="validated()"/>
+        <mx:method name="newExternalDataSource" result="created()"/>
+    </mx:RemoteObject>
+    <mx:Form>
+        <mx:Box id="coreContent"/>
+        <mx:FormItem label="" direction="vertical">
+            <mx:ProgressBar id="progressBar" indeterminate="true" visible="false"/>
+        </mx:FormItem>
+        <mx:FormItem label="" direction="horizontal">
+            <mx:Button label="Validate" click="validate()"/>
+            <mx:Button label="Create" click="create()"/>
+            <mx:Button label="Cancel" click="dispatchEvent(new UploadConfigEvent(UploadConfigEvent.UPLOAD_CONFIG_CANCEL))"/>
+        </mx:FormItem>
+	</mx:Form>
+</mx:VBox>

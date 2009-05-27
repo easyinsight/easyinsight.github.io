@@ -41,16 +41,54 @@
                     <mx:ViewStack id="individualStack" width="100%" height="100%">
                         <google:GoogleSpreadsheetSelection userConfigComplete="onFeedCreation(event)"
                                                            userConfigCancel="cancel(event)"/>
-                        <customupload:JiraDataSourceCreation userConfigComplete="onFeedCreation(event)"
+                        <customupload:ExternalDataSourceCreation dataSourceClass="com.easyinsight.customupload.JiraDataSourceCreation"
+                                                                 userConfigComplete="onFeedCreation(event)"
                                                            userConfigCancel="cancel(event)"/>
-                        <customupload:BaseCampDataSourceCreation userConfigComplete="onFeedCreation(event)"
+                        <customupload:ExternalDataSourceCreation dataSourceClass="com.easyinsight.customupload.BaseCampDataSourceCreation"
+                                                                 userConfigComplete="onFeedCreation(event)"
                                                            userConfigCancel="cancel(event)"/>
                     </mx:ViewStack>
                 </mx:VBox>
             </mx:AddChild>
             <mx:SetProperty target="{this}" name="viewStack" value="{individualStack}"/>
         </mx:State>
-
+        <mx:State name="Group">
+            <mx:AddChild relativeTo="{coreContent}">
+                <mx:VBox height="100%" horizontalAlign="center" width="200">
+                    <mx:Label text="Available Data Sources" fontFamily="Tahoma" fontSize="14" fontWeight="bold"/>
+                    <mx:List height="100%" width="100%" itemClick="onItemClick(event)">
+                        <mx:dataProvider>
+                            <mx:ArrayCollection>
+                                <mx:Array>
+                                    <mx:String>Google</mx:String>
+                                    <mx:String>JIRA</mx:String>
+                                    <mx:String>BaseCamp</mx:String>
+                                    <mx:String>Gnip</mx:String>
+                                </mx:Array>
+                            </mx:ArrayCollection>
+                        </mx:dataProvider>
+                    </mx:List>
+                </mx:VBox>
+            </mx:AddChild>
+            <mx:AddChild relativeTo="{coreContent}">
+                <mx:VBox width="100%" height="100%">
+                    <mx:ViewStack id="groupStack" width="100%" height="100%">
+                        <google:GoogleSpreadsheetSelection userConfigComplete="onFeedCreation(event)"
+                                                           userConfigCancel="cancel(event)"/>
+                        <customupload:ExternalDataSourceCreation dataSourceClass="com.easyinsight.customupload.JiraDataSourceCreation"
+                                                                 userConfigComplete="onFeedCreation(event)"
+                                                           userConfigCancel="cancel(event)"/>
+                        <customupload:ExternalDataSourceCreation dataSourceClass="com.easyinsight.customupload.BaseCampDataSourceCreation"
+                                                                 userConfigComplete="onFeedCreation(event)"
+                                                           userConfigCancel="cancel(event)"/>
+                        <customupload:ExternalDataSourceCreation dataSourceClass="com.easyinsight.customupload.GnipDataSourceCreation"
+                                                                 userConfigComplete="onFeedCreation(event)"
+                                                           userConfigCancel="cancel(event)"/>
+                    </mx:ViewStack>
+                </mx:VBox>
+            </mx:AddChild>
+            <mx:SetProperty target="{this}" name="viewStack" value="{groupStack}"/>
+        </mx:State>
         <mx:State name="Professional">
             <mx:AddChild relativeTo="{coreContent}">
                 <mx:VBox height="100%" horizontalAlign="center" width="200">
@@ -74,12 +112,15 @@
                     <mx:ViewStack id="professionalStack" width="100%" height="100%">
                         <google:GoogleSpreadsheetSelection userConfigComplete="onFeedCreation(event)"
                                                            userConfigCancel="cancel(event)"/>
-                        <customupload:JiraDataSourceCreation userConfigComplete="onFeedCreation(event)"
+                        <customupload:ExternalDataSourceCreation dataSourceClass="com.easyinsight.customupload.JiraDataSourceCreation"
+                                                                 userConfigComplete="onFeedCreation(event)"
                                                            userConfigCancel="cancel(event)"/>
-                        <customupload:BaseCampDataSourceCreation userConfigComplete="onFeedCreation(event)"
+                        <customupload:ExternalDataSourceCreation dataSourceClass="com.easyinsight.customupload.BaseCampDataSourceCreation"
+                                                                 userConfigComplete="onFeedCreation(event)"
                                                            userConfigCancel="cancel(event)"/>
-                        <customupload:GnipDataSourceCreation userConfigComplete="onFeedCreation(event)"
-                                                            userConfigCancel="cancel(event)" />
+                        <customupload:ExternalDataSourceCreation dataSourceClass="com.easyinsight.customupload.GnipDataSourceCreation"
+                                                                 userConfigComplete="onFeedCreation(event)"
+                                                           userConfigCancel="cancel(event)"/>
                     </mx:ViewStack>
                 </mx:VBox>
             </mx:AddChild>
@@ -109,12 +150,15 @@
                     <mx:ViewStack id="adminStack" width="100%" height="100%">
                         <google:GoogleSpreadsheetSelection userConfigComplete="onFeedCreation(event)"
                                                            userConfigCancel="cancel(event)"/>
-                        <customupload:JiraDataSourceCreation userConfigComplete="onFeedCreation(event)"
+                        <customupload:ExternalDataSourceCreation dataSourceClass="com.easyinsight.customupload.JiraDataSourceCreation"
+                                                                 userConfigComplete="onFeedCreation(event)"
                                                            userConfigCancel="cancel(event)"/>
-                        <customupload:BaseCampDataSourceCreation userConfigComplete="onFeedCreation(event)"
+                        <customupload:ExternalDataSourceCreation dataSourceClass="com.easyinsight.customupload.BaseCampDataSourceCreation"
+                                                                 userConfigComplete="onFeedCreation(event)"
                                                            userConfigCancel="cancel(event)"/>
-                        <customupload:GnipDataSourceCreation userConfigComplete="onFeedCreation(event)"
-                                                            userConfigCancel="cancel(event)" />
+                        <customupload:ExternalDataSourceCreation dataSourceClass="com.easyinsight.customupload.GnipDataSourceCreation"
+                                                                 userConfigComplete="onFeedCreation(event)"
+                                                           userConfigCancel="cancel(event)"/>
                         <customupload:NoCredentialsDataSourceCreation userConfigComplete="onFeedCreation(event)"
                                                            userConfigCancel="cancel(event)"
                                                            dataSourceClass="com.easyinsight.administration.feed.AdminStatsDataSource"/>
@@ -153,8 +197,11 @@
                 currentState = "Free";
             } else if (User.getInstance().getAccountType() == Account.ADMINISTRATOR) {
                 currentState = "Administration";
-            } else if(User.getInstance().getAccountType() == Account.PROFESSIONAL) {
+            } else if(User.getInstance().getAccountType() == Account.PROFESSIONAL ||
+                      User.getInstance().getAccountType() == Account.ENTERPRISE) {
                 currentState = "Professional";
+            } else if (User.getInstance().getAccountType() == Account.GROUP) {
+                currentState = "Group";
             }else {
                 currentState = "Individual";
             }

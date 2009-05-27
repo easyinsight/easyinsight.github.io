@@ -40,30 +40,26 @@ public abstract class ScheduledTask implements Runnable {
     private long taskGeneratorID;
 
     public void run() {
-        boolean failed = false;
         EIConnection conn = Database.instance().getConnection();
+        Session session = Database.instance().createSession(conn);
         try {
             conn.setAutoCommit(false);
             LogClass.info("Executing " + getClass().getName() + " with execution date = " + executionDate);
             execute(executionDate, conn);
             setStatus(COMPLETED);
+            session.update(this);
+            session.flush();
+            conn.commit();
         } catch (Exception e) {
             LogClass.error(e);
-            failed = true;
             conn.rollback();
+            setStatus(FAILED);
+            session.update(this);
+            session.flush();
         } finally {
             conn.setAutoCommit(true);
+            session.close();
             Database.instance().closeConnection(conn);
-        }
-        if (failed) {
-            Session session = Database.instance().createSession();
-            try {
-                session.getTransaction().begin();
-                setStatus(FAILED);
-                session.getTransaction().commit();
-            } finally {
-                session.close();
-            }
         }
     }
 

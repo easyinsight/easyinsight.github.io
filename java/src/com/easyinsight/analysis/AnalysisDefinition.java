@@ -15,89 +15,90 @@ import javax.persistence.*;
  * Time: 11:40:41 AM
  */
 @Entity
-@Table(name="analysis")
+@Table(name = "analysis")
 public class AnalysisDefinition implements Cloneable {
-    @Column(name="title")
+    @Column(name = "title")
     private String title;
-    @Id @GeneratedValue(strategy=GenerationType.IDENTITY)
-    @Column(name="analysis_id")
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "analysis_id")
     private Long analysisID;
-    @Column(name="data_feed_id")
+    @Column(name = "data_feed_id")
     private long dataFeedID;
 
-    @Column(name="root_definition")
+    @Column(name = "root_definition")
     private boolean rootDefinition;
 
-    @Column(name="report_type")
+    @Column(name = "report_type")
     private int reportType;
-    
-    @OneToMany(cascade=CascadeType.ALL)
-    @JoinTable(name="analysis_to_filter_join",
-        joinColumns = @JoinColumn(name="analysis_id", nullable = false),
-        inverseJoinColumns = @JoinColumn(name="filter_id", nullable = false))
+
+    @OneToMany(cascade = CascadeType.ALL)
+    @JoinTable(name = "analysis_to_filter_join",
+            joinColumns = @JoinColumn(name = "analysis_id", nullable = false),
+            inverseJoinColumns = @JoinColumn(name = "filter_id", nullable = false))
     private List<PersistableFilterDefinition> filterDefinitions;
 
-    @OneToMany(cascade=CascadeType.ALL)
-    @JoinTable(name="additional_items",
-        joinColumns = @JoinColumn(name="analysis_id", nullable = false),
-        inverseJoinColumns = @JoinColumn(name="analysis_item_id", nullable = false))
+    @OneToMany(cascade = CascadeType.ALL)
+    @JoinTable(name = "additional_items",
+            joinColumns = @JoinColumn(name = "analysis_id", nullable = false),
+            inverseJoinColumns = @JoinColumn(name = "analysis_item_id", nullable = false))
     private List<AnalysisItem> addedItems = new ArrayList<AnalysisItem>();
-    
-    @OneToMany(cascade=CascadeType.ALL)
-    @JoinColumn(name="analysis_id", nullable = false)
+
+    @OneToMany(cascade = CascadeType.ALL)
+    @JoinColumn(name = "analysis_id", nullable = false)
     private List<UserToAnalysisBinding> userBindings = new ArrayList<UserToAnalysisBinding>();
 
-    @OneToMany(cascade=CascadeType.ALL)
-    @JoinTable(name="analysis_to_data_scrub",
-        joinColumns = @JoinColumn(name="analysis_id", nullable = false),
-        inverseJoinColumns = @JoinColumn(name="data_scrub_id", nullable = false))
+    @OneToMany(cascade = CascadeType.ALL)
+    @JoinTable(name = "analysis_to_data_scrub",
+            joinColumns = @JoinColumn(name = "analysis_id", nullable = false),
+            inverseJoinColumns = @JoinColumn(name = "data_scrub_id", nullable = false))
     private List<DataScrub> dataScrubs = new ArrayList<DataScrub>();
 
-    @OneToMany(cascade= CascadeType.ALL)
-    @JoinTable(name="analysis_to_tag",
-        joinColumns = @JoinColumn(name="analysis_id", nullable = false),
-        inverseJoinColumns = @JoinColumn(name="analysis_tags_id", nullable = false))
+    @OneToMany(cascade = CascadeType.ALL)
+    @JoinTable(name = "analysis_to_tag",
+            joinColumns = @JoinColumn(name = "analysis_id", nullable = false),
+            inverseJoinColumns = @JoinColumn(name = "analysis_tags_id", nullable = false))
     private List<Tag> tags = new ArrayList<Tag>();
 
     @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name="report_state_id")
+    @JoinColumn(name = "report_state_id")
     private AnalysisDefinitionState analysisDefinitionState;
 
-    @Column(name="policy")
+    @Column(name = "policy")
     private int analysisPolicy;
 
-    @Column(name="genre")
+    @Column(name = "genre")
     private String genre;
 
-    @Column(name="create_date")
+    @Column(name = "create_date")
     private Date dateCreated;
 
-    @Column(name="update_date")
+    @Column(name = "update_date")
     private Date dateUpdated;
 
-    @Column(name="views")
+    @Column(name = "views")
     private int viewCount;
 
-    @Column(name="rating_count")
+    @Column(name = "rating_count")
     private int ratingCount;
 
-    @Column(name="rating_average")
+    @Column(name = "rating_average")
     private double ratingAverage;
 
-    @Column(name="marketplace_visible")
+    @Column(name = "marketplace_visible")
     private boolean marketplaceVisible;
 
-    @Column(name="publicly_visible")
+    @Column(name = "publicly_visible")
     private boolean publiclyVisible;
 
-    @Column(name="feed_visibility")
+    @Column(name = "feed_visibility")
     private boolean visibleAtFeedLevel;
 
     @OneToMany(cascade = CascadeType.ALL)
     @MapKey(columns = @Column(name = "structure_key"))
     @JoinTable(name = "report_structure",
-                joinColumns = @JoinColumn(name = "analysis_id"),
-                inverseJoinColumns = @JoinColumn(name = "analysis_item_id"))
+            joinColumns = @JoinColumn(name = "analysis_id"),
+            inverseJoinColumns = @JoinColumn(name = "analysis_item_id"))
     private Map<String, AnalysisItem> reportStructure;
 
     public int getReportType() {
@@ -283,7 +284,7 @@ public class AnalysisDefinition implements Cloneable {
         List<PersistableFilterDefinition> filterDefinitions = new ArrayList<PersistableFilterDefinition>();
         for (PersistableFilterDefinition persistableFilterDefinition : this.filterDefinitions) {
             filterDefinitions.add(persistableFilterDefinition.clone());
-            replacementMap.put(persistableFilterDefinition.getField().getAnalysisItemID(),  persistableFilterDefinition.getField().clone());
+            replacementMap.put(persistableFilterDefinition.getField().getAnalysisItemID(), persistableFilterDefinition.getField().clone());
         }
         analysisDefinition.setFilterDefinitions(filterDefinitions);
         List<AnalysisItem> addedItems = new ArrayList<AnalysisItem>();
@@ -295,7 +296,7 @@ public class AnalysisDefinition implements Cloneable {
             } else {
                 clonedItem = replacementMap.get(analysisItem.getAnalysisItemID());
             }
-            addedItems.add(clonedItem);                
+            addedItems.add(clonedItem);
         }
         Map<String, AnalysisItem> clonedStructure = new HashMap<String, AnalysisItem>(getReportStructure());
         for (Map.Entry<String, AnalysisItem> entry : clonedStructure.entrySet()) {
@@ -304,7 +305,14 @@ public class AnalysisDefinition implements Cloneable {
                 replacementMap.put(entry.getValue().getAnalysisItemID(), clonedItem);
                 clonedStructure.put(entry.getKey(), clonedItem);
             } else {
-                clonedStructure.put(entry.getKey(), replacementMap.get(entry.getValue().getAnalysisItemID())); 
+                clonedStructure.put(entry.getKey(), replacementMap.get(entry.getValue().getAnalysisItemID()));
+            }
+            List<AnalysisItem> items = entry.getValue().getAnalysisItems(new ArrayList<AnalysisItem>(), new ArrayList<AnalysisItem>());
+            for (AnalysisItem item : items) {
+                if (replacementMap.get(item.getAnalysisItemID()) == null) {
+                    AnalysisItem clonedItem = entry.getValue().clone();
+                    replacementMap.put(item.getAnalysisItemID(), clonedItem);
+                }
             }
         }
 
@@ -344,7 +352,7 @@ public class AnalysisDefinition implements Cloneable {
         }
         analysisDefinition = analysisDefinitionState.createWSDefinition();
         analysisDefinition.setReportStateID(analysisDefinitionState.getId());
-        analysisDefinition.setReportType(reportType);        
+        analysisDefinition.setReportType(reportType);
         analysisDefinition.setAnalysisID(analysisID);
         analysisDefinition.setDataFeedID(dataFeedID);
         if (getAddedItems() != null) {

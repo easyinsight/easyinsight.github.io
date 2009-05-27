@@ -349,6 +349,7 @@ public class FeedDefinition implements Cloneable, Serializable {
         feedDefinition.setTags(clonedTags);
         feedDefinition.setDataFeedID(0);
         feedDefinition.setCachedCredentials(null);
+        feedDefinition.setRefreshDataInterval(0);
         return feedDefinition;
     }
 
