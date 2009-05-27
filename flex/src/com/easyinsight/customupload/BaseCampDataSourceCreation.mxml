@@ -9,10 +9,17 @@
         import com.easyinsight.datasources.BaseCampDataSource;
         import com.easyinsight.framework.Credentials;
 
+        private var url:String;
+
         public function get dataSourceDefinition():FeedDefinitionData {
             var obj:BaseCampDataSource = new BaseCampDataSource();
             obj.url = urlInput.text;
             return obj;
+        }
+
+        public function set dataSourceDefinition(feedDefinition:FeedDefinitionData):void {
+            var ds:BaseCampDataSource = feedDefinition as BaseCampDataSource;
+            url = ds.url;
         }
 
         public function updateDataSource(feedDefinition:FeedDefinitionData):void {
@@ -21,7 +28,7 @@
         }
 
         public function get credentials():Credentials {
-            var credentials:Credentials = new Credentials();f
+            var credentials:Credentials = new Credentials();
             credentials.userName = userNameInput.text;
             credentials.password = passwordInput.text;
             return credentials;
