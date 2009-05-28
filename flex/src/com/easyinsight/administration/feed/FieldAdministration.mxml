@@ -124,6 +124,12 @@
                     }
                     allFields.addItem(wrapper);
                 }
+                var sort:Sort = new Sort();
+                sort.fields = [ new SortField("displayName", false) ];
+                coreFields.sort = sort;
+                coreFields.refresh();
+                derivedFields.sort = sort;
+                derivedFields.refresh();
             }
         }
 

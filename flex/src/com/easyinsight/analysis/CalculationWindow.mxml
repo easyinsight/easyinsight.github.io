@@ -1,8 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:analysis="com.easyinsight.analysis.*"
-        implements="com.easyinsight.analysis.IAnalysisItemEditor">
-	<mx:Script>
+           xmlns:formatter="com.easyinsight.analysis.formatter.*"
+           implements="com.easyinsight.analysis.IAnalysisItemEditor" width="100%" height="100%">
+    <mx:Script>
 		<![CDATA[
+
+        import com.easyinsight.analysis.conditions.MeasureConditionRange;
+
+        import com.easyinsight.analysis.formatter.FormattingConfiguration;
 
         import mx.collections.ArrayCollection;
         import mx.controls.DataGrid;
@@ -19,6 +24,12 @@
         [Bindable]
         private var calcName:String;
 
+        [Bindable]
+        private var formattingConfiguration:FormattingConfiguration;
+
+        [Bindable]
+        private var measureConditionRange:MeasureConditionRange;
+
         private var analysisCalculation:AnalysisCalculation;
 
         public function save():AnalysisItem {
@@ -31,6 +42,11 @@
                 analysisCalculation.displayName = nameInput.text;
             }
             analysisCalculation.calculationString = calculationInput.text;
+            var measureConditionRange:MeasureConditionRange = measureRangeSelection.createMeasureConditionRange();
+            if (measureConditionRange != null) {
+                analysisCalculation.measureConditionRange = measureRangeSelection.createMeasureConditionRange();
+            }
+            analysisCalculation.formattingConfiguration = formattingSetup.formattingConfiguration;
             return analysisCalculation;
             /*var validationResult:ValidationResultEvent = nameValidator.validate();
              if (validationResult.type == ValidationResultEvent.VALID) {
@@ -60,6 +76,8 @@
             if (analysisCalculation != null) {
                 calcText = analysisCalculation.calculationString;
                 calcName = analysisCalculation.display;
+                measureConditionRange = analysisCalculation.measureConditionRange;
+                formattingConfiguration = analysisCalculation.formattingConfiguration;
             }
         }
 
@@ -97,39 +115,46 @@
 
 		]]>
 	</mx:Script>
-	<!--<mx:RemoteObject destination="analysisDefinition" id="analysisService">
+    <!--<mx:RemoteObject destination="analysisDefinition" id="analysisService">
 		<mx:method name="validateCalculation" result="validatedCalculation()"/>
 	</mx:RemoteObject>-->
-	<mx:HBox>
-		<mx:VBox>
-			<mx:Label text="Available Functions"/>
-			<mx:Tree labelField="@label" width="300">
-				<mx:XMLListCollection>
-					<mx:XMLList>
-						<group label="Math">
-							<function label="ln"/>
-						</group>
-						<group label="Statistics">
-							<function label="stddev"/>
-						</group>
-					</mx:XMLList>
-				</mx:XMLListCollection>
-			</mx:Tree>
-		</mx:VBox>	
-		<mx:Form width="400">
-			<mx:FormItem label="Name: " direction="horizontal" width="100%">
-				<mx:TextInput id="nameInput" width="100%" text="{calcName}"/>
-			</mx:FormItem>
-			<mx:FormItem label="Calculation: " direction="horizontal" width="100%">
-				<mx:TextArea id="calculationInput" dragEnter="dragEnterHandler(event)" dragDrop="dragDropHandler(event)" width="100%" height="300"
-                        text="{calcText}"/>
-			</mx:FormItem>
-			<!--<mx:FormItem label="" direction="horizontal">
+    <mx:HBox width="100%" height="100%">
+        <mx:VBox>
+            <mx:Label text="Available Functions"/>
+            <mx:Tree labelField="@label" width="300">
+                <mx:XMLListCollection>
+                    <mx:XMLList>
+                        <group label="Math">
+                            <function label="ln"/>
+                        </group>
+                        <group label="Statistics">
+                            <function label="stddev"/>
+                        </group>
+                    </mx:XMLList>
+                </mx:XMLListCollection>
+            </mx:Tree>
+        </mx:VBox>
+        <mx:Form>
+            <mx:FormItem label="Name: " direction="horizontal" width="100%">
+                <mx:TextInput id="nameInput" width="100%" text="{calcName}"/>
+            </mx:FormItem>
+            <mx:FormItem label="Calculation: " direction="horizontal" width="100%">
+                <mx:TextArea id="calculationInput" dragEnter="dragEnterHandler(event)" dragDrop="dragDropHandler(event)"
+                             width="100%" height="300"
+                             text="{calcText}" borderStyle="solid" borderThickness="1"/>
+            </mx:FormItem>
+            <mx:FormItem label="Formatting: ">
+                <formatter:FormattingSetup id="formattingSetup" formattingConfiguration="{formattingConfiguration}"/>
+            </mx:FormItem>
+            <mx:FormItem label="">
+                <analysis:ColorSelection id="measureRangeSelection" measureConditionRange="{measureConditionRange}"/>
+            </mx:FormItem>
+            <!--<mx:FormItem label="" direction="horizontal">
 				<mx:Button label="Save" click="save()"/>
 				<mx:Button label="Cancel" click="cancel()"/>
 			</mx:FormItem>-->
-		</mx:Form>
-	</mx:HBox>	
-	<!--<mx:StringValidator id="nameValidator" source="{nameInput}" property="text" minLength="3"/>
+        </mx:Form>
+    </mx:HBox>
+    <!--<mx:StringValidator id="nameValidator" source="{nameInput}" property="text" minLength="3"/>
 	<analysis:CalculationValidator id="calcValidator" source="{calculationInput}" property="text" failureMessage="{failureMessage}"/>-->
 </mx:Canvas>

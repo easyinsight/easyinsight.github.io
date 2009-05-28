@@ -1,0 +1,40 @@
+<?xml version="1.0" ?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" backgroundColor="#DCE2F8" borderThickness="1" cornerRadius="15" dropShadowEnabled="true"
+        borderStyle="solid">
+    <mx:Script><![CDATA[
+        import com.easyinsight.analysis.AnalysisItem;
+
+        import mx.managers.PopUpManager;
+
+        private var _item:AnalysisItem;
+        private var _feedID:int;
+
+        public function set feedID(value:int):void {
+            _feedID = value;
+        }
+
+        public function set item(value:AnalysisItem):void {
+            _item = value;
+        }
+
+        private function addAbsolute():void {
+            var sliderDateFilter:SliderDateFilter = new SliderDateFilter(_feedID, _item);
+            dispatchEvent(new FilterCreationEvent(sliderDateFilter));
+            PopUpManager.removePopUp(this);
+        }
+
+        private function addRolling():void {
+            var rollingFilter:RollingRangeFilter = new RollingRangeFilter(_feedID, _item);
+            dispatchEvent(new FilterCreationEvent(rollingFilter));
+            PopUpManager.removePopUp(this);
+        }
+
+        ]]></mx:Script>
+    <mx:VBox id="coreBox" paddingTop="5" paddingBottom="5" paddingLeft="5" paddingRight="5">
+        <mx:Label text="Do you want to create an absolute or rolling date range filter?"/>
+        <mx:HBox width="100%" horizontalAlign="center">
+            <mx:Button label="Absolute" click="addAbsolute()"/>
+            <mx:Button label="Rolling" click="addRolling()"/>
+        </mx:HBox>
+    </mx:VBox>
+</mx:Canvas>

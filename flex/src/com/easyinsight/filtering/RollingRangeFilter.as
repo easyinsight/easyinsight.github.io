@@ -1,6 +1,5 @@
 package com.easyinsight.filtering
 {
-	import com.easyinsight.analysis.AnalysisDimensionResultMetadata;
 	import com.easyinsight.analysis.AnalysisItem;
 	
 	import flash.events.MouseEvent;
@@ -12,14 +11,11 @@ package com.easyinsight.filtering
 	import mx.controls.ComboBox;
 	import mx.events.DropdownEvent;
 	import mx.managers.PopUpManager;
-	import mx.rpc.events.ResultEvent;
-	import mx.rpc.remoting.RemoteObject;
 
 	public class RollingRangeFilter extends HBox implements IFilter
 	{
 		private var rollingFilter:RollingDateRangeFilterDefinition;
 		private var _feedID:int;
-		private var dataService:RemoteObject;
 		private var _analysisItem:AnalysisItem;
 		
 		private var comboBox:ComboBox;
@@ -95,7 +91,16 @@ package com.easyinsight.filtering
 				comboBox = new ComboBox();
 				comboBox.dataProvider = rangeOptions;
 				comboBox.addEventListener(DropdownEvent.CLOSE, filterValueChanged);
-				comboBox.enabled = false;				
+                if (rollingFilter == null) {
+                    comboBox.selectedIndex = 0;
+                } else {
+                    comboBox.selectedIndex = rollingFilter.interval - 1;
+                }
+                if (rollingFilter == null) {
+                    rollingFilter = new RollingDateRangeFilterDefinition();
+                    rollingFilter.field = _analysisItem;
+                }
+                dispatchEvent(new FilterUpdatedEvent(FilterUpdatedEvent.FILTER_ADDED, filterDefinition, null, this));
 			}
 			addChild(comboBox);
 			if (editButton == null) {
@@ -110,7 +115,6 @@ package com.easyinsight.filtering
 				deleteButton.addEventListener(MouseEvent.CLICK, deleteSelf);
 				deleteButton.setStyle("icon", deleteIcon);
 				deleteButton.toolTip = "Delete";
-				deleteButton.enabled = false;
 			}
 			addChild(deleteButton);
 		}
@@ -125,21 +129,7 @@ package com.easyinsight.filtering
 		}
 		
 		override protected function commitProperties():void {
-			super.commitProperties();						
-			dataService = new RemoteObject();
-			dataService.destination = "data";
-			dataService.getAnalysisItemMetadata.addEventListener(ResultEvent.RESULT, gotMetadata);
-			dataService.getAnalysisItemMetadata.send(_feedID, _analysisItem);
-		}
-		
-		private function gotMetadata(event:ResultEvent):void {
-			var analysisDimensionResultMetadata:AnalysisDimensionResultMetadata = dataService.getAnalysisItemMetadata.lastResult as 
-				AnalysisDimensionResultMetadata;
-									
-			//comboBox.selectedItem = selectedValue;
-			comboBox.enabled = true;
-			deleteButton.enabled = true;
-			dispatchEvent(new FilterUpdatedEvent(FilterUpdatedEvent.FILTER_ADDED, filterDefinition, null, this));
+			super.commitProperties();
 		}
 		
 		private function deleteSelf(event:MouseEvent):void {

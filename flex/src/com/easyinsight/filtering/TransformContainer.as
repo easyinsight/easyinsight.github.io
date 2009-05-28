@@ -7,8 +7,10 @@ import com.easyinsight.commands.CommandEvent;
 	import com.easyinsight.analysis.DropArea;
 	
 	import flash.display.DisplayObject;
-	
-	import mx.collections.ArrayCollection;
+
+import flash.geom.Point;
+
+import mx.collections.ArrayCollection;
 	import mx.containers.HBox;
 	import mx.containers.Tile;
 	import mx.containers.VBox;
@@ -16,8 +18,9 @@ import com.easyinsight.commands.CommandEvent;
 	import mx.controls.Label;
 	import mx.events.DragEvent;
 	import mx.managers.DragManager;
-	
-	[Event(name="transformAdded", type="com.easyinsight.filtering.TransformsUpdatedEvent")]
+import mx.managers.PopUpManager;
+
+[Event(name="transformAdded", type="com.easyinsight.filtering.TransformsUpdatedEvent")]
 	
 	public class TransformContainer extends HBox
 	{		
@@ -194,8 +197,16 @@ import com.easyinsight.commands.CommandEvent;
 				analysisItem = dropArea.analysisItem;
 			}
 			if (analysisItem.hasType(AnalysisItemTypes.DATE)) {
-				var sliderDateFilter:SliderDateFilter = new SliderDateFilter(_feedID, analysisItem);				
-				initializeFilter(sliderDateFilter);
+                var window:DateFilterWindow = new DateFilterWindow();
+                window.feedID = _feedID;
+                window.item = analysisItem;
+                window.addEventListener(FilterCreationEvent.FILTER_CREATION, onFilterSelection);
+                PopUpManager.addPopUp(window, this, true);
+                window.x = event.localX - (event.dragSource.dataForFormat("localX") as Number);
+                window.y = event.localY - (event.dragSource.dataForFormat("localY") as Number);
+
+				/*var sliderDateFilter:SliderDateFilter = new SliderDateFilter(_feedID, analysisItem);
+				initializeFilter(sliderDateFilter);*/
 			} else if (analysisItem.hasType(AnalysisItemTypes.MEASURE)) {
 				var sliderMeasureFilter:SliderMeasureFilter = new SliderMeasureFilter(_feedID, analysisItem);
 				initializeFilter(sliderMeasureFilter); 
@@ -209,6 +220,10 @@ import com.easyinsight.commands.CommandEvent;
 				initializeFilter(comboBoxFilter);
 			}
 		}
+
+        private function onFilterSelection(event:FilterCreationEvent):void {
+            initializeFilter(event.filter);
+        }
 		
 		private function filterAdded(event:FilterUpdatedEvent):void {
 			addFilter(event.filter);
