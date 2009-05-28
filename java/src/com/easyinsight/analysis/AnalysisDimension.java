@@ -127,4 +127,9 @@ public class AnalysisDimension extends AnalysisItem {
             session.save(keyDimension);
         }
     }
+
+    @Override
+    public String toString() {
+        return getKey().toKeyString() + " - " + getAnalysisItemID();
+    }
 }

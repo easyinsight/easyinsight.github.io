@@ -14,6 +14,18 @@ public class TreeMapDefinitionState extends AnalysisDefinitionState {
     @Column(name="color_scheme")
     private int colorScheme;
 
+    @GeneratedValue(strategy=GenerationType.IDENTITY)
+    @Column(name="treemap_report_id")
+    private long definitionID;
+
+    public long getDefinitionID() {
+        return definitionID;
+    }
+
+    public void setDefinitionID(long definitionID) {
+        this.definitionID = definitionID;
+    }
+
     public int getColorScheme() {
         return colorScheme;
     }
@@ -22,9 +34,17 @@ public class TreeMapDefinitionState extends AnalysisDefinitionState {
         this.colorScheme = colorScheme;
     }
 
+    @Override
+    public AnalysisDefinitionState clone() throws CloneNotSupportedException {
+        TreeMapDefinitionState treeMap = (TreeMapDefinitionState) super.clone();
+        treeMap.setDefinitionID(0);
+        return treeMap;
+    }
+
     public WSAnalysisDefinition createWSDefinition() {
         WSTreeMapDefinition wsTreeMapDefinition = new WSTreeMapDefinition();
         wsTreeMapDefinition.setColorScheme(colorScheme);
+        wsTreeMapDefinition.setTreeMapDefinitionID(definitionID);
         return wsTreeMapDefinition;
     }
 }

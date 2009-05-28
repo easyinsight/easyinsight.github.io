@@ -46,7 +46,9 @@ public class Scheduler {
         timer.scheduleAtFixedRate(new TimerTask() {
 
             public void run() {
-                scheduleTasks();
+                if (running) {
+                    scheduleTasks();
+                }
             }
         }, new Date(nextMinute), ONE_MINUTE);
         launchThread();

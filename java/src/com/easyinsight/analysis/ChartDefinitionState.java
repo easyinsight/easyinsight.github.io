@@ -158,6 +158,7 @@ public class ChartDefinitionState extends AnalysisDefinitionState {
         }
         wsChartDefinition.setRotationAngle(rotationAngle);
         wsChartDefinition.setElevationAngle(elevationAngle);
+        wsChartDefinition.setChartDefinitionID(definitionID);
         return wsChartDefinition;
     }
 }

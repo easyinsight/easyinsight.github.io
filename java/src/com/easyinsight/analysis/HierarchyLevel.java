@@ -52,7 +52,7 @@ public class HierarchyLevel implements Serializable, Cloneable {
     @Override
     public HierarchyLevel clone() throws CloneNotSupportedException {
         HierarchyLevel hierarchyLevel = (HierarchyLevel) super.clone();
-        hierarchyLevel.setHierarchyLevelID(hierarchyLevelID);
+        hierarchyLevel.setHierarchyLevelID(0);
         return hierarchyLevel;
     }
 }

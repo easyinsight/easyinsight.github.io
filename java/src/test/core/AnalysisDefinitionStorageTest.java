@@ -6,6 +6,7 @@ import com.easyinsight.analysis.*;
 import com.easyinsight.analysis.definitions.WSColumnChartDefinition;
 import com.easyinsight.datafeeds.FeedStorage;
 import com.easyinsight.datafeeds.FeedDefinition;
+import com.easyinsight.datafeeds.FeedRegistry;
 import com.easyinsight.core.NamedKey;
 import com.easyinsight.core.Key;
 
@@ -27,6 +28,7 @@ public class AnalysisDefinitionStorageTest extends TestCase {
 
     public void setUp() {
         Database.initialize();
+        FeedRegistry.initialize();
     }
 
     public void testHierarchies() throws SQLException {
@@ -75,13 +77,13 @@ public class AnalysisDefinitionStorageTest extends TestCase {
         listDefinition.setDataFeedID(dataSourceID);
         List<FilterDefinition> filters = new ArrayList<FilterDefinition>();
         FilterValueDefinition filter = new FilterValueDefinition();
-        AnalysisDimension analysisDimension = new AnalysisDimension(TestUtil.createKey("Product", dataSourceID), true);
+        AnalysisDimension analysisDimension = (AnalysisDimension) TestUtil.getItem(dataSourceID, "Product");
         filter.setField(analysisDimension);
         filter.setInclusive(true);
         filter.setFilteredValues(TestUtil.objectList("WidgetX"));
         filters.add(filter);
         listDefinition.setFilterDefinitions(filters);
-        AnalysisDimension myDimension = new AnalysisDimension(TestUtil.createKey("Customer", dataSourceID), true);
+        AnalysisDimension myDimension = (AnalysisDimension) TestUtil.getItem(dataSourceID, "Customer");
         List<AnalysisItem> analysisFields = new ArrayList<AnalysisItem>();
         analysisFields.add(myDimension);
         listDefinition.setColumns(analysisFields);
@@ -104,17 +106,17 @@ public class AnalysisDefinitionStorageTest extends TestCase {
         crosstabDefinition.setDataFeedID(dataFeedID);
         List<FilterDefinition> filters = new ArrayList<FilterDefinition>();
         FilterValueDefinition filter = new FilterValueDefinition();
-        AnalysisDimension analysisDimension = new AnalysisDimension(TestUtil.createKey("Product", dataFeedID), true);
+        AnalysisDimension analysisDimension = (AnalysisDimension) TestUtil.getItem(dataFeedID, "Product");
         filter.setField(analysisDimension);
         filter.setInclusive(true);
         filter.setFilteredValues(TestUtil.objectList("WidgetX"));
         filters.add(filter);
         crosstabDefinition.setFilterDefinitions(filters);
-        AnalysisItem myDimension = new AnalysisDimension(TestUtil.createKey("Product", dataFeedID), true);
+        AnalysisItem myDimension = TestUtil.getItem(dataFeedID, "Product");
         crosstabDefinition.setRows(Arrays.asList(myDimension));
-        AnalysisItem columnDimension = new AnalysisDimension(TestUtil.createKey("Customer", dataFeedID), true);
+        AnalysisItem columnDimension = TestUtil.getItem(dataFeedID, "Customer");
         crosstabDefinition.setColumns(Arrays.asList(columnDimension));
-        AnalysisItem measure = new AnalysisMeasure(TestUtil.createKey("Revenue", dataFeedID), AggregationTypes.SUM);
+        AnalysisItem measure = TestUtil.getItem(dataFeedID, "Revenue");
         crosstabDefinition.setMeasures(Arrays.asList(measure));
         AnalysisService analysisService = new AnalysisService();
         //WSAnalysisDefinition wsAnalysisDefinition = analysisService.openAnalysisDefinition(crosstabDefinition.getAnalysisID());

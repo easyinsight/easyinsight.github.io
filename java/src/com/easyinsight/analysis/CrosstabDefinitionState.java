@@ -26,6 +26,7 @@ public class CrosstabDefinitionState extends AnalysisDefinitionState {
     public WSAnalysisDefinition createWSDefinition() {
         WSCrosstabDefinition crosstab = new WSCrosstabDefinition();
         crosstab.setReportType(WSAnalysisDefinition.CROSSTAB);
+        crosstab.setCrosstabDefinitionID(crosstabDefinitionID);
         return crosstab;
     }
 

@@ -257,6 +257,7 @@ public class FeedStorage {
                 }
                 for (AnalysisItem analysisItem : analysisItems) {
                     analysisItem.beforeSave();
+                    analysisItem.reportSave(session);
                     if (analysisItem.getAnalysisItemID() == 0) {
                         session.save(analysisItem);
                     } else {

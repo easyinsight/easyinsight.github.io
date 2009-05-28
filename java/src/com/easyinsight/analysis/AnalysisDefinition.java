@@ -298,21 +298,37 @@ public class AnalysisDefinition implements Cloneable {
             }
             addedItems.add(clonedItem);
         }
+
+        Collection<AnalysisItem> reportItems = createBlazeDefinition().getAllAnalysisItems();
+        for (AnalysisItem baseItem : reportItems) {
+            if (replacementMap.get(baseItem.getAnalysisItemID()) == null) {
+                AnalysisItem clonedItem = baseItem.clone();
+                replacementMap.put(baseItem.getAnalysisItemID(), clonedItem);
+            }
+            List<AnalysisItem> items = baseItem.getAnalysisItems(new ArrayList<AnalysisItem>(), new ArrayList<AnalysisItem>());
+            for (AnalysisItem item : items) {
+                if (replacementMap.get(item.getAnalysisItemID()) == null) {
+                    AnalysisItem clonedItem = item.clone();
+                    replacementMap.put(item.getAnalysisItemID(), clonedItem);
+                }
+            }
+        }
+
         Map<String, AnalysisItem> clonedStructure = new HashMap<String, AnalysisItem>(getReportStructure());
         for (Map.Entry<String, AnalysisItem> entry : clonedStructure.entrySet()) {
             if (replacementMap.get(entry.getValue().getAnalysisItemID()) == null) {
                 AnalysisItem clonedItem = entry.getValue().clone();
                 replacementMap.put(entry.getValue().getAnalysisItemID(), clonedItem);
                 clonedStructure.put(entry.getKey(), clonedItem);
+                List<AnalysisItem> items = entry.getValue().getAnalysisItems(new ArrayList<AnalysisItem>(), new ArrayList<AnalysisItem>());
+                for (AnalysisItem item : items) {
+                    if (replacementMap.get(item.getAnalysisItemID()) == null) {
+                        AnalysisItem clonedChildItem = item.clone();
+                        replacementMap.put(item.getAnalysisItemID(), clonedChildItem);
+                    }
+                }
             } else {
                 clonedStructure.put(entry.getKey(), replacementMap.get(entry.getValue().getAnalysisItemID()));
-            }
-            List<AnalysisItem> items = entry.getValue().getAnalysisItems(new ArrayList<AnalysisItem>(), new ArrayList<AnalysisItem>());
-            for (AnalysisItem item : items) {
-                if (replacementMap.get(item.getAnalysisItemID()) == null) {
-                    AnalysisItem clonedItem = entry.getValue().clone();
-                    replacementMap.put(item.getAnalysisItemID(), clonedItem);
-                }
             }
         }
 

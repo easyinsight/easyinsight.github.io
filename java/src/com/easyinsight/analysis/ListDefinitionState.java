@@ -52,6 +52,7 @@ public class ListDefinitionState extends AnalysisDefinitionState {
         listDefinition.setListLimitsMetadata(listLimitsMetadata);
         listDefinition.setShowLineNumbers(showRowNumbers);
         listDefinition.setReportType(WSAnalysisDefinition.LIST);
+        listDefinition.setListDefinitionID(definitionID);
         return listDefinition;
     }
 

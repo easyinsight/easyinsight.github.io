@@ -14,6 +14,15 @@ public class WSListDefinition extends WSAnalysisDefinition {
     private List<AnalysisItem> columns;
     private boolean showLineNumbers = false;
     private ListLimitsMetadata listLimitsMetadata;
+    private long listDefinitionID;
+
+    public long getListDefinitionID() {
+        return listDefinitionID;
+    }
+
+    public void setListDefinitionID(long listDefinitionID) {
+        this.listDefinitionID = listDefinitionID;
+    }
 
     public ListLimitsMetadata getListLimitsMetadata() {
         return listLimitsMetadata;

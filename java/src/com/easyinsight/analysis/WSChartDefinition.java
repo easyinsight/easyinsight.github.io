@@ -21,6 +21,16 @@ public abstract class WSChartDefinition extends WSAnalysisDefinition {
 
     public abstract int getChartFamily();
 
+    private long chartDefinitionID;
+
+    public long getChartDefinitionID() {
+        return chartDefinitionID;
+    }
+
+    public void setChartDefinitionID(long chartDefinitionID) {
+        this.chartDefinitionID = chartDefinitionID;
+    }
+
     public double getRotationAngle() {
         return rotationAngle;
     }

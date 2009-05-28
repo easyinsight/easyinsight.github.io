@@ -10,10 +10,7 @@ import com.easyinsight.userupload.UploadPolicy;
 import com.easyinsight.database.Database;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.storage.DataStorage;
-import com.easyinsight.datafeeds.FeedDefinition;
-import com.easyinsight.datafeeds.FeedCreationResult;
-import com.easyinsight.datafeeds.FeedCreation;
-import com.easyinsight.datafeeds.FeedRegistry;
+import com.easyinsight.datafeeds.*;
 import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.analysis.FeedMetadata;
 import com.easyinsight.analysis.DataService;
@@ -50,6 +47,16 @@ public class TestUtil {
     public static AnalysisItem getItem(long feedID, String name) {
         FeedMetadata feedMetadata = new DataService().getFeedMetadata(feedID, false);
         for (AnalysisItem field : feedMetadata.getFields()) {
+            if (name.equals(field.getKey().toKeyString())) {
+                return field;
+            }
+        }
+        throw new NoSuchElementException();
+    }
+
+    public static AnalysisItem getActualItem(long feedID, String name) {
+        FeedDefinition feedDefinition = new FeedStorage().getFeedDefinitionData(feedID);
+        for (AnalysisItem field : feedDefinition.getFields()) {
             if (name.equals(field.getKey().toKeyString())) {
                 return field;
             }

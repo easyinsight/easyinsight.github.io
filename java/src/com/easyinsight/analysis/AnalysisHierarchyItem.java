@@ -112,7 +112,8 @@ public class AnalysisHierarchyItem extends AnalysisDimension {
         super.reportSave(session);
         for (HierarchyLevel hierarchyLevel : hierarchyLevels) {
             if (hierarchyLevel.getAnalysisItem().getAnalysisItemID() == 0) {
-                session.save(hierarchyLevel.getAnalysisItem());
+                AnalysisItem analysisItem = hierarchyLevel.getAnalysisItem();
+                session.save(analysisItem);
             }
         }
     }
