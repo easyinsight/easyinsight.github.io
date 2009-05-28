@@ -436,7 +436,28 @@
     <target name="modules1" depends="module.area3dchart, module.areachart, module.bar3dchart, module.barchart, module.bubblechart"/>
     <target name="modules2" depends="module.column3dchart, module.columnchart, module.line3dchart, module.list, module.map"/>
     <target name="modules3" depends="module.pie3dchart, module.piechart, module.plotchart, module.linechart"/>
-    <target name="modules4" depends="module.gauge, module.crosstab, module.tree, module.treemap"/>
+    <target name="modules4" depends="module.gauge, module.crosstab, module.tree, module.treemap, module.mmlinechart"/>
+
+    <target name="module.mmlinechart">
+        <mxmlc file="../src/com/easyinsight/analysis/charts/twoaxisbased/line/MultiMeasureLineChartModule.mxml" output="${deployment.path}/MultiMeasureLineChartModule.swf"
+               static-rsls="false">
+            <load-config filename="../modules/mm-line-chart-module.xml"/>
+            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
+                <url rsl-url="framework_3.3.0.4852.swz"/>
+                <url rsl-url="framework_3.3.0.4852.swf"/>
+            </runtime-shared-library-path>
+
+            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/datavisualization.swc">
+                <url rsl-url="datavisualization_3.3.0.4852.swz"/>
+                <url rsl-url="datavisualization_3.3.0.4852.swf"/>
+            </runtime-shared-library-path>
+
+            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
+                <url rsl-url="rpc_3.3.0.4852.swz"/>
+                <url rsl-url="rpc_3.3.0.4852.swf"/>
+            </runtime-shared-library-path>
+        </mxmlc>
+    </target>
 
     <target name="module.list">
         <mxmlc file="${teamcity.build.checkoutDir}/flex/src/com/easyinsight/analysis/list/ListModule.mxml" output="${flex.path}/ListModule.swf"
