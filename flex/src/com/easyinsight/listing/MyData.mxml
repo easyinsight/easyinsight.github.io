@@ -334,7 +334,7 @@
 				<mx:AdvancedDataGridColumn headerText="Name" dataField="name"/>
 				<mx:AdvancedDataGridColumn headerText="Size" dataField="size" width="110" itemRenderer="com.easyinsight.listing.SizeRenderer"/>
 				<mx:AdvancedDataGridColumn headerText="Last Data Time" dataField="lastDataTime" width="140" itemRenderer="com.easyinsight.listing.MyDataLastDataLabel"/>
-				<mx:AdvancedDataGridColumn width="200" headerText="" dataField="name" sortable="false" itemRenderer="com.easyinsight.listing.MyDataIconControls"/>
+				<mx:AdvancedDataGridColumn width="250" headerText="" dataField="name" sortable="false" itemRenderer="com.easyinsight.listing.MyDataIconControls"/>
 			</mx:columns>
 		</mx:AdvancedDataGrid>
 	</mx:VBox>

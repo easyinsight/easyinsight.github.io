@@ -1,8 +1,6 @@
 package com.easyinsight.listing
 {
 import com.easyinsight.administration.feed.CredentialsResponse;
-import com.easyinsight.administration.feed.ServerDataSourceDefinition;
-import com.easyinsight.analysis.CredentialsDefinition;
 import com.easyinsight.customupload.FileFeedUpdateWindow;
 import com.easyinsight.customupload.RefreshWindow;
 import com.easyinsight.customupload.UploadConfigEvent;
@@ -29,6 +27,9 @@ public class MyDataIconControls extends HBox
                 
         [Embed(source="../../../../assets/businessman_edit.png")]
         public var adminIcon:Class;
+
+        [Embed(source="../../../../assets/copy.png")]
+        public var copyIcon:Class;
         
         [Embed(source="../../../../assets/media_play_green.png")]
         public var playIcon:Class;
@@ -36,12 +37,13 @@ public class MyDataIconControls extends HBox
         [Embed(source="../../../../assets/navigate_cross.png")]
         public var deleteIcon:Class;
 
-        private var userUploadSource:RemoteObject
+        private var userUploadSource:RemoteObject;
         
         private var refreshButton:Button;
         private var adminButton:Button;
         private var analyzeButton:Button;
         private var deleteButton:Button;
+        private var copyButton:Button;
 
 		public function MyDataIconControls()
 		{
@@ -61,15 +63,27 @@ public class MyDataIconControls extends HBox
 			adminButton.toolTip = "Administer...";
 			adminButton.addEventListener(MouseEvent.CLICK, adminCalled);
 			addChild(adminButton);
+            copyButton = new Button();
+			copyButton.setStyle("icon", copyIcon);
+			copyButton.toolTip = "Copy...";
+			copyButton.addEventListener(MouseEvent.CLICK, copyCalled);
+			addChild(copyButton);
 			deleteButton = new Button();
             deleteButton.setStyle("icon", deleteIcon);
             deleteButton.addEventListener(MouseEvent.CLICK, deleteCalled);
-
             addChild(deleteButton);
 			
 			this.setStyle("paddingLeft", 5);
 			this.setStyle("paddingRight", 5);
 		}
+
+    private function copyCalled(event:MouseEvent):void {
+        var window:CopyDataSourceWindow = new CopyDataSourceWindow();
+        window.dataSourceDescriptor = obj as DataFeedDescriptor;
+        PopUpManager.addPopUp(window, this.parent.parent.parent, true);
+        window.addEventListener(UploadConfigEvent.UPLOAD_CONFIG_COMPLETE, passEvent);
+        PopUpManager.centerPopUp(window);
+    }
 		
 		private function refreshCalled(event:MouseEvent):void {
 			if (obj is DataFeedDescriptor) {
@@ -156,6 +170,7 @@ public class MyDataIconControls extends HBox
 			} else {
 				refreshButton.setVisible(false);
 				adminButton.setVisible(false);
+                copyButton.setVisible(false);
 			}			
 		}
 		

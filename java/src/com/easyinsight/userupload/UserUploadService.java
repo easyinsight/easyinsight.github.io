@@ -17,6 +17,7 @@ import com.easyinsight.security.Roles;
 import com.easyinsight.users.*;
 import com.easyinsight.analysis.*;
 import com.easyinsight.PasswordStorage;
+import com.easyinsight.solutions.SolutionInstallInfo;
 
 import java.io.*;
 import java.util.*;
@@ -37,6 +38,25 @@ public class UserUploadService implements IUserUploadService {
     private Map<Long, RawUploadData> rawDataMap = new WeakHashMap<Long, RawUploadData>();
 
     public UserUploadService() {
+    }
+
+    public List<SolutionInstallInfo> copyDataSource(long dataSourceID, String newName, boolean copyData, boolean includeChildren) {
+        SecurityUtil.authorizeFeed(dataSourceID, Roles.OWNER);
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            conn.setAutoCommit(false);
+            FeedDefinition existingDef = feedStorage.getFeedDefinitionData(dataSourceID, conn);
+            List<SolutionInstallInfo> results = DataSourceCopyUtils.installFeed(SecurityUtil.getUserID(), conn, copyData, dataSourceID, existingDef, includeChildren, newName);
+            conn.commit();
+            return results;
+        } catch (Exception e) {
+            LogClass.error(e);
+            conn.rollback();
+            throw new RuntimeException(e);
+        } finally {
+            conn.setAutoCommit(true);
+            Database.instance().closeConnection(conn);
+        }
     }
 
     public List<Object> getFeedAnalysisTree() {

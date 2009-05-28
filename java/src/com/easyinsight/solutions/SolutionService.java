@@ -1,23 +1,11 @@
 package com.easyinsight.solutions;
 
-import com.easyinsight.datafeeds.FeedDefinition;
-import com.easyinsight.datafeeds.FeedStorage;
-import com.easyinsight.datafeeds.FeedDescriptor;
-import com.easyinsight.datafeeds.FeedConsumer;
+import com.easyinsight.datafeeds.*;
 import com.easyinsight.analysis.*;
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.logging.LogClass;
-import com.easyinsight.userupload.UploadPolicy;
-import com.easyinsight.userupload.UserUploadInternalService;
-import com.easyinsight.security.Roles;
 import com.easyinsight.security.SecurityUtil;
-import com.easyinsight.storage.DataStorage;
-import com.easyinsight.dataset.DataSet;
-import com.easyinsight.api.APIService;
-import com.easyinsight.api.dynamic.DynamicServiceDefinition;
-import com.easyinsight.api.dynamic.ConfiguredMethod;
-import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.goals.*;
 import com.easyinsight.email.UserStub;
 import com.easyinsight.core.InsightDescriptor;
@@ -27,8 +15,6 @@ import java.util.*;
 import java.sql.*;
 import java.io.ByteArrayInputStream;
 
-import org.hibernate.Session;
-
 /**
  * User: James Boe
  * Date: Aug 28, 2008
@@ -37,7 +23,6 @@ import org.hibernate.Session;
 public class SolutionService {
 
     private FeedStorage feedStorage = new FeedStorage();
-    private AnalysisStorage analysisStorage = new AnalysisStorage();
 
     public Solution retrieveSolution(long solutionID) {
         long tier = SecurityUtil.getAccountTier();
@@ -201,7 +186,7 @@ public class SolutionService {
                 visitor.visit(goalTree.getRootNode());
                 for (Long dataSourceID : dataSourceIDs) {
                     FeedDefinition feedDefinition = feedStorage.getFeedDefinitionData(dataSourceID, conn);
-                    objects.addAll(installFeed(userID, conn, true, dataSourceID, feedDefinition));
+                    objects.addAll(DataSourceCopyUtils.installFeed(userID, conn, true, dataSourceID, feedDefinition, true, null));
                 }
                 if (!inlineTree) {
                     GoalTree clonedTree = goalTree.clone();
@@ -323,146 +308,9 @@ public class SolutionService {
         while (rs.next()) {
             long feedID = rs.getLong(1);
             FeedDefinition feedDefinition = feedStorage.getFeedDefinitionData(feedID, conn);
-            descriptors.addAll(installFeed(userID, conn, copyData, feedID, feedDefinition));
+            descriptors.addAll(DataSourceCopyUtils.installFeed(userID, conn, copyData, feedID, feedDefinition, true, null));
         }
         return descriptors;
-    }
-
-    private List<SolutionInstallInfo> installFeed(long userID, Connection conn, boolean copyData, long feedID, FeedDefinition feedDefinition) throws CloneNotSupportedException, SQLException {
-        List<SolutionInstallInfo> infos = new ArrayList<SolutionInstallInfo>();
-        FeedDefinition clonedFeedDefinition = cloneFeed(userID, conn, feedDefinition);
-        feedStorage.updateDataFeedConfiguration(clonedFeedDefinition, conn);
-        buildClonedDataStores(copyData, feedDefinition, clonedFeedDefinition, conn);
-        new UserUploadInternalService().createUserFeedLink(userID, clonedFeedDefinition.getDataFeedID(), Roles.OWNER, conn);
-        List<AnalysisDefinition> insights = getInsightsFromFeed(feedID, conn);
-        for (AnalysisDefinition insight : insights) {
-            if (insight.isRootDefinition()) {
-                continue;
-            }
-            AnalysisDefinition clonedInsight = insight.clone();
-            clonedInsight.setAnalysisPolicy(AnalysisPolicy.PRIVATE);
-            clonedInsight.setDataFeedID(clonedFeedDefinition.getDataFeedID());
-            clonedInsight.setUserBindings(Arrays.asList(new UserToAnalysisBinding(userID, UserPermission.OWNER)));
-            analysisStorage.saveAnalysis(clonedInsight, conn);
-            infos.add(new SolutionInstallInfo(insight.getAnalysisID(), clonedInsight.getAnalysisID(), SolutionInstallInfo.INSIGHT));
-            List<FeedDefinition> insightFeeds = getFeedsFromInsight(clonedInsight.getAnalysisID(), conn);
-            for (FeedDefinition insightFeed : insightFeeds) {
-                infos.addAll(installFeed(userID, conn, copyData, insightFeed.getDataFeedID(), insightFeed));
-            }
-        }
-        infos.add(new SolutionInstallInfo(feedDefinition.getDataFeedID(), clonedFeedDefinition.getDataFeedID(), SolutionInstallInfo.DATA_SOURCE));
-        return infos;
-    }
-
-    private void buildClonedDataStores(boolean copyData, FeedDefinition feedDefinition, FeedDefinition clonedFeedDefinition, Connection conn) throws SQLException {
-        if (copyData) {
-            DataStorage sourceTable = DataStorage.writeConnection(feedDefinition, conn);
-            DataSet dataSet;
-            try {
-                Set<AnalysisItem> validQueryItems = new HashSet<AnalysisItem>();
-                for (AnalysisItem analysisItem : feedDefinition.getFields()) {
-                    if (!analysisItem.isDerived()) {
-                        validQueryItems.add(analysisItem);
-                    }
-                }
-                dataSet = sourceTable.retrieveData(validQueryItems, null, null, null, null);
-            } finally {
-                sourceTable.closeConnection();
-            }
-            DataStorage clonedTable = DataStorage.writeConnection(clonedFeedDefinition, conn);
-            try {
-                clonedTable.createTable();
-                clonedTable.insertData(dataSet);
-                clonedTable.commit();
-            } catch (SQLException e) {
-                LogClass.error(e);
-                clonedTable.rollback();
-                throw new RuntimeException(e);
-            } finally {
-                clonedTable.closeConnection();
-            }
-        } else {
-            DataStorage clonedTable = DataStorage.writeConnection(clonedFeedDefinition, conn);
-            try {
-                clonedTable.createTable();
-                clonedTable.commit();
-            } catch (SQLException e) {
-                LogClass.error(e);
-                clonedTable.rollback();
-                throw new RuntimeException(e);
-            } finally {
-                clonedTable.closeConnection();
-            }
-        }
-    }
-
-    private FeedDefinition cloneFeed(long userID, Connection conn, FeedDefinition feedDefinition) throws CloneNotSupportedException, SQLException {
-        FeedDefinition clonedFeedDefinition = feedDefinition.clone();
-        clonedFeedDefinition.setUploadPolicy(new UploadPolicy(userID));
-        feedStorage.addFeedDefinitionData(clonedFeedDefinition, conn);
-        AnalysisDefinition clonedRootInsight = analysisStorage.cloneReport(feedDefinition.getAnalysisDefinitionID(), conn);
-        clonedRootInsight.setUserBindings(Arrays.asList(new UserToAnalysisBinding(userID, UserPermission.OWNER)));
-        analysisStorage.saveAnalysis(clonedRootInsight, conn);
-        clonedFeedDefinition.setAnalysisDefinitionID(clonedRootInsight.getAnalysisID());
-        if (clonedFeedDefinition.getDynamicServiceDefinitionID() > 0) {
-            cloneAPIs(conn, feedDefinition, clonedFeedDefinition);
-        }
-        return clonedFeedDefinition;
-    }
-
-    private void cloneAPIs(Connection conn, FeedDefinition feedDefinition, FeedDefinition clonedFeedDefinition) {
-        Session session = Database.instance().createSession(conn);
-        try {
-            APIService apiService = new APIService();
-            DynamicServiceDefinition dynamicServiceDefinition = apiService.getDynamicServiceDefinition(feedDefinition.getDataFeedID(), conn, session);
-            List<ConfiguredMethod> clonedConfiguredMethods = new ArrayList<ConfiguredMethod>();
-            for (ConfiguredMethod configuredMethod : dynamicServiceDefinition.getConfiguredMethods()) {
-                List<AnalysisItem> clonedMethodItems = new ArrayList<AnalysisItem>();
-                for (AnalysisItem keyItem : configuredMethod.getKeys()) {
-                    // find that item in the cloned definition...
-                    AnalysisItem matchedItem = null;
-                    for (AnalysisItem clonedItem : clonedFeedDefinition.getFields()) {
-                        if (clonedItem.equals(keyItem)) {
-                            matchedItem = clonedItem;
-                        }
-                    }
-                    clonedMethodItems.add(matchedItem);
-                }
-                ConfiguredMethod clonedMethod = configuredMethod.clone();
-                clonedMethod.setKeys(clonedMethodItems);
-                clonedConfiguredMethods.add(clonedMethod);
-            }
-            DynamicServiceDefinition clonedDefinition = dynamicServiceDefinition.clone();
-            clonedDefinition.setConfiguredMethods(clonedConfiguredMethods);
-            apiService.addDynamicServiceDefinition(clonedDefinition, conn);
-            clonedFeedDefinition.setDynamicServiceDefinitionID(clonedDefinition.getServiceID());
-            session.flush();
-        } finally {
-            session.close();
-        }
-    }
-
-    private List<AnalysisDefinition> getInsightsFromFeed(long feedID, Connection conn) throws SQLException {
-        List<AnalysisDefinition> analyses = new ArrayList<AnalysisDefinition>();
-        PreparedStatement queryStmt = conn.prepareStatement("SELECT ANALYSIS_ID FROM ANALYSIS WHERE DATA_FEED_ID = ?");
-        queryStmt.setLong(1, feedID);
-        ResultSet rs = queryStmt.executeQuery();
-        while (rs.next()) {
-            analyses.add(AnalysisDefinitionFactory.fromWSDefinition(analysisStorage.getAnalysisDefinition(rs.getLong(1), conn)));
-        }
-        return analyses;
-    }
-
-    private List<FeedDefinition> getFeedsFromInsight(long insightID, Connection conn) throws SQLException {
-        List<FeedDefinition> feeds = new ArrayList<FeedDefinition>();
-        PreparedStatement queryStmt = conn.prepareStatement("SELECT DATA_FEED_ID FROM ANALYSIS_BASED_FEED WHERE analysis_id = ?");
-        queryStmt.setLong(1, insightID);
-        ResultSet rs = queryStmt.executeQuery();
-        while (rs.next()) {
-            long feedID = rs.getLong(1);
-            feeds.add(feedStorage.getFeedDefinitionData(feedID, conn));
-        }
-        return feeds;
     }
 
     private Solution getSolution(long solutionID) {
