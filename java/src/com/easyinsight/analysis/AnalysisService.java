@@ -203,6 +203,7 @@ public class AnalysisService {
         } catch (Exception e) {
             LogClass.error(e);
             session.getTransaction().rollback();
+            throw new RuntimeException(e);
         } finally {
             session.close();
         }
