@@ -74,7 +74,11 @@ public class FilterValueDefinition extends FilterDefinition {
         StringBuilder queryBuilder = new StringBuilder();
         String columnName = getField().toKeySQL();
         queryBuilder.append(columnName);
-        queryBuilder.append(" in (");
+        if (inclusive) {
+            queryBuilder.append(" in (");
+        } else {
+            queryBuilder.append(" not in (");
+        }
         for (int i = 0; i < getFilteredValues().size(); i++) {
             queryBuilder.append("?,");
         }
@@ -120,7 +124,6 @@ public class FilterValueDefinition extends FilterDefinition {
 
     @Override
     public boolean validForQuery() {
-        if (!inclusive) return false;
         if (filteredValues.size() == 1) {
             Object value = filteredValues.get(0);
             if (value instanceof String) {

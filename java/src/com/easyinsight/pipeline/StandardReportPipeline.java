@@ -22,6 +22,7 @@ public class StandardReportPipeline extends Pipeline {
         components.add(new VirtualDimensionComponent());
         components.add(new TypeTransformComponent());
         components.add(new FilterComponent(true));
+        components.add(new FilterPipelineCleanupComponent());
         for (AnalysisItem step : items(AnalysisItemTypes.STEP, allNeededAnalysisItems)) {
             components.add(new StepCorrelationComponent((AnalysisStep) step));
         }

@@ -13,8 +13,11 @@ import com.easyinsight.datafeeds.FeedStorage;
 import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.datafeeds.FeedRegistry;
 import com.easyinsight.datafeeds.Feed;
+import com.easyinsight.core.NamedKey;
+import com.easyinsight.core.NumericValue;
 
 import java.util.*;
+import java.sql.SQLException;
 
 import org.antlr.runtime.ANTLRStringStream;
 import org.antlr.runtime.CommonTokenStream;
@@ -61,6 +64,43 @@ public class CalculationIntegrationTest extends TestCase {
 
             // TODO: produce your double here and I'll hook up to the next piece
         }
+    }
+
+    public void testExclusiveFilterScenario() throws SQLException {
+        TestUtil.getIndividualTestUser();
+        AnalysisDimension otherDim = new AnalysisDimension("Other", true);
+        AnalysisMeasure count = new AnalysisMeasure("Count", AggregationTypes.SUM);
+        AnalysisMeasure value = new AnalysisMeasure("Value", AggregationTypes.SUM);
+        DataSet dataSet = new DataSet();
+        IRow rowA = dataSet.createRow();
+        rowA.addValue(count.getKey(), 5);
+        rowA.addValue(value.getKey(), 10);
+        rowA.addValue(otherDim.getKey(), "X");
+        IRow rowB = dataSet.createRow();
+        rowB.addValue(count.getKey(), 5);
+        rowB.addValue(value.getKey(), 10);
+        rowB.addValue(otherDim.getKey(), "Y");
+        IRow rowZ = dataSet.createRow();
+        rowZ.addValue(count.getKey(), 7);
+        rowZ.addValue(value.getKey(), 18);
+        rowZ.addValue(otherDim.getKey(), "Z");
+        long id = TestUtil.createTestDataSource(dataSet, Arrays.asList(value, otherDim, count));
+        AnalysisCalculation calculation = new AnalysisCalculation();
+        calculation.setKey(new NamedKey("Calculation"));
+        calculation.setCalculationString("Count + Value");
+        WSListDefinition listDefinition = new WSListDefinition();
+        FilterValueDefinition filterValueDefinition = new FilterValueDefinition();
+        filterValueDefinition.setField(TestUtil.getItem(id, "Other"));
+        filterValueDefinition.setInclusive(false);
+        filterValueDefinition.setFilteredValues(Arrays.asList((Object) "Z"));
+        filterValueDefinition.setApplyBeforeAggregation(true);
+        listDefinition.setFilterDefinitions(Arrays.asList((FilterDefinition) filterValueDefinition));
+        listDefinition.setColumns(Arrays.asList((AnalysisItem) calculation));
+        listDefinition.setDataFeedID(id);
+        ListDataResults results = new DataService().list(listDefinition, new InsightRequestMetadata());
+        assertEquals(1, results.getRows().length);
+        NumericValue doubleValue = (NumericValue) results.getRows()[0].getValues()[0];
+        assertEquals(30., doubleValue.toDouble(), .1);
     }
 
     public void testVariableSet() {
