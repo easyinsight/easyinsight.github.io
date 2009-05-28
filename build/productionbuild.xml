@@ -439,9 +439,9 @@
     <target name="modules4" depends="module.gauge, module.crosstab, module.tree, module.treemap, module.mmlinechart"/>
 
     <target name="module.mmlinechart">
-        <mxmlc file="../src/com/easyinsight/analysis/charts/twoaxisbased/line/MultiMeasureLineChartModule.mxml" output="${deployment.path}/MultiMeasureLineChartModule.swf"
+        <mxmlc file="${teamcity.build.checkoutDir}/flex//src/com/easyinsight/analysis/charts/twoaxisbased/line/MultiMeasureLineChartModule.mxml" output="${flex.path}/MultiMeasureLineChartModule.swf"
                static-rsls="false">
-            <load-config filename="../modules/mm-line-chart-module.xml"/>
+            <load-config filename="${teamcity.build.checkoutDir}/modules/mm-line-chart-module.xml"/>
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
                 <url rsl-url="framework_3.3.0.4852.swz"/>
                 <url rsl-url="framework_3.3.0.4852.swf"/>
