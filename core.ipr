@@ -1812,6 +1812,102 @@
         </RELATIONSHIP_ELEMENT>
       </TABLE_DATA>
       <TABLE_DATA>
+        <option name="NAME" value="analysis_step" />
+        <option name="SCHEMA" />
+        <option name="CATALOG" value="dms" />
+        <option name="TYPE" value="TABLE" />
+        <FIELD_ELEMENT>
+          <option name="NAME" value="analysis_step_id" />
+          <option name="SQL_TYPE" value="bigint" />
+          <option name="JDBC_TYPE" value="-5" />
+          <option name="TYPE" />
+          <option name="PRIMARY" value="true" />
+          <option name="LENGTH" value="20" />
+          <option name="PRECISION" value="0" />
+          <option name="NULLABLE" value="false" />
+        </FIELD_ELEMENT>
+        <FIELD_ELEMENT>
+          <option name="NAME" value="correlation_dimension_id" />
+          <option name="SQL_TYPE" value="bigint" />
+          <option name="JDBC_TYPE" value="-5" />
+          <option name="TYPE" />
+          <option name="PRIMARY" value="false" />
+          <option name="LENGTH" value="20" />
+          <option name="PRECISION" value="0" />
+          <option name="NULLABLE" value="true" />
+        </FIELD_ELEMENT>
+        <FIELD_ELEMENT>
+          <option name="NAME" value="start_date_dimension_id" />
+          <option name="SQL_TYPE" value="bigint" />
+          <option name="JDBC_TYPE" value="-5" />
+          <option name="TYPE" />
+          <option name="PRIMARY" value="false" />
+          <option name="LENGTH" value="20" />
+          <option name="PRECISION" value="0" />
+          <option name="NULLABLE" value="true" />
+        </FIELD_ELEMENT>
+        <FIELD_ELEMENT>
+          <option name="NAME" value="end_date_dimension_id" />
+          <option name="SQL_TYPE" value="bigint" />
+          <option name="JDBC_TYPE" value="-5" />
+          <option name="TYPE" />
+          <option name="PRIMARY" value="false" />
+          <option name="LENGTH" value="20" />
+          <option name="PRECISION" value="0" />
+          <option name="NULLABLE" value="true" />
+        </FIELD_ELEMENT>
+        <FIELD_ELEMENT>
+          <option name="NAME" value="analysis_item_id" />
+          <option name="SQL_TYPE" value="bigint" />
+          <option name="JDBC_TYPE" value="-5" />
+          <option name="TYPE" />
+          <option name="PRIMARY" value="false" />
+          <option name="LENGTH" value="20" />
+          <option name="PRECISION" value="0" />
+          <option name="NULLABLE" value="false" />
+        </FIELD_ELEMENT>
+        <RELATIONSHIP_ELEMENT>
+          <option name="RELATION_NAME" value="analysis_step_ibfk1" />
+          <option name="TARGET_TABLE" value="analysis_item" />
+          <option name="TARGET_SCHEMA" />
+          <option name="TARGET_CATALOG" value="dms" />
+          <option name="TARGET_COLUMN" value="analysis_item_id" />
+          <option name="SOURCE_COLUMN" value="correlation_dimension_id" />
+          <option name="CASCADE_REMOVE" value="true" />
+          <option name="CASCADE_UPDATE" value="false" />
+        </RELATIONSHIP_ELEMENT>
+        <RELATIONSHIP_ELEMENT>
+          <option name="RELATION_NAME" value="analysis_step_ibfk2" />
+          <option name="TARGET_TABLE" value="analysis_item" />
+          <option name="TARGET_SCHEMA" />
+          <option name="TARGET_CATALOG" value="dms" />
+          <option name="TARGET_COLUMN" value="analysis_item_id" />
+          <option name="SOURCE_COLUMN" value="start_date_dimension_id" />
+          <option name="CASCADE_REMOVE" value="true" />
+          <option name="CASCADE_UPDATE" value="false" />
+        </RELATIONSHIP_ELEMENT>
+        <RELATIONSHIP_ELEMENT>
+          <option name="RELATION_NAME" value="analysis_step_ibfk3" />
+          <option name="TARGET_TABLE" value="analysis_item" />
+          <option name="TARGET_SCHEMA" />
+          <option name="TARGET_CATALOG" value="dms" />
+          <option name="TARGET_COLUMN" value="analysis_item_id" />
+          <option name="SOURCE_COLUMN" value="end_date_dimension_id" />
+          <option name="CASCADE_REMOVE" value="true" />
+          <option name="CASCADE_UPDATE" value="false" />
+        </RELATIONSHIP_ELEMENT>
+        <RELATIONSHIP_ELEMENT>
+          <option name="RELATION_NAME" value="analysis_step_ibfk4" />
+          <option name="TARGET_TABLE" value="analysis_item" />
+          <option name="TARGET_SCHEMA" />
+          <option name="TARGET_CATALOG" value="dms" />
+          <option name="TARGET_COLUMN" value="analysis_item_id" />
+          <option name="SOURCE_COLUMN" value="analysis_item_id" />
+          <option name="CASCADE_REMOVE" value="true" />
+          <option name="CASCADE_UPDATE" value="false" />
+        </RELATIONSHIP_ELEMENT>
+      </TABLE_DATA>
+      <TABLE_DATA>
         <option name="NAME" value="analysis_tags" />
         <option name="SCHEMA" />
         <option name="CATALOG" value="dms" />
@@ -1934,9 +2030,9 @@
           <option name="JDBC_TYPE" value="-5" />
           <option name="TYPE" />
           <option name="PRIMARY" value="false" />
-          <option name="LENGTH" value="11" />
+          <option name="LENGTH" value="20" />
           <option name="PRECISION" value="0" />
-          <option name="NULLABLE" value="true" />
+          <option name="NULLABLE" value="false" />
         </FIELD_ELEMENT>
         <FIELD_ELEMENT>
           <option name="NAME" value="data_scrub_id" />
@@ -1944,10 +2040,30 @@
           <option name="JDBC_TYPE" value="-5" />
           <option name="TYPE" />
           <option name="PRIMARY" value="false" />
-          <option name="LENGTH" value="11" />
+          <option name="LENGTH" value="20" />
           <option name="PRECISION" value="0" />
-          <option name="NULLABLE" value="true" />
+          <option name="NULLABLE" value="false" />
         </FIELD_ELEMENT>
+        <RELATIONSHIP_ELEMENT>
+          <option name="RELATION_NAME" value="analysis_to_data_scrub_ibfk2" />
+          <option name="TARGET_TABLE" value="data_scrub" />
+          <option name="TARGET_SCHEMA" />
+          <option name="TARGET_CATALOG" value="dms" />
+          <option name="TARGET_COLUMN" value="data_scrub_id" />
+          <option name="SOURCE_COLUMN" value="data_scrub_id" />
+          <option name="CASCADE_REMOVE" value="true" />
+          <option name="CASCADE_UPDATE" value="false" />
+        </RELATIONSHIP_ELEMENT>
+        <RELATIONSHIP_ELEMENT>
+          <option name="RELATION_NAME" value="analysis_to_data_scrub_ibfk1" />
+          <option name="TARGET_TABLE" value="analysis_item" />
+          <option name="TARGET_SCHEMA" />
+          <option name="TARGET_CATALOG" value="dms" />
+          <option name="TARGET_COLUMN" value="analysis_item_id" />
+          <option name="SOURCE_COLUMN" value="analysis_id" />
+          <option name="CASCADE_REMOVE" value="true" />
+          <option name="CASCADE_UPDATE" value="false" />
+        </RELATIONSHIP_ELEMENT>
       </TABLE_DATA>
       <TABLE_DATA>
         <option name="NAME" value="analysis_to_filter_join" />
@@ -3318,6 +3434,16 @@
           <option name="PRECISION" value="0" />
           <option name="NULLABLE" value="true" />
         </FIELD_ELEMENT>
+        <FIELD_ELEMENT>
+          <option name="NAME" value="current_version" />
+          <option name="SQL_TYPE" value="int" />
+          <option name="JDBC_TYPE" value="4" />
+          <option name="TYPE" />
+          <option name="PRIMARY" value="false" />
+          <option name="LENGTH" value="11" />
+          <option name="PRECISION" value="0" />
+          <option name="NULLABLE" value="true" />
+        </FIELD_ELEMENT>
         <RELATIONSHIP_ELEMENT>
           <option name="RELATION_NAME" value="data_feed_ibfk1" />
           <option name="TARGET_TABLE" value="dynamic_service_definition" />
@@ -4253,6 +4379,52 @@
           <option name="TARGET_CATALOG" value="dms" />
           <option name="TARGET_COLUMN" value="value_id" />
           <option name="SOURCE_COLUMN" value="value_id" />
+          <option name="CASCADE_REMOVE" value="true" />
+          <option name="CASCADE_UPDATE" value="false" />
+        </RELATIONSHIP_ELEMENT>
+      </TABLE_DATA>
+      <TABLE_DATA>
+        <option name="NAME" value="event_base" />
+        <option name="SCHEMA" />
+        <option name="CATALOG" value="dms" />
+        <option name="TYPE" value="TABLE" />
+        <FIELD_ELEMENT>
+          <option name="NAME" value="event_id" />
+          <option name="SQL_TYPE" value="bigint" />
+          <option name="JDBC_TYPE" value="-5" />
+          <option name="TYPE" />
+          <option name="PRIMARY" value="true" />
+          <option name="LENGTH" value="20" />
+          <option name="PRECISION" value="0" />
+          <option name="NULLABLE" value="false" />
+        </FIELD_ELEMENT>
+        <FIELD_ELEMENT>
+          <option name="NAME" value="message" />
+          <option name="SQL_TYPE" value="varchar" />
+          <option name="JDBC_TYPE" value="12" />
+          <option name="TYPE" />
+          <option name="PRIMARY" value="false" />
+          <option name="LENGTH" value="255" />
+          <option name="PRECISION" value="0" />
+          <option name="NULLABLE" value="true" />
+        </FIELD_ELEMENT>
+        <FIELD_ELEMENT>
+          <option name="NAME" value="user_id" />
+          <option name="SQL_TYPE" value="bigint" />
+          <option name="JDBC_TYPE" value="-5" />
+          <option name="TYPE" />
+          <option name="PRIMARY" value="false" />
+          <option name="LENGTH" value="20" />
+          <option name="PRECISION" value="0" />
+          <option name="NULLABLE" value="false" />
+        </FIELD_ELEMENT>
+        <RELATIONSHIP_ELEMENT>
+          <option name="RELATION_NAME" value="event_base_ibfk1" />
+          <option name="TARGET_TABLE" value="user" />
+          <option name="TARGET_SCHEMA" />
+          <option name="TARGET_CATALOG" value="dms" />
+          <option name="TARGET_COLUMN" value="user_id" />
+          <option name="SOURCE_COLUMN" value="user_id" />
           <option name="CASCADE_REMOVE" value="true" />
           <option name="CASCADE_UPDATE" value="false" />
         </RELATIONSHIP_ELEMENT>
@@ -7328,7 +7500,7 @@
           <option name="PRIMARY" value="false" />
           <option name="LENGTH" value="20" />
           <option name="PRECISION" value="0" />
-          <option name="NULLABLE" value="true" />
+          <option name="NULLABLE" value="false" />
         </FIELD_ELEMENT>
         <FIELD_ELEMENT>
           <option name="NAME" value="source_key" />
@@ -7338,7 +7510,7 @@
           <option name="PRIMARY" value="false" />
           <option name="LENGTH" value="20" />
           <option name="PRECISION" value="0" />
-          <option name="NULLABLE" value="true" />
+          <option name="NULLABLE" value="false" />
         </FIELD_ELEMENT>
         <FIELD_ELEMENT>
           <option name="NAME" value="target_key" />
@@ -7348,8 +7520,38 @@
           <option name="PRIMARY" value="false" />
           <option name="LENGTH" value="20" />
           <option name="PRECISION" value="0" />
-          <option name="NULLABLE" value="true" />
+          <option name="NULLABLE" value="false" />
         </FIELD_ELEMENT>
+        <RELATIONSHIP_ELEMENT>
+          <option name="RELATION_NAME" value="lookup_table_scrub_ibfk3" />
+          <option name="TARGET_TABLE" value="item_key" />
+          <option name="TARGET_SCHEMA" />
+          <option name="TARGET_CATALOG" value="dms" />
+          <option name="TARGET_COLUMN" value="item_key_id" />
+          <option name="SOURCE_COLUMN" value="target_key" />
+          <option name="CASCADE_REMOVE" value="true" />
+          <option name="CASCADE_UPDATE" value="false" />
+        </RELATIONSHIP_ELEMENT>
+        <RELATIONSHIP_ELEMENT>
+          <option name="RELATION_NAME" value="lookup_table_scrub_ibfk1" />
+          <option name="TARGET_TABLE" value="data_scrub" />
+          <option name="TARGET_SCHEMA" />
+          <option name="TARGET_CATALOG" value="dms" />
+          <option name="TARGET_COLUMN" value="data_scrub_id" />
+          <option name="SOURCE_COLUMN" value="data_scrub_id" />
+          <option name="CASCADE_REMOVE" value="true" />
+          <option name="CASCADE_UPDATE" value="false" />
+        </RELATIONSHIP_ELEMENT>
+        <RELATIONSHIP_ELEMENT>
+          <option name="RELATION_NAME" value="lookup_table_scrub_ibfk2" />
+          <option name="TARGET_TABLE" value="item_key" />
+          <option name="TARGET_SCHEMA" />
+          <option name="TARGET_CATALOG" value="dms" />
+          <option name="TARGET_COLUMN" value="item_key_id" />
+          <option name="SOURCE_COLUMN" value="source_key" />
+          <option name="CASCADE_REMOVE" value="true" />
+          <option name="CASCADE_UPDATE" value="false" />
+        </RELATIONSHIP_ELEMENT>
       </TABLE_DATA>
       <TABLE_DATA>
         <option name="NAME" value="lookup_table_scrub_pair" />
@@ -7368,23 +7570,23 @@
         </FIELD_ELEMENT>
         <FIELD_ELEMENT>
           <option name="NAME" value="source_value" />
-          <option name="SQL_TYPE" value="varchar" />
-          <option name="JDBC_TYPE" value="12" />
+          <option name="SQL_TYPE" value="bigint" />
+          <option name="JDBC_TYPE" value="-5" />
           <option name="TYPE" />
           <option name="PRIMARY" value="false" />
-          <option name="LENGTH" value="255" />
+          <option name="LENGTH" value="20" />
           <option name="PRECISION" value="0" />
-          <option name="NULLABLE" value="true" />
+          <option name="NULLABLE" value="false" />
         </FIELD_ELEMENT>
         <FIELD_ELEMENT>
           <option name="NAME" value="target_value" />
-          <option name="SQL_TYPE" value="varchar" />
-          <option name="JDBC_TYPE" value="12" />
+          <option name="SQL_TYPE" value="bigint" />
+          <option name="JDBC_TYPE" value="-5" />
           <option name="TYPE" />
           <option name="PRIMARY" value="false" />
-          <option name="LENGTH" value="255" />
+          <option name="LENGTH" value="20" />
           <option name="PRECISION" value="0" />
-          <option name="NULLABLE" value="true" />
+          <option name="NULLABLE" value="false" />
         </FIELD_ELEMENT>
         <FIELD_ELEMENT>
           <option name="NAME" value="data_scrub_id" />
@@ -7394,8 +7596,38 @@
           <option name="PRIMARY" value="false" />
           <option name="LENGTH" value="20" />
           <option name="PRECISION" value="0" />
-          <option name="NULLABLE" value="true" />
+          <option name="NULLABLE" value="false" />
         </FIELD_ELEMENT>
+        <RELATIONSHIP_ELEMENT>
+          <option name="RELATION_NAME" value="lookup_table_scrub_pair_ibfk3" />
+          <option name="TARGET_TABLE" value="value" />
+          <option name="TARGET_SCHEMA" />
+          <option name="TARGET_CATALOG" value="dms" />
+          <option name="TARGET_COLUMN" value="value_id" />
+          <option name="SOURCE_COLUMN" value="target_value" />
+          <option name="CASCADE_REMOVE" value="true" />
+          <option name="CASCADE_UPDATE" value="false" />
+        </RELATIONSHIP_ELEMENT>
+        <RELATIONSHIP_ELEMENT>
+          <option name="RELATION_NAME" value="lookup_table_scrub_pair_ibfk1" />
+          <option name="TARGET_TABLE" value="data_scrub" />
+          <option name="TARGET_SCHEMA" />
+          <option name="TARGET_CATALOG" value="dms" />
+          <option name="TARGET_COLUMN" value="data_scrub_id" />
+          <option name="SOURCE_COLUMN" value="data_scrub_id" />
+          <option name="CASCADE_REMOVE" value="true" />
+          <option name="CASCADE_UPDATE" value="false" />
+        </RELATIONSHIP_ELEMENT>
+        <RELATIONSHIP_ELEMENT>
+          <option name="RELATION_NAME" value="lookup_table_scrub_pair_ibfk2" />
+          <option name="TARGET_TABLE" value="value" />
+          <option name="TARGET_SCHEMA" />
+          <option name="TARGET_CATALOG" value="dms" />
+          <option name="TARGET_COLUMN" value="value_id" />
+          <option name="SOURCE_COLUMN" value="source_value" />
+          <option name="CASCADE_REMOVE" value="true" />
+          <option name="CASCADE_UPDATE" value="false" />
+        </RELATIONSHIP_ELEMENT>
       </TABLE_DATA>
       <TABLE_DATA>
         <option name="NAME" value="map_definition" />
@@ -8082,6 +8314,72 @@
         </RELATIONSHIP_ELEMENT>
       </TABLE_DATA>
       <TABLE_DATA>
+        <option name="NAME" value="refresh_event" />
+        <option name="SCHEMA" />
+        <option name="CATALOG" value="dms" />
+        <option name="TYPE" value="TABLE" />
+        <FIELD_ELEMENT>
+          <option name="NAME" value="refresh_event_id" />
+          <option name="SQL_TYPE" value="bigint" />
+          <option name="JDBC_TYPE" value="-5" />
+          <option name="TYPE" />
+          <option name="PRIMARY" value="true" />
+          <option name="LENGTH" value="20" />
+          <option name="PRECISION" value="0" />
+          <option name="NULLABLE" value="false" />
+        </FIELD_ELEMENT>
+        <FIELD_ELEMENT>
+          <option name="NAME" value="event_id" />
+          <option name="SQL_TYPE" value="bigint" />
+          <option name="JDBC_TYPE" value="-5" />
+          <option name="TYPE" />
+          <option name="PRIMARY" value="false" />
+          <option name="LENGTH" value="20" />
+          <option name="PRECISION" value="0" />
+          <option name="NULLABLE" value="false" />
+        </FIELD_ELEMENT>
+        <FIELD_ELEMENT>
+          <option name="NAME" value="event_status" />
+          <option name="SQL_TYPE" value="int" />
+          <option name="JDBC_TYPE" value="4" />
+          <option name="TYPE" />
+          <option name="PRIMARY" value="false" />
+          <option name="LENGTH" value="11" />
+          <option name="PRECISION" value="0" />
+          <option name="NULLABLE" value="false" />
+        </FIELD_ELEMENT>
+        <FIELD_ELEMENT>
+          <option name="NAME" value="data_source_id" />
+          <option name="SQL_TYPE" value="bigint" />
+          <option name="JDBC_TYPE" value="-5" />
+          <option name="TYPE" />
+          <option name="PRIMARY" value="false" />
+          <option name="LENGTH" value="20" />
+          <option name="PRECISION" value="0" />
+          <option name="NULLABLE" value="false" />
+        </FIELD_ELEMENT>
+        <RELATIONSHIP_ELEMENT>
+          <option name="RELATION_NAME" value="refresh_event_ibfk1" />
+          <option name="TARGET_TABLE" value="event_base" />
+          <option name="TARGET_SCHEMA" />
+          <option name="TARGET_CATALOG" value="dms" />
+          <option name="TARGET_COLUMN" value="event_id" />
+          <option name="SOURCE_COLUMN" value="event_id" />
+          <option name="CASCADE_REMOVE" value="true" />
+          <option name="CASCADE_UPDATE" value="false" />
+        </RELATIONSHIP_ELEMENT>
+        <RELATIONSHIP_ELEMENT>
+          <option name="RELATION_NAME" value="refresh_event_ibfk2" />
+          <option name="TARGET_TABLE" value="data_feed" />
+          <option name="TARGET_SCHEMA" />
+          <option name="TARGET_CATALOG" value="dms" />
+          <option name="TARGET_COLUMN" value="data_feed_id" />
+          <option name="SOURCE_COLUMN" value="data_source_id" />
+          <option name="CASCADE_REMOVE" value="true" />
+          <option name="CASCADE_UPDATE" value="false" />
+        </RELATIONSHIP_ELEMENT>
+      </TABLE_DATA>
+      <TABLE_DATA>
         <option name="NAME" value="report_deliveree" />
         <option name="SCHEMA" />
         <option name="CATALOG" value="dms" />
@@ -8396,6 +8694,82 @@
           <option name="PRECISION" value="0" />
           <option name="NULLABLE" value="false" />
         </FIELD_ELEMENT>
+      </TABLE_DATA>
+      <TABLE_DATA>
+        <option name="NAME" value="server_refresh_task" />
+        <option name="SCHEMA" />
+        <option name="CATALOG" value="dms" />
+        <option name="TYPE" value="TABLE" />
+        <FIELD_ELEMENT>
+          <option name="NAME" value="server_refresh_task_id" />
+          <option name="SQL_TYPE" value="bigint" />
+          <option name="JDBC_TYPE" value="-5" />
+          <option name="TYPE" />
+          <option name="PRIMARY" value="true" />
+          <option name="LENGTH" value="20" />
+          <option name="PRECISION" value="0" />
+          <option name="NULLABLE" value="false" />
+        </FIELD_ELEMENT>
+        <FIELD_ELEMENT>
+          <option name="NAME" value="data_source_id" />
+          <option name="SQL_TYPE" value="bigint" />
+          <option name="JDBC_TYPE" value="-5" />
+          <option name="TYPE" />
+          <option name="PRIMARY" value="false" />
+          <option name="LENGTH" value="20" />
+          <option name="PRECISION" value="0" />
+          <option name="NULLABLE" value="false" />
+        </FIELD_ELEMENT>
+        <FIELD_ELEMENT>
+          <option name="NAME" value="user_id" />
+          <option name="SQL_TYPE" value="bigint" />
+          <option name="JDBC_TYPE" value="-5" />
+          <option name="TYPE" />
+          <option name="PRIMARY" value="false" />
+          <option name="LENGTH" value="20" />
+          <option name="PRECISION" value="0" />
+          <option name="NULLABLE" value="false" />
+        </FIELD_ELEMENT>
+        <FIELD_ELEMENT>
+          <option name="NAME" value="scheduled_task_id" />
+          <option name="SQL_TYPE" value="bigint" />
+          <option name="JDBC_TYPE" value="-5" />
+          <option name="TYPE" />
+          <option name="PRIMARY" value="false" />
+          <option name="LENGTH" value="20" />
+          <option name="PRECISION" value="0" />
+          <option name="NULLABLE" value="false" />
+        </FIELD_ELEMENT>
+        <RELATIONSHIP_ELEMENT>
+          <option name="RELATION_NAME" value="server_refresh_task_ibfk1" />
+          <option name="TARGET_TABLE" value="scheduled_task" />
+          <option name="TARGET_SCHEMA" />
+          <option name="TARGET_CATALOG" value="dms" />
+          <option name="TARGET_COLUMN" value="scheduled_task_id" />
+          <option name="SOURCE_COLUMN" value="scheduled_task_id" />
+          <option name="CASCADE_REMOVE" value="true" />
+          <option name="CASCADE_UPDATE" value="false" />
+        </RELATIONSHIP_ELEMENT>
+        <RELATIONSHIP_ELEMENT>
+          <option name="RELATION_NAME" value="server_refresh_task_ibfk2" />
+          <option name="TARGET_TABLE" value="data_feed" />
+          <option name="TARGET_SCHEMA" />
+          <option name="TARGET_CATALOG" value="dms" />
+          <option name="TARGET_COLUMN" value="data_feed_id" />
+          <option name="SOURCE_COLUMN" value="data_source_id" />
+          <option name="CASCADE_REMOVE" value="true" />
+          <option name="CASCADE_UPDATE" value="false" />
+        </RELATIONSHIP_ELEMENT>
+        <RELATIONSHIP_ELEMENT>
+          <option name="RELATION_NAME" value="server_refresh_task_ibfk3" />
+          <option name="TARGET_TABLE" value="user" />
+          <option name="TARGET_SCHEMA" />
+          <option name="TARGET_CATALOG" value="dms" />
+          <option name="TARGET_COLUMN" value="user_id" />
+          <option name="SOURCE_COLUMN" value="user_id" />
+          <option name="CASCADE_REMOVE" value="true" />
+          <option name="CASCADE_UPDATE" value="false" />
+        </RELATIONSHIP_ELEMENT>
       </TABLE_DATA>
       <TABLE_DATA>
         <option name="NAME" value="session_id_storage" />
@@ -9046,7 +9420,7 @@
           <option name="PRIMARY" value="false" />
           <option name="LENGTH" value="20" />
           <option name="PRECISION" value="0" />
-          <option name="NULLABLE" value="true" />
+          <option name="NULLABLE" value="false" />
         </FIELD_ELEMENT>
         <FIELD_ELEMENT>
           <option name="NAME" value="source_text" />
@@ -9088,6 +9462,16 @@
           <option name="PRECISION" value="0" />
           <option name="NULLABLE" value="true" />
         </FIELD_ELEMENT>
+        <RELATIONSHIP_ELEMENT>
+          <option name="RELATION_NAME" value="text_replace_scrub_ibfk1" />
+          <option name="TARGET_TABLE" value="data_scrub" />
+          <option name="TARGET_SCHEMA" />
+          <option name="TARGET_CATALOG" value="dms" />
+          <option name="TARGET_COLUMN" value="data_scrub_id" />
+          <option name="SOURCE_COLUMN" value="data_scrub_id" />
+          <option name="CASCADE_REMOVE" value="true" />
+          <option name="CASCADE_UPDATE" value="false" />
+        </RELATIONSHIP_ELEMENT>
       </TABLE_DATA>
       <TABLE_DATA>
         <option name="NAME" value="time_based_analysis_measure" />
@@ -9134,6 +9518,26 @@
           <option name="PRECISION" value="0" />
           <option name="NULLABLE" value="true" />
         </FIELD_ELEMENT>
+        <RELATIONSHIP_ELEMENT>
+          <option name="RELATION_NAME" value="time_based_analysis_measure_ibfk2" />
+          <option name="TARGET_TABLE" value="analysis_item" />
+          <option name="TARGET_SCHEMA" />
+          <option name="TARGET_CATALOG" value="dms" />
+          <option name="TARGET_COLUMN" value="analysis_item_id" />
+          <option name="SOURCE_COLUMN" value="date_dimension" />
+          <option name="CASCADE_REMOVE" value="true" />
+          <option name="CASCADE_UPDATE" value="false" />
+        </RELATIONSHIP_ELEMENT>
+        <RELATIONSHIP_ELEMENT>
+          <option name="RELATION_NAME" value="time_based_analysis_measure_ibfk1" />
+          <option name="TARGET_TABLE" value="analysis_item" />
+          <option name="TARGET_SCHEMA" />
+          <option name="TARGET_CATALOG" value="dms" />
+          <option name="TARGET_COLUMN" value="analysis_item_id" />
+          <option name="SOURCE_COLUMN" value="analysis_item_id" />
+          <option name="CASCADE_REMOVE" value="true" />
+          <option name="CASCADE_UPDATE" value="false" />
+        </RELATIONSHIP_ELEMENT>
       </TABLE_DATA>
       <TABLE_DATA>
         <option name="NAME" value="tree_report" />
@@ -9262,6 +9666,26 @@
           <option name="PRECISION" value="0" />
           <option name="NULLABLE" value="false" />
         </FIELD_ELEMENT>
+        <RELATIONSHIP_ELEMENT>
+          <option name="RELATION_NAME" value="upload_policy_groups_ibfk2" />
+          <option name="TARGET_TABLE" value="community_group" />
+          <option name="TARGET_SCHEMA" />
+          <option name="TARGET_CATALOG" value="dms" />
+          <option name="TARGET_COLUMN" value="community_group_id" />
+          <option name="SOURCE_COLUMN" value="group_id" />
+          <option name="CASCADE_REMOVE" value="true" />
+          <option name="CASCADE_UPDATE" value="false" />
+        </RELATIONSHIP_ELEMENT>
+        <RELATIONSHIP_ELEMENT>
+          <option name="RELATION_NAME" value="upload_policy_groups_ibfk1" />
+          <option name="TARGET_TABLE" value="data_feed" />
+          <option name="TARGET_SCHEMA" />
+          <option name="TARGET_CATALOG" value="dms" />
+          <option name="TARGET_COLUMN" value="data_feed_id" />
+          <option name="SOURCE_COLUMN" value="feed_id" />
+          <option name="CASCADE_REMOVE" value="true" />
+          <option name="CASCADE_UPDATE" value="false" />
+        </RELATIONSHIP_ELEMENT>
       </TABLE_DATA>
       <TABLE_DATA>
         <option name="NAME" value="upload_policy_users" />
@@ -9308,6 +9732,26 @@
           <option name="PRECISION" value="0" />
           <option name="NULLABLE" value="false" />
         </FIELD_ELEMENT>
+        <RELATIONSHIP_ELEMENT>
+          <option name="RELATION_NAME" value="upload_policy_users_ibfk2" />
+          <option name="TARGET_TABLE" value="user" />
+          <option name="TARGET_SCHEMA" />
+          <option name="TARGET_CATALOG" value="dms" />
+          <option name="TARGET_COLUMN" value="user_id" />
+          <option name="SOURCE_COLUMN" value="user_id" />
+          <option name="CASCADE_REMOVE" value="true" />
+          <option name="CASCADE_UPDATE" value="false" />
+        </RELATIONSHIP_ELEMENT>
+        <RELATIONSHIP_ELEMENT>
+          <option name="RELATION_NAME" value="upload_policy_users_ibfk1" />
+          <option name="TARGET_TABLE" value="data_feed" />
+          <option name="TARGET_SCHEMA" />
+          <option name="TARGET_CATALOG" value="dms" />
+          <option name="TARGET_COLUMN" value="data_feed_id" />
+          <option name="SOURCE_COLUMN" value="feed_id" />
+          <option name="CASCADE_REMOVE" value="true" />
+          <option name="CASCADE_UPDATE" value="false" />
+        </RELATIONSHIP_ELEMENT>
       </TABLE_DATA>
       <TABLE_DATA>
         <option name="NAME" value="user" />

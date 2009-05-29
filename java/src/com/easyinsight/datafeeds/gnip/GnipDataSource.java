@@ -232,6 +232,7 @@ public class GnipDataSource extends ServerDataSourceDefinition {
             gf.setFilterName(rs.getString("FILTER_ID"));
             filters.add(gf);
         }
+        loadStmt.close();
     }
 
     public List<GnipFilter> getFilters() {

@@ -135,7 +135,10 @@
     </listing:ListingOption>
 
     <mx:Spacer width="100%"/>
+
     <mx:Button icon="{findIcon}" click="dispatchEvent(new LaunchQuickSearchEvent())" toolTip="Search (Ctrl+N)" visible="{loggedIn}"/>
+
+
         
     <easyinsight:LoginStatusDisplay id="loginStatusDisplay" horizontalAlign="right"/>
 

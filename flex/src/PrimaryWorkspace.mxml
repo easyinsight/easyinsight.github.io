@@ -25,8 +25,10 @@
 			import com.easyinsight.analysis.DelayedFeedLink;
 			import com.easyinsight.analysis.DelayedDeepLink;
             import com.easyinsight.listing.AnalysisDefinitionAnalyzeSource;
+            import com.easyinsight.listing.AsyncWindowEvent;
             import com.easyinsight.listing.DataFeedDescriptor;
             import com.easyinsight.listing.DescriptorAnalyzeSource;
+            import com.easyinsight.notifications.AsyncNotifyWindow;
             import com.easyinsight.quicksearch.EIDescriptor;
             import com.easyinsight.quicksearch.QuickSearchEvent;
             import com.easyinsight.quicksearch.QuickSearchWindow;
@@ -61,6 +63,8 @@
             
             public var browserManager:IBrowserManager;
 
+            private var asyncWindow:AsyncNotifyWindow;
+
             private function startWorkspace():void {
                 userService.isSessionLoggedIn.send();                
                 new CommandProcessor();
@@ -71,6 +75,7 @@
                 browserManager.init("", "Intro");
                 introPanel.gotFocus();
                 User.getEventNotifier().addEventListener(NavigationEvent.NAVIGATION, navigation);
+                addEventListener(AsyncWindowEvent.LAUNCH_ASYNC_WINDOW,  onAsyncWindow);
             }
 
             private function applicationListeners():void {
@@ -83,6 +88,13 @@
                 }
             }
 
+            private function onAsyncWindow(event:AsyncWindowEvent):void {
+                if(asyncWindow == null) {
+                    asyncWindow = new AsyncNotifyWindow();
+                }
+                PopUpManager.addPopUp(asyncWindow, this, false);
+            }
+
             private function launchQuickSearchWindow():void {
                 var window:QuickSearchWindow = new QuickSearchWindow();
                 window.addEventListener(QuickSearchEvent.QUICK_SEARCH, onQuickSearch);
@@ -90,6 +102,7 @@
                 PopUpManager.addPopUp(window, this, false);
                 PopUpManager.centerPopUp(window);
             }
+
 
             private function onQuickSearch(event:QuickSearchEvent):void {
                 event.currentTarget.removeEventListener(QuickSearchEvent.QUICK_SEARCH, onQuickSearch);
@@ -342,6 +355,11 @@
 				<intro1:IntroPanel id="introPanel" width="100%" height="100%" paddingTop="0" navigation="navigation(event)"/>
 						
 		</mx:HBox>
+        <mx:HBox width="100%" paddingLeft="5" paddingTop="5" top="0" paddingRight="5" paddingBottom="5">
+            <mx:Button label="Async" click="dispatchEvent(new AsyncWindowEvent());" />
+            <mx:Button label="TODO"  />
+            <mx:Button label="Collaboration" />
+        </mx:HBox>
 	</mx:VBox>
 	
 </mx:Application>

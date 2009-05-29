@@ -1,0 +1,56 @@
+<?xml version="1.0" ?>
+<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*"
+                creationComplete="onCreationComplete()" showCloseButton="true" close="PopUpManager.removePopUp(this);" >
+    <mx:Script><![CDATA[
+            import mx.collections.ArrayCollection;
+            import mx.controls.Alert;
+            import mx.managers.PopUpManager;
+            import mx.messaging.events.MessageEvent;
+            import mx.messaging.events.MessageFaultEvent;
+
+            private function handleFault(event:mx.messaging.events.MessageFaultEvent):void {
+                Alert.show(event.message.faultString);
+            }
+
+            private function handleMessage(event:mx.messaging.events.MessageEvent):void {
+                var info:RefreshEventInfo = event.message.body as RefreshEventInfo;
+                if(info.action == RefreshEventInfo.ADD)
+                    _data.addItem(info);
+                else {
+                    for(var i:int = 0;i < _data.length;i++) {
+                        var currentEvent:RefreshEventInfo = _data.getItemAt(i) as RefreshEventInfo;
+                        if(currentEvent.taskId == info.taskId) {
+                            _data.setItemAt(info, i);
+                        }
+                    }
+                }
+            }
+
+            [Bindable]
+            private var _data:ArrayCollection;
+
+            private function onCreationComplete():void {
+                userUploadService.getOngoingTasks.send();
+                eventListener.subscribe();
+            }
+
+            private function tasksRetrieved():void {
+                _data = userUploadService.getOngoingTasks.lastResult as ArrayCollection;
+            }
+
+
+            ]]></mx:Script>
+    <mx:Consumer id="eventListener" destination="generalNotifications" message="handleMessage(event)" fault="handleFault(event)" />
+    <mx:RemoteObject id="userUploadService" destination="userUpload">
+        <mx:method name="getOngoingTasks" result="tasksRetrieved()"/>
+    </mx:RemoteObject>
+    <mx:VBox>
+        <mx:DataGrid dataProvider="{_data}">
+            <mx:columns>
+                <util:EIDataGridColumn headerText="Name" dataField="feedName"/>
+                <util:EIDataGridColumn headerText="" dataField="dataSourceID" sortable="false"
+                                       itemRenderer="com.easyinsight.notifications.NotificationProgressColumnControls"/>
+            </mx:columns>
+        </mx:DataGrid>
+    </mx:VBox>
+</mx:TitleWindow>

@@ -33,9 +33,15 @@ public class Scheduler {
     private boolean running = false;
     private Thread thread;
 
+    private static Scheduler instance = new Scheduler();
+
+    public static Scheduler instance() {
+        return instance;
+    }
+
     // simplest level...
 
-    public Scheduler() {
+    private Scheduler() {
         executor = new ThreadPoolExecutor(5, 5, 5000, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<Runnable>());
         timer = new Timer();        
     }
@@ -121,6 +127,7 @@ public class Scheduler {
             PreparedStatement lockStmt = conn.prepareStatement("DELETE FROM DISTRIBUTED_LOCK WHERE LOCK_NAME = ?");
             lockStmt.setString(1, SCHEDULE_LOCK);
             lockStmt.executeUpdate();
+            lockStmt.close();
         } catch (SQLException e) {
             LogClass.error(e);
         } finally {
@@ -135,6 +142,7 @@ public class Scheduler {
             lockStmt.setString(1, SCHEDULE_LOCK);
             lockStmt.execute();
             locked = true;
+            lockStmt.close();
         } catch (SQLException e) {
             LogClass.debug("Failed to obtain distributed lock, assuming another app server has it.");
         } finally {
@@ -211,4 +219,22 @@ public class Scheduler {
         }
 
     }
+
+    public void saveTask(ScheduledTask t) {
+        // assert(t.getStatus() == ScheduledTask.INMEMORY);
+        t.setStartedDate(new Date());
+        Session session = Database.instance().createSession();
+        try {
+            session.getTransaction().begin();
+            session.save(t);
+            session.getTransaction().commit();
+            executor.execute(t);
+        }
+        catch(Exception e) {
+            LogClass.error(e);
+            session.getTransaction().rollback();
+            throw new RuntimeException(e);
+        }
+    }
+
 }

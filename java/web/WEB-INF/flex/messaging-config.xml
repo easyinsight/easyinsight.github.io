@@ -14,12 +14,10 @@
     <destination id="generalNotifications">
         <properties>
                 <server>
-                <allow-subtopics>true</allow-subtopics>
-                <subtopic-separator>.</subtopic-separator>
+                <allow-subtopics>false</allow-subtopics>
                 </server>
         </properties>
         <channels>
-                <channel ref="my-longpolling-amf"/>
                 <channel ref="my-polling-amf"/>
         </channels>
      </destination>
@@ -32,7 +30,6 @@
                 </server>
         </properties>
         <channels>
-                <channel ref="my-longpolling-amf"/>
                 <channel ref="my-polling-amf"/>
         </channels>
      </destination>
@@ -45,20 +42,6 @@
                     </server>
             </properties>
             <channels>
-                    <channel ref="my-longpolling-amf"/>
-                    <channel ref="my-polling-amf"/>
-            </channels>
-     </destination>
-
-    <destination id="orderManagement">
-            <properties>
-                    <server>
-                    <allow-subtopics>true</allow-subtopics>
-                    <subtopic-separator>.</subtopic-separator>
-                    </server>
-            </properties>
-            <channels>
-                    <channel ref="my-longpolling-amf"/>
                     <channel ref="my-polling-amf"/>
             </channels>
      </destination>

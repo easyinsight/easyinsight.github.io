@@ -55,11 +55,8 @@ public class PasswordStorage {
 
     public static void setPasswordCredentials(String username, String password, long feedId, Connection conn) throws SQLException {
 
-        try {
-            Cipher c = Cipher.getInstance("RSA");
-            c.init(Cipher.ENCRYPT_MODE, publicKey);
-            String encryptedUsername = new String(Base64.encode(c.doFinal(username.getBytes("UTF-8"))));
-            String encryptedPassword = new String(Base64.encode(c.doFinal(password.getBytes("UTF-8"))));
+            String encryptedUsername = encryptString(username);
+            String encryptedPassword = encryptString(password);
 
 
             PreparedStatement updateStatement = conn.prepareStatement("UPDATE PASSWORD_STORAGE SET username = ?, password = ? WHERE data_feed_id = ?");
@@ -76,23 +73,16 @@ public class PasswordStorage {
             if(rows == 0)
                 insertStatement.execute();
             new FeedStorage().removeFeed(feedId);
+    }
+
+    public static String encryptString(String username) {
+        try {
+            Cipher c = Cipher.getInstance("RSA");
+            c.init(Cipher.ENCRYPT_MODE, publicKey);
+            String encryptedUsername = new String(Base64.encode(c.doFinal(username.getBytes("UTF-8"))));
+            return encryptedUsername;
         }
-        catch (NoSuchAlgorithmException e) {
-            LogClass.error(e);
-            throw new RuntimeException(e);
-        } catch (NoSuchPaddingException e) {
-            LogClass.error(e);
-            throw new RuntimeException(e);
-        } catch (UnsupportedEncodingException e) {
-            LogClass.error(e);
-            throw new RuntimeException(e);
-        } catch (InvalidKeyException e) {
-            LogClass.error(e);
-            throw new RuntimeException(e);
-        } catch (IllegalBlockSizeException e) {
-            LogClass.error(e);
-            throw new RuntimeException(e);
-        } catch (BadPaddingException e) {
+        catch(Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);
         }
@@ -107,38 +97,28 @@ public class PasswordStorage {
             String username = rs.getString(1);
             String password = rs.getString(2);
             Cipher cipher = null;
-            try {
-                cipher = Cipher.getInstance("RSA");
-                cipher.init(Cipher.DECRYPT_MODE, privateKey);
-                String decodedUsername = new String(cipher.doFinal(Base64.decode(username.getBytes("UTF-8"))));
-                String decodedPassword = new String(cipher.doFinal(Base64.decode(password.getBytes("UTF-8"))));
+                String decodedUsername = decryptString(username);
+                String decodedPassword = decryptString(password);
                 credentials.setUserName(decodedUsername);
                 credentials.setPassword(decodedPassword);
-
-                // This sucks, but I want SQLExceptions to bubble up.
-            } catch (NoSuchAlgorithmException e) {
-                LogClass.error(e);
-                throw new RuntimeException(e);
-            } catch (NoSuchPaddingException e) {
-                LogClass.error(e);
-                throw new RuntimeException(e);
-            } catch (InvalidKeyException e) {
-                LogClass.error(e);
-                throw new RuntimeException(e);
-            } catch (IllegalBlockSizeException e) {
-                LogClass.error(e);
-                throw new RuntimeException(e);
-            } catch (BadPaddingException e) {
-                LogClass.error(e);
-                throw new RuntimeException(e);
-            } catch (UnsupportedEncodingException e) {
-                LogClass.error(e);
-                throw new RuntimeException(e);
-            }
 
             return credentials;
         }
 
         return null;
+    }
+
+    public static String decryptString(String username) {
+        try {
+            Cipher cipher;
+            cipher = Cipher.getInstance("RSA");
+            cipher.init(Cipher.DECRYPT_MODE, privateKey);
+            String decodedUsername = new String(cipher.doFinal(Base64.decode(username.getBytes("UTF-8"))));
+            return decodedUsername;
+        }
+        catch(Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        }
     }
 }

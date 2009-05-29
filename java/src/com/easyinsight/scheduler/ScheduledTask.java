@@ -23,6 +23,7 @@ public abstract class ScheduledTask implements Runnable {
     public static final int RUNNING = 2;
     public static final int COMPLETED = 3;
     public static final int FAILED = 4;
+    public static final int INMEMORY = 5;
 
     @Id
     @GeneratedValue(strategy=GenerationType.IDENTITY)
@@ -46,21 +47,30 @@ public abstract class ScheduledTask implements Runnable {
             conn.setAutoCommit(false);
             LogClass.info("Executing " + getClass().getName() + " with execution date = " + executionDate);
             execute(executionDate, conn);
-            setStatus(COMPLETED);
-            session.update(this);
+            onComplete(session);
             session.flush();
             conn.commit();
         } catch (Exception e) {
             LogClass.error(e);
             conn.rollback();
-            setStatus(FAILED);
-            session.update(this);
+            onFailure(session, e.getMessage());
             session.flush();
         } finally {
             conn.setAutoCommit(true);
             session.close();
             Database.instance().closeConnection(conn);
         }
+    }
+
+    protected void onComplete(Session session) {
+        setStatus(COMPLETED);
+        session.update(this);
+    }
+
+    protected void onFailure(Session session, String error) {
+        setStatus(FAILED);
+        setCompletionDate(new Date());
+        session.update(this);
     }
 
     public long getScheduledTaskID() {

@@ -36,7 +36,7 @@ public class DMSServlet extends HttpServlet {
                 DatabaseManager.instance();
                 FeedRegistry.initialize();
                 new APIManager().start();
-                scheduler = new Scheduler();
+                scheduler = Scheduler.instance();
                 scheduler.start();
             }
             LogClass.info("Started the server.");

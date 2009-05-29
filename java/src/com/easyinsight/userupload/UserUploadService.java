@@ -17,6 +17,10 @@ import com.easyinsight.security.Roles;
 import com.easyinsight.users.*;
 import com.easyinsight.analysis.*;
 import com.easyinsight.PasswordStorage;
+import com.easyinsight.scheduler.ServerRefreshScheduledTask;
+import com.easyinsight.scheduler.ScheduledTask;
+import com.easyinsight.scheduler.Scheduler;
+import com.easyinsight.scheduler.RefreshEventInfo;
 import com.easyinsight.solutions.SolutionInstallInfo;
 
 import java.io.*;
@@ -25,6 +29,8 @@ import java.util.Date;
 import java.sql.*;
 
 import org.hibernate.Session;
+import flex.messaging.messages.AsyncMessage;
+import flex.messaging.MessageBroker;
 
 /**
  * User: James Boe
@@ -438,10 +444,9 @@ public class UserUploadService implements IUserUploadService {
         }
     }
 
-    public CredentialsResponse refreshData(long feedID, Credentials credentials, boolean saveCredentials) {
+        public CredentialsResponse refreshData(long feedID, Credentials credentials, boolean saveCredentials) {
         SecurityUtil.authorizeFeed(feedID, Roles.OWNER);
         try {
-            ServerDataSourceDefinition feedDefinition = (ServerDataSourceDefinition) getDataFeedConfiguration(feedID);
             if(saveCredentials) {
                 EIConnection conn = Database.instance().getConnection();
                 try {
@@ -451,7 +456,17 @@ public class UserUploadService implements IUserUploadService {
                     Database.instance().closeConnection(conn);
                 }
             }
-            return feedDefinition.refreshData(credentials, SecurityUtil.getAccountID(), new Date());
+
+            ServerRefreshScheduledTask task = new ServerRefreshScheduledTask();
+            task.setDataSourceID(feedID);
+            task.setUserID(SecurityUtil.getUserID());
+            task.setExecutionDate(new Date());
+            task.setStatus(ScheduledTask.INMEMORY);
+            task.setRefreshCreds(credentials);
+            Scheduler.instance().saveTask(task);
+
+
+            return new CredentialsResponse(true);
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);
@@ -530,6 +545,70 @@ public class UserUploadService implements IUserUploadService {
             throw new RuntimeException(e);
         }
     }
+
+    public List<RefreshEventInfo> getOngoingTasks() {
+
+        long userID = SecurityUtil.getUserID();
+        try {
+            EIConnection conn = Database.instance().getConnection();
+            conn.setAutoCommit(false);
+            Session session = Database.instance().createSession(conn);
+            List results;
+            List<RefreshEventInfo> translatedResults = new LinkedList<RefreshEventInfo>();
+            try {
+                session.beginTransaction();
+                results = session.createQuery("from ServerRefreshScheduledTask where userID = ? and status != " + ScheduledTask.COMPLETED).setLong(0, userID).list();
+                if(results.size()  > 0) {
+                    String str = "SELECT data_feed_id, feed_name FROM data_feed WHERE data_feed_id IN (";
+                    boolean first = true;
+                    for(int i = 0;i < results.size();i++) {
+                        if(!first)
+                            str += ",";
+                        str += "?";
+                        first = false;
+                    }
+                    str += ")";
+                    PreparedStatement stmt = conn.prepareStatement(str);
+                    int i = 1;
+                    for(Object o : results) {
+                        RefreshEventInfo result = new RefreshEventInfo();
+                        ServerRefreshScheduledTask s = (ServerRefreshScheduledTask) o;
+                        result.setFeedId(s.getDataSourceID());
+                        result.setUserId(s.getUserID());
+                        result.setTaskId(s.getScheduledTaskID());
+                        result.setAction(RefreshEventInfo.ADD);
+                        result.setMessage(null);
+                        translatedResults.add(result);
+                        stmt.setLong(i++, s.getDataSourceID());
+                    }
+                    ResultSet rs = stmt.executeQuery();
+                    while(rs.next()) {
+                        long feedID = rs.getLong(1);
+                        String feedName = rs.getString(2);
+                        for(RefreshEventInfo info : translatedResults) {
+                            if(info.getFeedId() == feedID) {
+                                info.setFeedName(feedName);
+                            }
+                        }
+                    }
+                }
+
+                session.flush();
+                conn.commit();
+            } catch (Exception e) {
+                conn.rollback();
+                throw new RuntimeException(e);
+            } finally {
+                session.close();
+                conn.close();
+            }
+            return translatedResults;
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        }
+    }
+
 
     public long newExternalDataSource(FeedDefinition feedDefinition, Credentials credentials) {
         if (SecurityUtil.getAccountTier() < feedDefinition.getRequiredAccountTier()) {

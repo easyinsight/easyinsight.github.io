@@ -709,6 +709,7 @@ public class GoalStorage {
             saveUserStmt.setLong(1, goalTreeNodeID);
             saveUserStmt.setLong(2, userID);
             saveUserStmt.execute();
+            saveUserStmt.close();
         } catch (SQLException e) {
             LogClass.error(e);
             throw new RuntimeException(e);
@@ -739,6 +740,7 @@ public class GoalStorage {
             saveInsightLinkStmt.setLong(1, goalTreeNode.getGoalTreeNodeID());
             saveInsightLinkStmt.setLong(2, goalInsight.getId());
             saveInsightLinkStmt.execute();
+            saveInsightLinkStmt.close();
         }
     }
 
@@ -752,6 +754,7 @@ public class GoalStorage {
             saveFeedLinkStmt.setLong(2, goalFeed.getFeedID());
             saveFeedLinkStmt.execute();
         }
+        saveFeedLinkStmt.close();
     }
 
     private void saveSolutions(GoalTreeNode goalTreeNode, Connection conn) throws SQLException {
@@ -764,6 +767,7 @@ public class GoalStorage {
             saveSolutionLinkStmt.setLong(2, goalSolution.getSolutionID());
             saveSolutionLinkStmt.execute();
         }
+        saveSolutionLinkStmt.close();
     }
 
     // 
@@ -857,6 +861,7 @@ public class GoalStorage {
                 long goalTreeNodeID = rs.getLong(1);
                 populateGoal(startDate, endDate, nodes, conn, goalTreeNodeID);
             }
+            stmt.close();
         } catch (SQLException e) {
             LogClass.error(e);
         } finally {
@@ -892,6 +897,7 @@ public class GoalStorage {
                 long goalTreeNodeID = rs.getLong(1);
                 populateGoal(startDate, endDate, nodes, conn, goalTreeNodeID);
             }
+            queryStmt.close();
         } catch (SQLException e) {
             LogClass.error(e);
             throw new RuntimeException(e);
@@ -913,6 +919,7 @@ public class GoalStorage {
                 descriptors.add(new GoalTreeDescriptor(subTreeRS.getLong(1), subTreeRS.getString(2), Roles.SUBSCRIBER));
             }
             goalTree.setSubTreeParents(descriptors);
+            queryStmt.close();
         } catch (SQLException e) {
             LogClass.error(e);
         } finally {
