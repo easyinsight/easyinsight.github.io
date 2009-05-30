@@ -82,7 +82,6 @@
 	<mx:RemoteObject destination="login" id="userService">
 		<mx:method name="retrieveAccount" result="gotAccountInfo()"/>
 	</mx:RemoteObject>
-    <mx:Box width="100%" height="5" backgroundColor="#D42525" left="0" right="0"/>
 	<mx:VBox id="coreContent" width="100%" height="100%" paddingTop="0" top="0">
 		<account:AccountCreationWizard id="accountWizard" accountCreated="accountCreated(event)"/>		
 	</mx:VBox>
