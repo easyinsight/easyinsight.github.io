@@ -59,6 +59,7 @@
             <properties>
                 <polling-enabled>true</polling-enabled>
                 <polling-interval-seconds>4</polling-interval-seconds>
+                <flex-client-outbound-queue-processor class="com.easyinsight.notifications.UserNotificationProcessor"/>                
             </properties>
         </channel-definition>
 
