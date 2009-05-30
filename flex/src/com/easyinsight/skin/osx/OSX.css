@@ -379,3 +379,10 @@ CartesianChart3D {
     fontFamily: "Tahoma";
     fontSize: 14;
 }
+
+CorePageButton {
+    rolloverColor: #cccccc;
+    backgroundColor: #ffffff;
+    borderStyle: solid;
+    borderThickness: 1;
+}
