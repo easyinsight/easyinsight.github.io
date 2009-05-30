@@ -24,11 +24,6 @@ import com.easyinsight.security.UserPrincipal;
 public class UserNotificationProcessor extends FlexClientOutboundQueueProcessor {
 
     @Override
-    public void add(List list, Message message) {
-        super.add(list, message);    //To change body of overridden methods use File | Settings | File Templates.
-    }
-
-    @Override
     public FlushResult flush(List list) {
         for(Object o : list) {
             Message m = (Message) o;
