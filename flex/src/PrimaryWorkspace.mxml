@@ -9,7 +9,7 @@
     <mx:states>
         <mx:State name="Analysis">
             <mx:RemoveChild target="{headerBar}"/>
-            <mx:RemoveChild target="{coreSpace}"/>
+            <mx:RemoveChild target="{primarySpace}"/>
             <mx:AddChild relativeTo="{coreVBox}" target="{dataAnalysis}"/>
         </mx:State>
     </mx:states>
@@ -18,7 +18,7 @@
         import com.easyinsight.analysis.DelayedAPIKeyLink;
         import com.easyinsight.framework.FullScreenModuleEvent;
         import com.easyinsight.framework.ModuleAnalyzeSource;
-        import com.easyinsight.genredata.ModuleAnalyzeEvent;
+        import com.easyinsight.genredata.ModuleAnalyzeEvent;              
         import com.easyinsight.goals.DelayedGoalLink;
         import com.easyinsight.goals.GoalDataAnalyzeSource;
         import com.easyinsight.groups.DelayedGroupLink;
@@ -345,6 +345,7 @@
                         authResult.dataSourceCreator, authResult.insightCreator, authResult.userID);
                 User.getInstance().password = authResult.encryptedPassword;
                 User.getInstance().userName = authResult.userName;
+                loggedIn = true;
                 User.getEventNotifier().dispatchEvent(new LoginEvent(LoginEvent.LOGIN));
             }
         }
@@ -372,24 +373,28 @@
 
     <mx:VBox width="100%" height="100%" id="coreVBox" paddingLeft="0" verticalGap="0" paddingRight="0">
         <listing:HeaderBar keywordSearch="search(event)" width="100%" id="headerBar"
-                            paddingTop="5" paddingBottom="5" paddingLeft="10" paddingRight="10" bottom="0" top="0"
-                            listingChange="changePerspective(event)" launchQuickSearch="launchQuickSearchWindow()"/>
-        <mx:HBox width="100%" height="100%" horizontalGap="0">
-        <mx:Canvas height="100%" width="29" backgroundColor="0xF0F0F0">
-            <framework:CorePageButton rotation="-90" x="3" y="70" image="{noteIcon}" text="TODO" visible="{loggedIn}"/>
-            <notification:BackgroundTaskButton rotation="-90" x="3" y="155" image="{clockIcon}" text="Tasks" messageListener="{messageListener}"
-                    visible="{loggedIn}"/>
-        </mx:Canvas>
-        <mx:Box height="100%" width="5" backgroundColor="#D42525" top="0" bottom="0"/>
-        <mx:HBox width="100%" height="100%" id="coreSpace" paddingLeft="0" paddingTop="0" top="0" paddingRight="0">
-
-            <intro1:IntroPanel id="introPanel" width="100%" height="100%" paddingTop="0"
-                               navigation="navigation(event)"/>
-
-        </mx:HBox>
-        <mx:Box height="100%" width="5" backgroundColor="#D42525" top="0" bottom="0"/>
+                           paddingTop="5" paddingBottom="5" paddingLeft="10" paddingRight="10" bottom="0" top="0"
+                           listingChange="changePerspective(event)" launchQuickSearch="launchQuickSearchWindow()"/>
+        <mx:Box width="100%" height="5" backgroundColor="#D42525" left="0" right="0"/>
+        <mx:HBox width="100%" height="100%" horizontalGap="0" id="primarySpace">
             <mx:Canvas height="100%" width="29" backgroundColor="0xF0F0F0">
-                <framework:CorePageButton rotation="90" x="26" y="3" image="{clockIcon}" text="Messages" visible="{loggedIn}"/>
+                <framework:CorePageButton rotation="-90" x="3" y="70" image="{noteIcon}" text="TODO"
+                                          visible="{loggedIn}"/>
+                <notification:BackgroundTaskButton rotation="-90" x="3" y="155" image="{clockIcon}" text="Tasks"
+                                                   messageListener="{messageListener}"
+                                                   visible="{loggedIn}"/>
+            </mx:Canvas>
+            <mx:Box height="100%" width="5" backgroundColor="#D42525" top="0" bottom="0"/>
+            <mx:HBox width="100%" height="100%" id="coreSpace" paddingLeft="0" paddingTop="0" top="0" paddingRight="0">
+
+                <intro1:IntroPanel id="introPanel" width="100%" height="100%" paddingTop="0"
+                                   navigation="navigation(event)"/>
+
+            </mx:HBox>
+            <mx:Box height="100%" width="5" backgroundColor="#D42525" top="0" bottom="0"/>
+            <mx:Canvas height="100%" width="29" backgroundColor="0xF0F0F0">
+                <framework:CorePageButton rotation="90" x="26" y="3" image="{clockIcon}" text="Messages"
+                                          visible="{loggedIn}"/>
             </mx:Canvas>
         </mx:HBox>
     </mx:VBox>
