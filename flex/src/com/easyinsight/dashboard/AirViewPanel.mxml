@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%" implements="com.easyinsight.dashboard.IView"
+        creationComplete="setupTimer()">
+	<mx:Script>
+		<![CDATA[
+        import com.easyinsight.analysis.AirViewFactory;
+        import com.easyinsight.analysis.EmbeddedControllerLookup;
+        import com.easyinsight.analysis.EmbeddedViewFactory;
+        import com.easyinsight.analysis.IEmbeddedReportController;
+
+        import com.easyinsight.framework.DataServiceLoadingEvent;
+
+        private function setupTimer():void {
+            timer = new Timer(300000);
+            timer.addEventListener(TimerEvent.TIMER, onTimer);
+            timer.start();
+        }
+
+        private function onTimer(event:TimerEvent):void {
+            dataViewFactory.retrieveData();
+        }
+
+        private var _analysisID:int;
+        private var _reportType:int;
+
+        private var dataViewFactory:AirViewFactory;
+
+        private var timer:Timer;
+
+        public function set reportType(val:int):void {
+            _reportType = val;
+        }
+
+        public function set analysisID(analysisID:int):void {
+            this._analysisID = analysisID;
+        }
+
+
+        public function get analysisID():int {
+            return _analysisID;
+        }
+
+        override protected function createChildren():void {
+            super.createChildren();
+            if (dataViewFactory == null) {
+                var controllerClass:Class = EmbeddedControllerLookup.controllerForType(_reportType);
+                var controller:IEmbeddedReportController = new controllerClass();
+                var dataViewFactory:EmbeddedViewFactory = controller.createEmbeddedView();
+                var airViewFactory:AirViewFactory = new AirViewFactory();
+                airViewFactory.reportType = _reportType;
+                airViewFactory.reportID = _analysisID;
+                airViewFactory.addEventListener(DataServiceLoadingEvent.LOADING_STARTED, dataLoadingEvent);
+                airViewFactory.addEventListener(DataServiceLoadingEvent.LOADING_STOPPED, dataLoadingEvent);
+                this.dataViewFactory = airViewFactory;
+            }
+            addChild(airViewFactory);
+            airViewFactory.retrieveData();
+        }
+
+        private function dataLoadingEvent(event:DataServiceLoadingEvent):void {
+            dispatchEvent(event);
+        }
+
+        public function refreshData():void {
+            dataViewFactory.retrieveData();
+        }
+                ]]>
+	</mx:Script>
+</mx:VBox>

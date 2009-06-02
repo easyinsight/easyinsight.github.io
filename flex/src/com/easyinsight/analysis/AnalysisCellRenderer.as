@@ -10,7 +10,6 @@ import com.easyinsight.filtering.FilterRawData;
 
     import flash.system.System;
     import flash.ui.ContextMenu;
-    import flash.ui.ContextMenuItem;
 import mx.controls.Label;
     import mx.controls.listClasses.IListItemRenderer;
     import mx.events.FlexEvent;
@@ -52,30 +51,20 @@ import mx.controls.Label;
 
         override protected function commitProperties():void {
             super.commitProperties();
-            contextMenu = new ContextMenu();
-            contextMenu.hideBuiltInItems();
-            var items:Array = [];
+            var drilldownFunction:Function = null;
+            var rollupFunction:Function = null;
             if (analysisItem is AnalysisHierarchyItem) {
                 var hierarchy:AnalysisHierarchyItem = _analysisItem as AnalysisHierarchyItem;
                 var index:int = hierarchy.hierarchyLevels.getItemIndex(hierarchy.hierarchyLevel);
                 if (index < (hierarchy.hierarchyLevels.length - 1)) {
-                    var drilldownContextItem:ContextMenuItem = new ContextMenuItem("Drilldown", true);
-                    drilldownContextItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, onDrilldown);
-                    items.push(drilldownContextItem);
+                    drilldownFunction = onDrilldown;
                 }
                 if (index > 0) {
-                    var rollupContextItem:ContextMenuItem = new ContextMenuItem("Rollup", true);
-                    rollupContextItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, onRollup);
-                    items.push(rollupContextItem);
+                    rollupFunction = onRollup;
                 }
             }
-            var copyContextItem:ContextMenuItem = new ContextMenuItem("Copy Cell", true);
-            copyContextItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, copySelected);
-            items.push(copyContextItem);
-            var detailsItem:ContextMenuItem = new ContextMenuItem("View Individual Rows", true);
-            detailsItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, details);
-            items.push(detailsItem);
-            contextMenu.customItems = items;
+            PopupMenuFactory.menuFactory.createListMenu(copySelected, details,
+                    drilldownFunction, rollupFunction, this);
         }
 
         private function onDrilldown(event:ContextMenuEvent):void {

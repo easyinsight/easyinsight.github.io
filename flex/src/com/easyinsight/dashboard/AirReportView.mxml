@@ -1,0 +1,251 @@
+<?xml version="1.0" ?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:dashboard="com.easyinsight.dashboard.*" width="100%"
+           height="100%">
+    <mx:Metadata>
+        [Event(name="airLogout", type="com.easyinsight.dashboard.AirLogoutEvent")]
+    </mx:Metadata>
+    <mx:Script><![CDATA[
+        import com.adobe.ac.mxeffects.CubeRotate;
+        import com.easyinsight.analysis.service.ReportRetrievalFault;
+        import com.easyinsight.framework.DataServiceLoadingEvent;
+        import com.easyinsight.solutions.InsightDescriptor;
+
+        import mx.collections.ArrayCollection;
+
+        import flash.data.EncryptedLocalStore;
+
+        import mx.core.Container;
+        import mx.rpc.events.ResultEvent;
+
+        [Bindable]
+        private var _reports:ArrayCollection;
+
+        private var reportMap:Object = new Object();
+
+        private var loadingTarget:Container;
+
+        override protected function createChildren():void {
+            super.createChildren();
+            analysisService.getWidgetAnalyses.send();
+        }
+
+        private function refreshReports(event:ResultEvent):void {
+            var reportColl:ArrayCollection = refreshService.getWidgetAnalyses.lastResult as ArrayCollection;
+            for each (var report:InsightDescriptor in reportColl) {
+                var found:Boolean = false;
+                for each (var existingReport:AirWidgetItem in _reports) {
+                    if (existingReport is ReportAirWidgetItem) {
+                        var reportWidgetItem:ReportAirWidgetItem = existingReport as ReportAirWidgetItem;
+                        if (reportWidgetItem.report.id == report.id) {
+                            found = true;
+                            break;
+                        }
+                    }
+                }
+                if (!found) {
+                    _reports.addItem(new ReportAirWidgetItem(report));
+                }
+            }
+            for each (var existingRep:AirWidgetItem in _reports) {
+                if (existingRep is ReportAirWidgetItem) {
+                    var existingReportWidgetItem:ReportAirWidgetItem = existingRep as ReportAirWidgetItem;
+                    var existingFound:Boolean = false;
+                    for each (var newRep:InsightDescriptor in reportColl) {
+                        if (newRep.id == existingReportWidgetItem.report.id) {
+                            existingFound = true;
+                            break;
+                        }
+                    }
+                    if (!existingFound) {
+                        _reports.removeItemAt(_reports.getItemIndex(existingRep));
+                        if (existingReportWidgetItem.displayObject != null) {
+                            viewStack.removeChild(existingReportWidgetItem.displayObject);
+                        }
+                    }
+                }
+            }
+        }
+
+        private function gotAnalyses():void {
+            _reports = new ArrayCollection();
+            _reports.addItem(new DefaultAirWidgetItem());
+            var reportColl:ArrayCollection = analysisService.getWidgetAnalyses.lastResult as ArrayCollection;
+            for each (var report:InsightDescriptor in reportColl) {
+                var reportWidgetItem:ReportAirWidgetItem = new ReportAirWidgetItem(report);
+                _reports.addItem(reportWidgetItem);
+            }
+            reportRows = _reports.length;
+            var widgetItem:AirWidgetItem = _reports.getItemAt(0) as AirWidgetItem;
+            var displayObject:Container = widgetItem.createDisplayObject();
+            widgetItem.displayObject = displayObject;
+            loadingTarget = displayObject;
+            displayObject.addEventListener(DataServiceLoadingEvent.LOADING_STOPPED, gotInitialData);
+            viewStack.addChild(displayObject);
+            /*
+             reportRows = _reports.length;
+             var reportBytes:ByteArray = EncryptedLocalStore.getItem("viewedReport");
+             if (reportBytes != null) {
+             var reportID:int = int(reportBytes.readUTFBytes(reportBytes.length));
+             for each (var report:InsightDescript
+             s) {
+             if (
+             reportID) {
+             var dataViewPanel:AirViewPanel = new
+             ();
+
+             nalysisID = report.id;
+             dataViewPanel.reportNa
+
+             dataViewPanel.reportType = r
+             dataVie
+             ort.dataFeedID;
+             reportMap[St
+             ewPanel;
+             load
+             ;
+             dataViewPanel
+             viceLoadingEvent.LOADING_STOPPED, gotInitialD
+             viewStack.addChild(dataViewPanel);
+
+             }
+             }*/
+        }
+
+        private function onLoadStart(event:DataServiceLoadingEvent):void {
+            showProgress = true;
+        }
+
+        private function onLoadStop(event:DataServiceLoadingEvent):void {
+            showProgress = false;
+            statusDisplay.good();
+        }
+
+        private function onFault(event:ReportRetrievalFault):void {
+            showProgress = false;
+            statusDisplay.bad(event);
+        }
+
+        private function gotInitialData(event:DataServiceLoadingEvent):void {
+            var dataViewPanel:Container = loadingTarget;
+            dataViewPanel.removeEventListener(DataServiceLoadingEvent.LOADING_STOPPED, gotInitialData);
+            loadingTarget = null;
+            dataViewPanel.addEventListener(DataServiceLoadingEvent.LOADING_STARTED, onLoadStart);
+            dataViewPanel.addEventListener(DataServiceLoadingEvent.LOADING_STOPPED, onLoadStop);
+            dataViewPanel.addEventListener(ReportRetrievalFault.RETRIEVAL_FAULT, onFault);
+            if (viewStack.getChildren().length == 1) {
+                viewStack.selectedChild = dataViewPanel;
+            } else {
+                viewStack.selectedChild.removeEventListener(DataServiceLoadingEvent.LOADING_STARTED, onLoadStart);
+                viewStack.selectedChild.removeEventListener(DataServiceLoadingEvent.LOADING_STOPPED, onLoadStop);
+                var targetIndex:int = viewStack.getChildIndex(dataViewPanel);
+                var cubeRotate:CubeRotate = new CubeRotate();
+                if (targetIndex > viewStack.selectedIndex) {
+                    cubeRotate.direction = "RIGHT";
+                } else {
+                    cubeRotate.direction = "LEFT";
+                }
+                cubeRotate.duration = 1000;
+                cubeRotate.target = viewStack.selectedChild;
+                cubeRotate.siblings = [ dataViewPanel ];
+                viewStack.selectedChild = dataViewPanel;
+                cubeRotate.play();
+            }
+            showProgress = false;
+            if (dataViewPanel is AirViewPanel) {
+                reportSelected = true;
+                statusDisplay.good();
+            }
+        }
+
+        private function onReportChange():void {
+            var widgetItem:AirWidgetItem = reportBox.selectedItem as AirWidgetItem;
+            showProgress = true;
+            reportSelected = false;
+            if (widgetItem.displayObject == null) {
+                var displayObject:Container = widgetItem.createDisplayObject();
+                widgetItem.displayObject = displayObject;
+                loadingTarget = displayObject;
+                displayObject.addEventListener(DataServiceLoadingEvent.LOADING_STOPPED, gotInitialData);
+                viewStack.addChild(displayObject);
+            } else {
+                loadingTarget = widgetItem.displayObject;
+                widgetItem.displayObject.addEventListener(DataServiceLoadingEvent.LOADING_STOPPED, gotInitialData);
+                widgetItem.refreshData();
+            }
+            /*var report:InsightDescriptor = reportBox.selectedItem as InsightDescriptor;
+             var reportBytes:ByteArray = new ByteArray();
+             reportBytes.writeUTFBytes(String(report.id));
+             EncryptedLocalStore.setItem("viewedReport", reportBytes);
+             var dataViewPanel:AirViewPanel = reportMap[String(report.id)];
+
+             owProgress = true;
+             reportSelecte
+             if (dataViewPanel == null) {
+
+             aViewPanel = new AirViewPanel();
+             dataView
+             sID = report.id;
+             dataViewPanel.reportName = re
+             dataVi
+             tType = report.reportTy
+             dataViewPanel.dataSou
+             taFeedID;
+             reportMap
+             )] = dataViewPanel;
+             l
+             taViewPanel;
+             dataViewPa
+             ner(DataServiceLoadingEvent.LOADING_STOPPED,
+             viewStack.addChild(dataViewPane
+             else {
+             loadingTarget = dataV
+             dataViewPanel.addEven
+             viceLoadingEvent.LOADING_STOPPED, gotInitialData);
+             dataViewPanel.refresh
+             }*/
+        }
+
+        private function refreshData():void {
+            var panel:AirViewPanel = viewStack.selectedChild as AirViewPanel;
+            panel.refreshData();
+        }
+
+        private function launchBrowser():void {
+            var panel:AirViewPanel = viewStack.selectedChild as AirViewPanel;
+            var reportID:int = panel.analysisID;
+            var reportURL:String = "https://www.easy-insight.com/app/#analysisID=" + reportID;
+            flash.net.navigateToURL(new URLRequest(reportURL), "_self");
+        }
+
+        [Bindable]
+        private var reportSelected:Boolean = false;
+        [Bindable]
+        private var showProgress:Boolean = false;
+        [Bindable]
+        private var reportRows:int;
+
+        ]]></mx:Script>
+    <mx:RemoteObject id="analysisService" destination="analysisDefinition">
+        <mx:method name="getWidgetAnalyses" result="gotAnalyses()"/>
+    </mx:RemoteObject>
+    <mx:RemoteObject id="refreshService" destination="analysisDefinition">
+        <mx:method name="getWidgetAnalyses" result="refreshReports(event)"/>
+    </mx:RemoteObject>
+    <mx:VBox width="100%" height="100%" paddingLeft="5" paddingBottom="5" paddingRight="5" paddingTop="5">
+        <mx:HBox width="100%" verticalAlign="middle">
+            <mx:ComboBox id="reportBox" dataProvider="{
+                         _reports}" labelField="name" change="onReportChange()" rowCount="{reportRows}"/>
+            <mx:Button icon="@Embed(source=
+                       '../../../../assets/tables_x16.png')" toolTip="Refresh Report List" click="refreshService.getWidgetAnalyses.send()"/>
+            <mx:Button icon="@Embed(source=
+                       '../../../../assets/refresh.png')" toolTip="Refresh Selected Report" click="refreshData()" visible="{reportSelected}"/>
+            <mx:Button icon="@Embed(source=
+                       '../../../../assets/favicon.PNG')" toolTip="Launch Browser to View Report in Easy Insight" click="launchBrowser()" visible="{reportSelected}"/>
+            <dashboard:ReportStatusDisplay id="statusDisplay"/>
+            <mx:ProgressBar id="progressBar" indeterminate="true" visible="{showProgress}" width="100" label=""/>
+            <mx:Spacer width="100%"/>
+            <mx:Button label="Log Out" click="dispatchEvent(new AirLogoutEvent())"/>
+        </mx:HBox>
+        <mx:ViewStack id="viewStack" width="100%" height="100%"/>
+    </mx:VBox>
+</mx:Canvas>

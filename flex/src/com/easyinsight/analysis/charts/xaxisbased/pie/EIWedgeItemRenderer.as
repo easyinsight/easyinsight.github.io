@@ -9,13 +9,12 @@ package com.easyinsight.analysis.charts.xaxisbased.pie {
 ////////////////////////////////////////////////////////////////////////////////
 
 
+import com.easyinsight.analysis.PopupMenuFactory;
 import com.easyinsight.analysis.charts.ChartDrilldownEvent;
 import flash.display.Graphics;
 import flash.events.ContextMenuEvent;
 import flash.geom.Point;
 import flash.geom.Rectangle;
-import flash.ui.ContextMenu;
-import flash.ui.ContextMenuItem;
 import mx.charts.chartClasses.GraphicsUtilities;
 import mx.charts.series.items.PieSeriesItem;
 import mx.core.IDataRenderer;
@@ -99,13 +98,7 @@ public class EIWedgeItemRenderer extends UIComponent implements IDataRenderer
 	{
 		_wedge = PieSeriesItem(value);
 
-        contextMenu = new ContextMenu();
-        contextMenu.hideBuiltInItems();
-        var drilldownContextItem:ContextMenuItem = new ContextMenuItem("Drilldown", true);
-        drilldownContextItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, onDrilldown);
-        var rollupContextItem:ContextMenuItem = new ContextMenuItem("Rollup", true);
-        rollupContextItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, onRollup);
-        contextMenu.customItems = [ drilldownContextItem, rollupContextItem ];
+        PopupMenuFactory.menuFactory.createStandardMenu(onDrilldown, onRollup, this);
 		invalidateDisplayList();
 	}
 

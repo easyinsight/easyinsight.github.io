@@ -1,0 +1,41 @@
+<?xml version="1.0" ?>
+<mx:HBox xmlns:mx="http://www.adobe.com/2006/mxml">
+    <mx:states>
+        <mx:State name="Good">
+            <mx:AddChild relativeTo="{coreBox}">
+                <mx:Image source="{goodIcon}" toolTip="Data is coming in correctly for this report."/>
+            </mx:AddChild>
+        </mx:State>
+        <mx:State name="ReportFault">
+            <mx:AddChild relativeTo="{coreBox}">
+                <mx:HBox>
+                    <mx:Image source="{badIcon}" toolTip="{failureMessage}"/>                    
+                </mx:HBox>
+            </mx:AddChild>
+        </mx:State>
+    </mx:states>
+    <mx:Script><![CDATA[
+        import com.easyinsight.analysis.service.ReportRetrievalFault;
+
+        [Bindable]
+        [Embed(source="../../../../assets/bullet_ball_green.png")]
+        private var goodIcon:Class;
+
+        [Bindable]
+        [Embed(source="../../../../assets/bullet_square_glass_red.png")]
+        private var badIcon:Class;
+
+        [Bindable]
+        private var failureMessage:String;
+
+        public function good():void {
+            currentState = "Good";
+        }
+
+        public function bad(event:ReportRetrievalFault):void {
+            failureMessage = event.message;
+            currentState = "Bad";
+        }
+        ]]></mx:Script>
+    <mx:HBox id="coreBox"/>
+</mx:HBox>

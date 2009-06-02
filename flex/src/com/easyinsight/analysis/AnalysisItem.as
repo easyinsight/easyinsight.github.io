@@ -24,13 +24,7 @@ import mx.formatters.Formatter;
 		
 		public function AnalysisItem() {
 			super();
-		}
-
-        public function createDropItemElement(dropArea:DropArea):UIComponent {
-            var dropAreaLabel:Label = new Label();
-            dropAreaLabel.text = display;
-            return dropAreaLabel;
-        }
+		}        
 		
 		public function get display():String {
 			if (displayName != null) {

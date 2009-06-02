@@ -1,18 +1,12 @@
 package com.easyinsight.analysis.charts {
+import com.easyinsight.analysis.PopupMenuFactory;
+
 import flash.events.ContextMenuEvent;
-import flash.ui.ContextMenu;
-import flash.ui.ContextMenuItem;
 import mx.charts.LegendItem;
 public class EILegendItem extends LegendItem{
     public function EILegendItem() {
         super();
-        contextMenu = new ContextMenu();
-        contextMenu.hideBuiltInItems();
-        var drilldownContextItem:ContextMenuItem = new ContextMenuItem("Drilldown", true);
-        drilldownContextItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, onDrilldown);
-        var rollupContextItem:ContextMenuItem = new ContextMenuItem("Rollup", true);
-        rollupContextItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, onRollup);
-        contextMenu.customItems = [ drilldownContextItem, rollupContextItem ];
+        PopupMenuFactory.menuFactory.createStandardMenu(onDrilldown, onRollup, this);
 		invalidateDisplayList();
     }
 

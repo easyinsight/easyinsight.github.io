@@ -24,7 +24,11 @@ public class EmbeddedDataService extends EventDispatcher implements IEmbeddedDat
         dataRemoteSource = new RemoteObject();
         dataRemoteSource.destination = "data";
         dataRemoteSource.getEmbeddedResults.addEventListener(ResultEvent.RESULT, processListData);
-        dataRemoteSource.getEmbeddedResults.addEventListener(FaultEvent.FAULT, GenericFaultHandler.genericFault);
+        dataRemoteSource.getEmbeddedResults.addEventListener(FaultEvent.FAULT, onFault);
+    }
+
+    private function onFault(event:FaultEvent):void {
+        dispatchEvent(new ReportRetrievalFault(event.fault.message));
     }
 
     private function processListData(event:ResultEvent):void {
@@ -55,6 +59,7 @@ public class EmbeddedDataService extends EventDispatcher implements IEmbeddedDat
     }
 
     public function retrieveData(reportID:int):void {
+        dispatchEvent(new DataServiceLoadingEvent(DataServiceLoadingEvent.LOADING_STARTED));
         dataRemoteSource.getEmbeddedResults.send(reportID);        
     }
 }

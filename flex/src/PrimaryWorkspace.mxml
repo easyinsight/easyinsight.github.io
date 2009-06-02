@@ -10,15 +10,34 @@
         <mx:State name="Analysis">
             <mx:RemoveChild target="{headerBar}"/>
             <mx:RemoveChild target="{primarySpace}"/>
+            <mx:RemoveChild target="{highBar}"/>
             <mx:AddChild relativeTo="{coreVBox}" target="{dataAnalysis}"/>
+        </mx:State>
+        <mx:State name="LoggedIn">
+            <mx:AddChild relativeTo="{primarySpace}" position="firstChild">
+                <mx:Canvas height="100%" width="29" backgroundColor="0xF0F0F0">
+                    <framework:CorePageButton rotation="-90" x="3" y="70" image="{noteIcon}" text="TODO"
+                            />
+                    <notification:BackgroundTaskButton rotation="-90" x="3" y="155" image="{clockIcon}" text="Tasks"
+                                                       messageListener="{messageListener}"
+                            />
+                </mx:Canvas>
+            </mx:AddChild>
+            <mx:AddChild relativeTo="{primarySpace}" position="lastChild">
+                <mx:Canvas height="100%" width="29" backgroundColor="0xF0F0F0">
+                    <framework:CorePageButton rotation="90" x="26" y="3" image="{clockIcon}" text="Messages"/>
+                </mx:Canvas>
+            </mx:AddChild>
         </mx:State>
     </mx:states>
     <mx:Script>
 		<![CDATA[
+        import com.easyinsight.analysis.DefaultMenuFactory;
         import com.easyinsight.analysis.DelayedAPIKeyLink;
+        import com.easyinsight.analysis.PopupMenuFactory;
         import com.easyinsight.framework.FullScreenModuleEvent;
         import com.easyinsight.framework.ModuleAnalyzeSource;
-        import com.easyinsight.genredata.ModuleAnalyzeEvent;              
+        import com.easyinsight.genredata.ModuleAnalyzeEvent;
         import com.easyinsight.goals.DelayedGoalLink;
         import com.easyinsight.goals.GoalDataAnalyzeSource;
         import com.easyinsight.groups.DelayedGroupLink;
@@ -38,7 +57,7 @@
 
         import mx.rpc.events.FaultEvent;
 
-        import com.easyinsight.LoginDialog;
+        import com.easyinsight.LoginDialog;                                 
         import com.easyinsight.framework.SessionExpirationEvent;
         import com.easyinsight.framework.UserServiceResponse;
         import com.easyinsight.analysis.AnalysisCloseEvent;
@@ -89,6 +108,7 @@
 
 
         private function startWorkspace():void {
+            PopupMenuFactory.menuFactory = new DefaultMenuFactory();
             userService.isSessionLoggedIn.send();
             new CommandProcessor();
             addEventListener(FaultEvent.FAULT, onFault, true);
@@ -165,6 +185,7 @@
 
         private function onLogin(event:LoginEvent):void {
             User.getEventNotifier().removeEventListener(LoginEvent.LOGIN, onLogin);
+            currentState = "LoggedIn";
             navigation(new NavigationEvent("Intro"));
         }
 
@@ -214,7 +235,11 @@
                                         var page:String = o.page;
                                         if (page != null) {
                                             if (currentState == "Analysis") {
-                                                currentState = "";
+                                                if (loggedIn) {
+                                                    currentState = "LoggedIn";
+                                                } else {
+                                                    currentState = "";
+                                                }
                                                 dataAnalysis.removeEventListener(AnalysisCloseEvent.ANALYSIS_CLOSE, analysisClosed);
                                                 dataAnalysis = null;
                                             }
@@ -260,7 +285,11 @@
                 dataAnalysis.removeEventListener(AnalyzeEvent.ANALYZE, internalAnalyze);
                 dataAnalysis.removeEventListener(ModuleAnalyzeEvent.MODULE_ANALYZE, internalModuleAnalyze);
                 dataAnalysis.removeEventListener(AnalysisCloseEvent.ANALYSIS_CLOSE, analysisClosed);
-                currentState = "";
+                if (loggedIn) {
+                    currentState = "LoggedIn";
+                } else {
+                    currentState = "";
+                }
                 validateNow();
             }
             if (analyzeSource != null) {
@@ -274,7 +303,11 @@
         }
 
         private function analysisClosed(event:AnalysisCloseEvent):void {
-            currentState = "";
+            if (loggedIn) {
+                currentState = "LoggedIn";
+            } else {
+                currentState = "";
+            }
             event.dataAnalysisContainer.removeEventListener(AnalysisCloseEvent.ANALYSIS_CLOSE, analysisClosed);
             event.dataAnalysisContainer.removeEventListener(AnalyzeEvent.ANALYZE, internalAnalyze);
             event.dataAnalysisContainer.removeEventListener(ModuleAnalyzeEvent.MODULE_ANALYZE, internalModuleAnalyze);
@@ -319,7 +352,11 @@
                 dataAnalysis.removeEventListener(AnalyzeEvent.ANALYZE, internalAnalyze);
                 dataAnalysis.removeEventListener(ModuleAnalyzeEvent.MODULE_ANALYZE, internalModuleAnalyze);
                 dataAnalysis.removeEventListener(AnalysisCloseEvent.ANALYSIS_CLOSE, analysisClosed);
-                currentState = "";
+                if (loggedIn) {
+                    currentState = "LoggedIn";
+                } else {
+                    currentState = "";
+                }
                 validateNow();
             }
             var moduleAnalyzeSource:ModuleAnalyzeSource = event.analyzeSource;
@@ -346,6 +383,7 @@
                 User.getInstance().password = authResult.encryptedPassword;
                 User.getInstance().userName = authResult.userName;
                 loggedIn = true;
+                currentState = "LoggedIn";
                 User.getEventNotifier().dispatchEvent(new LoginEvent(LoginEvent.LOGIN));
             }
         }
@@ -375,27 +413,18 @@
         <listing:HeaderBar keywordSearch="search(event)" width="100%" id="headerBar"
                            paddingTop="5" paddingBottom="5" paddingLeft="10" paddingRight="10" bottom="0" top="0"
                            listingChange="changePerspective(event)" launchQuickSearch="launchQuickSearchWindow()"/>
-        <mx:Box width="100%" height="5" backgroundColor="#D42525" left="0" right="0"/>
+        <mx:Box width="100%" height="5" backgroundColor="#D42525" left="0" right="0" id="highBar"/>
         <mx:HBox width="100%" height="100%" horizontalGap="0" id="primarySpace">
-            <mx:Canvas height="100%" width="29" backgroundColor="0xF0F0F0">
-                <framework:CorePageButton rotation="-90" x="3" y="70" image="{noteIcon}" text="TODO"
-                                          visible="{loggedIn}"/>
-                <notification:BackgroundTaskButton rotation="-90" x="3" y="155" image="{clockIcon}" text="Tasks"
-                                                   messageListener="{messageListener}"
-                                                   visible="{loggedIn}"/>
-            </mx:Canvas>
-            <mx:Box height="100%" width="5" backgroundColor="#D42525" top="0" bottom="0"/>
+
+
             <mx:HBox width="100%" height="100%" id="coreSpace" paddingLeft="0" paddingTop="0" top="0" paddingRight="0">
 
                 <intro1:IntroPanel id="introPanel" width="100%" height="100%" paddingTop="0"
                                    navigation="navigation(event)"/>
 
             </mx:HBox>
-            <mx:Box height="100%" width="5" backgroundColor="#D42525" top="0" bottom="0"/>
-            <mx:Canvas height="100%" width="29" backgroundColor="0xF0F0F0">
-                <framework:CorePageButton rotation="90" x="26" y="3" image="{clockIcon}" text="Messages"
-                                          visible="{loggedIn}"/>
-            </mx:Canvas>
+
+
         </mx:HBox>
     </mx:VBox>
 

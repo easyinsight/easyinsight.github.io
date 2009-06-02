@@ -1,0 +1,33 @@
+<?xml version="1.0" ?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" addedToStage="dispatchEvent(new DataServiceLoadingEvent(DataServiceLoadingEvent.LOADING_STOPPED));">
+    <mx:Script><![CDATA[
+        import com.easyinsight.framework.DataServiceLoadingEvent;
+
+        [Bindable]
+        private var runOnStartup:Boolean;
+
+        import flash.desktop.NativeApplication;
+
+        private function changeStartup():void {
+            NativeApplication.nativeApplication.startAtLogin = startupCheckbox.selected;
+        }
+
+        override protected function commitProperties():void {
+            super.commitProperties();
+            try {
+                runOnStartup = NativeApplication.nativeApplication.startAtLogin;
+            } catch (err:Error) {
+                // error means we're just running with ADL
+            }
+        }
+    ]]>
+    </mx:Script>
+    <mx:VBox paddingLeft="20" paddingTop="20" paddingRight="20" width="100%" height="100%">
+        <mx:Form paddingBottom="0" paddingLeft="0" paddingRight="0" paddingTop="0">
+            <mx:FormItem label="Run on Startup">
+                <mx:CheckBox id="startupCheckbox" selected="{runOnStartup}" change="changeStartup()"/>
+            </mx:FormItem>
+        </mx:Form>
+        <mx:TextArea width="100%" height="100" borderStyle="none" text="This widget allows you to view your reports from Easy Insight. The available reports will be those you have under your My Data page." backgroundAlpha="0"/>
+    </mx:VBox>
+</mx:Canvas>

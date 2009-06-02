@@ -25,7 +25,6 @@
             import mx.events.AdvancedDataGridEvent;
             import mx.utils.URLUtil;
 			import mx.managers.BrowserManager;
-			import com.easyinsight.customupload.UploadPolicy;
 			import mx.events.ListEvent;
 			import com.easyinsight.genredata.AnalyzeEvent;
 			import mx.collections.IHierarchicalCollectionView;
@@ -38,9 +37,19 @@
 			import mx.events.CloseEvent;
 			import mx.managers.PopUpManager;
 			import mx.collections.ArrayCollection;
-			
-			[Embed(source="../../../../assets/data_blue_x16.png")]
+
+            private function downloadAirWidget():void {
+                var request:URLRequest = new URLRequest("/app/assets/EIAirWidget.air");
+                request.method = URLRequestMethod.GET;
+                flash.net.navigateToURL(request);
+            }
+
+            [Embed(source="../../../../assets/data_blue_x16.png")]
         	public var listIcon:Class;
+
+            [Bindable]
+            [Embed(source="../../../../assets/monitor2.png")]
+        	public var monitorIcon:Class;
                 
             [Bindable]
 	        [Embed(source="../../../../assets/chart_column.png")]
@@ -311,12 +320,13 @@
 				label="Upload File" labelPlacement="bottom"/>
 			<mx:Button toolTip="Connect to external data..." click="externalConnect()" id="connectButton" icon="{dataConnectionIcon}"
 				label="External Data" labelPlacement="bottom"/>
-			<mx:Button toolTip="Create composite data source.." click="createCompositeFeed()" id="compositeFeedButton" icon="{joinIcon}"
+			<mx:Button toolTip="Create composite data source..." click="createCompositeFeed()" id="compositeFeedButton" icon="{joinIcon}"
 				label="Combine Sources" labelPlacement="bottom"/>
 			<mx:Button toolTip="Create empty data source..." click="createEmptyFeed()" id="emptyFeedButton" icon="{addIcon}"
 				label="New Empty Source" labelPlacement="bottom"/>
             <!--<mx:Button icon="{helpIcon}" label="Help..." labelPlacement="bottom" click="help()"/>-->
-			<customupload:SpaceUsage id="spaceUsage" descriptors="{displayTreeData}"/>
+			<mx:Button toolTip="Download desktop widget..." click="downloadAirWidget()" id="downloadAirButton" icon="{monitorIcon}"
+               label="Desktop Widget" labelPlacement="bottom"/>
             <mx:Spacer width="100%"/>
             <mx:HBox borderStyle="inset" borderThickness="1" paddingTop="5" paddingBottom="5" paddingLeft="5" paddingRight="5">
                 <mx:TextInput id="searchText" keyUp="search()"/>

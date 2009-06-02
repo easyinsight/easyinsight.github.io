@@ -13,6 +13,13 @@
         </mxmlc>
     </target>
 
+    <target name="compileAir">
+        <mxmlc file="../src/EIAirWidget.mxml" output="${deployment.path}/EIAirWidget.swf"
+               static-rsls="true" incremental="true">
+            <load-config filename="../ei-air-config.xml"/>
+        </mxmlc>
+    </target>
+
     <target name="compileFlexOptimized">
         <mxmlc file="../src/PrimaryWorkspace.mxml" output="${deployment.path}/PrimaryWorkspace.swf"
                static-rsls="false" link-report="optimized.txt">

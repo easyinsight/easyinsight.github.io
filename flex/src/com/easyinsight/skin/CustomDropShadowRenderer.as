@@ -1,12 +1,11 @@
 package com.easyinsight.skin {
 import com.easyinsight.analysis.AnalysisHierarchyItem;
 import com.easyinsight.analysis.AnalysisItem;
+import com.easyinsight.analysis.PopupMenuFactory;
 import com.easyinsight.analysis.charts.ChartDrilldownEvent;
 import flash.display.Graphics;
 import flash.events.ContextMenuEvent;
 import flash.geom.Rectangle;
-import flash.ui.ContextMenu;
-import flash.ui.ContextMenuItem;
 import mx.charts.ChartItem;
 import mx.charts.chartClasses.GraphicsUtilities;
 import mx.core.IDataRenderer;
@@ -87,24 +86,19 @@ public class CustomDropShadowRenderer extends UIComponent implements IDataRender
 
     override protected function commitProperties():void {
         super.commitProperties();
-        contextMenu = new ContextMenu();
-        contextMenu.hideBuiltInItems();
+        var drilldownFunction:Function = null;
+        var rollupFunction:Function = null;
         if (_analysisItem is AnalysisHierarchyItem) {
             var hierarchy:AnalysisHierarchyItem = _analysisItem as AnalysisHierarchyItem;
             var index:int = hierarchy.hierarchyLevels.getItemIndex(hierarchy.hierarchyLevel);
-            var items:Array = [];
             if (index < (hierarchy.hierarchyLevels.length - 1)) {
-                var drilldownContextItem:ContextMenuItem = new ContextMenuItem("Drilldown", true);
-                drilldownContextItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, onDrilldown);
-                items.push(drilldownContextItem);
+                drilldownFunction = onDrilldown;
             }
             if (index > 0) {
-                var rollupContextItem:ContextMenuItem = new ContextMenuItem("Rollup", true);
-                rollupContextItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, onRollup);
-                items.push(rollupContextItem);
+                rollupFunction = onRollup;
             }
-            contextMenu.customItems = items;
         }
+ PopupMenuFactory.menuFactory.createStandardMenu(drilldownFunction, rollupFunction, this);
     }
 
     //--------------------------------------------------------------------------

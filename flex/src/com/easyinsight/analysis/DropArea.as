@@ -91,7 +91,7 @@ public class DropArea extends HBox
         this._analysisItems = analysisItems;
     }
 
-    protected function supportsDrilldown():Boolean {
+    protected function supportsDrilldown():Boolean {                         
         return true;
     }
 
@@ -148,7 +148,7 @@ public class DropArea extends HBox
             addChildAt(createNoDataLabel(), 0);
             currentState = "";
         } else {
-            var component:UIComponent = analysisItem.createDropItemElement(this);
+            var component:UIComponent = DropAreaFactory.createDropItemElement(this, analysisItem);
             component.addEventListener(MouseEvent.MOUSE_DOWN, onMouseDown);
             addChildAt(component, 0);
             currentState = "Configured";

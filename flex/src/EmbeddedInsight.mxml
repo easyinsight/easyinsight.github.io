@@ -4,10 +4,14 @@
 	            bottom="0" paddingBottom="0" backgroundColor="#FFFFFF">
 	<mx:Script>
 		<![CDATA[
+            import com.easyinsight.analysis.DefaultMenuFactory;
+            import com.easyinsight.analysis.PopupMenuFactory;
+
             [Bindable]
             private var analysisID:int;
 			
 			private function handleFlashVars():void {
+                PopupMenuFactory.menuFactory = new DefaultMenuFactory();
 				this.analysisID = int(Application.application.parameters.analysisID);
 			}
 		]]>

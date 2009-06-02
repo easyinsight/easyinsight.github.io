@@ -57,6 +57,10 @@ public class EmbeddedViewFactory extends VBox {
         _newDefinition = val;
     }
 
+    public function get dataService():IEmbeddedDataService {
+        return _dataService;
+    }
+
     override protected function createChildren():void {
         super.createChildren();
 
