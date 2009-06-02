@@ -27,7 +27,7 @@ public class DataService {
 
     public AnalysisItemResultMetadata getAnalysisItemMetadata(long feedID, AnalysisItem analysisItem) {
         try {
-            SecurityUtil.authorizeFeed(feedID, Roles.SUBSCRIBER);
+            SecurityUtil.authorizeFeedAccess(feedID);
             Feed feed = feedRegistry.getFeed(feedID);
             return feed.getMetadata(analysisItem);
         } catch (Exception e) {
@@ -37,10 +37,7 @@ public class DataService {
     }
 
     public FeedMetadata getFeedMetadata(long feedID, boolean preview) {
-        int role = SecurityUtil.getRole(SecurityUtil.getUserID(), feedID);
-        if (role > Roles.SUBSCRIBER) {
-            throw new SecurityException();
-        }
+        SecurityUtil.authorizeFeedAccess(feedID);
         try {
             Feed feed = feedRegistry.getFeed(feedID);
             Collection<AnalysisItem> feedItems = feed.getFields();
@@ -59,7 +56,7 @@ public class DataService {
             feedMetadata.setFields(feedItemArray);
             feedMetadata.setDataFeedID(feedID);
             feedMetadata.setVersion(feed.getVersion());
-            feedMetadata.setDataSourceAdmin(role == Roles.OWNER);
+            feedMetadata.setDataSourceAdmin(SecurityUtil.getRole(SecurityUtil.getUserID(), feedID) == Roles.OWNER);
             return feedMetadata;
         } catch (Exception e) {
             LogClass.error(e);
@@ -100,6 +97,7 @@ public class DataService {
     }
 
     public EmbeddedDataResults getEmbeddedResults(long reportID) {
+        SecurityUtil.authorizeInsight(reportID);
         try {
             // TODO: check cache for report ID
             WSAnalysisDefinition analysisDefinition = new AnalysisService().openAnalysisDefinition(reportID);
@@ -131,8 +129,8 @@ public class DataService {
     }
 
     public ListDataResults list(WSAnalysisDefinition analysisDefinition, boolean preview, InsightRequestMetadata insightRequestMetadata) {
+        SecurityUtil.authorizeFeedAccess(analysisDefinition.getDataFeedID());
         try {
-            SecurityUtil.authorizeFeed(analysisDefinition.getDataFeedID(), Roles.SUBSCRIBER);
             long startTime = System.currentTimeMillis();
             ListDataResults results;
             Feed feed = feedRegistry.getFeed(analysisDefinition.getDataFeedID());
@@ -173,6 +171,7 @@ public class DataService {
     }
 
     public List<Map<String, Object>> getAllData(long dataSourceID, List<FilterDefinition> filterDefinitions) {
+        SecurityUtil.authorizeFeedAccess(dataSourceID);
         List<Map<String, Object>> objList = new ArrayList<Map<String, Object>>();
         try {
             Feed feed = feedRegistry.getFeed(dataSourceID);

@@ -24,13 +24,13 @@ public class MarketplaceStorage {
 
     private static String defaultQueryStmt = "SELECT DATA_FEED_ID, FEED_NAME, FEED_TYPE, OWNER_NAME, DESCRIPTION, " +
             "ATTRIBUTION, ROLE FROM DATA_FEED LEFT OUTER JOIN UPLOAD_POLICY_USERS ON " +
-            "DATA_FEED.DATA_FEED_ID = UPLOAD_POLICY_USERS.FEED_ID WHERE DATA_FEED.MARKETPLACE_VISIBLE = ? AND UPLOAD_POLICY_USERS.USER_ID = ? {0} {1}";
+            "DATA_FEED.DATA_FEED_ID = UPLOAD_POLICY_USERS.FEED_ID WHERE DATA_FEED.MARKETPLACE_VISIBLE = ? {0} {1}";
 
     private static String keywordQueryStmt = "SELECT DISTINCT DATA_FEED_ID, FEED_NAME, FEED_TYPE, OWNER_NAME, DESCRIPTION, " +
             "ATTRIBUTION, ROLE FROM FEED_TO_TAG, ANALYSIS_TAGS, DATA_FEED LEFT OUTER JOIN UPLOAD_POLICY_USERS ON DATA_FEED.DATA_FEED_ID = UPLOAD_POLICY_USERS.FEED_ID WHERE " +
             "((FEED_TO_TAG.FEED_ID = DATA_FEED.DATA_FEED_ID AND FEED_TO_TAG.ANALYSIS_TAGS_ID = ANALYSIS_TAGS.ANALYSIS_TAGS_ID AND ANALYSIS_TAGS.TAG LIKE ?) OR " +
             "FEED_NAME LIKE ?) AND " +
-            "UPLOAD_POLICY_USERS.USER_ID = ? AND DATA_FEED.MARKETPLACE_VISIBLE = ? {0} {1}";
+            "DATA_FEED.MARKETPLACE_VISIBLE = ? {0} {1}";
 
     // specific cases...
     // querying for marketplace
@@ -42,13 +42,13 @@ public class MarketplaceStorage {
             String stmtString = MessageFormat.format(defaultQueryStmt, sortClause != null ? sortClause : "", cutoff > 0 ? "LIMIT " + cutoff : "");
             preparedStatement = conn.prepareStatement(stmtString);
             preparedStatement.setBoolean(1, true);
-            preparedStatement.setLong(2, userID);
+            //preparedStatement.setLong(2, userID);
         } else {
             String stmtString = MessageFormat.format(keywordQueryStmt, sortClause != null ? sortClause : "", cutoff > 0 ? "LIMIT " + cutoff : "");
             preparedStatement = conn.prepareStatement(stmtString);
             preparedStatement.setString(1, "%" + keyword + "%");
             preparedStatement.setString(2, "%" + keyword + "%");
-            preparedStatement.setLong(3, userID);
+            //preparedStatement.setLong(3, userID);
             preparedStatement.setBoolean(4, true);
         }
         return preparedStatement;

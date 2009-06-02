@@ -1,16 +1,15 @@
 package com.easyinsight.analysis;
 
-import com.easyinsight.analysis.AnalysisMeasure;
-import com.easyinsight.analysis.AnalysisDateDimension;
-import com.easyinsight.analysis.AnalysisItem;
-import com.easyinsight.analysis.AnalysisItemTypes;
 import com.easyinsight.core.Key;
+import com.easyinsight.database.Database;
 
 import javax.persistence.*;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
+
+import org.hibernate.Session;
 
 /**
  * User: James Boe
@@ -21,8 +20,8 @@ import java.util.Map;
 @Table(name="time_based_analysis_measure")
 @PrimaryKeyJoinColumn(name="analysis_item_id")
 public class TemporalAnalysisMeasure extends AnalysisMeasure {
-    @OneToOne(cascade = CascadeType.MERGE)
-    @JoinColumn(name="analysis_item_id")
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name="date_dimension")
     private AnalysisDimension analysisDimension;
     @Column(name="wrapped_aggregation")
     private int wrappedAggregation;
@@ -33,6 +32,20 @@ public class TemporalAnalysisMeasure extends AnalysisMeasure {
     public void updateIDs(Map<Long, AnalysisItem> replacementMap) {
         super.updateIDs(replacementMap);
         analysisDimension = (AnalysisDimension) replacementMap.get(analysisDimension.getAnalysisItemID());
+    }
+
+    @Override
+    public void reportSave(Session session) {
+        super.reportSave(session);
+        if (analysisDimension.getAnalysisItemID() == 0) {
+            session.save(analysisDimension);
+        }
+    }
+
+    @Override
+    public void afterLoad() {
+        super.afterLoad();
+        setAnalysisDimension((AnalysisDimension) Database.deproxy(getAnalysisDimension()));
     }
 
     public AnalysisDimension getAnalysisDimension() {
@@ -97,11 +110,7 @@ public class TemporalAnalysisMeasure extends AnalysisMeasure {
     }
 
     public boolean requiresReAggregation() {
-        if (getAggregation() == AggregationTypes.DELTA) {
-            return false;
-        } else {
-            return true;
-        }
+        return getAggregation() != AggregationTypes.DELTA;
     }
 
     public ITemporalAggregation createAggregation() {
@@ -117,5 +126,10 @@ public class TemporalAnalysisMeasure extends AnalysisMeasure {
                 throw new RuntimeException("Unknown temporal aggregation type " + getAggregation());
         }
         return aggregation;
+    }
+
+    @Override
+    public boolean isDerived() {
+        return true;
     }
 }
