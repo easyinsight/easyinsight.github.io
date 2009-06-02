@@ -78,7 +78,8 @@ public class SWFAnalysis extends Task {
         validateProperties();
         try {
             DocumentBuilder documentBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-            File file = new File(linkReportPath);
+            File base = getProject().getBaseDir();
+            File file = new File(base, linkReportPath);
             Document document = documentBuilder.parse(file);
             NodeList scriptsList = document.getChildNodes();
             Node scriptsNode = scriptsList.item(0).getChildNodes().item(1);

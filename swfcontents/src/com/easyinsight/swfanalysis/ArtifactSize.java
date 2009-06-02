@@ -60,9 +60,10 @@ public class ArtifactSize extends Task {
             Row row = new Row();
             StringPair componentPair = new StringPair("Component", component);
             DatePair datePair = new DatePair("Date", cal);
-            File file = new File(artifactPath);
+            File baseDir = getProject().getBaseDir();
+            File file = new File(baseDir, artifactPath);
             if (!file.exists()) {
-                throw new BuildException("Could not find artifact " + artifactPath);
+                throw new BuildException("Could not find artifact " + file.getAbsolutePath());
             }
             NumberPair sizePair = new NumberPair("Size", file.length());
             row.setStringPairs( new StringPair[] { componentPair });
