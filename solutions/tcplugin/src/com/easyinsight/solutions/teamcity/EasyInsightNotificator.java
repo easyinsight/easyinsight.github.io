@@ -15,7 +15,7 @@ import java.io.IOException;
 import java.io.File;
 
 import org.jetbrains.annotations.NotNull;
-import com.easyinsight.solutions.teamcity.webservice.*;
+import com.easyinsight.solutions.teamcity.validated.*;
 
 import javax.xml.rpc.ServiceException;
 
@@ -30,18 +30,20 @@ public class EasyInsightNotificator implements Notificator {
     private static final String TYPE_NAME = "Easy Insight Metrics Notifier";
     private static final String EI_LOGIN = "easyInsightLogin";
     private static final String EI_PASSWORD = "easyInsightPassword";
-    private static final String EI_HOST = "easyInsightHost";
+    private static final String TEST_API_KEY = "easyInsightTestAPIKey";
+    private static final String COVERAGE_API_KEY = "easyInsightCoverageAPIKey";
 
     private static final PropertyKey EI_LOGIN_KEY = new NotificatorPropertyKey(TYPE, EI_LOGIN);
     private static final PropertyKey EI_PASSWORD_KEY = new NotificatorPropertyKey(TYPE, EI_PASSWORD);
-    private static final PropertyKey EI_HOST_KEY = new NotificatorPropertyKey(TYPE, EI_HOST);
+    private static final PropertyKey EI_TEST_KEY = new NotificatorPropertyKey(TYPE, TEST_API_KEY);
+    private static final PropertyKey EI_COVERAGE_KEY = new NotificatorPropertyKey(TYPE, COVERAGE_API_KEY);
 
     public EasyInsightNotificator(NotificatorRegistry notificatorRegistry) throws IOException {
         List<UserPropertyInfo> userProps = new ArrayList<UserPropertyInfo>();
-        userProps.add(new UserPropertyInfo(EI_LOGIN, "Easy Insight ID"));
-        userProps.add(new UserPropertyInfo(EI_PASSWORD, "Easy Insight Password"));
-        userProps.add(new UserPropertyInfo(EI_HOST, "Easy Insight Host"));
-
+        userProps.add(new UserPropertyInfo(EI_LOGIN, "Easy Insight Key"));
+        userProps.add(new UserPropertyInfo(EI_PASSWORD, "Easy Insight Secret Key"));
+        userProps.add(new UserPropertyInfo(TEST_API_KEY, "Test Result Data Source"));
+        userProps.add(new UserPropertyInfo(COVERAGE_API_KEY, "Coverage Result Data Source"));
         notificatorRegistry.register(this, userProps);
     }
 
@@ -56,25 +58,15 @@ public class EasyInsightNotificator implements Notificator {
         for (SUser user : sUsers) {
             String eiUserName = user.getPropertyValue(EI_LOGIN_KEY);
             String eiPassword = user.getPropertyValue(EI_PASSWORD_KEY);
-            SBuildType buildType = sRunningBuild.getBuildType();
-            if (buildType != null) {
-                RunType runType = buildType.getBuildRunner();
-                if (runType != null && runType.getType().equals("IPR")) {
-                    for (List<ArtifactInfo> artifactInfos : sRunningBuild.getDownloadedArtifacts().getArtifacts().values()) {
-                        for (ArtifactInfo artifactInfo : artifactInfos) {
-                            String artifactPath = artifactInfo.getArtifactPath();
-                        }
-                    }
-                }
-            }
+            String eiTestKey = user.getPropertyValue(EI_TEST_KEY);
+            String eiCoverageKey = user.getPropertyValue(EI_COVERAGE_KEY);
             BuildStatistics buildStatistics = sRunningBuild.getFullStatistics();
             if (buildStatistics.getAllTestCount() > 0) {
                 try {
-                    BasicAuthUncheckedPublishServiceServiceLocator locator = new BasicAuthUncheckedPublishServiceServiceLocator();
-                    locator.setBasicAuthUncheckedPublishServicePortEndpointAddress(user.getPropertyValue(EI_HOST_KEY));
-                    BasicAuthUncheckedPublish service = locator.getBasicAuthUncheckedPublishServicePort();
-                    ((BasicAuthUncheckedPublishServiceServiceSoapBindingStub)service).setUsername(eiUserName);
-                    ((BasicAuthUncheckedPublishServiceServiceSoapBindingStub)service).setPassword(eiPassword);
+                    BasicAuthValidatingPublishServiceServiceLocator locator = new BasicAuthValidatingPublishServiceServiceLocator();
+                    BasicAuthValidatedPublish service = locator.getBasicAuthValidatingPublishServicePort();
+                    ((BasicAuthValidatingPublishServiceServiceSoapBindingStub)service).setUsername(eiUserName);
+                    ((BasicAuthValidatingPublishServiceServiceSoapBindingStub)service).setPassword(eiPassword);
                     Row row = new Row();
                     StringPair stringPair = new StringPair();
                     stringPair.setKey("Project");
@@ -102,21 +94,21 @@ public class EasyInsightNotificator implements Notificator {
                     if (artifactsDirectory.exists()) {
                         File file = new File(artifactsDirectory, "coverage.txt");
                         if (file.exists()) {
-                            new CoverageDataParse().parseData(file.getAbsolutePath(), service);
+                            new CoverageDataParse().parseData(file.getAbsolutePath(), service, eiCoverageKey);
                         }
                     }
 
                     for (List<ArtifactInfo> artifactInfos : sRunningBuild.getProvidedArtifacts().getArtifacts().values()) {
                         for (ArtifactInfo artifactInfo : artifactInfos) {
                             if (artifactInfo.getArtifactPath().endsWith("coverage.txt")) {
-                                new CoverageDataParse().parseData(artifactInfo.getArtifactPath(), service);
+                                new CoverageDataParse().parseData(artifactInfo.getArtifactPath(), service, eiCoverageKey);
                             }
                         }
                     }
                     for (List<ArtifactInfo> artifactInfos : sRunningBuild.getDownloadedArtifacts().getArtifacts().values()) {
                         for (ArtifactInfo artifactInfo : artifactInfos) {
                             if (artifactInfo.getArtifactPath().endsWith("coverage.txt")) {
-                                new CoverageDataParse().parseData(artifactInfo.getArtifactPath(), service);
+                                new CoverageDataParse().parseData(artifactInfo.getArtifactPath(), service, eiCoverageKey);
                             }
                         }
                     }
@@ -141,7 +133,7 @@ public class EasyInsightNotificator implements Notificator {
                     row.setDatePairs(new DatePair[] { datePair });
                     Where where = new Where();
                     where.setDayWheres(new DayWhere[] { dayWhere });
-                    service.updateRow("teamcity", row, where);
+                    service.updateRow(eiTestKey, row, where);
                 } catch (ServiceException e) {
                     e.printStackTrace();
                 } catch (java.rmi.RemoteException e) {
