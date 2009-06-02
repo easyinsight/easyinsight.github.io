@@ -347,46 +347,7 @@ public class UserAccountAdminService {
             Database.instance().closeConnection(conn);
         }
         return activated;
-    }
-
-    @NotNull
-    public UserServiceResponse authenticateAdmin(String userName, String password) {
-        try {
-            UserServiceResponse userServiceResponse;
-            Session session = Database.instance().createSession();
-            List results;
-            try {
-                session.getTransaction().begin();
-                results = session.createQuery("from User where userName = ?").setString(0, userName).list();
-                if (results.size() > 0) {
-                    User user = (User) results.get(0);
-                    String actualPassword = user.getPassword();
-                    String encryptedPassword = PasswordService.getInstance().encrypt(password);
-                    if (encryptedPassword.equals(actualPassword)) {
-                        List accountResults = session.createQuery("from Account where accountID = ?").setLong(0, user.getAccount().getAccountID()).list();
-                        Account account = (Account) accountResults.get(0);
-                        if (account.getAccountType() != Account.ADMINISTRATOR) {
-                            throw new SecurityException();
-                        }
-                        userServiceResponse = new UserServiceResponse(true, user.getUserID(), user.getAccount().getAccountID(), user.getName(),
-                                user.getAccount().getAccountType(), account.getMaxSize(), user.getEmail(), user.getUserName(), encryptedPassword, user.isAccountAdmin(), user.isDataSourceCreator(), user.isInsightCreator());
-                        // FlexContext.getFlexSession().getRemoteCredentials();
-                    } else {
-                        userServiceResponse = new UserServiceResponse(false, "Incorrect password, please try again.");
-                    }
-                } else {
-                    userServiceResponse = new UserServiceResponse(false, "Incorrect user name, please try again.");
-                }
-                session.getTransaction().commit();
-            } finally {
-                session.close();
-            }
-            return userServiceResponse;
-        } catch (Exception e) {
-            LogClass.error(e);
-            throw new RuntimeException(e);
-        }
-    }
+    }    
 
     public AccountStats getAccountStats() {
         long accountID = SecurityUtil.getAccountID();
