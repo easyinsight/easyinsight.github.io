@@ -2,7 +2,7 @@
 <mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*"
                 showCloseButton="true" close="PopUpManager.removePopUp(this);" >
     <mx:Script><![CDATA[
-        import mx.collectio\ns.ArrayCollection;
+        import mx.collections.ArrayCollection;
         import mx.managers.PopUpManager;
 
             [Bindable]
@@ -22,9 +22,9 @@
 
             ]]></mx:Script>
     <mx:VBox>
-        <mx:DataGrid dataProvider="{_data}">
+        <mx:DataGrid dataProvider="{_data}" horizontalScrollPolicy="on">
             <mx:columns>
-                <util:EIDataGridColumn headerText="Name" dataField="feedName"/>
+                <util:EIDataGridColumn headerText="Name" dataField="feedName" itemRenderer="com.easyinsight.notifications.TodoNotifyWindowTitleLabel" />
             </mx:columns>
         </mx:DataGrid>
     </mx:VBox>

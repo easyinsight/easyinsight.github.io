@@ -43,6 +43,10 @@ public class TodoButton extends CorePageButton{
         userUploadService.getTodoEvents.send();
     }
 
+    private function hack():void {
+        var hack:ConfigureDataFeedInfo;
+    }
+
     [Bindable]
     private var _asyncData:ArrayCollection;
 
