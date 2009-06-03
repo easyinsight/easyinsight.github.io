@@ -118,7 +118,6 @@
             browserManager.init("", "Intro");
             introPanel.gotFocus();
             User.getEventNotifier().addEventListener(NavigationEvent.NAVIGATION, navigation);
-            Alert.show("startWorkspace");
             userService.isSessionLoggedIn.send();
         }
 
@@ -186,7 +185,6 @@
         }
 
         private function onLogin(event:LoginEvent):void {
-            Alert.show("onlogin")
             User.getEventNotifier().removeEventListener(LoginEvent.LOGIN, onLogin);
             currentState = "LoggedIn";
             navigation(new NavigationEvent("Intro"));
@@ -387,7 +385,6 @@
                 User.getInstance().userName = authResult.userName;
                 loggedIn = true;
                 currentState = "LoggedIn";
-                Alert.show('wtf');
                 User.getEventNotifier().dispatchEvent(new LoginEvent(LoginEvent.LOGIN));
             }
         }

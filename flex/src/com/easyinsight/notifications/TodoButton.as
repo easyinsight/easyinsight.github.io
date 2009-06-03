@@ -1,12 +1,9 @@
 package com.easyinsight.notifications {
-import com.easyinsight.framework.AsyncInfoEvent;
 import com.easyinsight.framework.CorePageButton;
 import com.easyinsight.framework.EIMessageListener;
 
-import com.easyinsight.framework.LoginEvent;
 
 import com.easyinsight.framework.TodoInfoEvent;
-import com.easyinsight.framework.User;
 
 import flash.events.Event;
 
@@ -14,7 +11,6 @@ import flash.events.MouseEvent;
 
 import mx.binding.utils.BindingUtils;
 import mx.collections.ArrayCollection;
-import mx.controls.Alert;
 import mx.events.FlexEvent;
 import mx.managers.PopUpManager;
 import mx.rpc.events.ResultEvent;
@@ -52,7 +48,6 @@ public class TodoButton extends CorePageButton{
 
     private function tasksRetrieved(event:ResultEvent):void {
         _asyncData = userUploadService.getTodoEvents.lastResult as ArrayCollection;
-        Alert.show('hi');
     }
 
     [Bindable(event="_asyncDataChanged")]
