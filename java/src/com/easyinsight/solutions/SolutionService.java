@@ -10,6 +10,7 @@ import com.easyinsight.goals.*;
 import com.easyinsight.email.UserStub;
 import com.easyinsight.core.InsightDescriptor;
 import com.easyinsight.users.Account;
+import com.easyinsight.notifications.ConfigureDataFeedTodo;
 
 import java.util.*;
 import java.sql.*;
@@ -152,6 +153,9 @@ public class SolutionService {
             conn.setAutoCommit(false);
             List<SolutionInstallInfo> objects = installSolution(userID, solution, conn, false);
             conn.commit();
+            for(SolutionInstallInfo info : objects) {
+                ; // todo: send out messages for any todos.
+            }
             return objects;
         } catch (Exception e) {
             LogClass.error(e);

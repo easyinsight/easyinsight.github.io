@@ -12,6 +12,7 @@ import com.easyinsight.api.dynamic.DynamicServiceDefinition;
 import com.easyinsight.api.dynamic.ConfiguredMethod;
 import com.easyinsight.solutions.SolutionInstallInfo;
 import com.easyinsight.security.Roles;
+import com.easyinsight.notifications.ConfigureDataFeedTodo;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -50,14 +51,24 @@ public class DataSourceCopyUtils {
                 clonedInsight.setDataFeedID(clonedFeedDefinition.getDataFeedID());
                 clonedInsight.setUserBindings(Arrays.asList(new UserToAnalysisBinding(userID, UserPermission.OWNER)));
                 analysisStorage.saveAnalysis(clonedInsight, conn);
-                infos.add(new SolutionInstallInfo(insight.getAnalysisID(), clonedInsight.getAnalysisID(), SolutionInstallInfo.INSIGHT));
+                infos.add(new SolutionInstallInfo(insight.getAnalysisID(), clonedInsight.getAnalysisID(), SolutionInstallInfo.INSIGHT, null));
                 List<FeedDefinition> insightFeeds = getFeedsFromInsight(clonedInsight.getAnalysisID(), conn);
                 for (FeedDefinition insightFeed : insightFeeds) {
                     infos.addAll(installFeed(userID, conn, copyData, insightFeed.getDataFeedID(), insightFeed, true, null));
                 }
             }
         }
-        infos.add(new SolutionInstallInfo(feedDefinition.getDataFeedID(), clonedFeedDefinition.getDataFeedID(), SolutionInstallInfo.DATA_SOURCE));
+
+        Session session = Database.instance().createSession(conn);
+        ConfigureDataFeedTodo todo = new ConfigureDataFeedTodo();
+        todo.setFeedID(clonedFeedDefinition.getDataFeedID());
+        todo.setUserID(userID);
+        session.save(todo);
+        session.flush();
+        infos.add(new SolutionInstallInfo(feedDefinition.getDataFeedID(), clonedFeedDefinition.getDataFeedID(), SolutionInstallInfo.DATA_SOURCE, todo));
+
+
+        
         return infos;
     }
 

@@ -7,7 +7,7 @@ package com.easyinsight.scheduler;
  * Time: 5:12:42 PM
  * To change this template use File | Settings | File Templates.
  */
-public class RefreshEventInfo {
+public class RefreshEventInfo extends OutboundEvent {
 
     public static final int ADD = 1;
     public static final int COMPLETE = 2;
@@ -15,18 +15,9 @@ public class RefreshEventInfo {
 
     private long taskId;
     private long feedId;
-    private long userId;
     private String feedName;
     private String message;
     private int action;
-
-    public long getUserId() {
-        return userId;
-    }
-
-    public void setUserId(long userId) {
-        this.userId = userId;
-    }
 
     public long getFeedId() {
         return feedId;

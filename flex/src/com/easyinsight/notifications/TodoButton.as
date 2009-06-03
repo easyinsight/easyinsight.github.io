@@ -5,6 +5,7 @@ import com.easyinsight.framework.EIMessageListener;
 
 import com.easyinsight.framework.LoginEvent;
 
+import com.easyinsight.framework.TodoInfoEvent;
 import com.easyinsight.framework.User;
 
 import flash.events.Event;
@@ -13,42 +14,45 @@ import flash.events.MouseEvent;
 
 import mx.binding.utils.BindingUtils;
 import mx.collections.ArrayCollection;
+import mx.controls.Alert;
 import mx.events.FlexEvent;
 import mx.managers.PopUpManager;
 import mx.rpc.events.ResultEvent;
 import mx.rpc.remoting.RemoteObject;
 
-public class BackgroundTaskButton extends CorePageButton{
+public class TodoButton extends CorePageButton{
 
-    private var asyncWindow:AsyncNotifyWindow;
+    private var asyncWindow:TodoNotifyWindow;
     private var userUploadService:RemoteObject;
 
-    public function BackgroundTaskButton() {
+    public function TodoButton() {
         super();
         userUploadService = new RemoteObject();
         userUploadService.destination = "userUpload";
-        userUploadService.getOngoingTasks.addEventListener(ResultEvent.RESULT, tasksRetrieved);
+        userUploadService.getTodoEvents.addEventListener(ResultEvent.RESULT, tasksRetrieved);
         addEventListener(FlexEvent.CREATION_COMPLETE, onCreation);
         addEventListener(MouseEvent.CLICK, onClick);
+
     }
 
     private function onClick(event:MouseEvent):void {
         if (asyncWindow == null) {
-            asyncWindow = new AsyncNotifyWindow();
+            asyncWindow = new TodoNotifyWindow();
             BindingUtils.bindProperty(asyncWindow, "data", this, "asyncData");
         }
         PopUpManager.addPopUp(asyncWindow, this, false);
     }
 
     private function onCreation(event:FlexEvent):void {
-        userUploadService.getOngoingTasks.send();
+        userUploadService.getTodoEvents.send();
     }
 
     [Bindable]
     private var _asyncData:ArrayCollection;
 
     private function tasksRetrieved(event:ResultEvent):void {
-        _asyncData = userUploadService.getOngoingTasks.lastResult as ArrayCollection;
+        _asyncData = userUploadService.getTodoEvents.lastResult as ArrayCollection;
+        Alert.show('hi');
     }
 
     [Bindable(event="_asyncDataChanged")]
@@ -62,17 +66,17 @@ public class BackgroundTaskButton extends CorePageButton{
     }
 
     override protected function onMessageListener(value:EIMessageListener):void {
-        value.addEventListener(AsyncInfoEvent.ASYNC_INFO, onAsync);
-    }
+        value.addEventListener(TodoInfoEvent.TODO_INFO, onAsync);
+    }                                                              
 
-    private function onAsync(event:AsyncInfoEvent):void {
-        var info:RefreshEventInfo = event.info;
-        if (info.action == RefreshEventInfo.ADD)
+    private function onAsync(event:TodoInfoEvent):void {
+        var info:TodoEventInfo = event.info;
+        if (info.action == TodoEventInfo.ADD)
             _asyncData.addItem(info);
         else {
             for (var i:int = 0; i < _asyncData.length; i++) {
-                var currentEvent:RefreshEventInfo = _asyncData.getItemAt(i) as RefreshEventInfo;
-                if (currentEvent.taskId == info.taskId) {
+                var currentEvent:TodoEventInfo = _asyncData.getItemAt(i) as TodoEventInfo;
+                if (currentEvent.todoID == info.todoID) {
                     _asyncData.setItemAt(info, i);
                 }
             }

@@ -1,5 +1,7 @@
 package com.easyinsight.solutions;
 
+import com.easyinsight.notifications.ConfigureDataFeedTodo;
+
 /**
  * User: James Boe
  * Date: Jan 11, 2009
@@ -13,14 +15,13 @@ public class SolutionInstallInfo {
     private long previousID;
     private long newID;
     private int type;
+    private ConfigureDataFeedTodo todoItem;
 
-    public SolutionInstallInfo() {
-    }
-
-    public SolutionInstallInfo(long previousID, long newID, int type) {
+    public SolutionInstallInfo(long previousID, long newID, int type, ConfigureDataFeedTodo todoItem) {
         this.previousID = previousID;
         this.newID = newID;
         this.type = type;
+        this.todoItem = todoItem;
     }
 
     public int getType() {
@@ -45,5 +46,13 @@ public class SolutionInstallInfo {
 
     public void setNewID(long newID) {
         this.newID = newID;
+    }
+
+    public ConfigureDataFeedTodo getTodoItem() {
+        return todoItem;
+    }
+
+    public void setTodoItem(ConfigureDataFeedTodo todoItem) {
+        this.todoItem = todoItem;
     }
 }

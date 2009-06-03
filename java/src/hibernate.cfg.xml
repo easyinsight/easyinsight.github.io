@@ -128,6 +128,9 @@
         <mapping class="com.easyinsight.users.SubscriptionLicense"/>
         <mapping class="com.easyinsight.users.Consultant"/>
         <mapping class="com.easyinsight.users.BandwidthUsage" />
+
+        <mapping class="com.easyinsight.notifications.TodoBase" />
+        <mapping class="com.easyinsight.notifications.ConfigureDataFeedTodo" />
     </session-factory>
 
 </hibernate-configuration>

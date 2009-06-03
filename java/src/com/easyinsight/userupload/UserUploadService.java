@@ -17,6 +17,10 @@ import com.easyinsight.security.Roles;
 import com.easyinsight.users.*;
 import com.easyinsight.analysis.*;
 import com.easyinsight.PasswordStorage;
+import com.easyinsight.notifications.TodoEventInfo;
+import com.easyinsight.notifications.ConfigureDataFeedTodo;
+import com.easyinsight.notifications.ConfigureDataFeedInfo;
+import com.easyinsight.notifications.TodoBase;
 import com.easyinsight.scheduler.ServerRefreshScheduledTask;
 import com.easyinsight.scheduler.ScheduledTask;
 import com.easyinsight.scheduler.Scheduler;
@@ -546,6 +550,74 @@ public class UserUploadService implements IUserUploadService {
         }
     }
 
+    public List<TodoEventInfo> getTodoEvents() {
+        long userID = SecurityUtil.getUserID();
+        try {
+            EIConnection conn = Database.instance().getConnection();
+            conn.setAutoCommit(false);
+            Session session = Database.instance().createSession(conn);
+            List results;
+            List<TodoEventInfo> translatedResults = new LinkedList<TodoEventInfo>();
+            try {
+                session.beginTransaction();
+                results = session.createQuery("from TodoBase where userID = ?").setLong(0, userID).list();
+
+                if(results.size() > 0) {
+                    Map<Integer, List<TodoBase> > mapping = new HashMap<Integer, List<TodoBase>>();
+                    for(Object o : results) {
+                        TodoBase item = (TodoBase) o;
+                        if(!mapping.containsKey(item.getType()))
+                            mapping.put(item.getType(), new LinkedList<TodoBase>());
+                        mapping.get(item.getType()).add(item);
+
+                    }
+                    for(Map.Entry<Integer, List<TodoBase>> listPair : mapping.entrySet()) {
+                        switch(listPair.getKey()) {
+                            case TodoBase.CONFIGURE_DATA_SOURCE:
+                                List<TodoEventInfo> result = new LinkedList<TodoEventInfo>();
+                                List<Long> feedIDs = new LinkedList<Long>();
+                                for(TodoBase cur : listPair.getValue()) {
+                                    ConfigureDataFeedTodo configTodo = (ConfigureDataFeedTodo) cur;
+                                    ConfigureDataFeedInfo resultInfo = new ConfigureDataFeedInfo();
+                                    resultInfo.setUserId(configTodo.getUserID());
+                                    resultInfo.setTodoID(configTodo.getId());
+                                    resultInfo.setAction(TodoEventInfo.ADD);
+                                    resultInfo.setFeedID(configTodo.getFeedID());
+                                    feedIDs.add(configTodo.getFeedID());
+                                    result.add(resultInfo);
+                                }
+
+                                Map<Long, String> dataFeedMapping = FeedUtil.getFeedNames(feedIDs, conn);
+                                for(TodoEventInfo cur : result) {
+                                    ConfigureDataFeedInfo configInfo = (ConfigureDataFeedInfo) cur;
+                                    configInfo.setFeedName(dataFeedMapping.get(configInfo.getFeedID()));
+                                }
+                                translatedResults.addAll(result);
+                                break;
+                            default:
+                                throw new RuntimeException("Invalid type of todo found!");
+                        }
+                    }
+
+                }
+                session.flush();
+                conn.commit();
+            } catch (Exception e) {
+                conn.rollback();
+                throw new RuntimeException(e);
+            } finally {
+                session.close();
+                conn.close();
+            }
+            return translatedResults;
+        }
+        catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        }
+    }
+    
+
     public List<RefreshEventInfo> getOngoingTasks() {
 
         long userID = SecurityUtil.getUserID();
@@ -558,18 +630,9 @@ public class UserUploadService implements IUserUploadService {
             try {
                 session.beginTransaction();
                 results = session.createQuery("from ServerRefreshScheduledTask where userID = ? and status != " + ScheduledTask.COMPLETED).setLong(0, userID).list();
+                
                 if(results.size()  > 0) {
-                    String str = "SELECT data_feed_id, feed_name FROM data_feed WHERE data_feed_id IN (";
-                    boolean first = true;
-                    for(int i = 0;i < results.size();i++) {
-                        if(!first)
-                            str += ",";
-                        str += "?";
-                        first = false;
-                    }
-                    str += ")";
-                    PreparedStatement stmt = conn.prepareStatement(str);
-                    int i = 1;
+                    List<Long> feedIds = new LinkedList<Long>();
                     for(Object o : results) {
                         RefreshEventInfo result = new RefreshEventInfo();
                         ServerRefreshScheduledTask s = (ServerRefreshScheduledTask) o;
@@ -578,18 +641,15 @@ public class UserUploadService implements IUserUploadService {
                         result.setTaskId(s.getScheduledTaskID());
                         result.setAction(RefreshEventInfo.ADD);
                         result.setMessage(null);
+                        feedIds.add(s.getDataSourceID());
                         translatedResults.add(result);
-                        stmt.setLong(i++, s.getDataSourceID());
+                        
                     }
-                    ResultSet rs = stmt.executeQuery();
-                    while(rs.next()) {
-                        long feedID = rs.getLong(1);
-                        String feedName = rs.getString(2);
-                        for(RefreshEventInfo info : translatedResults) {
-                            if(info.getFeedId() == feedID) {
-                                info.setFeedName(feedName);
-                            }
-                        }
+
+                    Map<Long, String> feedNames = FeedUtil.getFeedNames(feedIds ,conn);
+
+                    for(RefreshEventInfo info : translatedResults) {
+                            info.setFeedName(feedNames.get(info.getFeedId()));
                     }
                 }
 

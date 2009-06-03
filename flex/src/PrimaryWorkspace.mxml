@@ -16,7 +16,8 @@
         <mx:State name="LoggedIn">
             <mx:AddChild relativeTo="{primarySpace}" position="firstChild">
                 <mx:Canvas height="100%" width="29" backgroundColor="0xF0F0F0">
-                    <framework:CorePageButton rotation="-90" x="3" y="70" image="{noteIcon}" text="TODO"
+                    <notification:TodoButton rotation="-90" x="3" y="70" image="{noteIcon}" text="TODO"
+                                                        messageListener="{messageListener}"
                             />
                     <notification:BackgroundTaskButton rotation="-90" x="3" y="155" image="{clockIcon}" text="Tasks"
                                                        messageListener="{messageListener}"
@@ -109,7 +110,6 @@
 
         private function startWorkspace():void {
             PopupMenuFactory.menuFactory = new DefaultMenuFactory();
-            userService.isSessionLoggedIn.send();
             new CommandProcessor();
             addEventListener(FaultEvent.FAULT, onFault, true);
             this.perspective = introPanel;
@@ -118,6 +118,8 @@
             browserManager.init("", "Intro");
             introPanel.gotFocus();
             User.getEventNotifier().addEventListener(NavigationEvent.NAVIGATION, navigation);
+            Alert.show("startWorkspace");
+            userService.isSessionLoggedIn.send();
         }
 
         private function applicationListeners():void {
@@ -184,6 +186,7 @@
         }
 
         private function onLogin(event:LoginEvent):void {
+            Alert.show("onlogin")
             User.getEventNotifier().removeEventListener(LoginEvent.LOGIN, onLogin);
             currentState = "LoggedIn";
             navigation(new NavigationEvent("Intro"));
@@ -384,6 +387,7 @@
                 User.getInstance().userName = authResult.userName;
                 loggedIn = true;
                 currentState = "LoggedIn";
+                Alert.show('wtf');
                 User.getEventNotifier().dispatchEvent(new LoginEvent(LoginEvent.LOGIN));
             }
         }
