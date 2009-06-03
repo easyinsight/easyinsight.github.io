@@ -1,31 +1,46 @@
 <?xml version="1.0" encoding="utf-8"?>
-<mx:DataGrid xmlns:mx="http://www.adobe.com/2006/mxml" dataProvider="{comparisons}" creationComplete="setup()" sortableColumns="false"
+<mx:DataGrid xmlns:mx="http://www.adobe.com/2006/mxml" dataProvider="{visualizations}" creationComplete="setup()" sortableColumns="false"
 	resizableColumns="false" selectable="false" rowCount="10" fontSize="12" verticalGridLines="false">
 	<mx:Script>
 		<![CDATA[
 			import mx.collections.ArrayCollection;
 			
 			[Bindable]			
-			private var comparisons:ArrayCollection;		
+			private var visualizations:ArrayCollection;		
 			
 			private function setup():void {
-				comparisons = new ArrayCollection( [
-					new AccountComparisonIcon("Drag and Drop Analysis", true, true, true, true),
-					new AccountComparisonIcon("Intuitive Charting", true, true, true, true),
-					new AccountComparisonIcon("Share your Data", true, true, true, true),
-					new AccountComparisonIcon("Powerful APIs", false, true, true, true),
-                    new AccountComparisonIcon("Development Solutions", false, true, true, true),
-                    new AccountComparisonIcon("Database Solution", false, false, true, true),
-                    new AccountComparisonIcon("Template Goal Trees", false, true, true, true),
-                    new AccountComparisonIcon("Custom Goal Trees", false, false, true, true),
-                    new AccountComparisonIcon("Lean Templates", false, false, false, true),
-                    new AccountComparisonIcon("Six Sigma Templates", false, false, false, true),
-                    new AccountComparisonIcon("Balanced Scorecard Templates", false, false, false, true),
-					new AccountComparisonRow("Maximum Users", "1", "1", "Unlimited", "Unlimited"),
-					new AccountComparisonRow("Available Space", "1 MB", "20 MB", "200 MB", "1 GB")
-					//new AccountComparisonRow("Monthly Cost", "FREE!", "Free for beta phase", "Free for beta phase", "Free for beta phase"),
+				visualizations = new ArrayCollection( [
+					new AccountComparisonIcon("Drag and Drop Analysis", true, true, true, true, true),
+					new AccountComparisonIcon("Intuitive Charting", true, true, true, true, true),
+					new AccountComparisonIcon("Share your Data", true, true, true, true, true),
+					new AccountComparisonIcon("iGoogle/NetVibes Integration", true, true, true, true, true),
+					new AccountComparisonIcon("Desktop Widget", true, true, true, true, true),
+                    new AccountComparisonIcon("Excel/CSV Upload", true, true, true, true, true),
+					new AccountComparisonIcon("Standard APIs", false, true, true, true, true),
+					new AccountComparisonIcon("Dynamic API", false, false, false, true, true),
+					new AccountComparisonIcon("WS-Security", false, false, false, false, true),
+                    new AccountComparisonIcon("Basecamp Integration", false, false, true, true, true),
+                    new AccountComparisonIcon("JIRA Integration", false, false, true, true, true),
+                    new AccountComparisonIcon("TeamCity Integration", false, false, true, true, true),
+                    new AccountComparisonIcon("SWF Analysis", false, false, true, true, true),
+                    new AccountComparisonIcon("Database Solution", false, false, true, true, true),
+                    new AccountComparisonIcon("Gnip Integration", false, false, true, true, true),                        
+                    new AccountComparisonIcon("Google Analytics Integration", false, false, true, true, true),
+                    new AccountComparisonIcon("Template Goal Trees", false, false, true, true, true),
+                    new AccountComparisonIcon("Custom Goal Trees", false, false, false, true, true),
+                    new AccountComparisonIcon("Lean Templates", false, false, false, true, true),
+                    new AccountComparisonIcon("Six Sigma Templates", false, false, false, true, true),
+                    new AccountComparisonIcon("Balanced Scorecard Templates", false, false, false, true, true),
+                    new AccountComparisonIcon("SSL", true, true, true, true, true),
+                    new AccountComparisonIcon("Dedicated Database", false, false, false, false, true),
+                    new AccountComparisonIcon("SLA", false, false, false, false, true),
+					new AccountComparisonRow("Maximum Users", "1", "1", "20", "Unlimited", "Unlimited"),
+					new AccountComparisonRow("Available Space", "1 MB", "50 MB", "100 MB", "5 GB", "1 TB+"),
+					new AccountComparisonRow("Support", "None", "Email", "Email", "Phone", "24/7"),
+					new AccountComparisonRow("Consulting", "None", "$", "$", "$", "$"),
+					new AccountComparisonRow("Price", "FREE!", "$10/mo", "$100/mo", "$1200/mo", "Talk to us")
 					] );
-				trace(comparisons.length);
+				trace(visualizations.length);
 			}
 		]]>
 	</mx:Script>
@@ -33,6 +48,7 @@
 		<mx:DataGridColumn headerText="" dataField="comparisonRowName" width="220"/>
 		<mx:DataGridColumn headerText="Free" dataField="free" width="160" itemRenderer="{new AccountComparisonFactory('free')}" headerRenderer="com.easyinsight.groups.CustomGroupHeader"/>
 		<mx:DataGridColumn headerText="Individual" dataField="individual" width="160" itemRenderer="{new AccountComparisonFactory('individual')}" headerRenderer="com.easyinsight.groups.CustomGroupHeader"/>
+		<mx:DataGridColumn headerText="Group" dataField="group" width="160" itemRenderer="{new AccountComparisonFactory('group')}" headerRenderer="com.easyinsight.groups.CustomGroupHeader"/>
 		<mx:DataGridColumn headerText="Professional" dataField="professional" width="160"  itemRenderer="{new AccountComparisonFactory('professional')}" headerRenderer="com.easyinsight.groups.CustomGroupHeader"/>
 		<mx:DataGridColumn headerText="Enterprise" dataField="enterprise" width="160"  itemRenderer="{new AccountComparisonFactory('enterprise')}" headerRenderer="com.easyinsight.groups.CustomGroupHeader"/>
 	</mx:columns>

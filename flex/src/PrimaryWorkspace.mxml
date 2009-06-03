@@ -386,6 +386,8 @@
                 loggedIn = true;
                 currentState = "LoggedIn";
                 User.getEventNotifier().dispatchEvent(new LoginEvent(LoginEvent.LOGIN));
+            } else {
+                User.getEventNotifier().addEventListener(LoginEvent.LOGIN, onLogin);
             }
         }
 
