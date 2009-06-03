@@ -10,6 +10,7 @@ import flash.events.MouseEvent;
 import mx.binding.utils.BindingUtils;
 import mx.collections.ArrayCollection;
 import mx.controls.Alert;
+import mx.events.CloseEvent;
 import mx.events.FlexEvent;
 import mx.managers.PopUpManager;
 import mx.rpc.events.FaultEvent;
@@ -48,12 +49,19 @@ public class BackgroundTaskButton extends CorePageButton{
             if (asyncWindow == null) {
                 asyncWindow = new AsyncNotifyWindow();
                 BindingUtils.bindProperty(asyncWindow, "data", this, "asyncData");
+                asyncWindow.addEventListener(CloseEvent.CLOSE, onClose);                
             }
             PopUpManager.addPopUp(asyncWindow, this, false);
             asyncWindow.x = lastX;
             asyncWindow.y = lastY;
         }
         showingWindow = !showingWindow;
+    }
+
+    private function onClose(event:CloseEvent):void {
+        lastX = asyncWindow.x;
+        lastY = asyncWindow.y;
+        showingWindow = false;
     }
 
     private function onCreation(event:FlexEvent):void {
