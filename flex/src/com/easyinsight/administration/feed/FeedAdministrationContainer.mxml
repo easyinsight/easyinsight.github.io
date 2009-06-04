@@ -2,337 +2,258 @@
 <FullScreenPage xmlns="com.easyinsight.*" xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%" 
 	xmlns:feed="com.easyinsight.administration.feed.*" paddingTop="10" paddingLeft="10" paddingRight="10" paddingBottom="10"
         creationComplete="setupListeners()" backgroundColor="#DCE2F8">
-    <states>
-        <mx:State name="RefreshedDataSource">
-            <mx:AddChild relativeTo="{clearDataFormItem}" position="after">
-                <mx:FormItem id="refreshIntervalFormItem" label="Refresh Interval (Hours):" direction="horizontal">
-                    <mx:NumericStepper id="refreshIntervalStepper" value="{refreshInterval}"/>
-                </mx:FormItem>
-            </mx:AddChild>
-        </mx:State>
-        <mx:State name="SessionIdCredentialDataSource" basedOn="RefreshedDataSource">
-            <mx:AddChild relativeTo="{clearDataFormItem}" position="after">
-                <mx:FormItem label="Use this session ID:">
-                    <mx:CheckBox id="saveSessionIdCheckbox" />
-                </mx:FormItem>
-            </mx:AddChild>
-            <mx:AddChild relativeTo="{clearDataFormItem}" position="after">
-                <mx:FormItem label="Session ID:">
-                    <mx:TextInput id="sessionIdInput" text="{sessionIdInputText}" />
-                </mx:FormItem>
-            </mx:AddChild>
-        </mx:State>
-        <mx:State name="PasswordCredentialDataSource" basedOn="RefreshedDataSource" enterState="checkCheckbox()">
-            <mx:AddChild relativeTo="{clearDataFormItem}" position="after">
-                <mx:FormItem label="Use these Credentials:">
-                    <mx:CheckBox id="saveCredentialsCheckbox" />
-                </mx:FormItem>
-            </mx:AddChild>            
-            <mx:AddChild relativeTo="{clearDataFormItem}" position="after">
-                <mx:FormItem label="Password:">
-                    <mx:TextInput id="passwordInput" displayAsPassword="true" text="{passwordInputText}" />
-                </mx:FormItem>
-            </mx:AddChild>
-            <mx:AddChild relativeTo="{clearDataFormItem}" position="after">
-                <mx:FormItem label="User Name:">
-                    <mx:TextInput id="usernameInput" text="{usernameInputText}"/>
-                </mx:FormItem>
-            </mx:AddChild>
-        </mx:State>
-    </states>
 	<mx:Script>
 		<![CDATA[
             import com.easyinsight.analysis.AnalysisChangedEvent;
-            import com.easyinsight.analysis.CredentialsDefinition;
-            import com.easyinsight.customupload.ExcelUploadFormat;
-            import com.easyinsight.customupload.FlatFileUploadFormat;
-            import com.easyinsight.customupload.IServerDataSourceCreation;
-            import com.easyinsight.genredata.ModuleAnalyzeEvent;
-            import com.easyinsight.listing.DescriptorAnalyzeSource;
-            import com.easyinsight.util.ProgressAlert;
-            import mx.events.CloseEvent;
-			import mx.managers.BrowserManager;
-			import mx.validators.Validator;
-			import mx.controls.Alert;
-			import com.easyinsight.feedassembly.CompositeFeedDefinition;
-			import com.easyinsight.feedassembly.CompositeWorkspace;
-			import com.easyinsight.listing.DataFeedDescriptor;
-			import com.easyinsight.analysis.AnalysisCloseEvent;
-			import mx.collections.ArrayCollection;
-			import com.easyinsight.analysis.AnalysisDefinition;
-			import com.easyinsight.customupload.UploadPolicy;
+        import com.easyinsight.customupload.ExcelUploadFormat;
+        import com.easyinsight.customupload.FlatFileUploadFormat;
+        import com.easyinsight.genredata.ModuleAnalyzeEvent;
+        import com.easyinsight.listing.DescriptorAnalyzeSource;
+        import com.easyinsight.util.ProgressAlert;
+
+        import mx.events.CloseEvent;
+        import mx.managers.BrowserManager;
+        import mx.validators.Validator;
+        import mx.controls.Alert;
+
+        import com.easyinsight.feedassembly.CompositeFeedDefinition;
+        import com.easyinsight.feedassembly.CompositeWorkspace;
+        import com.easyinsight.listing.DataFeedDescriptor;
+        import com.easyinsight.analysis.AnalysisCloseEvent;
+
+        import mx.collections.ArrayCollection;
+
+        import com.easyinsight.analysis.AnalysisDefinition;
+        import com.easyinsight.customupload.UploadPolicy;
 
 
-            private var feedAdminMode:Boolean = false;
-			[Bindable]                                  
-            private var feedName:String;
-            [Bindable]
-            private var feedTags:String;
-            [Bindable]            
-            private var feedUploadPolicy:UploadPolicy;
-            [Bindable]
-            private var feedDescription:String;
-            [Bindable]
-            private var feedAttribution:String;
-            [Bindable]
-			private var feedOwnerName:String;
-            [Bindable]
-            private var analysisDefinition:AnalysisDefinition;
-			private var feedType:int;
-            [Bindable]
-			private var feedDefinition:FeedDefinitionData;
-            [Bindable]
-            private var refreshInterval:int;
-            [Bindable]
-            private var usernameInputText:String;
-            [Bindable]
-            private var passwordInputText:String;
-            [Bindable]
-            private var sessionIdInputText:String;
+        private var feedAdminMode:Boolean = false;
+        [Bindable]
+        private var feedName:String;
+        [Bindable]
+        private var feedTags:String;
+        [Bindable]
+        private var feedUploadPolicy:UploadPolicy;
+        [Bindable]
+        private var feedDescription:String;
+        [Bindable]
+        private var feedAttribution:String;
+        [Bindable]
+        private var feedOwnerName:String;
+        [Bindable]
+        private var analysisDefinition:AnalysisDefinition;
+        private var feedType:int;
+        [Bindable]
+        private var feedDefinition:FeedDefinitionData;
+        [Bindable]
+        private var refreshInterval:int;
+        [Bindable]
+        private var usernameInputText:String;
+        [Bindable]
+        private var passwordInputText:String;
+        [Bindable]
+        private var sessionIdInputText:String;
 
-            [Bindable]
-            private var haveFeed:Boolean = false;
-			
-			private var unsavedChanges:Boolean = false;
+        [Bindable]
+        private var haveFeed:Boolean = false;
 
-            [Bindable]
-            private var showImpl:Boolean = false;
-			
-			private var _feedID:int;
-			
-			private var feedAdminDetail:IFeedAdminDetail;
-			
-			private var generalValidators:Array = [];
-			
-			private var fieldsValidators:Array = [];
+        private var unsavedChanges:Boolean = false;
 
-            private function setupListeners():void {
-                addEventListener(AnalysisChangedEvent.ANALYSIS_CHANGED, onChange);
-                addEventListener(DeleteHierarchyEvent.DELETE_HIERARCHY, onHierarchyDelete);
+        [Bindable]
+        private var showImpl:Boolean = false;
+
+        private var _feedID:int;
+
+        private var feedAdminDetail:IFeedAdminDetail;
+
+        private var generalValidators:Array = [];
+
+        private var fieldsValidators:Array = [];
+
+        private function setupListeners():void {
+            addEventListener(AnalysisChangedEvent.ANALYSIS_CHANGED, onChange);
+            addEventListener(DeleteHierarchyEvent.DELETE_HIERARCHY, onHierarchyDelete);
+        }
+
+        public function set feedID(feedID:int):void {
+            this._feedID = feedID;
+        }
+
+        override protected function createChildren():void {
+            super.createChildren();
+            feedService.getFeedDefinition.send(_feedID);
+        }
+
+        private function gotFeedDefinition():void {
+            this.feedDefinition = feedService.getFeedDefinition.lastResult as FeedDefinitionData;
+            BrowserManager.getInstance().setTitle("Easy Insight - Data Source Administration - " + feedDefinition.feedName);
+            if (feedType == DataFeedDescriptor.COMPOSITE) {
+                var compositeFeedDefinition:CompositeFeedDefinition = feedDefinition as CompositeFeedDefinition;
+                var compositeWorkspace:CompositeWorkspace = new CompositeWorkspace();
+                compositeWorkspace.addExistingDef(compositeFeedDefinition.compositeFeedNodes, compositeFeedDefinition.connections);
+                implBox.addChild(compositeWorkspace);
+                implBox.label = "Composite Details";
+                showImpl = true;
+                this.feedAdminDetail = compositeWorkspace;
+            } else if (feedDefinition is ServerDataSourceDefinition) {
+                var sds:ServerDataSourceDefinition = feedDefinition as ServerDataSourceDefinition;
+                var configClass:Class = sds.configClass();
+                var admin:ServerDataSourceAdministration = new ServerDataSourceAdministration();
+                admin.dataSourceClass = configClass;
+                admin.dataSourceDefinition = feedDefinition as ServerDataSourceDefinition;
+                implBox.addChild(admin);
+                implBox.label = "Server Configuration";
+                showImpl = true;
+                feedAdminDetail = admin;
+            } else {
+                tabNav.removeChild(implBox);
             }
-			
-			public function set feedID(feedID:int):void {
-				this._feedID = feedID;
-			}
-			
-			override protected function createChildren():void {
-				super.createChildren();
-				feedService.getFeedDefinition.send(_feedID);			
-			}
 
-            /*private function gotAnalysis():void {
-                this.analysisDefinition = analysisService.openAnalysisDefinition.lastResult as AnalysisDefinition;
-                var dataService:DataService = new DataService();
-				dataService.dataFeedID = _feedID;
-				dataAnalysisContainer = new DataAnalysisContainer();
-				dataAnalysisContainer.dataService = dataService;
-				dataAnalysisContainer.label = analysisDefinition.name;
-				dataAnalysisContainer.feedAdministrationMode();
-				dataAnalysisContainer.openAnalysis(analysisDefinition);
-				fieldsBox.addChild(dataAnalysisContainer);
-            }*/
-			
-			private function gotFeedDefinition():void {				
-				this.feedDefinition = feedService.getFeedDefinition.lastResult as FeedDefinitionData;
-				BrowserManager.getInstance().setTitle("Easy Insight - Data Source Administration - " + feedDefinition.feedName);
-				if (feedType == DataFeedDescriptor.COMPOSITE) {					
-					var compositeFeedDefinition:CompositeFeedDefinition = feedDefinition as CompositeFeedDefinition; 
-					var compositeWorkspace:CompositeWorkspace = new CompositeWorkspace();
-					compositeWorkspace.addExistingDef(compositeFeedDefinition.compositeFeedNodes, compositeFeedDefinition.connections);
-					implBox.addChild(compositeWorkspace);
-                    implBox.label = "Composite Details";
-                    showImpl = true;
-					this.feedAdminDetail = compositeWorkspace;
-                /*} else if (feedDefinition is ServerDataSourceDefinition) {
-                    var sds:ServerDataSourceDefinition = feedDefinition as ServerDataSourceDefinition;
-                    var configClass:Class = sds.configClass();
-                    var sdsEditor:IServerDataSourceCreation = new configClass();
-                    sdsEditor.dataSourceDefinition =*/
-                } else if (feedType == DataFeedDescriptor.JIRA) {
-                    var jiraConfig:JiraConfig = new JiraConfig();
-                    jiraConfig.feedDefinition = this.feedDefinition;
-                    implBox.addChild(jiraConfig);
-                    implBox.label = "JIRA Configuration";
-                    showImpl = true;
-                    this.feedAdminDetail = jiraConfig;
-				} else {
-                    tabNav.removeChild(implBox);
+            /* else if (feedType == DataFeedDescriptor.GOOGLE) {
+             this.feedAdminDetail = new GoogleFeedAdministration();
+             } else if (feedType == DataFeedDescriptor.STATIC || feedType == DataFeedDescriptor.EMPTY) {
+             this.feedAdminDetail = new FileUploadFeedAdmin();
+             } else if (feedType == DataFeedDescriptor.ANALYSIS) {
+             this.feedAdminDetail = new AnalysisBasedFeedAdmin();
+             }*/
+            this.feedAdminMode = true;
+            this.feedName = feedDefinition.feedName;
+            this.feedTags = TagCloud.toString(feedDefinition.tags);
+            this.feedUploadPolicy = feedDefinition.uploadPolicy;
+            this.feedDescription = feedDefinition.description;
+            this.feedOwnerName = feedDefinition.ownerName;
+            this.feedAttribution = feedDefinition.attribution;
+            this.feedType = feedDefinition.getFeedType();
+
+            this.refreshInterval = feedDefinition.refreshDataInterval / (1000 * 60 * 60);
+            this.sessionIdInputText = feedDefinition.sessionId;
+            this.usernameInputText = feedDefinition.username;
+            
+            haveFeed = true;
+
+            //analysisService.openAnalysisDefinition.send(feedDefinition.analysisDefinitionID);
+        }
+
+        private function onChange(event:AnalysisChangedEvent):void {
+            if (event.metadata) {
+                this.unsavedChanges = true;
+            }
+        }
+
+        private function onHierarchyDelete(event:DeleteHierarchyEvent):void {
+            //dataAnalysisContainer.deleteItem(event.hierarchy);
+        }
+
+        private function save():void {
+            var results:Array = Validator.validateAll(generalValidators);
+            var detailValidated:Boolean = true;
+            if (feedAdminDetail != null) {
+                detailValidated = feedAdminDetail.validate();
+            }
+            if (results.length > 0 || !detailValidated) {
+                Alert.show("There are one or more errors which must be fixed before you can save this data source.");
+            } else {
+                //var analysisDefinition:AnalysisDefinition = dataAnalysisContainer.getAnalysisDefinition();
+                var analysisItems:ArrayCollection;
+                if (fieldAdministration == null) {
+                    analysisItems = feedDefinition.fields;
+                } else {
+                    analysisItems = fieldAdministration.createFields();
                 }
-
-                /* else if (feedType == DataFeedDescriptor.GOOGLE) {
-					this.feedAdminDetail = new GoogleFeedAdministration();
-				} else if (feedType == DataFeedDescriptor.STATIC || feedType == DataFeedDescriptor.EMPTY) {
-					this.feedAdminDetail = new FileUploadFeedAdmin();
-				} else if (feedType == DataFeedDescriptor.ANALYSIS) {
-					this.feedAdminDetail = new AnalysisBasedFeedAdmin();
-				}*/
-                this.feedAdminMode = true;
-            	this.feedName = feedDefinition.feedName;
-                this.feedTags = TagCloud.toString(feedDefinition.tags);
-            	this.feedUploadPolicy = feedDefinition.uploadPolicy;
-            	this.feedDescription = feedDefinition.description;
-            	this.feedOwnerName = feedDefinition.ownerName;
-            	this.feedAttribution = feedDefinition.attribution;
-            	this.feedType = feedDefinition.getFeedType();
-
-                this.refreshInterval = feedDefinition.refreshDataInterval / (1000 * 60 * 60);
-                this.sessionIdInputText = feedDefinition.sessionId;
-                this.usernameInputText = feedDefinition.username;
-
-                if(feedDefinition.canRefresh()) {
-                    if(feedDefinition is ServerDataSourceDefinition) {
-                        var serverDataSource:ServerDataSourceDefinition = feedDefinition as ServerDataSourceDefinition;
-                        if(serverDataSource.credentialsDefinition == CredentialsDefinition.NO_CREDENTIALS)
-                            this.currentState = "RefreshedDataSource";
-                        else if(serverDataSource.credentialsDefinition == CredentialsDefinition.SALESFORCE)
-                            this.currentState = "SessionIdCredentialDataSource";
-                        else if(serverDataSource.credentialsDefinition == CredentialsDefinition.STANDARD_USERNAME_PW)
-                            this.currentState = "PasswordCredentialDataSource";
-
+                /*if (hierarchiesBox != null) {
+                 for each (var analysisItem:AnalysisHierarchyItem in hierarchiesBox.getHierarchies()) {
+                 if (analysisItem.analysisItemID == 0) {
+                 analysisItems.addItem(analysisItem);
+                 }
+                 }
+                 }*/
+                if (virtualBox != null) {
+                    virtualBox.save();
+                    for each (var dimension:VirtualDimension in virtualBox.getVirtualDimensions()) {
+                        for each (var transform:VirtualTransform in dimension.virtualTransforms) {
+                            if (transform.transformDimension.analysisItemID == 0) {
+                                analysisItems.addItem(transform.transformDimension);
+                            }
+                        }
+                        if (dimension.defaultTransform.transformDimension.analysisItemID == 0) {
+                            analysisItems.addItem(dimension.defaultTransform.transformDimension);
+                        }
                     }
+                    feedDefinition.virtualDimensions = virtualBox.getVirtualDimensions();
                 }
-                haveFeed = true;
-                
-                //analysisService.openAnalysisDefinition.send(feedDefinition.analysisDefinitionID);
-			}	
-            
-            private function onChange(event:AnalysisChangedEvent):void {
-                if (event.metadata) {
-            	    this.unsavedChanges = true;
-                }
-            }
-
-            private function onHierarchyDelete(event:DeleteHierarchyEvent):void {
-                //dataAnalysisContainer.deleteItem(event.hierarchy);
-            }
-            
-            private function save():void {
-            	var results:Array = Validator.validateAll(generalValidators);
-                var detailValidated:Boolean = true;
+                feedDefinition.fields = analysisItems;
+                feedDefinition.feedName = feedNameInput.text;
+                feedDefinition.uploadPolicy = feedPolicy.uploadPolicy;
+                feedDefinition.description = feedDescriptionTextArea.text;
+                feedDefinition.attribution = feedAttributionInput.text;
+                feedDefinition.ownerName = feedOwnerNameInput.text;
                 if (feedAdminDetail != null) {
-                    detailValidated = feedAdminDetail.validate();
+                    feedAdminDetail.updateDataSource(feedDefinition);
                 }
-            	if (results.length > 0 || !detailValidated) {
-            		Alert.show("There are one or more errors which must be fixed before you can save this data source.");
-            	} else {
-                    //var analysisDefinition:AnalysisDefinition = dataAnalysisContainer.getAnalysisDefinition();
-                    var analysisItems:ArrayCollection = fieldAdministration.createFields();                    
-                    /*if (hierarchiesBox != null) {
-                        for each (var analysisItem:AnalysisHierarchyItem in hierarchiesBox.getHierarchies()) {
-                            if (analysisItem.analysisItemID == 0) {
-                                analysisItems.addItem(analysisItem);
-                            }
-                        }
-                    }*/
-                    if (virtualBox != null) {
-                        virtualBox.save();
-                        for each (var dimension:VirtualDimension in virtualBox.getVirtualDimensions()) {
-                            for each (var transform:VirtualTransform in dimension.virtualTransforms) {
-                                if (transform.transformDimension.analysisItemID == 0) {
-                                    analysisItems.addItem(transform.transformDimension);
-                                }
-                            }
-                            if (dimension.defaultTransform.transformDimension.analysisItemID == 0) {
-                                analysisItems.addItem(dimension.defaultTransform.transformDimension);
-                            }
-                        }
-                        feedDefinition.virtualDimensions = virtualBox.getVirtualDimensions();
-                    }
-	            	feedDefinition.fields = analysisItems;
-	            	feedDefinition.feedName = feedNameInput.text;
-	            	feedDefinition.uploadPolicy = feedPolicy.uploadPolicy;
-	            	feedDefinition.description = feedDescriptionTextArea.text;
-	            	feedDefinition.attribution = feedAttributionInput.text;
-	            	feedDefinition.ownerName = feedOwnerNameInput.text;
-                    if(refreshIntervalStepper != null)
-                        feedDefinition.refreshDataInterval = refreshIntervalStepper.value * 1000 * 60 * 60;
-                    if(saveCredentialsCheckbox != null) {
-                        if(saveCredentialsCheckbox.selected) {
-                            if(usernameInput.text != "" && passwordInput.text != "") {
-                                feedDefinition.username = usernameInput.text;
-                                feedDefinition.password = passwordInput.text;
-                            }
-                        }
-                        else {
-                            feedDefinition.username = null;
-                            feedDefinition.password = null;
-                        }
-                    }
-                    if(saveSessionIdCheckbox != null && saveSessionIdCheckbox.selected) {
-                        feedDefinition.sessionId = sessionIdInput.text;
-                    }
-                    if (feedAdminDetail != null) {
-	            	    feedAdminDetail.updateFeedDefinition(feedDefinition);
-                    }
-                    ProgressAlert.alert(this, "Updating data source...", "Updated data source!", feedService.updateFeedDefinition);
-	    			feedService.updateFeedDefinition.send(feedDefinition, feedTagsInput.text, analysisDefinition);
-	    			this.unsavedChanges = false;
-            	}
+                ProgressAlert.alert(this, "Updating data source...", "Updated data source!", feedService.updateFeedDefinition);
+                feedService.updateFeedDefinition.send(feedDefinition, feedTagsInput.text, analysisDefinition);
+                this.unsavedChanges = false;
             }
+        }
 
-            private function toReport():void {
-                if (unsavedChanges) {
-                    Alert.show("You have unsaved changes. Are you sure you want to exit?", "Alert",
-		                		Alert.OK | Alert.CANCEL, null, alertListener, null, Alert.CANCEL);
-                } else {
-                    var descriptor:DataFeedDescriptor = new DataFeedDescriptor();
-                    descriptor.name = feedDefinition.feedName;
-                    descriptor.dataFeedID = feedDefinition.dataFeedID;
-                    dispatchEvent(new ModuleAnalyzeEvent(new DescriptorAnalyzeSource(descriptor)));
-                }
+        private function toReport():void {
+            if (unsavedChanges) {
+                Alert.show("You have unsaved changes. Are you sure you want to exit?", "Alert",
+                        Alert.OK | Alert.CANCEL, null, alertListener, null, Alert.CANCEL);
+            } else {
+                var descriptor:DataFeedDescriptor = new DataFeedDescriptor();
+                descriptor.name = feedDefinition.feedName;
+                descriptor.dataFeedID = feedDefinition.dataFeedID;
+                dispatchEvent(new ModuleAnalyzeEvent(new DescriptorAnalyzeSource(descriptor)));
             }
+        }
 
-            private function toReportListener(event:CloseEvent):void {
-                if (event.detail == Alert.OK) {
-                 //   dataAnalysisContainer.cleanup();
-                    var descriptor:DataFeedDescriptor = new DataFeedDescriptor();
-                    descriptor.name = feedDefinition.feedName;
-                    descriptor.dataFeedID = feedDefinition.dataFeedID;
-                    dispatchEvent(new ModuleAnalyzeEvent(new DescriptorAnalyzeSource(descriptor)));
-                }
+        private function toReportListener(event:CloseEvent):void {
+            if (event.detail == Alert.OK) {
+                //   dataAnalysisContainer.cleanup();
+                var descriptor:DataFeedDescriptor = new DataFeedDescriptor();
+                descriptor.name = feedDefinition.feedName;
+                descriptor.dataFeedID = feedDefinition.dataFeedID;
+                dispatchEvent(new ModuleAnalyzeEvent(new DescriptorAnalyzeSource(descriptor)));
             }
-            
-            private function close():void {
-                if (unsavedChanges) {
-                    Alert.show("You have unsaved changes. Are you sure you want to exit?", "Alert",
-		                		Alert.OK | Alert.CANCEL, null, alertListener, null, Alert.CANCEL);
-                } else {
-               //     dataAnalysisContainer.cleanup();
-                    dispatchEvent(new AnalysisCloseEvent(this));
-                }
-            }
+        }
 
-            private function alertListener(event:CloseEvent):void {
-                if (event.detail == Alert.OK) {
-                 //   dataAnalysisContainer.cleanup();
-                    dispatchEvent(new AnalysisCloseEvent(this));
-                }
+        private function close():void {
+            if (unsavedChanges) {
+                Alert.show("You have unsaved changes. Are you sure you want to exit?", "Alert",
+                        Alert.OK | Alert.CANCEL, null, alertListener, null, Alert.CANCEL);
+            } else {
+                //     dataAnalysisContainer.cleanup();
+                dispatchEvent(new AnalysisCloseEvent(this));
             }
-            
-            private function clearFeedData():void {
-            	Alert.show("Are you sure you want to clear all stored data for this feed?", "Alert",
-		                		Alert.OK | Alert.CANCEL, this, alertFeedListener, null, Alert.CANCEL);
-            }
-            
-            private function alertFeedListener(event:CloseEvent):void {
-                if (event.detail == Alert.OK) {
-                	feedService.wipeData.send(_feedID);
-                }
-            }
-            
-            private function wipedData():void {
-            	Alert.show("All data cleared!");
-            }
+        }
 
-            private function blah():void {
-                var excelUploadFormat:ExcelUploadFormat;
-                var flatFileUploadFormat:FlatFileUploadFormat;
+        private function alertListener(event:CloseEvent):void {
+            if (event.detail == Alert.OK) {
+                //   dataAnalysisContainer.cleanup();
+                dispatchEvent(new AnalysisCloseEvent(this));
             }
+        }
 
-            private function checkCheckbox():void {
-                if(this.feedDefinition.username != null)
-                    saveCredentialsCheckbox.selected = true;    
+        private function clearFeedData():void {
+            Alert.show("Are you sure you want to clear all stored data for this feed?", "Alert",
+                    Alert.OK | Alert.CANCEL, this, alertFeedListener, null, Alert.CANCEL);
+        }
+
+        private function alertFeedListener(event:CloseEvent):void {
+            if (event.detail == Alert.OK) {
+                feedService.wipeData.send(_feedID);
             }
+        }
+
+        private function wipedData():void {
+            Alert.show("All data cleared!");
+        }
+
+        private function blah():void {
+            var excelUploadFormat:ExcelUploadFormat;
+            var flatFileUploadFormat:FlatFileUploadFormat;
+        }
 		]]>
 	</mx:Script>
 

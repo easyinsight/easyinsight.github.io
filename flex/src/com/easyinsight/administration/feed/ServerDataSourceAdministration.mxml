@@ -1,0 +1,108 @@
+<?xml version="1.0" ?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" implements="com.easyinsight.administration.feed.IFeedAdminDetail">
+    <mx:Script><![CDATA[
+        import com.easyinsight.customupload.IServerDataSourceCreation;
+
+        import com.easyinsight.framework.Credentials;
+
+        import mx.controls.Alert;
+
+        private var _dataSourceClass:Class;
+        private var dataSourceCreation:IServerDataSourceCreation;
+        private var _dataSourceID:int;
+        private var _dataSourceDefinition:ServerDataSourceDefinition;
+
+        [Bindable]
+        private var ready:Boolean;
+
+        [Bindable]
+        private var credentialsSaved:Boolean;
+
+        [Bindable]
+        private var refreshValue:int;
+
+        override protected function createChildren():void {
+            super.createChildren();
+            ready = true;
+            dataSourceCreation = new _dataSourceClass();
+            dataSourceCreation.dataSourceDefinition = _dataSourceDefinition;
+            credentialsSaved = _dataSourceDefinition.username != null;
+            refreshValue = _dataSourceDefinition.refreshDataInterval;
+            coreContent.addChild(dataSourceCreation as DisplayObject);
+        }
+
+        public function set dataSourceID(value:int):void {
+            _dataSourceID = value;
+        }
+
+        public function get dataSourceDefinition():ServerDataSourceDefinition {
+            return _dataSourceDefinition;
+        }
+
+        public function set dataSourceDefinition(value:ServerDataSourceDefinition):void {
+            _dataSourceDefinition = value;
+        }
+
+        private function serverValidate():void {
+            progressBar.visible = true;
+            dataSourceCreation.updateDataSource(dataSourceDefinition);
+            uploadService.validateCredentials.send(dataSourceDefinition, dataSourceCreation.credentials);
+        }
+
+        private function validated():void {
+            progressBar.visible = false;
+            var validation:String = uploadService.validateCredentials.lastResult as String;
+            if (validation == null) {
+                Alert.show("Validation successful!");
+            } else {
+                Alert.show(validation);
+            }
+        }
+
+        public function set dataSourceClass(value:Class):void {
+            _dataSourceClass = value;
+        }
+
+        private function credentialClick():void {
+            credentialsSaved = !credentialsSaved;
+            if (!credentialsSaved) {
+                refreshStepper.value = 0;
+            }
+        }
+
+        public function updateDataSource(feedDefinition:FeedDefinitionData):void {
+            if (saveCredentialsCheckbox.selected) {
+                feedDefinition.refreshDataInterval = refreshStepper.value * 1000 * 60 * 60;
+                var credentials:Credentials = dataSourceCreation.credentials;
+                feedDefinition.username = credentials.userName;
+                feedDefinition.password = credentials.password;
+            } else {
+                feedDefinition.refreshDataInterval = 0;
+                feedDefinition.username = null;
+                feedDefinition.password = null;
+            }
+            dataSourceCreation.updateDataSource(feedDefinition);
+        }
+
+        public function validate():Boolean {
+            return true;
+        }]]></mx:Script>
+    <mx:RemoteObject destination="userUpload" id="uploadService">
+        <mx:method name="validateCredentials" result="validated()"/>
+    </mx:RemoteObject>
+    <mx:Form>
+        <mx:Box id="coreContent"/>
+        <mx:FormItem label="" direction="vertical">
+            <mx:ProgressBar id="progressBar" indeterminate="true" visible="false"/>
+        </mx:FormItem>
+        <mx:FormItem label="Save Credentials:" enabled="{ready}">
+            <mx:CheckBox id="saveCredentialsCheckbox" click="credentialClick()" selected="{credentialsSaved}"/>
+        </mx:FormItem>
+        <mx:FormItem label="Hourly Refresh:" enabled="{credentialsSaved}">
+            <mx:NumericStepper id="refreshStepper" value="{refreshValue}"/>
+        </mx:FormItem>
+        <mx:FormItem label="" direction="horizontal">
+            <mx:Button label="Validate" click="serverValidate()" enabled="{ready}"/>
+        </mx:FormItem>
+	</mx:Form>
+</mx:Canvas>

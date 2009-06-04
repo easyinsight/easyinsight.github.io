@@ -86,9 +86,9 @@
 
 	<!-- The icon the system uses for the application. For at least one resolution,
 		 specify the path to a PNG file included in the AIR package. Optional. -->
-    <icon>
+    <!--<icon>
 		<image16x16>favicon.PNG</image16x16>
-    </icon>
+    </icon>-->
 	<!-- <icon>
 		<image16x16></image16x16>
 		<image32x32></image32x32>

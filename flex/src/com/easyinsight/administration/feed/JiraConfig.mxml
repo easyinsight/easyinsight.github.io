@@ -3,7 +3,8 @@
         creationComplete="validators = [ urlValidator ]">
     <mx:Script><![CDATA[
         import com.easyinsight.analysis.AnalysisChangedEvent;
-import com.easyinsight.datasources.JiraDataSource;
+        import com.easyinsight.datasources.JiraDataSource;
+
         import mx.validators.Validator;
 
         private var validators:Array = [];
@@ -14,17 +15,17 @@ import com.easyinsight.datasources.JiraDataSource;
             var jiraDef:JiraDataSource = feedDefinition as JiraDataSource;
             url = jiraDef.url;
         }
-        
-    public function updateFeedDefinition(feedDefinition:FeedDefinitionData):void {
-        var jiraDef:JiraDataSource = feedDefinition as JiraDataSource;
-        jiraDef.url = urlInput.text;
-    }
 
-    public function validate():Boolean {
-        var results:Array = Validator.validateAll(validators);
-        return results.length == 0;
-    }
-    ]]></mx:Script>
+        public function updateDataSource(feedDefinition:FeedDefinitionData):void {
+            var jiraDef:JiraDataSource = feedDefinition as JiraDataSource;
+            jiraDef.url = urlInput.text;
+        }
+
+        public function validate():Boolean {
+            var results:Array = Validator.validateAll(validators);
+            return results.length == 0;
+        }
+        ]]></mx:Script>
     <mx:Form>
         <mx:FormItem label="URL: " direction="horizontal" fontWeight="bold" fontFamily="Tahoma">
 			<mx:TextInput id="urlInput" fontWeight="normal" fontFamily="Lucida Grande" text="{url}" change="dispatchEvent(new AnalysisChangedEvent())"/>

@@ -3,13 +3,13 @@
 	<mx:Script>
 		<![CDATA[
 			import com.easyinsight.administration.feed.FeedDefinitionData;
-			
-			public function updateFeedDefinition(feedDefinition:FeedDefinitionData):void {
-			}
-			
-			public function validate():Boolean {
-				return true;
-			}
+
+        public function updateDataSource(feedDefinition:FeedDefinitionData):void {
+        }
+
+        public function validate():Boolean {
+            return true;
+        }
 		]]>
 	</mx:Script>	
 </mx:Canvas>

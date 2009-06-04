@@ -1,7 +1,8 @@
 <?xml version="1.0" ?>
 <mx:Application xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:dashboard="com.easyinsight.dashboard.*" width="100%"
                 height="100%"
-                creationComplete="onCreationComplete()" backgroundAlpha=".2" backgroundSize="100%"
+                creationComplete="onCreationComplete()" backgroundAlpha=".2" backgroundImage="{backgroundPattern}"
+                backgroundSize="100%"
                 paddingTop="0" top="0" borderThickness="0" left="0" paddingLeft="0" right="0" paddingRight="0"
                 bottom="0" paddingBottom="0">
     <mx:states>
@@ -65,6 +66,11 @@
 
         import com.easyinsight.framework.User;
         import com.easyinsight.framework.UserServiceResponse;
+
+        [Bindable]
+        [Embed(source="../assets/background2.JPG")]
+        private var backgroundPattern:Class;
+
 
         [Bindable]
         private var failureMessageText:String;

@@ -1,10 +1,11 @@
 package com.easyinsight.customupload {
 import com.easyinsight.administration.feed.FeedDefinitionData;
+import com.easyinsight.administration.feed.IFeedAdminDetail;
 import com.easyinsight.framework.Credentials;
 
-public interface IServerDataSourceCreation {
+public interface IServerDataSourceCreation extends IFeedAdminDetail {
+    function set dataSourceDefinition(feedDefinition:FeedDefinitionData):void;
     function get dataSourceDefinition():FeedDefinitionData;
-    function updateDataSource(feedDefinition:FeedDefinitionData):void;
     function get credentials():Credentials;
 }
 }

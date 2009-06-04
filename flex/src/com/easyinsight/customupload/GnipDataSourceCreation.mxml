@@ -10,6 +10,10 @@
         import com.easyinsight.datasources.GnipDataSource;
         import com.easyinsight.framework.Credentials;
 
+        public function set dataSourceDefinition(definition:FeedDefinitionData):void {
+
+        }
+
         public function get dataSourceDefinition():FeedDefinitionData {
             return new GnipDataSource();
         }
@@ -24,6 +28,10 @@
         public function updateDataSource(feedDefinition:FeedDefinitionData):void {
             var obj:GnipDataSource = feedDefinition as GnipDataSource;
             obj.filters = gnipDataGrid._filters;
+        }
+
+        public function validate():Boolean {
+            return true;
         }]]></mx:Script>
     <mx:Form>
         <mx:FormItem label="User Name: " direction="horizontal" fontWeight="bold" fontFamily="Tahoma">

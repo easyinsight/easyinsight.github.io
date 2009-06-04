@@ -9,7 +9,12 @@
         import com.easyinsight.datasources.BaseCampDataSource;
         import com.easyinsight.framework.Credentials;
 
+        [Bindable]
         private var url:String;
+        [Bindable]
+        private var usernameInputText:String;
+        [Bindable]
+        private var passwordText:String;
 
         public function get dataSourceDefinition():FeedDefinitionData {
             var obj:BaseCampDataSource = new BaseCampDataSource();
@@ -20,6 +25,8 @@
         public function set dataSourceDefinition(feedDefinition:FeedDefinitionData):void {
             var ds:BaseCampDataSource = feedDefinition as BaseCampDataSource;
             url = ds.url;
+            usernameInputText = ds.username;
+            passwordText = ds.password;
         }
 
         public function updateDataSource(feedDefinition:FeedDefinitionData):void {
@@ -33,17 +40,20 @@
             credentials.password = passwordInput.text;
             return credentials;
         }
-        ]]></mx:Script>
+
+        public function validate():Boolean {
+            return true;
+        }]]></mx:Script>
     <mx:Form>
         <mx:FormItem label="Basecamp Path: " direction="horizontal" fontWeight="bold" fontFamily="Tahoma">
-			<mx:TextInput id="urlInput" fontWeight="normal" fontFamily="Lucida Grande"/>
+			<mx:TextInput id="urlInput" fontWeight="normal" fontFamily="Lucida Grande" text="{url}"/>
 		</mx:FormItem>
         <mx:FormItem label="Example: easyinsight for easyinsight.basecamphq.com" fontSize="10"/>
 		<mx:FormItem label="User Name: " direction="horizontal" fontWeight="bold" fontFamily="Tahoma">
-			<mx:TextInput id="userNameInput" fontWeight="normal" fontFamily="Lucida Grande"/>
+			<mx:TextInput id="userNameInput" fontWeight="normal" fontFamily="Lucida Grande" text="{usernameInputText}"/>
 		</mx:FormItem>
 		<mx:FormItem label="Password: " direction="horizontal" fontWeight="bold" fontFamily="Tahoma">
-			<mx:TextInput id="passwordInput" displayAsPassword="true"/>
+			<mx:TextInput id="passwordInput" displayAsPassword="true" text="{passwordText}"/>
 		</mx:FormItem>
 	</mx:Form>
 </mx:VBox>

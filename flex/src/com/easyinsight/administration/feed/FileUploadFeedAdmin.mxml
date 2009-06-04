@@ -3,30 +3,30 @@
 	<mx:Script>
 		<![CDATA[
 			import com.easyinsight.customupload.ExcelUploadFormat;
-			import com.easyinsight.customupload.FlatFileUploadFormat;
-			
-			[Bindable]
-			private var formatType:String;
-			
-			[Bindable]
-			private var delimiter:String;
-			
-			public function updateFeedDefinition(feedDefinition:FeedDefinitionData):void {
-				/*var fileBasedFeedDefinition:FileBasedFeedDefinition = feedDefinition as FileBasedFeedDefinition;
-				if (fileBasedFeedDefinition is FlatFileUploadFormat) {
-					var flatFile:FlatFileUploadFormat;
-					formatType = "Flat File";
-					delimiter = flatFile.delimiter;
-				} else {
-					var excelFile:ExcelUploadFormat;
-					formatType = "Excel 1997-2003 Spreadsheet";
-					delimiterForm.visible = false;					
-				}*/	
-			}
-			
-			public function validate():Boolean {
-				return true;
-			}
+        import com.easyinsight.customupload.FlatFileUploadFormat;
+
+        [Bindable]
+        private var formatType:String;
+
+        [Bindable]
+        private var delimiter:String;
+
+        public function updateDataSource(feedDefinition:FeedDefinitionData):void {
+            /*var fileBasedFeedDefinition:FileBasedFeedDefinition = feedDefinition as FileBasedFeedDefinition;
+             if (fileBasedFeedDefinition is FlatFileUploadFormat) {
+             var flatFile:FlatFileUploadFormat;
+             formatType = "Flat File";
+             delimiter = flatFile.delimiter;
+             } else {
+             var excelFile:ExcelUploadFormat;
+             formatType = "Excel 1997-2003 Spreadsheet";
+             delimiterForm.visible = false;
+             }*/
+        }
+
+        public function validate():Boolean {
+            return true;
+        }
 		]]>
 	</mx:Script>
 	<mx:Form>

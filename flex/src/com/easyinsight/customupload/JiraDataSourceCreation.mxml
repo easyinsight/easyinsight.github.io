@@ -9,6 +9,22 @@
         import com.easyinsight.datasources.JiraDataSource;
         import com.easyinsight.framework.Credentials;
 
+        [Bindable]
+        private var jiraURL:String;
+
+        [Bindable]
+        private var usernameInputText:String;
+
+        [Bindable]
+        private var passwordText:String;
+
+        public function set dataSourceDefinition(definition:FeedDefinitionData):void {
+            var jiraDef:JiraDataSource = definition as JiraDataSource;
+            jiraURL = jiraDef.url;
+            usernameInputText = definition.username;
+            passwordText = definition.password;
+        }
+
         public function get dataSourceDefinition():FeedDefinitionData {
             return new JiraDataSource();
         }
@@ -23,17 +39,21 @@
         public function updateDataSource(feedDefinition:FeedDefinitionData):void {
             var source:JiraDataSource = feedDefinition as JiraDataSource;
             source.url = urlInput.text;
+        }
+
+        public function validate():Boolean {
+            return true;
         }]]></mx:Script>
     <mx:Form>
         <mx:FormItem label="JIRA URL: " direction="horizontal" fontWeight="bold" fontFamily="Tahoma">
-			<mx:TextInput id="urlInput" fontWeight="normal" fontFamily="Lucida Grande"/>
+			<mx:TextInput id="urlInput" fontWeight="normal" fontFamily="Lucida Grande" text="{jiraURL}"/>
 		</mx:FormItem>
         <mx:FormItem label="Example: http://demohost:8080" fontSize="10"/>
 		<mx:FormItem label="User Name: " direction="horizontal" fontWeight="bold" fontFamily="Tahoma">
-			<mx:TextInput id="userNameInput" fontWeight="normal" fontFamily="Lucida Grande"/>
+			<mx:TextInput id="userNameInput" fontWeight="normal" fontFamily="Lucida Grande" text="{usernameInputText}"/>
 		</mx:FormItem>
 		<mx:FormItem label="Password: " direction="horizontal" fontWeight="bold" fontFamily="Tahoma">
-			<mx:TextInput id="passwordInput" displayAsPassword="true"/>
+			<mx:TextInput id="passwordInput" displayAsPassword="true" text="{passwordText}"/>
 		</mx:FormItem>
 	</mx:Form>
 </mx:VBox>
