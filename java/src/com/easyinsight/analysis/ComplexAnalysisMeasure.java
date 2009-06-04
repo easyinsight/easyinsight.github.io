@@ -1,8 +1,5 @@
 package com.easyinsight.analysis;
 
-import com.easyinsight.analysis.AnalysisMeasure;
-import com.easyinsight.analysis.AnalysisItemTypes;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;

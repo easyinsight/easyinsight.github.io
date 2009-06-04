@@ -407,7 +407,7 @@ public class FeedService implements IDataFeedService {
             if(feedDefinition instanceof ServerDataSourceDefinition) {
                 ServerDataSourceDefinition serverSource = (ServerDataSourceDefinition) feedDefinition;
                 if(serverSource.getCredentialsDefinition() == CredentialsDefinition.STANDARD_USERNAME_PW){
-                    if(serverSource.getUsername() != null && serverSource.retrievePassword() != null) {
+                    if(serverSource.getUsername() != null && serverSource.retrievePassword() != null && !"".equals(serverSource.retrievePassword())) {
                             PasswordStorage.setPasswordCredentials(serverSource.getUsername(), serverSource.retrievePassword(), serverSource.getDataFeedID(), conn);
                     }
                     else if(serverSource.getUsername() == null && serverSource.getPassword() == null) {
