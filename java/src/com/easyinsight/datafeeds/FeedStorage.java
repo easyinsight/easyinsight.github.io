@@ -18,6 +18,8 @@ import com.easyinsight.groups.GroupDescriptor;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.security.Roles;
 import com.easyinsight.PasswordStorage;
+import com.easyinsight.eventing.EventDispatcher;
+import com.easyinsight.eventing.TodoCompletedEvent;
 import com.easyinsight.users.Credentials;
 
 import java.sql.*;
@@ -120,6 +122,7 @@ public class FeedStorage {
             conn.setAutoCommit(false);
             long feedID = addFeedDefinitionData(feedDefinition, conn);
             conn.commit();
+            EventDispatcher.instance().dispatch(new TodoCompletedEvent(feedDefinition));
             return feedID;
         } catch (SQLException e) {
             conn.rollback();
@@ -556,6 +559,7 @@ public class FeedStorage {
             conn.setAutoCommit(false);
             updateDataFeedConfiguration(feedDefinition, conn);
             conn.commit();
+            EventDispatcher.instance().dispatch(new TodoCompletedEvent(feedDefinition));
         } catch (SQLException e) {
             conn.rollback();
             LogClass.error(e);

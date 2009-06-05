@@ -18,6 +18,8 @@ public class TodoEventInfo extends OutboundEvent{
         return "";
     }
 
-    
+    public function get title():String {
+        return getTitle(); 
+    }
 }
 }

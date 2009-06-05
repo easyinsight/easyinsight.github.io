@@ -88,6 +88,10 @@ public class GoogleFeedDefinition extends ServerDataSourceDefinition {
         return keyMap;
     }
 
+    public boolean isConfigured() {
+        return worksheetURL != null && !worksheetURL.isEmpty();
+    }
+
     @Override
     public int getRequiredAccountTier() {
         return Account.FREE;

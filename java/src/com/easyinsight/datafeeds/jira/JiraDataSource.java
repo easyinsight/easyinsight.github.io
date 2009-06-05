@@ -158,6 +158,10 @@ public class JiraDataSource extends ServerDataSourceDefinition {
                 ASSIGNEE, COUNT, PROJECT, TYPE, VERSIONS, UPDATED);
     }
 
+    public boolean isConfigured() {
+        return url != null && !url.isEmpty();
+    }
+
     public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, DataSet dataSet) {
         List<AnalysisItem> analysisItems = new ArrayList<AnalysisItem>();
         analysisItems.add(new AnalysisDimension(keys.get(REPORTER), true));

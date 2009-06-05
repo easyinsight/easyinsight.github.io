@@ -1,31 +1,31 @@
 <?xml version="1.0" ?>
 <mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*"
-                showCloseButton="true" close="PopUpManager.removePopUp(this);" >
+                showCloseButton="true" close="PopUpManager.removePopUp(this);">
     <mx:Script><![CDATA[
         import mx.collections.ArrayCollection;
         import mx.managers.PopUpManager;
 
-            [Bindable]
-            private var _data:ArrayCollection;
 
-            [Bindable("dataChange")]
-            [Inspectable(environment="none")]
+        [Bindable]
+        private var _data:ArrayCollection;
 
-            override public function get data():Object {
-                return _data;
-            }
+        [Bindable("dataChange")]
+        [Inspectable(environment="none")]
 
-            override public function set data(value:Object):void {
-                this._data = value as ArrayCollection;
-            }
+        override public function get data():Object {
+            return _data;
+        }
 
+        override public function set data(value:Object):void {
+            this._data = value as ArrayCollection;
+        }
 
-            ]]></mx:Script>
-    <mx:VBox>
-        <mx:DataGrid dataProvider="{_data}" horizontalScrollPolicy="on">
-            <mx:columns>
-                <util:EIDataGridColumn headerText="Name" dataField="feedName" itemRenderer="com.easyinsight.notifications.TodoNotifyWindowTitleLabel" />
-            </mx:columns>
-        </mx:DataGrid>
-    </mx:VBox>
+        ]]></mx:Script>
+
+    <mx:DataGrid id="dataGrid" dataProvider="{_data}">
+        <mx:columns>
+            <util:EIDataGridColumn headerText="Name" width="350" itemRenderer="com.easyinsight.notifications.TodoNotifyWindowTitleLabel" />
+            <util:EIDataGridColumn headerText="" dataField="title" width="48" itemRenderer="com.easyinsight.notifications.TodoNotifyWindowNavigateIcon"/>
+        </mx:columns>
+    </mx:DataGrid>
 </mx:TitleWindow>

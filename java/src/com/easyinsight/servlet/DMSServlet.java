@@ -9,6 +9,9 @@ import com.easyinsight.security.DefaultSecurityProvider;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.storage.DatabaseManager;
 import com.easyinsight.scheduler.Scheduler;
+import com.easyinsight.eventing.EventDispatcher;
+import com.easyinsight.eventing.TodoCompletedEvent;
+import com.easyinsight.eventing.TodoCompletedListener;
 
 import javax.servlet.http.HttpServlet;
 import javax.servlet.ServletConfig;
@@ -37,6 +40,8 @@ public class DMSServlet extends HttpServlet {
                 FeedRegistry.initialize();
                 new APIManager().start();
                 scheduler = Scheduler.instance();
+                EventDispatcher.instance().start();
+                EventDispatcher.instance().registerListener(TodoCompletedEvent.TODO_COMPLETED, new TodoCompletedListener());
                 scheduler.start();
             }
             LogClass.info("Started the server.");
@@ -51,6 +56,8 @@ public class DMSServlet extends HttpServlet {
         super.destroy();
         Database.instance().shutdown();
         DatabaseManager.instance().shutdown();
+        EventDispatcher.instance().setRunning(false);
+        EventDispatcher.instance().interrupt();
         scheduler.stop();
     }
 }

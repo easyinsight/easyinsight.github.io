@@ -16,12 +16,21 @@ public class SolutionInstallInfo {
     private long newID;
     private int type;
     private ConfigureDataFeedTodo todoItem;
+    private String feedName;
 
     public SolutionInstallInfo(long previousID, long newID, int type, ConfigureDataFeedTodo todoItem) {
         this.previousID = previousID;
         this.newID = newID;
         this.type = type;
         this.todoItem = todoItem;
+    }
+
+    public SolutionInstallInfo(long previousID, long newID, int type, ConfigureDataFeedTodo todoItem, String feedName) {
+        this.previousID = previousID;
+        this.newID = newID;
+        this.type = type;
+        this.todoItem = todoItem;
+        this.feedName = feedName;
     }
 
     public int getType() {
@@ -54,5 +63,13 @@ public class SolutionInstallInfo {
 
     public void setTodoItem(ConfigureDataFeedTodo todoItem) {
         this.todoItem = todoItem;
+    }
+
+    public String getFeedName() {
+        return feedName;
+    }
+
+    public void setFeedName(String feedName) {
+        this.feedName = feedName;
     }
 }

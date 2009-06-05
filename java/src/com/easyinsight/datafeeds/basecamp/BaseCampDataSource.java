@@ -239,6 +239,10 @@ public class BaseCampDataSource extends ServerDataSourceDefinition {
                 PROJECTID, TODOLISTDESC, TODOLISTID, TODOLISTPRIVATE, COMPLETERNAME, COMPLETERID, COUNT, ITEMCYCLE);
     }
 
+    public boolean isConfigured() {
+        return url != null && !url.isEmpty();
+    }
+
     public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, DataSet dataSet) {
         List<AnalysisItem> analysisItems = new ArrayList<AnalysisItem>();
         AnalysisDimension itemDim = new AnalysisDimension(keys.get(ITEMID), true);

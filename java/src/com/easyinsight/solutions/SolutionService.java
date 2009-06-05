@@ -11,10 +11,15 @@ import com.easyinsight.email.UserStub;
 import com.easyinsight.core.InsightDescriptor;
 import com.easyinsight.users.Account;
 import com.easyinsight.notifications.ConfigureDataFeedTodo;
+import com.easyinsight.notifications.TodoEventInfo;
+import com.easyinsight.notifications.ConfigureDataFeedInfo;
 
 import java.util.*;
 import java.sql.*;
 import java.io.ByteArrayInputStream;
+
+import flex.messaging.messages.AsyncMessage;
+import flex.messaging.MessageBroker;
 
 /**
  * User: James Boe
@@ -154,7 +159,18 @@ public class SolutionService {
             List<SolutionInstallInfo> objects = installSolution(userID, solution, conn, false);
             conn.commit();
             for(SolutionInstallInfo info : objects) {
-                ; // todo: send out messages for any todos.
+                ConfigureDataFeedTodo todo = info.getTodoItem();
+                ConfigureDataFeedInfo todoInfo = new ConfigureDataFeedInfo();
+                todoInfo.setTodoID(todo.getId());
+                todoInfo.setAction(TodoEventInfo.ADD);
+                todoInfo.setUserId(todo.getUserID());
+                todoInfo.setFeedID(todo.getFeedID());
+                todoInfo.setFeedName(info.getFeedName());
+                AsyncMessage message = new AsyncMessage();
+                message.setDestination("generalNotifications");
+                message.setMessageId(UUID.randomUUID().toString());
+                message.setBody(todoInfo);
+                MessageBroker.getMessageBroker(null).routeMessageToService(message, null);
             }
             return objects;
         } catch (Exception e) {

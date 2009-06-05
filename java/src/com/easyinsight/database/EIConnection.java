@@ -14,6 +14,7 @@ import java.util.Properties;
 public class EIConnection implements Connection {
 
     private Connection conn;
+    private CommitEventListener listener = new CommitEventListener();  
 
     public EIConnection(Connection conn) {
         this.conn = conn;
@@ -49,6 +50,7 @@ public class EIConnection implements Connection {
 
     public void commit() throws SQLException {
         conn.commit();
+
     }
 
     public void rollback() {
@@ -102,7 +104,7 @@ public class EIConnection implements Connection {
     public void clearWarnings() throws SQLException {
         conn.clearWarnings();
     }
-
+                                       
     public Statement createStatement(int resultSetType, int resultSetConcurrency) throws SQLException {
         return conn.createStatement(resultSetType, resultSetConcurrency);
     }
@@ -221,5 +223,13 @@ public class EIConnection implements Connection {
 
     public boolean isWrapperFor(Class<?> iface) throws SQLException {
         return conn.isWrapperFor(iface);
+    }
+
+    public CommitEventListener getListener() {
+        return listener;
+    }
+
+    public void setListener(CommitEventListener listener) {
+        this.listener = listener;
     }
 }

@@ -65,7 +65,7 @@ public class DataSourceCopyUtils {
         todo.setUserID(userID);
         session.save(todo);
         session.flush();
-        infos.add(new SolutionInstallInfo(feedDefinition.getDataFeedID(), clonedFeedDefinition.getDataFeedID(), SolutionInstallInfo.DATA_SOURCE, todo));
+        infos.add(new SolutionInstallInfo(feedDefinition.getDataFeedID(), clonedFeedDefinition.getDataFeedID(), SolutionInstallInfo.DATA_SOURCE, todo, clonedFeedDefinition.getFeedName()));
 
 
         

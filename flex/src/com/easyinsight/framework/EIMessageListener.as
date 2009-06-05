@@ -1,6 +1,8 @@
 package com.easyinsight.framework {
 import com.easyinsight.notifications.RefreshEventInfo;
 
+import com.easyinsight.notifications.TodoEventInfo;
+
 import flash.events.EventDispatcher;
 
 import mx.controls.Alert;
@@ -34,8 +36,14 @@ public class EIMessageListener extends EventDispatcher {
     }
 
     private function handleMessage(event:mx.messaging.events.MessageEvent):void {
-        var info:RefreshEventInfo = event.message.body as RefreshEventInfo;
-        dispatchEvent(new AsyncInfoEvent(info));
+        if(event.message.body is RefreshEventInfo) {
+            var info:RefreshEventInfo = event.message.body as RefreshEventInfo;
+            dispatchEvent(new AsyncInfoEvent(info));
+        }
+        else if(event.message.body is TodoEventInfo) {
+            var todoInfo:TodoEventInfo = event.message.body as TodoEventInfo;
+            dispatchEvent(new TodoInfoEvent(todoInfo));
+        }
     }
 }
 }

@@ -249,6 +249,10 @@ public class GnipDataSource extends ServerDataSourceDefinition {
         dataStorage.insertData(dataSet);
     }
 
+    public boolean isConfigured() {
+        return filters != null && filters.size() > 0;
+    }
+
     @Override
     public FeedDefinition clone() throws CloneNotSupportedException {
         GnipDataSource gnipDataSource = (GnipDataSource) super.clone();

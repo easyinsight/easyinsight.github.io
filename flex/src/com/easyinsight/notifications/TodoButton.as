@@ -4,13 +4,13 @@ import com.easyinsight.framework.EIMessageListener;
 
 
 import com.easyinsight.framework.TodoInfoEvent;
-
 import flash.events.Event;
 
 import flash.events.MouseEvent;
 
 import mx.binding.utils.BindingUtils;
 import mx.collections.ArrayCollection;
+import mx.controls.Alert;
 import mx.events.FlexEvent;
 import mx.managers.PopUpManager;
 import mx.rpc.events.ResultEvent;
@@ -28,7 +28,6 @@ public class TodoButton extends CorePageButton{
         userUploadService.getTodoEvents.addEventListener(ResultEvent.RESULT, tasksRetrieved);
         addEventListener(FlexEvent.CREATION_COMPLETE, onCreation);
         addEventListener(MouseEvent.CLICK, onClick);
-
     }
 
     private function onClick(event:MouseEvent):void {
@@ -39,7 +38,7 @@ public class TodoButton extends CorePageButton{
         PopUpManager.addPopUp(asyncWindow, this, false);
     }
 
-    private function onCreation(event:FlexEvent):void {
+    protected function onCreation(event:FlexEvent):void {
         userUploadService.getTodoEvents.send();
     }
 
@@ -70,10 +69,12 @@ public class TodoButton extends CorePageButton{
 
     private function onAsync(event:TodoInfoEvent):void {
         var info:TodoEventInfo = event.info;
-        if (info.action == TodoEventInfo.ADD)
+        if (info.action == TodoEventInfo.ADD) {
             _asyncData.addItem(info);
+        }
         else {
             for (var i:int = 0; i < _asyncData.length; i++) {
+
                 var currentEvent:TodoEventInfo = _asyncData.getItemAt(i) as TodoEventInfo;
                 if (currentEvent.todoID == info.todoID) {
                     _asyncData.setItemAt(info, i);

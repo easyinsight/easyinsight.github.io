@@ -1,5 +1,4 @@
 package com.easyinsight.notifications {
-import flash.utils.describeType;
 
 import mx.containers.HBox;
 import mx.controls.Alert;
@@ -15,23 +14,28 @@ public class TodoNotifyWindowTitleLabel extends HBox{
 
     override public function set data(value:Object):void {
         this.todoInfo = value as TodoEventInfo;
-        titleLabel.text = todoInfo.getTitle();
+        var str:String = todoInfo.getTitle();
+        if(str.length > 70)
+            titleLabel.text = str.substr(0, 67) + "...";
+        else
+            titleLabel.text = str;
+        titleLabel.toolTip = str;
     }
 
     private var todoInfo:TodoEventInfo;
     private var titleLabel:Label;
 
     override protected function createChildren():void {
-
-        this.addChild(titleLabel);
         super.createChildren();
+        this.addChild(titleLabel);
     }
 
     public function TodoNotifyWindowTitleLabel() {
+        super();
         titleLabel = new Label();
         titleLabel.percentHeight = 100;
         titleLabel.percentWidth = 100;
-        super();
+
     }
 }
 }

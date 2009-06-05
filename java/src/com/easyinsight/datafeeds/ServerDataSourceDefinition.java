@@ -200,4 +200,5 @@ public abstract class ServerDataSourceDefinition extends FeedDefinition {
     public void setSessionId(String sessionId) {
         this.sessionId = sessionId;
     }
+
 }

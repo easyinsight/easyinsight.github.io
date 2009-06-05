@@ -115,4 +115,8 @@ public class AdminStatsDataSource extends ServerDataSourceDefinition {
     protected void addData(DataStorage dataStorage, DataSet dataSet) throws SQLException {
         dataStorage.insertData(dataSet);
     }
+
+    public boolean isConfigured() {
+        return true;
+    }
 }

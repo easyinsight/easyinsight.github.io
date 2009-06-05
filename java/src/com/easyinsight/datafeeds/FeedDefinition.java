@@ -392,4 +392,10 @@ public class FeedDefinition implements Cloneable, Serializable {
     public Map<String, Key> newDataSourceFields(Credentials credentials) {
         throw new UnsupportedOperationException();
     }
+
+
+    // A little nonsensical, but returns false if not a ServerDataSource to prevent events from firing.
+    public boolean isConfigured() {
+        return false;
+    }
 }

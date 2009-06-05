@@ -16,6 +16,8 @@ import com.easyinsight.core.DataSourceDescriptor;
 import com.easyinsight.scheduler.DataSourceTaskGenerator;
 import com.easyinsight.goals.GoalTreeDescriptor;
 import com.easyinsight.PasswordStorage;
+import com.easyinsight.eventing.EventDispatcher;
+import com.easyinsight.eventing.TodoCompletedEvent;
 
 import java.util.*;
 import java.sql.SQLException;
@@ -472,6 +474,7 @@ public class FeedService implements IDataFeedService {
             }
             Database.instance().closeConnection(conn);
         }
+        EventDispatcher.instance().dispatch(new TodoCompletedEvent(feedDefinition));
         /*final User originator = new UserService().retrieveUser();
         new Thread(new Runnable() {
             public void run() {

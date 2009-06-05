@@ -42,7 +42,7 @@ public class GnipFilterControls extends HBox {
         this.addChild(editButton);
         this.addChild(deleteButton);
     }
-
+                  
     private function onDelete(event:MouseEvent):void {
         Alert.show("Are you sure you want to delete this filter? You will not be able to undo this operation.", "Alert",
                 Alert.OK | Alert.CANCEL, this, alertListener, null, Alert.CANCEL);
