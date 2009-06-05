@@ -39,11 +39,7 @@ public class TodoCompletedListener extends EIEventListener {
                     info.setFeedName(f.getFeedName());
                     info.setTodoID(todo.getId());
                     info.setUserId(todo.getUserID());
-                    AsyncMessage message = new AsyncMessage();
-                    message.setDestination("generalNotifications");
-                    message.setMessageId(UUID.randomUUID().toString());
-                    message.setBody(info);
-                    MessageBroker.getMessageBroker(null).routeMessageToService(message, null);
+                    MessageUtils.sendMessage("generalNotifications", todo);
                     
                     s.delete(todo);
                 }

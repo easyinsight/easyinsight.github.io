@@ -6,6 +6,7 @@ import com.easyinsight.datafeeds.FeedConsumer;
 import com.easyinsight.email.UserStub;
 import com.easyinsight.users.Credentials;
 import com.easyinsight.database.Database;
+import com.easyinsight.eventing.MessageUtils;
 
 
 import javax.persistence.*;
@@ -52,10 +53,6 @@ public class ServerRefreshScheduledTask extends ScheduledTask {
 
     protected void execute(Date now, Connection conn) throws Exception {
         dataSource = (ServerDataSourceDefinition) feedStorage.getFeedDefinitionData(dataSourceID);
-
-        AsyncMessage message = new AsyncMessage();
-        message.setDestination("generalNotifications");
-        message.setMessageId(UUID.randomUUID().toString());
  
         RefreshEventInfo info = new RefreshEventInfo();
         info.setTaskId(getScheduledTaskID());
@@ -64,8 +61,7 @@ public class ServerRefreshScheduledTask extends ScheduledTask {
         info.setFeedId(getDataSourceID());
         info.setFeedName(dataSource.getFeedName());
         info.setMessage(null);
-        message.setBody(info);
-        MessageBroker.getMessageBroker(null).routeMessageToService(message, null);
+        MessageUtils.sendMessage("generalNotifications", info);
 
         UserStub dataSourceUser = null;
         List<FeedConsumer> owners = dataSource.getUploadPolicy().getOwners();
@@ -83,10 +79,6 @@ public class ServerRefreshScheduledTask extends ScheduledTask {
 
     @Override
     protected void onFailure(Session s, String error) {
-        AsyncMessage message = new AsyncMessage();
-        message.setDestination("generalNotifications");
-        message.setMessageId(UUID.randomUUID().toString());
-
         RefreshEventInfo info = new RefreshEventInfo();
         info.setTaskId(getScheduledTaskID());
         info.setUserId(getUserID());
@@ -94,16 +86,12 @@ public class ServerRefreshScheduledTask extends ScheduledTask {
         info.setFeedId(getDataSourceID());
         info.setFeedName(dataSource.getFeedName());
         info.setMessage(error);
-        message.setBody(info);
-        MessageBroker.getMessageBroker(null).routeMessageToService(message, null);
+        MessageUtils.sendMessage("generalNotifications", info);
         super.onFailure(s, error);
     }
 
     @Override
     protected void onComplete(Session session) {
-        AsyncMessage message = new AsyncMessage();
-        message.setDestination("generalNotifications");
-        message.setMessageId(UUID.randomUUID().toString());
 
         RefreshEventInfo info = new RefreshEventInfo();
         info.setTaskId(getScheduledTaskID());
@@ -112,8 +100,7 @@ public class ServerRefreshScheduledTask extends ScheduledTask {
         info.setFeedId(getDataSourceID());
         info.setFeedName(dataSource.getFeedName());
         info.setMessage("Completed!");
-        message.setBody(info);
-        MessageBroker.getMessageBroker(null).routeMessageToService(message, null);
+        MessageUtils.sendMessage("generalNotifications", info);
         super.onComplete(session);
     }
 

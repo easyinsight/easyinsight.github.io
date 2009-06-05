@@ -13,6 +13,7 @@ import com.easyinsight.users.Account;
 import com.easyinsight.notifications.ConfigureDataFeedTodo;
 import com.easyinsight.notifications.TodoEventInfo;
 import com.easyinsight.notifications.ConfigureDataFeedInfo;
+import com.easyinsight.eventing.MessageUtils;
 
 import java.util.*;
 import java.sql.*;
@@ -166,11 +167,7 @@ public class SolutionService {
                 todoInfo.setUserId(todo.getUserID());
                 todoInfo.setFeedID(todo.getFeedID());
                 todoInfo.setFeedName(info.getFeedName());
-                AsyncMessage message = new AsyncMessage();
-                message.setDestination("generalNotifications");
-                message.setMessageId(UUID.randomUUID().toString());
-                message.setBody(todoInfo);
-                MessageBroker.getMessageBroker(null).routeMessageToService(message, null);
+                MessageUtils.sendMessage("generalNotifications", todoInfo);
             }
             return objects;
         } catch (Exception e) {
