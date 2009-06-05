@@ -186,6 +186,7 @@
 
         private function onLogin(event:LoginEvent):void {
             User.getEventNotifier().removeEventListener(LoginEvent.LOGIN, onLogin);
+            loggedIn = true;
             currentState = "LoggedIn";
             navigation(new NavigationEvent("Intro"));
         }

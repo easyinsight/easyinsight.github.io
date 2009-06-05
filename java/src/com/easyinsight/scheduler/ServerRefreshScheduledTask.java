@@ -74,7 +74,6 @@ public class ServerRefreshScheduledTask extends ScheduledTask {
             throw new RuntimeException();
         }
         dataSource.refreshData(refreshCreds, dataSourceUser.getAccountID(), now);
-        Session session = Database.instance().createSession(conn);
     }
 
     @Override

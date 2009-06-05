@@ -82,7 +82,7 @@
         }
 
         private function created():void {
-            uploadService.refreshData.send(dataSourceDefinition.dataFeedID, dataSourceCreation.credentials, credentialsSaved);
+            uploadService.refreshData.send(dataSourceDefinition.dataFeedID, dataSourceCreation.credentials, credentialsSaved, true);
         }
 
         private function refreshed():void {

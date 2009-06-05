@@ -456,7 +456,11 @@ public class UserUploadService implements IUserUploadService {
         }
     }
 
-        public CredentialsResponse refreshData(long feedID, Credentials credentials, boolean saveCredentials) {
+    public CredentialsResponse refreshData(long feedID, Credentials credentials, boolean saveCredentials) {
+        return refreshData(feedID, credentials, saveCredentials, false);
+    }
+
+    public CredentialsResponse refreshData(long feedID, Credentials credentials, boolean saveCredentials, boolean synchronous) {
         SecurityUtil.authorizeFeed(feedID, Roles.OWNER);
         try {
             if(saveCredentials) {
@@ -469,16 +473,19 @@ public class UserUploadService implements IUserUploadService {
                 }
             }
 
-            ServerRefreshScheduledTask task = new ServerRefreshScheduledTask();
-            task.setDataSourceID(feedID);
-            task.setUserID(SecurityUtil.getUserID());
-            task.setExecutionDate(new Date());
-            task.setStatus(ScheduledTask.INMEMORY);
-            task.setRefreshCreds(credentials);
-            Scheduler.instance().saveTask(task);
-
-
-            return new CredentialsResponse(true);
+            if (synchronous) {
+                ServerDataSourceDefinition dataSource = (ServerDataSourceDefinition) feedStorage.getFeedDefinitionData(feedID);
+                dataSource.refreshData(credentials, SecurityUtil.getAccountID(), new Date());
+            } else {
+                ServerRefreshScheduledTask task = new ServerRefreshScheduledTask();
+                task.setDataSourceID(feedID);
+                task.setUserID(SecurityUtil.getUserID());
+                task.setExecutionDate(new Date());
+                task.setStatus(ScheduledTask.INMEMORY);
+                task.setRefreshCreds(credentials);
+                Scheduler.instance().saveTask(task);
+            }
+            return new CredentialsResponse(true);            
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);
