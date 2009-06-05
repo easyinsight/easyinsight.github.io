@@ -24,7 +24,7 @@ public class EIMessageListener extends EventDispatcher {
     }
 
     private function handleFault(event:mx.messaging.events.MessageFaultEvent):void {
-        Alert.show(event.message.faultString);
+        //Alert.show(event.message.faultString);
     }
 
     private function onLogin(event:LoginEvent):void {

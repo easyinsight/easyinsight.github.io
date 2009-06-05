@@ -298,6 +298,7 @@
                 analysisWindow.addEventListener(AnalyzeEvent.ANALYZE, internalAnalyze);
                 analysisWindow.addEventListener(ModuleAnalyzeEvent.MODULE_ANALYZE, internalModuleAnalyze);
                 analysisWindow.addEventListener(AnalysisCloseEvent.ANALYSIS_CLOSE, analysisClosed);
+                analysisWindow.addEventListener(NavigationEvent.NAVIGATION, navigation);
                 dataAnalysis = analysisWindow;
                 currentState = "Analysis";
             }
@@ -312,6 +313,7 @@
             event.dataAnalysisContainer.removeEventListener(AnalysisCloseEvent.ANALYSIS_CLOSE, analysisClosed);
             event.dataAnalysisContainer.removeEventListener(AnalyzeEvent.ANALYZE, internalAnalyze);
             event.dataAnalysisContainer.removeEventListener(ModuleAnalyzeEvent.MODULE_ANALYZE, internalModuleAnalyze);
+            event.dataAnalysisContainer.removeEventListener(NavigationEvent.NAVIGATION, navigation);
             dataAnalysis = null;
             this.perspective.gotFocus();
         }
@@ -353,6 +355,7 @@
                 dataAnalysis.removeEventListener(AnalyzeEvent.ANALYZE, internalAnalyze);
                 dataAnalysis.removeEventListener(ModuleAnalyzeEvent.MODULE_ANALYZE, internalModuleAnalyze);
                 dataAnalysis.removeEventListener(AnalysisCloseEvent.ANALYSIS_CLOSE, analysisClosed);
+                dataAnalysis.removeEventListener(NavigationEvent.NAVIGATION, navigation);
                 if (loggedIn) {
                     currentState = "LoggedIn";
                 } else {
@@ -365,6 +368,7 @@
             analysisWindow.addEventListener(AnalysisCloseEvent.ANALYSIS_CLOSE, analysisClosed);
             analysisWindow.addEventListener(AnalyzeEvent.ANALYZE, internalAnalyze);
             analysisWindow.addEventListener(ModuleAnalyzeEvent.MODULE_ANALYZE, internalModuleAnalyze);
+            analysisWindow.addEventListener(NavigationEvent.NAVIGATION, navigation);
             dataAnalysis = analysisWindow;
             currentState = "Analysis";
         }

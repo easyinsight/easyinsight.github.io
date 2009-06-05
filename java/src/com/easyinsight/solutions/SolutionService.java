@@ -160,14 +160,16 @@ public class SolutionService {
             List<SolutionInstallInfo> objects = installSolution(userID, solution, conn, false);
             conn.commit();
             for(SolutionInstallInfo info : objects) {
-                ConfigureDataFeedTodo todo = info.getTodoItem();
-                ConfigureDataFeedInfo todoInfo = new ConfigureDataFeedInfo();
-                todoInfo.setTodoID(todo.getId());
-                todoInfo.setAction(TodoEventInfo.ADD);
-                todoInfo.setUserId(todo.getUserID());
-                todoInfo.setFeedID(todo.getFeedID());
-                todoInfo.setFeedName(info.getFeedName());
-                MessageUtils.sendMessage("generalNotifications", todoInfo);
+                if (info.getType() == SolutionInstallInfo.DATA_SOURCE && info.getTodoItem() != null) {
+                    ConfigureDataFeedTodo todo = info.getTodoItem();
+                    ConfigureDataFeedInfo todoInfo = new ConfigureDataFeedInfo();
+                    todoInfo.setTodoID(todo.getId());
+                    todoInfo.setAction(TodoEventInfo.ADD);
+                    todoInfo.setUserId(todo.getUserID());
+                    todoInfo.setFeedID(todo.getFeedID());
+                    todoInfo.setFeedName(info.getFeedName());
+                    MessageUtils.sendMessage("generalNotifications", todoInfo);
+                }
             }
             return objects;
         } catch (Exception e) {

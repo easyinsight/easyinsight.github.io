@@ -51,7 +51,7 @@ public class DataSourceCopyUtils {
                 clonedInsight.setDataFeedID(clonedFeedDefinition.getDataFeedID());
                 clonedInsight.setUserBindings(Arrays.asList(new UserToAnalysisBinding(userID, UserPermission.OWNER)));
                 analysisStorage.saveAnalysis(clonedInsight, conn);
-                infos.add(new SolutionInstallInfo(insight.getAnalysisID(), clonedInsight.getAnalysisID(), SolutionInstallInfo.INSIGHT, null));
+                infos.add(new SolutionInstallInfo(insight.getAnalysisID(), clonedInsight.getAnalysisID(), SolutionInstallInfo.INSIGHT, null, false));
                 List<FeedDefinition> insightFeeds = getFeedsFromInsight(clonedInsight.getAnalysisID(), conn);
                 for (FeedDefinition insightFeed : insightFeeds) {
                     infos.addAll(installFeed(userID, conn, copyData, insightFeed.getDataFeedID(), insightFeed, true, null));
@@ -59,13 +59,17 @@ public class DataSourceCopyUtils {
             }
         }
 
-        Session session = Database.instance().createSession(conn);
-        ConfigureDataFeedTodo todo = new ConfigureDataFeedTodo();
-        todo.setFeedID(clonedFeedDefinition.getDataFeedID());
-        todo.setUserID(userID);
-        session.save(todo);
-        session.flush();
-        infos.add(new SolutionInstallInfo(feedDefinition.getDataFeedID(), clonedFeedDefinition.getDataFeedID(), SolutionInstallInfo.DATA_SOURCE, todo, clonedFeedDefinition.getFeedName()));
+        ConfigureDataFeedTodo todo = null;        
+        if (feedDefinition instanceof ServerDataSourceDefinition) {
+            Session session = Database.instance().createSession(conn);
+
+            todo = new ConfigureDataFeedTodo();
+            todo.setFeedID(clonedFeedDefinition.getDataFeedID());
+            todo.setUserID(userID);
+            session.save(todo);
+            session.flush();
+        }
+        infos.add(new SolutionInstallInfo(feedDefinition.getDataFeedID(), clonedFeedDefinition.getDataFeedID(), SolutionInstallInfo.DATA_SOURCE, todo, clonedFeedDefinition.getFeedName(), todo != null));
 
 
         

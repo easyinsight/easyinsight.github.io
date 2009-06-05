@@ -20,7 +20,11 @@
 		<![CDATA[
 			import com.easyinsight.customupload.ConfigureDataSource;
 
-        import mx.collections.ArrayCollection;
+            import com.easyinsight.genredata.ModuleAnalyzeEvent;
+
+            import com.easyinsight.util.ProgressAlert;
+
+            import mx.collections.ArrayCollection;
 			import mx.managers.PopUpManager;
 
             [Bindable]
@@ -80,6 +84,7 @@
 			
 			private function install():void {
                 var insightDescriptor:InsightDescriptor;
+                ProgressAlert.alert(this, "Installing solution...", null, solutionService.installSolution);
 				solutionService.installSolution.send(_solution.solutionID);
 			}
 			
@@ -99,18 +104,30 @@
                 showGoalTrees = goalTrees.length > 0;
                 goalCount = goalTrees.length;
             }
-			
-			private function installedSolution():void {
+
+            private function onModuleAnalyze(event:ModuleAnalyzeEvent):void {
+                dispatchEvent(event);
+            }
+
+            private function installedSolution():void {
 				installResult = solutionService.installSolution.lastResult as ArrayCollection;
+                var configuredSources:int = 0;
+                for each (var solInstall:SolutionInstallInfo in installResult) {
+                    if (solInstall.type == SolutionInstallInfo.DATA_SOURCE && solInstall.requiresConfiguration) {
+                        configuredSources++;
+                    }
+                }
                 for each (var solutionInstallInfo:SolutionInstallInfo in installResult) {
-                    if (solutionInstallInfo.type == SolutionInstallInfo.DATA_SOURCE) {
+                    if (solutionInstallInfo.type == SolutionInstallInfo.DATA_SOURCE && solutionInstallInfo.requiresConfiguration) {
                         var configWindow:ConfigureDataSource = new ConfigureDataSource();
                         configWindow.dataSourceID = solutionInstallInfo.newID;
+                        configWindow.onlyDataSource = configuredSources == 1;
+                        configWindow.addEventListener(ModuleAnalyzeEvent.MODULE_ANALYZE, onModuleAnalyze);
                         PopUpManager.addPopUp(configWindow, this, true);
                         PopUpManager.centerPopUp(configWindow);
                     }
                 }
-				currentState = "installComplete";			
+				PopUpManager.removePopUp(this);			
 				dispatchEvent(new SolutionEvent(SolutionEvent.SOLUTION_INSTALLED, _solution.solutionID));
 			}
 		]]>

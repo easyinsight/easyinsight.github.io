@@ -9,6 +9,7 @@ public class SolutionInstallInfo {
     public var previousID:int;
     public var newID:int;
     public var type:int;
+    public var requiresConfiguration:Boolean;
 
     public function SolutionInstallInfo() {
     }

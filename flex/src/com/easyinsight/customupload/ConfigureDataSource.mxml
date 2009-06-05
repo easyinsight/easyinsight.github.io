@@ -3,6 +3,10 @@
     <mx:Script><![CDATA[
         import com.easyinsight.administration.feed.ServerDataSourceDefinition;
 
+        import com.easyinsight.genredata.ModuleAnalyzeEvent;
+        import com.easyinsight.listing.DataFeedDescriptor;
+        import com.easyinsight.listing.DescriptorAnalyzeSource;
+
         import mx.controls.Alert;
         import mx.managers.PopUpManager;
 
@@ -11,11 +15,17 @@
         private var _dataSourceID:int;
         private var _dataSourceDefinition:ServerDataSourceDefinition;
 
+        private var _onlyDataSource:Boolean;
+
         [Bindable]
         private var ready:Boolean;
 
         [Bindable]
         private var credentialsSaved:Boolean;
+
+        public function set onlyDataSource(value:Boolean):void {
+            _onlyDataSource = value;
+        }
 
         override protected function createChildren():void {
             super.createChildren();
@@ -76,6 +86,12 @@
         }
 
         private function refreshed():void {
+            if (_onlyDataSource) {
+                var descriptor:DataFeedDescriptor = new DataFeedDescriptor();
+                descriptor.dataFeedID = dataSourceDefinition.dataFeedID;
+                descriptor.name = dataSourceDefinition.feedName;
+                dispatchEvent(new ModuleAnalyzeEvent(new DescriptorAnalyzeSource(descriptor)));
+            }
             PopUpManager.removePopUp(this);
         }
 

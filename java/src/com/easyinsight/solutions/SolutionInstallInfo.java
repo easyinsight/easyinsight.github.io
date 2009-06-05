@@ -15,22 +15,29 @@ public class SolutionInstallInfo {
     private long previousID;
     private long newID;
     private int type;
+    private boolean requiresConfiguration;
     private ConfigureDataFeedTodo todoItem;
     private String feedName;
 
-    public SolutionInstallInfo(long previousID, long newID, int type, ConfigureDataFeedTodo todoItem) {
+    public SolutionInstallInfo(long previousID, long newID, int type, ConfigureDataFeedTodo todoItem, boolean requiresConfiguration) {
         this.previousID = previousID;
         this.newID = newID;
         this.type = type;
         this.todoItem = todoItem;
+        this.requiresConfiguration = requiresConfiguration;
     }
 
-    public SolutionInstallInfo(long previousID, long newID, int type, ConfigureDataFeedTodo todoItem, String feedName) {
-        this.previousID = previousID;
-        this.newID = newID;
-        this.type = type;
-        this.todoItem = todoItem;
+    public SolutionInstallInfo(long previousID, long newID, int type, ConfigureDataFeedTodo todoItem, String feedName, boolean requiresConfiguration) {
+        this(previousID, newID, type, todoItem, requiresConfiguration);
         this.feedName = feedName;
+    }
+
+    public boolean isRequiresConfiguration() {
+        return requiresConfiguration;
+    }
+
+    public void setRequiresConfiguration(boolean requiresConfiguration) {
+        this.requiresConfiguration = requiresConfiguration;
     }
 
     public int getType() {

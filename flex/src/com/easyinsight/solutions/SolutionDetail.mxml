@@ -5,7 +5,9 @@
 		<![CDATA[
 			import com.easyinsight.analysis.AnalysisCloseEvent;
 
-        import com.easyinsight.util.FileAlert;
+            import com.easyinsight.framework.NavigationEvent;
+            import com.easyinsight.genredata.ModuleAnalyzeEvent;
+            import com.easyinsight.util.FileAlert;
 
         import mx.controls.Alert;
 
@@ -170,10 +172,20 @@
             trace(event);
         }
 
-        private function install():void {
+            private function onModuleAnalyze(event:ModuleAnalyzeEvent):void {
+                dispatchEvent(event);
+            }
+
+            private function install():void {
             var window:SolutionInstallationWindow = SolutionInstallationWindow(PopUpManager.createPopUp(this.parent, SolutionInstallationWindow, true));
+            window.addEventListener(SolutionEvent.SOLUTION_INSTALLED, onSolutionInstalled);
+            window.addEventListener(ModuleAnalyzeEvent.MODULE_ANALYZE, onModuleAnalyze);
             window.solution = this._solution;
             PopUpManager.centerPopUp(window);
+        }
+
+        private function onSolutionInstalled(event:SolutionEvent):void {
+            dispatchEvent(new NavigationEvent("My Data"));
         }
 
         private function complete(event:Event):void {

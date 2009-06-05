@@ -47,7 +47,7 @@ public class TodoButton extends CorePageButton{
     }
 
     [Bindable]
-    private var _asyncData:ArrayCollection;
+    private var _asyncData:ArrayCollection = new ArrayCollection();
 
     private function tasksRetrieved(event:ResultEvent):void {
         _asyncData = userUploadService.getTodoEvents.lastResult as ArrayCollection;
