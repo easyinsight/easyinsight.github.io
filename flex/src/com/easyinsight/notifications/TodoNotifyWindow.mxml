@@ -21,11 +21,6 @@
         }
 
         ]]></mx:Script>
-
-    <mx:DataGrid id="dataGrid" dataProvider="{_data}">
-        <mx:columns>
-            <util:EIDataGridColumn headerText="Name" width="350" itemRenderer="com.easyinsight.notifications.TodoNotifyWindowTitleLabel" />
-            <util:EIDataGridColumn headerText="" dataField="title" width="48" itemRenderer="com.easyinsight.notifications.TodoNotifyWindowNavigateIcon"/>
-        </mx:columns>
-    </mx:DataGrid>
+    <mx:TileList id="tileList" dataProvider="{_data}" itemRenderer="com.easyinsight.notifications.TodoNotifyWindowRenderer" width="400" columnWidth="400">
+    </mx:TileList>
 </mx:TitleWindow>
