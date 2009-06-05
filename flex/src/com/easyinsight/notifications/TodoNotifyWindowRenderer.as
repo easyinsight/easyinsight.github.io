@@ -38,6 +38,7 @@ public class TodoNotifyWindowRenderer extends HBox {
     private var todoInfo:TodoEventInfo;
     private var titleLabel:Label;
     private var button:Button;
+    private var deleteButton:Button;
 
     [Embed(source="../../../../assets/businessman_edit.png")]
     private var administerIcon:Class;
@@ -45,10 +46,14 @@ public class TodoNotifyWindowRenderer extends HBox {
     [Embed(source="../../../../assets/check_x16.png")]
     private var checkboxIcon:Class;
 
+    [Embed(source="../../../../assets/navigate_cross.png")]
+    private var cancelIcon:Class
+
     override protected function createChildren():void {
         super.createChildren();
         this.addChild(titleLabel);
         this.addChild(button);
+        this.addChild(deleteButton);
     }
 
     public function TodoNotifyWindowRenderer() {
@@ -59,8 +64,15 @@ public class TodoNotifyWindowRenderer extends HBox {
         titleLabel.setStyle("fontSize", 11);
         button = new Button();
         button.addEventListener(MouseEvent.CLICK, onNavigateClick);
+        deleteButton = new Button();
+        deleteButton.setStyle("icon", cancelIcon);
+        deleteButton.addEventListener(MouseEvent.CLICK, onDelete);
         this.setStyle("verticalAlign", "middle");
         this.percentWidth=100;
+    }
+
+    private function onDelete(event:MouseEvent):void {
+        dispatchEvent(new TodoDeleteEvent(todoInfo));
     }
 
     private function onNavigateClick(event:MouseEvent):void {

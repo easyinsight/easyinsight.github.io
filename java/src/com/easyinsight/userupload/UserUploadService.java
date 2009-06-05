@@ -332,8 +332,16 @@ public class UserUploadService implements IUserUploadService {
             int role = SecurityUtil.getUserRoleToFeed(dataFeedID);
             if (role == Roles.OWNER) {
                 DataStorage.delete(dataFeedID, conn);
+                // cascade into base classes - see http://bugs.mysql.com/bug.php?id=13102 as to why this code sucks.
+                PreparedStatement deleteTodosStmt = conn.prepareStatement("delete from todo_base where todo_id in (select todo_id from configure_data_feed_todo where data_source_id = ?)");
+                PreparedStatement deleteAsyncTasksStmt = conn.prepareStatement("DELETE FROM scheduled_task WHERE scheduled_task_id in (select scheduled_task_id from server_refresh_task where data_source_id = ?)");
                 PreparedStatement deleteStmt = conn.prepareStatement("DELETE FROM DATA_FEED WHERE DATA_FEED_ID = ?");
+                deleteTodosStmt.setLong(1, dataFeedID);
+                deleteAsyncTasksStmt.setLong(1, dataFeedID);
                 deleteStmt.setLong(1, dataFeedID);
+
+                deleteTodosStmt.executeUpdate();
+                deleteAsyncTasksStmt.executeUpdate();
                 deleteStmt.executeUpdate();
             } else if (role == Roles.SUBSCRIBER) {
                 deleteUserFeedLink(SecurityUtil.getUserID(), dataFeedID, conn);
@@ -550,6 +558,32 @@ public class UserUploadService implements IUserUploadService {
         }
     }
 
+    public void deleteTodo(long todoID) {
+        long userID = SecurityUtil.getUserID();
+        try {
+            Session s = Database.instance().createSession();
+            try {
+                s.getTransaction().begin();
+                TodoBase todo = (TodoBase) s.get(TodoBase.class, todoID);
+                if(todo != null && todo.getUserID() == userID)
+                    s.delete(todo);
+                s.getTransaction().commit();
+            }
+            catch(Exception e) {
+                LogClass.error(e);
+                s.getTransaction().rollback();
+            }
+            finally {
+                s.close();
+            }
+
+
+        }
+        catch(Exception e) {
+            LogClass.error(e);
+        }
+    }
+
     public List<TodoEventInfo> getTodoEvents() {
         long userID = SecurityUtil.getUserID();
         try {
@@ -572,31 +606,7 @@ public class UserUploadService implements IUserUploadService {
 
                     }
                     for(Map.Entry<Integer, List<TodoBase>> listPair : mapping.entrySet()) {
-                        switch(listPair.getKey()) {
-                            case TodoBase.CONFIGURE_DATA_SOURCE:
-                                List<TodoEventInfo> result = new LinkedList<TodoEventInfo>();
-                                List<Long> feedIDs = new LinkedList<Long>();
-                                for(TodoBase cur : listPair.getValue()) {
-                                    ConfigureDataFeedTodo configTodo = (ConfigureDataFeedTodo) cur;
-                                    ConfigureDataFeedInfo resultInfo = new ConfigureDataFeedInfo();
-                                    resultInfo.setUserId(configTodo.getUserID());
-                                    resultInfo.setTodoID(configTodo.getId());
-                                    resultInfo.setAction(TodoEventInfo.ADD);
-                                    resultInfo.setFeedID(configTodo.getFeedID());
-                                    feedIDs.add(configTodo.getFeedID());
-                                    result.add(resultInfo);
-                                }
-
-                                Map<Long, String> dataFeedMapping = FeedUtil.getFeedNames(feedIDs, conn);
-                                for(TodoEventInfo cur : result) {
-                                    ConfigureDataFeedInfo configInfo = (ConfigureDataFeedInfo) cur;
-                                    configInfo.setFeedName(dataFeedMapping.get(configInfo.getFeedID()));
-                                }
-                                translatedResults.addAll(result);
-                                break;
-                            default:
-                                throw new RuntimeException("Invalid type of todo found!");
-                        }
+                        addTodosForTypes(conn, translatedResults, listPair);
                     }
 
                 }
@@ -616,7 +626,35 @@ public class UserUploadService implements IUserUploadService {
             throw new RuntimeException(e);
         }
     }
-    
+
+    private void addTodosForTypes(EIConnection conn, List<TodoEventInfo> translatedResults, Map.Entry<Integer, List<TodoBase>> listPair) throws SQLException {
+        switch(listPair.getKey()) {
+            case TodoBase.CONFIGURE_DATA_SOURCE:
+                List<TodoEventInfo> result = new LinkedList<TodoEventInfo>();
+                List<Long> feedIDs = new LinkedList<Long>();
+                for(TodoBase cur : listPair.getValue()) {
+                    ConfigureDataFeedTodo configTodo = (ConfigureDataFeedTodo) cur;
+                    ConfigureDataFeedInfo resultInfo = new ConfigureDataFeedInfo();
+                    resultInfo.setUserId(configTodo.getUserID());
+                    resultInfo.setTodoID(configTodo.getId());
+                    resultInfo.setAction(TodoEventInfo.ADD);
+                    resultInfo.setFeedID(configTodo.getFeedID());
+                    feedIDs.add(configTodo.getFeedID());
+                    result.add(resultInfo);
+                }
+
+                Map<Long, String> dataFeedMapping = FeedUtil.getFeedNames(feedIDs, conn);
+                for(TodoEventInfo cur : result) {
+                    ConfigureDataFeedInfo configInfo = (ConfigureDataFeedInfo) cur;
+                    configInfo.setFeedName(dataFeedMapping.get(configInfo.getFeedID()));
+                }
+                translatedResults.addAll(result);
+                break;
+            default:
+                throw new RuntimeException("Invalid type of todo found!");
+        }
+    }
+
 
     public List<RefreshEventInfo> getOngoingTasks() {
 

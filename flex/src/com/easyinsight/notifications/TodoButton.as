@@ -30,9 +30,15 @@ public class TodoButton extends CorePageButton{
         addEventListener(MouseEvent.CLICK, onClick);
     }
 
+    private function onTodoDelete(event:TodoDeleteEvent):void {
+        _asyncData.removeItemAt(_asyncData.getItemIndex(event.todoItem));
+        userUploadService.deleteTodo.send(event.todoItem.todoID);
+    }
+
     private function onClick(event:MouseEvent):void {
         if (asyncWindow == null) {
             asyncWindow = new TodoNotifyWindow();
+            asyncWindow.addEventListener(TodoDeleteEvent.TODO_DELETE, onTodoDelete);
             BindingUtils.bindProperty(asyncWindow, "data", this, "asyncData");
         }
         PopUpManager.addPopUp(asyncWindow, this, false);

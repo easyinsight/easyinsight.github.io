@@ -49,13 +49,18 @@ public class BackgroundTaskButton extends CorePageButton{
             if (asyncWindow == null) {
                 asyncWindow = new AsyncNotifyWindow();
                 BindingUtils.bindProperty(asyncWindow, "data", this, "asyncData");
-                asyncWindow.addEventListener(CloseEvent.CLOSE, onClose);                
+                asyncWindow.addEventListener(CloseEvent.CLOSE, onClose);
+                asyncWindow.addEventListener(AsyncDeleteEvent.ASYNC_DELETE, onDelete);
             }
             PopUpManager.addPopUp(asyncWindow, this, false);
             asyncWindow.x = lastX;
             asyncWindow.y = lastY;
         }
         showingWindow = !showingWindow;
+    }
+
+    private function onDelete(event:AsyncDeleteEvent):void {
+        _asyncData.removeItemAt(_asyncData.getItemIndex(event.info));
     }
 
     private function onClose(event:CloseEvent):void {

@@ -16,6 +16,10 @@ public class NotificationProgressColumnControls extends HBox {
 
     private var progress:ProgressBar;
     private var infoLabel:Label;
+    private var deleteButton:Button;
+
+    [Embed(source="../../../../assets/navigate_cross.png")]
+    private var cancelIcon:Class
 
     [Bindable("dataChange")]
     [Inspectable(environment="none")]
@@ -39,6 +43,7 @@ public class NotificationProgressColumnControls extends HBox {
             infoLabel.text = dataItem.message;
             this.addChild(infoLabel);
         }
+        this.addChild(deleteButton);
     }
 
     private var dataItem:RefreshEventInfo;
@@ -47,6 +52,14 @@ public class NotificationProgressColumnControls extends HBox {
     public function NotificationProgressColumnControls() {
         this.setStyle("horizontalAlign", "center");
         this.percentWidth = 100;
+        this.setStyle("verticalAlign", "middle");
+        deleteButton = new Button();
+        deleteButton.setStyle("icon", cancelIcon);
+        deleteButton.addEventListener(MouseEvent.CLICK, onDeleteClicked);
+    }
+
+    private function onDeleteClicked(event:MouseEvent):void {
+        dispatchEvent(new AsyncDeleteEvent(dataItem));
     }
 
     override protected function createChildren():void {
