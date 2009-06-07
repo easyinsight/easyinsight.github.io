@@ -43,7 +43,7 @@ public class FilterDateRangeDefinition extends FilterDefinition {
         return new MaterializedFilterDateRangeDefinition(getField(), startDate, endDate);
     }
 
-    public String toQuerySQL() {
+    public String toQuerySQL(String tableName) {
         StringBuilder queryBuilder = new StringBuilder();
         String columnName = "k" + getField().getKey().getKeyID();
         queryBuilder.append(columnName);

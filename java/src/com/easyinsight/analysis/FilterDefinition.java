@@ -49,7 +49,7 @@ public abstract class FilterDefinition implements Serializable {
 
     public abstract MaterializedFilterDefinition materialize(InsightRequestMetadata insightRequestMetadata);
 
-    public abstract String toQuerySQL();
+    public abstract String toQuerySQL(String tableName);
 
     public abstract int populatePreparedStatement(PreparedStatement preparedStatement, int start, int type, InsightRequestMetadata insightRequestMetadata) throws SQLException;
 

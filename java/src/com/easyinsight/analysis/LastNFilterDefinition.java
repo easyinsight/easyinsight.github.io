@@ -33,7 +33,7 @@ public class LastNFilterDefinition extends FilterDefinition {
         return new MaterializedLastNFilterDefinition(getField(), limit);
     }
 
-    public String toQuerySQL() {
+    public String toQuerySQL(String tableName) {
         // TODO: implement
         StringBuilder queryBuilder = new StringBuilder();
         return queryBuilder.toString();

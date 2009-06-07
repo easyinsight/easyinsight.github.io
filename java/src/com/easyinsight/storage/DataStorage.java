@@ -510,7 +510,7 @@ public class DataStorage {
             Iterator<FilterDefinition> filterIter = filters.iterator();
             while (filterIter.hasNext()) {
                 FilterDefinition filterDefinition = filterIter.next();
-                whereBuilder.append(filterDefinition.toQuerySQL());
+                whereBuilder.append(filterDefinition.toQuerySQL(getTableName()));
                 if (filterIter.hasNext()) {
                     whereBuilder.append(" AND ");
                 }
@@ -581,6 +581,7 @@ public class DataStorage {
         String columns = columnBuilder.toString();
         String parameters = paramBuilder.toString();
         String insertSQL = "INSERT INTO " + getTableName() + " (" + columns + ") VALUES (" + parameters + ")";
+        System.out.println("inserting into database " + database.getID() + " table " + getTableName());
         PreparedStatement insertStmt = storageConn.prepareStatement(insertSQL);
         try {
             for (IRow row : dataSet.getRows()) {
@@ -976,7 +977,7 @@ public class DataStorage {
         sqlBuilder.append(getTableName());
         sqlBuilder.append(" WHERE ");
         for (FilterDefinition filterDefinition : filters) {
-            sqlBuilder.append(filterDefinition.toQuerySQL());
+            sqlBuilder.append(filterDefinition.toQuerySQL(getTableName()));
             sqlBuilder.append(",");
         }
         sqlBuilder.deleteCharAt(sqlBuilder.length() - 1);

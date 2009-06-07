@@ -23,6 +23,7 @@ public class MaterializedRollingFilterDefinition extends MaterializedFilterDefin
     public static final int MONTH_TO_NOW = 8;
     public static final int QUARTER_TO_NOW = 9;
     public static final int YEAR_TO_NOW = 10;
+    public static final int LAST_DAY = 10;
 
     private long limitDate;
     private Date now;

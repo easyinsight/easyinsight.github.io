@@ -60,7 +60,7 @@ public class FilterRangeDefinition extends FilterDefinition {
         return new MaterializedFilterRangeDefinition(getField(), startValueDefined ? startValue : null, endValueDefined ? endValue : null);
     }
 
-    public String toQuerySQL() {
+    public String toQuerySQL(String tableName) {
         StringBuilder queryBuilder = new StringBuilder();
         String columnName = "k" + getField().getKey().getKeyID();
         queryBuilder.append(columnName);

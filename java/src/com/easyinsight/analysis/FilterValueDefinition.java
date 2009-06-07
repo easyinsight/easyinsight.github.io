@@ -70,7 +70,7 @@ public class FilterValueDefinition extends FilterDefinition {
         return persistableFilterDefinition;
     }
 
-    public String toQuerySQL() {
+    public String toQuerySQL(String tableName) {
         StringBuilder queryBuilder = new StringBuilder();
         String columnName = getField().toKeySQL();
         queryBuilder.append(columnName);

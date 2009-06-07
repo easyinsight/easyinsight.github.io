@@ -37,20 +37,26 @@ public class RollingFilterDefinition extends FilterDefinition {
         return new MaterializedRollingFilterDefinition(getField(), interval, insightRequestMetadata == null ? null : insightRequestMetadata.getNow());
     }
 
-    public String toQuerySQL() {
+    public String toQuerySQL(String tableName) {
         StringBuilder queryBuilder = new StringBuilder();
-        queryBuilder.append(getField().toKeySQL());
-        queryBuilder.append(" >= ? AND ");
-        queryBuilder.append(getField().toKeySQL());
-        queryBuilder.append(" <= ?");
+        if (interval == MaterializedRollingFilterDefinition.LAST_DAY) {
+            queryBuilder.append("date(").append(getField().toKeySQL()).append(") = (select max(date(").append(getField().toKeySQL()).append(")) from ").append(tableName).append(")");
+        } else {
+            queryBuilder.append(getField().toKeySQL());
+            queryBuilder.append(" >= ? AND ");
+            queryBuilder.append(getField().toKeySQL());
+            queryBuilder.append(" <= ?");
+        }
         return queryBuilder.toString();
     }
 
     public int populatePreparedStatement(PreparedStatement preparedStatement, int start, int type, InsightRequestMetadata insightRequestMetadata) throws SQLException {
-        Date now = insightRequestMetadata.getNow();
-        long startTime = MaterializedRollingFilterDefinition.findStartDate(interval, now);
-        preparedStatement.setTimestamp(start++, new java.sql.Timestamp(startTime));
-        preparedStatement.setTimestamp(start++, new java.sql.Timestamp(now.getTime()));
+        if (interval != MaterializedRollingFilterDefinition.LAST_DAY) {
+            Date now = insightRequestMetadata.getNow();
+            long startTime = MaterializedRollingFilterDefinition.findStartDate(interval, now);
+            preparedStatement.setTimestamp(start++, new java.sql.Timestamp(startTime));
+            preparedStatement.setTimestamp(start++, new java.sql.Timestamp(now.getTime()));
+        }
         return start;
     }
 }
