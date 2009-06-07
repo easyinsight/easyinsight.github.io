@@ -14,7 +14,8 @@ package com.easyinsight.filtering
 		public static const MONTH_TO_NOW:int = 8;
 		public static const QUARTER_TO_NOW:int = 9;
 		public static const YEAR_TO_NOW:int = 10;        
-		
+		public static const LAST_DAY:int = 10;        
+
 		public var interval:int = DAY;
 		
 		public function RollingDateRangeFilterDefinition()
