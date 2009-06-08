@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <mx:Application xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:account="com.easyinsight.account.*"
                 xmlns:solutions="com.easyinsight.solutions.*" layout="absolute"
-                xmlns:genres="com.easyinsight.administration.genres.*" creationComplete="setup()"
+                creationComplete="setup()"
                 xmlns:system="com.easyinsight.administration.system.*">
     <mx:states>
         <mx:State name="loggedIn">
@@ -26,11 +26,6 @@
     <mx:Script>
 		<![CDATA[
         import com.easyinsight.account.Account;
-import com.easyinsight.solutions.UpdateSolutionArchiveWindow;
-
-        import mx.managers.PopUpManager;
-
-        import com.easyinsight.solutions.CreateSolutionWindow;
         import com.easyinsight.framework.User;
         import com.easyinsight.framework.UserServiceResponse;
 

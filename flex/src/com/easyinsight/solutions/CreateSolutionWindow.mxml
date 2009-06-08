@@ -2,7 +2,8 @@
 <mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" creationComplete="goalService.getGoalTrees.send()">
 	<mx:Script>
 		<![CDATA[
-			import com.easyinsight.listing.DataFeedDescriptor;
+			import com.easyinsight.goals.GoalTreeDescriptor;
+        import com.easyinsight.listing.DataFeedDescriptor;
 			import mx.managers.PopUpManager;
 			import mx.collections.ArrayCollection;
 			
@@ -55,7 +56,7 @@
                 _solution.copyData = includeDataCheckbox.selected;
                 _solution.solutionTier = accountTierBox.selectedIndex + 1;
                 if (goalTreeComboBox.selectedIndex > 0) {
-                    _solution.goalTreeID = goalTreeComboBox.selectedItem.goalTreeID;
+                    _solution.goalTreeID = goalTreeComboBox.selectedItem.id;
                 }
 				var feedIDs:ArrayCollection = new ArrayCollection();
 				for each (var feedDescriptor:DataFeedDescriptor in includedFeeds) {
@@ -95,6 +96,16 @@
                 var treesWithNoneOption:ArrayCollection = new ArrayCollection(goalTrees.source);
                 treesWithNoneOption.addItemAt({name: "[ No Selection ]"}, 0);
                 this.goalTrees = treesWithNoneOption;
+                if (_solution.goalTreeID > 0) {
+                    for each (var obj:Object in goalTrees) {
+                        if (obj is GoalTreeDescriptor) {
+                            var descriptor:GoalTreeDescriptor = obj as GoalTreeDescriptor;
+                            if (descriptor.id == _solution.goalTreeID) {
+                                goalTreeComboBox.selectedItem = descriptor;
+                            }
+                        }
+                    }
+                }
             }
 		]]>
 	</mx:Script>

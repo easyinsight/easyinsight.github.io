@@ -402,7 +402,7 @@ public class SolutionService {
         List<Solution> solutions = new ArrayList<Solution>();
         Connection conn = Database.instance().getConnection();
         try {
-            PreparedStatement getSolutionsStmt = conn.prepareStatement("SELECT SOLUTION_ID, NAME, DESCRIPTION, INDUSTRY, AUTHOR, COPY_DATA, SOLUTION_ARCHIVE_NAME, GOAL_TREE_ID FROM SOLUTION WHERE SOLUTION_TIER <= ?");
+            PreparedStatement getSolutionsStmt = conn.prepareStatement("SELECT SOLUTION_ID, NAME, DESCRIPTION, INDUSTRY, AUTHOR, COPY_DATA, SOLUTION_ARCHIVE_NAME, GOAL_TREE_ID, SOLUTION_TIER FROM SOLUTION WHERE SOLUTION_TIER <= ?");
             getSolutionsStmt.setInt(1, accountType);
             PreparedStatement dataSourceCountStmt = conn.prepareStatement("SELECT COUNT(*) FROM solution_to_feed WHERE solution_id = ?");
             PreparedStatement goalTreeCountStmt = conn.prepareStatement("SELECT COUNT(*) FROM solution_to_goal_tree WHERE solution_id = ?");
@@ -416,6 +416,7 @@ public class SolutionService {
                 boolean copyData = rs.getBoolean(6);
                 String solutionArchiveName = rs.getString(7);
                 long goalTreeID = rs.getLong(8);
+                int solutionTier = rs.getInt(9);
                 Solution solution = new Solution();
                 solution.setName(name);
                 solution.setDescription(description);
@@ -425,6 +426,7 @@ public class SolutionService {
                 solution.setCopyData(copyData);
                 solution.setSolutionArchiveName(solutionArchiveName);
                 solution.setGoalTreeID(goalTreeID);
+                solution.setSolutionTier(solutionTier);
                 dataSourceCountStmt.setLong(1, solutionID);
                 ResultSet dataSourceRS = dataSourceCountStmt.executeQuery();
                 dataSourceRS.next();
