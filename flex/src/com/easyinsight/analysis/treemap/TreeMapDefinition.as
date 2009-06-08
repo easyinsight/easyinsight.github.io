@@ -19,7 +19,7 @@ public class TreeMapDefinition extends AnalysisDefinition{
     public var measure2:AnalysisItem;
     public var hierarchy:AnalysisItem;
     public var treeMapDefinitionID:int;
-    public var colorScheme:int;
+    public var colorScheme:int = QUALITATIVE;
 
     override public function get type():int {
         return AnalysisDefinition.TREEMAP;
