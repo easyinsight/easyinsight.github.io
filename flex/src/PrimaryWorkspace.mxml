@@ -389,7 +389,9 @@
                 User.getInstance().password = authResult.encryptedPassword;
                 User.getInstance().userName = authResult.userName;
                 loggedIn = true;
-                currentState = "LoggedIn";
+                if (currentState == "" || currentState == null) {
+                    currentState = "LoggedIn";
+                }
                 User.getEventNotifier().dispatchEvent(new LoginEvent(LoginEvent.LOGIN));
             } else {
                 User.getEventNotifier().addEventListener(LoginEvent.LOGIN, onLogin);
