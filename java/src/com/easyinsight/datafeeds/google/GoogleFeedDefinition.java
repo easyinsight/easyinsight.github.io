@@ -112,7 +112,7 @@ public class GoogleFeedDefinition extends ServerDataSourceDefinition {
     }
 
     @Override
-    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, DataSet dataSet) {
+    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, DataSet dataSet, Credentials credentials) {
         return populateFields(dataSet);
     }
 

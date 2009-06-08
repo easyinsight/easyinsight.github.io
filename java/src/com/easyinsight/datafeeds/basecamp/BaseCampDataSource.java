@@ -1,6 +1,7 @@
 package com.easyinsight.datafeeds.basecamp;
 
 import org.apache.commons.httpclient.*;
+import org.apache.commons.httpclient.Credentials;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.auth.AuthScope;
 import org.apache.ws.security.util.XmlSchemaDateFormat;
@@ -24,7 +25,7 @@ import com.easyinsight.core.Key;
 import com.easyinsight.core.NumericValue;
 import com.easyinsight.core.DateValue;
 import com.easyinsight.analysis.*;
-import com.easyinsight.users.Account;
+import com.easyinsight.users.*;
 import com.easyinsight.logging.LogClass;
 
 /**
@@ -243,7 +244,7 @@ public class BaseCampDataSource extends ServerDataSourceDefinition {
         return url != null && !url.isEmpty();
     }
 
-    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, DataSet dataSet) {
+    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, DataSet dataSet, com.easyinsight.users.Credentials credentials) {
         List<AnalysisItem> analysisItems = new ArrayList<AnalysisItem>();
         AnalysisDimension itemDim = new AnalysisDimension(keys.get(ITEMID), true);
         analysisItems.add(itemDim);

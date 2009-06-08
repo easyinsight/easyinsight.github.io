@@ -13,6 +13,7 @@ import com.easyinsight.analysis.*;
 import com.easyinsight.core.DateValue;
 import com.easyinsight.core.Key;
 import com.easyinsight.core.NumericValue;
+import com.easyinsight.core.NamedKey;
 
 import javax.xml.rpc.ServiceException;
 import java.util.*;
@@ -91,6 +92,7 @@ public class JiraDataSource extends ServerDataSourceDefinition {
             JiraSoapService jiraSoapService = jiraSoapServiceGetter.getJirasoapserviceV2();
             String token = jiraSoapService.login(userName, password);
             RemoteStatus[] statuses = jiraSoapService.getStatuses(token);
+
             Map<String, String> statusMap = new HashMap<String, String>();
             for (RemoteStatus remoteStatus : statuses) {
                 statusMap.put(remoteStatus.getId(), remoteStatus.getName());
@@ -102,6 +104,11 @@ public class JiraDataSource extends ServerDataSourceDefinition {
             Map<String, String> typeMap = new HashMap<String, String>();
             for (RemoteIssueType type : jiraSoapService.getIssueTypes(token)) {
                 typeMap.put(type.getId(), type.getName());
+            }
+            Map<String, String> customFieldMap = new HashMap<String, String>();
+            RemoteField[] remoteFields = jiraSoapService.getCustomFields(token);
+            for (RemoteField remoteField : remoteFields) {
+                customFieldMap.put(remoteField.getId(), remoteField.getName());
             }
             RemoteIssue[] issues = jiraSoapService.getIssuesFromTextSearch(token, null);
             for (RemoteIssue issue : issues) {
@@ -131,6 +138,7 @@ public class JiraDataSource extends ServerDataSourceDefinition {
                     }
                     versionString = versionBuilder.substring(0, versionBuilder.length() - 1);    
                 }
+
                 String project = issue.getProject();
                 IRow row = dataSet.createRow();
                 row.addValue(keys.get(REPORTER), reporter);
@@ -144,12 +152,57 @@ public class JiraDataSource extends ServerDataSourceDefinition {
                 row.addValue(keys.get(VERSIONS), versionString);
                 row.addValue(keys.get(TYPE), typeMap.get(type));
                 row.addValue(keys.get(UPDATED), new DateValue(issue.getUpdated().getTime()));
+                for (RemoteCustomFieldValue value : issue.getCustomFieldValues()) {
+                    String customFieldKey = customFieldMap.get(value.getCustomfieldId());
+                    String customFieldValue = null;
+                    if (value.getValues().length > 0) {
+                        StringBuilder customFieldBuilder = new StringBuilder();
+                        for (String fieldValue : value.getValues()) {
+                            customFieldBuilder.append(fieldValue);
+                            customFieldBuilder.append(",");
+                        }
+                        customFieldValue = customFieldBuilder.substring(0, customFieldBuilder.length() - 1);
+                    }
+                    row.addValue(keys.get(customFieldKey), customFieldValue);
+                }
             }
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);
         }
         return dataSet;
+    }
+
+
+
+    public Map<String, Key> newDataSourceFields(Credentials credentials) {
+        Map<String, Key> keyMap = new HashMap<String, Key>();
+        if (getDataFeedID() == 0) {
+            try {
+                List<String> keys = getKeys();
+                for (String key : keys) {
+                    keyMap.put(key, new NamedKey(key));
+                }
+                String userName = credentials.getUserName();
+                String password = credentials.getPassword();
+                JiraSoapServiceServiceLocator jiraSoapServiceGetter = new JiraSoapServiceServiceLocator();
+                String jiraURL = (url.startsWith("http://") ? "" : "http://") + url + (url.endsWith("/") ? "" : "/") + "rpc/soap/jirasoapservice-v2";
+                jiraSoapServiceGetter.setJirasoapserviceV2EndpointAddress(jiraURL);
+                JiraSoapService jiraSoapService = jiraSoapServiceGetter.getJirasoapserviceV2();
+                String token = jiraSoapService.login(userName, password);
+                RemoteField[] remoteFields = jiraSoapService.getCustomFields(token);
+                for (RemoteField remoteField : remoteFields) {
+                    keyMap.put(remoteField.getName(), new NamedKey(remoteField.getName()));
+                }
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        } else {
+            for (AnalysisItem field : getFields()) {
+                keyMap.put(field.getKey().toKeyString(), field.getKey());
+            }
+        }
+        return keyMap;
     }
 
     @NotNull
@@ -162,7 +215,7 @@ public class JiraDataSource extends ServerDataSourceDefinition {
         return url != null && !url.isEmpty();
     }
 
-    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, DataSet dataSet) {
+    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, DataSet dataSet, Credentials credentials) {
         List<AnalysisItem> analysisItems = new ArrayList<AnalysisItem>();
         analysisItems.add(new AnalysisDimension(keys.get(REPORTER), true));
         analysisItems.add(new AnalysisList(keys.get(COMPONENTS), true, ","));
@@ -175,6 +228,21 @@ public class JiraDataSource extends ServerDataSourceDefinition {
         analysisItems.add(new AnalysisDimension(keys.get(PROJECT), true));
         analysisItems.add(new AnalysisDimension(keys.get(TYPE), true));
         analysisItems.add(new AnalysisMeasure(keys.get(COUNT), AggregationTypes.SUM));
+        String userName = credentials.getUserName();
+        String password = credentials.getPassword();
+        JiraSoapServiceServiceLocator jiraSoapServiceGetter = new JiraSoapServiceServiceLocator();
+        String jiraURL = (url.startsWith("http://") ? "" : "http://") + url + (url.endsWith("/") ? "" : "/") + "rpc/soap/jirasoapservice-v2";
+        jiraSoapServiceGetter.setJirasoapserviceV2EndpointAddress(jiraURL);
+        try {
+            JiraSoapService jiraSoapService = jiraSoapServiceGetter.getJirasoapserviceV2();
+            String token = jiraSoapService.login(userName, password);
+            RemoteField[] remoteFields = jiraSoapService.getCustomFields(token);
+            for (RemoteField remoteField : remoteFields) {
+                analysisItems.add(new AnalysisList(keys.get(remoteField.getName()), true, ","));
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
         return analysisItems;
     }
 

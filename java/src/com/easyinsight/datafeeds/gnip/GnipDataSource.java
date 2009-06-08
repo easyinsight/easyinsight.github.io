@@ -18,6 +18,7 @@ import com.easyinsight.core.Key;
 import com.easyinsight.core.NumericValue;
 import com.easyinsight.analysis.*;
 import com.easyinsight.users.Account;
+import com.easyinsight.users.Credentials;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.storage.DataStorage;
 import com.gnipcentral.client.GnipException;
@@ -187,7 +188,7 @@ public class GnipDataSource extends ServerDataSourceDefinition {
                 TO, REGARDINGURL, SOURCE, LATITUDE, LONGITUDE, COUNT);
     }
 
-    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, DataSet dataSet) {
+    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, DataSet dataSet, Credentials credentials) {
         List<AnalysisItem> analysisItems = new ArrayList<AnalysisItem>();
         analysisItems.add(new AnalysisDimension(keys.get(PUBLISHER), true));
         analysisItems.add(new AnalysisDimension(keys.get(ACTION), true));

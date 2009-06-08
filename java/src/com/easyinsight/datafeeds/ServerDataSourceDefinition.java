@@ -66,9 +66,10 @@ public abstract class ServerDataSourceDefinition extends FeedDefinition {
      * For example, analysisItem.setKey(keys.get(CONSTANT));
      * @param keys the keys defined in the earlier getKeys() call
      * @param dataSet the data set retrieved by getDataSet()
+     * @param credentials
      * @return the analysis items for the data source
      */
-    public abstract List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, DataSet dataSet);
+    public abstract List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, DataSet dataSet, Credentials credentials);
 
     /**
      * Any custom logic for storage of the data source. Will execute in the transactional scope of saving the data source, on
@@ -142,8 +143,11 @@ public abstract class ServerDataSourceDefinition extends FeedDefinition {
                     credentials.setPassword(retrievePassword());
                 }
             }
+            Map<String, Key> keys = newDataSourceFields(credentials);
             DataSet dataSet = getDataSet(credentials, newDataSourceFields(credentials), now);
+            List<AnalysisItem> items = createAnalysisItems(keys, dataSet, credentials);
             dataStorage = DataStorage.writeConnection(this, conn, accountID);
+            dataStorage.migrate(getFields(), items);
             addData(dataStorage, dataSet);
             dataStorage.commit();
             notifyOfDataUpdate();

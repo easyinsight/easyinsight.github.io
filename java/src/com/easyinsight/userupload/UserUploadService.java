@@ -33,8 +33,6 @@ import java.util.Date;
 import java.sql.*;
 
 import org.hibernate.Session;
-import flex.messaging.messages.AsyncMessage;
-import flex.messaging.MessageBroker;
 
 /**
  * User: James Boe
@@ -726,7 +724,7 @@ public class UserUploadService implements IUserUploadService {
             conn.setAutoCommit(false);
             Map<String, Key> keys = feedDefinition.newDataSourceFields(credentials);
             DataSet dataSet = feedDefinition.getDataSet(credentials, keys, new Date());
-            feedDefinition.setFields(feedDefinition.createAnalysisItems(keys, dataSet));
+            feedDefinition.setFields(feedDefinition.createAnalysisItems(keys, dataSet, credentials));
             feedDefinition.setOwnerName(retrieveUser(conn).getUserName());
             UploadPolicy uploadPolicy = new UploadPolicy(userID);
             feedDefinition.setUploadPolicy(uploadPolicy);
