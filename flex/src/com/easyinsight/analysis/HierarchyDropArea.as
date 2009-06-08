@@ -27,6 +27,13 @@ package com.easyinsight.analysis
 			return "Drop Hierarchy Here";
 		}
 
+        override protected function accept(analysisItem:AnalysisItem):Boolean {
+            if (analysisItem == null) {
+                return false;
+            }
+            return analysisItem.hasType(AnalysisItemTypes.HIERARCHY);
+        }
+
         override public function set analysisItem(analysisItem:AnalysisItem):void {
 
             if (analysisItem != null) {

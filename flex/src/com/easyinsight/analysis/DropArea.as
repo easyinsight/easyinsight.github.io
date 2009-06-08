@@ -160,10 +160,28 @@ public class DropArea extends HBox
     }
 
     protected function dragEnterHandler(event:DragEvent):void {
-        if (event.dragInitiator is DataGrid || event.dragInitiator is DropArea) {
+        var analysisItem:AnalysisItem = analysisItemFromDrag(event);
+        if (accept(analysisItem)) {
             setStyle("borderColor", "green");
             DragManager.acceptDragDrop(event.currentTarget as IUIComponent);
         }
+    }
+
+    protected function accept(analysisItem:AnalysisItem):Boolean {
+        return true;
+    }
+
+    private function analysisItemFromDrag(event:DragEvent):AnalysisItem {
+        var analysisItem:AnalysisItem = null;
+        if (event.dragInitiator is DataGrid) {
+            var initialList:DataGrid = event.dragInitiator as DataGrid;
+            var newAnalysisItem:AnalysisItemWrapper = initialList.selectedItem as AnalysisItemWrapper;
+            analysisItem = newAnalysisItem.analysisItem;
+        } else if (event.dragInitiator is DropArea) {
+            var dropArea:DropArea = event.dragInitiator as DropArea;
+            analysisItem = dropArea.analysisItem;
+        }
+        return analysisItem;
     }
 
     public function isConfigured():Boolean {
