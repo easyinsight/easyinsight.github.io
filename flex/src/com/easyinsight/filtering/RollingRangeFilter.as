@@ -49,7 +49,7 @@ package com.easyinsight.filtering
 			rangeOptions.addItem(new RangeOption("Month to Date", RollingDateRangeFilterDefinition.MONTH_TO_NOW));
 			rangeOptions.addItem(new RangeOption("Quarter to Date", RollingDateRangeFilterDefinition.QUARTER_TO_NOW));
 			rangeOptions.addItem(new RangeOption("Year to Date", RollingDateRangeFilterDefinition.YEAR_TO_NOW));
-			rangeOptions.addItem(new RangeOption("Last Day", RollingDateRangeFilterDefinition.LAST_DAY));
+			rangeOptions.addItem(new RangeOption("Last Day of Data", RollingDateRangeFilterDefinition.LAST_DAY));
 		}
 		
 		public function set filterDefinition(filterDefinition:FilterDefinition):void

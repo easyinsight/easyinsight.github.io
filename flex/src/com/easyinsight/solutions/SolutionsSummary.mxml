@@ -13,14 +13,6 @@
                 <listing:GottaLoginPage/>
             </mx:AddChild>
         </mx:State>
-        <mx:State name="functionalityUnavailable">
-            <mx:RemoveChild target="{solutionGrid}"/>
-            <mx:RemoveChild target="{controlsBox}"/>
-            <mx:RemoveChild target="{infoBox}"/>
-            <mx:AddChild relativeTo="{coreContent}">
-                <solutions:SolutionFunctionalityUnavailable/>
-            </mx:AddChild>
-        </mx:State>
     </mx:states>
     <mx:Script>
 		<![CDATA[
