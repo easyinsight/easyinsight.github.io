@@ -404,7 +404,7 @@ public class UserUploadService implements IUserUploadService {
     }
 
     public void subscribe(long dataFeedID) {
-        SecurityUtil.authorizeFeed(dataFeedID, Roles.SUBSCRIBER);
+        SecurityUtil.authorizeFeedAccess(dataFeedID);
         long userID = SecurityUtil.getUserID();
         try {
             new UserUploadInternalService().createUserFeedLink(userID, dataFeedID, Roles.SUBSCRIBER);
