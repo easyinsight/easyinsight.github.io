@@ -33,6 +33,7 @@ public abstract class WSAnalysisDefinition implements Serializable {
     public static final int PLOT = 14;
     public static final int BUBBLE = 15;
     public static final int GAUGE = 16;
+    public static final int MULTIMEASURE = 17;
 
     private String name;
     private long analysisID;

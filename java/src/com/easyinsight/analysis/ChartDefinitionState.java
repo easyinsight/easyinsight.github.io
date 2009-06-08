@@ -153,6 +153,10 @@ public class ChartDefinitionState extends AnalysisDefinitionState {
                 wsChartDefinition = new WSBubbleChartDefinition();
                 wsChartDefinition.setReportType(WSAnalysisDefinition.BUBBLE);
                 break;
+            case ChartDefinitionState.MULTI_MEASURE_LINE_2D:
+                wsChartDefinition = new WSMultiMeasureLineChartDefinition();
+                wsChartDefinition.setReportType(WSAnalysisDefinition.MULTIMEASURE);
+                break;
             default:
                 throw new UnsupportedOperationException();
         }

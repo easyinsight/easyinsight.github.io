@@ -37,7 +37,7 @@ public abstract class WSMultiMeasureDefinition extends WSChartDefinition {
 
     public void populateFromReportStructure(Map<String, AnalysisItem> structure) {
         xaxis = firstItem("xAxis", structure);
-        measures = items("measure", structure);
+        measures = items("measures", structure);
     }
 
     public Set<AnalysisItem> getAllAnalysisItems() {
