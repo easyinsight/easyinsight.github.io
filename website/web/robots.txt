@@ -1,1 +1,2 @@
 User-agent: *
+sitemap: http://www.easy-insight.com/sitemap_index.xml
