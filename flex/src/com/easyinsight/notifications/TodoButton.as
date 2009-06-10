@@ -11,6 +11,7 @@ import flash.events.MouseEvent;
 import mx.binding.utils.BindingUtils;
 import mx.collections.ArrayCollection;
 import mx.controls.Alert;
+import mx.events.CloseEvent;
 import mx.events.FlexEvent;
 import mx.managers.PopUpManager;
 import mx.rpc.events.ResultEvent;
@@ -20,6 +21,10 @@ public class TodoButton extends CorePageButton{
 
     private var asyncWindow:TodoNotifyWindow;
     private var userUploadService:RemoteObject;
+
+    private var showingWindow:Boolean;
+    private var lastX:int;
+    private var lastY:int;
 
     public function TodoButton() {
         super();
@@ -36,12 +41,34 @@ public class TodoButton extends CorePageButton{
     }
 
     private function onClick(event:MouseEvent):void {
-        if (asyncWindow == null) {
-            asyncWindow = new TodoNotifyWindow();
-            asyncWindow.addEventListener(TodoDeleteEvent.TODO_DELETE, onTodoDelete);
-            BindingUtils.bindProperty(asyncWindow, "data", this, "asyncData");
+        if (showingWindow) {
+            lastX = asyncWindow.x;
+            lastY = asyncWindow.y;
+            PopUpManager.removePopUp(asyncWindow);
+            showingWindow = false;
+        } else {
+            showWindow();
         }
-        PopUpManager.addPopUp(asyncWindow, this, false);
+    }
+
+    private function showWindow():void {
+        if (asyncWindow == null) {
+                asyncWindow = new TodoNotifyWindow();
+                BindingUtils.bindProperty(asyncWindow, "data", this, "asyncData");
+                asyncWindow.addEventListener(CloseEvent.CLOSE, onClose);
+                asyncWindow.addEventListener(TodoDeleteEvent.TODO_DELETE, onTodoDelete);
+            }
+            PopUpManager.addPopUp(asyncWindow, this, false);
+            asyncWindow.x = lastX;
+        
+            asyncWindow.y = lastY;
+        showingWindow = true;
+    }
+
+    private function onClose(event:CloseEvent):void {
+        lastX = asyncWindow.x;
+        lastY = asyncWindow.y;
+        showingWindow = false;
     }
 
     protected function onCreation(event:FlexEvent):void {
@@ -77,6 +104,7 @@ public class TodoButton extends CorePageButton{
         var info:TodoEventInfo = event.info;
         if (info.action == TodoEventInfo.ADD) {
             _asyncData.addItem(info);
+            bringWindowToFront();
         }
         else {
             for (var i:int = 0; i < _asyncData.length; i++) {
@@ -84,8 +112,15 @@ public class TodoButton extends CorePageButton{
                 var currentEvent:TodoEventInfo = _asyncData.getItemAt(i) as TodoEventInfo;
                 if (currentEvent.todoID == info.todoID) {
                     _asyncData.setItemAt(info, i);
+                    bringWindowToFront();
                 }
             }
+        }
+    }
+
+    private function bringWindowToFront():void {
+        if(!showingWindow) {
+            showWindow();
         }
     }
 }

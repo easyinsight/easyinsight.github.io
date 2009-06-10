@@ -45,8 +45,15 @@ public class BackgroundTaskButton extends CorePageButton{
             lastX = asyncWindow.x;
             lastY = asyncWindow.y;
             PopUpManager.removePopUp(asyncWindow);
+            showingWindow = false;
         } else {
-            if (asyncWindow == null) {
+            showWindow();
+        }
+
+    }
+
+    private function showWindow():void {
+        if (asyncWindow == null) {
                 asyncWindow = new AsyncNotifyWindow();
                 BindingUtils.bindProperty(asyncWindow, "data", this, "asyncData");
                 asyncWindow.addEventListener(CloseEvent.CLOSE, onClose);
@@ -55,8 +62,7 @@ public class BackgroundTaskButton extends CorePageButton{
             PopUpManager.addPopUp(asyncWindow, this, false);
             asyncWindow.x = lastX;
             asyncWindow.y = lastY;
-        }
-        showingWindow = !showingWindow;
+        showingWindow = true;
     }
 
     private function onDelete(event:AsyncDeleteEvent):void {
@@ -96,16 +102,27 @@ public class BackgroundTaskButton extends CorePageButton{
 
     private function onAsync(event:AsyncInfoEvent):void {
         var info:RefreshEventInfo = event.info;
-        if (info.action == RefreshEventInfo.ADD)
+        if (info.action == RefreshEventInfo.ADD) {
+            bringWindowToFront();
             _asyncData.addItem(info);
+        }
         else {
             for (var i:int = 0; i < _asyncData.length; i++) {
                 var currentEvent:RefreshEventInfo = _asyncData.getItemAt(i) as RefreshEventInfo;
                 if (currentEvent.taskId == info.taskId) {
                     _asyncData.setItemAt(info, i);
+                    bringWindowToFront();
                 }
             }
         }
     }
+
+
+    private function bringWindowToFront():void {
+        if(!showingWindow)
+            showWindow();
+    }
+
+
 }
 }
