@@ -294,7 +294,7 @@
                                             </mx:Component>
                                         </mx:itemRenderer>
                                     </mx:DataGridColumn>
-                                    <mx:DataGridColumn headerText="Name" dataField="goalTreeName"
+                                    <mx:DataGridColumn headerText="Name" dataField="name"
                                                        headerRenderer="com.easyinsight.groups.CustomGroupHeader"/>
                                 </mx:columns>
                             </mx:DataGrid>

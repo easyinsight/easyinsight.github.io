@@ -740,8 +740,8 @@ public class GoalStorage {
             saveInsightLinkStmt.setLong(1, goalTreeNode.getGoalTreeNodeID());
             saveInsightLinkStmt.setLong(2, goalInsight.getId());
             saveInsightLinkStmt.execute();
-            saveInsightLinkStmt.close();
         }
+        saveInsightLinkStmt.close();
     }
 
     private void saveFeeds(GoalTreeNode goalTreeNode, Connection conn) throws SQLException {

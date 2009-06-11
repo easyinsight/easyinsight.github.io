@@ -19,9 +19,6 @@ import java.util.*;
 import java.sql.*;
 import java.io.ByteArrayInputStream;
 
-import flex.messaging.messages.AsyncMessage;
-import flex.messaging.MessageBroker;
-
 /**
  * User: James Boe
  * Date: Aug 28, 2008
@@ -272,8 +269,8 @@ public class SolutionService {
                     insightDescriptors.add(new InsightDescriptor(insightID, insightName, insightRS.getLong(3), insightRS.getInt(4)));
                 }
             }
-            PreparedStatement getGoalsStmt = conn.prepareStatement("SELECT goal_tree.goal_tree_id, name FROM solution_to_goal_tree, goal_tree " +
-                    "WHERE SOLUTION_ID = ? AND goal_tree.goal_tree_id = solution_to_goal_tree.goal_tree_id");
+            PreparedStatement getGoalsStmt = conn.prepareStatement("SELECT goal_tree.goal_tree_id, goal_tree.name FROM solution, goal_tree " +
+                    "WHERE SOLUTION_ID = ? AND goal_tree.goal_tree_id = solution.goal_tree_id");
             getGoalsStmt.setLong(1, solutionID);
             ResultSet goalRS = getGoalsStmt.executeQuery();
             while (goalRS.next()) {
