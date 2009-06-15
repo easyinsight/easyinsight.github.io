@@ -39,22 +39,12 @@ public class AsyncCompletedEvent extends EIEvent {
         this.userID = userID;
     }
 
-    public void setFeedDefinition(FeedDefinition feedDefinition) {
-        this.feedDefinition = feedDefinition;
-    }
-
-    private FeedDefinition feedDefinition;
-
     public ScheduledTask getTask() {
         return task;
     }
 
     public long getUserID() {
         return userID;
-    }
-
-    public FeedDefinition getFeedDefinition() {
-        return feedDefinition;
     }
 
     public void setFeedID(int feedID) {

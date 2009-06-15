@@ -102,7 +102,6 @@ public class BackgroundTaskButton extends CorePageButton{
 
     private function onAsync(event:AsyncInfoEvent):void {
         var info:RefreshEventInfo = event.info;
-        Alert.show("" + info.taskId);
         if (info.action == RefreshEventInfo.CREATE) {
             _asyncData.addItem(info);
             bringWindowToFront();

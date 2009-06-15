@@ -14,10 +14,9 @@ public class AsyncCompletedListener extends EIEventListener {
     public void execute(EIEvent e) {
         AsyncCompletedEvent event = (AsyncCompletedEvent) e;
         RefreshEventInfo info = new RefreshEventInfo();
-        FeedDefinition definition = event.getFeedDefinition();
         ScheduledTask t = event.getTask();
-        info.setFeedName(definition.getFeedName());
-        info.setFeedId(definition.getDataFeedID());
+        info.setFeedName(event.getFeedName());
+        info.setFeedId(event.getFeedID());
         info.setMessage("Completed!");
         info.setAction(RefreshEventInfo.COMPLETE);
         info.setTaskId(t.getScheduledTaskID());

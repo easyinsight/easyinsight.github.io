@@ -44,7 +44,7 @@ public class UserUploadService implements IUserUploadService {
 
     private static FeedStorage feedStorage = new FeedStorage();
     private static Map<Long, RawUploadData> rawDataMap = new WeakHashMap<Long, RawUploadData>();
-    private static final long TEN_MEGABYTES = 1; //10485760;
+    private static final long TEN_MEGABYTES = 10485760;
 
     public UserUploadService() {
     }
