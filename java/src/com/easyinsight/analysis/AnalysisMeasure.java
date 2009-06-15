@@ -48,6 +48,11 @@ public class AnalysisMeasure extends AnalysisItem {
         this.aggregation = aggregation;
     }
 
+    public AnalysisMeasure(Key key, String displayName, int aggregation) {
+        super(key, displayName);
+        this.aggregation = aggregation;
+    }
+
     public Value transformValue(Value value) {
         Value result;
         if (value == null) {

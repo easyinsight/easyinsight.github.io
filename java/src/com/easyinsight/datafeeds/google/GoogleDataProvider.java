@@ -12,8 +12,6 @@ import com.google.gdata.client.spreadsheet.SpreadsheetService;
 import com.google.gdata.data.spreadsheet.*;
 
 import java.util.*;
-import java.util.regex.Pattern;
-import java.util.regex.Matcher;
 import java.net.URL;
 import java.io.IOException;
 import java.sql.PreparedStatement;
@@ -34,10 +32,6 @@ public class GoogleDataProvider implements IGoogleStream {
 
     public GoogleDataProvider() {
         instance = this;
-    }
-
-    public FeedType getDataFeedType() {
-        return FeedType.GOOGLE;
     }
 
     public static GoogleDataProvider instance() {

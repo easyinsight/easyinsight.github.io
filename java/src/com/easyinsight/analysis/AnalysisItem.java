@@ -62,6 +62,11 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
         this.key = new NamedKey(keyName);
     }
 
+    public AnalysisItem(Key key, String displayName) {
+        this.key = key;
+        this.displayName = displayName;
+    }
+
     public AnalysisItem(Key key) {
         this.key = key;
     }

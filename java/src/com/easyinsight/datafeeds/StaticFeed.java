@@ -85,9 +85,9 @@ public class StaticFeed extends Feed implements Serializable {
         } finally {
             source.closeConnection();
         }
-        if (!adminMode) {
+        /*if (!adminMode) {
             dataSet = new DerivedDataSourcePipeline().setup(getAnalysisDefinition(), this, insightRequestMetadata).toDataSet(dataSet);
-        }
+        }*/
         return dataSet;
     }
 }

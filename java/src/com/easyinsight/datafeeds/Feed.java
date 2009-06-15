@@ -62,8 +62,6 @@ public abstract class Feed implements Serializable {
         this.feedID = feedID;
     }
 
-    public abstract FeedType getDataFeedType();
-
     public abstract AnalysisItemResultMetadata getMetadata(AnalysisItem analysisItem);
 
     public abstract DataSet getAggregateDataSet(Set<AnalysisItem> analysisItems, Collection<FilterDefinition> filters, InsightRequestMetadata insightRequestMetadata, List<AnalysisItem> allAnalysisItems, boolean adminMode, Collection<Key> additionalNeededKeys);

@@ -6,6 +6,7 @@ import javax.persistence.*;
 import java.io.Serializable;
 
 import org.hibernate.annotations.IndexColumn;
+import org.hibernate.Session;
 
 /**
  * User: James Boe
@@ -19,11 +20,15 @@ public class HierarchyLevel implements Serializable, Cloneable {
     @GeneratedValue(strategy= GenerationType.IDENTITY)
     @Column(name="hierarchy_level_id")
     private long hierarchyLevelID;
-    @OneToOne
+    @OneToOne (cascade=CascadeType.REMOVE)
     @JoinColumn(name="analysis_item_id")
     private AnalysisItem analysisItem;
     @Column(name="position")
     private int position;
+
+    public void delete(Session session) {
+        analysisItem = null;
+    }
 
     public int getPosition() {
         return position;

@@ -205,6 +205,10 @@ public class DataStorage {
         committed = true;
     }
 
+    public Connection getStorageConn() {
+        return storageConn;
+    }
+
     public void rollback() {
         try {
             if (!committed) {
@@ -581,7 +585,6 @@ public class DataStorage {
         String columns = columnBuilder.toString();
         String parameters = paramBuilder.toString();
         String insertSQL = "INSERT INTO " + getTableName() + " (" + columns + ") VALUES (" + parameters + ")";
-        System.out.println("inserting into database " + database.getID() + " table " + getTableName());
         PreparedStatement insertStmt = storageConn.prepareStatement(insertSQL);
         try {
             for (IRow row : dataSet.getRows()) {

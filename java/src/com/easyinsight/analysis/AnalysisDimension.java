@@ -66,6 +66,10 @@ public class AnalysisDimension extends AnalysisItem {
         this.group = group;
     }
 
+    public AnalysisDimension(Key key, String displayName) {
+        super(key, displayName);
+    }
+
     public AnalysisDimension(String key, boolean group) {
         super(key);
         this.group = group;
