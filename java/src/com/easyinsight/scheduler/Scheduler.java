@@ -1,6 +1,7 @@
 package com.easyinsight.scheduler;
 
 import com.easyinsight.database.Database;
+import com.easyinsight.database.EIConnection;
 import com.easyinsight.logging.LogClass;
 
 import java.util.concurrent.*;
@@ -221,18 +222,34 @@ public class Scheduler {
     }
 
     public void saveTask(ScheduledTask t) {
-        // assert(t.getStatus() == ScheduledTask.INMEMORY);
-        t.setStartedDate(new Date());
-        Session session = Database.instance().createSession();
+        EIConnection conn = Database.instance().getConnection();
+
         try {
-            session.getTransaction().begin();
+            conn.setAutoCommit(false);
+            saveTask(t, conn);
+            conn.commit();
+        }
+        catch(Exception e) {
+            conn.rollback();
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        }
+        finally {
+            Database.closeConnection(conn);
+        }
+    }
+
+    public void saveTask(ScheduledTask t, Connection conn) {
+        t.setStartedDate(new Date());
+        Session session = Database.instance().createSession(conn);
+        try {
             session.save(t);
-            session.getTransaction().commit();
-            executor.execute(t);
+            session.flush();
+            if(t.getStatus() == ScheduledTask.INMEMORY)
+                executor.execute(t);
         }
         catch(Exception e) {
             LogClass.error(e);
-            session.getTransaction().rollback();
             throw new RuntimeException(e);
         }
     }

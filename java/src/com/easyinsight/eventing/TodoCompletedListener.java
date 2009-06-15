@@ -43,8 +43,6 @@ public class TodoCompletedListener extends EIEventListener {
                     
                     s.delete(todo);
                 }
-
-
                 s.getTransaction().commit();
             } catch(Exception ex) {
                 s.getTransaction().rollback();

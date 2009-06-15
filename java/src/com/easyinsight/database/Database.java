@@ -104,7 +104,7 @@ public class Database {
         }
     }
 
-    public void closeConnection(Connection conn) {
+    public static void closeConnection(Connection conn) {
         try {
             conn.close();
         } catch (SQLException e) {

@@ -12,13 +12,14 @@ public class RefreshEventInfo extends OutboundEvent {
     public static final int ADD = 1;
     public static final int COMPLETE = 2;
     public static final int ERROR = 3;
+    public static final int CREATE = 4;
 
     private long taskId;
     private long feedId;
     private String feedName;
     private String message;
     private int action;
-
+    
     public long getFeedId() {
         return feedId;
     }

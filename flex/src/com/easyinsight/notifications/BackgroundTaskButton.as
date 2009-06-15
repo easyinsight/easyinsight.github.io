@@ -102,9 +102,23 @@ public class BackgroundTaskButton extends CorePageButton{
 
     private function onAsync(event:AsyncInfoEvent):void {
         var info:RefreshEventInfo = event.info;
-        if (info.action == RefreshEventInfo.ADD) {
-            bringWindowToFront();
+        Alert.show("" + info.taskId);
+        if (info.action == RefreshEventInfo.CREATE) {
             _asyncData.addItem(info);
+            bringWindowToFront();
+        }
+        else if (info.action == RefreshEventInfo.ADD) {
+            var found:Boolean = false;
+            for (var index:int = 0; i < _asyncData.length; i++) {
+                var curEvent:RefreshEventInfo = _asyncData.getItemAt(i) as RefreshEventInfo;
+                if (curEvent.taskId == info.taskId) {
+                    _asyncData.setItemAt(info, i);
+                    bringWindowToFront();
+                    found = true;
+                }
+            }
+            if(!found)
+                _asyncData.addItem(info);
         }
         else {
             for (var i:int = 0; i < _asyncData.length; i++) {

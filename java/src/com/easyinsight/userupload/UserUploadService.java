@@ -17,14 +17,14 @@ import com.easyinsight.security.Roles;
 import com.easyinsight.users.*;
 import com.easyinsight.analysis.*;
 import com.easyinsight.PasswordStorage;
+import com.easyinsight.eventing.EventDispatcher;
+import com.easyinsight.eventing.EIEvent;
+import com.easyinsight.eventing.AsyncCreatedEvent;
 import com.easyinsight.notifications.TodoEventInfo;
 import com.easyinsight.notifications.ConfigureDataFeedTodo;
 import com.easyinsight.notifications.ConfigureDataFeedInfo;
 import com.easyinsight.notifications.TodoBase;
-import com.easyinsight.scheduler.ServerRefreshScheduledTask;
-import com.easyinsight.scheduler.ScheduledTask;
-import com.easyinsight.scheduler.Scheduler;
-import com.easyinsight.scheduler.RefreshEventInfo;
+import com.easyinsight.scheduler.*;
 import com.easyinsight.solutions.SolutionInstallInfo;
 
 import java.io.*;
@@ -42,8 +42,9 @@ import org.hibernate.Session;
 public class UserUploadService implements IUserUploadService {
 
 
-    private FeedStorage feedStorage = new FeedStorage();
-    private Map<Long, RawUploadData> rawDataMap = new WeakHashMap<Long, RawUploadData>();
+    private static FeedStorage feedStorage = new FeedStorage();
+    private static Map<Long, RawUploadData> rawDataMap = new WeakHashMap<Long, RawUploadData>();
+    private static final long TEN_MEGABYTES = 1; //10485760;
 
     public UserUploadService() {
     }
@@ -104,6 +105,15 @@ public class UserUploadService implements IUserUploadService {
         SecurityUtil.authorizeFeed(dataFeedID, Roles.SUBSCRIBER);
         try {
             //SecurityUtil.authorizeFeed(dataFeedID, Roles.OWNER);
+            return getFeedDefinition(dataFeedID);
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static FeedDefinition getFeedDefinition(long dataFeedID) {
+        try {
             return feedStorage.getFeedDefinitionData(dataFeedID);
         } catch (Exception e) {
             LogClass.error(e);
@@ -203,41 +213,36 @@ public class UserUploadService implements IUserUploadService {
     public UploadResponse create(long uploadID, String name) {
         UploadResponse uploadResponse;
         Connection conn = Database.instance().getConnection();
-        DataStorage tableDef = null;
         try {
             conn.setAutoCommit(false);
-            RawUploadData rawUploadData = retrieveRawData(uploadID);
+            RawUploadData rawUploadData = retrieveRawData(uploadID, conn);
             UploadFormat uploadFormat = new UploadFormatTester().determineFormat(rawUploadData.userData);
             if (uploadFormat == null) {
                 uploadResponse = new UploadResponse("Sorry, we couldn't figure out what type of file you tried to upload. Supported types are Excel 1997-2003 and delimited text files.");
             } else {
-                UserUploadAnalysis userUploadAnalysis = uploadFormat.analyze(uploadID, rawUploadData.userData);
-                List<AnalysisItem> fields = userUploadAnalysis.getFields();
-                PersistableDataSetForm dataSet = UploadAnalysisCache.instance().getDataSet(uploadID);
-                if (dataSet == null) {
-                    dataSet = uploadFormat.createDataSet(rawUploadData.userData, fields);
+                FileProcessCreateScheduledTask task = new FileProcessCreateScheduledTask();
+                task.setUploadID(uploadID);
+                task.setName(name);
+                task.setStatus(ScheduledTask.SCHEDULED);
+                task.setExecutionDate(new Date());
+                task.setUserID(SecurityUtil.getUserID());
+                task.setAccountID(SecurityUtil.getAccountID());
+                if(rawUploadData.getUserData().length > TEN_MEGABYTES) {
+                    Scheduler.instance().saveTask(task, conn);
+                    AsyncCreatedEvent e = new AsyncCreatedEvent();
+                    e.setTask(task);
+                    e.setUserID(SecurityUtil.getUserID());
+                    e.setFeedName(name);
+                    e.setFeedID(0);
+                    EventDispatcher.instance().dispatch(e);
+                    uploadResponse = new UploadResponse("Your file has been uploaded and verified, and will be processed shortly.");
                 }
-                for (AnalysisItem field : fields) {
-                    dataSet.refreshKey(field.getKey());
+                else {
+                    task.createFeed(conn, rawUploadData, uploadFormat);
+                    uploadResponse = new UploadResponse(task.getFeedID(), task.getAnalysisID());
                 }
-                
-                FileBasedFeedDefinition feedDefinition = new FileBasedFeedDefinition();
-                feedDefinition.setUploadFormat(uploadFormat);
-                feedDefinition.setFeedName(name);
-                feedDefinition.setOwnerName(retrieveUser(conn).getUserName());
-                UploadPolicy uploadPolicy = new UploadPolicy(rawUploadData.accountID);
-                feedDefinition.setUploadPolicy(uploadPolicy);
-                feedDefinition.setFields(fields);
-                FeedCreationResult result = new FeedCreation().createFeed(feedDefinition, conn, dataSet.toDataSet(), rawUploadData.accountID);
-                tableDef = result.getTableDefinitionMetadata();
-                uploadResponse = new UploadResponse(result.getFeedID(), feedDefinition.getAnalysisDefinitionID());
-                tableDef.commit();
-                conn.commit();
             }
         } catch (StorageLimitException se) {
-            if (tableDef != null) {
-                tableDef.rollback();
-            }
             try {
                 conn.rollback();
             } catch (SQLException e1) {
@@ -246,9 +251,6 @@ public class UserUploadService implements IUserUploadService {
             uploadResponse = new UploadResponse("You have reached your account storage limit.");
         } catch (Exception e) {
             LogClass.error(e);
-            if (tableDef != null) {
-                tableDef.rollback();
-            }
             try {
                 conn.rollback();
             } catch (SQLException e1) {
@@ -256,9 +258,6 @@ public class UserUploadService implements IUserUploadService {
             }
             uploadResponse = new UploadResponse("Something caused an internal error in the processing of the uploaded file.");
         } finally {
-            if (tableDef != null) {
-                tableDef.closeConnection();
-            }
             try {
                 conn.setAutoCommit(true);
             } catch (SQLException e) {
@@ -268,6 +267,7 @@ public class UserUploadService implements IUserUploadService {
         }
         return uploadResponse;
     }
+
 
     private FeedDefinition createFeedFromUpload(long uploadID, UploadFormat uploadFormat, String feedName, String genre,
                        List<AnalysisItem> fields, UploadPolicy uploadPolicy, TagCloud tagCloud) {
@@ -282,12 +282,27 @@ public class UserUploadService implements IUserUploadService {
         new UserUploadInternalService().createUserFeedLink(rawUploadData.accountID, feedDefinition.getDataFeedID(), Roles.OWNER);
         return feedDefinition;
     }
+
+    public static RawUploadData retrieveRawData(long uploadID) {
+        Connection conn = Database.instance().getConnection();
+        RawUploadData result = null;
+        try {
+            conn.setAutoCommit(false);
+            result = retrieveRawData(uploadID, conn);
+        }
+        catch (SQLException e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        }
+        finally {
+            Database.closeConnection(conn);
+        }
+        return result;
+    }
     
-    private RawUploadData retrieveRawData(long uploadID) {
+    public static RawUploadData retrieveRawData(long uploadID, Connection conn) throws SQLException {
         RawUploadData rawUploadData = rawDataMap.get(uploadID);
         if (rawUploadData == null) {
-            Connection conn = Database.instance().getConnection();
-            try {
                 PreparedStatement rawDataStmt = conn.prepareStatement("SELECT ACCOUNT_ID, DATA_NAME, USER_DATA FROM " +
                         "USER_UPLOAD WHERE USER_UPLOAD_ID = ?");
                 rawDataStmt.setLong(1, uploadID);
@@ -300,22 +315,41 @@ public class UserUploadService implements IUserUploadService {
                 } else {
                     throw new RuntimeException("Couldn't find upload info");
                 }
-            } catch (SQLException e) {
-                LogClass.error(e);
-                throw new RuntimeException(e);
-            } finally {
-                Database.instance().closeConnection(conn);
-            }
+
         }
         return rawUploadData;
     }
 
-    private static class RawUploadData {
+    public static class RawUploadData {
 
         private RawUploadData(long accountID, String dataName, byte[] userData) {
             this.accountID = accountID;
             this.dataName = dataName;
             this.userData = userData;
+        }
+
+        public byte[] getUserData() {
+            return userData;
+        }
+
+        public void setUserData(byte[] userData) {
+            this.userData = userData;
+        }
+
+        public String getDataName() {
+            return dataName;
+        }
+
+        public void setDataName(String dataName) {
+            this.dataName = dataName;
+        }
+
+        public long getAccountID() {
+            return accountID;
+        }
+
+        public void setAccountID(long accountID) {
+            this.accountID = accountID;
         }
 
         long accountID;
@@ -497,24 +531,31 @@ public class UserUploadService implements IUserUploadService {
         try {
             conn.setAutoCommit(false);
             RawUploadData rawUploadData = retrieveRawData(rawDataID);
-            FileBasedFeedDefinition feedDefinition = (FileBasedFeedDefinition) getDataFeedConfiguration(feedID);
-            metadata = DataStorage.writeConnection(feedDefinition, conn);
-            PersistableDataSetForm form = feedDefinition.getUploadFormat().createDataSet(rawUploadData.userData, feedDefinition.getFields());
-            if (update) {
-                //DataRetrievalManager.instance().storeData(feedID, form);
-                metadata.truncate();
-                metadata.insertData(form.toDataSet());
-            } else {
-                //DataRetrievalManager.instance().appendData(feedID, form);
-                metadata.insertData(form.toDataSet());
+            FileProcessUpdateScheduledTask task = new FileProcessUpdateScheduledTask();
+            task.setStatus(ScheduledTask.SCHEDULED);
+            task.setExecutionDate(new Date());
+            task.setFeedID(feedID);
+            task.setUpdate(update);
+            task.setUploadID(rawDataID);
+            task.setUserID(SecurityUtil.getUserID());
+            task.setAccountID(SecurityUtil.getAccountID());
+            if(rawUploadData.getUserData().length > TEN_MEGABYTES) {
+                Scheduler.instance().saveTask(task, conn);
+                AsyncCreatedEvent e = new AsyncCreatedEvent();
+                e.setTask(task);
+                e.setUserID(SecurityUtil.getUserID());
+                LinkedList<Long> l = new LinkedList<Long>();
+                l.add(feedID);
+                Map<Long, String> map = FeedUtil.getFeedNames(l, conn);
+                e.setFeedName(map.get(feedID));
+                e.setFeedID(feedID);
+                EventDispatcher.instance().dispatch(e);
             }
-            metadata.commit();
+            else
+                task.updateData(feedID, update, conn, rawUploadData);
             conn.commit();
         } catch (Exception e) {
             LogClass.error(e);
-            if (metadata != null) {
-                metadata.rollback();
-            }
             try {
                 conn.rollback();
             } catch (SQLException e1) {
@@ -526,9 +567,6 @@ public class UserUploadService implements IUserUploadService {
                 conn.setAutoCommit(true);
             } catch (SQLException e) {
                 LogClass.error(e);
-            }
-            if (metadata != null) {
-                metadata.closeConnection();
             }
             Database.instance().closeConnection(conn);
         }
@@ -647,11 +685,12 @@ public class UserUploadService implements IUserUploadService {
                     feedIDs.add(configTodo.getFeedID());
                     result.add(resultInfo);
                 }
-
-                Map<Long, String> dataFeedMapping = FeedUtil.getFeedNames(feedIDs, conn);
-                for(TodoEventInfo cur : result) {
-                    ConfigureDataFeedInfo configInfo = (ConfigureDataFeedInfo) cur;
-                    configInfo.setFeedName(dataFeedMapping.get(configInfo.getFeedID()));
+                if(feedIDs.size() > 0) {
+                    Map<Long, String> dataFeedMapping = FeedUtil.getFeedNames(feedIDs, conn);
+                    for(TodoEventInfo cur : result) {
+                        ConfigureDataFeedInfo configInfo = (ConfigureDataFeedInfo) cur;
+                        configInfo.setFeedName(dataFeedMapping.get(configInfo.getFeedID()));
+                    }
                 }
                 translatedResults.addAll(result);
                 break;
@@ -672,10 +711,10 @@ public class UserUploadService implements IUserUploadService {
             List<RefreshEventInfo> translatedResults = new LinkedList<RefreshEventInfo>();
             try {
                 session.beginTransaction();
-                results = session.createQuery("from ServerRefreshScheduledTask where userID = ? and status != " + ScheduledTask.COMPLETED).setLong(0, userID).list();
-                
+                results = session.createQuery("from ServerRefreshScheduledTask where userID = ? and status != " + ScheduledTask.COMPLETED + " and status != " + ScheduledTask.FAILED).setLong(0, userID).list();
+
+                List<Long> feedIds = new LinkedList<Long>();
                 if(results.size()  > 0) {
-                    List<Long> feedIds = new LinkedList<Long>();
                     for(Object o : results) {
                         RefreshEventInfo result = new RefreshEventInfo();
                         ServerRefreshScheduledTask s = (ServerRefreshScheduledTask) o;
@@ -686,13 +725,57 @@ public class UserUploadService implements IUserUploadService {
                         result.setMessage(null);
                         feedIds.add(s.getDataSourceID());
                         translatedResults.add(result);
-                        
                     }
+                }
 
+                results = session.createQuery("from FileProcessUpdateScheduledTask where userID = ? and status != " + ScheduledTask.COMPLETED).setLong(0, userID).list();
+                if(results.size() > 0) {
+                    for(Object o : results) {
+                        RefreshEventInfo result = new RefreshEventInfo();
+                        FileProcessUpdateScheduledTask task = (FileProcessUpdateScheduledTask) o;
+                        result.setFeedId(task.getFeedID());
+                        if(task.getStatus() == ScheduledTask.RUNNING) {
+                            result.setAction(RefreshEventInfo.ADD);
+                            result.setMessage(null);
+                        }
+                        else {
+                            result.setAction(RefreshEventInfo.CREATE);
+                            result.setMessage("Waiting...");
+                        }
+                        result.setUserId(task.getUserID());
+                        result.setTaskId(task.getScheduledTaskID());
+                        feedIds.add(task.getFeedID());
+                        translatedResults.add(result);
+                    }
+                }
+
+                results = session.createQuery("from FileProcessCreateScheduledTask where userID = ? and status != " + ScheduledTask.COMPLETED).setLong(0, userID).list();
+                if(results.size() > 0) {
+                    for(Object o : results) {
+                        RefreshEventInfo result = new RefreshEventInfo();
+                        FileProcessCreateScheduledTask task = (FileProcessCreateScheduledTask) o;
+                        result.setFeedId(0);
+                        if(task.getStatus() == ScheduledTask.RUNNING) {
+                            result.setAction(RefreshEventInfo.ADD);
+                            result.setMessage(null);
+                        }
+                        else {
+                            result.setAction(RefreshEventInfo.CREATE);
+                            result.setMessage("Waiting...");
+                        }
+                        result.setUserId(task.getUserID());
+                        result.setTaskId(task.getScheduledTaskID());
+                        result.setFeedName(task.getName());
+                        translatedResults.add(result);
+                    }
+                }
+                
+                if(feedIds.size() > 0) {
                     Map<Long, String> feedNames = FeedUtil.getFeedNames(feedIds ,conn);
 
                     for(RefreshEventInfo info : translatedResults) {
-                            info.setFeedName(feedNames.get(info.getFeedId()));
+                            if(info.getFeedId() != 0)
+                                info.setFeedName(feedNames.get(info.getFeedId()));
                     }
                 }
 
@@ -753,9 +836,12 @@ public class UserUploadService implements IUserUploadService {
             Database.instance().closeConnection(conn);
         }
     }
-
-    private User retrieveUser(Connection conn) {
+    public static User retrieveUser(Connection conn) {
         long userID = SecurityUtil.getUserID();
+        return retrieveUser(conn, userID);
+    }
+
+    public static User retrieveUser(Connection conn, long userID) {
         try {
             User user = null;
             Session session = Database.instance().createSession(conn);
