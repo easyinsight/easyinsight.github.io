@@ -28,7 +28,7 @@ public class UserNotificationProcessor extends FlexClientOutboundQueueProcessor 
         for(Object o : list) {
             Message m = (Message) o;
             OutboundEvent info = (OutboundEvent)m.getBody();
-            if(((UserPrincipal) FlexContext.getFlexSession().getUserPrincipal()).getUserID() != info.getUserId()) {
+            if(!info.isBroadcast() && ((UserPrincipal) FlexContext.getFlexSession().getUserPrincipal()).getUserID() != info.getUserId()) {
                 list.remove(o);
             }
         }

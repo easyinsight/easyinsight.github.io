@@ -9,6 +9,7 @@ package com.easyinsight.scheduler;
  */
 public class OutboundEvent {
     private long userId;
+    private boolean broadcast = false;
 
     public long getUserId() {
         return userId;
@@ -16,5 +17,13 @@ public class OutboundEvent {
 
     public void setUserId(long userId) {
         this.userId = userId;
+    }
+
+    public boolean isBroadcast() {
+        return broadcast;
+    }
+
+    public void setBroadcast(boolean broadcast) {
+        this.broadcast = broadcast;
     }
 }

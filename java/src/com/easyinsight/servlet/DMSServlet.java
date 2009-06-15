@@ -10,6 +10,7 @@ import com.easyinsight.logging.LogClass;
 import com.easyinsight.storage.DatabaseManager;
 import com.easyinsight.scheduler.Scheduler;
 import com.easyinsight.eventing.*;
+import com.easyinsight.notifications.BroadcastInfo;
 
 import javax.servlet.http.HttpServlet;
 import javax.servlet.ServletConfig;

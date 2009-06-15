@@ -26,7 +26,8 @@
             </mx:AddChild>
             <mx:AddChild relativeTo="{primarySpace}" position="lastChild">
                 <mx:Canvas height="100%" width="29" backgroundColor="0xF0F0F0">
-                    <framework:CorePageButton rotation="90" x="26" y="3" image="{clockIcon}" text="Messages"/>
+                    <notification:NotificationsButton rotation="90" x="26" y="3" image="{clockIcon}" text="Messages"
+                                                        messageListener="{messageListener}" />
                 </mx:Canvas>
             </mx:AddChild>
         </mx:State>

@@ -2,6 +2,8 @@ package com.easyinsight.admin;
 
 import com.easyinsight.database.Database;
 import com.easyinsight.logging.LogClass;
+import com.easyinsight.notifications.BroadcastInfo;
+import com.easyinsight.eventing.MessageUtils;
 
 import javax.management.ObjectName;
 import javax.management.MBeanServer;
@@ -30,6 +32,15 @@ public class AdminService {
         for (ThreadInfo threadInfo : threadInfos) {
             LogClass.debug(threadInfo.toString());
         }
+    }
+
+    public void sendShutdownNotification(String s) {
+        BroadcastInfo info = new BroadcastInfo();
+        if(s == null || s.isEmpty())
+            info.setMessage("Please be aware that the server is going down shortly, and you will not be able to access your data.");
+        else
+            info.setMessage(s);
+        MessageUtils.sendMessage("generalNotifications", info);        
     }
 
     public static final String MAX_MEMORY = "Max Memory";

@@ -55,6 +55,7 @@
 	</mx:Script>
 	<mx:RemoteObject id="adminService" destination="admin">
 		<mx:method name="getHealthInfo" result="gotHealthInfo()"/>
+        <mx:method name="sendShutdownNotification" />
 	</mx:RemoteObject>	
 	<mx:Form>
 		<mx:FormItem label="Free Memory:">
@@ -94,5 +95,7 @@
 			<mx:Label text="{this.clientCount}"/>
 		</mx:FormItem>
 	</mx:Form>
-	<mx:Button label="Refresh" click="adminService.getHealthInfo.send()"/>		
+	<mx:Button label="Refresh" click="adminService.getHealthInfo.send()"/>
+    <mx:TextInput id="shutdownText" />
+    <mx:Button label="Send Shutdown Notification" click="adminService.sendShutdownNotification.send(shutdownText.text)" />
 </mx:Box>
