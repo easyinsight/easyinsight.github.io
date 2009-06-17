@@ -23,7 +23,7 @@ import org.hibernate.Session;
 @PrimaryKeyJoinColumn(name="analysis_item_id")
 public class AnalysisDimension extends AnalysisItem {
     @Column(name="group_by")
-    private boolean group;
+    private boolean group = true;
 
     @OneToOne(cascade=CascadeType.MERGE)
     @JoinColumn(name="key_dimension_id")

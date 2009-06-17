@@ -52,10 +52,12 @@ public class DateTimeTest extends TestCase {
         cal.set(Calendar.MONTH, 1);
         cal.set(Calendar.DAY_OF_MONTH, 1);
         DataSet dataSet = new DataSet();
+        // row 1 = c1, 1/1/2009, 50
         IRow row1 = dataSet.createRow();
         row1.addValue(TestUtil.createKey("c", dataSourceID), "c1");
         row1.addValue(TestUtil.createKey("m", dataSourceID), new NumericValue(50));
         row1.addValue(TestUtil.createKey("d", dataSourceID), new DateValue(cal.getTime()));
+        // row2 = c1, 2/1/2009, 100
         IRow row2 = dataSet.createRow();
         row2.addValue(TestUtil.createKey("c", dataSourceID), "c1");
         row2.addValue(TestUtil.createKey("m", dataSourceID), new NumericValue(100));
@@ -65,6 +67,7 @@ public class DateTimeTest extends TestCase {
         cal.set(Calendar.MINUTE, 3);
         cal.set(Calendar.SECOND, 37);
         row2.addValue(TestUtil.createKey("d", dataSourceID), new DateValue(cal.getTime()));
+        // row 3 = 
         IRow row3 = dataSet.createRow();
         row3.addValue(TestUtil.createKey("c", dataSourceID), "c1");
         row3.addValue(TestUtil.createKey("m", dataSourceID), new NumericValue(100));
@@ -144,9 +147,31 @@ public class DateTimeTest extends TestCase {
         validateResults(minuteResults, 5);
     }
 
+    public void testRollingDate() throws SQLException {
+        TestUtil.getIndividualTestUser();
+        long dataSourceID = createDeltaTestDataSource();
+        DataService dataService = new DataService();
+        WSListDefinition noDimDefinition = new WSListDefinition();
+        noDimDefinition.setDataFeedID(dataSourceID);
+        AnalysisMeasure measure = new AnalysisMeasure(TestUtil.createKey("m", dataSourceID), AggregationTypes.SUM);
+        noDimDefinition.setColumns(Arrays.asList((AnalysisItem) measure));
+        RollingFilterDefinition rollingFilterDefinition = new RollingFilterDefinition();
+        rollingFilterDefinition.setField(TestUtil.getItem(dataSourceID, "d"));
+        rollingFilterDefinition.setInterval(MaterializedRollingFilterDefinition.LAST_DAY);
+        noDimDefinition.setFilterDefinitions(Arrays.asList((FilterDefinition) rollingFilterDefinition));
+        ListDataResults yearResults = dataService.list(noDimDefinition, new InsightRequestMetadata());
+        assertEquals(1, yearResults.getRows().length);
+        ListRow row = yearResults.getRows()[0];
+        for (int i = 0; i < yearResults.getHeaders().length; i++) {
+            if (yearResults.getHeaders()[i] == measure) {
+                assertEquals(150, row.getValues()[i].toDouble(), .1);
+            }
+        }
+    }
+
     public void testTemporalAggregations() throws SQLException {
-        long userID = TestUtil.getIndividualTestUser();
-        long dataSourceID = createDeltaTestDataSource(userID);
+        TestUtil.getIndividualTestUser();
+        long dataSourceID = createDeltaTestDataSource();
         DataService dataService = new DataService();
         WSListDefinition noDimDefinition = new WSListDefinition();
         noDimDefinition.setDataFeedID(dataSourceID);
@@ -183,7 +208,7 @@ public class DateTimeTest extends TestCase {
         }*/
     }
 
-    public static long createDeltaTestDataSource(long userID) throws SQLException {
+    public static long createDeltaTestDataSource() throws SQLException {
         UserUploadService userUploadService = new UserUploadService();
 
         //IRow row3 = dataSet.createRow();

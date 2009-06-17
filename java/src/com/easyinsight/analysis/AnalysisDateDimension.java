@@ -44,6 +44,11 @@ public class AnalysisDateDimension extends AnalysisDimension {
         this.dateLevel = dateLevel;
     }
 
+    public AnalysisDateDimension(Key key, String displayName, int dateLevel) {
+        super(key, displayName);
+        this.dateLevel = dateLevel;
+    }
+
     public AnalysisDateDimension(Key key, boolean group, int dateLevel, String customDateFormat) {
         super(key, group);
         this.dateLevel = dateLevel;

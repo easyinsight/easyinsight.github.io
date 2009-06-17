@@ -44,6 +44,7 @@ public class PersistableDateRangeFilterDefinition extends PersistableFilterDefin
         date.setField(getField());
         date.setStartDate(lowDate);
         date.setEndDate(highDate);
+        date.setIntrinsic(isIntrinsic());
         return date;
     }
 }

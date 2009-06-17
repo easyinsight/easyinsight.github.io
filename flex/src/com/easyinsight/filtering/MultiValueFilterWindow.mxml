@@ -2,7 +2,9 @@
 <mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml">
 	<mx:Script>
 		<![CDATA[
-			import mx.rpc.remoting.RemoteObject;
+			import com.easyinsight.framework.CredentialsCache;
+
+        import mx.rpc.remoting.RemoteObject;
 			import mx.rpc.events.ResultEvent;
 			import mx.managers.PopUpManager;
 			import mx.collections.ArrayCollection;
@@ -33,7 +35,7 @@
 				dataService = new RemoteObject();
 				dataService.destination = "data";
 				dataService.getAnalysisItemMetadata.addEventListener(ResultEvent.RESULT, gotMetadata);
-				dataService.getAnalysisItemMetadata.send(_feedID, _filterValueDefinition.field);
+				dataService.getAnalysisItemMetadata.send(_feedID, _filterValueDefinition.field, CredentialsCache.getCache().createCredentials());
 			}
 			
 			private function gotMetadata(event:ResultEvent):void {

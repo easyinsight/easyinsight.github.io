@@ -7,7 +7,6 @@ package com.easyinsight.customupload
 		public var successful:Boolean;
 		public var failureMessage:String;
 		public var feedID:int;
-		public var analysisID:int;
 		
 		public function UploadResponse()
 		{

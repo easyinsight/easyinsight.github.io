@@ -45,6 +45,7 @@ public class FilterValueDefinition extends FilterDefinition {
 
     public PersistableFilterDefinition toPersistableFilterDefinition() {
         PersistableValueFilterDefinition persistableFilterDefinition = new PersistableValueFilterDefinition();
+        persistableFilterDefinition.setIntrinsic(isIntrinsic());
         persistableFilterDefinition.setFilterId(getFilterID());
         persistableFilterDefinition.setInclusive(inclusive);
         persistableFilterDefinition.setApplyBeforeAggregation(isApplyBeforeAggregation());

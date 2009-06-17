@@ -1,23 +1,19 @@
 package com.easyinsight.scheduler;
 
 import com.easyinsight.datafeeds.FeedStorage;
-import com.easyinsight.datafeeds.ServerDataSourceDefinition;
 import com.easyinsight.datafeeds.FeedConsumer;
+import com.easyinsight.datafeeds.IServerDataSourceDefinition;
 import com.easyinsight.email.UserStub;
 import com.easyinsight.users.Credentials;
-import com.easyinsight.database.Database;
 import com.easyinsight.eventing.MessageUtils;
 
 
 import javax.persistence.*;
 import java.util.List;
 import java.util.Date;
-import java.util.UUID;
 import java.sql.Connection;
 
 import org.hibernate.Session;
-import flex.messaging.messages.AsyncMessage;
-import flex.messaging.MessageBroker;
 
 /**
  * User: James Boe
@@ -41,7 +37,7 @@ public class ServerRefreshScheduledTask extends ScheduledTask {
     private Credentials refreshCreds;
 
     @Transient
-    private ServerDataSourceDefinition dataSource;
+    private IServerDataSourceDefinition dataSource;
 
     public long getDataSourceID() {
         return dataSourceID;
@@ -52,7 +48,7 @@ public class ServerRefreshScheduledTask extends ScheduledTask {
     }
 
     protected void execute(Date now, Connection conn) throws Exception {
-        dataSource = (ServerDataSourceDefinition) feedStorage.getFeedDefinitionData(dataSourceID);
+        dataSource = (IServerDataSourceDefinition) feedStorage.getFeedDefinitionData(dataSourceID);
  
         RefreshEventInfo info = new RefreshEventInfo();
         info.setTaskId(getScheduledTaskID());
@@ -73,7 +69,7 @@ public class ServerRefreshScheduledTask extends ScheduledTask {
         if (dataSourceUser == null) {
             throw new RuntimeException();
         }
-        dataSource.refreshData(refreshCreds, dataSourceUser.getAccountID(), now);
+        dataSource.refreshData(refreshCreds, dataSourceUser.getAccountID(), now, null);
     }
 
     @Override

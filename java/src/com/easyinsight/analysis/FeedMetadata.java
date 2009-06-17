@@ -1,6 +1,10 @@
 package com.easyinsight.analysis;
 
+import com.easyinsight.datafeeds.CredentialRequirement;
+
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * User: James Boe
@@ -13,6 +17,24 @@ public class FeedMetadata implements Serializable {
     private String dataSourceName;
     private int version;
     private boolean dataSourceAdmin;
+    private List<CredentialRequirement> credentials = new ArrayList<CredentialRequirement>();
+    private List<FilterDefinition> intrinsicFilters = new ArrayList<FilterDefinition>();
+
+    public List<FilterDefinition> getIntrinsicFilters() {
+        return intrinsicFilters;
+    }
+
+    public void setIntrinsicFilters(List<FilterDefinition> intrinsicFilters) {
+        this.intrinsicFilters = intrinsicFilters;
+    }
+
+    public List<CredentialRequirement> getCredentials() {
+        return credentials;
+    }
+
+    public void setCredentials(List<CredentialRequirement> credentials) {
+        this.credentials = credentials;
+    }
 
     public boolean isDataSourceAdmin() {
         return dataSourceAdmin;

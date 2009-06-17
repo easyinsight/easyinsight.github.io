@@ -5,6 +5,7 @@ import com.easyinsight.core.DerivedKey;
 import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.database.Database;
+import com.easyinsight.security.SecurityUtil;
 
 import java.sql.*;
 import java.util.*;
@@ -58,41 +59,36 @@ public class CompositeFeedDefinition extends FeedDefinition {
         }
     }
 
-    public void customLoad(Connection conn) {
-        try {
-            PreparedStatement getCustomFeedIDStmt = conn.prepareStatement("SELECT COMPOSITE_FEED_ID FROM COMPOSITE_FEED WHERE " +
-                    "DATA_FEED_ID = ?");
-            getCustomFeedIDStmt.setLong(1, getDataFeedID());
-            ResultSet rs = getCustomFeedIDStmt.executeQuery();
-            rs.next();
-            long compositeFeedID = rs.getLong(1);
-            PreparedStatement queryStmt = conn.prepareStatement("SELECT DATA_FEED_ID FROM COMPOSITE_NODE WHERE COMPOSITE_FEED_ID = ?");
-            queryStmt.setLong(1, compositeFeedID);
-            ResultSet nodeRS = queryStmt.executeQuery();
-            List<CompositeFeedNode> nodes = new ArrayList<CompositeFeedNode>();
-            while (nodeRS.next()) {
-                long feedID = nodeRS.getLong(1);
-                nodes.add(new CompositeFeedNode(feedID));
-            }
-            PreparedStatement queryConnStmt = conn.prepareStatement("SELECT SOURCE_FEED_NODE_ID, TARGET_FEED_NODE_ID," +
-                    "SOURCE_JOIN, TARGET_JOIN FROM COMPOSITE_CONNECTION WHERE COMPOSITE_FEED_ID = ?");
-            queryConnStmt.setLong(1, compositeFeedID);
-            List<CompositeFeedConnection> edges = new ArrayList<CompositeFeedConnection>();
-            ResultSet connectionRS = queryConnStmt.executeQuery();
-            while (connectionRS.next()) {
-                long sourceID = connectionRS.getLong(1);
-                long targetID = connectionRS.getLong(2);
-                Key sourceKey = getKey(conn, connectionRS.getLong(3));
-                Key targetKey = getKey(conn, connectionRS.getLong(4));
-                edges.add(new CompositeFeedConnection(sourceID, targetID, sourceKey, targetKey));
-            }
-            this.compositeFeedNodes = nodes;
-            this.connections = edges;
-            queryStmt.close();
-        } catch (SQLException e) {
-            LogClass.error(e);
-            throw new RuntimeException(e);
+    public void customLoad(Connection conn) throws SQLException {
+        PreparedStatement getCustomFeedIDStmt = conn.prepareStatement("SELECT COMPOSITE_FEED_ID FROM COMPOSITE_FEED WHERE " +
+                "DATA_FEED_ID = ?");
+        getCustomFeedIDStmt.setLong(1, getDataFeedID());
+        ResultSet rs = getCustomFeedIDStmt.executeQuery();
+        rs.next();
+        long compositeFeedID = rs.getLong(1);
+        PreparedStatement queryStmt = conn.prepareStatement("SELECT DATA_FEED_ID FROM COMPOSITE_NODE WHERE COMPOSITE_FEED_ID = ?");
+        queryStmt.setLong(1, compositeFeedID);
+        ResultSet nodeRS = queryStmt.executeQuery();
+        List<CompositeFeedNode> nodes = new ArrayList<CompositeFeedNode>();
+        while (nodeRS.next()) {
+            long feedID = nodeRS.getLong(1);
+            nodes.add(new CompositeFeedNode(feedID));
         }
+        PreparedStatement queryConnStmt = conn.prepareStatement("SELECT SOURCE_FEED_NODE_ID, TARGET_FEED_NODE_ID," +
+                "SOURCE_JOIN, TARGET_JOIN FROM COMPOSITE_CONNECTION WHERE COMPOSITE_FEED_ID = ?");
+        queryConnStmt.setLong(1, compositeFeedID);
+        List<CompositeFeedConnection> edges = new ArrayList<CompositeFeedConnection>();
+        ResultSet connectionRS = queryConnStmt.executeQuery();
+        while (connectionRS.next()) {
+            long sourceID = connectionRS.getLong(1);
+            long targetID = connectionRS.getLong(2);
+            Key sourceKey = getKey(conn, connectionRS.getLong(3));
+            Key targetKey = getKey(conn, connectionRS.getLong(4));
+            edges.add(new CompositeFeedConnection(sourceID, targetID, sourceKey, targetKey));
+        }
+        this.compositeFeedNodes = nodes;
+        this.connections = edges;
+        queryStmt.close();
     }
 
     public Feed createFeedObject() {
@@ -165,7 +161,7 @@ public class CompositeFeedDefinition extends FeedDefinition {
         protected void accept(CompositeFeedNode compositeFeedNode) throws SQLException {
             List<AnalysisItem> analysisItemList = retrieveFields(compositeFeedNode.getDataFeedID());
             for (AnalysisItem analysisItem : analysisItemList) {
-                AnalysisItem clonedItem = null;
+                AnalysisItem clonedItem;
                 try {
                     clonedItem = analysisItem.clone();
                 } catch (CloneNotSupportedException e) {
@@ -189,5 +185,25 @@ public class CompositeFeedDefinition extends FeedDefinition {
         } finally {
             Database.instance().closeConnection(conn);
         }
+    }
+
+    @Override
+    public FeedDefinition clone(Connection conn) throws CloneNotSupportedException, SQLException {
+        CompositeFeedDefinition feedDefinition = (CompositeFeedDefinition) super.clone(conn);
+        List<CompositeFeedNode> children = feedDefinition.getCompositeFeedNodes();
+        Map<Long, FeedDefinition> replacementMap = new HashMap<Long, FeedDefinition>();
+        for (CompositeFeedNode child : children) {
+            FeedDefinition childDefinition = new FeedStorage().getFeedDefinitionData(child.getDataFeedID());
+            FeedDefinition clonedDefinition = DataSourceCopyUtils.cloneFeed(SecurityUtil.getUserID(), conn, childDefinition);
+            replacementMap.put(child.getDataFeedID(), clonedDefinition);
+            child.setDataFeedID(clonedDefinition.getDataFeedID());
+        }
+        for (CompositeFeedConnection connection : feedDefinition.getConnections()) {
+            connection.setSourceFeedID(replacementMap.get(connection.getSourceFeedID()).getDataFeedID());
+            connection.setTargetFeedID(replacementMap.get(connection.getTargetFeedID()).getDataFeedID());
+            connection.setSourceJoin(replacementMap.get(connection.getSourceFeedID()).getField(connection.getSourceJoin().toKeyString()));
+            connection.setTargetJoin(replacementMap.get(connection.getTargetFeedID()).getField(connection.getTargetJoin().toKeyString()));
+        }
+        return feedDefinition;
     }
 }

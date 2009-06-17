@@ -10,8 +10,12 @@ import com.easyinsight.datafeeds.salesforce.SalesforceSubFeedDefinition;
 import com.easyinsight.datafeeds.file.FileBasedFeedDefinition;
 import com.easyinsight.datafeeds.jira.JiraDataSource;
 import com.easyinsight.datafeeds.basecamp.BaseCampDataSource;
+import com.easyinsight.datafeeds.basecamp.BaseCampCompositeSource;
+import com.easyinsight.datafeeds.basecamp.BaseCampTimeSource;
+import com.easyinsight.datafeeds.basecamp.BaseCampTodoSource;
 import com.easyinsight.datafeeds.admin.AdminStatsDataSource;
 import com.easyinsight.datafeeds.gnip.GnipDataSource;
+import com.easyinsight.datafeeds.ganalytics.GoogleAnalyticsDataSource;
 import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.email.UserStub;
 import com.easyinsight.groups.GroupDescriptor;
@@ -30,6 +34,9 @@ import java.io.Serializable;
 import org.hibernate.Session;
 import org.apache.jcs.JCS;
 import org.apache.jcs.access.exception.CacheException;
+import test.composite.TestAlphaDataSource;
+import test.composite.TestBetaDataSource;
+import test.composite.TestGammaDataSource;
 
 /**
  * User: jboe
@@ -307,7 +314,7 @@ public class FeedStorage {
         }
     }
 
-    public void setPasswordCredentials(Connection conn, ServerDataSourceDefinition ds) throws SQLException {
+    public void setPasswordCredentials(Connection conn, IServerDataSourceDefinition ds) throws SQLException {
         Credentials c = PasswordStorage.getPasswordCredentials(ds.getDataFeedID(), conn);
         if(c != null) {
             ds.setUsername(c.getUserName());
@@ -315,7 +322,7 @@ public class FeedStorage {
         }
     }
 
-    public void setSessionIdCredentials(Connection conn, ServerDataSourceDefinition ds) throws SQLException {
+    public void setSessionIdCredentials(Connection conn, IServerDataSourceDefinition ds) throws SQLException {
         PreparedStatement selectStmt = conn.prepareStatement("SELECT session_id from session_id_storage WHERE data_feed_id = ?");
         selectStmt.setLong(1, ds.getDataFeedID());
         ResultSet rs = selectStmt.executeQuery();
@@ -611,12 +618,24 @@ public class FeedStorage {
                     feedDefinition = new FeedDefinition();
                 } else if (feedType.equals(FeedType.JIRA)) {
                     feedDefinition = new JiraDataSource();
-                } else if (feedType.equals(FeedType.BASECAMP)) {
-                    feedDefinition = new BaseCampDataSource();
+                } else if (feedType.equals(FeedType.BASECAMP_MASTER)) {
+                    feedDefinition = new BaseCampCompositeSource();
                 } else if (feedType.equals(FeedType.ADMIN_STATS)) {
                     feedDefinition = new AdminStatsDataSource();
                 } else if (feedType.equals(FeedType.GNIP)) {
                     feedDefinition = new GnipDataSource();
+                } else if (feedType.equals(FeedType.GOOGLE_ANALYTICS)) {
+                    feedDefinition = new GoogleAnalyticsDataSource();
+                } else if (feedType.equals(FeedType.TEST_ALPHA)) {
+                    feedDefinition = new TestAlphaDataSource();
+                } else if (feedType.equals(FeedType.TEST_BETA)) {
+                    feedDefinition = new TestBetaDataSource();
+                } else if (feedType.equals(FeedType.TEST_GAMMA)) {
+                    feedDefinition = new TestGammaDataSource();
+                } else if (feedType.equals(FeedType.BASECAMP)) {
+                    feedDefinition = new BaseCampTodoSource();
+                } else if (feedType.equals(FeedType.BASECAMP_TIME)) {
+                    feedDefinition = new BaseCampTimeSource();
                 }
                 else {
                     throw new RuntimeException("Couldn't identify type");
@@ -658,8 +677,8 @@ public class FeedStorage {
                 feedDefinition.setRefreshDataInterval(rs.getLong(20));
                 feedDefinition.setTags(getTags(feedDefinition.getDataFeedID(), conn));
                 feedDefinition.customLoad(conn);
-                if(feedDefinition instanceof ServerDataSourceDefinition) {
-                    ServerDataSourceDefinition ds = (ServerDataSourceDefinition) feedDefinition;
+                if(feedDefinition instanceof IServerDataSourceDefinition) {
+                    IServerDataSourceDefinition ds = (IServerDataSourceDefinition) feedDefinition;
                     if(ds.getCredentialsDefinition() == CredentialsDefinition.SALESFORCE)
                         setSessionIdCredentials(conn, ds);
                     else if(ds.getCredentialsDefinition() == CredentialsDefinition.STANDARD_USERNAME_PW) {

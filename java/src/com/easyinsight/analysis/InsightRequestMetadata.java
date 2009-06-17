@@ -1,6 +1,11 @@
 package com.easyinsight.analysis;
 
+import com.easyinsight.datafeeds.CredentialFulfillment;
+import com.easyinsight.users.Credentials;
+
 import java.util.Date;
+import java.util.ArrayList;
+import java.util.List;
 import java.io.Serializable;
 
 /**
@@ -11,6 +16,25 @@ import java.io.Serializable;
 public class InsightRequestMetadata implements Serializable {
     private Date now = new Date();
     private int version;
+    private List<CredentialFulfillment> credentialFulfillmentList = new ArrayList<CredentialFulfillment>();
+
+    public Credentials getCredentialForDataSource(long dataSourceID) {
+        Credentials credentials = null;
+        for (CredentialFulfillment credentialFulfillment : credentialFulfillmentList) {
+            if (credentialFulfillment.getDataSourceID() == dataSourceID) {
+                credentials = credentialFulfillment.getCredentials();
+            }
+        }
+        return credentials;
+    }
+
+    public List<CredentialFulfillment> getCredentialFulfillmentList() {
+        return credentialFulfillmentList;
+    }
+
+    public void setCredentialFulfillmentList(List<CredentialFulfillment> credentialFulfillmentList) {
+        this.credentialFulfillmentList = credentialFulfillmentList;
+    }
 
     public int getVersion() {
         return version;

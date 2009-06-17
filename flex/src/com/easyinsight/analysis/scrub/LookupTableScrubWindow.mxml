@@ -6,7 +6,9 @@
 			import com.easyinsight.analysis.AnalysisDimensionResultMetadata;
 			import com.easyinsight.analysis.AnalysisItemTypes;
 			import com.easyinsight.analysis.AnalysisItem;
-			import mx.collections.ArrayCollection;
+            import com.easyinsight.framework.CredentialsCache;
+
+            import mx.collections.ArrayCollection;
             import mx.controls.Alert;
 import mx.managers.PopUpManager;
 
@@ -96,7 +98,7 @@ import mx.managers.PopUpManager;
 			private function onSourceFieldSelect():void {
 			 	if (sourceFieldBox.selectedItem is AnalysisItem) {
 			 		var analysisItem:AnalysisItem = sourceFieldBox.selectedItem as AnalysisItem;
-			 		dataService.getAnalysisItemMetadata.send(feedID, analysisItem);
+			 		dataService.getAnalysisItemMetadata.send(feedID, analysisItem, CredentialsCache.getCache().createCredentials());
                     sourceSelected = true;
                     if (!(targetFieldBox.selectedItem is AnalysisItem)) {
                         targetFieldBox.selectedItem = analysisItem;

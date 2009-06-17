@@ -25,6 +25,17 @@ public abstract class PersistableFilterDefinition implements Cloneable {
     @Column(name="apply_before_aggregation")
     private boolean applyBeforeAggregation;
 
+    @Column(name="intrinsic")
+    private boolean intrinsic;
+
+    public boolean isIntrinsic() {
+        return intrinsic;
+    }
+
+    public void setIntrinsic(boolean intrinsic) {
+        this.intrinsic = intrinsic;
+    }
+
     public PersistableFilterDefinition clone() throws CloneNotSupportedException {
         PersistableFilterDefinition filter = (PersistableFilterDefinition) super.clone();
         filter.setFilterId(0);

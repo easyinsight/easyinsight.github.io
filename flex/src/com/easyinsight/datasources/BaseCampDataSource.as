@@ -1,11 +1,9 @@
 package com.easyinsight.datasources {
-import com.easyinsight.administration.feed.FeedDefinitionData;
-import com.easyinsight.administration.feed.ServerDataSourceDefinition;
 import com.easyinsight.customupload.BaseCampDataSourceCreation;
 
 [Bindable]
-[RemoteClass(alias="com.easyinsight.datafeeds.basecamp.BaseCampDataSource")]
-public class BaseCampDataSource extends ServerDataSourceDefinition{
+[RemoteClass(alias="com.easyinsight.datafeeds.basecamp.BaseCampCompositeSource")]
+public class BaseCampDataSource extends CompositeServerDataSource {
 
     public var url:String;
 

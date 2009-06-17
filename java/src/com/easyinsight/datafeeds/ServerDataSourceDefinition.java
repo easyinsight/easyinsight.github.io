@@ -1,23 +1,25 @@
 package com.easyinsight.datafeeds;
 
 import com.easyinsight.users.Credentials;
+import com.easyinsight.users.User;
+import com.easyinsight.users.SubscriptionLicense;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.core.Key;
 import com.easyinsight.core.NamedKey;
 import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.userupload.CredentialsResponse;
+import com.easyinsight.userupload.UploadPolicy;
 import com.easyinsight.database.Database;
 import com.easyinsight.storage.DataStorage;
 import com.easyinsight.logging.LogClass;
+import com.easyinsight.security.SecurityUtil;
 
-import java.util.Map;
-import java.util.List;
-import java.util.HashMap;
-import java.util.Date;
+import java.util.*;
 import java.sql.Connection;
 import java.sql.SQLException;
 
 import org.jetbrains.annotations.NotNull;
+import org.hibernate.Session;
 import flex.messaging.MessageBroker;
 import flex.messaging.messages.AsyncMessage;
 import flex.messaging.util.UUIDUtils;
@@ -27,64 +29,65 @@ import flex.messaging.util.UUIDUtils;
  * Date: Mar 30, 2009
  * Time: 8:50:59 PM
  */
-public abstract class ServerDataSourceDefinition extends FeedDefinition {
+public abstract class ServerDataSourceDefinition extends FeedDefinition implements IServerDataSourceDefinition {
 
     private String username;
     private String password;
     private String sessionId;
 
-    /**
-     * The account tier (matching constants on Account) required to see this data source in Connect External
-     * @return the required account tier
-     */
-    public abstract int getRequiredAccountTier();
 
-    
-
-    /**
-     * The FeedType constant associated with this data source, used for loading purposes
-     * @return the FeedType constant
-     */
-    public abstract FeedType getFeedType();
-    public abstract int getCredentialsDefinition();
     public void setCredentialsDefinition(int i) { }
 
-    public abstract String validateCredentials(Credentials credentials);
+    public long create(Credentials credentials, Connection conn) throws SQLException, CloneNotSupportedException {
+        DataStorage metadata = null;
+        try {
+            Map<String, Key> keys = newDataSourceFields(credentials);
+            DataSet dataSet = getDataSet(credentials, keys, new Date(), null);
+            setFields(createAnalysisItems(keys, dataSet, credentials));
+            setOwnerName(retrieveUser(conn, SecurityUtil.getUserID()).getUserName());
+            UploadPolicy uploadPolicy = new UploadPolicy(SecurityUtil.getUserID());
+            setUploadPolicy(uploadPolicy);
+            FeedCreationResult feedCreationResult = new FeedCreation().createFeed(this, conn, dataSet, SecurityUtil.getUserID());
+            metadata = feedCreationResult.getTableDefinitionMetadata();
+            metadata.commit();
+            return feedCreationResult.getFeedID();
+        } catch (SQLException e) {
+            if (metadata != null) {
+                metadata.rollback();
+            }
+            throw e;
+        } finally {
+            if (metadata != null) {
+                metadata.closeConnection();
+            }
+        }
+    }
 
-    /**
-     * Retrieves the actual data of the data source
-     * @param credentials the credentials required for cnonection to the external source
-     * @param keys the keys defined earlier by the getKeys() call
-     * @param now
-     * @return the data set
-     */
-    public abstract DataSet getDataSet(Credentials credentials, Map<String, Key> keys, Date now);
-
-    /**
-     * Retrieves the analysis items for the data source, defining such traits as dimensions, measures, dates, and so on. Use
-     * the keys parameter to retrieve keys by their constants defined in getKeys() to associate with given analysis items.
-     * For example, analysisItem.setKey(keys.get(CONSTANT));
-     * @param keys the keys defined in the earlier getKeys() call
-     * @param dataSet the data set retrieved by getDataSet()
-     * @param credentials
-     * @return the analysis items for the data source
-     */
-    public abstract List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, DataSet dataSet, Credentials credentials);
-
-    /**
-     * Any custom logic for storage of the data source. Will execute in the transactional scope of saving the data source, on
-     * new save and on update.
-     * @param conn the connection object for JDBC persistence
-     * @throws SQLException
-     */
-    public abstract void customStorage(Connection conn) throws SQLException;
-
-    /**
-     * Any custom logic for retrieval of the data source.
-     * @param conn the connection object for JDBC persistence
-     * @throws SQLException
-     */
-    public abstract void customLoad(Connection conn) throws SQLException;
+    public static User retrieveUser(Connection conn, long userID) {
+        try {
+            User user = null;
+            Session session = Database.instance().createSession(conn);
+            List results;
+            try {
+                session.beginTransaction();
+                results = session.createQuery("from User where userID = ?").setLong(0, userID).list();
+                session.getTransaction().commit();
+            } catch (Exception e) {
+                session.getTransaction().rollback();
+                throw new RuntimeException(e);
+            } finally {
+                session.close();
+            }
+            if (results.size() > 0) {
+                user = (User) results.get(0);
+                user.setLicenses(new ArrayList<SubscriptionLicense>());
+            }
+            return user;
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        }
+    }
 
     /**
      * The names of the fields used in this data source
@@ -113,11 +116,11 @@ public abstract class ServerDataSourceDefinition extends FeedDefinition {
         dataStorage.insertData(dataSet);
     }
 
-    public CredentialsResponse refreshData(Credentials credentials, long accountID, Date now) {
+    public CredentialsResponse refreshData(Credentials credentials, long accountID, Date now, FeedDefinition parentDefinition) {
         Connection conn = Database.instance().getConnection();
         try {
             conn.setAutoCommit(false);
-            refreshData(credentials, accountID, now, conn);
+            refreshData(credentials, accountID, now, conn, null);
             conn.commit();
             return new CredentialsResponse(true);
         } catch (Exception e) {
@@ -133,7 +136,7 @@ public abstract class ServerDataSourceDefinition extends FeedDefinition {
         }
     }
 
-    public void refreshData(Credentials credentials, long accountID, Date now, Connection conn) throws Exception {
+    public boolean refreshData(Credentials credentials, long accountID, Date now, Connection conn, FeedDefinition parentDefinition) throws Exception {
         DataStorage dataStorage = null;
         try {
             if(credentials == null) {
@@ -144,13 +147,15 @@ public abstract class ServerDataSourceDefinition extends FeedDefinition {
                 }
             }
             Map<String, Key> keys = newDataSourceFields(credentials);
-            DataSet dataSet = getDataSet(credentials, newDataSourceFields(credentials), now);
+            DataSet dataSet = getDataSet(credentials, newDataSourceFields(credentials), now, parentDefinition);
             List<AnalysisItem> items = createAnalysisItems(keys, dataSet, credentials);
             dataStorage = DataStorage.writeConnection(this, conn, accountID);
-            dataStorage.migrate(getFields(), items);
+            int version = dataStorage.getVersion();
+            int newVersion = dataStorage.migrate(getFields(), items);
             addData(dataStorage, dataSet);
             dataStorage.commit();
             notifyOfDataUpdate();
+            return version != newVersion;
         } catch (Exception e) {
             if (dataStorage != null) {
                 dataStorage.rollback();

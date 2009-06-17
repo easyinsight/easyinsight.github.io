@@ -3,8 +3,10 @@ package com.easyinsight.filtering
 	import com.easyinsight.analysis.AnalysisDimensionResultMetadata;
 	import com.easyinsight.analysis.AnalysisItem;
 	import com.easyinsight.analysis.Value;
-	
-	import flash.events.MouseEvent;
+
+import com.easyinsight.framework.CredentialsCache;
+
+import flash.events.MouseEvent;
 	import flash.geom.Point;
 	
 	import mx.collections.ArrayCollection;
@@ -28,6 +30,8 @@ package com.easyinsight.filtering
 		private var deleteButton:Button;
 		private var editButton:Button;
 		private var _analysisItems:ArrayCollection;
+
+        private var _credentials:Object;
 		
 		[Bindable]
         [Embed(source="../../../../assets/navigate_cross.png")]
@@ -43,8 +47,12 @@ package com.easyinsight.filtering
 			this._feedID = feedID;
 			this._analysisItem = analysisItem;			
 		}
-		
-		public function set analysisItems(analysisItems:ArrayCollection):void {
+
+        public function set credentials(value:Object):void {
+            _credentials = value;
+        }
+
+        public function set analysisItems(analysisItems:ArrayCollection):void {
 			_analysisItems = analysisItems;
 		}		
 		
@@ -108,7 +116,7 @@ package com.easyinsight.filtering
 			dataService = new RemoteObject();
 			dataService.destination = "data";
 			dataService.getAnalysisItemMetadata.addEventListener(ResultEvent.RESULT, gotMetadata);
-			dataService.getAnalysisItemMetadata.send(_feedID, _analysisItem);
+			dataService.getAnalysisItemMetadata.send(_feedID, _analysisItem, CredentialsCache.getCache().createCredentials());
 		}
 		
 		private function gotMetadata(event:ResultEvent):void {

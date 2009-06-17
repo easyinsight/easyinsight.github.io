@@ -6,6 +6,7 @@
 	</mx:Metadata>
     <mx:Script><![CDATA[
         import com.easyinsight.administration.feed.FeedDefinitionData;
+        import com.easyinsight.framework.CredentialsCache;
         import com.easyinsight.genredata.ModuleAnalyzeEvent;
         import com.easyinsight.listing.DataFeedDescriptor;
         import com.easyinsight.listing.DescriptorAnalyzeSource;
@@ -14,6 +15,7 @@
 
         private var _dataSourceClass:Class;
         private var dataSourceCreation:IServerDataSourceCreation;
+        private var dataSourceName:String;
 
         public function set dataSourceClass(value:Class):void {
             _dataSourceClass = value;
@@ -48,15 +50,17 @@
 
         private function create():void {
             progressBar.visible = true;
+            dataSourceName = dataSourceDefinition.feedName;
             uploadService.newExternalDataSource.send(dataSourceDefinition, dataSourceCreation.credentials);
         }
 
         private function created():void {
             progressBar.visible = false;
             var id:int = uploadService.newExternalDataSource.lastResult as int;
+            CredentialsCache.getCache().addCredentials(id, dataSourceCreation.credentials);            
             var descriptor:DataFeedDescriptor = new DataFeedDescriptor();
             descriptor.dataFeedID = id;
-            descriptor.name = "BaseCamp";
+            descriptor.name = dataSourceName;
             dispatchEvent(new UploadConfigEvent(UploadConfigEvent.UPLOAD_CONFIG_COMPLETE, id, descriptor.name));
             dispatchEvent(new ModuleAnalyzeEvent(new DescriptorAnalyzeSource(descriptor)));
         }

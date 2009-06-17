@@ -48,6 +48,7 @@ public class FilterRangeDefinition extends FilterDefinition {
 
     public PersistableFilterDefinition toPersistableFilterDefinition() {
         PersistableRangeFilterDefinition range = new PersistableRangeFilterDefinition();
+        range.setIntrinsic(isIntrinsic());
         range.setFilterId(getFilterID());
         range.setField(getField());
         range.setApplyBeforeAggregation(isApplyBeforeAggregation());

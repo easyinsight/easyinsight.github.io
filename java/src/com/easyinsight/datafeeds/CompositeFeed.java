@@ -35,17 +35,19 @@ public class CompositeFeed extends Feed {
         return FeedType.COMPOSITE;
     }
 
-    public AnalysisItemResultMetadata getMetadata(AnalysisItem analysisItem) {
-        throw new RuntimeException();
+    public AnalysisItemResultMetadata getMetadata(AnalysisItem analysisItem, InsightRequestMetadata insightRequestMetadata) {
+        DerivedKey derivedKey = (DerivedKey) analysisItem.getKey();
+        for (CompositeFeedNode compositeFeedNode : getCompositeFeedNodes()) {
+            if (compositeFeedNode.getDataFeedID() == derivedKey.getFeedID()) {
+                return FeedRegistry.instance().getFeed(compositeFeedNode.getDataFeedID()).getMetadata(analysisItem, insightRequestMetadata);
+            }
+        }
+        return null;
     }
 
     public DataSet getAggregateDataSet(Set<AnalysisItem> analysisItems, Collection<FilterDefinition> filters, InsightRequestMetadata insightRequestMetadata, List<AnalysisItem> allAnalysisItems, boolean adminMode, Collection<Key> additionalNeededKeys) {
         try {
-            DataSet dataSet = getDataSet(analysisItems, insightRequestMetadata);
-            if (!adminMode) {
-                dataSet = new DerivedDataSourcePipeline().setup(getAnalysisDefinition(), this, insightRequestMetadata).toDataSet(dataSet);
-            }
-            return dataSet;
+            return getDataSet(analysisItems, insightRequestMetadata);
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);

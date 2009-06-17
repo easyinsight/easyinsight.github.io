@@ -2,11 +2,13 @@ package test.basecamp;
 
 import junit.framework.TestCase;
 import com.easyinsight.datafeeds.basecamp.BaseCampDataSource;
+import com.easyinsight.datafeeds.basecamp.BaseCampCompositeSource;
 import com.easyinsight.datafeeds.FeedRegistry;
 import com.easyinsight.users.Credentials;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.database.Database;
 import com.easyinsight.userupload.UserUploadService;
+import com.easyinsight.analysis.DataService;
 import test.util.TestUtil;
 
 /**
@@ -17,10 +19,10 @@ import test.util.TestUtil;
  * To change this template use File | Settings | File Templates.
  */
 public class BaseCampTest extends TestCase {
-    private BaseCampDataSource ds;
+    private BaseCampCompositeSource ds;
 
     public void setUp() {
-        ds = new BaseCampDataSource();
+        ds = new BaseCampCompositeSource();
     }
 
     public void testBaseCampData() {
@@ -33,6 +35,8 @@ public class BaseCampTest extends TestCase {
         c.setUserName("apiuser");
         c.setPassword("@p!user");
         long sourceId = uploadService.newExternalDataSource(ds, c);
+        DataService dataService = new DataService();
+        dataService.getFeedMetadata(sourceId, null);
     }
 
     public void testUrlByName() {

@@ -81,7 +81,7 @@ public class JiraDataSource extends ServerDataSourceDefinition {
         }
     }
 
-    public DataSet getDataSet(Credentials credentials, Map<String, Key> keys, Date now) {
+    public DataSet getDataSet(Credentials credentials, Map<String, Key> keys, Date now, FeedDefinition parentDefinition) {
         DataSet dataSet = new DataSet();
         try {
             String userName = credentials.getUserName();
@@ -268,8 +268,8 @@ public class JiraDataSource extends ServerDataSourceDefinition {
     }
 
     @Override
-    public FeedDefinition clone() throws CloneNotSupportedException {
-        JiraDataSource jiraDataSource = (JiraDataSource) super.clone();
+    public FeedDefinition clone(Connection conn) throws CloneNotSupportedException, SQLException {
+        JiraDataSource jiraDataSource = (JiraDataSource) super.clone(conn);
         jiraDataSource.setUrl("");
         return jiraDataSource;
     }

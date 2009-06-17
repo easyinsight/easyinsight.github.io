@@ -41,7 +41,7 @@ public class DataSourceRefreshTimer extends TimerTask {
             }
             for (Long dataSourceID : dataSourceIDs) {
                 // TODO: add credentials to refresh
-                ServerDataSourceDefinition dataSource = (ServerDataSourceDefinition) new FeedStorage().getFeedDefinitionData(dataSourceID);
+                IServerDataSourceDefinition dataSource = (IServerDataSourceDefinition) new FeedStorage().getFeedDefinitionData(dataSourceID);
                 UserStub dataSourceUser = null;
                 List<FeedConsumer> owners = dataSource.getUploadPolicy().getOwners();
                 for (FeedConsumer owner : owners){
@@ -49,7 +49,7 @@ public class DataSourceRefreshTimer extends TimerTask {
                         dataSourceUser = (UserStub) owner;
                     }
                 }
-                dataSource.refreshData(null, dataSourceUser.getAccountID(), null);
+                dataSource.refreshData(null, dataSourceUser.getAccountID(), null, null);
             }
         } catch (Exception e) {
             LogClass.error(e);

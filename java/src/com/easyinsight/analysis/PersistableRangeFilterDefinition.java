@@ -44,6 +44,7 @@ public class PersistableRangeFilterDefinition extends PersistableFilterDefinitio
         range.setStartValueDefined(lowValue != null);
         range.setEndValue(highValue != null ? highValue : 0);
         range.setEndValueDefined(highValue != null);
+        range.setIntrinsic(isIntrinsic());
         return range;
     }
 }

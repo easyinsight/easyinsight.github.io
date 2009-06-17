@@ -25,11 +25,13 @@ public class DataService {
 
     private FeedRegistry feedRegistry = FeedRegistry.instance();
 
-    public AnalysisItemResultMetadata getAnalysisItemMetadata(long feedID, AnalysisItem analysisItem) {
+    public AnalysisItemResultMetadata getAnalysisItemMetadata(long feedID, AnalysisItem analysisItem, List<CredentialFulfillment> credentials) {
         try {
             SecurityUtil.authorizeFeedAccess(feedID);
             Feed feed = feedRegistry.getFeed(feedID);
-            return feed.getMetadata(analysisItem);
+            InsightRequestMetadata insightRequestMetadata = new InsightRequestMetadata();
+            insightRequestMetadata.setCredentialFulfillmentList(credentials);
+            return feed.getMetadata(analysisItem, insightRequestMetadata);
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);
@@ -40,6 +42,7 @@ public class DataService {
         SecurityUtil.authorizeFeedAccess(feedID);
         try {
             Feed feed = feedRegistry.getFeed(feedID);
+            List<CredentialRequirement> credentials = feed.getCredentialRequirement();            
             Collection<AnalysisItem> feedItems = feed.getFields();
             // need to apply renames from the com.easyinsight.analysis definition here?
             List<AnalysisItem> sortedList = new ArrayList<AnalysisItem>(feedItems);
@@ -52,8 +55,10 @@ public class DataService {
             AnalysisItem[] feedItemArray = new AnalysisItem[sortedList.size()];
             sortedList.toArray(feedItemArray);
             FeedMetadata feedMetadata = new FeedMetadata();
+            feedMetadata.setCredentials(credentials);
             feedMetadata.setDataSourceName(feed.getName());
             feedMetadata.setFields(feedItemArray);
+            feedMetadata.setIntrinsicFilters(feed.getIntrinsicFilters());
             feedMetadata.setDataFeedID(feedID);
             feedMetadata.setVersion(feed.getVersion());
             feedMetadata.setDataSourceAdmin(SecurityUtil.getRole(SecurityUtil.getUserID(), feedID) == Roles.OWNER);

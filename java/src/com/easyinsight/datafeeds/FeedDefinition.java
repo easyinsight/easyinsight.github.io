@@ -316,7 +316,6 @@ public class FeedDefinition implements Cloneable, Serializable {
             clone.updateIDs(replacementMap);
         }
         feed.setFields(clones);
-        feed.setAnalysisDefinition(new AnalysisStorage().getAnalysisDefinition(analysisDefinitionID));
         feed.setName(getFeedName());
         return feed;
     }
@@ -329,7 +328,7 @@ public class FeedDefinition implements Cloneable, Serializable {
         
     }
 
-    public FeedDefinition clone() throws CloneNotSupportedException {
+    public FeedDefinition clone(Connection conn) throws CloneNotSupportedException, SQLException {
         FeedDefinition feedDefinition = (FeedDefinition) super.clone();
         List<AnalysisItem> clonedFields = new ArrayList<AnalysisItem>();
         Map<Long, AnalysisItem> replacementMap = new HashMap<Long, AnalysisItem>();
@@ -361,7 +360,7 @@ public class FeedDefinition implements Cloneable, Serializable {
         return CredentialsDefinition.NO_CREDENTIALS;
     }
     
-     public DataSet getDataSet(Credentials credentials, Map<String, Key> keys, Date now) {
+     public DataSet getDataSet(Credentials credentials, Map<String, Key> keys, Date now, FeedDefinition parentDefinition) {
         throw new UnsupportedOperationException();
     }
 
@@ -397,5 +396,15 @@ public class FeedDefinition implements Cloneable, Serializable {
     // A little nonsensical, but returns false if not a ServerDataSource to prevent events from firing.
     public boolean isConfigured() {
         return false;
+    }
+
+    public Key getField(String sourceKey) {
+        Key key = null;
+        for (AnalysisItem field : getFields()) {
+            if (sourceKey.equals(field.getKey().toKeyString())) {
+                key = field.getKey();
+            }
+        }
+        return key;
     }
 }

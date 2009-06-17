@@ -9,7 +9,6 @@ import com.easyinsight.logging.LogClass;
 import com.easyinsight.analysis.*;
 import com.easyinsight.core.Key;
 import com.easyinsight.core.Value;
-import com.easyinsight.pipeline.DerivedDataSourcePipeline;
 
 import java.util.*;
 import java.sql.SQLException;
@@ -28,7 +27,7 @@ public class StaticFeed extends Feed implements Serializable {
         return FeedType.STATIC;
     }
 
-    public AnalysisItemResultMetadata getMetadata(AnalysisItem analysisItem) {
+    public AnalysisItemResultMetadata getMetadata(AnalysisItem analysisItem, InsightRequestMetadata insightRequestMetadata) {
         // this would change to return the data from our contained analysis definition
         AnalysisItemResultMetadata metadata = analysisItem.createResultMetadata();
         AnalysisItem queryItem;

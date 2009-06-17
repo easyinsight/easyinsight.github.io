@@ -1,8 +1,8 @@
 package com.easyinsight.scheduler;
 
 import com.easyinsight.datafeeds.FeedStorage;
-import com.easyinsight.datafeeds.ServerDataSourceDefinition;
 import com.easyinsight.datafeeds.FeedConsumer;
+import com.easyinsight.datafeeds.IServerDataSourceDefinition;
 import com.easyinsight.email.UserStub;
 
 import javax.persistence.Entity;
@@ -36,7 +36,7 @@ public class DataSourceScheduledTask extends ScheduledTask {
     }
 
     protected void execute(Date now, Connection conn) throws Exception {
-        ServerDataSourceDefinition dataSource = (ServerDataSourceDefinition) feedStorage.getFeedDefinitionData(dataSourceID);
+        IServerDataSourceDefinition dataSource = (IServerDataSourceDefinition) feedStorage.getFeedDefinitionData(dataSourceID);
         UserStub dataSourceUser = null;
         List<FeedConsumer> owners = dataSource.getUploadPolicy().getOwners();
         for (FeedConsumer owner : owners){
@@ -47,6 +47,6 @@ public class DataSourceScheduledTask extends ScheduledTask {
         if (dataSourceUser == null) {
             throw new RuntimeException();
         }
-        dataSource.refreshData(null, dataSourceUser.getAccountID(), now, conn);
+        dataSource.refreshData(null, dataSourceUser.getAccountID(), now, conn, null);
     }
 }

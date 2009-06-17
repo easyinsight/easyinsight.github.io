@@ -1,15 +1,12 @@
 package com.easyinsight.userupload;
 
-import com.easyinsight.dataset.PersistableDataSetForm;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.storage.DataStorage;
 import com.easyinsight.storage.StorageLimitException;
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.*;
-import com.easyinsight.datafeeds.file.FileBasedFeedDefinition;
 import com.easyinsight.analysis.AnalysisItem;
-import com.easyinsight.core.Key;
 import com.easyinsight.core.InsightDescriptor;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.security.SecurityUtil;
@@ -18,7 +15,6 @@ import com.easyinsight.users.*;
 import com.easyinsight.analysis.*;
 import com.easyinsight.PasswordStorage;
 import com.easyinsight.eventing.EventDispatcher;
-import com.easyinsight.eventing.EIEvent;
 import com.easyinsight.eventing.AsyncCreatedEvent;
 import com.easyinsight.notifications.TodoEventInfo;
 import com.easyinsight.notifications.ConfigureDataFeedTodo;
@@ -268,21 +264,6 @@ public class UserUploadService implements IUserUploadService {
         return uploadResponse;
     }
 
-
-    private FeedDefinition createFeedFromUpload(long uploadID, UploadFormat uploadFormat, String feedName, String genre,
-                       List<AnalysisItem> fields, UploadPolicy uploadPolicy, TagCloud tagCloud) {
-        RawUploadData rawUploadData = retrieveRawData(uploadID);
-        FileBasedFeedDefinition feedDefinition = new FileBasedFeedDefinition();
-        feedDefinition.setUploadFormat(uploadFormat);
-        feedDefinition.setFeedName(feedName);
-        feedDefinition.setGenre(genre);
-        feedDefinition.setUploadPolicy(uploadPolicy);
-        feedDefinition.setFields(fields);
-        feedStorage.addFeedDefinitionData(feedDefinition);
-        new UserUploadInternalService().createUserFeedLink(rawUploadData.accountID, feedDefinition.getDataFeedID(), Roles.OWNER);
-        return feedDefinition;
-    }
-
     public static RawUploadData retrieveRawData(long uploadID) {
         Connection conn = Database.instance().getConnection();
         RawUploadData result = null;
@@ -409,21 +390,6 @@ public class UserUploadService implements IUserUploadService {
         }
     }
 
-    public long asyncParse(long uploadID, UploadFormat uploadFormat, String feedName, String genre,
-                       List<AnalysisItem> fields, UploadPolicy uploadPolicy, TagCloud tagCloud) {
-        RawUploadData rawUploadData = retrieveRawData(uploadID);
-        FeedDefinition feedDefinition = createFeedFromUpload(uploadID, uploadFormat, feedName, genre, fields, uploadPolicy, tagCloud);
-        PersistableDataSetForm dataSet = UploadAnalysisCache.instance().getDataSet(uploadID);
-        if (dataSet == null) {
-            dataSet = uploadFormat.createDataSet(rawUploadData.userData, fields);
-        }
-        for (AnalysisItem field : fields) {
-            dataSet.refreshKey(field.getKey());
-        }
-        AsyncPersistanceManager.instance().addAsyncPersistence(new AsyncPersistence(dataSet, feedDefinition.getDataFeedID()));
-        return feedDefinition.getDataFeedID();
-    }
-
     public long createAnalysisBasedFeed(AnalysisBasedFeedDefinition definition) {
         long userID = SecurityUtil.getUserID();
         SecurityUtil.authorizeInsight(definition.getAnalysisDefinitionID());
@@ -506,8 +472,8 @@ public class UserUploadService implements IUserUploadService {
             }
 
             if (synchronous) {
-                ServerDataSourceDefinition dataSource = (ServerDataSourceDefinition) feedStorage.getFeedDefinitionData(feedID);
-                dataSource.refreshData(credentials, SecurityUtil.getAccountID(), new Date());
+                IServerDataSourceDefinition dataSource = (IServerDataSourceDefinition) feedStorage.getFeedDefinitionData(feedID);
+                dataSource.refreshData(credentials, SecurityUtil.getAccountID(), new Date(), null);
             } else {
                 ServerRefreshScheduledTask task = new ServerRefreshScheduledTask();
                 task.setDataSourceID(feedID);
@@ -527,7 +493,6 @@ public class UserUploadService implements IUserUploadService {
     public void updateData(long feedID, long rawDataID, boolean update) {
         SecurityUtil.authorizeFeed(feedID, Roles.OWNER);
         Connection conn = Database.instance().getConnection();
-        DataStorage metadata = null;
         try {
             conn.setAutoCommit(false);
             RawUploadData rawUploadData = retrieveRawData(rawDataID);
@@ -594,6 +559,16 @@ public class UserUploadService implements IUserUploadService {
 
     public String validateCredentials(FeedDefinition feedDefinition, Credentials credentials) {
         try {
+            return feedDefinition.validateCredentials(credentials);
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        }
+    }
+
+    public String validateCredentialsForID(long id, Credentials credentials) {
+        try {
+            FeedDefinition feedDefinition = feedStorage.getFeedDefinitionData(id);
             return feedDefinition.validateCredentials(credentials);
         } catch (Exception e) {
             LogClass.error(e);
@@ -800,27 +775,15 @@ public class UserUploadService implements IUserUploadService {
         if (SecurityUtil.getAccountTier() < feedDefinition.getRequiredAccountTier()) {
             throw new RuntimeException("You are not allowed to create data sources of this type with your account.");
         }
-        long userID = SecurityUtil.getUserID();
         Connection conn = Database.instance().getConnection();
-        DataStorage metadata = null;
         try {
             conn.setAutoCommit(false);
-            Map<String, Key> keys = feedDefinition.newDataSourceFields(credentials);
-            DataSet dataSet = feedDefinition.getDataSet(credentials, keys, new Date());
-            feedDefinition.setFields(feedDefinition.createAnalysisItems(keys, dataSet, credentials));
-            feedDefinition.setOwnerName(retrieveUser(conn).getUserName());
-            UploadPolicy uploadPolicy = new UploadPolicy(userID);
-            feedDefinition.setUploadPolicy(uploadPolicy);
-            FeedCreationResult feedCreationResult = new FeedCreation().createFeed(feedDefinition, conn, dataSet, userID);
-            metadata = feedCreationResult.getTableDefinitionMetadata();
-            metadata.commit();
+            IServerDataSourceDefinition serverDataSourceDefinition = (IServerDataSourceDefinition) feedDefinition;
+            long id = serverDataSourceDefinition.create(credentials, conn);
             conn.commit();
-            return feedCreationResult.getFeedID();
+            return id;
         } catch (Exception e) {
             LogClass.error(e);
-            if (metadata != null) {
-                metadata.rollback();
-            }
             try {
                 conn.rollback();
             } catch (SQLException e1) {

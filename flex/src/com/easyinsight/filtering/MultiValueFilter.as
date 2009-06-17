@@ -2,8 +2,10 @@ package com.easyinsight.filtering
 {
 	import com.easyinsight.analysis.AnalysisDimensionResultMetadata;
 	import com.easyinsight.analysis.AnalysisItem;
-	
-	import flash.events.MouseEvent;
+
+import com.easyinsight.framework.CredentialsCache;
+
+import flash.events.MouseEvent;
 	import flash.geom.Point;
 	
 	import mx.collections.ArrayCollection;
@@ -90,7 +92,7 @@ package com.easyinsight.filtering
 			dataService = new RemoteObject();
 			dataService.destination = "data";
 			dataService.getAnalysisItemMetadata.addEventListener(ResultEvent.RESULT, gotMetadata);
-			dataService.getAnalysisItemMetadata.send(_feedID, _analysisItem);
+			dataService.getAnalysisItemMetadata.send(_feedID, _analysisItem, CredentialsCache.getCache().createCredentials());
 		}
 		
 		private function gotMetadata(event:ResultEvent):void {

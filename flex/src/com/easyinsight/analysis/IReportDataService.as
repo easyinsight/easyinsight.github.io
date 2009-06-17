@@ -1,4 +1,6 @@
 package com.easyinsight.analysis {
+import mx.collections.ArrayCollection;
+
 [Event(name="returnData", type="com.easyinsight.analysis.DataServiceEvent")]
 public interface IReportDataService {
     function retrieveData(definition:AnalysisDefinition):void;

@@ -13,12 +13,21 @@ public abstract class FilterDefinition implements Serializable {
     private AnalysisItem field;
     private boolean applyBeforeAggregation = true;
     private long filterID;
+    private boolean intrinsic;
 
     public FilterDefinition() {
     }
 
     public FilterDefinition(AnalysisItem field) {
         this.field = field;
+    }
+
+    public boolean isIntrinsic() {
+        return intrinsic;
+    }
+
+    public void setIntrinsic(boolean intrinsic) {
+        this.intrinsic = intrinsic;
     }
 
     public long getFilterID() {

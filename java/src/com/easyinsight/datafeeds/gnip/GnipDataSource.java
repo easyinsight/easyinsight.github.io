@@ -78,7 +78,7 @@ public class GnipDataSource extends ServerDataSourceDefinition {
         return result;
     }
 
-    public DataSet getDataSet(com.easyinsight.users.Credentials credentials, Map<String, Key> keys, Date now) {
+    public DataSet getDataSet(com.easyinsight.users.Credentials credentials, Map<String, Key> keys, Date now, FeedDefinition parentDefinition) {
         DataSet ds = new DataSet();
         List<Exception> exceptions = new LinkedList<Exception>();
         GnipHelper gh = new GnipHelper();
@@ -255,8 +255,8 @@ public class GnipDataSource extends ServerDataSourceDefinition {
     }
 
     @Override
-    public FeedDefinition clone() throws CloneNotSupportedException {
-        GnipDataSource gnipDataSource = (GnipDataSource) super.clone();
+    public FeedDefinition clone(Connection conn) throws CloneNotSupportedException, SQLException {
+        GnipDataSource gnipDataSource = (GnipDataSource) super.clone(conn);
         gnipDataSource.setFilters(new ArrayList<GnipFilter>());
         return gnipDataSource;
     }

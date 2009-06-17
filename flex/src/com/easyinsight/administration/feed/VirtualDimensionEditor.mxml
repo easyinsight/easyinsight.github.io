@@ -28,6 +28,8 @@
 
         import com.easyinsight.analysis.Value;
 
+        import com.easyinsight.framework.CredentialsCache;
+
         import mx.collections.ArrayCollection;
 
         public function save():void {
@@ -105,7 +107,7 @@
                 dimensionName = _dimension.name;
                 transforms = _dimension.virtualTransforms;
                 //defaultTransform = _dimension.defaultTransform;
-                dataService.getAnalysisItemMetadata.send(_dataSourceID, _dimension.baseDimension);
+                dataService.getAnalysisItemMetadata.send(_dataSourceID, _dimension.baseDimension, CredentialsCache.getCache().createCredentials());
             }
         }]]></mx:Script>
     <mx:RemoteObject id="dataService" destination="data">

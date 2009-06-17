@@ -30,9 +30,12 @@ public class FeedCreation {
 
     public FeedCreationResult createFeed(FeedDefinition feedDefinition, Connection conn, DataSet dataSet, long userID, long accountID) throws SQLException {
         long feedID = feedStorage.addFeedDefinitionData(feedDefinition, conn);
-        DataStorage tableDef = DataStorage.writeConnection(feedDefinition, conn, accountID);
-        tableDef.createTable();
-        tableDef.insertData(dataSet);
+        DataStorage tableDef = null;
+        if (dataSet != null) {
+            tableDef = DataStorage.writeConnection(feedDefinition, conn, accountID);
+            tableDef.createTable();
+            tableDef.insertData(dataSet);
+        }
         AnalysisDefinition baseDefinition = new AnalysisDefinition();
         baseDefinition.setDataFeedID(feedID);
         baseDefinition.setRootDefinition(true);

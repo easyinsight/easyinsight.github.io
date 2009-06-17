@@ -8,6 +8,7 @@ import com.easyinsight.core.Key;
 import java.util.List;
 import java.util.Collection;
 import java.util.Set;
+import java.util.ArrayList;
 import java.io.Serializable;
 
 /**
@@ -18,9 +19,12 @@ import java.io.Serializable;
 public abstract class Feed implements Serializable {
     private long feedID;
     private List<AnalysisItem> fields;
-    private WSAnalysisDefinition analysisDefinition;
     private int version;
     private String name;
+
+    public List<FilterDefinition> getIntrinsicFilters() {
+        return new ArrayList<FilterDefinition>();
+    }
 
     public String getName() {
         return name;
@@ -42,14 +46,6 @@ public abstract class Feed implements Serializable {
         return fields;
     }
 
-    public WSAnalysisDefinition getAnalysisDefinition() {
-        return analysisDefinition;
-    }
-
-    public void setAnalysisDefinition(WSAnalysisDefinition analysisDefinition) {
-        this.analysisDefinition = analysisDefinition;
-    }
-
     public void setFields(List<AnalysisItem> fields) {
         this.fields = fields;
     }
@@ -62,7 +58,11 @@ public abstract class Feed implements Serializable {
         this.feedID = feedID;
     }
 
-    public abstract AnalysisItemResultMetadata getMetadata(AnalysisItem analysisItem);
+    public List<CredentialRequirement> getCredentialRequirement() {
+        return new ArrayList<CredentialRequirement>();
+    }
+
+    public abstract AnalysisItemResultMetadata getMetadata(AnalysisItem analysisItem, InsightRequestMetadata insightRequestMetadata);
 
     public abstract DataSet getAggregateDataSet(Set<AnalysisItem> analysisItems, Collection<FilterDefinition> filters, InsightRequestMetadata insightRequestMetadata, List<AnalysisItem> allAnalysisItems, boolean adminMode, Collection<Key> additionalNeededKeys);
 

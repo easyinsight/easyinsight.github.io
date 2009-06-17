@@ -29,6 +29,7 @@ public class PersistableLastNFilterDefinition extends PersistableFilterDefinitio
         filterDefinition.setField(getField());
         filterDefinition.setApplyBeforeAggregation(isApplyBeforeAggregation());
         filterDefinition.setLimit(limit);
+        filterDefinition.setIntrinsic(isIntrinsic());
         return filterDefinition;
     }
 }

@@ -119,7 +119,7 @@ public class BaseCampDataSource extends ServerDataSourceDefinition {
         return doc;
     }
 
-    public DataSet getDataSet(com.easyinsight.users.Credentials credentials, Map<String, Key> keys, Date now) {
+    public DataSet getDataSet(com.easyinsight.users.Credentials credentials, Map<String, Key> keys, Date now, FeedDefinition parentDefinition) {
         DateFormat df = new XmlSchemaDateFormat();
         DateFormat deadlineFormat = new SimpleDateFormat(XMLDATEFORMAT);
 
@@ -308,8 +308,8 @@ public class BaseCampDataSource extends ServerDataSourceDefinition {
     }
 
     @Override
-    public FeedDefinition clone() throws CloneNotSupportedException {
-        BaseCampDataSource dataSource = (BaseCampDataSource) super.clone();
+    public FeedDefinition clone(Connection conn) throws CloneNotSupportedException, SQLException {
+        BaseCampDataSource dataSource = (BaseCampDataSource) super.clone(conn);
         dataSource.setUrl("");
         return dataSource;
     }

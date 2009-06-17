@@ -36,6 +36,7 @@ public class DataStorage {
 
     /**
      * Creates a read only connection for retrieving data.
+     *
      * @param fields the analysis items you want to retrieve
      * @param feedID the ID of the data source
      * @return a DataStorage object for making read calls
@@ -61,7 +62,7 @@ public class DataStorage {
         try {
             dataStorage.metadata = getMetadata(feedID, conn);
             if (dataStorage.metadata == null) {
-               dataStorage.metadata = createDefaultMetadata(conn);
+                dataStorage.metadata = createDefaultMetadata(conn);
             }
         } finally {
             Database.instance().closeConnection(conn);
@@ -81,8 +82,9 @@ public class DataStorage {
 
     /**
      * Creates a DataStorage object for write purposes.
+     *
      * @param feedDefinition the definition of the data source
-     * @param conn a connection with an existing transaction open
+     * @param conn           a connection with an existing transaction open
      * @return the new DataStorage object for writing
      * @throws java.sql.SQLException if something goes wrong
      */
@@ -125,7 +127,7 @@ public class DataStorage {
 
     private void validateSpace(Connection conn) throws SQLException, StorageLimitException {
         PreparedStatement queryStmt = conn.prepareStatement("SELECT SUM(SIZE) " +
-                    "FROM FEED_PERSISTENCE_METADATA, upload_policy_users, user WHERE feed_persistence_metadata.feed_id = upload_policy_users.feed_id and " +
+                "FROM FEED_PERSISTENCE_METADATA, upload_policy_users, user WHERE feed_persistence_metadata.feed_id = upload_policy_users.feed_id and " +
                 "upload_policy_users.role = ? and upload_policy_users.user_id = user.user_id and user.account_id = ?");
         queryStmt.setInt(1, Roles.OWNER);
         queryStmt.setLong(2, accountID);
@@ -140,6 +142,10 @@ public class DataStorage {
         if (size > allowed) {
             throw new StorageLimitException("Storage boundary for this account has been reached.");
         }
+    }
+
+    public int getVersion() {
+        return version;
     }
 
     public static void delete(long feedID, Connection conn) throws SQLException {
@@ -193,7 +199,7 @@ public class DataStorage {
         if (coreDBConn == null) {
             Connection conn = Database.instance().getConnection();
             try {
-                addOrUpdateMetadata(feedID, metadata, conn);                                
+                addOrUpdateMetadata(feedID, metadata, conn);
             } finally {
                 Database.instance().closeConnection(conn);
             }
@@ -352,6 +358,7 @@ public class DataStorage {
 
     /**
      * Clears out all data in the data source.
+     *
      * @throws java.sql.SQLException if something goes wrong
      */
 
@@ -362,10 +369,11 @@ public class DataStorage {
 
     /**
      * Retrieves the requested data set from the database.
-     * @param reportItems the analysis items you're looking to retrieve
-     * @param filters any filter definitions you want to constrain data by
+     *
+     * @param reportItems    the analysis items you're looking to retrieve
+     * @param filters        any filter definitions you want to constrain data by
      * @param additionalKeys any additional keys not associated to analysis items, like data scrubs or composite connections
-     * @param limit optional limit on result set
+     * @param limit          optional limit on result set
      * @return the created data set
      * @throws java.sql.SQLException if something goes wrong
      */
@@ -376,10 +384,11 @@ public class DataStorage {
 
     /**
      * Retrieves the requested data set from the database.
-     * @param reportItems the analysis items you're looking to retrieve
-     * @param filters any filter definitions you want to constrain data by
-     * @param additionalKeys any additional keys not associated to analysis items, like data scrubs or composite connections
-     * @param limit optional limit on result set
+     *
+     * @param reportItems            the analysis items you're looking to retrieve
+     * @param filters                any filter definitions you want to constrain data by
+     * @param additionalKeys         any additional keys not associated to analysis items, like data scrubs or composite connections
+     * @param limit                  optional limit on result set
      * @param insightRequestMetadata the request metadata
      * @return the created data set
      * @throws java.sql.SQLException if something goes wrong
@@ -391,7 +400,7 @@ public class DataStorage {
     }
 
     private DataSet retrieveData(@NotNull Collection<AnalysisItem> reportItems, @Nullable Collection<FilterDefinition> filters, @Nullable Collection<Key> additionalKeys, @Nullable Integer limit,
-                                @NotNull Map<Key, KeyMetadata> keys, int version, @Nullable InsightRequestMetadata insightRequestMetadata) throws SQLException {
+                                 @NotNull Map<Key, KeyMetadata> keys, int version, @Nullable InsightRequestMetadata insightRequestMetadata) throws SQLException {
         if (insightRequestMetadata == null) {
             insightRequestMetadata = new InsightRequestMetadata();
             insightRequestMetadata.setNow(new Date());
@@ -410,12 +419,11 @@ public class DataStorage {
         createWhereClause(filters, whereBuilder);
         groupByBuilder = createGroupByClause(groupByBuilder, groupByItems);
         createSQL(filters, limit, queryBuilder, selectBuilder, fromBuilder, whereBuilder, groupByBuilder, groupByItems);
-        System.out.println("sql = " + queryBuilder.toString());
         PreparedStatement queryStmt = storageConn.prepareStatement(queryBuilder.toString());
         populateParameters(filters, keys, queryStmt, insightRequestMetadata);
         DataSet dataSet = new DataSet();
         ResultSet dataRS = queryStmt.executeQuery();
-        processQueryResults(reportItems, keys, dataSet, dataRS);
+        processQueryResults(reportItems, keys, dataSet, dataRS, additionalKeys);
         return dataSet;
     }
 
@@ -432,7 +440,7 @@ public class DataStorage {
         return eligibleFilters;
     }
 
-    private void processQueryResults(@NotNull Collection<AnalysisItem> reportItems, @NotNull Map<Key, KeyMetadata> keys, @NotNull DataSet dataSet, @NotNull ResultSet dataRS) throws SQLException {
+    private void processQueryResults(@NotNull Collection<AnalysisItem> reportItems, @NotNull Map<Key, KeyMetadata> keys, @NotNull DataSet dataSet, @NotNull ResultSet dataRS, Collection<Key> additionalKeys) throws SQLException {
         while (dataRS.next()) {
             IRow row = dataSet.createRow();
             int i = 1;
@@ -460,6 +468,35 @@ public class DataStorage {
                             row.addValue(key, new EmptyValue());
                         } else {
                             row.addValue(key, new StringValue(value));
+                        }
+                    }
+                }
+            }
+            if (additionalKeys != null) {
+                for (Key key : additionalKeys) {
+                    KeyMetadata keyMetadata = keys.get(key);
+                    if (keyMetadata != null) {
+                        if (keyMetadata.getType() == Value.DATE) {
+                            Timestamp time = dataRS.getTimestamp(i++);
+                            if (dataRS.wasNull()) {
+                                row.addValue(key, new EmptyValue());
+                            } else {
+                                row.addValue(key, new DateValue(new java.util.Date(time.getTime())));
+                            }
+                        } else if (keyMetadata.getType() == Value.NUMBER) {
+                            double value = dataRS.getDouble(i++);
+                            if (dataRS.wasNull()) {
+                                row.addValue(key, new EmptyValue());
+                            } else {
+                                row.addValue(key, new NumericValue(value));
+                            }
+                        } else {
+                            String value = dataRS.getString(i++);
+                            if (dataRS.wasNull()) {
+                                row.addValue(key, new EmptyValue());
+                            } else {
+                                row.addValue(key, new StringValue(value));
+                            }
                         }
                     }
                 }
@@ -612,7 +649,7 @@ public class DataStorage {
                 }
             }
             //if (!inWhereClause) {
-                updateKeys.add(keyMetadata);
+            updateKeys.add(keyMetadata);
             //}
         }
         Iterator<KeyMetadata> keyIter = updateKeys.iterator();
@@ -649,7 +686,7 @@ public class DataStorage {
         }
         updateStmt.executeUpdate();
         dataSet.mergeWheres(wheres);
-        insertData(dataSet);        
+        insertData(dataSet);
         for (IRow row : dataSet.getRows()) {
             /*int i = 1;
             for (KeyMetadata keyMetadata : updateKeys) {
@@ -939,7 +976,7 @@ public class DataStorage {
             if (versionRS.next()) {
                 long version = versionRS.getLong(1);
                 PreparedStatement queryStmt = conn.prepareStatement("SELECT FEED_PERSISTENCE_METADATA_ID, SIZE, VERSION, DATABASE_NAME " +
-                    "FROM FEED_PERSISTENCE_METADATA WHERE FEED_ID = ? AND VERSION = ?");
+                        "FROM FEED_PERSISTENCE_METADATA WHERE FEED_ID = ? AND VERSION = ?");
                 queryStmt.setLong(1, dataFeedID);
                 queryStmt.setLong(2, version);
                 ResultSet rs = queryStmt.executeQuery();
@@ -996,7 +1033,7 @@ public class DataStorage {
         System.out.println(sqlBuilder.toString());
         ResultSet dataRS = queryStmt.executeQuery();
         while (dataRS.next()) {
-            int i = 1;            
+            int i = 1;
             IRow row = dataSet.createRow();
             for (Map.Entry<Key, KeyMetadata> keyEntry : keys.entrySet()) {
                 Key key = keyEntry.getKey();

@@ -7,8 +7,10 @@ import com.easyinsight.analysis.IReportDataService;
 import com.easyinsight.analysis.ListDataResults;
 import com.easyinsight.analysis.Value;
 import com.easyinsight.analysis.conditions.ConditionRenderer;
+import com.easyinsight.framework.CredentialsCache;
 import com.easyinsight.framework.DataServiceLoadingEvent;
 import com.easyinsight.framework.GenericFaultHandler;
+import com.easyinsight.framework.InsightRequestMetadata;
 import com.easyinsight.framework.InvalidFieldsEvent;
 import flash.events.EventDispatcher;
 import mx.collections.ArrayCollection;
@@ -61,7 +63,9 @@ public class ListDataService extends EventDispatcher implements IReportDataServi
 
     public function retrieveData(definition:AnalysisDefinition):void {
         dispatchEvent(new DataServiceLoadingEvent(DataServiceLoadingEvent.LOADING_STARTED));
-        dataRemoteSource.list.send(definition, false, null);
+        var metadata:InsightRequestMetadata = new InsightRequestMetadata();
+        metadata.credentialFulfillmentList = CredentialsCache.getCache().createCredentials();
+        dataRemoteSource.list.send(definition, false, metadata);
     }
 }
 }

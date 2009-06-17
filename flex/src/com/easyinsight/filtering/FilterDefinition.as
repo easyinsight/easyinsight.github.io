@@ -15,6 +15,7 @@ package com.easyinsight.filtering
 		public var field:AnalysisItem;
 		public var applyBeforeAggregation:Boolean = true;
         public var filterID:int;
+        public var intrinsic:Boolean = false;
 		
 		public function FilterDefinition()
 			{

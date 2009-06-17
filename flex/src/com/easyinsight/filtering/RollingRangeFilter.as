@@ -115,7 +115,12 @@ package com.easyinsight.filtering
 				deleteButton = new Button();
 				deleteButton.addEventListener(MouseEvent.CLICK, deleteSelf);
 				deleteButton.setStyle("icon", deleteIcon);
-				deleteButton.toolTip = "Delete";
+                if (rollingFilter.intrinsic) {
+                    deleteButton.enabled = false;
+                    deleteButton.toolTip = "This filter is an intrinsic part of the data source and cannot be deleted.";
+                } else {
+				    deleteButton.toolTip = "Delete";
+                }
 			}
 			addChild(deleteButton);
 		}

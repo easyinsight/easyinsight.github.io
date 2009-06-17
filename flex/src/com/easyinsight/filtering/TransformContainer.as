@@ -32,6 +32,8 @@ import mx.managers.PopUpManager;
 		private var dropHereBox:VBox;
 		[Bindable]
 		private var _analysisItems:ArrayCollection;
+
+    private var showingFeedback:Boolean = false;
 			
 		public function TransformContainer() {
 			super();
@@ -160,7 +162,10 @@ import mx.managers.PopUpManager;
 		}
 		
 		protected function dragOverHandler(event:DragEvent):void {
-			DragManager.showFeedback(DragManager.MOVE);
+            if (!showingFeedback) {
+			    DragManager.showFeedback(DragManager.MOVE);
+                showingFeedback = true;
+            }
 		}
 		
 		protected function dragEnterHandler(event:DragEvent):void {
@@ -182,12 +187,14 @@ import mx.managers.PopUpManager;
 		
 		protected function dragExitHandler(event:DragEvent):void {
 			setStyle("borderThickness", 0);
-			setStyle("borderStyle", "none");			
+			setStyle("borderStyle", "none");
+            showingFeedback = false;
 		}
 		
 		protected function dragDropHandler(event:DragEvent):void {
 			setStyle("borderThickness", 0);
 			setStyle("borderStyle", "none");
+            showingFeedback = false;
 			var analysisItem:AnalysisItem;
 			if (event.dragInitiator is DataGrid) {
 				var initialList:DataGrid = DataGrid(event.dragInitiator);						

@@ -60,7 +60,7 @@ public class DataSourceCopyUtils {
         }
 
         ConfigureDataFeedTodo todo = null;        
-        if (feedDefinition instanceof ServerDataSourceDefinition) {
+        if (feedDefinition instanceof IServerDataSourceDefinition) {
             Session session = Database.instance().createSession(conn);
 
             todo = new ConfigureDataFeedTodo();
@@ -121,7 +121,7 @@ public class DataSourceCopyUtils {
     public static FeedDefinition cloneFeed(long userID, Connection conn, FeedDefinition feedDefinition) throws CloneNotSupportedException, SQLException {
         FeedStorage feedStorage = new FeedStorage();
         AnalysisStorage analysisStorage = new AnalysisStorage();
-        FeedDefinition clonedFeedDefinition = feedDefinition.clone();
+        FeedDefinition clonedFeedDefinition = feedDefinition.clone(conn);
         clonedFeedDefinition.setUploadPolicy(new UploadPolicy(userID));
         feedStorage.addFeedDefinitionData(clonedFeedDefinition, conn);
         AnalysisDefinition clonedRootInsight = analysisStorage.cloneReport(feedDefinition.getAnalysisDefinitionID(), conn);

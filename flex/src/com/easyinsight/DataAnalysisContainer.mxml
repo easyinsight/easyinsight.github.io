@@ -31,13 +31,16 @@
         import com.easyinsight.analysis.AnalysisItemEditWindow;
         import com.easyinsight.analysis.AnalysisUtil;
         import com.easyinsight.analysis.ControllerLookup;
-import com.easyinsight.analysis.HierarchyDrilldownEvent;
+        import com.easyinsight.analysis.CredentialRequirement;
+        import com.easyinsight.analysis.CredentialsEvent;
+        import com.easyinsight.analysis.HierarchyDrilldownEvent;
         import com.easyinsight.analysis.AnalysisStateChangeEvent;
         import com.easyinsight.analysis.DataViewFactory;
         import com.easyinsight.analysis.HierarchyRollupEvent;
         import com.easyinsight.analysis.HierarchyWindow;
         import com.easyinsight.analysis.IReportController;
         import com.easyinsight.analysis.QuickDataSourceAPIWindow;
+        import com.easyinsight.analysis.RuntimeCredentialsWindow;
         import com.easyinsight.analysis.list.ListController;
         import com.easyinsight.analysis.scrub.LookupTableScrubListWindow;
         import com.easyinsight.analysis.scrub.TextReplaceScrubListWindow;
@@ -193,6 +196,8 @@ import com.easyinsight.analysis.HierarchyDrilldownEvent;
         [Bindable]
         private var _reportID:int;
 
+        private var credentialMap:Object = new Object();
+
         private var loading:Boolean = false;
 
         public function set previewMode(previewMode:Boolean):void {
@@ -236,6 +241,7 @@ import com.easyinsight.analysis.HierarchyDrilldownEvent;
                 dataViewFactory.analysisDefinition = analysisDefinition;
             }
             dataView = dataViewFactory;
+            dataView.credentialsMap = credentialMap;
             dataView.addEventListener(DataServiceLoadingEvent.LOADING_STARTED, startLoading);
             dataView.addEventListener(DataServiceLoadingEvent.LOADING_STOPPED, stopLoading);
             dataView.addEventListener(AnalysisChangedEvent.ANALYSIS_CHANGED, onAnalysisChanged);
@@ -286,10 +292,21 @@ import com.easyinsight.analysis.HierarchyDrilldownEvent;
             }
         }
 
+        private function onCredentials(event:CredentialsEvent):void {
+            credentialMap[String(event.dataSourceID)] = event.credentials;
+        }
+
         private function onMetadataReceipt(feedMetadata:FeedMetadata):void {
             if (User.getInstance() == null) {
                 currentState = "NotLoggedIn";
                 User.getEventNotifier().addEventListener(LoginEvent.LOGIN, onLogin);
+            }
+            for each (var credential:CredentialRequirement in feedMetadata.credentials) {
+                var window:RuntimeCredentialsWindow = new RuntimeCredentialsWindow();
+                window.requirement = credential;
+                window.addEventListener(CredentialsEvent.CREDENTIALS_SAVED, onCredentials);
+                PopUpManager.addPopUp(window, this, true);
+                PopUpManager.centerPopUp(window);
             }
             this.analysisValidators = [ analysisNameValidator ];
             this.feedMetadata = feedMetadata;
@@ -302,9 +319,11 @@ import com.easyinsight.analysis.HierarchyDrilldownEvent;
                 availableFields.addItem(analysisWrapper);
             }
 
-            // see, this is where we need to do validation...
             if (analysisDefinition == null) {
                 newAnalysis();
+                for each (var filter:FilterDefinition in feedMetadata.intrinsicFilters) {
+                    transformContainer.addFilterDefinition(filter);
+                }
                 var fragmentObject:Object = new Object();
                 fragmentObject.feedID = String(dataService.dataFeedID);
                 var fragmentString:String = URLUtil.objectToString(fragmentObject);

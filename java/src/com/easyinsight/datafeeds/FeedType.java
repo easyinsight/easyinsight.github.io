@@ -19,6 +19,11 @@ public class FeedType {
     public static final FeedType ADMIN_STATS = new FeedType(11);
     public static final FeedType GNIP = new FeedType(12);
     public static final FeedType GOOGLE_ANALYTICS = new FeedType(13);
+    public static final FeedType TEST_ALPHA = new FeedType(14);
+    public static final FeedType TEST_BETA = new FeedType(15);
+    public static final FeedType TEST_GAMMA = new FeedType(16);
+    public static final FeedType BASECAMP_TIME = new FeedType(17);
+    public static final FeedType BASECAMP_MASTER = new FeedType(18);
 
     private int type;
 

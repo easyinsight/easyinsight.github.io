@@ -16,8 +16,18 @@ import java.util.*;
  */
 public class AnalysisBasedFeed extends Feed {
 
+    private WSAnalysisDefinition analysisDefinition;    
+
     public FeedType getDataFeedType() {
         return FeedType.ANALYSIS_BASED;
+    }
+
+    public WSAnalysisDefinition getAnalysisDefinition() {
+        return analysisDefinition;
+    }
+
+    public void setAnalysisDefinition(WSAnalysisDefinition analysisDefinition) {
+        this.analysisDefinition = analysisDefinition;
     }
 
     public List<AnalysisItem> getFields() {
@@ -26,10 +36,10 @@ public class AnalysisBasedFeed extends Feed {
         return feed.getFields();
     }
 
-    public AnalysisItemResultMetadata getMetadata(AnalysisItem analysisItem) {
+    public AnalysisItemResultMetadata getMetadata(AnalysisItem analysisItem, InsightRequestMetadata insightRequestMetadata) {
         WSAnalysisDefinition analysisDefinition = getAnalysisDefinition();
         Feed feed = FeedRegistry.instance().getFeed(analysisDefinition.getDataFeedID());
-        return feed.getMetadata(analysisItem);
+        return feed.getMetadata(analysisItem, null);
     }
 
     @Override

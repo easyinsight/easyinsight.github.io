@@ -3,8 +3,10 @@ package com.easyinsight.filtering
 	import com.easyinsight.analysis.AnalysisItem;
 	import com.easyinsight.analysis.AnalysisItemResultMetadata;
 	import com.easyinsight.analysis.AnalysisMeasureResultMetadata;
-	
-	import flash.events.MouseEvent;
+
+import com.easyinsight.framework.CredentialsCache;
+
+import flash.events.MouseEvent;
 	import flash.geom.Point;
 	
 	import mx.collections.ArrayCollection;
@@ -47,7 +49,7 @@ package com.easyinsight.filtering
 			dataService = new RemoteObject();
 			dataService.destination = "data";
 			dataService.getAnalysisItemMetadata.addEventListener(ResultEvent.RESULT, gotMetadata);
-			dataService.getAnalysisItemMetadata.send(feedID, analysisItem);
+			dataService.getAnalysisItemMetadata.send(feedID, analysisItem, CredentialsCache.getCache().createCredentials());
 		}
 		
 		public function set analysisItems(analysisItems:ArrayCollection):void {

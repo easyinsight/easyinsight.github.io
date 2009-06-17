@@ -30,6 +30,7 @@ public class PersistableRollingFilterDefinition extends PersistableFilterDefinit
         rollingFilterDefinition.setField(getField());
         rollingFilterDefinition.setApplyBeforeAggregation(isApplyBeforeAggregation());
         rollingFilterDefinition.setInterval(interval);
+        rollingFilterDefinition.setIntrinsic(isIntrinsic());
         return rollingFilterDefinition;
     }
 }

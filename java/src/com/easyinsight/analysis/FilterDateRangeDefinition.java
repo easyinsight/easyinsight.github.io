@@ -36,6 +36,7 @@ public class FilterDateRangeDefinition extends FilterDefinition {
         date.setField(getField());
         date.setLowDate(getStartDate());
         date.setHighDate(getEndDate());
+        date.setIntrinsic(isIntrinsic());
         return date;
     }
 

@@ -1,6 +1,8 @@
 package com.easyinsight.analysis
 {
-	[Bindable]
+import mx.collections.ArrayCollection;
+
+[Bindable]
 	[RemoteClass(alias="com.easyinsight.analysis.FeedMetadata")]
 	public class FeedMetadata
 	{
@@ -9,6 +11,8 @@ package com.easyinsight.analysis
         public var version:int;
         public var dataSourceName:String;
         public var dataSourceAdmin:Boolean;
+        public var credentials:ArrayCollection;
+        public var intrinsicFilters:ArrayCollection;
 		
 		public function FeedMetadata()
 			{

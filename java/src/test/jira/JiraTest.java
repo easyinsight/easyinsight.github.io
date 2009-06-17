@@ -27,9 +27,9 @@ public class JiraTest extends TestCase {
         jiraDataSource.setUrl("http://ec2-67-202-6-200.compute-1.amazonaws.com:8080");
         UserUploadService uploadService = new UserUploadService();
         Credentials credentials = new Credentials();
-        credentials.setUserName("apiuser");
-        credentials.setPassword("e@symone$");
+        credentials.setUserName("jboe");
+        credentials.setPassword("Grav1tyfails");
         long dataSourceID = uploadService.newExternalDataSource(jiraDataSource, credentials);
-        
+        uploadService.refreshData(dataSourceID, credentials, false);
     }
 }

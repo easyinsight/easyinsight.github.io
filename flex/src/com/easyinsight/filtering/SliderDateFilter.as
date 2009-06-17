@@ -3,8 +3,10 @@ package com.easyinsight.filtering
 	import com.easyinsight.analysis.AnalysisDateDimensionResultMetadata;
 	import com.easyinsight.analysis.AnalysisItem;
 	import com.easyinsight.analysis.AnalysisItemResultMetadata;
-	
-	import flash.events.MouseEvent;
+
+import com.easyinsight.framework.CredentialsCache;
+
+import flash.events.MouseEvent;
 	import flash.geom.Point;
 	
 	import mx.collections.ArrayCollection;
@@ -45,7 +47,7 @@ package com.easyinsight.filtering
 			dataService = new RemoteObject();
 			dataService.destination = "data";
 			dataService.getAnalysisItemMetadata.addEventListener(ResultEvent.RESULT, gotMetadata);
-			dataService.getAnalysisItemMetadata.send(feedID, analysisItem);
+			dataService.getAnalysisItemMetadata.send(feedID, analysisItem, CredentialsCache.getCache().createCredentials());
 		}
 		
 		private function gotMetadata(event:ResultEvent):void {
@@ -94,11 +96,17 @@ package com.easyinsight.filtering
 			editButton.setStyle("icon", editIcon);
 			editButton.toolTip = "Edit";
 			addChild(editButton);
-			
+
+
 			var deleteButton:Button = new Button();
 			deleteButton.addEventListener(MouseEvent.CLICK, deleteSelf);
 			deleteButton.setStyle("icon", deleteIcon);
-			deleteButton.toolTip = "Delete";
+            if (_filterDefinition.intrinsic) {
+                deleteButton.enabled = false;
+                deleteButton.toolTip = "This filter is an intrinsic part of the data source and cannot be deleted.";
+            } else {
+			    deleteButton.toolTip = "Delete";
+            }
 			addChild(deleteButton);
 			
 			
