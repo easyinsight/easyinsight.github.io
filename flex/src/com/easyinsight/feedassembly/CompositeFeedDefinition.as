@@ -8,8 +8,8 @@ package com.easyinsight.feedassembly
 	[RemoteClass(alias="com.easyinsight.datafeeds.CompositeFeedDefinition")]
 	public class CompositeFeedDefinition extends FeedDefinitionData
 	{
-		public var compositeFeedNodes:ArrayCollection;
-		public var connections:ArrayCollection;
+		public var compositeFeedNodes:ArrayCollection = new ArrayCollection();
+		public var connections:ArrayCollection = new ArrayCollection();
 		
 		public function CompositeFeedDefinition()
 		{

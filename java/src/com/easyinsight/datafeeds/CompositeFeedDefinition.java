@@ -18,8 +18,8 @@ import org.hibernate.Session;
  * Time: 11:55:05 PM
  */
 public class CompositeFeedDefinition extends FeedDefinition {
-    private List<CompositeFeedNode> compositeFeedNodes;
-    private List<CompositeFeedConnection> connections;
+    private List<CompositeFeedNode> compositeFeedNodes = new ArrayList<CompositeFeedNode>();
+    private List<CompositeFeedConnection> connections = new ArrayList<CompositeFeedConnection>();
 
     public List<CompositeFeedNode> getCompositeFeedNodes() {
         return compositeFeedNodes;

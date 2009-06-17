@@ -79,6 +79,14 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
         this.virtualDimension = virtualDimension;
     }
 
+    public String toDisplay() {
+        if (displayName == null) {
+            return getKey().toDisplayName();
+        } else {
+            return displayName;
+        }
+    }
+
     public int getWidth() {
         return width;
     }

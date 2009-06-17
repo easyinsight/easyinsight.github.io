@@ -49,7 +49,7 @@ public class DataService {
             Collections.sort(sortedList, new Comparator<AnalysisItem>() {
 
                 public int compare(AnalysisItem o1, AnalysisItem o2) {
-                    return o1.getKey().compareTo(o2.getKey());
+                    return o1.toDisplay().compareTo(o2.toDisplay());
                 }
             });
             AnalysisItem[] feedItemArray = new AnalysisItem[sortedList.size()];

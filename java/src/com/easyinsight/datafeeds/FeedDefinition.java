@@ -48,6 +48,24 @@ public class FeedDefinition implements Cloneable, Serializable {
     private boolean inheritAccountAPISettings;
     private long refreshDataInterval;
     private List<VirtualDimension> virtualDimensions;
+    private boolean visible = true;
+    private long parentSourceID;
+
+    public long getParentSourceID() {
+        return parentSourceID;
+    }
+
+    public void setParentSourceID(long parentSourceID) {
+        this.parentSourceID = parentSourceID;
+    }
+
+    public boolean isVisible() {
+        return visible;
+    }
+
+    public void setVisible(boolean visible) {
+        this.visible = visible;
+    }
 
     private Credentials cachedCredentials;
 

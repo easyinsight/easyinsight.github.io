@@ -53,6 +53,7 @@ public class GoogleAnalyticsDataSource extends ServerDataSourceDefinition {
     public static final String VISITOR_TYPE = "ga:visitorType";
     public static final String TITLE = "title";
 
+
     public static final String PAGEVIEWS = "ga:pageviews";
     public static final String BOUNCES = "ga:bounces";
     public static final String ENTRANCES = "ga:entrances";
@@ -62,6 +63,58 @@ public class GoogleAnalyticsDataSource extends ServerDataSourceDefinition {
     public static final String TIME_ON_SITE = "ga:timeOnSite";
     public static final String VISITS = "ga:visits";
 
+    public static final String AD_CONTENT = "ga:adContent";
+    public static final String AD_GROUP = "ga:adGroup";
+    public static final String AD_SLOT = "ga:adSlot";
+    public static final String AD_SLOT_POSITION = "ga:adSlotPosition";
+    public static final String AD_CAMPAIGN = "ga:campaign";
+    public static final String AD_KEYWORD = "ga:keyword";
+    public static final String AD_MEDIUM = "ga:medium";
+    public static final String AD_REFERRAL_PATH = "ga:referralPath";
+    public static final String AD_SOURCE = "ga:source";
+
+    public static final String AD_CLICKS = "ga:adClicks";
+    public static final String AD_COST = "ga:adCost";
+    public static final String AD_CPC = "ga:CPC";
+    public static final String AD_CPM = "ga:CPM";
+    public static final String AD_CTR = "ga:CTR";
+    public static final String AD_IMPRESSIONS = "ga:impression";
+
+    public static final String CONTENT_EXIT_PAGE_PATH = "ga:exitPagePath";
+    public static final String CONTENT_LANDING_PAGE_PATH = "ga:landingPagePath";
+    public static final String CONTENT_PAGE_PATH = "ga:pagePath";
+    public static final String CONTENT_PAGE_TITLE = "ga:pageTitle";
+
+    public static final String CONTENT_UNIQUE_VIEWS = "ga:uniquePageViews";
+
+    public static final String EC_AFFILIATION = "ga:affiliation";
+    public static final String EC_DAYS_TO = "ga:daysToTransaction";
+    public static final String EC_CATEGORY = "ga:productCategory";
+    public static final String EC_NAME = "ga:productName";
+    public static final String EC_SKU = "ga:productSku";    
+    public static final String EC_TID = "ga:transactionId";
+
+    public static final String EC_ITEM_REVENUE = "ga:itemRevenue";
+    public static final String EC_ITEM_QUANTITY = "ga:itemQuantity";
+    public static final String EC_TRANSACTION_REVENUE = "ga:transactionRevenue";
+    public static final String EC_TRANSACTIONS = "ga:transactions";
+    public static final String EC_TRANSACTION_SHIPPING = "ga:transactionShipping";
+    public static final String EC_TRANSACTION_TAX = "ga:transactionTax";
+    public static final String EC_UNIQUE_PURCHASES = "ga:uniquePurchases";
+
+    public static final String SEARCH_CATEGORY = "ga:searchCategory";
+    public static final String SEARCH_DESTINATION = "ga:searchDestinationPage";
+    public static final String SEARCH_KEYWORD = "ga:searchKeyword";
+    public static final String SEARCH_KEYWORD_REFINEMENT = "ga:searchKeywordRefinement";
+    public static final String SEARCH_SEARCH_START = "ga:searchStart";
+    public static final String SEARCH_SEARCH_USED = "ga:searchUed";
+
+    public static final String SEARCH_DEPTH = "ga:searchDepth";
+    public static final String SEARCH_DURATION = "ga:searchDuration";
+    public static final String SEARCH_EXITS = "ga:searchExits";
+    public static final String SEARCH_REFINEMENTS = "ga:searchRefinements";
+    public static final String SEARCH_UNIQUES = "ga:searchUniques";
+    public static final String SEARCH_VISITS = "ga:searchVisits";
 
     public int getRequiredAccountTier() {
         return Account.GROUP;
@@ -104,7 +157,16 @@ public class GoogleAnalyticsDataSource extends ServerDataSourceDefinition {
                 DATE, DAYS_SINCE_LAST_VISIT, HOSTNAME, HOUR, JAVA_ENABLED, FLASH_VERSION, LANGUAGE, LONGITUDE,
                 LATITUDE, NETWORK_DOMAIN, NETWORK_LOCATION, OPERATING_SYSTEM, OPERATING_SYSTEM_VERSION,
                 REGION, SCREEN_COLORS, SCREEN_RESOLUTION, SUB_CONTINENT, VISITOR_TYPE, PAGEVIEWS, TITLE,
-                BOUNCES, ENTRANCES, EXITS, NEW_VISITS, TIME_ON_PAGE, TIME_ON_SITE, VISITS);
+                BOUNCES, ENTRANCES, EXITS, NEW_VISITS, TIME_ON_PAGE, TIME_ON_SITE, VISITS,
+                AD_CONTENT, AD_GROUP, AD_SLOT, AD_SLOT_POSITION, AD_CAMPAIGN, AD_KEYWORD, AD_MEDIUM,
+                AD_REFERRAL_PATH, AD_SOURCE, AD_CLICKS, AD_COST, AD_CPC, AD_CPM, AD_CTR, AD_IMPRESSIONS,
+                CONTENT_EXIT_PAGE_PATH, CONTENT_LANDING_PAGE_PATH, CONTENT_PAGE_PATH, CONTENT_PAGE_TITLE,
+                CONTENT_UNIQUE_VIEWS, EC_AFFILIATION, EC_DAYS_TO, EC_CATEGORY, EC_NAME, EC_SKU, EC_TID,
+                EC_ITEM_REVENUE, EC_ITEM_QUANTITY, EC_TRANSACTION_REVENUE, EC_TRANSACTIONS,
+                EC_TRANSACTION_SHIPPING, EC_TRANSACTION_TAX, EC_UNIQUE_PURCHASES, SEARCH_CATEGORY,
+                SEARCH_DESTINATION, SEARCH_KEYWORD, SEARCH_KEYWORD_REFINEMENT, SEARCH_SEARCH_START,
+                SEARCH_SEARCH_USED, SEARCH_DEPTH, SEARCH_DURATION, SEARCH_EXITS, SEARCH_REFINEMENTS,
+                SEARCH_UNIQUES, SEARCH_VISITS);
     }
 
     public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, DataSet dataSet, Credentials credentials) {
@@ -143,6 +205,51 @@ public class GoogleAnalyticsDataSource extends ServerDataSourceDefinition {
         analysisItems.add(new AnalysisMeasure(keys.get(TIME_ON_PAGE), "Time on Page", AggregationTypes.SUM));
         analysisItems.add(new AnalysisMeasure(keys.get(TIME_ON_SITE), "Time on Site", AggregationTypes.SUM));
         analysisItems.add(new AnalysisMeasure(keys.get(VISITS), "Visits", AggregationTypes.SUM));
+        analysisItems.add(new AnalysisDimension(keys.get(AD_CONTENT), "Ad Content"));
+        analysisItems.add(new AnalysisDimension(keys.get(AD_GROUP), "Ad Group"));
+        analysisItems.add(new AnalysisDimension(keys.get(AD_SLOT), "Ad Slot"));
+        analysisItems.add(new AnalysisDimension(keys.get(AD_SLOT_POSITION), "Ad Slot Position"));
+        analysisItems.add(new AnalysisDimension(keys.get(AD_CAMPAIGN), "Ad Campaign"));
+        analysisItems.add(new AnalysisDimension(keys.get(AD_KEYWORD), "Ad Keyword"));
+        analysisItems.add(new AnalysisDimension(keys.get(AD_MEDIUM), "Ad Medium"));
+        analysisItems.add(new AnalysisDimension(keys.get(AD_REFERRAL_PATH), "Ad Referral Path"));
+        analysisItems.add(new AnalysisDimension(keys.get(AD_SOURCE), "Ad Source"));
+        analysisItems.add(new AnalysisMeasure(keys.get(AD_CLICKS), "Ad Clicks", AggregationTypes.SUM));
+        analysisItems.add(new AnalysisMeasure(keys.get(AD_COST), "Ad Cost", AggregationTypes.SUM));
+        analysisItems.add(new AnalysisMeasure(keys.get(AD_CPC), "Cost to Advertiser Per Click", AggregationTypes.SUM));
+        analysisItems.add(new AnalysisMeasure(keys.get(AD_CPM), "Cost per Thousand Impressions", AggregationTypes.SUM));
+        analysisItems.add(new AnalysisMeasure(keys.get(AD_CTR), "Click-Through Rate", AggregationTypes.SUM));
+        analysisItems.add(new AnalysisMeasure(keys.get(AD_IMPRESSIONS), "Impressions", AggregationTypes.SUM));
+        analysisItems.add(new AnalysisDimension(keys.get(CONTENT_EXIT_PAGE_PATH), "Exit Page Path"));
+        analysisItems.add(new AnalysisDimension(keys.get(CONTENT_LANDING_PAGE_PATH), "Landing Page Path"));
+        analysisItems.add(new AnalysisDimension(keys.get(CONTENT_PAGE_PATH), "Page Path"));
+        analysisItems.add(new AnalysisDimension(keys.get(CONTENT_PAGE_TITLE), "Page Title"));
+        analysisItems.add(new AnalysisMeasure(keys.get(CONTENT_UNIQUE_VIEWS), "Unique Page Views", AggregationTypes.SUM));
+        analysisItems.add(new AnalysisDimension(keys.get(EC_AFFILIATION), "Product Affiliate"));
+        analysisItems.add(new AnalysisDimension(keys.get(EC_DAYS_TO), "Days to Transaction"));
+        analysisItems.add(new AnalysisDimension(keys.get(EC_CATEGORY), "Product Category"));
+        analysisItems.add(new AnalysisDimension(keys.get(EC_NAME), "Product Name"));
+        analysisItems.add(new AnalysisDimension(keys.get(EC_SKU), "Product Sku"));
+        analysisItems.add(new AnalysisDimension(keys.get(EC_TID), "Transaction ID"));
+        analysisItems.add(new AnalysisMeasure(keys.get(EC_ITEM_REVENUE), "Item Revenue", AggregationTypes.SUM));
+        analysisItems.add(new AnalysisMeasure(keys.get(EC_ITEM_QUANTITY), "Item Quantity", AggregationTypes.SUM));
+        analysisItems.add(new AnalysisMeasure(keys.get(EC_TRANSACTION_REVENUE), "Transaction Revenue", AggregationTypes.SUM));
+        analysisItems.add(new AnalysisMeasure(keys.get(EC_TRANSACTIONS), "Transactions", AggregationTypes.SUM));
+        analysisItems.add(new AnalysisMeasure(keys.get(EC_TRANSACTION_SHIPPING), "Transaction Shipping", AggregationTypes.SUM));
+        analysisItems.add(new AnalysisMeasure(keys.get(EC_TRANSACTION_TAX), "Transaction Tax", AggregationTypes.SUM));
+        analysisItems.add(new AnalysisMeasure(keys.get(EC_UNIQUE_PURCHASES), "Unique Purchases", AggregationTypes.SUM));
+        analysisItems.add(new AnalysisDimension(keys.get(SEARCH_CATEGORY), "Search Category"));
+        analysisItems.add(new AnalysisDimension(keys.get(SEARCH_DESTINATION), "Search Destination"));
+        analysisItems.add(new AnalysisDimension(keys.get(SEARCH_KEYWORD), "Search Keyword"));
+        analysisItems.add(new AnalysisDimension(keys.get(SEARCH_KEYWORD_REFINEMENT), "Search Keyword Refinement"));
+        analysisItems.add(new AnalysisDimension(keys.get(SEARCH_SEARCH_START), "Search Start Page"));
+        analysisItems.add(new AnalysisDimension(keys.get(SEARCH_SEARCH_USED), "Search Used"));
+        analysisItems.add(new AnalysisMeasure(keys.get(SEARCH_DEPTH), "Search Depth", AggregationTypes.SUM));
+        analysisItems.add(new AnalysisMeasure(keys.get(SEARCH_DURATION), "Search Duration", AggregationTypes.SUM));
+        analysisItems.add(new AnalysisMeasure(keys.get(SEARCH_EXITS), "Search Exits", AggregationTypes.SUM));
+        analysisItems.add(new AnalysisMeasure(keys.get(SEARCH_REFINEMENTS), "Search Refinements", AggregationTypes.SUM));
+        analysisItems.add(new AnalysisMeasure(keys.get(SEARCH_UNIQUES), "Unique Searches", AggregationTypes.SUM));
+        analysisItems.add(new AnalysisMeasure(keys.get(SEARCH_VISITS), "Search Visits", AggregationTypes.SUM));
         return analysisItems;
     }
 

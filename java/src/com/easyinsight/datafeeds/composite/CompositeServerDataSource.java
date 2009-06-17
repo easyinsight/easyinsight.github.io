@@ -48,11 +48,12 @@ public abstract class CompositeServerDataSource extends CompositeFeedDefinition 
     protected abstract IServerDataSourceDefinition createForFeedType(FeedType feedType);
 
     public long create(Credentials credentials, Connection conn) throws SQLException, CloneNotSupportedException {
-        obtainChildDataSources(conn, credentials);
         setOwnerName(retrieveUser(conn, SecurityUtil.getUserID()).getUserName());
         UploadPolicy uploadPolicy = new UploadPolicy(SecurityUtil.getUserID());
         setUploadPolicy(uploadPolicy);
         FeedCreationResult feedCreationResult = new FeedCreation().createFeed(this, conn, null, SecurityUtil.getUserID());
+        obtainChildDataSources(conn, credentials);
+        new FeedStorage().updateDataFeedConfiguration(this, conn);
         return feedCreationResult.getFeedID();
     }
 
@@ -127,10 +128,12 @@ public abstract class CompositeServerDataSource extends CompositeFeedDefinition 
         DataStorage metadata = null;
         try {
             FeedDefinition feedDefinition = (FeedDefinition) definition;
+            feedDefinition.setVisible(false);
             Map<String, Key> keys = feedDefinition.newDataSourceFields(credentials);
             DataSet dataSet = feedDefinition.getDataSet(credentials, keys, new Date(), this);
             feedDefinition.setFields(feedDefinition.createAnalysisItems(keys, dataSet, credentials));
             feedDefinition.setOwnerName(userName);
+            feedDefinition.setParentSourceID(getDataFeedID());
             UploadPolicy uploadPolicy = new UploadPolicy(userID);
             feedDefinition.setUploadPolicy(uploadPolicy);
             FeedCreationResult feedCreationResult = new FeedCreation().createFeed(feedDefinition, conn, dataSet, userID);

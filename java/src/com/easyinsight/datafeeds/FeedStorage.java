@@ -72,8 +72,8 @@ public class FeedStorage {
                     "CREATE_DATE, UPDATE_DATE, FEED_VIEWS, FEED_RATING_COUNT, FEED_RATING_AVERAGE, DESCRIPTION," +
                     "ATTRIBUTION, OWNER_NAME, DYNAMIC_SERVICE_DEFINITION_ID, ANALYSIS_ID, MARKETPLACE_VISIBLE, " +
                 "API_KEY, UNCHECKED_API_BASIC_AUTH, UNCHECKED_API_ENABLED, validated_api_basic_auth, validated_api_enabled, INHERIT_ACCOUNT_API_SETTINGS," +
-                "REFRESH_INTERVAL, CURRENT_VERSION) " +
-                        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                "REFRESH_INTERVAL, CURRENT_VERSION, VISIBLE, PARENT_SOURCE_ID) " +
+                        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                         Statement.RETURN_GENERATED_KEYS);
         insertDataFeedStmt.setString(1, feedDefinition.getFeedName());
         insertDataFeedStmt.setInt(2, feedDefinition.getFeedType().getType());
@@ -111,6 +111,8 @@ public class FeedStorage {
         insertDataFeedStmt.setBoolean(21, feedDefinition.isInheritAccountAPISettings());
         insertDataFeedStmt.setLong(22, feedDefinition.getRefreshDataInterval());
         insertDataFeedStmt.setInt(23, 1);
+        insertDataFeedStmt.setBoolean(24, feedDefinition.isVisible());
+        insertDataFeedStmt.setLong(25, feedDefinition.getParentSourceID());
         insertDataFeedStmt.execute();
         long feedID = Database.instance().getAutoGenKey(insertDataFeedStmt);
         feedDefinition.setDataFeedID(feedID);
@@ -524,7 +526,7 @@ public class FeedStorage {
         }
         PreparedStatement updateDataFeedStmt = conn.prepareStatement("UPDATE DATA_FEED SET FEED_NAME = ?, FEED_TYPE = ?, PUBLICLY_VISIBLE = ?, GENRE = ?, " +
                         "FEED_SIZE = ?, ANALYSIS_ID = ?, DESCRIPTION = ?, ATTRIBUTION = ?, OWNER_NAME = ?, DYNAMIC_SERVICE_DEFINITION_ID = ?, MARKETPLACE_VISIBLE = ?," +
-                "API_KEY = ?, validated_api_enabled = ?, unchecked_api_enabled = ?, REFRESH_INTERVAL = ? WHERE DATA_FEED_ID = ?");
+                "API_KEY = ?, validated_api_enabled = ?, unchecked_api_enabled = ?, REFRESH_INTERVAL = ?, VISIBLE = ?, parent_source_id = ? WHERE DATA_FEED_ID = ?");
         feedDefinition.setDateUpdated(new Date());
         updateDataFeedStmt.setString(1, feedDefinition.getFeedName());
         updateDataFeedStmt.setInt(2, feedDefinition.getFeedType().getType());
@@ -544,7 +546,9 @@ public class FeedStorage {
         updateDataFeedStmt.setBoolean(13, feedDefinition.isValidatedAPIEnabled());
         updateDataFeedStmt.setBoolean(14, feedDefinition.isUncheckedAPIEnabled());
         updateDataFeedStmt.setLong(15, feedDefinition.getRefreshDataInterval());
-        updateDataFeedStmt.setLong(16, feedDefinition.getDataFeedID());
+        updateDataFeedStmt.setBoolean(16, feedDefinition.isVisible());
+        updateDataFeedStmt.setLong(17, feedDefinition.getParentSourceID());
+        updateDataFeedStmt.setLong(18, feedDefinition.getDataFeedID());
         int rows = updateDataFeedStmt.executeUpdate();
         if (rows != 1) {
             throw new RuntimeException("Could not locate row to update");
@@ -593,7 +597,7 @@ public class FeedStorage {
             PreparedStatement queryFeedStmt = conn.prepareStatement("SELECT FEED_NAME, FEED_TYPE, PUBLICLY_VISIBLE, GENRE, CREATE_DATE," +
                     "UPDATE_DATE, FEED_VIEWS, FEED_RATING_COUNT, FEED_RATING_AVERAGE, FEED_SIZE, ANALYSIS_ID," +
                     "ATTRIBUTION, DESCRIPTION, OWNER_NAME, DYNAMIC_SERVICE_DEFINITION_ID, MARKETPLACE_VISIBLE, API_KEY, unchecked_api_enabled, validated_api_enabled," +
-                    "REFRESH_INTERVAL " +
+                    "REFRESH_INTERVAL, VISIBLE, PARENT_SOURCE_ID " +
                     "FROM DATA_FEED WHERE " +
                     "DATA_FEED_ID = ?");
             queryFeedStmt.setLong(1, identifier);
@@ -674,6 +678,11 @@ public class FeedStorage {
                 feedDefinition.setUncheckedAPIEnabled(rs.getBoolean(18));
                 feedDefinition.setValidatedAPIEnabled(rs.getBoolean(19));
                 feedDefinition.setRefreshDataInterval(rs.getLong(20));
+                feedDefinition.setVisible(rs.getBoolean(21));
+                long parentSourceID = rs.getLong(22);
+                if (!rs.wasNull()) {
+                    feedDefinition.setParentSourceID(parentSourceID);
+                }
                 feedDefinition.setTags(getTags(feedDefinition.getDataFeedID(), conn));
                 feedDefinition.customLoad(conn);
                 if(feedDefinition instanceof IServerDataSourceDefinition) {
@@ -771,10 +780,14 @@ public class FeedStorage {
         Connection conn = Database.instance().getConnection();
         try {
             PreparedStatement queryStmt = conn.prepareStatement("SELECT DISTINCT DATA_FEED.DATA_FEED_ID, DATA_FEED.FEED_NAME, " +
-                    "FEED_PERSISTENCE_METADATA.SIZE, DATA_FEED.FEED_TYPE, DATA_FEED.ANALYSIS_ID, OWNER_NAME, DESCRIPTION, ATTRIBUTION, ROLE, PUBLICLY_VISIBLE, MARKETPLACE_VISIBLE, FEED_PERSISTENCE_METADATA.LAST_DATA_TIME, PASSWORD_STORAGE.USERNAME " +
+                    "FEED_PERSISTENCE_METADATA.SIZE, DATA_FEED.FEED_TYPE, DATA_FEED.ANALYSIS_ID, OWNER_NAME, DESCRIPTION, ATTRIBUTION, ROLE, PUBLICLY_VISIBLE, MARKETPLACE_VISIBLE, FEED_PERSISTENCE_METADATA.LAST_DATA_TIME, PASSWORD_STORAGE.USERNAME," +
+                    "DATA_FEED.PARENT_SOURCE_ID " +
                     " FROM (UPLOAD_POLICY_USERS, DATA_FEED LEFT JOIN FEED_PERSISTENCE_METADATA ON DATA_FEED.DATA_FEED_ID = FEED_PERSISTENCE_METADATA.FEED_ID) LEFT JOIN PASSWORD_STORAGE ON DATA_FEED.DATA_FEED_ID = PASSWORD_STORAGE.DATA_FEED_ID WHERE " +
                     "UPLOAD_POLICY_USERS.USER_ID = ? AND DATA_FEED.DATA_FEED_ID = UPLOAD_POLICY_USERS.FEED_ID");
             queryStmt.setLong(1, userID);
+            Map<Long, Long> sizeMap = new HashMap<Long, Long>();
+            Map<Long, FeedDescriptor> feedMap = new HashMap<Long, FeedDescriptor>();
+            Map<Long, Date> lastDateMap = new HashMap<Long, Date>();
             ResultSet rs = queryStmt.executeQuery();
             while (rs.next()) {
                 long dataFeedID = rs.getLong(1);
@@ -791,10 +804,30 @@ public class FeedStorage {
                 if (lastTime != null) {
                     lastDataTime = new Date(lastTime.getTime());
                 }
-                FeedDescriptor feedDescriptor = createDescriptor(dataFeedID, feedName, userRole, feedSize, feedType, ownerName, description, attribution, lastDataTime);
-                feedDescriptor.setHasSavedCredentials(hasSavedCredentials);
-                descriptorList.add(feedDescriptor);
+                Long parentSourceID = rs.getLong(14);
+                if (!rs.wasNull() && parentSourceID > 0) {
+                    Long size = sizeMap.get(parentSourceID);
+                    if (size == null) {
+                        sizeMap.put(parentSourceID, feedSize);
+                    } else {
+                        sizeMap.put(parentSourceID, feedSize + size);
+                    }
+                    lastDateMap.put(parentSourceID, lastDataTime);
+                } else {
+                    FeedDescriptor feedDescriptor = createDescriptor(dataFeedID, feedName, userRole, feedSize, feedType, ownerName, description, attribution, lastDataTime);
+                    feedDescriptor.setHasSavedCredentials(hasSavedCredentials);
+                    descriptorList.add(feedDescriptor);
+                    feedMap.put(dataFeedID, feedDescriptor);
+                }
             }
+            for (Map.Entry<Long, Long> sizeEntry : sizeMap.entrySet()) {
+                FeedDescriptor feedDescriptor = feedMap.get(sizeEntry.getKey());
+                if (feedDescriptor != null) {
+                    feedDescriptor.setSize(sizeEntry.getValue());
+                    feedDescriptor.setLastDataTime(lastDateMap.get(sizeEntry.getKey()));
+                }
+            }
+            descriptorList = new ArrayList<FeedDescriptor>(feedMap.values());
             queryStmt.close();
         } catch (SQLException e) {
             LogClass.error(e);

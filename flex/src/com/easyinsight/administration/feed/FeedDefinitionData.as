@@ -39,6 +39,8 @@ package com.easyinsight.administration.feed
         public var inheritAccountAPISettings:Boolean;
         public var refreshDataInterval:int;
         public var virtualDimensions:ArrayCollection = new ArrayCollection();
+        public var visible:Boolean = true;
+        public var parentSourceID:int;
 
         public var username:String;
         public var password:String;
