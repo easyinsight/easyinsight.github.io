@@ -9,7 +9,6 @@ import com.easyinsight.datafeeds.salesforce.SalesforceFeedDefinition;
 import com.easyinsight.datafeeds.salesforce.SalesforceSubFeedDefinition;
 import com.easyinsight.datafeeds.file.FileBasedFeedDefinition;
 import com.easyinsight.datafeeds.jira.JiraDataSource;
-import com.easyinsight.datafeeds.basecamp.BaseCampDataSource;
 import com.easyinsight.datafeeds.basecamp.BaseCampCompositeSource;
 import com.easyinsight.datafeeds.basecamp.BaseCampTimeSource;
 import com.easyinsight.datafeeds.basecamp.BaseCampTodoSource;
@@ -34,9 +33,9 @@ import java.io.Serializable;
 import org.hibernate.Session;
 import org.apache.jcs.JCS;
 import org.apache.jcs.access.exception.CacheException;
-import test.composite.TestAlphaDataSource;
-import test.composite.TestBetaDataSource;
-import test.composite.TestGammaDataSource;
+import com.easyinsight.datafeeds.test.TestAlphaDataSource;
+import com.easyinsight.datafeeds.test.TestBetaDataSource;
+import com.easyinsight.datafeeds.test.TestGammaDataSource;
 
 /**
  * User: jboe
