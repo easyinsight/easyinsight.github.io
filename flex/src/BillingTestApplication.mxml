@@ -1,0 +1,35 @@
+<?xml version="1.0" ?>
+<mx:Application xmlns:mx="http://www.adobe.com/2006/mxml">
+    <mx:Script><![CDATA[
+        import mx.collections.ArrayCollection;
+
+        private var requests:ArrayCollection = new ArrayCollection();
+        private var loaders:ArrayCollection = new ArrayCollection();
+
+        private function onError(event:IOErrorEvent):void {
+        }
+
+        private function onComplete(event:Event):void {
+            // do something here
+        }
+
+        private function test():void {
+            var uploadPath:String = "braintree path";
+            var variables:Object = new Object();
+            // variables["variable_name"] = blah;
+            var urlRequest:URLRequest = new URLRequest();
+            urlRequest.url = uploadPath;
+            urlRequest.method = URLRequestMethod.POST;
+            urlRequest.requestHeaders.push( new URLRequestHeader( 'Cache-Control', 'no-cache' ) );
+            var urlLoader:URLLoader = new URLLoader();
+            urlLoader.dataFormat = URLLoaderDataFormat.BINARY;
+            urlLoader.addEventListener(Event.COMPLETE, onComplete);
+            urlLoader.addEventListener(IOErrorEvent.IO_ERROR, onError);
+            urlLoader.addEventListener(SecurityErrorEvent.SECURITY_ERROR, onError);
+            requests.addItem(urlRequest);
+            loaders.addItem(urlLoader);
+            urlLoader.load(urlRequest);
+        }
+        ]]></mx:Script>
+    <mx:Button label="Test"/>
+</mx:Application>

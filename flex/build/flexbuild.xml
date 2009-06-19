@@ -8,16 +8,74 @@
 
     <target name="compileFlex">
         <mxmlc file="../src/PrimaryWorkspace.mxml" output="${deployment.path}/PrimaryWorkspace.swf"
-               static-rsls="true" incremental="true" link-report="blah.txt">
+               static-rsls="true" incremental="true">
             <load-config filename="../flex-config.xml"/>
         </mxmlc>
     </target>
 
+    <target name="compileBillingTest">
+        <mxmlc file="../src/BillingTestApplication.mxml" output="${deployment.path}/BillingTestApplication.swf"
+               static-rsls="true" incremental="true">
+            <load-config filename="../billing-config.xml"/>
+        </mxmlc>
+    </target>
+
     <target name="compileAir">
+        <mkdir dir="../out"/>
+        <mkdir dir="../out/air"/>
         <mxmlc file="../src/EIAirWidget.mxml" output="${deployment.path}/EIAirWidget.swf"
                static-rsls="true" incremental="true">
             <load-config filename="../ei-air-config.xml"/>
         </mxmlc>
+    </target>
+
+    <property name="ADL" value="${FLEX_HOME}/bin/adl.exe"/>
+    <property name="ADT.JAR" value="${FLEX_HOME}/lib/adt.jar"/>
+
+    <property name="APP_NAME" value="EIAirWidget"/>
+    <property name="APP_ROOT" value="."/>
+    <property name="MAIN_SOURCE_FILE" value="../src/${APP_NAME}.mxml"/>
+    <property name="APP_DESCRIPTOR" value="../src/AirWidget.xml"/>
+    <property name="AIR_NAME" value="EIAirWidget.air"/>
+    <property name="AIR_PREP_NAME" value="EIAirWidget.airi"/>
+    <property name="DEBUG" value="false"/>
+    <property name="STORETYPE" value="pkcs12"/>
+    <property name="KEYSTORE" value="eiwidget.p12"/>
+
+    <target name="assembleAir" depends="compileAir">
+        <java jar="${ADT.JAR}" fork="true" failonerror="true">
+            <arg value="-prepare"/>
+            <arg value="${AIR_PREP_NAME}"/>
+            <arg value="-C"/>
+            <arg value="../out/air"/>
+            <arg value="${APP_DESCRIPTOR}"/>
+            <arg value="${APP_NAME}.swf"/>
+        </java>
+        <java jar="${ADT.JAR}" fork="true" failonerror="true">
+            <arg value="-sign"/>
+            <arg value="-C"/>
+            <arg value="../out/air"/>
+            <arg value="-storetype"/>
+            <arg value="${STORETYPE}"/>
+            <arg value="-keystore"/>
+            <arg value="${KEYSTORE}"/>
+            <arg value="-storepass"/>
+            <arg value="e@symone$"/>
+            <arg value="${AIR_PREP_NAME}"/>
+            <arg value="${AIR_NAME}"/>            
+        </java>
+        <!--<java jar="${ADT.JAR}" fork="true" failonerror="true">
+            <arg value="-package"/>
+            <arg value="-storetype"/>
+            <arg value="${STORETYPE}"/>
+            <arg value="-keystore"/>
+            <arg value="${KEYSTORE}"/>
+            <arg value="-storepass"/>
+            <arg value="Grav1tyfails"/>
+            <arg value="${AIR_NAME}"/>
+            <arg value="${APP_DESCRIPTOR}"/>
+            <arg value="../out/air/${APP_NAME}.swf"/>
+        </java>-->
     </target>
 
     <target name="compileFlexOptimized">
