@@ -42,6 +42,7 @@ public class BaseCampTimeSource extends ServerDataSourceDefinition {
     public static final String DESCRIPTION = "Description";
 
     public static final String COUNT = "Count";
+    private static final String PERSONNAME = "Person Name";
 
 
     public FeedType getFeedType() {
@@ -56,7 +57,7 @@ public class BaseCampTimeSource extends ServerDataSourceDefinition {
         return client;
     }
 
-    private Document runRestRequest(String path, HttpClient client, Builder builder, String url) throws BaseCampLoginException {
+    private Document runRestRequest(String path, HttpClient client, Builder builder, String url, EIPageInfo pageInfo) throws BaseCampLoginException {
         HttpMethod restMethod = new GetMethod(url + path);
         restMethod.setRequestHeader("Accept", "application/xml");
         restMethod.setRequestHeader("Content-Type", "application/xml");
@@ -64,6 +65,9 @@ public class BaseCampTimeSource extends ServerDataSourceDefinition {
         try {
             client.executeMethod(restMethod);
             doc = builder.build(restMethod.getResponseBodyAsStream());
+            if(pageInfo != null) {
+                pageInfo.MaxPages = Integer.parseInt(restMethod.getResponseHeader("X-Pages").getValue());
+            }
         }
         catch (nu.xom.ParsingException e) {
                 throw new BaseCampLoginException("Invalid username/password.");
@@ -86,34 +90,53 @@ public class BaseCampTimeSource extends ServerDataSourceDefinition {
         Builder builder = new Builder();
         Map<String, String> peopleCache = new HashMap<String, String>();
         try {
-            Document projects = runRestRequest("/projects.xml", client, builder, url);
+            Document projects = runRestRequest("/projects.xml", client, builder, url, null);
             Nodes projectNodes = projects.query("/projects/project");
             for(int i = 0;i < projectNodes.size();i++) {
                 Node curProject = projectNodes.get(i);
                 String projectIdToRetrieve = queryField(curProject, "id/text()");
 
-                Document todoLists = runRestRequest("/projects/" + projectIdToRetrieve + "/time_entries.xml", client, builder, url);
-                Nodes todoListNodes = todoLists.query("/time-entries/time-entry");
-                for(int j = 0;j < todoListNodes.size();j++) {
-                    Node todoListNode = todoListNodes.get(j);
-                    String personID = queryField(todoListNode, "person-id/text()");
-                    String timeHours = queryField(todoListNode, "hours/text()");
-                    String timeDescription = queryField(todoListNode, "description/text()");
+                EIPageInfo info = new EIPageInfo();
+                info.currentPage = 1;
+                do {
+                    Document todoLists = runRestRequest("/projects/" + projectIdToRetrieve + "/time_entries.xml?page=" + info.currentPage, client, builder, url, info);
+                    Nodes todoListNodes = todoLists.query("/time-entries/time-entry");
+                    for(int j = 0;j < todoListNodes.size();j++) {
+                        Node todoListNode = todoListNodes.get(j);
+                        String personID = queryField(todoListNode, "person-id/text()");
+                        String timeHours = queryField(todoListNode, "hours/text()");
+                        String timeDescription = queryField(todoListNode, "description/text()");
+                        String personName = retrieveContactInfo(client, builder, peopleCache, personID, url);
 
-                    IRow row = ds.createRow();
-                    row.addValue(keys.get(PROJECTID), projectIdToRetrieve);
-                    row.addValue(keys.get(PERSONID), personID);
-                    row.addValue(keys.get(HOURS), new NumericValue(Double.parseDouble(timeHours)));
-                    row.addValue(keys.get(DESCRIPTION), timeDescription);
-
-                    row.addValue(keys.get(COUNT), new NumericValue(1));
-                }
+                        IRow row = ds.createRow();
+                        row.addValue(keys.get(PROJECTID), projectIdToRetrieve);
+                        row.addValue(keys.get(PERSONNAME), personName);
+                        row.addValue(keys.get(PERSONID), personID);
+                        row.addValue(keys.get(HOURS), new NumericValue(Double.parseDouble(timeHours)));
+                        row.addValue(keys.get(DESCRIPTION), timeDescription);
+                        row.addValue(keys.get(COUNT), new NumericValue(1));
+                    }
+                } while(info.currentPage++ < info.MaxPages);
             }
         } catch (Throwable e) {
             LogClass.error(e);
             throw new RuntimeException(e);
         }
         return ds;
+    }
+
+    private String retrieveContactInfo(HttpClient client, Builder builder, Map<String, String> peopleCache, String contactId, String url) throws BaseCampLoginException {
+        String contactName = null;
+        if(contactId != null) {
+            contactName = peopleCache.get(contactId);
+            if(contactName == null) {
+                Document contactInfo = runRestRequest("/contacts/person/" + contactId, client, builder, url, null);
+                contactName = queryField(contactInfo, "/person/first-name/text()") + " " + queryField(contactInfo, "/person/last-name/text()");
+                peopleCache.put(contactId, contactName);
+            }
+
+        }
+        return contactName;
     }
 
     private static String queryField(Node n, String xpath) {
@@ -126,7 +149,7 @@ public class BaseCampTimeSource extends ServerDataSourceDefinition {
 
     @NotNull
     protected List<String> getKeys() {
-        return Arrays.asList(PERSONID, HOURS, DESCRIPTION, PROJECTID, COUNT);
+        return Arrays.asList(PERSONID, PERSONNAME, HOURS, DESCRIPTION, PROJECTID, COUNT);
     }
 
     public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, DataSet dataSet, com.easyinsight.users.Credentials credentials) {
@@ -136,9 +159,15 @@ public class BaseCampTimeSource extends ServerDataSourceDefinition {
         analysisItems.add(projectDim);
         analysisItems.add(new AnalysisDimension(keys.get(DESCRIPTION), true));
         analysisItems.add(new AnalysisDimension(keys.get(PERSONID), true));
+        analysisItems.add(new AnalysisDimension(keys.get(PERSONNAME), true));
         analysisItems.add(new AnalysisMeasure(keys.get(HOURS), AggregationTypes.SUM));
         analysisItems.add(new AnalysisMeasure(keys.get(COUNT), AggregationTypes.SUM));
         return analysisItems;
+    }
+
+    private class EIPageInfo {
+        public int MaxPages;
+        public int currentPage;
     }
 
 }

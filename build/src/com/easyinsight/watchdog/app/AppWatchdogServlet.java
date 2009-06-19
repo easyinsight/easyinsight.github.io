@@ -31,7 +31,5 @@ public class AppWatchdogServlet extends HttpServlet {
     }
 
     public static void main(String[] args) {
-        System.out.println(Password.Crypt.crypt("einsight", "eJAqp0Q~j!n>L"));
-
     }
 }

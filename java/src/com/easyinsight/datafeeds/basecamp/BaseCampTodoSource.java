@@ -75,7 +75,7 @@ public class BaseCampTodoSource extends ServerDataSourceDefinition {
         return client;
     }
 
-    private Document runRestRequest(String path, HttpClient client, Builder builder, String url) throws BaseCampLoginException {
+    private Document runRestRequest(String path, HttpClient client, Builder builder, String url, EIPageInfo info) throws BaseCampLoginException {
         HttpMethod restMethod = new GetMethod(url + path);
         restMethod.setRequestHeader("Accept", "application/xml");
         restMethod.setRequestHeader("Content-Type", "application/xml");
@@ -105,7 +105,7 @@ public class BaseCampTodoSource extends ServerDataSourceDefinition {
         Builder builder = new Builder();
         Map<String, String> peopleCache = new HashMap<String, String>();
         try {
-            Document projects = runRestRequest("/projects.xml", client, builder, url);
+            Document projects = runRestRequest("/projects.xml", client, builder, url, null);
             Nodes projectNodes = projects.query("/projects/project");
             for(int i = 0;i < projectNodes.size();i++) {
                 Node curProject = projectNodes.get(i);
@@ -113,8 +113,8 @@ public class BaseCampTodoSource extends ServerDataSourceDefinition {
                 String projectStatus = queryField(curProject, "status/text()");
                 String projectIdToRetrieve = queryField(curProject, "id/text()");
 
-                Document milestoneList = runRestRequest("/projects/" + projectIdToRetrieve + "/milestones/list", client, builder, url);
-                Document todoLists = runRestRequest("/projects/" + projectIdToRetrieve + "/todo_lists.xml", client, builder, url);
+                Document milestoneList = runRestRequest("/projects/" + projectIdToRetrieve + "/milestones/list", client, builder, url, null);
+                Document todoLists = runRestRequest("/projects/" + projectIdToRetrieve + "/todo_lists.xml", client, builder, url, null);
                 Nodes todoListNodes = todoLists.query("/todo-lists/todo-list");
                 for(int j = 0;j < todoListNodes.size();j++) {
                     Node todoListNode = todoListNodes.get(j);
@@ -135,7 +135,7 @@ public class BaseCampTodoSource extends ServerDataSourceDefinition {
                     }
 
 
-                    Document todoItems = runRestRequest("/todo_lists/" + todoListId + "/todo_items.xml", client, builder, url);
+                    Document todoItems = runRestRequest("/todo_lists/" + todoListId + "/todo_items.xml", client, builder, url, null);
                     Nodes todoItemNodes = todoItems.query("/todo-items/todo-item");
                     for(int k = 0;k < todoItemNodes.size();k++) {
                         Node todoItem = todoItemNodes.get(k);
@@ -192,7 +192,7 @@ public class BaseCampTodoSource extends ServerDataSourceDefinition {
         if(contactId != null) {
             contactName = peopleCache.get(contactId);
             if(contactName == null) {
-                Document contactInfo = runRestRequest("/contacts/person/" + contactId, client, builder, url);
+                Document contactInfo = runRestRequest("/contacts/person/" + contactId, client, builder, url, null);
                 contactName = queryField(contactInfo, "/person/first-name/text()") + " " + queryField(contactInfo, "/person/last-name/text()");
                 peopleCache.put(contactId, contactName);
             }
@@ -247,5 +247,10 @@ public class BaseCampTodoSource extends ServerDataSourceDefinition {
         analysisItems.add(new AnalysisStep(keys.get(ITEMCYCLE), true, AnalysisDateDimension.DAY_LEVEL, createdDim, completedDim, itemDim));
         analysisItems.add(new AnalysisMeasure(keys.get(COUNT), AggregationTypes.SUM));
         return analysisItems;
+    }
+
+    private class EIPageInfo {
+        public int MaxPages;
+        public int currentPage;
     }
 }
