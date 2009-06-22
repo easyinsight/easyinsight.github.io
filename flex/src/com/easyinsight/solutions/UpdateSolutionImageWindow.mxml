@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" width="400" height="300"
+	creationComplete="doCreationComplete()">
+	<mx:Script>
+		<![CDATA[
+			import mx.controls.Alert;
+        import mx.managers.PopUpManager;
+
+
+        private var _sourceID:int;
+
+        [Bindable]
+        private var file:FileReference = new FileReference();
+
+
+        public function set sourceID(value:int):void {
+            _sourceID = value;
+        }
+
+        private function doBrowse(event:Event):void {
+            file.browse();
+        }
+
+        public function doCreationComplete():void {
+            file.addEventListener(Event.SELECT, doSelect);
+            file.addEventListener(DataEvent.UPLOAD_COMPLETE_DATA, doComplete);
+        }
+
+        public function doSelect(event:Event):void {
+            fileName.text = file.name;
+        }
+
+        public function doSubmit():void {
+            var request:URLRequest = new URLRequest("/app/SolutionImageServlet");
+            var vars:URLVariables = new URLVariables();
+
+            vars.solutionID = _sourceID;
+
+            request.data = vars;
+
+            // Start the file upload process
+            file.upload(request);
+        }
+
+        private function doComplete(event:Event):void {
+            Alert.show("Successful!");
+        }
+
+        private function cancel():void {
+            PopUpManager.removePopUp(this);
+        }
+		]]>
+	</mx:Script>
+	<mx:VBox>
+		<mx:TextInput id="fileName" editable="false" />
+		<mx:Button label="Browse..." click="doBrowse( event )" />
+		<mx:Button label="Submit" click="doSubmit()"/>
+		<mx:Button label="Close" click="cancel()"/>
+	</mx:VBox>
+</mx:TitleWindow>

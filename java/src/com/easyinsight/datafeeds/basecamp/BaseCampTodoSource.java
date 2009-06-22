@@ -63,6 +63,10 @@ public class BaseCampTodoSource extends ServerDataSourceDefinition {
 
     public static final String ITEMCYCLE = "Item Cycle";
 
+    public BaseCampTodoSource() {
+        setFeedName("Todo");
+    }
+
     public FeedType getFeedType() {
         return FeedType.BASECAMP;
     }

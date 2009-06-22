@@ -21,9 +21,18 @@ public abstract class Feed implements Serializable {
     private List<AnalysisItem> fields;
     private int version;
     private String name;
+    private String attribution;
 
     public List<FilterDefinition> getIntrinsicFilters() {
         return new ArrayList<FilterDefinition>();
+    }
+
+    public String getAttribution() {
+        return attribution;
+    }
+
+    public void setAttribution(String attribution) {
+        this.attribution = attribution;
     }
 
     public String getName() {

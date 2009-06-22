@@ -2,11 +2,13 @@ package com.easyinsight.listing {
 import mx.controls.Label;
 public class SizeRenderer extends Label{
 
-    private var _data:Object;
+
 
     public function SizeRenderer() {
         super();
     }
+
+    private var _data:Object;
 
     override public function set data(value:Object):void {
         _data = value;
@@ -16,6 +18,13 @@ public class SizeRenderer extends Label{
                 this.text = "( Derived )";
             } else {
                 this.text = String(descriptor.size);
+            }
+            if (descriptor.solutionTemplate) {
+                setStyle("textDecoration", "underline");
+                toolTip = "This data source is the template for a solution.";
+            } else {
+                setStyle("textDecoration", "");
+                toolTip = "";
             }
         } else {
             this.text = "";

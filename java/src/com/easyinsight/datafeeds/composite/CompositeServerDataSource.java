@@ -64,13 +64,13 @@ public abstract class CompositeServerDataSource extends CompositeFeedDefinition 
         Set<FeedType> feedTypes = getFeedTypes();
         FeedStorage feedStorage = new FeedStorage();
         List<AnalysisItem> newFields = new ArrayList<AnalysisItem>();
-        Map<Key, AnalysisItem> fieldMap = new HashMap<Key, AnalysisItem>();
+        /*Map<Key, AnalysisItem> fieldMap = new HashMap<Key, AnalysisItem>();
         if (getFields() != null) {
             for (AnalysisItem item : getFields()) {
                 DerivedKey derivedKey = (DerivedKey) item.getKey();
                 fieldMap.put(derivedKey, item);
             }
-        }
+        }*/
         if (getCompositeFeedNodes() != null) {
             for (CompositeFeedNode node : getCompositeFeedNodes()) {
                 IServerDataSourceDefinition definition = (IServerDataSourceDefinition) feedStorage.getFeedDefinitionData(node.getDataFeedID(), conn);
@@ -78,7 +78,7 @@ public abstract class CompositeServerDataSource extends CompositeFeedDefinition 
                 feedMap.put(definition.getFeedType(), definition);
                 feedTypes.remove(definition.getFeedType());
                 nodes.add(node);
-                addFields(newFields, fieldMap, definition);
+                //addFields(newFields, fieldMap, definition);
             }
         }
         for (FeedType feedType : feedTypes) {
@@ -89,8 +89,9 @@ public abstract class CompositeServerDataSource extends CompositeFeedDefinition 
             node.setDataFeedID(definition.getDataFeedID());
             feedMap.put(definition.getFeedType(), definition);
             nodes.add(node);
-            addFields(newFields, fieldMap, definition);
+            //addFields(newFields, fieldMap, definition);
         }
+        setCompositeFeedNodes(nodes);
         List<CompositeFeedConnection> connections = new ArrayList<CompositeFeedConnection>();
         for (ChildConnection childConnection : getChildConnections()) {
             IServerDataSourceDefinition sourceDef = feedMap.get(childConnection.getSourceFeedType());
@@ -101,14 +102,15 @@ public abstract class CompositeServerDataSource extends CompositeFeedDefinition 
                     sourceKey, targetKey);
             connections.add(connection);
         }
-        setFields(newFields);
-        setCompositeFeedNodes(nodes);
         setConnections(connections);
+        populateFields(conn);        
         return dataSources;
     }
 
-    private boolean addFields(List<AnalysisItem> newFields, Map<Key, AnalysisItem> fieldMap, IServerDataSourceDefinition definition) throws CloneNotSupportedException {
+    /*private boolean addFields(List<AnalysisItem> newFields, Map<Key, AnalysisItem> fieldMap, IServerDataSourceDefinition definition) throws CloneNotSupportedException {
         boolean changed = false;
+        Map<Long, AnalysisItem> replacementMap = new HashMap<Long, AnalysisItem>();
+        List<AnalysisItem> updateFields = new ArrayList<AnalysisItem>();
         for (AnalysisItem childField : definition.getFields()) {
             DerivedKey derivedKey = new DerivedKey(childField.getKey(), definition.getDataFeedID());
             AnalysisItem analysisItem = fieldMap.get(derivedKey);
@@ -117,12 +119,17 @@ public abstract class CompositeServerDataSource extends CompositeFeedDefinition 
                 AnalysisItem clonedItem = childField.clone();
                 clonedItem.setKey(derivedKey);
                 newFields.add(clonedItem);
+                replacementMap.put(childField.getAnalysisItemID(), clonedItem);
+                updateFields.add(clonedItem);
             } else {
                 newFields.add(analysisItem);
             }
         }
+        for (AnalysisItem item : updateFields) {
+            item.updateIDs(replacementMap);
+        }
         return changed;
-    }
+    }*/
 
     private void newDefinition(IServerDataSourceDefinition definition, Connection conn, Credentials credentials, String userName, long userID) throws SQLException {
         DataStorage metadata = null;

@@ -20,6 +20,10 @@ import mx.events.FlexEvent;
             return name;
         }
 
+        override public function internalString():String {
+            return name;
+        }
+
         public function set nameValue(nameValue:String):void {
             this.name = nameValue;
             dispatchEvent(new FlexEvent(FlexEvent.DATA_CHANGE));

@@ -6,7 +6,6 @@
                       backgroundColor="#DCE2F8">
     <listing:states>
         <mx:State name="SearchState">
-            <mx:RemoveChild target="{headlineDisplayBox}"/>
             <mx:RemoveChild target="{topSpacer}"/>
             <mx:RemoveChild target="{listsBox}"/>
             <mx:AddChild relativeTo="{centerBox}">
@@ -14,7 +13,6 @@
             </mx:AddChild>
         </mx:State>
         <mx:State name="AnalysisSearchState">
-            <mx:RemoveChild target="{headlineDisplayBox}"/>
             <mx:RemoveChild target="{topSpacer}"/>
             <mx:RemoveChild target="{listsBox}"/>
             <mx:AddChild relativeTo="{centerBox}">
@@ -117,7 +115,7 @@
 
         private function gotHeadlines(event:ResultEvent):void {
             analysisDefinitions = dataProvider.getHeadlineAnalysesForGenre.lastResult as ArrayCollection;
-            refreshHeadlineAnalyses();
+            //refreshHeadlineAnalyses();
         }
 
         private function previousHeadline():void {
@@ -126,10 +124,10 @@
             } else {
                 currentIndex--;
             }
-            refreshHeadlineAnalyses();
+            //refreshHeadlineAnalyses();
         }
 
-        private function refreshHeadlineAnalyses():void {
+        /*private function refreshHeadlineAnalyses():void {
             if (analysisDefinitions.length > 0) {
                 var analysisDefinition:InsightDescriptor = analysisDefinitions.getItemAt(currentIndex) as InsightDescriptor;
                 var dataViewPanel:DataViewPanel = new DataViewPanel();
@@ -158,7 +156,7 @@
                 centerRBox.removeAllChildren();
                 centerRBox.addChild(dataViewPanel2);
             }
-        }
+        }*/
 
         private function nextHeadline():void {
             if (currentIndex == analysisDefinitions.length - 1) {
@@ -166,7 +164,7 @@
             } else {
                 currentIndex++;
             }
-            refreshHeadlineAnalyses();
+            //refreshHeadlineAnalyses();
         }
 
         public function search():void {
@@ -260,7 +258,7 @@
                 <mx:Label fontSize="10" text="Enter data source or report name or tags"/>
             </mx:VBox>
         </mx:HBox>
-        <mx:HBox width="100%" height="55%" id="headlineDisplayBox" horizontalAlign="center">
+        <!--<mx:HBox width="100%" height="55%" id="headlineDisplayBox" horizontalAlign="center">
             <mx:VBox height="100%" verticalAlign="middle">
                 <mx:Button id="previousHeadlineButton" click="previousHeadline()"
                            icon="@Embed(source='../../../../assets/nav_left_green.png')"/>
@@ -272,7 +270,7 @@
                 <mx:Button id="nextHeadlineButton" click="nextHeadline()"
                            icon="@Embed(source='../../../../assets/nav_right_green.png')"/>
             </mx:VBox>
-        </mx:HBox>
+        </mx:HBox>-->
         <mx:Spacer height="20" id="topSpacer"/>
         <mx:VBox width="100%" height="500" id="listsBox" backgroundColor="#FFFFFF" backgroundAlpha=".1">
             <mx:HBox width="100%" horizontalAlign="center">

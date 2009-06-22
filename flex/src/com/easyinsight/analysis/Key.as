@@ -14,6 +14,10 @@ package com.easyinsight.analysis
 		public function createString():String {
 			return null;
 		}
+
+        public function internalString():String {
+            return null;
+        }
 				
 		/*public function createDisplayName():String {
 			if (displayName != null) {

@@ -18,6 +18,7 @@ import java.io.Serializable;
 public class DataSet implements Serializable {
 
     private List<IRow> rows;
+    private Date lastTime;
 
     public DataSet() {
         rows = new ArrayList<IRow>();
@@ -35,6 +36,14 @@ public class DataSet implements Serializable {
         for (IRow row : rows) {
             row.replaceKey(existingKey, newKey);
         }
+    }
+
+    public Date getLastTime() {
+        return lastTime;
+    }
+
+    public void setLastTime(Date lastTime) {
+        this.lastTime = lastTime;
     }
 
     public IRow createRow() {

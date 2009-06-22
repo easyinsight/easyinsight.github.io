@@ -21,7 +21,8 @@ import mx.collections.ArrayCollection;
 import mx.managers.PopUpManager;
 
 [Event(name="transformAdded", type="com.easyinsight.filtering.TransformsUpdatedEvent")]
-	
+[Event(name="updatedTransforms", type="com.easyinsight.filtering.TransformsUpdatedEvent")]
+
 	public class TransformContainer extends HBox
 	{		
 		private var filterMap:Object = new Object();
@@ -30,8 +31,11 @@ import mx.managers.PopUpManager;
 		private var _feedID:int;
 		private var noFilters:Boolean = true;
 		private var dropHereBox:VBox;
+        private var _filterEditable:Boolean;
 		[Bindable]
 		private var _analysisItems:ArrayCollection;
+
+    private var _filterDefinitions:ArrayCollection;
 
     private var showingFeedback:Boolean = false;
 			
@@ -43,7 +47,17 @@ import mx.managers.PopUpManager;
 			this.addEventListener(DragEvent.DRAG_EXIT, dragExitHandler);					
 		}
 
-        public function clearFilter(item:AnalysisItem):void {
+
+    public function set filterEditable(value:Boolean):void {
+        _filterEditable = value;
+    }
+
+
+    public function set existingFilters(value:ArrayCollection):void {
+        _filterDefinitions = value;
+    }
+
+    public function clearFilter(item:AnalysisItem):void {
             for each (var filter:IFilter in filterMap) {
                 if (filter.filterDefinition.field.qualifiedName() == item.qualifiedName()) {
                     filterTile.removeChild(filter as DisplayObject);
@@ -101,10 +115,15 @@ import mx.managers.PopUpManager;
 				textMessage.setStyle("color", "#333333");
 				dropHereBox.addChild(textMessage);
 			}			
-			if (noFilters) {
+			if (noFilters && _filterDefinitions == null) {
 				addChild(dropHereBox);											
 			} else {
 				addChild(filterTile);
+                if (_filterDefinitions != null) {
+                    for each (var filter:FilterDefinition in _filterDefinitions) {
+                        addFilterDefinition(filter);
+                    }
+                }
 			}			
 		}
 		
@@ -153,6 +172,7 @@ import mx.managers.PopUpManager;
 			} else if (filterDefinition.getType() == FilterDefinition.ROLLING_DATE) {
 				filter = new RollingRangeFilter(_feedID, filterDefinition.field);
 			}
+            filter.filterEditable = _filterEditable;
 			filter.filterDefinition = filterDefinition;
 			return filter;	
 		}
@@ -260,10 +280,13 @@ import mx.managers.PopUpManager;
         public function commandFilterAdd(filter:IFilter):void {
             if (noFilters) {
 				noFilters = false;
-				removeChild(dropHereBox);
+                if (dropHereBox.parent != null) {
+				    removeChild(dropHereBox);
+                    addChild(filterTile);
+                }
 				//filterTile.explicitWidth = dropHereBox.width;
-				addChild(filterTile);
 			}
+            filter.filterEditable = _filterEditable;
 			filter.addEventListener(FilterUpdatedEvent.FILTER_ADDED, filterAdded);
 			filter.addEventListener(FilterUpdatedEvent.FILTER_UPDATED, filterUpdated);
 			filter.addEventListener(FilterDeletionEvent.DELETED_FILTER, filterDeleted);

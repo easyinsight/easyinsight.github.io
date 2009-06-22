@@ -10,12 +10,15 @@ import com.easyinsight.core.Key;
  */
 public class AggregateKey extends NamedKey {
     private int type;
+    private Key key;
 
     public AggregateKey(Key key, int type) {
         super(key.toKeyString());
+        this.key = key;
         this.type = type;
     }
 
+    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
@@ -23,13 +26,15 @@ public class AggregateKey extends NamedKey {
 
         AggregateKey that = (AggregateKey) o;
 
-        return type == that.type;
+        return type == that.type && key.equals(that.key);
 
     }
 
+    @Override
     public int hashCode() {
         int result = super.hashCode();
         result = 31 * result + type;
+        result = 31 * result + key.hashCode();
         return result;
     }
 }

@@ -44,6 +44,9 @@ public class BaseCampTimeSource extends ServerDataSourceDefinition {
     public static final String COUNT = "Count";
     private static final String PERSONNAME = "Person Name";
 
+    public BaseCampTimeSource() {
+        setFeedName("Time Tracking");
+    }
 
     public FeedType getFeedType() {
         return FeedType.BASECAMP_TIME;

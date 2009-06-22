@@ -26,6 +26,51 @@ public class Solution {
     private long goalTreeID;
     private int solutionTier;
     private List<String> tags;
+    private byte[] image;
+    private boolean accessible;
+    private int category;
+    private String screencastName;
+    private String screencastDirectory;
+
+    public String getScreencastName() {
+        return screencastName;
+    }
+
+    public void setScreencastName(String screencastName) {
+        this.screencastName = screencastName;
+    }
+
+    public String getScreencastDirectory() {
+        return screencastDirectory;
+    }
+
+    public void setScreencastDirectory(String screencastDirectory) {
+        this.screencastDirectory = screencastDirectory;
+    }
+
+    public int getCategory() {
+        return category;
+    }
+
+    public void setCategory(int category) {
+        this.category = category;
+    }
+
+    public boolean isAccessible() {
+        return accessible;
+    }
+
+    public void setAccessible(boolean accessible) {
+        this.accessible = accessible;
+    }
+
+    public byte[] getImage() {
+        return image;
+    }
+
+    public void setImage(byte[] image) {
+        this.image = image;
+    }
 
     public int getSolutionTier() {
         return solutionTier;

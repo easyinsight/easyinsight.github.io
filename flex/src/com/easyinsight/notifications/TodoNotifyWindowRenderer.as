@@ -20,18 +20,21 @@ public class TodoNotifyWindowRenderer extends HBox {
     override public function set data(value:Object):void {
         this.todoInfo = value as TodoEventInfo;
         var str:String = todoInfo.getTitle();
-        if(str.length > 70)
-            titleLabel.text = str.substr(0, 67) + "...";
+        if(str.length > 48)
+            titleLabel.text = str.substr(0, 45) + "...";
         else
             titleLabel.text = str;
         titleLabel.toolTip = str;
         if(todoInfo.action == TodoEventInfo.ADD) {
-            button.setStyle("icon", administerIcon);
-            button.enabled = true;
+            titleLabel.setStyle("textDecoration", "underline");
+            titleLabel.addEventListener(MouseEvent.CLICK, onNavigateClick);
+            button.visible = false;
         }
         else if(todoInfo.action == TodoEventInfo.COMPLETE) {
+            titleLabel.setStyle("textDecoration", "none");
+            titleLabel.removeEventListener(MouseEvent.CLICK, onNavigateClick);
             button.setStyle("icon", checkboxIcon);
-            button.enabled = false;
+            button.visible = true;
         }
     }
 
@@ -40,14 +43,11 @@ public class TodoNotifyWindowRenderer extends HBox {
     private var button:Button;
     private var deleteButton:Button;
 
-    [Embed(source="../../../../assets/businessman_edit.png")]
-    private var administerIcon:Class;
-
     [Embed(source="../../../../assets/check_x16.png")]
     private var checkboxIcon:Class;
 
     [Embed(source="../../../../assets/navigate_cross.png")]
-    private var cancelIcon:Class
+    private var cancelIcon:Class;
 
     override protected function createChildren():void {
         super.createChildren();
@@ -63,12 +63,12 @@ public class TodoNotifyWindowRenderer extends HBox {
         titleLabel.percentWidth = 100;
         titleLabel.setStyle("fontSize", 11);
         button = new Button();
-        button.addEventListener(MouseEvent.CLICK, onNavigateClick);
+        button.visible = false;
         deleteButton = new Button();
         deleteButton.setStyle("icon", cancelIcon);
         deleteButton.addEventListener(MouseEvent.CLICK, onDelete);
         this.setStyle("verticalAlign", "middle");
-        this.percentWidth=100;
+        this.width = 300;
     }
 
     private function onDelete(event:MouseEvent):void {

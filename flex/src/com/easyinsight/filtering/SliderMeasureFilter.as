@@ -89,16 +89,18 @@ import flash.events.MouseEvent;
 			highInput = new TextInput();
 			highInput.editable = false;
 			addChild(highInput);
-			
-			var editButton:Button = new Button();
-			editButton.addEventListener(MouseEvent.CLICK, edit);
-			editButton.setStyle("icon", editIcon);
-			editButton.toolTip = "Edit";
-			addChild(editButton);
-			var deleteButton:Button = new Button();
-			deleteButton.addEventListener(MouseEvent.CLICK, deleteSelf);
-			deleteButton.setStyle("icon", deleteIcon);
-			deleteButton.toolTip = "Delete";
+
+            if (_filterEditable) {
+                var editButton:Button = new Button();
+                editButton.addEventListener(MouseEvent.CLICK, edit);
+                editButton.setStyle("icon", editIcon);
+                editButton.toolTip = "Edit";
+                addChild(editButton);
+                var deleteButton:Button = new Button();
+                deleteButton.addEventListener(MouseEvent.CLICK, deleteSelf);
+                deleteButton.setStyle("icon", deleteIcon);
+                deleteButton.toolTip = "Delete";
+            }
 			
 			addChild(deleteButton);
 			
@@ -123,6 +125,12 @@ import flash.events.MouseEvent;
 		public function set filterDefinition(filterDefinition:FilterDefinition):void {
 			this._filterDefinition = filterDefinition as FilterRangeDefinition;
 		}
+
+        private var _filterEditable:Boolean = true;
+
+        public function set filterEditable(editable:Boolean):void {
+            _filterEditable = editable;
+        }
 		
 		public function get filterDefinition():FilterDefinition {
 			return this._filterDefinition;

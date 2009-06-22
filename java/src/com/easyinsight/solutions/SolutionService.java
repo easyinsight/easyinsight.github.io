@@ -29,14 +29,8 @@ public class SolutionService {
     private FeedStorage feedStorage = new FeedStorage();
 
     public Solution retrieveSolution(long solutionID) {
-        long tier = SecurityUtil.getAccountTier();
         try {
-            Solution solution = getSolution(solutionID);
-            if (solution.getSolutionTier() > tier) {
-                return null;
-            } else {
-                return solution;
-            }
+            return getSolution(solutionID);
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);
@@ -67,7 +61,7 @@ public class SolutionService {
         EIConnection conn = Database.instance().getConnection();
         try {
             conn.setAutoCommit(false);
-            PreparedStatement insertSolutionStmt = conn.prepareStatement("INSERT INTO SOLUTION (NAME, DESCRIPTION, INDUSTRY, AUTHOR, COPY_DATA, goal_tree_id, SOLUTION_TIER) VALUES (?, ?, ?, ?, ?, ?, ?)",
+            PreparedStatement insertSolutionStmt = conn.prepareStatement("INSERT INTO SOLUTION (NAME, DESCRIPTION, INDUSTRY, AUTHOR, COPY_DATA, goal_tree_id, SOLUTION_TIER, CATEGORY) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
                     Statement.RETURN_GENERATED_KEYS);
             insertSolutionStmt.setString(1, solution.getName());
             insertSolutionStmt.setString(2, solution.getDescription());
@@ -80,6 +74,7 @@ public class SolutionService {
                 insertSolutionStmt.setLong(6, solution.getGoalTreeID());
             }
             insertSolutionStmt.setInt(7, solution.getSolutionTier());
+            insertSolutionStmt.setInt(8, solution.getCategory());
             insertSolutionStmt.execute();
             long solutionID = Database.instance().getAutoGenKey(insertSolutionStmt);
             PreparedStatement addRoleStmt = conn.prepareStatement("INSERT INTO USER_TO_SOLUTION (USER_ID, SOLUTION_ID, USER_ROLE) VALUES (?, ?, ?)");
@@ -109,7 +104,7 @@ public class SolutionService {
         EIConnection conn = Database.instance().getConnection();
         try {
             conn.setAutoCommit(false);
-            PreparedStatement updateSolutionStmt = conn.prepareStatement("UPDATE SOLUTION SET NAME = ?, DESCRIPTION = ?, INDUSTRY = ?, AUTHOR = ?, COPY_DATA = ?, GOAL_TREE_ID = ?, SOLUTION_TIER = ? WHERE SOLUTION_ID = ?",
+            PreparedStatement updateSolutionStmt = conn.prepareStatement("UPDATE SOLUTION SET NAME = ?, DESCRIPTION = ?, INDUSTRY = ?, AUTHOR = ?, COPY_DATA = ?, GOAL_TREE_ID = ?, SOLUTION_TIER = ?, CATEGORY = ? WHERE SOLUTION_ID = ?",
                     Statement.RETURN_GENERATED_KEYS);
             updateSolutionStmt.setString(1, solution.getName());
             updateSolutionStmt.setString(2, solution.getDescription());
@@ -122,7 +117,8 @@ public class SolutionService {
                 updateSolutionStmt.setLong(6, solution.getGoalTreeID());
             }
             updateSolutionStmt.setInt(7, solution.getSolutionTier());
-            updateSolutionStmt.setLong(8, solution.getSolutionID());
+            updateSolutionStmt.setInt(8, solution.getCategory());
+            updateSolutionStmt.setLong(9, solution.getSolutionID());
             updateSolutionStmt.executeUpdate();
             PreparedStatement deleteFeedsStmt = conn.prepareStatement("DELETE FROM SOLUTION_TO_FEED WHERE SOLUTION_ID = ?");
             deleteFeedsStmt.setLong(1, solution.getSolutionID());
@@ -223,8 +219,9 @@ public class SolutionService {
         Connection conn = Database.instance().getConnection();
         try {
             PreparedStatement queryStmt = conn.prepareStatement("SELECT DATA_FEED.DATA_FEED_ID, DATA_FEED.FEED_NAME FROM DATA_FEED, UPLOAD_POLICY_USERS WHERE " +
-                    "UPLOAD_POLICY_USERS.USER_ID = ? AND DATA_FEED.DATA_FEED_ID = UPLOAD_POLICY_USERS.FEED_ID");
+                    "UPLOAD_POLICY_USERS.USER_ID = ? AND DATA_FEED.DATA_FEED_ID = UPLOAD_POLICY_USERS.FEED_ID AND DATA_FEED.VISIBLE = ?");
             queryStmt.setLong(1, SecurityUtil.getUserID());
+            queryStmt.setBoolean(2, true);
             ResultSet rs = queryStmt.executeQuery();
             while (rs.next()) {
                 long feedID = rs.getLong(1);
@@ -342,8 +339,12 @@ public class SolutionService {
     }
 
     public Solution getSolution(long solutionID, Connection conn) throws SQLException {
-        PreparedStatement getSolutionsStmt = conn.prepareStatement("SELECT SOLUTION_ID, NAME, DESCRIPTION, INDUSTRY, AUTHOR, COPY_DATA, SOLUTION_ARCHIVE_NAME, goal_tree_id" +
-                " FROM SOLUTION WHERE SOLUTION_ID = ?");
+        int accountType = 0;
+        if (SecurityUtil.getUserID(false) > 0) {
+            accountType = SecurityUtil.getAccountTier();
+        }
+        PreparedStatement getSolutionsStmt = conn.prepareStatement("SELECT SOLUTION_ID, NAME, DESCRIPTION, INDUSTRY, AUTHOR, COPY_DATA, SOLUTION_ARCHIVE_NAME, goal_tree_id," +
+                "solution_image, screencast_directory, screencast_mp4_name, solution_tier FROM SOLUTION WHERE SOLUTION_ID = ?");
         getSolutionsStmt.setLong(1, solutionID);
         ResultSet rs = getSolutionsStmt.executeQuery();
         if (rs.next()) {
@@ -363,6 +364,11 @@ public class SolutionService {
             solution.setCopyData(copyData);
             solution.setSolutionArchiveName(solutionArchiveName);
             solution.setGoalTreeID(goalTreeID);
+            solution.setImage(rs.getBytes(9));
+            solution.setScreencastDirectory(rs.getString(10));
+            solution.setScreencastName(rs.getString(11));
+            solution.setSolutionTier(rs.getInt(12));
+            solution.setAccessible(solution.getSolutionTier() <= accountType);
             return solution;
         } else {
             throw new RuntimeException();
@@ -395,12 +401,16 @@ public class SolutionService {
     }
 
     public List<Solution> getSolutions() {
-        int accountType = SecurityUtil.getAccountTier();
+        int accountType = 0;
+        if (SecurityUtil.getUserID(false) > 0) {
+            accountType = SecurityUtil.getAccountTier();
+        }
         List<Solution> solutions = new ArrayList<Solution>();
         Connection conn = Database.instance().getConnection();
         try {
-            PreparedStatement getSolutionsStmt = conn.prepareStatement("SELECT SOLUTION_ID, NAME, DESCRIPTION, INDUSTRY, AUTHOR, COPY_DATA, SOLUTION_ARCHIVE_NAME, GOAL_TREE_ID, SOLUTION_TIER FROM SOLUTION WHERE SOLUTION_TIER <= ?");
-            getSolutionsStmt.setInt(1, accountType);
+            PreparedStatement getSolutionsStmt = conn.prepareStatement("SELECT SOLUTION_ID, NAME, DESCRIPTION, INDUSTRY, AUTHOR, COPY_DATA, SOLUTION_ARCHIVE_NAME, GOAL_TREE_ID, SOLUTION_TIER," +
+                    "solution_image, CATEGORY, screencast_directory, screencast_mp4_name FROM SOLUTION WHERE SOLUTION_TIER <= ?");
+            getSolutionsStmt.setInt(1, Account.ADMINISTRATOR);
             PreparedStatement dataSourceCountStmt = conn.prepareStatement("SELECT COUNT(*) FROM solution_to_feed WHERE solution_id = ?");
             PreparedStatement goalTreeCountStmt = conn.prepareStatement("SELECT COUNT(*) FROM solution_to_goal_tree WHERE solution_id = ?");
             ResultSet rs = getSolutionsStmt.executeQuery();
@@ -414,8 +424,10 @@ public class SolutionService {
                 String solutionArchiveName = rs.getString(7);
                 long goalTreeID = rs.getLong(8);
                 int solutionTier = rs.getInt(9);
+                byte[] solutionImage = rs.getBytes(10);
                 Solution solution = new Solution();
                 solution.setName(name);
+                solution.setAccessible(solutionTier <= accountType);
                 solution.setDescription(description);
                 solution.setSolutionID(solutionID);
                 solution.setIndustry(industry);
@@ -424,6 +436,10 @@ public class SolutionService {
                 solution.setSolutionArchiveName(solutionArchiveName);
                 solution.setGoalTreeID(goalTreeID);
                 solution.setSolutionTier(solutionTier);
+                solution.setImage(solutionImage);
+                solution.setCategory(rs.getInt(11));
+                solution.setScreencastDirectory(rs.getString(12));
+                solution.setScreencastName(rs.getString(13));
                 dataSourceCountStmt.setLong(1, solutionID);
                 ResultSet dataSourceRS = dataSourceCountStmt.executeQuery();
                 dataSourceRS.next();
@@ -433,6 +449,18 @@ public class SolutionService {
                 solution.setInstallable(dataSourceRS.getInt(1) > 0 || goalTreeRS.getInt(1) > 0);
                 solutions.add(solution);
             }
+            Collections.sort(solutions, new Comparator<Solution>() {
+
+                public int compare(Solution o1, Solution o2) {
+                    if (o1.isAccessible() && !o2.isAccessible()) {
+                        return -1;
+                    } else if (!o1.isAccessible() && o2.isAccessible()) {
+                        return 1;
+                    } else {
+                        return o1.getName().compareTo(o2.getName());
+                    }
+                }
+            });
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);
@@ -561,6 +589,22 @@ public class SolutionService {
             
         } catch (SQLException e) {
             LogClass.error(e);
+        } finally {
+            Database.instance().closeConnection(conn);
+        }
+    }
+
+    public void addSolutionImage(byte[] bytes, long solutionID) {
+        Connection conn = Database.instance().getConnection();
+        try {
+            PreparedStatement updateArchiveStmt = conn.prepareStatement("UPDATE SOLUTION SET SOLUTION_IMAGE = ? WHERE SOLUTION_ID = ?");
+            ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
+            updateArchiveStmt.setBinaryStream(1, bais, bytes.length);
+            updateArchiveStmt.setLong(2, solutionID);
+            updateArchiveStmt.executeUpdate();
+        } catch (Throwable e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
         } finally {
             Database.instance().closeConnection(conn);
         }

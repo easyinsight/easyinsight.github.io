@@ -7,6 +7,9 @@ package com.easyinsight.analysis
 		public var headers:Array;
 		public var rows:Array;
         public var definition:AnalysisDefinition;
+        public var dataSourceAccessible:Boolean;
+        public var lastDataTime:Date;
+        public var attribution:String;
 
 		public function EmbeddedDataResults()
 			{

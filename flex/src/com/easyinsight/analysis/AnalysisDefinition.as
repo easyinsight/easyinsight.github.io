@@ -47,6 +47,7 @@ package com.easyinsight.analysis
 		public var publiclyVisible:Boolean;
 		public var marketplaceVisible:Boolean;
         public var reportStateID:int;
+        public var authorName:String;
 		
 		public function AnalysisDefinition()
 		{

@@ -86,9 +86,9 @@
 			</mx:FormItem>
 			<mx:FormItem>
 				<mx:HBox>
-					<mx:Button label="Cancel" click="cancel()"/>
-					<mx:Button label="Next" click="createAccount()"/>						
-				</mx:HBox>	
+                    <mx:Button label="Next" click="createAccount()"/>
+					<mx:LinkButton label="Cancel" click="cancel()" textDecoration="underline"/>
+				</mx:HBox>
 			</mx:FormItem>
 			<mx:FormItem label="">
 				<mx:Text text="" id="failureMessageLabel"/>

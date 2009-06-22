@@ -6,11 +6,28 @@
         import com.easyinsight.listing.DataFeedDescriptor;
 			import mx.managers.PopUpManager;
 			import mx.collections.ArrayCollection;
-			
-			[Bindable]
+
+            private function updateImage():void {
+                var window:UpdateSolutionImageWindow = new UpdateSolutionImageWindow();
+                window.sourceID = _solution.solutionID;
+                PopUpManager.addPopUp(window, this, true);
+                PopUpManager.centerPopUp(window);
+            }
+
+            private function updateArchive():void {
+                var window:UpdateSolutionArchiveWindow = new UpdateSolutionArchiveWindow();
+                window.sourceID = _solution.solutionID;
+                PopUpManager.addPopUp(window, this, true);
+                PopUpManager.centerPopUp(window);
+            }
+
+            [Bindable]
 			private var includedFeeds:ArrayCollection = new ArrayCollection();
 			
 			private var _solution:Solution;
+
+            [Bindable]
+            private var solutionCategory:int;
 			
 			[Bindable]
 			private var nameText:String;
@@ -30,8 +47,16 @@
             private var solutionTier:int;
             [Bindable]
             private var archiveName:String;
+            [Bindable]
+            private var solutionImage:Bitmap;
 
-			public function set solution(solution:Solution):void {
+            private function onComplete(event:Event):void {
+                var loaderContent:LoaderInfo = event.currentTarget as LoaderInfo;
+                solutionImage = Bitmap(loaderContent.loader.content);
+                loaderContent.loader.removeEventListener(Event.COMPLETE, onComplete);
+            }
+
+            public function set solution(solution:Solution):void {
 				this._solution = solution;
 				nameText = this._solution.name;
 				descriptionText = this._solution.description;
@@ -39,10 +64,16 @@
                 industry = this._solution.industry;
                 includeData = this._solution.copyData;
                 solutionTier = this._solution.solutionTier - 1;
+                solutionCategory = this._solution.category - 1;
                 archiveName = _solution.solutionArchiveName;
 				if (solution.solutionID > 0) {
 					solutionService.getDescriptorsForSolution.send(solution.solutionID);
 				}
+                if (solution.image != null) {
+                    var loader:Loader = new Loader();
+                    loader.contentLoaderInfo.addEventListener(Event.COMPLETE, onComplete);
+                    loader.loadBytes(solution.image);
+                }
 			}
 			
 			private function save():void {
@@ -55,6 +86,7 @@
                 _solution.industry = industryInput.text;
                 _solution.copyData = includeDataCheckbox.selected;
                 _solution.solutionTier = accountTierBox.selectedIndex + 1;
+                _solution.category = solutionCategoryBox.selectedIndex + 1;
                 if (goalTreeComboBox.selectedIndex > 0) {
                     _solution.goalTreeID = goalTreeComboBox.selectedItem.id;
                 }
@@ -128,8 +160,9 @@
             <mx:FormItem label="Industry: ">
                 <mx:TextInput id="industryInput" text="{industry}"/>
             </mx:FormItem>
-            <mx:FormItem label="Archive Name: ">
+            <mx:FormItem label="Archive Name: " direction="horizontal">
                 <mx:Label text="{archiveName}"/>
+                <mx:Button label="Update Archive" click="updateArchive()"/>
             </mx:FormItem>
             <mx:FormItem label="Author: ">
                 <mx:TextInput id="authorInput" text="{author}"/>
@@ -149,11 +182,28 @@
                     </mx:dataProvider>
                 </mx:ComboBox>
             </mx:FormItem>
+            <mx:FormItem label="Solution Category: ">
+                <mx:ComboBox id="solutionCategoryBox" selectedIndex="{solutionCategory}">
+                    <mx:dataProvider>
+                        <mx:ArrayCollection>
+                            <mx:Array>
+                                <mx:String>SaaS</mx:String>
+                                <mx:String>Client</mx:String>
+                                <mx:String>Learning</mx:String>
+                            </mx:Array>
+                        </mx:ArrayCollection>
+                    </mx:dataProvider>
+                </mx:ComboBox>
+            </mx:FormItem>
             <mx:FormItem label="Include Data Source Data: ">
                 <mx:CheckBox id="includeDataCheckbox" selected="{includeData}"/>
             </mx:FormItem>
             <mx:FormItem label="Associate Goal Tree: ">
                 <mx:ComboBox id="goalTreeComboBox" dataProvider="{goalTrees}" labelField="name"/>
+            </mx:FormItem>
+            <mx:FormItem label="Image: " direction="vertical">
+                <mx:Button label="Update Image" click="updateImage()"/>
+                <mx:Image source="{solutionImage}"/>
             </mx:FormItem>
             <mx:FormItem label="Data Sources: ">
                 <mx:VBox>

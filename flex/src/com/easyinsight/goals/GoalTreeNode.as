@@ -74,9 +74,8 @@ import com.easyinsight.analysis.AnalysisMeasure;
             clonedNode.name = this.name;
             clonedNode.description = this.description;
             clonedNode.iconImage = this.iconImage;
-            for each (var goalFeed:GoalFeed in clonedNode.associatedFeeds) {
-                
-            }
+            clonedNode.associatedFeeds = new ArrayCollection(associatedFeeds.toArray());
+            clonedNode.associatedInsights = new ArrayCollection(associatedInsights.toArray());
             var newChildren:ArrayCollection = new ArrayCollection();
             for each (var childNode:GoalTreeNode in children) {
                 var clonedChild:GoalTreeNode = childNode.clone();

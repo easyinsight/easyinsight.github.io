@@ -70,21 +70,23 @@ import flash.events.MouseEvent;
 				labelText.text = _filterDefinition.field.display;							
 			}
 			addChild(labelText);
-			if (editButton == null) {
-				editButton = new Button();
-				editButton.addEventListener(MouseEvent.CLICK, edit);
-				editButton.setStyle("icon", editIcon);
-				editButton.toolTip = "Edit";
-			}
-			addChild(editButton);
-			if (deleteButton == null) {
-				deleteButton = new Button();
-				deleteButton.addEventListener(MouseEvent.CLICK, deleteSelf);
-				deleteButton.setStyle("icon", deleteIcon);
-				deleteButton.toolTip = "Delete";
-				deleteButton.enabled = false;
-			}
-			addChild(deleteButton);
+            if (_filterEditable) {
+                if (editButton == null) {
+                    editButton = new Button();
+                    editButton.addEventListener(MouseEvent.CLICK, edit);
+                    editButton.setStyle("icon", editIcon);
+                    editButton.toolTip = "Edit";
+                }
+                addChild(editButton);
+                if (deleteButton == null) {
+                    deleteButton = new Button();
+                    deleteButton.addEventListener(MouseEvent.CLICK, deleteSelf);
+                    deleteButton.setStyle("icon", deleteIcon);
+                    deleteButton.toolTip = "Delete";
+                    deleteButton.enabled = false;
+                }
+                addChild(deleteButton);
+            }
 		}
 		
 		override protected function commitProperties():void {
@@ -118,7 +120,9 @@ import flash.events.MouseEvent;
 			comboBox.selectedItem = selectedValue;
 			comboBox.enabled = true;
 			deleteButton.enabled = true;*/
-			deleteButton.enabled = true;
+            if (deleteButton != null) {
+			    deleteButton.enabled = true;
+            }
 			dispatchEvent(new FilterUpdatedEvent(FilterUpdatedEvent.FILTER_ADDED, filterDefinition, null, this));
 		}
 		
@@ -155,6 +159,12 @@ import flash.events.MouseEvent;
 		public function get filterDefinition():FilterDefinition {
 			return _filterDefinition;
 		}
+
+        private var _filterEditable:Boolean = true;
+
+        public function set filterEditable(editable:Boolean):void {
+            _filterEditable = editable;
+        }
 		
 		public function set filterDefinition(filterDefinition:FilterDefinition):void {
 			_filterDefinition = filterDefinition as FilterValueDefinition; 	

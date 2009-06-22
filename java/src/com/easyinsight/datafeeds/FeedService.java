@@ -5,6 +5,7 @@ import com.easyinsight.userupload.UploadPolicy;
 import com.easyinsight.userupload.UserUploadInternalService;
 import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.database.Database;
+import com.easyinsight.database.EIConnection;
 import com.easyinsight.storage.DataStorage;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.security.*;
@@ -324,7 +325,9 @@ public class FeedService implements IDataFeedService {
 
     public CompositeFeedDefinition createCompositeFeed(List<CompositeFeedNode> compositeFeedNodes, List<CompositeFeedConnection> edges, String feedName) {
         long userID = SecurityUtil.getUserID();
+        final EIConnection conn = Database.instance().getConnection();
         try {
+            conn.setAutoCommit(false);
             CompositeFeedDefinition feedDef = new CompositeFeedDefinition();
             feedDef.setFeedName(feedName);
             feedDef.setCompositeFeedNodes(compositeFeedNodes);
@@ -335,25 +338,22 @@ public class FeedService implements IDataFeedService {
 
                 protected void accept(CompositeFeedNode compositeFeedNode) throws SQLException {
                     SecurityUtil.authorizeFeed(compositeFeedNode.getDataFeedID(), Roles.SUBSCRIBER);
-                    FeedDefinition feedDefinition = feedStorage.getFeedDefinitionData(compositeFeedNode.getDataFeedID());
+                    FeedDefinition feedDefinition = feedStorage.getFeedDefinitionData(compositeFeedNode.getDataFeedID(), conn);
                     containedInfo.feedItems.addAll(feedDefinition.getFields());
                 }
             }.visit(feedDef);
-            feedDef.populateFields();
-            long feedID = feedStorage.addFeedDefinitionData(feedDef);
-            AnalysisDefinition baseDefinition = new AnalysisDefinition();
-            baseDefinition.setDataFeedID(feedID);
-            baseDefinition.setRootDefinition(true);
-            baseDefinition.setUserBindings(Arrays.asList(new UserToAnalysisBinding(SecurityUtil.getUserID(), UserPermission.OWNER)));
-            baseDefinition.setAnalysisDefinitionState(new ListDefinitionState());
-            new AnalysisStorage().saveAnalysis(baseDefinition);
-            feedDef.setAnalysisDefinitionID(baseDefinition.getAnalysisID());
-            feedStorage.updateDataFeedConfiguration(feedDef);
-            new UserUploadInternalService().createUserFeedLink(userID, feedID, Roles.OWNER);
+            feedDef.populateFields(conn);
+            long feedID = feedStorage.addFeedDefinitionData(feedDef, conn);
+            new UserUploadInternalService().createUserFeedLink(userID, feedID, Roles.OWNER, conn);
+            conn.commit();
             return feedDef;
         } catch (Exception e) {
             LogClass.error(e);
+            conn.rollback();
             throw new RuntimeException(e);
+        } finally {
+            conn.setAutoCommit(true);
+            Database.closeConnection(conn);
         }
     }
 

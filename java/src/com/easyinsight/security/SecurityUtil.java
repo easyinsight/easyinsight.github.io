@@ -36,6 +36,10 @@ public class SecurityUtil {
         return getSecurityProvider().getUserPrincipal().isAccountAdmin();
     }
 
+    public static String getUserName() {
+        return getSecurityProvider().getUserPrincipal().getUserName();
+    }
+
     public static void authorizeAccountAdmin() {
         if (!isAccountAdmin()) {
             throw new SecurityException();
@@ -185,7 +189,7 @@ public class SecurityUtil {
         }
     }
 
-    private static int getInsightRole(long userID, long insightID) {
+    public static int getInsightRole(long userID, long insightID) {
         Connection conn = Database.instance().getConnection();
         try {
             PreparedStatement existingLinkQuery = conn.prepareStatement("SELECT RELATIONSHIP_TYPE FROM USER_TO_ANALYSIS WHERE " +

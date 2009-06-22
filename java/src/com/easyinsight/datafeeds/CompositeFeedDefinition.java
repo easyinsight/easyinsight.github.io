@@ -6,6 +6,8 @@ import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.database.Database;
 import com.easyinsight.security.SecurityUtil;
+import com.easyinsight.security.Roles;
+import com.easyinsight.userupload.UserUploadInternalService;
 
 import java.sql.*;
 import java.util.*;
@@ -101,12 +103,13 @@ public class CompositeFeedDefinition extends FeedDefinition {
         return (Key) results.get(0);
     }
 
-    public void populateFields() {
+    public void populateFields(Connection conn) {
         // get fields from the composite feed nodes...
         try {
-            AnalysisItemVisitor analysisItemVisitor = new AnalysisItemVisitor();
+            AnalysisItemVisitor analysisItemVisitor = new AnalysisItemVisitor(conn);
             analysisItemVisitor.visit(this);
             Map<String, AnalysisItem> keyMap = new HashMap<String, AnalysisItem>();
+
             Map<String, List<AnalysisItem>> duplicateNameMap = new HashMap<String, List<AnalysisItem>>();
             for (AnalysisItem analysisItem : analysisItemVisitor.derivedKeys) {
                 String displayName = analysisItem.getDisplayName() != null ? analysisItem.getDisplayName() : analysisItem.getKey().toKeyString();
@@ -118,6 +121,7 @@ public class CompositeFeedDefinition extends FeedDefinition {
                     if (analysisItems == null) {
                         analysisItems = new ArrayList<AnalysisItem>();
                         duplicateNameMap.put(displayName, analysisItems);
+                        analysisItems.add(existing);
                     }
                     analysisItems.add(analysisItem);
                 }
@@ -126,11 +130,12 @@ public class CompositeFeedDefinition extends FeedDefinition {
                 keyMap.remove(entry.getKey());
                 for (AnalysisItem analysisItem : entry.getValue()) {
                     DerivedKey derivedKey = (DerivedKey) analysisItem.getKey();
-                    String name = getCompositeFeedName(derivedKey.getFeedID());
+                    String name = getCompositeFeedName(derivedKey.getFeedID(), conn);
                     analysisItem.setDisplayName(name + " - " + entry.getKey());
                     keyMap.put(name, analysisItem);
                 }
             }
+
             setFields(new ArrayList<AnalysisItem>(keyMap.values()));
         } catch (SQLException e) {
             LogClass.error(e);
@@ -138,8 +143,7 @@ public class CompositeFeedDefinition extends FeedDefinition {
         }
     }
 
-    private String getCompositeFeedName(long feedID) {
-        Connection conn = Database.instance().getConnection();
+    private String getCompositeFeedName(long feedID, Connection conn) {
         try {
             PreparedStatement nameStmt = conn.prepareStatement("SELECT FEED_NAME FROM DATA_FEED WHERE DATA_FEED_ID = ?");
             nameStmt.setLong(1, feedID);
@@ -149,17 +153,21 @@ public class CompositeFeedDefinition extends FeedDefinition {
         } catch (SQLException e) {
             LogClass.error(e);
             throw new RuntimeException(e);
-        } finally {
-            Database.instance().closeConnection(conn);
         }
     }
 
     private class AnalysisItemVisitor extends CompositeFeedNodeVisitor {
 
         private List<AnalysisItem> derivedKeys = new ArrayList<AnalysisItem>();
+        Map<Long, AnalysisItem> replacementMap = new HashMap<Long, AnalysisItem>();
+        private Connection conn;
+
+        private AnalysisItemVisitor(Connection conn) {
+            this.conn = conn;
+        }
 
         protected void accept(CompositeFeedNode compositeFeedNode) throws SQLException {
-            List<AnalysisItem> analysisItemList = retrieveFields(compositeFeedNode.getDataFeedID());
+            List<AnalysisItem> analysisItemList = retrieveFields(compositeFeedNode.getDataFeedID(), conn);
             for (AnalysisItem analysisItem : analysisItemList) {
                 AnalysisItem clonedItem;
                 try {
@@ -173,18 +181,17 @@ public class CompositeFeedDefinition extends FeedDefinition {
                 derivedKey.setParentKey(key);
                 clonedItem.setKey(derivedKey);
                 clonedItem.setAnalysisItemID(0);
-                derivedKeys.add(clonedItem);                
+                derivedKeys.add(clonedItem);
+                replacementMap.put(analysisItem.getAnalysisItemID(), clonedItem);
+            }
+            for (Map.Entry<Long, AnalysisItem> replEntry : replacementMap.entrySet()) {
+                replEntry.getValue().updateIDs(replacementMap);
             }
         }
     }
 
-    private List<AnalysisItem> retrieveFields(long feedID) throws SQLException {
-        Connection conn = Database.instance().getConnection();
-        try {
-            return new FeedStorage().retrieveFields(feedID, conn);
-        } finally {
-            Database.instance().closeConnection(conn);
-        }
+    private List<AnalysisItem> retrieveFields(long feedID, Connection conn) throws SQLException {
+        return new FeedStorage().retrieveFields(feedID, conn);
     }
 
     @Override
@@ -193,17 +200,45 @@ public class CompositeFeedDefinition extends FeedDefinition {
         List<CompositeFeedNode> children = feedDefinition.getCompositeFeedNodes();
         Map<Long, FeedDefinition> replacementMap = new HashMap<Long, FeedDefinition>();
         for (CompositeFeedNode child : children) {
-            FeedDefinition childDefinition = new FeedStorage().getFeedDefinitionData(child.getDataFeedID());
+            FeedDefinition childDefinition = new FeedStorage().getFeedDefinitionData(child.getDataFeedID(), conn);
             FeedDefinition clonedDefinition = DataSourceCopyUtils.cloneFeed(SecurityUtil.getUserID(), conn, childDefinition);
+            DataSourceCopyUtils.buildClonedDataStores(false, feedDefinition, clonedDefinition, conn);
+            new UserUploadInternalService().createUserFeedLink(SecurityUtil.getUserID(), clonedDefinition.getDataFeedID(), Roles.OWNER, conn);
             replacementMap.put(child.getDataFeedID(), clonedDefinition);
             child.setDataFeedID(clonedDefinition.getDataFeedID());
         }
         for (CompositeFeedConnection connection : feedDefinition.getConnections()) {
-            connection.setSourceFeedID(replacementMap.get(connection.getSourceFeedID()).getDataFeedID());
-            connection.setTargetFeedID(replacementMap.get(connection.getTargetFeedID()).getDataFeedID());
             connection.setSourceJoin(replacementMap.get(connection.getSourceFeedID()).getField(connection.getSourceJoin().toKeyString()));
             connection.setTargetJoin(replacementMap.get(connection.getTargetFeedID()).getField(connection.getTargetJoin().toKeyString()));
+            connection.setSourceFeedID(replacementMap.get(connection.getSourceFeedID()).getDataFeedID());
+            connection.setTargetFeedID(replacementMap.get(connection.getTargetFeedID()).getDataFeedID());
         }
+        feedDefinition.populateFields(conn);
         return feedDefinition;
+    }
+
+    public void postClone(Connection conn) throws SQLException {
+        FeedStorage feedStorage = new FeedStorage();
+        for (CompositeFeedNode child : getCompositeFeedNodes()) {
+            FeedDefinition feedDefinition = feedStorage.getFeedDefinitionData(child.getDataFeedID(), conn);
+            feedDefinition.setParentSourceID(getDataFeedID());
+            feedStorage.updateDataFeedConfiguration(feedDefinition, conn);
+        }
+    }
+
+    @Override
+    public void delete(Connection conn) throws SQLException {
+        super.delete(conn);
+        for (CompositeFeedNode node : getCompositeFeedNodes()) {
+            FeedDefinition feedDefinition = new FeedStorage().getFeedDefinitionData(node.getDataFeedID(), conn);
+            if (feedDefinition != null && !feedDefinition.isVisible()) {
+                feedDefinition.delete(conn);
+            }
+        }
+    }
+
+    @Override
+    protected void onDelete(Connection conn) throws SQLException {
+
     }
 }

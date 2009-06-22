@@ -13,6 +13,9 @@ import com.easyinsight.pipeline.Pipeline;
 import com.easyinsight.pipeline.StandardReportPipeline;
 
 import java.util.*;
+import java.io.Serializable;
+
+import org.apache.jcs.JCS;
 
 
 /**
@@ -23,7 +26,18 @@ import java.util.*;
 
 public class DataService {
 
+    private JCS reportCache = getCache("embeddedReports");
+
     private FeedRegistry feedRegistry = FeedRegistry.instance();
+
+    private JCS getCache(String cacheName) {
+        try {
+            return JCS.getInstance(cacheName);
+        } catch (Exception e) {
+            LogClass.error(e);
+        }
+        return null;
+    }
 
     public AnalysisItemResultMetadata getAnalysisItemMetadata(long feedID, AnalysisItem analysisItem, List<CredentialFulfillment> credentials) {
         try {
@@ -101,11 +115,71 @@ public class DataService {
         return invalidIDs;
     }
 
-    public EmbeddedDataResults getEmbeddedResults(long reportID) {
+    private static class EmbeddedCacheKey implements Serializable {
+        private Collection<FilterDefinition> filters;
+        private long reportID;
+
+        private EmbeddedCacheKey(Collection<FilterDefinition> filters, long reportID) {
+            this.filters = filters;
+            this.reportID = reportID;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+
+            EmbeddedCacheKey that = (EmbeddedCacheKey) o;
+
+            return reportID == that.reportID && !(filters != null ? !filters.equals(that.filters) : that.filters != null);
+
+        }
+
+        @Override
+        public int hashCode() {
+            int result = filters != null ? filters.hashCode() : 0;
+            result = 31 * result + (int) (reportID ^ (reportID >>> 32));
+            return result;
+        }
+    }
+
+    public EmbeddedDataResults getEmbeddedResults(long reportID, long dataSourceID, List<FilterDefinition> customFilters) {
         SecurityUtil.authorizeInsight(reportID);
         try {
-            // TODO: check cache for report ID
+            EmbeddedCacheKey key = new EmbeddedCacheKey(customFilters, reportID);
+            Map<EmbeddedCacheKey, EmbeddedDataResults> resultsCache = null;
+            if (reportCache != null) {
+                //noinspection unchecked
+                resultsCache = (Map<EmbeddedCacheKey, EmbeddedDataResults>) reportCache.get(dataSourceID);
+                if (resultsCache != null) {
+                    EmbeddedDataResults results = resultsCache.get(key);
+                    if (results != null) {
+                        results = new EmbeddedDataResults(results);
+                        boolean dataSourceAccessible;
+                        try {
+                            SecurityUtil.authorizeFeedAccess(results.getDefinition().getDataFeedID());
+                            dataSourceAccessible = true;
+                        } catch (Exception e) {
+                            dataSourceAccessible = false;
+                        }
+                        results.setDataSourceAccessible(dataSourceAccessible);
+                        return results;
+                    }
+                } else {
+                    resultsCache = new HashMap<EmbeddedCacheKey, EmbeddedDataResults>();
+                }
+            }
             WSAnalysisDefinition analysisDefinition = new AnalysisService().openAnalysisDefinition(reportID);
+            boolean dataSourceAccessible;
+            try {
+                SecurityUtil.authorizeFeedAccess(analysisDefinition.getDataFeedID());
+                dataSourceAccessible = true;
+            } catch (Exception e) {
+                dataSourceAccessible = false;
+            }
+            if (customFilters != null) {
+                analysisDefinition.setFilterDefinitions(customFilters);
+            }
             long startTime = System.currentTimeMillis();
             EmbeddedDataResults results;
             Feed feed = feedRegistry.getFeed(analysisDefinition.getDataFeedID());
@@ -121,9 +195,16 @@ public class DataService {
                 pipeline.setup(analysisDefinition, feed, insightRequestMetadata);
                 ListDataResults listDataResults = pipeline.toList(dataSet);
                 results = new EmbeddedDataResults();
+                results.setDataSourceAccessible(dataSourceAccessible);
                 results.setDefinition(analysisDefinition);
                 results.setHeaders(listDataResults.getHeaders());
                 results.setRows(listDataResults.getRows());
+                results.setLastDataTime(dataSet.getLastTime());
+                results.setAttribution(feed.getAttribution());
+                if (resultsCache != null) {
+                    resultsCache.put(key, results);                    
+                    reportCache.put(dataSourceID, resultsCache);
+                }
             }
             BenchmarkManager.recordBenchmark("DataService:List", System.currentTimeMillis() - startTime);
             return results;

@@ -1,0 +1,239 @@
+<?xml version="1.0" ?>
+<mx:Box xmlns:mx="http://www.adobe.com/2006/mxml"
+        creationComplete="addEventListener(KeyboardEvent.KEY_UP, keyedSignon); focusManager.setFocus(userName)"
+         backgroundImage="{background2}" backgroundSize="100%">
+    <mx:Metadata>
+        [Event(name="loginEvent2", type="com.easyinsight.framework.LoginEvent")]
+        [Event(name="loginClose", type="flash.events.Event")]
+    </mx:Metadata>
+    <mx:states>
+        <mx:State name="ResetPassword">
+            <mx:RemoveChild target="{loginForm}"/>
+            <mx:AddChild relativeTo="{coreBox}">
+                <mx:Form>
+                    <mx:FormItem label="Email Address:" direction="horizontal">
+                        <mx:TextInput id="emailAddressInput"/>
+                        <mx:Label text="{emailFailure}" visible="{emailFailure != null}"/>
+                    </mx:FormItem>
+                    <mx:FormItem label="">
+                        <mx:Button label="Reset Password" click="resetPassword()"/>
+                    </mx:FormItem>
+                    <mx:FormItem label="">
+                        <mx:Button label="Back to Login" click="currentState=''"/>
+                        <mx:Button label="Cancel" click="cancel()" visible="{_cancelVisible}"/>
+                    </mx:FormItem>
+                </mx:Form>
+            </mx:AddChild>
+        </mx:State>
+        <mx:State name="RemindUserName">
+            <mx:RemoveChild target="{loginForm}"/>
+            <mx:AddChild relativeTo="{coreBox}">
+                <mx:Form>
+                    <mx:FormItem label="Email Address:" direction="horizontal">
+                        <mx:TextInput id="userEmailAddressInput"/>
+                        <mx:Label text="{emailFailure}" visible="{emailFailure != null}"/>
+                    </mx:FormItem>
+                    <mx:FormItem label="">
+                        <mx:Button label="Send User Name to Email" click="remindUserName()"/>
+                    </mx:FormItem>
+                    <mx:FormItem label="">
+                        <mx:Button label="Back to Login" click="currentState=''"/>
+                        <mx:Button label="Cancel" click="cancel()" visible="{_cancelVisible}"/>
+                    </mx:FormItem>
+                </mx:Form>
+            </mx:AddChild>
+        </mx:State>
+        <mx:State name="PasswordReset">
+            <mx:AddChild relativeTo="{activationBox}">
+                <mx:Label text="A new temporary password has been sent to your email address."/>
+            </mx:AddChild>
+        </mx:State>
+        <mx:State name="UserNameReminded">
+            <mx:AddChild relativeTo="{activationBox}">
+                <mx:Label text="Your user name has been sent to your email address."/>
+            </mx:AddChild>
+        </mx:State>
+        <mx:State name="AdditionalInfo">
+            <mx:AddChild relativeTo="{activationBox}">
+                <mx:Label text="{_additionalInfo}"/>
+            </mx:AddChild>
+        </mx:State>
+        <mx:State name="Activated">
+            <mx:RemoveChild target="{noAccount}"/>
+            <mx:AddChild relativeTo="{activationBox}">
+                <mx:Label text="Your account has been activated! You can now log in: "/>
+            </mx:AddChild>
+        </mx:State>
+    </mx:states>
+    <mx:Script>
+		<![CDATA[
+			import mx.rpc.AsyncResponder;
+        import mx.rpc.events.FaultEvent;
+        import mx.rpc.events.ResultEvent;
+        import mx.rpc.AsyncToken;
+        import mx.messaging.config.ServerConfig;
+
+        [Bindable]
+        private var _additionalInfo:String;
+
+        [Bindable]
+        private var _cancelVisible:Boolean;
+
+        private var _showActivation:Boolean;
+
+            [Bindable]
+        private var resetResult:String;
+
+            [Bindable]
+            private var emailFailure:String;
+
+        public function set additionalInfo(value:String):void {
+            _additionalInfo = value;
+        }
+
+            private function toBaseState():void {
+                if (_additionalInfo == null) {
+                    currentState = "";
+                } else {
+                    currentState = "AdditionalInfo";
+                }
+            }
+
+        [Bindable]
+        [Embed(source="../../../../assets/background2.JPG")]
+        private var background2:Class;
+
+        public function set cancelVisible(value:Boolean):void {
+            _cancelVisible = value;
+        }
+
+        public function set showActivation(val:Boolean):void {
+            _showActivation = val;
+        }
+
+        private function resetPassword():void {
+            authService.remindPassword.send(emailAddressInput.text);
+        }
+
+        private function remindUserName():void {
+            authService.remindUserName.send(userEmailAddressInput.text);
+        }
+
+        private function reset():void {
+            var result:Boolean = authService.remindPassword.lastResult as Boolean;
+            if (result) {
+                currentState = "PasswordReset";
+            } else {
+                emailFailure = "No such email address was found in Easy Insight.";
+            }
+        }
+
+        private function remindedUserName():void {
+            var result:Boolean = authService.remindUserName.lastResult as Boolean;
+            if (result) {
+                currentState = "UserNameReminded";
+            } else {
+                emailFailure = "No such email address was found in Easy Insight.";
+            }
+        }
+
+
+        override protected function createChildren():void {
+            super.createChildren();
+            if (_showActivation) {
+                currentState = "Activated";
+            }
+        }
+
+        private function handleAuthentication():void {
+
+            var authResult:UserServiceResponse = authService.authenticate.lastResult as UserServiceResponse;
+            var successful:Boolean = authResult.successful;
+            if (successful) {
+                User.initializeUser(authResult.name, authResult.email,
+                        authResult.accountType, authResult.spaceAllowed, authResult.accountAdmin,
+                        authResult.dataSourceCreator, authResult.insightCreator, authResult.userID);
+                User.getInstance().password = authResult.encryptedPassword;
+                User.getInstance().userName = authResult.userName;
+                dispatchEvent(new LoginEvent(LoginEvent.LOGIN));
+                User.getEventNotifier().dispatchEvent(new LoginEvent(LoginEvent.LOGIN));
+            } else {
+                failureMessageLabel.text = authResult.failureMessage;
+            }
+        }
+
+        private function signon():void {
+            if (authService.channelSet == null) {
+                authService.channelSet = ServerConfig.getChannelSet(authService.destination);
+            }
+            var token:AsyncToken = authService.channelSet.login(userName.text, password.text);
+            token.addResponder(new AsyncResponder(
+                    function (event:ResultEvent, token:Object = null):void {
+                        switch (event.result) {
+                            case "success":
+                                authService.authenticate.send(userName.text, password.text);
+                                break;
+                            default:
+                                trace(event.result);
+                        }
+                    },
+                    function (event:FaultEvent, token:Object = null):void {
+                        switch (event.fault.faultCode) {
+                            case "Client.Authentication":
+                            default:
+                                var failureMessage:String = event.fault.faultString;
+                                failureMessageLabel.text = failureMessage;
+                        }
+                    }
+                    ));
+
+        }
+
+        private function cancel():void {
+            dispatchEvent(new Event("loginClose"));
+        }
+
+        private function keyedSignon(event:KeyboardEvent):void {
+            if (event.keyCode == Keyboard.ENTER) {
+                signon();
+            }
+        }
+
+        private function createNewAccount():void {
+            User.getEventNotifier().dispatchEvent(new NavigationEvent(NavigationEvent.ACCOUNTS));
+            dispatchEvent(new Event("loginClose"));
+        }
+                ]]>
+	</mx:Script>
+    <mx:VBox id="coreBox">
+        <mx:Box id="activationBox"/>
+        <mx:Form id="loginForm">
+            <mx:FormItem label="User Name:" direction="horizontal">
+                <mx:TextInput id="userName"/>
+                <mx:LinkButton fontSize="10" textDecoration="underline" label="Forgot your User Name?"
+                               click="currentState='RemindUserName'"/>
+            </mx:FormItem>
+            <mx:FormItem label="Password:" direction="horizontal">
+                <mx:TextInput id="password" displayAsPassword="true"/>
+                <mx:LinkButton fontSize="10" textDecoration="underline" label="Forgot your Password?"
+                               click="currentState='ResetPassword'"/>
+            </mx:FormItem>
+            <mx:FormItem direction="horizontal">
+                <mx:Button label="Sign In" click="signon()"/>
+                <mx:Button label="Cancel" click="cancel()" visible="{_cancelVisible}"/>
+            </mx:FormItem>
+            <mx:FormItem label="">
+                <mx:Spacer height="25"/>
+            </mx:FormItem>
+            <mx:FormItem label="Don't have an account yet?" id="noAccount">
+                <mx:Button label="Create Account" click="createNewAccount()"/>
+            </mx:FormItem>
+        </mx:Form>
+        <mx:Text text="" id="failureMessageLabel"/>
+    </mx:VBox>
+    <mx:RemoteObject id="authService" destination="login">
+        <mx:method name="authenticate" result="handleAuthentication()"/>
+        <mx:method name="remindPassword" result="reset()"/>
+        <mx:method name="remindUserName" result="remindedUserName()"/>
+    </mx:RemoteObject>
+</mx:Box>

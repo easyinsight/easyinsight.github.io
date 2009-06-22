@@ -31,6 +31,15 @@ import flex.messaging.FlexContext;
  */
 public class UserService implements IUserService {
 
+    public void salesRequest(String userName, String email, String company, String additionalInfo) {
+        try {
+            new AccountMemberInvitation().salesNotification(userName, email, company, additionalInfo);
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        }
+    }
+
     public AccountAPISettings regenerateSecretKey() {
         long userID = SecurityUtil.getUserID();
         Session session = Database.instance().createSession();
@@ -54,20 +63,20 @@ public class UserService implements IUserService {
         }
     }
 
-    public String remindPassword(String emailAddress) {
-        String message;
+    public boolean remindPassword(String emailAddress) {
+        boolean success;
         Session session = Database.instance().createSession();
         try {
             session.getTransaction().begin();
             List results = session.createQuery("from User where email = ?").setString(0, emailAddress).list();
             if (results.size() == 0) {
-                message = "No user was found by that email address.";
+                success = false;
             } else {
                 User user = (User) results.get(0);
                 String password = RandomTextGenerator.generateText(12);
                 user.setPassword(password);
-                new AccountMemberInvitation().resetPassword(emailAddress, user.getUserName(), user.getPassword());
-                message = "Your password has been emailed to your address.";
+                new AccountMemberInvitation().resetPassword(emailAddress, user.getPassword());
+                success = true;
             }
             session.getTransaction().commit();
         } catch (Exception e) {
@@ -77,7 +86,31 @@ public class UserService implements IUserService {
         } finally {
             session.close();
         }
-        return message;
+        return success;
+    }
+
+    public boolean remindUserName(String emailAddress) {
+        boolean success;
+        Session session = Database.instance().createSession();
+        try {
+            session.getTransaction().begin();
+            List results = session.createQuery("from User where email = ?").setString(0, emailAddress).list();
+            if (results.size() == 0) {
+                success = false;
+            } else {
+                User user = (User) results.get(0);
+                new AccountMemberInvitation().remindUserName(emailAddress, user.getUserName());
+                success = true;
+            }
+            session.getTransaction().commit();
+        } catch (Exception e) {
+            LogClass.error(e);
+            session.getTransaction().rollback();
+            throw new RuntimeException(e);
+        } finally {
+            session.close();
+        }
+        return success;
     }
 
 

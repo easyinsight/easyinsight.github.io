@@ -4,7 +4,6 @@
          width="100%" borderStyle="none" xmlns:easyinsight="com.easyinsight.*" horizontalGap="25" verticalAlign="middle" backgroundColor="0xF0F0F0"
         creationComplete="setup()">
     <mx:Metadata>
-        [Event(name="keywordSearch", type="com.easyinsight.listing.KeywordSearchEvent")]
         [Event(name="triggerAnalyze", type="com.easyinsight.listing.TriggerAnalyzeEvent")]
         [Event(name="listingChange", type="com.easyinsight.listing.ListingChangeEvent")]
         [Event(name="launchQuickSearch", type="com.easyinsight.listing.LaunchQuickSearchEvent")]
@@ -14,7 +13,7 @@
         import com.easyinsight.framework.LoginEvent;
         import com.easyinsight.framework.User;
         import com.easyinsight.goals.MyGoals;
-        import com.easyinsight.solutions.SolutionsSummary;
+        import com.easyinsight.solutions.RevisedSolutionSummary;
         import com.easyinsight.groups.GroupsSummary;
         import com.easyinsight.account.AccountBasePage;
         import com.easyinsight.customupload.api.APIPage;
@@ -117,7 +116,7 @@
         <mx:Image source="{groupsIcon}" id="groupsImage"/>
         <mx:Label text="Groups" fontSize="12" fontFamily="Tahoma" fontWeight="bold" color="0x323232"/>
     </listing:ListingOption>
-    <listing:ListingOption perspective="{new SolutionsSummary()}" enableAnalysis="false" displayName="Solutions" listingChange="onListingChange(event)">
+    <listing:ListingOption perspective="{new RevisedSolutionSummary()}" enableAnalysis="false" displayName="Solutions" listingChange="onListingChange(event)">
         <mx:Image source="{solutionsIcon}" id="solutionsImage"/>
         <mx:Label text="Solutions" fontSize="12" fontFamily="Tahoma" fontWeight="bold" color="0x323232"/>
     </listing:ListingOption>

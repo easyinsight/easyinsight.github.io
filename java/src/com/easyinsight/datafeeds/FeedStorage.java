@@ -20,10 +20,12 @@ import com.easyinsight.email.UserStub;
 import com.easyinsight.groups.GroupDescriptor;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.security.Roles;
+import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.PasswordStorage;
 import com.easyinsight.eventing.EventDispatcher;
 import com.easyinsight.eventing.TodoCompletedEvent;
 import com.easyinsight.users.Credentials;
+import com.easyinsight.users.Account;
 
 import java.sql.*;
 import java.util.*;
@@ -589,11 +591,11 @@ public class FeedStorage {
         if(feedCache != null && cache)
             feedDefinition = (FeedDefinition) feedCache.get(identifier);
         if(feedDefinition != null) {
-            LogClass.info("Cache hit for feed id: " + identifier);
+            LogClass.info("Cache hit for data source definition id: " + identifier);
             return feedDefinition;
         }
         try {
-            LogClass.info("Cache miss for feed id: " + identifier);
+            LogClass.info("Cache miss for data source definition id: " + identifier);
             PreparedStatement queryFeedStmt = conn.prepareStatement("SELECT FEED_NAME, FEED_TYPE, PUBLICLY_VISIBLE, GENRE, CREATE_DATE," +
                     "UPDATE_DATE, FEED_VIEWS, FEED_RATING_COUNT, FEED_RATING_AVERAGE, FEED_SIZE, ANALYSIS_ID," +
                     "ATTRIBUTION, DESCRIPTION, OWNER_NAME, DYNAMIC_SERVICE_DEFINITION_ID, MARKETPLACE_VISIBLE, API_KEY, unchecked_api_enabled, validated_api_enabled," +
@@ -825,6 +827,24 @@ public class FeedStorage {
                 if (feedDescriptor != null) {
                     feedDescriptor.setSize(sizeEntry.getValue());
                     feedDescriptor.setLastDataTime(lastDateMap.get(sizeEntry.getKey()));
+                }
+            }
+            if (SecurityUtil.getAccountTier() == Account.ADMINISTRATOR) {
+                StringBuilder sqlBuilder = new StringBuilder("SELECT SOLUTION_ID, FEED_ID FROM SOLUTION_TO_FEED " +
+                        "WHERE SOLUTION_TO_FEED.FEED_ID IN (");
+                for (FeedDescriptor feedDescriptor : feedMap.values()) {
+                    sqlBuilder.append("?,");
+                }
+                PreparedStatement solutionStmt = conn.prepareStatement(sqlBuilder.substring(0, sqlBuilder.length() - 1) + ")");
+                int i = 0;
+                for (FeedDescriptor feedDescriptor : feedMap.values()) {
+                    solutionStmt.setLong(++i, feedDescriptor.getDataFeedID());
+                }
+                ResultSet solutionRS = solutionStmt.executeQuery();
+                while (solutionRS.next()) {
+                    long feedID = solutionRS.getLong(2);
+                    //long solutionID = solutionRS.getLong(1);
+                    feedMap.get(feedID).setSolutionTemplate(true);
                 }
             }
             descriptorList = new ArrayList<FeedDescriptor>(feedMap.values());

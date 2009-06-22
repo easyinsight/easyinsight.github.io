@@ -16,6 +16,8 @@ import java.sql.*;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.apache.jcs.JCS;
+import org.apache.jcs.access.exception.CacheException;
 
 /**
  * User: James Boe
@@ -33,6 +35,17 @@ public class DataStorage {
     private boolean committed = false;
     private FeedPersistenceMetadata metadata;
     private static DateDimCache dateDimCache = new DateDimCache();
+
+    private JCS reportCache = getCache("embeddedReports");
+
+    private JCS getCache(String cacheName) {
+        try {
+            return JCS.getInstance(cacheName);
+        } catch (Exception e) {
+            LogClass.error(e);
+        }
+        return null;
+    }
 
     /**
      * Creates a read only connection for retrieving data.
@@ -208,6 +221,11 @@ public class DataStorage {
             addOrUpdateMetadata(feedID, metadata, coreDBConn);
         }
         storageConn.commit();
+        try {
+            if (reportCache != null) reportCache.remove(feedID);
+        } catch (CacheException e) {
+            LogClass.error(e);
+        }
         committed = true;
     }
 
@@ -424,6 +442,7 @@ public class DataStorage {
         DataSet dataSet = new DataSet();
         ResultSet dataRS = queryStmt.executeQuery();
         processQueryResults(reportItems, keys, dataSet, dataRS, additionalKeys);
+        dataSet.setLastTime(metadata.getLastData());
         return dataSet;
     }
 
@@ -975,7 +994,7 @@ public class DataStorage {
             ResultSet versionRS = versionStmt.executeQuery();
             if (versionRS.next()) {
                 long version = versionRS.getLong(1);
-                PreparedStatement queryStmt = conn.prepareStatement("SELECT FEED_PERSISTENCE_METADATA_ID, SIZE, VERSION, DATABASE_NAME " +
+                PreparedStatement queryStmt = conn.prepareStatement("SELECT FEED_PERSISTENCE_METADATA_ID, SIZE, VERSION, DATABASE_NAME, LAST_DATA_TIME " +
                         "FROM FEED_PERSISTENCE_METADATA WHERE FEED_ID = ? AND VERSION = ?");
                 queryStmt.setLong(1, dataFeedID);
                 queryStmt.setLong(2, version);
@@ -987,6 +1006,7 @@ public class DataStorage {
                     metadata.setSize(rs.getLong(2));
                     metadata.setVersion(rs.getInt(3));
                     metadata.setDatabase(rs.getString(4));
+                    metadata.setLastData(rs.getTimestamp(5));
                 }
             } else {
                 throw new RuntimeException("No metadata found for " + dataFeedID);

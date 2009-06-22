@@ -51,15 +51,11 @@ import com.easyinsight.framework.UserTransferObject;
                     break;
                 case Account.INDIVIDUAL:
                     this.accountReviewText = "Individual";
-                    this.accountReviewCost = "Free for current beta";
+                    this.accountReviewCost = "$10/month";
                     break;
-                case Account.PROFESSIONAL:
-                    this.accountReviewText = "Professional";
-                    this.accountReviewCost = "Free for current beta";
-                    break;
-                case Account.ENTERPRISE:
-                    this.accountReviewText = "Enterprise";
-                    this.accountReviewCost = "Free for current beta";
+                case Account.GROUP:
+                    this.accountReviewText = "Group";
+                    this.accountReviewCost = "$100/month";
                     break;
             }
         }
@@ -87,8 +83,8 @@ import com.easyinsight.framework.UserTransferObject;
                 <mx:Label text="{accountReviewCost}" fontFamily="Lucida Grande" fontWeight="normal"/>
             </mx:FormItem>
             <mx:FormItem label="" direction="horizontal">
-                <mx:Button label="Back to Previous Page" click="backToPrevious()"/>
-                <mx:Button label="Confirm and Create the Account!" click="confirm()" id="confirmButton"/>
+                <mx:Button label="Confirm and Create the Account!" click="confirm()" id="confirmButton" fontSize="14"/>
+                <mx:LinkButton label="Back to Previous Page" click="backToPrevious()" textDecoration="underline"/>
             </mx:FormItem>
             <mx:FormItem label="Creating the account..." id="creationBar" visible="false">
                 <mx:ProgressBar indeterminate="true"/>

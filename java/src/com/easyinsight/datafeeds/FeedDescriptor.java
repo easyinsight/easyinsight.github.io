@@ -24,6 +24,7 @@ public class FeedDescriptor {
     private String description;
     private String attribution;
     private Date lastDataTime;
+    private boolean solutionTemplate;
 
     private boolean hasSavedCredentials;
 
@@ -41,6 +42,14 @@ public class FeedDescriptor {
         this.description = description;
         this.attribution = attribution;
         this.lastDataTime = lastDataTime;
+    }
+
+    public boolean isSolutionTemplate() {
+        return solutionTemplate;
+    }
+
+    public void setSolutionTemplate(boolean solutionTemplate) {
+        this.solutionTemplate = solutionTemplate;
     }
 
     public Date getLastDataTime() {

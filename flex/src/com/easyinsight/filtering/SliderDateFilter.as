@@ -90,24 +90,26 @@ import flash.events.MouseEvent;
 				var newHighVal:int = ((highField.selectedDate.valueOf() - lowDate.valueOf()) / delta) * 100;
 				hslider.values = [ newLowVal, newHighVal ] ;
 			}
-			
-			var editButton:Button = new Button();
-			editButton.addEventListener(MouseEvent.CLICK, edit);
-			editButton.setStyle("icon", editIcon);
-			editButton.toolTip = "Edit";
-			addChild(editButton);
+
+            if (_filterEditable) {
+                var editButton:Button = new Button();
+                editButton.addEventListener(MouseEvent.CLICK, edit);
+                editButton.setStyle("icon", editIcon);
+                editButton.toolTip = "Edit";
+                addChild(editButton);
 
 
-			var deleteButton:Button = new Button();
-			deleteButton.addEventListener(MouseEvent.CLICK, deleteSelf);
-			deleteButton.setStyle("icon", deleteIcon);
-            if (_filterDefinition.intrinsic) {
-                deleteButton.enabled = false;
-                deleteButton.toolTip = "This filter is an intrinsic part of the data source and cannot be deleted.";
-            } else {
-			    deleteButton.toolTip = "Delete";
+                var deleteButton:Button = new Button();
+                deleteButton.addEventListener(MouseEvent.CLICK, deleteSelf);
+                deleteButton.setStyle("icon", deleteIcon);
+                if (_filterDefinition.intrinsic) {
+                    deleteButton.enabled = false;
+                    deleteButton.toolTip = "This filter is an intrinsic part of the data source and cannot be deleted.";
+                } else {
+                    deleteButton.toolTip = "Delete";
+                }
+                addChild(deleteButton);
             }
-			addChild(deleteButton);
 			
 			
 			dispatchEvent(new FilterUpdatedEvent(FilterUpdatedEvent.FILTER_ADDED, filterDefinition, null, this));			
@@ -139,6 +141,12 @@ import flash.events.MouseEvent;
 		private function deleteSelf(event:MouseEvent):void {
 			dispatchEvent(new FilterDeletionEvent(this));
 		}
+
+        private var _filterEditable:Boolean = true;
+
+        public function set filterEditable(editable:Boolean):void {
+            _filterEditable = editable;
+        }
 		
 		private function thumbRelease(event:SliderEvent):void {
 			var lowValue:int = hslider.values[0];

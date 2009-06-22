@@ -1,0 +1,318 @@
+<?xml version="1.0" ?>
+<easyinsight:FullScreenPage xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:easyinsight="com.easyinsight.*"
+                            xmlns:filtering="com.easyinsight.filtering.*"
+                            width="100%" height="100%" backgroundImage="{background2}" backgroundSize="100%"
+        creationComplete="onCreation()">
+    <easyinsight:states>
+        <mx:State name="FullScreen">
+            <mx:RemoveChild target="{buttonBar}"/>
+            <mx:RemoveChild target="{reportMetadata}"/>
+        </mx:State>
+        <mx:State name="Filtering">
+            <mx:AddChild relativeTo="{transformBox}">
+                <filtering:TransformContainer id="transformContainer" filterEditable="false" existingFilters="{filterDefinitions}"
+                         transformAdded="transformsUpdated(event)" updatedTransforms="transformsUpdated(event)" width="100%" paddingLeft="10" paddingTop="10" paddingBottom="10"
+                         paddingRight="10" feedID="{_dataSourceID}"/>
+            </mx:AddChild>
+        </mx:State>
+    </easyinsight:states>
+    <mx:Script><![CDATA[
+        import com.easyinsight.LoginDialog;
+        import com.easyinsight.administration.feed.Tag;
+        import com.easyinsight.analysis.AnalysisCloseEvent;
+        import com.easyinsight.analysis.AnalysisDefinition;
+        import com.easyinsight.analysis.EmbeddedControllerLookup;
+        import com.easyinsight.analysis.EmbeddedDataServiceEvent;
+        import com.easyinsight.analysis.EmbeddedViewFactory;
+        import com.easyinsight.analysis.HierarchyDrilldownEvent;
+        import com.easyinsight.analysis.HierarchyRollupEvent;
+        import com.easyinsight.analysis.IEmbeddedReportController;
+
+        import com.easyinsight.commands.CommandEvent;
+        import com.easyinsight.commands.CommandProcessor;
+        import com.easyinsight.detail.DataDetailEvent;
+        import com.easyinsight.filtering.TransformsUpdatedEvent;
+        import com.easyinsight.framework.User;
+        import com.easyinsight.genredata.ModuleAnalyzeEvent;
+
+        import com.easyinsight.listing.AnalysisDefinitionAnalyzeSource;
+
+        import com.easyinsight.solutions.InsightDescriptor;
+
+        import mx.collections.ArrayCollection;
+        import mx.controls.Alert;
+        import mx.formatters.DateFormatter;
+        import mx.managers.BrowserManager;
+        import mx.managers.PopUpManager;
+        import mx.utils.URLUtil;
+
+        private function subscribedToInsight():void {
+            Alert.show("This report will now show in your My Data page.");
+        }
+
+        private function bookmark():void {
+            if (User.getInstance() == null) {
+                var loginDialog:LoginDialog = LoginDialog(PopUpManager.createPopUp(this, LoginDialog, true));
+                PopUpManager.centerPopUp(loginDialog);
+            } else {
+                analysisService.subscribeToAnalysis.send(_reportID);
+            }
+        }
+
+        private function onCreation():void {
+            commandProcessor = new CommandProcessor();
+            addEventListener(CommandEvent.COMMAND, onCommand);
+            /*addEventListener(HierarchyDrilldownEvent.DRILLDOWN, childFilterCreation);
+            addEventListener(HierarchyRollupEvent.HIERARCHY_ROLLUP, onRollup);
+            addEventListener(DataDetailEvent.DATA_DETAIL, toDetails);*/
+        }
+
+        private function transformsUpdated(event:TransformsUpdatedEvent):void {
+            viewFactory.filterDefinitions = transformContainer.getFilterDefinitions();
+            viewFactory.retrieveData();
+        }
+
+        [Bindable]
+        private var filterDefinitions:ArrayCollection;
+
+        [Bindable]
+        private var lastDataTime:String;
+
+        [Bindable]
+        [Embed(source="../../../../assets/star2_grey.png")]
+        private var noRatingIcon:Class;
+
+        [Bindable]
+        [Embed(source="../../../../assets/background2.JPG")]
+        private var background2:Class;
+
+        [Bindable]
+        [Embed(source="../../../../assets/star2_green.png")]
+        private var ratedIcon:Class;
+
+        [Bindable]
+        [Embed(source="../../../../assets/document_out_x32.png")]
+        private var closeIcon:Class;
+        [Bindable]
+        [Embed(source="../../../../assets/plasma_tv_x32.png")]
+        private var fullScreenIcon:Class;
+        [Bindable]
+        [Embed(source="../../../../assets/edit.png")]
+        private var reportEditorIcon:Class;
+        [Bindable]
+        [Embed(source="../../../../assets/funnel_x32.png")]
+        private var filterIcon:Class;
+        [Bindable]
+        [Embed(source="../../../../assets/bookmark_blue.png")]
+        private var bookmarkIcon:Class;
+
+        [Bindable]
+        private var reportName:String;
+
+        [Bindable]
+        private var ownerName:String;
+
+        [Bindable]
+        private var attribution:String;
+
+        [Bindable]
+        private var reportRating:String;
+
+        [Bindable]
+        private var reportRatingCount:String;
+
+        [Bindable]
+        private var reportViews:String;
+
+        [Bindable]
+        private var description:String;
+
+        [Bindable]
+        private var tags:String;
+
+        [Bindable]
+        private var reportDate:String;
+
+        private var commandProcessor:CommandProcessor;
+
+        [Bindable]
+        private var rateReportText:String;
+
+        private var _reportID:int;
+
+        private var _reportType:int;
+
+        private var factory:EmbeddedViewFactory;
+
+        private var reportChanged:Boolean;
+
+        [Bindable]
+        private var _dataSourceID:int;
+
+        private var viewFactory:EmbeddedViewFactory;
+
+        [Bindable]
+        private var admin:Boolean;
+
+        private function onCommand(event:CommandEvent):void {
+            commandProcessor.addCommand(event.command);
+        }
+
+        public function set reportID(value:int):void {
+            if (_reportID != value) {
+                _reportID = value;
+                reportChanged = true;
+            }
+        }
+
+        public function set reportType(value:int):void {
+            _reportType = value;
+        }
+
+        override protected function createChildren():void {
+            super.createChildren();
+            var controllerClass:Class = EmbeddedControllerLookup.controllerForType(_reportType);
+            var controller:IEmbeddedReportController = new controllerClass();
+            var dataViewFactory:EmbeddedViewFactory = controller.createEmbeddedView();
+            dataViewFactory.reportID = _reportID;
+            reportBox.addChild(dataViewFactory);
+            dataViewFactory.addEventListener(EmbeddedDataServiceEvent.DATA_RETURNED, gotData);
+            progressBar.visible = true;
+            this.viewFactory = dataViewFactory;
+            dataViewFactory.retrieveData();
+        }
+
+        public function set dataSourceID(value:int):void {
+            _dataSourceID = value;
+        }
+
+        private function gotData(event:EmbeddedDataServiceEvent):void {
+            var report:AnalysisDefinition = event.analysisDefinition;
+            reportName = report.name;
+            reportRatingCount = String(report.ratingCount);
+            reportRating = String(report.ratingAverage);
+            reportViews = String(report.viewCount);
+            attribution = event.attribution;
+            tags = "";
+            if (report.tagCloud != null && report.tagCloud.length > 0) {
+                for each (var tag:Tag in report.tagCloud) {
+                    tags += tag.tagName;
+                    tags += ",";
+                }
+                tags = tags.substring(0, tags.length - 1);
+            }
+            admin = event.dataSourceAccessible;
+            if (admin && report.filterDefinitions != null && report.filterDefinitions.length > 0) {
+                filterDefinitions = report.filterDefinitions;
+                showFilters = true;
+            }
+            ownerName = report.authorName;
+            var dateFormatter:DateFormatter = new DateFormatter();
+            dateFormatter.formatString = "MM/DD/YYYY HH:NN";
+            reportDate = dateFormatter.format(report.dateCreated);
+            lastDataTime = dateFormatter.format(event.lastDataTime);
+            var feedFragmentObject:Object = new Object();
+            feedFragmentObject.reportID = String(_reportID);
+            var feedFragmentString:String = URLUtil.objectToString(feedFragmentObject);
+            BrowserManager.getInstance().setFragment(feedFragmentString);
+            BrowserManager.getInstance().setTitle("Easy Insight - " + reportName);
+            progressBar.visible = false;
+        }
+
+        private function close():void {
+            dispatchEvent(new AnalysisCloseEvent(this));
+        }
+
+        private function toFullScreen():void {
+            Alert.show("You can return to normal view by hitting Escape.");
+            addEventListener(KeyboardEvent.KEY_UP, onKey);
+            currentState = "FullScreen";
+        }
+
+        private function toReportEditor():void {
+            var report:InsightDescriptor = new InsightDescriptor();
+            report.id = _reportID;
+            report.dataFeedID = _dataSourceID;
+            report.name = reportName;
+            report.reportType = _reportType;
+            dispatchEvent(new ModuleAnalyzeEvent(new AnalysisDefinitionAnalyzeSource(report)));
+        }
+
+        private function onKey(event:KeyboardEvent):void {
+            if (Keyboard.ESCAPE == event.keyCode) {
+                currentState = "";
+            }
+        }
+
+        [Bindable]
+        private var showFilters:Boolean;
+
+        private function adjustFilters():void {
+            if (currentState == "" || currentState == null) {
+                currentState = "Filtering";
+            } else {
+                currentState = "";
+            }
+        }
+        ]]></mx:Script>
+    <mx:VBox width="100%" height="100%" paddingBottom="10" paddingLeft="10" paddingRight="10" paddingTop="10">
+        <mx:HBox id="buttonBar" verticalAlign="middle">
+            <mx:Button label="Back" click="close()" icon="{closeIcon}" labelPlacement="bottom"/>
+            <mx:Button label="Full Screen" click="toFullScreen()" icon="{fullScreenIcon}" labelPlacement="bottom"/>
+            <mx:Button label="Bookmark" click="bookmark()" icon="{bookmarkIcon}" labelPlacement="bottom"/>
+            <mx:Button label="Edit this Report" icon="{reportEditorIcon}" click="toReportEditor()" visible="{admin}"
+                       labelPlacement="bottom"/>
+            <mx:Button label="Adjust Filters" icon="{filterIcon}" click="adjustFilters()" visible="{showFilters}"
+                       labelPlacement="bottom"/>
+            <mx:ProgressBar id="progressBar" visible="false" indeterminate="true"/>
+            <mx:Label text="Last Data Time:" fontFamily="Tahoma" fontWeight="bold"/>
+            <mx:Label text="{lastDataTime}"/>
+        </mx:HBox>
+        <mx:HBox width="100%" height="100%">
+            <mx:VBox id="reportBox" width="100%" height="100%">
+                <mx:Box width="100%" id="transformBox"/>
+            </mx:VBox>
+            <mx:VBox id="reportMetadata">
+                <mx:Form>
+                    <mx:FormItem label="Report Name:">
+                        <mx:Label text="{reportName}" fontFamily="Lucida Grande" fontWeight="normal"/>
+                    </mx:FormItem>
+                    <mx:FormItem label="Author Name:">
+                        <mx:Label text="{ownerName}" fontFamily="Lucida Grande" fontWeight="normal"/>
+                    </mx:FormItem>
+                    <mx:FormItem label="Report Creation Date:">
+                        <mx:Label text="{reportDate}" fontFamily="Lucida Grande" fontWeight="normal"/>
+                    </mx:FormItem>
+                    <mx:FormItem label="Description:">
+                        <mx:Label text="{description}" fontFamily="Lucida Grande" fontWeight="normal"/>
+                    </mx:FormItem>
+                    <mx:FormItem label="Tags:">
+                        <mx:Label text="{tags}" fontFamily="Lucida Grande" fontWeight="normal"/>
+                    </mx:FormItem>
+                    <mx:FormItem label="Data Attribution:">
+                        <mx:Label text="{attribution}" fontFamily="Lucida Grande" fontWeight="normal"/>
+                    </mx:FormItem>
+                    <!--<mx:FormItem label="Report Rating:">
+                        <mx:Label text="{reportRating}"/>
+                    </mx:FormItem>
+                    <mx:FormItem label="{rateReportText}" id="rateReportItem">
+                        <mx:HBox>
+                            <mx:Image source="{noRatingIcon}"/>
+                            <mx:Image source="{noRatingIcon}"/>
+                            <mx:Image source="{noRatingIcon}"/>
+                            <mx:Image source="{noRatingIcon}"/>
+                            <mx:Image source="{noRatingIcon}"/>
+                        </mx:HBox>
+                    </mx:FormItem>-->
+                    <mx:FormItem label="Report Views:">
+                        <mx:Label text="{reportViews}" fontFamily="Lucida Grande" fontWeight="normal"/>
+                    </mx:FormItem>
+                </mx:Form>
+                <!-- -->
+            </mx:VBox>
+        </mx:HBox>
+    </mx:VBox>
+    <mx:RemoteObject id="analysisService" destination="analysisDefinition">
+        <mx:method name="subscribeToAnalysis" result="subscribedToInsight()"/>
+    </mx:RemoteObject>
+</easyinsight:FullScreenPage>

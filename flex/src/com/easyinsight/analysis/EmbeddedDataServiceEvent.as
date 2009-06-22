@@ -10,16 +10,23 @@ public class EmbeddedDataServiceEvent extends Event {
     public var dataSet:ArrayCollection;
     public var clientProcessorMap:Object;
     public var analysisDefinition:AnalysisDefinition;
+    public var dataSourceAccessible:Boolean;
+    public var lastDataTime:Date;
+    public var attribution:String;
 
-    public function EmbeddedDataServiceEvent(type:String, dataSet:ArrayCollection, analysisDefinition:AnalysisDefinition, clientProcessorMap:Object) {
+    public function EmbeddedDataServiceEvent(type:String, dataSet:ArrayCollection, analysisDefinition:AnalysisDefinition, clientProcessorMap:Object, dataSourceAccessible:Boolean,
+            lastDataTime:Date, attribution:String) {
         super(type);
         this.dataSet = dataSet;
         this.clientProcessorMap = clientProcessorMap;
         this.analysisDefinition = analysisDefinition;
+        this.dataSourceAccessible = dataSourceAccessible;
+        this.lastDataTime = lastDataTime;
+        this.attribution = attribution;
     }
 
     override public function clone():Event {
-        return new EmbeddedDataServiceEvent(type, dataSet, analysisDefinition, clientProcessorMap);
+        return new EmbeddedDataServiceEvent(type, dataSet, analysisDefinition, clientProcessorMap, dataSourceAccessible, lastDataTime, attribution);
     }
 }
 }

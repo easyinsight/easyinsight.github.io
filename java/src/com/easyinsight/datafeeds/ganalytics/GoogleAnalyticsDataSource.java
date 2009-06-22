@@ -181,7 +181,7 @@ public class GoogleAnalyticsDataSource extends ServerDataSourceDefinition {
         analysisItems.add(new AnalysisDateDimension(keys.get(DATE), "Date", AnalysisDateDimension.DAY_LEVEL));
         analysisItems.add(new AnalysisDimension(keys.get(DAYS_SINCE_LAST_VISIT), "Days Since Last Visit"));
         analysisItems.add(new AnalysisDimension(keys.get(HOSTNAME), "Host Name"));
-        analysisItems.add(new AnalysisDimension(keys.get(HOUR), "HOUR"));
+        analysisItems.add(new AnalysisDimension(keys.get(HOUR), "Hour"));
         analysisItems.add(new AnalysisDimension(keys.get(JAVA_ENABLED), "Java Enabled"));
         analysisItems.add(new AnalysisDimension(keys.get(FLASH_VERSION), "Flash Version"));
         analysisItems.add(new AnalysisDimension(keys.get(LANGUAGE), "Language"));

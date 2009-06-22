@@ -2,7 +2,9 @@ package com.easyinsight.email;
 
 import com.easyinsight.logging.LogClass;
 
+import javax.mail.MessagingException;
 import java.text.MessageFormat;
+import java.io.UnsupportedEncodingException;
 
 /**
  * User: James Boe
@@ -29,9 +31,14 @@ public class AccountMemberInvitation {
             "Tutorials are available through the Help button on each application page to help you get started.\r\n\r\nWelcome to Easy Insight!";
 
     private static String resetPasswordText =
-            "Your password has been reset:\r\n\r\n" +
-            "User Name: {0}\r\n"+
-            "Password:  {1}";
+            "Your password with Easy Insight has been reset:\r\n\r\n" +
+            "Password:  {0}\r\n\r\n"+
+            "This email was sent from an automated account. Please do not reply to this address.";
+
+    private static String remindUserNameText =
+            "Your user name with Easy Insight is below:\r\n\r\n" +
+            "User Name:  {0}\r\n\r\n"+
+            "This email was sent from an automated account. Please do not reply to this address.";;
 
     private static String newConsultantProAccountText =
             "A new professional account for your organization has been created on Easy Insight.\r\nYou can access the application at\r\n\r\n" +
@@ -52,6 +59,13 @@ public class AccountMemberInvitation {
             "{0}\r\n\r\n"+
             "This email was sent from an automated account. Please do not reply to this address.";
 
+    private static String salesText =
+            "The following user requested sales info:\r\n\r\n" +
+                    "Name: {0}\r\n"+
+                    "Email: {1}\r\n"+
+                    "Company Name: {2}\r\n"+
+                    "Additional Info: {3}\r\n";
+
     private static String individualAccountCreationText =
             "Welcome to Easy Insight!\r\n\r\n" +
             "You have created an individual account.";
@@ -70,11 +84,22 @@ public class AccountMemberInvitation {
         }
     }
 
-    public void resetPassword(String to, String userName, String password) {
-        String body = MessageFormat.format(resetPasswordText, userName, password);
+    public void resetPassword(String to, String password) {
+        String body = MessageFormat.format(resetPasswordText, password);
         String subject = "Easy Insight Password Reset";
         try {
-            new AuthSMTPConnection().sendSSLMessage(to, subject, body, "accounts@easy-insight.com");
+            new AuthSMTPConnection().sendSSLMessage(to, subject, body, "donotreply@easy-insight.com");
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void remindUserName(String to, String userName) {
+        String body = MessageFormat.format(remindUserNameText, userName);
+        String subject = "Easy Insight User Name Reminder";
+        try {
+            new AuthSMTPConnection().sendSSLMessage(to, subject, body, "donotreply@easy-insight.com");
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);
@@ -85,7 +110,7 @@ public class AccountMemberInvitation {
         String body = MessageFormat.format(newProAccountText, userName, password, consultant, consultantEMail);
         String subject = "Easy Insight Account Creation";
         try {
-            new AuthSMTPConnection().sendSSLMessage(to, subject, body, "accounts@easy-insight.com");
+            new AuthSMTPConnection().sendSSLMessage(to, subject, body, "donotreply@easy-insight.com");
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);
@@ -113,5 +138,11 @@ public class AccountMemberInvitation {
             LogClass.error(e);
             throw new RuntimeException(e);
         }
+    }
+
+    public void salesNotification(String userName, String email, String company, String additionalInfo) throws MessagingException, UnsupportedEncodingException {
+        String body = MessageFormat.format(salesText, userName, email, company, additionalInfo);
+        String subject = "Sales Info Request";
+        new AuthSMTPConnection().sendSSLMessage("sales@easy-insight.com", subject, body, "donotreply@easy-insight.com");
     }
 }

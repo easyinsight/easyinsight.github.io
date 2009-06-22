@@ -67,6 +67,7 @@
             var dataViewFactory:EmbeddedViewFactory = controller.createEmbeddedView();
             dataViewFactory.prefix = _prefix;
             dataViewFactory.reportID = _analysisID;
+            dataViewFactory.dataSourceID = _dataSourceID;
             coreVBox.addChild(dataViewFactory);
             dataViewFactory.retrieveData();
         }

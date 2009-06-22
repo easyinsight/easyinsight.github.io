@@ -1,9 +1,8 @@
 package com.easyinsight.genredata
 {
-    import com.easyinsight.solutions.InsightDescriptor;
+import com.easyinsight.report.ReportAnalyzeSource;
+import com.easyinsight.solutions.InsightDescriptor;
     import flash.events.MouseEvent;
-	
-	import com.easyinsight.listing.AnalysisDefinitionAnalyzeSource;
 	
 	import mx.controls.LinkButton;
 
@@ -29,7 +28,7 @@ package com.easyinsight.genredata
 		}
 		
 		private function analyze(event:MouseEvent):void {
-			parent.dispatchEvent(new ModuleAnalyzeEvent(new AnalysisDefinitionAnalyzeSource(_data)));
+			parent.dispatchEvent(new ModuleAnalyzeEvent(new ReportAnalyzeSource(_data)));
 		}				
 	}
 }

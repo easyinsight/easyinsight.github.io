@@ -48,6 +48,12 @@ import flash.events.MouseEvent;
 			this._analysisItem = analysisItem;			
 		}
 
+        private var _filterEditable:Boolean = true;
+
+        public function set filterEditable(editable:Boolean):void {
+            _filterEditable = editable;
+        }
+
         public function set credentials(value:Object):void {
             _credentials = value;
         }
@@ -82,21 +88,23 @@ import flash.events.MouseEvent;
 				comboBox.enabled = false;				
 			}
 			addChild(comboBox);
-			if (editButton == null) {
-				editButton = new Button();
-				editButton.addEventListener(MouseEvent.CLICK, edit);
-				editButton.setStyle("icon", editIcon);
-				editButton.toolTip = "Edit";
-			}
-			addChild(editButton);
-			if (deleteButton == null) {
-				deleteButton = new Button();
-				deleteButton.addEventListener(MouseEvent.CLICK, deleteSelf);
-				deleteButton.setStyle("icon", deleteIcon);
-				deleteButton.toolTip = "Delete";
-				deleteButton.enabled = false;
-			}
-			addChild(deleteButton);
+            if (_filterEditable) {
+                if (editButton == null) {
+                    editButton = new Button();
+                    editButton.addEventListener(MouseEvent.CLICK, edit);
+                    editButton.setStyle("icon", editIcon);
+                    editButton.toolTip = "Edit";
+                }
+                addChild(editButton);
+                if (deleteButton == null) {
+                    deleteButton = new Button();
+                    deleteButton.addEventListener(MouseEvent.CLICK, deleteSelf);
+                    deleteButton.setStyle("icon", deleteIcon);
+                    deleteButton.toolTip = "Delete";
+                    deleteButton.enabled = false;
+                }
+                addChild(deleteButton);
+            }
 		}
 		
 		private function filterValueChanged(event:DropdownEvent):void {			
@@ -147,7 +155,9 @@ import flash.events.MouseEvent;
 			//selectedValue = _filterDefinition.filteredValues.getItemAt(0) as String;
 			comboBox.selectedItem = selectedValue;
 			comboBox.enabled = true;
-			deleteButton.enabled = true;
+            if (deleteButton != null) {
+			    deleteButton.enabled = true;
+            }
 			dispatchEvent(new FilterUpdatedEvent(FilterUpdatedEvent.FILTER_ADDED, filterDefinition, null, this));
 		}
 		

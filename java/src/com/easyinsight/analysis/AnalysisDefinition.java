@@ -94,12 +94,23 @@ public class AnalysisDefinition implements Cloneable {
     @Column(name = "feed_visibility")
     private boolean visibleAtFeedLevel;
 
+    @Column(name = "author_name")
+    private String authorName;
+
     @OneToMany(cascade = CascadeType.ALL)
     @MapKey(columns = @Column(name = "structure_key"))
     @JoinTable(name = "report_structure",
             joinColumns = @JoinColumn(name = "analysis_id"),
             inverseJoinColumns = @JoinColumn(name = "analysis_item_id"))
     private Map<String, AnalysisItem> reportStructure;
+
+    public String getAuthorName() {
+        return authorName;
+    }
+
+    public void setAuthorName(String authorName) {
+        this.authorName = authorName;
+    }
 
     public int getReportType() {
         return reportType;
@@ -394,6 +405,9 @@ public class AnalysisDefinition implements Cloneable {
             }
         }
         analysisDefinition.setCanSaveDirectly(isOwner(SecurityUtil.getUserID(false)));
+        analysisDefinition.setAuthorName(getAuthorName());
+        analysisDefinition.setDateCreated(getDateCreated());
+        analysisDefinition.setDateUpdated(getDateUpdated());
         analysisDefinition.setDataScrubs(newScrubs);
         analysisDefinition.setTagCloud(new ArrayList<Tag>(getTags()));
         analysisDefinition.setMarketplaceVisible(marketplaceVisible);

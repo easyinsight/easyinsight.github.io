@@ -14,6 +14,10 @@ package com.easyinsight.analysis
 		
 		override public function createString():String {
 			return parentKey.createString();
-		}				
+		}
+
+        override public function internalString():String {
+            return feedID + "-" + parentKey.createString();
+        }
 	}
 }

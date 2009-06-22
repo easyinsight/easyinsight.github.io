@@ -1,11 +1,50 @@
 package com.easyinsight.analysis;
 
 import java.io.Serializable;
+import java.util.Date;
 
 public class EmbeddedDataResults implements Serializable {
     private AnalysisItem[] headers;
     private WSAnalysisDefinition definition;
     private ListRow[] rows;
+    private boolean dataSourceAccessible;
+    private Date lastDataTime;
+    private String attribution;
+
+    public EmbeddedDataResults() {
+    }
+
+    public EmbeddedDataResults(EmbeddedDataResults results) {
+        this.headers = results.headers;
+        this.definition = results.definition;
+        this.rows = results.rows;
+        this.lastDataTime = results.lastDataTime;
+        this.attribution = results.attribution;
+    }
+
+    public String getAttribution() {
+        return attribution;
+    }
+
+    public void setAttribution(String attribution) {
+        this.attribution = attribution;
+    }
+
+    public Date getLastDataTime() {
+        return lastDataTime;
+    }
+
+    public void setLastDataTime(Date lastDataTime) {
+        this.lastDataTime = lastDataTime;
+    }
+
+    public boolean isDataSourceAccessible() {
+        return dataSourceAccessible;
+    }
+
+    public void setDataSourceAccessible(boolean dataSourceAccessible) {
+        this.dataSourceAccessible = dataSourceAccessible;
+    }
 
     public WSAnalysisDefinition getDefinition() {
         return definition;

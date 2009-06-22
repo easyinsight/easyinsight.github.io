@@ -1,0 +1,300 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Box xmlns="com.easyinsight.*" xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%"
+        paddingLeft="0" paddingBottom="0" paddingTop="0" paddingRight="0" creationComplete="onCreation()"
+        verticalGap="0"
+        backgroundColor="#818285" horizontalAlign="center" implements="com.easyinsight.listing.IPerspective">
+    <mx:states>
+        <mx:State name="NotLoggedIn">
+            <mx:AddChild relativeTo="{controlsBox}">
+                <mx:VBox horizontalAlign="center" verticalAlign="middle" height="100%" verticalGap="15">
+                    <mx:VBox verticalGap="0">
+                        <mx:Label text="You'll need to log in or create an"/>
+                        <mx:Label text="account before installing the solution."/>    
+                    </mx:VBox>
+                    <mx:Button label="Log in or Create Account" styleName="blueButton" click="login()"/>
+                </mx:VBox>
+            </mx:AddChild>
+        </mx:State>
+        <mx:State name="AccountBelowRequired">
+            <mx:SetProperty target="this" name="controlsEnabled" value="false"/>
+            <mx:SetProperty target="this" name="controlsAlpha" value=".3"/>
+        </mx:State>
+    </mx:states>
+    <mx:Script>
+		<![CDATA[
+        import com.easyinsight.LoginDialog;
+        import com.easyinsight.framework.NavigationEvent;
+        import com.easyinsight.genredata.ModuleAnalyzeEvent;
+        import com.easyinsight.util.FileAlert;
+
+        import mx.controls.Alert;
+
+        import com.easyinsight.framework.User;
+
+        import mx.collections.ArrayCollection;
+        import mx.managers.BrowserManager;
+        import mx.managers.CursorManager;
+        import mx.managers.PopUpManager;
+        import mx.utils.URLUtil;
+
+        private function lesson1():void {
+        }
+
+        [Bindable]
+        [Embed(source="../../../../assets/document_out.png")]
+        private var closeIcon:Class;
+
+        [Bindable]
+        [Embed(source="../../../../assets/component_x16.png")]
+        private var installIcon:Class;
+
+        [Bindable]
+        [Embed(source="../../../../assets/gear.png")]
+        private var archiveIcon:Class;
+
+        [Bindable]
+        [Embed(source="../../../../assets/background2.JPG")]
+        private var background2:Class;
+
+        [Bindable]
+        [Embed(source="../../../../assets/data_blue_x16.png")]
+        public var dataSourceIcon:Class;
+
+        [Bindable]
+        [Embed(source="../../../../assets/chart_column.png")]
+        public var insightIcon:Class;
+
+        [Bindable]
+        [Embed(source="../../../../assets/branchx16.png")]
+        public var goalTreeIcon:Class;
+
+        [Bindable]
+        private var logo:Bitmap;
+
+        [Bindable]
+        private var description:String;
+
+        private var _solution:Solution;
+
+        [Bindable]
+        private var solutionName:String;
+        [Bindable]
+        private var solutionIndustry:String;
+        [Bindable]
+        private var solutionAuthor:String;
+
+        [Bindable]
+        private var solutionDescription:String;
+
+        [Bindable]
+        private var solutionFileName:String;
+
+        private var solutionID:int;
+
+        [Bindable]
+        [Embed(source="../../../../assets/media_play.png")]
+        private var pointerIcon:Class;
+
+        [Bindable]
+        private var displayTreeData:ArrayCollection;
+
+        private var fileRef:FileReference;
+
+        private var _controlsEnabled:Boolean;
+
+        [Bindable]
+        private var downloadAvailable:Boolean = true;
+
+        [Bindable]
+        private var installAvailable:Boolean = true;
+
+        [Bindable]
+        private var dataSourceCount:int;
+        [Bindable]
+        private var goalCount:int;
+        [Bindable]
+        private var reportCount:int;
+
+        private var _controlsAlpha:uint = 0;
+
+        [Bindable]
+        [Embed(source="../../../../assets/data_blue_x16.png")]
+        public var listIcon:Class;
+
+        [Bindable]
+        [Embed(source="../../../../assets/chart_column.png")]
+        public var crosstabIcon:Class;
+
+
+        [Bindable(event="controlsEnabledChanged")]
+        public function get controlsEnabled():Boolean {
+            return _controlsEnabled;
+        }
+
+        public function set controlsEnabled(value:Boolean):void {
+            if (_controlsEnabled == value) return;
+            _controlsEnabled = value;
+            dispatchEvent(new Event("controlsEnabledChanged"));
+        }
+
+        [Bindable(event="controlsAlphaChanged")]
+        public function get controlsAlpha():uint {
+            return _controlsAlpha;
+        }
+
+        public function set controlsAlpha(value:uint):void {
+            if (_controlsAlpha == value) return;
+            _controlsAlpha = value;
+            dispatchEvent(new Event("controlsAlphaChanged"));
+        }
+
+        private function onCreation():void {
+            var fragmentObject:Object = new Object();
+            fragmentObject.solutionID = String(solutionID);
+            var fragmentString:String = URLUtil.objectToString(fragmentObject);
+            BrowserManager.getInstance().setFragment(fragmentString);
+            BrowserManager.getInstance().setTitle("Easy Insight - " + solutionName);
+            if (User.getInstance() == null) {
+                controlsEnabled = false;
+                controlsAlpha = .5;
+                currentState = "NotLoggedIn";
+            }
+        }
+
+        public function set treeData(data:ArrayCollection):void {
+            this.displayTreeData = data;
+        }
+
+        public function set solution(solution:Solution):void {
+            this._solution = solution;
+            description = solution.description;
+            solutionID = solution.solutionID;
+            solutionFileName = solution.solutionArchiveName;
+            solutionName = solution.name;
+            solutionAuthor = solution.author;
+            solutionIndustry = solution.industry;
+            solutionDescription = solution.description;
+            if (solution.solutionArchiveName == null || solution.solutionArchiveName == "") {
+                downloadAvailable = false;
+            }
+            if (solution.image != null) {
+                var loader:Loader = new Loader();
+                loader.contentLoaderInfo.addEventListener(Event.COMPLETE, onComplete);
+                loader.loadBytes(solution.image);
+            }
+            if (solution.accessible) {
+                controlsAlpha = 1;
+            }
+            installAvailable = solution.installable;
+        }
+
+        private function onComplete(event:Event):void {
+            var loaderContent:LoaderInfo = event.currentTarget as LoaderInfo;
+            logo = Bitmap(loaderContent.loader.content);
+            loaderContent.loader.removeEventListener(Event.COMPLETE, onComplete);
+        }
+
+        private function iconFunction(item:Object, depth:int):Class {
+            return listIcon;
+        }
+
+        private function download():void {
+            if (User.getInstance() == null) {
+                // TODO: smooth jump into login or account creation
+            } else if (!_solution.accessible) {
+                // TODO: sorry, no install for you, pop up a message with upgrade option
+            } else {
+                var request:URLRequest = new URLRequest("/app/DownloadServlet");
+                request.method = URLRequestMethod.GET;
+                var vars:URLVariables = new URLVariables();
+
+                vars.userName = new String(User.getInstance().userName);
+                vars.password = new String(User.getInstance().password);
+                vars.operation = new String(2);
+                vars.fileID = new String(_solution.solutionID);
+                request.data = vars;
+
+                fileRef = new FileReference();
+                fileRef.addEventListener(Event.CANCEL, doEvent);
+                fileRef.addEventListener(Event.COMPLETE, complete);
+                fileRef.addEventListener(Event.OPEN, doEvent);
+                fileRef.addEventListener(Event.SELECT, doEvent);
+                fileRef.addEventListener(HTTPStatusEvent.HTTP_STATUS, doEvent);
+                fileRef.addEventListener(IOErrorEvent.IO_ERROR, doEvent);
+                fileRef.addEventListener(ProgressEvent.PROGRESS, doEvent);
+                fileRef.addEventListener(SecurityErrorEvent.SECURITY_ERROR, doEvent);
+
+                FileAlert.alert(this, "Downloading...", null, fileRef);
+                fileRef.download(request, _solution.solutionArchiveName);
+            }
+        }
+
+        private function doEvent(event:Event):void {
+            trace(event);
+        }
+
+        private function onModuleAnalyze(event:ModuleAnalyzeEvent):void {
+            dispatchEvent(event);
+        }
+
+        private function login():void {
+            var login:LoginDialog = new LoginDialog();
+            login.additionalInfo = "You need to be logged in before you can install this solution.";
+            PopUpManager.addPopUp(login, this, true);
+            PopUpManager.centerPopUp(login);
+        }
+
+        private function install():void {
+            if (User.getInstance() != null && _solution.accessible) {
+                var window:SolutionInstallationWindow = SolutionInstallationWindow(PopUpManager.createPopUp(this.parent, SolutionInstallationWindow, true));
+                window.addEventListener(SolutionEvent.SOLUTION_INSTALLED, onSolutionInstalled);
+                window.addEventListener(ModuleAnalyzeEvent.MODULE_ANALYZE, onModuleAnalyze);
+                window.solution = this._solution;
+                PopUpManager.centerPopUp(window);
+            }
+        }
+
+        private function onSolutionInstalled(event:SolutionEvent):void {
+            dispatchEvent(new NavigationEvent("My Data"));
+        }
+
+        private function complete(event:Event):void {
+            Alert.show("Solution files copied!");
+        }
+
+        public function gotFocus():void {
+        }
+		]]>
+	</mx:Script>
+    <mx:HBox width="1000" height="100%" backgroundImage="{background2}" backgroundSize="100%" paddingLeft="20"
+         paddingRight="20" paddingTop="20" paddingBottom="20">
+        <mx:VBox>
+            <mx:Image source="{logo}"/>
+            <mx:Spacer height="50"/>
+            <mx:Canvas id="controlsBox">
+                <mx:VBox alpha="{controlsAlpha}">
+                    <mx:Button label="Install into your Easy Insight Account" fontSize="20" click="install()" styleName="blueButton"
+                            visible="{installAvailable}" enabled="{controlsEnabled}"/>
+                    <mx:Button label="Download Associated Files" fontSize="20" click="download()" styleName="blueButton"
+                            visible="{downloadAvailable}" enabled="{controlsEnabled}"/>
+                </mx:VBox>
+            </mx:Canvas>
+            <mx:Spacer height="50"/>
+            <mx:HBox>
+                <mx:VBox id="screenshotBox">
+                    <mx:Image source="../assets/lesson1/FirstFrame.png" width="286" height="212" click="lesson1()"
+                              rollOver="CursorManager.setCursor(pointerIcon);"
+                              rollOut="CursorManager.removeAllCursors()"/>
+                    <mx:HBox width="100%" horizontalAlign="center">
+                        <mx:Label text="Watch Demo Video" fontSize="14"/>
+                    </mx:HBox>
+                </mx:VBox>
+            </mx:HBox>
+        </mx:VBox>
+        <mx:Spacer width="50"/>
+        <mx:VBox width="500" height="100%">
+            <mx:TextArea height="100%" width="100%" backgroundAlpha="0" borderStyle="none" selectable="false"
+                         htmlText="{solutionDescription}" borderThickness="0"/>
+        </mx:VBox>
+    </mx:HBox>
+</mx:Box>

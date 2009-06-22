@@ -418,7 +418,7 @@ public class GoalStorage {
     private List<GoalFeed> getGoalFeeds(long goalTreeNodeID, Connection conn) throws SQLException {
         List<GoalFeed> feeds = new ArrayList<GoalFeed>();
         PreparedStatement feedQueryStmt = conn.prepareStatement("SELECT FEED_ID, feed_name FROM GOAL_TREE_NODE_TO_FEED, DATA_FEED WHERE goal_tree_node_id = ? AND " +
-                "goal_tree_node_to_feed.goal_tree_node_to_feed_id = data_feed.data_feed_id");
+                "goal_tree_node_to_feed.feed_id = data_feed.data_feed_id");
         feedQueryStmt.setLong(1, goalTreeNodeID);
         ResultSet rs = feedQueryStmt.executeQuery();
         while (rs.next()) {

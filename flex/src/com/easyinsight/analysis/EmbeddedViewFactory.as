@@ -17,6 +17,7 @@ public class EmbeddedViewFactory extends VBox {
     private var _reportDataService:Class = EmbeddedDataService;
 
     private var _reportID:int;
+    private var _dataSourceID:int;
     private var _availableFields:ArrayCollection;
 
     private var _prefix:String = "";
@@ -26,11 +27,18 @@ public class EmbeddedViewFactory extends VBox {
     private var _reportRenderer:IReportRenderer;
     private var _dataService:IEmbeddedDataService = new EmbeddedDataService();
 
+    private var _filterDefinitions:ArrayCollection;
+
     private var pendingRequest:Boolean = false;
 
     public function EmbeddedViewFactory() {
         this.percentHeight = 100;
         this.percentWidth = 100;
+    }
+
+
+    public function set filterDefinitions(value:ArrayCollection):void {
+        _filterDefinitions = value;
     }
 
     public function set prefix(val:String):void {
@@ -43,6 +51,11 @@ public class EmbeddedViewFactory extends VBox {
 
     public function set reportID(val:int):void {
         _reportID = val;
+    }
+
+
+    public function set dataSourceID(value:int):void {
+        _dataSourceID = value;
     }
 
     public function set reportDataService(val:Class):void {
@@ -84,12 +97,13 @@ public class EmbeddedViewFactory extends VBox {
         if (_reportRenderer == null) {
             pendingRequest = true;
         } else {
-            _dataService.retrieveData(_reportID);
+            _dataService.retrieveData(_reportID, _dataSourceID, _filterDefinitions);
         }
     }
 
     private function gotData(event:EmbeddedDataServiceEvent):void {
         _reportRenderer.renderReport(event.dataSet, event.analysisDefinition, event.clientProcessorMap);
+        dispatchEvent(event);
     }
 
     private function loadReportRenderer():void {

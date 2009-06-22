@@ -7,12 +7,17 @@
         [Event(name="previousPage", type="com.easyinsight.account.PreviousPageEvent")]
     </mx:Metadata>
     <mx:Script><![CDATA[
+        import mx.controls.Alert;
+
         private function backToPrevious():void {
             dispatchEvent(new PreviousPageEvent());
         }
 
         private function acceptTerms():void {
-            dispatchEvent(new TermsOfServiceEvent());
+            if (acceptCheckbox.selected)
+                dispatchEvent(new TermsOfServiceEvent());
+            else
+                Alert.show("You must check acceptance of the terms of service to continue.");
         }
 ]]></mx:Script>
     <mx:TextArea width="800" height="100%" editable="false">
@@ -83,8 +88,6 @@ General Conditions
 
             ]]></mx:htmlText>
     </mx:TextArea>
-    <mx:HBox>
-        <mx:Button label="Back to Previous Page" click="backToPrevious()"/>
-        <mx:Button label="I Accept These Terms" click="acceptTerms()"/>
-    </mx:HBox>
+    <mx:CheckBox label="I Accept These Terms" id="acceptCheckbox"/>
+    <mx:LinkButton label="Back to Previous Page" click="backToPrevious()" textDecoration="underline"/>
 </mx:VBox>

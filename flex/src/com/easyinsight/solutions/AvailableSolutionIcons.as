@@ -37,7 +37,7 @@ import com.easyinsight.genredata.AnalyzeEvent;
 		}
 		
 		private function installCalled(event:MouseEvent):void {
-            dispatchEvent(new AnalyzeEvent(new SolutionAnalyzeSource(solution)));
+            dispatchEvent(new SolutionSelectionEvent(solution));
 			/*var window:SolutionInstallationWindow = SolutionInstallationWindow(PopUpManager.createPopUp(this.parent, SolutionInstallationWindow, true));
 			window.solution = this.solution;
 			PopUpManager.centerPopUp(window);*/			

@@ -150,7 +150,7 @@ public class BaseCampCompositeSource extends CompositeServerDataSource {
 
     @Override
     public FeedDefinition clone(Connection conn) throws CloneNotSupportedException, SQLException {
-        BaseCampDataSource dataSource = (BaseCampDataSource) super.clone(conn);
+        BaseCampCompositeSource dataSource = (BaseCampCompositeSource) super.clone(conn);
         dataSource.setUrl("");
         return dataSource;
     }

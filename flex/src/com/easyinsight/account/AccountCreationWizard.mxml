@@ -4,6 +4,12 @@
 		[Event(name="accountCreated", type="com.easyinsight.account.AccountWizardResultEvent")]
 	</mx:Metadata>
 	<mx:states>
+        <mx:State name="ContactUs">
+			<mx:RemoveChild target="{initialContent}"/>
+			<mx:AddChild relativeTo="{coreContent}">
+				<account:TypeContactUs previousPage="onPreviousPage(event)"/>
+			</mx:AddChild>
+		</mx:State>
 		<mx:State name="UserInfo">
 			<mx:RemoveChild target="{initialContent}"/>			
 			<mx:AddChild relativeTo="{coreContent}">
@@ -44,46 +50,28 @@
 	</mx:states>
 	<mx:Script>
 		<![CDATA[
-			import mx.rpc.AsyncResponder;
-			import mx.messaging.config.ServerConfig;
-			import mx.rpc.events.ResultEvent;
-			import mx.rpc.events.FaultEvent;
-			import mx.rpc.AsyncToken;
 			import com.easyinsight.framework.LoginEvent;
 			import com.easyinsight.framework.UserServiceResponse;
 			import com.easyinsight.framework.UserTransferObject;
 			import com.easyinsight.framework.User;
-			
-			[Bindable]
+
+            import mx.managers.PopUpManager;
+
+            [Bindable]
 			private var account:Account;
             [Bindable]
 			private var user:UserTransferObject;
             private var password:String;
 
-			public function startAccountCreation():void {
-				var accountType:int;
-            	switch (accountTypeRadio.selectedValue) {
-            		case "free":
-            			accountType = Account.FREE;
-    					break;
-					case "individual":
-						accountType = Account.INDIVIDUAL;
-						break;
-					case "professional":
-						accountType = Account.PROFESSIONAL;
-						break;
-					case "enterprise":
-                        accountType = Account.ENTERPRISE;
-						break;
-            	}
-				this.account = new Account();
+            private function signup(accountType:int):void {
+                this.account = new Account();
 				account.accountType = accountType;
                 if (accountType == Account.FREE || accountType == Account.INDIVIDUAL) {
 				    this.currentState = "UserInfo";
                 } else {
                     this.currentState = "ProAccountUserInfo";
                 }
-			}
+            }
 			
 			private function onPreviousPage(event:PreviousPageEvent):void {
 				switch (this.currentState) {
@@ -119,6 +107,10 @@
 				}*/
 			}
 
+            private function contactUs():void {
+                currentState = "ContactUs";
+            }
+
             private function tosAccepted():void {
                 currentState = "ConfirmCreation";
             }
@@ -134,37 +126,6 @@
 			private function createdAccount():void {
 				var resultID:int = creationService.createAccount.lastResult as int;
                 currentState = "FreeActivation";
-
-                /*if (account.accountType == Account.FREE) {
-                    currentState = "FreeActivation";
-                } else {*/
-                    /*account.accountID = resultID;
-                    if (creationService.channelSet == null) {
-                        creationService.channelSet = ServerConfig.getChannelSet(creationService.destination);
-                    }
-                    var token:AsyncToken = creationService.channelSet.login(user.userName, password);
-                    token.addResponder(new AsyncResponder(
-                        function (event:ResultEvent, token:Object = null):void {
-                            switch (event.result) {
-                                case "success":
-                                    creationService.authenticate.send(user.userName, password);
-                                    break;
-                                default:
-                                    trace(event.result);
-                            }
-                        },
-                        function (event:FaultEvent, token:Object = null):void {
-                            switch (event.fault.faultCode) {
-                                case "Client.Authentication":
-                                default:
-                                    trace("this shouldn't happen...");
-                            }
-                        }
-                    ));*/
-                //}
-				//creationService.authenticate.send(user.userName, user.password);
-				//dispatchEvent(new AccountWizardResultEvent(AccountWizardResultEvent.ACCOUNT_CREATED, account));
-				
 			}
 			
 			private function gotUserInfo():void {
@@ -180,29 +141,84 @@
 	</mx:Script>
 	<mx:VBox width="100%" height="100%" id="coreContent" backgroundAlpha="1" paddingTop="0">
 		<mx:VBox width="100%" height="100%" id="initialContent" horizontalAlign="center">
+            <mx:HBox verticalAlign="middle">
+                <mx:Label text="60 (Sixty!) day free trial" fontSize="24" fontWeight="bold"/>
+                <mx:Label text="Really? 60 Days?" textDecoration="underline" fontSize="12"
+                        toolTip="We're still in the early stages of our release, so for a limited time, we're giving a 60 day trial period instead of the normal 30."/>
+            </mx:HBox>
+            <mx:Label text="Sign up in a couple of clicks!" fontSize="18"/>
             <mx:Spacer height="15"/>
-            <account:NoAccountText id="noAccountText" width="80%"/>
-            <mx:TextArea fontWeight="bold" width="80%" borderStyle="none" editable="false" text="Important Beta Note: For the current phase of application testing, all account types are available without subscription fee. Once Easy Insight determines that the current phase is complete, account tiers other than Free will require subscription fees."/>
-			<mx:HBox width="80%" id="box1">
-				<mx:VBox width="50%" backgroundColor="#FFFFFF">
-					<mx:RadioButtonGroup id="accountTypeRadio" selectedValue="free"/>
-					<mx:RadioButton group="{accountTypeRadio}" fontSize="12" id="free" value="free" label="Free Account - The quick and free way to start" selected="true"/>
-					<mx:RadioButton group="{accountTypeRadio}" fontSize="12" id="individual" value="individual" label="Individual Account - More features, more space, more insight!"/>
-                    <!--
-					<mx:RadioButton group="{accountTypeRadio}" fontSize="12" id="professional" value="professional" label="Professional Account - For the company ready to move ahead"/>
-                    <mx:RadioButton group="{accountTypeRadio}" fontSize="12" id="enterprise" value="enterprise" label="Enterprise Account - For the company ready to move ahead"/>
-                    -->
-                    <mx:TextArea fontWeight="bold" width="80%" borderStyle="none" editable="false" text="Professional and enterprise accounts are invite only for the current phase of beta."/>
-				</mx:VBox>
-				<mx:Spacer width="40"/>
-				<mx:VBox verticalAlign="middle" height="100%">
-					<mx:Spacer height="100%"/>
-					<mx:Button fontSize="14" label="Create Account!" click="startAccountCreation()"/>
-					<mx:Spacer height="100%"/>
-				</mx:VBox>
-			</mx:HBox>
-			<mx:Spacer height="30"/>		
-			<account:AccountTypeComparison width="80%" id="accountComparison"/>
+            <mx:HBox>
+                <mx:Spacer width="100%"/>
+                <mx:LinkButton label="Detailed Comparison Grid" textDecoration="underline" fontSize="14"
+                        click="PopUpManager.createPopUp(this, DetailedComparisonWindow)"/>                
+            </mx:HBox>
+            <mx:Spacer height="15"/>
+            <mx:HBox width="100%" horizontalAlign="center" paddingLeft="20" paddingRight="20">
+                <mx:VBox borderStyle="solid" dropShadowEnabled="true" cornerRadius="15" horizontalAlign="center" backgroundColor="#FFFFFF"
+                        width="250" paddingTop="5" paddingBottom="10">
+                    <mx:Label text="FREE" fontSize="20" fontWeight="bold"/>
+                    <mx:Label text="Not a cent!" color="#D42525" fontWeight="bold"/>
+                    <mx:HRule width="100%"/>
+                    <mx:Label text="Upload data"/>
+                    <mx:Label text="Easily create reports"/>
+                    <mx:Label text="Use the marketplace"/>
+                    <mx:Label text="One user"/>
+                    <mx:Button label="Sign up!" click="signup(Account.FREE)" styleName="blueButton"/>
+                </mx:VBox>
+                <mx:Spacer width="30"/>
+                <mx:VBox borderStyle="solid" dropShadowEnabled="true" cornerRadius="15" horizontalAlign="center" backgroundColor="#FFFFFF"
+                        width="250" paddingTop="5" paddingBottom="10">
+                    <mx:Label text="INDIVIDUAL" fontSize="20" fontWeight="bold"/>
+                    <mx:Label text="$10/month" color="#D42525" fontWeight="bold"/>
+                    <mx:HRule width="100%"/>
+                    <mx:Label text="Connect to other SaaS"/>
+                    <mx:Label text="Integrate with API"/>
+                    <mx:Label text="100 MB of storage"/>
+                    <mx:Label text="One user"/>
+                    <mx:Button label="Sign up!" click="signup(Account.INDIVIDUAL)" styleName="blueButton"/>
+                </mx:VBox>
+                <mx:Spacer width="30"/>
+                <mx:VBox borderStyle="solid" dropShadowEnabled="true" cornerRadius="15" horizontalAlign="center" backgroundColor="#FFFFFF"
+                        width="250" paddingTop="5" paddingBottom="10">
+                    <mx:Label text="GROUP" fontSize="20" fontWeight="bold"/>
+                    <mx:Label text="$100/month" color="#D42525" fontWeight="bold"/>
+                    <mx:HRule width="100%"/>
+                    <mx:Label text="Collaborate across your business"/>
+                    <mx:Label text="Data level security"/>
+                    <mx:Label text="1 GB of storage"/>
+                    <mx:Label text="20 users"/>
+                    <mx:Button label="Sign up!" click="signup(Account.GROUP)" styleName="blueButton"/>
+                </mx:VBox>
+            </mx:HBox>
+            <mx:Spacer height="15"/>
+            <mx:Label text="If your business wants to really move it up to the next level..." fontSize="20"/>
+            <mx:Spacer height="15"/>
+            <mx:HBox width="100%" horizontalAlign="center" paddingLeft="20" paddingRight="20">
+                <mx:VBox borderStyle="solid" dropShadowEnabled="true" cornerRadius="15" horizontalAlign="center" backgroundColor="#FFFFFF"
+                        width="250" paddingTop="5" paddingBottom="10">
+                    <mx:Label text="PROFESSIONAL" fontSize="20" fontWeight="bold"/>
+                    <mx:Label text="$1500/month" color="#D42525" fontWeight="bold"/>
+                    <mx:HRule width="100%"/>
+                    <mx:Label text="Sophisticated improvement tools"/>
+                    <mx:Label text="Business process integration"/>
+                    <mx:Label text="20 GB of storage"/>
+                    <mx:Label text="Unlimited users"/>
+                    <mx:Button label="Contact us" click="contactUs()" styleName="blueButton"/>
+                </mx:VBox>
+                <mx:Spacer width="30"/>
+                <mx:VBox borderStyle="solid" dropShadowEnabled="true" cornerRadius="15" horizontalAlign="center" backgroundColor="#FFFFFF"
+                        width="250" paddingTop="5" paddingBottom="10">
+                    <mx:Label text="ENTERPRISE" fontSize="20" fontWeight="bold"/>
+                    <mx:Label text="Talk to us" color="#D42525" fontWeight="bold"/>
+                    <mx:HRule width="100%"/>
+                    <mx:Label text="Dedicated storage and systems"/>
+                    <mx:Label text="Extra customization and security"/>
+                    <mx:Label text="Terabytes of storage"/>
+                    <mx:Label text="Unlimited users"/>
+                    <mx:Button label="Contact us" click="contactUs()" styleName="blueButton"/>
+                </mx:VBox>
+            </mx:HBox>
 		</mx:VBox>
 	</mx:VBox>
 	<mx:RemoteObject id="creationService" destination="login">

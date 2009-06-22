@@ -60,6 +60,8 @@
         import com.easyinsight.genredata.ModuleAnalyzeEvent;
         import com.easyinsight.listing.FeedAdminAnalyzeSource;
 
+        import com.easyinsight.util.PNGEnc;
+
         import mx.collections.SortField;
         import mx.collections.Sort;
         import mx.events.ListEvent;
@@ -515,14 +517,16 @@
                     var valid:Boolean = Validator.validateAll(analysisValidators).length == 0;
                     if (valid) {
                         dataView.updateExportMetadata();
+                        var bd:BitmapData = new BitmapData(dataView.width, dataView.height);
+			            bd.draw(dataView);
+			            var ba:ByteArray = PNGEnc.encode(bd);
                         analysisDefinition.name = analysisNameInput.text;
                         analysisDefinition.tagCloud = TagCloud.fromString(analysisTagsInput.text);
                         analysisDefinition.marketplaceVisible = marketplaceVisibleCheckbox.selected;
                         analysisDefinition.publiclyVisible = publiclyVisibleCheckbox.selected;
                         analysisDefinition.visibleAtFeedLevel = shareDataSourceSharingCheckbox.selected;
                         ProgressAlert.alert(this, "Saving the report...", "Saved!", analysisService.saveAnalysisDefinition);
-                        analysisService.saveAnalysisDefinition(analysisDefinition);
-
+                        analysisService.saveAnalysisDefinition(analysisDefinition, ba);
                     } else {
                         tabNavigator.selectedIndex = 0;
                         Alert.show("There are one or more errors which need to be corrected before this report can be saved.");
@@ -909,10 +913,16 @@
                     <mx:CheckBox label="Use Data Source Sharing Settings"
                                  id="shareDataSourceSharingCheckbox" selected="{shareDataSourceSharing}"
                                  click="sourceSharingChange(event)"/>
-                    <mx:CheckBox label="Publicly Visible" id="publiclyVisibleCheckbox"
+                    <mx:HBox verticalAlign="middle">
+                        <mx:CheckBox label="Publicly Visible" id="publiclyVisibleCheckbox"
                                  selected="{publiclyVisible}"/>
-                    <mx:CheckBox label="Marketplace Visible" id="marketplaceVisibleCheckbox"
-                                 selected="{marketplaceVisible}"/>
+                        <mx:Label fontSize="10" textDecoration="underline" text="What is this?" toolTip="By checking this box, you make the report visible to other users that you send the URL to."/>
+                    </mx:HBox>
+                    <mx:HBox verticalAlign="middle">
+                        <mx:CheckBox label="Marketplace Visible" id="marketplaceVisibleCheckbox"
+                                 selected="{marketplaceVisible}" enabled="{publiclyVisible}"/>
+                        <mx:Label fontSize="10" textDecoration="underline" text="What is this?" toolTip="By checking this box, you make the report visible to all other Easy Insight users in the marketplace."/>
+                    </mx:HBox>
                 </mx:VBox>
             </mx:HBox>
             <mx:HBox label="Data" icon="@Embed(source='../../../assets/data_table.png')" paddingLeft="10"

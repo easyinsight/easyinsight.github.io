@@ -34,7 +34,7 @@ import mx.formatters.Formatter;
 		}
 		
 		public function qualifiedName():String {
-			return key.createString() + getQualifiedSuffix();
+			return key.internalString() + getQualifiedSuffix();
 		}
 		
 		protected function getQualifiedSuffix():String {

@@ -36,6 +36,7 @@
 		<![CDATA[
         import com.easyinsight.analysis.DefaultMenuFactory;
         import com.easyinsight.analysis.DelayedAPIKeyLink;
+        import com.easyinsight.analysis.DelayedReportLink;
         import com.easyinsight.analysis.PopupMenuFactory;
         import com.easyinsight.framework.FullScreenModuleEvent;
         import com.easyinsight.framework.ModuleAnalyzeSource;
@@ -53,6 +54,7 @@
         import com.easyinsight.quicksearch.EIDescriptor;
         import com.easyinsight.quicksearch.QuickSearchEvent;
         import com.easyinsight.quicksearch.QuickSearchWindow;
+        import com.easyinsight.report.ReportAnalyzeSource;
         import com.easyinsight.solutions.DataSourceDescriptor;
         import com.easyinsight.solutions.DelayedSolutionLink;
         import com.easyinsight.solutions.InsightDescriptor;
@@ -74,7 +76,6 @@
         import com.easyinsight.genredata.AnalyzeEvent;
         import com.easyinsight.listing.AnalyzeSource;
         import com.easyinsight.listing.IPerspective;
-        import com.easyinsight.listing.KeywordSearchEvent;
         import com.easyinsight.listing.ListingChangeEvent;
         import com.easyinsight.commands.CommandProcessor;
         import com.easyinsight.framework.User;
@@ -113,11 +114,9 @@
             PopupMenuFactory.menuFactory = new DefaultMenuFactory();
             new CommandProcessor();
             addEventListener(FaultEvent.FAULT, onFault, true);
-            this.perspective = introPanel;
             browserManager = BrowserManager.getInstance();
             browserManager.addEventListener(BrowserChangeEvent.BROWSER_URL_CHANGE, parseURL);
             browserManager.init("", "Intro");
-            introPanel.gotFocus();
             User.getEventNotifier().addEventListener(NavigationEvent.NAVIGATION, navigation);
             userService.isSessionLoggedIn.send();
         }
@@ -152,7 +151,7 @@
                     descriptor.dataFeedID = eiDescriptor.id;
                     internalModuleAnalyze(new ModuleAnalyzeEvent(new DescriptorAnalyzeSource(descriptor)));
                 } else if (event.eiDescriptor.getType() == EIDescriptor.REPORT) {
-                    internalModuleAnalyze(new ModuleAnalyzeEvent(new AnalysisDefinitionAnalyzeSource(event.eiDescriptor as InsightDescriptor)));
+                    internalModuleAnalyze(new ModuleAnalyzeEvent(new ReportAnalyzeSource(event.eiDescriptor as InsightDescriptor)));
                 } else if (event.eiDescriptor.getType() == EIDescriptor.GOAL_TREE) {
                     internalAnalyze(new AnalyzeEvent(new GoalDataAnalyzeSource(event.eiDescriptor.id)));
                 }
@@ -232,9 +231,15 @@
                                     var solution:String = o.solutionID;
                                     if (solution != null) {
                                         var solutionLink:DelayedSolutionLink = new DelayedSolutionLink(Number(solution));
-                                        solutionLink.addEventListener(AnalyzeEvent.ANALYZE, internalAnalyze);
+                                        solutionLink.addEventListener(ListingChangeEvent.LISTING_CHANGE, changePerspective);
                                         solutionLink.execute();
                                     } else {
+                                        var reportID:String = o.reportID;
+                                        if (reportID != null) {
+                                            var deepReportLink:DelayedReportLink = new DelayedReportLink(Number(reportID));
+                                            deepReportLink.addEventListener(ModuleAnalyzeEvent.MODULE_ANALYZE, internalModuleAnalyze);
+                                            deepReportLink.execute();
+                                        } else {
                                         var page:String = o.page;
                                         if (page != null) {
                                             if (currentState == "Analysis") {
@@ -268,11 +273,14 @@
                                                     navigation(new NavigationEvent("Solutions"));
                                                     break;
                                                 case "account":
-                                                    navigation(new NavigationEvent("My Account"));
+                                                    navigation(new NavigationEvent("Accounts"));
                                                     break;
                                                 case "welcome":
                                                     navigation(new NavigationEvent(null, new WelcomeScreen()));
                                             }
+                                        } else {
+                                            navigation(new NavigationEvent("Intro"));
+                                        }
                                         }
                                     }
                                 }
@@ -317,7 +325,11 @@
             event.dataAnalysisContainer.removeEventListener(ModuleAnalyzeEvent.MODULE_ANALYZE, internalModuleAnalyze);
             event.dataAnalysisContainer.removeEventListener(NavigationEvent.NAVIGATION, navigation);
             dataAnalysis = null;
-            this.perspective.gotFocus();
+            if (this.perspective == null) {
+                navigation(new NavigationEvent("Intro"));
+            } else {
+                this.perspective.gotFocus();
+            }
         }
 
         private function changePerspective(event:ListingChangeEvent):void {
@@ -326,19 +338,19 @@
                     var existingDispatcher:EventDispatcher = this.perspective as EventDispatcher;
                     existingDispatcher.removeEventListener(AnalyzeEvent.ANALYZE, internalAnalyze);
                     existingDispatcher.removeEventListener(ModuleAnalyzeEvent.MODULE_ANALYZE, internalModuleAnalyze);
+                    existingDispatcher.removeEventListener(ListingChangeEvent.LISTING_CHANGE, changePerspective);
                 }
-                coreSpace.removeChildAt(0);
+                if (coreSpace.getChildren().length > 0) {
+                    coreSpace.removeChildAt(0);
+                }
                 this.perspective = event.perspective;
                 coreSpace.addChildAt(perspective as DisplayObject, 0);
                 perspective.gotFocus();
                 var dispatcher:EventDispatcher = perspective as EventDispatcher;
                 dispatcher.addEventListener(AnalyzeEvent.ANALYZE, internalAnalyze);
                 dispatcher.addEventListener(ModuleAnalyzeEvent.MODULE_ANALYZE, internalModuleAnalyze);
+                dispatcher.addEventListener(ListingChangeEvent.LISTING_CHANGE, changePerspective);
             }
-        }
-
-        private function search(event:KeywordSearchEvent):void {
-            //getCurrentPerspective().search(event.keyword);
         }
 
         private function getCurrentPerspective():IPerspective {
@@ -421,7 +433,7 @@
     <framework:EIMessageListener id="messageListener"/>
 
     <mx:VBox width="100%" height="100%" id="coreVBox" paddingLeft="0" verticalGap="0" paddingRight="0">
-        <listing:HeaderBar keywordSearch="search(event)" width="100%" id="headerBar"
+        <listing:HeaderBar width="100%" id="headerBar"
                            paddingTop="5" paddingBottom="5" paddingLeft="10" paddingRight="10" bottom="0" top="0"
                            listingChange="changePerspective(event)" launchQuickSearch="launchQuickSearchWindow()"/>
         <mx:Box width="100%" height="5" backgroundColor="#D42525" left="0" right="0" id="highBar"/>
@@ -429,10 +441,8 @@
 
 
             <mx:HBox width="100%" height="100%" id="coreSpace" paddingLeft="0" paddingTop="0" top="0" paddingRight="0">
-
                 <intro1:IntroPanel id="introPanel" width="100%" height="100%" paddingTop="0"
                                    navigation="navigation(event)"/>
-
             </mx:HBox>
 
 

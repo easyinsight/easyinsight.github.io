@@ -38,7 +38,10 @@ public class DataSourceCopyUtils {
             clonedFeedDefinition.setFeedName(newDataSourceName);
         }
         feedStorage.updateDataFeedConfiguration(clonedFeedDefinition, conn);
-        buildClonedDataStores(copyData, feedDefinition, clonedFeedDefinition, conn);
+        if (!(clonedFeedDefinition instanceof CompositeFeedDefinition)) {
+            buildClonedDataStores(copyData, feedDefinition, clonedFeedDefinition, conn);
+        }
+        clonedFeedDefinition.postClone(conn);
         new UserUploadInternalService().createUserFeedLink(userID, clonedFeedDefinition.getDataFeedID(), Roles.OWNER, conn);
         if (includeChildren) {
             List<AnalysisDefinition> insights = getInsightsFromFeed(feedID, conn);
@@ -76,7 +79,7 @@ public class DataSourceCopyUtils {
         return infos;
     }
 
-    private static void buildClonedDataStores(boolean copyData, FeedDefinition feedDefinition, FeedDefinition clonedFeedDefinition, Connection conn) throws SQLException {
+    public static void buildClonedDataStores(boolean copyData, FeedDefinition feedDefinition, FeedDefinition clonedFeedDefinition, Connection conn) throws SQLException {
         if (copyData) {
             DataStorage sourceTable = DataStorage.writeConnection(feedDefinition, conn);
             DataSet dataSet;
@@ -124,10 +127,14 @@ public class DataSourceCopyUtils {
         FeedDefinition clonedFeedDefinition = feedDefinition.clone(conn);
         clonedFeedDefinition.setUploadPolicy(new UploadPolicy(userID));
         feedStorage.addFeedDefinitionData(clonedFeedDefinition, conn);
-        AnalysisDefinition clonedRootInsight = analysisStorage.cloneReport(feedDefinition.getAnalysisDefinitionID(), conn);
-        clonedRootInsight.setUserBindings(Arrays.asList(new UserToAnalysisBinding(userID, UserPermission.OWNER)));
-        analysisStorage.saveAnalysis(clonedRootInsight, conn);
-        clonedFeedDefinition.setAnalysisDefinitionID(clonedRootInsight.getAnalysisID());
+        if (feedDefinition.getAnalysisDefinitionID() > 0) {
+            AnalysisDefinition clonedRootInsight = analysisStorage.cloneReport(feedDefinition.getAnalysisDefinitionID(), conn);
+            if (clonedRootInsight != null) {
+                clonedRootInsight.setUserBindings(Arrays.asList(new UserToAnalysisBinding(userID, UserPermission.OWNER)));
+                analysisStorage.saveAnalysis(clonedRootInsight, conn);
+                clonedFeedDefinition.setAnalysisDefinitionID(clonedRootInsight.getAnalysisID());
+            }
+        }
         if (clonedFeedDefinition.getDynamicServiceDefinitionID() > 0) {
             cloneAPIs(conn, feedDefinition, clonedFeedDefinition);
         }

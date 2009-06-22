@@ -1,13 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FullScreenPage xmlns="com.easyinsight.*" xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%"
-                paddingLeft="0" paddingBottom="0" paddingTop="0" paddingRight="0" creationComplete="onCreation()">
+<mx:Box xmlns="com.easyinsight.*" xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%"
+                paddingLeft="0" paddingBottom="0" paddingTop="0" paddingRight="0" creationComplete="onCreation()"
+                backgroundColor="#818285" horizontalAlign="center" implements="com.easyinsight.listing.IPerspective">
     <mx:Script>
 		<![CDATA[
 			import com.easyinsight.analysis.AnalysisCloseEvent;
 
-            import com.easyinsight.framework.NavigationEvent;
-            import com.easyinsight.genredata.ModuleAnalyzeEvent;
-            import com.easyinsight.util.FileAlert;
+        import com.easyinsight.framework.NavigationEvent;
+        import com.easyinsight.genredata.ModuleAnalyzeEvent;
+        import com.easyinsight.util.FileAlert;
 
         import mx.controls.Alert;
 
@@ -172,11 +173,11 @@
             trace(event);
         }
 
-            private function onModuleAnalyze(event:ModuleAnalyzeEvent):void {
-                dispatchEvent(event);
-            }
+        private function onModuleAnalyze(event:ModuleAnalyzeEvent):void {
+            dispatchEvent(event);
+        }
 
-            private function install():void {
+        private function install():void {
             var window:SolutionInstallationWindow = SolutionInstallationWindow(PopUpManager.createPopUp(this.parent, SolutionInstallationWindow, true));
             window.addEventListener(SolutionEvent.SOLUTION_INSTALLED, onSolutionInstalled);
             window.addEventListener(ModuleAnalyzeEvent.MODULE_ANALYZE, onModuleAnalyze);
@@ -204,13 +205,14 @@
             showGoalTrees = true;
             goalCount = goalTrees.length;
         }
+
+        public function gotFocus():void {
+        }
 		]]>
 	</mx:Script>
     <mx:RemoteObject destination="solutionService" id="solutionService">
         <mx:method name="getSolutionContents" result="gotContents()"/>
     </mx:RemoteObject>
-    <mx:Box width="100%" height="100%" backgroundColor="#818285" horizontalAlign="center" paddingLeft="0" paddingTop="0"
-            paddingRight="0" paddingBottom="0">
         <mx:VBox width="1000" height="100%" backgroundImage="{background2}" backgroundSize="100%" paddingLeft="20"
                 paddingRight="20" paddingTop="20" paddingBottom="20"> 
             <mx:HBox>
@@ -312,5 +314,4 @@
                 </mx:VBox>
             </mx:HBox>
         </mx:VBox>
-    </mx:Box>
-</FullScreenPage>
+</mx:Box>

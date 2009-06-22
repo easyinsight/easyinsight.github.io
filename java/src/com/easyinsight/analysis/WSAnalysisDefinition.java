@@ -36,6 +36,7 @@ public abstract class WSAnalysisDefinition implements Serializable {
     public static final int MULTIMEASURE = 17;
 
     private String name;
+    private String authorName;
     private long analysisID;
     private long dataFeedID;
     private int reportType;
@@ -50,6 +51,32 @@ public abstract class WSAnalysisDefinition implements Serializable {
     private boolean publiclyVisible;
     private boolean marketplaceVisible;
     private boolean visibleAtFeedLevel;
+    private Date dateCreated;
+    private Date dateUpdated;
+
+    public Date getDateCreated() {
+        return dateCreated;
+    }
+
+    public void setDateCreated(Date dateCreated) {
+        this.dateCreated = dateCreated;
+    }
+
+    public Date getDateUpdated() {
+        return dateUpdated;
+    }
+
+    public void setDateUpdated(Date dateUpdated) {
+        this.dateUpdated = dateUpdated;
+    }
+
+    public String getAuthorName() {
+        return authorName;
+    }
+
+    public void setAuthorName(String authorName) {
+        this.authorName = authorName;
+    }
 
     public long getReportStateID() {
         return reportStateID;

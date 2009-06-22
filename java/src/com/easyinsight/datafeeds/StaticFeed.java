@@ -49,7 +49,7 @@ public class StaticFeed extends Feed implements Serializable {
             source.closeConnection();
         }
         for (IRow row : dataSet.getRows()) {
-            Value value = row.getValue(queryItem.getKey());
+            Value value = row.getValue(queryItem.getKey().toBaseKey());
             metadata.addValue(analysisItem, value);
         }
         return metadata;

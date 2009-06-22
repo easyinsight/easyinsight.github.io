@@ -1,0 +1,68 @@
+<?xml version="1.0" ?>
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" creationComplete="setupValidators()">
+    <mx:Metadata>
+        [Event(name="previousPage", type="com.easyinsight.account.PreviousPageEvent")]
+    </mx:Metadata>
+    <mx:states>
+        <mx:State name="Contacted">
+            <mx:RemoveChild target="{box1}"/>
+            <mx:RemoveChild target="{box2}"/>
+            <mx:RemoveChild target="{box3}"/>
+            <mx:AddChild relativeTo="{coreBox}">
+                <mx:Label text="Thanks for your interest. A sales representive will contact you soon." fontSize="18"/>
+            </mx:AddChild>
+        </mx:State>
+    </mx:states>
+    <mx:Script><![CDATA[
+        import mx.validators.Validator;
+
+        private var validators:Array;
+
+        private function setupValidators():void {
+            validators = [ userNameValidator, fullNameValidator, emailValidator ];
+        }
+
+        private function contact():void {
+            var results:Array = Validator.validateAll(validators);
+            if (results.length == 0) {
+                userService.salesRequest.send(yourName.text, emailAddress.text, accountName.text, additionalInfo.text);
+            }
+        }
+
+        private function requested():void {
+            currentState = "Contacted";
+        }
+        ]]></mx:Script>
+    <mx:VBox verticalGap="0" borderThickness="1" borderColor="#D42525" borderStyle="solid" dropShadowEnabled="true" id="coreBox">
+        <mx:Box width="100%" height="5" backgroundColor="#D42525" left="0" right="0" id="box1"/>
+        <mx:Box width="100%" backgroundColor="#DBD9AC" horizontalAlign="center" id="box2">
+            <mx:Label text="Give us a little info: " fontFamily="Tahoma" fontWeight="bold" fontSize="14"/>
+        </mx:Box>
+        <mx:Form width="100%" backgroundColor="0xDCDBD0" id="box3">
+            <mx:FormItem label="Your name: " direction="horizontal" fontFamily="Tahoma" fontWeight="bold">
+                <mx:TextInput id="yourName"/>
+            </mx:FormItem>
+            <mx:FormItem label="Your email address: " direction="horizontal" fontFamily="Tahoma" fontWeight="bold">
+                <mx:TextInput id="emailAddress"/>
+            </mx:FormItem>
+            <mx:FormItem label="Company name: " direction="horizontal" fontFamily="Tahoma" fontWeight="bold">
+                <mx:TextInput id="accountName"/>
+            </mx:FormItem>
+            <mx:FormItem label="Any additional info: " direction="horizontal" fontFamily="Tahoma" fontWeight="bold">
+                <mx:TextArea id="additionalInfo"/>
+            </mx:FormItem>
+            <mx:FormItem>
+				<mx:HBox>
+					<mx:Button label="Send" click="contact()"/>
+                    <mx:LinkButton label="Cancel" click="dispatchEvent(new PreviousPageEvent())"/>
+				</mx:HBox>
+			</mx:FormItem>
+        </mx:Form>
+    </mx:VBox>
+    <mx:StringValidator source="{yourName}" property="text" id="userNameValidator" minLength="3" maxLength="20"/>
+	<mx:StringValidator source="{accountName}" property="text" id="fullNameValidator" minLength="3" maxLength="40"/>
+	<mx:EmailValidator source="{emailAddress}" property="text" id="emailValidator"/>
+    <mx:RemoteObject id="userService" destination="login">
+        <mx:method name="salesRequest" result="requested()"/>
+    </mx:RemoteObject>
+</mx:VBox>

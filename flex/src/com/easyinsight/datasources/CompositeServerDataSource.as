@@ -3,7 +3,7 @@ import com.easyinsight.feedassembly.CompositeFeedDefinition;
 
 [Bindable]
 [RemoteClass(alias="com.easyinsight.datafeeds.composite.CompositeServerDataSource")]
-public class CompositeServerDataSource extends CompositeFeedDefinition {
+public class CompositeServerDataSource extends CompositeFeedDefinition implements IServerDataSourceDefinition {
 
     public var credentialsDefinition:int;
 

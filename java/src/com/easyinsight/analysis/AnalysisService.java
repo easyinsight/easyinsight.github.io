@@ -45,6 +45,7 @@ public class AnalysisService {
             session.getTransaction().begin();
             AnalysisDefinition analysisDefinition = analysisStorage.getPersistableReport(reportID, session);
             AnalysisDefinition clone = analysisDefinition.clone();
+            clone.setAuthorName(SecurityUtil.getUserName());
             clone.setTitle(newName);
             List<UserToAnalysisBinding> bindings = new ArrayList<UserToAnalysisBinding>();
             bindings.add(new UserToAnalysisBinding(SecurityUtil.getUserID(), UserPermission.OWNER));
@@ -124,6 +125,10 @@ public class AnalysisService {
     }
 
     public WSAnalysisDefinition saveAnalysisDefinition(WSAnalysisDefinition wsAnalysisDefinition) {
+        return saveAnalysisDefinition(wsAnalysisDefinition, null);
+    }
+
+    public WSAnalysisDefinition saveAnalysisDefinition(WSAnalysisDefinition wsAnalysisDefinition, byte[] image) {
         long userID = SecurityUtil.getUserID();
         if (wsAnalysisDefinition.getAnalysisID() > 0) {
             SecurityUtil.authorizeInsight(wsAnalysisDefinition.getAnalysisID());
@@ -156,8 +161,12 @@ public class AnalysisService {
 
             AnalysisDefinition analysisDefinition = AnalysisDefinitionFactory.fromWSDefinition(wsAnalysisDefinition);
             analysisDefinition.setUserBindings(bindings);
+            analysisDefinition.setAuthorName(SecurityUtil.getUserName());
             analysisStorage.saveAnalysis(analysisDefinition, session);
             session.flush();
+            if (image != null) {
+                saveImage(image, analysisDefinition.getAnalysisID(), conn);
+            }
             conn.commit();
             return analysisDefinition.createBlazeDefinition();
         } catch (Exception e) {
@@ -177,7 +186,14 @@ public class AnalysisService {
             session.close();
             Database.instance().closeConnection(conn);
         }
-    }    
+    }
+
+    private void saveImage(byte[] image, long reportID, Connection conn) throws SQLException {
+        PreparedStatement saveImageStmt = conn.prepareStatement("INSERT INTO REPORT_IMAGE (REPORT_ID, REPORT_IMAGE) VALUES (?, ?)");
+        saveImageStmt.setLong(1, reportID);
+        saveImageStmt.setBytes(2, image);
+        saveImageStmt.execute();
+    }
 
     public void deleteAnalysisDefinition(long reportID) {
         long userID = SecurityUtil.getUserID();

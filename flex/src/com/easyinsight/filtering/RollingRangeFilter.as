@@ -56,6 +56,12 @@ package com.easyinsight.filtering
 		{
 			this.rollingFilter = filterDefinition as RollingDateRangeFilterDefinition;
 		}
+
+        private var _filterEditable:Boolean = true;
+
+        public function set filterEditable(editable:Boolean):void {
+            _filterEditable = editable;
+        }
 		
 		public function get filterDefinition():FilterDefinition
 		{
@@ -104,25 +110,27 @@ package com.easyinsight.filtering
                 dispatchEvent(new FilterUpdatedEvent(FilterUpdatedEvent.FILTER_ADDED, filterDefinition, null, this));
 			}
 			addChild(comboBox);
-			if (editButton == null) {
-				editButton = new Button();
-				editButton.addEventListener(MouseEvent.CLICK, edit);
-				editButton.setStyle("icon", editIcon);
-				editButton.toolTip = "Edit";
-			}
-			addChild(editButton);
-			if (deleteButton == null) {
-				deleteButton = new Button();
-				deleteButton.addEventListener(MouseEvent.CLICK, deleteSelf);
-				deleteButton.setStyle("icon", deleteIcon);
-                if (rollingFilter.intrinsic) {
-                    deleteButton.enabled = false;
-                    deleteButton.toolTip = "This filter is an intrinsic part of the data source and cannot be deleted.";
-                } else {
-				    deleteButton.toolTip = "Delete";
+            if (_filterEditable) {
+                if (editButton == null) {
+                    editButton = new Button();
+                    editButton.addEventListener(MouseEvent.CLICK, edit);
+                    editButton.setStyle("icon", editIcon);
+                    editButton.toolTip = "Edit";
                 }
-			}
-			addChild(deleteButton);
+                addChild(editButton);
+                if (deleteButton == null) {
+                    deleteButton = new Button();
+                    deleteButton.addEventListener(MouseEvent.CLICK, deleteSelf);
+                    deleteButton.setStyle("icon", deleteIcon);
+                    if (rollingFilter.intrinsic) {
+                        deleteButton.enabled = false;
+                        deleteButton.toolTip = "This filter is an intrinsic part of the data source and cannot be deleted.";
+                    } else {
+                        deleteButton.toolTip = "Delete";
+                    }
+                }
+                addChild(deleteButton);
+            }
 		}
 		
 		private function filterValueChanged(event:DropdownEvent):void {			

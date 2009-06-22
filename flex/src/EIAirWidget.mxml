@@ -136,10 +136,8 @@
                 currentState = "LoggingIn";
                 login(userNameJS, passwordJS);
             } else {
-                if (authService.channelSet == null) {
-                    currentState = "LoginState";
-                    authService.channelSet = ServerConfig.getChannelSet(authService.destination);
-                }
+                currentState = "LoginState";
+                authService.channelSet = ServerConfig.getChannelSet(authService.destination);
             }
         }
 

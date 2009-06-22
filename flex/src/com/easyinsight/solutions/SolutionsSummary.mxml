@@ -130,15 +130,17 @@
                     <mx:Button toolTip="Search" icon="@Embed(source='../../../../assets/view.png')" id="searchButton"/>
                 </mx:HBox>
             </mx:HBox>
+            
             <mx:DataGrid dataProvider="{availableSolutions}" width="100%" height="100%"
-                         itemDoubleClick="onDoubleClick(event)" id="solutionGrid">
+                         itemDoubleClick="onDoubleClick(event)" id="solutionGrid" rowHeight="100">
                 <mx:columns>
+                    <util:EIDataGridColumn headerText="" sortable="false" dataField="name"
+                                           itemRenderer="com.easyinsight.solutions.SolutionImageRenderer" width="200"/>
                     <util:EIDataGridColumn headerText="Solution Name" dataField="name"
-                                           headerRenderer="com.easyinsight.groups.CustomGroupHeader"/>
+                                           />
                     <util:EIDataGridColumn headerText="Industry" dataField="industry" width="150"
-                                           headerRenderer="com.easyinsight.groups.CustomGroupHeader"/>
-                    <util:EIDataGridColumn headerText="Author" dataField="author" width="150"
-                                           headerRenderer="com.easyinsight.groups.CustomGroupHeader"/>
+                                           />
+                    <util:EIDataGridColumn headerText="Author" dataField="author" width="150"/>
                     <util:EIDataGridColumn headerText="" width="50" sortable="false"
                                            itemRenderer="com.easyinsight.solutions.AvailableSolutionIcons"/>
                 </mx:columns>

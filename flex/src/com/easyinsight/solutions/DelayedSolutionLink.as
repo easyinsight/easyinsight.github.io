@@ -1,6 +1,8 @@
 package com.easyinsight.solutions {
 import com.easyinsight.genredata.AnalyzeEvent;
 
+import com.easyinsight.listing.ListingChangeEvent;
+
 import flash.events.EventDispatcher;
 
 import mx.rpc.events.ResultEvent;
@@ -26,7 +28,10 @@ public class DelayedSolutionLink extends EventDispatcher{
     private function gotSolution(event:ResultEvent):void {
         var result:Solution = solutionService.retrieveSolution.lastResult as Solution;
         if (result != null) {
-            dispatchEvent(new AnalyzeEvent(new SolutionAnalyzeSource(result)));
+            var solutionDetail:RevisedSolutionDetail = new RevisedSolutionDetail();
+            solutionDetail.solution = result;
+            dispatchEvent(new ListingChangeEvent(solutionDetail));
+            //dispatchEvent(new AnalyzeEvent(new SolutionAnalyzeSource(result)));
         }
     }
 }

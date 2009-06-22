@@ -54,13 +54,14 @@ public class EmbeddedDataService extends EventDispatcher implements IEmbeddedDat
             }
             data.addItem(endObject);
         }
-        dispatchEvent(new EmbeddedDataServiceEvent(EmbeddedDataServiceEvent.DATA_RETURNED, data, listData.definition, clientProcessorMap));
+        dispatchEvent(new EmbeddedDataServiceEvent(EmbeddedDataServiceEvent.DATA_RETURNED, data, listData.definition, clientProcessorMap, listData.dataSourceAccessible,
+                listData.lastDataTime, listData.attribution));
         dispatchEvent(new DataServiceLoadingEvent(DataServiceLoadingEvent.LOADING_STOPPED));
     }
 
-    public function retrieveData(reportID:int):void {
+    public function retrieveData(reportID:int, dataSourceID:int, filters:ArrayCollection):void {
         dispatchEvent(new DataServiceLoadingEvent(DataServiceLoadingEvent.LOADING_STARTED));
-        dataRemoteSource.getEmbeddedResults.send(reportID);        
+        dataRemoteSource.getEmbeddedResults.send(reportID, dataSourceID, filters);
     }
 }
 }

@@ -1,146 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
-<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml"
-                creationComplete="addEventListener(KeyboardEvent.KEY_UP, keyedSignon); focusManager.setFocus(userName)"
-                title="Login">
-    <mx:states>
-        <mx:State name="ResetPassword">
-            <mx:RemoveChild target="{loginForm}"/>
-            <mx:AddChild relativeTo="{coreBox}">
-                <mx:Form>
-                    <mx:FormItem label="Email Address:">
-                        <mx:TextInput id="emailAddressInput"/>
-                    </mx:FormItem>
-                    <mx:FormItem label="">
-                        <mx:Button label="Reset Password" click="resetPassword()"/>
-                    </mx:FormItem>
-                </mx:Form>
-            </mx:AddChild>
-        </mx:State>
-        <mx:State name="Activated">
-            <mx:RemoveChild target="{noAccount}"/>
-            <mx:AddChild relativeTo="{activationBox}">
-                <mx:Label text="Your account has been activated! You can now log in: "/>
-            </mx:AddChild>
-        </mx:State>
-    </mx:states>
-    <mx:Script>
-		<![CDATA[
-			import mx.rpc.AsyncResponder;
-        import mx.rpc.events.FaultEvent;
-        import mx.rpc.events.ResultEvent;
-        import mx.rpc.AsyncToken;
-        import mx.messaging.config.ServerConfig;
-
-        import com.easyinsight.framework.NavigationEvent;
-        import com.easyinsight.framework.UserServiceResponse;
-        import com.easyinsight.framework.User;
-        import com.easyinsight.framework.LoginEvent;
-
+<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:framework="com.easyinsight.framework.*"
+                title="Login" removedEffect="{dissolveOut}" creationCompleteEffect="{dissolveIn}">
+    <framework:LoginComponent loginEvent2="PopUpManager.removePopUp(this)" loginClose="PopUpManager.removePopUp(this)"
+            showActivation="{_showActivation}" cancelVisible="true" additionalInfo="{_additionalInfo}"/>
+    <mx:Dissolve id="dissolveOut" duration="500" alphaFrom="1.0" alphaTo="0.0"/>
+    <mx:Dissolve id="dissolveIn" duration="500" alphaFrom="0.0" alphaTo="1.0"/>
+    <mx:Script><![CDATA[
         import mx.managers.PopUpManager;
 
+        [Bindable]
         private var _showActivation:Boolean;
 
-        public function set showActivation(val:Boolean):void {
-            _showActivation = val;
+        [Bindable]
+        private var _additionalInfo:String;
+
+
+        public function set additionalInfo(value:String):void {
+            _additionalInfo = value;
         }
 
-        private function resetPassword():void {
-        }
-
-
-        override protected function createChildren():void {
-            super.createChildren();
-            if (_showActivation) {
-                currentState = "Activated";
-            }
-        }
-
-        private function handleAuthentication():void {
-
-            var authResult:UserServiceResponse = authService.authenticate.lastResult as UserServiceResponse;
-            var successful:Boolean = authResult.successful;
-            if (successful) {
-                User.initializeUser(authResult.name, authResult.email,
-                        authResult.accountType, authResult.spaceAllowed, authResult.accountAdmin,
-                        authResult.dataSourceCreator, authResult.insightCreator, authResult.userID);
-                User.getInstance().password = authResult.encryptedPassword;
-                User.getInstance().userName = authResult.userName;
-                PopUpManager.removePopUp(this);
-                dispatchEvent(new LoginEvent(LoginEvent.LOGIN));
-                User.getEventNotifier().dispatchEvent(new LoginEvent(LoginEvent.LOGIN));
-            } else {
-                failureMessageLabel.text = authResult.failureMessage;
-            }
-        }
-
-        private function signon():void {
-            if (authService.channelSet == null) {
-                authService.channelSet = ServerConfig.getChannelSet(authService.destination);
-            }
-            var token:AsyncToken = authService.channelSet.login(userName.text, password.text);
-            token.addResponder(new AsyncResponder(
-                    function (event:ResultEvent, token:Object = null):void {
-                        switch (event.result) {
-                            case "success":
-                                authService.authenticate.send(userName.text, password.text);
-                                break;
-                            default:
-                                trace(event.result);
-                        }
-                    },
-                    function (event:FaultEvent, token:Object = null):void {
-                        switch (event.fault.faultCode) {
-                            case "Client.Authentication":
-                            default:
-                                var failureMessage:String = event.fault.faultString;
-                                failureMessageLabel.text = failureMessage;
-                        }
-                    }
-                    ));
-
-        }
-
-        private function cancel():void {
-            PopUpManager.removePopUp(this);
-        }
-
-        private function keyedSignon(event:KeyboardEvent):void {
-            if (event.keyCode == Keyboard.ENTER) {
-                signon();
-            }
-        }
-
-        private function createNewAccount():void {
-            User.getEventNotifier().dispatchEvent(new NavigationEvent(NavigationEvent.ACCOUNTS));
-            PopUpManager.removePopUp(this);
-        }
-                ]]>
-	</mx:Script>
-    <mx:VBox styleName="TitleWindowContents" id="coreBox">
-        <mx:Box id="activationBox"/>
-        <mx:Form id="loginForm">
-            <mx:FormItem label="User Name:" direction="horizontal">
-                <mx:TextInput id="userName"/>
-            </mx:FormItem>
-            <mx:FormItem label="Password:" direction="horizontal">
-                <mx:TextInput id="password" displayAsPassword="true"/>
-            </mx:FormItem>
-            <mx:FormItem direction="horizontal">
-                <mx:Button label="Sign In" click="signon()"/>
-                <mx:Button label="Cancel" click="cancel()"/>
-            </mx:FormItem>
-            <mx:FormItem label="Don't have an account yet?" id="noAccount">
-                <mx:Button label="Create Account" click="createNewAccount()"/>
-            </mx:FormItem>
-            <!--
-            <mx:FormItem label="Forgot your Password?">
-                <mx:Button label="resetPassword()"/>
-            </mx:FormItem>
-            -->
-        </mx:Form>
-        <mx:Text text="" id="failureMessageLabel"/>
-    </mx:VBox>
-    <mx:RemoteObject id="authService" destination="login">
-        <mx:method name="authenticate" result="handleAuthentication()"/>
-    </mx:RemoteObject>
+        public function set showActivation(value:Boolean):void {
+            _showActivation = value;
+        }]]></mx:Script>
 </mx:TitleWindow>

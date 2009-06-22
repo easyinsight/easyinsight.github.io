@@ -21,7 +21,11 @@
 			import com.easyinsight.customupload.UserUpload;
 			import com.easyinsight.framework.LoginEvent;
 			import com.easyinsight.customupload.UploadExternalSource;
+            import com.easyinsight.report.ReportAnalyzeSource;
             import com.easyinsight.solutions.InsightDescriptor;
+
+            import mx.collections.ICollectionView;
+            import mx.collections.Sort;
             import mx.events.AdvancedDataGridEvent;
             import mx.utils.URLUtil;
 			import mx.managers.BrowserManager;
@@ -168,7 +172,7 @@
                 	analyzeSource = new DescriptorAnalyzeSource(selectedObject as DataFeedDescriptor);
                     dispatchEvent(new ModuleAnalyzeEvent(analyzeSource));
                 } else {
-                    analyzeSource = new AnalysisDefinitionAnalyzeSource(InsightDescriptor(selectedObject));
+                    analyzeSource = new ReportAnalyzeSource(InsightDescriptor(selectedObject));
                     dispatchEvent(new ModuleAnalyzeEvent(analyzeSource));
                 }
 			}
@@ -245,12 +249,15 @@
             }
 
             private function gotFeedAnalysisTree():void {
+                var sort:Sort = ICollectionView(uploadGrid.dataProvider).sort;
                 sourceTreeData = uploadService.getFeedAnalysisTree.lastResult as ArrayCollection;
                 displayTreeData = new ArrayCollection(sourceTreeData.toArray());
                 var hierarchicalData:HierarchicalData = new HierarchicalData();
                 hierarchicalData.source = displayTreeData;
                 uploadGrid.dataProvider = hierarchicalData;
                 IHierarchicalCollectionView(uploadGrid.dataProvider).filterFunction = filterFunction;
+                displayTreeData.sort = sort;
+                displayTreeData.refresh();
             }
             
             private function filterFunction(item:Object):Boolean {            	

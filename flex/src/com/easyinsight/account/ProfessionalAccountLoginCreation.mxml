@@ -61,7 +61,6 @@
                 user.insightCreator = true;
                 user.dataSourceCreator = true;
                 _account.name = accountName.text;
-                _account.maxUsers = licenseNumber.value;
                 creationService.doesUserExist.send(userName.text, email.text);
             }
         }
@@ -78,11 +77,8 @@
             <mx:Label text="Account Settings: " fontFamily="Tahoma" fontWeight="bold" fontSize="14"/>
         </mx:Box>
         <mx:Form width="100%" backgroundColor="0xDCDBD0">
-            <mx:FormItem label="Account Name: " direction="horizontal" fontFamily="Tahoma" fontWeight="bold">
+            <mx:FormItem label="Company Name: " direction="horizontal" fontFamily="Tahoma" fontWeight="bold">
                 <mx:TextInput id="accountName"/>
-            </mx:FormItem>
-            <mx:FormItem label="Number of User Licenses: "  direction="horizontal" fontFamily="Tahoma" fontWeight="bold">
-                <mx:NumericStepper id="licenseNumber" minimum="1" stepSize="1" value="1"/>
             </mx:FormItem>
         </mx:Form>
     </mx:VBox>
@@ -113,8 +109,8 @@
 			</mx:FormItem>
 			<mx:FormItem>
 				<mx:HBox>
-					<mx:Button label="Cancel" click="cancel()"/>
-					<mx:Button label="Next" click="createAccount()"/>
+                    <mx:Button label="Next" click="createAccount()"/>
+					<mx:LinkButton label="Cancel" click="cancel()" textDecoration="underline"/>
 				</mx:HBox>
 			</mx:FormItem>
 			<mx:FormItem label="">

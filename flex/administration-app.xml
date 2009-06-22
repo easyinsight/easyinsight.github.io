@@ -1,6 +1,6 @@
 <flex-config xmlns="http://www.adobe.com/2006/flex-config">
     <compiler>
-        <debug>false</debug>
+        <debug>true</debug>
         <!--
         <external-library-path>
             <path-element>libs/astra-flex.swc</path-element>

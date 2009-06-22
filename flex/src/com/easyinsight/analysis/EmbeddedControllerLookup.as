@@ -5,6 +5,7 @@ import com.easyinsight.analysis.charts.twoaxisbased.area.Area3DChartEmbeddedCont
 import com.easyinsight.analysis.charts.twoaxisbased.area.AreaChartEmbeddedController;
 import com.easyinsight.analysis.charts.twoaxisbased.line.Line3DChartEmbeddedController;
 import com.easyinsight.analysis.charts.twoaxisbased.line.LineChartEmbeddedController;
+import com.easyinsight.analysis.charts.twoaxisbased.line.MultiMeasureLineChartEmbeddedController;
 import com.easyinsight.analysis.charts.xaxisbased.column.Column3DChartEmbeddedController;
 import com.easyinsight.analysis.charts.xaxisbased.column.ColumnChartEmbeddedController;
 import com.easyinsight.analysis.charts.xaxisbased.pie.Pie3DChartEmbeddedController;
@@ -55,6 +56,9 @@ public class EmbeddedControllerLookup {
                 break;
             case AnalysisDefinition.LINE:
                 controller = LineChartEmbeddedController;
+                break;
+            case AnalysisDefinition.MMLINE:
+                controller = MultiMeasureLineChartEmbeddedController;
                 break;
             case AnalysisDefinition.LINE3D:
                 controller = Line3DChartEmbeddedController;

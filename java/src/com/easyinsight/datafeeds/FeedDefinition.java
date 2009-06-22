@@ -6,10 +6,12 @@ import com.easyinsight.core.Key;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.users.Credentials;
 import com.easyinsight.analysis.*;
+import com.easyinsight.storage.DataStorage;
 
 import java.util.*;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.sql.PreparedStatement;
 import java.io.Serializable;
 
 /**
@@ -319,6 +321,7 @@ public class FeedDefinition implements Cloneable, Serializable {
     public Feed createFeed() {
         Feed feed = createFeedObject();
         feed.setFeedID(getDataFeedID());
+        feed.setAttribution(getAttribution());
         Map<Long, AnalysisItem> replacementMap = new HashMap<Long, AnalysisItem>();
         List<AnalysisItem> clones = new ArrayList<AnalysisItem>();
         for (AnalysisItem field : getFields()) {
@@ -424,5 +427,28 @@ public class FeedDefinition implements Cloneable, Serializable {
             }
         }
         return key;
+    }
+
+    public void postClone(Connection conn) throws SQLException {
+        
+    }
+
+    public void delete(Connection conn) throws SQLException {
+        onDelete(conn);
+        // cascade into base classes - see http://bugs.mysql.com/bug.php?id=13102 as to why this code sucks.
+        PreparedStatement deleteTodosStmt = conn.prepareStatement("delete from todo_base where todo_id in (select todo_id from configure_data_feed_todo where data_source_id = ?)");
+        PreparedStatement deleteAsyncTasksStmt = conn.prepareStatement("DELETE FROM scheduled_task WHERE scheduled_task_id in (select scheduled_task_id from server_refresh_task where data_source_id = ?)");
+        PreparedStatement deleteStmt = conn.prepareStatement("DELETE FROM DATA_FEED WHERE DATA_FEED_ID = ?");
+        deleteTodosStmt.setLong(1, dataFeedID);
+        deleteAsyncTasksStmt.setLong(1, dataFeedID);
+        deleteStmt.setLong(1, dataFeedID);
+
+        deleteTodosStmt.executeUpdate();
+        deleteAsyncTasksStmt.executeUpdate();
+        deleteStmt.executeUpdate();
+    }
+
+    protected void onDelete(Connection conn) throws SQLException {
+        DataStorage.delete(dataFeedID, conn);
     }
 }

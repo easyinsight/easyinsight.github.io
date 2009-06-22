@@ -8,6 +8,7 @@ package com.easyinsight.filtering
 		function set filterDefinition(filterDefinition:FilterDefinition):void;
 		function get filterDefinition():FilterDefinition;
 		function addEventListener(type:String, listener:Function, useCapture:Boolean=false, priority:int=0, useWeakReference:Boolean=false):void;
-		function set analysisItems(analysisItems:ArrayCollection):void; 
+		function set analysisItems(analysisItems:ArrayCollection):void;
+        function set filterEditable(editable:Boolean):void;
 	}
 }

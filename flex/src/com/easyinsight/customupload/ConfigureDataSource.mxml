@@ -1,8 +1,9 @@
 <?xml version="1.0" ?>
 <mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml">
     <mx:Script><![CDATA[
-        import com.easyinsight.administration.feed.ServerDataSourceDefinition;
+        import com.easyinsight.administration.feed.FeedDefinitionData;
 
+        import com.easyinsight.datasources.IServerDataSourceDefinition;
         import com.easyinsight.genredata.ModuleAnalyzeEvent;
         import com.easyinsight.listing.DataFeedDescriptor;
         import com.easyinsight.listing.DescriptorAnalyzeSource;
@@ -13,7 +14,7 @@
         private var _dataSourceClass:Class;
         private var dataSourceCreation:IServerDataSourceCreation;
         private var _dataSourceID:int;
-        private var _dataSourceDefinition:ServerDataSourceDefinition;
+        private var _dataSourceDefinition:FeedDefinitionData;
 
         private var _onlyDataSource:Boolean;
 
@@ -39,9 +40,9 @@
         }
 
         private function gotDataSource():void {
-            dataSourceDefinition = feedService.getFeedDefinition.lastResult as ServerDataSourceDefinition;
+            dataSourceDefinition = feedService.getFeedDefinition.lastResult as FeedDefinitionData;
             ready = true;
-            var configClass:Class = dataSourceDefinition.configClass();
+            var configClass:Class = (dataSourceDefinition as IServerDataSourceDefinition).configClass();
             dataSourceCreation = new configClass();
             coreContent.addChild(dataSourceCreation as DisplayObject);
         }
@@ -50,11 +51,11 @@
             _dataSourceID = value;
         }
 
-        public function get dataSourceDefinition():ServerDataSourceDefinition {
+        public function get dataSourceDefinition():FeedDefinitionData {
             return _dataSourceDefinition;
         }
 
-        public function set dataSourceDefinition(value:ServerDataSourceDefinition):void {
+        public function set dataSourceDefinition(value:FeedDefinitionData):void {
             _dataSourceDefinition = value;
         }
 

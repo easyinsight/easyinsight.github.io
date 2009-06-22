@@ -38,6 +38,7 @@ package com.easyinsight.listing
 		public var description:String;
 		public var ownerName:String;
         public var hasSavedCredentials:Boolean;
+        public var solutionTemplate:Boolean;
 		
 		public function DataFeedDescriptor()
 		{
