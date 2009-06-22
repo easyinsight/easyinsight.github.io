@@ -2,7 +2,6 @@ package com.easyinsight.datafeeds.composite;
 
 import com.easyinsight.datafeeds.*;
 import com.easyinsight.core.Key;
-import com.easyinsight.core.DerivedKey;
 import com.easyinsight.users.Credentials;
 import com.easyinsight.users.User;
 import com.easyinsight.users.SubscriptionLicense;
@@ -63,73 +62,38 @@ public abstract class CompositeServerDataSource extends CompositeFeedDefinition 
         List<CompositeFeedNode> nodes = new ArrayList<CompositeFeedNode>();
         Set<FeedType> feedTypes = getFeedTypes();
         FeedStorage feedStorage = new FeedStorage();
-        List<AnalysisItem> newFields = new ArrayList<AnalysisItem>();
-        /*Map<Key, AnalysisItem> fieldMap = new HashMap<Key, AnalysisItem>();
-        if (getFields() != null) {
-            for (AnalysisItem item : getFields()) {
-                DerivedKey derivedKey = (DerivedKey) item.getKey();
-                fieldMap.put(derivedKey, item);
+        boolean newSource = getCompositeFeedNodes().size() == 0;
+        if (newSource) {
+            for (FeedType feedType : feedTypes) {
+                IServerDataSourceDefinition definition = createForFeedType(feedType);
+                newDefinition(definition, conn, credentials, retrieveUser(conn, SecurityUtil.getUserID()).getUserName(), SecurityUtil.getUserID());
+                dataSources.add(definition);
+                CompositeFeedNode node = new CompositeFeedNode();
+                node.setDataFeedID(definition.getDataFeedID());
+                feedMap.put(definition.getFeedType(), definition);
+                nodes.add(node);
             }
-        }*/
-        if (getCompositeFeedNodes() != null) {
+            setCompositeFeedNodes(nodes);
+            List<CompositeFeedConnection> connections = new ArrayList<CompositeFeedConnection>();
+            for (ChildConnection childConnection : getChildConnections()) {
+                IServerDataSourceDefinition sourceDef = feedMap.get(childConnection.getSourceFeedType());
+                IServerDataSourceDefinition targetDef = feedMap.get(childConnection.getTargetFeedType());
+                Key sourceKey = sourceDef.getField(childConnection.getSourceKey());
+                Key targetKey = targetDef.getField(childConnection.getTargetKey());
+                CompositeFeedConnection connection = new CompositeFeedConnection(sourceDef.getDataFeedID(), targetDef.getDataFeedID(),
+                        sourceKey, targetKey);
+                connections.add(connection);
+            }
+            setConnections(connections);
+            populateFields(conn);
+        } else {
             for (CompositeFeedNode node : getCompositeFeedNodes()) {
                 IServerDataSourceDefinition definition = (IServerDataSourceDefinition) feedStorage.getFeedDefinitionData(node.getDataFeedID(), conn);
                 dataSources.add(definition);
-                feedMap.put(definition.getFeedType(), definition);
-                feedTypes.remove(definition.getFeedType());
-                nodes.add(node);
-                //addFields(newFields, fieldMap, definition);
             }
         }
-        for (FeedType feedType : feedTypes) {
-            IServerDataSourceDefinition definition = createForFeedType(feedType);
-            newDefinition(definition, conn, credentials, retrieveUser(conn, SecurityUtil.getUserID()).getUserName(), SecurityUtil.getUserID());
-            dataSources.add(definition);
-            CompositeFeedNode node = new CompositeFeedNode();
-            node.setDataFeedID(definition.getDataFeedID());
-            feedMap.put(definition.getFeedType(), definition);
-            nodes.add(node);
-            //addFields(newFields, fieldMap, definition);
-        }
-        setCompositeFeedNodes(nodes);
-        List<CompositeFeedConnection> connections = new ArrayList<CompositeFeedConnection>();
-        for (ChildConnection childConnection : getChildConnections()) {
-            IServerDataSourceDefinition sourceDef = feedMap.get(childConnection.getSourceFeedType());
-            IServerDataSourceDefinition targetDef = feedMap.get(childConnection.getTargetFeedType());
-            Key sourceKey = sourceDef.getField(childConnection.getSourceKey());
-            Key targetKey = targetDef.getField(childConnection.getTargetKey());
-            CompositeFeedConnection connection = new CompositeFeedConnection(sourceDef.getDataFeedID(), targetDef.getDataFeedID(),
-                    sourceKey, targetKey);
-            connections.add(connection);
-        }
-        setConnections(connections);
-        populateFields(conn);        
         return dataSources;
     }
-
-    /*private boolean addFields(List<AnalysisItem> newFields, Map<Key, AnalysisItem> fieldMap, IServerDataSourceDefinition definition) throws CloneNotSupportedException {
-        boolean changed = false;
-        Map<Long, AnalysisItem> replacementMap = new HashMap<Long, AnalysisItem>();
-        List<AnalysisItem> updateFields = new ArrayList<AnalysisItem>();
-        for (AnalysisItem childField : definition.getFields()) {
-            DerivedKey derivedKey = new DerivedKey(childField.getKey(), definition.getDataFeedID());
-            AnalysisItem analysisItem = fieldMap.get(derivedKey);
-            if (analysisItem == null) {
-                changed = true;
-                AnalysisItem clonedItem = childField.clone();
-                clonedItem.setKey(derivedKey);
-                newFields.add(clonedItem);
-                replacementMap.put(childField.getAnalysisItemID(), clonedItem);
-                updateFields.add(clonedItem);
-            } else {
-                newFields.add(analysisItem);
-            }
-        }
-        for (AnalysisItem item : updateFields) {
-            item.updateIDs(replacementMap);
-        }
-        return changed;
-    }*/
 
     private void newDefinition(IServerDataSourceDefinition definition, Connection conn, Credentials credentials, String userName, long userID) throws SQLException {
         DataStorage metadata = null;
@@ -259,7 +223,9 @@ public abstract class CompositeServerDataSource extends CompositeFeedDefinition 
         msg.setHeader(AsyncMessage.SUBTOPIC_HEADER_NAME, String.valueOf(getDataFeedID()));
         msg.setMessageId(clientID);
         msg.setTimestamp(System.currentTimeMillis());
-        msgBroker.routeMessageToService(msg, null);
+        if (msgBroker != null) {
+            msgBroker.routeMessageToService(msg, null);
+        }
     }
 
     public String retrievePassword() {

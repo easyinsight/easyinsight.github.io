@@ -30,7 +30,7 @@ public class AdminService {
         ThreadMXBean threadMXBean = ManagementFactory.getThreadMXBean();
         ThreadInfo[] threadInfos = threadMXBean.dumpAllThreads(true, true);
         for (ThreadInfo threadInfo : threadInfos) {
-            LogClass.debug(threadInfo.toString());
+            LogClass.info(threadInfo.toString());
         }
     }
 

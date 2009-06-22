@@ -176,7 +176,9 @@ public abstract class ServerDataSourceDefinition extends FeedDefinition implemen
         msg.setHeader(AsyncMessage.SUBTOPIC_HEADER_NAME, String.valueOf(getDataFeedID()));
         msg.setMessageId(clientID);
         msg.setTimestamp(System.currentTimeMillis());
-        msgBroker.routeMessageToService(msg, null);
+        if (msgBroker != null) {
+            msgBroker.routeMessageToService(msg, null);
+        }
     }
 
     public String getUsername() {
