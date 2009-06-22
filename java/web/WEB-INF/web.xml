@@ -53,6 +53,13 @@
         <load-on-startup>1</load-on-startup>
     </servlet>
 
+    <servlet>
+        <servlet-name>SolutionImageServlet</servlet-name>
+        <display-name>SolutionImageServlet</display-name>
+        <servlet-class>com.easyinsight.solutions.SolutionImageServlet</servlet-class>
+        <load-on-startup>1</load-on-startup>
+    </servlet>
+
     <!-- MessageBroker Servlet -->
     <servlet>
         <servlet-name>MessageBrokerServlet</servlet-name>
@@ -88,6 +95,11 @@
     <servlet-mapping>
         <servlet-name>SolutionUploadServlet</servlet-name>
         <url-pattern>/SolutionUploadServlet</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>SolutionImageServlet</servlet-name>
+        <url-pattern>/SolutionImageServlet</url-pattern>
     </servlet-mapping>
 
     <servlet-mapping>
