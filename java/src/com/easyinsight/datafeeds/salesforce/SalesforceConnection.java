@@ -15,9 +15,6 @@ import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.analysis.*;
 import com.easyinsight.logging.LogClass;
 import com.sforce.soap.enterprise.*;
-import com.sun.xml.internal.ws.developer.WSBindingProvider;
-import com.sun.xml.internal.ws.api.message.Headers;
-import com.sun.xml.internal.bind.api.JAXBRIContext;
 
 import javax.xml.namespace.QName;
 import javax.xml.ws.BindingProvider;
@@ -227,15 +224,15 @@ public class SalesforceConnection {
             Soap port = new SforceService(wsdlLocation, new QName("urn:enterprise.soap.sforce.com", "SforceService")).getSoap();
             LoginResult loginResponse = port.login(userName, password);
 
-            WSBindingProvider bindingProvider = ((WSBindingProvider) port);
-            bindingProvider.getRequestContext().put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY, loginResponse.getServerUrl());
+            /*WSBindingProvider bindingProvider = ((WSBindingProvider) port);
+            bindingProvider.getRequestContext().put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY, loginResponse.getServerUrl());*/
 
             //Enable GZip compression
             Map<String, List<String>> httpHeaders = new HashMap<String, List<String>>();
             httpHeaders.put("Content-Encoding", Collections.singletonList("gzip"));
             httpHeaders.put("Accept-Encoding", Collections.singletonList("gzip"));
-            Map<String, Object> reqContext = bindingProvider.getRequestContext();
-            reqContext.put(MessageContext.HTTP_REQUEST_HEADERS, httpHeaders);
+            /*Map<String, Object> reqContext = bindingProvider.getRequestContext();
+            reqContext.put(MessageContext.HTTP_REQUEST_HEADERS, httpHeaders);*/
 
             SessionHeader sh = new SessionHeader();
             sh.setSessionId(loginResponse.getSessionId());
@@ -247,7 +244,7 @@ public class SalesforceConnection {
                 throw new WebServiceException(e);
             }
 
-            bindingProvider.setOutboundHeaders(Headers.create((JAXBRIContext) jc, sh));
+            //bindingProvider.setOutboundHeaders(Headers.create((JAXBRIContext) jc, sh));
             return port;
         } catch (LoginFault lf) {
             throw lf;
