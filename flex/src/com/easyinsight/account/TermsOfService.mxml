@@ -1,24 +1,9 @@
 <?xml version="1.0" ?>
-<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%" horizontalAlign="center"
+<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" width="800" height="600" horizontalAlign="center"
         paddingLeft="15"
-		paddingTop="15" paddingBottom="15" paddingRight="15">
-    <mx:Metadata>
-        [Event(name="tosAccepted", type="com.easyinsight.account.TermsOfServiceEvent")]
-        [Event(name="previousPage", type="com.easyinsight.account.PreviousPageEvent")]
-    </mx:Metadata>
+		paddingTop="15" paddingBottom="15" paddingRight="15" title="Terms of Service" showCloseButton="true" close="PopUpManager.removePopUp(this)">
     <mx:Script><![CDATA[
-        import mx.controls.Alert;
-
-        private function backToPrevious():void {
-            dispatchEvent(new PreviousPageEvent());
-        }
-
-        private function acceptTerms():void {
-            if (acceptCheckbox.selected)
-                dispatchEvent(new TermsOfServiceEvent());
-            else
-                Alert.show("You must check acceptance of the terms of service to continue.");
-        }
+        import mx.managers.PopUpManager;
 ]]></mx:Script>
     <mx:TextArea width="800" height="100%" editable="false">
             <mx:htmlText><![CDATA[
@@ -88,6 +73,4 @@ General Conditions
 
             ]]></mx:htmlText>
     </mx:TextArea>
-    <mx:CheckBox label="I Accept These Terms" id="acceptCheckbox"/>
-    <mx:LinkButton label="Back to Previous Page" click="backToPrevious()" textDecoration="underline"/>
-</mx:VBox>
+</mx:TitleWindow>

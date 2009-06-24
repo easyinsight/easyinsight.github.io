@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%" xmlns:account="com.easyinsight.account.*" top="0">
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%" xmlns:account="com.easyinsight.account.*" top="0">
 	<mx:Metadata>
 		[Event(name="accountCreated", type="com.easyinsight.account.AccountWizardResultEvent")]
 	</mx:Metadata>
@@ -22,19 +22,6 @@
 				<account:ProfessionalAccountLoginCreation userDefined="postUserInfo(event)" previousPage="onPreviousPage(event)" account="{account}"/>
 			</mx:AddChild>
 		</mx:State>
-        <mx:State name="TermsOfService">
-			<mx:RemoveChild target="{initialContent}"/>
-			<mx:AddChild relativeTo="{coreContent}">
-				<account:TermsOfService tosAccepted="tosAccepted()" previousPage="onPreviousPage(event)"/>
-			</mx:AddChild>
-		</mx:State>
-		<mx:State name="ConfirmCreation">
-			<mx:RemoveChild target="{initialContent}"/>
-			<mx:AddChild relativeTo="{coreContent}">
-				<account:AccountConfirmationRequest accountCreationConfirmed="accountConfirmed(event)" previousPage="onPreviousPage(event)"
-					account="{account}" user="{user}"/>
-			</mx:AddChild>
-		</mx:State>
 		<mx:State name="AccountCreated">
 			<mx:RemoveChild target="{initialContent}"/>
 			<mx:AddChild relativeTo="{coreContent}">
@@ -54,6 +41,8 @@
 			import com.easyinsight.framework.UserServiceResponse;
 			import com.easyinsight.framework.UserTransferObject;
 			import com.easyinsight.framework.User;
+
+            import com.easyinsight.util.ProgressAlert;
 
             import mx.managers.PopUpManager;
 
@@ -79,45 +68,19 @@
                     case "ProAccountUserInfo":
 						currentState = "";
 						break;
-					case "TermsOfService":
-                        if (account.accountType == Account.FREE || account.accountType == Account.INDIVIDUAL) {
-						    currentState = "UserInfo";
-                        } else {
-                            this.currentState = "ProAccountUserInfo";
-                        }
-						break;
-					case "ConfirmCreation":
-						currentState = "TermsOfService";
-						break;					
 				}
 			}
 			
 			private function postUserInfo(event:UserDefinitionEvent):void {
-				this.user = event.user;
+                this.user = event.user;
                 this.password = event.password;
-                currentState = "TermsOfService";
-				/*switch (account.accountType) {
-					case Account.FREE:
-						attemptAccountCreation();
-						break;						
-					case Account.INDIVIDUAL:						
-					case Account.PROFESSIONAL:
-
-						break;
-				}*/
+                ProgressAlert.alert(this, "Creating account...", "The account has been created and an activation email sent to your address.", creationService.createAccount);
+				attemptAccountCreation();
 			}
 
             private function contactUs():void {
                 currentState = "ContactUs";
             }
-
-            private function tosAccepted():void {
-                currentState = "ConfirmCreation";
-            }
-			
-			private function accountConfirmed(event:AccountCreationConfirmationEvent):void {
-				attemptAccountCreation();
-			}
 			
 			private function attemptAccountCreation():void {
 				creationService.createAccount(user, account, password);
@@ -225,4 +188,4 @@
 		<mx:method name="createAccount" result="createdAccount()"/>
 		<mx:method name="authenticate" result="gotUserInfo()"/>
 	</mx:RemoteObject>
-</mx:Canvas>
+</mx:VBox>

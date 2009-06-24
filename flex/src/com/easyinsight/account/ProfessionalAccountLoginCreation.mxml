@@ -8,7 +8,8 @@
 	</mx:Metadata>
 	<mx:Script>
 		<![CDATA[
-			import mx.validators.Validator;
+        import mx.managers.PopUpManager;
+        import mx.validators.Validator;
 
         import com.easyinsight.framework.UserTransferObject;
 
@@ -16,6 +17,11 @@
         private var _account:Account;
         private var validators:Array;
 
+            private function showTerms():void {
+                var window:TermsOfService = new TermsOfService();
+                PopUpManager.addPopUp(window, this, true);
+                PopUpManager.centerPopUp(window);
+            }
 
         public function set account(val:Account):void {
             _account = val;
@@ -51,6 +57,8 @@
                 failureMessageLabel.text = "Your email addresses do not match.";
             } else if (password.text != confirmPassword.text) {
                 failureMessageLabel.text = "Your passwords do not match.";
+            } else if (!tosCheckbox.selected) {
+                failureMessageLabel.text = "You must accept the terms of service.";
             } else {
                 failureMessageLabel.text = "";
                 user = new UserTransferObject();
@@ -107,9 +115,13 @@
             <mx:FormItem label="Confirm Email Address:" direction="horizontal" fontFamily="Tahoma" fontWeight="bold">
 				<mx:TextInput id="confirmEmail" fontFamily="Lucida Grande" fontWeight="normal"/>
 			</mx:FormItem>
+            <mx:FormItem label="I Accept the Terms of Service" direction="horizontal">
+                <mx:CheckBox id="tosCheckbox"/>
+                <mx:LinkButton label="View Terms of Service" click="showTerms()" textDecoration="underline"/>
+            </mx:FormItem>
 			<mx:FormItem>
 				<mx:HBox>
-                    <mx:Button label="Next" click="createAccount()"/>
+                    <mx:Button label="Create" click="createAccount()"/>
 					<mx:LinkButton label="Cancel" click="cancel()" textDecoration="underline"/>
 				</mx:HBox>
 			</mx:FormItem>

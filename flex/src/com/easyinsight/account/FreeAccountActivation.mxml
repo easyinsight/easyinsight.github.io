@@ -1,4 +1,4 @@
 <?xml version="1.0" ?>
-<mx:Box xmlns:mx="http://www.adobe.com/2006/mxml">
-    <mx:Label text="An email has been sent to your address for activating your new account."/>
+<mx:Box xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%" horizontalAlign="center" verticalAlign="middle">
+    <mx:Label text="An email has been sent to your address for activating your new account." fontSize="14"/>
 </mx:Box>

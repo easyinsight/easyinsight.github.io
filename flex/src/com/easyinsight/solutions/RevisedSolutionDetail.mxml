@@ -22,7 +22,7 @@
                         <mx:Label text="This solution requires a higher account"/>
                         <mx:Label text="tier than what your current subscription."/>    
                     </mx:VBox>
-                    <mx:Button label="Log in or Create Account" styleName="blueButton" click="login()"/>
+                    <mx:Button label="Upgrade Account" styleName="blueButton" click="login()"/>
                 </mx:VBox>
             </mx:AddChild>
         </mx:State>
@@ -196,6 +196,7 @@
             } else {
                 controlsAlpha = .5;
                 controlsEnabled = false;
+                currentState = "AccountBelowRequired";
             }
             installAvailable = solution.installable || solution.goalTreeID > 0;
             if (solution.screencastDirectory == null && "" != solution.screencastDirectory) {

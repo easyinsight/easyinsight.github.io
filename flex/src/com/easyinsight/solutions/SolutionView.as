@@ -16,6 +16,9 @@ public class SolutionView extends VBox{
     private var _titleText:String;
     private var titleLabel:Label;
     private var imageRenderer:SolutionImageRenderer;
+    private var box:VBox;
+
+    private var backgroundColor:uint = 0xFFFFFF;
 
     public function SolutionView() {
         super();
@@ -47,12 +50,12 @@ public class SolutionView extends VBox{
 
     override protected function createChildren():void {
         super.createChildren();
-        var box:VBox = new VBox();
+        box = new VBox();
         box.setStyle("borderStyle", "solid");
         box.setStyle("cornerRadius", 15);
         box.setStyle("dropShadowEnabled", "true");
         box.setStyle("backgroundAlpha", 1);
-        box.setStyle("backgroundColor", 0xFFFFFF);
+        box.setStyle("backgroundColor", backgroundColor);
         addChild(box);
         var titleBox:HBox = new HBox();
         titleBox.percentWidth = 100;
@@ -67,15 +70,17 @@ public class SolutionView extends VBox{
         imageRenderer.data = solution;
         titleText = solution.name;
         if (User.getInstance() == null) {
-            setStyle("alpha", 1);
+            backgroundColor = 0xFFFFFF;
             toolTip = "Click to look at details about this solution.";
         } else if (solution.accessible) {
-            setStyle("alpha", 1);
+            backgroundColor = 0xFFFFFF;
             toolTip = "Click to look at details about this solution.";
         } else {
-            setStyle("alpha", .5);
+            backgroundColor = 0xCCCCCC;
             toolTip = "This solution is not accessible to your account tier.";
         }
+        if (box != null) box.setStyle("backgroundColor", backgroundColor);
+
     }
 
     override public function get data():Object {

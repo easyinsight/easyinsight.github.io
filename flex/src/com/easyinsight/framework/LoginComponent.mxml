@@ -61,13 +61,13 @@
         <mx:State name="Activated">
             <mx:RemoveChild target="{noAccount}"/>
             <mx:AddChild relativeTo="{activationBox}">
-                <mx:Label text="Your account has been activated! You can now log in: "/>
+                <mx:Label text="Your account has been activated! You can now log in: " fontSize="14"/>
             </mx:AddChild>
         </mx:State>
     </mx:states>
     <mx:Script>
 		<![CDATA[
-			import mx.rpc.AsyncResponder;
+        import mx.rpc.AsyncResponder;
         import mx.rpc.events.FaultEvent;
         import mx.rpc.events.ResultEvent;
         import mx.rpc.AsyncToken;
@@ -81,23 +81,23 @@
 
         private var _showActivation:Boolean;
 
-            [Bindable]
+        [Bindable]
         private var resetResult:String;
 
-            [Bindable]
-            private var emailFailure:String;
+        [Bindable]
+        private var emailFailure:String;
 
         public function set additionalInfo(value:String):void {
             _additionalInfo = value;
         }
 
-            private function toBaseState():void {
-                if (_additionalInfo == null) {
-                    currentState = "";
-                } else {
-                    currentState = "AdditionalInfo";
-                }
+        private function toBaseState():void {
+            if (_additionalInfo == null) {
+                currentState = "";
+            } else {
+                currentState = "AdditionalInfo";
             }
+        }
 
         [Bindable]
         [Embed(source="../../../../assets/background2.JPG")]
@@ -109,6 +109,7 @@
 
         public function set showActivation(val:Boolean):void {
             _showActivation = val;
+            invalidateProperties();
         }
 
         private function resetPassword():void {
@@ -138,8 +139,8 @@
         }
 
 
-        override protected function createChildren():void {
-            super.createChildren();
+        override protected function commitProperties():void {
+            super.commitProperties();
             if (_showActivation) {
                 currentState = "Activated";
             }
@@ -206,21 +207,21 @@
                 ]]>
 	</mx:Script>
     <mx:VBox id="coreBox">
-        <mx:Box id="activationBox"/>
+        <mx:Box id="activationBox" width="100%" horizontalAlign="center" paddingTop="10"/>
         <mx:Form id="loginForm">
             <mx:FormItem label="User Name:" direction="horizontal">
-                <mx:TextInput id="userName"/>
+                <mx:TextInput id="userName" tabIndex="1"/>
                 <mx:LinkButton fontSize="10" textDecoration="underline" label="Forgot your User Name?"
                                click="currentState='RemindUserName'"/>
             </mx:FormItem>
             <mx:FormItem label="Password:" direction="horizontal">
-                <mx:TextInput id="password" displayAsPassword="true"/>
+                <mx:TextInput id="password" displayAsPassword="true" tabIndex="2"/>
                 <mx:LinkButton fontSize="10" textDecoration="underline" label="Forgot your Password?"
                                click="currentState='ResetPassword'"/>
             </mx:FormItem>
             <mx:FormItem direction="horizontal">
-                <mx:Button label="Sign In" click="signon()"/>
-                <mx:Button label="Cancel" click="cancel()" visible="{_cancelVisible}"/>
+                <mx:Button label="Sign In" click="signon()" tabIndex="3"/>
+                <mx:Button label="Cancel" click="cancel()" visible="{_cancelVisible}" tabIndex="4"/>
             </mx:FormItem>
             <mx:FormItem label="">
                 <mx:Spacer height="25"/>
