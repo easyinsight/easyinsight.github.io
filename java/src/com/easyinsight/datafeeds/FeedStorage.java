@@ -749,8 +749,6 @@ public class FeedStorage {
                 String description = rs.getString(4);
                 String attribution = rs.getString(5);
                 int role = rs.getInt(6);
-                long analysisID = rs.getLong(9);
-                WSAnalysisDefinition analysisDefinition = new AnalysisStorage().getAnalysisDefinition(analysisID, conn);
                 feedDescriptor = createDescriptor(feedID, feedName, role, 0, feedType, ownerName, description, attribution, null);
                 Collection<Tag> tags = getTags(feedID, conn);
                 StringBuilder tagStringBuilder = new StringBuilder();
@@ -763,10 +761,6 @@ public class FeedStorage {
                     }
                 }
                 feedDescriptor.setTagString(tagStringBuilder.toString());
-                if (feedDescriptor.getRole() == Roles.OWNER) {
-                    analysisDefinition.setCanSaveDirectly(true);
-                }
-                //feedDescriptor.setDefinition(analysisDefinition);
             }
             queryStmt.close();
         } catch (SQLException e) {

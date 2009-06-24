@@ -54,6 +54,7 @@
         import com.easyinsight.quicksearch.EIDescriptor;
         import com.easyinsight.quicksearch.QuickSearchEvent;
         import com.easyinsight.quicksearch.QuickSearchWindow;
+        import com.easyinsight.report.DelayedMultiReportLink;
         import com.easyinsight.report.ReportAnalyzeSource;
         import com.easyinsight.solutions.DataSourceDescriptor;
         import com.easyinsight.solutions.DelayedSolutionLink;
@@ -146,10 +147,7 @@
             if (event.type == QuickSearchEvent.QUICK_SEARCH) {
                 if (event.eiDescriptor.getType() == EIDescriptor.DATA_SOURCE) {
                     var eiDescriptor:DataSourceDescriptor = event.eiDescriptor as DataSourceDescriptor;
-                    var descriptor:DataFeedDescriptor = new DataFeedDescriptor();
-                    descriptor.name = eiDescriptor.name;
-                    descriptor.dataFeedID = eiDescriptor.id;
-                    internalModuleAnalyze(new ModuleAnalyzeEvent(new DescriptorAnalyzeSource(descriptor)));
+                    internalModuleAnalyze(new ModuleAnalyzeEvent(new DescriptorAnalyzeSource(eiDescriptor.id, eiDescriptor.name)));
                 } else if (event.eiDescriptor.getType() == EIDescriptor.REPORT) {
                     internalModuleAnalyze(new ModuleAnalyzeEvent(new ReportAnalyzeSource(event.eiDescriptor as InsightDescriptor)));
                 } else if (event.eiDescriptor.getType() == EIDescriptor.GOAL_TREE) {
@@ -240,7 +238,13 @@
                                             deepReportLink.addEventListener(ModuleAnalyzeEvent.MODULE_ANALYZE, internalModuleAnalyze);
                                             deepReportLink.execute();
                                         } else {
-                                        var page:String = o.page;
+                                            var multiReportID:String = o.multiReportID;
+                                            if (multiReportID != null) {
+                                                var multiReportLink:DelayedMultiReportLink = new DelayedMultiReportLink(Number(multiReportID));
+                                                multiReportLink.addEventListener(ModuleAnalyzeEvent.MODULE_ANALYZE, internalModuleAnalyze);
+                                                multiReportLink.execute();
+                                            } else {
+                                            var page:String = o.page;
                                         if (page != null) {
                                             if (currentState == "Analysis") {
                                                 if (loggedIn) {
@@ -280,6 +284,7 @@
                                             }
                                         } else {
                                             navigation(new NavigationEvent("Intro"));
+                                        }
                                         }
                                         }
                                     }

@@ -45,7 +45,7 @@ public class TestUtil {
     }
 
     public static AnalysisItem getItem(long feedID, String name) {
-        FeedMetadata feedMetadata = new DataService().getFeedMetadata(feedID, false);
+        FeedMetadata feedMetadata = new DataService().getFeedMetadata(feedID);
         for (AnalysisItem field : feedMetadata.getFields()) {
             if (name.equals(field.getKey().toKeyString())) {
                 return field;

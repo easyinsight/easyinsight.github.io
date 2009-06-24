@@ -19,6 +19,9 @@ public class DateValue extends Value implements Serializable {
 
     @Override
     public String toString() {
+        if (date == null) {
+            return "";
+        }
         return date.toString();
     }
 

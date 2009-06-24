@@ -2,7 +2,6 @@ package com.easyinsight.analysis;
 
 import com.easyinsight.datafeeds.*;
 import com.easyinsight.dataset.DataSet;
-import com.easyinsight.users.Credentials;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.benchmark.BenchmarkManager;
 import com.easyinsight.security.SecurityUtil;
@@ -52,11 +51,11 @@ public class DataService {
         }
     }
 
-    public FeedMetadata getFeedMetadata(long feedID, boolean preview) {
+    public FeedMetadata getFeedMetadata(long feedID) {
         SecurityUtil.authorizeFeedAccess(feedID);
         try {
             Feed feed = feedRegistry.getFeed(feedID);
-            List<CredentialRequirement> credentials = feed.getCredentialRequirement();            
+            List<CredentialRequirement> credentialRequirements = feed.getCredentialRequirement();
             Collection<AnalysisItem> feedItems = feed.getFields();
             // need to apply renames from the com.easyinsight.analysis definition here?
             List<AnalysisItem> sortedList = new ArrayList<AnalysisItem>(feedItems);
@@ -69,7 +68,7 @@ public class DataService {
             AnalysisItem[] feedItemArray = new AnalysisItem[sortedList.size()];
             sortedList.toArray(feedItemArray);
             FeedMetadata feedMetadata = new FeedMetadata();
-            feedMetadata.setCredentials(credentials);
+            feedMetadata.setCredentials(credentialRequirements);
             feedMetadata.setDataSourceName(feed.getName());
             feedMetadata.setFields(feedItemArray);
             feedMetadata.setIntrinsicFilters(feed.getIntrinsicFilters());
@@ -143,7 +142,8 @@ public class DataService {
         }
     }
 
-    public EmbeddedDataResults getEmbeddedResults(long reportID, long dataSourceID, List<FilterDefinition> customFilters) {
+    public EmbeddedDataResults getEmbeddedResults(long reportID, long dataSourceID, List<FilterDefinition> customFilters,
+                                                  InsightRequestMetadata insightRequestMetadata) {
         SecurityUtil.authorizeInsight(reportID);
         try {
             EmbeddedCacheKey key = new EmbeddedCacheKey(customFilters, reportID);
@@ -183,11 +183,10 @@ public class DataService {
             long startTime = System.currentTimeMillis();
             EmbeddedDataResults results;
             Feed feed = feedRegistry.getFeed(analysisDefinition.getDataFeedID());
-            Set<Long> ids = validate(analysisDefinition, feed);
+            /*Set<Long> ids = validate(analysisDefinition, feed);
             if (ids.size() > 0) {
                 throw new RuntimeException("Report is no longer valid.");
-            } else {
-                InsightRequestMetadata insightRequestMetadata = new InsightRequestMetadata();
+            } else {*/
                 Set<AnalysisItem> analysisItems = analysisDefinition.getColumnItems(feed.getFields());
                 Collection<FilterDefinition> filters = analysisDefinition.getFilterDefinitions();
                 DataSet dataSet = feed.getAggregateDataSet(analysisItems, filters, insightRequestMetadata, feed.getFields(), false, null);
@@ -205,7 +204,7 @@ public class DataService {
                     resultsCache.put(key, results);                    
                     reportCache.put(dataSourceID, resultsCache);
                 }
-            }
+            //}
             BenchmarkManager.recordBenchmark("DataService:List", System.currentTimeMillis() - startTime);
             return results;
         } catch (Exception e) {
@@ -214,7 +213,7 @@ public class DataService {
         }
     }
 
-    public ListDataResults list(WSAnalysisDefinition analysisDefinition, boolean preview, InsightRequestMetadata insightRequestMetadata) {
+    public ListDataResults list(WSAnalysisDefinition analysisDefinition, InsightRequestMetadata insightRequestMetadata) {
         SecurityUtil.authorizeFeedAccess(analysisDefinition.getDataFeedID());
         try {
             long startTime = System.currentTimeMillis();
@@ -246,14 +245,6 @@ public class DataService {
             LogClass.error(e);
             throw new RuntimeException(e);
         }
-    }
-
-    public FeedMetadata getFeedMetadata(long dataFeed, Credentials credentials) {
-        return getFeedMetadata(dataFeed, false);
-    }
-
-    public ListDataResults list(WSAnalysisDefinition analysisDefinition, InsightRequestMetadata insightRequestMetadata) {
-        return list(analysisDefinition, false, insightRequestMetadata);
     }
 
     public List<Map<String, Object>> getAllData(long dataSourceID, List<FilterDefinition> filterDefinitions) {

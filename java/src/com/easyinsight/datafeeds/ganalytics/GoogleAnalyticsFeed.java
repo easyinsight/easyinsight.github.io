@@ -21,6 +21,8 @@ import java.text.SimpleDateFormat;
 import java.text.DateFormat;
 import java.text.ParseException;
 
+import org.jetbrains.annotations.NotNull;
+
 /**
  * User: James Boe
  * Date: Jun 11, 2009
@@ -83,7 +85,7 @@ public class GoogleAnalyticsFeed extends Feed {
         return metadata;
     }
 
-    private AnalyticsService getAnalyticsService(Credentials credentials) throws AuthenticationException {
+    private AnalyticsService getAnalyticsService(@NotNull Credentials credentials) throws AuthenticationException {
         if (as == null) {
             as = new AnalyticsService("gaExportAPI_acctSample_v1.0");
             as.setUserCredentials(credentials.getUserName(), credentials.getPassword());
@@ -131,8 +133,13 @@ public class GoogleAnalyticsFeed extends Feed {
                 return new DataSet();
             }
 
-            AnalyticsService as = getAnalyticsService(insightRequestMetadata.getCredentialForDataSource(getFeedID()));
             DataSet dataSet = new DataSet();
+
+            Credentials credentials = insightRequestMetadata.getCredentialForDataSource(getFeedID());
+            if (credentials == null) {
+                // user needs to log in again
+            }
+            AnalyticsService as = getAnalyticsService(credentials);
 
             Date startDate = null;
             Date endDate = null;

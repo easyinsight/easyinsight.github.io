@@ -4,21 +4,31 @@
 		<![CDATA[
 			import com.easyinsight.goals.GoalTreeDescriptor;
         import com.easyinsight.listing.DataFeedDescriptor;
-			import mx.managers.PopUpManager;
+
+            import mx.controls.Alert;
+            import mx.managers.PopUpManager;
 			import mx.collections.ArrayCollection;
 
             private function updateImage():void {
-                var window:UpdateSolutionImageWindow = new UpdateSolutionImageWindow();
-                window.sourceID = _solution.solutionID;
-                PopUpManager.addPopUp(window, this, true);
-                PopUpManager.centerPopUp(window);
+                if (_solution == null) {
+                    Alert.show("Save the solution before adding an image.");
+                } else {
+                    var window:UpdateSolutionImageWindow = new UpdateSolutionImageWindow();
+                    window.sourceID = _solution.solutionID;
+                    PopUpManager.addPopUp(window, this, true);
+                    PopUpManager.centerPopUp(window);
+                }
             }
 
             private function updateArchive():void {
-                var window:UpdateSolutionArchiveWindow = new UpdateSolutionArchiveWindow();
-                window.sourceID = _solution.solutionID;
-                PopUpManager.addPopUp(window, this, true);
-                PopUpManager.centerPopUp(window);
+                if (_solution == null) {
+                    Alert.show("Save the solution before adding an archive.");
+                } else {
+                    var window:UpdateSolutionArchiveWindow = new UpdateSolutionArchiveWindow();
+                    window.sourceID = _solution.solutionID;
+                    PopUpManager.addPopUp(window, this, true);
+                    PopUpManager.centerPopUp(window);
+                }
             }
 
             [Bindable]
@@ -49,6 +59,10 @@
             private var archiveName:String;
             [Bindable]
             private var solutionImage:Bitmap;
+            [Bindable]
+            private var screencastName:String;
+            [Bindable]
+            private var screencastDirectory:String;
 
             private function onComplete(event:Event):void {
                 var loaderContent:LoaderInfo = event.currentTarget as LoaderInfo;
@@ -66,6 +80,8 @@
                 solutionTier = this._solution.solutionTier - 1;
                 solutionCategory = this._solution.category - 1;
                 archiveName = _solution.solutionArchiveName;
+                screencastName = _solution.screencastName;
+                screencastDirectory = _solution.screencastDirectory;
 				if (solution.solutionID > 0) {
 					solutionService.getDescriptorsForSolution.send(solution.solutionID);
 				}
@@ -90,6 +106,8 @@
                 if (goalTreeComboBox.selectedIndex > 0) {
                     _solution.goalTreeID = goalTreeComboBox.selectedItem.id;
                 }
+                _solution.screencastDirectory = screencastDirectoryInput.text;
+                _solution.screencastName = screencastNameInput.text;
 				var feedIDs:ArrayCollection = new ArrayCollection();
 				for each (var feedDescriptor:DataFeedDescriptor in includedFeeds) {
 					feedIDs.addItem(feedDescriptor.dataFeedID);
@@ -128,12 +146,14 @@
                 var treesWithNoneOption:ArrayCollection = new ArrayCollection(goalTrees.source);
                 treesWithNoneOption.addItemAt({name: "[ No Selection ]"}, 0);
                 this.goalTrees = treesWithNoneOption;
-                if (_solution.goalTreeID > 0) {
-                    for each (var obj:Object in goalTrees) {
-                        if (obj is GoalTreeDescriptor) {
-                            var descriptor:GoalTreeDescriptor = obj as GoalTreeDescriptor;
-                            if (descriptor.id == _solution.goalTreeID) {
-                                goalTreeComboBox.selectedItem = descriptor;
+                if (_solution != null) {
+                    if (_solution.goalTreeID > 0) {
+                        for each (var obj:Object in goalTrees) {
+                            if (obj is GoalTreeDescriptor) {
+                                var descriptor:GoalTreeDescriptor = obj as GoalTreeDescriptor;
+                                if (descriptor.id == _solution.goalTreeID) {
+                                    goalTreeComboBox.selectedItem = descriptor;
+                                }
                             }
                         }
                     }
@@ -204,6 +224,12 @@
             <mx:FormItem label="Image: " direction="vertical">
                 <mx:Button label="Update Image" click="updateImage()"/>
                 <mx:Image source="{solutionImage}"/>
+            </mx:FormItem>
+            <mx:FormItem label="Screencast Directory: ">
+                <mx:TextInput id="screencastDirectoryInput" text="{screencastDirectory}"/>
+            </mx:FormItem>
+            <mx:FormItem label="Screencast Name: ">
+                <mx:TextInput id="screencastNameInput" text="{screencastName}"/>
             </mx:FormItem>
             <mx:FormItem label="Data Sources: ">
                 <mx:VBox>

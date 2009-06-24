@@ -1,7 +1,6 @@
 package com.easyinsight.goals {
 import com.easyinsight.framework.ModuleAnalyzeSource;
 import com.easyinsight.genredata.ModuleAnalyzeEvent;
-import com.easyinsight.listing.DataFeedDescriptor;
 import com.easyinsight.listing.DescriptorAnalyzeSource;
 import flash.events.MouseEvent;
 import mx.containers.HBox;
@@ -20,10 +19,7 @@ public class DataSourceLinkButton extends HBox{
     }
 
     private function onClick(event:MouseEvent):void {
-        var descriptor:DataFeedDescriptor = new DataFeedDescriptor();
-        descriptor.name = goalDataSource.feedName;
-        descriptor.dataFeedID = goalDataSource.feedID;
-        var analyzeSource:ModuleAnalyzeSource = new DescriptorAnalyzeSource(descriptor);
+        var analyzeSource:ModuleAnalyzeSource = new DescriptorAnalyzeSource(goalDataSource.feedID, goalDataSource.feedName);
         dispatchEvent(new ModuleAnalyzeEvent(analyzeSource));
     }
 

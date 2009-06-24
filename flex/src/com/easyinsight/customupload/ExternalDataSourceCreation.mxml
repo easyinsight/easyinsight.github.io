@@ -57,12 +57,9 @@
         private function created():void {
             progressBar.visible = false;
             var id:int = uploadService.newExternalDataSource.lastResult as int;
-            CredentialsCache.getCache().addCredentials(id, dataSourceCreation.credentials);            
-            var descriptor:DataFeedDescriptor = new DataFeedDescriptor();
-            descriptor.dataFeedID = id;
-            descriptor.name = dataSourceName;
-            dispatchEvent(new UploadConfigEvent(UploadConfigEvent.UPLOAD_CONFIG_COMPLETE, id, descriptor.name));
-            dispatchEvent(new ModuleAnalyzeEvent(new DescriptorAnalyzeSource(descriptor)));
+            CredentialsCache.getCache().addCredentials(id, dataSourceCreation.credentials);
+            dispatchEvent(new UploadConfigEvent(UploadConfigEvent.UPLOAD_CONFIG_COMPLETE, id, dataSourceName));
+            dispatchEvent(new ModuleAnalyzeEvent(new DescriptorAnalyzeSource(id, dataSourceName)));
         }
 
         ]]></mx:Script>

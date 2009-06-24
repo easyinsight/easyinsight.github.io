@@ -1,0 +1,64 @@
+<?xml version="1.0" ?>
+<easyinsight:FullScreenPage xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:easyinsight="com.easyinsight.*"
+        xmlns:util="com.easyinsight.util.*" width="100%" height="100%" creationComplete="onCreation()">
+    <mx:Script><![CDATA[
+        import com.easyinsight.analysis.AnalysisCloseEvent;
+
+        import com.easyinsight.quicksearch.EIDescriptor;
+
+        import mx.collections.ArrayCollection;
+        import mx.events.ListEvent;
+
+        private function onCreation():void {
+            setupBrowser();
+        }
+
+        protected function setupBrowser():void {
+        }
+
+        [Bindable]
+        private var _reports:ArrayCollection;
+
+        [Bindable]
+        private var report:EIDescriptor;
+
+        [Bindable]
+        private var factory:ReportScreenFactory = new ReportScreenFactory();
+
+        [Bindable]
+        [Embed(source="../../../../assets/document_out_x32.png")]
+        private var closeIcon:Class;
+
+        public function set reports(value:ArrayCollection):void {
+            _reports = value;
+            if (_reports != null) {
+                report = value.getItemAt(0) as EIDescriptor;
+            }
+        }
+
+        override protected function commitProperties():void {
+            super.commitProperties();
+        }
+
+        private function onItemClick(event:ListEvent):void {
+            onReportChange(reportsList.selectedItem as EIDescriptor);
+        }
+
+        private function onReportChange(descriptor:EIDescriptor):void {
+            this.report = descriptor;
+        }
+
+        private function close():void {
+            dispatchEvent(new AnalysisCloseEvent(this));
+        }
+        ]]></mx:Script>
+    <mx:VBox width="100%" height="100%" paddingBottom="10" paddingLeft="10" paddingRight="10" paddingTop="10">
+        <mx:HBox width="100%">
+            <mx:Button label="Back" click="close()" icon="{closeIcon}" labelPlacement="bottom"/>
+            <mx:ProgressBar id="progressBar" indeterminate="true"/>
+            <mx:TileList id="reportsList" width="100%" dataProvider="{_reports}"
+                         itemRenderer="com.easyinsight.report.ReportButton" itemClick="onItemClick(event)" columnWidth="150"/>
+        </mx:HBox>
+        <util:AsyncViewStack width="100%" height="100%" targetDescriptor="{report}" screenRenderer="{factory}"/>
+    </mx:VBox>
+</easyinsight:FullScreenPage>

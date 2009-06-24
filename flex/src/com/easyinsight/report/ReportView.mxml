@@ -2,7 +2,7 @@
 <easyinsight:FullScreenPage xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:easyinsight="com.easyinsight.*"
                             xmlns:filtering="com.easyinsight.filtering.*"
                             width="100%" height="100%" backgroundImage="{background2}" backgroundSize="100%"
-        creationComplete="onCreation()">
+        creationComplete="onCreation()" implements="com.easyinsight.util.IAsyncScreen">
     <easyinsight:states>
         <mx:State name="FullScreen">
             <mx:RemoveChild target="{buttonBar}"/>
@@ -31,7 +31,9 @@
         import com.easyinsight.commands.CommandEvent;
         import com.easyinsight.commands.CommandProcessor;
         import com.easyinsight.detail.DataDetailEvent;
+        import com.easyinsight.filtering.FilterDefinition;
         import com.easyinsight.filtering.TransformsUpdatedEvent;
+        import com.easyinsight.framework.DataServiceLoadingEvent;
         import com.easyinsight.framework.User;
         import com.easyinsight.genredata.ModuleAnalyzeEvent;
 
@@ -41,10 +43,18 @@
 
         import mx.collections.ArrayCollection;
         import mx.controls.Alert;
+        import mx.core.Container;
         import mx.formatters.DateFormatter;
         import mx.managers.BrowserManager;
         import mx.managers.PopUpManager;
         import mx.utils.URLUtil;
+
+        [Bindable]
+        private var _embedded:Boolean;
+
+        public function set embedded(value:Boolean):void {
+            _embedded = value;
+        }
 
         private function subscribedToInsight():void {
             Alert.show("This report will now show in your My Data page.");
@@ -62,9 +72,26 @@
         private function onCreation():void {
             commandProcessor = new CommandProcessor();
             addEventListener(CommandEvent.COMMAND, onCommand);
-            /*addEventListener(HierarchyDrilldownEvent.DRILLDOWN, childFilterCreation);
+            addEventListener(HierarchyDrilldownEvent.DRILLDOWN, childFilterCreation);
             addEventListener(HierarchyRollupEvent.HIERARCHY_ROLLUP, onRollup);
-            addEventListener(DataDetailEvent.DATA_DETAIL, toDetails);*/
+            addEventListener(DataDetailEvent.DATA_DETAIL, toDetails);
+        }
+
+        private function onRollup(event:HierarchyRollupEvent):void {
+            transformContainer.clearFilter(event.analysisItem);
+        }
+
+        private function childFilterCreation(event:HierarchyDrilldownEvent):void {
+            transformContainer.processRawFilterData(event.filterRawData, event.type == HierarchyDrilldownEvent.DRILLDOWN);
+        }
+
+        private function toDetails(event:DataDetailEvent):void {
+            var filter:FilterDefinition = transformContainer.createSimpleFilter(event.filterRawData);
+            var filters:ArrayCollection = transformContainer.getFilterDefinitions();
+            var allFilters:ArrayCollection = new ArrayCollection(filters.toArray());
+            allFilters.addItem(filter);
+            // TODO: implement
+            //detailService.getAllData.send(dataService.dataFeedID, allFilters);
         }
 
         private function transformsUpdated(event:TransformsUpdatedEvent):void {
@@ -177,7 +204,9 @@
             dataViewFactory.reportID = _reportID;
             reportBox.addChild(dataViewFactory);
             dataViewFactory.addEventListener(EmbeddedDataServiceEvent.DATA_RETURNED, gotData);
-            progressBar.visible = true;
+            if (!_embedded) {
+                progressBar.visible = true;
+            }
             this.viewFactory = dataViewFactory;
             dataViewFactory.retrieveData();
         }
@@ -211,12 +240,15 @@
             dateFormatter.formatString = "MM/DD/YYYY HH:NN";
             reportDate = dateFormatter.format(report.dateCreated);
             lastDataTime = dateFormatter.format(event.lastDataTime);
-            var feedFragmentObject:Object = new Object();
-            feedFragmentObject.reportID = String(_reportID);
-            var feedFragmentString:String = URLUtil.objectToString(feedFragmentObject);
-            BrowserManager.getInstance().setFragment(feedFragmentString);
-            BrowserManager.getInstance().setTitle("Easy Insight - " + reportName);
-            progressBar.visible = false;
+            if (!_embedded) {
+                var feedFragmentObject:Object = new Object();
+                feedFragmentObject.reportID = String(_reportID);
+                var feedFragmentString:String = URLUtil.objectToString(feedFragmentObject);
+                BrowserManager.getInstance().setFragment(feedFragmentString);
+                BrowserManager.getInstance().setTitle("Easy Insight - " + reportName);
+                progressBar.visible = false;                
+            }
+            dispatchEvent(new DataServiceLoadingEvent(DataServiceLoadingEvent.LOADING_STOPPED));
         }
 
         private function close():void {
@@ -254,10 +286,17 @@
                 currentState = "";
             }
         }
-        ]]></mx:Script>
+
+        public function getContainer():Container {
+            return this;
+        }
+
+        public function refreshData():void {
+            viewFactory.retrieveData();
+        }]]></mx:Script>
     <mx:VBox width="100%" height="100%" paddingBottom="10" paddingLeft="10" paddingRight="10" paddingTop="10">
         <mx:HBox id="buttonBar" verticalAlign="middle">
-            <mx:Button label="Back" click="close()" icon="{closeIcon}" labelPlacement="bottom"/>
+            <mx:Button label="Back" click="close()" icon="{closeIcon}" labelPlacement="bottom" visible="{!_embedded}"/>
             <mx:Button label="Full Screen" click="toFullScreen()" icon="{fullScreenIcon}" labelPlacement="bottom"/>
             <mx:Button label="Bookmark" click="bookmark()" icon="{bookmarkIcon}" labelPlacement="bottom"/>
             <mx:Button label="Edit this Report" icon="{reportEditorIcon}" click="toReportEditor()" visible="{admin}"

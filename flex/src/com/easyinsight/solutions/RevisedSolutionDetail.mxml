@@ -16,16 +16,35 @@
             </mx:AddChild>
         </mx:State>
         <mx:State name="AccountBelowRequired">
-            <mx:SetProperty target="this" name="controlsEnabled" value="false"/>
-            <mx:SetProperty target="this" name="controlsAlpha" value=".3"/>
+            <mx:AddChild relativeTo="{controlsBox}">
+                <mx:VBox horizontalAlign="center" verticalAlign="middle" height="100%" verticalGap="15">
+                    <mx:VBox verticalGap="0">
+                        <mx:Label text="This solution requires a higher account"/>
+                        <mx:Label text="tier than what your current subscription."/>    
+                    </mx:VBox>
+                    <mx:Button label="Log in or Create Account" styleName="blueButton" click="login()"/>
+                </mx:VBox>
+            </mx:AddChild>
         </mx:State>
     </mx:states>
     <mx:Script>
 		<![CDATA[
         import com.easyinsight.LoginDialog;
+        import com.easyinsight.customupload.ConfigureDataSource;
+        import com.easyinsight.customupload.DataSourceConfiguredEvent;
         import com.easyinsight.framework.NavigationEvent;
+        import com.easyinsight.genredata.AnalyzeEvent;
         import com.easyinsight.genredata.ModuleAnalyzeEvent;
+        import com.easyinsight.goals.GoalDataAnalyzeSource;
+        import com.easyinsight.goals.GoalTreeDescriptor;
+        import com.easyinsight.help.ScreencastWindow;
+        import com.easyinsight.listing.DescriptorAnalyzeSource;
+        import com.easyinsight.quicksearch.EIDescriptor;
+        import com.easyinsight.report.MultiScreenAnalyzeSource;
+        import com.easyinsight.report.ReportAnalyzeSource;
         import com.easyinsight.util.FileAlert;
+
+        import com.easyinsight.util.ProgressAlert;
 
         import mx.controls.Alert;
 
@@ -38,6 +57,11 @@
         import mx.utils.URLUtil;
 
         private function lesson1():void {
+            var window:ScreencastWindow = new ScreencastWindow();
+            window.screencastSource = "../assets/"+screencastDirectory+"/"+screencastVideoFile;
+            PopUpManager.addPopUp(window, this);
+            window.x = 300;
+            window.y = 200;
         }
 
         [Bindable]
@@ -55,18 +79,6 @@
         [Bindable]
         [Embed(source="../../../../assets/background2.JPG")]
         private var background2:Class;
-
-        [Bindable]
-        [Embed(source="../../../../assets/data_blue_x16.png")]
-        public var dataSourceIcon:Class;
-
-        [Bindable]
-        [Embed(source="../../../../assets/chart_column.png")]
-        public var insightIcon:Class;
-
-        [Bindable]
-        [Embed(source="../../../../assets/branchx16.png")]
-        public var goalTreeIcon:Class;
 
         [Bindable]
         private var logo:Bitmap;
@@ -92,6 +104,12 @@
         private var solutionID:int;
 
         [Bindable]
+        private var screencastEnabled:Boolean;
+
+        [Bindable]
+        private var installResult:ArrayCollection;
+
+        [Bindable]
         [Embed(source="../../../../assets/media_play.png")]
         private var pointerIcon:Class;
 
@@ -103,28 +121,18 @@
         private var _controlsEnabled:Boolean;
 
         [Bindable]
+        private var screencastAddress:String;
+
+        [Bindable]
         private var downloadAvailable:Boolean = true;
 
         [Bindable]
         private var installAvailable:Boolean = true;
 
-        [Bindable]
-        private var dataSourceCount:int;
-        [Bindable]
-        private var goalCount:int;
-        [Bindable]
-        private var reportCount:int;
+        private var screencastVideoFile:String;
+        private var screencastDirectory:String;
 
         private var _controlsAlpha:uint = 0;
-
-        [Bindable]
-        [Embed(source="../../../../assets/data_blue_x16.png")]
-        public var listIcon:Class;
-
-        [Bindable]
-        [Embed(source="../../../../assets/chart_column.png")]
-        public var crosstabIcon:Class;
-
 
         [Bindable(event="controlsEnabledChanged")]
         public function get controlsEnabled():Boolean {
@@ -184,8 +192,20 @@
             }
             if (solution.accessible) {
                 controlsAlpha = 1;
+                controlsEnabled = true;
+            } else {
+                controlsAlpha = .5;
+                controlsEnabled = false;
             }
-            installAvailable = solution.installable;
+            installAvailable = solution.installable || solution.goalTreeID > 0;
+            if (solution.screencastDirectory == null && "" != solution.screencastDirectory) {
+                screencastEnabled = false;
+            } else {
+                screencastEnabled = true;
+                screencastDirectory = solution.screencastDirectory;
+                screencastVideoFile = solution.screencastName;
+                screencastAddress = "../assets/" + solution.screencastDirectory + "/FirstFrame.png";
+            }
         }
 
         private function onComplete(event:Event):void {
@@ -194,39 +214,29 @@
             loaderContent.loader.removeEventListener(Event.COMPLETE, onComplete);
         }
 
-        private function iconFunction(item:Object, depth:int):Class {
-            return listIcon;
-        }
-
         private function download():void {
-            if (User.getInstance() == null) {
-                // TODO: smooth jump into login or account creation
-            } else if (!_solution.accessible) {
-                // TODO: sorry, no install for you, pop up a message with upgrade option
-            } else {
-                var request:URLRequest = new URLRequest("/app/DownloadServlet");
-                request.method = URLRequestMethod.GET;
-                var vars:URLVariables = new URLVariables();
+            var request:URLRequest = new URLRequest("/app/DownloadServlet");
+            request.method = URLRequestMethod.GET;
+            var vars:URLVariables = new URLVariables();
 
-                vars.userName = new String(User.getInstance().userName);
-                vars.password = new String(User.getInstance().password);
-                vars.operation = new String(2);
-                vars.fileID = new String(_solution.solutionID);
-                request.data = vars;
+            vars.userName = new String(User.getInstance().userName);
+            vars.password = new String(User.getInstance().password);
+            vars.operation = new String(2);
+            vars.fileID = new String(_solution.solutionID);
+            request.data = vars;
 
-                fileRef = new FileReference();
-                fileRef.addEventListener(Event.CANCEL, doEvent);
-                fileRef.addEventListener(Event.COMPLETE, complete);
-                fileRef.addEventListener(Event.OPEN, doEvent);
-                fileRef.addEventListener(Event.SELECT, doEvent);
-                fileRef.addEventListener(HTTPStatusEvent.HTTP_STATUS, doEvent);
-                fileRef.addEventListener(IOErrorEvent.IO_ERROR, doEvent);
-                fileRef.addEventListener(ProgressEvent.PROGRESS, doEvent);
-                fileRef.addEventListener(SecurityErrorEvent.SECURITY_ERROR, doEvent);
+            fileRef = new FileReference();
+            fileRef.addEventListener(Event.CANCEL, doEvent);
+            fileRef.addEventListener(Event.COMPLETE, complete);
+            fileRef.addEventListener(Event.OPEN, doEvent);
+            fileRef.addEventListener(Event.SELECT, doEvent);
+            fileRef.addEventListener(HTTPStatusEvent.HTTP_STATUS, doEvent);
+            fileRef.addEventListener(IOErrorEvent.IO_ERROR, doEvent);
+            fileRef.addEventListener(ProgressEvent.PROGRESS, doEvent);
+            fileRef.addEventListener(SecurityErrorEvent.SECURITY_ERROR, doEvent);
 
-                FileAlert.alert(this, "Downloading...", null, fileRef);
-                fileRef.download(request, _solution.solutionArchiveName);
-            }
+            FileAlert.alert(this, "Downloading...", null, fileRef);
+            fileRef.download(request, _solution.solutionArchiveName);
         }
 
         private function doEvent(event:Event):void {
@@ -246,12 +256,64 @@
 
         private function install():void {
             if (User.getInstance() != null && _solution.accessible) {
-                var window:SolutionInstallationWindow = SolutionInstallationWindow(PopUpManager.createPopUp(this.parent, SolutionInstallationWindow, true));
-                window.addEventListener(SolutionEvent.SOLUTION_INSTALLED, onSolutionInstalled);
-                window.addEventListener(ModuleAnalyzeEvent.MODULE_ANALYZE, onModuleAnalyze);
-                window.solution = this._solution;
-                PopUpManager.centerPopUp(window);
+                ProgressAlert.alert(this, "Installing solution...", null, solutionService.installSolution);
+				solutionService.installSolution.send(_solution.solutionID);
             }
+        }
+
+        private function onSourceConfigured(event:DataSourceConfiguredEvent):void {
+            postInstall();
+        }
+
+        private function postInstall():void {
+            var dataSources:int = 0;
+            var goalTrees:int = 0;
+            var reports:int = 0;
+            var items:ArrayCollection = new ArrayCollection();
+            var dataSourceItems:ArrayCollection = new ArrayCollection();
+            for each (var solInstall:SolutionInstallInfo in installResult) {
+                if (solInstall.descriptor.getType() == EIDescriptor.DATA_SOURCE) {
+                    dataSources++;
+                    dataSourceItems.addItem(solInstall.descriptor);
+                } else if (solInstall.descriptor.getType() == EIDescriptor.GOAL_TREE) {
+                    goalTrees++;
+                    items.addItem(solInstall.descriptor);
+                } else if (solInstall.descriptor.getType() == EIDescriptor.REPORT) {
+                    reports++;
+                    items.addItem(solInstall.descriptor);
+                }
+            }
+            if (items.length == 1 && goalTrees == 1) {
+                dispatchEvent(new AnalyzeEvent(new GoalDataAnalyzeSource((GoalTreeDescriptor(items.getItemAt(0)).id))));
+            } else if (items.length == 1 && reports == 1) {
+                dispatchEvent(new ModuleAnalyzeEvent(new ReportAnalyzeSource(InsightDescriptor(items.getItemAt(0)))));
+            } else if (items.length > 1) {
+                dispatchEvent(new ModuleAnalyzeEvent(new MultiScreenAnalyzeSource(items)));
+            } else {
+                var dataSourceDescriptor:DataSourceDescriptor = dataSourceItems.getItemAt(0) as DataSourceDescriptor;
+                dispatchEvent(new ModuleAnalyzeEvent(new DescriptorAnalyzeSource(dataSourceDescriptor.id, dataSourceDescriptor.name)));
+            }
+        }
+
+        private function installedSolution():void {
+            this.installResult = solutionService.installSolution.lastResult as ArrayCollection;
+            var configuredSources:int = 0;
+            for each (var solInstall:SolutionInstallInfo in installResult) {
+                if (solInstall.descriptor.getType() == EIDescriptor.DATA_SOURCE && solInstall.requiresConfiguration) {
+                    configuredSources++;
+                }
+            }
+            for each (var solutionInstallInfo:SolutionInstallInfo in installResult) {
+                if (solutionInstallInfo.descriptor.getType() == EIDescriptor.DATA_SOURCE && solutionInstallInfo.requiresConfiguration) {
+                    var configWindow:ConfigureDataSource = new ConfigureDataSource();
+                    configWindow.dataSourceID = solutionInstallInfo.descriptor.id;
+                    configWindow.onlyDataSource = configuredSources == 1;
+                    configWindow.addEventListener(DataSourceConfiguredEvent.DATA_SOURCE_CONFIGURED, onSourceConfigured);
+                    PopUpManager.addPopUp(configWindow, this, true);
+                    PopUpManager.centerPopUp(configWindow);
+                }
+            }
+            dispatchEvent(new SolutionEvent(SolutionEvent.SOLUTION_INSTALLED, _solution.solutionID));
         }
 
         private function onSolutionInstalled(event:SolutionEvent):void {
@@ -266,6 +328,9 @@
         }
 		]]>
 	</mx:Script>
+    <mx:RemoteObject destination="solutionService" id="solutionService">
+		<mx:method name="installSolution" result="installedSolution()"/>
+    </mx:RemoteObject>
     <mx:HBox width="1000" height="100%" backgroundImage="{background2}" backgroundSize="100%" paddingLeft="20"
          paddingRight="20" paddingTop="20" paddingBottom="20">
         <mx:VBox>
@@ -281,10 +346,10 @@
             </mx:Canvas>
             <mx:Spacer height="50"/>
             <mx:HBox>
-                <mx:VBox id="screenshotBox">
-                    <mx:Image source="../assets/lesson1/FirstFrame.png" width="286" height="212" click="lesson1()"
+                <mx:VBox id="screenshotBox" visible="{screencastEnabled}">
+                    <mx:Image source="{screencastAddress}" width="286" height="212" click="lesson1()"
                               rollOver="CursorManager.setCursor(pointerIcon);"
-                              rollOut="CursorManager.removeAllCursors()"/>
+                              rollOut="CursorManager.removeAllCursors()" id="screencastImage"/>
                     <mx:HBox width="100%" horizontalAlign="center">
                         <mx:Label text="Watch Demo Video" fontSize="14"/>
                     </mx:HBox>

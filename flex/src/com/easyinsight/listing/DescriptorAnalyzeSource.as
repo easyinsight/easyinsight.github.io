@@ -12,22 +12,24 @@ import mx.rpc.remoting.RemoteObject;
 	
 	public class DescriptorAnalyzeSource extends ModuleAnalyzeSource
 	{
-		private var dataFeedDescriptor:DataFeedDescriptor;
+        private var dataFeedID:int;
+        private var name:String;
 		private var feedService:RemoteObject;
 		private var preview:Boolean;
 		private var loginRequired:Boolean;
 		
-		public function DescriptorAnalyzeSource(descriptor:DataFeedDescriptor)
+		public function DescriptorAnalyzeSource(dataFeedID:int, name:String)
 		{
-			this.dataFeedDescriptor = descriptor;
+			this.dataFeedID = dataFeedID;
+            this.name = name;
 		}
 
         override public function createDirect():DisplayObject {
             var dataAnalysisContainer:DataAnalysisContainer = new DataAnalysisContainer();
             var dataService:DataService = new DataService();
-            dataService.dataFeedID = dataFeedDescriptor.dataFeedID;
+            dataService.dataFeedID = dataFeedID;
             dataAnalysisContainer.dataService = dataService;
-            BrowserManager.getInstance().setTitle("Easy Insight - " + dataFeedDescriptor.name);
+            BrowserManager.getInstance().setTitle("Easy Insight - " + name);
             return dataAnalysisContainer;
         }
 	}

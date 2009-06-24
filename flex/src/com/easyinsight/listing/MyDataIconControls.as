@@ -109,7 +109,7 @@ public class MyDataIconControls extends HBox
     private function analyzeCalled(event:MouseEvent):void {
         if (obj is DataFeedDescriptor) {
             var descriptor:DataFeedDescriptor = obj as DataFeedDescriptor;
-            dispatchEvent(new ModuleAnalyzeEvent(new DescriptorAnalyzeSource(descriptor)));
+            dispatchEvent(new ModuleAnalyzeEvent(new DescriptorAnalyzeSource(descriptor.dataFeedID, descriptor.name)));
         } else {
             var analysisDefinition:InsightDescriptor = obj as InsightDescriptor;
             dispatchEvent(new ModuleAnalyzeEvent(new ReportAnalyzeSource(analysisDefinition)));

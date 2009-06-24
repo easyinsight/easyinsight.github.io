@@ -10,6 +10,11 @@ import com.easyinsight.core.EIDescriptor;
 public class GoalTreeDescriptor extends EIDescriptor {
     private int role;
 
+    @Override
+    public int getType() {
+        return EIDescriptor.GOAL_TREE;
+    }
+
     public GoalTreeDescriptor() {
     }
 

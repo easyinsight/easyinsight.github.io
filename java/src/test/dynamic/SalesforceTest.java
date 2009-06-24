@@ -3,6 +3,7 @@ package test.dynamic;
 import junit.framework.TestCase;
 import com.easyinsight.database.Database;
 import com.easyinsight.datafeeds.salesforce.SalesforceConnection;
+import com.easyinsight.users.Credentials;
 
 /**
  * User: James Boe
@@ -17,5 +18,7 @@ public class SalesforceTest extends TestCase {
 
     public void testConnectivity() {
         SalesforceConnection salesforceConnection = new SalesforceConnection();
+        Credentials credentials = new Credentials("jboe99@gmail.com", "Grav1tyfailsQrBLE3rV3VZPrKmtqZBZk9rm");
+        salesforceConnection.testSFConnect(credentials);
     }
 }

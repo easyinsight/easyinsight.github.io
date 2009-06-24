@@ -350,11 +350,25 @@ public class FeedDefinition implements Cloneable, Serializable {
     }
 
     public FeedDefinition clone(Connection conn) throws CloneNotSupportedException, SQLException {
+        return (FeedDefinition) super.clone();
+    }
+
+    public DataSourceCloneResult cloneDataSource(Connection conn) throws CloneNotSupportedException, SQLException {
         FeedDefinition feedDefinition = (FeedDefinition) super.clone();
         List<AnalysisItem> clonedFields = new ArrayList<AnalysisItem>();
         Map<Long, AnalysisItem> replacementMap = new HashMap<Long, AnalysisItem>();
+        Map<Key, Key> keyReplacementMap = new HashMap<Key, Key>();
+
+        // is this different for normal data sources vs. composite data sources?
+        // if it's a normal data source, we're just going to clone the key here, then it's in the map for lookup
+        // if it's a composite data source, cloning the key requires that we update the target as well
+        // 
+
         for (AnalysisItem analysisItem : fields) {
             AnalysisItem clonedItem = analysisItem.clone();
+            Key clonedKey = clonedItem.getKey().clone();
+            clonedItem.setKey(clonedKey);
+            keyReplacementMap.put(analysisItem.getKey(), clonedKey);
             clonedFields.add(clonedItem);
             replacementMap.put(analysisItem.getAnalysisItemID(), clonedItem);
         }
@@ -370,7 +384,7 @@ public class FeedDefinition implements Cloneable, Serializable {
         feedDefinition.setDataFeedID(0);
         feedDefinition.setCachedCredentials(null);
         feedDefinition.setRefreshDataInterval(0);
-        return feedDefinition;
+        return new DataSourceCloneResult(feedDefinition, keyReplacementMap);
     }
 
     public InitialAnalysis initialAnalysisDefinition() {

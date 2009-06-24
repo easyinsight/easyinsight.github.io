@@ -101,7 +101,7 @@ import flash.events.Event;
 		}
 		
 		private function analyze(event:MouseEvent):void {
-			dispatchEvent(new ModuleAnalyzeEvent(new DescriptorAnalyzeSource(this.feedDescriptor)));
+			dispatchEvent(new ModuleAnalyzeEvent(new DescriptorAnalyzeSource(this.feedDescriptor.dataFeedID, this.feedDescriptor.name)));
 		}
 		
 		override public function get data():Object {

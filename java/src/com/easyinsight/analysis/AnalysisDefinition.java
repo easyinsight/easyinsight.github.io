@@ -2,6 +2,7 @@ package com.easyinsight.analysis;
 
 import com.easyinsight.scrubbing.DataScrub;
 import com.easyinsight.security.SecurityUtil;
+import com.easyinsight.core.Key;
 
 import java.util.*;
 
@@ -288,7 +289,7 @@ public class AnalysisDefinition implements Cloneable {
         this.publiclyVisible = publiclyVisible;
     }
 
-    public AnalysisDefinition clone() throws CloneNotSupportedException {
+    public AnalysisDefinition clone(Map<Key, Key> keyMap) throws CloneNotSupportedException {
         AnalysisDefinition analysisDefinition = (AnalysisDefinition) super.clone();
         analysisDefinition.setAnalysisID(null);
         Map<Long, AnalysisItem> replacementMap = new HashMap<Long, AnalysisItem>();
@@ -344,6 +345,9 @@ public class AnalysisDefinition implements Cloneable {
         }
 
         for (AnalysisItem analysisItem : replacementMap.values()) {
+            if (keyMap != null) {
+                analysisItem.setKey(keyMap.get(analysisItem.getKey()));
+            }
             analysisItem.updateIDs(replacementMap);
         }
         for (PersistableFilterDefinition filter : filterDefinitions) {

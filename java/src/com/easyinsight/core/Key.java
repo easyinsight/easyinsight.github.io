@@ -11,7 +11,7 @@ import java.io.Serializable;
 @Entity
 @Table(name="item_key")
 @Inheritance(strategy= InheritanceType.JOINED)
-public abstract class Key implements Comparable<Key>, Serializable {
+public abstract class Key implements Comparable<Key>, Serializable, Cloneable {
     @Id
     @GeneratedValue(strategy=GenerationType.IDENTITY)
     @Column(name="item_key_id")
@@ -35,5 +35,11 @@ public abstract class Key implements Comparable<Key>, Serializable {
 
     public int compareTo(Key o) {
         return toDisplayName().compareTo(o.toDisplayName());
+    }
+    
+    public Key clone() throws CloneNotSupportedException {
+        Key key = (Key) super.clone();
+        key.keyID = 0;
+        return key;
     }
 }

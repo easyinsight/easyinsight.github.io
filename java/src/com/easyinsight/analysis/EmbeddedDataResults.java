@@ -1,7 +1,10 @@
 package com.easyinsight.analysis;
 
+import com.easyinsight.datafeeds.CredentialRequirement;
+
 import java.io.Serializable;
 import java.util.Date;
+import java.util.List;
 
 public class EmbeddedDataResults implements Serializable {
     private AnalysisItem[] headers;
@@ -10,6 +13,7 @@ public class EmbeddedDataResults implements Serializable {
     private boolean dataSourceAccessible;
     private Date lastDataTime;
     private String attribution;
+    private List<CredentialRequirement> credentialRequirements;
 
     public EmbeddedDataResults() {
     }
@@ -20,6 +24,14 @@ public class EmbeddedDataResults implements Serializable {
         this.rows = results.rows;
         this.lastDataTime = results.lastDataTime;
         this.attribution = results.attribution;
+    }
+
+    public List<CredentialRequirement> getCredentialRequirements() {
+        return credentialRequirements;
+    }
+
+    public void setCredentialRequirements(List<CredentialRequirement> credentialRequirements) {
+        this.credentialRequirements = credentialRequirements;
     }
 
     public String getAttribution() {

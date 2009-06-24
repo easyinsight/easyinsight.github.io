@@ -783,7 +783,7 @@ public class GoalStorage {
             Solution solution = solutionService.getSolution(solutionID, conn);
             List<SolutionInstallInfo> objects = solutionService.installSolution(userID, solution, conn, true);
             for (SolutionInstallInfo solutionInstallInfo : objects) {
-                installedObjectMap.put(new SolutionElementKey(solutionInstallInfo.getType(), solutionInstallInfo.getPreviousID()), solutionInstallInfo.getNewID());
+                installedObjectMap.put(new SolutionElementKey(solutionInstallInfo.getDescriptor().getType(), solutionInstallInfo.getPreviousID()), solutionInstallInfo.getDescriptor().getId());
             }
         }
 

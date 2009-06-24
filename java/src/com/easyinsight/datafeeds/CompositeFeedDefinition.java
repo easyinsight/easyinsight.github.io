@@ -195,26 +195,56 @@ public class CompositeFeedDefinition extends FeedDefinition {
     }
 
     @Override
-    public FeedDefinition clone(Connection conn) throws CloneNotSupportedException, SQLException {
-        CompositeFeedDefinition feedDefinition = (CompositeFeedDefinition) super.clone(conn);
-        List<CompositeFeedNode> children = feedDefinition.getCompositeFeedNodes();
-        Map<Long, FeedDefinition> replacementMap = new HashMap<Long, FeedDefinition>();
-        for (CompositeFeedNode child : children) {
+    public DataSourceCloneResult cloneDataSource(Connection conn) throws CloneNotSupportedException, SQLException {
+        DataSourceCloneResult dataSourceCloneResult = super.cloneDataSource(conn);
+        CompositeFeedDefinition feedDefinition = (CompositeFeedDefinition) dataSourceCloneResult.getFeedDefinition();
+
+        // need clean model here
+        // clone the core information
+        // there's a "generate keys" phase, effectively
+        // 
+
+        Map<Long, DataSourceCloneResult> replacementMap = new HashMap<Long, DataSourceCloneResult>();
+        List<CompositeFeedNode> newChildren = new ArrayList<CompositeFeedNode>();
+        for (CompositeFeedNode child : getCompositeFeedNodes()) {
             FeedDefinition childDefinition = new FeedStorage().getFeedDefinitionData(child.getDataFeedID(), conn);
-            FeedDefinition clonedDefinition = DataSourceCopyUtils.cloneFeed(SecurityUtil.getUserID(), conn, childDefinition);
+            DataSourceCloneResult result = DataSourceCopyUtils.cloneFeed(SecurityUtil.getUserID(), conn, childDefinition);
+            FeedDefinition clonedDefinition = result.getFeedDefinition();
             DataSourceCopyUtils.buildClonedDataStores(false, feedDefinition, clonedDefinition, conn);
             new UserUploadInternalService().createUserFeedLink(SecurityUtil.getUserID(), clonedDefinition.getDataFeedID(), Roles.OWNER, conn);
-            replacementMap.put(child.getDataFeedID(), clonedDefinition);
-            child.setDataFeedID(clonedDefinition.getDataFeedID());
+            replacementMap.put(child.getDataFeedID(), result);
+            newChildren.add(new CompositeFeedNode(clonedDefinition.getDataFeedID()));
         }
+
+        // 
+
+        feedDefinition.setCompositeFeedNodes(newChildren);
+        List<CompositeFeedConnection> newConnections = new ArrayList<CompositeFeedConnection>();
         for (CompositeFeedConnection connection : feedDefinition.getConnections()) {
-            connection.setSourceJoin(replacementMap.get(connection.getSourceFeedID()).getField(connection.getSourceJoin().toKeyString()));
-            connection.setTargetJoin(replacementMap.get(connection.getTargetFeedID()).getField(connection.getTargetJoin().toKeyString()));
-            connection.setSourceFeedID(replacementMap.get(connection.getSourceFeedID()).getDataFeedID());
-            connection.setTargetFeedID(replacementMap.get(connection.getTargetFeedID()).getDataFeedID());
+            CompositeFeedConnection newConnection = new CompositeFeedConnection();
+            newConnection.setSourceJoin(replacementMap.get(connection.getSourceFeedID()).getFeedDefinition().getField(connection.getSourceJoin().toKeyString()));
+            newConnection.setTargetJoin(replacementMap.get(connection.getTargetFeedID()).getFeedDefinition().getField(connection.getTargetJoin().toKeyString()));
+            newConnection.setSourceFeedID(replacementMap.get(connection.getSourceFeedID()).getFeedDefinition().getDataFeedID());
+            newConnection.setTargetFeedID(replacementMap.get(connection.getTargetFeedID()).getFeedDefinition().getDataFeedID());
+            newConnections.add(newConnection);
         }
-        feedDefinition.populateFields(conn);
-        return feedDefinition;
+        feedDefinition.setConnections(newConnections);
+
+        // at this point, we're referencing the cloned keys on our internal fields
+        for (AnalysisItem analysisItem : feedDefinition.getFields()) {
+            Key key = analysisItem.getKey();
+            if (key instanceof DerivedKey) {
+                DerivedKey derivedKey = (DerivedKey) key;
+                DataSourceCloneResult result = replacementMap.get(derivedKey.getFeedID());
+                derivedKey.setFeedID(result.getFeedDefinition().getDataFeedID());
+                derivedKey.setParentKey(result.getKeyReplacementMap().get(derivedKey.getParentKey()));
+            }
+        }
+        return dataSourceCloneResult;
+    }
+
+    protected void cloneFields() {
+
     }
 
     public void postClone(Connection conn) throws SQLException {

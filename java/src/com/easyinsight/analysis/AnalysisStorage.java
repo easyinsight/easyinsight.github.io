@@ -3,6 +3,7 @@ package com.easyinsight.analysis;
 import com.easyinsight.database.Database;
 import com.easyinsight.core.PersistableValue;
 import com.easyinsight.core.InsightDescriptor;
+import com.easyinsight.core.Key;
 import com.easyinsight.logging.LogClass;
 
 import java.util.*;
@@ -80,7 +81,7 @@ public class AnalysisStorage {
         return analysisDefinition;
     }
 
-    public AnalysisDefinition cloneReport(long analysisID, Connection conn) {
+    public AnalysisDefinition cloneReport(long analysisID, Connection conn, Map<Key, Key> keyMap) {
         AnalysisDefinition analysisDefinition = null;
         Session session = Database.instance().createSession(conn);
         try {
@@ -88,7 +89,7 @@ public class AnalysisStorage {
             List results = session.createQuery("from AnalysisDefinition where analysisID = ?").setLong(0, analysisID).list();
             if (results.size() > 0) {
                 analysisDefinition = (AnalysisDefinition) results.get(0);
-                analysisDefinition = analysisDefinition.clone();
+                analysisDefinition = analysisDefinition.clone(keyMap);
             }
             session.getTransaction().commit();
         } catch (Exception e) {

@@ -9,6 +9,7 @@ import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.goals.*;
 import com.easyinsight.email.UserStub;
 import com.easyinsight.core.InsightDescriptor;
+import com.easyinsight.core.EIDescriptor;
 import com.easyinsight.users.Account;
 import com.easyinsight.notifications.ConfigureDataFeedTodo;
 import com.easyinsight.notifications.TodoEventInfo;
@@ -61,7 +62,8 @@ public class SolutionService {
         EIConnection conn = Database.instance().getConnection();
         try {
             conn.setAutoCommit(false);
-            PreparedStatement insertSolutionStmt = conn.prepareStatement("INSERT INTO SOLUTION (NAME, DESCRIPTION, INDUSTRY, AUTHOR, COPY_DATA, goal_tree_id, SOLUTION_TIER, CATEGORY) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+            PreparedStatement insertSolutionStmt = conn.prepareStatement("INSERT INTO SOLUTION (NAME, DESCRIPTION, INDUSTRY, AUTHOR, COPY_DATA, goal_tree_id, " +
+                    "SOLUTION_TIER, CATEGORY, screencast_directory, screencast_mp4_name) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                     Statement.RETURN_GENERATED_KEYS);
             insertSolutionStmt.setString(1, solution.getName());
             insertSolutionStmt.setString(2, solution.getDescription());
@@ -75,6 +77,8 @@ public class SolutionService {
             }
             insertSolutionStmt.setInt(7, solution.getSolutionTier());
             insertSolutionStmt.setInt(8, solution.getCategory());
+            insertSolutionStmt.setString(9, solution.getScreencastDirectory());
+            insertSolutionStmt.setString(10, solution.getScreencastName());
             insertSolutionStmt.execute();
             long solutionID = Database.instance().getAutoGenKey(insertSolutionStmt);
             PreparedStatement addRoleStmt = conn.prepareStatement("INSERT INTO USER_TO_SOLUTION (USER_ID, SOLUTION_ID, USER_ROLE) VALUES (?, ?, ?)");
@@ -104,7 +108,8 @@ public class SolutionService {
         EIConnection conn = Database.instance().getConnection();
         try {
             conn.setAutoCommit(false);
-            PreparedStatement updateSolutionStmt = conn.prepareStatement("UPDATE SOLUTION SET NAME = ?, DESCRIPTION = ?, INDUSTRY = ?, AUTHOR = ?, COPY_DATA = ?, GOAL_TREE_ID = ?, SOLUTION_TIER = ?, CATEGORY = ? WHERE SOLUTION_ID = ?",
+            PreparedStatement updateSolutionStmt = conn.prepareStatement("UPDATE SOLUTION SET NAME = ?, DESCRIPTION = ?, INDUSTRY = ?, AUTHOR = ?, " +
+                    "COPY_DATA = ?, GOAL_TREE_ID = ?, SOLUTION_TIER = ?, CATEGORY = ?, screencast_directory = ?, screencast_mp4_name = ? WHERE SOLUTION_ID = ?",
                     Statement.RETURN_GENERATED_KEYS);
             updateSolutionStmt.setString(1, solution.getName());
             updateSolutionStmt.setString(2, solution.getDescription());
@@ -118,7 +123,9 @@ public class SolutionService {
             }
             updateSolutionStmt.setInt(7, solution.getSolutionTier());
             updateSolutionStmt.setInt(8, solution.getCategory());
-            updateSolutionStmt.setLong(9, solution.getSolutionID());
+            updateSolutionStmt.setString(9, solution.getScreencastDirectory());
+            updateSolutionStmt.setString(10, solution.getScreencastName());
+            updateSolutionStmt.setLong(11, solution.getSolutionID());
             updateSolutionStmt.executeUpdate();
             PreparedStatement deleteFeedsStmt = conn.prepareStatement("DELETE FROM SOLUTION_TO_FEED WHERE SOLUTION_ID = ?");
             deleteFeedsStmt.setLong(1, solution.getSolutionID());
@@ -153,7 +160,7 @@ public class SolutionService {
             List<SolutionInstallInfo> objects = installSolution(userID, solution, conn, false);
             conn.commit();
             for(SolutionInstallInfo info : objects) {
-                if (info.getType() == SolutionInstallInfo.DATA_SOURCE && info.getTodoItem() != null) {
+                if (info.getDescriptor().getType() == EIDescriptor.DATA_SOURCE && info.getTodoItem() != null) {
                     ConfigureDataFeedTodo todo = info.getTodoItem();
                     ConfigureDataFeedInfo todoInfo = new ConfigureDataFeedInfo();
                     todoInfo.setTodoID(todo.getId());
@@ -190,14 +197,11 @@ public class SolutionService {
                         for (GoalFeed dataSource : goalTreeNode.getAssociatedFeeds()) {
                             dataSourceIDs.add(dataSource.getFeedID());
                         }
-                        /*for (GoalInsight goalInsight : goalTreeNode.getAssociatedInsights()) {
-                            reportIDs.add(goalInsight.getInsightID());
-                        }*/
                     }
                 };
                 visitor.visit(goalTree.getRootNode());
                 for (Long dataSourceID : dataSourceIDs) {
-                    FeedDefinition feedDefinition = feedStorage.getFeedDefinitionData(dataSourceID, conn);
+                    FeedDefinition feedDefinition = feedStorage.getFeedDefinitionData(dataSourceID, conn, false);
                     objects.addAll(DataSourceCopyUtils.installFeed(userID, conn, true, dataSourceID, feedDefinition, true, null));
                 }
                 if (!inlineTree) {

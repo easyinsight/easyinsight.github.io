@@ -22,7 +22,7 @@ public class AssociatedFeedsAdminControls extends HBox{
         deleteButton.addEventListener(MouseEvent.CLICK, deleteAssociation);
     }
 
-    private function deleteAssociation():void {
+    private function deleteAssociation(event:MouseEvent):void {
         dispatchEvent(new DeleteAssociationEvent(DeleteAssociationEvent.DELETE_DATA_SOURCE, goalFeed));
     }
 

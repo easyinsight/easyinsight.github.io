@@ -169,7 +169,8 @@
             	var analyzeSource:ModuleAnalyzeSource = null;
 				var selectedObject:Object = event.currentTarget.selectedItem;
 				if (selectedObject is DataFeedDescriptor) {
-                	analyzeSource = new DescriptorAnalyzeSource(selectedObject as DataFeedDescriptor);
+                    var descriptor:DataFeedDescriptor = selectedObject as DataFeedDescriptor;
+                	analyzeSource = new DescriptorAnalyzeSource(descriptor.dataFeedID, descriptor.name);
                     dispatchEvent(new ModuleAnalyzeEvent(analyzeSource));
                 } else {
                     analyzeSource = new ReportAnalyzeSource(InsightDescriptor(selectedObject));
@@ -243,7 +244,7 @@
                     if (event.startInAdmin) {
                         dispatchEvent(new ModuleAnalyzeEvent(new FeedAdminAnalyzeSource(descriptor.dataFeedID)));
                     } else {
-                        dispatchEvent(new ModuleAnalyzeEvent(new DescriptorAnalyzeSource(descriptor)));
+                	    dispatchEvent(new ModuleAnalyzeEvent(new DescriptorAnalyzeSource(event.feedID, event.name)));
                    }
                 }
             }

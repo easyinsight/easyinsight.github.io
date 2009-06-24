@@ -31,7 +31,7 @@ import mx.managers.PopUpManager;
 		private var _feedID:int;
 		private var noFilters:Boolean = true;
 		private var dropHereBox:VBox;
-        private var _filterEditable:Boolean;
+        private var _filterEditable:Boolean = true;
 		[Bindable]
 		private var _analysisItems:ArrayCollection;
 

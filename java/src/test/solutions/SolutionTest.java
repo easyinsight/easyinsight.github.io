@@ -10,6 +10,7 @@ import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.datafeeds.FeedService;
 import com.easyinsight.datafeeds.FeedRegistry;
 import com.easyinsight.datafeeds.basecamp.BaseCampDataSource;
+import com.easyinsight.datafeeds.basecamp.BaseCampCompositeSource;
 import com.easyinsight.api.ValidatingPublishService;
 import com.easyinsight.api.Row;
 import com.easyinsight.api.StringPair;
@@ -21,6 +22,7 @@ import com.easyinsight.database.Database;
 import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.users.Credentials;
 import com.easyinsight.core.NamedKey;
+import com.easyinsight.core.EIDescriptor;
 import test.util.TestUtil;
 
 import java.util.Arrays;
@@ -98,15 +100,15 @@ public class SolutionTest extends TestCase {
         TestUtil.getIndividualTestUser();
         List<SolutionInstallInfo> infos = solutionService.installSolution(solutionID);
         for (SolutionInstallInfo info : infos) {
-            if (info.getType() == SolutionInstallInfo.DATA_SOURCE) {
-                FeedDefinition newDataSource = new FeedStorage().getFeedDefinitionData(info.getNewID());
+            if (info.getDescriptor().getType() == EIDescriptor.DATA_SOURCE) {
+                FeedDefinition newDataSource = new FeedStorage().getFeedDefinitionData(info.getDescriptor().getId());
                 WSListDefinition defaultQuery = new WSListDefinition();
-                defaultQuery.setDataFeedID(info.getNewID());
+                defaultQuery.setDataFeedID(info.getDescriptor().getId());
                 defaultQuery.setColumns(Arrays.asList(getItem("customer", newDataSource), getItem("amount", newDataSource)));
                 ListDataResults results = new DataService().list(defaultQuery, new InsightRequestMetadata());
                 assertEquals(1, results.getRows().length);
-            } else if (info.getType() == SolutionInstallInfo.INSIGHT) {
-                WSAnalysisDefinition def = new AnalysisService().openAnalysisDefinition(info.getNewID());
+            } else if (info.getDescriptor().getType() == EIDescriptor.REPORT) {
+                WSAnalysisDefinition def = new AnalysisService().openAnalysisDefinition(info.getDescriptor().getId());
                 ListDataResults results = new DataService().list(def, new InsightRequestMetadata());
                 assertEquals(1, results.getRows().length);
             }
@@ -117,7 +119,7 @@ public class SolutionTest extends TestCase {
     public void testDynamicSources() {
         TestUtil.getIndividualAdminUser();
         UserUploadService uploadService = new UserUploadService();
-        BaseCampDataSource ds = new BaseCampDataSource();
+        BaseCampCompositeSource ds = new BaseCampCompositeSource();
         ds.setUrl("easyinsight.basecamphq.com");
         Credentials c = new Credentials();
         c.setUserName("apiuser");
@@ -133,10 +135,10 @@ public class SolutionTest extends TestCase {
         todoLevel.setPosition(1);
         responsibility.setHierarchyLevel(respPartyLevel);
         responsibility.setHierarchyLevels(Arrays.asList(respPartyLevel, todoLevel));
-        ds = (BaseCampDataSource) new FeedService().getFeedDefinition(sourceId);
+        ds = (BaseCampCompositeSource) new FeedService().getFeedDefinition(sourceId);
         ds.getFields().add(responsibility);
         new FeedService().updateFeedDefinition(ds, "", null);
-        ds = (BaseCampDataSource) new FeedService().getFeedDefinition(sourceId);
+        ds = (BaseCampCompositeSource) new FeedService().getFeedDefinition(sourceId);
         WSTreeMapDefinition treeMap = new WSTreeMapDefinition();
         treeMap.setDataFeedID(sourceId);
         treeMap.setHierarchy(TestUtil.getItem(sourceId, "Responsibility"));
@@ -163,17 +165,18 @@ public class SolutionTest extends TestCase {
         long newSourceID = 0;
         List<SolutionInstallInfo> infos = solutionService.installSolution(solutionID);
         for (SolutionInstallInfo info : infos) {
-            if (info.getType() == SolutionInstallInfo.DATA_SOURCE) {
-                newSourceID = info.getNewID();
+            if (info.getDescriptor().getType() == EIDescriptor.DATA_SOURCE) {
+                newSourceID = info.getDescriptor().getId();
                 FeedDefinition newDataSource = new FeedStorage().getFeedDefinitionData(newSourceID);
+                new DataService().getFeedMetadata(newSourceID);
                 WSListDefinition defaultQuery = new WSListDefinition();
-                defaultQuery.setDataFeedID(info.getNewID());
+                defaultQuery.setDataFeedID(info.getDescriptor().getId());
                 defaultQuery.setColumns(Arrays.asList(getItem(BaseCampDataSource.CREATORNAME, newDataSource)));
                 ListDataResults results = new DataService().list(defaultQuery, new InsightRequestMetadata());
                 assertEquals(0, results.getRows().length);
             }
         }
-        ds = (BaseCampDataSource) new FeedService().getFeedDefinition(newSourceID);
+        ds = (BaseCampCompositeSource) new FeedService().getFeedDefinition(newSourceID);
         ds.setUrl("easyinsight.basecamphq.com");
         ds.refreshData(c, SecurityUtil.getAccountID(), new Date(), null);
         WSListDefinition defaultQuery = new WSListDefinition();

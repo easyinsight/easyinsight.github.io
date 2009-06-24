@@ -60,6 +60,7 @@
         import com.easyinsight.genredata.ModuleAnalyzeEvent;
         import com.easyinsight.listing.FeedAdminAnalyzeSource;
 
+        import com.easyinsight.report.MultiReportAnalyzeSource;
         import com.easyinsight.util.PNGEnc;
 
         import mx.collections.SortField;
@@ -859,6 +860,16 @@
             dataView.addItem(field.analysisItem);
             dispatchEvent(new AnalysisChangedEvent(false));
         }
+
+        private function toReports():void {
+            if (analysisChanged) {
+                Alert.show("You have unsaved changes. Are you sure you want to go to reports?", "Alert",
+                        Alert.OK | Alert.CANCEL, null, adminAlertListener, null, Alert.CANCEL);
+            } else {
+                cleanup();
+                dispatchEvent(new ModuleAnalyzeEvent(new MultiReportAnalyzeSource(dataService.dataFeedID)));
+            }
+        }
         ]]>
     </mx:Script>
     <mx:RemoteObject id="analysisService" destination="analysisDefinition">
@@ -901,6 +912,8 @@
                            toolTip="Save" enabled="{!_previewMode}"/>
                 <mx:Button id="saveAsButton" icon="@Embed(source='../../../assets/save_as.png')" click="saveAs()"
                            toolTip="Save As" enabled="{!_previewMode}"/>
+                <mx:Button id="reportsButton" icon="@Embed(source='../../../assets/tables_x16.png')" click="toReports()"
+                           toolTip="Go to Reports" enabled="{!_previewMode}"/>
                 <mx:Form paddingTop="0" paddingBottom="0" id="analysisNameForm">
                     <mx:FormItem label="Report Name:">
                         <mx:TextInput text="{labelNameField}" id="analysisNameInput"/>

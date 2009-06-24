@@ -43,6 +43,33 @@ public class FeedService implements IDataFeedService {
         // this goes into a different data provider        
     }
 
+    public List<InsightDescriptor> getReportsForDataSource(long dataSourceID) {
+        List<InsightDescriptor> descriptors = new ArrayList<InsightDescriptor>();
+        Connection conn = Database.instance().getConnection();
+        try {
+            PreparedStatement queryStmt = conn.prepareStatement("SELECT ANALYSIS.ANALYSIS_ID, TITLE, REPORT_TYPE FROM ANALYSIS WHERE data_feed_id = ?");
+            queryStmt.setLong(1, dataSourceID);
+            ResultSet reportRS = queryStmt.executeQuery();
+            while (reportRS.next()) {
+                descriptors.add(new InsightDescriptor(reportRS.getLong(1), reportRS.getString(2), dataSourceID, reportRS.getInt(3)));
+            }
+        } catch (SQLException e) {
+            LogClass.error(e);
+        } finally {
+            Database.instance().closeConnection(conn);
+        }
+        List<InsightDescriptor> validDescriptors = new ArrayList<InsightDescriptor>();
+        for (InsightDescriptor descriptor : descriptors) {
+            try {
+                SecurityUtil.authorizeInsight(descriptor.getId());
+                validDescriptors.add(descriptor);
+            } catch (Exception e) {
+                // ignore
+            }
+        }
+        return validDescriptors;
+    }
+
     public List<EIDescriptor> getDescriptors() {
         List<EIDescriptor> descriptorList = new ArrayList<EIDescriptor>();
         Connection conn = Database.instance().getConnection();

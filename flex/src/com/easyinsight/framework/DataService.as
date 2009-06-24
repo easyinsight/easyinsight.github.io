@@ -52,7 +52,7 @@ package com.easyinsight.framework
 			this.onMetadata = functionToCall;
 			this.onMetadataCaller = caller;
 			dispatchEvent(new DataServiceLoadingEvent(DataServiceLoadingEvent.LOADING_STARTED));
-			var call:Object = dataRemoteSource.getFeedMetadata.send(dataFeedID, previewMode);
+			var call:Object = dataRemoteSource.getFeedMetadata.send(dataFeedID);
 			call.marker = _dataFeedID;				
 		}
 		

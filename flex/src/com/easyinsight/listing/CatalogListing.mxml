@@ -28,7 +28,7 @@
             }
             var analyzeSource:ModuleAnalyzeSource = null;
             if (dataFeedDescriptor != null) {
-                analyzeSource = new DescriptorAnalyzeSource(dataFeedDescriptor);
+                analyzeSource = new DescriptorAnalyzeSource(dataFeedDescriptor.dataFeedID, dataFeedDescriptor.name);
             }
             return analyzeSource;
         }
@@ -39,7 +39,7 @@
 
         private function gridDoubleClick(event:ListEvent):void {
             var feedDescriptor:DataFeedDescriptor = event.currentTarget.selectedItem as DataFeedDescriptor;
-            dispatchEvent(new ModuleAnalyzeEvent(new DescriptorAnalyzeSource(feedDescriptor)));
+            dispatchEvent(new ModuleAnalyzeEvent(new DescriptorAnalyzeSource(feedDescriptor.dataFeedID, feedDescriptor.name)));
         }
 		]]>
     </mx:Script>

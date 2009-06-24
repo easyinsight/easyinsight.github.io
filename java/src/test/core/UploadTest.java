@@ -49,7 +49,7 @@ public class UploadTest extends TestCase {
         System.gc();
 
         DataService dataService = new DataService();
-        FeedMetadata feedMetadata = dataService.getFeedMetadata(dataFeedID, null);
+        FeedMetadata feedMetadata = dataService.getFeedMetadata(dataFeedID);
 
         WSListDefinition listDefinition = new WSListDefinition();
         listDefinition.setDataFeedID(dataFeedID);

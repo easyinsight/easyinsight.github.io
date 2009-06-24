@@ -104,7 +104,7 @@ public class HierarchialDataService extends EventDispatcher implements IReportDa
         dispatchEvent(new DataServiceLoadingEvent(DataServiceLoadingEvent.LOADING_STARTED));
         var metadata:InsightRequestMetadata = new InsightRequestMetadata();
         metadata.credentialFulfillmentList = CredentialsCache.getCache().createCredentials();
-        dataRemoteSource.list.send(definition, false, metadata);
+        dataRemoteSource.list.send(definition, metadata);
     }
 }
 }

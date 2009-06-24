@@ -5,7 +5,7 @@ package com.easyinsight.core;
  * Date: Mar 28, 2009
  * Time: 8:30:25 AM
  */
-public class EIDescriptor {
+public abstract class EIDescriptor {
 
     public static final int DATA_SOURCE = 1;
     public static final int REPORT = 2;
@@ -16,9 +16,7 @@ public class EIDescriptor {
     private String name;
     private long id;
 
-    public int getType() {
-        throw new UnsupportedOperationException();
-    }
+    public abstract int getType();
 
     public String getName() {
         return name;

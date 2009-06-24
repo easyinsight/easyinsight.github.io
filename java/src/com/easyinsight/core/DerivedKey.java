@@ -77,4 +77,10 @@ public class DerivedKey extends Key {
         result = 31 * result + (int) (feedID ^ (feedID >>> 32));
         return result;
     }
+
+    @Override
+    public Key clone() throws CloneNotSupportedException {
+        DerivedKey derivedKey = (DerivedKey) super.clone();
+        return derivedKey;
+    }
 }

@@ -58,7 +58,7 @@ public class CrosstabDataService extends EventDispatcher implements IReportDataS
         dispatchEvent(new DataServiceLoadingEvent(DataServiceLoadingEvent.LOADING_STARTED));
         var metadata:InsightRequestMetadata = new InsightRequestMetadata();
         metadata.credentialFulfillmentList = CredentialsCache.getCache().createCredentials();
-        dataRemoteSource.list.send(definition, false, metadata);
+        dataRemoteSource.list.send(definition, metadata);
     }
 }
 }

@@ -8,6 +8,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.io.Serializable;
 
+import org.jetbrains.annotations.Nullable;
+
 /**
  * User: James Boe
  * Date: Oct 28, 2008
@@ -18,6 +20,7 @@ public class InsightRequestMetadata implements Serializable {
     private int version;
     private List<CredentialFulfillment> credentialFulfillmentList = new ArrayList<CredentialFulfillment>();
 
+    @Nullable
     public Credentials getCredentialForDataSource(long dataSourceID) {
         Credentials credentials = null;
         for (CredentialFulfillment credentialFulfillment : credentialFulfillmentList) {

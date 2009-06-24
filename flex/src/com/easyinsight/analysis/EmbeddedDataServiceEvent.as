@@ -13,9 +13,10 @@ public class EmbeddedDataServiceEvent extends Event {
     public var dataSourceAccessible:Boolean;
     public var lastDataTime:Date;
     public var attribution:String;
+    public var credentialRequirements:ArrayCollection;
 
     public function EmbeddedDataServiceEvent(type:String, dataSet:ArrayCollection, analysisDefinition:AnalysisDefinition, clientProcessorMap:Object, dataSourceAccessible:Boolean,
-            lastDataTime:Date, attribution:String) {
+            lastDataTime:Date, attribution:String, credentialRequirements:ArrayCollection) {
         super(type);
         this.dataSet = dataSet;
         this.clientProcessorMap = clientProcessorMap;
@@ -23,10 +24,12 @@ public class EmbeddedDataServiceEvent extends Event {
         this.dataSourceAccessible = dataSourceAccessible;
         this.lastDataTime = lastDataTime;
         this.attribution = attribution;
+        this.credentialRequirements = credentialRequirements;
     }
 
     override public function clone():Event {
-        return new EmbeddedDataServiceEvent(type, dataSet, analysisDefinition, clientProcessorMap, dataSourceAccessible, lastDataTime, attribution);
+        return new EmbeddedDataServiceEvent(type, dataSet, analysisDefinition, clientProcessorMap, dataSourceAccessible, lastDataTime, attribution,
+                credentialRequirements);
     }
 }
 }

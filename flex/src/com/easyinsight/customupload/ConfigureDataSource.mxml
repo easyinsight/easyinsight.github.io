@@ -87,12 +87,10 @@
         }
 
         private function refreshed():void {
-            if (_onlyDataSource) {
-                var descriptor:DataFeedDescriptor = new DataFeedDescriptor();
-                descriptor.dataFeedID = dataSourceDefinition.dataFeedID;
-                descriptor.name = dataSourceDefinition.feedName;
-                dispatchEvent(new ModuleAnalyzeEvent(new DescriptorAnalyzeSource(descriptor)));
-            }
+            var descriptor:DataFeedDescriptor = new DataFeedDescriptor();
+            descriptor.dataFeedID = dataSourceDefinition.dataFeedID;
+            descriptor.name = dataSourceDefinition.feedName;
+            dispatchEvent(new DataSourceConfiguredEvent(descriptor));            
             PopUpManager.removePopUp(this);
         }
 

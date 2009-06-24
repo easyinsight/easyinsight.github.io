@@ -83,7 +83,7 @@ import com.easyinsight.listing.DataFeedDescriptor;
 		}
 		
 		private function analyze(event:Event):void {
-			this.parent.dispatchEvent(new ModuleAnalyzeEvent(new DescriptorAnalyzeSource(_data.feedDescriptor)));
+			this.parent.dispatchEvent(new ModuleAnalyzeEvent(new DescriptorAnalyzeSource(_data.feedDescriptor.dataFeedID, _data.feedDescriptor.name)));
 		}
 		
 		private function successfulSubscription(event:ResultEvent):void {

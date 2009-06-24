@@ -346,8 +346,6 @@ public class UserUploadService implements IUserUploadService {
             if (role == Roles.OWNER) {
                 FeedDefinition feedDefinition = feedStorage.getFeedDefinitionData(dataFeedID, conn);
                 feedDefinition.delete(conn);
-                
-                
             } else if (role == Roles.SUBSCRIBER) {
                 deleteUserFeedLink(SecurityUtil.getUserID(), dataFeedID, conn);
             } else {

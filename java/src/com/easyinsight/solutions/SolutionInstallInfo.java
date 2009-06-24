@@ -1,6 +1,7 @@
 package com.easyinsight.solutions;
 
 import com.easyinsight.notifications.ConfigureDataFeedTodo;
+import com.easyinsight.core.EIDescriptor;
 
 /**
  * User: James Boe
@@ -9,26 +10,21 @@ import com.easyinsight.notifications.ConfigureDataFeedTodo;
  */
 public class SolutionInstallInfo {
 
-    public static final int DATA_SOURCE = 1;
-    public static final int INSIGHT = 2;
-
     private long previousID;
-    private long newID;
-    private int type;
+    private EIDescriptor descriptor;
     private boolean requiresConfiguration;
     private ConfigureDataFeedTodo todoItem;
     private String feedName;
 
-    public SolutionInstallInfo(long previousID, long newID, int type, ConfigureDataFeedTodo todoItem, boolean requiresConfiguration) {
+    public SolutionInstallInfo(long previousID, EIDescriptor descriptor, ConfigureDataFeedTodo todoItem, boolean requiresConfiguration) {
         this.previousID = previousID;
-        this.newID = newID;
-        this.type = type;
+        this.descriptor = descriptor;
         this.todoItem = todoItem;
         this.requiresConfiguration = requiresConfiguration;
     }
 
-    public SolutionInstallInfo(long previousID, long newID, int type, ConfigureDataFeedTodo todoItem, String feedName, boolean requiresConfiguration) {
-        this(previousID, newID, type, todoItem, requiresConfiguration);
+    public SolutionInstallInfo(long previousID, EIDescriptor descriptor, ConfigureDataFeedTodo todoItem, String feedName, boolean requiresConfiguration) {
+        this(previousID, descriptor, todoItem, requiresConfiguration);
         this.feedName = feedName;
     }
 
@@ -40,12 +36,12 @@ public class SolutionInstallInfo {
         this.requiresConfiguration = requiresConfiguration;
     }
 
-    public int getType() {
-        return type;
+    public EIDescriptor getDescriptor() {
+        return descriptor;
     }
 
-    public void setType(int type) {
-        this.type = type;
+    public void setDescriptor(EIDescriptor descriptor) {
+        this.descriptor = descriptor;
     }
 
     public long getPreviousID() {
@@ -54,14 +50,6 @@ public class SolutionInstallInfo {
 
     public void setPreviousID(long previousID) {
         this.previousID = previousID;
-    }
-
-    public long getNewID() {
-        return newID;
-    }
-
-    public void setNewID(long newID) {
-        this.newID = newID;
     }
 
     public ConfigureDataFeedTodo getTodoItem() {

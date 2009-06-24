@@ -10,6 +10,11 @@ public class InsightDescriptor extends EIDescriptor {
     private long dataFeedID;
     private int reportType;
 
+    @Override
+    public int getType() {
+        return EIDescriptor.REPORT;
+    }
+
     public InsightDescriptor() {
     }
 

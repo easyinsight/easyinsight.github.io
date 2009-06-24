@@ -1,0 +1,47 @@
+<?xml version="1.0" ?>
+<report:MultiScreenView xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:easyinsight="com.easyinsight.*"
+                        xmlns:util="com.easyinsight.util.*" xmlns:report="com.easyinsight.report.*" width="100%"
+                        height="100%">
+    <mx:Script><![CDATA[
+        import com.easyinsight.analysis.AnalysisCloseEvent;
+
+        import mx.collections.ArrayCollection;
+        import mx.managers.BrowserManager;
+        import mx.utils.URLUtil;
+
+
+        override protected function setupBrowser():void {
+            var feedFragmentObject:Object = new Object();
+            feedFragmentObject.multiReportID = String(_dataSourceID);
+            var feedFragmentString:String = URLUtil.objectToString(feedFragmentObject);
+            BrowserManager.getInstance().setFragment(feedFragmentString);
+            BrowserManager.getInstance().setTitle("Easy Insight - Reports");
+        }
+
+        private var _dataSourceID:int;
+
+        [Bindable]
+        [Embed(source="../../../../assets/document_out_x32.png")]
+        private var closeIcon:Class;
+
+        public function set dataSourceID(value:int):void {
+            _dataSourceID = value;
+        }
+
+        override protected function commitProperties():void {
+            super.commitProperties();
+            feedService.getReportsForDataSource.send(_dataSourceID);
+        }
+
+        private function gotReports():void {
+            this.reports = feedService.getReportsForDataSource.lastResult as ArrayCollection;
+        }
+
+        private function close():void {
+            dispatchEvent(new AnalysisCloseEvent(this));
+        }
+        ]]></mx:Script>
+    <mx:RemoteObject id="feedService" destination="feeds">
+        <mx:method name="getReportsForDataSource" result="gotReports()"/>
+    </mx:RemoteObject>
+</report:MultiScreenView>

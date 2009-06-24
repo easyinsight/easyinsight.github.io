@@ -102,8 +102,13 @@ public class EmbeddedViewFactory extends VBox {
     }
 
     private function gotData(event:EmbeddedDataServiceEvent):void {
-        _reportRenderer.renderReport(event.dataSet, event.analysisDefinition, event.clientProcessorMap);
-        dispatchEvent(event);
+        if (event.credentialRequirements != null && event.credentialRequirements.length > 0) {
+            
+            // TODO: retrieve the requested credentials
+        } else {
+            _reportRenderer.renderReport(event.dataSet, event.analysisDefinition, event.clientProcessorMap);
+            dispatchEvent(event);
+        }
     }
 
     private function loadReportRenderer():void {

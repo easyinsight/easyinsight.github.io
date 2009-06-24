@@ -40,7 +40,7 @@ import com.easyinsight.listing.DescriptorAnalyzeSource;
 		private function gotFeed(event:ResultEvent):void {
         	var feedResponse:FeedResponse = feedService.openFeedByAPIKey.lastResult as FeedResponse;
         	if (feedResponse.status == FeedResponse.SUCCESS) {
-        		dispatchEvent(new ModuleAnalyzeEvent(new DescriptorAnalyzeSource(feedResponse.feedDescriptor)));
+        		dispatchEvent(new ModuleAnalyzeEvent(new DescriptorAnalyzeSource(feedResponse.feedDescriptor.dataFeedID, feedResponse.feedDescriptor.name)));
             } else if (feedResponse.status == FeedResponse.NEED_LOGIN) {
                 var loginDialog:LoginDialog = LoginDialog(PopUpManager.createPopUp(Application.application as DisplayObject, LoginDialog, true));
         		loginDialog.addEventListener(LoginEvent.LOGIN, delayedFeed);

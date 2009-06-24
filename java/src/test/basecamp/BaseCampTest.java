@@ -36,7 +36,7 @@ public class BaseCampTest extends TestCase {
         c.setPassword("@p!user");
         long sourceId = uploadService.newExternalDataSource(ds, c);
         DataService dataService = new DataService();
-        dataService.getFeedMetadata(sourceId, null);
+        dataService.getFeedMetadata(sourceId);
     }
 
     public void testUrlByName() {

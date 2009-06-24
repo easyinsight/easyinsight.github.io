@@ -44,7 +44,7 @@ public class AnalysisService {
         try {
             session.getTransaction().begin();
             AnalysisDefinition analysisDefinition = analysisStorage.getPersistableReport(reportID, session);
-            AnalysisDefinition clone = analysisDefinition.clone();
+            AnalysisDefinition clone = analysisDefinition.clone(null);
             clone.setAuthorName(SecurityUtil.getUserName());
             clone.setTitle(newName);
             List<UserToAnalysisBinding> bindings = new ArrayList<UserToAnalysisBinding>();
