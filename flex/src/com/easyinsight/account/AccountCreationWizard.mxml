@@ -37,69 +37,77 @@
 	</mx:states>
 	<mx:Script>
 		<![CDATA[
-			import com.easyinsight.framework.LoginEvent;
-			import com.easyinsight.framework.UserServiceResponse;
-			import com.easyinsight.framework.UserTransferObject;
-			import com.easyinsight.framework.User;
+        import com.easyinsight.framework.LoginEvent;
+        import com.easyinsight.framework.UserServiceResponse;
+        import com.easyinsight.framework.UserTransferObject;
+        import com.easyinsight.framework.User;
 
-            import com.easyinsight.util.ProgressAlert;
+        import com.easyinsight.util.ProgressAlert;
 
-            import mx.managers.PopUpManager;
+        import mx.managers.PopUpManager;
 
-            [Bindable]
-			private var account:Account;
-            [Bindable]
-			private var user:UserTransferObject;
-            private var password:String;
+        [Bindable]
+        private var account:Account;
+        [Bindable]
+        private var user:UserTransferObject;
+        private var password:String;
 
-            private function signup(accountType:int):void {
-                this.account = new Account();
-				account.accountType = accountType;
-                if (accountType == Account.FREE || accountType == Account.INDIVIDUAL) {
-				    this.currentState = "UserInfo";
-                } else {
-                    this.currentState = "ProAccountUserInfo";
-                }
+        [Bindable]
+        private var _destinationURL:String;
+
+
+        public function set destinationURL(value:String):void {
+            _destinationURL = value;
+        }
+
+        private function signup(accountType:int):void {
+            this.account = new Account();
+            account.accountType = accountType;
+            if (accountType == Account.FREE || accountType == Account.INDIVIDUAL) {
+                this.currentState = "UserInfo";
+            } else {
+                this.currentState = "ProAccountUserInfo";
             }
-			
-			private function onPreviousPage(event:PreviousPageEvent):void {
-				switch (this.currentState) {
-					case "UserInfo":
-                    case "ProAccountUserInfo":
-						currentState = "";
-						break;
-				}
-			}
-			
-			private function postUserInfo(event:UserDefinitionEvent):void {
-                this.user = event.user;
-                this.password = event.password;
-                ProgressAlert.alert(this, "Creating account...", "The account has been created and an activation email sent to your address.", creationService.createAccount);
-				attemptAccountCreation();
-			}
+        }
 
-            private function contactUs():void {
-                currentState = "ContactUs";
+        private function onPreviousPage(event:PreviousPageEvent):void {
+            switch (this.currentState) {
+                case "UserInfo":
+                case "ProAccountUserInfo":
+                    currentState = "";
+                    break;
             }
-			
-			private function attemptAccountCreation():void {
-				creationService.createAccount(user, account, password);
-			}
-			
-			private function createdAccount():void {
-				var resultID:int = creationService.createAccount.lastResult as int;
-                currentState = "FreeActivation";
-			}
-			
-			private function gotUserInfo():void {
-				var user:UserServiceResponse = creationService.authenticate.lastResult as UserServiceResponse;
-				User.initializeUser(user.name, user.email, user.accountType, user.spaceAllowed, user.accountAdmin,
-                            user.dataSourceCreator, user.insightCreator, user.userID);
-            	User.getInstance().password = user.encryptedPassword;
-            	User.getInstance().userName = user.userName;
-            	User.getEventNotifier().dispatchEvent(new LoginEvent(LoginEvent.LOGIN));
-				currentState = "AccountCreated";
-			}		
+        }
+
+        private function postUserInfo(event:UserDefinitionEvent):void {
+            this.user = event.user;
+            this.password = event.password;
+            ProgressAlert.alert(this, "Creating account...", "The account has been created and an activation email sent to your address.", creationService.createAccount);
+            attemptAccountCreation();
+        }
+
+        private function contactUs():void {
+            currentState = "ContactUs";
+        }
+
+        private function attemptAccountCreation():void {
+            creationService.createAccount(user, account, password, _destinationURL);
+        }
+
+        private function createdAccount():void {
+            var resultID:int = creationService.createAccount.lastResult as int;
+            currentState = "FreeActivation";
+        }
+
+        private function gotUserInfo():void {
+            var user:UserServiceResponse = creationService.authenticate.lastResult as UserServiceResponse;
+            User.initializeUser(user.name, user.email, user.accountType, user.spaceAllowed, user.accountAdmin,
+                    user.dataSourceCreator, user.insightCreator, user.userID);
+            User.getInstance().password = user.encryptedPassword;
+            User.getInstance().userName = user.userName;
+            User.getEventNotifier().dispatchEvent(new LoginEvent(LoginEvent.LOGIN));
+            currentState = "AccountCreated";
+        }
 		]]>
 	</mx:Script>
 	<mx:VBox width="100%" height="100%" id="coreContent" backgroundAlpha="1" paddingTop="0">

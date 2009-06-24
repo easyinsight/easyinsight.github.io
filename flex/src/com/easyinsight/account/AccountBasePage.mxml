@@ -9,77 +9,85 @@
 	</mx:states>	
 	<mx:Script>
 		<![CDATA[
-			import com.easyinsight.framework.User;
+        import com.easyinsight.framework.User;
 
-            import mx.managers.BrowserManager;
-            import mx.utils.URLUtil;
+        import mx.managers.BrowserManager;
+        import mx.utils.URLUtil;
 
-            [Bindable]
-			public var account:Account;
+        [Bindable]
+        public var account:Account;
 
-            [Bindable]
-            [Embed(source="../../../../assets/background2.JPG")]
-            private var background2:Class;
+        [Bindable]
+        [Embed(source="../../../../assets/background2.JPG")]
+        private var background2:Class;
 
-            private function setupListeners():void {
-                addEventListener(RefreshAccountEvent.REFRESH_ACCOUNT, refreshAccount);
-            }
+        [Bindable]
+        private var _destinationURL:String;
 
-            private function refreshAccount(event:RefreshAccountEvent):void {
-                this.account = null;
-                coreContent.removeAllChildren();
-                retrieveAccountInfo();
-            }
 
-            public function gotFocus():void {
-                var fragmentObject:Object = new Object();
-                fragmentObject.page = "account";
-                BrowserManager.getInstance().setTitle("Easy Insight - Account");
-                var fragmentString:String = URLUtil.objectToString(fragmentObject);
-				BrowserManager.getInstance().setFragment(fragmentString);
-            	var user:User = User.getInstance();
-                if (user != null) {
-                    if (currentState != "loggedIn") {
-                        currentState = "loggedIn";
-                        if (account == null) {
-                        	retrieveAccountInfo();
-                        }                        
+        public function set destinationURL(value:String):void {
+            _destinationURL = value;
+        }
+
+        private function setupListeners():void {
+            addEventListener(RefreshAccountEvent.REFRESH_ACCOUNT, refreshAccount);
+        }
+
+        private function refreshAccount(event:RefreshAccountEvent):void {
+            this.account = null;
+            coreContent.removeAllChildren();
+            retrieveAccountInfo();
+        }
+
+        public function gotFocus():void {
+            var fragmentObject:Object = new Object();
+            fragmentObject.page = "account";
+            BrowserManager.getInstance().setTitle("Easy Insight - Account");
+            var fragmentString:String = URLUtil.objectToString(fragmentObject);
+            BrowserManager.getInstance().setFragment(fragmentString);
+            var user:User = User.getInstance();
+            if (user != null) {
+                if (currentState != "loggedIn") {
+                    currentState = "loggedIn";
+                    if (account == null) {
+                        retrieveAccountInfo();
                     }
-                } else {
-                    currentState = "";                    
                 }
+            } else {
+                currentState = "";
             }
-            
-            private function retrieveAccountInfo():void {
-            	userService.retrieveAccount.send();
-            }
-            
-            private function gotAccountInfo():void {
-                if (this.account == null) {
-                    this.account = userService.retrieveAccount.lastResult as Account;
-                    var accountSummary:AccountSummary = new AccountSummary();
-                    accountSummary.account = account;
-                    coreContent.addChild(accountSummary);
-                }
-            }
+        }
 
-            public function lostFocus():void {
-            }
+        private function retrieveAccountInfo():void {
+            userService.retrieveAccount.send();
+        }
 
-            public function getDefaultAnalyzeState():Boolean {
-                return false;
+        private function gotAccountInfo():void {
+            if (this.account == null) {
+                this.account = userService.retrieveAccount.lastResult as Account;
+                var accountSummary:AccountSummary = new AccountSummary();
+                accountSummary.account = account;
+                coreContent.addChild(accountSummary);
             }
+        }
 
-            public function isKeywordSearchInstant():Boolean {
-                return false;
-            }
-            
-            private function accountCreated(event:AccountWizardResultEvent):void {
-            	//currentState = "loggedIn";
-            	/*User.initializeUser(event.user.userID, event.account.accountID, event.user.userName, event.user.email,
-            		event.account.accountType, event.account.accountType.getSpaceAllowed(), event.user.permissions);            	            
-            	User.getEventNotifier().dispatchEvent(new LoginEvent());*/
-            }                    
+        public function lostFocus():void {
+        }
+
+        public function getDefaultAnalyzeState():Boolean {
+            return false;
+        }
+
+        public function isKeywordSearchInstant():Boolean {
+            return false;
+        }
+
+        private function accountCreated(event:AccountWizardResultEvent):void {
+            //currentState = "loggedIn";
+            /*User.initializeUser(event.user.userID, event.account.accountID, event.user.userName, event.user.email,
+             event.account.accountType, event.account.accountType.getSpaceAllowed(), event.user.permissions);
+             User.getEventNotifier().dispatchEvent(new LoginEvent());*/
+        }
 		]]>
 	</mx:Script>
 	<mx:RemoteObject destination="login" id="userService">
@@ -87,6 +95,6 @@
 	</mx:RemoteObject>
 	<mx:VBox width="1000" height="100%" backgroundImage="{background2}" backgroundSize="100%" paddingLeft="20"
          paddingRight="20" paddingTop="20" paddingBottom="20" id="coreContent">
-		<account:AccountCreationWizard id="accountWizard" accountCreated="accountCreated(event)"/>		
+		<account:AccountCreationWizard id="accountWizard" accountCreated="accountCreated(event)" destinationURL="{_destinationURL}"/>		
 	</mx:VBox>
 </mx:VBox>

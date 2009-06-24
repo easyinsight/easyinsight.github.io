@@ -67,6 +67,7 @@
     </mx:states>
     <mx:Script>
 		<![CDATA[
+        import mx.controls.Alert;
         import mx.rpc.AsyncResponder;
         import mx.rpc.events.FaultEvent;
         import mx.rpc.events.ResultEvent;
@@ -85,7 +86,15 @@
         private var resetResult:String;
 
         [Bindable]
+        private var _targetURL:String;
+
+        [Bindable]
         private var emailFailure:String;
+
+
+        public function set targetURL(value:String):void {
+            _targetURL = value;
+        }
 
         public function set additionalInfo(value:String):void {
             _additionalInfo = value;
@@ -156,8 +165,8 @@
                         authResult.dataSourceCreator, authResult.insightCreator, authResult.userID);
                 User.getInstance().password = authResult.encryptedPassword;
                 User.getInstance().userName = authResult.userName;
-                dispatchEvent(new LoginEvent(LoginEvent.LOGIN));
-                User.getEventNotifier().dispatchEvent(new LoginEvent(LoginEvent.LOGIN));
+                dispatchEvent(new LoginEvent(LoginEvent.LOGIN, _targetURL));
+                User.getEventNotifier().dispatchEvent(new LoginEvent(LoginEvent.LOGIN, _targetURL));
             } else {
                 failureMessageLabel.text = authResult.failureMessage;
             }

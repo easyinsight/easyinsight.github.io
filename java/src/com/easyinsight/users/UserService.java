@@ -241,6 +241,10 @@ public class UserService implements IUserService {
     } */
 
     public long createAccount(UserTransferObject userTransferObject, AccountTransferObject accountTransferObject, String password) {
+        return createAccount(userTransferObject, accountTransferObject, password, null);
+    }
+
+    public long createAccount(UserTransferObject userTransferObject, AccountTransferObject accountTransferObject, String password, String sourceURL) {
         Connection conn = Database.instance().getConnection();
         Session session = Database.instance().createSession(conn);
         try {
@@ -263,10 +267,11 @@ public class UserService implements IUserService {
             }
             //if (account.getAccountType() == Account.FREE || account.getAccountType() == Account.INDIVIDUAL) {
             String activationKey = RandomTextGenerator.generateText(12);
-            PreparedStatement insertActivationStmt = conn.prepareStatement("INSERT INTO ACCOUNT_ACTIVATION (ACCOUNT_ID, ACTIVATION_KEY, CREATION_DATE) VALUES (?, ?, ?)");
+            PreparedStatement insertActivationStmt = conn.prepareStatement("INSERT INTO ACCOUNT_ACTIVATION (ACCOUNT_ID, ACTIVATION_KEY, CREATION_DATE, target_url) VALUES (?, ?, ?, ?)");
             insertActivationStmt.setLong(1, account.getAccountID());
             insertActivationStmt.setString(2, activationKey);
             insertActivationStmt.setDate(3, new java.sql.Date(System.currentTimeMillis()));
+            insertActivationStmt.setString(4, sourceURL);
             insertActivationStmt.execute();
             new AccountActivityStorage().saveAccountActivity(new AccountActivity(account.getAccountType(),
                     new Date(), account.getAccountID(), 0, AccountActivity.ACCOUNT_CREATED, "", 0, 0, Account.INACTIVE), conn);

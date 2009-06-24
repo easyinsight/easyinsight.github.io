@@ -92,9 +92,9 @@
             return null;
         }
 
-        public function explicitChange(targetPage:String):void {
+        public function explicitChange(targetPage:String, properties:Object):void {
             var listingOption:ListingOption = findNode(targetPage, getChildren());
-            dispatchEvent(new ListingChangeEvent(listingOption.perspective));
+            dispatchEvent(new ListingChangeEvent(listingOption.perspective, properties));
         }
 		]]>
     </mx:Script>

@@ -9,7 +9,6 @@ import com.easyinsight.email.AccountMemberInvitation;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.groups.GroupStorage;
 import org.hibernate.Session;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -301,23 +300,23 @@ public class UserAccountAdminService {
         return accountAPISettings;
     }
 
-    public boolean activateAccount(String activationID) {
-        boolean activated = false;
+    public String activateAccount(String activationID) {
         Connection conn = Database.instance().getConnection();
         Session session = Database.instance().createSession(conn);
         try {
             conn.setAutoCommit(false);
-            PreparedStatement queryStmt = conn.prepareStatement("SELECT ACCOUNT_ID FROM ACCOUNT_ACTIVATION WHERE ACTIVATION_KEY = ?");
+            PreparedStatement queryStmt = conn.prepareStatement("SELECT ACCOUNT_ID, target_url FROM ACCOUNT_ACTIVATION WHERE ACTIVATION_KEY = ?");
             queryStmt.setString(1, activationID);
+            String url = null;            
             ResultSet rs = queryStmt.executeQuery();
             if (rs.next()) {
                 long accountID = rs.getLong(1);
+                url = rs.getString(2);
                 List results = session.createQuery("from Account where accountID = ?").setLong(0, accountID).list();
                 Account account = (Account) results.get(0);
                 account.setAccountState(Account.TRIAL);
                 session.update(account);
                 session.flush();
-                activated = true;
                 if (account.getAccountType() == Account.FREE) {
                     new AccountActivityStorage().saveAccountActivity(new AccountActivity(account.getAccountType(),
                         new Date(), account.getAccountID(), 0, AccountActivity.ACCOUNT_CREATED, "", 0, 0, Account.ACTIVE), conn);
@@ -330,6 +329,7 @@ public class UserAccountAdminService {
                 }
             }
             conn.commit();
+            return url;
         } catch (SQLException e) {
             LogClass.error(e);
             try {
@@ -337,6 +337,7 @@ public class UserAccountAdminService {
             } catch (SQLException e1) {
                 LogClass.error(e1);
             }
+            throw new RuntimeException(e);
         } finally {
             session.close();
             try {
@@ -346,8 +347,7 @@ public class UserAccountAdminService {
             }
             Database.instance().closeConnection(conn);
         }
-        return activated;
-    }    
+    }
 
     public AccountStats getAccountStats() {
         long accountID = SecurityUtil.getAccountID();

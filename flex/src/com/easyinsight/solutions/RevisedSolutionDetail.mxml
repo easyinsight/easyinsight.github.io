@@ -8,10 +8,14 @@
             <mx:AddChild relativeTo="{controlsBox}">
                 <mx:VBox horizontalAlign="center" verticalAlign="middle" height="100%" verticalGap="15">
                     <mx:VBox verticalGap="0">
-                        <mx:Label text="You'll need to log in or create an"/>
-                        <mx:Label text="account before installing the solution."/>    
+                        <mx:Label text="You'll need to create an account or log"/>
+                        <mx:Label text="in before installing the solution."/>
                     </mx:VBox>
-                    <mx:Button label="Log in or Create Account" styleName="blueButton" click="login()"/>
+                    <mx:HBox width="100%" horizontalAlign="center">
+                        <mx:Button label="Create Account" styleName="blueButton" click="createAccount()"/>
+                        <mx:Spacer width="20"/>
+                        <mx:Button label="Log in" styleName="blueButton" click="login()"/>
+                    </mx:HBox>
                 </mx:VBox>
             </mx:AddChild>
         </mx:State>
@@ -55,6 +59,15 @@
         import mx.managers.CursorManager;
         import mx.managers.PopUpManager;
         import mx.utils.URLUtil;
+
+        private function createAccount():void {
+            var urlObject:Object = new Object();
+            urlObject.solutionID = solutionID;
+            var url:String = URLUtil.objectToString(urlObject);
+            var props:Object = new Object();
+            props["destinationURL"] = url;
+            User.getEventNotifier().dispatchEvent(new NavigationEvent(NavigationEvent.ACCOUNTS, null, props));
+        }
 
         private function lesson1():void {
             var window:ScreencastWindow = new ScreencastWindow();

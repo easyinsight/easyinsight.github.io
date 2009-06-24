@@ -1,0 +1,1 @@
+alter table account_activation add target_url varchar(255) default null;
