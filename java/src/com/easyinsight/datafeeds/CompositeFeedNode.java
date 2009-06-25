@@ -6,13 +6,14 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.io.Serializable;
 
 /**
  * User: James Boe
  * Date: Jan 28, 2008
  * Time: 6:47:10 PM
  */
-public class CompositeFeedNode {
+public class CompositeFeedNode implements Serializable {
     private long dataFeedID;
 
     public CompositeFeedNode() {

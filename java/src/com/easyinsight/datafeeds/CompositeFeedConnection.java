@@ -5,13 +5,14 @@ import com.easyinsight.core.Key;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.io.Serializable;
 
 /**
  * User: James Boe
  * Date: Jan 28, 2008
  * Time: 6:47:05 PM
  */
-public class CompositeFeedConnection {
+public class CompositeFeedConnection implements Serializable {
     private Long sourceFeedID;
     private Long targetFeedID;
     private Key sourceJoin;
