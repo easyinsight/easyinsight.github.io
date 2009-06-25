@@ -16,6 +16,11 @@ import com.easyinsight.solutions.SolutionElementKey;
 import com.easyinsight.security.Roles;
 import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.core.InsightDescriptor;
+import com.easyinsight.core.EIDescriptor;
+import com.easyinsight.notifications.ConfigureDataFeedInfo;
+import com.easyinsight.notifications.ConfigureDataFeedTodo;
+import com.easyinsight.notifications.TodoEventInfo;
+import com.easyinsight.eventing.MessageUtils;
 
 import java.sql.*;
 import java.util.*;
@@ -779,9 +784,12 @@ public class GoalStorage {
 
         final Map<SolutionElementKey, Long> installedObjectMap = new HashMap<SolutionElementKey, Long>();
 
+        List<SolutionInstallInfo> allSolutions = new ArrayList<SolutionInstallInfo>();
+
         for (Integer solutionID : goalTree.getNewSolutions()) {
             Solution solution = solutionService.getSolution(solutionID, conn);
             List<SolutionInstallInfo> objects = solutionService.installSolution(userID, solution, conn, true);
+            allSolutions.addAll(objects);
             for (SolutionInstallInfo solutionInstallInfo : objects) {
                 installedObjectMap.put(new SolutionElementKey(solutionInstallInfo.getDescriptor().getType(), solutionInstallInfo.getPreviousID()), solutionInstallInfo.getDescriptor().getId());
             }
@@ -838,6 +846,19 @@ public class GoalStorage {
         };
 
         idReplacementVisitor.visit(goalTree.getRootNode());
+
+        for(SolutionInstallInfo info : allSolutions) {
+            if (info.getDescriptor().getType() == EIDescriptor.DATA_SOURCE && info.getTodoItem() != null) {
+                ConfigureDataFeedTodo todo = info.getTodoItem();
+                ConfigureDataFeedInfo todoInfo = new ConfigureDataFeedInfo();
+                todoInfo.setTodoID(todo.getId());
+                todoInfo.setAction(TodoEventInfo.ADD);
+                todoInfo.setUserId(todo.getUserID());
+                todoInfo.setFeedID(todo.getFeedID());
+                todoInfo.setFeedName(info.getFeedName());
+                MessageUtils.sendMessage("generalNotifications", todoInfo);
+            }
+        }
     }
 
     private AnalysisItem findItem(AnalysisItem analysisItem, FeedDefinition feedDefinition) {

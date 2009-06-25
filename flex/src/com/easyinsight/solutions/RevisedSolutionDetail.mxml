@@ -212,7 +212,7 @@
                 currentState = "AccountBelowRequired";
             }
             installAvailable = solution.installable || solution.goalTreeID > 0;
-            if (solution.screencastDirectory == null && "" != solution.screencastDirectory) {
+            if (solution.screencastDirectory == null || "" == solution.screencastDirectory) {
                 screencastEnabled = false;
             } else {
                 screencastEnabled = true;

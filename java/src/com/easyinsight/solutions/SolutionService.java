@@ -9,12 +9,7 @@ import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.goals.*;
 import com.easyinsight.email.UserStub;
 import com.easyinsight.core.InsightDescriptor;
-import com.easyinsight.core.EIDescriptor;
 import com.easyinsight.users.Account;
-import com.easyinsight.notifications.ConfigureDataFeedTodo;
-import com.easyinsight.notifications.TodoEventInfo;
-import com.easyinsight.notifications.ConfigureDataFeedInfo;
-import com.easyinsight.eventing.MessageUtils;
 
 import java.util.*;
 import java.sql.*;
@@ -159,7 +154,7 @@ public class SolutionService {
             conn.setAutoCommit(false);
             List<SolutionInstallInfo> objects = installSolution(userID, solution, conn, false);
             conn.commit();
-            for(SolutionInstallInfo info : objects) {
+            /*for(SolutionInstallInfo info : objects) {
                 if (info.getDescriptor().getType() == EIDescriptor.DATA_SOURCE && info.getTodoItem() != null) {
                     ConfigureDataFeedTodo todo = info.getTodoItem();
                     ConfigureDataFeedInfo todoInfo = new ConfigureDataFeedInfo();
@@ -170,7 +165,7 @@ public class SolutionService {
                     todoInfo.setFeedName(info.getFeedName());
                     MessageUtils.sendMessage("generalNotifications", todoInfo);
                 }
-            }
+            }*/
             return objects;
         } catch (Exception e) {
             LogClass.error(e);
@@ -350,6 +345,8 @@ public class SolutionService {
         PreparedStatement getSolutionsStmt = conn.prepareStatement("SELECT SOLUTION_ID, NAME, DESCRIPTION, INDUSTRY, AUTHOR, COPY_DATA, SOLUTION_ARCHIVE_NAME, goal_tree_id," +
                 "solution_image, screencast_directory, screencast_mp4_name, solution_tier FROM SOLUTION WHERE SOLUTION_ID = ?");
         getSolutionsStmt.setLong(1, solutionID);
+        PreparedStatement dataSourceCountStmt = conn.prepareStatement("SELECT COUNT(*) FROM solution_to_feed WHERE solution_id = ?");
+        PreparedStatement goalTreeCountStmt = conn.prepareStatement("SELECT COUNT(*) FROM solution_to_goal_tree WHERE solution_id = ?");
         ResultSet rs = getSolutionsStmt.executeQuery();
         if (rs.next()) {
             String name = rs.getString(2);
@@ -373,6 +370,13 @@ public class SolutionService {
             solution.setScreencastName(rs.getString(11));
             solution.setSolutionTier(rs.getInt(12));
             solution.setAccessible(solution.getSolutionTier() <= accountType);
+            dataSourceCountStmt.setLong(1, solutionID);
+            ResultSet dataSourceRS = dataSourceCountStmt.executeQuery();
+            dataSourceRS.next();
+            goalTreeCountStmt.setLong(1, solutionID);
+            ResultSet goalTreeRS = goalTreeCountStmt.executeQuery();
+            goalTreeRS.next();
+            solution.setInstallable(dataSourceRS.getInt(1) > 0 || goalTreeRS.getInt(1) > 0);
             return solution;
         } else {
             throw new RuntimeException();

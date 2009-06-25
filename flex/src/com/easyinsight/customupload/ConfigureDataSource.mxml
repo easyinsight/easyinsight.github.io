@@ -7,6 +7,7 @@
         import com.easyinsight.genredata.ModuleAnalyzeEvent;
         import com.easyinsight.listing.DataFeedDescriptor;
         import com.easyinsight.listing.DescriptorAnalyzeSource;
+        import com.easyinsight.framework.CredentialsCache;
 
         import mx.controls.Alert;
         import mx.managers.PopUpManager;
@@ -83,6 +84,7 @@
         }
 
         private function created():void {
+            CredentialsCache.getCache().addCredentials(dataSourceDefinition.dataFeedID, dataSourceCreation.credentials);
             uploadService.refreshData.send(dataSourceDefinition.dataFeedID, dataSourceCreation.credentials, credentialsSaved, true);
         }
 
