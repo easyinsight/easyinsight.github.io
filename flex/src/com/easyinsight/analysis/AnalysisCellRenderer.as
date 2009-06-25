@@ -39,6 +39,7 @@ public class AnalysisCellRenderer extends UITextField implements IListItemRender
         addEventListener(MouseEvent.MOUSE_OVER, onMouseOver);
         addEventListener(MouseEvent.MOUSE_OUT, onMouseOut);
         addEventListener(MouseEvent.CLICK, onClick);
+        setStyle("fontFamily", "Tahoma");
     }
 
     private function onDrilldown(event:ContextMenuEvent):void {
