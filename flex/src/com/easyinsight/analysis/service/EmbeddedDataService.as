@@ -6,6 +6,7 @@ import com.easyinsight.analysis.EmbeddedDataServiceEvent;
 import com.easyinsight.analysis.IEmbeddedDataService;
 import com.easyinsight.analysis.Value;
 import com.easyinsight.analysis.conditions.ConditionRenderer;
+import com.easyinsight.framework.CredentialsCache;
 import com.easyinsight.framework.DataServiceLoadingEvent;
 import com.easyinsight.framework.InsightRequestMetadata;
 
@@ -64,6 +65,7 @@ public class EmbeddedDataService extends EventDispatcher implements IEmbeddedDat
     public function retrieveData(reportID:int, dataSourceID:int, filters:ArrayCollection):void {
         dispatchEvent(new DataServiceLoadingEvent(DataServiceLoadingEvent.LOADING_STARTED));
         var insightRequestMetadata:InsightRequestMetadata = new InsightRequestMetadata();
+        insightRequestMetadata.credentialFulfillmentList = CredentialsCache.getCache().createCredentials();
         dataRemoteSource.getEmbeddedResults.send(reportID, dataSourceID, filters, insightRequestMetadata);
     }
 }

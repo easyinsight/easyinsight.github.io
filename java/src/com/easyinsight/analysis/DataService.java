@@ -146,6 +146,21 @@ public class DataService {
                                                   InsightRequestMetadata insightRequestMetadata) {
         SecurityUtil.authorizeInsight(reportID);
         try {
+            Feed feed = feedRegistry.getFeed(dataSourceID);
+            List<CredentialRequirement> credentialsRequired = feed.getCredentialRequirement();
+            if (credentialsRequired.size() > 0) {
+                int count = 0;
+                for (CredentialRequirement credentialRequirement : credentialsRequired) {
+                    if (insightRequestMetadata.getCredentialForDataSource(credentialRequirement.getDataSourceID()) != null) {
+                        count++;
+                    }
+                }
+                if (count < credentialsRequired.size()) {
+                    EmbeddedDataResults embeddedDataResults = new EmbeddedDataResults();
+                    embeddedDataResults.setCredentialRequirements(credentialsRequired);
+                    return embeddedDataResults;
+                }
+            }
             EmbeddedCacheKey key = new EmbeddedCacheKey(customFilters, reportID);
             Map<EmbeddedCacheKey, EmbeddedDataResults> resultsCache = null;
             if (reportCache != null) {
@@ -182,7 +197,6 @@ public class DataService {
             }
             long startTime = System.currentTimeMillis();
             EmbeddedDataResults results;
-            Feed feed = feedRegistry.getFeed(analysisDefinition.getDataFeedID());
             /*Set<Long> ids = validate(analysisDefinition, feed);
             if (ids.size() > 0) {
                 throw new RuntimeException("Report is no longer valid.");

@@ -21,6 +21,8 @@
         import com.easyinsight.administration.feed.Tag;
         import com.easyinsight.analysis.AnalysisCloseEvent;
         import com.easyinsight.analysis.AnalysisDefinition;
+        import com.easyinsight.analysis.CredentialRequirement;
+        import com.easyinsight.analysis.CredentialsEvent;
         import com.easyinsight.analysis.EmbeddedControllerLookup;
         import com.easyinsight.analysis.EmbeddedDataServiceEvent;
         import com.easyinsight.analysis.EmbeddedViewFactory;
@@ -28,6 +30,7 @@
         import com.easyinsight.analysis.HierarchyRollupEvent;
         import com.easyinsight.analysis.IEmbeddedReportController;
 
+        import com.easyinsight.analysis.RuntimeCredentialsWindow;
         import com.easyinsight.commands.CommandEvent;
         import com.easyinsight.commands.CommandProcessor;
         import com.easyinsight.detail.DataDetailEvent;
@@ -202,6 +205,7 @@
             var controller:IEmbeddedReportController = new controllerClass();
             var dataViewFactory:EmbeddedViewFactory = controller.createEmbeddedView();
             dataViewFactory.reportID = _reportID;
+            dataViewFactory.dataSourceID = _dataSourceID;
             reportBox.addChild(dataViewFactory);
             dataViewFactory.addEventListener(EmbeddedDataServiceEvent.DATA_RETURNED, gotData);
             if (!_embedded) {
@@ -215,40 +219,54 @@
             _dataSourceID = value;
         }
 
+        private function onCredentials(event:CredentialsEvent):void {
+            viewFactory.retrieveData();
+        }
+
         private function gotData(event:EmbeddedDataServiceEvent):void {
-            var report:AnalysisDefinition = event.analysisDefinition;
-            reportName = report.name;
-            reportRatingCount = String(report.ratingCount);
-            reportRating = String(report.ratingAverage);
-            reportViews = String(report.viewCount);
-            attribution = event.attribution;
-            tags = "";
-            if (report.tagCloud != null && report.tagCloud.length > 0) {
-                for each (var tag:Tag in report.tagCloud) {
-                    tags += tag.tagName;
-                    tags += ",";
+            if (event.credentialRequirements != null) {
+                for each (var credential:CredentialRequirement in event.credentialRequirements) {
+                    var window:RuntimeCredentialsWindow = new RuntimeCredentialsWindow();
+                    window.requirement = credential;
+                    window.addEventListener(CredentialsEvent.CREDENTIALS_SAVED, onCredentials);
+                    PopUpManager.addPopUp(window, this, true);
+                    PopUpManager.centerPopUp(window);
                 }
-                tags = tags.substring(0, tags.length - 1);
+            } else {
+                var report:AnalysisDefinition = event.analysisDefinition;
+                reportName = report.name;
+                reportRatingCount = String(report.ratingCount);
+                reportRating = String(report.ratingAverage);
+                reportViews = String(report.viewCount);
+                attribution = event.attribution;
+                tags = "";
+                if (report.tagCloud != null && report.tagCloud.length > 0) {
+                    for each (var tag:Tag in report.tagCloud) {
+                        tags += tag.tagName;
+                        tags += ",";
+                    }
+                    tags = tags.substring(0, tags.length - 1);
+                }
+                admin = event.dataSourceAccessible;
+                if (admin && report.filterDefinitions != null && report.filterDefinitions.length > 0) {
+                    filterDefinitions = report.filterDefinitions;
+                    showFilters = true;
+                }
+                ownerName = report.authorName;
+                var dateFormatter:DateFormatter = new DateFormatter();
+                dateFormatter.formatString = "MM/DD/YYYY HH:NN";
+                reportDate = dateFormatter.format(report.dateCreated);
+                lastDataTime = dateFormatter.format(event.lastDataTime);
+                if (!_embedded) {
+                    var feedFragmentObject:Object = new Object();
+                    feedFragmentObject.reportID = String(_reportID);
+                    var feedFragmentString:String = URLUtil.objectToString(feedFragmentObject);
+                    BrowserManager.getInstance().setFragment(feedFragmentString);
+                    BrowserManager.getInstance().setTitle("Easy Insight - " + reportName);
+                    progressBar.visible = false;
+                }
+                dispatchEvent(new DataServiceLoadingEvent(DataServiceLoadingEvent.LOADING_STOPPED));
             }
-            admin = event.dataSourceAccessible;
-            if (admin && report.filterDefinitions != null && report.filterDefinitions.length > 0) {
-                filterDefinitions = report.filterDefinitions;
-                showFilters = true;
-            }
-            ownerName = report.authorName;
-            var dateFormatter:DateFormatter = new DateFormatter();
-            dateFormatter.formatString = "MM/DD/YYYY HH:NN";
-            reportDate = dateFormatter.format(report.dateCreated);
-            lastDataTime = dateFormatter.format(event.lastDataTime);
-            if (!_embedded) {
-                var feedFragmentObject:Object = new Object();
-                feedFragmentObject.reportID = String(_reportID);
-                var feedFragmentString:String = URLUtil.objectToString(feedFragmentObject);
-                BrowserManager.getInstance().setFragment(feedFragmentString);
-                BrowserManager.getInstance().setTitle("Easy Insight - " + reportName);
-                progressBar.visible = false;                
-            }
-            dispatchEvent(new DataServiceLoadingEvent(DataServiceLoadingEvent.LOADING_STOPPED));
         }
 
         private function close():void {

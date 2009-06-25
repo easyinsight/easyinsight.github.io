@@ -6,7 +6,8 @@ import com.easyinsight.quicksearch.EIDescriptor;
 
 import mx.containers.ViewStack;
 import mx.core.Container;
-
+[Event(name="dataServiceLoadingStarted", type="com.easyinsight.framework.DataServiceLoadingEvent")]
+[Event(name="dataServiceLoadingStopped", type="com.easyinsight.framework.DataServiceLoadingEvent")]
 public class AsyncViewStack extends ViewStack{
 
     private var loadingTarget:Container;
@@ -56,6 +57,7 @@ public class AsyncViewStack extends ViewStack{
             selectedChild = dataViewPanel;
             cubeRotate.play();
         }
+        dispatchEvent(new DataServiceLoadingEvent(DataServiceLoadingEvent.LOADING_STOPPED));
     }
 
     override protected function commitProperties():void {
@@ -73,6 +75,7 @@ public class AsyncViewStack extends ViewStack{
             var container:Container = screen.getContainer();
             loadingTarget = container;
             container.addEventListener(DataServiceLoadingEvent.LOADING_STOPPED, gotInitialData);
+            dispatchEvent(new DataServiceLoadingEvent(DataServiceLoadingEvent.LOADING_STARTED));
             if (newScreen) {
                 addChild(container);
             } else {
