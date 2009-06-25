@@ -104,6 +104,8 @@
         import com.easyinsight.filtering.FilterRawData;
         import com.easyinsight.analysis.FeedMetadata;
 
+        import com.easyinsight.framework.CredentialsCache;
+
         import mx.collections.ArrayCollection;
 
         import com.easyinsight.analysis.AnalysisDefinition;
@@ -305,11 +307,13 @@
                 User.getEventNotifier().addEventListener(LoginEvent.LOGIN, onLogin);
             }
             for each (var credential:CredentialRequirement in feedMetadata.credentials) {
-                var window:RuntimeCredentialsWindow = new RuntimeCredentialsWindow();
-                window.requirement = credential;
-                window.addEventListener(CredentialsEvent.CREDENTIALS_SAVED, onCredentials);
-                PopUpManager.addPopUp(window, this, true);
-                PopUpManager.centerPopUp(window);
+                if (CredentialsCache.getCache().getCredentials(credential.dataSourceID) == null) {
+                    var window:RuntimeCredentialsWindow = new RuntimeCredentialsWindow();
+                    window.requirement = credential;
+                    window.addEventListener(CredentialsEvent.CREDENTIALS_SAVED, onCredentials);
+                    PopUpManager.addPopUp(window, this, true);
+                    PopUpManager.centerPopUp(window);
+                }
             }
             this.analysisValidators = [ analysisNameValidator ];
             this.feedMetadata = feedMetadata;
