@@ -386,3 +386,7 @@ CorePageButton {
     borderStyle: solid;
     borderThickness: 1;
 }
+
+AnalysisCellRenderer {
+    fontFamily: "Tahoma";
+}
