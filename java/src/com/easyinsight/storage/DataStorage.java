@@ -9,6 +9,7 @@ import com.easyinsight.dataset.DataSet;
 import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.datafeeds.FeedPersistenceMetadata;
 import com.easyinsight.core.*;
+import com.easyinsight.cache.Cache;
 
 import java.util.*;
 import java.util.Date;
@@ -36,17 +37,8 @@ public class DataStorage {
     private FeedPersistenceMetadata metadata;
     private static DateDimCache dateDimCache = new DateDimCache();
 
-    private JCS reportCache = getCache("embeddedReports");
-
-    private JCS getCache(String cacheName) {
-        try {
-            return JCS.getInstance(cacheName);
-        } catch (Exception e) {
-            LogClass.error(e);
-        }
-        return null;
-    }
-
+    private JCS reportCache = Cache.getCache(Cache.EMBEDDED_REPORTS);
+                               
     /**
      * Creates a read only connection for retrieving data.
      *

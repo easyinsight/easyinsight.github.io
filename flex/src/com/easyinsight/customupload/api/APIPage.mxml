@@ -10,15 +10,8 @@
                 <listing:GottaLoginPage/>
             </mx:AddChild>
         </mx:State>
-        <mx:State name="functionalityUnavailable">
-            <mx:RemoveChild target="{apiListing}"/>
-            <mx:AddChild relativeTo="{coreContent}">
-                <api:APIFunctionalityUnavailable/>
-            </mx:AddChild>
-        </mx:State>
     </mx:states>
     <mx:Script><![CDATA[
-        import com.easyinsight.account.Account;
         import com.easyinsight.framework.LoginEvent;
         import com.easyinsight.framework.User;
 
@@ -68,14 +61,10 @@
             if (user == null) {
                 currentState = "notLoggedIn";
             } else {
-                if (User.getInstance().getAccountType() == Account.FREE) {
-                    currentState = "functionalityUnavailable";
-                } else {
-                    if (currentState != "") {
-                        currentState = "";
-                    }
-                    apiService.getDataSourceAPIs.send();
+                if (currentState != "") {
+                    currentState = "";
                 }
+                apiService.getDataSourceAPIs.send();
             }
         }
 

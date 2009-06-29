@@ -51,13 +51,8 @@ public class BasicAuthAuthorizationInterceptor extends SoapHeaderInterceptor {
         try {
             UserServiceResponse response;
             response = SecurityUtil.authenticateKeys(policy.getUserName(), policy.getPassword());
-            if (response.getAccountType() < Account.INDIVIDUAL) {
-                log.warn("Free user " + response.getUserName() + " attempted to use API");
-                sendErrorResponse(message, HttpURLConnection.HTTP_UNAUTHORIZED);
-            } else {
-                message.put("accountID", response.getAccountID());
-                message.put("userID", response.getUserID());
-            }
+            message.put("accountID", response.getAccountID());
+            message.put("userID", response.getUserID());
         } catch (Exception e) {
             log.warn("Invalid username or password for user: " + policy.getUserName());
             sendErrorResponse(message, HttpURLConnection.HTTP_FORBIDDEN);

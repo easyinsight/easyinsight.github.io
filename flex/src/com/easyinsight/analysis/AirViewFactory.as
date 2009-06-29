@@ -6,6 +6,7 @@ import com.easyinsight.analysis.charts.twoaxisbased.area.Area3DChartModule;
 import com.easyinsight.analysis.charts.twoaxisbased.area.AreaChartModule;
 import com.easyinsight.analysis.charts.twoaxisbased.line.Line3DChartModule;
 import com.easyinsight.analysis.charts.twoaxisbased.line.LineChartModule;
+import com.easyinsight.analysis.charts.twoaxisbased.line.MultiMeasureLineChartModule;
 import com.easyinsight.analysis.charts.xaxisbased.column.Column3DChartModule;
 import com.easyinsight.analysis.charts.xaxisbased.column.ColumnChartModule;
 import com.easyinsight.analysis.charts.xaxisbased.pie.Pie3DChartModule;
@@ -47,9 +48,15 @@ public class AirViewFactory extends VBox {
 
     private var pendingRequest:Boolean = false;
 
+    private var _dataSourceID:int;
+
     public function AirViewFactory() {
         this.percentHeight = 100;
         this.percentWidth = 100;
+    }
+
+    public function set dataSourceID(value:int):void {
+        _dataSourceID = value;
     }
 
     public function set prefix(val:String):void {
@@ -103,12 +110,17 @@ public class AirViewFactory extends VBox {
         if (_reportRenderer == null) {
             pendingRequest = true;
         } else {
-            _dataService.retrieveData(_reportID);
+            _dataService.retrieveData(_reportID, _dataSourceID, null);
         }
     }
 
     private function gotData(event:EmbeddedDataServiceEvent):void {
-        _reportRenderer.renderReport(event.dataSet, event.analysisDefinition, event.clientProcessorMap);
+        if (event.credentialRequirements != null && event.credentialRequirements.length > 0) {
+
+        } else {
+            _reportRenderer.renderReport(event.dataSet, event.analysisDefinition, event.clientProcessorMap);
+        }
+        dispatchEvent(event);
     }
 
     private function loadReportRenderer():void {
@@ -179,6 +191,9 @@ public class AirViewFactory extends VBox {
                 break;
             case AnalysisDefinition.TREE:
                 controller = TreeModule;
+                break;
+            case AnalysisDefinition.MMLINE:
+                controller = MultiMeasureLineChartModule;
                 break;
         }
         return new controller();

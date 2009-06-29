@@ -74,6 +74,7 @@
             switch (this.currentState) {
                 case "UserInfo":
                 case "ProAccountUserInfo":
+                case "ContactUs":                        
                     currentState = "";
                     break;
             }

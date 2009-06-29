@@ -22,10 +22,7 @@
     </listing:states>
     <mx:Script>
 		<![CDATA[
-        import com.easyinsight.analysis.AnalysisDefinition;
         import com.easyinsight.framework.ModuleAnalyzeSource;
-        import com.easyinsight.listing.AnalysisDefinitionAnalyzeSource;
-        import com.easyinsight.solutions.InsightDescriptor;
         import mx.utils.URLUtil;
         import mx.managers.BrowserManager;
         import mx.rpc.events.FaultEvent;
@@ -33,10 +30,12 @@
         import mx.rpc.events.ResultEvent;
 
         import com.easyinsight.listing.CatalogNavigationEvent;
-        import com.easyinsight.dashboard.DataViewPanel;
 
         import mx.collections.ArrayCollection;
         import mx.containers.Canvas;
+
+        [Bindable]
+        private var thumbnails:ArrayCollection;
 
         public var intro:Canvas;
         private var analysisDefinitions:ArrayCollection;
@@ -51,14 +50,6 @@
             var dataProviderDescriptors:ArrayCollection = dataProvider.searchForAvailableFeeds.lastResult as ArrayCollection;
             currentState = "SearchState";
             catalogListing.dataFeeds = dataProviderDescriptors;
-        }
-
-        public function titleClick(definition:AnalysisDefinition):void {
-            var insightDescriptor:InsightDescriptor = new InsightDescriptor();
-            insightDescriptor.id = definition.analysisID;
-            insightDescriptor.name = definition.name;
-            insightDescriptor.dataFeedID = definition.dataFeedID;
-            dispatchEvent(new ModuleAnalyzeEvent(new AnalysisDefinitionAnalyzeSource(insightDescriptor)));
         }
 
         private function onSearchAnalysis(event:ChildSearchEvent):void {
@@ -103,7 +94,6 @@
             if (lastGenre != genre) {
                 lastGenre = genre;                
             }
-            dataProvider.getHeadlineAnalysesForGenre.send(genre);
             topRatedAnalyses.refreshData();
             mostPopularAnalyses.refreshData();
             mostRecentAnalyses.refreshData();
@@ -271,8 +261,10 @@
                            icon="@Embed(source='../../../../assets/nav_right_green.png')"/>
             </mx:VBox>
         </mx:HBox>-->
+        <!--<mx:TileList dataProvider="{thumbnails}" width="100%" height="100%" itemRenderer="com.easyinsight.genredata.ReportThumbnailRenderer"/>-->
         <mx:Spacer height="20" id="topSpacer"/>
         <mx:VBox width="100%" height="500" id="listsBox" backgroundColor="#FFFFFF" backgroundAlpha=".1">
+
             <mx:HBox width="100%" horizontalAlign="center">
                 <mx:HBox horizontalAlign="center" id="buttonBox" backgroundColor="#FFFFFF" backgroundAlpha=".1">
                     <mx:Button label="Top Rated" id="topRatedButton" click="selectTopRated()" styleName="blueButton"/>

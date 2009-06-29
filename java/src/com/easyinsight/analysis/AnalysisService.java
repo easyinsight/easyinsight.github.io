@@ -8,6 +8,7 @@ import com.easyinsight.security.SecurityException;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.database.Database;
 import com.easyinsight.core.InsightDescriptor;
+import com.easyinsight.cache.Cache;
 
 import java.util.*;
 import java.sql.Connection;
@@ -18,6 +19,7 @@ import java.sql.SQLException;
 import org.antlr.runtime.ANTLRStringStream;
 import org.antlr.runtime.CommonTokenStream;
 import org.hibernate.Session;
+import org.apache.jcs.access.exception.CacheException;
 
 /**
  * User: James Boe
@@ -129,9 +131,15 @@ public class AnalysisService {
     }
 
     public WSAnalysisDefinition saveAnalysisDefinition(WSAnalysisDefinition wsAnalysisDefinition, byte[] image) {
+
         long userID = SecurityUtil.getUserID();
         if (wsAnalysisDefinition.getAnalysisID() > 0) {
             SecurityUtil.authorizeInsight(wsAnalysisDefinition.getAnalysisID());
+        }
+        try {
+            Cache.getCache(Cache.EMBEDDED_REPORTS).remove(wsAnalysisDefinition.getDataFeedID());
+        } catch (CacheException e) {
+            LogClass.error(e);
         }
         Connection conn = Database.instance().getConnection();
         Session session = Database.instance().createSession(conn);

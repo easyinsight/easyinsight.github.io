@@ -4,11 +4,17 @@
 	<mx:Script>
 		<![CDATA[
         import com.easyinsight.analysis.AirViewFactory;
+        import com.easyinsight.analysis.CredentialRequirement;
+        import com.easyinsight.analysis.CredentialsEvent;
         import com.easyinsight.analysis.EmbeddedControllerLookup;
         import com.easyinsight.analysis.EmbeddedViewFactory;
         import com.easyinsight.analysis.IEmbeddedReportController;
+        import com.easyinsight.analysis.EmbeddedDataServiceEvent;
 
+        import com.easyinsight.analysis.RuntimeCredentialsWindow;
         import com.easyinsight.framework.DataServiceLoadingEvent;
+
+        import mx.managers.PopUpManager;
 
         private function setupTimer():void {
             timer = new Timer(300000);
@@ -22,6 +28,12 @@
 
         private var _analysisID:int;
         private var _reportType:int;
+        private var _dataSourceID:int;
+
+
+        public function set dataSourceID(value:int):void {
+            _dataSourceID = value;
+        }
 
         private var dataViewFactory:AirViewFactory;
 
@@ -40,6 +52,22 @@
             return _analysisID;
         }
 
+        private function onCredentials(event:CredentialsEvent):void {
+            dataViewFactory.retrieveData();
+        }
+
+        private function onDataReturn(event:EmbeddedDataServiceEvent):void {
+            if (event.credentialRequirements != null) {
+                for each (var credential:CredentialRequirement in event.credentialRequirements) {
+                    var window:RuntimeCredentialsWindow = new RuntimeCredentialsWindow();
+                    window.requirement = credential;
+                    window.addEventListener(CredentialsEvent.CREDENTIALS_SAVED, onCredentials);
+                    PopUpManager.addPopUp(window, this, true);
+                    PopUpManager.centerPopUp(window);
+                }
+            }
+        }
+
         override protected function createChildren():void {
             super.createChildren();
             if (dataViewFactory == null) {
@@ -47,8 +75,10 @@
                 var controller:IEmbeddedReportController = new controllerClass();
                 var dataViewFactory:EmbeddedViewFactory = controller.createEmbeddedView();
                 var airViewFactory:AirViewFactory = new AirViewFactory();
+                airViewFactory.dataSourceID = _dataSourceID;
                 airViewFactory.reportType = _reportType;
                 airViewFactory.reportID = _analysisID;
+                airViewFactory.addEventListener(EmbeddedDataServiceEvent.DATA_RETURNED, onDataReturn);
                 airViewFactory.addEventListener(DataServiceLoadingEvent.LOADING_STARTED, dataLoadingEvent);
                 airViewFactory.addEventListener(DataServiceLoadingEvent.LOADING_STOPPED, dataLoadingEvent);
                 this.dataViewFactory = airViewFactory;

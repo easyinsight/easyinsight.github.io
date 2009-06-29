@@ -53,7 +53,7 @@ public class GnipDataSource extends ServerDataSourceDefinition {
     private List<GnipFilter> filters;
 
     public int getRequiredAccountTier() {
-        return Account.GROUP;
+        return Account.INDIVIDUAL;
     }
 
     public FeedType getFeedType() {

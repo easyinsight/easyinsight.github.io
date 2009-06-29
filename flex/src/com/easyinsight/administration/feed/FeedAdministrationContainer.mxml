@@ -7,7 +7,8 @@
             import com.easyinsight.analysis.AnalysisChangedEvent;
         import com.easyinsight.customupload.ExcelUploadFormat;
         import com.easyinsight.customupload.FlatFileUploadFormat;
-        import com.easyinsight.genredata.ModuleAnalyzeEvent;
+            import com.easyinsight.datasources.IServerDataSourceDefinition;
+            import com.easyinsight.genredata.ModuleAnalyzeEvent;
         import com.easyinsight.listing.DescriptorAnalyzeSource;
         import com.easyinsight.util.ProgressAlert;
 
@@ -95,8 +96,8 @@
                 implBox.label = "Composite Details";
                 showImpl = true;
                 this.feedAdminDetail = compositeWorkspace;
-            } else if (feedDefinition is ServerDataSourceDefinition) {
-                var sds:ServerDataSourceDefinition = feedDefinition as ServerDataSourceDefinition;
+            } else if (feedDefinition is IServerDataSourceDefinition) {
+                var sds:IServerDataSourceDefinition = feedDefinition as IServerDataSourceDefinition;
                 var configClass:Class = sds.configClass();
                 var admin:ServerDataSourceAdministration = new ServerDataSourceAdministration();
                 admin.dataSourceClass = configClass;

@@ -15,6 +15,7 @@ import mx.collections.ArrayCollection;
 import mx.rpc.events.FaultEvent;
 import mx.rpc.events.ResultEvent;
 import mx.rpc.remoting.RemoteObject;
+import mx.controls.Alert;
 
 public class EmbeddedDataService extends EventDispatcher implements IEmbeddedDataService {
 
@@ -34,7 +35,7 @@ public class EmbeddedDataService extends EventDispatcher implements IEmbeddedDat
 
     private function processListData(event:ResultEvent):void {
         var listData:EmbeddedDataResults = dataRemoteSource.getEmbeddedResults.lastResult as EmbeddedDataResults;
-        if (listData.credentialRequirements == null) {
+        if (listData.credentialRequirements == null || listData.credentialRequirements.length == 0) {
             var clientProcessorMap:Object = new Object();
             var headers:ArrayCollection = new ArrayCollection(listData.headers);
             for each (var analysisItem:AnalysisItem in headers) {

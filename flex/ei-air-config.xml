@@ -30,6 +30,8 @@
        <library-path>
          <path-element>${flexlib}/libs/datavisualization.swc</path-element>
          <path-element>${flexlib}/libs/air/applicationupdater.swc</path-element>
+         <path-element>${flexlib}/libs/air/applicationupdater_ui.swc</path-element>
+         <path-element>${flexlib}/libs/air/servicemonitor.swc</path-element>
          <path-element>${flexlib}/libs/flex.swc</path-element>
          <path-element>${flexlib}/libs/framework.swc</path-element>
          <path-element>${flexlib}/libs/rpc.swc</path-element>

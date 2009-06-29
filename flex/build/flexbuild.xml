@@ -29,6 +29,16 @@
         </mxmlc>
     </target>
 
+    <target name="compileAirForAssembly">
+        <mkdir dir="../out"/>
+        <mkdir dir="../out/air"/>
+        <copy file="../src/AirWidget.xml" todir="../out/air"/>
+        <mxmlc file="../src/EIAirWidget.mxml" output="../out/air/EIAirWidget.swf"
+               static-rsls="true" incremental="true">
+            <load-config filename="../ei-air-config.xml"/>
+        </mxmlc>
+    </target>
+
     <property name="ADL" value="${FLEX_HOME}/bin/adl.exe"/>
     <property name="ADT.JAR" value="${FLEX_HOME}/lib/adt.jar"/>
 

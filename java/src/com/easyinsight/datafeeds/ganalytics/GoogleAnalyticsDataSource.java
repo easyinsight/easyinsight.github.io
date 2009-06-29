@@ -118,7 +118,7 @@ public class GoogleAnalyticsDataSource extends ServerDataSourceDefinition {
     public static final String SEARCH_VISITS = "ga:searchVisits";
 
     public int getRequiredAccountTier() {
-        return Account.GROUP;
+        return Account.INDIVIDUAL;
     }
 
     public FeedType getFeedType() {

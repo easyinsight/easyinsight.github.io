@@ -22,9 +22,22 @@
             <mx:SetProperty target="{analysisNameInput}" name="editable" value="false"/>
             <mx:SetProperty target="{analysisTagsInput}" name="editable" value="false"/>
         </mx:State>
+        <mx:State name="Professional">
+
+        </mx:State>
+        <mx:State name="Group" basedOn="Professional">
+
+        </mx:State>
+        <mx:State name="Individual" basedOn="Group">
+            <mx:RemoveChild target="{createFeedButton}"/>
+        </mx:State>
+        <mx:State name="Free" basedOn="Individual">
+
+        </mx:State>
     </core:states>
     <mx:Script>
 		<![CDATA[
+        import com.easyinsight.account.Account;
         import com.easyinsight.administration.feed.DeleteAnalysisItemEvent;
         import com.easyinsight.analysis.AnalysisChangedEvent;
         import com.easyinsight.analysis.AnalysisItemEditEvent;
@@ -305,6 +318,21 @@
             if (User.getInstance() == null) {
                 currentState = "NotLoggedIn";
                 User.getEventNotifier().addEventListener(LoginEvent.LOGIN, onLogin);
+            } else {
+                switch (User.getInstance().getAccountType()) {
+                    case Account.PROFESSIONAL:
+                        currentState = "Professional";
+                        break;
+                    case Account.GROUP:
+                        currentState = "Group";
+                        break;
+                    case Account.INDIVIDUAL:
+                        currentState = "Individual";
+                        break;
+                    case Account.FREE:
+                        currentState = "Free";
+                        break;
+                }
             }
             for each (var credential:CredentialRequirement in feedMetadata.credentials) {
                 if (CredentialsCache.getCache().getCredentials(credential.dataSourceID) == null) {
@@ -522,8 +550,8 @@
                     var valid:Boolean = Validator.validateAll(analysisValidators).length == 0;
                     if (valid) {
                         dataView.updateExportMetadata();
-                        var bd:BitmapData = new BitmapData(dataView.width, dataView.height);
-			            bd.draw(dataView);
+                        var bd:BitmapData = new BitmapData(dataView.getCoreView().width, dataView.getCoreView().height);
+			            bd.draw(dataView.getCoreView());
 			            var ba:ByteArray = PNGEnc.encode(bd);
                         analysisDefinition.name = analysisNameInput.text;
                         analysisDefinition.tagCloud = TagCloud.fromString(analysisTagsInput.text);
@@ -855,7 +883,7 @@
                 embedWindow.analysisID = analysisDefinition.analysisID;
                 PopUpManager.centerPopUp(embedWindow);
             } else {
-                Alert.show("You need to save the insight first.");
+                Alert.show("You need to save the report first.");
             }
         }
 
@@ -932,7 +960,7 @@
                                  click="sourceSharingChange(event)"/>
                     <mx:HBox verticalAlign="middle">
                         <mx:CheckBox label="Publicly Visible" id="publiclyVisibleCheckbox"
-                                 selected="{publiclyVisible}"/>
+                                 selected="{publiclyVisible}" change="publiclyVisible = publiclyVisibleCheckbox.selected"/>
                         <mx:Label fontSize="10" textDecoration="underline" text="What is this?" toolTip="By checking this box, you make the report visible to other users that you send the URL to."/>
                     </mx:HBox>
                     <mx:HBox verticalAlign="middle">

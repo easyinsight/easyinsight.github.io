@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:analysis="analysis.*"
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml"
          xmlns:dashboard="com.easyinsight.dashboard.*" alpha="1" backgroundAlpha=".1"
          width="100%" height="100%" backgroundColor="#FFFFFF">
     <mx:Metadata>
@@ -12,11 +12,30 @@
         [Bindable]
         private var _analysisID:int;
         [Bindable]
+        private var _reportType:int;
+        [Bindable]
+        private var _dataSourceID:int;
+        [Bindable]
+        private var _reportName:String;
+        [Bindable]
         private var title:String;
         private var dataView:DisplayObject;
 
         public function set analysisID(val:int):void {
             _analysisID = val;
+        }
+
+
+        public function set reportType(value:int):void {
+            _reportType = value;
+        }
+
+        public function set dataSourceID(value:int):void {
+            _dataSourceID = value;
+        }
+
+        public function set reportName(value:String):void {
+            _reportName = value;
         }
 
         private function returnToList():void {
@@ -30,6 +49,7 @@
     </mx:Script>
     <mx:Consumer id="defConsumer" destination="dataUpdates" message="onMessage(event)"/>
     <mx:VBox id="coreVBox" height="100%" width="100%">
-        <dashboard:DataViewPanel id="panel" analysisID="{_analysisID}"/>
+        <dashboard:DataViewPanel id="panel" analysisID="{_analysisID}" dataSourceID="{_dataSourceID}"
+                reportType="{_reportType}" reportName="{_reportName}"/>
     </mx:VBox>
 </mx:VBox>

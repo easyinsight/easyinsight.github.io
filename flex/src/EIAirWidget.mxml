@@ -5,11 +5,21 @@
                 paddingTop="0" top="0" borderThickness="0" left="0" paddingLeft="0" right="0" paddingRight="0"
                 bottom="0" paddingBottom="0" backgroundImage="{background2}" backgroundSize="100%">
     <mx:states>
-        <mx:State name="LoggingIn">
+        <mx:State name="Offline">
             <mx:AddChild relativeTo="{coreBox}">
                 <mx:Box width="100%" height="100%" horizontalAlign="center" verticalAlign="middle">
                     <mx:VBox horizontalAlign="center">
                         <mx:Label text="Connecting to Easy Insight..."/>
+                        <mx:ProgressBar indeterminate="true"/>
+                    </mx:VBox>
+                </mx:Box>
+            </mx:AddChild>
+        </mx:State>
+        <mx:State name="LoggingIn">
+            <mx:AddChild relativeTo="{coreBox}">
+                <mx:Box width="100%" height="100%" horizontalAlign="center" verticalAlign="middle">
+                    <mx:VBox horizontalAlign="center">
+                        <mx:Label text="Logging in to Easy Insight..."/>
                         <mx:ProgressBar indeterminate="true"/>
                     </mx:VBox>
                 </mx:Box>
@@ -40,12 +50,15 @@
         </mx:State>
         <mx:State name="GettingReport">
             <mx:AddChild relativeTo="{coreBox}">
-                <dashboard:AirReportView airLogout="onLogout()"/>
+                <dashboard:AirReportView airLogout="onLogout()" eiUpdate="updater.checkNow()"/>
             </mx:AddChild>
         </mx:State>
     </mx:states>
     <mx:Script>
 		<![CDATA[
+        import air.net.URLMonitor;
+        import air.update.ApplicationUpdaterUI;
+
         import com.easyinsight.analysis.AirMenuFactory;
         import com.easyinsight.analysis.AnalysisCalculation;
         import com.easyinsight.analysis.AnalysisDateDimension;
@@ -61,6 +74,8 @@
         import com.easyinsight.analysis.TemporalAnalysisMeasure;
         import flash.data.EncryptedLocalStore;
 
+        import air.update.events.UpdateEvent;
+
         import mx.core.BitmapAsset;
         import mx.rpc.events.ResultEvent;
         import mx.messaging.config.ServerConfig;
@@ -71,7 +86,12 @@
         import com.easyinsight.framework.User;
         import com.easyinsight.framework.UserServiceResponse;
 
+        import mx.controls.Alert;
+
         import flash.desktop.NativeApplication;
+
+        private var monitor:URLMonitor;
+        private var connected:Boolean;
 
         [Bindable]
         [Embed(source="../assets/background2.JPG")]
@@ -104,8 +124,60 @@
         */
         private function onLogout():void {
             EncryptedLocalStore.reset();
+            ServerConfig.getChannelSet(authService.destination).logout();
             currentState = "LoginState";
             addEventListener(KeyboardEvent.KEY_UP, onKeyUp);
+        }
+
+        private function postUpdates():void {
+            
+        }
+
+        private var updater:ApplicationUpdaterUI = new ApplicationUpdaterUI();
+
+        private function onStatusEvent(event:StatusEvent):void {
+            var available:Boolean = monitor.available;
+            if (available && !connected) {
+                if (authService.channelSet == null) {
+                    connected = true;
+                    /**
+                     * Retrieve the user from the local store in AIR, if it exists.
+                     */
+                    var userBytes:ByteArray = EncryptedLocalStore.getItem("userID");
+                    if (userBytes != null) {
+                        var userNameJS:String = userBytes.readUTFBytes(userBytes.length);
+                    }
+                    var passwordBytes:ByteArray = EncryptedLocalStore.getItem("password");
+                    if (passwordBytes != null) {
+                        var passwordJS:String = passwordBytes.readUTFBytes(passwordBytes.length);
+                    }
+
+                    // are user credentials already set in preferences?
+
+                    if (userNameJS != null && "" != userNameJS && passwordJS != null && "" != passwordJS) {
+                        currentState = "LoggingIn";
+                        login(userNameJS, passwordJS);
+                    } else {
+                        currentState = "LoginState";
+                        authService.channelSet = ServerConfig.getChannelSet(authService.destination);
+                    }
+                } else {
+                    currentState = "GettingReport";
+                }
+            } else if (!available && connected) {
+                connected = false;
+                currentState = "Offline";
+            }
+        }
+
+        private function onInitialize(event:UpdateEvent):void {
+            addEventListener(KeyboardEvent.KEY_UP, onKeyUp);
+
+            currentState = "Offline";
+            var request:URLRequest = new URLRequest("https://www.easy-insight.com/app");
+            monitor = new URLMonitor(request);
+            monitor.addEventListener(StatusEvent.STATUS, onStatusEvent);
+            monitor.start();
         }
 
         private function onCreationComplete():void {
@@ -116,29 +188,17 @@
 
             PopupMenuFactory.menuFactory = new AirMenuFactory();
 
-            addEventListener(KeyboardEvent.KEY_UP, onKeyUp);
+            // do the updates stuff...
 
-            /**
-             * Retrieve the user from the local store in AIR, if it exists.
-             */
-            var userBytes:ByteArray = EncryptedLocalStore.getItem("userID");
-            if (userBytes != null) {
-                var userNameJS:String = userBytes.readUTFBytes(userBytes.length);
-            }
-            var passwordBytes:ByteArray = EncryptedLocalStore.getItem("password");
-            if (passwordBytes != null) {
-                var passwordJS:String = passwordBytes.readUTFBytes(passwordBytes.length);
-            }
+            updater.updateURL = "https://www.easy-insight.com/app/upgrade.xml";
+            updater.isCheckForUpdateVisible = true;
+            updater.isDownloadProgressVisible = true;
+            updater.isDownloadUpdateVisible = true;
+            updater.isInstallUpdateVisible = true;
 
-            // are user credentials already set in preferences?
+            updater.addEventListener(UpdateEvent.INITIALIZED, onInitialize);
 
-            if (userNameJS != null && "" != userNameJS && passwordJS != null && "" != passwordJS) {
-                currentState = "LoggingIn";
-                login(userNameJS, passwordJS);
-            } else {
-                currentState = "LoginState";
-                authService.channelSet = ServerConfig.getChannelSet(authService.destination);
-            }
+            updater.initialize();
         }
 
         private function handleAuthentication():void {
@@ -180,6 +240,7 @@
                                 authService.authenticate.send(usernameStr, passwordStr);
                                 break;
                             default:
+                                Alert.show(String(event.result));
                                 trace(event.result);
                         }
                     },

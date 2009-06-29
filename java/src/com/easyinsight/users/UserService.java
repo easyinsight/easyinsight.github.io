@@ -208,18 +208,19 @@ public class UserService implements IUserService {
         }
     }
 
-    public boolean updatePassword(String existingPassword, String password) {
+    public String updatePassword(String existingPassword, String password) {
         Session session = Database.instance().createSession();
         try {
             session.beginTransaction();
             User user = (User) session.createQuery("from User where userID = ?").setLong(0, SecurityUtil.getUserID()).list().get(0);
             if (!PasswordService.getInstance().encrypt(existingPassword).equals(user.getPassword())) {
-                return false;
+                return null;
             }
-            user.setPassword(PasswordService.getInstance().encrypt(password));
+            String encryptedPassword = PasswordService.getInstance().encrypt(password);
+            user.setPassword(encryptedPassword);
             session.update(user);
             session.getTransaction().commit();
-            return true;
+            return encryptedPassword;
         } catch (Exception e) {
             LogClass.error(e);
             session.getTransaction().rollback();
@@ -256,7 +257,7 @@ public class UserService implements IUserService {
             session.save(account);
             user.setAccount(account);
             session.update(user);
-            if (account.getAccountType() == Account.PROFESSIONAL || account.getAccountType() == Account.ENTERPRISE) {
+            if (account.getAccountType() == Account.GROUP || account.getAccountType() == Account.PROFESSIONAL || account.getAccountType() == Account.ENTERPRISE) {
                 Group group = new Group();
                 group.setName(account.getName());
                 group.setPubliclyVisible(false);

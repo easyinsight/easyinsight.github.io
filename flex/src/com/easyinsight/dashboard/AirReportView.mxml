@@ -3,6 +3,7 @@
            height="100%">
     <mx:Metadata>
         [Event(name="airLogout", type="com.easyinsight.dashboard.AirLogoutEvent")]
+        [Event(name="eiUpdate", type="com.easyinsight.dashboard.EIUpdateEvent")]
     </mx:Metadata>
     <mx:Script><![CDATA[
         import com.adobe.ac.mxeffects.CubeRotate;
@@ -213,7 +214,7 @@
         private function launchBrowser():void {
             var panel:AirViewPanel = viewStack.selectedChild as AirViewPanel;
             var reportID:int = panel.analysisID;
-            var reportURL:String = "https://www.easy-insight.com/app/#analysisID=" + reportID;
+            var reportURL:String = "https://www.easy-insight.com/app/#reportID=" + reportID;
             flash.net.navigateToURL(new URLRequest(reportURL), "_self");
         }
 
@@ -242,8 +243,10 @@
             <mx:Button icon="@Embed(source=
                        '../../../../assets/favicon.PNG')" toolTip="Launch Browser to View Report in Easy Insight" click="launchBrowser()" visible="{reportSelected}"/>
             <dashboard:ReportStatusDisplay id="statusDisplay"/>
-            <mx:ProgressBar id="progressBar" indeterminate="true" visible="{showProgress}" width="100" label=""/>
+            <mx:ProgressBar id="progressBar" indeterminate="true" visible="{showProgress}" width="50" label=""/>
             <mx:Spacer width="100%"/>
+            <mx:Button icon="@Embed(source=
+                       '../../../../assets/downloadx16.PNG')" toolTip="Check for Updates" click="dispatchEvent(new EIUpdateEvent())"/>
             <mx:Button label="Log Out" click="dispatchEvent(new AirLogoutEvent())"/>
         </mx:HBox>
         <mx:ViewStack id="viewStack" width="100%" height="100%"/>

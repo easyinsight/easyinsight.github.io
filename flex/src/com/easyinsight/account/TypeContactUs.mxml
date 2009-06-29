@@ -54,7 +54,7 @@
             <mx:FormItem>
 				<mx:HBox>
 					<mx:Button label="Send" click="contact()"/>
-                    <mx:LinkButton label="Cancel" click="dispatchEvent(new PreviousPageEvent())"/>
+                    <mx:LinkButton label="Cancel" click="dispatchEvent(new PreviousPageEvent())" textDecoration="underline"/>
 				</mx:HBox>
 			</mx:FormItem>
         </mx:Form>

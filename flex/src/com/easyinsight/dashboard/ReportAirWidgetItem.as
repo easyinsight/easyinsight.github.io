@@ -17,6 +17,7 @@ public class ReportAirWidgetItem extends AirWidgetItem{
         var dataViewPanel:AirViewPanel = new AirViewPanel();
         dataViewPanel.analysisID = report.id;
         dataViewPanel.reportType = report.reportType;
+        dataViewPanel.dataSourceID = report.dataFeedID;
         return dataViewPanel;
     }
 

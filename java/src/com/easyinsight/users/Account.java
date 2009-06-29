@@ -30,6 +30,7 @@ public class Account {
     public static final int BETA = 8;
     public static final int TRIAL = 9;
 
+    public static final long FREE_MAX = 1000000;
     public static final long INDIVIDUAL_MAX = 50000000;
     public static final long PROFESSIONAL_MAX = 200000000;
     public static final long ENTERPRISE_MAX = 1000000000;
@@ -323,6 +324,8 @@ public class Account {
 
     public static long getMaxCount(int tier) {
         switch(tier) {
+            case Account.FREE:
+                return FREE_MAX;
             case Account.INDIVIDUAL:
                 return INDIVIDUAL_MAX;
             case Account.GROUP:
@@ -334,7 +337,7 @@ public class Account {
             case Account.ADMINISTRATOR:
                 return ADMINISTRATOR_MAX;
             default:
-                throw new RuntimeException("Users that aren't Individual, Professional, Enterprise, or Administrator tier should not be accessing the API.");
+                throw new RuntimeException("Unknown account type " + tier);
         }
     }
 }
