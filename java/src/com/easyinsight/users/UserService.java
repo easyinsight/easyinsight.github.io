@@ -212,8 +212,9 @@ public class UserService implements IUserService {
         Session session = Database.instance().createSession();
         try {
             session.beginTransaction();
+            String encryptedExistingPassword = PasswordService.getInstance().encrypt(existingPassword);
             User user = (User) session.createQuery("from User where userID = ?").setLong(0, SecurityUtil.getUserID()).list().get(0);
-            if (!PasswordService.getInstance().encrypt(existingPassword).equals(user.getPassword())) {
+            if (!encryptedExistingPassword.equals(user.getPassword())) {
                 return null;
             }
             String encryptedPassword = PasswordService.getInstance().encrypt(password);
