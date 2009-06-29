@@ -86,7 +86,6 @@ public class SWFAnalysis extends Task {
             NodeList scriptList = scriptsNode.getChildNodes();
             StringPair componentPair = new StringPair("Component", component);
             Calendar cal = Calendar.getInstance();
-            DatePair datePair = new DatePair("Date", cal);
             Map<ClassNode, List<ClassNode>> nodeMap = new HashMap<ClassNode, List<ClassNode>>();
             Map<ClassNode, ClassNode> containmentMap = new HashMap<ClassNode, ClassNode>();
             for (int i = 0; i < scriptList.getLength(); i++) {
@@ -114,16 +113,11 @@ public class SWFAnalysis extends Task {
             BasicAuthValidatedPublish service = new BasicAuthValidatingPublishServiceServiceLocator().getBasicAuthValidatingPublishServicePort();
             ((BasicAuthValidatingPublishServiceServiceSoapBindingStub)service).setUsername(key);
             ((BasicAuthValidatingPublishServiceServiceSoapBindingStub)service).setPassword(secretKey);
-            DayWhere dayWhere = new DayWhere();
-            dayWhere.setKey("Date");
-            dayWhere.setDayOfYear(cal.get(Calendar.DAY_OF_YEAR));
-            dayWhere.setYear(cal.get(Calendar.YEAR));
             StringWhere componentWhere = new StringWhere();
             componentWhere.setKey("Component");
             componentWhere.setValue(component);
 
             Where where = new Where();
-            where.setDayWheres(new DayWhere[] { dayWhere });
             where.setStringWheres(new StringWhere[] { componentWhere });
             List<Row> rows = new ArrayList<Row>();
             for (ClassNode classNode : nodeMap.keySet()) {
@@ -136,7 +130,6 @@ public class SWFAnalysis extends Task {
                 Row row = new Row();
                 row.setStringPairs(new StringPair[] { namePair, packagePair, componentPair });
                 row.setNumberPairs(new NumberPair[] { sizePair, optimizedSizePair, retainedSizePair, retainedOptimizedSizePair });
-                row.setDatePairs(new DatePair[] { datePair });
                 rows.add(row);
             }
             Row[] rowArray = new Row[rows.size()];
