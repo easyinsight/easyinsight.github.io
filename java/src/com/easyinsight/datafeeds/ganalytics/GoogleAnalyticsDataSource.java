@@ -49,6 +49,7 @@ public class GoogleAnalyticsDataSource extends ServerDataSourceDefinition {
     public static final String REGION = "ga:region";
     public static final String SCREEN_COLORS = "ga:screenColors";
     public static final String SCREEN_RESOLUTION = "ga:screenResolution";
+    public static final String SOURCE = "ga:source";
     public static final String SUB_CONTINENT = "ga:subContinent";
     public static final String VISITOR_TYPE = "ga:visitorType";
     public static final String TITLE = "title";
@@ -166,7 +167,7 @@ public class GoogleAnalyticsDataSource extends ServerDataSourceDefinition {
                 EC_TRANSACTION_SHIPPING, EC_TRANSACTION_TAX, EC_UNIQUE_PURCHASES, SEARCH_CATEGORY,
                 SEARCH_DESTINATION, SEARCH_KEYWORD, SEARCH_KEYWORD_REFINEMENT, SEARCH_SEARCH_START,
                 SEARCH_SEARCH_USED, SEARCH_DEPTH, SEARCH_DURATION, SEARCH_EXITS, SEARCH_REFINEMENTS,
-                SEARCH_UNIQUES, SEARCH_VISITS);
+                SEARCH_UNIQUES, SEARCH_VISITS, SOURCE);
     }
 
     public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, DataSet dataSet, Credentials credentials) {
@@ -194,6 +195,7 @@ public class GoogleAnalyticsDataSource extends ServerDataSourceDefinition {
         analysisItems.add(new AnalysisDimension(keys.get(REGION), "Region"));
         analysisItems.add(new AnalysisDimension(keys.get(SCREEN_COLORS), "Screen Colors"));
         analysisItems.add(new AnalysisDimension(keys.get(SCREEN_RESOLUTION), "Screen Resolution"));
+        analysisItems.add(new AnalysisDimension(keys.get(SOURCE), "Source"));
         analysisItems.add(new AnalysisDimension(keys.get(SUB_CONTINENT), "Sub Continent"));
         analysisItems.add(new AnalysisDimension(keys.get(VISITOR_TYPE), "Visitor Type"));
         analysisItems.add(new AnalysisDimension(keys.get(TITLE), "Title"));
