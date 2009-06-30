@@ -2,25 +2,24 @@
 <mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" creationComplete="dataProvider.searchForSubscribedFeeds.send()">
 	<mx:Script>
 		<![CDATA[
-			import com.easyinsight.administration.feed.FeedDefinitionData;
-			import mx.managers.PopUpManager;
+            import com.easyinsight.solutions.DataSourceDescriptor;
+
+            import mx.managers.PopUpManager;
 			import com.easyinsight.listing.DataFeedDescriptor;
 			import mx.collections.ArrayCollection;
 			[Bindable]
 			private var descriptors:ArrayCollection;
 
 			private function gotFeeds():void {
-				descriptors = dataProvider.searchForSubscribedFeeds.lastResult;
+				descriptors = dataProvider.searchForSubscribedFeeds.lastResult as ArrayCollection;
 			}
 
 			private function chose():void {
 				var descriptor:DataFeedDescriptor = feedBox.selectedItem as DataFeedDescriptor;
-				uploadService.getDataFeedConfiguration.send(descriptor.dataFeedID);
-			}
-
-			private function gotFeedDetails():void {
-				dispatchEvent(new DataSourceChoiceEvent(uploadService.getDataFeedConfiguration.lastResult as FeedDefinitionData));
-				PopUpManager.removePopUp(this);
+                var dsD:DataSourceDescriptor = new DataSourceDescriptor();
+                dsD.id = descriptor.dataFeedID;
+                dsD.name = descriptor.name;
+                dispatchEvent(new DataSourceChoiceEvent(dsD));
 			}
 
 			private function cancel():void {
@@ -30,9 +29,6 @@
 	</mx:Script>
 	<mx:RemoteObject id="dataProvider" destination="feeds">
 		<mx:method name="searchForSubscribedFeeds" result="gotFeeds()"/>
-	</mx:RemoteObject>
-	<mx:RemoteObject id="uploadService" destination="userUpload">
-		<mx:method name="getDataFeedConfiguration" result="gotFeedDetails()"/>
 	</mx:RemoteObject>
 	<mx:Form styleName="TitleWindowContents">
 		<mx:FormItem label="Choose a Data Source:">

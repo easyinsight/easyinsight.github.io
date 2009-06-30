@@ -271,8 +271,9 @@ public class GoalStorage {
         EIConnection conn = Database.instance().getConnection();
         try {
             conn.setAutoCommit(false);
-            installSolutions(goalTree, conn);            
+            installSolutions(goalTree, conn);
             long nodeID = saveGoalTreeNode(goalTree.getRootNode(), conn, goalTree.getGoalTreeID());
+            deleteOldNodes(goalTree.getRootNode(), conn);            
             PreparedStatement updateTreeStmt = conn.prepareStatement("UPDATE GOAL_TREE SET NAME = ?, DESCRIPTION = ?, ROOT_NODE = ? WHERE GOAL_TREE_ID = ?");
             updateTreeStmt.setString(1, goalTree.getName());
             updateTreeStmt.setString(2, goalTree.getDescription());
@@ -315,7 +316,7 @@ public class GoalStorage {
 
     GoalTreeNode retrieveNode(long nodeID, Connection conn) throws SQLException {
         PreparedStatement queryNodeStmt = conn.prepareStatement("SELECT FEED_ID, GOAL_VALUE, ANALYSIS_MEASURE_ID, FILTER_ID, " +
-                "NAME, DESCRIPTION, high_is_good, ICON_IMAGE, GOAL_MILESTONE_ID FROM " +
+                "NAME, DESCRIPTION, high_is_good, ICON_IMAGE, GOAL_MILESTONE_ID, goal_measure_description, goal_defined FROM " +
                 "GOAL_TREE_NODE WHERE GOAL_TREE_NODE_ID = ?");
         PreparedStatement querySubTreeStmt = conn.prepareStatement("SELECT SUB_TREE_ID, GOAL_TREE.NAME FROM GOAL_TREE_NODE, GOAL_TREE WHERE " +
                 "GOAL_TREE_NODE.SUB_TREE_ID = GOAL_TREE.GOAL_TREE_ID AND GOAL_TREE_NODE.GOAL_TREE_NODE_ID = ?");
@@ -341,13 +342,9 @@ public class GoalStorage {
                     goalTreeNode.setCoreFeedName(rs.getString(1));
                     goalTreeNode.setGoalValue(goalValue);
                 }
-                long filterID = nodeRS.getLong(4);
+
                 if (!nodeRS.wasNull()) {
-                    List results = session.createQuery("from PersistableFilterDefinition where filterId = ?").setLong(0, filterID).list();
-                    if (results.size() > 0) {
-                        PersistableFilterDefinition filter = (PersistableFilterDefinition) results.get(0);
-                        goalTreeNode.setFilterDefinition(filter.toFilterDefinition());
-                    }
+
                 }
             }
             String name = nodeRS.getString(5);
@@ -364,10 +361,13 @@ public class GoalStorage {
             goalTreeNode.setAssociatedFeeds(getGoalFeeds(nodeID, conn));
             goalTreeNode.setAssociatedInsights(getGoalInsights(nodeID, conn));
             goalTreeNode.setAssociatedSolutions(getGoalSolutions(nodeID, conn));
+            goalTreeNode.setFilters(getGoalFilters(nodeID, conn));
             goalTreeNode.setTags(getGoalTags(nodeID, conn));
             goalTreeNode.setUsers(getGoalUsers(nodeID, conn));
             goalTreeNode.setIconImage(iconImage);
             goalTreeNode.setMilestone(goalTreeMilestone);
+            goalTreeNode.setMeasureLabel(nodeRS.getString(10));
+            goalTreeNode.setGoalDefined(nodeRS.getBoolean(11));
             PreparedStatement childQueryStmt = conn.prepareStatement("SELECT GOAL_TREE_NODE_ID FROM GOAL_TREE_NODE WHERE PARENT_GOAL_TREE_NODE_ID = ?");
             childQueryStmt.setLong(1, nodeID);
             List<GoalTreeNode> children = new ArrayList<GoalTreeNode>();
@@ -418,6 +418,26 @@ public class GoalStorage {
             users.add(userID);
         }
         return users;
+    }
+
+    private List<FilterDefinition> getGoalFilters(long goalTreeNodeID, Connection conn) throws SQLException {
+        List<FilterDefinition> filters = new ArrayList<FilterDefinition>();
+        PreparedStatement feedQueryStmt = conn.prepareStatement("SELECT FILTER_ID FROM GOAL_TO_FILTER WHERE goal_tree_node_id = ?");
+        feedQueryStmt.setLong(1, goalTreeNodeID);
+        ResultSet rs = feedQueryStmt.executeQuery();
+        Session session = Database.instance().createSession(conn);
+        try {
+            while (rs.next()) {
+                List results = session.createQuery("from PersistableFilterDefinition where filterId = ?").setLong(0, rs.getLong(1)).list();
+                if (results.size() > 0) {
+                    PersistableFilterDefinition filter = (PersistableFilterDefinition) results.get(0);
+                    filters.add(filter.toFilterDefinition());
+                }
+            }
+        } finally {
+            session.close();
+        }
+        return filters;
     }
 
     private List<GoalFeed> getGoalFeeds(long goalTreeNodeID, Connection conn) throws SQLException {
@@ -543,7 +563,8 @@ public class GoalStorage {
                 insertNodeStmt.close();
             } else {
                 PreparedStatement insertNodeStmt = conn.prepareStatement("INSERT INTO GOAL_TREE_NODE (PARENT_GOAL_TREE_NODE_ID, NAME, DESCRIPTION," +
-                        "FEED_ID, GOAL_VALUE, ANALYSIS_MEASURE_ID, FILTER_ID, high_is_good, ICON_IMAGE, GOAL_MILESTONE_ID, GOAL_TREE_ID, SUB_TREE_ID) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
+                        "FEED_ID, GOAL_VALUE, ANALYSIS_MEASURE_ID, high_is_good, ICON_IMAGE, GOAL_MILESTONE_ID, GOAL_TREE_ID, SUB_TREE_ID, goal_measure_description, goal_defined) " +
+                        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
                 if (goalTreeNode.getParent() == null) {
                     insertNodeStmt.setNull(1, Types.BIGINT);
                 } else {
@@ -554,32 +575,21 @@ public class GoalStorage {
                 insertNodeStmt.setLong(4, goalTreeNode.getCoreFeedID());
                 insertNodeStmt.setDouble(5, goalTreeNode.getGoalValue());
                 insertNodeStmt.setLong(6, goalTreeNode.getAnalysisMeasure().getAnalysisItemID());
-                if (goalTreeNode.getFilterDefinition() == null) {
-                    insertNodeStmt.setNull(7, Types.BIGINT);
-                } else {
-                    Session session = Database.instance().createSession(conn);
-                    try {
-                        PersistableFilterDefinition persistableFilterDefinition = goalTreeNode.getFilterDefinition().toPersistableFilterDefinition();
-                        session.save(persistableFilterDefinition);
-                        insertNodeStmt.setLong(7, persistableFilterDefinition.getFilterId());
-                        session.flush();
-                    } finally {
-                        session.close();
-                    }
-                }
-                insertNodeStmt.setBoolean(8, goalTreeNode.isHighIsGood());
-                insertNodeStmt.setString(9, goalTreeNode.getIconImage());
+                insertNodeStmt.setBoolean(7, goalTreeNode.isHighIsGood());
+                insertNodeStmt.setString(8, goalTreeNode.getIconImage());
                 if (goalTreeNode.getMilestone() == null) {
-                    insertNodeStmt.setNull(10, Types.BIGINT);
+                    insertNodeStmt.setNull(9, Types.BIGINT);
                 } else {
-                    insertNodeStmt.setLong(10, goalTreeNode.getMilestone().getMilestoneID());
+                    insertNodeStmt.setLong(9, goalTreeNode.getMilestone().getMilestoneID());
                 }
-                insertNodeStmt.setLong(11, goalTreeID);
+                insertNodeStmt.setLong(10, goalTreeID);
                 if (goalTreeNode.getSubTreeID() == 0) {
-                    insertNodeStmt.setNull(12, Types.BIGINT);
+                    insertNodeStmt.setNull(11, Types.BIGINT);
                 } else {
-                    insertNodeStmt.setLong(12, goalTreeNode.getSubTreeID());
+                    insertNodeStmt.setLong(11, goalTreeNode.getSubTreeID());
                 }
+                insertNodeStmt.setString(12, goalTreeNode.getMeasureLabel());
+                insertNodeStmt.setBoolean(13, goalTreeNode.isGoalDefined());
                 insertNodeStmt.execute();
                 nodeID = Database.instance().getAutoGenKey(insertNodeStmt);
                 goalTreeNode.setGoalTreeNodeID(nodeID);
@@ -588,7 +598,8 @@ public class GoalStorage {
         } else {
             nodeID = goalTreeNode.getGoalTreeNodeID();
             PreparedStatement updateNodeStmt = conn.prepareStatement("UPDATE GOAL_TREE_NODE SET PARENT_GOAL_TREE_NODE_ID = ?, NAME = ?, DESCRIPTION = ?, FEED_ID = ?," +
-                    "GOAL_VALUE = ?, ANALYSIS_MEASURE_ID = ?, FILTER_ID = ?, HIGH_IS_GOOD = ?, ICON_IMAGE = ?, GOAL_TREE_ID = ?, GOAL_MILESTONE_ID = ?, SUB_TREE_ID = ?, ICON_IMAGE = ? WHERE GOAL_TREE_NODE_ID = ?");
+                    "GOAL_VALUE = ?, ANALYSIS_MEASURE_ID = ?, HIGH_IS_GOOD = ?, ICON_IMAGE = ?, GOAL_TREE_ID = ?, GOAL_MILESTONE_ID = ?, SUB_TREE_ID = ?, ICON_IMAGE = ?," +
+                    "goal_measure_description = ?, goal_defined = ? WHERE GOAL_TREE_NODE_ID = ?");
             if (goalTreeNode.getParent() == null) {
                 updateNodeStmt.setNull(1, Types.BIGINT);
             } else {
@@ -599,54 +610,49 @@ public class GoalStorage {
             if (goalTreeNode.getCoreFeedID() > 0) {
                 updateNodeStmt.setLong(4, goalTreeNode.getCoreFeedID());
                 updateNodeStmt.setDouble(5, goalTreeNode.getGoalValue());
+                Session session = Database.instance().createSession(conn);
+                session.saveOrUpdate(goalTreeNode.getAnalysisMeasure());
+                session.flush();
+                session.close();
                 updateNodeStmt.setLong(6, goalTreeNode.getAnalysisMeasure().getAnalysisItemID());
-                if (goalTreeNode.getFilterDefinition() == null) {
-                    updateNodeStmt.setNull(7, Types.BIGINT);
-                } else {
-                    Session session = Database.instance().createSession(conn);
-                    try {
-                        PersistableFilterDefinition persistableFilterDefinition = goalTreeNode.getFilterDefinition().toPersistableFilterDefinition();
-                        session.save(persistableFilterDefinition);
-                        updateNodeStmt.setLong(7, persistableFilterDefinition.getFilterId());
-                    } finally {
-                        session.close();
-                    }
-                }
-                updateNodeStmt.setBoolean(8, goalTreeNode.isHighIsGood());
-                updateNodeStmt.setString(9, goalTreeNode.getIconImage());
-                updateNodeStmt.setLong(10, goalTreeID);
+                updateNodeStmt.setBoolean(7, goalTreeNode.isHighIsGood());
+                updateNodeStmt.setString(8, goalTreeNode.getIconImage());
+                updateNodeStmt.setLong(9, goalTreeID);
                 if (goalTreeNode.getMilestone() == null) {
-                    updateNodeStmt.setNull(11, Types.BIGINT);
+                    updateNodeStmt.setNull(10, Types.BIGINT);
                 } else {
-                    updateNodeStmt.setLong(11, goalTreeNode.getMilestone().getMilestoneID());
+                    updateNodeStmt.setLong(10, goalTreeNode.getMilestone().getMilestoneID());
                 }
                 if (goalTreeNode.getSubTreeID() == 0) {
-                    updateNodeStmt.setNull(12, Types.BIGINT);
+                    updateNodeStmt.setNull(11, Types.BIGINT);
                 } else {
-                    updateNodeStmt.setLong(12, goalTreeNode.getSubTreeID());
+                    updateNodeStmt.setLong(11, goalTreeNode.getSubTreeID());
                 }
-                updateNodeStmt.setString(13, goalTreeNode.getIconImage());
-                updateNodeStmt.setLong(14, goalTreeNode.getGoalTreeNodeID());
+                updateNodeStmt.setString(12, goalTreeNode.getIconImage());
+                updateNodeStmt.setString(13, goalTreeNode.getMeasureLabel());
+                updateNodeStmt.setBoolean(14, goalTreeNode.isGoalDefined());
+                updateNodeStmt.setLong(15, goalTreeNode.getGoalTreeNodeID());
             } else {
-                updateNodeStmt.setNull(5, Types.BIGINT);
                 updateNodeStmt.setNull(4, Types.BIGINT);
+                updateNodeStmt.setNull(5, Types.BIGINT);
                 updateNodeStmt.setNull(6, Types.DOUBLE);
-                updateNodeStmt.setNull(7, Types.BIGINT);
-                updateNodeStmt.setNull(8, Types.BOOLEAN);
-                updateNodeStmt.setString(9, goalTreeNode.getIconImage());
-                updateNodeStmt.setLong(10, goalTreeID);
+                updateNodeStmt.setNull(7, Types.BOOLEAN);
+                updateNodeStmt.setString(8, goalTreeNode.getIconImage());
+                updateNodeStmt.setLong(9, goalTreeID);
                 if (goalTreeNode.getMilestone() == null) {
-                    updateNodeStmt.setNull(11, Types.BIGINT);
+                    updateNodeStmt.setNull(10, Types.BIGINT);
                 } else {
-                    updateNodeStmt.setLong(11, goalTreeNode.getMilestone().getMilestoneID());
+                    updateNodeStmt.setLong(10, goalTreeNode.getMilestone().getMilestoneID());
                 }
                 if (goalTreeNode.getSubTreeID() == 0) {
-                    updateNodeStmt.setNull(12, Types.BIGINT);
+                    updateNodeStmt.setNull(11, Types.BIGINT);
                 } else {
-                    updateNodeStmt.setLong(12, goalTreeNode.getSubTreeID());
+                    updateNodeStmt.setLong(11, goalTreeNode.getSubTreeID());
                 }
-                updateNodeStmt.setString(13, goalTreeNode.getIconImage());
-                updateNodeStmt.setLong(14, goalTreeNode.getGoalTreeNodeID());
+                updateNodeStmt.setString(12, goalTreeNode.getIconImage());
+                updateNodeStmt.setString(13, goalTreeNode.getMeasureLabel());
+                updateNodeStmt.setBoolean(14, goalTreeNode.isGoalDefined());
+                updateNodeStmt.setLong(15, goalTreeNode.getGoalTreeNodeID());
             }
             updateNodeStmt.executeUpdate();
             updateNodeStmt.close();
@@ -655,17 +661,23 @@ public class GoalStorage {
         saveInsights(goalTreeNode, conn);
         saveFeeds(goalTreeNode, conn);
         saveSolutions(goalTreeNode, conn);
+        saveFilters(goalTreeNode, conn);
         saveUsers(goalTreeNode, conn);
         if (goalTreeNode.getChildren() != null) {
             for (GoalTreeNode childNode : goalTreeNode.getChildren()) {
                 saveGoalTreeNode(childNode, conn, goalTreeID);
             }
         }
-        deleteOldNodes(goalTreeNode, conn);
+        //deleteOldNodes(goalTreeNode, conn);
         return nodeID;
     }
 
     private void deleteOldNodes(GoalTreeNode goalTreeNode, Connection conn) throws SQLException {
+        if (goalTreeNode.getChildren() != null) {
+            for (GoalTreeNode child : goalTreeNode.getChildren()) {
+                deleteOldNodes(child, conn);
+            }
+        }
         PreparedStatement queryStmt = conn.prepareStatement("SELECT GOAL_TREE_NODE_ID FROM GOAL_TREE_NODE WHERE PARENT_GOAL_TREE_NODE_ID = ?");
         queryStmt.setLong(1, goalTreeNode.getGoalTreeNodeID());
         Set<Long> deleteIDs = new HashSet<Long>();
@@ -775,7 +787,25 @@ public class GoalStorage {
         saveSolutionLinkStmt.close();
     }
 
-    // 
+    private void saveFilters(GoalTreeNode goalTreeNode, Connection conn) throws SQLException {
+        PreparedStatement clearExistingStmt = conn.prepareStatement("DELETE FROM GOAL_TO_FILTER WHERE GOAL_TREE_NODE_ID = ?");
+        clearExistingStmt.setLong(1, goalTreeNode.getGoalTreeNodeID());
+        clearExistingStmt.executeUpdate();
+        Session session = Database.instance().createSession(conn);
+        try {
+            PreparedStatement saveFiltersStmt = conn.prepareStatement("INSERT INTO GOAL_TO_FILTER (GOAL_TREE_NODE_ID, FILTER_ID) VALUES (?, ?)");
+            for (FilterDefinition filterDefinition : goalTreeNode.getFilters()) {
+                PersistableFilterDefinition persistableFilterDefinition = filterDefinition.toPersistableFilterDefinition();
+                session.saveOrUpdate(persistableFilterDefinition);
+                session.flush();
+                saveFiltersStmt.setLong(1, goalTreeNode.getGoalTreeNodeID());
+                saveFiltersStmt.setLong(2, persistableFilterDefinition.getFilterId());
+                saveFiltersStmt.execute();
+            }
+        } finally {
+            session.close();
+        }
+    }
 
     public void installSolutions(GoalTree goalTree, final Connection conn) throws SQLException {
         final long userID = SecurityUtil.getUserID();
@@ -823,12 +853,29 @@ public class GoalStorage {
                     if (newID != null) {
                         goalTreeNode.setCoreFeedID(newID);
                         FeedDefinition feedDefinition = feedStorage.getFeedDefinitionData(newID);
-                        goalTreeNode.setAnalysisMeasure((AnalysisMeasure) findItem(goalTreeNode.getAnalysisMeasure(), feedDefinition));
-                        if (goalTreeNode.getFilterDefinition() != null) {
-                            goalTreeNode.getFilterDefinition().setField(findItem(goalTreeNode.getFilterDefinition().getField(), feedDefinition));
+                        try {
+                            goalTreeNode.setAnalysisMeasure((AnalysisMeasure) findItem(goalTreeNode.getAnalysisMeasure(), feedDefinition).clone());
+                        } catch (CloneNotSupportedException e) {
+                            LogClass.error(e);
+                            throw new RuntimeException(e);
+                        }
+                        if (goalTreeNode.getFilters() != null) {
+                            List<FilterDefinition> newFilters = new ArrayList<FilterDefinition>();
+                            for (FilterDefinition filterDefinition : goalTreeNode.getFilters()) {
+                                PersistableFilterDefinition persistableFilterDefinition = filterDefinition.toPersistableFilterDefinition();
+                                PersistableFilterDefinition clonedPersistableFilterDefinition;
+                                try {
+                                    clonedPersistableFilterDefinition = persistableFilterDefinition.clone();
+                                } catch (CloneNotSupportedException e) {
+                                    throw new RuntimeException(e);
+                                }
+                                FilterDefinition clonedDefinition = clonedPersistableFilterDefinition.toFilterDefinition();
+                                clonedDefinition.setField(findItem(filterDefinition.getField(), feedDefinition));
+                                newFilters.add(clonedDefinition);
+                            }
+                            goalTreeNode.setFilters(newFilters);
                         }
                     }
-                    //saveGoalTreeNode(goalTreeNode, conn);
                 }
                 for (GoalFeed goalFeed : goalTreeNode.getAssociatedFeeds()) {
                     Long newID = installedObjectMap.get(new SolutionElementKey(SolutionElementKey.DATA_SOURCE, goalFeed.getFeedID()));
@@ -864,7 +911,7 @@ public class GoalStorage {
     private AnalysisItem findItem(AnalysisItem analysisItem, FeedDefinition feedDefinition) {
         AnalysisItem foundItem = null;
         for (AnalysisItem feedItem : feedDefinition.getFields()) {
-            if (feedItem.getKey().equals(analysisItem.getKey())) {
+            if (feedItem.getKey().toKeyString().equals(analysisItem.getKey().toKeyString())) {
                 foundItem = feedItem;
             }
         }

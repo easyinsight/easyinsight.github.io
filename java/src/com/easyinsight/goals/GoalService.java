@@ -185,8 +185,16 @@ public class GoalService {
 
                 protected void accept(GoalTreeNode goalTreeNode) {
                     GoalTreeNodeData data = (GoalTreeNodeData) goalTreeNode;
-                    data.populateCurrentValue();                    
-                    data.determineOutcome(startDate, endDate, goalEvaluationStorage);
+                    if (data.getSubTreeID() > 0) {
+                        GoalStorage goalStorage = new GoalStorage();
+                        GoalTree subTree = goalStorage.retrieveGoalTree(data.getSubTreeID());
+                        GoalTreeNodeData subData = createDataTreeForDates(subTree, startDate, endDate);
+                        data.setCurrentValue(subData.getCurrentValue());
+                        data.setGoalOutcome(subData.getGoalOutcome());
+                    } else {
+                        data.populateCurrentValue();
+                        data.determineOutcome(startDate, endDate, goalEvaluationStorage);
+                    }
                 }
             };
         visitor.visit(dataNode);

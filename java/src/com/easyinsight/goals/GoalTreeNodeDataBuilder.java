@@ -19,7 +19,7 @@ public class GoalTreeNodeDataBuilder {
         goalTreeNodeData.setCoreFeedID(goalTreeNode.getCoreFeedID());
         goalTreeNodeData.setCoreFeedName(goalTreeNode.getCoreFeedName());
         goalTreeNodeData.setDescription(goalTreeNode.getDescription());
-        goalTreeNodeData.setFilterDefinition(goalTreeNode.getFilterDefinition());
+        goalTreeNodeData.setFilters(goalTreeNode.getFilters());
         goalTreeNodeData.setGoalTreeNodeID(goalTreeNode.getGoalTreeNodeID());
         goalTreeNodeData.setGoalValue(goalTreeNode.getGoalValue());
         goalTreeNodeData.setHighIsGood(goalTreeNode.isHighIsGood());
@@ -28,11 +28,16 @@ public class GoalTreeNodeDataBuilder {
         goalTreeNodeData.setSubTreeID(goalTreeNode.getSubTreeID());
         goalTreeNodeData.setSubTreeName(goalTreeNode.getSubTreeName());
         goalTreeNodeData.setMilestone(goalTreeNode.getMilestone());
+        goalTreeNodeData.setGoalDefined(goalTreeNode.isGoalDefined());
+        goalTreeNodeData.setMeasureLabel(goalTreeNode.getMeasureLabel());
         List<GoalTreeNode> newChildren = new ArrayList<GoalTreeNode>();
         for (GoalTreeNode child : goalTreeNode.getChildren()) {
             GoalTreeNodeData childData = build(child);
             newChildren.add(childData);
             childData.setParent(goalTreeNode);
+        }
+        if (goalTreeNodeData.getSubTreeID() > 0) {
+            
         }
         goalTreeNodeData.setChildren(newChildren);
         return goalTreeNodeData;

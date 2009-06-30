@@ -45,7 +45,7 @@ public class GoalEvaluationStorage {
         GoalTreeVisitor hasDateVisitor = new GoalTreeVisitor() {
 
             protected void accept(GoalTreeNode goalTreeNode) {
-                if (goalTreeNode.getCoreFeedID() > 0 && goalTreeNode.getFilterDefinition() != null) {
+                if (goalTreeNode.getCoreFeedID() > 0) {
                     validIDs.add(goalTreeNode.getGoalTreeNodeID());
                 }
             }
@@ -78,8 +78,15 @@ public class GoalEvaluationStorage {
             protected void accept(GoalTreeNode goalTreeNode) {
                 if (goalTreeNode.getCoreFeedID() > 0 && validIDs.contains(goalTreeNode.getGoalTreeNodeID())) {
                     List<Date> dates = getDates(goalTreeNode);
-                    for (Date date : dates) {
-                        GoalValue goalValue = evaluateGoalTreeNode(goalTreeNode, date);
+                    if (dates.size() > 0) {
+                        for (Date date : dates) {
+                            GoalValue goalValue = evaluateGoalTreeNode(goalTreeNode, date);
+                            if (goalValue != null) {
+                                goalValues.add(goalValue);
+                            }
+                        }
+                    } else {
+                        GoalValue goalValue = evaluateGoalTreeNode(goalTreeNode, new Date());
                         if (goalValue != null) {
                             goalValues.add(goalValue);
                         }
@@ -126,7 +133,7 @@ public class GoalEvaluationStorage {
                         GoalValue goalValue = evaluateGoalTreeNode(goalTreeNode, date);
                         if (goalValue != null) {
                             goalValues.add(goalValue);
-                        }
+                        }                        
                     }
                 }
             }
@@ -139,9 +146,17 @@ public class GoalEvaluationStorage {
 
     private List<Date> getDates(GoalTreeNode goalTreeNode) {
         List<Date> dates = new ArrayList<Date>();
-        RollingFilterDefinition rollingFilterDefinition = (RollingFilterDefinition) goalTreeNode.getFilterDefinition();
-        AnalysisDateDimension dateItem = (AnalysisDateDimension) rollingFilterDefinition.getField();
-        dateItem.setDateLevel(AnalysisDateDimension.DAY_LEVEL);
+        AnalysisDateDimension dateItem = null;
+        for (FilterDefinition filter : goalTreeNode.getFilters()){
+            if (filter instanceof RollingFilterDefinition) {
+                RollingFilterDefinition rollingFilterDefinition = (RollingFilterDefinition) filter;
+                dateItem = (AnalysisDateDimension) rollingFilterDefinition.getField();
+                dateItem.setDateLevel(AnalysisDateDimension.DAY_LEVEL);
+            }
+        }
+        if (dateItem == null) {
+            return dates;
+        }
         WSListDefinition dateDefinition = new WSListDefinition();
         dateDefinition.setDataFeedID(goalTreeNode.getCoreFeedID());
         List<AnalysisItem> analysisItems = new ArrayList<AnalysisItem>();
@@ -193,9 +208,7 @@ public class GoalEvaluationStorage {
             List<AnalysisItem> analysisItems = new ArrayList<AnalysisItem>();
             analysisItems.add(goalTreeNode.getAnalysisMeasure());
             listDefinition.setColumns(analysisItems);
-            if (goalTreeNode.getFilterDefinition() != null) {
-                listDefinition.setFilterDefinitions(Arrays.asList(goalTreeNode.getFilterDefinition()));
-            }
+            listDefinition.setFilterDefinitions(goalTreeNode.getFilters());
             InsightRequestMetadata insightRequestMetadata = new InsightRequestMetadata();
             insightRequestMetadata.setNow(date);
             ListDataResults results = new DataService().list(listDefinition, insightRequestMetadata);

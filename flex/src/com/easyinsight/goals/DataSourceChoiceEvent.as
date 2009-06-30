@@ -1,12 +1,13 @@
 package com.easyinsight.goals {
-import com.easyinsight.administration.feed.FeedDefinitionData;
+import com.easyinsight.solutions.DataSourceDescriptor;
+
 import flash.events.Event;
 public class DataSourceChoiceEvent extends Event {
     public static const DATA_SOURCE_CHOICE:String = "dataSourceChoice";
 
-    public var feedDefinition:FeedDefinitionData;
+    public var feedDefinition:DataSourceDescriptor;
 
-    public function DataSourceChoiceEvent(feedDefinition:FeedDefinitionData) {
+    public function DataSourceChoiceEvent(feedDefinition:DataSourceDescriptor) {
         super(DATA_SOURCE_CHOICE);
         this.feedDefinition = feedDefinition;
     }

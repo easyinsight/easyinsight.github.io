@@ -16,7 +16,8 @@ import mx.collections.ArrayCollection;
 	import mx.containers.VBox;
 	import mx.controls.DataGrid;
 	import mx.controls.Label;
-	import mx.events.DragEvent;
+import mx.controls.List;
+import mx.events.DragEvent;
 	import mx.managers.DragManager;
 import mx.managers.PopUpManager;
 
@@ -191,12 +192,15 @@ import mx.managers.PopUpManager;
 		protected function dragEnterHandler(event:DragEvent):void {
 			var analysisItem:AnalysisItem;
 			if (event.dragInitiator is DataGrid) {
-				var initialList:DataGrid = DataGrid(event.dragInitiator);						
+				var initialList:DataGrid = DataGrid(event.dragInitiator);
 				analysisItem = AnalysisItemWrapper(initialList.selectedItem).analysisItem;
 			} else if (event.dragInitiator is DropArea) {
 				var dropArea:DropArea = event.dragInitiator as DropArea;
 				analysisItem = dropArea.analysisItem;
-			}		
+			} else if (event.dragInitiator is List) {
+                var list:List = List(event.dragInitiator);
+                analysisItem = list.selectedItem as AnalysisItem;
+            }
 			if (analysisItem != null) {
 				setStyle("borderThickness", 1);
 				setStyle("borderStyle", "solid");
@@ -222,7 +226,10 @@ import mx.managers.PopUpManager;
 			} else if (event.dragInitiator is DropArea) {
 				var dropArea:DropArea = event.dragInitiator as DropArea;
 				analysisItem = dropArea.analysisItem;
-			}
+			} else if (event.dragInitiator is List) {
+                var list:List = List(event.dragInitiator);
+                analysisItem = list.selectedItem as AnalysisItem;
+            }
 			if (analysisItem.hasType(AnalysisItemTypes.DATE)) {
                 var window:DateFilterWindow = new DateFilterWindow();
                 window.feedID = _feedID;

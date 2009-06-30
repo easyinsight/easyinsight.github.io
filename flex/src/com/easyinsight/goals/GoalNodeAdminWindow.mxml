@@ -1,16 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
-<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" creationComplete="setupData()" width="600" height="400">
+<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:filtering="com.easyinsight.filtering.*"
+                creationComplete="setupData()" width="1000" height="500">
     <mx:Script>
 		<![CDATA[
+        import com.easyinsight.analysis.AnalysisItemEditEvent;
+        import com.easyinsight.analysis.AnalysisItemEditWindow;
+        import com.easyinsight.analysis.AnalysisItemWrapper;
+        import com.easyinsight.analysis.CalculationWindow;
+        import com.easyinsight.analysis.FeedMetadata;
+        import com.easyinsight.analysis.MeasureItemEditor;
+        import com.easyinsight.commands.CommandEvent;
+        import com.easyinsight.commands.CommandProcessor;
         import com.easyinsight.solutions.Solution;
         import com.easyinsight.filtering.FilterDefinition;
         import com.easyinsight.analysis.AnalysisMeasure;
-        import com.easyinsight.filtering.RollingDateRangeFilterDefinition;
-        import com.easyinsight.administration.feed.FeedDefinitionData;
         import com.easyinsight.analysis.AnalysisItemTypes;
         import com.easyinsight.analysis.AnalysisItem;
         import com.easyinsight.administration.feed.TagCloud;
 
+        import mx.collections.Sort;
+        import mx.collections.SortField;
         import mx.managers.PopUpManager;
         import mx.collections.ArrayCollection;
 
@@ -29,6 +38,9 @@
         private var _goalTreeNode:GoalTreeNode;
 
         [Bindable]
+        private var availableDimensions:ArrayCollection;
+
+        [Bindable]
         private var nodeName:String;
         [Bindable]
         private var nodeDescription:String;
@@ -40,6 +52,7 @@
         private var availableItems:ArrayCollection;
         [Bindable]
         private var feedName:String;
+        [Bindable]
         private var feedID:int;
 
         [Bindable]
@@ -49,15 +62,6 @@
 
         [Bindable]
         private var rangeOptions:ArrayCollection;
-
-        [Bindable]
-        private var availableDates:ArrayCollection;
-
-        [Bindable]
-        private var dateSelected:Boolean;
-
-        [Bindable]
-        private var datesAvailable:Boolean;
 
         [Bindable]
         private var measureSelected:Boolean;
@@ -70,6 +74,12 @@
         private var analysisMeasure:AnalysisMeasure;
 
         [Bindable]
+        private var filterDefinitions:ArrayCollection;
+
+        [Bindable]
+        private var targetDefined:Boolean;
+
+        [Bindable]
         private var iconPath:String;
 
         private var iconFile:String;
@@ -79,7 +89,7 @@
         private var newChildren:ArrayCollection = new ArrayCollection();
 
         [Bindable]
-        private var associatedSolutions:ArrayCollection = new ArrayCollection();
+        private var allFields:ArrayCollection = new ArrayCollection();
 
         [Bindable]
         private var associatedDataSources:ArrayCollection = new ArrayCollection();
@@ -95,22 +105,21 @@
         private static const NO_MILESTONE:String = "No Milestone";
 
         private function setupData():void {
-            rangeOptions = new ArrayCollection();
-            rangeOptions.addItem(new RangeOption("Last Day", RollingDateRangeFilterDefinition.DAY));
-            rangeOptions.addItem(new RangeOption("Last 7 Days", RollingDateRangeFilterDefinition.WEEK));
-            rangeOptions.addItem(new RangeOption("Last 30 Days", RollingDateRangeFilterDefinition.MONTH));
-            rangeOptions.addItem(new RangeOption("Last 90 Days", RollingDateRangeFilterDefinition.QUARTER));
-            rangeOptions.addItem(new RangeOption("Last 365 Days", RollingDateRangeFilterDefinition.YEAR));
-            rangeOptions.addItem(new RangeOption("Today", RollingDateRangeFilterDefinition.DAY_TO_NOW));
-            rangeOptions.addItem(new RangeOption("Week to Date", RollingDateRangeFilterDefinition.WEEK_TO_NOW));
-            rangeOptions.addItem(new RangeOption("Month to Date", RollingDateRangeFilterDefinition.MONTH_TO_NOW));
-            rangeOptions.addItem(new RangeOption("Quarter to Date", RollingDateRangeFilterDefinition.QUARTER_TO_NOW));
-            rangeOptions.addItem(new RangeOption("Year to Date", RollingDateRangeFilterDefinition.YEAR_TO_NOW));
+            commandProcessor = new CommandProcessor();
+            addEventListener(CommandEvent.COMMAND, onCommand);
             NONE.displayName = "[ No Selection ]";
             addEventListener(DeleteAssociationEvent.DELETE_DATA_SOURCE, deleteDataSource);
             addEventListener(DeleteAssociationEvent.DELETE_REPORT, deleteReport);
-            addEventListener(DeleteAssociationEvent.DELETE_SOLUTION, deleteSolution);
+            if (_goalTreeNode != null) {
+                for each (var filter:FilterDefinition in _goalTreeNode.filters) {
+                    transformContainer.addFilterDefinition(filter);
+                }
+            }
             goalService.getMilestones.send();
+        }
+
+        private function onCommand(event:CommandEvent):void {
+            commandProcessor.addCommand(event.command);
         }
 
         private function gotMilestones():void {
@@ -137,10 +146,6 @@
             associatedReports.removeItemAt(associatedReports.getItemIndex(event.deleteObj));
         }
 
-        private function deleteSolution(event:DeleteAssociationEvent):void {
-            associatedSolutions.removeItemAt(associatedSolutions.getItemIndex(event.deleteObj));
-        }
-
         public function set goalTreeNode(goalTreeNode:GoalTreeNode):void {
             this._goalTreeNode = goalTreeNode;
             this.nodeName = goalTreeNode.name;
@@ -150,19 +155,20 @@
                 this.iconPath = "/app/assets/icons/32x32/" + goalTreeNode.iconImage;
                 this.iconFile = goalTreeNode.iconImage;
             }
-            associatedSolutions = goalTreeNode.associatedSolutions;
             associatedDataSources = goalTreeNode.associatedFeeds;
             associatedReports = goalTreeNode.associatedInsights;
             this.feedID = goalTreeNode.coreFeedID;
             if (goalTreeNode.coreFeedID > 0) {
                 insightBound = true;
                 this.feedName = goalTreeNode.coreFeedName;
-                this.filterDefinition = goalTreeNode.filterDefinition;
+                filterDefinitions = goalTreeNode.filters;
+
                 this.analysisMeasure = goalTreeNode.analysisMeasure;
                 this.highValues = goalTreeNode.highIsGood;
                 this.lowValues = !goalTreeNode.highIsGood;
                 this.targetValue = String(goalTreeNode.goalValue);
-                feedService.getDataFeedConfiguration.send(goalTreeNode.coreFeedID);
+                dataService.getFeedMetadata.send(goalTreeNode.coreFeedID);
+                targetDefined = goalTreeNode.goalDefined;
             }
         }
 
@@ -186,15 +192,8 @@
                 _goalTreeNode.analysisMeasure = availableItemBox.selectedItem as AnalysisMeasure;
                 _goalTreeNode.highIsGood = highValuesGoal.selected;
                 _goalTreeNode.goalValue = int(targetValueInput.text);
-                var selectedDate:AnalysisItem = availableDateBox.selectedItem as AnalysisItem;
-                if (datesAvailable && selectedDate != NONE) {
-                    var rangeOption:RangeOption = rollingDateBox.selectedItem as RangeOption;
-                    var rangeSelection:int = rangeOption.data as int;
-                    var rollingFilterDefinition:RollingDateRangeFilterDefinition = new RollingDateRangeFilterDefinition();
-                    rollingFilterDefinition.field = selectedDate;
-                    rollingFilterDefinition.interval = rangeSelection;
-                    _goalTreeNode.filterDefinition = rollingFilterDefinition;
-                }
+                _goalTreeNode.filters = transformContainer.getFilterDefinitions();
+                _goalTreeNode.goalDefined = targetDefinedCheckbox.selected;
                 if (milestoneBox.selectedItem != NO_MILESTONE) {
                     _goalTreeNode.milestone = milestoneBox.selectedItem as GoalTreeMilestone;
                 }
@@ -207,6 +206,9 @@
             PopUpManager.removePopUp(this);
         }
 
+        private var commandProcessor:CommandProcessor;
+
+
         private function bindDataSource():void {
             var window:DataSourceChoiceWindow = DataSourceChoiceWindow(PopUpManager.createPopUp(this, DataSourceChoiceWindow, true));
             window.addEventListener(DataSourceChoiceEvent.DATA_SOURCE_CHOICE, boundDataSource);
@@ -214,41 +216,40 @@
         }
 
         private function boundDataSource(event:DataSourceChoiceEvent):void {
-            this.feedName = event.feedDefinition.feedName;
-            this.feedID = event.feedDefinition.dataFeedID;
+            this.feedName = event.feedDefinition.name;
+            this.feedID = event.feedDefinition.id;
             insightBound = true;
-            processFeed(event.feedDefinition);
+            dataService.getFeedMetadata.send(feedID);
         }
 
-        private function processFeed(feedDefinition:FeedDefinitionData):void {
+        private function processFeed(feedDefinition:FeedMetadata):void {
+            availableDimensions = new ArrayCollection();
             var measures:ArrayCollection = new ArrayCollection();
             var dates:ArrayCollection = new ArrayCollection();
+            allFields = new ArrayCollection();
             for each (var analysisItem:AnalysisItem in feedDefinition.fields) {
                 if (analysisItem.hasType(AnalysisItemTypes.MEASURE)) {
                     measures.addItem(analysisItem);
-                } else if (analysisItem.hasType(AnalysisItemTypes.DATE)) {
-                    dates.addItem(analysisItem);
+                } else if (analysisItem.hasType(AnalysisItemTypes.DIMENSION)) {
+                    availableDimensions.addItem(analysisItem);
                 }
+                allFields.addItem(new AnalysisItemWrapper(analysisItem));
             }
+            var sort:Sort = new Sort();
+            sort.fields = [ new SortField("display", false) ];
+            availableDimensions.sort = sort;
+            availableDimensions.refresh();
             this.availableItems = measures;
-            if (dates.length == 0) {
-                datesAvailable = false;
-            } else {
-                datesAvailable = true;
-                dates.addItemAt(NONE, 0);
-            }
-            this.availableDates = dates;
-        }
-
-        private function onDateSelection():void {
-            var selectedObject:Object = availableDateBox.selectedItem;
-            dateSelected = (selectedObject != NONE);
+            var measureSort:Sort = new Sort();
+            measureSort.fields = [ new SortField("display", false) ];
+            measures.sort = measureSort;
+            measures.refresh();
+            feedID = feedDefinition.dataFeedID;
         }
 
         private function gotDefinition():void {
-            var feedDefinition:FeedDefinitionData = feedService.getDataFeedConfiguration.lastResult as FeedDefinitionData;
+            var feedDefinition:FeedMetadata = dataService.getFeedMetadata.lastResult as FeedMetadata;
             processFeed(feedDefinition);
-            availableItemBox.selectedItem = _goalTreeNode.analysisMeasure;
             if (analysisMeasure != null) {
                 var foundAnalysisItem:AnalysisItem = null;
                 for (var i:int = 0; i < availableItems.length && foundAnalysisItem == null; i++) {
@@ -257,26 +258,14 @@
                         foundAnalysisItem = analysisTest;
                     }
                 }
-                if (analysisTest != null) {
-                    availableItemBox.selectedItem = foundAnalysisItem;
+                if (foundAnalysisItem != null) {
+                    var index:int = availableItems.getItemIndex(foundAnalysisItem);
+                    availableItems.removeItemAt(index);
+                    availableItems.addItemAt(analysisMeasure, index);
+                    availableItemBox.selectedItem = analysisMeasure;
                 }
             }
-            if (filterDefinition != null) {
-                if (filterDefinition != null) {
-                    var foundDate:AnalysisItem = null;
-                    for (var j:int = 0; j < availableDates.length && foundDate == null; j++) {
-                        var dateTest:AnalysisItem = availableDates.getItemAt(j) as AnalysisItem;
-                        if (dateTest.display == filterDefinition.field.display) {
-                            foundDate = dateTest;
-                        }
-                    }
-                    if (analysisTest != null) {
-                        availableDateBox.selectedItem = foundDate;
-                    }
-                }
-                dateSelected = true;
-            }
-        }        
+        }
 
         private function installSolution(event:GoalSolutionInstallEvent):void {
             var solution:Solution = event.solution;
@@ -296,6 +285,38 @@
             _goalTreeNode.children.addItem(clonedNode);
         }
 
+        private function itemEdited(event:AnalysisItemEditEvent):void {
+            analysisMeasure = event.analysisItem as AnalysisMeasure;
+            if (analysisMeasure != null) {
+                var foundAnalysisItem:AnalysisItem = null;
+                for (var i:int = 0; i < availableItems.length && foundAnalysisItem == null; i++) {
+                    var analysisTest:AnalysisItem = availableItems.getItemAt(i) as AnalysisItem;
+                    if (analysisTest.display == analysisMeasure.display) {
+                        foundAnalysisItem = analysisTest;
+                    }
+                }
+                if (foundAnalysisItem != null) {
+                    var index:int = availableItems.getItemIndex(foundAnalysisItem);
+                    availableItems.removeItemAt(index);
+                    availableItems.addItemAt(analysisMeasure, index);
+                    availableItemBox.selectedItem = analysisMeasure;
+                }
+            }
+        }
+
+        private function editMeasure():void {
+            var analysisItemEditor:AnalysisItemEditWindow = new AnalysisItemEditWindow();
+            if (analysisMeasure.hasType(AnalysisItemTypes.CALCULATION)) {
+                analysisItemEditor.editorClass = CalculationWindow;
+            } else {
+                analysisItemEditor.editorClass = MeasureItemEditor;
+            }
+            analysisItemEditor.analysisItems = this.allFields;
+            analysisItemEditor.analysisItem = this.analysisMeasure;
+            PopUpManager.addPopUp(analysisItemEditor, this);
+            analysisItemEditor.addEventListener(AnalysisItemEditEvent.ANALYSIS_ITEM_EDIT, itemEdited);
+        }
+
         private function chooseSolution():void {
             var goalSolutionInstallWindow:GoalSolutionInstallWindow = new GoalSolutionInstallWindow();
             goalSolutionInstallWindow.goalTreeNode = _goalTreeNode;
@@ -304,9 +325,9 @@
             PopUpManager.centerPopUp(goalSolutionInstallWindow);
         }
 		]]>
-	</mx:Script>
-    <mx:RemoteObject destination="userUpload" id="feedService">
-        <mx:method name="getDataFeedConfiguration" result="gotDefinition()"/>
+    </mx:Script>
+    <mx:RemoteObject destination="data" id="dataService">
+        <mx:method name="getFeedMetadata" result="gotDefinition()"/>
     </mx:RemoteObject>
     <mx:RemoteObject destination="goalService" id="goalService">
         <mx:method name="getGoalTree" result="gotGoalTree()"/>
@@ -314,7 +335,7 @@
     </mx:RemoteObject>
     <mx:VBox styleName="TitleWindowContents" width="100%" height="100%">
         <mx:TabNavigator width="100%" height="100%" paddingTop="0" paddingBottom="0"
-                         paddingLeft="0" paddingRight="0" creationPolicy="all">
+                         paddingLeft="0" paddingRight="0" creationPolicy="all" resizeToContent="true">
             <mx:Canvas width="100%" height="100%" label="Specifications">
                 <mx:Form>
                     <mx:FormItem label="Name:" fontFamily="Tahoma" fontWeight="bold" width="300">
@@ -324,75 +345,95 @@
                         <mx:TextInput id="tagsInput" text="{nodeTags}" fontFamily="Lucida Grande" fontWeight="normal"/>
                     </mx:FormItem>
                     <mx:FormItem label="Description:" fontFamily="Tahoma" fontWeight="bold">
-                        <mx:TextArea id="descriptionTextArea" width="300" height="100" text="{nodeDescription}" fontFamily="Lucida Grande" fontWeight="normal"/>
+                        <mx:TextArea id="descriptionTextArea" width="300" height="100" text="{nodeDescription}"
+                                     fontFamily="Lucida Grande" fontWeight="normal"/>
                     </mx:FormItem>
                 </mx:Form>
             </mx:Canvas>
             <mx:Canvas width="100%" height="100%" label="Implementation">
-                <mx:Form paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5">
-                    <!--
-                    <mx:FormItem label="">
-                        <mx:Button label="Install Solution..." click="chooseSolution()"/>
-                    </mx:FormItem>
-                    -->
-                    <mx:FormItem label="Goal Data Source Binding:" direction="horizontal" fontFamily="Tahoma" fontWeight="bold">
-                        <mx:Label text="{feedName}" fontFamily="Lucide Grande" fontWeight="normal"/>
-                        <mx:Button icon="{dataSourceIcon}" toolTip="Bind Data Source" click="bindDataSource()"/>
-                        <mx:Button icon="{deleteIcon}" toolTip="Clear" click="clear()"/>
-                    </mx:FormItem>
-                    <mx:FormItem label="" enabled="{insightBound}" direction="horizontal">
-                        <mx:Form>
-                            <mx:FormItem label="Measure:" fontFamily="Tahoma" fontWeight="bold">
-                                <mx:ComboBox dataProvider="{availableItems}" labelField="display"
-                                             id="availableItemBox" fontFamily="Lucide Grande" fontWeight="normal"/>
+                <mx:HBox width="100%" height="100%">
+                    <mx:VBox paddingTop="10">
+                        <mx:HBox width="100%" horizontalAlign="center">
+                            <mx:Label fontSize="14" text="Define the Measure" fontWeight="bold" fontFamily="Tahoma"/>
+                        </mx:HBox>
+                        <mx:Form paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5">
+                            <mx:FormItem label="Goal Data Source Binding:" direction="horizontal" fontFamily="Tahoma"
+                                         fontWeight="bold">
+                                <mx:Label text="{feedName}" fontFamily="Lucida Grande" fontWeight="normal"/>
+                                <mx:Button icon="{dataSourceIcon}" toolTip="Bind Data Source" click="bindDataSource()"/>
+                                <mx:Button icon="{deleteIcon}" toolTip="Clear" click="clear()"/>
                             </mx:FormItem>
-                            <mx:FormItem label="" direction="horizontal" fontFamily="Tahoma" fontWeight="bold">
+                            <mx:FormItem label="Measure:" fontFamily="Tahoma" fontWeight="bold"
+                                         enabled="{insightBound}" direction="horizontal">
+                                <mx:ComboBox dataProvider="{availableItems}" labelField="display"
+                                             id="availableItemBox" fontFamily="Lucida Grande" fontWeight="normal"/>
+                                <mx:Button icon="{editIcon}" toolTip="Edit Measure..." click="editMeasure()"/>
+                            </mx:FormItem>
+                        </mx:Form>
+                        <mx:HBox width="100%" horizontalAlign="center">
+                            <mx:Label fontSize="14" text="Define the Target" fontWeight="bold" fontFamily="Tahoma"/>
+                        </mx:HBox>
+                        <mx:Form paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5">
+                            <mx:FormItem label="Defined" fontFamily="Tahoma" fontWeight="bold">
+                                <mx:CheckBox id="targetDefinedCheckbox" selected="{targetDefined}"/>
+                            </mx:FormItem>
+                            <mx:FormItem label="" direction="horizontal" fontFamily="Tahoma" fontWeight="bold"
+                                         enabled="{insightBound}">
                                 <mx:RadioButtonGroup id="goalGroup"/>
                                 <mx:RadioButton label="Goal of High Values" value="highValuesGoal" group="{goalGroup}"
                                                 id="highValuesGoal" selected="{highValues}"/>
                                 <mx:RadioButton label="Goal of Low Values" value="lowValuesGoal" group="{goalGroup}"
                                                 id="lowValuesGoal" selected="{lowValues}"/>
                             </mx:FormItem>
-                            <mx:FormItem label="Target Value:" fontFamily="Tahoma" fontWeight="bold">
-                                <mx:TextInput id="targetValueInput" text="{targetValue}" fontFamily="Lucide Grande" fontWeight="normal"/>
-                            </mx:FormItem>
-                            <mx:FormItem label="Date Field:" enabled="{datesAvailable}" fontFamily="Tahoma" fontWeight="bold">
-                                <mx:ComboBox dataProvider="{availableDates}" labelField="display" id="availableDateBox"
-                                             close="onDateSelection()" fontFamily="Lucide Grande" fontWeight="normal"/>
-                            </mx:FormItem>
-                            <mx:FormItem label="Date Range:" enabled="{dateSelected}" fontFamily="Tahoma" fontWeight="bold">
-                                <mx:ComboBox dataProvider="{rangeOptions}" labelField="label" id="rollingDateBox" fontFamily="Lucida Grande" fontWeight="normal"/>
-                            </mx:FormItem>
-                            <mx:FormItem label="Target Milestone:" fontFamily="Tahoma" fontWeight="bold">
-                                <mx:ComboBox dataProvider="{milestones}" labelField="milestoneName" id="milestoneBox" fontFamily="Lucida Grande" fontWeight="normal"/>
+                            <mx:FormItem label="Target Value:" fontFamily="Tahoma" fontWeight="bold"
+                                         enabled="{insightBound}">
+                                <mx:TextInput id="targetValueInput" text="{targetValue}" fontFamily="Lucide Grande"
+                                              fontWeight="normal"/>
                             </mx:FormItem>
                         </mx:Form>
-                    </mx:FormItem>
-                </mx:Form>
+                        <mx:HBox width="100%" horizontalAlign="center">
+                            <mx:Label fontSize="14" text="Define the When" fontWeight="bold" fontFamily="Tahoma"/>
+                        </mx:HBox>
+                        <mx:Form paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5">
+                            <mx:FormItem label="Target Milestone:" fontFamily="Tahoma" fontWeight="bold"
+                                         enabled="{insightBound}">
+                                <mx:ComboBox dataProvider="{milestones}" labelField="milestoneName" id="milestoneBox"
+                                             fontFamily="Lucida Grande" fontWeight="normal"/>
+                            </mx:FormItem>
+                        </mx:Form>
+                    </mx:VBox>
+                    <mx:VBox width="100%" enabled="{insightBound}" paddingTop="10" height="100%">
+                        <mx:HBox width="100%" horizontalAlign="center">
+                            <mx:Label fontSize="14" text="Define the Filters" fontWeight="bold" fontFamily="Tahoma"/>
+                        </mx:HBox>
+                        <mx:HBox height="100%" width="100%">
+                            <mx:List dataProvider="{availableDimensions}" labelField="display" dragEnabled="true"
+                                 dragMoveEnabled="false" enabled="{insightBound}" width="50%" height="100%"/>
+                            <mx:Box width="50%" height="100%" horizontalAlign="center" verticalAlign="middle"
+                                    id="workspace" paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5">
+                                <filtering:TransformContainer id="transformContainer" width="100%" height="100%"
+                                                              borderStyle="solid"
+                                                              borderThickness="1" backgroundColor="#ffffff"
+                                                              backgroundAlpha=".1" feedID="{feedID}"
+                                                              analysisItems="{allFields}"/>
+                            </mx:Box>
+                       </mx:HBox>
+                    </mx:VBox>
+                </mx:HBox>
+
             </mx:Canvas>
             <mx:Canvas width="100%" height="100%" label="Associations">
                 <mx:VBox width="100%" height="100%" paddingTop="10" paddingBottom="10"
-                         paddingLeft="10" paddingRight="10">                    
+                         paddingLeft="10" paddingRight="10">
                     <mx:HBox width="100%" height="100%">
-                        <mx:VBox verticalGap="0" height="100%">
-                            <mx:Box width="100%" backgroundColor="#3B56AF" horizontalAlign="center">
-                                <mx:Label text="Solutions" color="0xFFFFFF"/>
-                            </mx:Box>
-                            <mx:DataGrid width="100%" height="100%" dataProvider="{associatedSolutions}">
-                                <mx:columns>
-                                    <mx:DataGridColumn headerText="Name" dataField="solutionName" headerRenderer="com.easyinsight.groups.CustomGroupHeader"/>
-                                    <mx:DataGridColumn headerText="" dataField="solutionName" sortable="false" width="100"
-                                                       itemRenderer="com.easyinsight.goals.AssociatedSolutionsAdminControls"/>
-                                </mx:columns>
-                            </mx:DataGrid>
-                        </mx:VBox>
                         <mx:VBox verticalGap="0" height="100%">
                             <mx:Box width="100%" backgroundColor="#3B56AF" horizontalAlign="center">
                                 <mx:Label text="Data Sources" color="0xFFFFFF"/>
                             </mx:Box>
                             <mx:DataGrid width="100%" height="100%" dataProvider="{associatedDataSources}">
                                 <mx:columns>
-                                    <mx:DataGridColumn headerText="Name" dataField="feedName" headerRenderer="com.easyinsight.groups.CustomGroupHeader"/>
+                                    <mx:DataGridColumn headerText="Name" dataField="feedName"
+                                                       headerRenderer="com.easyinsight.groups.CustomGroupHeader"/>
                                     <mx:DataGridColumn headerText="" dataField="feedName" sortable="false" width="50"
                                                        itemRenderer="com.easyinsight.goals.AssociatedFeedsAdminControls"/>
                                 </mx:columns>
@@ -400,11 +441,14 @@
                         </mx:VBox>
                         <mx:VBox verticalGap="0" height="100%">
                             <mx:Box width="100%" backgroundColor="#3B56AF" horizontalAlign="center">
-                                <mx:Label text="Reports" color="0xFFFFFF"/>
+                                <mx:Label text="Reports" color="0xFFFFFF" paddingBottom="5" paddingLeft="5"
+                                          paddingRight="5"
+                                          paddingTop="5"/>
                             </mx:Box>
                             <mx:DataGrid width="100%" height="100%" dataProvider="{associatedReports}">
                                 <mx:columns>
-                                    <mx:DataGridColumn headerText="Name" dataField="name" headerRenderer="com.easyinsight.groups.CustomGroupHeader"/>
+                                    <mx:DataGridColumn headerText="Name" dataField="name"
+                                                       headerRenderer="com.easyinsight.groups.CustomGroupHeader"/>
                                     <mx:DataGridColumn headerText="" dataField="name" sortable="false" width="50"
                                                        itemRenderer="com.easyinsight.goals.AssociatedInsightsAdminControls"/>
                                 </mx:columns>

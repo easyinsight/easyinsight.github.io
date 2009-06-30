@@ -104,6 +104,8 @@
             } else if (event.dragInitiator is DataGrid) {
                 var dataGrid:DataGrid = DataGrid(event.dragInitiator);
                 obj = dataGrid.selectedItem;
+            } else {
+                var dragNode:GoalTreeNode = event.dragSource.dataForFormat("GoalTreeNode") as GoalTreeNode;
             }
             if (obj is Solution) {
                 var solution:Solution = obj as Solution;
@@ -150,6 +152,14 @@
             DragManager.showFeedback(DragManager.MOVE);	
         }
 
+        private function moveNode(event:ContextMenuEvent):void {
+            dispatchEvent(new GoalContextEvent(GoalContextEvent.MOVE_GOAL, orgChartItem.data as GoalTreeNode, this));
+        }
+
+        private function newGoalTree(event:ContextMenuEvent):void {
+            dispatchEvent(new GoalContextEvent(GoalContextEvent.NEW_TREE, orgChartItem.data as GoalTreeNode, this));
+        }
+
         override public function set data(value:Object):void {
             this.orgChartItem = value as OrgChartItem;
             var goalTreeNode:GoalTreeNode = orgChartItem.data as GoalTreeNode;
@@ -184,7 +194,14 @@
                 var newParentItem:ContextMenuItem = new ContextMenuItem("Insert New Parent", true);
                 newParentItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, newParent);
                 items.push(newParentItem);
+                /*var moveItem:ContextMenuItem = new ContextMenuItem("Move", true);
+                moveItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, moveNode);
+                items.push(moveItem);*/
+                var newTreeItem:ContextMenuItem = new ContextMenuItem("Create New Goal Tree", true);
+                newTreeItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, newGoalTree);
+                items.push(newTreeItem);
                 contextMenu.customItems = items;
+
             }
         }
 
@@ -206,7 +223,7 @@
         }
 
         private function newParent(event:ContextMenuEvent):void {
-            dispatchEvent(new GoalParentEvent(orgChartItem.data as GoalTreeNode));
+            dispatchEvent(new GoalContextEvent(GoalContextEvent.NEW_PARENT, orgChartItem.data as GoalTreeNode, this));
         }
 
         private function copyNode():void {

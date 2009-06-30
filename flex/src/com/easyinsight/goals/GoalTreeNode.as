@@ -1,6 +1,5 @@
 package com.easyinsight.goals
 {
-import com.easyinsight.filtering.FilterDefinition;
 import com.easyinsight.analysis.AnalysisMeasure;
 	import mx.collections.ArrayCollection;
 	
@@ -19,9 +18,11 @@ import com.easyinsight.analysis.AnalysisMeasure;
 
         public var analysisMeasure:AnalysisMeasure;
         public var goalValue:Number;
-        public var filterDefinition:FilterDefinition;
         public var highIsGood:Boolean = true;
+        public var measureLabel:String;
+        public var goalDefined:Boolean;
 
+        public var filters:ArrayCollection = new ArrayCollection();        
 		public var associatedFeeds:ArrayCollection = new ArrayCollection();
 		public var associatedInsights:ArrayCollection = new ArrayCollection();
 		public var associatedSolutions:ArrayCollection = new ArrayCollection();
@@ -69,13 +70,15 @@ import com.easyinsight.analysis.AnalysisMeasure;
             clonedNode.coreFeedID = this.coreFeedID;
             clonedNode.coreFeedName = this.coreFeedName;
             clonedNode.goalValue = this.goalValue;
-            clonedNode.filterDefinition = this.filterDefinition;
+            clonedNode.filters = new ArrayCollection(filters.toArray());
             clonedNode.highIsGood = this.highIsGood;
             clonedNode.name = this.name;
             clonedNode.description = this.description;
             clonedNode.iconImage = this.iconImage;
             clonedNode.associatedFeeds = new ArrayCollection(associatedFeeds.toArray());
             clonedNode.associatedInsights = new ArrayCollection(associatedInsights.toArray());
+            clonedNode.measureLabel = this.measureLabel;
+            clonedNode.goalDefined = this.goalDefined;
             var newChildren:ArrayCollection = new ArrayCollection();
             for each (var childNode:GoalTreeNode in children) {
                 var clonedChild:GoalTreeNode = childNode.clone();

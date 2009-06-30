@@ -23,24 +23,57 @@ public class GoalTreeNode implements Cloneable {
     private long goalTreeNodeID;
     private List<GoalTreeNode> children = new ArrayList<GoalTreeNode>();
     private GoalTreeNode parent;
+
     private long coreFeedID;
+    private List<FilterDefinition> filters = new ArrayList<FilterDefinition>();
     private String coreFeedName;
     private AnalysisMeasure analysisMeasure;
+    private GoalTreeMilestone milestone;
+    private String measureLabel;
+
+    private boolean goalDefined;
     private double goalValue;
     private boolean highIsGood;
-    private FilterDefinition filterDefinition;
+
     private List<GoalFeed> associatedFeeds = new ArrayList<GoalFeed>();
     private List<InsightDescriptor> associatedInsights = new ArrayList<InsightDescriptor>();
     private List<GoalSolution> associatedSolutions = new ArrayList<GoalSolution>();
+
     private List<Tag> tags = new ArrayList<Tag>();
+
     private String name;
     private String description;
     private String iconImage;
+    
     private List<Integer> users = new ArrayList<Integer>();
-    private GoalTreeMilestone milestone;
+
     private long subTreeID;
     private String subTreeName;
     private SolutionGoalTreeDescriptor newSubTree;
+
+    public String getMeasureLabel() {
+        return measureLabel;
+    }
+
+    public void setMeasureLabel(String measureLabel) {
+        this.measureLabel = measureLabel;
+    }
+
+    public boolean isGoalDefined() {
+        return goalDefined;
+    }
+
+    public void setGoalDefined(boolean goalDefined) {
+        this.goalDefined = goalDefined;
+    }
+
+    public List<FilterDefinition> getFilters() {
+        return filters;
+    }
+
+    public void setFilters(List<FilterDefinition> filters) {
+        this.filters = filters;
+    }
 
     public String getSubTreeName() {
         return subTreeName;
@@ -104,14 +137,6 @@ public class GoalTreeNode implements Cloneable {
 
     public void setGoalTreeNodeID(long goalTreeNodeID) {
         this.goalTreeNodeID = goalTreeNodeID;
-    }
-
-    public FilterDefinition getFilterDefinition() {
-        return filterDefinition;
-    }
-
-    public void setFilterDefinition(FilterDefinition filterDefinition) {
-        this.filterDefinition = filterDefinition;
     }
 
     public long getCoreFeedID() {

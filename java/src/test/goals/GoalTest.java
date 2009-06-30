@@ -68,7 +68,7 @@ public class GoalTest extends TestCase {
         RollingFilterDefinition rollingFilterDefinition = new RollingFilterDefinition();
         rollingFilterDefinition.setField(findAnalysisItem(dataSourceID, "When"));
         rollingFilterDefinition.setInterval(MaterializedRollingFilterDefinition.DAY);
-        dataNode.setFilterDefinition(rollingFilterDefinition);
+        dataNode.setFilters(Arrays.asList((FilterDefinition) rollingFilterDefinition));
         dataNode.setGoalValue(1000);
         dataNode.setHighIsGood(true);
         dataNode.setName("Data Node");

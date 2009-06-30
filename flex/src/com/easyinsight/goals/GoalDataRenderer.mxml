@@ -126,7 +126,11 @@ import mx.formatters.NumberFormatter;
             if (goalTreeNodeData != null) {
                 goalIcon = "/app/assets/icons/32x32/" + goalTreeNodeData.iconImage;
                 if (goalTreeNodeData.currentValue != null) {
-                    currentValue = numberFormatter.format(goalTreeNodeData.currentValue.value);
+                    if (goalTreeNodeData.analysisMeasure == null) {
+                        currentValue = numberFormatter.format(goalTreeNodeData.currentValue.value);
+                    } else {
+                        currentValue = goalTreeNodeData.analysisMeasure.getFormatter().format(goalTreeNodeData.currentValue.value);                        
+                    }
                     currentValueExists = true;
                 }
                 iconExists = goalTreeNodeData.iconImage != null && goalTreeNodeData.iconImage != "";
@@ -203,8 +207,8 @@ import mx.formatters.NumberFormatter;
         }
         ]]></mx:Script>
     <mx:VBox id="layer2" verticalAlign="middle" paddingLeft="10"
-           paddingRight="10" paddingTop="0" paddingBottom="0" width="180" height="60" horizontalAlign="center">
-        <mx:HBox>
+           paddingRight="10" paddingTop="0" paddingBottom="0" width="180" height="80" horizontalAlign="center">
+        <mx:HBox verticalAlign="middle">
             <mx:Image source="{goalIcon}" visible="{iconExists}"/>
             <mx:Box backgroundColor="#000000" borderStyle="solid" cornerRadius="3" visible="{currentValueExists}" horizontalAlign="center" verticalAlign="middle">
                 <mx:Label text="{currentValue}" fontFamily="Trebuchet MS" fontSize="14" color="#ffffff"/>
@@ -212,6 +216,7 @@ import mx.formatters.NumberFormatter;
             <mx:Image source="{trendImage}" toolTip="{trendTooltip}"/>
             <mx:Button icon="{subTreeIcon}" toolTip="Navigate into Sub Tree" click="navigateToSubTree()" visible="{subTreePresent}"/>
         </mx:HBox>
-        <mx:Label text="{treeName}" fontSize="12" maxWidth="160"/>
+        <mx:TextArea text="{treeName}" fontSize="12" maxWidth="160" maxHeight="38" editable="false" borderStyle="none" backgroundAlpha="0"
+                textAlign="center"/>
     </mx:VBox>
 </OrgChartItemRendererBase>

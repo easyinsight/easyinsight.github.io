@@ -3,6 +3,7 @@
                 xmlns:goals="com.easyinsight.goals.*" width="100%" height="100%" creationComplete="setup()" backgroundColor="#DCE2F8">
     <mx:Script><![CDATA[
         import com.easyinsight.analysis.AnalysisCloseEvent;
+        import com.easyinsight.genredata.AnalyzeEvent;
         import com.easyinsight.util.ModelessWindowEvent;
 
         import com.easyinsight.util.ProgressAlert;
@@ -16,6 +17,10 @@
         [Bindable]
         [Embed(source="../../../../assets/background2.JPG")]
         private var background2:Class;
+
+        [Bindable]
+        [Embed(source="../../../../assets/document_out_x32.png")]
+        private var closeIcon:Class;
 
         private var _goalTreeID:int;
 
@@ -72,8 +77,22 @@
             goalService.createDataTree.send(_goalTreeID, startChooser.selectedDate, endChooser.selectedDate);
         }
 
+        private function parentTreeClick(event:MouseEvent):void {
+            var descriptor:GoalTreeDescriptor = event.currentTarget.data;
+            dispatchEvent(new AnalyzeEvent(new GoalDataAnalyzeSource(descriptor.id)));
+        }
+
         private function gotTree():void {
             goalTree = goalService.createDataTree.lastResult as GoalTree;
+            if (goalTree.subTreeParents != null) {
+                for each (var descriptor:GoalTreeDescriptor in goalTree.subTreeParents) {
+                    var button:Button = new Button();
+                    button.label = descriptor.name;
+                    button.data = descriptor;
+                    button.addEventListener(MouseEvent.CLICK, parentTreeClick);
+                    parentsBox.addChild(button);
+                }
+            }
             _goalTreeNodes = goalTree.rootNode;
             myOrgChart.dataProvider = _goalTreeNodes;
         }
@@ -89,7 +108,8 @@
         <mx:method name="createDataTree" result="gotTree()"/>
     </mx:RemoteObject>
     <mx:HBox id="buttonBox" paddingLeft="5" paddingTop="5" paddingBottom="5" width="100%">
-        <mx:Button id="wrapButton" icon="@Embed(source='../../../../assets/document_out.png')" click="close()" toolTip="Close"/>
+        <mx:Button id="wrapButton" icon="{closeIcon}" click="close()" toolTip="Close"/>
+        <mx:VBox id="parentsBox"/>
         <mx:HBox width="100%" horizontalAlign="center">
             <mx:DateField id="startChooser" selectedDate="{startDate}" change="onDatesChanged()"/>
             <mx:Spacer width="200"/>
