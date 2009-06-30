@@ -3,6 +3,7 @@
     <mx:Script><![CDATA[
         import com.easyinsight.customupload.IServerDataSourceCreation;
 
+        import com.easyinsight.datasources.IServerDataSourceDefinition;
         import com.easyinsight.framework.Credentials;
 
         import mx.controls.Alert;
@@ -10,7 +11,7 @@
         private var _dataSourceClass:Class;
         private var dataSourceCreation:IServerDataSourceCreation;
         private var _dataSourceID:int;
-        private var _dataSourceDefinition:ServerDataSourceDefinition;
+        private var _dataSourceDefinition:IServerDataSourceDefinition;
 
         [Bindable]
         private var ready:Boolean;
@@ -25,9 +26,10 @@
             super.createChildren();
             ready = true;
             dataSourceCreation = new _dataSourceClass();
-            dataSourceCreation.dataSourceDefinition = _dataSourceDefinition;
-            credentialsSaved = _dataSourceDefinition.username != null;
-            refreshValue = _dataSourceDefinition.refreshDataInterval;
+            var def:FeedDefinitionData = _dataSourceDefinition as FeedDefinitionData;
+            dataSourceCreation.dataSourceDefinition = def;
+            credentialsSaved = def != null;
+            refreshValue = def.refreshDataInterval;
             coreContent.addChild(dataSourceCreation as DisplayObject);
         }
 
@@ -35,17 +37,17 @@
             _dataSourceID = value;
         }
 
-        public function get dataSourceDefinition():ServerDataSourceDefinition {
+        public function get dataSourceDefinition():IServerDataSourceDefinition {
             return _dataSourceDefinition;
         }
 
-        public function set dataSourceDefinition(value:ServerDataSourceDefinition):void {
+        public function set dataSourceDefinition(value:IServerDataSourceDefinition):void {
             _dataSourceDefinition = value;
         }
 
         private function serverValidate():void {
             progressBar.visible = true;
-            dataSourceCreation.updateDataSource(dataSourceDefinition);
+            dataSourceCreation.updateDataSource(dataSourceDefinition as FeedDefinitionData);
             uploadService.validateCredentials.send(dataSourceDefinition, dataSourceCreation.credentials);
         }
 

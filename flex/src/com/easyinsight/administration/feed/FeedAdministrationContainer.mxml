@@ -101,7 +101,7 @@
                 var configClass:Class = sds.configClass();
                 var admin:ServerDataSourceAdministration = new ServerDataSourceAdministration();
                 admin.dataSourceClass = configClass;
-                admin.dataSourceDefinition = feedDefinition as ServerDataSourceDefinition;
+                admin.dataSourceDefinition = feedDefinition as IServerDataSourceDefinition;
                 implBox.addChild(admin);
                 implBox.label = "Server Configuration";
                 showImpl = true;
