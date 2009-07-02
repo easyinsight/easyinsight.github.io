@@ -99,7 +99,7 @@
 		]]>
     </mx:Script>
     <mx:Image source="{logo}"/>
-    <mx:Spacer width="40"/>
+    <mx:Spacer width="10"/>
     <listing:ListingOption perspective="{new IntroPanel()}" enableAnalysis="false" displayName="Intro" listingChange="onListingChange(event)" width="50">
         <mx:Image source="{homeIcon}" id="homeImage"/>
         <mx:Label text="Intro" fontSize="12" fontFamily="Tahoma" fontWeight="bold" color="0x323232"/>
