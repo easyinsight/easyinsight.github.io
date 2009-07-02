@@ -9,7 +9,7 @@ package com.easyinsight.solutions
 
 	public class SolutionFeedIcons extends HBox
 	{
-		[Embed(source="../../../../assets/refresh.png")]
+		[Embed(source="../../../../assets/navigate_cross.png")]
         public var refreshIcon:Class;
         
         private var feedDescriptor:DataFeedDescriptor;
@@ -29,7 +29,7 @@ package com.easyinsight.solutions
 		}
 		
 		private function deleteCalled(event:MouseEvent):void {
-			
+			dispatchEvent(new DataSourceSolutionEvent(DataSourceSolutionEvent.DELETE_DATA_SOURCE, feedDescriptor));
 		}
 		
 		override public function set data(value:Object):void {

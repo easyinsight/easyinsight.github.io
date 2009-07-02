@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" creationComplete="goalService.getGoalTrees.send()">
+<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" creationComplete="goalService.getGoalTrees.send(); addEventListener(DataSourceSolutionEvent.DELETE_DATA_SOURCE, onDelete)">
 	<mx:Script>
 		<![CDATA[
 			import com.easyinsight.goals.GoalTreeDescriptor;
@@ -8,6 +8,10 @@
             import mx.controls.Alert;
             import mx.managers.PopUpManager;
 			import mx.collections.ArrayCollection;
+
+            private function onDelete(event:DataSourceSolutionEvent):void {
+                includedFeeds.removeItemAt(includedFeeds.getItemIndex(event.descriptor));
+            }
 
             private function updateImage():void {
                 if (_solution == null) {
