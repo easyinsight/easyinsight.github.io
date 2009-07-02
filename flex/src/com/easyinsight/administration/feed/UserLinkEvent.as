@@ -11,7 +11,7 @@ package com.easyinsight.administration.feed
 		
 		public function UserLinkEvent(type:String, userStub:FeedConsumer)
 		{
-			super(type);
+			super(type, true);
 			this.userStub = userStub;
 		}
 		

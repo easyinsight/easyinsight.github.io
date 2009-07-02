@@ -2,7 +2,8 @@
 <mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" creationComplete="initHandlers()">
 	<mx:Script>
 		<![CDATA[
-			import mx.managers.PopUpManager;
+        import mx.controls.Alert;
+        import mx.managers.PopUpManager;
 			import com.easyinsight.customupload.UploadPolicy;
 			import mx.collections.ArrayCollection;
 			
@@ -24,18 +25,22 @@
 			private var marketplaceViewable:Boolean;
 			
 			private function initHandlers():void {
-				ownersGrid.addEventListener(UserLinkEvent.DELETE_USER_LINK, deletedOwner);
-				viewersGrid.addEventListener(UserLinkEvent.DELETE_USER_LINK, deletedViewer);
+				addEventListener(UserLinkEvent.DELETE_USER_LINK, deletedOwner);
 			}
 			
 			private function deletedOwner(event:UserLinkEvent):void {
-				owners.removeItemAt(owners.getItemIndex(event.userStub));
+                if (owners.length == 1) {
+                    Alert.show("A data source must have at least one owner.");
+                } else {
+                    var index:int = owners.getItemIndex(event.userStub);
+                    if (index == -1) {
+                        viewers.removeItemAt(viewers.getItemIndex(event.userStub));
+                    } else {
+                        owners.removeItemAt(index);
+                    }
+                }
 			}
-			
-			private function deletedViewer(event:UserLinkEvent):void {
-				viewers.removeItemAt(viewers.getItemIndex(event.userStub));
-			}
-			
+
 			public function set uploadPolicy(uploadPolicy:UploadPolicy):void {
 				owners = uploadPolicy.owners;
 				viewers = uploadPolicy.viewers;

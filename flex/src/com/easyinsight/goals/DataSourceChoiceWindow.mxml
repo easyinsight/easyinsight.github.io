@@ -20,6 +20,7 @@
                 dsD.id = descriptor.dataFeedID;
                 dsD.name = descriptor.name;
                 dispatchEvent(new DataSourceChoiceEvent(dsD));
+                PopUpManager.removePopUp(this);
 			}
 
 			private function cancel():void {

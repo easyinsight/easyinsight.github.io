@@ -562,6 +562,10 @@ public class GoalStorage {
                 goalTreeNode.setGoalTreeNodeID(nodeID);
                 insertNodeStmt.close();
             } else {
+                Session session = Database.instance().createSession(conn);
+                session.saveOrUpdate(goalTreeNode.getAnalysisMeasure());
+                session.flush();
+                session.close();
                 PreparedStatement insertNodeStmt = conn.prepareStatement("INSERT INTO GOAL_TREE_NODE (PARENT_GOAL_TREE_NODE_ID, NAME, DESCRIPTION," +
                         "FEED_ID, GOAL_VALUE, ANALYSIS_MEASURE_ID, high_is_good, ICON_IMAGE, GOAL_MILESTONE_ID, GOAL_TREE_ID, SUB_TREE_ID, goal_measure_description, goal_defined) " +
                         "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);

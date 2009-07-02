@@ -32,7 +32,7 @@ package com.easyinsight.administration.feed
 		}
 		
 		private function deleteUser(event:MouseEvent):void {
-			parent.dispatchEvent(new UserLinkEvent(UserLinkEvent.DELETE_USER_LINK, feedConsumer));
+			dispatchEvent(new UserLinkEvent(UserLinkEvent.DELETE_USER_LINK, feedConsumer));
 		}
 		
 		override public function set data(object:Object):void {

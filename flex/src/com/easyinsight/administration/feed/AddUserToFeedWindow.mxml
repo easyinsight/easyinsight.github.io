@@ -52,7 +52,7 @@
 	<mx:RemoteObject id="loginService" destination="login">
 		<mx:method name="getUserStub" result="validationResult()"/>
 	</mx:RemoteObject>
-	<yahoo:AutoCompleteManager id="autoCompleteManager" target="{userIDInput}" dataProvider="{userStubs}" labelField="userName" minCharsForCompletion="1"/>
+	<yahoo:AutoCompleteManager id="autoCompleteManager" target="{userIDInput}" dataProvider="{userStubs}" labelField="name" minCharsForCompletion="1"/>
 	<mx:VBox styleName="TitleWindowContents">
 		<mx:Label text="Enter the name of the user:"/>
 		<mx:Form width="100%">
