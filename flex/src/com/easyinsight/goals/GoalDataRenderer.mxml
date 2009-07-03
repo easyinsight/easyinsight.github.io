@@ -217,6 +217,6 @@ import mx.formatters.NumberFormatter;
             <mx:Button icon="{subTreeIcon}" toolTip="Navigate into Sub Tree" click="navigateToSubTree()" visible="{subTreePresent}"/>
         </mx:HBox>
         <mx:TextArea text="{treeName}" fontSize="12" maxWidth="160" maxHeight="38" editable="false" borderStyle="none" backgroundAlpha="0"
-                textAlign="center"/>
+                textAlign="center" selectable="false"/>
     </mx:VBox>
 </OrgChartItemRendererBase>

@@ -49,6 +49,9 @@
         [Bindable]
         private var newSolutions:ArrayCollection = new ArrayCollection();
 
+        [Bindable]
+        private var saved:Boolean;
+
         private var validators:Array;
 
         private var changed:Boolean = false;
@@ -70,6 +73,7 @@
         override protected function createChildren():void {
             super.createChildren();
             if (_goalTreeID == 0) {
+                saved = false;
                 changed = true;
                 _goalTree = new GoalTree();
                 _goalTree.rootNode = new GoalTreeNode();
@@ -79,6 +83,7 @@
                 _goalTree.administrators.addItem(userStub);
                 rootNode = _goalTree.rootNode;
             } else {
+                saved = true;
                 ProgressAlert.alert(this, "Retrieving goal tree...", null, goalService.getGoalTree);
                 goalService.getGoalTree.send(_goalTreeID);
             }
@@ -96,6 +101,7 @@
         }
 
         private function process(rootNode:GoalTreeNode):void {
+            saved = true;
             rootNode.updateName();
             if (rootNode.children != null) {
                 for each (var node:GoalTreeNode in rootNode.children) {
@@ -196,7 +202,8 @@
 		<mx:HBox id="buttonBox" paddingLeft="5" paddingTop="5" paddingBottom="5">
             <mx:Button id="wrapButton" icon="@Embed(source='../../../../assets/document_out.png')" click="close()" toolTip="Close"/>
 			<mx:Button id="saveButton" icon="@Embed(source='../../../../assets/floppy_disk.png')" click="save()" toolTip="Save"/>
-			<mx:Button id="playButton" icon="@Embed(source='../../../../assets/media_play_green.png')" click="viewData()" toolTip="View Data"/>
+			<mx:Button id="playButton" icon="@Embed(source='../../../../assets/media_play_green.png')" click="viewData()" toolTip="View Data"
+                    enabled="{saved}"/>
 		</mx:HBox>
         <mx:TabNavigator width="100%" height="100%" paddingTop="0" paddingBottom="0"
 			paddingLeft="0" paddingRight="0" resizeToContent="true" id="tabNavigator">
