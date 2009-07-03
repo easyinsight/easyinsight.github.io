@@ -117,6 +117,60 @@ public class GoogleAnalyticsDataSource extends ServerDataSourceDefinition {
     public static final String SEARCH_UNIQUES = "ga:searchUniques";
     public static final String SEARCH_VISITS = "ga:searchVisits";
 
+    public static String[] generalDimensions = { BROWSER, BROWSER_VERSION, CITY, CONNECTION_SPEED, CONTINENT, CONTINENT,
+        COUNT_OF_VISITS, COUNTRY, DATE, DAYS_SINCE_LAST_VISIT, HOSTNAME, HOUR, JAVA_ENABLED, FLASH_VERSION, LATITUDE,
+        LONGITUDE, NETWORK_DOMAIN, LANGUAGE, NETWORK_DOMAIN, NETWORK_LOCATION, PAGE_DEPTH, OPERATING_SYSTEM,
+        OPERATING_SYSTEM_VERSION, REGION, SCREEN_COLORS, SCREEN_RESOLUTION, SOURCE, SUB_CONTINENT, VISITOR_TYPE, TITLE};
+
+    public static String[] generalMeasures = { VISITS };
+
+    public static String[] adDimensions = { AD_CONTENT, AD_GROUP, AD_SLOT, AD_SLOT_POSITION, AD_CAMPAIGN, AD_KEYWORD,
+        AD_MEDIUM, AD_REFERRAL_PATH, AD_SOURCE };
+
+    public static String[] adMeasures = { AD_CLICKS };
+
+    public static String[] contentDimensions = { CONTENT_EXIT_PAGE_PATH, CONTENT_LANDING_PAGE_PATH, CONTENT_PAGE_PATH,
+        CONTENT_PAGE_TITLE };
+
+    public static String[] contentMeasures = { PAGEVIEWS };
+
+    public static String[] ecommerceDimensions = { EC_AFFILIATION, EC_DAYS_TO, EC_CATEGORY, EC_NAME, EC_SKU, EC_TID };
+
+    public static String[] ecommerceMeasures = { EC_ITEM_QUANTITY };
+
+    public static String[] searchDimensions = { SEARCH_CATEGORY, SEARCH_DESTINATION, SEARCH_KEYWORD, SEARCH_KEYWORD_REFINEMENT,
+        SEARCH_SEARCH_START, SEARCH_SEARCH_USED };
+
+    public static String[] searchMeasures = { SEARCH_VISITS };
+
+    private static Map<String, String> compiledMap;
+
+    private static void compileMap() {
+        if (compiledMap == null) {
+            compiledMap = new HashMap<String, String>();
+            for (String dimension : generalDimensions) {
+                compiledMap.put(dimension, generalMeasures[0]);
+            }
+            for (String dimension : adDimensions) {
+                compiledMap.put(dimension, adMeasures[0]);
+            }
+            for (String dimension : contentDimensions) {
+                compiledMap.put(dimension, contentMeasures[0]);
+            }
+            for (String dimension : ecommerceDimensions) {
+                compiledMap.put(dimension, ecommerceMeasures[0]);
+            }
+            for (String dimension : searchDimensions) {
+                compiledMap.put(dimension, searchMeasures[0]);
+            }
+        }
+    }
+
+    public static String getMeasure(String dimension) {
+        compileMap();
+        return compiledMap.get(dimension);
+    }
+
     public int getRequiredAccountTier() {
         return Account.INDIVIDUAL;
     }

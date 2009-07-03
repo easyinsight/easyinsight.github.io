@@ -68,6 +68,9 @@ public class GoogleAnalyticsFeed extends Feed {
 
                     urlBuilder.append("&dimensions=");
                     urlBuilder.append(queryItem.getKey().toKeyString());
+                    urlBuilder.append("&metrics=");
+                    // TODO: update for categories other than basic
+                    urlBuilder.append(GoogleAnalyticsDataSource.getMeasure(queryItem.getKey().toKeyString()));
                     urlBuilder.append("&start-date=2009-06-09&end-date=2009-06-15");
                     URL reportUrl = new URL(urlBuilder.toString());
                     DataFeed feed = as.getFeed(reportUrl, DataFeed.class);
@@ -128,6 +131,9 @@ public class GoogleAnalyticsFeed extends Feed {
                 } else {
                     dimensions.add((AnalysisDimension) analysisItem);
                 }
+            }
+            if (measures.size() == 0 && dimensions.size() > 0) {
+                measures.add(getDefaultMeasure(dimensions));
             }
             if (measures.size() == 0 && dimensions.size() == 0) {
                 return new DataSet();
@@ -231,5 +237,17 @@ public class GoogleAnalyticsFeed extends Feed {
 
     public DataSet getDetails(Collection<FilterDefinition> filters) {
         return null;  //To change body of implemented methods use File | Settings | File Templates.
+    }
+
+    public AnalysisMeasure getDefaultMeasure(Collection<AnalysisDimension> dimensions) {
+        AnalysisMeasure analysisMeasure = null;
+        AnalysisDimension dimension = dimensions.iterator().next();
+        String measureName = GoogleAnalyticsDataSource.getMeasure(dimension.getKey().toKeyString());
+        for (AnalysisItem analysisItem : getFields()) {
+            if (measureName.equals(analysisItem.getKey().toKeyString())) {
+                analysisMeasure = (AnalysisMeasure) analysisItem;
+            }
+        }
+        return analysisMeasure;
     }
 }

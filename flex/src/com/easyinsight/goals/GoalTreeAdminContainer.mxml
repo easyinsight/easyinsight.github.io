@@ -5,7 +5,6 @@
 		<![CDATA[
         import com.easyinsight.administration.sharing.UserStub;
         import com.easyinsight.customupload.ConfigureDataSource;
-        import com.easyinsight.customupload.DataSourceConfiguredEvent;
         import com.easyinsight.framework.User;
         import com.easyinsight.genredata.AnalyzeEvent;
         import com.easyinsight.quicksearch.EIDescriptor;
@@ -118,6 +117,14 @@
             }
         }
 
+        private function onUpdateClose(event:CloseEvent):void {
+            event.currentTarget.removeEventListener(CloseEvent.CLOSE, onSaveClose);
+            var info:GoalSaveInfo = goalService.updateGoalTree.lastResult as GoalSaveInfo;
+            if (info.installInfos.length > 0) {
+                newSolutionInstalls(info);
+            }
+        }
+
         private function save():void {
             var results:Array = Validator.validateAll(validators);
             if (results.length == 0) {
@@ -132,7 +139,7 @@
                     goalService.createGoalTree.send(_goalTree);
                 } else {
                     var updateAlert:ProgressAlert = ProgressAlert.alert(this, "Updating goal tree...", "Updated successfully!", goalService.updateGoalTree);
-                    updateAlert.addEventListener(CloseEvent.CLOSE, onSaveClose);
+                    updateAlert.addEventListener(CloseEvent.CLOSE, onUpdateClose);
                     goalService.updateGoalTree.send(_goalTree);
                 }
             } else {
