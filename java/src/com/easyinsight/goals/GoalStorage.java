@@ -7,6 +7,7 @@ import com.easyinsight.analysis.*;
 import com.easyinsight.groups.GroupDescriptor;
 import com.easyinsight.email.UserStub;
 import com.easyinsight.datafeeds.FeedConsumer;
+import com.easyinsight.datafeeds.CredentialFulfillment;
 import com.easyinsight.security.Roles;
 import com.easyinsight.core.InsightDescriptor;
 
@@ -905,7 +906,7 @@ public class GoalStorage {
         GoalEvaluationStorage goalEvaluationStorage = new GoalEvaluationStorage();
         List<GoalValue> goalValues = new ArrayList<GoalValue>();
         for (GoalTreeNode node : neededNodes) {
-            GoalValue goalValue = goalEvaluationStorage.evaluateGoalTreeNode(node, date);
+            GoalValue goalValue = goalEvaluationStorage.evaluateGoalTreeNode(node, date, new ArrayList<CredentialFulfillment>());
             goalValues.add(goalValue);
         }
         conn = Database.instance().getConnection();
