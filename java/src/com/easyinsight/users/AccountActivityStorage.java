@@ -80,7 +80,7 @@ public class AccountActivityStorage {
         } catch (SQLException e) {
             LogClass.error(e);
         } finally {
-            Database.instance().closeConnection(conn);
+            Database.closeConnection(conn);
         }
     }
 
@@ -119,7 +119,7 @@ public class AccountActivityStorage {
         } catch (SQLException e) {
             LogClass.error(e);
         } finally {
-            Database.instance().closeConnection(conn);
+            Database.closeConnection(conn);
         }
         return accountActivity;
     }
@@ -177,7 +177,7 @@ public class AccountActivityStorage {
             throw new RuntimeException(e);
         } finally {
             conn.setAutoCommit(true);
-            Database.instance().closeConnection(conn);
+            Database.closeConnection(conn);
         }
     }
 

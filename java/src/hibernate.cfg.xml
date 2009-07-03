@@ -108,6 +108,8 @@
         <mapping class="com.easyinsight.users.AccountBillingTask"/>
         <mapping class="com.easyinsight.database.VolumeSnapshotTask"/>
         <mapping class="com.easyinsight.database.DatabaseVolumeScheduler"/>
+        <mapping class="com.easyinsight.billing.BillingTaskGenerator" />
+        <mapping class="com.easyinsight.billing.BillingScheduledTask" />
 
         <mapping class="com.easyinsight.core.PersistableValue"/>
         <mapping class="com.easyinsight.core.PersistableStringValue"/>
@@ -130,6 +132,7 @@
         <mapping class="com.easyinsight.users.SubscriptionLicense"/>
         <mapping class="com.easyinsight.users.Consultant"/>
         <mapping class="com.easyinsight.users.BandwidthUsage" />
+        <mapping class="com.easyinsight.users.AccountCreditCardBillingInfo" />
 
         <mapping class="com.easyinsight.notifications.TodoBase" />
         <mapping class="com.easyinsight.notifications.ConfigureDataFeedTodo" />

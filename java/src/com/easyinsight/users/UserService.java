@@ -613,7 +613,7 @@ public class UserService implements IUserService {
                     if (encryptedPassword.equals(actualPassword)) {
                         List accountResults = session.createQuery("from Account where accountID = ?").setLong(0, user.getAccount().getAccountID()).list();
                         Account account = (Account) accountResults.get(0);
-                        if (account.getAccountState() == Account.ACTIVE || account.getAccountState() == Account.TRIAL) {
+                        if (account.getAccountState() == Account.ACTIVE || account.getAccountState() == Account.TRIAL || account.getAccountState() == Account.DELINQUENT) {
                             userServiceResponse = new UserServiceResponse(true, user.getUserID(), user.getAccount().getAccountID(), user.getName(),
                                 user.getAccount().getAccountType(), account.getMaxSize(), user.getEmail(), user.getUserName(), encryptedPassword, user.isAccountAdmin(), user.isDataSourceCreator(), user.isInsightCreator());
                         } else {

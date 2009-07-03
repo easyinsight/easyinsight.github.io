@@ -58,7 +58,7 @@ public abstract class ScheduledTask implements Runnable {
         } finally {
             conn.setAutoCommit(true);
             session.close();
-            Database.instance().closeConnection(conn);
+            Database.closeConnection(conn);
         }
     }
 

@@ -1,8 +1,12 @@
 package com.easyinsight.users;
 
+import com.easyinsight.billing.BrainTreeBillingSystem;
+
 import javax.persistence.*;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Map;
+import java.util.Date;
 
 /**
  * User: James Boe
@@ -91,6 +95,12 @@ public class Account {
     @Column(name="account_secret_key")
     private String accountSecretKey;
 
+    @Column(name="billing_information_given")
+    private Boolean billingInformationGiven;
+
+    @Column(name="billing_day_of_month")
+    private Integer billingDayOfMonth;
+
     @OneToMany(cascade=CascadeType.ALL)
     @JoinTable(name="account_to_guest_user",
         joinColumns = @JoinColumn(name="account_id", nullable = false),
@@ -101,7 +111,22 @@ public class Account {
     @JoinColumn(name="account_id")
     private List<BandwidthUsage> historicBandwidthUsage = new ArrayList<BandwidthUsage>();
 
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JoinColumn(name="account_id")
+    private List<AccountCreditCardBillingInfo> billingInfo = new ArrayList<AccountCreditCardBillingInfo>();
+
+    private static final double GROUP_BILLING_AMOUNT = 100.00;
+    private static final double INDIVIDUAL_BILLING_AMOUNT = 10.00;
+
     //private BillingParty billingParty;
+
+    public List<AccountCreditCardBillingInfo> getBillingInfo() {
+        return billingInfo;
+    }
+
+    public void setBillingInfo(List<AccountCreditCardBillingInfo> billingInfo) {
+        this.billingInfo = billingInfo;
+    }
 
     /*public BillingParty getBillingParty() {
         return billingParty;
@@ -338,6 +363,52 @@ public class Account {
                 return ADMINISTRATOR_MAX;
             default:
                 throw new RuntimeException("Unknown account type " + tier);
+        }
+    }
+
+    public Boolean isBillingInformationGiven() {
+        return billingInformationGiven;
+    }
+
+    public void setBillingInformationGiven(Boolean billingInformationGiven) {
+        this.billingInformationGiven = billingInformationGiven;
+    }
+
+    public Integer getBillingDayOfMonth() {
+        return billingDayOfMonth;
+    }
+
+    public void setBillingDayOfMonth(Integer billingDayOfMonth) {
+        this.billingDayOfMonth = billingDayOfMonth;
+    }
+
+    public AccountCreditCardBillingInfo bill() {
+        // the indirection here is to support invoice billingSystem later
+        BrainTreeBillingSystem billingSystem = new BrainTreeBillingSystem();
+        billingSystem.setUsername("testapi");
+        billingSystem.setPassword("password1");
+        Map<String, String> params = billingSystem.billAccount(this.getAccountID(), this.monthlyCharge());
+        if(!params.get("response").equals("1"))
+            setAccountState(Account.DELINQUENT);
+        AccountCreditCardBillingInfo info = new AccountCreditCardBillingInfo();
+        info.setAmount(String.valueOf(monthlyCharge()));
+        info.setAccountId(this.getAccountID());
+        info.setResponse(params.get("response"));
+        info.setResponseCode(params.get("response_code"));
+        info.setResponseString(params.get("responsetext"));
+        info.setTransactionID(params.get("transactionid"));
+        info.setTransactionTime(new Date());
+        return info;
+    }
+
+    public double monthlyCharge() {
+        switch(getAccountType()) {
+            case Account.INDIVIDUAL:
+                return INDIVIDUAL_BILLING_AMOUNT;
+            case Account.GROUP:
+                return GROUP_BILLING_AMOUNT;
+            default:
+                throw new RuntimeException("Only doing credit card billing for Individual and Group accounts at the moment.");
         }
     }
 }
