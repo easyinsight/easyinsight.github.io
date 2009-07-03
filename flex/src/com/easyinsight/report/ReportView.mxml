@@ -1,11 +1,12 @@
 <?xml version="1.0" ?>
 <easyinsight:FullScreenPage xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:easyinsight="com.easyinsight.*"
                             xmlns:filtering="com.easyinsight.filtering.*"
-                            width="100%" height="100%" backgroundImage="{background2}" backgroundSize="100%"
+                            width="100%" height="100%"
         creationComplete="onCreation()" implements="com.easyinsight.util.IAsyncScreen">
     <easyinsight:states>
         <mx:State name="FullScreen">
             <mx:RemoveChild target="{buttonBar}"/>
+            <mx:RemoveChild target="{hrule}"/>
             <mx:RemoveChild target="{reportMetadata}"/>
         </mx:State>
         <mx:State name="Filtering">
@@ -199,6 +200,14 @@
             _reportType = value;
         }
 
+        override protected function commitProperties():void {
+            super.commitProperties();
+            if (!_embedded) {
+                setStyle("backgroundImage", background2);
+                setStyle("backgroundSize", "100%");
+            }
+        }
+
         override protected function createChildren():void {
             super.createChildren();
             var controllerClass:Class = EmbeddedControllerLookup.controllerForType(_reportType);
@@ -279,6 +288,12 @@
             currentState = "FullScreen";
         }
 
+        private function onKey(event:KeyboardEvent):void {
+            if (Keyboard.ESCAPE == event.keyCode) {
+                currentState = "";
+            }
+        }
+
         private function toReportEditor():void {
             var report:InsightDescriptor = new InsightDescriptor();
             report.id = _reportID;
@@ -288,11 +303,7 @@
             dispatchEvent(new ModuleAnalyzeEvent(new AnalysisDefinitionAnalyzeSource(report)));
         }
 
-        private function onKey(event:KeyboardEvent):void {
-            if (Keyboard.ESCAPE == event.keyCode) {
-                currentState = "";
-            }
-        }
+
 
         [Bindable]
         private var showFilters:Boolean;
@@ -328,6 +339,7 @@
         <mx:HBox width="100%" height="100%">
             <mx:VBox id="reportBox" width="100%" height="100%">
                 <mx:Box width="100%" id="transformBox"/>
+                <mx:HRule width="100%" id="hrule"/>                
             </mx:VBox>
             <mx:VBox id="reportMetadata">
                 <mx:Form>

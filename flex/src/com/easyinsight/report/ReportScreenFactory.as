@@ -22,6 +22,7 @@ public class ReportScreenFactory implements IAsyncScreenFactory{
         } else {
             var goalView:GoalTreeViewContainer = new GoalTreeViewContainer();
             goalView.goalTreeID = descriptor.id;
+            goalView.embedded = true;
             return goalView;
         }
     }

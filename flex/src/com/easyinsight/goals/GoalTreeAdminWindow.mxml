@@ -55,11 +55,6 @@ import com.easyinsight.util.ProgressAlert;
             accordion.getHeaderAt(2).labelPlacement = "right";
             accordion.getHeaderAt(2).setStyle("fontfamily", "Tahoma");
             accordion.getHeaderAt(2).setStyle("fontWeight", "bold");
-            accordion.getHeaderAt(3).setStyle("fontSize", 12);
-            accordion.getHeaderAt(3).labelPlacement = "right";
-            accordion.getHeaderAt(3).setStyle("fontfamily", "Tahoma");
-            accordion.getHeaderAt(3).setStyle("fontWeight", "bold");
-            accordion.getHeaderAt(3).setStyle("icon", reportIcon);
             ProgressAlert.alert(this, "Retrieving possible data...", null, feedService.searchForSubscribedFeeds,
                     solutionService.getSolutions, goalService.getGoalTreesForInstall, analysisService.getInsightDescriptors);
             feedService.searchForSubscribedFeeds.send();
@@ -90,6 +85,15 @@ import com.easyinsight.util.ProgressAlert;
 
         private function gotGoalTrees():void {
             var availableTrees:AvailableGoalTreeList = goalService.getGoalTreesForInstall.lastResult as AvailableGoalTreeList;
+            var myRemoveIndex:int = -1;
+            for each (var myDescriptor:GoalTreeDescriptor in availableTrees.myTrees) {
+                if (myDescriptor.id == this._goalTreeID) {
+                    myRemoveIndex = availableTrees.myTrees.getItemIndex(myDescriptor);
+                }
+            }
+            if (myRemoveIndex != -1) {
+                availableTrees.myTrees.removeItemAt(myRemoveIndex);
+            }
             this.accountTrees = availableTrees.myTrees;
             this.goalTrees = availableTrees.solutionTrees;
         }
@@ -123,9 +127,6 @@ import com.easyinsight.util.ProgressAlert;
                         <mx:Label text="External Goal Trees"/>
                     </mx:Box>
                     <mx:List dataProvider="{goalTrees}" width="100%" height="100%" labelField="name" dragEnabled="true"/>
-                </mx:VBox>
-                <mx:VBox label="Solutions" width="100%" height="100%">
-                    <mx:List dataProvider="{solutions}" width="100%" height="100%" labelField="name" dragEnabled="true"/>
                 </mx:VBox>
                 <mx:VBox label="Data Sources" width="100%" height="100%">
                     <mx:List dataProvider="{dataSources}" width="100%" height="100%" labelField="name" dragEnabled="true"/>

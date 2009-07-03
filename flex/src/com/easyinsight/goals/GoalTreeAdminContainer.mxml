@@ -7,6 +7,7 @@
         import com.easyinsight.customupload.ConfigureDataSource;
         import com.easyinsight.customupload.DataSourceConfiguredEvent;
         import com.easyinsight.framework.User;
+        import com.easyinsight.genredata.AnalyzeEvent;
         import com.easyinsight.quicksearch.EIDescriptor;
         import com.easyinsight.solutions.SolutionInstallInfo;
         import com.easyinsight.util.ProgressAlert;
@@ -19,6 +20,21 @@
         import mx.events.CloseEvent;
         import mx.managers.PopUpManager;
         import mx.validators.Validator;
+
+        private function viewData():void {
+            if (changed) {
+                Alert.show("You have unsaved changes. Are you sure you want to view the goal tree data?", "Alert",
+                        Alert.OK | Alert.CANCEL, null, viewListener, null, Alert.CANCEL);
+            } else {
+                dispatchEvent(new AnalyzeEvent(new GoalDataAnalyzeSource(_goalTreeID)));
+            }
+        }
+
+        private function viewListener(event:CloseEvent):void {
+            if (event.detail == Alert.OK) {
+                dispatchEvent(new AnalyzeEvent(new GoalDataAnalyzeSource(_goalTreeID)));
+            }
+        }
 
         [Bindable]
         private var _goalTree:GoalTree;
@@ -88,6 +104,14 @@
             }
         }
 
+        private function onSaveClose(event:CloseEvent):void {
+            event.currentTarget.removeEventListener(CloseEvent.CLOSE, onSaveClose);
+            var info:GoalSaveInfo = goalService.createGoalTree.lastResult as GoalSaveInfo;
+            if (info.installInfos.length > 0) {
+                newSolutionInstalls(info);
+            }
+        }
+
         private function save():void {
             var results:Array = Validator.validateAll(validators);
             if (results.length == 0) {
@@ -97,10 +121,12 @@
                 goalsPolicy.updateContents();
                 process(_goalTree.rootNode);
                 if (_goalTree.goalTreeID == 0) {
-                    ProgressAlert.alert(this, "Saving goal tree...", "Saved successfully!", goalService.createGoalTree);
+                    var saveAlert:ProgressAlert = ProgressAlert.alert(this, "Saving goal tree...", "Saved successfully!", goalService.createGoalTree);
+                    saveAlert.addEventListener(CloseEvent.CLOSE, onSaveClose);
                     goalService.createGoalTree.send(_goalTree);
                 } else {
-                    ProgressAlert.alert(this, "Updating goal tree...", "Updated successfully!", goalService.updateGoalTree);
+                    var updateAlert:ProgressAlert = ProgressAlert.alert(this, "Updating goal tree...", "Updated successfully!", goalService.updateGoalTree);
+                    updateAlert.addEventListener(CloseEvent.CLOSE, onSaveClose);
                     goalService.updateGoalTree.send(_goalTree);
                 }
             } else {
@@ -133,7 +159,6 @@
             newSolutions = new ArrayCollection();
             rootNode = _goalTree.rootNode;
             goalTreeID = _goalTree.goalTreeID;
-            newSolutionInstalls(info);
         }
 
         private function updatedGoalTree():void {
@@ -142,7 +167,6 @@
             _goalTree = info.goalTree;
             newSolutions = new ArrayCollection();
             rootNode = _goalTree.rootNode;
-            newSolutionInstalls(info);
         }
 
         private function newSolutionInstalls(info:GoalSaveInfo):void {
@@ -154,6 +178,12 @@
                     PopUpManager.centerPopUp(configWindow);
                 }
             }
+
+            // once you've set up a goal tree, should provide an option to view the result
+        }
+
+        private function saveComplete():void {
+            
         }
     ]]>
 	</mx:Script>
@@ -166,6 +196,7 @@
 		<mx:HBox id="buttonBox" paddingLeft="5" paddingTop="5" paddingBottom="5">
             <mx:Button id="wrapButton" icon="@Embed(source='../../../../assets/document_out.png')" click="close()" toolTip="Close"/>
 			<mx:Button id="saveButton" icon="@Embed(source='../../../../assets/floppy_disk.png')" click="save()" toolTip="Save"/>
+			<mx:Button id="playButton" icon="@Embed(source='../../../../assets/media_play_green.png')" click="viewData()" toolTip="View Data"/>
 		</mx:HBox>
         <mx:TabNavigator width="100%" height="100%" paddingTop="0" paddingBottom="0"
 			paddingLeft="0" paddingRight="0" resizeToContent="true" id="tabNavigator">

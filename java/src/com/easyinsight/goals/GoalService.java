@@ -9,6 +9,8 @@ import com.easyinsight.security.Roles;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.email.UserStub;
 import com.easyinsight.users.Account;
+import com.easyinsight.database.EIConnection;
+import com.easyinsight.database.Database;
 
 import java.util.*;
 
@@ -147,7 +149,24 @@ public class GoalService {
         }
     }
 
-    
+    public GoalTree forceRefresh(long goalTreeID, Date startDate, Date endDate) {
+        SecurityUtil.authorizeGoalTree(goalTreeID, Roles.SUBSCRIBER);
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            conn.setAutoCommit(false);
+            GoalTree goalTree = goalStorage.retrieveGoalTree(goalTreeID, conn);
+            goalEvaluationStorage.evaluateGoalTree(goalTree, conn);
+            conn.commit();
+        } catch (Exception e) {
+            LogClass.error(e);
+            conn.rollback();
+            throw new RuntimeException(e);
+        } finally {
+            conn.setAutoCommit(true);
+            Database.closeConnection(conn);
+        }
+        return createDataTree(goalTreeID, startDate, endDate);
+    }
 
     public GoalTree createDataTree(long goalTreeID, Date startDate, Date endDate) {
         SecurityUtil.authorizeGoalTree(goalTreeID, Roles.SUBSCRIBER);

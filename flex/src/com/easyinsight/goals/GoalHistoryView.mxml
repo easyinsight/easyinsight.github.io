@@ -64,7 +64,10 @@
         }
 
         private function gotValues():void {
-            goalHistory = goalService.getGoalValues.lastResult as ArrayCollection;
+            var history:ArrayCollection = goalService.getGoalValues.lastResult as ArrayCollection;
+            if (history.length > 1) {
+                goalHistory = history;
+            }
         }
 
         private function onDatesChanged():void {

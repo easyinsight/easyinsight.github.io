@@ -1,15 +1,23 @@
 <?xml version="1.0" ?>
 <FullScreenPage xmlns="com.easyinsight.*" xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:ilog="ilog.orgchart.*"
-                xmlns:goals="com.easyinsight.goals.*" width="100%" height="100%" creationComplete="setup()" backgroundColor="#DCE2F8"
+                xmlns:goals="com.easyinsight.goals.*" width="100%" height="100%" creationComplete="setup()"
          implements="com.easyinsight.util.IAsyncScreen">
+    <states>
+        <mx:State name="FullScreen">
+            <mx:RemoveChild target="{buttonBox}"/>
+            <mx:RemoveChild target="{hrule}"/>
+        </mx:State>
+    </states>
     <mx:Script><![CDATA[
         import com.easyinsight.analysis.AnalysisCloseEvent;
+        import com.easyinsight.framework.DataServiceLoadingEvent;
         import com.easyinsight.genredata.AnalyzeEvent;
         import com.easyinsight.util.ModelessWindowEvent;
 
         import com.easyinsight.util.ProgressAlert;
 
         import mx.collections.ArrayCollection;
+        import mx.controls.Alert;
         import mx.core.Container;
         import mx.core.IFlexDisplayObject;
         import mx.managers.BrowserManager;
@@ -23,6 +31,14 @@
         [Bindable]
         [Embed(source="../../../../assets/document_out_x32.png")]
         private var closeIcon:Class;
+
+        [Bindable]
+        [Embed(source="../../../../assets/refresh_x32.png")]
+        private var refreshIcon:Class;
+
+        [Bindable]
+        [Embed(source="../../../../assets/plasma_tv_x32.png")]
+        private var fullScreenIcon:Class;
 
         private var _goalTreeID:int;
 
@@ -39,6 +55,13 @@
 
         private var windows:ArrayCollection = new ArrayCollection();
 
+        [Bindable]
+        private var _embedded:Boolean;
+
+        public function set embedded(value:Boolean):void {
+            _embedded = value;
+        }
+
         public function set goalTreeID(val:int):void {
             _goalTreeID = val;
         }
@@ -53,6 +76,8 @@
             ProgressAlert.alert(this, "Retrieving latest goal data", null, goalService.createDataTree);
             goalService.createDataTree.send(_goalTreeID, startChooser.selectedDate, endChooser.selectedDate);
         }
+
+
 
         private function onWindowRemove(event:ModelessWindowEvent):void {
             windows.removeItemAt(windows.getItemIndex(event.displayObject));
@@ -69,9 +94,10 @@
         }
 
         override protected function commitProperties():void {
-            //goalTree = goalService.createDataTree.lastResult as GoalTree;
-
-            //myOrgChart.dataProvider = _goalTreeNodes;
+            if (!_embedded) {
+                setStyle("backgroundImage", background2);
+                setStyle("backgroundSize", "100%");
+            }
         }
 
         private function onDatesChanged():void {
@@ -86,6 +112,16 @@
 
         private function gotTree():void {
             goalTree = goalService.createDataTree.lastResult as GoalTree;
+            BrowserManager.getInstance().setTitle("Easy Insight - " + goalTree.name);
+            processTree();
+        }
+
+        private function gotRefresh():void {
+            goalTree = goalService.forceRefresh.lastResult as GoalTree;
+            processTree();
+        }
+
+        private function processTree():void {
             if (goalTree.subTreeParents != null) {
                 for each (var descriptor:GoalTreeDescriptor in goalTree.subTreeParents) {
                     var button:Button = new Button();
@@ -97,6 +133,7 @@
             }
             _goalTreeNodes = goalTree.rootNode;
             myOrgChart.dataProvider = _goalTreeNodes;
+            dispatchEvent(new DataServiceLoadingEvent(DataServiceLoadingEvent.LOADING_STOPPED));
         }
 
         private function close():void {
@@ -110,13 +147,30 @@
             return this;
         }
 
+        private function toFullScreen():void {
+            Alert.show("You can return to normal view by hitting Escape.");
+            addEventListener(KeyboardEvent.KEY_UP, onKey);
+            currentState = "FullScreen";
+        }
+
+        private function onKey(event:KeyboardEvent):void {
+            if (Keyboard.ESCAPE == event.keyCode) {
+                currentState = "";
+            }
+        }
+
         public function refreshData():void {
+            ProgressAlert.alert(this, "Refreshing goal data...", null, goalService.forceRefresh);
+            goalService.forceRefresh.send(_goalTreeID, startChooser.selectedDate, endChooser.selectedDate);
         }]]></mx:Script>
     <mx:RemoteObject destination="goalService" id="goalService">
         <mx:method name="createDataTree" result="gotTree()"/>
+        <mx:method name="forceRefresh" result="gotRefresh()"/>
     </mx:RemoteObject>
-    <mx:HBox id="buttonBox" paddingLeft="5" paddingTop="5" paddingBottom="5" width="100%">
-        <mx:Button id="wrapButton" icon="{closeIcon}" click="close()" toolTip="Close"/>
+    <mx:HBox id="buttonBox" paddingLeft="10" paddingTop="10" paddingRight="10" width="100%" verticalAlign="middle">
+        <mx:Button id="wrapButton" icon="{closeIcon}" click="close()" toolTip="Close" visible="{!_embedded}" label="Back" labelPlacement="bottom"/>
+        <mx:Button id="refreshButton" icon="{refreshIcon}" click="refreshData()" toolTip="Refresh Data" visible="{!_embedded}" label="Refresh" labelPlacement="bottom"/>
+        <mx:Button id="fullScreenButton" icon="{fullScreenIcon}" click="toFullScreen()" toolTip="View in Full Screen" label="Full Screen" labelPlacement="bottom"/>
         <mx:VBox id="parentsBox"/>
         <mx:HBox width="100%" horizontalAlign="center">
             <mx:DateField id="startChooser" selectedDate="{startDate}" change="onDatesChanged()"/>
@@ -124,8 +178,9 @@
             <mx:DateField id="endChooser" selectedDate="{endDate}" change="onDatesChanged()"/>
         </mx:HBox>
     </mx:HBox>
+    <mx:HRule width="100%" id="hrule"/>
     <mx:VBox width="100%" height="100%" paddingRight="15" paddingTop="15" paddingLeft="15" paddingBottom="15">
-        <mx:Canvas height="100%" width="100%" backgroundImage="{background2}" backgroundSize="100%">
+        <mx:Canvas height="100%" width="100%" backgroundAlpha="0">
             <ilog:OrgChart id="myOrgChart" dataProvider="{_goalTreeNodes}"
                            width="100%" height="100%" minZoomLevel="1" maxZoomLevel="1" allowSelection="false">
                 <ilog:itemRenderer>

@@ -7,7 +7,7 @@
             <mx:AddChild relativeTo="{coreBox}">
                 <mx:VBox horizontalAlign="center">
                     <mx:Label text="{completeText}" fontWeight="bold" fontSize="14" fontFamily="Tahoma"/>
-                    <mx:Button label="OK" click="cancel()"/>
+                    <mx:Button label="OK" click="complete()"/>
                 </mx:VBox>
             </mx:AddChild>
         </mx:State>
@@ -25,6 +25,7 @@
     </mx:states>
     <mx:Script><![CDATA[
         import mx.collections.ArrayCollection;
+        import mx.events.CloseEvent;
         import mx.events.FlexEvent;
         import mx.managers.PopUpManager;
         import mx.rpc.events.FaultEvent;
@@ -50,6 +51,15 @@
                 operation.removeEventListener(FaultEvent.FAULT, onFault);
             }
             PopUpManager.removePopUp(this);
+        }
+
+        private function complete():void {
+            for each (var operation:Operation in _operations) {
+                operation.removeEventListener(ResultEvent.RESULT, onResult);
+                operation.removeEventListener(FaultEvent.FAULT, onFault);
+            }
+            PopUpManager.removePopUp(this);
+            dispatchEvent(new CloseEvent(CloseEvent.CLOSE));
         }
 
         public function set operations(val:ArrayCollection):void {
