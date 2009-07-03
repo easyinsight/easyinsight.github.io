@@ -11,6 +11,7 @@ import com.easyinsight.email.UserStub;
 import com.easyinsight.users.Account;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.database.Database;
+import com.easyinsight.datafeeds.CredentialFulfillment;
 
 import java.util.*;
 
@@ -149,13 +150,13 @@ public class GoalService {
         }
     }
 
-    public GoalTree forceRefresh(long goalTreeID, Date startDate, Date endDate) {
+    public GoalTree forceRefresh(long goalTreeID, Date startDate, Date endDate, List<CredentialFulfillment> credentials) {
         SecurityUtil.authorizeGoalTree(goalTreeID, Roles.SUBSCRIBER);
         EIConnection conn = Database.instance().getConnection();
         try {
             conn.setAutoCommit(false);
             GoalTree goalTree = goalStorage.retrieveGoalTree(goalTreeID, conn);
-            goalEvaluationStorage.evaluateGoalTree(goalTree, conn);
+            goalEvaluationStorage.forceEvaluate(goalTree, conn, credentials);
             conn.commit();
         } catch (Exception e) {
             LogClass.error(e);

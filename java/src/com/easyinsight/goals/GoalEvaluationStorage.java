@@ -10,6 +10,7 @@ import com.easyinsight.core.Value;
 import com.easyinsight.core.DateValue;
 import com.easyinsight.analysis.*;
 import com.easyinsight.analysis.ListRow;
+import com.easyinsight.datafeeds.CredentialFulfillment;
 
 import java.util.*;
 import java.sql.Connection;
@@ -82,13 +83,13 @@ public class GoalEvaluationStorage {
                     List<Date> dates = getDates(goalTreeNode);
                     if (dates.size() > 0) {
                         for (Date date : dates) {
-                            GoalValue goalValue = evaluateGoalTreeNode(goalTreeNode, date);
+                            GoalValue goalValue = evaluateGoalTreeNode(goalTreeNode, date, new ArrayList<CredentialFulfillment>());
                             if (goalValue != null) {
                                 goalValues.add(goalValue);
                             }
                         }
                     } else {
-                        GoalValue goalValue = evaluateGoalTreeNode(goalTreeNode, new Date());
+                        GoalValue goalValue = evaluateGoalTreeNode(goalTreeNode, new Date(), new ArrayList<CredentialFulfillment>());
                         if (goalValue != null) {
                             goalValues.add(goalValue);
                         }
@@ -111,7 +112,7 @@ public class GoalEvaluationStorage {
             while (trees.next()) {
                 long treeID = trees.getLong(1);
                 GoalTree goalTree = new GoalStorage().retrieveGoalTree(treeID);
-                evaluateGoalTree(goalTree, conn);
+                evaluateGoalTree(goalTree, conn, new ArrayList<CredentialFulfillment>());
             }
             conn.commit();
         } catch (SQLException e) {
@@ -123,7 +124,7 @@ public class GoalEvaluationStorage {
         }
     }
 
-    public void evaluateGoalTree(GoalTree goalTree, Connection conn) throws SQLException {
+    public void evaluateGoalTree(GoalTree goalTree, Connection conn, final List<CredentialFulfillment> credentials) throws SQLException {
         final List<GoalValue> goalValues = new ArrayList<GoalValue>();
 
         GoalTreeVisitor goalTreeVisitor = new GoalTreeVisitor() {
@@ -132,11 +133,31 @@ public class GoalEvaluationStorage {
                 if (goalTreeNode.getCoreFeedID() > 0) {
                     List<Date> dates = getDates(goalTreeNode);
                     for (Date date : dates) {
-                        GoalValue goalValue = evaluateGoalTreeNode(goalTreeNode, date);
+                        GoalValue goalValue = evaluateGoalTreeNode(goalTreeNode, date, credentials);
                         if (goalValue != null) {
                             goalValues.add(goalValue);
                         }                        
                     }
+                }
+            }
+        };
+
+        goalTreeVisitor.visit(goalTree.getRootNode());
+
+        saveGoalEvaluations(goalValues, conn);
+    }
+
+    public void forceEvaluate(GoalTree goalTree, Connection conn, final List<CredentialFulfillment> credentials) throws SQLException {
+        final List<GoalValue> goalValues = new ArrayList<GoalValue>();
+
+        GoalTreeVisitor goalTreeVisitor = new GoalTreeVisitor() {
+
+            protected void accept(GoalTreeNode goalTreeNode) {
+                if (goalTreeNode.getCoreFeedID() > 0) {
+                    GoalValue goalValue = evaluateGoalTreeNode(goalTreeNode, new Date(), credentials);
+                    if (goalValue != null) {
+                        goalValues.add(goalValue);
+                    }                        
                 }
             }
         };
@@ -158,6 +179,9 @@ public class GoalEvaluationStorage {
         }
         if (dateItem == null) {
             return dates;
+        }
+        if (new DataService().getFeedMetadata(goalTreeNode.getCoreFeedID()).getCredentials().size() > 0) {
+            return new ArrayList<Date>();
         }
         WSListDefinition dateDefinition = new WSListDefinition();
         dateDefinition.setDataFeedID(goalTreeNode.getCoreFeedID());
@@ -202,7 +226,7 @@ public class GoalEvaluationStorage {
         return goalValue;
     }
 
-    public GoalValue evaluateGoalTreeNode(GoalTreeNode goalTreeNode, Date date) {
+    public GoalValue evaluateGoalTreeNode(GoalTreeNode goalTreeNode, Date date, List<CredentialFulfillment> credentials) {
         GoalValue goalValue = null;
         if (goalTreeNode.getCoreFeedID() > 0) {
             WSListDefinition listDefinition = new WSListDefinition();
@@ -213,6 +237,7 @@ public class GoalEvaluationStorage {
             listDefinition.setFilterDefinitions(goalTreeNode.getFilters());
             InsightRequestMetadata insightRequestMetadata = new InsightRequestMetadata();
             insightRequestMetadata.setNow(date);
+            insightRequestMetadata.setCredentialFulfillmentList(credentials);
             ListDataResults results = new DataService().list(listDefinition, insightRequestMetadata);
             if (results.getRows().length == 1) {
                 ListRow listRow = results.getRows()[0];

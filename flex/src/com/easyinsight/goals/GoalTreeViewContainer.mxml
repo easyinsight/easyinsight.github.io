@@ -10,6 +10,7 @@
     </states>
     <mx:Script><![CDATA[
         import com.easyinsight.analysis.AnalysisCloseEvent;
+        import com.easyinsight.framework.CredentialsCache;
         import com.easyinsight.framework.DataServiceLoadingEvent;
         import com.easyinsight.genredata.AnalyzeEvent;
         import com.easyinsight.util.ModelessWindowEvent;
@@ -161,7 +162,7 @@
 
         public function refreshData():void {
             ProgressAlert.alert(this, "Refreshing goal data...", null, goalService.forceRefresh);
-            goalService.forceRefresh.send(_goalTreeID, startChooser.selectedDate, endChooser.selectedDate);
+            goalService.forceRefresh.send(_goalTreeID, startChooser.selectedDate, endChooser.selectedDate, CredentialsCache.getCache().createCredentials());
         }]]></mx:Script>
     <mx:RemoteObject destination="goalService" id="goalService">
         <mx:method name="createDataTree" result="gotTree()"/>
