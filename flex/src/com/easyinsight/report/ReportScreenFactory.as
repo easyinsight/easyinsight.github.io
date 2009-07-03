@@ -1,4 +1,5 @@
 package com.easyinsight.report {
+import com.easyinsight.goals.GoalTreeViewContainer;
 import com.easyinsight.quicksearch.EIDescriptor;
 import com.easyinsight.solutions.InsightDescriptor;
 import com.easyinsight.util.IAsyncScreen;
@@ -19,7 +20,9 @@ public class ReportScreenFactory implements IAsyncScreenFactory{
             reportView.embedded = true;
             return reportView;
         } else {
-            return null;
+            var goalView:GoalTreeViewContainer = new GoalTreeViewContainer();
+            goalView.goalTreeID = descriptor.id;
+            return goalView;
         }
     }
 }

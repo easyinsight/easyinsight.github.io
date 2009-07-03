@@ -354,7 +354,7 @@ public class FeedDefinition implements Cloneable, Serializable {
     }
 
     public DataSourceCloneResult cloneDataSource(Connection conn) throws CloneNotSupportedException, SQLException {
-        FeedDefinition feedDefinition = (FeedDefinition) super.clone();
+        FeedDefinition feedDefinition = clone(conn);
         List<AnalysisItem> clonedFields = new ArrayList<AnalysisItem>();
         Map<Long, AnalysisItem> replacementMap = new HashMap<Long, AnalysisItem>();
         Map<Key, Key> keyReplacementMap = new HashMap<Key, Key>();

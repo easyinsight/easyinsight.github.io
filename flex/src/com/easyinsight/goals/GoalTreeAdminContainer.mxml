@@ -4,7 +4,11 @@
 	<mx:Script>
 		<![CDATA[
         import com.easyinsight.administration.sharing.UserStub;
+        import com.easyinsight.customupload.ConfigureDataSource;
+        import com.easyinsight.customupload.DataSourceConfiguredEvent;
         import com.easyinsight.framework.User;
+        import com.easyinsight.quicksearch.EIDescriptor;
+        import com.easyinsight.solutions.SolutionInstallInfo;
         import com.easyinsight.util.ProgressAlert;
 
         import mx.collections.ArrayCollection;
@@ -13,6 +17,7 @@
 
         import mx.controls.Alert;
         import mx.events.CloseEvent;
+        import mx.managers.PopUpManager;
         import mx.validators.Validator;
 
         [Bindable]
@@ -123,17 +128,32 @@
 
         private function savedGoalTree():void {
             changed = false;
-            _goalTree = goalService.createGoalTree.lastResult as GoalTree;
+            var info:GoalSaveInfo = goalService.createGoalTree.lastResult as GoalSaveInfo;
+            _goalTree = info.goalTree;
             newSolutions = new ArrayCollection();
             rootNode = _goalTree.rootNode;
             goalTreeID = _goalTree.goalTreeID;
+            newSolutionInstalls(info);
         }
 
         private function updatedGoalTree():void {
             changed = false;
-            _goalTree = goalService.updateGoalTree.lastResult as GoalTree;
+            var info:GoalSaveInfo = goalService.updateGoalTree.lastResult as GoalSaveInfo;
+            _goalTree = info.goalTree;
             newSolutions = new ArrayCollection();
             rootNode = _goalTree.rootNode;
+            newSolutionInstalls(info);
+        }
+
+        private function newSolutionInstalls(info:GoalSaveInfo):void {
+            for each (var solutionInstallInfo:SolutionInstallInfo in info.installInfos) {
+                if (solutionInstallInfo.descriptor.getType() == EIDescriptor.DATA_SOURCE && solutionInstallInfo.requiresConfiguration) {
+                    var configWindow:ConfigureDataSource = new ConfigureDataSource();
+                    configWindow.dataSourceID = solutionInstallInfo.descriptor.id;
+                    PopUpManager.addPopUp(configWindow, this, true);
+                    PopUpManager.centerPopUp(configWindow);
+                }
+            }
         }
     ]]>
 	</mx:Script>

@@ -7,7 +7,6 @@ import com.easyinsight.database.EIConnection;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.goals.*;
-import com.easyinsight.email.UserStub;
 import com.easyinsight.core.InsightDescriptor;
 import com.easyinsight.users.Account;
 
@@ -21,8 +20,6 @@ import java.io.ByteArrayInputStream;
  * Time: 12:32:59 AM
  */
 public class SolutionService {
-
-    private FeedStorage feedStorage = new FeedStorage();
 
     public Solution retrieveSolution(long solutionID) {
         try {
@@ -147,26 +144,14 @@ public class SolutionService {
         // retrieve the feeds for this solution
         // retrieve the insights matching that feed
         // clone the feed/insights
-        long userID = SecurityUtil.getUserID();
         Solution solution = getSolution(solutionID);
         EIConnection conn = Database.instance().getConnection();
         try {
             conn.setAutoCommit(false);
-            List<SolutionInstallInfo> objects = installSolution(userID, solution, conn, false);
+            InstallationSystem installationSystem = new InstallationSystem(conn);
+            installationSystem.installSolution(solution);
             conn.commit();
-            /*for(SolutionInstallInfo info : objects) {
-                if (info.getDescriptor().getType() == EIDescriptor.DATA_SOURCE && info.getTodoItem() != null) {
-                    ConfigureDataFeedTodo todo = info.getTodoItem();
-                    ConfigureDataFeedInfo todoInfo = new ConfigureDataFeedInfo();
-                    todoInfo.setTodoID(todo.getId());
-                    todoInfo.setAction(TodoEventInfo.ADD);
-                    todoInfo.setUserId(todo.getUserID());
-                    todoInfo.setFeedID(todo.getFeedID());
-                    todoInfo.setFeedName(info.getFeedName());
-                    MessageUtils.sendMessage("generalNotifications", todoInfo);
-                }
-            }*/
-            return objects;
+            return installationSystem.getAllSolutions();
         } catch (Exception e) {
             LogClass.error(e);
             conn.rollback();
@@ -174,41 +159,6 @@ public class SolutionService {
         } finally {
             conn.setAutoCommit(true);
             Database.instance().closeConnection(conn);
-        }
-    }
-
-    public List<SolutionInstallInfo> installSolution(long userID, Solution solution, Connection conn, boolean inlineTree) throws SQLException {
-        try {
-            List<SolutionInstallInfo> objects = new ArrayList<SolutionInstallInfo>(generateFeedsForSolution(solution.getSolutionID(), userID, conn, solution.isCopyData()));
-            if (solution.getGoalTreeID() != 0) {
-                GoalTree goalTree = new GoalStorage().retrieveGoalTree(solution.getGoalTreeID(), conn);
-                final Set<Long> dataSourceIDs = new HashSet<Long>();
-                GoalTreeVisitor visitor = new GoalTreeVisitor() {
-
-                    protected void accept(GoalTreeNode goalTreeNode) {
-                        if (goalTreeNode.getCoreFeedID() > 0) {
-                            dataSourceIDs.add(goalTreeNode.getCoreFeedID());
-                        }
-                        for (GoalFeed dataSource : goalTreeNode.getAssociatedFeeds()) {
-                            dataSourceIDs.add(dataSource.getFeedID());
-                        }
-                    }
-                };
-                visitor.visit(goalTree.getRootNode());
-                for (Long dataSourceID : dataSourceIDs) {
-                    FeedDefinition feedDefinition = feedStorage.getFeedDefinitionData(dataSourceID, conn, false);
-                    objects.addAll(DataSourceCopyUtils.installFeed(userID, conn, true, dataSourceID, feedDefinition, true, null));
-                }
-                if (!inlineTree) {
-                    GoalTree clonedTree = goalTree.clone();
-                    FeedConsumer feedConsumer = new UserStub(userID, null, null, null);
-                    clonedTree.setAdministrators(Arrays.asList(feedConsumer));
-                    new GoalStorage().installSolutions(clonedTree, conn);
-                }
-            }
-            return objects;
-        } catch (CloneNotSupportedException e) {
-            throw new RuntimeException(e);
         }
     }
 
@@ -310,19 +260,6 @@ public class SolutionService {
             Database.instance().closeConnection(conn);
         }
         return feedDescriptors;
-    }
-
-    private List<SolutionInstallInfo> generateFeedsForSolution(long solutionID, long userID, Connection conn, boolean copyData) throws SQLException, CloneNotSupportedException {
-        List<SolutionInstallInfo> descriptors = new ArrayList<SolutionInstallInfo>();
-        PreparedStatement queryStmt = conn.prepareStatement("SELECT FEED_ID FROM SOLUTION_TO_FEED WHERE SOLUTION_ID = ?");
-        queryStmt.setLong(1, solutionID);
-        ResultSet rs = queryStmt.executeQuery();
-        while (rs.next()) {
-            long feedID = rs.getLong(1);
-            FeedDefinition feedDefinition = feedStorage.getFeedDefinitionData(feedID, conn);
-            descriptors.addAll(DataSourceCopyUtils.installFeed(userID, conn, copyData, feedID, feedDefinition, true, null));
-        }
-        return descriptors;
     }
 
     private Solution getSolution(long solutionID) {
@@ -586,22 +523,7 @@ public class SolutionService {
         }
         return solutions;
     }
-
-    public void installSubTree(long solutionID) {
-        Connection conn = Database.instance().getConnection();
-        try {
-            GoalService goalService = new GoalService();
-            SolutionService solutionService = new SolutionService();
-            Solution solution = solutionService.getSolution(solutionID, conn);
-            GoalTree goalTree = goalService.getGoalTree(solution.getGoalTreeID());
-            
-        } catch (SQLException e) {
-            LogClass.error(e);
-        } finally {
-            Database.instance().closeConnection(conn);
-        }
-    }
-
+    
     public void addSolutionImage(byte[] bytes, long solutionID) {
         Connection conn = Database.instance().getConnection();
         try {

@@ -6,21 +6,9 @@ import com.easyinsight.logging.LogClass;
 import com.easyinsight.analysis.*;
 import com.easyinsight.groups.GroupDescriptor;
 import com.easyinsight.email.UserStub;
-import com.easyinsight.datafeeds.FeedStorage;
-import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.datafeeds.FeedConsumer;
-import com.easyinsight.solutions.SolutionService;
-import com.easyinsight.solutions.Solution;
-import com.easyinsight.solutions.SolutionInstallInfo;
-import com.easyinsight.solutions.SolutionElementKey;
 import com.easyinsight.security.Roles;
-import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.core.InsightDescriptor;
-import com.easyinsight.core.EIDescriptor;
-import com.easyinsight.notifications.ConfigureDataFeedInfo;
-import com.easyinsight.notifications.ConfigureDataFeedTodo;
-import com.easyinsight.notifications.TodoEventInfo;
-import com.easyinsight.eventing.MessageUtils;
 
 import java.sql.*;
 import java.util.*;
@@ -233,47 +221,53 @@ public class GoalStorage {
         return descriptors;
     }
 
-    public void addGoalTree(GoalTree goalTree) {
+    public GoalSaveInfo addGoalTree(GoalTree goalTree) throws Exception {
         EIConnection conn = Database.instance().getConnection();
         try {
             conn.setAutoCommit(false);
-            if (goalTree.getRootNode() == null) {
-                throw new RuntimeException("You must have a root node on a goal tree.");
-            }
-            installSolutions(goalTree, conn);
-            PreparedStatement insertTreeStmt = conn.prepareStatement("INSERT INTO GOAL_TREE (NAME, DESCRIPTION) VALUES (?, ?)", Statement.RETURN_GENERATED_KEYS);
-            insertTreeStmt.setString(1, goalTree.getName());
-            insertTreeStmt.setString(2, goalTree.getDescription());
-            insertTreeStmt.execute();
-            long treeID = Database.instance().getAutoGenKey(insertTreeStmt);
-            goalTree.setGoalTreeID(treeID);
-            long nodeID = saveGoalTreeNode(goalTree.getRootNode(), conn, goalTree.getGoalTreeID());
-            PreparedStatement updateStmt = conn.prepareStatement("UPDATE GOAL_TREE SET ROOT_NODE = ? WHERE GOAL_TREE_ID = ?");
-            updateStmt.setLong(1, nodeID);
-            updateStmt.setLong(2, treeID);
-            updateStmt.executeUpdate();
-            saveUsers(treeID, goalTree.getAdministrators(), Roles.OWNER, conn);
-            saveUsers(treeID, goalTree.getConsumers(), Roles.SUBSCRIBER, conn);
-            //setUserRole(userID, treeID, Roles.OWNER, conn);
-            goalEvaluationStorage.backPopulateGoalTree(goalTree, conn);
+            InstallationSystem installationSystem = new InstallationSystem(conn);
+            installationSystem.installUserTree(goalTree, goalTree.getNewSolutions());
+            addGoalTree(goalTree, conn);
             conn.commit();
-        } catch (SQLException e) {
-            LogClass.error(e);
+            return new GoalSaveInfo(goalTree, installationSystem.getAllSolutions());
+        } catch (Exception e) {
             conn.rollback();
-            throw new RuntimeException(e);
+            throw e;
         } finally {
             conn.setAutoCommit(true);
             Database.instance().closeConnection(conn);
         }
     }
 
-    public void updateGoalTree(GoalTree goalTree) {
+    public void addGoalTree(GoalTree goalTree, Connection conn) throws SQLException {
+        if (goalTree.getRootNode() == null) {
+            throw new RuntimeException("You must have a root node on a goal tree.");
+        }
+        PreparedStatement insertTreeStmt = conn.prepareStatement("INSERT INTO GOAL_TREE (NAME, DESCRIPTION) VALUES (?, ?)", Statement.RETURN_GENERATED_KEYS);
+        insertTreeStmt.setString(1, goalTree.getName());
+        insertTreeStmt.setString(2, goalTree.getDescription());
+        insertTreeStmt.execute();
+        long treeID = Database.instance().getAutoGenKey(insertTreeStmt);
+        goalTree.setGoalTreeID(treeID);
+        long nodeID = saveGoalTreeNode(goalTree.getRootNode(), conn, goalTree.getGoalTreeID());
+        PreparedStatement updateStmt = conn.prepareStatement("UPDATE GOAL_TREE SET ROOT_NODE = ? WHERE GOAL_TREE_ID = ?");
+        updateStmt.setLong(1, nodeID);
+        updateStmt.setLong(2, treeID);
+        updateStmt.executeUpdate();
+        saveUsers(treeID, goalTree.getAdministrators(), Roles.OWNER, conn);
+        saveUsers(treeID, goalTree.getConsumers(), Roles.SUBSCRIBER, conn);
+        //setUserRole(userID, treeID, Roles.OWNER, conn);
+        goalEvaluationStorage.backPopulateGoalTree(goalTree, conn);
+    }
+
+    public GoalSaveInfo updateGoalTree(GoalTree goalTree) {
         EIConnection conn = Database.instance().getConnection();
         try {
             conn.setAutoCommit(false);
-            installSolutions(goalTree, conn);
+            InstallationSystem installationSystem = new InstallationSystem(conn);
+            installationSystem.installUserTree(goalTree, goalTree.getNewSolutions());
             long nodeID = saveGoalTreeNode(goalTree.getRootNode(), conn, goalTree.getGoalTreeID());
-            deleteOldNodes(goalTree.getRootNode(), conn);            
+            deleteOldNodes(goalTree.getRootNode(), conn);
             PreparedStatement updateTreeStmt = conn.prepareStatement("UPDATE GOAL_TREE SET NAME = ?, DESCRIPTION = ?, ROOT_NODE = ? WHERE GOAL_TREE_ID = ?");
             updateTreeStmt.setString(1, goalTree.getName());
             updateTreeStmt.setString(2, goalTree.getDescription());
@@ -284,7 +278,8 @@ public class GoalStorage {
             saveUsers(goalTree.getGoalTreeID(), goalTree.getConsumers(), Roles.SUBSCRIBER, conn);
             goalEvaluationStorage.backPopulateGoalTree(goalTree, conn);
             conn.commit();
-        } catch (SQLException e) {
+            return new GoalSaveInfo(goalTree, installationSystem.getAllSolutions());
+        } catch (Exception e) {
             LogClass.error(e);
             conn.rollback();
             throw new RuntimeException(e);
@@ -811,117 +806,6 @@ public class GoalStorage {
         }
     }
 
-    public void installSolutions(GoalTree goalTree, final Connection conn) throws SQLException {
-        final long userID = SecurityUtil.getUserID();
-        final SolutionService solutionService = new SolutionService();
-        final FeedStorage feedStorage = new FeedStorage();
-
-        final Map<SolutionElementKey, Long> installedObjectMap = new HashMap<SolutionElementKey, Long>();
-
-        List<SolutionInstallInfo> allSolutions = new ArrayList<SolutionInstallInfo>();
-
-        for (Integer solutionID : goalTree.getNewSolutions()) {
-            Solution solution = solutionService.getSolution(solutionID, conn);
-            List<SolutionInstallInfo> objects = solutionService.installSolution(userID, solution, conn, true);
-            allSolutions.addAll(objects);
-            for (SolutionInstallInfo solutionInstallInfo : objects) {
-                installedObjectMap.put(new SolutionElementKey(solutionInstallInfo.getDescriptor().getType(), solutionInstallInfo.getPreviousID()), solutionInstallInfo.getDescriptor().getId());
-            }
-        }
-
-        goalTree.setNewSolutions(new ArrayList<Integer>());
-
-        GoalTreeVisitor solutionInstallationVisitor = new GoalTreeVisitor() {
-
-            protected void accept(GoalTreeNode goalTreeNode) {
-                try {
-                    if (goalTreeNode.getNewSubTree() != null) {
-                        solutionService.installSolution(SecurityUtil.getUserID(), solutionService.getSolution(goalTreeNode.getNewSubTree().getSolutionID(), conn), conn, false);
-                        goalTreeNode.setNewSubTree(null);
-                    }
-                } catch (SQLException e) {
-                    throw new RuntimeException(e);
-                }
-            }
-        };
-
-        solutionInstallationVisitor.visit(goalTree.getRootNode());
-
-        // once the solutions are installed...
-
-        GoalTreeVisitor idReplacementVisitor = new GoalTreeVisitor() {
-
-            protected void accept(GoalTreeNode goalTreeNode) {
-                if (goalTreeNode.getCoreFeedID() > 0) {
-                    Long newID = installedObjectMap.get(new SolutionElementKey(SolutionElementKey.DATA_SOURCE, goalTreeNode.getCoreFeedID()));
-                    if (newID != null) {
-                        goalTreeNode.setCoreFeedID(newID);
-                        FeedDefinition feedDefinition = feedStorage.getFeedDefinitionData(newID);
-                        try {
-                            goalTreeNode.setAnalysisMeasure((AnalysisMeasure) findItem(goalTreeNode.getAnalysisMeasure(), feedDefinition).clone());
-                        } catch (CloneNotSupportedException e) {
-                            LogClass.error(e);
-                            throw new RuntimeException(e);
-                        }
-                        if (goalTreeNode.getFilters() != null) {
-                            List<FilterDefinition> newFilters = new ArrayList<FilterDefinition>();
-                            for (FilterDefinition filterDefinition : goalTreeNode.getFilters()) {
-                                PersistableFilterDefinition persistableFilterDefinition = filterDefinition.toPersistableFilterDefinition();
-                                PersistableFilterDefinition clonedPersistableFilterDefinition;
-                                try {
-                                    clonedPersistableFilterDefinition = persistableFilterDefinition.clone();
-                                } catch (CloneNotSupportedException e) {
-                                    throw new RuntimeException(e);
-                                }
-                                FilterDefinition clonedDefinition = clonedPersistableFilterDefinition.toFilterDefinition();
-                                clonedDefinition.setField(findItem(filterDefinition.getField(), feedDefinition));
-                                newFilters.add(clonedDefinition);
-                            }
-                            goalTreeNode.setFilters(newFilters);
-                        }
-                    }
-                }
-                for (GoalFeed goalFeed : goalTreeNode.getAssociatedFeeds()) {
-                    Long newID = installedObjectMap.get(new SolutionElementKey(SolutionElementKey.DATA_SOURCE, goalFeed.getFeedID()));
-                    if (newID != null) {
-                        goalFeed.setFeedID(newID);
-                    }
-                }
-                for (InsightDescriptor goalInsight : goalTreeNode.getAssociatedInsights()) {
-                    Long newID = installedObjectMap.get(new SolutionElementKey(SolutionElementKey.INSIGHT, goalInsight.getId()));
-                    if (newID != null) {
-                        goalInsight.setId(newID);
-                    }
-                }
-            }
-        };
-
-        idReplacementVisitor.visit(goalTree.getRootNode());
-
-        for(SolutionInstallInfo info : allSolutions) {
-            if (info.getDescriptor().getType() == EIDescriptor.DATA_SOURCE && info.getTodoItem() != null) {
-                ConfigureDataFeedTodo todo = info.getTodoItem();
-                ConfigureDataFeedInfo todoInfo = new ConfigureDataFeedInfo();
-                todoInfo.setTodoID(todo.getId());
-                todoInfo.setAction(TodoEventInfo.ADD);
-                todoInfo.setUserId(todo.getUserID());
-                todoInfo.setFeedID(todo.getFeedID());
-                todoInfo.setFeedName(info.getFeedName());
-                MessageUtils.sendMessage("generalNotifications", todoInfo);
-            }
-        }
-    }
-
-    private AnalysisItem findItem(AnalysisItem analysisItem, FeedDefinition feedDefinition) {
-        AnalysisItem foundItem = null;
-        for (AnalysisItem feedItem : feedDefinition.getFields()) {
-            if (feedItem.getKey().toKeyString().equals(analysisItem.getKey().toKeyString())) {
-                foundItem = feedItem;
-            }
-        }
-        return foundItem;
-    }
-
     public List<GoalTreeNodeData> getGoalsForUser(long userID, final Date startDate, final Date endDate) {
         List<GoalTreeNodeData> nodes = new ArrayList<GoalTreeNodeData>();
         Connection conn = Database.instance().getConnection();
@@ -948,12 +832,12 @@ public class GoalStorage {
         nodes.add(dataNode);
         GoalTreeVisitor visitor = new GoalTreeVisitor() {
 
-                protected void accept(GoalTreeNode goalTreeNode) {
-                    GoalTreeNodeData data = (GoalTreeNodeData) goalTreeNode;
-                    data.populateCurrentValue();
-                    data.determineOutcome(startDate, endDate, goalEvaluationStorage);
-                }
-            };
+            protected void accept(GoalTreeNode goalTreeNode) {
+                GoalTreeNodeData data = (GoalTreeNodeData) goalTreeNode;
+                data.populateCurrentValue();
+                data.determineOutcome(startDate, endDate, goalEvaluationStorage);
+            }
+        };
         visitor.visit(dataNode);
         dataNode.summarizeOutcomes();
     }
@@ -998,5 +882,40 @@ public class GoalStorage {
             Database.instance().closeConnection(conn);
         }
 
+    }
+
+    public void updateGoals(long dataSourceID) {
+        Collection<GoalTreeNode> neededNodes = new ArrayList<GoalTreeNode>();
+        Connection conn = Database.instance().getConnection();
+        try {
+            PreparedStatement queryStmt = conn.prepareStatement("SELECT GOAL_TREE_NODE_ID FROM GOAL_TREE_NODE WHERE FEED_ID = ?");
+            queryStmt.setLong(1, dataSourceID);
+            ResultSet rs = queryStmt.executeQuery();
+            while (rs.next()) {
+                neededNodes.add(retrieveNode(rs.getLong(1), conn));
+            }
+
+        } catch (SQLException se) {
+            LogClass.error(se);
+            throw new RuntimeException(se);
+        } finally {
+            Database.closeConnection(conn);
+        }
+        Date date = new Date();
+        GoalEvaluationStorage goalEvaluationStorage = new GoalEvaluationStorage();
+        List<GoalValue> goalValues = new ArrayList<GoalValue>();
+        for (GoalTreeNode node : neededNodes) {
+            GoalValue goalValue = goalEvaluationStorage.evaluateGoalTreeNode(node, date);
+            goalValues.add(goalValue);
+        }
+        conn = Database.instance().getConnection();
+        try {
+            goalEvaluationStorage.saveGoalEvaluations(goalValues, conn);
+        } catch (SQLException se) {
+            LogClass.error(se);
+            throw new RuntimeException(se);
+        } finally {
+            Database.closeConnection(conn);
+        }
     }
 }

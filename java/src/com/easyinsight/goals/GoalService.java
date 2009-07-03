@@ -31,7 +31,7 @@ public class GoalService {
         }
     }
 
-    public GoalTree createGoalTree(GoalTree goalTree) {
+    public GoalSaveInfo createGoalTree(GoalTree goalTree) {
         SecurityUtil.authorizeAccountTier(Account.PROFESSIONAL);
         if (goalTree.getAdministrators() == null || goalTree.getAdministrators().size() == 0) {
             throw new RuntimeException("At least one administrator must be defined.");
@@ -40,8 +40,7 @@ public class GoalService {
         try {
             UserStub userStub = new UserStub();
             userStub.setUserID(userID);
-            goalStorage.addGoalTree(goalTree);
-            return goalTree;
+            return goalStorage.addGoalTree(goalTree);
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);
@@ -98,11 +97,10 @@ public class GoalService {
         }
     }
 
-    public GoalTree updateGoalTree(GoalTree goalTree) {
+    public GoalSaveInfo updateGoalTree(GoalTree goalTree) {
         SecurityUtil.authorizeGoalTree(goalTree.getGoalTreeID(), Roles.OWNER);
         try {
-            goalStorage.updateGoalTree(goalTree);
-            return goalTree;
+            return goalStorage.updateGoalTree(goalTree);
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);
@@ -148,6 +146,8 @@ public class GoalService {
             throw new RuntimeException(e);
         }
     }
+
+    
 
     public GoalTree createDataTree(long goalTreeID, Date startDate, Date endDate) {
         SecurityUtil.authorizeGoalTree(goalTreeID, Roles.SUBSCRIBER);
@@ -203,7 +203,7 @@ public class GoalService {
     }
 
     public GoalTree getGoalTree(long goalTreeID) {
-        SecurityUtil.authorizeGoalTree(goalTreeID, Roles.SUBSCRIBER);
+        SecurityUtil.authorizeGoalTreeSolutionInstall(goalTreeID);
         try {
             return goalStorage.retrieveGoalTree(goalTreeID);
         } catch (Exception e) {

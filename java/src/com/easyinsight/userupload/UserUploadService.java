@@ -14,6 +14,7 @@ import com.easyinsight.security.Roles;
 import com.easyinsight.users.*;
 import com.easyinsight.analysis.*;
 import com.easyinsight.PasswordStorage;
+import com.easyinsight.goals.GoalStorage;
 import com.easyinsight.eventing.EventDispatcher;
 import com.easyinsight.eventing.AsyncCreatedEvent;
 import com.easyinsight.notifications.TodoEventInfo;
@@ -464,6 +465,8 @@ public class UserUploadService implements IUserUploadService {
             if (synchronous) {
                 IServerDataSourceDefinition dataSource = (IServerDataSourceDefinition) feedStorage.getFeedDefinitionData(feedID);
                 dataSource.refreshData(credentials, SecurityUtil.getAccountID(), new Date(), null);
+                // TODO: refactor into event model
+                new GoalStorage().updateGoals(feedID);
             } else {
                 ServerRefreshScheduledTask task = new ServerRefreshScheduledTask();
                 task.setDataSourceID(feedID);

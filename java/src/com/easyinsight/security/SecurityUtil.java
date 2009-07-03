@@ -388,6 +388,37 @@ public class SecurityUtil {
         }
     }
 
+    public static void authorizeGoalTreeSolutionInstall(long goalTreeID) {
+        UserPrincipal userPrincipal = securityProvider.getUserPrincipal();
+        if (userPrincipal == null) {
+            throw new SecurityException();
+        }
+        int role = getRoleForGoalTree(userPrincipal.getUserID(), goalTreeID);
+        boolean valid = false;
+        if (role == Integer.MAX_VALUE) {
+            Connection conn = Database.instance().getConnection();
+            try {
+                PreparedStatement queryStmt = conn.prepareStatement("SELECT SOLUTION_TIER FROM SOLUTION WHERE GOAL_TREE_ID = ?");
+                queryStmt.setLong(1, goalTreeID);
+                ResultSet rs = queryStmt.executeQuery();
+                if (rs.next()) {
+                    int solutionTier = rs.getInt(1);
+                    valid = (solutionTier <= SecurityUtil.getAccountTier());
+                }
+            } catch (SQLException e) {
+                LogClass.error(e);
+                throw new RuntimeException(e);
+            } finally {
+                Database.closeConnection(conn);
+            }
+        } else {
+            valid = true;
+        }
+        if (!valid) {
+            throw new SecurityException();
+        }
+    }
+
     public static void authorizeGroup(long groupID, int requiredRole) {
         UserPrincipal userPrincipal = securityProvider.getUserPrincipal();
         if (userPrincipal == null) {

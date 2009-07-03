@@ -4,9 +4,7 @@
         import com.easyinsight.administration.feed.FeedDefinitionData;
 
         import com.easyinsight.datasources.IServerDataSourceDefinition;
-        import com.easyinsight.genredata.ModuleAnalyzeEvent;
         import com.easyinsight.listing.DataFeedDescriptor;
-        import com.easyinsight.listing.DescriptorAnalyzeSource;
         import com.easyinsight.framework.CredentialsCache;
 
         import mx.controls.Alert;
@@ -22,8 +20,19 @@
         [Bindable]
         private var ready:Boolean;
 
-        [Bindable]
-        private var credentialsSaved:Boolean;
+
+        private var _credentialsSaved:Boolean = false;
+
+        [Bindable(event="credentialsSavedChanged")]
+        public function get credentialsSaved():Boolean {
+            return _credentialsSaved;
+        }
+
+        public function set credentialsSaved(value:Boolean):void {
+            if (_credentialsSaved == value) return;
+            _credentialsSaved = value;
+            dispatchEvent(new Event("credentialsSavedChanged"));
+        }
 
         public function set onlyDataSource(value:Boolean):void {
             _onlyDataSource = value;
@@ -92,7 +101,7 @@
             var descriptor:DataFeedDescriptor = new DataFeedDescriptor();
             descriptor.dataFeedID = dataSourceDefinition.dataFeedID;
             descriptor.name = dataSourceDefinition.feedName;
-            dispatchEvent(new DataSourceConfiguredEvent(descriptor));            
+            dispatchEvent(new DataSourceConfiguredEvent(descriptor));
             PopUpManager.removePopUp(this);
         }
 
@@ -116,12 +125,16 @@
         <mx:method name="getFeedDefinition" result="gotDataSource()"/>
     </mx:RemoteObject>
     <mx:Form>
+        <mx:FormItem label="">
+            <mx:Label text="Now that you've installed this solution, you need to configure it:" fontSize="14"/>
+        </mx:FormItem>
         <mx:Box id="coreContent"/>
         <mx:FormItem label="" direction="vertical">
             <mx:ProgressBar id="progressBar" indeterminate="true" visible="false"/>
         </mx:FormItem>
-        <mx:FormItem label="Save Credentials:" enabled="{ready}">
+        <mx:FormItem label="Save Credentials:" enabled="{ready}" direction="horizontal">
             <mx:CheckBox id="saveCredentialsCheckbox" click="credentialClick()"/>
+            <mx:Label textDecoration="underline" text=""/>
         </mx:FormItem>
         <mx:FormItem label="Hourly Refresh:" enabled="{credentialsSaved}">
             <mx:NumericStepper id="refreshStepper"/>

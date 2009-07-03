@@ -78,7 +78,7 @@ public class GoalTest extends TestCase {
         List<FeedConsumer> admins = new ArrayList<FeedConsumer>();
         admins.add(user);
         goalTree.setAdministrators(admins);
-        GoalTree savedTree = goalService.createGoalTree(goalTree);
+        GoalTree savedTree = goalService.createGoalTree(goalTree).getGoalTree();
         long goalTreeID = savedTree.getGoalTreeID();
         Calendar cal = Calendar.getInstance();
         cal.set(Calendar.YEAR, 2009);
