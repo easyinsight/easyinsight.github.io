@@ -71,7 +71,11 @@ public class GoogleAnalyticsFeed extends Feed {
                     urlBuilder.append("&metrics=");
                     // TODO: update for categories other than basic
                     urlBuilder.append(GoogleAnalyticsDataSource.getMeasure(queryItem.getKey().toKeyString()));
-                    urlBuilder.append("&start-date=2009-06-09&end-date=2009-06-15");
+                    Calendar cal = Calendar.getInstance();
+                    cal.add(Calendar.YEAR, -1);
+                    String endDateString = outboundDateFormat.format(new Date());
+                    String startDateString = outboundDateFormat.format(cal.getTime());
+                    urlBuilder.append("&start-date=").append(startDateString).append("&end-date=").append(endDateString);
                     URL reportUrl = new URL(urlBuilder.toString());
                     DataFeed feed = as.getFeed(reportUrl, DataFeed.class);
 
