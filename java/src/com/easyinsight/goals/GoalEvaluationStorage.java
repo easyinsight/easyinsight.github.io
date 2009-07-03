@@ -26,11 +26,13 @@ public class GoalEvaluationStorage {
 
 
     public void saveGoalEvaluation(long goalTreeNodeID, double evaluationResult, Date evaluationDate, Connection conn) throws SQLException {
-        PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO goal_history (goal_tree_node_id, evaluation_date, evaluation_result) VALUES (?, ?, ?)");
-        insertStmt.setLong(1, goalTreeNodeID);
-        insertStmt.setDate(2, new java.sql.Date(evaluationDate.getTime()));
-        insertStmt.setDouble(3, evaluationResult);
-        insertStmt.execute();
+        if (!Double.isNaN(evaluationResult) && !Double.isInfinite(evaluationResult)) {
+            PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO goal_history (goal_tree_node_id, evaluation_date, evaluation_result) VALUES (?, ?, ?)");
+            insertStmt.setLong(1, goalTreeNodeID);
+            insertStmt.setDate(2, new java.sql.Date(evaluationDate.getTime()));
+            insertStmt.setDouble(3, evaluationResult);
+            insertStmt.execute();
+        }
     }
 
     public void saveGoalEvaluations(List<GoalValue> goalValues, Connection conn) throws SQLException {

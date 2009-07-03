@@ -317,8 +317,10 @@
                     configuredSources++;
                 }
             }
+            var immediate:Boolean = true;
             for each (var solutionInstallInfo:SolutionInstallInfo in installResult) {
                 if (solutionInstallInfo.descriptor.getType() == EIDescriptor.DATA_SOURCE && solutionInstallInfo.requiresConfiguration) {
+                    immediate = false;
                     var configWindow:ConfigureDataSource = new ConfigureDataSource();
                     configWindow.dataSourceID = solutionInstallInfo.descriptor.id;
                     configWindow.onlyDataSource = configuredSources == 1;
@@ -326,6 +328,9 @@
                     PopUpManager.addPopUp(configWindow, this, true);
                     PopUpManager.centerPopUp(configWindow);
                 }
+            }
+            if (immediate) {
+                Alert.show("The solution has been installed. Any data sources and/or reports associated to this solution will now be available to you under the My Data page.");
             }
             dispatchEvent(new SolutionEvent(SolutionEvent.SOLUTION_INSTALLED, _solution.solutionID));
         }

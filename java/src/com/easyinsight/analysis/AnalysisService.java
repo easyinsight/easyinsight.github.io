@@ -9,6 +9,8 @@ import com.easyinsight.logging.LogClass;
 import com.easyinsight.database.Database;
 import com.easyinsight.core.InsightDescriptor;
 import com.easyinsight.cache.Cache;
+import com.easyinsight.datafeeds.FeedRegistry;
+import com.easyinsight.datafeeds.Feed;
 
 import java.util.*;
 import java.sql.Connection;
@@ -46,7 +48,8 @@ public class AnalysisService {
         try {
             session.getTransaction().begin();
             AnalysisDefinition analysisDefinition = analysisStorage.getPersistableReport(reportID, session);
-            AnalysisDefinition clone = analysisDefinition.clone(null);
+            // TODO: fix me
+            AnalysisDefinition clone = analysisDefinition.clone(null, new ArrayList<AnalysisItem>());
             clone.setAuthorName(SecurityUtil.getUserName());
             clone.setTitle(newName);
             List<UserToAnalysisBinding> bindings = new ArrayList<UserToAnalysisBinding>();

@@ -56,7 +56,7 @@ public class DataSourceCopyUtils {
                 if (insight.isRootDefinition()) {
                     continue;
                 }
-                AnalysisDefinition clonedInsight = insight.clone(result.getKeyReplacementMap());
+                AnalysisDefinition clonedInsight = insight.clone(result.getKeyReplacementMap(), clonedFeedDefinition.getFields());
                 // need to update keys on the analysis items at this point
                 clonedInsight.setAnalysisPolicy(AnalysisPolicy.PRIVATE);
                 clonedInsight.setDataFeedID(clonedFeedDefinition.getDataFeedID());
@@ -137,7 +137,7 @@ public class DataSourceCopyUtils {
         clonedFeedDefinition.setUploadPolicy(new UploadPolicy(userID));
         feedStorage.addFeedDefinitionData(clonedFeedDefinition, conn);
         if (feedDefinition.getAnalysisDefinitionID() > 0) {
-            AnalysisDefinition clonedRootInsight = analysisStorage.cloneReport(feedDefinition.getAnalysisDefinitionID(), conn, result.getKeyReplacementMap());
+            AnalysisDefinition clonedRootInsight = analysisStorage.cloneReport(feedDefinition.getAnalysisDefinitionID(), conn, result.getKeyReplacementMap(), clonedFeedDefinition.getFields());
             if (clonedRootInsight != null) {
                 clonedRootInsight.setUserBindings(Arrays.asList(new UserToAnalysisBinding(userID, UserPermission.OWNER)));
                 analysisStorage.saveAnalysis(clonedRootInsight, conn);

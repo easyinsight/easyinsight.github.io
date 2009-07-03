@@ -289,7 +289,7 @@ public class AnalysisDefinition implements Cloneable {
         this.publiclyVisible = publiclyVisible;
     }
 
-    public AnalysisDefinition clone(Map<Key, Key> keyMap) throws CloneNotSupportedException {
+    public AnalysisDefinition clone(Map<Key, Key> keyMap, List<AnalysisItem> allFields) throws CloneNotSupportedException {
         AnalysisDefinition analysisDefinition = (AnalysisDefinition) super.clone();
         analysisDefinition.setAnalysisID(null);
         Map<Long, AnalysisItem> replacementMap = new HashMap<Long, AnalysisItem>();
@@ -317,7 +317,7 @@ public class AnalysisDefinition implements Cloneable {
                 AnalysisItem clonedItem = baseItem.clone();
                 replacementMap.put(baseItem.getAnalysisItemID(), clonedItem);
             }
-            List<AnalysisItem> items = baseItem.getAnalysisItems(new ArrayList<AnalysisItem>(), new ArrayList<AnalysisItem>());
+            List<AnalysisItem> items = baseItem.getAnalysisItems(allFields, reportItems);
             for (AnalysisItem item : items) {
                 if (replacementMap.get(item.getAnalysisItemID()) == null) {
                     AnalysisItem clonedItem = item.clone();

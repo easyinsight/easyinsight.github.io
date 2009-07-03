@@ -81,7 +81,7 @@ public class AnalysisStorage {
         return analysisDefinition;
     }
 
-    public AnalysisDefinition cloneReport(long analysisID, Connection conn, Map<Key, Key> keyMap) {
+    public AnalysisDefinition cloneReport(long analysisID, Connection conn, Map<Key, Key> keyMap, List<AnalysisItem> analysisItems) {
         AnalysisDefinition analysisDefinition = null;
         Session session = Database.instance().createSession(conn);
         try {
@@ -89,7 +89,7 @@ public class AnalysisStorage {
             List results = session.createQuery("from AnalysisDefinition where analysisID = ?").setLong(0, analysisID).list();
             if (results.size() > 0) {
                 analysisDefinition = (AnalysisDefinition) results.get(0);
-                analysisDefinition = analysisDefinition.clone(keyMap);
+                analysisDefinition = analysisDefinition.clone(keyMap, analysisItems);
             }
             session.getTransaction().commit();
         } catch (Exception e) {
