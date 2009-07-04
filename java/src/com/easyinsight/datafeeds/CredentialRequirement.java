@@ -10,6 +10,16 @@ public class CredentialRequirement {
     private String dataSourceName;
     private int credentialsDefinition;
 
+    public CredentialRequirement() {
+    }
+
+    public CredentialRequirement(long dataSourceID, String dataSourceName, int credentialsDefinition) {
+
+        this.dataSourceID = dataSourceID;
+        this.dataSourceName = dataSourceName;
+        this.credentialsDefinition = credentialsDefinition;
+    }
+
     public long getDataSourceID() {
         return dataSourceID;
     }

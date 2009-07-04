@@ -10,6 +10,9 @@
     </states>
     <mx:Script><![CDATA[
         import com.easyinsight.analysis.AnalysisCloseEvent;
+        import com.easyinsight.analysis.CredentialRequirement;
+        import com.easyinsight.analysis.CredentialsEvent;
+        import com.easyinsight.analysis.RuntimeCredentialsWindow;
         import com.easyinsight.framework.CredentialsCache;
         import com.easyinsight.framework.DataServiceLoadingEvent;
         import com.easyinsight.genredata.AnalyzeEvent;
@@ -24,6 +27,8 @@
         import mx.managers.BrowserManager;
         import mx.managers.PopUpManager;
         import mx.utils.URLUtil;
+
+
 
         [Bindable]
         [Embed(source="../../../../assets/background2.JPG")]
@@ -55,6 +60,9 @@
         public var endDate:Date;
 
         private var windows:ArrayCollection = new ArrayCollection();
+
+        private var neededCredentialCount:int = 0;
+        private var receivedCredentialCount:int = 0;
 
         [Bindable]
         private var _embedded:Boolean;
@@ -137,6 +145,26 @@
             dispatchEvent(new DataServiceLoadingEvent(DataServiceLoadingEvent.LOADING_STOPPED));
         }
 
+        private function onCredentials(event:CredentialsEvent):void {
+            CredentialsCache.getCache().addCredentials(event.dataSourceID, event.credentials);
+            receivedCredentialCount++;
+            if (receivedCredentialCount == neededCredentialCount) {
+                ProgressAlert.alert(this, "Refreshing the goal tree...", null, goalService.forceRefresh);
+                goalService.forceRefresh.send(_goalTreeID, startChooser.selectedDate, endChooser.selectedDate, CredentialsCache.getCache().createCredentials());
+            }
+        }
+
+        private function gotCredentials():void {
+            var credentials:ArrayCollection = goalService.getCredentialsForGoalTree.lastResult as ArrayCollection;
+            for each (var credential:CredentialRequirement in credentials) {
+                var window:RuntimeCredentialsWindow = new RuntimeCredentialsWindow();
+                window.requirement = credential;
+                window.addEventListener(CredentialsEvent.CREDENTIALS_SAVED, onCredentials);
+                PopUpManager.addPopUp(window, this, true);
+                PopUpManager.centerPopUp(window);
+            }
+        }
+
         private function close():void {
             for each (var displayObject:DisplayObject in windows) {
                 PopUpManager.removePopUp(displayObject as IFlexDisplayObject);
@@ -161,11 +189,12 @@
         }
 
         public function refreshData():void {
-            ProgressAlert.alert(this, "Refreshing goal data...", null, goalService.forceRefresh);
-            goalService.forceRefresh.send(_goalTreeID, startChooser.selectedDate, endChooser.selectedDate, CredentialsCache.getCache().createCredentials());
+            ProgressAlert.alert(this, "Determining needed credentials...", null, goalService.getCredentialsForGoalTree);
+            goalService.getCredentialsForGoalTree.send(_goalTreeID, true, true, CredentialsCache.getCache().createCredentials());
         }]]></mx:Script>
     <mx:RemoteObject destination="goalService" id="goalService">
         <mx:method name="createDataTree" result="gotTree()"/>
+        <mx:method name="getCredentialsForGoalTree" result="gotCredentials()"/>
         <mx:method name="forceRefresh" result="gotRefresh()"/>
     </mx:RemoteObject>
     <mx:HBox id="buttonBox" paddingLeft="10" paddingTop="10" paddingRight="10" width="100%" verticalAlign="middle">

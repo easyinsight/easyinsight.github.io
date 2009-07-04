@@ -94,7 +94,7 @@ public class GoogleAnalyticsFeed extends Feed {
 
     private AnalyticsService getAnalyticsService(@NotNull Credentials credentials) throws AuthenticationException {
         if (as == null) {
-            as = new AnalyticsService("gaExportAPI_acctSample_v1.0");
+            as = new AnalyticsService("EasyInsight_acctSample_v1.0");
             as.setUserCredentials(credentials.getUserName(), credentials.getPassword());
         }
         return as;

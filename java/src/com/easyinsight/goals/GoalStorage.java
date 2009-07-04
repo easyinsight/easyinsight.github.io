@@ -258,7 +258,7 @@ public class GoalStorage {
         saveUsers(treeID, goalTree.getAdministrators(), Roles.OWNER, conn);
         saveUsers(treeID, goalTree.getConsumers(), Roles.SUBSCRIBER, conn);
         //setUserRole(userID, treeID, Roles.OWNER, conn);
-        goalEvaluationStorage.backPopulateGoalTree(goalTree, conn);
+        //goalEvaluationStorage.backPopulateGoalTree(goalTree, conn);
     }
 
     public GoalSaveInfo updateGoalTree(GoalTree goalTree) {
@@ -277,7 +277,7 @@ public class GoalStorage {
             updateTreeStmt.executeUpdate();
             saveUsers(goalTree.getGoalTreeID(), goalTree.getAdministrators(), Roles.OWNER, conn);
             saveUsers(goalTree.getGoalTreeID(), goalTree.getConsumers(), Roles.SUBSCRIBER, conn);
-            goalEvaluationStorage.backPopulateGoalTree(goalTree, conn);
+            //goalEvaluationStorage.backPopulateGoalTree(goalTree, conn);
             conn.commit();
             return new GoalSaveInfo(goalTree, installationSystem.getAllSolutions());
         } catch (Exception e) {
