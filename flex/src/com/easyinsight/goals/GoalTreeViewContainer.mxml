@@ -132,6 +132,7 @@
 
         private function processTree():void {
             if (goalTree.subTreeParents != null) {
+                parentsBox.removeAllChildren();
                 for each (var descriptor:GoalTreeDescriptor in goalTree.subTreeParents) {
                     var button:Button = new Button();
                     button.label = descriptor.name;
@@ -150,18 +151,24 @@
             receivedCredentialCount++;
             if (receivedCredentialCount == neededCredentialCount) {
                 ProgressAlert.alert(this, "Refreshing the goal tree...", null, goalService.forceRefresh);
-                goalService.forceRefresh.send(_goalTreeID, startChooser.selectedDate, endChooser.selectedDate, CredentialsCache.getCache().createCredentials());
+                goalService.forceRefresh.send(_goalTreeID, startChooser.selectedDate, endChooser.selectedDate, CredentialsCache.getCache().createCredentials(), true, true);
             }
         }
 
         private function gotCredentials():void {
             var credentials:ArrayCollection = goalService.getCredentialsForGoalTree.lastResult as ArrayCollection;
-            for each (var credential:CredentialRequirement in credentials) {
-                var window:RuntimeCredentialsWindow = new RuntimeCredentialsWindow();
-                window.requirement = credential;
-                window.addEventListener(CredentialsEvent.CREDENTIALS_SAVED, onCredentials);
-                PopUpManager.addPopUp(window, this, true);
-                PopUpManager.centerPopUp(window);
+            if (credentials.length == 0) {
+                goalService.forceRefresh.send(_goalTreeID, startChooser.selectedDate, endChooser.selectedDate, CredentialsCache.getCache().createCredentials(), true, true);
+            } else {
+                receivedCredentialCount = 0;
+                neededCredentialCount = credentials.length;
+                for each (var credential:CredentialRequirement in credentials) {
+                    var window:RuntimeCredentialsWindow = new RuntimeCredentialsWindow();
+                    window.requirement = credential;
+                    window.addEventListener(CredentialsEvent.CREDENTIALS_SAVED, onCredentials);
+                    PopUpManager.addPopUp(window, this, true);
+                    PopUpManager.centerPopUp(window);
+                }
             }
         }
 
