@@ -17,6 +17,7 @@ package com.easyinsight.goals
         public var consumers:ArrayCollection = new ArrayCollection();
         public var newSolutions:ArrayCollection = new ArrayCollection();
         public var subTreeParents:ArrayCollection = new ArrayCollection();
+        public var iconImage:String;
 		
 		public function GoalTree()
 		{

@@ -30,6 +30,16 @@ public class GoalTree implements Cloneable {
 
     private List<GoalTreeDescriptor> subTreeParents = new ArrayList<GoalTreeDescriptor>();
 
+    private String iconImage;
+
+    public String getIconImage() {
+        return iconImage;
+    }
+
+    public void setIconImage(String iconImage) {
+        this.iconImage = iconImage;
+    }
+
     public List<GoalTreeDescriptor> getSubTreeParents() {
         return subTreeParents;
     }

@@ -34,6 +34,10 @@ package com.easyinsight.analysis.formatter
 					formatter = currencyFormatter;
 					break;
 				case PERCENTAGE:
+                    var percentageFormatter:PercentageNumberFormatter = new PercentageNumberFormatter();
+                    percentageFormatter.precision = 2;
+                    formatter = percentageFormatter;
+                    break;
 				case TEXT_UOM:
 				default:
 					var defaultFormatter:FlexibleNumberFormatter = new FlexibleNumberFormatter();

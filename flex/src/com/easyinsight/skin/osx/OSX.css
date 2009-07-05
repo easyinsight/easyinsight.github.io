@@ -386,3 +386,11 @@ CorePageButton {
     borderStyle: solid;
     borderThickness: 1;
 }
+
+GoalDataRenderer {
+    highlightedSelectedColor: #8695FF;
+    highlightedUnselectedColor: #FEFBBA;
+    unhiglightedSelectedColor: #637DFF;
+    unhighlightedUnselectedColor: #EAF1F6;
+    subTreePresentColor: #99ccff; 
+}

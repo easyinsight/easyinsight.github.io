@@ -197,6 +197,12 @@
                 if (milestoneBox.selectedItem != NO_MILESTONE) {
                     _goalTreeNode.milestone = milestoneBox.selectedItem as GoalTreeMilestone;
                 }
+            } else {
+                _goalTreeNode.coreFeedID = 0;
+                _goalTreeNode.analysisMeasure = null;
+                _goalTreeNode.filters = new ArrayCollection();
+                _goalTreeNode.milestone = null;
+                _goalTreeNode.goalValue = 0;
             }
             dispatchEvent(new GoalEditEvent());
             PopUpManager.removePopUp(this);
@@ -264,6 +270,10 @@
                     availableItems.addItemAt(analysisMeasure, index);
                     availableItemBox.selectedItem = analysisMeasure;
                 }
+            } else {
+                if (availableItems.length > 0) {
+                    analysisMeasure = availableItems.getItemAt(0) as AnalysisMeasure;
+                }
             }
         }
 
@@ -313,7 +323,8 @@
             }
             analysisItemEditor.analysisItems = this.allFields;
             analysisItemEditor.analysisItem = this.analysisMeasure;
-            PopUpManager.addPopUp(analysisItemEditor, this);
+            PopUpManager.addPopUp(analysisItemEditor, this, true);
+            PopUpManager.centerPopUp(analysisItemEditor);
             analysisItemEditor.addEventListener(AnalysisItemEditEvent.ANALYSIS_ITEM_EDIT, itemEdited);
         }
 

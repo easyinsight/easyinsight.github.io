@@ -5,27 +5,27 @@
 			public function set formattingConfiguration(formatConfig:FormattingConfiguration):void {
 				switch (formatConfig.formattingType) {
 					case FormattingConfiguration.NUMBER:
-						formattingType.selectedValue = "Number";
+						formattingType.selectedIndex = 0;
 						break;
 					case FormattingConfiguration.CURRENCY:
-						formattingType.selectedValue = "Currency";
+						formattingType.selectedIndex = 1;
 						break;
 					case FormattingConfiguration.PERCENTAGE:
-						formattingType.selectedValue = "Percentage"
+						formattingType.selectedIndex = 2;
 						break;
 				}				
 			}		
 		
 			public function get formattingConfiguration():FormattingConfiguration {
 				var formattingConfiguration:FormattingConfiguration = new FormattingConfiguration();
-				formattingConfiguration.formattingType = formattingType.value as int;
+				formattingConfiguration.formattingType = formattingType.selectedIndex + 1;
 				return formattingConfiguration;
 			}
 		]]>
 	</mx:Script>
-	<util:ValueAwareComboBox id="formattingType" selectedIndex="0">
-		<mx:Object label="Number" data="{FormattingConfiguration.NUMBER}"/>
-		<mx:Object label="Currency" data="{FormattingConfiguration.CURRENCY}"/>
-		<mx:Object label="Percentage" data="{FormattingConfiguration.PERCENTAGE}"/>		
-	</util:ValueAwareComboBox>
+	<mx:ComboBox id="formattingType" selectedIndex="0">
+		<mx:Object label="Number" data="{FormattingConfiguration.NUMBER}" value="Number"/>
+		<mx:Object label="Currency" data="{FormattingConfiguration.CURRENCY}" value="Currency"/>
+		<mx:Object label="Percentage" data="{FormattingConfiguration.PERCENTAGE}" value="Percentage"/>		
+	</mx:ComboBox>
 </mx:HBox>

@@ -142,6 +142,9 @@
 
         private function subTreeInstall(event:SubTreeInstallEvent):void {
             subTreePresent = true;
+            this.orgChartItem = data as OrgChartItem;
+            var goalTreeNode:GoalTreeNode = orgChartItem.data as GoalTreeNode;
+            defineContextMenu(goalTreeNode);
         }
 
         private function passThrough(event:Event):void {
@@ -177,32 +180,47 @@
                 showBinding = goalTreeNode.coreFeedID > 0;
                 showAssociations = goalTreeNode.associatedFeeds.length > 0 || goalTreeNode.associatedInsights.length > 0 ||
                                    goalTreeNode.associatedSolutions.length > 0;
-                contextMenu = new ContextMenu();
-                contextMenu.hideBuiltInItems();
-                var items:Array = [];
-                var editItem:ContextMenuItem = new ContextMenuItem("Edit Goal", true);
-                editItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, editNode);
-                items.push(editItem);
-                var createChildItem:ContextMenuItem = new ContextMenuItem("Create Child", true);
-                createChildItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, addChildNode);
-                items.push(createChildItem);
-                if (goalTreeNode.parent != null || (goalTreeNode.children != null && goalTreeNode.children.length > 0)) {
-                    var deleteItem:ContextMenuItem = new ContextMenuItem("Delete Goal", true);
-                    deleteItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, deleteSelf);
-                    items.push(deleteItem);
-                }
-                var newParentItem:ContextMenuItem = new ContextMenuItem("Insert New Parent", true);
-                newParentItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, newParent);
-                items.push(newParentItem);
-                /*var moveItem:ContextMenuItem = new ContextMenuItem("Move", true);
-                moveItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, moveNode);
-                items.push(moveItem);*/
-                var newTreeItem:ContextMenuItem = new ContextMenuItem("Create New Goal Tree", true);
-                newTreeItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, newGoalTree);
-                items.push(newTreeItem);
-                contextMenu.customItems = items;
-
+                defineContextMenu(goalTreeNode);
             }
+        }
+
+        private function deleteSubTree(event:ContextMenuEvent):void {
+            subTreePresent = false;
+            this.orgChartItem = data as OrgChartItem;
+            var goalTreeNode:GoalTreeNode = orgChartItem.data as GoalTreeNode;
+            goalTreeNode.subTreeID = 0;
+        }
+
+        private function defineContextMenu(goalTreeNode:GoalTreeNode):void {
+            contextMenu = new ContextMenu();
+            contextMenu.hideBuiltInItems();
+            var items:Array = [];
+            var editItem:ContextMenuItem = new ContextMenuItem("Edit Goal", true);
+            editItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, editNode);
+            items.push(editItem);
+            var createChildItem:ContextMenuItem = new ContextMenuItem("Create Child", true);
+            createChildItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, addChildNode);
+            items.push(createChildItem);
+            if (goalTreeNode.parent != null || (goalTreeNode.children != null && goalTreeNode.children.length > 0)) {
+                var deleteItem:ContextMenuItem = new ContextMenuItem("Delete Goal", true);
+                deleteItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, deleteSelf);
+                items.push(deleteItem);
+            }
+            var newParentItem:ContextMenuItem = new ContextMenuItem("Insert New Parent", true);
+            newParentItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, newParent);
+            items.push(newParentItem);
+            /*var moveItem:ContextMenuItem = new ContextMenuItem("Move", true);
+            moveItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, moveNode);
+            items.push(moveItem);*/
+            /*var newTreeItem:ContextMenuItem = new ContextMenuItem("Create New Goal Tree", true);
+            newTreeItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, newGoalTree);
+            items.push(newTreeItem);*/
+            if (goalTreeNode.subTreeID > 0) {
+                var removeItem:ContextMenuItem = new ContextMenuItem("Remove Sub Tree", true);
+                removeItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, deleteSubTree);
+                items.push(removeItem);
+            }
+            contextMenu.customItems = items;
         }
 
         override public function get data():Object {

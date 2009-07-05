@@ -6,6 +6,7 @@ import com.easyinsight.quicksearch.EIDescriptor;
 public class GoalTreeDescriptor extends EIDescriptor {
     
     public var role:int;
+    public var iconName:String;
 
     public function GoalTreeDescriptor() {
         

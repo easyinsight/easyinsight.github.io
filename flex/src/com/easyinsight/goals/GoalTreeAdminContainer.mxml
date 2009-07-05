@@ -7,6 +7,8 @@
         import com.easyinsight.customupload.ConfigureDataSource;
         import com.easyinsight.framework.User;
         import com.easyinsight.genredata.AnalyzeEvent;
+        import com.easyinsight.icons.IconSelectionEvent;
+        import com.easyinsight.icons.IconSelectionWindow;
         import com.easyinsight.quicksearch.EIDescriptor;
         import com.easyinsight.solutions.SolutionInstallInfo;
         import com.easyinsight.util.ProgressAlert;
@@ -19,6 +21,25 @@
         import mx.events.CloseEvent;
         import mx.managers.PopUpManager;
         import mx.validators.Validator;
+
+        private function onIconSelected(event:IconSelectionEvent):void {
+            iconString = "/app/assets/icons/32x32/" + event.icon.path;
+            iconName = event.icon.path;
+            showIcon = true;
+        }
+
+        private function onIconRemoved(event:IconSelectionEvent):void {
+            iconString = null;
+            showIcon = false;
+        }
+
+        private function changeIcon():void {
+            var iconWindow:IconSelectionWindow = new IconSelectionWindow();
+            iconWindow.addEventListener(IconSelectionEvent.ICON_SELECTION, onIconSelected);
+            iconWindow.addEventListener(IconSelectionEvent.ICON_REMOVED, onIconRemoved);
+            PopUpManager.addPopUp(iconWindow, this, true);
+            PopUpManager.centerPopUp(iconWindow);
+        }
 
         private function viewData():void {
             if (changed) {
@@ -34,6 +55,13 @@
                 dispatchEvent(new AnalyzeEvent(new GoalDataAnalyzeSource(_goalTreeID)));
             }
         }
+
+        [Bindable]
+        private var iconString:String;
+        private var iconName:String;
+
+        [Bindable]
+        private var showIcon:Boolean = false;
 
         [Bindable]
         private var _goalTree:GoalTree;
@@ -93,6 +121,11 @@
             rootNode = _goalTree.rootNode;
             goalTreeName = _goalTree.name;
             goalTreeDescription = _goalTree.description;
+            if (_goalTree.iconImage != null) {
+                iconName = _goalTree.iconImage;
+                iconString = "/app/assets/icons/32x32/" + iconName;
+                showIcon = true;
+            }
         }
 
         private function onNewSolution(event:SolutionInstallRequiredEvent):void {
@@ -131,6 +164,7 @@
                 _goalTree.name = nameInput.text;
                 _goalTree.description = descriptionTextArea.text;
                 _goalTree.newSolutions = newSolutions;
+                _goalTree.iconImage = iconName;
                 goalsPolicy.updateContents();
                 process(_goalTree.rootNode);
                 if (_goalTree.goalTreeID == 0) {
@@ -232,6 +266,10 @@
                             </mx:FormItem>
                             <mx:FormItem label="Description:" fontFamily="Tahoma" fontWeight="bold">
                                 <mx:TextArea id="descriptionTextArea" width="300" height="60" text="{goalTreeDescription}" fontFamily="Lucida Grande" fontWeight="normal"/>
+                            </mx:FormItem>
+                            <mx:FormItem label="Icon:" fontFamily="Tahoma" fontWeight="bold" direction="vertical">
+                                <mx:Image id="iconImage" source="{iconString}" visible="{showIcon}"/>
+                                <mx:Button label="Change Icon..." click="changeIcon()"/>
                             </mx:FormItem>
                         </mx:Form>
                     </mx:VBox>

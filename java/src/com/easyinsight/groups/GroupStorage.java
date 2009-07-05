@@ -348,12 +348,12 @@ public class GroupStorage {
         List<GoalTreeDescriptor> goalTrees = new ArrayList<GoalTreeDescriptor>();
         Connection conn = Database.instance().getConnection();
         try {
-            PreparedStatement queryStmt = conn.prepareStatement("SELECT GOAL_TREE.GOAL_TREE_ID, GOAL_TREE.name FROM GROUP_TO_GOAL_TREE_JOIN, GOAL_TREE WHERE GROUP_ID = ? AND " +
+            PreparedStatement queryStmt = conn.prepareStatement("SELECT GOAL_TREE.GOAL_TREE_ID, GOAL_TREE.name, goal_tree_icon FROM GROUP_TO_GOAL_TREE_JOIN, GOAL_TREE WHERE GROUP_ID = ? AND " +
                     "GROUP_TO_GOAL_TREE_JOIN.GOAL_TREE_ID = GOAL_TREE.goal_tree_id");
             queryStmt.setLong(1, groupID);
             ResultSet rs = queryStmt.executeQuery();
             while (rs.next()) {
-                goalTrees.add(new GoalTreeDescriptor(rs.getLong(1), rs.getString(2), Roles.OWNER));
+                goalTrees.add(new GoalTreeDescriptor(rs.getLong(1), rs.getString(2), Roles.SHARER, rs.getString(3)));
             }
         } catch (SQLException e) {
             LogClass.error(e);

@@ -67,6 +67,12 @@
         [Bindable]
         private var _embedded:Boolean;
 
+        [Bindable]
+        private var parentTrees:ArrayCollection;
+
+        [Bindable]
+        private var columnCount:int;
+
         public function set embedded(value:Boolean):void {
             _embedded = value;
         }
@@ -131,16 +137,8 @@
         }
 
         private function processTree():void {
-            if (goalTree.subTreeParents != null) {
-                parentsBox.removeAllChildren();
-                for each (var descriptor:GoalTreeDescriptor in goalTree.subTreeParents) {
-                    var button:Button = new Button();
-                    button.label = descriptor.name;
-                    button.data = descriptor;
-                    button.addEventListener(MouseEvent.CLICK, parentTreeClick);
-                    parentsBox.addChild(button);
-                }
-            }
+            parentTrees = goalTree.subTreeParents;
+            this.columnCount = parentTrees.length;
             _goalTreeNodes = goalTree.rootNode;
             myOrgChart.dataProvider = _goalTreeNodes;
             dispatchEvent(new DataServiceLoadingEvent(DataServiceLoadingEvent.LOADING_STOPPED));
@@ -208,10 +206,15 @@
         <mx:Button id="wrapButton" icon="{closeIcon}" click="close()" toolTip="Close" visible="{!_embedded}" label="Back" labelPlacement="bottom"/>
         <mx:Button id="refreshButton" icon="{refreshIcon}" click="refreshData()" toolTip="Refresh Data" visible="{!_embedded}" label="Refresh" labelPlacement="bottom"/>
         <mx:Button id="fullScreenButton" icon="{fullScreenIcon}" click="toFullScreen()" toolTip="View in Full Screen" label="Full Screen" labelPlacement="bottom"/>
-        <mx:VBox id="parentsBox"/>
-        <mx:HBox width="100%" horizontalAlign="center">
+        <mx:VRule height="100"/>
+        <mx:TileList id="parentsBox" itemRenderer="com.easyinsight.goals.GoalTreeIconRenderer" dataProvider="{parentTrees}" height="80"
+                backgroundAlpha="0" borderStyle="none" paddingBottom="0" paddingLeft="0" paddingRight="0" paddingTop="0"
+                columnCount="{columnCount}"/>
+        <mx:VRule height="100"/>
+        <mx:HBox width="100%" horizontalAlign="center" verticalAlign="middle">
+            <mx:Label text="Start Date:" fontSize="14"/>
             <mx:DateField id="startChooser" selectedDate="{startDate}" change="onDatesChanged()"/>
-            <mx:Spacer width="200"/>
+            <mx:Label text="End Date:" fontSize="14"/>
             <mx:DateField id="endChooser" selectedDate="{endDate}" change="onDatesChanged()"/>
         </mx:HBox>
     </mx:HBox>

@@ -1,5 +1,6 @@
-package com.easyinsight.solutions {
-import com.easyinsight.framework.User;
+package com.easyinsight.goals {
+
+import com.easyinsight.genredata.AnalyzeEvent;
 
 import flash.events.Event;
 
@@ -11,31 +12,38 @@ import mx.containers.VBox;
 import mx.controls.Image;
 import mx.controls.Label;
 
-public class SolutionView extends VBox{
+public class GoalTreeIconRenderer extends VBox{
 
-    private var solution:Solution;
+    private var goalTreeDescriptor:GoalTreeDescriptor;
     private var _titleText:String;
     private var titleLabel:Label;
+    private var imageRenderer:Image;
     private var box:VBox;
-    private var goalTreeImage:Image;
 
     private var backgroundColor:uint = 0xFFFFFF;
 
-    public function SolutionView() {
+    public function GoalTreeIconRenderer() {
         super();
         titleLabel = new Label();
+        titleLabel.maxWidth = 110;
         BindingUtils.bindProperty(titleLabel, "text", this, "titleText");
-        goalTreeImage = new Image();
-        setStyle("paddingLeft", 10);
-        setStyle("paddingRight", 10);
-        setStyle("paddingTop", 10);
-        setStyle("paddingBottom", 10);
+        imageRenderer = new Image();
+        setStyle("paddingLeft", 0);
+        setStyle("paddingRight", 0);
+        setStyle("paddingTop", 0);
+        setStyle("paddingBottom", 0);
+        //setStyle("borderStyle", "solid");
+        //setStyle("borderThickness", 1);
         setStyle("backgroundAlpha", 0);
+        setStyle("horizontalAlign", "center");
+        setStyle("verticalAlign", "middle");
+        this.width = 120;
+        this.height = 80;
         addEventListener(MouseEvent.CLICK, onClick);
     }
 
     private function onClick(event:MouseEvent):void {
-        dispatchEvent(new SolutionSelectionEvent(solution));
+        dispatchEvent(new AnalyzeEvent(new GoalDataAnalyzeSource(goalTreeDescriptor.id)));
     }
 
     [Bindable(event="titleTextChanged")]
@@ -53,39 +61,36 @@ public class SolutionView extends VBox{
         super.createChildren();
         box = new VBox();
         box.setStyle("borderStyle", "solid");
-        box.setStyle("cornerRadius", 15);
+        box.setStyle("cornerRadius", 8);
         box.setStyle("dropShadowEnabled", "true");
         box.setStyle("backgroundAlpha", 1);
         box.setStyle("backgroundColor", backgroundColor);
+        box.setStyle("horizontalAlign", "center");
+        box.setStyle("verticalAlign", "middle");
         addChild(box);
         var titleBox:HBox = new HBox();
         titleBox.percentWidth = 100;
         titleBox.setStyle("horizontalAlign", "center");
         titleBox.addChild(titleLabel);
-        box.addChild(titleBox);
-        box.addChild(goalTreeImage);
+        box.addChild(imageRenderer);
+        box.addChild(titleBox);        
     }
 
     override public function set data(val:Object):void {
-        solution = val as Solution;
-
-        titleText = solution.name;
-        if (User.getInstance() == null) {
-            backgroundColor = 0xFFFFFF;
-            toolTip = "Click to look at details about this solution.";
-        } else if (solution.accessible) {
-            backgroundColor = 0xFFFFFF;
-            toolTip = "Click to look at details about this solution.";
+        goalTreeDescriptor = val as GoalTreeDescriptor;
+        if (goalTreeDescriptor.iconName == null) {
+            imageRenderer.visible = false;
         } else {
-            backgroundColor = 0xCCCCCC;
-            toolTip = "This solution is not accessible to your account tier.";
+            imageRenderer.source = "/app/assets/icons/32x32/" + goalTreeDescriptor.iconName;
+            imageRenderer.visible = true;
         }
+        titleText = goalTreeDescriptor.name;
         if (box != null) box.setStyle("backgroundColor", backgroundColor);
 
     }
 
     override public function get data():Object {
-        return solution;
+        return goalTreeDescriptor;
     }
 }
 }

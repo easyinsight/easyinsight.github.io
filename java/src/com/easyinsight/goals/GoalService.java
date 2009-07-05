@@ -290,8 +290,13 @@ public class GoalService {
                         GoalStorage goalStorage = new GoalStorage();
                         GoalTree subTree = goalStorage.retrieveGoalTree(data.getSubTreeID());
                         GoalTreeNodeData subData = createDataTreeForDates(subTree, startDate, endDate);
-                        data.setCurrentValue(subData.getCurrentValue());
-                        data.setGoalOutcome(subData.getGoalOutcome());
+                        if (data.getAnalysisMeasure() == null) {
+                            data.setCurrentValue(subData.getCurrentValue());
+                            data.setGoalOutcome(subData.getGoalOutcome());
+                        } else {
+                            data.populateCurrentValue();
+                            data.determineOutcome(startDate, endDate, goalEvaluationStorage);
+                        }
                     } else {
                         data.populateCurrentValue();
                         data.determineOutcome(startDate, endDate, goalEvaluationStorage);

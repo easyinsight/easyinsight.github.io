@@ -9,6 +9,7 @@ import com.easyinsight.core.EIDescriptor;
  */
 public class GoalTreeDescriptor extends EIDescriptor {
     private int role;
+    private String iconName;
 
     @Override
     public int getType() {
@@ -18,9 +19,18 @@ public class GoalTreeDescriptor extends EIDescriptor {
     public GoalTreeDescriptor() {
     }
 
-    public GoalTreeDescriptor(long id, String name, int role) {
+    public GoalTreeDescriptor(long id, String name, int role, String iconName) {
         super(name, id);
         this.role = role;
+        this.iconName = iconName;
+    }
+
+    public String getIconName() {
+        return iconName;
+    }
+
+    public void setIconName(String iconName) {
+        this.iconName = iconName;
     }
 
     public int getRole() {

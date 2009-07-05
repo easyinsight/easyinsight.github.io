@@ -2,6 +2,7 @@ package com.easyinsight.goals;
 
 import com.easyinsight.database.Database;
 import com.easyinsight.logging.LogClass;
+import com.easyinsight.core.InsightDescriptor;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -28,6 +29,12 @@ public class GoalUtil {
         protected void accept(GoalTreeNode goalTreeNode) {
             if (goalTreeNode.getCoreFeedID() > 0) {
                 dataSourceIDs.add(goalTreeNode.getCoreFeedID());
+            }
+            for (GoalFeed goalFeed : goalTreeNode.getAssociatedFeeds()) {
+                dataSourceIDs.add(goalFeed.getFeedID());
+            }
+            for (InsightDescriptor insightDescriptor : goalTreeNode.getAssociatedInsights()) {
+                dataSourceIDs.add(insightDescriptor.getDataFeedID());
             }
             if (includeSubTrees && goalTreeNode.getSubTreeID() > 0) {
                 GoalStorage goalStorage = new GoalStorage();

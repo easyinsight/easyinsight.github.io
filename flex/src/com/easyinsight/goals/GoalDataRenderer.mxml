@@ -174,7 +174,21 @@ import mx.formatters.NumberFormatter;
                     trendTooltip = concreteGoalOutcome.startValue + " to " + concreteGoalOutcome.endValue + " (" +
                                    concreteGoalOutcome.percentChange + "%)";
                 }
+                defineContextMenu(goalTreeNodeData);
             }
+        }
+
+        private function defineContextMenu(goalTreeNode:GoalTreeNodeData):void {
+            contextMenu = new ContextMenu();
+            contextMenu.hideBuiltInItems();
+            var items:Array = [];
+            if (subTreePresent) {
+                var subTreeItem:ContextMenuItem = new ContextMenuItem("Navigate to Sub Tree", true);
+                subTreeItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, navigateToSubTree);
+                items.push(subTreeItem);
+            }
+            contextMenu.customItems = items;
+            this.contextMenu = contextMenu;
         }
 
         override protected function updateDisplayList(unscaledWidth:Number, unscaledHeight:Number):void {
@@ -192,9 +206,9 @@ import mx.formatters.NumberFormatter;
 
                 var color:uint;
                 if (isHightlighted) {
-                    color = isSelected ? 0x8695FF : 0xFEFBBA;
+                    color = isSelected ? getStyle("higlightedSelectedColor") : getStyle("highlightedUnselectedColor");
                 } else {
-                    color = isSelected ? 0x637DFF : 0xEAF1F6;
+                    color = isSelected ? getStyle("unhiglightedSelectedColor") : subTreePresent ? getStyle("subTreePresentColor") : getStyle("unhighlightedUnselectedColor");
                 }
 
                 setStyle("backgroundColor", color);
@@ -202,19 +216,19 @@ import mx.formatters.NumberFormatter;
             }
         }
 
-        private function navigateToSubTree():void {
+        private function navigateToSubTree(event:ContextMenuEvent):void {
             dispatchEvent(new AnalyzeEvent(new GoalDataAnalyzeSource(goalTreeNodeData.subTreeID)));
         }
         ]]></mx:Script>
-    <mx:VBox id="layer2" verticalAlign="middle" paddingLeft="10"
-           paddingRight="10" paddingTop="0" paddingBottom="0" width="180" height="80" horizontalAlign="center">
-        <mx:HBox verticalAlign="middle">
+    <mx:VBox id="layer2" verticalAlign="middle" paddingLeft="3"
+           paddingRight="3" paddingTop="0" paddingBottom="0" width="180" height="80" horizontalAlign="center">
+        <mx:HBox verticalAlign="middle" horizontalGap="3">
             <mx:Image source="{goalIcon}" visible="{iconExists}"/>
-            <mx:Box backgroundColor="#000000" borderStyle="solid" cornerRadius="3" visible="{currentValueExists}" horizontalAlign="center" verticalAlign="middle">
-                <mx:Label text="{currentValue}" fontFamily="Trebuchet MS" fontSize="14" color="#ffffff"/>
+            <mx:Box backgroundColor="#000000" borderStyle="solid" cornerRadius="3" visible="{currentValueExists}" horizontalAlign="center" verticalAlign="middle" paddingLeft="0" horizontalGap="0">
+                <mx:Label text="{currentValue}" fontFamily="Trebuchet MS" fontSize="14" color="#ffffff" maxWidth="110"/>
             </mx:Box>
             <mx:Image source="{trendImage}" toolTip="{trendTooltip}"/>
-            <mx:Button icon="{subTreeIcon}" toolTip="Navigate into Sub Tree" click="navigateToSubTree()" visible="{subTreePresent}"/>
+            <!--<mx:Button icon="{subTreeIcon}" toolTip="Navigate into Sub Tree" click="navigateToSubTree()" visible="{subTreePresent}"/>-->
         </mx:HBox>
         <mx:TextArea text="{treeName}" fontSize="12" maxWidth="160" maxHeight="38" editable="false" borderStyle="none" backgroundAlpha="0"
                 textAlign="center" selectable="false"/>

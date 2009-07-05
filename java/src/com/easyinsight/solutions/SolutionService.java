@@ -215,14 +215,14 @@ public class SolutionService {
                     insightDescriptors.add(new InsightDescriptor(insightID, insightName, insightRS.getLong(3), insightRS.getInt(4)));
                 }
             }
-            PreparedStatement getGoalsStmt = conn.prepareStatement("SELECT goal_tree.goal_tree_id, goal_tree.name FROM solution, goal_tree " +
+            PreparedStatement getGoalsStmt = conn.prepareStatement("SELECT goal_tree.goal_tree_id, goal_tree.name, goal_tree.goal_tree_icon FROM solution, goal_tree " +
                     "WHERE SOLUTION_ID = ? AND goal_tree.goal_tree_id = solution.goal_tree_id");
             getGoalsStmt.setLong(1, solutionID);
             ResultSet goalRS = getGoalsStmt.executeQuery();
             while (goalRS.next()) {
                 long goalID = goalRS.getLong(1);
                 String goalName = goalRS.getString(2);
-                GoalTreeDescriptor goalTreeDescriptor = new GoalTreeDescriptor(goalID, goalName, 0);
+                GoalTreeDescriptor goalTreeDescriptor = new GoalTreeDescriptor(goalID, goalName, 0, goalRS.getString(3));
                 goalTreeDescriptors.add(goalTreeDescriptor);
             }
         } catch (Exception e) {
@@ -325,7 +325,7 @@ public class SolutionService {
         List<SolutionGoalTreeDescriptor> descriptors = new ArrayList<SolutionGoalTreeDescriptor>();
         Connection conn = Database.instance().getConnection();
         try {
-            PreparedStatement treeStmt = conn.prepareStatement("SELECT SOLUTION_ID, SOLUTION.NAME, GOAL_TREE.GOAL_TREE_ID, GOAL_TREE.NAME FROM SOLUTION, GOAL_TREE WHERE " +
+            PreparedStatement treeStmt = conn.prepareStatement("SELECT SOLUTION_ID, SOLUTION.NAME, GOAL_TREE.GOAL_TREE_ID, GOAL_TREE.NAME, GOAL_TREE.goal_tree_icon FROM SOLUTION, GOAL_TREE WHERE " +
                     "SOLUTION.GOAL_TREE_ID = GOAL_TREE.GOAL_TREE_ID AND SOLUTION.SOLUTION_TIER <= ?");
             treeStmt.setInt(1, solutionTier);
             ResultSet rs = treeStmt.executeQuery();
@@ -334,7 +334,7 @@ public class SolutionService {
                 String solutionName = rs.getString(2);
                 long goalTreeID = rs.getLong(3);
                 String goalTreeName = rs.getString(4);
-                descriptors.add(new SolutionGoalTreeDescriptor(goalTreeID, goalTreeName, 0, solutionID, solutionName));
+                descriptors.add(new SolutionGoalTreeDescriptor(goalTreeID, goalTreeName, 0, solutionID, solutionName, rs.getString(5)));
             }
         } catch (Exception e) {
             LogClass.error(e);

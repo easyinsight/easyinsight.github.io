@@ -14,8 +14,8 @@ public class SolutionGoalTreeDescriptor extends GoalTreeDescriptor {
     public SolutionGoalTreeDescriptor() {
     }
 
-    public SolutionGoalTreeDescriptor(long goalTreeID, String goalTreeName, int role, long solutionID, String solutionName) {
-        super(goalTreeID, goalTreeName, role);
+    public SolutionGoalTreeDescriptor(long goalTreeID, String goalTreeName, int role, long solutionID, String solutionName, String iconImage) {
+        super(goalTreeID, goalTreeName, role, iconImage);
         this.solutionID = solutionID;
         this.solutionName = solutionName;
     }

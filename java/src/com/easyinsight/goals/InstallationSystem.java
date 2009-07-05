@@ -90,7 +90,8 @@ public class InstallationSystem {
         duplicateGoalDataSources(goalTree);
         installDataSourcesAndReports(clonedTree);
         goalStorage.addGoalTree(clonedTree, conn);
-        allSolutions.add(new SolutionInstallInfo(goalTree.getGoalTreeID(), new GoalTreeDescriptor(clonedTree.getGoalTreeID(), clonedTree.getName(), Roles.OWNER), null, false));        
+        allSolutions.add(new SolutionInstallInfo(goalTree.getGoalTreeID(), new GoalTreeDescriptor(clonedTree.getGoalTreeID(), clonedTree.getName(), Roles.OWNER,
+                clonedTree.getIconImage()), null, false));        
         return clonedTree.getGoalTreeID();
     }
 

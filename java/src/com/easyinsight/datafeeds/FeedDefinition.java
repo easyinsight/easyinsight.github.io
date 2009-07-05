@@ -7,6 +7,7 @@ import com.easyinsight.dataset.DataSet;
 import com.easyinsight.users.Credentials;
 import com.easyinsight.analysis.*;
 import com.easyinsight.storage.DataStorage;
+import com.easyinsight.util.RandomTextGenerator;
 
 import java.util.*;
 import java.sql.Connection;
@@ -382,6 +383,7 @@ public class FeedDefinition implements Cloneable, Serializable {
         }
         feedDefinition.setTags(clonedTags);
         feedDefinition.setDataFeedID(0);
+        feedDefinition.setApiKey(RandomTextGenerator.generateText(12));
         feedDefinition.setCachedCredentials(null);
         feedDefinition.setRefreshDataInterval(0);
         return new DataSourceCloneResult(feedDefinition, keyReplacementMap);

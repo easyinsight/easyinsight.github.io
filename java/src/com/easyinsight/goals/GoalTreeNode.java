@@ -49,6 +49,7 @@ public class GoalTreeNode implements Cloneable {
 
     private long subTreeID;
     private String subTreeName;
+    private String subTreeIcon;
     private SolutionGoalTreeDescriptor newSubTree;
 
     public String getMeasureLabel() {
@@ -57,6 +58,14 @@ public class GoalTreeNode implements Cloneable {
 
     public void setMeasureLabel(String measureLabel) {
         this.measureLabel = measureLabel;
+    }
+
+    public String getSubTreeIcon() {
+        return subTreeIcon;
+    }
+
+    public void setSubTreeIcon(String subTreeIcon) {
+        this.subTreeIcon = subTreeIcon;
     }
 
     public boolean isGoalDefined() {
