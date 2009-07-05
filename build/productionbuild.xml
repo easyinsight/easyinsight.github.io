@@ -28,7 +28,7 @@
     <property name="ei.key" value="xrnnCqtaFhZN"/>
     <property name="ei.secret.key" value="IzxHGLKiErchVLdo"/>
     <property name="size.api.key" value="RhHnvgiymUfx"/>
-    <property name="analysis.api.key" value="wuOecBUjyUKd"/>
+    <property name="analysis.api.key" value="LeKXRECmALcL"/>
 
     <target name="shutdownInstances">
         <StopInstances userName="einsight" password="eJAqp0Q~j!n>L"/>
