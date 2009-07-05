@@ -212,37 +212,42 @@ public class GoalService {
 
     public GoalTree forceRefresh(long goalTreeID, Date startDate, Date endDate, List<CredentialFulfillment> credentialsList, boolean allSources, boolean includeSubTrees) {
         SecurityUtil.authorizeGoalTree(goalTreeID, Roles.SUBSCRIBER);
-        if (allSources) {
-            Set<Long> dataSourceIDs = GoalUtil.getDataSourceIDs(goalTreeID, includeSubTrees);
-            for (Long dataSourceID : dataSourceIDs) {
-                FeedDefinition feedDefinition = new FeedStorage().getFeedDefinitionData(dataSourceID);
-                if (feedDefinition.getCredentialsDefinition() == CredentialsDefinition.STANDARD_USERNAME_PW) {
-                    IServerDataSourceDefinition dataSource = (IServerDataSourceDefinition) feedDefinition;
-                    Credentials credentials = null;
-                    for (CredentialFulfillment fulfillment : credentialsList) {
-                        if (fulfillment.getDataSourceID() == feedDefinition.getDataFeedID()) {
-                            credentials = fulfillment.getCredentials();
+        try {
+            if (allSources) {
+                Set<Long> dataSourceIDs = GoalUtil.getDataSourceIDs(goalTreeID, includeSubTrees);
+                for (Long dataSourceID : dataSourceIDs) {
+                    FeedDefinition feedDefinition = new FeedStorage().getFeedDefinitionData(dataSourceID);
+                    if (feedDefinition.getCredentialsDefinition() == CredentialsDefinition.STANDARD_USERNAME_PW) {
+                        IServerDataSourceDefinition dataSource = (IServerDataSourceDefinition) feedDefinition;
+                        Credentials credentials = null;
+                        for (CredentialFulfillment fulfillment : credentialsList) {
+                            if (fulfillment.getDataSourceID() == feedDefinition.getDataFeedID()) {
+                                credentials = fulfillment.getCredentials();
+                            }
                         }
+                        dataSource.refreshData(credentials, SecurityUtil.getAccountID(), new Date(), null);
                     }
-                    dataSource.refreshData(credentials, SecurityUtil.getAccountID(), new Date(), null);
                 }
             }
-        }
-        EIConnection conn = Database.instance().getConnection();
-        try {
-            conn.setAutoCommit(false);
-            GoalTree goalTree = goalStorage.retrieveGoalTree(goalTreeID, conn);
-            goalEvaluationStorage.forceEvaluate(goalTree, conn, credentialsList);
-            conn.commit();
-        } catch (Exception e) {
+            EIConnection conn = Database.instance().getConnection();
+            try {
+                conn.setAutoCommit(false);
+                GoalTree goalTree = goalStorage.retrieveGoalTree(goalTreeID, conn);
+                goalEvaluationStorage.forceEvaluate(goalTree, conn, credentialsList);
+                conn.commit();
+            } catch (Exception e) {
+                LogClass.error(e);
+                conn.rollback();
+                throw new RuntimeException(e);
+            } finally {
+                conn.setAutoCommit(true);
+                Database.closeConnection(conn);
+            }
+            return createDataTree(goalTreeID, startDate, endDate);
+        } catch (RuntimeException e) {
             LogClass.error(e);
-            conn.rollback();
             throw new RuntimeException(e);
-        } finally {
-            conn.setAutoCommit(true);
-            Database.closeConnection(conn);
         }
-        return createDataTree(goalTreeID, startDate, endDate);
     }
 
     public GoalTree createDataTree(long goalTreeID, Date startDate, Date endDate) {
