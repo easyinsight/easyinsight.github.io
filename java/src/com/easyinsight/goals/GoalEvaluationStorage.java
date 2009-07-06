@@ -11,6 +11,7 @@ import com.easyinsight.core.DateValue;
 import com.easyinsight.analysis.*;
 import com.easyinsight.analysis.ListRow;
 import com.easyinsight.datafeeds.CredentialFulfillment;
+import com.easyinsight.pipeline.HistoryRun;
 
 import java.util.*;
 import java.sql.Connection;
@@ -288,10 +289,12 @@ public class GoalEvaluationStorage {
         }
     }
 
-    public List<GoalValue> getGoalValues(long goalTreeNodeID, Date startDate, Date endDate) {
+    public List<GoalValue> getGoalValues(long goalTreeNodeID, Date startDate, Date endDate) throws SQLException {
+        GoalTreeNode goalTreeNode = null;
         Connection conn = Database.instance().getConnection();
         try {
-            PreparedStatement queryStmt = conn.prepareStatement("SELECT evaluation_result, evaluation_date FROM goal_history " +
+            goalTreeNode = new GoalStorage().retrieveNode(goalTreeNodeID, conn);
+            /*PreparedStatement queryStmt = conn.prepareStatement("SELECT evaluation_result, evaluation_date FROM goal_history " +
                     "WHERE evaluation_date >= ? AND evaluation_date <= ? AND goal_tree_node_id = ? ORDER BY evaluation_date");
             queryStmt.setDate(1, new java.sql.Date(startDate.getTime()));
             queryStmt.setDate(2, new java.sql.Date(endDate.getTime()));
@@ -303,16 +306,21 @@ public class GoalEvaluationStorage {
                 Date evaluationDate = new Date(startRS.getDate(2).getTime());
                 goalValues.add(new GoalValue(goalTreeNodeID, evaluationDate, evaluationResult));
             }
-            return goalValues;
-        } catch (SQLException e) {
-            LogClass.error(e);
-            throw new RuntimeException(e);
+            return goalValues;*/
         } finally {
             Database.instance().closeConnection(conn);
         }
+        List<GoalValue> goalValues;
+        if (goalTreeNode != null && goalTreeNode.getCoreFeedID() > 0) {
+            goalValues = new HistoryRun().calculateHistoricalValues(goalTreeNode.getCoreFeedID(), goalTreeNode.getAnalysisMeasure(),
+                goalTreeNode.getFilters(), startDate, endDate);
+        } else {
+            goalValues = new ArrayList<GoalValue>();
+        }
+        return goalValues;
     }
 
-    public GoalOutcome getEvaluations(long goalTreeNodeID, Date startDate, Date endDate, double goalValue, boolean highIsGood, int importance) {
+    public GoalOutcome getEvaluations(long goalTreeNodeID, Date startDate, Date endDate, double goalValue, boolean highIsGood, int importance) throws SQLException {
         // key here is what's the value at the start date, what's the value at the end date
         // delta between those two values
         // outcomes:

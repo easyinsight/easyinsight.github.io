@@ -119,8 +119,9 @@
             var goalNodeWindow:GoalNodeAdminWindow = new GoalNodeAdminWindow();
             goalNodeWindow.goalTreeNode = node;
             goalNodeWindow.addEventListener(GoalEditEvent.GOAL_EDIT, goalEdited);
-            PopUpManager.addPopUp(goalNodeWindow, this.parent.parent);
-            PopUpManager.centerPopUp(goalNodeWindow);
+            PopUpManager.addPopUp(goalNodeWindow, this, true);
+            goalNodeWindow.x = 20;
+            goalNodeWindow.y = 20;
         }
 
         private function goalEdited(event:GoalEditEvent):void {

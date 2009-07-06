@@ -1,6 +1,8 @@
 package com.easyinsight.goals;
 
 import com.easyinsight.analysis.Tag;
+import com.easyinsight.analysis.AnalysisMeasure;
+import com.easyinsight.analysis.FilterDefinition;
 import com.easyinsight.solutions.Solution;
 import com.easyinsight.solutions.SolutionService;
 import com.easyinsight.solutions.SolutionGoalTreeDescriptor;
@@ -13,6 +15,7 @@ import com.easyinsight.users.Credentials;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.database.Database;
 import com.easyinsight.datafeeds.*;
+import com.easyinsight.pipeline.HistoryRun;
 
 import java.util.*;
 
@@ -95,6 +98,15 @@ public class GoalService {
         SecurityUtil.authorizeGoalTree(goalTreeID, Roles.OWNER);
         try {
             goalStorage.deleteGoalTree(goalTreeID);
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        }
+    }
+
+    public List<GoalValue> generateHistory(AnalysisMeasure analysisMeasure, List<FilterDefinition> filters, long dataSourceID, Date startDate, Date endDate) {
+        try {
+            return new HistoryRun().calculateHistoricalValues(dataSourceID, analysisMeasure, filters, startDate, endDate);
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);
@@ -286,20 +298,24 @@ public class GoalService {
 
                 protected void accept(GoalTreeNode goalTreeNode) {
                     GoalTreeNodeData data = (GoalTreeNodeData) goalTreeNode;
-                    if (data.getSubTreeID() > 0) {
-                        GoalStorage goalStorage = new GoalStorage();
-                        GoalTree subTree = goalStorage.retrieveGoalTree(data.getSubTreeID());
-                        GoalTreeNodeData subData = createDataTreeForDates(subTree, startDate, endDate);
-                        if (data.getAnalysisMeasure() == null) {
-                            data.setCurrentValue(subData.getCurrentValue());
-                            data.setGoalOutcome(subData.getGoalOutcome());
+                    try {
+                        if (data.getSubTreeID() > 0) {
+                            GoalStorage goalStorage = new GoalStorage();
+                            GoalTree subTree = goalStorage.retrieveGoalTree(data.getSubTreeID());
+                            GoalTreeNodeData subData = createDataTreeForDates(subTree, startDate, endDate);
+                            if (data.getAnalysisMeasure() == null) {
+                                data.setCurrentValue(subData.getCurrentValue());
+                                data.setGoalOutcome(subData.getGoalOutcome());
+                            } else {
+                                data.populateCurrentValue();
+                                data.determineOutcome(startDate, endDate, goalEvaluationStorage);
+                            }
                         } else {
                             data.populateCurrentValue();
                             data.determineOutcome(startDate, endDate, goalEvaluationStorage);
                         }
-                    } else {
-                        data.populateCurrentValue();
-                        data.determineOutcome(startDate, endDate, goalEvaluationStorage);
+                    } catch (Exception e) {
+                        LogClass.error(e);
                     }
                 }
             };

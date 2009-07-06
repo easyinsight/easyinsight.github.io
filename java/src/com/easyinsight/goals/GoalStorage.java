@@ -841,7 +841,11 @@ public class GoalStorage {
             protected void accept(GoalTreeNode goalTreeNode) {
                 GoalTreeNodeData data = (GoalTreeNodeData) goalTreeNode;
                 data.populateCurrentValue();
-                data.determineOutcome(startDate, endDate, goalEvaluationStorage);
+                try {
+                    data.determineOutcome(startDate, endDate, goalEvaluationStorage);
+                } catch (SQLException e) {
+                    LogClass.error(e);
+                }
             }
         };
         visitor.visit(dataNode);

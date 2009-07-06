@@ -17,7 +17,7 @@
             <mx:AddChild relativeTo="{primarySpace}" position="firstChild">
                 <mx:Canvas height="100%" width="29" backgroundColor="0xF0F0F0">
                     <notification:TodoButton rotation="-90" x="3" y="70" image="{noteIcon}" text="TODO"
-                                                        messageListener="{messageListener}"
+                                             messageListener="{messageListener}"
                             />
                     <notification:BackgroundTaskButton rotation="-90" x="3" y="155" image="{clockIcon}" text="Tasks"
                                                        messageListener="{messageListener}"
@@ -27,7 +27,7 @@
             <mx:AddChild relativeTo="{primarySpace}" position="lastChild">
                 <mx:Canvas height="100%" width="29" backgroundColor="0xF0F0F0">
                     <notification:NotificationsButton rotation="90" x="26" y="3" image="{clockIcon}" text="Messages"
-                                                        messageListener="{messageListener}" />
+                                                      messageListener="{messageListener}"/>
                 </mx:Canvas>
             </mx:AddChild>
         </mx:State>
@@ -42,6 +42,7 @@
         import com.easyinsight.framework.FullScreenModuleEvent;
         import com.easyinsight.framework.ModuleAnalyzeSource;
         import com.easyinsight.genredata.ModuleAnalyzeEvent;
+        import com.easyinsight.goals.DelayedGoalAdminLink;
         import com.easyinsight.goals.DelayedGoalLink;
         import com.easyinsight.goals.GoalDataAnalyzeSource;
         import com.easyinsight.groups.DelayedGroupLink;
@@ -63,7 +64,7 @@
 
         import mx.rpc.events.FaultEvent;
 
-        import com.easyinsight.LoginDialog;                                 
+        import com.easyinsight.LoginDialog;
         import com.easyinsight.framework.SessionExpirationEvent;
         import com.easyinsight.framework.UserServiceResponse;
         import com.easyinsight.analysis.AnalysisCloseEvent;
@@ -264,48 +265,55 @@
                                                 multiReportLink.addEventListener(ModuleAnalyzeEvent.MODULE_ANALYZE, internalModuleAnalyze);
                                                 multiReportLink.execute();
                                             } else {
-                                            var page:String = o.page;
-                                        if (page != null) {
-                                            if (currentState == "Analysis") {
-                                                if (loggedIn) {
-                                                    currentState = "LoggedIn";
+                                                var goalAdminID:String = o.goalTreeAdminID;
+                                                if (goalAdminID != null) {
+                                                    var delayedGoalAdminLink:DelayedGoalAdminLink = new DelayedGoalAdminLink(Number(goalAdminID));
+                                                    delayedGoalAdminLink.addEventListener(AnalyzeEvent.ANALYZE, internalAnalyze);
+                                                    delayedGoalAdminLink.execute();
                                                 } else {
-                                                    currentState = "";
+                                                    var page:String = o.page;
+                                                    if (page != null) {
+                                                        if (currentState == "Analysis") {
+                                                            if (loggedIn) {
+                                                                currentState = "LoggedIn";
+                                                            } else {
+                                                                currentState = "";
+                                                            }
+                                                            dataAnalysis.removeEventListener(AnalysisCloseEvent.ANALYSIS_CLOSE, analysisClosed);
+                                                            dataAnalysis = null;
+                                                        }
+                                                        switch (page) {
+                                                            case "myData":
+                                                                navigation(new NavigationEvent("My Data"));
+                                                                break;
+                                                            case "myGoals":
+                                                                navigation(new NavigationEvent("Goals"));
+                                                                break;
+                                                            case "marketplace":
+                                                                navigation(new NavigationEvent("Marketplace"));
+                                                                break;
+                                                            case "groups":
+                                                                navigation(new NavigationEvent("Groups"));
+                                                                break;
+                                                            case "groupDetail":
+                                                                break;
+                                                            case "intro":
+                                                                navigation(new NavigationEvent("Intro"));
+                                                                break;
+                                                            case "solutions":
+                                                                navigation(new NavigationEvent("Solutions"));
+                                                                break;
+                                                            case "account":
+                                                                navigation(new NavigationEvent("Accounts"));
+                                                                break;
+                                                            case "welcome":
+                                                                navigation(new NavigationEvent(null, new WelcomeScreen()));
+                                                        }
+                                                    } else {
+                                                        navigation(new NavigationEvent("Intro"));
+                                                    }
                                                 }
-                                                dataAnalysis.removeEventListener(AnalysisCloseEvent.ANALYSIS_CLOSE, analysisClosed);
-                                                dataAnalysis = null;
                                             }
-                                            switch (page) {
-                                                case "myData":
-                                                    navigation(new NavigationEvent("My Data"));
-                                                    break;
-                                                case "myGoals":
-                                                    navigation(new NavigationEvent("Goals"));
-                                                    break;
-                                                case "marketplace":
-                                                    navigation(new NavigationEvent("Marketplace"));
-                                                    break;
-                                                case "groups":
-                                                    navigation(new NavigationEvent("Groups"));
-                                                    break;
-                                                case "groupDetail":
-                                                    break;
-                                                case "intro":
-                                                    navigation(new NavigationEvent("Intro"));
-                                                    break;
-                                                case "solutions":
-                                                    navigation(new NavigationEvent("Solutions"));
-                                                    break;
-                                                case "account":
-                                                    navigation(new NavigationEvent("Accounts"));
-                                                    break;
-                                                case "welcome":
-                                                    navigation(new NavigationEvent(null, new WelcomeScreen()));
-                                            }
-                                        } else {
-                                            navigation(new NavigationEvent("Intro"));
-                                        }
-                                        }
                                         }
                                     }
                                 }

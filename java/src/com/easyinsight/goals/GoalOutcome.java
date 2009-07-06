@@ -8,11 +8,11 @@ package com.easyinsight.goals;
 public class GoalOutcome {
     // outcome is exceeding goal, positive, neutral, negative
 
+    public static final int NO_DATA = 0;
     public static final int EXCEEDING_GOAL = 1;
     public static final int POSITIVE = 2;
     public static final int NEUTRAL = 3;
     public static final int NEGATIVE = 4;
-    public static final int NO_DATA = 5;
 
     private int outcomeState;
     private double outcomeValue;

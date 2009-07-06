@@ -32,6 +32,16 @@ public class GoalTree implements Cloneable {
 
     private String iconImage;
 
+    private GoalTreeMilestone defaultMilestone;
+
+    public GoalTreeMilestone getDefaultMilestone() {
+        return defaultMilestone;
+    }
+
+    public void setDefaultMilestone(GoalTreeMilestone defaultMilestone) {
+        this.defaultMilestone = defaultMilestone;
+    }
+
     public String getIconImage() {
         return iconImage;
     }

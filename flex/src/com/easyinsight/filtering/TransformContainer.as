@@ -328,6 +328,12 @@ import mx.managers.PopUpManager;
 			}
 			dispatchEvent(new TransformsUpdatedEvent(filterDefinitions));
         }
+
+    public function removeAllFilters():void {
+        for each (var filter:IFilter in filterMap) {
+            commandFilterDelete(filter);
+        }
+    }
 		
 		private function filterDeleted(event:FilterDeletionEvent):void {
             dispatchEvent(new CommandEvent(new FilterDeleteCommand(this, event.getFilter())));

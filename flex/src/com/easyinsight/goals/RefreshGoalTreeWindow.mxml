@@ -1,0 +1,89 @@
+<?xml version="1.0" ?>
+<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" title="Refresh Goal Tree Data Sources">
+    <mx:Script><![CDATA[
+        import com.easyinsight.analysis.CredentialRequirement;
+        import com.easyinsight.analysis.CredentialsEvent;
+        import com.easyinsight.analysis.RuntimeCredentialsWindow;
+        import com.easyinsight.framework.CredentialsCache;
+        import com.easyinsight.util.ProgressAlert;
+
+        import mx.collections.ArrayCollection;
+        import mx.managers.PopUpManager;
+
+        private var _goalTreeID:int;
+        private var _startDate:Date;
+        private var _endDate:Date;
+
+        private var neededCredentialCount:int = 0;
+        private var receivedCredentialCount:int = 0;
+
+        public function set startDate(value:Date):void {
+            _startDate = value;
+        }
+
+        public function set endDate(value:Date):void {
+            _endDate = value;
+        }
+
+        public function set goalTreeID(value:int):void {
+            _goalTreeID = value;
+        }
+
+        public function refreshData():void {
+            ProgressAlert.alert(this, "Determining needed credentials...", null, goalService.getCredentialsForGoalTree);
+            goalService.getCredentialsForGoalTree.send(_goalTreeID, allDataSourcesCheckbox.selected, subTreesCheckbox.selected,
+                    CredentialsCache.getCache().createCredentials());
+        }
+
+        private function onCredentials(event:CredentialsEvent):void {
+            CredentialsCache.getCache().addCredentials(event.dataSourceID, event.credentials);
+            receivedCredentialCount++;
+            if (receivedCredentialCount == neededCredentialCount) {
+                ProgressAlert.alert(this, "Refreshing the goal tree...", null, goalService.forceRefresh);
+                goalService.forceRefresh.send(_goalTreeID, _startDate, _endDate, CredentialsCache.getCache().createCredentials(),
+                        allDataSourcesCheckbox.selected, subTreesCheckbox.selected);
+            }
+        }
+
+        private function gotCredentials():void {
+            var credentials:ArrayCollection = goalService.getCredentialsForGoalTree.lastResult as ArrayCollection;
+            if (credentials.length == 0) {
+                goalService.forceRefresh.send(_goalTreeID, _startDate, _endDate, CredentialsCache.getCache().createCredentials(), allDataSourcesCheckbox.selected,
+                        subTreesCheckbox.selected);
+            } else {
+                receivedCredentialCount = 0;
+                neededCredentialCount = credentials.length;
+                for each (var credential:CredentialRequirement in credentials) {
+                    var window:RuntimeCredentialsWindow = new RuntimeCredentialsWindow();
+                    window.requirement = credential;
+                    window.addEventListener(CredentialsEvent.CREDENTIALS_SAVED, onCredentials);
+                    PopUpManager.addPopUp(window, this, true);
+                    PopUpManager.centerPopUp(window);
+                }
+            }
+        }
+
+        private function gotRefresh():void {
+            var goalTree:GoalTree = goalService.forceRefresh.lastResult as GoalTree;
+            dispatchEvent(new GoalTreeRefreshEvent(goalTree));
+            PopUpManager.removePopUp(this);
+        }
+        ]]></mx:Script>
+    <mx:RemoteObject destination="goalService" id="goalService">
+        <mx:method name="getCredentialsForGoalTree" result="gotCredentials()"/>
+        <mx:method name="forceRefresh" result="gotRefresh()"/>
+    </mx:RemoteObject>
+    <mx:Form styleName="TitleWindowContents">
+        <mx:FormItem label="Include All Data Sources:">
+            <mx:CheckBox id="allDataSourcesCheckbox"/>
+        </mx:FormItem>
+        <mx:FormItem label="Include Sub Trees:">
+            <mx:CheckBox id="subTreesCheckbox"/>
+        </mx:FormItem>
+        <mx:FormItem label="" direction="horizontal">
+            <mx:Button label="Refresh" click="refreshData()"/>
+            <mx:LinkButton label="Cancel" textDecoration="underline" click="PopUpManager.removePopUp(this)"/>
+        </mx:FormItem>
+    </mx:Form>
+
+</mx:TitleWindow>
