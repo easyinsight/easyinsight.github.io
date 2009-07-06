@@ -41,7 +41,7 @@
             <mx:DataGridColumn dataField="name" headerText="Name"/>
             <mx:DataGridColumn dataField="solutionArchiveName" headerText="Archive" width="120"/>
             <mx:DataGridColumn dataField="solutionTier" headerText="Tier" width="120" itemRenderer="com.easyinsight.solutions.SolutionTierRenderer"/>
-            <mx:DataGridColumn dataField="name" width="100" sortable="false" headerText="" itemRenderer="com.easyinsight.solutions.SolutionAdminControls"/>
+            <mx:DataGridColumn dataField="name" width="70" sortable="false" headerText="" itemRenderer="com.easyinsight.solutions.SolutionAdminControls"/>
         </mx:columns>
     </mx:DataGrid>
 </mx:VBox>
