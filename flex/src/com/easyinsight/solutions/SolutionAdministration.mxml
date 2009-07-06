@@ -1,8 +1,16 @@
 <?xml version="1.0" ?>
-<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" creationComplete="refreshData()">
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" creationComplete="refreshData(); addEventListener(DeleteSolutionEvent.DELETE_SOLUTION, onSolutionDelete)">
     <mx:Script><![CDATA[
         import mx.collections.ArrayCollection;
         import mx.managers.PopUpManager;
+
+        private function deletedSolution():void {
+            refreshData();
+        }
+
+        private function onSolutionDelete(event:DeleteSolutionEvent):void {
+            solutionService.deleteSolution.send(event.solutionID);
+        }
 
         [Bindable]
         private var solutions:ArrayCollection;
@@ -22,6 +30,7 @@
 ]]></mx:Script>
     <mx:RemoteObject id="solutionService" destination="solutionService">
         <mx:method name="getSolutions" result="gotSolutions()"/>
+        <mx:method name="deleteSolution" result="deletedSolution()"/>
     </mx:RemoteObject>
     <mx:HBox>
         <mx:Button label="Add Solution..." click="createSolution()"/>

@@ -332,19 +332,16 @@ public class GoalStorage {
                     AnalysisMeasure analysisMeasure = (AnalysisMeasure) measureResults.get(0);
                     long feedID = nodeRS.getLong(1);
                     double goalValue = nodeRS.getDouble(2);
-                    goalTreeNode.setAnalysisMeasure(analysisMeasure);
-                    goalTreeNode.setCoreFeedID(feedID);
-                    goalTreeNode.setHighIsGood(nodeRS.getBoolean(7));
                     PreparedStatement getFeedNameStmt = conn.prepareStatement("SELECT FEED_NAME FROM DATA_FEED WHERE DATA_FEED_ID = ?");
                     getFeedNameStmt.setLong(1, feedID);
                     ResultSet rs = getFeedNameStmt.executeQuery();
-                    rs.next();
-                    goalTreeNode.setCoreFeedName(rs.getString(1));
-                    goalTreeNode.setGoalValue(goalValue);
-                }
-
-                if (!nodeRS.wasNull()) {
-
+                    if (rs.next()) {
+                        goalTreeNode.setCoreFeedName(rs.getString(1));
+                        goalTreeNode.setGoalValue(goalValue);
+                        goalTreeNode.setAnalysisMeasure(analysisMeasure);
+                        goalTreeNode.setCoreFeedID(feedID);
+                        goalTreeNode.setHighIsGood(nodeRS.getBoolean(7));
+                    }
                 }
             }
             String name = nodeRS.getString(5);

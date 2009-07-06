@@ -5,16 +5,12 @@ import mx.controls.Button;
 import mx.managers.PopUpManager;
 public class SolutionAdminControls extends HBox{
 
-    [Embed(source="../../../../assets/gear.png")]
-    private var uploadIcon:Class;
-
     [Embed(source="../../../../assets/pencil.png")]
     private var editIcon:Class;
 
     [Embed(source="../../../../assets/navigate_cross.png")]
     private var deleteIcon:Class;
 
-    private var uploadButton:Button;
     private var editButton:Button;
     private var deleteButton:Button;
 
@@ -22,9 +18,6 @@ public class SolutionAdminControls extends HBox{
 
     public function SolutionAdminControls() {
         super();
-        uploadButton = new Button();
-        uploadButton.setStyle("icon", uploadIcon);
-        uploadButton.addEventListener(MouseEvent.CLICK, updateArchive);
         editButton = new Button();
         editButton.setStyle("icon", editIcon);
         editButton.addEventListener(MouseEvent.CLICK, editSolution);
@@ -38,7 +31,6 @@ public class SolutionAdminControls extends HBox{
     override protected function createChildren():void {
         super.createChildren();
         addChild(editButton);
-        addChild(uploadButton);
         addChild(deleteButton);
     }
 
@@ -58,12 +50,7 @@ public class SolutionAdminControls extends HBox{
     }
 
     private function deleteSolution(event:MouseEvent):void {
-
-    }
-
-    private function updateArchive(event:MouseEvent):void {
-        var window:UpdateSolutionArchiveWindow = UpdateSolutionArchiveWindow(PopUpManager.createPopUp(this, UpdateSolutionArchiveWindow, true));
-        PopUpManager.centerPopUp(window);
+        dispatchEvent(new DeleteSolutionEvent(solution.solutionID));
     }
 }
 }

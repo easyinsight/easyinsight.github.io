@@ -72,11 +72,10 @@ public class JiraDataSource extends ServerDataSourceDefinition {
             System.out.println(localURL);
             jiraSoapServiceGetter.setJirasoapserviceV2EndpointAddress(localURL);
             JiraSoapService jiraSoapService = jiraSoapServiceGetter.getJirasoapserviceV2();
-            jiraSoapService.login(credentials.getUserName(), credentials.getPassword());
+            String token = jiraSoapService.login(credentials.getUserName(), credentials.getPassword());
+            jiraSoapService.getStatuses(token);
             return null;
-        } catch (ServiceException e) {
-            return e.getMessage();
-        } catch (java.rmi.RemoteException e) {
+        } catch (Exception e) {
             return e.getMessage();
         }
     }

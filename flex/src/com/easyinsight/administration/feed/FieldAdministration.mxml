@@ -288,7 +288,7 @@
                     <mx:Button icon="@Embed(source='../../../../../assets/calendar.png')" toolTip="Add Date..."
                                click="addDate()"/>
                 </mx:HBox>
-                <mx:DataGrid dataProvider="{coreFields}" itemClick="onItemClick(event)" height="100%" dragEnabled="true">
+                <mx:DataGrid dataProvider="{coreFields}" itemClick="onItemClick(event)" height="100%" dragEnabled="true" rowHeight="30">
                     <mx:columns>
                         <util:EIDataGridColumn dataField="displayName" headerText=""
                                                itemRenderer="com.easyinsight.analysis.AnalysisItemTypeRenderer"
@@ -316,7 +316,7 @@
                     <mx:Button icon="@Embed(source='../../../../../assets/graph_edge_curved.png')"
                                toolTip="Add Cycle..." click="addCycle()()"/>
                 </mx:HBox>
-                <mx:DataGrid dataProvider="{derivedFields}" itemClick="onItemClick(event)" height="100%" dragEnabled="true">
+                <mx:DataGrid dataProvider="{derivedFields}" itemClick="onItemClick(event)" height="100%" dragEnabled="true" rowHeight="30">
                     <mx:columns>
                         <mx:DataGridColumn dataField="displayName" headerText=""
                                            itemRenderer="com.easyinsight.analysis.AnalysisItemTypeRenderer"

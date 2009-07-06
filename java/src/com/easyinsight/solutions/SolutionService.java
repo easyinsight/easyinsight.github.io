@@ -30,6 +30,21 @@ public class SolutionService {
         }
     }
 
+    public void deleteSolution(long solutionID) {
+        SecurityUtil.authorizeAccountTier(Account.ADMINISTRATOR);
+        Connection conn = Database.instance().getConnection();
+        try {
+            PreparedStatement stmt = conn.prepareStatement("DELETE FROM SOLUTION WHERE SOLUTION_ID = ?");
+            stmt.setLong(1, solutionID);
+            stmt.executeUpdate();
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        } finally {
+            Database.closeConnection(conn);
+        }
+    }
+
     public void addSolutionArchive(byte[] archive, long solutionID, String solutionArchiveName) {
         Connection conn = Database.instance().getConnection();
         try {
