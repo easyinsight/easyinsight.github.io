@@ -544,15 +544,17 @@
                             <mx:HDividedBox height="100%" width="100%">
                                 <mx:List dataProvider="{availableDimensions}" labelField="display" dragEnabled="true"
                                          dragMoveEnabled="false" enabled="{insightBound}" width="50%" height="100%"/>
-                                <mx:Box width="50%" height="100%" horizontalAlign="center" verticalAlign="middle"
-                                        id="workspace" paddingBottom="5" paddingLeft="5" paddingRight="5"
-                                        paddingTop="5">
+                                <mx:Canvas width="50%" height="100%"
+                                        id="workspace">
                                     <filtering:TransformContainer id="transformContainer" width="100%" height="100%"
                                                                   borderStyle="solid"
                                                                   borderThickness="1" backgroundColor="#ffffff"
                                                                   backgroundAlpha=".1" feedID="{feedID}"
-                                                                  analysisItems="{allFields}"/>
-                                </mx:Box>
+                                                                  analysisItems="{allFields}"
+                                                                  showLabel="false"
+                                            paddingBottom="5" paddingLeft="5" paddingRight="5"
+                                        paddingTop="5"/>
+                                </mx:Canvas>
                             </mx:HDividedBox>
                         </mx:VBox>
                     </mx:HBox>

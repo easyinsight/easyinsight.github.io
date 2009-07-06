@@ -247,6 +247,7 @@
                 reportRatingCount = String(report.ratingCount);
                 reportRating = String(report.ratingAverage);
                 reportViews = String(report.viewCount);
+                description = report.description;
                 attribution = event.attribution;
                 tags = "";
                 if (report.tagCloud != null && report.tagCloud.length > 0) {
@@ -342,24 +343,21 @@
                 <mx:HRule width="100%" id="hrule"/>                
             </mx:VBox>
             <mx:VBox id="reportMetadata">
-                <mx:Form>
+                <mx:Form width="350">
                     <mx:FormItem label="Report Name:">
-                        <mx:Label text="{reportName}" fontFamily="Lucida Grande" fontWeight="normal"/>
+                        <mx:Label text="{reportName}" fontFamily="Lucida Grande" fontWeight="normal" maxWidth="180"/>
                     </mx:FormItem>
                     <mx:FormItem label="Author Name:">
-                        <mx:Label text="{ownerName}" fontFamily="Lucida Grande" fontWeight="normal"/>
+                        <mx:Label text="{ownerName}" fontFamily="Lucida Grande" fontWeight="normal" maxWidth="180"/>
                     </mx:FormItem>
                     <mx:FormItem label="Report Creation Date:">
-                        <mx:Label text="{reportDate}" fontFamily="Lucida Grande" fontWeight="normal"/>
-                    </mx:FormItem>
-                    <mx:FormItem label="Description:">
-                        <mx:Label text="{description}" fontFamily="Lucida Grande" fontWeight="normal"/>
+                        <mx:Label text="{reportDate}" fontFamily="Lucida Grande" fontWeight="normal" maxWidth="180"/>
                     </mx:FormItem>
                     <mx:FormItem label="Tags:">
-                        <mx:Label text="{tags}" fontFamily="Lucida Grande" fontWeight="normal"/>
+                        <mx:Label text="{tags}" fontFamily="Lucida Grande" fontWeight="normal" maxWidth="180"/>
                     </mx:FormItem>
                     <mx:FormItem label="Data Attribution:">
-                        <mx:Label text="{attribution}" fontFamily="Lucida Grande" fontWeight="normal"/>
+                        <mx:Label text="{attribution}" fontFamily="Lucida Grande" fontWeight="normal" maxWidth="180"/>
                     </mx:FormItem>
                     <!--<mx:FormItem label="Report Rating:">
                         <mx:Label text="{reportRating}"/>
@@ -373,8 +371,12 @@
                             <mx:Image source="{noRatingIcon}"/>
                         </mx:HBox>
                     </mx:FormItem>-->
-                    <mx:FormItem label="Report Views:">
+                    <!--<mx:FormItem label="Report Views:">
                         <mx:Label text="{reportViews}" fontFamily="Lucida Grande" fontWeight="normal"/>
+                    </mx:FormItem>-->          
+                    <mx:FormItem label="Description:">
+                        <mx:TextArea text="{description}" fontFamily="Lucida Grande" fontWeight="normal" borderStyle="none"
+                                editable="false" selectable="false" backgroundAlpha="0" width="180" height="200"/>
                     </mx:FormItem>
                 </mx:Form>
                 <!-- -->

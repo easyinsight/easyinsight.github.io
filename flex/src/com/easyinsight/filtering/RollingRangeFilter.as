@@ -9,7 +9,8 @@ package com.easyinsight.filtering
 	import mx.containers.HBox;
 	import mx.controls.Button;
 	import mx.controls.ComboBox;
-	import mx.events.DropdownEvent;
+import mx.controls.Label;
+import mx.events.DropdownEvent;
 	import mx.managers.PopUpManager;
 
 	public class RollingRangeFilter extends HBox implements IFilter
@@ -94,6 +95,13 @@ package com.easyinsight.filtering
 		
 		override protected function createChildren():void {
 			super.createChildren();
+            if (_showLabel) {
+                var label:Label = new Label();
+                label.text = _analysisItem.display + ":";
+                addChild(label);
+            } else {
+                toolTip = _analysisItem.display;
+            }
 			if (comboBox == null) {
 				comboBox = new ComboBox();
 				comboBox.dataProvider = rangeOptions;
@@ -149,6 +157,12 @@ package com.easyinsight.filtering
 		private function deleteSelf(event:MouseEvent):void {
 			dispatchEvent(new FilterDeletionEvent(this));
 		}
+
+        private var _showLabel:Boolean;
+
+        public function set showLabel(show:Boolean):void {
+            _showLabel = show;
+        }
 	}
 	
 	

@@ -36,11 +36,15 @@ public class CompositeFeed extends Feed {
     }
 
     public AnalysisItemResultMetadata getMetadata(AnalysisItem analysisItem, InsightRequestMetadata insightRequestMetadata) {
-        DerivedKey derivedKey = (DerivedKey) analysisItem.getKey();
-        for (CompositeFeedNode compositeFeedNode : getCompositeFeedNodes()) {
-            if (compositeFeedNode.getDataFeedID() == derivedKey.getFeedID()) {
-                return FeedRegistry.instance().getFeed(compositeFeedNode.getDataFeedID()).getMetadata(analysisItem, insightRequestMetadata);
+        if (analysisItem.getKey() instanceof DerivedKey) {
+            DerivedKey derivedKey = (DerivedKey) analysisItem.getKey();
+            for (CompositeFeedNode compositeFeedNode : getCompositeFeedNodes()) {
+                if (compositeFeedNode.getDataFeedID() == derivedKey.getFeedID()) {
+                    return FeedRegistry.instance().getFeed(compositeFeedNode.getDataFeedID()).getMetadata(analysisItem, insightRequestMetadata);
+                }
             }
+        } else {
+            
         }
         return null;
     }

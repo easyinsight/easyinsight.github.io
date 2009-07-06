@@ -33,6 +33,7 @@ import mx.managers.PopUpManager;
 		private var noFilters:Boolean = true;
 		private var dropHereBox:VBox;
         private var _filterEditable:Boolean = true;
+        private var _showLabel:Boolean = true;
 		[Bindable]
 		private var _analysisItems:ArrayCollection;
 
@@ -48,6 +49,10 @@ import mx.managers.PopUpManager;
 			this.addEventListener(DragEvent.DRAG_EXIT, dragExitHandler);					
 		}
 
+
+    public function set showLabel(value:Boolean):void {
+        _showLabel = value;
+    }
 
     public function set filterEditable(value:Boolean):void {
         _filterEditable = value;
@@ -174,6 +179,7 @@ import mx.managers.PopUpManager;
 				filter = new RollingRangeFilter(_feedID, filterDefinition.field);
 			}
             filter.filterEditable = _filterEditable;
+            filter.showLabel = _showLabel;
 			filter.filterDefinition = filterDefinition;
 			return filter;	
 		}
@@ -294,6 +300,7 @@ import mx.managers.PopUpManager;
 				//filterTile.explicitWidth = dropHereBox.width;
 			}
             filter.filterEditable = _filterEditable;
+            filter.showLabel = _showLabel;
 			filter.addEventListener(FilterUpdatedEvent.FILTER_ADDED, filterAdded);
 			filter.addEventListener(FilterUpdatedEvent.FILTER_UPDATED, filterUpdated);
 			filter.addEventListener(FilterDeletionEvent.DELETED_FILTER, filterDeleted);

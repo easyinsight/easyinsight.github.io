@@ -46,6 +46,8 @@
         import com.easyinsight.analysis.ControllerLookup;
         import com.easyinsight.analysis.CredentialRequirement;
         import com.easyinsight.analysis.CredentialsEvent;
+        import com.easyinsight.analysis.DescriptionEditWindow;
+        import com.easyinsight.analysis.DescriptionUpdateEvent;
         import com.easyinsight.analysis.HierarchyDrilldownEvent;
         import com.easyinsight.analysis.AnalysisStateChangeEvent;
         import com.easyinsight.analysis.DataViewFactory;
@@ -902,6 +904,18 @@
                 dispatchEvent(new ModuleAnalyzeEvent(new MultiReportAnalyzeSource(dataService.dataFeedID)));
             }
         }
+
+        private function onDescriptionUpdate(event:DescriptionUpdateEvent):void {
+            analysisDefinition.description = event.text;
+        }
+
+        private function editDescription():void {
+            var window:DescriptionEditWindow = new DescriptionEditWindow();
+            window.addEventListener(DescriptionUpdateEvent.DESCRIPTION_UPDATE, onDescriptionUpdate);
+            window.text = analysisDefinition.description;
+            PopUpManager.addPopUp(window, this, true);
+            PopUpManager.centerPopUp(window);
+        }
         ]]>
     </mx:Script>
     <mx:RemoteObject id="analysisService" destination="analysisDefinition">
@@ -952,6 +966,9 @@
                     </mx:FormItem>
                     <mx:FormItem label="Tags:">
                         <mx:TextInput text="{tags}" id="analysisTagsInput"/>
+                    </mx:FormItem>
+                    <mx:FormItem label="Description:">
+                        <mx:Button icon="@Embed(source='../../../assets/text.png')" toolTip="Edit Description..." click="editDescription()"/>
                     </mx:FormItem>
                 </mx:Form>
                 <mx:VBox id="sharingSettingsBox">

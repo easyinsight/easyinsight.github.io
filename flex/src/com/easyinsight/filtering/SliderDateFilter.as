@@ -14,7 +14,8 @@ import flash.events.MouseEvent;
 	import mx.controls.Button;
 	import mx.controls.DateField;
 	import mx.controls.HSlider;
-	import mx.events.CalendarLayoutChangeEvent;
+import mx.controls.Label;
+import mx.events.CalendarLayoutChangeEvent;
 	import mx.events.SliderEvent;
 	import mx.managers.PopUpManager;
 	import mx.rpc.events.ResultEvent;
@@ -69,6 +70,13 @@ import flash.events.MouseEvent;
 			highField = new DateField();
 			highField.selectedDate = dateMetadata.latestDate;
 			highField.addEventListener(CalendarLayoutChangeEvent.CHANGE, highDateChange);
+            if (_showLabel) {
+                var label:Label = new Label();
+                label.text = analysisItem.display + ":";
+                addChild(label);
+            } else {
+                toolTip = analysisItem.display;
+            }
 			addChild(lowField);
 			addChild(hslider);
 			addChild(highField);
@@ -186,5 +194,11 @@ import flash.events.MouseEvent;
 		public function get filterDefinition():FilterDefinition {
 			return _filterDefinition;
 		}
+
+        private var _showLabel:Boolean;
+
+        public function set showLabel(show:Boolean):void {
+            _showLabel = show;
+        }
 	}
 }

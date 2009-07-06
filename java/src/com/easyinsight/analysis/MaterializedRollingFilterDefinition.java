@@ -83,10 +83,13 @@ public class MaterializedRollingFilterDefinition extends MaterializedFilterDefin
                 cal.setTimeInMillis(cal.getTimeInMillis() - (60L * 60L * 1000L * 24L * 7L));
                 break;
             case MONTH:
-                cal.setTimeInMillis(cal.getTimeInMillis() - (60L * 60L * 1000L * 24L * 7L * 30L));
+                cal.setTimeInMillis(cal.getTimeInMillis() - (60L * 60L * 1000L * 24L * 30L));
                 break;
             case YEAR:
-                cal.setTimeInMillis(cal.getTimeInMillis() - (60L * 60L * 1000L * 24L * 7L * 365L));
+                cal.setTimeInMillis(cal.getTimeInMillis() - (60L * 60L * 1000L * 24L * 365L));
+                break;
+            case QUARTER:
+                cal.setTimeInMillis(cal.getTimeInMillis() - (60L * 60L * 1000L * 24L * 30L * 3L));
                 break;
         }
         return cal.getTimeInMillis();

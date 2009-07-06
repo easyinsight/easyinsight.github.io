@@ -68,6 +68,7 @@ public class AnalysisDefinitionFactory {
         analysisDefinitionState.setId(wsAnalysisDefinition.getReportStateID());
         AnalysisDefinition analysisDefinition = new AnalysisDefinition();
         analysisDefinition.setAnalysisDefinitionState(analysisDefinitionState);
+        analysisDefinition.setDescription(wsAnalysisDefinition.getDescription());
         analysisDefinition.setAuthorName(wsAnalysisDefinition.getAuthorName());
         analysisDefinition.setDateCreated(wsAnalysisDefinition.getDateCreated());
         analysisDefinition.setDateUpdated(wsAnalysisDefinition.getDateUpdated());

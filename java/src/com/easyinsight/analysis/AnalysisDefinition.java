@@ -98,12 +98,23 @@ public class AnalysisDefinition implements Cloneable {
     @Column(name = "author_name")
     private String authorName;
 
+    @Column(name = "description")
+    private String description;
+
     @OneToMany(cascade = CascadeType.ALL)
     @MapKey(columns = @Column(name = "structure_key"))
     @JoinTable(name = "report_structure",
             joinColumns = @JoinColumn(name = "analysis_id"),
             inverseJoinColumns = @JoinColumn(name = "analysis_item_id"))
     private Map<String, AnalysisItem> reportStructure;
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
 
     public String getAuthorName() {
         return authorName;
@@ -408,6 +419,7 @@ public class AnalysisDefinition implements Cloneable {
                 newScrubs.add(dataScrub);
             }
         }
+        analysisDefinition.setDescription(getDescription());
         analysisDefinition.setCanSaveDirectly(isOwner(SecurityUtil.getUserID(false)));
         analysisDefinition.setAuthorName(getAuthorName());
         analysisDefinition.setDateCreated(getDateCreated());

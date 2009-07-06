@@ -1,8 +1,5 @@
 package com.easyinsight.analysis;
 
-import com.easyinsight.analysis.MaterializedFilterDefinition;
-import com.easyinsight.analysis.MaterializedRollingFilterDefinition;
-
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.Date;

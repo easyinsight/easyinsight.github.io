@@ -234,8 +234,7 @@
     </mx:RemoteObject>
     <mx:VBox width="100%" height="100%" paddingLeft="5" paddingBottom="5" paddingRight="5" paddingTop="5">
         <mx:HBox width="100%" verticalAlign="middle">
-            <mx:ComboBox id="reportBox" dataProvider="{
-                         _reports}" labelField="name" change="onReportChange()" rowCount="{reportRows}"/>
+            <mx:ComboBox id="reportBox" dataProvider="{_reports}" labelField="name" change="onReportChange()" rowCount="{reportRows}"/>
             <mx:Button icon="@Embed(source=
                        '../../../../assets/tables_x16.png')" toolTip="Refresh Report List" click="refreshService.getWidgetAnalyses.send()"/>
             <mx:Button icon="@Embed(source=

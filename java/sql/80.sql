@@ -1,0 +1,1 @@
+alter table analysis add description text default null;

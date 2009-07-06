@@ -3,7 +3,6 @@ package com.easyinsight.report {
 import com.easyinsight.quicksearch.EIDescriptor;
 
 import mx.containers.Box;
-import mx.controls.Button;
 import mx.controls.Label;
 
 public class ReportButton extends Box {
@@ -25,8 +24,10 @@ public class ReportButton extends Box {
         box.setStyle("cornerRadius", 8);
         box.setStyle("dropShadowEnabled", true);
         box.setStyle("backgroundColor", 0xFFFFFF);
+        box.percentWidth = 100;
         reportLabel = new Label();
         reportLabel.setStyle("fontSize", 14);
+        reportLabel.maxWidth = 130;
         setStyle("paddingLeft", 5);
         setStyle("paddingRight", 5);
         setStyle("paddingTop", 5);

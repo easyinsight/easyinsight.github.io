@@ -1,0 +1,25 @@
+<?xml version="1.0" ?>
+<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" width="300" height="300" title="Description">
+    <mx:Script><![CDATA[
+        import mx.managers.PopUpManager;
+
+        [Bindable]
+        private var _text:String;
+
+        private function save():void {
+            dispatchEvent(new DescriptionUpdateEvent(textArea.text));
+            PopUpManager.removePopUp(this);
+        }
+
+        public function set text(value:String):void {
+            _text = value;
+        }]]></mx:Script>
+    <mx:VBox width="100%" height="100%">
+        <mx:TextArea width="100%" height="100%" id="textArea" text="{_text}"/>
+        <mx:HBox width="100%" horizontalAlign="center">
+            <mx:Button label="Save" click="save()"/>
+            <mx:LinkButton label="Cancel" textDecoration="underline" click="PopUpManager.removePopUp(this)"/>
+        </mx:HBox>
+    </mx:VBox>
+
+</mx:TitleWindow>

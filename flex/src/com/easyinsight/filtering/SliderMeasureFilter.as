@@ -78,6 +78,13 @@ import flash.events.MouseEvent;
 		private function gotMetadata(event:ResultEvent):void {
 			var metadata:AnalysisItemResultMetadata = dataService.getAnalysisItemMetadata.lastResult as AnalysisItemResultMetadata;
 			var measureMetadata:AnalysisMeasureResultMetadata = metadata as AnalysisMeasureResultMetadata;
+            if (_showLabel) {
+                var label:Label = new Label();
+                label.text = analysisItem.display + ":";
+                addChild(label);
+            } else {
+                toolTip = analysisItem.display;
+            }
 			lowInput = new TextInput();
 			lowInput.editable = false;
 			addChild(lowInput);
@@ -138,6 +145,12 @@ import flash.events.MouseEvent;
 		
 		private function deleteSelf(event:MouseEvent):void {
 			dispatchEvent(new FilterDeletionEvent(this));
-		}			
+		}
+
+        private var _showLabel:Boolean;
+
+        public function set showLabel(show:Boolean):void {
+            _showLabel = show;
+        }
 	}
 }

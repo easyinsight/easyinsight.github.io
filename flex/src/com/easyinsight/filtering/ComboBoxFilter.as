@@ -14,7 +14,8 @@ import flash.events.MouseEvent;
 	import mx.containers.HBox;
 	import mx.controls.Button;
 	import mx.controls.ComboBox;
-	import mx.events.DropdownEvent;
+import mx.controls.Label;
+import mx.events.DropdownEvent;
 	import mx.managers.PopUpManager;
 	import mx.rpc.events.ResultEvent;
 	import mx.rpc.remoting.RemoteObject;
@@ -32,6 +33,9 @@ import flash.events.MouseEvent;
 		private var _analysisItems:ArrayCollection;
 
         private var _credentials:Object;
+
+
+
 		
 		[Bindable]
         [Embed(source="../../../../assets/navigate_cross.png")]
@@ -45,7 +49,8 @@ import flash.events.MouseEvent;
 		{
 			super();
 			this._feedID = feedID;
-			this._analysisItem = analysisItem;			
+			this._analysisItem = analysisItem;
+            setStyle("verticalAlign", "middle");
 		}
 
         private var _filterEditable:Boolean = true;
@@ -82,6 +87,13 @@ import flash.events.MouseEvent;
 		
 		override protected function createChildren():void {
 			super.createChildren();
+            if (_showLabel) {
+                var label:Label = new Label();
+                label.text = _analysisItem.display + ":";
+                addChild(label);
+            } else {
+                toolTip = _analysisItem.display;
+            }
 			if (comboBox == null) {
 				comboBox = new ComboBox();
 				comboBox.addEventListener(DropdownEvent.CLOSE, filterValueChanged);
@@ -172,5 +184,11 @@ import flash.events.MouseEvent;
 		public function set filterDefinition(filterDefinition:FilterDefinition):void {
 			_filterDefinition = filterDefinition as FilterValueDefinition; 	
 		}
-	}
+
+        private var _showLabel:Boolean;
+
+        public function set showLabel(show:Boolean):void {
+            _showLabel = show;
+        }
+    }
 }

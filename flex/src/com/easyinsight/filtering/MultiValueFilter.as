@@ -65,11 +65,15 @@ import flash.events.MouseEvent;
 		
 		override protected function createChildren():void {
 			super.createChildren();
-			if (labelText == null) {
-				labelText = new Label();
-				labelText.text = _filterDefinition.field.display;							
-			}
-			addChild(labelText);
+            if (_showLabel) {
+                if (labelText == null) {
+                    labelText = new Label();
+                    labelText.text = _filterDefinition.field.display + ":";
+                }
+                addChild(labelText);
+            } else {
+                this.toolTip = _filterDefinition.field.display + ":";
+            }
             if (_filterEditable) {
                 if (editButton == null) {
                     editButton = new Button();
@@ -169,5 +173,11 @@ import flash.events.MouseEvent;
 		public function set filterDefinition(filterDefinition:FilterDefinition):void {
 			_filterDefinition = filterDefinition as FilterValueDefinition; 	
 		}
+
+        private var _showLabel:Boolean;
+
+        public function set showLabel(show:Boolean):void {
+            _showLabel = show;
+        }
 	}
 }

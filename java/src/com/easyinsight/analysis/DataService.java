@@ -212,6 +212,9 @@ public class DataService {
                 results.setDefinition(analysisDefinition);
                 results.setHeaders(listDataResults.getHeaders());
                 results.setRows(listDataResults.getRows());
+                if (dataSet.getLastTime() == null) {
+                    dataSet.setLastTime(new Date());
+                }
                 results.setLastDataTime(dataSet.getLastTime());
                 results.setAttribution(feed.getAttribution());
                 if (resultsCache != null) {

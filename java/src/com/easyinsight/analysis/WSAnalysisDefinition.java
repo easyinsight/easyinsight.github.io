@@ -53,6 +53,15 @@ public abstract class WSAnalysisDefinition implements Serializable {
     private boolean visibleAtFeedLevel;
     private Date dateCreated;
     private Date dateUpdated;
+    private String description;
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
 
     public Date getDateCreated() {
         return dateCreated;
