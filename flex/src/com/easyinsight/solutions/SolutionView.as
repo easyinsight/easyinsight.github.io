@@ -8,7 +8,6 @@ import flash.events.MouseEvent;
 import mx.binding.utils.BindingUtils;
 import mx.containers.HBox;
 import mx.containers.VBox;
-import mx.controls.Image;
 import mx.controls.Label;
 
 public class SolutionView extends VBox{
@@ -16,8 +15,8 @@ public class SolutionView extends VBox{
     private var solution:Solution;
     private var _titleText:String;
     private var titleLabel:Label;
+    private var imageRenderer:SolutionImageRenderer;
     private var box:VBox;
-    private var goalTreeImage:Image;
 
     private var backgroundColor:uint = 0xFFFFFF;
 
@@ -25,7 +24,7 @@ public class SolutionView extends VBox{
         super();
         titleLabel = new Label();
         BindingUtils.bindProperty(titleLabel, "text", this, "titleText");
-        goalTreeImage = new Image();
+        imageRenderer = new SolutionImageRenderer();
         setStyle("paddingLeft", 10);
         setStyle("paddingRight", 10);
         setStyle("paddingTop", 10);
@@ -63,12 +62,12 @@ public class SolutionView extends VBox{
         titleBox.setStyle("horizontalAlign", "center");
         titleBox.addChild(titleLabel);
         box.addChild(titleBox);
-        box.addChild(goalTreeImage);
+        box.addChild(imageRenderer);
     }
 
     override public function set data(val:Object):void {
         solution = val as Solution;
-
+        imageRenderer.data = solution;
         titleText = solution.name;
         if (User.getInstance() == null) {
             backgroundColor = 0xFFFFFF;
