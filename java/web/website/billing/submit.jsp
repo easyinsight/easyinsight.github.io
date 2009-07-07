@@ -8,6 +8,7 @@
 <%@ page import="java.text.SimpleDateFormat" %>
 <%@ page import="java.text.DateFormat" %>
 <%@ page import="java.util.*" %>
+<%@ page import="com.easyinsight.users.User" %>
 <%--
   Created by IntelliJ IDEA.
   User: abaldwin
@@ -26,14 +27,20 @@
     else
     {
         long accountID = (Long) request.getSession().getAttribute("accountID");
+        long userID = (Long) request.getSession().getAttribute("userID");
         Account account = null;
-
+        User user = null;
         EIConnection conn = Database.instance().getConnection();
         conn.setAutoCommit(false);
         Session s = Database.instance().createSession(conn);
         try {
+            user = (User) s.createQuery("from User where userID = ?").setLong(0, userID).list().get(0);
             account = (Account) s.createQuery("from Account where accountID = ?").setLong(0, accountID).list().get(0);
             account.setBillingInformationGiven(true);
+
+            if((account.getAccountType() == Account.GROUP || account.getAccountType() == Account.PROFESSIONAL || account.getAccountType() == Account.ENTERPRISE)
+              && !user.isAccountAdmin())
+                response.sendRedirect("access.jsp");
 
             if(account.getAccountState() == Account.DELINQUENT) {
                 AccountCreditCardBillingInfo info = new AccountCreditCardBillingInfo();

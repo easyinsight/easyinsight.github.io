@@ -1,5 +1,5 @@
 <?xml version="1.0" ?>
-<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:account="com.easyinsight.account.*" width="100%" height="100%">
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:account="com.easyinsight.account.*" width="100%" height="100%" creationComplete="onCreationComplete()">
     <mx:VBox width="100%" height="100%" horizontalAlign="center">
         <mx:VBox id="accountSettingsBox" verticalGap="0" borderThickness="1" borderColor="#D42525" borderStyle="solid"
                  dropShadowEnabled="true">
@@ -12,11 +12,30 @@
                 <mx:FormItem>
                     <mx:Button label="Change/Update Billing Information" click="flash.net.navigateToURL(new URLRequest('billing/billing.jsp'), '_self');"/><mx:Button label="Cancel Account..." click="cancelPaidAccount()"/> 
                 </mx:FormItem>
+                <mx:FormItem>
+                    <mx:Button label="Upgrade Account..." click="onUpgradeAccount()" visible="{showUpgrade}" />
+                </mx:FormItem>
             </mx:Form>
         </mx:VBox>
     </mx:VBox>
     <mx:Script><![CDATA[
+        import com.easyinsight.framework.User;
+
         import mx.managers.PopUpManager;
+
+        [Bindable]
+        private var showUpgrade:Boolean;
+
+        private function onCreationComplete():void {
+            showUpgrade = User.getInstance().getAccountType() != Account.ENTERPRISE;
+        }
+
+        private function onUpgradeAccount():void {
+            var window:ChangeAccountTypeWindow = new ChangeAccountTypeWindow();
+            PopUpManager.addPopUp(window, this, true);
+            PopUpManager.centerPopUp(window);
+            window.y = 10;
+        }
 
         private function cancelPaidAccount():void {
             var window:CancelPaidAccountWindow = new CancelPaidAccountWindow();

@@ -23,6 +23,7 @@
   <%
       long accountID = 0;
       Account account = null;
+      User user = null;
       Session s = Database.instance().createSession();
       try {
           if(request.getParameter("username") != null && request.getParameter("password") != null) {
@@ -31,7 +32,8 @@
               List results = s.createQuery("from User where userName = ? and password = ?").setString(0, request.getParameter("username")).setString(1, encryptedPass).list();
               if(results.size() != 1)
                   response.sendRedirect("login.jsp?error=true");
-              account = ((User) results.get(0)).getAccount();
+              user =(User) results.get(0);
+              account = user.getAccount();
               accountID = account.getAccountID();
               request.getSession().setAttribute("accountID", accountID);
           }
@@ -39,12 +41,18 @@
               if(request.getSession().getAttribute("accountID")== null)
                 response.sendRedirect("login.jsp?error=true");
               accountID = (Long) request.getSession().getAttribute("accountID");
+              long userID = (Long) request.getSession().getAttribute("userID");
+              user = (User) s.createQuery("from User where userID = ?").setLong(0, userID).list().get(0);
               account = (Account) s.createQuery("from Account where accountID = ?").setLong(0, accountID).list().get(0);
           }
       }
       finally {
           s.close();
       }
+      if((account.getAccountType() == Account.GROUP || account.getAccountType() == Account.PROFESSIONAL || account.getAccountType() == Account.ENTERPRISE)
+              && !user.isAccountAdmin())
+        response.sendRedirect("access.jsp");
+
       String keyID = BillingUtil.getKeyID();
       String key = BillingUtil.getKey();
       String orderID = "";

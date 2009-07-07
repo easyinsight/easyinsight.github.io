@@ -29,7 +29,8 @@
         import com.easyinsight.framework.User;
         import com.easyinsight.framework.UserTransferObject;
 import mx.controls.Alert;
-import mx.managers.PopUpManager;
+        import mx.controls.Spacer;
+        import mx.managers.PopUpManager;
 
         private function previousPage():void {
             currentState = "";
@@ -104,27 +105,46 @@ import mx.managers.PopUpManager;
 
         private function setup():void {
             var accountType:int = User.getInstance().getAccountType();
+            var spacer:Spacer;
             switch(accountType) {
             case Account.FREE:
-                individualAvailable = true;
+                var individual:IndividualAccountInfo = new IndividualAccountInfo();
+                individual.addEventListener(UpgradeEvent.UPGRADE_EVENT, upgradeToIndividual);
+                flowBox.addChild(individual);
             case Account.INDIVIDUAL:
-                groupAvailable = true;
+                spacer = new Spacer();
+                spacer.width = 30;
+                flowBox.addChild(spacer);
+                var group:GroupAccountInfo = new GroupAccountInfo();
+                group.addEventListener(UpgradeEvent.UPGRADE_EVENT, upgradeToGroup);
+                flowBox.addChild(group);
+                flowBox.height = 450;
             case Account.GROUP:
-                professionalAvailable = true;
+                    spacer = new Spacer();
+                    spacer.width = 30;
+                var professional:ProfessionalAccountInfo = new ProfessionalAccountInfo();
+                professional.addEventListener(UpgradeEvent.UPGRADE_EVENT, upgradeToProfessional);
+                flowBox.addChild(spacer);
+                flowBox.addChild(professional);
             case Account.PROFESSIONAL:
-                enterpriseAvailable = true;
+                spacer = new Spacer();
+                spacer.width = 30;
+                    flowBox.addChild(spacer);
+                    var enterprise:EnterpriseAccountInfo = new EnterpriseAccountInfo();
+                    enterprise.addEventListener(UpgradeEvent.UPGRADE_EVENT, upgradeToProfessional);
+                    flowBox.addChild(enterprise);
                 break;
             default:
                 break;
             }
         }
 
-        private function upgradeToIndividual():void {
+        private function upgradeToIndividual(event:UpgradeEvent):void {
             newAccountType = Account.INDIVIDUAL;
             currentState = "Confirmation";
         }
 
-        private function upgradeToGroup():void {
+        private function upgradeToGroup(event:UpgradeEvent):void {
             newAccountType = Account.GROUP;
             currentState = "Confirmation";
         }
@@ -142,54 +162,7 @@ import mx.managers.PopUpManager;
             <mx:HBox horizontalAlign="center" width="100%">
                 <mx:Label text="You can upgrade to the following options:" fontSize="14" fontWeight="bold" fontFamily="Tahoma"/>                                
             </mx:HBox>
-            <containers:FlowBox width="600" height="450">
-                <mx:VBox borderStyle="solid" dropShadowEnabled="true" cornerRadius="15" horizontalAlign="center" backgroundColor="#FFFFFF"
-                        width="250" paddingTop="5" paddingBottom="10" visible="{individualAvailable}">
-                    <mx:Label text="INDIVIDUAL" fontSize="20" fontWeight="bold"/>
-                    <mx:Label text="$10/month" color="#D42525" fontWeight="bold"/>
-                    <mx:HRule width="100%"/>
-                    <mx:Label text="Connect to other SaaS"/>
-                    <mx:Label text="Integrate with API"/>
-                    <mx:Label text="100 MB of storage"/>
-                    <mx:Label text="One user"/>
-                    <mx:Button label="Upgrade to Individual!" click="upgradeToIndividual()" styleName="blueButton"/>
-                </mx:VBox>
-                <mx:Spacer width="30" visible="{groupAvailable}" />
-                <mx:VBox borderStyle="solid" dropShadowEnabled="true" cornerRadius="15" horizontalAlign="center" backgroundColor="#FFFFFF"
-                        width="250" paddingTop="5" paddingBottom="10" visible="{groupAvailable}">
-                    <mx:Label text="GROUP" fontSize="20" fontWeight="bold"/>
-                    <mx:Label text="$100/month" color="#D42525" fontWeight="bold"/>
-                    <mx:HRule width="100%"/>
-                    <mx:Label text="Collaborate across your business"/>
-                    <mx:Label text="Data level security"/>
-                    <mx:Label text="1 GB of storage"/>
-                    <mx:Label text="20 users"/>
-                    <mx:Button label="Upgrade to Group!" click="upgradeToGroup()" styleName="blueButton"/>
-                </mx:VBox>
-                <mx:Spacer width="30" visible="{professionalAvailable}" />
-                    <mx:VBox borderStyle="solid" dropShadowEnabled="true" cornerRadius="15" horizontalAlign="center" backgroundColor="#FFFFFF"
-                             width="250" paddingTop="5" paddingBottom="10" visible="{professionalAvailable}">
-                         <mx:Label text="PROFESSIONAL" fontSize="20" fontWeight="bold"/>
-                         <mx:Label text="$1500/month" color="#D42525" fontWeight="bold"/>
-                         <mx:HRule width="100%"/>
-                         <mx:Label text="Sophisticated improvement tools"/>
-                         <mx:Label text="Business process integration"/>
-                         <mx:Label text="20 GB of storage"/>
-                         <mx:Label text="Unlimited users"/>
-                         <mx:Button label="Contact us" click="upgradeToProfessional()" styleName="blueButton"/>
-                    </mx:VBox>
-                    <mx:Spacer width="30" visible="{enterpriseAvailable}" />
-                    <mx:VBox borderStyle="solid" dropShadowEnabled="true" cornerRadius="15" horizontalAlign="center" backgroundColor="#FFFFFF"
-                             width="250" paddingTop="5" paddingBottom="10">
-                         <mx:Label text="ENTERPRISE" fontSize="20" fontWeight="bold"/>
-                         <mx:Label text="Talk to us" color="#D42525" fontWeight="bold"/>
-                         <mx:HRule width="100%"/>
-                         <mx:Label text="Dedicated storage and systems"/>
-                         <mx:Label text="Extra customization and security"/>
-                         <mx:Label text="Terabytes of storage"/>
-                         <mx:Label text="Unlimited users"/>
-                         <mx:Button label="Contact us" click="upgradeToProfessional()" styleName="blueButton"/>
-                    </mx:VBox>
+            <containers:FlowBox width="600" height="250" id="flowBox">
             </containers:FlowBox>
             <mx:HBox width="100%" horizontalAlign="center">
                 <mx:Button label="Cancel" click="PopUpManager.removePopUp(this)"/>

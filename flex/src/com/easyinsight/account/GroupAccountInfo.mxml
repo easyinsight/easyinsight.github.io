@@ -1,0 +1,19 @@
+<?xml version="1.0" ?>
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml"
+    borderStyle="solid" dropShadowEnabled="true" cornerRadius="15" horizontalAlign="center" backgroundColor="#FFFFFF"
+                        width="250" paddingTop="5" paddingBottom="10">
+    <mx:Metadata>
+        [Event(name="upgrade", type="com.easyinsight.account.UpgradeEvent")]
+    </mx:Metadata>
+      <mx:Label text="GROUP" fontSize="20" fontWeight="bold"/>
+                    <mx:Label text="$100/month" color="#D42525" fontWeight="bold"/>
+                    <mx:HRule width="100%"/>
+                    <mx:Label text="Collaborate across your business"/>
+                    <mx:Label text="Data level security"/>
+                    <mx:Label text="1 GB of storage"/>
+                    <mx:Label text="20 users"/>
+                    <mx:Button label="Upgrade to Group!" click="dispatchEvent(new UpgradeEvent())" styleName="blueButton"/>
+    <mx:Script><![CDATA[
+        import com.easyinsight.account.UpgradeEvent;
+        ]]></mx:Script>
+</mx:VBox>
