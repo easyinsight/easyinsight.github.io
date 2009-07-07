@@ -71,5 +71,69 @@
 
 %>
 <html>
+<head>
+<!-- InstanceBeginEditable name="doctitle" -->
+            <title>Easy Insight - Billing Complete</title>
+<!-- InstanceEndEditable -->
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <link href="/website.css" rel="stylesheet" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="/history/history.css" />
+    <link rel="icon" type="image/ico" href="/favicon.ico"/>
+    <script src="/AC_OETags.js" language="javascript"></script>
+    <script src="/history/history.js" language="javascript"></script>
+    <!-- InstanceBeginEditable name="head" -->
+    <!-- InstanceEndEditable -->
+</head>
+<body>
+<div id="allPage">
+    <div id="header">
+        <div id="navigationElements">
+            <div id="topLinks" style="width:100%">
+                <a href="/contactus.html">contact us</a><div></div>
+                <a href="http://jamesboe.blogspot.com/">blog</a><div></div>
+                <a href="/index.html">home</a>
+            </div>
+            <div id="mainLinks" style="width:100%">
+                <a href="/company.html">COMPANY</a><div></div>
+                <a href="/consulting.html">CONSULTING</a><div></div>
+                <!--<a href="index.html">COMMUNITY</a><div></div>-->
+                <a href="/solutions.html">SOLUTIONS</a><div></div>
+                <a href="/product.html">PRODUCT</a><div></div>
+                <a href="/index.html">HOME</a>
+            </div>
+        </div>
+        <div id="logo">
+            <img src="/logo2.PNG" alt="Easy Insight Logo"/>
+        </div>
+    </div>
+    <img src="/redbar.PNG" alt="Red Bar"/>
+    <div id="centerPage">
+        <!-- InstanceBeginEditable name="content" -->
+        <p> You have successfully set up your billing account. You will not be billed until your free trial has expired. </p>
+        <p><a href="/app/#page=account">Go Back</a></p>
 
+        <!-- InstanceEndEditable -->
+    </div>
+
+    <div id="footer">
+        <div style="width:400px">
+          &copy; 2009 Easy Insight LLC. All rights reserved.
+        </div>
+        <div>
+          <a href="/index.html">Home</a>
+        </div>
+        <div>
+          <a href="/sitemap.html">Site Map</a>
+        </div>
+        <div>
+          <a href="/privacy.html">Privacy Policy</a>
+        </div>
+        <div>
+          <a href="/tos.html">Terms of Service</a>
+        </div>
+    </div>
+
+</div>
+
+    </body>
 </html>

@@ -9,6 +9,7 @@
 	</mx:states>	
 	<mx:Script>
 		<![CDATA[
+        import com.easyinsight.framework.LoginEvent;
         import com.easyinsight.framework.User;
 
         import mx.managers.BrowserManager;
@@ -29,8 +30,13 @@
             _destinationURL = value;
         }
 
+        private function onLogin(event:LoginEvent):void {
+            gotFocus();
+        }
+
         private function setupListeners():void {
             addEventListener(RefreshAccountEvent.REFRESH_ACCOUNT, refreshAccount);
+            User.getEventNotifier().addEventListener(LoginEvent.LOGIN, onLogin);
         }
 
         private function refreshAccount(event:RefreshAccountEvent):void {

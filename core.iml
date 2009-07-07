@@ -28,7 +28,7 @@
           <root url="file://$MODULE_DIR$/java/web" relative="/" />
         </webroots>
         <building>
-          <setting name="EXPLODED_URL" value="file://$MODULE_DIR$/../apache-tomcat-6.0.14/webapps/app" />
+          <setting name="EXPLODED_URL" value="file://$MODULE_DIR$/../../../../../tomcat/webapps/app" />
           <setting name="EXPLODED_ENABLED" value="true" />
           <setting name="JAR_URL" value="file://" />
           <setting name="JAR_ENABLED" value="false" />
@@ -75,6 +75,14 @@
             <attribute name="method" value="1" />
             <attribute name="URI" value="/WEB-INF/lib" />
           </containerElement>
+          <containerElement type="library" name="CXF Runtime" level="project">
+            <attribute name="method" value="1" />
+            <attribute name="URI" value="/WEB-INF/lib" />
+          </containerElement>
+          <containerElement type="library" name="Gnip" level="module">
+            <attribute name="method" value="1" />
+            <attribute name="URI" value="/WEB-INF/lib" />
+          </containerElement>
         </packaging>
       </configuration>
     </facet>
@@ -85,6 +93,7 @@
       <sourceFolder url="file://$MODULE_DIR$/java/src" isTestSource="false" />
       <excludeFolder url="file://$MODULE_DIR$/java/out" />
     </content>
+    <orderEntry type="library" name="CXF Runtime" level="project" />
     <orderEntry type="module-library">
       <library name="cxf">
         <CLASSES>
@@ -184,6 +193,16 @@
         <JAVADOC />
         <SOURCES />
         <jarDirectory url="file://$MODULE_DIR$/java/lib/axis" recursive="false" />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="Gnip">
+        <CLASSES>
+          <root url="file://$MODULE_DIR$/java/lib/gnip" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+        <jarDirectory url="file://$MODULE_DIR$/java/lib/gnip" recursive="false" />
       </library>
     </orderEntry>
   </component>

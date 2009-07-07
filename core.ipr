@@ -239,6 +239,55 @@
             </SvnBranchConfiguration>
           </value>
         </entry>
+        <entry key="$PROJECT_DIR$/ant">
+          <value>
+            <SvnBranchConfiguration>
+              <option name="trunkUrl" value="https://wush.net/svn/easyinsight/code/ant" />
+            </SvnBranchConfiguration>
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/build">
+          <value>
+            <SvnBranchConfiguration>
+              <option name="trunkUrl" value="https://wush.net/svn/easyinsight/code/build" />
+            </SvnBranchConfiguration>
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/flex">
+          <value>
+            <SvnBranchConfiguration>
+              <option name="trunkUrl" value="https://wush.net/svn/easyinsight/code/flex" />
+            </SvnBranchConfiguration>
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/java">
+          <value>
+            <SvnBranchConfiguration>
+              <option name="trunkUrl" value="https://wush.net/svn/easyinsight/code/java" />
+            </SvnBranchConfiguration>
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/solutions/jdbc">
+          <value>
+            <SvnBranchConfiguration>
+              <option name="trunkUrl" value="https://wush.net/svn/easyinsight/code/solutions/jdbc" />
+            </SvnBranchConfiguration>
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/solutions/jira">
+          <value>
+            <SvnBranchConfiguration>
+              <option name="trunkUrl" value="https://wush.net/svn/easyinsight/code/solutions/jira" />
+            </SvnBranchConfiguration>
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/solutions/tcplugin">
+          <value>
+            <SvnBranchConfiguration>
+              <option name="trunkUrl" value="https://wush.net/svn/easyinsight/code/solutions/tcplugin" />
+            </SvnBranchConfiguration>
+          </value>
+        </entry>
       </map>
     </option>
     <option name="myVersion" value="124" />

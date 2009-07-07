@@ -67,7 +67,7 @@
 <!-- InstanceBeginEditable name="doctitle" -->
         <title>Billing</title>
 <!-- InstanceEndEditable -->
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <link href="/website.css" rel="stylesheet" type="text/css" />
     <link rel="stylesheet" type="text/css" href="/history/history.css" />
     <link rel="icon" type="image/ico" href="/favicon.ico"/>
@@ -77,8 +77,20 @@
     <script language="javascript" type="text/javascript">
         function setCCexp() {
             document.getElementById("ccexp").value = document.getElementById("ccexpMonth").value + document.getElementById("ccexpYear").value;
+
         }
     </script>
+    <style type="text/css">
+        #centerPage div {
+            width:22.5em;
+            display:inline-block;
+            padding: .25em;
+        }
+
+        span {
+            color: red;
+        }
+    </style>
     <!-- InstanceEndEditable -->
 </head>
 <body>
@@ -106,8 +118,9 @@
     <img src="/redbar.PNG" alt="Red Bar"/>
     <div id="centerPage">
         <!-- InstanceBeginEditable name="content" -->
+        <p>Please input your billing information below. Billing is handled through Braintree Payment Solutions (<a href="http://www.braintreepaymentsolutions.com">www.braintreepaymentsolutions.com</a>) - we never receive your credit card information.  Items marked with a <span>*</span> are required.</p>
         <% if(request.getParameter("error") != null) { %>
-            <span style="color:red">There was an error with your billing information. Please input the correct information below.</span>
+            <p><span>There was an error with your billing information. Please input the correct information below.</span></p>
         <% } %>
   <form method="post" action="https://secure.braintreepaymentgateway.com/api/transact.php" onsubmit="setCCexp()">
       <input id="ccexp" type="hidden" value="" name="ccexp"/>
@@ -121,15 +134,15 @@
       <input id="time" type="hidden" value="<%= time %>" name="time"/>
       <input id="hash" type="hidden" value="<%= hash %>" name="hash"/>
       <input id="type" type="hidden" value="<%= type %>" name="type" />
-      <p>Company: <input id="company" type="text" value="" name="company" /></p>
-      <p>First Name: <input id="firstname" type="text" value="" name="firstname" /> Last Name: <input id="lastname" type="text" value="" name="lastname" /></p>
-      <p>Address 1: <input id="address1" type="text" value="" name="address1" /></p>
-      <p>Address 2: <input id="address2" type="text" value="" name="address2" /></p>
-      <p>City: <input id="city" type="text" value="" name="city" /> State: <input id="state" type="text" value="" name="state" /> Zip Code: <input id="zip" type="text" value="" name="zip" /></p>
-      <p>Phone #: <input id="phone" type="text" value="" name="phone" /></p>
+      <div>Company: <input id="company" type="text" value="" name="company" /></div><br />
+      <div>First Name: <input id="firstname" type="text" value="" name="firstname" /><span>*</span></div><div>Last Name: <input id="lastname" type="text" value="" name="lastname" /><span>*</span></div><br />
+      <div>Address 1: <input id="address1" type="text" value="" name="address1" /><span>*</span></div><br />
+      <div>Address 2: <input id="address2" type="text" value="" name="address2" /></div><br />
+      <div>City: <input id="city" type="text" value="" name="city" /><span>*</span> State: <input id="state" type="text" value="" style="width:2.5em" maxlength="2" name="state" /><span>*</span></div><div> Zip Code: <input id="zip" type="text" value="" name="zip" /><span>*</span></div><br />
+      <div>Phone #: <input id="phone" type="text" value="" name="phone" style="width:14.5em" /><span>*</span></div> <br />
 
-      <p>Credit Card Number: <input id="ccnumber" type="text" value="4111111111111111" name="ccnumber"/> CVV/CVC: <input id="cvv" type="text" value="" name="cvv" /> </p>
-      <p>
+      <div>Credit Card Number: <input id="ccnumber" type="text" value="4111111111111111" style="width:16.5em" name="ccnumber"/><span>*</span></div><div>CVV/CVC: <input id="cvv" type="text" value="" name="cvv" style="width:3.5em" /><span>*</span></div><br />
+      <div>
       Expiration date: <select id="ccexpMonth">
           <option value="01">01 - January</option>
           <option value="02">02 - February</option>
@@ -158,9 +171,10 @@
           <option value="19">19</option>
           <option value="20">20</option>
       </select>
-      </p>
+      <span>*</span>
+      </div> <br />
 
-      <p><input type="submit" value="Submit" name="commit"/></p>
+      <div><input type="submit" value="Submit" name="commit"/></div>
   </form>
     	<!-- InstanceEndEditable -->
     </div>
