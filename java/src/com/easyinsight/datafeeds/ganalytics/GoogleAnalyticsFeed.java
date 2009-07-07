@@ -218,6 +218,7 @@ public class GoogleAnalyticsFeed extends Feed {
             //String ids = "ga:16750246";
             return dataSet;
         } catch (Exception e) {
+            as = null;
             throw new RuntimeException(e);
         }
     }

@@ -195,9 +195,7 @@ public class GoogleAnalyticsDataSource extends ServerDataSourceDefinition {
             String baseUrl = "https://www.google.com/analytics/feeds/accounts/default";
             as.getFeed(new URL(baseUrl), AccountFeed.class);
             return null;
-        } catch (IOException e) {
-            return e.getMessage();
-        } catch (ServiceException e) {
+        } catch (Exception e) {
             return e.getMessage();
         }
     }

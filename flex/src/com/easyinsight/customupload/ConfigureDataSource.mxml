@@ -76,20 +76,14 @@
         }
 
         private function validated():void {
-            progressBar.visible = false;
             var validation:String = uploadService.validateCredentials.lastResult as String;
             if (validation == null) {
-                Alert.show("Validation successful!");
+                dataSourceDefinition.refreshDataInterval = refreshStepper.value * 1000 * 60 * 60;
+                dataSourceCreation.updateDataSource(dataSourceDefinition);
+                feedService.updateFeedDefinition.send(dataSourceDefinition, "", null);
             } else {
                 Alert.show(validation);
             }
-        }
-
-        private function create():void {
-            progressBar.visible = true;
-            dataSourceDefinition.refreshDataInterval = refreshStepper.value * 1000 * 60 * 60;
-            dataSourceCreation.updateDataSource(dataSourceDefinition);
-            feedService.updateFeedDefinition.send(dataSourceDefinition, "", null);
         }
 
         private function created():void {
@@ -140,8 +134,7 @@
             <mx:NumericStepper id="refreshStepper"/>
         </mx:FormItem>
         <mx:FormItem label="" direction="horizontal">
-            <mx:Button label="Validate" click="validate()" enabled="{ready}"/>
-            <mx:Button label="Create" click="create()" enabled="{ready}"/>
+            <mx:Button label="Create" click="validate()" enabled="{ready}"/>
             <mx:Button label="Cancel" click="PopUpManager.removePopUp(this)"/>
         </mx:FormItem>
 	</mx:Form>
