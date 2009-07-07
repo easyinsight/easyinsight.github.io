@@ -1,0 +1,40 @@
+<?xml version="1.0" ?>
+<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml">
+    <mx:Script><![CDATA[
+        import com.easyinsight.framework.LoginEvent;
+        import com.easyinsight.framework.User;
+
+        import mx.controls.Alert;
+        import mx.messaging.config.ServerConfig;
+        import mx.managers.PopUpManager;
+
+        private function cancelFreeAccount():void {
+            Alert.show("Your account has been cancelled. You are now being logged out.");
+            cancel();
+            ServerConfig.getChannelSet(userService.destination).logout();
+            User.getEventNotifier().dispatchEvent(new LoginEvent(LoginEvent.LOGOUT));
+        }
+
+        private var validators:Array;
+
+        private function save():void {
+            userService.cancelFreeAccount.send();
+        }
+
+        private function cancel():void {
+            PopUpManager.removePopUp(this);
+        }
+]]></mx:Script>
+    <mx:RemoteObject destination="login" id="userService">
+		<mx:method name="cancelFreeAccount" result="cancelFreeAccount()"/>
+	</mx:RemoteObject>
+    <mx:Form styleName="TitleWindowContents">
+		<mx:FormItem label="" direction="horizontal">
+			<mx:Label text="Are you sure you want to cancel your account? You will be locked out of your account immediately, and you will have to re-activate it to continue using the application." />
+		</mx:FormItem>
+        <mx:FormItem label="" direction="horizontal">
+            <mx:Button label="Yes" click="save()"/>
+            <mx:Button label="No" click="cancel()"/>
+        </mx:FormItem>
+    </mx:Form>
+</mx:TitleWindow>

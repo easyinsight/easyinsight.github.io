@@ -100,6 +100,12 @@
             _additionalInfo = value;
         }
 
+        private function delinquentAccount():void {
+            var delinquent:Boolean = authService.isAccountDelinquentOrClosed.lastResult as Boolean;
+            if(delinquent)
+                flash.net.navigateToURL(new URLRequest("billing/login.jsp"), "_self");
+        }
+
         private function toBaseState():void {
             if (_additionalInfo == null) {
                 currentState = "";
@@ -169,6 +175,7 @@
                 User.getEventNotifier().dispatchEvent(new LoginEvent(LoginEvent.LOGIN, _targetURL));
             } else {
                 failureMessageLabel.text = authResult.failureMessage;
+                authService.isAccountDelinquentOrClosed.send(userName.text);
             }
         }
 
@@ -193,6 +200,7 @@
                             default:
                                 var failureMessage:String = event.fault.faultString;
                                 failureMessageLabel.text = failureMessage;
+                                authService.isAccountDelinquentOrClosed.send(userName.text);
                         }
                     }
                     ));
@@ -245,5 +253,6 @@
         <mx:method name="authenticate" result="handleAuthentication()"/>
         <mx:method name="remindPassword" result="reset()"/>
         <mx:method name="remindUserName" result="remindedUserName()"/>
+        <mx:method name="isAccountDelinquentOrClosed" result="delinquentAccount()" />
     </mx:RemoteObject>
 </mx:Box>

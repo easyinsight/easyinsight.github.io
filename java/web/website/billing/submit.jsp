@@ -33,13 +33,9 @@
         Session s = Database.instance().createSession(conn);
         try {
             account = (Account) s.createQuery("from Account where accountID = ?").setLong(0, accountID).list().get(0);
-            if(!(account.isBillingInformationGiven() == null) && !account.isBillingInformationGiven()) {
-                account.setBillingInformationGiven(true);
-                s.save(account);
-            }
+            account.setBillingInformationGiven(true);
 
             if(account.getAccountState() == Account.DELINQUENT) {
-                account.setAccountState(Account.ACTIVE);
                 AccountCreditCardBillingInfo info = new AccountCreditCardBillingInfo();
                 info.setTransactionID(request.getParameter("transactionid"));
                 info.setAmount(request.getParameter("amount"));
@@ -56,8 +52,9 @@
                 info.setTransactionTime(transTime);
                 account.getBillingInfo().add(info);
                 s.save(info);
-                s.save(account);
             }
+            account.setAccountState(Account.ACTIVE);
+            s.save(account);
 
             s.flush();
 
@@ -68,7 +65,7 @@
             throw new RuntimeException(e);
         }
         finally {
-          conn.close();
+          Database.closeConnection(conn);
         }
     }
 

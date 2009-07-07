@@ -33,6 +33,7 @@ public class Account {
     public static final int PREPARING = 7;
     public static final int BETA = 8;
     public static final int TRIAL = 9;
+    public static final int CLOSING = 10;
 
     public static final long FREE_MAX = 1000000;
     public static final long INDIVIDUAL_MAX = 50000000;
@@ -383,6 +384,8 @@ public class Account {
     }
 
     public AccountCreditCardBillingInfo bill() {
+        if(getAccountState() == Account.FREE)
+            setAccountState(Account.ACTIVE);
         // the indirection here is to support invoice billingSystem later
         BrainTreeBillingSystem billingSystem = new BrainTreeBillingSystem();
         billingSystem.setUsername("testapi");

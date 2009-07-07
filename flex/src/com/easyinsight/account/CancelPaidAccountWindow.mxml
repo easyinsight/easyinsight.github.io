@@ -1,0 +1,38 @@
+<?xml version="1.0" ?>
+<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml">
+    <mx:Script><![CDATA[
+        import com.easyinsight.framework.LoginEvent;
+        import com.easyinsight.framework.User;
+
+        import mx.controls.Alert;
+        import mx.messaging.config.ServerConfig;
+        import mx.managers.PopUpManager;
+
+        private function cancelPaidAccount():void {
+            Alert.show("Your account has been cancelled, and your billing information has been cleared. You can reinstate your account by entering your billing information again.");
+            cancel();
+        }
+
+        private var validators:Array;
+
+        private function save():void {
+            userService.cancelPaidAccount.send();
+        }
+
+        private function cancel():void {
+            PopUpManager.removePopUp(this);
+        }
+]]></mx:Script>
+    <mx:RemoteObject destination="login" id="userService">
+		<mx:method name="cancelPaidAccount" result="cancelPaidAccount()"/>
+	</mx:RemoteObject>
+    <mx:Form styleName="TitleWindowContents">
+		<mx:FormItem label="" direction="horizontal">
+			<mx:Label text="Are you sure you want to cancel your account? You will be locked out of your account when your next bill would be due. You may reinstate your account by entering your billing information again." />
+		</mx:FormItem>
+        <mx:FormItem label="" direction="horizontal">
+            <mx:Button label="Yes" click="save()"/>
+            <mx:Button label="No" click="cancel()"/>
+        </mx:FormItem>
+    </mx:Form>
+</mx:TitleWindow>

@@ -14,9 +14,17 @@
         }
 
         private function test():void {
-            var uploadPath:String = "braintree path";
-            var variables:Object = new Object();
-            // variables["variable_name"] = blah;
+            var uploadPath:String = "https://secure.braintreepaymentgateway.com/api/transact.php";
+            var form:Object = new Object();
+            form["type"] = "sale";
+            form["key_id"] = "776320";
+            form["orderid"] = "alantest1";
+            form.amount = "10.00";
+            form.time = "20090621172040";
+            form.ccnumber = "4111111111111111";
+            form.ccexp = "1010";
+            form.hash = "6f1717e005b3749f3224de8f893d686d";
+            form.redirect = "https://www.easy-insight.com/app";
             var urlRequest:URLRequest = new URLRequest();
             urlRequest.url = uploadPath;
             urlRequest.method = URLRequestMethod.POST;
@@ -31,5 +39,5 @@
             urlLoader.load(urlRequest);
         }
         ]]></mx:Script>
-    <mx:Button label="Test"/>
+    <mx:Button label="Test" click="test()"/>
 </mx:Application>

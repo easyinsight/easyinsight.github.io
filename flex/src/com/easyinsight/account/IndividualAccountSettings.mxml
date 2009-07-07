@@ -52,6 +52,12 @@
             PopUpManager.centerPopUp(window);
         }
 
+        private function cancelAccount():void {
+            var window:CancelPaidAccountWindow = new CancelPaidAccountWindow();
+            PopUpManager.addPopUp(window, this, true);
+            PopUpManager.centerPopUp(window);
+        }
+
         private function onRefresh(event:RefreshAccountEvent):void {
             event.currentTarget.removeEventListener(RefreshAccountEvent.REFRESH_ACCOUNT, onRefresh);
             dispatchEvent(event);
@@ -78,8 +84,11 @@
                 <mx:FormItem label="">
                     <mx:Button label="Upgrade Account to Professional..." click="upgradeAccount()"/>
                 </mx:FormItem>
+                <mx:FormItem label="">
+                    <mx:Button label="Change/Update Billing Information" click="flash.net.navigateToURL(new URLRequest('billing/billing.jsp'), '_self');"/>
+                </mx:FormItem>
                 <mx:FormItem>
-                    <mx:Button label="Cancel Account..."/>
+                    <mx:Button label="Cancel Account..." click="cancelAccount()"/>
                 </mx:FormItem>
             </mx:Form>
             <account:AccountInfoDisplay/>

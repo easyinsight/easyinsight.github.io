@@ -63,8 +63,9 @@
         }
 
         private function gotAccountInfo():void {
-            if (this.account == null) {
-                this.account = userService.retrieveAccount.lastResult as Account;
+            var x:Account = userService.retrieveAccount.lastResult as Account;
+            if (x != null) {
+                this.account = x;
                 var accountSummary:AccountSummary = new AccountSummary();
                 accountSummary.account = account;
                 coreContent.addChild(accountSummary);

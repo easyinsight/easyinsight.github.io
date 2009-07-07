@@ -1,5 +1,5 @@
 <?xml version="1.0" ?>
-<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:account="com.easyinsight.account.*"
+<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:account="com.easyinsight.account.*" xmlns:containers="flexlib.containers.*"
                 creationComplete="setup()" backgroundColor="#F5F6F9" paddingBottom="20" paddingLeft="20" paddingRight="20" paddingTop="20">
     <mx:Metadata>
         [Event(name="refreshAccount", type="com.easyinsight.account.RefreshAccountEvent")]
@@ -8,15 +8,43 @@
         <mx:State name="Confirmation">
             <mx:RemoveChild target="{upgradeBox}"/>
             <mx:AddChild relativeTo="{coreContent}">
-                <account:AccountConfirmationUpgrade previousPage="backFromConfirm()" accountCreationConfirmed="onConfirm()" creationComplete="PopUpManager.centerPopUp(this)" account="{newAccountType}"/>
+                <account:AccountConfirmationUpgrade previousPage="backFromConfirm()" accountCreationConfirmed="onConfirm()" creationComplete="onCreationComplete()" account="{newAccountType}"/>
+            </mx:AddChild>
+        </mx:State>
+        <mx:State name="ContactUs">
+            <mx:RemoveChild target="{upgradeBox}"/>
+            <mx:AddChild relativeTo="{coreContent}">
+                <account:TypeContactUs id="contactUs" previousPage="previousPage();"/>
+            </mx:AddChild>
+        </mx:State>
+        <mx:State name="BillingInformation">
+            <mx:RemoveChild target="{upgradeBox}" />
+            <mx:AddChild relativeTo="{coreContent}">
+                <account:AccountBillingInformation id="billingInformation" previousPage="previousPage()" />
             </mx:AddChild>
         </mx:State>
     </mx:states>
     <mx:Script><![CDATA[
+        import com.easyinsight.framework.UpgradeAccountResponse;
         import com.easyinsight.framework.User;
         import com.easyinsight.framework.UserTransferObject;
 import mx.controls.Alert;
 import mx.managers.PopUpManager;
+
+        private function previousPage():void {
+            currentState = "";
+        }
+
+        private function onCreationComplete():void {
+            //PopUpManager.centerPopUp(this);
+            this.y = 100;
+            this.x = 100;
+//            var point1:Point = new Point();
+//            point1.x = 0;
+//            point1.y = 0;
+//            this.localToGlobal(point1);
+//            this.y = point1.y - 100;
+        }
 
         [Bindable]
         [Embed(source="../../../../assets/bullet_ball_blue.png")]
@@ -29,6 +57,12 @@ import mx.managers.PopUpManager;
 
         [Bindable]
         private var professionalAvailable:Boolean;
+
+        [Bindable]
+        private var groupAvailable:Boolean;
+
+        [Bindable]
+        private var enterpriseAvailable:Boolean;
 
         private var billingInfo:BillingInfo;
 
@@ -49,12 +83,19 @@ import mx.managers.PopUpManager;
         }
 
         private function upgradedAccount():void {
-            var user:UserTransferObject = userService.upgradeAccount.lastResult as UserTransferObject;
+            var response:UpgradeAccountResponse = userService.upgradeAccount.lastResult as UpgradeAccountResponse;
+            var user:UserTransferObject = response.user;
             User.getInstance().resync(user);
             User.getInstance().setAccountType(newAccountType);
             dispatchEvent(new RefreshAccountEvent());
-            PopUpManager.removePopUp(this);
-            Alert.show("Account upgraded!");
+
+            if(response.billingInformationNeeded) {
+                currentState = "BillingInformation";
+            }
+            else {
+                PopUpManager.removePopUp(this);
+                Alert.show("Account upgraded!");
+            }
         }
 
         private function backFromBilling():void {
@@ -63,11 +104,18 @@ import mx.managers.PopUpManager;
 
         private function setup():void {
             var accountType:int = User.getInstance().getAccountType();
-            if (accountType == Account.FREE) {
+            switch(accountType) {
+            case Account.FREE:
                 individualAvailable = true;
+            case Account.INDIVIDUAL:
+                groupAvailable = true;
+            case Account.GROUP:
                 professionalAvailable = true;
-            } else if (accountType == Account.INDIVIDUAL) {
-                professionalAvailable = true;
+            case Account.PROFESSIONAL:
+                enterpriseAvailable = true;
+                break;
+            default:
+                break;
             }
         }
 
@@ -76,9 +124,14 @@ import mx.managers.PopUpManager;
             currentState = "Confirmation";
         }
 
+        private function upgradeToGroup():void {
+            newAccountType = Account.GROUP;
+            currentState = "Confirmation";
+        }
+
         private function upgradeToProfessional():void {
             newAccountType = Account.PROFESSIONAL;
-            currentState = "BillingInfo";
+            currentState = "ContactUs";
         }
         ]]></mx:Script>
     <mx:RemoteObject id="userService" destination="accountAdmin">
@@ -89,103 +142,55 @@ import mx.managers.PopUpManager;
             <mx:HBox horizontalAlign="center" width="100%">
                 <mx:Label text="You can upgrade to the following options:" fontSize="14" fontWeight="bold" fontFamily="Tahoma"/>                                
             </mx:HBox>
-            <mx:HBox>
-                <mx:VBox borderThickness="1" borderStyle="solid" cornerRadius="15" dropShadowEnabled="true"
-                         visible="{individualAvailable}" backgroundColor="#8296D2" paddingBottom="10" paddingRight="10"
-                        paddingLeft="10" paddingTop="10">
-                    <mx:VBox backgroundColor="#E9ECF2" paddingBottom="5" paddingTop="5" paddingLeft="5" paddingRight="5">
-                        <mx:HBox width="100%" horizontalAlign="center">
-                            <mx:Label text="Individual" fontSize="14" fontWeight="bold" fontFamily="Tahoma"/>
-                        </mx:HBox>
-                        <mx:Grid>
-                            <mx:GridRow>
-                                <mx:GridItem>
-                                    <mx:Image source="{bulletIcon}"/>
-                                </mx:GridItem>
-                                <mx:GridItem>
-                                    <mx:Label text="Share your data with friends and coworkers"/>
-                                </mx:GridItem>
-                            </mx:GridRow>
-                            <mx:GridRow>
-                                <mx:GridItem>
-                                    <mx:Image source="{bulletIcon}"/>
-                                </mx:GridItem>
-                                <mx:GridItem>
-                                    <mx:Label text="Flexible storage allocation"/>
-                                </mx:GridItem>
-                            </mx:GridRow>
-                            <mx:GridRow>
-                                <mx:GridItem>
-                                    <mx:Image source="{bulletIcon}"/>
-                                </mx:GridItem>
-                                <mx:GridItem>
-                                    <mx:Label text="Quick integrations to help you see your data"/>
-                                </mx:GridItem>
-                            </mx:GridRow>
-                            <mx:GridRow>
-                                <mx:GridItem>
-                                    <mx:Image source="{bulletIcon}"/>
-                                </mx:GridItem>
-                                <mx:GridItem>
-                                    <mx:Label text="API access"/>
-                                </mx:GridItem>
-                            </mx:GridRow>
-                        </mx:Grid>
-                        <mx:HBox width="100%" horizontalAlign="center">
-                            <mx:LinkButton label="Upgrade to Individual!" textDecoration="underline" click="upgradeToIndividual()"
-                                    fontSize="14" fontWeight="bold" fontFamily="Tahoma"/>
-                        </mx:HBox>
-                    </mx:VBox>
+            <containers:FlowBox width="600" height="450">
+                <mx:VBox borderStyle="solid" dropShadowEnabled="true" cornerRadius="15" horizontalAlign="center" backgroundColor="#FFFFFF"
+                        width="250" paddingTop="5" paddingBottom="10" visible="{individualAvailable}">
+                    <mx:Label text="INDIVIDUAL" fontSize="20" fontWeight="bold"/>
+                    <mx:Label text="$10/month" color="#D42525" fontWeight="bold"/>
+                    <mx:HRule width="100%"/>
+                    <mx:Label text="Connect to other SaaS"/>
+                    <mx:Label text="Integrate with API"/>
+                    <mx:Label text="100 MB of storage"/>
+                    <mx:Label text="One user"/>
+                    <mx:Button label="Upgrade to Individual!" click="upgradeToIndividual()" styleName="blueButton"/>
                 </mx:VBox>
-                <!--
-                <mx:VBox borderThickness="1" borderStyle="solid" cornerRadius="15" dropShadowEnabled="true"
-                         visible="{professionalAvailable}" backgroundColor="#8296D2" paddingBottom="10" paddingRight="10"
-                        paddingLeft="10" paddingTop="10">
-                    <mx:VBox backgroundColor="#E9ECF2" paddingBottom="5" paddingTop="5" paddingLeft="5" paddingRight="5">
-                        <mx:HBox width="100%" horizontalAlign="center">
-                            <mx:Label text="Professional" fontSize="14" fontWeight="bold" fontFamily="Tahoma"/>
-                        </mx:HBox>
-                        <mx:Grid>
-                            <mx:GridRow>
-                                <mx:GridItem>
-                                    <mx:Image source="{bulletIcon}"/>
-                                </mx:GridItem>
-                                <mx:GridItem>
-                                    <mx:Label text="Manage multiple users within your account"/>
-                                </mx:GridItem>
-                            </mx:GridRow>
-                            <mx:GridRow>
-                                <mx:GridItem>
-                                    <mx:Image source="{bulletIcon}"/>
-                                </mx:GridItem>
-                                <mx:GridItem>
-                                    <mx:Label text="Track improvement through goal trees"/>
-                                </mx:GridItem>
-                            </mx:GridRow>
-                            <mx:GridRow>
-                                <mx:GridItem>
-                                    <mx:Image source="{bulletIcon}"/>
-                                </mx:GridItem>
-                                <mx:GridItem>
-                                    <mx:Label text="Apply powerful enterprise solutions"/>
-                                </mx:GridItem>
-                            </mx:GridRow>
-                            <mx:GridRow>
-                                <mx:GridItem>
-                                    <mx:Image source="{bulletIcon}"/>
-                                </mx:GridItem>
-                                <mx:GridItem>
-                                    <mx:Label text="Enhanced security options"/>
-                                </mx:GridItem>
-                            </mx:GridRow>
-                        </mx:Grid>
-                        <mx:HBox width="100%" horizontalAlign="center">
-                            <mx:LinkButton label="Upgrade to Professional!" textDecoration="underline" click="upgradeToProfessional()"
-                                    fontSize="14" fontWeight="bold" fontFamily="Tahoma"/>
-                        </mx:HBox>
+                <mx:Spacer width="30" visible="{groupAvailable}" />
+                <mx:VBox borderStyle="solid" dropShadowEnabled="true" cornerRadius="15" horizontalAlign="center" backgroundColor="#FFFFFF"
+                        width="250" paddingTop="5" paddingBottom="10" visible="{groupAvailable}">
+                    <mx:Label text="GROUP" fontSize="20" fontWeight="bold"/>
+                    <mx:Label text="$100/month" color="#D42525" fontWeight="bold"/>
+                    <mx:HRule width="100%"/>
+                    <mx:Label text="Collaborate across your business"/>
+                    <mx:Label text="Data level security"/>
+                    <mx:Label text="1 GB of storage"/>
+                    <mx:Label text="20 users"/>
+                    <mx:Button label="Upgrade to Group!" click="upgradeToGroup()" styleName="blueButton"/>
+                </mx:VBox>
+                <mx:Spacer width="30" visible="{professionalAvailable}" />
+                    <mx:VBox borderStyle="solid" dropShadowEnabled="true" cornerRadius="15" horizontalAlign="center" backgroundColor="#FFFFFF"
+                             width="250" paddingTop="5" paddingBottom="10" visible="{professionalAvailable}">
+                         <mx:Label text="PROFESSIONAL" fontSize="20" fontWeight="bold"/>
+                         <mx:Label text="$1500/month" color="#D42525" fontWeight="bold"/>
+                         <mx:HRule width="100%"/>
+                         <mx:Label text="Sophisticated improvement tools"/>
+                         <mx:Label text="Business process integration"/>
+                         <mx:Label text="20 GB of storage"/>
+                         <mx:Label text="Unlimited users"/>
+                         <mx:Button label="Contact us" click="upgradeToProfessional()" styleName="blueButton"/>
                     </mx:VBox>
-                </mx:VBox> -->
-            </mx:HBox>
+                    <mx:Spacer width="30" visible="{enterpriseAvailable}" />
+                    <mx:VBox borderStyle="solid" dropShadowEnabled="true" cornerRadius="15" horizontalAlign="center" backgroundColor="#FFFFFF"
+                             width="250" paddingTop="5" paddingBottom="10">
+                         <mx:Label text="ENTERPRISE" fontSize="20" fontWeight="bold"/>
+                         <mx:Label text="Talk to us" color="#D42525" fontWeight="bold"/>
+                         <mx:HRule width="100%"/>
+                         <mx:Label text="Dedicated storage and systems"/>
+                         <mx:Label text="Extra customization and security"/>
+                         <mx:Label text="Terabytes of storage"/>
+                         <mx:Label text="Unlimited users"/>
+                         <mx:Button label="Contact us" click="upgradeToProfessional()" styleName="blueButton"/>
+                    </mx:VBox>
+            </containers:FlowBox>
             <mx:HBox width="100%" horizontalAlign="center">
                 <mx:Button label="Cancel" click="PopUpManager.removePopUp(this)"/>
             </mx:HBox>

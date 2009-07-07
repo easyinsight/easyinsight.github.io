@@ -11,6 +11,9 @@
             <mx:AddChild relativeTo="{coreBox}">
                 <mx:Label text="Thanks for your interest. A sales representive will contact you soon." fontSize="18"/>
             </mx:AddChild>
+            <mx:AddChild relativeTo="{coreBox}">
+                <mx:Button label="Go Back" click="dispatchEvent(new PreviousPageEvent())"/>
+            </mx:AddChild>
         </mx:State>
     </mx:states>
     <mx:Script><![CDATA[

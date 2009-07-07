@@ -4,11 +4,11 @@ package com.easyinsight.account
 
 	public class PreviousPageEvent extends Event
 	{
-		public var PREVIOUS_PAGE:String = "previousPage";
+		public static var PREVIOUS_PAGE:String = "previousPage";
 		
 		public function PreviousPageEvent()
 		{
-			super(PREVIOUS_PAGE);
+			super(PREVIOUS_PAGE, true);
 		}
 		
 	}

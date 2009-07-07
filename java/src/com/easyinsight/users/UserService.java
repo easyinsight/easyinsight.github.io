@@ -11,6 +11,7 @@ import com.easyinsight.email.AccountMemberInvitation;
 import com.easyinsight.util.RandomTextGenerator;
 import com.easyinsight.groups.Group;
 import com.easyinsight.groups.GroupStorage;
+import com.easyinsight.billing.BrainTreeBillingSystem;
 
 import java.util.List;
 import java.util.ArrayList;
@@ -30,6 +31,51 @@ import flex.messaging.FlexContext;
  * Time: 5:34:56 PM
  */
 public class UserService implements IUserService {
+
+    public void cancelPaidAccount() {
+        long accountID = SecurityUtil.getAccountID();
+        Session session = Database.instance().createSession();
+        try {
+            session.getTransaction().begin();
+            Account a = (Account) session.createQuery("from Account where accountID  = ?").setLong(0, accountID).list().get(0);
+            a.setAccountState(Account.CLOSING);
+            a.setBillingInformationGiven(false);
+            BrainTreeBillingSystem billingSystem = new BrainTreeBillingSystem();
+            billingSystem.setUsername("testapi");
+            billingSystem.setPassword("password1");
+            billingSystem.cancelPlan(a.getAccountID());
+            session.save(a);
+            session.getTransaction().commit();
+        }
+        catch(Exception e) {
+            session.getTransaction().rollback();
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        }
+        finally {
+            session.close();
+        }
+    }
+
+    public void cancelFreeAccount() {
+        long accountID = SecurityUtil.getAccountID();
+        Session session = Database.instance().createSession();
+        try {
+            session.getTransaction().begin();
+            Account a = (Account) session.createQuery("from Account where accountID  = ?").setLong(0, accountID).list().get(0);
+            a.setAccountState(Account.CLOSED);
+            session.save(a);
+            session.getTransaction().commit();
+        }
+        catch(Exception e) {
+            session.getTransaction().rollback();
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        }
+        finally {
+            session.close();
+        }
+    }
 
     public void salesRequest(String userName, String email, String company, String additionalInfo) {
         try {
@@ -534,6 +580,8 @@ public class UserService implements IUserService {
         } else {
             User user = retrieveUser();
             Account account = user.getAccount();
+            if(account.getAccountState() == Account.CLOSED || account.getAccountState() == Account.DELINQUENT)
+                return null;
             return new UserServiceResponse(true, user.getUserID(), user.getAccount().getAccountID(), user.getName(),
                                 account.getAccountType(), account.getMaxSize(), user.getEmail(), user.getUserName(),
                                 user.getPassword(), user.isAccountAdmin(), user.isDataSourceCreator(), user.isInsightCreator());
@@ -560,6 +608,24 @@ public class UserService implements IUserService {
         return userStub;
     }
 
+    public boolean isAccountDelinquentOrClosed(String userName) {
+        Session session = Database.instance().createSession();
+        boolean delinquent = false;
+        try {
+            session.getTransaction().begin();
+            List results = session.createQuery("from User where userName = ?").setString(0, userName).list();
+            if(results.size() > 0) {
+                User user = (User) results.get(0);
+                int state = user.getAccount().getAccountState();
+                delinquent = (state == Account.DELINQUENT || state == Account.CLOSED);
+            }
+        }
+        finally {
+            session.close();
+        }
+        return delinquent;
+    }
+
     public UserServiceResponse authenticateWithEncrypted(String userName, String encryptedPassword) {
         try {
             UserServiceResponse userServiceResponse;
@@ -574,7 +640,7 @@ public class UserService implements IUserService {
                     if (encryptedPassword.equals(actualPassword)) {
                         List accountResults = session.createQuery("from Account where accountID = ?").setLong(0, user.getAccount().getAccountID()).list();
                         Account account = (Account) accountResults.get(0);
-                        if (account.getAccountState() == Account.ACTIVE || account.getAccountState() == Account.TRIAL) {
+                        if (account.getAccountState() == Account.ACTIVE || account.getAccountState() == Account.TRIAL || account.getAccountState() == Account.DELINQUENT) {
                             userServiceResponse = new UserServiceResponse(true, user.getUserID(), user.getAccount().getAccountID(), user.getName(),
                                 user.getAccount().getAccountType(), account.getMaxSize(), user.getEmail(), user.getUserName(), encryptedPassword, user.isAccountAdmin(), user.isDataSourceCreator(), user.isInsightCreator());
                         } else {
@@ -613,9 +679,9 @@ public class UserService implements IUserService {
                     if (encryptedPassword.equals(actualPassword)) {
                         List accountResults = session.createQuery("from Account where accountID = ?").setLong(0, user.getAccount().getAccountID()).list();
                         Account account = (Account) accountResults.get(0);
-                        if (account.getAccountState() == Account.ACTIVE || account.getAccountState() == Account.TRIAL || account.getAccountState() == Account.DELINQUENT) {
+                        if (account.getAccountState() == Account.ACTIVE || account.getAccountState() == Account.TRIAL || account.getAccountState() == Account.CLOSING) {
                             userServiceResponse = new UserServiceResponse(true, user.getUserID(), user.getAccount().getAccountID(), user.getName(),
-                                user.getAccount().getAccountType(), account.getMaxSize(), user.getEmail(), user.getUserName(), encryptedPassword, user.isAccountAdmin(), user.isDataSourceCreator(), user.isInsightCreator());
+                                 user.getAccount().getAccountType(), account.getMaxSize(), user.getEmail(), user.getUserName(), encryptedPassword, user.isAccountAdmin(), user.isDataSourceCreator(), user.isInsightCreator());
                         } else {
                             userServiceResponse = new UserServiceResponse(false, "Your account is not active.");
                         }

@@ -8,6 +8,9 @@
 <%@ page import="org.hibernate.Session" %>
 <%@ page import="java.security.NoSuchAlgorithmException" %>
 <%@ page import="com.easyinsight.billing.BillingUtil" %>
+<%@ page import="com.easyinsight.security.PasswordService" %>
+<%@ page import="com.easyinsight.users.User" %>
+<%@ page import="java.util.List" %>
 <%--
   Created by IntelliJ IDEA.
   User: abaldwin
@@ -18,11 +21,26 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <html>
   <%
+      long accountID = 0;
       Account account = null;
-      long accountID = (Long) request.getSession().getAttribute("accountID");
       Session s = Database.instance().createSession();
       try {
-          account = (Account) s.createQuery("from Account where accountID = ?").setLong(0, accountID).list().get(0);
+          if(request.getParameter("username") != null && request.getParameter("password") != null) {
+              String encryptedPass = PasswordService.getInstance().encrypt(request.getParameter("password"));
+
+              List results = s.createQuery("from User where userName = ? and password = ?").setString(0, request.getParameter("username")).setString(1, encryptedPass).list();
+              if(results.size() != 1)
+                  response.sendRedirect("login.jsp?error=true");
+              account = ((User) results.get(0)).getAccount();
+              accountID = account.getAccountID();
+              request.getSession().setAttribute("accountID", accountID);
+          }
+          if(account == null) {
+              if(request.getSession().getAttribute("accountID")== null)
+                response.sendRedirect("login.jsp?error=true");
+              accountID = (Long) request.getSession().getAttribute("accountID");
+              account = (Account) s.createQuery("from Account where accountID = ?").setLong(0, accountID).list().get(0);
+          }
       }
       finally {
           s.close();

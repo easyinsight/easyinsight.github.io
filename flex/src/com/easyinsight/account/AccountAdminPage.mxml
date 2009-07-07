@@ -9,7 +9,19 @@
                 <mx:FormItem label="Account Space Used: " fontFamily="Tahoma" fontWeight="bold">
                     <account:AvailableSpace/>
                 </mx:FormItem>
+                <mx:FormItem>
+                    <mx:Button label="Change/Update Billing Information" click="flash.net.navigateToURL(new URLRequest('billing/billing.jsp'), '_self');"/><mx:Button label="Cancel Account..." click="cancelPaidAccount()"/> 
+                </mx:FormItem>
             </mx:Form>
         </mx:VBox>
     </mx:VBox>
+    <mx:Script><![CDATA[
+        import mx.managers.PopUpManager;
+
+        private function cancelPaidAccount():void {
+            var window:CancelPaidAccountWindow = new CancelPaidAccountWindow();
+            PopUpManager.addPopUp(window, this, true);
+            PopUpManager.centerPopUp(window);            
+        }
+        ]]></mx:Script>
 </mx:VBox>

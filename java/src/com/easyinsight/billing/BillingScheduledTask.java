@@ -29,7 +29,7 @@ public class BillingScheduledTask extends ScheduledTask {
     protected void execute(Date now, Connection conn) throws Exception {
         Calendar c = Calendar.getInstance();
         int dayOfMonth = c.get(Calendar.DAY_OF_MONTH);
-        String queryString = "from Account where accountState = " + Account.ACTIVE + " and accountType != " + Account.FREE + " and accountType != " + Account.ADMINISTRATOR;
+        String queryString = "from Account where (accountState = " + Account.ACTIVE + " or accountState = " + Account.CLOSING + ") and accountType != " + Account.FREE + " and accountType != " + Account.ADMINISTRATOR;
 
         if(dayOfMonth == c.getActualMaximum(Calendar.DAY_OF_MONTH)) {
             queryString += " and billingDayOfMonth >= ?";
@@ -42,9 +42,14 @@ public class BillingScheduledTask extends ScheduledTask {
         AccountActivityStorage as = new AccountActivityStorage();
         for(Object o : results) {
             Account a = (Account) o;
-            Date d = as.getTrialTime(a.getAccountID(), conn);
-            if(d == null || d.before(now))
-                s.save(a.bill());
+            if(a.getAccountState() == Account.CLOSING)
+                a.setAccountState(Account.CLOSED);
+            else {
+                Date d = as.getTrialTime(a.getAccountID(), conn);
+                if(d == null || d.before(now))
+                    s.save(a.bill());
+
+            }
             s.save(a);
         }
         s.flush();

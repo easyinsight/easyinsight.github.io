@@ -38,6 +38,7 @@
          <path-element>/libs/ilog-elixir.swc</path-element>
          <path-element>/libs/ilog-elixir_rb.swc</path-element>
          <path-element>/libs/YahooMap.swc</path-element>
+         <path-element>/libs/flexlib.swc</path-element>
       </library-path>
         <context-root>/app</context-root>
        <!-- <services>C:\apache-tomcat-6.0.14\webapps\app\WEB-INF\flex\services-config.xml</services> -->

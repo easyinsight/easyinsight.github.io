@@ -4,6 +4,7 @@ import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.security.PasswordService;
 import com.easyinsight.security.Roles;
 import com.easyinsight.database.Database;
+import com.easyinsight.database.EIConnection;
 import com.easyinsight.util.RandomTextGenerator;
 import com.easyinsight.email.AccountMemberInvitation;
 import com.easyinsight.logging.LogClass;
@@ -211,19 +212,35 @@ public class UserAccountAdminService {
         return userCreationResponse;
     }
 
-    public UserTransferObject upgradeAccount(int toType) {
+    public UpgradeAccountResponse upgradeAccount(int toType) {
+        UpgradeAccountResponse response = new UpgradeAccountResponse();
         if (toType == Account.ADMINISTRATOR) {
             throw new SecurityException();
         }
         SecurityUtil.authorizeAccountAdmin();
         long accountID = SecurityUtil.getAccountID();
-        Session session = Database.instance().createSession();
+        EIConnection conn = Database.instance().getConnection();
+        Session session = Database.instance().createSession(conn);
         try {
-            session.beginTransaction();
+            conn.setAutoCommit(false);
             Account account = (Account) session.createQuery("from Account where accountID = ?").setLong(0, accountID).list().get(0);
-            User user = (User) session.createQuery("from User where userID = ?").setLong(0, SecurityUtil.getAccountID()).list().get(0);
+            User user = (User) session.createQuery("from User where userID = ?").setLong(0, SecurityUtil.getUserID()).list().get(0);
             account.setAccountType(toType);
-            if (toType == Account.PROFESSIONAL) {
+            Date trialEnd = new AccountActivityStorage().getTrialTime(account.getAccountID(), conn);
+            if(trialEnd != null && trialEnd.after(new Date()) && account.getBillingDayOfMonth() == null) {
+                Calendar c = Calendar.getInstance();
+                c.setTime(trialEnd);
+                account.setBillingDayOfMonth(c.get(Calendar.DAY_OF_MONTH));
+            }
+            else {
+                if(account.isBillingInformationGiven() == null || !account.isBillingInformationGiven()) {
+                    account.setAccountState(Account.DELINQUENT);
+                }
+            }
+            if(account.isBillingInformationGiven() == null || !account.isBillingInformationGiven())
+                response.setBillingInformationNeeded(true);
+
+            if (toType == Account.GROUP || toType == Account.PROFESSIONAL || toType == Account.ENTERPRISE) {
                 user.setAccountAdmin(true);
                 user.setDataSourceCreator(true);
                 user.setInsightCreator(true);
@@ -231,14 +248,16 @@ public class UserAccountAdminService {
             }
             session.update(account);
             account.toTransferObject();
-            session.getTransaction().commit();
-            return user.toUserTransferObject();
+            session.flush();
+            conn.commit();
+            response.setUser(user.toUserTransferObject());
+            return response;
         } catch (Exception e) {
             LogClass.error(e);
-            session.getTransaction().rollback();
+            conn.rollback();
             throw new RuntimeException(e);
         } finally {
-            session.close();
+            Database.closeConnection(conn);
         }
     }
 

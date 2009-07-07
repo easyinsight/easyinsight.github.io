@@ -46,16 +46,19 @@ import com.easyinsight.framework.UserTransferObject;
                     break;
                 case Account.INDIVIDUAL:
                     this.accountReviewText = "Individual";
-                    this.accountReviewCost = "Free for current beta";
+                    this.accountReviewCost = "$10/month after free trial";
                     break;
-                case Account.PROFESSIONAL:
-                    this.accountReviewText = "Professional";
-                    this.accountReviewCost = "Free for current beta";
-                    break;
-                case Account.ENTERPRISE:
-                    this.accountReviewText = "Enterprise";
-                    this.accountReviewCost = "Free for current beta";
-                    break;
+                case Account.GROUP:
+                    this.accountReviewText = "Group";
+                    this.accountReviewCost = "$100/month after free trial"
+//                case Account.PROFESSIONAL:
+//                    this.accountReviewText = "Professional";
+//                    this.accountReviewCost = "$1500/month after free trial";
+//                    break;
+//                case Account.ENTERPRISE:
+//                    this.accountReviewText = "Enterprise";
+//                    this.accountReviewCost = "Free for current beta";
+//                    break;
             }
         }
 		]]>
