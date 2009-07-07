@@ -271,7 +271,7 @@ import mx.managers.PopUpManager;
 		}
 		
 		private function filterUpdated(event:FilterUpdatedEvent):void {
-			if (!filterDefinitions.contains(event.filterDefinition)) {
+			if (!filterDefinitions.contains(event.filterDefinition) || event.rebuild) {
 				var index:int = filterDefinitions.getItemIndex(event.previousFilterDefinition);
 				filterDefinitions.removeItemAt(index);
 				var existingFilter:IFilter = null;

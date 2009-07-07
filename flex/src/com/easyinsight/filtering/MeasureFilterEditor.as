@@ -63,5 +63,8 @@ package com.easyinsight.filtering
 			}
 			return _filterDefinition;
 		}
-	}
+
+        public function set feedID(feedID:int):void {
+        }
+    }
 }

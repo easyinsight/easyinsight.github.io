@@ -69,6 +69,8 @@ import mx.events.DropdownEvent;
 		
 		private function edit(event:MouseEvent):void {
 			var window:GeneralFilterEditSettings = new GeneralFilterEditSettings();
+            window.feedID = _feedID;
+            window.detailClass = ComboBoxFilterWindow;
 			window.addEventListener(FilterEditEvent.FILTER_EDIT, onFilterEdit);
 			window.analysisItems = _analysisItems;
 			window.filterDefinition = _filterDefinition;
@@ -82,7 +84,7 @@ import mx.events.DropdownEvent;
 		}
 		
 		private function onFilterEdit(event:FilterEditEvent):void {
-			dispatchEvent(new FilterUpdatedEvent(FilterUpdatedEvent.FILTER_UPDATED, event.filterDefinition, event.previousFilterDefinition, this));
+			dispatchEvent(new FilterUpdatedEvent(FilterUpdatedEvent.FILTER_UPDATED, event.filterDefinition, event.previousFilterDefinition, this, event.bubbles, event.rebuild));
 		}
 		
 		override protected function createChildren():void {

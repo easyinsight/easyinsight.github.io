@@ -47,7 +47,9 @@ import flash.events.MouseEvent;
 		
 		private function edit(event:MouseEvent):void {
 			var window:GeneralFilterEditSettings = new GeneralFilterEditSettings();
+            window.feedID = _feedID;
 			window.addEventListener(FilterEditEvent.FILTER_EDIT, onFilterEdit);
+            window.detailClass = MultiValueFilterWindow;
 			window.analysisItems = _analysisItems;
 			window.filterDefinition = _filterDefinition;			
 			PopUpManager.addPopUp(window, this, true);
@@ -60,7 +62,7 @@ import flash.events.MouseEvent;
 		}
 		
 		private function onFilterEdit(event:FilterEditEvent):void {
-			dispatchEvent(new FilterUpdatedEvent(FilterUpdatedEvent.FILTER_UPDATED, event.filterDefinition, event.previousFilterDefinition, this));
+			dispatchEvent(new FilterUpdatedEvent(FilterUpdatedEvent.FILTER_UPDATED, event.filterDefinition, event.previousFilterDefinition, this, event.bubbles, event.rebuild));
 		}
 		
 		override protected function createChildren():void {

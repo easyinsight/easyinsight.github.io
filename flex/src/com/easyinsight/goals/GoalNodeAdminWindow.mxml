@@ -24,10 +24,14 @@
         import com.easyinsight.analysis.AnalysisItemEditWindow;
         import com.easyinsight.analysis.AnalysisItemWrapper;
         import com.easyinsight.analysis.CalculationWindow;
+        import com.easyinsight.analysis.CredentialRequirement;
+        import com.easyinsight.analysis.CredentialsEvent;
         import com.easyinsight.analysis.FeedMetadata;
         import com.easyinsight.analysis.MeasureItemEditor;
+        import com.easyinsight.analysis.RuntimeCredentialsWindow;
         import com.easyinsight.commands.CommandEvent;
         import com.easyinsight.commands.CommandProcessor;
+        import com.easyinsight.framework.CredentialsCache;
         import com.easyinsight.solutions.Solution;
         import com.easyinsight.filtering.FilterDefinition;
         import com.easyinsight.analysis.AnalysisMeasure;
@@ -131,6 +135,8 @@
 
         [Bindable]
         private var milestones:ArrayCollection;
+
+        private var feedMetadata:FeedMetadata;
 
         private static const NONE:AnalysisItem = new AnalysisItem();
 
@@ -266,6 +272,16 @@
         }
 
         private function processFeed(feedDefinition:FeedMetadata):void {
+            this.feedMetadata = feedDefinition;
+            for each (var credential:CredentialRequirement in feedMetadata.credentials) {
+                if (CredentialsCache.getCache().getCredentials(credential.dataSourceID) == null) {
+                    var window:RuntimeCredentialsWindow = new RuntimeCredentialsWindow();
+                    window.addEventListener(CredentialsEvent.CREDENTIALS_SAVED, onCredentials);
+                    window.requirement = credential;
+                    PopUpManager.addPopUp(window, this, true);
+                    PopUpManager.centerPopUp(window);
+                }
+            }
             availableDimensions = new ArrayCollection();
             var measures:ArrayCollection = new ArrayCollection();
             var dates:ArrayCollection = new ArrayCollection();
@@ -337,9 +353,13 @@
             _goalTreeNode.children.addItem(clonedNode);
         }
 
+        private function onCredentials(event:CredentialsEvent):void {
+            generateHistory();
+        }
+
         private function generateHistory():void {
             goalService.generateHistory.send(availableItemBox.selectedItem, transformContainer.getFilterDefinitions(),
-                    feedID, startChooser.selectedDate, endChooser.selectedDate);
+                feedID, startChooser.selectedDate, endChooser.selectedDate, CredentialsCache.getCache().createCredentials());
         }
 
         private function itemEdited(event:AnalysisItemEditEvent):void {

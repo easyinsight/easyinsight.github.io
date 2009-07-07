@@ -104,9 +104,10 @@ public class GoalService {
         }
     }
 
-    public List<GoalValue> generateHistory(AnalysisMeasure analysisMeasure, List<FilterDefinition> filters, long dataSourceID, Date startDate, Date endDate) {
+    public List<GoalValue> generateHistory(AnalysisMeasure analysisMeasure, List<FilterDefinition> filters, long dataSourceID, Date startDate, Date endDate,
+                                           List<CredentialFulfillment> credentials) {
         try {
-            return new HistoryRun().calculateHistoricalValues(dataSourceID, analysisMeasure, filters, startDate, endDate);
+            return new HistoryRun().calculateHistoricalValues(dataSourceID, analysisMeasure, filters, startDate, endDate, credentials);
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);
@@ -285,8 +286,8 @@ public class GoalService {
     public List<GoalValue> getGoalValues(final long goalTreeNodeID, final Date startDate, final Date endDate) {
         SecurityUtil.authorizeGoal(goalTreeNodeID, Roles.SUBSCRIBER);
         try {
-            return goalEvaluationStorage.getGoalValues(goalTreeNodeID, startDate, endDate);
-        } catch (Exception e) {
+            return goalEvaluationStorage.getGoalValuesFromDatabase(goalTreeNodeID, startDate, endDate);
+        } catch (Exception e) {                                             
             LogClass.error(e);
             throw new RuntimeException(e);
         }

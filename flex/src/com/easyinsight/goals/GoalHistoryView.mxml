@@ -1,8 +1,13 @@
 <?xml version="1.0" ?>
 <mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" creationComplete="setup()" width="100%" height="100%">
     <mx:Script><![CDATA[
+        import mx.charts.LinearAxis;
+        import mx.charts.chartClasses.IAxis;
+        import mx.charts.chartClasses.Series;
         import mx.collections.ArrayCollection;
         import mx.controls.Alert;
+        import mx.controls.Label;
+        import mx.controls.VRule;
         import mx.graphics.BitmapFill;
 
         [Bindable]
@@ -83,6 +88,55 @@
         private function subscribedToGoal():void {
             Alert.show("This goal will now show for you in the My Goals page.");
         }
+
+        private function drawLine():void {
+            linesCanvas.removeAllChildren();
+            var milestone:GoalTreeMilestone;
+            /*var dateFormatter:DateFormatter = new DateFormatter();
+            dateFormatter.formatString = "MM/DD/YY";
+            var format:String = dateFormatter.format(milestone.milestoneDate);
+            Alert.show(format);*/
+            var chartXValue:Object = getNumericChartValue(milestone.milestoneDate, horAxis);
+            var thePosition:Point = chartToScreen(chartXValue.numericValue, 0, horSeries);
+
+            //creating the line
+            var theLine:VRule = VRule(linesCanvas.addChild(new VRule()));
+            theLine.x = thePosition.x;
+            theLine.y = 0;
+            theLine.setStyle("strokeColor", 0x000000);
+            theLine.setStyle("strokeWidth", 5);
+            theLine.height = linesCanvas.height;
+
+            //creating the button
+            var milestoneLabel:Label = Label(linesCanvas.addChild(new Label()));
+            milestoneLabel.setStyle("fontSize", 13);
+            milestoneLabel.text = milestone.milestoneName;
+            //milestoneLabel.width = milestoneLabel.height = 20;
+            milestoneLabel.x = thePosition.x - (milestoneLabel.width / 2) + 1;
+            milestoneLabel.y = 5;
+        }
+
+
+        public function chartToScreen(chartX:Number, chartY:Number, theSeries:Series):Point {
+            var tmpCache:Array = new Array({chartX:chartX, chartY:chartY});
+            if (theSeries) {
+                theSeries.dataTransform.transformCache(tmpCache, "chartX", "screenX", "chartY", "screenY");
+            }
+            return new Point(Math.round(tmpCache[0].screenX), Math.round(tmpCache[0].screenY));
+
+        }
+
+
+        public function getNumericChartValue(inValue:Object, theAxis:IAxis):Object {
+            var axisCache:Array = new Array({inValue: inValue});
+            if (!(theAxis is LinearAxis)) {
+                theAxis.mapCache(axisCache, "inValue", "outValue", false);
+                return {numericValue: axisCache[0].outValue};
+            }
+            else {
+                return {numericValue: Number(inValue)};
+            }
+        }
         ]]></mx:Script>
     <mx:RemoteObject destination="goalService" id="goalService">
         <mx:method name="getGoalValues" result="gotValues()"/>
@@ -99,14 +153,18 @@
             <mx:Spacer width="100%"/>
             <mx:Button icon="{addIcon}" toolTip="Add this goal to My Goals" click="subscribe()"/>
         </mx:HBox>
-        <mx:AreaChart dataProvider="{goalHistory}" width="100%" height="100%">
+        <mx:LineChart dataProvider="{goalHistory}" width="100%" height="100%">
             <mx:horizontalAxis>
-                <mx:DateTimeAxis/>
+                <mx:DateTimeAxis id="horAxis"/>
             </mx:horizontalAxis>
             <mx:series>
-                <mx:AreaSeries yField="value" xField="date" form="curve" areaFill="{areaFill}" showDataEffect="{slideIn}" hideDataEffect="{slideOut}"/>
+                <mx:LineSeries yField="value" xField="date" form="curve" showDataEffect="{slideIn}" hideDataEffect="{slideOut}" id="horSeries"/>
                 <!--<mx:LineSeries yField="value" xField="date" form="segment" visible="{showSlope}" dataProvider="{slopeData}"/>-->
             </mx:series>
-        </mx:AreaChart>
+            <mx:annotationElements>
+                <mx:Canvas id="linesCanvas" horizontalScrollPolicy="off"
+                           verticalScrollPolicy="off"/>
+            </mx:annotationElements>
+        </mx:LineChart>
     </mx:VBox>
 </mx:Canvas>

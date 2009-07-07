@@ -58,6 +58,8 @@ package com.easyinsight.filtering
 		{
 			this._filterDefinition = filterDefinition;
 		}
-		
-	}
+
+        public function set feedID(feedID:int):void {
+        }
+    }
 }

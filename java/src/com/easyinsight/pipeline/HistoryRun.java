@@ -5,6 +5,7 @@ import com.easyinsight.dataset.DataSet;
 import com.easyinsight.analysis.*;
 import com.easyinsight.datafeeds.Feed;
 import com.easyinsight.datafeeds.FeedRegistry;
+import com.easyinsight.datafeeds.CredentialFulfillment;
 import com.easyinsight.core.Value;
 
 import java.util.*;
@@ -15,7 +16,8 @@ import java.util.*;
  * Time: 9:48:00 PM
  */
 public class HistoryRun {
-    public List<GoalValue> calculateHistoricalValues(long dataSourceID, AnalysisMeasure measure, List<FilterDefinition> filters, Date startDate, Date endDate) {
+    public List<GoalValue> calculateHistoricalValues(long dataSourceID, AnalysisMeasure measure, List<FilterDefinition> filters, Date startDate, Date endDate,
+                                                     List<CredentialFulfillment> credentials) {
         List<GoalValue> goalValues = new ArrayList<GoalValue>();
         Set<AnalysisItem> itemSet = new HashSet<AnalysisItem>();
         itemSet.add(measure);
@@ -33,7 +35,20 @@ public class HistoryRun {
             itemSet.add(filterDefinition.getField());
         }
         Feed feed = FeedRegistry.instance().getFeed(dataSourceID);
-        DataSet dataSet = feed.getAggregateDataSet(itemSet, otherFilters, new InsightRequestMetadata(), feed.getFields(), false, null);
+        List<FilterDefinition> intrinsicFilters = feed.getIntrinsicFilters();
+        for (FilterDefinition intrinsicFilter : intrinsicFilters) {
+            if (intrinsicFilter instanceof RollingFilterDefinition) {
+                FilterDateRangeDefinition dateRange = new FilterDateRangeDefinition();
+                dateRange.setField(intrinsicFilter.getField());
+                dateRange.setStartDate(startDate);
+                dateRange.setEndDate(endDate);
+                otherFilters.add(dateRange);
+                itemSet.add(intrinsicFilter.getField());
+            }
+        }
+        InsightRequestMetadata dataRequest = new InsightRequestMetadata();
+        dataRequest.setCredentialFulfillmentList(credentials);
+        DataSet dataSet = feed.getAggregateDataSet(itemSet, otherFilters, dataRequest, feed.getFields(), false, null);
         if (rollingFilterDefinition == null) {
             StandardReportPipeline pipeline = new StandardReportPipeline();
             WSListDefinition report = new WSListDefinition();

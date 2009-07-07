@@ -42,7 +42,7 @@ public class GoalTreeNodeData extends GoalTreeNode {
         if (getCoreFeedID() > 0) {
             if (isGoalDefined())
                 this.goalOutcome = goalEvaluationStorage.getEvaluations(getGoalTreeNodeID(), startDate, endDate,
-                    getGoalValue(), isHighIsGood(), 1);
+                    getGoalValue(), isHighIsGood());
         }
     }
 

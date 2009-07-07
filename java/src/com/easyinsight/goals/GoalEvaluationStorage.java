@@ -289,7 +289,7 @@ public class GoalEvaluationStorage {
         }
     }
 
-    public List<GoalValue> getGoalValues(long goalTreeNodeID, Date startDate, Date endDate) throws SQLException {
+    public List<GoalValue> getGoalValues(long goalTreeNodeID, Date startDate, Date endDate, List<CredentialFulfillment> credentials) throws SQLException {
         GoalTreeNode goalTreeNode = null;
         Connection conn = Database.instance().getConnection();
         try {
@@ -313,14 +313,36 @@ public class GoalEvaluationStorage {
         List<GoalValue> goalValues;
         if (goalTreeNode != null && goalTreeNode.getCoreFeedID() > 0) {
             goalValues = new HistoryRun().calculateHistoricalValues(goalTreeNode.getCoreFeedID(), goalTreeNode.getAnalysisMeasure(),
-                goalTreeNode.getFilters(), startDate, endDate);
+                goalTreeNode.getFilters(), startDate, endDate, credentials);
         } else {
             goalValues = new ArrayList<GoalValue>();
         }
         return goalValues;
     }
 
-    public GoalOutcome getEvaluations(long goalTreeNodeID, Date startDate, Date endDate, double goalValue, boolean highIsGood, int importance) throws SQLException {
+    public List<GoalValue> getGoalValuesFromDatabase(long goalTreeNodeID, Date startDate, Date endDate) throws SQLException {
+        List<GoalValue> goalValues = new ArrayList<GoalValue>();
+        Connection conn = Database.instance().getConnection();
+        try {
+            PreparedStatement queryStmt = conn.prepareStatement("SELECT evaluation_result, evaluation_date FROM goal_history " +
+                    "WHERE evaluation_date >= ? AND evaluation_date <= ? AND goal_tree_node_id = ? ORDER BY evaluation_date");
+            queryStmt.setDate(1, new java.sql.Date(startDate.getTime()));
+            queryStmt.setDate(2, new java.sql.Date(endDate.getTime()));
+            queryStmt.setLong(3, goalTreeNodeID);
+
+            ResultSet startRS = queryStmt.executeQuery();
+            while (startRS.next()) {
+                double evaluationResult = startRS.getDouble(1);
+                Date evaluationDate = new Date(startRS.getDate(2).getTime());
+                goalValues.add(new GoalValue(goalTreeNodeID, evaluationDate, evaluationResult));
+            }
+        } finally {
+            Database.instance().closeConnection(conn);
+        }
+        return goalValues;
+    }
+
+    public GoalOutcome getEvaluations(long goalTreeNodeID, Date startDate, Date endDate, double goalValue, boolean highIsGood) throws SQLException {
         // key here is what's the value at the start date, what's the value at the end date
         // delta between those two values
         // outcomes:
@@ -330,7 +352,7 @@ public class GoalEvaluationStorage {
         //   is delta ~= epsilon
         //   is delta negative and < epsilon
 
-        List<GoalValue> goalValues = getGoalValues(goalTreeNodeID, startDate, endDate);
+        List<GoalValue> goalValues = getGoalValuesFromDatabase(goalTreeNodeID, startDate, endDate);
         int resultLength = goalValues.size();
         if (resultLength >= 2) {
             for (int i = 1; i < (resultLength - 1); i++) {
