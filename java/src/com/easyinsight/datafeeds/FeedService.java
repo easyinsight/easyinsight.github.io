@@ -83,8 +83,9 @@ public class FeedService implements IDataFeedService {
                 descriptorList.add(new DataSourceDescriptor(queryRS.getString(1), queryRS.getLong(2)));
             }
             PreparedStatement getInsightsStmt = conn.prepareStatement("SELECT ANALYSIS.ANALYSIS_ID, TITLE, DATA_FEED_ID, REPORT_TYPE FROM ANALYSIS, user_to_analysis WHERE " +
-                    "ANALYSIS.ANALYSIS_ID = USER_TO_ANALYSIS.ANALYSIS_ID AND USER_TO_ANALYSIS.user_id = ?");
+                    "ANALYSIS.ANALYSIS_ID = USER_TO_ANALYSIS.ANALYSIS_ID AND USER_TO_ANALYSIS.user_id = ? AND ANALYSIS.ROOT_DEFINITION = ?");
             getInsightsStmt.setLong(1, SecurityUtil.getUserID());
+            getInsightsStmt.setBoolean(2, false);
             ResultSet reportRS = getInsightsStmt.executeQuery();
             while (reportRS.next()) {
                 descriptorList.add(new InsightDescriptor(reportRS.getLong(1), reportRS.getString(2), reportRS.getLong(3), reportRS.getInt(4)));

@@ -1,4 +1,6 @@
 package com.easyinsight.goals {
+import com.easyinsight.util.PrefixManager;
+
 import mx.containers.HBox;
 import mx.controls.Image;
 public class GoalIconRenderer extends HBox{
@@ -22,7 +24,7 @@ public class GoalIconRenderer extends HBox{
     override public function set data(val:Object):void {
         this._goalTreeNodeData = val as GoalTreeNodeData;
         if (this._goalTreeNodeData.iconImage != null) {
-            image.load("/app/assets/icons/16x16/" + this._goalTreeNodeData.iconImage);
+            image.load(PrefixManager.prefix + "/app/assets/icons/16x16/" + this._goalTreeNodeData.iconImage);
         }
     }
 

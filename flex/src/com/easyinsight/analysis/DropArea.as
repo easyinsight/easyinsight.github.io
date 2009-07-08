@@ -68,9 +68,10 @@ public class DropArea extends HBox
         var deleteContextItem:ContextMenuItem = new ContextMenuItem("Delete Field", true);
         deleteContextItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, onDelete);
         //dataSet.addEventListener(KeyboardEvent.KEY_UP, keyboardHandler);
-        contextMenu = new ContextMenu();
+        PopupMenuFactory.assignMenu(this, [ deleteContextItem ]);
+        /*contextMenu = new ContextMenu();
         contextMenu.hideBuiltInItems();
-        contextMenu.customItems = [ deleteContextItem ];
+        contextMenu.customItems = [ deleteContextItem ];*/
     }
 
     private function createNoDataLabel():UIComponent {

@@ -355,6 +355,13 @@ public class GoalService {
         }
     }
 
+    // what do we want to see here...
+    // we want to see the latest value
+    // we want to understand some context around that number
+    // context is relevant to the goal that we're trying to meet
+    // sparkline seems useful as one thing there
+    
+
     public List<GoalTreeNodeData> getGoals() {
         long userID = SecurityUtil.getUserID();
         try {

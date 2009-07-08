@@ -98,7 +98,7 @@ public class CustomDropShadowRenderer extends UIComponent implements IDataRender
                 rollupFunction = onRollup;
             }
         }
- PopupMenuFactory.menuFactory.createStandardMenu(drilldownFunction, rollupFunction, this);
+        PopupMenuFactory.menuFactory.createStandardMenu(drilldownFunction, rollupFunction, this);
     }
 
     //--------------------------------------------------------------------------

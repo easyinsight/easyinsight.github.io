@@ -175,7 +175,7 @@
                 } else {
                     analyzeSource = new ReportAnalyzeSource(InsightDescriptor(selectedObject));
                     dispatchEvent(new ModuleAnalyzeEvent(analyzeSource));
-                }
+                }                                   
 			}
 
             public function gotFocus():void {

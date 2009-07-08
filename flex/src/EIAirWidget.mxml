@@ -50,7 +50,7 @@
         </mx:State>
         <mx:State name="GettingReport">
             <mx:AddChild relativeTo="{coreBox}">
-                <dashboard:AirReportView airLogout="onLogout()" eiUpdate="updater.checkNow()"/>
+                <dashboard:AirReportView airLogout="onLogout()" eiUpdate="updater.checkNow()" app="{windowedApp}"/>
             </mx:AddChild>
         </mx:State>
     </mx:states>
@@ -72,6 +72,9 @@
         import com.easyinsight.analysis.PopupMenuFactory;
         import com.easyinsight.analysis.SixSigmaMeasure;
         import com.easyinsight.analysis.TemporalAnalysisMeasure;
+        import com.easyinsight.dashboard.AirCredentialsCache;
+        import com.easyinsight.framework.CredentialsCache;
+        import com.easyinsight.util.PrefixManager;
         import flash.data.EncryptedLocalStore;
 
         import air.update.events.UpdateEvent;
@@ -92,6 +95,9 @@
 
         private var monitor:URLMonitor;
         private var connected:Boolean;
+
+        [Bindable]
+        private var windowedApp:WindowedApplication;
 
         [Bindable]
         [Embed(source="../assets/background2.JPG")]
@@ -181,7 +187,9 @@
         }
 
         private function onCreationComplete():void {
-
+            windowedApp = this;
+            PrefixManager.prefix = "https://www.easy-insight.com";
+            CredentialsCache.initialize(new AirCredentialsCache());
             if (NativeApplication.supportsSystemTrayIcon) {
                 this.nativeApplication.icon.bitmaps = [ (new iconClass() as BitmapAsset )];
             }

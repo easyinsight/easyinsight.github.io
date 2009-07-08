@@ -4,10 +4,9 @@
     <mx:Script><![CDATA[
         import mx.collections.ArrayCollection;
         import mx.controls.List;
-import mx.managers.PopUpManager;
+        import mx.managers.PopUpManager;
 
-        [Bindable]
-        private var descriptors:ArrayCollection;
+        private var _descriptors:ArrayCollection;
 
         private var error:Boolean = false;
 
@@ -30,13 +29,39 @@ import mx.managers.PopUpManager;
         [Bindable]
         private var factory:ClassFactory;
 
+
+        [Bindable(event="descriptorsChanged")]
+        public function get descriptors():ArrayCollection {
+            return _descriptors;
+        }
+
+        public function set descriptors(value:ArrayCollection):void {
+            if (_descriptors == value) return;
+            _descriptors = value;
+            dispatchEvent(new Event("descriptorsChanged"));
+        }
+
         private function setupListeners():void {
             factory = new ClassFactory(List);
             factory.properties = { iconField: "icon" };
             focusManager.setFocus(searchInput);
             stage.addEventListener(KeyboardEvent.KEY_DOWN, onKeyDown);
             searchInput.addEventListener(KeyboardEvent.KEY_DOWN, onKeyDown);
-            feedService.getDescriptors.send();
+            if (descriptors == null) {
+                feedService.getDescriptors.send();
+            } else {
+                for each (var descriptor:EIDescriptor in descriptors) {
+                    descriptorMap[descriptor.name] = descriptor;
+                    if (descriptor.getType() == EIDescriptor.DATA_SOURCE) {
+                        descriptor.icon = dataSourceIcon;
+                    } else if (descriptor.getType() == EIDescriptor.GOAL_TREE) {
+                        descriptor.icon = goalTreeIcon;
+                    } else {
+                        descriptor.icon = reportIcon;
+                    }
+                }
+                searchInput.enabled = true;
+            }
         }
 
         private function onKeyDown(event:KeyboardEvent):void {

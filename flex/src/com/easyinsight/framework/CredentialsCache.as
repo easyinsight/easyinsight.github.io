@@ -7,34 +7,16 @@ public class CredentialsCache {
 
     private var cache:Object = new Object();
 
-    private static var credentialsCache:CredentialsCache;
+    private static var credentialsCache:ICredentialsCache;
 
     public function CredentialsCache() {
     }
 
-    public function addCredentials(dataSourceID:int, credentials:Credentials):void {
-        cache[String(dataSourceID)] = credentials;
+    public static function initialize(cache:ICredentialsCache):void {
+        credentialsCache = cache;
     }
 
-    public function getCredentials(dataSourceID:int):Credentials {
-        return cache[String(dataSourceID)];
-    }
-
-    public function createCredentials():ArrayCollection {
-        var creds:ArrayCollection = new ArrayCollection();
-        for (var dataSourceID:String in cache) {
-            var credentialFulfillment:CredentialFulfillment = new CredentialFulfillment();
-            credentialFulfillment.dataSourceID = int(dataSourceID);
-            credentialFulfillment.credentials = cache[dataSourceID];
-            creds.addItem(credentialFulfillment);
-        }
-        return creds;
-    }
-
-    public static function getCache():CredentialsCache {
-        if (credentialsCache == null) {
-            credentialsCache = new CredentialsCache();
-        }
+    public static function getCache():ICredentialsCache {
         return credentialsCache;
     }
 }

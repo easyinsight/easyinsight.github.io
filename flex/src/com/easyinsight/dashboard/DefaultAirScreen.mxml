@@ -1,7 +1,10 @@
 <?xml version="1.0" ?>
-<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" addedToStage="dispatchEvent(new DataServiceLoadingEvent(DataServiceLoadingEvent.LOADING_STOPPED));">
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" creationComplete="dispatchEvent(new DataServiceLoadingEvent(DataServiceLoadingEvent.LOADING_STOPPED));"
+        implements="com.easyinsight.util.IAsyncScreen">
     <mx:Script><![CDATA[
         import com.easyinsight.framework.DataServiceLoadingEvent;
+
+        import mx.core.Container;
 
         [Bindable]
         private var runOnStartup:Boolean;
@@ -19,6 +22,26 @@
             } catch (err:Error) {
                 // error means we're just running with ADL
             }
+        }
+
+        public function getContainer():Container {
+            return this;
+        }
+
+        public function refreshData():void {
+            dispatchEvent(new DataServiceLoadingEvent(DataServiceLoadingEvent.LOADING_STOPPED));
+        }
+
+        public function canRefresh():Boolean {
+            return false;
+        }
+
+        public function canViewInBrowser():Boolean {
+            return false;
+        }
+
+        public function getBrowserURL():String {
+            return null;
         }
     ]]>
     </mx:Script>

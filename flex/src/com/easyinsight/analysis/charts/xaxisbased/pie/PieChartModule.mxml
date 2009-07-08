@@ -148,7 +148,8 @@ import com.easyinsight.filtering.FilterRawData;
 	</mx:Script>
     <mx:HBox width="100%" height="100%">
         <mx:PieChart id="pieChart" dataProvider="{graphData}" selectionMode="multiple" height="100%" width="100%"
-					paddingLeft="0" paddingRight="0" paddingTop="0" paddingBottom="0" itemClick="drilldown(event)">
+					paddingLeft="0" paddingRight="0" paddingTop="0" paddingBottom="0" itemClick="drilldown(event)"
+                showDataTips="true">
             <mx:series>
                 <mx:PieSeries field="{measureName}" nameField="{dimension}" labelPosition="insideWithCallout"
                     labelFunction="renderPieLabel" itemRenderer="com.easyinsight.analysis.charts.xaxisbased.pie.EIWedgeItemRenderer">

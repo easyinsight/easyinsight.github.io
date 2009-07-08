@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%" implements="com.easyinsight.dashboard.IView"
-        creationComplete="setupTimer()">
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%"
+        creationComplete="setupTimer()" implements="com.easyinsight.util.IAsyncScreen">
 	<mx:Script>
 		<![CDATA[
         import com.easyinsight.analysis.AirViewFactory;
@@ -14,6 +14,7 @@
         import com.easyinsight.analysis.RuntimeCredentialsWindow;
         import com.easyinsight.framework.DataServiceLoadingEvent;
 
+        import mx.core.Container;
         import mx.managers.PopUpManager;
 
         private function setupTimer():void {
@@ -93,6 +94,22 @@
 
         public function refreshData():void {
             dataViewFactory.retrieveData();
+        }
+
+        public function getContainer():Container {
+            return this;
+        }
+
+        public function canRefresh():Boolean {
+            return true;
+        }
+
+        public function canViewInBrowser():Boolean {
+            return true;
+        }
+
+        public function getBrowserURL():String {
+            return "https://www.easy-insight.com/app/#reportID=" + _analysisID;
         }
                 ]]>
 	</mx:Script>

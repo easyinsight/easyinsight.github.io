@@ -39,8 +39,10 @@
         import com.easyinsight.analysis.DelayedReportLink;
         import com.easyinsight.analysis.PopupMenuFactory;
         import com.easyinsight.framework.ActivationEvent;
+        import com.easyinsight.framework.CredentialsCache;
         import com.easyinsight.framework.FullScreenModuleEvent;
         import com.easyinsight.framework.ModuleAnalyzeSource;
+        import com.easyinsight.framework.WebCredentialsCache;
         import com.easyinsight.genredata.ModuleAnalyzeEvent;
         import com.easyinsight.goals.DelayedGoalAdminLink;
         import com.easyinsight.goals.DelayedGoalLink;
@@ -115,6 +117,7 @@
 
         private function startWorkspace():void {
             PopupMenuFactory.menuFactory = new DefaultMenuFactory();
+            CredentialsCache.initialize(new WebCredentialsCache());
             new CommandProcessor();
             addEventListener(FaultEvent.FAULT, onFault, true);
             browserManager = BrowserManager.getInstance();

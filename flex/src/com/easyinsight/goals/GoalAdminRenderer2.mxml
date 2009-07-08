@@ -3,6 +3,7 @@
 	borderStyle="solid" borderColor="#CCCCCC" cornerRadius="10" creationComplete="setup()" implements="com.easyinsight.goals.IGoalRenderer">
 	<mx:Script>
 		<![CDATA[
+        import com.easyinsight.analysis.PopupMenuFactory;
         import com.easyinsight.icons.IconSelectionEvent;
         import com.easyinsight.icons.IconSelectionWindow;
         import com.easyinsight.listing.DataFeedDescriptor;
@@ -192,8 +193,7 @@
         }
 
         private function defineContextMenu(goalTreeNode:GoalTreeNode):void {
-            contextMenu = new ContextMenu();
-            contextMenu.hideBuiltInItems();
+
             var items:Array = [];
             var editItem:ContextMenuItem = new ContextMenuItem("Edit Goal", true);
             editItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, editNode);
@@ -220,7 +220,7 @@
                 removeItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, deleteSubTree);
                 items.push(removeItem);
             }
-            contextMenu.customItems = items;
+            PopupMenuFactory.assignMenu(this, items);
         }
 
         override public function get data():Object {

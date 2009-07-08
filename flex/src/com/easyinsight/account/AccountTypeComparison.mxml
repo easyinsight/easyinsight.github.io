@@ -16,7 +16,7 @@
 					new AccountComparisonIcon("iGoogle/NetVibes Integration", true, true, true, true, true),
 					new AccountComparisonIcon("Desktop Widget", true, true, true, true, true),
                     new AccountComparisonIcon("Excel/CSV Upload", true, true, true, true, true),
-					new AccountComparisonIcon("Standard APIs", false, true, true, true, true),
+					new AccountComparisonIcon("Standard APIs", true, true, true, true, true),
 					new AccountComparisonIcon("Dynamic API", false, false, false, true, true),
 					new AccountComparisonIcon("WS-Security", false, false, false, false, true),
                     new AccountComparisonIcon("Basecamp Integration", false, false, true, true, true),

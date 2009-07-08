@@ -99,7 +99,6 @@
         }
 
 
-
         private function onWindowRemove(event:ModelessWindowEvent):void {
             windows.removeItemAt(windows.getItemIndex(event.displayObject));
         }
@@ -189,6 +188,18 @@
             window.addEventListener(GoalTreeRefreshEvent.GOAL_TREE_REFRESH, gotRefresh);
             PopUpManager.addPopUp(window, this, true);
             PopUpManager.centerPopUp(window);
+        }
+
+        public function canRefresh():Boolean {
+            return false;
+        }
+
+        public function canViewInBrowser():Boolean {
+            return false;
+        }
+
+        public function getBrowserURL():String {
+            return null;
         }]]></mx:Script>
     <mx:RemoteObject destination="goalService" id="goalService">
         <mx:method name="createDataTree" result="gotTree()"/>

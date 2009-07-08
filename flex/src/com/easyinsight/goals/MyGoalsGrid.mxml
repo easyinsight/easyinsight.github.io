@@ -1,12 +1,16 @@
 <?xml version="1.0" ?>
-<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" creationComplete="setup()" doubleClickEnabled="true">
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" creationComplete="setup()" doubleClickEnabled="true"
+        implements="com.easyinsight.util.IAsyncScreen">
     <mx:Metadata>
         [Event(name="goalDetailNav", type="com.easyinsight.goals.GoalDetailEvent")]
     </mx:Metadata>
     <mx:Script><![CDATA[
+        import com.easyinsight.framework.DataServiceLoadingEvent;
         import com.easyinsight.framework.User;
 
         import mx.collections.ArrayCollection;
+        import mx.controls.Alert;
+        import mx.core.Container;
         import mx.events.ListEvent;
 
         [Bindable]
@@ -15,16 +19,12 @@
         [Bindable]
         private var rowCount:int;
 
-        private var timer:Timer;
-
         public function gotFocus():void {
             goalService.getGoals.send();
         }
 
         private function setup():void {
-            timer = new Timer(300000);
-            timer.addEventListener(TimerEvent.TIMER, onTimer);
-            timer.start();
+            goalService.getGoals.send();
         }
 
         private function onTimer(event:TimerEvent):void {
@@ -36,6 +36,7 @@
         private function gotGoals():void {
             this.goals = goalService.getGoals.lastResult as ArrayCollection;
             rowCount = this.goals.length;
+            dispatchEvent(new DataServiceLoadingEvent(DataServiceLoadingEvent.LOADING_STOPPED));
         }
 
         private function onDoubleClick(event:ListEvent):void {
@@ -43,7 +44,26 @@
             dispatchEvent(new GoalDetailEvent(goal));
             //dispatchEvent(new AnalyzeEvent(new GoalDetailAnalyzeSource(goal)));
         }
-]]></mx:Script>
+
+        public function getContainer():Container {
+            return this;
+        }
+
+        public function refreshData():void {
+            goalService.getGoals.send();
+        }
+
+        public function canRefresh():Boolean {
+            return true;
+        }
+
+        public function canViewInBrowser():Boolean {
+            return false;
+        }
+
+        public function getBrowserURL():String {
+            return null;
+        }]]></mx:Script>
     <mx:RemoteObject destination="goalService" id="goalService">
         <mx:method name="getGoals" result="gotGoals()"/>
     </mx:RemoteObject>

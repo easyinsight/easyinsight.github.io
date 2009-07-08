@@ -6,11 +6,12 @@ import com.easyinsight.quicksearch.EIDescriptor;
 
 import mx.containers.ViewStack;
 import mx.core.Container;
-[Event(name="dataServiceLoadingStarted", type="com.easyinsight.framework.DataServiceLoadingEvent")]
-[Event(name="dataServiceLoadingStopped", type="com.easyinsight.framework.DataServiceLoadingEvent")]
+[Event(name="asyncLoadStart", type="com.easyinsight.util.AsyncLoadEvent")]
+[Event(name="asyncLoadSuccess", type="com.easyinsight.util.AsyncLoadEvent")]
+[Event(name="asyncLoadFailure", type="com.easyinsight.util.AsyncLoadEvent")]
 public class AsyncViewStack extends ViewStack{
 
-    private var loadingTarget:Container;
+    private var loadingScreen:IAsyncScreen;
 
     private var descriptorMap:Object = new Object();
 
@@ -37,9 +38,10 @@ public class AsyncViewStack extends ViewStack{
     }
 
     private function gotInitialData(event:DataServiceLoadingEvent):void {
-        var dataViewPanel:Container = loadingTarget;
+        var screen:IAsyncScreen = loadingScreen;
+        var dataViewPanel:Container = screen.getContainer();
         dataViewPanel.removeEventListener(DataServiceLoadingEvent.LOADING_STOPPED, gotInitialData);
-        loadingTarget = null;
+        loadingScreen = null;
         if (getChildren().length == 1) {
             selectedChild = dataViewPanel;
         } else {
@@ -57,7 +59,7 @@ public class AsyncViewStack extends ViewStack{
             selectedChild = dataViewPanel;
             cubeRotate.play();
         }
-        dispatchEvent(new DataServiceLoadingEvent(DataServiceLoadingEvent.LOADING_STOPPED));
+        dispatchEvent(new AsyncLoadEvent(AsyncLoadEvent.LOAD_SUCCESS, screen));
     }
 
     override protected function commitProperties():void {
@@ -73,9 +75,9 @@ public class AsyncViewStack extends ViewStack{
                 descriptorMap[idString] = container;
             }
             var container:Container = screen.getContainer();
-            loadingTarget = container;
+            loadingScreen = screen;
             container.addEventListener(DataServiceLoadingEvent.LOADING_STOPPED, gotInitialData);
-            dispatchEvent(new DataServiceLoadingEvent(DataServiceLoadingEvent.LOADING_STARTED));
+            dispatchEvent(new AsyncLoadEvent(AsyncLoadEvent.LOAD_START));
             if (newScreen) {
                 addChild(container);
             } else {
