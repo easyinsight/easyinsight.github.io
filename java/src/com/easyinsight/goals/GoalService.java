@@ -355,6 +355,16 @@ public class GoalService {
         }
     }
 
+    public void unsubscribeToGoal(long goalTreeNodeID) {
+        long userID = SecurityUtil.getUserID();
+        try {
+            goalStorage.removeUserFromGoal(userID, goalTreeNodeID);
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        }
+    }
+
     // what do we want to see here...
     // we want to see the latest value
     // we want to understand some context around that number

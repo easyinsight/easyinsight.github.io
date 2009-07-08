@@ -1,5 +1,9 @@
 package com.easyinsight.goals {
+import com.easyinsight.analysis.PopupMenuFactory;
 import com.easyinsight.util.PrefixManager;
+
+import flash.events.ContextMenuEvent;
+import flash.ui.ContextMenuItem;
 
 import mx.containers.HBox;
 import mx.controls.Image;
@@ -12,6 +16,13 @@ public class GoalIconRenderer extends HBox{
         image = new Image();
         this.percentWidth = 100;
         setStyle("horizontalAlign", "center");
+        var removeItem:ContextMenuItem = new ContextMenuItem("Remove Goal");
+        removeItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, onRemove);
+        PopupMenuFactory.assignMenu(this, [ removeItem]);
+    }
+
+    private function onRemove(event:ContextMenuEvent):void {
+        dispatchEvent(new GoalSubscriptionEvent(GoalSubscriptionEvent.GOAL_REMOVE, _goalTreeNodeData.goalTreeNodeID));
     }
 
     override protected function createChildren():void {

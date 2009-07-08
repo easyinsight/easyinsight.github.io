@@ -740,6 +740,22 @@ public class GoalStorage {
         }
     }
 
+    public void removeUserFromGoal(long userID, long goalTreeNodeID) {
+        Connection conn = Database.instance().getConnection();
+        try {
+            PreparedStatement saveUserStmt = conn.prepareStatement("DELETE FROM goal_node_to_user WHERE GOAL_TREE_NODE_ID = ? AND user_id = ?");
+            saveUserStmt.setLong(1, goalTreeNodeID);
+            saveUserStmt.setLong(2, userID);
+            saveUserStmt.executeUpdate();
+            saveUserStmt.close();
+        } catch (SQLException e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        } finally {
+            Database.instance().closeConnection(conn);
+        }
+    }
+
     private void saveTags(GoalTreeNode goalTreeNode, Connection conn) throws SQLException {
         PreparedStatement clearExistingStmt = conn.prepareStatement("DELETE FROM GOAL_TREE_NODE_TAG WHERE GOAL_TREE_NODE_ID = ?");
         clearExistingStmt.setLong(1, goalTreeNode.getGoalTreeNodeID());
