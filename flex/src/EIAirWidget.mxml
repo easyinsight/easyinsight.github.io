@@ -80,6 +80,7 @@
         import air.update.events.UpdateEvent;
 
         import mx.core.BitmapAsset;
+        import mx.events.FlexNativeWindowBoundsEvent;
         import mx.rpc.events.ResultEvent;
         import mx.messaging.config.ServerConfig;
         import mx.rpc.AsyncToken;
@@ -186,6 +187,28 @@
             monitor.start();
         }
 
+        private function onMove(event:FlexNativeWindowBoundsEvent):void {
+            var xString:String = String(nativeWindow.x);
+            var yString:String = String(nativeWindow.y);
+            var xBytes:ByteArray = new ByteArray();
+            var yBytes:ByteArray = new ByteArray();
+            xBytes.writeUTFBytes(xString);
+            yBytes.writeUTFBytes(yString);
+            EncryptedLocalStore.setItem("x", xBytes);
+            EncryptedLocalStore.setItem("y", yBytes);
+        }
+
+        private function onResize(event:FlexNativeWindowBoundsEvent):void {
+            var width:String = String(nativeWindow.width);
+            var height:String = String(nativeWindow.height);
+            var widthBytes:ByteArray = new ByteArray();
+            var heightBytes:ByteArray = new ByteArray();
+            widthBytes.writeUTFBytes(width);
+            heightBytes.writeUTFBytes(height);
+            EncryptedLocalStore.setItem("width", widthBytes);
+            EncryptedLocalStore.setItem("height", heightBytes);
+        }
+
         private function onCreationComplete():void {
             windowedApp = this;
             PrefixManager.prefix = "https://www.easy-insight.com";
@@ -195,6 +218,27 @@
             }
 
             PopupMenuFactory.menuFactory = new AirMenuFactory();
+
+            var xBytes:ByteArray = EncryptedLocalStore.getItem("x");
+            var yBytes:ByteArray = EncryptedLocalStore.getItem("y");
+            if (xBytes != null && yBytes != null) {
+                var x:int = int(xBytes.readUTFBytes(xBytes.length));
+                var y:int = int(yBytes.readUTFBytes(yBytes.length));
+                nativeWindow.x = x;
+                nativeWindow.y = y;
+            }
+
+            var widthArray:ByteArray = EncryptedLocalStore.getItem("width");
+            var heightArray:ByteArray = EncryptedLocalStore.getItem("height");
+            if (widthArray != null && heightArray != null) {
+                var width:int = int(widthArray.readUTFBytes(widthArray.length));
+                var height:int = int(heightArray.readUTFBytes(heightArray.length));
+                nativeWindow.width = width;
+                nativeWindow.height = height;
+            }
+
+            addEventListener(FlexNativeWindowBoundsEvent.WINDOW_MOVE, onMove);
+            addEventListener(FlexNativeWindowBoundsEvent.WINDOW_MOVE, onResize);
 
             // do the updates stuff...
 

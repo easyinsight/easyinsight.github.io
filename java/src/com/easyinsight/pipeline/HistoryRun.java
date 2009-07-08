@@ -20,7 +20,7 @@ public class HistoryRun {
                                                      List<CredentialFulfillment> credentials) {
         List<GoalValue> goalValues = new ArrayList<GoalValue>();
         Set<AnalysisItem> itemSet = new HashSet<AnalysisItem>();
-        itemSet.add(measure);
+
         List<FilterDefinition> otherFilters = new ArrayList<FilterDefinition>();
         RollingFilterDefinition rollingFilterDefinition = null;
         for (FilterDefinition filterDefinition : filters) {
@@ -35,6 +35,7 @@ public class HistoryRun {
             itemSet.add(filterDefinition.getField());
         }
         Feed feed = FeedRegistry.instance().getFeed(dataSourceID);
+        itemSet.addAll(measure.getAnalysisItems(feed.getFields(), Arrays.asList((AnalysisItem) measure)));
         List<FilterDefinition> intrinsicFilters = feed.getIntrinsicFilters();
         for (FilterDefinition intrinsicFilter : intrinsicFilters) {
             if (intrinsicFilter instanceof RollingFilterDefinition) {

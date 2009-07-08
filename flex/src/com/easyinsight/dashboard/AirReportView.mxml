@@ -22,6 +22,8 @@
 
         import flash.data.EncryptedLocalStore;
 
+        import mx.collections.Sort;
+        import mx.collections.SortField;
         import mx.core.Container;
         import mx.core.WindowedApplication;
         import mx.managers.PopUpManager;
@@ -69,11 +71,17 @@
         private var reportsMenu:NativeMenu;
         private var goalsMenu:NativeMenu;
 
+        private var defaultScreen:EIDescriptor;
+
         [Bindable]
         private var descriptors:ArrayCollection;
 
+        private var allDescriptors:ArrayCollection;
+
         [Bindable]
         private var currentView:EIDescriptor;
+
+        private var myGoalsDescriptor:MyGoalsDescriptor;
 
         [Bindable]
         private var screenFactory:IAsyncScreenFactory = new AirScreenFactory();
@@ -104,15 +112,16 @@
             baseMenu.addSubmenu(goalsMenu, "Goals");
             var myGoalsItem:NativeMenuItem = new NativeMenuItem("My Goals");
             myGoalsItem.addEventListener(Event.SELECT, onReport);
-            myGoalsItem.data = new MyGoalsDescriptor();
+            myGoalsDescriptor = new MyGoalsDescriptor();
+            myGoalsItem.data = myGoalsDescriptor;
             goalsMenu.addItem(myGoalsItem);
             var helpMenu:NativeMenu = new NativeMenu();
-            var defaultScreen:AirIntroDescriptor = new AirIntroDescriptor();
+            defaultScreen = new AirIntroDescriptor();
             var welcomeItem:NativeMenuItem = new NativeMenuItem("Welcome");
             welcomeItem.data = defaultScreen;
             welcomeItem.addEventListener(Event.SELECT, onReport);
             helpMenu.addItem(welcomeItem);
-            currentView = defaultScreen;
+
             var updatesItem:NativeMenuItem = new NativeMenuItem("Check for Updates");
             updatesItem.addEventListener(Event.SELECT, checkForUpdates);
             helpMenu.addItem(updatesItem);
@@ -135,21 +144,68 @@
         private function gotDescriptors():void {
             descriptors = new ArrayCollection();
             var reportColl:ArrayCollection = feedService.getDescriptors.lastResult as ArrayCollection;
+            var reportSort:ArrayCollection = new ArrayCollection();
+            var goalSort:ArrayCollection = new ArrayCollection();
             for each (var descriptor:EIDescriptor in reportColl) {
                 if (descriptor.getType() == EIDescriptor.REPORT) {
-                    var reportMenuItem:NativeMenuItem = new NativeMenuItem(descriptor.name);
+                    reportSort.addItem(descriptor);
+                    /*var reportMenuItem:NativeMenuItem = new NativeMenuItem(descriptor.name);
                     reportsMenu.addItem(reportMenuItem);
                     reportMenuItem.addEventListener(Event.SELECT, onReport);
-                    reportMenuItem.data = descriptor;
+                    reportMenuItem.data = descriptor;*/
                     descriptors.addItem(descriptor);
                 } else if (descriptor.getType() == EIDescriptor.GOAL_TREE) {
-                    var goalsMenuItem:NativeMenuItem = new NativeMenuItem(descriptor.name);
+                    goalSort.addItem(descriptor);
+                    /*var goalsMenuItem:NativeMenuItem = new NativeMenuItem(descriptor.name);
                     goalsMenu.addItem(goalsMenuItem);
                     goalsMenuItem.addEventListener(Event.SELECT, onReport);
-                    goalsMenuItem.data = descriptor;
+                    goalsMenuItem.data = descriptor;*/
                     descriptors.addItem(descriptor);
                 }
             }
+            allDescriptors = new ArrayCollection(descriptors.toArray());
+            allDescriptors.addItem(defaultScreen);
+            allDescriptors.addItem(myGoalsDescriptor);
+            var sort:Sort = new Sort();
+            sort.fields = [new SortField("name")];
+            reportSort.sort = sort;
+            reportSort.refresh();
+            goalSort.sort = sort;
+            goalSort.refresh();
+            for each (var reportDescriptor:EIDescriptor in reportSort) {
+                var reportMenuItem:NativeMenuItem = new NativeMenuItem(reportDescriptor.name);
+                reportsMenu.addItem(reportMenuItem);
+                reportMenuItem.addEventListener(Event.SELECT, onReport);
+                reportMenuItem.data = reportDescriptor;
+            }
+            for each (var goalDescriptor:EIDescriptor in goalSort) {
+                var goalsMenuItem:NativeMenuItem = new NativeMenuItem(goalDescriptor.name);
+                goalsMenu.addItem(goalsMenuItem);
+                goalsMenuItem.addEventListener(Event.SELECT, onReport);
+                goalsMenuItem.data = goalDescriptor;
+            }
+
+            var currentViewTypeBytes:ByteArray = EncryptedLocalStore.getItem("currentViewType");
+            if (currentViewTypeBytes != null) {
+                var currentViewType:String = currentViewTypeBytes.readUTFBytes(currentViewTypeBytes.length);
+
+            }
+            var currentViewIDBytes:ByteArray = EncryptedLocalStore.getItem("currentViewID");
+            if (currentViewIDBytes != null) {
+                var currentViewID:String = currentViewIDBytes.readUTFBytes(currentViewIDBytes.length);
+
+            }
+            var selectedDescriptor:EIDescriptor = defaultScreen;
+            if (currentViewType != null && currentViewID != null) {
+                for each (var viewDescriptor:EIDescriptor in allDescriptors) {
+                    if (viewDescriptor.getType() == int(currentViewType) &&
+                            viewDescriptor.id == int(currentViewID)) {
+                        selectedDescriptor = viewDescriptor;
+                        break;
+                    }
+                }
+            }
+            currentView = selectedDescriptor;
         }
 
         private function onLoadStart(event:AsyncLoadEvent):void {
@@ -161,6 +217,13 @@
             statusDisplay.good();
             showRefresh = event.asyncScreen.canRefresh();
             showBrowser = event.asyncScreen.canViewInBrowser();
+
+            var currentViewTypeBytes:ByteArray = new ByteArray();
+            currentViewTypeBytes.writeUTFBytes(String(currentView.getType()));
+            EncryptedLocalStore.setItem("currentViewType", currentViewTypeBytes);
+            var currentViewIDBytes:ByteArray = new ByteArray();
+            currentViewIDBytes.writeUTFBytes(String(currentView.id));
+            EncryptedLocalStore.setItem("currentViewID", currentViewIDBytes);
         }
 
         private function onFault(event:ReportRetrievalFault):void {
