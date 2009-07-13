@@ -44,6 +44,8 @@ public class BaseCampTimeSource extends ServerDataSourceDefinition {
     public static final String COUNT = "Count";
     private static final String PERSONNAME = "Person Name";
 
+    public static final String TODOID = "Todo ID";
+
     public BaseCampTimeSource() {
         setFeedName("Time Tracking");
     }
@@ -109,6 +111,7 @@ public class BaseCampTimeSource extends ServerDataSourceDefinition {
                         String personID = queryField(todoListNode, "person-id/text()");
                         String timeHours = queryField(todoListNode, "hours/text()");
                         String timeDescription = queryField(todoListNode, "description/text()");
+                        String todoItemID = queryField(todoListNode, "todo-item-id/text()");
                         String personName = retrieveContactInfo(client, builder, peopleCache, personID, url);
 
                         IRow row = ds.createRow();
@@ -117,6 +120,7 @@ public class BaseCampTimeSource extends ServerDataSourceDefinition {
                         row.addValue(keys.get(PERSONID), personID);
                         row.addValue(keys.get(HOURS), new NumericValue(Double.parseDouble(timeHours)));
                         row.addValue(keys.get(DESCRIPTION), timeDescription);
+                        row.addValue(keys.get(TODOID), todoItemID);
                         row.addValue(keys.get(COUNT), new NumericValue(1));
                     }
                 } while(info.currentPage++ < info.MaxPages);
@@ -152,7 +156,7 @@ public class BaseCampTimeSource extends ServerDataSourceDefinition {
 
     @NotNull
     protected List<String> getKeys() {
-        return Arrays.asList(PERSONID, PERSONNAME, HOURS, DESCRIPTION, PROJECTID, COUNT);
+        return Arrays.asList(PERSONID, PERSONNAME, HOURS, DESCRIPTION, PROJECTID, COUNT, TODOID);
     }
 
     public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, DataSet dataSet, com.easyinsight.users.Credentials credentials) {
@@ -165,6 +169,7 @@ public class BaseCampTimeSource extends ServerDataSourceDefinition {
         analysisItems.add(new AnalysisDimension(keys.get(PERSONNAME), true));
         analysisItems.add(new AnalysisMeasure(keys.get(HOURS), AggregationTypes.SUM));
         analysisItems.add(new AnalysisMeasure(keys.get(COUNT), AggregationTypes.SUM));
+        analysisItems.add(new AnalysisDimension(keys.get(TODOID), true));
         return analysisItems;
     }
 

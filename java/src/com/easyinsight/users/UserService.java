@@ -120,8 +120,8 @@ public class UserService implements IUserService {
             } else {
                 User user = (User) results.get(0);
                 String password = RandomTextGenerator.generateText(12);
-                user.setPassword(password);
-                new AccountMemberInvitation().resetPassword(emailAddress, user.getPassword());
+                user.setPassword(PasswordService.getInstance().encrypt(password));
+                new AccountMemberInvitation().resetPassword(emailAddress, password);
                 success = true;
             }
             session.getTransaction().commit();

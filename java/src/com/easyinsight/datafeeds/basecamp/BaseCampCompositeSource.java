@@ -101,7 +101,7 @@ public class BaseCampCompositeSource extends CompositeServerDataSource {
 
     protected Collection<ChildConnection> getChildConnections() {
         return Arrays.asList(new ChildConnection(FeedType.BASECAMP, FeedType.BASECAMP_TIME, BaseCampTodoSource.PROJECTID,
-                BaseCampTimeSource.PROJECTID));
+                BaseCampTimeSource.PROJECTID), new ChildConnection(FeedType.BASECAMP,  FeedType.BASECAMP_TIME, BaseCampTodoSource.ITEMID,  BaseCampTimeSource.TODOID));
     }
 
     protected IServerDataSourceDefinition createForFeedType(FeedType feedType) {
