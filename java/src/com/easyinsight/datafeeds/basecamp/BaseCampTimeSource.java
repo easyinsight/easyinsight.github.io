@@ -7,6 +7,7 @@ import com.easyinsight.logging.LogClass;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.core.Key;
 import com.easyinsight.core.NumericValue;
+import com.easyinsight.core.DateValue;
 import com.easyinsight.analysis.*;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.Credentials;
@@ -113,6 +114,7 @@ public class BaseCampTimeSource extends ServerDataSourceDefinition {
                         String timeDescription = queryField(todoListNode, "description/text()");
                         String todoItemID = queryField(todoListNode, "todo-item-id/text()");
                         String personName = retrieveContactInfo(client, builder, peopleCache, personID, url);
+                        Date date = deadlineFormat.parse(queryField(todoListNode, "date/text()"));
 
                         IRow row = ds.createRow();
                         row.addValue(keys.get(PROJECTID), projectIdToRetrieve);
@@ -121,6 +123,7 @@ public class BaseCampTimeSource extends ServerDataSourceDefinition {
                         row.addValue(keys.get(HOURS), new NumericValue(Double.parseDouble(timeHours)));
                         row.addValue(keys.get(DESCRIPTION), timeDescription);
                         row.addValue(keys.get(TODOID), todoItemID);
+                        row.addValue(keys.get(DATE), new DateValue(date));
                         row.addValue(keys.get(COUNT), new NumericValue(1));
                     }
                 } while(info.currentPage++ < info.MaxPages);
@@ -156,7 +159,7 @@ public class BaseCampTimeSource extends ServerDataSourceDefinition {
 
     @NotNull
     protected List<String> getKeys() {
-        return Arrays.asList(PERSONID, PERSONNAME, HOURS, DESCRIPTION, PROJECTID, COUNT, TODOID);
+        return Arrays.asList(PERSONID, PERSONNAME, HOURS, DESCRIPTION, PROJECTID, COUNT, TODOID, DATE);
     }
 
     public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, DataSet dataSet, com.easyinsight.users.Credentials credentials) {
@@ -169,6 +172,7 @@ public class BaseCampTimeSource extends ServerDataSourceDefinition {
         analysisItems.add(new AnalysisDimension(keys.get(PERSONNAME), true));
         analysisItems.add(new AnalysisMeasure(keys.get(HOURS), AggregationTypes.SUM));
         analysisItems.add(new AnalysisMeasure(keys.get(COUNT), AggregationTypes.SUM));
+        analysisItems.add(new AnalysisDateDimension(keys.get(DATE), true,  AnalysisDateDimension.DAY_LEVEL));
         analysisItems.add(new AnalysisDimension(keys.get(TODOID), true));
         return analysisItems;
     }
