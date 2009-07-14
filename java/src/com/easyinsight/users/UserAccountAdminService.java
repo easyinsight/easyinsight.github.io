@@ -50,6 +50,22 @@ public class UserAccountAdminService {
         }
     }
 
+    public boolean doesAccountExist(String accountName) {
+        Session session = Database.instance().createSession();
+        List results;
+        try {
+            session.beginTransaction();
+            results = session.createQuery("from Account where name = ?").setString(0, accountName).list();
+            session.getTransaction().commit();
+        } catch (Exception e) {
+            session.getTransaction().rollback();
+            throw new RuntimeException(e);
+        } finally {
+            session.close();
+        }
+        return (results.size() > 0);
+    }
+
     public List<UserTransferObject> getUsers() {
         List<UserTransferObject> users = new ArrayList<UserTransferObject>();
         long accountID = SecurityUtil.getAccountID();
