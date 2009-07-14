@@ -93,18 +93,11 @@
         }
 
         private function initHandlers():void {
-            if (User.getInstance().getAccountType() == Account.FREE) {
-                currentState = "Free";
-            } else if (User.getInstance().getAccountType() == Account.ADMINISTRATOR) {
+            if (User.getInstance().getAccountType() == Account.ADMINISTRATOR) {
                 currentState = "Administration";
-            } else if(User.getInstance().getAccountType() == Account.PROFESSIONAL ||
-                      User.getInstance().getAccountType() == Account.ENTERPRISE) {
-                currentState = "Professional";
-            } else if (User.getInstance().getAccountType() == Account.GROUP) {
-                currentState = "Group";
-            }else {
-                currentState = "Individual";
-            }
+            } else {
+                currentState = "Free";
+            } 
         }
 
         private function onFeedCreation(event:UploadConfigEvent):void {
