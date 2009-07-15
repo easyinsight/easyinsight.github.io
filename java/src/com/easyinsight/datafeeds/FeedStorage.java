@@ -5,8 +5,6 @@ import com.easyinsight.database.EIConnection;
 import com.easyinsight.userupload.*;
 import com.easyinsight.analysis.*;
 import com.easyinsight.datafeeds.google.GoogleFeedDefinition;
-import com.easyinsight.datafeeds.salesforce.SalesforceFeedDefinition;
-import com.easyinsight.datafeeds.salesforce.SalesforceSubFeedDefinition;
 import com.easyinsight.datafeeds.salesforce.SalesforceBaseDataSource;
 import com.easyinsight.datafeeds.file.FileBasedFeedDefinition;
 import com.easyinsight.datafeeds.jira.JiraDataSource;
