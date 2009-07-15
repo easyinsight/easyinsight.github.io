@@ -1,18 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 <mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:customupload="com.easyinsight.customupload.*"
-                creationComplete="initHandlers()" xmlns:google="com.easyinsight.google.*" title="Connect to External Data Source" width="800" height="600">
+                creationComplete="initHandlers()" xmlns:google="com.easyinsight.google.*"
+                title="Connect to External Data Source" width="800" height="600">
     <mx:states>
         <mx:State name="Free">
             <mx:AddChild relativeTo="{coreContent}">
-                <mx:List height="100%" width="100" itemClick="onItemClick(event)">
-                    <mx:dataProvider>
-                        <mx:ArrayCollection>
-                            <mx:Array>
-                                <mx:String>Google Spreadsheet</mx:String>
-                            </mx:Array>
-                        </mx:ArrayCollection>
-                    </mx:dataProvider>
-                </mx:List>
+                <mx:VBox height="100%" horizontalAlign="center" width="200">
+                    <mx:Label text="Available Data Sources" fontFamily="Tahoma" fontSize="14" fontWeight="bold"/>
+                    <mx:List height="100%" width="100%" itemClick="onItemClick(event)">
+                        <mx:dataProvider>
+                            <mx:ArrayCollection>
+                                <mx:Array>
+                                    <mx:String>Google Spreadsheet</mx:String>
+                                </mx:Array>
+                            </mx:ArrayCollection>
+                        </mx:dataProvider>
+                    </mx:List>
+                </mx:VBox>
+            </mx:AddChild>
+            <mx:AddChild relativeTo="{coreContent}">
                 <mx:VBox width="100%" height="100%">
                     <mx:ViewStack id="freeStack" width="100%" height="100%">
                         <google:GoogleSpreadsheetSelection userConfigComplete="onFeedCreation(event)"
@@ -47,21 +53,25 @@
                     <mx:ViewStack id="adminStack" width="100%" height="100%">
                         <google:GoogleSpreadsheetSelection userConfigComplete="onFeedCreation(event)"
                                                            userConfigCancel="cancel(event)"/>
-                        <customupload:ExternalDataSourceCreation dataSourceClass="com.easyinsight.customupload.GoogleAnalyticsSourceCreation"
-                                                                 userConfigComplete="onFeedCreation(event)"
-                                                           userConfigCancel="cancel(event)"/>
-                        <customupload:ExternalDataSourceCreation dataSourceClass="com.easyinsight.customupload.JiraDataSourceCreation"
-                                                                 userConfigComplete="onFeedCreation(event)"
-                                                           userConfigCancel="cancel(event)"/>
-                        <customupload:ExternalDataSourceCreation dataSourceClass="com.easyinsight.customupload.BaseCampDataSourceCreation"
-                                                                 userConfigComplete="onFeedCreation(event)"
-                                                           userConfigCancel="cancel(event)"/>
-                        <customupload:ExternalDataSourceCreation dataSourceClass="com.easyinsight.customupload.GnipDataSourceCreation"
-                                                                 userConfigComplete="onFeedCreation(event)"
-                                                           userConfigCancel="cancel(event)"/>
+                        <customupload:ExternalDataSourceCreation
+                                dataSourceClass="com.easyinsight.customupload.GoogleAnalyticsSourceCreation"
+                                userConfigComplete="onFeedCreation(event)"
+                                userConfigCancel="cancel(event)"/>
+                        <customupload:ExternalDataSourceCreation
+                                dataSourceClass="com.easyinsight.customupload.JiraDataSourceCreation"
+                                userConfigComplete="onFeedCreation(event)"
+                                userConfigCancel="cancel(event)"/>
+                        <customupload:ExternalDataSourceCreation
+                                dataSourceClass="com.easyinsight.customupload.BaseCampDataSourceCreation"
+                                userConfigComplete="onFeedCreation(event)"
+                                userConfigCancel="cancel(event)"/>
+                        <customupload:ExternalDataSourceCreation
+                                dataSourceClass="com.easyinsight.customupload.GnipDataSourceCreation"
+                                userConfigComplete="onFeedCreation(event)"
+                                userConfigCancel="cancel(event)"/>
                         <customupload:NoCredentialsDataSourceCreation userConfigComplete="onFeedCreation(event)"
-                                                           userConfigCancel="cancel(event)"
-                                                           dataSourceClass="com.easyinsight.administration.feed.AdminStatsDataSource"/>
+                                                                      userConfigCancel="cancel(event)"
+                                                                      dataSourceClass="com.easyinsight.administration.feed.AdminStatsDataSource"/>
                     </mx:ViewStack>
                 </mx:VBox>
             </mx:AddChild>
@@ -97,7 +107,7 @@
                 currentState = "Administration";
             } else {
                 currentState = "Free";
-            } 
+            }
         }
 
         private function onFeedCreation(event:UploadConfigEvent):void {

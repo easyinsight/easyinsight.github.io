@@ -8,8 +8,10 @@ import com.easyinsight.customupload.UploadConfigEvent;
 import com.easyinsight.genredata.ModuleAnalyzeEvent;
 import com.easyinsight.listing.DataFeedDescriptor;
 	import com.easyinsight.listing.DescriptorAnalyzeSource;
-	
-	import flash.events.Event;
+
+import com.easyinsight.util.ProgressAlert;
+
+import flash.events.Event;
 	import flash.events.MouseEvent;
 	
 	import mx.containers.HBox;
@@ -79,6 +81,7 @@ import com.easyinsight.listing.DataFeedDescriptor;
             var googleDef:GoogleFeedDefinition = new GoogleFeedDefinition();
             googleDef.feedName = _data.spreadsheet + " - " + _data.title;
             googleDef.worksheetURL = _data.url;
+            ProgressAlert.alert(this.parent.parent, "Creating data source...", null, remoteService.newExternalDataSource);
 			remoteService.newExternalDataSource.send(googleDef, credentials);
 		}
 		
