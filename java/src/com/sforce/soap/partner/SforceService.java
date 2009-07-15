@@ -23,24 +23,24 @@ public class SforceService
     extends Service
 {
 
-    private final static URL SFORCESERVICE_WSDL_LOCATION;
-
-    static {
-        URL url = null;
-        try {
-            url = new URL("file:/C:/Users/abaldwin/Documents/EasyInsight/code/java/wsdl/partner.wsdl");
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
-        }
-        SFORCESERVICE_WSDL_LOCATION = url;
-    }
+//    private final static URL SFORCESERVICE_WSDL_LOCATION;
+//
+//    static {
+//        URL url = null;
+//        try {
+//            url = new URL("file:/C:/Users/abaldwin/Documents/EasyInsight/code/java/wsdl/partner.wsdl");
+//        } catch (MalformedURLException e) {
+//            e.printStackTrace();
+//        }
+//        SFORCESERVICE_WSDL_LOCATION = url;
+//    }
 
     public SforceService(URL wsdlLocation, QName serviceName) {
-        super(wsdlLocation, serviceName);
+        super(SforceService.class.getClassLoader().getResource("partner.wsdl"), serviceName);
     }
 
     public SforceService() {
-        super(SFORCESERVICE_WSDL_LOCATION, new QName("urn:partner.soap.sforce.com", "SforceService"));
+        super(SforceService.class.getClassLoader().getResource("partner.wsdl"), new QName("urn:partner.soap.sforce.com", "SforceService"));
     }
 
     /**
