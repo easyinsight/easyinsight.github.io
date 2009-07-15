@@ -57,7 +57,6 @@
         import com.easyinsight.analysis.HierarchyRollupEvent;
         import com.easyinsight.analysis.HierarchyWindow;
         import com.easyinsight.analysis.IReportController;
-        import com.easyinsight.analysis.ListViewGrid;
         import com.easyinsight.analysis.QuickDataSourceAPIWindow;
         import com.easyinsight.analysis.RuntimeCredentialsWindow;
         import com.easyinsight.analysis.list.ListController;
@@ -909,10 +908,6 @@
             } else {
                 Alert.show("You need to save the report first.");
             }
-        }
-
-        private function blah():void {
-            var grid:ListViewGrid;
         }
 
         private function onItemDoubleClick(event:ListEvent):void {
