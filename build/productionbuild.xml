@@ -99,6 +99,7 @@
                 <pathelement location="../java/src"/>
                 <fileset dir="../java/lib/cxf2">
                     <include name="*.jar"/>
+                    <include name="*.wsdl"/>
                 </fileset>
                 <fileset dir="../java/lib/axis">
                     <include name="*.jar"/>
@@ -262,6 +263,11 @@
         <copy todir="${webapp.path}/WEB-INF/flex">
             <fileset dir="../java/web/WEB-INF/flex">
                 <include name="**/*"/>
+            </fileset>
+        </copy>
+        <copy todir="${webapp.path}/WEB-INF/classes">
+            <fileset dir="../java/lib/cxf2">
+                <include name="**/*.wsdl"/>
             </fileset>
         </copy>
         <copy todir="${webapp.path}/WEB-INF/classes">
