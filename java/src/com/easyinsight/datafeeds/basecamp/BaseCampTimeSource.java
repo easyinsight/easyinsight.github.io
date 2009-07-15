@@ -137,16 +137,21 @@ public class BaseCampTimeSource extends ServerDataSourceDefinition {
 
     private String retrieveContactInfo(HttpClient client, Builder builder, Map<String, String> peopleCache, String contactId, String url) throws BaseCampLoginException {
         String contactName = null;
-        if(contactId != null) {
-            contactName = peopleCache.get(contactId);
-            if(contactName == null) {
-                Document contactInfo = runRestRequest("/contacts/person/" + contactId, client, builder, url, null);
-                contactName = queryField(contactInfo, "/person/first-name/text()") + " " + queryField(contactInfo, "/person/last-name/text()");
-                peopleCache.put(contactId, contactName);
-            }
+        try {
+            if(contactId != null) {
+                contactName = peopleCache.get(contactId);
+                if(contactName == null) {
+                    Document contactInfo = runRestRequest("/contacts/person/" + contactId, client, builder, url, null);
+                    contactName = queryField(contactInfo, "/person/first-name/text()") + " " + queryField(contactInfo, "/person/last-name/text()");
+                    peopleCache.put(contactId, contactName);
+                }
 
+            }
+            return contactName;            
+        } catch (BaseCampLoginException e) {
+            LogClass.error(e);
+            return "";
         }
-        return contactName;
     }
 
     private static String queryField(Node n, String xpath) {
