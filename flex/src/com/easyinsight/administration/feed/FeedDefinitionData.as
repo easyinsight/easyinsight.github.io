@@ -41,6 +41,7 @@ package com.easyinsight.administration.feed
         public var virtualDimensions:ArrayCollection = new ArrayCollection();
         public var visible:Boolean = true;
         public var parentSourceID:int;
+        public var folders:ArrayCollection;
 
         public var username:String;
         public var password:String;
