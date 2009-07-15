@@ -423,6 +423,17 @@ public class FeedDefinition implements Cloneable, Serializable {
         feedDefinition.setApiKey(RandomTextGenerator.generateText(12));
         feedDefinition.setCachedCredentials(null);
         feedDefinition.setRefreshDataInterval(0);
+        List<FeedFolder> clonedFolders = new ArrayList<FeedFolder>();
+        for (FeedFolder feedFolder : getFolders()) {
+            try {
+                FeedFolder clonedFolder = feedFolder.clone();
+                clonedFolder.updateIDs(replacementMap);
+                clonedFolders.add(clonedFolder);
+            } catch (CloneNotSupportedException e) {
+                LogClass.error(e);
+            }
+        }
+        feedDefinition.setFolders(clonedFolders);
         return new DataSourceCloneResult(feedDefinition, keyReplacementMap);
     }
 
