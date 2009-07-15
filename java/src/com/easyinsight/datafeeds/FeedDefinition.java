@@ -8,6 +8,7 @@ import com.easyinsight.users.Credentials;
 import com.easyinsight.analysis.*;
 import com.easyinsight.storage.DataStorage;
 import com.easyinsight.util.RandomTextGenerator;
+import com.easyinsight.logging.LogClass;
 
 import java.util.*;
 import java.sql.Connection;
@@ -346,12 +347,15 @@ public class FeedDefinition implements Cloneable, Serializable {
         for (AnalysisItem clone : clones) {
             clone.updateIDs(replacementMap);
         }
-        for (FeedFolder feedFolder : getFolders()) {
-            feedFolder.updateIDs(replacementMap);
-        }
         List<FeedNode> feedNodes = new ArrayList<FeedNode>();
         for (FeedFolder feedFolder : getFolders()) {
-            feedNodes.add(feedFolder.toFeedNode());
+            try {
+                FeedFolder clonedFolder = feedFolder.clone();
+                clonedFolder.updateIDs(replacementMap);
+                feedNodes.add(clonedFolder.toFeedNode());
+            } catch (CloneNotSupportedException e) {
+                LogClass.error(e);
+            }
         }
         for (AnalysisItem analysisItem : replacementMap.values()) {
             if (!analysisItem.isHidden()) {
