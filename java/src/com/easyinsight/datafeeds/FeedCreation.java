@@ -31,7 +31,7 @@ public class FeedCreation {
     public FeedCreationResult createFeed(FeedDefinition feedDefinition, Connection conn, DataSet dataSet, long userID, long accountID) throws SQLException {
         long feedID = feedStorage.addFeedDefinitionData(feedDefinition, conn);
         DataStorage tableDef = null;
-        if (dataSet != null) {
+        if (dataSet != null && !feedDefinition.isLiveData()) {
             tableDef = DataStorage.writeConnection(feedDefinition, conn, accountID);
             tableDef.createTable();
             tableDef.insertData(dataSet);

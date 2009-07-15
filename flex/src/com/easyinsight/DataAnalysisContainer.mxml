@@ -1099,15 +1099,6 @@
 
                 <analysis:AnalysisStatePopupButton analysisStateChange="onAnalysisStateChange(event)" id="analysisState"
                                                    mode="all"/>
-                <!--
-			<util:IconComboBox id="outputTypeSelector" close="changeDisplayType()" selectedIndex="{selectedMode}" iconFunction="geticon" iconField="icon">
-				<mx:Object label="List" data="1" icon="{listIcon}"/>
-	            <mx:Object label="Chart" data="2" icon="{graphIcon}"/>
-	            <mx:Object label="Crosstab" data="3" icon="{crosstabIcon}"/>
-	            <mx:Object label="Yahoo Map" data="4" icon="{yahooMapIcon}"/>
-	            <mx:Object label="Map" data="5" icon="{yahooMapIcon}"/>
-			</util:IconComboBox>
-			-->
 
                 <mx:VBox height="100%" width="100%" verticalGap="0" borderThickness="1" borderColor="#DCE2F8" borderStyle="solid" dropShadowEnabled="true">
                     <mx:Box width="100%" height="5" backgroundColor="#10319A" left="0" right="0"/>

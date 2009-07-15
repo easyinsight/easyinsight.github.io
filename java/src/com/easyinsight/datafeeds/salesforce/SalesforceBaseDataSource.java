@@ -1,13 +1,9 @@
 package com.easyinsight.datafeeds.salesforce;
 
-import com.easyinsight.datafeeds.ServerDataSourceDefinition;
-import com.easyinsight.datafeeds.FeedDefinition;
-import com.easyinsight.userupload.CredentialsResponse;
+import com.easyinsight.datafeeds.*;
 import com.easyinsight.users.Credentials;
-import com.easyinsight.analysis.AnalysisItem;
-import com.easyinsight.analysis.AnalysisDimension;
-import com.easyinsight.analysis.AnalysisMeasure;
-import com.easyinsight.analysis.AggregationTypes;
+import com.easyinsight.users.Account;
+import com.easyinsight.analysis.*;
 import com.easyinsight.core.Key;
 import com.easyinsight.core.NamedKey;
 import com.easyinsight.dataset.DataSet;
@@ -15,18 +11,22 @@ import com.sforce.soap.partner.*;
 import org.jetbrains.annotations.NotNull;
 
 import javax.persistence.Transient;
-import javax.xml.transform.Result;
 import javax.xml.ws.BindingProvider;
 import java.util.*;
 
 /**
- * Created by IntelliJ IDEA.
  * User: abaldwin
  * Date: Jul 8, 2009
  * Time: 10:10:17 AM
- * To change this template use File | Settings | File Templates.
  */
 public class SalesforceBaseDataSource extends ServerDataSourceDefinition {
+
+    public static final String OPPORTUNITY = "Opportunity";
+    public static final String ACCOUNT = "Account";
+    public static final String LEAD = "Lead";
+    public static final String CAMPAIGN = "Campaign";
+    public static final String CONTACT = "Contact";
+    public static final String CASE = "Case";
 
     @Transient
     protected SessionHeader sessionHeader;
@@ -40,15 +40,41 @@ public class SalesforceBaseDataSource extends ServerDataSourceDefinition {
             Map<String, Key> keys = new HashMap<String, Key>();
             if(service == null || sessionHeader == null)
                 login(credentials);
-            keys.putAll(getKeysForObject("Opportunity"));
-            keys.putAll(getKeysForObject("Account"));
-            keys.putAll(getKeysForObject("Lead"));
+            keys.putAll(getKeysForObject(OPPORTUNITY));
+            keys.putAll(getKeysForObject(ACCOUNT));
+            keys.putAll(getKeysForObject(LEAD));
+            keys.putAll(getKeysForObject(CAMPAIGN));
+            keys.putAll(getKeysForObject(CONTACT));
+            keys.putAll(getKeysForObject(CASE));
             return keys;
         }
         catch(Exception e) {
             throw new RuntimeException(e);
         }
 
+    }
+
+    @Override
+    public int getRequiredAccountTier() {
+        return Account.GROUP;
+    }
+
+    public int getCredentialsDefinition() {
+        return CredentialsDefinition.STANDARD_USERNAME_PW;
+    }
+
+    public boolean isConfigured() {
+        return true;
+    }
+
+    @Override
+    public Feed createFeedObject() {
+        return new SalesforceFeed();
+    }
+
+    @Override
+    public FeedType getFeedType() {
+        return FeedType.SALESFORCE;
     }
 
     private Map<String, Key> getKeysForObject(String s) throws InvalidSObjectFault, UnexpectedErrorFault {
@@ -68,13 +94,33 @@ public class SalesforceBaseDataSource extends ServerDataSourceDefinition {
                 login(credentials);
 
             List<AnalysisItem> items = new LinkedList<AnalysisItem>();
-            items.addAll(getAnalysisItemsForObject("Opportunity", keys));
-
-            return super.createAnalysisItems(keys, dataSet, credentials);    //To change body of overridden methods use File | Settings | File Templates.
+            List<AnalysisItem> opportunityItems = getAnalysisItemsForObject(OPPORTUNITY, keys);
+            List<AnalysisItem> accountItems = getAnalysisItemsForObject(ACCOUNT, keys);
+            List<AnalysisItem> leadItems = getAnalysisItemsForObject(LEAD, keys);
+            List<AnalysisItem> campaignItems = getAnalysisItemsForObject(CAMPAIGN, keys);
+            List<AnalysisItem> caseItems = getAnalysisItemsForObject(CASE, keys);
+            List<AnalysisItem> contactItems = getAnalysisItemsForObject(CONTACT, keys);
+            defineFolder("Opportunities").getChildItems().addAll(opportunityItems);
+            defineFolder("Accounts").getChildItems().addAll(accountItems);
+            defineFolder("Leads").getChildItems().addAll(leadItems);
+            defineFolder("Campaigns").getChildItems().addAll(campaignItems);
+            defineFolder("Cases").getChildItems().addAll(caseItems);
+            defineFolder("Contacts").getChildItems().addAll(contactItems);
+            items.addAll(opportunityItems);
+            items.addAll(accountItems);
+            items.addAll(leadItems);
+            items.addAll(campaignItems);
+            items.addAll(caseItems);
+            items.addAll(contactItems);
+            return items;
         }
         catch(Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public boolean isLiveData() {
+        return true;
     }
 
     private List<AnalysisItem> getAnalysisItemsForObject(String s, Map<String, Key> keys) throws InvalidSObjectFault, UnexpectedErrorFault {
@@ -82,21 +128,55 @@ public class SalesforceBaseDataSource extends ServerDataSourceDefinition {
         DescribeSObjectResultType response = service.describeSObject(sessionHeader, s);
         for(FieldType f : response.getFields()) {
             String fieldName = s + "." + f.getName();
+            String friendlyName = f.getName();
+            if (friendlyName.endsWith("__c")) {
+                friendlyName = friendlyName.substring(0, friendlyName.length() - 3);
+            }
             if("BOOLEAN".equals(f.getType().name()) ||
                     "STRING".equals(f.getType().name()) ||
                     "TEXTAREA".equals(f.getType().name()) ||
                     "PHONE".equals(f.getType().name()) ||
-                    "URL".equals(f.getType().name())) {
-                items.add(new AnalysisDimension(keys.get(fieldName), fieldName));
+                    "URL".equals(f.getType().name()) ||
+                    "PICKLIST".equals(f.getType().name())) {
+                items.add(new AnalysisDimension(keys.get(fieldName), friendlyName));
             }
-            else if("DOUBLE".equals(f.getType().name()) || "CURRENCY".equals(f.getType().name()) || "INT".equals(f.getType().name())) {
-                items.add(new AnalysisMeasure(keys.get(fieldName), AggregationTypes.SUM));
+            else if("DOUBLE".equals(f.getType().name()) || "INT".equals(f.getType().name())) {
+                items.add(new AnalysisMeasure(keys.get(fieldName), friendlyName, AggregationTypes.SUM));
+            } else if ("CURRENCY".equals(f.getType().name())) {
+                AnalysisMeasure analysisMeasure = new AnalysisMeasure(keys.get(fieldName), friendlyName, AggregationTypes.SUM);
+                FormattingConfiguration formattingConfiguration = new FormattingConfiguration();
+                formattingConfiguration.setFormattingType(FormattingConfiguration.CURRENCY);
+                analysisMeasure.setFormattingConfiguration(formattingConfiguration);
+                items.add(analysisMeasure);
+            } else if ("PERCENT".equals(f.getType().name())) {
+                AnalysisMeasure analysisMeasure = new AnalysisMeasure(keys.get(fieldName), friendlyName, AggregationTypes.AVERAGE);
+                FormattingConfiguration formattingConfiguration = new FormattingConfiguration();
+                formattingConfiguration.setFormattingType(FormattingConfiguration.PERCENTAGE);
+                analysisMeasure.setFormattingConfiguration(formattingConfiguration);
+                items.add(analysisMeasure);
+            } else if ("DATE".equals(f.getType().name())) {
+                items.add(new AnalysisDateDimension(keys.get(fieldName), friendlyName, AnalysisDateDimension.DAY_LEVEL));
+            } else if ("DATETIME".equals(f.getType().name())) {
+                AnalysisDateDimension dateDimension = new AnalysisDateDimension(keys.get(fieldName), friendlyName, AnalysisDateDimension.DAY_LEVEL);
+                dateDimension.setCustomDateFormat("yyyy-MM-dd'T'HH:mm:SS.sss'Z'");
+                items.add(dateDimension);
             }
-
-
         }
+        return items;
+    }
 
-        return null;  //To change body of created methods use File | Settings | File Templates.
+    public DataSet getDataSet(Credentials credentials, Map<String, Key> keys, Date now, FeedDefinition parentDefinition) {
+        return new DataSet();
+    }
+
+    @Override
+    public String validateCredentials(Credentials credentials) {
+        try {
+            if (sessionHeader == null) login(credentials);
+            return null;
+        } catch (Exception e) {
+            return e.getMessage();
+        }
     }
 
     private void login(Credentials c) throws InvalidIdFault, UnexpectedErrorFault, LoginFault {
@@ -109,11 +189,6 @@ public class SalesforceBaseDataSource extends ServerDataSourceDefinition {
         ((BindingProvider) service).getRequestContext().put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY, result.getServerUrl());
         sessionHeader = new SessionHeader();
         sessionHeader.setSessionId(result.getSessionId());
-    }
-
-    @Override
-    public CredentialsResponse refreshData(Credentials credentials, long accountID, Date now, FeedDefinition parentDefinition) {
-        return super.refreshData(credentials, accountID, now, parentDefinition);    //To change body of overridden methods use File | Settings | File Templates.
     }
 
     @NotNull

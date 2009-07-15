@@ -8,9 +8,6 @@
 		<![CDATA[
         import ilog.orgchart.OrgChartEvent;
         import mx.collections.ArrayCollection;
-        import mx.controls.Image;
-        import mx.core.DragSource;
-        import mx.managers.DragManager;
         import mx.managers.PopUpManager;
 
         [Bindable]

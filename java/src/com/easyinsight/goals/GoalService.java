@@ -39,7 +39,7 @@ public class GoalService {
     }
 
     public GoalSaveInfo createGoalTree(GoalTree goalTree) {
-        SecurityUtil.authorizeAccountTier(Account.PROFESSIONAL);
+        SecurityUtil.authorizeAccountTier(Account.GROUP);
         if (goalTree.getAdministrators() == null || goalTree.getAdministrators().size() == 0) {
             throw new RuntimeException("At least one administrator must be defined.");
         }

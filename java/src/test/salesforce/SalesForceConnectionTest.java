@@ -2,6 +2,11 @@ package test.salesforce;
 
 import junit.framework.TestCase;
 import com.sforce.soap.partner.*;
+import com.sforce.soap.partner.sobject.SObject;
+import com.easyinsight.datafeeds.salesforce.SalesforceBaseDataSource;
+import com.easyinsight.datafeeds.salesforce.SalesforceIntegration;
+import com.easyinsight.userupload.UserUploadService;
+import com.easyinsight.users.Credentials;
 
 import javax.xml.ws.BindingProvider;
 import javax.xml.namespace.QName;
@@ -11,9 +16,13 @@ import org.apache.cxf.transport.http.HTTPConduit;
 import org.apache.cxf.transports.http.configuration.HTTPClientPolicy;
 import org.apache.cxf.headers.Header;
 import org.apache.cxf.binding.soap.SoapHeader;
+import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
+import org.w3c.dom.Node;
 
-import java.util.List;
-import java.util.LinkedList;
+import java.util.*;
+
+import test.util.TestUtil;
 
 /**
  * Created by IntelliJ IDEA.
@@ -90,6 +99,48 @@ public class SalesForceConnectionTest extends TestCase {
 
     }
 
+    public void testJoin() {
+
+        try {
+            DescribeSObjectResultType response = service.describeSObject(sessionHeader, "Contact");
+            QueryResultType result = service.query(sessionHeader, "select Product.Name, Opportunity.Name, Account.Name, Account.NumberOfEmployees from Product");
+            result.isDone();
+            List<SObject> objects = result.getRecords();
+            for (SObject object : objects) {
+                List<Object> blahs = object.getAny();
+                for (Object blah : blahs) {
+                    Element element = (Element) blah;
+                    if (element.getChildNodes().getLength() == 1) {
+                        System.out.println("type = " + object.getType());
+                        System.out.println("name = " + element.getNodeName().split(":")[1]);
+                        System.out.println("value = " + element.getTextContent());
+                    } else if (element.getChildNodes().getLength() > 1) {
+                        String querySubject = element.getNodeName().split(":")[1];
+                        NodeList childList = element.getChildNodes();
+                        for (int i = 0; i < childList.getLength(); i++) {
+                            Node child = childList.item(i);
+                            System.out.println("\tchild name = " + querySubject + "." + child.getNodeName().split(":")[1]);
+                            System.out.println("\tchild value = " + child.getTextContent());
+                        }
+                    }
+                }
+            }
+        } catch (InvalidFieldFault invalidFieldFault) {
+            invalidFieldFault.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+        } catch (InvalidIdFault invalidIdFault) {
+            invalidIdFault.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+        } catch (InvalidQueryLocatorFault invalidQueryLocatorFault) {
+            invalidQueryLocatorFault.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+        } catch (InvalidSObjectFault invalidSObjectFault) {
+            invalidSObjectFault.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+        } catch (MalformedQueryFault malformedQueryFault) {
+            malformedQueryFault.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+        } catch (UnexpectedErrorFault unexpectedErrorFault) {
+            unexpectedErrorFault.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+        }
+
+    }
+
     public void testGetOpportunities() {
 
         try {
@@ -120,5 +171,14 @@ public class SalesForceConnectionTest extends TestCase {
             unexpectedErrorFault.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
         }
 
+    }
+
+    public void testQuery() throws InvalidSObjectFault, MalformedQueryFault, InvalidIdFault, InvalidFieldFault, UnexpectedErrorFault, LoginFault, InvalidQueryLocatorFault {
+        SalesforceIntegration salesforceIntegration = new SalesforceIntegration();
+        Set<String> subjects = new HashSet<String>();
+        subjects.add("Opportunity");
+        List<String> fields = Arrays.asList("Name");
+        Credentials credentials = new Credentials("jboe99@gmail.com", "e@symone$rKxLSrt0eol9SbnHAr8UbZOR");
+        salesforceIntegration.query(credentials, subjects, fields);
     }
 }

@@ -19,26 +19,26 @@
 					new AccountComparisonIcon("Standard APIs", true, true, true, true, true),
 					new AccountComparisonIcon("Dynamic API", false, false, false, true, true),
 					new AccountComparisonIcon("WS-Security", false, false, false, false, true),
-                    new AccountComparisonIcon("Basecamp Integration", false, false, true, true, true),
-                    new AccountComparisonIcon("JIRA Integration", false, false, true, true, true),
-                    new AccountComparisonIcon("TeamCity Integration", false, false, true, true, true),
-                    new AccountComparisonIcon("SWF Analysis", false, false, true, true, true),
+                    new AccountComparisonIcon("Basecamp Integration", false, true, true, true, true),
+                    new AccountComparisonIcon("JIRA Integration", false, true, true, true, true),
+                    new AccountComparisonIcon("TeamCity Integration", false, true, true, true, true),
+                    new AccountComparisonIcon("SWF Analysis", true, true, true, true, true),
                     new AccountComparisonIcon("Database Solution", false, false, true, true, true),
                     new AccountComparisonIcon("Gnip Integration", false, false, true, true, true),                        
-                    new AccountComparisonIcon("Google Analytics Integration", false, false, true, true, true),
+                    new AccountComparisonIcon("Google Analytics Integration", false, true, true, true, true),
                     new AccountComparisonIcon("Template Goal Trees", false, false, true, true, true),
                     new AccountComparisonIcon("Custom Goal Trees", false, false, false, true, true),
-                    new AccountComparisonIcon("Lean Templates", false, false, false, true, true),
+                    /*new AccountComparisonIcon("Lean Templates", false, false, false, true, true),
                     new AccountComparisonIcon("Six Sigma Templates", false, false, false, true, true),
-                    new AccountComparisonIcon("Balanced Scorecard Templates", false, false, false, true, true),
+                    new AccountComparisonIcon("Balanced Scorecard Templates", false, false, false, true, true),*/
                     new AccountComparisonIcon("SSL", true, true, true, true, true),
                     new AccountComparisonIcon("Dedicated Database", false, false, false, false, true),
                     new AccountComparisonIcon("SLA", false, false, false, false, true),
 					new AccountComparisonRow("Maximum Users", "1", "1", "20", "Unlimited", "Unlimited"),
-					new AccountComparisonRow("Available Space", "1 MB", "50 MB", "100 MB", "5 GB", "1 TB+"),
+					new AccountComparisonRow("Available Space", "1 MB", "100 MB", "500 MB", "10 GB", "1 TB+"),
 					new AccountComparisonRow("Support", "None", "Email", "Email", "Phone", "24/7"),
 					new AccountComparisonRow("Consulting", "None", "$", "$", "$", "$"),
-					new AccountComparisonRow("Price", "FREE!", "$10/mo", "$100/mo", "$1200/mo", "Talk to us")
+					new AccountComparisonRow("Price", "FREE!", "$10/mo", "$100/mo", "$1500/mo", "Talk to us")
 					] );
 				trace(visualizations.length);
 			}

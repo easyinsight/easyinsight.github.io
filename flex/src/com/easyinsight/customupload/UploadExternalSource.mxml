@@ -41,6 +41,7 @@
                                     <mx:String>JIRA</mx:String>
                                     <mx:String>BaseCamp</mx:String>
                                     <mx:String>Gnip</mx:String>
+                                    <mx:String>Salesforce</mx:String>
                                     <mx:String>Admin Server Stats</mx:String>
                                 </mx:Array>
                             </mx:ArrayCollection>
@@ -67,6 +68,10 @@
                                 userConfigCancel="cancel(event)"/>
                         <customupload:ExternalDataSourceCreation
                                 dataSourceClass="com.easyinsight.customupload.GnipDataSourceCreation"
+                                userConfigComplete="onFeedCreation(event)"
+                                userConfigCancel="cancel(event)"/>
+                        <customupload:ExternalDataSourceCreation
+                                dataSourceClass="com.easyinsight.customupload.SalesforceDataSourceCreation"
                                 userConfigComplete="onFeedCreation(event)"
                                 userConfigCancel="cancel(event)"/>
                         <customupload:NoCredentialsDataSourceCreation userConfigComplete="onFeedCreation(event)"

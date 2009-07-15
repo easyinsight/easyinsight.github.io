@@ -7,6 +7,7 @@ import com.easyinsight.analysis.*;
 import com.easyinsight.datafeeds.google.GoogleFeedDefinition;
 import com.easyinsight.datafeeds.salesforce.SalesforceFeedDefinition;
 import com.easyinsight.datafeeds.salesforce.SalesforceSubFeedDefinition;
+import com.easyinsight.datafeeds.salesforce.SalesforceBaseDataSource;
 import com.easyinsight.datafeeds.file.FileBasedFeedDefinition;
 import com.easyinsight.datafeeds.jira.JiraDataSource;
 import com.easyinsight.datafeeds.basecamp.BaseCampCompositeSource;
@@ -685,9 +686,7 @@ public class FeedStorage {
                 } else if (feedType.equals(FeedType.COMPOSITE)) {
                     feedDefinition = new CompositeFeedDefinition();
                 } else if (feedType.equals(FeedType.SALESFORCE)) {
-                    feedDefinition = new SalesforceFeedDefinition();
-                } else if (feedType.equals(FeedType.SALESFORCE_SUB)) {
-                    feedDefinition = new SalesforceSubFeedDefinition();
+                    feedDefinition = new SalesforceBaseDataSource();
                 } else if (feedType.equals(FeedType.DEFAULT)) {
                     feedDefinition = new FeedDefinition();
                 } else if (feedType.equals(FeedType.JIRA)) {

@@ -158,7 +158,7 @@
                     <mx:HRule width="100%"/>
                     <mx:Label text="Collaborate across your business"/>
                     <mx:Label text="Data level security"/>
-                    <mx:Label text="1 GB of storage"/>
+                    <mx:Label text="500 MB of storage"/>
                     <mx:Label text="20 users"/>
                     <mx:Button label="Sign up!" click="signup(Account.GROUP)" styleName="blueButton"/>
                 </mx:VBox>
@@ -174,7 +174,7 @@
                     <mx:HRule width="100%"/>
                     <mx:Label text="Sophisticated improvement tools"/>
                     <mx:Label text="Business process integration"/>
-                    <mx:Label text="20 GB of storage"/>
+                    <mx:Label text="10 GB of storage"/>
                     <mx:Label text="Unlimited users"/>
                     <mx:Button label="Contact us" click="contactUs()" styleName="blueButton"/>
                 </mx:VBox>

@@ -2,30 +2,39 @@ package test.salesforce;
 
 import junit.framework.TestCase;
 import com.easyinsight.datafeeds.salesforce.SalesforceBaseDataSource;
+import com.easyinsight.datafeeds.FeedRegistry;
+import com.easyinsight.datafeeds.FeedStorage;
+import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.users.Credentials;
 import com.easyinsight.core.Key;
+import com.easyinsight.userupload.UserUploadService;
+import com.easyinsight.database.Database;
 
 import java.util.Map;
 
+import test.util.TestUtil;
+
 /**
- * Created by IntelliJ IDEA.
  * User: abaldwin
  * Date: Jul 13, 2009
  * Time: 10:45:09 AM
- * To change this template use File | Settings | File Templates.
  */
-public class SalesForceDataSourceTest extends TestCase {
 
-    SalesforceBaseDataSource dataSource;
+public class SalesForceDataSourceTest extends TestCase {
 
     @Override
     protected void setUp() throws Exception {
-        dataSource = new SalesforceBaseDataSource();
-        super.setUp();
+        Database.initialize();
+        FeedRegistry.initialize();
     }
 
-    public void testDataSourceKeys() {
-        Map<String, Key> keys = dataSource.newDataSourceFields(new Credentials("jboe99@gmail.com", "e@symone$rKxLSrt0eol9SbnHAr8UbZOR"));
-        assertTrue(keys.size() > 0);
+    public void testDataSource() {
+        TestUtil.getProUser();
+        SalesforceBaseDataSource sbds = new SalesforceBaseDataSource();
+        Credentials credentials = new Credentials("jboe99@gmail.com", "e@symone$rKxLSrt0eol9SbnHAr8UbZOR");
+
+        long dataSourceID = new UserUploadService().newExternalDataSource(sbds, credentials);
+        FeedDefinition feedDefinition = new FeedStorage().getFeedDefinitionData(dataSourceID);
+        System.out.println("blah");
     }
 }

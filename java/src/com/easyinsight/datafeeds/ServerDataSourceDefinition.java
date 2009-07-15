@@ -49,7 +49,7 @@ public abstract class ServerDataSourceDefinition extends FeedDefinition implemen
             setUploadPolicy(uploadPolicy);
             FeedCreationResult feedCreationResult = new FeedCreation().createFeed(this, conn, dataSet, SecurityUtil.getUserID());
             metadata = feedCreationResult.getTableDefinitionMetadata();
-            metadata.commit();
+            if (metadata != null) metadata.commit();
             return feedCreationResult.getFeedID();
         } catch (SQLException e) {
             if (metadata != null) {

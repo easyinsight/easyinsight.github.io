@@ -56,6 +56,10 @@ public class FeedDefinition implements Cloneable, Serializable {
     private boolean visible = true;
     private long parentSourceID;
 
+    public boolean isLiveData() {
+        return false;
+    }
+
     public List<FeedFolder> getFolders() {
         return folders;
     }

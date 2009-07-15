@@ -155,7 +155,7 @@
                     if (currentState != "") {
                         currentState = "";
                     }
-                    addGoalTreeAvailable = User.getInstance().getAccountType() >= Account.PROFESSIONAL;
+                    addGoalTreeAvailable = User.getInstance().getAccountType() >= Account.GROUP;
                     goalService.getGoalTrees.send();
                     myGoalsGrid.gotFocus();
                 }

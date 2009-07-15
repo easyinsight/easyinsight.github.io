@@ -43,6 +43,10 @@ public class GoogleFeedDefinition extends ServerDataSourceDefinition {
         this.worksheetURL = worksheetURL;
     }
 
+    public boolean isLiveData() {
+        return true;
+    }
+
     public void customStorage(Connection conn) throws SQLException {
         PreparedStatement clearStmt = conn.prepareStatement("DELETE FROM GOOGLE_FEED WHERE DATA_FEED_ID = ? ");
         PreparedStatement insertGoogleStmt = conn.prepareStatement("INSERT INTO GOOGLE_FEED (DATA_FEED_ID, WORKSHEETURL) " +
