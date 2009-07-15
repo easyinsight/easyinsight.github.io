@@ -934,7 +934,9 @@ public class GoalStorage {
         List<GoalValue> goalValues = new ArrayList<GoalValue>();
         for (GoalTreeNode node : neededNodes) {
             GoalValue goalValue = goalEvaluationStorage.evaluateGoalTreeNode(node, date, new ArrayList<CredentialFulfillment>());
-            goalValues.add(goalValue);
+            if (goalValue != null) {
+                goalValues.add(goalValue);
+            }
         }
         conn = Database.instance().getConnection();
         try {

@@ -6,13 +6,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Collections;
 import java.util.Comparator;
+import java.io.Serializable;
 
 /**
  * User: James Boe
  * Date: Apr 27, 2008
  * Time: 9:34:20 PM
  */
-public abstract class FeedNode {
+public abstract class FeedNode implements Serializable {
 
     private List<FeedNode> children = new ArrayList<FeedNode>();
 
