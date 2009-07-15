@@ -96,10 +96,10 @@
         <junit printsummary="yes" haltonfailure="no" maxmemory="256m">
             <classpath>
                 <pathelement location="${test.path}/classes"/>
+                <pathelement location="../java/lib/cxf2"/>
                 <pathelement location="../java/src"/>
                 <fileset dir="../java/lib/cxf2">
                     <include name="*.jar"/>
-                    <include name="*.wsdl"/>
                 </fileset>
                 <fileset dir="../java/lib/axis">
                     <include name="*.jar"/>
