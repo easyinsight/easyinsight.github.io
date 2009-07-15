@@ -5,13 +5,14 @@ import com.easyinsight.analysis.AnalysisItem;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.io.Serializable;
 
 /**
  * User: James Boe
  * Date: Apr 27, 2008
  * Time: 9:33:57 PM
  */
-public class FeedFolder implements Cloneable {
+public class FeedFolder implements Cloneable, Serializable {
 
     private long folderID;
     private String name;
