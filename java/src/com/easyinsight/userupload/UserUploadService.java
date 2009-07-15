@@ -461,13 +461,14 @@ public class UserUploadService implements IUserUploadService {
                     Database.instance().closeConnection(conn);
                 }
             }
-
+            CredentialsResponse credentialsResponse;
             if (synchronous) {
                 IServerDataSourceDefinition dataSource = (IServerDataSourceDefinition) feedStorage.getFeedDefinitionData(feedID);
-                dataSource.refreshData(credentials, SecurityUtil.getAccountID(), new Date(), null);
+                credentialsResponse = dataSource.refreshData(credentials, SecurityUtil.getAccountID(), new Date(), null);
                 // TODO: refactor into event model
                 new GoalStorage().updateGoals(feedID);
             } else {
+                credentialsResponse = new CredentialsResponse(true);
                 ServerRefreshScheduledTask task = new ServerRefreshScheduledTask();
                 task.setDataSourceID(feedID);
                 task.setUserID(SecurityUtil.getUserID());
@@ -476,7 +477,7 @@ public class UserUploadService implements IUserUploadService {
                 task.setRefreshCreds(credentials);
                 Scheduler.instance().saveTask(task);
             }
-            return new CredentialsResponse(true);            
+            return credentialsResponse;
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);

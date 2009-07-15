@@ -89,6 +89,7 @@ public class BaseCampTodoSource extends ServerDataSourceDefinition {
             doc = builder.build(restMethod.getResponseBodyAsStream());
         }
         catch (nu.xom.ParsingException e) {
+            LogClass.error(e);
                 throw new BaseCampLoginException("Invalid username/password.");
         }
         catch (Throwable e) {
