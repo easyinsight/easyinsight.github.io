@@ -21,6 +21,10 @@ public class TestAlphaDataSource extends ServerDataSourceDefinition {
     public static final String JOIN_DIM = "JoinDimension";
     public static final String MEASURE = "AlphaMeasure";
 
+    public TestAlphaDataSource() {
+        setFeedName("Alpha");
+    }
+
     @NotNull
     protected List<String> getKeys() {
         return Arrays.asList(DIM, JOIN_DIM, MEASURE);

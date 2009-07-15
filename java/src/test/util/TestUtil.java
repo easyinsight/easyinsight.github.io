@@ -104,7 +104,7 @@ public class TestUtil {
         User user = new InternalUserService().retrieveUser("testuser");
         long userID;
         if (user == null) {
-            UserTransferObject initialUser = new UserTransferObject("testuser", 0, "James Boe", "testuser99@gmail.com", null);
+            UserTransferObject initialUser = new UserTransferObject("testuser", 0, "testuser99@gmail.com", "James Boe", null);
             AccountTransferObject account = new AccountTransferObject();
             account.setAccountType(Account.INDIVIDUAL);
             long accountID = userService.createAccount(initialUser, account, "password");
@@ -140,7 +140,7 @@ public class TestUtil {
         User user = new InternalUserService().retrieveUser("prouser");
         long userID;
         if (user == null) {
-            UserTransferObject initialUser = new UserTransferObject("prouser", 0, "James Boe", "prouser@gmail.com", null);
+            UserTransferObject initialUser = new UserTransferObject("prouser", 0, "prouser@gmail.com", "James Boe", null);
             AccountTransferObject account = new AccountTransferObject();
             account.setAccountType(Account.PROFESSIONAL);
             long accountID = userService.createAccount(initialUser, account, "password");
@@ -176,7 +176,7 @@ public class TestUtil {
         User user = new InternalUserService().retrieveUser("adminuser");
         long userID;
         if (user == null) {
-            UserTransferObject initialUser = new UserTransferObject("adminuser", 0, "James Boe", "adminuser99@gmail.com", null);
+            UserTransferObject initialUser = new UserTransferObject("adminuser", 0, "adminuser99@gmail.com", "James Boe", null);
             AccountTransferObject account = new AccountTransferObject();
             account.setAccountType(Account.ADMINISTRATOR);
             long accountID = userService.createAccount(initialUser, account, "password");

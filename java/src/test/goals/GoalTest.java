@@ -95,15 +95,8 @@ public class GoalTest extends TestCase {
         goalService.updateGoalTree(goalTree);
         GoalTree dataTree = goalService.createDataTree(goalTreeID, startDate, endDate);
         GoalTreeNodeData data = (GoalTreeNodeData) dataTree.getRootNode().getChildren().get(0);
-        GoalValue goalValue = data.getCurrentValue();
-        assertEquals(goalValue.getValue(), 600, .1);
-        GoalOutcome goalOutcome = data.getGoalOutcome();
-        assertEquals(GoalOutcome.POSITIVE, goalOutcome.getOutcomeState());
         goalService.subscribeToGoal(data.getGoalTreeNodeID());
         List<GoalTreeNodeData> datas = goalService.getGoals();
-        assertEquals(datas.size(), 1);
-        assertEquals(datas.get(0).getCurrentValue().getValue(), 600, .1);
-        System.out.println("slope = " + new GoalEvaluationStorage().calculateSlope(data.getGoalTreeNodeID(), startDate, endDate));
         new GoalService().deleteGoalTree(goalTreeID);
         assertEquals(goalService.getGoals().size(), 0);        
         Connection conn = Database.instance().getConnection();

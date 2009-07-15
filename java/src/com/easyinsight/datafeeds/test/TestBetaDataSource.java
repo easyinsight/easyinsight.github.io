@@ -21,6 +21,10 @@ public class TestBetaDataSource extends ServerDataSourceDefinition {
     public static final String JOIN_DIM = "JoinDimension";
     public static final String MEASURE = "BetaMeasure";
 
+    public TestBetaDataSource() {
+        setFeedName("Beta");
+    }
+
     @NotNull
     protected List<String> getKeys() {
         return Arrays.asList(DIM, JOIN_DIM, MEASURE);
