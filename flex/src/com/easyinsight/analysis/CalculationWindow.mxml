@@ -10,6 +10,7 @@
         import com.easyinsight.analysis.formatter.FormattingConfiguration;
 
         import mx.collections.ArrayCollection;
+        import mx.controls.AdvancedDataGrid;
         import mx.controls.DataGrid;
         import mx.managers.DragManager;
         import mx.controls.List;
@@ -89,6 +90,12 @@
             } else if (event.dragInitiator is DropArea) {
                 var dropArea:DropArea = event.dragInitiator as DropArea;
                 analysisItem = dropArea.analysisItem;
+            } else if (event.dragInitiator is AdvancedDataGrid) {
+                var analysisItemLabel:AdvancedDataGrid = event.dragInitiator as AdvancedDataGrid;
+                var analysisItemWrapper:AnalysisItemWrapper = analysisItemLabel.selectedItem as AnalysisItemWrapper;
+                if (analysisItemWrapper.isAnalysisItem()) {
+                    analysisItem = analysisItemWrapper.analysisItem;
+                }
             }
             DragManager.acceptDragDrop(event.target as TextArea);
         }
@@ -102,6 +109,12 @@
             } else if (event.dragInitiator is DropArea) {
                 var dropArea:DropArea = event.dragInitiator as DropArea;
                 analysisItem = dropArea.analysisItem;
+            } else if (event.dragInitiator is AdvancedDataGrid) {
+                var analysisItemLabel:AdvancedDataGrid = event.dragInitiator as AdvancedDataGrid;
+                analysisItemWrapper = analysisItemLabel.selectedItem as AnalysisItemWrapper;
+                if (analysisItemWrapper.isAnalysisItem()) {
+                    analysisItem = analysisItemWrapper.analysisItem;
+                }
             }
             calculationInput.text += analysisItem.key.createString();
         }

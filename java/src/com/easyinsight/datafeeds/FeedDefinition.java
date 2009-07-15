@@ -51,8 +51,17 @@ public class FeedDefinition implements Cloneable, Serializable {
     private boolean inheritAccountAPISettings;
     private long refreshDataInterval;
     private List<VirtualDimension> virtualDimensions;
+    private List<FeedFolder> folders = new ArrayList<FeedFolder>();
     private boolean visible = true;
     private long parentSourceID;
+
+    public List<FeedFolder> getFolders() {
+        return folders;
+    }
+
+    public void setFolders(List<FeedFolder> folders) {
+        this.folders = folders;
+    }
 
     public long getParentSourceID() {
         return parentSourceID;
@@ -337,6 +346,30 @@ public class FeedDefinition implements Cloneable, Serializable {
         for (AnalysisItem clone : clones) {
             clone.updateIDs(replacementMap);
         }
+        for (FeedFolder feedFolder : getFolders()) {
+            feedFolder.updateIDs(replacementMap);
+        }
+        List<FeedNode> feedNodes = new ArrayList<FeedNode>();
+        for (FeedFolder feedFolder : getFolders()) {
+            feedNodes.add(feedFolder.toFeedNode());
+        }
+        for (AnalysisItem analysisItem : replacementMap.values()) {
+            if (!analysisItem.isHidden()) {
+                feedNodes.add(analysisItem.toFeedNode());
+            }
+        }
+        Collections.sort(feedNodes, new Comparator<FeedNode>() {
+
+                public int compare(FeedNode o1, FeedNode o2) {
+                    if (o1 instanceof FolderNode && !(o2 instanceof FolderNode)) {
+                        return -1;
+                    } else if (!(o1 instanceof FolderNode) && o2 instanceof FolderNode) {
+                        return 1;
+                    }
+                    return o1.toDisplay().compareTo(o2.toDisplay());
+                }
+            });
+        feed.setFieldHierarchy(feedNodes);
         feed.setFields(clones);
         feed.setName(getFeedName());
         return feed;
@@ -466,5 +499,29 @@ public class FeedDefinition implements Cloneable, Serializable {
 
     protected void onDelete(Connection conn) throws SQLException {
         DataStorage.delete(dataFeedID, conn);
+    }
+
+    protected FeedFolder defineFolder(String name) {
+        for (FeedFolder feedFolder : getFolders()) {
+            if (name.equals(feedFolder.getName())) {
+                return feedFolder;
+            }
+        }
+        FeedFolder feedFolder = new FeedFolder();
+        feedFolder.setName(name);
+        getFolders().add(feedFolder);
+        return feedFolder;
+    }
+
+    protected FeedFolder defineFolder(String name, FeedFolder parent) {
+        for (FeedFolder feedFolder : parent.getChildFolders()) {
+            if (name.equals(feedFolder.getName())) {
+                return feedFolder;
+            }
+        }
+        FeedFolder feedFolder = new FeedFolder();
+        feedFolder.setName(name);
+        parent.getChildFolders().add(feedFolder);
+        return feedFolder;
     }
 }

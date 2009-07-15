@@ -71,6 +71,7 @@ public class DataService {
             feedMetadata.setCredentials(credentialRequirements);
             feedMetadata.setDataSourceName(feed.getName());
             feedMetadata.setFields(feedItemArray);
+            feedMetadata.setFieldHierarchy(feed.getFieldHierarchy());
             feedMetadata.setIntrinsicFilters(feed.getIntrinsicFilters());
             feedMetadata.setDataFeedID(feedID);
             feedMetadata.setVersion(feed.getVersion());

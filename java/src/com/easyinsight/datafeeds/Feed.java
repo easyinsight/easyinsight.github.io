@@ -19,9 +19,18 @@ import java.io.Serializable;
 public abstract class Feed implements Serializable {
     private long feedID;
     private List<AnalysisItem> fields;
+    private List<FeedNode> fieldHierarchy;
     private int version;
     private String name;
     private String attribution;
+
+    public List<FeedNode> getFieldHierarchy() {
+        return fieldHierarchy;
+    }
+
+    public void setFieldHierarchy(List<FeedNode> fieldHierarchy) {
+        this.fieldHierarchy = fieldHierarchy;
+    }
 
     public List<FilterDefinition> getIntrinsicFilters() {
         return new ArrayList<FilterDefinition>();

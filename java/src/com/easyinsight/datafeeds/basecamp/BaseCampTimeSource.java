@@ -168,12 +168,16 @@ public class BaseCampTimeSource extends ServerDataSourceDefinition {
         projectDim.setHidden(true);
         analysisItems.add(projectDim);
         analysisItems.add(new AnalysisDimension(keys.get(DESCRIPTION), true));
-        analysisItems.add(new AnalysisDimension(keys.get(PERSONID), true));
+        AnalysisDimension personDim = new AnalysisDimension(keys.get(PERSONID), true);
+        personDim.setHidden(true);
+        analysisItems.add(personDim);
         analysisItems.add(new AnalysisDimension(keys.get(PERSONNAME), true));
         analysisItems.add(new AnalysisMeasure(keys.get(HOURS), AggregationTypes.SUM));
         analysisItems.add(new AnalysisMeasure(keys.get(COUNT), AggregationTypes.SUM));
         analysisItems.add(new AnalysisDateDimension(keys.get(DATE), true,  AnalysisDateDimension.DAY_LEVEL));
-        analysisItems.add(new AnalysisDimension(keys.get(TODOID), true));
+        AnalysisDimension todoDimension = new AnalysisDimension(keys.get(TODOID), true);
+        todoDimension.setHidden(true);
+        analysisItems.add(todoDimension);
         return analysisItems;
     }
 

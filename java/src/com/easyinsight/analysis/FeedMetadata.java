@@ -1,6 +1,7 @@
 package com.easyinsight.analysis;
 
 import com.easyinsight.datafeeds.CredentialRequirement;
+import com.easyinsight.datafeeds.FeedNode;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -13,12 +14,21 @@ import java.util.List;
  */
 public class FeedMetadata implements Serializable {
     private AnalysisItem[] fields;
+    private List<FeedNode> fieldHierarchy;
     private long dataFeedID;
     private String dataSourceName;
     private int version;
     private boolean dataSourceAdmin;
     private List<CredentialRequirement> credentials = new ArrayList<CredentialRequirement>();
     private List<FilterDefinition> intrinsicFilters = new ArrayList<FilterDefinition>();
+
+    public List<FeedNode> getFieldHierarchy() {
+        return fieldHierarchy;
+    }
+
+    public void setFieldHierarchy(List<FeedNode> fieldHierarchy) {
+        this.fieldHierarchy = fieldHierarchy;
+    }
 
     public List<FilterDefinition> getIntrinsicFilters() {
         return intrinsicFilters;

@@ -121,9 +121,77 @@ public class FeedStorage {
         savePolicy(conn, feedID, feedDefinition.getUploadPolicy());
         feedDefinition.setDataFeedID(feedID);
         saveFields(feedID, conn, feedDefinition.getFields(), feedDefinition.getVirtualDimensions());
+        saveFolders(feedID, conn, feedDefinition.getFolders());
         saveTags(feedID, conn, feedDefinition.getTags());
         feedDefinition.customStorage(conn);
         return feedID;
+    }
+
+    private void saveFolders(long feedID, Connection conn, List<FeedFolder> folders) throws SQLException {
+        PreparedStatement wipeStmt = conn.prepareStatement("DELETE FROM FOLDER WHERE DATA_SOURCE_ID = ?");
+        wipeStmt.setLong(1, feedID);
+        wipeStmt.executeUpdate();
+        for (FeedFolder folder : folders) {
+            saveFolder(folder, feedID, conn);
+        }
+    }
+
+    private void saveFolder(FeedFolder folder, long feedID, Connection conn) throws SQLException {
+        PreparedStatement insertFolderStmt = conn.prepareStatement("INSERT INTO FOLDER (FOLDER_NAME, DATA_SOURCE_ID) VALUES (?, ?)",
+                Statement.RETURN_GENERATED_KEYS);
+        insertFolderStmt.setString(1, folder.getName());
+        insertFolderStmt.setLong(2, feedID);
+        insertFolderStmt.execute();
+        folder.setFolderID(Database.instance().getAutoGenKey(insertFolderStmt));
+        saveFields(conn, folder);
+    }
+
+    private void saveFields(Connection conn, FeedFolder folder) throws SQLException {
+        PreparedStatement clearJoinsStmt = conn.prepareStatement("DELETE FROM folder_to_analysis_item WHERE folder_id = ?");
+        clearJoinsStmt.setLong(1, folder.getFolderID());
+        clearJoinsStmt.executeUpdate();
+        PreparedStatement insertFieldStmt = conn.prepareStatement("INSERT INTO folder_to_analysis_item (folder_id, analysis_item_id) values (?, ?)");
+        for (AnalysisItem analysisItem : folder.getChildItems()) {
+            insertFieldStmt.setLong(1, folder.getFolderID());
+            insertFieldStmt.setLong(2, analysisItem.getAnalysisItemID());
+            insertFieldStmt.execute();
+        }
+        PreparedStatement clearFoldersStmt = conn.prepareStatement("DELETE FROM folder_to_folder WHERE parent_folder_id = ?");
+        clearFoldersStmt.setLong(1, folder.getFolderID());
+        clearFoldersStmt.executeUpdate();
+        PreparedStatement insertChildFolderStmt = conn.prepareStatement("INSERT INTO folder_to_folder (parent_folder_id, child_folder_id) values (?, ?)");
+        for (FeedFolder child : folder.getChildFolders()) {
+            insertChildFolderStmt.setLong(1, folder.getFolderID());
+            insertChildFolderStmt.setLong(2, child.getFolderID());
+            insertChildFolderStmt.execute();
+        }
+    }
+
+    private void getFolders(FeedDefinition feedDefinition, Connection conn) throws SQLException {
+        List<FeedFolder> folders = new ArrayList<FeedFolder>();
+        PreparedStatement queryStmt = conn.prepareStatement("SELECT FOLDER_NAME, FOLDER_ID FROM FOLDER WHERE DATA_SOURCE_ID = ?");
+        queryStmt.setLong(1, feedDefinition.getDataFeedID());
+        ResultSet rs = queryStmt.executeQuery();
+        while (rs.next()) {
+            String folderName = rs.getString(1);
+            long folderID = rs.getLong(2);
+            FeedFolder feedFolder = new FeedFolder();
+            feedFolder.setFolderID(folderID);
+            feedFolder.setName(folderName);
+            PreparedStatement analysisItemStmt = conn.prepareStatement("SELECT ANALYSIS_ITEM_ID FROM FOLDER_TO_ANALYSIS_ITEM WHERE FOLDER_ID = ?");
+            analysisItemStmt.setLong(1, folderID);
+            ResultSet fieldRS = analysisItemStmt.executeQuery();
+            while (fieldRS.next()) {
+                long analysisItemID = fieldRS.getLong(1);
+                for (AnalysisItem analysisItem : feedDefinition.getFields()) {
+                    if (analysisItem.getAnalysisItemID() == analysisItemID) {
+                        feedFolder.addAnalysisItem(analysisItem);
+                    }
+                }
+            }
+            folders.add(feedFolder);
+        }
+        feedDefinition.setFolders(folders);
     }
 
     public long addFeedDefinitionData(FeedDefinition feedDefinition) {
@@ -558,6 +626,7 @@ public class FeedStorage {
         updateDataFeedStmt.close();
         savePolicy(conn, feedDefinition.getDataFeedID(), feedDefinition.getUploadPolicy());
         saveFields(feedDefinition.getDataFeedID(), conn, feedDefinition.getFields(), feedDefinition.getVirtualDimensions());
+        saveFolders(feedDefinition.getDataFeedID(), conn, feedDefinition.getFolders());
         saveTags(feedDefinition.getDataFeedID(), conn, feedDefinition.getTags());
         feedDefinition.customStorage(conn);
         if (feedDefinition.getRefreshDataInterval() > 0) {
@@ -685,6 +754,7 @@ public class FeedStorage {
                 if (!rs.wasNull()) {
                     feedDefinition.setParentSourceID(parentSourceID);
                 }
+                getFolders(feedDefinition, conn);
                 feedDefinition.setTags(getTags(feedDefinition.getDataFeedID(), conn));
                 feedDefinition.customLoad(conn);
                 if(feedDefinition instanceof IServerDataSourceDefinition) {

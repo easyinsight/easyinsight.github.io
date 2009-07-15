@@ -14,6 +14,8 @@ import com.easyinsight.core.Key;
 import com.easyinsight.core.NamedKey;
 import com.easyinsight.core.Value;
 import com.easyinsight.dataset.DataSet;
+import com.easyinsight.datafeeds.FeedNode;
+import com.easyinsight.datafeeds.AnalysisItemNode;
 import org.hibernate.Session;
 
 /**
@@ -268,5 +270,11 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
 
     public void reportSave(Session session) {
 
+    }
+
+    public FeedNode toFeedNode() {
+        AnalysisItemNode analysisItemNode = new AnalysisItemNode();
+        analysisItemNode.setAnalysisItem(this);
+        return analysisItemNode;
     }
 }

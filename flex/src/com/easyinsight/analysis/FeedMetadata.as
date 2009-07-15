@@ -13,6 +13,7 @@ import mx.collections.ArrayCollection;
         public var dataSourceAdmin:Boolean;
         public var credentials:ArrayCollection;
         public var intrinsicFilters:ArrayCollection;
+        public var fieldHierarchy:ArrayCollection;
 		
 		public function FeedMetadata()
 			{

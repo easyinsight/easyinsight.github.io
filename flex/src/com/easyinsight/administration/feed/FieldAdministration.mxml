@@ -9,6 +9,7 @@
         import com.easyinsight.analysis.AnalysisHierarchyItem;
         import com.easyinsight.analysis.AnalysisItem;
         import com.easyinsight.analysis.AnalysisItemEditor;
+        import com.easyinsight.analysis.AnalysisItemNode;
         import com.easyinsight.analysis.AnalysisItemTypes;
         import com.easyinsight.analysis.AnalysisItemWrapper;
 
@@ -79,7 +80,9 @@
             var list:IList = IList(grid.dataProvider);
             if (row < list.length) {
                 var wrapper:AnalysisItemWrapper = list.getItemAt(row) as AnalysisItemWrapper;
-                toFocus(wrapper);
+                if (wrapper.isAnalysisItem()) {
+                    toFocus(wrapper);
+                }
             }
         }
 
@@ -116,7 +119,9 @@
                 allFields = new ArrayCollection();
                 coreFields = new ArrayCollection();
                 for each (var item:AnalysisItem in _feedDefinition.fields) {
-                    var wrapper:AnalysisItemWrapper = new AnalysisItemWrapper(item);
+                    var aNode:AnalysisItemNode = new AnalysisItemNode();
+                    aNode.analysisItem = item;
+                    var wrapper:AnalysisItemWrapper = new AnalysisItemWrapper(aNode);
                     if (item.hasType(AnalysisItemTypes.HIERARCHY) || item.hasType(AnalysisItemTypes.CALCULATION)) {
                         derivedFields.addItem(wrapper);
                     } else {
@@ -176,7 +181,9 @@
         private function gotGroupingName(event:NewFieldEvent):void {
             var grouping:AnalysisDimension = new AnalysisDimension();
             grouping.key = findName(event.name);
-            var wrapper:AnalysisItemWrapper = new AnalysisItemWrapper(grouping);
+            var aNode:AnalysisItemNode = new AnalysisItemNode();
+            aNode.analysisItem = grouping;
+            var wrapper:AnalysisItemWrapper = new AnalysisItemWrapper(aNode);
             coreFields.addItem(wrapper);
             allFields.addItem(wrapper);
             var sort:Sort = new Sort();
@@ -197,7 +204,9 @@
         private function gotMeasureName(event:NewFieldEvent):void {
             var measure:AnalysisMeasure = new AnalysisMeasure();
             measure.key = findName(event.name);
-            var wrapper:AnalysisItemWrapper = new AnalysisItemWrapper(measure);
+            var aNode:AnalysisItemNode = new AnalysisItemNode();
+            aNode.analysisItem = measure;
+            var wrapper:AnalysisItemWrapper = new AnalysisItemWrapper(aNode);
             coreFields.addItem(wrapper);
             allFields.addItem(wrapper);
             var sort:Sort = new Sort();
@@ -218,7 +227,9 @@
         private function gotDateName(event:NewFieldEvent):void {
             var date:AnalysisDateDimension = new AnalysisDateDimension(AnalysisItemTypes.DAY_LEVEL);
             date.key = findName(event.name);
-            var wrapper:AnalysisItemWrapper = new AnalysisItemWrapper(date);
+            var aNode:AnalysisItemNode = new AnalysisItemNode();
+            aNode.analysisItem = date;
+            var wrapper:AnalysisItemWrapper = new AnalysisItemWrapper(aNode);
             coreFields.addItem(wrapper);
             allFields.addItem(wrapper);
             var sort:Sort = new Sort();
@@ -232,7 +243,9 @@
         private function addHierarchy():void {
             var hierarchy:AnalysisHierarchyItem = new AnalysisHierarchyItem();
             hierarchy.key = findName("Hierarchy");
-            var wrapper:AnalysisItemWrapper = new AnalysisItemWrapper(hierarchy);
+            var aNode:AnalysisItemNode = new AnalysisItemNode();
+            aNode.analysisItem = hierarchy;
+            var wrapper:AnalysisItemWrapper = new AnalysisItemWrapper(aNode);
             derivedFields.addItem(wrapper);
             allFields.addItem(wrapper);
             var sort:Sort = new Sort();
@@ -246,7 +259,9 @@
         private function addCalculation():void {
             var calculation:AnalysisCalculation = new AnalysisCalculation();
             calculation.key = findName("Calculation");
-            var wrapper:AnalysisItemWrapper = new AnalysisItemWrapper(calculation);
+            var aNode:AnalysisItemNode = new AnalysisItemNode();
+            aNode.analysisItem = calculation;
+            var wrapper:AnalysisItemWrapper = new AnalysisItemWrapper(aNode);
             derivedFields.addItem(wrapper);
             allFields.addItem(wrapper);
             var sort:Sort = new Sort();
@@ -260,7 +275,9 @@
         private function addCycle():void {
             var cycle:AnalysisStep = new AnalysisStep();
             cycle.key = findName("Cycle");
-            var wrapper:AnalysisItemWrapper = new AnalysisItemWrapper(cycle);
+            var aNode:AnalysisItemNode = new AnalysisItemNode();
+            aNode.analysisItem = cycle;
+            var wrapper:AnalysisItemWrapper = new AnalysisItemWrapper(aNode);
             derivedFields.addItem(wrapper);
             allFields.addItem(wrapper);
             var sort:Sort = new Sort();

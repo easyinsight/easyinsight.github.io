@@ -1,40 +1,45 @@
 package com.easyinsight.datafeeds;
 
+import com.easyinsight.analysis.AnalysisItem;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Collections;
+import java.util.Comparator;
+
 /**
  * User: James Boe
  * Date: Apr 27, 2008
  * Time: 9:34:20 PM
  */
-public class FeedNode {
-    private String name;
+public abstract class FeedNode {
+
+    private List<FeedNode> children = new ArrayList<FeedNode>();
 
     public FeedNode() {
     }
 
-    public FeedNode(String name) {
-        this.name = name;
+    public List<FeedNode> getChildren() {
+        return children;
     }
 
-    public String getName() {
-        return name;
+    public void setChildren(List<FeedNode> children) {
+        this.children = children;
     }
 
-    public void setName(String name) {
-        this.name = name;
-    }
+    public abstract String toDisplay();
 
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+    public void sort() {
+        Collections.sort(children, new Comparator<FeedNode>() {
 
-        FeedNode that = (FeedNode) o;
-
-        if (name != null ? !name.equals(that.name) : that.name != null) return false;
-
-        return true;
-    }
-
-    public int hashCode() {
-        return (name != null ? name.hashCode() : 0);
+                public int compare(FeedNode o1, FeedNode o2) {
+                    if (o1 instanceof FolderNode && !(o2 instanceof FolderNode)) {
+                        return -1;
+                    } else if (!(o1 instanceof FolderNode) && o2 instanceof FolderNode) {
+                        return 1;
+                    }
+                    return o1.toDisplay().compareTo(o2.toDisplay());
+                }
+            });
     }
 }

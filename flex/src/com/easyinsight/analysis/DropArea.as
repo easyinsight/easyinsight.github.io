@@ -14,6 +14,7 @@ import flash.ui.Keyboard;
 
 import mx.collections.ArrayCollection;
 import mx.containers.HBox;
+import mx.controls.AdvancedDataGrid;
 import mx.controls.Button;
 import mx.controls.DataGrid;
 import mx.controls.Image;
@@ -161,19 +162,8 @@ public class DropArea extends HBox
     }
 
     protected function dragEnterHandler(event:DragEvent):void {
-        var analysisItem:AnalysisItem = analysisItemFromDrag(event);
-        if (accept(analysisItem)) {
-            setStyle("borderColor", "green");
-            DragManager.acceptDragDrop(event.currentTarget as IUIComponent);
-        }
-    }
-
-    protected function accept(analysisItem:AnalysisItem):Boolean {
-        return true;
-    }
-
-    private function analysisItemFromDrag(event:DragEvent):AnalysisItem {
         var analysisItem:AnalysisItem = null;
+        var okay:Boolean = true;
         if (event.dragInitiator is DataGrid) {
             var initialList:DataGrid = event.dragInitiator as DataGrid;
             var newAnalysisItem:AnalysisItemWrapper = initialList.selectedItem as AnalysisItemWrapper;
@@ -181,8 +171,23 @@ public class DropArea extends HBox
         } else if (event.dragInitiator is DropArea) {
             var dropArea:DropArea = event.dragInitiator as DropArea;
             analysisItem = dropArea.analysisItem;
+        } else if (event.dragInitiator is AdvancedDataGrid) {
+            var analysisItemLabel:AdvancedDataGrid = event.dragInitiator as AdvancedDataGrid;
+            newAnalysisItem = analysisItemLabel.selectedItem as AnalysisItemWrapper;
+            if (newAnalysisItem.isAnalysisItem()) {
+                analysisItem = newAnalysisItem.analysisItem;
+            } else {
+                okay = false;
+            }
         }
-        return analysisItem;
+        if (okay && accept(analysisItem)) {
+            setStyle("borderColor", "green");
+            DragManager.acceptDragDrop(event.currentTarget as IUIComponent);
+        }
+    }
+
+    protected function accept(analysisItem:AnalysisItem):Boolean {
+        return true;
     }
 
     public function isConfigured():Boolean {
@@ -228,6 +233,16 @@ public class DropArea extends HBox
         } else if (event.dragInitiator is DropArea) {
             var dropArea:DropArea = event.dragInitiator as DropArea;
             dispatchEvent(new CommandEvent(new DropAreaSwapCommand(dropArea, this)));
+        } else if (event.dragInitiator is AdvancedDataGrid) {
+            var analysisItemLabel:AdvancedDataGrid = event.dragInitiator as AdvancedDataGrid;
+            newAnalysisItem = analysisItemLabel.selectedItem as AnalysisItemWrapper;
+            if (newAnalysisItem.isAnalysisItem()) {
+                if (this.analysisItem == null) {
+                    dispatchEvent(new CommandEvent(new DropAreaAddedCommand(this, newAnalysisItem.analysisItem)));
+                } else {
+                    dispatchEvent(new CommandEvent(new DropAreaDragUpdateCommand(this, this.analysisItem, newAnalysisItem.analysisItem)));
+                }
+            }
         }
     }
 

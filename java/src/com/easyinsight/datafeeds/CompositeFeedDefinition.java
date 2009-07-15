@@ -108,35 +108,24 @@ public class CompositeFeedDefinition extends FeedDefinition {
         try {
             AnalysisItemVisitor analysisItemVisitor = new AnalysisItemVisitor(conn);
             analysisItemVisitor.visit(this);
-            Map<String, AnalysisItem> keyMap = new HashMap<String, AnalysisItem>();
+            List<AnalysisItem> fields = new ArrayList<AnalysisItem>();
+            
+            // define folder for each child
 
-            Map<String, List<AnalysisItem>> duplicateNameMap = new HashMap<String, List<AnalysisItem>>();
+            Map<Long, FeedFolder> folderMap = new HashMap<Long, FeedFolder>();
+            for (CompositeFeedNode feed : getCompositeFeedNodes()) {
+                String name = getCompositeFeedName(feed.getDataFeedID(), conn);
+                folderMap.put(feed.getDataFeedID(), defineFolder(name));
+            }
+
             for (AnalysisItem analysisItem : analysisItemVisitor.derivedKeys) {
-                String displayName = analysisItem.getDisplayName() != null ? analysisItem.getDisplayName() : analysisItem.getKey().toKeyString();
-                AnalysisItem existing = keyMap.get(displayName);
-                if (existing == null) {
-                    keyMap.put(displayName, analysisItem);
-                } else {
-                    List<AnalysisItem> analysisItems = duplicateNameMap.get(displayName);
-                    if (analysisItems == null) {
-                        analysisItems = new ArrayList<AnalysisItem>();
-                        duplicateNameMap.put(displayName, analysisItems);
-                        analysisItems.add(existing);
-                    }
-                    analysisItems.add(analysisItem);
-                }
-            }
-            for (Map.Entry<String, List<AnalysisItem>> entry : duplicateNameMap.entrySet()) {
-                keyMap.remove(entry.getKey());
-                for (AnalysisItem analysisItem : entry.getValue()) {
-                    DerivedKey derivedKey = (DerivedKey) analysisItem.getKey();
-                    String name = getCompositeFeedName(derivedKey.getFeedID(), conn);
-                    analysisItem.setDisplayName(name + " - " + entry.getKey());
-                    keyMap.put(name, analysisItem);
-                }
+                DerivedKey derivedKey = (DerivedKey) analysisItem.getKey();
+                folderMap.get(derivedKey.getFeedID()).addAnalysisItem(analysisItem);
+                fields.add(analysisItem);
             }
 
-            setFields(new ArrayList<AnalysisItem>(keyMap.values()));
+
+            setFields(fields);
         } catch (SQLException e) {
             LogClass.error(e);
             throw new RuntimeException(e);

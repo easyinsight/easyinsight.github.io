@@ -1,8 +1,6 @@
 package com.easyinsight.analysis {
 import mx.events.FlexEvent;
 
-import flash.events.Event;
-
 import mx.binding.utils.BindingUtils;
 import mx.controls.Image;
 import mx.containers.HBox;
@@ -10,28 +8,32 @@ import mx.containers.HBox;
 public class AnalysisItemTypeRenderer extends HBox {
     [Bindable]
     [Embed(source="../../../../assets/calendar.png")]
-    public var dateIcon:Class;
+    public static var dateIcon:Class;
 
     [Bindable]
     [Embed(source="../../../../assets/text.png")]
-    public var groupingIcon:Class;
+    public static var groupingIcon:Class;
 
     [Bindable]
     [Embed(source="../../../../assets/text_sum.png")]
-    public var measureIcon:Class;
+    public static var measureIcon:Class;
 
     [Bindable]
     [Embed(source="../../../../assets/cubes_x16.png")]
-    public var hierarchyIcon:Class;
+    public static var hierarchyIcon:Class;
 
     [Bindable]
+    [Embed(source="../../../../assets/folder.png")]
+    public static var folderIcon:Class;
+                               
+    [Bindable]
     [Embed(source="../../../../assets/text_formula.png")]
-    public var calculationIcon:Class;
+    public static var calculationIcon:Class;
 
 
     [Bindable]
     [Embed(source="../../../../assets/graph_edge_curved.png")]
-    public var cycleIcon:Class;
+    public static var cycleIcon:Class;
 
 
     private var typeIcon:Image;
@@ -70,29 +72,59 @@ public class AnalysisItemTypeRenderer extends HBox {
         return analysisItemWrapper;
     }
 
+    public static function getImageClass(analysisItemWrapper:AnalysisItemWrapper):Class {
+        var typeSource:Class;
+        if (analysisItemWrapper.isAnalysisItem()) {
+            if (analysisItemWrapper.analysisItem.hasType(AnalysisItemTypes.CALCULATION)) {
+                typeSource = calculationIcon;
+            } else if (analysisItemWrapper.analysisItem.hasType(AnalysisItemTypes.MEASURE)) {
+                //typeIcon.source = measureIcon;
+                typeSource = measureIcon;
+            } else if (analysisItemWrapper.analysisItem.hasType(AnalysisItemTypes.STEP)) {
+                typeSource = cycleIcon;
+            } else if (analysisItemWrapper.analysisItem.hasType(AnalysisItemTypes.DATE)) {
+                //typeIcon.source = dateIcon;
+                typeSource = dateIcon;
+            } else if (analysisItemWrapper.analysisItem.hasType(AnalysisItemTypes.HIERARCHY)) {
+                typeSource = hierarchyIcon;
+            } else {
+                //typeIcon.source = grou/ingIcon;
+                typeSource = groupingIcon;
+            }
+        } else {
+            typeSource = folderIcon;
+        }
+        return typeSource;
+    }
+
     override public function set data(obj:Object):void {
         this.analysisItemWrapper = obj as AnalysisItemWrapper;
-        if (analysisItemWrapper.analysisItem.hasType(AnalysisItemTypes.CALCULATION)) {
-            typeSource = calculationIcon;
-            this.toolTip = "Calculation";
-        } else if (analysisItemWrapper.analysisItem.hasType(AnalysisItemTypes.MEASURE)) {
-            //typeIcon.source = measureIcon;
-            typeSource = measureIcon;
-            this.toolTip = "Measure";
-        } else if (analysisItemWrapper.analysisItem.hasType(AnalysisItemTypes.STEP)) {
-            typeSource = cycleIcon;
-            this.toolTip = "Cycle";
-        } else if (analysisItemWrapper.analysisItem.hasType(AnalysisItemTypes.DATE)) {
-            //typeIcon.source = dateIcon;
-            typeSource = dateIcon;
-            this.toolTip = "Date";
-        } else if (analysisItemWrapper.analysisItem.hasType(AnalysisItemTypes.HIERARCHY)) {
-            typeSource = hierarchyIcon;
-            this.toolTip = "Hierarchy";
+        if (analysisItemWrapper.isAnalysisItem()) {
+            if (analysisItemWrapper.analysisItem.hasType(AnalysisItemTypes.CALCULATION)) {
+                typeSource = calculationIcon;
+                this.toolTip = "Calculation";
+            } else if (analysisItemWrapper.analysisItem.hasType(AnalysisItemTypes.MEASURE)) {
+                //typeIcon.source = measureIcon;
+                typeSource = measureIcon;
+                this.toolTip = "Measure";
+            } else if (analysisItemWrapper.analysisItem.hasType(AnalysisItemTypes.STEP)) {
+                typeSource = cycleIcon;
+                this.toolTip = "Cycle";
+            } else if (analysisItemWrapper.analysisItem.hasType(AnalysisItemTypes.DATE)) {
+                //typeIcon.source = dateIcon;
+                typeSource = dateIcon;
+                this.toolTip = "Date";
+            } else if (analysisItemWrapper.analysisItem.hasType(AnalysisItemTypes.HIERARCHY)) {
+                typeSource = hierarchyIcon;
+                this.toolTip = "Hierarchy";
+            } else {
+                //typeIcon.source = grou/ingIcon;
+                typeSource = groupingIcon;
+                this.toolTip = "Grouping";
+            }
         } else {
-            //typeIcon.source = grou/ingIcon;
-            typeSource = groupingIcon;
-            this.toolTip = "Grouping";
+            typeSource = folderIcon;
+            this.toolTip = "Folder";
         }
     }
 }

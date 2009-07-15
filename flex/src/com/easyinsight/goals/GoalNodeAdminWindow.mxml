@@ -22,6 +22,7 @@
 		<![CDATA[
         import com.easyinsight.analysis.AnalysisItemEditEvent;
         import com.easyinsight.analysis.AnalysisItemEditWindow;
+        import com.easyinsight.analysis.AnalysisItemNode;
         import com.easyinsight.analysis.AnalysisItemWrapper;
         import com.easyinsight.analysis.CalculationWindow;
         import com.easyinsight.analysis.CredentialRequirement;
@@ -292,7 +293,9 @@
                 } else if (analysisItem.hasType(AnalysisItemTypes.DIMENSION)) {
                     availableDimensions.addItem(analysisItem);
                 }
-                allFields.addItem(new AnalysisItemWrapper(analysisItem));
+                var aNode:AnalysisItemNode = new AnalysisItemNode();
+                aNode.analysisItem = analysisItem;
+                allFields.addItem(new AnalysisItemWrapper(aNode));
             }
             var sort:Sort = new Sort();
             sort.fields = [ new SortField("display", false) ];

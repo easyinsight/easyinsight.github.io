@@ -42,18 +42,22 @@
         import com.easyinsight.analysis.AnalysisChangedEvent;
         import com.easyinsight.analysis.AnalysisItemEditEvent;
         import com.easyinsight.analysis.AnalysisItemEditWindow;
+        import com.easyinsight.analysis.AnalysisItemNode;
+        import com.easyinsight.analysis.AnalysisItemTypeRenderer;
         import com.easyinsight.analysis.AnalysisUtil;
         import com.easyinsight.analysis.ControllerLookup;
         import com.easyinsight.analysis.CredentialRequirement;
         import com.easyinsight.analysis.CredentialsEvent;
         import com.easyinsight.analysis.DescriptionEditWindow;
         import com.easyinsight.analysis.DescriptionUpdateEvent;
+        import com.easyinsight.analysis.FeedNode;
         import com.easyinsight.analysis.HierarchyDrilldownEvent;
         import com.easyinsight.analysis.AnalysisStateChangeEvent;
         import com.easyinsight.analysis.DataViewFactory;
         import com.easyinsight.analysis.HierarchyRollupEvent;
         import com.easyinsight.analysis.HierarchyWindow;
         import com.easyinsight.analysis.IReportController;
+        import com.easyinsight.analysis.ListViewGrid;
         import com.easyinsight.analysis.QuickDataSourceAPIWindow;
         import com.easyinsight.analysis.RuntimeCredentialsWindow;
         import com.easyinsight.analysis.list.ListController;
@@ -80,6 +84,7 @@
 
         import mx.collections.SortField;
         import mx.collections.Sort;
+        import mx.events.DragEvent;
         import mx.events.ListEvent;
         import mx.validators.Validator;
 
@@ -200,6 +205,9 @@
         private var marketplaceVisible:Boolean;
 
         [Bindable]
+        private var wrappers:ArrayCollection;
+
+        [Bindable]
         private var publiclyVisible:Boolean;
 
         [Bindable]
@@ -229,8 +237,8 @@
             transformContainer.invalidateItems(event.invalidAnalysisItemIDs);
             dataView.invalidateItems(event.invalidAnalysisItemIDs);
             availableFields = new ArrayCollection();
-            for each (var analysisItem:AnalysisItem in event.feedMetadata.fields) {
-                var analysisWrapper:AnalysisItemWrapper = new AnalysisItemWrapper(analysisItem);
+            for each (var feedNode:FeedNode in event.feedMetadata.fieldHierarchy) {
+                var analysisWrapper:AnalysisItemWrapper = new AnalysisItemWrapper(feedNode);
                 availableFields.addItem(analysisWrapper);
             }
             dataView.availableFields = availableFields;
@@ -350,10 +358,18 @@
             this.admin = feedMetadata.dataSourceAdmin;
             dataSourceName = this.feedMetadata.dataSourceName;
             availableFields = new ArrayCollection();
-            for each (var analysisItem:AnalysisItem in feedMetadata.fields) {
-                if (analysisItem.hidden) continue;
-                var analysisWrapper:AnalysisItemWrapper = new AnalysisItemWrapper(analysisItem);
-                availableFields.addItem(analysisWrapper);
+            wrappers = new ArrayCollection();
+            for each (var feedNode:FeedNode in feedMetadata.fieldHierarchy) {
+                var analysisWrapper:AnalysisItemWrapper = new AnalysisItemWrapper(feedNode);
+                if (!analysisWrapper.hidden) {
+                    availableFields.addItem(analysisWrapper);
+                }
+            }
+            for each (var listItem:AnalysisItem in feedMetadata.fields) {
+                var analysisNode:AnalysisItemNode = new AnalysisItemNode();
+                analysisNode.analysisItem = listItem;
+                var wrapper:AnalysisItemWrapper = new AnalysisItemWrapper(analysisNode);
+                wrappers.addItem(wrapper);
             }
 
             if (analysisDefinition == null) {
@@ -387,7 +403,9 @@
                 // calculations and hierarchies
                 if (analysisDefinition.addedItems != null) {
                     for each (var item:AnalysisItem in analysisDefinition.addedItems) {
-                        var addedWrapper:AnalysisItemWrapper = new AnalysisItemWrapper(item);
+                        var analysisItemNode:AnalysisItemNode = new AnalysisItemNode();
+                        analysisItemNode.analysisItem = item;
+                        var addedWrapper:AnalysisItemWrapper = new AnalysisItemWrapper(analysisItemNode);
                         availableFields.addItem(addedWrapper);
                     }
                     var sort:Sort = new Sort();
@@ -715,7 +733,9 @@
 
         private function onNewItem(event:AnalysisItemEditEvent):void {
             dispatchEvent(new AnalysisChangedEvent());
-            availableFields.addItem(new AnalysisItemWrapper(event.analysisItem));
+            var node:AnalysisItemNode = new AnalysisItemNode();
+            node.analysisItem = event.analysisItem;
+            availableFields.addItem(new AnalysisItemWrapper(node));
             var sort:Sort = new Sort();
             sort.fields = [ new SortField("displayName", false) ];
             availableFields.sort = sort;
@@ -729,7 +749,7 @@
         private function createHierarchy():void {
             var window:AnalysisItemEditWindow = new AnalysisItemEditWindow();
             window.editorClass = HierarchyWindow;
-            window.analysisItems = availableFields;
+            window.analysisItems = wrappers;
             window.addEventListener(AnalysisItemEditEvent.ANALYSIS_ITEM_EDIT, onNewItem);
             PopUpManager.addPopUp(window, this);
             PopUpManager.centerPopUp(window);
@@ -743,7 +763,9 @@
 
         private function newFieldCreated(event:AnalysisItemCreationEvent):void {
             dispatchEvent(new AnalysisChangedEvent());
-            availableFields.addItem(new AnalysisItemWrapper(event.analysisItem));
+            var node:AnalysisItemNode = new AnalysisItemNode();
+            node.analysisItem = event.analysisItem;
+            availableFields.addItem(new AnalysisItemWrapper(node));
             var sort:Sort = new Sort();
             sort.fields = [ new SortField("displayName", false) ];
             availableFields.sort = sort;
@@ -889,10 +911,25 @@
             }
         }
 
+        private function blah():void {
+            var grid:ListViewGrid;
+        }
+
         private function onItemDoubleClick(event:ListEvent):void {
-            var field:AnalysisItemWrapper = availableFields.getItemAt(event.rowIndex) as AnalysisItemWrapper;
-            dataView.addItem(field.analysisItem);
-            dispatchEvent(new AnalysisChangedEvent(false));
+            var field:AnalysisItemWrapper = event.currentTarget.selectedItem as AnalysisItemWrapper;
+            if (field.isAnalysisItem()) {
+                dataView.addItem(field.analysisItem);
+                dispatchEvent(new AnalysisChangedEvent(false));
+            }
+        }
+
+        private function onDragComplete(event:DragEvent):void {
+            event.preventDefault();
+        }
+
+        private function iconFunction(item:Object):Class {
+            var wrapper:AnalysisItemWrapper = item as AnalysisItemWrapper;
+            return AnalysisItemTypeRenderer.getImageClass(wrapper);
         }
 
         private function toReports():void {
@@ -1071,16 +1108,18 @@
                     <mx:Box width="100%" backgroundColor="#3B56AF" horizontalAlign="center">
                         <mx:Label text="{dataSourceName}" color="0xFFFFFF"/>
                     </mx:Box>
-                    <mx:DataGrid dataProvider="{availableFields}" width="100%" height="100%" dragEnabled="true"
+                    <mx:AdvancedDataGrid width="100%" height="100%" dragEnabled="true" iconFunction="iconFunction"
                                  id="Measure" backgroundColor="#FFFFFF"
-                                 alternatingItemColors="#FFFFFF" fontSize="12" rowHeight="28" itemDoubleClick="onItemDoubleClick(event)">
+                                 alternatingItemColors="#FFFFFF" fontSize="12" rowHeight="28" itemDoubleClick="onItemDoubleClick(event)"
+                            dragComplete="onDragComplete(event)">
+                        <mx:dataProvider>
+                            <mx:HierarchicalData source="{availableFields}"/>
+                        </mx:dataProvider>
                         <mx:columns>
-                            <mx:DataGridColumn dataField="displayName" headerText=""
-                                               itemRenderer="com.easyinsight.analysis.AnalysisItemTypeRenderer"
-                                               width="32"/>
-                            <mx:DataGridColumn dataField="displayName" headerText=""/>
+                            <mx:AdvancedDataGridColumn dataField="displayName" headerText=""
+                                    />
                         </mx:columns>
-                    </mx:DataGrid>
+                    </mx:AdvancedDataGrid>
                 </mx:VBox>
             </mx:VBox>
             <mx:VBox width="100%" height="100%" id="dataControlVBox"/>
