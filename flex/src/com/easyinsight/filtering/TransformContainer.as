@@ -14,7 +14,8 @@ import mx.collections.ArrayCollection;
 	import mx.containers.HBox;
 	import mx.containers.Tile;
 	import mx.containers.VBox;
-	import mx.controls.DataGrid;
+import mx.controls.AdvancedDataGrid;
+import mx.controls.DataGrid;
 	import mx.controls.Label;
 import mx.controls.List;
 import mx.events.DragEvent;
@@ -206,6 +207,12 @@ import mx.managers.PopUpManager;
 			} else if (event.dragInitiator is List) {
                 var list:List = List(event.dragInitiator);
                 analysisItem = list.selectedItem as AnalysisItem;
+            } else if (event.dragInitiator is AdvancedDataGrid) {
+                var analysisItemLabel:AdvancedDataGrid = event.dragInitiator as AdvancedDataGrid;
+                var wrapper:AnalysisItemWrapper = analysisItemLabel.selectedItem as AnalysisItemWrapper;
+                if (wrapper.isAnalysisItem()) {
+                    analysisItem = wrapper.analysisItem;
+                }
             }
 			if (analysisItem != null) {
 				setStyle("borderThickness", 1);
@@ -235,6 +242,12 @@ import mx.managers.PopUpManager;
 			} else if (event.dragInitiator is List) {
                 var list:List = List(event.dragInitiator);
                 analysisItem = list.selectedItem as AnalysisItem;
+            } else if (event.dragInitiator is AdvancedDataGrid) {
+                var analysisItemLabel:AdvancedDataGrid = event.dragInitiator as AdvancedDataGrid;
+                var wrapper:AnalysisItemWrapper = analysisItemLabel.selectedItem as AnalysisItemWrapper;
+                if (wrapper.isAnalysisItem()) {
+                    analysisItem = wrapper.analysisItem;
+                }
             }
 			if (analysisItem.hasType(AnalysisItemTypes.DATE)) {
                 var window:DateFilterWindow = new DateFilterWindow();
