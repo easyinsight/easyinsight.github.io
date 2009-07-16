@@ -169,10 +169,9 @@ public class CompositeFeedDefinition extends FeedDefinition {
         }
     }
 
-    private class AnalysisItemVisitor extends CompositeFeedNodeVisitor {
+    private class AnalysisItemVisitor extends CompositeFeedNodeShallowVisitor {
 
         private List<AnalysisItem> derivedKeys = new ArrayList<AnalysisItem>();
-        Map<Long, AnalysisItem> replacementMap = new HashMap<Long, AnalysisItem>();
         private Connection conn;
 
         private AnalysisItemVisitor(Connection conn) {
@@ -180,6 +179,7 @@ public class CompositeFeedDefinition extends FeedDefinition {
         }
 
         protected void accept(CompositeFeedNode compositeFeedNode) throws SQLException {
+            Map<Long, AnalysisItem> replacementMap = new HashMap<Long, AnalysisItem>();
             List<AnalysisItem> analysisItemList = retrieveFields(compositeFeedNode.getDataFeedID(), conn);
             for (AnalysisItem analysisItem : analysisItemList) {
                 AnalysisItem clonedItem;

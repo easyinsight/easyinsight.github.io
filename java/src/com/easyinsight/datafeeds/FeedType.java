@@ -24,6 +24,8 @@ public class FeedType {
     public static final FeedType TEST_GAMMA = new FeedType(16);
     public static final FeedType BASECAMP_TIME = new FeedType(17);
     public static final FeedType BASECAMP_MASTER = new FeedType(18);
+    public static final FeedType WESABE_ACCOUNTS = new FeedType(19);
+    public static final FeedType WESABE_TRANSACTIONS = new FeedType(20);
 
     private int type;
 

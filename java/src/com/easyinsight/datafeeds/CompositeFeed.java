@@ -51,7 +51,9 @@ public class CompositeFeed extends Feed {
 
     public DataSet getAggregateDataSet(Set<AnalysisItem> analysisItems, Collection<FilterDefinition> filters, InsightRequestMetadata insightRequestMetadata, List<AnalysisItem> allAnalysisItems, boolean adminMode, Collection<Key> additionalNeededKeys) {
         try {
-            return getDataSet(analysisItems, insightRequestMetadata);
+            Set<AnalysisItem> set = new HashSet<AnalysisItem>();
+
+            return getDataSet(analysisItems, additionalNeededKeys, insightRequestMetadata);
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);
@@ -62,18 +64,30 @@ public class CompositeFeed extends Feed {
         return null;  //To change body of implemented methods use File | Settings | File Templates.
     }
 
-    private DataSet getDataSet(Set<AnalysisItem> analysisItems, InsightRequestMetadata insightRequestMetadata) {
+    private DataSet getDataSet(Set<AnalysisItem> analysisItems, Collection<Key> additionalKeys, InsightRequestMetadata insightRequestMetadata) {
 
         Map<Long, QueryStateNode> queryNodeMap = new HashMap<Long, QueryStateNode>();
 
         UndirectedGraph<QueryStateNode, Edge> graph = new SimpleGraph<QueryStateNode, Edge>(Edge.class);
 
         // convert the nodes and edges into the graph with addVertex() and addEdge()
+        Map<Long, QueryStateNode> neededNodes = new HashMap<Long, QueryStateNode>();
 
         for (CompositeFeedNode node : compositeFeedNodes) {
             QueryStateNode queryStateNode = new QueryStateNode(node.getDataFeedID());
             queryNodeMap.put(node.getDataFeedID(), queryStateNode);
             graph.addVertex(queryStateNode);
+            for (AnalysisItem analysisItem : analysisItems) {
+                if (queryStateNode.handles(analysisItem.getKey())) {
+                    neededNodes.put(queryStateNode.feedID, queryStateNode);
+                    queryStateNode.addItem(analysisItem);
+                }
+            }
+            if (additionalKeys != null) {
+                for (Key key : additionalKeys) {
+                    queryStateNode.addKey(key);
+                }
+            }
         }
 
         for (CompositeFeedConnection connection : connections) {
@@ -85,9 +99,8 @@ public class CompositeFeed extends Feed {
 
         // determine the path through the graph, create a new graph
 
-        Map<Long, QueryStateNode> neededNodes = new HashMap<Long, QueryStateNode>();
 
-        Iterator<QueryStateNode> graphIterator = new BreadthFirstIterator<QueryStateNode, Edge>(graph);
+        /*Iterator<QueryStateNode> graphIterator = new BreadthFirstIterator<QueryStateNode, Edge>(graph);
         while (graphIterator.hasNext()) {
             QueryStateNode queryStateNode = graphIterator.next();
             for (AnalysisItem analysisItem : analysisItems) {
@@ -96,7 +109,7 @@ public class CompositeFeed extends Feed {
                     queryStateNode.addItem(analysisItem);
                 }
             }
-        }
+        }*/
 
         if (neededNodes.size() == 1) {
             QueryStateNode queryStateNode = neededNodes.values().iterator().next();
@@ -170,7 +183,9 @@ public class CompositeFeed extends Feed {
         for (Edge edge : edgeSet) {
             QueryStateNode sourceNode = neededNodes.get(edge.connection.getSourceFeedID());
             QueryStateNode targetNode = neededNodes.get(edge.connection.getTargetFeedID());
-            dataSet = sourceNode.myDataSet.merge(targetNode.myDataSet, edge.connection.getSourceJoin(), edge.connection.getTargetJoin());
+            Key sourceJoin = new DerivedKey(edge.connection.getSourceJoin(), edge.connection.getSourceFeedID());
+            Key targetJoin = new DerivedKey(edge.connection.getTargetJoin(), edge.connection.getTargetFeedID());
+            dataSet = sourceNode.myDataSet.merge(targetNode.myDataSet, sourceJoin, targetJoin);
             sourceNode.myDataSet = dataSet;
             targetNode.myDataSet = dataSet;
         }
@@ -203,7 +218,9 @@ public class CompositeFeed extends Feed {
 
         public void addKey(Key key) {
             if (!neededKeys.contains(key)) {
-                additionalKeys.add(key);
+                DerivedKey derivedKey = new DerivedKey(key, feedID);
+                neededKeys.add(derivedKey);
+                neededItems.add(new AnalysisDimension(derivedKey, true));
             }
         }
 
@@ -222,11 +239,32 @@ public class CompositeFeed extends Feed {
                     columnSet.put(key, key);
                 }
             }
+            for (Key key : additionalKeys) {
+                if (key instanceof DerivedKey) {
+                    DerivedKey derivedKey = (DerivedKey) key;
+                    columnSet.put(derivedKey.getParentKey(), derivedKey);
+                } else {
+                    columnSet.put(key, key);
+                }
+            }
+            for (AnalysisItem analysisItem : neededItems) {
+                Key key = analysisItem.getKey();
+                if (key instanceof DerivedKey) {
+                    DerivedKey derivedKey = (DerivedKey) key;
+                    columnSet.put(derivedKey.getParentKey(), derivedKey);
+                    analysisItem.setKey(derivedKey.getParentKey());
+                } else {
+                    columnSet.put(key, key);
+                }
+            }
             DataSet dataSet = feed.getAggregateDataSet(neededItems, filters, insightRequestMetadata, allAnalysisItems, false, additionalKeys);
             for (Map.Entry<Key, Key> entry : columnSet.entrySet()) {
                 if (entry.getValue() != null) {
                     dataSet.replaceKey(entry.getKey(), entry.getValue());
                 }
+            }
+            for (AnalysisItem analysisItem : neededItems) {
+                analysisItem.setKey(columnSet.get(analysisItem.getKey()));
             }
             myDataSet = dataSet;
         }

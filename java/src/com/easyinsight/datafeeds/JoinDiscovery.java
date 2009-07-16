@@ -7,6 +7,7 @@ import com.easyinsight.database.Database;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.core.Key;
 import com.easyinsight.core.Value;
+import com.easyinsight.core.DerivedKey;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.storage.DataStorage;
 
@@ -23,13 +24,76 @@ public class JoinDiscovery {
 
     private FeedStorage feedStorage = new FeedStorage();
 
-    public List<CompositeFeedConnection> findPotentialJoins(long sourceFeedID, long targetFeedID) {
+    public List<CompositeFeedConnection> findPotentialJoins(long sourceFeedID, long targetFeedID) throws SQLException {
         FeedDefinition sourceFeed = feedStorage.getFeedDefinitionData(sourceFeedID);
         FeedDefinition targetFeed = feedStorage.getFeedDefinitionData(targetFeedID);
-        return explore(sourceFeed, targetFeed);
+
+        List<FeedDefinition> sourceFeeds;
+        List<FeedDefinition> targetFeeds;
+        if (sourceFeed instanceof CompositeFeedDefinition) {
+            CompositeFeedDefinition source = (CompositeFeedDefinition) sourceFeed;
+            FeedVisitor feedVisitor = new FeedVisitor();
+            feedVisitor.visit(source);
+            sourceFeeds = feedVisitor.feeds;
+        } else {
+            sourceFeeds = Arrays.asList(sourceFeed);
+        }
+
+        if (sourceFeed instanceof CompositeFeedDefinition) {
+            CompositeFeedDefinition source = (CompositeFeedDefinition) targetFeed;
+            FeedVisitor feedVisitor = new FeedVisitor();
+            feedVisitor.visit(source);
+            targetFeeds = feedVisitor.feeds;
+        } else {
+            targetFeeds = Arrays.asList(sourceFeed);
+        }
+        List<CompositeFeedConnection> connections = new ArrayList<CompositeFeedConnection>();
+        for (FeedDefinition sourceDefinition : sourceFeeds) {
+            for (FeedDefinition targetDefinition : targetFeeds) {
+                connections.addAll(explore(sourceDefinition, targetDefinition));
+            }
+        }
+        for (CompositeFeedConnection connection : connections) {
+            if (connection.getSourceFeedID() != sourceFeedID) {
+                for (AnalysisItem field : sourceFeed.getFields()) {
+                    Key key = field.getKey();
+                    if (key instanceof DerivedKey) {
+                        DerivedKey derivedKey = (DerivedKey) key;
+                        if (derivedKey.toBaseKey().equals(connection.getSourceJoin())) {
+                            connection.setSourceFeedID(sourceFeedID);
+                            connection.setSourceJoin(derivedKey);
+                        }
+                    }
+                }
+            }
+            if (connection.getTargetFeedID() != targetFeedID) {
+                for (AnalysisItem field : targetFeed.getFields()) {
+                    Key key = field.getKey();
+                    if (key instanceof DerivedKey) {
+                        DerivedKey derivedKey = (DerivedKey) key;
+                        if (derivedKey.toBaseKey().equals(connection.getTargetJoin())) {
+                            connection.setTargetFeedID(targetFeedID);
+                            connection.setTargetJoin(derivedKey);
+                        }
+                    }
+                }
+            }
+        }
+        return connections;
     }
 
-    private List<CompositeFeedConnection> explore(FeedDefinition sourceFeed, FeedDefinition targetFeed) {
+    private class FeedVisitor extends CompositeFeedNodeVisitor {
+        private List<FeedDefinition> feeds = new ArrayList<FeedDefinition>();
+
+        protected void accept(CompositeFeedNode compositeFeedNode) throws SQLException {
+            FeedDefinition feed = feedStorage.getFeedDefinitionData(compositeFeedNode.getDataFeedID());
+            if (!(feed instanceof CompositeFeedDefinition)) {
+                feeds.add(feed);
+            }
+        }
+    }
+
+    private List<CompositeFeedConnection> explore(FeedDefinition sourceFeed, FeedDefinition targetFeed) throws SQLException {
         Connection conn = Database.instance().getConnection();
         List<CompositeFeedConnection> potentialJoins;
         try {
@@ -84,11 +148,8 @@ public class JoinDiscovery {
                     }
                 }
             }
-        } catch (SQLException e) {
-            LogClass.error(e);
-            throw new RuntimeException(e);
         } finally {
-            Database.instance().closeConnection(conn);
+            Database.closeConnection(conn);
         }
         return potentialJoins;
     }

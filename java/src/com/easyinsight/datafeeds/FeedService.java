@@ -363,7 +363,7 @@ public class FeedService implements IDataFeedService {
             feedDef.setConnections(edges);
             feedDef.setUploadPolicy(new UploadPolicy(userID));
             final ContainedInfo containedInfo = new ContainedInfo();
-            new CompositeFeedNodeVisitor() {
+            new CompositeFeedNodeShallowVisitor() {
 
                 protected void accept(CompositeFeedNode compositeFeedNode) throws SQLException {
                     SecurityUtil.authorizeFeed(compositeFeedNode.getDataFeedID(), Roles.SUBSCRIBER);

@@ -37,6 +37,9 @@ import org.apache.jcs.access.exception.CacheException;
 import com.easyinsight.datafeeds.test.TestAlphaDataSource;
 import com.easyinsight.datafeeds.test.TestBetaDataSource;
 import com.easyinsight.datafeeds.test.TestGammaDataSource;
+import com.easyinsight.datafeeds.wesabe.WesabeAccountDataSource;
+import com.easyinsight.datafeeds.wesabe.WesabeTransactionDataSource;
+import com.easyinsight.datafeeds.wesabe.WesabeDataSource;
 
 /**
  * User: jboe
@@ -707,6 +710,12 @@ public class FeedStorage {
                     feedDefinition = new BaseCampTodoSource();
                 } else if (feedType.equals(FeedType.BASECAMP_TIME)) {
                     feedDefinition = new BaseCampTimeSource();
+                } else if (feedType.equals(FeedType.WESABE)) {
+                    feedDefinition = new WesabeDataSource();
+                } else if (feedType.equals(FeedType.WESABE_ACCOUNTS)) {
+                    feedDefinition = new WesabeAccountDataSource();
+                } else if (feedType.equals(FeedType.WESABE_TRANSACTIONS)) {
+                    feedDefinition = new WesabeTransactionDataSource();
                 }
                 else {
                     throw new RuntimeException("Couldn't identify type");

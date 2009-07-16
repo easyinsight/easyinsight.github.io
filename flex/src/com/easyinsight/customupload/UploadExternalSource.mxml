@@ -43,6 +43,7 @@
                                     <mx:String>Gnip</mx:String>
                                     <mx:String>Salesforce</mx:String>
                                     <mx:String>Admin Server Stats</mx:String>
+                                    <mx:String>Wesabe</mx:String>
                                 </mx:Array>
                             </mx:ArrayCollection>
                         </mx:dataProvider>
@@ -77,6 +78,10 @@
                         <customupload:NoCredentialsDataSourceCreation userConfigComplete="onFeedCreation(event)"
                                                                       userConfigCancel="cancel(event)"
                                                                       dataSourceClass="com.easyinsight.administration.feed.AdminStatsDataSource"/>
+                        <customupload:ExternalDataSourceCreation
+                                dataSourceClass="com.easyinsight.wesabe.WesabeDataSourceCreation"
+                                userConfigComplete="onFeedCreation(event)"
+                                userConfigCancel="cancel(event)"/>
                     </mx:ViewStack>
                 </mx:VBox>
             </mx:AddChild>
