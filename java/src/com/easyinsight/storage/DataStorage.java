@@ -964,6 +964,13 @@ public class DataStorage {
         }
     }
 
+    public static void liveDataSource(long dataSourceID, Connection conn) {
+        FeedPersistenceMetadata metadata = new FeedPersistenceMetadata();
+        metadata.setVersion(1);
+        metadata.setLastData(new Date());
+        addOrUpdateMetadata(dataSourceID, metadata, conn);
+    }
+
     private static FeedPersistenceMetadata createDefaultMetadata(Connection conn) {
         try {
             FeedPersistenceMetadata metadata = new FeedPersistenceMetadata();

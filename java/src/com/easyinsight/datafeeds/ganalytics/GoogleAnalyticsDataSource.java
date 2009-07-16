@@ -310,16 +310,18 @@ public class GoogleAnalyticsDataSource extends ServerDataSourceDefinition {
         searchItems.add(new AnalysisMeasure(keys.get(SEARCH_REFINEMENTS), "Search Refinements", AggregationTypes.SUM));
         searchItems.add(new AnalysisMeasure(keys.get(SEARCH_UNIQUES), "Unique Searches", AggregationTypes.SUM));
         searchItems.add(new AnalysisMeasure(keys.get(SEARCH_VISITS), "Search Visits", AggregationTypes.SUM));
-        FeedFolder visitorFolder = defineFolder("Visitor");
-        visitorFolder.getChildItems().addAll(standardItems);
-        FeedFolder adFolder = defineFolder("Ad Words");
-        adFolder.getChildItems().addAll(adItems);
-        FeedFolder contentFolder = defineFolder("Content");
-        contentFolder.getChildItems().addAll(contentItems);
-        FeedFolder ecommerceFolder = defineFolder("eCommerce");
-        ecommerceFolder.getChildItems().addAll(ecommerceItems);
-        FeedFolder searchFolder = defineFolder("Search");
-        searchFolder.getChildItems().addAll(searchItems);
+        if (getDataFeedID() == 0) {
+            FeedFolder visitorFolder = defineFolder("Visitor");
+            visitorFolder.getChildItems().addAll(standardItems);
+            FeedFolder adFolder = defineFolder("Ad Words");
+            adFolder.getChildItems().addAll(adItems);
+            FeedFolder contentFolder = defineFolder("Content");
+            contentFolder.getChildItems().addAll(contentItems);
+            FeedFolder ecommerceFolder = defineFolder("eCommerce");
+            ecommerceFolder.getChildItems().addAll(ecommerceItems);
+            FeedFolder searchFolder = defineFolder("Search");
+            searchFolder.getChildItems().addAll(searchItems);
+        }
         analysisItems.addAll(standardItems);
         analysisItems.addAll(adItems);
         analysisItems.addAll(contentItems);

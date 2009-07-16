@@ -35,6 +35,8 @@ public class FeedCreation {
             tableDef = DataStorage.writeConnection(feedDefinition, conn, accountID);
             tableDef.createTable();
             tableDef.insertData(dataSet);
+        } else if (feedDefinition.isLiveData()) {
+            DataStorage.liveDataSource(feedID, conn);
         }
         AnalysisDefinition baseDefinition = new AnalysisDefinition();
         baseDefinition.setDataFeedID(feedID);

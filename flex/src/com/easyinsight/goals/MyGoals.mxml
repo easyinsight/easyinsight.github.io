@@ -19,7 +19,7 @@
             </mx:AddChild>
         </mx:State>
         <mx:State name="noGoalsIndividual">
-            <mx:RemoveChild target="{goalTreesBox}"/>
+            <mx:RemoveChild target="{controlsBox}"/>
             <mx:RemoveChild target="{dataBoxes}"/>
             <mx:AddChild relativeTo="{coreContent}">
                 <mx:VBox width="100%">
@@ -31,7 +31,7 @@
                         </mx:VBox>
                     </mx:HBox>
                     <mx:HBox width="100%" paddingLeft="30" paddingRight="30">
-                        <mx:TextArea editable="false"  text="You can import goal trees from solutions with your account level. Customization or other advanced manipulation of goal trees requires that you upgrade your account level."
+                        <mx:TextArea editable="false"  text="You can't use any of the goal functionality with your account level. You'll have to upgrade to Group or higher for access to the functionality."
                                 width="100%" borderStyle="none" fontSize="14"/>
                     </mx:HBox>
                 </mx:VBox>
