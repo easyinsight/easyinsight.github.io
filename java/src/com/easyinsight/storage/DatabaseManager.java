@@ -140,7 +140,7 @@ public class DatabaseManager {
     }
 
     public String chooseDatabase(Connection conn) throws SQLException {
-        PreparedStatement dbStmt = conn.prepareStatement("SELECT SUM(SIZE), DATABASE_NAME FROM FEED_PERSISTENCE_METADATA GROUP BY DATABASE_NAME");
+        PreparedStatement dbStmt = conn.prepareStatement("SELECT SUM(SIZE), DATABASE_NAME FROM FEED_PERSISTENCE_METADATA WHERE DATABASE_NAME IS NOT NULL GROUP BY DATABASE_NAME");
         ResultSet dbSizes = dbStmt.executeQuery();
         String dbToUse = null;
         long smallestSize = Long.MAX_VALUE;

@@ -9,12 +9,15 @@ import com.easyinsight.analysis.*;
 import com.easyinsight.storage.DataStorage;
 import com.easyinsight.util.RandomTextGenerator;
 import com.easyinsight.logging.LogClass;
+import com.easyinsight.database.Database;
 
 import java.util.*;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.PreparedStatement;
 import java.io.Serializable;
+
+import org.hibernate.Session;
 
 /**
  * User: James Boe
@@ -506,6 +509,14 @@ public class FeedDefinition implements Cloneable, Serializable {
         // cascade into base classes - see http://bugs.mysql.com/bug.php?id=13102 as to why this code sucks.
         PreparedStatement deleteTodosStmt = conn.prepareStatement("delete from todo_base where todo_id in (select todo_id from configure_data_feed_todo where data_source_id = ?)");
         PreparedStatement deleteAsyncTasksStmt = conn.prepareStatement("DELETE FROM scheduled_task WHERE scheduled_task_id in (select scheduled_task_id from server_refresh_task where data_source_id = ?)");
+        Session session = Database.instance().createSession(conn);
+        PreparedStatement deleteKeyStmt = conn.prepareStatement("delete from item_key where item_key_id = ?");
+        for (AnalysisItem field : getFields()) {
+            deleteKeyStmt.setLong(1, field.getKey().toBaseKey().getKeyID());
+            deleteKeyStmt.executeUpdate();
+        }
+        session.flush();
+        session.close();
         PreparedStatement deleteStmt = conn.prepareStatement("DELETE FROM DATA_FEED WHERE DATA_FEED_ID = ?");
         deleteTodosStmt.setLong(1, dataFeedID);
         deleteAsyncTasksStmt.setLong(1, dataFeedID);
