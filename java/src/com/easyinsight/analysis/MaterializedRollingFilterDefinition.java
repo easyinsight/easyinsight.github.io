@@ -27,9 +27,11 @@ public class MaterializedRollingFilterDefinition extends MaterializedFilterDefin
 
     private long limitDate;
     private Date now;
+    private int interval;
 
     public MaterializedRollingFilterDefinition(AnalysisItem key, int interval, Date now) {
         super(key);
+        this.interval = interval;
         if (now == null) {
             now = new Date();
         }
@@ -97,7 +99,9 @@ public class MaterializedRollingFilterDefinition extends MaterializedFilterDefin
 
     public boolean allows(Value value) {
         boolean allowed = false;
-        if (value.type() == Value.DATE) {
+        if (interval == LAST_DAY) {
+            allowed = true;
+        } else if (value.type() == Value.DATE) {
             DateValue dateValue = (DateValue) value;
             allowed = limitDate < dateValue.getDate().getTime() && dateValue.getDate().getTime() <= now.getTime();
         }

@@ -164,7 +164,7 @@ public class DateTimeTest extends TestCase {
         ListRow row = yearResults.getRows()[0];
         for (int i = 0; i < yearResults.getHeaders().length; i++) {
             if (yearResults.getHeaders()[i] == measure) {
-                assertEquals(150, row.getValues()[i].toDouble(), .1);
+                assertEquals(225, row.getValues()[i].toDouble(), .1);
             }
         }
     }
