@@ -54,6 +54,7 @@ public class HistoryRun {
             StandardReportPipeline pipeline = new StandardReportPipeline();
             WSListDefinition report = new WSListDefinition();
             report.setColumns(Arrays.asList((AnalysisItem) measure));
+            report.setFilterDefinitions(filters);
             report.setDataFeedID(dataSourceID);
             DataSet result = pipeline.setup(report, feed, new InsightRequestMetadata()).toDataSet(dataSet);
             if (result.getRows().size() > 0) {
