@@ -111,6 +111,30 @@ public class CompositeFeedDefinition extends FeedDefinition {
             List<AnalysisItem> fields = new ArrayList<AnalysisItem>();
             
             // define folder for each child
+            Map<String, AnalysisItem> keyMap = new HashMap<String, AnalysisItem>();
+            Map<String, List<AnalysisItem>> duplicateNameMap = new HashMap<String, List<AnalysisItem>>();
+            for (AnalysisItem analysisItem : analysisItemVisitor.derivedKeys) {
+                String displayName = analysisItem.getDisplayName() != null ? analysisItem.getDisplayName() : analysisItem.getKey().toKeyString();
+                AnalysisItem existing = keyMap.get(displayName);
+                if (existing == null) {
+                    keyMap.put(displayName, analysisItem);
+                } else {
+                    List<AnalysisItem> analysisItems = duplicateNameMap.get(displayName);
+                    if (analysisItems == null) {
+                        analysisItems = new ArrayList<AnalysisItem>();
+                        duplicateNameMap.put(displayName, analysisItems);
+                        analysisItems.add(existing);
+                    }
+                    analysisItems.add(analysisItem);
+                }
+            }
+            for (Map.Entry<String, List<AnalysisItem>> entry : duplicateNameMap.entrySet()) {
+                for (AnalysisItem analysisItem : entry.getValue()) {
+                    DerivedKey derivedKey = (DerivedKey) analysisItem.getKey();
+                    String name = getCompositeFeedName(derivedKey.getFeedID(), conn);
+                    analysisItem.setDisplayName(name + " - " + entry.getKey());
+                }
+            }
 
             Map<Long, FeedFolder> folderMap = new HashMap<Long, FeedFolder>();
             for (CompositeFeedNode feed : getCompositeFeedNodes()) {
