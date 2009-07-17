@@ -39,7 +39,7 @@ public class PasswordStorage {
     static {
         try {
             KeyStore ks = KeyStore.getInstance("JKS");
-            InputStream is = PasswordStorage.class.getClassLoader().getResourceAsStream("/encrypt.jks");
+            InputStream is = PasswordStorage.class.getClassLoader().getResourceAsStream("encrypt.jks");
             ks.load(is, password.toCharArray());
             encryptStore = ks;
             KeyStore.PrivateKeyEntry k = (KeyStore.PrivateKeyEntry) encryptStore.getEntry("dbencrypt", new KeyStore.PasswordProtection(password.toCharArray()));
@@ -52,6 +52,35 @@ public class PasswordStorage {
         }
     }
 
+    public static void setSessionTicket(String sessionTicket, long feedId, Connection conn) throws SQLException {
+        String encryptedTicket = encryptString(sessionTicket);
+
+        PreparedStatement updateStatement = conn.prepareStatement("UPDATE session_id_storage set session_id = ? WHERE data_feed_id = ?");
+        updateStatement.setString(1, encryptedTicket);
+        updateStatement.setLong(2, feedId);
+
+        PreparedStatement insertStatement = conn.prepareStatement("INSERT INTO session_id_storage(data_feed_id, session_id) VALUES (?,?)");
+        insertStatement.setLong(1, feedId);
+        insertStatement.setString(2, encryptedTicket);
+
+        int rows = updateStatement.executeUpdate();
+        if(rows == 0)
+            insertStatement.execute();
+        new FeedStorage().removeFeed(feedId);
+    }
+
+    public static String getSessionTicket(long feedId, Connection conn) throws SQLException {
+        PreparedStatement selectStmt = conn.prepareStatement("SELECT session_id from session_id_storage WHERE data_feed_id = ?");
+        selectStmt.setLong(1, feedId);
+        ResultSet rs = selectStmt.executeQuery();
+        String decodedUsername = null;
+        if(rs.next()) {
+            String username = rs.getString(1);
+            decodedUsername = decryptString(username);
+        }
+
+        return decodedUsername;
+    }
 
     public static void setPasswordCredentials(String username, String password, long feedId, Connection conn) throws SQLException {
 

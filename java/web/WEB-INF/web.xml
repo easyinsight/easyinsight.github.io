@@ -75,6 +75,14 @@
         </init-param>
         <load-on-startup>1</load-on-startup>
     </servlet>
+    <servlet>
+        <servlet-name>QuickBooksSubscribe</servlet-name>
+        <servlet-class>com.easyinsight.servlet.QuickBooksSubscribe</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>QuickBooksChange</servlet-name>
+        <servlet-class>com.easyinsight.servlet.QuickBooksChange</servlet-class>
+    </servlet>
 
 
     <servlet-mapping>
@@ -100,6 +108,16 @@
     <servlet-mapping>
         <servlet-name>SolutionImageServlet</servlet-name>
         <url-pattern>/SolutionImageServlet</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>QuickBooksSubscribe</servlet-name>
+        <url-pattern>/QuickBooksSubscribe</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>QuickBooksChange</servlet-name>
+        <url-pattern>/QuickBooksChange</url-pattern>
     </servlet-mapping>
 
     <servlet-mapping>

@@ -63,6 +63,8 @@
       <entry name="?*.js" />
       <entry name="?*.css" />
       <entry name="?*.swf" />
+      <entry name="?*.ccf" />
+      <entry name="?*.jks" />
     </wildcardResourcePatterns>
   </component>
   <component name="CopyrightManager" default="">
