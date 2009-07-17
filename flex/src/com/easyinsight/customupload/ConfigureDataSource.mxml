@@ -1,6 +1,7 @@
 <?xml version="1.0" ?>
-<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml">
+<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" creationComplete="setupListeners()">
     <mx:Script><![CDATA[
+        import com.easyinsight.administration.feed.CredentialsResponse;
         import com.easyinsight.administration.feed.FeedDefinitionData;
 
         import com.easyinsight.datasources.IServerDataSourceDefinition;
@@ -9,6 +10,14 @@
 
         import mx.controls.Alert;
         import mx.managers.PopUpManager;
+
+        private function onKey(event:KeyboardEvent):void {
+            validate();
+        }
+
+        private function setupListeners():void {
+            stage.addEventListener(KeyboardEvent.KEY_UP, onKey);
+        }
 
         private var _dataSourceClass:Class;
         private var dataSourceCreation:IServerDataSourceCreation;
@@ -82,6 +91,7 @@
                 dataSourceCreation.updateDataSource(dataSourceDefinition);
                 feedService.updateFeedDefinition.send(dataSourceDefinition, "", null);
             } else {
+                progressBar.visible = false;
                 Alert.show(validation);
             }
         }
@@ -92,11 +102,18 @@
         }
 
         private function refreshed():void {
-            var descriptor:DataFeedDescriptor = new DataFeedDescriptor();
-            descriptor.dataFeedID = dataSourceDefinition.dataFeedID;
-            descriptor.name = dataSourceDefinition.feedName;
-            dispatchEvent(new DataSourceConfiguredEvent(descriptor));
-            PopUpManager.removePopUp(this);
+            progressBar.visible = true;
+            var response:CredentialsResponse = uploadService.refreshData.lastResult as CredentialsResponse;
+            if (response.successful) {
+                var descriptor:DataFeedDescriptor = new DataFeedDescriptor();
+                descriptor.dataFeedID = dataSourceDefinition.dataFeedID;
+                descriptor.name = dataSourceDefinition.feedName;
+                dispatchEvent(new DataSourceConfiguredEvent(descriptor));
+                stage.removeEventListener(KeyboardEvent.KEY_UP, onKey);
+                PopUpManager.removePopUp(this);
+            } else {
+                Alert.show(response.failureMessage);
+            }
         }
 
         public function set dataSourceClass(value:Class):void {
@@ -135,7 +152,7 @@
         </mx:FormItem>
         <mx:FormItem label="" direction="horizontal">
             <mx:Button label="Create" click="validate()" enabled="{ready}"/>
-            <mx:Button label="Cancel" click="PopUpManager.removePopUp(this)"/>
+            <mx:Button label="Cancel" click="stage.removeEventListener(KeyboardEvent.KEY_UP, onKey); PopUpManager.removePopUp(this)"/>
         </mx:FormItem>
 	</mx:Form>
 </mx:TitleWindow>

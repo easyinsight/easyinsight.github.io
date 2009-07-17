@@ -11,6 +11,8 @@
         import com.easyinsight.listing.DataFeedDescriptor;
         import com.easyinsight.listing.DescriptorAnalyzeSource;
 
+        import com.easyinsight.util.ProgressAlert;
+
         import mx.controls.Alert;
 
         private var _dataSourceClass:Class;
@@ -49,13 +51,12 @@
         }
 
         private function create():void {
-            progressBar.visible = true;
             dataSourceName = dataSourceDefinition.feedName;
+            ProgressAlert.alert(this, "Creating the data source...", null, uploadService.newExternalDataSource);
             uploadService.newExternalDataSource.send(dataSourceDefinition, dataSourceCreation.credentials);
         }
 
         private function created():void {
-            progressBar.visible = false;
             var id:int = uploadService.newExternalDataSource.lastResult as int;
             CredentialsCache.getCache().addCredentials(id, dataSourceCreation.credentials);
             dispatchEvent(new UploadConfigEvent(UploadConfigEvent.UPLOAD_CONFIG_COMPLETE, id, dataSourceName));
