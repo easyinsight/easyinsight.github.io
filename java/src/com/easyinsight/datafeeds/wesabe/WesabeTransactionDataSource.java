@@ -87,7 +87,22 @@ public class WesabeTransactionDataSource extends WesabeBaseSource {
                         }
                     } else if ("tags".equals(transactionChildNode.getNodeName())) {
                         System.out.println("tags = " + transactionChildNode.getTextContent());
-                        row.addValue(keys.get(TAGS), transactionChildNode.getTextContent());
+                        NodeList tagChildren = transactionChildNode.getChildNodes();
+                        StringBuilder stringBuilder = new StringBuilder();
+                        for (int k = 0; k < tagChildren.getLength(); k++) {
+                            Node tagItem = tagChildren.item(k);
+                            if ("tag".equals(tagItem.getNodeName())) {
+                                stringBuilder.append(tagItem.getChildNodes().item(1).getTextContent());
+                                /*if ("name".equals(tagItem.getNodeName())) {
+                                    stringBuilder.append(tagItem.getTextContent());
+                                }*/
+                                stringBuilder.append(",");
+                            }
+                        }
+                        if (stringBuilder.length() > 0) {
+                            stringBuilder.delete(stringBuilder.length() - 1, stringBuilder.length());
+                        }
+                        row.addValue(keys.get(TAGS), stringBuilder.toString());
                     } else if ("display-name".equals(transactionChildNode.getNodeName())) {
                         row.addValue(keys.get(DISPLAYNAME), transactionChildNode.getTextContent());
                     } else if ("raw-name".equals(transactionChildNode.getNodeName())) {
