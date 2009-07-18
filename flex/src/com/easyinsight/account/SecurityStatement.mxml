@@ -1,0 +1,44 @@
+<?xml version="1.0" ?>
+<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" width="600" height="510" backgroundColor="#FFFFFF">
+    <mx:VBox width="100%" height="100%" paddingLeft="10" paddingRight="10" paddingTop="10">
+        <mx:HBox width="100%" horizontalAlign="center">
+            <mx:Label text="Easy Insight's Security" fontSize="16" fontFamily="Tahoma" fontWeight="bold"/>
+        </mx:HBox>
+        <mx:HBox width="100%" horizontalAlign="center">
+            <mx:Label text="All SSL, All the Time" fontSize="14" color="#D42525" fontFamily="Tahoma" fontWeight="bold"/>
+        </mx:HBox>
+        <mx:TextArea
+                text="Whether you're a free user just uploading a spreadsheet or an enterprise user sending terabytes of data through Easy Insight, your data is always protected by industry standard SSL to keep away any prying eyes."
+                backgroundAlpha="0" selectable="false" editable="false" borderStyle="none" width="100%"/>
+        <mx:HBox width="100%" horizontalAlign="center">
+            <mx:Label text="Secure Infrastructure" fontSize="14" color="#D42525" fontFamily="Tahoma" fontWeight="bold"/>
+        </mx:HBox>
+        <mx:TextArea
+                text="We update our software and infrastructure regularly with the latest security patches. We maintain the latest in security software and follow rigorous internal processes to make sure your data stays safe."
+                backgroundAlpha="0" selectable="false" editable="false" borderStyle="none" width="100%"/>
+        <mx:HBox width="100%" horizontalAlign="center">
+            <mx:Label text="Reliable Backups" fontSize="14" color="#D42525" fontFamily="Tahoma" fontWeight="bold"/>
+        </mx:HBox>
+        <mx:TextArea
+                text="All of your data is instantly written to reliable, multiple location storage. We run multiple backup processes to ensure that nothing goes wrong with your data."
+                backgroundAlpha="0" selectable="false" editable="false" borderStyle="none" width="100%"/>
+        <mx:HBox width="100%" horizontalAlign="center">
+            <mx:Label text="Billing Safety" fontSize="14" color="#D42525" fontFamily="Tahoma" fontWeight="bold"/>
+        </mx:HBox>
+        <mx:TextArea
+                text="We use Braintree Payment Systems for our payment processing, one of the leading vendors of secure payment systems. Your billing information is sent directly to them, never even entering our servers."
+                backgroundAlpha="0" selectable="false" editable="false" borderStyle="none" width="100%"/>
+        <mx:HBox width="100%" horizontalAlign="center">
+            <mx:Label text="Any other questions?" fontSize="14" color="#D42525" fontFamily="Tahoma" fontWeight="bold"/>
+        </mx:HBox>
+        <mx:TextArea
+                text="Feel free to email us at sales@easy-insight.com and we'll provide you with what information we can to address any further concerns you may have."
+                backgroundAlpha="0" selectable="false" editable="false" borderStyle="none" width="100%" fontFamily="Tahoma" fontWeight="bold"/>
+        <mx:HBox width="100%" horizontalAlign="center">
+            <mx:Button label="Close" click="PopUpManager.removePopUp(this)"/>
+        </mx:HBox>
+    </mx:VBox>
+    <mx:Script><![CDATA[
+        import mx.managers.PopUpManager;
+        ]]></mx:Script>
+</mx:TitleWindow>

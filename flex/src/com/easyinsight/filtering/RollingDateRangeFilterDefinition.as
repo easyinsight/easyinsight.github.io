@@ -15,6 +15,9 @@ package com.easyinsight.filtering
 		public static const QUARTER_TO_NOW:int = 9;
 		public static const YEAR_TO_NOW:int = 10;        
 		public static const LAST_DAY:int = 11;        
+		public static const LAST_FULL_DAY:int = 12;
+		public static const LAST_FULL_WEEK:int = 13;
+		public static const LAST_FULL_MONTH:int = 14;        
 
 		public var interval:int = DAY;
 		

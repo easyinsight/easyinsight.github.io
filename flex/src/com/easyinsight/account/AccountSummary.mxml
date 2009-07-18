@@ -6,6 +6,8 @@
         import com.easyinsight.framework.User;
         import mx.collections.ArrayCollection;
         import mx.events.ItemClickEvent;
+        import mx.managers.PopUpManager;
+
         private var _account:Account;
         [Bindable]
         private var accountName:String;
@@ -59,14 +61,32 @@
             }
             coreBox.addChild(accountOption.container);            
         }
+
+        private function showSecurityStatement():void {
+            var window:SecurityStatement = new SecurityStatement();
+            PopUpManager.addPopUp(window, this, true);
+            PopUpManager.centerPopUp(window);
+        }
+
+        private function showTermsOfService():void {
+            var window:TermsOfService = new TermsOfService();
+            PopUpManager.addPopUp(window, this, true);
+            PopUpManager.centerPopUp(window);
+        }
 		]]>
     </mx:Script>
     <mx:VBox width="100%" height="100%" paddingTop="15">
         <mx:HBox width="100%" horizontalAlign="center">
             <mx:ToggleButtonBar itemClick="choseButton(event)" dataProvider="{toggleOptions}" visible="{showToggle}"/>
         </mx:HBox>
-        <mx:HBox id="coreBox" width="100%" height="100%">
+        <mx:HBox id="coreBox" width="100%">
             
+        </mx:HBox>
+        <mx:Spacer height="30"/>
+        <mx:HBox width="100%" horizontalAlign="center">
+            <mx:LinkButton textDecoration="underline" label="Security Statement" click="showSecurityStatement()" fontSize="16"/>
+            <mx:Spacer width="20"/>
+            <mx:LinkButton textDecoration="underline" label="Terms of Service" click="showTermsOfService()" fontSize="16"/>
         </mx:HBox>
     </mx:VBox>
 </mx:Canvas>

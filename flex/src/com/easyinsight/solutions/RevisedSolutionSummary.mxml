@@ -12,6 +12,7 @@
 
         import com.easyinsight.listing.ListingChangeEvent;
 
+        import mx.binding.utils.BindingUtils;
         import mx.events.ItemClickEvent;
         import mx.managers.CursorManager;
         import mx.utils.URLUtil;
@@ -19,7 +20,6 @@
         import com.easyinsight.framework.User;
 
         import mx.managers.BrowserManager;
-        import mx.events.ListEvent;
         import mx.managers.PopUpManager;
         import mx.collections.ArrayCollection;
 
@@ -34,15 +34,58 @@
 
         private var selectedCategory:int;
 
-        [Bindable]
-        private var availableSolutions:ArrayCollection;
+        private var _saas:Boolean = true;
+
+        private var _client:Boolean = true;
+
+        private var _learning:Boolean = false;
+
+
+        [Bindable(event="saasChanged")]
+        public function get saas():Boolean {
+            return _saas;
+        }
+
+        public function set saas(value:Boolean):void {
+            if (_saas == value) return;
+            _saas = value;
+            updateFilters();
+            dispatchEvent(new Event("saasChanged"));
+        }
+
+        [Bindable(event="clientChanged")]
+        public function get client():Boolean {
+            return _client;
+        }
+
+        public function set client(value:Boolean):void {
+            if (_client == value) return;
+            _client = value;
+            updateFilters();
+            dispatchEvent(new Event("clientChanged"));
+        }
+
+        [Bindable(event="learningChanged")]
+        public function get learning():Boolean {
+            return _learning;
+        }
+
+        public function set learning(value:Boolean):void {
+            if (_learning == value) return;
+            _learning = value;
+            updateFilters();
+            dispatchEvent(new Event("learningChanged"));
+        }
 
         [Bindable]
-        private var availableRowCount:int = 5;
+        private var availableSolutions:ArrayCollection;
 
         private function initListeners():void {
             User.getEventNotifier().addEventListener(LoginEvent.LOGIN, onLogin);
             addEventListener(SolutionSelectionEvent.SOLUTION_SELECTION, onSelection);
+            BindingUtils.bindProperty(this, "saas", saasCheckbox, "selected");
+            BindingUtils.bindProperty(this, "client", clientCheckbox, "selected");
+            BindingUtils.bindProperty(this, "learning", trainingCheckbox, "selected");
         }
 
         private function onSelection(event:SolutionSelectionEvent):void {
@@ -61,12 +104,14 @@
             BrowserManager.getInstance().setTitle("Easy Insight - Solutions");
             var fragmentString:String = URLUtil.objectToString(fragmentObject);
             BrowserManager.getInstance().setFragment(fragmentString);
-            solutionService.getSolutions.send();            
+            solutionService.getSolutions.send();
         }
 
         private function gotAllSolutions():void {
-            this.availableSolutions = solutionService.getSolutions.lastResult as ArrayCollection;
-            availableSolutions.filterFunction = filterFunction;
+            var solutionColl:ArrayCollection = solutionService.getSolutions.lastResult as ArrayCollection;
+            solutionColl.filterFunction = filterFunction;
+            solutionColl.refresh();
+            this.availableSolutions = solutionColl;
         }
 
         private function search():void {
@@ -82,12 +127,24 @@
         }
 
         private function filterFunction(item:Object):Boolean {
+            var okay:Boolean = false;
             var solution:Solution = item as Solution;
-            if (selectedCategory == 0) {
-                return true;
-            } else {
-                return solution.category == selectedCategory;
+            switch (solution.category) {
+                case Solution.SAAS:
+                    okay = saas;
+                    break;
+                case Solution.CLIENT:
+                    okay = client;
+                    break;
+                case Solution.LEARNING:
+                    okay = learning;
+                    break;
             }
+            return okay;
+        }
+
+        private function updateFilters():void {
+            availableSolutions.refresh();
         }
                         
         ]]>
@@ -104,16 +161,11 @@
                         <mx:Label fontSize="24" text="Click one of the solutions below to get started!"/>
                     </mx:Box>
                     <mx:Label text="You can use these buttons to filter down to certain solution types."/>
-                    <mx:ButtonBar itemClick="onClick(event)">
-                        <mx:dataProvider>
-                            <mx:ArrayCollection>
-                                <mx:String>All Solutions</mx:String>
-                                <mx:String>SaaS Integrations</mx:String>
-                                <mx:String>Client Downloads</mx:String>
-                                <mx:String>Easy Insight Training</mx:String>
-                            </mx:ArrayCollection>
-                        </mx:dataProvider>
-                    </mx:ButtonBar>
+                    <mx:HBox>
+                        <mx:CheckBox label="SaaS Integrations" id="saasCheckbox" selected="{saas}"/>
+                        <mx:CheckBox label="Client Downloads" id="clientCheckbox" selected="{client}"/>
+                        <mx:CheckBox label="Easy Insight Training" id="trainingCheckbox" selected="{learning}"/>
+                    </mx:HBox>
                 </mx:VBox>
                 <mx:VBox horizontalAlign="center">
                     <mx:Image source="../assets/lesson1/FirstFrame.png" width="256" height="192" click="lesson1()" rollOver="CursorManager.setCursor(pointerIcon);"

@@ -83,7 +83,7 @@
                     <mx:Button label="Upgrade Account..." click="upgradeAccount()"/>
                 </mx:FormItem>
                 <mx:FormItem label="">
-                    <mx:Button label="Change/Update Billing Information" click="flash.net.navigateToURL(new URLRequest('billing/billing.jsp'), '_self');"/>
+                    <mx:Button label="Change/Update Billing Information..." click="flash.net.navigateToURL(new URLRequest('billing/billing.jsp'), '_self');"/>
                 </mx:FormItem>
                 <mx:FormItem>
                     <mx:Button label="Cancel Account..." click="cancelAccount()"/>

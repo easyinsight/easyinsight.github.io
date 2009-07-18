@@ -50,6 +50,9 @@ import mx.events.DropdownEvent;
 			rangeOptions.addItem(new RangeOption("Month to Date", RollingDateRangeFilterDefinition.MONTH_TO_NOW));
 			rangeOptions.addItem(new RangeOption("Quarter to Date", RollingDateRangeFilterDefinition.QUARTER_TO_NOW));
 			rangeOptions.addItem(new RangeOption("Year to Date", RollingDateRangeFilterDefinition.YEAR_TO_NOW));
+			rangeOptions.addItem(new RangeOption("Last Full Day", RollingDateRangeFilterDefinition.LAST_FULL_DAY));
+			rangeOptions.addItem(new RangeOption("Last Full Week", RollingDateRangeFilterDefinition.LAST_FULL_WEEK));
+			rangeOptions.addItem(new RangeOption("Last Full Month", RollingDateRangeFilterDefinition.LAST_FULL_MONTH));
 			rangeOptions.addItem(new RangeOption("Last Day of Data", RollingDateRangeFilterDefinition.LAST_DAY));
 		}
 		
@@ -104,6 +107,7 @@ import mx.events.DropdownEvent;
             }
 			if (comboBox == null) {
 				comboBox = new ComboBox();
+                comboBox.rowCount = 14;
 				comboBox.dataProvider = rangeOptions;
 				comboBox.addEventListener(DropdownEvent.CLOSE, filterValueChanged);
                 if (rollingFilter == null) {

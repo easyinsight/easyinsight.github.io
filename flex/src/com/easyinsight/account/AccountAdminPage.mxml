@@ -10,7 +10,7 @@
                     <account:AvailableSpace/>
                 </mx:FormItem>
                 <mx:FormItem>
-                    <mx:Button label="Change/Update Billing Information" click="flash.net.navigateToURL(new URLRequest('billing/billing.jsp'), '_self');"/><mx:Button label="Cancel Account..." click="cancelPaidAccount()"/> 
+                    <mx:Button label="Change/Update Billing Information..." click="flash.net.navigateToURL(new URLRequest('billing/billing.jsp'), '_self');"/><mx:Button label="Cancel Account..." click="cancelPaidAccount()"/> 
                 </mx:FormItem>
                 <mx:FormItem>
                     <mx:Button label="Upgrade Account..." click="onUpgradeAccount()" visible="{showUpgrade}" />
