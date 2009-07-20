@@ -1,6 +1,11 @@
 <?xml version="1.0" ?>
 <mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" creationComplete="setup()" width="100%" height="100%">
     <mx:Script><![CDATA[
+        import com.easyinsight.analysis.CredentialRequirement;
+        import com.easyinsight.analysis.CredentialsEvent;
+        import com.easyinsight.analysis.RuntimeCredentialsWindow;
+        import com.easyinsight.framework.CredentialsCache;
+
         import mx.charts.LinearAxis;
         import mx.charts.chartClasses.IAxis;
         import mx.charts.chartClasses.Series;
@@ -9,6 +14,7 @@
         import mx.controls.Label;
         import mx.controls.VRule;
         import mx.graphics.BitmapFill;
+        import mx.managers.PopUpManager;
 
         [Bindable]
         private var goalHistory:ArrayCollection;
@@ -45,10 +51,11 @@
                 _startDate = new Date(new Date().getTime() - 24 * 7 * 1000 * 60 * 60);
                 _endDate = new Date();
             }
-            goalService.getGoalValues.send(_goalTreeNodeData.goalTreeNodeID, _startDate, _endDate);
+            goalService.getCredentialsForNode.send(_goalTreeNodeData.goalTreeNodeID, CredentialsCache.getCache().createCredentials(), false);
+            /*goalService.getGoalValues.send(_goalTreeNodeData.goalTreeNodeID, _startDate, _endDate);
             if (_goalTreeNodeData.milestone != null) {
                 goalService.calculateSlope.send(_goalTreeNodeData.goalTreeNodeID, _startDate, _endDate);
-            }
+            }*/
         }
 
         private function gotSlope():void {
@@ -68,6 +75,25 @@
             _goalTreeNodeData = val;
         }
 
+        private function onCredentials(event:CredentialsEvent):void {
+            goalService.getGoalValues.send(_goalTreeNodeData.goalTreeNodeID, _startDate, _endDate, CredentialsCache.getCache().createCredentials());    
+        }
+
+        private function gotCredentials():void {
+            var credentials:ArrayCollection = goalService.getCredentialsForNode.lastResult as ArrayCollection;
+            if (credentials.length == 0) {
+                goalService.getGoalValues.send(_goalTreeNodeData.goalTreeNodeID, _startDate, _endDate, CredentialsCache.getCache().createCredentials());
+            } else {
+                for each (var credential:CredentialRequirement in credentials) {
+                    var window:RuntimeCredentialsWindow = new RuntimeCredentialsWindow();
+                    window.requirement = credential;
+                    window.addEventListener(CredentialsEvent.CREDENTIALS_SAVED, onCredentials);
+                    PopUpManager.addPopUp(window, this, true);
+                    PopUpManager.centerPopUp(window);
+                }
+            }
+        }
+
         private function gotValues():void {
             var history:ArrayCollection = goalService.getGoalValues.lastResult as ArrayCollection;
             if (history.length > 1) {
@@ -78,7 +104,7 @@
         private function onDatesChanged():void {
             _startDate = startChooser.selectedDate;
             _endDate = endChooser.selectedDate;
-            goalService.getGoalValues.send(_goalTreeNodeData.goalTreeNodeID, _startDate, _endDate);
+            goalService.getGoalValues.send(_goalTreeNodeData.goalTreeNodeID, _startDate, _endDate, CredentialsCache.getCache().createCredentials());
         }
 
         private function subscribe():void {
@@ -140,6 +166,7 @@
         ]]></mx:Script>
     <mx:RemoteObject destination="goalService" id="goalService">
         <mx:method name="getGoalValues" result="gotValues()"/>
+        <mx:method name="getCredentialsForNode" result="gotCredentials()"/>
         <mx:method name="calculateSlope" result="gotSlope()"/>
         <mx:method name="subscribeToGoal" result="subscribedToGoal()"/>
     </mx:RemoteObject>

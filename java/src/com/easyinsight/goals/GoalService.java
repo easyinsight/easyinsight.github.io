@@ -18,6 +18,7 @@ import com.easyinsight.datafeeds.*;
 import com.easyinsight.pipeline.HistoryRun;
 
 import java.util.*;
+import java.sql.SQLException;
 
 /**
  * User: James Boe
@@ -187,7 +188,7 @@ public class GoalService {
                         }
                         if (noCredentials) {
                             credentialMap.put(feedDefinition.getDataFeedID(), new CredentialRequirement(feedDefinition.getDataFeedID(), feedDefinition.getFeedName(),
-                                CredentialsDefinition.STANDARD_USERNAME_PW));
+                                    CredentialsDefinition.STANDARD_USERNAME_PW));
                         }
                     }
                 }
@@ -283,43 +284,97 @@ public class GoalService {
         }
     }
 
-    public List<GoalValue> getGoalValues(final long goalTreeNodeID, final Date startDate, final Date endDate) {
+    public List<GoalValue> getGoalValues(final long goalTreeNodeID, final Date startDate, final Date endDate, List<CredentialFulfillment> credentialsList) {
         SecurityUtil.authorizeGoal(goalTreeNodeID, Roles.SUBSCRIBER);
         try {
-            return goalEvaluationStorage.getGoalValuesFromDatabase(goalTreeNodeID, startDate, endDate);
-        } catch (Exception e) {                                             
+            return goalEvaluationStorage.getGoalValuesFromDatabase(goalTreeNodeID, startDate, endDate, credentialsList);
+        } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);
         }
+    }
+
+    public List<CredentialRequirement> getCredentialsForNode(long goalTreeNodeID, List<CredentialFulfillment> existingCredentials, boolean forceRefresh) {
+        Map<Long, CredentialRequirement> credentialMap = new HashMap<Long, CredentialRequirement>();
+        EIConnection conn = Database.instance().getConnection();
+        GoalTreeNode goalTreeNode;
+        try {
+            goalTreeNode = goalStorage.retrieveNode(goalTreeNodeID, conn);
+        } catch (SQLException e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        } finally {
+            Database.closeConnection(conn);
+        }
+        long dataSourceID = goalTreeNode.getCoreFeedID();
+        if (forceRefresh) {
+            FeedDefinition feedDefinition = new FeedStorage().getFeedDefinitionData(dataSourceID);
+            if (feedDefinition.getCredentialsDefinition() == CredentialsDefinition.STANDARD_USERNAME_PW) {
+                IServerDataSourceDefinition dataSource = (IServerDataSourceDefinition) feedDefinition;
+                Credentials credentials = null;
+                for (CredentialFulfillment fulfillment : existingCredentials) {
+                    if (fulfillment.getDataSourceID() == feedDefinition.getDataFeedID()) {
+                        credentials = fulfillment.getCredentials();
+                    }
+                }
+                boolean noCredentials = true;
+                if (credentials != null) {
+                    noCredentials = dataSource.validateCredentials(credentials) != null;
+                }
+                if (noCredentials) {
+                    credentialMap.put(feedDefinition.getDataFeedID(), new CredentialRequirement(feedDefinition.getDataFeedID(), feedDefinition.getFeedName(),
+                            CredentialsDefinition.STANDARD_USERNAME_PW));
+                }
+            }
+        } else {
+            Feed feed = FeedRegistry.instance().getFeed(dataSourceID);
+            Credentials credentials = null;
+            for (CredentialFulfillment fulfillment : existingCredentials) {
+                if (fulfillment.getDataSourceID() == dataSourceID) {
+                    credentials = fulfillment.getCredentials();
+                }
+            }
+            boolean noCredentials = true;
+            if (credentials != null) {
+                noCredentials = new FeedStorage().getFeedDefinitionData(dataSourceID).validateCredentials(credentials) != null;
+            }
+            if (noCredentials) {
+                List<CredentialRequirement> credentialRequirements = feed.getCredentialRequirement();
+                for (CredentialRequirement credentialRequirement : credentialRequirements) {
+                    credentialMap.put(credentialRequirement.getDataSourceID(), credentialRequirement);
+                }
+            }
+        }
+        return new ArrayList<CredentialRequirement>(credentialMap.values());
     }
 
     private GoalTreeNodeData createDataTreeForDates(GoalTree goalTree, final Date startDate, final Date endDate) {
         GoalTreeNodeData dataNode = new GoalTreeNodeDataBuilder().build(goalTree.getRootNode());
         GoalTreeVisitor visitor = new GoalTreeVisitor() {
 
-                protected void accept(GoalTreeNode goalTreeNode) {
-                    GoalTreeNodeData data = (GoalTreeNodeData) goalTreeNode;
-                    try {
-                        if (data.getSubTreeID() > 0) {
-                            GoalStorage goalStorage = new GoalStorage();
-                            GoalTree subTree = goalStorage.retrieveGoalTree(data.getSubTreeID());
-                            GoalTreeNodeData subData = createDataTreeForDates(subTree, startDate, endDate);
-                            if (data.getAnalysisMeasure() == null) {
-                                data.setCurrentValue(subData.getCurrentValue());
-                                data.setGoalOutcome(subData.getGoalOutcome());
-                            } else {
-                                data.populateCurrentValue();
-                                data.determineOutcome(startDate, endDate, goalEvaluationStorage);
-                            }
+            protected void accept(GoalTreeNode goalTreeNode) {
+                GoalTreeNodeData data = (GoalTreeNodeData) goalTreeNode;
+                try {
+                    if (data.getSubTreeID() > 0) {
+                        GoalStorage goalStorage = new GoalStorage();
+                        GoalTree subTree = goalStorage.retrieveGoalTree(data.getSubTreeID());
+                        GoalTreeNodeData subData = createDataTreeForDates(subTree, startDate, endDate);
+                        if (data.getAnalysisMeasure() == null) {
+                            data.setCurrentValue(subData.getCurrentValue());
+                            data.setGoalOutcome(subData.getGoalOutcome());
                         } else {
                             data.populateCurrentValue();
                             data.determineOutcome(startDate, endDate, goalEvaluationStorage);
                         }
-                    } catch (Exception e) {
-                        LogClass.error(e);
+                    } else {
+                        data.populateCurrentValue();
+                        data.determineOutcome(startDate, endDate, goalEvaluationStorage);
                     }
+                } catch (Exception e) {
+                    LogClass.error(e);
                 }
-            };
+            }
+        };
         visitor.visit(dataNode);
         dataNode.summarizeOutcomes();
         return dataNode;
@@ -370,7 +425,7 @@ public class GoalService {
     // we want to understand some context around that number
     // context is relevant to the goal that we're trying to meet
     // sparkline seems useful as one thing there
-    
+
 
     public List<GoalTreeNodeData> getGoals() {
         long userID = SecurityUtil.getUserID();

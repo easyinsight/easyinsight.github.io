@@ -308,7 +308,7 @@ public class GoalEvaluationStorage {
             }
             return goalValues;*/
         } finally {
-            Database.instance().closeConnection(conn);
+            Database.closeConnection(conn);
         }
         List<GoalValue> goalValues;
         if (goalTreeNode != null && goalTreeNode.getCoreFeedID() > 0) {
@@ -320,24 +320,46 @@ public class GoalEvaluationStorage {
         return goalValues;
     }
 
+    public List<GoalValue> getGoalValuesFromDatabase(long goalTreeNodeID, Date startDate, Date endDate, List<CredentialFulfillment> credentials) throws SQLException {
+        return getGoalValuesFromDatabase(goalTreeNodeID, startDate, endDate, credentials, true);
+    }
+
     public List<GoalValue> getGoalValuesFromDatabase(long goalTreeNodeID, Date startDate, Date endDate) throws SQLException {
+        return getGoalValuesFromDatabase(goalTreeNodeID, startDate, endDate, null, false); 
+    }
+
+    private List<GoalValue> getGoalValuesFromDatabase(long goalTreeNodeID, Date startDate, Date endDate, List<CredentialFulfillment> credentials, boolean liveData) throws SQLException {
         List<GoalValue> goalValues = new ArrayList<GoalValue>();
+        boolean hasDate = false;
+        GoalTreeNode goalTreeNode;
         Connection conn = Database.instance().getConnection();
         try {
-            PreparedStatement queryStmt = conn.prepareStatement("SELECT evaluation_result, evaluation_date FROM goal_history " +
-                    "WHERE evaluation_date >= ? AND evaluation_date <= ? AND goal_tree_node_id = ? ORDER BY evaluation_date");
-            queryStmt.setDate(1, new java.sql.Date(startDate.getTime()));
-            queryStmt.setDate(2, new java.sql.Date(endDate.getTime()));
-            queryStmt.setLong(3, goalTreeNodeID);
+            goalTreeNode = new GoalStorage().retrieveNode(goalTreeNodeID, conn);
+            for (FilterDefinition filterDefinition : goalTreeNode.getFilters()) {
+                if (filterDefinition instanceof RollingFilterDefinition) {
+                    hasDate = true;
+                }
+            }
+            if (!hasDate || !liveData) {
+                PreparedStatement queryStmt = conn.prepareStatement("SELECT evaluation_result, evaluation_date FROM goal_history " +
+                        "WHERE evaluation_date >= ? AND evaluation_date <= ? AND goal_tree_node_id = ? ORDER BY evaluation_date");
+                queryStmt.setDate(1, new java.sql.Date(startDate.getTime()));
+                queryStmt.setDate(2, new java.sql.Date(endDate.getTime()));
+                queryStmt.setLong(3, goalTreeNodeID);
 
-            ResultSet startRS = queryStmt.executeQuery();
-            while (startRS.next()) {
-                double evaluationResult = startRS.getDouble(1);
-                Date evaluationDate = new Date(startRS.getDate(2).getTime());
-                goalValues.add(new GoalValue(goalTreeNodeID, evaluationDate, evaluationResult));
+                ResultSet startRS = queryStmt.executeQuery();
+                while (startRS.next()) {
+                    double evaluationResult = startRS.getDouble(1);
+                    Date evaluationDate = new Date(startRS.getDate(2).getTime());
+                    goalValues.add(new GoalValue(goalTreeNodeID, evaluationDate, evaluationResult));
+                }
             }
         } finally {
-            Database.instance().closeConnection(conn);
+            Database.closeConnection(conn);
+        }
+        if (hasDate) {
+            goalValues = new HistoryRun().calculateHistoricalValues(goalTreeNode.getCoreFeedID(), goalTreeNode.getAnalysisMeasure(),
+                    goalTreeNode.getFilters(), startDate, endDate, credentials);
         }
         return goalValues;
     }
