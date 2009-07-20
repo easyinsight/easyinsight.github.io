@@ -52,7 +52,7 @@ public class RollingFilterDefinition extends FilterDefinition {
         if (interval != MaterializedRollingFilterDefinition.LAST_DAY) {
             Date now = insightRequestMetadata.getNow();
             long startTime = MaterializedRollingFilterDefinition.findStartDate(interval, now);
-            long endTime = MaterializedRollingFilterDefinition.findStartDate(interval, now);
+            long endTime = MaterializedRollingFilterDefinition.findEndDate(interval, now);
             preparedStatement.setTimestamp(start++, new java.sql.Timestamp(startTime));
             preparedStatement.setTimestamp(start++, new java.sql.Timestamp(endTime));
         }
