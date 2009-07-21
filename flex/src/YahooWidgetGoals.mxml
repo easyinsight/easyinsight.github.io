@@ -9,7 +9,7 @@
     <mx:states>
         <mx:State name="MyGoals">
             <mx:AddChild relativeTo="{coreBox}">
-                <dashboard:EmbeddedViewGoals id="panel" prefix="https://localhost/"/>
+                <dashboard:EmbeddedViewGoals id="panel" prefix="https://www.easy-insight.com/"/>
             </mx:AddChild>
         </mx:State>
         <mx:State name="LoginState">

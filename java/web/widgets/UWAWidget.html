@@ -37,7 +37,7 @@
           if(queryString.length > 1)
             queryString = queryString.substring(1, queryString.length);
             var keyPairs = parseQueryString(queryString);
-            if(keyPairs["insightCombo"] == null && keyPairs["reportName"] == null && keyPairs["reportType"] == null) {
+            if((keyPairs["insightCombo"] == null || keyPairs["dataSourceID"] == null) && keyPairs["reportName"] == null && keyPairs["reportType"] == null) {
                 var realUrl;
                 if(keyPairs["uwaUrl"] != null) {
                     realUrl = unescape(keyPairs["uwaUrl"]);
@@ -56,6 +56,10 @@
 
           if(widget.getValue("insightCombo") == null || widget.getValue("insightCombo") == "" && keyPairs != null && keyPairs["insightCombo"] != null) {
               widget.setValue("insightCombo", unescape(keyPairs["insightCombo"]));
+          }
+
+          if(widget.getValue("dataSourceID") == null || widget.getValue("dataSourceID") == "" && keyPairs != null && keyPairs["dataSourceID"] != null) {
+              widget.setValue("dataSourceID", unescape(keyPairs["dataSourceID"]));
           }
 
           if(widget.getValue("reportName") == null || widget.getValue("reportName") == "" && keyPairs != null && keyPairs["reportName"] != null) {

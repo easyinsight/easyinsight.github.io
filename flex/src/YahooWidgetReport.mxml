@@ -38,7 +38,7 @@
         </mx:State>
         <mx:State name="Report">
             <mx:AddChild relativeTo="{coreBox}">
-                <dashboard:DataViewPanel id="panel" analysisID="{analysisID}" reportType="{reportType}"
+                <dashboard:DataViewPanel id="panel" analysisID="{analysisID}" dataSourceID="{dataSourceID}" reportType="{reportType}"
                                          reportName="{reportName}" prefix="https://www.easy-insight.com/"/>
             </mx:AddChild>
         </mx:State>
@@ -55,9 +55,12 @@
             import com.easyinsight.analysis.DefaultMenuFactory;
             import com.easyinsight.analysis.PopupMenuFactory;
             import com.easyinsight.analysis.TemporalAnalysisMeasure;
-        import com.easyinsight.solutions.InsightDescriptor;
+            import com.easyinsight.framework.CredentialsCache;
+            import com.easyinsight.framework.WebCredentialsCache;
+            import com.easyinsight.solutions.InsightDescriptor;
 
-        import mx.rpc.events.ResultEvent;
+            import mx.controls.Alert;
+            import mx.rpc.events.ResultEvent;
         import mx.messaging.config.ServerConfig;
         import mx.rpc.AsyncToken;
         import mx.rpc.AsyncResponder;
@@ -77,6 +80,10 @@
 
         [Bindable]
         private var analysisID:Number;
+
+        [Bindable]
+        private var dataSourceID:Number;
+            
         [Bindable]
         private var stubs:ArrayCollection;
         [Bindable]
@@ -97,7 +104,7 @@
         }
 
         private function onCreationComplete():void {
-
+            CredentialsCache.initialize(new WebCredentialsCache());
             PopupMenuFactory.menuFactory = new DefaultMenuFactory();
 
             addEventListener(KeyboardEvent.KEY_UP, onKeyUp);
@@ -110,12 +117,15 @@
             var userNameJS:String = ExternalInterface.call("widget.getValue", "userName");
             var passwordJS:String = ExternalInterface.call("widget.getValue", "password");
             var analysisIDString:String = ExternalInterface.call("widget.getValue", "insightCombo");
+            var dataSourceIDString:String = ExternalInterface.call("widget.getValue", "dataSourceID");
             var reportNameString:String = ExternalInterface.call("widget.getValue", "reportName");
             var reportTypeString:String = ExternalInterface.call("widget.getValue", "reportType");
 
+
             // is report already set up?
-                if (analysisIDString != null && "" != analysisIDString) {
+                if (analysisIDString != null && "" != analysisIDString && dataSourceIDString != null && "" != dataSourceIDString) {
                     analysisID = Number(analysisIDString);
+                    dataSourceID = Number(dataSourceIDString);
                     reportName = reportNameString;
                     reportType = int(reportTypeString);
                 }
@@ -219,9 +229,11 @@
             this.analysisID = insight.id;
             this.reportName = insight.name;
             this.reportType = insight.reportType;
+            this.dataSourceID = insight.dataFeedID;
             ExternalInterface.call("widget.setValue", "insightCombo", insight.id);
             ExternalInterface.call("widget.setValue", "reportName", insight.name);
             ExternalInterface.call("widget.setValue", "reportType", insight.reportType);
+            ExternalInterface.call("widget.setValue", "dataSourceID", insight.dataFeedID);
             currentState = "Report";
         }
 		]]>
