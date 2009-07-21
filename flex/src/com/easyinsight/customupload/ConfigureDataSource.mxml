@@ -12,7 +12,9 @@
         import mx.managers.PopUpManager;
 
         private function onKey(event:KeyboardEvent):void {
-            validate();
+            if (event.keyCode == Keyboard.ENTER) {
+                validate();
+            }
         }
 
         private function setupListeners():void {
