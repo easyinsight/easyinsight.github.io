@@ -144,6 +144,22 @@ public class InstallationSystem {
                             }
                             goalTreeNode.setFilters(newFilters);
                         }
+                        if (goalTreeNode.getProblemConditions() != null) {
+                            List<FilterDefinition> newFilters = new ArrayList<FilterDefinition>();
+                            for (FilterDefinition filterDefinition : goalTreeNode.getProblemConditions()) {
+                                PersistableFilterDefinition persistableFilterDefinition = filterDefinition.toPersistableFilterDefinition();
+                                PersistableFilterDefinition clonedPersistableFilterDefinition;
+                                try {
+                                    clonedPersistableFilterDefinition = persistableFilterDefinition.clone();
+                                } catch (CloneNotSupportedException e) {
+                                    throw new RuntimeException(e);
+                                }
+                                FilterDefinition clonedDefinition = clonedPersistableFilterDefinition.toFilterDefinition();
+                                clonedDefinition.setField(findItem(filterDefinition.getField(), feedDefinition));
+                                newFilters.add(clonedDefinition);
+                            }
+                            goalTreeNode.setProblemConditions(newFilters);
+                        }
                     }
                 }
                 for (GoalFeed goalFeed : goalTreeNode.getAssociatedFeeds()) {

@@ -35,6 +35,8 @@ public class GoalTreeNode implements Cloneable {
     private double goalValue;
     private boolean highIsGood;
 
+    private List<FilterDefinition> problemConditions = new ArrayList<FilterDefinition>();
+
     private List<GoalFeed> associatedFeeds = new ArrayList<GoalFeed>();
     private List<InsightDescriptor> associatedInsights = new ArrayList<InsightDescriptor>();
     private List<GoalSolution> associatedSolutions = new ArrayList<GoalSolution>();
@@ -51,6 +53,14 @@ public class GoalTreeNode implements Cloneable {
     private String subTreeName;
     private String subTreeIcon;
     private SolutionGoalTreeDescriptor newSubTree;
+
+    public List<FilterDefinition> getProblemConditions() {
+        return problemConditions;
+    }
+
+    public void setProblemConditions(List<FilterDefinition> problemConditions) {
+        this.problemConditions = problemConditions;
+    }
 
     public String getMeasureLabel() {
         return measureLabel;

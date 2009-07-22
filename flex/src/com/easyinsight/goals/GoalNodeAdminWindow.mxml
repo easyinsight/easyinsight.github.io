@@ -114,6 +114,9 @@
         private var filterDefinitions:ArrayCollection;
 
         [Bindable]
+        private var problemDefinitions:ArrayCollection;
+
+        [Bindable]
         private var targetDefined:Boolean;
 
         [Bindable]
@@ -152,6 +155,9 @@
             if (_goalTreeNode != null) {
                 for each (var filter:FilterDefinition in _goalTreeNode.filters) {
                     transformContainer.addFilterDefinition(filter);
+                }
+                for each (var problem:FilterDefinition in _goalTreeNode.problemConditions) {
+                    problemContainer.addFilterDefinition(problem);
                 }
             }
             goalService.getMilestones.send();
@@ -201,6 +207,7 @@
                 insightBound = true;
                 this.feedName = goalTreeNode.coreFeedName;
                 filterDefinitions = goalTreeNode.filters;
+                problemDefinitions = goalTreeNode.problemConditions;
 
                 this.analysisMeasure = goalTreeNode.analysisMeasure;
                 this.highValues = goalTreeNode.highIsGood;
@@ -234,6 +241,7 @@
                 _goalTreeNode.highIsGood = highValuesGoal.selected;
                 _goalTreeNode.goalValue = int(targetValueInput.text);
                 _goalTreeNode.filters = transformContainer.getFilterDefinitions();
+                _goalTreeNode.problemConditions = problemContainer.getFilterDefinitions();
                 _goalTreeNode.goalDefined = targetDefinedCheckbox.selected;
                 if (milestoneBox.selectedItem != NO_MILESTONE) {
                     _goalTreeNode.milestone = milestoneBox.selectedItem as GoalTreeMilestone;
@@ -564,12 +572,29 @@
                                 <mx:Label fontSize="14" text="Define the Filters" fontWeight="bold"
                                           fontFamily="Tahoma"/>
                             </mx:HBox>
-                            <mx:HDividedBox height="100%" width="100%">
+                            <mx:HDividedBox height="50%" width="100%">
                                 <mx:List dataProvider="{availableDimensions}" labelField="display" dragEnabled="true"
                                          dragMoveEnabled="false" enabled="{insightBound}" width="50%" height="100%"/>
-                                <mx:Canvas width="50%" height="100%"
-                                        id="workspace">
+                                <mx:Canvas width="50%" height="100%">
                                     <filtering:TransformContainer id="transformContainer" width="100%" height="100%"
+                                                                  borderStyle="solid"
+                                                                  borderThickness="1" backgroundColor="#ffffff"
+                                                                  backgroundAlpha=".1" feedID="{feedID}"
+                                                                  analysisItems="{allFields}"
+                                                                  showLabel="false"
+                                            paddingBottom="5" paddingLeft="5" paddingRight="5"
+                                        paddingTop="5"/>
+                                </mx:Canvas>
+                            </mx:HDividedBox>
+                            <mx:HBox width="100%" horizontalAlign="center">
+                                <mx:Label fontSize="14" text="Define the Problems" fontWeight="bold"
+                                          fontFamily="Tahoma"/>
+                            </mx:HBox>
+                            <mx:HDividedBox height="50%" width="100%">
+                                <mx:List dataProvider="{availableItems}" labelField="display" dragEnabled="true"
+                                         dragMoveEnabled="false" enabled="{insightBound}" width="50%" height="100%"/>
+                                <mx:Canvas width="50%" height="100%">
+                                    <filtering:TransformContainer id="problemContainer" width="100%" height="100%"
                                                                   borderStyle="solid"
                                                                   borderThickness="1" backgroundColor="#ffffff"
                                                                   backgroundAlpha=".1" feedID="{feedID}"

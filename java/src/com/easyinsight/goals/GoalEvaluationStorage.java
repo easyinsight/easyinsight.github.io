@@ -8,6 +8,7 @@ import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.core.Value;
 import com.easyinsight.core.DateValue;
+import com.easyinsight.core.NumericValue;
 import com.easyinsight.analysis.*;
 import com.easyinsight.analysis.ListRow;
 import com.easyinsight.datafeeds.CredentialFulfillment;
@@ -121,7 +122,7 @@ public class GoalEvaluationStorage {
             conn.rollback();
         } finally {
             conn.setAutoCommit(true);
-            Database.instance().closeConnection(conn);
+            Database.closeConnection(conn);
         }
     }
 
@@ -222,7 +223,7 @@ public class GoalEvaluationStorage {
                 }
             }
         } finally {
-            Database.instance().closeConnection(conn);
+            Database.closeConnection(conn);
         }
         return goalValue;
     }
@@ -285,7 +286,7 @@ public class GoalEvaluationStorage {
             }
             return rangedValues;
         } finally {
-            Database.instance().closeConnection(conn);
+            Database.closeConnection(conn);
         }
     }
 
@@ -364,7 +365,7 @@ public class GoalEvaluationStorage {
         return goalValues;
     }
 
-    public GoalOutcome getEvaluations(long goalTreeNodeID, Date startDate, Date endDate, double goalValue, boolean highIsGood) throws SQLException {
+    public GoalOutcome getEvaluations(GoalTreeNode goalTreeNode, Date startDate, Date endDate, double goalValue, boolean highIsGood, List<CredentialFulfillment> credentials) throws SQLException {
         // key here is what's the value at the start date, what's the value at the end date
         // delta between those two values
         // outcomes:
@@ -374,8 +375,21 @@ public class GoalEvaluationStorage {
         //   is delta ~= epsilon
         //   is delta negative and < epsilon
 
-        List<GoalValue> goalValues = getGoalValuesFromDatabase(goalTreeNodeID, startDate, endDate);
+        
+
+        List<GoalValue> goalValues = getGoalValuesFromDatabase(goalTreeNode.getGoalTreeNodeID(), startDate, endDate, credentials);
         int resultLength = goalValues.size();
+        boolean failedProblemConditions = false;
+        if (goalTreeNode.getProblemConditions().size() > 0 && resultLength >= 1) {
+            GoalValue value = goalValues.get(goalValues.size() - 1);
+            for (FilterDefinition problemCondition : goalTreeNode.getProblemConditions()) {
+                MaterializedFilterDefinition filter = problemCondition.materialize(null);
+                NumericValue numericValue = new NumericValue(value.getValue());
+                if (filter.allows(numericValue)) {
+                    failedProblemConditions = true;
+                }
+            }
+        }
         if (resultLength >= 2) {
             for (int i = 1; i < (resultLength - 1); i++) {
                 goalValues.remove(1);
@@ -386,9 +400,9 @@ public class GoalEvaluationStorage {
             int outcome = determineOutcome(goalValue, highIsGood, delta, endValue);
             double percentChange = delta / startValue * 100;
             double outcomeWeight = (outcome == GoalOutcome.EXCEEDING_GOAL || outcome == GoalOutcome.POSITIVE) ? 1 : (outcome == GoalOutcome.NEUTRAL ? 0 : -1);
-            return new ConcreteGoalOutcome(outcome, goalValue, endValue, startValue, percentChange, outcomeWeight);
+            return new ConcreteGoalOutcome(failedProblemConditions ? GoalOutcome.NEGATIVE : outcome, goalValue, endValue, startValue, percentChange, outcomeWeight);
         } else {
-            return new GoalOutcome(GoalOutcome.NO_DATA, 0);
+            return new GoalOutcome(failedProblemConditions ? GoalOutcome.NEGATIVE : GoalOutcome.NO_DATA, 0);
         }
     }
 

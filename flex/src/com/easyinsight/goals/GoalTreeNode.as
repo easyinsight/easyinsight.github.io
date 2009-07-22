@@ -27,6 +27,7 @@ import com.easyinsight.analysis.AnalysisMeasure;
 		public var associatedFeeds:ArrayCollection = new ArrayCollection();
 		public var associatedInsights:ArrayCollection = new ArrayCollection();
 		public var associatedSolutions:ArrayCollection = new ArrayCollection();
+        public var problemConditions:ArrayCollection = new ArrayCollection();
 
 		public var tags:ArrayCollection = new ArrayCollection();
 		public var name:String;
@@ -76,6 +77,7 @@ import com.easyinsight.analysis.AnalysisMeasure;
             clonedNode.name = this.name;
             clonedNode.description = this.description;
             clonedNode.iconImage = this.iconImage;
+            clonedNode.problemConditions = new ArrayCollection(problemConditions.toArray());
             clonedNode.associatedFeeds = new ArrayCollection(associatedFeeds.toArray());
             clonedNode.associatedInsights = new ArrayCollection(associatedInsights.toArray());
             clonedNode.measureLabel = this.measureLabel;

@@ -66,11 +66,15 @@ public class GoogleAnalyticsFeed extends Feed {
                     StringBuilder urlBuilder = new StringBuilder("https://www.google.com/analytics/feeds/data?ids=");
                     urlBuilder.append(ids);
 
-                    urlBuilder.append("&dimensions=");
-                    urlBuilder.append(queryItem.getKey().toKeyString());
-                    urlBuilder.append("&metrics=");
-                    // TODO: update for categories other than basic
-                    urlBuilder.append(GoogleAnalyticsDataSource.getMeasure(queryItem.getKey().toKeyString()));
+                    if (analysisItem.hasType(AnalysisItemTypes.DIMENSION)) {
+                        urlBuilder.append("&dimensions=");
+                        urlBuilder.append(queryItem.getKey().toKeyString());
+                        urlBuilder.append("&metrics=");
+                        urlBuilder.append(GoogleAnalyticsDataSource.getMeasure(queryItem.getKey().toKeyString()));
+                    } else {
+                        urlBuilder.append("&metrics=");
+                        urlBuilder.append(queryItem.getKey().toKeyString());
+                    }
                     Calendar cal = Calendar.getInstance();
                     cal.add(Calendar.YEAR, -1);
                     String endDateString = outboundDateFormat.format(new Date());

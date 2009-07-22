@@ -231,6 +231,28 @@ public class DataService {
         }
     }
 
+    public DataSet listDataSet(WSAnalysisDefinition analysisDefinition, InsightRequestMetadata insightRequestMetadata) {
+        SecurityUtil.authorizeFeedAccess(analysisDefinition.getDataFeedID());
+        try {
+            Feed feed = feedRegistry.getFeed(analysisDefinition.getDataFeedID());
+            Set<AnalysisItem> analysisItems = analysisDefinition.getColumnItems(feed.getFields());
+            Set<AnalysisItem> validQueryItems = new HashSet<AnalysisItem>();
+            for (AnalysisItem analysisItem : analysisItems) {
+                if (!analysisItem.isDerived()) {
+                    validQueryItems.add(analysisItem);
+                }
+            }
+            Collection<FilterDefinition> filters = analysisDefinition.getFilterDefinitions();
+            DataSet dataSet = feed.getAggregateDataSet(validQueryItems, filters, insightRequestMetadata, feed.getFields(), false, null);
+            Pipeline pipeline = new StandardReportPipeline();
+            pipeline.setup(analysisDefinition, feed, insightRequestMetadata);
+            return pipeline.toDataSet(dataSet);
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        }
+    }
+
     public ListDataResults list(WSAnalysisDefinition analysisDefinition, InsightRequestMetadata insightRequestMetadata) {
         SecurityUtil.authorizeFeedAccess(analysisDefinition.getDataFeedID());
         try {

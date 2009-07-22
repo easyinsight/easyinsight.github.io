@@ -20,6 +20,7 @@ public class GoalTreeNodeDataBuilder {
         goalTreeNodeData.setCoreFeedName(goalTreeNode.getCoreFeedName());
         goalTreeNodeData.setDescription(goalTreeNode.getDescription());
         goalTreeNodeData.setFilters(goalTreeNode.getFilters());
+        goalTreeNodeData.setProblemConditions(goalTreeNode.getProblemConditions());
         goalTreeNodeData.setGoalTreeNodeID(goalTreeNode.getGoalTreeNodeID());
         goalTreeNodeData.setGoalValue(goalTreeNode.getGoalValue());
         goalTreeNodeData.setHighIsGood(goalTreeNode.isHighIsGood());

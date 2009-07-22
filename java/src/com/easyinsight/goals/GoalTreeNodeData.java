@@ -1,8 +1,10 @@
 package com.easyinsight.goals;
 
 import com.easyinsight.logging.LogClass;
+import com.easyinsight.datafeeds.CredentialFulfillment;
 
 import java.util.Date;
+import java.util.ArrayList;
 import java.sql.SQLException;
 
 /**
@@ -40,9 +42,9 @@ public class GoalTreeNodeData extends GoalTreeNode {
 
     public void determineOutcome(Date startDate, Date endDate, GoalEvaluationStorage goalEvaluationStorage) throws SQLException {
         if (getCoreFeedID() > 0) {
-            if (isGoalDefined())
-                this.goalOutcome = goalEvaluationStorage.getEvaluations(getGoalTreeNodeID(), startDate, endDate,
-                    getGoalValue(), isHighIsGood());
+            if (isGoalDefined() || !getProblemConditions().isEmpty())
+                this.goalOutcome = goalEvaluationStorage.getEvaluations(this, startDate, endDate,
+                    getGoalValue(), isHighIsGood(), new ArrayList<CredentialFulfillment>());
         }
     }
 

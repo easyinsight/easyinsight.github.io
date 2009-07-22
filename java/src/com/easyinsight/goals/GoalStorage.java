@@ -38,7 +38,7 @@ public class GoalStorage {
             LogClass.error(e);
             throw new RuntimeException(e);
         } finally {
-            Database.instance().closeConnection(conn);
+            Database.closeConnection(conn);
         }
     }
 
@@ -59,7 +59,7 @@ public class GoalStorage {
         } catch (SQLException e) {
             LogClass.error(e);
         } finally {
-            Database.instance().closeConnection(conn);
+            Database.closeConnection(conn);
         }
         return milestones;
     }
@@ -92,7 +92,7 @@ public class GoalStorage {
             LogClass.error(e);
             throw new RuntimeException(e);
         } finally {
-            Database.instance().closeConnection(conn);
+            Database.closeConnection(conn);
         }
     }
 
@@ -108,7 +108,7 @@ public class GoalStorage {
         } catch (SQLException e) {
             LogClass.error(e);
         } finally {
-            Database.instance().closeConnection(conn);
+            Database.closeConnection(conn);
         }
 
     }
@@ -218,7 +218,7 @@ public class GoalStorage {
         } catch (SQLException e) {
             LogClass.error(e);
         } finally {
-            Database.instance().closeConnection(conn);
+            Database.closeConnection(conn);
         }
         return descriptors;
     }
@@ -237,7 +237,7 @@ public class GoalStorage {
             throw e;
         } finally {
             conn.setAutoCommit(true);
-            Database.instance().closeConnection(conn);
+            Database.closeConnection(conn);
         }
     }
 
@@ -290,7 +290,7 @@ public class GoalStorage {
             throw new RuntimeException(e);
         } finally {
             conn.setAutoCommit(true);
-            Database.instance().closeConnection(conn);
+            Database.closeConnection(conn);
         }
     }
 
@@ -310,7 +310,7 @@ public class GoalStorage {
             conn.rollback();
         } finally {
             conn.setAutoCommit(true);
-            Database.instance().closeConnection(conn);
+            Database.closeConnection(conn);
         }
     }
 
@@ -358,6 +358,7 @@ public class GoalStorage {
             goalTreeNode.setAssociatedFeeds(getGoalFeeds(nodeID, conn));
             goalTreeNode.setAssociatedInsights(getGoalInsights(nodeID, conn));
             goalTreeNode.setAssociatedSolutions(getGoalSolutions(nodeID, conn));
+            goalTreeNode.setProblemConditions(getGoalProblemFilters(nodeID, conn));
             goalTreeNode.setFilters(getGoalFilters(nodeID, conn));
             goalTreeNode.setTags(getGoalTags(nodeID, conn));
             goalTreeNode.setUsers(getGoalUsers(nodeID, conn));
@@ -422,6 +423,26 @@ public class GoalStorage {
     private List<FilterDefinition> getGoalFilters(long goalTreeNodeID, Connection conn) throws SQLException {
         List<FilterDefinition> filters = new ArrayList<FilterDefinition>();
         PreparedStatement feedQueryStmt = conn.prepareStatement("SELECT FILTER_ID FROM GOAL_TO_FILTER WHERE goal_tree_node_id = ?");
+        feedQueryStmt.setLong(1, goalTreeNodeID);
+        ResultSet rs = feedQueryStmt.executeQuery();
+        Session session = Database.instance().createSession(conn);
+        try {
+            while (rs.next()) {
+                List results = session.createQuery("from PersistableFilterDefinition where filterId = ?").setLong(0, rs.getLong(1)).list();
+                if (results.size() > 0) {
+                    PersistableFilterDefinition filter = (PersistableFilterDefinition) results.get(0);
+                    filters.add(filter.toFilterDefinition());
+                }
+            }
+        } finally {
+            session.close();
+        }
+        return filters;
+    }
+
+    private List<FilterDefinition> getGoalProblemFilters(long goalTreeNodeID, Connection conn) throws SQLException {
+        List<FilterDefinition> filters = new ArrayList<FilterDefinition>();
+        PreparedStatement feedQueryStmt = conn.prepareStatement("SELECT FILTER_ID FROM GOAL_TO_PROBLEM_FILTER WHERE goal_tree_node_id = ?");
         feedQueryStmt.setLong(1, goalTreeNodeID);
         ResultSet rs = feedQueryStmt.executeQuery();
         Session session = Database.instance().createSession(conn);
@@ -507,7 +528,7 @@ public class GoalStorage {
             } catch (SQLException e) {
                 LogClass.error(e);
             }
-            Database.instance().closeConnection(conn);
+            Database.closeConnection(conn);
         }
     }
 
@@ -667,6 +688,7 @@ public class GoalStorage {
         saveFeeds(goalTreeNode, conn);
         saveSolutions(goalTreeNode, conn);
         saveFilters(goalTreeNode, conn);
+        saveProblemFilters(goalTreeNode, conn);
         saveUsers(goalTreeNode, conn);
         if (goalTreeNode.getChildren() != null) {
             for (GoalTreeNode childNode : goalTreeNode.getChildren()) {
@@ -736,7 +758,7 @@ public class GoalStorage {
             LogClass.error(e);
             throw new RuntimeException(e);
         } finally {
-            Database.instance().closeConnection(conn);
+            Database.closeConnection(conn);
         }
     }
 
@@ -752,7 +774,7 @@ public class GoalStorage {
             LogClass.error(e);
             throw new RuntimeException(e);
         } finally {
-            Database.instance().closeConnection(conn);
+            Database.closeConnection(conn);
         }
     }
 
@@ -828,6 +850,26 @@ public class GoalStorage {
         }
     }
 
+    private void saveProblemFilters(GoalTreeNode goalTreeNode, Connection conn) throws SQLException {
+        PreparedStatement clearExistingStmt = conn.prepareStatement("DELETE FROM GOAL_TO_PROBLEM_FILTER WHERE GOAL_TREE_NODE_ID = ?");
+        clearExistingStmt.setLong(1, goalTreeNode.getGoalTreeNodeID());
+        clearExistingStmt.executeUpdate();
+        Session session = Database.instance().createSession(conn);
+        try {
+            PreparedStatement saveFiltersStmt = conn.prepareStatement("INSERT INTO GOAL_TO_PROBLEM_FILTER (GOAL_TREE_NODE_ID, FILTER_ID) VALUES (?, ?)");
+            for (FilterDefinition filterDefinition : goalTreeNode.getProblemConditions()) {
+                PersistableFilterDefinition persistableFilterDefinition = filterDefinition.toPersistableFilterDefinition();
+                session.saveOrUpdate(persistableFilterDefinition);
+                session.flush();
+                saveFiltersStmt.setLong(1, goalTreeNode.getGoalTreeNodeID());
+                saveFiltersStmt.setLong(2, persistableFilterDefinition.getFilterId());
+                saveFiltersStmt.execute();
+            }
+        } finally {
+            session.close();
+        }
+    }
+
     public List<GoalTreeNodeData> getGoalsForUser(long userID, final Date startDate, final Date endDate) {
         List<GoalTreeNodeData> nodes = new ArrayList<GoalTreeNodeData>();
         Connection conn = Database.instance().getConnection();
@@ -843,7 +885,7 @@ public class GoalStorage {
         } catch (SQLException e) {
             LogClass.error(e);
         } finally {
-            Database.instance().closeConnection(conn);
+            Database.closeConnection(conn);
         }
         return nodes;
     }
@@ -884,7 +926,7 @@ public class GoalStorage {
             LogClass.error(e);
             throw new RuntimeException(e);
         } finally {
-            Database.instance().closeConnection(conn);
+            Database.closeConnection(conn);
         }
         return nodes;
     }
@@ -907,7 +949,7 @@ public class GoalStorage {
         } catch (SQLException e) {
             LogClass.error(e);
         } finally {
-            Database.instance().closeConnection(conn);
+            Database.closeConnection(conn);
         }
 
     }
