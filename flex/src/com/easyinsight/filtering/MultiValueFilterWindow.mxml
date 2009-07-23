@@ -40,16 +40,27 @@
 
         private function gotMetadata(event:ResultEvent):void {
             var analysisDimensionResultMetadata:AnalysisDimensionResultMetadata = dataService.getAnalysisItemMetadata.lastResult as
-                                                                                  AnalysisDimensionResultMetadata;
+                                                                                    AnalysisDimensionResultMetadata;
+            var filteredStrings:ArrayCollection = new ArrayCollection();
+            for each (var filterValue:Object in _filterValueDefinition.filteredValues) {
+                var filterString:String;
+                if (filterValue is Value) {
+                    filterString = String(Value(filterValue).getValue());
+                } else {
+                    filterString = String(filterValue);
+                }
+                filteredStrings.addItem(filterString);
+            }
             var strings:ArrayCollection = new ArrayCollection();
             for each (var value:Value in analysisDimensionResultMetadata.values) {
                 var string:String = String(value.getValue());
-                if (!strings.contains(string) && !_filterValueDefinition.filteredValues.contains(string)) {
+                if (!strings.contains(string) && !filteredStrings.contains(string)) {
                     strings.addItem(string);
                 }
             }
             sourceValues = strings;
-            targetValues = _filterValueDefinition.filteredValues;
+
+            targetValues = filteredStrings;
         }
 
 

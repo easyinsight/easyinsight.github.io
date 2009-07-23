@@ -223,8 +223,6 @@
         [Bindable]
         private var _reportID:int;
 
-        private var credentialMap:Object = new Object();
-
         private var loading:Boolean = false;
 
         public function set previewMode(previewMode:Boolean):void {
@@ -268,7 +266,6 @@
                 dataViewFactory.analysisDefinition = analysisDefinition;
             }
             dataView = dataViewFactory;
-            dataView.credentialsMap = credentialMap;
             dataView.addEventListener(DataServiceLoadingEvent.LOADING_STARTED, startLoading);
             dataView.addEventListener(DataServiceLoadingEvent.LOADING_STOPPED, stopLoading);
             dataView.addEventListener(AnalysisChangedEvent.ANALYSIS_CHANGED, onAnalysisChanged);
@@ -319,10 +316,6 @@
             }
         }
 
-        private function onCredentials(event:CredentialsEvent):void {
-            credentialMap[String(event.dataSourceID)] = event.credentials;
-        }
-
         private function onMetadataReceipt(feedMetadata:FeedMetadata):void {
             if (User.getInstance() == null) {
                 currentState = "NotLoggedIn";
@@ -343,15 +336,7 @@
                         break;
                 }
             }
-            for each (var credential:CredentialRequirement in feedMetadata.credentials) {
-                if (CredentialsCache.getCache().getCredentials(credential.dataSourceID) == null) {
-                    var window:RuntimeCredentialsWindow = new RuntimeCredentialsWindow();
-                    window.requirement = credential;
-                    window.addEventListener(CredentialsEvent.CREDENTIALS_SAVED, onCredentials);
-                    PopUpManager.addPopUp(window, this, true);
-                    PopUpManager.centerPopUp(window);
-                }
-            }
+
             this.analysisValidators = [ analysisNameValidator ];
             this.feedMetadata = feedMetadata;
             this.admin = feedMetadata.dataSourceAdmin;
@@ -485,7 +470,32 @@
             } else {
                 analysisService.getUserCapabilitiesForFeed.send(dataService.dataFeedID);
             }
+            // need to identify credential requirements at this point...
+            
+            //dataService.reloadInitialContent(this, onMetadataReceipt);
+            detailService.getCredentialRequirements.send(dataService.dataFeedID);
+        }
+
+        private function onCredentials(event:CredentialsEvent):void {
             dataService.reloadInitialContent(this, onMetadataReceipt);
+        }
+
+        private function gotCredentialRequirements():void {
+            var requirements:ArrayCollection = detailService.getCredentialRequirements.lastResult as ArrayCollection;
+            var canDirectly:Boolean = true;
+            for each (var credential:CredentialRequirement in requirements) {
+                if (CredentialsCache.getCache().getCredentials(credential.dataSourceID) == null) {
+                    var window:RuntimeCredentialsWindow = new RuntimeCredentialsWindow();
+                    window.requirement = credential;
+                    window.addEventListener(CredentialsEvent.CREDENTIALS_SAVED, onCredentials);
+                    PopUpManager.addPopUp(window, this, true);
+                    PopUpManager.centerPopUp(window);
+                    canDirectly = false;
+                }
+            }
+            if (canDirectly) {
+                dataService.reloadInitialContent(this, onMetadataReceipt);
+            }
         }
 
         private function onRollup(event:HierarchyRollupEvent):void {
@@ -973,6 +983,7 @@
     </mx:RemoteObject>
     <mx:RemoteObject id="detailService" destination="data">
         <mx:method name="getAllData" result="gotDetailData()"/>
+        <mx:method name="getCredentialRequirements" result="gotCredentialRequirements()"/>
     </mx:RemoteObject>
     <mx:VBox height="100%" width="100%">
         <mx:HBox id="buttonBox">

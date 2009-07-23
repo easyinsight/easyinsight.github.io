@@ -51,6 +51,17 @@ public class DataService {
         }
     }
 
+    public List<CredentialRequirement> getCredentialRequirements(long feedID) {
+        SecurityUtil.authorizeFeedAccess(feedID);
+        try {
+            Feed feed = feedRegistry.getFeed(feedID);
+            return feed.getCredentialRequirement();
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        }
+    }
+
     public FeedMetadata getFeedMetadata(long feedID) {
         SecurityUtil.authorizeFeedAccess(feedID);
         try {

@@ -29,8 +29,6 @@ public class DataViewFactory extends VBox {
     private var _reportRenderer:IReportRenderer;
     private var _dataService:IReportDataService;
 
-    private var _credentialsMap:Object;
-
     private var _loadingDisplay:LoadingModuleDisplay;
 
     private var pendingRequest:Boolean = false;
@@ -38,10 +36,6 @@ public class DataViewFactory extends VBox {
     public function DataViewFactory() {
         this.percentHeight = 100;
         this.percentWidth = 100;
-    }
-
-    public function set credentialsMap(value:Object):void {
-        _credentialsMap = value;
     }
 
     public function set availableFields(val:ArrayCollection):void {

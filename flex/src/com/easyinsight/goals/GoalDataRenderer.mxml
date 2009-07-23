@@ -135,6 +135,9 @@ import mx.formatters.NumberFormatter;
                         currentValue = goalTreeNodeData.analysisMeasure.getFormatter().format(goalTreeNodeData.goalOutcome.outcomeValue);
                     }
                     currentValueExists = true;
+                } else {
+                    currentValueExists = false;
+                    currentValue = null;
                 }
                 iconExists = goalTreeNodeData.iconImage != null && goalTreeNodeData.iconImage != "";
                 treeName = goalTreeNodeData.name;
@@ -172,6 +175,10 @@ import mx.formatters.NumberFormatter;
                 }
                 
                 defineContextMenu(goalTreeNodeData);
+            } else {
+                currentValue = null;
+                currentValueExists = false;
+                trendImage = noDataIcon;
             }
         }
 
