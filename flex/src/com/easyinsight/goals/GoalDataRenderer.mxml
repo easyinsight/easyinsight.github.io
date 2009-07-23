@@ -103,7 +103,7 @@ import mx.formatters.NumberFormatter;
 
         private function onAnalyze(event:ModuleAnalyzeEvent):void {
             dispatchEvent(event);
-        }
+        }                                                                          
 
         private function onClose(event:CloseEvent):void {
             event.currentTarget.removeEventListener(CloseEvent.CLOSE, onClose);

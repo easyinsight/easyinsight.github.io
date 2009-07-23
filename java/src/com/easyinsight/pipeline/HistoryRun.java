@@ -21,7 +21,9 @@ public class HistoryRun {
                                                      List<CredentialFulfillment> credentials) {
         Calendar cal = Calendar.getInstance();
         Date endDate = cal.getTime();
-        cal.add(Calendar.DAY_OF_YEAR, -1);
+        cal.add(Calendar.DAY_OF_YEAR, -2);
+        cal.set(Calendar.HOUR_OF_DAY, 0);
+        cal.set(Calendar.MINUTE, 0);
         Date startDate = cal.getTime();
         return calculateHistoricalValues(dataSourceID, measure, filters, startDate, endDate, credentials);
     }
@@ -33,9 +35,14 @@ public class HistoryRun {
 
         List<FilterDefinition> otherFilters = new ArrayList<FilterDefinition>();
         RollingFilterDefinition rollingFilterDefinition = null;
+        Date realStartDate = startDate;
         for (FilterDefinition filterDefinition : filters) {
             if (filterDefinition instanceof RollingFilterDefinition) {
+
                 rollingFilterDefinition = (RollingFilterDefinition) filterDefinition;
+                InsightRequestMetadata insightRequestMetadata = new InsightRequestMetadata();
+                insightRequestMetadata.setNow(startDate);
+                realStartDate = new Date(MaterializedRollingFilterDefinition.findStartDate(rollingFilterDefinition.getInterval(), startDate));
                 if (rollingFilterDefinition.getInterval() == MaterializedRollingFilterDefinition.LAST_DAY) {
                     rollingFilterDefinition.setInterval(MaterializedRollingFilterDefinition.DAY);
                 }
@@ -51,7 +58,7 @@ public class HistoryRun {
             if (intrinsicFilter instanceof RollingFilterDefinition) {
                 FilterDateRangeDefinition dateRange = new FilterDateRangeDefinition();
                 dateRange.setField(intrinsicFilter.getField());
-                dateRange.setStartDate(startDate);
+                dateRange.setStartDate(realStartDate);
                 dateRange.setEndDate(endDate);
                 otherFilters.add(dateRange);
                 itemSet.add(intrinsicFilter.getField());

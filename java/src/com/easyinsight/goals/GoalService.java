@@ -247,7 +247,7 @@ public class GoalService {
             try {
                 conn.setAutoCommit(false);
                 GoalTree goalTree = goalStorage.retrieveGoalTree(goalTreeID, conn);
-                goalEvaluationStorage.forceEvaluate(goalTree, conn, credentialsList);
+                goalEvaluationStorage.forceEvaluate(goalTree, conn, credentialsList, includeSubTrees);
                 conn.commit();
             } catch (Exception e) {
                 LogClass.error(e);

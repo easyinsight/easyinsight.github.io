@@ -5,6 +5,7 @@ import com.easyinsight.core.NumericValue;
 import com.easyinsight.analysis.*;
 import com.easyinsight.datafeeds.CredentialFulfillment;
 import com.easyinsight.pipeline.HistoryRun;
+import com.easyinsight.logging.LogClass;
 
 import java.util.*;
 import java.util.Date;
@@ -76,12 +77,20 @@ public class GoalEvaluationStorage {
         }
     }
 
-    public void forceEvaluate(GoalTree goalTree, Connection conn, final List<CredentialFulfillment> credentials) throws SQLException {
+    private class PopulationGoalTreeVisitor extends GoalTreeVisitor {
+
         final List<GoalOutcome> goalOutcomes = new ArrayList<GoalOutcome>();
+        Connection conn;
+        List<CredentialFulfillment> credentials; 
+        boolean includeSubtrees;
 
-        GoalTreeVisitor goalTreeVisitor = new GoalTreeVisitor() {
+        private PopulationGoalTreeVisitor(Connection conn, List<CredentialFulfillment> credentials, boolean includeSubtrees) {
+            this.conn = conn;
+            this.credentials = credentials;
+            this.includeSubtrees = includeSubtrees;
+        }
 
-            protected void accept(GoalTreeNode goalTreeNode) {
+        protected void accept(GoalTreeNode goalTreeNode) {
                 if (goalTreeNode.getCoreFeedID() > 0) {
                     List<GoalValue> lastTwoValues = new HistoryRun().lastTwoValues(goalTreeNode.getCoreFeedID(), goalTreeNode.getAnalysisMeasure(),
                             goalTreeNode.getFilters(), credentials);
@@ -122,11 +131,34 @@ public class GoalEvaluationStorage {
                     }
                     GoalOutcome goalOutcome = new GoalOutcome(outcomeState, direction, oldValue, failedCondition, newValue, new Date(), goalTreeNode.getGoalTreeNodeID());
                     goalOutcomes.add(goalOutcome);
+
                 }
+            if (includeSubtrees && goalTreeNode.getSubTreeID() > 0) {
+                        GoalTree subTree;
+                        try {
+                            subTree = new GoalStorage().retrieveGoalTree(goalTreeNode.getSubTreeID(), conn);
+                        } catch (SQLException e) {
+                            LogClass.error(e);
+                            throw new RuntimeException(e);
+                        }
+                        if (subTree != null) {
+                            PopulationGoalTreeVisitor visitor = new PopulationGoalTreeVisitor(conn, credentials, includeSubtrees);
+                            visitor.visit(subTree.getRootNode());
+                            goalOutcomes.addAll(visitor.goalOutcomes);
+                        }
+
+                    }
             }
-        };
+    }
+
+    public void forceEvaluate(GoalTree goalTree, Connection conn, final List<CredentialFulfillment> credentials, boolean includeSubtrees) throws SQLException {
+        final List<GoalOutcome> goalOutcomes = new ArrayList<GoalOutcome>();
+
+        PopulationGoalTreeVisitor goalTreeVisitor = new PopulationGoalTreeVisitor(conn, credentials, includeSubtrees);
 
         goalTreeVisitor.visit(goalTree.getRootNode());
+
+        goalOutcomes.addAll(goalTreeVisitor.goalOutcomes);
 
         saveGoalEvaluations(goalOutcomes, conn);
     }
