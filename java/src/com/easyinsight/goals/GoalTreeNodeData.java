@@ -1,11 +1,9 @@
 package com.easyinsight.goals;
 
 import com.easyinsight.logging.LogClass;
-import com.easyinsight.datafeeds.CredentialFulfillment;
 
-import java.util.Date;
-import java.util.ArrayList;
 import java.sql.SQLException;
+import java.util.Date;
 
 /**
  * User: James Boe
@@ -14,7 +12,6 @@ import java.sql.SQLException;
  */
 public class GoalTreeNodeData extends GoalTreeNode {
     private GoalOutcome goalOutcome;
-    private GoalValue currentValue;
 
     public GoalOutcome getGoalOutcome() {
         return goalOutcome;
@@ -24,70 +21,40 @@ public class GoalTreeNodeData extends GoalTreeNode {
         this.goalOutcome = goalOutcome;
     }
 
-    public GoalValue getCurrentValue() {
-        return currentValue;
-    }
-
-    public void setCurrentValue(GoalValue currentValue) {
-        this.currentValue = currentValue;
-    }
-
     public void populateCurrentValue() {
         try {
-            this.currentValue = new GoalEvaluationStorage().getLatestGoalValue(this);
+            this.goalOutcome = new GoalEvaluationStorage().getLatestGoalValue(this);
         } catch (SQLException e) {
             LogClass.error(e);
-        }
-    }
-
-    public void determineOutcome(Date startDate, Date endDate, GoalEvaluationStorage goalEvaluationStorage) throws SQLException {
-        if (getCoreFeedID() > 0) {
-            if (isGoalDefined() || !getProblemConditions().isEmpty())
-                this.goalOutcome = goalEvaluationStorage.getEvaluations(this, startDate, endDate,
-                    getGoalValue(), isHighIsGood(), new ArrayList<CredentialFulfillment>());
         }
     }
 
     public GoalOutcome summarizeOutcomes() {
         if (getChildren() != null) {
             int worstOutcome = GoalOutcome.NO_DATA;
-            //List<GoalOutcome> childOutcomes = new ArrayList<GoalOutcome>();
-            double outcomeValue = 0;
+            boolean problemCondition = false;
             if (goalOutcome != null) {
-                //childOutcomes.add(goalOutcome);
                 worstOutcome = goalOutcome.getOutcomeState();
-                outcomeValue = goalOutcome.getOutcomeValue();
+                problemCondition = goalOutcome.isProblemEvaluated();
             }
+
             for (GoalTreeNode child : getChildren()) {
                 GoalTreeNodeData dataChild = (GoalTreeNodeData) child;
                 GoalOutcome childOutcome = dataChild.summarizeOutcomes();
+                problemCondition = problemCondition || childOutcome.isProblemEvaluated();
                 if (childOutcome.getOutcomeState() > worstOutcome) {
                     worstOutcome = childOutcome.getOutcomeState();
-                    //childOutcomes.add(childOutcome);
                 }
             }
-            goalOutcome = new GoalOutcome(worstOutcome, outcomeValue);
-            /*if (childOutcomes.size() > 0) {
-                double sumValue = 0;
-                for (GoalOutcome goalOutcome : childOutcomes) {
-                    sumValue += goalOutcome.getOutcomeValue();
-                }
-                double resultAverage = sumValue / childOutcomes.size();
-                int resultOutcomeState;
-                *//*if (resultAverage >= 1) {
-                    resultOutcomeState = GoalOutcome.EXCEEDING_GOAL;
-                } else*//* if (resultAverage > .2) {
-                    resultOutcomeState = GoalOutcome.POSITIVE;
-                } else if (resultAverage < -.2) {
-                    resultOutcomeState = GoalOutcome.NEGATIVE;
-                } else {
-                    resultOutcomeState = GoalOutcome.NEUTRAL;
-                }
-                goalOutcome = new GoalOutcome(resultOutcomeState, resultAverage);
-            }*/
+            if (goalOutcome == null) {
+                goalOutcome = new GoalOutcome(worstOutcome, GoalOutcome.NO_DIRECTION, null, problemCondition, null, new Date(), getGoalTreeNodeID());
+            } else {
+                goalOutcome.setProblemEvaluated(problemCondition);
+                goalOutcome.setOutcomeState(worstOutcome);
+            }
         }
         if (goalOutcome == null) {
-            goalOutcome = new GoalOutcome(GoalOutcome.NO_DATA, 0);            
+            goalOutcome = new GoalOutcome(GoalOutcome.NO_DATA, GoalOutcome.NO_DIRECTION, null, false, null, new Date(), getGoalTreeNodeID());
         }
         return goalOutcome;
     }

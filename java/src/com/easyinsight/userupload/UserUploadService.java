@@ -466,7 +466,7 @@ public class UserUploadService implements IUserUploadService {
                 IServerDataSourceDefinition dataSource = (IServerDataSourceDefinition) feedStorage.getFeedDefinitionData(feedID);
                 credentialsResponse = dataSource.refreshData(credentials, SecurityUtil.getAccountID(), new Date(), null);
                 // TODO: refactor into event model
-                new GoalStorage().updateGoals(feedID);
+                //new GoalStorage().updateGoals(feedID);
             } else {
                 credentialsResponse = new CredentialsResponse(true);
                 ServerRefreshScheduledTask task = new ServerRefreshScheduledTask();

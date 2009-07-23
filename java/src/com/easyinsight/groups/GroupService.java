@@ -340,7 +340,7 @@ public class GroupService {
             Date endDate = cal.getTime();
             cal.add(Calendar.DAY_OF_YEAR, -7);
             Date startDate = cal.getTime();
-            return new GoalStorage().getGoalsForGroup(groupID, startDate, endDate);
+            return new GoalStorage().getGoalsForGroup(groupID);
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);

@@ -52,7 +52,7 @@ SET character_set_client = @saved_cs_client;
 
 DROP TABLE IF EXISTS `account_activation`;
 SET @saved_cs_client     = @@character_set_client;
-SET character_set_client = utf8;
+SET character_set_client = utf8;                                                                               
 CREATE TABLE `account_activation` (
   `account_activation_id` bigint(20) NOT NULL AUTO_INCREMENT,
   `account_id` bigint(11) NOT NULL,

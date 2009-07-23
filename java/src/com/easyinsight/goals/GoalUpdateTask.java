@@ -15,7 +15,7 @@ public class GoalUpdateTask extends TimerTask {
 
     public void run() {
         try {
-            goalEvaluationStorage.evaluateGoalTrees();
+            //goalEvaluationStorage.evaluateGoalTrees();
         } catch (Exception e) {
             LogClass.error(e);
         }

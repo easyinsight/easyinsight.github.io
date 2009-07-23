@@ -37,7 +37,7 @@ public class GoalService {
         } catch (SecurityException e) {
             return false;
         }
-    }
+    }                                                                
 
     public GoalSaveInfo createGoalTree(GoalTree goalTree) {
         SecurityUtil.authorizeAccountTier(Account.GROUP);
@@ -267,15 +267,9 @@ public class GoalService {
     public GoalTree createDataTree(long goalTreeID, Date startDate, Date endDate) {
         SecurityUtil.authorizeGoalTree(goalTreeID, Roles.SUBSCRIBER);
         try {
-            if (endDate == null) {
-                Calendar cal = Calendar.getInstance();
-                endDate = cal.getTime();
-                cal.add(Calendar.DAY_OF_YEAR, -7);
-                startDate = cal.getTime();
-            }
             GoalTree goalTree = getGoalTree(goalTreeID);
             goalStorage.decorateDataTree(goalTree);
-            GoalTreeNodeData data = createDataTreeForDates(goalTree, startDate, endDate);
+            GoalTreeNodeData data = createDataTreeForDates(goalTree);
             goalTree.setRootNode(data);
             return goalTree;
         } catch (Exception e) {
@@ -348,7 +342,7 @@ public class GoalService {
         return new ArrayList<CredentialRequirement>(credentialMap.values());
     }
 
-    private GoalTreeNodeData createDataTreeForDates(GoalTree goalTree, final Date startDate, final Date endDate) {
+    private GoalTreeNodeData createDataTreeForDates(GoalTree goalTree) {
         GoalTreeNodeData dataNode = new GoalTreeNodeDataBuilder().build(goalTree.getRootNode());
         GoalTreeVisitor visitor = new GoalTreeVisitor() {
 
@@ -358,17 +352,14 @@ public class GoalService {
                     if (data.getSubTreeID() > 0) {
                         GoalStorage goalStorage = new GoalStorage();
                         GoalTree subTree = goalStorage.retrieveGoalTree(data.getSubTreeID());
-                        GoalTreeNodeData subData = createDataTreeForDates(subTree, startDate, endDate);
+                        GoalTreeNodeData subData = createDataTreeForDates(subTree);
                         if (data.getAnalysisMeasure() == null) {
-                            data.setCurrentValue(subData.getCurrentValue());
                             data.setGoalOutcome(subData.getGoalOutcome());
                         } else {
                             data.populateCurrentValue();
-                            data.determineOutcome(startDate, endDate, goalEvaluationStorage);
                         }
                     } else {
                         data.populateCurrentValue();
-                        data.determineOutcome(startDate, endDate, goalEvaluationStorage);
                     }
                 } catch (Exception e) {
                     LogClass.error(e);
@@ -434,7 +425,7 @@ public class GoalService {
             Date endDate = cal.getTime();
             cal.add(Calendar.DAY_OF_YEAR, -7);
             Date startDate = cal.getTime();
-            return goalStorage.getGoalsForUser(userID, startDate, endDate);
+            return goalStorage.getGoalsForUser(userID);
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);

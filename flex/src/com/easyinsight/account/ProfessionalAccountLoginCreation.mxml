@@ -8,6 +8,8 @@
 	</mx:Metadata>
 	<mx:Script>
 		<![CDATA[
+        import com.easyinsight.util.ProgressAlert;
+
         import mx.managers.PopUpManager;
         import mx.validators.Validator;
 
@@ -59,7 +61,7 @@
                 failureMessageLabel.text = "Your passwords do not match.";
             } else if (!tosCheckbox.selected) {
                 failureMessageLabel.text = "You must accept the terms of service.";
-            } else {
+            } else {                                                                                         
                 failureMessageLabel.text = "";
                 user = new UserTransferObject();
                 user.userName = userName.text;
@@ -69,6 +71,7 @@
                 user.insightCreator = true;
                 user.dataSourceCreator = true;
                 _account.name = accountName.text;
+                ProgressAlert.alert(this, "Validating the account...", null, creationService.doesUserExist);
                 creationService.doesUserExist.send(userName.text, email.text);
             }
         }

@@ -128,41 +128,39 @@ import mx.formatters.NumberFormatter;
             goalTreeNodeData = orgChartItem.data as GoalTreeNodeData;
             if (goalTreeNodeData != null) {
                 goalIcon = PrefixManager.prefix + "/app/assets/icons/32x32/" + goalTreeNodeData.iconImage;
-                if (goalTreeNodeData.currentValue != null) {
+                if (goalTreeNodeData.goalOutcome.valueDefined) {
                     if (goalTreeNodeData.analysisMeasure == null) {
-                        currentValue = numberFormatter.format(goalTreeNodeData.currentValue.value);
+                        currentValue = numberFormatter.format(goalTreeNodeData.goalOutcome.outcomeValue);
                     } else {
-                        currentValue = goalTreeNodeData.analysisMeasure.getFormatter().format(goalTreeNodeData.currentValue.value);                        
+                        currentValue = goalTreeNodeData.analysisMeasure.getFormatter().format(goalTreeNodeData.goalOutcome.outcomeValue);
                     }
                     currentValueExists = true;
                 }
                 iconExists = goalTreeNodeData.iconImage != null && goalTreeNodeData.iconImage != "";
                 treeName = goalTreeNodeData.name;
                 subTreePresent = goalTreeNodeData.subTreeID > 0;
-                if (goalTreeNodeData.coreFeedID == 0) {
-                    switch (goalTreeNodeData.goalOutcome.outcomeState) {
-                        case GoalOutcome.EXCEEDING_GOAL:
-                        case GoalOutcome.POSITIVE:
-                            trendImage = positiveIcon;
-                            break;
-                        case GoalOutcome.NEGATIVE:
-                            trendImage = negativeIcon;
-                            break;
-                        case GoalOutcome.NEUTRAL:
-                            trendImage = neutralIcon;
-                            break;
-                        case GoalOutcome.NO_DATA:
-                            trendImage = noDataIcon;
-                            break;
-                    }
+                if (goalTreeNodeData.goalOutcome.problemEvaluated) {
+                    trendImage = negativeIcon;
                 } else {
                     switch (goalTreeNodeData.goalOutcome.outcomeState) {
                         case GoalOutcome.EXCEEDING_GOAL:
                         case GoalOutcome.POSITIVE:
-                            trendImage = goalTreeNodeData.highIsGood ? positiveUpIcon : positiveDownIcon;
+                            if (goalTreeNodeData.goalOutcome.direction == GoalOutcome.UP_DIRECTION) {
+                                trendImage = positiveUpIcon;
+                            } else if (goalTreeNodeData.goalOutcome.direction == GoalOutcome.DOWN_DIRECTION) {
+                                trendImage = positiveDownIcon;
+                            } else {
+                                trendImage = positiveIcon;
+                            }
                             break;
                         case GoalOutcome.NEGATIVE:
-                            trendImage = goalTreeNodeData.highIsGood ? negativeDownIcon : negativeUpIcon;
+                            if (goalTreeNodeData.goalOutcome.direction == GoalOutcome.UP_DIRECTION) {
+                                trendImage = negativeDownIcon;
+                            } else if (goalTreeNodeData.goalOutcome.direction == GoalOutcome.DOWN_DIRECTION) {
+                                trendImage = negativeUpIcon;
+                            } else {
+                                trendImage = negativeIcon;
+                            }
                             break;
                         case GoalOutcome.NEUTRAL:
                             trendImage = neutralIcon;
@@ -172,11 +170,7 @@ import mx.formatters.NumberFormatter;
                             break;
                     }
                 }
-                if (goalTreeNodeData.goalOutcome is ConcreteGoalOutcome) {
-                    var concreteGoalOutcome:ConcreteGoalOutcome = goalTreeNodeData as ConcreteGoalOutcome;
-                    trendTooltip = concreteGoalOutcome.startValue + " to " + concreteGoalOutcome.endValue + " (" +
-                                   concreteGoalOutcome.percentChange + "%)";
-                }
+                
                 defineContextMenu(goalTreeNodeData);
             }
         }

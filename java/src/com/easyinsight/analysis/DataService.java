@@ -196,7 +196,7 @@ public class DataService {
             if (customFilters != null) {
                 analysisDefinition.setFilterDefinitions(customFilters);
             }
-            long startTime = System.currentTimeMillis();
+            long startTime = System.currentTimeMillis();      
             EmbeddedDataResults results;
             /*Set<Long> ids = validate(analysisDefinition, feed);
             if (ids.size() > 0) {

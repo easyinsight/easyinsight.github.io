@@ -16,6 +16,16 @@ import java.util.*;
  * Time: 9:48:00 PM
  */
 public class HistoryRun {
+
+    public List<GoalValue> lastTwoValues(long dataSourceID, AnalysisMeasure measure, List<FilterDefinition> filters,
+                                                     List<CredentialFulfillment> credentials) {
+        Calendar cal = Calendar.getInstance();
+        Date endDate = cal.getTime();
+        cal.add(Calendar.DAY_OF_YEAR, -1);
+        Date startDate = cal.getTime();
+        return calculateHistoricalValues(dataSourceID, measure, filters, startDate, endDate, credentials);
+    }
+
     public List<GoalValue> calculateHistoricalValues(long dataSourceID, AnalysisMeasure measure, List<FilterDefinition> filters, Date startDate, Date endDate,
                                                      List<CredentialFulfillment> credentials) {
         List<GoalValue> goalValues = new ArrayList<GoalValue>();

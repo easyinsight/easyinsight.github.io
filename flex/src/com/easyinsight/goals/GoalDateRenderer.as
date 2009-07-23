@@ -34,9 +34,9 @@ public class GoalDateRenderer extends HBox{
 
     override public function set data(val:Object):void {
         this._goalTreeNodeData = val as GoalTreeNodeData;
-        if (this._goalTreeNodeData.currentValue != null) {
+        if (this._goalTreeNodeData.goalOutcome != null) {
             var dateFormatter:DateFormatter = new DateFormatter();
-            dateLabel.text = dateFormatter.format(_goalTreeNodeData.currentValue.date);
+            dateLabel.text = dateFormatter.format(_goalTreeNodeData.goalOutcome.evaluationDate);
         }
     }
 

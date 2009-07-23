@@ -7,7 +7,6 @@ import com.easyinsight.analysis.*;
 import com.easyinsight.groups.GroupDescriptor;
 import com.easyinsight.email.UserStub;
 import com.easyinsight.datafeeds.FeedConsumer;
-import com.easyinsight.datafeeds.CredentialFulfillment;
 import com.easyinsight.security.Roles;
 import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.core.InsightDescriptor;
@@ -25,8 +24,6 @@ import org.jetbrains.annotations.Nullable;
  * Time: 3:07:00 PM
  */
 public class GoalStorage {
-
-    private GoalEvaluationStorage goalEvaluationStorage = new GoalEvaluationStorage();
 
     public void deleteMilestone(long milestoneID) {
         Connection conn = Database.instance().getConnection();
@@ -870,7 +867,7 @@ public class GoalStorage {
         }
     }
 
-    public List<GoalTreeNodeData> getGoalsForUser(long userID, final Date startDate, final Date endDate) {
+    public List<GoalTreeNodeData> getGoalsForUser(long userID) {
         List<GoalTreeNodeData> nodes = new ArrayList<GoalTreeNodeData>();
         Connection conn = Database.instance().getConnection();
         try {
@@ -879,7 +876,7 @@ public class GoalStorage {
             ResultSet rs = stmt.executeQuery();
             while (rs.next()) {
                 long goalTreeNodeID = rs.getLong(1);
-                populateGoal(startDate, endDate, nodes, conn, goalTreeNodeID);
+                populateGoal(nodes, conn, goalTreeNodeID);
             }
             stmt.close();
         } catch (SQLException e) {
@@ -890,7 +887,7 @@ public class GoalStorage {
         return nodes;
     }
 
-    private void populateGoal(final Date startDate, final Date endDate, List<GoalTreeNodeData> nodes, Connection conn, long goalTreeNodeID) throws SQLException {
+    private void populateGoal(List<GoalTreeNodeData> nodes, Connection conn, long goalTreeNodeID) throws SQLException {
         GoalTreeNode goalTreeNode = retrieveNode(goalTreeNodeID, conn);
         GoalTreeNodeData dataNode = new GoalTreeNodeDataBuilder().build(goalTreeNode);
         nodes.add(dataNode);
@@ -899,18 +896,13 @@ public class GoalStorage {
             protected void accept(GoalTreeNode goalTreeNode) {
                 GoalTreeNodeData data = (GoalTreeNodeData) goalTreeNode;
                 data.populateCurrentValue();
-                try {
-                    data.determineOutcome(startDate, endDate, goalEvaluationStorage);
-                } catch (SQLException e) {
-                    LogClass.error(e);
-                }
             }
         };
         visitor.visit(dataNode);
         dataNode.summarizeOutcomes();
     }
 
-    public List<GoalTreeNodeData> getGoalsForGroup(long groupID, final Date startDate, final Date endDate) {
+    public List<GoalTreeNodeData> getGoalsForGroup(long groupID) {
         List<GoalTreeNodeData> nodes = new ArrayList<GoalTreeNodeData>();
         Connection conn = Database.instance().getConnection();
         try {
@@ -919,7 +911,7 @@ public class GoalStorage {
             ResultSet rs = queryStmt.executeQuery();
             while (rs.next()) {
                 long goalTreeNodeID = rs.getLong(1);
-                populateGoal(startDate, endDate, nodes, conn, goalTreeNodeID);
+                populateGoal(nodes, conn, goalTreeNodeID);
             }
             queryStmt.close();
         } catch (SQLException e) {
@@ -954,7 +946,7 @@ public class GoalStorage {
 
     }
 
-    public void updateGoals(long dataSourceID) {
+    /*public void updateGoals(long dataSourceID) {
         Collection<GoalTreeNode> neededNodes = new ArrayList<GoalTreeNode>();
         Connection conn = Database.instance().getConnection();
         try {
@@ -989,5 +981,5 @@ public class GoalStorage {
         } finally {
             Database.closeConnection(conn);
         }
-    }
+    }*/
 }

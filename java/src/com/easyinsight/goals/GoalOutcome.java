@@ -1,5 +1,7 @@
 package com.easyinsight.goals;
 
+import java.util.Date;
+
 /**
  * User: James Boe
  * Date: Jan 2, 2009
@@ -14,18 +16,49 @@ public class GoalOutcome {
     public static final int NEUTRAL = 3;
     public static final int NEGATIVE = 4;
 
+    public static final int DOWN_DIRECTION = 1;
+    public static final int NO_DIRECTION = 2;
+    public static final int UP_DIRECTION = 3;
+
     private int outcomeState;
-    private double outcomeValue;
+    private int direction;
+    private Double previousValue;
+    private boolean problemEvaluated;
+    private Double outcomeValue;
+    private Date evaluationDate;
+    private long goalTreeNodeID;
+    private boolean valueDefined;
 
     public GoalOutcome() {
     }
 
-    public double getOutcomeValue() {
-        return outcomeValue;
+    public long getGoalTreeNodeID() {
+        return goalTreeNodeID;
     }
 
-    public void setOutcomeValue(double outcomeValue) {
+    public void setGoalTreeNodeID(long goalTreeNodeID) {
+        this.goalTreeNodeID = goalTreeNodeID;
+    }
+
+    public GoalOutcome(int outcomeState, int direction, Double previousValue, boolean problemEvaluated, Double outcomeValue, Date evaluationDate,
+                       long goalTreeNodeID) {
+        this.outcomeState = outcomeState;
+        this.direction = direction;
+        this.previousValue = previousValue;
+        this.problemEvaluated = problemEvaluated;
         this.outcomeValue = outcomeValue;
+        valueDefined = this.outcomeValue != null;
+        this.evaluationDate = evaluationDate;
+        this.goalTreeNodeID = goalTreeNodeID;
+
+    }
+
+    public boolean isValueDefined() {
+        return valueDefined;
+    }
+
+    public void setValueDefined(boolean valueDefined) {
+        this.valueDefined = valueDefined;
     }
 
     public int getOutcomeState() {
@@ -36,8 +69,43 @@ public class GoalOutcome {
         this.outcomeState = outcomeState;
     }
 
-    public GoalOutcome(int outcomeState, double outcomeValue) {
-        this.outcomeState = outcomeState;
+    public int getDirection() {
+        return direction;
+    }
+
+    public void setDirection(int direction) {
+        this.direction = direction;
+    }
+
+    public Double getPreviousValue() {
+        return previousValue;
+    }
+
+    public void setPreviousValue(Double previousValue) {
+        this.previousValue = previousValue;
+    }
+
+    public boolean isProblemEvaluated() {
+        return problemEvaluated;
+    }
+
+    public void setProblemEvaluated(boolean problemEvaluated) {
+        this.problemEvaluated = problemEvaluated;
+    }
+
+    public Double getOutcomeValue() {
+        return outcomeValue;
+    }
+
+    public void setOutcomeValue(Double outcomeValue) {
         this.outcomeValue = outcomeValue;
+    }
+
+    public Date getEvaluationDate() {
+        return evaluationDate;
+    }
+
+    public void setEvaluationDate(Date evaluationDate) {
+        this.evaluationDate = evaluationDate;
     }
 }

@@ -65,44 +65,39 @@ public class GoalControls extends HBox{
 
     override public function set data(val:Object):void {
         this._goalTreeNodeData = val as GoalTreeNodeData;
-        if (_goalTreeNodeData.coreFeedID == 0) {
-            switch (_goalTreeNodeData.goalOutcome.outcomeState) {
-                case GoalOutcome.EXCEEDING_GOAL:
-                case GoalOutcome.POSITIVE:
-                    image.source = positiveIcon;
-                    break;
-                case GoalOutcome.NEGATIVE:
-                    image.source = negativeIcon;
-                    break;
-                case GoalOutcome.NEUTRAL:
-                    image.source = neutralIcon;
-                    break;
-                case GoalOutcome.NO_DATA:
-                    image.source = noDataIcon;
-                    break;
-            }
+        var trendImage:Class;
+        if (_goalTreeNodeData.goalOutcome.problemEvaluated) {
+            trendImage = negativeIcon;
         } else {
             switch (_goalTreeNodeData.goalOutcome.outcomeState) {
                 case GoalOutcome.EXCEEDING_GOAL:
                 case GoalOutcome.POSITIVE:
-                    image.source = _goalTreeNodeData.highIsGood ? positiveUpIcon : positiveDownIcon;
+                    if (_goalTreeNodeData.goalOutcome.direction == GoalOutcome.UP_DIRECTION) {
+                        trendImage = positiveUpIcon;
+                    } else if (_goalTreeNodeData.goalOutcome.direction == GoalOutcome.DOWN_DIRECTION) {
+                        trendImage = positiveDownIcon;
+                    } else {
+                        trendImage = positiveIcon;
+                    }
                     break;
                 case GoalOutcome.NEGATIVE:
-                    image.source = _goalTreeNodeData.highIsGood ? negativeDownIcon : negativeUpIcon;
+                    if (_goalTreeNodeData.goalOutcome.direction == GoalOutcome.UP_DIRECTION) {
+                        trendImage = negativeDownIcon;
+                    } else if (_goalTreeNodeData.goalOutcome.direction == GoalOutcome.DOWN_DIRECTION) {
+                        trendImage = negativeUpIcon;
+                    } else {
+                        trendImage = negativeIcon;
+                    }
                     break;
                 case GoalOutcome.NEUTRAL:
-                    image.source = neutralIcon;
+                    trendImage = neutralIcon;
                     break;
                 case GoalOutcome.NO_DATA:
-                    image.source = noDataIcon;
+                    trendImage = noDataIcon;
                     break;
             }
         }
-        if (_goalTreeNodeData.goalOutcome is ConcreteGoalOutcome) {
-            var concreteGoalOutcome:ConcreteGoalOutcome = _goalTreeNodeData as ConcreteGoalOutcome;
-            image.toolTip = concreteGoalOutcome.startValue + " to " + concreteGoalOutcome.endValue + " (" +
-                           concreteGoalOutcome.percentChange + "%)";
-        }
+        image.source = trendImage;
     }
 
     override public function get data():Object {

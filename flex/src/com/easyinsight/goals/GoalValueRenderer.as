@@ -36,14 +36,14 @@ public class GoalValueRenderer extends HBox{
 
     override public function set data(val:Object):void {
         this._goalTreeNodeData = val as GoalTreeNodeData;
-        if (this._goalTreeNodeData.currentValue != null) {
+        if (this._goalTreeNodeData.goalOutcome != null) {
             var formatter:Formatter;
             if (_goalTreeNodeData.analysisMeasure == null) {
                 formatter = new NumberFormatter();
             } else {
                 formatter = _goalTreeNodeData.analysisMeasure.getFormatter();
             }
-            valueLabel.text = formatter.format(_goalTreeNodeData.currentValue.value);
+            valueLabel.text = formatter.format(_goalTreeNodeData.goalOutcome.outcomeValue);
         }
     }
 
