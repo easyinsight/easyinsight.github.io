@@ -38,6 +38,13 @@
             _reportName = value;
         }
 
+        [Bindable]
+        private var _prefix:String;
+
+        public function set prefix(value:String):void {
+            _prefix = value;
+        }
+
         private function returnToList():void {
             dispatchEvent(new ReturnToListEvent());
         }
@@ -50,6 +57,6 @@
     <mx:Consumer id="defConsumer" destination="dataUpdates" message="onMessage(event)"/>
     <mx:VBox id="coreVBox" height="100%" width="100%">
         <dashboard:DataViewPanel id="panel" analysisID="{_analysisID}" dataSourceID="{_dataSourceID}"
-                reportType="{_reportType}" reportName="{_reportName}"/>
+                reportType="{_reportType}" reportName="{_reportName}" prefix="{_prefix}"/>
     </mx:VBox>
 </mx:VBox>

@@ -17,6 +17,8 @@
 
         private var _reportHeight:uint;
 
+        private var _reportName:String;
+
 
         public function set reportWidth(value:uint):void {
             _reportWidth = value;
@@ -43,8 +45,14 @@
             updateURL();
         }
 
+        public function set reportName(value:String):void {
+            this._reportName = value;
+            updateURL();
+        }
+
         private function updateURL():void {
-            url = "<object width=\"" + _reportWidth + "\" height=\"" + _reportHeight + "\"><param name=\"movie\" value=\"EmbeddedInsight.swf\" /><param name=\"quality\" value=\"high\" /><param name=\"bgcolor\" value=\"#869ca7\" /><param name=\"allowScriptAccess\" value=\"always\" /><param name=\"flashvars\" value=\"analysisID=" + _analysisID + ",dataSourceID=" + _dataSourceID + ",reportType=" + _reportType + "\"/><embed src=\"https://www.easy-insight.com/app/easyui-debug/EmbeddedInsight.swf\" quality=\"high\" bgcolor=\"#869ca7\" width=\"" + _reportWidth + "\" height=\"" + _reportHeight + "\" name=\"EmbeddedInsight\" align=\"middle\" play=\"true\" loop=\"false\" quality=\"high\" flashvars=\"analysisID=" + _analysisID + ",dataSourceID=" + _dataSourceID + ",reportType=" + _reportType + "\" allowScriptAccess=\"always\" type=\"application/x-shockwave-flash\" pluginspage=\"http://www.adobe.com/go/getflashplayer\"></embed></object>";
+            url = "<object width=\"" + _reportWidth + "\" height=\"" + _reportHeight + "\" codebase=\"http://fpdownload.macromedia.com/get/flashplayer/current/swflash.cab\"><param name=\"movie\" value=\"EmbeddedInsight.swf\" /><param name=\"quality\" value=\"high\" /><param name=\"bgcolor\" value=\"#869ca7\" /><param name=\"allowScriptAccess\" value=\"always\" /> <param name=\"flashvars\" value=\"analysisID=" + _analysisID + "&reportType=" + _reportType + "&dataSourceID=" + _dataSourceID + "&reportName=" + escape(_reportName) +  "\"/> <embed src=\"https://www.easy-insight.com/app/easyui-debug/EmbeddedInsight.swf\" quality=\"high\" bgcolor=\"##869ca7\" width=\"" + _reportWidth + "\" height=\"" + _reportHeight+ "\" name=\"PrimaryWorkspace\" align=\"middle\" play=\"true\" loop=\"false\" quality=\"high\" allowScriptAccess=\"always\" flashvars=\"analysisID=" + _analysisID + "&reportType=" + _reportType + "&dataSourceID=" + _dataSourceID + "&reportName=" + escape(_reportName) +  "\" type=\"application/x-shockwave-flash\" pluginspage=\"http://www.adobe.com/go/getflashplayer\"></embed></object>";
+//            url = "<object width=\"" + _reportWidth + "\" height=\"" + _reportHeight + "\"><param name=\"movie\" value=\"EmbeddedInsight.swf\" /><param name=\"quality\" value=\"high\" /><param name=\"bgcolor\" value=\"#869ca7\" /><param name=\"allowScriptAccess\" value=\"always\" /><param name=\"flashvars\" value=\"analysisID=" + _analysisID + ",dataSourceID=" + _dataSourceID + ",reportType=" + _reportType + "\"/><embed src=\"https://www.easy-insight.com/app/easyui-debug/EmbeddedInsight.swf\" quality=\"high\" bgcolor=\"#869ca7\" width=\"" + _reportWidth + "\" height=\"" + _reportHeight + "\" name=\"EmbeddedInsight\" align=\"middle\" play=\"true\" loop=\"false\" quality=\"high\" flashvars=\"analysisID=" + _analysisID + ",dataSourceID=" + _dataSourceID + ",reportType=" + _reportType + "\" allowScriptAccess=\"always\" type=\"application/x-shockwave-flash\" pluginspage=\"http://www.adobe.com/go/getflashplayer\"></embed></object>";
         }
 
         private function copyToClipboard():void {

@@ -11,6 +11,7 @@
         import com.easyinsight.analysis.EmbeddedViewFactory;
         import com.easyinsight.analysis.IEmbeddedReportController;
 
+        import mx.controls.Alert;
         import mx.controls.Label;
         import mx.rpc.events.FaultEvent;
 
@@ -34,42 +35,53 @@
 
         public function set dataSourceID(val:int):void {
             _dataSourceID = val;
+            invalidateProperties();
         }
 
         public function set prefix(val:String):void {
             _prefix = val;
+            invalidateProperties();
         }
 
         public function set reportType(val:int):void {
             _reportType = val;
+            invalidateProperties();
         }
 
         public function set reportName(val:String):void {
             _reportName = val;
+            invalidateProperties();
         }
 
         public function set titleClickFunction(functionName:Function):void {
             _titleFunction = functionName;
+            invalidateProperties();
         }
 
         public function set titleFunctionCaller(val:Object):void {
             _titleFunctionCaller = val;
+            invalidateProperties();
         }
 
         public function set analysisID(analysisID:int):void {
             this._analysisID = analysisID;
+            invalidateProperties();
         }
 
-        override protected function createChildren():void {
-            super.createChildren();
-            var controllerClass:Class = EmbeddedControllerLookup.controllerForType(_reportType);
-            var controller:IEmbeddedReportController = new controllerClass();
-            var dataViewFactory:EmbeddedViewFactory = controller.createEmbeddedView();
-            dataViewFactory.prefix = _prefix;
-            dataViewFactory.reportID = _analysisID;
-            dataViewFactory.dataSourceID = _dataSourceID;
-            coreVBox.addChild(dataViewFactory);
-            dataViewFactory.retrieveData();
+        override protected function commitProperties():void {
+            super.commitProperties();
+            if(_reportType != 0) {
+                if(dataViewFactory != null)
+                    coreVBox.removeChild(dataViewFactory);
+                var controllerClass:Class = EmbeddedControllerLookup.controllerForType(_reportType);
+                var controller:IEmbeddedReportController = new controllerClass();
+                dataViewFactory = controller.createEmbeddedView();
+                dataViewFactory.prefix = _prefix;
+                dataViewFactory.reportID = _analysisID;
+                dataViewFactory.dataSourceID = _dataSourceID;
+                coreVBox.addChild(dataViewFactory);
+                dataViewFactory.retrieveData();
+            }
         }
 
         private function titleClick():void {

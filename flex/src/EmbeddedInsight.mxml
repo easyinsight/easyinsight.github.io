@@ -4,8 +4,21 @@
 	            bottom="0" paddingBottom="0" backgroundColor="#FFFFFF">
 	<mx:Script>
 		<![CDATA[
-            import com.easyinsight.analysis.DefaultMenuFactory;
+        import com.easyinsight.analysis.AnalysisDateDimension;
+        import com.easyinsight.analysis.AnalysisDimension;
+        import com.easyinsight.analysis.AnalysisHierarchyItem;
+        import com.easyinsight.analysis.AnalysisList;
+        import com.easyinsight.analysis.AnalysisMeasure;
+        import com.easyinsight.analysis.AnalysisRangeDimension;
+        import com.easyinsight.analysis.ComplexAnalysisMeasure;
+        import com.easyinsight.analysis.DefaultMenuFactory;
             import com.easyinsight.analysis.PopupMenuFactory;
+
+        import com.easyinsight.analysis.TemporalAnalysisMeasure;
+        import com.easyinsight.framework.CredentialsCache;
+            import com.easyinsight.framework.WebCredentialsCache;
+
+            import mx.controls.Alert;
 
             [Bindable]
             private var analysisID:int;
@@ -18,18 +31,32 @@
 
             [Bindable]
             private var reportName:String;
-			
+
 			private function handleFlashVars():void {
+                CredentialsCache.initialize(new WebCredentialsCache());
                 PopupMenuFactory.menuFactory = new DefaultMenuFactory();
 				this.analysisID = int(Application.application.parameters.analysisID);
                 this.reportType = int(Application.application.parameters.reportType);
                 this.dataSourceID = int(Application.application.parameters.dataSourceID);
                 this.reportName = String(Application.application.parameters.reportName);
+
 			}
+
+            private function dependancies():void {
+                var analysisDate:AnalysisDateDimension;
+                var dim:AnalysisDimension;
+                var measure:AnalysisMeasure;
+                var temporal:TemporalAnalysisMeasure;
+                var complex:ComplexAnalysisMeasure;
+                var range:AnalysisRangeDimension;
+                var list:AnalysisList;
+                var hierarchy:AnalysisHierarchyItem;
+            }
+            
 		]]>
 	</mx:Script>
 	<mx:VBox width="100%" height="100%">		
 		<dashboard:EmbeddedViewPanel id="panel" analysisID="{analysisID}" reportName="{reportName}"
-                dataSourceID="{dataSourceID}" reportType="{reportType}"/>
+                dataSourceID="{dataSourceID}" reportType="{reportType}" prefix="https://www.easy-insight.com/"/>
 	</mx:VBox>
 </mx:Application>

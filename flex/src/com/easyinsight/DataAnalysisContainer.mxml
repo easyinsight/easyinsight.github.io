@@ -925,6 +925,11 @@
             if (analysisDefinition.analysisID > 0) {
                 var embedWindow:EmbedInsightWindow = EmbedInsightWindow(PopUpManager.createPopUp(this, EmbedInsightWindow));
                 embedWindow.analysisID = analysisDefinition.analysisID;
+                embedWindow.reportType = analysisDefinition.reportType;
+                embedWindow.dataSourceID = analysisDefinition.dataFeedID;
+                embedWindow.reportName = analysisDefinition.name;
+                embedWindow.reportHeight = 346;
+                embedWindow.reportWidth = 450;
                 PopUpManager.centerPopUp(embedWindow);
             } else {
                 Alert.show("You need to save the report first.");
