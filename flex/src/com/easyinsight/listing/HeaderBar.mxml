@@ -7,12 +7,14 @@
         [Event(name="triggerAnalyze", type="com.easyinsight.listing.TriggerAnalyzeEvent")]
         [Event(name="listingChange", type="com.easyinsight.listing.ListingChangeEvent")]
         [Event(name="launchQuickSearch", type="com.easyinsight.listing.LaunchQuickSearchEvent")]
+        [Event(name="reportBug", type="com.easyinsight.listing.ReportBugEvent")]
     </mx:Metadata>
     <mx:Script>
 		<![CDATA[
         import com.easyinsight.framework.LoginEvent;
         import com.easyinsight.framework.User;
         import com.easyinsight.goals.MyGoals;
+        import com.easyinsight.listing.ReportBugEvent;
         import com.easyinsight.solutions.RevisedSolutionSummary;
         import com.easyinsight.groups.GroupsSummary;
         import com.easyinsight.account.AccountBasePage;
@@ -68,6 +70,10 @@
         [Bindable]
         [Embed(source="../../../../assets/headericons/help.png")]
         private var helpIcon:Class;
+
+        [Bindable]
+        [Embed(source="../../../../assets/bug_red.png")]
+        private var bugIcon:Class;
 
         [Bindable]
         [Embed(source="../../../../assets/logo2.PNG")]
@@ -134,6 +140,8 @@
     </listing:ListingOption>
 
     <mx:Spacer width="100%"/>
+
+    <mx:Button icon="{bugIcon}" click="dispatchEvent(new ReportBugEvent())" toolTip="Report Bug" visible="{loggedIn}" />
 
     <mx:Button icon="{findIcon}" click="dispatchEvent(new LaunchQuickSearchEvent())" toolTip="Search (Ctrl+N)" visible="{loggedIn}"/>
 
