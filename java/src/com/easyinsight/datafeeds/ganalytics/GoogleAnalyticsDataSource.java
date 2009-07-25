@@ -132,7 +132,7 @@ public class GoogleAnalyticsDataSource extends ServerDataSourceDefinition {
     public static String[] contentDimensions = { CONTENT_EXIT_PAGE_PATH, CONTENT_LANDING_PAGE_PATH, CONTENT_PAGE_PATH,
         CONTENT_PAGE_TITLE };
 
-    public static String[] contentMeasures = { PAGEVIEWS };
+    public static String[] contentMeasures = { CONTENT_UNIQUE_VIEWS };
 
     public static String[] ecommerceDimensions = { EC_AFFILIATION, EC_DAYS_TO, EC_CATEGORY, EC_NAME, EC_SKU, EC_TID };
 
