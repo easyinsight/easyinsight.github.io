@@ -7,7 +7,7 @@
         [Event(name="loginClose", type="flash.events.Event")]
     </mx:Metadata>
     <mx:states>
-        <mx:State name="ResetPassword">
+        <mx:State name="ResetPassword" enterState="enterPasswordResetStateChange()" exitState="exitPasswordResetStateChange()">
             <mx:RemoveChild target="{loginForm}"/>
             <mx:AddChild relativeTo="{coreBox}">
                 <mx:Form>
@@ -25,7 +25,7 @@
                 </mx:Form>
             </mx:AddChild>
         </mx:State>
-        <mx:State name="RemindUserName">
+        <mx:State name="RemindUserName" enterState="enterRemindUserNameStateChange()" exitState="exitRemindUserNameStateChange()">
             <mx:RemoveChild target="{loginForm}"/>
             <mx:AddChild relativeTo="{coreBox}">
                 <mx:Form>
@@ -73,6 +73,38 @@
         import mx.rpc.events.ResultEvent;
         import mx.rpc.AsyncToken;
         import mx.messaging.config.ServerConfig;
+
+        private function remindUserNameEnter(event:KeyboardEvent):void {
+            if (event.keyCode == Keyboard.ENTER) {
+                remindUserName();
+            }
+        }
+
+        private function exitRemindUserNameStateChange():void {
+            this.removeEventListener(KeyboardEvent.KEY_UP, remindUserNameEnter);
+            this.addEventListener(KeyboardEvent.KEY_UP, keyedSignon);
+        }
+
+        private function enterRemindUserNameStateChange():void {
+            this.removeEventListener(KeyboardEvent.KEY_UP, keyedSignon);
+            this.addEventListener(KeyboardEvent.KEY_UP, remindUserNameEnter);
+        }
+
+        private function passwordResetEnter(event:KeyboardEvent):void {
+            if (event.keyCode == Keyboard.ENTER) {
+                resetPassword();
+            }
+        }
+
+        private function exitPasswordResetStateChange():void {
+            this.removeEventListener(KeyboardEvent.KEY_UP, passwordResetEnter);
+            this.addEventListener(KeyboardEvent.KEY_UP, keyedSignon);
+        }
+
+        private function enterPasswordResetStateChange():void {
+            this.removeEventListener(KeyboardEvent.KEY_UP, keyedSignon);
+            this.addEventListener(KeyboardEvent.KEY_UP, passwordResetEnter);
+        }
 
         [Bindable]
         private var _additionalInfo:String;

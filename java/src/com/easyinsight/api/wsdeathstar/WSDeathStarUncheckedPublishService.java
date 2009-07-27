@@ -27,7 +27,7 @@ public class WSDeathStarUncheckedPublishService extends UncheckedPublishService 
         Vector results = (Vector) ctx.get("RECV_RESULTS");
         WSHandlerResult wsHandlerResult = (WSHandlerResult) results.get(0);
         WSSecurityEngineResult securityResult = (WSSecurityEngineResult) wsHandlerResult.getResults().get(0);
-        WSUsernameTokenPrincipal principal = (WSUsernameTokenPrincipal) securityResult.getPrincipal();
+        WSUsernameTokenPrincipal principal = (WSUsernameTokenPrincipal) securityResult.get(WSSecurityEngineResult.TAG_PRINCIPAL);
         return principal.getName();
     }
 

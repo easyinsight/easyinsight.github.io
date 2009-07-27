@@ -34,7 +34,7 @@
 
         private function setupListeners():void {
             User.getEventNotifier().addEventListener(LoginEvent.LOGIN, onLogin);
-            User.getEventNotifier().addEventListener(LoginEvent.LOGIN, onLogOut);
+            User.getEventNotifier().addEventListener(LoginEvent.LOGOUT, onLogOut);
             factory = new DataSourceAPIEditControlsFactory(this);
             servicesGrid.addEventListener(ServiceDefinitionEvent.SERVICE_REMOVED, serviceRemoved);
         }

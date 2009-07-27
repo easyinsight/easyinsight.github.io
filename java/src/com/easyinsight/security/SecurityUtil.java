@@ -5,6 +5,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Arrays;
 
 import com.easyinsight.database.Database;
 import com.easyinsight.users.UserService;
@@ -71,12 +72,15 @@ public class SecurityUtil {
                     throw new SecurityException();
                 }
                 Account account = user.getAccount();
+                if(!Arrays.asList(Account.TRIAL, Account.ACTIVE).contains(account.getAccountState())) {
+                    return new UserServiceResponse(false, "This account is not active. Please log in to re-activate your account.");
+                }
                 userServiceResponse = new UserServiceResponse(true, user.getUserID(), user.getAccount().getAccountID(), user.getName(),
                                 user.getAccount().getAccountType(), account.getMaxSize(), user.getEmail(), user.getUserName(), null, user.isAccountAdmin(), user.isDataSourceCreator(), user.isInsightCreator());
             } else {
                /* results = session.createQuery("from Account where accountKey = ?").setString(0, key).list();
                 if (results.size() > 0) {
-                    
+
                 } else {
                     throw new SecurityException();
                 }*/
@@ -185,7 +189,7 @@ public class SecurityUtil {
             LogClass.error(e);
             throw new SecurityException();
         } finally {
-            Database.instance().closeConnection(conn);
+            Database.closeConnection(conn);
         }
     }
 
@@ -215,7 +219,7 @@ public class SecurityUtil {
             LogClass.error(e);
             throw new RuntimeException(e);
         } finally {
-            Database.instance().closeConnection(conn);
+            Database.closeConnection(conn);
         }
     }
 
@@ -245,7 +249,7 @@ public class SecurityUtil {
             LogClass.error(e);
             throw new RuntimeException(e);
         } finally {
-            Database.instance().closeConnection(conn);
+            Database.closeConnection(conn);
         }
     }
 
@@ -266,7 +270,7 @@ public class SecurityUtil {
             LogClass.error(e);
             throw new RuntimeException(e);
         } finally {
-            Database.instance().closeConnection(conn);
+            Database.closeConnection(conn);
         }
     }
 
@@ -299,7 +303,7 @@ public class SecurityUtil {
             LogClass.error(e);
             throw new RuntimeException(e);
         } finally {
-            Database.instance().closeConnection(conn);
+            Database.closeConnection(conn);
         }
         if (role > requiredRole) {
             throw new SecurityException();
@@ -332,7 +336,7 @@ public class SecurityUtil {
             LogClass.error(e);
             throw new RuntimeException(e);
         } finally {
-            Database.instance().closeConnection(conn);
+            Database.closeConnection(conn);
         }
     }
 
@@ -356,7 +360,7 @@ public class SecurityUtil {
             LogClass.error(e);
             throw new RuntimeException(e);
         } finally {
-            Database.instance().closeConnection(conn);
+            Database.closeConnection(conn);
         }
 
         if (publiclyVisible) {
@@ -447,7 +451,7 @@ public class SecurityUtil {
             LogClass.error(e);
             throw new RuntimeException(e);
         } finally {
-            Database.instance().closeConnection(conn);
+            Database.closeConnection(conn);
         }
         if (!publiclyVisible) {
             UserPrincipal userPrincipal = securityProvider.getUserPrincipal();

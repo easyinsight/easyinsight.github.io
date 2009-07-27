@@ -264,6 +264,10 @@
         private function login():void {
             var login:LoginDialog = new LoginDialog();
             login.additionalInfo = "You need to be logged in before you can install this solution.";
+            var urlObject:Object = new Object();
+            urlObject.solutionID = solutionID;
+            var url:String = URLUtil.objectToString(urlObject);
+            login.targetURL = url;
             PopUpManager.addPopUp(login, this, true);
             PopUpManager.centerPopUp(login);
         }
