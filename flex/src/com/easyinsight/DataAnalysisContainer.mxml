@@ -79,6 +79,8 @@
         import com.easyinsight.listing.FeedAdminAnalyzeSource;
 
         import com.easyinsight.report.MultiReportAnalyzeSource;
+        import com.easyinsight.report.ReportAnalyzeSource;
+        import com.easyinsight.solutions.InsightDescriptor;
         import com.easyinsight.util.PNGEnc;
 
         import mx.collections.SortField;
@@ -963,6 +965,23 @@
             }
         }
 
+        private function goReport():void {
+            if (analysisDefinition.analysisID == 0) {
+                Alert.show("You need to save this report first.");
+            } else if (analysisChanged) {
+                Alert.show("You have unsaved changes. Are you sure you want to go to reports?", "Alert",
+                        Alert.OK | Alert.CANCEL, null, adminAlertListener, null, Alert.CANCEL);
+            } else {
+                cleanup();
+                var report:InsightDescriptor = new InsightDescriptor();
+                report.dataFeedID = dataService.dataFeedID;
+                report.id = analysisDefinition.analysisID;
+                report.name = analysisDefinition.name;
+                report.reportType = analysisDefinition.reportType;
+                dispatchEvent(new ModuleAnalyzeEvent(new ReportAnalyzeSource(report)));
+            }
+        }
+
         private function onDescriptionUpdate(event:DescriptionUpdateEvent):void {
             analysisDefinition.description = event.text;
         }
@@ -996,6 +1015,13 @@
                        toolTip="Close"/>
             <mx:Button id="undoButton" icon="@Embed(source='../../../assets/undo.png')" click="undo()" toolTip="Undo"/>
             <mx:Button id="redoButton" icon="@Embed(source='../../../assets/redo.png')" click="redo()" toolTip="Redo"/>
+            <mx:Button id="saveButton" icon="@Embed(source='../../../assets/floppy_disk.png')" click="save()"
+                           toolTip="Save" enabled="{!_previewMode}"/>
+            <mx:Button id="saveAsButton" icon="@Embed(source='../../../assets/save_as.png')" click="saveAs()"
+                       toolTip="Save As" enabled="{!_previewMode}"/>
+            <mx:Button id="reportsButton" icon="@Embed(source='../../../assets/tables_x16.png')" click="toReports()"
+                       toolTip="Go to Reports" enabled="{!_previewMode}"/>
+            <mx:Button id="reportButton" icon="@Embed(source='../../../assets/media_play_green.png')" click="goReport()" toolTip="View Report"/>
             <mx:Button id="adminButton" icon="@Embed(source='../../../assets/businessman_edit.png')" click="goAdmin()" toolTip="Adminster"
                     visible="{admin}"/>
             <mx:Button id="subscribeToFeedButton" icon="@Embed(source='../../../assets/folder_into.png')"
@@ -1013,12 +1039,7 @@
                          paddingLeft="0" paddingRight="0" resizeToContent="true">
             <mx:HBox label="Metadata" icon="@Embed(source='../../../assets/note.png')" paddingLeft="10" paddingTop="10"
                      paddingBottom="10" id="metadataBox">
-                <mx:Button id="saveButton" icon="@Embed(source='../../../assets/floppy_disk.png')" click="save()"
-                           toolTip="Save" enabled="{!_previewMode}"/>
-                <mx:Button id="saveAsButton" icon="@Embed(source='../../../assets/save_as.png')" click="saveAs()"
-                           toolTip="Save As" enabled="{!_previewMode}"/>
-                <mx:Button id="reportsButton" icon="@Embed(source='../../../assets/tables_x16.png')" click="toReports()"
-                           toolTip="Go to Reports" enabled="{!_previewMode}"/>
+
                 <mx:Form paddingTop="0" paddingBottom="0" id="analysisNameForm">
                     <mx:FormItem label="Report Name:">
                         <mx:TextInput text="{labelNameField}" id="analysisNameInput"/>
