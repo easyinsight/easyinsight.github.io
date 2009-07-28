@@ -6,7 +6,8 @@
     </mx:Metadata>
 	<mx:Script>
 		<![CDATA[
-			import com.easyinsight.salesforce.SalesforceCredentialsWindow;
+        import com.easyinsight.listing.RefreshNotificationEvent;
+        import com.easyinsight.salesforce.SalesforceCredentialsWindow;
 			import mx.managers.PopUpManager;
 			import com.easyinsight.administration.feed.CredentialsResponse;
 			import com.easyinsight.analysis.CredentialsWindow;
@@ -43,6 +44,7 @@
 				var credentialsResponse:CredentialsResponse = uploadService.refreshData.lastResult as CredentialsResponse;
 				if (credentialsResponse.successful) {
                     dispatchEvent(new UploadConfigEvent(UploadConfigEvent.UPLOAD_CONFIG_COMPLETE));
+                    dispatchEvent(new RefreshNotificationEvent());
 					PopUpManager.removePopUp(this);
 				} else {
 					failureMessage.visible = true;

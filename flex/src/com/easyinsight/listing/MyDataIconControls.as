@@ -7,6 +7,7 @@ import com.easyinsight.customupload.UploadConfigEvent;
 import com.easyinsight.framework.GenericFaultHandler;
 import com.easyinsight.genredata.ModuleAnalyzeEvent;
 
+import com.easyinsight.notifications.NotifyBar;
 import com.easyinsight.report.ReportAnalyzeSource;
 import com.easyinsight.solutions.InsightDescriptor;
 
@@ -75,9 +76,17 @@ public class MyDataIconControls extends HBox
         deleteButton.addEventListener(MouseEvent.CLICK, deleteCalled);
         addChild(deleteButton);
 
+        this.addEventListener(RefreshNotificationEvent.REFRESH_NOTIFICATION, notifyRefresh);
+
         this.setStyle("paddingLeft", 5);
         this.setStyle("paddingRight", 5);
     }
+
+    private function notifyRefresh(event:RefreshNotificationEvent):void {
+        Alert.show("Your data has begun to refresh and will be available when the refresh completes. This process may take some time depending on the size of the data source. You will receive a notification when the process is complete.");
+    }
+
+
 
     private function copyCalled(event:MouseEvent):void {
         var window:CopyDataSourceWindow = new CopyDataSourceWindow();
@@ -123,12 +132,14 @@ public class MyDataIconControls extends HBox
             userUploadSource.refreshData.addEventListener(ResultEvent.RESULT, completedRefresh);
             userUploadSource.refreshData.addEventListener(FaultEvent.FAULT, GenericFaultHandler.genericFault);
             userUploadSource.refreshData.send(feedDescriptor.dataFeedID, null, false);
+            dispatchEvent(new RefreshNotificationEvent());
             return;
         }
 
         var refreshWindow:RefreshWindow = RefreshWindow(PopUpManager.createPopUp(this.parent.parent.parent, RefreshWindow, true));
         refreshWindow.feedID = feedDescriptor.dataFeedID;
         refreshWindow.addEventListener(UploadConfigEvent.UPLOAD_CONFIG_COMPLETE, passEvent);
+        refreshWindow.addEventListener(RefreshNotificationEvent.REFRESH_NOTIFICATION, notifyRefresh);
         PopUpManager.centerPopUp(refreshWindow);
     }
 
@@ -147,6 +158,7 @@ public class MyDataIconControls extends HBox
     private function fileData(feedDescriptor:DataFeedDescriptor):void {
         var feedUpdateWindow:FileFeedUpdateWindow = FileFeedUpdateWindow(PopUpManager.createPopUp(this.parent.parent.parent, FileFeedUpdateWindow, true));
         feedUpdateWindow.feedID = feedDescriptor.dataFeedID;
+        feedUpdateWindow.addEventListener(RefreshNotificationEvent.REFRESH_NOTIFICATION, notifyRefresh);
         PopUpManager.centerPopUp(feedUpdateWindow);
 
     }

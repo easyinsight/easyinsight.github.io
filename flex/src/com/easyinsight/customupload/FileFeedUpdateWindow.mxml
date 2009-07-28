@@ -3,8 +3,14 @@
 	<mx:Script>
 		<![CDATA[
 			import com.easyinsight.framework.User;
-			import mx.rpc.events.ResultEvent;
+
+            import com.easyinsight.listing.RefreshNotificationEvent;
+
+            import mx.controls.Alert;
+            import mx.rpc.events.ResultEvent;
 			import mx.managers.PopUpManager;
+
+
 			
 			private var rawUploadID:int;
 			private var _feedID:int;
@@ -78,8 +84,12 @@
 			private function cancel():void {
 				PopUpManager.removePopUp(this);
 			}
-			
-			private function updatedData():void {
+
+            private const TEN_MEGABYTES:uint = 1; //10485760;
+
+            private function updatedData():void {
+                if(file.size > TEN_MEGABYTES)
+                    dispatchEvent(new RefreshNotificationEvent());
 				PopUpManager.removePopUp(this);
 			}
 		]]>
@@ -98,7 +108,7 @@
 			</mx:FormItem>
 			<mx:FormItem label="" direction="horizontal">
 				<mx:HBox horizontalAlign="center">
-					<mx:ProgressBar id="progressBar" visible="false" source="file"/>	
+					<mx:ProgressBar id="progressBar" visible="false" source="file"/>
 				</mx:HBox>
 				<mx:Label text="Upload successful!" visible="false" id="successMessage"/>
 			</mx:FormItem>		

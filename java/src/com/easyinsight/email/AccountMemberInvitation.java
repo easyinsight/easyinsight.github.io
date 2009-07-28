@@ -30,9 +30,13 @@ public class AccountMemberInvitation {
             "Once logged in, you can change your password through Account - Change my Password.\r\n" +
             "Tutorials are available through the Help button on each application page to help you get started.\r\n\r\nWelcome to Easy Insight!";
 
-    private static String resetPasswordText =
+    /*private static String resetPasswordText =
             "Your password with Easy Insight has been reset:\r\n\r\n" +
             "Password:  {0}\r\n\r\n"+
+            "This email was sent from an automated account. Please do not reply to this address.";*/
+    private static String resetPasswordText =
+            "You are receiving this email because you have requested to reset your password.:\r\n\r\n" +
+            "To reset your password, use the following link:  https://www.easy-insight.com/app/#resetPassword={0}\r\n\r\n"+
             "This email was sent from an automated account. Please do not reply to this address.";
 
     private static String remindUserNameText =
@@ -129,7 +133,7 @@ public class AccountMemberInvitation {
     }
 
     public void sendActivationEmail(String to, String activation) {
-        String url = "http://www.easy-insight.com/app/#activationID=" + activation;
+        String url = "https://www.easy-insight.com/app/#activationID=" + activation;
         String body = MessageFormat.format(freeAccountConfirmationText, url);
         String subject = "Easy Insight Account Activation";
         try {

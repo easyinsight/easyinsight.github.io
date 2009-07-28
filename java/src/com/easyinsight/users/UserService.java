@@ -1,6 +1,7 @@
 package com.easyinsight.users;
 
 import com.easyinsight.database.Database;
+import com.easyinsight.database.EIConnection;
 import com.easyinsight.security.PasswordService;
 import com.easyinsight.security.UserPrincipal;
 import com.easyinsight.security.SecurityUtil;
@@ -16,9 +17,11 @@ import com.easyinsight.billing.BrainTreeBillingSystem;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Calendar;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.sql.ResultSet;
 
 import org.hibernate.Session;
 import org.jetbrains.annotations.NotNull;
@@ -31,6 +34,71 @@ import flex.messaging.FlexContext;
  * Time: 5:34:56 PM
  */
 public class UserService implements IUserService {
+
+    public boolean verifyPasswordReset(String passwordResetString) {
+        EIConnection conn = Database.instance().getConnection();
+        boolean success = false;
+        try {
+            conn.setAutoCommit(false);
+            PreparedStatement stmt = conn.prepareStatement("select password_request_string from password_reset where password_request_string = ? and request_date > ?");
+            Calendar c = Calendar.getInstance();
+            c.setTime(new Date());
+            c.setTimeInMillis(c.getTimeInMillis() - 86400000L);
+            stmt.setString(1,passwordResetString);
+            stmt.setDate(2, new java.sql.Date(c.getTimeInMillis()));
+            ResultSet rs = stmt.executeQuery();
+            if(rs.next() && rs.getString(1).equals(passwordResetString))
+                success = true;
+            stmt.close();
+            conn.commit();
+        } catch(SQLException e){
+            conn.rollback();
+            throw new RuntimeException(e);
+        } finally {
+            Database.closeConnection(conn);
+        }
+        return success;
+    }
+
+    public boolean resetPassword(String passwordResetValidation, String username, String password) {
+        boolean success = false;
+        EIConnection conn = Database.instance().getConnection();
+        Session s = Database.instance().createSession(conn);
+        try {
+            conn.setAutoCommit(false);
+            PreparedStatement stmt = conn.prepareStatement("select user_id, password_request_string from password_reset where password_request_string = ? and request_date > ?");
+            Calendar c = Calendar.getInstance();
+
+            c.setTime(new Date());
+            c.setTimeInMillis(c.getTimeInMillis() - 86400000L);
+            stmt.setString(1,passwordResetValidation);
+            stmt.setDate(2, new java.sql.Date(c.getTimeInMillis()));
+            ResultSet rs = stmt.executeQuery();
+            if(rs.next() && rs.getString(2).equals(passwordResetValidation)) {
+
+                List l = s.createQuery("from User where userName = ? and userID = ?").setString(0, username).setLong(1, rs.getLong(1)).list();
+                if(l.size() == 1) {
+                    User u = (User) l.get(0);
+                    u.setPassword(PasswordService.getInstance().encrypt(password));
+                    success = true;
+                    PreparedStatement deleteStatement = conn.prepareStatement("delete from password_reset where password_request_string = ?");
+                    deleteStatement.setString(1, passwordResetValidation);
+                    deleteStatement.executeUpdate();
+                }
+            }
+
+            stmt.close();
+            conn.commit();
+        } catch(SQLException e) {
+
+            conn.rollback();
+            throw new RuntimeException(e);
+        } finally {
+            Database.closeConnection(conn);
+        }
+
+        return success;
+    }    
 
     public void cancelPaidAccount() {
         long accountID = SecurityUtil.getAccountID();
@@ -111,26 +179,41 @@ public class UserService implements IUserService {
 
     public boolean remindPassword(String emailAddress) {
         boolean success;
-        Session session = Database.instance().createSession();
+        EIConnection conn = Database.instance().getConnection();
+        Session session = Database.instance().createSession(conn);
         try {
-            session.getTransaction().begin();
+            conn.setAutoCommit(false);
             List results = session.createQuery("from User where email = ?").setString(0, emailAddress).list();
             if (results.size() == 0) {
                 success = false;
             } else {
                 User user = (User) results.get(0);
-                String password = RandomTextGenerator.generateText(12);
-                user.setPassword(PasswordService.getInstance().encrypt(password));
-                new AccountMemberInvitation().resetPassword(emailAddress, password);
+                String passwordPrefix = RandomTextGenerator.generateText(20);
+
+                PreparedStatement updateStatement = conn.prepareStatement("update password_reset set request_date = ?, password_request_string = ? where user_id = ?");
+                updateStatement.setDate(1, new java.sql.Date(new Date().getTime()));
+                updateStatement.setString(2, passwordPrefix);
+                updateStatement.setLong(3, user.getUserID());
+
+
+                PreparedStatement insertStatement = conn.prepareStatement("insert into password_reset(user_id, request_date, password_request_string) values (?,?,?)");
+                insertStatement.setLong(1, user.getUserID());
+                insertStatement.setDate(2, new java.sql.Date(new Date().getTime()));
+                insertStatement.setString(3, passwordPrefix);
+
+                if(updateStatement.executeUpdate() == 0)
+                    insertStatement.executeUpdate();
+
+                new AccountMemberInvitation().resetPassword(emailAddress, passwordPrefix);
                 success = true;
             }
-            session.getTransaction().commit();
+            conn.commit();
         } catch (Exception e) {
             LogClass.error(e);
-            session.getTransaction().rollback();
+            conn.rollback();
             throw new RuntimeException(e);
         } finally {
-            session.close();
+            Database.closeConnection(conn);
         }
         return success;
     }

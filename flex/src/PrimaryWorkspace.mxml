@@ -54,6 +54,7 @@
         import com.easyinsight.analysis.DelayedFeedLink;
         import com.easyinsight.analysis.DelayedDeepLink;
         import com.easyinsight.listing.DescriptorAnalyzeSource;
+        import com.easyinsight.listing.PasswordResetWindow;
         import com.easyinsight.quicksearch.EIDescriptor;
         import com.easyinsight.quicksearch.QuickSearchEvent;
         import com.easyinsight.quicksearch.QuickSearchWindow;
@@ -88,6 +89,16 @@
         import com.easyinsight.framework.LoginEvent;
 
         import mx.managers.PopUpManager;
+
+        private function passwordResetCheck():void {
+            var result:Boolean = userService.verifyPasswordReset.lastResult as Boolean;
+            if(result) {
+                var window:PasswordResetWindow = new PasswordResetWindow();
+                window.passwordValidation = passwordResetValue;
+                PopUpManager.addPopUp(window, this, true);
+                PopUpManager.centerPopUp(window);
+            }
+        }
 
         private var perspective:IPerspective;
 
@@ -220,6 +231,8 @@
             parseFragmentObject(o);
         }
 
+        private var passwordResetValue:String;
+
         private function parseFragmentObject(o:Object):void {
             var analysisID:String = o.analysisID;
             if (analysisID != null) {
@@ -319,7 +332,12 @@
                                                             case "welcome":
                                                                 navigation(new NavigationEvent(null, new WelcomeScreen()));
                                                         }
-                                                    } else {
+                                                    }
+                                                    else if(o.resetPassword != null) {
+                                                        passwordResetValue = o.resetPassword;
+                                                        userService.verifyPasswordReset.send(o.resetPassword);
+                                                    }
+                                                    else {
                                                         navigation(new NavigationEvent("Intro"));
                                                     }
                                                 }
@@ -473,6 +491,7 @@
 
     <mx:RemoteObject id="userService" destination="login">
         <mx:method name="isSessionLoggedIn" result="sessionCheck()"/>
+        <mx:method name="verifyPasswordReset" result="passwordResetCheck()" />
     </mx:RemoteObject>
     <mx:RemoteObject id="accountService" destination="accountAdmin">
         <mx:method name="activateAccount" result="activated()"/>

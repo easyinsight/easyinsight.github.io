@@ -45,7 +45,7 @@
         </mx:State>
         <mx:State name="PasswordReset">
             <mx:AddChild relativeTo="{activationBox}">
-                <mx:Label text="A new temporary password has been sent to your email address."/>
+                <mx:Label text="An email has been sent to your email address to allow you to reset your password."/>
             </mx:AddChild>
         </mx:State>
         <mx:State name="UserNameReminded">
