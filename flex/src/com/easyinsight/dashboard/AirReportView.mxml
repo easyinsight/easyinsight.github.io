@@ -7,8 +7,10 @@
         [Event(name="eiUpdate", type="com.easyinsight.dashboard.EIUpdateEvent")]
     </mx:Metadata>
     <mx:Script><![CDATA[
+        import com.easyinsight.account.Account;
         import com.easyinsight.analysis.service.ReportRetrievalFault;
 
+        import com.easyinsight.framework.User;
         import com.easyinsight.quicksearch.EIDescriptor;
         import com.easyinsight.quicksearch.QuickSearchEvent;
         import com.easyinsight.quicksearch.QuickSearchWindow;
@@ -108,13 +110,17 @@
             }
             reportsMenu = new NativeMenu();
             baseMenu.addSubmenu(reportsMenu, "Reports");
-            goalsMenu = new NativeMenu();
-            baseMenu.addSubmenu(goalsMenu, "Goals");
-            var myGoalsItem:NativeMenuItem = new NativeMenuItem("My Goals");
-            myGoalsItem.addEventListener(Event.SELECT, onReport);
-            myGoalsDescriptor = new MyGoalsDescriptor();
-            myGoalsItem.data = myGoalsDescriptor;
-            goalsMenu.addItem(myGoalsItem);
+
+            if (User.getInstance().getAccountType() >= Account.GROUP) {
+                goalsMenu = new NativeMenu();
+                baseMenu.addSubmenu(goalsMenu, "Goals");
+                var myGoalsItem:NativeMenuItem = new NativeMenuItem("My Goals");
+                myGoalsItem.addEventListener(Event.SELECT, onReport);
+                myGoalsDescriptor = new MyGoalsDescriptor();
+                myGoalsItem.data = myGoalsDescriptor;
+                goalsMenu.addItem(myGoalsItem);
+            }
+
             var helpMenu:NativeMenu = new NativeMenu();
             defaultScreen = new AirIntroDescriptor();
             var welcomeItem:NativeMenuItem = new NativeMenuItem("Welcome");
@@ -154,7 +160,7 @@
                     reportMenuItem.addEventListener(Event.SELECT, onReport);
                     reportMenuItem.data = descriptor;*/
                     descriptors.addItem(descriptor);
-                } else if (descriptor.getType() == EIDescriptor.GOAL_TREE) {
+                } else if (User.getInstance().getAccountType() >= Account.GROUP && descriptor.getType() == EIDescriptor.GOAL_TREE) {
                     goalSort.addItem(descriptor);
                     /*var goalsMenuItem:NativeMenuItem = new NativeMenuItem(descriptor.name);
                     goalsMenu.addItem(goalsMenuItem);
@@ -178,11 +184,13 @@
                 reportMenuItem.addEventListener(Event.SELECT, onReport);
                 reportMenuItem.data = reportDescriptor;
             }
-            for each (var goalDescriptor:EIDescriptor in goalSort) {
-                var goalsMenuItem:NativeMenuItem = new NativeMenuItem(goalDescriptor.name);
-                goalsMenu.addItem(goalsMenuItem);
-                goalsMenuItem.addEventListener(Event.SELECT, onReport);
-                goalsMenuItem.data = goalDescriptor;
+            if (User.getInstance().getAccountType() >= Account.GROUP) {
+                for each (var goalDescriptor:EIDescriptor in goalSort) {
+                    var goalsMenuItem:NativeMenuItem = new NativeMenuItem(goalDescriptor.name);
+                    goalsMenu.addItem(goalsMenuItem);
+                    goalsMenuItem.addEventListener(Event.SELECT, onReport);
+                    goalsMenuItem.data = goalDescriptor;
+                }
             }
 
             var currentViewTypeBytes:ByteArray = EncryptedLocalStore.getItem("currentViewType");

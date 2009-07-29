@@ -51,6 +51,6 @@
                 <mx:CheckBox id="startupCheckbox" selected="{runOnStartup}" change="changeStartup()"/>
             </mx:FormItem>
         </mx:Form>
-        <mx:TextArea width="100%" height="100" borderStyle="none" text="This widget allows you to view your reports from Easy Insight. The available reports will be those you have under your My Data page." backgroundAlpha="0"/>
+        <mx:TextArea width="100%" height="200" borderStyle="none" text="This widget allows you to view your reports and goals from Easy Insight. You can select reports and goals from the application menu. You can also hit Ctrl-N to quickly search for a particular report or goal tree." backgroundAlpha="0" editable="false"/>
     </mx:VBox>
 </mx:Canvas>
