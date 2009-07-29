@@ -84,12 +84,8 @@ public class RollingRangeFilter extends HBox implements IFilter
         window.analysisItems = _analysisItems;
         window.filterDefinition = rollingFilter;
         PopUpManager.addPopUp(window, this, true);
-        var point:Point = new Point();
-        point.x = 0;
-        point.y = 0;
-        point = this.localToGlobal(point);
-        window.x = point.x + 25;
-        window.y = point.y + 25;
+        window.x = 50;
+        window.y = 50;
     }
 
     private function onFilterEdit(event:FilterEditEvent):void {

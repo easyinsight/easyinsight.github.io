@@ -13,14 +13,14 @@ import flash.geom.Point;
 import mx.collections.ArrayCollection;
 	import mx.containers.HBox;
 	import mx.containers.Tile;
-	import mx.containers.VBox;
 import mx.controls.AdvancedDataGrid;
 import mx.controls.DataGrid;
-	import mx.controls.Label;
 import mx.controls.List;
+import mx.controls.ToolTip;
 import mx.events.DragEvent;
 	import mx.managers.DragManager;
 import mx.managers.PopUpManager;
+import mx.managers.ToolTipManager;
 
 [Event(name="transformAdded", type="com.easyinsight.filtering.TransformsUpdatedEvent")]
 [Event(name="updatedTransforms", type="com.easyinsight.filtering.TransformsUpdatedEvent")]
@@ -32,7 +32,7 @@ import mx.managers.PopUpManager;
 		private var filterTile:Tile;
 		private var _feedID:int;
 		private var noFilters:Boolean = true;
-		private var dropHereBox:VBox;
+		// private var dropHereBox:VBox;
         private var _filterEditable:Boolean = true;
         private var _showLabel:Boolean = true;
 		[Bindable]
@@ -73,8 +73,8 @@ import mx.managers.PopUpManager;
                     filterDefinitions.removeItemAt(index);
                     if (filterDefinitions.length == 0) {
                         noFilters = true;
-                        removeChild(filterTile);
-                        addChild(dropHereBox);
+                        //removeChild(filterTile);
+                        //addChild(dropHereBox);
                     }
                 }
             }
@@ -91,8 +91,8 @@ import mx.managers.PopUpManager;
                         filterDefinitions.removeItemAt(index);
                         if (filterDefinitions.length == 0) {
                             noFilters = true;
-                            removeChild(filterTile);
-                            addChild(dropHereBox);
+                            //removeChild(filterTile);
+                            //addChild(dropHereBox);
                         }
                     }
                 }
@@ -101,7 +101,34 @@ import mx.managers.PopUpManager;
 		
 		public function set analysisItems(analysisItems:ArrayCollection):void {
 			_analysisItems = analysisItems;
-		}		
+		}
+
+    private var dropToolTip:ToolTip;
+
+    public function showDropMessage():void {
+
+        if (dropToolTip == null) {
+
+            var point:Point = new Point();
+            point.x = 0;
+            point.y = 0;
+            point = this.localToGlobal(point);
+            var x:int = point.x + this.width / 2 - 100;
+            var y:int = point.y + this.height / 2 - 15;
+
+            dropToolTip = ToolTipManager.createToolTip("Drop Items Here to Filter", x, y) as ToolTip;
+            dropToolTip.width = 250;
+            dropToolTip.height = 35;
+            dropToolTip.setStyle("fontSize", 18);
+        }
+    }
+
+    public function closeDropMessage():void {
+        if (dropToolTip != null) {
+            ToolTipManager.destroyToolTip(dropToolTip);
+            dropToolTip = null;
+        }
+    }
 		
 		override protected function createChildren():void {
 			super.createChildren();
@@ -110,7 +137,8 @@ import mx.managers.PopUpManager;
 				filterTile.percentWidth = 100;
 				filterTile.percentHeight = 100;				
 			}
-			if (dropHereBox == null) {
+            addChild(filterTile);
+			/*if (dropHereBox == null) {
 				dropHereBox = new VBox();
 				dropHereBox.percentWidth = 100;
 				dropHereBox.percentHeight = 100;
@@ -121,11 +149,11 @@ import mx.managers.PopUpManager;
 				textMessage.setStyle("fontSize", 16);
 				textMessage.setStyle("color", "#333333");
 				dropHereBox.addChild(textMessage);
-			}			
+			}			*/
 			if (noFilters && _filterDefinitions == null) {
-				addChild(dropHereBox);											
+				// addChild(dropHereBox);
 			} else {
-				addChild(filterTile);
+				//addChild(filterTile);
                 if (_filterDefinitions != null) {
                     for each (var filter:FilterDefinition in _filterDefinitions) {
                         addFilterDefinition(filter);
@@ -306,10 +334,10 @@ import mx.managers.PopUpManager;
         public function commandFilterAdd(filter:IFilter):void {
             if (noFilters) {
 				noFilters = false;
-                if (dropHereBox.parent != null) {
+                /*if (dropHereBox.parent != null) {
 				    removeChild(dropHereBox);
                     addChild(filterTile);
-                }
+                }*/
 				//filterTile.explicitWidth = dropHereBox.width;
 			}
             filter.filterEditable = _filterEditable;
@@ -343,8 +371,8 @@ import mx.managers.PopUpManager;
 			filterDefinitions.removeItemAt(index);
 			if (filterDefinitions.length == 0) {
 				noFilters = true;
-				removeChild(filterTile);
-				addChild(dropHereBox);
+				//removeChild(filterTile);
+				//addChild(dropHereBox);
 			}
 			dispatchEvent(new TransformsUpdatedEvent(filterDefinitions));
         }
@@ -417,7 +445,13 @@ import mx.managers.PopUpManager;
 						dispatchEvent(new TransformsUpdatedEvent(filterDefinitions));
 					} else if (filter is ComboBoxFilter) {
 						
-					}					
+					} else if (filter is SliderDateFilter) {
+
+                    } else if (filter is RollingRangeFilter) {
+
+                    } else if (filter is SliderMeasureFilter) {
+                        
+                    }
 				}				
 				
 			}				

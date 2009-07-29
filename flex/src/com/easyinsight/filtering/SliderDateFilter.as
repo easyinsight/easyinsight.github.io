@@ -6,19 +6,23 @@ package com.easyinsight.filtering
 
 import com.easyinsight.framework.CredentialsCache;
 
+import com.easyinsight.util.ProgressAlert;
+
 import flash.events.MouseEvent;
 	import flash.geom.Point;
 	
 	import mx.collections.ArrayCollection;
 	import mx.containers.HBox;
-	import mx.controls.Button;
+import mx.controls.Alert;
+import mx.controls.Button;
 	import mx.controls.DateField;
 	import mx.controls.HSlider;
 import mx.controls.Label;
 import mx.events.CalendarLayoutChangeEvent;
 	import mx.events.SliderEvent;
 	import mx.managers.PopUpManager;
-	import mx.rpc.events.ResultEvent;
+import mx.rpc.events.FaultEvent;
+import mx.rpc.events.ResultEvent;
 	import mx.rpc.remoting.RemoteObject;
 
 	public class SliderDateFilter extends HBox implements IFilter
@@ -48,8 +52,13 @@ import mx.events.CalendarLayoutChangeEvent;
 			dataService = new RemoteObject();
 			dataService.destination = "data";
 			dataService.getAnalysisItemMetadata.addEventListener(ResultEvent.RESULT, gotMetadata);
+            dataService.getAnalysisItemMetadata.addEventListener(FaultEvent.FAULT, onFault);
 			dataService.getAnalysisItemMetadata.send(feedID, analysisItem, CredentialsCache.getCache().createCredentials());
 		}
+
+        private function onFault(event:FaultEvent):void {
+            Alert.show(event.fault.faultDetail);
+        }
 		
 		private function gotMetadata(event:ResultEvent):void {
 			var metadata:AnalysisItemResultMetadata = dataService.getAnalysisItemMetadata.lastResult as AnalysisItemResultMetadata;
@@ -134,12 +143,8 @@ import mx.events.CalendarLayoutChangeEvent;
 			window.analysisItems = _analysisItems;
 			window.filterDefinition = _filterDefinition;
 			PopUpManager.addPopUp(window, this, true);
-			var point:Point = new Point();
-			point.x = 0;
-			point.y = 0;
-			point = this.localToGlobal(point);
-			window.x = point.x + 25;
-			window.y = point.y + 25;
+			window.x = 50;
+			window.y = 50;
 		}
 		
 		private function onFilterEdit(event:FilterEditEvent):void {
