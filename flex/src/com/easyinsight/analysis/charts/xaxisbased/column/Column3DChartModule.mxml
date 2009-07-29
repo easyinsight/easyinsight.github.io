@@ -53,6 +53,7 @@
         private var yField:String;
 
         private var measureFormatter:Formatter;
+        private var dimensionFormatter:Formatter;
 
         private var customColors:Boolean = false;
         private var conditionRenderer:ConditionRenderer;
@@ -155,6 +156,7 @@
                 BindingUtils.bindProperty(xAxis, "categoryField", this, "xField");
                 //xAxis.categoryField = xField;
                 xAxis.dataProvider = graphData;
+                xAxis.labelFunction = renderDimensionAxis;
                 //xAxis.title = xAxisTitle;
                 BindingUtils.bindProperty(xAxis, "title", this, "xAxisTitle");
                 columnChart.horizontalAxis = xAxis;
@@ -228,6 +230,10 @@
             return filterRawData;
         }
 
+        private function renderDimensionAxis(item:Object, prevValue:Object, axis:CategoryAxis, categoryItem:Object):String {
+            return dimensionFormatter.format(item);
+        }
+
         public function renderReport(dataSet:ArrayCollection, analysisDefinition:AnalysisDefinition, clientProcessorMap:Object):void {
             var columnChartDef:Column3DChartDefinition = analysisDefinition as Column3DChartDefinition;
 
@@ -241,6 +247,7 @@
                 }
 
                 measureFormatter = columnChartDef.measure.getFormatter();
+                dimensionFormatter = columnChartDef.xaxis.getFormatter();
                 var conditionRenderer:ConditionRenderer = columnChartDef.measure.createClientRenderer();
                 if (conditionRenderer.hasCustomColor()) {
                     customColors = true;

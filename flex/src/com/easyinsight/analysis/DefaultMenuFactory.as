@@ -49,6 +49,7 @@ public class DefaultMenuFactory implements IMenuFactory {
             rollupContextItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, rollupFunction);
             items.push(rollupContextItem);
         }
+        contextMenu.customItems = items;
         interactiveObject.contextMenu = contextMenu;
     }
 

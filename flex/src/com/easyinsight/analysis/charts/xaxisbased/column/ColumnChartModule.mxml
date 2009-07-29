@@ -58,6 +58,8 @@ import mx.charts.series.ColumnSeries;
 
         private var measureFormatter:Formatter;
 
+        private var dimensionFormatter:Formatter;
+
         private var customColors:Boolean = false;
         private var conditionRenderer:ConditionRenderer;
 
@@ -182,6 +184,7 @@ import mx.charts.series.ColumnSeries;
                 xAxis = new CategoryAxis();
                 BindingUtils.bindProperty(xAxis, "categoryField", this, "xField");
                 //xAxis.categoryField = xField;
+                xAxis.labelFunction = renderDimensionAxis;
                 xAxis.dataProvider = graphData;
                 xAxis.title = xAxisTitle;
                 columnChart.horizontalAxis = xAxis;
@@ -248,6 +251,10 @@ import mx.charts.series.ColumnSeries;
             return measureFormatter.format(labelValue);
         }
 
+        private function renderDimensionAxis(item:Object, prevValue:Object, axis:CategoryAxis, categoryItem:Object):String {
+            return dimensionFormatter.format(item);
+        }
+
         public function createFilterRawData():FilterRawData {
             var filterRawData:FilterRawData = new FilterRawData();
             for (var i:int = 0; i < columnChart.selectedChartItems.length; i++) {
@@ -266,6 +273,7 @@ import mx.charts.series.ColumnSeries;
                 createChart();
 
                 measureFormatter = columnChartDef.measure.getFormatter();
+                dimensionFormatter = columnChartDef.xaxis.getFormatter();
                 var conditionRenderer:ConditionRenderer = columnChartDef.measure.createClientRenderer();
                 if (conditionRenderer.hasCustomColor()) {
                     customColors = true;

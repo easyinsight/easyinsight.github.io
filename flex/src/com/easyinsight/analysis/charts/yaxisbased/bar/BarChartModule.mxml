@@ -57,6 +57,7 @@ import mx.events.FlexEvent;
         private var _yField:String;
 
         private var measureFormatter:Formatter;
+        private var dimensionFormatter:Formatter;
 
         private var customColors:Boolean = false;
         private var conditionRenderer:ConditionRenderer;
@@ -187,6 +188,7 @@ import mx.events.FlexEvent;
                 yAxis = new CategoryAxis();
                 BindingUtils.bindProperty(yAxis, "categoryField", this, "yField");
                 //xAxis.categoryField = xField;
+                yAxis.labelFunction = renderDimensionAxis;
                 yAxis.dataProvider = graphData;
                 yAxis.title = yAxisTitle;
                 barChart.verticalAxis = yAxis;
@@ -245,6 +247,10 @@ import mx.events.FlexEvent;
             return measureFormatter.format(labelValue);
         }
 
+        private function renderDimensionAxis(item:Object, prevValue:Object, axis:CategoryAxis, categoryItem:Object):String {
+            return dimensionFormatter.format(item);
+        }
+
         public function createFilterRawData():FilterRawData {
             var filterRawData:FilterRawData = new FilterRawData();
             for (var i:int = 0; i < barChart.selectedChartItems.length; i++) {
@@ -263,6 +269,7 @@ import mx.events.FlexEvent;
                 createChart();
 
                 measureFormatter = barChartDef.measure.getFormatter();
+                dimensionFormatter = barChartDef.yaxis.getFormatter();
                 var conditionRenderer:ConditionRenderer = barChartDef.measure.createClientRenderer();
                 if (conditionRenderer.hasCustomColor()) {
                     customColors = true;

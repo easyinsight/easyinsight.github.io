@@ -48,11 +48,11 @@ public class CustomDropShadowRenderer extends UIComponent implements IDataRender
         super();
     }
 
-    private function onDrilldown(event:ContextMenuEvent):void {
+    public function onDrilldown(event:ContextMenuEvent):void {
         dispatchEvent(new ChartDrilldownEvent(ChartDrilldownEvent.DRILLDOWN, _data as ChartItem));
     }
 
-    private function onRollup(event:ContextMenuEvent):void {
+    public function onRollup(event:ContextMenuEvent):void {
         dispatchEvent(new ChartDrilldownEvent(ChartDrilldownEvent.ROLLUP, _data as ChartItem));
     }
 

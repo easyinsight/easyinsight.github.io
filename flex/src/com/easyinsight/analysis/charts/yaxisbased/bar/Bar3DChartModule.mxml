@@ -51,6 +51,8 @@ import com.easyinsight.filtering.FilterRawData;
         private var xField:String;
         private var _yField:String;
 
+        private var dimensionFormatter:Formatter;
+
         private var visuals:Chart3DVisuals = new Chart3DVisuals();
 
         [Bindable]
@@ -130,6 +132,7 @@ import com.easyinsight.filtering.FilterRawData;
                 yAxis = new CategoryAxis();
                 BindingUtils.bindProperty(yAxis, "categoryField", this, "yField");
                 yAxis.dataProvider = graphData;
+                yAxis.labelFunction = renderDimensionAxis;
                 yAxis.title = yAxisTitle;
                 barChart.verticalAxis = yAxis;
                 /*var axisRenderer:AxisRenderer = new AxisRenderer();
@@ -184,6 +187,7 @@ import com.easyinsight.filtering.FilterRawData;
                 }
 
                 measureFormatter = barChartDef.measure.getFormatter();
+                dimensionFormatter = barChartDef.yaxis.getFormatter();
                 var conditionRenderer:ConditionRenderer = barChartDef.measure.createClientRenderer();
                 if (conditionRenderer.hasCustomColor()) {
                     customColors = true;
@@ -251,6 +255,10 @@ import com.easyinsight.filtering.FilterRawData;
 
         private function renderAxis(labelValue:Object, previousValue:Object, axis:IAxis):String {
             return measureFormatter.format(labelValue);
+        }
+
+        private function renderDimensionAxis(item:Object, prevValue:Object, axis:CategoryAxis, categoryItem:Object):String {
+            return dimensionFormatter.format(item);
         }
 
         public function createFilterRawData():FilterRawData {
