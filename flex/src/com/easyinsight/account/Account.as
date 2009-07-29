@@ -36,6 +36,7 @@ package com.easyinsight.account
         public var validatedAPIAllowed:Boolean;
         public var dynamicAPIAllowed:Boolean;
         public var basicAuthAllowed:Boolean;
+        public var activated:Boolean;
 		
 		public function Account()
 		{

@@ -446,7 +446,11 @@ public class UserService implements IUserService {
     }
 
     private void configureNewAccount(Account account) {
-        account.setAccountState(Account.ACTIVE);
+        if (account.getAccountType() == Account.FREE) {
+            account.setAccountState(Account.ACTIVE);
+        } else {
+            account.setAccountState(Account.TRIAL);
+        }
         account.setActivated(false);
         if (account.getAccountType() == Account.ENTERPRISE) {
             account.setMaxUsers(500);

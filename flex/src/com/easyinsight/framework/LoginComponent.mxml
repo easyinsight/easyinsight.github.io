@@ -211,16 +211,16 @@
             }
         }
 
-        private function signon():void {
+        public function signon(userNameStr:String, passwordStr:String):void {
             if (authService.channelSet == null) {
                 authService.channelSet = ServerConfig.getChannelSet(authService.destination);
             }
-            var token:AsyncToken = authService.channelSet.login(userName.text, password.text);
+            var token:AsyncToken = authService.channelSet.login(userNameStr, passwordStr);
             token.addResponder(new AsyncResponder(
                     function (event:ResultEvent, token:Object = null):void {
                         switch (event.result) {
                             case "success":
-                                authService.authenticate.send(userName.text, password.text);
+                                authService.authenticate.send(userNameStr, passwordStr);
                                 break;
                             default:
                                 trace(event.result);
@@ -232,7 +232,7 @@
                             default:
                                 var failureMessage:String = event.fault.faultString;
                                 failureMessageLabel.text = failureMessage;
-                                authService.isAccountDelinquentOrClosed.send(userName.text);
+                                authService.isAccountDelinquentOrClosed.send(userNameStr);
                         }
                     }
                     ));
@@ -245,7 +245,7 @@
 
         private function keyedSignon(event:KeyboardEvent):void {
             if (event.keyCode == Keyboard.ENTER) {
-                signon();
+                signon(userName.text, password.text);
             }
         }
 
@@ -269,7 +269,7 @@
                                click="currentState='ResetPassword'"/>
             </mx:FormItem>
             <mx:FormItem direction="horizontal">
-                <mx:Button label="Sign In" click="signon()" tabIndex="3"/>
+                <mx:Button label="Sign In" click="signon(userName.text, password.text)" tabIndex="3"/>
                 <mx:Button label="Cancel" click="cancel()" visible="{_cancelVisible}" tabIndex="4"/>
             </mx:FormItem>
             <mx:FormItem label="">

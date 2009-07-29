@@ -387,7 +387,7 @@ public class Account {
     }
 
     public AccountCreditCardBillingInfo bill() {
-        if(getAccountState() == Account.FREE)
+        if(getAccountType() == Account.FREE)
             setAccountState(Account.ACTIVE);
         // the indirection here is to support invoice billingSystem later
         BrainTreeBillingSystem billingSystem = new BrainTreeBillingSystem();

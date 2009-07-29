@@ -349,11 +349,7 @@ public class UserAccountAdminService {
                 url = rs.getString(2);
                 List results = session.createQuery("from Account where accountID = ?").setLong(0, accountID).list();
                 Account account = (Account) results.get(0);
-                if (account.getAccountType() == Account.FREE) {
-                    account.setAccountState(Account.ACTIVE);
-                } else {
-                    account.setAccountState(Account.TRIAL);                    
-                }
+                account.setActivated(true);
                 session.update(account);
                 session.flush();
                 if (account.getAccountType() == Account.FREE) {

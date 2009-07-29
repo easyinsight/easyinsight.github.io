@@ -28,15 +28,11 @@
 				<account:AccountCreated/>
 			</mx:AddChild>
 		</mx:State>
-        <mx:State name="FreeActivation">
-			<mx:RemoveChild target="{initialContent}"/>
-			<mx:AddChild relativeTo="{coreContent}">
-				<account:FreeAccountActivation/>
-			</mx:AddChild>
-		</mx:State>
+
 	</mx:states>
 	<mx:Script>
 		<![CDATA[
+        import com.easyinsight.framework.LoginComponent;
         import com.easyinsight.framework.LoginEvent;
         import com.easyinsight.framework.UserServiceResponse;
         import com.easyinsight.framework.UserTransferObject;
@@ -44,6 +40,7 @@
 
         import com.easyinsight.util.ProgressAlert;
 
+        import mx.controls.Alert;
         import mx.managers.PopUpManager;
 
         [Bindable]
@@ -92,12 +89,14 @@
         }
 
         private function attemptAccountCreation():void {
-            creationService.createAccount(user, account, password, _destinationURL);
+            creationService.createAccount(user, account, password, null);
         }
 
         private function createdAccount():void {
             var resultID:int = creationService.createAccount.lastResult as int;
-            currentState = "FreeActivation";
+            var c:LoginComponent = new LoginComponent();
+            c.targetURL = _destinationURL;
+            c.signon(user.userName, password);
         }
 
         private function gotUserInfo():void {
@@ -107,6 +106,7 @@
             User.getInstance().password = user.encryptedPassword;
             User.getInstance().userName = user.userName;
             User.getEventNotifier().dispatchEvent(new LoginEvent(LoginEvent.LOGIN));
+
             currentState = "AccountCreated";
         }
 
