@@ -41,15 +41,16 @@ import flash.events.Event;
 			super.createChildren();
 			if (button == null) {
 				button = new Button();
-				button.toolTip = "Analyze";
+				button.toolTip = "Create Data Source";
 				button.setStyle("icon", dataIcon);
+                button.addEventListener(MouseEvent.CLICK, subscribe);
 				addChild(button);	
 			}
 		}
 		
 		override protected function commitProperties():void {
 			super.commitProperties();
-			if (!setButtonProps) {
+			/*if (!setButtonProps) {
                 if (_data != null) {
                     if (_data.feedDescriptor == null) {
                         button.toolTip = "Create Data Source";
@@ -59,7 +60,7 @@ import flash.events.Event;
                         button.addEventListener(MouseEvent.CLICK, analyze);
                     }
                 }
-			}
+			}*/
 		}							
 
 		override public function set data(value:Object):void {			
@@ -97,7 +98,7 @@ import flash.events.Event;
             descriptor.name = _data.spreadsheet + " - " + _data.title;
 			_data.feedDescriptor = descriptor;
 			//this.parent.dispatchEvent(new AnalyzeEvent(new DescriptorAnalyzeSource(descriptor)));
-			this.parent.dispatchEvent(new UploadConfigEvent(UploadConfigEvent.UPLOAD_CONFIG_COMPLETE, descriptor.dataFeedID, descriptor.name));
+			dispatchEvent(new UploadConfigEvent(UploadConfigEvent.UPLOAD_CONFIG_COMPLETE, descriptor.dataFeedID, descriptor.name));
 		}
 		
 		private function failedSubscription(event:FaultEvent):void {

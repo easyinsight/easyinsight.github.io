@@ -19,7 +19,8 @@
 	<mx:Script>
 		<![CDATA[
 			import com.easyinsight.customupload.UploadConfigEvent;
-			import com.easyinsight.listing.AnalyzeSource;
+            import com.easyinsight.framework.CredentialsCache;
+            import com.easyinsight.listing.AnalyzeSource;
             import com.easyinsight.genredata.AnalyzeEvent;
             import com.easyinsight.framework.Credentials;
             import mx.collections.ArrayCollection;
@@ -76,7 +77,12 @@
                 dispatchEvent(event);
             }
 
-             private function retrieveSpreadsheets():void {
+            private function onComplete(event:UploadConfigEvent):void {
+                CredentialsCache.getCache().addCredentials(event.feedID, credentials);
+            }
+
+            private function retrieveSpreadsheets():void {
+                 addEventListener(UploadConfigEvent.UPLOAD_CONFIG_COMPLETE, onComplete);
 				 var user:User = User.getInstance();
                  if (user == null) {
                      currentState = "notLoggedIn";
