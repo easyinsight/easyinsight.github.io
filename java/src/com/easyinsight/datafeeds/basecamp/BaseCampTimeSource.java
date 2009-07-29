@@ -15,7 +15,6 @@ import org.apache.commons.httpclient.UsernamePasswordCredentials;
 import org.apache.commons.httpclient.HttpMethod;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.auth.AuthScope;
-import org.apache.ws.security.util.XmlSchemaDateFormat;
 import org.jetbrains.annotations.NotNull;
 import nu.xom.Builder;
 import nu.xom.Document;
@@ -41,6 +40,7 @@ public class BaseCampTimeSource extends ServerDataSourceDefinition {
     public static final String PERSONID = "Person ID";
     public static final String HOURS = "Hours";
     public static final String DESCRIPTION = "Description";
+    public static final String PROJECTNAME = "Project Name";
 
     public static final String COUNT = "Count";
     private static final String PERSONNAME = "Person Name";
@@ -88,7 +88,7 @@ public class BaseCampTimeSource extends ServerDataSourceDefinition {
     public DataSet getDataSet(com.easyinsight.users.Credentials credentials, Map<String, Key> keys, Date now, FeedDefinition parentDefinition) {
         BaseCampCompositeSource baseCampCompositeSource = (BaseCampCompositeSource) parentDefinition;
         String url = baseCampCompositeSource.getUrl();
-        DateFormat df = new XmlSchemaDateFormat();
+
         DateFormat deadlineFormat = new SimpleDateFormat(XMLDATEFORMAT);
 
         DataSet ds = new DataSet();
@@ -101,6 +101,7 @@ public class BaseCampTimeSource extends ServerDataSourceDefinition {
             for(int i = 0;i < projectNodes.size();i++) {
                 Node curProject = projectNodes.get(i);
                 String projectIdToRetrieve = queryField(curProject, "id/text()");
+                String projectName = queryField(curProject, "name/text()");
 
                 EIPageInfo info = new EIPageInfo();
                 info.currentPage = 1;
@@ -118,6 +119,7 @@ public class BaseCampTimeSource extends ServerDataSourceDefinition {
 
                         IRow row = ds.createRow();
                         row.addValue(keys.get(PROJECTID), projectIdToRetrieve);
+                        row.addValue(keys.get(PROJECTNAME), projectName);
                         row.addValue(keys.get(PERSONNAME), personName);
                         row.addValue(keys.get(PERSONID), personID);
                         row.addValue(keys.get(HOURS), new NumericValue(Double.parseDouble(timeHours)));
@@ -164,7 +166,7 @@ public class BaseCampTimeSource extends ServerDataSourceDefinition {
 
     @NotNull
     protected List<String> getKeys() {
-        return Arrays.asList(PERSONID, PERSONNAME, HOURS, DESCRIPTION, PROJECTID, COUNT, TODOID, DATE);
+        return Arrays.asList(PERSONID, PERSONNAME, HOURS, DESCRIPTION, PROJECTNAME, PROJECTID, COUNT, TODOID, DATE);
     }
 
     public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, DataSet dataSet, com.easyinsight.users.Credentials credentials) {
@@ -177,6 +179,7 @@ public class BaseCampTimeSource extends ServerDataSourceDefinition {
         personDim.setHidden(true);
         analysisItems.add(personDim);
         analysisItems.add(new AnalysisDimension(keys.get(PERSONNAME), true));
+        analysisItems.add(new AnalysisDimension(keys.get(PROJECTNAME), true));
         analysisItems.add(new AnalysisMeasure(keys.get(HOURS), AggregationTypes.SUM));
         analysisItems.add(new AnalysisMeasure(keys.get(COUNT), AggregationTypes.SUM));
         analysisItems.add(new AnalysisDateDimension(keys.get(DATE), true,  AnalysisDateDimension.DAY_LEVEL));
