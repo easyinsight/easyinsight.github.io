@@ -16,6 +16,8 @@ public class SizeRenderer extends Label{
             var descriptor:DataFeedDescriptor = _data as DataFeedDescriptor;
             if (descriptor.feedType == DataFeedDescriptor.ANALYSIS) {
                 this.text = "( Derived )";
+            } else if (descriptor.size == 0) {
+                this.text = "( Live )";
             } else {
                 this.text = String(descriptor.size);
             }
