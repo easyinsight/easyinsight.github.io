@@ -405,7 +405,7 @@ public class UserService implements IUserService {
             insertActivationStmt.setString(4, sourceURL);
             insertActivationStmt.execute();
             new AccountActivityStorage().saveAccountActivity(new AccountActivity(account.getAccountType(),
-                    new Date(), account.getAccountID(), 0, AccountActivity.ACCOUNT_CREATED, "", 0, 0, Account.INACTIVE), conn);
+                    new Date(), account.getAccountID(), 0, AccountActivity.ACCOUNT_CREATED, "", 0, 0, Account.ACTIVE), conn);
             //}
             session.flush();
             conn.commit();
@@ -446,7 +446,8 @@ public class UserService implements IUserService {
     }
 
     private void configureNewAccount(Account account) {
-        account.setAccountState(Account.INACTIVE);
+        account.setAccountState(Account.ACTIVE);
+        account.setActivated(false);
         if (account.getAccountType() == Account.ENTERPRISE) {
             account.setMaxUsers(500);
             account.setMaxSize(1000000000);

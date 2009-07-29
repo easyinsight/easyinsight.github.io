@@ -54,6 +54,9 @@ public class Account {
     @JoinColumn(name="account_id")
     private List<SubscriptionLicense> licenses = new ArrayList<SubscriptionLicense>();
 
+    @Column(name="activated")
+    private boolean activated;
+
     @Column(name="group_id")
     private Long groupID;
 
@@ -413,5 +416,13 @@ public class Account {
             default:
                 throw new RuntimeException("Only doing credit card billing for Individual and Group accounts at the moment.");
         }
+    }
+
+    public boolean isActivated() {
+        return activated;
+    }
+
+    public void setActivated(boolean activated) {
+        this.activated = activated;
     }
 }
