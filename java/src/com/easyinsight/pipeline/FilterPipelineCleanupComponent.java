@@ -18,12 +18,25 @@ public class FilterPipelineCleanupComponent implements IComponent {
         List<AnalysisItem> allRequestedAnalysisItems = new ArrayList<AnalysisItem>(pipelineData.getReport().getAllAnalysisItems());
         if (pipelineData.getReport().getFilterDefinitions() != null) {
             for (FilterDefinition filterDefinition : pipelineData.getReport().getFilterDefinitions()) {
-                if (!allRequestedAnalysisItems.contains(filterDefinition.getField())) {
+                boolean itemFound = findItem(filterDefinition.getField(), allRequestedAnalysisItems);
+                if (!itemFound) {
                     pipelineData.getReportItems().remove(filterDefinition.getField());
                 }
             }
         }
         return dataSet;
+    }
+
+    private boolean findItem(AnalysisItem field, List<AnalysisItem> allRequestedAnalysisItems) {
+        boolean found = false;
+        for (AnalysisItem item : allRequestedAnalysisItems) {
+            List<AnalysisItem> items = item.getAnalysisItems(allRequestedAnalysisItems, new ArrayList<AnalysisItem>());
+            found = items.contains(field);
+            if (found) {
+                break;
+            }
+        }
+        return found;
     }
 
     public void decorate(ListDataResults listDataResults) {

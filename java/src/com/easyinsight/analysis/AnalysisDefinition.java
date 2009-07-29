@@ -399,6 +399,9 @@ public class AnalysisDefinition implements Cloneable {
         analysisDefinition.setDataFeedID(dataFeedID);
         if (getAddedItems() != null) {
             analysisDefinition.setAddedItems(new ArrayList<AnalysisItem>(getAddedItems()));
+            for (AnalysisItem analysisItem : analysisDefinition.getAddedItems()) {
+                analysisItem.afterLoad();
+            }
         }
         analysisDefinition.setName(title);
         analysisDefinition.setFilterDefinitions(FilterDefinitionConverter.fromPersistableFilters(filterDefinitions));

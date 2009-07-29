@@ -3,6 +3,7 @@ import com.easyinsight.HierarchyComboBox;
 
 import mx.collections.ArrayCollection;
 import mx.core.UIComponent;
+import mx.formatters.Formatter;
 
 [Bindable]
 [RemoteClass(alias="com.easyinsight.analysis.AnalysisHierarchyItem")]
@@ -18,6 +19,10 @@ public class AnalysisHierarchyItem extends AnalysisDimension {
 
     override public function getType():int {
         return super.getType() | AnalysisItemTypes.HIERARCHY;
+    }
+
+    override public function getFormatter():Formatter {
+        return hierarchyLevel.analysisItem.getFormatter();
     }
 }
 }

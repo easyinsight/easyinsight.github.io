@@ -13,6 +13,7 @@ public class FilterDefinitionConverter {
         List<FilterDefinition> filterDefinitions = new ArrayList<FilterDefinition>();
         if (persistableFilterDefinitions != null) {
             for (PersistableFilterDefinition persistableFilterDefinition : persistableFilterDefinitions) {
+                persistableFilterDefinition.getField().afterLoad();
                 filterDefinitions.add(persistableFilterDefinition.toFilterDefinition());
             }
         }
