@@ -6,8 +6,9 @@ package com.easyinsight.analysis
 	
 	import mx.collections.ArrayCollection;
 	import mx.containers.HBox;
-	
-	public class ListDropAreaGrouping extends HBox
+import mx.controls.Alert;
+
+public class ListDropAreaGrouping extends HBox
 	{		
 		private var dropAreas:ArrayCollection = new ArrayCollection();
 		private var _dropAreaType:Class;
@@ -205,7 +206,7 @@ package com.easyinsight.analysis
 	    	var targetLocation:int = position == -1 ? dropAreas.length - 1 : position;
 	    	dropAreas.addItemAt(dropArea, targetLocation);
 	    	addChildAt(dropArea, targetLocation);
-            if (getCurrentElements() == _maxElements) {
+            if (!_unlimited && getCurrentElements() >= _maxElements) {
                 destroyLast();
             }
 	    	onItem(analysisItem, null);
