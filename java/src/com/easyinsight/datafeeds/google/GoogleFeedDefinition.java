@@ -117,13 +117,46 @@ public class GoogleFeedDefinition extends ServerDataSourceDefinition {
 
     @Override
     public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, DataSet dataSet, Credentials credentials) {
-        return populateFields(dataSet);
+        try {
+            SpreadsheetService myService = GoogleSpreadsheetAccess.getOrCreateSpreadsheetService(credentials);
+            URL listFeedUrl = new URL(worksheetURL);
+            ListFeed feed = myService.getFeed(listFeedUrl, ListFeed.class);
+            DataSet mySet = new DataSet();
+            for (ListEntry listEntry : feed.getEntries()) {
+                IRow row = mySet.createRow();
+                boolean atLeastOneValue = false;
+                for (String tag : listEntry.getCustomElements().getTags()) {
+                    Value value;
+                    String string = listEntry.getCustomElements().getValue(tag);
+                    if (string == null) {
+                        value = new EmptyValue();
+                    } else {
+                        if (string.length() > 0) {
+                            atLeastOneValue = true;
+                        }
+                        value = new StringValue(string);
+                    }
+                    NamedKey key = (NamedKey) keys.get(tag);
+                    if (key == null) {
+                        key = new NamedKey(tag);
+                        keys.put(tag, key);
+                    }
+                    row.addValue(new NamedKey(tag), value);
+                }
+                if (!atLeastOneValue) {
+                    mySet.removeRow(row);
+                }
+            }
+            return populateFields(mySet);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
     public DataSet getDataSet(Credentials credentials, Map<String, Key> keys, Date now, FeedDefinition parentDefinition) {
-        DataSet dataSet;
-        try {
+        DataSet dataSet = new DataSet();
+        /*try {
             SpreadsheetService myService = GoogleSpreadsheetAccess.getOrCreateSpreadsheetService(credentials);
             URL listFeedUrl = new URL(worksheetURL);
             ListFeed feed = myService.getFeed(listFeedUrl, ListFeed.class);
@@ -157,7 +190,7 @@ public class GoogleFeedDefinition extends ServerDataSourceDefinition {
             throw new RuntimeException(e);
         } catch (ServiceException e) {
             throw new RuntimeException(e);
-        }
+        }*/
         return dataSet;
     }
 
@@ -167,6 +200,11 @@ public class GoogleFeedDefinition extends ServerDataSourceDefinition {
 
     public int getCredentialsDefinition() {
         return CredentialsDefinition.STANDARD_USERNAME_PW;
+    }
+
+    @Override
+    public Feed createFeedObject() {
+        return new GoogleSpreadsheetFeed(worksheetURL);
     }
 
     public String validateCredentials(Credentials credentials) {
