@@ -233,11 +233,21 @@ public class InstallationSystem {
         List<SolutionInstallInfo> descriptors = new ArrayList<SolutionInstallInfo>();
         PreparedStatement queryStmt = conn.prepareStatement("SELECT FEED_ID FROM SOLUTION_TO_FEED WHERE SOLUTION_ID = ?");
         queryStmt.setLong(1, solutionID);
+        PreparedStatement installStmt = conn.prepareStatement("INSERT INTO SOLUTION_INSTALL (SOLUTION_ID, installed_data_source_id, original_data_source_id) VALUES (?, ?, ?)");
         ResultSet rs = queryStmt.executeQuery();
         while (rs.next()) {
             long feedID = rs.getLong(1);
             FeedDefinition feedDefinition = feedStorage.getFeedDefinitionData(feedID, conn);
             descriptors.addAll(DataSourceCopyUtils.installFeed(userID, conn, copyData, feedID, feedDefinition, true, null));
+
+            for (SolutionInstallInfo info : descriptors) {
+                if (info.getDescriptor().getType() == EIDescriptor.DATA_SOURCE) {
+                    installStmt.setLong(1, solutionID);
+                    installStmt.setLong(2, info.getDescriptor().getId());
+                    installStmt.setLong(3, info.getPreviousID());
+                    installStmt.execute();
+                }
+            }
         }
         return descriptors;
     }
