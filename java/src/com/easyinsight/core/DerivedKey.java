@@ -11,7 +11,7 @@ import javax.persistence.*;
 @Table(name="derived_item_key")
 @PrimaryKeyJoinColumn(name="item_key_id")
 public class DerivedKey extends Key {
-    @OneToOne(cascade = CascadeType.ALL)
+    @OneToOne
     @JoinColumn(name="parent_item_key_id")
     private Key parentKey;
     @Column(name="feed_id")

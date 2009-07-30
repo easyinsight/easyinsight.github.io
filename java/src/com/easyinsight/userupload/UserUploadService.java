@@ -14,7 +14,6 @@ import com.easyinsight.security.Roles;
 import com.easyinsight.users.*;
 import com.easyinsight.analysis.*;
 import com.easyinsight.PasswordStorage;
-import com.easyinsight.goals.GoalStorage;
 import com.easyinsight.eventing.EventDispatcher;
 import com.easyinsight.eventing.AsyncCreatedEvent;
 import com.easyinsight.notifications.TodoEventInfo;
@@ -61,7 +60,7 @@ public class UserUploadService implements IUserUploadService {
             throw new RuntimeException(e);
         } finally {
             conn.setAutoCommit(true);
-            Database.instance().closeConnection(conn);
+            Database.closeConnection(conn);
         }
     }
 
@@ -163,7 +162,7 @@ public class UserUploadService implements IUserUploadService {
             LogClass.error(e);
             throw new RuntimeException(e);
         } finally {
-            Database.instance().closeConnection(conn);
+            Database.closeConnection(conn);
         }
     }
 
@@ -203,7 +202,7 @@ public class UserUploadService implements IUserUploadService {
             } catch (SQLException e) {
                 LogClass.error(e);
             }
-            Database.instance().closeConnection(conn);
+            Database.closeConnection(conn);
         }
     }
 
@@ -260,7 +259,7 @@ public class UserUploadService implements IUserUploadService {
             } catch (SQLException e) {
                 LogClass.error(e);
             }
-            Database.instance().closeConnection(conn);
+            Database.closeConnection(conn);
         }
         return uploadResponse;
     }
@@ -353,7 +352,7 @@ public class UserUploadService implements IUserUploadService {
                 throw new SecurityException();
             }
             conn.commit();
-        } catch (SQLException e) {
+        } catch (Exception e) {
             LogClass.error(e);
             try {
                 conn.rollback();
@@ -367,7 +366,7 @@ public class UserUploadService implements IUserUploadService {
             } catch (SQLException e) {
                 LogClass.error(e);
             }
-            Database.instance().closeConnection(conn);
+            Database.closeConnection(conn);
         }
     }
 
@@ -422,7 +421,7 @@ public class UserUploadService implements IUserUploadService {
             LogClass.error(e);
             throw new RuntimeException(e);
         } finally {
-            Database.instance().closeConnection(conn);
+            Database.closeConnection(conn);
         }
     }
 
@@ -458,7 +457,7 @@ public class UserUploadService implements IUserUploadService {
                     PasswordStorage.setPasswordCredentials(credentials.getUserName(), credentials.getPassword(), feedID, conn);
                 }
                 finally {
-                    Database.instance().closeConnection(conn);
+                    Database.closeConnection(conn);
                 }
             }
             CredentialsResponse credentialsResponse;
@@ -527,7 +526,7 @@ public class UserUploadService implements IUserUploadService {
             } catch (SQLException e) {
                 LogClass.error(e);
             }
-            Database.instance().closeConnection(conn);
+            Database.closeConnection(conn);
         }
     }
 
@@ -790,7 +789,7 @@ public class UserUploadService implements IUserUploadService {
             } catch (SQLException e) {
                 LogClass.error(e);
             }
-            Database.instance().closeConnection(conn);
+            Database.closeConnection(conn);
         }
     }
     public static User retrieveUser(Connection conn) {

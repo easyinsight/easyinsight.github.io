@@ -3,6 +3,7 @@ package com.easyinsight.datafeeds;
 import com.easyinsight.userupload.UploadPolicy;
 import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.core.Key;
+import com.easyinsight.core.NamedKey;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.users.Credentials;
 import com.easyinsight.analysis.*;
@@ -506,15 +507,30 @@ public class FeedDefinition implements Cloneable, Serializable {
 
     public void delete(Connection conn) throws SQLException {
         onDelete(conn);
+        
         // cascade into base classes - see http://bugs.mysql.com/bug.php?id=13102 as to why this code sucks.
         PreparedStatement deleteTodosStmt = conn.prepareStatement("delete from todo_base where todo_id in (select todo_id from configure_data_feed_todo where data_source_id = ?)");
         PreparedStatement deleteAsyncTasksStmt = conn.prepareStatement("DELETE FROM scheduled_task WHERE scheduled_task_id in (select scheduled_task_id from server_refresh_task where data_source_id = ?)");
         Session session = Database.instance().createSession(conn);
-        PreparedStatement deleteKeyStmt = conn.prepareStatement("delete from item_key where item_key_id = ?");
+
+        List reportObjects = session.createQuery("from AnalysisDefinition where dataFeedID = ?").setLong(0, getDataFeedID()).list();
+
+        /*for (Object reportObject : reportObjects) {
+            AnalysisDefinition analysisDefinition = (AnalysisDefinition) reportObject;
+            for (AnalysisItem analysisItem : analysisDefinition.getReportStructure().values()) {
+                session.delete(analysisItem.getKey());
+            }
+            session.delete(analysisDefinition);
+        }*/
+
+        session.flush();
+
+        //PreparedStatement deleteKeyStmt = conn.prepareStatement("delete from item_key where item_key_id = ?");
         for (AnalysisItem field : getFields()) {
-            deleteKeyStmt.setLong(1, field.getKey().toBaseKey().getKeyID());
-            deleteKeyStmt.executeUpdate();
+
+            session.delete(field.getKey());
         }
+
         session.flush();
         session.close();
         PreparedStatement deleteStmt = conn.prepareStatement("DELETE FROM DATA_FEED WHERE DATA_FEED_ID = ?");
