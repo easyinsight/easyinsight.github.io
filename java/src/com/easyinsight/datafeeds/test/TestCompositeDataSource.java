@@ -26,11 +26,11 @@ public class TestCompositeDataSource extends CompositeServerDataSource {
 
     protected Collection<ChildConnection> getChildConnections() {
         return Arrays.asList(new ChildConnection(FeedType.TEST_ALPHA, FeedType.TEST_BETA,
-                TestAlphaDataSource.JOIN_DIM, TestBetaDataSource.JOIN_DIM),
-                new ChildConnection(FeedType.TEST_BETA, FeedType.TEST_GAMMA, TestBetaDataSource.JOIN_DIM,
-                        TestGammaDataSource.JOIN_DIM),
-                new ChildConnection(FeedType.TEST_ALPHA, FeedType.TEST_GAMMA, TestAlphaDataSource.JOIN_DIM,
-                        TestGammaDataSource.JOIN_DIM));
+                TestAlphaDataSource.TODO_DIM, TestBetaDataSource.TODO_DIM),
+                new ChildConnection(FeedType.TEST_BETA, FeedType.TEST_GAMMA, TestBetaDataSource.PROJECT_DIM,
+                        TestGammaDataSource.PROJECT_DIM),
+                new ChildConnection(FeedType.TEST_ALPHA, FeedType.TEST_GAMMA, TestAlphaDataSource.PROJECT_DIM,
+                        TestGammaDataSource.PROJECT_DIM));
     }
 
     protected IServerDataSourceDefinition createForFeedType(FeedType feedType) {

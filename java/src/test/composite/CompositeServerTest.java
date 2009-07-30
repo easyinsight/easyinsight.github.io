@@ -15,6 +15,7 @@ import com.easyinsight.datafeeds.test.TestCompositeDataSource;
 import com.easyinsight.datafeeds.test.TestGammaDataSource;
 import com.easyinsight.solutions.Solution;
 import com.easyinsight.solutions.SolutionService;
+import com.easyinsight.dataset.DataSet;
 
 import java.util.Arrays;
 
@@ -42,11 +43,12 @@ public class CompositeServerTest extends TestCase {
         listDef.setDataFeedID(sourceID);
         listDef.setColumns(Arrays.asList(TestUtil.getItem(sourceID, TestAlphaDataSource.DIM),
                 TestUtil.getItem(sourceID, TestBetaDataSource.DIM),
-                TestUtil.getItem(sourceID, TestGammaDataSource.DIM)));
-        ListDataResults results = dataService.list(listDef, new InsightRequestMetadata());
-        Solution solution = new Solution();
+                TestUtil.getItem(sourceID, TestGammaDataSource.PROJECT_NAME)));
+        DataSet results = dataService.listDataSet(listDef, new InsightRequestMetadata());
+        System.out.println("blah");
+        /*Solution solution = new Solution();
         solution.setName("Blah");
         long solutionID = new SolutionService().addSolution(solution, Arrays.asList((int) sourceID));
-        new SolutionService().installSolution(solutionID);
+        new SolutionService().installSolution(solutionID);*/
     }
 }

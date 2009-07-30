@@ -18,7 +18,8 @@ import java.util.*;
 public class TestBetaDataSource extends ServerDataSourceDefinition {
 
     public static final String DIM = "BetaDimension";
-    public static final String JOIN_DIM = "JoinDimension";
+    public static final String TODO_DIM = "JoinDimension";
+    public static final String PROJECT_DIM = "Project";
     public static final String MEASURE = "BetaMeasure";
 
     public TestBetaDataSource() {
@@ -27,7 +28,7 @@ public class TestBetaDataSource extends ServerDataSourceDefinition {
 
     @NotNull
     protected List<String> getKeys() {
-        return Arrays.asList(DIM, JOIN_DIM, MEASURE);
+        return Arrays.asList(DIM, TODO_DIM, PROJECT_DIM, MEASURE);
     }
 
     public FeedType getFeedType() {
@@ -38,11 +39,13 @@ public class TestBetaDataSource extends ServerDataSourceDefinition {
         DataSet dataSet = new DataSet();
         IRow row1 = dataSet.createRow();
         row1.addValue(keys.get(DIM), "Beta Row 1");
-        row1.addValue(keys.get(JOIN_DIM), "X");
+        row1.addValue(keys.get(PROJECT_DIM), "Project1");
+        row1.addValue(keys.get(TODO_DIM), "X");
         row1.addValue(keys.get(MEASURE), 100);
         IRow row2 = dataSet.createRow();
         row2.addValue(keys.get(DIM), "Beta Row 2");
-        row2.addValue(keys.get(JOIN_DIM), "Y");
+        row2.addValue(keys.get(TODO_DIM), "Y");
+        row2.addValue(keys.get(PROJECT_DIM), "Project2");
         row2.addValue(keys.get(MEASURE), 200);
         return dataSet;
     }
@@ -50,7 +53,8 @@ public class TestBetaDataSource extends ServerDataSourceDefinition {
     public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, DataSet dataSet, com.easyinsight.users.Credentials credentials) {
         List<AnalysisItem> analysisItems = new ArrayList<AnalysisItem>();
         analysisItems.add(new AnalysisDimension(keys.get(DIM), true));
-        analysisItems.add(new AnalysisDimension(keys.get(JOIN_DIM), true));
+        analysisItems.add(new AnalysisDimension(keys.get(TODO_DIM), true));
+        analysisItems.add(new AnalysisDimension(keys.get(PROJECT_DIM), true));
         analysisItems.add(new AnalysisMeasure(keys.get(MEASURE), AggregationTypes.SUM));
         return analysisItems;
     }
