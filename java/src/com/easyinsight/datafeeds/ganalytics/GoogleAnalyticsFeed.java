@@ -56,7 +56,7 @@ public class GoogleAnalyticsFeed extends Feed {
                 AccountFeed accountFeed = as.getFeed(new URL(baseUrl), AccountFeed.class);
                 for (AccountEntry accountEntry : accountFeed.getEntries()) {
                     String title = accountEntry.getTitle().getPlainText();
-                    metadata.addValue(analysisItem, new StringValue(title));
+                    metadata.addValue(analysisItem, new StringValue(title), insightRequestMetadata);
                 }
             } else {
                 String baseUrl = "https://www.google.com/analytics/feeds/accounts/default";
@@ -84,7 +84,7 @@ public class GoogleAnalyticsFeed extends Feed {
                     DataFeed feed = as.getFeed(reportUrl, DataFeed.class);
 
                     for (DataEntry entry : feed.getEntries()) {
-                        metadata.addValue(queryItem, getValue(queryItem, entry));
+                        metadata.addValue(queryItem, getValue(queryItem, entry), insightRequestMetadata);
                     }
                 }
             }

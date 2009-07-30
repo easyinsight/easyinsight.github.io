@@ -22,6 +22,6 @@ public class AnalysisItemResultMetadata implements Serializable {
         this.version = version;
     }
 
-    public void addValue(AnalysisItem analysisItem, Value value) {
+    public void addValue(AnalysisItem analysisItem, Value value, InsightRequestMetadata insightRequestMetadata) {
     }
 }

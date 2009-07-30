@@ -17,6 +17,7 @@ import org.jetbrains.annotations.Nullable;
  */
 public class InsightRequestMetadata implements Serializable {
     private Date now = new Date();
+    private int utcOffset;
     private int version;
     private List<CredentialFulfillment> credentialFulfillmentList = new ArrayList<CredentialFulfillment>();
 
@@ -29,6 +30,14 @@ public class InsightRequestMetadata implements Serializable {
             }
         }
         return credentials;
+    }
+
+    public int getUtcOffset() {
+        return utcOffset;
+    }
+
+    public void setUtcOffset(int utcOffset) {
+        this.utcOffset = utcOffset;
     }
 
     public List<CredentialFulfillment> getCredentialFulfillmentList() {

@@ -8,6 +8,7 @@ import mx.collections.ArrayCollection;
 	public class InsightRequestMetadata
 	{
 		public var now:Date = new Date();
+        public var utcOffset:int;
         public var version:int;
         public var credentialFulfillmentList:ArrayCollection;
 		

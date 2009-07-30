@@ -96,7 +96,7 @@ import flash.events.MouseEvent;
 			dataService = new RemoteObject();
 			dataService.destination = "data";
 			dataService.getAnalysisItemMetadata.addEventListener(ResultEvent.RESULT, gotMetadata);
-			dataService.getAnalysisItemMetadata.send(_feedID, _analysisItem, CredentialsCache.getCache().createCredentials());
+			dataService.getAnalysisItemMetadata.send(_feedID, _analysisItem, CredentialsCache.getCache().createCredentials(), new Date().getTimezoneOffset());
 		}
 		
 		private function gotMetadata(event:ResultEvent):void {

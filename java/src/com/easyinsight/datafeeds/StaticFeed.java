@@ -50,7 +50,7 @@ public class StaticFeed extends Feed implements Serializable {
         }
         for (IRow row : dataSet.getRows()) {
             Value value = row.getValue(queryItem.getKey().toBaseKey());
-            metadata.addValue(analysisItem, value);
+            metadata.addValue(analysisItem, value, insightRequestMetadata);
         }
         return metadata;
     }

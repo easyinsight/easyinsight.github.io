@@ -62,7 +62,7 @@ public class SalesforceFeed extends Feed {
                     List<Object> blahs = object.getAny();
                     for (Object blah : blahs) {
                         Element element = (Element) blah;
-                        metadata.addValue(analysisItem, new StringValue(element.getTextContent()));
+                        metadata.addValue(analysisItem, new StringValue(element.getTextContent()), insightRequestMetadata);
                     }
                 }
             }

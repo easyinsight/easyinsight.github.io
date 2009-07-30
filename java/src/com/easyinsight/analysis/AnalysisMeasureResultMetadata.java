@@ -28,8 +28,8 @@ public class AnalysisMeasureResultMetadata extends AnalysisItemResultMetadata {
         this.highestValue = highestValue;
     }
 
-   public void addValue(AnalysisItem analysisItem, Value value) {
-        Double doubleValue = analysisItem.transformValue(value).toDouble();
+   public void addValue(AnalysisItem analysisItem, Value value, InsightRequestMetadata insightRequestMetadata) {
+        Double doubleValue = analysisItem.transformValue(value, insightRequestMetadata).toDouble();
         if (doubleValue != null) {
             if (lowestValue == null) {
                 lowestValue = doubleValue;

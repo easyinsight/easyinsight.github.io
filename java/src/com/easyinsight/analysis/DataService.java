@@ -38,11 +38,12 @@ public class DataService {
         return null;
     }
 
-    public AnalysisItemResultMetadata getAnalysisItemMetadata(long feedID, AnalysisItem analysisItem, List<CredentialFulfillment> credentials) {
+    public AnalysisItemResultMetadata getAnalysisItemMetadata(long feedID, AnalysisItem analysisItem, List<CredentialFulfillment> credentials, int utfOffset) {
         try {
             SecurityUtil.authorizeFeedAccess(feedID);
             Feed feed = feedRegistry.getFeed(feedID);
             InsightRequestMetadata insightRequestMetadata = new InsightRequestMetadata();
+            insightRequestMetadata.setUtcOffset(utfOffset);
             insightRequestMetadata.setCredentialFulfillmentList(credentials);
             return feed.getMetadata(analysisItem, insightRequestMetadata);
         } catch (Exception e) {
@@ -269,6 +270,7 @@ public class DataService {
         try {
             long startTime = System.currentTimeMillis();
             ListDataResults results;
+            
             Feed feed = feedRegistry.getFeed(analysisDefinition.getDataFeedID());
             /*Set<Long> ids = validate(analysisDefinition, feed);
             if (ids.size() > 0) {

@@ -17,7 +17,7 @@ public class AnalysisDimensionResultMetadata extends AnalysisItemResultMetadata 
 
     private Set<Value> values = new HashSet<Value>();
 
-    public void addValue(AnalysisItem analysisItem, Value value) {
+    public void addValue(AnalysisItem analysisItem, Value value, InsightRequestMetadata insightRequestMetadata) {
         values.add(value);
     }
 

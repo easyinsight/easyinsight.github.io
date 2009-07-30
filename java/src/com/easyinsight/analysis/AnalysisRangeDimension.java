@@ -32,7 +32,7 @@ public class AnalysisRangeDimension extends AnalysisDimension {
         return super.getType() | AnalysisItemTypes.RANGE_DIMENSION;
     }
 
-    public Value transformValue(Value value) {
+    public Value transformValue(Value value, InsightRequestMetadata insightRequestMetadata) {
         Value transformedValue;
         try {
             Double doubleValue = value.toDouble();

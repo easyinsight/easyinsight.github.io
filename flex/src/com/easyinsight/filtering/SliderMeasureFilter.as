@@ -49,7 +49,7 @@ import flash.events.MouseEvent;
 			dataService = new RemoteObject();
 			dataService.destination = "data";
 			dataService.getAnalysisItemMetadata.addEventListener(ResultEvent.RESULT, gotMetadata);
-			dataService.getAnalysisItemMetadata.send(feedID, analysisItem, CredentialsCache.getCache().createCredentials());
+			dataService.getAnalysisItemMetadata.send(feedID, analysisItem, CredentialsCache.getCache().createCredentials(), new Date().getTimezoneOffset());
 		}
 		
 		public function set analysisItems(analysisItems:ArrayCollection):void {

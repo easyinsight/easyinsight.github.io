@@ -6,7 +6,6 @@ import com.easyinsight.analysis.AnalysisItemResultMetadata;
 import com.easyinsight.analysis.AnalysisMeasureResultMetadata;
 
 import javax.persistence.*;
-import java.util.List;
 
 /**
  * User: James Boe
@@ -53,7 +52,7 @@ public class AnalysisMeasure extends AnalysisItem {
         this.aggregation = aggregation;
     }
 
-    public Value transformValue(Value value) {
+    public Value transformValue(Value value, InsightRequestMetadata insightRequestMetadata) {
         Value result;
         if (value == null) {
             result = new EmptyValue();

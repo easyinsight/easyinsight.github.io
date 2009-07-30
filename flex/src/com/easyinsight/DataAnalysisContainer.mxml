@@ -76,6 +76,7 @@
         import com.easyinsight.framework.LoginEvent;
 
         import com.easyinsight.genredata.ModuleAnalyzeEvent;
+        import com.easyinsight.listing.DescriptorAnalyzeSource;
         import com.easyinsight.listing.FeedAdminAnalyzeSource;
 
         import com.easyinsight.report.MultiReportAnalyzeSource;
@@ -1004,6 +1005,16 @@
             PopUpManager.addPopUp(window, this, true);
             PopUpManager.centerPopUp(window);
         }
+
+        private function newReport():void {
+            if (analysisChanged) {
+                Alert.show("You have unsaved changes. Are you sure you want to create a new report?", "Alert",
+                        Alert.OK | Alert.CANCEL, null, adminAlertListener, null, Alert.CANCEL);
+            } else {
+                cleanup();
+                dispatchEvent(new ModuleAnalyzeEvent(new DescriptorAnalyzeSource(dataService.dataFeedID, dataSourceName)));
+            }
+        }
         ]]>
     </mx:Script>
     <mx:RemoteObject id="analysisService" destination="analysisDefinition">
@@ -1021,28 +1032,35 @@
         <mx:method name="getCredentialRequirements" result="gotCredentialRequirements()"/>
     </mx:RemoteObject>
     <mx:VBox height="100%" width="100%">
-        <mx:HBox id="buttonBox">
+        <mx:HBox id="buttonBox" verticalAlign="middle">
             <mx:Button id="wrapButton" icon="@Embed(source='../../../assets/document_out.png')" click="close()"
                        toolTip="Close"/>
+            <mx:VRule strokeColor="#DDDDDD" height="16"/>
             <mx:Button id="undoButton" icon="@Embed(source='../../../assets/undo.png')" click="undo()" toolTip="Undo"/>
             <mx:Button id="redoButton" icon="@Embed(source='../../../assets/redo.png')" click="redo()" toolTip="Redo"/>
+            <mx:VRule strokeColor="#DDDDDD" height="16"/>
             <mx:Button id="saveButton" icon="@Embed(source='../../../assets/floppy_disk.png')" click="save()"
                            toolTip="Save" enabled="{!_previewMode}"/>
             <mx:Button id="saveAsButton" icon="@Embed(source='../../../assets/save_as.png')" click="saveAs()"
                        toolTip="Save As" enabled="{!_previewMode}"/>
+            <mx:VRule strokeColor="#DDDDDD" height="16"/>
+            <mx:Button id="dataSourceButton" toolTip="Create a New Report from Data Source"
+                           icon="@Embed(source='../../../assets/table.png')" click="newReport()"/>
             <mx:Button id="reportsButton" icon="@Embed(source='../../../assets/tables_x16.png')" click="toReports()"
-                       toolTip="Go to Reports" enabled="{!_previewMode}"/>
+                       toolTip="View All Reports for Data Source" enabled="{!_previewMode}"/>
             <mx:Button id="reportButton" icon="@Embed(source='../../../assets/media_play_green.png')" click="goReport()" toolTip="View Report"/>
             <mx:Button id="adminButton" icon="@Embed(source='../../../assets/businessman_edit.png')" click="goAdmin()" toolTip="Adminster"
                     visible="{admin}"/>
+            <mx:VRule strokeColor="#DDDDDD" height="16"/>
             <mx:Button id="subscribeToFeedButton" icon="@Embed(source='../../../assets/folder_into.png')"
-                       click="subscribeToFeed()" toolTip="Add Data Source to My Data" visible="{canSubscribeToFeed}"/>
+                       click="subscribeToFeed()" toolTip="Add Data Source to My Data" enabled="{canSubscribeToFeed}"/>
             <mx:Button id="groupAddFeedButton" icon="@Embed(source='../../../assets/users_into.png')"
-                       click="addFeedToGroup()" toolTip="Add Data Source to Group" visible="{canAddFeedToGroup}"/>
+                       click="addFeedToGroup()" toolTip="Add Data Source to Group" enabled="{canAddFeedToGroup}"/>
             <mx:Button id="subscribeToInsightButton" icon="@Embed(source='../../../assets/folder_into.png')"
-                       click="subscribeToInsight()" toolTip="Add Report to My Data" visible="{canSubscribeToInsight}"/>
+                       click="subscribeToInsight()" toolTip="Add Report to My Data" enabled="{canSubscribeToInsight}"/>
             <mx:Button id="groupAddInsightButton" icon="@Embed(source='../../../assets/users_into.png')"
-                       click="addInsightToGroup()" toolTip="Add Report to Group" visible="{canAddInsightToGroup}"/>
+                       click="addInsightToGroup()" toolTip="Add Report to Group" enabled="{canAddInsightToGroup}"/>
+            <mx:VRule strokeColor="#DDDDDD" height="16"/>
             <mx:ProgressBar indeterminate="true" visible="false" id="loadingBar"/>
         </mx:HBox>
         <mx:TabNavigator id="tabNavigator" width="100%" creationPolicy="all" enabled="{!_previewMode}" paddingTop="0"
@@ -1095,6 +1113,7 @@
                 <mx:Button id="apiButton" toolTip="Show API Info for this Data Source"
                            icon="@Embed(source='../../../assets/app_enterprise_x16.png')" click="showAPIInfo()"/>
                 <analysis:ResultLimitComboBox limits="{limits}"/>
+
             </mx:HBox>
             <filtering:TransformContainer id="transformContainer" paddingLeft="10" paddingTop="10" paddingBottom="10"
                                           paddingRight="10" transformAdded="transformsUpdated(event)" label="Filters"

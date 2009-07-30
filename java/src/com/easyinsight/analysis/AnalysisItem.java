@@ -137,7 +137,7 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
         this.analysisItemID = analysisItemID;
     }
 
-    public Value transformValue(Value value) {
+    public Value transformValue(Value value, InsightRequestMetadata insightRequestMetadata) {
         return value;
     }
 

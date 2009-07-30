@@ -64,6 +64,7 @@ public class ListDataService extends EventDispatcher implements IReportDataServi
     public function retrieveData(definition:AnalysisDefinition):void {
         dispatchEvent(new DataServiceLoadingEvent(DataServiceLoadingEvent.LOADING_STARTED));
         var metadata:InsightRequestMetadata = new InsightRequestMetadata();
+        metadata.utcOffset = new Date().getTimezoneOffset();
         metadata.credentialFulfillmentList = CredentialsCache.getCache().createCredentials();
         dataRemoteSource.list.send(definition, metadata);
     }

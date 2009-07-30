@@ -53,7 +53,7 @@ import mx.rpc.events.ResultEvent;
 			dataService.destination = "data";
 			dataService.getAnalysisItemMetadata.addEventListener(ResultEvent.RESULT, gotMetadata);
             dataService.getAnalysisItemMetadata.addEventListener(FaultEvent.FAULT, onFault);
-			dataService.getAnalysisItemMetadata.send(feedID, analysisItem, CredentialsCache.getCache().createCredentials());
+			dataService.getAnalysisItemMetadata.send(feedID, analysisItem, CredentialsCache.getCache().createCredentials(), new Date().getTimezoneOffset());
 		}
 
         private function onFault(event:FaultEvent):void {

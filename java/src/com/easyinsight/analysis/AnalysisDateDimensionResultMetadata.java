@@ -32,10 +32,10 @@ public class AnalysisDateDimensionResultMetadata extends AnalysisItemResultMetad
         this.latestDate = latestDate;
     }
 
-    public void addValue(AnalysisItem analysisItem, Value value) {
+    public void addValue(AnalysisItem analysisItem, Value value, InsightRequestMetadata insightRequestMetadata) {
         AnalysisDateDimension dateDim = (AnalysisDateDimension) analysisItem;
         dateDim.setDateLevel(AnalysisDateDimension.DAY_LEVEL);
-        value = analysisItem.transformValue(value);
+        value = analysisItem.transformValue(value, insightRequestMetadata);
         if (value.type() == Value.DATE) {
             DateValue dateValue = (DateValue) value;
             Date date = dateValue.getDate();
