@@ -23,6 +23,7 @@ package com.easyinsight.framework
         public var dataSourceCreator:Boolean;
         public var insightCreator:Boolean;
         public var userID:int;
+        public var activated:Boolean;
 
 		private var merchants:ArrayCollection = new ArrayCollection();
 		private var storeService:RemoteObject;
@@ -32,7 +33,7 @@ package com.easyinsight.framework
         }
 		
 		static public function initializeUser(name:String, email:String, accountType:int,
-		spaceAllowed:int, accountAdmin:Boolean, dataSourceCreator:Boolean, insightCreator:Boolean, userID:int):void {
+		spaceAllowed:int, accountAdmin:Boolean, dataSourceCreator:Boolean, insightCreator:Boolean, userID:int, activated:Boolean):void {
 			_user = new User();
 			_user.name = name;
 			_user.email = email;
@@ -42,6 +43,7 @@ package com.easyinsight.framework
 			_user.spaceAllowed = spaceAllowed;
 			_user.accountType = accountType;
             _user.userID = userID;
+            _user.activated = activated;
 			/*_user.storeService = new RemoteObject();
 			_user.storeService.destination = "store";
 			_user.storeService.getMerchants.addEventListener(ResultEvent.RESULT, _user.gotMerchants);
@@ -114,6 +116,7 @@ package com.easyinsight.framework
 		
 		public function addMerchant(merchant:Merchant):void {
 			this.merchants.addItem(merchant);
-		}		
-	}
+		}
+
+        }
 }

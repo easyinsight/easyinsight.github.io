@@ -16,6 +16,16 @@ public class EIMessageListener extends EventDispatcher {
 
     private var consumer:Consumer;
 
+    private static var _instance:EIMessageListener;
+
+    public static function initialize():void {
+        _instance = new EIMessageListener();
+    }
+
+    public static function instance():EIMessageListener {
+        return _instance;
+    }
+
     public function EIMessageListener() {
         consumer = new Consumer();
         consumer.destination = "generalNotifications";

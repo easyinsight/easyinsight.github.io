@@ -731,6 +731,7 @@ public class UserService implements IUserService {
                         if (account.getAccountState() == Account.ACTIVE || account.getAccountState() == Account.TRIAL || account.getAccountState() == Account.DELINQUENT) {
                             userServiceResponse = new UserServiceResponse(true, user.getUserID(), user.getAccount().getAccountID(), user.getName(),
                                 user.getAccount().getAccountType(), account.getMaxSize(), user.getEmail(), user.getUserName(), encryptedPassword, user.isAccountAdmin(), user.isDataSourceCreator(), user.isInsightCreator());
+                            userServiceResponse.setActivated(account.isActivated());
                         } else {
                             userServiceResponse = new UserServiceResponse(false, "Your account is not active.");
                         }
@@ -770,6 +771,7 @@ public class UserService implements IUserService {
                         if (account.getAccountState() == Account.ACTIVE || account.getAccountState() == Account.TRIAL || account.getAccountState() == Account.CLOSING) {
                             userServiceResponse = new UserServiceResponse(true, user.getUserID(), user.getAccount().getAccountID(), user.getName(),
                                  user.getAccount().getAccountType(), account.getMaxSize(), user.getEmail(), user.getUserName(), encryptedPassword, user.isAccountAdmin(), user.isDataSourceCreator(), user.isInsightCreator());
+                            userServiceResponse.setActivated(account.isActivated());
                         } else {
                             userServiceResponse = new UserServiceResponse(false, "Your account is not active.");
                         }

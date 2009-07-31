@@ -68,13 +68,18 @@
         private function credentialClick():void {
             credentialsSaved = !credentialsSaved;
             if (!credentialsSaved) {
-                refreshStepper.value = 0;
+                dailyRefresh.selected = false;
+//                refreshStepper.value = 0;
             }
         }
 
         public function updateDataSource(feedDefinition:FeedDefinitionData):void {
             if (saveCredentialsCheckbox.selected) {
-                feedDefinition.refreshDataInterval = refreshStepper.value * 1000 * 60 * 60;
+//                feedDefinition.refreshDataInterval = refreshStepper.value * 1000 * 60 * 60;
+                if(dailyRefresh.selected)
+                    feedDefinition.refreshDataInterval = 60*60*1000*24;
+                else
+                    feedDefinition.refreshDataInterval = 0;
                 var credentials:Credentials = dataSourceCreation.credentials;
                 feedDefinition.username = credentials.userName;
                 feedDefinition.password = credentials.password;
@@ -100,8 +105,8 @@
         <mx:FormItem label="Save Credentials:" enabled="{ready}">
             <mx:CheckBox id="saveCredentialsCheckbox" click="credentialClick()" selected="{credentialsSaved}"/>
         </mx:FormItem>
-        <mx:FormItem label="Hourly Refresh:" enabled="{credentialsSaved}">
-            <mx:NumericStepper id="refreshStepper" value="{refreshValue}"/>
+        <mx:FormItem label="Refresh Daily:" enabled="{credentialsSaved}">
+            <mx:CheckBox id="dailyRefresh" />
         </mx:FormItem>
         <mx:FormItem label="" direction="horizontal">
             <mx:Button label="Validate" click="serverValidate()" enabled="{ready}"/>

@@ -8,6 +8,7 @@
         import com.easyinsight.customupload.ExcelUploadFormat;
         import com.easyinsight.customupload.FlatFileUploadFormat;
             import com.easyinsight.datasources.IServerDataSourceDefinition;
+            import com.easyinsight.framework.User;
             import com.easyinsight.genredata.ModuleAnalyzeEvent;
         import com.easyinsight.listing.DescriptorAnalyzeSource;
         import com.easyinsight.util.ProgressAlert;
@@ -54,6 +55,8 @@
         private var passwordInputText:String;
         [Bindable]
         private var sessionIdInputText:String;
+        [Bindable]
+        private var activated:Boolean;
 
         [Bindable]
         private var haveFeed:Boolean = false;
@@ -125,6 +128,8 @@
             this.feedOwnerName = feedDefinition.ownerName;
             this.feedAttribution = feedDefinition.attribution;
             this.feedType = feedDefinition.getFeedType();
+
+            this.activated = User.getInstance().activated;
 
             this.refreshInterval = feedDefinition.refreshDataInterval / (1000 * 60 * 60);
             this.sessionIdInputText = feedDefinition.sessionId;
@@ -304,7 +309,7 @@
 							<mx:Label text="Sharing" fontSize="14"/>	
 						</mx:Box>
 					</mx:HBox>			
-					<feed:FeedSharing id="feedPolicy" paddingTop="15" paddingLeft="45" uploadPolicy="{feedUploadPolicy}"/>								
+					<feed:FeedSharing id="feedPolicy" paddingTop="15" paddingLeft="45" uploadPolicy="{feedUploadPolicy}" activated="{activated}"/>								
 				</mx:VBox>										
 			</mx:HBox>
             <mx:Box label="Fields">

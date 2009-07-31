@@ -90,7 +90,7 @@
             if (successful) {
                 User.initializeUser(authResult.name, authResult.email,
                         authResult.accountType, authResult.spaceAllowed, authResult.accountAdmin,
-                        authResult.dataSourceCreator, authResult.insightCreator, authResult.userID);
+                        authResult.dataSourceCreator, authResult.insightCreator, authResult.userID, authResult.activated);
                 User.getInstance().password = authResult.encryptedPassword;
                 User.getInstance().userName = authResult.userName;
                 if(currentState == "LoginState") {

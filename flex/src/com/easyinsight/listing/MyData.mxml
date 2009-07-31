@@ -14,6 +14,8 @@
 	<mx:Script>
 		<![CDATA[
             import com.easyinsight.customupload.SimpleFeedWindow;
+            import com.easyinsight.framework.AsyncInfoEvent;
+            import com.easyinsight.framework.EIMessageListener;
             import com.easyinsight.framework.ModuleAnalyzeSource;
             import com.easyinsight.genredata.ModuleAnalyzeEvent;
             import com.easyinsight.help.MyDataHelp;
@@ -21,6 +23,7 @@
 			import com.easyinsight.customupload.UserUpload;
 			import com.easyinsight.framework.LoginEvent;
 			import com.easyinsight.customupload.UploadExternalSource;
+            import com.easyinsight.notifications.RefreshEventInfo;
             import com.easyinsight.report.ReportAnalyzeSource;
             import com.easyinsight.solutions.InsightDescriptor;
 
@@ -84,12 +87,29 @@
 			private var sourceTreeData:ArrayCollection;
 			
 			private var keyword:String;
+
+            private var _messageListener:EIMessageListener;
+
+            private function onAsyncRefresh(event:AsyncInfoEvent):void {
+                if(event.info.action == RefreshEventInfo.COMPLETE) {
+                    uploadService.getFeedAnalysisTree.send();
+                }
+            }
+
+            public function set messageListener(value:EIMessageListener):void {
+                if (value == _messageListener) {
+                    return;
+                }
+                _messageListener = value;
+                value.addEventListener(AsyncInfoEvent.ASYNC_INFO, onAsyncRefresh);
+            }
 			
 			private function initListeners():void {
 			    addEventListener(KeyboardEvent.KEY_UP, keyHit);
 			    User.getEventNotifier().addEventListener(LoginEvent.LOGIN, onLogin);
                 addEventListener(DeleteDataSourceEvent.DELETE_DATA_SOURCE, onDelete);
                 addEventListener(UploadConfigEvent.UPLOAD_CONFIG_COMPLETE, uploadConfigComplete);
+                messageListener = EIMessageListener.instance();
 			}
 			
 			private function onLogin(event:LoginEvent):void {

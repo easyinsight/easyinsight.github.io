@@ -17,6 +17,7 @@ package com.easyinsight.framework
         public var accountAdmin:Boolean;
         public var dataSourceCreator:Boolean;
         public var insightCreator:Boolean;
+        public var activated:Boolean;
 		
 		public function UserServiceResponse()
 			{

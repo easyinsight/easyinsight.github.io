@@ -102,7 +102,7 @@
         private function gotUserInfo():void {
             var user:UserServiceResponse = creationService.authenticate.lastResult as UserServiceResponse;
             User.initializeUser(user.name, user.email, user.accountType, user.spaceAllowed, user.accountAdmin,
-                    user.dataSourceCreator, user.insightCreator, user.userID);
+                    user.dataSourceCreator, user.insightCreator, user.userID, user.activated);
             User.getInstance().password = user.encryptedPassword;
             User.getInstance().userName = user.userName;
             User.getEventNotifier().dispatchEvent(new LoginEvent(LoginEvent.LOGIN));

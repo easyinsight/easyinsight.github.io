@@ -41,6 +41,7 @@
         import com.easyinsight.bugreports.BugReportWindow;
         import com.easyinsight.framework.ActivationEvent;
         import com.easyinsight.framework.CredentialsCache;
+        import com.easyinsight.framework.EIMessageListener;
         import com.easyinsight.framework.FullScreenModuleEvent;
         import com.easyinsight.framework.ModuleAnalyzeSource;
         import com.easyinsight.framework.WebCredentialsCache;
@@ -100,6 +101,9 @@
             }
         }
 
+        [Bindable]
+        private var messageListener:EIMessageListener;
+
         private var perspective:IPerspective;
 
         [Bindable]
@@ -137,6 +141,8 @@
             browserManager.init("", "Intro");
             User.getEventNotifier().addEventListener(NavigationEvent.NAVIGATION, navigation);
             userService.isSessionLoggedIn.send();
+            EIMessageListener.initialize();
+            messageListener = EIMessageListener.instance(); 
         }
 
         private function applicationListeners():void {
@@ -464,7 +470,7 @@
             if (authResult != null) {
                 User.initializeUser(authResult.name, authResult.email,
                         authResult.accountType, authResult.spaceAllowed, authResult.accountAdmin,
-                        authResult.dataSourceCreator, authResult.insightCreator, authResult.userID);
+                        authResult.dataSourceCreator, authResult.insightCreator, authResult.userID, authResult.activated);
                 User.getInstance().password = authResult.encryptedPassword;
                 User.getInstance().userName = authResult.userName;
                 loggedIn = true;
@@ -496,8 +502,6 @@
     <mx:RemoteObject id="accountService" destination="accountAdmin">
         <mx:method name="activateAccount" result="activated()"/>
     </mx:RemoteObject>
-
-    <framework:EIMessageListener id="messageListener"/>
 
     <mx:VBox width="100%" height="100%" id="coreVBox" paddingLeft="0" verticalGap="0" paddingRight="0">
         <listing:HeaderBar width="100%" id="headerBar"

@@ -19,6 +19,7 @@ public class UserServiceResponse {
     private boolean accountAdmin;
     private boolean dataSourceCreator;
     private boolean insightCreator;
+    private boolean activated;
 
     public UserServiceResponse(boolean successful, String failureMessage) {
         this.successful = successful;
@@ -147,5 +148,13 @@ public class UserServiceResponse {
 
     public void setInsightCreator(boolean insightCreator) {
         this.insightCreator = insightCreator;
+    }
+
+    public boolean isActivated() {
+        return activated;
+    }
+
+    public void setActivated(boolean activated) {
+        this.activated = activated;
     }
 }
