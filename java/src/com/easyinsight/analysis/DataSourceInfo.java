@@ -2,13 +2,14 @@ package com.easyinsight.analysis;
 
 import java.util.Date;
 import java.util.List;
+import java.io.Serializable;
 
 /**
  * User: jamesboe
  * Date: Jul 30, 2009
  * Time: 2:39:04 PM
  */
-public class DataSourceInfo {
+public class DataSourceInfo implements Serializable {
 
     public static final int STORED_PUSH = 1;
     public static final int STORED_PULL = 2;

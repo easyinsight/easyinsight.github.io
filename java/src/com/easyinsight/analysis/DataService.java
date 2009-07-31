@@ -228,7 +228,9 @@ public class DataService {
                 if (dataSet.getLastTime() == null) {
                     dataSet.setLastTime(new Date());
                 }
-                results.setLastDataTime(dataSet.getLastTime());
+                DataSourceInfo dataSourceInfo = feed.getDataSourceInfo();
+                dataSourceInfo.setLastDataTime(dataSet.getLastTime());
+                results.setDataSourceInfo(dataSourceInfo);
                 results.setAttribution(feed.getAttribution());
                 if (resultsCache != null) {
                     resultsCache.put(key, results);                    

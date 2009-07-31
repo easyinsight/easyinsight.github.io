@@ -1,5 +1,7 @@
 package com.easyinsight.analysis {
 
+import com.easyinsight.datasources.DataSourceInfo;
+
 import flash.events.Event;
 import mx.collections.ArrayCollection;
 
@@ -11,25 +13,25 @@ public class EmbeddedDataServiceEvent extends Event {
     public var clientProcessorMap:Object;
     public var analysisDefinition:AnalysisDefinition;
     public var dataSourceAccessible:Boolean;
-    public var lastDataTime:Date;
     public var attribution:String;
     public var credentialRequirements:ArrayCollection;
+    public var dataSourceInfo:DataSourceInfo;
 
     public function EmbeddedDataServiceEvent(type:String, dataSet:ArrayCollection, analysisDefinition:AnalysisDefinition, clientProcessorMap:Object, dataSourceAccessible:Boolean,
-            lastDataTime:Date, attribution:String, credentialRequirements:ArrayCollection) {
+            attribution:String, credentialRequirements:ArrayCollection, dataSourceInfo:DataSourceInfo) {
         super(type);
         this.dataSet = dataSet;
         this.clientProcessorMap = clientProcessorMap;
         this.analysisDefinition = analysisDefinition;
         this.dataSourceAccessible = dataSourceAccessible;
-        this.lastDataTime = lastDataTime;
         this.attribution = attribution;
         this.credentialRequirements = credentialRequirements;
+        this.dataSourceInfo = dataSourceInfo;
     }
 
     override public function clone():Event {
-        return new EmbeddedDataServiceEvent(type, dataSet, analysisDefinition, clientProcessorMap, dataSourceAccessible, lastDataTime, attribution,
-                credentialRequirements);
+        return new EmbeddedDataServiceEvent(type, dataSet, analysisDefinition, clientProcessorMap, dataSourceAccessible, attribution,
+                credentialRequirements, dataSourceInfo);
     }
 }
 }

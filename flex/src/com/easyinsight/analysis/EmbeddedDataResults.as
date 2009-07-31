@@ -1,5 +1,7 @@
 package com.easyinsight.analysis
 {
+import com.easyinsight.datasources.DataSourceInfo;
+
 import mx.collections.ArrayCollection;
 
 [Bindable]
@@ -10,7 +12,7 @@ import mx.collections.ArrayCollection;
 		public var rows:Array;
         public var definition:AnalysisDefinition;
         public var dataSourceAccessible:Boolean;
-        public var lastDataTime:Date;
+        public var dataSourceInfo:DataSourceInfo;
         public var attribution:String;
         public var credentialRequirements:ArrayCollection;
 

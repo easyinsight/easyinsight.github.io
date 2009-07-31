@@ -3,7 +3,6 @@ package com.easyinsight.analysis;
 import com.easyinsight.datafeeds.CredentialRequirement;
 
 import java.io.Serializable;
-import java.util.Date;
 import java.util.List;
 
 public class EmbeddedDataResults implements Serializable {
@@ -11,7 +10,7 @@ public class EmbeddedDataResults implements Serializable {
     private WSAnalysisDefinition definition;
     private ListRow[] rows;
     private boolean dataSourceAccessible;
-    private Date lastDataTime;
+    private DataSourceInfo dataSourceInfo;
     private String attribution;
     private List<CredentialRequirement> credentialRequirements;
 
@@ -22,7 +21,7 @@ public class EmbeddedDataResults implements Serializable {
         this.headers = results.headers;
         this.definition = results.definition;
         this.rows = results.rows;
-        this.lastDataTime = results.lastDataTime;
+        this.dataSourceInfo = results.dataSourceInfo;
         this.attribution = results.attribution;
     }
 
@@ -42,12 +41,12 @@ public class EmbeddedDataResults implements Serializable {
         this.attribution = attribution;
     }
 
-    public Date getLastDataTime() {
-        return lastDataTime;
+    public DataSourceInfo getDataSourceInfo() {
+        return dataSourceInfo;
     }
 
-    public void setLastDataTime(Date lastDataTime) {
-        this.lastDataTime = lastDataTime;
+    public void setDataSourceInfo(DataSourceInfo dataSourceInfo) {
+        this.dataSourceInfo = dataSourceInfo;
     }
 
     public boolean isDataSourceAccessible() {

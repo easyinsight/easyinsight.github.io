@@ -1,8 +1,8 @@
 <?xml version="1.0" ?>
 <easyinsight:FullScreenPage xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:easyinsight="com.easyinsight.*"
-                            xmlns:filtering="com.easyinsight.filtering.*"
+                            xmlns:filtering="com.easyinsight.filtering.*" xmlns:datasources="com.easyinsight.datasources.*"
                             width="100%" height="100%"
-        creationComplete="onCreation()" implements="com.easyinsight.util.IAsyncScreen">
+                            creationComplete="onCreation()" implements="com.easyinsight.util.IAsyncScreen">
     <easyinsight:states>
         <mx:State name="FullScreen">
             <mx:RemoveChild target="{buttonBar}"/>
@@ -11,9 +11,12 @@
         </mx:State>
         <mx:State name="Filtering">
             <mx:AddChild relativeTo="{transformBox}">
-                <filtering:TransformContainer id="transformContainer" filterEditable="false" existingFilters="{filterDefinitions}"
-                         transformAdded="transformsUpdated(event)" updatedTransforms="transformsUpdated(event)" width="100%" paddingLeft="10" paddingTop="10" paddingBottom="10"
-                         paddingRight="10" feedID="{_dataSourceID}"/>
+                <filtering:TransformContainer id="transformContainer" filterEditable="false"
+                                              existingFilters="{filterDefinitions}"
+                                              transformAdded="transformsUpdated(event)"
+                                              updatedTransforms="transformsUpdated(event)" width="100%" paddingLeft="10"
+                                              paddingTop="10" paddingBottom="10"
+                                              paddingRight="10" feedID="{_dataSourceID}"/>
             </mx:AddChild>
         </mx:State>
     </easyinsight:states>
@@ -34,6 +37,7 @@
         import com.easyinsight.analysis.RuntimeCredentialsWindow;
         import com.easyinsight.commands.CommandEvent;
         import com.easyinsight.commands.CommandProcessor;
+        import com.easyinsight.datasources.DataSourceInfo;
         import com.easyinsight.detail.DataDetailEvent;
         import com.easyinsight.filtering.FilterDefinition;
         import com.easyinsight.filtering.TransformsUpdatedEvent;
@@ -106,8 +110,8 @@
         [Bindable]
         private var filterDefinitions:ArrayCollection;
 
-        [Bindable]
-        private var lastDataTime:String;
+        /*[Bindable]
+        private var lastDataTime:String;*/
 
         [Bindable]
         [Embed(source="../../../../assets/star2_grey.png")]
@@ -136,6 +140,9 @@
         [Bindable]
         [Embed(source="../../../../assets/bookmark_blue.png")]
         private var bookmarkIcon:Class;
+
+        [Bindable]
+        private var dataSource:DataSourceInfo;
 
         [Bindable]
         private var reportName:String;
@@ -243,6 +250,7 @@
                 }
             } else {
                 var report:AnalysisDefinition = event.analysisDefinition;
+                dataSource = event.dataSourceInfo;
                 reportName = report.name;
                 reportRatingCount = String(report.ratingCount);
                 reportRating = String(report.ratingAverage);
@@ -266,7 +274,7 @@
                 var dateFormatter:DateFormatter = new DateFormatter();
                 dateFormatter.formatString = "MM/DD/YYYY HH:NN";
                 reportDate = dateFormatter.format(report.dateCreated);
-                lastDataTime = dateFormatter.format(event.lastDataTime);
+                // lastDataTime = dateFormatter.format(event.lastDataTime);
                 if (!_embedded) {
                     var feedFragmentObject:Object = new Object();
                     feedFragmentObject.reportID = String(_reportID);
@@ -344,14 +352,15 @@
                        labelPlacement="bottom"/>
             <mx:Button label="Adjust Filters" icon="{filterIcon}" click="adjustFilters()" visible="{showFilters}"
                        labelPlacement="bottom"/>
-            <mx:ProgressBar id="progressBar" visible="false" indeterminate="true"/>
-            <mx:Label text="Last Data Time:" fontFamily="Tahoma" fontWeight="bold"/>
-            <mx:Label text="{lastDataTime}"/>
+
+            <datasources:DataSourceDisplay dataSource="{dataSource}"/>
+            <!--<mx:Label text="Last Data Time:" fontFamily="Tahoma" fontWeight="bold"/>
+            <mx:Label text="{lastDataTime}"/>-->
         </mx:HBox>
         <mx:HBox width="100%" height="100%">
             <mx:VBox id="reportBox" width="100%" height="100%">
                 <mx:Box width="100%" id="transformBox"/>
-                <mx:HRule width="100%" id="hrule"/>                
+                <mx:HRule width="100%" id="hrule"/>
             </mx:VBox>
             <mx:VBox id="reportMetadata">
                 <mx:Form width="350">
@@ -384,12 +393,14 @@
                     </mx:FormItem>-->
                     <!--<mx:FormItem label="Report Views:">
                         <mx:Label text="{reportViews}" fontFamily="Lucida Grande" fontWeight="normal"/>
-                    </mx:FormItem>-->          
+                    </mx:FormItem>-->
                     <mx:FormItem label="Description:">
-                        <mx:TextArea text="{description}" fontFamily="Lucida Grande" fontWeight="normal" borderStyle="none"
-                                editable="false" selectable="false" backgroundAlpha="0" width="180" height="200"/>
+                        <mx:TextArea text="{description}" fontFamily="Lucida Grande" fontWeight="normal"
+                                     borderStyle="none"
+                                     editable="false" selectable="false" backgroundAlpha="0" width="180" height="200"/>
                     </mx:FormItem>
                 </mx:Form>
+                <mx:ProgressBar id="progressBar" visible="false" indeterminate="true"/>
                 <!-- -->
             </mx:VBox>
         </mx:HBox>
