@@ -31,6 +31,16 @@ public class CompositeFeed extends Feed {
         this.connections = connections;
     }
 
+    @Override
+    public List<CredentialRequirement> getCredentialRequirement() {
+        List<CredentialRequirement> requirement = super.getCredentialRequirement();
+        for (CompositeFeedNode child : compositeFeedNodes) {
+            Feed childDataSource = FeedRegistry.instance().getFeed(child.getDataFeedID());
+            requirement.addAll(childDataSource.getCredentialRequirement());
+        }
+        return requirement;
+    }
+
     public FeedType getDataFeedType() {
         return FeedType.COMPOSITE;
     }

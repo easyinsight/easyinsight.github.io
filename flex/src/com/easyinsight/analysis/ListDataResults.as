@@ -1,6 +1,8 @@
 package com.easyinsight.analysis
 {
-	import mx.collections.ArrayCollection;
+import com.easyinsight.datasources.DataSourceInfo;
+
+import mx.collections.ArrayCollection;
 	
 	[Bindable]
 	[RemoteClass(alias="com.easyinsight.analysis.ListDataResults")]
@@ -15,6 +17,7 @@ package com.easyinsight.analysis
 		public var maxResults:int;
         public var invalidAnalysisItemIDs:ArrayCollection;
         public var feedMetadata:FeedMetadata;
+        public var dataSourceInfo:DataSourceInfo;
 		
 		public function ListDataResults()
 			{

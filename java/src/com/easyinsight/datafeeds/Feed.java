@@ -23,6 +23,44 @@ public abstract class Feed implements Serializable {
     private int version;
     private String name;
     private String attribution;
+    private boolean visible;
+    private boolean push;
+
+    public DataSourceInfo getDataSourceInfo() {
+        DataSourceInfo dataSourceInfo = new DataSourceInfo();
+        int type;
+        // TODo: yes, this is horrible, but it's late
+        if (this instanceof CompositeFeed && push) {
+            type = DataSourceInfo.COMPOSITE;
+        } else {
+            if (push) {
+                type = DataSourceInfo.STORED_PUSH;
+            } else {
+                type = getCredentialRequirement().isEmpty() ? DataSourceInfo.STORED_PULL : DataSourceInfo.LIVE;
+            }
+        }
+        dataSourceInfo.setType(type);
+        dataSourceInfo.setDataSourceID(feedID);
+        dataSourceInfo.setDataSourceName(name);
+        dataSourceInfo.setLiveDataSource(!getCredentialRequirement().isEmpty());
+        return dataSourceInfo;
+    }
+
+    public boolean isPush() {
+        return push;
+    }
+
+    public void setPush(boolean push) {
+        this.push = push;
+    }
+
+    public boolean isVisible() {
+        return visible;
+    }
+
+    public void setVisible(boolean visible) {
+        this.visible = visible;
+    }
 
     public List<FeedNode> getFieldHierarchy() {
         return fieldHierarchy;

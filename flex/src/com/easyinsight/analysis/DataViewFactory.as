@@ -134,6 +134,7 @@ public class DataViewFactory extends VBox {
     }
 
     private function gotData(event:DataServiceEvent):void {
+        dispatchEvent(event);
         _controlBar.onDataReceipt(event);
         _lastData = event.dataSet;
         _lastClientProcessorMap = event.clientProcessorMap;

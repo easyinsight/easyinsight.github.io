@@ -384,6 +384,9 @@ public class FeedDefinition implements Cloneable, Serializable {
         feed.setFieldHierarchy(feedNodes);
         feed.setFields(clones);
         feed.setName(getFeedName());
+        feed.setVisible(isVisible());
+
+        feed.setPush(getCredentialsDefinition() == CredentialsDefinition.NO_CREDENTIALS);
         return feed;
     }
 
@@ -427,6 +430,7 @@ public class FeedDefinition implements Cloneable, Serializable {
             clonedTags.add(tag);
         }
         feedDefinition.setTags(clonedTags);
+        feedDefinition.setVisible(visible);
         feedDefinition.setDataFeedID(0);
         feedDefinition.setApiKey(RandomTextGenerator.generateText(12));
         feedDefinition.setCachedCredentials(null);

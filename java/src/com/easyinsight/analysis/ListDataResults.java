@@ -19,6 +19,15 @@ public class ListDataResults implements Serializable {
     private int maxResults;
     private Set<Long> invalidAnalysisItemIDs;
     private FeedMetadata feedMetadata;
+    private DataSourceInfo dataSourceInfo;
+
+    public DataSourceInfo getDataSourceInfo() {
+        return dataSourceInfo;
+    }
+
+    public void setDataSourceInfo(DataSourceInfo dataSourceInfo) {
+        this.dataSourceInfo = dataSourceInfo;
+    }
 
     public FeedMetadata getFeedMetadata() {
         return feedMetadata;

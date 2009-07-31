@@ -79,7 +79,7 @@ public class DataService {
             });
             AnalysisItem[] feedItemArray = new AnalysisItem[sortedList.size()];
             sortedList.toArray(feedItemArray);
-            FeedMetadata feedMetadata = new FeedMetadata();
+            FeedMetadata feedMetadata = new FeedMetadata();            
             feedMetadata.setCredentials(credentialRequirements);
             feedMetadata.setDataSourceName(feed.getName());
             feedMetadata.setFields(feedItemArray);
@@ -291,6 +291,9 @@ public class DataService {
             Pipeline pipeline = new StandardReportPipeline();
             pipeline.setup(analysisDefinition, feed, insightRequestMetadata);
             results = pipeline.toList(dataSet);
+            DataSourceInfo dataSourceInfo = feed.getDataSourceInfo();
+            dataSourceInfo.setLastDataTime(dataSet.getLastTime());
+            results.setDataSourceInfo(dataSourceInfo);
            // }
             BenchmarkManager.recordBenchmark("DataService:List", System.currentTimeMillis() - startTime);
             return results;
