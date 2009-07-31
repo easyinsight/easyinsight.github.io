@@ -34,6 +34,7 @@
     <mx:Script>
 		<![CDATA[
         import com.easyinsight.LoginDialog;
+        import com.easyinsight.account.Account;
         import com.easyinsight.customupload.ConfigureDataSource;
         import com.easyinsight.customupload.DataSourceConfiguredEvent;
         import com.easyinsight.framework.NavigationEvent;
@@ -233,10 +234,10 @@
             request.method = URLRequestMethod.GET;
             var vars:URLVariables = new URLVariables();
 
-            vars.userName = new String(User.getInstance().userName);
-            vars.password = new String(User.getInstance().password);
-            vars.operation = new String(2);
-            vars.fileID = new String(_solution.solutionID);
+            vars.userName = User.getInstance().userName;
+            vars.password = User.getInstance().password;
+            vars.operation = String(2);
+            vars.fileID = String(_solution.solutionID);
             request.data = vars;
 
             fileRef = new FileReference();
@@ -294,8 +295,10 @@
                     dataSources++;
                     dataSourceItems.addItem(solInstall.descriptor);
                 } else if (solInstall.descriptor.getType() == EIDescriptor.GOAL_TREE) {
-                    goalTrees++;
-                    items.addItem(solInstall.descriptor);
+                    if (User.getInstance().getAccountType() >= Account.GROUP) {
+                        goalTrees++;
+                        items.addItem(solInstall.descriptor);
+                    }
                 } else if (solInstall.descriptor.getType() == EIDescriptor.REPORT) {
                     reports++;
                     items.addItem(solInstall.descriptor);
