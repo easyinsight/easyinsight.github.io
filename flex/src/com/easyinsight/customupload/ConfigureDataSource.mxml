@@ -10,6 +10,11 @@
 
         import mx.controls.Alert;
         import mx.managers.PopUpManager;
+        import mx.rpc.events.FaultEvent;
+
+        private function updateFault(event:FaultEvent):void {
+            Alert.show(event.fault.faultString);
+        }
 
         private function onKey(event:KeyboardEvent):void {
             if (event.keyCode == Keyboard.ENTER) {
@@ -89,7 +94,7 @@
         private function validated():void {
             var validation:String = uploadService.validateCredentials.lastResult as String;
             if (validation == null) {
-                dataSourceDefinition.refreshDataInterval = refreshStepper.value * 1000 * 60 * 60;
+                dataSourceDefinition.refreshDataInterval = (dailyRefresh.selected ? 1 : 0) * 24 * 1000 * 60 * 60;
                 dataSourceCreation.updateDataSource(dataSourceDefinition);
                 feedService.updateFeedDefinition.send(dataSourceDefinition, "", null);
             } else {
@@ -125,7 +130,7 @@
         private function credentialClick():void {
             credentialsSaved = !credentialsSaved;
             if (!credentialsSaved) {
-                refreshStepper.value = 0;
+                dailyRefresh.selected = false;
             }
         }
         ]]></mx:Script>
@@ -134,7 +139,7 @@
         <mx:method name="refreshData" result="refreshed()"/>
     </mx:RemoteObject>
     <mx:RemoteObject destination="feeds" id="feedService">
-        <mx:method name="updateFeedDefinition" result="created()"/>
+        <mx:method name="updateFeedDefinition" result="created()" fault="updateFault(event)" />
         <mx:method name="getFeedDefinition" result="gotDataSource()"/>
     </mx:RemoteObject>
     <mx:Form>
@@ -149,8 +154,8 @@
             <mx:CheckBox id="saveCredentialsCheckbox" click="credentialClick()"/>
             <mx:Label textDecoration="underline" text=""/>
         </mx:FormItem>
-        <mx:FormItem label="Hourly Refresh:" enabled="{credentialsSaved}">
-            <mx:NumericStepper id="refreshStepper"/>
+        <mx:FormItem label="Daily Refresh:" enabled="{credentialsSaved}">
+            <mx:CheckBox id="dailyRefresh"/>
         </mx:FormItem>
         <mx:FormItem label="" direction="horizontal">
             <mx:Button label="Create" click="validate()" enabled="{ready}"/>

@@ -45,11 +45,11 @@ public class DataSourceCopyUtils {
             clonedFeedDefinition.setFeedName(newDataSourceName);
         }
         feedStorage.updateDataFeedConfiguration(clonedFeedDefinition, conn);
+        new UserUploadInternalService().createUserFeedLink(userID, clonedFeedDefinition.getDataFeedID(), Roles.OWNER, conn);
         if (!(clonedFeedDefinition instanceof CompositeFeedDefinition)) {
             buildClonedDataStores(copyData, feedDefinition, clonedFeedDefinition, conn);
         }
         clonedFeedDefinition.postClone(conn);
-        new UserUploadInternalService().createUserFeedLink(userID, clonedFeedDefinition.getDataFeedID(), Roles.OWNER, conn);
         if (includeChildren) {
             List<AnalysisDefinition> insights = getInsightsFromFeed(feedID, conn);
             for (AnalysisDefinition insight : insights) {

@@ -30,6 +30,10 @@
             import mx.collections.ICollectionView;
             import mx.collections.Sort;
             import mx.events.AdvancedDataGridEvent;
+            import mx.events.CollectionEvent;
+            import mx.events.CollectionEventKind;
+            import mx.events.ScrollEvent;
+            import mx.events.ScrollEventDirection;
             import mx.utils.URLUtil;
 			import mx.managers.BrowserManager;
 			import mx.events.ListEvent;
@@ -103,8 +107,8 @@
                 _messageListener = value;
                 value.addEventListener(AsyncInfoEvent.ASYNC_INFO, onAsyncRefresh);
             }
-			
-			private function initListeners():void {
+
+            private function initListeners():void {
 			    addEventListener(KeyboardEvent.KEY_UP, keyHit);
 			    User.getEventNotifier().addEventListener(LoginEvent.LOGIN, onLogin);
                 addEventListener(DeleteDataSourceEvent.DELETE_DATA_SOURCE, onDelete);
@@ -120,7 +124,7 @@
 			    if (event.keyCode == Keyboard.DELETE) {
 			        if (uploadGrid.selectedItems != null) {
                         if (uploadGrid.selectedItems.length > 1) {
-                            Alert.show("You can only delete single items at the moment.");
+                             Alert.show("You can only delete single items at the moment.");
                         } else {
 		            	    deleteItem(uploadGrid.selectedItem);
                          }

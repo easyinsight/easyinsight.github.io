@@ -21,6 +21,7 @@ import com.easyinsight.logging.LogClass;
 import com.easyinsight.security.Roles;
 import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.PasswordStorage;
+import com.easyinsight.storage.DataStorage;
 import com.easyinsight.eventing.EventDispatcher;
 import com.easyinsight.eventing.TodoCompletedEvent;
 import com.easyinsight.users.Credentials;
@@ -642,6 +643,7 @@ public class FeedStorage {
         saveFolders(feedDefinition.getDataFeedID(), conn, feedDefinition.getFolders());
         saveTags(feedDefinition.getDataFeedID(), conn, feedDefinition.getTags());
         feedDefinition.customStorage(conn);
+        
         if (feedDefinition.getRefreshDataInterval() > 0) {
 
         }

@@ -209,8 +209,8 @@ public class DataStorage {
                 Database.instance().closeConnection(conn);
             }
         } else {
-            validateSpace(coreDBConn);
             addOrUpdateMetadata(feedID, metadata, coreDBConn);
+            validateSpace(coreDBConn);
         }
         storageConn.commit();
         try {

@@ -63,7 +63,9 @@
 
         import mx.controls.Alert;
         import mx.events.CloseEvent;
+        import mx.events.DividerEvent;
         import mx.events.ListEvent;
+
         import mx.managers.PopUpManager;
         import mx.utils.URLUtil;
         import mx.managers.BrowserManager;
@@ -117,8 +119,14 @@
             return null;
         }
 
+        private function onDividerRelease(event:DividerEvent):void {
+            User.getSharedObject().data.goalSliderPos = dataBoxes.getDividerAt(0).y + event.delta;
+            User.getSharedObject().flush();
+        }
+
         private function onCreation():void {
             User.getEventNotifier().addEventListener(LoginEvent.LOGIN, onLogin);
+            dataBoxes.addEventListener(DividerEvent.DIVIDER_RELEASE, onDividerRelease);
             addEventListener(DeleteGoalTreeEvent.DELETE_GOAL_TREE, onDelete);
         }
 
@@ -190,6 +198,9 @@
                 } else {
                     currentState = "noGoalsPro";
                 }
+            }
+            if(User.getSharedObject().data.goalSliderPos != null) {
+                        dataBoxes.getDividerAt(0).y = User.getSharedObject().data.goalSliderPos;
             }
         }
 

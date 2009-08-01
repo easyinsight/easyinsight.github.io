@@ -1,8 +1,10 @@
 package com.easyinsight.framework
 {
 	import com.easyinsight.store.Merchant;
-	
-	import mx.collections.ArrayCollection;
+
+import flash.net.SharedObject;
+
+import mx.collections.ArrayCollection;
 	import mx.rpc.events.ResultEvent;
 	import mx.rpc.remoting.RemoteObject;
 	
@@ -15,6 +17,7 @@ package com.easyinsight.framework
 		private var credentialsMap:Object = new Object();
 		static private var _user:User;
 		static private var notifier:UserEventNotifier;
+        static private var sharedObject:SharedObject;
 		public var commercialEnabled:Boolean;
 		public var spaceAllowed:int;
 		public var password:String;
@@ -44,6 +47,8 @@ package com.easyinsight.framework
 			_user.accountType = accountType;
             _user.userID = userID;
             _user.activated = activated;
+            sharedObject = SharedObject.getLocal(name);
+
 			/*_user.storeService = new RemoteObject();
 			_user.storeService.destination = "store";
 			_user.storeService.getMerchants.addEventListener(ResultEvent.RESULT, _user.gotMerchants);
@@ -109,6 +114,10 @@ package com.easyinsight.framework
 		static public function getInstance():User {
 			return _user;
 		}
+
+        static public function getSharedObject():SharedObject {
+            return sharedObject;
+        }
 		
 		public function getMerchants():ArrayCollection {
 			return this.merchants;
