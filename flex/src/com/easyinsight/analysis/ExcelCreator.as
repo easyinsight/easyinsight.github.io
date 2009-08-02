@@ -19,6 +19,7 @@ public class ExcelCreator {
     private var upload:RemoteObject;
 		private var fileRef:FileReference;
         private var excelID:int;
+        private var report:AnalysisDefinition;
 
 		public function ExcelCreator()
 		{
@@ -55,7 +56,11 @@ public class ExcelCreator {
 
 		private function gotExcelID(event:ResultEvent):void {
 			excelID = upload.exportToExcel.lastResult as int;
-            Alert.show("Click to start download of the Excel spreadsheet.", "Alert",
+            var msg:String = "Click to start download of the Excel spreadsheet.";
+            if(report.reportType != AnalysisDefinition.LIST) {
+                msg += " The report will be saved in a list format.";
+            }
+            Alert.show(msg, "Alert",
 		                		Alert.OK | Alert.CANCEL, null, alertListener, null, Alert.CANCEL);
 
 		}
@@ -69,6 +74,7 @@ public class ExcelCreator {
 		}
 
 		public function exportExcel(definition:AnalysisDefinition):void {
+            report = definition;
 			upload.exportToExcel.send(definition);
 		}
 	}

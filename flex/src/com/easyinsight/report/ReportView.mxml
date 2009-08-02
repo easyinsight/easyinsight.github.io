@@ -30,6 +30,7 @@
         import com.easyinsight.analysis.EmbeddedControllerLookup;
         import com.easyinsight.analysis.EmbeddedDataServiceEvent;
         import com.easyinsight.analysis.EmbeddedViewFactory;
+        import com.easyinsight.analysis.ExcelCreator;
         import com.easyinsight.analysis.HierarchyDrilldownEvent;
         import com.easyinsight.analysis.HierarchyRollupEvent;
         import com.easyinsight.analysis.IEmbeddedReportController;
@@ -56,6 +57,11 @@
         import mx.managers.BrowserManager;
         import mx.managers.PopUpManager;
         import mx.utils.URLUtil;
+
+        private function exportExcel():void {
+            new ExcelCreator().exportExcel(report);
+
+        }
 
         [Bindable]
         private var _embedded:Boolean;
@@ -112,6 +118,10 @@
 
         /*[Bindable]
         private var lastDataTime:String;*/
+
+        [Bindable]
+        [Embed(source='../../../../assets/table_x32.png')]
+        private var exportToExcelIcon:Class;
 
         [Bindable]
         [Embed(source="../../../../assets/star2_grey.png")]
@@ -239,6 +249,8 @@
             viewFactory.retrieveData();
         }
 
+        private var report:AnalysisDefinition;
+
         private function gotData(event:EmbeddedDataServiceEvent):void {
             if (event.credentialRequirements != null) {
                 for each (var credential:CredentialRequirement in event.credentialRequirements) {
@@ -249,7 +261,7 @@
                     PopUpManager.centerPopUp(window);
                 }
             } else {
-                var report:AnalysisDefinition = event.analysisDefinition;
+                report = event.analysisDefinition;
                 dataSource = event.dataSourceInfo;
                 reportName = report.name;
                 reportRatingCount = String(report.ratingCount);
@@ -348,11 +360,11 @@
             <mx:Button label="Back" click="close()" icon="{closeIcon}" labelPlacement="bottom" visible="{!_embedded}"/>
             <mx:Button label="Full Screen" click="toFullScreen()" icon="{fullScreenIcon}" labelPlacement="bottom"/>
             <mx:Button label="Bookmark" click="bookmark()" icon="{bookmarkIcon}" labelPlacement="bottom"/>
+            <mx:Button label="Export to Excel" icon="{exportToExcelIcon}" click="exportExcel()" labelPlacement="bottom" />
             <mx:Button label="Edit this Report" icon="{reportEditorIcon}" click="toReportEditor()" visible="{admin}"
                        labelPlacement="bottom"/>
             <mx:Button label="Adjust Filters" icon="{filterIcon}" click="adjustFilters()" visible="{showFilters}"
                        labelPlacement="bottom"/>
-
             <datasources:DataSourceDisplay dataSource="{dataSource}"/>
             <!--<mx:Label text="Last Data Time:" fontFamily="Tahoma" fontWeight="bold"/>
             <mx:Label text="{lastDataTime}"/>-->
