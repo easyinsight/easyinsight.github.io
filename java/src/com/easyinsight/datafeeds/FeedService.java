@@ -10,7 +10,6 @@ import com.easyinsight.storage.DataStorage;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.security.*;
 import com.easyinsight.security.SecurityException;
-import com.easyinsight.users.SubscriptionLicense;
 import com.easyinsight.core.EIDescriptor;
 import com.easyinsight.core.InsightDescriptor;
 import com.easyinsight.core.DataSourceDescriptor;
@@ -27,7 +26,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 
 import org.hibernate.Session;
-import org.apache.jcs.access.exception.CacheException;
 
 /**
  * User: jboe
@@ -44,6 +42,27 @@ public class FeedService implements IDataFeedService {
         // this goes into a different data provider        
     }
 
+    public List<CredentialRequirement> getCredentials(List<Integer> dataSourceIDs, List<CredentialFulfillment> existingCredentials) {
+        try {
+            List<CredentialRequirement> neededCredentials = new ArrayList<CredentialRequirement>();
+            InsightRequestMetadata metadata = new InsightRequestMetadata();
+            metadata.setCredentialFulfillmentList(existingCredentials);
+            for (Integer dataSourceID : dataSourceIDs) {
+                Feed feed = FeedRegistry.instance().getFeed(dataSourceID);
+                List<CredentialRequirement> requirements = feed.getCredentialRequirement();
+                for (CredentialRequirement credentialRequirement : requirements) {
+                    if (metadata.getCredentialForDataSource(credentialRequirement.getDataSourceID()) == null) {
+                        neededCredentials.add(credentialRequirement);
+                    }
+                }
+            }
+            return neededCredentials;
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        }
+    }
+
     public List<InsightDescriptor> getReportsForDataSource(long dataSourceID) {
         List<InsightDescriptor> descriptors = new ArrayList<InsightDescriptor>();
         Connection conn = Database.instance().getConnection();
@@ -58,7 +77,7 @@ public class FeedService implements IDataFeedService {
         } catch (SQLException e) {
             LogClass.error(e);
         } finally {
-            Database.instance().closeConnection(conn);
+            Database.closeConnection(conn);
         }
         List<InsightDescriptor> validDescriptors = new ArrayList<InsightDescriptor>();
         for (InsightDescriptor descriptor : descriptors) {
@@ -102,7 +121,7 @@ public class FeedService implements IDataFeedService {
             LogClass.error(e);
             throw new RuntimeException(e);
         } finally {
-            Database.instance().closeConnection(conn);
+            Database.closeConnection(conn);
         }
         return descriptorList;
     }
@@ -180,7 +199,7 @@ public class FeedService implements IDataFeedService {
             if (metadata != null) {
                 metadata.closeConnection();
             }
-            Database.instance().closeConnection(conn);
+            Database.closeConnection(conn);
         }
     }
 
@@ -239,7 +258,7 @@ public class FeedService implements IDataFeedService {
         }
     }
 
-    public List<CompositeFeedConnection> initialDefine(List<CompositeFeedNode> nodes, List<FeedDescriptor> newFeeds) {
+    public List<CompositeFeedConnection> initialDefine(List<CompositeFeedNode> nodes, List<FeedDescriptor> newFeeds, List<CredentialFulfillment> credentials) {
         try {
             Set<Set<Long>> connectionMap = new HashSet<Set<Long>>();
             List<CompositeFeedConnection> allNewEdges = new ArrayList<CompositeFeedConnection>();
@@ -251,7 +270,7 @@ public class FeedService implements IDataFeedService {
                     ids.add(node.getDataFeedID());
                     if (!connectionMap.contains(ids)) {
                         connectionMap.add(ids);
-                        List<CompositeFeedConnection> potentialJoins = joinDiscovery.findPotentialJoins(node.getDataFeedID(), newFeed.getDataFeedID());
+                        List<CompositeFeedConnection> potentialJoins = joinDiscovery.findPotentialJoins(node.getDataFeedID(), newFeed.getDataFeedID(), credentials);
                         allNewEdges.addAll(potentialJoins);
                     }
                 }
@@ -264,7 +283,7 @@ public class FeedService implements IDataFeedService {
                     ids.add(otherNewFeed.getDataFeedID());
                     if (!connectionMap.contains(ids)) {
                         connectionMap.add(ids);
-                        List<CompositeFeedConnection> potentialJoins = joinDiscovery.findPotentialJoins(otherNewFeed.getDataFeedID(), newFeed.getDataFeedID());
+                        List<CompositeFeedConnection> potentialJoins = joinDiscovery.findPotentialJoins(otherNewFeed.getDataFeedID(), newFeed.getDataFeedID(), credentials);
                         allNewEdges.addAll(potentialJoins);
                     }
                 }
@@ -374,6 +393,7 @@ public class FeedService implements IDataFeedService {
             }.visit(feedDef);
             feedDef.populateFields(conn);
             long feedID = feedStorage.addFeedDefinitionData(feedDef, conn);
+            DataStorage.liveDataSource(feedID, conn);
             new UserUploadInternalService().createUserFeedLink(userID, feedID, Roles.OWNER, conn);
             conn.commit();
             return feedDef;
@@ -502,7 +522,7 @@ public class FeedService implements IDataFeedService {
             if (metadata != null) {
                 metadata.closeConnection();
             }
-            Database.instance().closeConnection(conn);
+            Database.closeConnection(conn);
         }
         EventDispatcher.instance().dispatch(new TodoCompletedEvent(feedDefinition));
         /*final User originator = new UserService().retrieveUser();

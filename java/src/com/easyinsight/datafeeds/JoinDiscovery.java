@@ -1,8 +1,6 @@
 package com.easyinsight.datafeeds;
 
-import com.easyinsight.analysis.AnalysisItem;
-import com.easyinsight.analysis.AnalysisItemTypes;
-import com.easyinsight.analysis.IRow;
+import com.easyinsight.analysis.*;
 import com.easyinsight.database.Database;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.core.Key;
@@ -24,7 +22,7 @@ public class JoinDiscovery {
 
     private FeedStorage feedStorage = new FeedStorage();
 
-    public List<CompositeFeedConnection> findPotentialJoins(long sourceFeedID, long targetFeedID) throws SQLException {
+    public List<CompositeFeedConnection> findPotentialJoins(long sourceFeedID, long targetFeedID, List<CredentialFulfillment> credentials) throws SQLException {
         FeedDefinition sourceFeed = feedStorage.getFeedDefinitionData(sourceFeedID);
         FeedDefinition targetFeed = feedStorage.getFeedDefinitionData(targetFeedID);
 
@@ -39,18 +37,18 @@ public class JoinDiscovery {
             sourceFeeds = Arrays.asList(sourceFeed);
         }
 
-        if (sourceFeed instanceof CompositeFeedDefinition) {
+        if (targetFeed instanceof CompositeFeedDefinition) {
             CompositeFeedDefinition source = (CompositeFeedDefinition) targetFeed;
             FeedVisitor feedVisitor = new FeedVisitor();
             feedVisitor.visit(source);
             targetFeeds = feedVisitor.feeds;
         } else {
-            targetFeeds = Arrays.asList(sourceFeed);
+            targetFeeds = Arrays.asList(targetFeed);
         }
         List<CompositeFeedConnection> connections = new ArrayList<CompositeFeedConnection>();
         for (FeedDefinition sourceDefinition : sourceFeeds) {
             for (FeedDefinition targetDefinition : targetFeeds) {
-                connections.addAll(explore(sourceDefinition, targetDefinition));
+                connections.addAll(explore(sourceDefinition, targetDefinition, credentials));
             }
         }
         for (CompositeFeedConnection connection : connections) {
@@ -93,53 +91,38 @@ public class JoinDiscovery {
         }
     }
 
-    private List<CompositeFeedConnection> explore(FeedDefinition sourceFeed, FeedDefinition targetFeed) throws SQLException {
+    private List<CompositeFeedConnection> explore(FeedDefinition sourceFeed, FeedDefinition targetFeed, List<CredentialFulfillment> credentials) throws SQLException {
         Connection conn = Database.instance().getConnection();
         List<CompositeFeedConnection> potentialJoins;
         try {
             potentialJoins = new ArrayList<CompositeFeedConnection>();
-            Map<Key, Value[]> valueMap = new HashMap<Key, Value[]>();
+            Map<Key, List<Value>> valueMap = new HashMap<Key, List<Value>>();
             for (AnalysisItem analysisItem : sourceFeed.getFields()) {
                 if (!analysisItem.isDerived()) {
-                    if (analysisItem.hasType(AnalysisItemTypes.DIMENSION)) {
-                        List<AnalysisItem> keys = Arrays.asList(analysisItem);
-                        DataStorage metadata = DataStorage.writeConnection(sourceFeed, conn);
-                        DataSet dataSet;
-                        try {
-                            dataSet = metadata.retrieveData(keys, null, null, 3);
-                        } finally {
-                            metadata.closeConnection();
-                        }
-                        Value[] subset = new Value[Math.min(dataSet.getRows().size(), 3)];
-                        for (int i = 0; i < Math.min(dataSet.getRows().size(), 3); i++) {
-                            IRow row = dataSet.getRow(i);
-                            subset[i] = row.getValue(analysisItem.getKey());
-                        }
-                        valueMap.put(analysisItem.getKey(), subset);
+                    if (analysisItem.getType() == AnalysisItemTypes.DIMENSION) {
+                        AnalysisDimensionResultMetadata metadata = (AnalysisDimensionResultMetadata) new DataService().getAnalysisItemMetadata(sourceFeed.getDataFeedID(), analysisItem, credentials, 0);
+                        valueMap.put(analysisItem.getKey(), metadata.getValues());
                     }
                 }
             }
             for (AnalysisItem analysisItem : targetFeed.getFields()) {
                 if (!analysisItem.isDerived()) {
-                    if (analysisItem.hasType(AnalysisItemTypes.DIMENSION)) {
-                        List<AnalysisItem> keys = Arrays.asList(analysisItem);
-                        DataStorage metadata = DataStorage.writeConnection(targetFeed, conn);
-                        DataSet dataSet;
-                        try {
-                            dataSet = metadata.retrieveData(keys, null, null, 3);
-                        } finally {
-                            metadata.closeConnection();
-                        }
-                        Set<Value> valueSet = new HashSet<Value>();
-                        for (IRow row : dataSet.getRows()) {
-                            valueSet.add(row.getValue(analysisItem.getKey()));
-                        }
-                        for (Map.Entry<Key, Value[]> entry : valueMap.entrySet()) {
-                            boolean matched = true;
+                    if (analysisItem.getType() == AnalysisItemTypes.DIMENSION) {
+                        AnalysisDimensionResultMetadata metadata = (AnalysisDimensionResultMetadata) new DataService().getAnalysisItemMetadata(targetFeed.getDataFeedID(), analysisItem, credentials, 0);
+                        Set<Value> valueSet = new HashSet<Value>(metadata.getValues());
+                        for (Map.Entry<Key, List<Value>> entry : valueMap.entrySet()) {
+                            boolean matched = false;
+                            int matches = 0;
+                            int mismatches = 0;
                             for (Value sourceValue : entry.getValue()) {
                                 if (!valueSet.contains(sourceValue)) {
-                                    matched = false;
+                                    mismatches++;
+                                } else {
+                                    matches++;
                                 }
+                            }
+                            if (matches > 0) {
+                                matched = mismatches == 0 || matches > mismatches;
                             }
                             if (matched) {
                                 potentialJoins.add(new CompositeFeedConnection(sourceFeed.getDataFeedID(), targetFeed.getDataFeedID(), entry.getKey(), analysisItem.getKey()));

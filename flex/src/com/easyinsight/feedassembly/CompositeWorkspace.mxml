@@ -10,11 +10,16 @@
 		<![CDATA[
 			import com.easyinsight.administration.feed.FeedChangeEvent;
         import com.easyinsight.administration.feed.FeedDefinitionData;
-        import com.easyinsight.util.GraphFeedNode;
+            import com.easyinsight.analysis.CredentialRequirement;
+            import com.easyinsight.analysis.CredentialsEvent;
+            import com.easyinsight.analysis.RuntimeCredentialsWindow;
+            import com.easyinsight.framework.CredentialsCache;
+            import com.easyinsight.util.GraphFeedNode;
         import com.easyinsight.util.EdgeSelectionEvent;
         import com.easyinsight.util.GraphSelectionState;
         import com.easyinsight.util.NodeSelectionEvent;
-        import com.easyinsight.util.TestEdgeRenderer;
+            import com.easyinsight.util.ProgressAlert;
+            import com.easyinsight.util.TestEdgeRenderer;
         import com.easyinsight.util.GraphLine;
 
             import mx.collections.Sort;
@@ -234,7 +239,15 @@
             allFeeds.sort = sort;
             allFeeds.refresh();
             if (initialFeedIDs != null) {
-                feedService.initialDefine.send(new ArrayCollection(), initialFeedIDs);
+                queuedExistings = new ArrayCollection();
+                queuedNews = initialFeedIDs;
+                var dsIDs:ArrayCollection = new ArrayCollection();
+                for each (var feedDescriptor:DataFeedDescriptor in initialFeedIDs) {
+                    dsIDs.addItem(feedDescriptor.dataFeedID);
+                }
+                ProgressAlert.alert(this, "Determining needed credentials...", null, feedService.getCredentials);
+                feedService.getCredentials.send(dsIDs, CredentialsCache.getCache().createCredentials());
+                //feedService.initialDefine.send(new ArrayCollection(), initialFeedIDs);
             } else {
                 for each (var compositeFeedNode:CompositeFeedNode in definedNodes) {
                     var descriptor:DataFeedDescriptor = findDescriptor(compositeFeedNode.dataFeedID);
@@ -336,8 +349,44 @@
             var yPosition:int = event.localY - (event.dragSource.dataForFormat("localY") as Number);
             addDescriptorToGraph(selectedObject, xPosition, yPosition);
             dispatchEvent(new FeedChangeEvent());
-            feedService.initialDefine.send(compositeFeedNodes, new ArrayCollection([ selectedObject ]));
+            queuedExistings = compositeFeedNodes;
+            queuedNews = new ArrayCollection([selectedObject]);
+            ProgressAlert.alert(this, "Determining needed credentials...", null, feedService.getCredentials);
+            feedService.getCredentials.send(new ArrayCollection([selectedObject.dataFeedID]), CredentialsCache.getCache().createCredentials());
         }
+
+        private var neededCredentialCount:int;
+            private var receivedCredentialCount:int;
+            private var queuedExistings:ArrayCollection;
+            private var queuedNews:ArrayCollection;
+
+            private function onCredentials(event:CredentialsEvent):void {
+                receivedCredentialCount++;
+                if (receivedCredentialCount >= neededCredentialCount) {
+                    ProgressAlert.alert(this, "Trying to automatically find joins...", null, feedService.initialDefine);
+                    feedService.initialDefine.send(queuedExistings, queuedNews, CredentialsCache.getCache().createCredentials());
+                }
+            }
+
+            private function gotCredentials():void {
+                var requirements:ArrayCollection = feedService.getCredentials.lastResult as ArrayCollection;
+                neededCredentialCount = 0;
+                receivedCredentialCount = 0;
+                for each (var credential:CredentialRequirement in requirements) {
+                    if (CredentialsCache.getCache().getCredentials(credential.dataSourceID) == null) {
+                        neededCredentialCount++;
+                        var window:RuntimeCredentialsWindow = new RuntimeCredentialsWindow();
+                        window.requirement = credential;
+                        window.addEventListener(CredentialsEvent.CREDENTIALS_SAVED, onCredentials);
+                        PopUpManager.addPopUp(window, this, true);
+                        PopUpManager.centerPopUp(window);
+                    }
+                }
+                if (neededCredentialCount == 0) {
+                    ProgressAlert.alert(this, "Trying to automatically find joins...", null, feedService.initialDefine);
+                    feedService.initialDefine.send(queuedExistings, queuedNews, CredentialsCache.getCache().createCredentials());
+                }
+            }
 
         private function dragOverHandler(event:DragEvent):void {
             DragManager.showFeedback(DragManager.MOVE);
@@ -399,6 +448,7 @@
 	<mx:RemoteObject destination="feeds" id="feedService">
 		<mx:method name="initialDefine" result="gotDefine()"/>
 		<mx:method name="searchForSubscribedFeeds" result="gotFeeds()"/>
+		<mx:method name="getCredentials" result="gotCredentials()"/>
 	</mx:RemoteObject>
 	<mx:HBox width="100%" height="100%">
 		<mx:List dataProvider="{allFeeds}" dragEnabled="true" labelField="name" height="100%" width="150"/>

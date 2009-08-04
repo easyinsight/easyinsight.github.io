@@ -31,7 +31,31 @@ public class GoogleSpreadsheetFeed extends Feed {
     }
 
     public AnalysisItemResultMetadata getMetadata(AnalysisItem analysisItem, InsightRequestMetadata insightRequestMetadata) {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+        try {
+            AnalysisItemResultMetadata metadata = analysisItem.createResultMetadata();
+            Credentials credentials = insightRequestMetadata.getCredentialForDataSource(getFeedID());
+            SpreadsheetService myService = GoogleSpreadsheetAccess.getOrCreateSpreadsheetService(credentials);
+            URL listFeedUrl = new URL(worksheetURL);
+            ListFeed feed = myService.getFeed(listFeedUrl, ListFeed.class);
+            for (ListEntry listEntry : feed.getEntries()) {
+                for (String tag : listEntry.getCustomElements().getTags()) {
+                    if (analysisItem.getKey().toKeyString().equals(tag)) {
+                        String string = listEntry.getCustomElements().getValue(tag);
+                        Value value;
+                        if (string == null) {
+                            value = new EmptyValue();
+                        } else {
+                            value = new StringValue(string);
+                        }
+                        metadata.addValue(analysisItem, value, insightRequestMetadata);
+                    }
+                }
+            }
+            return metadata;
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        }
     }
 
     public List<CredentialRequirement> getCredentialRequirement() {
