@@ -47,7 +47,12 @@ import mx.collections.ArrayCollection;
 			_user.accountType = accountType;
             _user.userID = userID;
             _user.activated = activated;
-            sharedObject = SharedObject.getLocal(name);
+            try {
+                sharedObject = SharedObject.getLocal(name);
+            } catch (e) {
+                // Do nothing for now
+            }
+
 
 			/*_user.storeService = new RemoteObject();
 			_user.storeService.destination = "store";
