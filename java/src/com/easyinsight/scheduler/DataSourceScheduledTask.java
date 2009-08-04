@@ -4,6 +4,7 @@ import com.easyinsight.datafeeds.FeedStorage;
 import com.easyinsight.datafeeds.FeedConsumer;
 import com.easyinsight.datafeeds.IServerDataSourceDefinition;
 import com.easyinsight.email.UserStub;
+import com.easyinsight.logging.LogClass;
 
 import javax.persistence.Entity;
 import javax.persistence.Table;
@@ -36,17 +37,22 @@ public class DataSourceScheduledTask extends ScheduledTask {
     }
 
     protected void execute(Date now, Connection conn) throws Exception {
-        IServerDataSourceDefinition dataSource = (IServerDataSourceDefinition) feedStorage.getFeedDefinitionData(dataSourceID);
-        UserStub dataSourceUser = null;
-        List<FeedConsumer> owners = dataSource.getUploadPolicy().getOwners();
-        for (FeedConsumer owner : owners){
-            if (owner.type() == FeedConsumer.USER) {
-                dataSourceUser = (UserStub) owner;
+        try {
+            IServerDataSourceDefinition dataSource = (IServerDataSourceDefinition) feedStorage.getFeedDefinitionData(dataSourceID);
+            UserStub dataSourceUser = null;
+            List<FeedConsumer> owners = dataSource.getUploadPolicy().getOwners();
+            for (FeedConsumer owner : owners){
+                if (owner.type() == FeedConsumer.USER) {
+                    dataSourceUser = (UserStub) owner;
+                }
             }
+            if (dataSourceUser == null) {
+                throw new RuntimeException("No user found for data source.");
+            }
+            dataSource.refreshData(null, dataSourceUser.getAccountID(), now, conn, null);
+        } catch (Exception e) {
+            LogClass.error("Data source " + dataSourceID + " had error " + e.getMessage() + " in trying to refresh data.");
+            throw e;
         }
-        if (dataSourceUser == null) {
-            throw new RuntimeException();
-        }
-        dataSource.refreshData(null, dataSourceUser.getAccountID(), now, conn, null);
     }
 }

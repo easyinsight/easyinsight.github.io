@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <mx:Application xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:framework="com.easyinsight.framework.*"
+                xmlns:util="com.easyinsight.util.*"
                 creationComplete="startWorkspace()" xmlns:local="*" applicationComplete="applicationListeners()"
                 xmlns:listing="com.easyinsight.listing.*" xmlns:intro1="com.easyinsight.intro.*"
                 xmlns:notification="com.easyinsight.notifications.*"
@@ -93,7 +94,7 @@
 
         private function passwordResetCheck():void {
             var result:Boolean = userService.verifyPasswordReset.lastResult as Boolean;
-            if(result) {
+            if (result) {
                 var window:PasswordResetWindow = new PasswordResetWindow();
                 window.passwordValidation = passwordResetValue;
                 PopUpManager.addPopUp(window, this, true);
@@ -142,7 +143,7 @@
             User.getEventNotifier().addEventListener(NavigationEvent.NAVIGATION, navigation);
             userService.isSessionLoggedIn.send();
             EIMessageListener.initialize();
-            messageListener = EIMessageListener.instance(); 
+            messageListener = EIMessageListener.instance();
         }
 
         private function applicationListeners():void {
@@ -339,7 +340,7 @@
                                                                 navigation(new NavigationEvent(null, new WelcomeScreen()));
                                                         }
                                                     }
-                                                    else if(o.resetPassword != null) {
+                                                    else if (o.resetPassword != null) {
                                                         passwordResetValue = o.resetPassword;
                                                         userService.verifyPasswordReset.send(o.resetPassword);
                                                     }
@@ -406,6 +407,7 @@
                     existingDispatcher.removeEventListener(AnalyzeEvent.ANALYZE, internalAnalyze);
                     existingDispatcher.removeEventListener(ModuleAnalyzeEvent.MODULE_ANALYZE, internalModuleAnalyze);
                     existingDispatcher.removeEventListener(ListingChangeEvent.LISTING_CHANGE, changePerspective);
+                    existingDispatcher.removeEventListener(NavigationEvent.NAVIGATION, navigation);
                 }
                 if (coreSpace.getChildren().length > 0) {
                     coreSpace.removeChildAt(0);
@@ -422,6 +424,7 @@
                 dispatcher.addEventListener(AnalyzeEvent.ANALYZE, internalAnalyze);
                 dispatcher.addEventListener(ModuleAnalyzeEvent.MODULE_ANALYZE, internalModuleAnalyze);
                 dispatcher.addEventListener(ListingChangeEvent.LISTING_CHANGE, changePerspective);
+                dispatcher.addEventListener(NavigationEvent.NAVIGATION, navigation);
             }
         }
 
@@ -491,33 +494,37 @@
         private function loginEvent(event:LoginEvent):void {
             loggedIn = event.type == LoginEvent.LOGIN;
         }
+
+
         ]]>
     </mx:Script>
     <mx:Style source="com/easyinsight/skin/osx/OSX.css"/>
 
     <mx:RemoteObject id="userService" destination="login">
         <mx:method name="isSessionLoggedIn" result="sessionCheck()"/>
-        <mx:method name="verifyPasswordReset" result="passwordResetCheck()" />
+        <mx:method name="verifyPasswordReset" result="passwordResetCheck()"/>
     </mx:RemoteObject>
     <mx:RemoteObject id="accountService" destination="accountAdmin">
         <mx:method name="activateAccount" result="activated()"/>
     </mx:RemoteObject>
+    <util:AntiScrollCanvas width="100%" height="100%">
+        <mx:VBox width="100%" height="100%" id="coreVBox" paddingLeft="0" verticalGap="0" paddingRight="0">
+            <listing:HeaderBar width="100%" id="headerBar"
+                               paddingTop="5" paddingBottom="5" paddingLeft="10" paddingRight="10" bottom="0" top="0"
+                               listingChange="changePerspective(event)" launchQuickSearch="launchQuickSearchWindow()"
+                               reportBug="launchBugReportWindow()"/>
+            <mx:Box width="100%" height="5" backgroundColor="#D42525" left="0" right="0" id="highBar"/>
+            <mx:HBox width="100%" height="100%" horizontalGap="0" id="primarySpace">
 
-    <mx:VBox width="100%" height="100%" id="coreVBox" paddingLeft="0" verticalGap="0" paddingRight="0">
-        <listing:HeaderBar width="100%" id="headerBar"
-                           paddingTop="5" paddingBottom="5" paddingLeft="10" paddingRight="10" bottom="0" top="0"
-                           listingChange="changePerspective(event)" launchQuickSearch="launchQuickSearchWindow()" reportBug="launchBugReportWindow()"/>
-        <mx:Box width="100%" height="5" backgroundColor="#D42525" left="0" right="0" id="highBar"/>
-        <mx:HBox width="100%" height="100%" horizontalGap="0" id="primarySpace">
+
+                <mx:HBox width="100%" height="100%" id="coreSpace" paddingLeft="0" paddingTop="0" top="0"
+                         paddingRight="0">
+                    <intro1:IntroPanel id="introPanel" width="100%" height="100%" paddingTop="0"
+                                       navigation="navigation(event)"/>
+                </mx:HBox>
 
 
-            <mx:HBox width="100%" height="100%" id="coreSpace" paddingLeft="0" paddingTop="0" top="0" paddingRight="0">
-                <intro1:IntroPanel id="introPanel" width="100%" height="100%" paddingTop="0"
-                                   navigation="navigation(event)"/>
             </mx:HBox>
-
-
-        </mx:HBox>
-    </mx:VBox>
-
+        </mx:VBox>
+     </util:AntiScrollCanvas>
 </mx:Application>

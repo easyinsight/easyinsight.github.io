@@ -1,0 +1,12 @@
+<?xml version="1.0" ?>
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%" horizontalAlign="center">
+    <mx:Script><![CDATA[
+        [Bindable]
+        private var logoPath:String;
+
+        override public function set data(val:Object):void {
+            logoPath = val as String;
+        }
+        ]]></mx:Script>
+    <mx:Image source="{logoPath}" maxWidth="250" maxHeight="100"/>
+</mx:VBox>

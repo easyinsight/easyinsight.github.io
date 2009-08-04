@@ -1,205 +1,197 @@
 <?xml version="1.0" encoding="utf-8"?>
-<mx:Box xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%" paddingTop="0" top="0">
-	<mx:Script>
+<mx:Box xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:twitter="com.easyinsight.twitter.*"
+        xmlns:util="com.easyinsight.util.*" width="100%" height="100%"
+        paddingTop="0" top="0">
+    <mx:Script>
 		<![CDATA[
-			import com.easyinsight.framework.NavigationEvent;
-            import com.easyinsight.help.ScreencastWindow;
-            import mx.managers.CursorManager;
-import mx.managers.PopUpManager;
-			
-			[Bindable]
-            [Embed(source="../../../../assets/headericons/chart_area.png")]
-            private var myDataIcon:Class;
+        import com.easyinsight.framework.NavigationEvent;
+        import com.easyinsight.help.ScreencastWindow;
 
-            [Bindable]
-            [Embed(source="../../../../assets/headericons/shopping_bag.png")]
-            private var catalogIcon:Class;
+        import mx.collections.ArrayCollection;
+        import mx.managers.PopUpManager;
 
-            [Bindable]
-            [Embed(source="../../../../assets/background2.JPG")]
-            private var background2:Class;
+        [Bindable]
+        [Embed(source="../../../../assets/headericons/chart_area.png")]
+        private var myDataIcon:Class;
 
-            [Bindable]
-            [Embed(source="../../../../assets/headericons/users2.png")]
-            private var groupsIcon:Class;
+        [Bindable]
+        [Embed(source="../../../../assets/headericons/shopping_bag.png")]
+        private var catalogIcon:Class;
 
-            [Bindable]
-            [Embed(source="../../../../assets/headericons/components.png")]
-            private var solutionsIcon:Class;
+        [Bindable]
+        [Embed(source="../../../../assets/background2.JPG")]
+        private var background2:Class;
 
-            [Bindable]
-            [Embed(source="../../../../assets/headericons/branch.png")]
-            private var goalsIcon:Class;
+        [Bindable]
+        [Embed(source="../../../../assets/headericons/users2.png")]
+        private var groupsIcon:Class;
 
-            [Bindable]
-            [Embed(source="../../../../assets/headericons/application_enterprise.png")]
-            private var apiIcon:Class;
+        [Bindable]
+        [Embed(source="../../../../assets/headericons/components.png")]
+        private var solutionsIcon:Class;
 
-            [Bindable]
-            [Embed(source="../../../../assets/media_play.png")]
-            private var pointerIcon:Class;
-			
-			private function toMarketplace():void {
-            	dispatchEvent(new NavigationEvent("Marketplace"));
-            }
-            
-            private function toUploads():void {
-            	dispatchEvent(new NavigationEvent("My Data"));
-            }
+        [Bindable]
+        [Embed(source="../../../../assets/headericons/branch.png")]
+        private var goalsIcon:Class;
 
-            private function toSolutions():void {
-            	dispatchEvent(new NavigationEvent("Solutions"));
-            }
+        [Bindable]
+        [Embed(source="../../../../assets/headericons/application_enterprise.png")]
+        private var apiIcon:Class;
 
-            private function toGroups():void {
-            	dispatchEvent(new NavigationEvent("Groups"));
-            }
+        [Bindable]
+        [Embed(source="../../../../assets/media_play.png")]
+        private var pointerIcon:Class;
 
-            private function toAPI():void {
-            	dispatchEvent(new NavigationEvent("API")); 
-            }
+        private function toMarketplace():void {
+            dispatchEvent(new NavigationEvent("Marketplace"));
+        }
 
-            private function toGoals():void {
-            	dispatchEvent(new NavigationEvent("My Goals"));
-            }
+        private function toUploads():void {
+            dispatchEvent(new NavigationEvent("My Data"));
+        }
 
-            private function lesson1():void {
-                var window:ScreencastWindow = new ScreencastWindow();
-                window.screencastSource = "../assets/lesson1/training.mp4";
-                PopUpManager.addPopUp(window, this);
-                window.x = 300;
-                window.y = 200;
-            }
+        private function toSolutions():void {
+            dispatchEvent(new NavigationEvent("Solutions"));
+        }
 
-            private function apilesson():void {
-                var window:ScreencastWindow = new ScreencastWindow();
-                window.screencastSource = "../assets/uncheckedjavaapilesson/API Lesson.mp4";
-                PopUpManager.addPopUp(window, this);
-                window.x = 300;
-                window.y = 200;
-            }
+        private function toGroups():void {
+            dispatchEvent(new NavigationEvent("Groups"));
+        }
+
+        private function toAPI():void {
+            dispatchEvent(new NavigationEvent("API"));
+        }
+
+        private function toGoals():void {
+            dispatchEvent(new NavigationEvent("My Goals"));
+        }
+
+        private function lesson1():void {
+            var window:ScreencastWindow = new ScreencastWindow();
+            window.screencastSource = "../assets/lesson1/training.mp4";
+            PopUpManager.addPopUp(window, this);
+            window.x = 300;
+            window.y = 200;
+        }
+
+        private function apilesson():void {
+            var window:ScreencastWindow = new ScreencastWindow();
+            window.screencastSource = "../assets/uncheckedjavaapilesson/API Lesson.mp4";
+            PopUpManager.addPopUp(window, this);
+            window.x = 300;
+            window.y = 200;
+        }
+
+        [Bindable]
+        private var logos:ArrayCollection = new ArrayCollection(["../assets/logos/Basecamp Logo.png",
+            "../assets/logos/Google Analytics Logo.gif", "../assets/logos/Google Docs Logo.gif",
+            "../assets/logos/JIRA Logo.gif", "../assets/logos/MySQL Logo.gif", "../assets/logos/Oracle Logo.gif",
+            "../assets/logos/Salesforce Logo.gif", "../assets/logos/SQL Server Logo.gif", "../assets/logos/wesabe.jpg"]);
+
+        private function appSolutions():void {
+            var properties:Object = { saas: true, client:true, biz: false, learning: false };
+            dispatchEvent(new NavigationEvent("Solutions", null, properties));
+        }
+
+        private function bizSolutions():void {
+            var properties:Object = { biz: true, client:false, saas: false, learning: false };
+            dispatchEvent(new NavigationEvent("Solutions", null, properties));
+        }
 		]]>
-	</mx:Script>
+    </mx:Script>
     <mx:HBox width="100%" height="100%" horizontalAlign="center" backgroundColor="#818285">
         <mx:VBox height="100%" backgroundImage="{background2}" backgroundSize="100%" width="1000" paddingTop="20">
-            <mx:VBox width="100%" horizontalAlign="center">
+            <!--<mx:VBox width="100%" horizontalAlign="center">
                 <mx:Label fontSize="18" color="#000000" text="Welcome to Easy Insight!"/>
-                <mx:Label fontSize="16" color="#000000" text="You can start by clicking any of the top buttons to navigate to that particular section."/>
-            </mx:VBox>
-            <mx:HBox width="100%">
-                <mx:Grid width="50%">
-                    <mx:GridRow width="100%">
-                    <mx:GridItem>
-                        <mx:VBox horizontalAlign="center">
-                            <mx:Image source="{myDataIcon}"/>
-                            <mx:LinkButton label="My Data" textDecoration="underline" click="toUploads()"/>
-                        </mx:VBox>
-                    </mx:GridItem>
-                    <mx:GridItem width="100%">
-                        <mx:HBox verticalAlign="middle" width="100%">
-                            <mx:TextArea editable="false" borderStyle="none" backgroundAlpha="0" width="100%" text="Upload data files, connect to external data, manage your sources, create new reports"/>
-                        </mx:HBox>
-                    </mx:GridItem>
-                </mx:GridRow>
-                <mx:GridRow width="100%">
-                    <mx:GridItem>
-                        <mx:VBox horizontalAlign="center">
-                            <mx:Image source="{groupsIcon}"/>
-                            <mx:LinkButton label="Groups" textDecoration="underline" click="toGroups()"/>
-                        </mx:VBox>
-                    </mx:GridItem>
-                    <mx:GridItem width="100%">
-                        <mx:HBox verticalAlign="middle" width="100%">
-                        <mx:TextArea editable="false" borderStyle="none" backgroundAlpha="0" width="100%" text="Collaborate with others to understand problems, share your insights"/>
-                    </mx:HBox>
-                    </mx:GridItem>
-                </mx:GridRow>
-                <mx:GridRow width="100%">
-                    <mx:GridItem>
-                        <mx:VBox horizontalAlign="center">
-                            <mx:Image source="{goalsIcon}"/>
-                            <mx:LinkButton label="My Goals" textDecoration="underline" click="toGoals()"/>
-                        </mx:VBox>
-                    </mx:GridItem>
-                    <mx:GridItem width="10%">
-                    <mx:HBox verticalAlign="middle" width="100%">
-
-                        <mx:TextArea editable="false" borderStyle="none" backgroundAlpha="0" width="100%" text="Track your progress to meet key goals, solve end to end business problems"/>
-                    </mx:HBox>
-                    </mx:GridItem>
-                </mx:GridRow>
-            </mx:Grid>
-                <mx:Grid width="50%">
-                <mx:GridRow width="100%">
-
-                    <mx:GridItem width="100">
-                        <mx:VBox horizontalAlign="center" width="100%">
-                            <mx:Image source="{catalogIcon}"/>
-                            <mx:LinkButton label="Marketplace" textDecoration="underline" click="toMarketplace()"/>
-                        </mx:VBox>
-                    </mx:GridItem>
-                    <mx:GridItem width="100%">
-                        <mx:HBox verticalAlign="middle" width="100%">
-                            <mx:TextArea editable="false" borderStyle="none" backgroundAlpha="0" width="100%" text="Explore data sets that others have published, find interesting data to add to your own"/>
-                        </mx:HBox>
-                    </mx:GridItem>
-                </mx:GridRow>
-                <mx:GridRow width="100%">
-                    <mx:GridItem width="100">
-                        <mx:VBox horizontalAlign="center" width="100%">
-                            <mx:Image source="{solutionsIcon}"/>
-                            <mx:LinkButton label="Solutions" textDecoration="underline" click="toSolutions()"/>
-                        </mx:VBox>
-                        </mx:GridItem>
-                    <mx:GridItem width="100%">
-                    <mx:HBox verticalAlign="middle" width="100%">
-                        <mx:TextArea editable="false" borderStyle="none" backgroundAlpha="0" width="100%" text="Install solutions to rapidly gather data from a variety of sources"/>
-                    </mx:HBox>
-                    </mx:GridItem>
-                </mx:GridRow>
-                <mx:GridRow width="100%">
-                    <mx:GridItem width="100">
-                        <mx:VBox horizontalAlign="center" width="100%">
-                            <mx:Image source="{apiIcon}"/>
-                            <mx:LinkButton label="API" textDecoration="underline" click="toAPI()"/>
-                        </mx:VBox>
-                        </mx:GridItem>
-                    <mx:GridItem width="100%">
-                    <mx:HBox verticalAlign="middle" width="100%">
-                        <mx:TextArea editable="false" borderStyle="none" backgroundAlpha="0" width="100%" text="Publish data through a variety of powerful APIs to meet any use case"/>
-                    </mx:HBox>
-                    </mx:GridItem>
-                </mx:GridRow>
-            </mx:Grid>
-            </mx:HBox>
-            <mx:Spacer height="30"/>
+                <mx:Label fontSize="16" color="#000000"
+                          text="You can start by clicking any of the top buttons to navigate to that particular section."/>
+            </mx:VBox>-->
             <mx:HBox width="100%" horizontalAlign="center">
-                <mx:Label fontSize="16" color="#000000" text="The tutorials below can help you get started with a little more guidance."/>
+                <mx:Label fontSize="20" text="Achieve full business visibility now!" fontFamily="Tahoma"
+                          fontWeight="bold" color="0x323232"/>
             </mx:HBox>
+            <mx:HBox width="100%" paddingLeft="10" paddingRight="10">
+                <mx:VBox height="100%" verticalAlign="middle">
+                    <mx:Label fontSize="16" text="Instant connections to reports on SaaS systems" fontFamily="Tahoma"
+                              fontWeight="bold" color="0x323232"/>
+                    <mx:Label fontSize="16" text="Publish custom business data with ease" fontFamily="Tahoma"
+                              fontWeight="bold" color="0x323232"/>
+                    <mx:Label fontSize="16" text="Look at your data in a wide variety of ways" fontFamily="Tahoma"
+                              fontWeight="bold" color="0x323232"/>
+                    <mx:Label fontSize="16" text="Track your key metrics to drive business success" fontFamily="Tahoma"
+                              fontWeight="bold" color="0x323232"/>
+                    <mx:Spacer height="20"/>
+                    <!--<mx:TextArea editable="false"
+                                 text="Welcome to Easy Insight! We're in beta right now, so feel free to explore the application. You can easily get started through one of the options below."
+                                 borderStyle="none" width="100%" fontSize="14" height="80" backgroundAlpha="0"/>-->
+                </mx:VBox>
+                <mx:Spacer width="100%"/>
+                <mx:VBox height="100%" verticalAlign="middle">
+                    <mx:VBox horizontalAlign="center" borderStyle="solid" cornerRadius="10"
+                             backgroundColor="0xFFFFFF" verticalAlign="middle" paddingLeft="10" paddingRight="10" paddingTop="10"
+                            paddingBottom="10">
+                        <mx:Image source="../assets/logos/film.png" click="lesson1()"
+                                  useHandCursor="true" buttonMode="true"/>
+                        <mx:LinkButton label="Take a tour!" fontSize="14" click="lesson1()" textDecoration="underline"/>
+                    </mx:VBox>
+                </mx:VBox>
+                <mx:Spacer width="100%"/>
+                <twitter:TwitterDisplay person="easyinsight"/>
+            </mx:HBox>
+
+            <mx:HBox width="100%" paddingLeft="10" paddingRight="10">
+                <mx:HBox width="480" backgroundColor="#FFFFFF" borderStyle="solid" cornerRadius="15" paddingLeft="5" paddingRight="5"
+                        paddingTop="5" paddingBottom="5" height="240" verticalAlign="middle" buttonMode="true">
+                    <mx:VBox width="210">
+                        <mx:Label text="Instant Solutions" fontSize="20" fontFamily="Tahoma" fontWeight="bold" selectable="false"
+                                buttonMode="true" mouseChildren="false" useHandCursor="true" color="0x323232"/>
+                        <mx:TextArea editable="false"
+                                     text="You can jump right into Easy Insight through our rich set of integrations to other applications. We provide immediate connections to a variety of SaaS applications and ways to easily publish data from systems in your enterprise."
+                                     borderStyle="none" selectable="false" width="100%" fontSize="12" height="120" backgroundAlpha="0"
+                                buttonMode="true" mouseChildren="false" useHandCursor="true" color="0x323232"/>
+                    </mx:VBox>
+                    <mx:VBox horizontalAlign="center">
+                        <mx:LinkButton fontSize="18" label="Get Started!" click="appSolutions()" textDecoration="underline"/>
+                        <util:ImageVScroller id="scroller" dataProvider="{logos}"
+                                             itemRenderer="com.easyinsight.util.LogoRenderer" direction="up" width="250" height="180"
+                                             horizontalCenter="0" verticalCenter="0"/>
+                    </mx:VBox>
+                </mx:HBox>
+                <mx:Spacer width="100%"/>
+                <mx:HBox width="480" backgroundColor="#FFFFFF" borderStyle="solid" cornerRadius="15" paddingLeft="5" paddingRight="5"
+                        paddingTop="5" paddingBottom="5" height="240" verticalAlign="middle" buttonMode="true">
+                    <mx:VBox width="210">
+                        <mx:Label text="Business Visibility" fontSize="20" fontFamily="Tahoma" fontWeight="bold" buttonMode="true"
+                                 mouseChildren="false" useHandCursor="true" color="0x323232"/>
+                        <mx:TextArea editable="false"
+                                         text="Define your strategic business objectives to drive continuous improvement. Take advantage of industry patterns to quickly build out executive scorecards tailored to your particular business."
+                                         borderStyle="none" width="100%" fontSize="12" height="120" backgroundAlpha="0"
+                                    selectable="false" buttonMode="true" mouseChildren="false" useHandCursor="true" color="0x323232"/>
+                    </mx:VBox>
+                    <mx:VBox horizontalAlign="center">
+                        <mx:LinkButton fontSize="18" label="Get Started!" click="bizSolutions()" textDecoration="underline"/>
+                        <mx:Box width="250" height="180" verticalAlign="middle" horizontalAlign="center">
+                            <mx:Image source="../assets/logos/goals1.jpg" maxWidth="250" maxHeight="180"/>
+                        </mx:Box>
+                    </mx:VBox>
+                </mx:HBox>
+            </mx:HBox>
+
             <mx:Spacer height="30"/>
-            <mx:HBox width="100%" paddingLeft="20" paddingRight="20" horizontalAlign="center" horizontalGap="40">
-                <mx:VBox horizontalAlign="center">
-                    <mx:Image source="../assets/lesson1/FirstFrame.png" width="256" height="192" click="lesson1()" rollOver="CursorManager.setCursor(pointerIcon);"
-                            rollOut="CursorManager.removeAllCursors()"/>
-                    <mx:HBox>
-                        <mx:Label text="Creating a data source" fontSize="14"/>
-                    </mx:HBox>
-                </mx:VBox>
-                <mx:VBox horizontalAlign="center">
-                    <mx:Box width="256" height="192" backgroundColor="#000000" horizontalAlign="center"  verticalAlign="middle">
-                        <mx:Label text="Coming soon..." fontSize="16" color="#FFFFFF"/>
-                    </mx:Box>
-                    <mx:HBox>
-                        <mx:Label text="Running the database solution" fontSize="14"/>
-                    </mx:HBox>
-                </mx:VBox>
-                <mx:VBox horizontalAlign="center">
-                    <mx:Image source="../assets/uncheckedjavaapilesson/FirstFrame.png" width="256" height="192" click="apilesson()" rollOver="CursorManager.setCursor(pointerIcon);"
-                            rollOut="CursorManager.removeAllCursors()"/>
-                    <mx:HBox>
-                        <mx:Label text="Using the API" fontSize="14"/>
-                    </mx:HBox>
-                </mx:VBox>
+
+            <mx:HBox width="100%" paddingLeft="10" paddingBottom="10" paddingRight="10">
+                <mx:HBox width="100%" verticalAlign="middle" paddingLeft="10" paddingRight="10" backgroundColor="0xFFFFFF"
+                        borderStyle="solid" cornerRadius="5">
+                    <!--<mx:Image source="../assets/logos/logo-truste.gif"/>
+
+                    <mx:Image source="../assets/logos/vlogo.gif"/>-->
+                    <mx:Spacer width="100%"/>
+                    <mx:LinkButton textDecoration="underline" label="Security Statement" fontSize="14"/>
+                    <mx:Spacer width="100%"/>
+                    <mx:LinkButton textDecoration="underline" label="Terms of Service" fontSize="14"/>
+                    <mx:Spacer width="100%"/>
+                    <mx:LinkButton textDecoration="underline" label="Privacy Policy" fontSize="14"/>
+                </mx:HBox>
             </mx:HBox>
         </mx:VBox>
     </mx:HBox>

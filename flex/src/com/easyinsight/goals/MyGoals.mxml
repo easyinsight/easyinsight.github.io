@@ -120,7 +120,7 @@
         }
 
         private function onDividerRelease(event:DividerEvent):void {
-            if(User.getSharedObject() != null) {
+            if (User.getSharedObject() != null) {
                 User.getSharedObject().data.goalSliderPos = dataBoxes.getDividerAt(0).y + event.delta;
                 User.getSharedObject().flush();
             }
@@ -201,8 +201,11 @@
                     currentState = "noGoalsPro";
                 }
             }
-            if(User.getSharedObject().data.goalSliderPos != null) {
-                        dataBoxes.getDividerAt(0).y = User.getSharedObject().data.goalSliderPos;
+            try {
+                if (User.getSharedObject().data.goalSliderPos != null) {
+                    dataBoxes.getDividerAt(0).y = User.getSharedObject().data.goalSliderPos;
+                }
+            } catch(e:Error) {
             }
         }
 
@@ -234,9 +237,9 @@
         }
 
         private function complete(event:Event):void {
-			Alert.show("This downloaded widget will allow you to see your monitored KPIs. You can add it to your widgets by selecting Open Widget... from your Yahoo Widgets dock.");
+            Alert.show("This downloaded widget will allow you to see your monitored KPIs. You can add it to your widgets by selecting Open Widget... from your Yahoo Widgets dock.");
             fileRef = null;
-		}
+        }
 
         private function doEvent(event:Event):void {
         }
@@ -273,8 +276,6 @@
                 </mx:DataGrid>
                 <mx:VBox height="100%" width="100%">
                     <mx:HBox>
-                        <mx:Button toolTip="Download Yahoo Widget for KPI Display..." click="downloadWidget()" id="downloadYahooWidgetButton" icon="@Embed(source='../../../../assets/document_gear_x16.png')"
-                           label="Yahoo! Widget"/>
                         <mx:Button id="igoogleButton" toolTip="Add to iGoogle"
                            icon="@Embed(source='../../../../assets/uwa-google.png')" click="igoogle()" />
                         <mx:Button id="netvibesButton" toolTip="Add to Netvibes"

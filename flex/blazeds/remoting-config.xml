@@ -16,6 +16,12 @@
         </properties>
     </destination>
 
+    <destination id="twitter">
+        <properties>
+            <source>com.easyinsight.twitter.TwitterService</source>
+        </properties>
+    </destination>
+
     <destination id="exportService">
         <properties>
             <source>com.easyinsight.export.ExportService</source>

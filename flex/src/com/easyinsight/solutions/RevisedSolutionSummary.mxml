@@ -34,6 +34,8 @@
 
         private var selectedCategory:int;
 
+        public var defaultView:int;
+
         private var _saas:Boolean = true;
 
         private var _client:Boolean = true;
@@ -117,6 +119,13 @@
             BrowserManager.getInstance().setTitle("Easy Insight - Solutions");
             var fragmentString:String = URLUtil.objectToString(fragmentObject);
             BrowserManager.getInstance().setFragment(fragmentString);
+            if (defaultView > 0) {
+                /*saas = (Solution.SAAS & defaultView == Solution.SAAS);
+                client = (Solution.CLIENT & defaultView == Solution.CLIENT);
+                learning = (Solution.LEARNING & defaultView == Solution.LEARNING);
+                biz = (Solution.BIZ & defaultView == Solution.BIZ);*/
+                defaultView = 0;
+            }
             solutionService.getSolutions.send();
         }
 

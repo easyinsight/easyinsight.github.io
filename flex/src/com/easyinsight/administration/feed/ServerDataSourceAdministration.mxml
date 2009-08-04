@@ -62,7 +62,7 @@
         }
 
         public function set dataSourceClass(value:Class):void {
-            _dataSourceClass = value;
+            _dataSourceClass = value;                   
         }
 
         private function credentialClick():void {
