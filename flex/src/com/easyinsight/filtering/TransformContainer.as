@@ -190,8 +190,24 @@ import mx.managers.ToolTipManager;
 			var filter:IFilter = createFilter(filterDefinition);
 			initializeFilter(filter);						
 		}
-		
-		private function createFilter(filterDefinition:FilterDefinition):IFilter {
+
+    private var _preparedFilters:ArrayCollection;
+
+
+    public function set preparedFilters(value:ArrayCollection):void {
+        _preparedFilters = value;
+    }
+
+    override protected function commitProperties():void {
+        super.commitProperties();
+        if (_preparedFilters != null) {
+            for each (var filter:FilterDefinition in _preparedFilters) {
+                addFilterDefinition(filter);
+            }
+        }
+    }
+
+    private function createFilter(filterDefinition:FilterDefinition):IFilter {
 			var filter:IFilter;
 			if (filterDefinition.getType() == FilterDefinition.VALUE) {
 				var filterValueDefinition:FilterValueDefinition = filterDefinition as FilterValueDefinition;

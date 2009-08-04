@@ -23,6 +23,7 @@ import org.w3c.dom.Document;
  * Time: 9:47:13 AM
  */
 public class WesabeDataSource extends CompositeServerDataSource {
+    
     protected Set<FeedType> getFeedTypes() {
         Set<FeedType> feedTypes = new HashSet<FeedType>();
         feedTypes.add(FeedType.WESABE_ACCOUNTS);

@@ -993,8 +993,20 @@
                 Alert.show("You need to save this report first.");
             } else if (analysisChanged) {
                 Alert.show("You have unsaved changes. Are you sure you want to go to reports?", "Alert",
-                        Alert.OK | Alert.CANCEL, null, adminAlertListener, null, Alert.CANCEL);
+                        Alert.OK | Alert.CANCEL, null, goReportListener, null, Alert.CANCEL);
             } else {
+                cleanup();
+                var report:InsightDescriptor = new InsightDescriptor();
+                report.dataFeedID = dataService.dataFeedID;
+                report.id = analysisDefinition.analysisID;
+                report.name = analysisDefinition.name;
+                report.reportType = analysisDefinition.reportType;
+                dispatchEvent(new ModuleAnalyzeEvent(new ReportAnalyzeSource(report)));
+            }
+        }
+
+        private function goReportListener(event:CloseEvent):void {
+            if (event.detail == Alert.OK) {
                 cleanup();
                 var report:InsightDescriptor = new InsightDescriptor();
                 report.dataFeedID = dataService.dataFeedID;
@@ -1020,8 +1032,15 @@
         private function newReport():void {
             if (analysisChanged) {
                 Alert.show("You have unsaved changes. Are you sure you want to create a new report?", "Alert",
-                        Alert.OK | Alert.CANCEL, null, adminAlertListener, null, Alert.CANCEL);
+                        Alert.OK | Alert.CANCEL, null, newReportListener, null, Alert.CANCEL);
             } else {
+                cleanup();
+                dispatchEvent(new ModuleAnalyzeEvent(new DescriptorAnalyzeSource(dataService.dataFeedID, dataSourceName)));
+            }
+        }
+
+        private function newReportListener(event:CloseEvent):void {
+            if (event.detail == Alert.OK) {
                 cleanup();
                 dispatchEvent(new ModuleAnalyzeEvent(new DescriptorAnalyzeSource(dataService.dataFeedID, dataSourceName)));
             }

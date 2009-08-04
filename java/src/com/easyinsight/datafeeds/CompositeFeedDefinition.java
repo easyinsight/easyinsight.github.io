@@ -23,6 +23,11 @@ public class CompositeFeedDefinition extends FeedDefinition {
     private List<CompositeFeedNode> compositeFeedNodes = new ArrayList<CompositeFeedNode>();
     private List<CompositeFeedConnection> connections = new ArrayList<CompositeFeedConnection>();
 
+    @Override
+    public boolean isLiveData() {
+        return true;
+    }
+
     public List<CompositeFeedNode> getCompositeFeedNodes() {
         return compositeFeedNodes;
     }

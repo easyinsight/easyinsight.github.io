@@ -6,21 +6,24 @@ package com.easyinsight.filtering
 
 import com.easyinsight.framework.CredentialsCache;
 
+import flash.events.Event;
 import flash.events.MouseEvent;
-	import flash.geom.Point;
-	
-	import mx.collections.ArrayCollection;
+
+import mx.binding.utils.BindingUtils;
+import mx.collections.ArrayCollection;
 	import mx.containers.HBox;
 	import mx.controls.Button;
 	import mx.controls.HSlider;
 	import mx.controls.Label;
 	import mx.controls.Text;
-	import mx.controls.TextInput;
 	import mx.managers.PopUpManager;
 	import mx.rpc.events.ResultEvent;
 	import mx.rpc.remoting.RemoteObject;
+import mx.states.AddChild;
+import mx.states.RemoveChild;
+import mx.states.State;
 
-	public class SliderMeasureFilter extends HBox implements IFilter
+public class SliderMeasureFilter extends HBox implements IFilter
 	{
 		private var dataService:RemoteObject;
 		private var hslider:HSlider;
@@ -30,9 +33,12 @@ import flash.events.MouseEvent;
 		private var highValue:int;
 		private var lowField:Label;
 		private var highField:Label;
+
+    private var _lowValueString:String;
+    private var _highValueString:String;
 		
-		private var lowInput:TextInput;
-		private var highInput:TextInput;
+		private var lowInput:Label;
+		private var highInput:Label;
 		
 		private var _analysisItems:ArrayCollection;
 		
@@ -51,8 +57,31 @@ import flash.events.MouseEvent;
 			dataService.getAnalysisItemMetadata.addEventListener(ResultEvent.RESULT, gotMetadata);
 			dataService.getAnalysisItemMetadata.send(feedID, analysisItem, CredentialsCache.getCache().createCredentials(), new Date().getTimezoneOffset());
 		}
-		
-		public function set analysisItems(analysisItems:ArrayCollection):void {
+
+
+    [Bindable(event="lowValueStringChanged")]
+    public function get lowValueString():String {
+        return _lowValueString;
+    }
+
+    public function set lowValueString(value:String):void {
+        if (_lowValueString == value) return;
+        _lowValueString = value;
+        dispatchEvent(new Event("lowValueStringChanged"));
+    }
+
+    [Bindable(event="highValueStringChanged")]
+    public function get highValueString():String {
+        return _highValueString;
+    }
+
+    public function set highValueString(value:String):void {
+        if (_highValueString == value) return;
+        _highValueString = value;
+        dispatchEvent(new Event("highValueStringChanged"));
+    }
+
+    public function set analysisItems(analysisItems:ArrayCollection):void {
 			_analysisItems = analysisItems;
 		}		
 		
@@ -68,44 +97,84 @@ import flash.events.MouseEvent;
 		}		
 		
 		private function onFilterEdit(event:FilterEditEvent):void {
+            var measureFilter:FilterRangeDefinition = event.filterDefinition as FilterRangeDefinition;
+            if (measureFilter.startValueDefined) {
+                lowValueString = String(measureFilter.startValue);
+            }
+            if (measureFilter.endValueDefined) {
+                highValueString = String(measureFilter.endValue);
+            }
+            if (measureFilter.startValueDefined || measureFilter.endValueDefined) {
+                currentState = "Configured";
+            } else {
+                currentState = "";
+            }
 			dispatchEvent(new FilterUpdatedEvent(FilterUpdatedEvent.FILTER_UPDATED, event.filterDefinition, event.previousFilterDefinition, this));
 		}
 		
 		private function gotMetadata(event:ResultEvent):void {
 			var metadata:AnalysisItemResultMetadata = dataService.getAnalysisItemMetadata.lastResult as AnalysisItemResultMetadata;
 			var measureMetadata:AnalysisMeasureResultMetadata = metadata as AnalysisMeasureResultMetadata;
-            if (_showLabel) {
-                var label:Label = new Label();
-                label.text = analysisItem.display + ":";
-                addChild(label);
-            } else {
-                toolTip = analysisItem.display;
-            }
-			lowInput = new TextInput();
-			lowInput.editable = false;
-			addChild(lowInput);
-			
-			var between:Text = new Text();
-			between.text = " < " + analysisItem.display + " < ";
-			addChild(between);
-			
-			highInput = new TextInput();
-			highInput.editable = false;
-			addChild(highInput);
 
-            if (_filterEditable) {
-                var editButton:Button = new Button();
-                editButton.addEventListener(MouseEvent.CLICK, edit);
-                editButton.setStyle("icon", editIcon);
-                editButton.toolTip = "Edit";
-                addChild(editButton);
-                var deleteButton:Button = new Button();
-                deleteButton.addEventListener(MouseEvent.CLICK, deleteSelf);
-                deleteButton.setStyle("icon", deleteIcon);
-                deleteButton.toolTip = "Delete";
+            if (lowInput == null) {
+                var haveDataState:State = new State();
+                haveDataState.name = "Configured";
+                var defaultBox:HBox = new HBox();
+                var removeOp:RemoveChild = new RemoveChild();
+                removeOp.target = defaultBox;
+                var addChildOp:AddChild = new AddChild();
+                haveDataState.overrides = [ removeOp, addChildOp ];
+                var box:HBox = new HBox();
+                addChildOp.target = box;
+
+                lowInput = new Label();
+                BindingUtils.bindProperty(lowInput, "text", this, "lowValueString");
+                box.addChild(lowInput);
+
+                var between:Text = new Text();
+                between.text = " < " + analysisItem.display + " < ";
+                box.addChild(between);
+
+                highInput = new Label();
+                BindingUtils.bindProperty(highInput, "text", this, "highValueString");
+			    box.addChild(highInput);
+
+                if (_filterEditable) {
+                    var editButton:Button = new Button();
+                    editButton.addEventListener(MouseEvent.CLICK, edit);
+                    editButton.setStyle("icon", editIcon);
+                    editButton.toolTip = "Edit";
+                    box.addChild(editButton);
+                    var deleteButton:Button = new Button();
+                    deleteButton.addEventListener(MouseEvent.CLICK, deleteSelf);
+                    deleteButton.setStyle("icon", deleteIcon);
+                    deleteButton.toolTip = "Delete";
+                    box.addChild(deleteButton);
+                }
+
+
+
+                this.states = [ haveDataState ];
+
+                if (_filterEditable) {
+                    var editLabel:Label = new Label();
+                    editLabel.setStyle("fontSize", 10);
+                    editLabel.text = "Click Edit to Configure";
+                    defaultBox.addChild(editLabel);
+                    var editDefault:Button = new Button();
+                    editDefault.addEventListener(MouseEvent.CLICK, edit);
+                    editDefault.setStyle("icon", editIcon);
+                    editDefault.toolTip = "Edit";
+                    defaultBox.addChild(editDefault);
+                    var deleteDefault:Button = new Button();
+                    deleteDefault.addEventListener(MouseEvent.CLICK, deleteSelf);
+                    deleteDefault.setStyle("icon", deleteIcon);
+                    deleteDefault.toolTip = "Delete";
+                    defaultBox.addChild(deleteDefault);
+                }
+                addChild(defaultBox);
             }
-			
-			addChild(deleteButton);
+
 			
 			if (_filterDefinition == null) {
 				_filterDefinition = new FilterRangeDefinition();
@@ -114,13 +183,14 @@ import flash.events.MouseEvent;
 				_filterDefinition.field = analysisItem;
 					
 			} else {
-				if (_filterDefinition.startValueDefined) {
-					lowInput.text = String(_filterDefinition.startValue);
-				}
-				if (_filterDefinition.endValueDefined) {
-					highInput.text = String(_filterDefinition.endValue);
-				}
-			}
+                if (_filterDefinition.startValueDefined) {
+                    lowValueString = String(_filterDefinition.startValue);
+                }
+                if (_filterDefinition.endValueDefined) {
+                    highValueString = String(_filterDefinition.endValue);
+                }
+                currentState = "Configured";
+            }
 			
 			dispatchEvent(new FilterUpdatedEvent(FilterUpdatedEvent.FILTER_ADDED, filterDefinition, null, this));
 		}

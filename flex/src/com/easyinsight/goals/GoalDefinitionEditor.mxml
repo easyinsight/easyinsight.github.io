@@ -1,0 +1,542 @@
+<?xml version="1.0" ?>
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:filtering="com.easyinsight.filtering.*" width="100%"
+         height="100%" creationComplete="setupData()">
+    <mx:states>
+        <mx:State name="noHistory">
+            <mx:AddChild relativeTo="{historyBox}">
+                <mx:Label text="No values found for this combination in the data source history." fontSize="14"/>
+            </mx:AddChild>
+        </mx:State>
+        <mx:State name="oneResult">
+            <mx:AddChild relativeTo="{historyBox}">
+                <mx:HBox>
+                    <mx:Label text="Latest Value:" fontSize="14"/>
+                    <mx:Label text="{latestValue}"/>
+                </mx:HBox>
+            </mx:AddChild>
+        </mx:State>
+        <mx:State name="history">
+            <mx:RemoveChild target="{coreBox}"/>
+            <mx:AddChild relativeTo="{historyBox}">
+                <mx:Button label="Close History" click="currentState=''"/>
+            </mx:AddChild>
+            <mx:AddChild relativeTo="{chartBox}">
+                <mx:Box width="100%" horizontalAlign="center" verticalAlign="middle" id="historyBox">
+                    <mx:LineChart dataProvider="{historyData}" width="100%" height="250" id="lineChart"
+                                  showDataTips="true">
+                        <mx:horizontalAxis>
+                            <mx:DateTimeAxis id="horAxis"/>
+                        </mx:horizontalAxis>
+                        <mx:series>
+                            <mx:LineSeries yField="value" xField="date" form="curve" id="horSeries"/>
+                            <!--<mx:LineSeries yField="value" xField="date" form="segment" visible="{showSlope}" dataProvider="{slopeData}"/>-->
+                        </mx:series>
+                        <mx:annotationElements>
+                            <mx:Canvas id="linesCanvas" horizontalScrollPolicy="off"
+                                       verticalScrollPolicy="off"/>
+                        </mx:annotationElements>
+                    </mx:LineChart>
+                </mx:Box>
+            </mx:AddChild>
+        </mx:State>
+    </mx:states>
+    <mx:Script><![CDATA[
+        import com.easyinsight.analysis.AnalysisItem;
+        import com.easyinsight.analysis.AnalysisItemEditEvent;
+        import com.easyinsight.analysis.AnalysisItemEditWindow;
+        import com.easyinsight.analysis.AnalysisItemNode;
+        import com.easyinsight.analysis.AnalysisItemTypes;
+        import com.easyinsight.analysis.AnalysisItemWrapper;
+        import com.easyinsight.analysis.AnalysisMeasure;
+
+        import com.easyinsight.analysis.CalculationWindow;
+        import com.easyinsight.analysis.CredentialRequirement;
+        import com.easyinsight.analysis.CredentialsEvent;
+        import com.easyinsight.analysis.FeedMetadata;
+        import com.easyinsight.analysis.MeasureItemEditor;
+        import com.easyinsight.analysis.RuntimeCredentialsWindow;
+        import com.easyinsight.commands.CommandEvent;
+        import com.easyinsight.commands.CommandProcessor;
+        import com.easyinsight.filtering.FilterDefinition;
+
+        import com.easyinsight.framework.CredentialsCache;
+
+        import mx.charts.LinearAxis;
+        import mx.charts.chartClasses.IAxis;
+        import mx.charts.chartClasses.Series;
+        import mx.collections.ArrayCollection;
+        import mx.collections.Sort;
+        import mx.collections.SortField;
+        import mx.managers.PopUpManager;
+
+        [Bindable]
+        private var insightBound:Boolean;
+        [Bindable]
+        private var availableItems:ArrayCollection;
+        [Bindable]
+        private var feedName:String;
+        [Bindable]
+        private var feedID:int;
+
+        [Bindable]
+        private var highValues:Boolean = true;
+        [Bindable]
+        private var lowValues:Boolean = false;
+
+        [Bindable]
+        private var rangeOptions:ArrayCollection;
+
+        [Bindable]
+        private var measureSelected:Boolean;
+
+        [Bindable]
+        private var startDate:Date;
+
+        [Bindable]
+        private var latestValue:String;
+
+        [Bindable]
+        private var endDate:Date;
+
+        [Bindable]
+        private var historyData:ArrayCollection;
+
+        [Bindable]
+        private var targetValue:String;
+
+        private var filterDefinition:FilterDefinition;
+
+        private var analysisMeasure:AnalysisMeasure;
+
+        [Bindable]
+        private var filterDefinitions:ArrayCollection;
+
+        [Bindable]
+        private var problemDefinitions:ArrayCollection;
+
+        [Bindable]
+        private var targetDefined:Boolean;
+
+
+        [Bindable]
+        private var milestones:ArrayCollection;
+
+        private var feedMetadata:FeedMetadata;
+
+        private static const NONE:AnalysisItem = new AnalysisItem();
+
+        private static const NO_MILESTONE:String = "No Milestone";
+
+        private var _goalTreeNode:GoalTreeNode;
+
+        [Bindable]
+        private var availableDimensions:ArrayCollection;
+
+        [Bindable]
+        private var allFields:ArrayCollection = new ArrayCollection();
+
+        [Bindable]
+        [Embed(source="../../../../assets/pencil.png")]
+        private var editIcon:Class;
+
+        [Bindable]
+        [Embed(source="../../../../assets/navigate_cross.png")]
+        private var deleteIcon:Class;
+
+        [Bindable]
+        [Embed(source="../../../../assets/data_blue_x16.png")]
+        public var dataSourceIcon:Class;
+        
+        private var commandProcessor:CommandProcessor;
+
+        private function setupData():void {
+            commandProcessor = new CommandProcessor();
+            addEventListener(CommandEvent.COMMAND, onCommand);
+            NONE.displayName = "[ No Selection ]";
+            if (_goalTreeNode != null) {
+                for each (var filter:FilterDefinition in _goalTreeNode.filters) {
+                    transformContainer.addFilterDefinition(filter);
+                }
+                for each (var problem:FilterDefinition in _goalTreeNode.problemConditions) {
+                    problemContainer.addFilterDefinition(problem);
+                }
+            }
+            goalService.getMilestones.send();
+        }
+
+        private function onCommand(event:CommandEvent):void {
+            commandProcessor.addCommand(event.command);
+        }
+
+        private function gotMilestones():void {
+            var milestoneColl:ArrayCollection = goalService.getMilestones.lastResult as ArrayCollection;
+            milestoneColl.addItemAt(NO_MILESTONE, 0);
+            milestones = milestoneColl;
+            if (_goalTreeNode != null && _goalTreeNode.milestone != null) {
+                for each (var obj:Object in milestoneColl) {
+                    if (obj is GoalTreeMilestone) {
+                        var milestone:GoalTreeMilestone = obj as GoalTreeMilestone;
+                        if (milestone.milestoneID == _goalTreeNode.milestone.milestoneID) {
+                            milestoneBox.selectedItem = milestone;
+                        }
+                    }
+                }
+            }
+        }
+
+        private function bindDataSource():void {
+            var window:DataSourceChoiceWindow = DataSourceChoiceWindow(PopUpManager.createPopUp(this, DataSourceChoiceWindow, true));
+            window.addEventListener(DataSourceChoiceEvent.DATA_SOURCE_CHOICE, boundDataSource);
+            PopUpManager.centerPopUp(window);
+        }
+
+        private function boundDataSource(event:DataSourceChoiceEvent):void {
+            currentState = "";
+            historyData = null;
+            transformContainer.removeAllFilters();
+            this.feedName = event.feedDefinition.name;
+            this.feedID = event.feedDefinition.id;
+            insightBound = true;
+            dataService.getFeedMetadata.send(feedID);
+        }
+
+        private function processFeed(feedDefinition:FeedMetadata):void {
+            this.feedMetadata = feedDefinition;
+            for each (var credential:CredentialRequirement in feedMetadata.credentials) {
+                if (CredentialsCache.getCache().getCredentials(credential.dataSourceID) == null) {
+                    var window:RuntimeCredentialsWindow = new RuntimeCredentialsWindow();
+                    window.addEventListener(CredentialsEvent.CREDENTIALS_SAVED, onCredentials);
+                    window.requirement = credential;
+                    PopUpManager.addPopUp(window, this, true);
+                    PopUpManager.centerPopUp(window);
+                }
+            }
+            availableDimensions = new ArrayCollection();
+            var measures:ArrayCollection = new ArrayCollection();
+            var dates:ArrayCollection = new ArrayCollection();
+            allFields = new ArrayCollection();
+            for each (var analysisItem:AnalysisItem in feedDefinition.fields) {
+                if (analysisItem.hasType(AnalysisItemTypes.MEASURE)) {
+                    measures.addItem(analysisItem);
+                } else if (analysisItem.hasType(AnalysisItemTypes.DIMENSION)) {
+                    availableDimensions.addItem(analysisItem);
+                }
+                var aNode:AnalysisItemNode = new AnalysisItemNode();
+                aNode.analysisItem = analysisItem;
+                allFields.addItem(new AnalysisItemWrapper(aNode));
+            }
+            var sort:Sort = new Sort();
+            sort.fields = [ new SortField("display", false) ];
+            availableDimensions.sort = sort;
+            availableDimensions.refresh();
+            this.availableItems = measures;
+            var measureSort:Sort = new Sort();
+            measureSort.fields = [ new SortField("display", false) ];
+            measures.sort = measureSort;
+            measures.refresh();
+            feedID = feedDefinition.dataFeedID;
+        }
+
+        private function gotDefinition():void {
+            var feedDefinition:FeedMetadata = dataService.getFeedMetadata.lastResult as FeedMetadata;
+            processFeed(feedDefinition);
+            if (transformContainer.getFilterDefinitions().length == 0) {
+                for each (var filter:FilterDefinition in feedDefinition.intrinsicFilters) {
+                    transformContainer.addFilterDefinition(filter);
+                }
+            }
+            if (analysisMeasure != null) {
+                var foundAnalysisItem:AnalysisItem = null;
+                for (var i:int = 0; i < availableItems.length && foundAnalysisItem == null; i++) {
+                    var analysisTest:AnalysisItem = availableItems.getItemAt(i) as AnalysisItem;
+                    if (analysisTest.display == analysisMeasure.display) {
+                        foundAnalysisItem = analysisTest;
+                    }
+                }
+                if (foundAnalysisItem != null) {
+                    var index:int = availableItems.getItemIndex(foundAnalysisItem);
+                    availableItems.removeItemAt(index);
+                    availableItems.addItemAt(analysisMeasure, index);
+                    availableItemBox.selectedItem = analysisMeasure;
+                }
+            } else {
+                if (availableItems.length > 0) {
+                    analysisMeasure = availableItems.getItemAt(0) as AnalysisMeasure;
+                }
+            }
+        }
+
+        private function onCredentials(event:CredentialsEvent):void {
+            generateHistory();
+        }
+
+        private function generateHistory():void {
+            goalService.generateHistory.send(availableItemBox.selectedItem, transformContainer.getFilterDefinitions(),
+                feedID, startChooser.selectedDate, endChooser.selectedDate, CredentialsCache.getCache().createCredentials());
+        }
+
+        private function itemEdited(event:AnalysisItemEditEvent):void {
+            analysisMeasure = event.analysisItem as AnalysisMeasure;
+            if (analysisMeasure != null) {
+                var foundAnalysisItem:AnalysisItem = null;
+                for (var i:int = 0; i < availableItems.length && foundAnalysisItem == null; i++) {
+                    var analysisTest:AnalysisItem = availableItems.getItemAt(i) as AnalysisItem;
+                    if (analysisTest.display == analysisMeasure.display) {
+                        foundAnalysisItem = analysisTest;
+                    }
+                }
+                if (foundAnalysisItem != null) {
+                    var index:int = availableItems.getItemIndex(foundAnalysisItem);
+                    availableItems.removeItemAt(index);
+                    availableItems.addItemAt(analysisMeasure, index);
+                    availableItemBox.selectedItem = analysisMeasure;
+                }
+            }
+        }
+
+        private function editMeasure():void {
+            var analysisItemEditor:AnalysisItemEditWindow = new AnalysisItemEditWindow();
+            if (analysisMeasure.hasType(AnalysisItemTypes.CALCULATION)) {
+                analysisItemEditor.editorClass = CalculationWindow;
+            } else {
+                analysisItemEditor.editorClass = MeasureItemEditor;
+            }
+            analysisItemEditor.analysisItems = this.allFields;
+            analysisItemEditor.analysisItem = this.analysisMeasure;
+            PopUpManager.addPopUp(analysisItemEditor, this, true);
+            PopUpManager.centerPopUp(analysisItemEditor);
+            analysisItemEditor.addEventListener(AnalysisItemEditEvent.ANALYSIS_ITEM_EDIT, itemEdited);
+        }
+
+        private function drawLine():void {
+            linesCanvas.removeAllChildren();
+            var milestone:GoalTreeMilestone = milestoneBox.selectedItem as GoalTreeMilestone;
+            /*var dateFormatter:DateFormatter = new DateFormatter();
+            dateFormatter.formatString = "MM/DD/YY";
+            var format:String = dateFormatter.format(milestone.milestoneDate);
+            Alert.show(format);*/
+            var chartXValue:Object = getNumericChartValue(milestone.milestoneDate, horAxis);
+            var thePosition:Point = chartToScreen(chartXValue.numericValue, 0, horSeries);
+
+            //creating the line
+            var theLine:VRule = VRule(linesCanvas.addChild(new VRule()));
+            theLine.x = thePosition.x;
+            theLine.y = 0;
+            theLine.setStyle("strokeColor", 0x000000);
+            theLine.setStyle("strokeWidth", 5);
+            theLine.height = linesCanvas.height;
+
+            //creating the button
+            var milestoneLabel:Label = Label(linesCanvas.addChild(new Label()));
+            milestoneLabel.setStyle("fontSize", 13);
+            milestoneLabel.text = milestone.milestoneName;
+            //milestoneLabel.width = milestoneLabel.height = 20;
+            milestoneLabel.x = thePosition.x - (milestoneLabel.width / 2) + 1;
+            milestoneLabel.y = 5;
+        }
+
+
+        public function chartToScreen(chartX:Number, chartY:Number, theSeries:Series):Point {
+            var tmpCache:Array = new Array({chartX:chartX, chartY:chartY});
+            if (theSeries) {
+                theSeries.dataTransform.transformCache(tmpCache, "chartX", "screenX", "chartY", "screenY");
+            }
+            return new Point(Math.round(tmpCache[0].screenX), Math.round(tmpCache[0].screenY));
+
+        }
+
+
+        public function getNumericChartValue(inValue:Object, theAxis:IAxis):Object {
+            var axisCache:Array = new Array({inValue: inValue});
+            if (!(theAxis is LinearAxis)) {
+                theAxis.mapCache(axisCache, "inValue", "outValue", false);
+                return {numericValue: axisCache[0].outValue};
+            }
+            else {
+                return {numericValue: Number(inValue)};
+            }
+        }
+
+
+        private function gotHistory():void {
+            var results:ArrayCollection = goalService.generateHistory.lastResult as ArrayCollection;
+            if (results.length == 0) {
+                currentState = "noHistory";
+            } else if (results.length == 1) {
+                var goalValue:GoalValue = results.getItemAt(0) as GoalValue;
+                var measure:AnalysisMeasure = availableItemBox.selectedItem as AnalysisMeasure;
+                latestValue = measure.getFormatter().format(goalValue.value);
+                currentState = "oneResult";
+            } else {
+                historyData = results;
+                currentState = "history";
+            }
+        }
+
+        private function clear():void {
+            feedID = 0;
+            feedName = "";
+            insightBound = false;
+        }
+
+        public function set goalTreeNode(goalTreeNode:GoalTreeNode):void {
+            this._goalTreeNode = goalTreeNode;
+            this.feedID = goalTreeNode.coreFeedID;
+            if (goalTreeNode.coreFeedID > 0) {
+                insightBound = true;
+                this.feedName = goalTreeNode.coreFeedName;
+                filterDefinitions = goalTreeNode.filters;
+                problemDefinitions = goalTreeNode.problemConditions;
+
+                this.analysisMeasure = goalTreeNode.analysisMeasure;
+                this.highValues = goalTreeNode.highIsGood;
+                this.lowValues = !goalTreeNode.highIsGood;
+                this.targetValue = String(goalTreeNode.goalValue);
+                dataService.getFeedMetadata.send(goalTreeNode.coreFeedID);
+                targetDefined = goalTreeNode.goalDefined;
+            }
+            endDate = new Date();
+            startDate = new Date(endDate.getTime() - (1000 * 60 * 60 * 24 * 14));
+        }
+        
+        public function save():void {
+            if (insightBound) {
+                _goalTreeNode.coreFeedID = feedID;
+                _goalTreeNode.coreFeedName = feedName;
+                _goalTreeNode.analysisMeasure = availableItemBox.selectedItem as AnalysisMeasure;
+                _goalTreeNode.highIsGood = highValuesGoal.selected;
+                _goalTreeNode.goalValue = int(targetValueInput.text);
+                _goalTreeNode.filters = transformContainer.getFilterDefinitions();
+                _goalTreeNode.problemConditions = problemContainer.getFilterDefinitions();
+                _goalTreeNode.goalDefined = targetDefinedCheckbox.selected;
+                if (milestoneBox.selectedItem != NO_MILESTONE) {
+                    _goalTreeNode.milestone = milestoneBox.selectedItem as GoalTreeMilestone;
+                }
+            } else {
+                _goalTreeNode.coreFeedID = 0;
+                _goalTreeNode.analysisMeasure = null;
+                _goalTreeNode.filters = new ArrayCollection();
+                _goalTreeNode.milestone = null;
+                _goalTreeNode.goalValue = 0;
+            }
+            dispatchEvent(new GoalEditEvent());
+        }
+        ]]></mx:Script>
+    <mx:RemoteObject destination="data" id="dataService">
+        <mx:method name="getFeedMetadata" result="gotDefinition()"/>
+    </mx:RemoteObject>
+    <mx:RemoteObject destination="goalService" id="goalService">
+        <mx:method name="generateHistory" result="gotHistory()"/>
+        <mx:method name="getMilestones" result="gotMilestones()"/>
+    </mx:RemoteObject>
+    <mx:HBox width="100%" height="100%" id="coreBox">
+        <mx:VBox paddingTop="10">
+            <mx:HBox width="100%" horizontalAlign="center">
+                <mx:Label fontSize="14" text="Define the Measure" fontWeight="bold"
+                          fontFamily="Tahoma"/>
+            </mx:HBox>
+            <mx:Form paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5">
+                <mx:FormItem label="Goal Data Source Binding:" direction="horizontal"
+                             fontFamily="Tahoma"
+                             fontWeight="bold">
+                    <mx:Label text="{feedName}" fontFamily="Lucida Grande" fontWeight="normal"/>
+                    <mx:Button icon="{dataSourceIcon}" toolTip="Bind Data Source"
+                               click="bindDataSource()"/>
+                    <mx:Button icon="{deleteIcon}" toolTip="Clear" click="clear()"/>
+                </mx:FormItem>
+                <mx:FormItem label="Measure:" fontFamily="Tahoma" fontWeight="bold"
+                             enabled="{insightBound}" direction="horizontal">
+                    <mx:ComboBox dataProvider="{availableItems}" labelField="display"
+                                 id="availableItemBox" fontFamily="Lucida Grande" fontWeight="normal"/>
+                    <mx:Button icon="{editIcon}" toolTip="Edit Measure..." click="editMeasure()"/>
+                </mx:FormItem>
+            </mx:Form>
+            <mx:HRule width="100%"/>
+            <mx:HBox width="100%" horizontalAlign="center">
+                <mx:Label fontSize="14" text="Define the Target" fontWeight="bold" fontFamily="Tahoma"/>
+            </mx:HBox>
+            <mx:Form paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5">
+                <mx:FormItem label="Defined" fontFamily="Tahoma" fontWeight="bold">
+                    <mx:CheckBox id="targetDefinedCheckbox" selected="{targetDefined}"/>
+                </mx:FormItem>
+                <mx:FormItem label="" direction="horizontal" fontFamily="Tahoma" fontWeight="bold"
+                             enabled="{insightBound}">
+                    <mx:RadioButtonGroup id="goalGroup"/>
+                    <mx:RadioButton label="Goal of High Values" value="highValuesGoal"
+                                    group="{goalGroup}"
+                                    id="highValuesGoal" selected="{highValues}"/>
+                    <mx:RadioButton label="Goal of Low Values" value="lowValuesGoal" group="{goalGroup}"
+                                    id="lowValuesGoal" selected="{lowValues}"/>
+                </mx:FormItem>
+                <mx:FormItem label="Target Value:" fontFamily="Tahoma" fontWeight="bold"
+                             enabled="{insightBound}">
+                    <mx:TextInput id="targetValueInput" text="{targetValue}" fontFamily="Lucide Grande"
+                                  fontWeight="normal"/>
+                </mx:FormItem>
+            </mx:Form>
+            <mx:HRule width="100%"/>
+            <mx:HBox width="100%" horizontalAlign="center">
+                <mx:Label fontSize="14" text="Define the When" fontWeight="bold" fontFamily="Tahoma"/>
+            </mx:HBox>
+            <mx:Form paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5">
+                <mx:FormItem label="Target Milestone:" fontFamily="Tahoma" fontWeight="bold"
+                             enabled="{insightBound}">
+                    <mx:ComboBox dataProvider="{milestones}" labelField="milestoneName"
+                                 id="milestoneBox"
+                                 fontFamily="Lucida Grande" fontWeight="normal"/>
+                </mx:FormItem>
+            </mx:Form>
+
+        </mx:VBox>
+        <mx:VRule height="100%"/>
+        <mx:VBox width="100%" enabled="{insightBound}" paddingTop="10" height="100%">
+            <mx:HBox width="100%" horizontalAlign="center">
+                <mx:Label fontSize="14" text="Define the Filters" fontWeight="bold"
+                          fontFamily="Tahoma"/>
+            </mx:HBox>
+            <mx:HDividedBox height="50%" width="100%">
+                <mx:List dataProvider="{availableDimensions}" labelField="display" dragEnabled="true"
+                         dragMoveEnabled="false" enabled="{insightBound}" width="50%" height="100%"/>
+                <mx:Canvas width="50%" height="100%">
+                    <filtering:TransformContainer id="transformContainer" width="100%" height="100%"
+                                                  borderStyle="solid"
+                                                  borderThickness="1" backgroundColor="#ffffff"
+                                                  backgroundAlpha=".1" feedID="{feedID}"
+                                                  analysisItems="{allFields}"
+                                                  showLabel="false"
+                                                  paddingBottom="5" paddingLeft="5" paddingRight="5"
+                                                  paddingTop="5"/>
+                </mx:Canvas>
+            </mx:HDividedBox>
+            <mx:HBox width="100%" horizontalAlign="center">
+                <mx:Label fontSize="14" text="Define the Problems" fontWeight="bold"
+                          fontFamily="Tahoma"/>
+            </mx:HBox>
+            <mx:HDividedBox height="50%" width="100%">
+                <mx:List dataProvider="{availableItems}" labelField="display" dragEnabled="true"
+                         dragMoveEnabled="false" enabled="{insightBound}" width="50%" height="100%"/>
+                <mx:Canvas width="50%" height="100%">
+                    <filtering:TransformContainer id="problemContainer" width="100%" height="100%"
+                                                  borderStyle="solid"
+                                                  borderThickness="1" backgroundColor="#ffffff"
+                                                  backgroundAlpha=".1" feedID="{feedID}"
+                                                  analysisItems="{allFields}"
+                                                  showLabel="false"
+                                                  paddingBottom="5" paddingLeft="5" paddingRight="5"
+                                                  paddingTop="5"/>
+                </mx:Canvas>
+            </mx:HDividedBox>
+        </mx:VBox>
+    </mx:HBox>
+    <mx:HRule width="100%"/>
+    <mx:VBox width="100%" enabled="{insightBound}">
+        <mx:HBox width="100%" horizontalAlign="center" verticalAlign="middle" id="historyControls">
+            <mx:Button label="Generate History" click="generateHistory()"/>
+            <mx:Label text="Start Date:"/>
+            <mx:DateField id="startChooser" selectedDate="{startDate}"/>
+            <mx:Label text="End Date:"/>
+            <mx:DateField id="endChooser" selectedDate="{endDate}"/>
+        </mx:HBox>
+    </mx:VBox>
+    <mx:Box width="100%" height="100%" id="chartBox"/>
+</mx:VBox>

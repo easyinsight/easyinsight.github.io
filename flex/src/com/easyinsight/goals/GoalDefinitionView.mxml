@@ -1,0 +1,69 @@
+<?xml version="1.0" ?>
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*" width="100%" height="100%">
+    <mx:Script><![CDATA[
+        import mx.collections.ArrayCollection;
+        import mx.events.ListEvent;
+
+        public function gotFocus():void {
+            var nodes:ArrayCollection = new ArrayCollection();
+            createNodeList(rootNode, nodes);
+            goals = nodes;    
+        }
+
+        private var _goals:ArrayCollection;
+
+        private var selectedGoal:GoalTreeNode;
+        private var openEditor:GoalDefinitionEditor;
+
+        private var _rootNode:GoalTreeNode;
+
+
+        [Bindable(event="rootNodeChanged")]
+        public function get rootNode():GoalTreeNode {
+            return _rootNode;
+        }
+
+        public function set rootNode(value:GoalTreeNode):void {
+            if (_rootNode == value) return;
+            _rootNode = value;
+            dispatchEvent(new Event("rootNodeChanged"));
+        }
+
+        override protected function commitProperties():void {
+            super.commitProperties();
+            gotFocus();
+        }
+
+        private function createNodeList(node:GoalTreeNode, nodes:ArrayCollection):void {
+            nodes.addItem(node);
+            for each (var child:GoalTreeNode in node.children) {
+                createNodeList(child, nodes);
+            }
+        }
+
+        private function toFocus(goal:GoalTreeNode):void {
+        }
+
+        private function onItemClick(event:ListEvent):void {
+        }
+
+        [Bindable(event="goalsChanged")]
+        public function get goals():ArrayCollection {
+            return _goals;
+        }
+
+        public function set goals(value:ArrayCollection):void {
+            if (_goals == value) return;
+            _goals = value;
+            dispatchEvent(new Event("goalsChanged"));
+        }
+
+        ]]></mx:Script>
+    <mx:HBox>
+        <mx:DataGrid dataProvider="{goals}" itemClick="onItemClick(event)" height="100%" rowHeight="30">
+            <mx:columns>
+                <util:EIDataGridColumn dataField="name" headerText="Name"/>
+            </mx:columns>
+        </mx:DataGrid>
+    </mx:HBox>
+</mx:VBox>

@@ -212,9 +212,11 @@
             /*var moveItem:ContextMenuItem = new ContextMenuItem("Move", true);
             moveItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, moveNode);
             items.push(moveItem);*/
-            /*var newTreeItem:ContextMenuItem = new ContextMenuItem("Create New Goal Tree", true);
-            newTreeItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, newGoalTree);
-            items.push(newTreeItem);*/
+            /*if (goalTreeNode.parent != null) {
+                var newTreeItem:ContextMenuItem = new ContextMenuItem("Create New Goal Tree", true);
+                newTreeItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, newGoalTree);
+                items.push(newTreeItem);
+            }*/
             if (goalTreeNode.subTreeID > 0) {
                 var removeItem:ContextMenuItem = new ContextMenuItem("Remove Sub Tree", true);
                 removeItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, deleteSubTree);

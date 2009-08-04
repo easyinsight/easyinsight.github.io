@@ -12,6 +12,9 @@ public class BaseCampDataSource extends CompositeServerDataSource {
         this.feedName = "BaseCamp";
     }
 
+    override public function isLiveData():Boolean {
+        return false;
+    }
 
     override public function configClass():Class {
         return BaseCampDataSourceCreation;

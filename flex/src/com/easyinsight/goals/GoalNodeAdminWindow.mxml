@@ -1,46 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:filtering="com.easyinsight.filtering.*"
-                creationComplete="setupData()" width="1000" height="450">
+                xmlns:goals="com.easyinsight.goals.*"
+                creationComplete="setupData()" width="1100" height="550" headerHeight="0">
     <mx:states>
-        <mx:State name="noHistory">
-            <mx:RemoveChild target="{lineChart}"/>
-            <mx:AddChild relativeTo="{historyBox}">
-                <mx:Label text="No values found for this combination in the data source history." fontSize="14"/>
+
+        <mx:State name="problem">
+            <mx:AddChild relativeTo="{targetBox}">
+                <mx:VBox width="100%" height="180" horizontalAlign="center">
+
+                </mx:VBox>
             </mx:AddChild>
         </mx:State>
-        <mx:State name="oneResult">
-            <mx:RemoveChild target="{lineChart}"/>
-            <mx:AddChild relativeTo="{historyBox}">
-                <mx:HBox>
-                    <mx:Label text="Latest Value:" fontSize="14"/>
-                    <mx:Label text="{latestValue}"/>
-                </mx:HBox>
+        <mx:State name="goal">
+            <mx:AddChild relativeTo="{targetBox}">
+                
             </mx:AddChild>
         </mx:State>
-        <mx:State name="history">
-            <mx:RemoveChild target="{coreBox}"/>
-            <mx:AddChild relativeTo="{historyBox}">
-                <mx:Button label="Close History" click="currentState=''"/>
-            </mx:AddChild>
-            <mx:AddChild relativeTo="{chartBox}">
-                <mx:Box width="100%" horizontalAlign="center" verticalAlign="middle" id="historyBox">
-                    <mx:LineChart dataProvider="{historyData}" width="100%" height="250" id="lineChart"
-                                  showDataTips="true">
-                        <mx:horizontalAxis>
-                            <mx:DateTimeAxis id="horAxis"/>
-                        </mx:horizontalAxis>
-                        <mx:series>
-                            <mx:LineSeries yField="value" xField="date" form="curve" id="horSeries"/>
-                            <!--<mx:LineSeries yField="value" xField="date" form="segment" visible="{showSlope}" dataProvider="{slopeData}"/>-->
-                        </mx:series>
-                        <mx:annotationElements>
-                            <mx:Canvas id="linesCanvas" horizontalScrollPolicy="off"
-                                       verticalScrollPolicy="off"/>
-                        </mx:annotationElements>
-                    </mx:LineChart>
-                </mx:Box>
-            </mx:AddChild>
-        </mx:State>
+
     </mx:states>
     <mx:Script>
 		<![CDATA[
@@ -50,23 +26,17 @@
         import com.easyinsight.analysis.AnalysisItemWrapper;
         import com.easyinsight.analysis.CalculationWindow;
         import com.easyinsight.analysis.CredentialRequirement;
-        import com.easyinsight.analysis.CredentialsEvent;
         import com.easyinsight.analysis.FeedMetadata;
         import com.easyinsight.analysis.MeasureItemEditor;
         import com.easyinsight.analysis.RuntimeCredentialsWindow;
         import com.easyinsight.commands.CommandEvent;
         import com.easyinsight.commands.CommandProcessor;
         import com.easyinsight.framework.CredentialsCache;
-        import com.easyinsight.solutions.Solution;
         import com.easyinsight.filtering.FilterDefinition;
         import com.easyinsight.analysis.AnalysisMeasure;
         import com.easyinsight.analysis.AnalysisItemTypes;
         import com.easyinsight.analysis.AnalysisItem;
-        import com.easyinsight.administration.feed.TagCloud;
 
-        import mx.charts.LinearAxis;
-        import mx.charts.chartClasses.IAxis;
-        import mx.charts.chartClasses.Series;
         import mx.collections.Sort;
         import mx.collections.SortField;
         import mx.managers.PopUpManager;
@@ -90,11 +60,8 @@
         private var availableDimensions:ArrayCollection;
 
         [Bindable]
-        private var nodeName:String;
-        [Bindable]
-        private var nodeDescription:String;
-        [Bindable]
-        private var nodeTags:String;
+        private var problemFilters:ArrayCollection;
+
         [Bindable]
         private var insightBound:Boolean;
         [Bindable]
@@ -105,40 +72,21 @@
         private var feedID:int;
 
         [Bindable]
-        private var highValues:Boolean = true;
-        [Bindable]
-        private var lowValues:Boolean = false;
-
-        [Bindable]
         private var rangeOptions:ArrayCollection;
 
         [Bindable]
         private var measureSelected:Boolean;
 
-        [Bindable]
-        private var startDate:Date;
-
-        [Bindable]
-        private var latestValue:String;
-
-        [Bindable]
-        private var endDate:Date;
-
-        [Bindable]
-        private var historyData:ArrayCollection;
-
-        [Bindable]
-        private var targetValue:String;
-
         private var filterDefinition:FilterDefinition;
 
+        [Bindable]
         private var analysisMeasure:AnalysisMeasure;
 
         [Bindable]
         private var filterDefinitions:ArrayCollection;
 
         [Bindable]
-        private var problemDefinitions:ArrayCollection;
+        private var problemDefinition:FilterDefinition;
 
         [Bindable]
         private var targetDefined:Boolean;
@@ -161,14 +109,16 @@
         [Bindable]
         private var associatedReports:ArrayCollection = new ArrayCollection();
 
-        [Bindable]
-        private var milestones:ArrayCollection;
 
         private var feedMetadata:FeedMetadata;
 
+        [Bindable]
+        private var milestone:GoalTreeMilestone;
+
         private static const NONE:AnalysisItem = new AnalysisItem();
 
-        private static const NO_MILESTONE:String = "No Milestone";
+        [Bindable]
+        private var goalType:String = "none";
 
         private function setupData():void {
             commandProcessor = new CommandProcessor();
@@ -180,9 +130,10 @@
                 for each (var filter:FilterDefinition in _goalTreeNode.filters) {
                     transformContainer.addFilterDefinition(filter);
                 }
-                for each (var problem:FilterDefinition in _goalTreeNode.problemConditions) {
-                    problemContainer.addFilterDefinition(problem);
-                }
+                problemFilters = _goalTreeNode.problemConditions;
+                /*for each (var problem:FilterDefinition in _goalTreeNode.problemConditions) {
+                 problemContainer.addFilterDefinition(problem);
+                 }*/
             }
             goalService.getMilestones.send();
         }
@@ -191,21 +142,6 @@
             commandProcessor.addCommand(event.command);
         }
 
-        private function gotMilestones():void {
-            var milestoneColl:ArrayCollection = goalService.getMilestones.lastResult as ArrayCollection;
-            milestoneColl.addItemAt(NO_MILESTONE, 0);
-            milestones = milestoneColl;
-            if (_goalTreeNode != null && _goalTreeNode.milestone != null) {
-                for each (var obj:Object in milestoneColl) {
-                    if (obj is GoalTreeMilestone) {
-                        var milestone:GoalTreeMilestone = obj as GoalTreeMilestone;
-                        if (milestone.milestoneID == _goalTreeNode.milestone.milestoneID) {
-                            milestoneBox.selectedItem = milestone;
-                        }
-                    }
-                }
-            }
-        }
 
         private function deleteDataSource(event:DeleteAssociationEvent):void {
             associatedDataSources.removeItemAt(associatedDataSources.getItemIndex(event.deleteObj));
@@ -217,9 +153,6 @@
 
         public function set goalTreeNode(goalTreeNode:GoalTreeNode):void {
             this._goalTreeNode = goalTreeNode;
-            this.nodeName = goalTreeNode.name;
-            this.nodeDescription = goalTreeNode.description;
-            this.nodeTags = TagCloud.toString(goalTreeNode.tags);
             if (goalTreeNode.iconImage != null && "" != goalTreeNode.iconImage) {
                 this.iconPath = "/app/assets/icons/32x32/" + goalTreeNode.iconImage;
                 this.iconFile = goalTreeNode.iconImage;
@@ -231,18 +164,32 @@
                 insightBound = true;
                 this.feedName = goalTreeNode.coreFeedName;
                 filterDefinitions = goalTreeNode.filters;
-                problemDefinitions = goalTreeNode.problemConditions;
+                if (goalTreeNode.problemConditions.length > 0) {
+                    problemDefinition = goalTreeNode.problemConditions.getItemAt(0) as FilterDefinition;
+                }
 
                 this.analysisMeasure = goalTreeNode.analysisMeasure;
-                this.highValues = goalTreeNode.highIsGood;
-                this.lowValues = !goalTreeNode.highIsGood;
-                this.targetValue = String(goalTreeNode.goalValue);
+                this.milestone = goalTreeNode.milestone;
+                if (goalTreeNode.goalDefined) {
+                    goalType = "goal";
+                    targetIndex = 1;
+                } else if (goalTreeNode.problemConditions.length > 0) {
+                    goalType = "condition";
+                    targetIndex = 2;
+                }
                 dataService.getFeedMetadata.send(goalTreeNode.coreFeedID);
                 targetDefined = goalTreeNode.goalDefined;
             }
-            endDate = new Date();
-            startDate = new Date(endDate.getTime() - (1000 * 60 * 60 * 24 * 14));
+
         }
+
+        [Bindable(event="goalTreeNodeChanged")]
+        public function get goalTreeNode():GoalTreeNode {
+            return _goalTreeNode;
+        }
+
+        [Bindable]
+        private var targetIndex:int;
 
         private function clear():void {
             feedID = 0;
@@ -251,24 +198,28 @@
         }
 
         private function save():void {
-            _goalTreeNode.name = nameInput.text;
-            if (_goalTreeNode.getRenderer() != null) {
-                _goalTreeNode.getRenderer().goalName = nameInput.text;
-            }
-            _goalTreeNode.description = descriptionTextArea.text;
-            _goalTreeNode.tags = TagCloud.fromString(tagsInput.text);
             _goalTreeNode.iconImage = this.iconFile;
             if (insightBound) {
                 _goalTreeNode.coreFeedID = feedID;
                 _goalTreeNode.coreFeedName = feedName;
                 _goalTreeNode.analysisMeasure = availableItemBox.selectedItem as AnalysisMeasure;
-                _goalTreeNode.highIsGood = highValuesGoal.selected;
-                _goalTreeNode.goalValue = int(targetValueInput.text);
+
                 _goalTreeNode.filters = transformContainer.getFilterDefinitions();
-                _goalTreeNode.problemConditions = problemContainer.getFilterDefinitions();
-                _goalTreeNode.goalDefined = targetDefinedCheckbox.selected;
-                if (milestoneBox.selectedItem != NO_MILESTONE) {
-                    _goalTreeNode.milestone = milestoneBox.selectedItem as GoalTreeMilestone;
+
+
+                if (targetBox.selectedIndex == 1) {
+                    _goalTreeNode.problemConditions = new ArrayCollection();
+                    var goalWindow:GoalDefinitionWindow = targetBox.getChildAt(1) as GoalDefinitionWindow;
+                    goalWindow.update(_goalTreeNode);
+                } else if (targetBox.selectedIndex == 2) {
+                    _goalTreeNode.goalDefined = false;
+                    _goalTreeNode.goalValue = 0;
+                    var problemWindow:ProblemDefinitionWindow = targetBox.getChildAt(2) as ProblemDefinitionWindow;
+                    problemWindow.update(_goalTreeNode);
+                } else {
+                    _goalTreeNode.goalDefined = false;
+                    _goalTreeNode.goalValue = 0;
+                    _goalTreeNode.problemConditions = new ArrayCollection();
                 }
             } else {
                 _goalTreeNode.coreFeedID = 0;
@@ -276,6 +227,9 @@
                 _goalTreeNode.filters = new ArrayCollection();
                 _goalTreeNode.milestone = null;
                 _goalTreeNode.goalValue = 0;
+                _goalTreeNode.goalDefined = false;
+                _goalTreeNode.goalValue = 0;
+                _goalTreeNode.problemConditions = new ArrayCollection();
             }
             dispatchEvent(new GoalEditEvent());
             PopUpManager.removePopUp(this);
@@ -296,7 +250,6 @@
 
         private function boundDataSource(event:DataSourceChoiceEvent):void {
             currentState = "";
-            historyData = null;
             transformContainer.removeAllFilters();
             this.feedName = event.feedDefinition.name;
             this.feedID = event.feedDefinition.id;
@@ -309,7 +262,7 @@
             for each (var credential:CredentialRequirement in feedMetadata.credentials) {
                 if (CredentialsCache.getCache().getCredentials(credential.dataSourceID) == null) {
                     var window:RuntimeCredentialsWindow = new RuntimeCredentialsWindow();
-                    window.addEventListener(CredentialsEvent.CREDENTIALS_SAVED, onCredentials);
+                    // window.addEventListener(CredentialsEvent.CREDENTIALS_SAVED, onCredentials);
                     window.requirement = credential;
                     PopUpManager.addPopUp(window, this, true);
                     PopUpManager.centerPopUp(window);
@@ -370,16 +323,6 @@
             }
         }
 
-        private function installSolution(event:GoalSolutionInstallEvent):void {
-            var solution:Solution = event.solution;
-            newSolutions.addItem(solution.solutionID);
-            // key of installing the solution here is the goal tree
-            // once we have the solution, we need to retrieve its goal tree
-            if (solution.goalTreeID > 0) {
-                goalService.getGoalTree.send(solution.goalTreeID);
-            }
-        }
-
         private function gotGoalTree():void {
             var goalTree:GoalTree = goalService.getGoalTree.lastResult as GoalTree;
             var rootNode:GoalTreeNode = goalTree.rootNode;
@@ -388,14 +331,6 @@
             _goalTreeNode.children.addItem(clonedNode);
         }
 
-        private function onCredentials(event:CredentialsEvent):void {
-            generateHistory();
-        }
-
-        private function generateHistory():void {
-            goalService.generateHistory.send(availableItemBox.selectedItem, transformContainer.getFilterDefinitions(),
-                feedID, startChooser.selectedDate, endChooser.selectedDate, CredentialsCache.getCache().createCredentials());
-        }
 
         private function itemEdited(event:AnalysisItemEditEvent):void {
             analysisMeasure = event.analysisItem as AnalysisMeasure;
@@ -430,76 +365,13 @@
             analysisItemEditor.addEventListener(AnalysisItemEditEvent.ANALYSIS_ITEM_EDIT, itemEdited);
         }
 
-        private function chooseSolution():void {
-            var goalSolutionInstallWindow:GoalSolutionInstallWindow = new GoalSolutionInstallWindow();
-            goalSolutionInstallWindow.goalTreeNode = _goalTreeNode;
-            goalSolutionInstallWindow.addEventListener(GoalSolutionInstallEvent.GOAL_SOLUTION_INSTALL, installSolution);
-            PopUpManager.addPopUp(goalSolutionInstallWindow, this.parent.parent.parent, true);
-            PopUpManager.centerPopUp(goalSolutionInstallWindow);
-        }
-
-        private function drawLine():void {
-            linesCanvas.removeAllChildren();
-            var milestone:GoalTreeMilestone = milestoneBox.selectedItem as GoalTreeMilestone;
-            /*var dateFormatter:DateFormatter = new DateFormatter();
-            dateFormatter.formatString = "MM/DD/YY";
-            var format:String = dateFormatter.format(milestone.milestoneDate);
-            Alert.show(format);*/
-            var chartXValue:Object = getNumericChartValue(milestone.milestoneDate, horAxis);
-            var thePosition:Point = chartToScreen(chartXValue.numericValue, 0, horSeries);
-
-            //creating the line
-            var theLine:VRule = VRule(linesCanvas.addChild(new VRule()));
-            theLine.x = thePosition.x;
-            theLine.y = 0;
-            theLine.setStyle("strokeColor", 0x000000);
-            theLine.setStyle("strokeWidth", 5);
-            theLine.height = linesCanvas.height;
-
-            //creating the button
-            var milestoneLabel:Label = Label(linesCanvas.addChild(new Label()));
-            milestoneLabel.setStyle("fontSize", 13);
-            milestoneLabel.text = milestone.milestoneName;
-            //milestoneLabel.width = milestoneLabel.height = 20;
-            milestoneLabel.x = thePosition.x - (milestoneLabel.width / 2) + 1;
-            milestoneLabel.y = 5;
-        }
-
-
-        public function chartToScreen(chartX:Number, chartY:Number, theSeries:Series):Point {
-            var tmpCache:Array = new Array({chartX:chartX, chartY:chartY});
-            if (theSeries) {
-                theSeries.dataTransform.transformCache(tmpCache, "chartX", "screenX", "chartY", "screenY");
-            }
-            return new Point(Math.round(tmpCache[0].screenX), Math.round(tmpCache[0].screenY));
-
-        }
-
-
-        public function getNumericChartValue(inValue:Object, theAxis:IAxis):Object {
-            var axisCache:Array = new Array({inValue: inValue});
-            if (!(theAxis is LinearAxis)) {
-                theAxis.mapCache(axisCache, "inValue", "outValue", false);
-                return {numericValue: axisCache[0].outValue};
-            }
-            else {
-                return {numericValue: Number(inValue)};
-            }
-        }
-
-
-        private function gotHistory():void {
-            var results:ArrayCollection = goalService.generateHistory.lastResult as ArrayCollection;
-            if (results.length == 0) {
-                currentState = "noHistory";
-            } else if (results.length == 1) {
-                var goalValue:GoalValue = results.getItemAt(0) as GoalValue;
-                var measure:AnalysisMeasure = availableItemBox.selectedItem as AnalysisMeasure;
-                latestValue = measure.getFormatter().format(goalValue.value);
-                currentState = "oneResult";
+        private function toggleGoalState():void {
+            if (goalTypeGroup.selectedValue == "goal") {
+                targetBox.selectedIndex = 1;
+            } else if (goalTypeGroup.selectedValue == "condition") {
+                targetBox.selectedIndex = 2;
             } else {
-                historyData = results;
-                currentState = "history";
+                targetBox.selectedIndex = 0;
             }
         }
 		]]>
@@ -509,141 +381,87 @@
     </mx:RemoteObject>
     <mx:RemoteObject destination="goalService" id="goalService">
         <mx:method name="getGoalTree" result="gotGoalTree()"/>
-        <mx:method name="generateHistory" result="gotHistory()"/>
-        <mx:method name="getMilestones" result="gotMilestones()"/>
     </mx:RemoteObject>
     <mx:VBox styleName="TitleWindowContents" width="100%" height="100%">
         <mx:TabNavigator width="100%" height="100%" paddingTop="0" paddingBottom="0"
                          paddingLeft="0" paddingRight="0" creationPolicy="all" resizeToContent="true">
-            <mx:Canvas width="100%" height="100%" label="Specifications">
-                <mx:Form>
-                    <mx:FormItem label="Name:" fontFamily="Tahoma" fontWeight="bold" width="300">
-                        <mx:TextInput id="nameInput" text="{nodeName}" fontFamily="Lucida Grande" fontWeight="normal"/>
-                    </mx:FormItem>
-                    <mx:FormItem label="Tags:" fontFamily="Tahoma" fontWeight="bold" width="300">
-                        <mx:TextInput id="tagsInput" text="{nodeTags}" fontFamily="Lucida Grande" fontWeight="normal"/>
-                    </mx:FormItem>
-                    <mx:FormItem label="Description:" fontFamily="Tahoma" fontWeight="bold">
-                        <mx:TextArea id="descriptionTextArea" width="300" height="100" text="{nodeDescription}"
-                                     fontFamily="Lucida Grande" fontWeight="normal"/>
-                    </mx:FormItem>
-                </mx:Form>
-            </mx:Canvas>
             <mx:Canvas width="100%" height="100%" label="Implementation">
                 <mx:VBox width="100%" height="100%">
-                    <mx:HBox width="100%" height="100%" id="coreBox">
-                        <mx:VBox paddingTop="10">
-                            <mx:HBox width="100%" horizontalAlign="center">
-                                <mx:Label fontSize="14" text="Define the Measure" fontWeight="bold"
-                                          fontFamily="Tahoma"/>
-                            </mx:HBox>
-                            <mx:Form paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5">
-                                <mx:FormItem label="Goal Data Source Binding:" direction="horizontal"
-                                             fontFamily="Tahoma"
-                                             fontWeight="bold">
-                                    <mx:Label text="{feedName}" fontFamily="Lucida Grande" fontWeight="normal"/>
-                                    <mx:Button icon="{dataSourceIcon}" toolTip="Bind Data Source"
-                                               click="bindDataSource()"/>
-                                    <mx:Button icon="{deleteIcon}" toolTip="Clear" click="clear()"/>
-                                </mx:FormItem>
-                                <mx:FormItem label="Measure:" fontFamily="Tahoma" fontWeight="bold"
-                                             enabled="{insightBound}" direction="horizontal">
-                                    <mx:ComboBox dataProvider="{availableItems}" labelField="display"
-                                                 id="availableItemBox" fontFamily="Lucida Grande" fontWeight="normal"/>
-                                    <mx:Button icon="{editIcon}" toolTip="Edit Measure..." click="editMeasure()"/>
-                                </mx:FormItem>
-                            </mx:Form>
-                            <mx:HRule width="100%"/>
-                            <mx:HBox width="100%" horizontalAlign="center">
-                                <mx:Label fontSize="14" text="Define the Target" fontWeight="bold" fontFamily="Tahoma"/>
-                            </mx:HBox>
-                            <mx:Form paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5">
-                                <mx:FormItem label="Defined" fontFamily="Tahoma" fontWeight="bold">
-                                    <mx:CheckBox id="targetDefinedCheckbox" selected="{targetDefined}"/>
-                                </mx:FormItem>
-                                <mx:FormItem label="" direction="horizontal" fontFamily="Tahoma" fontWeight="bold"
-                                             enabled="{insightBound}">
-                                    <mx:RadioButtonGroup id="goalGroup"/>
-                                    <mx:RadioButton label="Goal of High Values" value="highValuesGoal"
-                                                    group="{goalGroup}"
-                                                    id="highValuesGoal" selected="{highValues}"/>
-                                    <mx:RadioButton label="Goal of Low Values" value="lowValuesGoal" group="{goalGroup}"
-                                                    id="lowValuesGoal" selected="{lowValues}"/>
-                                </mx:FormItem>
-                                <mx:FormItem label="Target Value:" fontFamily="Tahoma" fontWeight="bold"
-                                             enabled="{insightBound}">
-                                    <mx:TextInput id="targetValueInput" text="{targetValue}" fontFamily="Lucide Grande"
-                                                  fontWeight="normal"/>
-                                </mx:FormItem>
-                            </mx:Form>
-                            <mx:HRule width="100%"/>
-                            <mx:HBox width="100%" horizontalAlign="center">
-                                <mx:Label fontSize="14" text="Define the When" fontWeight="bold" fontFamily="Tahoma"/>
-                            </mx:HBox>
-                            <mx:Form paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5">
-                                <mx:FormItem label="Target Milestone:" fontFamily="Tahoma" fontWeight="bold"
-                                             enabled="{insightBound}">
-                                    <mx:ComboBox dataProvider="{milestones}" labelField="milestoneName"
-                                                 id="milestoneBox"
-                                                 fontFamily="Lucida Grande" fontWeight="normal"/>
-                                </mx:FormItem>
-                            </mx:Form>
-
-                        </mx:VBox>
-                        <mx:VRule height="100%"/>
-                        <mx:VBox width="100%" enabled="{insightBound}" paddingTop="10" height="100%">
-                            <mx:HBox width="100%" horizontalAlign="center">
-                                <mx:Label fontSize="14" text="Define the Filters" fontWeight="bold"
-                                          fontFamily="Tahoma"/>
-                            </mx:HBox>
-                            <mx:HDividedBox height="50%" width="100%">
-                                <mx:List dataProvider="{availableDimensions}" labelField="display" dragEnabled="true"
-                                         dragMoveEnabled="false" enabled="{insightBound}" width="50%" height="100%"/>
-                                <mx:Canvas width="50%" height="100%">
-                                    <filtering:TransformContainer id="transformContainer" width="100%" height="100%"
-                                                                  borderStyle="solid"
-                                                                  borderThickness="1" backgroundColor="#ffffff"
-                                                                  backgroundAlpha=".1" feedID="{feedID}"
-                                                                  analysisItems="{allFields}"
-                                                                  showLabel="false"
-                                            paddingBottom="5" paddingLeft="5" paddingRight="5"
-                                        paddingTop="5"/>
-                                </mx:Canvas>
-                            </mx:HDividedBox>
-                            <mx:HBox width="100%" horizontalAlign="center">
-                                <mx:Label fontSize="14" text="Define the Problems" fontWeight="bold"
-                                          fontFamily="Tahoma"/>
-                            </mx:HBox>
-                            <mx:HDividedBox height="50%" width="100%">
-                                <mx:List dataProvider="{availableItems}" labelField="display" dragEnabled="true"
-                                         dragMoveEnabled="false" enabled="{insightBound}" width="50%" height="100%"/>
-                                <mx:Canvas width="50%" height="100%">
-                                    <filtering:TransformContainer id="problemContainer" width="100%" height="100%"
-                                                                  borderStyle="solid"
-                                                                  borderThickness="1" backgroundColor="#ffffff"
-                                                                  backgroundAlpha=".1" feedID="{feedID}"
-                                                                  analysisItems="{allFields}"
-                                                                  showLabel="false"
-                                            paddingBottom="5" paddingLeft="5" paddingRight="5"
-                                        paddingTop="5"/>
-                                </mx:Canvas>
-                            </mx:HDividedBox>
-                        </mx:VBox>
-                    </mx:HBox>
-                    <mx:HRule width="100%"/>
-                    <mx:VBox width="100%" enabled="{insightBound}">
-                        <mx:HBox width="100%" horizontalAlign="center" verticalAlign="middle" id="historyControls">
-                            <mx:Button label="Generate History" click="generateHistory()"/>
-                            <mx:Label text="Start Date:"/>
-                            <mx:DateField id="startChooser" selectedDate="{startDate}"/>
-                            <mx:Label text="End Date:"/>
-                            <mx:DateField id="endChooser" selectedDate="{endDate}"/>
+                    <mx:VBox width="100%" height="100%" id="coreBox">
+                        <mx:HBox width="100%">
+                            <mx:VBox paddingTop="10">
+                                <mx:HBox width="100%" horizontalAlign="center">
+                                    <mx:Label fontSize="14" text="Define the Measure" fontWeight="bold"
+                                              fontFamily="Tahoma"/>
+                                </mx:HBox>
+                                <mx:Form paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5">
+                                    <mx:FormItem label="Goal Data Source Binding:" direction="horizontal"
+                                                 fontFamily="Tahoma"
+                                                 fontWeight="bold">
+                                        <mx:Label text="{feedName}" fontFamily="Lucida Grande" fontWeight="normal"/>
+                                        <mx:Button icon="{dataSourceIcon}" toolTip="Bind Data Source"
+                                                   click="bindDataSource()"/>
+                                        <mx:Button icon="{deleteIcon}" toolTip="Clear" click="clear()"/>
+                                    </mx:FormItem>
+                                    <mx:FormItem label="Measure:" fontFamily="Tahoma" fontWeight="bold"
+                                                 enabled="{insightBound}" direction="horizontal">
+                                        <mx:ComboBox dataProvider="{availableItems}" labelField="display"
+                                                     id="availableItemBox" fontFamily="Lucida Grande"
+                                                     fontWeight="normal"/>
+                                        <mx:Button icon="{editIcon}" toolTip="Edit Measure..." click="editMeasure()"/>
+                                    </mx:FormItem>
+                                </mx:Form>
+                            </mx:VBox>
+                            <mx:VRule height="100%"/>
+                            <mx:VBox width="100%" enabled="{insightBound}" paddingTop="10" height="180">
+                                <mx:HBox width="100%" horizontalAlign="center">
+                                    <mx:Label fontSize="14" text="Define the Filters" fontWeight="bold"
+                                              fontFamily="Tahoma"/>
+                                </mx:HBox>
+                                <mx:HDividedBox height="100%" width="100%">
+                                    <mx:List dataProvider="{availableDimensions}" labelField="display"
+                                             dragEnabled="true"
+                                             dragMoveEnabled="false" enabled="{insightBound}" width="50%"
+                                             height="100%"/>
+                                    <mx:Canvas width="50%" height="100%">
+                                        <filtering:TransformContainer id="transformContainer" width="100%" height="100%"
+                                                                      borderStyle="solid"
+                                                                      borderThickness="1" backgroundColor="#ffffff"
+                                                                      backgroundAlpha=".1" feedID="{feedID}"
+                                                                      analysisItems="{allFields}"
+                                                                      showLabel="false"
+                                                                      paddingBottom="5" paddingLeft="5" paddingRight="5"
+                                                                      paddingTop="5"/>
+                                    </mx:Canvas>
+                                </mx:HDividedBox>
+                            </mx:VBox>
                         </mx:HBox>
+                        <mx:HRule width="100%"/>
 
+                        <mx:HBox width="100%" height="100%" paddingLeft="5">
+                            <goals:GoalAdminHistoryDisplay id="historyDisplay" analysisMeasure="{availableItemBox.selectedItem}" feedID="{feedID}"
+                                    transformContainer="{transformContainer}"/>
+                            <mx:VRule height="100%"/>
+                            <mx:VBox>
+                                <mx:HBox width="100%" horizontalAlign="center" verticalAlign="middle" enabled="{insightBound}">
+                            <mx:Label fontSize="14" text="Define the Condition" fontWeight="bold"
+                                              fontFamily="Tahoma"/>
+                            <mx:RadioButtonGroup id="goalTypeGroup" selectedValue="{goalType}" change="toggleGoalState()"/>
+                            <mx:RadioButton group="{goalTypeGroup}" value="none" label="None" fontSize="14"/>
+                            <mx:RadioButton group="{goalTypeGroup}" value="goal" label="Goal" fontSize="14"/>
+                            <mx:RadioButton group="{goalTypeGroup}" value="condition" label="Problem" fontSize="14"/>
+                        </mx:HBox>
+                                <mx:HRule width="100%"/>
+                                <mx:ViewStack id="targetBox" width="100%" height="100%" selectedIndex="{targetIndex}">
+                                    <mx:Box width="100%" height="100%"/>
+                                    <goals:GoalDefinitionWindow milestone="{milestone}" node="{goalTreeNode}" width="100%" height="100%"/>
+                                    <goals:ProblemDefinitionWindow id="problemWindow" analysisMeasure="{availableItemBox.selectedItem}"
+                                            filterDefinition="{problemDefinition}" width="100%" height="100%"/>
+                                </mx:ViewStack>
+                            </mx:VBox>
+                        </mx:HBox>
                     </mx:VBox>
-                    <mx:Box width="100%" height="100%" id="chartBox"/>
                 </mx:VBox>
-
             </mx:Canvas>
             <mx:Canvas width="100%" height="100%" label="Associations">
                 <mx:VBox width="100%" height="100%" paddingTop="10" paddingBottom="10"

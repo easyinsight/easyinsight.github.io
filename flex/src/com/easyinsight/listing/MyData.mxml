@@ -350,8 +350,8 @@
 		<mx:HBox width="100%" id="uploadBox">	
 			<mx:Button toolTip="Upload data from Excel or CSV..." click="toUpload()" id="uploadButton" icon="{addIcon}" 
 				label="Upload File" labelPlacement="bottom"/>
-			<mx:Button toolTip="Connect to external data..." click="externalConnect()" id="connectButton" icon="{dataConnectionIcon}"
-				label="External Data" labelPlacement="bottom"/>
+			<mx:Button toolTip="Connect to Google Spreadsheets..." click="externalConnect()" id="connectButton" icon="{dataConnectionIcon}"
+				label="Google Spreadsheets" labelPlacement="bottom"/>
 			<mx:Button toolTip="Create composite data source..." click="createCompositeFeed()" id="compositeFeedButton" icon="{joinIcon}"
 				label="Combine Sources" labelPlacement="bottom"/>
 			<mx:Button toolTip="Create empty data source..." click="createEmptyFeed()" id="emptyFeedButton" icon="{addIcon}"

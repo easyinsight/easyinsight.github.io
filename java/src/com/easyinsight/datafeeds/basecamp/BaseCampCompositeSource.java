@@ -37,6 +37,11 @@ public class BaseCampCompositeSource extends CompositeServerDataSource {
     private String url;
 
     @Override
+    public boolean isLiveData() {
+        return false;
+    }
+
+    @Override
     public FeedType getFeedType() {
         return FeedType.BASECAMP_MASTER;
     }

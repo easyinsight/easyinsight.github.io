@@ -9,6 +9,7 @@ import flash.utils.ByteArray;
         public static const SAAS:int = 1;
         public static const CLIENT:int = 2;
         public static const LEARNING:int = 3;
+        public static const BIZ:int = 4; 
 
 		public var solutionID:int;
 		public var name:String;

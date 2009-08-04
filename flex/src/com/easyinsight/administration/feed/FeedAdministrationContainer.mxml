@@ -90,6 +90,7 @@
 
         private function gotFeedDefinition():void {
             this.feedDefinition = feedService.getFeedDefinition.lastResult as FeedDefinitionData;
+            liveData = feedDefinition.isLiveData();
             BrowserManager.getInstance().setTitle("Easy Insight - Data Source Administration - " + feedDefinition.feedName);
             if (feedType == DataFeedDescriptor.COMPOSITE) {
                 var compositeFeedDefinition:CompositeFeedDefinition = feedDefinition as CompositeFeedDefinition;
@@ -99,7 +100,7 @@
                 implBox.label = "Composite Details";
                 showImpl = true;
                 this.feedAdminDetail = compositeWorkspace;
-            } else if (feedDefinition is IServerDataSourceDefinition) {
+            } else if (feedDefinition is IServerDataSourceDefinition && !feedDefinition.isLiveData()) {
                 var sds:IServerDataSourceDefinition = feedDefinition as IServerDataSourceDefinition;
                 var configClass:Class = sds.configClass();
                 var admin:ServerDataSourceAdministration = new ServerDataSourceAdministration();
@@ -112,14 +113,6 @@
             } else {
                 tabNav.removeChild(implBox);
             }
-
-            /* else if (feedType == DataFeedDescriptor.GOOGLE) {
-             this.feedAdminDetail = new GoogleFeedAdministration();
-             } else if (feedType == DataFeedDescriptor.STATIC || feedType == DataFeedDescriptor.EMPTY) {
-             this.feedAdminDetail = new FileUploadFeedAdmin();
-             } else if (feedType == DataFeedDescriptor.ANALYSIS) {
-             this.feedAdminDetail = new AnalysisBasedFeedAdmin();
-             }*/
             this.feedAdminMode = true;
             this.feedName = feedDefinition.feedName;
             this.feedTags = TagCloud.toString(feedDefinition.tags);
@@ -172,7 +165,7 @@
                  analysisItems.addItem(analysisItem);
                  }
                  }
-                 }*/
+                /* }*//*
                 if (virtualBox != null) {
                     virtualBox.save();
                     for each (var dimension:VirtualDimension in virtualBox.getVirtualDimensions()) {
@@ -186,7 +179,7 @@
                         }
                     }
                     feedDefinition.virtualDimensions = virtualBox.getVirtualDimensions();
-                }
+                }*/
                 feedDefinition.fields = analysisItems;
                 feedDefinition.feedName = feedNameInput.text;
                 feedDefinition.uploadPolicy = feedPolicy.uploadPolicy;
@@ -254,6 +247,9 @@
             var excelUploadFormat:ExcelUploadFormat;
             var flatFileUploadFormat:FlatFileUploadFormat;
         }
+
+            [Bindable]
+            private var liveData:Boolean;
 		]]>
 	</mx:Script>
 
@@ -303,7 +299,7 @@
 						</mx:FormItem>
 					</mx:Form>
 				</mx:VBox>
-				<mx:VBox>
+				<mx:VBox enabled="{liveData}">
 					<mx:HBox width="100%" horizontalAlign="center">
 						<mx:Box backgroundColor="#FFFFFF" backgroundAlpha=".8" width="50%" horizontalAlign="center">
 							<mx:Label text="Sharing" fontSize="14"/>	
@@ -315,9 +311,9 @@
             <mx:Box label="Fields">
                 <feed:FieldAdministration feedDefinition="{feedDefinition}" id="fieldAdministration"/>
             </mx:Box>
-            <mx:Box label="Virtual Groupings" paddingLeft="10" paddingTop="10" paddingBottom="10" paddingRight="10">
+            <!--<mx:Box label="Virtual Groupings" paddingLeft="10" paddingTop="10" paddingBottom="10" paddingRight="10">
                 <feed:VirtualDimensionAdministration id="virtualBox" feedDefinition="{feedDefinition}"/>
-            </mx:Box>
+            </mx:Box>-->
 			<mx:Box label="Impl" paddingLeft="10" paddingTop="10" paddingBottom="10" paddingRight="10" id="implBox" visible="{showImpl}">
 				
 			</mx:Box>

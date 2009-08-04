@@ -28,6 +28,8 @@ import mx.managers.PopUpManager;
                 if (saveNeeded) {
                     Alert.show("You have unsaved changes. Are you sure you want to exit?", "Alert",
 		                		Alert.OK | Alert.CANCEL, null, alertListener, null, Alert.CANCEL);
+                } else {
+                    dispatchEvent(new AnalysisCloseEvent(this));
                 }
 			}
 

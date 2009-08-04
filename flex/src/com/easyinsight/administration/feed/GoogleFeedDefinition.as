@@ -10,6 +10,9 @@ package com.easyinsight.administration.feed
 		{
 			super();
 		}
-		
+
+        override public function isLiveData():Boolean {
+            return true;
+        }
 	}
 }

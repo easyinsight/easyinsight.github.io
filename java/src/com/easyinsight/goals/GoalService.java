@@ -6,6 +6,7 @@ import com.easyinsight.analysis.FilterDefinition;
 import com.easyinsight.solutions.Solution;
 import com.easyinsight.solutions.SolutionService;
 import com.easyinsight.solutions.SolutionGoalTreeDescriptor;
+import com.easyinsight.solutions.SolutionInstallInfo;
 import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.security.Roles;
 import com.easyinsight.logging.LogClass;
@@ -122,6 +123,37 @@ public class GoalService {
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);
+        }
+    }
+
+    public GoalSaveInfo splitGoalTree(GoalTree originalTree, GoalTree newTree, GoalTreeNode parentNode) {
+        SecurityUtil.authorizeGoalTree(originalTree.getGoalTreeID(), Roles.OWNER);
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            // TODO: finish implementation
+            conn.setAutoCommit(false);
+            // make the initial save of the tree
+            GoalSaveInfo initialSaveInfo;
+            if (originalTree.getGoalTreeID() == 0) {
+                goalStorage.addGoalTree(originalTree, conn);
+            } else {
+                initialSaveInfo = goalStorage.updateGoalTree(originalTree, conn);
+            }
+            
+            goalStorage.addGoalTree(newTree, conn);
+            parentNode.setSubTreeID(newTree.getGoalTreeID());
+
+            conn.commit();
+            //GoalSaveInfo goalSaveInfo = new GoalSaveInfo(newTree, );
+            //return newTree.getGoalTreeID();
+            return null;
+        } catch (Exception e) {
+            LogClass.error(e);
+            conn.rollback();
+            throw new RuntimeException(e);
+        } finally {
+            conn.setAutoCommit(true);
+            Database.closeConnection(conn);
         }
     }
 

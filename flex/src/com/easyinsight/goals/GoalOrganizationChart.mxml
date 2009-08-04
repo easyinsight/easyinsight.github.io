@@ -3,6 +3,7 @@
         creationComplete="blah()" width="100%" height="100%" xmlns:goals="com.easyinsight.goals.*" doubleClickEnabled="true">
     <mx:Metadata>
         [Event(name="solutionInstall", type="com.easyinsight.goals.SolutionInstallRequiredEvent")]
+        [Event(name="splitTree", type="com.easyinsight.goals.SplitGoalTreeEvent")]
     </mx:Metadata>
     <mx:Script>
 		<![CDATA[
@@ -41,7 +42,14 @@
 
         private function newTree(event:GoalContextEvent):void {
             var goalTreeNode:GoalTreeNode = event.goalTreeNode;
-            
+            var window:NewSubTreeWindow = new NewSubTreeWindow();
+            window.node = goalTreeNode;
+            window.addEventListener(SplitGoalTreeEvent.SPLIT_TREE, onSplitTree);
+            PopUpManager.addPopUp(window, this, true);
+        }
+
+        private function onSplitTree(event:SplitGoalTreeEvent):void {
+            dispatchEvent(event);
         }
 
         private function blah():void {

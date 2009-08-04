@@ -291,6 +291,27 @@ public class GoalStorage {
         }
     }
 
+    public GoalSaveInfo updateGoalTree(GoalTree goalTree, Connection conn) throws SQLException, CloneNotSupportedException {
+
+            InstallationSystem installationSystem = new InstallationSystem(conn);
+            installationSystem.installUserTree(goalTree, goalTree.getNewSolutions());
+            long nodeID = saveGoalTreeNode(goalTree.getRootNode(), conn, goalTree.getGoalTreeID());
+            // deleteOldNodes(goalTree.getRootNode(), conn);
+            PreparedStatement updateTreeStmt = conn.prepareStatement("UPDATE GOAL_TREE SET NAME = ?, DESCRIPTION = ?, ROOT_NODE = ?, GOAL_TREE_ICON = ? " +
+                    "WHERE GOAL_TREE_ID = ?");
+            updateTreeStmt.setString(1, goalTree.getName());
+            updateTreeStmt.setString(2, goalTree.getDescription());
+            updateTreeStmt.setLong(3, nodeID);
+            updateTreeStmt.setString(4, goalTree.getIconImage());
+            updateTreeStmt.setLong(5, goalTree.getGoalTreeID());
+            updateTreeStmt.executeUpdate();
+            saveUsers(goalTree.getGoalTreeID(), goalTree.getAdministrators(), Roles.OWNER, conn);
+            saveUsers(goalTree.getGoalTreeID(), goalTree.getConsumers(), Roles.SUBSCRIBER, conn);
+            //goalEvaluationStorage.backPopulateGoalTree(goalTree, conn);
+            
+            return new GoalSaveInfo(goalTree, installationSystem.getAllSolutions());
+    }
+
     public void deleteGoalTree(long goalTreeID) {
         EIConnection conn = Database.instance().getConnection();
         try {

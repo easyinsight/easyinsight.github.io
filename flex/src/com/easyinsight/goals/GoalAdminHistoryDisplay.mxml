@@ -1,0 +1,197 @@
+<?xml version="1.0" ?>
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" creationComplete="setup()">
+    <mx:states>
+        <mx:State name="noHistory">
+            <mx:AddChild relativeTo="{chartBox}">
+                <mx:Label text="No values found for this combination in the data source history." fontSize="14"/>
+            </mx:AddChild>
+        </mx:State>
+        <mx:State name="oneResult">
+            <mx:AddChild relativeTo="{chartBox}">
+                <mx:HBox>
+                    <mx:Label text="Latest Value:" fontSize="14"/>
+                    <mx:Label text="{latestValue}"/>
+                </mx:HBox>
+            </mx:AddChild>
+        </mx:State>
+        <mx:State name="history">
+            <mx:AddChild relativeTo="{chartBox}">
+                <mx:Box width="100%" horizontalAlign="center" verticalAlign="middle" id="historyBox">
+                    <mx:LineChart dataProvider="{historyData}" width="100%" height="250" id="lineChart"
+                                  showDataTips="true">
+                        <mx:horizontalAxis>
+                            <mx:DateTimeAxis id="horAxis"/>
+                        </mx:horizontalAxis>
+                        <mx:series>
+                            <mx:LineSeries yField="value" xField="date" form="curve" id="horSeries"/>
+                            <!--<mx:LineSeries yField="value" xField="date" form="segment" visible="{showSlope}" dataProvider="{slopeData}"/>-->
+                        </mx:series>
+                        <mx:annotationElements>
+                            <mx:Canvas id="linesCanvas" horizontalScrollPolicy="off"
+                                       verticalScrollPolicy="off"/>
+                        </mx:annotationElements>
+                    </mx:LineChart>
+                </mx:Box>
+            </mx:AddChild>
+        </mx:State>
+    </mx:states>
+    <mx:RemoteObject destination="goalService" id="goalService">
+        <mx:method name="generateHistory" result="gotHistory()"/>
+    </mx:RemoteObject>
+    <mx:Script><![CDATA[
+        import com.easyinsight.analysis.AnalysisMeasure;
+
+        import com.easyinsight.filtering.TransformContainer;
+        import com.easyinsight.framework.CredentialsCache;
+
+        import mx.charts.LinearAxis;
+        import mx.charts.chartClasses.IAxis;
+        import mx.charts.chartClasses.Series;
+        import mx.collections.ArrayCollection;
+        import mx.controls.VRule;
+
+        private function setup():void {
+            endDate = new Date();
+            startDate = new Date(endDate.getTime() - (1000 * 60 * 60 * 24 * 14));
+        }
+
+        private var _milestone:GoalTreeMilestone;
+        private var _analysisMeasure:AnalysisMeasure;
+
+        private var _transformContainer:TransformContainer;
+
+        private var _feedID:int;
+
+        [Bindable]
+        private var startDate:Date;
+
+        [Bindable]
+        private var latestValue:String;
+
+        [Bindable]
+        private var endDate:Date;
+
+        [Bindable]
+        private var historyData:ArrayCollection;
+
+        [Bindable(event="feedIDChanged")]
+        public function get feedID():int {
+            return _feedID;
+        }
+
+        public function set feedID(value:int):void {
+            if (_feedID == value) return;
+            _feedID = value;
+            dispatchEvent(new Event("feedIDChanged"));
+        }
+
+        public function set transformContainer(value:TransformContainer):void {
+            _transformContainer = value;
+        }
+
+        [Bindable(event="analysisMeasureChanged")]
+        public function get analysisMeasure():Object {
+            return _analysisMeasure;
+        }
+
+        public function set analysisMeasure(value:Object):void {
+            if (_analysisMeasure == value) return;
+            _analysisMeasure = value as AnalysisMeasure;
+            invalidateProperties();
+            dispatchEvent(new Event("analysisMeasureChanged"));
+        }
+
+        [Bindable(event="milestoneChanged")]
+        public function get milestone():GoalTreeMilestone {
+            return _milestone;
+        }
+
+        public function set milestone(value:GoalTreeMilestone):void {
+            if (_milestone == value) return;
+            _milestone = value;
+            dispatchEvent(new Event("milestoneChanged"));
+        }
+
+        private function drawLine():void {
+            linesCanvas.removeAllChildren();
+            /*var dateFormatter:DateFormatter = new DateFormatter();
+             dateFormatter.formatString = "MM/DD/YY";
+             var format:String = dateFormatter.format(milestone.milestoneDate);
+             Alert.show(format);*/
+            if (milestone != null) {
+                var chartXValue:Object = getNumericChartValue(milestone.milestoneDate, horAxis);
+                var thePosition:Point = chartToScreen(chartXValue.numericValue, 0, horSeries);
+
+                //creating the line
+                var theLine:VRule = VRule(linesCanvas.addChild(new VRule()));
+                theLine.x = thePosition.x;
+                theLine.y = 0;
+                theLine.setStyle("strokeColor", 0x000000);
+                theLine.setStyle("strokeWidth", 5);
+                theLine.height = linesCanvas.height;
+
+                //creating the button
+                var milestoneLabel:Label = Label(linesCanvas.addChild(new Label()));
+                milestoneLabel.setStyle("fontSize", 13);
+                milestoneLabel.text = milestone.milestoneName;
+                //milestoneLabel.width = milestoneLabel.height = 20;
+                milestoneLabel.x = thePosition.x - (milestoneLabel.width / 2) + 1;
+                milestoneLabel.y = 5;
+            }
+        }
+
+
+        public function chartToScreen(chartX:Number, chartY:Number, theSeries:Series):Point {
+            var tmpCache:Array = new Array({chartX:chartX, chartY:chartY});
+            if (theSeries) {
+                theSeries.dataTransform.transformCache(tmpCache, "chartX", "screenX", "chartY", "screenY");
+            }
+            return new Point(Math.round(tmpCache[0].screenX), Math.round(tmpCache[0].screenY));
+
+        }
+
+
+        public function getNumericChartValue(inValue:Object, theAxis:IAxis):Object {
+            var axisCache:Array = new Array({inValue: inValue});
+            if (!(theAxis is LinearAxis)) {
+                theAxis.mapCache(axisCache, "inValue", "outValue", false);
+                return {numericValue: axisCache[0].outValue};
+            }
+            else {
+                return {numericValue: Number(inValue)};
+            }
+        }
+
+        private function generateHistory():void {
+            goalService.generateHistory.send(analysisMeasure, _transformContainer.getFilterDefinitions(),
+                    feedID, startChooser.selectedDate, endChooser.selectedDate, CredentialsCache.getCache().createCredentials());
+        }
+
+
+        private function gotHistory():void {
+            var results:ArrayCollection = goalService.generateHistory.lastResult as ArrayCollection;
+            if (results.length == 0) {
+                currentState = "noHistory";
+            } else if (results.length == 1) {
+                var goalValue:GoalValue = results.getItemAt(0) as GoalValue;
+
+                latestValue = analysisMeasure.getFormatter().format(goalValue.value);
+                currentState = "oneResult";
+            } else {
+                historyData = results;
+                currentState = "history";
+            }
+        }
+        ]]></mx:Script>
+    <mx:VBox>
+        <mx:HBox width="100%" horizontalAlign="center" verticalAlign="middle" id="historyControls">
+            <mx:Button label="Generate History" click="generateHistory()"/>
+            <mx:Label text="Start Date:"/>
+            <mx:DateField id="startChooser" selectedDate="{startDate}"/>
+            <mx:Label text="End Date:"/>
+            <mx:DateField id="endChooser" selectedDate="{endDate}"/>
+        </mx:HBox>
+        <mx:HRule width="100%"/>
+        <mx:Box width="100%" height="100%" id="chartBox"/>
+    </mx:VBox>
+</mx:VBox>

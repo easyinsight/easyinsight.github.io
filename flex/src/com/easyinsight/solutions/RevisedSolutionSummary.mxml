@@ -40,6 +40,18 @@
 
         private var _learning:Boolean = false;
 
+        private var _biz:Boolean = false;
+
+        [Bindable(event="bizChanged")]
+        public function get biz():Boolean {
+            return _biz;
+        }
+
+        public function set biz(value:Boolean):void {
+            if (_biz == value) return;
+            _biz = value;
+            dispatchEvent(new Event("bizChanged"));
+        }
 
         [Bindable(event="saasChanged")]
         public function get saas():Boolean {
@@ -86,6 +98,7 @@
             BindingUtils.bindProperty(this, "saas", saasCheckbox, "selected");
             BindingUtils.bindProperty(this, "client", clientCheckbox, "selected");
             BindingUtils.bindProperty(this, "learning", trainingCheckbox, "selected");
+            BindingUtils.bindProperty(this, "biz", bizCheckbox, "selected");
         }
 
         private function onSelection(event:SolutionSelectionEvent):void {
@@ -114,10 +127,6 @@
             this.availableSolutions = solutionColl;
         }
 
-        private function search():void {
-
-        }
-
         private function lesson1():void {
             var window:ScreencastWindow = new ScreencastWindow();
             window.screencastSource = "../assets/lesson1/training.mp4";
@@ -139,6 +148,9 @@
                 case Solution.LEARNING:
                     okay = learning;
                     break;
+                case Solution.BIZ:
+                    okay = biz;
+                    break;  
             }
             return okay;
         }
@@ -164,6 +176,7 @@
                     <mx:HBox>
                         <mx:CheckBox label="SaaS Integrations" id="saasCheckbox" selected="{saas}"/>
                         <mx:CheckBox label="Client Downloads" id="clientCheckbox" selected="{client}"/>
+                        <mx:CheckBox label="Business Patterns" id="bizCheckbox" selected="{biz}"/>
                         <mx:CheckBox label="Easy Insight Training" id="trainingCheckbox" selected="{learning}"/>
                     </mx:HBox>
                 </mx:VBox>

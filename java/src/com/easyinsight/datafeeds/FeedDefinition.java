@@ -3,7 +3,6 @@ package com.easyinsight.datafeeds;
 import com.easyinsight.userupload.UploadPolicy;
 import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.core.Key;
-import com.easyinsight.core.NamedKey;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.users.Credentials;
 import com.easyinsight.analysis.*;
@@ -517,7 +516,7 @@ public class FeedDefinition implements Cloneable, Serializable {
         PreparedStatement deleteAsyncTasksStmt = conn.prepareStatement("DELETE FROM scheduled_task WHERE scheduled_task_id in (select scheduled_task_id from server_refresh_task where data_source_id = ?)");
         Session session = Database.instance().createSession(conn);
 
-        List reportObjects = session.createQuery("from AnalysisDefinition where dataFeedID = ?").setLong(0, getDataFeedID()).list();
+        /*List reportObjects = session.createQuery("from AnalysisDefinition where dataFeedID = ?").setLong(0, getDataFeedID()).list();*/
 
         /*for (Object reportObject : reportObjects) {
             AnalysisDefinition analysisDefinition = (AnalysisDefinition) reportObject;

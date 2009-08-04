@@ -14,6 +14,10 @@ public class FilterRangeDefinition extends FilterDefinition {
     private double endValue;
     private boolean endValueDefined;
 
+    public FilterRangeDefinition() {
+        setApplyBeforeAggregation(false);
+    }
+
     public boolean isStartValueDefined() {
         return startValueDefined;
     }

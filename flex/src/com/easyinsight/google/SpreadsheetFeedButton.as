@@ -4,7 +4,6 @@ import com.easyinsight.administration.feed.GoogleFeedDefinition;
 import com.easyinsight.customupload.UploadConfigEvent;
 	import com.easyinsight.framework.Credentials;
 	import com.easyinsight.framework.User;
-	import com.easyinsight.genredata.AnalyzeEvent;
 import com.easyinsight.genredata.ModuleAnalyzeEvent;
 import com.easyinsight.listing.DataFeedDescriptor;
 	import com.easyinsight.listing.DescriptorAnalyzeSource;
@@ -13,8 +12,9 @@ import com.easyinsight.util.ProgressAlert;
 
 import flash.events.Event;
 	import flash.events.MouseEvent;
-	
-	import mx.containers.HBox;
+
+import mx.binding.utils.BindingUtils;
+import mx.containers.HBox;
 	import mx.controls.Alert;
 	import mx.controls.Button;
 	import mx.rpc.events.FaultEvent;
@@ -27,8 +27,22 @@ import flash.events.Event;
 		private var remoteService:RemoteObject;
 		private var button:Button;
 		private var setButtonProps:Boolean = true;
-		
-		[Embed(source="../../../../assets/media_play_green.png")]
+
+        private var _buttonVisible:Boolean = false;
+
+
+        [Bindable(event="buttonVisibleChanged")]
+        public function get buttonVisible():Boolean {
+            return _buttonVisible;
+        }
+
+        public function set buttonVisible(value:Boolean):void {
+            if (_buttonVisible == value) return;
+            _buttonVisible = value;
+            dispatchEvent(new Event("buttonVisibleChanged"));
+        }
+
+        [Embed(source="../../../../assets/media_play_green.png")]
     	public var dataIcon:Class;	
 		
 		public function SpreadsheetFeedButton()
@@ -44,6 +58,7 @@ import flash.events.Event;
 				button.toolTip = "Create Data Source";
 				button.setStyle("icon", dataIcon);
                 button.addEventListener(MouseEvent.CLICK, subscribe);
+                BindingUtils.bindProperty(button, "visible", this, "buttonVisible");
 				addChild(button);	
 			}
 		}
@@ -63,10 +78,13 @@ import flash.events.Event;
 			}*/
 		}							
 
-		override public function set data(value:Object):void {			
-			var descriptor:Worksheet = value as Worksheet;
-			_data = descriptor;
-			setButtonProps = false;	
+		override public function set data(value:Object):void {
+            if (value is Worksheet) {
+                _data = value as Worksheet;
+                buttonVisible = true;
+            } else {
+                buttonVisible = false;
+            }
 		}
 		
 		override public function get data():Object {

@@ -1,0 +1,27 @@
+<?xml version="1.0" ?>
+<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml">
+    <mx:Script><![CDATA[
+
+        import mx.managers.PopUpManager;
+
+        public var node:GoalTreeNode;
+
+        private function create():void {
+            dispatchEvent(new SplitGoalTreeEvent(node, newTreeNameInput.text));
+            PopUpManager.removePopUp(this);
+        }
+
+        private function cancel():void {
+            PopUpManager.removePopUp(this);
+        }
+        ]]></mx:Script>
+    <mx:Form>
+        <mx:FormItem label="New Tree Name:">
+            <mx:TextInput id="newTreeNameInput"/>
+        </mx:FormItem>
+        <mx:FormItem label="" direction="horizontal">
+            <mx:Button label="Create" click="create()"/>
+            <mx:Button label="Cancel" click="cancel()"/>
+        </mx:FormItem>
+    </mx:Form>
+</mx:TitleWindow>

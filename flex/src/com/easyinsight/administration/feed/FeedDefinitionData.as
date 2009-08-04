@@ -55,6 +55,10 @@ package com.easyinsight.administration.feed
 		public function getFeedType():int {
 			return DataFeedType.STATIC;
 		}
+
+        public function isLiveData():Boolean {
+            return false;
+        }
 		
 		public static function hack():void {
 			var googleDef:GoogleFeedDefinition;

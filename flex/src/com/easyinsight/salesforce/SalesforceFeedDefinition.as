@@ -17,6 +17,9 @@ import com.easyinsight.customupload.SalesforceDataSourceCreation;
     override public function configClass():Class {
         return SalesforceDataSourceCreation;
     }
-		
+
+    override public function isLiveData():Boolean {
+            return true;
+        }
 	}
 }

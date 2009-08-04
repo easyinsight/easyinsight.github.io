@@ -10,6 +10,7 @@ package com.easyinsight.analysis.options
 		public static const NORMALS:String = "Normality";
 		public static const DELTA:String = "Delta";
 		public static const LASTVALUE:String = "Last Value";
+        public static const PERCENTCHANGE:String = "Percent Change";
 		public static const SIXSIGMA:String = "Six Sigma";
 
 		public static const STEP:String = "Step";

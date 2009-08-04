@@ -13,14 +13,10 @@
         import mx.controls.Alert;
         import mx.controls.Label;
         import mx.controls.VRule;
-        import mx.graphics.BitmapFill;
         import mx.managers.PopUpManager;
 
         [Bindable]
         private var goalHistory:ArrayCollection;
-
-        [Bindable]
-        private var areaFill:BitmapFill;
 
         [Bindable]
         private var _startDate:Date;
@@ -29,12 +25,12 @@
         private var _endDate:Date;
 
         [Bindable]
-        [Embed(source="../../../../assets/water4.JPG")]
-        private var areaBackground:Class;
-
-        [Bindable]
         [Embed(source="../../../../assets/add.png")]
         private var addIcon:Class;
+
+        [Bindable]
+        [Embed(source="../../../../assets/data_blue_x16.png")]
+        private var dataIcon:Class;
 
         private var _goalTreeNodeData:GoalTreeNodeData;
 
@@ -45,8 +41,6 @@
         private var slopeData:ArrayCollection;
 
         private function setup():void {
-            areaFill = new BitmapFill();
-            areaFill.source = areaBackground;
             if (_startDate == null) {
                 _startDate = new Date(new Date().getTime() - 24 * 7 * 1000 * 60 * 60);
                 _endDate = new Date();
@@ -178,6 +172,7 @@
             <mx:Spacer width="30"/>
             <mx:DateField id="endChooser" selectedDate="{_endDate}" change="onDatesChanged()"/>
             <mx:Spacer width="100%"/>
+            <!--<mx:Button icon="{dataIcon}" toolTip="View this Data Source" click="subscribe()"/>-->
             <mx:Button icon="{addIcon}" toolTip="Add this goal to My Goals" click="subscribe()"/>
         </mx:HBox>
         <mx:LineChart dataProvider="{goalHistory}" width="100%" height="100%">

@@ -12,6 +12,7 @@ package com.easyinsight.filtering
 		public function FilterRangeDefinition()
 		{
 			super();
+            applyBeforeAggregation = false;
 		}
 		
 		override public function getType():int {
