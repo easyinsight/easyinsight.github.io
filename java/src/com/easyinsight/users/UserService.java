@@ -670,9 +670,11 @@ public class UserService implements IUserService {
             Account account = user.getAccount();
             if(account.getAccountState() == Account.CLOSED || account.getAccountState() == Account.DELINQUENT)
                 return null;
-            return new UserServiceResponse(true, user.getUserID(), user.getAccount().getAccountID(), user.getName(),
+            UserServiceResponse response = new UserServiceResponse(true, user.getUserID(), user.getAccount().getAccountID(), user.getName(),
                                 account.getAccountType(), account.getMaxSize(), user.getEmail(), user.getUserName(),
                                 user.getPassword(), user.isAccountAdmin(), user.isDataSourceCreator(), user.isInsightCreator());
+            response.setActivated(account.isActivated());
+            return response;
         }
     }
 

@@ -5,7 +5,7 @@ package com.easyinsight.framework
 import flash.net.SharedObject;
 
 import mx.collections.ArrayCollection;
-	import mx.rpc.events.ResultEvent;
+import mx.rpc.events.ResultEvent;
 	import mx.rpc.remoting.RemoteObject;
 	
 	

@@ -299,7 +299,7 @@
 						</mx:FormItem>
 					</mx:Form>
 				</mx:VBox>
-				<mx:VBox enabled="{liveData}">
+				<mx:VBox enabled="!{liveData}">
 					<mx:HBox width="100%" horizontalAlign="center">
 						<mx:Box backgroundColor="#FFFFFF" backgroundAlpha=".8" width="50%" horizontalAlign="center">
 							<mx:Label text="Sharing" fontSize="14"/>	

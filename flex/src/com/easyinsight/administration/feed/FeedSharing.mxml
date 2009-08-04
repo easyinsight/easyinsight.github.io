@@ -192,6 +192,6 @@
 		</mx:VBox>
 	</mx:HBox>
 	<mx:Spacer height="30"/>
-	<mx:CheckBox label="Anyone Can View: " selected="{anyoneCanView}" id="anyoneCheckbox" click="anyoneCanViewChange(event)" enabled="{liveData}"/>
+	<mx:CheckBox label="Anyone Can View: " selected="{anyoneCanView}" id="anyoneCheckbox" click="anyoneCanViewChange(event)" enabled="!{liveData}"/>
 	<mx:CheckBox label="Visible in the Marketplace: " selected="{marketplaceViewable}" id="marketplaceCheckbox" enabled="false"/>
 </mx:VBox>
