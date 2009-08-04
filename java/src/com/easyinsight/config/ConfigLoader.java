@@ -21,6 +21,16 @@ public class ConfigLoader {
     private String databaseUserName;
     private String databasePassword;
 
+    public Boolean isProduction() {
+        return production;
+    }
+
+    public void setProduction(Boolean production) {
+        this.production = production;
+    }
+
+    private Boolean production;
+
     private static ConfigLoader instance;
 
     public static ConfigLoader instance() {
@@ -60,6 +70,8 @@ public class ConfigLoader {
             databaseName = (String) properties.get("database.name");
             databaseUserName = (String) properties.get("database.username");
             databasePassword = (String) properties.get("database.password");
+            production = Boolean.valueOf((String) properties.get("production"));
+            
         } catch (IOException e) {
             LogClass.error(e);
             throw new RuntimeException(e);
