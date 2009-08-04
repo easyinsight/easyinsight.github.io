@@ -120,8 +120,10 @@
         }
 
         private function onDividerRelease(event:DividerEvent):void {
-            User.getSharedObject().data.goalSliderPos = dataBoxes.getDividerAt(0).y + event.delta;
-            User.getSharedObject().flush();
+            if(User.getSharedObject() != null) {
+                User.getSharedObject().data.goalSliderPos = dataBoxes.getDividerAt(0).y + event.delta;
+                User.getSharedObject().flush();
+            }
         }
 
         private function onCreation():void {
