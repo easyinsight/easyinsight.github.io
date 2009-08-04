@@ -35,7 +35,7 @@ public class CalculationIntegrationTest extends TestCase {
         FeedRegistry.initialize();
     }
 
-    public void testIntegration() {
+    public void testIntegration() throws SQLException {
         FeedDefinition feedDefinition = setupStuff();
         long feedID = feedDefinition.getDataFeedID();
         Resolver resolver = new Resolver(feedDefinition);
@@ -103,7 +103,7 @@ public class CalculationIntegrationTest extends TestCase {
         assertEquals(30., doubleValue.toDouble(), .1);
     }
 
-    public void testVariableSet() {
+    public void testVariableSet() throws SQLException {
 
         FeedDefinition feedDefinition = setupStuff();
         long feedID = feedDefinition.getDataFeedID();
@@ -139,7 +139,7 @@ public class CalculationIntegrationTest extends TestCase {
         return c;
     }
 
-    private FeedDefinition setupStuff() {
+    private FeedDefinition setupStuff() throws SQLException {
         long userID = TestUtil.getIndividualTestUser();
         UserUploadService userUploadService = new UserUploadService();
         long dataFeedID = createDataFeed(userID, userUploadService);

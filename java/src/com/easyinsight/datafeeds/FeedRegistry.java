@@ -58,7 +58,12 @@ public class FeedRegistry {
 
         if (feed == null || !isLatestVersion(feed, identifier)) {
             LogClass.info("Cache miss for feed id: " + identifier);
-            FeedDefinition feedDefinition = feedStorage.getFeedDefinitionData(identifier);
+            FeedDefinition feedDefinition = null;
+            try {
+                feedDefinition = feedStorage.getFeedDefinitionData(identifier);
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
             feed = feedDefinition.createFeed();
             feed.setVersion(getLatestVersion(identifier));
             try {

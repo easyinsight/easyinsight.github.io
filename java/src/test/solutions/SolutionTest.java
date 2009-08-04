@@ -28,6 +28,7 @@ import test.util.TestUtil;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Date;
+import java.sql.SQLException;
 
 /**
  * User: James Boe
@@ -41,7 +42,7 @@ public class SolutionTest extends TestCase {
         FeedRegistry.initialize();
     }
 
-    public void testSolutions() {
+    public void testSolutions() throws SQLException {
         TestUtil.getIndividualAdminUser();
         UserUploadService uploadService = new UserUploadService();
         long dataSourceID = uploadService.createNewDefaultFeed("Default Data Source");
@@ -116,7 +117,7 @@ public class SolutionTest extends TestCase {
         List<Solution> solutions = solutionService.getSolutions();
     }
 
-    public void testDynamicSources() {
+    public void testDynamicSources() throws SQLException {
         TestUtil.getIndividualAdminUser();
         UserUploadService uploadService = new UserUploadService();
         BaseCampCompositeSource ds = new BaseCampCompositeSource();

@@ -5,7 +5,6 @@ import com.easyinsight.core.NumericValue;
 import com.easyinsight.analysis.*;
 import com.easyinsight.datafeeds.CredentialFulfillment;
 import com.easyinsight.pipeline.HistoryRun;
-import com.easyinsight.logging.LogClass;
 
 import java.util.*;
 import java.util.Date;
@@ -138,7 +137,6 @@ public class GoalEvaluationStorage {
                         try {
                             subTree = new GoalStorage().retrieveGoalTree(goalTreeNode.getSubTreeID(), conn);
                         } catch (SQLException e) {
-                            LogClass.error(e);
                             throw new RuntimeException(e);
                         }
                         if (subTree != null) {

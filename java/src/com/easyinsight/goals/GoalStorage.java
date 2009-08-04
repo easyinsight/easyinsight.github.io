@@ -2,7 +2,6 @@ package com.easyinsight.goals;
 
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
-import com.easyinsight.logging.LogClass;
 import com.easyinsight.analysis.*;
 import com.easyinsight.groups.GroupDescriptor;
 import com.easyinsight.email.UserStub;
@@ -25,21 +24,18 @@ import org.jetbrains.annotations.Nullable;
  */
 public class GoalStorage {
 
-    public void deleteMilestone(long milestoneID) {
+    public void deleteMilestone(long milestoneID) throws SQLException {
         Connection conn = Database.instance().getConnection();
         try {
             PreparedStatement deleteStmt = conn.prepareStatement("DELETE FROM MILESTONE WHERE MILESTONE_ID = ?");
             deleteStmt.setLong(1, milestoneID);
             deleteStmt.executeUpdate();
-        } catch (SQLException e) {
-            LogClass.error(e);
-            throw new RuntimeException(e);
         } finally {
             Database.closeConnection(conn);
         }
     }
 
-    public List<GoalTreeMilestone> getMilestones(long accountID) {
+    public List<GoalTreeMilestone> getMilestones(long accountID) throws SQLException {
         List<GoalTreeMilestone> milestones = new ArrayList<GoalTreeMilestone>();
         Connection conn = Database.instance().getConnection();
         try {
@@ -53,8 +49,6 @@ public class GoalStorage {
                 Date milestoneDate = new Date(milestoneRS.getDate(3).getTime());
                 milestones.add(new GoalTreeMilestone(milestoneDate, milestoneID, milestoneName));
             }
-        } catch (SQLException e) {
-            LogClass.error(e);
         } finally {
             Database.closeConnection(conn);
         }
@@ -73,7 +67,7 @@ public class GoalStorage {
         return goalTreeMilestone;
     }
 
-    public long addMilestone(GoalTreeMilestone goalTreeMilestone, long accountID) {
+    public long addMilestone(GoalTreeMilestone goalTreeMilestone, long accountID) throws SQLException {
         Connection conn = Database.instance().getConnection();
         try {
             PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO MILESTONE (MILESTONE_NAME, MILESTONE_DATE, ACCOUNT_ID) vALUES (?, ?, ?)",
@@ -85,15 +79,12 @@ public class GoalStorage {
             long id = Database.instance().getAutoGenKey(insertStmt);
             goalTreeMilestone.setMilestoneID(id);
             return id;
-        } catch (SQLException e) {
-            LogClass.error(e);
-            throw new RuntimeException(e);
         } finally {
             Database.closeConnection(conn);
         }
     }
 
-    public void updateMilestone(GoalTreeMilestone goalTreeMilestone) {
+    public void updateMilestone(GoalTreeMilestone goalTreeMilestone) throws SQLException {
         Connection conn = Database.instance().getConnection();
         try {
             PreparedStatement updateStmt = conn.prepareStatement("UPDATE MILESTONE SET MILESTONE_NAME = ? AND MILESTONE_DATE = ? WHERE " +
@@ -102,8 +93,6 @@ public class GoalStorage {
             updateStmt.setDate(2, new java.sql.Date(goalTreeMilestone.getMilestoneDate().getTime()));
             updateStmt.setLong(3, goalTreeMilestone.getMilestoneID());
             updateStmt.executeUpdate();
-        } catch (SQLException e) {
-            LogClass.error(e);
         } finally {
             Database.closeConnection(conn);
         }
@@ -198,7 +187,7 @@ public class GoalStorage {
         }
     }*/
 
-    public List<GoalTreeDescriptor> getTreesForUser(long userID) {
+    public List<GoalTreeDescriptor> getTreesForUser(long userID) throws SQLException {
         List<GoalTreeDescriptor> descriptors = new ArrayList<GoalTreeDescriptor>();
         Connection conn = Database.instance().getConnection();
         try {
@@ -212,8 +201,6 @@ public class GoalStorage {
                 int role = rs.getInt(3);
                 descriptors.add(new GoalTreeDescriptor(treeID, name, role, rs.getString(4)));
             }
-        } catch (SQLException e) {
-            LogClass.error(e);
         } finally {
             Database.closeConnection(conn);
         }
@@ -282,7 +269,6 @@ public class GoalStorage {
             conn.commit();
             return new GoalSaveInfo(goalTree, installationSystem.getAllSolutions());
         } catch (Exception e) {
-            LogClass.error(e);
             conn.rollback();
             throw new RuntimeException(e);
         } finally {
@@ -323,9 +309,9 @@ public class GoalStorage {
             deleteStmt.setLong(1, goalTreeID);
             deleteStmt.executeUpdate();
             conn.commit();
-        } catch (SQLException e) {
-            LogClass.error(e);
+        } catch (Exception e) {
             conn.rollback();
+            throw new RuntimeException(e);
         } finally {
             conn.setAutoCommit(true);
             Database.closeConnection(conn);
@@ -526,26 +512,17 @@ public class GoalStorage {
 
     public GoalTree retrieveGoalTree(long goalTreeID) {
         GoalTree goalTree;
-        Connection conn = Database.instance().getConnection();
+        EIConnection conn = Database.instance().getConnection();
         try {
             conn.setAutoCommit(false);
             goalTree = retrieveGoalTree(goalTreeID, conn);
             conn.commit();
             return goalTree;
         } catch (SQLException e) {
-            LogClass.error(e);
-            try {
-                conn.rollback();
-            } catch (SQLException e1) {
-                LogClass.error(e1);
-            }
+            conn.rollback();
             throw new RuntimeException(e);
         } finally {
-            try {
-                conn.setAutoCommit(true);
-            } catch (SQLException e) {
-                LogClass.error(e);
-            }
+            conn.setAutoCommit(true);
             Database.closeConnection(conn);
         }
     }
@@ -764,7 +741,7 @@ public class GoalStorage {
         saveUserStmt.close();
     }
 
-    public void addUserToGoal(long userID, long goalTreeNodeID) {
+    public void addUserToGoal(long userID, long goalTreeNodeID) throws SQLException {
         Connection conn = Database.instance().getConnection();
         try {
             PreparedStatement saveUserStmt = conn.prepareStatement("INSERT INTO goal_node_to_user (GOAL_TREE_NODE_ID, user_id) VALUES (?, ?)");
@@ -772,15 +749,12 @@ public class GoalStorage {
             saveUserStmt.setLong(2, userID);
             saveUserStmt.execute();
             saveUserStmt.close();
-        } catch (SQLException e) {
-            LogClass.error(e);
-            throw new RuntimeException(e);
         } finally {
             Database.closeConnection(conn);
         }
     }
 
-    public void removeUserFromGoal(long userID, long goalTreeNodeID) {
+    public void removeUserFromGoal(long userID, long goalTreeNodeID) throws SQLException {
         Connection conn = Database.instance().getConnection();
         try {
             PreparedStatement saveUserStmt = conn.prepareStatement("DELETE FROM goal_node_to_user WHERE GOAL_TREE_NODE_ID = ? AND user_id = ?");
@@ -788,9 +762,6 @@ public class GoalStorage {
             saveUserStmt.setLong(2, userID);
             saveUserStmt.executeUpdate();
             saveUserStmt.close();
-        } catch (SQLException e) {
-            LogClass.error(e);
-            throw new RuntimeException(e);
         } finally {
             Database.closeConnection(conn);
         }
@@ -888,7 +859,7 @@ public class GoalStorage {
         }
     }
 
-    public List<GoalTreeNodeData> getGoalsForUser(long userID) {
+    public List<GoalTreeNodeData> getGoalsForUser(long userID) throws SQLException {
         List<GoalTreeNodeData> nodes = new ArrayList<GoalTreeNodeData>();
         Connection conn = Database.instance().getConnection();
         try {
@@ -900,8 +871,6 @@ public class GoalStorage {
                 populateGoal(nodes, conn, goalTreeNodeID);
             }
             stmt.close();
-        } catch (SQLException e) {
-            LogClass.error(e);
         } finally {
             Database.closeConnection(conn);
         }
@@ -923,7 +892,7 @@ public class GoalStorage {
         dataNode.summarizeOutcomes();
     }
 
-    public List<GoalTreeNodeData> getGoalsForGroup(long groupID) {
+    public List<GoalTreeNodeData> getGoalsForGroup(long groupID) throws SQLException {
         List<GoalTreeNodeData> nodes = new ArrayList<GoalTreeNodeData>();
         Connection conn = Database.instance().getConnection();
         try {
@@ -935,16 +904,13 @@ public class GoalStorage {
                 populateGoal(nodes, conn, goalTreeNodeID);
             }
             queryStmt.close();
-        } catch (SQLException e) {
-            LogClass.error(e);
-            throw new RuntimeException(e);
         } finally {
             Database.closeConnection(conn);
         }
         return nodes;
     }
 
-    public void decorateDataTree(GoalTree goalTree) {
+    public void decorateDataTree(GoalTree goalTree) throws SQLException {
         Connection conn = Database.instance().getConnection();
         try {
             PreparedStatement queryStmt = conn.prepareStatement("SELECT GOAL_TREE.GOAL_TREE_ID, GOAL_TREE.NAME, user_role, GOAL_TREE.GOAL_TREE_ICON FROM " +
@@ -959,8 +925,6 @@ public class GoalStorage {
             }
             goalTree.setSubTreeParents(descriptors);
             queryStmt.close();
-        } catch (SQLException e) {
-            LogClass.error(e);
         } finally {
             Database.closeConnection(conn);
         }

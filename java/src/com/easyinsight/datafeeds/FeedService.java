@@ -27,6 +27,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 
 import org.hibernate.Session;
+import org.apache.jcs.access.exception.CacheException;
 
 /**
  * User: jboe
@@ -184,11 +185,19 @@ public class FeedService implements IDataFeedService {
     }
 
     public void addView(long feedID) {
-        feedStorage.addFeedView(feedID);
+        try {
+            feedStorage.addFeedView(feedID);
+        } catch (Exception e) {
+            LogClass.error(e);
+        }
     }
 
     public void addRating(long feedID, long userID, int rating) {
-        feedStorage.rateFeed(feedID, userID, rating);
+        try {
+            feedStorage.rateFeed(feedID, userID, rating);
+        } catch (Exception e) {
+            LogClass.error(e);
+        }
     }
 
     public List<Tag> getAllFeedTags() {
@@ -198,14 +207,6 @@ public class FeedService implements IDataFeedService {
             LogClass.error(e);
             throw new RuntimeException(e);
         }
-    }
-
-    public List<FeedDefinition> getFeedDefinitions(List<SubscriptionLicense> licenses) {
-        List<FeedDefinition> descriptorList = new ArrayList<FeedDefinition>();
-        for (SubscriptionLicense license : licenses) {
-            descriptorList.add(feedStorage.getFeedDefinitionData(license.getFeedID()));
-        }
-        return descriptorList;
     }
 
     public List<FeedDescriptor> getMostPopularFeeds(String genreKey, int cutoff) {

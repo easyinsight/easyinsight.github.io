@@ -17,11 +17,10 @@ import com.easyinsight.datafeeds.ganalytics.GoogleAnalyticsDataSource;
 import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.email.UserStub;
 import com.easyinsight.groups.GroupDescriptor;
-import com.easyinsight.logging.LogClass;
 import com.easyinsight.security.Roles;
 import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.PasswordStorage;
-import com.easyinsight.storage.DataStorage;
+import com.easyinsight.logging.LogClass;
 import com.easyinsight.eventing.EventDispatcher;
 import com.easyinsight.eventing.TodoCompletedEvent;
 import com.easyinsight.users.Credentials;
@@ -197,7 +196,7 @@ public class FeedStorage {
         feedDefinition.setFolders(folders);
     }
 
-    public long addFeedDefinitionData(FeedDefinition feedDefinition) {
+    public long addFeedDefinitionData(FeedDefinition feedDefinition) throws SQLException {
         EIConnection conn = Database.instance().getConnection();
         try {
             conn.setAutoCommit(false);
@@ -207,11 +206,10 @@ public class FeedStorage {
             return feedID;
         } catch (SQLException e) {
             conn.rollback();
-            LogClass.error(e);
-            throw new RuntimeException(e);
+            throw e;
         } finally {
             conn.setAutoCommit(true);
-            Database.instance().closeConnection(conn);
+            Database.closeConnection(conn);
         }
     }
 
@@ -291,9 +289,6 @@ public class FeedStorage {
                     session.saveOrUpdate(tag);
                 }
                 session.flush();
-            } catch (Exception e) {
-                LogClass.error(e);
-                throw new RuntimeException(e);
             } finally {
                 session.close();
             }
@@ -372,9 +367,6 @@ public class FeedStorage {
                 }*/
                 session.flush();
                 //session.getTransaction().commit();
-            } catch (Exception e) {
-                LogClass.error(e);
-                throw new RuntimeException(e);
             } finally {
                 session.close();
             }
@@ -426,9 +418,8 @@ public class FeedStorage {
         }
         queryTagsStmt.close();
         Set<Tag> tags = new HashSet<Tag>();
-        Session session = Database.instance().createSession();
+        Session session = Database.instance().createSession(conn);
         try {
-            session.beginTransaction();
             for (Long tagID : tagIDs) {
                 List items = session.createQuery("from Tag where tagID = ?").setLong(0, tagID).list();
                 if (items.size() > 0) {
@@ -436,11 +427,6 @@ public class FeedStorage {
                     tags.add(tag);
                 }
             }
-            session.getTransaction().commit();
-        } catch (Exception e) {
-            LogClass.error(e);
-            session.getTransaction().rollback();
-            throw new RuntimeException(e);
         } finally {
             session.close();
         }
@@ -491,9 +477,6 @@ public class FeedStorage {
             for (AnalysisItem item : analysisItems) {
                 item.afterLoad();                
             }
-        } catch (Exception e) {
-            LogClass.error(e);
-            throw new RuntimeException(e);
         } finally {
             session.close();
         }
@@ -525,16 +508,13 @@ public class FeedStorage {
                     analysisItems.add(analysisItem);
                 }
             }
-        } catch (Exception e) {
-            LogClass.error(e);
-            throw new RuntimeException(e);
         } finally {
             session.close();
         }
         return analysisItems;
     }
 
-    public void addFeedView(long feedID) {
+    public void addFeedView(long feedID) throws CacheException, SQLException {
         Connection conn = Database.instance().getConnection();
         try {
             PreparedStatement getViewCountStmt = conn.prepareStatement("SELECT FEED_VIEWS FROM DATA_FEED WHERE " +
@@ -560,18 +540,13 @@ public class FeedStorage {
                     feedCache.put(feedID, feedCache);
                 }
             }
-        } catch (SQLException e) {
-            LogClass.error(e);
-            throw new RuntimeException(e);
-        } catch (CacheException e) {
-            LogClass.error(e);
         } finally {
-            Database.instance().closeConnection(conn);
+            Database.closeConnection(conn);
         }
 
     }
 
-    public void rateFeed(long feedID, long accountID, int rating) {
+    public void rateFeed(long feedID, long accountID, int rating) throws SQLException {
         Connection conn = Database.instance().getConnection();
         try {
             PreparedStatement getExistingRatingStmt = conn.prepareStatement("SELECT FEED_RATING_COUNT, FEED_RATING_AVERAGE FROM " +
@@ -592,11 +567,8 @@ public class FeedStorage {
             }
             getExistingRatingStmt.close();
             updateRatingStmt.close();
-        } catch (SQLException e) {
-            LogClass.error(e);
-            throw new RuntimeException(e);
         } finally {
-            Database.instance().closeConnection(conn);
+            Database.closeConnection(conn);
         }
     }
 
@@ -649,7 +621,7 @@ public class FeedStorage {
         }
     }
 
-    public void updateDataFeedConfiguration(FeedDefinition feedDefinition) {
+    public void updateDataFeedConfiguration(FeedDefinition feedDefinition) throws SQLException {
         EIConnection conn = Database.instance().getConnection();
         try {
             conn.setAutoCommit(false);
@@ -658,19 +630,18 @@ public class FeedStorage {
             EventDispatcher.instance().dispatch(new TodoCompletedEvent(feedDefinition));
         } catch (SQLException e) {
             conn.rollback();
-            LogClass.error(e);
-            throw new RuntimeException(e);
+            throw e;
         } finally {
             conn.setAutoCommit(false);
-            Database.instance().closeConnection(conn);
+            Database.closeConnection(conn);
         }
     }
 
-    public FeedDefinition getFeedDefinitionData(long identifier, Connection conn) {
+    public FeedDefinition getFeedDefinitionData(long identifier, Connection conn) throws SQLException {
         return getFeedDefinitionData(identifier, conn, true);
     }
 
-    public FeedDefinition getFeedDefinitionData(long identifier, Connection conn, boolean cache) {
+    public FeedDefinition getFeedDefinitionData(long identifier, Connection conn, boolean cache) throws SQLException {
         FeedDefinition feedDefinition = null;
         if(feedCache != null && cache)
             feedDefinition = (FeedDefinition) feedCache.get(identifier);
@@ -678,7 +649,7 @@ public class FeedStorage {
             LogClass.info("Cache hit for data source definition id: " + identifier);
             return feedDefinition;
         }
-        try {
+
             LogClass.info("Cache miss for data source definition id: " + identifier);
             PreparedStatement queryFeedStmt = conn.prepareStatement("SELECT FEED_NAME, FEED_TYPE, PUBLICLY_VISIBLE, GENRE, CREATE_DATE," +
                     "UPDATE_DATE, FEED_VIEWS, FEED_RATING_COUNT, FEED_RATING_AVERAGE, FEED_SIZE, ANALYSIS_ID," +
@@ -788,10 +759,7 @@ public class FeedStorage {
                 throw new RuntimeException("Could not find data source " + identifier);
             }
             queryFeedStmt.close();
-        } catch (SQLException e) {
-            LogClass.error(e);
-            throw new RuntimeException(e);
-        }
+
 
         try {
             if(feedCache != null)
@@ -803,13 +771,13 @@ public class FeedStorage {
         return feedDefinition;
     }
 
-    public FeedDefinition getFeedDefinitionData(long identifier) {
+    public FeedDefinition getFeedDefinitionData(long identifier) throws SQLException {
         FeedDefinition feedDefinition;
         Connection conn = Database.instance().getConnection();
         try {
             feedDefinition = getFeedDefinitionData(identifier, conn);
         } finally {
-            Database.instance().closeConnection(conn);
+            Database.closeConnection(conn);
         }
         return feedDefinition;
 
@@ -820,7 +788,7 @@ public class FeedStorage {
         return new FeedDescriptor(feedName, dataFeedID, size, feedType, userRole != null ? userRole : 0, ownerName, description, attribution, lastDataTime);
     }
 
-    public FeedDescriptor getFeedDescriptor(long accountID, long feedID) {
+    public FeedDescriptor getFeedDescriptor(long accountID, long feedID) throws SQLException {
         FeedDescriptor feedDescriptor = null;
         Connection conn = Database.instance().getConnection();
         try {
@@ -852,15 +820,13 @@ public class FeedStorage {
                 feedDescriptor.setTagString(tagStringBuilder.toString());
             }
             queryStmt.close();
-        } catch (SQLException e) {
-            LogClass.error(e);
         } finally {
-            Database.instance().closeConnection(conn);
+            Database.closeConnection(conn);
         }
         return feedDescriptor;
     }    
 
-    public List<FeedDescriptor> searchForSubscribedFeeds(long userID) {
+    public List<FeedDescriptor> searchForSubscribedFeeds(long userID) throws SQLException {
         List<FeedDescriptor> descriptorList = new ArrayList<FeedDescriptor>();
         Connection conn = Database.instance().getConnection();
         try {
@@ -951,10 +917,8 @@ public class FeedStorage {
             }
             descriptorList = new ArrayList<FeedDescriptor>(feedMap.values());
             queryStmt.close();
-        } catch (SQLException e) {
-            LogClass.error(e);
         } finally {
-            Database.instance().closeConnection(conn);
+            Database.closeConnection(conn);
         }
         return descriptorList;
     }
@@ -1004,7 +968,7 @@ public class FeedStorage {
         return uploadPolicy;
     }
 
-    public long getFeedForAPIKey(long userID, String apiKey) {
+    public long getFeedForAPIKey(long userID, String apiKey) throws CacheException, SQLException {
         Connection conn = Database.instance().getConnection();
         Long feedID = null;
         if(apiKeyCache != null)
@@ -1027,11 +991,6 @@ public class FeedStorage {
                     apiKeyCache.put(new FeedApiKey(apiKey, userID), feedID);
                 return feedID;
             }
-        } catch (SQLException se) {
-            LogClass.error(se);
-            throw new RuntimeException(se);
-        } catch (CacheException e) {
-            LogClass.error(e);
         } finally {
             Database.instance().closeConnection(conn);
         }

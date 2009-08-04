@@ -121,10 +121,11 @@ public class InstallationSystem {
                     Long newID = installedObjectMap.get(new SolutionElementKey(SolutionElementKey.DATA_SOURCE, goalTreeNode.getCoreFeedID()));
                     if (newID != null) {
                         goalTreeNode.setCoreFeedID(newID);
-                        FeedDefinition feedDefinition = feedStorage.getFeedDefinitionData(newID);
+                        FeedDefinition feedDefinition;
                         try {
+                            feedDefinition = feedStorage.getFeedDefinitionData(newID);
                             goalTreeNode.setAnalysisMeasure((AnalysisMeasure) findItem(goalTreeNode.getAnalysisMeasure(), feedDefinition).clone());
-                        } catch (CloneNotSupportedException e) {
+                        } catch (Exception e) {
                             LogClass.error(e);
                             throw new RuntimeException(e);
                         }

@@ -18,6 +18,7 @@ import com.easyinsight.core.Value;
 import com.easyinsight.database.Database;
 
 import java.util.Arrays;
+import java.sql.SQLException;
 
 /**
  * User: James Boe
@@ -31,7 +32,7 @@ public class SixSigmaTest extends TestCase {
         FeedRegistry.initialize();
     }
 
-    public void testMeasure() {
+    public void testMeasure() throws SQLException {
         TestUtil.getIndividualTestUser();
         UserUploadService uploadService = new UserUploadService();
         long dataSourceID = uploadService.createNewDefaultFeed("Default Data Source");

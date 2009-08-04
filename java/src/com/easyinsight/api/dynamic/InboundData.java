@@ -29,7 +29,13 @@ public class InboundData {
     private static FeedStorage feedStorage = new FeedStorage();
 
     public static void addInboundData(long feedID, Map<String, Value> data) {
-        FeedDefinition feedDefinition = feedStorage.getFeedDefinitionData(feedID);
+        FeedDefinition feedDefinition = null;
+        try {
+            feedDefinition = feedStorage.getFeedDefinitionData(feedID);
+        } catch (SQLException e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        }
         List<AnalysisItem> fields = feedDefinition.getFields();
         Map<String, Key> keyMap = new HashMap<String, Key>();
         for (AnalysisItem field : fields) {
@@ -61,7 +67,13 @@ public class InboundData {
     }
 
     public static void addInboundData(long feedID, List<Map<String, Value>> dataList) {
-        FeedDefinition feedDefinition = feedStorage.getFeedDefinitionData(feedID);
+        FeedDefinition feedDefinition;
+        try {
+            feedDefinition = feedStorage.getFeedDefinitionData(feedID);
+        } catch (SQLException e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        }
         List<AnalysisItem> fields = feedDefinition.getFields();
         Map<String, Key> keyMap = new HashMap<String, Key>();
         for (AnalysisItem field : fields) {
@@ -93,7 +105,13 @@ public class InboundData {
     }
 
     public static void replaceInboundData(long feedID, List<Map<String, Value>> dataList) {
-        FeedDefinition feedDefinition = feedStorage.getFeedDefinitionData(feedID);
+        FeedDefinition feedDefinition = null;
+        try {
+            feedDefinition = feedStorage.getFeedDefinitionData(feedID);
+        } catch (SQLException e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        }
         List<AnalysisItem> fields = feedDefinition.getFields();
         Map<String, Key> keyMap = new HashMap<String, Key>();
         for (AnalysisItem field : fields) {
@@ -127,7 +145,13 @@ public class InboundData {
     }
 
     public static void updateInboundData(long feedID, List<Map<String, Value>> dataList, Map<String, Value> updates) {
-        FeedDefinition feedDefinition = feedStorage.getFeedDefinitionData(feedID);
+        FeedDefinition feedDefinition = null;
+        try {
+            feedDefinition = feedStorage.getFeedDefinitionData(feedID);
+        } catch (SQLException e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        }
         List<AnalysisItem> fields = feedDefinition.getFields();
         Map<String, Key> keyMap = new HashMap<String, Key>();
         for (AnalysisItem field : fields) {

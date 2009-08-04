@@ -13,6 +13,7 @@ import com.easyinsight.analysis.*;
 import java.util.Arrays;
 import java.util.List;
 import java.util.ArrayList;
+import java.sql.SQLException;
 
 import test.util.TestUtil;
 
@@ -28,7 +29,7 @@ public class TagsTest extends TestCase {
         FeedRegistry.initialize();
     }
 
-    public void testTags() {
+    public void testTags() throws SQLException {
         long userID = TestUtil.getIndividualTestUser();
         UserUploadService userUploadService = new UserUploadService();
         long dataFeedID = createFirstDataFeed(userID, userUploadService);
@@ -57,7 +58,7 @@ public class TagsTest extends TestCase {
         assertEquals(2, retrievedDefinition.getTagCloud().size());
     }
 
-    private long createFirstDataFeed(long accountID, UserUploadService userUploadService) {
+    private long createFirstDataFeed(long accountID, UserUploadService userUploadService) throws SQLException {
         String csvText = "Customer,Product,Revenue\nAcme,WidgetX,500\nAcme,WidgetY,200";
         long uploadID = userUploadService.addRawUploadData(accountID, "test.csv", csvText.getBytes());
         UploadResponse uploadResponse = userUploadService.create(uploadID, "Test Feed");

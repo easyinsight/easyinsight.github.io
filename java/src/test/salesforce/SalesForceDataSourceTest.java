@@ -11,6 +11,7 @@ import com.easyinsight.userupload.UserUploadService;
 import com.easyinsight.database.Database;
 
 import java.util.Map;
+import java.sql.SQLException;
 
 import test.util.TestUtil;
 
@@ -28,7 +29,7 @@ public class SalesForceDataSourceTest extends TestCase {
         FeedRegistry.initialize();
     }
 
-    public void testDataSource() {
+    public void testDataSource() throws SQLException {
         TestUtil.getProUser();
         SalesforceBaseDataSource sbds = new SalesforceBaseDataSource();
         Credentials credentials = new Credentials("jboe99@gmail.com", "e@symone$rKxLSrt0eol9SbnHAr8UbZOR");

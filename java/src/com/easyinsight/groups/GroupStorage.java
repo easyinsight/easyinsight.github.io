@@ -23,7 +23,7 @@ import java.sql.*;
  */
 public class GroupStorage {
 
-    public long addGroupComment(GroupComment groupComment) {
+    public long addGroupComment(GroupComment groupComment) throws SQLException {
         Connection conn = Database.instance().getConnection();
         try {
             PreparedStatement insertCommentStmt = conn.prepareStatement("INSERT INTO group_comment (group_id, user_id, comment, time_created) values (?, ?, ?, ?)",
@@ -34,26 +34,18 @@ public class GroupStorage {
             insertCommentStmt.setTimestamp(4, new java.sql.Timestamp(new Date().getTime()));
             insertCommentStmt.execute();
             return Database.instance().getAutoGenKey(insertCommentStmt);
-        } catch (Exception e) {
-            LogClass.error(e);
-            throw new RuntimeException(e);
         } finally {
-            Database.instance().closeConnection(conn);
+            Database.closeConnection(conn);
         }
     }
 
-    public void addGroupAudit(GroupAuditMessage groupAuditMessage, Connection conn) {
-        try {
+    public void addGroupAudit(GroupAuditMessage groupAuditMessage, Connection conn) throws SQLException {
             PreparedStatement insertCommentStmt = conn.prepareStatement("INSERT INTO group_audit_message (group_id, user_id, comment, audit_time) values (?, ?, ?, ?)");
             insertCommentStmt.setLong(1, groupAuditMessage.getGroupID());
             insertCommentStmt.setLong(2, groupAuditMessage.getUserID());
             insertCommentStmt.setString(3, groupAuditMessage.getMessage());
             insertCommentStmt.setTimestamp(4, new java.sql.Timestamp(new Date().getTime()));
             insertCommentStmt.execute();
-        } catch (Exception e) {
-            LogClass.error(e);
-            throw new RuntimeException(e);
-        }
     }
 
     public long addGroup(Group group, long userID, Connection conn) throws SQLException {
@@ -84,11 +76,11 @@ public class GroupStorage {
             throw new RuntimeException(e);
         } finally {
             conn.setAutoCommit(true);
-            Database.instance().closeConnection(conn);
+            Database.closeConnection(conn);
         }
     }
 
-    public Group getGroup(long groupID) {
+    public Group getGroup(long groupID) throws SQLException {
         Group group = null;
         Connection conn = Database.instance().getConnection();
         try {
@@ -109,11 +101,8 @@ public class GroupStorage {
                 group.setPubliclyVisible(publiclyVisible);
                 group.setTags(new ArrayList<Tag>(getTags(groupID, conn)));
             }
-        } catch (Exception e) {
-            LogClass.error(e);
-            throw new RuntimeException(e);
         } finally {
-            Database.instance().closeConnection(conn);
+            Database.closeConnection(conn);
         }
         return group;
     }
@@ -133,7 +122,6 @@ public class GroupStorage {
             }
             saveTags(group.getTags(), group.getGroupID(), conn);
         } catch (Exception e) {
-            LogClass.error(e);
             try {
                 conn.rollback();
             } catch (SQLException e1) {
@@ -165,7 +153,6 @@ public class GroupStorage {
             }
             session.getTransaction().commit();
         } catch (Exception e) {
-            LogClass.error(e);
             session.getTransaction().rollback();
             throw new RuntimeException(e);
         } finally {
@@ -190,7 +177,6 @@ public class GroupStorage {
                 }
                 session.flush();
             } catch (Exception e) {
-                LogClass.error(e);
                 throw new RuntimeException(e);
             } finally {
                 session.close();
@@ -206,7 +192,7 @@ public class GroupStorage {
         }
     }
 
-    public List<GroupDescriptor> getAllPublicGroups() {
+    public List<GroupDescriptor> getAllPublicGroups() throws SQLException {
         List<GroupDescriptor> descriptors = new ArrayList<GroupDescriptor>();
         Connection conn = Database.instance().getConnection();
         try {
@@ -219,16 +205,13 @@ public class GroupStorage {
             while (rs.next()) {
                 descriptors.add(new GroupDescriptor(rs.getString(2), rs.getLong(1), rs.getInt(4), rs.getString(3)));
             }
-        } catch (SQLException e) {
-            LogClass.error(e);
-            throw new RuntimeException(e);
         } finally {
-            Database.instance().closeConnection(conn);
+            Database.closeConnection(conn);
         }
         return descriptors;
     }
 
-    public List<GroupUser> getUsersForGroup(long groupID) {
+    public List<GroupUser> getUsersForGroup(long groupID) throws SQLException {
         List<GroupUser> users = new ArrayList<GroupUser>();
         Connection conn = Database.instance().getConnection();
         try {
@@ -244,16 +227,13 @@ public class GroupStorage {
                 int role = rs.getInt(5);
                 users.add(new GroupUser(userID, userName, email, name, role));
             }
-        } catch (SQLException e) {
-            LogClass.error(e);
-            throw new RuntimeException(e);
         } finally {
-            Database.instance().closeConnection(conn);
+            Database.closeConnection(conn);
         }
         return users;
     }
 
-    public List<GroupDescriptor> getGroupsForUser(long userID) {
+    public List<GroupDescriptor> getGroupsForUser(long userID) throws SQLException {
         List<GroupDescriptor> descriptors = new ArrayList<GroupDescriptor>();
         Connection conn = Database.instance().getConnection();
         try {
@@ -264,24 +244,18 @@ public class GroupStorage {
             while (rs.next()) {
                 descriptors.add(new GroupDescriptor(rs.getString(2), rs.getLong(1), 0, rs.getString(3)));
             }
-        } catch (SQLException e) {
-            LogClass.error(e);
-            throw new RuntimeException(e);
         } finally {
-            Database.instance().closeConnection(conn);
+            Database.closeConnection(conn);
         }
         return descriptors;
     }
 
-    public void addUserToGroup(long userID, long groupID, int userRole) {
+    public void addUserToGroup(long userID, long groupID, int userRole) throws SQLException {
         Connection conn = Database.instance().getConnection();
         try {
             addUserToGroup(userID, groupID, userRole, conn);
-        } catch (SQLException e) {
-            LogClass.error(e);
-            throw new RuntimeException(e);
         } finally {
-            Database.instance().closeConnection(conn);
+            Database.closeConnection(conn);
         }
     }
 
@@ -307,19 +281,14 @@ public class GroupStorage {
         }
     }
 
-    public void removeUserFromGroup(long userID, long groupID, Connection conn) {
-        try {
+    public void removeUserFromGroup(long userID, long groupID, Connection conn) throws SQLException {
             PreparedStatement deleteUserStmt = conn.prepareStatement("DELETE FROM GROUP_TO_USER_JOIN WHERE USER_ID = ? AND GROUP_ID = ?");
             deleteUserStmt.setLong(1, userID);
             deleteUserStmt.setLong(2, groupID);
             deleteUserStmt.executeUpdate();
-        } catch (SQLException e) {
-            LogClass.error(e);
-            throw new RuntimeException(e);
-        }
     }
 
-    public List<InsightDescriptor> getInsights(long groupID) {
+    public List<InsightDescriptor> getInsights(long groupID) throws SQLException {
         List<InsightDescriptor> analysisIDs = new ArrayList<InsightDescriptor>();
         Connection conn = Database.instance().getConnection();
         try {
@@ -335,16 +304,13 @@ public class GroupStorage {
                 int reportType = rs.getInt(4);
                 analysisIDs.add(new InsightDescriptor(analysisID, title, dataSourceID, reportType));
             }
-        } catch (SQLException e) {
-            LogClass.error(e);
-            throw new RuntimeException(e);
         } finally {
             Database.instance().closeConnection(conn);
         }
         return analysisIDs;
     }
 
-    public List<GoalTreeDescriptor> getGoalTrees(long groupID) {
+    public List<GoalTreeDescriptor> getGoalTrees(long groupID) throws SQLException {
         List<GoalTreeDescriptor> goalTrees = new ArrayList<GoalTreeDescriptor>();
         Connection conn = Database.instance().getConnection();
         try {
@@ -355,16 +321,13 @@ public class GroupStorage {
             while (rs.next()) {
                 goalTrees.add(new GoalTreeDescriptor(rs.getLong(1), rs.getString(2), Roles.SHARER, rs.getString(3)));
             }
-        } catch (SQLException e) {
-            LogClass.error(e);
-            throw new RuntimeException(e);
         } finally {
             Database.instance().closeConnection(conn);
         }
         return goalTrees;
     }
 
-    public String inviteNewUserToGroup(long groupID) {
+    public String inviteNewUserToGroup(long groupID) throws SQLException {
         Connection conn = Database.instance().getConnection();
         try {
             char[] activationBuf = new char[30];
@@ -384,75 +347,60 @@ public class GroupStorage {
             addActivationStmt.setString(2, activationString);
             addActivationStmt.execute();
             return activationString; 
-        } catch (SQLException e) {
-            LogClass.error(e);
-            throw new RuntimeException(e);
         } finally {
             Database.instance().closeConnection(conn);
         }
     }
 
-    public void removeDataSourceFromGroup(long dataSourceID, long groupID) {
+    public void removeDataSourceFromGroup(long dataSourceID, long groupID) throws SQLException {
         Connection conn = Database.instance().getConnection();
         try {
             PreparedStatement deleteStmt = conn.prepareStatement("DELETE FROM UPLOAD_POLICY_GROUPS WHERE FEED_ID = ? AND GROUP_ID = ?");
             deleteStmt.setLong(1, dataSourceID);
             deleteStmt.setLong(2, groupID);
             deleteStmt.executeUpdate();
-        } catch (SQLException e) {
-            LogClass.error(e);
-            throw new RuntimeException(e);
         } finally {
             Database.instance().closeConnection(conn);
         }
     }
 
-    public void removeReportFromGroup(long dataSourceID, long groupID) {
+    public void removeReportFromGroup(long dataSourceID, long groupID) throws SQLException {
         Connection conn = Database.instance().getConnection();
         try {
             PreparedStatement deleteStmt = conn.prepareStatement("DELETE FROM GROUP_TO_INSIGHT WHERE INSIGHT_ID = ? AND GROUP_ID = ?");
             deleteStmt.setLong(1, dataSourceID);
             deleteStmt.setLong(2, groupID);
             deleteStmt.executeUpdate();
-        } catch (SQLException e) {
-            LogClass.error(e);
-            throw new RuntimeException(e);
         } finally {
             Database.instance().closeConnection(conn);
         }
     }
 
-    public void removeGoalTreeFromGroup(long dataSourceID, long groupID) {
+    public void removeGoalTreeFromGroup(long dataSourceID, long groupID) throws SQLException {
         Connection conn = Database.instance().getConnection();
         try {
             PreparedStatement deleteStmt = conn.prepareStatement("DELETE FROM GROUP_TO_GOAL_TREE_JOIN WHERE GOAL_TREE_ID = ? AND GROUP_ID = ?");
             deleteStmt.setLong(1, dataSourceID);
             deleteStmt.setLong(2, groupID);
             deleteStmt.executeUpdate();
-        } catch (SQLException e) {
-            LogClass.error(e);
-            throw new RuntimeException(e);
         } finally {
             Database.instance().closeConnection(conn);
         }
     }
 
-    public void removeGoalFromGroup(long dataSourceID, long groupID) {
+    public void removeGoalFromGroup(long dataSourceID, long groupID) throws SQLException {
         Connection conn = Database.instance().getConnection();
         try {
             PreparedStatement deleteStmt = conn.prepareStatement("DELETE FROM GROUP_TO_GOAL_TREE_NODE_JOIN WHERE goal_tree_node_id = ? AND GROUP_ID = ?");
             deleteStmt.setLong(1, dataSourceID);
             deleteStmt.setLong(2, groupID);
             deleteStmt.executeUpdate();
-        } catch (SQLException e) {
-            LogClass.error(e);
-            throw new RuntimeException(e);
         } finally {
             Database.instance().closeConnection(conn);
         }
     }
 
-    public void addFeedToGroup(long feedID, long groupID, int owner) {
+    public void addFeedToGroup(long feedID, long groupID, int owner) throws SQLException {
         Connection conn = Database.instance().getConnection();
         try {
             PreparedStatement existingLinkQuery = conn.prepareStatement("SELECT UPLOAD_POLICY_GROUPS_ID FROM UPLOAD_POLICY_GROUPS WHERE " +
@@ -476,15 +424,12 @@ public class GroupStorage {
                 insertFeedStmt.execute();
             }
             addGroupAudit(new GroupAuditMessage(SecurityUtil.getUserID(), new Date(), "Added data source", groupID, null), conn);
-        } catch (SQLException e) {
-            LogClass.error(e);
-            throw new RuntimeException(e);
         } finally {
             Database.instance().closeConnection(conn);
         }
     }
 
-    public void addInsightToGroup(long feedID, long groupID) {
+    public void addInsightToGroup(long feedID, long groupID) throws SQLException {
         Connection conn = Database.instance().getConnection();
         try {
             PreparedStatement existingLinkQuery = conn.prepareStatement("SELECT GROUP_TO_INSIGHT_ID FROM GROUP_TO_INSIGHT WHERE " +
@@ -507,15 +452,12 @@ public class GroupStorage {
                 insertFeedStmt.setLong(3, Roles.SUBSCRIBER);
                 insertFeedStmt.execute();
             }
-        } catch (SQLException e) {
-            LogClass.error(e);
-            throw new RuntimeException(e);
         } finally {
             Database.instance().closeConnection(conn);
         }
     }
 
-    public void addGoalTreeToGroup(long goalTreeID, long groupID) {
+    public void addGoalTreeToGroup(long goalTreeID, long groupID) throws SQLException {
         Connection conn = Database.instance().getConnection();
         try {
             PreparedStatement existingLinkQuery = conn.prepareStatement("SELECT GROUP_TO_GOAL_TREE_JOIN_ID FROM GROUP_TO_GOAL_TREE_JOIN WHERE " +
@@ -530,15 +472,12 @@ public class GroupStorage {
                 insertFeedStmt.setLong(2, goalTreeID);
                 insertFeedStmt.execute();
             }
-        } catch (SQLException e) {
-            LogClass.error(e);
-            throw new RuntimeException(e);
         } finally {
             Database.instance().closeConnection(conn);
         }
     }
 
-    public void addGoalToGroup(long goalID, long groupID) {
+    public void addGoalToGroup(long goalID, long groupID) throws SQLException {
         Connection conn = Database.instance().getConnection();
         try {
             PreparedStatement existingLinkQuery = conn.prepareStatement("SELECT GROUP_TO_GOAL_TREE_NODE_JOIN_ID FROM GROUP_TO_GOAL_TREE_NODE_JOIN WHERE " +
@@ -553,15 +492,12 @@ public class GroupStorage {
                 insertFeedStmt.setLong(2, goalID);
                 insertFeedStmt.execute();
             }
-        } catch (SQLException e) {
-            LogClass.error(e);
-            throw new RuntimeException(e);
         } finally {
             Database.instance().closeConnection(conn);
         }
     }
 
-    public List<FeedDescriptor> getFeeds(long groupID, long userID) {
+    public List<FeedDescriptor> getFeeds(long groupID, long userID) throws SQLException {
         List<FeedDescriptor> descriptors = new ArrayList<FeedDescriptor>();
         Connection conn = Database.instance().getConnection();
         try {
@@ -593,9 +529,6 @@ public class GroupStorage {
                 FeedDescriptor feedDescriptor = createDescriptor(feedID, name, role, 0, feedType, ownerName, description, attribution, null);
                 descriptors.add(feedDescriptor);
             }
-        } catch (SQLException e) {
-            LogClass.error(e);
-            throw new RuntimeException(e);
         } finally {
             Database.instance().closeConnection(conn);
         }

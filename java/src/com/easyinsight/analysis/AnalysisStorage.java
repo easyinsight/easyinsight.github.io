@@ -4,7 +4,6 @@ import com.easyinsight.database.Database;
 import com.easyinsight.core.PersistableValue;
 import com.easyinsight.core.InsightDescriptor;
 import com.easyinsight.core.Key;
-import com.easyinsight.logging.LogClass;
 
 import java.util.*;
 import java.sql.Connection;
@@ -186,7 +185,6 @@ public class AnalysisStorage {
             saveAnalysis(analysisDefinition, session);
             session.getTransaction().commit();
         } catch (Exception e) {
-            LogClass.error(e);
             session.getTransaction().rollback();
             throw new RuntimeException(e);
         } finally {
@@ -278,7 +276,7 @@ public class AnalysisStorage {
                 analysisList.add(new InsightDescriptor(analysisID, title, dataSourceID, analysisRS.getInt(4)));
             }
         } catch (Exception e) {
-            LogClass.error(e);
+            throw new RuntimeException(e);
         } finally {
             session.close();
             Database.instance().closeConnection(conn);
@@ -325,7 +323,7 @@ public class AnalysisStorage {
                 analysisList.add(new InsightDescriptor(analysisID, title, dataSourceID, analysisRS.getInt(4)));
             }
         } catch (Exception e) {
-            LogClass.error(e);
+            throw new RuntimeException(e);
         } finally {
             session.close();
             Database.instance().closeConnection(conn);
@@ -372,7 +370,7 @@ public class AnalysisStorage {
                 analysisList.add(new InsightDescriptor(analysisID, title, dataSourceID, analysisRS.getInt(4)));
             }
         } catch (Exception e) {
-            LogClass.error(e);
+            throw new RuntimeException(e);
         } finally {
             session.close();
             Database.instance().closeConnection(conn);
@@ -400,7 +398,7 @@ public class AnalysisStorage {
             getViewCountStmt.close();
             updateViewsStmt.close();
         } catch (SQLException e) {
-            LogClass.error(e);
+
             throw new RuntimeException(e);
         } finally {
             Database.instance().closeConnection(conn);
@@ -427,7 +425,7 @@ public class AnalysisStorage {
                 updateRatingStmt.executeUpdate();
             }
         } catch (SQLException e) {
-            LogClass.error(e);
+
             throw new RuntimeException(e);
         } finally {
             Database.instance().closeConnection(conn);
@@ -454,8 +452,9 @@ public class AnalysisStorage {
             }
             session.getTransaction().commit();
         } catch (Exception e) {
-            LogClass.error(e);
+            
             session.getTransaction().rollback();
+            throw new RuntimeException(e);
         } finally {
             session.close();
         }
@@ -485,7 +484,7 @@ public class AnalysisStorage {
             session.getTransaction().commit();
             return tag;
         } catch (Exception e) {
-            LogClass.error(e);
+
             session.getTransaction().rollback();
             throw new RuntimeException(e);
         } finally {
@@ -509,7 +508,7 @@ public class AnalysisStorage {
             session.delete(analysisDefinition);
             session.getTransaction().commit();
         } catch (Exception e) {
-            LogClass.error(e);
+            
             session.getTransaction().rollback();
             throw new RuntimeException(e);
         } finally {

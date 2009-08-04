@@ -391,9 +391,9 @@ public class APIService {
 
     public void undeployService(long feedID, Connection conn) {
         SecurityUtil.authorizeFeed(feedID, Roles.OWNER);
-        FeedStorage feedStorage = new FeedStorage();
-        FeedDefinition feedDefinition = feedStorage.getFeedDefinitionData(feedID, conn);
         try {
+            FeedStorage feedStorage = new FeedStorage();
+            FeedDefinition feedDefinition = feedStorage.getFeedDefinitionData(feedID, conn);
             PreparedStatement deleteStmt = conn.prepareStatement("DELETE FROM DYNAMIC_SERVICE_DESCRIPTOR WHERE FEED_ID = ?");
             deleteStmt.setLong(1, feedID);
             deleteStmt.executeUpdate();

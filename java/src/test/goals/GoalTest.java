@@ -43,7 +43,7 @@ public class GoalTest extends TestCase {
         return uploadResponse.getFeedID();
     }
 
-    private AnalysisItem findAnalysisItem(long dataSourceID, String name) {
+    private AnalysisItem findAnalysisItem(long dataSourceID, String name) throws SQLException {
         FeedDefinition feedDefinition = new FeedStorage().getFeedDefinitionData(dataSourceID);
         for (AnalysisItem field : feedDefinition.getFields()) {
             if (field.getKey().toKeyString().equals(name)) {

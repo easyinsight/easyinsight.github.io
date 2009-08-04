@@ -14,6 +14,7 @@ import com.easyinsight.datafeeds.*;
 import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.analysis.FeedMetadata;
 import com.easyinsight.analysis.DataService;
+import com.easyinsight.logging.LogClass;
 
 import java.util.List;
 import java.util.ArrayList;
@@ -55,7 +56,13 @@ public class TestUtil {
     }
 
     public static AnalysisItem getActualItem(long feedID, String name) {
-        FeedDefinition feedDefinition = new FeedStorage().getFeedDefinitionData(feedID);
+        FeedDefinition feedDefinition = null;
+        try {
+            feedDefinition = new FeedStorage().getFeedDefinitionData(feedID);
+        } catch (SQLException e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        }
         for (AnalysisItem field : feedDefinition.getFields()) {
             if (name.equals(field.getKey().toKeyString())) {
                 return field;
