@@ -139,6 +139,19 @@
         public function set activated(value:Boolean):void {
             _activated = value;
         }
+
+        private var _liveData:Boolean;
+
+	    [Bindable(event="liveDataChanged")]
+        public function get liveData():Boolean {
+            return _liveData;
+        }
+
+        public function set liveData(value:Boolean):void {
+            if (_liveData == value) return;
+            _liveData = value;
+            dispatchEvent(new Event("liveDataChanged"));
+        }
 		]]>
 	</mx:Script>
 	<mx:HBox>
@@ -179,6 +192,6 @@
 		</mx:VBox>
 	</mx:HBox>
 	<mx:Spacer height="30"/>
-	<mx:CheckBox label="Anyone Can View: " selected="{anyoneCanView}" id="anyoneCheckbox" click="anyoneCanViewChange(event)"/>
+	<mx:CheckBox label="Anyone Can View: " selected="{anyoneCanView}" id="anyoneCheckbox" click="anyoneCanViewChange(event)" enabled="{liveData}"/>
 	<mx:CheckBox label="Visible in the Marketplace: " selected="{marketplaceViewable}" id="marketplaceCheckbox" enabled="false"/>
 </mx:VBox>
