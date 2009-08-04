@@ -44,8 +44,6 @@
             var results:Array = Validator.validateAll(validators);
             if (results.length > 0) {
                 failureMessageLabel.text = "There are one or more problems with the fields above.";
-            } else if (email.text != confirmEmail.text) {
-                failureMessageLabel.text = "Your email addresses do not match.";
             } else if (password.text != confirmPassword.text) {
                 failureMessageLabel.text = "Your passwords do not match.";
             } else if (!tosCheckbox.selected) {
@@ -89,9 +87,6 @@
 			</mx:FormItem>
 			<mx:FormItem label="Email Address:" direction="horizontal" fontFamily="Tahoma" fontWeight="bold">
 				<mx:TextInput id="email" fontFamily="Lucida Grande" fontWeight="normal"/>				
-			</mx:FormItem>
-            <mx:FormItem label="Confirm Email Address:" direction="horizontal" fontFamily="Tahoma" fontWeight="bold">
-				<mx:TextInput id="confirmEmail" fontFamily="Lucida Grande" fontWeight="normal"/>
 			</mx:FormItem>
             <mx:FormItem label="I Accept the Terms of Service:" direction="horizontal">
                 <mx:CheckBox id="tosCheckbox"/>
