@@ -144,6 +144,8 @@ import mx.formatters.NumberFormatter;
                 subTreePresent = goalTreeNodeData.subTreeID > 0;
                 if (goalTreeNodeData.goalOutcome.problemEvaluated) {
                     trendImage = negativeIcon;
+                } else if (goalTreeNodeData.problemConditions.length > 0) {
+                    trendImage = positiveIcon;
                 } else {
                     switch (goalTreeNodeData.goalOutcome.outcomeState) {
                         case GoalOutcome.EXCEEDING_GOAL:

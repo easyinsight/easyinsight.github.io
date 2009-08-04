@@ -28,7 +28,7 @@
             dataSourceCreation = new _dataSourceClass();
             var def:FeedDefinitionData = _dataSourceDefinition as FeedDefinitionData;
             dataSourceCreation.dataSourceDefinition = def;
-            credentialsSaved = def != null;
+            credentialsSaved = def.username != null;
             refreshValue = def.refreshDataInterval;
             coreContent.addChild(dataSourceCreation as DisplayObject);
         }

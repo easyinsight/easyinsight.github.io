@@ -128,7 +128,7 @@
     </listing:ListingOption>
     <listing:ListingOption perspective="{new MyGoals()}" enableAnalysis="false" displayName="Goals" listingChange="onListingChange(event)">
         <mx:Image source="{goalsIcon}" id="goalsImage"/>
-        <mx:Label text="Goals" fontSize="12" fontFamily="Tahoma" fontWeight="bold" color="0x323232"/>
+        <mx:Label text="KPIs" fontSize="12" fontFamily="Tahoma" fontWeight="bold" color="0x323232"/>
     </listing:ListingOption>
     <listing:ListingOption perspective="{new APIPage()}" enableAnalysis="false" displayName="API" listingChange="onListingChange(event)">
         <mx:Image source="{apiIcon}" id="apiImage"/>

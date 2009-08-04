@@ -26,12 +26,12 @@
                     <mx:HBox width="100%">
                         <mx:Image source="{screenshot}"/>
                         <mx:VBox height="100%" width="100%" verticalAlign="middle">
-                            <mx:TextArea editable="false" text="Goals provide you with a broad strategic view of your improvement on key metrics. Starting with a high level overall goal, you repeatedly subdivide into the various lower level goals that will bring you closer to achieving that overall goal."
+                            <mx:TextArea editable="false" text="KPI trees provide you with a broad strategic view of your improvement on key metrics. Starting with a high level overall goal, you repeatedly subdivide into the various lower level key performance indicators that will bring you closer to achieving that overall goal."
                                     borderStyle="none" width="100%" fontSize="14" height="120"/>
                         </mx:VBox>
                     </mx:HBox>
                     <mx:HBox width="100%" paddingLeft="30" paddingRight="30">
-                        <mx:TextArea editable="false"  text="You can't use any of the goal functionality with your account level. You'll have to upgrade to Group or higher for access to the functionality."
+                        <mx:TextArea editable="false"  text="You can't use any of the KPI functionality with your account level. You'll have to upgrade to Group or higher for access to the functionality."
                                 width="100%" borderStyle="none" fontSize="14"/>
                     </mx:HBox>
                 </mx:VBox>
@@ -45,12 +45,12 @@
                     <mx:HBox width="100%" horizontalGap="10">
                         <mx:Image source="{screenshot}"/>
                         <mx:VBox height="100%" width="100%" verticalAlign="middle">
-                            <mx:TextArea editable="false"  text="Goals provide you with a broad strategic view of your improvement on key metrics. Starting with a high level overall goal, you repeatedly subdivide into the various lower level goals that will bring you closer to achieving that overall goal."
+                            <mx:TextArea editable="false"  text="KPI trees provide you with a broad strategic view of your improvement on key metrics. Starting with a high level overall goal, you repeatedly subdivide into the various lower level key performance indicators that will bring you closer to achieving that overall goal."
                                     borderStyle="none" width="100%" fontSize="14" height="150"/>
                         </mx:VBox>
                     </mx:HBox>
                     <mx:HBox width="100%" paddingLeft="30" paddingRight="30">
-                        <mx:TextArea editable="false"  text="You can start by importing goal trees from solutions or by clicking Create New Goal... above. From there, you can customize the tree, altering template goals to match your specific scenarios, drag in additional trees to rapidly build out a tree, and associating relevant data sources and reports to goals."
+                        <mx:TextArea editable="false"  text="You can start by importing KPI trees from solutions or by clicking Create New KPI Tree... above. From there, you can customize the tree, altering template goals to match your specific scenarios, drag in additional trees to rapidly build out a tree, and associating relevant data sources and reports to goals."
                             width="100%" borderStyle="none" fontSize="14" height="60"/>
                     </mx:HBox>
                 </mx:VBox>
@@ -134,13 +134,13 @@
 
         private function onDelete(event:DeleteGoalTreeEvent):void {
             deleteID = event.goalTree.id;
-            Alert.show("Are you sure you want to delete the goal tree?", "Alert",
+            Alert.show("Are you sure you want to delete the KPI tree?", "Alert",
                     Alert.OK | Alert.CANCEL, this, alertListener, null, Alert.CANCEL);
         }
 
         private function alertListener(event:CloseEvent):void {
             if (event.detail == Alert.OK) {
-                ProgressAlert.alert(this, "Deleting goal tree...", "Deleted goal tree!", goalService.deleteGoalTree);
+                ProgressAlert.alert(this, "Deleting goal tree...", "Deleted KPI tree!", goalService.deleteGoalTree);
                 goalService.deleteGoalTree.send(deleteID);
             }
         }
@@ -234,7 +234,7 @@
         }
 
         private function complete(event:Event):void {
-			Alert.show("This downloaded widget will allow you to see your monitored goals. You can add it to your widgets by selecting Open Widget... from your Yahoo Widgets dock.");
+			Alert.show("This downloaded widget will allow you to see your monitored KPIs. You can add it to your widgets by selecting Open Widget... from your Yahoo Widgets dock.");
             fileRef = null;
 		}
 
@@ -256,8 +256,8 @@
         <mx:VBox width="1000" height="100%" paddingTop="10" paddingBottom="10" paddingLeft="10"
                  paddingRight="10" verticalGap="10" backgroundColor="#ffffff" id="coreContent">
             <mx:HBox width="100%" id="controlsBox">
-                <mx:Button toolTip="Add Goal Tree..." click="createGoalTree()" id="uploadButton" icon="{addIcon}"
-                           label="Add Goal Tree" labelPlacement="bottom" visible="{addGoalTreeAvailable}"/>
+                <mx:Button toolTip="Add KPI Tree..." click="createGoalTree()" id="uploadButton" icon="{addIcon}"
+                           label="Add KPI Tree" labelPlacement="bottom" visible="{addGoalTreeAvailable}"/>
                 <mx:Button toolTip="Manage Milestones..." click="manageMilestones()" id="milestonesButton" icon="{calendarIcon}"
                            label="Milestones" labelPlacement="bottom"/>
                 <!--<mx:Button icon="@Embed('../../../../assets/helpx48.png')" label="Help..." labelPlacement="bottom"/>-->
@@ -266,14 +266,14 @@
                 <mx:DataGrid dataProvider="{goalTrees}" width="100%" id="goalTreesBox"
                          itemDoubleClick="gridDoubleClick(event)">
                     <mx:columns>
-                        <util:EIDataGridColumn headerText="Goal Tree Name" dataField="name"/>
+                        <util:EIDataGridColumn headerText="KPI Tree Name" dataField="name"/>
                         <util:EIDataGridColumn headerText="" dataField="goalTreeName" width="150"
                                                itemRenderer="com.easyinsight.goals.MyGoalsControls" sortable="false"/>
                     </mx:columns>
                 </mx:DataGrid>
                 <mx:VBox height="100%" width="100%">
                     <mx:HBox>
-                        <mx:Button toolTip="Download Yahoo Widget for Goal Display..." click="downloadWidget()" id="downloadYahooWidgetButton" icon="@Embed(source='../../../../assets/document_gear_x16.png')"
+                        <mx:Button toolTip="Download Yahoo Widget for KPI Display..." click="downloadWidget()" id="downloadYahooWidgetButton" icon="@Embed(source='../../../../assets/document_gear_x16.png')"
                            label="Yahoo! Widget"/>
                         <mx:Button id="igoogleButton" toolTip="Add to iGoogle"
                            icon="@Embed(source='../../../../assets/uwa-google.png')" click="igoogle()" />
