@@ -45,11 +45,11 @@
         <UpdateInstances userName="einsight" password="eJAqp0Q~j!n>L"/>
     </target>
 
-    <target name="updateStaging">
+    <target name="updateStagingInstances">
         <UpdateStaging userName="einsight" password="eJAqp0Q~j!n>L"/>
     </target>
 
-    <target  name="startStaging">
+    <target  name="startStagingInstances">
         <StartStaging userName="einsight" password="eJAqp0Q~j!n>L"/>
     </target>
 
