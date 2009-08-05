@@ -25,10 +25,14 @@ public class LastValueTemporalAggregation extends TemporalAggregation implements
     }
 
     public Value getValue(int i) {
-        if (i == positionLimit && latestValue != null) {
+        /*if (i == positionLimit && latestValue != null) {
             return new NumericValue(latestValue);
         } else {
             return new EmptyValue();
+        }*/
+        if (latestValue == null) {
+            return new EmptyValue();
         }
+        return new NumericValue(latestValue);
     }
 }

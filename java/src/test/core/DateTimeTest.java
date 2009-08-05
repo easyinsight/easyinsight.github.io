@@ -51,11 +51,13 @@ public class DateTimeTest extends TestCase {
         cal.set(Calendar.YEAR, 2009);
         cal.set(Calendar.MONTH, 1);
         cal.set(Calendar.DAY_OF_MONTH, 1);
+        cal.set(Calendar.HOUR_OF_DAY, 0);
+        cal.set(Calendar.MINUTE, 0);
         DataSet dataSet = new DataSet();
         // row 1 = c1, 1/1/2009, 50
         IRow row1 = dataSet.createRow();
         row1.addValue(TestUtil.createKey("c", dataSourceID), "c1");
-        row1.addValue(TestUtil.createKey("m", dataSourceID), new NumericValue(50));
+        row1.addValue(TestUtil.createKey("m", dataSourceID), new NumericValue(100));
         row1.addValue(TestUtil.createKey("d", dataSourceID), new DateValue(cal.getTime()));
         // row2 = c1, 2/1/2009, 100
         IRow row2 = dataSet.createRow();
@@ -67,15 +69,16 @@ public class DateTimeTest extends TestCase {
         cal.set(Calendar.MINUTE, 3);
         cal.set(Calendar.SECOND, 37);
         row2.addValue(TestUtil.createKey("d", dataSourceID), new DateValue(cal.getTime()));
-        // row 3 = 
+        // row 3 = c1, 2/1/2009, 8:3:37
         IRow row3 = dataSet.createRow();
         row3.addValue(TestUtil.createKey("c", dataSourceID), "c1");
-        row3.addValue(TestUtil.createKey("m", dataSourceID), new NumericValue(100));
+        row3.addValue(TestUtil.createKey("m", dataSourceID), new NumericValue(50));
         cal.set(Calendar.DAY_OF_MONTH, 3);
         cal.set(Calendar.HOUR_OF_DAY, 8);
         cal.set(Calendar.MINUTE, 3);
         cal.set(Calendar.SECOND, 37);
         row3.addValue(TestUtil.createKey("d", dataSourceID), new DateValue(cal.getTime()));
+        // row 4 = c1, 2/3/2009, 8:3:37
         IRow row4 = dataSet.createRow();
         row4.addValue(TestUtil.createKey("c", dataSourceID), "c1");
         row4.addValue(TestUtil.createKey("m", dataSourceID), new NumericValue(100));
@@ -171,32 +174,25 @@ public class DateTimeTest extends TestCase {
 
     public void testTemporalAggregations() throws SQLException {
         TestUtil.getIndividualTestUser();
-        long dataSourceID = createDeltaTestDataSource();
+        long dataSourceID = createDefaultTestDataSource();
         DataService dataService = new DataService();
-        WSListDefinition noDimDefinition = new WSListDefinition();
-        noDimDefinition.setDataFeedID(dataSourceID);
         TemporalAnalysisMeasure measure = new TemporalAnalysisMeasure();
-        AnalysisDateDimension dim = new AnalysisDateDimension(TestUtil.createKey("d", dataSourceID), true, AnalysisDateDimension.MINUTE_LEVEL);
+        AnalysisDateDimension dim = new AnalysisDateDimension(TestUtil.createKey("d", dataSourceID), true, AnalysisDateDimension.DAY_LEVEL);
         measure.setAnalysisDimension(dim);
         measure.setWrappedAggregation(AggregationTypes.SUM);
         measure.setAggregation(AggregationTypes.LAST_VALUE);
         measure.setKey(TestUtil.createKey("m", dataSourceID));
-        noDimDefinition.setColumns(Arrays.asList(new AnalysisDimension(TestUtil.createKey("c", dataSourceID), true),
-                measure));
-        ListDataResults yearResults = dataService.list(noDimDefinition, new InsightRequestMetadata());
-        assertEquals(1, yearResults.getRows().length);
-        ListRow row = yearResults.getRows()[0];
-        for (int i = 0; i < yearResults.getHeaders().length; i++) {
-            if (yearResults.getHeaders()[i] == measure) {
-                assertEquals(150, row.getValues()[i].toDouble(), .1);
-            }
-        }
         WSListDefinition dateDimDefinition = new WSListDefinition();
         dateDimDefinition.setDataFeedID(dataSourceID);
-        dateDimDefinition.setColumns(Arrays.asList(new AnalysisDimension(TestUtil.createKey("c", dataSourceID), true),
-                new AnalysisDateDimension(TestUtil.createKey("d", dataSourceID), true, AnalysisDateDimension.DAY_LEVEL), measure));
+        dateDimDefinition.setColumns(Arrays.asList(new AnalysisDimension(TestUtil.createKey("c", dataSourceID), true), measure));
         measure.triggerApplied(false);
-        ListDataResults results = dataService.list(dateDimDefinition, new InsightRequestMetadata());
+        DataSet dataSet = dataService.listDataSet(dateDimDefinition, new InsightRequestMetadata());
+        assertEquals(1, dataSet.getRows().size());
+        for (IRow irow : dataSet.getRows()) {
+            NumericValue numericValue = (NumericValue) irow.getValue(measure.createAggregateKey());
+            assertEquals(100.0, numericValue.toDouble(), .001);
+        }
+
         //assertEquals(2, results.getRows().length);
         /*for (int j = 0; j < results.getRows().length; j++) {
             row = results.getRows()[j];
@@ -206,6 +202,29 @@ public class DateTimeTest extends TestCase {
                 }
             }
         }*/
+    }
+
+    public void testMultiDateLastValue() throws Exception {
+        TestUtil.getIndividualTestUser();
+        long dataSourceID = createDefaultTestDataSource();
+        DataService dataService = new DataService();
+        TemporalAnalysisMeasure measure = new TemporalAnalysisMeasure();
+        AnalysisDateDimension dim = new AnalysisDateDimension(TestUtil.createKey("d", dataSourceID), true, AnalysisDateDimension.DAY_LEVEL);
+        measure.setAnalysisDimension(dim);
+        measure.setWrappedAggregation(AggregationTypes.SUM);
+        measure.setAggregation(AggregationTypes.LAST_VALUE);
+        measure.setKey(TestUtil.createKey("m", dataSourceID));
+        WSListDefinition dateDimDefinition = new WSListDefinition();
+        dateDimDefinition.setDataFeedID(dataSourceID);
+        dateDimDefinition.setColumns(Arrays.asList(new AnalysisDimension(TestUtil.createKey("c", dataSourceID), true),
+                new AnalysisDateDimension(TestUtil.createKey("d", dataSourceID), true, AnalysisDateDimension.DAY_LEVEL), measure));
+        measure.triggerApplied(false);
+        DataSet dataSet = dataService.listDataSet(dateDimDefinition, new InsightRequestMetadata());
+        assertEquals(3, dataSet.getRows().size());
+        for (IRow irow : dataSet.getRows()) {
+            NumericValue numericValue = (NumericValue) irow.getValue(measure.createAggregateKey());
+            assertEquals(100.0, numericValue.toDouble(), .001);
+        }
     }
 
     public static long createDeltaTestDataSource() throws SQLException {

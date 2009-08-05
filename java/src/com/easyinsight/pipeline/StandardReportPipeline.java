@@ -3,6 +3,7 @@ package com.easyinsight.pipeline;
 import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.analysis.AnalysisItemTypes;
 import com.easyinsight.analysis.AnalysisStep;
+import com.easyinsight.analysis.TemporalAnalysisMeasure;
 
 import java.util.Set;
 import java.util.List;
@@ -14,7 +15,7 @@ import java.util.ArrayList;
  * Time: 9:36:30 AM
  */
 public class StandardReportPipeline extends Pipeline {
-    protected List<IComponent> generatePipelineCommands(Set<AnalysisItem> allNeededAnalysisItems) {
+    protected List<IComponent> generatePipelineCommands(Set<AnalysisItem> allNeededAnalysisItems, Set<AnalysisItem> reportItems) {
         List<IComponent> components = new ArrayList<IComponent>();
         components.add(new DataScrubComponent());
         components.add(new TagTransformComponent());
@@ -26,7 +27,14 @@ public class StandardReportPipeline extends Pipeline {
         for (AnalysisItem step : items(AnalysisItemTypes.STEP, allNeededAnalysisItems)) {
             components.add(new StepCorrelationComponent((AnalysisStep) step));
         }
-        components.add(new AggregationComponent());
+        boolean temporalAdded = false;
+        for (AnalysisItem temporal : items(AnalysisItemTypes.TEMPORAL_MEASURE, reportItems)) {
+            temporalAdded = true;
+            components.add(new TemporalComponent((TemporalAnalysisMeasure) temporal));
+        }
+        if (!temporalAdded) {
+            components.add(new AggregationComponent());
+        }
         components.add(new FilterComponent(false));
         components.add(new LimitsComponent());
         return components;

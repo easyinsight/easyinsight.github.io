@@ -12,7 +12,7 @@ import java.util.ArrayList;
  * Time: 9:38:23 AM
  */
 public class DerivedDataSourcePipeline extends Pipeline {
-    protected List<IComponent> generatePipelineCommands(Set<AnalysisItem> allNeededAnalysisItems) {
+    protected List<IComponent> generatePipelineCommands(Set<AnalysisItem> allNeededAnalysisItems, Set<AnalysisItem> reportItems) {
         List<IComponent> components = new ArrayList<IComponent>();
         components.add(new DataScrubComponent());
         components.add(new FilterComponent(true));

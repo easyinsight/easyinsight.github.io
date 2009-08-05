@@ -83,7 +83,7 @@ public class ListTransform {
             }
         }
         // for each post processor, run the values through again...
-        boolean postAggregationRequired = false;
+        /*boolean postAggregationRequired = false;
         for (TemporalAnalysisMeasure temporalAnalysisMeasure : temporalAnalysisMeasures) {
             if (temporalAnalysisMeasure.hasBeenApplied()) {
                 continue;
@@ -105,7 +105,7 @@ public class ListTransform {
             }
             ListTransform listTransform = dataSet.listTransform(allRequestedAnalysisItems, temporalRequestedItems);
             dataSet = listTransform.aggregate(allRequestedAnalysisItems, derivedItems, temporalRequestedItems);
-        }
+        }*/
 
         if (derivedItems != null) {
             for (IRow row : dataSet.getRows()) {
