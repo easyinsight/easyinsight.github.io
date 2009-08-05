@@ -18,7 +18,9 @@ package com.easyinsight.filtering
 		}
 		
 		public function addPair(key:AnalysisItem, value:Object):void {
-			keys.addItem(key);
+            if (keys.getItemIndex(key) == -1) {
+			    keys.addItem(key);
+            }
 			values.addItem(value);
 			var setValues:ArrayCollection = valuesMap[key.qualifiedName()];
 			if (setValues == null) {

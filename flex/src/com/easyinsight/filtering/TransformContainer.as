@@ -418,6 +418,12 @@ import mx.managers.ToolTipManager;
 			for (var i:int = 0; i < filterRawData.getKeys().length; i++) {
 				var key:AnalysisItem = filterRawData.getKeys().getItemAt(i) as AnalysisItem;
 				var values:ArrayCollection = filterRawData.getValues(key);
+                var uniqueValues:ArrayCollection = new ArrayCollection();
+                for each (var val:Object in values) {
+                    if (uniqueValues.getItemIndex(val) == -1) {
+                        uniqueValues.addItem(val);
+                    }
+                }
 				var filter:IFilter = filterMap[key.qualifiedName()];
 				if (filter == null) {					
 					// doesn't exist yet, create it
@@ -430,7 +436,7 @@ import mx.managers.ToolTipManager;
 					} else if (key.hasType(AnalysisItemTypes.DIMENSION)) {
 						var filterValueDefinition:FilterValueDefinition = new FilterValueDefinition();
 						filterValueDefinition.field = key;
-						filterValueDefinition.filteredValues = values;
+						filterValueDefinition.filteredValues = uniqueValues;
 						filterValueDefinition.inclusive = includeFilter;
 						filterDefinition = filterValueDefinition;
 						if (values.length == 1 && includeFilter) {
@@ -452,13 +458,13 @@ import mx.managers.ToolTipManager;
 						var multiValueFilter:MultiValueFilter = filter as MultiValueFilter;					
 						// update the filtered values
 						if (!multiValueFilter.inclusive && includeFilter) {
-							multiValueFilter.toInclusive(values);
+							multiValueFilter.toInclusive(uniqueValues);
 							// gonna change...						
 						} else if (multiValueFilter.inclusive && !includeFilter) {
 							// TODO
 						} else {
 							// just changing values
-							multiValueFilter.addValues(values);
+							multiValueFilter.addValues(uniqueValues);
 						}
 						dispatchEvent(new TransformsUpdatedEvent(filterDefinitions));
 					} else if (filter is ComboBoxFilter) {
