@@ -81,6 +81,11 @@ public class GoogleFeedDefinition extends ServerDataSourceDefinition {
     }
 
     @Override
+    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, DataSet dataSet, Credentials credentials) {
+        return populateFields(createDataSet(credentials, keys, new Date(), null));
+    }
+
+    @Override
     public Map<String, Key> newDataSourceFields(Credentials credentials) {
         Map<String, Key> keyMap = new HashMap<String, Key>();
         if (getDataFeedID() == 0) {
@@ -90,6 +95,46 @@ public class GoogleFeedDefinition extends ServerDataSourceDefinition {
             }
         }
         return keyMap;
+    }
+
+    private DataSet createDataSet(Credentials credentials, Map<String, Key> keys, Date now, FeedDefinition parentDefinition) {
+        DataSet dataSet;
+        try {
+            SpreadsheetService myService = GoogleSpreadsheetAccess.getOrCreateSpreadsheetService(credentials);
+            URL listFeedUrl = new URL(worksheetURL);
+            ListFeed feed = myService.getFeed(listFeedUrl, ListFeed.class);
+            dataSet = new DataSet();
+            for (ListEntry listEntry : feed.getEntries()) {
+                IRow row = dataSet.createRow();
+                boolean atLeastOneValue = false;
+                for (String tag : listEntry.getCustomElements().getTags()) {
+                    Value value;
+                    String string = listEntry.getCustomElements().getValue(tag);
+                    if (string == null) {
+                        value = new EmptyValue();
+                    } else {
+                        if (string.length() > 0) {
+                            atLeastOneValue = true;
+                        }
+                        value = new StringValue(string);
+                    }
+                    NamedKey key = (NamedKey) keys.get(tag);
+                    if (key == null) {
+                        key = new NamedKey(tag);
+                        keys.put(tag, key);
+                    }
+                    row.addValue(new NamedKey(tag), value);
+                }
+                if (!atLeastOneValue) {
+                    dataSet.removeRow(row);
+                }
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        } catch (ServiceException e) {
+            throw new RuntimeException(e);
+        }
+        return dataSet;
     }
 
     public boolean isConfigured() {
@@ -113,44 +158,6 @@ public class GoogleFeedDefinition extends ServerDataSourceDefinition {
             }
         }
         return guesser.createFeedItems();
-    }
-
-    @Override
-    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, DataSet dataSet, Credentials credentials) {
-        try {
-            SpreadsheetService myService = GoogleSpreadsheetAccess.getOrCreateSpreadsheetService(credentials);
-            URL listFeedUrl = new URL(worksheetURL);
-            ListFeed feed = myService.getFeed(listFeedUrl, ListFeed.class);
-            DataSet mySet = new DataSet();
-            for (ListEntry listEntry : feed.getEntries()) {
-                IRow row = mySet.createRow();
-                boolean atLeastOneValue = false;
-                for (String tag : listEntry.getCustomElements().getTags()) {
-                    Value value;
-                    String string = listEntry.getCustomElements().getValue(tag);
-                    if (string == null) {
-                        value = new EmptyValue();
-                    } else {
-                        if (string.length() > 0) {
-                            atLeastOneValue = true;
-                        }
-                        value = new StringValue(string);
-                    }
-                    NamedKey key = (NamedKey) keys.get(tag);
-                    if (key == null) {
-                        key = new NamedKey(tag);
-                        keys.put(tag, key);
-                    }
-                    row.addValue(new NamedKey(tag), value);
-                }
-                if (!atLeastOneValue) {
-                    mySet.removeRow(row);
-                }
-            }
-            return populateFields(mySet);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
     }
 
     @Override
