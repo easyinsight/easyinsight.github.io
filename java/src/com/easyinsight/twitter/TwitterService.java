@@ -43,6 +43,7 @@ public class TwitterService {
                 tweet.setStatus(title);
                 tweets.add(tweet);
             }
+            tweets = tweets.subList(0, 3);
             return tweets;
         } catch (Exception e) {
             LogClass.error(e);

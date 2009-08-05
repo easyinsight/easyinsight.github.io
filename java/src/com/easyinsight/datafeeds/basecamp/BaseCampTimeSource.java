@@ -79,7 +79,6 @@ public class BaseCampTimeSource extends ServerDataSourceDefinition {
                 throw new BaseCampLoginException("Invalid username/password.");
         }
         catch (Throwable e) {
-            LogClass.error(e);
             throw new RuntimeException(e);
         }
         return doc;
@@ -131,7 +130,6 @@ public class BaseCampTimeSource extends ServerDataSourceDefinition {
                 } while(info.currentPage++ < info.MaxPages);
             }
         } catch (Throwable e) {
-            LogClass.error(e);
             throw new RuntimeException(e);
         }
         return ds;
@@ -151,7 +149,6 @@ public class BaseCampTimeSource extends ServerDataSourceDefinition {
             }
             return contactName;            
         } catch (BaseCampLoginException e) {
-            LogClass.error(e);
             return "";
         }
     }

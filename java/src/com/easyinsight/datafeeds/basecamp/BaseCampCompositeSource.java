@@ -82,7 +82,6 @@ public class BaseCampCompositeSource extends CompositeServerDataSource {
                 throw new BaseCampLoginException("Invalid username/password.");
         }
         catch (Throwable e) {
-            LogClass.error(e);
             throw new RuntimeException(e);
         }
         return doc;

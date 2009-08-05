@@ -32,6 +32,15 @@ public class LogClass {
     }
 
     public static void error(String message) {
+        if(ConfigLoader.instance().isProduction()) {
+            try {
+                new AuthSMTPConnection().sendSSLMessage("errors@easy-insight.com", "Error: " + message, message , "donotreply@easy-insight.com");
+            }
+            catch(Exception ex) {
+                // do nothing, wtf do you do at this point?
+                ex.printStackTrace();
+            }
+        }
         log.error(message);
     }
 
