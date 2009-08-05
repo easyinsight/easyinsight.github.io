@@ -222,7 +222,9 @@ import mx.managers.ToolTipManager;
 				filter = new SliderMeasureFilter(_feedID, filterDefinition.field);
 			} else if (filterDefinition.getType() == FilterDefinition.ROLLING_DATE) {
 				filter = new RollingRangeFilter(_feedID, filterDefinition.field);
-			}
+			} else if (filterDefinition.getType() == FilterDefinition.LAST_VALUE) {
+                filter = new LastValueFilter(_feedID, filterDefinition.field);
+            }
             filter.filterEditable = _filterEditable;
             filter.showLabel = _showLabel;
 			filter.filterDefinition = filterDefinition;

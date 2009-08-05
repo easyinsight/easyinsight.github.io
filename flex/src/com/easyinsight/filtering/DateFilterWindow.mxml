@@ -6,6 +6,12 @@
 
         import mx.managers.PopUpManager;
 
+        private function addLastValue():void {
+            var filter:LastValueFilter = new LastValueFilter(_feedID, _item);
+            dispatchEvent(new FilterCreationEvent(filter));
+            PopUpManager.removePopUp(this);
+        }
+
         private var _item:AnalysisItem;
         private var _feedID:int;
 
@@ -31,10 +37,11 @@
 
         ]]></mx:Script>
     <mx:VBox id="coreBox" paddingTop="5" paddingBottom="5" paddingLeft="5" paddingRight="5">
-        <mx:Label text="Do you want to create an absolute or rolling date range filter?"/>
+        <mx:Label text="Do you want to create an absolute, rolling, or last value date range filter?"/>
         <mx:HBox width="100%" horizontalAlign="center">
             <mx:Button label="Absolute" click="addAbsolute()"/>
             <mx:Button label="Rolling" click="addRolling()"/>
+            <mx:Button label="Last Value" click="addLastValue()"/>
         </mx:HBox>
     </mx:VBox>
 </mx:Canvas>

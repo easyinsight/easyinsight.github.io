@@ -176,16 +176,16 @@ public class DateTimeTest extends TestCase {
         TestUtil.getIndividualTestUser();
         long dataSourceID = createDefaultTestDataSource();
         DataService dataService = new DataService();
-        TemporalAnalysisMeasure measure = new TemporalAnalysisMeasure();
-        AnalysisDateDimension dim = new AnalysisDateDimension(TestUtil.createKey("d", dataSourceID), true, AnalysisDateDimension.DAY_LEVEL);
-        measure.setAnalysisDimension(dim);
-        measure.setWrappedAggregation(AggregationTypes.SUM);
+        AnalysisMeasure measure = new AnalysisMeasure(TestUtil.createKey("m", dataSourceID), AggregationTypes.SUM);
+        LastValueFilter lastValueFilter = new LastValueFilter(new AnalysisDateDimension(TestUtil.createKey("d", dataSourceID), true, AnalysisDateDimension.DAY_LEVEL));
+        //AnalysisDateDimension dim = new AnalysisDateDimension(TestUtil.createKey("d", dataSourceID), true, AnalysisDateDimension.DAY_LEVEL);
+
         measure.setAggregation(AggregationTypes.LAST_VALUE);
         measure.setKey(TestUtil.createKey("m", dataSourceID));
         WSListDefinition dateDimDefinition = new WSListDefinition();
         dateDimDefinition.setDataFeedID(dataSourceID);
+        dateDimDefinition.setFilterDefinitions(Arrays.asList((FilterDefinition) lastValueFilter));
         dateDimDefinition.setColumns(Arrays.asList(new AnalysisDimension(TestUtil.createKey("c", dataSourceID), true), measure));
-        measure.triggerApplied(false);
         DataSet dataSet = dataService.listDataSet(dateDimDefinition, new InsightRequestMetadata());
         assertEquals(1, dataSet.getRows().size());
         for (IRow irow : dataSet.getRows()) {
@@ -208,17 +208,17 @@ public class DateTimeTest extends TestCase {
         TestUtil.getIndividualTestUser();
         long dataSourceID = createDefaultTestDataSource();
         DataService dataService = new DataService();
-        TemporalAnalysisMeasure measure = new TemporalAnalysisMeasure();
+        //TemporalAnalysisMeasure measure = new TemporalAnalysisMeasure();
         AnalysisDateDimension dim = new AnalysisDateDimension(TestUtil.createKey("d", dataSourceID), true, AnalysisDateDimension.DAY_LEVEL);
-        measure.setAnalysisDimension(dim);
-        measure.setWrappedAggregation(AggregationTypes.SUM);
+        AnalysisMeasure measure = new AnalysisMeasure(TestUtil.createKey("m", dataSourceID), AggregationTypes.SUM);
+        LastValueFilter lastValueFilter = new LastValueFilter(new AnalysisDateDimension(TestUtil.createKey("d", dataSourceID), true, AnalysisDateDimension.DAY_LEVEL));
         measure.setAggregation(AggregationTypes.LAST_VALUE);
         measure.setKey(TestUtil.createKey("m", dataSourceID));
         WSListDefinition dateDimDefinition = new WSListDefinition();
         dateDimDefinition.setDataFeedID(dataSourceID);
         dateDimDefinition.setColumns(Arrays.asList(new AnalysisDimension(TestUtil.createKey("c", dataSourceID), true),
                 new AnalysisDateDimension(TestUtil.createKey("d", dataSourceID), true, AnalysisDateDimension.DAY_LEVEL), measure));
-        measure.triggerApplied(false);
+        dateDimDefinition.setFilterDefinitions(Arrays.asList((FilterDefinition) lastValueFilter));
         DataSet dataSet = dataService.listDataSet(dateDimDefinition, new InsightRequestMetadata());
         assertEquals(3, dataSet.getRows().size());
         for (IRow irow : dataSet.getRows()) {
