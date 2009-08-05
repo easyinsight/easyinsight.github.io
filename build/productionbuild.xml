@@ -37,8 +37,20 @@
         <StopInstances userName="einsight" password="eJAqp0Q~j!n>L"/>
     </target>
 
+    <target name="shutdownStagingInstances">
+        <StopStaging userName="einsight" password="eJAqp0Q~j!n>L"/>
+    </target>
+
     <target name="updateInstances">
         <UpdateInstances userName="einsight" password="eJAqp0Q~j!n>L"/>
+    </target>
+
+    <target name="updateStaging">
+        <UpdateStaging userName="einsight" password="eJAqp0Q~j!n>L"/>
+    </target>
+
+    <target  name="startStaging">
+        <StartStaging userName="einsight" password="eJAqp0Q~j!n>L"/>
     </target>
 
     <target name="startInstances">
