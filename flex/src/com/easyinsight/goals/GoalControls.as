@@ -68,6 +68,8 @@ public class GoalControls extends HBox{
         var trendImage:Class;
         if (_goalTreeNodeData.goalOutcome.problemEvaluated) {
             trendImage = negativeIcon;
+        } else if (_goalTreeNodeData.problemConditions.length > 0) {
+            trendImage = positiveIcon;
         } else {
             switch (_goalTreeNodeData.goalOutcome.outcomeState) {
                 case GoalOutcome.EXCEEDING_GOAL:
