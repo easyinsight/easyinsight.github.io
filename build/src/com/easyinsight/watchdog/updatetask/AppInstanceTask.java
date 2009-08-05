@@ -34,7 +34,8 @@ import java.security.SignatureException;
  */
 public class AppInstanceTask extends Task {
 
-    private static final String APP_AMI = "ami-7aad4b13";
+    protected static final String APP_AMI = "ami-7aad4b13";
+    protected static final String STAGING_AMI = "ami-0f4aab66";
 
     private static final String HMAC_SHA1_ALGORITHM = "HmacSHA1";
     private static String hmacString = "Action{0}AWSAccessKeyId{1}SignatureVersion1Timestamp{2}Version2006-10-01";
@@ -43,6 +44,10 @@ public class AppInstanceTask extends Task {
 
     private String password;
     private String userName;
+
+    protected String getAMI() {
+        return APP_AMI;
+    }
 
     public String getUserName() {
         return userName;

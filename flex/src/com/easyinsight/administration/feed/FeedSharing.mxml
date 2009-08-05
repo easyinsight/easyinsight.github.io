@@ -43,8 +43,6 @@
                 ownersGrid.dragMoveEnabled = false;
                 viewersGrid.dragMoveEnabled = false;
             }
-
-
         }
 
         private function initHandlers():void {

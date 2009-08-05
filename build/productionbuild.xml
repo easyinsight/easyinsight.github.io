@@ -7,6 +7,9 @@
     <taskdef name="UpdateInstances" classname="com.easyinsight.watchdog.updatetask.UpdateAppInstanceTask"/>
     <taskdef name="StartInstances" classname="com.easyinsight.watchdog.updatetask.StartAppInstanceTask"/>
     <taskdef name="UpdateDB" classname="com.easyinsight.database.ant.DatabaseUpdateTask"/>
+    <taskdef name="StartStaging" classname="com.easyinsight.watchdog.updatetask.StartStagingTask" />
+    <taskdef name="UpdateStaging" classname="com.easyinsight.watchdog.updatetask.UpdateStagingTask" />
+    <taskdef name="StopStaging" classname="com.easyinsight.watchdog.updatetask.ShutdownStagingTask" />
 
     <taskdef name="SWFAnalysis" classname="com.easyinsight.swfanalysis.SWFAnalysis"/>
     <taskdef name="SWFSize" classname="com.easyinsight.swfanalysis.ArtifactSize"/>
