@@ -38,6 +38,7 @@ public class GoalTreeNodeData extends GoalTreeNode {
                 problemCondition = goalOutcome.isProblemEvaluated();
             }
 
+            boolean hasDefaultGood = false;
             for (GoalTreeNode child : getChildren()) {
                 GoalTreeNodeData dataChild = (GoalTreeNodeData) child;
                 GoalOutcome childOutcome = dataChild.summarizeOutcomes();
@@ -45,8 +46,14 @@ public class GoalTreeNodeData extends GoalTreeNode {
                 if (childOutcome.getOutcomeState() > worstOutcome) {
                     worstOutcome = childOutcome.getOutcomeState();
                 }
+                if (!childOutcome.isProblemEvaluated() && !child.getProblemConditions().isEmpty()) {
+                    hasDefaultGood = true;
+                }
             }
             if (goalOutcome == null) {
+                if (hasDefaultGood && worstOutcome == GoalOutcome.NO_DATA) {
+                    worstOutcome = GoalOutcome.POSITIVE;
+                }
                 goalOutcome = new GoalOutcome(worstOutcome, GoalOutcome.NO_DIRECTION, null, problemCondition, null, new Date(), getGoalTreeNodeID());
             } else {
                 goalOutcome.setProblemEvaluated(problemCondition);
