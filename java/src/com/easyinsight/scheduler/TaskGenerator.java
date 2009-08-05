@@ -13,7 +13,7 @@ import java.util.List;
 @Entity
 @Table(name="task_generator")
 @Inheritance(strategy= InheritanceType.JOINED)
-public abstract class TaskGenerator {
+public class TaskGenerator {
 
     @Id
     @GeneratedValue(strategy=GenerationType.IDENTITY)
@@ -57,7 +57,9 @@ public abstract class TaskGenerator {
         return task;
     }
 
-    protected abstract ScheduledTask createTask();
+    protected ScheduledTask createTask() {
+        throw new RuntimeException("Orphan task generator " + getTaskGeneratorID());
+    }
 
     public boolean isRequiresBackfill() {
         return requiresBackfill;
