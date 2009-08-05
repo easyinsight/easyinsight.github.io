@@ -1065,9 +1065,9 @@
         <mx:HBox id="buttonBox" verticalAlign="middle">
             <mx:Button id="wrapButton" icon="@Embed(source='../../../assets/document_out.png')" click="close()"
                        toolTip="Close"/>
-            <mx:VRule strokeColor="#DDDDDD" height="16"/>
+            <!--<mx:VRule strokeColor="#DDDDDD" height="16"/>
             <mx:Button id="undoButton" icon="@Embed(source='../../../assets/undo.png')" click="undo()" toolTip="Undo"/>
-            <mx:Button id="redoButton" icon="@Embed(source='../../../assets/redo.png')" click="redo()" toolTip="Redo"/>
+            <mx:Button id="redoButton" icon="@Embed(source='../../../assets/redo.png')" click="redo()" toolTip="Redo"/>-->
             <mx:VRule strokeColor="#DDDDDD" height="16"/>
             <mx:Button id="saveButton" icon="@Embed(source='../../../assets/floppy_disk.png')" click="save()"
                        toolTip="Save" enabled="{!_previewMode}"/>
