@@ -7,6 +7,8 @@
         import com.easyinsight.framework.NavigationEvent;
         import com.easyinsight.help.ScreencastWindow;
 
+        import com.easyinsight.util.PopUpUtil;
+
         import mx.collections.ArrayCollection;
         import mx.managers.PopUpManager;
 
@@ -70,8 +72,7 @@
             var window:ScreencastWindow = new ScreencastWindow();
             window.screencastSource = "../assets/lesson1/training.mp4";
             PopUpManager.addPopUp(window, this);
-            window.x = 300;
-            window.y = 200;
+            PopUpUtil.centerPopUp(window);
         }
 
         private function apilesson():void {
@@ -96,6 +97,24 @@
         private function bizSolutions():void {
             var properties:Object = { biz: true, client:false, saas: false, learning: false };
             dispatchEvent(new NavigationEvent("Solutions", null, properties));
+        }
+
+        private function showSecurityStatement():void {
+            var window:SecurityStatement = new SecurityStatement();
+            PopUpManager.addPopUp(window, this, true);
+            PopUpUtil.centerPopUp(window);
+        }
+
+        private function showTermsOfService():void {
+            var window:TermsOfService = new TermsOfService();
+            PopUpManager.addPopUp(window, this, true);
+            PopUpUtil.centerPopUp(window);
+        }
+
+        private function showPrivacyPolicy():void {
+            var window:PrivacyPolicy = new PrivacyPolicy();
+            PopUpManager.addPopUp(window, this, true);
+            PopUpUtil.centerPopUp(window);
         }
 		]]>
     </mx:Script>
@@ -186,11 +205,11 @@
 
                     <mx:Image source="../assets/logos/vlogo.gif"/>-->
                     <mx:Spacer width="100%"/>
-                    <mx:LinkButton textDecoration="underline" label="Security Statement" fontSize="14"/>
+                    <mx:LinkButton textDecoration="underline" label="Security Statement" fontSize="14" click="showSecurityStatement()"/>
                     <mx:Spacer width="100%"/>
-                    <mx:LinkButton textDecoration="underline" label="Terms of Service" fontSize="14"/>
+                    <mx:LinkButton textDecoration="underline" label="Terms of Service" fontSize="14" click="showTermsOfService()"/>
                     <mx:Spacer width="100%"/>
-                    <mx:LinkButton textDecoration="underline" label="Privacy Policy" fontSize="14"/>
+                    <mx:LinkButton textDecoration="underline" label="Privacy Policy" fontSize="14" click="showPrivacyPolicy()"/>
                 </mx:HBox>
             </mx:HBox>
         </mx:VBox>
