@@ -55,11 +55,11 @@ public class DMSServlet extends HttpServlet {
 
     public void destroy() {
         LogClass.info("Shutting down...");
-        super.destroy();
         Database.instance().shutdown();
         DatabaseManager.instance().shutdown();
         EventDispatcher.instance().setRunning(false);
         EventDispatcher.instance().interrupt();
         scheduler.stop();
+        super.destroy();
     }
 }
