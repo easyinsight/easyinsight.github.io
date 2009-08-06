@@ -2,7 +2,9 @@
 <mx:Box xmlns:mx="http://www.adobe.com/2006/mxml" creationComplete="initHandlers()">
 	<mx:Script>
 		<![CDATA[
-			import mx.managers.PopUpManager;
+        import com.easyinsight.util.PopUpUtil;
+
+        import mx.managers.PopUpManager;
 			import com.easyinsight.customupload.UploadPolicy;
 			import com.easyinsight.customupload.GroupUploadPolicy;
 			import mx.collections.ArrayCollection;
@@ -23,7 +25,7 @@
             private function addAccess():void {
             	var window:AddGroupToFeedWindow = AddGroupToFeedWindow(PopUpManager.createPopUp(this.parent.parent, AddGroupToFeedWindow, true));
             	window.addEventListener(GroupLinkEvent.ADD_GROUP_LINK, addUser);
-            	PopUpManager.centerPopUp(window);
+            	PopUpUtil.centerPopUp(window);
             }
             
             private function addUser(event:GroupLinkEvent):void {

@@ -21,6 +21,8 @@
     <mx:Script><![CDATA[
         import com.easyinsight.framework.User;
 
+        import com.easyinsight.util.PopUpUtil;
+
         import mx.managers.PopUpManager;
 
         [Bindable]
@@ -33,14 +35,14 @@
         private function onUpgradeAccount():void {
             var window:ChangeAccountTypeWindow = new ChangeAccountTypeWindow();
             PopUpManager.addPopUp(window, this, true);
-            PopUpManager.centerPopUp(window);
+            PopUpUtil.centerPopUp(window);
             window.y = 10;
         }
 
         private function cancelPaidAccount():void {
             var window:CancelPaidAccountWindow = new CancelPaidAccountWindow();
             PopUpManager.addPopUp(window, this, true);
-            PopUpManager.centerPopUp(window);            
+            PopUpUtil.centerPopUp(window);
         }
         ]]></mx:Script>
 </mx:VBox>

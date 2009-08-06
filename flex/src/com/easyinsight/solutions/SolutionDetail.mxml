@@ -10,7 +10,9 @@
         import com.easyinsight.genredata.ModuleAnalyzeEvent;
         import com.easyinsight.util.FileAlert;
 
-        import mx.controls.Alert;
+            import com.easyinsight.util.PopUpUtil;
+
+            import mx.controls.Alert;
 
         import com.easyinsight.framework.User;
 
@@ -182,7 +184,7 @@
             window.addEventListener(SolutionEvent.SOLUTION_INSTALLED, onSolutionInstalled);
             window.addEventListener(ModuleAnalyzeEvent.MODULE_ANALYZE, onModuleAnalyze);
             window.solution = this._solution;
-            PopUpManager.centerPopUp(window);
+            PopUpUtil.centerPopUp(window);
         }
 
         private function onSolutionInstalled(event:SolutionEvent):void {

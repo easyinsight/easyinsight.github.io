@@ -1,4 +1,6 @@
 package com.easyinsight.account {
+import com.easyinsight.util.PopUpUtil;
+
 import flash.events.MouseEvent;
 import mx.containers.HBox;
 import mx.controls.Button;
@@ -42,7 +44,7 @@ public class AccountActions extends HBox{
         window.accountAdminTO = account;
         window.addEventListener(RefreshAccountsListEvent.REFRESH_ACCOUNTS_LIST, onChange);
         PopUpManager.addPopUp(window, this.parent.parent, true);
-        PopUpManager.centerPopUp(window);
+        PopUpUtil.centerPopUp(window);
     }
 
     private function onChange(event:RefreshAccountsListEvent):void {

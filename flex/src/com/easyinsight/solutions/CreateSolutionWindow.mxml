@@ -5,6 +5,8 @@
 			import com.easyinsight.goals.GoalTreeDescriptor;
         import com.easyinsight.listing.DataFeedDescriptor;
 
+            import com.easyinsight.util.PopUpUtil;
+
             import mx.controls.Alert;
             import mx.managers.PopUpManager;
 			import mx.collections.ArrayCollection;
@@ -20,7 +22,7 @@
                     var window:UpdateSolutionImageWindow = new UpdateSolutionImageWindow();
                     window.sourceID = _solution.solutionID;
                     PopUpManager.addPopUp(window, this, true);
-                    PopUpManager.centerPopUp(window);
+                    PopUpUtil.centerPopUp(window);
                 }
             }
 
@@ -31,7 +33,7 @@
                     var window:UpdateSolutionArchiveWindow = new UpdateSolutionArchiveWindow();
                     window.sourceID = _solution.solutionID;
                     PopUpManager.addPopUp(window, this, true);
-                    PopUpManager.centerPopUp(window);
+                    PopUpUtil.centerPopUp(window);
                 }
             }
 
@@ -138,7 +140,7 @@
 			private function addFeed():void {
 				var window:AddFeedToSolutionWindow = AddFeedToSolutionWindow(PopUpManager.createPopUp(this, AddFeedToSolutionWindow, true));
 				window.addEventListener(FeedSelectionEvent.FEED_SELECTED, feedSelected);
-				PopUpManager.centerPopUp(window);
+				PopUpUtil.centerPopUp(window);
 			}
 			
 			private function feedSelected(event:FeedSelectionEvent):void {

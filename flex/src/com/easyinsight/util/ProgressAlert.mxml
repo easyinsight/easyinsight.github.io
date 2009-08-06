@@ -81,7 +81,7 @@
             alert.completeText = completeText;
             alert.operations = new ArrayCollection(operations);
             PopUpManager.addPopUp(alert, parent, true);
-            PopUpManager.centerPopUp(alert);
+            PopUpUtil.centerPopUp(alert);
             return alert;
         }
 

@@ -3,13 +3,15 @@
     <mx:Script><![CDATA[
         import com.easyinsight.account.RefreshAccountEvent;
         import com.easyinsight.account.ChangeAccountTypeWindow;
+        import com.easyinsight.util.PopUpUtil;
+
         import mx.managers.PopUpManager;
 
         private function upgradeAccount():void {
             var window:ChangeAccountTypeWindow = new ChangeAccountTypeWindow();
             window.addEventListener(RefreshAccountEvent.REFRESH_ACCOUNT, onRefresh);
             PopUpManager.addPopUp(window, this, true);
-            PopUpManager.centerPopUp(window);
+            PopUpUtil.centerPopUp(window);
         }
 
         private function onRefresh():void {

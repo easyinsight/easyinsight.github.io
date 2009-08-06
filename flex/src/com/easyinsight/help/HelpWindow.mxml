@@ -2,12 +2,14 @@
 <mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" width="700" height="500">
 	<mx:Script>
 		<![CDATA[
-			import mx.managers.PopUpManager;
+        import com.easyinsight.util.PopUpUtil;
+
+        import mx.managers.PopUpManager;
 			
 			public static function createHelpWindow(helpClass:Class, parent:DisplayObject):void {
 				var helpWindow:HelpWindow = HelpWindow(PopUpManager.createPopUp(parent, HelpWindow, false));
 				helpWindow.coreBox.addChildAt(new helpClass, 0);
-				PopUpManager.centerPopUp(helpWindow);
+				PopUpUtil.centerPopUp(helpWindow);
 			}
 			
 			private function closeWindow():void {

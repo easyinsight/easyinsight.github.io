@@ -4,7 +4,9 @@
 		<![CDATA[
 			import com.easyinsight.administration.sharing.UserStub;
 			import com.easyinsight.administration.feed.UserLinkEvent;
-			import mx.managers.PopUpManager;
+            import com.easyinsight.util.PopUpUtil;
+
+            import mx.managers.PopUpManager;
 			import com.easyinsight.administration.feed.AddUserToFeedWindow;
 			import mx.collections.ArrayCollection;
 			
@@ -24,7 +26,7 @@
 			private function addUser():void {
 				var window:AddUserToFeedWindow = AddUserToFeedWindow(PopUpManager.createPopUp(this, AddUserToFeedWindow));
 				window.addEventListener(UserLinkEvent.ADD_USER_LINK, userChange);
-				PopUpManager.centerPopUp(window);
+				PopUpUtil.centerPopUp(window);
 			}
 			
 			private function userChange(event:UserLinkEvent):void {

@@ -61,6 +61,8 @@
 		<![CDATA[
         import com.easyinsight.account.Account;
 
+        import com.easyinsight.util.PopUpUtil;
+
         import mx.controls.Alert;
         import mx.events.CloseEvent;
         import mx.events.DividerEvent;
@@ -247,7 +249,7 @@
         private function manageMilestones():void {
             var window:MilestonesWindow = new MilestonesWindow();
             PopUpManager.addPopUp(window, this, true);
-            PopUpManager.centerPopUp(window);
+            PopUpUtil.centerPopUp(window);
         }
 		]]>
     </mx:Script>

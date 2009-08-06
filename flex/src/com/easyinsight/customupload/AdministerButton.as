@@ -1,8 +1,10 @@
 package com.easyinsight.customupload
 {
 	import com.easyinsight.administration.feed.FeedAdministrationWindow;
-	
-	import flash.events.MouseEvent;
+
+import com.easyinsight.util.PopUpUtil;
+
+import flash.events.MouseEvent;
 	
 	import com.easyinsight.listing.DataFeedDescriptor;
 	
@@ -32,7 +34,7 @@ package com.easyinsight.customupload
 		private function administer(event:MouseEvent):void {
 			var feedAdministration:FeedAdministrationWindow = FeedAdministrationWindow(PopUpManager.createPopUp(
 				this.parent.parent.parent.parent, FeedAdministrationWindow, true));
-			PopUpManager.centerPopUp(feedAdministration);
+			PopUpUtil.centerPopUp(feedAdministration);
 			feedAdministration.setDataFeedDescriptor(_data);
 		}
 	}

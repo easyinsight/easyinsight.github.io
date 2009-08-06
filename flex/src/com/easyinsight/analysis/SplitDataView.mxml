@@ -7,7 +7,9 @@
 		<![CDATA[
 			import com.easyinsight.analysis.charts.ChartTypes;
 			import com.easyinsight.filtering.FilterEditEvent;
-			import mx.managers.PopUpManager;
+            import com.easyinsight.util.PopUpUtil;
+
+            import mx.managers.PopUpManager;
 			import com.easyinsight.filtering.MultiValueFilterWindow;
 			import com.easyinsight.framework.DataService;
 			import mx.controls.DataGrid;
@@ -270,7 +272,7 @@
             	window.filterValueDefinition = this.filterValueDefinition;
             	window.addEventListener(FilterEditEvent.FILTER_EDIT, onFilterEdit);
             	PopUpManager.addPopUp(window, this, true);
-            	PopUpManager.centerPopUp(window);
+            	PopUpUtil.centerPopUp(window);
             }
             
             private function onFilterEdit(event:FilterEditEvent):void {

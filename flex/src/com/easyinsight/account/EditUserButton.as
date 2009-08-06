@@ -1,5 +1,7 @@
 package com.easyinsight.account
 {
+import com.easyinsight.util.PopUpUtil;
+
 import flash.display.DisplayObject;
 import mx.managers.PopUpManager;
 import com.easyinsight.framework.UserTransferObject;
@@ -47,7 +49,7 @@ import mx.containers.HBox;
             userProfileEditor.user = user;
             userProfileEditor.addEventListener(RefreshAccountEvent.REFRESH_ACCOUNT, refreshAccount);
             PopUpManager.addPopUp(userProfileEditor, parentWindow, true);
-            PopUpManager.centerPopUp(userProfileEditor);
+            PopUpUtil.centerPopUp(userProfileEditor);
         }
 
         private function refreshAccount(event:RefreshAccountEvent):void {

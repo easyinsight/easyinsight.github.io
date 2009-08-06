@@ -5,7 +5,9 @@ package com.easyinsight.groups
 import com.easyinsight.framework.NavigationEvent;
 import com.easyinsight.framework.User;
 
-	import flash.display.DisplayObject;
+import com.easyinsight.util.PopUpUtil;
+
+import flash.display.DisplayObject;
 	import flash.events.EventDispatcher;
 	
 	import mx.controls.Alert;
@@ -46,7 +48,7 @@ import com.easyinsight.framework.User;
             } else if (groupResponse.status == GroupResponse.NEED_LOGIN) {
                 var loginDialog:LoginDialog = LoginDialog(PopUpManager.createPopUp(Application.application as DisplayObject, LoginDialog, true));
         		loginDialog.addEventListener(LoginEvent.LOGIN, delayedFeed);
-                PopUpManager.centerPopUp(loginDialog);
+                PopUpUtil.centerPopUp(loginDialog);
         	} else {
         		// tried to access a data source they don't have rights to, silently fail
         	}        	            

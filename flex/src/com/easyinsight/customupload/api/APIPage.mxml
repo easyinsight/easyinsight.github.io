@@ -15,6 +15,8 @@
         import com.easyinsight.framework.LoginEvent;
         import com.easyinsight.framework.User;
 
+        import com.easyinsight.util.PopUpUtil;
+
         import mx.collections.ArrayCollection;
         import mx.managers.PopUpManager;
         import mx.utils.URLUtil;
@@ -86,7 +88,7 @@
         private function addService():void {
             var serviceFeedChoice:ServiceFeedChoice = ServiceFeedChoice(PopUpManager.createPopUp(this, ServiceFeedChoice, true));
             serviceFeedChoice.addEventListener(ServiceDefinitionEvent.SERVICE_DEFINED, serviceDefined);
-            PopUpManager.centerPopUp(serviceFeedChoice);
+            PopUpUtil.centerPopUp(serviceFeedChoice);
         }
 
         private function serviceDefined(event:ServiceDefinitionEvent):void {
@@ -100,7 +102,7 @@
         private function help():void {
             var helpWindow:DynamicServiceHelpWindow = DynamicServiceHelpWindow(PopUpManager.createPopUp(this,
                     DynamicServiceHelpWindow, true));
-            PopUpManager.centerPopUp(helpWindow);
+            PopUpUtil.centerPopUp(helpWindow);
         }
 
         private function gotAPIs():void {

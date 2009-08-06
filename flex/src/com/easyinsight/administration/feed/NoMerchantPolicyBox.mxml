@@ -5,7 +5,9 @@
 	</mx:Metadata>
 	<mx:Script>
 		<![CDATA[
-			import mx.managers.PopUpManager;
+        import com.easyinsight.util.PopUpUtil;
+
+        import mx.managers.PopUpManager;
 			import com.easyinsight.store.CreatedMerchantEvent;
 			import com.easyinsight.store.MerchantAccountCreationWindow;
 			
@@ -13,7 +15,7 @@
             	var window:MerchantAccountCreationWindow = MerchantAccountCreationWindow(PopUpManager.createPopUp(this, 
             		MerchantAccountCreationWindow, true))
         		window.addEventListener(CreatedMerchantEvent.CREATED_MERCHANT, createdMerchant);                		
-        		PopUpManager.centerPopUp(window);	
+        		PopUpUtil.centerPopUp(window);
             }
             
             private function createdMerchant(event:CreatedMerchantEvent):void {

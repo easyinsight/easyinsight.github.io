@@ -34,6 +34,7 @@
         import com.easyinsight.discussion.MessagePostedEvent;
         import com.easyinsight.discussion.NewMessageWindow;
 
+        import com.easyinsight.util.PopUpUtil;
         import com.easyinsight.util.ProgressAlert;
 
         import mx.controls.Alert;
@@ -242,7 +243,7 @@
             var window:GroupAdministration = GroupAdministration(PopUpManager.createPopUp(this, GroupAdministration, true));
             window.group = _group;
             window.addEventListener(GroupCreatedEvent.GROUP_UPDATED, groupUpdated);
-            PopUpManager.centerPopUp(window);
+            PopUpUtil.centerPopUp(window);
         }
 
         private function joinGroup():void {
@@ -263,7 +264,7 @@
             var newMessageWindow:NewMessageWindow = new NewMessageWindow();
             newMessageWindow.addEventListener(MessagePostedEvent.MESSAGE_POSTED, onMessagePost);
             PopUpManager.addPopUp(newMessageWindow, this);
-            PopUpManager.centerPopUp(newMessageWindow);
+            PopUpUtil.centerPopUp(newMessageWindow);
         }
 
         private function onMessagePost(event:MessagePostedEvent):void {
@@ -283,7 +284,7 @@
             window.groupID = _group.groupID;
             window.addEventListener(GroupRefreshEvent.GROUP_REFRESH, onGroupRefresh);
             PopUpManager.addPopUp(window, this, true);
-            PopUpManager.centerPopUp(window);
+            PopUpUtil.centerPopUp(window);
         }
 
         private function addDataSource():void {
@@ -291,7 +292,7 @@
             window.groupID = _group.groupID;
             window.addEventListener(GroupRefreshEvent.GROUP_REFRESH, onGroupRefresh);
             PopUpManager.addPopUp(window, this, true);
-            PopUpManager.centerPopUp(window);
+            PopUpUtil.centerPopUp(window);
         }
 
         private function onGroupRefresh(event:GroupRefreshEvent):void {
@@ -308,7 +309,7 @@
             window.groupID = _group.groupID;
             window.addEventListener(GroupRefreshEvent.GROUP_REFRESH, onGroupRefresh);
             PopUpManager.addPopUp(window, this, true);
-            PopUpManager.centerPopUp(window);
+            PopUpUtil.centerPopUp(window);
         }
 
         private function gotGoalTrees():void {
@@ -324,7 +325,7 @@
             window.groupID = _group.groupID;
             window.addEventListener(GroupRefreshEvent.GROUP_REFRESH, onGroupRefresh);
             PopUpManager.addPopUp(window, this, true);
-            PopUpManager.centerPopUp(window);
+            PopUpUtil.centerPopUp(window);
         }
 
         private function removeFromGroup(event:RemoveItemFromGroupEvent):void {

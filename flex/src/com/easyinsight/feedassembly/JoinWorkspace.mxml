@@ -10,6 +10,8 @@
 			import com.easyinsight.listing.DataFeedDescriptor;
 			import com.easyinsight.framework.User;
             import com.easyinsight.analysis.FeedMetadata;
+            import com.easyinsight.util.PopUpUtil;
+
             import mx.managers.PopUpManager;
             import com.easyinsight.feedassembly.FeedDeletionEvent;
             import com.easyinsight.feedassembly.Connector;
@@ -33,7 +35,7 @@
             private function addExternalFeed():void {
             	var feedChoice:FeedChoice = FeedChoice(PopUpManager.createPopUp(this, FeedChoice, true));
             	feedChoice.addEventListener(FeedAdditionEvent.FEED_ADDED, feedChosen);
-            	PopUpManager.centerPopUp(feedChoice);
+            	PopUpUtil.centerPopUp(feedChoice);
             }
 
             private function createFeed(feedDefinition:FeedDefinitionData):Feed {

@@ -2,7 +2,9 @@
 <mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%" creationComplete="gotFocus()">
 	<mx:Script>
 		<![CDATA[
-			import mx.managers.PopUpManager;
+        import com.easyinsight.util.PopUpUtil;
+
+        import mx.managers.PopUpManager;
 			import mx.collections.ArrayCollection;
 
             [Bindable]
@@ -39,14 +41,14 @@
             private function addUser():void {
             	var newUserDialog:NewUserDialog = NewUserDialog(PopUpManager.createPopUp(this, NewUserDialog, true));
                 newUserDialog.addEventListener(RefreshAccountEvent.REFRESH_ACCOUNT, refreshAccount);
-            	PopUpManager.centerPopUp(newUserDialog);
+            	PopUpUtil.centerPopUp(newUserDialog);
             }
 
             private function addGuestUser():void {
                 var window:AddGuestUserWindow = new AddGuestUserWindow();
                 window.addEventListener(RefreshAccountEvent.REFRESH_ACCOUNT, refreshAccount);
                 PopUpManager.addPopUp(window, this, true);
-                PopUpManager.centerPopUp(window);
+                PopUpUtil.centerPopUp(window);
             }
 
             private function deletedUser():void {

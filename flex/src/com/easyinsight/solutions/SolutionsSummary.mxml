@@ -18,6 +18,8 @@
 		<![CDATA[
         import com.easyinsight.framework.LoginEvent;
 
+        import com.easyinsight.util.PopUpUtil;
+
         import mx.utils.URLUtil;
 
         import com.easyinsight.framework.User;
@@ -53,7 +55,7 @@
             var solution:Solution = event.currentTarget.selectedItem;
             var window:SolutionInstallationWindow = SolutionInstallationWindow(PopUpManager.createPopUp(this, SolutionInstallationWindow, true));
             window.solution = solution;
-            PopUpManager.centerPopUp(window);
+            PopUpUtil.centerPopUp(window);
         }
 
         public function gotFocus():void {

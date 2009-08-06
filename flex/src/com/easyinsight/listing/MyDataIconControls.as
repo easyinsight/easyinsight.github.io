@@ -11,6 +11,8 @@ import com.easyinsight.notifications.NotifyBar;
 import com.easyinsight.report.ReportAnalyzeSource;
 import com.easyinsight.solutions.InsightDescriptor;
 
+import com.easyinsight.util.PopUpUtil;
+
 import flash.events.MouseEvent;
 
 import mx.containers.HBox;
@@ -93,7 +95,7 @@ public class MyDataIconControls extends HBox
         window.dataSourceDescriptor = obj as DataFeedDescriptor;
         PopUpManager.addPopUp(window, this.parent.parent.parent, true);
         window.addEventListener(UploadConfigEvent.UPLOAD_CONFIG_COMPLETE, passEvent);
-        PopUpManager.centerPopUp(window);
+        PopUpUtil.centerPopUp(window);
     }
 
     private function refreshCalled(event:MouseEvent):void {
@@ -140,7 +142,7 @@ public class MyDataIconControls extends HBox
         refreshWindow.feedID = feedDescriptor.dataFeedID;
         refreshWindow.addEventListener(UploadConfigEvent.UPLOAD_CONFIG_COMPLETE, passEvent);
         refreshWindow.addEventListener(RefreshNotificationEvent.REFRESH_NOTIFICATION, notifyRefresh);
-        PopUpManager.centerPopUp(refreshWindow);
+        PopUpUtil.centerPopUp(refreshWindow);
     }
 
     private function passEvent(event:UploadConfigEvent):void {
@@ -159,7 +161,7 @@ public class MyDataIconControls extends HBox
         var feedUpdateWindow:FileFeedUpdateWindow = FileFeedUpdateWindow(PopUpManager.createPopUp(this.parent.parent.parent, FileFeedUpdateWindow, true));
         feedUpdateWindow.feedID = feedDescriptor.dataFeedID;
         feedUpdateWindow.addEventListener(RefreshNotificationEvent.REFRESH_NOTIFICATION, notifyRefresh);
-        PopUpManager.centerPopUp(feedUpdateWindow);
+        PopUpUtil.centerPopUp(feedUpdateWindow);
 
     }
 

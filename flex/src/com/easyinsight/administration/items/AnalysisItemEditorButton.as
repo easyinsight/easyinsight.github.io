@@ -3,8 +3,10 @@ package com.easyinsight.administration.items
 	import com.easyinsight.analysis.AnalysisItem;
 	import com.easyinsight.analysis.AnalysisItemEditEvent;
 	import com.easyinsight.analysis.AnalysisItemEditor;
-	
-	import flash.events.MouseEvent;
+
+import com.easyinsight.util.PopUpUtil;
+
+import flash.events.MouseEvent;
 	
 	import mx.controls.Button;
 	import mx.managers.PopUpManager;
@@ -24,7 +26,7 @@ package com.easyinsight.administration.items
 			var editor:AnalysisItemEditor = AnalysisItemEditor(PopUpManager.createPopUp(this.parent, AnalysisItemEditor, true));
 			editor.analysisItem = analysisItem;
 			editor.addEventListener(AnalysisItemEditEvent.ANALYSIS_ITEM_EDIT, onEdit);
-			PopUpManager.centerPopUp(editor);
+			PopUpUtil.centerPopUp(editor);
 		}
 		
 		private function onEdit(event:AnalysisItemEditEvent):void {

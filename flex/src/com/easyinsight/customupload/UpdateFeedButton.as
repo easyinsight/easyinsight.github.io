@@ -1,8 +1,10 @@
 package com.easyinsight.customupload
 {
 	import com.easyinsight.listing.DataFeedDescriptor;
-	
-	import flash.events.MouseEvent;
+
+import com.easyinsight.util.PopUpUtil;
+
+import flash.events.MouseEvent;
 	
 	import mx.controls.Button;
 	import mx.managers.PopUpManager;
@@ -45,13 +47,13 @@ package com.easyinsight.customupload
 		private function refreshData():void {
 			var refreshWindow:RefreshWindow = RefreshWindow(PopUpManager.createPopUp(this.parent, RefreshWindow, true));
 			refreshWindow.feedID = feedDescriptor.dataFeedID;
-			PopUpManager.centerPopUp(refreshWindow);
+			PopUpUtil.centerPopUp(refreshWindow);
 		}
 		
 		private function fileData():void {
 			var feedUpdateWindow:FileFeedUpdateWindow = FileFeedUpdateWindow(PopUpManager.createPopUp(this.parent, FileFeedUpdateWindow, true));
 			feedUpdateWindow.feedID = feedDescriptor.dataFeedID;
-			PopUpManager.centerPopUp(feedUpdateWindow);
+			PopUpUtil.centerPopUp(feedUpdateWindow);
 				
 		}
 		

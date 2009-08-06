@@ -6,6 +6,8 @@ import com.easyinsight.genredata.ModuleAnalyzeEvent;
 
 import com.easyinsight.report.ReportAnalyzeSource;
 
+import com.easyinsight.util.PopUpUtil;
+
 import flash.display.DisplayObject;
 	import flash.events.EventDispatcher;
 	
@@ -38,7 +40,7 @@ import flash.display.DisplayObject;
         	} else if (insightResponse.status == InsightResponse.NEED_LOGIN) {
         		var loginDialog:LoginDialog = LoginDialog(PopUpManager.createPopUp(Application.application as DisplayObject, LoginDialog, true));
         		loginDialog.addEventListener(LoginEvent.LOGIN, delayedAnalysis);
-                PopUpManager.centerPopUp(loginDialog);
+                PopUpUtil.centerPopUp(loginDialog);
         	} else {
                 // silently fail, user trying to spoof an ID
             }

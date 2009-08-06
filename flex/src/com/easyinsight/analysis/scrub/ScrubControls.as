@@ -1,6 +1,8 @@
 package com.easyinsight.analysis.scrub
 {
-	import flash.events.MouseEvent;
+import com.easyinsight.util.PopUpUtil;
+
+import flash.events.MouseEvent;
 	
 	import mx.collections.ArrayCollection;
 	import mx.containers.HBox;
@@ -54,7 +56,7 @@ package com.easyinsight.analysis.scrub
 			window.feedID = feedID;
 			window.availableFields = fields;
 			window.updateState();
-            PopUpManager.centerPopUp(window);
+            PopUpUtil.centerPopUp(window);
 		}
 		
 		private function passThrough(event:DataScrubEvent):void {

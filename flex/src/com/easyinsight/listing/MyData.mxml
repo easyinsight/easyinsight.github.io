@@ -27,6 +27,8 @@
             import com.easyinsight.report.ReportAnalyzeSource;
             import com.easyinsight.solutions.InsightDescriptor;
 
+            import com.easyinsight.util.PopUpUtil;
+
             import mx.collections.ICollectionView;
             import mx.collections.Sort;
             import mx.events.AdvancedDataGridEvent;
@@ -235,13 +237,13 @@
             private function toUpload():void {
                 var userUpload:UserUpload = UserUpload(PopUpManager.createPopUp(this, UserUpload, true));
                 userUpload.addEventListener(UploadConfigEvent.UPLOAD_CONFIG_COMPLETE, uploadConfigComplete);
-                PopUpManager.centerPopUp(userUpload);
+                PopUpUtil.centerPopUp(userUpload);
             }
             
             private function createEmptyFeed():void {
                 var userUpload:SimpleFeedWindow = SimpleFeedWindow(PopUpManager.createPopUp(this, SimpleFeedWindow, true));
                 userUpload.addEventListener(UploadConfigEvent.UPLOAD_CONFIG_COMPLETE, uploadConfigComplete);
-                PopUpManager.centerPopUp(userUpload);
+                PopUpUtil.centerPopUp(userUpload);
             }
             
             private function externalConnect():void {
@@ -249,12 +251,7 @@
             	uploadExternal.addEventListener(UploadConfigEvent.UPLOAD_CONFIG_COMPLETE, uploadConfigComplete);
             	uploadExternal.width = uploadGrid.width;
             	uploadExternal.height = uploadGrid.height;
-            	var point:Point = new Point();
-            	point.x = 0;
-            	point.y = 0;
-            	point = uploadGrid.localToGlobal(point);
-            	uploadExternal.x = point.x;
-            	uploadExternal.y = point.y;
+                PopUpUtil.centerPopUp(uploadExternal);
             }
 
             private function uploadConfigComplete(event:UploadConfigEvent):void {
@@ -314,7 +311,7 @@
             	
             	/*var joinWorkspace:JoinWorkspace = JoinWorkspace(PopUpManager.createPopUp(this, JoinWorkspace, true));
             	joinWorkspace.addEventListener(UploadConfigEvent.UPLOAD_CONFIG_COMPLETE, uploadConfigComplete);
-            	PopUpManager.centerPopUp(joinWorkspace);*/
+            	PopUpUtil.centerPopUp(joinWorkspace);*/
             	var descriptors:ArrayCollection = new ArrayCollection();
             	if (uploadGrid.selectedItems != null) {
             		

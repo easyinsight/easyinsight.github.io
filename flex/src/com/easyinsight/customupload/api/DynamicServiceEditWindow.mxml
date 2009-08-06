@@ -3,6 +3,8 @@
     <mx:Script><![CDATA[
         import com.easyinsight.administration.feed.FeedDefinitionData;
 
+        import com.easyinsight.util.PopUpUtil;
+
         import mx.collections.ArrayCollection;
         import mx.managers.PopUpManager;
 
@@ -54,7 +56,7 @@
             methodEditWindow.fields = fields;
             methodEditWindow.addEventListener(MethodDefinitionEvent.METHOD_EDITED, onMethodEdit);
             PopUpManager.addPopUp(methodEditWindow, this, true);
-            PopUpManager.centerPopUp(methodEditWindow);
+            PopUpUtil.centerPopUp(methodEditWindow);
         }
 
         private function onMethodEdit(event:MethodDefinitionEvent):void {
@@ -84,7 +86,7 @@
             methodEditWindow.fields = this.fields;
             methodEditWindow.addEventListener(MethodDefinitionEvent.METHOD_DEFINED, onMethodDefined);
             PopUpManager.addPopUp(methodEditWindow, this, true);
-            PopUpManager.centerPopUp(methodEditWindow);
+            PopUpUtil.centerPopUp(methodEditWindow);
         }
 
         private function onMethodDefined(event:MethodDefinitionEvent):void {

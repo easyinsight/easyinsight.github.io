@@ -10,6 +10,8 @@
         </mx:State>
     </mx:states>--> 
     <mx:Script><![CDATA[
+        import com.easyinsight.util.PopUpUtil;
+
         import mx.managers.PopUpManager;
         import com.easyinsight.util.ProgressAlert;
 
@@ -91,7 +93,7 @@
             dynamicServiceDefinition = new DynamicServiceDefinition();
             dynamicServiceDefinition.feedID = _dataSourceAPIDescriptor.feedID;
             currentState = "dynamicService";
-            PopUpManager.centerPopUp(this);
+            PopUpUtil.centerPopUp(this);
         }
 
         private function cancel():void {

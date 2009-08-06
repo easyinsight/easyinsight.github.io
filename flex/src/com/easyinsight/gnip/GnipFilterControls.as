@@ -1,6 +1,8 @@
 package com.easyinsight.gnip {
 import com.easyinsight.datasources.GnipFilter;
 
+import com.easyinsight.util.PopUpUtil;
+
 import flash.events.MouseEvent;
 
 import mx.containers.HBox;
@@ -58,7 +60,7 @@ public class GnipFilterControls extends HBox {
         var window:GnipFilterEditor = new GnipFilterEditor();
         window.gnipFilter = this._gnipFilter;
         PopUpManager.addPopUp(window, this, true);
-        PopUpManager.centerPopUp(window);
+        PopUpUtil.centerPopUp(window);
     }
 
 

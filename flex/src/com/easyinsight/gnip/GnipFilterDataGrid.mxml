@@ -3,6 +3,8 @@
     <mx:Script><![CDATA[
         import com.easyinsight.datasources.GnipDataSource;
 
+        import com.easyinsight.util.PopUpUtil;
+
         import mx.collections.ArrayCollection;
         import mx.managers.PopUpManager;
 
@@ -23,7 +25,7 @@
             var window:GnipFilterEditor = new GnipFilterEditor();
             window.addEventListener(GnipFilterEvent.FILTER_ADDED, onFilterAdded);
             PopUpManager.addPopUp(window, this, true);
-            PopUpManager.centerPopUp(window);
+            PopUpUtil.centerPopUp(window);
         }
 
         [Bindable]

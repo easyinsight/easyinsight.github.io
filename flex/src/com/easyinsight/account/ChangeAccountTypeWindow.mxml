@@ -37,7 +37,7 @@ import mx.controls.Alert;
         }
 
         private function onCreationComplete():void {
-            //PopUpManager.centerPopUp(this);
+            //PopUpUtil.centerPopUp(this);
             this.y = 100;
             this.x = 100;
 //            var point1:Point = new Point();

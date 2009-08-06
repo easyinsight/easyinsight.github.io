@@ -11,6 +11,7 @@
         import com.easyinsight.icons.IconSelectionWindow;
         import com.easyinsight.quicksearch.EIDescriptor;
         import com.easyinsight.solutions.SolutionInstallInfo;
+        import com.easyinsight.util.PopUpUtil;
         import com.easyinsight.util.ProgressAlert;
 
         import mx.collections.ArrayCollection;
@@ -40,7 +41,7 @@
             iconWindow.addEventListener(IconSelectionEvent.ICON_SELECTION, onIconSelected);
             iconWindow.addEventListener(IconSelectionEvent.ICON_REMOVED, onIconRemoved);
             PopUpManager.addPopUp(iconWindow, this, true);
-            PopUpManager.centerPopUp(iconWindow);
+            PopUpUtil.centerPopUp(iconWindow);
         }
 
         private function viewData():void {
@@ -269,7 +270,7 @@
                     var configWindow:ConfigureDataSource = new ConfigureDataSource();
                     configWindow.dataSourceID = solutionInstallInfo.descriptor.id;
                     PopUpManager.addPopUp(configWindow, this, true);
-                    PopUpManager.centerPopUp(configWindow);
+                    PopUpUtil.centerPopUp(configWindow);
                 }
             }
 

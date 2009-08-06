@@ -3,6 +3,8 @@
          xmlns:account="com.easyinsight.account.*" creationComplete="initProperties()"
          width="100%" height="100%">
     <mx:Script><![CDATA[
+        import com.easyinsight.util.PopUpUtil;
+
         import mx.managers.PopUpManager;
 
         import com.easyinsight.framework.User;
@@ -36,27 +38,27 @@
             window.fullNameText = fullName;
             window.addEventListener(RefreshAccountEvent.REFRESH_ACCOUNT, onRefresh);
             PopUpManager.addPopUp(window, this, true);
-            PopUpManager.centerPopUp(window);
+            PopUpUtil.centerPopUp(window);
         }
 
         private function editPassword():void {
             var window:ChangePasswordWindow = new ChangePasswordWindow();
             PopUpManager.addPopUp(window, this, true);
-            PopUpManager.centerPopUp(window);
+            PopUpUtil.centerPopUp(window);
         }
 
         private function upgradeAccount():void {
             var window:ChangeAccountTypeWindow = new ChangeAccountTypeWindow();
             window.addEventListener(RefreshAccountEvent.REFRESH_ACCOUNT, onRefresh);
             PopUpManager.addPopUp(window, this, true);
-            PopUpManager.centerPopUp(window);
+            PopUpUtil.centerPopUp(window);
             window.y = 10;
         }
 
         private function cancelAccount():void {
             var window:CancelPaidAccountWindow = new CancelPaidAccountWindow();
             PopUpManager.addPopUp(window, this, true);
-            PopUpManager.centerPopUp(window);
+            PopUpUtil.centerPopUp(window);
         }
 
         private function onRefresh(event:RefreshAccountEvent):void {

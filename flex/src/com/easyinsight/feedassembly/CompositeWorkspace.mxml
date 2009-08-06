@@ -18,6 +18,7 @@
         import com.easyinsight.util.EdgeSelectionEvent;
         import com.easyinsight.util.GraphSelectionState;
         import com.easyinsight.util.NodeSelectionEvent;
+            import com.easyinsight.util.PopUpUtil;
             import com.easyinsight.util.ProgressAlert;
             import com.easyinsight.util.TestEdgeRenderer;
         import com.easyinsight.util.GraphLine;
@@ -116,7 +117,7 @@
             decoratedConnection.targetFeedID = compositeFeedConnection.targetFeedID;
             var joinDetailWindow:JoinDetailWindow = JoinDetailWindow(PopUpManager.createPopUp(this, JoinDetailWindow));
             joinDetailWindow.feedConnection = decoratedConnection;
-            PopUpManager.centerPopUp(joinDetailWindow);
+            PopUpUtil.centerPopUp(joinDetailWindow);
         }
 
         private function join():void {
@@ -135,7 +136,7 @@
             manualJoinWindow.targetFeedID = secondNode.feedID;
             manualJoinWindow.addEventListener(JoinSelectionEvent.JOIN_SELECTION, joinsSelected);
             PopUpManager.addPopUp(manualJoinWindow, this, true);
-            PopUpManager.centerPopUp(manualJoinWindow);
+            PopUpUtil.centerPopUp(manualJoinWindow);
         }
 
         private function deleteItem():void {
@@ -293,7 +294,7 @@
                 var summary:JoinDiscoverySummary = JoinDiscoverySummary(PopUpManager.createPopUp(this, JoinDiscoverySummary, true));
                 summary.connections = connections;
                 summary.addEventListener(JoinSelectionEvent.JOIN_SELECTION, joinsSelected);
-                PopUpManager.centerPopUp(summary);
+                PopUpUtil.centerPopUp(summary);
             }
         }
 
@@ -379,7 +380,7 @@
                         window.requirement = credential;
                         window.addEventListener(CredentialsEvent.CREDENTIALS_SAVED, onCredentials);
                         PopUpManager.addPopUp(window, this, true);
-                        PopUpManager.centerPopUp(window);
+                        PopUpUtil.centerPopUp(window);
                     }
                 }
                 if (neededCredentialCount == 0) {

@@ -1,4 +1,6 @@
 package com.easyinsight.solutions {
+import com.easyinsight.util.PopUpUtil;
+
 import flash.events.MouseEvent;
 import mx.containers.HBox;
 import mx.controls.Button;
@@ -38,7 +40,7 @@ public class SolutionAdminControls extends HBox{
         var window:CreateSolutionWindow = new CreateSolutionWindow();
         window.solution = solution;
         PopUpManager.addPopUp(window, this.parent.parent, true);
-        PopUpManager.centerPopUp(window);
+        PopUpUtil.centerPopUp(window);
     }
 
     override public function set data(val:Object):void {

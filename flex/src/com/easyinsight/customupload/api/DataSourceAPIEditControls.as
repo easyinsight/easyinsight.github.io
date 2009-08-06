@@ -1,4 +1,6 @@
 package com.easyinsight.customupload.api {
+import com.easyinsight.util.PopUpUtil;
+
 import flash.display.DisplayObject;
 import flash.events.MouseEvent;
 import mx.containers.HBox;
@@ -35,7 +37,7 @@ public class DataSourceAPIEditControls extends HBox{
         var window:DataSourceAPIEdit = new DataSourceAPIEdit();
         window.dataSourceAPIDescriptor = apiDescriptor;
         PopUpManager.addPopUp(window, parentObj, true);
-        PopUpManager.centerPopUp(window);
+        PopUpUtil.centerPopUp(window);
     }
 
     override public function set data(val:Object):void {

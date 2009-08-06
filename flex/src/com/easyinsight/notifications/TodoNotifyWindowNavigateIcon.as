@@ -1,6 +1,8 @@
 package com.easyinsight.notifications {
 import com.easyinsight.customupload.ConfigureDataSource;
 
+import com.easyinsight.util.PopUpUtil;
+
 import flash.events.MouseEvent;
 
 import mx.containers.HBox;
@@ -45,7 +47,7 @@ public class TodoNotifyWindowNavigateIcon extends HBox {
         var configWindow:ConfigureDataSource = new ConfigureDataSource();
         configWindow.dataSourceID = todoInfo.feedID;
         PopUpManager.addPopUp(configWindow, this.parent, true);
-        PopUpManager.centerPopUp(configWindow);
+        PopUpUtil.centerPopUp(configWindow);
 
 
     }

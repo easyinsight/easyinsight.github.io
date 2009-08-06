@@ -4,6 +4,8 @@
     <mx:Script>
 		<![CDATA[
         import com.easyinsight.framework.User;
+        import com.easyinsight.util.PopUpUtil;
+
         import mx.collections.ArrayCollection;
         import mx.events.ItemClickEvent;
         import mx.managers.PopUpManager;
@@ -65,13 +67,13 @@
         private function showSecurityStatement():void {
             var window:SecurityStatement = new SecurityStatement();
             PopUpManager.addPopUp(window, this, true);
-            PopUpManager.centerPopUp(window);
+            PopUpUtil.centerPopUp(window);
         }
 
         private function showTermsOfService():void {
             var window:TermsOfService = new TermsOfService();
             PopUpManager.addPopUp(window, this, true);
-            PopUpManager.centerPopUp(window);
+            PopUpUtil.centerPopUp(window);
         }
 		]]>
     </mx:Script>

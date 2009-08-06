@@ -2,8 +2,10 @@ package com.easyinsight.listing
 {
 	import com.easyinsight.administration.analysis.AnalysisAdministrationWindow;
 	import com.easyinsight.analysis.AnalysisDefinition;
-	
-	import flash.events.MouseEvent;
+
+import com.easyinsight.util.PopUpUtil;
+
+import flash.events.MouseEvent;
 	
 	import mx.controls.Button;
 	import mx.managers.PopUpManager;
@@ -23,7 +25,7 @@ package com.easyinsight.listing
 			var window:AnalysisAdministrationWindow = AnalysisAdministrationWindow(PopUpManager.
                 createPopUp(this.parent, AnalysisAdministrationWindow, true));
             window.analysisDefinition = analysis;
-            PopUpManager.centerPopUp(window);
+            PopUpUtil.centerPopUp(window);
 		}
 		
 		override public function get data():Object {

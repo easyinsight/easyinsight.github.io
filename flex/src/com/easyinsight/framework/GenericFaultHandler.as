@@ -20,7 +20,7 @@ package com.easyinsight.framework
         		Alert.show(event.fault.faultDetail, "A server error occurred.");
 			
 			//var loginDialog:LoginDialog = LoginDialog(PopUpManager.createPopUp(Application.application as DisplayObject, LoginDialog, true));
-        	//PopUpManager.centerPopUp(loginDialog);
+        	//PopUpUtil.centerPopUp(loginDialog);
 		}
 		
 		private static function closeHandler(event:CloseEvent):void {

@@ -49,6 +49,7 @@
         import com.easyinsight.report.ReportAnalyzeSource;
         import com.easyinsight.util.FileAlert;
 
+        import com.easyinsight.util.PopUpUtil;
         import com.easyinsight.util.ProgressAlert;
 
         import mx.controls.Alert;
@@ -270,7 +271,7 @@
             var url:String = URLUtil.objectToString(urlObject);
             login.targetURL = url;
             PopUpManager.addPopUp(login, this, true);
-            PopUpManager.centerPopUp(login);
+            PopUpUtil.centerPopUp(login);
         }
 
         private function install():void {
@@ -333,7 +334,7 @@
                     configWindow.onlyDataSource = configuredSources == 1;
                     configWindow.addEventListener(DataSourceConfiguredEvent.DATA_SOURCE_CONFIGURED, onSourceConfigured);
                     PopUpManager.addPopUp(configWindow, this, true);
-                    PopUpManager.centerPopUp(configWindow);
+                    PopUpUtil.centerPopUp(configWindow);
                 }
             }
             if (immediate) {

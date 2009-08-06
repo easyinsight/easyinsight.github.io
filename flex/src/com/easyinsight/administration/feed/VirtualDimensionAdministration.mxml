@@ -6,6 +6,8 @@
 
         import com.easyinsight.analysis.AnalysisItemTypes;
 
+        import com.easyinsight.util.PopUpUtil;
+
         import mx.collections.ArrayCollection;
         import mx.events.ListEvent;
         import mx.managers.PopUpManager;
@@ -56,7 +58,7 @@
             window.groupings = groupings;
             window.addEventListener(NewVirtualDimensionEvent.NEW_VIRTUAL_DIMENSION, onDimension);
             PopUpManager.addPopUp(window, this, true);
-            PopUpManager.centerPopUp(window);
+            PopUpUtil.centerPopUp(window);
         }
 
         private function onDimension(event:NewVirtualDimensionEvent):void {

@@ -9,6 +9,8 @@
         import com.easyinsight.listing.DataFeedDescriptor;
         import com.easyinsight.solutions.InsightDescriptor;
         import com.easyinsight.solutions.Solution;
+        import com.easyinsight.util.PopUpUtil;
+
         import mx.controls.DataGrid;
         import mx.controls.List;
         import mx.core.IUIComponent;
@@ -133,7 +135,7 @@
                 window.addEventListener(SolutionInstallRequiredEvent.SOLUTION_INSTALL, passThrough);
                 window.addEventListener(SubTreeInstallEvent.SUB_TREE_INSTALL, subTreeInstall);
                 PopUpManager.addPopUp(window, this, true);
-                PopUpManager.centerPopUp(window);
+                PopUpUtil.centerPopUp(window);
             }
             showBinding = goalTreeNode.coreFeedID > 0;
             showAssociations = goalTreeNode.associatedFeeds.length > 0 || goalTreeNode.associatedInsights.length > 0 ||
@@ -358,7 +360,7 @@
             window.goalTreeNode = goalTreeNode;
             window.subTreeName = goalTreeNode.subTreeName;
             PopUpManager.addPopUp(window, this);
-            PopUpManager.centerPopUp(window);
+            PopUpUtil.centerPopUp(window);
         }
 
         private function uninstall(event:SubTreeInstallEvent):void {

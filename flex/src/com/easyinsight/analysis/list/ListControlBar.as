@@ -10,6 +10,8 @@ import com.easyinsight.analysis.IReportControlBar;
 import com.easyinsight.analysis.ListDropArea;
 import com.easyinsight.analysis.ListDropAreaGrouping;
 import com.easyinsight.analysis.ReportDataEvent;
+import com.easyinsight.util.PopUpUtil;
+
 import flash.events.MouseEvent;
 import mx.binding.utils.BindingUtils;
 import mx.collections.ArrayCollection;
@@ -74,7 +76,7 @@ public class ListControlBar extends HBox implements IReportControlBar {
         listWindow.fields = availableFields;
         listWindow.listDefinition = listDefinition;
         listWindow.addEventListener(AnalysisItemUpdateEvent.ANALYSIS_LIST_UPDATE, requestListData);
-        PopUpManager.centerPopUp(listWindow);
+        PopUpUtil.centerPopUp(listWindow);
     }
 
     private var _limitText:String;

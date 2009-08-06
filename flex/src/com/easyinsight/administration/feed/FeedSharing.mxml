@@ -2,6 +2,8 @@
 <mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" creationComplete="creationComplete()">
 	<mx:Script>
 		<![CDATA[
+        import com.easyinsight.util.PopUpUtil;
+
         import mx.controls.Alert;
         import mx.core.UIComponent;
         import mx.managers.PopUpManager;
@@ -84,7 +86,7 @@
         private function addGroupOwner():void {
             var window:AddGroupToFeedWindow = AddGroupToFeedWindow(PopUpManager.createPopUp(this, AddGroupToFeedWindow, true));
             window.addEventListener(GroupLinkEvent.ADD_GROUP_LINK, onGroupOwnerAdd);
-            PopUpManager.centerPopUp(window);
+            PopUpUtil.centerPopUp(window);
         }
 
         private function onGroupOwnerAdd(event:GroupLinkEvent):void {
@@ -94,7 +96,7 @@
         private function addUserOwner():void {
             var window:AddUserToFeedWindow = AddUserToFeedWindow(PopUpManager.createPopUp(this, AddUserToFeedWindow, true));
             window.addEventListener(UserLinkEvent.ADD_USER_LINK, onUserOwnerAdd);
-            PopUpManager.centerPopUp(window);
+            PopUpUtil.centerPopUp(window);
         }
 
         private function onUserOwnerAdd(event:UserLinkEvent):void {
@@ -104,7 +106,7 @@
         private function addUserViewer():void {
             var window:AddUserToFeedWindow = AddUserToFeedWindow(PopUpManager.createPopUp(this.parent.parent, AddUserToFeedWindow, true));
             window.addEventListener(UserLinkEvent.ADD_USER_LINK, onUserViewerAdd);
-            PopUpManager.centerPopUp(window);
+            PopUpUtil.centerPopUp(window);
         }
 
         private function onUserViewerAdd(event:UserLinkEvent):void {
@@ -114,7 +116,7 @@
         private function addGroupViewer():void {
             var window:AddGroupToFeedWindow = AddGroupToFeedWindow(PopUpManager.createPopUp(this, AddGroupToFeedWindow, true));
             window.addEventListener(GroupLinkEvent.ADD_GROUP_LINK, onGroupViewerAdd);
-            PopUpManager.centerPopUp(window);
+            PopUpUtil.centerPopUp(window);
         }
 
         private function onGroupViewerAdd(event:GroupLinkEvent):void {

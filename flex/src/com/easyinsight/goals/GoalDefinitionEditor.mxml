@@ -61,6 +61,8 @@
 
         import com.easyinsight.framework.CredentialsCache;
 
+        import com.easyinsight.util.PopUpUtil;
+
         import mx.charts.LinearAxis;
         import mx.charts.chartClasses.IAxis;
         import mx.charts.chartClasses.Series;
@@ -187,7 +189,7 @@
         private function bindDataSource():void {
             var window:DataSourceChoiceWindow = DataSourceChoiceWindow(PopUpManager.createPopUp(this, DataSourceChoiceWindow, true));
             window.addEventListener(DataSourceChoiceEvent.DATA_SOURCE_CHOICE, boundDataSource);
-            PopUpManager.centerPopUp(window);
+            PopUpUtil.centerPopUp(window);
         }
 
         private function boundDataSource(event:DataSourceChoiceEvent):void {
@@ -208,7 +210,7 @@
                     window.addEventListener(CredentialsEvent.CREDENTIALS_SAVED, onCredentials);
                     window.requirement = credential;
                     PopUpManager.addPopUp(window, this, true);
-                    PopUpManager.centerPopUp(window);
+                    PopUpUtil.centerPopUp(window);
                 }
             }
             availableDimensions = new ArrayCollection();
@@ -304,7 +306,7 @@
             analysisItemEditor.analysisItems = this.allFields;
             analysisItemEditor.analysisItem = this.analysisMeasure;
             PopUpManager.addPopUp(analysisItemEditor, this, true);
-            PopUpManager.centerPopUp(analysisItemEditor);
+            PopUpUtil.centerPopUp(analysisItemEditor);
             analysisItemEditor.addEventListener(AnalysisItemEditEvent.ANALYSIS_ITEM_EDIT, itemEdited);
         }
 

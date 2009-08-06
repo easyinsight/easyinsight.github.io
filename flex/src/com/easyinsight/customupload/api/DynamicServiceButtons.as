@@ -1,6 +1,8 @@
 package com.easyinsight.customupload.api
 {
-	import flash.events.MouseEvent;
+import com.easyinsight.util.PopUpUtil;
+
+import flash.events.MouseEvent;
 	
 	import mx.containers.HBox;
 	import mx.controls.Button;
@@ -53,7 +55,7 @@ package com.easyinsight.customupload.api
             window.dynamicServiceDefinition = dynamicServiceDefinition.dynamicServiceDefinition;
             window.feedID = dynamicServiceDefinition.feedID;
             PopUpManager.addPopUp(window, this.parent, true);
-            PopUpManager.centerPopUp(window);
+            PopUpUtil.centerPopUp(window);
 		}
 		
 		override public function set data(value:Object):void {
@@ -74,7 +76,7 @@ package com.easyinsight.customupload.api
 		private function propertiesClick(event:MouseEvent):void {
 			var serviceWindow:ServiceProperties = ServiceProperties(PopUpManager.createPopUp(this.parent, ServiceProperties));
 			serviceWindow.serviceDescriptor = dynamicServiceDefinition;
-			PopUpManager.centerPopUp(serviceWindow);			
+			PopUpUtil.centerPopUp(serviceWindow);
 		}
 	}
 }

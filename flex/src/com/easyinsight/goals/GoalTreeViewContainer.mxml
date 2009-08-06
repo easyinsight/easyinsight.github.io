@@ -17,6 +17,7 @@
         import com.easyinsight.genredata.AnalyzeEvent;
         import com.easyinsight.util.ModelessWindowEvent;
 
+        import com.easyinsight.util.PopUpUtil;
         import com.easyinsight.util.ProgressAlert;
 
         import mx.collections.ArrayCollection;
@@ -187,7 +188,7 @@
             window.endDate = endChooser.selectedDate;
             window.addEventListener(GoalTreeRefreshEvent.GOAL_TREE_REFRESH, gotRefresh);
             PopUpManager.addPopUp(window, this, true);
-            PopUpManager.centerPopUp(window);
+            PopUpUtil.centerPopUp(window);
         }
 
         public function canRefresh():Boolean {

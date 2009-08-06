@@ -87,6 +87,8 @@
         import com.easyinsight.solutions.InsightDescriptor;
         import com.easyinsight.util.PNGEnc;
 
+        import com.easyinsight.util.PopUpUtil;
+
         import mx.collections.SortField;
         import mx.collections.Sort;
         import mx.events.DragEvent;
@@ -503,7 +505,7 @@
                     window.requirement = credential;
                     window.addEventListener(CredentialsEvent.CREDENTIALS_SAVED, onCredentials);
                     PopUpManager.addPopUp(window, this, true);
-                    PopUpManager.centerPopUp(window);
+                    PopUpUtil.centerPopUp(window);
                     canDirectly = false;
                 }
             }
@@ -532,7 +534,7 @@
             var window:DetailBook = new DetailBook();
             window.details = detailService.getAllData.lastResult as ArrayCollection;
             PopUpManager.addPopUp(window, this);
-            PopUpManager.centerPopUp(window);
+            PopUpUtil.centerPopUp(window);
         }
 
         private function onKey(event:KeyboardEvent):void {
@@ -590,7 +592,7 @@
             var user:User = User.getInstance();
             if (user == null) {
                 var loginDialog:LoginDialog = LoginDialog(PopUpManager.createPopUp(this, LoginDialog, true));
-                PopUpManager.centerPopUp(loginDialog);
+                PopUpUtil.centerPopUp(loginDialog);
             } else {
                 if (getAnalysisDefinition().canSaveDirectly) {
                     var valid:Boolean = Validator.validateAll(analysisValidators).length == 0;
@@ -631,13 +633,13 @@
             var user:User = User.getInstance();
             if (user == null) {
                 var loginContainer:LoginDialog = LoginDialog(PopUpManager.createPopUp(this, LoginDialog, true));
-                PopUpManager.centerPopUp(loginContainer);
+                PopUpUtil.centerPopUp(loginContainer);
             } else {
                 var saveDialog:SaveDialog = SaveDialog(PopUpManager.createPopUp(this, SaveDialog, true));
                 dataView.updateExportMetadata();
                 saveDialog.analysisDefinition = getAnalysisDefinition();
                 saveDialog.addEventListener(SavedAnalysisEvent.SAVED_ANALYSIS, savedAnalysis);
-                PopUpManager.centerPopUp(saveDialog);
+                PopUpUtil.centerPopUp(saveDialog);
             }
         }
 
@@ -659,7 +661,7 @@
                 var feedCreationWindow:AnalysisBasedFeedCreationWindow = AnalysisBasedFeedCreationWindow(PopUpManager.
                         createPopUp(this, AnalysisBasedFeedCreationWindow, true));
                 feedCreationWindow.analysisDefinition = getAnalysisDefinition();
-                PopUpManager.centerPopUp(feedCreationWindow);
+                PopUpUtil.centerPopUp(feedCreationWindow);
             }
         }
 
@@ -679,7 +681,7 @@
             var window:QuickDataSourceAPIWindow = new QuickDataSourceAPIWindow();
             window.dataSourceID = dataService.dataFeedID;
             PopUpManager.addPopUp(window, this);
-            PopUpManager.centerPopUp(window);
+            PopUpUtil.centerPopUp(window);
         }
 
         private function undo():void {
@@ -703,7 +705,7 @@
         private function newTextReplaceScrub():void {
             var textWindow:TextReplaceScrubWindow = TextReplaceScrubWindow(PopUpManager.createPopUp(this, TextReplaceScrubWindow, false));
             textWindow.addEventListener(DataScrubEvent.ADDED_SCRUB, scrubAdded);
-            PopUpManager.centerPopUp(textWindow);
+            PopUpUtil.centerPopUp(textWindow);
         }
 
         private function newLookupTableScrub():void {
@@ -711,7 +713,7 @@
             lookupWindow.availableFields = getAnalysisItems();
             lookupWindow.feedID = dataService.dataFeedID;
             lookupWindow.addEventListener(DataScrubEvent.ADDED_SCRUB, scrubAdded);
-            PopUpManager.centerPopUp(lookupWindow);
+            PopUpUtil.centerPopUp(lookupWindow);
         }
 
         private function editTextReplaceScrubs():void {
@@ -720,7 +722,7 @@
             scrubListWindow.addEventListener(DataScrubEvent.UPDATED_SCRUB, scrubUpdated);
             scrubListWindow.addEventListener(DataScrubEvent.DELETED_SCRUB, scrubDeleted);
             scrubListWindow.initState(getAnalysisItems(), dataService.dataFeedID);
-            PopUpManager.centerPopUp(scrubListWindow);
+            PopUpUtil.centerPopUp(scrubListWindow);
         }
 
         private function editLookupTableScrubs():void {
@@ -729,7 +731,7 @@
             scrubListWindow.addEventListener(DataScrubEvent.UPDATED_SCRUB, scrubUpdated);
             scrubListWindow.addEventListener(DataScrubEvent.DELETED_SCRUB, scrubDeleted);
             scrubListWindow.initState(getAnalysisItems(), dataService.dataFeedID);
-            PopUpManager.centerPopUp(scrubListWindow);
+            PopUpUtil.centerPopUp(scrubListWindow);
         }
 
         private function scrubAdded(event:DataScrubEvent):void {
@@ -754,7 +756,7 @@
             window.editorClass = CalculationWindow;
             window.addEventListener(AnalysisItemEditEvent.ANALYSIS_ITEM_EDIT, onNewItem);
             PopUpManager.addPopUp(window, this);
-            PopUpManager.centerPopUp(window);
+            PopUpUtil.centerPopUp(window);
         }
 
         private function onNewItem(event:AnalysisItemEditEvent):void {
@@ -782,13 +784,13 @@
             window.analysisItems = wrappers;
             window.addEventListener(AnalysisItemEditEvent.ANALYSIS_ITEM_EDIT, onNewItem);
             PopUpManager.addPopUp(window, this);
-            PopUpManager.centerPopUp(window);
+            PopUpUtil.centerPopUp(window);
         }
 
         private function createBlankField():void {
             var window:NewBlankFeedWindow = NewBlankFeedWindow(PopUpManager.createPopUp(this, NewBlankFeedWindow));
             window.addEventListener(AnalysisItemCreationEvent.ANALYSIS_ITEM_CREATED, newFieldCreated);
-            PopUpManager.centerPopUp(window);
+            PopUpUtil.centerPopUp(window);
         }
 
         private function newFieldCreated(event:AnalysisItemCreationEvent):void {
@@ -875,14 +877,14 @@
             var window:AddInsightToGroupWindow = AddInsightToGroupWindow(PopUpManager.createPopUp(this, AddInsightToGroupWindow));
             window.insightID = analysisDefinition.analysisID;
             window.addEventListener(SubscriptionEvent.GROUP_TO_INSIGHT, addedToGroup);
-            PopUpManager.centerPopUp(window);
+            PopUpUtil.centerPopUp(window);
         }
 
         private function addFeedToGroup():void {
             var window:AddFeedToGroupWindow = AddFeedToGroupWindow(PopUpManager.createPopUp(this, AddFeedToGroupWindow));
             window.feedID = dataService.dataFeedID;
             window.addEventListener(SubscriptionEvent.GROUP_TO_INSIGHT, addedToGroup);
-            PopUpManager.centerPopUp(window);
+            PopUpUtil.centerPopUp(window);
         }
 
         private function addedToGroup(event:SubscriptionEvent):void {
@@ -944,7 +946,7 @@
                 embedWindow.reportName = analysisDefinition.name;
                 embedWindow.reportHeight = 346;
                 embedWindow.reportWidth = 450;
-                PopUpManager.centerPopUp(embedWindow);
+                PopUpUtil.centerPopUp(embedWindow);
             } else {
                 Alert.show("You need to save the report first.");
             }
@@ -1026,7 +1028,7 @@
             window.addEventListener(DescriptionUpdateEvent.DESCRIPTION_UPDATE, onDescriptionUpdate);
             window.text = analysisDefinition.description;
             PopUpManager.addPopUp(window, this, true);
-            PopUpManager.centerPopUp(window);
+            PopUpUtil.centerPopUp(window);
         }
 
         private function newReport():void {

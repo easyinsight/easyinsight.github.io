@@ -40,7 +40,7 @@ import com.easyinsight.genredata.AnalyzeEvent;
             dispatchEvent(new SolutionSelectionEvent(solution));
 			/*var window:SolutionInstallationWindow = SolutionInstallationWindow(PopUpManager.createPopUp(this.parent, SolutionInstallationWindow, true));
 			window.solution = this.solution;
-			PopUpManager.centerPopUp(window);*/			
+			PopUpUtil.centerPopUp(window);*/
 		}
 
 		override public function set data(value:Object):void {

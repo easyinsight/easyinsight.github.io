@@ -6,6 +6,8 @@
         import com.easyinsight.analysis.RuntimeCredentialsWindow;
         import com.easyinsight.framework.CredentialsCache;
 
+        import com.easyinsight.util.PopUpUtil;
+
         import mx.charts.LinearAxis;
         import mx.charts.chartClasses.IAxis;
         import mx.charts.chartClasses.Series;
@@ -83,7 +85,7 @@
                     window.requirement = credential;
                     window.addEventListener(CredentialsEvent.CREDENTIALS_SAVED, onCredentials);
                     PopUpManager.addPopUp(window, this, true);
-                    PopUpManager.centerPopUp(window);
+                    PopUpUtil.centerPopUp(window);
                 }
             }
         }

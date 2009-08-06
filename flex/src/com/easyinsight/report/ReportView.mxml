@@ -50,6 +50,8 @@
 
         import com.easyinsight.solutions.InsightDescriptor;
 
+        import com.easyinsight.util.PopUpUtil;
+
         import mx.collections.ArrayCollection;
         import mx.controls.Alert;
         import mx.core.Container;
@@ -77,7 +79,7 @@
         private function bookmark():void {
             if (User.getInstance() == null) {
                 var loginDialog:LoginDialog = LoginDialog(PopUpManager.createPopUp(this, LoginDialog, true));
-                PopUpManager.centerPopUp(loginDialog);
+                PopUpUtil.centerPopUp(loginDialog);
             } else {
                 analysisService.subscribeToAnalysis.send(_reportID);
             }
@@ -258,7 +260,7 @@
                     window.requirement = credential;
                     window.addEventListener(CredentialsEvent.CREDENTIALS_SAVED, onCredentials);
                     PopUpManager.addPopUp(window, this, true);
-                    PopUpManager.centerPopUp(window);
+                    PopUpUtil.centerPopUp(window);
                 }
             } else {
                 report = event.analysisDefinition;

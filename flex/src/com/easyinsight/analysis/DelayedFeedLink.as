@@ -4,8 +4,10 @@ package com.easyinsight.analysis
 	import com.easyinsight.framework.LoginEvent;
 import com.easyinsight.genredata.ModuleAnalyzeEvent;
 import com.easyinsight.listing.DescriptorAnalyzeSource;
-	
-	import flash.display.DisplayObject;
+
+import com.easyinsight.util.PopUpUtil;
+
+import flash.display.DisplayObject;
 	import flash.events.EventDispatcher;
 	
 	import mx.controls.Alert;
@@ -44,7 +46,7 @@ import com.easyinsight.listing.DescriptorAnalyzeSource;
             } else if (feedResponse.status == FeedResponse.NEED_LOGIN) {
                 var loginDialog:LoginDialog = LoginDialog(PopUpManager.createPopUp(Application.application as DisplayObject, LoginDialog, true));
         		loginDialog.addEventListener(LoginEvent.LOGIN, delayedFeed);
-                PopUpManager.centerPopUp(loginDialog);
+                PopUpUtil.centerPopUp(loginDialog);
         	} else {
         		// tried to access a data source they don't have rights to, silently fail
         	}        	            

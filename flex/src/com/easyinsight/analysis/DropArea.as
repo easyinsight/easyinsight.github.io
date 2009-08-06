@@ -2,6 +2,8 @@ package com.easyinsight.analysis
 {
 import com.easyinsight.commands.CommandEvent;
 
+import com.easyinsight.util.PopUpUtil;
+
 import flash.display.Bitmap;
 import flash.display.BitmapData;
 import flash.events.ContextMenuEvent;
@@ -109,12 +111,7 @@ public class DropArea extends HBox
         analysisItemEditor.analysisItems = this._analysisItems;
         analysisItemEditor.analysisItem = this.analysisItem;
         PopUpManager.addPopUp(analysisItemEditor, this);
-        var point:Point = new Point();
-        point.x = 0;
-        point.y = 0;
-        point = this.localToGlobal(point);
-        analysisItemEditor.x = point.x + 25;
-        analysisItemEditor.y = point.y + 25;
+        PopUpUtil.centerPopUp(analysisItemEditor);
         analysisItemEditor.addEventListener(AnalysisItemEditEvent.ANALYSIS_ITEM_EDIT, itemEdited);
     }
 

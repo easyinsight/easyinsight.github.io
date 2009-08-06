@@ -23,6 +23,8 @@
         import com.easyinsight.analysis.Key;
         import com.easyinsight.analysis.NamedKey;
 
+        import com.easyinsight.util.PopUpUtil;
+
         import mx.binding.utils.BindingUtils;
         import mx.collections.ArrayCollection;
         import mx.collections.IList;
@@ -175,7 +177,7 @@
             var window:NewFieldWindow = new NewFieldWindow();
             window.addEventListener(NewFieldEvent.NEW_FIELD, gotGroupingName);
             PopUpManager.addPopUp(window, this, true);
-            PopUpManager.centerPopUp(window);
+            PopUpUtil.centerPopUp(window);
         }
 
         private function gotGroupingName(event:NewFieldEvent):void {
@@ -198,7 +200,7 @@
             var window:NewFieldWindow = new NewFieldWindow();
             window.addEventListener(NewFieldEvent.NEW_FIELD, gotMeasureName);
             PopUpManager.addPopUp(window, this, true);
-            PopUpManager.centerPopUp(window);
+            PopUpUtil.centerPopUp(window);
         }
 
         private function gotMeasureName(event:NewFieldEvent):void {
@@ -221,7 +223,7 @@
             var window:NewFieldWindow = new NewFieldWindow();
             window.addEventListener(NewFieldEvent.NEW_FIELD, gotDateName);
             PopUpManager.addPopUp(window, this, true);
-            PopUpManager.centerPopUp(window);
+            PopUpUtil.centerPopUp(window);
         }
 
         private function gotDateName(event:NewFieldEvent):void {

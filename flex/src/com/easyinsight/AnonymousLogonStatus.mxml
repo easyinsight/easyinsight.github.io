@@ -2,7 +2,9 @@
 <mx:HBox xmlns:mx="http://www.adobe.com/2006/mxml">
 	<mx:Script>
 		<![CDATA[
-			import mx.core.Application;
+        import com.easyinsight.util.PopUpUtil;
+
+        import mx.core.Application;
                     import mx.managers.PopUpManager;
                     import com.easyinsight.framework.LoginEvent;
 
@@ -10,7 +12,7 @@
                         var displayObject:DisplayObject = Application.application as DisplayObject;
                         var loginDialog:LoginDialog = LoginDialog(PopUpManager.createPopUp(displayObject, LoginDialog, true));
                         loginDialog.addEventListener(LoginEvent.LOGIN, loggedIn);
-                        PopUpManager.centerPopUp(loginDialog);
+                        PopUpUtil.centerPopUp(loginDialog);
                     }
 
                     private function loggedIn(event:LoginEvent):void {

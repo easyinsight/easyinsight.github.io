@@ -7,6 +7,8 @@
 	</mx:Metadata>	
 	<mx:Script>
 		<![CDATA[
+        import com.easyinsight.util.PopUpUtil;
+
         import mx.managers.PopUpManager;
         import mx.validators.Validator;
 
@@ -15,7 +17,7 @@
             private function showTerms():void {
                 var window:TermsOfService = new TermsOfService();
                 PopUpManager.addPopUp(window, this, true);
-                PopUpManager.centerPopUp(window);
+                PopUpUtil.centerPopUp(window);
             }
 
             private var _account:Account;

@@ -2,6 +2,8 @@
 <mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*"
                 creationComplete="setup()">
     <mx:Script><![CDATA[
+        import com.easyinsight.util.PopUpUtil;
+
         import mx.collections.ArrayCollection;
         import mx.managers.PopUpManager;
 
@@ -17,7 +19,7 @@
             var window:MilestoneEditWindow = new MilestoneEditWindow();
             window.addEventListener(MilestoneRefreshEvent.MILESTONE_REFRESH, refreshMilestones);
             PopUpManager.addPopUp(window, this, true);
-            PopUpManager.centerPopUp(window);
+            PopUpUtil.centerPopUp(window);
         }
 
         private function refreshMilestones(event:MilestoneRefreshEvent):void {

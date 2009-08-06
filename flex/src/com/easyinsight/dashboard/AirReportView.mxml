@@ -20,6 +20,8 @@
         import com.easyinsight.util.IAsyncScreen;
         import com.easyinsight.util.IAsyncScreenFactory;
 
+        import com.easyinsight.util.PopUpUtil;
+
         import mx.collections.ArrayCollection;
 
         import flash.data.EncryptedLocalStore;
@@ -52,7 +54,7 @@
             window.addEventListener(QuickSearchEvent.QUICK_SEARCH_CANCEL, onQuickSearch);
             window.descriptors = descriptors; 
             PopUpManager.addPopUp(window, this, false);
-            PopUpManager.centerPopUp(window);
+            PopUpUtil.centerPopUp(window);
         }
 
 

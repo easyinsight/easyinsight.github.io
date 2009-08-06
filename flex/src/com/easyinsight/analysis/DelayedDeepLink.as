@@ -4,8 +4,10 @@ package com.easyinsight.analysis
 	import com.easyinsight.framework.LoginEvent;
 import com.easyinsight.genredata.ModuleAnalyzeEvent;
 import com.easyinsight.listing.AnalysisDefinitionAnalyzeSource;
-	
-	import flash.display.DisplayObject;
+
+import com.easyinsight.util.PopUpUtil;
+
+import flash.display.DisplayObject;
 	import flash.events.EventDispatcher;
 	
 	import mx.core.Application;
@@ -37,7 +39,7 @@ import com.easyinsight.listing.AnalysisDefinitionAnalyzeSource;
         	} else if (insightResponse.status == InsightResponse.NEED_LOGIN) {
         		var loginDialog:LoginDialog = LoginDialog(PopUpManager.createPopUp(Application.application as DisplayObject, LoginDialog, true));
         		loginDialog.addEventListener(LoginEvent.LOGIN, delayedAnalysis);
-                PopUpManager.centerPopUp(loginDialog);
+                PopUpUtil.centerPopUp(loginDialog);
         	} else {
                 // silently fail, user trying to spoof an ID
             }

@@ -18,6 +18,8 @@
 		<![CDATA[
         import com.easyinsight.account.Account;
 
+        import com.easyinsight.util.PopUpUtil;
+
         import mx.utils.URLUtil;
         import mx.managers.BrowserManager;
 
@@ -93,14 +95,14 @@
         private function createNewGroup():void {
             var groupWindow:NewGroupWindow = NewGroupWindow(PopUpManager.createPopUp(this, NewGroupWindow, true));
             groupWindow.addEventListener(GroupSelectedEvent.GROUP_SELECTED, groupSelected);
-            PopUpManager.centerPopUp(groupWindow);
+            PopUpUtil.centerPopUp(groupWindow);
         }
 
         private function joinPublicGroup():void {
             var groupJoinWindow:GroupJoinWindow = new GroupJoinWindow();
             groupJoinWindow.addEventListener(GroupSelectedEvent.GROUP_SELECTED, groupSelected);
             PopUpManager.addPopUp(groupJoinWindow, this, true);
-            PopUpManager.centerPopUp(groupJoinWindow);
+            PopUpUtil.centerPopUp(groupJoinWindow);
         }
         ]]>
     </mx:Script>
