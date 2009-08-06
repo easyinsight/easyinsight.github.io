@@ -788,17 +788,48 @@ public class FeedStorage {
         return new FeedDescriptor(feedName, dataFeedID, size, feedType, userRole != null ? userRole : 0, ownerName, description, attribution, lastDataTime);
     }
 
-    public FeedDescriptor getFeedDescriptor(long accountID, long feedID) throws SQLException {
+    public FeedDescriptor getFeedDescriptor(long feedID) throws SQLException {
         FeedDescriptor feedDescriptor = null;
         Connection conn = Database.instance().getConnection();
+        long userID = SecurityUtil.getUserID(false);
         try {
-            StringBuilder queryBuilder = new StringBuilder("SELECT FEED_NAME, FEED_TYPE, OWNER_NAME, DESCRIPTION, ATTRIBUTION, ROLE, PUBLICLY_VISIBLE, MARKETPLACE_VISIBLE, ANALYSIS_ID " +
+            if (userID == 0) {
+                StringBuilder queryBuilder = new StringBuilder("SELECT FEED_NAME, FEED_TYPE, OWNER_NAME, DESCRIPTION, ATTRIBUTION, PUBLICLY_VISIBLE, MARKETPLACE_VISIBLE, ANALYSIS_ID " +
+                        "FROM DATA_FEED WHERE " +
+                        "DATA_FEED_ID = ?");
+                PreparedStatement queryStmt = conn.prepareStatement(queryBuilder.toString());
+                // queryStmt.setLong(1, accountID);
+                queryStmt.setLong(1, feedID);
+                ResultSet rs = queryStmt.executeQuery();
+            if (rs.next()) {
+                String feedName = rs.getString(1);
+                int feedType = rs.getInt(2);
+                String ownerName = rs.getString(3);
+                String description = rs.getString(4);
+                String attribution = rs.getString(5);
+                int role = Roles.NONE;
+                feedDescriptor = createDescriptor(feedID, feedName, role, 0, feedType, ownerName, description, attribution, null);
+                Collection<Tag> tags = getTags(feedID, conn);
+                StringBuilder tagStringBuilder = new StringBuilder();
+                Iterator<Tag> tagIter = tags.iterator();
+                while (tagIter.hasNext()) {
+                    Tag tag = tagIter.next();
+                    tagStringBuilder.append(tag.getTagName());
+                    if (tagIter.hasNext()){
+                        tagStringBuilder.append(" ");
+                    }
+                }
+                feedDescriptor.setTagString(tagStringBuilder.toString());
+            }
+            queryStmt.close();
+            } else {
+                StringBuilder queryBuilder = new StringBuilder("SELECT FEED_NAME, FEED_TYPE, OWNER_NAME, DESCRIPTION, ATTRIBUTION, ROLE, PUBLICLY_VISIBLE, MARKETPLACE_VISIBLE, ANALYSIS_ID " +
                     "FROM DATA_FEED, UPLOAD_POLICY_USERS WHERE " +
                     "DATA_FEED.DATA_FEED_ID = UPLOAD_POLICY_USERS.FEED_ID AND UPLOAD_POLICY_USERS.USER_ID = ? AND DATA_FEED_ID = ?");
-            PreparedStatement queryStmt = conn.prepareStatement(queryBuilder.toString());
-            queryStmt.setLong(1, accountID);
-            queryStmt.setLong(2, feedID);
-            ResultSet rs = queryStmt.executeQuery();
+                PreparedStatement queryStmt = conn.prepareStatement(queryBuilder.toString());
+                queryStmt.setLong(1, userID);
+                queryStmt.setLong(2, feedID);
+                ResultSet rs = queryStmt.executeQuery();
             if (rs.next()) {
                 String feedName = rs.getString(1);
                 int feedType = rs.getInt(2);
@@ -820,6 +851,8 @@ public class FeedStorage {
                 feedDescriptor.setTagString(tagStringBuilder.toString());
             }
             queryStmt.close();
+            }
+
         } finally {
             Database.closeConnection(conn);
         }

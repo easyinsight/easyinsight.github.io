@@ -131,8 +131,8 @@ public class FeedService implements IDataFeedService {
         try {
             try {
                 SecurityUtil.authorizeFeedAccess(feedID);
-                long userID = SecurityUtil.getUserID();
-                FeedDescriptor feedDescriptor = feedStorage.getFeedDescriptor(userID, feedID);
+                //long userID = SecurityUtil.getUserID();
+                FeedDescriptor feedDescriptor = feedStorage.getFeedDescriptor(feedID);
                 feedResponse = new FeedResponse(FeedResponse.SUCCESS, feedDescriptor);
             } catch (SecurityException e) {
                 if (e.getReason() == SecurityException.LOGIN_REQUIRED)
@@ -151,9 +151,8 @@ public class FeedService implements IDataFeedService {
         FeedResponse feedResponse;
         try {
             try {
-                long userID = SecurityUtil.getUserID();
-                long feedID = feedStorage.getFeedForAPIKey(userID, apiKey);
-                FeedDescriptor feedDescriptor = feedStorage.getFeedDescriptor(userID, feedID);
+                long feedID = feedStorage.getFeedForAPIKey(SecurityUtil.getUserID(), apiKey);
+                FeedDescriptor feedDescriptor = feedStorage.getFeedDescriptor(feedID);
                 feedResponse = new FeedResponse(FeedResponse.SUCCESS, feedDescriptor);
             } catch (SecurityException e) {
                 if (e.getReason() == SecurityException.LOGIN_REQUIRED)

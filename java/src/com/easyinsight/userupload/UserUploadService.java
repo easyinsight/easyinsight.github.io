@@ -543,7 +543,7 @@ public class UserUploadService implements IUserUploadService {
     public FeedDescriptor getFeedDescriptor(long feedID) {
         SecurityUtil.authorizeFeed(feedID, Roles.OWNER);
         try {
-            return feedStorage.getFeedDescriptor(SecurityUtil.getUserID(), feedID);
+            return feedStorage.getFeedDescriptor(feedID);
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);

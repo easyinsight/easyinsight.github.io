@@ -87,7 +87,7 @@ public class DataService {
             feedMetadata.setIntrinsicFilters(feed.getIntrinsicFilters());
             feedMetadata.setDataFeedID(feedID);
             feedMetadata.setVersion(feed.getVersion());
-            feedMetadata.setDataSourceAdmin(SecurityUtil.getRole(SecurityUtil.getUserID(), feedID) == Roles.OWNER);
+            feedMetadata.setDataSourceAdmin(SecurityUtil.getRole(SecurityUtil.getUserID(false), feedID) == Roles.OWNER);
             return feedMetadata;
         } catch (Exception e) {
             LogClass.error(e);

@@ -397,6 +397,9 @@
                 feedFragmentObject.analysisID = String(analysisDefinition.analysisID);
                 var feedFragmentString:String = URLUtil.objectToString(feedFragmentObject);
                 BrowserManager.getInstance().setFragment(feedFragmentString);
+                if (analysisDefinition.filterDefinitions == null) {
+                    analysisDefinition.filterDefinitions = new ArrayCollection();
+                }
                 createFilterBoxes(analysisDefinition.filterDefinitions.toArray());
 
                 // add the fields which are specifically added in the context of the report, such as

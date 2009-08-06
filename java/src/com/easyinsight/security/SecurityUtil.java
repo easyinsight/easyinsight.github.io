@@ -115,7 +115,7 @@ public class SecurityUtil {
         if (userPrincipal == null) {
             if (required) {
                 SecurityLogger.error("Could not retrieve user principal.");
-                throw new SecurityException();
+                throw new SecurityException(SecurityException.LOGIN_REQUIRED);
             }
             else
                 return 0;
