@@ -1,5 +1,5 @@
 <?xml version="1.0" ?>
-<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%" horizontalAlign="center">
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="65" horizontalAlign="center" verticalAlign="middle">
     <mx:Script><![CDATA[
         [Bindable]
         private var logoPath:String;
@@ -8,5 +8,5 @@
             logoPath = val as String;
         }
         ]]></mx:Script>
-    <mx:Image source="{logoPath}" maxWidth="250" maxHeight="100"/>
+    <mx:Image source="{logoPath}" maxWidth="250" maxHeight="60" visible="{logoPath != null}"/>
 </mx:VBox>

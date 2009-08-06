@@ -42,7 +42,7 @@
 			
 			private function initComponent():void {
 				maxSize = contents.getChildren().length;
-				interval = setInterval(marquee,100);
+				interval = setInterval(marquee,50);
 				maxGap = (contents.getChildAt(0) as UIComponent).height * maxSize - contents.height;
 				trace(maxGap);
 				

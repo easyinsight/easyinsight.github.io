@@ -1,7 +1,6 @@
 package com.easyinsight.servlet;
 
 import com.easyinsight.database.Database;
-import com.easyinsight.database.migration.Migrations;
 import com.easyinsight.datafeeds.FeedRegistry;
 import com.easyinsight.api.APIManager;
 import com.easyinsight.security.SecurityUtil;
@@ -10,7 +9,7 @@ import com.easyinsight.logging.LogClass;
 import com.easyinsight.storage.DatabaseManager;
 import com.easyinsight.scheduler.Scheduler;
 import com.easyinsight.eventing.*;
-import com.easyinsight.notifications.BroadcastInfo;
+import com.easyinsight.twitter.TwitterTimer;
 
 import javax.servlet.http.HttpServlet;
 import javax.servlet.ServletConfig;
@@ -37,6 +36,7 @@ public class DMSServlet extends HttpServlet {
                 // create schedulers...
                 DatabaseManager.instance();
                 FeedRegistry.initialize();
+                TwitterTimer.start();
                 new APIManager().start();
                 scheduler = Scheduler.instance();
                 EventDispatcher.instance().start();
@@ -58,6 +58,7 @@ public class DMSServlet extends HttpServlet {
         Database.instance().shutdown();
         DatabaseManager.instance().shutdown();
         EventDispatcher.instance().setRunning(false);
+        TwitterTimer.stop();
         EventDispatcher.instance().interrupt();
         scheduler.stop();
         super.destroy();
