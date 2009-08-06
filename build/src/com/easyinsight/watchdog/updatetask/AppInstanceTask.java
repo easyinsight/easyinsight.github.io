@@ -111,7 +111,7 @@ public class AppInstanceTask extends Task {
                                         if ("running".equals(state)) {
                                             String amiID = infoNode.getChildNodes().item(3).getFirstChild().getNodeValue();
                                             System.out.println(amiID);
-                                            if (APP_AMI.equals(amiID)) {
+                                            if (getAMI().equals(amiID)) {
                                                 String dns = infoNode.getChildNodes().item(7).getFirstChild().getNodeValue();
                                                 System.out.println(dns);
                                                 instances.add(dns);
