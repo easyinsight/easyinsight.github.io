@@ -16,8 +16,17 @@ import java.util.HashSet;
  */
 public class WSPlotChartDefinition extends WSChartDefinition {
     private AnalysisItem dimension;
+    private AnalysisItem iconGrouping;
     private AnalysisItem xaxisMeasure;
     private AnalysisItem yaxisMeasure;
+
+    public AnalysisItem getIconGrouping() {
+        return iconGrouping;
+    }
+
+    public void setIconGrouping(AnalysisItem iconGrouping) {
+        this.iconGrouping = iconGrouping;
+    }
 
     public AnalysisItem getXaxisMeasure() {
         return xaxisMeasure;
@@ -47,12 +56,16 @@ public class WSPlotChartDefinition extends WSChartDefinition {
         addItems("xAxisMeasure", Arrays.asList(xaxisMeasure), structure);
         addItems("yAxisMeasure", Arrays.asList(yaxisMeasure), structure);
         addItems("dimension", Arrays.asList(dimension), structure);
+        if (iconGrouping != null) {
+            addItems("series", Arrays.asList(iconGrouping), structure);
+        }
     }
 
     public void populateFromReportStructure(Map<String, AnalysisItem> structure) {
         xaxisMeasure = firstItem("xAxisMeasure", structure);
         yaxisMeasure = firstItem("yAxisMeasure", structure);
         dimension = firstItem("dimension", structure);
+        iconGrouping = firstItem("series", structure);
     }
 
     public Set<AnalysisItem> getAllAnalysisItems() {
@@ -60,6 +73,9 @@ public class WSPlotChartDefinition extends WSChartDefinition {
         columnList.add(dimension);
         columnList.add(xaxisMeasure);
         columnList.add(yaxisMeasure);
+        if (iconGrouping != null) {
+            columnList.add(iconGrouping);
+        }
         return columnList;
     }
 

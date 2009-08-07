@@ -10,6 +10,8 @@
 
         import mx.charts.ChartItem;
         import mx.charts.chartClasses.IAxis;
+
+        import mx.charts.series.PlotSeries;
         import mx.formatters.Formatter;
         import mx.charts.HitData;
         import mx.collections.ArrayCollection;
@@ -38,6 +40,7 @@
 
         public function renderReport(dataSet:ArrayCollection, analysisDefinition:AnalysisDefinition, clientProcessorMap:Object):void {
             var plotChartDef:PlotChartDefinition = analysisDefinition as PlotChartDefinition;
+            var seriesMap:Object = new Object();
             if (dataSet.length > 0) {
                 measure1 = plotChartDef.xaxisMeasure.qualifiedName();
                 measure1Name = plotChartDef.xaxisMeasure.display;
@@ -47,6 +50,32 @@
                 measure2Formatter = plotChartDef.yaxisMeasure.getFormatter();
                 dimension = plotChartDef.dimension.qualifiedName();
                 dimensionItem = plotChartDef.dimension;
+                if (plotChartDef.iconGrouping != null) {
+                    // if an icon grouping is defined, we need to break out items by
+                    for each (var obj:Object in dataSet) {
+                        var key:String = String(obj[plotChartDef.iconGrouping.qualifiedName()]);
+                        var seriesData:ArrayCollection = seriesMap[key];
+                        if (seriesData == null) {
+                            seriesData = new ArrayCollection();
+                            seriesMap[key] = seriesData;
+                        }
+                        seriesData.addItem(obj);
+                    }
+                    var seriesArray:Array = [];
+                    for (var seriesKey:String in seriesMap) {
+                        var splitPlotSeries:PlotSeries = new PlotSeries();
+                        splitPlotSeries.dataProvider = seriesMap[seriesKey];
+                        splitPlotSeries.xField = measure1;
+                        splitPlotSeries.yField = measure2;
+                        seriesArray.push(splitPlotSeries);
+                    }
+                    plotChart.series = seriesArray;
+                } else {
+                    var defaultSeries:PlotSeries = new PlotSeries();
+                    defaultSeries.xField = measure1;
+                    defaultSeries.yField = measure2;
+                    plotChart.series = [ defaultSeries ];
+                }
             }
             graphData = dataSet;
         }
@@ -110,8 +139,8 @@
 
 			</mx:AxisRenderer>
 		</mx:verticalAxisRenderers>
-		<mx:series>
+		<!--<mx:series>
 			<mx:PlotSeries xField="{measure1}" yField="{measure2}" hideDataEffect="zoomOut" showDataEffect="zoomIn"/>
-		</mx:series>
+		</mx:series>-->
 	</mx:PlotChart>
 </mx:Module>

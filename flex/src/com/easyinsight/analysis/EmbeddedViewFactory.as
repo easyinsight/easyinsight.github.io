@@ -136,6 +136,11 @@ public class EmbeddedViewFactory extends VBox {
 
     }
 
+
+    public function get filterDefinitions():ArrayCollection {
+        return _filterDefinitions;
+    }
+
     private function customChangeFromControlBar(event:CustomChangeEvent):void {
         _reportRenderer.onCustomChangeEvent(event);
     }

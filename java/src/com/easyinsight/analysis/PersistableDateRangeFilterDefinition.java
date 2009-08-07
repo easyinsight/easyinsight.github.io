@@ -22,6 +22,17 @@ public class PersistableDateRangeFilterDefinition extends PersistableFilterDefin
     @Column(name="high_value")
     private Date highDate;
 
+    @Column(name="sliding")
+    private boolean sliding;
+
+    public boolean isSliding() {
+        return sliding;
+    }
+
+    public void setSliding(boolean sliding) {
+        this.sliding = sliding;
+    }
+
     public Date getLowDate() {
         return lowDate;
     }
@@ -41,6 +52,7 @@ public class PersistableDateRangeFilterDefinition extends PersistableFilterDefin
     public FilterDefinition toFilterDefinition() {
         FilterDateRangeDefinition date = new FilterDateRangeDefinition();
         date.setFilterID(getFilterId());
+        date.setSliding(isSliding());
         date.setField(getField());
         date.setStartDate(lowDate);
         date.setEndDate(highDate);

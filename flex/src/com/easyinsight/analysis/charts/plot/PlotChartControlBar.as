@@ -18,6 +18,7 @@ import mx.events.FlexEvent;
 public class PlotChartControlBar extends HBox implements IReportControlBar  {
 
     private var dimensionGrouping:ListDropAreaGrouping;
+    private var seriesGrouping:ListDropAreaGrouping;
     private var xmeasureGrouping:ListDropAreaGrouping;
     private var ymeasureGrouping:ListDropAreaGrouping;
 
@@ -28,6 +29,10 @@ public class PlotChartControlBar extends HBox implements IReportControlBar  {
         dimensionGrouping.maxElements = 1;
         dimensionGrouping.dropAreaType = DimensionDropArea;
         dimensionGrouping.addEventListener(AnalysisItemUpdateEvent.ANALYSIS_LIST_UPDATE, requestListData);
+        seriesGrouping = new ListDropAreaGrouping();
+        seriesGrouping.maxElements = 1;
+        seriesGrouping.dropAreaType = DimensionDropArea;
+        seriesGrouping.addEventListener(AnalysisItemUpdateEvent.ANALYSIS_LIST_UPDATE, requestListData);
         xmeasureGrouping = new ListDropAreaGrouping();
         xmeasureGrouping.maxElements = 1;
         xmeasureGrouping.dropAreaType = MeasureDropArea;
@@ -46,6 +51,11 @@ public class PlotChartControlBar extends HBox implements IReportControlBar  {
         groupingLabel.setStyle("fontSize", 14);
         addChild(groupingLabel);
         addChild(dimensionGrouping);
+        var pointTypeLabel:Label = new Label();
+        pointTypeLabel.text = "Point Type:";
+        pointTypeLabel.setStyle("fontSize", 14);
+        addChild(pointTypeLabel);
+        addChild(seriesGrouping);
         var yMeasureLabel:Label = new Label();
         yMeasureLabel.text = "Y Axis Measure:";
         yMeasureLabel.setStyle("fontSize", 14);
@@ -56,8 +66,11 @@ public class PlotChartControlBar extends HBox implements IReportControlBar  {
         xMeasureLabel.setStyle("fontSize", 14);
         addChild(xMeasureLabel);
         addChild(xmeasureGrouping);
-         if (xAxisDefinition.dimension != null) {
+        if (xAxisDefinition.dimension != null) {
             dimensionGrouping.addAnalysisItem(xAxisDefinition.dimension);
+        }
+        if (xAxisDefinition.iconGrouping != null) {
+            seriesGrouping.addAnalysisItem(xAxisDefinition.iconGrouping);
         }
         if (xAxisDefinition.xaxisMeasure != null) {
             xmeasureGrouping.addAnalysisItem(xAxisDefinition.xaxisMeasure);
@@ -107,6 +120,7 @@ public class PlotChartControlBar extends HBox implements IReportControlBar  {
         xAxisDefinition.dimension = dimensionGrouping.getListColumns()[0];
         xAxisDefinition.xaxisMeasure = xmeasureGrouping.getListColumns()[0];
         xAxisDefinition.yaxisMeasure = ymeasureGrouping.getListColumns()[0];
+        xAxisDefinition.iconGrouping = seriesGrouping.getListColumns()[0];
         return xAxisDefinition;
     }
 

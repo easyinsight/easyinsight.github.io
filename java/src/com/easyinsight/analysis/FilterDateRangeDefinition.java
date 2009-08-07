@@ -12,6 +12,15 @@ import java.sql.SQLException;
 public class FilterDateRangeDefinition extends FilterDefinition {
     private Date startDate;
     private Date endDate;
+    private boolean sliding;
+
+    public boolean isSliding() {
+        return sliding;
+    }
+
+    public void setSliding(boolean sliding) {
+        this.sliding = sliding;
+    }
 
     public Date getStartDate() {
         return startDate;
@@ -37,11 +46,12 @@ public class FilterDateRangeDefinition extends FilterDefinition {
         date.setLowDate(getStartDate());
         date.setHighDate(getEndDate());
         date.setIntrinsic(isIntrinsic());
+        date.setSliding(isSliding());
         return date;
     }
 
     public MaterializedFilterDefinition materialize(InsightRequestMetadata insightRequestMetadata) {
-        return new MaterializedFilterDateRangeDefinition(getField(), startDate, endDate);
+        return new MaterializedFilterDateRangeDefinition(getField(), startDate, endDate, sliding);
     }
 
     public String toQuerySQL(String tableName) {
@@ -55,8 +65,18 @@ public class FilterDateRangeDefinition extends FilterDefinition {
     }
 
     public int populatePreparedStatement(PreparedStatement preparedStatement, int start, int type, InsightRequestMetadata insightRequestMetadata) throws SQLException {
-        preparedStatement.setTimestamp(start++, new java.sql.Timestamp(startDate.getTime()));
-        preparedStatement.setTimestamp(start++, new java.sql.Timestamp(endDate.getTime()));
+        Date workingEndDate;
+        Date workingStartDate;
+        if (sliding) {
+            long delta = endDate.getTime() - startDate.getTime();
+            workingEndDate = new Date();
+            workingStartDate = new Date(System.currentTimeMillis() - delta);
+        } else {
+            workingEndDate = endDate;
+            workingStartDate = startDate;
+        }
+        preparedStatement.setTimestamp(start++, new java.sql.Timestamp(workingStartDate.getTime()));
+        preparedStatement.setTimestamp(start++, new java.sql.Timestamp(workingEndDate.getTime()));
         return start;
     }
 }

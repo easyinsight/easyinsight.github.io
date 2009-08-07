@@ -8,6 +8,7 @@ import com.easyinsight.framework.CredentialsCache;
 
 import com.easyinsight.util.ProgressAlert;
 
+import flash.events.Event;
 import flash.events.MouseEvent;
 	import flash.geom.Point;
 	
@@ -15,12 +16,14 @@ import flash.events.MouseEvent;
 	import mx.containers.HBox;
 import mx.controls.Alert;
 import mx.controls.Button;
-	import mx.controls.DateField;
+import mx.controls.CheckBox;
+import mx.controls.DateField;
 	import mx.controls.HSlider;
 import mx.controls.Label;
 import mx.events.CalendarLayoutChangeEvent;
 	import mx.events.SliderEvent;
-	import mx.managers.PopUpManager;
+import mx.formatters.DateFormatter;
+import mx.managers.PopUpManager;
 import mx.rpc.events.FaultEvent;
 import mx.rpc.events.ResultEvent;
 	import mx.rpc.remoting.RemoteObject;
@@ -59,6 +62,20 @@ import mx.rpc.events.ResultEvent;
         private function onFault(event:FaultEvent):void {
             Alert.show(event.fault.faultDetail);
         }
+
+        private function dataTipFormatter(value:Number):String {
+            var date:Date = new Date(lowDate.valueOf() + delta * (value / 100));
+            var df:DateFormatter = new DateFormatter();
+            return df.format(date);
+            
+        }
+
+
+        private function onChange(event:Event):void {
+            var checkbox:CheckBox = event.currentTarget as CheckBox;
+            _filterDefinition.enabled = checkbox.selected;
+            dispatchEvent(new FilterUpdatedEvent(FilterUpdatedEvent.FILTER_UPDATED, _filterDefinition, null, this));
+        }
 		
 		private function gotMetadata(event:ResultEvent):void {
 			var metadata:AnalysisItemResultMetadata = dataService.getAnalysisItemMetadata.lastResult as AnalysisItemResultMetadata;
@@ -70,6 +87,7 @@ import mx.rpc.events.ResultEvent;
 			hslider.thumbCount = 2;
 			hslider.liveDragging = false;
 			hslider.minimum = 0;
+            hslider.dataTipFormatFunction = dataTipFormatter;
 			hslider.maximum = 100;
 			hslider.values = [0, 100];
 			hslider.addEventListener(SliderEvent.THUMB_RELEASE, thumbRelease);
@@ -79,6 +97,13 @@ import mx.rpc.events.ResultEvent;
 			highField = new DateField();
 			highField.selectedDate = dateMetadata.latestDate;
 			highField.addEventListener(CalendarLayoutChangeEvent.CHANGE, highDateChange);
+            if (!_filterEditable) {
+                var checkbox:CheckBox = new CheckBox();
+                checkbox.selected = true;
+                checkbox.toolTip = "Click to disable this filter.";
+                checkbox.addEventListener(Event.CHANGE, onChange);
+                addChild(checkbox);
+            }
             if (_showLabel) {
                 var label:Label = new Label();
                 label.text = analysisItem.display + ":";
@@ -93,7 +118,8 @@ import mx.rpc.events.ResultEvent;
 				_filterDefinition = new FilterDateRangeDefinition();
 				_filterDefinition.startDate = dateMetadata.earliestDate;
 				_filterDefinition.endDate = dateMetadata.latestDate;
-				_filterDefinition.field = analysisItem;	
+				_filterDefinition.field = analysisItem;
+                _filterDefinition.sliding = true;
 			} else {
 				if (_filterDefinition.startDate == null) {
 					_filterDefinition.startDate = dateMetadata.earliestDate;
@@ -189,6 +215,7 @@ import mx.rpc.events.ResultEvent;
 			var newHighVal:int = ((event.newDate.valueOf() - lowDate.valueOf()) / delta) * 100;
 			hslider.values = [ hslider.values[0], newHighVal ] ;
 			_filterDefinition.endDate = event.newDate;
+            _filterDefinition.sliding = false;
 			dispatchEvent(new FilterUpdatedEvent(FilterUpdatedEvent.FILTER_UPDATED, filterDefinition, null, this));
 		}
 		

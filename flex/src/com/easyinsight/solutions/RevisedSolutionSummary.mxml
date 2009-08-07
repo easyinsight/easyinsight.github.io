@@ -198,7 +198,7 @@
                 </mx:VBox>
             </mx:HBox>
             <mx:TileList width="100%" height="100%" itemRenderer="com.easyinsight.solutions.SolutionView" dataProvider="{availableSolutions}" id="solutionGrid"
-                    columnWidth="240" rowHeight="160" backgroundColor="#EEEEEE" verticalScrollPolicy="off"/>
+                    columnWidth="240" rowHeight="160" backgroundColor="#EEEEEE"/>
         </mx:VBox>
     </mx:VBox>
 </mx:VBox>

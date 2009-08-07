@@ -323,7 +323,7 @@
             report.dataFeedID = _dataSourceID;
             report.name = reportName;
             report.reportType = _reportType;
-            dispatchEvent(new ModuleAnalyzeEvent(new AnalysisDefinitionAnalyzeSource(report)));
+            dispatchEvent(new ModuleAnalyzeEvent(new AnalysisDefinitionAnalyzeSource(report, viewFactory.filterDefinitions)));
         }
 
 

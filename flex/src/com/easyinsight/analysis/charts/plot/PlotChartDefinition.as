@@ -9,6 +9,7 @@ import mx.collections.ArrayCollection;
 [RemoteClass(alias="com.easyinsight.analysis.definitions.WSPlotChartDefinition")]
 public class PlotChartDefinition extends ChartDefinition{
     public var dimension:AnalysisItem;
+    public var iconGrouping:AnalysisItem;
     public var xaxisMeasure:AnalysisItem;
     public var yaxisMeasure:AnalysisItem;
 
@@ -31,7 +32,11 @@ public class PlotChartDefinition extends ChartDefinition{
     }
 
     override public function getFields():ArrayCollection {
-        return new ArrayCollection([ dimension, xaxisMeasure, yaxisMeasure ]);
+        var fields:ArrayCollection = new ArrayCollection([ dimension, xaxisMeasure, yaxisMeasure ]);
+        if (iconGrouping != null) {
+            fields.addItem(iconGrouping);
+        }
+        return fields;
     }
 
     override public function get type():int {

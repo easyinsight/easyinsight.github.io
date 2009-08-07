@@ -6,6 +6,7 @@ package com.easyinsight.filtering
 
 import com.easyinsight.framework.CredentialsCache;
 
+import flash.events.Event;
 import flash.events.MouseEvent;
 	import flash.geom.Point;
 	
@@ -13,7 +14,8 @@ import flash.events.MouseEvent;
 	import mx.collections.Sort;
 	import mx.containers.HBox;
 	import mx.controls.Button;
-	import mx.controls.ComboBox;
+import mx.controls.CheckBox;
+import mx.controls.ComboBox;
 import mx.controls.Label;
 import mx.events.DropdownEvent;
 	import mx.managers.PopUpManager;
@@ -82,9 +84,22 @@ import mx.events.DropdownEvent;
 		private function onFilterEdit(event:FilterEditEvent):void {
 			dispatchEvent(new FilterUpdatedEvent(FilterUpdatedEvent.FILTER_UPDATED, event.filterDefinition, event.previousFilterDefinition, this, event.bubbles, event.rebuild));
 		}
+
+        private function onChange(event:Event):void {
+            var checkbox:CheckBox = event.currentTarget as CheckBox;
+            _filterDefinition.enabled = checkbox.selected;
+            dispatchEvent(new FilterUpdatedEvent(FilterUpdatedEvent.FILTER_UPDATED, _filterDefinition, null, this));
+        }
 		
 		override protected function createChildren():void {
 			super.createChildren();
+            if (!_filterEditable) {
+                var checkbox:CheckBox = new CheckBox();
+                checkbox.selected = true;
+                checkbox.toolTip = "Click to disable this filter.";
+                checkbox.addEventListener(Event.CHANGE, onChange);
+                addChild(checkbox);
+            }
             if (_showLabel) {
                 var label:Label = new Label();
                 label.text = _analysisItem.display + ":";

@@ -14,12 +14,21 @@ public abstract class FilterDefinition implements Serializable {
     private boolean applyBeforeAggregation = true;
     private long filterID;
     private boolean intrinsic;
+    private boolean enabled = true; 
 
     public FilterDefinition() {
     }
 
     public FilterDefinition(AnalysisItem field) {
         this.field = field;
+    }
+
+    public boolean isEnabled() {
+        return enabled;
+    }
+
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
     }
 
     public boolean isIntrinsic() {
@@ -63,6 +72,6 @@ public abstract class FilterDefinition implements Serializable {
     public abstract int populatePreparedStatement(PreparedStatement preparedStatement, int start, int type, InsightRequestMetadata insightRequestMetadata) throws SQLException;
 
     public boolean validForQuery() {
-        return true;
+        return enabled;
     }
 }

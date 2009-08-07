@@ -299,7 +299,7 @@ public class DataService {
            // }
             BenchmarkManager.recordBenchmark("DataService:List", System.currentTimeMillis() - startTime);
             return results;
-        } catch (Exception e) {
+        } catch (Throwable e) {
             LogClass.error(e);
             throw new RuntimeException(e);
         }

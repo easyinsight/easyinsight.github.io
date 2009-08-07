@@ -15,10 +15,15 @@ public class MaterializedFilterDateRangeDefinition extends MaterializedFilterDef
     private Date lowValue;
     private Date highValue;
 
-    public MaterializedFilterDateRangeDefinition(AnalysisItem key, Date lowValue, Date highValue) {
+    public MaterializedFilterDateRangeDefinition(AnalysisItem key, Date lowValue, Date highValue, boolean sliding) {
         super(key);
         this.lowValue = lowValue;
-        this.highValue = highValue;
+        this.highValue = highValue;        
+        if (sliding) {
+            long delta = highValue.getTime() - lowValue.getTime();
+            this.highValue = new Date();
+            this.lowValue = new Date(System.currentTimeMillis() - delta);
+        }
     }
 
     public boolean allows(Value value) {

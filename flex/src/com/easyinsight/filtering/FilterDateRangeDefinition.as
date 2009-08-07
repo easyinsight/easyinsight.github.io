@@ -7,6 +7,7 @@ package com.easyinsight.filtering
 	{
 		public var startDate:Date;
 		public var endDate:Date;
+        public var sliding:Boolean;
 		
 		public function FilterDateRangeDefinition()
 		{

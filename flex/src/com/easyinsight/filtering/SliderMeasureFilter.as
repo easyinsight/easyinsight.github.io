@@ -13,7 +13,8 @@ import mx.binding.utils.BindingUtils;
 import mx.collections.ArrayCollection;
 	import mx.containers.HBox;
 	import mx.controls.Button;
-	import mx.controls.HSlider;
+import mx.controls.CheckBox;
+import mx.controls.HSlider;
 	import mx.controls.Label;
 	import mx.controls.Text;
 	import mx.managers.PopUpManager;
@@ -111,12 +112,26 @@ public class SliderMeasureFilter extends HBox implements IFilter
             }
 			dispatchEvent(new FilterUpdatedEvent(FilterUpdatedEvent.FILTER_UPDATED, event.filterDefinition, event.previousFilterDefinition, this));
 		}
+
+    private function onChange(event:Event):void {
+            var checkbox:CheckBox = event.currentTarget as CheckBox;
+            _filterDefinition.enabled = checkbox.selected;
+            dispatchEvent(new FilterUpdatedEvent(FilterUpdatedEvent.FILTER_UPDATED, _filterDefinition, null, this));
+        }
 		
 		private function gotMetadata(event:ResultEvent):void {
 			var metadata:AnalysisItemResultMetadata = dataService.getAnalysisItemMetadata.lastResult as AnalysisItemResultMetadata;
 			var measureMetadata:AnalysisMeasureResultMetadata = metadata as AnalysisMeasureResultMetadata;
 
             if (lowInput == null) {
+
+                if (!_filterEditable) {
+                    var checkbox:CheckBox = new CheckBox();
+                    checkbox.selected = true;
+                    checkbox.toolTip = "Click to disable this filter.";
+                    checkbox.addEventListener(Event.CHANGE, onChange);
+                    addChild(checkbox);
+                }
                 var haveDataState:State = new State();
                 haveDataState.name = "Configured";
                 var defaultBox:HBox = new HBox();

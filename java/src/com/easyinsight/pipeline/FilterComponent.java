@@ -26,13 +26,15 @@ public class FilterComponent implements IComponent {
         Map<AnalysisItem, Collection<MaterializedFilterDefinition>> filterMap = new HashMap<AnalysisItem, Collection<MaterializedFilterDefinition>>();
         if (pipelineData.getReport().getFilterDefinitions() != null) {
             for (FilterDefinition filterDefinition : pipelineData.getReport().getFilterDefinitions()) {
-                if (filterDefinition.isApplyBeforeAggregation() == beforeAggregation) {
-                    Collection<MaterializedFilterDefinition> filters = filterMap.get(filterDefinition.getField());
-                    if (filters == null) {
-                        filters = new ArrayList<MaterializedFilterDefinition>();
-                        filterMap.put(filterDefinition.getField(), filters);
+                if (filterDefinition.isEnabled()) {
+                    if (filterDefinition.isApplyBeforeAggregation() == beforeAggregation) {
+                        Collection<MaterializedFilterDefinition> filters = filterMap.get(filterDefinition.getField());
+                        if (filters == null) {
+                            filters = new ArrayList<MaterializedFilterDefinition>();
+                            filterMap.put(filterDefinition.getField(), filters);
+                        }
+                        filters.add(filterDefinition.materialize(pipelineData.getInsightRequestMetadata()));
                     }
-                    filters.add(filterDefinition.materialize(pipelineData.getInsightRequestMetadata()));
                 }
             }
         }

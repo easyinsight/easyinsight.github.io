@@ -190,6 +190,8 @@
         [Bindable]
         private var admin:Boolean;
 
+        public var filterOverrides:ArrayCollection = null;
+
         private var feedMetadata:FeedMetadata;
 
         [Bindable]
@@ -399,6 +401,9 @@
                 BrowserManager.getInstance().setFragment(feedFragmentString);
                 if (analysisDefinition.filterDefinitions == null) {
                     analysisDefinition.filterDefinitions = new ArrayCollection();
+                }
+                if (filterOverrides != null) {
+                    analysisDefinition.filterDefinitions = filterOverrides;
                 }
                 createFilterBoxes(analysisDefinition.filterDefinitions.toArray());
 

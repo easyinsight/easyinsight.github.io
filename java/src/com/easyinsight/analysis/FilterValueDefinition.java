@@ -132,7 +132,7 @@ public class FilterValueDefinition extends FilterDefinition {
                 return !"".equals(string);
             }
         }
-        return filteredValues.size() > 0;
+        return super.validForQuery() && filteredValues.size() > 0;
     }
 
     public MaterializedFilterDefinition materialize(InsightRequestMetadata insightRequestMetadata) {
