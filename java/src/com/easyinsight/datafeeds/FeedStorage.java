@@ -824,8 +824,8 @@ public class FeedStorage {
             queryStmt.close();
             } else {
                 StringBuilder queryBuilder = new StringBuilder("SELECT FEED_NAME, FEED_TYPE, OWNER_NAME, DESCRIPTION, ATTRIBUTION, ROLE, PUBLICLY_VISIBLE, MARKETPLACE_VISIBLE, ANALYSIS_ID " +
-                    "FROM DATA_FEED, UPLOAD_POLICY_USERS WHERE " +
-                    "DATA_FEED.DATA_FEED_ID = UPLOAD_POLICY_USERS.FEED_ID AND UPLOAD_POLICY_USERS.USER_ID = ? AND DATA_FEED_ID = ?");
+                    "FROM DATA_FEED LEFT JOIN UPLOAD_POLICY_USERS ON DATA_FEED.DATA_FEED_ID = UPLOAD_POLICY_USERS.FEED_ID AND UPLOAD_POLICY_USERS.USER_ID = ?" +
+                    " WHERE DATA_FEED.DATA_FEED_ID = ?");
                 PreparedStatement queryStmt = conn.prepareStatement(queryBuilder.toString());
                 queryStmt.setLong(1, userID);
                 queryStmt.setLong(2, feedID);
@@ -837,6 +837,9 @@ public class FeedStorage {
                 String description = rs.getString(4);
                 String attribution = rs.getString(5);
                 int role = rs.getInt(6);
+                if (rs.wasNull()) {
+                    role = Roles.NONE;
+                }
                 feedDescriptor = createDescriptor(feedID, feedName, role, 0, feedType, ownerName, description, attribution, null);
                 Collection<Tag> tags = getTags(feedID, conn);
                 StringBuilder tagStringBuilder = new StringBuilder();
