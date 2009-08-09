@@ -14,7 +14,6 @@ import com.google.gdata.data.spreadsheet.*;
 import java.util.Set;
 import java.util.Collection;
 import java.util.List;
-import java.util.ArrayList;
 import java.net.URL;
 
 /**
@@ -58,8 +57,8 @@ public class GoogleSpreadsheetFeed extends Feed {
         }
     }
 
-    public List<CredentialRequirement> getCredentialRequirement() {
-        List<CredentialRequirement> credentials = super.getCredentialRequirement();
+    public Set<CredentialRequirement> getCredentialRequirement(boolean allSources) {
+        Set<CredentialRequirement> credentials = super.getCredentialRequirement(allSources);
         CredentialRequirement requirement = new CredentialRequirement();
         requirement.setDataSourceID(getFeedID());
         requirement.setDataSourceName(getName());

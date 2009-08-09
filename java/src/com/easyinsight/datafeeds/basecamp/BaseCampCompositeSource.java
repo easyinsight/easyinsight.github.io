@@ -8,6 +8,7 @@ import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.datafeeds.CredentialsDefinition;
 import com.easyinsight.users.Account;
 import com.easyinsight.logging.LogClass;
+import com.easyinsight.analysis.DataSourceInfo;
 
 import java.util.Set;
 import java.util.Collection;
@@ -36,9 +37,8 @@ public class BaseCampCompositeSource extends CompositeServerDataSource {
 
     private String url;
 
-    @Override
-    public boolean isLiveData() {
-        return false;
+    public int getDataSourceType() {
+        return DataSourceInfo.COMPOSITE_PULL;
     }
 
     @Override

@@ -15,6 +15,7 @@ public class DataSourceInfo implements Serializable {
     public static final int STORED_PULL = 2;
     public static final int LIVE = 3;
     public static final int COMPOSITE = 4;
+    public static final int COMPOSITE_PULL = 5;
 
     private String dataSourceName;
     private long dataSourceID;

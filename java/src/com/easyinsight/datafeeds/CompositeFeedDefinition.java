@@ -3,6 +3,7 @@ package com.easyinsight.datafeeds;
 import com.easyinsight.core.Key;
 import com.easyinsight.core.DerivedKey;
 import com.easyinsight.analysis.AnalysisItem;
+import com.easyinsight.analysis.DataSourceInfo;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.database.Database;
 import com.easyinsight.security.SecurityUtil;
@@ -23,9 +24,8 @@ public class CompositeFeedDefinition extends FeedDefinition {
     private List<CompositeFeedNode> compositeFeedNodes = new ArrayList<CompositeFeedNode>();
     private List<CompositeFeedConnection> connections = new ArrayList<CompositeFeedConnection>();
 
-    @Override
-    public boolean isLiveData() {
-        return true;
+    public int getDataSourceType() {
+        return DataSourceInfo.COMPOSITE;
     }
 
     public List<CompositeFeedNode> getCompositeFeedNodes() {

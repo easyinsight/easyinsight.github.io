@@ -48,6 +48,10 @@ public class JiraDataSource extends ServerDataSourceDefinition {
         return url;
     }
 
+    public int getDataSourceType() {
+        return DataSourceInfo.STORED_PULL;
+    }
+
     public void setUrl(String url) {
         this.url = url;
     }

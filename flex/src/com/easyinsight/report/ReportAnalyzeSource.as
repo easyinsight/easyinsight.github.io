@@ -1,4 +1,7 @@
 package com.easyinsight.report {
+import com.easyinsight.analysis.EmbeddedControllerLookup;
+import com.easyinsight.analysis.EmbeddedViewFactory;
+import com.easyinsight.analysis.IEmbeddedReportController;
 import com.easyinsight.framework.ModuleAnalyzeSource;
 import com.easyinsight.solutions.InsightDescriptor;
 
@@ -18,6 +21,9 @@ public class ReportAnalyzeSource extends ModuleAnalyzeSource{
         reportView.reportID = insightDescriptor.id;
         reportView.reportType = insightDescriptor.reportType;
         reportView.dataSourceID = insightDescriptor.dataFeedID;
+        var controllerClass:Class = EmbeddedControllerLookup.controllerForType(insightDescriptor.reportType);
+        var controller:IEmbeddedReportController = new controllerClass();
+        reportView.viewFactory = controller.createEmbeddedView();
         return reportView;
     }
 }

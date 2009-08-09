@@ -46,7 +46,7 @@ public class DataSourceDisplay extends HBox {
             } else {
                 labelText = "This data source is displaying data pushed into Easy Insight at " + dateString + " from " + dataSource.originName + ".";
             }
-        } else if (_dataSource.type == DataSourceInfo.STORED_PULL) {
+        } else if (_dataSource.type == DataSourceInfo.STORED_PULL || _dataSource.type == DataSourceInfo.COMPOSITE_PULL) {
             if (dataSource.originName == null) {
                 labelText = "This data source is displaying data pulled into Easy Insight at " + dateString + ".";
             } else {

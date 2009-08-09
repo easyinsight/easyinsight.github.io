@@ -11,6 +11,7 @@ import mx.collections.ArrayCollection;
         public var utcOffset:int;
         public var version:int;
         public var credentialFulfillmentList:ArrayCollection;
+        public var refreshAllSources:Boolean;
 		
 		public function InsightRequestMetadata()
 		{

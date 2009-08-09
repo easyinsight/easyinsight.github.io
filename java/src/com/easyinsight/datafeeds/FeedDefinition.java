@@ -59,8 +59,8 @@ public class FeedDefinition implements Cloneable, Serializable {
     private boolean visible = true;
     private long parentSourceID;
 
-    public boolean isLiveData() {
-        return false;
+    public int getDataSourceType() {
+        return DataSourceInfo.STORED_PUSH;
     }
 
     public List<FeedFolder> getFolders() {
@@ -384,8 +384,7 @@ public class FeedDefinition implements Cloneable, Serializable {
         feed.setFields(clones);
         feed.setName(getFeedName());
         feed.setVisible(isVisible());
-
-        feed.setPush(getCredentialsDefinition() == CredentialsDefinition.NO_CREDENTIALS);
+        feed.setType(getDataSourceType());        
         return feed;
     }
 

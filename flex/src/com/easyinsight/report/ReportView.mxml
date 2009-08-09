@@ -27,14 +27,12 @@
         import com.easyinsight.analysis.AnalysisDefinition;
         import com.easyinsight.analysis.CredentialRequirement;
         import com.easyinsight.analysis.CredentialsEvent;
-        import com.easyinsight.analysis.EmbeddedControllerLookup;
         import com.easyinsight.analysis.EmbeddedDataServiceEvent;
-        import com.easyinsight.analysis.EmbeddedViewFactory;
         import com.easyinsight.analysis.ExcelCreator;
         import com.easyinsight.analysis.HierarchyDrilldownEvent;
         import com.easyinsight.analysis.HierarchyRollupEvent;
-        import com.easyinsight.analysis.IEmbeddedReportController;
 
+        import com.easyinsight.analysis.RefreshReportSourceWindow;
         import com.easyinsight.analysis.RuntimeCredentialsWindow;
         import com.easyinsight.commands.CommandEvent;
         import com.easyinsight.commands.CommandProcessor;
@@ -112,14 +110,14 @@
 
         private function transformsUpdated(event:TransformsUpdatedEvent):void {
             viewFactory.filterDefinitions = transformContainer.getFilterDefinitions();
-            viewFactory.retrieveData();
+            viewFactory.retrieveData(false);
         }
 
         [Bindable]
         private var filterDefinitions:ArrayCollection;
 
         /*[Bindable]
-        private var lastDataTime:String;*/
+         private var lastDataTime:String;*/
 
         [Bindable]
         [Embed(source='../../../../assets/table_x32.png')]
@@ -152,6 +150,9 @@
         [Bindable]
         [Embed(source="../../../../assets/bookmark_blue.png")]
         private var bookmarkIcon:Class;
+        [Bindable]
+        [Embed(source="../../../../assets/refresh_x32.png")]
+        private var refreshIcon:Class;
 
         [Bindable]
         private var dataSource:DataSourceInfo;
@@ -192,14 +193,20 @@
 
         private var _reportType:int;
 
-        private var factory:EmbeddedViewFactory;
-
         private var reportChanged:Boolean;
 
         [Bindable]
         private var _dataSourceID:int;
 
-        private var viewFactory:EmbeddedViewFactory;
+        private var _viewFactory:AbstractViewFactory;
+
+        public function get viewFactory():AbstractViewFactory {
+            return _viewFactory;
+        }
+
+        public function set viewFactory(value:AbstractViewFactory):void {
+            _viewFactory = value;
+        }
 
         [Bindable]
         private var admin:Boolean;
@@ -227,28 +234,18 @@
             }
         }
 
-        override protected function createChildren():void {
-            super.createChildren();
-            var controllerClass:Class = EmbeddedControllerLookup.controllerForType(_reportType);
-            var controller:IEmbeddedReportController = new controllerClass();
-            var dataViewFactory:EmbeddedViewFactory = controller.createEmbeddedView();
-            dataViewFactory.reportID = _reportID;
-            dataViewFactory.dataSourceID = _dataSourceID;
-            reportBox.addChild(dataViewFactory);
-            dataViewFactory.addEventListener(EmbeddedDataServiceEvent.DATA_RETURNED, gotData);
-            if (!_embedded) {
-                progressBar.visible = true;
-            }
-            this.viewFactory = dataViewFactory;
-            dataViewFactory.retrieveData();
+        private function dataLoadingEvent(event:DataServiceLoadingEvent):void {
+            progressBar.visible = event.type == DataServiceLoadingEvent.LOADING_STARTED;
         }
+
+
 
         public function set dataSourceID(value:int):void {
             _dataSourceID = value;
         }
 
         private function onCredentials(event:CredentialsEvent):void {
-            viewFactory.retrieveData();
+            viewFactory.retrieveData(false);
         }
 
         private var report:AnalysisDefinition;
@@ -343,7 +340,16 @@
         }
 
         public function refreshData():void {
-            viewFactory.retrieveData();
+            var window:RefreshReportSourceWindow = new RefreshReportSourceWindow();
+            window.dataSourceID = _dataSourceID;
+            window.reportID = _reportID;
+            window.embeddedViewFactory = viewFactory;
+            if (transformContainer != null) {
+                window.filterDefinitions = transformContainer.getFilterDefinitions();
+            }
+            PopUpManager.addPopUp(window, this, true);
+            PopUpUtil.centerPopUp(window);
+            //viewFactory.retrieveData(false);
         }
 
         public function canRefresh():Boolean {
@@ -356,22 +362,97 @@
 
         public function getBrowserURL():String {
             return null;
-        }]]></mx:Script>
+        }
+
+        private var _showBack:Boolean = true;
+        private var _showFullScreen:Boolean = true;
+        private var _showRefresh:Boolean = true;
+        private var _showBookmark:Boolean = true;
+        private var _showExport:Boolean = true;
+        private var _showReportEditor:Boolean = true;
+        private var _showFilters:Boolean = true;
+        private var _showMetadata:Boolean = true;
+
+
+        public function set showBack(value:Boolean):void {
+            _showBack = value;
+        }
+
+        public function set showFullScreen(value:Boolean):void {
+            _showFullScreen = value;
+        }
+
+        public function set showRefresh(value:Boolean):void {
+            _showRefresh = value;
+        }
+
+        public function set showBookmark(value:Boolean):void {
+            _showBookmark = value;
+        }
+
+        public function set showExport(value:Boolean):void {
+            _showExport = value;
+        }
+
+        public function set showReportEditor(value:Boolean):void {
+            _showReportEditor = value;
+        }
+
+        public function set showMetadata(value:Boolean):void {
+            _showMetadata = value;
+        }
+
+        override protected function createChildren():void {
+            super.createChildren();
+            if (!_showBack) {
+                buttonBar.removeChild(backButton);
+            }
+            if (!_showFullScreen) {
+                buttonBar.removeChild(fullScreenButton);
+            }
+            if (!_showBookmark) {
+                buttonBar.removeChild(bookmarkButton);
+            }
+            if (!_showExport) {
+                buttonBar.removeChild(exportButton);
+            }
+            if (!_showFilters) {
+                buttonBar.removeChild(adjustFiltersbutton);
+            }
+            if (!_showReportEditor) {
+                buttonBar.removeChild(editReportButton);
+            }
+            if (!_showMetadata) {
+                coreBox.removeChild(reportMetadata);
+            }
+            viewFactory.reportID = _reportID;
+            viewFactory.dataSourceID = _dataSourceID;
+            reportBox.addChild(viewFactory);
+            viewFactory.addEventListener(EmbeddedDataServiceEvent.DATA_RETURNED, gotData);
+            viewFactory.addEventListener(DataServiceLoadingEvent.LOADING_STARTED, dataLoadingEvent);
+            viewFactory.addEventListener(DataServiceLoadingEvent.LOADING_STOPPED, dataLoadingEvent);
+            if (!_embedded) {
+                progressBar.visible = true;
+            }
+            viewFactory.retrieveData(false);
+        }
+        ]]></mx:Script>
     <mx:VBox width="100%" height="100%" paddingBottom="10" paddingLeft="10" paddingRight="10" paddingTop="10">
         <mx:HBox id="buttonBar" verticalAlign="middle">
-            <mx:Button label="Back" click="close()" icon="{closeIcon}" labelPlacement="bottom" visible="{!_embedded}"/>
-            <mx:Button label="Full Screen" click="toFullScreen()" icon="{fullScreenIcon}" labelPlacement="bottom"/>
-            <mx:Button label="Bookmark" click="bookmark()" icon="{bookmarkIcon}" labelPlacement="bottom"/>
-            <mx:Button label="Export to Excel" icon="{exportToExcelIcon}" click="exportExcel()" labelPlacement="bottom" />
+            <mx:Button label="Back" click="close()" icon="{closeIcon}" labelPlacement="bottom" id="backButton"/>
+            <mx:Button label="Full Screen" click="toFullScreen()" icon="{fullScreenIcon}" labelPlacement="bottom" id="fullScreenButton"/>
+            <mx:Button label="Refresh" click="refreshData()" icon="{refreshIcon}" labelPlacement="bottom" id="refreshButton"/>
+            <mx:Button label="Bookmark" click="bookmark()" icon="{bookmarkIcon}" labelPlacement="bottom" id="bookmarkButton"/>
+            <mx:Button label="Export to Excel" icon="{exportToExcelIcon}" click="exportExcel()" labelPlacement="bottom" id="exportButton"/>
             <mx:Button label="Edit this Report" icon="{reportEditorIcon}" click="toReportEditor()" visible="{admin}"
-                       labelPlacement="bottom"/>
+                       labelPlacement="bottom" id="editReportButton"/>
             <mx:Button label="Adjust Filters" icon="{filterIcon}" click="adjustFilters()" visible="{showFilters}"
-                       labelPlacement="bottom"/>
+                       labelPlacement="bottom" id="adjustFiltersbutton"/>
             <datasources:DataSourceDisplay dataSource="{dataSource}"/>
             <!--<mx:Label text="Last Data Time:" fontFamily="Tahoma" fontWeight="bold"/>
             <mx:Label text="{lastDataTime}"/>-->
         </mx:HBox>
-        <mx:HBox width="100%" height="100%">
+        <mx:HBox width="100%" height="100%" id="coreBox">
             <mx:VBox id="reportBox" width="100%" height="100%">
                 <mx:Box width="100%" id="transformBox"/>
                 <mx:HRule width="100%" id="hrule"/>

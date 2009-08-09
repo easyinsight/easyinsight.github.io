@@ -7,6 +7,7 @@ import com.easyinsight.users.Account;
 import com.easyinsight.core.*;
 import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.analysis.IRow;
+import com.easyinsight.analysis.DataSourceInfo;
 import com.easyinsight.userupload.IDataTypeGuesser;
 import com.easyinsight.userupload.DataTypeGuesser;
 import com.google.gdata.client.spreadsheet.SpreadsheetService;
@@ -45,6 +46,10 @@ public class GoogleFeedDefinition extends ServerDataSourceDefinition {
 
     public boolean isLiveData() {
         return true;
+    }
+
+    public int getDataSourceType() {
+        return DataSourceInfo.LIVE;
     }
 
     public void customStorage(Connection conn) throws SQLException {

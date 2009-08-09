@@ -27,6 +27,19 @@ public class StaticFeed extends Feed implements Serializable {
         return FeedType.STATIC;
     }
 
+    public Set<CredentialRequirement> getCredentialRequirement(boolean allSources) {
+        if (allSources && getType() == DataSourceInfo.STORED_PULL) {
+            Set<CredentialRequirement> credentials = super.getCredentialRequirement(allSources);
+            CredentialRequirement requirement = new CredentialRequirement();
+            requirement.setDataSourceID(getFeedID());
+            requirement.setDataSourceName(getName());
+            requirement.setCredentialsDefinition(CredentialsDefinition.STANDARD_USERNAME_PW);
+            credentials.add(requirement);
+            return credentials;
+        }
+        return super.getCredentialRequirement(allSources);
+    }
+
     public AnalysisItemResultMetadata getMetadata(AnalysisItem analysisItem, InsightRequestMetadata insightRequestMetadata) {
         // this would change to return the data from our contained analysis definition
         AnalysisItemResultMetadata metadata = analysisItem.createResultMetadata();

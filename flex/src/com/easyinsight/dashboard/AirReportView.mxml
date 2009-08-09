@@ -224,7 +224,7 @@
 
         private function onLoadStop(event:AsyncLoadEvent):void {
             showProgress = false;
-            statusDisplay.good();
+            //statusDisplay.good();
             showRefresh = event.asyncScreen.canRefresh();
             showBrowser = event.asyncScreen.canViewInBrowser();
 
@@ -238,7 +238,7 @@
 
         private function onFault(event:ReportRetrievalFault):void {
             showProgress = false;
-            statusDisplay.bad(event);
+            //statusDisplay.bad(event);
         }
 
         private function refreshData():void {
@@ -266,7 +266,7 @@
     </mx:RemoteObject>
     <mx:VBox width="100%" height="100%" paddingLeft="5" paddingBottom="5" paddingRight="5" paddingTop="5">
         <mx:HBox width="100%" verticalAlign="middle">
-            <mx:Button icon="@Embed(source=
+            <!--<mx:Button icon="@Embed(source=
                        '../../../../assets/refresh.png')" toolTip="Refresh Selected View" click="refreshData()"
                        visible="{showRefresh}"/>
             <mx:Button icon="@Embed(source=
@@ -275,7 +275,7 @@
             <dashboard:ReportStatusDisplay id="statusDisplay"/>
             <mx:ProgressBar id="progressBar" indeterminate="true" visible="{showProgress}" width="50" label=""/>
             <mx:Spacer width="100%"/>
-            <mx:Button label="Log Out" click="dispatchEvent(new AirLogoutEvent())"/>
+            <mx:Button label="Log Out" click="dispatchEvent(new AirLogoutEvent())"/>-->
         </mx:HBox>
         <util:AsyncViewStack id="viewStack" width="100%" height="100%" screenRenderer="{screenFactory}"
                 asyncLoadStart="onLoadStart(event)" asyncLoadSuccess="onLoadStop(event)"

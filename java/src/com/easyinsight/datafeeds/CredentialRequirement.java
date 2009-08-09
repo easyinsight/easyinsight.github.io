@@ -43,4 +43,24 @@ public class CredentialRequirement {
     public void setCredentialsDefinition(int credentialsDefinition) {
         this.credentialsDefinition = credentialsDefinition;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        CredentialRequirement that = (CredentialRequirement) o;
+
+        if (dataSourceID != that.dataSourceID) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = (int) (dataSourceID ^ (dataSourceID >>> 32));
+        result = 31 * result + (dataSourceName != null ? dataSourceName.hashCode() : 0);
+        result = 31 * result + credentialsDefinition;
+        return result;
+    }
 }

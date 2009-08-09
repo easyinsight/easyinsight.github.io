@@ -9,6 +9,7 @@ public class DataSourceInfo {
     public static const STORED_PULL:int = 2;
     public static const LIVE:int = 3;
     public static const COMPOSITE:int = 4;
+    public static const COMPOSITE_PULL:int = 5;
 
     public var dataSourceName:String;
     public var dataSourceID:int;

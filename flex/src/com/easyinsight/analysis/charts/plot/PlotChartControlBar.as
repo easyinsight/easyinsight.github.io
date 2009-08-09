@@ -128,6 +128,7 @@ public class PlotChartControlBar extends HBox implements IReportControlBar  {
         xmeasureGrouping.analysisItems = analysisItems;
         dimensionGrouping.analysisItems = analysisItems;
         ymeasureGrouping.analysisItems = analysisItems;
+        seriesGrouping.analysisItems = analysisItems;
     }
 
     public function addItem(analysisItem:com.easyinsight.analysis.AnalysisItem):void {

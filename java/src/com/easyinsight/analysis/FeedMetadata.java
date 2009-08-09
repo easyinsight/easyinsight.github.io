@@ -6,6 +6,8 @@ import com.easyinsight.datafeeds.FeedNode;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.HashSet;
 
 /**
  * User: James Boe
@@ -19,7 +21,7 @@ public class FeedMetadata implements Serializable {
     private String dataSourceName;
     private int version;
     private boolean dataSourceAdmin;
-    private List<CredentialRequirement> credentials = new ArrayList<CredentialRequirement>();
+    private Set<CredentialRequirement> credentials = new HashSet<CredentialRequirement>();
     private List<FilterDefinition> intrinsicFilters = new ArrayList<FilterDefinition>();
 
     public List<FeedNode> getFieldHierarchy() {
@@ -38,11 +40,11 @@ public class FeedMetadata implements Serializable {
         this.intrinsicFilters = intrinsicFilters;
     }
 
-    public List<CredentialRequirement> getCredentials() {
+    public Set<CredentialRequirement> getCredentials() {
         return credentials;
     }
 
-    public void setCredentials(List<CredentialRequirement> credentials) {
+    public void setCredentials(Set<CredentialRequirement> credentials) {
         this.credentials = credentials;
     }
 

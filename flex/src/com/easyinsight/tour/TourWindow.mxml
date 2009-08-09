@@ -1,16 +1,35 @@
 <?xml version="1.0" ?>
 <mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml">
+    <!--
+        our roles:
+
+        start with solution, low level
+        start with high level KPI
+            small biz ecommerce scenario
+            start with some high level tree
+            demonstrate dragging in at least one other concept
+            building a marketing tree
+                
+        start with marketplace
+        start with API
+    -->
     <mx:VBox>
+        <mx:HBox>
+            <mx:Label text="Let's start by defining your "/>
+        </mx:HBox>
         <mx:Grid>
             <mx:GridRow>
                 <mx:GridItem>
-
+                    <mx:Box borderStyle="solid" cornerRadius="15" dropShadowEnabled="true" horizontalAlign="center" verticalAlign="middle">
+                        <mx:TextArea backgroundAlpha="0" borderStyle="none" editable="false" selectable="false"
+                                     text="Solutions"/>
+                    </mx:Box>
                 </mx:GridItem>
                 <mx:GridItem>
-
-                </mx:GridItem>
-                <mx:GridItem>
-
+                    <mx:Box borderStyle="solid" cornerRadius="15" dropShadowEnabled="true" horizontalAlign="center" verticalAlign="middle">
+                        <mx:TextArea backgroundAlpha="0" borderStyle="none" editable="false" selectable="false"
+                                     text="Small biz"/>
+                    </mx:Box>
                 </mx:GridItem>
             </mx:GridRow>
         </mx:Grid>

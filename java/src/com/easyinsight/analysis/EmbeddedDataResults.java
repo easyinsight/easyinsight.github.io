@@ -4,6 +4,7 @@ import com.easyinsight.datafeeds.CredentialRequirement;
 
 import java.io.Serializable;
 import java.util.List;
+import java.util.Set;
 
 public class EmbeddedDataResults implements Serializable {
     private AnalysisItem[] headers;
@@ -12,7 +13,7 @@ public class EmbeddedDataResults implements Serializable {
     private boolean dataSourceAccessible;
     private DataSourceInfo dataSourceInfo;
     private String attribution;
-    private List<CredentialRequirement> credentialRequirements;
+    private Set<CredentialRequirement> credentialRequirements;
 
     public EmbeddedDataResults() {
     }
@@ -25,11 +26,11 @@ public class EmbeddedDataResults implements Serializable {
         this.attribution = results.attribution;
     }
 
-    public List<CredentialRequirement> getCredentialRequirements() {
+    public Set<CredentialRequirement> getCredentialRequirements() {
         return credentialRequirements;
     }
 
-    public void setCredentialRequirements(List<CredentialRequirement> credentialRequirements) {
+    public void setCredentialRequirements(Set<CredentialRequirement> credentialRequirements) {
         this.credentialRequirements = credentialRequirements;
     }
 

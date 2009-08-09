@@ -36,10 +36,21 @@ import mx.events.DropdownEvent;
 
         private var _credentials:Object;
 
+        private var _filterEnabled:Boolean;
 
 
-		
-		[Bindable]
+        [Bindable(event="filterEnabledChanged")]
+        public function get filterEnabled():Boolean {
+            return _filterEnabled;
+        }
+
+        public function set filterEnabled(value:Boolean):void {
+            if (_filterEnabled == value) return;
+            _filterEnabled = value;
+            dispatchEvent(new Event("filterEnabledChanged"));
+        }
+
+        [Bindable]
         [Embed(source="../../../../assets/navigate_cross.png")]
         public var deleteIcon:Class;
         
@@ -88,6 +99,7 @@ import mx.events.DropdownEvent;
         private function onChange(event:Event):void {
             var checkbox:CheckBox = event.currentTarget as CheckBox;
             _filterDefinition.enabled = checkbox.selected;
+            comboBox.enabled = checkbox.selected;
             dispatchEvent(new FilterUpdatedEvent(FilterUpdatedEvent.FILTER_UPDATED, _filterDefinition, null, this));
         }
 		

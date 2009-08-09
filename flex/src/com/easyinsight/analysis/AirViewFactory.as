@@ -21,22 +21,19 @@ import com.easyinsight.analysis.service.EmbeddedDataService;
 import com.easyinsight.analysis.tree.TreeModule;
 import com.easyinsight.analysis.treemap.TreeMapModule;
 import com.easyinsight.framework.DataServiceLoadingEvent;
+import com.easyinsight.report.AbstractViewFactory;
+
 import flash.display.DisplayObject;
 import mx.collections.ArrayCollection;
-import mx.containers.VBox;
 import mx.controls.Alert;
 import mx.events.ModuleEvent;
 import mx.modules.IModuleInfo;
 
-public class AirViewFactory extends VBox {
+public class AirViewFactory extends AbstractViewFactory {
 
     private var _reportRendererModule:String;
     private var _newDefinition:Class;
     private var _reportDataService:Class = EmbeddedDataService;
-
-    private var _reportType:int;
-
-    private var _reportID:int;
     private var _availableFields:ArrayCollection;
 
     private var _prefix:String = "";
@@ -48,28 +45,17 @@ public class AirViewFactory extends VBox {
 
     private var pendingRequest:Boolean = false;
 
-    private var _dataSourceID:int;
-
     public function AirViewFactory() {
-        this.percentHeight = 100;
-        this.percentWidth = 100;
+        
     }
 
-    public function set dataSourceID(value:int):void {
-        _dataSourceID = value;
-    }
+
 
     public function set prefix(val:String):void {
         _prefix = val;
     }
 
-    public function set availableFields(val:ArrayCollection):void {
-        _availableFields = val;
-    }
 
-    public function set reportID(val:int):void {
-        _reportID = val;
-    }
 
     public function set reportDataService(val:Class):void {
         _reportDataService = val;
@@ -83,9 +69,6 @@ public class AirViewFactory extends VBox {
         _newDefinition = val;
     }
 
-    public function set reportType(value:int):void {
-        _reportType = value;
-    }
 
     override protected function createChildren():void {
         super.createChildren();
@@ -106,15 +89,15 @@ public class AirViewFactory extends VBox {
         retrieveData();
     }
 
-    public function retrieveData():void {
+    override public function retrieveData(allSources:Boolean = false):void {
         if (_reportRenderer == null) {
             pendingRequest = true;
         } else {
-            _dataService.retrieveData(_reportID, _dataSourceID, null);
+            _dataService.retrieveData(reportID, dataSourceID, filterDefinitions, allSources);
         }
     }
 
-    private function gotData(event:EmbeddedDataServiceEvent):void {
+    override public function gotData(event:EmbeddedDataServiceEvent):void {
         if (event.credentialRequirements != null && event.credentialRequirements.length > 0) {
 
         } else {
@@ -124,7 +107,7 @@ public class AirViewFactory extends VBox {
     }
 
     private function loadReportRenderer():void {
-        _reportRenderer = lookup(_reportType);
+        _reportRenderer = lookup(reportType);
         _reportRenderer.addEventListener(ReportRendererEvent.FORCE_RENDER, forceRender);
         _reportRenderer.addEventListener(HierarchyDrilldownEvent.DRILLDOWN, drilldown);
         _reportRenderer.addEventListener(HierarchyRollupEvent.HIERARCHY_ROLLUP, onRollup);

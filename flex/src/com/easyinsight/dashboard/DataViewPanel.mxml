@@ -80,7 +80,7 @@
                 dataViewFactory.reportID = _analysisID;
                 dataViewFactory.dataSourceID = _dataSourceID;
                 coreVBox.addChild(dataViewFactory);
-                dataViewFactory.retrieveData();
+                dataViewFactory.retrieveData(false);
             }
         }
 
@@ -102,7 +102,7 @@
         }
 
         public function refreshData():void {
-            dataViewFactory.retrieveData();
+            dataViewFactory.retrieveData(false);
         }
                 ]]>
 	</mx:Script>

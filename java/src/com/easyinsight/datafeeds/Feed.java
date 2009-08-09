@@ -5,10 +5,7 @@ import com.easyinsight.dataset.DataSet;
 import com.easyinsight.analysis.*;
 import com.easyinsight.core.Key;
 
-import java.util.List;
-import java.util.Collection;
-import java.util.Set;
-import java.util.ArrayList;
+import java.util.*;
 import java.io.Serializable;
 
 /**
@@ -24,34 +21,23 @@ public abstract class Feed implements Serializable {
     private String name;
     private String attribution;
     private boolean visible;
-    private boolean push;
+    private int type;
+
+    public int getType() {
+        return type;
+    }
+
+    public void setType(int type) {
+        this.type = type;
+    }
 
     public DataSourceInfo getDataSourceInfo() {
         DataSourceInfo dataSourceInfo = new DataSourceInfo();
-        int type;
-        // TODo: yes, this is horrible, but it's late
-        if (this instanceof CompositeFeed && push) {
-            type = DataSourceInfo.COMPOSITE;
-        } else {
-            if (push) {
-                type = DataSourceInfo.STORED_PUSH;
-            } else {
-                type = getCredentialRequirement().isEmpty() ? DataSourceInfo.STORED_PULL : DataSourceInfo.LIVE;
-            }
-        }
         dataSourceInfo.setType(type);
         dataSourceInfo.setDataSourceID(feedID);
         dataSourceInfo.setDataSourceName(name);
-        dataSourceInfo.setLiveDataSource(!getCredentialRequirement().isEmpty());
+        dataSourceInfo.setLiveDataSource(!getCredentialRequirement(false).isEmpty());
         return dataSourceInfo;
-    }
-
-    public boolean isPush() {
-        return push;
-    }
-
-    public void setPush(boolean push) {
-        this.push = push;
     }
 
     public boolean isVisible() {
@@ -114,8 +100,14 @@ public abstract class Feed implements Serializable {
         this.feedID = feedID;
     }
 
-    public List<CredentialRequirement> getCredentialRequirement() {
-        return new ArrayList<CredentialRequirement>();
+    public Set<CredentialRequirement> getCredentialRequirement(boolean allSources) {
+        return new HashSet<CredentialRequirement>();
+    }
+
+    public List<Long> getDataSourceIDs() {
+        List<Long> ids = new ArrayList<Long>();
+        ids.add(feedID);
+        return ids;
     }
 
     public abstract AnalysisItemResultMetadata getMetadata(AnalysisItem analysisItem, InsightRequestMetadata insightRequestMetadata);

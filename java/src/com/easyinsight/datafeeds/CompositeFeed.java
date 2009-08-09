@@ -5,13 +5,11 @@ import com.easyinsight.core.Key;
 import com.easyinsight.core.DerivedKey;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.analysis.*;
-import com.easyinsight.pipeline.DerivedDataSourcePipeline;
 
 import java.util.*;
 
 import org.jgrapht.UndirectedGraph;
 import org.jgrapht.alg.DijkstraShortestPath;
-import org.jgrapht.traverse.BreadthFirstIterator;
 import org.jgrapht.graph.SimpleGraph;
 
 /**
@@ -31,14 +29,29 @@ public class CompositeFeed extends Feed {
         this.connections = connections;
     }
 
+    public List<Long> getDataSourceIDs() {
+        List<Long> ids = super.getDataSourceIDs();
+        for (CompositeFeedNode node : compositeFeedNodes) {
+            ids.add(node.getDataFeedID());
+        }
+        return ids;
+    }
+
     @Override
-    public List<CredentialRequirement> getCredentialRequirement() {
-        List<CredentialRequirement> requirement = super.getCredentialRequirement();
+    public Set<CredentialRequirement> getCredentialRequirement(boolean allSources) {
+        Set<CredentialRequirement> requirements = super.getCredentialRequirement(allSources);
+        if (allSources && getType() == DataSourceInfo.COMPOSITE_PULL) {
+            CredentialRequirement requirement = new CredentialRequirement();
+            requirement.setDataSourceID(getFeedID());
+            requirement.setDataSourceName(getName());
+            requirement.setCredentialsDefinition(CredentialsDefinition.STANDARD_USERNAME_PW);
+            requirements.add(requirement);
+        }
         for (CompositeFeedNode child : compositeFeedNodes) {
             Feed childDataSource = FeedRegistry.instance().getFeed(child.getDataFeedID());
-            requirement.addAll(childDataSource.getCredentialRequirement());
+            requirements.addAll(childDataSource.getCredentialRequirement(allSources));
         }
-        return requirement;
+        return requirements;
     }
 
     public FeedType getDataFeedType() {

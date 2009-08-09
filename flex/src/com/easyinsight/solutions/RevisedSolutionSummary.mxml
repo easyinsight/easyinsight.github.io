@@ -52,6 +52,7 @@
         public function set biz(value:Boolean):void {
             if (_biz == value) return;
             _biz = value;
+            updateFilters();
             dispatchEvent(new Event("bizChanged"));
         }
 

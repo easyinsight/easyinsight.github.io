@@ -17,7 +17,7 @@ public class ReportScreenFactory implements IAsyncScreenFactory{
             reportView.reportID = insightDescriptor.id;
             reportView.reportType = insightDescriptor.reportType;
             reportView.dataSourceID = insightDescriptor.dataFeedID;
-            reportView.embedded = true;
+            reportView.showBack = false;
             return reportView;
         } else {
             var goalView:GoalTreeViewContainer = new GoalTreeViewContainer();

@@ -6,14 +6,12 @@ import com.easyinsight.security.Roles;
 import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.logging.LogClass;
-import com.easyinsight.database.Database;
 import com.easyinsight.util.RandomTextGenerator;
 
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.util.Arrays;
 
 /**
  * User: James Boe
@@ -31,20 +29,20 @@ public class FeedCreation {
     public FeedCreationResult createFeed(FeedDefinition feedDefinition, Connection conn, DataSet dataSet, long userID, long accountID) throws SQLException {
         long feedID = feedStorage.addFeedDefinitionData(feedDefinition, conn);
         DataStorage tableDef = null;
-        if (dataSet != null && !feedDefinition.isLiveData()) {
+        if (dataSet != null && (feedDefinition.getDataSourceType() == DataSourceInfo.STORED_PUSH || feedDefinition.getDataSourceType() == DataSourceInfo.STORED_PULL)) {
             tableDef = DataStorage.writeConnection(feedDefinition, conn, accountID);
             tableDef.createTable();
             tableDef.insertData(dataSet);
-        } else if (feedDefinition.isLiveData()) {
+        } else {
             DataStorage.liveDataSource(feedID, conn);
         }
-        AnalysisDefinition baseDefinition = new AnalysisDefinition();
+        /*AnalysisDefinition baseDefinition = new AnalysisDefinition();
         baseDefinition.setDataFeedID(feedID);
         baseDefinition.setRootDefinition(true);
         baseDefinition.setAnalysisDefinitionState(new ListDefinitionState());
         baseDefinition.setUserBindings(Arrays.asList(new UserToAnalysisBinding(userID, UserPermission.OWNER)));
         new AnalysisStorage().saveAnalysis(baseDefinition, conn);
-        feedDefinition.setAnalysisDefinitionID(baseDefinition.getAnalysisID());
+        feedDefinition.setAnalysisDefinitionID(baseDefinition.getAnalysisID());*/
         feedDefinition.setApiKey(RandomTextGenerator.generateText(12));
         feedStorage.updateDataFeedConfiguration(feedDefinition, conn);
         createUserFeedLink(userID, feedDefinition.getDataFeedID(), Roles.OWNER, conn);
@@ -79,12 +77,12 @@ public class FeedCreation {
         }
     }
 
-    private void createUserFeedLink(long userID, long dataFeedID, int owner) {
+    /*private void createUserFeedLink(long userID, long dataFeedID, int owner) {
         Connection conn = Database.instance().getConnection();
         try {
             createUserFeedLink(userID, dataFeedID, owner, conn);
         } finally {
             Database.instance().closeConnection(conn);
         }
-    }
+    }*/
 }

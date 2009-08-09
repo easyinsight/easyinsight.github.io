@@ -119,8 +119,8 @@ public class SalesforceBaseDataSource extends ServerDataSourceDefinition {
         }
     }
 
-    public boolean isLiveData() {
-        return true;
+    public int getDataSourceType() {
+        return DataSourceInfo.LIVE;
     }
 
     private List<AnalysisItem> getAnalysisItemsForObject(String s, Map<String, Key> keys) throws InvalidSObjectFault, UnexpectedErrorFault {

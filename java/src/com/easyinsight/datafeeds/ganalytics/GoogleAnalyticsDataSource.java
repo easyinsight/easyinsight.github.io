@@ -175,9 +175,8 @@ public class GoogleAnalyticsDataSource extends ServerDataSourceDefinition {
         return Account.INDIVIDUAL;
     }
 
-    @Override
-    public boolean isLiveData() {
-        return true;
+    public int getDataSourceType() {
+        return DataSourceInfo.LIVE;
     }
 
     public FeedType getFeedType() {

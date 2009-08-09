@@ -16,6 +16,7 @@ import com.easyinsight.core.DataSourceDescriptor;
 import com.easyinsight.scheduler.DataSourceTaskGenerator;
 import com.easyinsight.goals.GoalTreeDescriptor;
 import com.easyinsight.PasswordStorage;
+import com.easyinsight.users.Credentials;
 import com.easyinsight.eventing.EventDispatcher;
 import com.easyinsight.eventing.TodoCompletedEvent;
 
@@ -42,14 +43,37 @@ public class FeedService implements IDataFeedService {
         // this goes into a different data provider        
     }
 
-    public List<CredentialRequirement> getCredentials(List<Integer> dataSourceIDs, List<CredentialFulfillment> existingCredentials) {
+    public void forceRefresh(long dataSourceID, boolean allSources, List<CredentialFulfillment> credentialsList) {
+        try {
+            Feed feed = FeedRegistry.instance().getFeed(dataSourceID);
+            List<Long> dataSourceIDs = feed.getDataSourceIDs();
+            for (Long containedID : dataSourceIDs) {
+                FeedDefinition feedDefinition = new FeedStorage().getFeedDefinitionData(containedID);
+                if (feedDefinition.getCredentialsDefinition() == CredentialsDefinition.STANDARD_USERNAME_PW) {
+                    IServerDataSourceDefinition dataSource = (IServerDataSourceDefinition) feedDefinition;
+                    Credentials credentials = null;
+                    for (CredentialFulfillment fulfillment : credentialsList) {
+                        if (fulfillment.getDataSourceID() == feedDefinition.getDataFeedID()) {
+                            credentials = fulfillment.getCredentials();
+                        }
+                    }
+                    dataSource.refreshData(credentials, SecurityUtil.getAccountID(), new Date(), null);
+                }
+            }
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        }
+    }
+
+    public List<CredentialRequirement> getCredentials(List<Integer> dataSourceIDs, boolean allSources, List<CredentialFulfillment> existingCredentials) {
         try {
             List<CredentialRequirement> neededCredentials = new ArrayList<CredentialRequirement>();
             InsightRequestMetadata metadata = new InsightRequestMetadata();
             metadata.setCredentialFulfillmentList(existingCredentials);
             for (Integer dataSourceID : dataSourceIDs) {
                 Feed feed = FeedRegistry.instance().getFeed(dataSourceID);
-                List<CredentialRequirement> requirements = feed.getCredentialRequirement();
+                Set<CredentialRequirement> requirements = feed.getCredentialRequirement(false);
                 for (CredentialRequirement credentialRequirement : requirements) {
                     if (metadata.getCredentialForDataSource(credentialRequirement.getDataSourceID()) == null) {
                         neededCredentials.add(credentialRequirement);

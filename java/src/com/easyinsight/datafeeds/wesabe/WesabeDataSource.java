@@ -7,6 +7,7 @@ import com.easyinsight.datafeeds.IServerDataSourceDefinition;
 import com.easyinsight.datafeeds.CredentialsDefinition;
 import com.easyinsight.users.Account;
 import com.easyinsight.users.Credentials;
+import com.easyinsight.analysis.DataSourceInfo;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.DocumentBuilder;
@@ -64,6 +65,10 @@ public class WesabeDataSource extends CompositeServerDataSource {
     @Override
     public FeedType getFeedType() {
         return FeedType.WESABE;
+    }
+
+    public int getDataSourceType() {
+        return DataSourceInfo.STORED_PULL;
     }
 
     @Override

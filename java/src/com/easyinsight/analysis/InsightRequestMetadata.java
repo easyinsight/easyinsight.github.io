@@ -20,6 +20,7 @@ public class InsightRequestMetadata implements Serializable {
     private int utcOffset;
     private int version;
     private List<CredentialFulfillment> credentialFulfillmentList = new ArrayList<CredentialFulfillment>();
+    private boolean refreshAllSources;
 
     @Nullable
     public Credentials getCredentialForDataSource(long dataSourceID) {
@@ -30,6 +31,14 @@ public class InsightRequestMetadata implements Serializable {
             }
         }
         return credentials;
+    }
+
+    public boolean isRefreshAllSources() {
+        return refreshAllSources;
+    }
+
+    public void setRefreshAllSources(boolean refreshAllSources) {
+        this.refreshAllSources = refreshAllSources;
     }
 
     public int getUtcOffset() {

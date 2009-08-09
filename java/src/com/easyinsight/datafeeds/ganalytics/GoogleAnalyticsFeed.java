@@ -104,8 +104,8 @@ public class GoogleAnalyticsFeed extends Feed {
         return as;
     }
 
-    public List<CredentialRequirement> getCredentialRequirement() {
-        List<CredentialRequirement> credentials = super.getCredentialRequirement();
+    public Set<CredentialRequirement> getCredentialRequirement(boolean allSources) {
+        Set<CredentialRequirement> credentials = super.getCredentialRequirement(allSources);
         CredentialRequirement requirement = new CredentialRequirement();
         requirement.setDataSourceID(getFeedID());
         requirement.setDataSourceName(getName());

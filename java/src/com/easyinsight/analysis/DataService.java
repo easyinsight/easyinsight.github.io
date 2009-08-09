@@ -10,6 +10,7 @@ import com.easyinsight.core.Key;
 import com.easyinsight.core.Value;
 import com.easyinsight.pipeline.Pipeline;
 import com.easyinsight.pipeline.StandardReportPipeline;
+import com.easyinsight.users.Credentials;
 
 import java.util.*;
 import java.io.Serializable;
@@ -52,11 +53,11 @@ public class DataService {
         }
     }
 
-    public List<CredentialRequirement> getCredentialRequirements(long feedID) {
+    public Set<CredentialRequirement> getCredentialRequirements(long feedID) {
         SecurityUtil.authorizeFeedAccess(feedID);
         try {
             Feed feed = feedRegistry.getFeed(feedID);
-            return feed.getCredentialRequirement();
+            return feed.getCredentialRequirement(false);
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);
@@ -67,7 +68,7 @@ public class DataService {
         SecurityUtil.authorizeFeedAccess(feedID);
         try {
             Feed feed = feedRegistry.getFeed(feedID);
-            List<CredentialRequirement> credentialRequirements = feed.getCredentialRequirement();
+            Set<CredentialRequirement> credentialRequirements = feed.getCredentialRequirement(false);
             Collection<AnalysisItem> feedItems = feed.getFields();
             // need to apply renames from the com.easyinsight.analysis definition here?
             List<AnalysisItem> sortedList = new ArrayList<AnalysisItem>(feedItems);
@@ -160,7 +161,7 @@ public class DataService {
         SecurityUtil.authorizeInsight(reportID);
         try {
             Feed feed = feedRegistry.getFeed(dataSourceID);
-            List<CredentialRequirement> credentialsRequired = feed.getCredentialRequirement();
+            Set<CredentialRequirement> credentialsRequired = feed.getCredentialRequirement(insightRequestMetadata.isRefreshAllSources());
             if (credentialsRequired.size() > 0) {
                 int count = 0;
                 for (CredentialRequirement credentialRequirement : credentialsRequired) {
@@ -172,6 +173,18 @@ public class DataService {
                     EmbeddedDataResults embeddedDataResults = new EmbeddedDataResults();
                     embeddedDataResults.setCredentialRequirements(credentialsRequired);
                     return embeddedDataResults;
+                }
+            }
+            if (insightRequestMetadata.isRefreshAllSources()) {
+                List<Long> containedIDs = feed.getDataSourceIDs();
+                for (Long containedID : containedIDs) {
+                    FeedDefinition feedDefinition = new FeedStorage().getFeedDefinitionData(containedID);
+                    if (feedDefinition.getDataSourceType() == DataSourceInfo.STORED_PULL ||
+                            feedDefinition.getDataSourceType() == DataSourceInfo.COMPOSITE_PULL) {
+                        IServerDataSourceDefinition dataSource = (IServerDataSourceDefinition) feedDefinition;
+                        Credentials credentials = insightRequestMetadata.getCredentialForDataSource(feedDefinition.getDataFeedID());                        
+                        dataSource.refreshData(credentials, SecurityUtil.getAccountID(), new Date(), null);
+                    }
                 }
             }
             EmbeddedCacheKey key = new EmbeddedCacheKey(customFilters, reportID);

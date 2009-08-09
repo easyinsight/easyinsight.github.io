@@ -269,6 +269,18 @@ import mx.charts.series.ColumnSeries;
 
             if (dataSet.length > 0) {
 
+                if (columnChartDef.xaxis.sort > 0) {
+                    var sort:Sort = new Sort();
+                    sort.fields = [ new SortField(columnChartDef.xaxis.qualifiedName(), false, columnChartDef.xaxis.sort == ChartSortButton.DESCENDING)];
+                    graphData.sort = sort;
+                    graphData.refresh();
+                } else if (columnChartDef.measure.sort > 0) {
+                    var measureSort:Sort = new Sort();
+                    measureSort.fields = [ new SortField(columnChartDef.measure.qualifiedName(), false, columnChartDef.measure.sort == ChartSortButton.DESCENDING)];
+                    graphData.sort = measureSort;
+                    graphData.refresh();
+                }
+
                 xField = columnChartDef.xaxis.qualifiedName();
                 createChart();
 

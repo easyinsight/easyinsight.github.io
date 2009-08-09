@@ -245,7 +245,7 @@ public class GoalService {
                         noCredentials = new FeedStorage().getFeedDefinitionData(dataSourceID).validateCredentials(credentials) != null;
                     }
                     if (noCredentials) {
-                        List<CredentialRequirement> credentialRequirements = feed.getCredentialRequirement();
+                        Set<CredentialRequirement> credentialRequirements = feed.getCredentialRequirement(false);
                         for (CredentialRequirement credentialRequirement : credentialRequirements) {
                             credentialMap.put(credentialRequirement.getDataSourceID(), credentialRequirement);
                         }
@@ -375,7 +375,7 @@ public class GoalService {
                     noCredentials = new FeedStorage().getFeedDefinitionData(dataSourceID).validateCredentials(credentials) != null;
                 }
                 if (noCredentials) {
-                    List<CredentialRequirement> credentialRequirements = feed.getCredentialRequirement();
+                    Set<CredentialRequirement> credentialRequirements = feed.getCredentialRequirement(false);
                     for (CredentialRequirement credentialRequirement : credentialRequirements) {
                         credentialMap.put(credentialRequirement.getDataSourceID(), credentialRequirement);
                     }
