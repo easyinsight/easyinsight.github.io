@@ -113,7 +113,7 @@
             <div id="mainLinks" style="width:100%">
                 <a href="/company.html">COMPANY</a><div></div>
                 <a href="/consulting.html">CONSULTING</a><div></div>
-                <!--<a href="index.html">COMMUNITY</a><div></div>-->
+                <!--<a href="index.html">COMMUNITY</a><div></div>--->
                 <a href="/solutions.html">SOLUTIONS</a><div></div>
                 <a href="/product.html">PRODUCT</a><div></div>
                 <a href="/index.html">HOME</a>
