@@ -1,6 +1,7 @@
 package com.easyinsight.datafeeds;
 
 import com.easyinsight.analysis.AnalysisStorage;
+import com.easyinsight.analysis.WSAnalysisDefinition;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -25,6 +26,9 @@ public class AnalysisBasedFeedDefinition extends FeedDefinition {
 
     @Override
     public void customLoad(Connection conn) throws SQLException {
-        setFields(new FeedStorage().retrieveFields(new AnalysisStorage().getAnalysisDefinition(getAnalysisDefinitionID(), conn).getDataFeedID(), conn));
+        WSAnalysisDefinition def = new AnalysisStorage().getAnalysisDefinition(getAnalysisDefinitionID(), conn);
+        if (def != null) {
+            setFields(new FeedStorage().retrieveFields(def.getDataFeedID(), conn));
+        }
     }
 }
