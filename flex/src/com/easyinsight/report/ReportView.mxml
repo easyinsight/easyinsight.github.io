@@ -2,7 +2,7 @@
 <easyinsight:FullScreenPage xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:easyinsight="com.easyinsight.*"
                             xmlns:filtering="com.easyinsight.filtering.*" xmlns:datasources="com.easyinsight.datasources.*"
                             width="100%" height="100%"
-                            creationComplete="onCreation()" implements="com.easyinsight.util.IAsyncScreen">
+                            creationComplete="onCreation()" implements="com.easyinsight.util.IAsyncScreen,com.easyinsight.framework.IFullScreenPage">
     <easyinsight:states>
         <mx:State name="FullScreen">
             <mx:RemoveChild target="{buttonBar}"/>
@@ -244,7 +244,6 @@
         }
 
 
-
         public function set dataSourceID(value:int):void {
             _dataSourceID = value;
         }
@@ -444,7 +443,9 @@
             }
             viewFactory.retrieveData(false);
         }
-        ]]></mx:Script>
+
+        public function cleanup():void {
+        }]]></mx:Script>
     <mx:VBox width="100%" height="100%" paddingBottom="10" paddingLeft="10" paddingRight="10" paddingTop="10">
         <mx:HBox id="buttonBar" verticalAlign="middle">
             <mx:Button label="Back" click="close()" icon="{closeIcon}" labelPlacement="bottom" id="backButton"/>

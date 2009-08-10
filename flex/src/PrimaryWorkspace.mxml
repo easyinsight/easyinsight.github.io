@@ -398,6 +398,7 @@
             event.dataAnalysisContainer.removeEventListener(AnalyzeEvent.ANALYZE, internalAnalyze);
             event.dataAnalysisContainer.removeEventListener(ModuleAnalyzeEvent.MODULE_ANALYZE, internalModuleAnalyze);
             event.dataAnalysisContainer.removeEventListener(NavigationEvent.NAVIGATION, navigation);
+            fullScreenPage.cleanup();
             dataAnalysis = null;
             if (this.perspective == null) {
                 navigation(new NavigationEvent("Intro"));
