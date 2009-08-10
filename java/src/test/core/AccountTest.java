@@ -47,7 +47,7 @@ public class AccountTest extends TestCase {
         testSecurityProvider.setUserPrincipal(userID);
         SecurityUtil.setSecurityProvider(testSecurityProvider);
         accountTransferObject = userService.retrieveAccount();
-        assertEquals(Account.ACTIVE, accountTransferObject.getAccountState());
+        assertEquals(Account.TRIAL, accountTransferObject.getAccountState());
         String activationKey;
         Connection conn = Database.instance().getConnection();
         try {
@@ -71,7 +71,7 @@ public class AccountTest extends TestCase {
             Database.instance().closeConnection(conn);
         }
         account = getAccount();
-        assertEquals(Account.ACTIVE, account.getAccountState());
+        assertTrue(account.isActivated());
     }
 
     private Account getAccount() {
