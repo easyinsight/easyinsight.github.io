@@ -1,7 +1,7 @@
 <?xml version="1.0" ?>
 <FullScreenPage xmlns="com.easyinsight.*" xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:ilog="ilog.orgchart.*"
                 xmlns:goals="com.easyinsight.goals.*" width="100%" height="100%" creationComplete="setup()"
-         implements="com.easyinsight.util.IAsyncScreen">
+         implements="com.easyinsight.util.IAsyncScreen, com.easyinsight.framework.IFullScreenPage">
     <states>
         <mx:State name="FullScreen">
             <mx:RemoveChild target="{buttonBox}"/>
@@ -74,12 +74,6 @@
         [Bindable]
         private var _embedded:Boolean;
 
-        [Bindable]
-        private var parentTrees:ArrayCollection;
-
-        [Bindable]
-        private var columnCount:int;
-
         public function set embedded(value:Boolean):void {
             _embedded = value;
         }
@@ -96,7 +90,7 @@
             var feedFragmentString:String = URLUtil.objectToString(feedFragmentObject);
             BrowserManager.getInstance().setFragment(feedFragmentString);
             ProgressAlert.alert(this, "Retrieving latest goal data", null, goalService.createDataTree);
-            goalService.createDataTree.send(_goalTreeID, startChooser.selectedDate, endChooser.selectedDate);
+            goalService.createDataTree.send(_goalTreeID);
         }
 
 
@@ -110,8 +104,15 @@
 
         override protected function createChildren():void {
             super.createChildren();
-            endDate = new Date();
-            startDate = new Date(endDate.getTime() - (1000 * 60 * 60 * 24 * 7));
+            if (!_showBackButton) {
+                buttonBox.removeChild(backButton);
+            }
+            if (!_showEditButton) {
+                buttonBox.removeChild(editButton);
+            }
+            if (!_showFullScreen) {
+                buttonBox.removeChild(fullScreenButton);
+            }
         }
 
         override protected function commitProperties():void {
@@ -123,7 +124,7 @@
 
         private function onDatesChanged():void {
             ProgressAlert.alert(this, "Retrieving latest goal data...", null, goalService.createDataTree);
-            goalService.createDataTree.send(_goalTreeID, startChooser.selectedDate, endChooser.selectedDate);
+            goalService.createDataTree.send(_goalTreeID);
         }
 
         private function parentTreeClick(event:MouseEvent):void {
@@ -151,17 +152,20 @@
         }
 
         private function processTree():void {
-            parentTrees = goalTree.subTreeParents;
-            this.columnCount = parentTrees.length;
+            if (parentsBox.getChildren().length == 0 && goalTree.subTreeParents != null) {
+                for each (var parent:GoalTreeDescriptor in goalTree.subTreeParents) {
+                    var goalRenderer:GoalTreeIconRenderer = new GoalTreeIconRenderer();
+                    goalRenderer.data = parent;
+                    parentsBox.addChild(goalRenderer);
+                }
+            }
             _goalTreeNodes = goalTree.rootNode;
             myOrgChart.dataProvider = _goalTreeNodes;
             dispatchEvent(new DataServiceLoadingEvent(DataServiceLoadingEvent.LOADING_STOPPED));
         }
 
         private function close():void {
-            for each (var displayObject:DisplayObject in windows) {
-                PopUpManager.removePopUp(displayObject as IFlexDisplayObject);
-            }
+
             dispatchEvent(new AnalysisCloseEvent(this));
         }
 
@@ -184,8 +188,6 @@
         public function refreshData():void {
             var window:RefreshGoalTreeWindow = new RefreshGoalTreeWindow();
             window.goalTreeID = _goalTreeID;
-            window.startDate = startChooser.selectedDate;
-            window.endDate = endChooser.selectedDate;
             window.addEventListener(GoalTreeRefreshEvent.GOAL_TREE_REFRESH, gotRefresh);
             PopUpManager.addPopUp(window, this, true);
             PopUpUtil.centerPopUp(window);
@@ -201,26 +203,44 @@
 
         public function getBrowserURL():String {
             return null;
+        }
+
+        private var _showBackButton:Boolean = true;
+        private var _showFullScreen:Boolean = true;
+        private var _showEditButton:Boolean = true;
+
+
+        public function set showBackButton(value:Boolean):void {
+            _showBackButton = value;
+        }
+
+        public function set showFullScreen(value:Boolean):void {
+            _showFullScreen = value;
+        }
+
+        public function set showEditButton(value:Boolean):void {
+            _showEditButton = value;
+        }
+
+
+        public function cleanup():void {
+            for each (var displayObject:DisplayObject in windows) {
+                PopUpManager.removePopUp(displayObject as IFlexDisplayObject);
+            }
         }]]></mx:Script>
     <mx:RemoteObject destination="goalService" id="goalService">
         <mx:method name="createDataTree" result="gotTree()"/>
     </mx:RemoteObject>
     <mx:HBox id="buttonBox" paddingLeft="10" paddingTop="10" paddingRight="10" width="100%" verticalAlign="middle">
-        <mx:Button id="wrapButton" icon="{closeIcon}" click="close()" toolTip="Close" visible="{!_embedded}" label="Back" labelPlacement="bottom"/>
+        <mx:Button id="backButton" icon="{closeIcon}" click="close()" toolTip="Close" visible="{!_embedded}" label="Back" labelPlacement="bottom"/>
         <mx:Button id="refreshButton" icon="{refreshIcon}" click="refreshData()" toolTip="Refresh Data" visible="{!_embedded}" label="Refresh" labelPlacement="bottom"/>
         <mx:Button id="fullScreenButton" icon="{fullScreenIcon}" click="toFullScreen()" toolTip="View in Full Screen" label="Full Screen" labelPlacement="bottom"/>
         <mx:Button id="editButton" icon="{editIcon}" click="editTree()" toolTip="Edit the Goal Tree" label="Edit Tree" labelPlacement="bottom" visible="{editAvailable}"/>
-        <mx:VRule height="100"/>
-        <mx:TileList id="parentsBox" itemRenderer="com.easyinsight.goals.GoalTreeIconRenderer" dataProvider="{parentTrees}" height="80"
+        <mx:VRule height="60"/>
+        <mx:HBox id="parentsBox"/>
+        <!--<mx:TileList id="parentsBox" itemRenderer="com.easyinsight.goals.GoalTreeIconRenderer" dataProvider="{parentTrees}" height="80"
                 backgroundAlpha="0" borderStyle="none" paddingBottom="0" paddingLeft="0" paddingRight="0" paddingTop="0"
-                columnCount="{columnCount}"/>
-        <mx:VRule height="100"/>
-        <mx:HBox width="100%" horizontalAlign="center" verticalAlign="middle">
-            <mx:Label text="Start Date:" fontSize="14"/>
-            <mx:DateField id="startChooser" selectedDate="{startDate}" change="onDatesChanged()"/>
-            <mx:Label text="End Date:" fontSize="14"/>
-            <mx:DateField id="endChooser" selectedDate="{endDate}" change="onDatesChanged()"/>
-        </mx:HBox>
+                columnCount="{columnCount}"/>-->
     </mx:HBox>
     <mx:HRule width="100%" id="hrule"/>
     <mx:VBox width="100%" height="100%" paddingRight="15" paddingTop="15" paddingLeft="15" paddingBottom="15">

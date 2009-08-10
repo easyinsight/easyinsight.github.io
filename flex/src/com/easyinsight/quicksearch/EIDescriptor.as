@@ -11,6 +11,8 @@ public class EIDescriptor {
     public static const MY_GOALS:int = 5;
     public static const AIR_INTRO:int = 6;
 
+    public static const GOAL_HISTORY:int = 7;
+
     public var id:int;
     public var name:String;
     public var icon:Class;

@@ -1,11 +1,15 @@
 <?xml version="1.0" ?>
-<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" creationComplete="setup()" width="100%" height="100%">
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" creationComplete="setup()" width="100%" height="100%"
+        implements="com.easyinsight.util.IAsyncScreen">
     <mx:Script><![CDATA[
         import com.easyinsight.analysis.CredentialRequirement;
         import com.easyinsight.analysis.CredentialsEvent;
         import com.easyinsight.analysis.RuntimeCredentialsWindow;
         import com.easyinsight.framework.CredentialsCache;
 
+        import com.easyinsight.framework.DataServiceLoadingEvent;
+        import com.easyinsight.genredata.ModuleAnalyzeEvent;
+        import com.easyinsight.listing.DescriptorAnalyzeSource;
         import com.easyinsight.util.PopUpUtil;
 
         import mx.charts.LinearAxis;
@@ -15,7 +19,12 @@
         import mx.controls.Alert;
         import mx.controls.Label;
         import mx.controls.VRule;
+        import mx.core.Container;
         import mx.managers.PopUpManager;
+
+        private function goDataSource():void {
+            dispatchEvent(new ModuleAnalyzeEvent(new DescriptorAnalyzeSource(_dataSourceID, _dataSourceName)));
+        }
 
         [Bindable]
         private var goalHistory:ArrayCollection;
@@ -26,6 +35,20 @@
         [Bindable]
         private var _endDate:Date;
 
+        private var _goalID:int;
+
+        private var _dataSourceID:int;
+        private var _dataSourceName:String;
+
+
+        public function set dataSourceID(value:int):void {
+            _dataSourceID = value;
+        }
+
+        public function set dataSourceName(value:String):void {
+            _dataSourceName = value;
+        }
+
         [Bindable]
         [Embed(source="../../../../assets/add.png")]
         private var addIcon:Class;
@@ -34,7 +57,7 @@
         [Embed(source="../../../../assets/data_blue_x16.png")]
         private var dataIcon:Class;
 
-        private var _goalTreeNodeData:GoalTreeNodeData;
+        //private var _goalTreeNodeData:GoalTreeNodeData;
 
         [Bindable]
         private var showSlope:Boolean;
@@ -47,11 +70,12 @@
                 _startDate = new Date(new Date().getTime() - 24 * 7 * 1000 * 60 * 60);
                 _endDate = new Date();
             }
-            goalService.getCredentialsForNode.send(_goalTreeNodeData.goalTreeNodeID, CredentialsCache.getCache().createCredentials(), false);
+            dispatchEvent(new DataServiceLoadingEvent(DataServiceLoadingEvent.LOADING_STARTED));
+            goalService.getCredentialsForNode.send(_goalID, CredentialsCache.getCache().createCredentials(), false);
             /*goalService.getGoalValues.send(_goalTreeNodeData.goalTreeNodeID, _startDate, _endDate);
-            if (_goalTreeNodeData.milestone != null) {
-                goalService.calculateSlope.send(_goalTreeNodeData.goalTreeNodeID, _startDate, _endDate);
-            }*/
+             if (_goalTreeNodeData.milestone != null) {
+             goalService.calculateSlope.send(_goalTreeNodeData.goalTreeNodeID, _startDate, _endDate);
+             }*/
         }
 
         private function gotSlope():void {
@@ -67,18 +91,19 @@
             _endDate = val;
         }
 
-        public function set goalTreeNodeData(val:GoalTreeNodeData):void {
-            _goalTreeNodeData = val;
+
+        public function set goalID(value:int):void {
+            _goalID = value;
         }
 
         private function onCredentials(event:CredentialsEvent):void {
-            goalService.getGoalValues.send(_goalTreeNodeData.goalTreeNodeID, _startDate, _endDate, CredentialsCache.getCache().createCredentials());    
+            goalService.getGoalValues.send(_goalID, _startDate, _endDate, CredentialsCache.getCache().createCredentials());
         }
 
         private function gotCredentials():void {
             var credentials:ArrayCollection = goalService.getCredentialsForNode.lastResult as ArrayCollection;
             if (credentials.length == 0) {
-                goalService.getGoalValues.send(_goalTreeNodeData.goalTreeNodeID, _startDate, _endDate, CredentialsCache.getCache().createCredentials());
+                goalService.getGoalValues.send(_goalID, _startDate, _endDate, CredentialsCache.getCache().createCredentials());
             } else {
                 for each (var credential:CredentialRequirement in credentials) {
                     var window:RuntimeCredentialsWindow = new RuntimeCredentialsWindow();
@@ -95,16 +120,17 @@
             if (history.length > 1) {
                 goalHistory = history;
             }
+            dispatchEvent(new DataServiceLoadingEvent(DataServiceLoadingEvent.LOADING_STOPPED));
         }
 
         private function onDatesChanged():void {
             _startDate = startChooser.selectedDate;
             _endDate = endChooser.selectedDate;
-            goalService.getGoalValues.send(_goalTreeNodeData.goalTreeNodeID, _startDate, _endDate, CredentialsCache.getCache().createCredentials());
+            goalService.getGoalValues.send(_goalID, _startDate, _endDate, CredentialsCache.getCache().createCredentials());
         }
 
         private function subscribe():void {
-            goalService.subscribeToGoal.send(_goalTreeNodeData.goalTreeNodeID);
+            goalService.subscribeToGoal.send(_goalID);
         }
 
         private function subscribedToGoal():void {
@@ -115,9 +141,9 @@
             linesCanvas.removeAllChildren();
             var milestone:GoalTreeMilestone;
             /*var dateFormatter:DateFormatter = new DateFormatter();
-            dateFormatter.formatString = "MM/DD/YY";
-            var format:String = dateFormatter.format(milestone.milestoneDate);
-            Alert.show(format);*/
+             dateFormatter.formatString = "MM/DD/YY";
+             var format:String = dateFormatter.format(milestone.milestoneDate);
+             Alert.show(format);*/
             var chartXValue:Object = getNumericChartValue(milestone.milestoneDate, horAxis);
             var thePosition:Point = chartToScreen(chartXValue.numericValue, 0, horSeries);
 
@@ -159,7 +185,18 @@
                 return {numericValue: Number(inValue)};
             }
         }
-        ]]></mx:Script>
+
+        public function getContainer():Container {
+            return this;
+        }
+
+        public function refreshData():void {
+            goalService.getCredentialsForNode.send(_goalID, CredentialsCache.getCache().createCredentials(), false);
+        }
+
+        public function canRefresh():Boolean {
+            return true;
+        }]]></mx:Script>
     <mx:RemoteObject destination="goalService" id="goalService">
         <mx:method name="getGoalValues" result="gotValues()"/>
         <mx:method name="getCredentialsForNode" result="gotCredentials()"/>
@@ -175,6 +212,7 @@
             <mx:DateField id="endChooser" selectedDate="{_endDate}" change="onDatesChanged()"/>
             <mx:Spacer width="100%"/>
             <!--<mx:Button icon="{dataIcon}" toolTip="View this Data Source" click="subscribe()"/>-->
+            <mx:Button label="Go to the Data Source" click="goDataSource()"/>
             <mx:Button icon="{addIcon}" toolTip="Add this goal to My Goals" click="subscribe()"/>
         </mx:HBox>
         <mx:LineChart dataProvider="{goalHistory}" width="100%" height="100%">

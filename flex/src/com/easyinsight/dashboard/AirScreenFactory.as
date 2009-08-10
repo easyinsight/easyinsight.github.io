@@ -42,6 +42,9 @@ public class AirScreenFactory implements IAsyncScreenFactory{
             var goalView:GoalTreeViewContainer = new GoalTreeViewContainer();
             goalView.goalTreeID = descriptor.id;
             goalView.embedded = true;
+            goalView.showBackButton = false;
+            goalView.showEditButton = false;
+            goalView.showFullScreen = false;
             return goalView;
         } else if (descriptor.getType() == EIDescriptor.MY_GOALS) {
             return new MyGoalsGrid();

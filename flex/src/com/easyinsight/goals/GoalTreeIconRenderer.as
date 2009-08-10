@@ -1,5 +1,6 @@
 package com.easyinsight.goals {
 
+import com.benstucki.utilities.IconUtility;
 import com.easyinsight.genredata.AnalyzeEvent;
 
 import flash.events.Event;
@@ -9,22 +10,23 @@ import flash.events.MouseEvent;
 import mx.binding.utils.BindingUtils;
 import mx.containers.HBox;
 import mx.containers.VBox;
+import mx.controls.Button;
 import mx.controls.Image;
 import mx.controls.Label;
 
-public class GoalTreeIconRenderer extends VBox{
+public class GoalTreeIconRenderer extends Button {
 
     private var goalTreeDescriptor:GoalTreeDescriptor;
-    private var _titleText:String;
-    private var titleLabel:Label;
-    private var imageRenderer:Image;
-    private var box:VBox;
+    //private var _titleText:String;
+    //private var titleLabel:Label;
+    //private var imageRenderer:Image;
+    //private var box:VBox;
 
     private var backgroundColor:uint = 0xFFFFFF;
 
     public function GoalTreeIconRenderer() {
         super();
-        titleLabel = new Label();
+        /*titleLabel = new Label();
         titleLabel.maxWidth = 110;
         BindingUtils.bindProperty(titleLabel, "text", this, "titleText");
         imageRenderer = new Image();
@@ -38,15 +40,18 @@ public class GoalTreeIconRenderer extends VBox{
         setStyle("horizontalAlign", "center");
         setStyle("verticalAlign", "middle");
         this.width = 120;
-        this.height = 80;
+        this.height = 80;*/
+        this.width = 120;
+        this.height = 60;
         addEventListener(MouseEvent.CLICK, onClick);
+        labelPlacement = "bottom";
     }
 
     private function onClick(event:MouseEvent):void {
         dispatchEvent(new AnalyzeEvent(new GoalDataAnalyzeSource(goalTreeDescriptor.id)));
     }
 
-    [Bindable(event="titleTextChanged")]
+    /*[Bindable(event="titleTextChanged")]
     public function get titleText():String {
         return _titleText;
     }
@@ -55,11 +60,11 @@ public class GoalTreeIconRenderer extends VBox{
         if (_titleText == value) return;
         _titleText = value;
         dispatchEvent(new Event("titleTextChanged"));
-    }
+    }*/
 
     override protected function createChildren():void {
         super.createChildren();
-        box = new VBox();
+        /*box = new VBox();
         box.setStyle("borderStyle", "solid");
         box.setStyle("cornerRadius", 8);
         box.setStyle("dropShadowEnabled", "true");
@@ -73,19 +78,23 @@ public class GoalTreeIconRenderer extends VBox{
         titleBox.setStyle("horizontalAlign", "center");
         titleBox.addChild(titleLabel);
         box.addChild(imageRenderer);
-        box.addChild(titleBox);        
+        box.addChild(titleBox);        */
     }
 
     override public function set data(val:Object):void {
         goalTreeDescriptor = val as GoalTreeDescriptor;
         if (goalTreeDescriptor.iconName == null) {
-            imageRenderer.visible = false;
+            setStyle("icon", null);
+            //imageRenderer.visible = false;
         } else {
-            imageRenderer.source = "/app/assets/icons/32x32/" + goalTreeDescriptor.iconName;
-            imageRenderer.visible = true;
+            setStyle("icon", IconUtility.getClass(this, "/app/assets/icons/32x32/" + goalTreeDescriptor.iconName, 32, 32));
+            /*imageRenderer.source = "/app/assets/icons/32x32/" + goalTreeDescriptor.iconName;
+            imageRenderer.visible = true;*/
         }
-        titleText = goalTreeDescriptor.name;
-        if (box != null) box.setStyle("backgroundColor", backgroundColor);
+        //invalidateSize();
+        label = goalTreeDescriptor.name;
+        //titleText = goalTreeDescriptor.name;
+        //if (box != null) box.setStyle("backgroundColor", backgroundColor);
 
     }
 

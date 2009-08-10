@@ -1,72 +1,78 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FullScreenPage xmlns="com.easyinsight.*" xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%"
                 xmlns:feedassembly="com.easyinsight.feedassembly.*"
-                paddingTop="10" paddingLeft="10" paddingRight="10" paddingBottom="10">
+                paddingTop="10" paddingLeft="10" paddingRight="10" paddingBottom="10"
+        implements="com.easyinsight.framework.IFullScreenPage">
 	<mx:Script>
 		<![CDATA[
         import com.easyinsight.administration.feed.FeedChangeEvent;
         import com.easyinsight.util.PopUpUtil;
         import com.easyinsight.util.ProgressAlert;
-import mx.controls.Alert;
+
+        import mx.controls.Alert;
         import mx.events.CloseEvent;
-import mx.managers.PopUpManager;
-            import mx.collections.ArrayCollection;
-            import com.easyinsight.analysis.AnalysisCloseEvent;
+        import mx.managers.PopUpManager;
+        import mx.collections.ArrayCollection;
 
-            [Bindable]
-            private var _feedList:ArrayCollection;
+        import com.easyinsight.analysis.AnalysisCloseEvent;
 
-            private var saveNeeded:Boolean;
+        [Bindable]
+        private var _feedList:ArrayCollection;
 
-            private var feedDefinition:CompositeFeedDefinition;
+        private var saveNeeded:Boolean;
 
-			private function createdFeed(event:CompositeFeedSaveEvent):void {
-                saveNeeded = false;
-			    feedDefinition = event.feedDefinition;
-			}
-			
-			private function cancel():void {
-                if (saveNeeded) {
-                    Alert.show("You have unsaved changes. Are you sure you want to exit?", "Alert",
-		                		Alert.OK | Alert.CANCEL, null, alertListener, null, Alert.CANCEL);
-                } else {
-                    dispatchEvent(new AnalysisCloseEvent(this));
-                }
-			}
+        private var feedDefinition:CompositeFeedDefinition;
 
-            private function alertListener(event:CloseEvent):void {
-                if (event.detail == Alert.OK) {
-                    dispatchEvent(new AnalysisCloseEvent(this));
-                }
+        private function createdFeed(event:CompositeFeedSaveEvent):void {
+            saveNeeded = false;
+            feedDefinition = event.feedDefinition;
+        }
+
+        private function cancel():void {
+            if (saveNeeded) {
+                Alert.show("You have unsaved changes. Are you sure you want to exit?", "Alert",
+                        Alert.OK | Alert.CANCEL, null, alertListener, null, Alert.CANCEL);
+            } else {
+                dispatchEvent(new AnalysisCloseEvent(this));
             }
+        }
 
-            private function onFeedChange(event:FeedChangeEvent):void {
-                saveNeeded = true;
+        private function alertListener(event:CloseEvent):void {
+            if (event.detail == Alert.OK) {
+                dispatchEvent(new AnalysisCloseEvent(this));
             }
-			
-			private function save():void {
-				var compositeFeedNodes:ArrayCollection = workspace.createNodes();
-				var compositeFeedConnections:ArrayCollection = workspace.createEdges();
-                var saveWindow:SaveCompositeFeedWindow = new SaveCompositeFeedWindow();
-                if (workspace.compositeFeedID == 0) {
-                    saveWindow.compositeFeedNodes = compositeFeedNodes;
-                    saveWindow.compositeFeedConnections = compositeFeedConnections;
-                    saveWindow.addEventListener(CompositeFeedSaveEvent.COMPOSITE_FEED_SAVE, createdFeed);
-                    PopUpManager.addPopUp(saveWindow, this, true);
-                    PopUpUtil.centerPopUp(saveWindow);
-                } else {
-                    ProgressAlert.alert(this, "Updating...", "Updated data source.", feedService.updateFeedDefinition);
-                    feedService.updateFeedDefinition.send(feedDefinition);
-                }
-			}
+        }
 
-            private function updated():void {
-                saveNeeded = false;
-            }
+        private function onFeedChange(event:FeedChangeEvent):void {
+            saveNeeded = true;
+        }
 
-            public function addFeeds(feedList:ArrayCollection):void {
-                this._feedList = feedList;
+        private function save():void {
+            var compositeFeedNodes:ArrayCollection = workspace.createNodes();
+            var compositeFeedConnections:ArrayCollection = workspace.createEdges();
+            var saveWindow:SaveCompositeFeedWindow = new SaveCompositeFeedWindow();
+            if (workspace.compositeFeedID == 0) {
+                saveWindow.compositeFeedNodes = compositeFeedNodes;
+                saveWindow.compositeFeedConnections = compositeFeedConnections;
+                saveWindow.addEventListener(CompositeFeedSaveEvent.COMPOSITE_FEED_SAVE, createdFeed);
+                PopUpManager.addPopUp(saveWindow, this, true);
+                PopUpUtil.centerPopUp(saveWindow);
+            } else {
+                ProgressAlert.alert(this, "Updating...", "Updated data source.", feedService.updateFeedDefinition);
+                feedService.updateFeedDefinition.send(feedDefinition);
             }
+        }
+
+        private function updated():void {
+            saveNeeded = false;
+        }
+
+        public function addFeeds(feedList:ArrayCollection):void {
+            this._feedList = feedList;
+        }
+
+        public function cleanup():void {
+        }
 		]]>
 	</mx:Script>
     <mx:RemoteObject destination="feeds" id="feedService">

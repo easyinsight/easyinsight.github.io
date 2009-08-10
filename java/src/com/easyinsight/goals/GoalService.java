@@ -260,7 +260,7 @@ public class GoalService {
         return new ArrayList<CredentialRequirement>(credentialMap.values());
     }
 
-    public GoalTree forceRefresh(long goalTreeID, Date startDate, Date endDate, List<CredentialFulfillment> credentialsList, boolean allSources, boolean includeSubTrees) {
+    public GoalTree forceRefresh(long goalTreeID, List<CredentialFulfillment> credentialsList, boolean allSources, boolean includeSubTrees) {
         SecurityUtil.authorizeGoalTree(goalTreeID, Roles.SUBSCRIBER);
         try {
             try {
@@ -298,14 +298,14 @@ public class GoalService {
                 conn.setAutoCommit(true);
                 Database.closeConnection(conn);
             }
-            return createDataTree(goalTreeID, startDate, endDate);
+            return createDataTree(goalTreeID);
         } catch (RuntimeException e) {
             LogClass.error(e);
             throw new RuntimeException(e);
         }
     }
 
-    public GoalTree createDataTree(long goalTreeID, Date startDate, Date endDate) {
+    public GoalTree createDataTree(long goalTreeID) {
         SecurityUtil.authorizeGoalTree(goalTreeID, Roles.SUBSCRIBER);
         try {
             GoalTree goalTree = getGoalTree(goalTreeID);
@@ -436,11 +436,11 @@ public class GoalService {
         }
     }
 
-    public void subscribeToGoal(long goalTreeNodeID) {
+    public boolean subscribeToGoal(long goalTreeNodeID) {
         SecurityUtil.authorizeGoal(goalTreeNodeID, Roles.SUBSCRIBER);
         long userID = SecurityUtil.getUserID();
         try {
-            goalStorage.addUserToGoal(userID, goalTreeNodeID);
+            return goalStorage.addUserToGoal(userID, goalTreeNodeID);
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);

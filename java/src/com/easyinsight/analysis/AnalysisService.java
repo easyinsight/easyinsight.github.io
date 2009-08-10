@@ -236,14 +236,23 @@ public class AnalysisService {
         }
     }
 
-    public void subscribeToAnalysis(long analysisID) {
+    public boolean subscribeToAnalysis(long analysisID) {
         SecurityUtil.authorizeInsight(analysisID);
         try {
             long userID = SecurityUtil.getUserID();
             AnalysisDefinition analysisDefinition = analysisStorage.getPersistableReport(analysisID);
-            UserToAnalysisBinding binding = new UserToAnalysisBinding(userID, Roles.SUBSCRIBER);
-            analysisDefinition.getUserBindings().add(binding);
-            analysisStorage.saveAnalysis(analysisDefinition);
+            boolean found = false;
+            for (UserToAnalysisBinding existingBinding : analysisDefinition.getUserBindings()) {
+                if (existingBinding.getUserID() == userID) {
+                    found = true;
+                }
+            }
+            if (!found) {
+                UserToAnalysisBinding binding = new UserToAnalysisBinding(userID, Roles.SUBSCRIBER);
+                analysisDefinition.getUserBindings().add(binding);
+                analysisStorage.saveAnalysis(analysisDefinition);
+            }
+            return !found;
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);

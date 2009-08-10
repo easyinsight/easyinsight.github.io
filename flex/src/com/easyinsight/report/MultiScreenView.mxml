@@ -1,13 +1,18 @@
 <?xml version="1.0" ?>
 <easyinsight:FullScreenPage xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:easyinsight="com.easyinsight.*"
         xmlns:util="com.easyinsight.util.*" width="100%" height="100%" creationComplete="onCreation()"
-         backgroundImage="{background2}" backgroundSize="100%">
+         backgroundImage="{background2}" backgroundSize="100%" implements="com.easyinsight.framework.IFullScreenPage">
+    <mx:Metadata>
+        [Event(name="analysisClose", type="com.easyinsight.analysis.AnalysisCloseEvent")]
+    </mx:Metadata>
     <mx:Script><![CDATA[
         import com.easyinsight.analysis.AnalysisCloseEvent;
 
         import com.easyinsight.quicksearch.EIDescriptor;
 
         import com.easyinsight.util.AsyncLoadEvent;
+
+        import com.easyinsight.util.IAsyncScreenFactory;
 
         import mx.collections.ArrayCollection;
         import mx.events.ListEvent;
@@ -29,8 +34,8 @@
         [Bindable]
         private var report:EIDescriptor;
 
-        [Bindable]
-        private var factory:ReportScreenFactory = new ReportScreenFactory();
+
+        private var _factory:IAsyncScreenFactory = new ReportScreenFactory();
 
         [Bindable]
         private var progressVisible:Boolean;
@@ -38,6 +43,18 @@
         [Bindable]
         [Embed(source="../../../../assets/document_out_x32.png")]
         private var closeIcon:Class;
+
+
+        [Bindable(event="factoryChanged")]
+        public function get factory():IAsyncScreenFactory {
+            return _factory;
+        }
+
+        public function set factory(value:IAsyncScreenFactory):void {
+            if (_factory == value) return;
+            _factory = value;
+            dispatchEvent(new Event("factoryChanged"));
+        }
 
         public function set reports(value:ArrayCollection):void {
             _reports = value;
@@ -65,10 +82,26 @@
         private function close():void {
             dispatchEvent(new AnalysisCloseEvent(this));
         }
-        ]]></mx:Script>
+
+        private var _showBackButton:Boolean = true;
+
+
+        override protected function createChildren():void {
+            super.createChildren();
+            if (!_showBackButton) {
+                topBar.removeChild(backButton);
+            }
+        }
+
+        public function set showBackButton(value:Boolean):void {
+            _showBackButton = value;
+        }
+
+        public function cleanup():void {
+        }]]></mx:Script>
     <mx:VBox width="100%" height="100%" paddingBottom="10" paddingLeft="10" paddingRight="10" paddingTop="10">
-        <mx:HBox width="100%">
-            <mx:Button label="Back" click="close()" icon="{closeIcon}" labelPlacement="bottom"/>
+        <mx:HBox width="100%" id="topBar">
+            <mx:Button label="Back" click="close()" icon="{closeIcon}" labelPlacement="bottom" id="backButton"/>
             <mx:ProgressBar id="progressBar" indeterminate="true" visible="{progressVisible}"/>
             <mx:TileList id="reportsList" width="100%" dataProvider="{_reports}" height="50"
                          itemRenderer="com.easyinsight.report.ReportButton" itemClick="onItemClick(event)" columnWidth="150"

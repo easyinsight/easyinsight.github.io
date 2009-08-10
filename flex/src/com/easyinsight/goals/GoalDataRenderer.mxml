@@ -6,11 +6,12 @@
         import com.easyinsight.genredata.AnalyzeEvent;
         import com.easyinsight.genredata.ModuleAnalyzeEvent;
         import com.easyinsight.util.ModelessWindowEvent;
+        import com.easyinsight.util.PopUpUtil;
         import com.easyinsight.util.PrefixManager;
 
         import ilog.orgchart.OrgChartItem;
 
-        import mx.core.Application;
+        
         import mx.events.CloseEvent;
 import mx.formatters.NumberFormatter;
         import mx.managers.PopUpManager;
@@ -89,15 +90,11 @@ import mx.formatters.NumberFormatter;
 
         private function onDoubleClick():void {
             var window:GoalDetailWindow = new GoalDetailWindow();
-            window.goalTreeNodeData = goalTreeNodeData;
-            window.startDate = new Date(new Date().getTime() - (1000 * 60 * 60 * 24 * 7));
-            window.endDate = new Date();
+            window.goalTreeNodeData = goalTreeNodeData;            
             window.addEventListener(ModuleAnalyzeEvent.MODULE_ANALYZE, onAnalyze);
             window.addEventListener(CloseEvent.CLOSE, onClose);
             PopUpManager.addPopUp(window, this);
-            var displayObject:DisplayObject = Application.application as DisplayObject;
-            window.x = (displayObject.width / 2) - 200;
-            window.y = (displayObject.height / 2) - 150;
+            PopUpUtil.centerPopUp(window);
             dispatchEvent(new ModelessWindowEvent(ModelessWindowEvent.WINDOW_ADDED, window));
         }
 

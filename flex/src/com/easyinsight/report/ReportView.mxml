@@ -71,7 +71,12 @@
         }
 
         private function subscribedToInsight():void {
-            Alert.show("This report will now show in your My Data page.");
+            var result:Boolean = analysisService.subscribeToAnalysis.lastResult as Boolean;
+            if (result) {
+                Alert.show("This report will now show in your My Data page.");
+            } else {
+                Alert.show("This report is already in your My Data page.");
+            }
         }
 
         private function bookmark():void {
@@ -373,6 +378,9 @@
         private var _showFilters:Boolean = true;
         private var _showMetadata:Boolean = true;
 
+        public function set showFilterButton(value:Boolean):void {
+            _showFilters = value;
+        }
 
         public function set showBack(value:Boolean):void {
             _showBack = value;
@@ -444,7 +452,7 @@
             <mx:Button label="Refresh" click="refreshData()" icon="{refreshIcon}" labelPlacement="bottom" id="refreshButton"/>
             <mx:Button label="Bookmark" click="bookmark()" icon="{bookmarkIcon}" labelPlacement="bottom" id="bookmarkButton"/>
             <mx:Button label="Export to Excel" icon="{exportToExcelIcon}" click="exportExcel()" labelPlacement="bottom" id="exportButton"/>
-            <mx:Button label="Edit this Report" icon="{reportEditorIcon}" click="toReportEditor()" visible="{admin}"
+            <mx:Button label="Edit this Report" icon="{reportEditorIcon}" click="toReportEditor()" 
                        labelPlacement="bottom" id="editReportButton"/>
             <mx:Button label="Adjust Filters" icon="{filterIcon}" click="adjustFilters()" visible="{showFilters}"
                        labelPlacement="bottom" id="adjustFiltersbutton"/>

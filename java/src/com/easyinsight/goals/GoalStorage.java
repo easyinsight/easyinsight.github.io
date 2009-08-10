@@ -741,14 +741,23 @@ public class GoalStorage {
         saveUserStmt.close();
     }
 
-    public void addUserToGoal(long userID, long goalTreeNodeID) throws SQLException {
+    public boolean addUserToGoal(long userID, long goalTreeNodeID) throws SQLException {
         Connection conn = Database.instance().getConnection();
         try {
-            PreparedStatement saveUserStmt = conn.prepareStatement("INSERT INTO goal_node_to_user (GOAL_TREE_NODE_ID, user_id) VALUES (?, ?)");
-            saveUserStmt.setLong(1, goalTreeNodeID);
-            saveUserStmt.setLong(2, userID);
-            saveUserStmt.execute();
-            saveUserStmt.close();
+            PreparedStatement queryStmt = conn.prepareStatement("SELECT goal_node_to_user_id from goal_node_to_user where goal_tree_node_id = ? AND " +
+                    "user_id = ?");
+            queryStmt.setLong(1, goalTreeNodeID);
+            queryStmt.setLong(2, userID);
+            ResultSet rs = queryStmt.executeQuery();
+            if (!rs.next()) {
+                PreparedStatement saveUserStmt = conn.prepareStatement("INSERT INTO goal_node_to_user (GOAL_TREE_NODE_ID, user_id) VALUES (?, ?)");
+                saveUserStmt.setLong(1, goalTreeNodeID);
+                saveUserStmt.setLong(2, userID);
+                saveUserStmt.execute();
+                saveUserStmt.close();
+                return true;
+            }
+            return false;
         } finally {
             Database.closeConnection(conn);
         }

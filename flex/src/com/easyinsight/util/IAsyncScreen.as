@@ -5,7 +5,5 @@ public interface IAsyncScreen {
     function getContainer():Container;
     function refreshData():void;
     function canRefresh():Boolean;
-    function canViewInBrowser():Boolean;
-    function getBrowserURL():String;
 }
 }

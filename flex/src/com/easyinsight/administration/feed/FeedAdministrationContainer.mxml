@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FullScreenPage xmlns="com.easyinsight.*" xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%" 
 	xmlns:feed="com.easyinsight.administration.feed.*" paddingTop="10" paddingLeft="10" paddingRight="10" paddingBottom="10"
-        creationComplete="setupListeners()" backgroundColor="#DCE2F8">
+        creationComplete="setupListeners()" backgroundColor="#DCE2F8" implements="com.easyinsight.framework.IFullScreenPage">
 	<mx:Script>
 		<![CDATA[
-            import com.easyinsight.analysis.AnalysisChangedEvent;
+        import com.easyinsight.analysis.AnalysisChangedEvent;
         import com.easyinsight.customupload.ExcelUploadFormat;
         import com.easyinsight.customupload.FlatFileUploadFormat;
-            import com.easyinsight.datasources.IServerDataSourceDefinition;
-            import com.easyinsight.framework.User;
-            import com.easyinsight.genredata.ModuleAnalyzeEvent;
+        import com.easyinsight.datasources.IServerDataSourceDefinition;
+        import com.easyinsight.framework.User;
+        import com.easyinsight.genredata.ModuleAnalyzeEvent;
         import com.easyinsight.listing.DescriptorAnalyzeSource;
         import com.easyinsight.util.ProgressAlert;
 
@@ -127,7 +127,7 @@
             this.refreshInterval = feedDefinition.refreshDataInterval / (1000 * 60 * 60);
             this.sessionIdInputText = feedDefinition.sessionId;
             this.usernameInputText = feedDefinition.username;
-            
+
             haveFeed = true;
 
             //analysisService.openAnalysisDefinition.send(feedDefinition.analysisDefinitionID);
@@ -165,21 +165,21 @@
                  analysisItems.addItem(analysisItem);
                  }
                  }
-                /* }*//*
-                if (virtualBox != null) {
-                    virtualBox.save();
-                    for each (var dimension:VirtualDimension in virtualBox.getVirtualDimensions()) {
-                        for each (var transform:VirtualTransform in dimension.virtualTransforms) {
-                            if (transform.transformDimension.analysisItemID == 0) {
-                                analysisItems.addItem(transform.transformDimension);
-                            }
-                        }
-                        if (dimension.defaultTransform.transformDimension.analysisItemID == 0) {
-                            analysisItems.addItem(dimension.defaultTransform.transformDimension);
-                        }
-                    }
-                    feedDefinition.virtualDimensions = virtualBox.getVirtualDimensions();
-                }*/
+                 /* }*//*
+                 if (virtualBox != null) {
+                 virtualBox.save();
+                 for each (var dimension:VirtualDimension in virtualBox.getVirtualDimensions()) {
+                 for each (var transform:VirtualTransform in dimension.virtualTransforms) {
+                 if (transform.transformDimension.analysisItemID == 0) {
+                 analysisItems.addItem(transform.transformDimension);
+                 }
+                 }
+                 if (dimension.defaultTransform.transformDimension.analysisItemID == 0) {
+                 analysisItems.addItem(dimension.defaultTransform.transformDimension);
+                 }
+                 }
+                 feedDefinition.virtualDimensions = virtualBox.getVirtualDimensions();
+                 }*/
                 feedDefinition.fields = analysisItems;
                 feedDefinition.feedName = feedNameInput.text;
                 feedDefinition.uploadPolicy = feedPolicy.uploadPolicy;
@@ -248,8 +248,11 @@
             var flatFileUploadFormat:FlatFileUploadFormat;
         }
 
-            [Bindable]
-            private var liveData:Boolean;
+        [Bindable]
+        private var liveData:Boolean;
+
+        public function cleanup():void {
+        }
 		]]>
 	</mx:Script>
 

@@ -9,7 +9,8 @@
                      xmlns:filtering="com.easyinsight.filtering.*"
                      xmlns:feed="com.easyinsight.administration.feed.*" doubleClickEnabled="true"
                      backgroundImage="{background2}" backgroundSize="100%"
-                     paddingTop="10" paddingLeft="10" paddingRight="10" paddingBottom="10" backgroundColor="#DCE2F8">
+                     paddingTop="10" paddingLeft="10" paddingRight="10" paddingBottom="10" backgroundColor="#DCE2F8"
+        implements="com.easyinsight.framework.IFullScreenPage">
     <core:states>
         <mx:State name="NotLoggedIn">
             <mx:RemoveChild target="{subscribeToFeedButton}"/>
@@ -322,14 +323,12 @@
                 Alert.show("You have unsaved changes. Are you sure you want to go to data source administration?", "Alert",
                         Alert.OK | Alert.CANCEL, null, adminAlertListener, null, Alert.CANCEL);
             } else {
-                cleanup();
                 dispatchEvent(new ModuleAnalyzeEvent(new FeedAdminAnalyzeSource(dataService.dataFeedID)));
             }
         }
 
         private function adminAlertListener(event:CloseEvent):void {
             if (event.detail == Alert.OK) {
-                cleanup();
                 dispatchEvent(new ModuleAnalyzeEvent(new FeedAdminAnalyzeSource(dataService.dataFeedID)));
             }
         }
@@ -853,14 +852,12 @@
                 Alert.show("You have unsaved changes. Are you sure you want to exit?", "Alert",
                         Alert.OK | Alert.CANCEL, null, alertListener, null, Alert.CANCEL);
             } else {
-                cleanup();
                 dispatchEvent(new AnalysisCloseEvent(this));
             }
         }
 
         private function alertListener(event:CloseEvent):void {
             if (event.detail == Alert.OK) {
-                cleanup();
                 dispatchEvent(new AnalysisCloseEvent(this));
             }
         }
@@ -993,7 +990,6 @@
                 Alert.show("You have unsaved changes. Are you sure you want to go to reports?", "Alert",
                         Alert.OK | Alert.CANCEL, null, adminAlertListener, null, Alert.CANCEL);
             } else {
-                cleanup();
                 dispatchEvent(new ModuleAnalyzeEvent(new MultiReportAnalyzeSource(dataService.dataFeedID)));
             }
         }
@@ -1005,7 +1001,6 @@
                 Alert.show("You have unsaved changes. Are you sure you want to go to reports?", "Alert",
                         Alert.OK | Alert.CANCEL, null, goReportListener, null, Alert.CANCEL);
             } else {
-                cleanup();
                 var report:InsightDescriptor = new InsightDescriptor();
                 report.dataFeedID = dataService.dataFeedID;
                 report.id = analysisDefinition.analysisID;
@@ -1017,7 +1012,6 @@
 
         private function goReportListener(event:CloseEvent):void {
             if (event.detail == Alert.OK) {
-                cleanup();
                 var report:InsightDescriptor = new InsightDescriptor();
                 report.dataFeedID = dataService.dataFeedID;
                 report.id = analysisDefinition.analysisID;
@@ -1044,14 +1038,12 @@
                 Alert.show("You have unsaved changes. Are you sure you want to create a new report?", "Alert",
                         Alert.OK | Alert.CANCEL, null, newReportListener, null, Alert.CANCEL);
             } else {
-                cleanup();
                 dispatchEvent(new ModuleAnalyzeEvent(new DescriptorAnalyzeSource(dataService.dataFeedID, dataSourceName)));
             }
         }
 
         private function newReportListener(event:CloseEvent):void {
             if (event.detail == Alert.OK) {
-                cleanup();
                 dispatchEvent(new ModuleAnalyzeEvent(new DescriptorAnalyzeSource(dataService.dataFeedID, dataSourceName)));
             }
         }

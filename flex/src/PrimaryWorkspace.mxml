@@ -44,6 +44,7 @@
         import com.easyinsight.framework.CredentialsCache;
         import com.easyinsight.framework.EIMessageListener;
         import com.easyinsight.framework.FullScreenModuleEvent;
+        import com.easyinsight.framework.IFullScreenPage;
         import com.easyinsight.framework.ModuleAnalyzeSource;
         import com.easyinsight.framework.WebCredentialsCache;
         import com.easyinsight.genredata.ModuleAnalyzeEvent;
@@ -129,6 +130,8 @@
 
         [Bindable]
         private var dataAnalysis:DisplayObject;
+
+        private var fullScreenPage:IFullScreenPage;
 
         public var browserManager:IBrowserManager;
 
@@ -362,6 +365,7 @@
 
         private function doAnalyze(analyzeSource:AnalyzeSource):void {
             if (currentState == "Analysis") {
+                fullScreenPage.cleanup();
                 dataAnalysis.removeEventListener(AnalyzeEvent.ANALYZE, internalAnalyze);
                 dataAnalysis.removeEventListener(ModuleAnalyzeEvent.MODULE_ANALYZE, internalModuleAnalyze);
                 dataAnalysis.removeEventListener(AnalysisCloseEvent.ANALYSIS_CLOSE, analysisClosed);
@@ -379,6 +383,7 @@
                 analysisWindow.addEventListener(AnalysisCloseEvent.ANALYSIS_CLOSE, analysisClosed);
                 analysisWindow.addEventListener(NavigationEvent.NAVIGATION, navigation);
                 dataAnalysis = analysisWindow;
+                fullScreenPage = analysisWindow as IFullScreenPage;
                 currentState = "Analysis";
             }
         }
@@ -442,6 +447,7 @@
             // add a core container, nest everything else
             //
             if (currentState == "Analysis") {
+                fullScreenPage.cleanup();
                 dataAnalysis.removeEventListener(AnalyzeEvent.ANALYZE, internalAnalyze);
                 dataAnalysis.removeEventListener(ModuleAnalyzeEvent.MODULE_ANALYZE, internalModuleAnalyze);
                 dataAnalysis.removeEventListener(AnalysisCloseEvent.ANALYSIS_CLOSE, analysisClosed);
@@ -460,6 +466,7 @@
             analysisWindow.addEventListener(ModuleAnalyzeEvent.MODULE_ANALYZE, internalModuleAnalyze);
             analysisWindow.addEventListener(NavigationEvent.NAVIGATION, navigation);
             dataAnalysis = analysisWindow;
+            fullScreenPage = analysisWindow as IFullScreenPage;
             currentState = "Analysis";
         }
 

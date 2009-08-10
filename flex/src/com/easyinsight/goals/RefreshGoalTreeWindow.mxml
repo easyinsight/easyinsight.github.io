@@ -12,19 +12,9 @@
         import mx.managers.PopUpManager;
 
         private var _goalTreeID:int;
-        private var _startDate:Date;
-        private var _endDate:Date;
 
         private var neededCredentialCount:int = 0;
         private var receivedCredentialCount:int = 0;
-
-        public function set startDate(value:Date):void {
-            _startDate = value;
-        }
-
-        public function set endDate(value:Date):void {
-            _endDate = value;
-        }
 
         public function set goalTreeID(value:int):void {
             _goalTreeID = value;
@@ -41,7 +31,7 @@
             receivedCredentialCount++;
             if (receivedCredentialCount == neededCredentialCount) {
                 ProgressAlert.alert(this, "Refreshing the goal tree...", null, goalService.forceRefresh);
-                goalService.forceRefresh.send(_goalTreeID, _startDate, _endDate, CredentialsCache.getCache().createCredentials(),
+                goalService.forceRefresh.send(_goalTreeID, CredentialsCache.getCache().createCredentials(),
                         allDataSourcesCheckbox.selected, subTreesCheckbox.selected);
             }
         }
@@ -49,7 +39,7 @@
         private function gotCredentials():void {
             var credentials:ArrayCollection = goalService.getCredentialsForGoalTree.lastResult as ArrayCollection;
             if (credentials.length == 0) {
-                goalService.forceRefresh.send(_goalTreeID, _startDate, _endDate, CredentialsCache.getCache().createCredentials(), allDataSourcesCheckbox.selected,
+                goalService.forceRefresh.send(_goalTreeID, CredentialsCache.getCache().createCredentials(), allDataSourcesCheckbox.selected,
                         subTreesCheckbox.selected);
             } else {
                 receivedCredentialCount = 0;

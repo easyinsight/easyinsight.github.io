@@ -93,7 +93,7 @@ public class GoalTest extends TestCase {
         goalService.saveMilestone(milestone);
         dataNode.setMilestone(milestone);
         goalService.updateGoalTree(goalTree);
-        GoalTree dataTree = goalService.createDataTree(goalTreeID, startDate, endDate);
+        GoalTree dataTree = goalService.createDataTree(goalTreeID);
         GoalTreeNodeData data = (GoalTreeNodeData) dataTree.getRootNode().getChildren().get(0);
         goalService.subscribeToGoal(data.getGoalTreeNodeID());
         List<GoalTreeNodeData> datas = goalService.getGoals();
