@@ -505,11 +505,16 @@ public class FeedService implements IDataFeedService {
                         insertStatement.execute();
                 }
             }
-            List<AnalysisItem> existingFields = existingFeed.getFields();
-            metadata = DataStorage.writeConnection(feedDefinition, conn);
-            feedStorage.updateDataFeedConfiguration(feedDefinition, conn);
-            int version = metadata.migrate(existingFields, feedDefinition.getFields());
-            feedStorage.updateVersion(feedDefinition, version, conn);
+            if (feedDefinition.getDataSourceType() == DataSourceInfo.STORED_PUSH || feedDefinition.getDataSourceType() == DataSourceInfo.STORED_PULL) {
+                List<AnalysisItem> existingFields = existingFeed.getFields();
+                metadata = DataStorage.writeConnection(feedDefinition, conn);
+                feedStorage.updateDataFeedConfiguration(feedDefinition, conn);
+                int version = metadata.migrate(existingFields, feedDefinition.getFields());
+                feedStorage.updateVersion(feedDefinition, version, conn);
+                metadata.commit();
+            } else {
+                feedStorage.updateDataFeedConfiguration(feedDefinition, conn);
+            }
             if (newTaskGen) {
                 Session session = Database.instance().createSession(conn);
                 try {
@@ -523,7 +528,7 @@ public class FeedService implements IDataFeedService {
                 }
             }
             FeedRegistry.instance().flushCache(feedID);
-            metadata.commit();
+
             conn.commit();
         } catch (Exception e) {
             LogClass.error(e);
