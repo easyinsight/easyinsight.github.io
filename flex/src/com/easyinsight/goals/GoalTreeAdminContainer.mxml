@@ -92,10 +92,12 @@
         }
 
         private function onCreation():void {
-            var feedFragmentObject:Object = new Object();
-            feedFragmentObject.goalTreeAdminID = String(_goalTreeID);
-            var feedFragmentString:String = URLUtil.objectToString(feedFragmentObject);
-            BrowserManager.getInstance().setFragment(feedFragmentString);
+            if (_goalTreeID != 0) {
+                var feedFragmentObject:Object = new Object();
+                feedFragmentObject.goalTreeAdminID = String(_goalTreeID);
+                var feedFragmentString:String = URLUtil.objectToString(feedFragmentObject);
+                BrowserManager.getInstance().setFragment(feedFragmentString);
+            }
             addEventListener(SolutionInstallRequiredEvent.SOLUTION_INSTALL, onNewSolution);
             addEventListener(GoalTreeChangedEvent.GOAL_TREE_CHANGED, onTreeChanged);
             validators = [ nameValidator ];

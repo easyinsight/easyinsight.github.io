@@ -224,6 +224,8 @@ import mx.managers.ToolTipManager;
 				filter = new RollingRangeFilter(_feedID, filterDefinition.field);
 			} else if (filterDefinition.getType() == FilterDefinition.LAST_VALUE) {
                 filter = new LastValueFilter(_feedID, filterDefinition.field);
+            } else if (filterDefinition.getType() == FilterDefinition.PATTERN) {
+                filter = new PatternFilter(_feedID, filterDefinition.field);
             }
             filter.filterEditable = _filterEditable;
             filter.showLabel = _showLabel;

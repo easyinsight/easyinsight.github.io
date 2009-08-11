@@ -76,6 +76,8 @@
         private function onTypeChange():void {
             if (typeGroup.selectedValue == "single") {
                 dispatchEvent(new FilterEditEvent(_filterValueDefinition, _filterValueDefinition, ComboBoxFilterWindow));
+            } else if (typeGroup.selectedValue == "pattern") {
+                dispatchEvent(new FilterEditEvent(_filterValueDefinition, _filterValueDefinition, PatternFilterWindow));
             }
         }
 		]]>
@@ -84,6 +86,7 @@
         <mx:RadioButtonGroup id="typeGroup" change="onTypeChange()"/>
         <mx:RadioButton group="{typeGroup}" label="Single Value" value="single"/>
         <mx:RadioButton group="{typeGroup}" label="Multi Value" selected="true" value="multi"/>
+        <mx:RadioButton group="{typeGroup}" label="Pattern Match" value="pattern"/>
     </mx:HBox>
     <mx:Label text="Drag Items Between Available and Included to Filter"/>
     <mx:HBox>

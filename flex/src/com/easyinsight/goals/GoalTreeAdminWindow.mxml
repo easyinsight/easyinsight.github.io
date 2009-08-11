@@ -9,8 +9,10 @@
 import com.easyinsight.util.ProgressAlert;
 
         import mx.collections.ArrayCollection;
+import mx.collections.Sort;
+import mx.collections.SortField;
 
-        [Bindable]
+[Bindable]
         private var _goalTreeNode:GoalTreeNode;
 
         private var _goalTreeID:int;
@@ -76,14 +78,26 @@ import com.easyinsight.util.ProgressAlert;
 
         private function gotFeeds():void {
             dataSources = feedService.searchForSubscribedFeeds.lastResult as ArrayCollection;
+            var sort:Sort = new Sort();
+            sort.fields = [ new SortField("name") ];
+            dataSources.sort = sort;
+            dataSources.refresh();
         }
 
         private function gotSolutions():void {
             solutions = solutionService.getSolutions.lastResult as ArrayCollection;
+            var sort:Sort = new Sort();
+            sort.fields = [ new SortField("name") ];
+            solutions.sort = sort;
+            solutions.refresh();
         }
 
         private function gotInsights():void {
             insights = analysisService.getInsightDescriptors.lastResult as ArrayCollection;
+            var sort:Sort = new Sort();
+            sort.fields = [ new SortField("name") ];
+            insights.sort = sort;
+            insights.refresh();
         }
 
         private function gotGoalTrees():void {
@@ -98,7 +112,13 @@ import com.easyinsight.util.ProgressAlert;
                 availableTrees.myTrees.removeItemAt(myRemoveIndex);
             }
             this.accountTrees = availableTrees.myTrees;
+            var sort:Sort = new Sort();
+            sort.fields = [ new SortField("name") ];
+            accountTrees.sort = sort;
+            accountTrees.refresh();
             this.goalTrees = availableTrees.solutionTrees;
+            goalTrees.sort = sort;
+            goalTrees.refresh();
         }
 
         private function onSplitTree(event:SplitGoalTreeEvent):void {

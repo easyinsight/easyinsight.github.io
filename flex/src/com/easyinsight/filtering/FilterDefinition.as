@@ -12,6 +12,7 @@ package com.easyinsight.filtering
 		public static const ROLLING_DATE:int = 4;
 		public static const LAST_N:int = 5;
 		public static const LAST_VALUE:int = 5;
+		public static const PATTERN:int = 6;
 
 		public var field:AnalysisItem;
 		public var applyBeforeAggregation:Boolean = true;

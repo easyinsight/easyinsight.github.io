@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml"  implements="com.easyinsight.filtering.IFilterDetailEditor">
+	<mx:Script>
+		<![CDATA[
+        import mx.collections.ArrayCollection;
+
+        private var _filterValueDefinition:FilterDefinition;
+
+        [Bindable]
+        private var sourceValues:ArrayCollection;
+        [Bindable]
+        private var targetValues:ArrayCollection;
+
+        private var _feedID:int;
+
+        [Bindable]
+        private var caseSensitive:Boolean;
+        [Bindable]
+        private var patternText:String;
+
+        public function set filterValueDefinition(filterValueDefinition:FilterDefinition):void {
+            this._filterValueDefinition = filterValueDefinition;
+            if (filterValueDefinition is FilterPatternDefinition) {
+                var filterPatternDefinition:FilterPatternDefinition = filterValueDefinition as FilterPatternDefinition;
+                caseSensitive = filterPatternDefinition.caseSensitive;
+                patternText = filterPatternDefinition.pattern;
+            }
+        }
+
+        public function set feedID(feedID:int):void {
+            this._feedID = feedID;
+        }
+
+        public function makeUpdates():FilterDefinition {
+            var filterPatternDefinition:FilterPatternDefinition;
+            if (!(_filterValueDefinition is FilterPatternDefinition)) {
+                filterPatternDefinition = new FilterPatternDefinition();
+                filterPatternDefinition.applyBeforeAggregation = _filterValueDefinition.applyBeforeAggregation;
+                filterPatternDefinition.field = _filterValueDefinition.field;
+            } else {
+                filterPatternDefinition = _filterValueDefinition as FilterPatternDefinition;
+            }
+            filterPatternDefinition.pattern = patternInput.text;
+            filterPatternDefinition.caseSensitive = caseSensitiveCheckbox.selected;
+            return filterPatternDefinition;
+        }
+
+        public function set filterDefinition(filterDefinition:FilterDefinition):void {
+            _filterValueDefinition = filterDefinition;
+            if (filterDefinition is FilterPatternDefinition) {
+                var filterPatternDefinition:FilterPatternDefinition = filterDefinition as FilterPatternDefinition;
+                caseSensitive = filterPatternDefinition.caseSensitive;
+                patternText = filterPatternDefinition.pattern;
+            }
+        }
+
+        private function onTypeChange():void {
+            if (typeGroup.selectedValue == "single") {
+                dispatchEvent(new FilterEditEvent(_filterValueDefinition, _filterValueDefinition, ComboBoxFilterWindow));
+            } else if (typeGroup.selectedValue == "multi") {
+                dispatchEvent(new FilterEditEvent(_filterValueDefinition, _filterValueDefinition, MultiValueFilterWindow));
+            }
+        }
+		]]>
+	</mx:Script>
+    <mx:HBox>
+        <mx:RadioButtonGroup id="typeGroup" change="onTypeChange()"/>
+        <mx:RadioButton group="{typeGroup}" label="Combo Box" value="single"/>
+        <mx:RadioButton group="{typeGroup}" label="Multi Value" value="multi"/>
+        <mx:RadioButton group="{typeGroup}" label="Pattern Match" selected="true" value="pattern"/>
+    </mx:HBox>
+    <mx:Form>
+        <mx:FormItem label="Filter Pattern: ">
+            <mx:TextInput id="patternInput" text="{patternText}"/>
+        </mx:FormItem>
+        <mx:FormItem label="Case Sensitive: ">
+            <mx:CheckBox id="caseSensitiveCheckbox" selected="{caseSensitive}"/>
+        </mx:FormItem>
+    </mx:Form>
+</mx:VBox>

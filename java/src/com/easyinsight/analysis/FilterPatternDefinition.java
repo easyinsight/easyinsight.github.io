@@ -15,11 +15,19 @@ public class FilterPatternDefinition extends FilterDefinition {
     private boolean caseSensitive;
 
     public PersistableFilterDefinition toPersistableFilterDefinition() {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+        PersistableFilterPatternDefinition pattern = new PersistableFilterPatternDefinition();
+        pattern.setField(getField());
+        pattern.setCaseSensitive(isCaseSensitive());
+        pattern.setRegex(isRegex());
+        pattern.setPattern(getPattern());
+        pattern.setApplyBeforeAggregation(isApplyBeforeAggregation());
+        pattern.setFilterId(getFilterID());
+        pattern.setIntrinsic(isIntrinsic());
+        return pattern;
     }
 
     public MaterializedFilterDefinition materialize(InsightRequestMetadata insightRequestMetadata) {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+        return new MaterializedFilterPatternDefinition(getField(), pattern, caseSensitive, regex);
     }
 
     public String toQuerySQL(String tableName) {
@@ -34,5 +42,29 @@ public class FilterPatternDefinition extends FilterDefinition {
         String likePattern = pattern.replaceAll("\\*", "%");
         preparedStatement.setString(start, likePattern);
         return start + 1;
+    }
+
+    public String getPattern() {
+        return pattern;
+    }
+
+    public void setPattern(String pattern) {
+        this.pattern = pattern;
+    }
+
+    public boolean isRegex() {
+        return regex;
+    }
+
+    public void setRegex(boolean regex) {
+        this.regex = regex;
+    }
+
+    public boolean isCaseSensitive() {
+        return caseSensitive;
+    }
+
+    public void setCaseSensitive(boolean caseSensitive) {
+        this.caseSensitive = caseSensitive;
     }
 }

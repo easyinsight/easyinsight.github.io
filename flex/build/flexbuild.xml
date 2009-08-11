@@ -137,6 +137,27 @@
         </mxmlc>
     </target>
 
+    <target name="compileLogoAnimation">
+        <mxmlc file="../src/LogoAnimation.mxml" output="${deployment.path}/LogoAnimation.swf"
+               static-rsls="false">
+            <load-config filename="../logo-animation.xml"/>
+            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
+                <url rsl-url="framework_3.3.0.4852.swz"/>
+                <url rsl-url="framework_3.3.0.4852.swf"/>
+            </runtime-shared-library-path>
+
+            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/datavisualization.swc">
+                <url rsl-url="datavisualization_3.3.0.4852.swz"/>
+                <url rsl-url="datavisualization_3.3.0.4852.swf"/>
+            </runtime-shared-library-path>
+
+            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
+                <url rsl-url="rpc_3.3.0.4852.swz"/>
+                <url rsl-url="rpc_3.3.0.4852.swf"/>
+            </runtime-shared-library-path>
+        </mxmlc>
+    </target>
+
     <target name="compileChartModule">
         <mxmlc file="../src/com/easyinsight/dashboard/ColumnChartViewModule.mxml" output="${deployment.path}/ColumnChartViewModule.swf"
                static-rsls="false">

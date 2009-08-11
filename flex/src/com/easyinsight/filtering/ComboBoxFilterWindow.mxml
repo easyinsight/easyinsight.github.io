@@ -18,6 +18,8 @@
         private function onTypeChange():void {
             if (typeGroup.selectedValue == "multi") {
                 dispatchEvent(new FilterEditEvent(_filterDefinition, _filterDefinition, MultiValueFilterWindow));
+            } else if (typeGroup.selectedValue == "pattern") {
+                dispatchEvent(new FilterEditEvent(_filterDefinition, _filterDefinition, PatternFilterWindow));
             }
         }
         ]]></mx:Script>
@@ -25,5 +27,6 @@
         <mx:RadioButtonGroup id="typeGroup" change="onTypeChange()"/>
         <mx:RadioButton group="{typeGroup}" label="Single Value" selected="true" value="single"/>
         <mx:RadioButton group="{typeGroup}" label="Multi Value" value="multi"/>
+        <mx:RadioButton group="{typeGroup}" label="Pattern Match" value="pattern"/>
     </mx:HBox>
 </mx:VBox>
