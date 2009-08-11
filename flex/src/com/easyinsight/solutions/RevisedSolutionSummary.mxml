@@ -166,7 +166,8 @@
         }
 
         private function updateFilters():void {
-            availableSolutions.refresh();
+            if(availableSolutions != null)
+                availableSolutions.refresh();
         }
                         
         ]]>

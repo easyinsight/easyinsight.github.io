@@ -226,19 +226,19 @@
             if (event.targetURL == null)
                 navigation(new NavigationEvent("Intro"));
             else {
-                var o:Object = URLUtil.stringToObject(event.targetURL);
+                var o:Object = URLUtil.stringToObject(event.targetURL, "&");
                 parseFragmentObject(o);
             }
         }
 
         private function parseURL(event:Event):void {
-            var o:Object = URLUtil.stringToObject(browserManager.fragment);
+            var o:Object = URLUtil.stringToObject(browserManager.fragment, "&");
             parseFragmentObject(o);
         }
 
         private function postActivatePath(event:ActivationEvent):void {
             var url:String = event.url;
-            var o:Object = URLUtil.stringToObject(url);
+            var o:Object = URLUtil.stringToObject(url, "&");
             parseFragmentObject(o);
         }
 
@@ -335,7 +335,12 @@
                                                                 navigation(new NavigationEvent("Intro"));
                                                                 break;
                                                             case "solutions":
-                                                                navigation(new NavigationEvent("Solutions"));
+                                                                if(o.type != null && o.type == "business")
+                                                                    navigation(new NavigationEvent("Solutions", null, { biz: true, client:false, saas: false, learning: false }));
+                                                                else if(o.type != null && o.type == "application")
+                                                                    navigation(new NavigationEvent("Solutions", null, { saas: true, client:true, biz: false, learning: false }));
+                                                                else
+                                                                    navigation(new NavigationEvent("Solutions"));
                                                                 break;
                                                             case "account":
                                                                 navigation(new NavigationEvent("Accounts"));
