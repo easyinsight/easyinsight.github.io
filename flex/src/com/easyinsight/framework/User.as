@@ -49,9 +49,9 @@ import mx.rpc.events.ResultEvent;
             _user.userID = userID;
             _user.activated = activated;
             try {
-                sharedObject = SharedObject.getLocal(name);
-            } catch (e) {
-                Alert.show(e);
+                sharedObject = SharedObject.getLocal(userID.toString());
+            } catch (e:Error) {
+
             }
 
 
