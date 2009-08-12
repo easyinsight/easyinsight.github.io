@@ -5,6 +5,7 @@ package com.easyinsight.framework
 import flash.net.SharedObject;
 
 import mx.collections.ArrayCollection;
+import mx.controls.Alert;
 import mx.rpc.events.ResultEvent;
 	import mx.rpc.remoting.RemoteObject;
 	
@@ -50,7 +51,7 @@ import mx.rpc.events.ResultEvent;
             try {
                 sharedObject = SharedObject.getLocal(name);
             } catch (e) {
-                // Do nothing for now
+                Alert.show(e);
             }
 
 
