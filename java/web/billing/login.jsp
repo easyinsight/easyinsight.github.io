@@ -18,6 +18,11 @@
     <script src="/AC_OETags.js" language="javascript"></script>
     <script src="/history/history.js" language="javascript"></script>
     <!-- InstanceBeginEditable name="head" -->
+    <style type="text/css">
+        #centerPage p {
+            text-indent: 0px;
+        }
+    </style>
     <!-- InstanceEndEditable -->
 </head>
 <body>
@@ -46,10 +51,14 @@
     <div id="centerPage">
         <!-- InstanceBeginEditable name="content" -->
           <p>Welcome to Easy Insight!  In order to update your billing information, you must be logged in first.  If you are seeing this page, you have most likely been redirected here because your account is delinquent, and must log in via this page.</p>
-          <form method="post" action="billing.jsp">
-              User Name: <input type="text" name="username" /><br />
-              Password: <input type="password" name="password" /><br />
-              <input type="submit" />
+              <form method="post" action="billing.jsp">
+                  <table><tbody><tr>
+                      <td>User Name:</td>
+                      <td> <input type="text" name="username" /></td></tr>
+                  <tr><td>Password:</td>
+                  <td><input type="password" name="password" /></td></tr>
+                  <tr><td><input type="image" src="login.gif" alt="Log In" /></td></tr>
+                      </tbody></table>
           </form>
         <!-- InstanceEndEditable -->
     </div>
