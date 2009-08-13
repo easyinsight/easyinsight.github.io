@@ -4,7 +4,9 @@ import com.easyinsight.administration.feed.CredentialsResponse;
 import com.easyinsight.customupload.FileFeedUpdateWindow;
 import com.easyinsight.customupload.RefreshWindow;
 import com.easyinsight.customupload.UploadConfigEvent;
+import com.easyinsight.framework.Credentials;
 import com.easyinsight.framework.GenericFaultHandler;
+import com.easyinsight.framework.User;
 import com.easyinsight.genredata.ModuleAnalyzeEvent;
 
 import com.easyinsight.notifications.NotifyBar;
@@ -134,6 +136,19 @@ public class MyDataIconControls extends HBox
             userUploadSource.refreshData.addEventListener(ResultEvent.RESULT, completedRefresh);
             userUploadSource.refreshData.addEventListener(FaultEvent.FAULT, GenericFaultHandler.genericFault);
             userUploadSource.refreshData.send(feedDescriptor.dataFeedID, null, false);
+            dispatchEvent(new RefreshNotificationEvent());
+            return;
+        }
+        else if (User.getSharedObject() != null && User.getSharedObject().data[feedDescriptor.dataFeedID.toString()] != null) {
+            userUploadSource = new RemoteObject();
+            userUploadSource.destination = "userUpload";
+            userUploadSource.refreshData.addEventListener(ResultEvent.RESULT, completedRefresh);
+            userUploadSource.refreshData.addEventListener(FaultEvent.FAULT, GenericFaultHandler.genericFault);
+            var c:Credentials = new Credentials();
+            c.userName = User.getSharedObject().data[feedDescriptor.dataFeedID.toString()].username;
+            c.password = User.getSharedObject().data[feedDescriptor.dataFeedID.toString()].password;
+            c.encrypted = true;
+            userUploadSource.refreshData.send(feedDescriptor.dataFeedID, c, false);
             dispatchEvent(new RefreshNotificationEvent());
             return;
         }

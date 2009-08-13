@@ -450,6 +450,15 @@ public class UserUploadService implements IUserUploadService {
 
     public CredentialsResponse refreshData(long feedID, Credentials credentials, boolean saveCredentials, boolean synchronous) {
         SecurityUtil.authorizeFeed(feedID, Roles.OWNER);
+        if(credentials != null && credentials.isEncrypted()) {
+            try {
+            credentials = decryptCredentials(credentials);
+            }
+            catch(MalformedCredentialsException e) {
+                LogClass.error(e); // TODO: Remove this or make it a warning once we're sure this works
+                throw new RuntimeException(e);
+            }
+        }
         try {
             if(saveCredentials) {
                 EIConnection conn = Database.instance().getConnection();
@@ -552,6 +561,9 @@ public class UserUploadService implements IUserUploadService {
 
     public String validateCredentials(FeedDefinition feedDefinition, Credentials credentials) {
         try {
+            if(credentials.isEncrypted()) {
+                credentials = decryptCredentials(credentials);
+            }
             return feedDefinition.validateCredentials(credentials);
         } catch (Exception e) {
             LogClass.error(e);
@@ -837,12 +849,12 @@ public class UserUploadService implements IUserUploadService {
         if(i == -1) {
             throw new MalformedCredentialsException();
         }
-        c.setUserName(s.substring(0, i - 1));
+        c.setUserName(s.substring(0, i));
         s = PasswordStorage.decryptString(creds.getPassword());
         i = s.lastIndexOf(":" + SecurityUtil.getUserName());
         if(i == -1)
             throw new MalformedCredentialsException();
-        c.setPassword(s.substring(0, i - 1));
+        c.setPassword(s.substring(0, i));
         return c;
     }
 }
