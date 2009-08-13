@@ -6,7 +6,21 @@
         import com.easyinsight.datasources.IServerDataSourceDefinition;
         import com.easyinsight.framework.Credentials;
 
+        import com.easyinsight.framework.User;
+
         import mx.controls.Alert;
+
+        private function encryptedResults():void {
+            var c:Credentials = uploadService.encryptCredentials.lastResult as Credentials;
+            if(User.getSharedObject() == null) {
+                Alert.show("You must enable local storage for easy-insight.com in order to save credentials to your computer.");
+            }
+            var def:FeedDefinitionData = _dataSourceDefinition as FeedDefinitionData;
+            User.getSharedObject().data[def.dataFeedID.toString()] = new Object();
+            User.getSharedObject().data[def.dataFeedID.toString()].username = c.userName;
+            User.getSharedObject().data[def.dataFeedID.toString()].password = c.password;
+            User.getSharedObject().flush();
+        }
 
         private var _dataSourceClass:Class;
         private var dataSourceCreation:IServerDataSourceCreation;
@@ -22,6 +36,9 @@
         [Bindable]
         private var refreshValue:int;
 
+        [Bindable]
+        private var clientCredentialsSaved:Boolean;
+
         override protected function createChildren():void {
             super.createChildren();
             ready = true;
@@ -30,6 +47,17 @@
             dataSourceCreation.dataSourceDefinition = def;
             credentialsSaved = def.username != null;
             refreshValue = def.refreshDataInterval;
+            if(User.getSharedObject() != null && User.getSharedObject().data[def.dataFeedID.toString()] != null) {
+                /* This doesn't work, you get the encrypted strings, doh
+                var c:Credentials = new Credentials();
+                c.userName = User.getSharedObject().data[def.dataFeedID.toString()].username;
+                c.password = User.getSharedObject().data[def.dataFeedID.toString()].password;
+                dataSourceCreation.credentials = c;*/
+                clientCredentialsSaved = true;
+            }
+            else {
+                clientCredentialsSaved = false;
+            }
             coreContent.addChild(dataSourceCreation as DisplayObject);
         }
 
@@ -74,6 +102,18 @@
         }
 
         public function updateDataSource(feedDefinition:FeedDefinitionData):void {
+            if (saveClientCredentialsCheckbox.selected) {
+
+                uploadService.encryptCredentials.send(dataSourceCreation.credentials);
+            }
+            else {
+                if(User.getSharedObject() != null) {
+                    User.getSharedObject().data[feedDefinition.dataFeedID.toString()] = null;
+                    User.getSharedObject().flush();
+                }
+            }
+
+
             if (saveCredentialsCheckbox.selected) {
 //                feedDefinition.refreshDataInterval = refreshStepper.value * 1000 * 60 * 60;
                 if(dailyRefresh.selected)
@@ -96,6 +136,7 @@
         }]]></mx:Script>
     <mx:RemoteObject destination="userUpload" id="uploadService">
         <mx:method name="validateCredentials" result="validated()"/>
+        <mx:method name="encryptCredentials" result="encryptedResults()" />
     </mx:RemoteObject>
     <mx:Form>
         <mx:Box id="coreContent"/>
@@ -104,6 +145,9 @@
         </mx:FormItem>
         <mx:FormItem label="Save Credentials:" enabled="{ready}">
             <mx:CheckBox id="saveCredentialsCheckbox" click="credentialClick()" selected="{credentialsSaved}"/>
+        </mx:FormItem>
+        <mx:FormItem label="Save Credentials (On Client):" enabled="{ready}">
+            <mx:CheckBox id="saveClientCredentialsCheckbox" selected="{clientCredentialsSaved}" />
         </mx:FormItem>
         <mx:FormItem label="Refresh Daily:" enabled="{credentialsSaved}">
             <mx:CheckBox id="dailyRefresh" />

@@ -10,12 +10,24 @@
         import com.easyinsight.datasources.GnipDataSource;
         import com.easyinsight.framework.Credentials;
 
+
         public function set dataSourceDefinition(definition:FeedDefinitionData):void {
 
         }
 
         public function get dataSourceDefinition():FeedDefinitionData {
             return new GnipDataSource();
+        }
+
+        [Bindable]
+        private var usernameInputText:String;
+
+        [Bindable]
+        private var passwordText:String;
+
+        public function set credentials(c:Credentials):void {
+            usernameInputText = c.userName;
+            passwordText = c.password;
         }
 
         public function get credentials():Credentials {
@@ -35,10 +47,10 @@
         }]]></mx:Script>
     <mx:Form>
         <mx:FormItem label="User Name: " direction="horizontal" fontWeight="bold" fontFamily="Tahoma">
-            <mx:TextInput id="userNameInput" fontWeight="normal" fontFamily="Lucida Grande"/>
+            <mx:TextInput id="userNameInput" text="{usernameInputText}" fontWeight="normal" fontFamily="Lucida Grande"/>
         </mx:FormItem>
         <mx:FormItem label="Password: " direction="horizontal" fontWeight="bold" fontFamily="Tahoma">
-            <mx:TextInput id="passwordInput" displayAsPassword="true"/>
+            <mx:TextInput id="passwordInput" text="{passwordText}" displayAsPassword="true"/>
         </mx:FormItem>
         <mx:FormItem>
             <gnip:GnipFilterDataGrid id="gnipDataGrid" />

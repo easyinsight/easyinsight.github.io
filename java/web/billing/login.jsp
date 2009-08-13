@@ -25,6 +25,21 @@
         #centerPage {
             height:400px;
         }
+
+        .loginButton {
+            height: 25px;
+            width: 61px;
+            background-image: url('login.gif');
+        }
+
+        .loginButton:hover {
+            background-image: url('loginSelected.gif');
+        }
+
+        .loginButton:active {
+            background-image: url('loginActivated.gif');
+        }
+
     </style>
     <!-- InstanceEndEditable -->
 </head>
@@ -61,7 +76,7 @@
                       <td> <input type="text" name="username" /></td></tr>
                   <tr><td>Password:</td>
                   <td><input type="password" name="password" /></td></tr>
-                  <tr><td colspan="2" style="text-align:center"><input type="image" src="login.gif" alt="Log In" /></td></tr>
+                  <tr><td colspan="2" style="text-align:center"><input class="loginButton" type="image" src="loginTransparent.gif" alt="Log In" /></td></tr>
                       </tbody></table>
 
           </form>

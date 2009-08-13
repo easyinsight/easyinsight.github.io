@@ -67,7 +67,7 @@ public class AppInstanceTask extends Task {
 
     protected List<String> getInstances() throws ParserConfigurationException, SignatureException, IOException, SAXException {
         String action = "DescribeInstances";
-
+        System.out.println(getAMI());
             Date date = new Date();
             String timestamp = getDateAsISO8601String(date);
             String accessKey = "0AWCBQ78TJR8QCY8ABG2";

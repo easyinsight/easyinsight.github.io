@@ -125,7 +125,7 @@
                 <mx:Label id="failureMessageLabel"/>
             </mx:FormItem>
             <mx:FormItem label="">
-                <mx:Button label="Log In" click="login()"/>
+                <mx:Button label="Submit" click="login()"/>
             </mx:FormItem>
         </mx:Form>
     </mx:VBox>

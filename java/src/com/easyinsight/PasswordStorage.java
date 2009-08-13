@@ -69,6 +69,13 @@ public class PasswordStorage {
         new FeedStorage().removeFeed(feedId);
     }
 
+    public static void clearSessionTicket(long feedId, Connection conn) throws SQLException {
+        PreparedStatement deleteStatement = conn.prepareStatement("DELETE from SESSION_ID_STORAGE WHERE data_feed_id = ?");
+        deleteStatement.setLong(1, feedId);
+        deleteStatement.execute();
+        new FeedStorage().removeFeed(feedId);
+    }
+
     public static String getSessionTicket(long feedId, Connection conn) throws SQLException {
         PreparedStatement selectStmt = conn.prepareStatement("SELECT session_id from session_id_storage WHERE data_feed_id = ?");
         selectStmt.setLong(1, feedId);
@@ -102,6 +109,13 @@ public class PasswordStorage {
             if(rows == 0)
                 insertStatement.execute();
             new FeedStorage().removeFeed(feedId);
+    }
+
+    public static void clearPasswordCredentials(long feedId, Connection conn) throws SQLException {
+        PreparedStatement deleteStatement = conn.prepareStatement("DELETE from PASSWORD_STORAGE WHERE data_feed_id = ?");
+        deleteStatement.setLong(1, feedId);
+        deleteStatement.execute();
+        new FeedStorage().removeFeed(feedId);
     }
 
     public static String encryptString(String username) {

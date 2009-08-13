@@ -15,6 +15,17 @@ public class Credentials {
     private String password;
     private int failureState = UNKNOWN;
 
+    public boolean isEncrypted() {
+        return encrypted;
+    }
+
+    public void setEncrypted(boolean encrypted) {
+        this.encrypted = encrypted;
+    }
+
+    private boolean encrypted = false;
+
+
     public Credentials() {
     }
 

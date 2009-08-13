@@ -98,6 +98,21 @@
         span {
             color: red;
         }
+
+        .submitButton {
+            height:25px;
+            width:66px;
+            background-image: url('submit.gif');
+        }
+
+        .submitButton:hover{
+            background-image: url('submitSelected.gif');
+        }
+
+        .submitButton:active{
+            background-image: url('submitActive.gif');
+        }
+
     </style>
     <!-- InstanceEndEditable -->
 </head>
@@ -194,7 +209,7 @@
           <option value="20">20</option>
       </select>
       <span>*</span></td></tr>
-      <tr><td colspan="6" style="text-align:center"> <input type="submit" value="Submit" name="commit"/></td></tr>
+      <tr><td colspan="6" style="text-align:center"> <input class="submitButton" type="image" value="" src="transparent.gif" name="commit"/></td></tr>
       </tbody></table>
 
 

@@ -11,6 +11,7 @@ package com.easyinsight.framework
 		public var userName:String;
 		public var password:String;
 		public var failureState:int = UNKNOWN;
+        public var encrypted:Boolean = false;
 		
 		public function Credentials()
 			{

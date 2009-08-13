@@ -33,6 +33,11 @@
             return credentials;
         }
 
+        public function set credentials(c:Credentials):void {
+            usernameInputText = c.userName;
+            passwordText = c.password;
+        }
+
         public function validate():Boolean {
             return true;
         }

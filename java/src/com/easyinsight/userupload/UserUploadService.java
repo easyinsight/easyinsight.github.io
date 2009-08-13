@@ -822,4 +822,27 @@ public class UserUploadService implements IUserUploadService {
             throw new RuntimeException(e);
         }
     }
+
+    public Credentials encryptCredentials(Credentials creds) {
+        Credentials c = new Credentials();
+        c.setUserName(PasswordStorage.encryptString(creds.getUserName() + ":" + SecurityUtil.getUserName()));
+        c.setPassword(PasswordStorage.encryptString(creds.getPassword() + ":" + SecurityUtil.getUserName()));
+        return c;
+    }
+
+    private Credentials decryptCredentials(Credentials creds) throws MalformedCredentialsException {
+        Credentials c = new Credentials();
+        String s = PasswordStorage.decryptString(creds.getUserName());
+        int i = s.lastIndexOf(":" + SecurityUtil.getUserName());
+        if(i == -1) {
+            throw new MalformedCredentialsException();
+        }
+        c.setUserName(s.substring(0, i - 1));
+        s = PasswordStorage.decryptString(creds.getPassword());
+        i = s.lastIndexOf(":" + SecurityUtil.getUserName());
+        if(i == -1)
+            throw new MalformedCredentialsException();
+        c.setPassword(s.substring(0, i - 1));
+        return c;
+    }
 }

@@ -442,9 +442,7 @@ public class FeedService implements IDataFeedService {
                             PasswordStorage.setPasswordCredentials(serverSource.getUsername(), serverSource.retrievePassword(), serverSource.getDataFeedID(), conn);
                     }
                     else if(serverSource.getUsername() == null && serverSource.getPassword() == null) {
-                        PreparedStatement deleteStmt = conn.prepareStatement("DELETE FROM password_storage WHERE data_feed_id = ?");
-                        deleteStmt.setLong(1, serverSource.getDataFeedID());
-                        deleteStmt.execute();
+                        PasswordStorage.clearPasswordCredentials(serverSource.getDataFeedID(), conn);
                     }
                 }
                 else if(serverSource.getCredentialsDefinition() == CredentialsDefinition.SALESFORCE) {
