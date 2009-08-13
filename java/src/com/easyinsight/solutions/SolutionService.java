@@ -70,7 +70,7 @@ public class SolutionService {
         try {
             conn.setAutoCommit(false);
             PreparedStatement insertSolutionStmt = conn.prepareStatement("INSERT INTO SOLUTION (NAME, DESCRIPTION, INDUSTRY, AUTHOR, COPY_DATA, goal_tree_id, " +
-                    "SOLUTION_TIER, CATEGORY, screencast_directory, screencast_mp4_name) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                    "SOLUTION_TIER, CATEGORY, screencast_directory, screencast_mp4_name, footer_text, logo_link) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                     Statement.RETURN_GENERATED_KEYS);
             insertSolutionStmt.setString(1, solution.getName());
             insertSolutionStmt.setString(2, solution.getDescription());
@@ -86,6 +86,8 @@ public class SolutionService {
             insertSolutionStmt.setInt(8, solution.getCategory());
             insertSolutionStmt.setString(9, solution.getScreencastDirectory());
             insertSolutionStmt.setString(10, solution.getScreencastName());
+            insertSolutionStmt.setString(11, solution.getFooterText());
+            insertSolutionStmt.setString(12, solution.getLogoLink());
             insertSolutionStmt.execute();
             long solutionID = Database.instance().getAutoGenKey(insertSolutionStmt);
             PreparedStatement addRoleStmt = conn.prepareStatement("INSERT INTO USER_TO_SOLUTION (USER_ID, SOLUTION_ID, USER_ROLE) VALUES (?, ?, ?)");
@@ -116,7 +118,8 @@ public class SolutionService {
         try {
             conn.setAutoCommit(false);
             PreparedStatement updateSolutionStmt = conn.prepareStatement("UPDATE SOLUTION SET NAME = ?, DESCRIPTION = ?, INDUSTRY = ?, AUTHOR = ?, " +
-                    "COPY_DATA = ?, GOAL_TREE_ID = ?, SOLUTION_TIER = ?, CATEGORY = ?, screencast_directory = ?, screencast_mp4_name = ? WHERE SOLUTION_ID = ?",
+                    "COPY_DATA = ?, GOAL_TREE_ID = ?, SOLUTION_TIER = ?, CATEGORY = ?, screencast_directory = ?, screencast_mp4_name = ?, footer_text = ?," +
+                    "logo_link = ? WHERE SOLUTION_ID = ?",
                     Statement.RETURN_GENERATED_KEYS);
             updateSolutionStmt.setString(1, solution.getName());
             updateSolutionStmt.setString(2, solution.getDescription());
@@ -132,7 +135,9 @@ public class SolutionService {
             updateSolutionStmt.setInt(8, solution.getCategory());
             updateSolutionStmt.setString(9, solution.getScreencastDirectory());
             updateSolutionStmt.setString(10, solution.getScreencastName());
-            updateSolutionStmt.setLong(11, solution.getSolutionID());
+            updateSolutionStmt.setString(11, solution.getFooterText());
+            updateSolutionStmt.setString(12, solution.getLogoLink());
+            updateSolutionStmt.setLong(13, solution.getSolutionID());
             updateSolutionStmt.executeUpdate();
             PreparedStatement deleteFeedsStmt = conn.prepareStatement("DELETE FROM SOLUTION_TO_FEED WHERE SOLUTION_ID = ?");
             deleteFeedsStmt.setLong(1, solution.getSolutionID());
@@ -295,7 +300,7 @@ public class SolutionService {
             accountType = SecurityUtil.getAccountTier();
         }
         PreparedStatement getSolutionsStmt = conn.prepareStatement("SELECT SOLUTION_ID, NAME, DESCRIPTION, INDUSTRY, AUTHOR, COPY_DATA, SOLUTION_ARCHIVE_NAME, goal_tree_id," +
-                "solution_image, screencast_directory, screencast_mp4_name, solution_tier FROM SOLUTION WHERE SOLUTION_ID = ?");
+                "solution_image, screencast_directory, screencast_mp4_name, solution_tier, footer_text, logo_link FROM SOLUTION WHERE SOLUTION_ID = ?");
         getSolutionsStmt.setLong(1, solutionID);
         PreparedStatement dataSourceCountStmt = conn.prepareStatement("SELECT COUNT(*) FROM solution_to_feed WHERE solution_id = ?");
         PreparedStatement goalTreeCountStmt = conn.prepareStatement("SELECT COUNT(*) FROM solution_to_goal_tree WHERE solution_id = ?");
@@ -321,6 +326,8 @@ public class SolutionService {
             solution.setScreencastDirectory(rs.getString(10));
             solution.setScreencastName(rs.getString(11));
             solution.setSolutionTier(rs.getInt(12));
+            solution.setFooterText(rs.getString(13));
+            solution.setLogoLink(rs.getString(14));
             solution.setAccessible(solution.getSolutionTier() <= accountType);
             dataSourceCountStmt.setLong(1, solutionID);
             ResultSet dataSourceRS = dataSourceCountStmt.executeQuery();
@@ -369,7 +376,7 @@ public class SolutionService {
         Connection conn = Database.instance().getConnection();
         try {
             PreparedStatement getSolutionsStmt = conn.prepareStatement("SELECT SOLUTION_ID, NAME, DESCRIPTION, INDUSTRY, AUTHOR, COPY_DATA, SOLUTION_ARCHIVE_NAME, GOAL_TREE_ID, SOLUTION_TIER," +
-                    "solution_image, CATEGORY, screencast_directory, screencast_mp4_name FROM SOLUTION WHERE SOLUTION_TIER <= ?");
+                    "solution_image, CATEGORY, screencast_directory, screencast_mp4_name, footer_text, logo_link FROM SOLUTION WHERE SOLUTION_TIER <= ?");
             getSolutionsStmt.setInt(1, Account.ADMINISTRATOR);
             PreparedStatement dataSourceCountStmt = conn.prepareStatement("SELECT COUNT(*) FROM solution_to_feed WHERE solution_id = ?");
             PreparedStatement goalTreeCountStmt = conn.prepareStatement("SELECT COUNT(*) FROM solution_to_goal_tree WHERE solution_id = ?");
@@ -400,6 +407,8 @@ public class SolutionService {
                 solution.setCategory(rs.getInt(11));
                 solution.setScreencastDirectory(rs.getString(12));
                 solution.setScreencastName(rs.getString(13));
+                solution.setFooterText(rs.getString(14));
+                solution.setLogoLink(rs.getString(15));
                 dataSourceCountStmt.setLong(1, solutionID);
                 ResultSet dataSourceRS = dataSourceCountStmt.executeQuery();
                 dataSourceRS.next();

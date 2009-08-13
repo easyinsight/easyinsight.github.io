@@ -4,6 +4,7 @@ import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.analysis.FeedMetadata;
 import com.easyinsight.analysis.AnalysisItemResultMetadata;
 import com.easyinsight.datafeeds.CredentialFailure;
+import com.easyinsight.datafeeds.CredentialRequirement;
 
 import java.util.List;
 import java.util.Set;
@@ -13,13 +14,21 @@ public class ListDataResults implements Serializable {
     private AnalysisItem[] headers;
     private AnalysisItemResultMetadata[] headerMetadata;
     private ListRow[] rows;
-    private List<CredentialFailure> credentialFailures;
+    private Set<CredentialRequirement> credentialRequirements;
     private boolean limitedResults;
     private int limitResults;
     private int maxResults;
     private Set<Long> invalidAnalysisItemIDs;
     private FeedMetadata feedMetadata;
     private DataSourceInfo dataSourceInfo;
+
+    public Set<CredentialRequirement> getCredentialRequirements() {
+        return credentialRequirements;
+    }
+
+    public void setCredentialRequirements(Set<CredentialRequirement> credentialRequirements) {
+        this.credentialRequirements = credentialRequirements;
+    }
 
     public DataSourceInfo getDataSourceInfo() {
         return dataSourceInfo;
@@ -75,14 +84,6 @@ public class ListDataResults implements Serializable {
 
     public void setHeaderMetadata(AnalysisItemResultMetadata[] headerMetadata) {
         this.headerMetadata = headerMetadata;
-    }
-
-    public List<CredentialFailure> getCredentialFailures() {
-        return credentialFailures;
-    }
-
-    public void setCredentialFailures(List<CredentialFailure> credentialFailures) {
-        this.credentialFailures = credentialFailures;
     }
 
     public AnalysisItem[] getHeaders() {

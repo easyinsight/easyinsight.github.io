@@ -69,9 +69,9 @@ public class FilterRangeDefinition extends FilterDefinition {
         StringBuilder queryBuilder = new StringBuilder();
         String columnName = "k" + getField().getKey().getKeyID();
         queryBuilder.append(columnName);
-        queryBuilder.append(" >= ? AND ");
+        queryBuilder.append(" > ? AND ");
         queryBuilder.append(columnName);
-        queryBuilder.append(" <= ?");
+        queryBuilder.append(" < ?");
         return queryBuilder.toString();
     }
 

@@ -25,7 +25,7 @@ public class MaterializedFilterRangeDefinition extends MaterializedFilterDefinit
         if (value.type() == Value.NUMBER) {
             Double doubleValue = value.toDouble();
             if (doubleValue != null) {
-                allowed = doubleValue >= lowValue && doubleValue <= highValue;
+                allowed = doubleValue > lowValue && doubleValue < highValue;
             }
         }
         return allowed;

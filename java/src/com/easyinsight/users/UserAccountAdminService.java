@@ -28,7 +28,7 @@ import java.sql.SQLException;
  */
 public class UserAccountAdminService {
 
-    public AccountAPISettings regenerateSecretKey() {
+    public void regenerateAccountSecretKey() {
         long accountID = SecurityUtil.getAccountID();
         Session session = Database.instance().createSession();
         try {
@@ -37,10 +37,26 @@ public class UserAccountAdminService {
             String accountSecretKey = RandomTextGenerator.generateText(16);
             account.setAccountSecretKey(accountSecretKey);
             session.save(account);
-            AccountAPISettings settings = new AccountAPISettings(account.getAccountKey(), account.getAccountSecretKey(),
-                    account.isUncheckedAPIEnabled(), account.isValidatedAPIEnabled(), account.isDynamicAPIAllowed());
             session.getTransaction().commit();
-            return settings;
+        } catch (Exception e) {
+            LogClass.error(e);
+            session.getTransaction().rollback();
+            throw new RuntimeException(e);
+        } finally {
+            session.close();
+        }
+    }
+
+    public void regenerateUserSecretKey() {
+        long userID = SecurityUtil.getUserID();
+        Session session = Database.instance().createSession();
+        try {
+            session.getTransaction().begin();
+            User user = (User) session.createQuery("from User where userID = ?").setLong(0, userID).list().get(0);
+            String accountSecretKey = RandomTextGenerator.generateText(16);
+            user.setUserSecretKey(accountSecretKey);
+            session.save(user);
+            session.getTransaction().commit();
         } catch (Exception e) {
             LogClass.error(e);
             session.getTransaction().rollback();
@@ -107,7 +123,7 @@ public class UserAccountAdminService {
             LogClass.error(e);
         } finally {
             session.close();
-            Database.instance().closeConnection(conn);
+            Database.closeConnection(conn);
         }
         return accountInfo;
     }
@@ -187,29 +203,35 @@ public class UserAccountAdminService {
         } else {
             Session session = Database.instance().createSession();
             Account account;
-            User user;
+            User user = null;
             try {
                 session.beginTransaction();
                 List results = session.createQuery("from Account where accountID = ?").setLong(0, accountID).list();
                 account = (Account) results.get(0);
-                User admin = (User) session.createQuery("from User where userID = ?").setLong(0, SecurityUtil.getUserID()).list().get(0);
-                user = userTransferObject.toUser();
-                user.setAccount(account);
-                final String password = RandomTextGenerator.generateText(12);
-                final String adminName = admin.getName();
-                final String userEmail = user.getEmail();
-                final String userName = user.getUserName();
-                user.setPassword(PasswordService.getInstance().encrypt(password));
-                account.addUser(user);
-                user.setAccount(account);
-                session.update(account);
-                session.getTransaction().commit();
-                new Thread(new Runnable() {
-                    public void run() {
-                        new AccountMemberInvitation().sendAccountEmail(userEmail, adminName, userName, password);
-                    }
-                }).start();
-                userCreationResponse = new UserCreationResponse(user.getUserID());
+                int maxUsers = account.getMaxUsers();
+                int currentUsers = account.getUsers().size();
+                if (currentUsers >= maxUsers) {
+                    userCreationResponse = new UserCreationResponse("You are at the maximum number of users for your account.");
+                } else {
+                    User admin = (User) session.createQuery("from User where userID = ?").setLong(0, SecurityUtil.getUserID()).list().get(0);
+                    user = userTransferObject.toUser();
+                    user.setAccount(account);
+                    final String password = RandomTextGenerator.generateText(12);
+                    final String adminName = admin.getName();
+                    final String userEmail = user.getEmail();
+                    final String userName = user.getUserName();
+                    user.setPassword(PasswordService.getInstance().encrypt(password));
+                    account.addUser(user);
+                    user.setAccount(account);
+                    session.update(account);
+                    session.getTransaction().commit();
+                    new Thread(new Runnable() {
+                        public void run() {
+                            new AccountMemberInvitation().sendAccountEmail(userEmail, adminName, userName, password);
+                        }
+                    }).start();
+                    userCreationResponse = new UserCreationResponse(user.getUserID());
+                }
             } catch (Exception e) {
                 LogClass.error(e);
                 session.getTransaction().rollback();
@@ -217,7 +239,7 @@ public class UserAccountAdminService {
             } finally {
                 session.close();
             }
-            if (account.getAccountType() == Account.GROUP || account.getAccountType() == Account.PROFESSIONAL || account.getAccountType() == Account.ENTERPRISE) {
+            if (user != null && account.getAccountType() == Account.GROUP || account.getAccountType() == Account.PROFESSIONAL || account.getAccountType() == Account.ENTERPRISE) {
                 try {
                     new GroupStorage().addUserToGroup(user.getUserID(), account.getGroupID(), userTransferObject.isAccountAdmin() ? Roles.OWNER : Roles.SUBSCRIBER);
                 } catch (Exception e) {
@@ -319,11 +341,24 @@ public class UserAccountAdminService {
                 account.setAccountSecretKey(accountSecretKey);
                 changed = true;
             }
+            List userResults = session.createQuery("from User where userID = ?").setLong(0, SecurityUtil.getUserID()).list();
+            User user = (User) userResults.get(0);
+            if (user.getUserKey() == null) {
+                String accountKey = RandomTextGenerator.generateText(12);
+                user.setUserKey(accountKey);
+                changed = true;
+            }
+            if (user.getUserSecretKey() == null) {
+                String accountSecretKey = RandomTextGenerator.generateText(16);
+                user.setUserSecretKey(accountSecretKey);
+                changed = true;
+            }
             if (changed) {
+                session.update(user);
                 session.update(account);
             }
             accountAPISettings = new AccountAPISettings(account.getAccountKey(), account.getAccountSecretKey(),
-                    account.isUncheckedAPIEnabled(), account.isValidatedAPIEnabled(), account.isDynamicAPIAllowed());
+                    user.getUserKey(), user.getUserSecretKey(), account.isApiEnabled());
             session.getTransaction().commit();
         } catch (Exception e) {
             LogClass.error(e);
@@ -336,7 +371,7 @@ public class UserAccountAdminService {
     }
 
     public String activateAccount(String activationID) {
-        Connection conn = Database.instance().getConnection();
+        EIConnection conn = Database.instance().getConnection();
         Session session = Database.instance().createSession(conn);
         try {
             conn.setAutoCommit(false);
@@ -367,20 +402,12 @@ public class UserAccountAdminService {
             return url;
         } catch (SQLException e) {
             LogClass.error(e);
-            try {
-                conn.rollback();
-            } catch (SQLException e1) {
-                LogClass.error(e1);
-            }
+            conn.rollback();
             throw new RuntimeException(e);
         } finally {
             session.close();
-            try {
-                conn.setAutoCommit(true);
-            } catch (SQLException e) {
-                LogClass.error(e);
-            }
-            Database.instance().closeConnection(conn);
+            conn.setAutoCommit(true);
+            Database.closeConnection(conn);
         }
     }
 
@@ -425,7 +452,7 @@ public class UserAccountAdminService {
             LogClass.error(e);
             throw new RuntimeException(e);
         } finally {
-            Database.instance().closeConnection(conn);
+            Database.closeConnection(conn);
         }
         AccountStats accountStats = new AccountStats();
         accountStats.setMaxSpace(maxSize);
@@ -437,7 +464,7 @@ public class UserAccountAdminService {
         return accountStats;
     }
 
-    public void saveAccountAPISettings(AccountAPISettings accountAPISettings) {
+    public void saveAccountSettings(AccountSettings accountSettings) {
         long accountID = SecurityUtil.getAccountID();
         SecurityUtil.authorizeAccountAdmin();
         Session session = Database.instance().createSession();
@@ -445,9 +472,7 @@ public class UserAccountAdminService {
             session.getTransaction().begin();
             List results = session.createQuery("from Account where accountID = ?").setLong(0, accountID).list();
             Account account = (Account) results.get(0);
-            account.setUncheckedAPIEnabled(accountAPISettings.isUncheckedAPIEnabled());
-            account.setValidatedAPIEnabled(accountAPISettings.isValidatedAPIEnabled());
-            account.setDynamicAPIAllowed(accountAPISettings.isDynamicAPIEnabled());
+            account.setApiEnabled(accountSettings.isApiEnabled());            
             session.getTransaction().commit();
         } catch (Exception e) {
             LogClass.error(e);
@@ -458,6 +483,27 @@ public class UserAccountAdminService {
         }
     }
 
+    public AccountSettings getAccountSettings() {
+        AccountSettings accountSettings;
+        long accountID = SecurityUtil.getAccountID();
+        SecurityUtil.authorizeAccountAdmin();
+        Session session = Database.instance().createSession();
+        try {
+            session.getTransaction().begin();
+            List results = session.createQuery("from Account where accountID = ?").setLong(0, accountID).list();
+            Account account = (Account) results.get(0);
+            accountSettings = new AccountSettings();
+            accountSettings.setApiEnabled(account.isApiEnabled());
+            session.getTransaction().commit();
+        } catch (Exception e) {
+            LogClass.error(e);
+            session.getTransaction().rollback();
+            throw new RuntimeException(e);
+        } finally {
+            session.close();
+        }
+        return accountSettings;
+    }
 
     public void updateAccount(AccountTransferObject accountTransferObject) {
         if (SecurityUtil.getAccountID() != accountTransferObject.getAccountID()) {

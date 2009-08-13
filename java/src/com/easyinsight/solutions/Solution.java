@@ -26,11 +26,29 @@ public class Solution {
     private long goalTreeID;
     private int solutionTier;
     private List<String> tags;
+    private String footerText;
+    private String logoLink;
     private byte[] image;
     private boolean accessible;
     private int category;
     private String screencastName;
     private String screencastDirectory;
+
+    public String getFooterText() {
+        return footerText;
+    }
+
+    public void setFooterText(String footerText) {
+        this.footerText = footerText;
+    }
+
+    public String getLogoLink() {
+        return logoLink;
+    }
+
+    public void setLogoLink(String logoLink) {
+        this.logoLink = logoLink;
+    }
 
     public String getScreencastName() {
         return screencastName;

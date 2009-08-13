@@ -19,13 +19,16 @@ public class AccountAdminTO {
     private int accountState;
     private long groupID;
     private List<UserTransferObject> adminUsers = new ArrayList<UserTransferObject>();
-    private boolean uncheckedAPIEnabled;
-    private boolean validatedAPIEnabled;
-    private boolean uncheckedAPIAllowed;
-    private boolean validatedAPIAllowed;
-    private boolean dynamicAPIAllowed;
-    private boolean basicAuthAllowed;
+    private boolean apiEnabled;
     private List<ConsultantTO> consultants = new ArrayList<ConsultantTO>();
+
+    public boolean isApiEnabled() {
+        return apiEnabled;
+    }
+
+    public void setApiEnabled(boolean apiEnabled) {
+        this.apiEnabled = apiEnabled;
+    }
 
     public List<UserTransferObject> getAdminUsers() {
         return adminUsers;
@@ -41,55 +44,7 @@ public class AccountAdminTO {
 
     public void setGroupID(long groupID) {
         this.groupID = groupID;
-    }
-
-    public boolean isUncheckedAPIEnabled() {
-        return uncheckedAPIEnabled;
-    }
-
-    public void setUncheckedAPIEnabled(boolean uncheckedAPIEnabled) {
-        this.uncheckedAPIEnabled = uncheckedAPIEnabled;
-    }
-
-    public boolean isValidatedAPIEnabled() {
-        return validatedAPIEnabled;
-    }
-
-    public void setValidatedAPIEnabled(boolean validatedAPIEnabled) {
-        this.validatedAPIEnabled = validatedAPIEnabled;
-    }
-
-    public boolean isUncheckedAPIAllowed() {
-        return uncheckedAPIAllowed;
-    }
-
-    public void setUncheckedAPIAllowed(boolean uncheckedAPIAllowed) {
-        this.uncheckedAPIAllowed = uncheckedAPIAllowed;
-    }
-
-    public boolean isValidatedAPIAllowed() {
-        return validatedAPIAllowed;
-    }
-
-    public void setValidatedAPIAllowed(boolean validatedAPIAllowed) {
-        this.validatedAPIAllowed = validatedAPIAllowed;
-    }
-
-    public boolean isDynamicAPIAllowed() {
-        return dynamicAPIAllowed;
-    }
-
-    public void setDynamicAPIAllowed(boolean dynamicAPIAllowed) {
-        this.dynamicAPIAllowed = dynamicAPIAllowed;
-    }
-
-    public boolean isBasicAuthAllowed() {
-        return basicAuthAllowed;
-    }
-
-    public void setBasicAuthAllowed(boolean basicAuthAllowed) {
-        this.basicAuthAllowed = basicAuthAllowed;
-    }
+    }    
 
     public String getName() {
         return name;
@@ -159,12 +114,7 @@ public class AccountAdminTO {
         account.setMaxSize(maxSize);
         account.setMaxUsers(maxUsers);
         account.setAccountState(accountState);
-        account.setBasicAuthAllowed(basicAuthAllowed);
-        account.setUncheckedAPIAllowed(uncheckedAPIAllowed);
-        account.setUncheckedAPIEnabled(uncheckedAPIEnabled);
-        account.setValidatedAPIAllowed(validatedAPIAllowed);
-        account.setValidatedAPIEnabled(validatedAPIEnabled);
-        account.setDynamicAPIAllowed(dynamicAPIAllowed);
+        account.setApiEnabled(apiEnabled);
         return account;
     }
 

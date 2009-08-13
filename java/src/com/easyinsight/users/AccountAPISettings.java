@@ -8,20 +8,36 @@ package com.easyinsight.users;
 public class AccountAPISettings {
     private String accountKey;
     private String accountSecretKey;
-    private boolean uncheckedAPIEnabled;
-    private boolean validatedAPIEnabled;
-    private boolean dynamicAPIEnabled;
+    private String userKey;
+    private String userSecretKey;
+    private boolean apiEnabled;
 
     public AccountAPISettings() {
     }
 
-    public AccountAPISettings(String accountKey, String accountSecretKey, boolean uncheckedAPIEnabled,
-                              boolean validatedAPIEnabled, boolean dynamicAPIEnabled) {
+    public AccountAPISettings(String accountKey, String accountSecretKey, String userKey, String userSecretKey,
+                              boolean apiEnabled) {
         this.accountKey = accountKey;
         this.accountSecretKey = accountSecretKey;
-        this.uncheckedAPIEnabled = uncheckedAPIEnabled;
-        this.validatedAPIEnabled = validatedAPIEnabled;
-        this.dynamicAPIEnabled = dynamicAPIEnabled;
+        this.userKey = userKey;
+        this.userSecretKey = userSecretKey;
+        this.apiEnabled = apiEnabled;
+    }
+
+    public String getUserKey() {
+        return userKey;
+    }
+
+    public void setUserKey(String userKey) {
+        this.userKey = userKey;
+    }
+
+    public String getUserSecretKey() {
+        return userSecretKey;
+    }
+
+    public void setUserSecretKey(String userSecretKey) {
+        this.userSecretKey = userSecretKey;
     }
 
     public String getAccountKey() {
@@ -40,27 +56,11 @@ public class AccountAPISettings {
         this.accountSecretKey = accountSecretKey;
     }
 
-    public boolean isUncheckedAPIEnabled() {
-        return uncheckedAPIEnabled;
+    public boolean isApiEnabled() {
+        return apiEnabled;
     }
 
-    public void setUncheckedAPIEnabled(boolean uncheckedAPIEnabled) {
-        this.uncheckedAPIEnabled = uncheckedAPIEnabled;
-    }
-
-    public boolean isValidatedAPIEnabled() {
-        return validatedAPIEnabled;
-    }
-
-    public void setValidatedAPIEnabled(boolean validatedAPIEnabled) {
-        this.validatedAPIEnabled = validatedAPIEnabled;
-    }
-
-    public boolean isDynamicAPIEnabled() {
-        return dynamicAPIEnabled;
-    }
-
-    public void setDynamicAPIEnabled(boolean dynamicAPIEnabled) {
-        this.dynamicAPIEnabled = dynamicAPIEnabled;
+    public void setApiEnabled(boolean apiEnabled) {
+        this.apiEnabled = apiEnabled;
     }
 }

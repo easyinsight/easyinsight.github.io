@@ -284,9 +284,35 @@ public class DataService {
         SecurityUtil.authorizeFeedAccess(analysisDefinition.getDataFeedID());
         try {
             long startTime = System.currentTimeMillis();
-            ListDataResults results;
-            
             Feed feed = feedRegistry.getFeed(analysisDefinition.getDataFeedID());
+            Set<CredentialRequirement> credentialsRequired = feed.getCredentialRequirement(insightRequestMetadata.isRefreshAllSources());
+            if (credentialsRequired.size() > 0) {
+                int count = 0;
+                for (CredentialRequirement credentialRequirement : credentialsRequired) {
+                    if (insightRequestMetadata.getCredentialForDataSource(credentialRequirement.getDataSourceID()) != null) {
+                        count++;
+                    }
+                }
+                if (count < credentialsRequired.size()) {
+                    ListDataResults embeddedDataResults = new ListDataResults();
+                    embeddedDataResults.setCredentialRequirements(credentialsRequired);
+                    return embeddedDataResults;
+                }
+            }
+            if (insightRequestMetadata.isRefreshAllSources()) {
+                List<Long> containedIDs = feed.getDataSourceIDs();
+                for (Long containedID : containedIDs) {
+                    FeedDefinition feedDefinition = new FeedStorage().getFeedDefinitionData(containedID);
+                    if (feedDefinition.getDataSourceType() == DataSourceInfo.STORED_PULL ||
+                            feedDefinition.getDataSourceType() == DataSourceInfo.COMPOSITE_PULL) {
+                        IServerDataSourceDefinition dataSource = (IServerDataSourceDefinition) feedDefinition;
+                        Credentials credentials = insightRequestMetadata.getCredentialForDataSource(feedDefinition.getDataFeedID());
+                        dataSource.refreshData(credentials, SecurityUtil.getAccountID(), new Date(), null);
+                    }
+                }
+            }
+            ListDataResults results;
+
             /*Set<Long> ids = validate(analysisDefinition, feed);
             if (ids.size() > 0) {
                 results = new ListDataResults();
@@ -307,6 +333,9 @@ public class DataService {
             pipeline.setup(analysisDefinition, feed, insightRequestMetadata);
             results = pipeline.toList(dataSet);
             DataSourceInfo dataSourceInfo = feed.getDataSourceInfo();
+            if (dataSet.getLastTime() == null) {
+                dataSet.setLastTime(new Date());
+            }
             dataSourceInfo.setLastDataTime(dataSet.getLastTime());
             results.setDataSourceInfo(dataSourceInfo);
            // }

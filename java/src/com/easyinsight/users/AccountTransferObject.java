@@ -20,59 +20,14 @@ public class AccountTransferObject {
     private long maxSize;
     private String name;
     private int accountState;
-    private boolean uncheckedAPIEnabled;
-    private boolean validatedAPIEnabled;
-    private boolean uncheckedAPIAllowed;
-    private boolean validatedAPIAllowed;
-    private boolean dynamicAPIAllowed;
-    private boolean basicAuthAllowed;
+    private boolean apiEnabled;
 
-    public boolean isUncheckedAPIEnabled() {
-        return uncheckedAPIEnabled;
+    public boolean isApiEnabled() {
+        return apiEnabled;
     }
 
-    public void setUncheckedAPIEnabled(boolean uncheckedAPIEnabled) {
-        this.uncheckedAPIEnabled = uncheckedAPIEnabled;
-    }
-
-    public boolean isValidatedAPIEnabled() {
-        return validatedAPIEnabled;
-    }
-
-    public void setValidatedAPIEnabled(boolean validatedAPIEnabled) {
-        this.validatedAPIEnabled = validatedAPIEnabled;
-    }
-
-    public boolean isUncheckedAPIAllowed() {
-        return uncheckedAPIAllowed;
-    }
-
-    public void setUncheckedAPIAllowed(boolean uncheckedAPIAllowed) {
-        this.uncheckedAPIAllowed = uncheckedAPIAllowed;
-    }
-
-    public boolean isValidatedAPIAllowed() {
-        return validatedAPIAllowed;
-    }
-
-    public void setValidatedAPIAllowed(boolean validatedAPIAllowed) {
-        this.validatedAPIAllowed = validatedAPIAllowed;
-    }
-
-    public boolean isDynamicAPIAllowed() {
-        return dynamicAPIAllowed;
-    }
-
-    public void setDynamicAPIAllowed(boolean dynamicAPIAllowed) {
-        this.dynamicAPIAllowed = dynamicAPIAllowed;
-    }
-
-    public boolean isBasicAuthAllowed() {
-        return basicAuthAllowed;
-    }
-
-    public void setBasicAuthAllowed(boolean basicAuthAllowed) {
-        this.basicAuthAllowed = basicAuthAllowed;
+    public void setApiEnabled(boolean apiEnabled) {
+        this.apiEnabled = apiEnabled;
     }
 
     public String getName() {
@@ -137,11 +92,7 @@ public class AccountTransferObject {
         account.setLicenses(licenses);
         account.setAccountID(accountID);
         account.setName(name);
-        account.setBasicAuthAllowed(basicAuthAllowed);
-        account.setUncheckedAPIAllowed(uncheckedAPIAllowed);
-        account.setUncheckedAPIEnabled(uncheckedAPIEnabled);
-        account.setValidatedAPIAllowed(validatedAPIAllowed);
-        account.setValidatedAPIEnabled(validatedAPIEnabled);
+        account.setApiEnabled(apiEnabled);
         return account;
     }
 }

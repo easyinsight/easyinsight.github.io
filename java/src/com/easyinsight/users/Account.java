@@ -69,23 +69,8 @@ public class Account {
     @Column(name="max_users")
     private int maxUsers;
 
-    @Column(name="unchecked_api_enabled")
-    private boolean uncheckedAPIEnabled;
-
-    @Column(name="validated_api_enabled")
-    private boolean validatedAPIEnabled;
-
-    @Column(name="unchecked_api_allowed")
-    private boolean uncheckedAPIAllowed;
-
-    @Column(name="validated_api_allowed")
-    private boolean validatedAPIAllowed;
-
-    @Column(name="dynamic_api_enabled")
-    private boolean dynamicAPIAllowed;
-
-    @Column(name="basic_auth_allowed")
-    private boolean basicAuthAllowed;
+    @Column(name="api_enabled")
+    private boolean apiEnabled;
 
     @Column(name="name")
     private String name;
@@ -130,6 +115,14 @@ public class Account {
 
     public void setBillingInfo(List<AccountCreditCardBillingInfo> billingInfo) {
         this.billingInfo = billingInfo;
+    }
+
+    public boolean isApiEnabled() {
+        return apiEnabled;
+    }
+
+    public void setApiEnabled(boolean apiEnabled) {
+        this.apiEnabled = apiEnabled;
     }
 
     /*public BillingParty getBillingParty() {
@@ -227,12 +220,7 @@ public class Account {
         transfer.setName(name);
         transfer.setMaxUsers(maxUsers);
         transfer.setAccountState(accountState);
-        transfer.setBasicAuthAllowed(basicAuthAllowed);
-        transfer.setUncheckedAPIAllowed(uncheckedAPIAllowed);
-        transfer.setUncheckedAPIEnabled(uncheckedAPIEnabled);
-        transfer.setValidatedAPIAllowed(validatedAPIAllowed);
-        transfer.setValidatedAPIEnabled(validatedAPIEnabled);
-        transfer.setDynamicAPIAllowed(dynamicAPIAllowed);
+        transfer.setApiEnabled(apiEnabled);
         return transfer;
     }
 
@@ -262,12 +250,7 @@ public class Account {
         transfer.setConsultants(consultants);
         transfer.setAdminUsers(adminUsers);
         transfer.setAccountState(accountState);
-        transfer.setBasicAuthAllowed(basicAuthAllowed);
-        transfer.setUncheckedAPIAllowed(uncheckedAPIAllowed);
-        transfer.setUncheckedAPIEnabled(uncheckedAPIEnabled);
-        transfer.setValidatedAPIAllowed(validatedAPIAllowed);
-        transfer.setValidatedAPIEnabled(validatedAPIEnabled);
-        transfer.setDynamicAPIAllowed(dynamicAPIAllowed);
+        transfer.setApiEnabled(apiEnabled);
         return transfer;
     }
     
@@ -285,54 +268,6 @@ public class Account {
 
     public void setMaxUsers(int maxUsers) {
         this.maxUsers = maxUsers;
-    }
-
-    public boolean isUncheckedAPIEnabled() {
-        return uncheckedAPIEnabled;
-    }
-
-    public void setUncheckedAPIEnabled(boolean uncheckedAPIEnabled) {
-        this.uncheckedAPIEnabled = uncheckedAPIEnabled;
-    }
-
-    public boolean isValidatedAPIEnabled() {
-        return validatedAPIEnabled;
-    }
-
-    public void setValidatedAPIEnabled(boolean validatedAPIEnabled) {
-        this.validatedAPIEnabled = validatedAPIEnabled;
-    }
-
-    public boolean isUncheckedAPIAllowed() {
-        return uncheckedAPIAllowed;
-    }
-
-    public void setUncheckedAPIAllowed(boolean uncheckedAPIAllowed) {
-        this.uncheckedAPIAllowed = uncheckedAPIAllowed;
-    }
-
-    public boolean isValidatedAPIAllowed() {
-        return validatedAPIAllowed;
-    }
-
-    public void setValidatedAPIAllowed(boolean validatedAPIAllowed) {
-        this.validatedAPIAllowed = validatedAPIAllowed;
-    }
-
-    public boolean isDynamicAPIAllowed() {
-        return dynamicAPIAllowed;
-    }
-
-    public void setDynamicAPIAllowed(boolean dynamicAPIAllowed) {
-        this.dynamicAPIAllowed = dynamicAPIAllowed;
-    }
-
-    public boolean isBasicAuthAllowed() {
-        return basicAuthAllowed;
-    }
-
-    public void setBasicAuthAllowed(boolean basicAuthAllowed) {
-        this.basicAuthAllowed = basicAuthAllowed;
     }
 
     public List<Consultant> getGuestUsers() {

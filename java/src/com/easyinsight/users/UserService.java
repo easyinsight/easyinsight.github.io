@@ -152,30 +152,7 @@ public class UserService implements IUserService {
             LogClass.error(e);
             throw new RuntimeException(e);
         }
-    }
-
-    public AccountAPISettings regenerateSecretKey() {
-        long userID = SecurityUtil.getUserID();
-        Session session = Database.instance().createSession();
-        try {
-            session.getTransaction().begin();
-            User user = (User) session.createQuery("from User where userID = ?").setLong(0, userID).list().get(0);
-            String accountSecretKey = RandomTextGenerator.generateText(16);
-            user.setUserSecretKey(accountSecretKey);
-            session.save(user);
-            AccountAPISettings settings = new AccountAPISettings(user.getUserKey(), user.getUserSecretKey(),
-                    user.getAccount().isUncheckedAPIEnabled(), user.getAccount().isValidatedAPIEnabled(),
-                    user.getAccount().isDynamicAPIAllowed());
-            session.getTransaction().commit();
-            return settings;
-        } catch (Exception e) {
-            LogClass.error(e);
-            session.getTransaction().rollback();
-            throw new RuntimeException(e);
-        } finally {
-            session.close();
-        }
-    }
+    }    
 
     public boolean remindPassword(String emailAddress) {
         boolean success;
@@ -406,6 +383,11 @@ public class UserService implements IUserService {
             insertActivationStmt.execute();
             new AccountActivityStorage().saveAccountActivity(new AccountActivity(account.getAccountType(),
                     new Date(), account.getAccountID(), 0, AccountActivity.ACCOUNT_CREATED, "", 0, 0, Account.ACTIVE), conn);
+            if (account.getAccountType() != Account.FREE) {
+                Calendar cal = Calendar.getInstance();
+                cal.add(Calendar.DAY_OF_YEAR, 30);
+                new AccountActivityStorage().saveAccountTimeChange(account.getAccountID(), Account.ACTIVE, cal.getTime(), conn);
+            }
             //}
             session.flush();
             conn.commit();
@@ -602,47 +584,6 @@ public class UserService implements IUserService {
             session.close();
         }
     }
-
-    
-    public AccountAPISettings getUserAPISettings() {
-        AccountAPISettings accountAPISettings;
-        long userID = SecurityUtil.getUserID();
-        Session session = Database.instance().createSession();
-        try {
-            session.getTransaction().begin();
-            List results = session.createQuery("from User where userID = ?").setLong(0, userID).list();
-            User user = (User) results.get(0);
-            Account account = user.getAccount();
-            boolean changed = false;
-            if (user.getUserKey() == null) {
-                String accountKey = RandomTextGenerator.generateText(12);
-                user.setUserKey(accountKey);
-                changed = true;
-            }
-            if (user.getUserSecretKey() == null) {
-                String accountSecretKey = RandomTextGenerator.generateText(16);
-                user.setUserSecretKey(accountSecretKey);
-                changed = true;
-            }
-            if (changed) {
-                session.update(account);
-            }
-            accountAPISettings = new AccountAPISettings(user.getUserKey(), user.getUserSecretKey(),
-                    account.isUncheckedAPIEnabled(), account.isValidatedAPIEnabled(), account.isDynamicAPIAllowed());
-            session.getTransaction().commit();
-        } catch (Exception e) {
-            LogClass.error(e);
-            session.getTransaction().rollback();
-            throw new RuntimeException(e);
-        } finally {
-            session.close();
-        }
-        return accountAPISettings;
-    }
-
-    
-
-
 
     public void deleteAccount() {
         long accountID = SecurityUtil.getAccountID();

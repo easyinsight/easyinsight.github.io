@@ -528,9 +528,11 @@ public class FeedDefinition implements Cloneable, Serializable {
         session.flush();
 
         //PreparedStatement deleteKeyStmt = conn.prepareStatement("delete from item_key where item_key_id = ?");
-        for (AnalysisItem field : getFields()) {
+        if (getFields() != null) {
+            for (AnalysisItem field : getFields()) {
 
-            session.delete(field.getKey());
+                session.delete(field.getKey());
+            }
         }
 
         session.flush();
