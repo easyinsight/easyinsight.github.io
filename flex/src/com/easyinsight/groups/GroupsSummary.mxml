@@ -34,12 +34,6 @@
         private var myGroups:ArrayCollection;
 
         [Bindable]
-        private var publicGroups:ArrayCollection;
-
-        [Bindable]
-        private var publicGroupRowCount:int;
-
-        [Bindable]
         private var showMyGroups:Boolean = false;
 
         [Bindable]
@@ -66,9 +60,9 @@
                 if (currentState != "") {
                     currentState = "";
                 }
-                individualOrHigherAccount = User.getInstance().getAccountType() >= Account.INDIVIDUAL;
+                individualOrHigherAccount = User.getInstance().getAccountType() >= Account.GROUP;
                 groupService.getMemberGroups.send();
-                groupService.getPublicGroups.send();
+                //groupService.getPublicGroups.send();
                 groupComments.retrieveMessages();
             }
         }
@@ -87,10 +81,10 @@
             showMyGroups = (myGroups.length > 0);
         }
 
-        private function gotPublicGroups():void {
+        /*private function gotPublicGroups():void {
             this.publicGroups = groupService.getPublicGroups.lastResult as ArrayCollection;
             publicGroupRowCount = this.publicGroups.length;
-        }
+        }*/
 
         private function createNewGroup():void {
             var groupWindow:NewGroupWindow = NewGroupWindow(PopUpManager.createPopUp(this, NewGroupWindow, true));
@@ -98,17 +92,17 @@
             PopUpUtil.centerPopUp(groupWindow);
         }
 
-        private function joinPublicGroup():void {
+        /*private function joinPublicGroup():void {
             var groupJoinWindow:GroupJoinWindow = new GroupJoinWindow();
             groupJoinWindow.addEventListener(GroupSelectedEvent.GROUP_SELECTED, groupSelected);
             PopUpManager.addPopUp(groupJoinWindow, this, true);
             PopUpUtil.centerPopUp(groupJoinWindow);
-        }
+        }*/
         ]]>
     </mx:Script>
     <mx:RemoteObject destination="groupService" id="groupService">
         <mx:method name="getMemberGroups" result="gotMemberGroups()"/>
-        <mx:method name="getPublicGroups" result="gotPublicGroups()"/>
+        <!--<mx:method name="getPublicGroups" result="gotPublicGroups()"/>-->
     </mx:RemoteObject>
     <mx:Box width="100%" height="100%" backgroundColor="#818285" horizontalAlign="center">
         <mx:VBox width="1000" height="100%" id="coreContent" paddingTop="10" paddingLeft="10" paddingRight="10"
@@ -116,8 +110,8 @@
             <mx:HBox width="100%" id="topBox">
                 <mx:Button icon="@Embed('../../../../assets/users3_add.png')" label="Create a New Group..."
                            click="createNewGroup()" labelPlacement="bottom" visible="{individualOrHigherAccount}"/>
-                <mx:Button icon="@Embed('../../../../assets/earth_new.png')" label="Join a Public Group..."
-                           click="joinPublicGroup()" labelPlacement="bottom"/>
+                <!--<mx:Button icon="@Embed('../../../../assets/earth_new.png')" label="Join a Public Group..."
+                           click="joinPublicGroup()" labelPlacement="bottom"/>-->
                 <!--<mx:Button icon="@Embed('../../../../assets/helpx48.png')" label="Help..." labelPlacement="bottom"/>-->
             </mx:HBox>
             <mx:VBox width="100%" id="bodyBox">
@@ -136,7 +130,7 @@
                         </mx:DataGrid>
                     </mx:VBox>
                     <mx:Spacer width="50"/>
-                    <mx:TextArea width="100%" fontSize="14" borderStyle="none" editable="false" text="Groups provide you with the functionality to collaborate on data problems. You can add data sources and reports to groups. Groups can be invite only--any group focused around business data should be kept that way. For more public data, you can make the groups publicly visible and/or joinable." height="120"/>
+                    <mx:TextArea width="100%" fontSize="14" borderStyle="none" editable="false" text="Groups provide you with the functionality to collaborate on data problems. You can add data sources, reports, and KPIs to groups. Groups are limited to accounts of the Group level and higher." height="120"/>
                 </mx:HBox>
                 <mx:Spacer height="10"/>
                 <discussion:GroupWideDiscussionPanel width="100%" id="groupComments"/>

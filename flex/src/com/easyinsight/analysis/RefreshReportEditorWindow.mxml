@@ -1,0 +1,92 @@
+<?xml version="1.0" ?>
+<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" title="Refresh Report Data Sources">
+    <mx:Script><![CDATA[
+        import com.easyinsight.analysis.service.EmbeddedDataService;
+        import com.easyinsight.framework.CredentialsCache;
+        import com.easyinsight.report.AbstractViewFactory;
+        import com.easyinsight.util.PopUpUtil;
+
+        import mx.collections.ArrayCollection;
+        import mx.managers.PopUpManager;
+
+        private var _dataSourceID:int;
+
+        private var neededCredentialCount:int = 0;
+        private var receivedCredentialCount:int = 0;
+
+        private var _reportID:int;
+
+        private var _embeddedViewFactory:DataViewFactory;
+
+        private var _filters:ArrayCollection;
+
+        private var service:EmbeddedDataService;
+
+
+        public function set reportID(value:int):void {
+            _reportID = value;
+        }
+
+        public function set embeddedViewFactory(value:DataViewFactory):void {
+            _embeddedViewFactory = value;
+        }
+
+        public function set filterDefinitions(value:ArrayCollection):void {
+            _filters = value;
+        }
+
+        public function set dataSourceID(value:int):void {
+            _dataSourceID = value;
+        }
+
+        private function onDataReturn(event:EmbeddedDataServiceEvent):void {
+            progressBar.visible = false;
+            if (event.credentialRequirements != null) {
+                neededCredentialCount = 0;
+                receivedCredentialCount = 0;
+                for each (var credential:CredentialRequirement in event.credentialRequirements) {
+                    neededCredentialCount++;
+                    var window:RuntimeCredentialsWindow = new RuntimeCredentialsWindow();
+                    window.requirement = credential;
+                    window.addEventListener(CredentialsEvent.CREDENTIALS_SAVED, onCredentials);
+                    PopUpManager.addPopUp(window, this, true);
+                    PopUpUtil.centerPopUp(window);
+                }
+            } else {
+                _embeddedViewFactory.gotData(event);
+                PopUpManager.removePopUp(this);
+            }
+        }
+
+        public function refreshData():void {
+            progressBar.visible = true;
+            //ProgressAlert.alert(this, "Determining needed credentials...", null, feedService.getCredentials);
+            service = new EmbeddedDataService();
+            service.addEventListener(EmbeddedDataServiceEvent.DATA_RETURNED, onDataReturn);
+            service.retrieveData(_reportID, _dataSourceID, _filters, allDataSourcesCheckbox.selected);
+        }
+
+        private function onCredentials(event:CredentialsEvent):void {
+            CredentialsCache.getCache().addCredentials(event.dataSourceID, event.credentials);
+            receivedCredentialCount++;
+            if (receivedCredentialCount == neededCredentialCount) {
+                //ProgressAlert.alert(this, "Refreshing the goal tree...", null, goalService.forceRefresh);
+                progressBar.visible = true;
+                service.retrieveData(_reportID, _dataSourceID, _filters, allDataSourcesCheckbox.selected);
+            }
+        }
+        ]]></mx:Script>
+    <mx:Form styleName="TitleWindowContents">
+        <mx:FormItem label="Include All Data Sources:">
+            <mx:CheckBox id="allDataSourcesCheckbox"/>
+        </mx:FormItem>
+        <mx:FormItem label="">
+            <mx:ProgressBar id="progressBar" visible="false" indeterminate="true"/>
+        </mx:FormItem>
+        <mx:FormItem label="" direction="horizontal">
+            <mx:Button label="Refresh" click="refreshData()"/>
+            <mx:LinkButton label="Cancel" textDecoration="underline" click="PopUpManager.removePopUp(this)"/>
+        </mx:FormItem>
+    </mx:Form>
+
+</mx:TitleWindow>

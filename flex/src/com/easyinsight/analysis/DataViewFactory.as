@@ -119,19 +119,21 @@ public class DataViewFactory extends VBox {
         }
     }
 
-    public function retrieveData():void {
+    public function retrieveData(refreshAllSources:Boolean = false):void {
         if (_reportRenderer == null) {
             pendingRequest = true;
         } else {
             _analysisDefinition = _controlBar.createAnalysisDefinition();
             if (_controlBar.isDataValid()) {
                 _analysisDefinition.createDefaultLimits();
-                _dataService.retrieveData(_analysisDefinition);
+                _dataService.retrieveData(_analysisDefinition, refreshAllSources);
             } else {
                 _reportRenderer.renderReport(new ArrayCollection(), _analysisDefinition, new Object());
             }
         }
     }
+
+    
 
     private function gotData(event:DataServiceEvent):void {
         dispatchEvent(event);

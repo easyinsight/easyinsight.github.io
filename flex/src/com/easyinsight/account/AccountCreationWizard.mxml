@@ -127,9 +127,7 @@
 	<mx:VBox width="100%" height="100%" id="coreContent" backgroundAlpha="1" paddingTop="0">
 		<mx:VBox width="100%" height="100%" id="initialContent" horizontalAlign="center">
             <mx:HBox verticalAlign="middle">
-                <mx:Label text="60 (Sixty!) day free trial" fontSize="24" fontWeight="bold"/>
-                <mx:Label text="Really? 60 Days?" textDecoration="underline" fontSize="12"
-                        toolTip="We're still in the early stages of our release, so for a limited time, we're giving a 60 day trial period instead of the normal 30."/>
+                <mx:Label text="30 day free trial" fontSize="24" fontWeight="bold"/>                
             </mx:HBox>
             <mx:Label text="Sign up in a couple of clicks!" fontSize="18"/>
             <mx:Spacer height="15"/>
@@ -155,24 +153,24 @@
                 <mx:VBox borderStyle="solid" dropShadowEnabled="true" cornerRadius="15" horizontalAlign="center" backgroundColor="#FFFFFF"
                         width="250" paddingTop="5" paddingBottom="10">
                     <mx:Label text="INDIVIDUAL" fontSize="20" fontWeight="bold"/>
-                    <mx:Label text="$10/month" color="#D42525" fontWeight="bold"/>
+                    <mx:Label text="$25/month" color="#D42525" fontWeight="bold"/>
                     <mx:HRule width="100%"/>
                     <mx:Label text="Connect to other SaaS"/>
                     <mx:Label text="Integrate with API"/>
                     <mx:Label text="100 MB of storage"/>
-                    <mx:Label text="One user"/>
+                    <mx:Label text="5 users"/>
                     <mx:Button label="Sign up!" click="signup(Account.INDIVIDUAL)" styleName="blueButton"/>
                 </mx:VBox>
                 <mx:Spacer width="30"/>
                 <mx:VBox borderStyle="solid" dropShadowEnabled="true" cornerRadius="15" horizontalAlign="center" backgroundColor="#FFFFFF"
                         width="250" paddingTop="5" paddingBottom="10">
                     <mx:Label text="GROUP" fontSize="20" fontWeight="bold"/>
-                    <mx:Label text="$100/month" color="#D42525" fontWeight="bold"/>
+                    <mx:Label text="$200/month" color="#D42525" fontWeight="bold"/>
                     <mx:HRule width="100%"/>
                     <mx:Label text="Collaborate across your business"/>
                     <mx:Label text="Data level security"/>
                     <mx:Label text="500 MB of storage"/>
-                    <mx:Label text="20 users"/>
+                    <mx:Label text="50 users"/>
                     <mx:Button label="Sign up!" click="signup(Account.GROUP)" styleName="blueButton"/>
                 </mx:VBox>
             </mx:HBox>

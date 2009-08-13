@@ -22,6 +22,7 @@
 
         import com.easyinsight.util.PopUpUtil;
 
+        import mx.binding.utils.BindingUtils;
         import mx.collections.ArrayCollection;
 
         import flash.data.EncryptedLocalStore;
@@ -52,7 +53,7 @@
             var window:QuickSearchWindow = new QuickSearchWindow();
             window.addEventListener(QuickSearchEvent.QUICK_SEARCH, onQuickSearch);
             window.addEventListener(QuickSearchEvent.QUICK_SEARCH_CANCEL, onQuickSearch);
-            window.descriptors = descriptors; 
+            window.descriptors = descriptors;
             PopUpManager.addPopUp(window, this, false);
             PopUpUtil.centerPopUp(window);
         }
@@ -77,8 +78,20 @@
 
         private var defaultScreen:EIDescriptor;
 
-        [Bindable]
-        private var descriptors:ArrayCollection;
+
+        private var _descriptors:ArrayCollection;
+
+
+        [Bindable(event="descriptorsChanged")]
+        public function get descriptors():ArrayCollection {
+            return _descriptors;
+        }
+
+        public function set descriptors(value:ArrayCollection):void {
+            if (_descriptors == value) return;
+            _descriptors = value;
+            dispatchEvent(new Event("descriptorsChanged"));
+        }
 
         private var allDescriptors:ArrayCollection;
 
@@ -87,8 +100,10 @@
 
         private var myGoalsDescriptor:MyGoalsDescriptor;
 
+        private var adapter:AnalyzeEventAdapter = new AnalyzeEventAdapter();
+
         [Bindable]
-        private var screenFactory:IAsyncScreenFactory = new AirScreenFactory();
+        private var screenFactory:IAsyncScreenFactory = new AirScreenFactory(adapter);
 
         public function set app(value:WindowedApplication):void {
             _app = value;
@@ -103,6 +118,8 @@
 
         override protected function createChildren():void {
             super.createChildren();
+            BindingUtils.bindProperty(adapter, "descriptors", this, "descriptors");
+            adapter.addEventListener(AirDescriptorEvent.DESCRIPTOR_SELECTION, onDescriptorEvent);
             var baseMenu:NativeMenu = new NativeMenu();
             if (NativeApplication.supportsMenu) {
                 _app.nativeApplication.menu = baseMenu;
@@ -145,6 +162,10 @@
             viewDescriptor(widgetItem);
         }
 
+        private function onDescriptorEvent(event:AirDescriptorEvent):void {
+            currentView = event.descriptor;
+        }
+
         private function viewDescriptor(descriptor:EIDescriptor):void {
             currentView = descriptor;
         }
@@ -158,16 +179,16 @@
                 if (descriptor.getType() == EIDescriptor.REPORT) {
                     reportSort.addItem(descriptor);
                     /*var reportMenuItem:NativeMenuItem = new NativeMenuItem(descriptor.name);
-                    reportsMenu.addItem(reportMenuItem);
-                    reportMenuItem.addEventListener(Event.SELECT, onReport);
-                    reportMenuItem.data = descriptor;*/
+                     reportsMenu.addItem(reportMenuItem);
+                     reportMenuItem.addEventListener(Event.SELECT, onReport);
+                     reportMenuItem.data = descriptor;*/
                     descriptors.addItem(descriptor);
                 } else if (User.getInstance().getAccountType() >= Account.GROUP && descriptor.getType() == EIDescriptor.GOAL_TREE) {
                     goalSort.addItem(descriptor);
                     /*var goalsMenuItem:NativeMenuItem = new NativeMenuItem(descriptor.name);
-                    goalsMenu.addItem(goalsMenuItem);
-                    goalsMenuItem.addEventListener(Event.SELECT, onReport);
-                    goalsMenuItem.data = descriptor;*/
+                     goalsMenu.addItem(goalsMenuItem);
+                     goalsMenuItem.addEventListener(Event.SELECT, onReport);
+                     goalsMenuItem.data = descriptor;*/
                     descriptors.addItem(descriptor);
                 }
             }
@@ -209,7 +230,7 @@
             if (currentViewType != null && currentViewID != null) {
                 for each (var viewDescriptor:EIDescriptor in allDescriptors) {
                     if (viewDescriptor.getType() == int(currentViewType) &&
-                            viewDescriptor.id == int(currentViewID)) {
+                        viewDescriptor.id == int(currentViewID)) {
                         selectedDescriptor = viewDescriptor;
                         break;
                     }
@@ -226,7 +247,7 @@
             showProgress = false;
             //statusDisplay.good();
             showRefresh = event.asyncScreen.canRefresh();
-            showBrowser = event.asyncScreen.canViewInBrowser();
+            //showBrowser = event.asyncScreen.canViewInBrowser();
 
             var currentViewTypeBytes:ByteArray = new ByteArray();
             currentViewTypeBytes.writeUTFBytes(String(currentView.getType()));
@@ -246,10 +267,10 @@
             panel.refreshData();
         }
 
-        private function launchBrowser():void {
-            var panel:IAsyncScreen = viewStack.selectedChild as IAsyncScreen;
-            flash.net.navigateToURL(new URLRequest(panel.getBrowserURL()), "_self");
-        }
+        /*private function launchBrowser():void {
+         var panel:IAsyncScreen = viewStack.selectedChild as IAsyncScreen;
+         flash.net.navigateToURL(new URLRequest(panel.getBrowserURL()), "_self");
+         }*/
 
         [Bindable]
         private var showRefresh:Boolean = false;

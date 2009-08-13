@@ -30,12 +30,7 @@ package com.easyinsight.account
         public var maxSize:int;
         public var name:String;
         public var accountState:int;
-        public var uncheckedAPIEnabled:Boolean;
-        public var validatedAPIEnabled:Boolean;
-        public var uncheckedAPIAllowed:Boolean;
-        public var validatedAPIAllowed:Boolean;
-        public var dynamicAPIAllowed:Boolean;
-        public var basicAuthAllowed:Boolean;
+        public var apiEnabled:Boolean;
         public var activated:Boolean;
 		
 		public function Account()

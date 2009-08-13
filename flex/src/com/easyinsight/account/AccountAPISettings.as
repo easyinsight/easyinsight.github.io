@@ -5,9 +5,7 @@ public class AccountAPISettings {
 
     public var accountKey:String;
     public var accountSecretKey:String;
-    public var uncheckedAPIEnabled:Boolean;
-    public var validatedAPIEnabled:Boolean;
-    public var dynamicAPIEnabled:Boolean;
+    public var apiEnabled:Boolean;
 
     public function AccountAPISettings() {
     }

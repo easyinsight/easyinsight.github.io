@@ -12,6 +12,8 @@
         </mx:State>
     </mx:states>
     <mx:Script><![CDATA[
+        import com.easyinsight.account.APIUserAdmin;
+        import com.easyinsight.account.AccountAPISettings;
         import com.easyinsight.framework.LoginEvent;
         import com.easyinsight.framework.User;
 
@@ -24,11 +26,38 @@
 
         import com.easyinsight.listing.AnalyzeSource;
 
+        private function gotSettings():void {
+            var settings:AccountAPISettings = userService.getUserAPISettings.lastResult as AccountAPISettings;
+            if (settings.apiEnabled) {
+                apiLabel = "The API is currently enabled for your account.";
+            } else {
+                if (User.getInstance().accountAdmin) {
+                    apiLabel = "The API is currently disabled for your account.";
+                } else {
+                    apiLabel = "The API is currently disabled for your account.";
+                }
+            }
+        }
+
+        private function onAPIUpdate(event:APIUpdateEvent):void {
+            userService.getUserAPISettings.send();
+        }
+
+        private function apiInformation():void {
+            var window:APIUserAdmin = new APIUserAdmin();
+            window.addEventListener(APIUpdateEvent.API_UPDATE, onAPIUpdate);
+            PopUpManager.addPopUp(window, this, true);
+            PopUpUtil.centerPopUp(window);
+        }
+
         [Bindable]
         private var services:ArrayCollection;
 
         [Bindable]
         private var apis:ArrayCollection;
+
+        [Bindable]
+        private var apiLabel:String;
 
         [Bindable]
         [Embed(source="../../../../../assets/helpx48.png")]
@@ -67,6 +96,7 @@
                     currentState = "";
                 }
                 apiService.getDataSourceAPIs.send();
+                userService.getUserAPISettings.send();
             }
         }
 
@@ -120,6 +150,9 @@
         private function search():void {
         }
         ]]></mx:Script>
+    <mx:RemoteObject destination="login" id="userService">
+        <mx:method name="getUserAPISettings" result="gotSettings()"/>
+    </mx:RemoteObject>
     <mx:RemoteObject destination="apiService" id="apiService">
         <mx:method name="getDeployedServices" result="gotDeployedServices()"/>
         <mx:method name="getDataSourceAPIs" result="gotAPIs()"/>
@@ -129,8 +162,15 @@
                  paddingBottom="10" verticalGap="10" backgroundColor="#FFFFFF">
             <mx:Box paddingLeft="10" paddingTop="10" paddingRight="10" paddingBottom="10" width="100%" height="100%"
                     verticalGap="10" id="apiListing">
+
                 <mx:HBox width="100%">
-                    
+                    <mx:TextArea text="The Easy Insight API gives you a SOAP interface to publish in your data. You can access the API with an account level of Basic or higher."
+                             borderStyle="none" backgroundAlpha="0" editable="false" selectable="false" width="400"/>
+                    <mx:VBox horizontalAlign="center">
+                        <mx:Label text="{apiLabel}"/>
+                        <mx:Button label="My API Information..." click="apiInformation()" styleName="redButton"/>
+                    </mx:VBox>
+
                     <!--<mx:Button icon="{helpIcon}" toolTip="Help!" click="help()"/>-->
                     <mx:Spacer width="100%"/>
                     <mx:HBox borderStyle="inset" borderThickness="1" paddingTop="5" paddingBottom="5" paddingLeft="5"

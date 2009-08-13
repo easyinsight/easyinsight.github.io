@@ -27,7 +27,7 @@
                         <mx:Image source="{screenshot}"/>
                         <mx:VBox height="100%" width="100%" verticalAlign="middle">
                             <mx:TextArea editable="false" text="KPI trees provide you with a broad strategic view of your improvement on key metrics. Starting with a high level overall goal, you repeatedly subdivide into the various lower level key performance indicators that will bring you closer to achieving that overall goal."
-                                    borderStyle="none" width="100%" fontSize="14" height="120"/>
+                                    borderStyle="none" width="100%" fontSize="14" height="160"/>
                         </mx:VBox>
                     </mx:HBox>
                     <mx:HBox width="100%" paddingLeft="30" paddingRight="30">

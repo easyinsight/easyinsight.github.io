@@ -10,7 +10,7 @@ import mx.collections.ArrayCollection;
 	{
 		public var headers:Array;
 		public var rows:Array;
-		public var credentialFailures:ArrayCollection;
+		public var credentialRequirements:ArrayCollection;
 		public var headerMetadata:Array;
 		public var limitedResults:Boolean;
 		public var limitResults:int;

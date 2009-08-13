@@ -1,0 +1,38 @@
+<?xml version="1.0" ?>
+<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" creationComplete="userService.getAccountAPISettings.send()">
+    <mx:Script><![CDATA[
+        import mx.managers.PopUpManager;
+
+        [Bindable]
+        private var apiEnabled:Boolean = false;
+
+        private var settings:AccountAPISettings;
+
+        private function gotSettings():void {
+            settings.
+        }
+
+        private function save():void {
+
+        }
+
+        private function cancel():void {
+            PopUpManager.removePopUp(this);
+        }
+        ]]></mx:Script>
+    <mx:RemoteObject destination="accountAdmin" id="userService">
+        <mx:method name="getAccountAPISettings" result="gotSettings()"/>
+        <mx:method name="saveAccountAPISettings"/>
+    </mx:RemoteObject>
+    <mx:VBox>
+        <mx:Form>
+            <mx:FormItem label="API Enabled:">
+                <mx:CheckBox id="apiEnabledCheckbox" selected="{apiEnabled}"/>
+            </mx:FormItem>
+        </mx:Form>
+        <mx:HBox width="100%" horizontalAlign="center">
+            <mx:Button label="Save" click="save()"/>
+            <mx:Button label="Cancel" click="cancel()"/>
+        </mx:HBox>
+    </mx:VBox>
+</mx:TitleWindow>

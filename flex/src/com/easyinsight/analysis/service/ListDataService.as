@@ -35,6 +35,9 @@ public class ListDataService extends EventDispatcher implements IReportDataServi
         if (listData.invalidAnalysisItemIDs != null && listData.invalidAnalysisItemIDs.length > 0) {
             dispatchEvent(new InvalidFieldsEvent(listData.invalidAnalysisItemIDs, listData.feedMetadata));
         }
+        if (listData.credentialRequirements != null && listData.credentialRequirements.length > 0) {
+            
+        }
         var clientProcessorMap:Object = new Object();
         var headers:ArrayCollection = new ArrayCollection(listData.headers);        
         for each (var analysisItem:AnalysisItem in headers) {
@@ -61,10 +64,11 @@ public class ListDataService extends EventDispatcher implements IReportDataServi
         dispatchEvent(new DataServiceLoadingEvent(DataServiceLoadingEvent.LOADING_STOPPED));
     }
 
-    public function retrieveData(definition:AnalysisDefinition):void {
+    public function retrieveData(definition:AnalysisDefinition, refreshAllSources:Boolean):void {
         dispatchEvent(new DataServiceLoadingEvent(DataServiceLoadingEvent.LOADING_STARTED));
         var metadata:InsightRequestMetadata = new InsightRequestMetadata();
         metadata.utcOffset = new Date().getTimezoneOffset();
+        metadata.refreshAllSources = refreshAllSources;
         metadata.credentialFulfillmentList = CredentialsCache.getCache().createCredentials();
         dataRemoteSource.list.send(definition, metadata);
     }

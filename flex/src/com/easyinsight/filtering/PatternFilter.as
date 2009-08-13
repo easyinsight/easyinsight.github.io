@@ -25,7 +25,7 @@ import mx.controls.Label;
 		private var labelText:Label;
 		private var dataService:RemoteObject;		
 		private var _analysisItems:ArrayCollection; 
-		
+		                                            
 		[Bindable]
         [Embed(source="../../../../assets/navigate_cross.png")]
         public var deleteIcon:Class;

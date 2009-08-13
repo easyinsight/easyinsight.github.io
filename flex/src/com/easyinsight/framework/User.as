@@ -24,8 +24,8 @@ import mx.rpc.events.ResultEvent;
 		public var password:String;
 		public var userName:String;
         public var accountAdmin:Boolean;
-        public var dataSourceCreator:Boolean;
-        public var insightCreator:Boolean;
+        //public var dataSourceCreator:Boolean;
+        //public var insightCreator:Boolean;
         public var userID:int;
         public var activated:Boolean;
 
@@ -42,8 +42,8 @@ import mx.rpc.events.ResultEvent;
 			_user.name = name;
 			_user.email = email;
             _user.accountAdmin = accountAdmin;
-            _user.dataSourceCreator = dataSourceCreator;
-            _user.insightCreator = insightCreator;
+            //_user.dataSourceCreator = dataSourceCreator;
+            //_user.insightCreator = insightCreator;
 			_user.spaceAllowed = spaceAllowed;
 			_user.accountType = accountType;
             _user.userID = userID;
@@ -53,7 +53,6 @@ import mx.rpc.events.ResultEvent;
             } catch (e:Error) {
 
             }
-
 
 			/*_user.storeService = new RemoteObject();
 			_user.storeService.destination = "store";
@@ -69,8 +68,8 @@ import mx.rpc.events.ResultEvent;
 
         public function resync(userTransferObject:UserTransferObject):void {
             this.accountAdmin = userTransferObject.accountAdmin;
-            this.dataSourceCreator = userTransferObject.dataSourceCreator;
-            this.insightCreator = userTransferObject.insightCreator;
+            //this.dataSourceCreator = userTransferObject.dataSourceCreator;
+            //this.insightCreator = userTransferObject.insightCreator;
         }
 		
 		private function gotMerchants(event:ResultEvent):void {

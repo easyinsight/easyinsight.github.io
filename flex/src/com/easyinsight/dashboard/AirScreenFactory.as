@@ -3,6 +3,7 @@ import com.easyinsight.analysis.AirViewFactory;
 import com.easyinsight.analysis.EmbeddedControllerLookup;
 import com.easyinsight.analysis.EmbeddedViewFactory;
 import com.easyinsight.analysis.IEmbeddedReportController;
+import com.easyinsight.genredata.AnalyzeEvent;
 import com.easyinsight.goals.MyGoalsGrid;
 import com.easyinsight.goals.GoalTreeViewContainer;
 import com.easyinsight.quicksearch.EIDescriptor;
@@ -12,8 +13,12 @@ import com.easyinsight.util.IAsyncScreen;
 import com.easyinsight.util.IAsyncScreenFactory;
 
 public class AirScreenFactory implements IAsyncScreenFactory{
-    public function AirScreenFactory() {
+
+    private var adapter:AnalyzeEventAdapter;
+
+    public function AirScreenFactory(adapter:AnalyzeEventAdapter) {
         super();
+        this.adapter = adapter;
     }
 
     public function createScreen(descriptor:EIDescriptor):IAsyncScreen {
@@ -45,6 +50,7 @@ public class AirScreenFactory implements IAsyncScreenFactory{
             goalView.showBackButton = false;
             goalView.showEditButton = false;
             goalView.showFullScreen = false;
+            goalView.addEventListener(AnalyzeEvent.ANALYZE, onAnalyze);
             return goalView;
         } else if (descriptor.getType() == EIDescriptor.MY_GOALS) {
             return new MyGoalsGrid();
@@ -53,6 +59,10 @@ public class AirScreenFactory implements IAsyncScreenFactory{
         } else {
             return null;
         }
+    }
+
+    private function onAnalyze(event:AnalyzeEvent):void {
+        adapter.translateAnalyze(event);
     }
 }
 }

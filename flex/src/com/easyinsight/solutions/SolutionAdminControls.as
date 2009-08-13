@@ -38,9 +38,14 @@ public class SolutionAdminControls extends HBox{
 
     private function editSolution(event:MouseEvent):void {
         var window:CreateSolutionWindow = new CreateSolutionWindow();
+        window.addEventListener(SolutionAdminEvent.SOLUTION_ADMIN, onAdminChange);
         window.solution = solution;
         PopUpManager.addPopUp(window, this.parent.parent, true);
         PopUpUtil.centerPopUp(window);
+    }
+
+    private function onAdminChange(event:SolutionAdminEvent):void {
+        dispatchEvent(event);
     }
 
     override public function set data(val:Object):void {

@@ -70,8 +70,8 @@
             		user.userName = userNameInput.text;
             		user.name = fullNameInput.text;
                     user.accountAdmin = accountAdminCheckbox.selected;
-                    user.insightCreator = insightCreatorCheckbox.selected;
-                    user.dataSourceCreator = dataSourceCreatorCheckbox.selected;
+                    /*user.insightCreator = insightCreatorCheckbox.selected;
+                    user.dataSourceCreator = dataSourceCreatorCheckbox.selected;*/
                     if (userID == 0) creationService.addUserToAccount.send(user);
                     else creationService.updateUser.send(user);
 	            }
@@ -95,12 +95,12 @@
         <mx:FormItem label="Account Administrator">
             <mx:CheckBox id="accountAdminCheckbox" selected="{accountAdmin}"/>
         </mx:FormItem>
-        <mx:FormItem label="Data Source Creator">
+        <!--<mx:FormItem label="Data Source Creator">
             <mx:CheckBox id="dataSourceCreatorCheckbox" selected="{dataSourceCreator}"/>
         </mx:FormItem>
         <mx:FormItem label="Insight Creator">
             <mx:CheckBox id="insightCreatorCheckbox" selected="{insightCreator}"/>
-        </mx:FormItem>
+        </mx:FormItem>-->
 		<mx:FormItem>
 			<mx:HBox>
 				<mx:Button label="{createLabel}" click="save()"/>

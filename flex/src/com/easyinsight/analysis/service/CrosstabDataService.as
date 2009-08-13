@@ -54,7 +54,7 @@ public class CrosstabDataService extends EventDispatcher implements IReportDataS
         dispatchEvent(new DataServiceLoadingEvent(DataServiceLoadingEvent.LOADING_STOPPED));
     }
 
-    public function retrieveData(definition:AnalysisDefinition):void {
+    public function retrieveData(definition:AnalysisDefinition, refreshAll:Boolean):void {
         dispatchEvent(new DataServiceLoadingEvent(DataServiceLoadingEvent.LOADING_STARTED));
         var metadata:InsightRequestMetadata = new InsightRequestMetadata();
         metadata.credentialFulfillmentList = CredentialsCache.getCache().createCredentials();

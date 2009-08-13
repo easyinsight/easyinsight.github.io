@@ -26,6 +26,8 @@ import flash.utils.ByteArray;
         public var category:int;
         public var screencastName:String;
         public var screencastDirectory:String;
+        public var footerText:String;
+        public var logoLink:String;
 		
 		public function Solution()
 		{

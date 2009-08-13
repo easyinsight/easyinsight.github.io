@@ -1,5 +1,5 @@
 <?xml version="1.0" ?>
-<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" creationComplete="setup()" doubleClickEnabled="true"
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" doubleClickEnabled="true"
         implements="com.easyinsight.util.IAsyncScreen">
     <mx:Metadata>
         [Event(name="goalDetailNav", type="com.easyinsight.goals.GoalDetailEvent")]
@@ -27,8 +27,7 @@
         }
 
         private function setup():void {
-            addEventListener(GoalSubscriptionEvent.GOAL_REMOVE, onRemove);
-            goalService.getGoals.send();
+            addEventListener(GoalSubscriptionEvent.GOAL_REMOVE, onRemove);            
         }
 
         private function onTimer(event:TimerEvent):void {

@@ -15,11 +15,24 @@
             [Bindable]
 			private var consultants:ArrayCollection;
 
+        [Bindable]
+        private var enableAdd:Boolean;
+
+        [Bindable]
+        private var usersAvailableString:String;
+
+        [Bindable]
+        private var usersUsedString:String;
+
+        private var usersAvailable:int;
+        private var usersUsed:int;
+
             public function gotFocus():void {
                 usersGrid.addEventListener(RefreshAccountEvent.REFRESH_ACCOUNT, refreshAccount);
                 usersGrid.addEventListener(DeleteUserEvent.DELETE_USER, deleteUser);
                 userButtonFactory = new EditUserButtonFactory(this);
             	userService.getUsers.send();
+                userService.getAccountStats.send();
             }
 
             private function deleteUser(event:DeleteUserEvent):void {
@@ -28,14 +41,11 @@
             
 			private function refreshAccount(event:RefreshAccountEvent):void {
 				userService.getUsers.send();
+                userService.getAccountStats.send();
 			}            
             
             private function gotUsers():void {
             	users = userService.getUsers.lastResult as ArrayCollection;
-            }
-
-            private function gotConsultants():void {
-            	consultants = userService.getConsultants.lastResult as ArrayCollection;
             }
             
             private function addUser():void {
@@ -54,17 +64,33 @@
             private function deletedUser():void {
                 refreshAccount(null);
             }
+
+            private function gotStats():void {
+                var accountStats:AccountStats = userService.getAccountStats.lastResult as AccountStats;
+                usersUsedString = String(accountStats.currentUsers);
+                usersAvailableString = String(accountStats.availableUsers);
+                usersUsed = accountStats.currentUsers;
+                usersAvailable = accountStats.availableUsers;
+                enableAdd = usersUsed < usersAvailable;
+            }
         ]]>
 	</mx:Script>
 	<mx:RemoteObject destination="accountAdmin" id="userService">
 		<mx:method name="getUsers" result="gotUsers()"/>
-        <mx:method name="getConsultants" result="gotConsultants()"/>
         <mx:method name="deleteUser" result="deletedUser()"/>
+        <mx:method name="getAccountStats" result="gotStats()"/>
 	</mx:RemoteObject>
 	<mx:VBox width="100%" height="100%" horizontalAlign="center">
         <mx:VBox>
+            <mx:Form paddingTop="5" paddingLeft="5">
+                <mx:FormItem label="Account Users Used: " direction="horizontal">
+                    <mx:Label text="{usersUsedString}" fontFamily="Lucida Grande" fontWeight="normal"/>
+                    <mx:Label text=" / "/>
+                    <mx:Label text="{usersAvailableString}" fontFamily="Lucida Grande" fontWeight="normal"/>
+                </mx:FormItem>
+            </mx:Form>
 		<mx:HBox width="100%">
-			<mx:Button label="Add User..." click="addUser()"/>
+			<mx:Button label="Add User..." click="addUser()" enabled="{enableAdd}"/>
 			<!-- <mx:Button label="Add Consultant" click="addGuestUser()"/> -->
 		</mx:HBox>
         <mx:VBox id="accountSettingsBox" verticalGap="0" borderThickness="1" borderColor="#D42525" borderStyle="solid" dropShadowEnabled="true">

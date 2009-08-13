@@ -232,8 +232,8 @@
         <mx:method name="createDataTree" result="gotTree()"/>
     </mx:RemoteObject>
     <mx:HBox id="buttonBox" paddingLeft="10" paddingTop="10" paddingRight="10" width="100%" verticalAlign="middle">
-        <mx:Button id="backButton" icon="{closeIcon}" click="close()" toolTip="Close" visible="{!_embedded}" label="Back" labelPlacement="bottom"/>
-        <mx:Button id="refreshButton" icon="{refreshIcon}" click="refreshData()" toolTip="Refresh Data" visible="{!_embedded}" label="Refresh" labelPlacement="bottom"/>
+        <mx:Button id="backButton" icon="{closeIcon}" click="close()" toolTip="Close" label="Back" labelPlacement="bottom"/>
+        <mx:Button id="refreshButton" icon="{refreshIcon}" click="refreshData()" toolTip="Refresh Data" label="Refresh" labelPlacement="bottom"/>
         <mx:Button id="fullScreenButton" icon="{fullScreenIcon}" click="toFullScreen()" toolTip="View in Full Screen" label="Full Screen" labelPlacement="bottom"/>
         <mx:Button id="editButton" icon="{editIcon}" click="editTree()" toolTip="Edit the Goal Tree" label="Edit Tree" labelPlacement="bottom" visible="{editAvailable}"/>
         <mx:VRule height="60"/>

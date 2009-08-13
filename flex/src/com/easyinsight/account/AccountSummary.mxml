@@ -34,8 +34,7 @@
                 toggleOptions = new ArrayCollection([ new AccountOption("Account Settings", new FreeAccountSettings()) ]);
             } else if (_account.accountType == Account.INDIVIDUAL) {
                 // user profile information, option to ugprade, option to cancel, billing link, general account settings?
-                toggleOptions = new ArrayCollection([ new AccountOption("Account Settings", new IndividualAccountSettings()),
-                    new AccountOption("API Settings", new IndividualAPIAdmin())]);
+                toggleOptions = new ArrayCollection([ new AccountOption("Account Settings", new IndividualAccountSettings())]);
             } else {
                 if (User.getInstance() != null && User.getInstance().accountAdmin) {
                     // user profile
@@ -43,13 +42,10 @@
                     // core user administration...add user, remove user, change user privileges
                     toggleOptions = new ArrayCollection([ new AccountOption("Account Administration", new AccountAdminPage()),
                         new AccountOption("User Administration", new UserAdministration()),                            
-                        new AccountOption("My Profile", new ProfessionalMyProfile()),
-                            new AccountOption("My API Settings", new APIUserAdmin()),
-                        new AccountOption("API Administration", new APIAccountAdmin())]);
+                        new AccountOption("My Profile", new ProfessionalMyProfile())]);
                     showToggle = true;
                 } else {
-                    toggleOptions = new ArrayCollection([ new AccountOption("My Profile", new ProfessionalMyProfile()),
-                    new AccountOption("My API Settings", new APIUserAdmin())]);
+                    toggleOptions = new ArrayCollection([ new AccountOption("My Profile", new ProfessionalMyProfile())]);
                     showToggle = true;
                 }
             }

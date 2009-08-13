@@ -141,9 +141,6 @@
             CredentialsCache.initialize(new WebCredentialsCache());
             new CommandProcessor();
             addEventListener(FaultEvent.FAULT, onFault, true);
-            browserManager = BrowserManager.getInstance();
-            browserManager.addEventListener(BrowserChangeEvent.BROWSER_URL_CHANGE, parseURL);
-            browserManager.init("", "Intro");
             User.getEventNotifier().addEventListener(NavigationEvent.NAVIGATION, navigation);
             userService.isSessionLoggedIn.send();
             EIMessageListener.initialize();
@@ -498,6 +495,9 @@
             } else {
                 User.getEventNotifier().addEventListener(LoginEvent.LOGIN, onLogin);
             }
+            browserManager = BrowserManager.getInstance();
+            browserManager.addEventListener(BrowserChangeEvent.BROWSER_URL_CHANGE, parseURL);
+            browserManager.init("", "Intro");
         }
 
         private function setup():void {

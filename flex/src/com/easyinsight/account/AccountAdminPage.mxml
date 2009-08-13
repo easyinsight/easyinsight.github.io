@@ -35,8 +35,7 @@
         private function onUpgradeAccount():void {
             var window:ChangeAccountTypeWindow = new ChangeAccountTypeWindow();
             PopUpManager.addPopUp(window, this, true);
-            PopUpUtil.centerPopUp(window);
-            window.y = 10;
+            PopUpUtil.centerPopUp(window);            
         }
 
         private function cancelPaidAccount():void {

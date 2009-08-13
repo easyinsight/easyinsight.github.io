@@ -144,6 +144,18 @@ Button {
    fontWeight: normal;
 }
 
+.redButton { 
+   cornerRadius: 12;
+   highlightAlphas: 0.79, 0.2;
+   fillColors: #b91919, #ffadad, #b91919, #ffadad;
+   fillAlphas: 1, 1, 1, 1;
+   borderColor: #999999;
+   dropShadow: true;
+   shadowDistance: 1;
+   fontSize: 11;
+   fontWeight: normal;
+}
+
 Accordion { 
    headerHeight: 17;
    borderStyle: solid;
