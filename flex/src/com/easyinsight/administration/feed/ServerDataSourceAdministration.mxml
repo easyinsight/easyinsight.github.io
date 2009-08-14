@@ -93,28 +93,27 @@
             _dataSourceClass = value;                   
         }
 
-        private function credentialClick():void {
+        /*private function credentialClick():void {
             credentialsSaved = !credentialsSaved;
             if (!credentialsSaved) {
                 dailyRefresh.selected = false;
 //                refreshStepper.value = 0;
             }
-        }
+        }*/
 
         public function updateDataSource(feedDefinition:FeedDefinitionData):void {
-            if (saveClientCredentialsCheckbox.selected) {
+            /*if (saveClientCredentialsCheckbox.selected) {
 
                 uploadService.encryptCredentials.send(dataSourceCreation.credentials);
             }
             else {
                 if(User.getSharedObject() != null) {
-                    User.getSharedObject().data[feedDefinition.dataFeedID.toString()] = null;
-                    User.getSharedObject().flush();
+
                 }
-            }
+            }*/
 
 
-            if (saveCredentialsCheckbox.selected) {
+            /*if (saveCredentialsCheckbox.selected) {
 //                feedDefinition.refreshDataInterval = refreshStepper.value * 1000 * 60 * 60;
                 if(dailyRefresh.selected)
                     feedDefinition.refreshDataInterval = 60*60*1000*24;
@@ -123,11 +122,17 @@
                 var credentials:Credentials = dataSourceCreation.credentials;
                 feedDefinition.username = credentials.userName;
                 feedDefinition.password = credentials.password;
-            } else {
-                feedDefinition.refreshDataInterval = 0;
-                feedDefinition.username = null;
-                feedDefinition.password = null;
-            }
+            } else {*/
+            feedDefinition.refreshDataInterval = 0;
+            feedDefinition.username = null;
+            feedDefinition.password = null;
+            /*if (saveClientCredentialsCheckbox.selected) {
+                if (User.getSharedObject() != null) {
+                    User.getSharedObject().data[feedDefinition.dataFeedID.toString()] = null;
+                    User.getSharedObject().flush();
+                }
+            }*/
+            //}
             dataSourceCreation.updateDataSource(feedDefinition);
         }
 
@@ -143,15 +148,15 @@
         <mx:FormItem label="" direction="vertical">
             <mx:ProgressBar id="progressBar" indeterminate="true" visible="false"/>
         </mx:FormItem>
-        <mx:FormItem label="Save Credentials:" enabled="{ready}">
+        <!--<mx:FormItem label="Save Credentials:" enabled="{ready}">
             <mx:CheckBox id="saveCredentialsCheckbox" click="credentialClick()" selected="{credentialsSaved}"/>
-        </mx:FormItem>
-        <mx:FormItem label="Save Credentials (On Client):" enabled="{ready}">
+        </mx:FormItem>-->
+        <!--<mx:FormItem label="Save Credentials (On Client):" enabled="{ready}">
             <mx:CheckBox id="saveClientCredentialsCheckbox" selected="{clientCredentialsSaved}" />
-        </mx:FormItem>
-        <mx:FormItem label="Refresh Daily:" enabled="{credentialsSaved}">
+        </mx:FormItem>-->
+        <!--<mx:FormItem label="Refresh Daily:" enabled="{credentialsSaved}">
             <mx:CheckBox id="dailyRefresh" />
-        </mx:FormItem>
+        </mx:FormItem>-->
         <mx:FormItem label="" direction="horizontal">
             <mx:Button label="Validate" click="serverValidate()" enabled="{ready}"/>
         </mx:FormItem>

@@ -18,7 +18,8 @@
 	</mx:states>
 	<mx:Script>
 		<![CDATA[
-			import com.easyinsight.customupload.UploadConfigEvent;
+        import com.easyinsight.administration.feed.CredentialsResponse;
+        import com.easyinsight.customupload.UploadConfigEvent;
             import com.easyinsight.framework.CredentialsCache;
             import com.easyinsight.listing.AnalyzeSource;
             import com.easyinsight.genredata.AnalyzeEvent;
@@ -108,18 +109,24 @@
                  credentials = new Credentials();
                  credentials.userName = userName.text;
                  credentials.password = password.text;
-                 User.getInstance().addCredentials("google", credentials);
-                 dataService.testGoogleConnect.send(credentials);
+                 //SpreadsheetFeedButton.credentials = credentials;
+                 //User.getInstance().addCredentials("google", credentials);
+                 dataService.testGoogleConnect.send(credentials, saveCredentialsCheckbox.selected);
                  progressBar.visible = true;
              }
 
              private function googleConnectAttempted():void {
-                var success:Boolean = dataService.testGoogleConnect.lastResult as Boolean;
-                if (success) {
+                var response:CredentialsResponse = dataService.testGoogleConnect.lastResult as CredentialsResponse;
+                if (response.successful) {
+                    if (response.encryptedResponse == null) {
+                        SpreadsheetFeedButton.credentials = credentials;
+                    } else {
+                        SpreadsheetFeedButton.credentials = response.encryptedResponse;
+                    }
                     connectMessage = "Successfully connected to Google Spreadsheets, retrieving available spreadsheets...";
                     dataService.getAvailableGoogleSpreadsheets.send(credentials);
                 } else {
-                    connectMessage = "Could not connect with those credentials--check your user name and password values.";
+                    connectMessage = response.failureMessage;
                     progressBar.visible = false;
                 }
              }
@@ -157,6 +164,9 @@
 				<mx:FormItem label="Password:" direction="horizontal">
 					<mx:TextInput id="password" displayAsPassword="true"/>				
 				</mx:FormItem>
+                <mx:FormItem label="">
+                    <mx:CheckBox id="saveCredentialsCheckbox" label="Save credentials"/>
+                </mx:FormItem>
 				<mx:FormItem label="" direction="horizontal">						
 					<mx:Button label="Connect" click="attemptGoogleConnect()"/>					
 					<mx:Button label="Cancel" click="cancel()"/>								

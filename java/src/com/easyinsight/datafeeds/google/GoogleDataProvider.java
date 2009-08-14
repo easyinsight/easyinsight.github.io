@@ -2,10 +2,13 @@ package com.easyinsight.datafeeds.google;
 
 import com.easyinsight.datafeeds.*;
 import com.easyinsight.users.Credentials;
+import com.easyinsight.users.MalformedCredentialsException;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.security.Roles;
 import com.easyinsight.database.Database;
+import com.easyinsight.userupload.CredentialsResponse;
+import com.easyinsight.PasswordStorage;
 import com.google.gdata.util.AuthenticationException;
 import com.google.gdata.util.ServiceException;
 import com.google.gdata.client.spreadsheet.SpreadsheetService;
@@ -24,7 +27,7 @@ import java.sql.ResultSet;
  * Date: Jan 6, 2008
  * Time: 7:44:31 PM
  */
-public class GoogleDataProvider implements IGoogleStream {
+public class GoogleDataProvider {
 
     private Map<Credentials, List<Spreadsheet>> cachedSpreadsheetResults = new WeakHashMap<Credentials, List<Spreadsheet>>();
     
@@ -38,18 +41,51 @@ public class GoogleDataProvider implements IGoogleStream {
         return instance;
     }
 
-    public boolean testGoogleConnect(Credentials credentials) {
-        boolean success = true;
+    public CredentialsResponse testGoogleConnect(Credentials credentials, boolean encrypt) {
+        CredentialsResponse credentialsResponse;
         try {
             GoogleSpreadsheetAccess.getOrCreateSpreadsheetService(credentials);
+            credentialsResponse = new CredentialsResponse(true);
+            if (encrypt) {
+                credentialsResponse.setEncryptedResponse(encryptCredentials(credentials));
+            }            
+        } catch (AuthenticationException ae) {
+            credentialsResponse = new CredentialsResponse(false, ae.getMessage());
         } catch (Exception e) {
             LogClass.error(e);
-            success = false;
+            credentialsResponse = new CredentialsResponse(false, e.getMessage());
         }
-        return success;
+        return credentialsResponse;
+    }
+
+    public Credentials encryptCredentials(Credentials creds) {
+        Credentials c = new Credentials();
+        c.setUserName(PasswordStorage.encryptString(creds.getUserName() + ":" + SecurityUtil.getUserName()));
+        c.setPassword(PasswordStorage.encryptString(creds.getPassword() + ":" + SecurityUtil.getUserName()));
+        c.setEncrypted(true);
+        return c;
+    }
+
+    private Credentials decryptCredentials(Credentials creds) {
+        Credentials c = new Credentials();
+        String s = PasswordStorage.decryptString(creds.getUserName());
+        int i = s.lastIndexOf(":" + SecurityUtil.getUserName());
+        if(i == -1) {
+            throw new RuntimeException();
+        }
+        c.setUserName(s.substring(0, i));
+        s = PasswordStorage.decryptString(creds.getPassword());
+        i = s.lastIndexOf(":" + SecurityUtil.getUserName());
+        if(i == -1)
+            throw new RuntimeException();
+        c.setPassword(s.substring(0, i));
+        return c;
     }
 
     public List<Spreadsheet> getAvailableGoogleSpreadsheets(Credentials credentials) {
+        if (credentials.isEncrypted()) {
+            credentials = decryptCredentials(credentials);
+        }
         List<Spreadsheet> worksheets = cachedSpreadsheetResults.get(credentials);
         if (worksheets == null) {
             try {

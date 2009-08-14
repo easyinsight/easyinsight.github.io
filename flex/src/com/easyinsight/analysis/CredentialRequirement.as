@@ -5,6 +5,7 @@ public class CredentialRequirement {
     public var dataSourceID:int;
     public var dataSourceName:String;
     public var credentialsDefinition:CredentialsDefinition;
+    public var userNameField:String;
 
     public function CredentialRequirement() {
     }

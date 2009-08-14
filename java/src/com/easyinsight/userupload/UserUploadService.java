@@ -470,20 +470,25 @@ public class UserUploadService implements IUserUploadService {
                 }
             }
             CredentialsResponse credentialsResponse;
+            IServerDataSourceDefinition dataSource = (IServerDataSourceDefinition) feedStorage.getFeedDefinitionData(feedID);
             if (synchronous) {
-                IServerDataSourceDefinition dataSource = (IServerDataSourceDefinition) feedStorage.getFeedDefinitionData(feedID);
                 credentialsResponse = dataSource.refreshData(credentials, SecurityUtil.getAccountID(), new Date(), null);
                 // TODO: refactor into event model
                 //new GoalStorage().updateGoals(feedID);
             } else {
-                credentialsResponse = new CredentialsResponse(true);
-                ServerRefreshScheduledTask task = new ServerRefreshScheduledTask();
-                task.setDataSourceID(feedID);
-                task.setUserID(SecurityUtil.getUserID());
-                task.setExecutionDate(new Date());
-                task.setStatus(ScheduledTask.INMEMORY);
-                task.setRefreshCreds(credentials);
-                Scheduler.instance().saveTask(task);
+                String message = dataSource.validateCredentials(credentials);
+                if (message == null) {
+                    credentialsResponse = new CredentialsResponse(true);
+                    ServerRefreshScheduledTask task = new ServerRefreshScheduledTask();
+                    task.setDataSourceID(feedID);
+                    task.setUserID(SecurityUtil.getUserID());
+                    task.setExecutionDate(new Date());
+                    task.setStatus(ScheduledTask.INMEMORY);
+                    task.setRefreshCreds(credentials);
+                    Scheduler.instance().saveTask(task);
+                } else {
+                    credentialsResponse = new CredentialsResponse(false, message);
+                }
             }
             return credentialsResponse;
         } catch (Exception e) {
@@ -559,23 +564,33 @@ public class UserUploadService implements IUserUploadService {
         }
     }
 
-    public String validateCredentials(FeedDefinition feedDefinition, Credentials credentials) {
+    public CredentialsResponse validateCredentials(FeedDefinition feedDefinition, Credentials credentials, boolean needsEncryption) {
         try {
             
             if(credentials.isEncrypted()) {
                 credentials = decryptCredentials(credentials);
             }
-            return feedDefinition.validateCredentials(credentials);
+            String failureMessage = feedDefinition.validateCredentials(credentials);
+            CredentialsResponse credentialsResponse;
+            if (failureMessage == null) {
+                credentialsResponse = new CredentialsResponse(true);
+                if (needsEncryption) {
+                    credentialsResponse.setEncryptedResponse(encryptCredentials(credentials));
+                }
+            } else {
+                credentialsResponse = new CredentialsResponse(false, failureMessage);
+            }
+            return credentialsResponse;
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);
         }
     }
 
-    public String validateCredentialsForID(long id, Credentials credentials) {
+    public CredentialsResponse validateCredentialsForID(long id, Credentials credentials, boolean needsEncryption) {
         try {
             FeedDefinition feedDefinition = feedStorage.getFeedDefinitionData(id);
-            return feedDefinition.validateCredentials(credentials);
+            return validateCredentials(feedDefinition, credentials, needsEncryption);
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);
@@ -784,6 +799,9 @@ public class UserUploadService implements IUserUploadService {
         Connection conn = Database.instance().getConnection();
         try {
             conn.setAutoCommit(false);
+            if (credentials.isEncrypted()) {
+                credentials = decryptCredentials(credentials);
+            }
             IServerDataSourceDefinition serverDataSourceDefinition = (IServerDataSourceDefinition) feedDefinition;
             long id = serverDataSourceDefinition.create(credentials, conn);
             conn.commit();
@@ -840,6 +858,7 @@ public class UserUploadService implements IUserUploadService {
         Credentials c = new Credentials();
         c.setUserName(PasswordStorage.encryptString(creds.getUserName() + ":" + SecurityUtil.getUserName()));
         c.setPassword(PasswordStorage.encryptString(creds.getPassword() + ":" + SecurityUtil.getUserName()));
+        c.setEncrypted(true);
         return c;
     }
 

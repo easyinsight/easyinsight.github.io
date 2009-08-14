@@ -40,6 +40,7 @@
         import com.easyinsight.detail.DataDetailEvent;
         import com.easyinsight.filtering.FilterDefinition;
         import com.easyinsight.filtering.TransformsUpdatedEvent;
+        import com.easyinsight.framework.CredentialsCache;
         import com.easyinsight.framework.DataServiceLoadingEvent;
         import com.easyinsight.framework.User;
         import com.easyinsight.genredata.ModuleAnalyzeEvent;
@@ -256,13 +257,7 @@
 
         private function gotData(event:EmbeddedDataServiceEvent):void {
             if (event.credentialRequirements != null) {
-                for each (var credential:CredentialRequirement in event.credentialRequirements) {
-                    var window:RuntimeCredentialsWindow = new RuntimeCredentialsWindow();
-                    window.requirement = credential;
-                    window.addEventListener(CredentialsEvent.CREDENTIALS_SAVED, onCredentials);
-                    PopUpManager.addPopUp(window, this, true);
-                    PopUpUtil.centerPopUp(window);
-                }
+                CredentialsCache.getCache().obtainCredentials(this, event.credentialRequirements, onCredentials);
             } else {
                 report = event.analysisDefinition;
                 dataSource = event.dataSourceInfo;

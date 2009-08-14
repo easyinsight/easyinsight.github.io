@@ -5,7 +5,6 @@ package com.easyinsight.framework
 import flash.net.SharedObject;
 
 import mx.collections.ArrayCollection;
-import mx.controls.Alert;
 import mx.rpc.events.ResultEvent;
 	import mx.rpc.remoting.RemoteObject;
 	
@@ -15,7 +14,6 @@ import mx.rpc.events.ResultEvent;
 		private var name:String;
 		private var email:String;
 		private var accountType:int;
-		private var credentialsMap:Object = new Object();
 		static private var _user:User;
 		static private var notifier:UserEventNotifier;
         static private var sharedObject:SharedObject;
@@ -28,9 +26,6 @@ import mx.rpc.events.ResultEvent;
         //public var insightCreator:Boolean;
         public var userID:int;
         public var activated:Boolean;
-
-		private var merchants:ArrayCollection = new ArrayCollection();
-		private var storeService:RemoteObject;
 
         public function User() {
 
@@ -72,10 +67,6 @@ import mx.rpc.events.ResultEvent;
             //this.insightCreator = userTransferObject.insightCreator;
         }
 		
-		private function gotMerchants(event:ResultEvent):void {
-			this.merchants = storeService.getMerchants.lastResult;
-		}
-		
 		static public function destroy():void {
 			_user = null;
 		}
@@ -102,19 +93,7 @@ import mx.rpc.events.ResultEvent;
 		public function getName():String {
 			return name;
 		}
-		
-		public function addCredentials(type:String, credentials:Credentials):void {
-			credentialsMap[type] = credentials;
-		}			
-		
-		public function getCredentials(type:String):Credentials {
-			var credentials:Credentials = credentialsMap[type];			
-			return credentials;
-		}
-		
-		public function getAllCredentials():Object {
-			return credentialsMap;
-		}
+
 		
 		static public function getInstance():User {
 			return _user;
@@ -123,14 +102,28 @@ import mx.rpc.events.ResultEvent;
         static public function getSharedObject():SharedObject {
             return sharedObject;
         }
-		
-		public function getMerchants():ArrayCollection {
-			return this.merchants;
-		}
-		
-		public function addMerchant(merchant:Merchant):void {
-			this.merchants.addItem(merchant);
-		}
+
+        static public function getCredentials(dataSourceID:int):Credentials {
+            var idString:String = dataSourceID.toString();
+            if(getSharedObject() != null && getSharedObject().data[idString] != null) {
+                var c:Credentials = new Credentials();
+                c.userName = User.getSharedObject().data[idString].username;
+                c.password = User.getSharedObject().data[idString].password;
+                c.encrypted = true;
+                return c;
+            }
+            return null;
+        }
+
+        static public function saveCredentials(dataSourceID:int, c:Credentials):void {
+            var idString:String = dataSourceID.toString();
+            if (getSharedObject() != null) {
+                getSharedObject().data[idString] = new Object();
+                getSharedObject().data[idString].username = c.userName;
+                getSharedObject().data[idString].password = c.password;
+                getSharedObject().flush();
+            }
+        }
 
         }
 }

@@ -396,10 +396,9 @@
         <mx:Spacer width="50"/>
         <mx:VBox width="500" height="100%">
             <mx:TextArea height="100%" width="100%" backgroundAlpha="0" borderStyle="none" selectable="false"
-                         htmlText="{solutionDescription}" borderThickness="0" editable="false"/>
-            <mx:Spacer height="100%"/>
+                         htmlText="{solutionDescription}" borderThickness="0" editable="false"/>            
             <mx:TextArea width="100%" backgroundAlpha="0" borderStyle="none" selectable="false"
-                         htmlText="{footerText}" borderThickness="0" editable="false"/>
+                         htmlText="{footerText}" borderThickness="0" editable="false" maxHeight="80"/>
         </mx:VBox>
     </mx:HBox>
 </mx:Box>

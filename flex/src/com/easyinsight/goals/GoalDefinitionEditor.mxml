@@ -204,7 +204,8 @@
 
         private function processFeed(feedDefinition:FeedMetadata):void {
             this.feedMetadata = feedDefinition;
-            for each (var credential:CredentialRequirement in feedMetadata.credentials) {
+            CredentialsCache.getCache().obtainCredentials(this, feedMetadata.credentials, onCredentials);
+            /*for each (var credential:CredentialRequirement in feedMetadata.credentials) {
                 if (CredentialsCache.getCache().getCredentials(credential.dataSourceID) == null) {
                     var window:RuntimeCredentialsWindow = new RuntimeCredentialsWindow();
                     window.addEventListener(CredentialsEvent.CREDENTIALS_SAVED, onCredentials);
@@ -212,7 +213,7 @@
                     PopUpManager.addPopUp(window, this, true);
                     PopUpUtil.centerPopUp(window);
                 }
-            }
+            }*/
             availableDimensions = new ArrayCollection();
             var measures:ArrayCollection = new ArrayCollection();
             var dates:ArrayCollection = new ArrayCollection();
@@ -268,7 +269,7 @@
             }
         }
 
-        private function onCredentials(event:CredentialsEvent):void {
+        private function onCredentials():void {
             generateHistory();
         }
 

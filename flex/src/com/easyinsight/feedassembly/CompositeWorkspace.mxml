@@ -356,37 +356,20 @@
             feedService.getCredentials.send(new ArrayCollection([selectedObject.dataFeedID]), CredentialsCache.getCache().createCredentials());
         }
 
-        private var neededCredentialCount:int;
-            private var receivedCredentialCount:int;
+        
             private var queuedExistings:ArrayCollection;
             private var queuedNews:ArrayCollection;
 
-            private function onCredentials(event:CredentialsEvent):void {
-                receivedCredentialCount++;
-                if (receivedCredentialCount >= neededCredentialCount) {
+            private function onCredentials():void {
+
                     ProgressAlert.alert(this, "Trying to automatically find joins...", null, feedService.initialDefine);
                     feedService.initialDefine.send(queuedExistings, queuedNews, CredentialsCache.getCache().createCredentials());
-                }
+
             }
 
             private function gotCredentials():void {
                 var requirements:ArrayCollection = feedService.getCredentials.lastResult as ArrayCollection;
-                neededCredentialCount = 0;
-                receivedCredentialCount = 0;
-                for each (var credential:CredentialRequirement in requirements) {
-                    if (CredentialsCache.getCache().getCredentials(credential.dataSourceID) == null) {
-                        neededCredentialCount++;
-                        var window:RuntimeCredentialsWindow = new RuntimeCredentialsWindow();
-                        window.requirement = credential;
-                        window.addEventListener(CredentialsEvent.CREDENTIALS_SAVED, onCredentials);
-                        PopUpManager.addPopUp(window, this, true);
-                        PopUpUtil.centerPopUp(window);
-                    }
-                }
-                if (neededCredentialCount == 0) {
-                    ProgressAlert.alert(this, "Trying to automatically find joins...", null, feedService.initialDefine);
-                    feedService.initialDefine.send(queuedExistings, queuedNews, CredentialsCache.getCache().createCredentials());
-                }
+                CredentialsCache.getCache().obtainCredentials(this, requirements, onCredentials);                
             }
 
         private function dragOverHandler(event:DragEvent):void {

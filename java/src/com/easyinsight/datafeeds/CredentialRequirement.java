@@ -9,6 +9,7 @@ public class CredentialRequirement {
     private long dataSourceID;
     private String dataSourceName;
     private int credentialsDefinition;
+    private String userNameField;
 
     public CredentialRequirement() {
     }
@@ -18,6 +19,14 @@ public class CredentialRequirement {
         this.dataSourceID = dataSourceID;
         this.dataSourceName = dataSourceName;
         this.credentialsDefinition = credentialsDefinition;
+    }
+
+    public String getUserNameField() {
+        return userNameField;
+    }
+
+    public void setUserNameField(String userNameField) {
+        this.userNameField = userNameField;
     }
 
     public long getDataSourceID() {

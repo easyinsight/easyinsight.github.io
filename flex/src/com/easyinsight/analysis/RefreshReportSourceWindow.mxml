@@ -4,22 +4,14 @@
         import com.easyinsight.analysis.service.EmbeddedDataService;
         import com.easyinsight.framework.CredentialsCache;
         import com.easyinsight.report.AbstractViewFactory;
-        import com.easyinsight.util.PopUpUtil;
 
         import mx.collections.ArrayCollection;
         import mx.managers.PopUpManager;
 
         private var _dataSourceID:int;
-
-        private var neededCredentialCount:int = 0;
-        private var receivedCredentialCount:int = 0;
-
         private var _reportID:int;
-
         private var _embeddedViewFactory:AbstractViewFactory;
-
         private var _filters:ArrayCollection;
-
         private var service:EmbeddedDataService;
 
 
@@ -39,41 +31,31 @@
             _dataSourceID = value;
         }
 
+        private function gotCredentials(event:EmbeddedDataServiceEvent):void {
+            _embeddedViewFactory.gotData(event);
+            PopUpManager.removePopUp(this);
+        }
+
         private function onDataReturn(event:EmbeddedDataServiceEvent):void {
             progressBar.visible = false;
-            if (event.credentialRequirements != null) {
-                neededCredentialCount = 0;
-                receivedCredentialCount = 0;
-                for each (var credential:CredentialRequirement in event.credentialRequirements) {
-                    neededCredentialCount++;
-                    var window:RuntimeCredentialsWindow = new RuntimeCredentialsWindow();
-                    window.requirement = credential;
-                    window.addEventListener(CredentialsEvent.CREDENTIALS_SAVED, onCredentials);
-                    PopUpManager.addPopUp(window, this, true);
-                    PopUpUtil.centerPopUp(window);
-                }
-            } else {
+            if (event.credentialRequirements == null || event.credentialRequirements.length == 0) {
                 _embeddedViewFactory.gotData(event);
                 PopUpManager.removePopUp(this);
+            } else {
+                CredentialsCache.getCache().obtainCredentials(this, event.credentialRequirements, onCredentials);
             }
         }
 
         public function refreshData():void {
-            progressBar.visible = true;
-            //ProgressAlert.alert(this, "Determining needed credentials...", null, feedService.getCredentials);
+            progressBar.visible = true;            
             service = new EmbeddedDataService();
             service.addEventListener(EmbeddedDataServiceEvent.DATA_RETURNED, onDataReturn);
             service.retrieveData(_reportID, _dataSourceID, _filters, allDataSourcesCheckbox.selected);
         }
 
-        private function onCredentials(event:CredentialsEvent):void {
-            CredentialsCache.getCache().addCredentials(event.dataSourceID, event.credentials);
-            receivedCredentialCount++;
-            if (receivedCredentialCount == neededCredentialCount) {
-                //ProgressAlert.alert(this, "Refreshing the goal tree...", null, goalService.forceRefresh);
-                progressBar.visible = true;
-                service.retrieveData(_reportID, _dataSourceID, _filters, allDataSourcesCheckbox.selected);
-            }
+        private function onCredentials():void {
+            progressBar.visible = true;
+            service.retrieveData(_reportID, _dataSourceID, _filters, allDataSourcesCheckbox.selected);
         }
         ]]></mx:Script>
     <mx:Form styleName="TitleWindowContents">

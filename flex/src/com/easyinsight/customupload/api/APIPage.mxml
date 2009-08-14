@@ -27,7 +27,7 @@
         import com.easyinsight.listing.AnalyzeSource;
 
         private function gotSettings():void {
-            var settings:AccountAPISettings = userService.getUserAPISettings.lastResult as AccountAPISettings;
+            var settings:AccountAPISettings = userService.getAccountAPISettings.lastResult as AccountAPISettings;
             if (settings.apiEnabled) {
                 apiLabel = "The API is currently enabled for your account.";
             } else {
@@ -40,7 +40,7 @@
         }
 
         private function onAPIUpdate(event:APIUpdateEvent):void {
-            userService.getUserAPISettings.send();
+            userService.getAccountAPISettings.send();
         }
 
         private function apiInformation():void {
@@ -96,7 +96,7 @@
                     currentState = "";
                 }
                 apiService.getDataSourceAPIs.send();
-                userService.getUserAPISettings.send();
+                userService.getAccountAPISettings.send();
             }
         }
 
@@ -150,8 +150,8 @@
         private function search():void {
         }
         ]]></mx:Script>
-    <mx:RemoteObject destination="login" id="userService">
-        <mx:method name="getUserAPISettings" result="gotSettings()"/>
+    <mx:RemoteObject destination="accountAdmin" id="userService">
+        <mx:method name="getAccountAPISettings" result="gotSettings()"/>
     </mx:RemoteObject>
     <mx:RemoteObject destination="apiService" id="apiService">
         <mx:method name="getDeployedServices" result="gotDeployedServices()"/>

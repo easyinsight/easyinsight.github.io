@@ -9,7 +9,6 @@ import com.easyinsight.framework.GenericFaultHandler;
 import com.easyinsight.framework.User;
 import com.easyinsight.genredata.ModuleAnalyzeEvent;
 
-import com.easyinsight.notifications.NotifyBar;
 import com.easyinsight.report.ReportAnalyzeSource;
 import com.easyinsight.solutions.InsightDescriptor;
 
@@ -139,7 +138,7 @@ public class MyDataIconControls extends HBox
             dispatchEvent(new RefreshNotificationEvent());
             return;
         }
-        else if (User.getSharedObject() != null && User.getSharedObject().data[feedDescriptor.dataFeedID.toString()] != null) {
+        else if (User.getCredentials(feedDescriptor.dataFeedID) != null) {
             userUploadSource = new RemoteObject();
             userUploadSource.destination = "userUpload";
             userUploadSource.refreshData.addEventListener(ResultEvent.RESULT, completedRefresh);

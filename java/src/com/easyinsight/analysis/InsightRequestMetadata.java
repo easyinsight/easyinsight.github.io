@@ -2,6 +2,8 @@ package com.easyinsight.analysis;
 
 import com.easyinsight.datafeeds.CredentialFulfillment;
 import com.easyinsight.users.Credentials;
+import com.easyinsight.PasswordStorage;
+import com.easyinsight.security.SecurityUtil;
 
 import java.util.Date;
 import java.util.ArrayList;
@@ -28,9 +30,29 @@ public class InsightRequestMetadata implements Serializable {
         for (CredentialFulfillment credentialFulfillment : credentialFulfillmentList) {
             if (credentialFulfillment.getDataSourceID() == dataSourceID) {
                 credentials = credentialFulfillment.getCredentials();
+                if (credentials.isEncrypted()) {
+                    credentials = decryptCredentials(credentials);
+                }
+
             }
         }
         return credentials;
+    }
+
+    private Credentials decryptCredentials(Credentials creds) {
+        Credentials c = new Credentials();
+        String s = PasswordStorage.decryptString(creds.getUserName());
+        int i = s.lastIndexOf(":" + SecurityUtil.getUserName());
+        if(i == -1) {
+            throw new RuntimeException();
+        }
+        c.setUserName(s.substring(0, i));
+        s = PasswordStorage.decryptString(creds.getPassword());
+        i = s.lastIndexOf(":" + SecurityUtil.getUserName());
+        if(i == -1)
+            throw new RuntimeException();
+        c.setPassword(s.substring(0, i));
+        return c;
     }
 
     public boolean isRefreshAllSources() {

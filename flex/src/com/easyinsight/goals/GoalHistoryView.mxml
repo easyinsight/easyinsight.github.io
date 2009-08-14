@@ -96,23 +96,13 @@
             _goalID = value;
         }
 
-        private function onCredentials(event:CredentialsEvent):void {
+        private function onCredentials():void {
             goalService.getGoalValues.send(_goalID, _startDate, _endDate, CredentialsCache.getCache().createCredentials());
         }
 
         private function gotCredentials():void {
             var credentials:ArrayCollection = goalService.getCredentialsForNode.lastResult as ArrayCollection;
-            if (credentials.length == 0) {
-                goalService.getGoalValues.send(_goalID, _startDate, _endDate, CredentialsCache.getCache().createCredentials());
-            } else {
-                for each (var credential:CredentialRequirement in credentials) {
-                    var window:RuntimeCredentialsWindow = new RuntimeCredentialsWindow();
-                    window.requirement = credential;
-                    window.addEventListener(CredentialsEvent.CREDENTIALS_SAVED, onCredentials);
-                    PopUpManager.addPopUp(window, this, true);
-                    PopUpUtil.centerPopUp(window);
-                }
-            }
+            CredentialsCache.getCache().obtainCredentials(this, credentials, onCredentials);            
         }
 
         private function gotValues():void {

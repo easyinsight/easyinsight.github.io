@@ -302,13 +302,13 @@
 						</mx:FormItem>
 					</mx:Form>
 				</mx:VBox>
-				<mx:VBox enabled="!{liveData}">
+				<mx:VBox>
 					<mx:HBox width="100%" horizontalAlign="center">
 						<mx:Box backgroundColor="#FFFFFF" backgroundAlpha=".8" width="50%" horizontalAlign="center">
 							<mx:Label text="Sharing" fontSize="14"/>	
 						</mx:Box>
 					</mx:HBox>			
-					<feed:FeedSharing id="feedPolicy" paddingTop="15" paddingLeft="45" uploadPolicy="{feedUploadPolicy}" activated="{activated}"/>								
+					<feed:FeedSharing id="feedPolicy" paddingTop="15" paddingLeft="45" uploadPolicy="{feedUploadPolicy}" activated="{activated}" liveData="{liveData}"/>								
 				</mx:VBox>										
 			</mx:HBox>
             <mx:Box label="Fields">

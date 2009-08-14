@@ -1,9 +1,13 @@
 package com.easyinsight.framework {
 import com.easyinsight.analysis.CredentialFulfillment;
 
+import flash.display.DisplayObject;
+
+import flash.events.EventDispatcher;
+
 import mx.collections.ArrayCollection;
 
-public class WebCredentialsCache implements ICredentialsCache {
+public class WebCredentialsCache extends EventDispatcher implements ICredentialsCache {
     public function WebCredentialsCache() {
     }
 
@@ -27,5 +31,16 @@ public class WebCredentialsCache implements ICredentialsCache {
         }
         return creds;
     }
+
+    public function requireCredentials(credentials:ArrayCollection):void {
+        
+    }
+
+    public function obtainCredentials(displayObject:DisplayObject, credentials:ArrayCollection, successFunction:Function,
+            ... callbackParams):void {
+        var credentialRequirementState:CredentialRequirementState = new CredentialRequirementState(displayObject, credentials,
+                successFunction, callbackParams);
+        credentialRequirementState.act();
+    }    
 }
 }

@@ -1,5 +1,7 @@
 package com.easyinsight.userupload;
 
+import com.easyinsight.users.Credentials;
+
 /**
  * User: James Boe
  * Date: Jul 14, 2008
@@ -8,6 +10,7 @@ package com.easyinsight.userupload;
 public class CredentialsResponse {
     private boolean successful;
     private String failureMessage;
+    private Credentials encryptedResponse;
 
     public CredentialsResponse() {
     }
@@ -19,6 +22,14 @@ public class CredentialsResponse {
     public CredentialsResponse(boolean successful, String failureMessage) {
         this.successful = successful;
         this.failureMessage = failureMessage;
+    }
+
+    public Credentials getEncryptedResponse() {
+        return encryptedResponse;
+    }
+
+    public void setEncryptedResponse(Credentials encryptedResponse) {
+        this.encryptedResponse = encryptedResponse;
     }
 
     public boolean isSuccessful() {

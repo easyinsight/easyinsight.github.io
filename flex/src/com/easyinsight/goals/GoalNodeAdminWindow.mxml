@@ -2,22 +2,6 @@
 <mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:filtering="com.easyinsight.filtering.*"
                 xmlns:goals="com.easyinsight.goals.*"
                 creationComplete="setupData()" width="1100" height="550" headerHeight="0">
-    <mx:states>
-
-        <mx:State name="problem">
-            <mx:AddChild relativeTo="{targetBox}">
-                <mx:VBox width="100%" height="180" horizontalAlign="center">
-
-                </mx:VBox>
-            </mx:AddChild>
-        </mx:State>
-        <mx:State name="goal">
-            <mx:AddChild relativeTo="{targetBox}">
-                
-            </mx:AddChild>
-        </mx:State>
-
-    </mx:states>
     <mx:Script>
 		<![CDATA[
         import com.easyinsight.analysis.AnalysisItemEditEvent;
@@ -259,9 +243,13 @@
             dataService.getFeedMetadata.send(feedID);
         }
 
+        private function onCredentials():void {
+        }
+
         private function processFeed(feedDefinition:FeedMetadata):void {
             this.feedMetadata = feedDefinition;
-            for each (var credential:CredentialRequirement in feedMetadata.credentials) {
+            CredentialsCache.getCache().obtainCredentials(this, feedMetadata.credentials, onCredentials);
+            /*for each (var credential:CredentialRequirement in feedMetadata.credentials) {
                 if (CredentialsCache.getCache().getCredentials(credential.dataSourceID) == null) {
                     var window:RuntimeCredentialsWindow = new RuntimeCredentialsWindow();
                     // window.addEventListener(CredentialsEvent.CREDENTIALS_SAVED, onCredentials);
@@ -269,7 +257,7 @@
                     PopUpManager.addPopUp(window, this, true);
                     PopUpUtil.centerPopUp(window);
                 }
-            }
+            }*/
             availableDimensions = new ArrayCollection();
             var measures:ArrayCollection = new ArrayCollection();
             var dates:ArrayCollection = new ArrayCollection();

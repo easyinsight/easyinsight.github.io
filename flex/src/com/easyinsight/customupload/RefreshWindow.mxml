@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" width="400" height="300" creationComplete="onCreationComplete()">
+<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" creationComplete="onCreationComplete()">
     <mx:Metadata>
         [Event(name="userConfigComplete", type="com.easyinsight.customupload.UploadConfigEvent")]
         [Event(name="userConfigCancel", type="com.easyinsight.customupload.UploadConfigEvent")]
     </mx:Metadata>
 	<mx:Script>
 		<![CDATA[
+        import com.easyinsight.framework.User;
         import com.easyinsight.listing.RefreshNotificationEvent;
         import com.easyinsight.salesforce.SalesforceCredentialsWindow;
 			import mx.managers.PopUpManager;
@@ -43,6 +44,9 @@
 				progressBar.visible = false;
 				var credentialsResponse:CredentialsResponse = uploadService.refreshData.lastResult as CredentialsResponse;
 				if (credentialsResponse.successful) {
+                    if (credentialsResponse.encryptedResponse != null) {
+                        User.saveCredentials(feedID, credentialsResponse.encryptedResponse);
+                    }
                     dispatchEvent(new UploadConfigEvent(UploadConfigEvent.UPLOAD_CONFIG_COMPLETE));
                     dispatchEvent(new RefreshNotificationEvent());
 					PopUpManager.removePopUp(this);

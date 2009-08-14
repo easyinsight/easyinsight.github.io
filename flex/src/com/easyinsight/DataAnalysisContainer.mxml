@@ -499,13 +499,15 @@
             detailService.getCredentialRequirements.send(dataService.dataFeedID);
         }
 
-        private function onCredentials(event:CredentialsEvent):void {
+        private function onCredentials():void {
             dataService.reloadInitialContent(this, onMetadataReceipt);
         }
 
         private function gotCredentialRequirements():void {
             var requirements:ArrayCollection = detailService.getCredentialRequirements.lastResult as ArrayCollection;
             var canDirectly:Boolean = true;
+            CredentialsCache.getCache().obtainCredentials(this, requirements, onCredentials);
+/*
             for each (var credential:CredentialRequirement in requirements) {
                 if (CredentialsCache.getCache().getCredentials(credential.dataSourceID) == null) {
                     var window:RuntimeCredentialsWindow = new RuntimeCredentialsWindow();
@@ -518,7 +520,7 @@
             }
             if (canDirectly) {
                 dataService.reloadInitialContent(this, onMetadataReceipt);
-            }
+            }*/
         }
 
         private function onRollup(event:HierarchyRollupEvent):void {

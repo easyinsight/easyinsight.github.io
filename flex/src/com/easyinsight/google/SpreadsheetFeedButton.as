@@ -23,6 +23,9 @@ import mx.containers.HBox;
 
 	public class SpreadsheetFeedButton extends HBox
 	{
+
+        public static var credentials:Credentials;
+
 		private var _data:Worksheet;
 		private var remoteService:RemoteObject;
 		private var button:Button;
@@ -92,7 +95,7 @@ import mx.containers.HBox;
 		}
 		
 		public function subscribe(event:Event):void {
-			var credentials:Credentials = User.getInstance().getCredentials("google");
+			//var credentials:Credentials = User.getInstance().getCredentials("google");
 			remoteService = new RemoteObject();
 			remoteService.destination = "userUpload";
 			remoteService.newExternalDataSource.addEventListener(ResultEvent.RESULT, successfulSubscription);

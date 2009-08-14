@@ -38,7 +38,7 @@ public class GoogleSpreadsheetTest extends TestCase {
         credentials.setUserName("easyinsight99");
         credentials.setPassword("analyze123");
         GoogleDataProvider googleDataProvider = new GoogleDataProvider();
-        assertTrue(googleDataProvider.testGoogleConnect(credentials));
+        googleDataProvider.testGoogleConnect(credentials, false);
         googleDataProvider.getAvailableGoogleSpreadsheets(credentials);
         URL feedUrl = new URL("http://spreadsheets.google.com/feeds/spreadsheets/private/full");
         SpreadsheetService myService = GoogleSpreadsheetAccess.getOrCreateSpreadsheetService(credentials);
