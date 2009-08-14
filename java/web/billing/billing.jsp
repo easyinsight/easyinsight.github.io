@@ -11,6 +11,7 @@
 <%@ page import="com.easyinsight.security.PasswordService" %>
 <%@ page import="com.easyinsight.users.User" %>
 <%@ page import="java.util.List" %>
+<%@ page import="java.util.Formatter" %>
 <%--
   Created by IntelliJ IDEA.
   User: abaldwin
@@ -69,6 +70,19 @@
       request.getSession().setAttribute("billingTime", time);
       String hashString = orderID + "|" + amount + "|" + String.valueOf(accountID) + "|" + time + "|" + key;
       String hash = BillingUtil.MD5Hash(hashString);
+      String accountInfoString = null;
+      switch(account.getAccountType()) {
+          case Account.INDIVIDUAL:
+              accountInfoString = "Individual";
+              break;
+          case Account.GROUP:
+              accountInfoString = "Group";
+              break;
+          default:
+              accountInfoString = "";
+      }
+      Formatter f = new Formatter();
+      String charge = f.format("%.2f", account.monthlyCharge()).toString();
 
   %>
 <head>
@@ -209,6 +223,7 @@
           <option value="20">20</option>
       </select>
       <span>*</span></td></tr>
+      <tr><td colspan="6" style="font-size:14px;text-align:left">You are signing up for the <%= accountInfoString %> account tier, and you will be charged $<%= charge %> USD monthly for your subscription.  <% if(account.getAccountState() == Account.DELINQUENT) { %> Since your account is currently delinquent, the first charge will be applied today. <% } %>  </td></tr>
       <tr><td colspan="6" style="text-align:center"> <input class="submitButton" type="image" value="" src="transparent.gif" name="commit"/></td></tr>
       </tbody></table>
 

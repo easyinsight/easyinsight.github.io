@@ -14,7 +14,9 @@ public class VariableNode extends CalculationTreeNode {
     }
     
     public void resolveVariableKey(Resolver r) {
-        variableKey = r.getKey(getText().trim());
+        String s = getText().trim();
+        s = s.substring(1, s.length() - 1);
+        variableKey = r.getKey(s);
     }
 
     @Override

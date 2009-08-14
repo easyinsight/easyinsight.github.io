@@ -561,6 +561,7 @@ public class UserUploadService implements IUserUploadService {
 
     public String validateCredentials(FeedDefinition feedDefinition, Credentials credentials) {
         try {
+            
             if(credentials.isEncrypted()) {
                 credentials = decryptCredentials(credentials);
             }

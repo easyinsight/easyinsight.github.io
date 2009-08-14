@@ -1,4 +1,4 @@
-// $ANTLR 3.1.2 C:\\Users\\abaldwin\\Documents\\EasyInsight\\code\\java\\src\\com\\easyinsight\\calculations\\Calculations.g 2009-08-01 21:21:51
+// $ANTLR 3.1.2 C:\\Users\\abaldwin\\Documents\\EasyInsight\\code\\java\\src\\com\\easyinsight\\calculations\\Calculations.g 2009-08-14 11:58:55
  package com.easyinsight.calculations.generated; 
 
 import org.antlr.runtime.*;
@@ -287,17 +287,26 @@ public class CalculationsLexer extends Lexer {
         try {
             int _type = Variable;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // C:\\Users\\abaldwin\\Documents\\EasyInsight\\code\\java\\src\\com\\easyinsight\\calculations\\Calculations.g:45:9: ( Character ( Character | Digit | SpecialChars | VariableWhitespace )* )
-            // C:\\Users\\abaldwin\\Documents\\EasyInsight\\code\\java\\src\\com\\easyinsight\\calculations\\Calculations.g:45:11: Character ( Character | Digit | SpecialChars | VariableWhitespace )*
+            // C:\\Users\\abaldwin\\Documents\\EasyInsight\\code\\java\\src\\com\\easyinsight\\calculations\\Calculations.g:45:9: ( '[' ( Character | Digit ) ( Character | Digit | SpecialChars | VariableWhitespace )* ']' )
+            // C:\\Users\\abaldwin\\Documents\\EasyInsight\\code\\java\\src\\com\\easyinsight\\calculations\\Calculations.g:45:11: '[' ( Character | Digit ) ( Character | Digit | SpecialChars | VariableWhitespace )* ']'
             {
-            mCharacter(); 
-            // C:\\Users\\abaldwin\\Documents\\EasyInsight\\code\\java\\src\\com\\easyinsight\\calculations\\Calculations.g:45:21: ( Character | Digit | SpecialChars | VariableWhitespace )*
+            match('['); 
+            if ( (input.LA(1)>='0' && input.LA(1)<='9')||(input.LA(1)>='A' && input.LA(1)<='Z')||(input.LA(1)>='a' && input.LA(1)<='z') ) {
+                input.consume();
+
+            }
+            else {
+                MismatchedSetException mse = new MismatchedSetException(null,input);
+                recover(mse);
+                throw mse;}
+
+            // C:\\Users\\abaldwin\\Documents\\EasyInsight\\code\\java\\src\\com\\easyinsight\\calculations\\Calculations.g:45:35: ( Character | Digit | SpecialChars | VariableWhitespace )*
             loop3:
             do {
                 int alt3=2;
                 int LA3_0 = input.LA(1);
 
-                if ( (LA3_0=='\t'||LA3_0==' '||(LA3_0>='0' && LA3_0<='9')||(LA3_0>='A' && LA3_0<='Z')||LA3_0=='_'||(LA3_0>='a' && LA3_0<='z')) ) {
+                if ( (LA3_0=='\t'||LA3_0==' '||LA3_0=='\"'||LA3_0=='\''||(LA3_0>='+' && LA3_0<='?')||(LA3_0>='A' && LA3_0<='Z')||LA3_0=='_'||(LA3_0>='a' && LA3_0<='{')||LA3_0=='}') ) {
                     alt3=1;
                 }
 
@@ -306,7 +315,7 @@ public class CalculationsLexer extends Lexer {
             	case 1 :
             	    // C:\\Users\\abaldwin\\Documents\\EasyInsight\\code\\java\\src\\com\\easyinsight\\calculations\\Calculations.g:
             	    {
-            	    if ( input.LA(1)=='\t'||input.LA(1)==' '||(input.LA(1)>='0' && input.LA(1)<='9')||(input.LA(1)>='A' && input.LA(1)<='Z')||input.LA(1)=='_'||(input.LA(1)>='a' && input.LA(1)<='z') ) {
+            	    if ( input.LA(1)=='\t'||input.LA(1)==' '||input.LA(1)=='\"'||input.LA(1)=='\''||(input.LA(1)>='+' && input.LA(1)<='?')||(input.LA(1)>='A' && input.LA(1)<='Z')||input.LA(1)=='_'||(input.LA(1)>='a' && input.LA(1)<='{')||input.LA(1)=='}' ) {
             	        input.consume();
 
             	    }
@@ -324,6 +333,7 @@ public class CalculationsLexer extends Lexer {
                 }
             } while (true);
 
+            match(']'); 
 
             }
 
@@ -590,10 +600,18 @@ public class CalculationsLexer extends Lexer {
     // $ANTLR start "SpecialChars"
     public final void mSpecialChars() throws RecognitionException {
         try {
-            // C:\\Users\\abaldwin\\Documents\\EasyInsight\\code\\java\\src\\com\\easyinsight\\calculations\\Calculations.g:76:2: ( '_' )
-            // C:\\Users\\abaldwin\\Documents\\EasyInsight\\code\\java\\src\\com\\easyinsight\\calculations\\Calculations.g:76:4: '_'
+            // C:\\Users\\abaldwin\\Documents\\EasyInsight\\code\\java\\src\\com\\easyinsight\\calculations\\Calculations.g:76:2: ( '_' | ':' | '<' | '>' | ',' | '.' | ';' | '/' | '?' | '\"' | '\\'' | '{' | '}' | '-' | '=' | '+' )
+            // C:\\Users\\abaldwin\\Documents\\EasyInsight\\code\\java\\src\\com\\easyinsight\\calculations\\Calculations.g:
             {
-            match('_'); 
+            if ( input.LA(1)=='\"'||input.LA(1)=='\''||(input.LA(1)>='+' && input.LA(1)<='/')||(input.LA(1)>=':' && input.LA(1)<='?')||input.LA(1)=='_'||input.LA(1)=='{'||input.LA(1)=='}' ) {
+                input.consume();
+
+            }
+            else {
+                MismatchedSetException mse = new MismatchedSetException(null,input);
+                recover(mse);
+                throw mse;}
+
 
             }
 
@@ -706,14 +724,14 @@ public class CalculationsLexer extends Lexer {
     static final String DFA7_minS =
         "\1\50\14\uffff";
     static final String DFA7_maxS =
-        "\1\172\14\uffff";
+        "\1\136\14\uffff";
     static final String DFA7_acceptS =
         "\1\uffff\1\1\1\2\1\3\1\4\1\5\1\6\1\7\1\10\1\11\1\12\1\13\1\14";
     static final String DFA7_specialS =
         "\15\uffff}>";
     static final String[] DFA7_transitionS = {
-            "\1\1\1\2\1\5\1\3\1\7\1\4\1\10\1\6\12\12\7\uffff\32\13\3\uffff"+
-            "\1\11\2\uffff\32\13",
+            "\1\1\1\2\1\5\1\3\1\7\1\4\1\10\1\6\12\12\41\uffff\1\13\2\uffff"+
+            "\1\11",
             "",
             "",
             "",

@@ -42,7 +42,7 @@ function:	Variable OpenParen (expr (Comma expr)*)? CloseParen -> ^(FuncEval Vari
 
 Decimal	:	UInteger (Dot UInteger)? ('E' Integer)?;
 
-Variable:	Character (Character | Digit | SpecialChars | VariableWhitespace)*;
+Variable:	'[' (Character | Digit) (Character | Digit | SpecialChars | VariableWhitespace)* ']';
 
 // Last rule to make sure whitespace incorporated in earlier rules is counted.
 
@@ -64,7 +64,7 @@ fragment Whitespace
 		
 fragment LowerCase
 	:	'a'..'z';
-
+otepad
 fragment UpperCase
 	:	'A'..'Z';
 	
@@ -73,4 +73,4 @@ fragment Character
 	
 // List any special characters that should be part of variable names here.
 fragment SpecialChars
-	:	'_';
+	:	'_' | ':' | '<' | '>' | ',' | '.' | ';' | '/' | '?' | '"' | '\'' | '{' | '}' | '-' | '=' | '+';
