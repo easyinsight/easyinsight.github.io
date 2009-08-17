@@ -40,8 +40,8 @@ public class DataService {
     }
 
     public AnalysisItemResultMetadata getAnalysisItemMetadata(long feedID, AnalysisItem analysisItem, List<CredentialFulfillment> credentials, int utfOffset) {
+        SecurityUtil.authorizeFeedAccess(feedID);
         try {
-            SecurityUtil.authorizeFeedAccess(feedID);
             Feed feed = feedRegistry.getFeed(feedID);
             InsightRequestMetadata insightRequestMetadata = new InsightRequestMetadata();
             insightRequestMetadata.setUtcOffset(utfOffset);
@@ -285,6 +285,9 @@ public class DataService {
         try {
             long startTime = System.currentTimeMillis();
             Feed feed = feedRegistry.getFeed(analysisDefinition.getDataFeedID());
+            if (insightRequestMetadata == null) {
+                insightRequestMetadata = new InsightRequestMetadata();
+            }
             Set<CredentialRequirement> credentialsRequired = feed.getCredentialRequirement(insightRequestMetadata.isRefreshAllSources());
             if (credentialsRequired.size() > 0) {
                 int count = 0;
