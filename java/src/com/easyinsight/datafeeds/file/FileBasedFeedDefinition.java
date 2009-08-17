@@ -5,6 +5,7 @@ import com.easyinsight.datafeeds.FeedType;
 import com.easyinsight.userupload.UploadFormat;
 import com.easyinsight.userupload.ExcelUploadFormat;
 import com.easyinsight.userupload.FlatFileUploadFormat;
+import com.easyinsight.userupload.CsvFileUploadFormat;
 
 import java.sql.*;
 
@@ -53,7 +54,10 @@ public class FileBasedFeedDefinition extends FeedDefinition {
                 if (rs.wasNull()) {
                     escape = null;
                 }
-                uploadFormat = new FlatFileUploadFormat(pattern, escape);
+                if(!pattern.equals(","))
+                    uploadFormat = new FlatFileUploadFormat(pattern, escape);
+                else
+                    uploadFormat = new CsvFileUploadFormat();
             } else {
                 throw new RuntimeException("Could not match feed to an upload format");
             }
