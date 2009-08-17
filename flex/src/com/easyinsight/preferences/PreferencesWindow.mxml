@@ -1,0 +1,136 @@
+<?xml version="1.0" ?>
+<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml">
+    <mx:Script><![CDATA[
+        import com.easyinsight.framework.User;
+        import com.easyinsight.listing.DataFeedDescriptor;
+
+        import com.easyinsight.util.ProgressAlert;
+
+        import mx.collections.ArrayCollection;
+        import mx.managers.PopUpManager;
+
+        [Bindable]
+        [Embed(source="../../../../assets/headericons/house.png")]
+        private var homeIcon:Class;
+
+        [Bindable]
+        [Embed(source="../../../../assets/headericons/chart_area.png")]
+        private var myDataIcon:Class;
+
+        [Bindable]
+        [Embed(source="../../../../assets/headericons/shopping_bag.png")]
+        private var catalogIcon:Class;
+
+        [Bindable]
+        [Embed(source="../../../../assets/headericons/users2.png")]
+        private var groupsIcon:Class;
+
+        [Bindable]
+        [Embed(source="../../../../assets/headericons/components.png")]
+        private var solutionsIcon:Class;
+
+        [Bindable]
+        [Embed(source="../../../../assets/headericons/branch.png")]
+        private var goalsIcon:Class;
+
+        [Bindable]
+        [Embed(source="../../../../assets/headericons/user.png")]
+        private var accountIcon:Class;
+
+        [Bindable]
+        [Embed(source="../../../../assets/headericons/application_enterprise.png")]
+        private var apiIcon:Class;
+
+        [Bindable]
+        private var homeIconSelected:Boolean;
+
+        [Bindable]
+        private var myDataSelected:Boolean;
+
+        [Bindable]
+        private var marketplaceSelected:Boolean;
+
+        [Bindable]
+        private var groupsSelected:Boolean;
+
+        [Bindable]
+        private var solutionsSelected:Boolean;
+
+        [Bindable]
+        private var goalsSelected:Boolean;
+
+        [Bindable]
+        private var accountSelected:Boolean;
+
+        [Bindable]
+        private var apiSelected:Boolean;
+
+        private function gotDataSources():void {
+            var dataSources:ArrayCollection = feedService.searchForSubscribedFeeds.lastResult as ArrayCollection;
+            for each (var desc:DataFeedDescriptor in dataSources) {
+                User.getSharedObject().data[desc.dataFeedID.toString()] = null;
+            }
+            User.getSharedObject().flush();
+        }
+
+        private function clearCredentials():void {
+            if (User.getSharedObject() != null) {
+                ProgressAlert.alert(this, "Clearing saved credentials...", null, feedService.searchForSubscribedFeeds);
+                feedService.searchForSubscribedFeeds.send();
+            }
+        }
+        ]]></mx:Script>
+    <mx:RemoteObject destination="feeds" id="feedService">
+        <mx:method name="searchForSubscribedFeeds" result="gotDataSources()"/>
+    </mx:RemoteObject>
+    <mx:VBox paddingBottom="10" paddingLeft="10" paddingRight="10" paddingTop="10">
+        <mx:Button label="Clear All Saved Credentials" click="clearCredentials()"/>
+        <mx:HRule width="100%"/>
+        <!--<mx:HBox>
+            <mx:VBox horizontalAlign="center">
+                <mx:Image source="{homeIcon}" id="homeImage"/>
+                <mx:Label text="Intro" fontSize="12" fontFamily="Tahoma" fontWeight="bold" color="0x323232"/>
+                <mx:CheckBox id="introCheckbox" selected="{homeIconSelected}"/>
+            </mx:VBox>
+            <mx:VBox horizontalAlign="center">
+                <mx:Image source="{myDataIcon}" id="myDataImage"/>
+                <mx:Label text="My Data" fontSize="12" fontFamily="Tahoma" fontWeight="bold" color="0x323232"/>
+                <mx:CheckBox id="myDataCheckbox" selected="{myDataSelected}"/>
+            </mx:VBox>
+            <mx:VBox horizontalAlign="center">
+                <mx:Image source="{catalogIcon}" id="catalogImage"/>
+                <mx:Label text="Marketplace" fontSize="12" fontFamily="Tahoma" fontWeight="bold" color="0x323232"/>
+                <mx:CheckBox id="marketplaceCheckbox" selected="{marketplaceSelected}"/>
+            </mx:VBox>
+            <mx:VBox horizontalAlign="center">
+                <mx:Image source="{groupsIcon}" id="groupsImage"/>
+                <mx:Label text="Groups" fontSize="12" fontFamily="Tahoma" fontWeight="bold" color="0x323232"/>
+                <mx:CheckBox id="groupCheckbox" selected="{groupsSelected}"/>
+            </mx:VBox>
+            <mx:VBox horizontalAlign="center">
+                <mx:Image source="{solutionsIcon}" id="solutionsImage"/>
+                <mx:Label text="Solutions" fontSize="12" fontFamily="Tahoma" fontWeight="bold" color="0x323232"/>
+                <mx:CheckBox id="solutionsCheckbox" selected="{solutionsSelected}"/>
+            </mx:VBox>
+            <mx:VBox horizontalAlign="center">
+                <mx:Image source="{goalsIcon}" id="goalsImage"/>
+                <mx:Label text="KPIs" fontSize="12" fontFamily="Tahoma" fontWeight="bold" color="0x323232"/>
+                <mx:CheckBox id="kpisCheckbox" selected="{goalsSelected}"/>
+            </mx:VBox>
+            <mx:VBox horizontalAlign="center">
+                <mx:Image source="{apiIcon}" id="apiImage"/>
+                <mx:Label text="API" fontSize="12" fontFamily="Tahoma" fontWeight="bold" color="0x323232"/>
+                <mx:CheckBox id="apiCheckbox" selected="{apiSelected}"/>
+            </mx:VBox>
+            <mx:VBox horizontalAlign="center">
+                <mx:Image source="{accountIcon}" id="accountImage"/>
+                <mx:Label text="Account" fontSize="12" fontFamily="Tahoma" fontWeight="bold" color="0x323232"/>
+                <mx:CheckBox id="accountCheckbox" selected="{accountSelected}"/>
+            </mx:VBox>
+        </mx:HBox>
+        <mx:HRule width="100%"/>-->
+        <mx:HBox width="100%" horizontalAlign="center">
+            <mx:Button label="Close" click="PopUpManager.removePopUp(this)"/>
+        </mx:HBox>
+    </mx:VBox>
+</mx:TitleWindow>

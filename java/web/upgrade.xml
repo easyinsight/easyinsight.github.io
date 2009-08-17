@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <update xmlns="http://ns.adobe.com/air/framework/update/description/1.0">
-    <version>0.2</version>
+    <version>1.0</version>
     <url>https://www.easy-insight.com/app/assets/EIAirWidget.air</url>
     <description><![CDATA[Bug fixes]]></description>
 </update>

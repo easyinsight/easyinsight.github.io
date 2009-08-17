@@ -32,10 +32,6 @@ public class WebCredentialsCache extends EventDispatcher implements ICredentials
         return creds;
     }
 
-    public function requireCredentials(credentials:ArrayCollection):void {
-        
-    }
-
     public function obtainCredentials(displayObject:DisplayObject, credentials:ArrayCollection, successFunction:Function,
             ... callbackParams):void {
         var credentialRequirementState:CredentialRequirementState = new CredentialRequirementState(displayObject, credentials,

@@ -14,13 +14,23 @@
         import com.easyinsight.framework.LoginEvent;
         import com.easyinsight.framework.User;
         import com.easyinsight.goals.MyGoals;
-        import com.easyinsight.listing.ReportBugEvent;
+        import com.easyinsight.preferences.PreferencesWindow;
         import com.easyinsight.solutions.RevisedSolutionSummary;
         import com.easyinsight.groups.GroupsSummary;
         import com.easyinsight.account.AccountBasePage;
         import com.easyinsight.customupload.api.APIPage;
         import com.easyinsight.genredata.GenreDataProvider;
         import com.easyinsight.intro.IntroPanel;
+
+        import com.easyinsight.util.PopUpUtil;
+
+        import mx.managers.PopUpManager;
+
+        private function showPreferences():void {
+            var window:PreferencesWindow = new PreferencesWindow();
+            PopUpManager.addPopUp(window, this, true);
+            PopUpUtil.centerPopUp(window);
+        }
 
         private function setup():void {
             User.getEventNotifier().addEventListener(LoginEvent.LOGIN, loginEvent);
@@ -34,6 +44,10 @@
         [Bindable]
         [Embed(source="../../../../assets/find.png")]
         private var findIcon:Class;
+
+        [Bindable]
+        [Embed(source="../../../../assets/preferences.png")]
+        private var preferencesIcon:Class;
 
         [Bindable]
         [Embed(source="../../../../assets/headericons/house.png")]
@@ -140,6 +154,8 @@
     </listing:ListingOption>
 
     <mx:Spacer width="100%"/>
+
+    <mx:Button icon="{preferencesIcon}" click="showPreferences()" toolTip="Preferences" visible="{loggedIn}" />
 
     <mx:Button icon="{bugIcon}" click="dispatchEvent(new ReportBugEvent())" toolTip="Report Bug" visible="{loggedIn}" />
 

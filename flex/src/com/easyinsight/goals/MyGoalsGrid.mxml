@@ -1,6 +1,6 @@
 <?xml version="1.0" ?>
 <mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" doubleClickEnabled="true"
-        implements="com.easyinsight.util.IAsyncScreen">
+        implements="com.easyinsight.util.IAsyncScreen" creationComplete="setup()">
     <mx:Metadata>
         [Event(name="goalDetailNav", type="com.easyinsight.goals.GoalDetailEvent")]
     </mx:Metadata>
@@ -18,6 +18,13 @@
         [Bindable]
         private var rowCount:int;
 
+        private var _inAir:Boolean;
+
+
+        public function set inAir(value:Boolean):void {
+            _inAir = value;
+        }
+
         public function gotFocus():void {
             goalService.getGoals.send();
         }
@@ -27,7 +34,10 @@
         }
 
         private function setup():void {
-            addEventListener(GoalSubscriptionEvent.GOAL_REMOVE, onRemove);            
+            addEventListener(GoalSubscriptionEvent.GOAL_REMOVE, onRemove);
+            if (_inAir) {
+                gotFocus();
+            }
         }
 
         private function onTimer(event:TimerEvent):void {

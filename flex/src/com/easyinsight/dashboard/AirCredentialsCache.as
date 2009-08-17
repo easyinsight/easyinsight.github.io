@@ -1,8 +1,10 @@
 package com.easyinsight.dashboard {
 import com.easyinsight.analysis.CredentialFulfillment;
+import com.easyinsight.framework.CredentialRequirementState;
 import com.easyinsight.framework.Credentials;
 import com.easyinsight.framework.ICredentialsCache;
 
+import flash.display.DisplayObject;
 import flash.utils.ByteArray;
 
 import flash.data.EncryptedLocalStore;
@@ -75,6 +77,13 @@ public class AirCredentialsCache implements ICredentialsCache {
             }
         }
         return credentialsCollection;
+    }
+
+    public function obtainCredentials(displayObject:DisplayObject, credentials:ArrayCollection, successFunction:Function,
+            ... callbackParams):void {
+        var credentialRequirementState:CredentialRequirementState = new CredentialRequirementState(displayObject, credentials,
+                successFunction, callbackParams);
+        credentialRequirementState.act();
     }
 }
 }

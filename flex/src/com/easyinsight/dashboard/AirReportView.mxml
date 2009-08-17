@@ -114,6 +114,7 @@
         }
 
         private function about(event:Event):void {
+            
         }
 
         override protected function createChildren():void {
@@ -155,6 +156,13 @@
             helpMenu.addItem(aboutItem);
             baseMenu.addSubmenu(helpMenu, "Help");
             feedService.getDescriptors.send();
+            var logoutItem:NativeMenuItem = new NativeMenuItem("Log Out");
+            helpMenu.addItem(logoutItem);
+            logoutItem.addEventListener(Event.SELECT, logout);
+        }
+
+        private function logout():void {
+            dispatchEvent(new AirLogoutEvent());
         }
 
         private function onReport(event:Event):void {

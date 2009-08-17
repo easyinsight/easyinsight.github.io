@@ -53,7 +53,9 @@ public class AirScreenFactory implements IAsyncScreenFactory{
             goalView.addEventListener(AnalyzeEvent.ANALYZE, onAnalyze);
             return goalView;
         } else if (descriptor.getType() == EIDescriptor.MY_GOALS) {
-            return new MyGoalsGrid();
+            var grid:MyGoalsGrid = new MyGoalsGrid();
+            grid.inAir = true;
+            return grid;
         } else if (descriptor.getType() == EIDescriptor.AIR_INTRO) {
             return new DefaultAirScreen();
         } else {
