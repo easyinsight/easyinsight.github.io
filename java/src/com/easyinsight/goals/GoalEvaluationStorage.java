@@ -20,7 +20,7 @@ public class GoalEvaluationStorage {
 
     public void saveGoalEvaluation(long goalTreeNodeID, Double newValue, Double oldValue, Date evaluationDate, int outcomeValue,
                                    int direction, boolean problemEvaluated, Connection conn) throws SQLException {
-        if (Double.isNaN(newValue) || Double.isInfinite(newValue)) {
+        if (newValue != null && (Double.isNaN(newValue) || Double.isInfinite(newValue))) {
             newValue = null;
         }
 
