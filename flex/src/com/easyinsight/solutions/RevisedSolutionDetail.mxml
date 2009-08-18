@@ -342,7 +342,8 @@
                 }
             }
             if (immediate) {
-                Alert.show("The solution has been installed. Any data sources and/or reports associated to this solution will now be available to you under the My Data page.");
+                postInstall();
+                //Alert.show("The solution has been installed. Any data sources and/or reports associated to this solution will now be available to you under the My Data page.");
             }
             dispatchEvent(new SolutionEvent(SolutionEvent.SOLUTION_INSTALLED, _solution.solutionID));
         }
@@ -398,7 +399,7 @@
             <mx:TextArea height="100%" width="100%" backgroundAlpha="0" borderStyle="none" selectable="false"
                          htmlText="{solutionDescription}" borderThickness="0" editable="false"/>            
             <mx:TextArea width="100%" backgroundAlpha="0" borderStyle="none" selectable="false"
-                         htmlText="{footerText}" borderThickness="0" editable="false" maxHeight="80"/>
+                         htmlText="{footerText}" borderThickness="0" editable="false" maxHeight="100" verticalScrollPolicy="off"/>
         </mx:VBox>
     </mx:HBox>
 </mx:Box>

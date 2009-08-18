@@ -44,6 +44,8 @@
         import com.easyinsight.filtering.TransformContainer;
         import com.easyinsight.framework.CredentialsCache;
 
+        import com.easyinsight.util.ProgressAlert;
+
         import mx.charts.LinearAxis;
         import mx.charts.chartClasses.IAxis;
         import mx.charts.chartClasses.Series;
@@ -163,6 +165,7 @@
         }
 
         private function generateHistory():void {
+            ProgressAlert.alert(this, "Generating goal history...", null, goalService.generateHistory);
             goalService.generateHistory.send(analysisMeasure, _transformContainer.getFilterDefinitions(),
                     feedID, startChooser.selectedDate, endChooser.selectedDate, CredentialsCache.getCache().createCredentials());
         }

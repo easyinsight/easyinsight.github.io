@@ -9,7 +9,7 @@
         private var keyDimension:AnalysisDimension;
 
         [Bindable]
-        private var group:Boolean;
+        private var group:Boolean = true;
 
         override public function createAnalysisItem(aggregation:String):AnalysisItem {
             return new AnalysisDimension();

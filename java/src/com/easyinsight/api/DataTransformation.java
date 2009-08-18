@@ -67,11 +67,14 @@ public class DataTransformation {
                 if (type == null) {
                     throw new RuntimeException("Unrecognized field " + numberPair.getKey() + " passed as a NumberPair.");
                 }
-                if (type != Value.NUMBER) {
+                if (type == Value.STRING) {
+                    transformedRow.addValue(numberPair.getKey(), new StringValue(String.valueOf(numberPair.getValue())));
+                } else if (type == Value.DATE) {
                     throw new RuntimeException("Field " + numberPair.getKey() + " was passed as a NumberPair value when Easy Insight was expecting a " +
-                        (type == Value.DATE ? "DatePair." : "StringPair."));
+                        ("DatePair."));
+                } else {
+                    transformedRow.addValue(numberPair.getKey(), new NumericValue(numberPair.getValue()));
                 }
-                transformedRow.addValue(numberPair.getKey(), new NumericValue(numberPair.getValue()));
             }
         }
         DatePair[] datePairs = row.getDatePairs();

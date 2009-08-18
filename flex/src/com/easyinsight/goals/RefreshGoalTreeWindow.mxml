@@ -28,6 +28,7 @@
         private function gotCredentials():void {
             var credentials:ArrayCollection = goalService.getCredentialsForGoalTree.lastResult as ArrayCollection;
             if (credentials.length == 0) {
+                ProgressAlert.alert(this, "Refreshing the goal tree...", null, goalService.forceRefresh);
                 goalService.forceRefresh.send(_goalTreeID, CredentialsCache.getCache().createCredentials(), allDataSourcesCheckbox.selected,
                         subTreesCheckbox.selected);
             } else {
