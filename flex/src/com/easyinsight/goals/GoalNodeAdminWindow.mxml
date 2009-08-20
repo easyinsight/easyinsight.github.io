@@ -77,11 +77,6 @@
         [Bindable]
         private var targetDefined:Boolean;
 
-        [Bindable]
-        private var iconPath:String;
-
-        private var iconFile:String;
-
         private var newSolutions:ArrayCollection = new ArrayCollection();
 
         private var newChildren:ArrayCollection = new ArrayCollection();
@@ -138,11 +133,7 @@
         }
 
         public function set goalTreeNode(goalTreeNode:GoalTreeNode):void {
-            this._goalTreeNode = goalTreeNode;
-            if (goalTreeNode.iconImage != null && "" != goalTreeNode.iconImage) {
-                this.iconPath = "/app/assets/icons/32x32/" + goalTreeNode.iconImage;
-                this.iconFile = goalTreeNode.iconImage;
-            }
+            this._goalTreeNode = goalTreeNode;            
             associatedDataSources = goalTreeNode.associatedFeeds;
             associatedReports = goalTreeNode.associatedInsights;
             this.feedID = goalTreeNode.coreFeedID;
@@ -184,7 +175,7 @@
         }
 
         private function save():void {
-            _goalTreeNode.iconImage = this.iconFile;
+
             if (insightBound) {
                 _goalTreeNode.coreFeedID = feedID;
                 _goalTreeNode.coreFeedName = feedName;
