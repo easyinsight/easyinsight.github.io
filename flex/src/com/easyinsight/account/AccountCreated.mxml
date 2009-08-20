@@ -7,6 +7,7 @@
         import com.easyinsight.framework.NavigationEvent;
         import com.easyinsight.help.ScreencastWindow;
 
+        import com.easyinsight.tour.TourWindow;
         import com.easyinsight.util.PopUpUtil;
 
         import mx.collections.ArrayCollection;
@@ -69,10 +70,9 @@
         }
 
         private function lesson1():void {
-            var window:ScreencastWindow = new ScreencastWindow();
-            window.screencastSource = "../assets/lesson1/training.mp4";
-            PopUpManager.addPopUp(window, this);
-            PopUpUtil.centerPopUp(window);
+            var tourWindow:TourWindow = new TourWindow();
+            PopUpManager.addPopUp(tourWindow, this);
+            PopUpUtil.centerPopUp(tourWindow);
         }
 
         private function apilesson():void {

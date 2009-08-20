@@ -4,7 +4,7 @@
                 creationComplete="startWorkspace()" xmlns:local="*" applicationComplete="applicationListeners()"
                 xmlns:listing="com.easyinsight.listing.*" xmlns:intro1="com.easyinsight.intro.*"
                 xmlns:notification="com.easyinsight.notifications.*"
-                historyManagementEnabled="false" paddingTop="0" top="0" borderThickness="0" left="0" paddingLeft="0"
+                paddingTop="0" top="0" borderThickness="0" left="0" paddingLeft="0"
                 right="0" paddingRight="0"
                 bottom="0" paddingBottom="0" preloader="com.easyinsight.preloader.EIProgressBar">
     <mx:states>
@@ -142,6 +142,7 @@
             new CommandProcessor();
             addEventListener(FaultEvent.FAULT, onFault, true);
             User.getEventNotifier().addEventListener(NavigationEvent.NAVIGATION, navigation);
+            ProgressAlert.alert(this, "Taking care of initial setup...", null, userService.isSessionLoggedIn);
             userService.isSessionLoggedIn.send();
             EIMessageListener.initialize();
             messageListener = EIMessageListener.instance();
@@ -228,7 +229,7 @@
             }
         }
 
-        private function parseURL(event:Event):void {
+        private function parseURL(event:Event):void {            
             var o:Object = URLUtil.stringToObject(browserManager.fragment, "&");
             parseFragmentObject(o);
         }
@@ -496,7 +497,7 @@
                 User.getEventNotifier().addEventListener(LoginEvent.LOGIN, onLogin);
             }
             browserManager = BrowserManager.getInstance();
-            browserManager.addEventListener(BrowserChangeEvent.BROWSER_URL_CHANGE, parseURL);
+            browserManager.addEventListener(BrowserChangeEvent.BROWSER_URL_CHANGE, parseURL);           
             browserManager.init("", "Intro");
         }
 

@@ -2,7 +2,6 @@
 <mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" showCloseButton="true" close="videoViewer.stop(); PopUpManager.removePopUp(this)">
 	<mx:Script>
 		<![CDATA[
-        import mx.controls.SWFLoader;
         import mx.managers.PopUpManager;
 
         [Bindable]

@@ -76,6 +76,8 @@
             apiEnabled = accountAPISettings.apiEnabled;            
             accountAPIKey = accountAPISettings.accountKey;
             accountAPISecretKey = accountAPISettings.accountSecretKey;
+            userAPIKey = accountAPISettings.userKey;
+            userAPISecretKey = accountAPISettings.userSecretKey;
         }
 
         private function copyKeyToClipboard():void {
@@ -115,13 +117,13 @@
             <mx:Label text="The keys below are your personal credentials for publishing data into Easy Insight through the API."/>
             <mx:Form paddingBottom="0" paddingLeft="0" paddingRight="0" paddingTop="0">                
                 <mx:FormItem label="API Key: " direction="horizontal" enabled="{apiEnabled}">
-                    <mx:Text text="{accountAPIKey}"/>
+                    <mx:Text text="{userAPIKey}"/>
                     <mx:Button label="Copy to Clipboard" click="copyKeyToClipboard()"/>
                 </mx:FormItem>
                 <mx:FormItem label="API Secret Key: " direction="horizontal" enabled="{apiEnabled}">
                     <mx:Button label="Regenerate Secret Key" click="adminService.regenerateUserSecretKey.send()"/>
                     <mx:Button label="{secretKeyButton}" click="showSecretUserKey()"/>
-                    <mx:Text text="{accountAPISecretKey}" visible="{showingSecretUserKey}"/>
+                    <mx:Text text="{userAPISecretKey}" visible="{showingSecretUserKey}"/>
                     <mx:Button label="Copy to Clipboard" click="copySecretKeyToClipboard()" visible="{showingSecretUserKey}"/>
                 </mx:FormItem>
             </mx:Form>

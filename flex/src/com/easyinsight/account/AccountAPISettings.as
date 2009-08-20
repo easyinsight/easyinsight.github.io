@@ -6,6 +6,8 @@ public class AccountAPISettings {
     public var accountKey:String;
     public var accountSecretKey:String;
     public var apiEnabled:Boolean;
+    public var userKey:String;
+    public var userSecretKey:String;
 
     public function AccountAPISettings() {
     }
