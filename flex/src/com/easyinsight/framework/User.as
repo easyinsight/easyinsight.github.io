@@ -1,12 +1,9 @@
 package com.easyinsight.framework
 {
-	import com.easyinsight.store.Merchant;
+
 
 import flash.net.SharedObject;
 
-import mx.collections.ArrayCollection;
-import mx.rpc.events.ResultEvent;
-	import mx.rpc.remoting.RemoteObject;
 	
 	
 	public class User
@@ -22,8 +19,6 @@ import mx.rpc.events.ResultEvent;
 		public var password:String;
 		public var userName:String;
         public var accountAdmin:Boolean;
-        //public var dataSourceCreator:Boolean;
-        //public var insightCreator:Boolean;
         public var userID:int;
         public var activated:Boolean;
 
@@ -37,8 +32,6 @@ import mx.rpc.events.ResultEvent;
 			_user.name = name;
 			_user.email = email;
             _user.accountAdmin = accountAdmin;
-            //_user.dataSourceCreator = dataSourceCreator;
-            //_user.insightCreator = insightCreator;
 			_user.spaceAllowed = spaceAllowed;
 			_user.accountType = accountType;
             _user.userID = userID;
@@ -48,11 +41,6 @@ import mx.rpc.events.ResultEvent;
             } catch (e:Error) {
 
             }
-
-			/*_user.storeService = new RemoteObject();
-			_user.storeService.destination = "store";
-			_user.storeService.getMerchants.addEventListener(ResultEvent.RESULT, _user.gotMerchants);
-			_user.storeService.getMerchants.send();*/
 		}
 
         public function updateLabels(userName:String, fullName:String, email:String):void {
@@ -112,7 +100,7 @@ import mx.rpc.events.ResultEvent;
                 c.encrypted = true;
                 return c;
             }
-            return null;
+            return CredentialsCache.getCache().getCredentials(dataSourceID);            
         }
 
         static public function saveCredentials(dataSourceID:int, c:Credentials):void {

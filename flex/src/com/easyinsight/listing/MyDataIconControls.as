@@ -129,7 +129,7 @@ public class MyDataIconControls extends HBox
     }
 
     private function refreshData(feedDescriptor:DataFeedDescriptor):void {
-        if (feedDescriptor.hasSavedCredentials) {
+        /*if (feedDescriptor.hasSavedCredentials) {
             userUploadSource = new RemoteObject();
             userUploadSource.destination = "userUpload";
             userUploadSource.refreshData.addEventListener(ResultEvent.RESULT, completedRefresh);
@@ -138,7 +138,8 @@ public class MyDataIconControls extends HBox
             dispatchEvent(new RefreshNotificationEvent());
             return;
         }
-        else if (User.getCredentials(feedDescriptor.dataFeedID) != null) {
+        else */
+        if (User.getCredentials(feedDescriptor.dataFeedID) != null) {
             userUploadSource = new RemoteObject();
             userUploadSource.destination = "userUpload";
             userUploadSource.refreshData.addEventListener(ResultEvent.RESULT, completedRefresh);
