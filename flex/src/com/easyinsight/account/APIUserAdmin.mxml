@@ -88,6 +88,14 @@
             System.setClipboard(accountAPISecretKey);
         }
 
+        private function copyUserKeyToClipboard():void {
+            System.setClipboard(userAPIKey);
+        }
+
+        private function copyUserSecretKeyToClipboard():void {
+            System.setClipboard(userAPISecretKey);
+        }
+
         private function save():void {
             var accountSettings:AccountSettings = new AccountSettings();
             accountSettings.apiEnabled = apiEnabledAccount.selected;
@@ -118,13 +126,13 @@
             <mx:Form paddingBottom="0" paddingLeft="0" paddingRight="0" paddingTop="0">                
                 <mx:FormItem label="API Key: " direction="horizontal" enabled="{apiEnabled}">
                     <mx:Text text="{userAPIKey}"/>
-                    <mx:Button label="Copy to Clipboard" click="copyKeyToClipboard()"/>
+                    <mx:Button label="Copy to Clipboard" click="copyUserKeyToClipboard()"/>
                 </mx:FormItem>
                 <mx:FormItem label="API Secret Key: " direction="horizontal" enabled="{apiEnabled}">
                     <mx:Button label="Regenerate Secret Key" click="adminService.regenerateUserSecretKey.send()"/>
                     <mx:Button label="{secretKeyButton}" click="showSecretUserKey()"/>
                     <mx:Text text="{userAPISecretKey}" visible="{showingSecretUserKey}"/>
-                    <mx:Button label="Copy to Clipboard" click="copySecretKeyToClipboard()" visible="{showingSecretUserKey}"/>
+                    <mx:Button label="Copy to Clipboard" click="copyUserSecretKeyToClipboard()" visible="{showingSecretUserKey}"/>
                 </mx:FormItem>
             </mx:Form>
             <mx:HRule width="100%"/>

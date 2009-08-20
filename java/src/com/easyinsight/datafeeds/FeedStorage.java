@@ -214,7 +214,8 @@ public class FeedStorage {
     }
 
     private void savePolicy(Connection conn, long feedID, UploadPolicy uploadPolicy) throws SQLException {
-        Session s = Database.instance().createSession(conn);
+        // tODO: restore, but as it stands, breaks a lot of stuff
+        /*Session s = Database.instance().createSession(conn);
         try {
             Account a = (Account) s.createQuery("from Account where accountID = ?").setLong(0, SecurityUtil.getAccountID()).list().get(0);
             s.flush();
@@ -223,7 +224,7 @@ public class FeedStorage {
         }
         finally {
             s.close();
-        }
+        }*/
         
         PreparedStatement clearExistingStmt = conn.prepareStatement("DELETE FROM UPLOAD_POLICY_USERS WHERE FEED_ID = ?");
         clearExistingStmt.setLong(1, feedID);
