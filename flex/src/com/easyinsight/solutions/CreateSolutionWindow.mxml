@@ -226,6 +226,7 @@
                                 <mx:String>Client</mx:String>
                                 <mx:String>Learning</mx:String>
                                 <mx:String>Business</mx:String>
+                                <mx:String>Hidden</mx:String>
                             </mx:Array>
                         </mx:ArrayCollection>
                     </mx:dataProvider>
