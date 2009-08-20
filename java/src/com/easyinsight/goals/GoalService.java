@@ -263,26 +263,21 @@ public class GoalService {
     public GoalTree forceRefresh(long goalTreeID, List<CredentialFulfillment> credentialsList, boolean allSources, boolean includeSubTrees) {
         SecurityUtil.authorizeGoalTree(goalTreeID, Roles.SUBSCRIBER);
         try {
-            try {
-                if (allSources) {
-                    Set<Long> dataSourceIDs = GoalUtil.getDataSourceIDs(goalTreeID, includeSubTrees);
-                    for (Long dataSourceID : dataSourceIDs) {
-                        FeedDefinition feedDefinition = new FeedStorage().getFeedDefinitionData(dataSourceID);
-                        if (feedDefinition.getCredentialsDefinition() == CredentialsDefinition.STANDARD_USERNAME_PW) {
-                            IServerDataSourceDefinition dataSource = (IServerDataSourceDefinition) feedDefinition;
-                            Credentials credentials = null;
-                            for (CredentialFulfillment fulfillment : credentialsList) {
-                                if (fulfillment.getDataSourceID() == feedDefinition.getDataFeedID()) {
-                                    credentials = fulfillment.getCredentials();
-                                }
+            if (allSources) {
+                Set<Long> dataSourceIDs = GoalUtil.getDataSourceIDs(goalTreeID, includeSubTrees);
+                for (Long dataSourceID : dataSourceIDs) {
+                    FeedDefinition feedDefinition = new FeedStorage().getFeedDefinitionData(dataSourceID);
+                    if (feedDefinition.getCredentialsDefinition() == CredentialsDefinition.STANDARD_USERNAME_PW) {
+                        IServerDataSourceDefinition dataSource = (IServerDataSourceDefinition) feedDefinition;
+                        Credentials credentials = null;
+                        for (CredentialFulfillment fulfillment : credentialsList) {
+                            if (fulfillment.getDataSourceID() == feedDefinition.getDataFeedID()) {
+                                credentials = fulfillment.getCredentials();
                             }
-                            dataSource.refreshData(credentials, SecurityUtil.getAccountID(), new Date(), null);
                         }
+                        dataSource.refreshData(credentials, SecurityUtil.getAccountID(), new Date(), null);
                     }
                 }
-            } catch (Exception e) {
-                LogClass.error(e);
-                throw new RuntimeException(e);
             }
             EIConnection conn = Database.instance().getConnection();
             try {
@@ -291,7 +286,6 @@ public class GoalService {
                 goalEvaluationStorage.forceEvaluate(goalTree, conn, credentialsList, includeSubTrees);
                 conn.commit();
             } catch (Exception e) {
-                LogClass.error(e);
                 conn.rollback();
                 throw new RuntimeException(e);
             } finally {
@@ -299,7 +293,7 @@ public class GoalService {
                 Database.closeConnection(conn);
             }
             return createDataTree(goalTreeID);
-        } catch (RuntimeException e) {
+        } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);
         }
