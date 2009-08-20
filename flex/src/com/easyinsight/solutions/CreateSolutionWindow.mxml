@@ -212,6 +212,7 @@
                                 <mx:String>Group</mx:String>
                                 <mx:String>Professional</mx:String>
                                 <mx:String>Enterprise</mx:String>
+                                <mx:String>Admin (Hidden)</mx:String>
                             </mx:Array>
                         </mx:ArrayCollection>
                     </mx:dataProvider>
