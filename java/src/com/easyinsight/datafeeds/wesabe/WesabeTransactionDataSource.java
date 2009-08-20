@@ -72,10 +72,8 @@ public class WesabeTransactionDataSource extends WesabeBaseSource {
                     if ("account-id".equals(transactionChildNode.getNodeName())) {
                         row.addValue(keys.get(ACCOUNT_ID), new StringValue(transactionChildNode.getTextContent()));
                     } else if ("date".equals(transactionChildNode.getNodeName())) {
-                        System.out.println("date = " + transactionChildNode.getTextContent());
                         row.addValue(keys.get(DATE), new StringValue(transactionChildNode.getTextContent()));
                     } else if ("amount".equals(transactionChildNode.getNodeName())) {
-                        System.out.println("amount = " + transactionChildNode.getTextContent());
                         row.addValue(keys.get(AMOUNT), new NumericValue(Double.parseDouble(transactionChildNode.getTextContent())));
                     } else if ("merchant".equals(transactionChildNode.getNodeName())) {
                         NodeList merchantChildren = transactionChildNode.getChildNodes();
@@ -86,7 +84,6 @@ public class WesabeTransactionDataSource extends WesabeBaseSource {
                             }
                         }
                     } else if ("tags".equals(transactionChildNode.getNodeName())) {
-                        System.out.println("tags = " + transactionChildNode.getTextContent());
                         NodeList tagChildren = transactionChildNode.getChildNodes();
                         StringBuilder stringBuilder = new StringBuilder();
                         for (int k = 0; k < tagChildren.getLength(); k++) {
