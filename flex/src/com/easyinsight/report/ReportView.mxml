@@ -174,7 +174,7 @@
         [Embed(source="../../../../assets/window_earth.png")]
         private var browserIcon:Class;
         [Bindable]
-        [Embed(source="../../../../assets/logo2.png")]
+        [Embed(source="../../../../assets/logo2.PNG")]
         private var logo:Class;
 
         [Bindable]
