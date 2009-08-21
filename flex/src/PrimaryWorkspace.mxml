@@ -330,7 +330,10 @@
                                                             case "groupDetail":
                                                                 break;
                                                             case "intro":
-                                                                navigation(new NavigationEvent("Intro"));
+                                                                    if(o.type != null && o.type == "tour")
+                                                                        navigation(new NavigationEvent("Intro", null, { tour: true }));
+                                                                    else
+                                                                        navigation(new NavigationEvent("Intro"));
                                                                 break;
                                                             case "solutions":
                                                                 if(o.type != null && o.type == "business")

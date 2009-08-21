@@ -45,6 +45,18 @@
         [Embed(source="../../../../assets/media_play.png")]
         private var pointerIcon:Class;
 
+        private var _tour:Boolean;
+
+        public function get tour():Boolean {
+            return _tour;
+        }
+
+        public function set tour(value:Boolean):void {
+            _tour = value;
+            if(_tour)
+                lesson1();
+        }
+
         private function toMarketplace():void {
             dispatchEvent(new NavigationEvent("Marketplace"));
         }
