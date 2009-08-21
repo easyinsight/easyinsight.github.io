@@ -15,6 +15,8 @@ tokens
 	Comma = ',';
 	Dot = '.';
 	Exp = '^';
+	OpenBrace = '[';
+	CloseBrace = ']';
 }
 
 @header { package com.easyinsight.calculations.generated; }
@@ -42,12 +44,12 @@ function:	Variable OpenParen (expr (Comma expr)*)? CloseParen -> ^(FuncEval Vari
 
 Decimal	:	UInteger (Dot UInteger)? ('E' Integer)?;
 
-Variable:	'[' (Character | Digit) (Character | Digit | SpecialChars | VariableWhitespace)* ']';
+Variable:	BracketedVariable | NoBracketsVariable;
 
 // Last rule to make sure whitespace incorporated in earlier rules is counted.
 
 HideWhiteSpace
-	:	Whitespace* {  $channel = HIDDEN; };
+	:	Whitespace+ {  $channel = HIDDEN; };
 
 fragment Integer :	(Add | Subtract)? UInteger;
 	
@@ -64,13 +66,22 @@ fragment Whitespace
 		
 fragment LowerCase
 	:	'a'..'z';
-otepad
 fragment UpperCase
 	:	'A'..'Z';
 	
 fragment Character
 	:	LowerCase | UpperCase;
 	
+fragment BracketedVariable
+	:	OpenBrace (Character | Digit) (Character | Digit | SpecialChars | VariableWhitespace)* CloseBrace;
+
+fragment NoBracketsVariable
+	:	(Character | Digit) (Character | Digit | VariableWhitespace)*;
+	
 // List any special characters that should be part of variable names here.
+fragment NoBracketSpecialChars
+	:	'_';
+	
 fragment SpecialChars
-	:	'_' | ':' | '<' | '>' | ',' | '.' | ';' | '/' | '?' | '"' | '\'' | '{' | '}' | '-' | '=' | '+';
+	:	NoBracketSpecialChars | ':' | '<' | '>' | ',' | '.' | ';' | '/' | '?' | '"' | '\'' | '{' | '}' | '-' | '=' | '+';
+	

@@ -61,14 +61,14 @@ public class AnalysisCalculation extends AnalysisMeasure {
         Resolver resolver = new Resolver(allItems);
         CalculationTreeNode tree;
         ICalculationTreeVisitor visitor;
-        CalculationsParser.expr_return ret;
+        CalculationsParser.startExpr_return ret;
         CalculationsLexer lexer = new CalculationsLexer(new ANTLRStringStream(calculationString));
         CommonTokenStream tokes = new CommonTokenStream();
         tokes.setTokenSource(lexer);
         CalculationsParser parser = new CalculationsParser(tokes);
         parser.setTreeAdaptor(new NodeFactory());
         try {
-            ret = parser.expr();
+            ret = parser.startExpr();
             tree = (CalculationTreeNode) ret.getTree();
             visitor = new ResolverVisitor(resolver, new FunctionFactory());
             tree.accept(visitor);

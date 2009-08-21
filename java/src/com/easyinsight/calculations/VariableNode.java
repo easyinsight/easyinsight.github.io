@@ -15,7 +15,8 @@ public class VariableNode extends CalculationTreeNode {
     
     public void resolveVariableKey(Resolver r) {
         String s = getText().trim();
-        s = s.substring(1, s.length() - 1);
+        if(s.startsWith("[") && s.endsWith("]"))
+            s = s.substring(1, s.length() - 1);
         variableKey = r.getKey(s);
     }
 

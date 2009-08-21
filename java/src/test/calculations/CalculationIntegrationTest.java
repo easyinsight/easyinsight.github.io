@@ -111,7 +111,7 @@ public class CalculationIntegrationTest extends TestCase {
         // The data set provided at this point has three numeric variables--Revenue, Cost Number, and Units.
         // TODO: use this resolver to populate your object tree with Keys for each variable
         // TODO: our target calculation will be ((Revenue + 100) - (Cost Number)) / Units * 12
-        CalculationTreeNode tree = evalString("((Revenue + 100) - (Cost Number)) / Units * 12 + Units * Revenue", resolver);
+        CalculationTreeNode tree = evalString("((Revenue + 100) - ([Cost Number])) / [Units] * 12 + [Units] * [Revenue]", resolver);
 
         VariableListVisitor visitor = new VariableListVisitor();
         tree.accept(visitor);
@@ -122,14 +122,14 @@ public class CalculationIntegrationTest extends TestCase {
     private CalculationTreeNode evalString(String s, Resolver r) {
         CalculationTreeNode c = null;
         ICalculationTreeVisitor visitor = new EvaluationVisitor();
-        CalculationsParser.expr_return ret;
+        CalculationsParser.startExpr_return ret;
         CalculationsLexer lexer = new CalculationsLexer(new ANTLRStringStream(s));
         CommonTokenStream tokes = new CommonTokenStream();
         tokes.setTokenSource(lexer);
         CalculationsParser parser = new CalculationsParser(tokes);
         parser.setTreeAdaptor(new NodeFactory());
         try {
-            ret = parser.expr();
+            ret = parser.startExpr();
             c = (CalculationTreeNode) ret.getTree();
             visitor = new ResolverVisitor(r, new FunctionFactory());
             c.accept(visitor);
