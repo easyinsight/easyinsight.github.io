@@ -26,6 +26,7 @@ public class PersistableRollingFilterDefinition extends PersistableFilterDefinit
 
     public FilterDefinition toFilterDefinition() {
         RollingFilterDefinition rollingFilterDefinition = new RollingFilterDefinition();
+        rollingFilterDefinition.setEnabled(isEnabled());
         rollingFilterDefinition.setFilterID(getFilterId());
         rollingFilterDefinition.setField(getField());
         rollingFilterDefinition.setApplyBeforeAggregation(isApplyBeforeAggregation());

@@ -22,6 +22,7 @@ public class LastNFilterDefinition extends FilterDefinition {
 
     public PersistableFilterDefinition toPersistableFilterDefinition() {
         PersistableLastNFilterDefinition filter = new PersistableLastNFilterDefinition();
+        filter.setEnabled(isEnabled());
         filter.setIntrinsic(isIntrinsic());
         filter.setFilterId(getFilterID());
         filter.setField(getField());

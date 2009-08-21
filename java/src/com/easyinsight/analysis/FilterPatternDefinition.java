@@ -16,6 +16,7 @@ public class FilterPatternDefinition extends FilterDefinition {
 
     public PersistableFilterDefinition toPersistableFilterDefinition() {
         PersistableFilterPatternDefinition pattern = new PersistableFilterPatternDefinition();
+        pattern.setEnabled(isEnabled());
         pattern.setField(getField());
         pattern.setCaseSensitive(isCaseSensitive());
         pattern.setRegex(isRegex());

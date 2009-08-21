@@ -23,6 +23,7 @@ public class RollingFilterDefinition extends FilterDefinition {
 
     public PersistableFilterDefinition toPersistableFilterDefinition() {
         PersistableRollingFilterDefinition filter = new PersistableRollingFilterDefinition();
+        filter.setEnabled(isEnabled());
         filter.setIntrinsic(isIntrinsic());
         filter.setFilterId(getFilterID());
         filter.setField(getField());

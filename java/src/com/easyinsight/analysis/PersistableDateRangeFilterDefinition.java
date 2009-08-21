@@ -51,6 +51,7 @@ public class PersistableDateRangeFilterDefinition extends PersistableFilterDefin
 
     public FilterDefinition toFilterDefinition() {
         FilterDateRangeDefinition date = new FilterDateRangeDefinition();
+        date.setEnabled(isEnabled());
         date.setFilterID(getFilterId());
         date.setSliding(isSliding());
         date.setField(getField());

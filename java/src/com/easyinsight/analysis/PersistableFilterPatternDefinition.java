@@ -24,6 +24,7 @@ public class PersistableFilterPatternDefinition extends PersistableFilterDefinit
 
     public FilterDefinition toFilterDefinition() {
         FilterPatternDefinition filterPatternDefinition = new FilterPatternDefinition();
+        filterPatternDefinition.setEnabled(isEnabled());
         filterPatternDefinition.setFilterID(getFilterId());
         filterPatternDefinition.setApplyBeforeAggregation(isApplyBeforeAggregation());
         filterPatternDefinition.setCaseSensitive(isCaseSensitive());

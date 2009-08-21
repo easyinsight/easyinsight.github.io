@@ -38,6 +38,8 @@ public class PersistableRangeFilterDefinition extends PersistableFilterDefinitio
 
     public FilterDefinition toFilterDefinition() {
         FilterRangeDefinition range = new FilterRangeDefinition();
+        range.setApplyBeforeAggregation(isApplyBeforeAggregation());
+        range.setEnabled(isEnabled());
         range.setFilterID(getFilterId());
         range.setField(getField());
         range.setStartValue(lowValue != null ? lowValue : 0);

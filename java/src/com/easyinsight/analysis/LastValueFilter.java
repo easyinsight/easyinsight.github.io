@@ -19,6 +19,7 @@ public class LastValueFilter extends FilterDefinition {
 
     public PersistableFilterDefinition toPersistableFilterDefinition() {
         PersistableLastValueFilter date = new PersistableLastValueFilter();
+        date.setEnabled(isEnabled());
         date.setFilterId(getFilterID());
         date.setApplyBeforeAggregation(isApplyBeforeAggregation());
         date.setField(getField());

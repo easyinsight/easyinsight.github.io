@@ -12,6 +12,12 @@ import javax.persistence.Table;
 @Table(name="last_value_filter")
 public class PersistableLastValueFilter extends PersistableFilterDefinition {
     public FilterDefinition toFilterDefinition() {
-        return new LastValueFilter(getField());
+        LastValueFilter lastValueFilter = new LastValueFilter();
+        lastValueFilter.setEnabled(isEnabled());
+        lastValueFilter.setApplyBeforeAggregation(isApplyBeforeAggregation());
+        lastValueFilter.setField(getField());
+        lastValueFilter.setFilterID(getFilterId());
+        lastValueFilter.setIntrinsic(isIntrinsic());
+        return lastValueFilter;
     }
 }

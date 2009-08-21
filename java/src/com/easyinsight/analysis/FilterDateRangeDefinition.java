@@ -41,6 +41,7 @@ public class FilterDateRangeDefinition extends FilterDefinition {
     public PersistableFilterDefinition toPersistableFilterDefinition() {
         PersistableDateRangeFilterDefinition date = new PersistableDateRangeFilterDefinition();
         date.setFilterId(getFilterID());
+        date.setEnabled(isEnabled());
         date.setApplyBeforeAggregation(isApplyBeforeAggregation());
         date.setField(getField());
         date.setLowDate(getStartDate());

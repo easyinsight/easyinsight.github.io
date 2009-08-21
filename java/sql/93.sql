@@ -13,3 +13,5 @@ create table user_preferences (
   primary key(user_preferences_id),
   constraint user_preferences_ibfk1 foreign key (user_id) references user (user_id) on delete cascade
 );
+
+alter table filter add enabled tinyint(4) not null default 1;
