@@ -7,8 +7,7 @@ package com.easyinsight.filtering
 import com.easyinsight.framework.CredentialsCache;
 
 import flash.events.Event;
-import flash.events.MouseEvent;
-	import flash.geom.Point;
+import flash.events.MouseEvent;	
 	
 	import mx.collections.ArrayCollection;
 	import mx.collections.Sort;
@@ -105,13 +104,13 @@ import mx.events.DropdownEvent;
 		
 		override protected function createChildren():void {
 			super.createChildren();
-            if (!_filterEditable) {
+            //if (!_filterEditable) {
                 var checkbox:CheckBox = new CheckBox();
-                checkbox.selected = true;
+                checkbox.selected = _filterDefinition.enabled;
                 checkbox.toolTip = "Click to disable this filter.";
                 checkbox.addEventListener(Event.CHANGE, onChange);
                 addChild(checkbox);
-            }
+            //}
             if (_showLabel) {
                 var label:Label = new Label();
                 label.text = _analysisItem.display + ":";
@@ -174,8 +173,7 @@ import mx.events.DropdownEvent;
 					strings.addItem(string);
 				}
 			}
-			var sort:Sort = new Sort();
-			strings.sort = sort;
+			strings.sort = new Sort();
 			strings.refresh();			
 			comboBox.dataProvider = strings;
 			comboBox.rowCount = Math.min(strings.length, 15);

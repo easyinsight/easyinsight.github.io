@@ -25,7 +25,7 @@
         import com.easyinsight.administration.feed.Tag;
         import com.easyinsight.analysis.AnalysisCloseEvent;
         import com.easyinsight.analysis.AnalysisDefinition;
-        import com.easyinsight.analysis.CredentialRequirement;
+
         import com.easyinsight.analysis.CredentialsEvent;
         import com.easyinsight.analysis.EmbeddedDataServiceEvent;
         import com.easyinsight.analysis.ExcelCreator;
@@ -33,7 +33,7 @@
         import com.easyinsight.analysis.HierarchyRollupEvent;
 
         import com.easyinsight.analysis.RefreshReportSourceWindow;
-        import com.easyinsight.analysis.RuntimeCredentialsWindow;
+
         import com.easyinsight.commands.CommandEvent;
         import com.easyinsight.commands.CommandProcessor;
         import com.easyinsight.datasources.DataSourceInfo;
@@ -59,6 +59,10 @@
         import mx.managers.PopUpManager;
         import mx.utils.URLUtil;
 
+        private function toBrowser():void {
+            flash.net.navigateToURL(new URLRequest("https://www.easy-insight.com/app/#reportID=" + _reportID), "_blank");
+        }
+
         private function exportExcel():void {
             new ExcelCreator().exportExcel(report);
 
@@ -69,6 +73,13 @@
 
         public function set embedded(value:Boolean):void {
             _embedded = value;
+        }
+
+        private var _prefix:String = "";
+
+
+        public function set prefix(value:String):void {
+            _prefix = value;
         }
 
         private function subscribedToInsight():void {
@@ -159,6 +170,12 @@
         [Bindable]
         [Embed(source="../../../../assets/refresh_x32.png")]
         private var refreshIcon:Class;
+        [Bindable]
+        [Embed(source="../../../../assets/window_earth.png")]
+        private var browserIcon:Class;
+        [Bindable]
+        [Embed(source="../../../../assets/logo2.png")]
+        private var logo:Class;
 
         [Bindable]
         private var dataSource:DataSourceInfo;
@@ -249,7 +266,7 @@
             _dataSourceID = value;
         }
 
-        private function onCredentials(event:CredentialsEvent):void {
+        private function onCredentials():void {
             viewFactory.retrieveData(false);
         }
 
@@ -371,6 +388,16 @@
         private var _showReportEditor:Boolean = true;
         private var _showFilters:Boolean = true;
         private var _showMetadata:Boolean = true;
+        private var _showBrowser:Boolean = false;
+        private var _showLogo:Boolean = false;
+
+        public function set showLogo(value:Boolean):void {
+            _showLogo = value;
+        }
+
+        public function set showBrowser(value:Boolean):void {
+            _showBrowser = value;
+        }
 
         public function set showFilterButton(value:Boolean):void {
             _showFilters = value;
@@ -406,6 +433,9 @@
 
         override protected function createChildren():void {
             super.createChildren();
+            if (_showLogo) {
+                buttonBar.removeChild(logoImage);
+            }
             if (!_showBack) {
                 buttonBar.removeChild(backButton);
             }
@@ -427,7 +457,11 @@
             if (!_showMetadata) {
                 coreBox.removeChild(reportMetadata);
             }
+            if (!_showBrowser) {
+                buttonBar.removeChild(browserButton);
+            }
             viewFactory.reportID = _reportID;
+            viewFactory.prefix = _prefix;
             viewFactory.dataSourceID = _dataSourceID;
             reportBox.addChild(viewFactory);
             viewFactory.addEventListener(EmbeddedDataServiceEvent.DATA_RETURNED, gotData);
@@ -443,6 +477,7 @@
         }]]></mx:Script>
     <mx:VBox width="100%" height="100%" paddingBottom="10" paddingLeft="10" paddingRight="10" paddingTop="10">
         <mx:HBox id="buttonBar" verticalAlign="middle">
+            <mx:Image source="{logo}" id="logoImage" click="navigateToURL(new URLRequest('http://www.easy-insight.com/'), 'blank')"/>
             <mx:Button label="Back" click="close()" icon="{closeIcon}" labelPlacement="bottom" id="backButton"/>
             <mx:Button label="Full Screen" click="toFullScreen()" icon="{fullScreenIcon}" labelPlacement="bottom" id="fullScreenButton"/>
             <mx:Button label="Refresh" click="refreshData()" icon="{refreshIcon}" labelPlacement="bottom" id="refreshButton"/>
@@ -450,6 +485,7 @@
             <mx:Button label="Export to Excel" icon="{exportToExcelIcon}" click="exportExcel()" labelPlacement="bottom" id="exportButton"/>
             <mx:Button label="Edit this Report" icon="{reportEditorIcon}" click="toReportEditor()" 
                        labelPlacement="bottom" id="editReportButton"/>
+            <mx:Button label="View in Browser" click="toBrowser()" icon="{browserIcon}" labelPlacement="bottom" id="browserButton"/>
             <mx:Button label="Adjust Filters" icon="{filterIcon}" click="adjustFilters()" visible="{showFilters}"
                        labelPlacement="bottom" id="adjustFiltersbutton"/>
             <datasources:DataSourceDisplay dataSource="{dataSource}"/>

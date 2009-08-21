@@ -9,7 +9,7 @@
         private var logos:ArrayCollection = new ArrayCollection(["../assets/logos/Basecamp Logo.png",
             "../assets/logos/Google Analytics Logo.gif", "../assets/logos/Google Docs Logo.gif",
             "../assets/logos/JIRA Logo.gif", "../assets/logos/MySQL Logo.gif", "../assets/logos/Oracle Logo.gif",
-            "../assets/logos/Salesforce Logo.gif", "../assets/logos/SQL Server Logo.gif", "../assets/logos/wesabe.jpg", null]);
+            "../assets/logos/SQL Server Logo.gif", null]);
         ]]></mx:Script>
     <mx:Box backgroundColor="#FFFFFF" width="100%" height="100%" verticalAlign="middle" horizontalAlign="center">
     <util:ImageVScroller id="scroller" dataProvider="{logos}"

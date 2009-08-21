@@ -142,7 +142,7 @@
             new CommandProcessor();
             addEventListener(FaultEvent.FAULT, onFault, true);
             User.getEventNotifier().addEventListener(NavigationEvent.NAVIGATION, navigation);
-            ProgressAlert.alert(this, "Taking care of initial setup...", null, userService.isSessionLoggedIn);
+            //ProgressAlert.alert(this, "Taking care of initial setup...", null, userService.isSessionLoggedIn);
             userService.isSessionLoggedIn.send();
             EIMessageListener.initialize();
             messageListener = EIMessageListener.instance();

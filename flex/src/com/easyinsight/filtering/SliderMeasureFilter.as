@@ -12,12 +12,15 @@ import flash.events.MouseEvent;
 import mx.binding.utils.BindingUtils;
 import mx.collections.ArrayCollection;
 	import mx.containers.HBox;
-	import mx.controls.Button;
+import mx.controls.Alert;
+import mx.controls.Button;
 import mx.controls.CheckBox;
 import mx.controls.HSlider;
 	import mx.controls.Label;
 	import mx.controls.Text;
-	import mx.managers.PopUpManager;
+import mx.events.SliderEvent;
+import mx.formatters.NumberFormatter;
+import mx.managers.PopUpManager;
 	import mx.rpc.events.ResultEvent;
 	import mx.rpc.remoting.RemoteObject;
 import mx.states.AddChild;
@@ -26,7 +29,7 @@ import mx.states.State;
 
 public class SliderMeasureFilter extends HBox implements IFilter
 	{
-		private var dataService:RemoteObject;
+		//private var dataService:RemoteObject;
 		private var hslider:HSlider;
 		private var _filterDefinition:FilterRangeDefinition;
 		private var analysisItem:AnalysisItem;
@@ -53,10 +56,13 @@ public class SliderMeasureFilter extends HBox implements IFilter
 		public function SliderMeasureFilter(feedID:int, analysisItem:AnalysisItem) {
 			super();
 			this.analysisItem = analysisItem;
-			dataService = new RemoteObject();
+			/*dataService = new RemoteObject();
 			dataService.destination = "data";
 			dataService.getAnalysisItemMetadata.addEventListener(ResultEvent.RESULT, gotMetadata);
-			dataService.getAnalysisItemMetadata.send(feedID, analysisItem, CredentialsCache.getCache().createCredentials(), new Date().getTimezoneOffset());
+			dataService.getAnalysisItemMetadata.send(feedID, analysisItem, CredentialsCache.getCache().createCredentials(), new Date().getTimezoneOffset());*/
+            /*setStyle("borderStyle", "solid");
+            setStyle("borderThickness", 1);
+            setStyle("paddingBottom", 0);*/
 		}
 
 
@@ -118,60 +124,58 @@ public class SliderMeasureFilter extends HBox implements IFilter
             _filterDefinition.enabled = checkbox.selected;
             dispatchEvent(new FilterUpdatedEvent(FilterUpdatedEvent.FILTER_UPDATED, _filterDefinition, null, this));
         }
-		
-		private function gotMetadata(event:ResultEvent):void {
-			var metadata:AnalysisItemResultMetadata = dataService.getAnalysisItemMetadata.lastResult as AnalysisItemResultMetadata;
-			var measureMetadata:AnalysisMeasureResultMetadata = metadata as AnalysisMeasureResultMetadata;
 
-            if (lowInput == null) {
 
-                if (!_filterEditable) {
-                    var checkbox:CheckBox = new CheckBox();
-                    checkbox.selected = true;
-                    checkbox.toolTip = "Click to disable this filter.";
-                    checkbox.addEventListener(Event.CHANGE, onChange);
-                    addChild(checkbox);
-                }
-                var haveDataState:State = new State();
-                haveDataState.name = "Configured";
-                var defaultBox:HBox = new HBox();
-                var removeOp:RemoveChild = new RemoveChild();
-                removeOp.target = defaultBox;
-                var addChildOp:AddChild = new AddChild();
-                haveDataState.overrides = [ removeOp, addChildOp ];
-                var box:HBox = new HBox();
-                addChildOp.target = box;
+    override protected function createChildren():void {
+        super.createChildren();
+        if (lowInput == null) {
 
-                lowInput = new Label();
-                BindingUtils.bindProperty(lowInput, "text", this, "lowValueString");
-                box.addChild(lowInput);
 
-                var between:Text = new Text();
-                between.text = " < " + analysisItem.display + " < ";
-                box.addChild(between);
-
-                highInput = new Label();
-                BindingUtils.bindProperty(highInput, "text", this, "highValueString");
-			    box.addChild(highInput);
+                var checkbox:CheckBox = new CheckBox();
+                checkbox.selected = true;
+                checkbox.toolTip = "Click to disable this filter.";
+                checkbox.addEventListener(Event.CHANGE, onChange);
+                addChild(checkbox);
 
                 if (_filterEditable) {
-                    var editButton:Button = new Button();
-                    editButton.addEventListener(MouseEvent.CLICK, edit);
-                    editButton.setStyle("icon", editIcon);
-                    editButton.toolTip = "Edit";
-                    box.addChild(editButton);
-                    var deleteButton:Button = new Button();
-                    deleteButton.addEventListener(MouseEvent.CLICK, deleteSelf);
-                    deleteButton.setStyle("icon", deleteIcon);
-                    deleteButton.toolTip = "Delete";
-                    box.addChild(deleteButton);
-                }
+                    var haveDataState:State = new State();
+                    haveDataState.name = "Configured";
+                    var defaultBox:HBox = new HBox();
+                    var removeOp:RemoveChild = new RemoveChild();
+                    removeOp.target = defaultBox;
+                    var addChildOp:AddChild = new AddChild();
+                    haveDataState.overrides = [ removeOp, addChildOp ];
+                    var box:HBox = new HBox();
+                    addChildOp.target = box;
+
+                    lowInput = new Label();
+                    BindingUtils.bindProperty(lowInput, "text", this, "lowValueString");
+                    box.addChild(lowInput);
+
+                    var between:Text = new Text();
+                    between.text = " < " + analysisItem.display + " < ";
+                    box.addChild(between);
+
+                    highInput = new Label();
+                    BindingUtils.bindProperty(highInput, "text", this, "highValueString");
+                    box.addChild(highInput);
+
+                        var editButton:Button = new Button();
+                        editButton.addEventListener(MouseEvent.CLICK, edit);
+                        editButton.setStyle("icon", editIcon);
+                        editButton.toolTip = "Edit";
+                        box.addChild(editButton);
+                        var deleteButton:Button = new Button();
+                        deleteButton.addEventListener(MouseEvent.CLICK, deleteSelf);
+                        deleteButton.setStyle("icon", deleteIcon);
+                        deleteButton.toolTip = "Delete";
+                        box.addChild(deleteButton);
 
 
 
-                this.states = [ haveDataState ];
+                    this.states = [ haveDataState ];
 
-                if (_filterEditable) {
+
                     var editLabel:Label = new Label();
                     editLabel.setStyle("fontSize", 10);
                     editLabel.text = "Click Edit to Configure";
@@ -186,17 +190,42 @@ public class SliderMeasureFilter extends HBox implements IFilter
                     deleteDefault.setStyle("icon", deleteIcon);
                     deleteDefault.toolTip = "Delete";
                     defaultBox.addChild(deleteDefault);
+
+                    addChild(defaultBox);
+                } else {
+                    setStyle("verticalAlign", "middle");
+                    var initLabel:Label = new Label();
+                    initLabel.text = analysisItem.display + ":";
+                    addChild(initLabel);
+                    var leftLabel:Label = new Label();
+                    var nf:NumberFormatter = new NumberFormatter();
+                    leftLabel.text = nf.format(_filterDefinition.startValue);
+                    addChild(leftLabel);
+                    var slider:HSlider = new HSlider();
+                    slider.minimum = _filterDefinition.startValue;
+                    slider.maximum = _filterDefinition.endValue;
+                    //slider.labels = [ _filterDefinition.startValue, _filterDefinition.endValue ];
+                    slider.showDataTip = true;
+                    slider.thumbCount = 2;
+			        slider.liveDragging = false;
+                    slider.values = [ _filterDefinition.startValue, _filterDefinition.endValue ];
+                    slider.addEventListener(SliderEvent.THUMB_RELEASE, onRelease);
+                    slider.setStyle("bottom", 0);
+                    slider.setStyle("dataTipPlacement", "top");
+                    addChild(slider);
+                    var rightLabel:Label = new Label();
+                    rightLabel.text = nf.format(_filterDefinition.endValue);
+                    addChild(rightLabel);
                 }
-                addChild(defaultBox);
             }
 
-			
+
 			if (_filterDefinition == null) {
 				_filterDefinition = new FilterRangeDefinition();
 				_filterDefinition.startValueDefined = false;
 				_filterDefinition.endValueDefined = false;
 				_filterDefinition.field = analysisItem;
-					
+
 			} else {
                 if (_filterDefinition.startValueDefined) {
                     lowValueString = String(_filterDefinition.startValue);
@@ -204,11 +233,27 @@ public class SliderMeasureFilter extends HBox implements IFilter
                 if (_filterDefinition.endValueDefined) {
                     highValueString = String(_filterDefinition.endValue);
                 }
-                currentState = "Configured";
+                if (_filterEditable) {
+                    currentState = "Configured";
+                }
             }
-			
+
 			dispatchEvent(new FilterUpdatedEvent(FilterUpdatedEvent.FILTER_ADDED, filterDefinition, null, this));
-		}
+    }
+
+    /*private function gotMetadata(event:ResultEvent):void {
+			var metadata:AnalysisItemResultMetadata = dataService.getAnalysisItemMetadata.lastResult as AnalysisItemResultMetadata;
+			var measureMetadata:AnalysisMeasureResultMetadata = metadata as AnalysisMeasureResultMetadata;
+
+
+		}*/
+
+    private function onRelease(event:SliderEvent):void {
+        var slider:HSlider = event.currentTarget as HSlider;
+        _filterDefinition.startValue = slider.values[0];
+        _filterDefinition.endValue = slider.values[1];
+        dispatchEvent(new FilterUpdatedEvent(FilterUpdatedEvent.FILTER_UPDATED, _filterDefinition, null, this));
+    }
 		
 		public function set filterDefinition(filterDefinition:FilterDefinition):void {
 			this._filterDefinition = filterDefinition as FilterRangeDefinition;

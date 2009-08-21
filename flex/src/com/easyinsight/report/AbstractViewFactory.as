@@ -18,6 +18,10 @@ public class AbstractViewFactory extends VBox{
         this.percentWidth = 100;
     }
 
+    public function set prefix(val:String):void {
+        
+    }
+
     public function gotData(event:EmbeddedDataServiceEvent):void {
         
     }
