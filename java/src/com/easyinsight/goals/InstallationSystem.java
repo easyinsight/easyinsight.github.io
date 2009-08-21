@@ -256,8 +256,14 @@ public class InstallationSystem {
     private AnalysisItem findItem(AnalysisItem analysisItem, FeedDefinition feedDefinition) {
         AnalysisItem foundItem = null;
         for (AnalysisItem feedItem : feedDefinition.getFields()) {
-            if (feedItem.getKey().toKeyString().equals(analysisItem.getKey().toKeyString())) {
-                foundItem = feedItem;
+            if (analysisItem.getDisplayName() != null) {
+                if (analysisItem.getDisplayName().equals(feedItem.getDisplayName())) {
+                    foundItem = feedItem;
+                }
+            } else {
+                if (feedItem.getKey().toKeyString().equals(analysisItem.getKey().toKeyString())) {
+                    foundItem = feedItem;
+                }
             }
         }
         return foundItem;
