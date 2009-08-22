@@ -23,50 +23,24 @@ public class GoalEvaluationStorage {
         if (newValue != null && (Double.isNaN(newValue) || Double.isInfinite(newValue))) {
             newValue = null;
         }
-
-        PreparedStatement existsStmt = conn.prepareStatement("SELECT goal_outcome_id FROM goal_outcome WHERE goal_tree_node_id = ?");
-        existsStmt.setLong(1, goalTreeNodeID);
-        ResultSet rs = existsStmt.executeQuery();
-        if (rs.next()) {
-            PreparedStatement updateStmt = conn.prepareStatement("UPDATE goal_outcome SET end_value = ?, evaluation_date = ?," +
-                    "start_value = ?, outcome_value = ?, direction = ?, problem_evaluated = ? WHERE goal_tree_node_id = ?");
-            if (newValue == null) {
-                updateStmt.setNull(1, Types.DOUBLE);
-            } else {
-                updateStmt.setDouble(1, newValue);
-            }
-            updateStmt.setTimestamp(2, new java.sql.Timestamp(evaluationDate.getTime()));
-            if (oldValue == null) {
-                updateStmt.setNull(3, Types.DOUBLE);
-            } else {
-                updateStmt.setDouble(3, oldValue);
-            }
-            updateStmt.setInt(4, outcomeValue);
-            updateStmt.setInt(5, direction);
-            updateStmt.setBoolean(6, problemEvaluated);
-            updateStmt.setLong(7, goalTreeNodeID);
-            updateStmt.execute();
-        } else {
-            PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO goal_outcome (goal_tree_node_id, start_value, end_value," +
+        PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO goal_outcome (goal_tree_node_id, start_value, end_value," +
                     "evaluation_date, outcome_value, direction, problem_evaluated) VALUES (?, ?, ?, ?, ?, ?, ?)");
-            insertStmt.setLong(1, goalTreeNodeID);
-            if (oldValue == null) {
-                insertStmt.setNull(2, Types.DOUBLE);
-            } else {
-                insertStmt.setDouble(2, oldValue);
-            }
-            if (newValue == null) {
-                insertStmt.setNull(3, Types.DOUBLE);
-            } else {
-                insertStmt.setDouble(3, newValue);
-            }
-            insertStmt.setTimestamp(4, new java.sql.Timestamp(evaluationDate.getTime()));
-            insertStmt.setInt(5, outcomeValue);
-            insertStmt.setInt(6, direction);
-            insertStmt.setBoolean(7, problemEvaluated);
-            insertStmt.execute();
+        insertStmt.setLong(1, goalTreeNodeID);
+        if (oldValue == null) {
+            insertStmt.setNull(2, Types.DOUBLE);
+        } else {
+            insertStmt.setDouble(2, oldValue);
         }
-
+        if (newValue == null) {
+            insertStmt.setNull(3, Types.DOUBLE);
+        } else {
+            insertStmt.setDouble(3, newValue);
+        }
+        insertStmt.setTimestamp(4, new java.sql.Timestamp(evaluationDate.getTime()));
+        insertStmt.setInt(5, outcomeValue);
+        insertStmt.setInt(6, direction);
+        insertStmt.setBoolean(7, problemEvaluated);
+        insertStmt.execute();
     }
 
     public void saveGoalEvaluations(List<GoalOutcome> goalValues, Connection conn) throws SQLException {
@@ -74,6 +48,34 @@ public class GoalEvaluationStorage {
             saveGoalEvaluation(goalValue.getGoalTreeNodeID(), goalValue.getOutcomeValue(), goalValue.getPreviousValue(),
                     goalValue.getEvaluationDate(), goalValue.getOutcomeState(), goalValue.getDirection(), goalValue.isProblemEvaluated(), conn);
         }
+    }
+
+    private Double findLastGoalValue(Connection conn, long goalTreeNodeID) {
+        Double oldValue = null;
+        try {
+            PreparedStatement findMaxStmt = conn.prepareStatement("SELECT MAX(EVALUATION_DATE) FROM GOAL_OUTCOME WHERE GOAL_TREE_NODE_ID = ? AND EVALUATION_DATE < ?");
+            findMaxStmt.setLong(1, goalTreeNodeID);
+            findMaxStmt.setDate(2, new java.sql.Date(System.currentTimeMillis()));
+            ResultSet dateRS = findMaxStmt.executeQuery();
+            if (dateRS.next()) {
+                Timestamp timestampDate = dateRS.getTimestamp(1);
+                if (!dateRS.wasNull()) {
+                    PreparedStatement lastValStmt = conn.prepareStatement("SELECT END_VALUE, MAX(EVALUATION_DATE) FROM GOAL_OUTCOME WHERE GOAL_TREE_NODE_ID = ? AND " +
+                        "EVALUATION_DATE < ?");
+                    lastValStmt.setLong(1, goalTreeNodeID);
+                    lastValStmt.setTimestamp(2, timestampDate);
+                    ResultSet rs = lastValStmt.executeQuery();
+                    if (rs.next()) {
+                        if (!rs.wasNull()) {
+                            oldValue = rs.getDouble(1);
+                        }
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return oldValue;
     }
 
     private class PopulationGoalTreeVisitor extends GoalTreeVisitor {
@@ -91,6 +93,11 @@ public class GoalEvaluationStorage {
 
         protected void accept(GoalTreeNode goalTreeNode) {
                 if (goalTreeNode.getCoreFeedID() > 0) {
+                    // if there's no date filter, we're screwed on this...
+                    // can we retrieve the last outcome value?
+
+                    // exactly what do we actually want to be looking at here
+                    // first query we need to figure out is "what's the last day before today?"
                     List<GoalValue> lastTwoValues = new HistoryRun().lastTwoValues(goalTreeNode.getCoreFeedID(), goalTreeNode.getAnalysisMeasure(),
                             goalTreeNode.getFilters(), credentials);
                     Double newValue = null;
@@ -114,8 +121,18 @@ public class GoalEvaluationStorage {
                                 }
                             }
                         } else {
+                            oldValue = findLastGoalValue(conn, goalTreeNode.getGoalTreeNodeID());
                             GoalValue goalValue = lastTwoValues.get(0);
                             newValue = goalValue.getValue();
+                            if (oldValue != null && newValue != null && goalTreeNode.isGoalDefined()) {
+                                double delta = newValue - oldValue;
+                                outcomeState = determineOutcome(goalTreeNode.getGoalValue(), goalTreeNode.isHighIsGood(), delta, newValue);
+                                if (goalTreeNode.isHighIsGood()) {
+                                    direction = GoalOutcome.UP_DIRECTION;
+                                } else {
+                                    direction = GoalOutcome.DOWN_DIRECTION;
+                                }
+                            }
                         }
 
                         if (goalTreeNode.getProblemConditions().size() > 0) {
@@ -165,24 +182,37 @@ public class GoalEvaluationStorage {
         GoalOutcome goalOutcome = null;
         Connection conn = Database.instance().getConnection();
         try {
-            PreparedStatement queryStmt = conn.prepareStatement("SELECT DIRECTION, END_VALUE, EVALUATION_DATE," +
-                    "OUTCOME_VALUE, PROBLEM_EVALUATED, START_VALUE FROM GOAL_OUTCOME WHERE GOAL_TREE_NODE_ID = ?");
-            queryStmt.setLong(1, goalTreeNode.getGoalTreeNodeID());
-            ResultSet rs = queryStmt.executeQuery();
-            if (rs.next()) {
-                int direction = rs.getInt(1);
-                Double endValue = rs.getDouble(6);
-                if (rs.wasNull()) {
-                    endValue = null;
+            PreparedStatement findLastDateStmt = conn.prepareStatement("SELECT MAX(EVALUATION_DATE) FROM GOAL_OUTCOME WHERE GOAL_TREE_NODE_ID = ?");
+            findLastDateStmt.setLong(1, goalTreeNode.getGoalTreeNodeID());
+            ResultSet dateRS = findLastDateStmt.executeQuery();
+            if (dateRS.next()) {
+                Timestamp maxDate = dateRS.getTimestamp(1);
+                if (!dateRS.wasNull()) {
+                    PreparedStatement queryStmt = conn.prepareStatement("SELECT DIRECTION, END_VALUE, EVALUATION_DATE," +
+                        "OUTCOME_VALUE, PROBLEM_EVALUATED, START_VALUE FROM GOAL_OUTCOME WHERE GOAL_TREE_NODE_ID = ? AND EVALUATION_DATE = ?");
+                    queryStmt.setLong(1, goalTreeNode.getGoalTreeNodeID());
+                    queryStmt.setTimestamp(2, maxDate);
+                    ResultSet rs = queryStmt.executeQuery();
+                    if (rs.next()) {
+                        int direction = rs.getInt(1);
+                        Double endValue = rs.getDouble(6);
+                        if (rs.wasNull()) {
+                            endValue = null;
+                        }
+                        Timestamp timestamp = rs.getTimestamp(3);
+                        Date evaluationDate = null;
+                        if (!rs.wasNull()) {
+                            evaluationDate = new Date(timestamp.getTime());
+                        }
+                        int outcome = rs.getInt(4);
+                        Double value = rs.getDouble(2);
+                        if (rs.wasNull()) {
+                            value = null;
+                        }
+                        boolean problem = rs.getBoolean(5);
+                        goalOutcome = new GoalOutcome(outcome, direction, endValue, problem, value, evaluationDate, goalTreeNode.getGoalTreeNodeID());
+                    }
                 }
-                Date evaluationDate = new java.util.Date(rs.getTimestamp(3).getTime());
-                int outcome = rs.getInt(4);
-                Double value = rs.getDouble(2);
-                if (rs.wasNull()) {
-                    value = null;
-                }
-                boolean problem = rs.getBoolean(5);
-                goalOutcome = new GoalOutcome(outcome, direction, endValue, problem, value, evaluationDate, goalTreeNode.getGoalTreeNodeID());
             }
         } finally {
             Database.closeConnection(conn);
