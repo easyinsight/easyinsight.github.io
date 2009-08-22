@@ -16,11 +16,18 @@
         #centerPage {
             margin:0px;
             padding:0px;
-            position:relative;
-            height:600px;
         }
         li {
             padding:5px;
+        }
+
+        a.noHoverLink { }
+        a.noHoverLink > img {
+            border:0px;
+        }
+
+        a.noHoverLink:hover {
+            text-decoration:none;
         }
     </style>
     <!-- InstanceEndEditable -->
@@ -70,8 +77,8 @@
                          <tr style="height:60px" />
                          <tr><td><img src="ulcorner.gif" /></td><td style="background-image:url('ubar.gif')"></td><td><img src="urcorner.gif" /></td></tr>
                          <tr><td style="background-image:url('lbar.gif')"></td><td style="background-color:white;text-align:center;">
-                             <img src="film.png" /><br />
-                             <span style="text-decoration:underline">Take a Tour!</span>
+                             <a class="noHoverLink" href="https://www.easy-insight.com/app/#page=intro&type=tour"><img src="film.png" /><br />
+                             <span style="text-decoration:underline">Take a Tour!</span></a>
                          </td><td style="background-image:url('rbar.gif')"></td></tr>
                          <tr><td><img src="blcorner.gif" /></td><td style="background-image:url('bbar.gif')"></td><td><img src="brcorner.gif" /></td></tr>
                      </tbody></table>
