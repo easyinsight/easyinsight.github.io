@@ -41,7 +41,28 @@ public class FeedService implements IDataFeedService {
 
     public FeedService() {
         // this goes into a different data provider        
-    }    
+    }
+
+    public List<CredentialRequirement> getCredentials(List<Integer> dataSourceIDs, List<CredentialFulfillment> existingCredentials) {
+        try {
+            List<CredentialRequirement> neededCredentials = new ArrayList<CredentialRequirement>();
+            InsightRequestMetadata metadata = new InsightRequestMetadata();
+            metadata.setCredentialFulfillmentList(existingCredentials);
+            for (Integer dataSourceID : dataSourceIDs) {
+                Feed feed = FeedRegistry.instance().getFeed(dataSourceID);
+                Set<CredentialRequirement> requirements = feed.getCredentialRequirement(false);
+                for (CredentialRequirement credentialRequirement : requirements) {
+                    if (metadata.getCredentialForDataSource(credentialRequirement.getDataSourceID()) == null) {
+                        neededCredentials.add(credentialRequirement);
+                    }
+                }
+            }
+            return neededCredentials;
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        }
+    }
 
     public List<InsightDescriptor> getReportsForDataSource(long dataSourceID) {
         List<InsightDescriptor> descriptors = new ArrayList<InsightDescriptor>();
