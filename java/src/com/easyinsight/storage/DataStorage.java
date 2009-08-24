@@ -157,19 +157,21 @@ public class DataStorage {
         FeedPersistenceMetadata metadata = getMetadata(feedID, conn);
         if (metadata != null) {
             deleteMetadata(feedID, conn);
-            String dropSQL = "DROP TABLE " + "df" + feedID + "v" + metadata.getVersion();
-            Connection storageConn = DatabaseManager.instance().getDatabase(metadata.getDatabase()).getConnection();
-            try {
-                PreparedStatement dropTableStmt = storageConn.prepareStatement(dropSQL);
-                dropTableStmt.execute();
-            } catch (SQLException se) {
-                if (se.getMessage().contains("Unknown table")) {
-                    LogClass.error("Data source " + feedID + " did not have a storage table. Continuing with delete, screwed up data.");
-                } else {
-                    throw se;
+            if (DatabaseManager.instance().getDatabase(metadata.getDatabase()) != null) {
+                String dropSQL = "DROP TABLE " + "df" + feedID + "v" + metadata.getVersion();
+                Connection storageConn = DatabaseManager.instance().getDatabase(metadata.getDatabase()).getConnection();
+                try {
+                    PreparedStatement dropTableStmt = storageConn.prepareStatement(dropSQL);
+                    dropTableStmt.execute();
+                } catch (SQLException se) {
+                    if (se.getMessage().contains("Unknown table")) {
+                        LogClass.error("Data source " + feedID + " did not have a storage table. Continuing with delete, screwed up data.");
+                    } else {
+                        throw se;
+                    }
+                } finally {
+                    storageConn.close();
                 }
-            } finally {
-                storageConn.close();
             }
         }
     }
