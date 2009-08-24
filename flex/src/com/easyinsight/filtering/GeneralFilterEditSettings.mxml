@@ -1,13 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
-<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:analysis="com.easyinsight.analysis.*">
+<util:EITitleWindow xmlns:util="com.easyinsight.util.*" xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:analysis="com.easyinsight.analysis.*">
 	<mx:Script>
 		<![CDATA[
         import com.easyinsight.analysis.AnalysisItemEditor;
 
+        import com.easyinsight.util.PopUpUtil;
+
+        import mx.events.FlexEvent;
         import mx.managers.PopUpManager;
         import mx.collections.ArrayCollection;
 
         import com.easyinsight.analysis.AnalysisItem;
+
+        import mx.states.AddChild;
+        import mx.states.State;
 
         [Bindable]
         private var _analysisItem:AnalysisItem;
@@ -63,7 +69,6 @@
 
         override protected function createChildren():void {
             super.createChildren();
-            var index:int = 1;
             if (_detailClass != null) {
                 if (filterDetailEditor == null) {
                     filterDetailEditor = new _detailClass();
@@ -71,23 +76,43 @@
                     filterDetailEditor.addEventListener(FilterEditEvent.FILTER_EDIT, onFilterEdit);
                     filterDetailEditor.feedID = _feedID;
                 }
-                coreBox.addChildAt(filterDetailEditor as DisplayObject, index);
-                index++;
+                filterDetailBox.addChild(filterDetailEditor as DisplayObject);
+            }
+
+            if (!_fieldEditable) {
+                coreBox.removeChild(fieldBox);    
             }
 
             if (editor == null) {
+                editorState = new State();
+                editorState.name = "editorState";
+                var addOp:AddChild = new AddChild();
                 editor = new AnalysisItemEditor();
                 editor.analysisItem = _analysisItem;
                 editor.analysisItems = _analysisItems;
                 editor.fieldNameEditable = false;
+                addOp.target = editor;
+                addOp.relativeTo = changeFieldBox;
+                editorState.overrides = [ addOp ];
+                states = [ editorState ];
             }
-            coreBox.addChildAt(editor, index);
+            //coreBox.addChildAt(editor, index);
+        }
+
+        private var editorState:State;
+        private var _fieldEditable:Boolean = true;
+
+
+        public function set fieldEditable(value:Boolean):void {
+            _fieldEditable = value;
         }
 
         private function save():void {
             var previousDefinition:FilterDefinition = _filterDefinition;
             _filterDefinition = filterDetailEditor.makeUpdates();
-            _filterDefinition.field = editor.save();
+            if (currentState == "editorState") {
+                _filterDefinition.field = editor.save();
+            }
             _filterDefinition.applyBeforeAggregation = aggregationCheckbox.selected;
 
             dispatchEvent(new FilterEditEvent(_filterDefinition, previousDefinition, null, rebuild));
@@ -97,14 +122,29 @@
         private function cancel():void {
             PopUpManager.removePopUp(this);
         }
+
+        private function changeField():void {
+            if (currentState == "" || currentState == null) {
+                changeButton.label = "Hide Changes to Filter Field:";
+                currentState = "editorState";
+            } else {
+                changeButton.label = "Change the Filter Field:";
+                currentState = "";
+            }
+        }
 		]]>
 	</mx:Script>
 	<mx:VBox id="coreBox" styleName="TitleWindowContents">
 		<mx:CheckBox label="Apply Before Aggregation" selected="{beforeAgg}" id="aggregationCheckbox"/>
+        <mx:Box id="filterDetailBox"/>
+        <mx:VBox id="fieldBox">
+            <mx:Button label="Change the Filter Field:" click="changeField()" id="changeButton"/>
+            <mx:Box id="changeFieldBox"/>
+        </mx:VBox>
 		<mx:HBox width="100%" horizontalAlign="center">
 			<mx:Button label="Save" click="save()"/>
 			<mx:Button label="Cancel" click="cancel()"/>
 		</mx:HBox>	
 	</mx:VBox>
 	
-</mx:TitleWindow>
+</util:EITitleWindow>

@@ -1,5 +1,5 @@
 <?xml version="1.0" ?>
-<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" creationComplete="retrieveData()" width="100%" height="100%">
+<util:EITitleWindow xmlns:util="com.easyinsight.util.*" xmlns:mx="http://www.adobe.com/2006/mxml" creationComplete="retrieveData()" width="100%" height="100%">
     <mx:Script><![CDATA[
         import com.easyinsight.customupload.api.APIUpdateEvent;
         import com.easyinsight.framework.User;
@@ -156,4 +156,4 @@
             <mx:Button label="Cancel" click="PopUpManager.removePopUp(this)"/>
         </mx:HBox>
     </mx:VBox>
-</mx:TitleWindow>
+</util:EITitleWindow>

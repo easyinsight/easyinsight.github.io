@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" keyDown="submitted(event)" creationComplete="onCreationComplete()" xmlns:yahoo="http://www.yahoo.com/astra/2006/mxml">
+<util:EITitleWindow xmlns:util="com.easyinsight.util.*" xmlns:mx="http://www.adobe.com/2006/mxml" keyDown="submitted(event)" creationComplete="onCreationComplete()" xmlns:yahoo="http://www.yahoo.com/astra/2006/mxml">
 	<mx:Script>
 		<![CDATA[
 			import com.easyinsight.administration.sharing.UserStub;
@@ -67,4 +67,4 @@
 		</mx:Form>
 	</mx:VBox>	
 	<mx:StringValidator source="{userIDInput}" property="text" minLength="0"/>
-</mx:TitleWindow>
+</util:EITitleWindow>

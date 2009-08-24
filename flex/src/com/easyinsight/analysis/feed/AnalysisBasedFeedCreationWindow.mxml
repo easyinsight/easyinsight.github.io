@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" creationPolicy="all"
+<util:EITitleWindow xmlns:util="com.easyinsight.util.*" xmlns:mx="http://www.adobe.com/2006/mxml" creationPolicy="all"
 	creationComplete="initDef()">
 	<mx:Script>
 		<![CDATA[
@@ -99,4 +99,4 @@
         </mx:VBox>
 	</mx:HBox>
     <mx:StringValidator source="{feedName}" property="text" id="nameValidator" minLength="3" maxLength="30"/>
-</mx:TitleWindow>
+</util:EITitleWindow>

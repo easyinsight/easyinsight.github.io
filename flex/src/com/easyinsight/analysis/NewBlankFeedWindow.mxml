@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" title="New Field"
+<util:EITitleWindow xmlns:util="com.easyinsight.util.*" xmlns:mx="http://www.adobe.com/2006/mxml" title="New Field"
                 creationComplete="setup()">
     <mx:Script>
 		<![CDATA[
@@ -67,4 +67,4 @@
         </mx:HBox>
     </mx:VBox>
     <mx:StringValidator source="{nameInput}" property="text" minLength="3" id="nameValidator"/>
-</mx:TitleWindow>
+</util:EITitleWindow>

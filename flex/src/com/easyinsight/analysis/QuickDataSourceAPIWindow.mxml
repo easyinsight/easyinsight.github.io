@@ -1,5 +1,5 @@
 <?xml version="1.0" ?>
-<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" showCloseButton="true" close="PopUpManager.removePopUp(this)">
+<util:EITitleWindow xmlns:util="com.easyinsight.util.*" xmlns:mx="http://www.adobe.com/2006/mxml" showCloseButton="true" close="PopUpManager.removePopUp(this)">
     <mx:Script><![CDATA[
         import com.easyinsight.account.AccountAPISettings;
         import com.easyinsight.customupload.api.DataSourceAPIDescriptor;
@@ -90,4 +90,4 @@
             <mx:CheckBox id="validatedAPICheckbox" selected="{validatedEnabled}"/>
         </mx:FormItem>
     </mx:Form>
-</mx:TitleWindow>
+</util:EITitleWindow>

@@ -1,5 +1,5 @@
 <?xml version="1.0" ?>
-<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" creationComplete="dataProvider.searchForSubscribedFeeds.send()">
+<util:EITitleWindow xmlns:util="com.easyinsight.util.*" xmlns:mx="http://www.adobe.com/2006/mxml" creationComplete="dataProvider.searchForSubscribedFeeds.send()">
 	<mx:Script>
 		<![CDATA[
             import com.easyinsight.solutions.DataSourceDescriptor;
@@ -51,4 +51,4 @@
 			<mx:Button label="Cancel" click="cancel()"/>
 		</mx:FormItem>
 	</mx:Form>
-</mx:TitleWindow>
+</util:EITitleWindow>

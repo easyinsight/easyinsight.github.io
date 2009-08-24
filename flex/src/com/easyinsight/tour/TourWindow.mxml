@@ -1,5 +1,5 @@
 <?xml version="1.0" ?>
-<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:tour="com.easyinsight.tour.*" resize="PopUpUtil.centerPopUp(this)"
+<util:EITitleWindow xmlns:util="com.easyinsight.util.*" xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:tour="com.easyinsight.tour.*" resize="PopUpUtil.centerPopUp(this)"
         backgroundImage="{background2}" backgroundSize="100%" showCloseButton="true" close="shutdown()">
     <mx:Script><![CDATA[
         import com.easyinsight.util.PopUpUtil;
@@ -41,7 +41,7 @@
         [Embed(source="../../../../assets/media_play.png")]
         private var pointerIcon:Class;
         ]]></mx:Script>
-    <mx:states>
+    <util:states>
         <mx:State name="individual">
 
         </mx:State>
@@ -51,7 +51,7 @@
                 <tour:SevenEasySteps backToWindow="currentState=''" id="sevenSteps"/>
             </mx:AddChild>
         </mx:State>
-    </mx:states>
+    </util:states>
     <!--
         our roles:
 
@@ -94,4 +94,4 @@
     <mx:Script><![CDATA[
         import mx.managers.CursorManager;
         ]]></mx:Script>
-</mx:TitleWindow>
+</util:EITitleWindow>

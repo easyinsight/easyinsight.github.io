@@ -1,5 +1,5 @@
 <?xml version="1.0" ?>
-<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:report="com.easyinsight.report.*"
+<util:EITitleWindow xmlns:util="com.easyinsight.util.*" xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:report="com.easyinsight.report.*"
                 backgroundImage="{background2}" backgroundSize="100%"
                 width="600" height="500" showCloseButton="true" close="PopUpManager.removePopUp(this)"
                 title="{_goalTitle}"
@@ -47,4 +47,4 @@
         }        
         ]]></mx:Script>
     <report:MultiScreenView reports="{allDescriptors}" factory="{factory}" showBackButton="false"/>
-</mx:TitleWindow>
+</util:EITitleWindow>

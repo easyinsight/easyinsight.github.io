@@ -1,5 +1,5 @@
 <?xml version="1.0" ?>
-<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" title="Refresh Report Data Sources">
+<util:EITitleWindow xmlns:util="com.easyinsight.util.*" xmlns:mx="http://www.adobe.com/2006/mxml" title="Refresh Report Data Sources">
     <mx:Script><![CDATA[
         import com.easyinsight.analysis.service.EmbeddedDataService;
         import com.easyinsight.framework.CredentialsCache;
@@ -71,4 +71,4 @@
         </mx:FormItem>
     </mx:Form>
 
-</mx:TitleWindow>
+</util:EITitleWindow>

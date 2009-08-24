@@ -1,5 +1,5 @@
 <?xml version="1.0" ?>
-<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:api="com.easyinsight.customupload.api.*">
+<util:EITitleWindow xmlns:util="com.easyinsight.util.*" xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:api="com.easyinsight.customupload.api.*">
     <!--<mx:states>
         <mx:State name="dynamicService">
             <mx:RemoveChild target="{noDynamicServiceLabel}"/>
@@ -197,4 +197,4 @@
             <mx:Button label="Cancel" click="cancel()"/>
         </mx:HBox>
     </mx:VBox>
-</mx:TitleWindow>
+</util:EITitleWindow>

@@ -1,9 +1,9 @@
 <?xml version="1.0" ?>
-<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:account="com.easyinsight.account.*"
+<util:EITitleWindow xmlns:util="com.easyinsight.util.*" xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:account="com.easyinsight.account.*"
         close="PopUpManager.removePopUp(this)" showCloseButton="true" width="200">
     <mx:Script><![CDATA[
         import mx.managers.PopUpManager;
         ]]></mx:Script>
     <mx:TextArea backgroundAlpha="0" borderStyle="none" width="100%"
                  text="We're still in the early stages of our release, so for a limited time, we're giving a 60 day trial period instead of the normal 30."/>
-</mx:TitleWindow>
+</util:EITitleWindow>

@@ -159,7 +159,7 @@
 
     <mx:Button icon="{bugIcon}" click="dispatchEvent(new ReportBugEvent())" toolTip="Report Bug" visible="{loggedIn}" />
 
-    <mx:Button icon="{findIcon}" click="dispatchEvent(new LaunchQuickSearchEvent())" toolTip="Search (Ctrl+N)" visible="{loggedIn}"/>
+    <mx:Button icon="{findIcon}" click="dispatchEvent(new LaunchQuickSearchEvent())" toolTip="Search (N)" visible="{loggedIn}"/>
 
 
         

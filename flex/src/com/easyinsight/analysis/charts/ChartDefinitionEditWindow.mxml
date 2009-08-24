@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml">
+<util:EITitleWindow xmlns:util="com.easyinsight.util.*" xmlns:mx="http://www.adobe.com/2006/mxml">
 	<mx:Form styleName="TitleWindowContents">
 		<mx:FormItem label="Row Numbers: " direction="horizontal">
 			<mx:CheckBox id="rowNumbersOn" selected="{rowNumbersSelected}"/>
@@ -31,4 +31,4 @@
 			<mx:Button label="Cancel" click="cancel()"/>
 		</mx:FormItem>			
 	</mx:Form>
-</mx:TitleWindow>
+</util:EITitleWindow>

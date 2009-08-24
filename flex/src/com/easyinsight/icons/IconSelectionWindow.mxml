@@ -1,5 +1,5 @@
 <?xml version="1.0" ?>
-<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:icons="com.easyinsight.icons.*"
+<util:EITitleWindow xmlns:util="com.easyinsight.util.*" xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:icons="com.easyinsight.icons.*"
                 creationComplete="getIcons()">
     <mx:Script><![CDATA[
 import mx.managers.PopUpManager;
@@ -54,4 +54,4 @@ import mx.managers.PopUpManager;
         <mx:Button label="No Icon" click="removeIcon()"/>
         <mx:Button label="Cancel" click="cancel()"/>
     </mx:HBox>
-</mx:TitleWindow>
+</util:EITitleWindow>

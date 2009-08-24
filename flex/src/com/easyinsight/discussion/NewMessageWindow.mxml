@@ -1,5 +1,5 @@
 <?xml version="1.0" ?>
-<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" title="New Message" creationComplete="validators = [ messageValidator ]">
+<util:EITitleWindow xmlns:util="com.easyinsight.util.*" xmlns:mx="http://www.adobe.com/2006/mxml" title="New Message" creationComplete="validators = [ messageValidator ]">
     <mx:Script><![CDATA[
 import mx.controls.Alert;
 import mx.validators.Validator;
@@ -42,4 +42,4 @@ import mx.managers.PopUpManager;
         </mx:HBox>
     </mx:VBox>
     <mx:StringValidator source="{messageArea}" property="text" minLength="1" id="messageValidator"/>
-</mx:TitleWindow>
+</util:EITitleWindow>

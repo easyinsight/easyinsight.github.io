@@ -1,5 +1,5 @@
 <?xml version="1.0" ?>
-<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" width="800" height="600" horizontalAlign="center"
+<util:EITitleWindow xmlns:util="com.easyinsight.util.*" xmlns:mx="http://www.adobe.com/2006/mxml" width="800" height="600" horizontalAlign="center"
         paddingLeft="15"
 		paddingTop="15" paddingBottom="15" paddingRight="15" title="Terms of Service" showCloseButton="true" close="PopUpManager.removePopUp(this)">
     <mx:Script><![CDATA[
@@ -57,4 +57,4 @@ Any questions about this Privacy Policy should be addressed to support at easyin
 
             ]]></mx:htmlText>
     </mx:TextArea>
-</mx:TitleWindow>
+</util:EITitleWindow>

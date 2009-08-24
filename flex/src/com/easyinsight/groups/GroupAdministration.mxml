@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:groups="com.easyinsight.groups.*" title="Group Administration">
+<util:EITitleWindow xmlns:util="com.easyinsight.util.*" xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:groups="com.easyinsight.groups.*" title="Group Administration">
 	<mx:Script>
 		<![CDATA[
 			import mx.collections.ArrayCollection;
@@ -81,4 +81,4 @@
 			<mx:Button label="Cancel" click="cancel()"/>
 		</mx:HBox> 
 	</mx:VBox>
-</mx:TitleWindow>
+</util:EITitleWindow>

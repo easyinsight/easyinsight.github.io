@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" creationComplete="onCreationComplete()">
+<util:EITitleWindow xmlns:util="com.easyinsight.util.*" xmlns:mx="http://www.adobe.com/2006/mxml" creationComplete="onCreationComplete()">
     <mx:Metadata>
         [Event(name="userConfigComplete", type="com.easyinsight.customupload.UploadConfigEvent")]
         [Event(name="userConfigCancel", type="com.easyinsight.customupload.UploadConfigEvent")]
@@ -74,4 +74,4 @@
 			<mx:Button label="Cancel" click="cancel()"/>
 		</mx:HBox>
 	</mx:VBox>
-</mx:TitleWindow>
+</util:EITitleWindow>

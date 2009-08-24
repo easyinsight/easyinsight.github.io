@@ -67,6 +67,7 @@
         import com.easyinsight.solutions.DelayedSolutionLink;
         import com.easyinsight.solutions.InsightDescriptor;
 
+        import com.easyinsight.util.EITitleWindow;
         import com.easyinsight.util.PopUpUtil;
         import com.easyinsight.util.ProgressAlert;
 
@@ -153,7 +154,7 @@
         }
 
         private function onKeyDown(event:KeyboardEvent):void {
-            if (event.ctrlKey && event.keyCode == 78) {
+            if (EITitleWindow.windowCount == 0 && currentState != "Analysis" && event.keyCode == 78) {
                 launchQuickSearchWindow();
             }
         }

@@ -1,0 +1,47 @@
+<?xml version="1.0" ?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" backgroundColor="#DCE2F8" borderThickness="1" cornerRadius="15" dropShadowEnabled="true"
+        borderStyle="solid">
+    <mx:Script><![CDATA[
+        import com.easyinsight.analysis.AnalysisItem;
+
+        import mx.managers.PopUpManager;
+
+        private function addPatternMatch():void {
+            var patternFilter:PatternFilter = new PatternFilter(_feedID, _item);
+            dispatchEvent(new FilterCreationEvent(patternFilter));
+            PopUpManager.removePopUp(this);
+        }
+
+        private function addMultiValue():void {
+            var multiValFilter:MultiValueFilter = new MultiValueFilter(_feedID, _item);
+            dispatchEvent(new FilterCreationEvent(multiValFilter));
+            PopUpManager.removePopUp(this);
+        }
+
+        private function addComboBox():void {
+            var comboBoxFilter:ComboBoxFilter = new ComboBoxFilter(_feedID, _item);
+            dispatchEvent(new FilterCreationEvent(comboBoxFilter));
+            PopUpManager.removePopUp(this);
+        }        
+
+        private var _item:AnalysisItem;
+        private var _feedID:int;
+
+        public function set feedID(value:int):void {
+            _feedID = value;
+        }
+
+        public function set item(value:AnalysisItem):void {
+            _item = value;
+        }
+
+        ]]></mx:Script>
+    <mx:VBox id="coreBox" paddingTop="5" paddingBottom="5" paddingLeft="5" paddingRight="5">
+        <mx:Label text="Do you want to create a combo box, multi value, or pattern match filter?"/>
+        <mx:HBox width="100%" horizontalAlign="center">
+            <mx:Button label="Combo Box" click="addComboBox()"/>
+            <mx:Button label="Multi Value" click="addMultiValue()"/>
+            <mx:Button label="Pattern Match" click="addPatternMatch()"/>
+        </mx:HBox>
+    </mx:VBox>
+</mx:Canvas>

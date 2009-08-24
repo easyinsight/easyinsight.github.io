@@ -1,5 +1,5 @@
 <?xml version="1.0" ?>
-<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" creationComplete="userService.getAccountAPISettings.send()">
+<util:EITitleWindow xmlns:util="com.easyinsight.util.*" xmlns:mx="http://www.adobe.com/2006/mxml" creationComplete="userService.getAccountAPISettings.send()">
     <mx:Script><![CDATA[
         import mx.managers.PopUpManager;
 
@@ -35,4 +35,4 @@
             <mx:Button label="Cancel" click="cancel()"/>
         </mx:HBox>
     </mx:VBox>
-</mx:TitleWindow>
+</util:EITitleWindow>

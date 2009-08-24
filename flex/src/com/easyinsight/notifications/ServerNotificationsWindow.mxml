@@ -1,5 +1,5 @@
 <?xml version="1.0" ?>
-<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*"
+<util:EITitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*"
                 removedEffect="{dissolveOut}" creationCompleteEffect="{dissolveIn}" showCloseButton="true" close="PopUpManager.removePopUp(this);" title="Notifications">
     <mx:Script><![CDATA[
         import mx.collections.ArrayCollection;
@@ -25,4 +25,4 @@
     <mx:Dissolve id="dissolveIn" duration="500" alphaFrom="0.0" alphaTo="1.0"/>
     <mx:TileList id="tileList" dataProvider="{_data}" itemRenderer="com.easyinsight.notifications.ServerNotificationsWindowRenderer" width="400" columnWidth="400">
     </mx:TileList>
-</mx:TitleWindow>
+</util:EITitleWindow>

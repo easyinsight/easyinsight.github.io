@@ -1,63 +1,64 @@
 <?xml version="1.0" encoding="utf-8"?>
-<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" title="Save Insight" 
-	creationComplete="addEventListener(KeyboardEvent.KEY_UP, keyHit); focusManager.setFocus(analysisName);
+<util:EITitleWindow xmlns:util="com.easyinsight.util.*" xmlns:mx="http://www.adobe.com/2006/mxml" title="Save Insight"
+                    creationComplete="addEventListener(KeyboardEvent.KEY_UP, keyHit); focusManager.setFocus(analysisName);
 	validators = [nameValidator]">
-	<mx:Script>
+    <mx:Script>
 		<![CDATA[                    
-                    import com.easyinsight.analysis.AnalysisUtil;
-                    import com.easyinsight.analysis.SavedAnalysisEvent;
-                    import com.easyinsight.util.ProgressAlert;
+        import com.easyinsight.analysis.AnalysisUtil;
+        import com.easyinsight.analysis.SavedAnalysisEvent;
+        import com.easyinsight.util.ProgressAlert;
 
-                    import mx.managers.PopUpManager;
-                    import com.easyinsight.analysis.AnalysisDefinition;
+        import mx.managers.PopUpManager;
 
-                    import mx.validators.Validator;
+        import com.easyinsight.analysis.AnalysisDefinition;
 
-                    [Bindable]
-                    public var analysisDefinition:AnalysisDefinition;
+        import mx.validators.Validator;
 
-                    private var validators:Array;
+        [Bindable]
+        public var analysisDefinition:AnalysisDefinition;
 
-                    private function save():void {
-                        var results:Array = Validator.validateAll(validators);
-                        if (results.length == 0) {
-                            ProgressAlert.alert(this, "Saving report...", null, analysisService.saveAs);
-                            analysisService.saveAs(analysisDefinition.analysisID, analysisName.text);
-                            PopUpManager.removePopUp(this);
-                        }
-                    }
-                    
-                    private function keyHit(event:KeyboardEvent):void {
-                    	if (event.keyCode == Keyboard.ENTER) {
-                    		save();
-                    	}
-                    }
+        private var validators:Array;
 
-                    private function cancel():void {
-                        PopUpManager.removePopUp(this);
-                    }
+        private function save():void {
+            var results:Array = Validator.validateAll(validators);
+            if (results.length == 0) {
+                ProgressAlert.alert(this, "Saving report...", null, analysisService.saveAs);
+                analysisService.saveAs(analysisDefinition.analysisID, analysisName.text);
+                PopUpManager.removePopUp(this);
+            }
+        }
 
-                    private function saved():void {
-                        var savedDef:AnalysisDefinition = analysisService.saveAs.lastResult as AnalysisDefinition;
-                        AnalysisUtil.updateReport(analysisDefinition, savedDef);
-                        dispatchEvent(new SavedAnalysisEvent(analysisName.text));                        
-                        PopUpManager.removePopUp(this);
-                    }
+        private function keyHit(event:KeyboardEvent):void {
+            if (event.keyCode == Keyboard.ENTER) {
+                save();
+            }
+        }
+
+        private function cancel():void {
+            PopUpManager.removePopUp(this);
+        }
+
+        private function saved():void {
+            var savedDef:AnalysisDefinition = analysisService.saveAs.lastResult as AnalysisDefinition;
+            AnalysisUtil.updateReport(analysisDefinition, savedDef);
+            dispatchEvent(new SavedAnalysisEvent(analysisName.text));
+            PopUpManager.removePopUp(this);
+        }
                 ]]>
-	</mx:Script>
-	<mx:VBox styleName="TitleWindowContents" width="100%" height="100%">			
-		<mx:Form>
-			<mx:FormItem label="Report Name:" direction="horizontal">
-				<mx:TextInput id="analysisName"/>				
-			</mx:FormItem>
-			<mx:FormItem label="" direction="horizontal">
-				<mx:Button label="Save" click="save()"/>
-				<mx:Button label="Cancel" click="cancel()"/>	
-			</mx:FormItem>		
-		</mx:Form>		
-	</mx:VBox>
-	<mx:StringValidator source="{analysisName}" property="text" minLength="3" id="nameValidator"/>
-	<mx:RemoteObject id="analysisService" destination="analysisDefinition">
-		<mx:method name="saveAs" result="saved()"/>
-	</mx:RemoteObject>
-</mx:TitleWindow>
+    </mx:Script>
+    <mx:VBox styleName="TitleWindowContents" width="100%" height="100%">
+        <mx:Form>
+            <mx:FormItem label="Report Name:" direction="horizontal">
+                <mx:TextInput id="analysisName"/>
+            </mx:FormItem>
+            <mx:FormItem label="" direction="horizontal">
+                <mx:Button label="Save" click="save()"/>
+                <mx:Button label="Cancel" click="cancel()"/>
+            </mx:FormItem>
+        </mx:Form>
+    </mx:VBox>
+    <mx:StringValidator source="{analysisName}" property="text" minLength="3" id="nameValidator"/>
+    <mx:RemoteObject id="analysisService" destination="analysisDefinition">
+        <mx:method name="saveAs" result="saved()"/>
+    </mx:RemoteObject>
+</util:EITitleWindow>

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" width="600" height="300" creationComplete="doCreationComplete()">
+<util:EITitleWindow xmlns:util="com.easyinsight.util.*" xmlns:mx="http://www.adobe.com/2006/mxml" width="600" height="300" creationComplete="doCreationComplete()">
 	<mx:Script>
 		<![CDATA[
 			import com.easyinsight.framework.User;
@@ -119,4 +119,4 @@
 			</mx:FormItem>
 		</mx:Form>
 	</mx:VBox>
-</mx:TitleWindow>
+</util:EITitleWindow>

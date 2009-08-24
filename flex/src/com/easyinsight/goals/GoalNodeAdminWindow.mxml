@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:filtering="com.easyinsight.filtering.*"
+<util:EITitleWindow xmlns:util="com.easyinsight.util.*" xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:filtering="com.easyinsight.filtering.*"
                 xmlns:goals="com.easyinsight.goals.*"
                 creationComplete="setupData()" width="1100" height="550" headerHeight="0">
     <mx:Script>
@@ -486,4 +486,4 @@
         </mx:HBox>
     </mx:VBox>
 
-</mx:TitleWindow>
+</util:EITitleWindow>

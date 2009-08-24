@@ -1,5 +1,5 @@
 <?xml version="1.0" ?>
-<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" title="Refresh Goal Tree Data Sources">
+<util:EITitleWindow xmlns:util="com.easyinsight.util.*" xmlns:mx="http://www.adobe.com/2006/mxml" title="Refresh Goal Tree Data Sources">
     <mx:Script><![CDATA[
         import com.easyinsight.framework.CredentialsCache;        
         import com.easyinsight.util.ProgressAlert;
@@ -59,4 +59,4 @@
         </mx:FormItem>
     </mx:Form>
 
-</mx:TitleWindow>
+</util:EITitleWindow>

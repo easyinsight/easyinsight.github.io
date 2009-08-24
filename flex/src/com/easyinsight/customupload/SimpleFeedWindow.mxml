@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" title="New Data Source"
+<util:EITitleWindow xmlns:util="com.easyinsight.util.*" xmlns:mx="http://www.adobe.com/2006/mxml" title="New Data Source"
         creationComplete="setup()">
 	<mx:Script>
 		<![CDATA[
@@ -51,4 +51,4 @@
 		</mx:FormItem>
 	</mx:Form>
     <mx:StringValidator source="{feedName}" property="text" minLength="3" id="nameValidator"/>
-</mx:TitleWindow>
+</util:EITitleWindow>

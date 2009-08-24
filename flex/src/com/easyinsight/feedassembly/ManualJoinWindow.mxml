@@ -1,5 +1,5 @@
 <?xml version="1.0" ?>
-<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" creationComplete="getDefinitions()">
+<util:EITitleWindow xmlns:util="com.easyinsight.util.*" xmlns:mx="http://www.adobe.com/2006/mxml" creationComplete="getDefinitions()">
     <mx:Script><![CDATA[
 import mx.managers.PopUpManager;
 import mx.collections.ArrayCollection;
@@ -68,4 +68,4 @@ import com.easyinsight.administration.feed.FeedDefinitionData;
             <mx:Button label="Cancel" click="cancel()"/>
         </mx:HBox>
     </mx:VBox>
-</mx:TitleWindow>
+</util:EITitleWindow>

@@ -1,5 +1,5 @@
 <?xml version="1.0" ?>
-<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*"
+<util:EITitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*"
                 showCloseButton="true" close="PopUpManager.removePopUp(this);" title="Background Tasks"
         removedEffect="{dissolveOut}" creationCompleteEffect="{dissolveIn}" showEffect="{dissolveIn}">
     <mx:Script><![CDATA[
@@ -40,4 +40,4 @@
             </mx:columns>
         </mx:DataGrid>
     </mx:VBox>
-</mx:TitleWindow>
+</util:EITitleWindow>

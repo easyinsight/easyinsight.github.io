@@ -1,5 +1,5 @@
 <?xml version="1.0" ?>
-<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:analysis="com.easyinsight.analysis.*">
+<util:EITitleWindow xmlns:util="com.easyinsight.util.*" xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:analysis="com.easyinsight.analysis.*">
     <mx:states>
         <mx:State name="Measure">
             <mx:AddChild relativeTo="{typeBox}">
@@ -29,4 +29,4 @@
         </mx:HBox>
         <mx:Box id="typeBox"/>
     </mx:VBox>
-</mx:TitleWindow>
+</util:EITitleWindow>

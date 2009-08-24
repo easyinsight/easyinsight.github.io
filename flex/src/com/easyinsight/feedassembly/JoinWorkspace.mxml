@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" creationComplete="initHandlers()" 
+<util:EITitleWindow xmlns:util="com.easyinsight.util.*" xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" creationComplete="initHandlers()"
 	width="800" height="600">
 	<mx:Script>
 		<![CDATA[
@@ -151,4 +151,4 @@
 		<mx:Panel id="ourPanel" layout="absolute" width="100%" height="100%" dragEnter="dragEnterHandler(event)"
 			dragDrop="dragDropHandler(event)"/>						
 	</mx:VBox>
-</mx:TitleWindow>
+</util:EITitleWindow>

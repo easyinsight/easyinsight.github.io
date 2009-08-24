@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%"
+<util:EITitleWindow xmlns:util="com.easyinsight.util.*" xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%"
 	initialize="initHandlers()" backgroundAlpha=".95" backgroundColor="#FFFFFF">
 	<mx:Script>
 		<![CDATA[
@@ -86,4 +86,4 @@
 	<mx:RemoteObject id="creationService" destination="login">
 		<mx:method name="updateUserLabels" result="savedUser()"/>
 	</mx:RemoteObject>
-</mx:TitleWindow>
+</util:EITitleWindow>

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" creationComplete="dataProvider.searchForSubscribedFeeds.send()">
+<util:EITitleWindow xmlns:util="com.easyinsight.util.*" xmlns:mx="http://www.adobe.com/2006/mxml" creationComplete="dataProvider.searchForSubscribedFeeds.send()">
 	<mx:Metadata>
 		[Event(name="feedAdded", type="com.easyinsight.feedassembly.FeedAdditionEvent")]
 	</mx:Metadata> 
@@ -48,4 +48,4 @@
 		</mx:FormItem>
 	</mx:Form>
 	
-</mx:TitleWindow>
+</util:EITitleWindow>

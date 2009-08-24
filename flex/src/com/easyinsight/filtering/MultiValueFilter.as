@@ -5,6 +5,8 @@ package com.easyinsight.filtering
 
 import com.easyinsight.framework.CredentialsCache;
 
+import com.easyinsight.util.PopUpUtil;
+
 import flash.events.Event;
 import flash.events.MouseEvent;
 	import flash.geom.Point;
@@ -55,8 +57,7 @@ import mx.controls.Label;
 			window.analysisItems = _analysisItems;
 			window.filterDefinition = _filterDefinition;			
 			PopUpManager.addPopUp(window, this, true);
-			window.x = 50;
-			window.y = 50;
+			PopUpUtil.centerPopUpWithY(window, 40);
 		}
 		
 		private function onFilterEdit(event:FilterEditEvent):void {
@@ -81,11 +82,11 @@ import mx.controls.Label;
             if (_showLabel) {
                 if (labelText == null) {
                     labelText = new Label();
-                    labelText.text = _filterDefinition.field.display + ":";
+                    labelText.text = _analysisItem.display + ":";
                 }
                 addChild(labelText);
             } else {
-                this.toolTip = _filterDefinition.field.display + ":";
+                this.toolTip = _analysisItem.display + ":";
             }
             if (_filterEditable) {
                 if (editButton == null) {
@@ -103,6 +104,11 @@ import mx.controls.Label;
                     deleteButton.enabled = false;
                 }
                 addChild(deleteButton);
+            }
+            if (_filterDefinition == null) {
+                _filterDefinition = new FilterValueDefinition();
+                _filterDefinition.inclusive = true;
+                _filterDefinition.field = _analysisItem;
             }
 		}
 		

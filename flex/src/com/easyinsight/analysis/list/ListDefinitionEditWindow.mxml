@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:analysis="com.easyinsight.analysis.list.*"
+<util:EITitleWindow xmlns:util="com.easyinsight.util.*" xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:analysis="com.easyinsight.analysis.list.*"
                 title="List Configuration">
     <mx:Script>
 		<![CDATA[
@@ -125,4 +125,4 @@
             <mx:Button label="Cancel" click="cancel()"/>
         </mx:FormItem>
     </mx:Form>
-</mx:TitleWindow>
+</util:EITitleWindow>

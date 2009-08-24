@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" creationComplete="goalService.getGoalTrees.send(); addEventListener(DataSourceSolutionEvent.DELETE_DATA_SOURCE, onDelete)">
+<util:EITitleWindow xmlns:util="com.easyinsight.util.*" xmlns:mx="http://www.adobe.com/2006/mxml" creationComplete="goalService.getGoalTrees.send(); addEventListener(DataSourceSolutionEvent.DELETE_DATA_SOURCE, onDelete)">
 	<mx:Script>
 		<![CDATA[
 			import com.easyinsight.goals.GoalTreeDescriptor;
@@ -277,4 +277,4 @@
             </mx:Box>
         </mx:TabNavigator>
     </mx:HBox>
-</mx:TitleWindow>
+</util:EITitleWindow>

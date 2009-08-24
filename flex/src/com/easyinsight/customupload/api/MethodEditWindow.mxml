@@ -1,5 +1,5 @@
 <?xml version="1.0" ?>
-<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" creationComplete="onCreation()">
+<util:EITitleWindow xmlns:util="com.easyinsight.util.*" xmlns:mx="http://www.adobe.com/2006/mxml" creationComplete="onCreation()">
     <mx:Script><![CDATA[
 import com.easyinsight.analysis.AnalysisItem;
 import mx.controls.Alert;
@@ -108,4 +108,4 @@ import com.easyinsight.analysis.AnalysisItemWrapper;
             <mx:Button label="Cancel" click="cancel()"/>
         </mx:HBox>
     </mx:VBox>
-</mx:TitleWindow>
+</util:EITitleWindow>

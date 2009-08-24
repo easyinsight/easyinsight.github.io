@@ -1,5 +1,5 @@
 <?xml version="1.0" ?>
-<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml">
+<util:EITitleWindow xmlns:util="com.easyinsight.util.*" xmlns:mx="http://www.adobe.com/2006/mxml">
     <mx:Form>
         <mx:FormItem label="Data Source:">
             <mx:Label text="{dataSourceName}"/>
@@ -55,4 +55,4 @@
     <mx:RemoteObject destination="userUpload" id="uploadService">
         <mx:method name="copyDataSource" result="copied()"/>
     </mx:RemoteObject>
-</mx:TitleWindow>
+</util:EITitleWindow>

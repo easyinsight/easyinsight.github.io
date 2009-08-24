@@ -1,5 +1,5 @@
 <?xml version="1.0" ?>
-<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml">
+<util:EITitleWindow xmlns:util="com.easyinsight.util.*" xmlns:mx="http://www.adobe.com/2006/mxml">
     <mx:Script><![CDATA[
         import mx.managers.PopUpManager;
 
@@ -24,4 +24,4 @@
             <mx:Button label="Cancel" click="PopUpManager.removePopUp(this)"/>
         </mx:FormItem>
     </mx:Form>
-</mx:TitleWindow>
+</util:EITitleWindow>

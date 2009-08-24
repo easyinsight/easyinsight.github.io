@@ -17,6 +17,9 @@ public class MaterializedFilterPatternDefinition extends MaterializedFilterDefin
 
     public MaterializedFilterPatternDefinition(AnalysisItem key, String pattern, boolean caseSensitive, boolean regex) {
         super(key);
+        if (pattern == null) {
+            pattern = "";
+        }
         if (regex) {
             this.pattern = Pattern.compile(caseSensitive ? pattern : pattern.toLowerCase());
         } else {

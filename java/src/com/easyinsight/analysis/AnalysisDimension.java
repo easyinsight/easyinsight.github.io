@@ -29,7 +29,18 @@ public class AnalysisDimension extends AnalysisItem {
     @JoinColumn(name="key_dimension_id")
     private AnalysisDimension keyDimension;
 
+    @Column(name="url_pattern")
+    private String urlPattern;
+
     public AnalysisDimension() {
+    }
+
+    public String getUrlPattern() {
+        return urlPattern;
+    }
+
+    public void setUrlPattern(String urlPattern) {
+        this.urlPattern = urlPattern;
     }
 
     public AnalysisDimension getKeyDimension() {

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" width="700" height="500">
+<util:EITitleWindow xmlns:util="com.easyinsight.util.*" xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" width="700" height="500">
 	<mx:Script>
 		<![CDATA[
         import com.easyinsight.util.PopUpUtil;
@@ -22,4 +22,4 @@
 			<mx:Button label="Close" click="closeWindow()"/>
 		</mx:HBox>	
 	</mx:VBox>
-</mx:TitleWindow>
+</util:EITitleWindow>

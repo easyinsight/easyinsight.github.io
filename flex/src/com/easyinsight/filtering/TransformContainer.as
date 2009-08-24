@@ -312,13 +312,13 @@ import mx.managers.ToolTipManager;
 				var sliderMeasureFilter:SliderMeasureFilter = new SliderMeasureFilter(_feedID, analysisItem);
 				initializeFilter(sliderMeasureFilter); 
 			} else if (analysisItem.hasType(AnalysisItemTypes.DIMENSION)) {
-				var filterValueDefinition:FilterValueDefinition = new FilterValueDefinition();
-				filterValueDefinition.field = analysisItem;
-				filterValueDefinition.filteredValues = new ArrayCollection();
-				filterValueDefinition.inclusive = true;
-				var comboBoxFilter:ComboBoxFilter = new ComboBoxFilter(_feedID, analysisItem);
-				comboBoxFilter.filterDefinition = filterValueDefinition;
-				initializeFilter(comboBoxFilter);
+                var dimWindow:GroupingFilterWindow = new GroupingFilterWindow();
+                dimWindow.item = analysisItem;
+                dimWindow.feedID = _feedID;
+                dimWindow.addEventListener(FilterCreationEvent.FILTER_CREATION, onFilterSelection);
+                PopUpManager.addPopUp(dimWindow, this, true);
+                dimWindow.x = event.localX - (event.dragSource.dataForFormat("localX") as Number);
+                dimWindow.y = event.localY - (event.dragSource.dataForFormat("localY") as Number);
 			}
 		}
 
