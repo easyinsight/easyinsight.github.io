@@ -1,6 +1,7 @@
 package com.easyinsight.analysis;
 
 import javax.persistence.*;
+import java.util.Map;
 
 /**
  * User: James Boe
@@ -60,8 +61,14 @@ public class ListDefinitionState extends AnalysisDefinitionState {
         ListDefinitionState listDefinition = (ListDefinitionState) super.clone();
         listDefinition.setDefinitionID(0);
         if (listLimitsMetadata != null) {
-            listDefinition.getListLimitsMetadata().setLimitsMetadataID(0);
+            listDefinition.listLimitsMetadata = listLimitsMetadata.clone();
         }
         return listDefinition;
+    }
+
+    public void updateIDs(Map<Long, AnalysisItem> replacementMap) {
+        if (listLimitsMetadata != null) {
+            listLimitsMetadata.updateIDs(replacementMap);
+        }
     }
 }

@@ -36,6 +36,7 @@ public class AnalysisDefinitionFactory {
             chartDefinition.setRotationAngle(wsChart.getRotationAngle());
             chartDefinition.setChartFamily(wsChart.getChartFamily());
             chartDefinition.setChartType(wsChart.getChartType());
+            chartDefinition.setLimitsMetadata(wsChart.getLimitsMetadata());
             chartDefinition.setDefinitionID(wsChart.getChartDefinitionID());
             analysisDefinitionState = chartDefinition;
         } else if (wsAnalysisDefinition.getDataFeedType().equals(AnalysisTypes.MAP)) {

@@ -132,7 +132,7 @@ public class SliderMeasureFilter extends HBox implements IFilter
 
 
                 var checkbox:CheckBox = new CheckBox();
-                checkbox.selected = true;
+                checkbox.selected = _filterDefinition == null ? true : _filterDefinition.enabled;
                 checkbox.toolTip = "Click to disable this filter.";
                 checkbox.addEventListener(Event.CHANGE, onChange);
                 addChild(checkbox);

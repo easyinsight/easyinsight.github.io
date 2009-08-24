@@ -364,6 +364,7 @@ public class AnalysisDefinition implements Cloneable {
         for (PersistableFilterDefinition filter : filterDefinitions) {
             filter.updateIDs(replacementMap);
         }
+        analysisDefinitionState.updateIDs(replacementMap);
         analysisDefinition.setAnalysisDefinitionState(analysisDefinitionState.clone());
         analysisDefinition.setReportStructure(clonedStructure);
         analysisDefinition.setAddedItems(addedItems);

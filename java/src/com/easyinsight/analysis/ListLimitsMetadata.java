@@ -4,6 +4,7 @@ import com.easyinsight.analysis.AnalysisItem;
 
 import javax.persistence.*;
 import java.io.Serializable;
+import java.util.Map;
 
 /**
  * User: James Boe
@@ -13,7 +14,7 @@ import java.io.Serializable;
 @Entity
 @Table(name="list_limits_metadata")
 @PrimaryKeyJoinColumn(name="limits_metadata_id")
-public class ListLimitsMetadata extends LimitsMetadata implements Serializable {
+public class ListLimitsMetadata extends LimitsMetadata implements Serializable, Cloneable {
     @OneToOne
     @JoinColumn(name="analysis_item_id")
     private AnalysisItem analysisItem;
@@ -24,5 +25,14 @@ public class ListLimitsMetadata extends LimitsMetadata implements Serializable {
 
     public void setAnalysisItem(AnalysisItem analysisItem) {
         this.analysisItem = analysisItem;
+    }
+
+    @Override
+    public ListLimitsMetadata clone() throws CloneNotSupportedException {
+        return (ListLimitsMetadata) super.clone();
+    }
+
+    public void updateIDs(Map<Long, AnalysisItem> replacementMap) {
+        analysisItem = replacementMap.get(analysisItem.getAnalysisItemID());
     }
 }

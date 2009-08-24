@@ -66,6 +66,10 @@ public abstract class Pipeline {
         for (IComponent component : components) {
             dataSet = component.apply(dataSet, pipelineData);
         }
-        return dataSet.toListDataResults(new ArrayList<AnalysisItem>(pipelineData.getReport().getAllAnalysisItems()));
+        ListDataResults results = dataSet.toListDataResults(new ArrayList<AnalysisItem>(pipelineData.getReport().getAllAnalysisItems()));
+        for (IComponent component : components) {
+            component.decorate(results);
+        }
+        return results;
     }
 }

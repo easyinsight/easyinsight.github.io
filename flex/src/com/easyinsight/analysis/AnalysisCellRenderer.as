@@ -38,15 +38,6 @@ import mx.controls.Label;
             addEventListener(MouseEvent.MOUSE_OVER, onMouseOver);
             addEventListener(MouseEvent.MOUSE_OUT, onMouseOut);
             addEventListener(MouseEvent.CLICK, onClick);
-            /*var drilldownContextItem:ContextMenuItem = new ContextMenuItem("Drilldown", true);
-            drilldownContextItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, onDrilldown);
-            var rollupContextItem:ContextMenuItem = new ContextMenuItem("Rollup", true);
-            rollupContextItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, onRollup);
-
-            //dataSet.addEventListener(KeyboardEvent.KEY_UP, keyboardHandler);
-            contextMenu = new ContextMenu();
-            contextMenu.hideBuiltInItems();
-            contextMenu.customItems = [ drilldownContextItem, rollupContextItem, copyContextItem ];*/
 		}
 
         override protected function commitProperties():void {

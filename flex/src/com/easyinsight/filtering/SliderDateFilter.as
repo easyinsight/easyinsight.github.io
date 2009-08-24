@@ -97,13 +97,13 @@ import mx.rpc.events.ResultEvent;
 			highField = new DateField();
 			highField.selectedDate = dateMetadata.latestDate;
 			highField.addEventListener(CalendarLayoutChangeEvent.CHANGE, highDateChange);
-            if (!_filterEditable) {
+            //if (!_filterEditable) {
                 var checkbox:CheckBox = new CheckBox();
-                checkbox.selected = true;
+                checkbox.selected = _filterDefinition == null ? true : _filterDefinition.enabled;;
                 checkbox.toolTip = "Click to disable this filter.";
                 checkbox.addEventListener(Event.CHANGE, onChange);
                 addChild(checkbox);
-            }
+            //}
             if (_showLabel) {
                 var label:Label = new Label();
                 label.text = analysisItem.display + ":";

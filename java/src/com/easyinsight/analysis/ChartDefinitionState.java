@@ -18,6 +18,10 @@ public class ChartDefinitionState extends AnalysisDefinitionState {
     @Column(name="chart_report_id")
     private long definitionID;
 
+    @OneToOne(cascade=CascadeType.ALL)
+    @JoinColumn(name="limits_metadata_id")
+    private LimitsMetadata limitsMetadata;
+
     @Column(name="chart_family")
     private int chartFamily;
 
@@ -71,6 +75,14 @@ public class ChartDefinitionState extends AnalysisDefinitionState {
         this.elevationAngle = elevationAngle;
     }
 
+    public LimitsMetadata getLimitsMetadata() {
+        return limitsMetadata;
+    }
+
+    public void setLimitsMetadata(LimitsMetadata limitsMetadata) {
+        this.limitsMetadata = limitsMetadata;
+    }
+
     public long getDefinitionID() {
         return definitionID;
     }
@@ -91,6 +103,9 @@ public class ChartDefinitionState extends AnalysisDefinitionState {
     public AnalysisDefinitionState clone() throws CloneNotSupportedException {
         ChartDefinitionState chartDefinitionState = (ChartDefinitionState) super.clone();
         chartDefinitionState.definitionID = 0;
+        if (limitsMetadata != null) {
+            chartDefinitionState.limitsMetadata = limitsMetadata.clone();
+        }
         return chartDefinitionState;
     }
 
@@ -162,6 +177,7 @@ public class ChartDefinitionState extends AnalysisDefinitionState {
         }
         wsChartDefinition.setRotationAngle(rotationAngle);
         wsChartDefinition.setElevationAngle(elevationAngle);
+        wsChartDefinition.setLimitsMetadata(limitsMetadata);
         wsChartDefinition.setChartDefinitionID(definitionID);
         return wsChartDefinition;
     }

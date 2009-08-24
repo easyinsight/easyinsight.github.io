@@ -11,7 +11,7 @@ import java.io.Serializable;
 @Entity
 @Table(name="limits_metadata")
 @Inheritance(strategy=InheritanceType.JOINED)
-public class LimitsMetadata implements Serializable {
+public class LimitsMetadata implements Serializable, Cloneable {
     @Column(name="top_items")
     private boolean top;
 
@@ -44,5 +44,11 @@ public class LimitsMetadata implements Serializable {
 
     public void setNumber(int number) {
         this.number = number;
+    }
+
+    public LimitsMetadata clone() throws CloneNotSupportedException {
+        LimitsMetadata limitsMetadata = (LimitsMetadata) super.clone();
+        limitsMetadata.setLimitsMetadataID(0);
+        return limitsMetadata;
     }
 }

@@ -40,6 +40,7 @@ public class StandardReportPipeline extends Pipeline {
         if (!temporalAdded) {*/
             components.add(new AggregationComponent());
         //}
+        components.add(new LinkDecorationComponent());
         components.add(new FilterComponent(false));
         components.add(new LimitsComponent());
         return components;

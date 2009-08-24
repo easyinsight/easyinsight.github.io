@@ -106,7 +106,7 @@ import mx.events.DropdownEvent;
 			super.createChildren();
             //if (!_filterEditable) {
                 var checkbox:CheckBox = new CheckBox();
-                checkbox.selected = _filterDefinition.enabled;
+                checkbox.selected = _filterDefinition == null ? true : _filterDefinition.enabled;
                 checkbox.toolTip = "Click to disable this filter.";
                 checkbox.addEventListener(Event.CHANGE, onChange);
                 addChild(checkbox);

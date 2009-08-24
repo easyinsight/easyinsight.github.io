@@ -17,6 +17,18 @@ public abstract class Value implements Serializable {
     public static final int EMPTY = 4;
     private static final long serialVersionUID = 5584087693730331068L;
 
+    // in theory, we have URL, we have image
+
+    private String url;
+
+    public String getUrl() {
+        return url;
+    }
+
+    public void setUrl(String url) {
+        this.url = url;
+    }
+
     public abstract int type();
 
     public abstract Double toDouble();

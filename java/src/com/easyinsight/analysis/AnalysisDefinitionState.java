@@ -1,6 +1,7 @@
 package com.easyinsight.analysis;
 
 import javax.persistence.*;
+import java.util.Map;
 
 /**
  * User: James Boe
@@ -32,5 +33,9 @@ public abstract class AnalysisDefinitionState implements Cloneable {
 
     public void setId(long id) {
         this.id = id;
+    }
+
+    public void updateIDs(Map<Long, AnalysisItem> replacementMap) {
+
     }
 }

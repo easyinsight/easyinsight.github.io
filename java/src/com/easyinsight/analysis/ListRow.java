@@ -11,6 +11,15 @@ import java.io.Serializable;
  */
 public class ListRow implements Serializable {
     private Value[] values;
+    private String[] urls;
+
+    public String[] getUrls() {
+        return urls;
+    }
+
+    public void setUrls(String[] urls) {
+        this.urls = urls;
+    }
 
     public Value[] getValues() {
         return values;
