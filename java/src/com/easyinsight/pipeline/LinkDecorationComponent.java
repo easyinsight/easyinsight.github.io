@@ -13,13 +13,13 @@ public class LinkDecorationComponent implements IComponent {
 
     public DataSet apply(DataSet dataSet, PipelineData pipelineData) {
         for (AnalysisItem analysisItem : pipelineData.getReportItems()) {
-            if (analysisItem.getUrlPattern() != null && analysisItem.getUrlPattern().length() > 0) {
+            /*if (analysisItem.getUrlPattern() != null && analysisItem.getUrlPattern().length() > 0) {
                 // compile the pattern
                 // retrieve the value for each row, annotate
                 for (IRow row : dataSet.getRows()) {
 
                 }
-            }
+            }*/
 
         }
 

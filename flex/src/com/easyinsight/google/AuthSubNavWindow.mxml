@@ -1,0 +1,18 @@
+<?xml version="1.0" ?>
+<util:EITitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*">
+    <mx:Script><![CDATA[
+        private var _googleURL:String;
+
+        private function goGoogle():void {
+            flash.net.navigateToURL(new URLRequest(_googleURL), "_blank");
+        }
+
+        public function set googleURL(value:String):void {
+            _googleURL = value;
+        }
+        ]]></mx:Script>
+    <mx:VBox>
+        <mx:Label text="You'll need to authorize Easy Insight to access your Google account."/>
+        <mx:LinkButton label="Go to Google" click="goGoogle()"/>
+    </mx:VBox>
+</util:EITitleWindow>

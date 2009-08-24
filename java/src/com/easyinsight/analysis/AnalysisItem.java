@@ -53,8 +53,8 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
     @Column(name="width")
     private int width;
 
-    @Column(name="url_pattern")
-    private String urlPattern;
+    /*@Column(name="url_pattern")
+    private String urlPattern;*/
 
     @OneToOne(cascade = CascadeType.MERGE)
     @JoinColumn(name="virtual_dimension_id")
@@ -92,13 +92,13 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
         }
     }
 
-    public String getUrlPattern() {
+    /*public String getUrlPattern() {
         return urlPattern;
     }
 
     public void setUrlPattern(String urlPattern) {
         this.urlPattern = urlPattern;
-    }
+    }*/
 
     public int getWidth() {
         return width;

@@ -31,6 +31,13 @@
         <servlet-class>com.easyinsight.goals.GoalTaskServlet</servlet-class>
         <load-on-startup>2</load-on-startup>
     </servlet>
+
+    <servlet>
+        <servlet-name>TokenRedirect</servlet-name>
+        <display-name>TokenRedirect</display-name>
+        <servlet-class>com.easyinsight.users.TokenRedirectServlet</servlet-class>
+        <load-on-startup>2</load-on-startup>
+    </servlet>
                
     <servlet>
         <servlet-name>UploadExample</servlet-name>
