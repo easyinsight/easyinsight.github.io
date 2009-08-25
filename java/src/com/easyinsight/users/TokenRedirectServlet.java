@@ -2,6 +2,7 @@ package com.easyinsight.users;
 
 import com.google.gdata.client.http.AuthSubUtil;
 import com.google.gdata.util.AuthenticationException;
+import com.easyinsight.security.SecurityUtil;
 
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -74,12 +75,13 @@ public class TokenRedirectServlet extends HttpServlet {
         }
 
         // Retrieve the authentication cookie to identify user
-        String principal = Utility.getCookieValueWithName(req.getCookies(), Utility.LOGIN_COOKIE_NAME);
+        /*String principal = Utility.getCookieValueWithName(req.getCookies(), Utility.LOGIN_COOKIE_NAME);
         if (principal == null) {
           resp.sendError(HttpServletResponse.SC_BAD_REQUEST,
                          "Unidentified principal.");
           return;
-        }
+        }*/
+        //SecurityUtil.getUserID(false);
 
         Token tokenObject = new Token();
         //tokenObject.setUserID(SecurityUtil.getUserID());
