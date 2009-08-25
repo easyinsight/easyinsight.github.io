@@ -86,7 +86,7 @@ public class TokenRedirectServlet extends HttpServlet {
         Token tokenObject = new Token();
         //tokenObject.setUserID(SecurityUtil.getUserID());
         tokenObject.setTokenType(TokenStorage.GOOGLE_DOCS_TOKEN);
-        tokenObject.setTokenValue(token);
+        tokenObject.setTokenValue(sessionToken);
         new TokenStorage().saveToken(tokenObject);
 
         // Redirect to main.jsp where the token will be used
