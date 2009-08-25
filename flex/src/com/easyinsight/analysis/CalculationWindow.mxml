@@ -11,6 +11,7 @@
 
         import mx.collections.ArrayCollection;
         import mx.controls.AdvancedDataGrid;
+        import mx.controls.Alert;
         import mx.controls.DataGrid;
         import mx.managers.DragManager;
         import mx.controls.List;
@@ -116,7 +117,18 @@
                     analysisItem = analysisItemWrapper.analysisItem;
                 }
             }
-            calculationInput.text += analysisItem.key.createString();
+            var outputStr:String = analysisItem.key.createString();
+            var str:String = ":<>,.;/?\"\'{}-=+";
+            var foundSpecialChar:Boolean = false;
+            for(var i:int = 0;i < str.length;i++){
+                if(outputStr.indexOf(str.charAt(i)) != -1)
+                    foundSpecialChar = true;
+            }
+            if(foundSpecialChar)
+                calculationInput.text += "[";
+            calculationInput.text += outputStr;
+            if(foundSpecialChar)
+                calculationInput.text += "]";
         }
 
         public function set analysisItem(analysisItem:AnalysisItem):void {

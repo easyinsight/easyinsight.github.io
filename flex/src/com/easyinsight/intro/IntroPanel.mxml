@@ -72,7 +72,6 @@ import mx.managers.PopUpManager;
             window.y = 200;
         }
 
-
         private var _tour:Boolean;
 
         public function get tour():Boolean {
