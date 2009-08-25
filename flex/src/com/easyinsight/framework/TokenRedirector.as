@@ -30,7 +30,7 @@ public class TokenRedirector extends EventDispatcher {
     private function onTokenResult(event:ResultEvent):void {
         var result:String = tokenService.setToken.lastResult as String;
         if (result == null) {
-            dispatchEvent(new NavigationEvent("My Data", null, { toGDocs: true }));
+            User.getEventNotifier().dispatchEvent(new NavigationEvent("My Data", null, { toGDocs: true }));
         } else {
             Alert.show(result);
         }
