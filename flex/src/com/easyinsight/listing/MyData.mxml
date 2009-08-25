@@ -225,11 +225,13 @@
                 uploadService.getFeedAnalysisTree.send();
             }
             if (_toGDocs) {
-                var uploadExternal:UploadExternalSource = UploadExternalSource(PopUpManager.createPopUp(this, UploadExternalSource, true));
+                var uploadExternal:UploadExternalSource = new UploadExternalSource();
                 uploadExternal.addEventListener(UploadConfigEvent.UPLOAD_CONFIG_COMPLETE, uploadConfigComplete);
                 uploadExternal.width = uploadGrid.width;
                 uploadExternal.height = uploadGrid.height;
+                PopUpManager.addPopUp(uploadExternal, this, true);
                 PopUpUtil.centerPopUp(uploadExternal);
+                _toGDocs = false;
             }
         }
 
