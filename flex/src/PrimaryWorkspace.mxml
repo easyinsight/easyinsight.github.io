@@ -227,13 +227,13 @@
                 navigation(new NavigationEvent("Intro"));
             else {
                 var o:Object = URLUtil.stringToObject(event.targetURL, "&");
-                parseFragmentObject(o);
+                parseFragmentObject(o, event.targetURL);
             }
         }
 
         private function parseURL(event:Event):void {            
             var o:Object = URLUtil.stringToObject(browserManager.fragment, "&");
-            parseFragmentObject(o);
+            parseFragmentObject(o, browserManager.fragment);
         }
 
         private function postActivatePath(event:ActivationEvent):void {
