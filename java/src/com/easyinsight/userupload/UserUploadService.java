@@ -830,7 +830,7 @@ public class UserUploadService implements IUserUploadService {
         Connection conn = Database.instance().getConnection();
         try {
             conn.setAutoCommit(false);
-            if (credentials.isEncrypted()) {
+            if (credentials != null && credentials.isEncrypted()) {
                 credentials = decryptCredentials(credentials);
             }
             IServerDataSourceDefinition serverDataSourceDefinition = (IServerDataSourceDefinition) feedDefinition;
