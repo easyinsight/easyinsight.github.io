@@ -1,12 +1,12 @@
 <?xml version="1.0" ?>
 <util:EITitleWindow xmlns:util="com.easyinsight.util.*" xmlns:mx="http://www.adobe.com/2006/mxml">
-    <mx:states>
+    <util:states>
         <mx:State name="PreparingAccount">
             <mx:AddChild relativeTo="{actionsBox}">
                 <mx:Button label="Activate" click="activate()"/>
             </mx:AddChild>
         </mx:State>
-    </mx:states>
+    </util:states>
     <mx:Script><![CDATA[
         import mx.collections.ArrayCollection;
         import mx.managers.PopUpManager;
