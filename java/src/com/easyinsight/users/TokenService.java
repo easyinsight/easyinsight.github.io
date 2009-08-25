@@ -22,7 +22,7 @@ public class TokenService {
     }
 
     public String getAuthSubURL() {
-        String nextURL = "https://www.easy-insight.com/app/TokenRedirect";
+        String nextURL = "https://staging.easy-insight.com/app/TokenRedirect";
         String scope = "http://spreadsheets.google.com/feeds/";
         return AuthSubUtil.getRequestUrl(nextURL, scope, false, true);
     }
