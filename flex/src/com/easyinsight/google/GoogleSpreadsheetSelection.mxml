@@ -60,6 +60,7 @@
         private function retrieveSpreadsheets():void {
             //addEventListener(UploadConfigEvent.UPLOAD_CONFIG_COMPLETE, onComplete);
             if (_straightToConnect) {
+                ProgressAlert.alert(this, "Retrieving available spreadsheets...", null, dataService.getAvailableGoogleSpreadsheets);
                 dataService.getAvailableGoogleSpreadsheets.send();
             }
         }
@@ -115,6 +116,7 @@
         private function gotToken():void {
             var result:Boolean = tokenService.isTokenEstablished.lastResult as Boolean;
             if (result) {
+                ProgressAlert.alert(this, "Retrieving available spreadsheets...", null, dataService.getAvailableGoogleSpreadsheets);
                 dataService.getAvailableGoogleSpreadsheets.send();
             } else {
                 var window:AuthSubNavWindow = new AuthSubNavWindow();
