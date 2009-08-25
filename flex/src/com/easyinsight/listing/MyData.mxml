@@ -226,9 +226,7 @@
             }
             if (_toGDocs) {
                 var uploadExternal:UploadExternalSource = new UploadExternalSource();
-                uploadExternal.addEventListener(UploadConfigEvent.UPLOAD_CONFIG_COMPLETE, uploadConfigComplete);
-                uploadExternal.width = uploadGrid.width;
-                uploadExternal.height = uploadGrid.height;
+                uploadExternal.addEventListener(UploadConfigEvent.UPLOAD_CONFIG_COMPLETE, uploadConfigComplete);                
                 PopUpManager.addPopUp(uploadExternal, this, true);
                 PopUpUtil.centerPopUp(uploadExternal);
                 _toGDocs = false;
