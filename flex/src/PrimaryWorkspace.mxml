@@ -308,9 +308,10 @@
                                                     var redirectID:String = o.redirectID;
                                                     if (redirectID != null) {
                                                         var redirectType:int = int(redirectID);
+                                                        var sessionToken:String = String(o.token);
                                                         var redirector:TokenRedirector = new TokenRedirector();
                                                         redirector.type = redirectType;
-                                                        redirector.onURL(url);
+                                                        redirector.onURL(sessionToken);
                                                     } else {
                                                         var page:String = o.page;
                                                         if (page != null) {

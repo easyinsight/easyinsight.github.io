@@ -23,57 +23,10 @@ import java.util.Iterator;
  */
 public class TokenService {
 
-    public String setToken(int type, String url) {
+    public String setToken(int type, String sessionToken) {
         /*System.out.println("got URL " + url);
         String queryString = url.substring(url.indexOf("?"));*/
-        String queryURL = "https://staging.easy-insight.com/app?" + url;
-        String token = AuthSubUtil.getTokenFromReply(url);
-        if (token == null) {
-          return "No token specified.";
-
-        }
-
-        // Exchange the token for a session token
-        String sessionToken;
-        try {
-          sessionToken =
-            AuthSubUtil.exchangeForSessionToken(token,
-                                                Utility.getPrivateKey());
-        } catch (IOException e1) {
-          return "Exception retrieving session token.";
-        } catch (GeneralSecurityException e1) {
-          return "Security error while retrieving session token.";
-        } catch (AuthenticationException e) {
-          return "Server rejected one time use token.";
-        }
-
-        try {
-          // Sanity checking usability of token
-          Map<String, String> info =
-            AuthSubUtil.getTokenInfo(sessionToken, Utility.getPrivateKey());
-          for (Iterator<String> iter = info.keySet().iterator(); iter.hasNext();) {
-            String key = iter.next();
-            System.out.println("\t(key, value): (" + key + ", " + info.get(key)
-                               + ")");
-          }
-        } catch (IOException e1) {
-          return "Exception retrieving info for session token.";
-        } catch (GeneralSecurityException e1) {
-          return "Security error while retrieving session token info.";
-        } catch (AuthenticationException e) {
-          return "Auth error retrieving info for session token: " +
-                         e.getMessage();
-        }
-
-        // Retrieve the authentication cookie to identify user
-        /*String principal = Utility.getCookieValueWithName(req.getCookies(), Utility.LOGIN_COOKIE_NAME);
-        if (principal == null) {
-          resp.sendError(HttpServletResponse.SC_BAD_REQUEST,
-                         "Unidentified principal.");
-          return;
-        }*/
-        //SecurityUtil.getUserID(false);
-
+        
         Token tokenObject = new Token();
         tokenObject.setUserID(SecurityUtil.getUserID());
         tokenObject.setTokenType(type);
