@@ -8,6 +8,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.ServletException;
+import javax.servlet.ServletOutputStream;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.util.Map;
@@ -84,10 +85,13 @@ public class TokenRedirectServlet extends HttpServlet {
         //SecurityUtil.getUserID(false);
 
         Token tokenObject = new Token();
-        //tokenObject.setUserID(SecurityUtil.getUserID());
+        tokenObject.setUserID(SecurityUtil.getUserID());
         tokenObject.setTokenType(TokenStorage.GOOGLE_DOCS_TOKEN);
         tokenObject.setTokenValue(sessionToken);
         new TokenStorage().saveToken(tokenObject);
+
+        ServletOutputStream out = resp.getOutputStream();
+        out.println(String.valueOf(SecurityUtil.getUserID()));
 
         // Redirect to main.jsp where the token will be used
         /*StringBuffer continueUrl = req.getRequestURL();
