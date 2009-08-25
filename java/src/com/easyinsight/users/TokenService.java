@@ -24,9 +24,10 @@ import java.util.Iterator;
 public class TokenService {
 
     public String setToken(int type, String url) {
-        System.out.println("got URL " + url);
-        String queryString = url.substring(url.indexOf("?"));
-        String token = AuthSubUtil.getTokenFromReply(queryString);
+        /*System.out.println("got URL " + url);
+        String queryString = url.substring(url.indexOf("?"));*/
+        String queryURL = "https://staging.easy-insight.com/app?" + url;
+        String token = AuthSubUtil.getTokenFromReply(url);
         if (token == null) {
           return "No token specified.";
 
@@ -93,7 +94,7 @@ public class TokenService {
 
     public String getAuthSubURL() {
         try {
-            String nextURL = "https://staging.easy-insight.com/app/#redirectID=1";
+            String nextURL = "https://staging.easy-insight.com/app/TokenRedirect";
             String scope = "http://spreadsheets.google.com/feeds/";
             return AuthSubUtil.getRequestUrl(nextURL, scope, false, true);
         } catch (Exception e) {

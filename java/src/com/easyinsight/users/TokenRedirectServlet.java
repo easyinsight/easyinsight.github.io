@@ -84,15 +84,19 @@ public class TokenRedirectServlet extends HttpServlet {
         }*/
         //SecurityUtil.getUserID(false);
 
-        Token tokenObject = new Token();
+        String redirectURL = "https://staging.easy-insight.com/app/#redirectID=1&token=" + sessionToken;
+        resp.sendRedirect(redirectURL);
+
+        /*Token tokenObject = new Token();
         tokenObject.setUserID(SecurityUtil.getUserID());
         tokenObject.setTokenType(TokenStorage.GOOGLE_DOCS_TOKEN);
         tokenObject.setTokenValue(sessionToken);
         new TokenStorage().saveToken(tokenObject);
 
         ServletOutputStream out = resp.getOutputStream();
-        out.println(String.valueOf(SecurityUtil.getUserID()));
+        out.println(String.valueOf(SecurityUtil.getUserID()));*/
 
+        //resp.sendRedirect("https://www.easy-insight.com/app#googleSpreadsheets=1");
         // Redirect to main.jsp where the token will be used
         /*StringBuffer continueUrl = req.getRequestURL();
         int index = continueUrl.lastIndexOf("/");
