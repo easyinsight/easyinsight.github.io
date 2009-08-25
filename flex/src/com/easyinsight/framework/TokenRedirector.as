@@ -35,6 +35,7 @@ public class TokenRedirector {
     }
 
     public function onURL(url:String):void {
+        Alert.show("url = " + url);
         tokenService.setToken.send(_type, url);
     }
 }
