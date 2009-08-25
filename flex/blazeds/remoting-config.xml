@@ -16,6 +16,12 @@
         </properties>
     </destination>
 
+    <destination id="tokenService">
+        <properties>
+            <source>com.easyinsight.users.TokenService</source>
+        </properties>
+    </destination>
+
     <destination id="twitter">
         <properties>
             <source>com.easyinsight.twitter.TwitterService</source>

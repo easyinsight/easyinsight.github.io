@@ -45,6 +45,37 @@ public class UserUploadService implements IUserUploadService {
     public UserUploadService() {
     }
 
+    public UploadResponse newAirSource(String dataSourceName, String fileName, byte[] fileBytes) {
+        long uploadID = addRawUploadData(SecurityUtil.getUserID(), fileName, fileBytes);
+        EIConnection conn = Database.instance().getConnection();
+        UploadResponse uploadResponse;
+        try {
+            conn.setAutoCommit(false);
+            UploadFormat uploadFormat = new UploadFormatTester().determineFormat(fileBytes);
+            if (uploadFormat == null) {
+                uploadResponse = new UploadResponse("Sorry, we couldn't figure out what type of file you tried to upload. Supported types are Excel 1997-2003 and delimited text files.");
+            } else {
+                FileProcessCreateScheduledTask task = new FileProcessCreateScheduledTask();
+                task.setUploadID(uploadID);
+                task.setName(dataSourceName);
+                task.setStatus(ScheduledTask.SCHEDULED);
+                task.setExecutionDate(new Date());
+                task.setUserID(SecurityUtil.getUserID());
+                task.setAccountID(SecurityUtil.getAccountID());
+                task.createFeed(conn, fileBytes, uploadFormat);
+                uploadResponse = new UploadResponse(task.getFeedID(), task.getAnalysisID());
+            }
+            conn.commit();
+        } catch (Exception e) {
+            LogClass.error(e);
+            conn.rollback();
+            uploadResponse = new UploadResponse("Something caused an internal error in the processing of the uploaded file.");
+        } finally {
+            Database.closeConnection(conn);
+        }
+        return uploadResponse;
+    }
+
     public List<SolutionInstallInfo> copyDataSource(long dataSourceID, String newName, boolean copyData, boolean includeChildren) {
         SecurityUtil.authorizeFeed(dataSourceID, Roles.OWNER);
         EIConnection conn = Database.instance().getConnection();
@@ -234,7 +265,7 @@ public class UserUploadService implements IUserUploadService {
                     uploadResponse = new UploadResponse("Your file has been uploaded and verified, and will be processed shortly.");
                 }
                 else {
-                    task.createFeed(conn, rawUploadData, uploadFormat);
+                    task.createFeed(conn, rawUploadData.getUserData(), uploadFormat);
                     uploadResponse = new UploadResponse(task.getFeedID(), task.getAnalysisID());
                 }
             }

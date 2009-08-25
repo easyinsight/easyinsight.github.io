@@ -10,6 +10,12 @@
         <channel ref="my-secure-amf" />
     </default-channels>
 
+    <destination id="tokenService">
+        <properties>
+            <source>com.easyinsight.users.TokenService</source>
+        </properties>
+    </destination>
+
     <destination id="google">
         <properties>
             <source>com.easyinsight.datafeeds.google.GoogleDataProvider</source>

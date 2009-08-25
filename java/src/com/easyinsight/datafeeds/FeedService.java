@@ -43,6 +43,8 @@ public class FeedService implements IDataFeedService {
         // this goes into a different data provider        
     }
 
+    
+
     public List<CredentialRequirement> getCredentials(List<Integer> dataSourceIDs, List<CredentialFulfillment> existingCredentials) {
         try {
             List<CredentialRequirement> neededCredentials = new ArrayList<CredentialRequirement>();

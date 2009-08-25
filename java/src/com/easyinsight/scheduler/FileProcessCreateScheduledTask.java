@@ -92,17 +92,17 @@ public class FileProcessCreateScheduledTask extends ScheduledTask {
         ev.setFeedID(0);
         ev.setFeedName(name);
         EventDispatcher.instance().dispatch(ev);
-        createFeed(conn, rawUploadData, uploadFormat);
+        createFeed(conn,  rawUploadData.getUserData(), uploadFormat);
     }
 
-    public void createFeed(Connection conn, UserUploadService.RawUploadData rawUploadData, UploadFormat uploadFormat) throws Exception {
+    public void createFeed(Connection conn, byte[] bytes, UploadFormat uploadFormat) throws Exception {
         DataStorage tableDef = null;
         try {
-            UserUploadAnalysis userUploadAnalysis = uploadFormat.analyze(uploadID, rawUploadData.getUserData());
+            UserUploadAnalysis userUploadAnalysis = uploadFormat.analyze(uploadID, bytes);
             List<AnalysisItem> fields = userUploadAnalysis.getFields();
             PersistableDataSetForm dataSet = UploadAnalysisCache.instance().getDataSet(uploadID);
             if (dataSet == null) {
-                dataSet = uploadFormat.createDataSet(rawUploadData.getUserData(), fields);
+                dataSet = uploadFormat.createDataSet(bytes, fields);
             }
             for (AnalysisItem field : fields) {
                 dataSet.refreshKey(field.getKey());
@@ -112,10 +112,10 @@ public class FileProcessCreateScheduledTask extends ScheduledTask {
             feedDefinition.setUploadFormat(uploadFormat);
             feedDefinition.setFeedName(name);
             feedDefinition.setOwnerName(UserUploadService.retrieveUser(conn, userID).getUserName());
-            UploadPolicy uploadPolicy = new UploadPolicy(rawUploadData.getAccountID());
+            UploadPolicy uploadPolicy = new UploadPolicy(accountID);
             feedDefinition.setUploadPolicy(uploadPolicy);
             feedDefinition.setFields(fields);
-            FeedCreationResult result = new FeedCreation().createFeed(feedDefinition, conn, dataSet.toDataSet(), rawUploadData.getAccountID(), accountID);
+            FeedCreationResult result = new FeedCreation().createFeed(feedDefinition, conn, dataSet.toDataSet(), userID, accountID);
             tableDef = result.getTableDefinitionMetadata();
             feedID = result.getFeedID();
             analysisID = feedDefinition.getAnalysisDefinitionID();

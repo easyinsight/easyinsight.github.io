@@ -1,0 +1,57 @@
+<?xml version="1.0" ?>
+<mx:Window xmlns:mx="http://www.adobe.com/2006/mxml">
+    <mx:states>
+        <mx:State name="Uploaded">
+
+        </mx:State>
+    </mx:states>
+    <mx:Script><![CDATA[
+
+        import com.easyinsight.customupload.UploadResponse;
+
+        import flash.filesystem.FileStream;
+
+        private var _filePath:String;
+
+        public function set filePath(value:String):void {
+            _filePath = value;
+        }
+
+        private function readFile():void {
+            var file:File = new File();
+            file.nativePath = _filePath;
+            var fileStream:FileStream = new FileStream();
+            fileStream.open(file, FileMode.READ);
+            var byteArray:ByteArray = new ByteArray();
+            fileStream.readBytes(byteArray, 0, fileStream.bytesAvailable);
+            fileStream.close();
+            uploadService.newAirSource.send();
+        }
+
+        private function uploaded():void {
+            var response:UploadResponse = uploadService.newAirSource.lastResult as UploadResponse;
+            if (response.successful) {
+                
+            } else {
+                
+            }
+        }
+
+        private function closeWindow():void {
+            this.nativeWindow.close();
+        }
+        ]]></mx:Script>
+    <mx:RemoteObject destination="userUpload" id="uploadService">
+        <mx:method name="newAirSource" result="uploaded()"/>
+    </mx:RemoteObject>
+    <mx:VBox id="coreBox">
+        <mx:HBox>
+            <mx:Label text="Data Source Name: "/>
+            <mx:TextInput id="dataSourceNameInput"/>
+        </mx:HBox>
+        <mx:HBox>
+            <mx:Button label="Send to Easy Insight" click="readFile()"/>
+            <mx:Button label="Cancel" click="closeWindow()"/>
+        </mx:HBox>
+    </mx:VBox>
+</mx:Window>
