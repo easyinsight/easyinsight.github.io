@@ -12,6 +12,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import java.util.*;
+import java.sql.Connection;
 
 /**
  * User: jboe
@@ -32,7 +33,7 @@ public class WesabeAccountDataSource extends WesabeBaseSource {
         return Arrays.asList(ACCOUNT_NAME, ACCOUNT_ID, ACCOUNT_BALANCE);
     }
 
-    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, DataSet dataSet, com.easyinsight.users.Credentials credentials) {
+    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, DataSet dataSet, com.easyinsight.users.Credentials credentials, Connection conn) {
         List<AnalysisItem> analysisItems = new ArrayList<AnalysisItem>();
         analysisItems.add(new AnalysisDimension(keys.get(ACCOUNT_NAME), true));
         AnalysisDimension accountDimension = new AnalysisDimension(keys.get(ACCOUNT_ID), true);

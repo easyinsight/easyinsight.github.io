@@ -3,10 +3,7 @@ package com.easyinsight.google
 import com.easyinsight.administration.feed.GoogleFeedDefinition;
 import com.easyinsight.customupload.UploadConfigEvent;
 	import com.easyinsight.framework.Credentials;
-	import com.easyinsight.framework.User;
-import com.easyinsight.genredata.ModuleAnalyzeEvent;
 import com.easyinsight.listing.DataFeedDescriptor;
-	import com.easyinsight.listing.DescriptorAnalyzeSource;
 
 import com.easyinsight.util.ProgressAlert;
 
@@ -14,10 +11,8 @@ import flash.events.Event;
 	import flash.events.MouseEvent;
 
 import mx.binding.utils.BindingUtils;
-import mx.containers.HBox;
-	import mx.controls.Alert;
+import mx.containers.HBox;	
 	import mx.controls.Button;
-	import mx.rpc.events.FaultEvent;
 	import mx.rpc.events.ResultEvent;
 	import mx.rpc.remoting.RemoteObject;
 
@@ -99,16 +94,11 @@ import mx.containers.HBox;
 			remoteService = new RemoteObject();
 			remoteService.destination = "userUpload";
 			remoteService.newExternalDataSource.addEventListener(ResultEvent.RESULT, successfulSubscription);
-			remoteService.newExternalDataSource.addEventListener(FaultEvent.FAULT, failedSubscription);
             var googleDef:GoogleFeedDefinition = new GoogleFeedDefinition();
             googleDef.feedName = _data.spreadsheet + " - " + _data.title;
             googleDef.worksheetURL = _data.url;
             ProgressAlert.alert(this.parent.parent, "Creating data source...", null, remoteService.newExternalDataSource);
 			remoteService.newExternalDataSource.send(googleDef, credentials);
-		}
-		
-		private function analyze(event:Event):void {
-			this.parent.dispatchEvent(new ModuleAnalyzeEvent(new DescriptorAnalyzeSource(_data.feedDescriptor.dataFeedID, _data.feedDescriptor.name)));
 		}
 		
 		private function successfulSubscription(event:ResultEvent):void {
@@ -120,10 +110,6 @@ import mx.containers.HBox;
 			_data.feedDescriptor = descriptor;
 			//this.parent.dispatchEvent(new AnalyzeEvent(new DescriptorAnalyzeSource(descriptor)));
 			dispatchEvent(new UploadConfigEvent(UploadConfigEvent.UPLOAD_CONFIG_COMPLETE, descriptor.dataFeedID, descriptor.name));
-		}
-		
-		private function failedSubscription(event:FaultEvent):void {
-			Alert.show(event.fault.message);
 		}
 	}
 }

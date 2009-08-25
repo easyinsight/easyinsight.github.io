@@ -15,7 +15,6 @@ import com.easyinsight.core.Key;
 import com.easyinsight.core.NumericValue;
 import com.easyinsight.core.NamedKey;
 
-import javax.xml.rpc.ServiceException;
 import java.util.*;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -218,7 +217,7 @@ public class JiraDataSource extends ServerDataSourceDefinition {
         return url != null && !url.isEmpty();
     }
 
-    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, DataSet dataSet, Credentials credentials) {
+    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, DataSet dataSet, Credentials credentials, Connection conn) {
         List<AnalysisItem> analysisItems = new ArrayList<AnalysisItem>();
         analysisItems.add(new AnalysisDimension(keys.get(REPORTER), true));
         analysisItems.add(new AnalysisList(keys.get(COMPONENTS), true, ","));

@@ -479,7 +479,7 @@ public class FeedDefinition implements Cloneable, Serializable {
         throw new UnsupportedOperationException();
     }
 
-    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, DataSet dataSet, Credentials credentials) {
+    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, DataSet dataSet, Credentials credentials, Connection conn) {
         throw new UnsupportedOperationException();
     }
 

@@ -43,7 +43,7 @@ public abstract class ServerDataSourceDefinition extends FeedDefinition implemen
         try {
             Map<String, Key> keys = newDataSourceFields(credentials);
             DataSet dataSet = getDataSet(credentials, keys, new Date(), null);
-            setFields(createAnalysisItems(keys, dataSet, credentials));
+            setFields(createAnalysisItems(keys, dataSet, credentials, conn));
             setOwnerName(retrieveUser(conn, SecurityUtil.getUserID()).getUserName());
             UploadPolicy uploadPolicy = new UploadPolicy(SecurityUtil.getUserID());
             setUploadPolicy(uploadPolicy);
@@ -148,7 +148,7 @@ public abstract class ServerDataSourceDefinition extends FeedDefinition implemen
             }
             Map<String, Key> keys = newDataSourceFields(credentials);
             DataSet dataSet = getDataSet(credentials, newDataSourceFields(credentials), now, parentDefinition);
-            List<AnalysisItem> items = createAnalysisItems(keys, dataSet, credentials);
+            List<AnalysisItem> items = createAnalysisItems(keys, dataSet, credentials, conn);
             dataStorage = DataStorage.writeConnection(this, conn, accountID);
             int version = dataStorage.getVersion();
             int newVersion = dataStorage.migrate(getFields(), items);

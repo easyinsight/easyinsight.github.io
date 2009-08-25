@@ -1,13 +1,13 @@
 package com.easyinsight.datafeeds.google;
 
 import com.easyinsight.datafeeds.Feed;
-import com.easyinsight.datafeeds.CredentialRequirement;
-import com.easyinsight.datafeeds.CredentialsDefinition;
 import com.easyinsight.analysis.*;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.core.*;
-import com.easyinsight.users.Credentials;
+import com.easyinsight.users.TokenStorage;
+import com.easyinsight.users.Token;
 import com.easyinsight.logging.LogClass;
+import com.easyinsight.security.SecurityUtil;
 import com.google.gdata.client.spreadsheet.SpreadsheetService;
 import com.google.gdata.data.spreadsheet.*;
 
@@ -24,16 +24,27 @@ import java.net.URL;
 public class GoogleSpreadsheetFeed extends Feed {
 
     private String worksheetURL;
+    private String token;
 
     public GoogleSpreadsheetFeed(String worksheetURL) {
         this.worksheetURL = worksheetURL;
     }
 
+    private String getToken() {
+        if (token == null) {
+            Token tokenObject = new TokenStorage().getToken(SecurityUtil.getUserID(), TokenStorage.GOOGLE_DOCS_TOKEN);
+            if (tokenObject == null) {
+                throw new RuntimeException("Token access revoked?");
+            }
+            token = tokenObject.getTokenValue();
+        }
+        return token;
+    }
+
     public AnalysisItemResultMetadata getMetadata(AnalysisItem analysisItem, InsightRequestMetadata insightRequestMetadata) {
         try {
             AnalysisItemResultMetadata metadata = analysisItem.createResultMetadata();
-            Credentials credentials = insightRequestMetadata.getCredentialForDataSource(getFeedID());
-            SpreadsheetService myService = GoogleSpreadsheetAccess.getOrCreateSpreadsheetService(credentials);
+            SpreadsheetService myService = GoogleSpreadsheetAccess.getOrCreateSpreadsheetService(getToken());
             URL listFeedUrl = new URL(worksheetURL);
             ListFeed feed = myService.getFeed(listFeedUrl, ListFeed.class);
             for (ListEntry listEntry : feed.getEntries()) {
@@ -57,20 +68,9 @@ public class GoogleSpreadsheetFeed extends Feed {
         }
     }
 
-    public Set<CredentialRequirement> getCredentialRequirement(boolean allSources) {
-        Set<CredentialRequirement> credentials = super.getCredentialRequirement(allSources);
-        CredentialRequirement requirement = new CredentialRequirement();
-        requirement.setDataSourceID(getFeedID());
-        requirement.setDataSourceName(getName());
-        requirement.setCredentialsDefinition(CredentialsDefinition.STANDARD_USERNAME_PW);
-        credentials.add(requirement);
-        return credentials;
-    }
-
     public DataSet getAggregateDataSet(Set<AnalysisItem> analysisItems, Collection<FilterDefinition> filters, InsightRequestMetadata insightRequestMetadata, List<AnalysisItem> allAnalysisItems, boolean adminMode, Collection<Key> additionalNeededKeys) {
         try {
-            Credentials credentials = insightRequestMetadata.getCredentialForDataSource(getFeedID());
-            SpreadsheetService myService = GoogleSpreadsheetAccess.getOrCreateSpreadsheetService(credentials);
+            SpreadsheetService myService = GoogleSpreadsheetAccess.getOrCreateSpreadsheetService(getToken());
             URL listFeedUrl = new URL(worksheetURL);
             ListFeed feed = myService.getFeed(listFeedUrl, ListFeed.class);
             DataSet dataSet = new DataSet();
@@ -100,6 +100,6 @@ public class GoogleSpreadsheetFeed extends Feed {
     }
 
     public DataSet getDetails(Collection<FilterDefinition> filters) {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+        throw new UnsupportedOperationException();
     }
 }

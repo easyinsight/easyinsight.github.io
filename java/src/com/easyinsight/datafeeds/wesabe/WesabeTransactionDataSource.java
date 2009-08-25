@@ -14,6 +14,7 @@ import org.w3c.dom.NodeList;
 import org.w3c.dom.Node;
 
 import java.util.*;
+import java.sql.Connection;
 
 /**
  * User: jboe
@@ -39,7 +40,7 @@ public class WesabeTransactionDataSource extends WesabeBaseSource {
         return Arrays.asList(ACCOUNT_ID, DATE, AMOUNT, MERCHANT, TAGS, DISPLAYNAME, RAWNAME, RAWTXN);
     }
 
-    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, DataSet dataSet, com.easyinsight.users.Credentials credentials) {
+    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, DataSet dataSet, com.easyinsight.users.Credentials credentials, Connection conn) {
         List<AnalysisItem> analysisItems = new ArrayList<AnalysisItem>();
         analysisItems.add(new AnalysisDateDimension(keys.get(DATE), true, AnalysisDateDimension.DAY_LEVEL));
         analysisItems.add(new AnalysisDimension(keys.get(MERCHANT), true));

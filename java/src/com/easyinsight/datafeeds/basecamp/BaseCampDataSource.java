@@ -244,7 +244,7 @@ public class BaseCampDataSource extends ServerDataSourceDefinition {
         return url != null && !url.isEmpty();
     }
 
-    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, DataSet dataSet, com.easyinsight.users.Credentials credentials) {
+    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, DataSet dataSet, com.easyinsight.users.Credentials credentials, Connection conn) {
         List<AnalysisItem> analysisItems = new ArrayList<AnalysisItem>();
         AnalysisDimension itemDim = new AnalysisDimension(keys.get(ITEMID), true);
         analysisItems.add(itemDim);

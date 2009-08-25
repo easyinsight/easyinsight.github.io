@@ -6,6 +6,7 @@ import com.easyinsight.database.EIConnection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.ResultSet;
+import java.sql.Connection;
 
 import org.jetbrains.annotations.Nullable;
 
@@ -79,6 +80,28 @@ public class TokenStorage {
         } finally {
             Database.closeConnection(conn);
         }
+        return token;
+    }
+
+    @Nullable
+    public Token getToken(long userID, int type, Connection conn) {
+        Token token = null;
+
+        try {
+            PreparedStatement queryStmt = conn.prepareStatement("SELECT token_value FROM TOKEN where user_id = ? AND token_type = ?");
+            queryStmt.setLong(1, userID);
+            queryStmt.setInt(2, type);
+            ResultSet rs = queryStmt.executeQuery();
+            if (rs.next()) {
+                String tokenValue = rs.getString(1);
+                token = new Token();
+                token.setUserID(userID);
+                token.setTokenType(type);
+                token.setTokenValue(tokenValue);
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        } 
         return token;
     }
 }

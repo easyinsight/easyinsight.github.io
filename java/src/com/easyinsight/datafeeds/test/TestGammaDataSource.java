@@ -9,6 +9,7 @@ import com.easyinsight.analysis.*;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
+import java.sql.Connection;
 
 /**
  * User: James Boe
@@ -50,7 +51,7 @@ public class TestGammaDataSource extends ServerDataSourceDefinition {
         return dataSet;
     }
 
-    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, DataSet dataSet, com.easyinsight.users.Credentials credentials) {
+    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, DataSet dataSet, com.easyinsight.users.Credentials credentials, Connection conn) {
         List<AnalysisItem> analysisItems = new ArrayList<AnalysisItem>();
         analysisItems.add(new AnalysisDimension(keys.get(DIM), true));
         analysisItems.add(new AnalysisDimension(keys.get(PROJECT_DIM), true));

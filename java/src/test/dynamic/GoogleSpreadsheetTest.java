@@ -38,9 +38,8 @@ public class GoogleSpreadsheetTest extends TestCase {
         credentials.setUserName("easyinsight99");
         credentials.setPassword("analyze123");
         GoogleDataProvider googleDataProvider = new GoogleDataProvider();
-        googleDataProvider.testGoogleConnect(credentials, false);
-        googleDataProvider.getAvailableGoogleSpreadsheets(credentials);
-        URL feedUrl = new URL("http://spreadsheets.google.com/feeds/spreadsheets/private/full");
+        //googleDataProvider.getAvailableGoogleSpreadsheets(credentials);
+        /*URL feedUrl = new URL("http://spreadsheets.google.com/feeds/spreadsheets/private/full");
         SpreadsheetService myService = GoogleSpreadsheetAccess.getOrCreateSpreadsheetService(credentials);
         SpreadsheetFeed spreadsheetFeed = myService.getFeed(feedUrl, SpreadsheetFeed.class);
         String url = null;
@@ -56,6 +55,6 @@ public class GoogleSpreadsheetTest extends TestCase {
         definition.setWorksheetURL(url);
         UserUploadService userUploadService = new UserUploadService();
         long dataSourceID = userUploadService.newExternalDataSource(definition, credentials);
-        userUploadService.refreshData(dataSourceID, credentials, false);
+        userUploadService.refreshData(dataSourceID, credentials, false);*/
     }
 }

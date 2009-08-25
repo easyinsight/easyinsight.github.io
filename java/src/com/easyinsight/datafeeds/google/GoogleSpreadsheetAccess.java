@@ -2,10 +2,13 @@ package com.easyinsight.datafeeds.google;
 
 import com.easyinsight.users.Credentials;
 import com.google.gdata.client.spreadsheet.SpreadsheetService;
+import com.google.gdata.client.http.AuthSubUtil;
 import com.google.gdata.util.AuthenticationException;
+import com.google.gdata.data.spreadsheet.SpreadsheetFeed;
 
 import java.util.Map;
 import java.util.WeakHashMap;
+import java.net.URL;
 
 /**
  * User: James Boe
@@ -14,15 +17,28 @@ import java.util.WeakHashMap;
  */
 public class GoogleSpreadsheetAccess {
 
-    private static Map<Credentials, SpreadsheetService> cacheSpreadsheetServices = new WeakHashMap<Credentials, SpreadsheetService>();
+    private static Map<String, SpreadsheetService> cacheSpreadsheetServices = new WeakHashMap<String, SpreadsheetService>();
 
-    public static SpreadsheetService getOrCreateSpreadsheetService(Credentials credentials) throws AuthenticationException {
-        SpreadsheetService spreadsheetService = cacheSpreadsheetServices.get(credentials);
+    public static SpreadsheetService getOrCreateSpreadsheetService(String token) throws AuthenticationException {
+        SpreadsheetService spreadsheetService = cacheSpreadsheetServices.get(token);
         if (spreadsheetService == null) {
-            spreadsheetService = new SpreadsheetService("nonameyet-startingthingsup-1");
-            spreadsheetService.setUserCredentials(credentials.getUserName(), credentials.getPassword());
-            cacheSpreadsheetServices.put(credentials, spreadsheetService);
+            spreadsheetService = new SpreadsheetService("easyinsight-eidocs-1");
+            spreadsheetService.setAuthSubToken(token);
+            cacheSpreadsheetServices.put(token, spreadsheetService);
         }
         return spreadsheetService;
+    }
+
+    public static void main(String[] args) throws Exception {
+        SpreadsheetService spreadsheetService = new SpreadsheetService("easyinsight-eidocs-1");
+        spreadsheetService.setAuthSubToken("CKCBo-7SChDpzLDhBw");
+        SpreadsheetFeed spreadsheetFeed = null;
+        try {
+            URL feedUrl = new URL("http://spreadsheets.google.com/feeds/spreadsheets/private/full");
+            spreadsheetFeed = spreadsheetService.getFeed(feedUrl, SpreadsheetFeed.class);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        int entrySize = spreadsheetFeed.getEntries().size();
     }
 }

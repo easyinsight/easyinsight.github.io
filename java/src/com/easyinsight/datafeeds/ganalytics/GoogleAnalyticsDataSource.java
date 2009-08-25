@@ -6,15 +6,10 @@ import com.easyinsight.users.Account;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.core.Key;
 import com.easyinsight.analysis.*;
-import com.google.gdata.data.analytics.AccountFeed;
-import com.google.gdata.client.analytics.AnalyticsService;
-import com.google.gdata.util.ServiceException;
 
 import java.util.*;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.net.URL;
-import java.io.IOException;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -183,25 +178,9 @@ public class GoogleAnalyticsDataSource extends ServerDataSourceDefinition {
         return FeedType.GOOGLE_ANALYTICS;
     }
 
-    public int getCredentialsDefinition() {
-        return CredentialsDefinition.STANDARD_USERNAME_PW;
-    }
-
     @Override
     public Feed createFeedObject() {
         return new GoogleAnalyticsFeed();
-    }
-
-    public String validateCredentials(Credentials credentials) {
-        try {
-            AnalyticsService as = new AnalyticsService("gaExportAPI_acctSample_v1.0");
-            as.setUserCredentials(credentials.getUserName(), credentials.getPassword());
-            String baseUrl = "https://www.google.com/analytics/feeds/accounts/default";
-            as.getFeed(new URL(baseUrl), AccountFeed.class);
-            return null;
-        } catch (Exception e) {
-            return e.getMessage();
-        }
     }
 
     public DataSet getDataSet(Credentials credentials, Map<String, Key> keys, Date now, FeedDefinition parentDefinition) {
@@ -226,7 +205,7 @@ public class GoogleAnalyticsDataSource extends ServerDataSourceDefinition {
                 SEARCH_UNIQUES, SEARCH_VISITS, SOURCE);
     }
 
-    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, DataSet dataSet, Credentials credentials) {
+    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, DataSet dataSet, Credentials credentials, Connection conn) {
         List<AnalysisItem> analysisItems = new ArrayList<AnalysisItem>();
         List<AnalysisItem> standardItems = new ArrayList<AnalysisItem>();
         List<AnalysisItem> adItems = new ArrayList<AnalysisItem>();

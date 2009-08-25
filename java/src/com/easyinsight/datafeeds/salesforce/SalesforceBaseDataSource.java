@@ -13,6 +13,7 @@ import org.jetbrains.annotations.NotNull;
 import javax.persistence.Transient;
 import javax.xml.ws.BindingProvider;
 import java.util.*;
+import java.sql.Connection;
 
 /**
  * User: abaldwin
@@ -88,7 +89,7 @@ public class SalesforceBaseDataSource extends ServerDataSourceDefinition {
     }
 
     @Override
-    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, DataSet dataSet, Credentials credentials) {
+    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, DataSet dataSet, Credentials credentials, Connection conn) {
         try {
             if(sessionHeader == null)
                 login(credentials);

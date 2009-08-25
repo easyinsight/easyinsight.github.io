@@ -3,7 +3,6 @@ package com.easyinsight.datafeeds.basecamp;
 import com.easyinsight.datafeeds.ServerDataSourceDefinition;
 import com.easyinsight.datafeeds.FeedType;
 import com.easyinsight.datafeeds.FeedDefinition;
-import com.easyinsight.logging.LogClass;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.core.Key;
 import com.easyinsight.core.NumericValue;
@@ -24,6 +23,7 @@ import nu.xom.Node;
 import java.util.*;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.sql.Connection;
 
 /**
  * User: James Boe
@@ -166,7 +166,7 @@ public class BaseCampTimeSource extends ServerDataSourceDefinition {
         return Arrays.asList(PERSONID, PERSONNAME, HOURS, DESCRIPTION, PROJECTNAME, PROJECTID, COUNT, TODOID, DATE);
     }
 
-    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, DataSet dataSet, com.easyinsight.users.Credentials credentials) {
+    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, DataSet dataSet, com.easyinsight.users.Credentials credentials, Connection conn) {
         List<AnalysisItem> analysisItems = new ArrayList<AnalysisItem>();
         AnalysisDimension projectDim = new AnalysisDimension(keys.get(PROJECTID), true);
         projectDim.setHidden(true);

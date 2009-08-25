@@ -4,12 +4,15 @@ import com.easyinsight.datafeeds.*;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.users.Credentials;
 import com.easyinsight.users.Account;
+import com.easyinsight.users.Token;
+import com.easyinsight.users.TokenStorage;
 import com.easyinsight.core.*;
 import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.analysis.IRow;
 import com.easyinsight.analysis.DataSourceInfo;
 import com.easyinsight.userupload.IDataTypeGuesser;
 import com.easyinsight.userupload.DataTypeGuesser;
+import com.easyinsight.security.SecurityUtil;
 import com.google.gdata.client.spreadsheet.SpreadsheetService;
 import com.google.gdata.data.spreadsheet.ListFeed;
 import com.google.gdata.data.spreadsheet.ListEntry;
@@ -86,8 +89,8 @@ public class GoogleFeedDefinition extends ServerDataSourceDefinition {
     }
 
     @Override
-    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, DataSet dataSet, Credentials credentials) {
-        return populateFields(createDataSet(credentials, keys, new Date(), null));
+    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, DataSet dataSet, Credentials credentials, Connection conn) {
+        return populateFields(createDataSet(keys, conn));
     }
 
     @Override
@@ -102,10 +105,18 @@ public class GoogleFeedDefinition extends ServerDataSourceDefinition {
         return keyMap;
     }
 
-    private DataSet createDataSet(Credentials credentials, Map<String, Key> keys, Date now, FeedDefinition parentDefinition) {
+    private String getToken(Connection conn) {
+        Token tokenObject = new TokenStorage().getToken(SecurityUtil.getUserID(), TokenStorage.GOOGLE_DOCS_TOKEN, conn);
+        if (tokenObject == null) {
+            throw new RuntimeException("Token access revoked?");
+        }
+        return tokenObject.getTokenValue();
+    }
+
+    private DataSet createDataSet(Map<String, Key> keys, Connection conn) {
         DataSet dataSet;
         try {
-            SpreadsheetService myService = GoogleSpreadsheetAccess.getOrCreateSpreadsheetService(credentials);
+            SpreadsheetService myService = GoogleSpreadsheetAccess.getOrCreateSpreadsheetService(getToken(conn));
             URL listFeedUrl = new URL(worksheetURL);
             ListFeed feed = myService.getFeed(listFeedUrl, ListFeed.class);
             dataSet = new DataSet();
@@ -210,16 +221,8 @@ public class GoogleFeedDefinition extends ServerDataSourceDefinition {
         return FeedType.GOOGLE;
     }
 
-    public int getCredentialsDefinition() {
-        return CredentialsDefinition.STANDARD_USERNAME_PW;
-    }
-
     @Override
     public Feed createFeedObject() {
         return new GoogleSpreadsheetFeed(worksheetURL);
-    }
-
-    public String validateCredentials(Credentials credentials) {
-        return null;
     }
 }

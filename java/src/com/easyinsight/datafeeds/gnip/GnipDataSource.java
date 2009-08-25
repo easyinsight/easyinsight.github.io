@@ -188,7 +188,7 @@ public class GnipDataSource extends ServerDataSourceDefinition {
                 TO, REGARDINGURL, SOURCE, LATITUDE, LONGITUDE, COUNT);
     }
 
-    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, DataSet dataSet, Credentials credentials) {
+    public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, DataSet dataSet, Credentials credentials, Connection conn) {
         List<AnalysisItem> analysisItems = new ArrayList<AnalysisItem>();
         analysisItems.add(new AnalysisDimension(keys.get(PUBLISHER), true));
         analysisItems.add(new AnalysisDimension(keys.get(ACTION), true));

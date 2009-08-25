@@ -63,7 +63,7 @@ public interface IServerDataSourceDefinition {
      * @param credentials
      * @return the analysis items for the data source
      */
-    List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, DataSet dataSet, Credentials credentials);
+    List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, DataSet dataSet, Credentials credentials, Connection conn);
 
     /**
      * Any custom logic for storage of the data source. Will execute in the transactional scope of saving the data source, on

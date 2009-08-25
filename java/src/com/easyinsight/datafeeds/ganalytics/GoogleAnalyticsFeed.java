@@ -1,13 +1,13 @@
 package com.easyinsight.datafeeds.ganalytics;
 
 import com.easyinsight.datafeeds.Feed;
-import com.easyinsight.datafeeds.CredentialRequirement;
-import com.easyinsight.datafeeds.CredentialsDefinition;
 import com.easyinsight.analysis.*;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.core.*;
-import com.easyinsight.users.Credentials;
+import com.easyinsight.users.Token;
+import com.easyinsight.users.TokenStorage;
 import com.easyinsight.logging.LogClass;
+import com.easyinsight.security.SecurityUtil;
 import com.google.gdata.client.analytics.AnalyticsService;
 import com.google.gdata.data.analytics.DataFeed;
 import com.google.gdata.data.analytics.DataEntry;
@@ -20,8 +20,6 @@ import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.text.DateFormat;
 import java.text.ParseException;
-
-import org.jetbrains.annotations.NotNull;
 
 /**
  * User: James Boe
@@ -49,7 +47,7 @@ public class GoogleAnalyticsFeed extends Feed {
             } else {
                 queryItem = analysisItem;
             }
-            AnalyticsService as = getAnalyticsService(insightRequestMetadata.getCredentialForDataSource(getFeedID()));
+            AnalyticsService as = getAnalyticsService();
 
             if ("title".equals(queryItem.getKey().toKeyString())) {
                 String baseUrl = "https://www.google.com/analytics/feeds/accounts/default";
@@ -96,22 +94,25 @@ public class GoogleAnalyticsFeed extends Feed {
         return metadata;
     }
 
-    private AnalyticsService getAnalyticsService(@NotNull Credentials credentials) throws AuthenticationException {
-        if (as == null) {
-            as = new AnalyticsService("EasyInsight_acctSample_v1.0");
-            as.setUserCredentials(credentials.getUserName(), credentials.getPassword());
+    private String token;
+
+    private String getToken() {
+        if (token == null) {
+            Token tokenObject = new TokenStorage().getToken(SecurityUtil.getUserID(), TokenStorage.GOOGLE_DOCS_TOKEN);
+            if (tokenObject == null) {
+                throw new RuntimeException("Token access revoked?");
+            }
+            token = tokenObject.getTokenValue();
         }
-        return as;
+        return token;
     }
 
-    public Set<CredentialRequirement> getCredentialRequirement(boolean allSources) {
-        Set<CredentialRequirement> credentials = super.getCredentialRequirement(allSources);
-        CredentialRequirement requirement = new CredentialRequirement();
-        requirement.setDataSourceID(getFeedID());
-        requirement.setDataSourceName(getName());
-        requirement.setCredentialsDefinition(CredentialsDefinition.STANDARD_USERNAME_PW);
-        credentials.add(requirement);
-        return credentials;
+    private AnalyticsService getAnalyticsService() throws AuthenticationException {
+        if (as == null) {
+            as = new AnalyticsService("easyinsight_eianalytics_v1.0");
+            as.setAuthSubToken(getToken());
+        }
+        return as;
     }
 
     public List<FilterDefinition> getIntrinsicFilters() {
@@ -149,11 +150,7 @@ public class GoogleAnalyticsFeed extends Feed {
 
             DataSet dataSet = new DataSet();
 
-            Credentials credentials = insightRequestMetadata.getCredentialForDataSource(getFeedID());
-            if (credentials == null) {
-                // user needs to log in again
-            }
-            AnalyticsService as = getAnalyticsService(credentials);
+            AnalyticsService as = getAnalyticsService();
 
             Date startDate = null;
             Date endDate = null;
@@ -245,7 +242,7 @@ public class GoogleAnalyticsFeed extends Feed {
     }
 
     public DataSet getDetails(Collection<FilterDefinition> filters) {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+        throw new UnsupportedOperationException();
     }
 
     public AnalysisMeasure getDefaultMeasure(Collection<AnalysisDimension> dimensions) {

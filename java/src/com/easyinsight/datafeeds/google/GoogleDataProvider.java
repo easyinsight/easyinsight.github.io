@@ -1,14 +1,12 @@
 package com.easyinsight.datafeeds.google;
 
 import com.easyinsight.datafeeds.*;
-import com.easyinsight.users.Credentials;
-import com.easyinsight.users.MalformedCredentialsException;
+import com.easyinsight.users.Token;
+import com.easyinsight.users.TokenStorage;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.security.Roles;
 import com.easyinsight.database.Database;
-import com.easyinsight.userupload.CredentialsResponse;
-import com.easyinsight.PasswordStorage;
 import com.google.gdata.util.AuthenticationException;
 import com.google.gdata.util.ServiceException;
 import com.google.gdata.client.spreadsheet.SpreadsheetService;
@@ -29,7 +27,7 @@ import java.sql.ResultSet;
  */
 public class GoogleDataProvider {
 
-    private Map<Credentials, List<Spreadsheet>> cachedSpreadsheetResults = new WeakHashMap<Credentials, List<Spreadsheet>>();
+    private Map<String, List<Spreadsheet>> cachedSpreadsheetResults = new WeakHashMap<String, List<Spreadsheet>>();
     
     private static GoogleDataProvider instance = null;
 
@@ -41,56 +39,21 @@ public class GoogleDataProvider {
         return instance;
     }
 
-    public CredentialsResponse testGoogleConnect(Credentials credentials, boolean encrypt) {
-        CredentialsResponse credentialsResponse;
-        try {
-            GoogleSpreadsheetAccess.getOrCreateSpreadsheetService(credentials);
-            credentialsResponse = new CredentialsResponse(true);
-            if (encrypt) {
-                credentialsResponse.setEncryptedResponse(encryptCredentials(credentials));
-            }            
-        } catch (AuthenticationException ae) {
-            credentialsResponse = new CredentialsResponse(false, ae.getMessage());
-        } catch (Exception e) {
-            LogClass.error(e);
-            credentialsResponse = new CredentialsResponse(false, e.getMessage());
+    private String getToken() {
+        Token tokenObject = new TokenStorage().getToken(SecurityUtil.getUserID(), TokenStorage.GOOGLE_DOCS_TOKEN);
+        if (tokenObject == null) {
+            throw new RuntimeException("Token access revoked?");
         }
-        return credentialsResponse;
+        return tokenObject.getTokenValue();
     }
 
-    public Credentials encryptCredentials(Credentials creds) {
-        Credentials c = new Credentials();
-        c.setUserName(PasswordStorage.encryptString(creds.getUserName() + ":" + SecurityUtil.getUserName()));
-        c.setPassword(PasswordStorage.encryptString(creds.getPassword() + ":" + SecurityUtil.getUserName()));
-        c.setEncrypted(true);
-        return c;
-    }
-
-    private Credentials decryptCredentials(Credentials creds) {
-        Credentials c = new Credentials();
-        String s = PasswordStorage.decryptString(creds.getUserName());
-        int i = s.lastIndexOf(":" + SecurityUtil.getUserName());
-        if(i == -1) {
-            throw new RuntimeException();
-        }
-        c.setUserName(s.substring(0, i));
-        s = PasswordStorage.decryptString(creds.getPassword());
-        i = s.lastIndexOf(":" + SecurityUtil.getUserName());
-        if(i == -1)
-            throw new RuntimeException();
-        c.setPassword(s.substring(0, i));
-        return c;
-    }
-
-    public List<Spreadsheet> getAvailableGoogleSpreadsheets(Credentials credentials) {
-        if (credentials.isEncrypted()) {
-            credentials = decryptCredentials(credentials);
-        }
-        List<Spreadsheet> worksheets = cachedSpreadsheetResults.get(credentials);
+    public List<Spreadsheet> getAvailableGoogleSpreadsheets() {
+        String token = getToken();
+        List<Spreadsheet> worksheets = cachedSpreadsheetResults.get(token);
         if (worksheets == null) {
             try {
-                worksheets = getSpreadsheets(credentials);
-                cachedSpreadsheetResults.put(credentials, worksheets);
+                worksheets = getSpreadsheets(token);
+                cachedSpreadsheetResults.put(token, worksheets);
                 return worksheets;
             } catch (Exception e) {
                 LogClass.error(e);
@@ -100,7 +63,7 @@ public class GoogleDataProvider {
         return worksheets;
     }
 
-    private List<Spreadsheet> getSpreadsheets(Credentials credentials) throws AuthenticationException {
+    private List<Spreadsheet> getSpreadsheets(String token) throws AuthenticationException {
         List<Spreadsheet> worksheets = new ArrayList<Spreadsheet>();
         Connection conn = Database.instance().getConnection();
         try {
@@ -120,7 +83,7 @@ public class GoogleDataProvider {
             }
             existsStmt.close();            
             URL feedUrl = new URL("http://spreadsheets.google.com/feeds/spreadsheets/private/full");
-            SpreadsheetService myService = GoogleSpreadsheetAccess.getOrCreateSpreadsheetService(credentials);
+            SpreadsheetService myService = GoogleSpreadsheetAccess.getOrCreateSpreadsheetService(token);
             SpreadsheetFeed spreadsheetFeed = myService.getFeed(feedUrl, SpreadsheetFeed.class);
             for (SpreadsheetEntry entry : spreadsheetFeed.getEntries()) {
                 List<WorksheetEntry> worksheetEntries = entry.getWorksheets();
@@ -148,7 +111,7 @@ public class GoogleDataProvider {
             LogClass.error(e);
             throw new RuntimeException(e);
         } finally {
-            Database.instance().closeConnection(conn);
+            Database.closeConnection(conn);
         }
         return worksheets;
     }
