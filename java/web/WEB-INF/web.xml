@@ -108,6 +108,11 @@
     </servlet-mapping>
 
     <servlet-mapping>
+        <servlet-name>TokenRedirect</servlet-name>
+        <url-pattern>/TokenRedirect</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
         <servlet-name>SolutionUploadServlet</servlet-name>
         <url-pattern>/SolutionUploadServlet</url-pattern>
     </servlet-mapping>
