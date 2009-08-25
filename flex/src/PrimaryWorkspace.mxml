@@ -325,9 +325,6 @@
                                                                 dataAnalysis = null;
                                                             }
                                                             switch (page) {
-                                                                case "gdocs":
-
-                                                                    break;
                                                                 case "myData":
                                                                     navigation(new NavigationEvent("My Data"));
                                                                     break;

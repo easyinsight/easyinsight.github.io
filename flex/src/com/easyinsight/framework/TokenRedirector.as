@@ -1,10 +1,12 @@
 package com.easyinsight.framework {
+import flash.events.EventDispatcher;
+
 import mx.controls.Alert;
 import mx.rpc.events.FaultEvent;
 import mx.rpc.events.ResultEvent;
 import mx.rpc.remoting.RemoteObject;
 
-public class TokenRedirector {
+public class TokenRedirector extends EventDispatcher {
 
     private var tokenService:RemoteObject;
 
@@ -28,14 +30,13 @@ public class TokenRedirector {
     private function onTokenResult(event:ResultEvent):void {
         var result:String = tokenService.setToken.lastResult as String;
         if (result == null) {
-            Alert.show("redirect at this point");
+            dispatchEvent(new NavigationEvent("My Data", null, { toGDocs: true }));
         } else {
             Alert.show(result);
         }
     }
 
     public function onURL(url:String):void {
-        Alert.show("url = " + url);
         tokenService.setToken.send(_type, url);
     }
 }
