@@ -24,6 +24,7 @@ import java.util.Iterator;
 public class TokenService {
 
     public String setToken(int type, String url) {
+        System.out.println("got URL " + url);
         String queryString = url.substring(url.indexOf("?"));
         String token = AuthSubUtil.getTokenFromReply(queryString);
         if (token == null) {

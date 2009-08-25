@@ -321,6 +321,10 @@
             <load-config filename="${teamcity.build.checkoutDir}/flex/flex-config.xml"/>
         </mxmlc> -->
     </target>
+
+    <target name="quickArchive" depends="compileJava, compileFlexOptimized">
+        <zip destfile="${code.path}/code.zip" baseDir="${webapp.path}"/>
+    </target>
     
     <target name="compileFlexOptimized">
         <mxmlc file="${teamcity.build.checkoutDir}/flex/src/PrimaryWorkspace.mxml" output="${flex.path}/PrimaryWorkspace.swf"
