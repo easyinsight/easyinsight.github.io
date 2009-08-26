@@ -48,7 +48,7 @@ public class TokenService {
 
     public String getAuthSubURL(int type) {
         try {
-            String nextURL = "https://staging.easy-insight.com/app?sourceType=" + type;
+            String nextURL = "https://staging.easy-insight.com/app/TokenRedirect?sourceType=" + type;
             FeedType feedType = new FeedType(type);
             String scope;
             if (feedType.equals(FeedType.GOOGLE_ANALYTICS)) {
