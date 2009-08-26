@@ -17,7 +17,7 @@ import org.jetbrains.annotations.Nullable;
  */
 public class TokenStorage {
     public static final int GOOGLE_DOCS_TOKEN = 1;
-    public static final int GOOGLE_ANALYTICS_TOKEN = 2;
+    public static final int GOOGLE_ANALYTICS_TOKEN = 13;
 
     public void saveToken(Token token) {
         EIConnection conn = Database.instance().getConnection();
