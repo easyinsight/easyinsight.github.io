@@ -112,7 +112,7 @@ public class FileProcessCreateScheduledTask extends ScheduledTask {
             feedDefinition.setUploadFormat(uploadFormat);
             feedDefinition.setFeedName(name);
             feedDefinition.setOwnerName(UserUploadService.retrieveUser(conn, userID).getUserName());
-            UploadPolicy uploadPolicy = new UploadPolicy(accountID);
+            UploadPolicy uploadPolicy = new UploadPolicy(userID);
             feedDefinition.setUploadPolicy(uploadPolicy);
             feedDefinition.setFields(fields);
             FeedCreationResult result = new FeedCreation().createFeed(feedDefinition, conn, dataSet.toDataSet(), userID, accountID);
