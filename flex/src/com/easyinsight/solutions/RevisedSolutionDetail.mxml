@@ -378,6 +378,11 @@
                 flash.net.navigateToURL(new URLRequest(_solution.logoLink), "_blank");
             }
         }
+
+        private function determineAuth():void {
+            ProgressAlert.alert(this, "Determining authorization requirements...", null, solutionService.determineAuthorizationRequirements);
+            solutionService.determineAuthorizationRequirements.send(solutionID);
+        }
 		]]>
 	</mx:Script>
     <mx:RemoteObject destination="solutionService" id="solutionService">
@@ -391,7 +396,7 @@
             <mx:Spacer height="50"/>
             <mx:Canvas id="controlsBox">
                 <mx:VBox alpha="{controlsAlpha}">
-                    <mx:Button label="Install into your Easy Insight Account" fontSize="20" click="solutionService.determineAuthorizationRequirements.send(solutionID)"
+                    <mx:Button label="Install into your Easy Insight Account" fontSize="20" click="determineAuth()"
                                styleName="blueButton" visible="{installAvailable}" enabled="{controlsEnabled}"/>
                     <mx:Button label="Download Associated Files" fontSize="20" click="download()" styleName="blueButton"
                             visible="{downloadAvailable}" enabled="{controlsEnabled}"/>
