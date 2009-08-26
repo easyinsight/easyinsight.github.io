@@ -4,6 +4,7 @@ package com.easyinsight.framework {
 public class AuthorizationRequirement {
 
     public var authorizationType:int;
+    public var url:String;
 
     public function AuthorizationRequirement() {
     }

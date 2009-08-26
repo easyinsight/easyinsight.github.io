@@ -2,6 +2,7 @@ package com.easyinsight.users;
 
 import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.logging.LogClass;
+import com.easyinsight.datafeeds.FeedType;
 import com.google.gdata.client.http.AuthSubUtil;
 import com.google.gdata.client.spreadsheet.SpreadsheetService;
 import com.google.gdata.data.spreadsheet.SpreadsheetFeed;
@@ -45,10 +46,18 @@ public class TokenService {
         }
     }
 
-    public String getAuthSubURL() {
+    public String getAuthSubURL(int type) {
         try {
-            String nextURL = "https://staging.easy-insight.com/app/TokenRedirect";
-            String scope = "http://spreadsheets.google.com/feeds/";
+            String nextURL = "https://staging.easy-insight.com/app?sourceType=" + type;
+            FeedType feedType = new FeedType(type);
+            String scope;
+            if (feedType.equals(FeedType.GOOGLE_ANALYTICS)) {
+                scope = "https://www.google.com/analytics/feeds/";
+            } else if (feedType.equals(FeedType.GOOGLE)) {
+                scope = "http://spreadsheets.google.com/feeds/";
+            } else {
+                throw new RuntimeException("Unknown type for authorization " + type);
+            }
             return AuthSubUtil.getRequestUrl(nextURL, scope, false, true);
         } catch (Exception e) {
             LogClass.error(e);

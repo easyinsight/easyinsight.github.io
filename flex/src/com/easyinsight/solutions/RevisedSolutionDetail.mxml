@@ -291,7 +291,7 @@
             var req:AuthorizationRequirement = solutionService.determineAuthorizationRequirements.lastResult as AuthorizationRequirement;
             if (req != null) {
                 var window:AuthSubNavWindow = new AuthSubNavWindow();
-                window.googleURL = "https://staging.easy-insight.com/app?sourceType=" + req.authorizationType;                
+                window.googleURL = req.url;                
                 PopUpManager.addPopUp(window, this, true);
                 PopUpUtil.centerPopUp(window);
             } else {

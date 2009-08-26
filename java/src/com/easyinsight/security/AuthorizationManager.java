@@ -3,6 +3,7 @@ package com.easyinsight.security;
 import com.easyinsight.datafeeds.FeedType;
 import com.easyinsight.users.TokenStorage;
 import com.easyinsight.users.Token;
+import com.easyinsight.users.TokenService;
 
 /**
  * User: jamesboe
@@ -14,7 +15,7 @@ public class AuthorizationManager {
         if (type.equals(FeedType.GOOGLE) || type.equals(FeedType.GOOGLE_ANALYTICS)) {
             Token token = new TokenStorage().getToken(SecurityUtil.getUserID(), type.getType());
             if (token == null) {
-                return new AuthorizationRequirement(type.getType());
+                return new AuthorizationRequirement(type.getType(), new TokenService().getAuthSubURL(type.getType()));
             }
         }
         return null;
