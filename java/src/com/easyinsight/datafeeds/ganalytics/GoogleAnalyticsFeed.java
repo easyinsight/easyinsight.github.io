@@ -98,7 +98,7 @@ public class GoogleAnalyticsFeed extends Feed {
 
     private String getToken() {
         if (token == null) {
-            Token tokenObject = new TokenStorage().getToken(SecurityUtil.getUserID(), TokenStorage.GOOGLE_DOCS_TOKEN);
+            Token tokenObject = new TokenStorage().getToken(SecurityUtil.getUserID(), TokenStorage.GOOGLE_ANALYTICS_TOKEN);
             if (tokenObject == null) {
                 throw new RuntimeException("Token access revoked?");
             }
