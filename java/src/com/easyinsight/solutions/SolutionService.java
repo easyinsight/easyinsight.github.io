@@ -6,6 +6,8 @@ import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.security.SecurityUtil;
+import com.easyinsight.security.AuthorizationManager;
+import com.easyinsight.security.AuthorizationRequirement;
 import com.easyinsight.goals.*;
 import com.easyinsight.core.InsightDescriptor;
 import com.easyinsight.users.Account;
@@ -157,6 +159,27 @@ public class SolutionService {
             conn.setAutoCommit(true);
             Database.instance().closeConnection(conn);
         }
+    }
+
+    public AuthorizationRequirement determineAuthorizationRequirements(long solutionID) {
+        List<AuthorizationRequirement> authRequirements = new ArrayList<AuthorizationRequirement>();
+        try {
+            Solution solution = getSolution(solutionID);
+            Set<FeedType> types = new SolutionVisitor().getFeedTypes(solution);
+            for (FeedType type : types) {
+                AuthorizationRequirement authorizationRequirement = new AuthorizationManager().authorize(type);
+                if (authorizationRequirement != null) {
+                    authRequirements.add(authorizationRequirement);
+                }
+            }
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        }
+        if (authRequirements.size() > 0) {
+            return authRequirements.get(0);
+        }
+        return null;
     }
 
     public List<SolutionInstallInfo> installSolution(long solutionID) {

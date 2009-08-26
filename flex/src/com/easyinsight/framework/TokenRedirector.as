@@ -1,4 +1,7 @@
 package com.easyinsight.framework {
+import com.easyinsight.listing.ListingChangeEvent;
+import com.easyinsight.solutions.RevisedSolutionDetail;
+
 import flash.events.EventDispatcher;
 
 import mx.controls.Alert;
@@ -11,6 +14,8 @@ public class TokenRedirector extends EventDispatcher {
     private var tokenService:RemoteObject;
 
     private var _type:int;
+
+    private var _solutionID:int;
 
     public function TokenRedirector() {
         tokenService = new RemoteObject();
@@ -30,7 +35,14 @@ public class TokenRedirector extends EventDispatcher {
     private function onTokenResult(event:ResultEvent):void {
         var result:String = tokenService.setToken.lastResult as String;
         if (result == null) {
-            User.getEventNotifier().dispatchEvent(new NavigationEvent("My Data", null, { toGDocs: true }));
+            Alert.show("Successfully authorized Easy Insight! You can now proceed with your previous action.");
+            /*if (_solutionID == 0) {
+                User.getEventNotifier().dispatchEvent(new NavigationEvent("My Data", null, { toGDocs: true }));
+            } else {
+                var solutionDetail:RevisedSolutionDetail = new RevisedSolutionDetail();
+                solutionDetail.solution = result;
+                dispatchEvent(new ListingChangeEvent(solutionDetail));
+            }*/
         } else {
             Alert.show(result);
         }

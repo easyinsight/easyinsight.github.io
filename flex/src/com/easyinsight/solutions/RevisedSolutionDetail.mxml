@@ -37,11 +37,13 @@
         import com.easyinsight.account.Account;
         import com.easyinsight.customupload.ConfigureDataSource;
         import com.easyinsight.customupload.DataSourceConfiguredEvent;
+        import com.easyinsight.framework.AuthorizationRequirement;
         import com.easyinsight.framework.NavigationEvent;
         import com.easyinsight.genredata.AnalyzeEvent;
         import com.easyinsight.genredata.ModuleAnalyzeEvent;
         import com.easyinsight.goals.GoalDataAnalyzeSource;
         import com.easyinsight.goals.GoalTreeDescriptor;
+        import com.easyinsight.google.AuthSubNavWindow;
         import com.easyinsight.help.ScreencastWindow;
         import com.easyinsight.listing.DescriptorAnalyzeSource;
         import com.easyinsight.quicksearch.EIDescriptor;
@@ -285,6 +287,18 @@
             }
         }
 
+        private function gotRequirements():void {
+            var req:AuthorizationRequirement = solutionService.determineAuthorizationRequirements.lastResult as AuthorizationRequirement;
+            if (req != null) {
+                var window:AuthSubNavWindow = new AuthSubNavWindow();
+                window.googleURL = "https://staging.easy-insight.com/app?sourceType=" + req.authorizationType;                
+                PopUpManager.addPopUp(window, this, true);
+                PopUpUtil.centerPopUp(window);
+            } else {
+                install();
+            }
+        }
+
         private function onSourceConfigured(event:DataSourceConfiguredEvent):void {
             postInstall();
         }
@@ -368,6 +382,7 @@
 	</mx:Script>
     <mx:RemoteObject destination="solutionService" id="solutionService">
 		<mx:method name="installSolution" result="installedSolution()"/>
+		<mx:method name="determineAuthorizationRequirements" result="gotRequirements()"/>
     </mx:RemoteObject>
     <mx:HBox width="1000" height="100%" backgroundImage="{background2}" backgroundSize="100%" paddingLeft="20"
          paddingRight="20" paddingTop="20" paddingBottom="20">
@@ -376,8 +391,8 @@
             <mx:Spacer height="50"/>
             <mx:Canvas id="controlsBox">
                 <mx:VBox alpha="{controlsAlpha}">
-                    <mx:Button label="Install into your Easy Insight Account" fontSize="20" click="install()" styleName="blueButton"
-                            visible="{installAvailable}" enabled="{controlsEnabled}"/>
+                    <mx:Button label="Install into your Easy Insight Account" fontSize="20" click="solutionService.determineAuthorizationRequirements.send(solutionID)"
+                               styleName="blueButton" visible="{installAvailable}" enabled="{controlsEnabled}"/>
                     <mx:Button label="Download Associated Files" fontSize="20" click="download()" styleName="blueButton"
                             visible="{downloadAvailable}" enabled="{controlsEnabled}"/>
                 </mx:VBox>

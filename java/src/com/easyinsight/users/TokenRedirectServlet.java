@@ -23,6 +23,8 @@ public class TokenRedirectServlet extends HttpServlet {
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
           throws ServletException, IOException {
 
+        String sourceType = req.getParameter("sourceType");
+
         // Retrieve the AuthSub token assigned by Google
         String token = AuthSubUtil.getTokenFromReply(req.getQueryString());
         if (token == null) {
@@ -84,7 +86,7 @@ public class TokenRedirectServlet extends HttpServlet {
         }*/
         //SecurityUtil.getUserID(false);
 
-        String redirectURL = "https://staging.easy-insight.com/app/#redirectID=1&token=" + sessionToken;
+        String redirectURL = "https://staging.easy-insight.com/app/#redirectID="+sourceType+"&token=" + sessionToken;
         resp.sendRedirect(redirectURL);
 
         /*Token tokenObject = new Token();
