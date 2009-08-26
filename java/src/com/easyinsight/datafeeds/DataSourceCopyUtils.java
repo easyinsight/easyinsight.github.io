@@ -74,13 +74,16 @@ public class DataSourceCopyUtils {
 
         ConfigureDataFeedTodo todo = null;        
         if (feedDefinition instanceof IServerDataSourceDefinition) {
-            Session session = Database.instance().createSession(conn);
+            IServerDataSourceDefinition def = (IServerDataSourceDefinition) feedDefinition;
+            if (def.getCredentialsDefinition() != CredentialsDefinition.NO_CREDENTIALS) {
+                Session session = Database.instance().createSession(conn);
 
-            todo = new ConfigureDataFeedTodo();
-            todo.setFeedID(clonedFeedDefinition.getDataFeedID());
-            todo.setUserID(userID);
-            session.save(todo);
-            session.flush();
+                todo = new ConfigureDataFeedTodo();
+                todo.setFeedID(clonedFeedDefinition.getDataFeedID());
+                todo.setUserID(userID);
+                session.save(todo);
+                session.flush();
+            }
         }
         DataSourceDescriptor dataSourceDescriptor = new DataSourceDescriptor(clonedFeedDefinition.getFeedName(), clonedFeedDefinition.getDataFeedID());
         infos.add(new SolutionInstallInfo(feedDefinition.getDataFeedID(), dataSourceDescriptor, todo, clonedFeedDefinition.getFeedName(), todo != null));
