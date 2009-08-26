@@ -86,7 +86,7 @@ public class TokenRedirectServlet extends HttpServlet {
         }*/
         //SecurityUtil.getUserID(false);
 
-        String redirectURL = "https://staging.easy-insight.com/app/#redirectID="+sourceType+"&token=" + sessionToken;
+        String redirectURL = "https://www.easy-insight.com/app/#redirectID="+sourceType+"&token=" + sessionToken;
         resp.sendRedirect(redirectURL);
 
         /*Token tokenObject = new Token();

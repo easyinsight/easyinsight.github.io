@@ -1,0 +1,46 @@
+<?xml version="1.0" ?>
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*"
+         creationComplete="tokenService.getTokenSpecifications.send()" width="600">
+    <mx:Script><![CDATA[
+        import mx.collections.ArrayCollection;
+
+        private function gotTokens():void {
+            var tokens:ArrayCollection = tokenService.getTokenSpecifications.lastResult as ArrayCollection;
+            configuredTokens = new ArrayCollection();
+            unconfiguredTokens = new ArrayCollection();
+            for each (var token:TokenSpecification in tokens) {
+                if (token.defined) {
+                    configuredTokens.addItem(token);
+                } else {
+                    unconfiguredTokens.addItem(token);
+                }
+            }
+        }
+
+        [Bindable]
+        private var configuredTokens:ArrayCollection;
+        [Bindable]
+        private var unconfiguredTokens:ArrayCollection;
+        ]]></mx:Script>
+    <mx:RemoteObject destination="tokenService" id="tokenService">
+        <mx:method name="getTokenSpecifications" result="gotTokens()"/>
+    </mx:RemoteObject>
+    <mx:HBox width="100%" horizontalAlign="center">
+        <mx:Label text="Authorized Systems"/>
+    </mx:HBox>
+    <mx:DataGrid dataProvider="{configuredTokens}" width="100%">
+        <mx:columns>
+            <mx:DataGridColumn headerText="Name" dataField="name"/>
+            <mx:DataGridColumn headerText="" dataField="name" itemRenderer="com.easyinsight.tokens.ConfiguredTokenControls"/>
+        </mx:columns>
+    </mx:DataGrid>
+    <mx:HBox width="100%" horizontalAlign="center">
+        <mx:Label text="Available Systems for Authorization"/>
+    </mx:HBox>
+    <mx:DataGrid dataProvider="{unconfiguredTokens}" width="100%">
+        <mx:columns>
+            <mx:DataGridColumn headerText="Name" dataField="name"/>
+            <mx:DataGridColumn headerText="" itemRenderer="com.easyinsight.tokens.UnconfiguredTokenControls"/>
+        </mx:columns>
+    </mx:DataGrid>
+</mx:VBox>

@@ -16,6 +16,8 @@ import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.util.Map;
 import java.util.Iterator;
+import java.util.List;
+import java.util.ArrayList;
 
 /**
  * User: jamesboe
@@ -23,6 +25,26 @@ import java.util.Iterator;
  * Time: 2:25:19 PM
  */
 public class TokenService {
+
+    public List<TokenSpecification> getTokenSpecifications() {
+        List<TokenSpecification> tokenSpecs = new ArrayList<TokenSpecification>();
+        TokenStorage tokenStorage = new TokenStorage();
+        TokenSpecification gDocsSpec = new TokenSpecification();
+        gDocsSpec.setName("Google Spreadsheets");
+        gDocsSpec.setType(TokenStorage.GOOGLE_DOCS_TOKEN);
+        Token gDocsToken = tokenStorage.getToken(SecurityUtil.getUserID(), TokenStorage.GOOGLE_DOCS_TOKEN);
+        gDocsSpec.setDefined(gDocsToken != null);
+        TokenSpecification gAnalyticsSpec = new TokenSpecification();
+        gAnalyticsSpec.setName("Google Analytics");
+        gAnalyticsSpec.setType(TokenStorage.GOOGLE_ANALYTICS_TOKEN);
+        Token gAnalyticsToken = tokenStorage.getToken(SecurityUtil.getUserID(), TokenStorage.GOOGLE_ANALYTICS_TOKEN);
+        gAnalyticsSpec.setDefined(gAnalyticsToken != null);
+        gDocsSpec.setUrlToConfigure(getAuthSubURL(TokenStorage.GOOGLE_DOCS_TOKEN));
+        gAnalyticsSpec.setUrlToConfigure(getAuthSubURL(TokenStorage.GOOGLE_ANALYTICS_TOKEN));
+        tokenSpecs.add(gDocsSpec);
+        tokenSpecs.add(gAnalyticsSpec);
+        return tokenSpecs;
+    }
 
     public String setToken(int type, String sessionToken) {
         /*System.out.println("got URL " + url);
@@ -48,7 +70,7 @@ public class TokenService {
 
     public String getAuthSubURL(int type) {
         try {
-            String nextURL = "https://staging.easy-insight.com/app/TokenRedirect?sourceType=" + type;
+            String nextURL = "https://www.easy-insight.com/app/TokenRedirect?sourceType=" + type;
             FeedType feedType = new FeedType(type);
             String scope;
             if (feedType.equals(FeedType.GOOGLE_ANALYTICS)) {

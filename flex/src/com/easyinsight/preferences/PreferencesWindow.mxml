@@ -1,5 +1,6 @@
 <?xml version="1.0" ?>
-<util:EITitleWindow xmlns:util="com.easyinsight.util.*" xmlns:mx="http://www.adobe.com/2006/mxml">
+<util:EITitleWindow xmlns:util="com.easyinsight.util.*" xmlns:mx="http://www.adobe.com/2006/mxml"
+                    xmlns:tokens="com.easyinsight.tokens.*">
     <mx:Script><![CDATA[
         import com.easyinsight.framework.User;
         import com.easyinsight.listing.DataFeedDescriptor;
@@ -85,6 +86,7 @@
     </mx:RemoteObject>
     <mx:VBox paddingBottom="10" paddingLeft="10" paddingRight="10" paddingTop="10">
         <mx:Button label="Clear All Saved Credentials" click="clearCredentials()"/>
+        <tokens:TokenManagementWindow/>
         <mx:HRule width="100%"/>
         <!--<mx:HBox>
             <mx:VBox horizontalAlign="center">

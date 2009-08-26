@@ -2,6 +2,7 @@ package com.easyinsight.goals;
 
 import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.security.Roles;
+import com.easyinsight.security.AuthorizationRequirement;
 import com.easyinsight.solutions.SolutionService;
 import com.easyinsight.solutions.SolutionElementKey;
 import com.easyinsight.solutions.SolutionInstallInfo;
@@ -38,6 +39,7 @@ public class InstallationSystem {
 
     private Map<SolutionElementKey, Long> installedObjectMap = new HashMap<SolutionElementKey, Long>();
     private List<SolutionInstallInfo> allSolutions = new ArrayList<SolutionInstallInfo>();
+    private List<AuthorizationRequirement> authRequirements = new ArrayList<AuthorizationRequirement>();
     private Connection conn;
     private long userID;
     private GoalStorage goalStorage = new GoalStorage();
@@ -51,6 +53,10 @@ public class InstallationSystem {
 
     public List<SolutionInstallInfo> getAllSolutions() {
         return allSolutions;
+    }
+
+    public List<AuthorizationRequirement> getAuthRequirements() {
+        return authRequirements;
     }
 
     public void installSolution(Solution solution) throws SQLException, CloneNotSupportedException {
