@@ -36,28 +36,30 @@ public class SolutionVisitor {
                 long dataSourceID = sourceRS.getLong(1);
                 dataSourceIDs.add(dataSourceID);
             }
-            StringBuilder queryBuilder = new StringBuilder();
-            queryBuilder.append("SELECT DISTINCT FEED_TYPE FROM DATA_FEED WHERE DATA_FEED_ID IN (");
-            Iterator<Long> dsIter = dataSourceIDs.iterator();
-            while (dsIter.hasNext()) {
-                dsIter.next();
-                queryBuilder.append("?");
-                if (dsIter.hasNext()) {
-                    queryBuilder.append(",");
+            if (dataSourceIDs.size() > 0) {
+                StringBuilder queryBuilder = new StringBuilder();
+                queryBuilder.append("SELECT DISTINCT FEED_TYPE FROM DATA_FEED WHERE DATA_FEED_ID IN (");
+                Iterator<Long> dsIter = dataSourceIDs.iterator();
+                while (dsIter.hasNext()) {
+                    dsIter.next();
+                    queryBuilder.append("?");
+                    if (dsIter.hasNext()) {
+                        queryBuilder.append(",");
+                    }
                 }
-            }
-            queryBuilder.append(")");
-            PreparedStatement queryStmt = conn.prepareStatement(queryBuilder.toString());
-            dsIter = dataSourceIDs.iterator();
-            int i = 1;
-            while (dsIter.hasNext()) {
-                long id = dsIter.next();
-                queryStmt.setLong(i++, id);
-            }
-            ResultSet typeRS = queryStmt.executeQuery();
-            while (typeRS.next()) {
-                int type = typeRS.getInt(1);
-                feedTypeSet.add(new FeedType(type));
+                queryBuilder.append(")");
+                PreparedStatement queryStmt = conn.prepareStatement(queryBuilder.toString());
+                dsIter = dataSourceIDs.iterator();
+                int i = 1;
+                while (dsIter.hasNext()) {
+                    long id = dsIter.next();
+                    queryStmt.setLong(i++, id);
+                }
+                ResultSet typeRS = queryStmt.executeQuery();
+                while (typeRS.next()) {
+                    int type = typeRS.getInt(1);
+                    feedTypeSet.add(new FeedType(type));
+                }
             }
         } finally {
             Database.closeConnection(conn);
