@@ -294,7 +294,7 @@ public class GoalService {
                             }
                         }
                         if (credentials != null && credentials.isEncrypted()) {
-                            decryptCredentials(credentials);
+                            credentials = decryptCredentials(credentials);
                         }
                         dataSource.refreshData(credentials, SecurityUtil.getAccountID(), new Date(), null);
                     }
