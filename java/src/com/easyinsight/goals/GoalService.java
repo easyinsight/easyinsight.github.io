@@ -12,10 +12,12 @@ import com.easyinsight.logging.LogClass;
 import com.easyinsight.email.UserStub;
 import com.easyinsight.users.Account;
 import com.easyinsight.users.Credentials;
+import com.easyinsight.users.MalformedCredentialsException;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.database.Database;
 import com.easyinsight.datafeeds.*;
 import com.easyinsight.pipeline.HistoryRun;
+import com.easyinsight.PasswordStorage;
 
 import java.util.*;
 import java.sql.SQLException;
@@ -260,6 +262,22 @@ public class GoalService {
         return new ArrayList<CredentialRequirement>(credentialMap.values());
     }
 
+    private Credentials decryptCredentials(Credentials creds) throws MalformedCredentialsException {
+        Credentials c = new Credentials();
+        String s = PasswordStorage.decryptString(creds.getUserName());
+        int i = s.lastIndexOf(":" + SecurityUtil.getUserName());
+        if(i == -1) {
+            throw new MalformedCredentialsException();
+        }
+        c.setUserName(s.substring(0, i));
+        s = PasswordStorage.decryptString(creds.getPassword());
+        i = s.lastIndexOf(":" + SecurityUtil.getUserName());
+        if(i == -1)
+            throw new MalformedCredentialsException();
+        c.setPassword(s.substring(0, i));
+        return c;
+    }
+
     public GoalTree forceRefresh(long goalTreeID, List<CredentialFulfillment> credentialsList, boolean allSources, boolean includeSubTrees) {
         SecurityUtil.authorizeGoalTree(goalTreeID, Roles.SUBSCRIBER);
         try {
@@ -274,6 +292,9 @@ public class GoalService {
                             if (fulfillment.getDataSourceID() == feedDefinition.getDataFeedID()) {
                                 credentials = fulfillment.getCredentials();
                             }
+                        }
+                        if (credentials != null && credentials.isEncrypted()) {
+                            decryptCredentials(credentials);
                         }
                         dataSource.refreshData(credentials, SecurityUtil.getAccountID(), new Date(), null);
                     }
