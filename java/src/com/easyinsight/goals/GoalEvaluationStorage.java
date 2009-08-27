@@ -290,6 +290,18 @@ public class GoalEvaluationStorage {
             if (hasDate) {
                 goalValues = new HistoryRun().calculateHistoricalValues(goalTreeNode.getCoreFeedID(), goalTreeNode.getAnalysisMeasure(),
                     goalTreeNode.getFilters(), startDate, endDate, credentials);
+            } else {
+                PreparedStatement queryStmt = conn.prepareStatement("SELECT END_VALUE, EVALUATION_DATE FROM GOAL_OUTCOME WHERE GOAL_TREE_NODE_ID = ? AND " +
+                        "EVALUATION_DATE >= ? AND EVALUATION_DATE <= ?");
+                queryStmt.setLong(1, goalTreeNodeID);
+                queryStmt.setTimestamp(2, new Timestamp(startDate.getTime()));
+                queryStmt.setTimestamp(3, new Timestamp(endDate.getTime()));
+                ResultSet rs = queryStmt.executeQuery();
+                while (rs.next()) {
+                    double endValue = rs.getDouble(1);
+                    Date evalDate = new Date(rs.getDate(2).getTime());
+                    goalValues.add(new GoalValue(goalTreeNodeID, evalDate, endValue));
+                }
             }
         } finally {
             Database.closeConnection(conn);
