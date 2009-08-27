@@ -119,11 +119,16 @@
                 ProgressAlert.alert(this, "Retrieving available spreadsheets...", null, dataService.getAvailableGoogleSpreadsheets);
                 dataService.getAvailableGoogleSpreadsheets.send();
             } else {
-                var window:AuthSubNavWindow = new AuthSubNavWindow();
-                window.googleURL = tokenService.getAuthSubURL.lastResult as String;
-                PopUpManager.addPopUp(window, this, true);
-                PopUpUtil.centerPopUp(window);
+                ProgressAlert.alert(this, "Generating Google URL...", null, tokenService.getAuthSubURL);
+                tokenService.getAuthSubURL.send(1);
             }
+        }
+
+        private function gotURL():void {
+            var window:AuthSubNavWindow = new AuthSubNavWindow();
+            window.googleURL = tokenService.getAuthSubURL.lastResult as String;
+            PopUpManager.addPopUp(window, this, true);
+            PopUpUtil.centerPopUp(window);
         }
                 ]]>
 	</mx:Script>
@@ -132,6 +137,7 @@
 	</mx:RemoteObject>
     <mx:RemoteObject id="tokenService" destination="tokenService">
         <mx:method name="isTokenEstablished" result="gotToken()"/>
+        <mx:method name="getAuthSubURL" result="gotURL()"/>
     </mx:RemoteObject>
 	<mx:WipeRight id="wipeIn" duration="1000"/>
 	<mx:VBox id="coreContent" width="100%" height="100%">
