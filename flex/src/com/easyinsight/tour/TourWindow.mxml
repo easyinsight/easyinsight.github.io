@@ -76,12 +76,12 @@
             </mx:HBox>
             <mx:HBox horizontalGap="100" paddingLeft="30" paddingTop="30" paddingBottom="30" paddingRight="30" width="100%" height="100%"
                     horizontalAlign="center" verticalAlign="middle">
-                <mx:Box borderStyle="solid" cornerRadius="15" dropShadowEnabled="true" horizontalAlign="center"
-                        verticalAlign="middle" click="individualTour()" width="300" height="150" backgroundColor="#FFFFFF"
-                        mouseOver="onMouseOver(event)" mouseOut="onMouseOut(event)">
+                <!--<mx:VBox borderStyle="solid" cornerRadius="15" dropShadowEnabled="true" horizontalAlign="center"
+                        verticalAlign="middle" click="individualTour()" width="300" height="150" backgroundColor="#FFFFFF">
                     <mx:TextArea backgroundAlpha="0" borderStyle="none" editable="false" selectable="false" fontSize="16"
                                  text="I'm just an individual seeing what this Easy Insight thing is" height="60" width="80%"/>
-                </mx:Box>
+                    <mx:Label text="Coming soon!" fontSize="16"/>
+                </mx:Box>-->
                 <mx:Box borderStyle="solid" cornerRadius="15" dropShadowEnabled="true" horizontalAlign="center"
                         verticalAlign="middle" click="bizTour()" width="300" height="150" backgroundColor="#FFFFFF"
                         mouseOver="onMouseOver(event)" mouseOut="onMouseOut(event)">
