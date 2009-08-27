@@ -29,7 +29,7 @@ public class JiraTest extends TestCase {
         Credentials credentials = new Credentials();
         credentials.setUserName("jboe");
         credentials.setPassword("Grav1tyfails");
-        long dataSourceID = uploadService.newExternalDataSource(jiraDataSource, credentials);
-        uploadService.refreshData(dataSourceID, credentials, false);
+        /*long dataSourceID = uploadService.newExternalDataSource(jiraDataSource, credentials);
+        uploadService.refreshData(dataSourceID, credentials, false);*/
     }
 }
