@@ -12,6 +12,8 @@
 
         import com.easyinsight.listing.ListingChangeEvent;
 
+        import com.easyinsight.util.PopUpUtil;
+
         import mx.binding.utils.BindingUtils;
         import mx.events.ItemClickEvent;
         import mx.managers.CursorManager;
@@ -139,10 +141,9 @@
 
         private function lesson1():void {
             var window:ScreencastWindow = new ScreencastWindow();
-            window.screencastSource = "../assets/lesson1/training.mp4";
+            window.screencastSource = "../assets/Quick Solution/Quick Solution.mp4";
             PopUpManager.addPopUp(window, this);
-            window.x = 300;
-            window.y = 200;
+            PopUpUtil.centerPopUp(window);
         }
 
         private function filterFunction(item:Object):Boolean {
@@ -192,7 +193,7 @@
                     </mx:HBox>
                 </mx:VBox>
                 <mx:VBox horizontalAlign="center">
-                    <mx:Image source="../assets/lesson1/FirstFrame.png" width="256" height="192" click="lesson1()" rollOver="CursorManager.setCursor(pointerIcon);"
+                    <mx:Image source="../assets/Quick Solution/FirstFrame.png" width="256" height="192" click="lesson1()" rollOver="CursorManager.setCursor(pointerIcon);"
                             rollOut="CursorManager.removeAllCursors()"/>
                     <mx:HBox>
                         <mx:Label text="Watch Demo Video" fontSize="14"/>
