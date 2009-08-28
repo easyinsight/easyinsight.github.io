@@ -128,6 +128,9 @@
             if (NativeWindow.supportsMenu) {
                 _app.nativeWindow.menu = baseMenu;
             }
+
+
+
             reportsMenu = new NativeMenu();
             baseMenu.addSubmenu(reportsMenu, "Reports");
 
@@ -140,6 +143,12 @@
                 myGoalsItem.data = myGoalsDescriptor;
                 goalsMenu.addItem(myGoalsItem);
             }
+
+            var uploadMenu:NativeMenu = new NativeMenu();
+            baseMenu.addSubmenu(uploadMenu, "Uploads");
+            var fileUploadItem:NativeMenuItem = new NativeMenuItem("Upload Spreadsheet or CSV");
+            fileUploadItem.addEventListener(Event.SELECT, onUpload);
+            uploadMenu.addItem(fileUploadItem);
 
             var helpMenu:NativeMenu = new NativeMenu();
             defaultScreen = new AirIntroDescriptor();
@@ -159,6 +168,15 @@
             var logoutItem:NativeMenuItem = new NativeMenuItem("Log Out");
             helpMenu.addItem(logoutItem);
             logoutItem.addEventListener(Event.SELECT, logout);
+        }
+
+        private function onUpload(event:Event):void {
+            var window:AirFileUpload = new AirFileUpload();
+            window.type = NativeWindowType.UTILITY;
+            window.open(true);
+            //window.nativeWindow.x = this.application.nativeWindow.x;
+            //window.nativeWindow.y = this.application.nativeWindow.y;
+            
         }
 
         private function logout():void {

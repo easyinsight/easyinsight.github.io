@@ -1,4 +1,6 @@
 package com.easyinsight.report {
+import com.easyinsight.analysis.EmbeddedControllerLookup;
+import com.easyinsight.analysis.IEmbeddedReportController;
 import com.easyinsight.goals.GoalHistoryDescriptor;
 import com.easyinsight.goals.GoalHistoryView;
 import com.easyinsight.goals.GoalTreeViewContainer;
@@ -27,7 +29,12 @@ public class ReportWindowFactory implements IAsyncScreenFactory{
             reportView.showMetadata = false;
             reportView.showReportEditor = false;
             reportView.showRefresh = false;
+            reportView.showBrowser = false;
             reportView.showBack = false;
+            reportView.showLogo = false;
+            var controllerClass:Class = EmbeddedControllerLookup.controllerForType(insightDescriptor.reportType);
+            var controller:IEmbeddedReportController = new controllerClass();
+            reportView.viewFactory = controller.createEmbeddedView();
             return reportView;
         } else if (descriptor.getType() == EIDescriptor.GOAL_HISTORY) {
             var histDescriptor:GoalHistoryDescriptor = descriptor as GoalHistoryDescriptor;

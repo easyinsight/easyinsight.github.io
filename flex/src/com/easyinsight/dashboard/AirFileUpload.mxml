@@ -1,5 +1,5 @@
 <?xml version="1.0" ?>
-<mx:Window xmlns:mx="http://www.adobe.com/2006/mxml">
+<mx:Window xmlns:mx="http://www.adobe.com/2006/mxml" width="500" height="400">
     <mx:states>
         <mx:State name="Uploaded">
 
@@ -10,6 +10,15 @@
         import com.easyinsight.customupload.UploadResponse;
 
         import flash.filesystem.FileStream;
+        import flash.filesystem.File;
+        import flash.filesystem.FileMode;
+
+        import mx.controls.Alert;
+        import mx.rpc.events.FaultEvent;
+
+        private function fault(event:FaultEvent):void {
+            Alert.show(event.fault.faultString, event.fault.faultDetail);
+        }
 
         private var _filePath:String;
 
@@ -25,26 +34,38 @@
             var byteArray:ByteArray = new ByteArray();
             fileStream.readBytes(byteArray, 0, fileStream.bytesAvailable);
             fileStream.close();
-            uploadService.newAirSource.send();
+            uploadService.newAirSource.send(dataSourceNameInput.text, dataSourceNameInput.text, byteArray);
         }
 
         private function uploaded():void {
             var response:UploadResponse = uploadService.newAirSource.lastResult as UploadResponse;
             if (response.successful) {
-                
+                Alert.show("worked!");    
             } else {
-                
+                Alert.show("failed :(");
             }
         }
 
         private function closeWindow():void {
             this.nativeWindow.close();
         }
+
+        private function browseForFile():void {
+            var file:File = new File();
+            file.addEventListener(Event.SELECT, fileSelectHandler);
+            file.browseForOpen("Select a File");
+        }
+
+        private function fileSelectHandler(event:Event):void {
+            _filePath = event.target.nativePath;
+            readFile();
+        }
         ]]></mx:Script>
     <mx:RemoteObject destination="userUpload" id="uploadService">
-        <mx:method name="newAirSource" result="uploaded()"/>
+        <mx:method name="newAirSource" result="uploaded()" fault="fault(event)"/>
     </mx:RemoteObject>
     <mx:VBox id="coreBox">
+        <mx:Button label="Browse for File" click="browseForFile()"/>
         <mx:HBox>
             <mx:Label text="Data Source Name: "/>
             <mx:TextInput id="dataSourceNameInput"/>

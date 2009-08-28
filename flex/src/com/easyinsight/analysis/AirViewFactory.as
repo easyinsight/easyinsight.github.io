@@ -51,7 +51,7 @@ public class AirViewFactory extends AbstractViewFactory {
 
 
 
-    public function set prefix(val:String):void {
+    override public function set prefix(val:String):void {
         _prefix = val;
     }
 

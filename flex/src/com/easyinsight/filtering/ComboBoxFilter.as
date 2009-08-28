@@ -177,6 +177,12 @@ import mx.events.DropdownEvent;
 			strings.refresh();			
 			comboBox.dataProvider = strings;
 			comboBox.rowCount = Math.min(strings.length, 15);
+            if (_filterDefinition == null) {
+                _filterDefinition = new FilterValueDefinition();
+                _filterDefinition.field = _analysisItem;
+                _filterDefinition.filteredValues = new ArrayCollection();
+                _filterDefinition.inclusive = true;
+            }
 			var selectedValue:String;
 			if (_filterDefinition.filteredValues.length == 0) {
 				_filterDefinition.filteredValues.addItem(strings.getItemAt(0));

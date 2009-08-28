@@ -460,6 +460,9 @@
             if (!_showBrowser) {
                 buttonBar.removeChild(browserButton);
             }
+            if (!_showRefresh) {
+                buttonBar.removeChild(refreshButton);
+            }
             viewFactory.reportID = _reportID;
             viewFactory.prefix = _prefix;
             viewFactory.dataSourceID = _dataSourceID;
