@@ -19,10 +19,10 @@
             <mx:RemoveChild target="{groupAddInsightButton}"/>
             <mx:RemoveChild target="{saveButton}"/>
             <mx:RemoveChild target="{saveAsButton}"/>
-            <mx:RemoveChild target="{sharingSettingsBox}"/>
+            <!--<mx:RemoveChild target="{sharingSettingsBox}"/>
             <mx:RemoveChild target="{createFeedButton}"/>
             <mx:SetProperty target="{analysisNameInput}" name="editable" value="false"/>
-            <mx:SetProperty target="{analysisTagsInput}" name="editable" value="false"/>
+            <mx:SetProperty target="{analysisTagsInput}" name="editable" value="false"/>-->
         </mx:State>
         <mx:State name="Professional">
 
@@ -31,7 +31,7 @@
 
         </mx:State>
         <mx:State name="Individual" basedOn="Group">
-            <mx:RemoveChild target="{createFeedButton}"/>
+            <!--<mx:RemoveChild target="{createFeedButton}"/>-->
         </mx:State>
         <mx:State name="Free" basedOn="Individual">
 
@@ -41,38 +41,23 @@
 		<![CDATA[
         import com.easyinsight.account.Account;
         import com.easyinsight.administration.feed.DeleteAnalysisItemEvent;
-        import com.easyinsight.analysis.AnalysisChangedEvent;
-        import com.easyinsight.analysis.AnalysisItemEditEvent;
-        import com.easyinsight.analysis.AnalysisItemEditWindow;
+        import com.easyinsight.analysis.AnalysisChangedEvent;        
         import com.easyinsight.analysis.AnalysisItemNode;
         import com.easyinsight.analysis.AnalysisItemTypeRenderer;
         import com.easyinsight.analysis.AnalysisUtil;
         import com.easyinsight.analysis.ControllerLookup;
-        import com.easyinsight.analysis.CredentialRequirement;
-        import com.easyinsight.analysis.CredentialsEvent;
         import com.easyinsight.analysis.DataServiceEvent;
-        import com.easyinsight.analysis.DescriptionEditWindow;
-        import com.easyinsight.analysis.DescriptionUpdateEvent;
         import com.easyinsight.analysis.FeedNode;
         import com.easyinsight.analysis.HierarchyDrilldownEvent;
         import com.easyinsight.analysis.AnalysisStateChangeEvent;
         import com.easyinsight.analysis.DataViewFactory;
         import com.easyinsight.analysis.HierarchyRollupEvent;
-        import com.easyinsight.analysis.HierarchyWindow;
         import com.easyinsight.analysis.IReportController;
-        import com.easyinsight.analysis.QuickDataSourceAPIWindow;
-        import com.easyinsight.analysis.RuntimeCredentialsWindow;
         import com.easyinsight.analysis.list.ListController;
-        import com.easyinsight.analysis.scrub.LookupTableScrubListWindow;
-        import com.easyinsight.analysis.scrub.TextReplaceScrubListWindow;
-        import com.easyinsight.analysis.NewBlankFeedWindow;
-        import com.easyinsight.analysis.scrub.LookupTableScrubWindow;
-        import com.easyinsight.analysis.EmbedInsightWindow;
         import com.easyinsight.analysis.AddFeedToGroupWindow;
         import com.easyinsight.analysis.SubscriptionEvent;
         import com.easyinsight.analysis.AddInsightToGroupWindow;
         import com.easyinsight.analysis.UserCapabilities;
-        import com.easyinsight.administration.feed.TagCloud;
         import com.easyinsight.datasources.DataSourceInfo;
         import com.easyinsight.detail.DataDetailEvent;
         import com.easyinsight.detail.DetailBook;
@@ -86,8 +71,6 @@
         import com.easyinsight.report.MultiReportAnalyzeSource;
         import com.easyinsight.report.ReportAnalyzeSource;
         import com.easyinsight.solutions.InsightDescriptor;
-        import com.easyinsight.util.EITitleWindow;
-        import com.easyinsight.util.PNGEnc;
 
         import com.easyinsight.util.PopUpUtil;
 
@@ -95,18 +78,10 @@
         import mx.collections.Sort;
         import mx.events.DragEvent;
         import mx.events.ListEvent;
-        import mx.validators.Validator;
 
         import com.easyinsight.analysis.AnalysisItemWrapper;
-        import com.easyinsight.administration.feed.FeedDefinitionData;
-        import com.easyinsight.analysis.AnalysisCloseEvent;
-        import com.easyinsight.analysis.PNGCreator;
-        import com.easyinsight.analysis.ExcelCreator;
+        import com.easyinsight.analysis.AnalysisCloseEvent;        
         import com.easyinsight.analysis.AnalysisItem;
-        import com.easyinsight.analysis.AnalysisItemCreationEvent;
-        import com.easyinsight.analysis.CalculationWindow;
-        import com.easyinsight.analysis.scrub.DataScrubEvent;
-        import com.easyinsight.analysis.scrub.TextReplaceScrubWindow;
         import com.easyinsight.util.ProgressAlert;
         import com.easyinsight.commands.CommandEvent;
 
@@ -118,11 +93,8 @@
         import com.easyinsight.commands.CommandProcessor;
         import com.easyinsight.framework.DataServiceLoadingEvent;
         import com.easyinsight.framework.DataService;
-        import com.easyinsight.analysis.feed.AnalysisBasedFeedCreationWindow;
         import com.easyinsight.analysis.SavedAnalysisEvent;
         import com.easyinsight.framework.User;
-
-        import mx.rpc.events.ResultEvent;
 
         import com.easyinsight.filtering.TransformsUpdatedEvent;
         import com.easyinsight.feedassembly.CompositeFeedCreatedEvent;
@@ -144,22 +116,6 @@
         private var background2:Class;
 
         [Bindable]
-        [Embed(source="../../../assets/table.png")]
-        public var listIcon:Class;
-
-        [Bindable]
-        [Embed(source="../../../assets/table2_selection_block.png")]
-        public var crosstabIcon:Class;
-
-        [Bindable]
-        [Embed(source="../../../assets/chart_pie2.png")]
-        public var graphIcon:Class;
-
-        [Bindable]
-        [Embed(source="../../../assets/earth.png")]
-        public var yahooMapIcon:Class;
-
-        [Bindable]
         public var dataService:DataService;
 
         [Bindable]
@@ -171,20 +127,13 @@
         [Bindable]
         private var selectedMode:int;
 
-        [Bindable]
-        private var analysisDefinition:AnalysisDefinition;
 
-        [Bindable]
-        private var feedDefinition:FeedDefinitionData;
+        private var _analysisDefinition:AnalysisDefinition;
 
-        [Bindable]
-        private var labelNameField:String;
 
-        [Bindable]
-        private var tags:String;
 
-        [Bindable]
-        private var analysisPolicy:int;
+        //[Bindable]
+        //private var analysisPolicy:int;
 
         [Bindable]
         private var _previewMode:Boolean = false;
@@ -202,9 +151,6 @@
         private var commandProcessor:CommandProcessor;
 
         [Bindable]
-        private var limits:ArrayCollection;
-
-        [Bindable]
         private var canSubscribeToInsight:Boolean;
         [Bindable]
         private var canAddInsightToGroup:Boolean;
@@ -213,19 +159,12 @@
         [Bindable]
         private var canAddFeedToGroup:Boolean;
 
-        private var analysisValidators:Array;
 
-        [Bindable]
-        private var marketplaceVisible:Boolean;
 
         [Bindable]
         private var wrappers:ArrayCollection;
 
-        [Bindable]
-        private var publiclyVisible:Boolean;
-
-        [Bindable]
-        private var shareDataSourceSharing:Boolean;
+        
 
         [Bindable]
         private var modeText:String = "";
@@ -264,7 +203,7 @@
         }
 
         private function onDataReturn(event:DataServiceEvent):void {
-            this.dataSourceInfo = event.dataSource; 
+            this.dataSourceInfo = event.dataSource;
         }
 
         private function loadController(controller:IReportController):void {
@@ -298,8 +237,16 @@
             loadController(controller);
         }
 
-        public function getAnalysisDefinition():AnalysisDefinition {
-            return analysisDefinition;
+
+        [Bindable(event="analysisDefinitionChanged")]
+        public function get analysisDefinition():AnalysisDefinition {
+            return _analysisDefinition;
+        }
+
+        public function set analysisDefinition(value:AnalysisDefinition):void {
+            if (_analysisDefinition == value) return;
+            _analysisDefinition = value;
+            dispatchEvent(new Event("analysisDefinitionChanged"));
         }
 
         public function set reportID(val:int):void {
@@ -309,14 +256,30 @@
         public function openAnalysis(analysisDefinition:AnalysisDefinition):void {
             BrowserManager.getInstance().setTitle("Easy Insight - " + analysisDefinition.name);
             this.analysisDefinition = analysisDefinition;
-            labelNameField = analysisDefinition.name;
-            tags = TagCloud.toString(analysisDefinition.tagCloud);
-            analysisPolicy = analysisDefinition.policy;
+            
+            //analysisPolicy = analysisDefinition.policy;
         }
 
         private function onLogin(event:LoginEvent):void {
-            currentState = "";
+            setState();
             User.getEventNotifier().removeEventListener(LoginEvent.LOGIN, onLogin);
+        }
+
+        private function setState():void {
+            switch (User.getInstance().getAccountType()) {
+                case Account.PROFESSIONAL:
+                    currentState = "Professional";
+                    break;
+                case Account.GROUP:
+                    currentState = "Group";
+                    break;
+                case Account.INDIVIDUAL:
+                    currentState = "Individual";
+                    break;
+                case Account.FREE:
+                    currentState = "Free";
+                    break;
+            }
         }
 
         private function goAdmin():void {
@@ -339,23 +302,10 @@
                 currentState = "NotLoggedIn";
                 User.getEventNotifier().addEventListener(LoginEvent.LOGIN, onLogin);
             } else {
-                switch (User.getInstance().getAccountType()) {
-                    case Account.PROFESSIONAL:
-                        currentState = "Professional";
-                        break;
-                    case Account.GROUP:
-                        currentState = "Group";
-                        break;
-                    case Account.INDIVIDUAL:
-                        currentState = "Individual";
-                        break;
-                    case Account.FREE:
-                        currentState = "Free";
-                        break;
-                }
+                setState();
             }
 
-            this.analysisValidators = [ analysisNameValidator ];
+            
             this.feedMetadata = feedMetadata;
             this.admin = feedMetadata.dataSourceAdmin;
             dataSourceName = this.feedMetadata.dataSourceName;
@@ -390,10 +340,6 @@
                 loadController(controller);
 
                 analysisState.selectedLabel = analysisDefinition.type;
-
-                shareDataSourceSharing = analysisDefinition.visibleAtFeedLevel;
-                publiclyVisible = analysisDefinition.publiclyVisible;
-                marketplaceVisible = analysisDefinition.marketplaceVisible;
 
                 var feedFragmentObject:Object = new Object();
                 feedFragmentObject.analysisID = String(analysisDefinition.analysisID);
@@ -482,9 +428,7 @@
         private function gotReport():void {
             this.analysisDefinition = analysisService.openAnalysisDefinition.lastResult as AnalysisDefinition;
             BrowserManager.getInstance().setTitle("Easy Insight - " + this.analysisDefinition.name);
-            labelNameField = this.analysisDefinition.name;
-            tags = TagCloud.toString(this.analysisDefinition.tagCloud);
-            analysisPolicy = this.analysisDefinition.policy;
+            //analysisPolicy = this.analysisDefinition.policy;
             initializeState();
         }
 
@@ -590,20 +534,12 @@
                 var loginDialog:LoginDialog = LoginDialog(PopUpManager.createPopUp(this, LoginDialog, true));
                 PopUpUtil.centerPopUp(loginDialog);
             } else {
-                if (getAnalysisDefinition().canSaveDirectly) {
-                    var valid:Boolean = Validator.validateAll(analysisValidators).length == 0;
+                if (analysisDefinition.canSaveDirectly) {
+                    var valid:Boolean = reportMetadataTab.updateReport().length == 0;
                     if (valid) {
                         dataView.updateExportMetadata();
-                        var bd:BitmapData = new BitmapData(dataView.getCoreView().width, dataView.getCoreView().height);
-                        bd.draw(dataView.getCoreView());
-                        var ba:ByteArray = PNGEnc.encode(bd);
-                        analysisDefinition.name = analysisNameInput.text;
-                        analysisDefinition.tagCloud = TagCloud.fromString(analysisTagsInput.text);
-                        analysisDefinition.marketplaceVisible = marketplaceVisibleCheckbox.selected;
-                        analysisDefinition.publiclyVisible = publiclyVisibleCheckbox.selected;
-                        analysisDefinition.visibleAtFeedLevel = shareDataSourceSharingCheckbox.selected;
                         ProgressAlert.alert(this, "Saving the report...", "Saved!", analysisService.saveAnalysisDefinition);
-                        analysisService.saveAnalysisDefinition(analysisDefinition, ba);
+                        analysisService.saveAnalysisDefinition(analysisDefinition);
                     } else {
                         tabNavigator.selectedIndex = 0;
                         Alert.show("There are one or more errors which need to be corrected before this report can be saved.");
@@ -633,7 +569,7 @@
             } else {
                 var saveDialog:SaveDialog = SaveDialog(PopUpManager.createPopUp(this, SaveDialog, true));
                 dataView.updateExportMetadata();
-                saveDialog.analysisDefinition = getAnalysisDefinition();
+                saveDialog.analysisDefinition = analysisDefinition;
                 saveDialog.addEventListener(SavedAnalysisEvent.SAVED_ANALYSIS, savedAnalysis);
                 PopUpUtil.centerPopUp(saveDialog);
             }
@@ -641,24 +577,13 @@
 
         private function savedAnalysis(event:SavedAnalysisEvent):void {
             //title = event.title;
-            analysisNameInput.text = event.title;
+            reportMetadataTab.updateName(event.title);
             var feedFragmentObject:Object = new Object();
             feedFragmentObject.analysisID = String(analysisDefinition.analysisID);
             var feedFragmentString:String = URLUtil.objectToString(feedFragmentObject);
             BrowserManager.getInstance().setFragment(feedFragmentString);
             BrowserManager.getInstance().setTitle("Easy Insight - " + event.title);
             this.analysisChanged = false;
-        }
-
-        private function createFeed():void {
-            if (getAnalysisDefinition().analysisID == 0) {
-                save();
-            } else {
-                var feedCreationWindow:AnalysisBasedFeedCreationWindow = AnalysisBasedFeedCreationWindow(PopUpManager.
-                        createPopUp(this, AnalysisBasedFeedCreationWindow, true));
-                feedCreationWindow.analysisDefinition = getAnalysisDefinition();
-                PopUpUtil.centerPopUp(feedCreationWindow);
-            }
         }
 
         private function startLoading(event:DataServiceLoadingEvent):void {
@@ -673,148 +598,13 @@
             return item["icon"];
         }
 
-        private function showAPIInfo():void {
-            var window:QuickDataSourceAPIWindow = new QuickDataSourceAPIWindow();
-            window.dataSourceID = dataService.dataFeedID;
-            PopUpManager.addPopUp(window, this);
-            PopUpUtil.centerPopUp(window);
-        }
-
+        
         private function undo():void {
             commandProcessor.undo();
         }
 
         private function redo():void {
             commandProcessor.redo();
-        }
-
-        private function bought(event:ResultEvent):void {
-            this._previewMode = false;
-            this.dataService.previewMode = false;
-            dataView.retrieveData();
-        }
-
-        private function refresh():void {
-            dataView.retrieveData();
-        }
-
-        private function newTextReplaceScrub():void {
-            var textWindow:TextReplaceScrubWindow = TextReplaceScrubWindow(PopUpManager.createPopUp(this, TextReplaceScrubWindow, false));
-            textWindow.addEventListener(DataScrubEvent.ADDED_SCRUB, scrubAdded);
-            PopUpUtil.centerPopUp(textWindow);
-        }
-
-        private function newLookupTableScrub():void {
-            var lookupWindow:LookupTableScrubWindow = LookupTableScrubWindow(PopUpManager.createPopUp(this, LookupTableScrubWindow, false));
-            lookupWindow.availableFields = getAnalysisItems();
-            lookupWindow.feedID = dataService.dataFeedID;
-            lookupWindow.addEventListener(DataScrubEvent.ADDED_SCRUB, scrubAdded);
-            PopUpUtil.centerPopUp(lookupWindow);
-        }
-
-        private function editTextReplaceScrubs():void {
-            var scrubListWindow:TextReplaceScrubListWindow = TextReplaceScrubListWindow(PopUpManager.createPopUp(this, TextReplaceScrubListWindow, false));
-            scrubListWindow.definition = getAnalysisDefinition();
-            scrubListWindow.addEventListener(DataScrubEvent.UPDATED_SCRUB, scrubUpdated);
-            scrubListWindow.addEventListener(DataScrubEvent.DELETED_SCRUB, scrubDeleted);
-            scrubListWindow.initState(getAnalysisItems(), dataService.dataFeedID);
-            PopUpUtil.centerPopUp(scrubListWindow);
-        }
-
-        private function editLookupTableScrubs():void {
-            var scrubListWindow:LookupTableScrubListWindow = LookupTableScrubListWindow(PopUpManager.createPopUp(this, LookupTableScrubListWindow, false));
-            scrubListWindow.definition = getAnalysisDefinition();
-            scrubListWindow.addEventListener(DataScrubEvent.UPDATED_SCRUB, scrubUpdated);
-            scrubListWindow.addEventListener(DataScrubEvent.DELETED_SCRUB, scrubDeleted);
-            scrubListWindow.initState(getAnalysisItems(), dataService.dataFeedID);
-            PopUpUtil.centerPopUp(scrubListWindow);
-        }
-
-        private function scrubAdded(event:DataScrubEvent):void {
-            dispatchEvent(new AnalysisChangedEvent());
-            getAnalysisDefinition().dataScrubs.addItem(event.dataScrub);
-            dataView.retrieveData();
-        }
-
-        private function scrubUpdated(event:DataScrubEvent):void {
-            dispatchEvent(new AnalysisChangedEvent());
-            dataView.retrieveData();
-        }
-
-        private function scrubDeleted(event:DataScrubEvent):void {
-            dispatchEvent(new AnalysisChangedEvent());
-            getAnalysisDefinition().dataScrubs.removeItemAt(getAnalysisDefinition().dataScrubs.getItemIndex(event.dataScrub));
-            dataView.retrieveData();
-        }
-
-        private function createCalculation():void {
-            var window:AnalysisItemEditWindow = new AnalysisItemEditWindow();
-            window.editorClass = CalculationWindow;
-            window.addEventListener(AnalysisItemEditEvent.ANALYSIS_ITEM_EDIT, onNewItem);
-            PopUpManager.addPopUp(window, this);
-            PopUpUtil.centerPopUp(window);
-        }
-
-        private function onNewItem(event:AnalysisItemEditEvent):void {
-            dispatchEvent(new AnalysisChangedEvent());
-            var node:AnalysisItemNode = new AnalysisItemNode();
-            node.analysisItem = event.analysisItem;
-            var wrapper:AnalysisItemWrapper = new AnalysisItemWrapper(node);
-            availableFields.addItem(wrapper);
-            wrappers.addItem(wrapper);
-            var sort:Sort = new Sort();
-            sort.fields = [ new SortField("displayName", false) ];
-            availableFields.sort = sort;
-            availableFields.refresh();
-            wrappers.sort = sort;
-            wrappers.refresh();
-            if (getAnalysisDefinition().addedItems == null) {
-                getAnalysisDefinition().addedItems = new ArrayCollection();
-            }
-            getAnalysisDefinition().addedItems.addItem(event.analysisItem);
-        }
-
-        private function createHierarchy():void {
-            var window:AnalysisItemEditWindow = new AnalysisItemEditWindow();
-            window.editorClass = HierarchyWindow;
-            window.analysisItems = wrappers;
-            window.addEventListener(AnalysisItemEditEvent.ANALYSIS_ITEM_EDIT, onNewItem);
-            PopUpManager.addPopUp(window, this);
-            PopUpUtil.centerPopUp(window);
-        }
-
-        private function createBlankField():void {
-            var window:NewBlankFeedWindow = NewBlankFeedWindow(PopUpManager.createPopUp(this, NewBlankFeedWindow));
-            window.addEventListener(AnalysisItemCreationEvent.ANALYSIS_ITEM_CREATED, newFieldCreated);
-            PopUpUtil.centerPopUp(window);
-        }
-
-        private function newFieldCreated(event:AnalysisItemCreationEvent):void {
-            dispatchEvent(new AnalysisChangedEvent());
-            var node:AnalysisItemNode = new AnalysisItemNode();
-            node.analysisItem = event.analysisItem;
-            var wrapper:AnalysisItemWrapper = new AnalysisItemWrapper(node);
-            availableFields.addItem(wrapper);
-            wrappers.addItem(wrapper);
-            var sort:Sort = new Sort();
-            sort.fields = [ new SortField("displayName", false) ];
-            availableFields.sort = sort;
-            availableFields.refresh();
-            wrappers.sort = sort;
-            wrappers.refresh();
-            if (getAnalysisDefinition().addedItems == null) {
-                getAnalysisDefinition().addedItems = new ArrayCollection();
-            }
-            getAnalysisDefinition().addedItems.addItem(event.analysisItem);
-        }
-
-        private function exportPNG():void {
-            new PNGCreator().draw(dataView.getCoreView());
-        }
-
-        private function exportExcel():void {
-            dataView.updateExportMetadata();
-            new ExcelCreator().exportExcel(analysisDefinition);
         }
 
         public function cleanup():void {
@@ -851,13 +641,6 @@
             }
         }
 
-        private function netvibes():void {
-            flash.net.navigateToURL(new URLRequest("http://www.netvibes.com/subscribe.php?module=UWA&moduleUrl=" + escape("https://www.easy-insight.com/app/widgets/UWAWidget.html?insightCombo=" + escape(String(analysisDefinition.analysisID)) + "&reportName=" + escape(analysisDefinition.name) + "&reportType=" + escape(String(analysisDefinition.type)) + "&dataSourceID=" + escape(String(analysisDefinition.dataFeedID)))));
-        }
-
-        private function igoogle():void {
-            flash.net.navigateToURL(new URLRequest("http://www.google.com/ig/add?moduleurl=" + escape("http://www.netvibes.com/api/uwa/compile/google.php?moduleUrl=" + escape("https://www.easy-insight.com/app/widgets/UWAWidget.html?insightCombo=" + escape(String(analysisDefinition.analysisID)) + "&reportName=" + escape(analysisDefinition.name) + "&reportType=" + escape(String(analysisDefinition.type)) + "&dataSourceID=" + escape(String(analysisDefinition.dataFeedID))))));
-        }
 
         private function subscribeToFeed():void {
             userUploadService.subscribe.send(dataService.dataFeedID);
@@ -919,32 +702,9 @@
             Alert.show("This report will now show in your My Data page.");
         }
 
-        private function sourceSharingChange(event:MouseEvent):void {
-            if (shareDataSourceSharingCheckbox.selected) {
-                marketplaceVisibleCheckbox.selected = false;
-                marketplaceVisibleCheckbox.enabled = false;
-                publiclyVisibleCheckbox.selected = false;
-                publiclyVisibleCheckbox.enabled = false;
-            } else {
-                marketplaceVisibleCheckbox.enabled = true;
-                publiclyVisibleCheckbox.enabled = true;
-            }
-        }
+        
 
-        private function embed():void {
-            if (analysisDefinition.analysisID > 0) {
-                var embedWindow:EmbedInsightWindow = EmbedInsightWindow(PopUpManager.createPopUp(this, EmbedInsightWindow));
-                embedWindow.analysisID = analysisDefinition.analysisID;
-                embedWindow.reportType = analysisDefinition.reportType;
-                embedWindow.dataSourceID = analysisDefinition.dataFeedID;
-                embedWindow.reportName = analysisDefinition.name;
-                embedWindow.reportHeight = 346;
-                embedWindow.reportWidth = 450;
-                PopUpUtil.centerPopUp(embedWindow);
-            } else {
-                Alert.show("You need to save the report first.");
-            }
-        }
+        
 
         private function onItemDoubleClick(event:ListEvent):void {
             var field:AnalysisItemWrapper = event.currentTarget.selectedItem as AnalysisItemWrapper;
@@ -1010,17 +770,7 @@
             }
         }
 
-        private function onDescriptionUpdate(event:DescriptionUpdateEvent):void {
-            analysisDefinition.description = event.text;
-        }
-
-        private function editDescription():void {
-            var window:DescriptionEditWindow = new DescriptionEditWindow();
-            window.addEventListener(DescriptionUpdateEvent.DESCRIPTION_UPDATE, onDescriptionUpdate);
-            window.text = analysisDefinition.description;
-            PopUpManager.addPopUp(window, this, true);
-            PopUpUtil.centerPopUp(window);
-        }
+        
 
         private function newReport():void {
             if (analysisChanged) {
@@ -1053,12 +803,12 @@
         <mx:method name="getCredentialRequirements" result="gotCredentialRequirements()"/>
     </mx:RemoteObject>
     <mx:VBox height="100%" width="100%">
-        <mx:HBox id="buttonBox" verticalAlign="middle">
+        <mx:HBox verticalAlign="middle">
             <mx:Button id="wrapButton" icon="@Embed(source='../../../assets/document_out.png')" click="close()"
-                       toolTip="Close"/>
-            <!--<mx:VRule strokeColor="#DDDDDD" height="16"/>
-            <mx:Button id="undoButton" icon="@Embed(source='../../../assets/undo.png')" click="undo()" toolTip="Undo"/>
-            <mx:Button id="redoButton" icon="@Embed(source='../../../assets/redo.png')" click="redo()" toolTip="Redo"/>-->
+               toolTip="Close"/>
+                <!--<mx:VRule strokeColor="#DDDDDD" height="16"/>
+                        <mx:Button id="undoButton" icon="@Embed(source='../../../assets/undo.png')" click="undo()" toolTip="Undo"/>
+                        <mx:Button id="redoButton" icon="@Embed(source='../../../assets/redo.png')" click="redo()" toolTip="Redo"/>-->
             <mx:VRule strokeColor="#DDDDDD" height="16"/>
             <mx:Button id="saveButton" icon="@Embed(source='../../../assets/floppy_disk.png')" click="save()"
                        toolTip="Save" enabled="{!_previewMode}"/>
@@ -1089,59 +839,10 @@
         <mx:TabNavigator id="tabNavigator" width="100%" creationPolicy="all" enabled="{!_previewMode}" paddingTop="0"
                          paddingBottom="0"
                          paddingLeft="0" paddingRight="0" resizeToContent="true">
-            <mx:HBox label="Metadata" icon="@Embed(source='../../../assets/note.png')" paddingLeft="10" paddingTop="10"
-                     paddingBottom="10" id="metadataBox">
-
-                <mx:Form paddingTop="0" paddingBottom="0" id="analysisNameForm">
-                    <mx:FormItem label="Report Name:">
-                        <mx:TextInput text="{labelNameField}" id="analysisNameInput"/>
-                    </mx:FormItem>
-                    <mx:FormItem label="Tags:">
-                        <mx:TextInput text="{tags}" id="analysisTagsInput"/>
-                    </mx:FormItem>
-                    <mx:FormItem label="Description:">
-                        <mx:Button icon="@Embed(source='../../../assets/text.png')" toolTip="Edit Description..."
-                                   click="editDescription()"/>
-                    </mx:FormItem>
-                </mx:Form>
-                <mx:VBox id="sharingSettingsBox">
-                    <mx:CheckBox label="Use Data Source Sharing Settings"
-                                 id="shareDataSourceSharingCheckbox" selected="{shareDataSourceSharing}"
-                                 click="sourceSharingChange(event)"/>
-                    <mx:HBox verticalAlign="middle">
-                        <mx:CheckBox label="Publicly Visible" id="publiclyVisibleCheckbox"
-                                     selected="{publiclyVisible}"
-                                     change="publiclyVisible = publiclyVisibleCheckbox.selected"/>
-                        <mx:Label fontSize="10" textDecoration="underline" text="What is this?"
-                                  toolTip="By checking this box, you make the report visible to other users that you send the URL to."/>
-                    </mx:HBox>
-                    <mx:HBox verticalAlign="middle">
-                        <mx:CheckBox label="Marketplace Visible" id="marketplaceVisibleCheckbox"
-                                     selected="{marketplaceVisible}" enabled="{publiclyVisible}"/>
-                        <mx:Label fontSize="10" textDecoration="underline" text="What is this?"
-                                  toolTip="By checking this box, you make the report visible to all other Easy Insight users in the marketplace."/>
-                    </mx:HBox>
-                </mx:VBox>
-            </mx:HBox>
-            <mx:HBox label="Data" icon="@Embed(source='../../../assets/data_table.png')" paddingLeft="10"
-                     paddingTop="10" paddingBottom="10"
-                     paddingRight="10" width="100%" height="100%">
-                <mx:Button id="refreshButton" toolTip="Refresh Data"
-                           icon="@Embed(source='../../../assets/refresh.png')"
-                           click="refresh()"/>
-                <mx:Button id="calculationButton" toolTip="Create Calculation"
-                           icon="@Embed(source='../../../assets/text_formula.png')"
-                           click="createCalculation()"/>
-                <mx:Button id="newFieldButton" toolTip="Create Blank Field"
-                           icon="@Embed(source='../../../assets/document_add.png')"
-                           click="createBlankField()"/>
-                <mx:Button icon="@Embed(source='../../../assets/cubes_blue_add.png')"
-                           toolTip="Add Hierarchy..." click="createHierarchy()"/>
-                <mx:Button id="apiButton" toolTip="Show API Info for this Data Source"
-                           icon="@Embed(source='../../../assets/app_enterprise_x16.png')" click="showAPIInfo()"/>
-                <analysis:ResultLimitComboBox limits="{limits}"/>
-                <datasources:DataSourceDisplay dataSource="{dataSourceInfo}"/>
-            </mx:HBox>
+            <analysis:ReportMetadataTab id="reportMetadataTab" analysisDefinition="{analysisDefinition}"/>
+            <analysis:ReportDataTab id="reportDataTab" analysisDefinition="{analysisDefinition}" dataService="{dataService}"
+                    wrappers="{wrappers}" availableFields="{availableFields}" dataSourceInfo="{dataSourceInfo}"
+                    dataView="{dataView}"/>
             <filtering:TransformContainer id="transformContainer" paddingLeft="10" paddingTop="10" paddingBottom="10"
                                           paddingRight="10" transformAdded="transformsUpdated(event)" label="Filters"
                                           icon="@Embed(source='../../../assets/funnel.png')"
@@ -1153,39 +854,7 @@
                 <mx:Button id="excludeButton" icon="@Embed(source='../../../assets/funnel_delete.png')"
                            toolTip="Exclude Data" click="exclude()"/>
             </filtering:TransformContainer>
-            <!--<mx:HBox label="Scrubbing" visible="false" icon="@Embed(source='../../../assets/brush2.png')"
-                     paddingLeft="10" paddingTop="10" paddingBottom="10"
-                     paddingRight="10" width="100%" height="100%">
-                <mx:Button id="textScrubButton" toolTip="Text Replace"
-                           icon="@Embed(source='../../../assets/text_find.png')"
-                           click="newTextReplaceScrub()"/>
-                <mx:Button id="textListButton" toolTip="Edit Text Replaces..."
-                           icon="@Embed(source='../../../assets/document_edit.png')"
-                           click="editTextReplaceScrubs()"/>
-                <mx:Button id="lookupTableScrubButton" toolTip="Lookup Table"
-                           icon="@Embed(source='../../../assets/tables_add.png')"
-                           click="newLookupTableScrub()"/>
-                <mx:Button id="lookupListButton" toolTip="Edit Lookup Tables..."
-                           icon="@Embed(source='../../../assets/tables_edit.png')"
-                           click="editLookupTableScrubs()"/>
-            </mx:HBox>-->
-            <mx:HBox label="Export" icon="@Embed(source='../../../assets/tables_add.png')" paddingLeft="10"
-                     paddingTop="10" paddingBottom="10"
-                     paddingRight="10">
-                <mx:Button id="createFeedButton" toolTip="Create Derived Data Source" click="createFeed()"
-                           icon="@Embed(source='../../../assets/data_add.png')"/>
-                <mx:Button id="embedButton" toolTip="Embed" click="embed()"
-                           icon="@Embed(source='../../../assets/link.png')"/>
-                <mx:Button id="imageButton" toolTip="Export PNG Image"
-                           icon="@Embed(source='../../../assets/camera.png')" click="exportPNG()"/>
-                <mx:Button id="excelButton" toolTip="Export to Excel"
-                           icon="@Embed(source='../../../assets/table.png')" click="exportExcel()"/>
-
-                <mx:Button id="netvibesButton" toolTip="Add to netvibes"
-                           icon="@Embed(source='../../../assets/uwa-netvibes.png')" click="netvibes()"/>
-                <mx:Button id="igoogleButton" toolTip="Add to iGoogle"
-                           icon="@Embed(source='../../../assets/uwa-google.png')" click="igoogle()"/>
-            </mx:HBox>
+            <analysis:ExportTab analysisDefinition="{analysisDefinition}"/>
         </mx:TabNavigator>
 
         <mx:HDividedBox id="hbox1" height="100%" width="100%">
@@ -1210,8 +879,7 @@
                             <mx:HierarchicalData source="{availableFields}"/>
                         </mx:dataProvider>
                         <mx:columns>
-                            <mx:AdvancedDataGridColumn dataField="displayName" headerText=""
-                                    />
+                            <mx:AdvancedDataGridColumn dataField="displayName" headerText=""/>
                         </mx:columns>
                     </mx:AdvancedDataGrid>
                 </mx:VBox>
@@ -1219,6 +887,4 @@
             <mx:VBox width="100%" height="100%" id="dataControlVBox"/>
         </mx:HDividedBox>
     </mx:VBox>
-    <mx:StringValidator id="analysisNameValidator" source="{analysisNameInput}" property="text" minLength="3"
-                        maxLength="40"/>
 </core:FullScreenPage>

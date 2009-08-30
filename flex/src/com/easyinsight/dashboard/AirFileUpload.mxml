@@ -1,8 +1,20 @@
 <?xml version="1.0" ?>
 <mx:Window xmlns:mx="http://www.adobe.com/2006/mxml" width="500" height="400">
     <mx:states>
+        <mx:State name="UploadFailure">
+            <mx:AddChild relativeTo="{failureBox}">
+                <mx:Label text="{failureMessage}"/>
+            </mx:AddChild>
+        </mx:State>
         <mx:State name="Uploaded">
-
+            <mx:RemoveChild target="{coreBox}"/>
+            <mx:AddChild relativeTo="{allBox}">
+                <mx:VBox height="100%" width="100%" horizontalAlign="center" verticalAlign="middle">
+                    <mx:Label text="Your data has been sent to Easy Insight."/>
+                    <mx:LinkButton label="Click to View the Data" click="viewData()"/>
+                    <mx:Button label="Close Window" click="closeWindow()"/>
+                </mx:Box>
+            </mx:AddChild>
         </mx:State>
     </mx:states>
     <mx:Script><![CDATA[
@@ -15,6 +27,15 @@
 
         import mx.controls.Alert;
         import mx.rpc.events.FaultEvent;
+
+        private function viewData():void {
+            flash.net.navigateToURL(new URLRequest(url));
+        }
+
+        private var url:String;
+
+        [Bindable]
+        private var failureMessage:String;
 
         private function fault(event:FaultEvent):void {
             Alert.show(event.fault.faultString, event.fault.faultDetail);
@@ -34,15 +55,19 @@
             var byteArray:ByteArray = new ByteArray();
             fileStream.readBytes(byteArray, 0, fileStream.bytesAvailable);
             fileStream.close();
+            progressBar.visible = true;
             uploadService.newAirSource.send(dataSourceNameInput.text, dataSourceNameInput.text, byteArray);
         }
 
         private function uploaded():void {
+            progressBar.visible = false;
             var response:UploadResponse = uploadService.newAirSource.lastResult as UploadResponse;
             if (response.successful) {
-                Alert.show("worked!");    
+                url = "https://www.easy-insight.com/app#reportID="+ response.feedID;
+                currentState = "Uploaded";
             } else {
-                Alert.show("failed :(");
+                failureMessage = response.failureMessage;
+                currentState = "UploadFailure";
             }
         }
 
@@ -60,19 +85,29 @@
             _filePath = event.target.nativePath;
             readFile();
         }
+
+        [Bindable]
+        private var fileName:String;
         ]]></mx:Script>
     <mx:RemoteObject destination="userUpload" id="uploadService">
         <mx:method name="newAirSource" result="uploaded()" fault="fault(event)"/>
     </mx:RemoteObject>
-    <mx:VBox id="coreBox">
-        <mx:Button label="Browse for File" click="browseForFile()"/>
-        <mx:HBox>
-            <mx:Label text="Data Source Name: "/>
-            <mx:TextInput id="dataSourceNameInput"/>
-        </mx:HBox>
-        <mx:HBox>
-            <mx:Button label="Send to Easy Insight" click="readFile()"/>
-            <mx:Button label="Cancel" click="closeWindow()"/>
-        </mx:HBox>
-    </mx:VBox>
+    <mx:Box id="allBox">
+        <mx:VBox id="coreBox">
+            <mx:HBox>
+                <mx:Button label="Browse for File" click="browseForFile()"/>
+                <mx:Label text="{fileName}"/>
+            </mx:HBox>
+            <mx:HBox>
+                <mx:Label text="Data Source Name: "/>
+                <mx:TextInput id="dataSourceNameInput"/>
+            </mx:HBox>
+            <mx:ProgressBar id="progressBar" visible="false"/>
+            <mx:Box id="failureBox"/>
+            <mx:HBox>
+                <mx:Button label="Send to Easy Insight" click="readFile()"/>
+                <mx:Button label="Cancel" click="closeWindow()"/>
+            </mx:HBox>
+        </mx:VBox>
+    </mx:Box>
 </mx:Window>

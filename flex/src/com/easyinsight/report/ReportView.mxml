@@ -473,6 +473,9 @@
             if (!_embedded) {
                 progressBar.visible = true;
             }
+
+            // if filters were passed in
+
             viewFactory.retrieveData(false);
         }
 

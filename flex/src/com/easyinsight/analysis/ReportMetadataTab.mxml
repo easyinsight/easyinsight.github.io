@@ -1,0 +1,171 @@
+<?xml version="1.0" ?>
+<mx:HBox label="Metadata" icon="@Embed(source='../../../../assets/note.png')" paddingLeft="10" paddingTop="10"
+         paddingBottom="10" xmlns:mx="http://www.adobe.com/2006/mxml" creationComplete="onCreation()">
+    <mx:states>
+        <mx:State name="NotLoggedIn">            
+            <mx:RemoveChild target="{sharingSettingsBox}"/>
+            <mx:SetProperty target="{analysisNameInput}" name="editable" value="false"/>
+            <mx:SetProperty target="{analysisTagsInput}" name="editable" value="false"/>
+        </mx:State>
+        <mx:State name="Professional">
+
+        </mx:State>
+        <mx:State name="Group" basedOn="Professional">
+
+        </mx:State>
+        <mx:State name="Individual" basedOn="Group">
+        </mx:State>
+        <mx:State name="Free" basedOn="Individual">
+
+        </mx:State>
+    </mx:states>
+    <mx:Script><![CDATA[
+        import com.easyinsight.account.Account;
+        import com.easyinsight.administration.feed.TagCloud;
+        import com.easyinsight.framework.LoginEvent;
+        import com.easyinsight.framework.User;
+        import com.easyinsight.util.PopUpUtil;
+
+        import mx.managers.PopUpManager;
+        import mx.validators.Validator;
+
+        private function onCreation():void {
+            this.analysisValidators = [ analysisNameValidator ];
+            if (User.getInstance() == null) {
+                currentState = "NotLoggedIn";
+                User.getEventNotifier().addEventListener(LoginEvent.LOGIN, onLogin);
+            } else {
+                setState();
+            }
+        }
+
+        private var _analysisDefinition:AnalysisDefinition;
+
+        private var analysisValidators:Array;
+
+        [Bindable]
+        private var labelNameField:String;
+
+        [Bindable]
+        private var tags:String;
+
+        [Bindable]
+        private var marketplaceVisible:Boolean;
+
+        [Bindable]
+        private var publiclyVisible:Boolean;
+
+        [Bindable]
+        private var shareDataSourceSharing:Boolean;
+
+        public function updateName(name:String):void {
+            labelNameField = name;
+        }
+
+        private function onLogin(event:LoginEvent):void {
+            setState();
+            User.getEventNotifier().removeEventListener(LoginEvent.LOGIN, onLogin);
+        }
+
+        private function setState():void {
+            switch (User.getInstance().getAccountType()) {
+                case Account.PROFESSIONAL:
+                    currentState = "Professional";
+                    break;
+                case Account.GROUP:
+                    currentState = "Group";
+                    break;
+                case Account.INDIVIDUAL:
+                    currentState = "Individual";
+                    break;
+                case Account.FREE:
+                    currentState = "Free";
+                    break;
+            }
+        }
+
+        [Bindable(event="analysisDefinitionChanged")]
+        public function get analysisDefinition():AnalysisDefinition {
+            return _analysisDefinition;
+        }
+
+        public function set analysisDefinition(value:AnalysisDefinition):void {
+            if (_analysisDefinition == value) return;
+            _analysisDefinition = value;
+            labelNameField = analysisDefinition.name;
+            tags = TagCloud.toString(analysisDefinition.tagCloud);
+            marketplaceVisible = value.marketplaceVisible;
+            publiclyVisible = value.publiclyVisible;
+            shareDataSourceSharing = value.visibleAtFeedLevel;
+            dispatchEvent(new Event("analysisDefinitionChanged"));
+        }
+
+        public function updateReport():Array {
+            var results:Array = Validator.validateAll(analysisValidators);
+            if (results.length == 0) {
+                analysisDefinition.name = analysisNameInput.text;
+                analysisDefinition.tagCloud = TagCloud.fromString(analysisTagsInput.text);
+                analysisDefinition.marketplaceVisible = marketplaceVisibleCheckbox.selected;
+                analysisDefinition.publiclyVisible = publiclyVisibleCheckbox.selected;
+                analysisDefinition.visibleAtFeedLevel = shareDataSourceSharingCheckbox.selected;
+            }
+            return results;
+        }
+
+        private function onDescriptionUpdate(event:DescriptionUpdateEvent):void {
+            analysisDefinition.description = event.text;
+        }
+
+        private function sourceSharingChange(event:MouseEvent):void {
+            if (shareDataSourceSharingCheckbox.selected) {
+                marketplaceVisibleCheckbox.selected = false;
+                marketplaceVisibleCheckbox.enabled = false;
+                publiclyVisibleCheckbox.selected = false;
+                publiclyVisibleCheckbox.enabled = false;
+            } else {
+                marketplaceVisibleCheckbox.enabled = true;
+                publiclyVisibleCheckbox.enabled = true;
+            }
+        }
+
+        private function editDescription():void {
+            var window:DescriptionEditWindow = new DescriptionEditWindow();
+            window.addEventListener(DescriptionUpdateEvent.DESCRIPTION_UPDATE, onDescriptionUpdate);
+            window.text = analysisDefinition.description;
+            PopUpManager.addPopUp(window, this, true);
+            PopUpUtil.centerPopUp(window);
+        }
+        ]]></mx:Script>
+    <mx:Form paddingTop="0" paddingBottom="0" id="analysisNameForm">
+        <mx:FormItem label="Report Name:">
+            <mx:TextInput text="{labelNameField}" id="analysisNameInput"/>
+        </mx:FormItem>
+        <mx:FormItem label="Tags:">
+            <mx:TextInput text="{tags}" id="analysisTagsInput"/>
+        </mx:FormItem>
+        <mx:FormItem label="Description:">
+            <mx:Button icon="@Embed(source='../../../../assets/text.png')" toolTip="Edit Description..."
+                       click="editDescription()"/>
+        </mx:FormItem>
+    </mx:Form>
+    <mx:VBox id="sharingSettingsBox">
+        <mx:CheckBox label="Use Data Source Sharing Settings"
+                     id="shareDataSourceSharingCheckbox" selected="{shareDataSourceSharing}"
+                     click="sourceSharingChange(event)"/>
+        <mx:HBox verticalAlign="middle">
+            <mx:CheckBox label="Publicly Visible" id="publiclyVisibleCheckbox"
+                         selected="{publiclyVisible}"
+                         change="publiclyVisible = publiclyVisibleCheckbox.selected"/>
+            <mx:Label fontSize="10" textDecoration="underline" text="What is this?"
+                      toolTip="By checking this box, you make the report visible to other users that you send the URL to."/>
+        </mx:HBox>
+        <mx:HBox verticalAlign="middle">
+            <mx:CheckBox label="Marketplace Visible" id="marketplaceVisibleCheckbox"
+                         selected="{marketplaceVisible}" enabled="{publiclyVisible}"/>
+            <mx:Label fontSize="10" textDecoration="underline" text="What is this?"
+                      toolTip="By checking this box, you make the report visible to all other Easy Insight users in the marketplace."/>
+        </mx:HBox>
+    </mx:VBox>
+    <mx:StringValidator id="analysisNameValidator" source="{analysisNameInput}" property="text" minLength="3"
+                        maxLength="40"/>
+</mx:HBox>
