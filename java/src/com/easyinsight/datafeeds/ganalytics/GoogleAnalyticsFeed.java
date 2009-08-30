@@ -96,18 +96,18 @@ public class GoogleAnalyticsFeed extends Feed {
 
     private String token;
 
-    private String getToken() {
+    private String getToken() throws TokenMissingException {
         if (token == null) {
             Token tokenObject = new TokenStorage().getToken(SecurityUtil.getUserID(), TokenStorage.GOOGLE_ANALYTICS_TOKEN);
             if (tokenObject == null) {
-                throw new RuntimeException("Token access revoked?");
+                throw new TokenMissingException();
             }
             token = tokenObject.getTokenValue();
         }
         return token;
     }
 
-    private AnalyticsService getAnalyticsService() throws AuthenticationException {
+    private AnalyticsService getAnalyticsService() throws AuthenticationException, TokenMissingException {
         if (as == null) {
             as = new AnalyticsService("easyinsight_eianalytics_v1.0");
             as.setAuthSubToken(getToken());
@@ -130,7 +130,7 @@ public class GoogleAnalyticsFeed extends Feed {
         return Arrays.asList((FilterDefinition) rollingFilterDefinition);
     }
 
-    public DataSet getAggregateDataSet(Set<AnalysisItem> analysisItems, Collection<FilterDefinition> filters, InsightRequestMetadata insightRequestMetadata, List<AnalysisItem> allAnalysisItems, boolean adminMode, Collection<Key> additionalNeededKeys) {
+    public DataSet getAggregateDataSet(Set<AnalysisItem> analysisItems, Collection<FilterDefinition> filters, InsightRequestMetadata insightRequestMetadata, List<AnalysisItem> allAnalysisItems, boolean adminMode, Collection<Key> additionalNeededKeys) throws TokenMissingException {
         try {
             Collection<AnalysisDimension> dimensions = new ArrayList<AnalysisDimension>();
             Collection<AnalysisMeasure> measures = new ArrayList<AnalysisMeasure>();
@@ -218,6 +218,8 @@ public class GoogleAnalyticsFeed extends Feed {
             }
             //String ids = "ga:16750246";
             return dataSet;
+        } catch (TokenMissingException tme) {
+            throw tme;
         } catch (Exception e) {
             as = null;
             throw new RuntimeException(e);

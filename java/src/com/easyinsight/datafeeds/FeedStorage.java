@@ -547,31 +547,32 @@ public class FeedStorage {
 
     }
 
-    public void rateFeed(long feedID, long accountID, int rating) throws SQLException {
+    public void rateFeed(long feedID, long userID, int rating) throws SQLException {
         Connection conn = Database.instance().getConnection();
         try {
-            PreparedStatement getExistingRatingStmt = conn.prepareStatement("SELECT FEED_RATING_COUNT, FEED_RATING_AVERAGE FROM " +
-                    "DATA_FEED WHERE DATA_FEED_ID = ?");
-            PreparedStatement updateRatingStmt = conn.prepareStatement("UPDATE DATA_FEED SET FEED_RATING_COUNT = ?, " +
-                    "FEED_RATING_AVERAGE = ? WHERE DATA_FEED_ID = ?");
-            getExistingRatingStmt.setLong(1, feedID);
+            PreparedStatement getExistingRatingStmt = conn.prepareStatement("SELECT user_data_source_rating_id FROM " +
+                    "user_data_source_rating WHERE user_id = ? AND data_source_id = ?");
+            getExistingRatingStmt.setLong(1, userID);
+            getExistingRatingStmt.setLong(2, feedID);
             ResultSet rs = getExistingRatingStmt.executeQuery();
-            while (rs.next()) {
-                int count = rs.getInt(1);
-                double average = rs.getDouble(2);
-                int newCount = count + 1;
-                double newAverage = ((average + rating) * newCount) / newCount;
-                updateRatingStmt.setInt(1, count);
-                updateRatingStmt.setDouble(2, newAverage);
-                updateRatingStmt.setLong(3, feedID);
-                updateRatingStmt.executeUpdate();
+            if (rs.next()) {
+                PreparedStatement updateRatingStmt = conn.prepareStatement("UPDATE USER_DATA_SOURCE_RATING " +
+                        "SET RATING = ? WHERE USER_DATA_SOURCE_RATING_ID = ?");
+                updateRatingStmt.setInt(1, rating);
+                updateRatingStmt.setLong(2, rs.getLong(1));
+                updateRatingStmt.executeQuery();
+            } else {
+                PreparedStatement insertRatingStmt = conn.prepareStatement("INSERT INTO USER_DATA_SOURCE_RATING " +
+                        "(USER_ID, data_source_id, rating) values (?, ?, ?)");
+                insertRatingStmt.setLong(1, userID);
+                insertRatingStmt.setLong(2, feedID);
+                insertRatingStmt.setInt(3, rating);
+                insertRatingStmt.execute();
             }
-            getExistingRatingStmt.close();
-            updateRatingStmt.close();
         } finally {
             Database.closeConnection(conn);
         }
-    }
+    }    
 
     public void updateDataFeedConfiguration(FeedDefinition feedDefinition, Connection conn) throws SQLException {
         try {

@@ -257,7 +257,7 @@ public class GoalEvaluationStorage {
         }
     }
 
-    public List<GoalValue> getGoalValues(long goalTreeNodeID, Date startDate, Date endDate, List<CredentialFulfillment> credentials) throws SQLException {
+    public List<GoalValue> getGoalValues(long goalTreeNodeID, Date startDate, Date endDate, List<CredentialFulfillment> credentials) throws SQLException, TokenMissingException {
         GoalTreeNode goalTreeNode = null;
         Connection conn = Database.instance().getConnection();
         try {
@@ -275,7 +275,7 @@ public class GoalEvaluationStorage {
         return goalValues;
     }
 
-    public List<GoalValue> getGoalValuesFromDatabase(long goalTreeNodeID, Date startDate, Date endDate, List<CredentialFulfillment> credentials) throws SQLException {
+    public List<GoalValue> getGoalValuesFromDatabase(long goalTreeNodeID, Date startDate, Date endDate, List<CredentialFulfillment> credentials) throws SQLException, TokenMissingException {
         List<GoalValue> goalValues = new ArrayList<GoalValue>();
         boolean hasDate = false;
         GoalTreeNode goalTreeNode;

@@ -18,7 +18,7 @@ import java.util.*;
 public class HistoryRun {
 
     public List<GoalValue> lastTwoValues(long dataSourceID, AnalysisMeasure measure, List<FilterDefinition> filters,
-                                                     List<CredentialFulfillment> credentials) {
+                                                     List<CredentialFulfillment> credentials) throws TokenMissingException {
         Calendar cal = Calendar.getInstance();
         Date endDate = cal.getTime();
         cal.add(Calendar.DAY_OF_YEAR, -2);
@@ -29,7 +29,7 @@ public class HistoryRun {
     }
 
     public List<GoalValue> calculateHistoricalValues(long dataSourceID, AnalysisMeasure measure, List<FilterDefinition> filters, Date startDate, Date endDate,
-                                                     List<CredentialFulfillment> credentials) {
+                                                     List<CredentialFulfillment> credentials) throws TokenMissingException {
         List<GoalValue> goalValues = new ArrayList<GoalValue>();
         Set<AnalysisItem> itemSet = new HashSet<AnalysisItem>();
 

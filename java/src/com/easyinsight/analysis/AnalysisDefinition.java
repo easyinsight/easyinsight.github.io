@@ -83,6 +83,9 @@ public class AnalysisDefinition implements Cloneable {
     @Column(name = "rating_count")
     private int ratingCount;
 
+    @Column(name = "solution_visible")
+    private boolean solutionVisible;
+
     @Column(name = "rating_average")
     private double ratingAverage;
 
@@ -178,6 +181,14 @@ public class AnalysisDefinition implements Cloneable {
 
     public void setDateCreated(Date dateCreated) {
         this.dateCreated = dateCreated;
+    }
+
+    public boolean isSolutionVisible() {
+        return solutionVisible;
+    }
+
+    public void setSolutionVisible(boolean solutionVisible) {
+        this.solutionVisible = solutionVisible;
     }
 
     public Date getDateUpdated() {

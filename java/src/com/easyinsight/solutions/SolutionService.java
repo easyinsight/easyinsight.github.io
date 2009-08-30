@@ -182,6 +182,26 @@ public class SolutionService {
         return null;
     }
 
+    public void getReportsForSolution(long solutionID) {
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            PreparedStatement queryStmt = conn.prepareStatement("SELECT ANALYSIS_ID FROM ANALYSIS, solution_install WHERE " +
+                    "ANALYSIS.DATA_FEED_ID = SOLUTION_INSTALL.installed_data_source_id AND SOLUTION_INSTALL.solution_id = ? AND " +
+                    "ANALYSIS.solution_visible = ?");
+            queryStmt.setLong(1, solutionID);
+            queryStmt.setBoolean(2, true);
+            ResultSet rs = queryStmt.executeQuery();
+            while (rs.next()) {
+                long reportID = rs.getLong(1);
+            }
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        } finally {
+            Database.closeConnection(conn);
+        }
+    }
+
     public List<SolutionInstallInfo> installSolution(long solutionID) {
         // establish the connection from the account/user to the solution
         // retrieve the feeds for this solution
@@ -201,7 +221,7 @@ public class SolutionService {
             throw new RuntimeException(e);
         } finally {
             conn.setAutoCommit(true);
-            Database.instance().closeConnection(conn);
+            Database.closeConnection(conn);
         }
     }
 

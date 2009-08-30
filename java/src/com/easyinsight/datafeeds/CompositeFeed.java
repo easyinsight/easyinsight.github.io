@@ -87,7 +87,7 @@ public class CompositeFeed extends Feed {
         return null;  //To change body of implemented methods use File | Settings | File Templates.
     }
 
-    private DataSet getDataSet(Set<AnalysisItem> analysisItems, Collection<Key> additionalKeys, InsightRequestMetadata insightRequestMetadata) {
+    private DataSet getDataSet(Set<AnalysisItem> analysisItems, Collection<Key> additionalKeys, InsightRequestMetadata insightRequestMetadata) throws TokenMissingException {
 
         Map<Long, QueryStateNode> queryNodeMap = new HashMap<Long, QueryStateNode>();
 
@@ -251,7 +251,7 @@ public class CompositeFeed extends Feed {
             neededKeys.add(key);
         }*/
 
-        public void produceDataSet(InsightRequestMetadata insightRequestMetadata) {
+        public void produceDataSet(InsightRequestMetadata insightRequestMetadata) throws TokenMissingException {
             Feed feed = FeedRegistry.instance().getFeed(feedID);
             Map<Key, Key> columnSet = new LinkedHashMap<Key, Key>();
             for (Key key : neededKeys) {

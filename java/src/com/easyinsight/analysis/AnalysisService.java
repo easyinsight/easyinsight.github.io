@@ -125,8 +125,34 @@ public class AnalysisService {
         analysisStorage.addAnalysisView(analysisID);
     }
 
-    public void rateAnalysis(long accountID, long analysisID, int rating) {
-        analysisStorage.rateAnalysis(analysisID, accountID, rating);
+    public void rateReport(long feedID, long userID, int rating) throws SQLException {
+        Connection conn = Database.instance().getConnection();
+        try {
+            PreparedStatement getExistingRatingStmt = conn.prepareStatement("SELECT user_data_source_rating_id FROM " +
+                    "user_report_rating WHERE user_id = ? AND report_id = ?");
+            getExistingRatingStmt.setLong(1, userID);
+            getExistingRatingStmt.setLong(2, feedID);
+            ResultSet rs = getExistingRatingStmt.executeQuery();
+            if (rs.next()) {
+                PreparedStatement updateRatingStmt = conn.prepareStatement("UPDATE user_report_rating " +
+                        "SET RATING = ? WHERE user_report_rating_id = ?");
+                updateRatingStmt.setInt(1, rating);
+                updateRatingStmt.setLong(2, rs.getLong(1));
+                updateRatingStmt.executeQuery();
+            } else {
+                PreparedStatement insertRatingStmt = conn.prepareStatement("INSERT INTO user_report_rating " +
+                        "(USER_ID, report_id, rating) values (?, ?, ?)");
+                insertRatingStmt.setLong(1, userID);
+                insertRatingStmt.setLong(2, feedID);
+                insertRatingStmt.setInt(3, rating);
+                insertRatingStmt.execute();
+            }
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        } finally {
+            Database.closeConnection(conn);
+        }
     }
 
     public WSAnalysisDefinition saveAnalysisDefinition(WSAnalysisDefinition wsAnalysisDefinition) {
