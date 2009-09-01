@@ -1,5 +1,5 @@
 <project default="jdbcsolution" basedir="." name="JDBCSolution">
-    <property file="../../../build/local.build.properties"/>
+    <property file="../../../flex/build/local.build.properties"/>
     <taskdef resource="flexTasks.tasks" classpath="${flex.sdk.dir}/ant/lib/flexTasks.jar"/>
     <property name="FLEX_HOME" value="${flex.sdk.dir}"/>
 

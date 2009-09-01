@@ -28,6 +28,7 @@
                 queryConfiguration.adHoc = false;
                 queryConfiguration.name = nameInput.text;
                 queryConfiguration.publishMode = mode;
+                ProgressAlert.alert(this, "Publishing the query...", null, dbService.publishQuery);
                 dbService.publishQuery.send(queryConfiguration);
             }
         }
@@ -70,7 +71,7 @@
             _dataSource = val;
             dispatchEvent(new FlexEvent(FlexEvent.DATA_CHANGE));
         }]]></mx:Script>
-    <mx:RemoteObject id="dbService" destination="dbremote" fault="onFault(event)">
+    <mx:RemoteObject id="dbService" destination="dbremote">
         <mx:method name="publishQuery" result="publishedQuery()"/>
     </mx:RemoteObject>
     <mx:VBox>

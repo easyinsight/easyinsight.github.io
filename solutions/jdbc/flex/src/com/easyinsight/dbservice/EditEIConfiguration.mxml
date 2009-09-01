@@ -30,6 +30,7 @@
         }
 
         private function validate():void {
+            ProgressAlert.alert(this, "Validating Easy Insight configuration...", null, dbService.assignEI);
             dbService.validateEI.send(createEIConfiguration());
         }
 
@@ -41,6 +42,7 @@
         }
 
         private function next():void {
+            ProgressAlert.alert(this, "Assigning Easy Insight configuration...", null, dbService.assignEI);
             dbService.assignEI.send(createEIConfiguration());
         }
         ]]></mx:Script>

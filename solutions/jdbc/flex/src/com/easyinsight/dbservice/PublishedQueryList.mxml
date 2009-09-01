@@ -16,6 +16,7 @@ import mx.controls.Alert;
         }
 
         private function deleteQueryConfiguration(event:DeleteQueryEvent):void {
+            ProgressAlert.alert(this, "Deleting the query...", null, dbService.deleteQuery);
             dbService.deleteQuery.send(event.queryConfiguration.queryConfigurationID);
             setup();
         }
@@ -25,11 +26,8 @@ import mx.controls.Alert;
         }
 
         private function setup():void  {
+            ProgressAlert.alert(this, "Retrieving the queries...", null, dbService.getQueryConfigurations);
             dbService.getQueryConfigurations.send();
-        }
-
-        private function onFault(event:FaultEvent):void {
-            Alert.show(event.message.toString());
         }
 
         private function gotQueries():void {
@@ -37,6 +35,7 @@ import mx.controls.Alert;
         }
 
         private function exportConfig():void {
+            ProgressAlert.alert(this, "Exporting configuration...", null, dbService.exportConfiguration);
             dbService.exportConfiguration.send();
         }
 
@@ -44,7 +43,7 @@ import mx.controls.Alert;
             Alert.show("Configuration exported.");
         }
 ]]></mx:Script>
-    <mx:RemoteObject id="dbService" destination="dbremote" fault="onFault(event)">
+    <mx:RemoteObject id="dbService" destination="dbremote">
         <mx:method name="getQueryConfigurations" result="gotQueries()"/>
         <mx:method name="deleteQuery" result="deletedQuery()"/>
         <mx:method name="exportConfiguration" result="exported()"/>

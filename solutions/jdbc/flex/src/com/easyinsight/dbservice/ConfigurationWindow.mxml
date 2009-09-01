@@ -11,6 +11,10 @@
     <mx:Script><![CDATA[
         import mx.managers.PopUpManager;
 
+        private function toURL():void {
+            flash.net.navigateToURL(new URLRequest("https://www.easy-insight.com/app/#page=apis"), "_blank");
+        }
+
         [Bindable]
         private var eiUserName:String;
         [Bindable]
@@ -43,6 +47,7 @@
         }
 
         private function validate():void {
+            ProgressAlert.alert(this, "Validating credentials...", null, dbService.validateEI);
             dbService.validateEI.send(createEIConfiguration());
         }
 
@@ -54,6 +59,7 @@
         }
 
         private function next():void {
+            ProgressAlert.alert(this, "Saving credentials...", null, dbService.assignEI);
             dbService.assignEI.send(createEIConfiguration());
         }
         ]]></mx:Script>
@@ -61,8 +67,13 @@
         <mx:method name="validateEI" result="validated()"/>
         <mx:method name="assignEI" result="assigned()"/>
     </mx:RemoteObject>
-    <mx:Box width="100%" height="100%" id="coreBox" styleName="TitleWindowContents">
-        <mx:Form id="coreForm">
+    <mx:VBox width="100%" height="100%" id="coreBox" styleName="TitleWindowContents"
+            paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5">        
+        <mx:Label text="You'll need to get your key/secret key from Easy Insight." fontSize="14"/>
+        <mx:Label text="You can find them under My API Information... at" fontSize="14"/>
+        <mx:LinkButton label="https://www.easy-insight.com/app/#page=apis" textDecoration="underline" fontSize="14"
+                paddingBottom="0" paddingLeft="0" paddingRight="0" paddingTop="0" click="toURL()"/>
+        <mx:Form id="coreForm" paddingBottom="0" paddingLeft="0" paddingRight="0" paddingTop="0">
             <mx:FormItem label="Easy Insight Key:">
                 <mx:TextInput id="eiUserNameInput" text="{eiUserName}"/>
             </mx:FormItem>
@@ -78,5 +89,5 @@
                 <mx:Button label="Cancel" click="PopUpManager.removePopUp(this)"/>
             </mx:FormItem>
         </mx:Form>
-    </mx:Box>
+    </mx:VBox>
 </mx:TitleWindow>

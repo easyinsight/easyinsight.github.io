@@ -9,6 +9,11 @@
                 <dbservice:MySQLPanel id="mysqlPanel"/>
             </mx:AddChild>
         </mx:State>
+        <mx:State name="SQL Server" enterState="assignPanel(event, sqlServerPanel)">
+            <mx:AddChild relativeTo="{coreBox}">
+                <dbservice:SQLServerPanel id="sqlServerPanel"/>
+            </mx:AddChild>
+        </mx:State>
         <mx:State name="Generic JDBC" enterState="assignPanel(event, genericPanel)">
             <mx:AddChild relativeTo="{coreBox}">
                 <dbservice:GenericJDBCWindow id="genericPanel"/>
@@ -26,13 +31,14 @@ import mx.rpc.events.FaultEvent;
         private var validationNote:String;
 
         [Bindable]
-        private var databases:ArrayCollection = new ArrayCollection([ "[ Select a Database ]", "MySQL", "Generic JDBC"]);
+        private var databases:ArrayCollection = new ArrayCollection([ "[ Select a Database ]", "MySQL", "SQL Server", "Generic JDBC"]);
 
         private function assignPanel(event:Event, settings:IDatabaseSettings):void {
             currentPanel = settings;
         }
 
         private function validateDatabase():void {
+            ProgressAlert.alert(this, "Validating database...", null, dbService.validateDB);
             dbService.validateDB.send(currentPanel.createSettings());
         }
 
@@ -53,6 +59,7 @@ import mx.rpc.events.FaultEvent;
             if (currentPanel == null) {
                 dispatchEvent(new ConfigProgressionEvent(null));
             } else {
+                ProgressAlert.alert(this, "Saving database information...", null, dbService.assignDB);
                 dbService.assignDB.send(currentPanel.createSettings());
             }
         }
