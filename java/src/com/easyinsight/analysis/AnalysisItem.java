@@ -53,11 +53,11 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
     @Column(name="width")
     private int width;
 
-    @OneToMany(cascade = CascadeType.ALL)
+    /*@OneToMany(cascade = CascadeType.ALL)
     @JoinTable(name = "analysis_item_to_link",
             joinColumns = @JoinColumn(name = "analysis_item_id", nullable = false),
             inverseJoinColumns = @JoinColumn(name = "link_id", nullable = false))
-    private List<Link> links = new ArrayList<Link>();
+    private List<Link> links = new ArrayList<Link>();*/
 
     @OneToOne(cascade = CascadeType.MERGE)
     @JoinColumn(name="virtual_dimension_id")
@@ -79,13 +79,13 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
         this.key = key;
     }
 
-    public List<Link> getLinks() {
+    /*public List<Link> getLinks() {
         return links;
     }
 
     public void setLinks(List<Link> links) {
         this.links = links;
-    }
+    }*/
 
     public VirtualDimension getVirtualDimension() {
         return virtualDimension;
@@ -262,9 +262,9 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
                 transform.toRemote();
             }
         }
-        for (Link link : getLinks()) {
+        /*for (Link link : getLinks()) {
             link.getLabel();
-        }
+        }*/
     }
 
     public String toKeySQL() {
