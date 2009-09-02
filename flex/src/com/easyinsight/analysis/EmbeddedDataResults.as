@@ -14,6 +14,8 @@ import mx.collections.ArrayCollection;
         public var dataSourceAccessible:Boolean;
         public var dataSourceInfo:DataSourceInfo;
         public var attribution:String;
+        public var ratingsAverage:Number;
+        public var ratingsCount:int;
         public var credentialRequirements:ArrayCollection;
 
 		public function EmbeddedDataResults()

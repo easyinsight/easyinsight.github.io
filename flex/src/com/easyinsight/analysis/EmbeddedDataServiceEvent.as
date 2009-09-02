@@ -15,10 +15,13 @@ public class EmbeddedDataServiceEvent extends Event {
     public var dataSourceAccessible:Boolean;
     public var attribution:String;
     public var credentialRequirements:ArrayCollection;
+    public var ratingsAverage:Number;
+    public var ratingsCount:int;
     public var dataSourceInfo:DataSourceInfo;
 
     public function EmbeddedDataServiceEvent(type:String, dataSet:ArrayCollection, analysisDefinition:AnalysisDefinition, clientProcessorMap:Object, dataSourceAccessible:Boolean,
-            attribution:String, credentialRequirements:ArrayCollection, dataSourceInfo:DataSourceInfo) {
+            attribution:String, credentialRequirements:ArrayCollection, dataSourceInfo:DataSourceInfo, ratingsAverage:Number,
+                ratingsCount:int) {
         super(type);
         this.dataSet = dataSet;
         this.clientProcessorMap = clientProcessorMap;
@@ -27,11 +30,13 @@ public class EmbeddedDataServiceEvent extends Event {
         this.attribution = attribution;
         this.credentialRequirements = credentialRequirements;
         this.dataSourceInfo = dataSourceInfo;
+        this.ratingsAverage = ratingsAverage;
+        this.ratingsCount = ratingsCount;
     }
 
     override public function clone():Event {
         return new EmbeddedDataServiceEvent(type, dataSet, analysisDefinition, clientProcessorMap, dataSourceAccessible, attribution,
-                credentialRequirements, dataSourceInfo);
+                credentialRequirements, dataSourceInfo, ratingsAverage, ratingsCount);
     }
 }
 }

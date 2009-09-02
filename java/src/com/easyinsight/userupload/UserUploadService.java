@@ -82,7 +82,7 @@ public class UserUploadService implements IUserUploadService {
         try {
             conn.setAutoCommit(false);
             FeedDefinition existingDef = feedStorage.getFeedDefinitionData(dataSourceID, conn);
-            List<SolutionInstallInfo> results = DataSourceCopyUtils.installFeed(SecurityUtil.getUserID(), conn, copyData, dataSourceID, existingDef, includeChildren, newName);
+            List<SolutionInstallInfo> results = DataSourceCopyUtils.installFeed(SecurityUtil.getUserID(), conn, copyData, dataSourceID, existingDef, includeChildren, newName, 0);
             conn.commit();
             return results;
         } catch (Exception e) {

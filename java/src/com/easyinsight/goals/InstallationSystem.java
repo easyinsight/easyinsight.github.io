@@ -62,7 +62,7 @@ public class InstallationSystem {
     public void installSolution(Solution solution) throws SQLException, CloneNotSupportedException {
         allSolutions.addAll(generateFeedsForSolution(solution.getSolutionID(), userID, conn, solution.isCopyData()));
         if (solution.getGoalTreeID() > 0) {
-            duplicateTree(solution.getGoalTreeID());
+            duplicateTree(solution.getGoalTreeID(), solution.getSolutionID());
         }
     }
 
@@ -71,7 +71,7 @@ public class InstallationSystem {
         for (Integer solutionID : inlineSolutionIDs) {
             Solution solution = solutionService.getSolution(solutionID, conn);
             GoalTree solutionTree = goalStorage.retrieveGoalTree(solution.getGoalTreeID(), conn);
-            duplicateGoalDataSources(solutionTree);
+            duplicateGoalDataSources(solutionTree, solutionID);
             allSolutions.addAll(generateFeedsForSolution(solutionID, userID, conn, solution.isCopyData()));
         }
 
@@ -88,12 +88,12 @@ public class InstallationSystem {
         //sendTodos();
     }
 
-    private long duplicateTree(long goalTreeID) throws SQLException, CloneNotSupportedException {
+    private long duplicateTree(long goalTreeID, long solutionID) throws SQLException, CloneNotSupportedException {
         GoalTree goalTree = new GoalStorage().retrieveGoalTree(goalTreeID, conn);
         GoalTree clonedTree = goalTree.clone();
         FeedConsumer feedConsumer = new UserStub(userID, null, null, null);
         clonedTree.setAdministrators(Arrays.asList(feedConsumer));
-        duplicateGoalDataSources(goalTree);
+        duplicateGoalDataSources(goalTree, solutionID);
         installDataSourcesAndReports(clonedTree);
         goalStorage.addGoalTree(clonedTree, conn);
         allSolutions.add(new SolutionInstallInfo(goalTree.getGoalTreeID(), new GoalTreeDescriptor(clonedTree.getGoalTreeID(), clonedTree.getName(), Roles.OWNER,
@@ -187,7 +187,7 @@ public class InstallationSystem {
         idReplacementVisitor.visit(goalTree.getRootNode());
     }
 
-    private void duplicateGoalDataSources(GoalTree goalTree) throws CloneNotSupportedException, SQLException {
+    private void duplicateGoalDataSources(GoalTree goalTree, long solutionID) throws CloneNotSupportedException, SQLException {
         final Set<Long> dataSourceIDs = new HashSet<Long>();
         GoalTreeVisitor visitor = new GoalTreeVisitor() {
 
@@ -203,7 +203,7 @@ public class InstallationSystem {
         visitor.visit(goalTree.getRootNode());
         for (Long dataSourceID : dataSourceIDs) {
             FeedDefinition feedDefinition = feedStorage.getFeedDefinitionData(dataSourceID, conn, false);
-            allSolutions.addAll(DataSourceCopyUtils.installFeed(userID, conn, true, dataSourceID, feedDefinition, true, null));
+            allSolutions.addAll(DataSourceCopyUtils.installFeed(userID, conn, true, dataSourceID, feedDefinition, true, null, solutionID));
         }
 
         for (SolutionInstallInfo solutionInstallInfo : allSolutions) {
@@ -221,7 +221,7 @@ public class InstallationSystem {
 
                     if (goalTreeNode.getNewSubTree() != null) {
                         try {
-                            goalTreeNode.setSubTreeID(duplicateTree(goalTreeNode.getSubTreeID()));
+                            goalTreeNode.setSubTreeID(duplicateTree(goalTreeNode.getSubTreeID(), 0));
                             goalTreeNode.setNewSubTree(null);                            
                         } catch (CloneNotSupportedException e) {
                             throw new RuntimeException(e);
@@ -240,21 +240,12 @@ public class InstallationSystem {
         List<SolutionInstallInfo> descriptors = new ArrayList<SolutionInstallInfo>();
         PreparedStatement queryStmt = conn.prepareStatement("SELECT FEED_ID FROM SOLUTION_TO_FEED WHERE SOLUTION_ID = ?");
         queryStmt.setLong(1, solutionID);
-        PreparedStatement installStmt = conn.prepareStatement("INSERT INTO SOLUTION_INSTALL (SOLUTION_ID, installed_data_source_id, original_data_source_id) VALUES (?, ?, ?)");
+
         ResultSet rs = queryStmt.executeQuery();
         while (rs.next()) {
             long feedID = rs.getLong(1);
             FeedDefinition feedDefinition = feedStorage.getFeedDefinitionData(feedID, conn);
-            descriptors.addAll(DataSourceCopyUtils.installFeed(userID, conn, copyData, feedID, feedDefinition, true, null));
-
-            for (SolutionInstallInfo info : descriptors) {
-                if (info.getDescriptor().getType() == EIDescriptor.DATA_SOURCE) {
-                    installStmt.setLong(1, solutionID);
-                    installStmt.setLong(2, info.getDescriptor().getId());
-                    installStmt.setLong(3, info.getPreviousID());
-                    installStmt.execute();
-                }
-            }
+            descriptors.addAll(DataSourceCopyUtils.installFeed(userID, conn, copyData, feedID, feedDefinition, true, null, solutionID));
         }
         return descriptors;
     }

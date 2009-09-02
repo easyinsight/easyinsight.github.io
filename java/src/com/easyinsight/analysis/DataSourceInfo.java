@@ -24,6 +24,15 @@ public class DataSourceInfo implements Serializable {
     private String originName;
     private int type;
     private List<DataSourceInfo> childSources;
+    private long originSolution;
+
+    public long getOriginSolution() {
+        return originSolution;
+    }
+
+    public void setOriginSolution(long originSolution) {
+        this.originSolution = originSolution;
+    }
 
     public String getOriginName() {
         return originName;

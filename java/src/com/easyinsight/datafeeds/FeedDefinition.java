@@ -10,11 +10,13 @@ import com.easyinsight.storage.DataStorage;
 import com.easyinsight.util.RandomTextGenerator;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.database.Database;
+import com.easyinsight.database.EIConnection;
 
 import java.util.*;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.io.Serializable;
 
 import org.hibernate.Session;
@@ -384,7 +386,21 @@ public class FeedDefinition implements Cloneable, Serializable {
         feed.setFields(clones);
         feed.setName(getFeedName());
         feed.setVisible(isVisible());
-        feed.setType(getDataSourceType());        
+        feed.setType(getDataSourceType());
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            PreparedStatement solutionQueryStmt = conn.prepareStatement("SELECT SOLUTION_ID FROM SOLUTION_INSTALL WHERE INSTALLED_DATA_SOURCE_ID = ?");
+            solutionQueryStmt.setLong(1, getDataFeedID());
+            ResultSet solutionRS = solutionQueryStmt.executeQuery();
+            if (solutionRS.next()) {
+                long solutionID = solutionRS.getLong(1);
+                feed.setOriginSolution(solutionID);
+            }
+        } catch (Exception e) {
+            LogClass.error(e);
+        } finally {
+            Database.closeConnection(conn);
+        }
         return feed;
     }
 

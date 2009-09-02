@@ -49,6 +49,7 @@ package com.easyinsight.analysis
         public var reportStateID:int;
         public var authorName:String;
         public var description:String;
+        public var solutionVisible:Boolean;
 		
 		public function AnalysisDefinition()
 		{

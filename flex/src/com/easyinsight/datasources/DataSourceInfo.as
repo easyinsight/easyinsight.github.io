@@ -16,6 +16,7 @@ public class DataSourceInfo {
     public var liveDataSource:Boolean;
     public var lastDataTime:Date;
     public var originName:String;
+    public var originSolution:int;
 
     public var type:int;
 

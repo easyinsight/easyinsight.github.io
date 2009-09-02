@@ -80,12 +80,14 @@ public class ListViewGrid extends AdvancedDataGrid {
     override protected function drawRowBackground(s:Sprite, rowIndex:int,
                                                   y:Number, height:Number, color:uint, dataIndex:int):void
     {
-        if (this.rowColorFunction != null)
-        {
-            if (dataIndex < (this.dataProvider as ArrayCollection).length)
+        if (this.dataProvider is ArrayCollection) {
+            if (this.rowColorFunction != null)
             {
-                var item:Object = (this.dataProvider as ArrayCollection).getItemAt(dataIndex);
-                color = this.rowColorFunction.call(this, item, color);
+                if (dataIndex < (this.dataProvider as ArrayCollection).length)
+                {
+                    var item:Object = (this.dataProvider as ArrayCollection).getItemAt(dataIndex);
+                    color = this.rowColorFunction.call(this, item, color);
+                }
             }
         }
 

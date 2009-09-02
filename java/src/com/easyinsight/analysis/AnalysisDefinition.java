@@ -444,6 +444,7 @@ public class AnalysisDefinition implements Cloneable {
         analysisDefinition.setMarketplaceVisible(marketplaceVisible);
         analysisDefinition.setPubliclyVisible(publiclyVisible);
         analysisDefinition.setVisibleAtFeedLevel(visibleAtFeedLevel);
+        analysisDefinition.setSolutionVisible(solutionVisible);
         return analysisDefinition;
     }
 

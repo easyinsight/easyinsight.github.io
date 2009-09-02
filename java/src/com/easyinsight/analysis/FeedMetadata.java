@@ -21,8 +21,17 @@ public class FeedMetadata implements Serializable {
     private String dataSourceName;
     private int version;
     private boolean dataSourceAdmin;
+    private long originSolution;
     private Set<CredentialRequirement> credentials = new HashSet<CredentialRequirement>();
     private List<FilterDefinition> intrinsicFilters = new ArrayList<FilterDefinition>();
+
+    public long getOriginSolution() {
+        return originSolution;
+    }
+
+    public void setOriginSolution(long originSolution) {
+        this.originSolution = originSolution;
+    }
 
     public List<FeedNode> getFieldHierarchy() {
         return fieldHierarchy;

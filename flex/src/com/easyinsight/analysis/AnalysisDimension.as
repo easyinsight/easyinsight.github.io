@@ -11,6 +11,7 @@ package com.easyinsight.analysis
 		public var group:Boolean = true;
 		public var analysisDimensionID:int;
         public var keyDimension:AnalysisDimension;
+        public var summary:Boolean = false;
 		
 		public function AnalysisDimension(group:Boolean = true)
 		{

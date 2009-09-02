@@ -1,8 +1,11 @@
 <?xml version="1.0" ?>
 <easyinsight:FullScreenPage xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:easyinsight="com.easyinsight.*"
-                            xmlns:filtering="com.easyinsight.filtering.*" xmlns:datasources="com.easyinsight.datasources.*"
+                            xmlns:filtering="com.easyinsight.filtering.*"
+                            xmlns:datasources="com.easyinsight.datasources.*"
+                            xmlns:analysis="com.easyinsight.analysis.*"
                             width="100%" height="100%"
-                            creationComplete="onCreation()" implements="com.easyinsight.util.IAsyncScreen,com.easyinsight.framework.IFullScreenPage">
+                            creationComplete="onCreation()"
+                            implements="com.easyinsight.util.IAsyncScreen,com.easyinsight.framework.IFullScreenPage">
     <easyinsight:states>
         <mx:State name="FullScreen">
             <mx:RemoveChild target="{buttonBar}"/>
@@ -25,8 +28,7 @@
         import com.easyinsight.administration.feed.Tag;
         import com.easyinsight.analysis.AnalysisCloseEvent;
         import com.easyinsight.analysis.AnalysisDefinition;
-
-        import com.easyinsight.analysis.CredentialsEvent;
+        
         import com.easyinsight.analysis.EmbeddedDataServiceEvent;
         import com.easyinsight.analysis.ExcelCreator;
         import com.easyinsight.analysis.HierarchyDrilldownEvent;
@@ -55,6 +57,7 @@
         import mx.controls.Alert;
         import mx.core.Container;
         import mx.formatters.DateFormatter;
+        import mx.formatters.NumberFormatter;
         import mx.managers.BrowserManager;
         import mx.managers.PopUpManager;
         import mx.utils.URLUtil;
@@ -212,6 +215,10 @@
         [Bindable]
         private var rateReportText:String;
 
+        [Bindable]
+        private var _score:Number;
+
+        [Bindable]
         private var _reportID:int;
 
         private var _reportType:int;
@@ -279,8 +286,10 @@
                 report = event.analysisDefinition;
                 dataSource = event.dataSourceInfo;
                 reportName = report.name;
-                reportRatingCount = String(report.ratingCount);
-                reportRating = String(report.ratingAverage);
+                var nf:NumberFormatter = new NumberFormatter();
+                reportRatingCount = nf.format(event.ratingsCount);
+                reportRating = nf.format(event.ratingsAverage);
+                _score = event.ratingsAverage;
                 reportViews = String(report.viewCount);
                 description = report.description;
                 attribution = event.attribution;
@@ -483,15 +492,21 @@
         }]]></mx:Script>
     <mx:VBox width="100%" height="100%" paddingBottom="10" paddingLeft="10" paddingRight="10" paddingTop="10">
         <mx:HBox id="buttonBar" verticalAlign="middle">
-            <mx:Image source="{logo}" id="logoImage" click="navigateToURL(new URLRequest('http://www.easy-insight.com/'), 'blank')"/>
+            <mx:Image source="{logo}" id="logoImage"
+                      click="navigateToURL(new URLRequest('http://www.easy-insight.com/'), 'blank')"/>
             <mx:Button label="Back" click="close()" icon="{closeIcon}" labelPlacement="bottom" id="backButton"/>
-            <mx:Button label="Full Screen" click="toFullScreen()" icon="{fullScreenIcon}" labelPlacement="bottom" id="fullScreenButton"/>
-            <mx:Button label="Refresh" click="refreshData()" icon="{refreshIcon}" labelPlacement="bottom" id="refreshButton"/>
-            <mx:Button label="Bookmark" click="bookmark()" icon="{bookmarkIcon}" labelPlacement="bottom" id="bookmarkButton"/>
-            <mx:Button label="Export to Excel" icon="{exportToExcelIcon}" click="exportExcel()" labelPlacement="bottom" id="exportButton"/>
-            <mx:Button label="Edit this Report" icon="{reportEditorIcon}" click="toReportEditor()" 
+            <mx:Button label="Full Screen" click="toFullScreen()" icon="{fullScreenIcon}" labelPlacement="bottom"
+                       id="fullScreenButton"/>
+            <mx:Button label="Refresh" click="refreshData()" icon="{refreshIcon}" labelPlacement="bottom"
+                       id="refreshButton"/>
+            <mx:Button label="Bookmark" click="bookmark()" icon="{bookmarkIcon}" labelPlacement="bottom"
+                       id="bookmarkButton"/>
+            <mx:Button label="Export to Excel" icon="{exportToExcelIcon}" click="exportExcel()" labelPlacement="bottom"
+                       id="exportButton"/>
+            <mx:Button label="Edit this Report" icon="{reportEditorIcon}" click="toReportEditor()"
                        labelPlacement="bottom" id="editReportButton"/>
-            <mx:Button label="View in Browser" click="toBrowser()" icon="{browserIcon}" labelPlacement="bottom" id="browserButton"/>
+            <mx:Button label="View in Browser" click="toBrowser()" icon="{browserIcon}" labelPlacement="bottom"
+                       id="browserButton"/>
             <mx:Button label="Adjust Filters" icon="{filterIcon}" click="adjustFilters()" visible="{showFilters}"
                        labelPlacement="bottom" id="adjustFiltersbutton"/>
             <datasources:DataSourceDisplay dataSource="{dataSource}"/>
@@ -520,21 +535,9 @@
                     <mx:FormItem label="Data Attribution:">
                         <mx:Label text="{attribution}" fontFamily="Lucida Grande" fontWeight="normal" maxWidth="180"/>
                     </mx:FormItem>
-                    <!--<mx:FormItem label="Report Rating:">
-                        <mx:Label text="{reportRating}"/>
+                    <mx:FormItem label="Report Rating:">
+                        <analysis:ReportRating reportID="{_reportID}" score="{_score}"/>
                     </mx:FormItem>
-                    <mx:FormItem label="{rateReportText}" id="rateReportItem">
-                        <mx:HBox>
-                            <mx:Image source="{noRatingIcon}"/>
-                            <mx:Image source="{noRatingIcon}"/>
-                            <mx:Image source="{noRatingIcon}"/>
-                            <mx:Image source="{noRatingIcon}"/>
-                            <mx:Image source="{noRatingIcon}"/>
-                        </mx:HBox>
-                    </mx:FormItem>-->
-                    <!--<mx:FormItem label="Report Views:">
-                        <mx:Label text="{reportViews}" fontFamily="Lucida Grande" fontWeight="normal"/>
-                    </mx:FormItem>-->
                     <mx:FormItem label="Description:">
                         <mx:TextArea text="{description}" fontFamily="Lucida Grande" fontWeight="normal"
                                      borderStyle="none"

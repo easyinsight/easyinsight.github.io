@@ -22,6 +22,15 @@ public abstract class Feed implements Serializable {
     private String attribution;
     private boolean visible;
     private int type;
+    private long originSolution;
+
+    public long getOriginSolution() {
+        return originSolution;
+    }
+
+    public void setOriginSolution(long originSolution) {
+        this.originSolution = originSolution;
+    }
 
     public int getType() {
         return type;
@@ -37,6 +46,7 @@ public abstract class Feed implements Serializable {
         dataSourceInfo.setDataSourceID(feedID);
         dataSourceInfo.setDataSourceName(name);
         dataSourceInfo.setLiveDataSource(!getCredentialRequirement(false).isEmpty());
+        dataSourceInfo.setOriginSolution(originSolution);
         return dataSourceInfo;
     }
 

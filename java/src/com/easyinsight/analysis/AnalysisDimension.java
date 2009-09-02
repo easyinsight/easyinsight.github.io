@@ -29,6 +29,9 @@ public class AnalysisDimension extends AnalysisItem {
     @JoinColumn(name="key_dimension_id")
     private AnalysisDimension keyDimension;
 
+    @Column(name="summary")
+    private boolean summary = false;
+
     public AnalysisDimension() {
     }
 
@@ -40,6 +43,14 @@ public class AnalysisDimension extends AnalysisItem {
 
     public void setKeyDimension(AnalysisDimension keyDimension) {
         this.keyDimension = keyDimension;
+    }
+
+    public boolean isSummary() {
+        return summary;
+    }
+
+    public void setSummary(boolean summary) {
+        this.summary = summary;
     }
 
     public List<AnalysisItem> getAnalysisItems(List<AnalysisItem> allItems, Collection<AnalysisItem> insightItems) {

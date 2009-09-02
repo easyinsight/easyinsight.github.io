@@ -13,6 +13,12 @@
 					case FormattingConfiguration.PERCENTAGE:
 						formattingType.selectedIndex = 2;
 						break;
+                    case FormattingConfiguration.MILLISECONDS:
+                        formattingType.selectedIndex = 3;
+                        break;
+                    case FormattingConfiguration.SECONDS:
+                        formattingType.selectedIndex = 4;
+                        break;
 				}				
 			}		
 		
@@ -27,5 +33,7 @@
 		<mx:Object label="Number" data="{FormattingConfiguration.NUMBER}" value="Number"/>
 		<mx:Object label="Currency" data="{FormattingConfiguration.CURRENCY}" value="Currency"/>
 		<mx:Object label="Percentage" data="{FormattingConfiguration.PERCENTAGE}" value="Percentage"/>		
+		<mx:Object label="Interval (milliseconds)" data="{FormattingConfiguration.MILLISECONDS}" value="Interval (milliseconds)"/>		
+		<mx:Object label="Interval (seconds)" data="{FormattingConfiguration.SECONDS}" value="Interval (seconds)"/>
 	</mx:ComboBox>
 </mx:HBox>

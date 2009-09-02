@@ -31,7 +31,9 @@ import org.hibernate.Session;
  */
 public class DataSourceCopyUtils {
 
-    public static List<SolutionInstallInfo> installFeed(long userID, Connection conn, boolean copyData, long feedID, FeedDefinition feedDefinition, boolean includeChildren, String newDataSourceName) throws CloneNotSupportedException, SQLException {
+    public static List<SolutionInstallInfo> installFeed(long userID, Connection conn, boolean copyData, long feedID,
+                                                        FeedDefinition feedDefinition, boolean includeChildren, String newDataSourceName,
+                                                        long solutionID) throws CloneNotSupportedException, SQLException {
         FeedStorage feedStorage = new FeedStorage();
         AnalysisStorage analysisStorage = new AnalysisStorage();
         List<SolutionInstallInfo> infos = new ArrayList<SolutionInstallInfo>();
@@ -67,7 +69,7 @@ public class DataSourceCopyUtils {
                 infos.add(new SolutionInstallInfo(insight.getAnalysisID(), insightDescriptor, null, false));
                 List<FeedDefinition> insightFeeds = getFeedsFromInsight(clonedInsight.getAnalysisID(), conn);
                 for (FeedDefinition insightFeed : insightFeeds) {
-                    infos.addAll(installFeed(userID, conn, copyData, insightFeed.getDataFeedID(), insightFeed, true, null));
+                    infos.addAll(installFeed(userID, conn, copyData, insightFeed.getDataFeedID(), insightFeed, true, null, solutionID));
                 }
             }
         }
@@ -87,6 +89,14 @@ public class DataSourceCopyUtils {
         }
         DataSourceDescriptor dataSourceDescriptor = new DataSourceDescriptor(clonedFeedDefinition.getFeedName(), clonedFeedDefinition.getDataFeedID());
         infos.add(new SolutionInstallInfo(feedDefinition.getDataFeedID(), dataSourceDescriptor, todo, clonedFeedDefinition.getFeedName(), todo != null));
+
+        if (solutionID > 0) {
+            PreparedStatement installStmt = conn.prepareStatement("INSERT INTO SOLUTION_INSTALL (SOLUTION_ID, installed_data_source_id, original_data_source_id) VALUES (?, ?, ?)");
+            installStmt.setLong(1, solutionID);
+            installStmt.setLong(2, clonedFeedDefinition.getDataFeedID());
+            installStmt.setLong(3, feedDefinition.getDataFeedID());
+            installStmt.execute();
+        }
         return infos;
     }
 

@@ -2,13 +2,18 @@ package com.easyinsight.analysis.formatter {
 import mx.formatters.Formatter;
 
 public class TimeStringFormatter extends Formatter{
-    public function TimeStringFormatter() {
+
+    private var baseInterval:int = 1;
+
+    public function TimeStringFormatter(baseInterval:int) {
         super();
+        this.baseInterval = baseInterval;
     }
 
     override public function format(value:Object):String {
         var resultString:String;
         var num:Number = Number(value);
+        num = num * baseInterval;
         if (num < 1000) {
             // < 1 second, display milliseconds
             resultString = num + " ms";

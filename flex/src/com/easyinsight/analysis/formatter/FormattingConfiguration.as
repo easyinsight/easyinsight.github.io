@@ -1,8 +1,8 @@
 package com.easyinsight.analysis.formatter
 {
 	import mx.formatters.CurrencyFormatter;
-import mx.formatters.DateFormatter;
-import mx.formatters.Formatter;
+
+    import mx.formatters.Formatter;
 	
 	[Bindable]
 	[RemoteClass(alias="com.easyinsight.analysis.FormattingConfiguration")]	
@@ -11,9 +11,9 @@ import mx.formatters.Formatter;
 		public static const NUMBER:int = 1;
     	public static const CURRENCY:int = 2;
     	public static const PERCENTAGE:int = 3;
-    	public static const TEXT_UOM:int = 4;
-        public static const MILLISECONDS:int = 5;
-    
+        public static const MILLISECONDS:int = 4;
+        public static const SECONDS:int = 5;
+
 		public var formattingConfigurationID:int;
 		public var formattingType:int;
 		public var textUom:String;
@@ -41,9 +41,11 @@ import mx.formatters.Formatter;
                     formatter = percentageFormatter;
                     break;
                 case MILLISECONDS:
-                    var dateFormatter:DateFormatter = new DateFormatter();
-            
-				case TEXT_UOM:
+                    formatter = new TimeStringFormatter(1);
+                    break;
+                case SECONDS:
+                    formatter = new TimeStringFormatter(1000);
+                    break;
 				default:
 					var defaultFormatter:FlexibleNumberFormatter = new FlexibleNumberFormatter();
 					defaultFormatter.precision = 2;

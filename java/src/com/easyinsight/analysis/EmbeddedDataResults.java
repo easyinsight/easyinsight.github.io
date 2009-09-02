@@ -12,6 +12,8 @@ public class EmbeddedDataResults implements Serializable {
     private ListRow[] rows;
     private boolean dataSourceAccessible;
     private DataSourceInfo dataSourceInfo;
+    private double ratingsAverage;
+    private int ratingsCount;
     private String attribution;
     private Set<CredentialRequirement> credentialRequirements;
 
@@ -23,7 +25,25 @@ public class EmbeddedDataResults implements Serializable {
         this.definition = results.definition;
         this.rows = results.rows;
         this.dataSourceInfo = results.dataSourceInfo;
+        this.ratingsAverage = results.ratingsAverage;
+        this.ratingsCount = results.ratingsCount;
         this.attribution = results.attribution;
+    }
+
+    public double getRatingsAverage() {
+        return ratingsAverage;
+    }
+
+    public void setRatingsAverage(double ratingsAverage) {
+        this.ratingsAverage = ratingsAverage;
+    }
+
+    public int getRatingsCount() {
+        return ratingsCount;
+    }
+
+    public void setRatingsCount(int ratingsCount) {
+        this.ratingsCount = ratingsCount;
     }
 
     public Set<CredentialRequirement> getCredentialRequirements() {

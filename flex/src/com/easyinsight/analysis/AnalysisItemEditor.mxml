@@ -288,18 +288,18 @@
                 </mx:Array>
             </mx:dataProvider>
         </mx:ToggleButtonBar>
+        <mx:Form id="coreForm" paddingBottom="0" paddingLeft="0" paddingRight="0" paddingTop="0">
+            <mx:FormItem label="Field Name: " direction="horizontal" id="fieldNameText">
+                <mx:TextInput id="fieldNameInput" text="{displayName}" editable="{_fieldNameEditable}"/>
+            </mx:FormItem>
+            <mx:FormItem label="Hidden: " direction="horizontal" id="hiddenText">
+                <mx:CheckBox id="hiddenCheckbox" selected="{hidden}"/>
+            </mx:FormItem>
+            <mx:FormItem label="Field Type: " direction="horizontal" id="firstForm">
+                <mx:ComboBox id="aggregationBox" dataProvider="{aggregationTypeObjects}"
+                             close="aggregationTypeChanged(event)" rowCount="9"/>
+            </mx:FormItem>
+        </mx:Form>
     </mx:VBox>
-    <mx:Form id="coreForm">
-        <mx:FormItem label="Field Name: " direction="horizontal" id="fieldNameText">
-            <mx:TextInput id="fieldNameInput" text="{displayName}" editable="{_fieldNameEditable}"/>
-        </mx:FormItem>
-        <mx:FormItem label="Hidden: " direction="horizontal" id="hiddenText">
-            <mx:CheckBox id="hiddenCheckbox" selected="{hidden}"/>
-        </mx:FormItem>
-        <mx:FormItem label="Field Type: " direction="horizontal" id="firstForm">
-            <mx:ComboBox id="aggregationBox" dataProvider="{aggregationTypeObjects}"
-                         close="aggregationTypeChanged(event)" rowCount="9"/>
-        </mx:FormItem>
-    </mx:Form>
     <mx:StringValidator id="nameValidator" source="{fieldNameInput}" property="text" minLength="3"/>
 </mx:Box>

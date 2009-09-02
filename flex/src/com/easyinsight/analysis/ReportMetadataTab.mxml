@@ -56,7 +56,25 @@
         private var publiclyVisible:Boolean;
 
         [Bindable]
+        private var solutionVisible:Boolean;
+
+        [Bindable]
         private var shareDataSourceSharing:Boolean;
+
+
+        private var _originSolution:int;
+
+
+        [Bindable(event="originSolutionChanged")]
+        public function get originSolution():int {
+            return _originSolution;
+        }
+
+        public function set originSolution(value:int):void {
+            if (_originSolution == value) return;
+            _originSolution = value;
+            dispatchEvent(new Event("originSolutionChanged"));
+        }
 
         public function updateName(name:String):void {
             labelNameField = name;
@@ -97,6 +115,7 @@
             marketplaceVisible = value.marketplaceVisible;
             publiclyVisible = value.publiclyVisible;
             shareDataSourceSharing = value.visibleAtFeedLevel;
+            solutionVisible = value.solutionVisible;
             dispatchEvent(new Event("analysisDefinitionChanged"));
         }
 
@@ -108,6 +127,7 @@
                 analysisDefinition.marketplaceVisible = marketplaceVisibleCheckbox.selected;
                 analysisDefinition.publiclyVisible = publiclyVisibleCheckbox.selected;
                 analysisDefinition.visibleAtFeedLevel = shareDataSourceSharingCheckbox.selected;
+                analysisDefinition.solutionVisible = solutionVisibleCheckbox.selected;
             }
             return results;
         }
@@ -164,6 +184,14 @@
                          selected="{marketplaceVisible}" enabled="{publiclyVisible}"/>
             <mx:Label fontSize="10" textDecoration="underline" text="What is this?"
                       toolTip="By checking this box, you make the report visible to all other Easy Insight users in the marketplace."/>
+        </mx:HBox>
+    </mx:VBox>
+    <mx:VBox>
+        <mx:HBox verticalAlign="middle">
+            <mx:CheckBox label="Solution Visible" id="solutionVisibleCheckbox"
+                         selected="{solutionVisible}" enabled="{originSolution > 0}"/>
+            <mx:Label fontSize="10" textDecoration="underline" text="What is this?"
+                      toolTip="By checking this box, you make the report template visible to all other Easy Insight users on the source solution."/>
         </mx:HBox>
     </mx:VBox>
     <mx:StringValidator id="analysisNameValidator" source="{analysisNameInput}" property="text" minLength="3"

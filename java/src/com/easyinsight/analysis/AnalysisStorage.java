@@ -1,6 +1,7 @@
 package com.easyinsight.analysis;
 
 import com.easyinsight.database.Database;
+import com.easyinsight.database.EIConnection;
 import com.easyinsight.core.PersistableValue;
 import com.easyinsight.core.InsightDescriptor;
 import com.easyinsight.core.Key;
@@ -20,6 +21,25 @@ import org.hibernate.Query;
  * Time: 6:37:10 PM
  */
 public class AnalysisStorage {
+
+    public ReportMetrics getRating(long analysisID) throws SQLException {
+        double ratingAverage = 0;
+        int ratingCount = 0;
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            PreparedStatement queryStmt = conn.prepareStatement("SELECT AVG(RATING), COUNT(RATING) FROM USER_REPORT_RATING WHERE " +
+                    "REPORT_ID = ?");
+            queryStmt.setLong(1, analysisID);
+            ResultSet rs = queryStmt.executeQuery();
+            if (rs.next()) {
+                ratingAverage = rs.getDouble(1);
+                ratingCount = rs.getInt(2);
+            }
+        } finally {
+            Database.closeConnection(conn);
+        }
+        return new ReportMetrics(ratingCount, ratingAverage);
+    }
 
     public WSAnalysisDefinition getAnalysisDefinition(long analysisID) {
         WSAnalysisDefinition analysisDefinition = null;

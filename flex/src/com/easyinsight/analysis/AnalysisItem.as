@@ -5,6 +5,7 @@ import com.easyinsight.analysis.conditions.ConditionRenderer;
 	import com.easyinsight.analysis.conditions.NoConditionRenderer;
 	import com.easyinsight.analysis.formatter.FormattingConfiguration;
 
+import mx.collections.ArrayCollection;
 import mx.controls.Label;
 import mx.core.UIComponent;
 import mx.formatters.Formatter;
@@ -21,6 +22,7 @@ import mx.formatters.Formatter;
 		public var displayName:String;
         public var width:int = 0;
         public var virtualDimension:VirtualDimension;
+        public var links:ArrayCollection;
 		
 		public function AnalysisItem() {
 			super();

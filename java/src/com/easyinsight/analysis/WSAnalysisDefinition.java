@@ -50,10 +50,19 @@ public abstract class WSAnalysisDefinition implements Serializable {
     private boolean canSaveDirectly;
     private boolean publiclyVisible;
     private boolean marketplaceVisible;
+    private boolean solutionVisible;
     private boolean visibleAtFeedLevel;
     private Date dateCreated;
     private Date dateUpdated;
     private String description;
+
+    public boolean isSolutionVisible() {
+        return solutionVisible;
+    }
+
+    public void setSolutionVisible(boolean solutionVisible) {
+        this.solutionVisible = solutionVisible;
+    }
 
     public String getDescription() {
         return description;

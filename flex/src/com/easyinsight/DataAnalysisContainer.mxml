@@ -177,6 +177,9 @@
         [Bindable]
         private var _reportID:int;
 
+        [Bindable]
+        private var originSolution:int;
+
         private var loading:Boolean = false;
 
         public function set previewMode(previewMode:Boolean):void {
@@ -307,6 +310,7 @@
 
             
             this.feedMetadata = feedMetadata;
+            this.originSolution = feedMetadata.originSolution;
             this.admin = feedMetadata.dataSourceAdmin;
             dataSourceName = this.feedMetadata.dataSourceName;
             availableFields = new ArrayCollection();
@@ -839,7 +843,7 @@
         <mx:TabNavigator id="tabNavigator" width="100%" creationPolicy="all" enabled="{!_previewMode}" paddingTop="0"
                          paddingBottom="0"
                          paddingLeft="0" paddingRight="0" resizeToContent="true">
-            <analysis:ReportMetadataTab id="reportMetadataTab" analysisDefinition="{analysisDefinition}"/>
+            <analysis:ReportMetadataTab id="reportMetadataTab" analysisDefinition="{analysisDefinition}" originSolution="{originSolution}"/>
             <analysis:ReportDataTab id="reportDataTab" analysisDefinition="{analysisDefinition}" dataService="{dataService}"
                     wrappers="{wrappers}" availableFields="{availableFields}" dataSourceInfo="{dataSourceInfo}"
                     dataView="{dataView}"/>

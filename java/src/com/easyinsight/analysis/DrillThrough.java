@@ -15,19 +15,6 @@ import java.util.List;
 public class DrillThrough extends Link {
     @Column(name="report_id")
     private long reportID;
-    @OneToMany(cascade = CascadeType.ALL)
-    @JoinTable(name = "drill_through_to_drill_through_pair",
-            joinColumns = @JoinColumn(name = "link_id", nullable = false),
-            inverseJoinColumns = @JoinColumn(name = "drill_through_pair_id", nullable = false))
-    private List<DrillThroughPair> pairs = new ArrayList<DrillThroughPair>();
-
-    public List<DrillThroughPair> getPairs() {
-        return pairs;
-    }
-
-    public void setPairs(List<DrillThroughPair> pairs) {
-        this.pairs = pairs;
-    }
 
     public long getReportID() {
         return reportID;

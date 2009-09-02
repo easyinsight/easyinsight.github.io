@@ -125,10 +125,13 @@ public class AnalysisService {
         analysisStorage.addAnalysisView(analysisID);
     }
 
-    public void rateReport(long feedID, long userID, int rating) throws SQLException {
+    public ReportMetrics rateReport(long feedID, int rating) throws SQLException {
+        long userID = SecurityUtil.getUserID();
+        double ratingAverage;
+        int ratingCount;
         Connection conn = Database.instance().getConnection();
         try {
-            PreparedStatement getExistingRatingStmt = conn.prepareStatement("SELECT user_data_source_rating_id FROM " +
+            PreparedStatement getExistingRatingStmt = conn.prepareStatement("SELECT user_report_rating_id FROM " +
                     "user_report_rating WHERE user_id = ? AND report_id = ?");
             getExistingRatingStmt.setLong(1, userID);
             getExistingRatingStmt.setLong(2, feedID);
@@ -138,7 +141,7 @@ public class AnalysisService {
                         "SET RATING = ? WHERE user_report_rating_id = ?");
                 updateRatingStmt.setInt(1, rating);
                 updateRatingStmt.setLong(2, rs.getLong(1));
-                updateRatingStmt.executeQuery();
+                updateRatingStmt.executeUpdate();
             } else {
                 PreparedStatement insertRatingStmt = conn.prepareStatement("INSERT INTO user_report_rating " +
                         "(USER_ID, report_id, rating) values (?, ?, ?)");
@@ -147,12 +150,20 @@ public class AnalysisService {
                 insertRatingStmt.setInt(3, rating);
                 insertRatingStmt.execute();
             }
+            PreparedStatement queryStmt = conn.prepareStatement("SELECT AVG(RATING), COUNT(RATING) FROM USER_REPORT_RATING WHERE " +
+                    "REPORT_ID = ?");
+            queryStmt.setLong(1, feedID);
+            ResultSet queryRS = queryStmt.executeQuery();
+            queryRS.next();
+            ratingAverage = queryRS.getDouble(1);
+            ratingCount = queryRS.getInt(2);
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);
         } finally {
             Database.closeConnection(conn);
         }
+        return new ReportMetrics(ratingCount, ratingAverage);
     }
 
     public WSAnalysisDefinition saveAnalysisDefinition(WSAnalysisDefinition wsAnalysisDefinition) {

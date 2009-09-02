@@ -15,6 +15,7 @@ import mx.collections.ArrayCollection;
         public var intrinsicFilters:ArrayCollection;
         public var fieldHierarchy:ArrayCollection;
         public var dataSourceInfos:ArrayCollection;
+        public var originSolution:int;
 		
 		public function FeedMetadata()
 			{

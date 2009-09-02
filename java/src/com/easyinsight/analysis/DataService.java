@@ -88,6 +88,7 @@ public class DataService {
             feedMetadata.setIntrinsicFilters(feed.getIntrinsicFilters());
             feedMetadata.setDataFeedID(feedID);
             feedMetadata.setVersion(feed.getVersion());
+            feedMetadata.setOriginSolution(feed.getOriginSolution());
             feedMetadata.setDataSourceAdmin(SecurityUtil.getRole(SecurityUtil.getUserID(false), feedID) == Roles.OWNER);
             return feedMetadata;
         } catch (Exception e) {
@@ -236,6 +237,9 @@ public class DataService {
                 results = new EmbeddedDataResults();
                 results.setDataSourceAccessible(dataSourceAccessible);
                 results.setDefinition(analysisDefinition);
+                ReportMetrics reportMetrics = new AnalysisStorage().getRating(reportID);
+                results.setRatingsAverage(reportMetrics.getAverage());
+                results.setRatingsCount(reportMetrics.getCount());
                 results.setHeaders(listDataResults.getHeaders());
                 results.setRows(listDataResults.getRows());
                 if (dataSet.getLastTime() == null) {

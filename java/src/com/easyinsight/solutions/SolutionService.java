@@ -182,6 +182,27 @@ public class SolutionService {
         return null;
     }
 
+    public void findInstalledSourcesForSolution(long solutionID) {
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            PreparedStatement queryStmt = conn.prepareStatement("SELECT DISTINCT DATA_FEED.DATA_FEED_ID " +
+                    " FROM UPLOAD_POLICY_USERS, DATA_FEED, SOLUTION_INSTALL WHERE " +
+                    "UPLOAD_POLICY_USERS.USER_ID = ? AND DATA_FEED.DATA_FEED_ID = UPLOAD_POLICY_USERS.FEED_ID AND " +
+                    "DATA_FEED.DATA_FEED_ID = SOLUTION_INSTALL.INSTALLED_DATA_SOURCE_ID AND SOLUTION_INSTALL.SOLUTION_ID = ?");
+            queryStmt.setLong(1, SecurityUtil.getUserID());
+            queryStmt.setLong(2, solutionID);
+            ResultSet rs = queryStmt.executeQuery();
+            while (rs.next()) {
+                long dataSourceID = rs.getLong(1);
+            }
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        } finally {
+            Database.closeConnection(conn);
+        }
+    }
+
     public void getReportsForSolution(long solutionID) {
         EIConnection conn = Database.instance().getConnection();
         try {
