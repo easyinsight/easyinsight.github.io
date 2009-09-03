@@ -56,7 +56,7 @@
         response.sendRedirect("access.jsp");
 
       String keyID = BillingUtil.getKeyID();
-      String key = BillinregUtil.getKey();
+      String key = BillingUtil.getKey();
       String orderID = "";
       String amount = "1.00";
       String type = "auth";
