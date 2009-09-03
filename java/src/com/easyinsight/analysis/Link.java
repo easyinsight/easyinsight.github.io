@@ -10,7 +10,7 @@ import javax.persistence.*;
 @Entity
 @Table(name="link")
 @Inheritance(strategy=InheritanceType.JOINED)
-public class Link {
+public class Link implements Cloneable {
     public static final int URL = 1;
     public static final int DRILLTHROUGH = 2;
 
@@ -20,6 +20,13 @@ public class Link {
     @GeneratedValue(strategy=GenerationType.IDENTITY)
     @Column(name="link_id")
     private long linkID;
+
+    @Override
+    public Link clone() throws CloneNotSupportedException {
+        Link link = (Link) super.clone();
+        link.setLinkID(0);
+        return link;
+    }
 
     public long getLinkID() {
         return linkID;

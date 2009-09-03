@@ -40,6 +40,10 @@ import com.easyinsight.datafeeds.test.TestGammaDataSource;
 import com.easyinsight.datafeeds.wesabe.WesabeAccountDataSource;
 import com.easyinsight.datafeeds.wesabe.WesabeTransactionDataSource;
 import com.easyinsight.datafeeds.wesabe.WesabeDataSource;
+import com.easyinsight.datafeeds.cloudwatch.CloudWatchDataSource;
+import com.easyinsight.datafeeds.highrise.HighRiseCompositeSource;
+import com.easyinsight.datafeeds.highrise.HighRiseCompanySource;
+import com.easyinsight.datafeeds.highrise.HighRiseDealSource;
 
 /**
  * User: jboe
@@ -702,6 +706,14 @@ public class FeedStorage {
                     feedDefinition = new WesabeAccountDataSource();
                 } else if (feedType.equals(FeedType.WESABE_TRANSACTIONS)) {
                     feedDefinition = new WesabeTransactionDataSource();
+                } else if (feedType.equals(FeedType.CLOUD_WATCH)) {
+                    feedDefinition = new CloudWatchDataSource();
+                } else if (feedType.equals(FeedType.HIGHRISE_COMPOSITE)) {
+                    feedDefinition = new HighRiseCompositeSource();
+                } else if (feedType.equals(FeedType.HIGHRISE_COMPANY)) {
+                    feedDefinition = new HighRiseCompanySource();
+                } else if (feedType.equals(FeedType.HIGHRISE_DEAL)) {
+                    feedDefinition = new HighRiseDealSource();
                 }
                 else {
                     throw new RuntimeException("Couldn't identify type");

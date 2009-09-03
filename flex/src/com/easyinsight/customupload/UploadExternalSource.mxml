@@ -45,6 +45,8 @@
                                     <mx:String>Salesforce</mx:String>
                                     <mx:String>Admin Server Stats</mx:String>
                                     <mx:String>Wesabe</mx:String>
+                                    <mx:String>Cloud Watch</mx:String>
+                                    <mx:String>Highrise</mx:String>
                                 </mx:Array>
                             </mx:ArrayCollection>
                         </mx:dataProvider>
@@ -82,6 +84,14 @@
                                                                       dataSourceClass="com.easyinsight.administration.feed.AdminStatsDataSource"/>
                         <customupload:ExternalDataSourceCreation
                                 dataSourceClass="com.easyinsight.wesabe.WesabeDataSourceCreation"
+                                userConfigComplete="onFeedCreation(event)"
+                                userConfigCancel="cancel(event)"/>
+                        <customupload:ExternalDataSourceCreation
+                                dataSourceClass="com.easyinsight.datasources.CloudWatchDataSourceCreation"
+                                userConfigComplete="onFeedCreation(event)"
+                                userConfigCancel="cancel(event)"/>
+                        <customupload:ExternalDataSourceCreation
+                                dataSourceClass="com.easyinsight.customupload.HighRiseDataSourceCreation"
                                 userConfigComplete="onFeedCreation(event)"
                                 userConfigCancel="cancel(event)"/>
                     </mx:ViewStack>

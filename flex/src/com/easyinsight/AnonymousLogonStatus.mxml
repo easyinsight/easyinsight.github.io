@@ -20,5 +20,5 @@
                     }
                 ]]>
 	</mx:Script>	
-	<mx:Button label="Log In" click="login()"/>
+	<mx:Button label="Log In" click="login()" id="loginButton"/>
 </mx:HBox>

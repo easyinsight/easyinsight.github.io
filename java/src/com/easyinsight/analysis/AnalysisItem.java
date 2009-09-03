@@ -205,6 +205,11 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
         AnalysisItem clonedItem = (AnalysisItem) super.clone();
         clonedItem.setAnalysisItemID(0);
         clonedItem.setFormattingConfiguration(formattingConfiguration.clone());
+        /*List<Link> clonedLinks = new ArrayList<Link>();
+        for (Link link : getLinks()) {
+            clonedLinks.add(link.clone());
+        }
+        setLinks(clonedLinks);*/
         return clonedItem;
     }
 
@@ -231,7 +236,7 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
     }
 
     public void updateIDs(Map<Long, AnalysisItem> replacementMap) {
-        
+
     }
 
     public List<AnalysisItem> getAnalysisItems(List<AnalysisItem> allItems, Collection<AnalysisItem> insightItems) {

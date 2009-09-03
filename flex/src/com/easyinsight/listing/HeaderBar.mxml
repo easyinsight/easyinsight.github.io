@@ -124,7 +124,7 @@
         <mx:Image source="{homeIcon}" id="homeImage"/>
         <mx:Label text="Intro" fontSize="12" fontFamily="Tahoma" fontWeight="bold" color="0x323232"/>
     </listing:ListingOption>
-    <listing:ListingOption perspective="{new MyData()}" enableAnalysis="false" displayName="My Data" listingChange="onListingChange(event)">
+    <listing:ListingOption perspective="{new MyData()}" enableAnalysis="false" displayName="My Data" listingChange="onListingChange(event)" id="myDataOption">
         <mx:Image source="{myDataIcon}" id="myDataImage"/>
         <mx:Label text="My Data" fontSize="12" fontFamily="Tahoma" fontWeight="bold" color="0x323232"/>
     </listing:ListingOption>

@@ -6,5 +6,9 @@ public class DrillThrough extends Link{
     public function DrillThrough() {
         super();
     }
+
+    override public function get type():String {
+        return "Drillthrough";
+    }
 }
 }

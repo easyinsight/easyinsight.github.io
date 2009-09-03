@@ -26,6 +26,12 @@ public class FeedType {
     public static final FeedType BASECAMP_MASTER = new FeedType(18);
     public static final FeedType WESABE_ACCOUNTS = new FeedType(19);
     public static final FeedType WESABE_TRANSACTIONS = new FeedType(20);
+    public static final FeedType CLOUD_WATCH = new FeedType(21);
+    public static final FeedType CLARITY = new FeedType(22);
+    public static final FeedType HIGHRISE_COMPOSITE = new FeedType(23);
+    public static final FeedType HIGHRISE_COMPANY = new FeedType(24);
+    public static final FeedType HIGHRISE_DEAL = new FeedType(25);
+    public static final FeedType TWITTER = new FeedType(26);
 
     private int type;
 

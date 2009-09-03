@@ -7,5 +7,9 @@ public class Link {
 
     public function Link() {
     }
+
+    public function get type():String {
+        return null;
+    }
 }
 }

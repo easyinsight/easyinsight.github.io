@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<mx:Box xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%"
+<mx:Box xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*" width="100%" height="100%"
         xmlns:analysis="com.easyinsight.analysis.*"
         creationComplete="initStuff()" creationPolicy="all" xmlns:formatter="com.easyinsight.analysis.formatter.*"
         implements="com.easyinsight.analysis.IAnalysisItemEditor">
@@ -7,70 +7,80 @@
 
         <mx:State name="Measure">
             <mx:AddChild relativeTo="{firstForm}" position="after">
-                <analysis:MeasureItemDetailEditor addedToStage="detailEditor = measureDetailEditor" id="measureDetailEditor"
-                        dimensionFields="{dimensionFields}" dateDimensionFields="{dateFields}"
-                        measureObjects="{measureObjects}" analysisItem="{startingAnalysisItem}"/>
+                <analysis:MeasureItemDetailEditor addedToStage="detailEditor = measureDetailEditor"
+                                                  id="measureDetailEditor"
+                                                  dimensionFields="{dimensionFields}" dateDimensionFields="{dateFields}"
+                                                  measureObjects="{measureObjects}"
+                                                  analysisItem="{startingAnalysisItem}"/>
             </mx:AddChild>
         </mx:State>
 
         <mx:State name="ComplexMeasure">
             <mx:AddChild relativeTo="{firstForm}" position="after" creationPolicy="all">
-                <analysis:ComplexMeasureDetailEditor addedToStage="detailEditor = complexDetailEditor" id="complexDetailEditor"
-                        dimensionFields="{dimensionFields}" dateDimensionFields="{dateFields}"
-                        measureObjects="{measureObjects}" analysisItem="{startingAnalysisItem}"/>
+                <analysis:ComplexMeasureDetailEditor addedToStage="detailEditor = complexDetailEditor"
+                                                     id="complexDetailEditor"
+                                                     dimensionFields="{dimensionFields}"
+                                                     dateDimensionFields="{dateFields}"
+                                                     measureObjects="{measureObjects}"
+                                                     analysisItem="{startingAnalysisItem}"/>
             </mx:AddChild>
         </mx:State>
 
         <mx:State name="SixSigmaMeasure">
             <mx:AddChild relativeTo="{firstForm}" position="after" creationPolicy="all">
                 <analysis:SixSigmaDetailEditor addedToStage="detailEditor = sigmaDetailEditor" id="sigmaDetailEditor"
-                        dimensionFields="{dimensionFields}" dateDimensionFields="{dateFields}" measureFields="{measureFields}"
-                        measureObjects="{measureObjects}" analysisItem="{startingAnalysisItem}"/>
+                                               dimensionFields="{dimensionFields}" dateDimensionFields="{dateFields}"
+                                               measureFields="{measureFields}"
+                                               measureObjects="{measureObjects}" analysisItem="{startingAnalysisItem}"/>
             </mx:AddChild>
         </mx:State>
 
         <mx:State name="TemporalMeasure">
             <mx:AddChild relativeTo="{firstForm}" position="after" creationPolicy="all">
-                <analysis:TemporalMeasureDetailEditor addedToStage="detailEditor = temporalDetailEditor" id="temporalDetailEditor"
-                        dimensionFields="{dimensionFields}" dateDimensionFields="{dateFields}"
-                        measureObjects="{measureObjects}" analysisItem="{startingAnalysisItem}"/>
+                <analysis:TemporalMeasureDetailEditor addedToStage="detailEditor = temporalDetailEditor"
+                                                      id="temporalDetailEditor"
+                                                      dimensionFields="{dimensionFields}"
+                                                      dateDimensionFields="{dateFields}"
+                                                      measureObjects="{measureObjects}"
+                                                      analysisItem="{startingAnalysisItem}"/>
             </mx:AddChild>
         </mx:State>
 
         <mx:State name="Grouping">
             <mx:AddChild relativeTo="{firstForm}" position="after" creationPolicy="all">
-                <analysis:GroupingDetailEditor addedToStage="detailEditor = groupingDetailEditor" id="groupingDetailEditor"
-                        dimensionFields="{dimensionFields}" dateDimensionFields="{dateFields}"
-                        measureObjects="{measureObjects}" analysisItem="{startingAnalysisItem}"/>
+                <analysis:GroupingDetailEditor addedToStage="detailEditor = groupingDetailEditor"
+                                               id="groupingDetailEditor"
+                                               dimensionFields="{dimensionFields}" dateDimensionFields="{dateFields}"
+                                               measureObjects="{measureObjects}" analysisItem="{startingAnalysisItem}"/>
             </mx:AddChild>
         </mx:State>
 
         <mx:State name="Range">
             <mx:AddChild relativeTo="{firstForm}" position="after" creationPolicy="all">
                 <analysis:RangeDetailEditor addedToStage="detailEditor = rangeDetailEditor" id="rangeDetailEditor"
-                        dimensionFields="{dimensionFields}" dateDimensionFields="{dateFields}"
-                        measureObjects="{measureObjects}" analysisItem="{startingAnalysisItem}"/>
+                                            dimensionFields="{dimensionFields}" dateDimensionFields="{dateFields}"
+                                            measureObjects="{measureObjects}" analysisItem="{startingAnalysisItem}"/>
             </mx:AddChild>
         </mx:State>
         <mx:State name="List">
             <mx:AddChild relativeTo="{firstForm}" position="after" creationPolicy="all">
                 <analysis:ListDetailEditor addedToStage="detailEditor = listDetailEditor" id="listDetailEditor"
-                        dimensionFields="{dimensionFields}" dateDimensionFields="{dateFields}"
-                        measureObjects="{measureObjects}" analysisItem="{startingAnalysisItem}"/>
+                                           dimensionFields="{dimensionFields}" dateDimensionFields="{dateFields}"
+                                           measureObjects="{measureObjects}" analysisItem="{startingAnalysisItem}"/>
             </mx:AddChild>
         </mx:State>
         <mx:State name="Date">
             <mx:AddChild relativeTo="{firstForm}" position="after" creationPolicy="all">
                 <analysis:DetailDateEditor addedToStage="detailEditor = dateDetailEditor" id="dateDetailEditor"
-                        dimensionFields="{dimensionFields}" dateDimensionFields="{dateFields}"
-                        measureObjects="{measureObjects}" analysisItem="{startingAnalysisItem}"/>
+                                           dimensionFields="{dimensionFields}" dateDimensionFields="{dateFields}"
+                                           measureObjects="{measureObjects}" analysisItem="{startingAnalysisItem}"/>
             </mx:AddChild>
         </mx:State>
         <mx:State name="Step">
             <mx:AddChild relativeTo="{firstForm}" position="after" creationPolicy="all">
                 <analysis:StepDetailEditor addedToStage="detailEditor = stepDetailEditor" id="stepDetailEditor"
-                        dimensionFields="{dimensionFields}" dateDimensionFields="{dateFields}"
-                        measureObjects="{measureObjects}" analysisItem="{startingAnalysisItem}"/>
+                                           dimensionFields="{dimensionFields}" dateDimensionFields="{dateFields}"
+                                           measureObjects="{measureObjects}" analysisItem="{startingAnalysisItem}"/>
             </mx:AddChild>
         </mx:State>
     </mx:states>
@@ -81,6 +91,9 @@
         import com.easyinsight.analysis.options.OptionFactory;
 
         import mx.collections.ArrayCollection;
+
+        [Bindable]
+        private var links:ArrayCollection;
 
         [Bindable]
         private var aggregationTypeObjects:ArrayCollection;
@@ -104,7 +117,6 @@
 
         [Bindable]
         private var _fieldNameEditable:Boolean = true;
-
 
 
         [Bindable]
@@ -277,7 +289,7 @@
             aggregationChange(aggregationTypeObjects.getItemAt(0) as String);
         }
         ]]>
-	</mx:Script>
+    </mx:Script>
     <mx:VBox>
         <mx:ToggleButtonBar id="toggleBar" itemClick="toggleClick()">
             <mx:dataProvider>
@@ -300,6 +312,13 @@
                              close="aggregationTypeChanged(event)" rowCount="9"/>
             </mx:FormItem>
         </mx:Form>
+        <mx:DataGrid dataProvider="{links}">
+            <mx:columns>
+                <util:EIDataGridColumn headerText="Link Name" dataField="label"/>
+                <util:EIDataGridColumn headerText="Link Type" dataField="linkType"/>
+                <util:EIDataGridColumn headerText="" sortable="false"/>
+            </mx:columns>
+        </mx:DataGrid>
     </mx:VBox>
     <mx:StringValidator id="nameValidator" source="{fieldNameInput}" property="text" minLength="3"/>
 </mx:Box>

@@ -6,5 +6,9 @@ public class URLLink extends Link{
     public function URLLink() {
         super();
     }
+
+    override public function get type():String {
+        return "URL";
+    }
 }
 }
