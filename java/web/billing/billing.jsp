@@ -12,6 +12,7 @@
 <%@ page import="com.easyinsight.users.User" %>
 <%@ page import="java.util.List" %>
 <%@ page import="java.util.Formatter" %>
+<%@ page import="com.easyinsight.config.ConfigLoader" %>
 <%--
   Created by IntelliJ IDEA.
   User: abaldwin
@@ -55,7 +56,7 @@
         response.sendRedirect("access.jsp");
 
       String keyID = BillingUtil.getKeyID();
-      String key = BillingUtil.getKey();
+      String key = BillinregUtil.getKey();
       String orderID = "";
       String amount = "1.00";
       String type = "auth";
@@ -164,7 +165,7 @@
       <input id="ccexp" type="hidden" value="" name="ccexp"/>
       <input id="customer_vault_id" type="hidden" value="<%= accountID %>" name="customer_vault_id" />
       <input id="customer_vault" type="hidden" value="<%= (account.isBillingInformationGiven() != null && account.isBillingInformationGiven()) ? "update_customer" : "add_customer" %>" name="customer_vault" />
-      <input id="redirect" type="hidden" value="https://localhost/app/billing/submit.jsp" name="redirect"/>
+      <input id="redirect" type="hidden" value="<%= ConfigLoader.instance().getRedirectLocation() %>/app/billing/submit.jsp" name="redirect"/>
       <input id="payment" type="hidden" value="creditcard" name="creditcard" />
       <input id="key_id" type="hidden" value="<%= keyID %>" name="key_id"/>
       <input id="orderid" type="hidden" value="<%= orderID %>" name="orderid"/>

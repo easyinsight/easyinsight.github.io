@@ -1,5 +1,7 @@
 package com.easyinsight.billing;
 
+import com.easyinsight.config.ConfigLoader;
+
 import java.security.NoSuchAlgorithmException;
 import java.security.MessageDigest;
 
@@ -12,11 +14,13 @@ import java.security.MessageDigest;
  */
 public class BillingUtil {
     public static String getKeyID() {
-        return "776320";
+        return ConfigLoader.instance().getBillingKeyID();
+//        return "776320";
     }
 
     public static String getKey() {
-        return "UVgCejU48ANga4mKF77WFXfm2yUve76W";
+        return ConfigLoader.instance().getBillingKey();
+//        return "UVgCejU48ANga4mKF77WFXfm2yUve76W";
     }
 
     public static String MD5Hash(String hashString) throws NoSuchAlgorithmException {

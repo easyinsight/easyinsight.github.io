@@ -1,6 +1,7 @@
 package com.easyinsight.users;
 
 import com.easyinsight.billing.BrainTreeBillingSystem;
+import com.easyinsight.config.ConfigLoader;
 
 import javax.persistence.*;
 import java.util.List;
@@ -326,8 +327,10 @@ public class Account {
             setAccountState(Account.ACTIVE);
         // the indirection here is to support invoice billingSystem later
         BrainTreeBillingSystem billingSystem = new BrainTreeBillingSystem();
-        billingSystem.setUsername("testapi");
-        billingSystem.setPassword("password1");
+//        billingSystem.setUsername("testapi");
+//        billingSystem.setPassword("password1");
+        billingSystem.setUsername(ConfigLoader.instance().getBillingUsername());
+        billingSystem.setPassword(ConfigLoader.instance().getBillingPassword());
         Map<String, String> params = billingSystem.billAccount(this.getAccountID(), this.monthlyCharge());
         if(!params.get("response").equals("1"))
             setAccountState(Account.DELINQUENT);

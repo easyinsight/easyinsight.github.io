@@ -21,6 +21,53 @@ public class ConfigLoader {
     private String databaseUserName;
     private String databasePassword;
 
+    private String billingUsername;
+    private String billingPassword;
+    private String billingKeyID;
+    private String billingKey;
+
+    public String getRedirectLocation() {
+        return redirectLocation;
+    }
+
+    public void setRedirectLocation(String redirectLocation) {
+        this.redirectLocation = redirectLocation;
+    }
+
+    private String redirectLocation;
+
+    public String getBillingKeyID() {
+        return billingKeyID;
+    }
+
+    public void setBillingKeyID(String billingKeyID) {
+        this.billingKeyID = billingKeyID;
+    }
+
+    public String getBillingPassword() {
+        return billingPassword;
+    }
+
+    public void setBillingPassword(String billingPassword) {
+        this.billingPassword = billingPassword;
+    }
+
+    public String getBillingUsername() {
+        return billingUsername;
+    }
+
+    public void setBillingUsername(String billingUsername) {
+        this.billingUsername = billingUsername;
+    }
+
+    public String getBillingKey() {
+        return billingKey;
+    }
+
+    public void setBillingKey(String billingKey) {
+        this.billingKey = billingKey;
+    }
+
     public Boolean isProduction() {
         return production;
     }
@@ -70,6 +117,13 @@ public class ConfigLoader {
             databaseName = (String) properties.get("database.name");
             databaseUserName = (String) properties.get("database.username");
             databasePassword = (String) properties.get("database.password");
+
+            billingUsername = (String) properties.get("billing.username");
+            billingPassword = (String) properties.get("billing.password");
+            billingKeyID = (String) properties.get("billing.keyid");
+            billingKey = (String) properties.get("billing.key");
+            redirectLocation = (String) properties.get("billing.redirectLocation");
+
             production = Boolean.valueOf((String) properties.get("production"));
             
         } catch (IOException e) {
