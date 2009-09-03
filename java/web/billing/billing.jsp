@@ -179,6 +179,7 @@
       </tr>
       <tr>
           <td>First Name:</td><td><input id="firstname" type="text" value="" name="firstname" style="width:16.5em" /><span>*</span></td>
+          <td>Last Name:</td><td><input id="lastname" type="text" value="" name="lastname" style="width:16.5em" /><span>*</span></td>
       </tr>
       <tr>
           <td>Address 1:</td><td> <input id="address1" type="text" value="" name="address1" style="width:16.5em" /><span>*</span></td>
