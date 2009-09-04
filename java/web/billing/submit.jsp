@@ -9,6 +9,7 @@
 <%@ page import="java.text.DateFormat" %>
 <%@ page import="java.util.*" %>
 <%@ page import="com.easyinsight.users.User" %>
+<%@ page import="com.easyinsight.users.AccountActivityStorage" %>
 <%--
   Created by IntelliJ IDEA.
   User: abaldwin
@@ -59,6 +60,13 @@
                 info.setTransactionTime(transTime);
                 account.getBillingInfo().add(info);
                 s.save(info);
+            } else {
+                Date trialEnd = new AccountActivityStorage().getTrialTime(account.getAccountID(), conn);
+                if(trialEnd != null && trialEnd.after(new Date()) && account.getBillingDayOfMonth() == null) {
+                    Calendar c = Calendar.getInstance();
+                    c.setTime(trialEnd);
+                    account.setBillingDayOfMonth(c.get(Calendar.DAY_OF_MONTH));
+                }
             }
             account.setAccountState(Account.ACTIVE);
             s.save(account);
