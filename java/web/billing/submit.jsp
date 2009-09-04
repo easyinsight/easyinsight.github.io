@@ -60,11 +60,14 @@
                 info.setTransactionTime(transTime);
                 account.getBillingInfo().add(info);
                 s.save(info);
+
             } else {
                 Date trialEnd = new AccountActivityStorage().getTrialTime(account.getAccountID(), conn);
+                System.out.println("Trial end date: " + trialEnd.toString());
                 if(trialEnd != null && trialEnd.after(new Date()) && account.getBillingDayOfMonth() == null) {
                     Calendar c = Calendar.getInstance();
                     c.setTime(trialEnd);
+                    System.out.println("Billing day of month: " + c.get(Calendar.DAY_OF_MONTH));
                     account.setBillingDayOfMonth(c.get(Calendar.DAY_OF_MONTH));
                 }
             }
