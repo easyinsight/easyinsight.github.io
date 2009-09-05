@@ -105,8 +105,8 @@ public class Account {
     @JoinColumn(name="account_id")
     private List<AccountCreditCardBillingInfo> billingInfo = new ArrayList<AccountCreditCardBillingInfo>();
 
-    private static final double GROUP_BILLING_AMOUNT = 100.00;
-    private static final double INDIVIDUAL_BILLING_AMOUNT = 10.00;
+    private static final double GROUP_BILLING_AMOUNT = 200.00;
+    private static final double INDIVIDUAL_BILLING_AMOUNT = 25.00;
 
     //private BillingParty billingParty;
 
