@@ -96,6 +96,14 @@ public class AnalysisDimension extends AnalysisItem {
         this.group = group;
     }
 
+    @Override
+    public void afterLoad() {
+        super.afterLoad();
+        if (keyDimension != null) {
+            keyDimension.afterLoad();
+        }
+    }
+
     public Value polishValue(Value value) {
         if (value.type() == Value.STRING) {
             StringValue stringValue = (StringValue) value;

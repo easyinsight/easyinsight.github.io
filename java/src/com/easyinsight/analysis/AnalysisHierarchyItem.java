@@ -41,6 +41,9 @@ public class AnalysisHierarchyItem extends AnalysisDimension {
                 }
             });
             hierarchyLevels = hierarchyLevelList;
+            for (HierarchyLevel hierarchyLevel : hierarchyLevels) {
+                hierarchyLevel.getAnalysisItem().afterLoad();
+            }
         }
     }
 

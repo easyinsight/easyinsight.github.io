@@ -63,12 +63,15 @@ public class AnalysisStep extends AnalysisDateDimension {
         super.afterLoad();
         if (startDate != null) {
             setStartDate((AnalysisDateDimension) Database.deproxy(getStartDate()));
+            getStartDate().afterLoad();
         }
         if (endDate != null) {
             setEndDate((AnalysisDateDimension) Database.deproxy(getEndDate()));
+            getEndDate().afterLoad();
         }
         if (correlationDimension != null) {
             setCorrelationDimension((AnalysisDimension) Database.deproxy(getCorrelationDimension()));
+            getCorrelationDimension().afterLoad();
         }
     }
 
