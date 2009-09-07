@@ -94,8 +94,7 @@
         <mapping class="com.easyinsight.analysis.PersistableFilterPatternDefinition"/>
         <mapping class="com.easyinsight.analysis.Link"/>
         <mapping class="com.easyinsight.analysis.URLLink"/>
-        <mapping class="com.easyinsight.analysis.DrillThrough"/>
-        <mapping class="com.easyinsight.analysis.DrillThroughPair"/>
+        <mapping class="com.easyinsight.analysis.DrillThrough"/>        
 
         <mapping class="com.easyinsight.scrubbing.DataScrub"/>
         <mapping class="com.easyinsight.scrubbing.LookupTableScrub"/>
