@@ -3,6 +3,9 @@
          paddingTop="10" paddingBottom="10"
          paddingRight="10" width="100%" height="100%" xmlns:mx="http://www.adobe.com/2006/mxml"
          xmlns:datasources="com.easyinsight.datasources.*" xmlns:analysis="com.easyinsight.analysis.*">
+    <mx:Metadata>
+        [Event(name="analysisItemCreated", type="com.easyinsight.analysis.AnalysisItemCreationEvent")]
+    </mx:Metadata>
     <mx:Script><![CDATA[
         import com.easyinsight.datasources.DataSourceInfo;
         import com.easyinsight.framework.DataService;
@@ -114,17 +117,12 @@
 
         private function onNewItem(event:AnalysisItemEditEvent):void {
             dispatchEvent(new AnalysisChangedEvent());
+            dispatchEvent(event);
             var node:AnalysisItemNode = new AnalysisItemNode();
             node.analysisItem = event.analysisItem;
             var wrapper:AnalysisItemWrapper = new AnalysisItemWrapper(node);
             availableFields.addItem(wrapper);
             wrappers.addItem(wrapper);
-            var sort:Sort = new Sort();
-            sort.fields = [ new SortField("displayName", false) ];
-            availableFields.sort = sort;
-            availableFields.refresh();
-            wrappers.sort = sort;
-            wrappers.refresh();
             if (analysisDefinition.addedItems == null) {
                 analysisDefinition.addedItems = new ArrayCollection();
             }
@@ -148,17 +146,12 @@
 
         private function newFieldCreated(event:AnalysisItemCreationEvent):void {
             dispatchEvent(new AnalysisChangedEvent());
+            dispatchEvent(event);
             var node:AnalysisItemNode = new AnalysisItemNode();
             node.analysisItem = event.analysisItem;
             var wrapper:AnalysisItemWrapper = new AnalysisItemWrapper(node);
             availableFields.addItem(wrapper);
             wrappers.addItem(wrapper);
-            var sort:Sort = new Sort();
-            sort.fields = [ new SortField("displayName", false) ];
-            availableFields.sort = sort;
-            availableFields.refresh();
-            wrappers.sort = sort;
-            wrappers.refresh();
             if (analysisDefinition.addedItems == null) {
                 analysisDefinition.addedItems = new ArrayCollection();
             }

@@ -85,6 +85,7 @@
         import com.easyinsight.util.ProgressAlert;
         import com.easyinsight.commands.CommandEvent;
 
+        import mx.utils.ObjectUtil;
         import mx.utils.URLUtil;
         import mx.managers.BrowserManager;
         import mx.controls.Alert;
@@ -367,17 +368,33 @@
                         availableFields.addItem(addedWrapper);
                         wrappers.addItem(addedWrapper);
                     }
-                    var sort:Sort = new Sort();
-                    sort.fields = [ new SortField("displayName", false) ];
-                    availableFields.sort = sort;
-                    availableFields.refresh();
-                    wrappers.sort = sort;
-                    wrappers.refresh();
+                    sortFields();
                 }
             }
             dataView.availableFields = wrappers;
             loading = false;
             stopLoading(null);
+        }
+
+        private function sortFields():void {
+            var sort:Sort = new Sort();
+            sort.compareFunction = customSort;
+            availableFields.sort = sort;
+            availableFields.refresh();
+            wrappers.sort = sort;
+            wrappers.refresh();
+        }
+
+        private function customSort(obj1:Object, obj2:Object, fields:Array = null):int {
+            var wrapper1:AnalysisItemWrapper = obj1 as AnalysisItemWrapper;
+            var wrapper2:AnalysisItemWrapper = obj2 as AnalysisItemWrapper;
+            if (wrapper1.isAnalysisItem() && !wrapper2.isAnalysisItem()) {
+                return 1;
+            } else if (!wrapper1.isAnalysisItem() && wrapper2.isAnalysisItem()) {
+                return -1;
+            } else {
+                return ObjectUtil.stringCompare(wrapper1.displayName, wrapper2.displayName);
+            }
         }
 
         public function deleteItem(item:AnalysisItem):void {
@@ -846,7 +863,7 @@
             <analysis:ReportMetadataTab id="reportMetadataTab" analysisDefinition="{analysisDefinition}" originSolution="{originSolution}"/>
             <analysis:ReportDataTab id="reportDataTab" analysisDefinition="{analysisDefinition}" dataService="{dataService}"
                     wrappers="{wrappers}" availableFields="{availableFields}" dataSourceInfo="{dataSourceInfo}"
-                    dataView="{dataView}"/>
+                    dataView="{dataView}" analysisItemCreated="sortFields()"/>
             <filtering:TransformContainer id="transformContainer" paddingLeft="10" paddingTop="10" paddingBottom="10"
                                           paddingRight="10" transformAdded="transformsUpdated(event)" label="Filters"
                                           icon="@Embed(source='../../../assets/funnel.png')"
@@ -858,7 +875,7 @@
                 <mx:Button id="excludeButton" icon="@Embed(source='../../../assets/funnel_delete.png')"
                            toolTip="Exclude Data" click="exclude()"/>
             </filtering:TransformContainer>
-            <analysis:ExportTab analysisDefinition="{analysisDefinition}"/>
+            <analysis:ExportTab analysisDefinition="{analysisDefinition}" dataView="{dataView}"/>
         </mx:TabNavigator>
 
         <mx:HDividedBox id="hbox1" height="100%" width="100%">

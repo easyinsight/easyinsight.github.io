@@ -53,7 +53,7 @@
         <mx:FormItem label="Highrise Path: " direction="horizontal" fontWeight="bold" fontFamily="Tahoma">
 			<mx:TextInput id="urlInput" fontWeight="normal" fontFamily="Lucida Grande" text="{url}"/>
 		</mx:FormItem>
-        <mx:FormItem label="Example: easyinsight for easyinsight.basecamphq.com" fontSize="10"/>
+        <mx:FormItem label="Example: easyinsight for easyinsight.highrisehq.com" fontSize="10"/>
 		<mx:FormItem label="User Name: " direction="horizontal" fontWeight="bold" fontFamily="Tahoma">
 			<mx:TextInput id="userNameInput" fontWeight="normal" fontFamily="Lucida Grande" text="{usernameInputText}"/>
 		</mx:FormItem>

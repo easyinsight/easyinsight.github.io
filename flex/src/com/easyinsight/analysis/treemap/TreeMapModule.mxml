@@ -5,7 +5,8 @@
         <mx:State name="hasData">
             <mx:AddChild relativeTo="{box}">
                 <ilog:TreeMap id="treeMap" width="100%" height="100%" areaField="area" labelField="label" colorField="color" algorithm="squarified"
-                    dataProvider="{resultData}" labelThreshold="2" colorScheme="{colorScheme}" borderThickness="1"/>
+                    dataProvider="{resultData}" labelThreshold="2" colorScheme="{colorScheme}" borderThickness="1" itemRollOver="onover(event)" itemRollOut="onout(event)"
+                        itemClick="onClick(event)"/>
             </mx:AddChild>
         </mx:State>
     </mx:states>
@@ -17,13 +18,42 @@ import com.easyinsight.analysis.AnalysisMeasure;
         import com.easyinsight.analysis.HierarchyLevel;
         import com.easyinsight.filtering.FilterRawData;
 
+        import ilog.treemap.TreeMapEvent;
+
         import mx.collections.ArrayCollection;
+        import mx.controls.ToolTip;
+        import mx.managers.ToolTipManager;
+
+        private function onClick(event:TreeMapEvent):void {
+            var item:Object = event.item;
+            
+        }
 
         [Bindable]
         private var resultData:ArrayCollection;
 
         [Bindable]
         private var colorScheme:String = "depth";
+
+public var tooltip:ToolTip;
+
+public function onover(event:TreeMapEvent):void {
+     if (event.item) {
+       tooltip =
+         ToolTipManager.createToolTip(event.item.@label,
+           MouseEvent(event.triggerEvent).stageX,
+           MouseEvent(event.triggerEvent).stageY)
+       as ToolTip;
+     }
+   }
+
+   public function onout(event:TreeMapEvent):void {
+     if (tooltip) {
+       ToolTipManager.destroyToolTip(tooltip);
+       tooltip = null;
+     }
+   }
+
 
         private function handleLevel(level:HierarchyLevel, levels:ArrayCollection, row:Object, measure1:AnalysisMeasure, measure2:AnalysisMeasure, masterResult:Object):Object {
             var value:Object = row[level.analysisItem.qualifiedName()];

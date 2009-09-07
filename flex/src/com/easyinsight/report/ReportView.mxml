@@ -440,6 +440,10 @@
             _showMetadata = value;
         }
 
+        private function reportNavigation(event:ReportNavigationEvent):void {
+            dispatchEvent(new ModuleAnalyzeEvent(new ReportAnalyzeSource(event.descriptor)));
+        }
+
         override protected function createChildren():void {
             super.createChildren();
             if (_showLogo) {
@@ -479,6 +483,7 @@
             viewFactory.addEventListener(EmbeddedDataServiceEvent.DATA_RETURNED, gotData);
             viewFactory.addEventListener(DataServiceLoadingEvent.LOADING_STARTED, dataLoadingEvent);
             viewFactory.addEventListener(DataServiceLoadingEvent.LOADING_STOPPED, dataLoadingEvent);
+            viewFactory.addEventListener(ReportNavigationEvent.TO_REPORT, reportNavigation);
             if (!_embedded) {
                 progressBar.visible = true;
             }

@@ -45,7 +45,7 @@
             }
 		]]>
 	</mx:Script>
-	<mx:VBox styleName="TitleWindowContents" id="editorFormItem">			
+	<mx:VBox styleName="TitleWindowContents" id="editorFormItem" width="100%" height="100%">			
 		<mx:HBox width="100%" horizontalAlign="center">
 			<mx:Button label="Save" click="save()" id="saveButton"/>
 			<mx:Button label="Cancel" click="cancel()"/>

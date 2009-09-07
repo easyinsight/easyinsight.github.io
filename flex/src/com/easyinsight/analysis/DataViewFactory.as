@@ -248,6 +248,7 @@ public class DataViewFactory extends VBox {
     }
 
     public function updateExportMetadata():void {
+        _reportRenderer.updateExportMetadata();
     }
 
     public function getCoreView():DisplayObject {

@@ -22,7 +22,7 @@ import mx.formatters.Formatter;
 		public var displayName:String;
         public var width:int = 0;
         public var virtualDimension:VirtualDimension;
-        public var links:ArrayCollection;
+        public var links:ArrayCollection = new ArrayCollection();
 		
 		public function AnalysisItem() {
 			super();

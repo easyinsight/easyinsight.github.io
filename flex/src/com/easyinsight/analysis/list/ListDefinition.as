@@ -11,6 +11,7 @@ import mx.collections.ArrayCollection;
 		public var listDefinitionID:int;
 		public var showLineNumbers:Boolean;
 		public var listLimitsMetadata:ListLimitsMetadata;
+        public var summarizeAll:Boolean;
 		
 		public function ListDefinition()
 		{

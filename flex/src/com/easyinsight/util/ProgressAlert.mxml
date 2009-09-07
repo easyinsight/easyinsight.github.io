@@ -1,6 +1,6 @@
 <?xml version="1.0" ?>
 <mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" backgroundColor="#D8DBEE" borderThickness="1" borderStyle="solid" borderColor="0x000000"
-           cornerRadius="15" dropShadowEnabled="true">
+           cornerRadius="15" dropShadowEnabled="true" addedToStage="setupListeners()">
     <mx:states>
         <mx:State name="Done">
             <mx:RemoveChild target="{progressBox}"/>
@@ -32,6 +32,20 @@
         import mx.rpc.events.ResultEvent;
         import mx.rpc.remoting.Operation;
 
+        private function onKey(event:KeyboardEvent):void {
+            if (event.keyCode == Keyboard.ESCAPE) {
+                cancel();
+            } else if (event.keyCode == Keyboard.ENTER) {
+                if (currentState == "Done") {
+                    complete();
+                }
+            }
+        }
+
+        private function setupListeners():void {
+            stage.addEventListener(KeyboardEvent.KEY_UP, onKey);
+        }
+
         private var _progressText:String;
         private var _completeText:String;
         [Bindable]
@@ -46,6 +60,7 @@
         private var failed:Boolean;
 
         private function cancel():void {
+            stage.removeEventListener(KeyboardEvent.KEY_UP, onKey);
             for each (var operation:Operation in _operations) {
                 operation.removeEventListener(ResultEvent.RESULT, onResult);
                 operation.removeEventListener(FaultEvent.FAULT, onFault);
@@ -54,6 +69,7 @@
         }
 
         private function complete():void {
+            stage.removeEventListener(KeyboardEvent.KEY_UP, onKey);
             for each (var operation:Operation in _operations) {
                 operation.removeEventListener(ResultEvent.RESULT, onResult);
                 operation.removeEventListener(FaultEvent.FAULT, onFault);

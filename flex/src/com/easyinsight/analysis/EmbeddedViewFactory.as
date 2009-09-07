@@ -4,6 +4,8 @@ import com.easyinsight.analysis.service.EmbeddedDataService;
 import com.easyinsight.framework.DataServiceLoadingEvent;
 import com.easyinsight.report.AbstractViewFactory;
 
+import com.easyinsight.report.ReportNavigationEvent;
+
 import flash.display.DisplayObject;
 import mx.controls.Alert;
 import mx.events.ModuleEvent;
@@ -104,11 +106,16 @@ public class EmbeddedViewFactory extends AbstractViewFactory {
         _reportRenderer.addEventListener(ReportRendererEvent.FORCE_RENDER, forceRender);
         _reportRenderer.addEventListener(HierarchyDrilldownEvent.DRILLDOWN, drilldown);
         _reportRenderer.addEventListener(HierarchyRollupEvent.HIERARCHY_ROLLUP, onRollup);
+        _reportRenderer.addEventListener(ReportNavigationEvent.TO_REPORT, toReport);
         addChild(_reportRenderer as DisplayObject);
         if (pendingRequest) {
             pendingRequest = false;
             retrieveData(false);
         }
+    }
+
+    private function toReport(event:ReportNavigationEvent):void {
+        dispatchEvent(event);
     }
 
     private function onRollup(event:HierarchyRollupEvent):void {

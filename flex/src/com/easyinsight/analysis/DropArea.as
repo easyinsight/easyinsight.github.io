@@ -9,8 +9,6 @@ import flash.display.BitmapData;
 import flash.events.ContextMenuEvent;
 import flash.events.KeyboardEvent;
 import flash.events.MouseEvent;
-import flash.geom.Point;
-import flash.ui.ContextMenu;
 import flash.ui.ContextMenuItem;
 import flash.ui.Keyboard;
 

@@ -4,18 +4,23 @@ package com.easyinsight.analysis
 
 import com.easyinsight.detail.DataDetailEvent;
 import com.easyinsight.filtering.FilterRawData;
-    import flash.events.ContextMenuEvent;
+import com.easyinsight.report.ReportNavigationEvent;
+
+import flash.events.ContextMenuEvent;
     import flash.events.MouseEvent;
 	import flash.net.URLRequest;
 
     import flash.system.System;
     import flash.ui.ContextMenu;
+import flash.ui.ContextMenuItem;
+
 import mx.controls.Label;
     import mx.controls.listClasses.IListItemRenderer;
     import mx.events.FlexEvent;
     import mx.formatters.Formatter;
+import mx.managers.CursorManager;
 
-	public class AnalysisCellRenderer extends Label implements IListItemRenderer
+public class AnalysisCellRenderer extends Label implements IListItemRenderer
 	{
 		private var _data:Object;
 		private var URL:String;
@@ -29,6 +34,8 @@ import mx.controls.Label;
 
         [Bindable]
         private var listContextMenu:ContextMenu;
+
+        private var lookupObj:Object = new Object();
 
 		//private var defaultLabel:Label;
 		//private var linkButton:LinkButton;
@@ -54,8 +61,61 @@ import mx.controls.Label;
                     rollupFunction = onRollup;
                 }
             }
-            PopupMenuFactory.menuFactory.createListMenu(copySelected, details,
-                    drilldownFunction, rollupFunction, this);
+            lookupObj = new Object();
+            var items:Array = [];
+            if (drilldownFunction != null) {
+                var drilldownContextItem:ContextMenuItem = new ContextMenuItem("Drilldown", true);
+                drilldownContextItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, drilldownFunction);
+                items.push(drilldownContextItem);
+            }
+            if (rollupFunction != null) {
+                var rollupContextItem:ContextMenuItem = new ContextMenuItem("Rollup", true);
+                rollupContextItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, rollupFunction);
+                items.push(rollupContextItem);
+            }
+            var copyContextItem:ContextMenuItem = new ContextMenuItem("Copy Cell", true);
+            copyContextItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, copySelected);
+            items.push(copyContextItem);
+
+            if (_analysisItem.links.length > 0) {
+                for each (var link:Link in _analysisItem.links) {
+                    if (link is URLLink) {
+                        var url:URLLink = link as URLLink;
+                        var urlContextItem:ContextMenuItem = new ContextMenuItem(url.label, true);
+                        lookupObj[url.label] = url;
+                        urlContextItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, urlClick);
+                        items.push(urlContextItem);
+                    } else if (link is DrillThrough) {
+                        var drillThrough:DrillThrough = link as DrillThrough;
+                        var drillContextItem:ContextMenuItem = new ContextMenuItem(drillThrough.label, true);
+                        lookupObj[drillThrough.label] = drillThrough;
+                        drillContextItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, drillthroughClick);
+                        items.push(drillContextItem);
+                    }
+                }
+            }
+
+            PopupMenuFactory.menuFactory.assignMenu(this, items);
+
+        }
+
+        private function drillthroughClick(event:ContextMenuEvent):void {
+            var contextItem:ContextMenuItem = event.currentTarget as ContextMenuItem;
+            var drillThrough:DrillThrough = lookupObj[contextItem.caption] as DrillThrough;
+            var executor:DrillThroughExecutor = new DrillThroughExecutor(drillThrough.reportID);
+            executor.addEventListener(ReportNavigationEvent.TO_REPORT, onReport);
+            executor.send();
+        }
+
+        private function onReport(event:ReportNavigationEvent):void {
+            dispatchEvent(event);
+        }
+
+        private function urlClick(event:ContextMenuEvent):void {
+            var contextItem:ContextMenuItem = event.currentTarget as ContextMenuItem;
+            var link:URLLink = lookupObj[contextItem.caption] as URLLink;
+            var url:String = link.url;
+            flash.net.navigateToURL(new URLRequest(url), "_blank");
         }
 
         private function onDrilldown(event:ContextMenuEvent):void {
@@ -75,17 +135,20 @@ import mx.controls.Label;
             System.setClipboard(text);
         }
 
+        [Embed(source="../../../../assets/gear.png")]
+        private var gearIcon:Class;
+
         private function onMouseOver(event:MouseEvent):void {
-            if (linkable && event.ctrlKey && !linkShowing) {
-                setStyle("textDecoration", "underline");
+            if (!linkShowing) {
                 linkShowing = true;
+                CursorManager.setCursor(gearIcon);
             }
         }
 
         private function onMouseOut(event:MouseEvent):void {
             if (linkShowing) {
-                setStyle("textDecoration", "none");
                 linkShowing = false;
+                CursorManager.removeAllCursors();
             }
         }
 

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<mx:Box xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*" width="100%" height="100%"
+<mx:Box xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*" width="500" height="400"
         xmlns:analysis="com.easyinsight.analysis.*"
         creationComplete="initStuff()" creationPolicy="all" xmlns:formatter="com.easyinsight.analysis.formatter.*"
         implements="com.easyinsight.analysis.IAnalysisItemEditor">
@@ -86,11 +86,14 @@
     </mx:states>
     <mx:Script>
 		<![CDATA[
+        import com.easyinsight.util.PopUpUtil;
+
         import mx.events.DropdownEvent;
 
         import com.easyinsight.analysis.options.OptionFactory;
 
         import mx.collections.ArrayCollection;
+        import mx.managers.PopUpManager;
 
         [Bindable]
         private var links:ArrayCollection;
@@ -154,6 +157,7 @@
             this.displayName = analysisItem.display;
             this.key = analysisItem.key;
             this.hidden = analysisItem.hidden;
+            this.links = analysisItem.links;
         }
 
         private function indexOfType(option:String):int {
@@ -195,6 +199,8 @@
             }
             focusManager.setFocus(fieldNameInput);
             addEventListener(KeyboardEvent.KEY_UP, keyedComplete);
+            addEventListener(LinkMetadataEvent.LINK_EDITED, onLinkUpdate);
+            addEventListener(LinkMetadataEvent.LINK_DELETED, onLinkDelete);
         }
 
         private function keyedComplete(event:KeyboardEvent):void {
@@ -228,7 +234,7 @@
             analysisItem.displayName = fieldNameInput.text;
             analysisItem.key = key;
             analysisItem.hidden = hiddenCheckbox.selected;
-
+            analysisItem.links = links;
             detailEditor.save(analysisItem);
             return analysisItem;
         }
@@ -288,9 +294,30 @@
             }
             aggregationChange(aggregationTypeObjects.getItemAt(0) as String);
         }
+
+        private function addLink():void {
+            var window:LinkWindow = new LinkWindow();
+            window.addEventListener(LinkMetadataEvent.LINK_DEFINED, onLinkSave);
+            PopUpManager.addPopUp(window, this, true);
+            PopUpUtil.centerPopUp(window);
+        }
+
+        private function onLinkSave(event:LinkMetadataEvent):void {
+            links.addItem(event.link);
+        }
+
+        private function onLinkUpdate(event:LinkMetadataEvent):void {
+            links.removeItemAt(links.getItemIndex(event.previousLink));
+            links.addItem(event.link);
+        }
+
+        private function onLinkDelete(event:LinkMetadataEvent):void {
+            links.removeItemAt(links.getItemIndex(event.link));
+        }
         ]]>
     </mx:Script>
-    <mx:VBox>
+    <mx:TabNavigator creationPolicy="all" width="100%" height="100%">
+    <mx:VBox label="Item" width="100%" height="100%" horizontalAlign="center">
         <mx:ToggleButtonBar id="toggleBar" itemClick="toggleClick()">
             <mx:dataProvider>
                 <mx:Array>
@@ -312,13 +339,19 @@
                              close="aggregationTypeChanged(event)" rowCount="9"/>
             </mx:FormItem>
         </mx:Form>
-        <mx:DataGrid dataProvider="{links}">
+
+    </mx:VBox>
+        <mx:VBox label="Links" width="100%" height="100%">
+            <mx:Button label="Add Link..." click="addLink()"/>
+        <mx:DataGrid dataProvider="{links}" width="100%">
             <mx:columns>
                 <util:EIDataGridColumn headerText="Link Name" dataField="label"/>
-                <util:EIDataGridColumn headerText="Link Type" dataField="linkType"/>
-                <util:EIDataGridColumn headerText="" sortable="false"/>
+                <util:EIDataGridColumn headerText="Link Type" dataField="type"/>
+                <util:EIDataGridColumn headerText="" sortable="false" dataField="label" itemRenderer="com.easyinsight.analysis.LinkControls"
+                        width="100"/>
             </mx:columns>
         </mx:DataGrid>
-    </mx:VBox>
+        </mx:VBox>
+    </mx:TabNavigator>
     <mx:StringValidator id="nameValidator" source="{fieldNameInput}" property="text" minLength="3"/>
 </mx:Box>

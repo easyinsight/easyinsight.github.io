@@ -1,0 +1,109 @@
+<?xml version="1.0" ?>
+<util:EITitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*"
+        creationComplete="analysisService.getInsightDescriptors.send()">
+    <mx:Script><![CDATA[
+        import com.easyinsight.solutions.InsightDescriptor;
+
+        import mx.collections.ArrayCollection;
+        import mx.managers.PopUpManager;
+
+        private function gotReports():void {
+            this.reports = analysisService.getInsightDescriptors.lastResult as ArrayCollection;
+            if (reportID > 0) {
+                for each (var desc:InsightDescriptor in reports) {
+                    if (desc.id == reportID) {
+                        reportChooser.selectedItem = desc;
+                        break;
+                    }
+                }
+            }
+        }
+
+        private var _link:Link;
+
+        [Bindable]
+        private var typeValue:String = "URL";
+
+        [Bindable]
+        private var urlText:String;
+
+        [Bindable]
+        private var reports:ArrayCollection;
+
+        private var linkID:int;
+
+        [Bindable]
+        private var linkLabel:String;
+
+        private var reportID:int;
+
+        public function set link(value:Link):void {
+            _link = value;
+            if (value != null) {
+                typeValue = _link.type;
+                linkLabel = _link.label;
+                linkID = _link.linkID;
+                if (typeValue == "URL") {
+                    var urlLink:URLLink = _link as URLLink;
+                    urlText = urlLink.url;
+                } else if (typeValue == "Drillthrough") {
+                    var drillthrough:DrillThrough = _link as DrillThrough;
+                    reportID = drillthrough.reportID;
+                }
+            }
+        }
+
+        private function save():void {
+            var firstLink:Link = _link;
+            if (typeGroup.selectedValue == "URL") {
+                var urlLink:URLLink = new URLLink();
+                urlLink.url = urlInput.text;
+                _link = urlLink;
+            } else {
+                var drillThrough:DrillThrough = new DrillThrough();
+                drillThrough.reportID = reportChooser.selectedItem.id;
+                _link = drillThrough;
+            }
+            _link.linkID = linkID;
+            _link.label = labelInput.text;
+            if (firstLink == null) {
+                dispatchEvent(new LinkMetadataEvent(LinkMetadataEvent.LINK_DEFINED, _link));
+            } else {
+                dispatchEvent(new LinkMetadataEvent(LinkMetadataEvent.LINK_EDITED, _link, firstLink));
+            }
+            PopUpManager.removePopUp(this);
+        }
+        ]]></mx:Script>
+    <mx:RemoteObject destination="analysisDefinition" id="analysisService">
+        <mx:method name="getInsightDescriptors" result="gotReports()"/>
+    </mx:RemoteObject>
+    <mx:VBox>
+    <mx:RadioButtonGroup id="typeGroup" selectedValue="{typeValue}"/>
+    <mx:HBox>
+        <mx:RadioButton group="{typeGroup}" label="URL" value="URL" click="viewStack.selectedIndex = 0"/>
+        <mx:RadioButton group="{typeGroup}" label="Drillthrough" value="Drillthrough" click="viewStack.selectedIndex = 1"/>
+    </mx:HBox>
+    <mx:HBox>
+        <mx:Label text="Label: " width="100"/>
+        <mx:TextInput id="labelInput" text="{linkLabel}" width="100%"/>
+    </mx:HBox>
+    <mx:ViewStack id="viewStack" width="100%" height="100%" resizeToContent="true">
+        <mx:VBox>
+            <mx:HBox>
+                <mx:Label text="URL: " width="100"/>
+                <mx:TextInput id="urlInput" text="{urlText}" width="100%"/>
+            </mx:HBox>
+        </mx:VBox>
+        <mx:VBox>
+            <mx:HBox>
+                <mx:Label text="Target Report:" width="100"/>
+                <mx:ComboBox id="reportChooser" dataProvider="{reports}" labelField="name"/>
+            </mx:HBox>
+        </mx:VBox>
+    </mx:ViewStack>
+    <mx:HBox>
+        <mx:Button label="Save" click="save()"/>
+        <mx:Button label="Cancel" click="PopUpManager.removePopUp(this)"/>
+    </mx:HBox>
+    </mx:VBox>
+</util:EITitleWindow>
