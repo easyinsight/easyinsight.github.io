@@ -40,7 +40,7 @@ public var tooltip:ToolTip;
 public function onover(event:TreeMapEvent):void {
      if (event.item) {
        tooltip =
-         ToolTipManager.createToolTip(event.item.@label,
+         ToolTipManager.createToolTip(event.item.label,
            MouseEvent(event.triggerEvent).stageX,
            MouseEvent(event.triggerEvent).stageY)
        as ToolTip;

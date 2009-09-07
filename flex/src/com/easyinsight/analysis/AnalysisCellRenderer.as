@@ -42,8 +42,8 @@ public class AnalysisCellRenderer extends Label implements IListItemRenderer
 		
 		public function AnalysisCellRenderer() {
 			super();
-            addEventListener(MouseEvent.MOUSE_OVER, onMouseOver);
-            addEventListener(MouseEvent.MOUSE_OUT, onMouseOut);
+            //addEventListener(MouseEvent.MOUSE_OVER, onMouseOver);
+            //addEventListener(MouseEvent.MOUSE_OUT, onMouseOut);
             addEventListener(MouseEvent.CLICK, onClick);
 		}
 
@@ -138,7 +138,7 @@ public class AnalysisCellRenderer extends Label implements IListItemRenderer
         [Embed(source="../../../../assets/gear.png")]
         private var gearIcon:Class;
 
-        private function onMouseOver(event:MouseEvent):void {
+        /*private function onMouseOver(event:MouseEvent):void {
             if (!linkShowing) {
                 linkShowing = true;
                 CursorManager.setCursor(gearIcon);
@@ -150,7 +150,7 @@ public class AnalysisCellRenderer extends Label implements IListItemRenderer
                 linkShowing = false;
                 CursorManager.removeAllCursors();
             }
-        }
+        }*/
 
         private function onRollup(event:ContextMenuEvent):void {
             var hierarchyItem:AnalysisHierarchyItem = _analysisItem as AnalysisHierarchyItem;
