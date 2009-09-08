@@ -39,7 +39,14 @@ public class URLTests extends TestCase {
         row.addValue("Location", "biz");
         row.addValue("Feed ID", "2");
         String url = URLPattern.getURL("http://www.[easy]-insight.[Location]/app#feedid=[Feed ID]", row);
-        Assert.assertEquals("http://www.easy-insight.biz/app#feedid=2", url);
+        Assert.assertEquals("http://www.[easy]-insight.biz/app#feedid=2", url);
+    }
+
+    public void testURLOnly() {
+        Row row = new Row();
+        row.addValue("URL", "http://www.easy-insight.com/app");
+        String url = URLPattern.getURL("[URL]", row);
+        Assert.assertEquals("http://www.easy-insight.com/app", url);
     }
 
 }

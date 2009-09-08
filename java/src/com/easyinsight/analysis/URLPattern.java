@@ -41,12 +41,16 @@ public class URLPattern {
         Matcher m = keyPattern.matcher(pattern);
         String[] fragments = pattern.split(patternStr);
         int i = 0;
-        StringBuilder sb = new StringBuilder(fragments[i++]);
+        StringBuilder sb = null;
+        if(i < fragments.length)
+             sb = new StringBuilder(fragments[i++]);
+        else
+            sb = new StringBuilder();
         while(m.find()) {
-            String s = m.group();
-            s = s.substring(1, s.length() - 1).trim();
-            if(row.getValue(values.get(s)) == null) {
-                // TODO: throw an exception here?
+            String t = m.group();
+            String s = t.substring(1, t.length() - 1).trim();
+            if(values.get(s) == null) {
+                sb.append(t);
             }
             sb.append(row.getValue(values.get(s)).toString());
             if(i < fragments.length)
