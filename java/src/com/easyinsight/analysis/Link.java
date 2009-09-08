@@ -1,6 +1,11 @@
 package com.easyinsight.analysis;
 
+import com.easyinsight.core.Key;
+import com.easyinsight.calculations.Resolver;
+
 import javax.persistence.*;
+import java.util.List;
+import java.util.ArrayList;
 
 /**
  * User: jamesboe
@@ -42,5 +47,17 @@ public class Link implements Cloneable {
 
     public void setLabel(String label) {
         this.label = label;
+    }
+
+    public List<Key> neededKeys(Resolver resolver) {
+        return new ArrayList<Key>();
+    }
+
+    public boolean generatesURL() {
+        return false;
+    }
+
+    public String generateLink(IRow row) {
+        throw new UnsupportedOperationException();
     }
 }

@@ -2,6 +2,10 @@ package com.easyinsight.pipeline;
 
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.analysis.*;
+import com.easyinsight.core.Value;
+
+import java.util.Map;
+import java.util.HashMap;
 
 /**
  * User: jamesboe
@@ -13,14 +17,20 @@ public class LinkDecorationComponent implements IComponent {
 
     public DataSet apply(DataSet dataSet, PipelineData pipelineData) {
         for (AnalysisItem analysisItem : pipelineData.getReportItems()) {
-            /*if (analysisItem.getUrlPattern() != null && analysisItem.getUrlPattern().length() > 0) {
-                // compile the pattern
-                // retrieve the value for each row, annotate
-                for (IRow row : dataSet.getRows()) {
-
+            for (Link link : analysisItem.getLinks()) {
+                if (link.generatesURL()) {
+                    for (IRow row : dataSet.getRows()) {
+                        String url = link.generateLink(row);
+                        Value value = row.getValue(analysisItem.createAggregateKey());
+                        Map<String, String> links = value.getLinks();
+                        if (links == null) {
+                            links = new HashMap<String, String>();
+                            value.setLinks(links);
+                        }
+                        links.put(link.getLabel(), url);
+                    }
                 }
-            }*/
-
+            }
         }
 
         return dataSet;

@@ -3,6 +3,7 @@ package com.easyinsight.core;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.Serializable;
+import java.util.Map;
 
 /**
  * User: James Boe
@@ -19,14 +20,14 @@ public abstract class Value implements Serializable {
 
     // in theory, we have URL, we have image
 
-    private String url;
+    private Map<String, String> links;
 
-    public String getUrl() {
-        return url;
+    public Map<String, String> getLinks() {
+        return links;
     }
 
-    public void setUrl(String url) {
-        this.url = url;
+    public void setLinks(Map<String, String> links) {
+        this.links = links;
     }
 
     public abstract int type();

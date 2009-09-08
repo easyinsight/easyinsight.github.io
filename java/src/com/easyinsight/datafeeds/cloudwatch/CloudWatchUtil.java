@@ -69,11 +69,12 @@ public class CloudWatchUtil {
         }
         params.put("Namespace", "AWS/EC2");
         params.put("Period", "3600");
-        if (analysisMeasure.getAggregation() == AggregationTypes.AVERAGE) {
+        params.put("Statistics.member.1", "Average");
+        /*if (analysisMeasure.getAggregation() == AggregationTypes.AVERAGE) {
             params.put("Statistics.member.1", "Average");
         } else {
             params.put("Statistics.member.1", "Sum");
-        }
+        }*/
         params.put("MeasureName", analysisMeasure.getKey().toKeyString());
         params.put("SignatureMethod", "HmacSHA256");
         params.put("SignatureVersion", "2");

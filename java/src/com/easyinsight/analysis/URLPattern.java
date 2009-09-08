@@ -56,7 +56,11 @@ public class URLPattern {
             if(i < fragments.length)
                 sb.append(fragments[i++]);
         }
-        return sb.toString();
+        String urlString = sb.toString();
+        if (!urlString.startsWith("http")) {
+            urlString = "http://" + urlString;
+        }
+        return urlString;
     }
 
 }

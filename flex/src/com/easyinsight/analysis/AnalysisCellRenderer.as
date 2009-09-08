@@ -14,11 +14,12 @@ import flash.events.ContextMenuEvent;
     import flash.ui.ContextMenu;
 import flash.ui.ContextMenuItem;
 
+
 import mx.controls.Label;
     import mx.controls.listClasses.IListItemRenderer;
     import mx.events.FlexEvent;
     import mx.formatters.Formatter;
-import mx.managers.CursorManager;
+
 
 public class AnalysisCellRenderer extends Label implements IListItemRenderer
 	{
@@ -114,7 +115,8 @@ public class AnalysisCellRenderer extends Label implements IListItemRenderer
         private function urlClick(event:ContextMenuEvent):void {
             var contextItem:ContextMenuItem = event.currentTarget as ContextMenuItem;
             var link:URLLink = lookupObj[contextItem.caption] as URLLink;
-            var url:String = link.url;
+            var url:String = data[link.label + "_link"];
+
             flash.net.navigateToURL(new URLRequest(url), "_blank");
         }
 

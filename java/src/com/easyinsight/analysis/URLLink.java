@@ -1,9 +1,14 @@
 package com.easyinsight.analysis;
 
+import com.easyinsight.core.Key;
+import com.easyinsight.calculations.Resolver;
+
 import javax.persistence.Entity;
 import javax.persistence.Table;
 import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Column;
+import java.util.List;
+import java.util.ArrayList;
 
 /**
  * User: jamesboe
@@ -23,5 +28,25 @@ public class URLLink extends Link {
 
     public void setUrl(String url) {
         this.url = url;
+    }
+
+    public List<Key> neededKeys(Resolver resolver) {
+        List<String> keyString = URLPattern.getKeys(url);
+        List<Key> keys = new ArrayList<Key>();
+        for (String string : keyString) {
+            Key key = resolver.getKey(string);
+            if (key != null) {
+                keys.add(key);
+            }
+        }
+        return keys;
+    }
+
+    public boolean generatesURL() {
+        return true;
+    }
+
+    public String generateLink(IRow row) {
+        return URLPattern.getURL(url, row);
     }
 }

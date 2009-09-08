@@ -4,10 +4,7 @@ package com.easyinsight.analysis;
 import javax.persistence.*;
 import javax.persistence.Entity;
 import javax.persistence.Table;
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Map;
+import java.util.*;
 import java.io.Serializable;
 
 import com.easyinsight.core.Key;
@@ -16,6 +13,7 @@ import com.easyinsight.core.Value;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.datafeeds.FeedNode;
 import com.easyinsight.datafeeds.AnalysisItemNode;
+import com.easyinsight.calculations.Resolver;
 import org.hibernate.Session;
 
 /**
@@ -242,6 +240,32 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
     public List<AnalysisItem> getAnalysisItems(List<AnalysisItem> allItems, Collection<AnalysisItem> insightItems) {
         List<AnalysisItem> items = new ArrayList<AnalysisItem>();
         items.add(this);
+        return items;
+    }
+
+    public List<AnalysisItem> addLinkItems(List<AnalysisItem> allItems, Collection<AnalysisItem> insightItems) {
+        List<AnalysisItem> items = new ArrayList<AnalysisItem>();
+        if (getLinks().size() > 0) {
+            Map<Key, AnalysisItem> map = new HashMap<Key, AnalysisItem>();
+            for (AnalysisItem analysisItem : allItems) {
+                map.put(analysisItem.getKey(), analysisItem);
+            }
+            Resolver resolver = new Resolver(allItems);
+            for (Link link : getLinks()) {
+                List<Key> keys = link.neededKeys(resolver);
+                //Set<Key> keys = variableVisitor.getVariableList();
+                for (Key key : keys) {
+                    AnalysisItem analysisItem = map.get(key);
+                    boolean alreadyInInsight = false;
+                    for (AnalysisItem insightItem : insightItems) {
+                        if (insightItem.getKey().equals(analysisItem.getKey())) {
+                            alreadyInInsight = true;
+                        }
+                    }
+                    if (!alreadyInInsight) items.add(analysisItem);
+                }
+            }
+        }
         return items;
     }
 

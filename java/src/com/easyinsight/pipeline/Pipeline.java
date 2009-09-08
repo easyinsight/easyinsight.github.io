@@ -35,6 +35,7 @@ public abstract class Pipeline {
         for (AnalysisItem item : allRequestedAnalysisItems) {
             if (item.isValid()) {
                 allNeededAnalysisItems.addAll(item.getAnalysisItems(dataSource.getFields(), allRequestedAnalysisItems));
+                allNeededAnalysisItems.addAll(item.addLinkItems(dataSource.getFields(), allRequestedAnalysisItems));
                 if (item.isVirtual()) {
                     allNeededAnalysisItems.add(item);
                 }

@@ -4,6 +4,9 @@ package com.easyinsight.analysis
 	[RemoteClass(alias="com.easyinsight.core.Value")]
 	public class Value
 	{
+
+        public var links:Object;
+
 		public function Value()
 		{
 		}

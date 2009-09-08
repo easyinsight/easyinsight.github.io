@@ -285,6 +285,10 @@ public abstract class WSAnalysisDefinition implements Serializable {
                         columnSet.add(item);
                     //}
                 }
+                List<AnalysisItem> linkItems = analysisItem.addLinkItems(allItems, analysisItems);
+                for (AnalysisItem item : linkItems) {
+                    columnSet.add(item);
+                }
             }
         }
         if (getFilterDefinitions() != null) {

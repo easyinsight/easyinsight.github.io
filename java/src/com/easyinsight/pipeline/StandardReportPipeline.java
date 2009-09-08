@@ -43,7 +43,7 @@ public class StandardReportPipeline extends Pipeline {
         components.add(new LinkDecorationComponent());
         components.add(new FilterComponent(false));
         components.add(new FilterPipelineCleanupComponent());
-        components.add(new AggregationComponent());
+        //components.add(new AggregationComponent());
         components.add(new LimitsComponent());
         components.add(new SortComponent());
         return components;
