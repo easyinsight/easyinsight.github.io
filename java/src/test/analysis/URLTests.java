@@ -34,4 +34,12 @@ public class URLTests extends TestCase {
         Assert.assertEquals("http://www.easy-insight.biz/app#feedid=2", url);
     }
 
+    public void testInvalidField() {
+        Row row = new Row();
+        row.addValue("Location", "biz");
+        row.addValue("Feed ID", "2");
+        String url = URLPattern.getURL("http://www.[easy]-insight.[Location]/app#feedid=[Feed ID]", row);
+        Assert.assertEquals("http://www.easy-insight.biz/app#feedid=2", url);
+    }
+
 }

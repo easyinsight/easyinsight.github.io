@@ -45,6 +45,9 @@ public class URLPattern {
         while(m.find()) {
             String s = m.group();
             s = s.substring(1, s.length() - 1).trim();
+            if(row.getValue(values.get(s)) == null) {
+                // TODO: throw an exception here?
+            }
             sb.append(row.getValue(values.get(s)).toString());
             if(i < fragments.length)
                 sb.append(fragments[i++]);
