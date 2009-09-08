@@ -19,22 +19,42 @@ public class TimeStringFormatter extends Formatter{
             resultString = num + " ms";
         } else if (num < 60000) {
             // < 1 minute
-            num = num / 1000;
             var seconds:uint = num / 1000;
             var milliseconds:uint = num % 1000;
-            resultString = seconds + ":" + milliseconds;
-        } else if (num < 3600000) {
+            if (milliseconds == 0) {
+                resultString = seconds + "s";
+            } else {
+                resultString = seconds + "s:" + milliseconds+"ms";
+            }
+        } else if (num < (60000 * 60)) {
             // < 1 hour
-            num = num / 1000 * 60;
-            var minutes:uint = num / 60;
-            var secondsRemainder:uint = num % 60;
-            resultString = minutes + ":" + seconds;
-        } else if (num < 36000000) {
+            var minutes:uint = num / (60 * 1000);
+            var secondsRemainder:uint = (num / 1000) % 60;
+            if (secondsRemainder == 0) {
+                resultString = minutes + "m";
+            } else {
+                resultString = minutes + "m:" + secondsRemainder + "s";
+            }
+        } else if (num < (60000 * 60 * 24)) {
             // < 24 hours
-            var hours:uint = num / 24;
+            var hours:uint = num / (60000 * 60);
             var minutesRemainder:uint = num % 24;
+            if (minutesRemainder == 0) {
+                resultString = hours + "h";
+            } else {
+                resultString = hours + "h:" + minutesRemainder + "m";
+            }
+        } else {      
+            var dayVal:uint = (60000 * 60 * 24);
+            var days:uint = num / dayVal;
+            var dayRemainder:uint = (num / (60000 * 60)) % 24;
+            if (dayRemainder == 0) {
+                resultString = days + "d";
+            } else {
+                resultString = days + "d:" + dayRemainder + "h";
+            }
         }
-        return super.format(value);
+        return resultString;
     }
 }
 }
