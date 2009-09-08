@@ -31,8 +31,8 @@
         }
 
         [Bindable]
-        [Embed(source="../../../../assets/media_play.png")]
-        private var pointerIcon:Class;
+        [Embed(source="../../../../assets/background2.JPG")]
+        private var background2:Class;
 
         private var selectedCategory:int;
 
@@ -192,16 +192,14 @@
                         <mx:CheckBox label="Easy Insight Training" id="trainingCheckbox" selected="{learning}"/>
                     </mx:HBox>
                 </mx:VBox>
-                <mx:VBox horizontalAlign="center">
-                    <mx:Image source="../assets/Quick Solution/FirstFrame.png" width="256" height="192" click="lesson1()" rollOver="CursorManager.setCursor(pointerIcon);"
-                            rollOut="CursorManager.removeAllCursors()"/>
+                <mx:VBox horizontalAlign="center" verticalAlign="middle" height="100%">                    
                     <mx:HBox>
-                        <mx:Label text="Watch Demo Video" fontSize="14"/>
+                        <mx:LinkButton label="Watch Demo Video" fontSize="16" textDecoration="underline" click="lesson1()"/>
                     </mx:HBox>
                 </mx:VBox>
             </mx:HBox>
             <mx:TileList width="100%" height="100%" itemRenderer="com.easyinsight.solutions.SolutionView" dataProvider="{availableSolutions}" id="solutionGrid"
-                    columnWidth="240" rowHeight="160" backgroundColor="#EEEEEE"/>
+                    columnWidth="240" rowHeight="160"  backgroundImage="{background2}" backgroundSize="100%"/>
         </mx:VBox>
     </mx:VBox>
 </mx:VBox>
