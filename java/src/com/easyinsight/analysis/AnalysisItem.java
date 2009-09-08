@@ -53,7 +53,7 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
     @Column(name="width")
     private int width;
 
-    @OneToMany(cascade = CascadeType.ALL)
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @JoinTable(name = "analysis_item_to_link",
             joinColumns = @JoinColumn(name = "analysis_item_id", nullable = false),
             inverseJoinColumns = @JoinColumn(name = "link_id", nullable = false))

@@ -334,6 +334,7 @@ public class GoalStorage {
                 List measureResults = session.createQuery("from AnalysisItem where analysisItemID = ?").setLong(0, analysisMeasureID).list();
                 if (measureResults.size() > 0) {
                     AnalysisMeasure analysisMeasure = (AnalysisMeasure) measureResults.get(0);
+                    analysisMeasure.afterLoad();
                     long feedID = nodeRS.getLong(1);
                     double goalValue = nodeRS.getDouble(2);
                     PreparedStatement getFeedNameStmt = conn.prepareStatement("SELECT FEED_NAME FROM DATA_FEED WHERE DATA_FEED_ID = ?");
@@ -435,6 +436,7 @@ public class GoalStorage {
                 List results = session.createQuery("from PersistableFilterDefinition where filterId = ?").setLong(0, rs.getLong(1)).list();
                 if (results.size() > 0) {
                     PersistableFilterDefinition filter = (PersistableFilterDefinition) results.get(0);
+                    filter.getField().afterLoad();
                     filters.add(filter.toFilterDefinition());
                 }
             }
