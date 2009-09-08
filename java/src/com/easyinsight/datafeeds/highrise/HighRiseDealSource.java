@@ -37,6 +37,7 @@ public class HighRiseDealSource extends HighRiseBaseSource {
     public static final String STATUS = "Status";
     public static final String CREATED_AT = "Created At";
     public static final String COUNT = "Count";
+    public static final String TOTAL_DEAL_VALUE = "Total Deal Value";
 
     public HighRiseDealSource() {
         setFeedName("Deals");
@@ -45,7 +46,7 @@ public class HighRiseDealSource extends HighRiseBaseSource {
     @NotNull
     protected List<String> getKeys() {
         return Arrays.asList(DEAL_NAME, COMPANY_ID, PRICE, DURATION, PRICE_TYPE, DEAL_OWNER,
-                CATEGORY, STATUS, CREATED_AT, COUNT);
+                CATEGORY, STATUS, CREATED_AT, COUNT, TOTAL_DEAL_VALUE);
     }
 
     public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, DataSet dataSet, com.easyinsight.users.Credentials credentials, Connection conn) {
@@ -57,6 +58,11 @@ public class HighRiseDealSource extends HighRiseBaseSource {
         formattingConfiguration.setFormattingType(FormattingConfiguration.CURRENCY);
         priceMeasure.setFormattingConfiguration(formattingConfiguration);
         analysisItems.add(priceMeasure);
+        AnalysisMeasure dealValueMeasure = new AnalysisMeasure(TOTAL_DEAL_VALUE, AggregationTypes.SUM);
+        FormattingConfiguration dealFormattingConfiguration = new FormattingConfiguration();
+        dealFormattingConfiguration.setFormattingType(FormattingConfiguration.CURRENCY);
+        dealValueMeasure.setFormattingConfiguration(dealFormattingConfiguration);
+        analysisItems.add(dealValueMeasure);
         analysisItems.add(new AnalysisDimension(keys.get(DURATION), true));
         analysisItems.add(new AnalysisDimension(keys.get(PRICE_TYPE), true));
         analysisItems.add(new AnalysisDimension(keys.get(CATEGORY), true));
@@ -140,8 +146,18 @@ public class HighRiseDealSource extends HighRiseBaseSource {
                     row.addValue(STATUS, status);
                     String priceType = queryField(currDeal, "price-type/text()");
                     row.addValue(PRICE_TYPE, priceType);
-                    String duration = queryField(currDeal, "duration/text()");
-                    row.addValue(DURATION, duration);
+                    double totalDealValue;
+                    if ("fixed".equals(priceType)) {
+                        totalDealValue = Double.parseDouble(price);
+                    } else {
+                        String durationString = queryField(currDeal, "duration/text()");
+                        int duration = Integer.parseInt(durationString);
+                        totalDealValue = Double.parseDouble(price) * duration;
+                        row.addValue(DURATION, new NumericValue(duration));
+
+                    }
+                    row.addValue(TOTAL_DEAL_VALUE, new NumericValue(totalDealValue));
+
                     String personID = queryField(currDeal, "person-id/text()");
                     row.addValue(DEAL_OWNER, retrieveContactInfo(client, builder, peopleCache, personID, url));
                     String categoryID = queryField(currDeal, "category-id/text()");
@@ -156,7 +172,6 @@ public class HighRiseDealSource extends HighRiseBaseSource {
                     System.out.println(price);
                     System.out.println(status);
                     System.out.println(priceType);
-                    System.out.println(duration);
                 }
             //} while(info.currentPage++ < info.MaxPages);
 
