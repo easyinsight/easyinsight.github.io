@@ -49,11 +49,11 @@ public class EC2Util {
             String timestamp = getDateAsISO8601String(date);
             String accessKey = key;
             String signature = MessageFormat.format(hmacString, action, accessKey, timestamp);
-            System.out.println(signature);
+
             String base64Sig = calculateRFC2104HMAC(signature, secretKey);
             timestamp = URLEncoder.encode(getDateAsISO8601String(date), "UTF-8");
             String urlString = MessageFormat.format(queryString, action, accessKey, timestamp, URLEncoder.encode(base64Sig, "UTF-8"));
-            System.out.println(urlString);
+
             HttpClient httpClient = new HttpClient();
             HttpMethod method = new GetMethod(urlString);
             int statusCode = httpClient.executeMethod(method);
@@ -71,7 +71,7 @@ public class EC2Util {
             List<EC2Info> instances = new ArrayList<EC2Info>();
             NodeList transactions = document.getElementsByTagName("reservationSet");
             if (transactions.getLength() == 0) {
-                System.out.println("No running transactions");
+
             } else {
                 Node root = transactions.item(0);
                 NodeList items = root.getChildNodes();
@@ -91,15 +91,15 @@ public class EC2Util {
                                         if ("running".equals(state)) {
                                             EC2Info subInfo = new EC2Info();
                                             String instanceID = infoNode.getChildNodes().item(1).getFirstChild().getNodeValue();
-                                            System.out.println("instance ID = " + instanceID);
+
                                             subInfo.setInstanceID(instanceID);
                                             String amiID = infoNode.getChildNodes().item(3).getFirstChild().getNodeValue();
                                             subInfo.setAmiID(amiID);
-                                            System.out.println(amiID);
+
 
                                             String dns = infoNode.getChildNodes().item(7).getFirstChild().getNodeValue();
                                             subInfo.setHostName(dns);
-                                            System.out.println(dns);
+
                                             //instances.add(dns);
                                             subInstances.add(subInfo);
                                         }
@@ -113,7 +113,7 @@ public class EC2Util {
                                     if ("groupId".equals(groupNode.getNodeName())) {
                                         String group = groupNode.getTextContent();
                                         groupBuilder.append(group).append(",");
-                                        System.out.println("group = " + group);
+                                        
                                     }
                                 }
 

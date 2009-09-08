@@ -26,6 +26,22 @@ public class CloudWatchFeed extends Feed {
             dateMeta.setEarliestDate(cal.getTime());
             dateMeta.setLatestDate(new Date());
             return dateMeta;
+        } else if (analysisItem.hasType(AnalysisItemTypes.DIMENSION)) {
+            Credentials credentials = insightRequestMetadata.getCredentialForDataSource(getFeedID());
+            if (credentials == null) {
+                throw new RuntimeException();
+            }
+            try {
+                List<EC2Info> ec2Infos = EC2Util.getInstances(credentials.getUserName(), credentials.getPassword());
+                DataSet childSet = EC2Util.createDataSet(ec2Infos, Arrays.asList((AnalysisDimension) analysisItem));
+                AnalysisItemResultMetadata metadata = analysisItem.createResultMetadata();
+                for (IRow row : childSet.getRows()) {
+                    metadata.addValue(analysisItem, row.getValue(analysisItem.getKey()), insightRequestMetadata);
+                }
+                return metadata;
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
         }
         return null;  //To change body of implemented methods use File | Settings | File Templates.
     }
