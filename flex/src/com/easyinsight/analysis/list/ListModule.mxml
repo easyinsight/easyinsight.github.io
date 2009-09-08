@@ -325,7 +325,7 @@
                 var item:AnalysisItem = listDef.columns.getItemAt(i) as AnalysisItem;
                 var column:AdvancedDataGridColumn = dataGrid.columns[i + (listDef.showLineNumbers ? 1 : 0)];
                 var sortInfo:SortInfo = dataGrid.getFieldSortInfo(column);                
-                if (sortInfo.status == SortInfo.ACTUALSORT) {
+                if (sortInfo != null && sortInfo.status == SortInfo.ACTUALSORT) {
                     
                     if (sortInfo.descending) {
                         item.sort = 2;
