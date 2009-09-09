@@ -21,6 +21,7 @@ public class StandardReportPipeline extends Pipeline {
         components.add(new VirtualDimensionComponent());
         components.add(new TypeTransformComponent());
         components.add(new FilterComponent(true));
+        components.add(new FilterPipelineCleanupComponent());
         for (AnalysisItem step : items(AnalysisItemTypes.STEP, allNeededAnalysisItems)) {
             components.add(new StepCorrelationComponent((AnalysisStep) step));
         }
@@ -37,12 +38,12 @@ public class StandardReportPipeline extends Pipeline {
             components.add(new TemporalComponent((TemporalAnalysisMeasure) temporal));
         }
         if (!temporalAdded) {*/
-            components.add(new BroadAggregationComponent());
+            //components.add(new BroadAggregationComponent());
+        components.add(new AggregationComponent());
         //}
 
         components.add(new LinkDecorationComponent());
         components.add(new FilterComponent(false));
-        components.add(new FilterPipelineCleanupComponent());
         //components.add(new AggregationComponent());
         components.add(new LimitsComponent());
         components.add(new SortComponent());

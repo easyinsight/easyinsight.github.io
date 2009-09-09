@@ -56,49 +56,15 @@ public class LastValueComponent implements IComponent {
                     dimensionKey.put(aggregateKey, row.getValue(aggregateKey));
                 }
             }
-            aggregationMap.put(dimensionKey, row);
-            /*Value value = row.getValue(temporalAnalysisMeasure.getAggregateKey());
-            ITemporalAggregation temporalAggregation = aggregationMap.get(dimensionKey);
-            if (temporalAggregation == null) {
-                temporalAggregation = temporalAnalysisMeasure.createAggregation();
-                aggregationMap.put(dimensionKey, temporalAggregation);
-            }
-            temporalAggregation.addValue(value, i);*/
+            aggregationMap.put(dimensionKey, row);            
         }
 
         for (Map.Entry<Map<Key, Value>, IRow> entry : aggregationMap.entrySet()) {
-            //Map<Key, Value> dimensionKey = entry.getKey();
             IRow row = entry.getValue();
             IRow newRow = producedSet.createRow();
             newRow.addValues(row.getValues());
-            /*for (Map.Entry<Key, Value> keyPair : dimensionKey.entrySet()) {
-                newRow.addValue(keyPair.getKey(), keyPair.getValue());
-            }
-            newRow.addValue(temporalAnalysisMeasure.createAggregateKey(), entry.getValue().getValue(0));*/
         }
 
-        /*if (existingDate == null) {
-            DateValue latestDate = null;
-            AggregateKey dateKey = temporalAnalysisMeasure.getAnalysisDimension().createAggregateKey();
-            for (IRow row : dataSet.getRows()) {
-                Value value = row.getValue(dateKey);
-                if (value.type() == Value.DATE) {
-                    DateValue dateValue = (DateValue) value;
-                    if (latestDate == null || dateValue.getDate().compareTo(latestDate.getDate()) > 0) {
-                        latestDate = dateValue;
-                    }
-                }
-            }
-            if (latestDate != null) {
-                DataSet anotherDataSet = new DataSet();
-                for (IRow row : producedSet.getRows()) {
-                    if (row.getValue(dateKey) != null && row.getValue(dateKey).equals(latestDate)) {
-                        anotherDataSet.addRow(row);
-                    }
-                }
-                producedSet = anotherDataSet;
-            }
-        }*/
         return producedSet;
     }
 
