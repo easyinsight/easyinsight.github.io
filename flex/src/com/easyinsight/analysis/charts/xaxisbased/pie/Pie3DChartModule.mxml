@@ -11,16 +11,34 @@
         import com.easyinsight.analysis.charts.Chart3DVisuals;
         import com.easyinsight.filtering.FilterRawData;
 
+        import com.easyinsight.pseudocontext.PseudoContextWindow;
+
         import mx.charts.ChartItem;
         import mx.charts.series.PieSeries;
         import mx.formatters.Formatter;
         import mx.charts.series.items.PieSeriesItem;
         import mx.charts.events.ChartItemEvent;
         import mx.collections.ArrayCollection;
+        import mx.managers.PopUpManager;
 
         private function onCreation():void {
             visuals.chart = pieChart;
             visuals.addEventListener(CustomChangeEvent.CUSTOM_CHANGE, onCustomChange);
+        }
+
+        private function onClick(event:ChartItemEvent):void {
+            if (event.shiftKey) {
+
+                var window:PseudoContextWindow = new PseudoContextWindow(dimensionItem, passThrough, this);
+                window.data = event.hitData.item;
+                PopUpManager.addPopUp(window, this);
+                window.x = event.stageX + 5;
+                window.y = event.stageY + 5;
+            }
+        }
+
+        private function passThrough(event:Event):void {
+            dispatchEvent(event);
         }
 
         private var visuals:Chart3DVisuals = new Chart3DVisuals();
@@ -102,7 +120,8 @@
     </mx:Script>
     <mx:HBox width="100%" height="100%">
         <ilog:PieChart3D id="pieChart" dataProvider="{graphData}" selectionMode="multiple" height="100%" width="100%"
-                              paddingLeft="0" paddingRight="0" paddingTop="0" paddingBottom="0" depth="5" showDataTips="true">
+                              paddingLeft="0" paddingRight="0" paddingTop="0" paddingBottom="0" depth="5" showDataTips="true"
+                itemClick="onClick(event)">
             <ilog:series>
                 <ilog:PieSeries3D field="{measureName}" nameField="{dimension}" labelPosition="inside"
                                   labelFunction="renderPieLabel">

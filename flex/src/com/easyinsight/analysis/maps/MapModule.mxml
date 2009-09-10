@@ -8,44 +8,49 @@
             <mx:RemoveChild target="{unitedStatesMap}"/>
             <mx:AddChild relativeTo="{coreCanvas}" creationPolicy="all">
                 <ilog:USStatesMap width="100%" height="100%" id="unitedStatesMap" allowNavigation="true"
-                                  allowMultipleSelection="true"/>
+                                  allowMultipleSelection="true" click="onClick(event)"/>
             </mx:AddChild>
         </mx:State>
         <mx:State name="Europe">
             <mx:RemoveChild target="{unitedStatesMap}"/>
             <mx:AddChild relativeTo="{coreCanvas}" creationPolicy="all">
-                <ilog:ContinentalEuropeMap width="100%" height="100%" id="europeMap"/>
+                <ilog:ContinentalEuropeMap width="100%" height="100%" id="europeMap" click="onClick(event)"/>
             </mx:AddChild>
         </mx:State>
         <mx:State name="AsiaPac">
             <mx:RemoveChild target="{unitedStatesMap}"/>
             <mx:AddChild relativeTo="{coreCanvas}" creationPolicy="all">
-                <ilog:AsiaPacificMap width="100%" height="100%" id="asiaMap"/>
+                <ilog:AsiaPacificMap width="100%" height="100%" id="asiaMap" click="onClick(event)"/>
             </mx:AddChild>
         </mx:State>
         <mx:State name="Americas">
             <mx:RemoveChild target="{unitedStatesMap}"/>
             <mx:AddChild relativeTo="{coreCanvas}" creationPolicy="all">
-                <ilog:AmericasMap width="100%" height="100%" id="americasMap"/>
+                <ilog:AmericasMap width="100%" height="100%" id="americasMap" click="onClick(event)"/>
             </mx:AddChild>
         </mx:State>
         <mx:State name="MiddleEast">
             <mx:RemoveChild target="{unitedStatesMap}"/>
             <mx:AddChild relativeTo="{coreCanvas}" creationPolicy="all">
-                <ilog:EuropeMiddleEastAfricaMap width="100%" height="100%" id="middleEastMap"/>
+                <ilog:EuropeMiddleEastAfricaMap width="100%" height="100%" id="middleEastMap" click="onClick(event)"/>
             </mx:AddChild>
         </mx:State>
     </mx:states>
     <mx:Script>
 		<![CDATA[
+        import com.easyinsight.analysis.AnalysisDimension;
+        import com.easyinsight.analysis.AnalysisItem;
         import com.easyinsight.analysis.CustomChangeEvent;
         import com.easyinsight.analysis.ReportRendererEvent;
         import com.easyinsight.filtering.FilterRawData;
+
+        import com.easyinsight.pseudocontext.PseudoContextWindow;
 
         import ilog.maps.MapBase;
 
         import com.easyinsight.analysis.conditions.ConditionRenderer;
 
+        import ilog.maps.MapEvent;
         import ilog.maps.MapFeature;
 
         import com.easyinsight.map.util.MapLocationLookup;
@@ -53,6 +58,24 @@
         import com.easyinsight.analysis.AnalysisDefinition;
 
         import mx.collections.ArrayCollection;
+        import mx.managers.PopUpManager;
+
+        private function onClick(event:MouseEvent):void {
+            if (dimension != null && event.shiftKey) {
+                var feature:MapFeature = map.getFeatureAt(event.localX, event.localY);
+                if (feature != null) {
+                    var window:PseudoContextWindow = new PseudoContextWindow(dimension, passThrough, this);
+                    window.data = feature.data;
+                    PopUpManager.addPopUp(window, this);                    
+                    window.x = event.stageX + 5;
+                    window.y = event.stageY + 5;
+                }
+            }
+        }
+
+        private function passThrough(event:Event):void {
+            dispatchEvent(event);
+        }
 
         [Bindable]
         private var graphData:ArrayCollection = new ArrayCollection();
@@ -64,6 +87,8 @@
         private var mapType:int = MapDefinition.WORLD;
 
         private var hasDropAreas:Boolean = true;
+
+        private var dimension:AnalysisItem;
 
         private function createRenderer(rows:ArrayCollection, mapDefinition:MapDefinition):ConditionRenderer {
             var renderer:ConditionRenderer = mapDefinition.measure.createClientRenderer();
@@ -91,6 +116,7 @@
 
         public function renderReport(dataSet:ArrayCollection, analysisDefinition:AnalysisDefinition, clientProcessorMap:Object):void {
             var mapDefinition:MapDefinition = analysisDefinition as MapDefinition;
+            dimension = mapDefinition.geography;
             if (mapDefinition.mapType == MapDefinition.USA) {
                 currentState = "USA";
                 mapType = MapDefinition.USA;
@@ -197,7 +223,7 @@
     </mx:Script>
     <mx:VBox id="chartVBox" width="100%" height="100%">
         <mx:Canvas id="coreCanvas" width="100%" height="100%">
-            <ilog:WorldCountriesMap width="100%" height="100%" id="worldMap"/>
+            <ilog:WorldCountriesMap width="100%" height="100%" id="worldMap" click="onClick(event)"/>
         </mx:Canvas>
     </mx:VBox>
 </mx:Module>

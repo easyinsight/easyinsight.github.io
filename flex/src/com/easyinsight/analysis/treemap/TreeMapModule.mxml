@@ -6,27 +6,45 @@
             <mx:AddChild relativeTo="{box}">
                 <ilog:TreeMap id="treeMap" width="100%" height="100%" areaField="area" labelField="label" colorField="color" algorithm="squarified"
                     dataProvider="{resultData}" labelThreshold="2" colorScheme="{colorScheme}" borderThickness="1" itemRollOver="onover(event)" itemRollOut="onout(event)"
-                        itemClick="onClick(event)"/>
+                        mouseChildren="true" mouseEnabled="true" click="onClick(event)" allowSelection="false" allowMultipleSelection="false"/>
             </mx:AddChild>
         </mx:State>
     </mx:states>
     <mx:Script><![CDATA[
         import com.easyinsight.analysis.AnalysisDefinition;
         import com.easyinsight.analysis.AnalysisHierarchyItem;
-import com.easyinsight.analysis.AnalysisMeasure;
+        import com.easyinsight.analysis.AnalysisItem;
+        import com.easyinsight.analysis.AnalysisMeasure;
         import com.easyinsight.analysis.CustomChangeEvent;
         import com.easyinsight.analysis.HierarchyLevel;
         import com.easyinsight.filtering.FilterRawData;
+
+        import com.easyinsight.pseudocontext.PseudoContextWindow;
 
         import ilog.treemap.TreeMapEvent;
 
         import mx.collections.ArrayCollection;
         import mx.controls.ToolTip;
+        import mx.managers.PopUpManager;
         import mx.managers.ToolTipManager;
 
-        private function onClick(event:TreeMapEvent):void {
-            var item:Object = event.item;
-            
+        private var regionDimension:AnalysisItem;
+
+        private function onClick(event:MouseEvent):void {
+            if (event.shiftKey) {
+                var item:Object = treeMap.getItemAt(event.localX, event.localY);
+                if (item != null) {
+                    var window:PseudoContextWindow = new PseudoContextWindow(regionDimension, passThrough, this);
+                    window.data = item;
+                    PopUpManager.addPopUp(window, this);
+                    window.x = event.stageX + 5;
+                    window.y = event.stageY + 5;
+                }
+            }
+        }
+
+        private function passThrough(event:Event):void {
+            dispatchEvent(event);
         }
 
         [Bindable]
@@ -70,6 +88,7 @@ public function onover(event:TreeMapEvent):void {
             var index:int = levels.getItemIndex(level);
             if (index < (levels.length - 1)) {
                 var nextLevel:HierarchyLevel = levels.getItemAt(index + 1) as HierarchyLevel;
+                regionDimension = nextLevel.analysisItem;
                 var returnResult:Object = handleLevel(nextLevel, levels, row, measure1, measure2, result);
                 if (returnResult != null) {
                     result.children.addItem(returnResult);

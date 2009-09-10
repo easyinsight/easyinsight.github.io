@@ -22,13 +22,12 @@ import flash.ui.ContextMenuItem;
 
 import mx.controls.Label;
     import mx.controls.listClasses.IListItemRenderer;
-import mx.core.UITextField;
-import mx.events.FlexEvent;
+    import mx.events.FlexEvent;
     import mx.formatters.Formatter;
 import mx.managers.PopUpManager;
 
 
-public class AnalysisCellRenderer extends UITextField implements IListItemRenderer
+public class TreeStubCellRenderer extends Label implements IListItemRenderer
 	{
 		private var _data:Object;
 		private var URL:String;
@@ -48,7 +47,7 @@ public class AnalysisCellRenderer extends UITextField implements IListItemRender
 		//private var defaultLabel:Label;
 		//private var linkButton:LinkButton;
 		
-		public function AnalysisCellRenderer() {
+		public function TreeStubCellRenderer() {
 			super();
             addEventListener(MouseEvent.CLICK, onClick);
 		}
@@ -92,7 +91,7 @@ public class AnalysisCellRenderer extends UITextField implements IListItemRender
             _renderer = val;
         }
 
-        public function validateProperties():void {
+        /*public function validateProperties():void {
 			validateNow();
 		}
 
@@ -102,42 +101,42 @@ public class AnalysisCellRenderer extends UITextField implements IListItemRender
 
 		public function validateDisplayList():void {
 			validateNow();
-		}
+		}*/
 			
-		public function set data(value:Object):void {
+		override public function set data(value:Object):void {
 			_data = value;
-			if (value != null) {
+            dispatchEvent(new FlexEvent(FlexEvent.DATA_CHANGE));
+            if (value != null) {
                 var field:String = analysisItem.qualifiedName();
                 var formatter:Formatter = analysisItem.getFormatter();
-				var objVal:Object = value[field];
-				
-				
-				if (objVal == null) {
-					this.text = "";
-				} else {
-					this.text = formatter.format(objVal);
+                var objVal:Object = value[field];
+
+
+                if (objVal == null) {
+                    this.text = "";
+                } else {
+                    this.text = "t" + formatter.format(objVal);
 
                     //Alert.show("retrieving " + field + " produced " + objVal + " gave us formatted text = " + this.text);
-					if (renderer.hasCustomColor()) {
-						var color:uint = renderer.getColor(objVal);
+                    if (renderer.hasCustomColor()) {
+                        var color:uint = renderer.getColor(objVal);
                         setStyle("color", color);
-						//this.textColor = color;
-						//defaultLabel.textColor = color;
-					} else {
+                        //this.textColor = color;
+                        //defaultLabel.textColor = color;
+                    } else {
                         //this.textColor = 0x000000;
                     }
-				}
-			} else {
-				/*if (objVal == null) {
-					defaultLabel = instantiateNewLabel("");		
-				}*/
-				this.text = "";
-			}
+                }
+            } else {
+                /*if (objVal == null) {
+                 defaultLabel = instantiateNewLabel("");
+                 }*/
+                this.text = "";
+            }
             invalidateProperties();
-            dispatchEvent(new FlexEvent(FlexEvent.DATA_CHANGE));
-		}
+        }
 			
-			public function get data():Object {
+			override public function get data():Object {
 				return _data;
 			}
 			

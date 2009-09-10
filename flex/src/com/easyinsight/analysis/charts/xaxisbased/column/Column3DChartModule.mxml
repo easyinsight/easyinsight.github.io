@@ -9,6 +9,8 @@
 
         import com.easyinsight.analysis.charts.Chart3DVisuals;
 
+        import com.easyinsight.pseudocontext.PseudoContextWindow;
+
         import ilog.charts3d.charts3dClasses.Series3D;
         import ilog.charts3d.series.ColumnSet3D;
         import ilog.charts3d.series.ColumnSeries3D;
@@ -17,6 +19,7 @@
         import com.easyinsight.analysis.AnalysisItem;
 
         import mx.binding.utils.BindingUtils;
+        import mx.charts.events.ChartItemEvent;
         import mx.events.FlexEvent;
 
         import com.easyinsight.filtering.FilterRawData;
@@ -33,6 +36,7 @@
         import mx.charts.ChartItem;
         import mx.charts.CategoryAxis;
         import mx.collections.ArrayCollection;
+        import mx.managers.PopUpManager;
 
         [Bindable]
         private var graphData:ArrayCollection = new ArrayCollection();
@@ -204,6 +208,7 @@
                 //mySeries.push(columnSeries);
                 columnSet.series = [ columnSeries ];
                 columnChart.series = [ columnSet ];
+                columnChart.addEventListener(ChartItemEvent.ITEM_CLICK, onClick);
                 addChild(columnChart);
             }
         }
@@ -233,6 +238,22 @@
         private function renderDimensionAxis(item:Object, prevValue:Object, axis:CategoryAxis, categoryItem:Object):String {
             return dimensionFormatter.format(item);
         }
+
+        private function onClick(event:ChartItemEvent):void {
+            if (event.shiftKey) {
+
+                var window:PseudoContextWindow = new PseudoContextWindow(xAxisItem, passThrough, this);
+                window.data = event.hitData.item;
+                PopUpManager.addPopUp(window, this);
+                window.x = event.stageX + 5;
+                window.y = event.stageY + 5;
+            }
+        }
+
+        private function passThrough(event:Event):void {
+            dispatchEvent(event);
+        }
+
 
         public function renderReport(dataSet:ArrayCollection, analysisDefinition:AnalysisDefinition, clientProcessorMap:Object):void {
             var columnChartDef:Column3DChartDefinition = analysisDefinition as Column3DChartDefinition;

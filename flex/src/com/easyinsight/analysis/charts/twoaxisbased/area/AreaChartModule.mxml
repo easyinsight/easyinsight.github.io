@@ -12,17 +12,21 @@
         import com.easyinsight.analysis.CustomChangeEvent;
         import com.easyinsight.filtering.FilterRawData;
 
+        import com.easyinsight.pseudocontext.PseudoContextWindow;
+
         import mx.charts.CategoryAxis;
         import mx.charts.DateTimeAxis;
         import mx.charts.HitData;
         import mx.charts.Legend;
         import mx.charts.AreaChart;
         import mx.charts.chartClasses.IAxis;
+        import mx.charts.events.ChartItemEvent;
         import mx.charts.series.AreaSeries;
         import mx.charts.series.items.AreaSeriesItem;
         import mx.collections.ArrayCollection;
         import mx.collections.Sort;
         import mx.collections.SortField;
+        import mx.managers.PopUpManager;
 
         [Bindable]
         private var chartData:ArrayCollection;
@@ -30,6 +34,7 @@
         private var areaChart:AreaChart;
 
         private var xAxisItem:AnalysisItem;
+        private var yAxisItem:AnalysisItem;
         private var measureItem:AnalysisItem;
 
         private var legend:Legend;
@@ -61,6 +66,21 @@
             hbox.addChild(legend);
         }
 
+        private function onClick(event:ChartItemEvent):void {
+            if (event.shiftKey) {
+
+                var window:PseudoContextWindow = new PseudoContextWindow(yAxisItem, passThrough, this);
+                window.data = event.hitData.item;
+                PopUpManager.addPopUp(window, this);
+                window.x = event.stageX + 5;
+                window.y = event.stageY + 5;
+            }
+        }
+
+        private function passThrough(event:Event):void {
+            dispatchEvent(event);
+        }
+
         public function renderReport(dataSet:ArrayCollection, analysisDefinition:AnalysisDefinition, clientProcessorMap:Object):void {
 
             var areaChartDef:AreaChartDefinition = analysisDefinition as AreaChartDefinition;
@@ -82,6 +102,7 @@
                 var xAxisDimension:AnalysisItem = areaChartDef.xaxis;
 
                 xAxisItem = xAxisDimension;
+                yAxisItem = areaChartDef.yaxis;
                 measureItem = areaChartDef.measure;
 
                 var sort:Sort = new Sort();

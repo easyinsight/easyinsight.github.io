@@ -3,8 +3,12 @@ import com.easyinsight.analysis.AnalysisHierarchyItem;
 import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.analysis.PopupMenuFactory;
 import com.easyinsight.analysis.charts.ChartDrilldownEvent;
+import com.easyinsight.pseudocontext.PseudoContextWindow;
+
 import flash.display.Graphics;
 import flash.events.ContextMenuEvent;
+import flash.events.Event;
+import flash.events.MouseEvent;
 import flash.geom.Rectangle;
 import mx.charts.ChartItem;
 import mx.charts.chartClasses.GraphicsUtilities;
@@ -13,6 +17,7 @@ import mx.core.UIComponent;
 import mx.graphics.BitmapFill;
 import mx.graphics.IFill;
 import mx.graphics.IStroke;
+import mx.managers.PopUpManager;
 
 public class CustomDropShadowRenderer extends UIComponent implements IDataRenderer {
 
@@ -46,6 +51,20 @@ public class CustomDropShadowRenderer extends UIComponent implements IDataRender
 
     public function CustomDropShadowRenderer() {
         super();
+        addEventListener(MouseEvent.CLICK, onClick);
+    }
+
+    private function onClick(event:MouseEvent):void {if (event.shiftKey) {
+            var window:PseudoContextWindow = new PseudoContextWindow(_analysisItem, passThrough, this);
+            window.data = this.data;
+            PopUpManager.addPopUp(window, this);
+            window.x = event.stageX + 5;
+            window.y = event.stageY + 5;
+        }
+    }
+
+    private function passThrough(event:Event):void {
+        dispatchEvent(event);
     }
 
     public function onDrilldown(event:ContextMenuEvent):void {
@@ -86,7 +105,7 @@ public class CustomDropShadowRenderer extends UIComponent implements IDataRender
 
     override protected function commitProperties():void {
         super.commitProperties();
-        var drilldownFunction:Function = null;
+        /*var drilldownFunction:Function = null;
         var rollupFunction:Function = null;
         if (_analysisItem is AnalysisHierarchyItem) {
             var hierarchy:AnalysisHierarchyItem = _analysisItem as AnalysisHierarchyItem;
@@ -98,7 +117,7 @@ public class CustomDropShadowRenderer extends UIComponent implements IDataRender
                 rollupFunction = onRollup;
             }
         }
-        PopupMenuFactory.menuFactory.createStandardMenu(drilldownFunction, rollupFunction, this);
+        PopupMenuFactory.menuFactory.createStandardMenu(drilldownFunction, rollupFunction, this);*/
     }
 
     //--------------------------------------------------------------------------

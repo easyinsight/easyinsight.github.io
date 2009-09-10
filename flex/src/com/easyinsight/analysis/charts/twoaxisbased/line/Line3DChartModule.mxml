@@ -13,6 +13,8 @@
         import com.easyinsight.analysis.charts.Chart3DVisuals;
 import com.easyinsight.filtering.FilterRawData;
 
+        import com.easyinsight.pseudocontext.PseudoContextWindow;
+
         import ilog.charts3d.LineChart3D;
         import ilog.charts3d.series.LineSeries3D;
 
@@ -23,9 +25,11 @@ import com.easyinsight.filtering.FilterRawData;
         import mx.charts.HitData;
         import mx.charts.Legend;
         import mx.charts.chartClasses.IAxis;
+        import mx.charts.events.ChartItemEvent;
         import mx.collections.ArrayCollection;
         import mx.collections.Sort;
         import mx.collections.SortField;
+        import mx.managers.PopUpManager;
 
         [Bindable]
         private var chartData:ArrayCollection;
@@ -33,6 +37,7 @@ import com.easyinsight.filtering.FilterRawData;
         private var lineChart:LineChart3D;
 
         private var xAxisItem:AnalysisItem;
+        private var yAxisItem:AnalysisItem;
         private var measureItem:AnalysisItem;
 
         private var legend:Legend;
@@ -74,6 +79,21 @@ import com.easyinsight.filtering.FilterRawData;
             hbox.addChild(legend);
         }
 
+        private function onClick(event:ChartItemEvent):void {
+            if (event.shiftKey) {
+
+                var window:PseudoContextWindow = new PseudoContextWindow(yAxisItem, passThrough, this);
+                window.data = event.hitData.item;
+                PopUpManager.addPopUp(window, this);
+                window.x = event.stageX + 5;
+                window.y = event.stageY + 5;
+            }
+        }
+
+        private function passThrough(event:Event):void {
+            dispatchEvent(event);
+        }
+
         public function renderReport(dataSet:ArrayCollection, analysisDefinition:AnalysisDefinition, clientProcessorMap:Object):void {
 
             var lineChartDef:Line3DChartDefinition = analysisDefinition as Line3DChartDefinition;
@@ -89,6 +109,7 @@ import com.easyinsight.filtering.FilterRawData;
             lineChart = new LineChart3D();
             lineChart.percentHeight = 100;
             lineChart.percentWidth = 100;
+            lineChart.addEventListener(ChartItemEvent.ITEM_CLICK, onClick);
             lineChart.dataTipFunction = dataTipFunction;
             visuals.chart = lineChart;
             lineChart.dataProvider = chartData;
@@ -106,6 +127,7 @@ import com.easyinsight.filtering.FilterRawData;
                 var xAxisDimension:AnalysisItem = lineChartDef.xaxis;
 
                 xAxisItem = xAxisDimension;
+                yAxisItem = lineChartDef.yaxis;
                 measureItem = lineChartDef.measure;
 
                 var sort:Sort = new Sort();

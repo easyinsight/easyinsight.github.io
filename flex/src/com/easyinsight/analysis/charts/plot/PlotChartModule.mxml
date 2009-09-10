@@ -15,13 +15,17 @@
         import com.easyinsight.analysis.CustomChangeEvent;
         import com.easyinsight.filtering.FilterRawData;
 
+        import com.easyinsight.pseudocontext.PseudoContextWindow;
+
         import mx.charts.ChartItem;
         import mx.charts.chartClasses.IAxis;
 
+        import mx.charts.events.ChartItemEvent;
         import mx.charts.series.PlotSeries;
         import mx.formatters.Formatter;
         import mx.charts.HitData;
         import mx.collections.ArrayCollection;
+        import mx.managers.PopUpManager;
 
         [Bindable]
         private var graphData:ArrayCollection = new ArrayCollection();
@@ -127,6 +131,21 @@
 
         public function onCustomChangeEvent(event:CustomChangeEvent):void {
         }
+
+        private function onClick(event:ChartItemEvent):void {
+            if (event.shiftKey) {
+
+                var window:PseudoContextWindow = new PseudoContextWindow(dimensionItem, passThrough, this);
+                window.data = event.hitData.item;
+                PopUpManager.addPopUp(window, this);
+                window.x = event.stageX + 5;
+                window.y = event.stageY + 5;
+            }
+        }
+
+        private function passThrough(event:Event):void {
+            dispatchEvent(event);
+        }
 		]]>
 	</mx:Script>
 
@@ -135,7 +154,7 @@
 
     <mx:HBox width="100%" height="100%" backgroundColor="#FFFFFF" id="coreBox">
         <mx:PlotChart id="plotChart" dataProvider="{graphData}" width="100%" height="100%" showDataTips="true" dataTipFunction="dtFunc"
-            selectionMode="multiple">
+            selectionMode="multiple" itemClick="onClick(event)">
             <mx:horizontalAxis>
                 <mx:LinearAxis labelFunction="renderXAxis" baseAtZero="false" title="{measure1Name}" id="xAxis"/>
             </mx:horizontalAxis>

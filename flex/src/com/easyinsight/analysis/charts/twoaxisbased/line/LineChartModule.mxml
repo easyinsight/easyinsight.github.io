@@ -12,17 +12,21 @@
         import com.easyinsight.analysis.CustomChangeEvent;
         import com.easyinsight.filtering.FilterRawData;
 
+        import com.easyinsight.pseudocontext.PseudoContextWindow;
+
         import mx.charts.CategoryAxis;
         import mx.charts.DateTimeAxis;
         import mx.charts.HitData;
         import mx.charts.Legend;
         import mx.charts.LineChart;
         import mx.charts.chartClasses.IAxis;
+        import mx.charts.events.ChartItemEvent;
         import mx.charts.series.LineSeries;
         import mx.charts.series.items.LineSeriesItem;
         import mx.collections.ArrayCollection;
         import mx.collections.Sort;
         import mx.collections.SortField;
+        import mx.managers.PopUpManager;
 
         [Bindable]
         private var chartData:ArrayCollection;
@@ -30,6 +34,7 @@
         private var lineChart:LineChart;
 
         private var xAxisItem:AnalysisItem;
+        private var yAxisItem:AnalysisItem;
         private var measureItem:AnalysisItem;
 
         private var legend:Legend;
@@ -61,6 +66,21 @@
             return string;
         }
 
+        private function onClick(event:ChartItemEvent):void {
+            if (event.shiftKey) {
+
+                var window:PseudoContextWindow = new PseudoContextWindow(yAxisItem, passThrough, this);
+                window.data = event.hitData.item;
+                PopUpManager.addPopUp(window, this);
+                window.x = event.stageX + 5;
+                window.y = event.stageY + 5;
+            }
+        }
+
+        private function passThrough(event:Event):void {
+            dispatchEvent(event);
+        }
+
         public function renderReport(dataSet:ArrayCollection, analysisDefinition:AnalysisDefinition, clientProcessorMap:Object):void {
 
             var lineChartDef:LineChartDefinition = analysisDefinition as LineChartDefinition;
@@ -74,7 +94,8 @@
             lineChart.percentWidth = 100;
             lineChart.dataProvider = chartData;
             lineChart.showDataTips = true;
-            lineChart.selectionMode = "multiple";
+            //lineChart.selectionMode = "multiple";
+            lineChart.addEventListener(ChartItemEvent.ITEM_CLICK, onClick);
             lineChart.dataTipFunction = dataTipFunction;
 
             if (dataSet.length > 0) {
@@ -107,6 +128,7 @@
 
                 var xAxis:IAxis;
                 xAxisItem = xAxisDimension;
+                yAxisItem = lineChartDef.yaxis;
                 if (xAxisDimension.hasType(AnalysisItemTypes.DATE)) {
                     var dateDimension:AnalysisDateDimension = xAxisDimension as AnalysisDateDimension;
                     var dateAxis:DateTimeAxis = new DateTimeAxis();

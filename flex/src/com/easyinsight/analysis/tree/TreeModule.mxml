@@ -1,19 +1,22 @@
 <?xml version="1.0" ?>
 <mx:Module xmlns:mx="http://www.adobe.com/2006/mxml" implements="com.easyinsight.analysis.IReportRenderer" width="100%" height="100%">
     <mx:Script><![CDATA[
+        import com.easyinsight.analysis.AnalysisCellRenderer;
         import com.easyinsight.analysis.AnalysisDefinition;
         import com.easyinsight.analysis.AnalysisHierarchyItem;
-import com.easyinsight.analysis.AnalysisItem;
-import com.easyinsight.analysis.CustomChangeEvent;
+        import com.easyinsight.analysis.AnalysisItem;
+        import com.easyinsight.analysis.AnalysisItemTypes;
+        import com.easyinsight.analysis.CustomChangeEvent;
         import com.easyinsight.analysis.HierarchyLevel;
         import com.easyinsight.analysis.ListViewHeaderRendererFactory;
-import com.easyinsight.filtering.FilterRawData;
+        import com.easyinsight.analysis.TreeStubCellRenderer;
+        import com.easyinsight.filtering.FilterRawData;
 
         import mx.collections.ArrayCollection;
         import mx.collections.Grouping;
-import mx.collections.GroupingCollection;
+        import mx.collections.GroupingCollection;
         import mx.collections.GroupingField;
-import mx.controls.advancedDataGridClasses.AdvancedDataGridColumn;
+        import mx.controls.advancedDataGridClasses.AdvancedDataGridColumn;
 
         [Bindable]
         private var myData:ArrayCollection;
@@ -57,14 +60,14 @@ import mx.controls.advancedDataGridClasses.AdvancedDataGridColumn;
                 var treeDefinition:TreeDefinition = analysisDefinition as TreeDefinition;
                 var hierarchy:AnalysisHierarchyItem = treeDefinition.hierarchy as AnalysisHierarchyItem;
                 /*var results:ArrayCollection = new ArrayCollection();
-                var masterResult:Object = new Object();*/
+                 var masterResult:Object = new Object();*/
                 /*for each (var row:Object in dataSet) {
-                    handleLevel(hierarchy.hierarchyLevels.getItemAt(0) as HierarchyLevel, hierarchy.hierarchyLevels, row,
-                            masterResult, treeDefinition.items);
-                }
-                for each (var obj:Object in masterResult) {
-                    results.addItem(obj);
-                }*/
+                 handleLevel(hierarchy.hierarchyLevels.getItemAt(0) as HierarchyLevel, hierarchy.hierarchyLevels, row,
+                 masterResult, treeDefinition.items);
+                 }
+                 for each (var obj:Object in masterResult) {
+                 results.addItem(obj);
+                 }*/
                 var groupingColl:GroupingCollection = new GroupingCollection();
                 groupingColl.source = dataSet;
                 var columns:Array = [];
@@ -90,11 +93,16 @@ import mx.controls.advancedDataGridClasses.AdvancedDataGridColumn;
                     //columnHeaderObject.headerText = "";
                     columnHeaderObject.dataField = myHeader.qualifiedName();
                     columnHeaderObject.headerRenderer = new ListViewHeaderRendererFactory(myHeader.display);
+                    if (k > 0) {
+                        var factory:ClassFactory = new ClassFactory(AnalysisCellRenderer);
+                        factory.properties = { analysisItem: myHeader, renderer: clientProcessorMap[myHeader.qualifiedName()] };
+                        columnHeaderObject.itemRenderer = factory;
+                    }
                     /*columnHeaderObject.itemRenderer = new AnalysisCellRendererFactory(keyString, myHeader,
                      clientProcessorMap[keyString]);*/
                     /*var factory:ClassFactory = new ClassFactory(AnalysisCellRenderer);
-                    factory.properties = { analysisItem: myHeader, renderer: clientProcessorMap[keyString] };
-                    columnHeaderObject.itemRenderer = factory;*/
+                     factory.properties = { analysisItem: myHeader, renderer: clientProcessorMap[keyString] };
+                     columnHeaderObject.itemRenderer = factory;*/
                     columns[k] = columnHeaderObject;
                 }
                 myData = dataSet;
