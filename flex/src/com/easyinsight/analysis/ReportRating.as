@@ -1,4 +1,5 @@
 package com.easyinsight.analysis {
+import com.easyinsight.framework.User;
 import com.easyinsight.report.ReportMetrics;
 import com.easyinsight.util.ProgressAlert;
 
@@ -78,7 +79,6 @@ public class ReportRating extends HBox{
     }
 
     private function updateScores():void {
-        Alert.show("score = " + _score);
         var i:int = 0;
         for each (var testImage:Image in stars) {
             i++;
@@ -91,18 +91,20 @@ public class ReportRating extends HBox{
     }
 
     private function onMouseClick(event:MouseEvent):void {
-        var image:Image = event.currentTarget as Image;
-        var i:int = 0;
-        for each (var testImage:Image in stars) {
-            //testImage.source = greenStar;
-            i++;
-            if (testImage == image) {
-                break;
+        if (User.getInstance() != null) {
+            var image:Image = event.currentTarget as Image;
+            var i:int = 0;
+            for each (var testImage:Image in stars) {
+                //testImage.source = greenStar;
+                i++;
+                if (testImage == image) {
+                    break;
+                }
             }
+            score = i;
+            ProgressAlert.alert(this, "Saving your rating...", null, analysisService.rateReport);
+            analysisService.rateReport.send(_reportID, _score);
         }
-        score = i;
-        ProgressAlert.alert(this, "Saving your rating...", null, analysisService.rateReport);
-        analysisService.rateReport.send(_reportID, _score);
     }
 }
 }

@@ -546,7 +546,7 @@
                     <mx:FormItem label="Description:">
                         <mx:TextArea text="{description}" fontFamily="Lucida Grande" fontWeight="normal"
                                      borderStyle="none"
-                                     editable="false" selectable="false" backgroundAlpha="0" width="180" height="200"/>
+                                     editable="false" selectable="false" backgroundAlpha="0" width="180" height="240"/>
                     </mx:FormItem>
                 </mx:Form>
                 <mx:ProgressBar id="progressBar" visible="false" indeterminate="true"/>
