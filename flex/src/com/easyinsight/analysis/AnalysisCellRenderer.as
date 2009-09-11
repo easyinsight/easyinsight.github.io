@@ -51,6 +51,7 @@ public class AnalysisCellRenderer extends UITextField implements IListItemRender
 		public function AnalysisCellRenderer() {
 			super();
             addEventListener(MouseEvent.CLICK, onClick);
+            setStyle("fontFamily", "Tahoma");
 		}
 
         private function details(event:ContextMenuEvent):void {
