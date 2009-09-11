@@ -353,7 +353,7 @@
                            dragDrop="dragDropHandler(event)" selectionMode="multipleCells"
                            keyUp="keyboardHandler(event)" rowColorFunction="rowColor"
                            headerShift="headersShifted(event)" fontSize="12" dragExit="dragExitHandler(event)"
-                           dragOver="dragOverHandler(event)" sort="onSort(event)"/>
+                           dragOver="dragOverHandler(event)" sort="onSort(event)" fontFamily="Tahoma"/>
     </mx:VBox>
 
 </mx:Module>

@@ -51,7 +51,6 @@ public class AnalysisCellRenderer extends UITextField implements IListItemRender
 		public function AnalysisCellRenderer() {
 			super();
             addEventListener(MouseEvent.CLICK, onClick);
-            setStyle("fontFamily", "Tahoma");
 		}
 
         private function details(event:ContextMenuEvent):void {
@@ -106,7 +105,7 @@ public class AnalysisCellRenderer extends UITextField implements IListItemRender
 		}
 			
 		public function set data(value:Object):void {
-			_data = value;
+			_data = value;            
 			if (value != null) {
                 var field:String = analysisItem.qualifiedName();
                 var formatter:Formatter = analysisItem.getFormatter();
