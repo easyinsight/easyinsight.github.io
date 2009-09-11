@@ -126,6 +126,6 @@
         public function onCustomChangeEvent(event:CustomChangeEvent):void {
         }]]></mx:Script>
     <mx:Box width="100%" height="100%">
-        <mx:AdvancedDataGrid id="coreGrid" width="100%" height="100%" visible="true"/>
+        <mx:AdvancedDataGrid id="coreGrid" width="100%" height="100%" visible="true" fontFamily="Tahoma"/>
     </mx:Box>
 </mx:Module>

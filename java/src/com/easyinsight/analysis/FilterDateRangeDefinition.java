@@ -68,14 +68,8 @@ public class FilterDateRangeDefinition extends FilterDefinition {
     public int populatePreparedStatement(PreparedStatement preparedStatement, int start, int type, InsightRequestMetadata insightRequestMetadata) throws SQLException {
         Date workingEndDate;
         Date workingStartDate;
-        if (sliding) {
-            long delta = endDate.getTime() - startDate.getTime();
-            workingEndDate = new Date();
-            workingStartDate = new Date(System.currentTimeMillis() - delta);
-        } else {
-            workingEndDate = endDate;
-            workingStartDate = startDate;
-        }
+        workingEndDate = endDate;
+        workingStartDate = startDate;
         preparedStatement.setTimestamp(start++, new java.sql.Timestamp(workingStartDate.getTime()));
         preparedStatement.setTimestamp(start++, new java.sql.Timestamp(workingEndDate.getTime()));
         return start;

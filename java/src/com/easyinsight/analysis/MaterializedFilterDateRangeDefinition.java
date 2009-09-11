@@ -18,19 +18,14 @@ public class MaterializedFilterDateRangeDefinition extends MaterializedFilterDef
     public MaterializedFilterDateRangeDefinition(AnalysisItem key, Date lowValue, Date highValue, boolean sliding) {
         super(key);
         this.lowValue = lowValue;
-        this.highValue = highValue;        
-        if (sliding) {
-            long delta = highValue.getTime() - lowValue.getTime();
-            this.highValue = new Date();
-            this.lowValue = new Date(System.currentTimeMillis() - delta);
-        }
+        this.highValue = highValue;       
     }
 
     public boolean allows(Value value) {
         boolean allowed = false;        
         if (value.type() == Value.DATE) {
             DateValue dateValue = (DateValue) value;
-            allowed = dateValue.getDate().compareTo(lowValue) >= 0 && dateValue.getDate().compareTo(highValue) <= 0;            
+            allowed = dateValue.getDate().compareTo(lowValue) >= 0 && dateValue.getDate().compareTo(highValue) <= 0;
         }
         return allowed;
     }
