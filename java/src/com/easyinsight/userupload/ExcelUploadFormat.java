@@ -65,6 +65,9 @@ public class ExcelUploadFormat extends UploadFormat {
             int rowCounter = 0;
             for (; rit.hasNext(); ) {
                 HSSFRow row = rit.next();
+                if (row.getLastCellNum() < columnModifier) {
+                    continue;
+                }
                 Value[] values = new Value[row.getLastCellNum() - columnModifier];
                 boolean foundAtLeastOneValue = false;
                 Iterator<HSSFCell> cit = (Iterator<HSSFCell>)row.cellIterator();

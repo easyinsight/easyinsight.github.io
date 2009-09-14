@@ -4,9 +4,12 @@
     <mx:states>
         <mx:State name="hasData">
             <mx:AddChild relativeTo="{box}">
-                <ilog:TreeMap id="treeMap" width="100%" height="100%" areaField="area" labelField="label" colorField="color" algorithm="squarified"
-                    dataProvider="{resultData}" labelThreshold="2" colorScheme="{colorScheme}" borderThickness="1" itemRollOver="onover(event)" itemRollOut="onout(event)"
-                        mouseChildren="true" mouseEnabled="true" click="onClick(event)" allowSelection="false" allowMultipleSelection="false"/>
+                <ilog:TreeMap id="treeMap" width="100%" height="100%" areaField="area" labelField="label"
+                              colorField="color" algorithm="squarified"
+                              dataProvider="{resultData}" labelThreshold="2" colorScheme="{colorScheme}"
+                              borderThickness="1" itemRollOver="onover(event)" itemRollOut="onout(event)"
+                              mouseChildren="true" mouseEnabled="true" click="onClick(event)" allowSelection="false"
+                              allowMultipleSelection="false"/>
             </mx:AddChild>
         </mx:State>
     </mx:states>
@@ -53,24 +56,24 @@
         [Bindable]
         private var colorScheme:String = "depth";
 
-public var tooltip:ToolTip;
+        public var tooltip:ToolTip;
 
-public function onover(event:TreeMapEvent):void {
-     if (event.item) {
-       tooltip =
-         ToolTipManager.createToolTip(event.item.label + " - " + event.item.area,
-           MouseEvent(event.triggerEvent).stageX,
-           MouseEvent(event.triggerEvent).stageY)
-       as ToolTip;
-     }
-   }
+        public function onover(event:TreeMapEvent):void {
+            if (event.item) {
+                tooltip =
+                ToolTipManager.createToolTip(event.item.label + " - " + event.item.area,
+                        MouseEvent(event.triggerEvent).stageX,
+                        MouseEvent(event.triggerEvent).stageY)
+                        as ToolTip;
+            }
+        }
 
-   public function onout(event:TreeMapEvent):void {
-     if (tooltip) {
-       ToolTipManager.destroyToolTip(tooltip);
-       tooltip = null;
-     }
-   }
+        public function onout(event:TreeMapEvent):void {
+            if (tooltip) {
+                ToolTipManager.destroyToolTip(tooltip);
+                tooltip = null;
+            }
+        }
 
 
         private function handleLevel(level:HierarchyLevel, levels:ArrayCollection, row:Object, measure1:AnalysisMeasure, measure2:AnalysisMeasure, masterResult:Object):Object {
@@ -134,7 +137,7 @@ public function onover(event:TreeMapEvent):void {
                 currentState = "hasData";
             } else {
                 currentState = "";
-                resultData = dataSet;                
+                resultData = dataSet;
             }
         }
 

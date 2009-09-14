@@ -5,32 +5,33 @@
            implements="com.easyinsight.analysis.IReportRenderer">
     <mx:states>
         <mx:State name="USA">
-            <mx:RemoveChild target="{unitedStatesMap}"/>
+            <mx:RemoveChild target="{worldMap}"/>
             <mx:AddChild relativeTo="{coreCanvas}" creationPolicy="all">
-                <ilog:USStatesMap width="100%" height="100%" id="unitedStatesMap" allowNavigation="true"
-                                  allowMultipleSelection="true" click="onClick(event)"/>
+                <ilog:USStatesMap width="100%" height="100%" id="unitedStatesMap" allowNavigation="false"
+                                  allowMultipleSelection="false" click="onClick(event)" mapItemRollOver="onover(event)"
+                        mapItemRollOut="onout(event)" filterEvents="true"/>
             </mx:AddChild>
         </mx:State>
         <mx:State name="Europe">
-            <mx:RemoveChild target="{unitedStatesMap}"/>
+            <mx:RemoveChild target="{worldMap}"/>
             <mx:AddChild relativeTo="{coreCanvas}" creationPolicy="all">
                 <ilog:ContinentalEuropeMap width="100%" height="100%" id="europeMap" click="onClick(event)"/>
             </mx:AddChild>
         </mx:State>
         <mx:State name="AsiaPac">
-            <mx:RemoveChild target="{unitedStatesMap}"/>
+            <mx:RemoveChild target="{worldMap}"/>
             <mx:AddChild relativeTo="{coreCanvas}" creationPolicy="all">
                 <ilog:AsiaPacificMap width="100%" height="100%" id="asiaMap" click="onClick(event)"/>
             </mx:AddChild>
         </mx:State>
         <mx:State name="Americas">
-            <mx:RemoveChild target="{unitedStatesMap}"/>
+            <mx:RemoveChild target="{worldMap}"/>
             <mx:AddChild relativeTo="{coreCanvas}" creationPolicy="all">
                 <ilog:AmericasMap width="100%" height="100%" id="americasMap" click="onClick(event)"/>
             </mx:AddChild>
         </mx:State>
         <mx:State name="MiddleEast">
-            <mx:RemoveChild target="{unitedStatesMap}"/>
+            <mx:RemoveChild target="{worldMap}"/>
             <mx:AddChild relativeTo="{coreCanvas}" creationPolicy="all">
                 <ilog:EuropeMiddleEastAfricaMap width="100%" height="100%" id="middleEastMap" click="onClick(event)"/>
             </mx:AddChild>
@@ -58,7 +59,38 @@
         import com.easyinsight.analysis.AnalysisDefinition;
 
         import mx.collections.ArrayCollection;
+        import mx.controls.Alert;
+        import mx.controls.ToolTip;
         import mx.managers.PopUpManager;
+        import mx.managers.ToolTipManager;
+
+        private var tooltip:ToolTip;
+
+        private var selectedPoint:String;
+
+        public function onover(event:MapEvent):void {
+
+            if (event.mapFeature != null && event.mapFeature.key != selectedPoint) {
+                if (tooltip != null && event.mapFeature.key != selectedPoint) {
+                    ToolTipManager.destroyToolTip(tooltip);
+                }
+                var mf:MapFeature = event.mapFeature;
+
+                var point:Point = mf.mapBarycenter;
+                var canvasPoint:Point = map.drawingCanvas.localToGlobal(point);
+                selectedPoint = event.mapFeature.key;
+                tooltip = ToolTipManager.createToolTip(mf.data.label + " - " + mf.data.data,
+                    canvasPoint.x, canvasPoint.y) as ToolTip;
+            }
+        }
+
+        public function onout(event:MapEvent):void {
+            if (tooltip) {
+                ToolTipManager.destroyToolTip(tooltip);
+                selectedPoint = null;
+                tooltip = null;
+            }
+        }
 
         private function onClick(event:MouseEvent):void {
             if (dimension != null && event.shiftKey) {
@@ -164,7 +196,11 @@
                     if (location != null) {
                         var mapFeature:MapFeature = map.getFeature(location);
                         if (mapFeature != null) {
+                            var dataObj:Object = new Object();
+                            dataObj.label = dimensionValue;
+                            dataObj.data = mapDefinition.measure.getFormatter().format(measureValue);
                             var color:uint = renderer.getColor(measureValue);
+                            mapFeature.data = dataObj;
                             mapFeature.setStyle(MapBase.FILL, color);
                         }
                     }

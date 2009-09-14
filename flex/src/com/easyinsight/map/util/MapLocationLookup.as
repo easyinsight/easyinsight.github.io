@@ -17,7 +17,7 @@ package com.easyinsight.map.util
 			usAliasMap["ARIZONA"] = "AZ";
 			usAliasMap["CALIFORNIA"] = "CA";
 			usAliasMap["COLORADO"] = "CO";
-			usAliasMap["CONNECTICUT"] = "AR";
+			usAliasMap["CONNECTICUT"] = "CT";
 			usAliasMap["DELAWARE"] = "DE";
 			usAliasMap["DISTRICT OF COLUMBIA"] = "DC";
 			usAliasMap["FLORIDA"] = "FL";
@@ -33,6 +33,7 @@ package com.easyinsight.map.util
 			usAliasMap["MAINE"] = "ME";
 			usAliasMap["MARYLAND"] = "MD";
 			usAliasMap["MASSACHUSETTS"] = "MA";
+                        
 			usAliasMap["MICHIGAN"] = "MI";
 			usAliasMap["MINNESOTA"] = "MN";
 			usAliasMap["MISSISSIPPI"] = "MS";
