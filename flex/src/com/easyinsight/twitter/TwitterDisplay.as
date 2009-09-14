@@ -25,7 +25,7 @@ import mx.states.State;
 public class TwitterDisplay extends VBox{
 
     private var updatesLabel:Label;
-    private var twitter:List;
+    private var twitter:VBox;
     private var followMeLink:LinkButton;
 
     private var _messages:ArrayCollection;
@@ -67,11 +67,12 @@ public class TwitterDisplay extends VBox{
         }
         addChild(updatesLabel);
         if (twitter == null) {
-            twitter = new List();            
+            twitter = new VBox();
+            /*twitter = new List();
             twitter.rowCount = 3;
             twitter.itemRenderer = new ClassFactory(TwitterItemRenderer);
             twitter.setStyle("backgroundAlpha", 0);
-            BindingUtils.bindProperty(twitter, "dataProvider", this, "messages");
+            BindingUtils.bindProperty(twitter, "dataProvider", this, "messages");*/
             twitter.percentWidth = 100;
         }
 
@@ -114,7 +115,13 @@ public class TwitterDisplay extends VBox{
     }
 
     private function onResult(event:ResultEvent):void {
+        twitter.removeAllChildren();
         messages = twitterService.getTweets.lastResult as ArrayCollection;
+        for each (var message:Tweet in messages) {
+            var twitterRenderer:TwitterItemRenderer = new TwitterItemRenderer();
+            twitterRenderer.data = message;
+            twitter.addChild(twitterRenderer);
+        }
     }
 
 
