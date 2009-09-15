@@ -186,10 +186,8 @@ public class ExcelUploadFormat extends UploadFormat {
             case HSSFCell.CELL_TYPE_BOOLEAN:
                 obj = new StringValue(String.valueOf(cell.getBooleanCellValue()));
                 break;
-            case HSSFCell.CELL_TYPE_NUMERIC:
-                short format = cell.getCellStyle().getDataFormat();
-                boolean dateBoolean = format >= 14;
-                if (dateBoolean) {
+            case HSSFCell.CELL_TYPE_NUMERIC:                                                
+                if (HSSFDateUtil.isCellDateFormatted(cell)) {
                     obj = new DateValue(cell.getDateCellValue());
                 } else {
                     obj = new NumericValue(cell.getNumericCellValue());
