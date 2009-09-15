@@ -50,19 +50,28 @@ public class APIManager implements IAPIManager {
 
     private void createdValidatedSOAPAPI() {        
         ValidatingPublishService basicAuthPublishService = new BasicAuthValidatingPublishService();
-        EndpointImpl basicAuthEndpoint = (EndpointImpl) Endpoint.publish("/ValidatedPublishBasic", basicAuthPublishService);
+        EndpointImpl basicAuthEndpoint = (EndpointImpl) Endpoint.create(basicAuthPublishService);
+        basicAuthEndpoint.setPublishedEndpointUrl("https://www.easy-insight.com/app/services/ValidatedPublishBasic");
+        basicAuthEndpoint.publish("/ValidatedPublishBasic");
         configureBasicAuth(basicAuthEndpoint);
+
         ValidatingPublishService wsDeathStarPublishService = new WSDeathStarValidatingPublishService();
-        EndpointImpl wsDeathStarEndpoint = (EndpointImpl) Endpoint.publish("/ValidatedPublishWSS", wsDeathStarPublishService);
+        EndpointImpl wsDeathStarEndpoint = (EndpointImpl) Endpoint.create(wsDeathStarPublishService);
+        wsDeathStarEndpoint.setPublishedEndpointUrl("https://www.easy-insight.com/app/services/ValidatedPublishWSS");
+        wsDeathStarEndpoint.publish("/ValidatedPublishWSS");
         configureWSDeathStar(wsDeathStarEndpoint);
     }
 
     private void createUncheckedSOAPAPI() {
         UncheckedPublishService basicAuthPublishService = new BasicAuthUncheckedPublishService();
-        EndpointImpl basicAuthEndpoint = (EndpointImpl) Endpoint.publish("/UncheckedPublishBasic", basicAuthPublishService);
+        EndpointImpl basicAuthEndpoint = (EndpointImpl) Endpoint.create(basicAuthPublishService);
+        basicAuthEndpoint.setPublishedEndpointUrl("https://www.easy-insight.com/app/services/UncheckedPublishBasic");
+        basicAuthEndpoint.publish("/UncheckedPublishBasic");
         configureBasicAuth(basicAuthEndpoint);
         UncheckedPublishService wsDeathStarPublishService = new WSDeathStarUncheckedPublishService();
-        EndpointImpl wsDeathStarEndpoint = (EndpointImpl) Endpoint.publish("/UncheckedPublishWSS", wsDeathStarPublishService);
+        EndpointImpl wsDeathStarEndpoint = (EndpointImpl) Endpoint.create(wsDeathStarPublishService);
+        wsDeathStarEndpoint.setPublishedEndpointUrl("https://www.easy-insight.com/app/services/UncheckedPublishWSS");
+        wsDeathStarEndpoint.publish("/UncheckedPublishWSS");
         configureWSDeathStar(wsDeathStarEndpoint);
     }
 
