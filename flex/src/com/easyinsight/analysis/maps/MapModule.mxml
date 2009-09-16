@@ -70,7 +70,7 @@
 
         public function onover(event:MapEvent):void {
 
-            if (event.mapFeature != null && event.mapFeature.key != selectedPoint) {
+            /*if (event.mapFeature != null && event.mapFeature.key != selectedPoint) {
                 if (tooltip != null && event.mapFeature.key != selectedPoint) {
                     ToolTipManager.destroyToolTip(tooltip);
                 }
@@ -81,15 +81,15 @@
                 selectedPoint = event.mapFeature.key;
                 tooltip = ToolTipManager.createToolTip(mf.data.label + " - " + mf.data.data,
                     canvasPoint.x, canvasPoint.y) as ToolTip;
-            }
+            }*/
         }
 
         public function onout(event:MapEvent):void {
-            if (tooltip) {
+            /*if (tooltip) {
                 ToolTipManager.destroyToolTip(tooltip);
                 selectedPoint = null;
                 tooltip = null;
-            }
+            }*/
         }
 
         private function onClick(event:MouseEvent):void {
@@ -257,9 +257,10 @@
         }
 		]]>
     </mx:Script>
-    <mx:VBox id="chartVBox" width="100%" height="100%">
+    <mx:HBox id="chartVBox" width="100%" height="100%">
         <mx:Canvas id="coreCanvas" width="100%" height="100%">
             <ilog:WorldCountriesMap width="100%" height="100%" id="worldMap" click="onClick(event)"/>
         </mx:Canvas>
-    </mx:VBox>
+
+    </mx:HBox>
 </mx:Module>

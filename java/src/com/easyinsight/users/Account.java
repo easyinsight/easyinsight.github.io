@@ -37,8 +37,9 @@ public class Account {
     public static final int CLOSING = 10;
 
     public static final long FREE_MAX = 1000000;
-    public static final long INDIVIDUAL_MAX = 50000000;
-    public static final long PROFESSIONAL_MAX = 200000000;
+    public static final long INDIVIDUAL_MAX = 100000000;
+    public static final long GROUP_MAX = 500000000;
+    public static final long PROFESSIONAL_MAX = 10000000000L;
     public static final long ENTERPRISE_MAX = 1000000000;
     public static final long ADMINISTRATOR_MAX = Long.MAX_VALUE;
 

@@ -208,7 +208,7 @@ public class UserAccountAdminService {
                 session.beginTransaction();
                 List results = session.createQuery("from Account where accountID = ?").setLong(0, accountID).list();
                 account = (Account) results.get(0);
-                int maxUsers = account.getMaxUsers();
+                int maxUsers = getMaxUsers(account.getAccountType());
                 int currentUsers = account.getUsers().size();
                 if (currentUsers >= maxUsers) {
                     userCreationResponse = new UserCreationResponse("You are at the maximum number of users for your account.");
@@ -411,8 +411,35 @@ public class UserAccountAdminService {
         }
     }
 
+    private int getMaxUsers(int accountType) {
+        int maxUsers;
+        if (accountType == Account.ENTERPRISE) {
+            maxUsers = 1000;
+
+        } else if (accountType == Account.PROFESSIONAL) {
+            maxUsers = 1000;
+
+        } else if (accountType == Account.INDIVIDUAL) {
+            maxUsers = 1;
+
+        } else if (accountType == Account.FREE) {
+            maxUsers = 1;
+
+        } else if (accountType == Account.GROUP) {
+
+            maxUsers = 50;
+        } else if (accountType == Account.ADMINISTRATOR) {
+
+            maxUsers = 50;
+        } else {
+            throw new RuntimeException();
+        }
+        return maxUsers;
+    }
+
     public AccountStats getAccountStats() {
         long accountID = SecurityUtil.getAccountID();
+        int accountType = SecurityUtil.getAccountTier();
         long usedSize = 0;
         long maxSize = 0;
         int currentUsers = 0;
@@ -440,13 +467,25 @@ public class UserAccountAdminService {
             ResultSet apiRS = apiTodayStmt.executeQuery();
             if (apiRS.next()) {
                 usedAPI = apiRS.getLong(1);
-            }
-            PreparedStatement accountStmt = conn.prepareStatement("SELECT max_size, max_users from account WHERE account_id = ?");
-            accountStmt.setLong(1, accountID);
-            ResultSet spaceRS = accountStmt.executeQuery();
-            if (spaceRS.next()) {
-                maxSize = spaceRS.getLong(1);
-                maxUsers = spaceRS.getInt(2);
+            }            
+            if (accountType == Account.ENTERPRISE) {
+                maxUsers = 1000;
+                maxSize = Account.ENTERPRISE_MAX;
+            } else if (accountType == Account.PROFESSIONAL) {
+                maxUsers = 1000;
+                maxSize = Account.PROFESSIONAL_MAX;
+            } else if (accountType == Account.INDIVIDUAL) {
+                maxUsers = 1;
+                maxSize = Account.INDIVIDUAL_MAX;
+            } else if (accountType == Account.FREE) {
+                maxUsers = 1;
+                maxSize = Account.FREE_MAX;
+            } else if (accountType == Account.GROUP) {
+                maxSize = Account.GROUP_MAX;
+                maxUsers = 50;
+            } else if (accountType == Account.ADMINISTRATOR) {
+                maxSize = Account.ADMINISTRATOR_MAX;
+                maxUsers = 50;
             }
         } catch (Exception e) {
             LogClass.error(e);
