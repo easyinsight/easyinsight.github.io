@@ -20,6 +20,8 @@ public class UserServiceResponse {
     private boolean dataSourceCreator;
     private boolean insightCreator;
     private boolean activated;
+    private boolean billingInformationGiven;
+    private int accountState;
 
     public UserServiceResponse(boolean successful, String failureMessage) {
         this.successful = successful;
@@ -28,7 +30,7 @@ public class UserServiceResponse {
 
     public UserServiceResponse(boolean successful, long userID, long accountID, String name, int accountType,
                                long spaceAllowed, String email, String userName, String encryptedPassword, boolean accountAdmin,
-                               boolean dataSourceCreator, boolean insightCreator) {
+                               boolean dataSourceCreator, boolean insightCreator, boolean billingInformationGiven, int accountState) {
         this.successful = successful;
         this.userID = userID;
         this.accountID = accountID;
@@ -41,6 +43,8 @@ public class UserServiceResponse {
         this.accountAdmin = accountAdmin;
         this.dataSourceCreator = dataSourceCreator;
         this.insightCreator = insightCreator;
+        this.billingInformationGiven = billingInformationGiven;
+        this.accountState = accountState;
     }
 
     public UserServiceResponse() {
@@ -156,5 +160,21 @@ public class UserServiceResponse {
 
     public void setActivated(boolean activated) {
         this.activated = activated;
+    }
+
+    public boolean isBillingInformationGiven() {
+        return billingInformationGiven;
+    }
+
+    public void setBillingInformationGiven(boolean billingInformationGiven) {
+        this.billingInformationGiven = billingInformationGiven;
+    }
+
+    public int getAccountState() {
+        return accountState;
+    }
+
+    public void setAccountState(int accountState) {
+        this.accountState = accountState;
     }
 }

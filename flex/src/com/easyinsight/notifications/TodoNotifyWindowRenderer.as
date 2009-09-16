@@ -21,6 +21,7 @@ public class TodoNotifyWindowRenderer extends HBox {
 
     override public function set data(value:Object):void {
         this.todoInfo = value as TodoEventInfo;
+        this.todoInfo.displayObject = this;
         var str:String = todoInfo.getTitle();
         if(str.length > 48)
             titleLabel.text = str.substr(0, 45) + "...";
@@ -29,7 +30,7 @@ public class TodoNotifyWindowRenderer extends HBox {
         titleLabel.toolTip = str;
         if(todoInfo.action == TodoEventInfo.ADD) {
             titleLabel.setStyle("textDecoration", "underline");
-            titleLabel.addEventListener(MouseEvent.CLICK, onNavigateClick);
+            titleLabel.addEventListener(MouseEvent.CLICK, todoInfo.onNavigateClick);
             button.visible = false;
         }
         else if(todoInfo.action == TodoEventInfo.COMPLETE) {
@@ -37,6 +38,10 @@ public class TodoNotifyWindowRenderer extends HBox {
             titleLabel.removeEventListener(MouseEvent.CLICK, onNavigateClick);
             button.setStyle("icon", checkboxIcon);
             button.visible = true;
+        }
+
+        if(!todoInfo.canDelete()) {
+            deleteButton.visible = false;
         }
     }
 

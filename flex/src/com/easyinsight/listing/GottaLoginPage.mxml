@@ -28,7 +28,7 @@
                 if (successful) {                            
                     User.initializeUser(authResult.name, authResult.email,
                     	authResult.accountType, authResult.spaceAllowed, authResult.accountAdmin,
-                            authResult.dataSourceCreator, authResult.insightCreator, authResult.userID, authResult.activated);
+                            authResult.dataSourceCreator, authResult.insightCreator, authResult.userID, authResult.activated, authResult.billingInformationGiven, authResult.accountState);
                 	User.getInstance().password = authResult.encryptedPassword;
                 	User.getInstance().userName = authResult.userName;                    
                     dispatchEvent(new LoginEvent(LoginEvent.LOGIN));

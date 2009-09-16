@@ -38,6 +38,7 @@
         import com.easyinsight.framework.UserTransferObject;
         import com.easyinsight.framework.User;
 
+        import com.easyinsight.util.BuyOurStuffWindow;
         import com.easyinsight.util.PopUpUtil;
         import com.easyinsight.util.ProgressAlert;
 
@@ -81,7 +82,7 @@
         private function postUserInfo(event:UserDefinitionEvent):void {
             this.user = event.user;
             this.password = event.password;
-            ProgressAlert.alert(this, "Creating account...", "The account has been created and an activation email sent to your address.", creationService.createAccount);
+            ProgressAlert.alert(this, "Creating account...", null, creationService.createAccount);
             attemptAccountCreation();
         }
 
@@ -93,17 +94,27 @@
             creationService.createAccount(user, account, password, null);
         }
 
+        private function onLogin(event:LoginEvent):void {
+            if(User.getInstance().getAccountType() != Account.FREE) {
+                var window:BuyOurStuffWindow = new BuyOurStuffWindow();
+                PopUpManager.addPopUp(window, this, true);
+                PopUpUtil.centerPopUp(window);
+            }
+            User.getEventNotifier().removeEventListener(LoginEvent.LOGIN, onLogin);
+        }
+
         private function createdAccount():void {
             var resultID:int = creationService.createAccount.lastResult as int;
             var c:LoginComponent = new LoginComponent();
             c.targetURL = _destinationURL;
             c.signon(user.userName, password);
+            User.getEventNotifier().addEventListener(LoginEvent.LOGIN, onLogin);
         }
 
         private function gotUserInfo():void {
             var user:UserServiceResponse = creationService.authenticate.lastResult as UserServiceResponse;
             User.initializeUser(user.name, user.email, user.accountType, user.spaceAllowed, user.accountAdmin,
-                    user.dataSourceCreator, user.insightCreator, user.userID, user.activated);
+                    user.dataSourceCreator, user.insightCreator, user.userID, user.activated, user.billingInformationGiven, user.accountState);
             User.getInstance().password = user.encryptedPassword;
             User.getInstance().userName = user.userName;
             User.getEventNotifier().dispatchEvent(new LoginEvent(LoginEvent.LOGIN));

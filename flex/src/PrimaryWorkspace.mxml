@@ -35,6 +35,7 @@
     </mx:states>
     <mx:Script>
 		<![CDATA[
+        import com.easyinsight.account.Account;
         import com.easyinsight.analysis.DefaultMenuFactory;
         import com.easyinsight.analysis.DelayedAPIKeyLink;
         import com.easyinsight.analysis.DelayedReportLink;
@@ -337,8 +338,6 @@
                                                                 case "groups":
                                                                     navigation(new NavigationEvent("Groups"));
                                                                     break;
-                                                                case "groupDetail":
-                                                                    break;
                                                                 case "intro":
                                                                         if(o.type != null && o.type == "tour")
                                                                             navigation(new NavigationEvent("Intro", null, { tour: true }));
@@ -499,7 +498,7 @@
             if (authResult != null) {
                 User.initializeUser(authResult.name, authResult.email,
                         authResult.accountType, authResult.spaceAllowed, authResult.accountAdmin,
-                        authResult.dataSourceCreator, authResult.insightCreator, authResult.userID, authResult.activated);
+                        authResult.dataSourceCreator, authResult.insightCreator, authResult.userID, authResult.activated, authResult.billingInformationGiven, authResult.accountState);
                 User.getInstance().password = authResult.encryptedPassword;
                 User.getInstance().userName = authResult.userName;
                 loggedIn = true;

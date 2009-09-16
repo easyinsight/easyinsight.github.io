@@ -16,10 +16,7 @@ import com.easyinsight.analysis.*;
 import com.easyinsight.PasswordStorage;
 import com.easyinsight.eventing.EventDispatcher;
 import com.easyinsight.eventing.AsyncCreatedEvent;
-import com.easyinsight.notifications.TodoEventInfo;
-import com.easyinsight.notifications.ConfigureDataFeedTodo;
-import com.easyinsight.notifications.ConfigureDataFeedInfo;
-import com.easyinsight.notifications.TodoBase;
+import com.easyinsight.notifications.*;
 import com.easyinsight.scheduler.*;
 import com.easyinsight.solutions.SolutionInstallInfo;
 
@@ -635,7 +632,7 @@ public class UserUploadService implements IUserUploadService {
             try {
                 s.getTransaction().begin();
                 TodoBase todo = (TodoBase) s.get(TodoBase.class, todoID);
-                if(todo != null && todo.getUserID() == userID)
+                if(todo != null && todo.getUserID() == userID && todo.getType() != TodoBase.BUY_OUR_STUFF)
                     s.delete(todo);
                 s.getTransaction().commit();
             }
@@ -698,9 +695,9 @@ public class UserUploadService implements IUserUploadService {
     }
 
     private void addTodosForTypes(EIConnection conn, List<TodoEventInfo> translatedResults, Map.Entry<Integer, List<TodoBase>> listPair) throws SQLException {
+        List<TodoEventInfo> result = new LinkedList<TodoEventInfo>();
         switch(listPair.getKey()) {
             case TodoBase.CONFIGURE_DATA_SOURCE:
-                List<TodoEventInfo> result = new LinkedList<TodoEventInfo>();
                 List<Long> feedIDs = new LinkedList<Long>();
                 for(TodoBase cur : listPair.getValue()) {
                     ConfigureDataFeedTodo configTodo = (ConfigureDataFeedTodo) cur;
@@ -718,6 +715,17 @@ public class UserUploadService implements IUserUploadService {
                         ConfigureDataFeedInfo configInfo = (ConfigureDataFeedInfo) cur;
                         configInfo.setFeedName(dataFeedMapping.get(configInfo.getFeedID()));
                     }
+                }
+                translatedResults.addAll(result);
+                break;
+            case TodoBase.BUY_OUR_STUFF:
+                for(TodoBase cur: listPair.getValue()) {
+                    BuyOurStuffTodo buyOurStuff = (BuyOurStuffTodo) cur;
+                    BuyOurStuffInfo resultInfo = new BuyOurStuffInfo();
+                    resultInfo.setUserId(buyOurStuff.getUserID());
+                    resultInfo.setTodoID(buyOurStuff.getId());
+                    resultInfo.setAction(TodoEventInfo.ADD);
+                    result.add(resultInfo);
                 }
                 translatedResults.addAll(result);
                 break;

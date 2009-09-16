@@ -18,6 +18,8 @@ package com.easyinsight.framework
         public var dataSourceCreator:Boolean;
         public var insightCreator:Boolean;
         public var activated:Boolean;
+        public var billingInformationGiven:Boolean;
+        public var accountState:int;
 		
 		public function UserServiceResponse()
 			{

@@ -76,7 +76,7 @@ public class SecurityUtil {
                     return new UserServiceResponse(false, "This account is not active. Please log in to re-activate your account.");
                 }
                 userServiceResponse = new UserServiceResponse(true, user.getUserID(), user.getAccount().getAccountID(), user.getName(),
-                                user.getAccount().getAccountType(), account.getMaxSize(), user.getEmail(), user.getUserName(), null, user.isAccountAdmin(), user.isDataSourceCreator(), user.isInsightCreator());
+                                user.getAccount().getAccountType(), account.getMaxSize(), user.getEmail(), user.getUserName(), null, user.isAccountAdmin(), user.isDataSourceCreator(), user.isInsightCreator(), account.isBillingInformationGiven(), account.getAccountState());
             } else {
                /* results = session.createQuery("from Account where accountKey = ?").setString(0, key).list();
                 if (results.size() > 0) {

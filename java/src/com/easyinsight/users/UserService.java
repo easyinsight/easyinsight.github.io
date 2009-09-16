@@ -14,6 +14,7 @@ import com.easyinsight.groups.Group;
 import com.easyinsight.groups.GroupStorage;
 import com.easyinsight.billing.BrainTreeBillingSystem;
 import com.easyinsight.PasswordStorage;
+import com.easyinsight.notifications.BuyOurStuffTodo;
 
 import java.util.List;
 import java.util.ArrayList;
@@ -374,6 +375,11 @@ public class UserService implements IUserService {
                 account.setGroupID(new GroupStorage().addGroup(group, user.getUserID(), conn));
                 session.update(account);
             }
+            if(account.getAccountType() != Account.FREE) {
+                BuyOurStuffTodo todo = new BuyOurStuffTodo();
+                todo.setUserID(user.getUserID());
+                session.save(todo);
+            }
             //if (account.getAccountType() == Account.FREE || account.getAccountType() == Account.INDIVIDUAL) {
             String activationKey = RandomTextGenerator.generateText(12);
             PreparedStatement insertActivationStmt = conn.prepareStatement("INSERT INTO ACCOUNT_ACTIVATION (ACCOUNT_ID, ACTIVATION_KEY, CREATION_DATE, target_url) VALUES (?, ?, ?, ?)");
@@ -614,7 +620,7 @@ public class UserService implements IUserService {
                 return null;
             UserServiceResponse response = new UserServiceResponse(true, user.getUserID(), user.getAccount().getAccountID(), user.getName(),
                                 account.getAccountType(), account.getMaxSize(), user.getEmail(), user.getUserName(),
-                                user.getPassword(), user.isAccountAdmin(), user.isDataSourceCreator(), user.isInsightCreator());
+                                user.getPassword(), user.isAccountAdmin(), user.isDataSourceCreator(), user.isInsightCreator(), (user.getAccount().isBillingInformationGiven() != null && user.getAccount().isBillingInformationGiven()), user.getAccount().getAccountState());
             response.setActivated(account.isActivated());
             return response;
         }
@@ -674,7 +680,7 @@ public class UserService implements IUserService {
                         Account account = (Account) accountResults.get(0);
                         if (account.getAccountState() == Account.ACTIVE || account.getAccountState() == Account.TRIAL || account.getAccountState() == Account.DELINQUENT) {
                             userServiceResponse = new UserServiceResponse(true, user.getUserID(), user.getAccount().getAccountID(), user.getName(),
-                                user.getAccount().getAccountType(), account.getMaxSize(), user.getEmail(), user.getUserName(), encryptedPassword, user.isAccountAdmin(), user.isDataSourceCreator(), user.isInsightCreator());
+                                user.getAccount().getAccountType(), account.getMaxSize(), user.getEmail(), user.getUserName(), encryptedPassword, user.isAccountAdmin(), user.isDataSourceCreator(), user.isInsightCreator(), (user.getAccount().isBillingInformationGiven() != null && user.getAccount().isBillingInformationGiven()), user.getAccount().getAccountState());
                             userServiceResponse.setActivated(account.isActivated());
                         } else {
                             userServiceResponse = new UserServiceResponse(false, "Your account is not active.");
@@ -714,7 +720,7 @@ public class UserService implements IUserService {
                         Account account = (Account) accountResults.get(0);
                         if (account.getAccountState() == Account.ACTIVE || account.getAccountState() == Account.TRIAL || account.getAccountState() == Account.CLOSING) {
                             userServiceResponse = new UserServiceResponse(true, user.getUserID(), user.getAccount().getAccountID(), user.getName(),
-                                 user.getAccount().getAccountType(), account.getMaxSize(), user.getEmail(), user.getUserName(), encryptedPassword, user.isAccountAdmin(), user.isDataSourceCreator(), user.isInsightCreator());
+                                 user.getAccount().getAccountType(), account.getMaxSize(), user.getEmail(), user.getUserName(), encryptedPassword, user.isAccountAdmin(), user.isDataSourceCreator(), user.isInsightCreator(), (user.getAccount().isBillingInformationGiven() != null && user.getAccount().isBillingInformationGiven()), user.getAccount().getAccountState());
                             userServiceResponse.setActivated(account.isActivated());
                         } else {
                             userServiceResponse = new UserServiceResponse(false, "Your account is not active.");

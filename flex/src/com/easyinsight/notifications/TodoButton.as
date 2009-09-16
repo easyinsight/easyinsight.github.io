@@ -8,6 +8,8 @@ import flash.events.Event;
 
 import flash.events.MouseEvent;
 
+import flash.utils.describeType;
+
 import mx.binding.utils.BindingUtils;
 import mx.collections.ArrayCollection;
 import mx.controls.Alert;
@@ -77,6 +79,7 @@ public class TodoButton extends CorePageButton{
 
     private function hack():void {
         var hack:ConfigureDataFeedInfo;
+        var hacka:BuyOurStuffInfo;
     }
 
     [Bindable]

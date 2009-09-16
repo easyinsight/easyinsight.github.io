@@ -141,6 +141,7 @@
 
         <mapping class="com.easyinsight.notifications.TodoBase" />
         <mapping class="com.easyinsight.notifications.ConfigureDataFeedTodo" />
+        <mapping class="com.easyinsight.notifications.BuyOurStuffTodo" />
     </session-factory>
 
 </hibernate-configuration>

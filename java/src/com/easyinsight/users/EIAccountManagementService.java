@@ -42,7 +42,7 @@ public class EIAccountManagementService {
                             throw new SecurityException();
                         }
                         userServiceResponse = new UserServiceResponse(true, user.getUserID(), user.getAccount().getAccountID(), user.getName(),
-                                user.getAccount().getAccountType(), account.getMaxSize(), user.getEmail(), user.getUserName(), encryptedPassword, user.isAccountAdmin(), user.isDataSourceCreator(), user.isInsightCreator());
+                                user.getAccount().getAccountType(), account.getMaxSize(), user.getEmail(), user.getUserName(), encryptedPassword, user.isAccountAdmin(), user.isDataSourceCreator(), user.isInsightCreator(), (user.getAccount().isBillingInformationGiven() != null && user.getAccount().isBillingInformationGiven()), user.getAccount().getAccountState());
                         // FlexContext.getFlexSession().getRemoteCredentials();
                     } else {
                         userServiceResponse = new UserServiceResponse(false, "Incorrect password, please try again.");

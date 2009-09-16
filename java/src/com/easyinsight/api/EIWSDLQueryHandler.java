@@ -50,35 +50,6 @@ import java.util.Collection;
 	    protected void updateDefinition(final Definition definition, final Map<String, Definition> done,
  	            final Map<String, SchemaReference> doneSchemas, final String base, final EndpointInfo endpointInfo) {
 
-// 	        // This code is from OW Celtix ServletServerTransport class (that was
-// 	        // updating the address of the Port binding)
-// 	        // And this is not done anymore in CXF
-// 	        QName serviceName = endpointInfo.getService().getName();
-// 	        javax.wsdl.Service serv = definition.getService(serviceName);
-// 	        Collection<Port> ports = serv.getPorts().values();
-// 	        for (Port port : ports) {
-// 	            List<?> exts = port.getExtensibilityElements();
-// 	            if (exts != null && exts.size() > 0) {
-// 	                ExtensibilityElement el = (ExtensibilityElement) exts.get(0);
-// 	                if (SOAPBindingUtil.isSOAPAddress(el)) {
-// 	                    SoapAddress add = SOAPBindingUtil.getSoapAddress(el);
-//                         String existingURI = add.getLocationURI();
-//
-//                         int indexHttp = existingURI.indexOf("8080");
-//                         int indexHttps = existingURI.indexOf("8443");
-//                         String newURI;
-//                         if(indexHttp != -1)
-//                            newURI = "http://www.easy-insight.com";
-//                         else
-//                            newURI = "https://www.easy-insight.com";
-//                         newURI = newURI + existingURI.substring(indexHttps + 4);
-//
-//                        add.setLocationURI(newURI);
-//	              }
-// 	            }
-// 	        }
-//
-// 	        super.updateDefinition(definition, done, doneSchemas, base, endpointInfo);
 
  	    }
 

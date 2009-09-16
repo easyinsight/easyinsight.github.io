@@ -14,6 +14,7 @@ import javax.persistence.*;
 public class TodoBase {
 
     public static final int CONFIGURE_DATA_SOURCE = 1;
+    public static final int BUY_OUR_STUFF = 2;
 
     @Id
     @GeneratedValue(strategy=GenerationType.IDENTITY)

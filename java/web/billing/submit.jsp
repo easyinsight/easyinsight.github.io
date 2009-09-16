@@ -10,6 +10,7 @@
 <%@ page import="java.util.*" %>
 <%@ page import="com.easyinsight.users.User" %>
 <%@ page import="com.easyinsight.users.AccountActivityStorage" %>
+<%@ page import="com.easyinsight.notifications.TodoBase" %>
 <%--
   Created by IntelliJ IDEA.
   User: abaldwin
@@ -38,6 +39,11 @@
             user = (User) s.createQuery("from User where userID = ?").setLong(0, userID).list().get(0);
             account = (Account) s.createQuery("from Account where accountID = ?").setLong(0, accountID).list().get(0);
             account.setBillingInformationGiven(true);
+
+            List l = s.createQuery("from BuyOurStuffTodo where userID = ?").setLong(0, userID).list();
+            if(l.size() > 0) {
+                s.delete(l.get(0));
+            }
 
             if((account.getAccountType() == Account.GROUP || account.getAccountType() == Account.PROFESSIONAL || account.getAccountType() == Account.ENTERPRISE)
               && !user.isAccountAdmin())
