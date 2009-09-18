@@ -302,9 +302,12 @@
                     tags = tags.substring(0, tags.length - 1);
                 }
                 admin = event.dataSourceAccessible;
-                if (admin && report.filterDefinitions != null && report.filterDefinitions.length > 0) {
+                if (report.filterDefinitions != null && report.filterDefinitions.length > 0) {
                     filterDefinitions = report.filterDefinitions;
                     showFilters = true;
+                }
+                if (!admin) {
+                    showReportEditor = false;
                 }
                 ownerName = report.authorName;
                 var dateFormatter:DateFormatter = new DateFormatter();
