@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" creationComplete="creationComplete()">
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" creationComplete="creationComplete()" enabled="{_activated}">
 	<mx:Script>
 		<![CDATA[
         import com.easyinsight.util.PopUpUtil;
@@ -36,15 +36,27 @@
 
         private function creationComplete():void {
             initHandlers();
-            var components:Array = [ anyoneCheckbox, marketplaceCheckbox, addOwnerGroupButton, addOwnerUserButton, addViewerUserButton, addViewerGroupButton ];
-            if(!_activated) {
+
+        }
+
+        override protected function commitProperties():void {
+            super.commitProperties();
+            /*var components:Array = [ anyoneCheckbox, marketplaceCheckbox, addOwnerGroupButton, addOwnerUserButton, addViewerUserButton, addViewerGroupButton ];
+            if (!_activated) {
                 for each (var component:UIComponent in components) {
                     component.enabled = false;
                     component.toolTip = SHARE_ERROR;
                 }
                 ownersGrid.dragMoveEnabled = false;
                 viewersGrid.dragMoveEnabled = false;
-            }
+            } else {
+                for each (var component2:UIComponent in components) {
+                    component2.enabled = true;
+                    component2.toolTip = "";
+                }
+                ownersGrid.dragMoveEnabled = true;
+                viewersGrid.dragMoveEnabled = true;
+            }*/
         }
 
         private function initHandlers():void {
@@ -138,11 +150,12 @@
 
         public function set activated(value:Boolean):void {
             _activated = value;
+            invalidateProperties();
         }
 
         private var _liveData:Boolean;
 
-	    [Bindable(event="liveDataChanged")]
+        [Bindable(event="liveDataChanged")]
         public function get liveData():Boolean {
             return _liveData;
         }
