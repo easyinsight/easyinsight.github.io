@@ -1,6 +1,6 @@
 <?xml version="1.0" ?>
 <mx:HBox xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:analysis="com.easyinsight.analysis.*" paddingTop="5" paddingBottom="5"
-        paddingLeft="5" paddingRight="5">
+        paddingLeft="5" paddingRight="5" horizontalScrollPolicy="off" verticalScrollPolicy="off">
     <mx:states>
         <mx:State name="UnavailableDataSource">
             <mx:RemoveChild target="{dsButton}"/>
