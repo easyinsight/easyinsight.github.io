@@ -275,9 +275,11 @@ public class AnalysisService {
 
     public boolean subscribeToAnalysis(long analysisID) {
         SecurityUtil.authorizeInsight(analysisID);
+        Session session = Database.instance().createSession();
         try {
+            session.getTransaction().begin();
             long userID = SecurityUtil.getUserID();
-            AnalysisDefinition analysisDefinition = analysisStorage.getPersistableReport(analysisID);
+            AnalysisDefinition analysisDefinition = analysisStorage.getPersistableReport(analysisID, session);
             boolean found = false;
             for (UserToAnalysisBinding existingBinding : analysisDefinition.getUserBindings()) {
                 if (existingBinding.getUserID() == userID) {
@@ -287,12 +289,16 @@ public class AnalysisService {
             if (!found) {
                 UserToAnalysisBinding binding = new UserToAnalysisBinding(userID, Roles.SUBSCRIBER);
                 analysisDefinition.getUserBindings().add(binding);
-                analysisStorage.saveAnalysis(analysisDefinition);
+                analysisStorage.saveAnalysis(analysisDefinition, session);
             }
+            session.getTransaction().commit();
             return !found;
         } catch (Exception e) {
             LogClass.error(e);
+            session.getTransaction().rollback();
             throw new RuntimeException(e);
+        } finally {
+            session.close();
         }
     }
 
