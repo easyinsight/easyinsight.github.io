@@ -553,10 +553,10 @@
                 <url rsl-url="rpc_3.3.0.4852.swf"/>
             </runtime-shared-library-path>
         </mxmlc>
-        <SWFSize artifactPath="${flex.path}/Column3DChartModule.swf" key="${ei.key}" secretKey="${ei.secret.key}" component="Column3DChartModule"
+        <!--<SWFSize artifactPath="${flex.path}/Column3DChartModule.swf" key="${ei.key}" secretKey="${ei.secret.key}" component="Column3DChartModule"
             sizeAPIKey="${size.api.key}"/>
         <SWFAnalysis linkReportPath="column3d.txt" key="${ei.key}" secretKey="${ei.secret.key}" component="Column3DChartModule"
-                classAnalysisAPIKey="${analysis.api.key}" packageFilter="com.easyinsight"/>
+                classAnalysisAPIKey="${analysis.api.key}" packageFilter="com.easyinsight"/>-->
     </target>
 
     <target name="module.piechart">
