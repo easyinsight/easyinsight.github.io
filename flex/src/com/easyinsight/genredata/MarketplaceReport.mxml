@@ -211,7 +211,7 @@
             <mx:HBox width="100%">
                 <mx:Image source="{reportImage}"/>
                 <mx:TextArea borderStyle="none" backgroundAlpha="0" editable="false" selectable="false"
-                             text="{reportDescription}" width="100%" maxChars="150"/>
+                             text="{reportDescription}" width="100%" maxChars="150" verticalScrollPolicy="off" toolTip="{reportDescription}"/>
             </mx:HBox>
             <mx:HBox>
                 <mx:Label text="Tags:" fontFamily="Tahoma" fontWeight="bold"/>
