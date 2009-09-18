@@ -10,6 +10,7 @@ import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.datafeeds.FeedPersistenceMetadata;
 import com.easyinsight.core.*;
 import com.easyinsight.cache.Cache;
+import com.easyinsight.users.Account;
 
 import java.util.*;
 import java.util.Date;
@@ -139,11 +140,27 @@ public class DataStorage {
         ResultSet currentSpaceRS = queryStmt.executeQuery();
         currentSpaceRS.next();
         long size = currentSpaceRS.getLong(1);
-        PreparedStatement spaceAllowed = conn.prepareStatement("SELECT MAX_SIZE FROM ACCOUNT WHERE account_id = ?");
+        PreparedStatement spaceAllowed = conn.prepareStatement("SELECT ACCOUNT_TYPE FROM ACCOUNT WHERE account_id = ?");
         spaceAllowed.setLong(1, accountID);
         ResultSet spaceRS = spaceAllowed.executeQuery();
         spaceRS.next();
-        long allowed = spaceRS.getLong(1);
+        int accountType = spaceRS.getInt(1);
+        long allowed;
+        if (accountType == Account.ENTERPRISE) {
+            allowed = Account.ENTERPRISE_MAX;
+        } else if (accountType == Account.PROFESSIONAL) {
+            allowed = Account.PROFESSIONAL_MAX;
+        } else if (accountType == Account.INDIVIDUAL) {
+            allowed = Account.INDIVIDUAL_MAX;
+        } else if (accountType == Account.FREE) {
+            allowed = Account.FREE_MAX;
+        } else if (accountType == Account.GROUP) {
+            allowed = Account.GROUP_MAX;
+        } else if (accountType == Account.ADMINISTRATOR) {
+            allowed = Account.ADMINISTRATOR_MAX;           
+        } else {
+            throw new RuntimeException();
+        }
         if (size > allowed) {
             throw new StorageLimitException("Storage boundary for this account has been reached.");
         }
