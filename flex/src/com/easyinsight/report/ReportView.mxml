@@ -541,7 +541,7 @@
                         <mx:Label text="{attribution}" fontFamily="Lucida Grande" fontWeight="normal" maxWidth="180"/>
                     </mx:FormItem>
                     <mx:FormItem label="Report Rating:">
-                        <analysis:ReportRating reportID="{_reportID}" score="{_score}"/>
+                        <analysis:ReportRating reportID="{_reportID}" score="{_score}" rateable="true"/>
                     </mx:FormItem>
                     <mx:FormItem label="Description:">
                         <mx:TextArea text="{description}" fontFamily="Lucida Grande" fontWeight="normal"

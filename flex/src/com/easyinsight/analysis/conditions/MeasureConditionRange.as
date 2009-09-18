@@ -1,6 +1,8 @@
 package com.easyinsight.analysis.conditions
 {
-	[Bindable]
+import mx.collections.ArrayCollection;
+
+[Bindable]
 	[RemoteClass(alias="com.easyinsight.conditions.MeasureConditionRange")]
 	public class MeasureConditionRange
 	{
@@ -27,11 +29,18 @@ package com.easyinsight.analysis.conditions
 				valueRange = new LogarithmicValueRange();
 			}
 			return valueRange;
-		}			
+		}
+
+        public function createColorData():ArrayCollection {
+            var colorData:ArrayCollection = new ArrayCollection();
+            if (lowCondition == null) {
+
+            }
+            return colorData;
+        }
 
 		public function getColor(value:Number, valueRange:ValueRange):uint {
 			var transformed:Number = valueRange.getRangeValue(value);
-			trace("transformed number = " + transformed);
 			var measureCondition:MeasureCondition = getCondition(transformed);
 			return measureCondition.getColor(transformed);
 		}

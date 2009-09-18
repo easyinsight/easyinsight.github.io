@@ -1,0 +1,45 @@
+<?xml version="1.0" ?>
+<mx:Box xmlns:mx="http://www.adobe.com/2006/mxml">
+    <mx:Script><![CDATA[
+        import mx.collections.ArrayCollection;
+
+        private var _dataProvider:ArrayCollection;
+        private var _keyword:String;
+        private var _selectedTag:String;
+
+
+        [Bindable(event="keywordChanged")]
+        public function get keyword():String {
+            return _keyword;
+        }
+
+        public function set keyword(value:String):void {
+            if (_keyword == value) return;
+            _keyword = value;
+            dispatchEvent(new Event("keywordChanged"));
+        }
+
+        [Bindable(event="selectedTagChanged")]
+        public function get selectedTag():String {
+            return _selectedTag;
+        }
+
+        public function set selectedTag(value:String):void {
+            if (_selectedTag == value) return;
+            _selectedTag = value;
+            dispatchEvent(new Event("selectedTagChanged"));
+        }
+
+        [Bindable(event="dataProviderChanged")]
+        public function get dataProvider2():ArrayCollection {
+            return _dataProvider;
+        }
+
+        public function set dataProvider2(value:ArrayCollection):void {
+            if (_dataProvider == value) return;
+            _dataProvider = value;
+            dispatchEvent(new Event("dataProviderChanged"));
+        }
+
+        ]]></mx:Script>
+</mx:Box>

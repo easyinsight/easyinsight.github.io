@@ -16,6 +16,12 @@
         </properties>
     </destination>
 
+    <destination id="exchangeService">
+        <properties>
+            <source>com.easyinsight.exchange.ExchangeService</source>
+        </properties>
+    </destination>
+
     <destination id="tokenService">
         <properties>
             <source>com.easyinsight.users.TokenService</source>

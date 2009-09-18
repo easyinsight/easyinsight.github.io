@@ -29,13 +29,20 @@ public class ReportRating extends HBox{
 
     private var analysisService:RemoteObject;
 
+    private var _rateable:Boolean = false;                                                                                  
+
     public function ReportRating() {
         super();
     }
 
+
+    public function set rateable(value:Boolean):void {
+        _rateable = value;
+    }
+
     public function set score(value:int):void {
         _score = value;
-        if (value > 0) {
+        if (stars != null) {
             updateScores();
         }
     }
@@ -46,29 +53,31 @@ public class ReportRating extends HBox{
 
     override protected function createChildren():void {
         super.createChildren();
-        analysisService = new RemoteObject();
-        analysisService.destination = "analysisDefinition";
-        analysisService.rateReport.addEventListener(ResultEvent.RESULT, onResult);
+        if (_rateable) {
+            analysisService = new RemoteObject();
+            analysisService.destination = "analysisDefinition";
+            analysisService.rateReport.addEventListener(ResultEvent.RESULT, onResult);
+        }
         
         var rate1:Image = new Image();
         rate1.source = _score < 1 ? grayStar : greenStar;
-        rate1.addEventListener(MouseEvent.CLICK, onMouseClick);
+        if (_rateable) rate1.addEventListener(MouseEvent.CLICK, onMouseClick);
         addChild(rate1);
         var rate2:Image = new Image();
         rate2.source = _score < 2 ? grayStar : greenStar;
-        rate2.addEventListener(MouseEvent.CLICK, onMouseClick);
+        if (_rateable) rate2.addEventListener(MouseEvent.CLICK, onMouseClick);
         addChild(rate2);
         var rate3:Image = new Image();
         rate3.source = _score < 3 ? grayStar : greenStar;
-        rate3.addEventListener(MouseEvent.CLICK, onMouseClick);       
+        if (_rateable) rate3.addEventListener(MouseEvent.CLICK, onMouseClick);
         addChild(rate3);
         var rate4:Image = new Image();
         rate4.source = _score < 4 ? grayStar : greenStar;
-        rate4.addEventListener(MouseEvent.CLICK, onMouseClick);
+        if (_rateable) rate4.addEventListener(MouseEvent.CLICK, onMouseClick);
         addChild(rate4);
         var rate5:Image = new Image();
         rate5.source = _score < 5 ? grayStar : greenStar;
-        rate5.addEventListener(MouseEvent.CLICK, onMouseClick);        
+        if (_rateable) rate5.addEventListener(MouseEvent.CLICK, onMouseClick);        
         addChild(rate5);
         stars = [rate1, rate2, rate3, rate4, rate5];
     }

@@ -27,7 +27,7 @@ package com.easyinsight.administration.feed
 		
 		public static function toString(tags:ArrayCollection):String {
 			var tagString:String = "";
-            if (tags.length > 0) {
+            if (tags != null && tags.length > 0) {
                 for (var i:int = 0; i < tags.length; i++) {
                     var tag:Tag = tags.getItemAt(i) as Tag;
                     tagString += tag.tagName + ",";

@@ -130,7 +130,7 @@
     </listing:ListingOption>
     <listing:ListingOption perspective="{new GenreDataProvider()}" enableAnalysis="false" displayName="Marketplace" listingChange="onListingChange(event)">
         <mx:Image source="{catalogIcon}" id="catalogImage"/>
-        <mx:Label text="Marketplace" fontSize="12" fontFamily="Tahoma" fontWeight="bold" color="0x323232"/>
+        <mx:Label text="Exchange" fontSize="12" fontFamily="Tahoma" fontWeight="bold" color="0x323232"/>
     </listing:ListingOption>
     <listing:ListingOption perspective="{new GroupsSummary()}" enableAnalysis="false" displayName="Groups" listingChange="onListingChange(event)">
         <mx:Image source="{groupsIcon}" id="groupsImage"/>

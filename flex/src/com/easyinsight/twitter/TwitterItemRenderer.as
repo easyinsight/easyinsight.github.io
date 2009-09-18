@@ -1,5 +1,4 @@
 package com.easyinsight.twitter {
-import com.easyinsight.util.AutoSizeTextArea;
 
 import mx.controls.TextArea;
 import mx.core.mx_internal;

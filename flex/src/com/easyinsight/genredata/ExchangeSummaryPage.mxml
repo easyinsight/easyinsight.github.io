@@ -1,0 +1,47 @@
+<?xml version="1.0" ?>
+<genredata:ExchangePage xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:genredata="com.easyinsight.genredata.*"
+                        xmlns:listing="com.easyinsight.listing.*" width="100%" height="100%">
+    <mx:Script><![CDATA[
+        private function onTagFocus(event:TagFocusEvent):void {
+            selectedTag = event.tag;
+        }
+
+        [Bindable]
+        private var _itemRenderer:IFactory;
+
+        public function set itemRenderer(value:IFactory):void {
+            _itemRenderer = value;
+        }
+        ]]>
+    </mx:Script>
+    <mx:HBox width="100%" height="100%" id="listsBox">
+        <mx:VBox>
+            <mx:HBox>
+                <!--<mx:Label text="Sort By:" fontFamily="Tahoma" fontWeight="bold" fontSize="14"/>
+                <mx:ComboBox id="sortBox">
+                    <mx:dataProvider>
+                        <mx:ArrayCollection>
+                            <mx:Array>
+                                <mx:String>Rating (Best)</mx:String>
+                                <mx:String>Rating (Worst)</mx:String>
+                                <mx:String>Date Added (Newest)</mx:String>
+                                <mx:String>Date Added (Oldest)</mx:String>
+                            </mx:Array>
+                        </mx:ArrayCollection>
+                    </mx:dataProvider>
+                </mx:ComboBox>-->
+            </mx:HBox>
+            <mx:Spacer height="30"/>
+            <mx:HBox width="100%" horizontalAlign="center">
+                <mx:Label text="Popular Tags" fontFamily="Tahoma" fontWeight="bold" fontSize="14"/>
+            </mx:HBox>
+            <listing:TagListing width="250" borderStyle="solid" borderThickness="1" tagFocus="onTagFocus(event)"/>
+        </mx:VBox>
+        <mx:Box width="100%" horizontalAlign="center" height="100%">
+            <!--<mx:Canvas backgroundAlpha="0" width="100%" height="100%">-->
+                <mx:List dataProvider="{dataProvider2}" itemRenderer="{_itemRenderer}" height="100%" width="100%"
+                        backgroundAlpha="0" borderStyle="none"/>
+            <!--</mx:Canvas>-->
+        </mx:Box>
+    </mx:HBox>
+</genredata:ExchangePage>
