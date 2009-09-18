@@ -141,12 +141,10 @@ public class TagStorage {
         List<Tag> tags = new ArrayList<Tag>();
         Connection conn = Database.instance().getConnection();
         try {
-            PreparedStatement queryTagsStmt = conn.prepareStatement("SELECT TAG, COUNT(TAG) FROM ANALYSIS_TAGS, FEED_TO_TAG, ANALYSIS_TO_TAG, DATA_FEED, ANALYSIS WHERE " +
-                    "(ANALYSIS_TAGS.ANALYSIS_TAGS_ID = FEED_TO_TAG.ANALYSIS_TAGS_ID AND FEED_TO_TAG.FEED_ID = DATA_FEED.DATA_FEED_ID AND DATA_FEED.MARKETPLACE_VISIBLE = ?) OR " +
+            PreparedStatement queryTagsStmt = conn.prepareStatement("SELECT TAG, COUNT(TAG) AS TAG_COUNT FROM ANALYSIS_TAGS, FEED_TO_TAG, ANALYSIS_TO_TAG, DATA_FEED, ANALYSIS WHERE " +
                     "(ANALYSIS_TAGS.ANALYSIS_TAGS_ID = ANALYSIS_TO_TAG.ANALYSIS_TAGS_ID AND ANALYSIS_TO_TAG.ANALYSIS_ID = ANALYSIS.ANALYSIS_ID AND ANALYSIS.MARKETPLACE_VISIBLE = ?) " +
-                    "GROUP BY TAG");
-            queryTagsStmt.setBoolean(1, true);
-            queryTagsStmt.setBoolean(2, true);
+                    "GROUP BY TAG ORDER BY TAG_COUNT");
+            queryTagsStmt.setBoolean(1, true);            
             ResultSet rs = queryTagsStmt.executeQuery();
             while (rs.next()) {
                 String tagName = rs.getString(1);
