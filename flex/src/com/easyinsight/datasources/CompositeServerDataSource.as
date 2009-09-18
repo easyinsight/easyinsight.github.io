@@ -14,5 +14,9 @@ public class CompositeServerDataSource extends CompositeFeedDefinition implement
     public function configClass():Class {
         return null;
     }
+    
+    override public function isLiveData():Boolean {
+        return true;
+    }
 }
 }

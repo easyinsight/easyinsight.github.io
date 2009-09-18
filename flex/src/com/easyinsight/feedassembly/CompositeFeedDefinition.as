@@ -15,9 +15,5 @@ package com.easyinsight.feedassembly
 		{
 			super();
 		}
-
-        override public function isLiveData():Boolean {
-            return true;
-        }
 	}
 }
