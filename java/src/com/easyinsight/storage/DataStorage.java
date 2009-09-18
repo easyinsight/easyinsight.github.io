@@ -159,7 +159,7 @@ public class DataStorage {
         } else if (accountType == Account.ADMINISTRATOR) {
             allowed = Account.ADMINISTRATOR_MAX;           
         } else {
-            throw new RuntimeException();
+            throw new RuntimeException("Unknown account type");
         }
         if (size > allowed) {
             throw new StorageLimitException("Storage boundary for this account has been reached.");

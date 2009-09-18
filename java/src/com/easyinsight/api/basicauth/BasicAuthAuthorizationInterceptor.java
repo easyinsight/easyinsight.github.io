@@ -19,6 +19,7 @@ import org.apache.log4j.Logger;
 import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.users.UserServiceResponse;
 import com.easyinsight.users.Account;
+import com.easyinsight.logging.LogClass;
 
 /**
  * User: James Boe
@@ -55,6 +56,7 @@ public class BasicAuthAuthorizationInterceptor extends SoapHeaderInterceptor {
             message.put("userID", response.getUserID());
         } catch (Exception e) {
             log.warn("Invalid username or password for user: " + policy.getUserName());
+            LogClass.error(e);
             sendErrorResponse(message, HttpURLConnection.HTTP_FORBIDDEN);
         }
     }
