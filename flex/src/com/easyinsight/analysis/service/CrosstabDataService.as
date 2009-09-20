@@ -47,6 +47,11 @@ public class CrosstabDataService extends EventDispatcher implements IReportDataS
                 var value:Value = values[j];
                 var key:String = headerDimension.qualifiedName();
                 endObject[key] = value;
+                if (value.links != null) {
+                    for (var linkKey:String in value.links) {
+                        endObject[linkKey + "_link"] = value.links[linkKey];
+                    }
+                }
             }
             data.addItem(endObject);
         }

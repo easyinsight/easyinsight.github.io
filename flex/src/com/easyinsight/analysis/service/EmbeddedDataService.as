@@ -54,6 +54,11 @@ public class EmbeddedDataService extends EventDispatcher implements IEmbeddedDat
                     endObject[key] = value.getValue();
                     var conditionRenderer:ConditionRenderer = clientProcessorMap[key];
                     conditionRenderer.addValue(value);
+                    if (value.links != null) {
+                        for (var linkKey:String in value.links) {
+                            endObject[linkKey + "_link"] = value.links[linkKey];
+                        }
+                    }
                 }
                 data.addItem(endObject);
             }
