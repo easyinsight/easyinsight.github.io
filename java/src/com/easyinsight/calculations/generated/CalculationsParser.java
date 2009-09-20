@@ -1,4 +1,4 @@
-// $ANTLR 3.1.2 C:\\Users\\abaldwin\\Documents\\EasyInsight\\code\\java\\src\\com\\easyinsight\\calculations\\Calculations.g 2009-08-21 10:09:36
+// $ANTLR 3.1.2 C:\\Users\\abaldwin\\Documents\\EasyInsight\\code\\java\\src\\com\\easyinsight\\calculations\\Calculations.g 2009-09-20 11:53:39
  package com.easyinsight.calculations.generated; 
 
 import org.antlr.runtime.*;

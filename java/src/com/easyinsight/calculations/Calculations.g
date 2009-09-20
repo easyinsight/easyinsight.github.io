@@ -83,5 +83,5 @@ fragment NoBracketSpecialChars
 	:	'_';
 	
 fragment SpecialChars
-	:	NoBracketSpecialChars | ':' | '<' | '>' | ',' | '.' | ';' | '/' | '?' | '"' | '\'' | '{' | '}' | '-' | '=' | '+';
+	:	NoBracketSpecialChars | ':' | '<' | '>' | ',' | '.' | ';' | '/' | '?' | '"' | '\'' | '{' | '}' | '-' | '=' | '+' | '(' | ')' | '!' | '@' | '#' | '$' | '%' | '^' | '&' | '*';
 	
