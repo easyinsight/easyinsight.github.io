@@ -74,6 +74,8 @@ public class TwitterDisplay extends VBox{
             twitter.setStyle("backgroundAlpha", 0);
             BindingUtils.bindProperty(twitter, "dataProvider", this, "messages");*/
             twitter.percentWidth = 100;
+            twitter.setStyle("borderStyle", "solid");
+            twitter.setStyle("borderThickness", 1);
         }
 
         coreBox.addChild(twitter);
