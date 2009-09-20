@@ -6,7 +6,7 @@ package com.easyinsight.filtering
 	[RemoteClass(alias="com.easyinsight.analysis.FilterValueDefinition")]
 	public class FilterValueDefinition extends FilterDefinition
 	{
-		public var filteredValues:ArrayCollection;
+		public var filteredValues:ArrayCollection = new ArrayCollection();
 		public var inclusive:Boolean;
 		
 		public function FilterValueDefinition()

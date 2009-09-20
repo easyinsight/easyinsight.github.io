@@ -182,6 +182,7 @@ import mx.events.DropdownEvent;
                 _filterDefinition.field = _analysisItem;
                 _filterDefinition.filteredValues = new ArrayCollection();
                 _filterDefinition.inclusive = true;
+                _filterDefinition.enabled = true;
             }
 			var selectedValue:String;
 			if (_filterDefinition.filteredValues.length == 0) {
@@ -195,7 +196,7 @@ import mx.events.DropdownEvent;
             }
 			//selectedValue = _filterDefinition.filteredValues.getItemAt(0) as String;
 			comboBox.selectedItem = selectedValue;
-			comboBox.enabled = true;
+			comboBox.enabled = _filterDefinition.enabled;
             if (deleteButton != null) {
 			    deleteButton.enabled = true;
             }
