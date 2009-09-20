@@ -1,38 +1,39 @@
 <?xml version="1.0" ?>
 <mx:Module xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:ilog="ilog.maps.*"
+           xmlns:maps="com.easyinsight.analysis.maps.*"
            width="100%" height="100%"
            xmlns:analysis="com.easyinsight.analysis.*" xmlns:map="com.easyinsight.map.*"
-           implements="com.easyinsight.analysis.IReportRenderer">
+           implements="com.easyinsight.analysis.IReportRenderer" removedFromStage="cleanup()">
     <mx:states>
         <mx:State name="USA">
-            <mx:RemoveChild target="{worldMap}"/>
-            <mx:AddChild relativeTo="{coreCanvas}" creationPolicy="all">
+            <mx:AddChild relativeTo="{coreCanvas}">
                 <ilog:USStatesMap width="100%" height="100%" id="unitedStatesMap" allowNavigation="false"
                                   allowMultipleSelection="false" click="onClick(event)" mapItemRollOver="onover(event)"
-                        mapItemRollOut="onout(event)" filterEvents="true"/>
+                                  mapItemRollOut="onout(event)" filterEvents="true"/>
+            </mx:AddChild>
+        </mx:State>
+        <mx:State name="World">
+            <mx:AddChild relativeTo="{coreCanvas}">
+                <ilog:WorldCountriesMap width="100%" height="100%" id="worldMap" click="onClick(event)"/>
             </mx:AddChild>
         </mx:State>
         <mx:State name="Europe">
-            <mx:RemoveChild target="{worldMap}"/>
-            <mx:AddChild relativeTo="{coreCanvas}" creationPolicy="all">
+            <mx:AddChild relativeTo="{coreCanvas}">
                 <ilog:ContinentalEuropeMap width="100%" height="100%" id="europeMap" click="onClick(event)"/>
             </mx:AddChild>
         </mx:State>
         <mx:State name="AsiaPac">
-            <mx:RemoveChild target="{worldMap}"/>
-            <mx:AddChild relativeTo="{coreCanvas}" creationPolicy="all">
+            <mx:AddChild relativeTo="{coreCanvas}">
                 <ilog:AsiaPacificMap width="100%" height="100%" id="asiaMap" click="onClick(event)"/>
             </mx:AddChild>
         </mx:State>
         <mx:State name="Americas">
-            <mx:RemoveChild target="{worldMap}"/>
-            <mx:AddChild relativeTo="{coreCanvas}" creationPolicy="all">
+            <mx:AddChild relativeTo="{coreCanvas}">
                 <ilog:AmericasMap width="100%" height="100%" id="americasMap" click="onClick(event)"/>
             </mx:AddChild>
         </mx:State>
         <mx:State name="MiddleEast">
-            <mx:RemoveChild target="{worldMap}"/>
-            <mx:AddChild relativeTo="{coreCanvas}" creationPolicy="all">
+            <mx:AddChild relativeTo="{coreCanvas}">
                 <ilog:EuropeMiddleEastAfricaMap width="100%" height="100%" id="middleEastMap" click="onClick(event)"/>
             </mx:AddChild>
         </mx:State>
@@ -61,35 +62,50 @@
         import mx.collections.ArrayCollection;
         import mx.controls.Alert;
         import mx.controls.ToolTip;
+        import mx.formatters.Formatter;
         import mx.managers.PopUpManager;
         import mx.managers.ToolTipManager;
+
+        private function onMouseOut(event:MouseEvent):void {
+            if (tooltip != null) {
+                ToolTipManager.destroyToolTip(tooltip);
+                selectedPoint = null;
+                tooltip = null;
+            }
+        }
+
+        private function cleanup():void {
+            if (tooltip != null) {
+                ToolTipManager.destroyToolTip(tooltip);
+                selectedPoint = null;
+                tooltip = null;
+            }
+        }
 
         private var tooltip:ToolTip;
 
         private var selectedPoint:String;
 
         public function onover(event:MapEvent):void {
-
-            /*if (event.mapFeature != null && event.mapFeature.key != selectedPoint) {
+            if (event.mapFeature != null && event.mapFeature.key != selectedPoint) {
                 if (tooltip != null && event.mapFeature.key != selectedPoint) {
                     ToolTipManager.destroyToolTip(tooltip);
                 }
                 var mf:MapFeature = event.mapFeature;
-
                 var point:Point = mf.mapBarycenter;
                 var canvasPoint:Point = map.drawingCanvas.localToGlobal(point);
                 selectedPoint = event.mapFeature.key;
                 tooltip = ToolTipManager.createToolTip(mf.data.label + " - " + mf.data.data,
-                    canvasPoint.x, canvasPoint.y) as ToolTip;
-            }*/
+                        canvasPoint.x, canvasPoint.y) as ToolTip;
+            }
         }
 
         public function onout(event:MapEvent):void {
-            /*if (tooltip) {
+            if (tooltip != null) {
                 ToolTipManager.destroyToolTip(tooltip);
                 selectedPoint = null;
                 tooltip = null;
-            }*/
+            }
         }
 
         private function onClick(event:MouseEvent):void {
@@ -98,7 +114,7 @@
                 if (feature != null) {
                     var window:PseudoContextWindow = new PseudoContextWindow(dimension, passThrough, this);
                     window.data = feature.data;
-                    PopUpManager.addPopUp(window, this);                    
+                    PopUpManager.addPopUp(window, this);
                     window.x = event.stageX + 5;
                     window.y = event.stageY + 5;
                 }
@@ -121,6 +137,18 @@
         private var hasDropAreas:Boolean = true;
 
         private var dimension:AnalysisItem;
+
+        [Bindable]
+        private var conditionRenderer:ConditionRenderer;
+
+        [Bindable]
+        private var minValue:Number;
+
+        [Bindable]
+        private var maxValue:Number;
+
+        [Bindable]
+        private var formatter:Formatter;
 
         private function createRenderer(rows:ArrayCollection, mapDefinition:MapDefinition):ConditionRenderer {
             var renderer:ConditionRenderer = mapDefinition.measure.createClientRenderer();
@@ -154,7 +182,7 @@
                 mapType = MapDefinition.USA;
                 map = unitedStatesMap;
             } else if (mapDefinition.mapType == MapDefinition.WORLD) {
-                currentState = "";
+                currentState = "World";
                 mapType = MapDefinition.WORLD;
                 if (worldMap != null) {
                     map = worldMap;
@@ -186,11 +214,17 @@
             }
             graphData = new ArrayCollection();
             if (dataSet.length > 0) {
+                this.formatter = mapDefinition.measure.getFormatter();
                 var renderer:ConditionRenderer = createRenderer(dataSet, mapDefinition);
+                this.conditionRenderer = renderer;
+                this.minValue = Number.MAX_VALUE;
+                this.maxValue = Number.MIN_VALUE;
                 for (var i:int = 0; i < dataSet.length; i++) {
                     var row:Object = dataSet.getItemAt(i);
                     var dimensionValue:String = row[mapDefinition.geography.qualifiedName()];
-                    var measureValue:Object = row[mapDefinition.measure.qualifiedName()];
+                    var measureValue:Number = Number(row[mapDefinition.measure.qualifiedName()]);
+                    this.minValue = Math.min(this.minValue, measureValue);
+                    this.maxValue = Math.max(this.maxValue, measureValue);
 
                     var location:String = MapLocationLookup.instance().getLocation(dimensionValue, String(mapType));
                     if (location != null) {
@@ -204,6 +238,9 @@
                             mapFeature.setStyle(MapBase.FILL, color);
                         }
                     }
+                }
+                if (minValue != Number.MAX_VALUE && maxValue != Number.MIN_VALUE) {                    
+                    legend.recreate();
                 }
             }
         }
@@ -223,7 +260,7 @@
                     mapType = MapDefinition.USA;
                     map = unitedStatesMap;
                 } else if (mapDefinition.mapType == MapDefinition.WORLD) {
-                    currentState = "";
+                    currentState = "World";
                     mapType = MapDefinition.WORLD;
                     if (worldMap != null) {
                         map = worldMap;
@@ -259,8 +296,9 @@
     </mx:Script>
     <mx:HBox id="chartVBox" width="100%" height="100%">
         <mx:Canvas id="coreCanvas" width="100%" height="100%">
-            <ilog:WorldCountriesMap width="100%" height="100%" id="worldMap" click="onClick(event)"/>
-        </mx:Canvas>
 
+        </mx:Canvas>
+        <maps:ColorRangeLegend points="5" conditionRenderer="{conditionRenderer}" maxValue="{maxValue}" minValue="{minValue}"
+                formatter="{formatter}" id="legend" width="100"/>
     </mx:HBox>
 </mx:Module>

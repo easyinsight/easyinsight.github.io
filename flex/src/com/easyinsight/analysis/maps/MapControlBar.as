@@ -25,6 +25,15 @@ public class MapControlBar extends HBox implements IReportControlBar {
     private var mapComboBox:ComboBox;
     private var mapDefinition:MapDefinition;
 
+    private static const WORLD:Object = {label:"World", data:MapDefinition.WORLD};
+    private static const USA:Object = { label:"USA", data:MapDefinition.USA};
+    private static const EUROPE:Object = {label:"Europe", data:MapDefinition.EUROPE};
+    private static const ASIA:Object = {label:"Asia", data:MapDefinition.ASIA};
+    private static const AMERICAS:Object = {label:"Americas", data:MapDefinition.AMERICAS};
+    private static const MIDDLE_EAST:Object = {label:"Middle East", data:MapDefinition.MIDDLE_EAST};
+
+    private var lookupMap:Object = new Object();
+
     public function MapControlBar() {
         xAxisGrouping = new ListDropAreaGrouping();
         xAxisGrouping.maxElements = 1;
@@ -35,11 +44,13 @@ public class MapControlBar extends HBox implements IReportControlBar {
         measureGrouping.dropAreaType = MeasureDropArea;
         measureGrouping.addEventListener(AnalysisItemUpdateEvent.ANALYSIS_LIST_UPDATE, requestListData);
         mapComboBox = new ComboBox();
-        mapComboBox.dataProvider = new ArrayCollection([
-                  {label:"World", data:MapDefinition.WORLD},{ label:"USA", data:MapDefinition.USA}, 
-                    {label:"Europe", data:MapDefinition.EUROPE}, {label:"Asia", data:MapDefinition.ASIA},
-                    {label:"Americas", data:MapDefinition.AMERICAS}, {label:"Middle East", data:MapDefinition.MIDDLE_EAST}
-        ]);
+        mapComboBox.dataProvider = new ArrayCollection([WORLD, USA, EUROPE, ASIA, AMERICAS, MIDDLE_EAST]);
+        lookupMap[MapDefinition.WORLD] = WORLD;
+        lookupMap[MapDefinition.USA] = USA;
+        lookupMap[MapDefinition.EUROPE] = EUROPE;
+        lookupMap[MapDefinition.ASIA] = ASIA;
+        lookupMap[MapDefinition.AMERICAS] = AMERICAS;
+        lookupMap[MapDefinition.MIDDLE_EAST] = MIDDLE_EAST;
         mapComboBox.rowCount = 6;
         mapComboBox.addEventListener(ListEvent.CHANGE, onMapTypeChange);
     }
@@ -92,6 +103,7 @@ public class MapControlBar extends HBox implements IReportControlBar {
 
     public function set analysisDefinition(analysisDefinition:AnalysisDefinition):void {
         mapDefinition = analysisDefinition as MapDefinition;
+        mapComboBox.selectedItem = lookupMap[mapDefinition.mapType];
     }
 
     public function createAnalysisDefinition():AnalysisDefinition {
