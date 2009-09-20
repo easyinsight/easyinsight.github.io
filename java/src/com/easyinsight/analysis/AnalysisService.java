@@ -48,8 +48,9 @@ public class AnalysisService {
         try {
             session.getTransaction().begin();
             AnalysisDefinition analysisDefinition = analysisStorage.getPersistableReport(reportID, session);
+            Feed feed = FeedRegistry.instance().getFeed(analysisDefinition.getDataFeedID());
             // TODO: fix me
-            AnalysisDefinition clone = analysisDefinition.clone(null, new ArrayList<AnalysisItem>());
+            AnalysisDefinition clone = analysisDefinition.clone(null, feed.getFields());
             clone.setAuthorName(SecurityUtil.getUserName());
             clone.setTitle(newName);
             List<UserToAnalysisBinding> bindings = new ArrayList<UserToAnalysisBinding>();
