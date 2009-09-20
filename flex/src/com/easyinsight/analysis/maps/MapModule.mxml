@@ -299,6 +299,6 @@
 
         </mx:Canvas>
         <maps:ColorRangeLegend points="5" conditionRenderer="{conditionRenderer}" maxValue="{maxValue}" minValue="{minValue}"
-                formatter="{formatter}" id="legend" width="100"/>
+                formatter="{formatter}" id="legend"/>
     </mx:HBox>
 </mx:Module>
