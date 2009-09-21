@@ -33,7 +33,15 @@ public abstract class WSAnalysisDefinition implements Serializable {
     public static final int PLOT = 14;
     public static final int BUBBLE = 15;
     public static final int GAUGE = 16;
-    public static final int MULTIMEASURE = 17;
+    public static final int TREE = 17;
+    public static final int TREE_MAP = 18;
+    public static final int MM_LINE = 18;
+    public static final int MAP_WORLD = 20;
+    public static final int MAP_USA = 21;
+    public static final int MAP_ASIA = 22;
+    public static final int MAP_AMERICAS = 23;
+    public static final int MAP_EUROPE = 24;
+    public static final int MAP_MIDDLE_EAST = 25;
 
     private String name;
     private String authorName;

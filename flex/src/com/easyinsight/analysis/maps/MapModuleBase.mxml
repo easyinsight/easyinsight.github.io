@@ -132,15 +132,9 @@
             return renderer;
         }
 
-        private function customChange(customChangeEvent:CustomChangeEvent, analysisDefinition:AnalysisDefinition):void {
-            var mapTypeEvent:MapTypeEvent = customChangeEvent as MapTypeEvent;
-            var mapDefinition:MapDefinition = analysisDefinition as MapDefinition;
-            mapDefinition.mapType = mapTypeEvent.mapType;
-            dispatchEvent(new ReportRendererEvent(ReportRendererEvent.FORCE_RENDER));
-        }
-
         public function renderReport(dataSet:ArrayCollection, analysisDefinition:AnalysisDefinition, clientProcessorMap:Object):void {
             var mapDefinition:MapDefinition = analysisDefinition as MapDefinition;
+            mapDefinition.mapType = mapType;
             dimension = mapDefinition.geography;
             graphData = new ArrayCollection();            
             if (dataSet.length > 0) {

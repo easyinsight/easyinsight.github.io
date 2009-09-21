@@ -11,6 +11,14 @@ import javax.persistence.*;
 @PrimaryKeyJoinColumn(name="report_state_id")
 @Table(name="map_report")
 public class MapDefinitionState extends AnalysisDefinitionState {
+
+    public static final int USA = 1;
+    public static final int WORLD = 2;
+    public static final int EUROPE = 3;
+    public static final int ASIA = 4;
+    public static final int AMERICAS = 5;
+    public static final int MIDDLE_EAST = 6;
+
     @Column(name="map_type")
     private int mapType;
 
@@ -37,9 +45,26 @@ public class MapDefinitionState extends AnalysisDefinitionState {
     public WSAnalysisDefinition createWSDefinition() {
         WSMapDefinition wsMapDefinition = new WSMapDefinition();
         wsMapDefinition.setMapType(mapType);
-        wsMapDefinition.setReportType(WSAnalysisDefinition.MAP);
         wsMapDefinition.setMapDefinitionID(mapDefinitionID);
         return wsMapDefinition;
+    }
+
+    public int translateType() {
+        if (mapType == WORLD) {
+            return WSAnalysisDefinition.MAP_WORLD;
+        } else if (mapType == USA) {
+            return WSAnalysisDefinition.MAP_USA;
+        } else if (mapType == EUROPE) {
+            return WSAnalysisDefinition.MAP_EUROPE;
+        } else if (mapType == ASIA) {
+            return WSAnalysisDefinition.MAP_ASIA;
+        } else if (mapType == AMERICAS) {
+            return WSAnalysisDefinition.MAP_AMERICAS;
+        } else if (mapType == MIDDLE_EAST) {
+            return WSAnalysisDefinition.MAP_MIDDLE_EAST;
+        } else {
+            throw new RuntimeException();
+        }
     }
 
     public AnalysisDefinitionState clone() throws CloneNotSupportedException {

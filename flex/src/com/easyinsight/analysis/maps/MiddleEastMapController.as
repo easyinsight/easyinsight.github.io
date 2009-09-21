@@ -1,4 +1,5 @@
 package com.easyinsight.analysis.maps {
+import com.easyinsight.analysis.AnalysisDefinition;
 import com.easyinsight.analysis.DataViewFactory;
 import com.easyinsight.analysis.EmbeddedViewFactory;
 import com.easyinsight.analysis.IReportController;
@@ -11,6 +12,7 @@ public class MiddleEastMapController implements IReportController {
         var factory:DataViewFactory = new DataViewFactory();
         factory.reportDataService = ListDataService;
         factory.reportControlBar = MapControlBar;
+        factory.explicitType = AnalysisDefinition.MAP_MIDDLE_EAST;
         factory.reportRenderer = "MiddleEastMapModule.swf";
         factory.newDefinition = MapDefinition;
         return factory;

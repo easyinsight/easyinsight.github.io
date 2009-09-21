@@ -212,6 +212,9 @@ public class DataViewFactory extends VBox {
             return existingDefinition;
         } else {
             var newDef:AnalysisDefinition = new _newDefinition();
+            if (_explicitType > 0) {
+                newDef.reportType = _explicitType;
+            }
             var fields:ArrayCollection = existingDefinition.getFields();
             newDef.populate(fields);
             copyStandardData(existingDefinition, newDef);
@@ -237,7 +240,17 @@ public class DataViewFactory extends VBox {
 
     public function createNewDefinition():AnalysisDefinition {
         _analysisDefinition = new _newDefinition();
+        if (_explicitType > 0) {
+            _analysisDefinition.reportType = _explicitType;
+        }
         return _analysisDefinition;
+    }
+
+    private var _explicitType:int;
+
+
+    public function set explicitType(value:int):void {
+        _explicitType = value;
     }
 
     public function createFilterRawData():FilterRawData {
