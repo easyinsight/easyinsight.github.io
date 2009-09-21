@@ -126,7 +126,7 @@ public class FilterValueDefinition extends FilterDefinition {
 
     @Override
     public boolean validForQuery() {
-        if (filteredValues.size() == 1) {
+        if (super.validForQuery() && filteredValues.size() == 1) {
             Object value = filteredValues.get(0);
             if (value instanceof String) {
                 String string = (String) value;
