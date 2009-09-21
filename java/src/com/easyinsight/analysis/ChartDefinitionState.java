@@ -170,7 +170,7 @@ public class ChartDefinitionState extends AnalysisDefinitionState {
                 break;
             case ChartDefinitionState.MULTI_MEASURE_LINE_2D:
                 wsChartDefinition = new WSMultiMeasureLineChartDefinition();
-                wsChartDefinition.setReportType(WSAnalysisDefinition.MULTIMEASURE);
+                wsChartDefinition.setReportType(WSAnalysisDefinition.MM_LINE);
                 break;
             default:
                 throw new UnsupportedOperationException();
