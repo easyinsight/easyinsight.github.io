@@ -78,7 +78,14 @@
         	<node label="Plot" type="{AnalysisDefinition.PLOT}"/>
         	<node label="Bubble" type="{AnalysisDefinition.BUBBLE}"/>
         </node>
-        <node label="Map" type="{AnalysisDefinition.MAP}"/>
+        <node label="Maps" icon="">
+            <node label="World" type="{AnalysisDefinition.MAP_WORLD}"/>
+            <node label="USA" type="{AnalysisDefinition.MAP_USA}"/>
+            <node label="Americas" type="{AnalysisDefinition.MAP_AMERICAS}"/>
+            <node label="Europe" type="{AnalysisDefinition.MAP_EUROPE}"/>
+            <node label="Asia" type="{AnalysisDefinition.MAP_ASIA}"/>
+            <node label="Middle East" type="{AnalysisDefinition.MAP_MIDDLE_EAST}"/>
+        </node>        
         <node label="Tree Map" type="{AnalysisDefinition.TREEMAP}"/>
         <node label="Gauge" type="{AnalysisDefinition.GAUGE}"/>
         <!-- <node label="Split" state="Split"/>-->

@@ -26,6 +26,13 @@ package com.easyinsight.analysis
         public static const TREEMAP:int = 18;
         public static const MMLINE:int = 19;
 
+        public static const MAP_WORLD:int = 20;
+        public static const MAP_USA:int = 21;
+        public static const MAP_ASIA:int = 22;
+        public static const MAP_AMERICAS:int = 23;
+        public static const MAP_EUROPE:int = 24;
+        public static const MAP_MIDDLE_EAST:int = 25;
+
 		public var dataFeedID:int;
 		public var name:String;
 		public var analysisID:int;

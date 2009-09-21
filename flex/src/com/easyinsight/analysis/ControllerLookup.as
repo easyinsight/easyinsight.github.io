@@ -15,7 +15,13 @@ import com.easyinsight.analysis.charts.yaxisbased.bar.BarChartController;
 import com.easyinsight.analysis.crosstab.CrosstabController;
 import com.easyinsight.analysis.gauge.GaugeController;
 import com.easyinsight.analysis.list.ListController;
+import com.easyinsight.analysis.maps.AmericasMapController;
+import com.easyinsight.analysis.maps.AsiaMapController;
+import com.easyinsight.analysis.maps.EuropeMapController;
 import com.easyinsight.analysis.maps.MapController;
+import com.easyinsight.analysis.maps.MiddleEastMapController;
+import com.easyinsight.analysis.maps.USMapController;
+import com.easyinsight.analysis.maps.WorldMapController;
 import com.easyinsight.analysis.tree.TreeController;
 import com.easyinsight.analysis.treemap.TreeMapController;
 
@@ -33,8 +39,23 @@ public class ControllerLookup {
             case AnalysisDefinition.CROSSTAB:
                 controller = CrosstabController;
                 break;
-            case AnalysisDefinition.MAP:
-                controller = MapController;
+            case AnalysisDefinition.MAP_USA:
+                controller = USMapController;
+                break;
+            case AnalysisDefinition.MAP_EUROPE:
+                controller = EuropeMapController;
+                break;
+            case AnalysisDefinition.MAP_WORLD:
+                controller = WorldMapController;
+                break;
+            case AnalysisDefinition.MAP_ASIA:
+                controller = AsiaMapController;
+                break;
+            case AnalysisDefinition.MAP_AMERICAS:
+                controller = AmericasMapController;
+                break;
+            case AnalysisDefinition.MAP_MIDDLE_EAST:
+                controller = MiddleEastMapController;
                 break;
             case AnalysisDefinition.COLUMN:
                 controller = ColumnChartController;

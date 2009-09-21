@@ -11,18 +11,18 @@ import com.easyinsight.analysis.ListDropAreaGrouping;
 import com.easyinsight.analysis.MeasureDropArea;
 import com.easyinsight.analysis.ReportDataEvent;
 import com.easyinsight.map.MapDropAreaGrouping;
+
 import mx.binding.utils.BindingUtils;
 import mx.collections.ArrayCollection;
 import mx.containers.HBox;
-import mx.controls.ComboBox;
 import mx.controls.Label;
 import mx.events.FlexEvent;
 import mx.events.ListEvent;
+
 public class MapControlBar extends HBox implements IReportControlBar {
 
     private var xAxisGrouping:ListDropAreaGrouping;
     private var measureGrouping:MapDropAreaGrouping;
-    private var mapComboBox:ComboBox;
     private var mapDefinition:MapDefinition;
 
     private static const WORLD:Object = {label:"World", data:MapDefinition.WORLD};
@@ -43,27 +43,20 @@ public class MapControlBar extends HBox implements IReportControlBar {
         measureGrouping.maxElements = 1;
         measureGrouping.dropAreaType = MeasureDropArea;
         measureGrouping.addEventListener(AnalysisItemUpdateEvent.ANALYSIS_LIST_UPDATE, requestListData);
-        mapComboBox = new ComboBox();
-        mapComboBox.dataProvider = new ArrayCollection([WORLD, USA, EUROPE, ASIA, AMERICAS, MIDDLE_EAST]);
         lookupMap[MapDefinition.WORLD] = WORLD;
         lookupMap[MapDefinition.USA] = USA;
         lookupMap[MapDefinition.EUROPE] = EUROPE;
         lookupMap[MapDefinition.ASIA] = ASIA;
         lookupMap[MapDefinition.AMERICAS] = AMERICAS;
         lookupMap[MapDefinition.MIDDLE_EAST] = MIDDLE_EAST;
-        mapComboBox.rowCount = 6;
-        mapComboBox.addEventListener(ListEvent.CHANGE, onMapTypeChange);
     }
 
     private function onMapTypeChange(event:ListEvent):void {
-        mapDefinition.mapType = mapComboBox.selectedItem.data;
-        dispatchEvent(new MapTypeEvent(mapComboBox.selectedItem.data));
         dispatchEvent(new ReportDataEvent(ReportDataEvent.REQUEST_DATA));
     }
 
     override protected function createChildren():void {
         super.createChildren();
-        addChild(mapComboBox);
         addChild(xAxisGrouping);
         addChild(measureGrouping);
          if (mapDefinition.geography != null) {
@@ -102,8 +95,7 @@ public class MapControlBar extends HBox implements IReportControlBar {
     }
 
     public function set analysisDefinition(analysisDefinition:AnalysisDefinition):void {
-        mapDefinition = analysisDefinition as MapDefinition;
-        mapComboBox.selectedItem = lookupMap[mapDefinition.mapType];
+        mapDefinition = analysisDefinition as MapDefinition;        
     }
 
     public function createAnalysisDefinition():AnalysisDefinition {

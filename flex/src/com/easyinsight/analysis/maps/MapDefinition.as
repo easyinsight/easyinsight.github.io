@@ -36,6 +36,19 @@ import mx.collections.ArrayCollection;
 
 
         override public function get type():int {
+            if (mapType == WORLD) {
+                return AnalysisDefinition.MAP_WORLD;
+            } else if (mapType == USA) {
+                return AnalysisDefinition.MAP_USA;
+            } else if (mapType == EUROPE) {
+                return AnalysisDefinition.MAP_EUROPE;
+            } else if (mapType == ASIA) {
+                return AnalysisDefinition.MAP_ASIA;
+            } else if (mapType == AMERICAS) {
+                return AnalysisDefinition.MAP_AMERICAS;
+            } else if (mapType == MIDDLE_EAST) {
+                return AnalysisDefinition.MAP_MIDDLE_EAST;
+            }
             return AnalysisDefinition.MAP;
         }
 

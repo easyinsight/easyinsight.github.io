@@ -6,42 +6,42 @@
            implements="com.easyinsight.analysis.IReportRenderer" removedFromStage="cleanup()">
     <mx:states>
         <mx:State name="USA">
-            <mx:AddChild relativeTo="{coreCanvas}">
+            <mx:AddChild relativeTo="{coreCanvas}" creationPolicy="all">
                 <ilog:USStatesMap width="100%" height="100%" id="unitedStatesMap" allowNavigation="false"
                                   allowMultipleSelection="false" click="onClick(event)" mapItemRollOver="onover(event)"
                                   mapItemRollOut="onout(event)" filterEvents="true"/>
             </mx:AddChild>
         </mx:State>
         <mx:State name="World">
-            <mx:AddChild relativeTo="{coreCanvas}">
+            <mx:AddChild relativeTo="{coreCanvas}" creationPolicy="all">
                 <ilog:WorldCountriesMap width="100%" height="100%" id="worldMap" allowNavigation="false"
                                   allowMultipleSelection="false" click="onClick(event)" mapItemRollOver="onover(event)"
                                   mapItemRollOut="onout(event)" filterEvents="true"/>
             </mx:AddChild>
         </mx:State>
         <mx:State name="Europe">
-            <mx:AddChild relativeTo="{coreCanvas}">
+            <mx:AddChild relativeTo="{coreCanvas}" creationPolicy="all">
                 <ilog:ContinentalEuropeMap width="100%" height="100%" id="europeMap" allowNavigation="false"
                                   allowMultipleSelection="false" click="onClick(event)" mapItemRollOver="onover(event)"
                                   mapItemRollOut="onout(event)" filterEvents="true"/>
             </mx:AddChild>
         </mx:State>
         <mx:State name="AsiaPac">
-            <mx:AddChild relativeTo="{coreCanvas}">
+            <mx:AddChild relativeTo="{coreCanvas}" creationPolicy="all">
                 <ilog:AsiaPacificMap width="100%" height="100%" id="asiaMap" allowNavigation="false"
                                   allowMultipleSelection="false" click="onClick(event)" mapItemRollOver="onover(event)"
                                   mapItemRollOut="onout(event)" filterEvents="true"/>
             </mx:AddChild>
         </mx:State>
         <mx:State name="Americas">
-            <mx:AddChild relativeTo="{coreCanvas}">
+            <mx:AddChild relativeTo="{coreCanvas}" creationPolicy="all">
                 <ilog:AmericasMap width="100%" height="100%" id="americasMap" allowNavigation="false"
                                   allowMultipleSelection="false" click="onClick(event)" mapItemRollOver="onover(event)"
                                   mapItemRollOut="onout(event)" filterEvents="true"/>
             </mx:AddChild>
         </mx:State>
         <mx:State name="MiddleEast">
-            <mx:AddChild relativeTo="{coreCanvas}">
+            <mx:AddChild relativeTo="{coreCanvas}" creationPolicy="all">
                 <ilog:EuropeMiddleEastAfricaMap width="100%" height="100%" id="middleEastMap" allowNavigation="false"
                                   allowMultipleSelection="false" click="onClick(event)" mapItemRollOver="onover(event)"
                                   mapItemRollOut="onout(event)" filterEvents="true"/>
@@ -76,10 +76,12 @@
         import mx.managers.PopUpManager;
         import mx.managers.ToolTipManager;
 
+        [Bindable]
+        private var tooltipFeature:String = "";
+
         private function onMouseOut(event:MouseEvent):void {
             if (tooltip != null) {
                 ToolTipManager.destroyToolTip(tooltip);
-                selectedPoint = null;
                 tooltip = null;
             }
         }
@@ -87,24 +89,18 @@
         private function cleanup():void {
             if (tooltip != null) {
                 ToolTipManager.destroyToolTip(tooltip);
-                selectedPoint = null;
                 tooltip = null;
             }
         }
 
         private var tooltip:ToolTip;
 
-        private var selectedPoint:String;
-
-        public function onover(event:MapEvent):void {
-            if (event.mapFeature != null && event.mapFeature.key != selectedPoint) {
-                if (tooltip != null && event.mapFeature.key != selectedPoint) {
-                    ToolTipManager.destroyToolTip(tooltip);
-                }
+        public function onover(event:MapEvent):void {            
+            if (event.mapFeature != null) {
                 var mf:MapFeature = event.mapFeature;
+                tooltipFeature += mf.key;
                 var point:Point = mf.mapBarycenter;
-                var canvasPoint:Point = map.drawingCanvas.localToGlobal(point);
-                selectedPoint = event.mapFeature.key;
+                var canvasPoint:Point = map.drawingCanvas.localToGlobal(point);                
                 tooltip = ToolTipManager.createToolTip(mf.data.label + " - " + mf.data.data,
                         canvasPoint.x, canvasPoint.y) as ToolTip;
             }
@@ -112,8 +108,7 @@
 
         public function onout(event:MapEvent):void {
             if (tooltip != null) {
-                ToolTipManager.destroyToolTip(tooltip);
-                selectedPoint = null;
+                ToolTipManager.destroyToolTip(tooltip);                
                 tooltip = null;
             }
         }
@@ -223,6 +218,7 @@
                 }
             }
             graphData = new ArrayCollection();
+            cleanup();
             if (dataSet.length > 0) {
                 this.formatter = mapDefinition.measure.getFormatter();
                 var renderer:ConditionRenderer = createRenderer(dataSet, mapDefinition);
@@ -309,7 +305,10 @@
         <mx:Canvas id="coreCanvas" width="100%" height="100%">
 
         </mx:Canvas>
+        <mx:VBox>
+        <mx:Label text="{tooltipFeature}"/>
         <maps:ColorRangeLegend points="5" conditionRenderer="{conditionRenderer}" maxValue="{maxValue}" minValue="{minValue}"
                 formatter="{formatter}" id="legend"/>
+        </mx:VBox>
     </mx:HBox>
 </mx:Module>

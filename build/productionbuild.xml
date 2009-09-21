@@ -462,6 +462,7 @@
     <target name="modules2" depends="module.column3dchart, module.columnchart, module.line3dchart, module.list, module.map"/>
     <target name="modules3" depends="module.pie3dchart, module.piechart, module.plotchart, module.linechart"/>
     <target name="modules4" depends="module.gauge, module.crosstab, module.tree, module.treemap, module.mmlinechart"/>
+    <target name="modules5" depends="module.worldmap, module.usmap, module.americasmap, module.asiamap, module.europemap, module.middleeastmap"/>
 
     <target name="module.mmlinechart">
         <mxmlc file="${teamcity.build.checkoutDir}/flex/src/com/easyinsight/analysis/charts/twoaxisbased/line/MultiMeasureLineChartModule.mxml" output="${flex.path}/MultiMeasureLineChartModule.swf"
@@ -832,6 +833,132 @@
             sizeAPIKey="${size.api.key}"/>
         <SWFAnalysis linkReportPath="map.txt" key="${ei.key}" secretKey="${ei.secret.key}" component="MapModule"
                 classAnalysisAPIKey="${analysis.api.key}" packageFilter="com.easyinsight"/>-->
+    </target>
+
+    <target name="module.usmap">
+        <mxmlc file="${teamcity.build.checkoutDir}/flex/src/com/easyinsight/analysis/maps/UnitedStatesMapModule.mxml" output="${flex.path}/UnitedStatesMapModule.swf"
+               static-rsls="false">
+            <load-config filename="${teamcity.build.checkoutDir}/flex/modules/map-us-module.xml"/>
+            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
+                <url rsl-url="framework_3.3.0.4852.swz"/>
+                <url rsl-url="framework_3.3.0.4852.swf"/>
+            </runtime-shared-library-path>
+
+            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/datavisualization.swc">
+                <url rsl-url="datavisualization_3.3.0.4852.swz"/>
+                <url rsl-url="datavisualization_3.3.0.4852.swf"/>
+            </runtime-shared-library-path>
+
+            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
+                <url rsl-url="rpc_3.3.0.4852.swz"/>
+                <url rsl-url="rpc_3.3.0.4852.swf"/>
+            </runtime-shared-library-path>
+        </mxmlc>
+    </target>
+
+    <target name="module.europemap">
+        <mxmlc file="${teamcity.build.checkoutDir}/flex/src/com/easyinsight/analysis/maps/EuropeMapModule.mxml" output="${flex.path}/EuropeMapModule.swf"
+               static-rsls="false">
+            <load-config filename="${teamcity.build.checkoutDir}/flex/modules/map-europe-module.xml"/>
+            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
+                <url rsl-url="framework_3.3.0.4852.swz"/>
+                <url rsl-url="framework_3.3.0.4852.swf"/>
+            </runtime-shared-library-path>
+
+            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/datavisualization.swc">
+                <url rsl-url="datavisualization_3.3.0.4852.swz"/>
+                <url rsl-url="datavisualization_3.3.0.4852.swf"/>
+            </runtime-shared-library-path>
+
+            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
+                <url rsl-url="rpc_3.3.0.4852.swz"/>
+                <url rsl-url="rpc_3.3.0.4852.swf"/>
+            </runtime-shared-library-path>
+        </mxmlc>
+    </target>
+
+    <target name="module.asiamap">
+        <mxmlc file="${teamcity.build.checkoutDir}/flex/src/com/easyinsight/analysis/maps/AsiaMapModule.mxml" output="${flex.path}/AsiaMapModule.swf"
+               static-rsls="false">
+            <load-config filename="${teamcity.build.checkoutDir}/flex/modules/map-asia-module.xml"/>
+            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
+                <url rsl-url="framework_3.3.0.4852.swz"/>
+                <url rsl-url="framework_3.3.0.4852.swf"/>
+            </runtime-shared-library-path>
+
+            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/datavisualization.swc">
+                <url rsl-url="datavisualization_3.3.0.4852.swz"/>
+                <url rsl-url="datavisualization_3.3.0.4852.swf"/>
+            </runtime-shared-library-path>
+
+            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
+                <url rsl-url="rpc_3.3.0.4852.swz"/>
+                <url rsl-url="rpc_3.3.0.4852.swf"/>
+            </runtime-shared-library-path>
+        </mxmlc>
+    </target>
+
+    <target name="module.worldmap">
+        <mxmlc file="${teamcity.build.checkoutDir}/flex/src/com/easyinsight/analysis/maps/WorldMapModule.mxml" output="${flex.path}/WorldMapModule.swf"
+               static-rsls="false">
+            <load-config filename="${teamcity.build.checkoutDir}/flex/modules/map-world-module.xml"/>
+            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
+                <url rsl-url="framework_3.3.0.4852.swz"/>
+                <url rsl-url="framework_3.3.0.4852.swf"/>
+            </runtime-shared-library-path>
+
+            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/datavisualization.swc">
+                <url rsl-url="datavisualization_3.3.0.4852.swz"/>
+                <url rsl-url="datavisualization_3.3.0.4852.swf"/>
+            </runtime-shared-library-path>
+
+            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
+                <url rsl-url="rpc_3.3.0.4852.swz"/>
+                <url rsl-url="rpc_3.3.0.4852.swf"/>
+            </runtime-shared-library-path>
+        </mxmlc>
+    </target>
+
+    <target name="module.americasmap">
+        <mxmlc file="${teamcity.build.checkoutDir}/flex/src/com/easyinsight/analysis/maps/AmericasModule.mxml" output="${flex.path}/AmericasModule.swf"
+               static-rsls="false">
+            <load-config filename="${teamcity.build.checkoutDir}/flex/modules/map-americas-module.xml"/>
+            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
+                <url rsl-url="framework_3.3.0.4852.swz"/>
+                <url rsl-url="framework_3.3.0.4852.swf"/>
+            </runtime-shared-library-path>
+
+            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/datavisualization.swc">
+                <url rsl-url="datavisualization_3.3.0.4852.swz"/>
+                <url rsl-url="datavisualization_3.3.0.4852.swf"/>
+            </runtime-shared-library-path>
+
+            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
+                <url rsl-url="rpc_3.3.0.4852.swz"/>
+                <url rsl-url="rpc_3.3.0.4852.swf"/>
+            </runtime-shared-library-path>
+        </mxmlc>
+    </target>
+
+    <target name="module.middleeastmap">
+        <mxmlc file="${teamcity.build.checkoutDir}/flex/src/com/easyinsight/analysis/maps/MiddleEastMapModule.mxml" output="${flex.path}/MiddleEastMapModule.swf"
+               static-rsls="false">
+            <load-config filename="${teamcity.build.checkoutDir}/flex/modules/map-middleeast-module.xml"/>
+            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
+                <url rsl-url="framework_3.3.0.4852.swz"/>
+                <url rsl-url="framework_3.3.0.4852.swf"/>
+            </runtime-shared-library-path>
+
+            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/datavisualization.swc">
+                <url rsl-url="datavisualization_3.3.0.4852.swz"/>
+                <url rsl-url="datavisualization_3.3.0.4852.swf"/>
+            </runtime-shared-library-path>
+
+            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
+                <url rsl-url="rpc_3.3.0.4852.swz"/>
+                <url rsl-url="rpc_3.3.0.4852.swf"/>
+            </runtime-shared-library-path>
+        </mxmlc>
     </target>
 
     <target name="module.crosstab">
