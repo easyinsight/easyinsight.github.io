@@ -147,9 +147,14 @@
                     var row:Object = dataSet.getItemAt(i);
                     var dimensionValue:String = row[mapDefinition.geography.qualifiedName()];
                     var measureValue:Number = Number(row[mapDefinition.measure.qualifiedName()]);
-                    this.minValue = Math.min(this.minValue, measureValue);
-                    this.maxValue = Math.max(this.maxValue, measureValue);
-
+                    var testMinValue:Number = Math.min(this.minValue, measureValue);
+                    if (!isNaN(testMinValue) && isFinite(testMinValue)) {
+                        this.minValue = testMinValue;
+                    }
+                    var testMaxValue:Number = Math.max(this.maxValue, measureValue);
+                    if (!isNaN(testMaxValue) && isFinite(testMaxValue)) {
+                        this.maxValue = testMaxValue;
+                    }
                     var location:String = MapLocationLookup.instance().getLocation(dimensionValue, String(mapType));
                     if (location != null) {
                         var mapFeature:MapFeature = map.getFeature(location);

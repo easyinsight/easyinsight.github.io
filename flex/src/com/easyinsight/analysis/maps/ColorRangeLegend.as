@@ -20,13 +20,14 @@ public class ColorRangeLegend extends VBox {
     public function recreate():void {
         removeAllChildren();
         if (_points > 0) {            
-            var delta:Number = (_maxValue - _minValue) / _points;
+            var delta:Number = (_maxValue - _minValue) / Number((_points - 1));
             var currentVal:Number = _minValue;
 
             for (var i:int = 0; i < _points; i++) {
                 var colorItem:ColorRangeItem = new ColorRangeItem();
                 colorItem.valueColor = _conditionRenderer.getColor(currentVal);;
                 colorItem.valueString = _formatter.format(currentVal);
+
                 addChild(colorItem);
                 currentVal += delta;
             }
