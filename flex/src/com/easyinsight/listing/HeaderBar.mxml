@@ -2,7 +2,7 @@
 
 <mx:HBox xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:local="*" xmlns:listing="com.easyinsight.listing.*"
          width="100%" borderStyle="none" xmlns:easyinsight="com.easyinsight.*" horizontalGap="25" verticalAlign="middle" backgroundColor="0xF0F0F0"
-        creationComplete="setup()">
+        creationComplete="setup()" addedToStage="onAdded()" removedFromStage="onRemoved()">
     <mx:Metadata>
         [Event(name="triggerAnalyze", type="com.easyinsight.listing.TriggerAnalyzeEvent")]
         [Event(name="listingChange", type="com.easyinsight.listing.ListingChangeEvent")]
@@ -12,6 +12,7 @@
     <mx:Script>
 		<![CDATA[
         import com.easyinsight.framework.LoginEvent;
+        import com.easyinsight.framework.NavigationEvent;
         import com.easyinsight.framework.User;
         import com.easyinsight.goals.MyGoals;
         import com.easyinsight.preferences.PreferencesWindow;
@@ -24,7 +25,16 @@
 
         import com.easyinsight.util.PopUpUtil;
 
+        import mx.controls.Alert;
         import mx.managers.PopUpManager;
+
+        private function onRemoved():void {
+            stage.removeEventListener(KeyboardEvent.KEY_UP, onKey);
+        }
+
+        private function onAdded():void {
+            stage.addEventListener(KeyboardEvent.KEY_UP, onKey);
+        }
 
         private function showPreferences():void {
             var window:PreferencesWindow = new PreferencesWindow();
@@ -32,9 +42,30 @@
             PopUpUtil.centerPopUp(window);
         }
 
+        private function onKey(event:KeyboardEvent):void {            
+            if (event.keyCode == Keyboard.F1) {
+                User.getEventNotifier().dispatchEvent(new NavigationEvent("Intro"));
+            } else if (event.keyCode == Keyboard.F2) {
+                User.getEventNotifier().dispatchEvent(new NavigationEvent("My Data"));
+            } else if (event.keyCode == Keyboard.F3) {
+                User.getEventNotifier().dispatchEvent(new NavigationEvent("Exchange"));
+            } else if (event.keyCode == Keyboard.F4) {
+                User.getEventNotifier().dispatchEvent(new NavigationEvent("Groups"));
+            } else if (event.keyCode == Keyboard.F5) {
+                User.getEventNotifier().dispatchEvent(new NavigationEvent("Solutions"));
+            } else if (event.keyCode == Keyboard.F6) {
+                User.getEventNotifier().dispatchEvent(new NavigationEvent("Goals"));
+            } else if (event.keyCode == Keyboard.F7) {
+                User.getEventNotifier().dispatchEvent(new NavigationEvent("API"));
+            } else if (event.keyCode == Keyboard.F8) {
+                User.getEventNotifier().dispatchEvent(new NavigationEvent("Accounts"));
+            }
+        }
+
         private function setup():void {
             User.getEventNotifier().addEventListener(LoginEvent.LOGIN, loginEvent);
             User.getEventNotifier().addEventListener(LoginEvent.LOGOUT, loginEvent);
+
         }
 
         private function loginEvent(event:LoginEvent):void {
@@ -128,7 +159,7 @@
         <mx:Image source="{myDataIcon}" id="myDataImage"/>
         <mx:Label text="My Data" fontSize="12" fontFamily="Tahoma" fontWeight="bold" color="0x323232"/>
     </listing:ListingOption>
-    <listing:ListingOption perspective="{new GenreDataProvider()}" enableAnalysis="false" displayName="Marketplace" listingChange="onListingChange(event)">
+    <listing:ListingOption perspective="{new GenreDataProvider()}" enableAnalysis="false" displayName="Exchange" listingChange="onListingChange(event)">
         <mx:Image source="{catalogIcon}" id="catalogImage"/>
         <mx:Label text="Exchange" fontSize="12" fontFamily="Tahoma" fontWeight="bold" color="0x323232"/>
     </listing:ListingOption>
@@ -159,7 +190,7 @@
 
     <mx:Button icon="{bugIcon}" click="dispatchEvent(new ReportBugEvent())" toolTip="Report Bug" visible="{loggedIn}" />
 
-    <mx:Button icon="{findIcon}" click="dispatchEvent(new LaunchQuickSearchEvent())" toolTip="Search (N)" visible="{loggedIn}"/>
+    <mx:Button icon="{findIcon}" click="dispatchEvent(new LaunchQuickSearchEvent())" toolTip="Search (Ctrl .)" visible="{loggedIn}"/>
 
 
         
