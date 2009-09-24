@@ -5,6 +5,8 @@ import flash.events.EventDispatcher;
 
 import mx.binding.utils.BindingUtils;
 import mx.collections.ArrayCollection;
+import mx.collections.Sort;
+import mx.collections.SortField;
 import mx.controls.Alert;
 import mx.core.IFactory;
 
@@ -100,6 +102,16 @@ public class ExchangeController extends EventDispatcher {
     private function onDataReturned(event:ExchangeDataEvent):void {
         var data:ArrayCollection = event.data;
         data.filterFunction = filterData;
+        if (dataProvider2.sort == null) {
+            var sort:Sort = new Sort();
+            var sortField:SortField = new SortField();
+            sortField.name = "ratingAverage";
+            sortField.descending = true;
+            sort.fields = [ sortField ];
+            data.sort = sort;
+        } else {
+            data.sort = dataProvider2.sort;
+        }
         data.refresh();
         dataProvider2 = data;
     }

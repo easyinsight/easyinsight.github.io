@@ -2,6 +2,9 @@
 <genredata:ExchangePage xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:genredata="com.easyinsight.genredata.*"
                         xmlns:listing="com.easyinsight.listing.*" width="100%" height="100%">
     <mx:Script><![CDATA[
+        import mx.collections.Sort;
+        import mx.collections.SortField;
+
         private function onTagFocus(event:TagFocusEvent):void {
             selectedTag = event.tag;
         }
@@ -12,13 +15,36 @@
         public function set itemRenderer(value:IFactory):void {
             _itemRenderer = value;
         }
+
+        private function changeSort():void {
+            var index:int = sortBox.selectedIndex;
+            var sort:Sort = new Sort();
+            var sortField:SortField = new SortField();
+            if (index == 0) {
+                sortField.name = "ratingAverage";
+                sortField.descending = true;
+            } else if (index == 1) {
+                sortField.name = "ratingAverage";
+                sortField.descending = false;
+            } else if (index == 2) {
+                sortField.name = "dateAdded";
+                sortField.descending = true;
+            } else if (index == 3) {
+                sortField.name = "dateAdded";
+                sortField.descending = false;
+            }
+            sort.fields = [ sortField ];
+            dataProvider2.sort = sort;
+            dataProvider2.refresh();
+        }
         ]]>
     </mx:Script>
     <mx:HBox width="100%" height="100%" id="listsBox">
         <mx:VBox>
             <mx:HBox>
-                <!--<mx:Label text="Sort By:" fontFamily="Tahoma" fontWeight="bold" fontSize="14"/>
-                <mx:ComboBox id="sortBox">
+
+                <mx:Label text="Sort By:" fontFamily="Tahoma" fontWeight="bold" fontSize="14"/>
+                <mx:ComboBox id="sortBox" change="changeSort()">
                     <mx:dataProvider>
                         <mx:ArrayCollection>
                             <mx:Array>
@@ -29,7 +55,8 @@
                             </mx:Array>
                         </mx:ArrayCollection>
                     </mx:dataProvider>
-                </mx:ComboBox>-->
+                </mx:ComboBox>
+
             </mx:HBox>
             <mx:Spacer height="30"/>
             <mx:HBox width="100%" horizontalAlign="center">

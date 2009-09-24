@@ -45,7 +45,7 @@ import mx.formatters.NumberFormatter;
                         break;
                 }
                 formatter = dateFormatter;
-            } else if (dateLevel == AnalysisItemTypes.WEEK_LEVEL) {
+            } else if (dateLevel == AnalysisItemTypes.WEEK_LEVEL || dateLevel == AnalysisItemTypes.DAY_OF_WEEK_FLAT ) {
                 formatter = new DimensionValueFormatter();
             } else {
                 var numberFormatter:NumberFormatter = new NumberFormatter();

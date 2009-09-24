@@ -197,7 +197,33 @@ public class AnalysisDateDimension extends AnalysisDimension {
                         resultValue = new NumericValue(calendar.get(Calendar.DAY_OF_YEAR));
                         break;
                     case DAY_OF_WEEK_FLAT:
-                        resultValue = new NumericValue(calendar.get(Calendar.DAY_OF_WEEK));
+                        int dayOfWeek = calendar.get(Calendar.DAY_OF_WEEK);
+                        switch (dayOfWeek) {
+                            case Calendar.MONDAY:
+                                resultValue = new StringValue("Monday");
+                                break;
+                            case Calendar.TUESDAY:
+                                resultValue = new StringValue("Tuesday");
+                                break;
+                            case Calendar.WEDNESDAY:
+                                resultValue = new StringValue("Wednesday");
+                                break;
+                            case Calendar.THURSDAY:
+                                resultValue = new StringValue("Thursday");
+                                break;
+                            case Calendar.FRIDAY:
+                                resultValue = new StringValue("Friday");
+                                break;
+                            case Calendar.SATURDAY:
+                                resultValue = new StringValue("Saturday");
+                                break;
+                            case Calendar.SUNDAY:
+                                resultValue = new StringValue("Sunday");
+                                break;
+                            default:
+                                throw new RuntimeException();
+                        }
+
                         break;
                     case WEEK_OF_YEAR_FLAT:
                         resultValue = new NumericValue(calendar.get(Calendar.WEEK_OF_YEAR));
