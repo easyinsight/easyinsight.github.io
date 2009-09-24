@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<mx:Box xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*">
+<mx:Box xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*" toolTip="(F5)">
 	<mx:Metadata>
 		[Event(name="analysisStateChange", type="com.easyinsight.analysis.AnalysisStateChangeEvent")]
 	</mx:Metadata>
@@ -44,6 +44,10 @@
                     }
                     setLabel(node, type);
                 }
+            }
+
+            public function openPopup():void {
+                p2.open();
             }
 		]]>
 	</mx:Script>

@@ -430,7 +430,7 @@
             addEventListener(AnalysisChangedEvent.ANALYSIS_CHANGED, onAnalysisChanged);
             addEventListener(DeleteAnalysisItemEvent.DELETE_ANALYSIS_ITEM, onFieldDelete);
             addEventListener(CommandEvent.COMMAND, onCommand);
-            addEventListener(KeyboardEvent.KEY_UP, onKey);
+            stage.addEventListener(KeyboardEvent.KEY_UP, onKey);
             addEventListener(HierarchyDrilldownEvent.DRILLDOWN, childFilterCreation);
             addEventListener(HierarchyRollupEvent.HIERARCHY_ROLLUP, onRollup);
             addEventListener(DataDetailEvent.DATA_DETAIL, toDetails);
@@ -498,15 +498,26 @@
             PopUpUtil.centerPopUp(window);
         }
 
-        private function onKey(event:KeyboardEvent):void {
+        private function onKey(event:KeyboardEvent):void {            
             if (event.ctrlKey && event.shiftKey) {
                 if (event.keyCode == 90) {
                     redo();
                 }
-            } else if (event.ctrlKey) {
+            } else if (event.ctrlKey) {                
                 if (event.keyCode == 90) {
                     undo();
                 }
+            } else if (event.keyCode == Keyboard.F1) {
+                tabNavigator.selectedIndex = 0;
+            } else if (event.keyCode == Keyboard.F2) {
+                tabNavigator.selectedIndex = 1;
+            } else if (event.keyCode == Keyboard.F3) {
+                tabNavigator.selectedIndex = 2;
+            } else if (event.keyCode == Keyboard.F4) {
+                tabNavigator.selectedIndex = 3;
+            } else if (event.keyCode == Keyboard.F5) {
+                focusManager.setFocus(analysisState.p2);
+                analysisState.openPopup();
             }
         }
 
@@ -630,7 +641,7 @@
 
         public function cleanup():void {
             removeEventListener(CommandEvent.COMMAND, onCommand);
-            removeEventListener(KeyboardEvent.KEY_UP, onKey);
+            stage.removeEventListener(KeyboardEvent.KEY_UP, onKey);
             removeEventListener(AnalysisChangedEvent.ANALYSIS_CHANGED, onAnalysisChanged);
             removeEventListener(DeleteAnalysisItemEvent.DELETE_ANALYSIS_ITEM, onFieldDelete);
             removeEventListener(HierarchyDrilldownEvent.DRILLDOWN, childFilterCreation);
@@ -865,7 +876,7 @@
                     wrappers="{wrappers}" availableFields="{availableFields}" dataSourceInfo="{dataSourceInfo}"
                     dataView="{dataView}" analysisItemCreated="sortFields()"/>
             <filtering:TransformContainer id="transformContainer" paddingLeft="10" paddingTop="10" paddingBottom="10"
-                                          paddingRight="10" transformAdded="transformsUpdated(event)" label="Filters"
+                                          paddingRight="10" transformAdded="transformsUpdated(event)" label="Filters (F3)"
                                           icon="@Embed(source='../../../assets/funnel.png')"
                                           width="100%" height="100%" backgroundColor="#ffffff" backgroundAlpha=".1"
                                           feedID="{dataService.dataFeedID}"
