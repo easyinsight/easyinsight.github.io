@@ -91,4 +91,9 @@ public class AnalysisList extends AnalysisDimension {
         return this == o || o instanceof AnalysisList && super.equals(o);
 
     }
+
+    @Override
+    public AnalysisItemResultMetadata createResultMetadata() {
+        return new AnalysisTagsResultMetadata();
+    }
 }

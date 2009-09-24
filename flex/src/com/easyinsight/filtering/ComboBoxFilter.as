@@ -2,7 +2,8 @@ package com.easyinsight.filtering
 {
 	import com.easyinsight.analysis.AnalysisDimensionResultMetadata;
 	import com.easyinsight.analysis.AnalysisItem;
-	import com.easyinsight.analysis.Value;
+import com.easyinsight.analysis.AnalysisTagsResultMetadata;
+import com.easyinsight.analysis.Value;
 
 import com.easyinsight.framework.CredentialsCache;
 
@@ -162,6 +163,10 @@ import mx.events.DropdownEvent;
 			dataService.getAnalysisItemMetadata.addEventListener(ResultEvent.RESULT, gotMetadata);
 			dataService.getAnalysisItemMetadata.send(_feedID, _analysisItem, CredentialsCache.getCache().createCredentials(), new Date().getTimezoneOffset());
 		}
+
+        private function blah():void {
+            var metadata:AnalysisTagsResultMetadata;
+        }
 		
 		private function gotMetadata(event:ResultEvent):void {
 			var analysisDimensionResultMetadata:AnalysisDimensionResultMetadata = dataService.getAnalysisItemMetadata.lastResult as 
