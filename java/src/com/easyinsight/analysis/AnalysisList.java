@@ -78,7 +78,7 @@ public class AnalysisList extends AnalysisDimension {
             String[] tokens = stringValue.getValue().split(delimiter);
             values = new Value[tokens.length];
             for (int i = 0; i < tokens.length; i++) {
-                values[i] = new StringValue(tokens[i]);
+                values[i] = new StringValue(tokens[i].trim());
             }
         } else {
             values = new Value[1];

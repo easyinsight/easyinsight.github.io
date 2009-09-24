@@ -17,7 +17,7 @@ package com.easyinsight.analysis.options
 		public static const GROUPING:String = "Grouping";
 		public static const RANGE:String = "Range";
 		public static const DATE:String = "Date";
-		public static const LIST:String = "List";
+		public static const LIST:String = "Tags";
 		
 		public function OptionTypeNames()
 		{

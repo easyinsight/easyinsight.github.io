@@ -62,7 +62,7 @@
                                             measureObjects="{measureObjects}" analysisItem="{startingAnalysisItem}"/>
             </mx:AddChild>
         </mx:State>
-        <mx:State name="List">
+        <mx:State name="Tags">
             <mx:AddChild relativeTo="{firstForm}" position="after" creationPolicy="all">
                 <analysis:ListDetailEditor addedToStage="detailEditor = listDetailEditor" id="listDetailEditor"
                                            dimensionFields="{dimensionFields}" dateDimensionFields="{dateFields}"
@@ -214,7 +214,7 @@
         }
 
         protected function getGroupingOptions():ArrayCollection {
-            return new ArrayCollection(["Grouping", "Range", "Date", "List"]);
+            return new ArrayCollection(["Grouping", "Range", "Date", "Tags"]);
         }
 
         protected function getMeasureOptions():ArrayCollection {
@@ -269,8 +269,8 @@
                 case "Range":
                     currentState = "Range";
                     break;
-                case "List":
-                    currentState = "List";
+                case "Tags":
+                    currentState = "Tags";
                     break;
                 case "Step":
                     currentState = "Step";
