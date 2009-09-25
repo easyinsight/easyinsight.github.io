@@ -19,7 +19,7 @@ public class APIPasswordCallback implements CallbackHandler {
     public void handle(Callback[] callbacks) throws IOException, UnsupportedCallbackException {
         WSPasswordCallback pc = (WSPasswordCallback) callbacks[0];
         try {
-            SecurityUtil.authenticate(pc.getIdentifer(), PasswordService.getInstance().encrypt(pc.getPassword()));
+            SecurityUtil.authenticate(pc.getIdentifier(), PasswordService.getInstance().encrypt(pc.getPassword()));
         } catch (Exception e) {
             throw new SecurityException();
         }

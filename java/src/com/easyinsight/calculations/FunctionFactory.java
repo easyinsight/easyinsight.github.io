@@ -14,6 +14,16 @@ public class FunctionFactory {
         else if(s.equals("nconcat")) {
             return new NConcat();
         }
+        else if(s.equals("abs")) {
+            return new AbsoluteValue();
+        }
+        else if(s.equals("min")) {
+            return new Minimum();
+        }
+        else if(s.equals("max")) {
+            return new Maximum();
+        }
+
         else {
             return null;
         }

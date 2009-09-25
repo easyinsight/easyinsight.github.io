@@ -47,7 +47,6 @@ public class NodeFactory extends CommonTreeAdaptor {
 		default:
 			retVal = super.create(payload);			
 		}
-
 		return retVal;
 	}
 }

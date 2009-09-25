@@ -66,6 +66,21 @@ public class CalculationIntegrationTest extends TestCase {
         }
     }
 
+    public void testInvalidCalculation() throws SQLException {
+        FeedDefinition feedDefinition = setupStuff();
+        long feedID = feedDefinition.getDataFeedID();
+        Resolver resolver = new Resolver(feedDefinition);
+        // The data set provided at this point has three numeric variables--Revenue, Cost Number, and Units.
+        // TODO: use this resolver to populate your object tree with Keys for each variable
+        // TODO: our target calculation will be ((Revenue + 100) - (Cost Number)) / Units * 12
+        //CalculationTreeNode tree = evalString("((Revenue + 100) - (Cost Number)) / Units * 12", resolver);
+        CalculationTreeNode tree = evalString("Revenue /", resolver);
+        ValidationVisitor v = new ValidationVisitor();
+        tree.accept(v);
+        assertEquals(1, v.getErrors().size());
+
+    }
+
     public void testExclusiveFilterScenario() throws SQLException {
         TestUtil.getIndividualTestUser();
         AnalysisDimension otherDim = new AnalysisDimension("Other", true);
@@ -119,6 +134,148 @@ public class CalculationIntegrationTest extends TestCase {
         
     }
 
+    public void testMin() throws SQLException {
+        FeedDefinition feedDefinition = setupStuff();
+        long feedID = feedDefinition.getDataFeedID();
+        Resolver resolver = new Resolver(feedDefinition);
+        // The data set provided at this point has three numeric variables--Revenue, Cost Number, and Units.
+        // TODO: use this resolver to populate your object tree with Keys for each variable
+        // TODO: our target calculation will be ((Revenue + 100) - (Cost Number)) / Units * 12
+        //CalculationTreeNode tree = evalString("((Revenue + 100) - (Cost Number)) / Units * 12", resolver);
+        CalculationTreeNode tree = evalString("min(Revenue / Cost Number, 1)", resolver);
+
+        // Once the object is populated, you can test by doing the following...
+
+        Feed feed = FeedRegistry.instance().getFeed(feedDefinition.getDataFeedID());
+        /*DataSet dataSet = feed.getAggregateDataSet(new HashSet<AnalysisItem>(Arrays.asList(TestUtil.createKey("Cost Number", feedID), TestUtil.createKey("Revenue", feedID),
+                TestUtil.createKey("Units", feedID))), null, new InsightRequestMetadata(), feedDefinition.getFields(), false, null);*/
+        DataSet dataSet = new DataSet();
+        Row r = new Row();
+        r.addValue("Revenue", new NumericValue(50));
+        r.addValue("Cost Number", new NumericValue(25));
+        dataSet.addRow(r);
+
+
+        for (IRow row : dataSet.getRows()) {
+            // TODO: apply your visitor here
+            // TODO: ((Revenue * Cost Number) / Units) * 12 = should give us 240
+
+            ICalculationTreeVisitor visitor = new EvaluationVisitor(row);
+            tree.accept(visitor);
+            assertEquals(1.0, visitor.getResult().toDouble(), .1);
+            //assertEquals(240.0, visitor.getResult().toDouble());
+
+
+            // TODO: produce your double here and I'll hook up to the next piece
+        }
+    }
+
+    public void testMax() throws SQLException {
+        FeedDefinition feedDefinition = setupStuff();
+        long feedID = feedDefinition.getDataFeedID();
+        Resolver resolver = new Resolver(feedDefinition);
+        // The data set provided at this point has three numeric variables--Revenue, Cost Number, and Units.
+        // TODO: use this resolver to populate your object tree with Keys for each variable
+        // TODO: our target calculation will be ((Revenue + 100) - (Cost Number)) / Units * 12
+        //CalculationTreeNode tree = evalString("((Revenue + 100) - (Cost Number)) / Units * 12", resolver);
+        CalculationTreeNode tree = evalString("max(Revenue / Cost Number, 100000)", resolver);
+
+        // Once the object is populated, you can test by doing the following...
+
+        Feed feed = FeedRegistry.instance().getFeed(feedDefinition.getDataFeedID());
+        /*DataSet dataSet = feed.getAggregateDataSet(new HashSet<AnalysisItem>(Arrays.asList(TestUtil.createKey("Cost Number", feedID), TestUtil.createKey("Revenue", feedID),
+                TestUtil.createKey("Units", feedID))), null, new InsightRequestMetadata(), feedDefinition.getFields(), false, null);*/
+        DataSet dataSet = new DataSet();
+        Row r = new Row();
+        r.addValue("Revenue", new NumericValue(50));
+        r.addValue("Cost Number", new NumericValue(25));
+        dataSet.addRow(r);
+
+        for (IRow row : dataSet.getRows()) {
+            // TODO: apply your visitor here
+            // TODO: ((Revenue * Cost Number) / Units) * 12 = should give us 240
+
+            ICalculationTreeVisitor visitor = new EvaluationVisitor(row);
+            tree.accept(visitor);
+            assertEquals(100000.0, visitor.getResult().toDouble(), .1);
+            //assertEquals(240.0, visitor.getResult().toDouble());
+
+
+            // TODO: produce your double here and I'll hook up to the next piece
+        }
+    }
+
+    public void testAbs() throws SQLException {
+        FeedDefinition feedDefinition = setupStuff();
+        long feedID = feedDefinition.getDataFeedID();
+        Resolver resolver = new Resolver(feedDefinition);
+        // The data set provided at this point has three numeric variables--Revenue, Cost Number, and Units.
+        // TODO: use this resolver to populate your object tree with Keys for each variable
+        // TODO: our target calculation will be ((Revenue + 100) - (Cost Number)) / Units * 12
+        //CalculationTreeNode tree = evalString("((Revenue + 100) - (Cost Number)) / Units * 12", resolver);
+        CalculationTreeNode tree = evalString("abs(Cost Number - Revenue)", resolver);
+
+        // Once the object is populated, you can test by doing the following...
+
+        Feed feed = FeedRegistry.instance().getFeed(feedDefinition.getDataFeedID());
+        /*DataSet dataSet = feed.getAggregateDataSet(new HashSet<AnalysisItem>(Arrays.asList(TestUtil.createKey("Cost Number", feedID), TestUtil.createKey("Revenue", feedID),
+                TestUtil.createKey("Units", feedID))), null, new InsightRequestMetadata(), feedDefinition.getFields(), false, null);*/
+        DataSet dataSet = new DataSet();
+        Row r = new Row();
+        r.addValue("Revenue", new NumericValue(50));
+        r.addValue("Cost Number", new NumericValue(25));
+        dataSet.addRow(r);
+
+        for (IRow row : dataSet.getRows()) {
+            // TODO: apply your visitor here
+            // TODO: ((Revenue * Cost Number) / Units) * 12 = should give us 240
+
+            ICalculationTreeVisitor visitor = new EvaluationVisitor(row);
+            tree.accept(visitor);
+            assertEquals(25.0, visitor.getResult().toDouble(), .1);
+            //assertEquals(240.0, visitor.getResult().toDouble());
+
+
+            // TODO: produce your double here and I'll hook up to the next piece
+        }
+    }
+
+    public void testMinMax() throws SQLException {
+        FeedDefinition feedDefinition = setupStuff();
+        long feedID = feedDefinition.getDataFeedID();
+        Resolver resolver = new Resolver(feedDefinition);
+        // The data set provided at this point has three numeric variables--Revenue, Cost Number, and Units.
+        // TODO: use this resolver to populate your object tree with Keys for each variable
+        // TODO: our target calculation will be ((Revenue + 100) - (Cost Number)) / Units * 12
+        //CalculationTreeNode tree = evalString("((Revenue + 100) - (Cost Number)) / Units * 12", resolver);
+        CalculationTreeNode tree = evalString("max(min(Revenue / Cost Number, 1), 100)", resolver);
+
+        // Once the object is populated, you can test by doing the following...
+
+        Feed feed = FeedRegistry.instance().getFeed(feedDefinition.getDataFeedID());
+        /*DataSet dataSet = feed.getAggregateDataSet(new HashSet<AnalysisItem>(Arrays.asList(TestUtil.createKey("Cost Number", feedID), TestUtil.createKey("Revenue", feedID),
+                TestUtil.createKey("Units", feedID))), null, new InsightRequestMetadata(), feedDefinition.getFields(), false, null);*/
+        DataSet dataSet = new DataSet();
+        Row r = new Row();
+        r.addValue("Revenue", new NumericValue(50));
+        r.addValue("Cost Number", new NumericValue(25));
+        dataSet.addRow(r);
+
+        for (IRow row : dataSet.getRows()) {
+            // TODO: apply your visitor here
+            // TODO: ((Revenue * Cost Number) / Units) * 12 = should give us 240
+
+            ICalculationTreeVisitor visitor = new EvaluationVisitor(row);
+            tree.accept(visitor);
+            assertEquals(100.0, visitor.getResult().toDouble(), .1);
+            //assertEquals(240.0, visitor.getResult().toDouble());
+
+
+            // TODO: produce your double here and I'll hook up to the next piece
+        }
+    }
+
+
     private CalculationTreeNode evalString(String s, Resolver r) {
         CalculationTreeNode c = null;
         ICalculationTreeVisitor visitor = new EvaluationVisitor();
@@ -134,7 +291,7 @@ public class CalculationIntegrationTest extends TestCase {
             visitor = new ResolverVisitor(r, new FunctionFactory());
             c.accept(visitor);
         } catch (RecognitionException e) {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            e.printStackTrace(); 
         }
         return c;
     }
@@ -162,7 +319,7 @@ public class CalculationIntegrationTest extends TestCase {
     }
 
     private long createDataFeed(long accountID, UserUploadService userUploadService) {
-        String csvText = "Customer,Revenue,Cost Number,Units\nAcme,400,100,20";
+        String csvText = "Customer,Revenue,Cost Number,Units\n\rAcme,400,100,20\n\r";
         long uploadID = userUploadService.addRawUploadData(accountID, "test.csv", csvText.getBytes());
         return userUploadService.create(uploadID, "Test Feed").getFeedID();
     }
