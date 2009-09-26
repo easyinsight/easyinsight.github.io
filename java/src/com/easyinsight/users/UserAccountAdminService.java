@@ -324,7 +324,6 @@ public class UserAccountAdminService {
     public AccountAPISettings getAccountAPISettings() {
         AccountAPISettings accountAPISettings;
         long accountID = SecurityUtil.getAccountID();
-        SecurityUtil.authorizeAccountAdmin();
         Session session = Database.instance().createSession();
         try {
             session.getTransaction().begin();
