@@ -68,7 +68,7 @@ public class UploadFormatTester {
         if (delimiter != null && !delimiter.equals(",")) {
             uploadFormat = new FlatFileUploadFormat(delimiter, "");
         }
-        else if(delimiter.equals(",")) {
+        else if(delimiter != null && delimiter.equals(",")) {
             uploadFormat = new CsvFileUploadFormat();
         }
         return uploadFormat;

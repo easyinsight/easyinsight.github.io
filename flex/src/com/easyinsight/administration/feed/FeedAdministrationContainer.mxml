@@ -5,6 +5,7 @@
 	<mx:Script>
 		<![CDATA[
         import com.easyinsight.analysis.AnalysisChangedEvent;
+        import com.easyinsight.customupload.CsvFileUploadFormat;
         import com.easyinsight.customupload.ExcelUploadFormat;
         import com.easyinsight.customupload.FlatFileUploadFormat;
         import com.easyinsight.datasources.IServerDataSourceDefinition;
@@ -246,6 +247,7 @@
         private function blah():void {
             var excelUploadFormat:ExcelUploadFormat;
             var flatFileUploadFormat:FlatFileUploadFormat;
+            var csvFileUploadFormat:CsvFileUploadFormat;
         }
 
         [Bindable]

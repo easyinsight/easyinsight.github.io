@@ -641,15 +641,20 @@
 
         public function cleanup():void {
             removeEventListener(CommandEvent.COMMAND, onCommand);
-            stage.removeEventListener(KeyboardEvent.KEY_UP, onKey);
+            if(stage != null)
+                stage.removeEventListener(KeyboardEvent.KEY_UP, onKey);
             removeEventListener(AnalysisChangedEvent.ANALYSIS_CHANGED, onAnalysisChanged);
             removeEventListener(DeleteAnalysisItemEvent.DELETE_ANALYSIS_ITEM, onFieldDelete);
             removeEventListener(HierarchyDrilldownEvent.DRILLDOWN, childFilterCreation);
             removeEventListener(HierarchyRollupEvent.HIERARCHY_ROLLUP, onRollup);
-            dataService.removeEventListener(DataServiceLoadingEvent.LOADING_STARTED, startLoading);
-            dataService.removeEventListener(DataServiceLoadingEvent.LOADING_STOPPED, stopLoading);
-            dataService.removeEventListener(InvalidFieldsEvent.INVALID_FIELDS, onInvalidFields);
-            transformContainer.removeEventListener(TransformsUpdatedEvent.UPDATED_TRANSFORMS, transformsUpdated);
+            if(dataService != null) {
+                dataService.removeEventListener(DataServiceLoadingEvent.LOADING_STARTED, startLoading);
+                dataService.removeEventListener(DataServiceLoadingEvent.LOADING_STOPPED, stopLoading);
+                dataService.removeEventListener(InvalidFieldsEvent.INVALID_FIELDS, onInvalidFields);
+            }
+            if(transformContainer != null) {
+                transformContainer.removeEventListener(TransformsUpdatedEvent.UPDATED_TRANSFORMS, transformsUpdated);
+            }
             if (dataView != null) {
                 dataView.removeEventListener(DataServiceLoadingEvent.LOADING_STARTED, startLoading);
                 dataView.removeEventListener(DataServiceLoadingEvent.LOADING_STOPPED, stopLoading);

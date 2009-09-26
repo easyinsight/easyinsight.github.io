@@ -164,6 +164,7 @@ public class AnalysisService {
         } finally {
             Database.closeConnection(conn);
         }
+
         return new ReportMetrics(ratingCount, ratingAverage);
     }
 
