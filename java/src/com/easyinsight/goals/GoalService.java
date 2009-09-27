@@ -358,41 +358,43 @@ public class GoalService {
         }
         try {
             long dataSourceID = goalTreeNode.getCoreFeedID();
-            if (forceRefresh) {
-                FeedDefinition feedDefinition = new FeedStorage().getFeedDefinitionData(dataSourceID);
-                if (feedDefinition.getCredentialsDefinition() == CredentialsDefinition.STANDARD_USERNAME_PW) {
-                    IServerDataSourceDefinition dataSource = (IServerDataSourceDefinition) feedDefinition;
+            if (dataSourceID > 0) {
+                if (forceRefresh) {
+                    FeedDefinition feedDefinition = new FeedStorage().getFeedDefinitionData(dataSourceID);
+                    if (feedDefinition.getCredentialsDefinition() == CredentialsDefinition.STANDARD_USERNAME_PW) {
+                        IServerDataSourceDefinition dataSource = (IServerDataSourceDefinition) feedDefinition;
+                        Credentials credentials = null;
+                        for (CredentialFulfillment fulfillment : existingCredentials) {
+                            if (fulfillment.getDataSourceID() == feedDefinition.getDataFeedID()) {
+                                credentials = fulfillment.getCredentials();
+                            }
+                        }
+                        boolean noCredentials = true;
+                        if (credentials != null) {
+                            noCredentials = dataSource.validateCredentials(credentials) != null;
+                        }
+                        if (noCredentials) {
+                            credentialMap.put(feedDefinition.getDataFeedID(), new CredentialRequirement(feedDefinition.getDataFeedID(), feedDefinition.getFeedName(),
+                                    CredentialsDefinition.STANDARD_USERNAME_PW));
+                        }
+                    }
+                } else {
+                    Feed feed = FeedRegistry.instance().getFeed(dataSourceID);
                     Credentials credentials = null;
                     for (CredentialFulfillment fulfillment : existingCredentials) {
-                        if (fulfillment.getDataSourceID() == feedDefinition.getDataFeedID()) {
+                        if (fulfillment.getDataSourceID() == dataSourceID) {
                             credentials = fulfillment.getCredentials();
                         }
                     }
                     boolean noCredentials = true;
                     if (credentials != null) {
-                        noCredentials = dataSource.validateCredentials(credentials) != null;
+                        noCredentials = new FeedStorage().getFeedDefinitionData(dataSourceID).validateCredentials(credentials) != null;
                     }
                     if (noCredentials) {
-                        credentialMap.put(feedDefinition.getDataFeedID(), new CredentialRequirement(feedDefinition.getDataFeedID(), feedDefinition.getFeedName(),
-                                CredentialsDefinition.STANDARD_USERNAME_PW));
-                    }
-                }
-            } else {
-                Feed feed = FeedRegistry.instance().getFeed(dataSourceID);
-                Credentials credentials = null;
-                for (CredentialFulfillment fulfillment : existingCredentials) {
-                    if (fulfillment.getDataSourceID() == dataSourceID) {
-                        credentials = fulfillment.getCredentials();
-                    }
-                }
-                boolean noCredentials = true;
-                if (credentials != null) {
-                    noCredentials = new FeedStorage().getFeedDefinitionData(dataSourceID).validateCredentials(credentials) != null;
-                }
-                if (noCredentials) {
-                    Set<CredentialRequirement> credentialRequirements = feed.getCredentialRequirement(false);
-                    for (CredentialRequirement credentialRequirement : credentialRequirements) {
-                        credentialMap.put(credentialRequirement.getDataSourceID(), credentialRequirement);
+                        Set<CredentialRequirement> credentialRequirements = feed.getCredentialRequirement(false);
+                        for (CredentialRequirement credentialRequirement : credentialRequirements) {
+                            credentialMap.put(credentialRequirement.getDataSourceID(), credentialRequirement);
+                        }
                     }
                 }
             }
