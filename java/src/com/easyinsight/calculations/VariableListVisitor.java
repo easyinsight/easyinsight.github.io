@@ -49,7 +49,7 @@ public class VariableListVisitor implements ICalculationTreeVisitor {
     }
 
     public void visit(FunctionNode node) {
-        visitChildren(node);
+        visitChildren(node, 1);
     }
 
     public Value getResult() {
@@ -60,8 +60,12 @@ public class VariableListVisitor implements ICalculationTreeVisitor {
     }
 
     private void visitChildren(CalculationTreeNode node) {
+        visitChildren(node, 0);
+    }
 
-        for(int i = 0;i < node.getChildCount();i++) {
+    private void visitChildren(CalculationTreeNode node, int start) {
+
+        for(int i = start;i < node.getChildCount();i++) {
             VariableListVisitor v = new VariableListVisitor();
             if (node.getChild(i) instanceof CalculationTreeNode) {
                 ((CalculationTreeNode) node.getChild(i)).accept(v);
