@@ -38,10 +38,16 @@
 			private function cancel():void {
                 PopUpManager.removePopUp(this);
             }
-            
+
+            private function onSaveComplete(event:AnalysisItemSaveEvent):void {
+                dispatchEvent(new AnalysisItemEditEvent(event.analysisItem, true));
+                editor.removeEventListener(AnalysisItemSaveEvent.ANALYSIS_ITEM_SAVE, onSaveComplete);
+                PopUpManager.removePopUp(this);
+            }
+
             private function save():void {
-            	dispatchEvent(new AnalysisItemEditEvent(editor.save(), true));
-            	PopUpManager.removePopUp(this);
+                editor.addEventListener(AnalysisItemSaveEvent.ANALYSIS_ITEM_SAVE, onSaveComplete);
+                editor.save();
             }
 		]]>
 	</mx:Script>

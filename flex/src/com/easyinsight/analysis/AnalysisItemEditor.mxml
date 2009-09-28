@@ -236,6 +236,7 @@
             analysisItem.hidden = hiddenCheckbox.selected;
             analysisItem.links = links;
             detailEditor.save(analysisItem);
+            dispatchEvent(new AnalysisItemSaveEvent(analysisItem));
             return analysisItem;
         }
 

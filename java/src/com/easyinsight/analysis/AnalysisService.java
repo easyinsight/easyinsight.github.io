@@ -3,6 +3,8 @@ package com.easyinsight.analysis;
 import com.easyinsight.calculations.generated.CalculationsParser;
 import com.easyinsight.calculations.generated.CalculationsLexer;
 import com.easyinsight.calculations.NodeFactory;
+import com.easyinsight.calculations.CalculationTreeNode;
+import com.easyinsight.calculations.ValidationVisitor;
 import com.easyinsight.security.*;
 import com.easyinsight.security.SecurityException;
 import com.easyinsight.logging.LogClass;
@@ -109,15 +111,21 @@ public class AnalysisService {
 
     public String validateCalculation(String calculationString) {
         String validationString = null;
+        CalculationTreeNode node = null;
         try {
             CalculationsLexer lexer = new CalculationsLexer(new ANTLRStringStream(calculationString));
             CommonTokenStream tokes = new CommonTokenStream();
             tokes.setTokenSource(lexer);
             CalculationsParser parser = new CalculationsParser(tokes);
             parser.setTreeAdaptor(new NodeFactory());
-            parser.expr();
+            node = (CalculationTreeNode) parser.startExpr().getTree();
         } catch (Exception e) {
             validationString = e.getMessage();
+        }
+        ValidationVisitor v = new ValidationVisitor();
+        node.accept(v);
+        if(validationString == null && v.getErrors().size() > 0) {
+            validationString = v.getErrors().get(0);
         }
         return validationString;
     }
