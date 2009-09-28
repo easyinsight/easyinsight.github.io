@@ -63,11 +63,16 @@ public class CompositeFeed extends Feed {
         List<FilterDefinition> filters = new ArrayList<FilterDefinition>();
         for (CompositeFeedNode child : compositeFeedNodes) {
             Feed childDataSource = FeedRegistry.instance().getFeed(child.getDataFeedID());
+            //filters.addAll(childDataSource.getIntrinsicFilters());
             List<FilterDefinition> childFilters = childDataSource.getIntrinsicFilters();
             for (FilterDefinition filterDefinition : childFilters) {
-                DerivedKey derivedKey = new DerivedKey(filterDefinition.getField().getKey(), child.getDataFeedID());
-                filterDefinition.getField().setKey(derivedKey);
-                filters.add(filterDefinition);
+                for (AnalysisItem item : getFields()) {
+                    Key key = item.getKey();
+                    if (key.toKeyString().equals(filterDefinition.getField().getKey().toKeyString())) {
+                        filterDefinition.getField().setKey(key);
+                        filters.add(filterDefinition);
+                    }
+                }                
             }
         }
         return filters;

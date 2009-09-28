@@ -102,8 +102,8 @@ public class GoogleAnalyticsDataSource extends ServerDataSourceDefinition {
     public static final String SEARCH_DESTINATION = "ga:searchDestinationPage";
     public static final String SEARCH_KEYWORD = "ga:searchKeyword";
     public static final String SEARCH_KEYWORD_REFINEMENT = "ga:searchKeywordRefinement";
-    public static final String SEARCH_SEARCH_START = "ga:searchStart";
-    public static final String SEARCH_SEARCH_USED = "ga:searchUed";
+    public static final String SEARCH_SEARCH_START = "ga:searchStartPage";
+    public static final String SEARCH_SEARCH_USED = "ga:searchUsed";
 
     public static final String SEARCH_DEPTH = "ga:searchDepth";
     public static final String SEARCH_DURATION = "ga:searchDuration";
