@@ -25,7 +25,18 @@ public class HistoryRun {
         cal.set(Calendar.HOUR_OF_DAY, 0);
         cal.set(Calendar.MINUTE, 0);
         Date startDate = cal.getTime();
-        return calculateHistoricalValues(dataSourceID, measure, filters, startDate, endDate, credentials);
+        List<GoalValue> values = calculateHistoricalValues(dataSourceID, measure, filters, startDate, endDate, credentials);
+        List<GoalValue> retValues = new ArrayList<GoalValue>();
+        if (values.size() == 1) {
+            retValues.add(values.get(0));
+        } else if (values.size() == 2) {
+            retValues.add(values.get(0));
+            retValues.add(values.get(1));
+        } else if (values.size() > 2) {
+            retValues.add(values.get(values.size() - 2));
+            retValues.add(values.get(values.size() - 1));
+        }
+        return retValues;
     }
 
     public List<GoalValue> calculateHistoricalValues(long dataSourceID, AnalysisMeasure measure, List<FilterDefinition> filters, Date startDate, Date endDate,
