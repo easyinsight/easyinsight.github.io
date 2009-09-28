@@ -36,10 +36,10 @@
 
         public function gotFocus():void {
             var pageString:String;
-            BrowserManager.getInstance().setTitle("Easy Insight - Marketplace");
-            pageString = "Marketplace";
+            BrowserManager.getInstance().setTitle("Easy Insight - Exchange");
+            pageString = "Exchange";
             var fragmentObject:Object = new Object();
-            fragmentObject.page = "marketplace";
+            fragmentObject.page = "exchange";
             var fragmentString:String = URLUtil.objectToString(fragmentObject);
             BrowserManager.getInstance().setFragment(fragmentString);
             if (exchangeController == null) {                

@@ -5,13 +5,12 @@
         <mx:State name="UnavailableDataSource">
             <mx:RemoveChild target="{dsButton}"/>
             <mx:AddChild relativeTo="{dsName}">
-                <mx:Label text="{dataSourceName}" fontFamily="Tahoma" fontWeight="bold" fontSize="12" maxWidth="170"
+                <mx:Label text="{dataSourceName}" fontFamily="Tahoma" fontWeight="bold" fontSize="12" maxWidth="150"
                         toolTip="The data source for this report is not publicly available."/> 
             </mx:AddChild>
         </mx:State>
     </mx:states>
     <mx:Script><![CDATA[
-        import com.easyinsight.administration.feed.TagCloud;
         import com.easyinsight.analysis.AnalysisDefinition;
 
         import com.easyinsight.report.ReportAnalyzeSource;
@@ -222,7 +221,8 @@
         <mx:VBox width="160" height="100%" horizontalAlign="center" verticalAlign="middle">
             <mx:Label text="Data Source:"/>
             <mx:Box id="dsName">
-                <mx:LinkButton id="dsButton" label="{dataSourceName}" fontFamily="Tahoma" fontWeight="bold" fontSize="12" textDecoration="underline" maxWidth="150"/>
+                <mx:LinkButton id="dsButton" label="{dataSourceName}" fontFamily="Tahoma" fontWeight="bold" fontSize="12" textDecoration="underline" maxWidth="130"
+                        toolTip="Click to jump in and create your own reports against this data source"/>
             </mx:Box>
         </mx:VBox>
         <mx:VRule height="80%"/>

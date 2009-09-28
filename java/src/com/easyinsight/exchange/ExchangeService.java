@@ -28,7 +28,7 @@ public class ExchangeService {
             if (tag == null) {
                 analysisQueryStmt = conn.prepareStatement("SELECT DISTINCT ANALYSIS.ANALYSIS_ID, ANALYSIS.TITLE, ANALYSIS.DATA_FEED_ID, ANALYSIS.REPORT_TYPE, avg(USER_REPORT_RATING.rating)," +
                         "analysis.create_date, data_feed.attribution, ANALYSIS.DESCRIPTION, DATA_FEED.FEED_NAME, ANALYSIS.AUTHOR_NAME," +
-                        "DATA_FEED.MARKETPLACE_VISIBLE FROM DATA_FEED, ANALYSIS " +
+                        "DATA_FEED.PUBLICLY_VISIBLE FROM DATA_FEED, ANALYSIS " +
                         " LEFT JOIN USER_REPORT_RATING ON USER_REPORT_RATING.report_id = ANALYSIS.ANALYSIS_ID WHERE ANALYSIS.DATA_FEED_ID = DATA_FEED.DATA_FEED_ID AND " +
                         "((DATA_FEED.MARKETPLACE_VISIBLE = ? AND ANALYSIS.FEED_VISIBILITY = ?) OR ANALYSIS.MARKETPLACE_VISIBLE = ?) AND " +
                         "ANALYSIS.ROOT_DEFINITION = ? GROUP BY ANALYSIS.ANALYSIS_ID");

@@ -332,8 +332,8 @@
                                                                 case "myGoals":
                                                                     navigation(new NavigationEvent("Goals"));
                                                                     break;
-                                                                case "marketplace":
-                                                                    navigation(new NavigationEvent("Marketplace"));
+                                                                case "exchange":
+                                                                    navigation(new NavigationEvent("Exchange"));
                                                                     break;
                                                                 case "groups":
                                                                     navigation(new NavigationEvent("Groups"));
