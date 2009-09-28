@@ -58,6 +58,21 @@ public class CompositeFeed extends Feed {
         return FeedType.COMPOSITE;
     }
 
+    @Override
+    public List<FilterDefinition> getIntrinsicFilters() {
+        List<FilterDefinition> filters = new ArrayList<FilterDefinition>();
+        for (CompositeFeedNode child : compositeFeedNodes) {
+            Feed childDataSource = FeedRegistry.instance().getFeed(child.getDataFeedID());
+            List<FilterDefinition> childFilters = childDataSource.getIntrinsicFilters();
+            for (FilterDefinition filterDefinition : childFilters) {
+                DerivedKey derivedKey = new DerivedKey(filterDefinition.getField().getKey(), child.getDataFeedID());
+                filterDefinition.getField().setKey(derivedKey);
+                filters.add(filterDefinition);
+            }
+        }
+        return filters;
+    }
+
     public AnalysisItemResultMetadata getMetadata(AnalysisItem analysisItem, InsightRequestMetadata insightRequestMetadata) {
         if (analysisItem.getKey() instanceof DerivedKey) {
             DerivedKey derivedKey = (DerivedKey) analysisItem.getKey();
