@@ -89,9 +89,7 @@ public class CompositeFeed extends Feed {
 
     public DataSet getAggregateDataSet(Set<AnalysisItem> analysisItems, Collection<FilterDefinition> filters, InsightRequestMetadata insightRequestMetadata, List<AnalysisItem> allAnalysisItems, boolean adminMode, Collection<Key> additionalNeededKeys) {
         try {
-            Set<AnalysisItem> set = new HashSet<AnalysisItem>();
-
-            return getDataSet(analysisItems, additionalNeededKeys, insightRequestMetadata);
+            return getDataSet(analysisItems, filters, additionalNeededKeys, insightRequestMetadata);
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);
@@ -102,7 +100,7 @@ public class CompositeFeed extends Feed {
         return null;  //To change body of implemented methods use File | Settings | File Templates.
     }
 
-    private DataSet getDataSet(Set<AnalysisItem> analysisItems, Collection<Key> additionalKeys, InsightRequestMetadata insightRequestMetadata) throws TokenMissingException {
+    private DataSet getDataSet(Set<AnalysisItem> analysisItems, Collection<FilterDefinition> filters, Collection<Key> additionalKeys, InsightRequestMetadata insightRequestMetadata) throws TokenMissingException {
 
         Map<Long, QueryStateNode> queryNodeMap = new HashMap<Long, QueryStateNode>();
 
@@ -124,6 +122,11 @@ public class CompositeFeed extends Feed {
             if (additionalKeys != null) {
                 for (Key key : additionalKeys) {
                     queryStateNode.addKey(key);
+                }
+            }
+            for (FilterDefinition filterDefinition : filters) {
+                if (queryStateNode.handles(filterDefinition.getField().getKey())) {
+                    queryStateNode.addFilter(filterDefinition);
                 }
             }
         }
@@ -305,6 +308,10 @@ public class CompositeFeed extends Feed {
                 analysisItem.setKey(columnSet.get(analysisItem.getKey()));
             }
             myDataSet = dataSet;
+        }
+
+        public void addFilter(FilterDefinition filterDefinition) {
+            filters.add(filterDefinition);
         }
     }
 
