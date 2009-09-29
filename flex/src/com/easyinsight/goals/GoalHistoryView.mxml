@@ -205,7 +205,7 @@
             <mx:Button label="Go to the Data Source" click="goDataSource()"/>
             <mx:Button icon="{addIcon}" toolTip="Add this goal to My Goals" click="subscribe()"/>
         </mx:HBox>
-        <mx:LineChart dataProvider="{goalHistory}" width="100%" height="100%">
+        <mx:LineChart dataProvider="{goalHistory}" width="100%" height="100%" showDataTips="true">
             <mx:horizontalAxis>
                 <mx:DateTimeAxis id="horAxis"/>
             </mx:horizontalAxis>
