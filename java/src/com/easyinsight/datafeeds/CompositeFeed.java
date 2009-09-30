@@ -255,8 +255,12 @@ public class CompositeFeed extends Feed {
         }
 
         public boolean handles(Key key) {
-            DerivedKey derivedKey = (DerivedKey) key;
-            return (feedID == derivedKey.getFeedID());
+            if (key instanceof DerivedKey) {
+                DerivedKey derivedKey = (DerivedKey) key;
+                return (feedID == derivedKey.getFeedID());
+            } else {
+                return false;
+            }
         }
 
         public void addItem(AnalysisItem analysisItem) {
