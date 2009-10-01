@@ -21,6 +21,8 @@
         import com.easyinsight.analysis.AnalysisItemTypes;
         import com.easyinsight.analysis.AnalysisItem;
 
+        import com.easyinsight.listing.DataFeedDescriptor;
+        import com.easyinsight.util.CompletionItemEvent;
         import com.easyinsight.util.PopUpUtil;
 
         import mx.collections.Sort;
@@ -53,7 +55,7 @@
         [Bindable]
         private var availableItems:ArrayCollection;
         [Bindable]
-        private var feedName:String;
+        private var dataSource:DataFeedDescriptor;
         [Bindable]
         private var feedID:int;
 
@@ -90,6 +92,9 @@
         [Bindable]
         private var associatedReports:ArrayCollection = new ArrayCollection();
 
+        [Bindable]
+        private var descriptors:ArrayCollection;
+
 
         private var feedMetadata:FeedMetadata;
 
@@ -117,6 +122,7 @@
                  }*/
             }
             goalService.getMilestones.send();
+            dataProvider.searchForSubscribedFeeds.send();
         }
 
         private function onCommand(event:CommandEvent):void {
@@ -139,7 +145,10 @@
             this.feedID = goalTreeNode.coreFeedID;
             if (goalTreeNode.coreFeedID > 0) {
                 insightBound = true;
-                this.feedName = goalTreeNode.coreFeedName;
+                var descriptor:DataFeedDescriptor = new DataFeedDescriptor();
+                descriptor.dataFeedID = feedID;
+                descriptor.name = goalTreeNode.coreFeedName;
+                dataSource = descriptor;
                 filterDefinitions = goalTreeNode.filters;
                 if (goalTreeNode.problemConditions.length > 0) {
                     problemDefinition = goalTreeNode.problemConditions.getItemAt(0) as FilterDefinition;
@@ -170,7 +179,6 @@
 
         private function clear():void {
             feedID = 0;
-            feedName = "";
             insightBound = false;
         }
 
@@ -178,7 +186,7 @@
 
             if (insightBound) {
                 _goalTreeNode.coreFeedID = feedID;
-                _goalTreeNode.coreFeedName = feedName;
+                _goalTreeNode.coreFeedName = dataSource.name;
                 _goalTreeNode.analysisMeasure = availableItemBox.selectedItem as AnalysisMeasure;
 
                 _goalTreeNode.filters = transformContainer.getFilterDefinitions();
@@ -219,18 +227,15 @@
         private var commandProcessor:CommandProcessor;
 
 
-        private function bindDataSource():void {
-            var window:DataSourceChoiceWindow = DataSourceChoiceWindow(PopUpManager.createPopUp(this, DataSourceChoiceWindow, true));
-            window.addEventListener(DataSourceChoiceEvent.DATA_SOURCE_CHOICE, boundDataSource);
-            PopUpUtil.centerPopUp(window);
-        }
 
-        private function boundDataSource(event:DataSourceChoiceEvent):void {
+        private function onDataSourceChange(event:CompletionItemEvent):void {
             currentState = "";
             transformContainer.removeAllFilters();
-            this.feedName = event.feedDefinition.name;
-            this.feedID = event.feedDefinition.id;
+            var descriptor:DataFeedDescriptor = event.selectedItem as DataFeedDescriptor;
+            dataSource = descriptor;
+            this.feedID = descriptor.dataFeedID;
             insightBound = true;
+            analysisMeasure = null;
             dataService.getFeedMetadata.send(feedID);
         }
 
@@ -355,6 +360,15 @@
                 targetBox.selectedIndex = 0;
             }
         }
+
+        private function gotFeeds():void {
+            descriptors = dataProvider.searchForSubscribedFeeds.lastResult as ArrayCollection;
+            var sort:Sort = new Sort();
+            var sortField:SortField = new SortField("name");
+            sort.fields = [ sortField ];
+            descriptors.sort = sort;
+            descriptors.refresh();
+        }
 		]]>
     </mx:Script>
     <mx:RemoteObject destination="data" id="dataService">
@@ -363,6 +377,9 @@
     <mx:RemoteObject destination="goalService" id="goalService">
         <mx:method name="getGoalTree" result="gotGoalTree()"/>
     </mx:RemoteObject>
+    <mx:RemoteObject id="dataProvider" destination="feeds">
+		<mx:method name="searchForSubscribedFeeds" result="gotFeeds()"/>
+	</mx:RemoteObject>
     <mx:VBox styleName="TitleWindowContents" width="100%" height="100%">
         <mx:TabNavigator width="100%" height="100%" paddingTop="0" paddingBottom="0"
                          paddingLeft="0" paddingRight="0" creationPolicy="all" resizeToContent="true">
@@ -379,16 +396,17 @@
                                     <mx:FormItem label="Goal Data Source Binding:" direction="horizontal"
                                                  fontFamily="Tahoma"
                                                  fontWeight="bold">
-                                        <mx:Label text="{feedName}" fontFamily="Lucida Grande" fontWeight="normal"/>
+                                        <util:AnalysisItemCompletionInput items="{descriptors}" id="dataSourceBox" selectedItem="{dataSource}"
+                                                                          fontFamily="Lucida Grande" fontWeight="normal" labelField="name" itemChanged="onDataSourceChange(event)"/>
+                                        <!--<mx:Label text="{feedName}" fontFamily="Lucida Grande" fontWeight="normal"/>
                                         <mx:Button icon="{dataSourceIcon}" toolTip="Bind Data Source"
                                                    click="bindDataSource()"/>
-                                        <mx:Button icon="{deleteIcon}" toolTip="Clear" click="clear()"/>
+                                        <mx:Button icon="{deleteIcon}" toolTip="Clear" click="clear()"/>-->
                                     </mx:FormItem>
                                     <mx:FormItem label="Measure:" fontFamily="Tahoma" fontWeight="bold"
                                                  enabled="{insightBound}" direction="horizontal">
-                                        <mx:ComboBox dataProvider="{availableItems}" labelField="display"
-                                                     id="availableItemBox" fontFamily="Lucida Grande"
-                                                     fontWeight="normal"/>
+                                        <util:AnalysisItemCompletionInput items="{availableItems}" id="availableItemBox" selectedItem="{analysisMeasure}"
+                                                                          fontFamily="Lucida Grande" fontWeight="normal" labelField="display"/>
                                         <mx:Button icon="{editIcon}" toolTip="Edit Measure..." click="editMeasure()"/>
                                     </mx:FormItem>
                                 </mx:Form>

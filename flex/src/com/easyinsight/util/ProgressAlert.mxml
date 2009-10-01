@@ -60,7 +60,9 @@
         private var failed:Boolean;
 
         private function cancel():void {
-            stage.removeEventListener(KeyboardEvent.KEY_UP, onKey);
+            if (stage != null) {
+                stage.removeEventListener(KeyboardEvent.KEY_UP, onKey);
+            }
             for each (var operation:Operation in _operations) {
                 operation.removeEventListener(ResultEvent.RESULT, onResult);
                 operation.removeEventListener(FaultEvent.FAULT, onFault);
