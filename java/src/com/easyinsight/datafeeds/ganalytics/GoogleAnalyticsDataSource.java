@@ -48,6 +48,7 @@ public class GoogleAnalyticsDataSource extends ServerDataSourceDefinition {
     public static final String SUB_CONTINENT = "ga:subContinent";
     public static final String VISITOR_TYPE = "ga:visitorType";
     public static final String TITLE = "title";
+    public static final String BOUNCE_RATE = "Bounce Rate";
 
 
     public static final String PAGEVIEWS = "ga:pageviews";
@@ -202,7 +203,7 @@ public class GoogleAnalyticsDataSource extends ServerDataSourceDefinition {
                 EC_TRANSACTION_SHIPPING, EC_TRANSACTION_TAX, EC_UNIQUE_PURCHASES, SEARCH_CATEGORY,
                 SEARCH_DESTINATION, SEARCH_KEYWORD, SEARCH_KEYWORD_REFINEMENT, SEARCH_SEARCH_START,
                 SEARCH_SEARCH_USED, SEARCH_DEPTH, SEARCH_DURATION, SEARCH_EXITS, SEARCH_REFINEMENTS,
-                SEARCH_UNIQUES, SEARCH_VISITS, SOURCE);
+                SEARCH_UNIQUES, SEARCH_VISITS, SOURCE, BOUNCE_RATE);
     }
 
     public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, DataSet dataSet, Credentials credentials, Connection conn) {
@@ -248,6 +249,10 @@ public class GoogleAnalyticsDataSource extends ServerDataSourceDefinition {
         standardItems.add(new AnalysisMeasure(keys.get(TIME_ON_PAGE), "Time on Page", AggregationTypes.SUM));
         standardItems.add(new AnalysisMeasure(keys.get(TIME_ON_SITE), "Time on Site", AggregationTypes.SUM));
         standardItems.add(new AnalysisMeasure(keys.get(VISITS), "Visits", AggregationTypes.SUM));
+        AnalysisCalculation bounceRate = new AnalysisCalculation();
+        bounceRate.setKey(keys.get(BOUNCE_RATE));
+        bounceRate.setCalculationString("([ga:bounces] / [ga:visits]) * 100");
+        standardItems.add(bounceRate);
         adItems.add(new AnalysisDimension(keys.get(AD_CONTENT), "Ad Content"));
         adItems.add(new AnalysisDimension(keys.get(AD_GROUP), "Ad Group"));
         adItems.add(new AnalysisDimension(keys.get(AD_SLOT), "Ad Slot"));
