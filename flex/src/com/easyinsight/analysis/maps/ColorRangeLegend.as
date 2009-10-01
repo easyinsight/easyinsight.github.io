@@ -2,7 +2,6 @@ package com.easyinsight.analysis.maps {
 import com.easyinsight.analysis.conditions.ConditionRenderer;
 
 import mx.containers.VBox;
-import mx.controls.Alert;
 import mx.formatters.Formatter;
 
 public class ColorRangeLegend extends VBox {
@@ -25,7 +24,7 @@ public class ColorRangeLegend extends VBox {
 
             for (var i:int = 0; i < _points; i++) {
                 var colorItem:ColorRangeItem = new ColorRangeItem();
-                colorItem.valueColor = _conditionRenderer.getColor(currentVal);;
+                colorItem.valueColor = _conditionRenderer.getColor(currentVal);
                 colorItem.valueString = _formatter.format(currentVal);
 
                 addChild(colorItem);
