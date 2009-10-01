@@ -39,7 +39,7 @@ public class TwitterItemRenderer extends TextArea {
     override public function set data(obj:Object):void {
         message = obj as Tweet;
         if (message != null) {
-            this.text = message.status;
+            this.htmlText = message.status;
         }
     }
 }
