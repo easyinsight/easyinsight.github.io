@@ -11,8 +11,11 @@ import com.easyinsight.analysis.ReportDataEvent;
 import com.easyinsight.map.MapDropAreaGrouping;
 import flash.events.Event;
 
+import flash.events.MouseEvent;
+
 import mx.collections.ArrayCollection;
 import mx.containers.HBox;
+import mx.controls.Button;
 import mx.controls.ComboBox;
 import mx.controls.Label;
 import mx.controls.TextInput;
@@ -56,11 +59,19 @@ public class GaugeControlBar extends HBox implements IReportControlBar {
         maxValueLabel.text = "Max Value: ";
         addChild(maxValueLabel);
         addChild(maxValueInput);
-        maxValueInput.addEventListener(Event.CHANGE, onMaxValueChange);
+        var applyButton:Button = new Button();
+        applyButton.label = "Apply Changes";
+        applyButton.addEventListener(MouseEvent.CLICK, onApplyClick);
+        addChild(applyButton);
+        //maxValueInput.addEventListener(Event.CHANGE, onMaxValueChange);
         if (gaugeDefinition.measure != null) {
             measureGrouping.addAnalysisItem(gaugeDefinition.measure);
         }
         maxValueInput.text = String(gaugeDefinition.maxValue);
+    }
+
+    private function onApplyClick(event:MouseEvent):void {
+        dispatchEvent(new ReportDataEvent(ReportDataEvent.REQUEST_DATA, false));
     }
 
     private function onMaxValueChange(event:Event):void {
