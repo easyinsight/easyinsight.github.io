@@ -56,11 +56,11 @@ import com.easyinsight.administration.feed.FeedDefinitionData;
         <mx:HBox>
             <mx:VBox>
                 <mx:Label text="{sourceFeedName}"/>
-                <mx:ComboBox id="sourceBox" dataProvider="{sourceFields}" labelField="display"/>
+                <util:AnalysisItemCompletionInput id="sourceBox" items="{sourceFields}" labelField="display"/>
             </mx:VBox>
             <mx:VBox>
-                <mx:Label text="{targetFeedName}"/>
-                <mx:ComboBox id="targetBox" dataProvider="{targetFields}" labelField="display"/>
+                <mx:Label text="{targetFeedName}"/>                
+                <util:AnalysisItemCompletionInput id="targetBox" items="{targetFields}" labelField="display"/>
             </mx:VBox>
         </mx:HBox>
         <mx:HBox width="100%" horizontalAlign="center">
