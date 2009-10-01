@@ -118,7 +118,7 @@ public class CompositeFeedDefinition extends FeedDefinition {
             // define folder for each child
             Map<String, AnalysisItem> keyMap = new HashMap<String, AnalysisItem>();
             Map<String, List<AnalysisItem>> duplicateNameMap = new HashMap<String, List<AnalysisItem>>();
-            for (AnalysisItem analysisItem : analysisItemVisitor.derivedKeys) {
+            for (AnalysisItem analysisItem : analysisItemVisitor.derivedItems) {
                 String displayName = analysisItem.getDisplayName() != null ? analysisItem.getDisplayName() : analysisItem.getKey().toKeyString();
                 AnalysisItem existing = keyMap.get(displayName);
                 if (existing == null) {
@@ -147,9 +147,15 @@ public class CompositeFeedDefinition extends FeedDefinition {
                 folderMap.put(feed.getDataFeedID(), defineFolder(name));
             }
 
-            for (AnalysisItem analysisItem : analysisItemVisitor.derivedKeys) {
-                DerivedKey derivedKey = (DerivedKey) analysisItem.getKey();
-                folderMap.get(derivedKey.getFeedID()).addAnalysisItem(analysisItem);
+            for (Map.Entry<Long, List<FeedNode>> entry : analysisItemVisitor.nodeMap.entrySet()) {
+                long dataSourceID = entry.getKey();
+                FeedFolder dataSourceFolder = folderMap.get(dataSourceID);
+                for (FeedNode feedNode : entry.getValue()) {
+                    addFeedNode(feedNode, dataSourceFolder);
+                }
+            }
+            for (AnalysisItem analysisItem : analysisItemVisitor.derivedItems) {
+                // is the item already in a folder?                
                 fields.add(analysisItem);
             }
 
@@ -158,6 +164,24 @@ public class CompositeFeedDefinition extends FeedDefinition {
         } catch (SQLException e) {
             LogClass.error(e);
             throw new RuntimeException(e);
+        }
+    }
+
+    private void addFeedNode(FeedNode feedNode, FeedFolder parentFolder) {
+        if (feedNode instanceof FolderNode) {
+            FolderNode folderNode = (FolderNode) feedNode;
+            FeedFolder feedFolder = parentFolder.getFolderByName(folderNode.getFolder().getName());
+            if (feedFolder == null) {
+                feedFolder = new FeedFolder();
+                feedFolder.setName(folderNode.getFolder().getName());
+                parentFolder.getChildFolders().add(feedFolder);
+            }
+            for (FeedNode childNode : folderNode.getChildren()) {
+                addFeedNode(childNode, feedFolder);
+            }
+        } else {
+            AnalysisItemNode itemNode = (AnalysisItemNode) feedNode;
+            parentFolder.addAnalysisItem(itemNode.getAnalysisItem());
         }
     }
 
@@ -174,9 +198,12 @@ public class CompositeFeedDefinition extends FeedDefinition {
         }
     }
 
+    
+
     private class AnalysisItemVisitor extends CompositeFeedNodeShallowVisitor {
 
-        private List<AnalysisItem> derivedKeys = new ArrayList<AnalysisItem>();
+        private Map<Long, List<FeedNode>> nodeMap = new HashMap<Long, List<FeedNode>>();
+        private List<AnalysisItem> derivedItems = new ArrayList<AnalysisItem>();
         private Connection conn;
 
         private AnalysisItemVisitor(Connection conn) {
@@ -186,6 +213,9 @@ public class CompositeFeedDefinition extends FeedDefinition {
         protected void accept(CompositeFeedNode compositeFeedNode) throws SQLException {
             Map<Long, AnalysisItem> replacementMap = new HashMap<Long, AnalysisItem>();
             List<AnalysisItem> analysisItemList = retrieveFields(compositeFeedNode.getDataFeedID(), conn);
+            List<FeedFolder> folders = new FeedStorage().getFolders(compositeFeedNode.getDataFeedID(), analysisItemList, conn);
+
+
             for (AnalysisItem analysisItem : analysisItemList) {
                 AnalysisItem clonedItem;
                 try {
@@ -199,12 +229,30 @@ public class CompositeFeedDefinition extends FeedDefinition {
                 derivedKey.setParentKey(key);
                 clonedItem.setKey(derivedKey);
                 clonedItem.setAnalysisItemID(0);
-                derivedKeys.add(clonedItem);
+                derivedItems.add(clonedItem);
                 replacementMap.put(analysisItem.getAnalysisItemID(), clonedItem);
             }
             for (Map.Entry<Long, AnalysisItem> replEntry : replacementMap.entrySet()) {
                 replEntry.getValue().updateIDs(replacementMap);
             }
+
+            List<FeedNode> feedNodes = new ArrayList<FeedNode>();
+            for (FeedFolder feedFolder : folders) {
+                try {
+                    FeedFolder clonedFolder = feedFolder.clone();
+                    clonedFolder.updateIDs(replacementMap);
+                    feedNodes.add(clonedFolder.toFeedNode());
+                } catch (CloneNotSupportedException e) {
+                    LogClass.error(e);
+                }
+            }
+            for (AnalysisItem analysisItem : replacementMap.values()) {
+                if (!analysisItem.isHidden()) {
+                    feedNodes.add(analysisItem.toFeedNode());
+                }
+            }
+
+            nodeMap.put(compositeFeedNode.getDataFeedID(), feedNodes);
         }
     }
 

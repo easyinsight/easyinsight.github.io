@@ -142,7 +142,7 @@ public class FeedStorage {
         }
     }
 
-    private void saveFolder(FeedFolder folder, long feedID, Connection conn) throws SQLException {
+    private long saveFolder(FeedFolder folder, long feedID, Connection conn) throws SQLException {
         PreparedStatement insertFolderStmt = conn.prepareStatement("INSERT INTO FOLDER (FOLDER_NAME, DATA_SOURCE_ID) VALUES (?, ?)",
                 Statement.RETURN_GENERATED_KEYS);
         insertFolderStmt.setString(1, folder.getName());
@@ -150,6 +150,17 @@ public class FeedStorage {
         insertFolderStmt.execute();
         folder.setFolderID(Database.instance().getAutoGenKey(insertFolderStmt));
         saveFields(conn, folder);
+        PreparedStatement insertChildFolderStmt = conn.prepareStatement("INSERT INTO folder_to_folder (parent_folder_id, child_folder_id) values (?, ?)");
+        PreparedStatement clearFoldersStmt = conn.prepareStatement("DELETE FROM folder_to_folder WHERE parent_folder_id = ?");
+        clearFoldersStmt.setLong(1, folder.getFolderID());
+        clearFoldersStmt.executeUpdate();
+        for (FeedFolder childFolder : folder.getChildFolders()) {
+            saveFolder(childFolder, feedID, conn);
+            insertChildFolderStmt.setLong(1, folder.getFolderID());
+            insertChildFolderStmt.setLong(2, childFolder.getFolderID());
+            insertChildFolderStmt.execute();
+        }
+        return folder.getFolderID();
     }
 
     private void saveFields(Connection conn, FeedFolder folder) throws SQLException {
@@ -162,42 +173,51 @@ public class FeedStorage {
             insertFieldStmt.setLong(2, analysisItem.getAnalysisItemID());
             insertFieldStmt.execute();
         }
-        PreparedStatement clearFoldersStmt = conn.prepareStatement("DELETE FROM folder_to_folder WHERE parent_folder_id = ?");
-        clearFoldersStmt.setLong(1, folder.getFolderID());
-        clearFoldersStmt.executeUpdate();
-        PreparedStatement insertChildFolderStmt = conn.prepareStatement("INSERT INTO folder_to_folder (parent_folder_id, child_folder_id) values (?, ?)");
-        for (FeedFolder child : folder.getChildFolders()) {
-            insertChildFolderStmt.setLong(1, folder.getFolderID());
-            insertChildFolderStmt.setLong(2, child.getFolderID());
-            insertChildFolderStmt.execute();
-        }
     }
 
-    private void getFolders(FeedDefinition feedDefinition, Connection conn) throws SQLException {
+    public List<FeedFolder> getFolders(long dataSourceID, List<AnalysisItem> fields, Connection conn) throws SQLException {
         List<FeedFolder> folders = new ArrayList<FeedFolder>();
-        PreparedStatement queryStmt = conn.prepareStatement("SELECT FOLDER_NAME, FOLDER_ID FROM FOLDER WHERE DATA_SOURCE_ID = ?");
-        queryStmt.setLong(1, feedDefinition.getDataFeedID());
+        PreparedStatement queryStmt = conn.prepareStatement("SELECT FOLDER_ID FROM FOLDER WHERE DATA_SOURCE_ID = ? AND " +
+                "FOLDER_ID NOT IN (SELECT CHILD_FOLDER_ID FROM FOLDER_TO_FOLDER)");
+        queryStmt.setLong(1, dataSourceID);
         ResultSet rs = queryStmt.executeQuery();
         while (rs.next()) {
-            String folderName = rs.getString(1);
-            long folderID = rs.getLong(2);
-            FeedFolder feedFolder = new FeedFolder();
-            feedFolder.setFolderID(folderID);
-            feedFolder.setName(folderName);
-            PreparedStatement analysisItemStmt = conn.prepareStatement("SELECT ANALYSIS_ITEM_ID FROM FOLDER_TO_ANALYSIS_ITEM WHERE FOLDER_ID = ?");
-            analysisItemStmt.setLong(1, folderID);
-            ResultSet fieldRS = analysisItemStmt.executeQuery();
-            while (fieldRS.next()) {
-                long analysisItemID = fieldRS.getLong(1);
-                for (AnalysisItem analysisItem : feedDefinition.getFields()) {
-                    if (analysisItem.getAnalysisItemID() == analysisItemID) {
-                        feedFolder.addAnalysisItem(analysisItem);
-                    }
-                }
-            }
+            long folderID = rs.getLong(1);
+            FeedFolder feedFolder = getFolder(folderID, fields, conn);
             folders.add(feedFolder);
         }
-        feedDefinition.setFolders(folders);
+        return folders;
+    }
+
+    private FeedFolder getFolder(long folderID, List<AnalysisItem> fields, Connection conn) throws SQLException {
+        PreparedStatement queryStmt = conn.prepareStatement("SELECT FOLDER_NAME FROM FOLDER WHERE FOLDER_ID = ?");
+        queryStmt.setLong(1, folderID);
+        ResultSet rs = queryStmt.executeQuery();
+        rs.next();
+        FeedFolder feedFolder = new FeedFolder();
+        feedFolder.setFolderID(folderID);
+        feedFolder.setName(rs.getString(1));
+        PreparedStatement analysisItemStmt = conn.prepareStatement("SELECT ANALYSIS_ITEM_ID FROM FOLDER_TO_ANALYSIS_ITEM WHERE FOLDER_ID = ?");
+        analysisItemStmt.setLong(1, folderID);
+        ResultSet fieldRS = analysisItemStmt.executeQuery();
+        while (fieldRS.next()) {
+            long analysisItemID = fieldRS.getLong(1);
+            for (AnalysisItem analysisItem : fields) {
+                if (analysisItem.getAnalysisItemID() == analysisItemID) {
+                    feedFolder.addAnalysisItem(analysisItem);
+                }
+            }
+        }
+        PreparedStatement childFoldersStmt = conn.prepareStatement("SELECT CHILD_FOLDER_ID FROM FOLDER_TO_FOLDER WHERE parent_folder_id = ?");
+        childFoldersStmt.setLong(1, folderID);
+        ResultSet childRS = childFoldersStmt.executeQuery();
+        List<FeedFolder> childFolders = new ArrayList<FeedFolder>();
+        while (childRS.next()) {
+            long childID = childRS.getLong(1);
+            childFolders.add(getFolder(childID, fields, conn));
+        }
+        feedFolder.setChildFolders(childFolders);
+        return feedFolder;
     }
 
     public long addFeedDefinitionData(FeedDefinition feedDefinition) throws SQLException {
@@ -758,7 +778,7 @@ public class FeedStorage {
                 if (!rs.wasNull()) {
                     feedDefinition.setParentSourceID(parentSourceID);
                 }
-                getFolders(feedDefinition, conn);
+                feedDefinition.setFolders(getFolders(feedDefinition.getDataFeedID(), feedDefinition.getFields(), conn));
                 feedDefinition.setTags(getTags(feedDefinition.getDataFeedID(), conn));
                 feedDefinition.customLoad(conn);
                 if(feedDefinition instanceof IServerDataSourceDefinition) {

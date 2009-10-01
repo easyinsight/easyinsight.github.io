@@ -2,6 +2,7 @@ package com.easyinsight.datafeeds;
 
 import com.easyinsight.analysis.AnalysisItem;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -94,5 +95,15 @@ public class FeedFolder implements Cloneable, Serializable {
         }
         folderNode.sort();
         return folderNode;
+    }
+
+    @Nullable
+    public FeedFolder getFolderByName(String name) {
+        for (FeedFolder child : getChildFolders()) {
+            if (name.equals(child.getName())) {
+                return child;
+            }
+        }
+        return null;
     }
 }
