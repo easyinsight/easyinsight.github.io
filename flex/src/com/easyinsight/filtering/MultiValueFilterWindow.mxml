@@ -4,6 +4,7 @@
 		<![CDATA[
         import com.easyinsight.framework.CredentialsCache;
 
+        import mx.collections.Sort;
         import mx.rpc.remoting.RemoteObject;
         import mx.rpc.events.ResultEvent;
         import mx.collections.ArrayCollection;
@@ -58,8 +59,11 @@
                     strings.addItem(string);
                 }
             }
+            strings.sort = new Sort();
+            strings.refresh();
             sourceValues = strings;
-
+            filteredStrings.sort = new Sort();
+            filteredStrings.refresh();
             targetValues = filteredStrings;
         }
 
