@@ -21,6 +21,7 @@ public class ReportAnalyzeSource extends ModuleAnalyzeSource{
         reportView.reportID = insightDescriptor.id;
         reportView.reportType = insightDescriptor.reportType;
         reportView.dataSourceID = insightDescriptor.dataFeedID;
+        reportView.showLogo = false;
         var controllerClass:Class = EmbeddedControllerLookup.controllerForType(insightDescriptor.reportType);
         var controller:IEmbeddedReportController = new controllerClass();
         reportView.viewFactory = controller.createEmbeddedView();

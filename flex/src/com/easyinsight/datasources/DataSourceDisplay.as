@@ -3,7 +3,7 @@ import flash.events.Event;
 
 import mx.binding.utils.BindingUtils;
 import mx.containers.HBox;
-import mx.controls.Label;
+import mx.controls.TextArea;
 import mx.controls.TileList;
 import mx.formatters.DateFormatter;
 
@@ -11,8 +11,7 @@ public class DataSourceDisplay extends HBox {
 
     private var tileList:TileList;
     private var _dataSource:DataSourceInfo;
-    private var sourceLabel:Label;
-    private var sourceBox:HBox;
+    private var sourceLabel:TextArea;
 
     private var _labelText:String;
 
@@ -75,7 +74,12 @@ public class DataSourceDisplay extends HBox {
         }
         addChild(sourceBox);*/
         if (sourceLabel == null) {
-            sourceLabel = new Label();
+            sourceLabel = new TextArea();
+            sourceLabel.percentWidth = 100;
+            sourceLabel.setStyle("backgroundAlpha", 0);
+            sourceLabel.setStyle("borderThickness", 0);
+            sourceLabel.editable = false;
+            sourceLabel.selectable = false;
             BindingUtils.bindProperty(sourceLabel, "text", this, "labelText");
         }
         addChild(sourceLabel);
