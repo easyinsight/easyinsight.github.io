@@ -1,12 +1,25 @@
 <?xml version="1.0" ?>
 <util:EITitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*"
                 showCloseButton="true" close="PopUpManager.removePopUp(this);" title="Background Tasks"
-        removedEffect="{dissolveOut}" creationCompleteEffect="{dissolveIn}" showEffect="{dissolveIn}">
+        removedEffect="{dissolveOut}" creationCompleteEffect="{dissolveIn}" showEffect="{dissolveIn}" creationComplete="onCreationComplete()" >
     <mx:Script><![CDATA[
+        import com.easyinsight.genredata.AsyncWindowAnalyzeEvent;
+        import com.easyinsight.genredata.ModuleAnalyzeEvent;
+
         import mx.collections.ArrayCollection;
         import mx.managers.PopUpManager;
 
-            [Bindable]
+
+        private function onModuleAnalyze(event:AsyncWindowAnalyzeEvent):void {
+            dispatchEvent(new ModuleAnalyzeEvent(event.analyzeSource));
+            PopUpManager.removePopUp(this);
+        }
+
+        private function onCreationComplete():void {
+            addEventListener(AsyncWindowAnalyzeEvent.ASYNC_WINDOW_ANALYZE, onModuleAnalyze);
+        }
+
+        [Bindable]
             private var _data:ArrayCollection;
 
         [Bindable]
@@ -34,7 +47,7 @@
     <mx:VBox>
         <mx:DataGrid dataProvider="{_data}" rowHeight="30">
             <mx:columns>
-                <util:EIDataGridColumn headerText="Name" dataField="feedName"/>
+                <util:EIDataGridColumn headerText="Name" dataField="feedName" itemRenderer="com.easyinsight.notifications.DataSourceNameColumnRender" />
                 <util:EIDataGridColumn headerText="" dataField="dataSourceID" sortable="false"
                                        itemRenderer="com.easyinsight.notifications.NotificationProgressColumnControls" width="150"/>
             </mx:columns>

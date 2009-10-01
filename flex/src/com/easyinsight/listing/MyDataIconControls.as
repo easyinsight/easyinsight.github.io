@@ -139,15 +139,12 @@ public class MyDataIconControls extends HBox
             return;
         }
         else */
-        if (User.getCredentials(feedDescriptor.dataFeedID) != null) {
+        var c:Credentials = User.getCredentials(feedDescriptor.dataFeedID);
+        if (c != null) {
             userUploadSource = new RemoteObject();
             userUploadSource.destination = "userUpload";
             userUploadSource.refreshData.addEventListener(ResultEvent.RESULT, completedRefresh);
             userUploadSource.refreshData.addEventListener(FaultEvent.FAULT, GenericFaultHandler.genericFault);
-            var c:Credentials = new Credentials();
-            c.userName = User.getSharedObject().data[feedDescriptor.dataFeedID.toString()].username;
-            c.password = User.getSharedObject().data[feedDescriptor.dataFeedID.toString()].password;
-            c.encrypted = true;
             userUploadSource.refreshData.send(feedDescriptor.dataFeedID, c, false);
             dispatchEvent(new RefreshNotificationEvent());
             return;

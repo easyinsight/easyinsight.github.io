@@ -10,6 +10,7 @@
 
         import com.easyinsight.quicksearch.EIDescriptor;
 
+        import com.easyinsight.solutions.EmptyReportDescriptor;
         import com.easyinsight.util.AsyncLoadEvent;
 
         import com.easyinsight.util.IAsyncScreenFactory;
@@ -27,6 +28,17 @@
 
         protected function setupBrowser():void {
         }
+
+        public function set dataSourceID(value:int):void {
+            _dataSourceID = value;
+        }
+
+        public function set dataSourceName(value:String):void {
+            _dataSourceName = value;
+        }
+
+        protected var _dataSourceID:int;
+        protected var _dataSourceName:String;
 
         [Bindable]
         private var _reports:ArrayCollection;
@@ -58,8 +70,11 @@
 
         public function set reports(value:ArrayCollection):void {
             _reports = value;
-            if (_reports != null) {
+            if (_reports != null && _reports.length != 0) {
                 report = value.getItemAt(0) as EIDescriptor;
+            }
+            else {
+                report = new EmptyReportDescriptor(_dataSourceID, _dataSourceName);
             }
         }
 

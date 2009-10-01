@@ -1,7 +1,10 @@
 package com.easyinsight.notifications {
+import com.easyinsight.analysis.UserCapabilities;
 import com.easyinsight.framework.AsyncInfoEvent;
 import com.easyinsight.framework.CorePageButton;
 import com.easyinsight.framework.EIMessageListener;
+
+import com.easyinsight.genredata.ModuleAnalyzeEvent;
 
 import flash.events.Event;
 
@@ -17,10 +20,12 @@ import mx.rpc.events.FaultEvent;
 import mx.rpc.events.ResultEvent;
 import mx.rpc.remoting.RemoteObject;
 
+[Event(name="moduleAnalyze", type="com.easyinsight.genredata.ModuleAnalyzeEvent")]
 public class BackgroundTaskButton extends CorePageButton{
 
     private var asyncWindow:AsyncNotifyWindow;
     private var userUploadService:RemoteObject;
+    private var analysisService:RemoteObject;
     private var showingWindow:Boolean;
 
     private var lastX:int;
@@ -35,6 +40,7 @@ public class BackgroundTaskButton extends CorePageButton{
         addEventListener(FlexEvent.CREATION_COMPLETE, onCreation);
         addEventListener(MouseEvent.CLICK, onClick);
     }
+
 
     private function onFault(event:FaultEvent):void {
         Alert.show(event.fault.message);
@@ -58,11 +64,16 @@ public class BackgroundTaskButton extends CorePageButton{
                 BindingUtils.bindProperty(asyncWindow, "data", this, "asyncData");
                 asyncWindow.addEventListener(CloseEvent.CLOSE, onClose);
                 asyncWindow.addEventListener(AsyncDeleteEvent.ASYNC_DELETE, onDelete);
+                asyncWindow.addEventListener(ModuleAnalyzeEvent.MODULE_ANALYZE, onModuleAnalyze);
             }
             PopUpManager.addPopUp(asyncWindow, this, false);
             asyncWindow.x = lastX;
             asyncWindow.y = lastY;
         showingWindow = true;
+    }
+
+    private function onModuleAnalyze(event:ModuleAnalyzeEvent):void {
+        dispatchEvent(event.clone());
     }
 
     private function onDelete(event:AsyncDeleteEvent):void {

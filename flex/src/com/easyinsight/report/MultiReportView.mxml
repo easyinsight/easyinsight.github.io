@@ -18,15 +18,9 @@
             BrowserManager.getInstance().setTitle("Easy Insight - Reports");
         }
 
-        private var _dataSourceID:int;
-
         [Bindable]
         [Embed(source="../../../../assets/document_out_x32.png")]
         private var closeIcon:Class;
-
-        public function set dataSourceID(value:int):void {
-            _dataSourceID = value;
-        }
 
         override protected function commitProperties():void {
             super.commitProperties();

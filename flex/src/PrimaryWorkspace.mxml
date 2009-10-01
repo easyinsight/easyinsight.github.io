@@ -21,7 +21,7 @@
                                              messageListener="{messageListener}"
                             />
                     <notification:BackgroundTaskButton rotation="-90" x="3" y="155" image="{clockIcon}" text="Tasks"
-                                                       messageListener="{messageListener}"
+                                                       messageListener="{messageListener}" moduleAnalyze="internalModuleAnalyze(event)"
                             />
                 </mx:Canvas>
             </mx:AddChild>

@@ -3,6 +3,7 @@ package com.easyinsight.quicksearch {
 [RemoteClass(alias="com.easyinsight.core.EIDescriptor")]
 public class EIDescriptor {
 
+    public static const EMPTY:int = 0;
     public static const DATA_SOURCE:int = 1;
     public static const REPORT:int = 2;
     public static const GROUP:int = 3;

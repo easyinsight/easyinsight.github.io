@@ -347,11 +347,12 @@ public class AnalysisService {
 
     public UserCapabilities getUserCapabilitiesForFeed(long feedID) {
         if (SecurityUtil.getUserID(false) == 0) {
-            return new UserCapabilities(Roles.NONE, Roles.NONE, false);
+            return new UserCapabilities(Roles.NONE, Roles.NONE, false, false);
         }
         long userID = SecurityUtil.getUserID();
         int feedRole = Integer.MAX_VALUE;
         boolean groupMember = false;
+        boolean hasReports = false;
         Connection conn = Database.instance().getConnection();
         try {
             PreparedStatement existingLinkQuery = conn.prepareStatement("SELECT ROLE FROM UPLOAD_POLICY_USERS WHERE " +
@@ -368,18 +369,23 @@ public class AnalysisService {
             ResultSet groupRS = queryStmt.executeQuery();
             groupRS.next();
             groupMember = groupRS.getInt(1) > 0;
+            PreparedStatement analysisCount = conn.prepareStatement("SELECT COUNT(analysis_id) from analysis WHERE data_feed_id = ?");
+            analysisCount.setLong(1, feedID);
+            ResultSet analysisCountRS = analysisCount.executeQuery();
+            analysisCountRS.next();
+            hasReports = analysisCountRS.getInt(1) > 0;
         } catch (SQLException e) {
             LogClass.error(e);
             throw new RuntimeException(e);
         } finally {
             Database.instance().closeConnection(conn);
         }
-        return new UserCapabilities(Integer.MAX_VALUE, feedRole, groupMember);
+        return new UserCapabilities(Integer.MAX_VALUE, feedRole, groupMember, hasReports);
     }
 
     public UserCapabilities getUserCapabilitiesForInsight(long feedID, long insightID) {
         if (SecurityUtil.getUserID(false) == 0) {
-            return new UserCapabilities(Roles.NONE, Roles.NONE, false);
+            return new UserCapabilities(Roles.NONE, Roles.NONE, false, false);
         }
         UserCapabilities userCapabilities = getUserCapabilitiesForFeed(feedID);
         long userID = SecurityUtil.getUserID();

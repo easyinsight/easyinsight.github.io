@@ -9,14 +9,16 @@ public class UserCapabilities {
     private int analysisRole;
     private int feedRole;
     private boolean groupMember;
+    private boolean reportingAvailable;
 
     public UserCapabilities() {
     }
 
-    public UserCapabilities(int analysisRole, int feedRole, boolean groupMember) {
+    public UserCapabilities(int analysisRole, int feedRole, boolean groupMember, boolean reportingAvailable) {
         this.analysisRole = analysisRole;
         this.feedRole = feedRole;
         this.groupMember = groupMember;
+        this.reportingAvailable = reportingAvailable;
     }
 
     public boolean isGroupMember() {
@@ -41,5 +43,13 @@ public class UserCapabilities {
 
     public void setFeedRole(int feedRole) {
         this.feedRole = feedRole;
+    }
+
+    public boolean isReportingAvailable() {
+        return reportingAvailable;
+    }
+
+    public void setReportingAvailable(boolean reportingAvailable) {
+        this.reportingAvailable = reportingAvailable;
     }
 }

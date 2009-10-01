@@ -63,53 +63,39 @@
         import com.easyinsight.detail.DetailBook;
         import com.easyinsight.framework.InvalidFieldsEvent;
         import com.easyinsight.framework.LoginEvent;
-
         import com.easyinsight.genredata.ModuleAnalyzeEvent;
         import com.easyinsight.listing.DescriptorAnalyzeSource;
         import com.easyinsight.listing.FeedAdminAnalyzeSource;
-
         import com.easyinsight.report.MultiReportAnalyzeSource;
         import com.easyinsight.report.ReportAnalyzeSource;
         import com.easyinsight.solutions.InsightDescriptor;
-
         import com.easyinsight.util.PopUpUtil;
-
-        import mx.collections.SortField;
         import mx.collections.Sort;
         import mx.events.DragEvent;
         import mx.events.ListEvent;
-
         import com.easyinsight.analysis.AnalysisItemWrapper;
         import com.easyinsight.analysis.AnalysisCloseEvent;        
         import com.easyinsight.analysis.AnalysisItem;
         import com.easyinsight.util.ProgressAlert;
         import com.easyinsight.commands.CommandEvent;
-
         import mx.utils.ObjectUtil;
         import mx.utils.URLUtil;
         import mx.managers.BrowserManager;
         import mx.controls.Alert;
         import mx.events.CloseEvent;
-
         import com.easyinsight.commands.CommandProcessor;
         import com.easyinsight.framework.DataServiceLoadingEvent;
         import com.easyinsight.framework.DataService;
         import com.easyinsight.analysis.SavedAnalysisEvent;
         import com.easyinsight.framework.User;
-
         import com.easyinsight.filtering.TransformsUpdatedEvent;
         import com.easyinsight.feedassembly.CompositeFeedCreatedEvent;
-
         import mx.managers.PopUpManager;
-
         import com.easyinsight.filtering.FilterDefinition;
         import com.easyinsight.filtering.FilterRawData;
         import com.easyinsight.analysis.FeedMetadata;
-
         import com.easyinsight.framework.CredentialsCache;
-
         import mx.collections.ArrayCollection;
-
         import com.easyinsight.analysis.AnalysisDefinition;
 
         [Bindable]
@@ -128,13 +114,7 @@
         [Bindable]
         private var selectedMode:int;
 
-
         private var _analysisDefinition:AnalysisDefinition;
-
-
-
-        //[Bindable]
-        //private var analysisPolicy:int;
 
         [Bindable]
         private var _previewMode:Boolean = false;
@@ -153,24 +133,26 @@
 
         [Bindable]
         private var canSubscribeToInsight:Boolean;
+
         [Bindable]
         private var canAddInsightToGroup:Boolean;
+
         [Bindable]
         private var canSubscribeToFeed:Boolean;
+
         [Bindable]
         private var canAddFeedToGroup:Boolean;
 
-
-
         [Bindable]
         private var wrappers:ArrayCollection;
-
-        
 
         [Bindable]
         private var modeText:String = "";
 
         private var analysisChanged:Boolean = false;
+
+        [Bindable]
+        private var canMultiViewAnalysis:Boolean;
 
         [Bindable]
         private var dataSourceName:String;
@@ -709,6 +691,7 @@
             var userCapabilities:UserCapabilities = analysisService.getUserCapabilitiesForFeed.lastResult as UserCapabilities;
             canSubscribeToFeed = userCapabilities.feedRole > 3;
             canAddFeedToGroup = userCapabilities.groupMember;
+            canMultiViewAnalysis = userCapabilities.reportingAvailable;
         }
 
         private function onFieldDelete(event:DeleteAnalysisItemEvent):void {
@@ -855,7 +838,7 @@
             <mx:Button id="dataSourceButton" toolTip="Create a New Report from Data Source"
                        icon="@Embed(source='../../../assets/table.png')" click="newReport()"/>
             <mx:Button id="reportsButton" icon="@Embed(source='../../../assets/tables_x16.png')" click="toReports()"
-                       toolTip="View All Reports for Data Source" enabled="{!_previewMode}"/>
+                       toolTip="View All Reports for Data Source" enabled="{!_previewMode &amp;&amp; canMultiViewAnalysis}"/>
             <mx:Button id="reportButton" icon="@Embed(source='../../../assets/media_play_green.png')" click="goReport()"
                        toolTip="View Report"/>
             <mx:Button id="adminButton" icon="@Embed(source='../../../assets/businessman_edit.png')" click="goAdmin()"

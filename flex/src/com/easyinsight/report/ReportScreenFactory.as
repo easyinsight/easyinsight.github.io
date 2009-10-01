@@ -4,6 +4,7 @@ import com.easyinsight.analysis.IEmbeddedReportController;
 import com.easyinsight.goals.GoalHistoryView;
 import com.easyinsight.goals.GoalTreeViewContainer;
 import com.easyinsight.quicksearch.EIDescriptor;
+import com.easyinsight.solutions.EmptyReportDescriptor;
 import com.easyinsight.solutions.InsightDescriptor;
 import com.easyinsight.util.IAsyncScreen;
 import com.easyinsight.util.IAsyncScreenFactory;
@@ -14,6 +15,13 @@ public class ReportScreenFactory implements IAsyncScreenFactory{
     }
 
     public function createScreen(descriptor:EIDescriptor):IAsyncScreen {
+        if  (descriptor.getType() == EIDescriptor.EMPTY) {
+            var desc:EmptyReportDescriptor = descriptor as EmptyReportDescriptor;
+            var view:EmptyReportView = new EmptyReportView();
+            view.feedID = desc.feedID;
+            view.feedName = desc.feedName;
+            return view;
+        }
         if (descriptor.getType() == EIDescriptor.REPORT) {
             var insightDescriptor:InsightDescriptor = descriptor as InsightDescriptor;
             var reportView:ReportView = new ReportView();
