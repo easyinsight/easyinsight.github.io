@@ -43,6 +43,6 @@ public class SaveAsTest extends TestCase {
         listDefinition.setFilterDefinitions(Arrays.asList((FilterDefinition) filterValueDefinition));
         listDefinition.setColumns(Arrays.asList(blah, count));
         long reportID = new AnalysisService().saveAnalysisDefinition(listDefinition).getAnalysisID();
-        new AnalysisService().saveAs(reportID, "Saved As Version");
+        new AnalysisService().saveAs(listDefinition, "Saved As Version");
     }
 }

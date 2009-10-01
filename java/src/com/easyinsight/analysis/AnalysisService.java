@@ -44,12 +44,12 @@ public class AnalysisService {
         }
     }
 
-    public WSAnalysisDefinition saveAs(long reportID, String newName) {
-        SecurityUtil.authorizeInsight(reportID);
+    public WSAnalysisDefinition saveAs(WSAnalysisDefinition saveDefinition, String newName) {
+        SecurityUtil.authorizeInsight(saveDefinition.getAnalysisID());
         Session session = Database.instance().createSession();
         try {
             session.getTransaction().begin();
-            AnalysisDefinition analysisDefinition = analysisStorage.getPersistableReport(reportID, session);
+            AnalysisDefinition analysisDefinition = AnalysisDefinitionFactory.fromWSDefinition(saveDefinition);
             Feed feed = FeedRegistry.instance().getFeed(analysisDefinition.getDataFeedID());
             // TODO: fix me
             AnalysisDefinition clone = analysisDefinition.clone(null, feed.getFields());

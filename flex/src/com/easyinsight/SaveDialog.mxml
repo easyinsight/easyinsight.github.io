@@ -23,7 +23,7 @@
             var results:Array = Validator.validateAll(validators);
             if (results.length == 0) {
                 ProgressAlert.alert(this, "Saving report...", null, analysisService.saveAs);
-                analysisService.saveAs(analysisDefinition.analysisID, analysisName.text);
+                analysisService.saveAs(analysisDefinition, analysisName.text);
                 PopUpManager.removePopUp(this);
             }
         }
