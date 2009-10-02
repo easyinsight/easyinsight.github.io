@@ -2,6 +2,7 @@
 <mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" creationComplete="creationComplete()" enabled="{_activated}">
 	<mx:Script>
 		<![CDATA[
+        import com.easyinsight.analysis.AnalysisChangedEvent;
         import com.easyinsight.util.PopUpUtil;
 
         import mx.controls.Alert;
@@ -67,11 +68,13 @@
             var index:int = owners.getItemIndex(event.userStub);
             if (index == -1) {
                 viewers.removeItemAt(viewers.getItemIndex(event.userStub));
+                dispatchEvent(new AnalysisChangedEvent());
             } else {
                 if (owners.length == 1) {
                     Alert.show("A data source must have at least one owner.");
                 } else {
                     owners.removeItemAt(index);
+                    dispatchEvent(new AnalysisChangedEvent());
                 }
             }
         }
@@ -103,6 +106,7 @@
 
         private function onGroupOwnerAdd(event:GroupLinkEvent):void {
             owners.addItem(event.groupDescriptor);
+            dispatchEvent(new AnalysisChangedEvent());
         }
 
         private function addUserOwner():void {
@@ -113,6 +117,7 @@
 
         private function onUserOwnerAdd(event:UserLinkEvent):void {
             owners.addItem(event.userStub);
+            dispatchEvent(new AnalysisChangedEvent());
         }
 
         private function addUserViewer():void {
@@ -123,6 +128,7 @@
 
         private function onUserViewerAdd(event:UserLinkEvent):void {
             viewers.addItem(event.userStub);
+            dispatchEvent(new AnalysisChangedEvent());
         }
 
         private function addGroupViewer():void {
@@ -133,6 +139,7 @@
 
         private function onGroupViewerAdd(event:GroupLinkEvent):void {
             viewers.addItem(event.groupDescriptor);
+            dispatchEvent(new AnalysisChangedEvent());
         }
 
         private function anyoneCanViewChange(event:MouseEvent):void {
