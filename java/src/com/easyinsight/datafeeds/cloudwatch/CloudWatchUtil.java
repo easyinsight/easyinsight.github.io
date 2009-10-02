@@ -45,7 +45,8 @@ public class CloudWatchUtil {
         return result;
     }
 
-    public static DataSet getDataSet(String key, String secretKey, EC2Info ec2Info, AnalysisMeasure analysisMeasure, Collection<AnalysisDimension> dimensions, Date startDate, Date endDate)
+    public static DataSet getDataSet(String key, String secretKey, EC2Info ec2Info, AnalysisMeasure analysisMeasure, Collection<AnalysisDimension> dimensions,
+                                     Date startDate, Date endDate, int period)
             throws NoSuchAlgorithmException,
             IOException, InvalidKeyException, ParserConfigurationException, SAXException, ParseException {
         Map<String, String> params = new HashMap<String, String>();
@@ -69,12 +70,18 @@ public class CloudWatchUtil {
         }
         params.put("Namespace", "AWS/EC2");
         params.put("Period", "3600");
-        params.put("Statistics.member.1", "Average");
-        /*if (analysisMeasure.getAggregation() == AggregationTypes.AVERAGE) {
+        //params.put("Statistics.member.1", "Average");
+        if (analysisMeasure.getAggregation() == AggregationTypes.AVERAGE) {
             params.put("Statistics.member.1", "Average");
-        } else {
+        } else if (analysisMeasure.getAggregation() == AggregationTypes.SUM) {
             params.put("Statistics.member.1", "Sum");
-        }*/
+        } else if (analysisMeasure.getAggregation() == AggregationTypes.MAX) {
+            params.put("Statistics.member.1", "Maximum");
+        } else if (analysisMeasure.getAggregation() == AggregationTypes.MIN) {
+            params.put("Statistics.member.1", "Minimum");
+        } else if (analysisMeasure.getAggregation() == AggregationTypes.COUNT) {
+            params.put("Statistics.member.1", "Samples");
+        }
         params.put("MeasureName", analysisMeasure.getKey().toKeyString());
         params.put("SignatureMethod", "HmacSHA256");
         params.put("SignatureVersion", "2");
@@ -120,12 +127,36 @@ public class CloudWatchUtil {
                 }
                 String timestamp = memberNode.getChildNodes().item(1).getTextContent();
                 Date dateVal = format.parse(timestamp);
-                String average = memberNode.getChildNodes().item(7).getTextContent();
-                System.out.println(dateVal + " - " + average);
-                row.addValue(CloudWatchDataSource.DATE, new DateValue(dateVal));
-                row.addValue(analysisMeasure.getKey(), new NumericValue(Double.parseDouble(average)));
+
+                String value = null;
+                if (analysisMeasure.getAggregation() == AggregationTypes.AVERAGE) {
+                    value = findNode("Average", memberNode);
+                } else if (analysisMeasure.getAggregation() == AggregationTypes.SUM) {
+                    value = findNode("Sum", memberNode);
+                } else if (analysisMeasure.getAggregation() == AggregationTypes.MAX) {
+                    value = findNode("Maximum", memberNode);
+                } else if (analysisMeasure.getAggregation() == AggregationTypes.MIN) {
+                    value = findNode("Minimum", memberNode);
+                } else if (analysisMeasure.getAggregation() == AggregationTypes.COUNT) {
+                    value = findNode("Samples", memberNode);
+                }
+                if (value != null) {
+                    System.out.println(dateVal + " - " + value);
+                    row.addValue(CloudWatchDataSource.DATE, new DateValue(dateVal));
+                    row.addValue(analysisMeasure.getKey(), new NumericValue(Double.parseDouble(value)));
+                }
             }
         }
         return dataSet;
+    }
+
+    private static String findNode(String nodeName, Node node) {
+        for (int i = 0; i < node.getChildNodes().getLength(); i++) {
+            Node child = node.getChildNodes().item(i);
+            if (nodeName.equals(child.getNodeName())) {
+                return child.getTextContent();
+            }
+        }
+        return null;
     }
 }
