@@ -231,7 +231,10 @@
                             case "Client.Authentication":
                             default:
                                 var failureMessage:String = event.fault.faultString;
-                                failureMessageLabel.text = failureMessage;
+                                if(failureMessageLabel != null)
+                                    failureMessageLabel.text = failureMessage;
+                                else
+                                    Alert.show(failureMessage);
                                 authService.isAccountDelinquentOrClosed.send(userNameStr);
                         }
                     }
