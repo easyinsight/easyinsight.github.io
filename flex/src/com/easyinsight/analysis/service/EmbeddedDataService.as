@@ -69,12 +69,12 @@ public class EmbeddedDataService extends EventDispatcher implements IEmbeddedDat
         dispatchEvent(new DataServiceLoadingEvent(DataServiceLoadingEvent.LOADING_STOPPED));
     }
 
-    public function retrieveData(reportID:int, dataSourceID:int, filters:ArrayCollection, refreshAll:Boolean):void {
+    public function retrieveData(reportID:int, dataSourceID:int, filters:ArrayCollection, refreshAll:Boolean, drillthroughFilters:ArrayCollection):void {
         dispatchEvent(new DataServiceLoadingEvent(DataServiceLoadingEvent.LOADING_STARTED));
         var insightRequestMetadata:InsightRequestMetadata = new InsightRequestMetadata();
         insightRequestMetadata.refreshAllSources = refreshAll;
         insightRequestMetadata.credentialFulfillmentList = CredentialsCache.getCache().createCredentials();
-        dataRemoteSource.getEmbeddedResults.send(reportID, dataSourceID, filters, insightRequestMetadata);
+        dataRemoteSource.getEmbeddedResults.send(reportID, dataSourceID, filters, insightRequestMetadata, drillthroughFilters);
     }
 }
 }
