@@ -19,6 +19,7 @@ public class MessageUtils {
         message.setDestination(destination);
         message.setMessageId(UUID.randomUUID().toString());
         message.setBody(messageBody);
+        message.setTimeToLive(60000); 
         if (MessageBroker.getMessageBroker(null) != null) {
             MessageBroker.getMessageBroker(null).routeMessageToService(message, null);
         }

@@ -32,6 +32,6 @@ public class UserNotificationProcessor extends FlexClientOutboundQueueProcessor 
                 list.remove(o);
             }
         }
-        return super.flush(list);    //To change body of overridden methods use File | Settings | File Templates.
+        return super.flush(list);
     }
 }

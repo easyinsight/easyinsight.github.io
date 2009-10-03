@@ -32,6 +32,8 @@ public class PasswordStorage {
     private static KeyStore encryptStore;
     private static PrivateKey privateKey;
     private static PublicKey publicKey;
+    private static PrivateKey googlePrivateKey;
+    private static PublicKey googlePublicKey;
 
 
     private static String password = "dmskey";
@@ -45,6 +47,9 @@ public class PasswordStorage {
             KeyStore.PrivateKeyEntry k = (KeyStore.PrivateKeyEntry) encryptStore.getEntry("dbencrypt", new KeyStore.PasswordProtection(password.toCharArray()));
             privateKey = k.getPrivateKey();
             publicKey = k.getCertificate().getPublicKey();
+            KeyStore.PrivateKeyEntry gkey = (KeyStore.PrivateKeyEntry) encryptStore.getEntry("googleauthsub", new KeyStore.PasswordProtection(password.toCharArray()));
+            googlePrivateKey = gkey.getPrivateKey();
+            googlePublicKey = gkey.getCertificate().getPublicKey();
         } catch (Exception e) {
             LogClass.error(e);
             encryptStore = null;
@@ -163,5 +168,13 @@ public class PasswordStorage {
             LogClass.error(e);
             throw new RuntimeException(e);
         }
+    }
+
+    public static PublicKey getGooglePublicKey() {
+        return googlePublicKey;
+    }
+
+    public static PrivateKey getGooglePrivateKey() {
+        return googlePrivateKey;
     }
 }
