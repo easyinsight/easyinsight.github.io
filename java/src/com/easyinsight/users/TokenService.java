@@ -80,7 +80,7 @@ public class TokenService {
             } else {
                 throw new RuntimeException("Unknown type for authorization " + type);
             }
-            return AuthSubUtil.getRequestUrl(nextURL, scope, false, true);
+            return AuthSubUtil.getRequestUrl(nextURL, scope, true, true);
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);
