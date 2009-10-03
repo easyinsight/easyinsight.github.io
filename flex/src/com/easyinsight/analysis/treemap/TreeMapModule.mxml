@@ -60,8 +60,14 @@
 
         public function onover(event:TreeMapEvent):void {
             if (event.item) {
+                var val:int;
+                if (event.item.sum > 0) {
+                    val = event.item.sum;
+                } else {
+                    val = event.item.area;
+                }
                 tooltip =
-                ToolTipManager.createToolTip(event.item.label + " - " + event.item.area,
+                ToolTipManager.createToolTip(event.item.label + " - " + val,
                         MouseEvent(event.triggerEvent).stageX,
                         MouseEvent(event.triggerEvent).stageY)
                         as ToolTip;
@@ -131,6 +137,11 @@
                             treeDefinition.measure1 as AnalysisMeasure, treeDefinition.measure2 as AnalysisMeasure, masterResult);
                 }
                 for each (var obj:Object in masterResult) {
+                    var sum:int = 0;
+                    for each (var child:Object in obj.children) {
+                        sum += child.area;
+                    }
+                    obj.sum = sum;
                     results.addItem(obj);
                 }
                 resultData = results;
