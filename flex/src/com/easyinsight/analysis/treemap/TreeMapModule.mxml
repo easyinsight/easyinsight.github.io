@@ -28,10 +28,13 @@
 
         import mx.collections.ArrayCollection;
         import mx.controls.ToolTip;
+        import mx.formatters.Formatter;
         import mx.managers.PopUpManager;
         import mx.managers.ToolTipManager;
 
         private var regionDimension:AnalysisItem;
+
+        private var areaFormatter:Formatter;
 
         private function onClick(event:MouseEvent):void {
             if (event.shiftKey) {
@@ -67,7 +70,7 @@
                     val = event.item.area;
                 }
                 tooltip =
-                ToolTipManager.createToolTip(event.item.label + " - " + val,
+                ToolTipManager.createToolTip(event.item.label + " - " + areaFormatter.format(val),
                         MouseEvent(event.triggerEvent).stageX,
                         MouseEvent(event.triggerEvent).stageY)
                         as ToolTip;
@@ -118,6 +121,7 @@
         public function renderReport(dataSet:ArrayCollection, analysisDefinition:AnalysisDefinition, clientProcessorMap:Object):void {
             var treeDefinition:TreeMapDefinition = analysisDefinition as TreeMapDefinition;
             if (dataSet.length > 0) {
+                areaFormatter = treeDefinition.measure1.getFormatter();
                 switch (treeDefinition.colorScheme) {
                     case TreeMapDefinition.DIV:
                         colorScheme = "div-red-green";
