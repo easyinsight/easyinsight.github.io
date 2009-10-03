@@ -172,5 +172,5 @@
     <mx:Button id="apiButton" toolTip="Show API Info for this Data Source"
                icon="@Embed(source='../../../../assets/app_enterprise_x16.png')" click="showAPIInfo()"/>
     <!--<analysis:ResultLimitComboBox limits="{limits}"/>-->
-    <datasources:DataSourceDisplay dataSource="{dataSourceInfo}"/>
+    <datasources:DataSourceDisplay dataSource="{dataSourceInfo}" width="100%"/>
 </mx:HBox>

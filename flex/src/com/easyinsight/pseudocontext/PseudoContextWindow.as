@@ -14,6 +14,7 @@ import com.easyinsight.analysis.Link;
 import com.easyinsight.analysis.URLLink;
 import com.easyinsight.filtering.FilterRawData;
 
+import com.easyinsight.filtering.FilterValueDefinition;
 import com.easyinsight.report.ReportNavigationEvent;
 
 import flash.events.KeyboardEvent;
@@ -23,6 +24,7 @@ import flash.net.URLRequest;
 import flash.system.System;
 import flash.ui.Keyboard;
 
+import mx.collections.ArrayCollection;
 import mx.containers.Box;
 import mx.containers.VBox;
 
@@ -182,7 +184,12 @@ public class PseudoContextWindow extends VBox {
 
     private function drillthroughClick(event:MouseEvent):void {
         var drillThrough:DrillThrough = event.currentTarget.data as DrillThrough;
-        var executor:DrillThroughExecutor = new DrillThroughExecutor(drillThrough.reportID);
+        var filterDefinition:FilterValueDefinition = new FilterValueDefinition();
+        filterDefinition.field = analysisItem;
+        filterDefinition.filteredValues = new ArrayCollection([data[analysisItem.qualifiedName()]]);
+        filterDefinition.enabled = true;
+        filterDefinition.inclusive = true;
+        var executor:DrillThroughExecutor = new DrillThroughExecutor(drillThrough.reportID, new ArrayCollection([ filterDefinition ]));
         executor.addEventListener(ReportNavigationEvent.TO_REPORT, onReport);
         executor.send();
     }

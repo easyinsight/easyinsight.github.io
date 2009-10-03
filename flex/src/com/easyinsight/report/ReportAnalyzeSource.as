@@ -7,13 +7,17 @@ import com.easyinsight.solutions.InsightDescriptor;
 
 import flash.display.DisplayObject;
 
+import mx.collections.ArrayCollection;
+
 public class ReportAnalyzeSource extends ModuleAnalyzeSource{
 
     private var insightDescriptor:InsightDescriptor;
+    private var filters:ArrayCollection;
 
-    public function ReportAnalyzeSource(insightDescriptor:InsightDescriptor) {
+    public function ReportAnalyzeSource(insightDescriptor:InsightDescriptor, filters:ArrayCollection = null) {
         super();
         this.insightDescriptor = insightDescriptor;
+        this.filters = filters;
     }
 
     override public function createDirect():DisplayObject {
@@ -21,6 +25,7 @@ public class ReportAnalyzeSource extends ModuleAnalyzeSource{
         reportView.reportID = insightDescriptor.id;
         reportView.reportType = insightDescriptor.reportType;
         reportView.dataSourceID = insightDescriptor.dataFeedID;
+        reportView.parameterFilters = filters;
         reportView.showLogo = false;
         var controllerClass:Class = EmbeddedControllerLookup.controllerForType(insightDescriptor.reportType);
         var controller:IEmbeddedReportController = new controllerClass();

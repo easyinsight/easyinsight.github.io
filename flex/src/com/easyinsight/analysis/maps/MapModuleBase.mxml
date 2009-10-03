@@ -74,7 +74,9 @@
                 var feature:MapFeature = map.getFeatureAt(event.localX, event.localY);
                 if (feature != null) {
                     var window:PseudoContextWindow = new PseudoContextWindow(dimension, passThrough, this);
-                    window.data = feature.data;
+                    var obj:Object = new Object();
+                    obj[dimension.qualifiedName()] = feature.data.label;
+                    window.data = obj;
                     PopUpManager.addPopUp(window, this);
                     window.x = event.stageX + 5;
                     window.y = event.stageY + 5;

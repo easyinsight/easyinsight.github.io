@@ -222,7 +222,7 @@
         }
 
         protected function getComplexOptions():ArrayCollection {
-            return new ArrayCollection(["Delta", "Last Value", "Normality", "Step", "Six Sigma"]);
+            return new ArrayCollection(["Delta", "Last Value", "Percent Change", "Normality", "Step", "Six Sigma"]);
         }
 
         public function save():AnalysisItem {
@@ -256,6 +256,7 @@
                     break;
                 case "Delta":
                 case "Last Value":
+                case "Percent Change":
                     currentState = "TemporalMeasure";
                     break;
                 case "Normality":
@@ -342,7 +343,7 @@
         </mx:Form>
 
     </mx:VBox>
-        <mx:VBox label="Links" width="100%" height="100%">
+        <mx:VBox label="Links" width="100%" height="100%" paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5">
             <mx:Button label="Add Link..." click="addLink()"/>
         <mx:DataGrid dataProvider="{links}" width="100%">
             <mx:columns>

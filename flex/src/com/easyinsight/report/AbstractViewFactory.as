@@ -68,6 +68,16 @@ public class AbstractViewFactory extends VBox{
         return _filterDefinitions;
     }
 
+    private var _drillthroughFilters:ArrayCollection;
+
+    public function set drillthroughFilters(value:ArrayCollection):void {
+        _drillthroughFilters = value;
+    }
+
+    public function get drillthroughFilters():ArrayCollection {
+        return _drillthroughFilters;
+    }
+
     public function retrieveData(allSources:Boolean = false):void {
 
     }

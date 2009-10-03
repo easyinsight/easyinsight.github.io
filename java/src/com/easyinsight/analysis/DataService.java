@@ -131,11 +131,13 @@ public class DataService {
 
     private static class EmbeddedCacheKey implements Serializable {
         private Collection<FilterDefinition> filters;
+        private List<FilterDefinition> drillThroughFilters;
         private long reportID;
 
-        private EmbeddedCacheKey(Collection<FilterDefinition> filters, long reportID) {
+        private EmbeddedCacheKey(Collection<FilterDefinition> filters, long reportID, List<FilterDefinition> drillThroughFilters) {
             this.filters = filters;
             this.reportID = reportID;
+            this.drillThroughFilters = drillThroughFilters;
         }
 
         @Override
@@ -145,20 +147,25 @@ public class DataService {
 
             EmbeddedCacheKey that = (EmbeddedCacheKey) o;
 
-            return reportID == that.reportID && !(filters != null ? !filters.equals(that.filters) : that.filters != null);
+            if (reportID != that.reportID) return false;
+            if (drillThroughFilters != null ? !drillThroughFilters.equals(that.drillThroughFilters) : that.drillThroughFilters != null)
+                return false;
+            if (filters != null ? !filters.equals(that.filters) : that.filters != null) return false;
 
+            return true;
         }
 
         @Override
         public int hashCode() {
             int result = filters != null ? filters.hashCode() : 0;
+            result = 31 * result + (drillThroughFilters != null ? drillThroughFilters.hashCode() : 0);
             result = 31 * result + (int) (reportID ^ (reportID >>> 32));
             return result;
         }
     }
 
     public EmbeddedDataResults getEmbeddedResults(long reportID, long dataSourceID, List<FilterDefinition> customFilters,
-                                                  InsightRequestMetadata insightRequestMetadata) {
+                                                  InsightRequestMetadata insightRequestMetadata, List<FilterDefinition> drillThroughFilters) {
         SecurityUtil.authorizeInsight(reportID);
         try {
             Feed feed = feedRegistry.getFeed(dataSourceID);
@@ -188,7 +195,7 @@ public class DataService {
                     }
                 }
             }
-            EmbeddedCacheKey key = new EmbeddedCacheKey(customFilters, reportID);
+            EmbeddedCacheKey key = new EmbeddedCacheKey(customFilters, reportID, drillThroughFilters);
             Map<EmbeddedCacheKey, EmbeddedDataResults> resultsCache = null;
             if (reportCache != null) {
                 //noinspection unchecked
@@ -221,6 +228,9 @@ public class DataService {
             }
             if (customFilters != null) {
                 analysisDefinition.setFilterDefinitions(customFilters);
+            }
+            if (drillThroughFilters != null) {
+                analysisDefinition.applyFilters(drillThroughFilters);
             }
             long startTime = System.currentTimeMillis();      
             EmbeddedDataResults results;

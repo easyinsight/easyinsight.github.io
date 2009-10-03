@@ -7,6 +7,8 @@ import com.easyinsight.report.AbstractViewFactory;
 import com.easyinsight.report.ReportNavigationEvent;
 
 import flash.display.DisplayObject;
+
+import mx.collections.ArrayCollection;
 import mx.controls.Alert;
 import mx.events.ModuleEvent;
 import mx.modules.IModuleInfo;
@@ -59,6 +61,8 @@ public class EmbeddedViewFactory extends AbstractViewFactory {
         return _dataService;
     }
 
+    
+
     override protected function createChildren():void {
         super.createChildren();
 
@@ -82,7 +86,7 @@ public class EmbeddedViewFactory extends AbstractViewFactory {
         if (_reportRenderer == null) {
             pendingRequest = true;
         } else {
-            _dataService.retrieveData(reportID, dataSourceID, filterDefinitions, allSources);
+            _dataService.retrieveData(reportID, dataSourceID, filterDefinitions, allSources, drillthroughFilters);
         }
     }
 

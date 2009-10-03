@@ -50,12 +50,12 @@
             progressBar.visible = true;            
             service = new EmbeddedDataService();
             service.addEventListener(EmbeddedDataServiceEvent.DATA_RETURNED, onDataReturn);
-            service.retrieveData(_reportID, _dataSourceID, _filters, allDataSourcesCheckbox.selected);
+            service.retrieveData(_reportID, _dataSourceID, _filters, allDataSourcesCheckbox.selected, null);
         }
 
         private function onCredentials():void {
             progressBar.visible = true;
-            service.retrieveData(_reportID, _dataSourceID, _filters, allDataSourcesCheckbox.selected);
+            service.retrieveData(_reportID, _dataSourceID, _filters, allDataSourcesCheckbox.selected, null);
         }
         ]]></mx:Script>
     <mx:Form styleName="TitleWindowContents">

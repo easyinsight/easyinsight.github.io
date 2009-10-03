@@ -37,6 +37,9 @@
 
         private var reportID:int;
 
+        [Bindable]
+        private var stackIndex:int = 0;
+
         public function set link(value:Link):void {
             _link = value;
             if (value != null) {
@@ -44,9 +47,11 @@
                 linkLabel = _link.label;
                 linkID = _link.linkID;
                 if (typeValue == "URL") {
+                    stackIndex = 0;
                     var urlLink:URLLink = _link as URLLink;
                     urlText = urlLink.url;
                 } else if (typeValue == "Drillthrough") {
+                    stackIndex = 1;
                     var drillthrough:DrillThrough = _link as DrillThrough;
                     reportID = drillthrough.reportID;
                 }
@@ -77,7 +82,7 @@
     <mx:RemoteObject destination="analysisDefinition" id="analysisService">
         <mx:method name="getInsightDescriptors" result="gotReports()"/>
     </mx:RemoteObject>
-    <mx:VBox>
+    <mx:VBox paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5">
     <mx:RadioButtonGroup id="typeGroup" selectedValue="{typeValue}"/>
     <mx:HBox>
         <mx:RadioButton group="{typeGroup}" label="URL" value="URL" click="viewStack.selectedIndex = 0"/>
@@ -87,7 +92,8 @@
         <mx:Label text="Label: " width="100"/>
         <mx:TextInput id="labelInput" text="{linkLabel}" width="100%"/>
     </mx:HBox>
-    <mx:ViewStack id="viewStack" width="100%" height="100%" resizeToContent="true">
+    <mx:ViewStack id="viewStack" width="100%" height="100%" resizeToContent="true" creationPolicy="all"
+            selectedIndex="{stackIndex}">
         <mx:VBox>
             <mx:HBox>
                 <mx:Label text="URL: " width="100"/>
@@ -97,7 +103,7 @@
         <mx:VBox>
             <mx:HBox>
                 <mx:Label text="Target Report:" width="100"/>
-                <mx:ComboBox id="reportChooser" dataProvider="{reports}" labelField="name"/>
+                <util:AnalysisItemCompletionInput id="reportChooser" items="{reports}" labelField="name"/>
             </mx:HBox>
         </mx:VBox>
     </mx:ViewStack>

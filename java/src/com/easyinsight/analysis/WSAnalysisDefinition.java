@@ -368,4 +368,19 @@ public abstract class WSAnalysisDefinition implements Serializable {
             structure.put(compositeKey, items.get(i));
         }
     }
+
+    public void applyFilters(List<FilterDefinition> drillThroughFilters) {
+        for (FilterDefinition filterDefinition : drillThroughFilters) {
+            for (FilterDefinition ourDefinition : getFilterDefinitions()) {
+                if (ourDefinition.getField().getKey().equals(filterDefinition.getField().getKey())) {
+                    // match the filter?
+                    if (ourDefinition instanceof FilterValueDefinition && filterDefinition instanceof FilterValueDefinition) {
+                        FilterValueDefinition ourFilterValueDefinition = (FilterValueDefinition) ourDefinition;
+                        FilterValueDefinition sourceFilterValueDefinition = (FilterValueDefinition) filterDefinition;
+                        ourFilterValueDefinition.setFilteredValues(sourceFilterValueDefinition.getFilteredValues());
+                    }
+                }
+            }
+        }
+    }
 }

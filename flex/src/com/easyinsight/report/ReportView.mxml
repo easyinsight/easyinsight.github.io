@@ -16,7 +16,6 @@
             <mx:AddChild relativeTo="{transformBox}">
                 <filtering:TransformContainer id="transformContainer" filterEditable="false"
                                               existingFilters="{filterDefinitions}"
-                                              transformAdded="transformsUpdated(event)"
                                               updatedTransforms="transformsUpdated(event)" width="100%" paddingLeft="10"
                                               paddingTop="10" paddingBottom="10"
                                               paddingRight="10" feedID="{_dataSourceID}"/>
@@ -214,6 +213,12 @@
 
         [Bindable]
         private var rateReportText:String;
+
+        private var _parameterFilters:ArrayCollection;
+
+        public function set parameterFilters(value:ArrayCollection):void {
+            _parameterFilters = value;
+        }
 
         [Bindable]
         private var _score:Number;
@@ -455,7 +460,7 @@
         }
 
         private function reportNavigation(event:ReportNavigationEvent):void {
-            dispatchEvent(new ModuleAnalyzeEvent(new ReportAnalyzeSource(event.descriptor)));
+            dispatchEvent(new ModuleAnalyzeEvent(new ReportAnalyzeSource(event.descriptor, event.filters)));
         }
 
         override protected function createChildren():void {
@@ -493,6 +498,7 @@
             viewFactory.reportID = _reportID;
             viewFactory.prefix = _prefix;
             viewFactory.dataSourceID = _dataSourceID;
+            viewFactory.drillthroughFilters = _parameterFilters;
             reportBox.addChild(viewFactory);
             viewFactory.addEventListener(EmbeddedDataServiceEvent.DATA_RETURNED, gotData);
             viewFactory.addEventListener(DataServiceLoadingEvent.LOADING_STARTED, dataLoadingEvent);
