@@ -3,6 +3,7 @@ package com.easyinsight.logging;
 import org.apache.log4j.Logger;
 import com.easyinsight.email.AuthSMTPConnection;
 import com.easyinsight.config.ConfigLoader;
+import com.easyinsight.security.SecurityUtil;
 
 import java.io.StringWriter;
 import java.io.PrintStream;
@@ -34,7 +35,12 @@ public class LogClass {
     public static void error(String message) {
         if(ConfigLoader.instance().isProduction()) {
             try {
-                new AuthSMTPConnection().sendSSLMessage("errors@easy-insight.com", "Error: " + message, message , "donotreply@easy-insight.com");
+                String username = null;
+                try {
+                    username = SecurityUtil.getUserName();
+                } catch(Exception e) {
+                }
+                new AuthSMTPConnection().sendSSLMessage("errors@easy-insight.com", "Error! " + (username != null ? username : "Unknown") + ": " + message, message , "donotreply@easy-insight.com");
             }
             catch(Exception ex) {
                 // do nothing, wtf do you do at this point?
