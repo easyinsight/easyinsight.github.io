@@ -1,0 +1,1 @@
+alter table analysis add temporary_report tinyint(4) not null default 0;
