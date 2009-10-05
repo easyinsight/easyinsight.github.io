@@ -10,7 +10,7 @@ package com.easyinsight.listing
 		
 		public function ListingChangeEvent(perspective:IPerspective, properties:Object = null)
 		{
-			super(LISTING_CHANGE);
+			super(LISTING_CHANGE, true);
 			this.perspective = perspective;
             this.properties = properties;
 		}

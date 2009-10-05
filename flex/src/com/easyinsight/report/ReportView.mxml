@@ -61,6 +61,11 @@
         import mx.managers.PopUpManager;
         import mx.utils.URLUtil;
 
+        private function confirmedKeep():void {
+            addReportBox.removeAllChildren();
+            buttonBar.addChildAt(editReportButton, 4);
+        }
+
         private function toBrowser():void {
             flash.net.navigateToURL(new URLRequest("https://www.easy-insight.com/app/#reportID=" + _reportID), "_blank");
         }
@@ -463,6 +468,10 @@
             dispatchEvent(new ModuleAnalyzeEvent(new ReportAnalyzeSource(event.descriptor, event.filters)));
         }
 
+        private function saveReport(event:MouseEvent):void {
+            analysisService.keepReport.send(_reportID);
+        }
+
         override protected function createChildren():void {
             super.createChildren();
             if (!_showLogo) {
@@ -474,7 +483,7 @@
             if (!_showFullScreen) {
                 buttonBar.removeChild(fullScreenButton);
             }
-            if (!_showBookmark) {
+            if (!_showBookmark || _showAddBar) {
                 buttonBar.removeChild(bookmarkButton);
             }
             if (!_showExport) {
@@ -483,7 +492,7 @@
             if (!_showFilters) {
                 buttonBar.removeChild(adjustFiltersbutton);
             }
-            if (!_showReportEditor) {
+            if (!_showReportEditor || _showAddBar) {
                 buttonBar.removeChild(editReportButton);
             }
             if (!_showMetadata) {
@@ -495,6 +504,17 @@
             if (!_showRefresh) {
                 buttonBar.removeChild(refreshButton);
             }
+
+            if (_showAddBar) {
+                var addLabel:Label = new Label();
+                addLabel.text = "Want to save this report permanently?";
+                addReportBox.addChild(addLabel);
+                var addButton:Button = new Button();
+                addButton.label = "Save to My Data";
+                addButton.addEventListener(MouseEvent.CLICK, saveReport);
+                addReportBox.addChild(addButton);
+            }
+
             viewFactory.reportID = _reportID;
             viewFactory.prefix = _prefix;
             viewFactory.dataSourceID = _dataSourceID;
@@ -511,6 +531,12 @@
             // if filters were passed in
 
             viewFactory.retrieveData(false);
+        }
+
+        private var _showAddBar:Boolean = false;
+
+        public function set showAddBar(value:Boolean):void {
+            _showAddBar = value;
         }
 
         private var _updateURL:Boolean = true;
@@ -548,6 +574,7 @@
         <mx:HBox width="100%" height="100%" id="coreBox">
             <mx:VBox id="reportBox" width="100%" height="100%">
                 <mx:Box width="100%" id="transformBox"/>
+                <mx:HBox width="100%" id="addReportBox" horizontalAlign="center" verticalAlign="middle"/>
                 <mx:HRule width="100%" id="hrule"/>
             </mx:VBox>
             <mx:VBox id="reportMetadata">
@@ -582,5 +609,6 @@
     </mx:VBox>
     <mx:RemoteObject id="analysisService" destination="analysisDefinition">
         <mx:method name="subscribeToAnalysis" result="subscribedToInsight()"/>
+        <mx:method name="keepReport" result="confirmedKeep()"/>
     </mx:RemoteObject>
 </easyinsight:FullScreenPage>

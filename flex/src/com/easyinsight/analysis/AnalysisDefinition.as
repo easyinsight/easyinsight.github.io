@@ -57,6 +57,7 @@ package com.easyinsight.analysis
         public var authorName:String;
         public var description:String;
         public var solutionVisible:Boolean;
+        public var temporaryReport:Boolean;
 		
 		public function AnalysisDefinition()
 		{

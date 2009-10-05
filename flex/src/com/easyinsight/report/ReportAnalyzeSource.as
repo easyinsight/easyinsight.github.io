@@ -13,11 +13,13 @@ public class ReportAnalyzeSource extends ModuleAnalyzeSource{
 
     private var insightDescriptor:InsightDescriptor;
     private var filters:ArrayCollection;
+    private var installOption:Boolean;
 
-    public function ReportAnalyzeSource(insightDescriptor:InsightDescriptor, filters:ArrayCollection = null) {
+    public function ReportAnalyzeSource(insightDescriptor:InsightDescriptor, filters:ArrayCollection = null, installOption:Boolean = false) {
         super();
         this.insightDescriptor = insightDescriptor;
         this.filters = filters;
+        this.installOption = installOption;
     }
 
     override public function createDirect():DisplayObject {
@@ -26,6 +28,7 @@ public class ReportAnalyzeSource extends ModuleAnalyzeSource{
         reportView.reportType = insightDescriptor.reportType;
         reportView.dataSourceID = insightDescriptor.dataFeedID;
         reportView.parameterFilters = filters;
+        reportView.showAddBar = installOption;
         reportView.showLogo = false;
         var controllerClass:Class = EmbeddedControllerLookup.controllerForType(insightDescriptor.reportType);
         var controller:IEmbeddedReportController = new controllerClass();

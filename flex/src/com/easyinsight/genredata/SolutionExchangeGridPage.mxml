@@ -1,0 +1,73 @@
+<?xml version="1.0" ?>
+<genredata:ExchangePage xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:genredata="com.easyinsight.genredata.*"
+                        xmlns:listing="com.easyinsight.listing.*" width="100%" height="100%">
+    <mx:Script><![CDATA[
+        import com.easyinsight.solutions.Solution;
+
+        import mx.collections.ArrayCollection;
+
+        private function onTagFocus(event:TagFocusEvent):void {
+            selectedTag = event.tag;
+        }
+
+        private function changeSolution():void {
+            var obj:Object = solutionBox.selectedItem;
+            if (obj is Solution) {
+                solution = obj as Solution;
+            } else {
+                solution = null;
+            }
+        }
+
+        [Bindable(event="solutionChanged")]
+        public function get solution():Solution {
+            return _solution;
+        }
+
+        public function set solution(value:Solution):void {
+            if (_solution == value) return;
+            _solution = value;
+            dispatchEvent(new Event("solutionChanged"));
+        }
+
+        private var _solution:Solution;
+
+
+        [Bindable(event="solutionsChanged")]
+        public function get solutions():ArrayCollection {
+            return _solutions;
+        }
+
+        public function set solutions(value:ArrayCollection):void {
+            if (_solutions == value) return;
+            _solutions = value;
+            dispatchEvent(new Event("solutionsChanged"));
+        }
+
+        private var _solutions:ArrayCollection;
+        ]]></mx:Script>
+    <mx:HBox width="100%" height="100%">
+        <mx:VBox>
+            <mx:HBox>
+                <mx:Label text="Solution:" fontFamily="Tahoma" fontWeight="bold" fontSize="14"/>
+                <mx:ComboBox id="solutionBox" change="changeSolution()" dataProvider="{solutions}" labelField="name" rowCount="15"/>
+            </mx:HBox>
+            <mx:Spacer height="30"/>
+            <mx:HBox width="100%" horizontalAlign="center">
+                <mx:Label text="Popular Tags" fontFamily="Tahoma" fontWeight="bold" fontSize="14"/>
+            </mx:HBox>
+            <listing:TagListing width="250" borderStyle="solid" borderThickness="1" tagFocus="onTagFocus(event)"/>
+        </mx:VBox>
+        <mx:DataGrid dataProvider="{dataProvider2}" width="100%" height="100%">
+        <mx:columns>
+            <mx:DataGridColumn headerText="Name" dataField="name"/>
+            <mx:DataGridColumn headerText="Author" dataField="author" width="120"/>
+            <mx:DataGridColumn headerText="Rating" dataField="name"
+                               itemRenderer="com.easyinsight.genredata.ExchangeRatingRenderer" width="120"/>
+            <mx:DataGridColumn headerText="" dataField="name" sortable="false"
+                               itemRenderer="com.easyinsight.genredata.SolutionGridActionRenderer" width="50"/>
+        </mx:columns>
+    </mx:DataGrid>
+    </mx:HBox>
+
+</genredata:ExchangePage>

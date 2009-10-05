@@ -16,6 +16,16 @@ public class PublicDataController extends ExchangeController{
         exchangeService.getReports.addEventListener(ResultEvent.RESULT, onData);
     }
 
+    override protected function createExchangeSummaryPage():ExchangePage {
+        var summary:ExchangeSummaryPage = new ExchangeSummaryPage();
+        summary.itemRenderer = summaryItemRenderer();
+        return summary;
+    }
+
+    override protected function createExchangedGridPage():ExchangePage {
+        return new ExchangeGridPage();
+    }
+
     private function onData(event:ResultEvent):void {
         var reports:ArrayCollection = exchangeService.getReports.lastResult as ArrayCollection;
         dispatchEvent(new ExchangeDataEvent(reports));

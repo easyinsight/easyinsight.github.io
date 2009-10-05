@@ -1,0 +1,32 @@
+<?xml version="1.0" ?>
+<util:EITitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*" headerHeight="0"
+        paddingTop="5" paddingBottom="5" paddingLeft="5" paddingRight="5">
+    <mx:Script><![CDATA[
+        import com.easyinsight.listing.ListingChangeEvent;
+        import com.easyinsight.solutions.DelayedSolutionLink;        
+
+        import mx.managers.PopUpManager;
+
+        private var _solutionID:int;
+
+        public function set solution(value:int):void {
+            _solutionID = value;
+        }
+
+        private function onEvent(event:ListingChangeEvent):void {
+            PopUpManager.removePopUp(this);
+            dispatchEvent(event);
+        }
+
+        private function toSolution():void {
+            var link:DelayedSolutionLink = new DelayedSolutionLink(_solutionID);
+            link.addEventListener(ListingChangeEvent.LISTING_CHANGE, onEvent);
+            link.execute();
+        }
+        ]]></mx:Script>
+    <mx:VBox horizontalAlign="center">
+        <mx:Label text="We couldn't find any installs of this solution in your account." fontSize="14"/>
+        <mx:Button label="Install this Solution" styleName="blueButton" fontSize="14" click="toSolution()"/>
+        <mx:LinkButton textDecoration="underline" label="Cancel" click="PopUpManager.removePopUp(this)" fontSize="14"/>
+    </mx:VBox>
+</util:EITitleWindow>

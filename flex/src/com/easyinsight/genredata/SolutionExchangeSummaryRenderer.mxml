@@ -1,0 +1,270 @@
+<?xml version="1.0" ?>
+<mx:HBox xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:analysis="com.easyinsight.analysis.*" paddingTop="5" paddingBottom="5"
+        paddingLeft="5" paddingRight="5" horizontalScrollPolicy="off" verticalScrollPolicy="off">
+    <mx:Script><![CDATA[
+        import com.easyinsight.analysis.AnalysisDefinition;
+
+        import com.easyinsight.listing.ListingChangeEvent;
+        import com.easyinsight.report.ReportAnalyzeSource;
+
+        import com.easyinsight.solutions.InsightDescriptor;
+
+        import com.easyinsight.util.PopUpUtil;
+
+        import mx.collections.ArrayCollection;
+        import mx.formatters.DateFormatter;
+        import mx.managers.PopUpManager;
+
+        private function installedReport():void {
+            var insightDescriptor:InsightDescriptor = solutionService.installReport.lastResult as InsightDescriptor;
+            // has to emit special property here to let us decide whether or not we want to keep this report
+            dispatchEvent(new ModuleAnalyzeEvent(new ReportAnalyzeSource(insightDescriptor, null, true)));
+        }
+
+        private function onListingEvent(event:ListingChangeEvent):void {
+            dispatchEvent(event);
+        }
+
+        private function gotMatchingDataSources():void {
+            var dataSources:ArrayCollection = solutionService.determineDataSource.lastResult as ArrayCollection;
+            if (dataSources.length == 0) {
+                var window:NoSolutionInstalledWindow = new NoSolutionInstalledWindow();
+                window.solution = _item.solutionID;
+                window.addEventListener(ListingChangeEvent.LISTING_CHANGE, onListingEvent);
+                PopUpManager.addPopUp(window, this, true);
+                PopUpUtil.centerPopUp(window);
+            } else if (dataSources.length == 1) {
+                solutionService.installReport.send(reportID, dataSources.getItemAt(0).id);
+            } else {
+                // TODO: this is a hack for now
+                solutionService.installReport.send(reportID, dataSources.getItemAt(0).id);
+            }
+        }
+
+        private function addReport():void {
+            solutionService.determineDataSource.send(dataSourceID);
+        }
+
+        private function toReport():void {
+            var insightDescriptor:InsightDescriptor = new InsightDescriptor();
+            insightDescriptor.id = reportID;
+            insightDescriptor.name = reportName;
+            insightDescriptor.dataFeedID = dataSourceID;
+            insightDescriptor.reportType = reportType;
+            dispatchEvent(new ModuleAnalyzeEvent(new ReportAnalyzeSource(insightDescriptor)));
+        }
+
+        private var _item:SolutionReportExchangeItem;
+
+        [Bindable]
+        private var reportName:String;
+
+        private var dataSourceID:int;
+
+        [Bindable]
+        private var reportDescription:String;
+
+        [Bindable]
+        private var reportImage:Class;
+
+        [Bindable]
+        private var dateCreated:String;
+
+        [Bindable]
+        private var score:int;
+
+        [Bindable]
+        private var author:String;
+
+        [Bindable]
+        private var solutionName:String;
+
+        [Bindable]
+        private var reportID:int;
+
+        [Bindable]
+        [Embed(source="../../../../assets/report/chart_area.png")]
+        private var areaChart:Class;
+
+        [Bindable]
+        [Embed(source="../../../../assets/report/chart_bar.png")]
+        private var barChart:Class;
+
+        [Bindable]
+        [Embed(source="../../../../assets/report/chart_bubble.png")]
+        private var bubbleChart:Class;
+
+        [Bindable]
+        [Embed(source="../../../../assets/report/chart_column.png")]
+        private var columnChart:Class;
+
+        [Bindable]
+        [Embed(source="../../../../assets/report/chart_dot.png")]
+        private var plotChart:Class;
+
+        [Bindable]
+        [Embed(source="../../../../assets/report/chart_line.png")]
+        private var lineChart:Class;
+
+        [Bindable]
+        [Embed(source="../../../../assets/report/chart_pie.png")]
+        private var pieChart:Class;
+
+        [Bindable]
+        [Embed(source="../../../../assets/report/components.png")]
+        private var treeMap:Class;
+
+        [Bindable]
+        [Embed(source="../../../../assets/report/control_panel2.png")]
+        private var gauge:Class;
+
+        [Bindable]
+        [Embed(source="../../../../assets/report/earth.png")]
+        private var map:Class;
+
+        [Bindable]
+        [Embed(source="../../../../assets/report/table.png")]
+        private var grid:Class;
+
+        [Bindable]
+        [Embed(source="../../../../assets/report/data.png")]
+        private var dataIcon:Class;
+
+        private function assignIcon():void {
+            switch (reportType) {
+                case AnalysisDefinition.AREA:
+                case AnalysisDefinition.AREA3D:
+                    reportImage = areaChart;
+                    break;
+                case AnalysisDefinition.BAR:
+                case AnalysisDefinition.BAR3D:
+                    reportImage = barChart;
+                    break;
+                case AnalysisDefinition.BUBBLE:
+                    reportImage = bubbleChart;
+                    break;
+                case AnalysisDefinition.COLUMN:
+                case AnalysisDefinition.COLUMN3D:
+                    reportImage = columnChart;
+                    break;
+                case AnalysisDefinition.PLOT:
+                    reportImage = plotChart;
+                    break;
+                case AnalysisDefinition.LINE:
+                case AnalysisDefinition.LINE3D:
+                case AnalysisDefinition.MMLINE:
+                    reportImage = lineChart;
+                    break;
+                case AnalysisDefinition.CROSSTAB:
+                case AnalysisDefinition.LIST:
+                case AnalysisDefinition.TREE:
+                    reportImage = grid;
+                    break;
+                case AnalysisDefinition.TREEMAP:
+                    reportImage = treeMap;
+                    break;
+                case AnalysisDefinition.PIE:
+                case AnalysisDefinition.PIE3D:
+                    reportImage = pieChart;
+                    break;
+                case AnalysisDefinition.MAP:
+                    reportImage = map;
+                    break;
+            }
+        }
+
+        private var reportType:int;
+
+        override public function set data(val:Object):void {
+            this._item = val as SolutionReportExchangeItem;
+            if (_item != null) {
+                reportName = _item.name;
+                reportDescription = _item.description;
+                reportID = _item.id;
+                reportType = _item.reportType;
+                dataSourceID = _item.dataSourceID;
+                score = _item.ratingAverage;
+                var df:DateFormatter = new DateFormatter();
+                if (_item.dateAdded == null) {
+                    dateCreated = null;
+                } else {
+                    dateCreated = df.format(_item.dateAdded);
+                }
+                solutionName = _item.solutionName;
+                author = _item.author;
+
+
+                tagBox.removeAllChildren();
+                for (var i:int = 0; i < _item.tags.length; i++) {
+                    var tag:String = _item.tags.getItemAt(i) as String;
+                    var tagButton:LinkButton = new LinkButton();
+                    tagButton.setStyle("paddingLeft", 0);
+                    tagButton.setStyle("paddingBottom", 0);
+                    tagButton.setStyle("paddingRight", 0);
+                    tagButton.setStyle("paddingTop", 0);
+                    tagButton.setStyle("textDecoration", "underline");
+                    tagButton.setStyle("fontSize", 12);
+                    tagButton.label = tag;
+                    tagBox.addChild(tagButton);
+                    if (i < (_item.tags.length - 1)) {
+                        var comma:Label = new Label();
+                        comma.text = ",";
+                        tagBox.addChild(comma);
+                    }
+                }
+
+
+                assignIcon();
+            }
+        }
+
+
+
+        override public function get data():Object {
+            return this._item;
+        }
+        ]]></mx:Script>
+    <mx:RemoteObject destination="solutionService" id="solutionService">
+        <mx:method name="determineDataSource" result="gotMatchingDataSources()"/>
+        <mx:method name="installReport" result="installedReport()"/>
+    </mx:RemoteObject>
+    <mx:HBox borderStyle="solid" borderThickness="1" width="100%" height="100%" verticalAlign="middle" backgroundColor="#FFFFFF" backgroundAlpha="1"
+            paddingLeft="5" paddingBottom="5" paddingRight="5" paddingTop="5">
+        <mx:VBox height="100%" width="270">
+            <mx:HBox width="100%" horizontalAlign="center">
+                <mx:LinkButton label="{reportName}" textDecoration="underline" click="addReport()" fontSize="13" fontFamily="Tahoma" fontWeight="bold"/>
+            </mx:HBox>
+            <mx:HBox width="100%">
+                <mx:Image source="{reportImage}"/>
+                <mx:TextArea borderStyle="none" backgroundAlpha="0" editable="false" selectable="false"
+                             text="{reportDescription}" width="100%" maxChars="150" verticalScrollPolicy="off" toolTip="{reportDescription}"/>
+            </mx:HBox>
+            <mx:HBox>
+                <mx:Label text="Tags:" fontFamily="Tahoma" fontWeight="bold"/>
+                <mx:HBox id="tagBox" width="200" horizontalScrollPolicy="off" verticalAlign="middle" horizontalGap="0"/>                                                    
+            </mx:HBox>
+        </mx:VBox>
+        <mx:VRule height="80%"/>
+        <mx:VBox width="160" height="100%" horizontalAlign="center" verticalAlign="middle">
+            <mx:Label text="Solution:"/>
+            <mx:Box id="dsName">
+                <mx:LinkButton id="dsButton" label="{solutionName}" fontFamily="Tahoma" fontWeight="bold" fontSize="12" textDecoration="underline" maxWidth="130"
+                        toolTip="Click to jump in and create your own reports against this data source"/>
+            </mx:Box>
+        </mx:VBox>
+        <mx:VRule height="80%"/>
+        <mx:VBox height="100%" verticalAlign="middle">
+            <mx:Form paddingBottom="0" paddingLeft="0" paddingRight="0" paddingTop="0">
+                <mx:FormItem label="Rating:">
+                    <analysis:ReportRating reportID="{reportID}" score="{score}"/>
+                </mx:FormItem>
+                <mx:FormItem label="Created On:">
+                    <mx:Label text="{dateCreated}" fontFamily="Lucida Grande" fontWeight="normal"/>
+                </mx:FormItem>
+                <mx:FormItem label="Author:">
+                    <mx:LinkButton label="{author}" fontFamily="Lucida Grande" fontWeight="normal"/>
+                </mx:FormItem>
+            </mx:Form>
+        </mx:VBox>
+    </mx:HBox>
+</mx:HBox>
