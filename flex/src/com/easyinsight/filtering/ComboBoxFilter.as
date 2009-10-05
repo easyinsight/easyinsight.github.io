@@ -121,6 +121,7 @@ import mx.events.DropdownEvent;
             }
 			if (comboBox == null) {
 				comboBox = new ComboBox();
+                comboBox.maxWidth = 300;
 				comboBox.addEventListener(DropdownEvent.CLOSE, filterValueChanged);
 				comboBox.enabled = false;				
 			}
