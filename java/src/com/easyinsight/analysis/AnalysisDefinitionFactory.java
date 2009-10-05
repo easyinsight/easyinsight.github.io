@@ -86,6 +86,7 @@ public class AnalysisDefinitionFactory {
         analysisDefinition.setRootDefinition(wsAnalysisDefinition.isRootDefinition());
         analysisDefinition.setPubliclyVisible(wsAnalysisDefinition.isPubliclyVisible());
         analysisDefinition.setMarketplaceVisible(wsAnalysisDefinition.isMarketplaceVisible());
+        analysisDefinition.setTemporaryReport(wsAnalysisDefinition.isTemporaryReport());
         analysisDefinition.setSolutionVisible(wsAnalysisDefinition.isSolutionVisible());
         analysisDefinition.setVisibleAtFeedLevel(wsAnalysisDefinition.isVisibleAtFeedLevel());
         return analysisDefinition;

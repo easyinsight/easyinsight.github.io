@@ -33,6 +33,9 @@ public class AnalysisDefinition implements Cloneable {
     @Column(name = "report_type")
     private int reportType;
 
+    @Column(name = "temporary_report")
+    private boolean temporaryReport;
+
     @OneToMany(cascade = CascadeType.ALL)
     @JoinTable(name = "analysis_to_filter_join",
             joinColumns = @JoinColumn(name = "analysis_id", nullable = false),
@@ -141,6 +144,14 @@ public class AnalysisDefinition implements Cloneable {
 
     public void setAnalysisDefinitionState(AnalysisDefinitionState analysisDefinitionState) {
         this.analysisDefinitionState = analysisDefinitionState;
+    }
+
+    public boolean isTemporaryReport() {
+        return temporaryReport;
+    }
+
+    public void setTemporaryReport(boolean temporaryReport) {
+        this.temporaryReport = temporaryReport;
     }
 
     public Map<String, AnalysisItem> getReportStructure() {
@@ -391,6 +402,7 @@ public class AnalysisDefinition implements Cloneable {
             dataScrubs.add(dataScrub);
         }
         analysisDefinition.setDataScrubs(dataScrubs);
+        analysisDefinition.setTemporaryReport(temporaryReport);
         return analysisDefinition;
     }
 

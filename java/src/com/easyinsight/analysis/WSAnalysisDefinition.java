@@ -63,6 +63,15 @@ public abstract class WSAnalysisDefinition implements Serializable {
     private Date dateCreated;
     private Date dateUpdated;
     private String description;
+    private boolean temporaryReport;
+
+    public boolean isTemporaryReport() {
+        return temporaryReport;
+    }
+
+    public void setTemporaryReport(boolean temporaryReport) {
+        this.temporaryReport = temporaryReport;
+    }
 
     public boolean isSolutionVisible() {
         return solutionVisible;

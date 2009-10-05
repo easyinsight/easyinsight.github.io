@@ -71,6 +71,22 @@ public class AnalysisService {
         }
     }
 
+    public void keepReport(long reportID) {
+        SecurityUtil.authorizeInsight(reportID);
+        Connection conn = Database.instance().getConnection();
+        try {
+            PreparedStatement updateStmt = conn.prepareStatement("UPDATE ANALYSIS SET TEMPORARY_REPORT = ? WHERE ANALYSIS_ID = ?");
+            updateStmt.setBoolean(1, false);
+            updateStmt.setLong(2, reportID);
+            updateStmt.executeUpdate();
+        } catch (SQLException e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        } finally {
+            Database.closeConnection(conn);
+        }
+    }
+
     public Collection<WSAnalysisDefinition> getAnalysisDefinitions() {
         long userID = SecurityUtil.getUserID();
         try {

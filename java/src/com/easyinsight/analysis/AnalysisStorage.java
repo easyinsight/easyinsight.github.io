@@ -217,9 +217,10 @@ public class AnalysisStorage {
         Connection conn = Database.instance().getConnection();
         try {
             PreparedStatement queryStmt = conn.prepareStatement("SELECT analysis.ANALYSIS_ID, TITLE, DATA_FEED_ID, REPORT_TYPE FROM ANALYSIS, USER_TO_ANALYSIS WHERE " +
-                    "USER_TO_ANALYSIS.analysis_id = analysis.analysis_id and user_to_analysis.user_id = ? and root_definition = ?");
+                    "USER_TO_ANALYSIS.analysis_id = analysis.analysis_id and user_to_analysis.user_id = ? and root_definition = ? AND temporary_report = ?");
             queryStmt.setLong(1, userID);
             queryStmt.setBoolean(2, false);
+            queryStmt.setBoolean(3, false);
             ResultSet rs = queryStmt.executeQuery();
             while (rs.next()) {
                 descriptors.add(new InsightDescriptor(rs.getLong(1), rs.getString(2), rs.getLong(3), rs.getInt(4)));
