@@ -433,11 +433,12 @@ public class GoalStorage {
         Session session = Database.instance().createSession(conn);
         try {
             while (rs.next()) {
-                List results = session.createQuery("from PersistableFilterDefinition where filterId = ?").setLong(0, rs.getLong(1)).list();
+                List results = session.createQuery("from FilterDefinition where filterID = ?").setLong(0, rs.getLong(1)).list();
                 if (results.size() > 0) {
-                    PersistableFilterDefinition filter = (PersistableFilterDefinition) results.get(0);
+                    FilterDefinition filter = (FilterDefinition) results.get(0);
                     filter.getField().afterLoad();
-                    filters.add(filter.toFilterDefinition());
+                    filter.afterLoad();
+                    filters.add(filter);
                 }
             }
         } finally {
@@ -454,10 +455,12 @@ public class GoalStorage {
         Session session = Database.instance().createSession(conn);
         try {
             while (rs.next()) {
-                List results = session.createQuery("from PersistableFilterDefinition where filterId = ?").setLong(0, rs.getLong(1)).list();
+                List results = session.createQuery("from FilterDefinition where filterID = ?").setLong(0, rs.getLong(1)).list();
                 if (results.size() > 0) {
-                    PersistableFilterDefinition filter = (PersistableFilterDefinition) results.get(0);
-                    filters.add(filter.toFilterDefinition());
+                    FilterDefinition filter = (FilterDefinition) results.get(0);
+                    filter.getField().afterLoad();
+                    filter.afterLoad();
+                    filters.add(filter);
                 }
             }
         } finally {
@@ -838,11 +841,12 @@ public class GoalStorage {
         try {
             PreparedStatement saveFiltersStmt = conn.prepareStatement("INSERT INTO GOAL_TO_FILTER (GOAL_TREE_NODE_ID, FILTER_ID) VALUES (?, ?)");
             for (FilterDefinition filterDefinition : goalTreeNode.getFilters()) {
-                PersistableFilterDefinition persistableFilterDefinition = filterDefinition.toPersistableFilterDefinition();
-                session.saveOrUpdate(persistableFilterDefinition);
+                filterDefinition.beforeSave();
+
+                session.saveOrUpdate(filterDefinition);
                 session.flush();
                 saveFiltersStmt.setLong(1, goalTreeNode.getGoalTreeNodeID());
-                saveFiltersStmt.setLong(2, persistableFilterDefinition.getFilterId());
+                saveFiltersStmt.setLong(2, filterDefinition.getFilterID());
                 saveFiltersStmt.execute();
             }
         } finally {
@@ -858,11 +862,11 @@ public class GoalStorage {
         try {
             PreparedStatement saveFiltersStmt = conn.prepareStatement("INSERT INTO GOAL_TO_PROBLEM_FILTER (GOAL_TREE_NODE_ID, FILTER_ID) VALUES (?, ?)");
             for (FilterDefinition filterDefinition : goalTreeNode.getProblemConditions()) {
-                PersistableFilterDefinition persistableFilterDefinition = filterDefinition.toPersistableFilterDefinition();
-                session.saveOrUpdate(persistableFilterDefinition);
+                filterDefinition.beforeSave();
+                session.saveOrUpdate(filterDefinition);
                 session.flush();
                 saveFiltersStmt.setLong(1, goalTreeNode.getGoalTreeNodeID());
-                saveFiltersStmt.setLong(2, persistableFilterDefinition.getFilterId());
+                saveFiltersStmt.setLong(2, filterDefinition.getFilterID());
                 saveFiltersStmt.execute();
             }
         } finally {

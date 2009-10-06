@@ -1,5 +1,9 @@
 package com.easyinsight.analysis;
 
+import javax.persistence.Column;
+import javax.persistence.Transient;
+import javax.persistence.Table;
+import javax.persistence.Entity;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
@@ -8,14 +12,46 @@ import java.sql.SQLException;
  * Date: Jul 8, 2008
  * Time: 2:23:40 PM
  */
+@Entity
+@Table(name="range_filter")
 public class FilterRangeDefinition extends FilterDefinition {
-    private double startValue;
+    @Column(name="low_value", nullable = true)
+    private Double startValue;
+    @Transient
     private boolean startValueDefined;
-    private double endValue;
+    @Column(name="high_value", nullable = true)
+    private Double endValue;
+    @Transient
     private boolean endValueDefined;
 
     public FilterRangeDefinition() {
         setApplyBeforeAggregation(false);
+    }
+
+    @Override
+    public void beforeSave() {
+        if (!startValueDefined) {
+            startValue = null;
+        }
+        if (!endValueDefined) {
+            endValue = null;
+        }
+    }
+
+    @Override
+    public void afterLoad() {
+        if (startValue == null) {
+            startValue = 0.;
+            startValueDefined = false;
+        } else {
+            startValueDefined = true;
+        }
+        if (endValue == null) {
+            endValue = 0.;
+            endValueDefined = false;
+        } else {
+            endValueDefined = true;
+        }
     }
 
     public boolean isStartValueDefined() {
@@ -48,18 +84,6 @@ public class FilterRangeDefinition extends FilterDefinition {
 
     public void setEndValue(double endValue) {
         this.endValue = endValue;
-    }
-
-    public PersistableFilterDefinition toPersistableFilterDefinition() {
-        PersistableRangeFilterDefinition range = new PersistableRangeFilterDefinition();
-        range.setEnabled(isEnabled());
-        range.setIntrinsic(isIntrinsic());
-        range.setFilterId(getFilterID());
-        range.setField(getField());
-        range.setApplyBeforeAggregation(isApplyBeforeAggregation());
-        range.setLowValue(startValueDefined ? startValue : null);
-        range.setHighValue(endValueDefined ? endValue : null);
-        return range;
     }
 
     public MaterializedFilterDefinition materialize(InsightRequestMetadata insightRequestMetadata) {

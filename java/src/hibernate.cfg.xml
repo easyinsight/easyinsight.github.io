@@ -57,11 +57,11 @@
         <mapping class="com.easyinsight.analysis.Tag"/>
         <mapping class="com.easyinsight.analysis.TagCloud"/>
         <mapping class="com.easyinsight.analysis.FormattingConfiguration"/>
-        <mapping class="com.easyinsight.analysis.PersistableFilterDefinition"/>
-        <mapping class="com.easyinsight.analysis.PersistableValueFilterDefinition"/>
-        <mapping class="com.easyinsight.analysis.PersistableRangeFilterDefinition"/>
-        <mapping class="com.easyinsight.analysis.PersistableDateRangeFilterDefinition"/>
-        <mapping class="com.easyinsight.analysis.PersistableRollingFilterDefinition"/>
+        <mapping class="com.easyinsight.analysis.FilterDefinition"/>
+        <mapping class="com.easyinsight.analysis.FilterValueDefinition"/>
+        <mapping class="com.easyinsight.analysis.FilterRangeDefinition"/>
+        <mapping class="com.easyinsight.analysis.FilterDateRangeDefinition"/>
+        <mapping class="com.easyinsight.analysis.RollingFilterDefinition"/>
         <mapping class="com.easyinsight.analysis.FilterDefinitionValue"/>
         <mapping class="com.easyinsight.analysis.AnalysisItem"/>
         <mapping class="com.easyinsight.analysis.AnalysisDimension"/>
@@ -90,11 +90,11 @@
         <mapping class="com.easyinsight.analysis.VirtualTransform"/>
         <mapping class="com.easyinsight.analysis.AnalysisStep"/>
         <mapping class="com.easyinsight.analysis.TemporalAnalysisMeasure"/>
-        <mapping class="com.easyinsight.analysis.PersistableLastValueFilter"/>
-        <mapping class="com.easyinsight.analysis.PersistableFilterPatternDefinition"/>
+        <mapping class="com.easyinsight.analysis.LastValueFilter"/>        
         <mapping class="com.easyinsight.analysis.Link"/>
         <mapping class="com.easyinsight.analysis.URLLink"/>
         <mapping class="com.easyinsight.analysis.DrillThrough"/>        
+        <mapping class="com.easyinsight.analysis.AnalysisMeasureGrouping"/>        
 
         <mapping class="com.easyinsight.scrubbing.DataScrub"/>
         <mapping class="com.easyinsight.scrubbing.LookupTableScrub"/>

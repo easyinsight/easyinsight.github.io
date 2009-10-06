@@ -1,5 +1,8 @@
 package com.easyinsight.analysis;
 
+import javax.persistence.Entity;
+import javax.persistence.Table;
+import javax.persistence.Column;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.Date;
@@ -9,8 +12,11 @@ import java.util.Date;
  * Date: Oct 28, 2008
  * Time: 11:08:41 AM
  */
+@Entity
+@Table(name="rolling_range_filter")
 public class RollingFilterDefinition extends FilterDefinition {
 
+    @Column(name="interval_value")
     private int interval;
 
     public int getInterval() {
@@ -19,17 +25,6 @@ public class RollingFilterDefinition extends FilterDefinition {
 
     public void setInterval(int interval) {
         this.interval = interval;
-    }
-
-    public PersistableFilterDefinition toPersistableFilterDefinition() {
-        PersistableRollingFilterDefinition filter = new PersistableRollingFilterDefinition();
-        filter.setEnabled(isEnabled());
-        filter.setIntrinsic(isIntrinsic());
-        filter.setFilterId(getFilterID());
-        filter.setField(getField());
-        filter.setApplyBeforeAggregation(isApplyBeforeAggregation());
-        filter.setInterval(getInterval());
-        return filter;
     }
 
     public MaterializedFilterDefinition materialize(InsightRequestMetadata insightRequestMetadata) {

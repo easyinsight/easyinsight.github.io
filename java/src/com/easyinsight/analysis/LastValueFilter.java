@@ -1,5 +1,7 @@
 package com.easyinsight.analysis;
 
+import javax.persistence.Entity;
+import javax.persistence.Table;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
@@ -8,6 +10,8 @@ import java.sql.SQLException;
  * Date: Aug 5, 2009
  * Time: 12:22:40 PM
  */
+@Entity
+@Table(name="last_value_filter")
 public class LastValueFilter extends FilterDefinition {
 
     public LastValueFilter(AnalysisItem key) {
@@ -15,16 +19,6 @@ public class LastValueFilter extends FilterDefinition {
     }
 
     public LastValueFilter() {
-    }
-
-    public PersistableFilterDefinition toPersistableFilterDefinition() {
-        PersistableLastValueFilter date = new PersistableLastValueFilter();
-        date.setEnabled(isEnabled());
-        date.setFilterId(getFilterID());
-        date.setApplyBeforeAggregation(isApplyBeforeAggregation());
-        date.setField(getField());
-        date.setIntrinsic(isIntrinsic());
-        return date;
     }
 
     public MaterializedFilterDefinition materialize(InsightRequestMetadata insightRequestMetadata) {

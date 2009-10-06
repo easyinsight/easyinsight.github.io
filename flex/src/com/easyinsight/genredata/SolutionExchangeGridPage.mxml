@@ -56,7 +56,7 @@
             <mx:HBox width="100%" horizontalAlign="center">
                 <mx:Label text="Popular Tags" fontFamily="Tahoma" fontWeight="bold" fontSize="14"/>
             </mx:HBox>
-            <listing:TagListing width="250" borderStyle="solid" borderThickness="1" tagFocus="onTagFocus(event)"/>
+            <listing:TagListing width="250" borderStyle="solid" borderThickness="1" tagFocus="onTagFocus(event)" solution="true"/>
         </mx:VBox>
         <mx:DataGrid dataProvider="{dataProvider2}" width="100%" height="100%">
         <mx:columns>

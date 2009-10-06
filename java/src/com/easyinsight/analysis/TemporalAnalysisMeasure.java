@@ -122,6 +122,9 @@ public class TemporalAnalysisMeasure extends AnalysisMeasure {
             case AggregationTypes.LAST_VALUE:
                 aggregation = new LastValueTemporalAggregation(analysisDimension, new AnalysisMeasure(this.getKey(), wrappedAggregation), AggregationTypes.LAST_VALUE, true);
                 break;
+            case AggregationTypes.PERCENT_CHANGE:
+                aggregation = new PercentDeltaTemporalAggregation(analysisDimension, new AnalysisMeasure(this.getKey(), wrappedAggregation), AggregationTypes.PERCENT_CHANGE, false);
+                break;
             default:
                 throw new RuntimeException("Unknown temporal aggregation type " + getAggregation());
         }

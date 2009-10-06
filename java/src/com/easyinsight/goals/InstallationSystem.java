@@ -15,7 +15,6 @@ import com.easyinsight.core.EIDescriptor;
 import com.easyinsight.core.InsightDescriptor;
 import com.easyinsight.analysis.AnalysisMeasure;
 import com.easyinsight.analysis.FilterDefinition;
-import com.easyinsight.analysis.PersistableFilterDefinition;
 import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.notifications.ConfigureDataFeedTodo;
@@ -138,32 +137,33 @@ public class InstallationSystem {
                         if (goalTreeNode.getFilters() != null) {
                             List<FilterDefinition> newFilters = new ArrayList<FilterDefinition>();
                             for (FilterDefinition filterDefinition : goalTreeNode.getFilters()) {
-                                PersistableFilterDefinition persistableFilterDefinition = filterDefinition.toPersistableFilterDefinition();
-                                PersistableFilterDefinition clonedPersistableFilterDefinition;
+                                filterDefinition.afterLoad();
+
+                                FilterDefinition clonedPersistableFilterDefinition;
                                 try {
-                                    clonedPersistableFilterDefinition = persistableFilterDefinition.clone();
+                                    clonedPersistableFilterDefinition = filterDefinition.clone();
                                 } catch (CloneNotSupportedException e) {
                                     throw new RuntimeException(e);
                                 }
-                                FilterDefinition clonedDefinition = clonedPersistableFilterDefinition.toFilterDefinition();
-                                clonedDefinition.setField(findItem(filterDefinition.getField(), feedDefinition));
-                                newFilters.add(clonedDefinition);
+
+                                clonedPersistableFilterDefinition.setField(findItem(filterDefinition.getField(), feedDefinition));
+                                newFilters.add(clonedPersistableFilterDefinition);
                             }
                             goalTreeNode.setFilters(newFilters);
                         }
                         if (goalTreeNode.getProblemConditions() != null) {
                             List<FilterDefinition> newFilters = new ArrayList<FilterDefinition>();
                             for (FilterDefinition filterDefinition : goalTreeNode.getProblemConditions()) {
-                                PersistableFilterDefinition persistableFilterDefinition = filterDefinition.toPersistableFilterDefinition();
-                                PersistableFilterDefinition clonedPersistableFilterDefinition;
+                                filterDefinition.afterLoad();
+
+                                FilterDefinition clonedPersistableFilterDefinition;
                                 try {
-                                    clonedPersistableFilterDefinition = persistableFilterDefinition.clone();
+                                    clonedPersistableFilterDefinition = filterDefinition.clone();
                                 } catch (CloneNotSupportedException e) {
                                     throw new RuntimeException(e);
                                 }
-                                FilterDefinition clonedDefinition = clonedPersistableFilterDefinition.toFilterDefinition();
-                                clonedDefinition.setField(findItem(filterDefinition.getField(), feedDefinition));
-                                newFilters.add(clonedDefinition);
+                                clonedPersistableFilterDefinition.setField(findItem(filterDefinition.getField(), feedDefinition));
+                                newFilters.add(clonedPersistableFilterDefinition);
                             }
                             goalTreeNode.setProblemConditions(newFilters);
                         }

@@ -40,7 +40,7 @@ public class AnalysisDefinition implements Cloneable {
     @JoinTable(name = "analysis_to_filter_join",
             joinColumns = @JoinColumn(name = "analysis_id", nullable = false),
             inverseJoinColumns = @JoinColumn(name = "filter_id", nullable = false))
-    private List<PersistableFilterDefinition> filterDefinitions;
+    private List<FilterDefinition> filterDefinitions;
 
     @OneToMany(cascade = CascadeType.ALL)
     @JoinTable(name = "additional_items",
@@ -274,11 +274,11 @@ public class AnalysisDefinition implements Cloneable {
         this.userBindings = userBindings;
     }
 
-    public List<PersistableFilterDefinition> getFilterDefinitions() {
+    public List<FilterDefinition> getFilterDefinitions() {
         return filterDefinitions;
     }
 
-    public void setFilterDefinitions(List<PersistableFilterDefinition> filterDefinitions) {
+    public void setFilterDefinitions(List<FilterDefinition> filterDefinitions) {
         this.filterDefinitions = filterDefinitions;
     }
 
@@ -326,8 +326,8 @@ public class AnalysisDefinition implements Cloneable {
         AnalysisDefinition analysisDefinition = (AnalysisDefinition) super.clone();
         analysisDefinition.setAnalysisID(null);
         Map<Long, AnalysisItem> replacementMap = new HashMap<Long, AnalysisItem>();
-        List<PersistableFilterDefinition> filterDefinitions = new ArrayList<PersistableFilterDefinition>();
-        for (PersistableFilterDefinition persistableFilterDefinition : this.filterDefinitions) {
+        List<FilterDefinition> filterDefinitions = new ArrayList<FilterDefinition>();
+        for (FilterDefinition persistableFilterDefinition : this.filterDefinitions) {
             filterDefinitions.add(persistableFilterDefinition.clone());
             replacementMap.put(persistableFilterDefinition.getField().getAnalysisItemID(), persistableFilterDefinition.getField().clone());
         }
@@ -383,7 +383,7 @@ public class AnalysisDefinition implements Cloneable {
             }
             analysisItem.updateIDs(replacementMap);
         }
-        for (PersistableFilterDefinition filter : filterDefinitions) {
+        for (FilterDefinition filter : filterDefinitions) {
             filter.updateIDs(replacementMap);
         }
         analysisDefinitionState.updateIDs(replacementMap);
@@ -428,6 +428,7 @@ public class AnalysisDefinition implements Cloneable {
             }
         }
         analysisDefinition.setName(title);
+        analysisDefinition.setFilterDefinitions(filterDefinitions);
         analysisDefinition.setFilterDefinitions(FilterDefinitionConverter.fromPersistableFilters(filterDefinitions));
         analysisDefinition.setPolicy(analysisPolicy);
         analysisDefinition.setRootDefinition(rootDefinition);

@@ -137,13 +137,20 @@ public class TagStorage {
         return 0;
     }
 
-    public List<Tag> getTags(Integer limit) {
+    public List<Tag> getTags(Integer limit, boolean solution) {
         List<Tag> tags = new ArrayList<Tag>();
         Connection conn = Database.instance().getConnection();
         try {
-            PreparedStatement queryTagsStmt = conn.prepareStatement("SELECT TAG, COUNT(TAG) AS TAG_COUNT FROM ANALYSIS_TAGS, FEED_TO_TAG, ANALYSIS_TO_TAG, DATA_FEED, ANALYSIS WHERE " +
+            PreparedStatement queryTagsStmt;
+            if (solution) {
+                queryTagsStmt = conn.prepareStatement("SELECT TAG, COUNT(TAG) AS TAG_COUNT FROM ANALYSIS_TAGS, ANALYSIS_TO_TAG, ANALYSIS WHERE " +
+                    "(ANALYSIS_TAGS.ANALYSIS_TAGS_ID = ANALYSIS_TO_TAG.ANALYSIS_TAGS_ID AND ANALYSIS_TO_TAG.ANALYSIS_ID = ANALYSIS.ANALYSIS_ID AND ANALYSIS.SOLUTION_VISIBLE = ?) " +
+                    "GROUP BY TAG ORDER BY TAG_COUNT");
+            } else {
+                queryTagsStmt = conn.prepareStatement("SELECT TAG, COUNT(TAG) AS TAG_COUNT FROM ANALYSIS_TAGS, ANALYSIS_TO_TAG, ANALYSIS WHERE " +
                     "(ANALYSIS_TAGS.ANALYSIS_TAGS_ID = ANALYSIS_TO_TAG.ANALYSIS_TAGS_ID AND ANALYSIS_TO_TAG.ANALYSIS_ID = ANALYSIS.ANALYSIS_ID AND ANALYSIS.MARKETPLACE_VISIBLE = ?) " +
                     "GROUP BY TAG ORDER BY TAG_COUNT");
+            }
             queryTagsStmt.setBoolean(1, true);            
             ResultSet rs = queryTagsStmt.executeQuery();
             while (rs.next()) {
@@ -160,7 +167,7 @@ public class TagStorage {
             LogClass.error(e);
             throw new RuntimeException(e);
         } finally {
-            Database.instance().closeConnection(conn);
+            Database.closeConnection(conn);
         }
         if (limit != null) {
             Collections.sort(tags, new Comparator<Tag> () {

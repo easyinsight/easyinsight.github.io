@@ -222,9 +222,9 @@ public class FeedService implements IDataFeedService {
         }
     }
 
-    public List<Tag> getAllFeedTags() {
+    public List<Tag> getAllFeedTags(boolean solution) {
         try {
-            return new TagStorage().getTags(20);
+            return new TagStorage().getTags(20, solution);
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);

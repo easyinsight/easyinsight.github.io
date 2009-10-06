@@ -16,4 +16,5 @@ public interface AggregationTypes {
 
     public static final int DELTA = 8;
     public static final int LAST_VALUE = 9;
+    public static final int PERCENT_CHANGE = 10;
 }

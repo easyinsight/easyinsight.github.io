@@ -163,10 +163,10 @@ public class AnalysisStorage {
         }
         analysisDefinition.setDateUpdated(new Date());
         if (analysisDefinition.getFilterDefinitions() != null) {
-            for (PersistableFilterDefinition filter : analysisDefinition.getFilterDefinitions()) {
-                if (filter instanceof PersistableValueFilterDefinition) {
-                    PersistableValueFilterDefinition valueFilter = (PersistableValueFilterDefinition) filter;
-                    for (PersistableValue persistableValue : valueFilter.getFilterValues()) {
+            for (FilterDefinition filter : analysisDefinition.getFilterDefinitions()) {
+                if (filter instanceof FilterValueDefinition) {
+                    FilterValueDefinition valueFilter = (FilterValueDefinition) filter;
+                    for (PersistableValue persistableValue : valueFilter.getPersistedValues()) {
                         session.saveOrUpdate(persistableValue);
                     }
                 }

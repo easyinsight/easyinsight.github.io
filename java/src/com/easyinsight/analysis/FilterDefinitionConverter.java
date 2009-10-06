@@ -9,22 +9,24 @@ import java.util.ArrayList;
  * Time: 1:52:43 PM
  */
 public class FilterDefinitionConverter {
-    public static List<FilterDefinition> fromPersistableFilters(List<PersistableFilterDefinition> persistableFilterDefinitions) {
+    public static List<FilterDefinition> fromPersistableFilters(List<FilterDefinition> persistableFilterDefinitions) {
         List<FilterDefinition> filterDefinitions = new ArrayList<FilterDefinition>();
         if (persistableFilterDefinitions != null) {
-            for (PersistableFilterDefinition persistableFilterDefinition : persistableFilterDefinitions) {
+            for (FilterDefinition persistableFilterDefinition : persistableFilterDefinitions) {
+                persistableFilterDefinition.afterLoad();
                 persistableFilterDefinition.getField().afterLoad();
-                filterDefinitions.add(persistableFilterDefinition.toFilterDefinition());
+                filterDefinitions.add(persistableFilterDefinition);
             }
         }
         return filterDefinitions;
     }
 
-    public static List<PersistableFilterDefinition> fromFilters(List<FilterDefinition> filterDefinitions) {
-        List<PersistableFilterDefinition> persistableFilterDefinitions = new ArrayList<PersistableFilterDefinition>();
+    public static List<FilterDefinition> fromFilters(List<FilterDefinition> filterDefinitions) {
+        List<FilterDefinition> persistableFilterDefinitions = new ArrayList<FilterDefinition>();
         if (filterDefinitions != null) {
             for (FilterDefinition filterDefinition : filterDefinitions) {
-                persistableFilterDefinitions.add(filterDefinition.toPersistableFilterDefinition());
+                filterDefinition.beforeSave();
+                persistableFilterDefinitions.add(filterDefinition);
             }
         }
         return persistableFilterDefinitions;

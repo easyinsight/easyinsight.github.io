@@ -31,7 +31,8 @@ public class PercentDeltaTemporalAggregation extends TemporalAggregation impleme
             Double newValue = value.toDouble();
             if (newValue != null) {
                 Double delta = newValue - previousValue;
-                values.put(position, new NumericValue(delta));
+                Double changed = delta / previousValue * 100;
+                values.put(position, new NumericValue(changed));
                 previousValue = newValue;
             }
         }

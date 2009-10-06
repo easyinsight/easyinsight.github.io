@@ -20,17 +20,6 @@ public class LastNFilterDefinition extends FilterDefinition {
         this.limit = limit;
     }
 
-    public PersistableFilterDefinition toPersistableFilterDefinition() {
-        PersistableLastNFilterDefinition filter = new PersistableLastNFilterDefinition();
-        filter.setEnabled(isEnabled());
-        filter.setIntrinsic(isIntrinsic());
-        filter.setFilterId(getFilterID());
-        filter.setField(getField());
-        filter.setApplyBeforeAggregation(isApplyBeforeAggregation());
-        filter.setLimit(limit);
-        return filter;
-    }
-
     public MaterializedFilterDefinition materialize(InsightRequestMetadata insightRequestMetadata) {
         return new MaterializedLastNFilterDefinition(getField(), limit);
     }

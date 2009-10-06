@@ -2,10 +2,8 @@ package com.easyinsight.analysis;
 
 import com.easyinsight.core.*;
 
-import java.util.List;
-import java.util.Set;
-import java.util.HashSet;
-import java.util.Date;
+import javax.persistence.*;
+import java.util.*;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
@@ -14,9 +12,19 @@ import java.sql.SQLException;
  * Date: Jul 8, 2008
  * Time: 2:57:56 PM
  */
+@Entity
+@Table(name="value_based_filter")
+@PrimaryKeyJoinColumn(name="filter_id")
 public class FilterValueDefinition extends FilterDefinition {
+    @Column(name="inclusive")
     private boolean inclusive;
+    @Transient
     private List<Object> filteredValues;
+    @OneToMany(cascade= CascadeType.ALL)
+    @JoinTable(name="filter_to_value",
+               joinColumns=@JoinColumn(name="filter_id"),
+               inverseJoinColumns=@JoinColumn(name="value_id"))
+    private Set<PersistableValue> persistedValues;
 
     public FilterValueDefinition() {        
     }
@@ -25,6 +33,14 @@ public class FilterValueDefinition extends FilterDefinition {
         super(field);
         this.inclusive = inclusive;
         this.filteredValues = filteredValues;
+    }
+
+    public Set<PersistableValue> getPersistedValues() {
+        return persistedValues;
+    }
+
+    public void setPersistedValues(Set<PersistableValue> persistedValues) {
+        this.persistedValues = persistedValues;
     }
 
     public boolean isInclusive() {
@@ -43,14 +59,17 @@ public class FilterValueDefinition extends FilterDefinition {
         this.filteredValues = filteredValues;
     }
 
-    public PersistableFilterDefinition toPersistableFilterDefinition() {
-        PersistableValueFilterDefinition persistableFilterDefinition = new PersistableValueFilterDefinition();
-        persistableFilterDefinition.setEnabled(isEnabled());
-        persistableFilterDefinition.setIntrinsic(isIntrinsic());
-        persistableFilterDefinition.setFilterId(getFilterID());
-        persistableFilterDefinition.setInclusive(inclusive);
-        persistableFilterDefinition.setApplyBeforeAggregation(isApplyBeforeAggregation());
-        persistableFilterDefinition.setField(getField());
+    public FilterDefinition clone() throws CloneNotSupportedException {
+        FilterValueDefinition filter = (FilterValueDefinition) super.clone();
+        Set<PersistableValue> values = new HashSet<PersistableValue>();
+        for (PersistableValue value : persistedValues) {
+            values.add(value.clone());
+        }
+        filter.setPersistedValues(values);
+        return filter;
+    }
+
+    public void beforeSave() {
         Set<Value> valueSet = new HashSet<Value>();
         for (Object valueObject : filteredValues) {
             Value value;
@@ -68,8 +87,15 @@ public class FilterValueDefinition extends FilterDefinition {
             valueSet.add(value);
         }
         Set<PersistableValue> filterDefinitionValues = PersistableValueFactory.fromValue(valueSet);
-        persistableFilterDefinition.setFilterValues(filterDefinitionValues);
-        return persistableFilterDefinition;
+        setPersistedValues(filterDefinitionValues);
+    }
+
+    public void afterLoad() {
+        List<Object> values = new ArrayList<Object>();
+        for (PersistableValue filterDefinitionValue : getPersistedValues()) {
+            values.add(filterDefinitionValue.toValue());
+        }
+        setFilteredValues(values);
     }
 
     public String toQuerySQL(String tableName) {

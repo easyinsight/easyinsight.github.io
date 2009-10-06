@@ -27,8 +27,13 @@ import mx.rpc.events.FaultEvent;
 		private var button:Button;
 		private var lastButton:LinkButton;
 		private var currentTag:String;
-		
-		public function TagListing()
+        private var _solution:Boolean = false;
+
+        public function set solution(value:Boolean):void {
+            _solution = value;
+        }
+
+        public function TagListing()
 		{
 			feedService = new RemoteObject();
 			feedService.destination = "feeds";
@@ -50,7 +55,7 @@ import mx.rpc.events.FaultEvent;
 		public function refresh(tag:String):void {
 			this.currentTag = tag;
 			if (tag == null) {
-				feedService.getAllFeedTags.send();
+				feedService.getAllFeedTags.send(_solution);
 			} else {
 				
 			}

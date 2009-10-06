@@ -1,19 +1,32 @@
 package com.easyinsight.analysis;
 
+import javax.persistence.*;
 import java.io.Serializable;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.Map;
 
 /**
  * User: James Boe
  * Date: Jan 12, 2008
  * Time: 9:47:18 PM
  */
+@Entity
+@Table(name="filter")
+@Inheritance(strategy= InheritanceType.JOINED)
 public abstract class FilterDefinition implements Serializable {
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name="analysis_item_id")
     private AnalysisItem field;
+    @Column(name="apply_before_aggregation")
     private boolean applyBeforeAggregation = true;
+    @Id
+    @GeneratedValue(strategy= GenerationType.IDENTITY)
+    @Column(name="filter_id")
     private long filterID;
+    @Column(name="intrinsic")
     private boolean intrinsic;
+    @Column(name="enabled")
     private boolean enabled = true; 
 
     public FilterDefinition() {
@@ -63,8 +76,6 @@ public abstract class FilterDefinition implements Serializable {
         this.applyBeforeAggregation = applyBeforeAggregation;
     }
 
-    public abstract PersistableFilterDefinition toPersistableFilterDefinition();
-
     public abstract MaterializedFilterDefinition materialize(InsightRequestMetadata insightRequestMetadata);
 
     public abstract String toQuerySQL(String tableName);
@@ -73,5 +84,23 @@ public abstract class FilterDefinition implements Serializable {
 
     public boolean validForQuery() {
         return enabled;
+    }
+
+    public FilterDefinition clone() throws CloneNotSupportedException {
+        FilterDefinition filter = (FilterDefinition) super.clone();
+        filter.setFilterID(0);
+        return filter;
+    }
+
+    public void updateIDs(Map<Long, AnalysisItem> replacementMap) {
+        setField(replacementMap.get(field.getAnalysisItemID()));
+    }
+
+    public void beforeSave() {
+
+    }
+
+    public void afterLoad() {
+        
     }
 }

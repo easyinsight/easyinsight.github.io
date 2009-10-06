@@ -1,5 +1,9 @@
 package com.easyinsight.analysis;
 
+import javax.persistence.Entity;
+import javax.persistence.Table;
+import javax.persistence.PrimaryKeyJoinColumn;
+import javax.persistence.Column;
 import java.util.Date;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -9,9 +13,15 @@ import java.sql.SQLException;
  * Date: Jul 8, 2008
  * Time: 2:24:20 PM
  */
+@Entity
+@Table(name="date_range_filter")
+@PrimaryKeyJoinColumn(name="filter_id")
 public class FilterDateRangeDefinition extends FilterDefinition {
+    @Column(name="low_value")
     private Date startDate;
+    @Column(name="high_value")
     private Date endDate;
+    @Column(name="sliding")
     private boolean sliding;
 
     public boolean isSliding() {
@@ -36,19 +46,6 @@ public class FilterDateRangeDefinition extends FilterDefinition {
 
     public void setEndDate(Date endDate) {
         this.endDate = endDate;
-    }
-
-    public PersistableFilterDefinition toPersistableFilterDefinition() {
-        PersistableDateRangeFilterDefinition date = new PersistableDateRangeFilterDefinition();
-        date.setFilterId(getFilterID());
-        date.setEnabled(isEnabled());
-        date.setApplyBeforeAggregation(isApplyBeforeAggregation());
-        date.setField(getField());
-        date.setLowDate(getStartDate());
-        date.setHighDate(getEndDate());
-        date.setIntrinsic(isIntrinsic());
-        date.setSliding(isSliding());
-        return date;
     }
 
     public MaterializedFilterDefinition materialize(InsightRequestMetadata insightRequestMetadata) {
