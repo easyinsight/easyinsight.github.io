@@ -54,6 +54,7 @@
 
         import mx.collections.ArrayCollection;
         import mx.controls.Alert;
+        import mx.core.Application;
         import mx.core.Container;
         import mx.formatters.DateFormatter;
         import mx.formatters.NumberFormatter;
@@ -354,6 +355,7 @@
         private function toFullScreen():void {
             Alert.show("You can return to normal view by hitting Escape.");
             addEventListener(KeyboardEvent.KEY_UP, onKey);
+            Application.application.stage.displayState = StageDisplayState.FULL_SCREEN;
             currentState = "FullScreen";
         }
 
