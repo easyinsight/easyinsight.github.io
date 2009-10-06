@@ -166,14 +166,14 @@ import mx.managers.ToolTipManager;
 			super.measure();			
 			var childrenHeight:int = 0;
 			var childrenWidth:int = 0;
-			/*if (!noFilters) {
+			if (!noFilters) {
 				childrenHeight = filterTile.viewMetricsAndPadding.top + filterTile.viewMetricsAndPadding.bottom + filterTile.measuredHeight +
 					this.viewMetricsAndPadding.top + this.viewMetricsAndPadding.bottom;
 				childrenWidth = filterTile.viewMetricsAndPadding.left + filterTile.viewMetricsAndPadding.right + filterTile.measuredWidth +
 					this.viewMetricsAndPadding.left + this.viewMetricsAndPadding.right;
 				measuredHeight = Math.max(measuredHeight, childrenHeight);
-				measuredWidth = Math.max(measuredWidth, childrenWidth);
-			}		*/
+				measuredWidth = Math.max(measuredWidth, childrenWidth);				
+			}		
 			/*for each (var obj:UIComponent in getChildren()) {
 				if (obj is Container) {
 					childrenHeight += Container(obj).viewMetricsAndPadding.top + Container(obj).viewMetricsAndPadding.bottom + obj.height;					
