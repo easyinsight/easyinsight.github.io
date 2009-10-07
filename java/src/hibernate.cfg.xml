@@ -61,6 +61,7 @@
         <mapping class="com.easyinsight.analysis.FilterValueDefinition"/>
         <mapping class="com.easyinsight.analysis.FilterRangeDefinition"/>
         <mapping class="com.easyinsight.analysis.FilterDateRangeDefinition"/>
+        <mapping class="com.easyinsight.analysis.FilterPatternDefinition"/>
         <mapping class="com.easyinsight.analysis.RollingFilterDefinition"/>
         <mapping class="com.easyinsight.analysis.FilterDefinitionValue"/>
         <mapping class="com.easyinsight.analysis.AnalysisItem"/>
