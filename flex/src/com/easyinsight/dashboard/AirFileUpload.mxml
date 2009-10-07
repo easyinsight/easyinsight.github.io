@@ -13,7 +13,7 @@
                     <mx:Label text="Your data has been sent to Easy Insight."/>
                     <mx:LinkButton label="Click to View the Data" click="viewData()"/>
                     <mx:Button label="Close Window" click="closeWindow()"/>
-                </mx:Box>
+                </mx:VBox>
             </mx:AddChild>
         </mx:State>
     </mx:states>

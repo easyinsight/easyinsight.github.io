@@ -23,6 +23,24 @@ public class InsightRequestMetadata implements Serializable {
     private int version;
     private List<CredentialFulfillment> credentialFulfillmentList = new ArrayList<CredentialFulfillment>();
     private boolean refreshAllSources;
+    private boolean noCache;
+    private List<HierarchyOverride> hierarchyOverrides = new ArrayList<HierarchyOverride>();
+
+    public List<HierarchyOverride> getHierarchyOverrides() {
+        return hierarchyOverrides;
+    }
+
+    public void setHierarchyOverrides(List<HierarchyOverride> hierarchyOverrides) {
+        this.hierarchyOverrides = hierarchyOverrides;
+    }
+
+    public boolean isNoCache() {
+        return noCache;
+    }
+
+    public void setNoCache(boolean noCache) {
+        this.noCache = noCache;
+    }
 
     @Nullable
     public Credentials getCredentialForDataSource(long dataSourceID) {

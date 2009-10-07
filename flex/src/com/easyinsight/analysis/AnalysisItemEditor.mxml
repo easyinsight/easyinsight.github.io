@@ -131,6 +131,9 @@
         [Bindable]
         private var hidden:Boolean;
 
+        [Bindable]
+        private var highGood:String;
+
         public function set fieldNameEditable(fieldNameEditable:Boolean):void {
             _fieldNameEditable = fieldNameEditable;
         }
@@ -158,6 +161,7 @@
             this.key = analysisItem.key;
             this.hidden = analysisItem.hidden;
             this.links = analysisItem.links;
+            this.highGood = analysisItem.highIsGood ? "yes" : "no";
         }
 
         private function indexOfType(option:String):int {
@@ -235,6 +239,7 @@
             analysisItem.key = key;
             analysisItem.hidden = hiddenCheckbox.selected;
             analysisItem.links = links;
+            analysisItem.highIsGood = highGroup.selectedValue == "yes";
             detailEditor.save(analysisItem);
             dispatchEvent(new AnalysisItemSaveEvent(analysisItem));
             return analysisItem;
@@ -335,6 +340,11 @@
             </mx:FormItem>
             <mx:FormItem label="Hidden: " direction="horizontal" id="hiddenText">
                 <mx:CheckBox id="hiddenCheckbox" selected="{hidden}"/>
+            </mx:FormItem>
+            <mx:FormItem label="Are high values good?" direction="horizontal">
+                <mx:RadioButtonGroup id="highGroup" selectedValue="{highGood}"/>
+                <mx:RadioButton group="{highGroup}" label="Yes" value="yes"/>
+                <mx:RadioButton group="{highGroup}" label="No" value="no"/>
             </mx:FormItem>
             <mx:FormItem label="Field Type: " direction="horizontal" id="firstForm">
                 <mx:ComboBox id="aggregationBox" dataProvider="{aggregationTypeObjects}"

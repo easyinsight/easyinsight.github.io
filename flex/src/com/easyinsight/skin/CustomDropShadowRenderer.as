@@ -1,14 +1,10 @@
 package com.easyinsight.skin {
-import com.easyinsight.analysis.AnalysisHierarchyItem;
+
 import com.easyinsight.analysis.AnalysisItem;
-import com.easyinsight.analysis.PopupMenuFactory;
-import com.easyinsight.analysis.charts.ChartDrilldownEvent;
-import com.easyinsight.pseudocontext.PseudoContextWindow;
+
 
 import flash.display.Graphics;
-import flash.events.ContextMenuEvent;
-import flash.events.Event;
-import flash.events.MouseEvent;
+
 import flash.geom.Rectangle;
 import mx.charts.ChartItem;
 import mx.charts.chartClasses.GraphicsUtilities;
@@ -17,16 +13,16 @@ import mx.core.UIComponent;
 import mx.graphics.BitmapFill;
 import mx.graphics.IFill;
 import mx.graphics.IStroke;
-import mx.managers.PopUpManager;
+
 
 public class CustomDropShadowRenderer extends UIComponent implements IDataRenderer {
 
     private static var rcFill:Rectangle = new Rectangle();
 
 
-    private var _selectedFill:Class;
+    // private var _selectedFill:Class;
 
-    private var _rolloverFill:Class;
+    // private var _rolloverFill:Class;
 
     private var _analysisItem:AnalysisItem;
 
@@ -35,26 +31,20 @@ public class CustomDropShadowRenderer extends UIComponent implements IDataRender
     }
 
     public function set selectedFill(val:Class):void {
-        _selectedFill = val;
-        bgFill = new BitmapFill();
-        bgFill.source = _selectedFill;
-    }
-
-    public function set rolloverFill(val:Class):void {
-        _rolloverFill = val;
-        darkWaterFill = new BitmapFill();
-        darkWaterFill.source = _rolloverFill;
+        //_selectedFill = val;
+        //bgFill = new BitmapFill();
+        //bgFill.source = _selectedFill;
     }
 
     private var bgFill:BitmapFill;
-    private var darkWaterFill:BitmapFill;
+
 
     public function CustomDropShadowRenderer() {
         super();
-        addEventListener(MouseEvent.CLICK, onClick);
+        //addEventListener(MouseEvent.CLICK, onClick);
     }
 
-    private function onClick(event:MouseEvent):void {if (event.shiftKey) {
+    /*private function onClick(event:MouseEvent):void {if (event.shiftKey) {
             var window:PseudoContextWindow = new PseudoContextWindow(_analysisItem, passThrough, this);
             window.data = this.data;
             PopUpManager.addPopUp(window, this);
@@ -73,7 +63,7 @@ public class CustomDropShadowRenderer extends UIComponent implements IDataRender
 
     public function onRollup(event:ContextMenuEvent):void {
         dispatchEvent(new ChartDrilldownEvent(ChartDrilldownEvent.ROLLUP, _data as ChartItem));
-    }
+    }*/
 
     /**
 	 *  @private
@@ -147,7 +137,7 @@ public class CustomDropShadowRenderer extends UIComponent implements IDataRender
 
 		var adjustedRadius:Number = 0;
 		
-		switch(state)
+		/*switch(state)
 		{
 			case ChartItem.FOCUSED:
 			case ChartItem.ROLLOVER:
@@ -156,13 +146,13 @@ public class CustomDropShadowRenderer extends UIComponent implements IDataRender
 				if(!adjustedRadius)
 					adjustedRadius = 0;
 				break;
-			/*case ChartItem.DISABLED:
+			case ChartItem.DISABLED:
 				if(StyleManager.isValidStyleValue(getStyle('itemDisabledColor')))
 					color = getStyle('itemDisabledColor');
 				else
 					color = ColorUtil.adjustBrightness2(GraphicsUtilities.colorFromFill(fill),20);
 				fill = new SolidColor(GraphicsUtilities.colorFromFill(color));
-				break;*/
+				break;
 			case ChartItem.FOCUSEDSELECTED:
 			case ChartItem.SELECTED:
 				fill = darkWaterFill;
@@ -170,7 +160,7 @@ public class CustomDropShadowRenderer extends UIComponent implements IDataRender
 				if(!adjustedRadius)
 					adjustedRadius = 0;
 				break;
-		}
+		}*/
 
 		var stroke:IStroke = getStyle("stroke");
 

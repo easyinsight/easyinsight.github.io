@@ -10,11 +10,20 @@ import com.easyinsight.analysis.IReportControlBar;
 import com.easyinsight.analysis.ListDropAreaGrouping;
 import com.easyinsight.analysis.MeasureDropArea;
 import com.easyinsight.analysis.ReportDataEvent;
+
+import com.easyinsight.analysis.charts.ChartDefinitionEditWindow;
+import com.easyinsight.util.PopUpUtil;
+
+import flash.events.MouseEvent;
+
 import mx.binding.utils.BindingUtils;
 import mx.collections.ArrayCollection;
 import mx.containers.HBox;
 import mx.controls.Label;
+import mx.controls.LinkButton;
 import mx.events.FlexEvent;
+import mx.managers.PopUpManager;
+
 public class PlotChartControlBar extends HBox implements IReportControlBar  {
 
     private var dimensionGrouping:ListDropAreaGrouping;
@@ -78,9 +87,23 @@ public class PlotChartControlBar extends HBox implements IReportControlBar  {
         if (xAxisDefinition.yaxisMeasure != null) {
             ymeasureGrouping.addAnalysisItem(xAxisDefinition.yaxisMeasure);
         }
-        var limitLabel:Label = new Label();
-        BindingUtils.bindProperty(limitLabel, "text", this, "limitText");
+        var limitLabel:LinkButton = new LinkButton();
+        limitLabel.setStyle("textDecoration", "underline");
+        limitLabel.addEventListener(MouseEvent.CLICK, editLimits);
+        BindingUtils.bindProperty(limitLabel, "label", this, "limitText");
         addChild(limitLabel);
+    }
+
+    private function editLimits(event:MouseEvent):void {
+        var window:ChartDefinitionEditWindow = new ChartDefinitionEditWindow();
+        window.chartDefinition = xAxisDefinition;
+        window.addEventListener(AnalysisItemUpdateEvent.ANALYSIS_LIST_UPDATE, onUpdate);
+        PopUpManager.addPopUp(window, this, true);
+        PopUpUtil.centerPopUp(window);
+    }
+
+    private function onUpdate(event:AnalysisItemUpdateEvent):void {
+        dispatchEvent(new ReportDataEvent(ReportDataEvent.REQUEST_DATA));
     }
 
     private var _limitText:String;

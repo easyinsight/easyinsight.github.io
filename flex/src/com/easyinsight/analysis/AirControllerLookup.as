@@ -14,7 +14,12 @@ import com.easyinsight.analysis.charts.yaxisbased.bar.BarChartEmbeddedController
 import com.easyinsight.analysis.crosstab.CrosstabEmbeddedController;
 import com.easyinsight.analysis.gauge.GaugeEmbeddedController;
 import com.easyinsight.analysis.list.ListEmbeddedController;
-import com.easyinsight.analysis.maps.MapEmbeddedController;
+import com.easyinsight.analysis.maps.AmericasMapEmbeddedController;
+import com.easyinsight.analysis.maps.AsiaMapEmbeddedController;
+import com.easyinsight.analysis.maps.EuropeMapEmbeddedController;
+import com.easyinsight.analysis.maps.MiddleEastMapEmbeddedController;
+import com.easyinsight.analysis.maps.USMapEmbeddedController;
+import com.easyinsight.analysis.maps.WorldMapEmbeddedController;
 import com.easyinsight.analysis.tree.TreeEmbeddedController;
 import com.easyinsight.analysis.treemap.TreeMapEmbeddedController;
 
@@ -32,8 +37,23 @@ public class AirControllerLookup {
             case AnalysisDefinition.CROSSTAB:
                 controller = CrosstabEmbeddedController;
                 break;
-            case AnalysisDefinition.MAP:
-                controller = MapEmbeddedController;
+            case AnalysisDefinition.MAP_USA:
+                controller = USMapEmbeddedController;
+                break;
+            case AnalysisDefinition.MAP_EUROPE:
+                controller = EuropeMapEmbeddedController;
+                break;
+            case AnalysisDefinition.MAP_WORLD:
+                controller = WorldMapEmbeddedController;
+                break;
+            case AnalysisDefinition.MAP_ASIA:
+                controller = AsiaMapEmbeddedController;
+                break;
+            case AnalysisDefinition.MAP_AMERICAS:
+                controller = AmericasMapEmbeddedController;
+                break;
+            case AnalysisDefinition.MAP_MIDDLE_EAST:
+                controller = MiddleEastMapEmbeddedController;
                 break;
             case AnalysisDefinition.COLUMN:
                 controller = ColumnChartEmbeddedController;

@@ -157,7 +157,7 @@ public class PseudoContextWindow extends VBox {
         if (index > 0) {
             hierarchyItem.hierarchyLevel = hierarchyItem.hierarchyLevels.getItemAt(index - 1) as HierarchyLevel;
             destroy();
-            passthroughFunction.call(passthroughObject, new HierarchyRollupEvent(hierarchyItem.hierarchyLevel.analysisItem));
+            passthroughFunction.call(passthroughObject, new HierarchyRollupEvent(hierarchyItem.hierarchyLevel.analysisItem, hierarchyItem, index - 1));
         }
     }
 
@@ -171,7 +171,8 @@ public class PseudoContextWindow extends VBox {
             filterRawData.addPair(hierarchyItem.hierarchyLevel.analysisItem, dataString);
             hierarchyItem.hierarchyLevel = hierarchyItem.hierarchyLevels.getItemAt(index + 1) as HierarchyLevel;
             destroy();
-            passthroughFunction.call(passthroughObject, new HierarchyDrilldownEvent(HierarchyDrilldownEvent.DRILLDOWN, filterRawData));
+            passthroughFunction.call(passthroughObject, new HierarchyDrilldownEvent(HierarchyDrilldownEvent.DRILLDOWN, filterRawData,
+                    hierarchyItem, index + 1));
         }
     }
 

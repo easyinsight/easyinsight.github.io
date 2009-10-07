@@ -18,7 +18,8 @@ package com.easyinsight.analysis.options
 		public static const RANGE:String = "Range";
 		public static const DATE:String = "Date";
 		public static const LIST:String = "Tags";
-		
+		public static const MEASURE_GROUPING:String = "Measure Grouping";
+
 		public function OptionTypeNames()
 		{
 		}

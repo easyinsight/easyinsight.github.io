@@ -1,5 +1,6 @@
 package com.easyinsight.analysis.service {
 
+import com.easyinsight.analysis.AnalysisDefinition;
 import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.analysis.EmbeddedDataResults;
 import com.easyinsight.analysis.EmbeddedDataServiceEvent;
@@ -69,11 +70,14 @@ public class EmbeddedDataService extends EventDispatcher implements IEmbeddedDat
         dispatchEvent(new DataServiceLoadingEvent(DataServiceLoadingEvent.LOADING_STOPPED));
     }
 
-    public function retrieveData(reportID:int, dataSourceID:int, filters:ArrayCollection, refreshAll:Boolean, drillthroughFilters:ArrayCollection):void {
+    public function retrieveData(reportID:int, dataSourceID:int, filters:ArrayCollection, refreshAll:Boolean, drillthroughFilters:ArrayCollection,
+            noCache:Boolean, hierarchyOverrides:ArrayCollection):void {
         dispatchEvent(new DataServiceLoadingEvent(DataServiceLoadingEvent.LOADING_STARTED));
         var insightRequestMetadata:InsightRequestMetadata = new InsightRequestMetadata();
         insightRequestMetadata.refreshAllSources = refreshAll;
         insightRequestMetadata.credentialFulfillmentList = CredentialsCache.getCache().createCredentials();
+        insightRequestMetadata.noCache = noCache;
+        insightRequestMetadata.hierarchyOverrides = hierarchyOverrides;
         dataRemoteSource.getEmbeddedResults.send(reportID, dataSourceID, filters, insightRequestMetadata, drillthroughFilters);
     }
 }

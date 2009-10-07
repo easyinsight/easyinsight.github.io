@@ -59,9 +59,18 @@ import mx.managers.ToolTipManager;
         _filterEditable = value;
     }
 
+    private var blah:Boolean = false;
 
     public function set existingFilters(value:ArrayCollection):void {
-        _filterDefinitions = value;
+        if (!blah && value != null) {
+            blah = true;
+            _filterDefinitions = value;
+            if (value != null) {
+                for each (var filterDefinition:FilterDefinition in _filterDefinitions) {
+                    addFilterDefinition(filterDefinition);
+                }
+            }
+        }
     }
 
     public function clearFilter(item:AnalysisItem):void {
@@ -166,14 +175,14 @@ import mx.managers.ToolTipManager;
 			super.measure();			
 			var childrenHeight:int = 0;
 			var childrenWidth:int = 0;
-			if (!noFilters) {
+			/*if (!noFilters) {
 				childrenHeight = filterTile.viewMetricsAndPadding.top + filterTile.viewMetricsAndPadding.bottom + filterTile.measuredHeight +
 					this.viewMetricsAndPadding.top + this.viewMetricsAndPadding.bottom;
 				childrenWidth = filterTile.viewMetricsAndPadding.left + filterTile.viewMetricsAndPadding.right + filterTile.measuredWidth +
 					this.viewMetricsAndPadding.left + this.viewMetricsAndPadding.right;
 				measuredHeight = Math.max(measuredHeight, childrenHeight);
-				measuredWidth = Math.max(measuredWidth, childrenWidth);				
-			}		
+				measuredWidth = Math.max(measuredWidth, childrenWidth);
+			}		*/
 			/*for each (var obj:UIComponent in getChildren()) {
 				if (obj is Container) {
 					childrenHeight += Container(obj).viewMetricsAndPadding.top + Container(obj).viewMetricsAndPadding.bottom + obj.height;					

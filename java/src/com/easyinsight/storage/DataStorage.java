@@ -538,7 +538,7 @@ public class DataStorage {
         if (filters.size() > 0) {
             int i = 1;
             for (FilterDefinition filterDefinition : filters) {
-                KeyMetadata keyMetadata = keys.get(filterDefinition.getField().getKey());
+                KeyMetadata keyMetadata = keys.get(filterDefinition.getField().getKey().toBaseKey());
                 int type = keyMetadata.type;
                 i = filterDefinition.populatePreparedStatement(queryStmt, i, type, insightRequestMetadata);
             }

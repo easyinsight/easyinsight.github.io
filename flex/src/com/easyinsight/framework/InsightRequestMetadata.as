@@ -12,6 +12,8 @@ import mx.collections.ArrayCollection;
         public var version:int;
         public var credentialFulfillmentList:ArrayCollection;
         public var refreshAllSources:Boolean;
+        public var noCache:Boolean;
+        public var hierarchyOverrides:ArrayCollection;
 		
 		public function InsightRequestMetadata()
 		{

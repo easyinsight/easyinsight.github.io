@@ -4,6 +4,7 @@ package com.easyinsight.analysis {
 public class HierarchyLevel {
     public var hierarchyLevelID:int;
     public var analysisItem:AnalysisItem;
+    public var position:int;
 
     public function HierarchyLevel() {
 

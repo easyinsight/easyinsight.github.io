@@ -12,15 +12,6 @@
             <mx:RemoveChild target="{hrule}"/>
             <mx:RemoveChild target="{reportMetadata}"/>
         </mx:State>
-        <mx:State name="Filtering">
-            <mx:AddChild relativeTo="{transformBox}">
-                <filtering:TransformContainer id="transformContainer" filterEditable="false"
-                                              existingFilters="{filterDefinitions}"
-                                              updatedTransforms="transformsUpdated(event)" width="100%" paddingLeft="10"
-                                              paddingTop="10" paddingBottom="10"
-                                              paddingRight="10" feedID="{_dataSourceID}"/>
-            </mx:AddChild>
-        </mx:State>
     </easyinsight:states>
     <mx:Script><![CDATA[
         import com.easyinsight.LoginDialog;
@@ -43,6 +34,7 @@
         import com.easyinsight.filtering.TransformsUpdatedEvent;
         import com.easyinsight.framework.CredentialsCache;
         import com.easyinsight.framework.DataServiceLoadingEvent;
+        import com.easyinsight.framework.HierarchyOverride;
         import com.easyinsight.framework.User;
         import com.easyinsight.genredata.ModuleAnalyzeEvent;
 
@@ -109,6 +101,7 @@
         }
 
         private function onCreation():void {
+            // initializeTransformContainer();
             commandProcessor = new CommandProcessor();
             addEventListener(CommandEvent.COMMAND, onCommand);
             addEventListener(HierarchyDrilldownEvent.DRILLDOWN, childFilterCreation);
@@ -117,10 +110,19 @@
         }
 
         private function onRollup(event:HierarchyRollupEvent):void {
+            var overrideObj:HierarchyOverride = new HierarchyOverride();
+            overrideObj.analysisItemID = event.hierarchy.analysisItemID;
+            overrideObj.position = event.position;
+            viewFactory.addOverride(overrideObj);
             transformContainer.clearFilter(event.analysisItem);
         }
 
         private function childFilterCreation(event:HierarchyDrilldownEvent):void {
+            viewFactory.noCache = true;
+            var overrideObj:HierarchyOverride = new HierarchyOverride();
+            overrideObj.analysisItemID = event.hierarchyItem.analysisItemID;
+            overrideObj.position = event.position;
+            viewFactory.addOverride(overrideObj);
             transformContainer.processRawFilterData(event.filterRawData, event.type == HierarchyDrilldownEvent.DRILLDOWN);
         }
 
@@ -138,8 +140,19 @@
             viewFactory.retrieveData(false);
         }
 
-        [Bindable]
-        private var filterDefinitions:ArrayCollection;
+        private var _filterDefinitions:ArrayCollection;
+
+
+        [Bindable(event="filterDefinitionsChanged")]
+        public function get filterDefinitions():ArrayCollection {
+            return _filterDefinitions;
+        }
+
+        public function set filterDefinitions(value:ArrayCollection):void {
+            if (_filterDefinitions == value) return;
+            _filterDefinitions = value;
+            dispatchEvent(new Event("filterDefinitionsChanged"));
+        }
 
         /*[Bindable]
          private var lastDataTime:String;*/
@@ -222,6 +235,18 @@
 
         private var _parameterFilters:ArrayCollection;
 
+        private var _originReportID:int;
+
+        public function set originReportID(value:int):void {
+            _originReportID = value;
+        }
+
+        private var _originReportScore:int;
+
+        public function set originReportScore(value:int):void {
+            _originReportScore = value;
+        }
+
         public function set parameterFilters(value:ArrayCollection):void {
             _parameterFilters = value;
         }
@@ -236,8 +261,20 @@
 
         private var reportChanged:Boolean;
 
-        [Bindable]
+
         private var _dataSourceID:int;
+
+
+        [Bindable(event="dataSourceIDChanged")]
+        public function get dataSourceID():int {
+            return _dataSourceID;
+        }
+
+        public function set dataSourceID(value:int):void {
+            if (_dataSourceID == value) return;
+            _dataSourceID = value;
+            dispatchEvent(new Event("dataSourceIDChanged"));
+        }
 
         [Bindable]
         private var receivedData:Boolean;
@@ -283,9 +320,7 @@
         }
 
 
-        public function set dataSourceID(value:int):void {
-            _dataSourceID = value;
-        }
+        
 
         private function onCredentials():void {
             viewFactory.retrieveData(false);
@@ -379,11 +414,7 @@
         private var showFilters:Boolean;
 
         private function adjustFilters():void {
-            if (currentState == "" || currentState == null) {
-                currentState = "Filtering";
-            } else {
-                currentState = "";
-            }
+            transformBox.selectedIndex = transformBox.selectedIndex == 0 ? 1 : 0;            
         }
 
         public function getContainer():Container {
@@ -575,7 +606,14 @@
         </mx:HBox>
         <mx:HBox width="100%" height="100%" id="coreBox">
             <mx:VBox id="reportBox" width="100%" height="100%">
-                <mx:Box width="100%" id="transformBox"/>
+                <mx:ViewStack width="100%" id="transformBox" resizeToContent="true" creationPolicy="all">
+                    <mx:Box/>
+                    <filtering:TransformContainer id="transformContainer" filterEditable="false"
+                                              existingFilters="{filterDefinitions}"
+                                              updatedTransforms="transformsUpdated(event)" width="100%" paddingLeft="10"
+                                              paddingTop="10" paddingBottom="10"
+                                              paddingRight="10" feedID="{dataSourceID}"/>
+                </mx:ViewStack>
                 <mx:HBox width="100%" id="addReportBox" horizontalAlign="center" verticalAlign="middle"/>
                 <mx:HRule width="100%" id="hrule"/>
             </mx:VBox>

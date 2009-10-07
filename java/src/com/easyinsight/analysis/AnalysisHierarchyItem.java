@@ -21,7 +21,7 @@ public class AnalysisHierarchyItem extends AnalysisDimension {
     @JoinTable(name="analysis_hierarchy_item_to_hierarchy_level",
         joinColumns = @JoinColumn(name="analysis_item_id", nullable = false),
         inverseJoinColumns = @JoinColumn(name="hierarchy_level_id", nullable = false))
-    private Collection<HierarchyLevel> hierarchyLevels;
+    private List<HierarchyLevel> hierarchyLevels;
 
     public void beforeSave() {
         int i = 0;
@@ -47,11 +47,11 @@ public class AnalysisHierarchyItem extends AnalysisDimension {
         }
     }
 
-    public Collection<HierarchyLevel> getHierarchyLevels() {
+    public List<HierarchyLevel> getHierarchyLevels() {
         return hierarchyLevels;
     }
 
-    public void setHierarchyLevels(Collection<HierarchyLevel> hierarchyLevels) {
+    public void setHierarchyLevels(List<HierarchyLevel> hierarchyLevels) {
         this.hierarchyLevels = hierarchyLevels;
     }
 
@@ -119,5 +119,25 @@ public class AnalysisHierarchyItem extends AnalysisDimension {
                 session.save(analysisItem);
             }
         }
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+
+        AnalysisHierarchyItem that = (AnalysisHierarchyItem) o;
+
+        if (!hierarchyLevel.equals(that.hierarchyLevel)) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = super.hashCode();
+        result = 31 * result + hierarchyLevel.hashCode();
+        return result;
     }
 }

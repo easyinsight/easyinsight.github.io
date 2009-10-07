@@ -10,6 +10,7 @@ public class ListViewGrid extends AdvancedDataGrid {
 
     private var _rowColorFunction:Function;
 
+    public function ListViewGrid() { super(); }
 
     override public function findString(str:String):Boolean {
         return false;

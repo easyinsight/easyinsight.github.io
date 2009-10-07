@@ -25,8 +25,10 @@
                 if (event.item != null && event.item.@controller != null) {
                     event.currentTarget.label= event.label;
                     var controllerClass:Class = ControllerLookup.controllerForType(event.item.@type);
-                    var controller:IReportController = new controllerClass();
-                    dispatchEvent(new AnalysisStateChangeEvent(controller));
+                    if (controllerClass != null) {
+                        var controller:IReportController = new controllerClass();
+                        dispatchEvent(new AnalysisStateChangeEvent(controller));
+                    }
                 }
             }
             

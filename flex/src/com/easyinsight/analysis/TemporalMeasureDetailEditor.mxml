@@ -21,7 +21,13 @@
 
         override public function createAnalysisItem(aggregation:String):AnalysisItem {
             var measure:TemporalAnalysisMeasure = new TemporalAnalysisMeasure();
-            measure.aggregation = aggregation == "Delta" ? AggregationTypes.DELTA : AggregationTypes.LAST_VALUE;
+            if (aggregation == "Delta") {
+                measure.aggregation = AggregationTypes.DELTA;
+            } else if (aggregation == "Last Value") {
+                measure.aggregation = AggregationTypes.LAST_VALUE;
+            } else if (aggregation == "Percent Change") {
+                measure.aggregation = AggregationTypes.PERCENT_CHANGE;
+            }            
             return measure;
         }
 

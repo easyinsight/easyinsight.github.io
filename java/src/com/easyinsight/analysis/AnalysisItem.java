@@ -51,6 +51,9 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
     @Column(name="width")
     private int width;
 
+    @Column(name="high_is_good")
+    private boolean highIsGood;
+
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @JoinTable(name = "analysis_item_to_link",
             joinColumns = @JoinColumn(name = "analysis_item_id", nullable = false),
@@ -99,6 +102,14 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
         } else {
             return displayName;
         }
+    }
+
+    public boolean isHighIsGood() {
+        return highIsGood;
+    }
+
+    public void setHighIsGood(boolean highIsGood) {
+        this.highIsGood = highIsGood;
     }
 
     public int getWidth() {

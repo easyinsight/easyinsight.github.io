@@ -1,34 +1,115 @@
 <?xml version="1.0" encoding="utf-8"?>
-<util:EITitleWindow xmlns:util="com.easyinsight.util.*" xmlns:mx="http://www.adobe.com/2006/mxml">
-	<mx:Form styleName="TitleWindowContents">
-		<mx:FormItem label="Row Numbers: " direction="horizontal">
-			<mx:CheckBox id="rowNumbersOn" selected="{rowNumbersSelected}"/>
-		</mx:FormItem>
-		<mx:FormItem label="Limits: " direction="horizontal">
-			<mx:Form paddingTop="0" paddingLeft="0" paddingRight="0" paddingBottom="0">
-				<mx:FormItem direction="horizontal" label="Enabled: ">
-					<mx:CheckBox id="limitsEnabledCheckbox" click="limitsEnabledCheck()" selected="{limitsEnabled}"/>
-				</mx:FormItem>
-				<mx:FormItem direction="horizontal" label="Field: " enabled="{limitsEnabled}">
-					<mx:ComboBox id="fieldSelectionBox" dataProvider="{availableFields}" labelField="display"/>
-				</mx:FormItem>
-				<mx:FormItem label="Threshold: " direction="horizontal">
-					<mx:ComboBox id="limitsBox" enabled="{limitsEnabled}" close="limitValueChanged()" labelField="name">				
-						<analysis:LimitsEntry name="Top 5" number="5" top="true"/>
-						<analysis:LimitsEntry name="Top 10" number="10" top="true"/>
-						<analysis:LimitsEntry id="topN" name="Top N" top="true"/>
-						<analysis:LimitsEntry name="Bottom 5" number="5" top="false"/>
-						<analysis:LimitsEntry name="Bottom 10" number="10" top="false"/>
-						<analysis:LimitsEntry id="bottomN" name="Bottom N" top="true"/>
-					</mx:ComboBox>
-					<mx:TextInput id="customLimitInput" enabled="{customLimitEnabled}"/>
-				</mx:FormItem>										
-			</mx:Form>		
-		</mx:FormItem>
-		
-		<mx:FormItem label="" direction="horizontal">
-			<mx:Button label="Save" click="save()"/>
-			<mx:Button label="Cancel" click="cancel()"/>
-		</mx:FormItem>			
-	</mx:Form>
+<util:EITitleWindow xmlns:util="com.easyinsight.util.*" xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:analysis="com.easyinsight.analysis.list.*"
+                title="List Configuration">
+    <mx:Script>
+		<![CDATA[
+        import com.easyinsight.analysis.AnalysisItemUpdateEvent;
+
+        import com.easyinsight.analysis.ChartDefinition;
+        import com.easyinsight.analysis.LimitsMetadata;
+        import com.easyinsight.analysis.ListLimitsMetadata;
+
+
+        import mx.managers.PopUpManager;
+
+        private var definition:ChartDefinition;
+
+        [Bindable]
+        private var limitsEnabled:Boolean;
+
+        [Bindable]
+        private var customLimitEnabled:Boolean;
+
+        public function set chartDefinition(chartDefinition:ChartDefinition):void {
+            this.definition = chartDefinition;
+
+
+        }
+
+        override protected function commitProperties():void {
+            super.commitProperties();
+            var existingLimits:LimitsMetadata = definition.limitsMetadata;
+            if (existingLimits != null) {
+                limitsEnabled = true;
+
+                var matchedEntry:LimitsEntry = null;
+                for each (var limitsEntry:LimitsEntry in limitOptions) {
+                    if (limitsEntry.number == existingLimits.number && limitsEntry.top == existingLimits.top) {
+                        matchedEntry = limitsEntry;
+                    }
+                }
+                if (matchedEntry == null) {
+                    customLimitEnabled = true;
+                    if (existingLimits.top) {
+                        matchedEntry = topN;
+                    } else {
+                        matchedEntry = bottomN;
+                    }
+                    customLimitInput.text = String(existingLimits.number);
+                }
+                limitsBox.selectedItem = matchedEntry;
+            }
+        }
+
+        public function save():void {
+
+            var limitsMetadata:ListLimitsMetadata;
+            if (limitsEnabled) {
+                limitsMetadata = new ListLimitsMetadata();
+
+                var limitsEntry:LimitsEntry = limitsBox.selectedItem as LimitsEntry;
+                if (limitsEntry == topN || limitsEntry == bottomN) {
+                    limitsEntry.number = Number(customLimitInput.text);
+                }
+                limitsEntry.toLimitsMetadata(limitsMetadata);
+            }
+            definition.limitsMetadata = limitsMetadata;
+            dispatchEvent(new AnalysisItemUpdateEvent());
+            PopUpManager.removePopUp(this);
+        }
+
+        public function cancel():void {
+            PopUpManager.removePopUp(this);
+        }
+
+        private function limitsEnabledCheck():void {
+            limitsEnabled = limitsEnabledCheckbox.selected;
+        }
+
+        private function limitValueChanged():void {
+            var limitsEntry:LimitsEntry = limitsBox.selectedItem as LimitsEntry;
+            customLimitEnabled = (limitsEntry == topN || limitsEntry == bottomN);
+        }
+		]]>
+    </mx:Script>
+    <mx:ArrayCollection id="limitOptions">
+        <mx:Array>
+            <analysis:LimitsEntry name="Top 5" number="5" top="true"/>
+            <analysis:LimitsEntry name="Top 10" number="10" top="true"/>
+            <analysis:LimitsEntry id="topN" name="Top N" top="true"/>
+            <analysis:LimitsEntry name="Bottom 5" number="5" top="false"/>
+            <analysis:LimitsEntry name="Bottom 10" number="10" top="false"/>
+            <analysis:LimitsEntry id="bottomN" name="Bottom N" top="true"/>
+        </mx:Array>
+    </mx:ArrayCollection>
+    <mx:Form styleName="TitleWindowContents">
+        <mx:FormItem label="Limits: " direction="horizontal">
+            <mx:Form paddingTop="0" paddingLeft="0" paddingRight="0" paddingBottom="0">
+                <mx:FormItem direction="horizontal" label="Enabled: ">
+                    <mx:CheckBox id="limitsEnabledCheckbox" click="limitsEnabledCheck()" selected="{limitsEnabled}"/>
+                </mx:FormItem>
+                <mx:FormItem label="Threshold: " direction="horizontal">
+                    <mx:ComboBox id="limitsBox" enabled="{limitsEnabled}" close="limitValueChanged()" labelField="name" dataProvider="{limitOptions}">
+
+                    </mx:ComboBox>
+                    <mx:TextInput id="customLimitInput" enabled="{customLimitEnabled}"/>
+                </mx:FormItem>
+            </mx:Form>
+        </mx:FormItem>
+
+        <mx:FormItem label="" direction="horizontal">
+            <mx:Button label="Save" click="save()"/>
+            <mx:Button label="Cancel" click="cancel()"/>
+        </mx:FormItem>
+    </mx:Form>
 </util:EITitleWindow>

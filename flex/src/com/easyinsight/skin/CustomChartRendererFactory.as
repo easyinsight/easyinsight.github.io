@@ -15,7 +15,7 @@ public class CustomChartRendererFactory implements IFactory {
 
     public function newInstance():* {
         var renderer:CustomDropShadowRenderer = new CustomDropShadowRenderer();
-        renderer.rolloverFill = _rolloverFill;
+        //renderer.rolloverFill = _rolloverFill;
         renderer.selectedFill = _selectedFill;
         renderer.analysisItem = _analysisItem;
         return renderer;

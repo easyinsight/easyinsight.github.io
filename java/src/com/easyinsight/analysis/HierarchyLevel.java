@@ -60,4 +60,21 @@ public class HierarchyLevel implements Serializable, Cloneable {
         hierarchyLevel.setHierarchyLevelID(0);
         return hierarchyLevel;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        HierarchyLevel that = (HierarchyLevel) o;
+
+        if (!analysisItem.equals(that.analysisItem)) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        return analysisItem.hashCode();
+    }
 }

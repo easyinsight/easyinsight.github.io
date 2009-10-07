@@ -121,6 +121,11 @@ import mx.rpc.events.ResultEvent;
 				_filterDefinition.field = analysisItem;
                 _filterDefinition.sliding = true;
 			} else {
+                if (_filterDefinition.sliding && _filterDefinition.startDate != null && _filterDefinition.endDate != null) {
+                    var nowDelta:int = dateMetadata.latestDate.getTime() - _filterDefinition.endDate.getTime();
+                    _filterDefinition.startDate = new Date(_filterDefinition.startDate.getTime() + nowDelta);
+                    _filterDefinition.endDate = new Date(_filterDefinition.endDate.getTime() + nowDelta);
+                }
 				if (_filterDefinition.startDate == null) {
 					_filterDefinition.startDate = dateMetadata.earliestDate;
 				}

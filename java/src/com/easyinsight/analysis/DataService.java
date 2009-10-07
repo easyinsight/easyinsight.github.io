@@ -130,6 +130,7 @@ public class DataService {
     }
 
     private static class EmbeddedCacheKey implements Serializable {
+        
         private Collection<FilterDefinition> filters;
         private List<FilterDefinition> drillThroughFilters;
         private long reportID;
@@ -197,7 +198,7 @@ public class DataService {
             }
             EmbeddedCacheKey key = new EmbeddedCacheKey(customFilters, reportID, drillThroughFilters);
             Map<EmbeddedCacheKey, EmbeddedDataResults> resultsCache = null;
-            if (reportCache != null) {
+            if (!insightRequestMetadata.isNoCache() && reportCache != null) {
                 //noinspection unchecked
                 resultsCache = (Map<EmbeddedCacheKey, EmbeddedDataResults>) reportCache.get(dataSourceID);
                 if (resultsCache != null) {
@@ -232,12 +233,24 @@ public class DataService {
             if (drillThroughFilters != null) {
                 analysisDefinition.applyFilters(drillThroughFilters);
             }
+
             long startTime = System.currentTimeMillis();      
             EmbeddedDataResults results;
             /*Set<Long> ids = validate(analysisDefinition, feed);
             if (ids.size() > 0) {
                 throw new RuntimeException("Report is no longer valid.");
             } else {*/
+
+                if (insightRequestMetadata.getHierarchyOverrides() != null) {
+                    for (HierarchyOverride hierarchyOverride : insightRequestMetadata.getHierarchyOverrides()) {
+                        for (AnalysisItem analysisItem : analysisDefinition.getAllAnalysisItems()) {
+                            if (analysisItem.getAnalysisItemID() == hierarchyOverride.getAnalysisItemID()) {
+                                AnalysisHierarchyItem hierarchy = (AnalysisHierarchyItem) analysisItem;
+                                hierarchy.setHierarchyLevel(hierarchy.getHierarchyLevels().get(hierarchyOverride.getPosition()));
+                            }
+                        }
+                    }
+                }
                 Set<AnalysisItem> analysisItems = analysisDefinition.getColumnItems(feed.getFields());
                 Collection<FilterDefinition> filters = analysisDefinition.getFilterDefinitions();
                 DataSet dataSet = feed.getAggregateDataSet(analysisItems, filters, insightRequestMetadata, feed.getFields(), false, null);

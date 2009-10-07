@@ -4,20 +4,18 @@
     <mx:Script><![CDATA[
         import com.easyinsight.analysis.AnalysisDefinition;
 
-        import com.easyinsight.analysis.AnalysisHierarchyItem;
+        
 import com.easyinsight.analysis.AnalysisItem;
         import com.easyinsight.analysis.ChartSortButton;
         import com.easyinsight.analysis.ChartSortEvent;
         import com.easyinsight.analysis.CustomChangeEvent;
-        import com.easyinsight.analysis.HierarchyDrilldownEvent;
-        import com.easyinsight.analysis.HierarchyLevel;
-        import com.easyinsight.analysis.HierarchyRollupEvent;
 import com.easyinsight.analysis.SortableAxisTitle;
-        import com.easyinsight.analysis.charts.ChartDrilldownEvent;
 import com.easyinsight.analysis.conditions.ConditionRenderer;
 
         import com.easyinsight.filtering.FilterRawData;
-        import com.easyinsight.skin.CustomChartRendererFactory;
+
+
+        import com.easyinsight.pseudocontext.PseudoContextWindow;
 
         import mx.binding.utils.BindingUtils;
         import mx.charts.AxisRenderer;
@@ -37,6 +35,7 @@ import mx.events.FlexEvent;
         import mx.formatters.Formatter;
         import mx.graphics.BitmapFill;
         import mx.graphics.IFill;
+        import mx.managers.PopUpManager;
 
         [Bindable]
         private var graphData:ArrayCollection = new ArrayCollection();
@@ -82,13 +81,13 @@ import mx.events.FlexEvent;
         [Embed(source="../../../../../../../assets/water4.JPG")]
         private var standardFill:Class;
 
-        [Bindable]
+        /*[Bindable]
         [Embed(source="../../../../../../../assets/magenta.jpg")]
         private var selectedFill:Class;
 
         [Bindable]
         [Embed(source="../../../../../../../assets/darkwater.jpg")]
-        private var rolloverFill:Class;
+        private var rolloverFill:Class;*/
 
         [Bindable]
         public function get yField():String {
@@ -111,7 +110,7 @@ import mx.events.FlexEvent;
            }
        }
 
-        private function onDrill(chartItem:ChartItem):void {
+        /*private function onDrill(chartItem:ChartItem):void {
             if (yAxisItem is AnalysisHierarchyItem) {
                var data:Object = chartItem.item;
                var hierarchyItem:AnalysisHierarchyItem = yAxisItem as AnalysisHierarchyItem;
@@ -122,7 +121,8 @@ import mx.events.FlexEvent;
                    var filterRawData:FilterRawData = new FilterRawData();
                    filterRawData.addPair(hierarchyItem.hierarchyLevel.analysisItem, dataString);
                    hierarchyItem.hierarchyLevel = hierarchyItem.hierarchyLevels.getItemAt(index + 1) as HierarchyLevel;
-                   dispatchEvent(new HierarchyDrilldownEvent(HierarchyDrilldownEvent.DRILLDOWN, filterRawData));
+                   dispatchEvent(new HierarchyDrilldownEvent(HierarchyDrilldownEvent.DRILLDOWN, filterRawData,
+                           hierarchyItem, index + 1));
                }
            }
         }
@@ -133,7 +133,7 @@ import mx.events.FlexEvent;
                 var index:int = hierarchyItem.hierarchyLevels.getItemIndex(hierarchyItem.hierarchyLevel);
                 if (index > 0) {
                     hierarchyItem.hierarchyLevel = hierarchyItem.hierarchyLevels.getItemAt(index - 1) as HierarchyLevel;
-                    dispatchEvent(new HierarchyRollupEvent(hierarchyItem.hierarchyLevel.analysisItem));
+                    dispatchEvent(new HierarchyRollupEvent(hierarchyItem.hierarchyLevel.analysisItem, hierarchyItem, index - 1));
                 }
             }
         }
@@ -148,7 +148,7 @@ import mx.events.FlexEvent;
             } else {
                 onDrill(event.chartItem);
             }
-        }
+        }*/
 
         private function setupListeners():void {
             addEventListener(ChartSortEvent.CHART_SORT, onChartSort);
@@ -166,6 +166,21 @@ import mx.events.FlexEvent;
             }
         }
 
+        private function onClick(event:ChartItemEvent):void {
+            if (event.shiftKey) {
+
+                var window:PseudoContextWindow = new PseudoContextWindow(yAxisItem, passThrough, this);
+                window.data = event.hitData.item;
+                PopUpManager.addPopUp(window, this);
+                window.x = event.stageX + 5;
+                window.y = event.stageY + 5;
+            }
+        }
+
+        private function passThrough(event:Event):void {
+            dispatchEvent(event);
+        }
+
         private function createChart():void {
             if (barChart == null) {
 
@@ -174,13 +189,14 @@ import mx.events.FlexEvent;
                 barChart = new BarChart();
                 barChart.percentHeight = 100;
                 barChart.percentWidth = 100;
-                barChart.addEventListener(ChartItemEvent.ITEM_CLICK, drilldown);
+                barChart.addEventListener(ChartItemEvent.ITEM_CLICK, onClick);
+                /*barChart.addEventListener(ChartItemEvent.ITEM_CLICK, drilldown);
                 barChart.addEventListener(ChartDrilldownEvent.DRILLDOWN, drilldownEvent);
-                barChart.addEventListener(ChartDrilldownEvent.ROLLUP, drilldownEvent);
+                barChart.addEventListener(ChartDrilldownEvent.ROLLUP, drilldownEvent);*/
                 barChart.showDataTips = true;
-                if (selectable) {
+                /*if (selectable) {
                     barChart.selectionMode = "multiple";
-                }
+                }*/
                 barChart.dataProvider = graphData;
 
                 // define the X axis

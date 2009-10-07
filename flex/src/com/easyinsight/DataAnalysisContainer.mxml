@@ -10,6 +10,7 @@
                      xmlns:feed="com.easyinsight.administration.feed.*" doubleClickEnabled="true"
                      backgroundImage="{background2}" backgroundSize="100%"
                      paddingTop="10" paddingLeft="10" paddingRight="10" paddingBottom="10" backgroundColor="#DCE2F8"
+                     removedFromStage="cleanupStage()"
         implements="com.easyinsight.framework.IFullScreenPage">
     <core:states>
         <mx:State name="NotLoggedIn">
@@ -97,6 +98,10 @@
         import com.easyinsight.framework.CredentialsCache;
         import mx.collections.ArrayCollection;
         import com.easyinsight.analysis.AnalysisDefinition;
+
+        private function cleanupStage():void {
+            stage.removeEventListener(KeyboardEvent.KEY_UP, onKey);    
+        }
 
         [Bindable]
         [Embed(source="../../../assets/background2.JPG")]

@@ -106,28 +106,35 @@ public class GoalEvaluationStorage {
                     int outcomeState = GoalOutcome.NO_DATA;
                     int direction = GoalOutcome.NO_DIRECTION;
                     if (lastTwoValues.size() > 0) {
+                        boolean highIsGood;
+                        if (goalTreeNode.isGoalDefined()) {
+                            highIsGood = goalTreeNode.isHighIsGood();
+                        } else {
+                            highIsGood = goalTreeNode.getAnalysisMeasure().isHighIsGood();
+                        }
                         if (lastTwoValues.size() > 1) {
                             GoalValue previousGoalValue = lastTwoValues.get(0);
                             oldValue = previousGoalValue.getValue();
                             GoalValue newGoalValue = lastTwoValues.get(1);
                             newValue = newGoalValue.getValue();
-                            if (goalTreeNode.isGoalDefined()) {
+
+                            //if (goalTreeNode.isGoalDefined()) {
                                 double delta = newValue - oldValue;
-                                outcomeState = determineOutcome(goalTreeNode.getGoalValue(), goalTreeNode.isHighIsGood(), delta, newValue);
-                                if (goalTreeNode.isHighIsGood()) {
+                                outcomeState = determineOutcome(goalTreeNode.getGoalValue(), highIsGood, delta, newValue);
+                                if (highIsGood) {
                                     direction = GoalOutcome.UP_DIRECTION;
                                 } else {
                                     direction = GoalOutcome.DOWN_DIRECTION;
                                 }
-                            }
+                            //}
                         } else {
                             oldValue = findLastGoalValue(conn, goalTreeNode.getGoalTreeNodeID());
                             GoalValue goalValue = lastTwoValues.get(0);
                             newValue = goalValue.getValue();
                             if (oldValue != null && newValue != null && goalTreeNode.isGoalDefined()) {
                                 double delta = newValue - oldValue;
-                                outcomeState = determineOutcome(goalTreeNode.getGoalValue(), goalTreeNode.isHighIsGood(), delta, newValue);
-                                if (goalTreeNode.isHighIsGood()) {
+                                outcomeState = determineOutcome(goalTreeNode.getGoalValue(), highIsGood, delta, newValue);
+                                if (highIsGood) {
                                     direction = GoalOutcome.UP_DIRECTION;
                                 } else {
                                     direction = GoalOutcome.DOWN_DIRECTION;

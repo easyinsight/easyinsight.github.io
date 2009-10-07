@@ -143,7 +143,7 @@
             </mx:HBox>
             <mx:HBox width="100%" paddingLeft="10" paddingRight="10">
                 <mx:VBox height="100%" verticalAlign="middle">
-                    <mx:Label fontSize="16" text="Instant connections to reports on SaaS systems" fontFamily="Tahoma"
+                    <mx:Label fontSize="16" text="Instant connections to Google Analytics, Salesforce, and more" fontFamily="Tahoma"
                               fontWeight="bold" color="0x323232"/>
                     <mx:Label fontSize="16" text="Publish custom business data with ease" fontFamily="Tahoma"
                               fontWeight="bold" color="0x323232"/>
@@ -151,6 +151,8 @@
                               fontWeight="bold" color="0x323232"/>
                     <mx:Label fontSize="16" text="Track your key metrics to drive business success" fontFamily="Tahoma"
                               fontWeight="bold" color="0x323232"/>
+                    <mx:TextArea fontSize="16" text="Business intelligence power made simple and affordable for the small and medium business" fontFamily="Tahoma"
+                              fontWeight="bold" color="0x323232" width="500" backgroundAlpha="0" borderStyle="none" editable="false" selectable="false"/>
                     <mx:Spacer height="20"/>
                     <!--<mx:TextArea editable="false"
                                  text="Welcome to Easy Insight! We're in beta right now, so feel free to explore the application. You can easily get started through one of the options below."
@@ -177,7 +179,7 @@
                         <mx:Label text="Instant Solutions" fontSize="20" fontFamily="Tahoma" fontWeight="bold" selectable="false"
                                 buttonMode="true" mouseChildren="false" useHandCursor="true" color="0x323232"/>
                         <mx:TextArea editable="false"
-                                     text="You can jump right into Easy Insight through our rich set of integrations to other applications. We provide immediate connections to a variety of SaaS applications and ways to easily publish data from systems in your enterprise."
+                                     text="You can jump right into Easy Insight through our rich set of integrations to other applications. We provide instant connections to a variety of SaaS applications and ways to easily publish data from systems in your enterprise."
                                      borderStyle="none" selectable="false" width="100%" fontSize="12" height="120" backgroundAlpha="0"
                                 buttonMode="true" mouseChildren="false" useHandCursor="true" color="0x323232"/>
                     </mx:VBox>

@@ -2,6 +2,7 @@ package com.easyinsight.analysis {
 
 import com.easyinsight.analysis.service.EmbeddedDataService;
 import com.easyinsight.framework.DataServiceLoadingEvent;
+import com.easyinsight.framework.HierarchyOverride;
 import com.easyinsight.report.AbstractViewFactory;
 
 import com.easyinsight.report.ReportNavigationEvent;
@@ -86,8 +87,24 @@ public class EmbeddedViewFactory extends AbstractViewFactory {
         if (_reportRenderer == null) {
             pendingRequest = true;
         } else {
-            _dataService.retrieveData(reportID, dataSourceID, filterDefinitions, allSources, drillthroughFilters);
+            var overrides:ArrayCollection = new ArrayCollection();
+            for each (var hierarchyOverride:HierarchyOverride in overrideObj) {
+                overrides.addItem(hierarchyOverride);
+            }
+            _dataService.retrieveData(reportID, dataSourceID, filterDefinitions, allSources, drillthroughFilters, _noCache, overrides);
         }
+    }
+
+    private var overrideObj:Object = new Object();
+
+    override public function addOverride(hierarchyOverride:HierarchyOverride):void {
+        overrideObj[hierarchyOverride.analysisItemID] = hierarchyOverride;
+    }
+
+    private var _noCache:Boolean = false;
+
+    override public function set noCache(value:Boolean):void {
+        _noCache = value;
     }
 
     override public function gotData(event:EmbeddedDataServiceEvent):void {

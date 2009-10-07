@@ -1,6 +1,8 @@
 package com.easyinsight.report {
 import com.easyinsight.analysis.EmbeddedDataServiceEvent;
 
+import com.easyinsight.framework.HierarchyOverride;
+
 import mx.collections.ArrayCollection;
 import mx.containers.VBox;
 
@@ -18,11 +20,19 @@ public class AbstractViewFactory extends VBox{
         this.percentWidth = 100;
     }
 
+    public function addOverride(hierarchyOverride:HierarchyOverride):void {
+        
+    }
+
     public function set prefix(val:String):void {
         
     }
 
     public function gotData(event:EmbeddedDataServiceEvent):void {
+        
+    }
+
+    public function set noCache(val:Boolean):void {
         
     }
 

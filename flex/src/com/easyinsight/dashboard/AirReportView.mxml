@@ -16,6 +16,7 @@
         import com.easyinsight.quicksearch.QuickSearchWindow;
 
 
+        import com.easyinsight.solutions.DataSourceDescriptor;
         import com.easyinsight.util.AsyncLoadEvent;
         import com.easyinsight.util.IAsyncScreen;
         import com.easyinsight.util.IAsyncScreenFactory;
@@ -144,11 +145,11 @@
                 goalsMenu.addItem(myGoalsItem);
             }
 
-            var uploadMenu:NativeMenu = new NativeMenu();
+            /*var uploadMenu:NativeMenu = new NativeMenu();
             baseMenu.addSubmenu(uploadMenu, "Uploads");
             var fileUploadItem:NativeMenuItem = new NativeMenuItem("Upload Spreadsheet or CSV");
             fileUploadItem.addEventListener(Event.SELECT, onUpload);
-            uploadMenu.addItem(fileUploadItem);
+            uploadMenu.addItem(fileUploadItem);*/
 
             var helpMenu:NativeMenu = new NativeMenu();
             defaultScreen = new AirIntroDescriptor();
@@ -216,6 +217,8 @@
                      goalsMenuItem.addEventListener(Event.SELECT, onReport);
                      goalsMenuItem.data = descriptor;*/
                     descriptors.addItem(descriptor);
+                } else if (descriptor.getType() == EIDescriptor.DATA_SOURCE) {
+                    var desc:DataSourceDescriptor = descriptor as DataSourceDescriptor;
                 }
             }
             allDescriptors = new ArrayCollection(descriptors.toArray());

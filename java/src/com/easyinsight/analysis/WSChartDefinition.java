@@ -63,7 +63,7 @@ public abstract class WSChartDefinition extends WSAnalysisDefinition {
         LimitsResults limitsResults;
         if (limitsMetadata != null) {
             int count = dataSet.getRows().size();
-            limitsResults = new LimitsResults(count > limitsMetadata.getNumber(), count, limitsMetadata.getNumber());
+            limitsResults = new LimitsResults(count >= limitsMetadata.getNumber(), count, limitsMetadata.getNumber());
             Map<String, AnalysisItem> structure = new HashMap<String, AnalysisItem>();
             createReportStructure(structure);
             AnalysisMeasure analysisMeasure = null;
