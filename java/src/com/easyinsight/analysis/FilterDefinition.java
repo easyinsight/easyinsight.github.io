@@ -14,7 +14,7 @@ import java.util.Map;
 @Entity
 @Table(name="filter")
 @Inheritance(strategy= InheritanceType.JOINED)
-public abstract class FilterDefinition implements Serializable {
+public abstract class FilterDefinition implements Serializable, Cloneable {
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name="analysis_item_id")
     private AnalysisItem field;
