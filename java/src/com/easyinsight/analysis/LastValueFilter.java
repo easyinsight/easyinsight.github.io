@@ -2,6 +2,7 @@ package com.easyinsight.analysis;
 
 import javax.persistence.Entity;
 import javax.persistence.Table;
+import javax.persistence.PrimaryKeyJoinColumn;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
@@ -12,6 +13,7 @@ import java.sql.SQLException;
  */
 @Entity
 @Table(name="last_value_filter")
+@PrimaryKeyJoinColumn(name="filter_id")
 public class LastValueFilter extends FilterDefinition {
 
     public LastValueFilter(AnalysisItem key) {

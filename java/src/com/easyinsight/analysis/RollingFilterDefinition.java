@@ -3,6 +3,7 @@ package com.easyinsight.analysis;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 import javax.persistence.Column;
+import javax.persistence.PrimaryKeyJoinColumn;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.Date;
@@ -14,6 +15,7 @@ import java.util.Date;
  */
 @Entity
 @Table(name="rolling_range_filter")
+@PrimaryKeyJoinColumn(name="filter_id")
 public class RollingFilterDefinition extends FilterDefinition {
 
     @Column(name="interval_value")

@@ -1,9 +1,6 @@
 package com.easyinsight.analysis;
 
-import javax.persistence.Column;
-import javax.persistence.Transient;
-import javax.persistence.Table;
-import javax.persistence.Entity;
+import javax.persistence.*;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
@@ -14,6 +11,7 @@ import java.sql.SQLException;
  */
 @Entity
 @Table(name="range_filter")
+@PrimaryKeyJoinColumn(name="filter_id")
 public class FilterRangeDefinition extends FilterDefinition {
     @Column(name="low_value", nullable = true)
     private Double startValue;
