@@ -55,9 +55,14 @@ public class LogClass {
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             PrintStream writer = new PrintStream(baos);
             e.printStackTrace(writer);
+            String username = null;
+            try {
+                username = SecurityUtil.getUserName();
+            } catch(Exception e1) {
+            }
             String msg = new String(baos.toByteArray());
             try {
-                new AuthSMTPConnection().sendSSLMessage("errors@easy-insight.com", "Error: " + e.getClass().getName(), msg, "donotreply@easy-insight.com");
+                new AuthSMTPConnection().sendSSLMessage("errors@easy-insight.com", "Error! " + (username != null ? username : "Unknown") + ": " + e.getClass().getName(), msg, "donotreply@easy-insight.com");
             }
             catch(Exception ex) {
                 // do nothing, wtf do you do at this point?
