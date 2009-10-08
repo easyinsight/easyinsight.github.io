@@ -70,6 +70,7 @@ public class AnalysisDefinitionStorageTest extends TestCase {
     }
 
     public void testListDefinitions() {
+        System.out.println("connections = " + Database.instance().getActiveConnections());
         long userID = TestUtil.getIndividualTestUser();
         long dataSourceID = TestUtil.createDefaultTestDataSource(userID);
         WSListDefinition listDefinition = new WSListDefinition();
@@ -99,6 +100,7 @@ public class AnalysisDefinitionStorageTest extends TestCase {
     }
 
     public void testCrosstabDefinitions() {
+        System.out.println("connections = " + Database.instance().getActiveConnections());
         long userID = TestUtil.getIndividualTestUser();
         long dataFeedID = TestUtil.createDefaultTestDataSource(userID);
         WSCrosstabDefinition crosstabDefinition = new WSCrosstabDefinition();
@@ -120,6 +122,7 @@ public class AnalysisDefinitionStorageTest extends TestCase {
         crosstabDefinition.setMeasures(Arrays.asList(measure));
         AnalysisService analysisService = new AnalysisService();
         //WSAnalysisDefinition wsAnalysisDefinition = analysisService.openAnalysisDefinition(crosstabDefinition.getAnalysisID());
+
         long crosstabID = analysisService.saveAnalysisDefinition(crosstabDefinition).getAnalysisID();
         WSCrosstabDefinition retrievedDefinition = (WSCrosstabDefinition) analysisService.openAnalysisDefinition(crosstabID);
         assertEquals(1, retrievedDefinition.getFilterDefinitions().size());
@@ -127,6 +130,7 @@ public class AnalysisDefinitionStorageTest extends TestCase {
     }
 
     public void testChartDefinitions() {
+        System.out.println("connections = " + Database.instance().getActiveConnections());
         long userID = TestUtil.getIndividualTestUser();
         long dataFeedID = TestUtil.createDefaultTestDataSource(userID);
         WSColumnChartDefinition chartDefinition = new WSColumnChartDefinition();
