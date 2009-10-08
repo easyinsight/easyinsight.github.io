@@ -72,7 +72,7 @@ public class TemporalAnalysisMeasure extends AnalysisMeasure {
         return super.getType() | AnalysisItemTypes.TEMPORAL_MEASURE;
     }
 
-    public List<AnalysisItem> getAnalysisItems(List<AnalysisItem> allItems, Collection<AnalysisItem> insightItems) {
+    public List<AnalysisItem> getAnalysisItems(List<AnalysisItem> allItems, Collection<AnalysisItem> insightItems, boolean getEverything) {
         List<AnalysisItem> items = new ArrayList<AnalysisItem>();
         items.add(new AnalysisMeasure(this.getKey(), wrappedAggregation));
         boolean foundDateDim = false;

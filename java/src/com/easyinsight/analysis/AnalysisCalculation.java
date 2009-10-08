@@ -53,7 +53,7 @@ public class AnalysisCalculation extends AnalysisMeasure {
         
     }
 
-    public List<AnalysisItem> getAnalysisItems(List<AnalysisItem> allItems, Collection<AnalysisItem> insightItems) {
+    public List<AnalysisItem> getAnalysisItems(List<AnalysisItem> allItems, Collection<AnalysisItem> insightItems, boolean getEverything) {
         Map<Key, AnalysisItem> map = new HashMap<Key, AnalysisItem>();
         for (AnalysisItem analysisItem : allItems) {
             map.put(analysisItem.getKey(), analysisItem);

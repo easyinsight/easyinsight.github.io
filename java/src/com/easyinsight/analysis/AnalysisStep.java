@@ -101,7 +101,7 @@ public class AnalysisStep extends AnalysisDateDimension {
     }
 
     @Override
-    public List<AnalysisItem> getAnalysisItems(List<AnalysisItem> allItems, Collection<AnalysisItem> insightItems) {
+    public List<AnalysisItem> getAnalysisItems(List<AnalysisItem> allItems, Collection<AnalysisItem> insightItems, boolean getEverything) {
         List<AnalysisItem> items = new ArrayList<AnalysisItem>();
         items.add(startDate);
         startDate.setDateLevel(getDateLevel());

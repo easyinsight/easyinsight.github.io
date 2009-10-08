@@ -63,10 +63,16 @@ public class AnalysisHierarchyItem extends AnalysisDimension {
         this.hierarchyLevel = hierarchyLevel;
     }
 
-    public List<AnalysisItem> getAnalysisItems(List<AnalysisItem> allItems, Collection<AnalysisItem> insightItems) {
+    public List<AnalysisItem> getAnalysisItems(List<AnalysisItem> allItems, Collection<AnalysisItem> insightItems, boolean getEverything) {
         List<AnalysisItem> analysisItems = new ArrayList<AnalysisItem>();
         //analysisItems.add(this);
-        analysisItems.add(hierarchyLevel.getAnalysisItem());
+        if (getEverything) {
+            for (HierarchyLevel hierarchyLevel : getHierarchyLevels()) {
+                analysisItems.add(hierarchyLevel.getAnalysisItem());
+            }
+        } else {
+            analysisItems.add(hierarchyLevel.getAnalysisItem());
+        }
         return analysisItems;
     }
 

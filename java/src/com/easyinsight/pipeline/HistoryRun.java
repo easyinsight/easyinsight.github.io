@@ -63,7 +63,7 @@ public class HistoryRun {
             itemSet.add(filterDefinition.getField());
         }
         Feed feed = FeedRegistry.instance().getFeed(dataSourceID);
-        itemSet.addAll(measure.getAnalysisItems(feed.getFields(), Arrays.asList((AnalysisItem) measure)));
+        itemSet.addAll(measure.getAnalysisItems(feed.getFields(), Arrays.asList((AnalysisItem) measure), false));
         List<FilterDefinition> intrinsicFilters = feed.getIntrinsicFilters();
         for (FilterDefinition intrinsicFilter : intrinsicFilters) {
             if (intrinsicFilter instanceof RollingFilterDefinition) {

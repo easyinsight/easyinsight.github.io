@@ -262,7 +262,7 @@ public abstract class WSAnalysisDefinition implements Serializable {
         Set<Key> columnSet = new HashSet<Key>();
         Set<AnalysisItem> analysisItems = getAllAnalysisItems();
         for (AnalysisItem analysisItem : analysisItems) {
-            List<AnalysisItem> items = analysisItem.getAnalysisItems(allItems, analysisItems);
+            List<AnalysisItem> items = analysisItem.getAnalysisItems(allItems, analysisItems, false);
             for (AnalysisItem item : items) {
                 //if (item.getAnalysisItemID()) {
                     columnSet.add(item.getKey());
@@ -271,7 +271,7 @@ public abstract class WSAnalysisDefinition implements Serializable {
         }
         if (getFilterDefinitions() != null) {
             for (FilterDefinition filterDefinition : getFilterDefinitions()) {
-                List<AnalysisItem> items = filterDefinition.getField().getAnalysisItems(allItems, analysisItems);
+                List<AnalysisItem> items = filterDefinition.getField().getAnalysisItems(allItems, analysisItems, false);
                 for (AnalysisItem item : items) {
                     //if (item.getAnalysisItemID() != 0) {
                         columnSet.add(item.getKey());
@@ -296,7 +296,7 @@ public abstract class WSAnalysisDefinition implements Serializable {
         Set<AnalysisItem> analysisItems = getAllAnalysisItems();
         for (AnalysisItem analysisItem : analysisItems) {
             if (analysisItem.isValid()) {
-                List<AnalysisItem> items = analysisItem.getAnalysisItems(allItems, analysisItems);
+                List<AnalysisItem> items = analysisItem.getAnalysisItems(allItems, analysisItems, false);
                 for (AnalysisItem item : items) {
                     //if (item.getAnalysisItemID()) {
                         columnSet.add(item);
@@ -310,7 +310,7 @@ public abstract class WSAnalysisDefinition implements Serializable {
         }
         if (getFilterDefinitions() != null) {
             for (FilterDefinition filterDefinition : getFilterDefinitions()) {
-                List<AnalysisItem> items = filterDefinition.getField().getAnalysisItems(allItems, analysisItems);
+                List<AnalysisItem> items = filterDefinition.getField().getAnalysisItems(allItems, analysisItems, false);
                 for (AnalysisItem item : items) {
                     //if (item.getAnalysisItemID() != 0) {
                         columnSet.add(item);

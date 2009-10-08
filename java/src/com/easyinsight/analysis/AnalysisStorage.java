@@ -182,7 +182,10 @@ public class AnalysisStorage {
         if (analysisDefinition.getReportStructure() != null) {
             for (AnalysisItem analysisItem : analysisDefinition.getReportStructure().values()) {
                 analysisItem.beforeSave();
-                analysisItem.reportSave(session);                
+                analysisItem.reportSave(session);
+                if (analysisItem.getKey().getKeyID() == 0) {
+                    session.save(analysisItem.getKey());
+                }
                 if (analysisItem.getAnalysisItemID() == 0) {
                     session.save(analysisItem);
                 } else {

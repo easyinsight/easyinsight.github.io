@@ -248,7 +248,7 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
 
     }
 
-    public List<AnalysisItem> getAnalysisItems(List<AnalysisItem> allItems, Collection<AnalysisItem> insightItems) {
+    public List<AnalysisItem> getAnalysisItems(List<AnalysisItem> allItems, Collection<AnalysisItem> insightItems, boolean getEverything) {
         List<AnalysisItem> items = new ArrayList<AnalysisItem>();
         items.add(this);
         return items;

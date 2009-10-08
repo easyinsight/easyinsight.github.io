@@ -293,6 +293,7 @@ public class SolutionService {
         // what to do here...
 
         clonedReport.setUserBindings(Arrays.asList(new UserToAnalysisBinding(SecurityUtil.getUserID(), UserPermission.OWNER)));
+        clonedReport.setTemporaryReport(true);
         new AnalysisStorage().saveAnalysis(clonedReport, conn);
         return new InsightDescriptor(clonedReport.getAnalysisID(), clonedReport.getTitle(),
                 clonedReport.getDataFeedID(), clonedReport.getReportType());
@@ -308,7 +309,8 @@ public class SolutionService {
                     "avg(USER_REPORT_RATING.rating), analysis.create_date, ANALYSIS.DESCRIPTION, DATA_FEED.FEED_NAME, ANALYSIS.AUTHOR_NAME," +
                     "DATA_FEED.PUBLICLY_VISIBLE, SOLUTION.NAME, SOLUTION.SOLUTION_ID FROM DATA_FEED, SOLUTION_INSTALL, SOLUTION, ANALYSIS " +
                     " LEFT JOIN USER_REPORT_RATING ON USER_REPORT_RATING.report_id = ANALYSIS.ANALYSIS_ID WHERE ANALYSIS.DATA_FEED_ID = DATA_FEED.DATA_FEED_ID AND " +
-                    "ANALYSIS.DATA_FEED_ID = SOLUTION_INSTALL.installed_data_source_id AND ANALYSIS.SOLUTION_VISIBLE = ? GROUP BY ANALYSIS.ANALYSIS_ID");
+                    "ANALYSIS.DATA_FEED_ID = SOLUTION_INSTALL.installed_data_source_id AND ANALYSIS.SOLUTION_VISIBLE = ? " +
+                    "AND solution_install.solution_id = solution.solution_id GROUP BY ANALYSIS.ANALYSIS_ID");
             analysisQueryStmt.setBoolean(1, true);
             ResultSet analysisRS = analysisQueryStmt.executeQuery();
             while (analysisRS.next()) {

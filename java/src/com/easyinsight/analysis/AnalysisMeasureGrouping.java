@@ -29,8 +29,8 @@ public class AnalysisMeasureGrouping extends AnalysisDimension {
     }
 
     @Override
-    public List<AnalysisItem> getAnalysisItems(List<AnalysisItem> allItems, Collection<AnalysisItem> insightItems) {
-        List<AnalysisItem> items = super.getAnalysisItems(allItems, insightItems);
+    public List<AnalysisItem> getAnalysisItems(List<AnalysisItem> allItems, Collection<AnalysisItem> insightItems, boolean getEverything) {
+        List<AnalysisItem> items = super.getAnalysisItems(allItems, insightItems, getEverything);
         items.addAll(measures);
         return items;
     }
