@@ -14,7 +14,6 @@ import com.easyinsight.core.Key;
 import com.easyinsight.core.DataSourceDescriptor;
 import com.easyinsight.users.Account;
 import com.easyinsight.exchange.SolutionReportExchangeItem;
-import com.easyinsight.exchange.ReportExchangeItem;
 
 import java.util.*;
 import java.util.Date;
@@ -256,7 +255,7 @@ public class SolutionService {
             AnalysisDefinition report = new AnalysisStorage().getPersistableReport(reportID, session);
             FeedDefinition sourceDataSource = feedStorage.getFeedDefinitionData(report.getDataFeedID(), conn);
             Map<Key, Key> keyReplacementMap = createKeyReplacementMap(targetDataSource, sourceDataSource);
-            InsightDescriptor id = installReportToDataSource(targetDataSource, report, conn, keyReplacementMap);
+            InsightDescriptor id = installReportToDataSource(targetDataSource, report, conn, keyReplacementMap, session);
             conn.commit();
             session.close();
             return id;
@@ -284,7 +283,7 @@ public class SolutionService {
     }
 
     private InsightDescriptor installReportToDataSource(FeedDefinition localDefinition, AnalysisDefinition report, Connection conn,
-                                                        Map<Key, Key> keyReplacementMap) throws CloneNotSupportedException {
+                                                        Map<Key, Key> keyReplacementMap, Session session) throws CloneNotSupportedException {
         AnalysisDefinition clonedReport = report.clone(keyReplacementMap, localDefinition.getFields());
         clonedReport.setSolutionVisible(false);
         clonedReport.setAnalysisPolicy(AnalysisPolicy.PRIVATE);
@@ -294,7 +293,7 @@ public class SolutionService {
 
         clonedReport.setUserBindings(Arrays.asList(new UserToAnalysisBinding(SecurityUtil.getUserID(), UserPermission.OWNER)));
         clonedReport.setTemporaryReport(true);
-        new AnalysisStorage().saveAnalysis(clonedReport, conn);
+        new AnalysisStorage().saveAnalysis(clonedReport, session);
         return new InsightDescriptor(clonedReport.getAnalysisID(), clonedReport.getTitle(),
                 clonedReport.getDataFeedID(), clonedReport.getReportType());
     }
