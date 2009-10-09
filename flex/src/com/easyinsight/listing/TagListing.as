@@ -45,7 +45,7 @@ import mx.rpc.events.FaultEvent;
 		}
 
         private function onCreation(event:FlexEvent):void {
-            feedService.getAllFeedTags.send();
+            feedService.getAllFeedTags.send(_solution);
         }
 		
 		public function fault(event:FaultEvent):void {
@@ -90,6 +90,7 @@ import mx.rpc.events.FaultEvent;
 			}
 			lastButton = event.currentTarget as LinkButton;
 			if (currentTag == tag) {
+                currentTag = null;
 				dispatchEvent(new TagFocusEvent(null));
 			} else {
                 currentTag = tag;

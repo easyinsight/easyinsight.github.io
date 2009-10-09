@@ -4,12 +4,15 @@
     <mx:Script><![CDATA[
         import com.easyinsight.analysis.AnalysisDefinition;
 
+        import com.easyinsight.framework.User;
         import com.easyinsight.listing.ListingChangeEvent;
         import com.easyinsight.report.ReportAnalyzeSource;
 
         import com.easyinsight.solutions.InsightDescriptor;
 
         import com.easyinsight.util.PopUpUtil;
+
+        import com.easyinsight.util.ProgressAlert;
 
         import mx.collections.ArrayCollection;
         import mx.formatters.DateFormatter;
@@ -34,15 +37,20 @@
                 PopUpManager.addPopUp(window, this, true);
                 PopUpUtil.centerPopUp(window);
             } else if (dataSources.length == 1) {
+                ProgressAlert.alert(this, "Getting the report ready...", null, solutionService.installReport);
                 solutionService.installReport.send(reportID, dataSources.getItemAt(0).id);
             } else {
                 // TODO: this is a hack for now
+                ProgressAlert.alert(this, "Getting the report ready...", null, solutionService.installReport);
                 solutionService.installReport.send(reportID, dataSources.getItemAt(0).id);
             }
         }
 
         private function addReport():void {
-            solutionService.determineDataSource.send(dataSourceID);
+            if (User.getInstance() != null) {
+                ProgressAlert.alert(this, "Getting the report ready...", null, solutionService.determineDataSource);
+                solutionService.determineDataSource.send(dataSourceID);
+            }
         }
 
         private function toReport():void {
