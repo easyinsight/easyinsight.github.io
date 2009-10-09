@@ -5,6 +5,7 @@ import com.easyinsight.framework.DataServiceLoadingEvent;
 import com.easyinsight.quicksearch.EIDescriptor;
 
 import mx.containers.ViewStack;
+import mx.controls.Alert;
 import mx.core.Container;
 [Event(name="asyncLoadStart", type="com.easyinsight.util.AsyncLoadEvent")]
 [Event(name="asyncLoadSuccess", type="com.easyinsight.util.AsyncLoadEvent")]
@@ -37,6 +38,8 @@ public class AsyncViewStack extends ViewStack{
         }
     }
 
+    
+
     private function gotInitialData(event:DataServiceLoadingEvent):void {
         var screen:IAsyncScreen = loadingScreen;
         var dataViewPanel:Container = screen.getContainer();
@@ -46,6 +49,7 @@ public class AsyncViewStack extends ViewStack{
             selectedChild = dataViewPanel;
         } else {
             var targetIndex:int = getChildIndex(dataViewPanel);
+            //Alert.show("target index = " + targetIndex + " , selected index = " + selectedIndex);
             // TODO: make effect pluggable
             var cubeRotate:CubeRotate = new CubeRotate();
             if (targetIndex > selectedIndex) {
@@ -70,18 +74,20 @@ public class AsyncViewStack extends ViewStack{
             var screen:IAsyncScreen = descriptorMap[idString];
             var newScreen:Boolean = false;
             if (screen == null) {
+                //Alert.show("creating new!");
                 newScreen = true;
                 screen = _screenRenderer.createScreen(selectedDescriptor);
-                descriptorMap[idString] = container;
+                descriptorMap[idString] = screen;
             }
-            var container:Container = screen.getContainer();
             loadingScreen = screen;
+            var container:Container = screen.getContainer();
             container.addEventListener(DataServiceLoadingEvent.LOADING_STOPPED, gotInitialData);
             dispatchEvent(new AsyncLoadEvent(AsyncLoadEvent.LOAD_START));
             if (newScreen) {
                 addChild(container);
             } else {
-                screen.refreshData();
+                var event:DataServiceLoadingEvent = new DataServiceLoadingEvent(DataServiceLoadingEvent.LOADING_STOPPED);
+                gotInitialData(event);
             }
         }
     }
