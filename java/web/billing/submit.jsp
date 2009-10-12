@@ -10,7 +10,7 @@
 <%@ page import="java.util.*" %>
 <%@ page import="com.easyinsight.users.User" %>
 <%@ page import="com.easyinsight.users.AccountActivityStorage" %>
-<%@ page import="com.easyinsight.notifications.TodoBase" %>
+<%@ page import="com.easyinsight.outboundnotifications.TodoBase" %>
 <%--
   Created by IntelliJ IDEA.
   User: abaldwin

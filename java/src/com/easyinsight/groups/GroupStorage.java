@@ -6,6 +6,7 @@ import com.easyinsight.database.EIConnection;
 import com.easyinsight.analysis.Tag;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.datafeeds.FeedDescriptor;
+import com.easyinsight.datafeeds.FeedStorage;
 import com.easyinsight.security.Roles;
 import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.audit.AuditMessage;
@@ -402,6 +403,7 @@ public class GroupStorage {
 
     public void addFeedToGroup(long feedID, long groupID, int owner) throws SQLException {
         Connection conn = Database.instance().getConnection();
+        new FeedStorage().removeFeed(feedID);
         try {
             PreparedStatement existingLinkQuery = conn.prepareStatement("SELECT UPLOAD_POLICY_GROUPS_ID FROM UPLOAD_POLICY_GROUPS WHERE " +
                     "GROUP_ID = ? AND FEED_ID = ?");

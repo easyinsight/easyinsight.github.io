@@ -17,9 +17,9 @@ import com.easyinsight.analysis.AnalysisMeasure;
 import com.easyinsight.analysis.FilterDefinition;
 import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.logging.LogClass;
-import com.easyinsight.notifications.ConfigureDataFeedTodo;
-import com.easyinsight.notifications.ConfigureDataFeedInfo;
-import com.easyinsight.notifications.TodoEventInfo;
+import com.easyinsight.outboundnotifications.ConfigureDataFeedTodo;
+import com.easyinsight.outboundnotifications.ConfigureDataFeedInfo;
+import com.easyinsight.outboundnotifications.TodoEventInfo;
 import com.easyinsight.eventing.MessageUtils;
 import com.easyinsight.email.UserStub;
 

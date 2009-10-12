@@ -505,6 +505,9 @@ public class FeedService implements IDataFeedService {
                     session.close();
                 }
             }
+            notifyNewOwners(feedDefinition, existingFeed);
+            notifyNewViewers(feedDefinition, existingFeed);
+
             FeedRegistry.instance().flushCache(feedID);
 
             conn.commit();
@@ -542,6 +545,25 @@ public class FeedService implements IDataFeedService {
                 }
             }
         }).start();*/
+    }
+
+    private void notifyNewViewers(FeedDefinition feedDefinition, FeedDefinition existingFeed) {
+        List<FeedConsumer> viewers = new ArrayList<FeedConsumer>(feedDefinition.getUploadPolicy().getViewers());
+        List<FeedConsumer> oldViewers = new ArrayList<FeedConsumer>(existingFeed.getUploadPolicy().getViewers());
+        viewers.removeAll(existingFeed.getUploadPolicy().getViewers());
+        for(FeedConsumer viewer : viewers) {
+
+        }
+    }
+
+    private void notifyNewOwners(FeedDefinition feedDefinition, FeedDefinition existingFeed) {
+        List<FeedConsumer> owners= new ArrayList<FeedConsumer>(feedDefinition.getUploadPolicy().getViewers());
+        List<FeedConsumer> oldOwners = new ArrayList<FeedConsumer>(existingFeed.getUploadPolicy().getViewers());
+        owners.removeAll(existingFeed.getUploadPolicy().getOwners());
+        for(FeedConsumer owner: owners) {
+        
+        }
+
     }
 
     public FeedDefinition getFeedDefinition(long dataFeedID) {

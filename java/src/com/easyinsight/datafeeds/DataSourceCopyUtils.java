@@ -12,7 +12,7 @@ import com.easyinsight.api.dynamic.DynamicServiceDefinition;
 import com.easyinsight.api.dynamic.ConfiguredMethod;
 import com.easyinsight.solutions.SolutionInstallInfo;
 import com.easyinsight.security.Roles;
-import com.easyinsight.notifications.ConfigureDataFeedTodo;
+import com.easyinsight.outboundnotifications.ConfigureDataFeedTodo;
 import com.easyinsight.core.InsightDescriptor;
 import com.easyinsight.core.DataSourceDescriptor;
 

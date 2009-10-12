@@ -3,7 +3,7 @@
                 xmlns:util="com.easyinsight.util.*"
                 creationComplete="startWorkspace()" xmlns:local="*" applicationComplete="applicationListeners()"
                 xmlns:listing="com.easyinsight.listing.*" xmlns:intro1="com.easyinsight.intro.*"
-                xmlns:notification="com.easyinsight.notifications.*"
+                xmlns:notification="com.easyinsight.outboundnotifications.*"
                 paddingTop="0" top="0" borderThickness="0" left="0" paddingLeft="0"
                 right="0" paddingRight="0"
                 bottom="0" paddingBottom="0" preloader="com.easyinsight.preloader.EIProgressBar">

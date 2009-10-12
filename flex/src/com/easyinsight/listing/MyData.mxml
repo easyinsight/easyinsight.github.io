@@ -23,7 +23,7 @@
         import com.easyinsight.customupload.UserUpload;
         import com.easyinsight.framework.LoginEvent;
         import com.easyinsight.customupload.UploadExternalSource;
-        import com.easyinsight.notifications.RefreshEventInfo;
+        import com.easyinsight.outboundnotifications.RefreshEventInfo;
         import com.easyinsight.report.ReportAnalyzeSource;
         import com.easyinsight.solutions.InsightDescriptor;
 
@@ -226,7 +226,7 @@
             }
             if (_toGDocs) {
                 var uploadExternal:UploadExternalSource = new UploadExternalSource();
-                uploadExternal.addEventListener(UploadConfigEvent.UPLOAD_CONFIG_COMPLETE, uploadConfigComplete);                
+                uploadExternal.addEventListener(UploadConfigEvent.UPLOAD_CONFIG_COMPLETE, uploadConfigComplete);
                 PopUpManager.addPopUp(uploadExternal, this, true);
                 PopUpUtil.centerPopUp(uploadExternal);
                 _toGDocs = false;

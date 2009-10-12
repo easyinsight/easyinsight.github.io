@@ -32,7 +32,6 @@ public class EventDispatcher extends Thread {
         try {
             while (running) {
                 EIEvent e = queue.take();
-
                 List<EIEventListener> listenerSet = listeners.get(e.getEventType());
                 if (listenerSet != null) {
                     for (EIEventListener l : listenerSet)

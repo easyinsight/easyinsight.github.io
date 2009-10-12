@@ -3,15 +3,11 @@ package com.easyinsight.eventing;
 import org.hibernate.Session;
 import com.easyinsight.database.Database;
 import com.easyinsight.datafeeds.FeedDefinition;
-import com.easyinsight.notifications.ConfigureDataFeedTodo;
-import com.easyinsight.notifications.ConfigureDataFeedInfo;
-import com.easyinsight.notifications.TodoEventInfo;
+import com.easyinsight.outboundnotifications.ConfigureDataFeedTodo;
+import com.easyinsight.outboundnotifications.ConfigureDataFeedInfo;
+import com.easyinsight.outboundnotifications.TodoEventInfo;
 
 import java.util.List;
-import java.util.UUID;
-
-import flex.messaging.MessageBroker;
-import flex.messaging.messages.AsyncMessage;
 
 /**
  * Created by IntelliJ IDEA.

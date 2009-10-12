@@ -16,7 +16,7 @@ import com.easyinsight.analysis.*;
 import com.easyinsight.PasswordStorage;
 import com.easyinsight.eventing.EventDispatcher;
 import com.easyinsight.eventing.AsyncCreatedEvent;
-import com.easyinsight.notifications.*;
+import com.easyinsight.outboundnotifications.*;
 import com.easyinsight.scheduler.*;
 import com.easyinsight.solutions.SolutionInstallInfo;
 

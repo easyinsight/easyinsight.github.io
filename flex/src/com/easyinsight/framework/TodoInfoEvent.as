@@ -1,7 +1,7 @@
 package com.easyinsight.framework {
-import com.easyinsight.notifications.RefreshEventInfo;
+import com.easyinsight.outboundnotifications.RefreshEventInfo;
 
-import com.easyinsight.notifications.TodoEventInfo;
+import com.easyinsight.outboundnotifications.TodoEventInfo;
 
 import flash.events.Event;
 

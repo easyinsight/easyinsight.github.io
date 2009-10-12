@@ -1,6 +1,6 @@
 package com.easyinsight.solutions;
 
-import com.easyinsight.notifications.ConfigureDataFeedTodo;
+import com.easyinsight.outboundnotifications.ConfigureDataFeedTodo;
 import com.easyinsight.core.EIDescriptor;
 
 /**

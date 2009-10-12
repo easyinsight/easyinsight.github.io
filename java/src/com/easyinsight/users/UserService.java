@@ -13,8 +13,7 @@ import com.easyinsight.util.RandomTextGenerator;
 import com.easyinsight.groups.Group;
 import com.easyinsight.groups.GroupStorage;
 import com.easyinsight.billing.BrainTreeBillingSystem;
-import com.easyinsight.PasswordStorage;
-import com.easyinsight.notifications.BuyOurStuffTodo;
+import com.easyinsight.outboundnotifications.BuyOurStuffTodo;
 
 import java.util.List;
 import java.util.ArrayList;

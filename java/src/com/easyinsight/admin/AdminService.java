@@ -2,18 +2,16 @@ package com.easyinsight.admin;
 
 import com.easyinsight.database.Database;
 import com.easyinsight.logging.LogClass;
-import com.easyinsight.notifications.BroadcastInfo;
+import com.easyinsight.outboundnotifications.BroadcastInfo;
 import com.easyinsight.eventing.MessageUtils;
 
 import javax.management.ObjectName;
 import javax.management.MBeanServer;
 import javax.management.JMX;
-import javax.management.MalformedObjectNameException;
 import java.lang.management.ManagementFactory;
 import java.lang.management.ThreadMXBean;
 import java.lang.management.ThreadInfo;
 import java.lang.management.GarbageCollectorMXBean;
-import java.io.IOException;
 
 import flex.management.runtime.messaging.client.FlexClientManagerControlMBean;
 
