@@ -68,7 +68,7 @@ public class SolutionService {
             LogClass.error(e);
             throw new RuntimeException(e);
         } finally {
-            Database.instance().closeConnection(conn);
+            Database.closeConnection(conn);
         }
     }
 
@@ -117,7 +117,7 @@ public class SolutionService {
             throw new RuntimeException(e);
         } finally {
             conn.setAutoCommit(false);
-            Database.instance().closeConnection(conn);
+            Database.closeConnection(conn);
         }
     }
 
@@ -163,7 +163,7 @@ public class SolutionService {
             throw new RuntimeException(e);
         } finally {
             conn.setAutoCommit(true);
-            Database.instance().closeConnection(conn);
+            Database.closeConnection(conn);
         }
     }
 
@@ -186,27 +186,6 @@ public class SolutionService {
             return authRequirements.get(0);
         }
         return null;
-    }
-
-    public void findInstalledSourcesForSolution(long solutionID) {
-        EIConnection conn = Database.instance().getConnection();
-        try {
-            PreparedStatement queryStmt = conn.prepareStatement("SELECT DISTINCT DATA_FEED.DATA_FEED_ID " +
-                    " FROM UPLOAD_POLICY_USERS, DATA_FEED, SOLUTION_INSTALL WHERE " +
-                    "UPLOAD_POLICY_USERS.USER_ID = ? AND DATA_FEED.DATA_FEED_ID = UPLOAD_POLICY_USERS.FEED_ID AND " +
-                    "DATA_FEED.DATA_FEED_ID = SOLUTION_INSTALL.INSTALLED_DATA_SOURCE_ID AND SOLUTION_INSTALL.SOLUTION_ID = ?");
-            queryStmt.setLong(1, SecurityUtil.getUserID());
-            queryStmt.setLong(2, solutionID);
-            ResultSet rs = queryStmt.executeQuery();
-            while (rs.next()) {
-                long dataSourceID = rs.getLong(1);
-            }
-        } catch (Exception e) {
-            LogClass.error(e);
-            throw new RuntimeException(e);
-        } finally {
-            Database.closeConnection(conn);
-        }
     }
 
     public List<DataSourceDescriptor> determineDataSource(long dataSourceID) {
@@ -255,7 +234,7 @@ public class SolutionService {
             AnalysisDefinition report = new AnalysisStorage().getPersistableReport(reportID, session);
             FeedDefinition sourceDataSource = feedStorage.getFeedDefinitionData(report.getDataFeedID(), conn);
             Map<Key, Key> keyReplacementMap = createKeyReplacementMap(targetDataSource, sourceDataSource);
-            InsightDescriptor id = installReportToDataSource(targetDataSource, report, conn, keyReplacementMap, session);
+            InsightDescriptor id = installReportToDataSource(targetDataSource, report, keyReplacementMap, session);
             conn.commit();
             session.close();
             return id;
@@ -282,7 +261,7 @@ public class SolutionService {
         return keys;
     }
 
-    private InsightDescriptor installReportToDataSource(FeedDefinition localDefinition, AnalysisDefinition report, Connection conn,
+    private InsightDescriptor installReportToDataSource(FeedDefinition localDefinition, AnalysisDefinition report,
                                                         Map<Key, Key> keyReplacementMap, Session session) throws CloneNotSupportedException {
         AnalysisDefinition clonedReport = report.clone(keyReplacementMap, localDefinition.getFields());
         clonedReport.setSolutionVisible(false);
@@ -354,26 +333,6 @@ public class SolutionService {
         return reports;
     }
 
-    public void getReportsForSolution(long solutionID) {
-        EIConnection conn = Database.instance().getConnection();
-        try {
-            PreparedStatement queryStmt = conn.prepareStatement("SELECT ANALYSIS_ID FROM ANALYSIS, solution_install WHERE " +
-                    "ANALYSIS.DATA_FEED_ID = SOLUTION_INSTALL.installed_data_source_id AND SOLUTION_INSTALL.solution_id = ? AND " +
-                    "ANALYSIS.solution_visible = ?");
-            queryStmt.setLong(1, solutionID);
-            queryStmt.setBoolean(2, true);
-            ResultSet rs = queryStmt.executeQuery();
-            while (rs.next()) {
-                long reportID = rs.getLong(1);
-            }
-        } catch (Exception e) {
-            LogClass.error(e);
-            throw new RuntimeException(e);
-        } finally {
-            Database.closeConnection(conn);
-        }
-    }
-
     public List<SolutionInstallInfo> installSolution(long solutionID) {
         // establish the connection from the account/user to the solution
         // retrieve the feeds for this solution
@@ -418,7 +377,7 @@ public class SolutionService {
         } catch (Exception e) {
             LogClass.error(e);
         } finally {
-            Database.instance().closeConnection(conn);
+            Database.closeConnection(conn);
         }
         return feedDescriptors;
     }
@@ -464,7 +423,7 @@ public class SolutionService {
             LogClass.error(e);
             throw new RuntimeException(e);
         } finally {
-            Database.instance().closeConnection(conn);
+            Database.closeConnection(conn);
         }
         SolutionContents solutionContents = new SolutionContents();
         solutionContents.setFeedDescriptors(feedDescriptors);
@@ -492,7 +451,7 @@ public class SolutionService {
         } catch (Exception e) {
             LogClass.error(e);
         } finally {
-            Database.instance().closeConnection(conn);
+            Database.closeConnection(conn);
         }
         return feedDescriptors;
     }
@@ -505,7 +464,7 @@ public class SolutionService {
             LogClass.error(e);
             throw new RuntimeException(e);
         } finally {
-            Database.instance().closeConnection(conn);
+            Database.closeConnection(conn);
         }
     }
 
@@ -577,7 +536,7 @@ public class SolutionService {
             LogClass.error(e);
             throw new RuntimeException(e);
         } finally {
-            Database.instance().closeConnection(conn);
+            Database.closeConnection(conn);
         }
         return descriptors;
     }
@@ -649,7 +608,7 @@ public class SolutionService {
             LogClass.error(e);
             throw new RuntimeException(e);
         } finally {
-            Database.instance().closeConnection(conn);
+            Database.closeConnection(conn);
         }
         return solutions;
     }
@@ -669,7 +628,7 @@ public class SolutionService {
             LogClass.error(e);
             throw new RuntimeException(e);
         } finally {
-            Database.instance().closeConnection(conn);
+            Database.closeConnection(conn);
         }
     }
 
@@ -706,7 +665,7 @@ public class SolutionService {
             LogClass.error(e);
             throw new RuntimeException(e);
         } finally {
-            Database.instance().closeConnection(conn);
+            Database.closeConnection(conn);
         }
         return solutions;
     }
@@ -726,7 +685,7 @@ public class SolutionService {
             LogClass.error(e);
             throw new RuntimeException(e);
         } finally {
-            Database.instance().closeConnection(conn);
+            Database.closeConnection(conn);
         }
         return bytes;
     }
@@ -758,7 +717,7 @@ public class SolutionService {
             LogClass.error(e);
             throw new RuntimeException(e);
         } finally {
-            Database.instance().closeConnection(conn);
+            Database.closeConnection(conn);
         }
         return solutions;
     }
@@ -775,7 +734,7 @@ public class SolutionService {
             LogClass.error(e);
             throw new RuntimeException(e);
         } finally {
-            Database.instance().closeConnection(conn);
+            Database.closeConnection(conn);
         }
     }
 }
