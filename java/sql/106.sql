@@ -38,7 +38,7 @@ create table group_notification (
   key(notification_id),
   key(acting_user_id),
   constraint group_notification_ibfk1 foreign key (notification_id) references notification_base(notification_id) on delete cascade,
-  constraint group_notification_ibfk2 foreign key (group_id) references community_group(community_group_id) on delete cascade,
+  constraint group_notification_ibfk2 foreign key (group_id) references community_group(community_group_id) on delete cascade
 );
 
 create table user_to_group_notification (
