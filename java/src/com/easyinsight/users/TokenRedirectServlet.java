@@ -26,6 +26,15 @@ public class TokenRedirectServlet extends HttpServlet {
 
         String sourceType = req.getParameter("sourceType");
 
+        String solutionIDString = req.getParameter("solutionID");
+
+        int solutionID;
+        if (solutionIDString == null || "".equals(solutionIDString)) {
+            solutionID = 0;
+        } else {
+            solutionID = Integer.parseInt(solutionIDString);
+        }
+
         // Retrieve the AuthSub token assigned by Google
         String token = AuthSubUtil.getTokenFromReply(req.getQueryString());
         if (token == null) {
@@ -89,9 +98,9 @@ public class TokenRedirectServlet extends HttpServlet {
 
         String redirectURL;
         if (ConfigLoader.instance().isProduction()) {
-            redirectURL = "https://www.easy-insight.com/app/#redirectID="+sourceType+"&token=" + sessionToken;
+            redirectURL = "https://www.easy-insight.com/app/#redirectID="+sourceType+"&token=" + sessionToken + "&solutionID=" + solutionID;
         } else {
-            redirectURL = "https://staging.easy-insight.com/app/#redirectID="+sourceType+"&token=" + sessionToken; 
+            redirectURL = "https://staging.easy-insight.com/app/#redirectID="+sourceType+"&token=" + sessionToken + "&solutionID=" + solutionID; 
         }
         resp.sendRedirect(redirectURL);
 

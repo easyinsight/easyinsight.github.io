@@ -11,11 +11,11 @@ import com.easyinsight.users.TokenService;
  * Time: 7:11:52 PM
  */
 public class AuthorizationManager {
-    public AuthorizationRequirement authorize(FeedType type) {
+    public AuthorizationRequirement authorize(FeedType type, long solutionID) {
         if (type.equals(FeedType.GOOGLE) || type.equals(FeedType.GOOGLE_ANALYTICS)) {
             Token token = new TokenStorage().getToken(SecurityUtil.getUserID(), type.getType());
             if (token == null) {
-                return new AuthorizationRequirement(type.getType(), new TokenService().getAuthSubURL(type.getType()));
+                return new AuthorizationRequirement(type.getType(), new TokenService().getAuthSubURL(type.getType(), solutionID));
             }
         }
         return null;

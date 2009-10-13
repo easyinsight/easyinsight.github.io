@@ -173,7 +173,7 @@ public class SolutionService {
             Solution solution = getSolution(solutionID);
             Set<FeedType> types = new SolutionVisitor().getFeedTypes(solution);
             for (FeedType type : types) {
-                AuthorizationRequirement authorizationRequirement = new AuthorizationManager().authorize(type);
+                AuthorizationRequirement authorizationRequirement = new AuthorizationManager().authorize(type, solutionID);
                 if (authorizationRequirement != null) {
                     authRequirements.add(authorizationRequirement);
                 }

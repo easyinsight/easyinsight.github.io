@@ -7,16 +7,8 @@ import com.easyinsight.config.ConfigLoader;
 import com.google.gdata.client.http.AuthSubUtil;
 import com.google.gdata.client.spreadsheet.SpreadsheetService;
 import com.google.gdata.data.spreadsheet.SpreadsheetFeed;
-import com.google.gdata.data.spreadsheet.SpreadsheetEntry;
-import com.google.gdata.util.ServiceException;
-import com.google.gdata.util.AuthenticationException;
 
-import javax.servlet.http.HttpServletResponse;
 import java.net.URL;
-import java.io.IOException;
-import java.security.GeneralSecurityException;
-import java.util.Map;
-import java.util.Iterator;
 import java.util.List;
 import java.util.ArrayList;
 
@@ -40,8 +32,8 @@ public class TokenService {
         gAnalyticsSpec.setType(TokenStorage.GOOGLE_ANALYTICS_TOKEN);
         Token gAnalyticsToken = tokenStorage.getToken(SecurityUtil.getUserID(), TokenStorage.GOOGLE_ANALYTICS_TOKEN);
         gAnalyticsSpec.setDefined(gAnalyticsToken != null);
-        gDocsSpec.setUrlToConfigure(getAuthSubURL(TokenStorage.GOOGLE_DOCS_TOKEN));
-        gAnalyticsSpec.setUrlToConfigure(getAuthSubURL(TokenStorage.GOOGLE_ANALYTICS_TOKEN));
+        gDocsSpec.setUrlToConfigure(getAuthSubURL(TokenStorage.GOOGLE_DOCS_TOKEN, 0));
+        gAnalyticsSpec.setUrlToConfigure(getAuthSubURL(TokenStorage.GOOGLE_ANALYTICS_TOKEN, 0));
         tokenSpecs.add(gDocsSpec);
         tokenSpecs.add(gAnalyticsSpec);
         return tokenSpecs;
@@ -81,13 +73,13 @@ public class TokenService {
         }
     }
 
-    public String getAuthSubURL(int type) {
+    public String getAuthSubURL(int type, long solution) {
         try {
             String nextURL;
             if (ConfigLoader.instance().isProduction()) {
-                nextURL = "https://www.easy-insight.com/app/TokenRedirect?sourceType=" + type;
+                nextURL = "https://www.easy-insight.com/app/TokenRedirect?sourceType=" + type + "?solutionID" + solution;
             } else {
-                nextURL = "https://staging.easy-insight.com/app/TokenRedirect?sourceType=" + type;
+                nextURL = "https://staging.easy-insight.com/app/TokenRedirect?sourceType=" + type + "?solutionID" + solution;
             }
             FeedType feedType = new FeedType(type);
             String scope;

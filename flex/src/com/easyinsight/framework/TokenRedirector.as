@@ -1,5 +1,6 @@
 package com.easyinsight.framework {
 import com.easyinsight.listing.ListingChangeEvent;
+import com.easyinsight.solutions.DelayedSolutionLink;
 import com.easyinsight.solutions.RevisedSolutionDetail;
 
 import flash.events.EventDispatcher;
@@ -32,20 +33,30 @@ public class TokenRedirector extends EventDispatcher {
         Alert.show(event.fault.faultString);
     }
 
+
+    public function set solutionID(value:int):void {
+        _solutionID = value;
+    }
+
     private function onTokenResult(event:ResultEvent):void {
         var result:String = tokenService.setToken.lastResult as String;
         if (result == null) {
-            Alert.show("Successfully authorized Easy Insight! You can now proceed with your previous action.");
-            /*if (_solutionID == 0) {
-                User.getEventNotifier().dispatchEvent(new NavigationEvent("My Data", null, { toGDocs: true }));
+            //Alert.show("Successfully authorized Easy Insight! You can now proceed with your previous action.");
+            if (_solutionID == 0) {
+                Alert.show("Successfully authorized Easy Insight! You can now proceed with your previous action.");
+                //User.getEventNotifier().dispatchEvent(new NavigationEvent("My Data", null, { toGDocs: true }));
             } else {
-                var solutionDetail:RevisedSolutionDetail = new RevisedSolutionDetail();
-                solutionDetail.solution = result;
-                dispatchEvent(new ListingChangeEvent(solutionDetail));
-            }*/
+                var delayedSolutionLink:DelayedSolutionLink = new DelayedSolutionLink(_solutionID);
+                delayedSolutionLink.addEventListener(ListingChangeEvent.LISTING_CHANGE, onEvent);
+                delayedSolutionLink.execute();
+            }
         } else {
             Alert.show(result);
         }
+    }
+
+    private function onEvent(event:ListingChangeEvent):void {
+        dispatchEvent(event);
     }
 
     public function onURL(url:String):void {
