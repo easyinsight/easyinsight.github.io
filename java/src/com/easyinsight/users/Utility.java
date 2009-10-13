@@ -7,6 +7,7 @@ package com.easyinsight.users;
  */
 import com.easyinsight.security.PasswordService;
 import com.easyinsight.PasswordStorage;
+import com.easyinsight.config.ConfigLoader;
 
 import java.security.PrivateKey;
 import java.util.HashMap;
@@ -26,7 +27,7 @@ public class Utility {
   private static PrivateKey privateKey;
 
     static {
-        privateKey = PasswordStorage.getGooglePrivateKey();
+        privateKey = ConfigLoader.instance().isProduction() ? PasswordStorage.getGooglePrivateKey() : null;
     }
 
   // Make class uninstantiable
