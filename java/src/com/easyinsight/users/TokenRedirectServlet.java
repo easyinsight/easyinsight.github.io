@@ -35,10 +35,8 @@ public class TokenRedirectServlet extends HttpServlet {
             solutionID = Integer.parseInt(solutionIDString);
         }
 
-        String sessionToken = "xyz";
-
         // Retrieve the AuthSub token assigned by Google
-        /*String token = AuthSubUtil.getTokenFromReply(req.getQueryString());
+        String token = AuthSubUtil.getTokenFromReply(req.getQueryString());
         if (token == null) {
           resp.sendError(HttpServletResponse.SC_BAD_REQUEST,
                          "No token specified.");
@@ -87,7 +85,7 @@ public class TokenRedirectServlet extends HttpServlet {
                          "Auth error retrieving info for session token: " +
                          e.getMessage());
           return;
-        }*/
+        }
 
         // Retrieve the authentication cookie to identify user
         /*String principal = Utility.getCookieValueWithName(req.getCookies(), Utility.LOGIN_COOKIE_NAME);

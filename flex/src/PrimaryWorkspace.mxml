@@ -315,8 +315,6 @@
                                                         redirector.type = redirectType;
                                                         redirector.onURL(sessionToken);
                                                     } else {
-                                                        if (o.blah != null) {
-                                                        } else {
                                                             var page:String = o.page;
                                                             if (page != null) {
                                                                 if (currentState == "Analysis") {
@@ -372,7 +370,6 @@
                                                             else {
                                                                 navigation(new NavigationEvent("Intro"));
                                                             }
-                                                        }
                                                     }
                                                 }
                                             }

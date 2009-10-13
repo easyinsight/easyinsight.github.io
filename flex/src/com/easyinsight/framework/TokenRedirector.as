@@ -42,14 +42,14 @@ public class TokenRedirector extends EventDispatcher {
         var result:String = tokenService.setToken.lastResult as String;
         if (result == null) {
             Alert.show("Successfully authorized Easy Insight! You can now proceed with your previous action.");
-            /*if (_solutionID == 0) {
+            if (_solutionID == 0) {
                 Alert.show("Successfully authorized Easy Insight! You can now proceed with your previous action.");
                 //User.getEventNotifier().dispatchEvent(new NavigationEvent("My Data", null, { toGDocs: true }));
             } else {
                 var delayedSolutionLink:DelayedSolutionLink = new DelayedSolutionLink(_solutionID);
                 delayedSolutionLink.addEventListener(ListingChangeEvent.LISTING_CHANGE, onEvent);
                 delayedSolutionLink.execute();
-            }*/
+            }
         } else {
             Alert.show(result);
         }
