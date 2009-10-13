@@ -98,9 +98,9 @@ public class TokenRedirectServlet extends HttpServlet {
 
         String redirectURL;
         if (ConfigLoader.instance().isProduction()) {
-            redirectURL = "https://www.easy-insight.com/app/#redirectID="+sourceType+"&token=" + sessionToken + "&solutionID=" + solutionID;
+            redirectURL = "https://www.easy-insight.com/app/#redirectID="+sourceType+"&token=" + sessionToken;
         } else {
-            redirectURL = "https://staging.easy-insight.com/app/#redirectID="+sourceType+"&token=" + sessionToken + "&solutionID=" + solutionID; 
+            redirectURL = "https://staging.easy-insight.com/app/#redirectID="+sourceType+"&token=" + sessionToken; 
         }
         resp.sendRedirect(redirectURL);
 
