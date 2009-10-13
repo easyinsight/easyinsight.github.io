@@ -26,6 +26,25 @@ public class ConfigLoader {
     private String billingKeyID;
     private String billingKey;
 
+    private String googleUserName;
+    private String googlePassword;
+
+    public String getGoogleUserName() {
+        return googleUserName;
+    }
+
+    public void setGoogleUserName(String googleUserName) {
+        this.googleUserName = googleUserName;
+    }
+
+    public String getGooglePassword() {
+        return googlePassword;
+    }
+
+    public void setGooglePassword(String googlePassword) {
+        this.googlePassword = googlePassword;
+    }
+
     public String getRedirectLocation() {
         return redirectLocation;
     }
@@ -123,6 +142,9 @@ public class ConfigLoader {
             billingKeyID = (String) properties.get("billing.keyid");
             billingKey = (String) properties.get("billing.key");
             redirectLocation = (String) properties.get("billing.redirectLocation");
+
+            googleUserName = (String) properties.get("google.username");
+            googlePassword = (String) properties.get("google.password");
 
             production = Boolean.valueOf((String) properties.get("production"));
             

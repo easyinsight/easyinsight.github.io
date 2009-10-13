@@ -3,6 +3,7 @@ package com.easyinsight.users;
 import com.google.gdata.client.http.AuthSubUtil;
 import com.google.gdata.util.AuthenticationException;
 import com.easyinsight.security.SecurityUtil;
+import com.easyinsight.config.ConfigLoader;
 
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -86,7 +87,12 @@ public class TokenRedirectServlet extends HttpServlet {
         }*/
         //SecurityUtil.getUserID(false);
 
-        String redirectURL = "https://www.easy-insight.com/app/#redirectID="+sourceType+"&token=" + sessionToken;
+        String redirectURL;
+        if (ConfigLoader.instance().isProduction()) {
+            redirectURL = "https://www.easy-insight.com/app/#redirectID="+sourceType+"&token=" + sessionToken;
+        } else {
+            redirectURL = "https://staging.easy-insight.com/app/#redirectID="+sourceType+"&token=" + sessionToken; 
+        }
         resp.sendRedirect(redirectURL);
 
         /*Token tokenObject = new Token();

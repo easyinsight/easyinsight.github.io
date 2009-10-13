@@ -8,6 +8,7 @@ import com.easyinsight.users.Token;
 import com.easyinsight.users.TokenStorage;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.security.SecurityUtil;
+import com.easyinsight.config.ConfigLoader;
 import com.google.gdata.client.analytics.AnalyticsService;
 import com.google.gdata.data.analytics.DataFeed;
 import com.google.gdata.data.analytics.DataEntry;
@@ -114,8 +115,16 @@ public class GoogleAnalyticsFeed extends Feed {
     private AnalyticsService getAnalyticsService() throws AuthenticationException, TokenMissingException {
         if (as == null) {
             as = new AnalyticsService("easyinsight_eianalytics_v1.0");
-            String token = getToken();
-            as.setAuthSubToken(token);            
+            try {
+                String token = getToken();
+                as.setAuthSubToken(token);
+            } catch (TokenMissingException e) {
+                if (ConfigLoader.instance().getGoogleUserName() != null && !"".equals(ConfigLoader.instance().getGoogleUserName())) {
+                    as.setUserCredentials(ConfigLoader.instance().getGoogleUserName(), ConfigLoader.instance().getGooglePassword());    
+                } else {
+                    throw e;
+                }
+            }
         }
         return as;
     }
@@ -254,8 +263,14 @@ public class GoogleAnalyticsFeed extends Feed {
             }
             value = new NumericValue(doubleValue);
         } else if (analysisItem.hasType(AnalysisItemTypes.DATE_DIMENSION)) {
-            Date dateValue = dateFormat.parse(entry.stringValueOf(analysisItem.getKey().toKeyString()));
-            value = new DateValue(dateValue);
+            String key = analysisItem.getKey().toKeyString();
+            String date = entry.stringValueOf(key);
+            if (date != null) {
+                Date dateValue = dateFormat.parse(date);
+                value = new DateValue(dateValue);
+            } else {
+                value = new DateValue(new Date());
+            }
         } else {
             value = new StringValue(entry.stringValueOf(analysisItem.getKey().toKeyString()));
         }
@@ -272,8 +287,18 @@ public class GoogleAnalyticsFeed extends Feed {
         Iterator<AnalysisDimension> iter = dimensions.iterator();
         while (dimension == null && iter.hasNext()) {
             AnalysisDimension testDim = iter.next();
-            if (!testDim.getKey().toKeyString().equals(GoogleAnalyticsDataSource.DATE)) {
+            if (!testDim.getKey().toKeyString().equals(GoogleAnalyticsDataSource.DATE) &&
+                    !testDim.getKey().toKeyString().equals(GoogleAnalyticsDataSource.SOURCE)) {
                 dimension = testDim;
+            }
+        }
+        if (dimension == null) {
+            iter = dimensions.iterator();
+            while (dimension == null && iter.hasNext()) {
+                AnalysisDimension testDim = iter.next();
+                if (!testDim.getKey().toKeyString().equals(GoogleAnalyticsDataSource.DATE)) {
+                    dimension = testDim;
+                }
             }
         }
         if (dimension == null) {

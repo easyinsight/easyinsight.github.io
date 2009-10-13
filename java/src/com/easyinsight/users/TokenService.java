@@ -3,6 +3,7 @@ package com.easyinsight.users;
 import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.datafeeds.FeedType;
+import com.easyinsight.config.ConfigLoader;
 import com.google.gdata.client.http.AuthSubUtil;
 import com.google.gdata.client.spreadsheet.SpreadsheetService;
 import com.google.gdata.data.spreadsheet.SpreadsheetFeed;
@@ -70,7 +71,12 @@ public class TokenService {
 
     public String getAuthSubURL(int type) {
         try {
-            String nextURL = "https://www.easy-insight.com/app/TokenRedirect?sourceType=" + type;
+            String nextURL;
+            if (ConfigLoader.instance().isProduction()) {
+                nextURL = "https://www.easy-insight.com/app/TokenRedirect?sourceType=" + type;
+            } else {
+                nextURL = "https://staging.easy-insight.com/app/TokenRedirect?sourceType=" + type;
+            }
             FeedType feedType = new FeedType(type);
             String scope;
             if (feedType.equals(FeedType.GOOGLE_ANALYTICS)) {

@@ -8,8 +8,10 @@ import com.easyinsight.users.TokenStorage;
 import com.easyinsight.users.Token;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.security.SecurityUtil;
+import com.easyinsight.config.ConfigLoader;
 import com.google.gdata.client.spreadsheet.SpreadsheetService;
 import com.google.gdata.data.spreadsheet.*;
+import com.google.gdata.util.AuthenticationException;
 
 import java.util.Set;
 import java.util.Collection;
@@ -26,25 +28,44 @@ public class GoogleSpreadsheetFeed extends Feed {
     private String worksheetURL;
     private String token;
 
+    private SpreadsheetService as;
+
     public GoogleSpreadsheetFeed(String worksheetURL) {
         this.worksheetURL = worksheetURL;
     }
 
-    private String getToken() {
+    private String getToken() throws TokenMissingException {
         if (token == null) {
             Token tokenObject = new TokenStorage().getToken(SecurityUtil.getUserID(), TokenStorage.GOOGLE_DOCS_TOKEN);
             if (tokenObject == null) {
-                throw new RuntimeException("Token access revoked?");
+                throw new TokenMissingException();
             }
             token = tokenObject.getTokenValue();
         }
         return token;
     }
 
+    private SpreadsheetService getService() throws AuthenticationException, TokenMissingException {
+        if (as == null) {
+            as = new SpreadsheetService("easyinsight_eidocs_v1.0");
+            try {
+                String token = getToken();
+                as.setAuthSubToken(token);
+            } catch (TokenMissingException e) {
+                if (ConfigLoader.instance().getGoogleUserName() != null && !"".equals(ConfigLoader.instance().getGoogleUserName())) {
+                    as.setUserCredentials(ConfigLoader.instance().getGoogleUserName(), ConfigLoader.instance().getGooglePassword());
+                } else {
+                    throw e;
+                }
+            }
+        }
+        return as;
+    }
+
     public AnalysisItemResultMetadata getMetadata(AnalysisItem analysisItem, InsightRequestMetadata insightRequestMetadata) {
         try {
             AnalysisItemResultMetadata metadata = analysisItem.createResultMetadata();
-            SpreadsheetService myService = GoogleSpreadsheetAccess.getOrCreateSpreadsheetService(getToken());
+            SpreadsheetService myService = getService();
             URL listFeedUrl = new URL(worksheetURL);
             ListFeed feed = myService.getFeed(listFeedUrl, ListFeed.class);
             for (ListEntry listEntry : feed.getEntries()) {
