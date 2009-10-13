@@ -47,6 +47,18 @@ public class TokenService {
         return tokenSpecs;
     }
 
+    public void deleteToken(int type) {
+        try {
+            Token token = new TokenStorage().getToken(SecurityUtil.getUserID(), type);
+            if (token != null) {
+                new TokenStorage().deleteToken(token);
+            }
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        }
+    }
+
     public String setToken(int type, String sessionToken) {
         /*System.out.println("got URL " + url);
         String queryString = url.substring(url.indexOf("?"));*/
