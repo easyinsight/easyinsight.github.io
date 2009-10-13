@@ -47,7 +47,7 @@
             hbox.addChild(legend);
         }
 
-        public function renderReport(dataSet:ArrayCollection, analysisDefinition:AnalysisDefinition, clientProcessorMap:Object):void {
+        public function renderReport(dataSet:ArrayCollection, analysisDefinition:AnalysisDefinition, clientProcessorMap:Object, additionalProperties:Object):void {
 
             var lineChartDef:MultiMeasureLineChartDefinition = analysisDefinition as MultiMeasureLineChartDefinition;
 
