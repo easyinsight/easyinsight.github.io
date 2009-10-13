@@ -77,9 +77,9 @@ public class TokenService {
         try {
             String nextURL;
             if (ConfigLoader.instance().isProduction()) {
-                nextURL = "https://www.easy-insight.com/app/TokenRedirect?sourceType=" + type + "&solutionID=" + solution;
+                nextURL = "https://www.easy-insight.com/app/TokenRedirect?sourceType=" + type + "&refSolutionID=" + solution;
             } else {
-                nextURL = "https://staging.easy-insight.com/app/TokenRedirect?sourceType=" + type + "&solutionID=" + solution;
+                nextURL = "https://staging.easy-insight.com/app/TokenRedirect?sourceType=" + type + "&refSolutionID=" + solution;
             }
             FeedType feedType = new FeedType(type);
             String scope;

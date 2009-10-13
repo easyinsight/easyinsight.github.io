@@ -26,7 +26,7 @@ public class TokenRedirectServlet extends HttpServlet {
 
         String sourceType = req.getParameter("sourceType");
 
-        String solutionIDString = req.getParameter("solutionID");
+        String solutionIDString = req.getParameter("refSolutionID");
 
         int solutionID;
         if (solutionIDString == null || "".equals(solutionIDString)) {
@@ -35,8 +35,10 @@ public class TokenRedirectServlet extends HttpServlet {
             solutionID = Integer.parseInt(solutionIDString);
         }
 
+        String sessionToken = "xyz";
+
         // Retrieve the AuthSub token assigned by Google
-        String token = AuthSubUtil.getTokenFromReply(req.getQueryString());
+        /*String token = AuthSubUtil.getTokenFromReply(req.getQueryString());
         if (token == null) {
           resp.sendError(HttpServletResponse.SC_BAD_REQUEST,
                          "No token specified.");
@@ -85,7 +87,7 @@ public class TokenRedirectServlet extends HttpServlet {
                          "Auth error retrieving info for session token: " +
                          e.getMessage());
           return;
-        }
+        }*/
 
         // Retrieve the authentication cookie to identify user
         /*String principal = Utility.getCookieValueWithName(req.getCookies(), Utility.LOGIN_COOKIE_NAME);
@@ -98,9 +100,9 @@ public class TokenRedirectServlet extends HttpServlet {
 
         String redirectURL;
         if (ConfigLoader.instance().isProduction()) {
-            redirectURL = "https://www.easy-insight.com/app/#redirectID="+sourceType+"&token=" + sessionToken + "&solutionID=" + solutionID;
+            redirectURL = "https://www.easy-insight.com/app/#redirectID="+sourceType+"&token=" + sessionToken + "&refSolutionID=" + solutionID;
         } else {
-            redirectURL = "https://staging.easy-insight.com/app/#redirectID="+sourceType+"&token=" + sessionToken + "&solutionID=" + solutionID; 
+            redirectURL = "https://staging.easy-insight.com/app/#redirectID="+sourceType+"&token=" + sessionToken + "&refSolutionID=" + solutionID; 
         }
         resp.sendRedirect(redirectURL);
 

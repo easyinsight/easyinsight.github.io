@@ -311,64 +311,67 @@
                                                         var redirectType:int = int(redirectID);
                                                         var sessionToken:String = String(o.token);
                                                         var redirector:TokenRedirector = new TokenRedirector();
-                                                        redirector.solutionID = o.solutionID;
+                                                        redirector.solutionID = o.refSolutionID;
                                                         redirector.type = redirectType;
                                                         redirector.onURL(sessionToken);
                                                     } else {
-                                                        var page:String = o.page;
-                                                        if (page != null) {
-                                                            if (currentState == "Analysis") {
-                                                                if (loggedIn) {
-                                                                    currentState = "LoggedIn";
-                                                                } else {
-                                                                    currentState = "";
+                                                        if (o.blah != null) {
+                                                        } else {
+                                                            var page:String = o.page;
+                                                            if (page != null) {
+                                                                if (currentState == "Analysis") {
+                                                                    if (loggedIn) {
+                                                                        currentState = "LoggedIn";
+                                                                    } else {
+                                                                        currentState = "";
+                                                                    }
+                                                                    dataAnalysis.removeEventListener(AnalysisCloseEvent.ANALYSIS_CLOSE, analysisClosed);
+                                                                    dataAnalysis = null;
                                                                 }
-                                                                dataAnalysis.removeEventListener(AnalysisCloseEvent.ANALYSIS_CLOSE, analysisClosed);
-                                                                dataAnalysis = null;
-                                                            }
-                                                            switch (page) {
-                                                                case "myData":
-                                                                    navigation(new NavigationEvent("My Data"));
-                                                                    break;
-                                                                case "myGoals":
-                                                                    navigation(new NavigationEvent("Goals"));
-                                                                    break;
-                                                                case "exchange":
-                                                                        
-                                                                    var view:int = int(o.view);
-                                                                    var display:int = int(o.display);
-                                                                    navigation(new NavigationEvent("Exchange", null, {viewMode: view, displayMode: display}));
-                                                                    break;
-                                                                case "groups":
-                                                                    navigation(new NavigationEvent("Groups"));
-                                                                    break;
-                                                                case "intro":
-                                                                        if(o.type != null && o.type == "tour")
-                                                                            navigation(new NavigationEvent("Intro", null, { tour: true }));
+                                                                switch (page) {
+                                                                    case "myData":
+                                                                        navigation(new NavigationEvent("My Data"));
+                                                                        break;
+                                                                    case "myGoals":
+                                                                        navigation(new NavigationEvent("Goals"));
+                                                                        break;
+                                                                    case "exchange":
+
+                                                                        var view:int = int(o.view);
+                                                                        var display:int = int(o.display);
+                                                                        navigation(new NavigationEvent("Exchange", null, {viewMode: view, displayMode: display}));
+                                                                        break;
+                                                                    case "groups":
+                                                                        navigation(new NavigationEvent("Groups"));
+                                                                        break;
+                                                                    case "intro":
+                                                                            if(o.type != null && o.type == "tour")
+                                                                                navigation(new NavigationEvent("Intro", null, { tour: true }));
+                                                                            else
+                                                                                navigation(new NavigationEvent("Intro"));
+                                                                        break;
+                                                                    case "solutions":
+                                                                        if(o.type != null && o.type == "business")
+                                                                            navigation(new NavigationEvent("Solutions", null, { biz: true, client:false, saas: false, learning: false }));
+                                                                        else if(o.type != null && o.type == "application")
+                                                                            navigation(new NavigationEvent("Solutions", null, { saas: true, client:true, biz: false, learning: false }));
                                                                         else
-                                                                            navigation(new NavigationEvent("Intro"));
-                                                                    break;
-                                                                case "solutions":
-                                                                    if(o.type != null && o.type == "business")
-                                                                        navigation(new NavigationEvent("Solutions", null, { biz: true, client:false, saas: false, learning: false }));
-                                                                    else if(o.type != null && o.type == "application")
-                                                                        navigation(new NavigationEvent("Solutions", null, { saas: true, client:true, biz: false, learning: false }));
-                                                                    else
-                                                                        navigation(new NavigationEvent("Solutions"));
-                                                                    break;
-                                                                case "account":
-                                                                    navigation(new NavigationEvent("Accounts"));
-                                                                    break;
-                                                                case "welcome":
-                                                                    navigation(new NavigationEvent(null, new WelcomeScreen()));
+                                                                            navigation(new NavigationEvent("Solutions"));
+                                                                        break;
+                                                                    case "account":
+                                                                        navigation(new NavigationEvent("Accounts"));
+                                                                        break;
+                                                                    case "welcome":
+                                                                        navigation(new NavigationEvent(null, new WelcomeScreen()));
+                                                                }
                                                             }
-                                                        }
-                                                        else if (o.resetPassword != null) {
-                                                            passwordResetValue = o.resetPassword;
-                                                            userService.verifyPasswordReset.send(o.resetPassword);
-                                                        }
-                                                        else {
-                                                            navigation(new NavigationEvent("Intro"));
+                                                            else if (o.resetPassword != null) {
+                                                                passwordResetValue = o.resetPassword;
+                                                                userService.verifyPasswordReset.send(o.resetPassword);
+                                                            }
+                                                            else {
+                                                                navigation(new NavigationEvent("Intro"));
+                                                            }
                                                         }
                                                     }
                                                 }
