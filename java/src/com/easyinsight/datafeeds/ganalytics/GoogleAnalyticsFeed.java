@@ -6,6 +6,7 @@ import com.easyinsight.dataset.DataSet;
 import com.easyinsight.core.*;
 import com.easyinsight.users.Token;
 import com.easyinsight.users.TokenStorage;
+import com.easyinsight.users.Utility;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.config.ConfigLoader;
@@ -117,7 +118,7 @@ public class GoogleAnalyticsFeed extends Feed {
             as = new AnalyticsService("easyinsight_eianalytics_v1.0");
             try {
                 String token = getToken();
-                as.setAuthSubToken(token);
+                as.setAuthSubToken(token, Utility.getPrivateKey());
             } catch (TokenMissingException e) {
                 if (ConfigLoader.instance().getGoogleUserName() != null && !"".equals(ConfigLoader.instance().getGoogleUserName())) {
                     as.setUserCredentials(ConfigLoader.instance().getGoogleUserName(), ConfigLoader.instance().getGooglePassword());    

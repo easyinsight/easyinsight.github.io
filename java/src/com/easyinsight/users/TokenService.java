@@ -98,7 +98,7 @@ public class TokenService {
             SpreadsheetService spreadsheetService = new SpreadsheetService("easyinsight-eidocs-1");
             Token token = new TokenStorage().getToken(SecurityUtil.getUserID(), TokenStorage.GOOGLE_DOCS_TOKEN);
             if (token != null) {
-                spreadsheetService.setAuthSubToken(token.getTokenValue());
+                spreadsheetService.setAuthSubToken(token.getTokenValue(), Utility.getPrivateKey());
                 SpreadsheetFeed spreadsheetFeed;
                 try {
                     URL feedUrl = new URL("http://spreadsheets.google.com/feeds/spreadsheets/private/full");
