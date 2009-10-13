@@ -63,7 +63,7 @@
             dispatchEvent(event);
         }
 
-        public function renderReport(dataSet:ArrayCollection, analysisDefinition:AnalysisDefinition, clientProcessorMap:Object):void {
+        public function renderReport(dataSet:ArrayCollection, analysisDefinition:AnalysisDefinition, clientProcessorMap:Object, additionalProperties:Object):void {
             var pieChartDef:Pie3DChartDefinition = analysisDefinition as Pie3DChartDefinition;
             if (pieChartDef.elevationAngle > 0) {
                 visuals.elevationAngle = pieChartDef.elevationAngle;

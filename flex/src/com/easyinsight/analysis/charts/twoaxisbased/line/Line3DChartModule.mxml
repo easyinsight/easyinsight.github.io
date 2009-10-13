@@ -94,7 +94,7 @@ import com.easyinsight.filtering.FilterRawData;
             dispatchEvent(event);
         }
 
-        public function renderReport(dataSet:ArrayCollection, analysisDefinition:AnalysisDefinition, clientProcessorMap:Object):void {
+        public function renderReport(dataSet:ArrayCollection, analysisDefinition:AnalysisDefinition, clientProcessorMap:Object, additionalProperties:Object):void {
 
             var lineChartDef:Line3DChartDefinition = analysisDefinition as Line3DChartDefinition;
 

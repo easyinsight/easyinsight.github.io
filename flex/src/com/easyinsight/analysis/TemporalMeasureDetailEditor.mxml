@@ -116,11 +116,15 @@
                 <mx:Object label="Year" data="{AnalysisItemTypes.YEAR_LEVEL}"/>
                 <mx:Object label="Month - Year" data="{AnalysisItemTypes.MONTH_LEVEL}"/>
                 <mx:Object label="Day - Month - Year" data="{AnalysisItemTypes.DAY_LEVEL}"/>
+                <mx:Object label="Day - Month - Year - Hour" data="{AnalysisItemTypes.HOUR_LEVEL}"/>
+                <mx:Object label="Day - Month - Year - Hour - Minute"
+                           data="{AnalysisItemTypes.MINUTE_LEVEL}"/>
+                <mx:Object label="Week - Year" data="{AnalysisItemTypes.WEEK_LEVEL}"/>
             </mx:ArrayCollection>
         </mx:ComboBox>
     </mx:FormItem>
     <mx:FormItem label="Grouping: ">
-        <util:AnalysisItemComboBox dataProvider="{dimensionFields}" id="dimensionComboBox" labelField="display"
-                                   change="onDimensionChange()" selectedValue="{grouping}"/>
+        <util:AnalysisItemCompletionInput items="{dimensionFields}" id="dimensionComboBox" labelField="display"
+                                   itemChanged="onDimensionChange()" selectedItem="{grouping}"/>        
     </mx:FormItem>
 </analysis:AnalysisItemDetailEditor>

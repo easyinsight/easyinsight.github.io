@@ -18,6 +18,7 @@ import mx.collections.ArrayCollection;
         public var invalidAnalysisItemIDs:ArrayCollection;
         public var feedMetadata:FeedMetadata;
         public var dataSourceInfo:DataSourceInfo;
+        public var additionalProperties:Object;
 		
 		public function ListDataResults()
 			{

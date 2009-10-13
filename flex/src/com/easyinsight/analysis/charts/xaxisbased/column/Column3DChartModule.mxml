@@ -255,7 +255,7 @@
         }
 
 
-        public function renderReport(dataSet:ArrayCollection, analysisDefinition:AnalysisDefinition, clientProcessorMap:Object):void {
+        public function renderReport(dataSet:ArrayCollection, analysisDefinition:AnalysisDefinition, clientProcessorMap:Object, additionalProperties:Object):void {
             var columnChartDef:Column3DChartDefinition = analysisDefinition as Column3DChartDefinition;
 
             if (dataSet.length > 0) {

@@ -229,7 +229,7 @@ import mx.charts.series.ColumnSeries;
             return filterRawData;
         }
 
-        public function renderReport(dataSet:ArrayCollection, analysisDefinition:AnalysisDefinition, clientProcessorMap:Object):void {
+        public function renderReport(dataSet:ArrayCollection, analysisDefinition:AnalysisDefinition, clientProcessorMap:Object, additionalProperties:Object):void {
             var columnChartDef:ColumnChartDefinition = analysisDefinition as ColumnChartDefinition;
 
             if (dataSet.length > 0) {

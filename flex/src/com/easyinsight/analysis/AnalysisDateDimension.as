@@ -25,7 +25,7 @@ import mx.formatters.NumberFormatter;
 		
 		override public function getFormatter():Formatter {
             var formatter:Formatter;
-            if (dateLevel < AnalysisItemTypes.WEEK_LEVEL) {
+            if (dateLevel <= AnalysisItemTypes.WEEK_LEVEL) {
                 var dateFormatter:DateFormatter = new DateFormatter();
                 switch (this.dateLevel) {
                     case AnalysisItemTypes.YEAR_LEVEL:
@@ -33,6 +33,9 @@ import mx.formatters.NumberFormatter;
                         break;
                     case AnalysisItemTypes.MONTH_LEVEL:
                         dateFormatter.formatString = "MM/YYYY";
+                        break;
+                    case AnalysisItemTypes.WEEK_LEVEL:
+                        dateFormatter.formatString = "MM/DD/YYYY";
                         break;
                     case AnalysisItemTypes.DAY_LEVEL:
                         dateFormatter.formatString = "MM/DD/YYYY";
@@ -45,7 +48,7 @@ import mx.formatters.NumberFormatter;
                         break;
                 }
                 formatter = dateFormatter;
-            } else if (dateLevel == AnalysisItemTypes.WEEK_LEVEL || dateLevel == AnalysisItemTypes.DAY_OF_WEEK_FLAT ) {
+            } else if (dateLevel == AnalysisItemTypes.DAY_OF_WEEK_FLAT ) {
                 formatter = new DimensionValueFormatter();
             } else {
                 var numberFormatter:NumberFormatter = new NumberFormatter();

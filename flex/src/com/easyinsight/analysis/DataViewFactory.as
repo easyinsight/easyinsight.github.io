@@ -115,7 +115,7 @@ public class DataViewFactory extends VBox {
             retrieveData();
         } else {
             _analysisDefinition = _controlBar.createAnalysisDefinition();
-            _reportRenderer.renderReport(_lastData, _analysisDefinition, _lastClientProcessorMap);
+            _reportRenderer.renderReport(_lastData, _analysisDefinition, _lastClientProcessorMap, null);
         }
     }
 
@@ -128,7 +128,7 @@ public class DataViewFactory extends VBox {
                 _analysisDefinition.createDefaultLimits();
                 _dataService.retrieveData(_analysisDefinition, refreshAllSources);
             } else {
-                _reportRenderer.renderReport(new ArrayCollection(), _analysisDefinition, new Object());
+                _reportRenderer.renderReport(new ArrayCollection(), _analysisDefinition, new Object(), null);
             }
         }
     }
@@ -140,7 +140,7 @@ public class DataViewFactory extends VBox {
         _controlBar.onDataReceipt(event);
         _lastData = event.dataSet;
         _lastClientProcessorMap = event.clientProcessorMap;
-        _reportRenderer.renderReport(event.dataSet, _analysisDefinition, event.clientProcessorMap);
+        _reportRenderer.renderReport(event.dataSet, _analysisDefinition, event.clientProcessorMap, event.additionalProperties);
     }
 
     private function loadReportRenderer():void {

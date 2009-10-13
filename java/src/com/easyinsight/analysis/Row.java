@@ -95,6 +95,10 @@ public class Row implements IRow, Serializable {
         valueMap.remove(key);
     }
 
+    public void addValue(String s, Number value) {
+        valueMap.put(new NamedKey(s), new NumericValue(value));
+    }
+
     public IRow merge(IRow row) {
         Row otherRow = (Row) row;
         Row mergedRow = new Row();

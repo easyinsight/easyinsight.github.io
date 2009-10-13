@@ -40,18 +40,24 @@ public class TemporalComponent implements IComponent {
         }
         // first question...
         // sort the values by the date sort item in an ascending fashion
+        AnalysisDimension deltaDim;
         if (existingDate == null) {
-            dataSet.sort(temporalAnalysisMeasure.getAnalysisDimension(), false);
+            deltaDim = temporalAnalysisMeasure.getAnalysisDimension();
         } else {
-            dataSet.sort(existingDate, false);
+            deltaDim = existingDate;
+
         }
+
+        dataSet.sort(deltaDim, false);
+
+        // first step is to aggregate in terms of the depth dimension
         
         for (int i = 0; i < dataSet.getRows().size(); i++) {
             IRow row = dataSet.getRow(i);
             // create the key map here...
             Map<Key, Value> dimensionKey = new HashMap<Key, Value>();
             for (AnalysisItem analysisItem : pipelineData.getReportItems()) {
-                if (analysisItem.hasType(AnalysisItemTypes.DIMENSION)) {
+                if (analysisItem.hasType(AnalysisItemTypes.DIMENSION) && !analysisItem.equals(deltaDim)) {
                     AggregateKey aggregateKey = analysisItem.createAggregateKey();
                     dimensionKey.put(aggregateKey, row.getValue(aggregateKey));
                 }
@@ -62,7 +68,7 @@ public class TemporalComponent implements IComponent {
                 temporalAggregation = temporalAnalysisMeasure.createAggregation();
                 aggregationMap.put(dimensionKey, temporalAggregation);
             }
-            temporalAggregation.addValue(value, i);
+            temporalAggregation.addValue(value, 0);
         }
 
         for (Map.Entry<Map<Key, Value>, ITemporalAggregation> entry : aggregationMap.entrySet()) {
@@ -74,7 +80,7 @@ public class TemporalComponent implements IComponent {
             newRow.addValue(temporalAnalysisMeasure.createAggregateKey(), entry.getValue().getValue(0));
         }
 
-        if (existingDate == null) {
+        /*if (existingDate == null) {
             DateValue latestDate = null;
             AggregateKey dateKey = temporalAnalysisMeasure.getAnalysisDimension().createAggregateKey();
             for (IRow row : dataSet.getRows()) {
@@ -95,7 +101,7 @@ public class TemporalComponent implements IComponent {
                 }
                 producedSet = anotherDataSet;
             }
-        }
+        }*/
         return producedSet;
     }
 

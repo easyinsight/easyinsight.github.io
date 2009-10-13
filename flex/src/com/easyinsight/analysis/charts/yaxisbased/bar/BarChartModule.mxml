@@ -276,7 +276,8 @@ import mx.events.FlexEvent;
             return filterRawData;
         }
 
-        public function renderReport(dataSet:ArrayCollection, analysisDefinition:AnalysisDefinition, clientProcessorMap:Object):void {
+        public function renderReport(dataSet:ArrayCollection, analysisDefinition:AnalysisDefinition, clientProcessorMap:Object,
+                additionalProperties:Object):void {
             var barChartDef:BarChartDefinition = analysisDefinition as BarChartDefinition;
 
             if (dataSet.length > 0) {

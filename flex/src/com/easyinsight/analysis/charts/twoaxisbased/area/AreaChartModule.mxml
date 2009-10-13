@@ -81,7 +81,7 @@
             dispatchEvent(event);
         }
 
-        public function renderReport(dataSet:ArrayCollection, analysisDefinition:AnalysisDefinition, clientProcessorMap:Object):void {
+        public function renderReport(dataSet:ArrayCollection, analysisDefinition:AnalysisDefinition, clientProcessorMap:Object, additionalProperties:Object):void {
 
             var areaChartDef:AreaChartDefinition = analysisDefinition as AreaChartDefinition;
 

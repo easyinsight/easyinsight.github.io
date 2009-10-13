@@ -64,8 +64,8 @@ public class ListDataService extends EventDispatcher implements IReportDataServi
             }
             data.addItem(endObject);
         }
-        dispatchEvent(new DataServiceEvent(DataServiceEvent.DATA_RETURNED, data, clientProcessorMap, listData.dataSourceInfo, listData.limitedResults,
-                listData.maxResults, listData.limitResults));
+        dispatchEvent(new DataServiceEvent(DataServiceEvent.DATA_RETURNED, data, clientProcessorMap, listData.dataSourceInfo,
+                listData.additionalProperties, listData.limitedResults, listData.maxResults, listData.limitResults));
         dispatchEvent(new DataServiceLoadingEvent(DataServiceLoadingEvent.LOADING_STOPPED));
     }
 

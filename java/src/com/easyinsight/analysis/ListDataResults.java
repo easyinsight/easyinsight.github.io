@@ -8,6 +8,8 @@ import com.easyinsight.datafeeds.CredentialRequirement;
 
 import java.util.List;
 import java.util.Set;
+import java.util.Map;
+import java.util.HashMap;
 import java.io.Serializable;
 
 public class ListDataResults implements Serializable {
@@ -21,6 +23,15 @@ public class ListDataResults implements Serializable {
     private Set<Long> invalidAnalysisItemIDs;
     private FeedMetadata feedMetadata;
     private DataSourceInfo dataSourceInfo;
+    private Map<String, Object> additionalProperties = new HashMap<String, Object>();
+
+    public Map<String, Object> getAdditionalProperties() {
+        return additionalProperties;
+    }
+
+    public void setAdditionalProperties(Map<String, Object> additionalProperties) {
+        this.additionalProperties = additionalProperties;
+    }
 
     public Set<CredentialRequirement> getCredentialRequirements() {
         return credentialRequirements;

@@ -103,10 +103,11 @@ public class TestUtil {
             PreparedStatement deleteStmt = conn.prepareStatement("DELETE ACCOUNT FROM USER, ACCOUNT WHERE USERNAME = ? AND USER.account_id = ACCOUNT.ACCOUNT_ID");
             deleteStmt.setString(1, "testuser");
             deleteStmt.executeUpdate();
+            deleteStmt.close();
         } catch (SQLException e) {
             throw new RuntimeException(e);
         } finally {
-            Database.instance().closeConnection(conn);
+            Database.closeConnection(conn);
         }
         User user = new InternalUserService().retrieveUser("testuser");
         long userID;

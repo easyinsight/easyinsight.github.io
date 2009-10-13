@@ -28,7 +28,7 @@
         [Bindable]
         private var maxValue:int = 100;
 
-        public function renderReport(dataSet:ArrayCollection, analysisDefinition:AnalysisDefinition, clientProcessorMap:Object):void {
+        public function renderReport(dataSet:ArrayCollection, analysisDefinition:AnalysisDefinition, clientProcessorMap:Object, additionalProperties:Object):void {
             var gaugeDefinition:GaugeDefinition = analysisDefinition as GaugeDefinition;
             if (dataSet.length > 0) {
                 var row:Object = dataSet.getItemAt(0);

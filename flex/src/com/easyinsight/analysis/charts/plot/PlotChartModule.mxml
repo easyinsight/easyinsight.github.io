@@ -25,7 +25,11 @@
         import mx.formatters.Formatter;
         import mx.charts.HitData;
         import mx.collections.ArrayCollection;
+        import mx.formatters.NumberFormatter;
         import mx.managers.PopUpManager;
+
+        [Bindable]
+        private var correlation:String;
 
         [Bindable]
         private var graphData:ArrayCollection = new ArrayCollection();
@@ -49,10 +53,14 @@
 
         private var measure2Formatter:Formatter;
 
-        public function renderReport(dataSet:ArrayCollection, analysisDefinition:AnalysisDefinition, clientProcessorMap:Object):void {
+        public function renderReport(dataSet:ArrayCollection, analysisDefinition:AnalysisDefinition, clientProcessorMap:Object, additionalProperties:Object):void {
             var plotChartDef:PlotChartDefinition = analysisDefinition as PlotChartDefinition;
             var seriesMap:Object = new Object();
             if (dataSet.length > 0) {
+                if (additionalProperties != null) {
+                    var correlation:Number = additionalProperties.correlation;
+                }
+                this.correlation = new NumberFormatter().format(correlation);
                 measure1 = plotChartDef.xaxisMeasure.qualifiedName();
                 measure1Name = plotChartDef.xaxisMeasure.display;
                 measure2 = plotChartDef.yaxisMeasure.qualifiedName();
@@ -153,6 +161,8 @@
     <mx:SeriesZoom id="zoomOut" duration="1000"/>
 
     <mx:HBox width="100%" height="100%" backgroundColor="#FFFFFF" id="coreBox">
+        <mx:VBox width="100%" height="100%">
+            <!--<mx:Label text="{correlation}"/>-->
         <mx:PlotChart id="plotChart" dataProvider="{graphData}" width="100%" height="100%" showDataTips="true" dataTipFunction="dtFunc"
             selectionMode="multiple" itemClick="onClick(event)">
             <mx:horizontalAxis>
@@ -175,5 +185,6 @@
                 <mx:PlotSeries xField="{measure1}" yField="{measure2}" hideDataEffect="zoomOut" showDataEffect="zoomIn"/>
             </mx:series>-->
         </mx:PlotChart>
+        </mx:VBox>
     </mx:HBox>
 </mx:Module>

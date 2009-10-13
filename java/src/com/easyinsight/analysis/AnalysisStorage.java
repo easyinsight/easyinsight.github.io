@@ -425,7 +425,7 @@ public class AnalysisStorage {
 
             throw new RuntimeException(e);
         } finally {
-            Database.instance().closeConnection(conn);
+            Database.closeConnection(conn);
         }
     }
 

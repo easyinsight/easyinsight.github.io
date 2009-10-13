@@ -20,6 +20,16 @@ public class WSPlotChartDefinition extends WSChartDefinition {
     private AnalysisItem xaxisMeasure;
     private AnalysisItem yaxisMeasure;
 
+    private boolean calculateCorrelation;
+
+    public boolean isCalculateCorrelation() {
+        return calculateCorrelation;
+    }
+
+    public void setCalculateCorrelation(boolean calculateCorrelation) {
+        this.calculateCorrelation = calculateCorrelation;
+    }
+
     public AnalysisItem getIconGrouping() {
         return iconGrouping;
     }

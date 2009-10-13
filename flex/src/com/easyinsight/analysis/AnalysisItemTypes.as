@@ -22,11 +22,11 @@ package com.easyinsight.analysis
 		public static const DAY_LEVEL:int = 3;
 		public static const HOUR_LEVEL:int = 4;
 		public static const MINUTE_LEVEL:int = 5;
-        public static const WEEK_LEVEL:int = 7;
-        public static const MONTH_FLAT:int = 8;
-        public static const DAY_OF_YEAR_FLAT:int = 9;
-        public static const DAY_OF_WEEK_FLAT:int = 10;
-        public static const WEEK_OF_YEAR_FLAT:int = 11;
+        public static const WEEK_LEVEL:int = 6;
+        public static const MONTH_FLAT:int = 7;
+        public static const DAY_OF_YEAR_FLAT:int = 8;
+        public static const DAY_OF_WEEK_FLAT:int = 9;
+        public static const WEEK_OF_YEAR_FLAT:int = 10;
 		
 		public function AnalysisItemTypes()
 			{

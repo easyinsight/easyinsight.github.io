@@ -134,7 +134,7 @@
             return renderer;
         }
 
-        public function renderReport(dataSet:ArrayCollection, analysisDefinition:AnalysisDefinition, clientProcessorMap:Object):void {
+        public function renderReport(dataSet:ArrayCollection, analysisDefinition:AnalysisDefinition, clientProcessorMap:Object, additionalProperties:Object):void {
             var mapDefinition:MapDefinition = analysisDefinition as MapDefinition;
             mapDefinition.mapType = mapType;
             dimension = mapDefinition.geography;

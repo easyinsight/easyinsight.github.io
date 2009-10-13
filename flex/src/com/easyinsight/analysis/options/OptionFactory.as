@@ -33,7 +33,9 @@ package com.easyinsight.analysis.options
 					option = OptionTypeNames.DELTA;
 				} else if (analysisMeasure.aggregation == AggregationTypes.LAST_VALUE) {
 					option = OptionTypeNames.LASTVALUE;
-				}
+				} else if (analysisMeasure.aggregation == AggregationTypes.PERCENT_CHANGE) {
+                    option = OptionTypeNames.PERCENTCHANGE;
+                }
 			} else {
                 if (analysisItem.hasType(AnalysisItemTypes.STEP)) {
 					option = OptionTypeNames.STEP;

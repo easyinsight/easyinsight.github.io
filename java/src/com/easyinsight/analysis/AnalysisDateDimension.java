@@ -34,11 +34,11 @@ public class AnalysisDateDimension extends AnalysisDimension {
     public static final int DAY_LEVEL = 3;
     public static final int HOUR_LEVEL = 4;
     public static final int MINUTE_LEVEL = 5;
-    public static final int WEEK_LEVEL = 7;
-    public static final int MONTH_FLAT = 8;
-    public static final int DAY_OF_YEAR_FLAT = 9;
-    public static final int DAY_OF_WEEK_FLAT = 10;
-    public static final int WEEK_OF_YEAR_FLAT = 11;
+    public static final int WEEK_LEVEL = 6;
+    public static final int MONTH_FLAT = 7;
+    public static final int DAY_OF_YEAR_FLAT = 8;
+    public static final int DAY_OF_WEEK_FLAT = 9;
+    public static final int WEEK_OF_YEAR_FLAT = 10;
 
     public AnalysisDateDimension(Key key, boolean group, int dateLevel) {
         super(key, group);
@@ -151,7 +151,7 @@ public class AnalysisDateDimension extends AnalysisDimension {
             }
 
             calendar.setTime(tempDate);
-            if (dateLevel < WEEK_LEVEL) {
+            if (dateLevel <= WEEK_LEVEL) {
                 switch (dateLevel) {
                     case YEAR_LEVEL:
                         calendar.set(Calendar.MONTH, 0);
@@ -163,6 +163,13 @@ public class AnalysisDateDimension extends AnalysisDimension {
                         break;
                     case MONTH_LEVEL:
                         calendar.set(Calendar.DAY_OF_MONTH, 0);
+                        calendar.set(Calendar.HOUR_OF_DAY, 0);
+                        calendar.set(Calendar.MINUTE, 0);
+                        calendar.set(Calendar.SECOND, 0);
+                        calendar.set(Calendar.MILLISECOND, 0);
+                        break;
+                    case WEEK_LEVEL:
+                        calendar.set(Calendar.DAY_OF_WEEK, 0);
                         calendar.set(Calendar.HOUR_OF_DAY, 0);
                         calendar.set(Calendar.MINUTE, 0);
                         calendar.set(Calendar.SECOND, 0);
@@ -188,9 +195,6 @@ public class AnalysisDateDimension extends AnalysisDimension {
                 }
                 finalDate = calendar.getTime();
                 resultValue = new DateValue(finalDate);
-            } else if (dateLevel == WEEK_LEVEL) {
-                int weekOfYear = calendar.get(Calendar.WEEK_OF_YEAR);
-                resultValue = new StringValue(weekOfYear + " - " + calendar.get(Calendar.YEAR));
             } else {
                 switch (dateLevel) {
                     case MONTH_FLAT:
@@ -234,6 +238,7 @@ public class AnalysisDateDimension extends AnalysisDimension {
                     default:
                         throw new RuntimeException();
                 }
+                resultValue.setOriginalValue(new DateValue(tempDate));
             }
         } else {
             resultValue = new EmptyValue();

@@ -118,7 +118,7 @@
             }
         }
 
-        public function renderReport(dataSet:ArrayCollection, analysisDefinition:AnalysisDefinition, clientProcessorMap:Object):void {
+        public function renderReport(dataSet:ArrayCollection, analysisDefinition:AnalysisDefinition, clientProcessorMap:Object, additionalProperties:Object):void {
             var treeDefinition:TreeMapDefinition = analysisDefinition as TreeMapDefinition;
             if (dataSet.length > 0) {
                 areaFormatter = treeDefinition.measure1.getFormatter();

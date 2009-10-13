@@ -16,7 +16,7 @@
 
         private var dimension1:AnalysisItem;
 
-        public function renderReport(data:ArrayCollection, analysisDefinition:AnalysisDefinition, clientProcessorMap:Object):void {
+        public function renderReport(data:ArrayCollection, analysisDefinition:AnalysisDefinition, clientProcessorMap:Object, additionalProperties:Object):void {
             if (data.length > 0) {
                 var crosstabDefinition:CrosstabDefinition = analysisDefinition as CrosstabDefinition;
                 dimension1 = crosstabDefinition.rows.getItemAt(0) as AnalysisItem;

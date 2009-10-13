@@ -55,7 +55,7 @@ public class CrosstabDataService extends EventDispatcher implements IReportDataS
             }
             data.addItem(endObject);
         }
-        dispatchEvent(new DataServiceEvent(DataServiceEvent.DATA_RETURNED, data, null, listData.dataSourceInfo));
+        dispatchEvent(new DataServiceEvent(DataServiceEvent.DATA_RETURNED, data, null, listData.dataSourceInfo, null));
         dispatchEvent(new DataServiceLoadingEvent(DataServiceLoadingEvent.LOADING_STOPPED));
     }
 

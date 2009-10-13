@@ -21,6 +21,15 @@ public abstract class Value implements Serializable {
     // in theory, we have URL, we have image
 
     private Map<String, String> links;
+    private Value originalValue;
+
+    public Value getOriginalValue() {
+        return originalValue;
+    }
+
+    public void setOriginalValue(Value originalValue) {
+        this.originalValue = originalValue;
+    }
 
     public Map<String, String> getLinks() {
         return links;

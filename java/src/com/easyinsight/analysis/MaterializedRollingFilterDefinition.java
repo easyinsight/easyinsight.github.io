@@ -188,6 +188,11 @@ public class MaterializedRollingFilterDefinition extends MaterializedFilterDefin
         } else if (value.type() == Value.DATE) {
             DateValue dateValue = (DateValue) value;
             allowed = limitDate < dateValue.getDate().getTime() && dateValue.getDate().getTime() <= endDate;
+        } else {
+            DateValue originalValue = (DateValue) value.getOriginalValue();
+            if (originalValue != null) {
+                allowed = limitDate < originalValue.getDate().getTime() && originalValue.getDate().getTime() <= endDate;
+            }
         }
         return allowed;
     }

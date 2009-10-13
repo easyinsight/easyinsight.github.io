@@ -40,4 +40,6 @@ public interface IRow {
     void replaceKey(Key existingKey, Key newKey);
 
     void removeValue(Key key);
+
+    void addValue(String s, Number value);
 }
