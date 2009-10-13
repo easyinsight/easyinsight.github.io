@@ -85,7 +85,8 @@
         <mx:method name="searchForSubscribedFeeds" result="gotDataSources()"/>
     </mx:RemoteObject>
     <mx:VBox paddingBottom="10" paddingLeft="10" paddingRight="10" paddingTop="10">
-        <mx:Button label="Clear All Saved Credentials" click="clearCredentials()"/>
+        <mx:Button label="Clear All Saved Credentials in the Browser" click="clearCredentials()"/>
+        <mx:HRule width="100%"/>
         <tokens:TokenManagementWindow/>
         <mx:HRule width="100%"/>
         <!--<mx:HBox>

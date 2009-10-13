@@ -13,6 +13,13 @@ import mx.managers.PopUpManager;
 
 public class ConfiguredTokenControls extends HBox{
     private var configureButton:Button;
+    private var revokeButton:Button;
+
+    [Embed(source="../../../../assets/navigate_cross.png")]
+    private var deleteIcon:Class;
+
+    [Embed(source="../../../../assets/lock_edit.png")]
+    private var configureIcon:Class;
 
     private var tokenSpecification:TokenSpecification;
 
@@ -34,10 +41,22 @@ public class ConfiguredTokenControls extends HBox{
         super.createChildren();
         if (configureButton == null) {
             configureButton = new Button();
-            configureButton.label = "Reauthorize";
+            configureButton.toolTip = "Reauthorize";
+            configureButton.setStyle("icon", configureIcon);
             configureButton.addEventListener(MouseEvent.CLICK, onClick);
         }
         addChild(configureButton);
+        if (revokeButton == null) {
+            revokeButton = new Button();
+            revokeButton.toolTip = "Revoke";
+            revokeButton.setStyle("icon", configureIcon);
+            revokeButton.addEventListener(MouseEvent.CLICK, onRevoke);
+        }
+        addChild(revokeButton);
+    }
+
+    private function onRevoke(event:MouseEvent):void {
+        dispatchEvent(new RevokeTokenEvent(tokenSpecification));
     }
 
     private function onClick(event:MouseEvent):void {
