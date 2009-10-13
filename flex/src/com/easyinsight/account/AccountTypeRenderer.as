@@ -27,6 +27,9 @@ public class AccountTypeRenderer extends HBox{
             case Account.INDIVIDUAL:
                 typeLabel.text = "Individual";
                 break;
+            case Account.GROUP:
+                typeLabel.text = "Group";
+                break;
             case Account.PROFESSIONAL:
                 typeLabel.text = "Professional";
                 break;

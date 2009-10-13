@@ -30,7 +30,7 @@
         <mx:method name="getAccounts" result="gotAccounts()"/>
     </mx:RemoteObject>
     <mx:Button label="New Account" click="newAccount()"/>
-    <mx:DataGrid dataProvider="{accounts}" width="100%">
+    <mx:DataGrid dataProvider="{accounts}" width="100%" height="100%">
         <mx:columns>
             <mx:DataGridColumn dataField="name" headerText="Name"/>
             <mx:DataGridColumn dataField="accountType" width="100" headerText="Type" itemRenderer="com.easyinsight.account.AccountTypeRenderer"/>
