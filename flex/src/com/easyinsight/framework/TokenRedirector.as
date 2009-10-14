@@ -45,7 +45,7 @@ public class TokenRedirector extends EventDispatcher {
                 Alert.show("Successfully authorized Easy Insight! You can now proceed with your previous action.");
                 //User.getEventNotifier().dispatchEvent(new NavigationEvent("My Data", null, { toGDocs: true }));
             } else {
-                var delayedSolutionLink:DelayedSolutionLink = new DelayedSolutionLink(_solutionID);
+                var delayedSolutionLink:DelayedSolutionLink = new DelayedSolutionLink(_solutionID, true);
                 delayedSolutionLink.addEventListener(ListingChangeEvent.LISTING_CHANGE, onEvent);
                 delayedSolutionLink.execute();
             }

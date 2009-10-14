@@ -30,6 +30,26 @@
                 </mx:VBox>
             </mx:AddChild>
         </mx:State>
+        <mx:State name="AuthorizationRequired">
+            <mx:RemoveChild target="{controls}"/>
+            <mx:AddChild relativeTo="{controlsBox}">
+                <mx:VBox horizontalAlign="center" verticalAlign="middle" height="100%" verticalGap="15">
+                    <mx:VBox verticalGap="0">
+                        <mx:Label text="This solution requires you to authorize"/>
+                        <mx:Label text="Easy Insight to access external data."/>
+                    </mx:VBox>
+                    <mx:Button label="Authorize" styleName="blueButton" click="authorize()" fontSize="20"/>
+                </mx:VBox>
+            </mx:AddChild>
+        </mx:State>
+        <mx:State name="Authorized">
+            <mx:AddChild relativeTo="{authBox}">
+                <mx:VBox>
+                    <mx:Label text="You're now authorized to access the external"/>
+                    <mx:Label text="data. Click Install Solution below to start!"/>
+                </mx:VBox>
+            </mx:AddChild>
+        </mx:State>
     </mx:states>
     <mx:Script>
 		<![CDATA[
@@ -75,10 +95,17 @@
 
         private function lesson1():void {
             var window:ScreencastWindow = new ScreencastWindow();
-            window.screencastSource = "../assets/"+screencastDirectory+"/"+screencastVideoFile;
+            window.screencastSource = "../assets/" + screencastDirectory + "/" + screencastVideoFile;
             PopUpManager.addPopUp(window, this);
             window.x = 300;
             window.y = 200;
+        }
+
+        private var _newAuth:Boolean;
+
+
+        public function set newAuth(value:Boolean):void {
+            _newAuth = value;
         }
 
         [Bindable]
@@ -136,6 +163,8 @@
         [Bindable]
         private var displayTreeData:ArrayCollection;
 
+        private var authRequirement:AuthorizationRequirement;
+
         private var fileRef:FileReference;
 
         private var _controlsEnabled:Boolean;
@@ -186,6 +215,10 @@
                 controlsEnabled = false;
                 controlsAlpha = .5;
                 currentState = "NotLoggedIn";
+            } else if (_newAuth) {
+                currentState = "Authorized";
+            } else {
+                solutionService.determineAuthorizationRequirements.send(solutionID);
             }
         }
 
@@ -274,8 +307,7 @@
             login.additionalInfo = "You need to be logged in before you can install this solution.";
             var urlObject:Object = new Object();
             urlObject.solutionID = solutionID;
-            var url:String = URLUtil.objectToString(urlObject);
-            login.targetURL = url;
+            login.targetURL = URLUtil.objectToString(urlObject);
             PopUpManager.addPopUp(login, this, true);
             PopUpUtil.centerPopUp(login);
         }
@@ -283,20 +315,22 @@
         private function install():void {
             if (User.getInstance() != null && _solution.accessible) {
                 ProgressAlert.alert(this, "Installing solution...", null, solutionService.installSolution);
-				solutionService.installSolution.send(_solution.solutionID);
+                solutionService.installSolution.send(_solution.solutionID);
             }
         }
 
         private function gotRequirements():void {
-            var req:AuthorizationRequirement = solutionService.determineAuthorizationRequirements.lastResult as AuthorizationRequirement;
-            if (req != null) {
-                var window:AuthSubNavWindow = new AuthSubNavWindow();
-                window.googleURL = req.url;                
-                PopUpManager.addPopUp(window, this, true);
-                PopUpUtil.centerPopUp(window);
-            } else {
-                install();
+            authRequirement = solutionService.determineAuthorizationRequirements.lastResult as AuthorizationRequirement;
+            if (authRequirement != null) {
+                currentState = "AuthorizationRequired";
             }
+        }
+
+        private function authorize():void {
+            var window:AuthSubNavWindow = new AuthSubNavWindow();
+            window.googleURL = authRequirement.url;
+            PopUpManager.addPopUp(window, this, true);
+            PopUpUtil.centerPopUp(window);
         }
 
         private function onSourceConfigured(event:DataSourceConfiguredEvent):void {
@@ -394,9 +428,10 @@
         <mx:VBox>
             <mx:Image source="{logo}" click="toExternalPage()"/>
             <mx:Spacer height="50"/>
+            <mx:Box id="authBox"/>
             <mx:Canvas id="controlsBox">
-                <mx:VBox alpha="{controlsAlpha}">
-                    <mx:Button label="Install into your Easy Insight Account" fontSize="20" click="determineAuth()"
+                <mx:VBox alpha="{controlsAlpha}" id="controls">
+                    <mx:Button label="Install into your Easy Insight Account" fontSize="20" click="install()"
                                styleName="blueButton" visible="{installAvailable}" enabled="{controlsEnabled}"/>
                     <mx:Button label="Download Associated Files" fontSize="20" click="download()" styleName="blueButton"
                             visible="{downloadAvailable}" enabled="{controlsEnabled}"/>
