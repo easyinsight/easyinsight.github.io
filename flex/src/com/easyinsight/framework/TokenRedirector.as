@@ -41,7 +41,6 @@ public class TokenRedirector extends EventDispatcher {
     private function onTokenResult(event:ResultEvent):void {
         var result:String = tokenService.setToken.lastResult as String;
         if (result == null) {
-            Alert.show("Successfully authorized Easy Insight! You can now proceed with your previous action.");
             if (_solutionID == 0) {
                 Alert.show("Successfully authorized Easy Insight! You can now proceed with your previous action.");
                 //User.getEventNotifier().dispatchEvent(new NavigationEvent("My Data", null, { toGDocs: true }));

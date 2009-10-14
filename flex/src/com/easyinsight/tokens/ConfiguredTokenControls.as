@@ -49,7 +49,7 @@ public class ConfiguredTokenControls extends HBox{
         if (revokeButton == null) {
             revokeButton = new Button();
             revokeButton.toolTip = "Revoke";
-            revokeButton.setStyle("icon", configureIcon);
+            revokeButton.setStyle("icon", deleteIcon);
             revokeButton.addEventListener(MouseEvent.CLICK, onRevoke);
         }
         addChild(revokeButton);

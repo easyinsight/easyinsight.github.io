@@ -311,7 +311,7 @@
                                                         var redirectType:int = int(redirectID);
                                                         var sessionToken:String = String(o.token);
                                                         var redirector:TokenRedirector = new TokenRedirector();
-                                                        redirector.solutionID = o.refSolutionID;
+                                                        redirector.solutionID = int(o.refSolutionID);
                                                         redirector.type = redirectType;
                                                         redirector.onURL(sessionToken);
                                                     } else {
