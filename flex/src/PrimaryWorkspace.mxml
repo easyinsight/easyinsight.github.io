@@ -314,6 +314,7 @@
                                                         redirector.solutionID = int(o.refSolutionID);
                                                         redirector.type = redirectType;
                                                         redirector.onURL(sessionToken);
+                                                        redirector.addEventListener(ListingChangeEvent.LISTING_CHANGE, changePerspective);
                                                     } else {
                                                             var page:String = o.page;
                                                             if (page != null) {
