@@ -1,0 +1,2 @@
+drop trigger cascade_datafeed_delete_todos;
+drop trigger cascade_datafeed_delete_tasks;
