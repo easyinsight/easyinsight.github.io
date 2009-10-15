@@ -48,8 +48,10 @@ public class DataSourceCopyUtils {
         }
         feedStorage.updateDataFeedConfiguration(clonedFeedDefinition, conn);
         new UserUploadInternalService().createUserFeedLink(userID, clonedFeedDefinition.getDataFeedID(), Roles.OWNER, conn);
-        if (!(clonedFeedDefinition instanceof CompositeFeedDefinition)) {
+        if ((feedDefinition.getDataSourceType() == DataSourceInfo.STORED_PUSH || feedDefinition.getDataSourceType() == DataSourceInfo.STORED_PULL)) {
             buildClonedDataStores(copyData, feedDefinition, clonedFeedDefinition, conn);
+        } else {
+            DataStorage.liveDataSource(result.getFeedDefinition().getDataFeedID(), conn);
         }
         clonedFeedDefinition.postClone(conn);
         if (includeChildren) {
