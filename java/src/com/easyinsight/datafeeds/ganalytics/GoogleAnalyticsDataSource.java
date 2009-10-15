@@ -113,6 +113,14 @@ public class GoogleAnalyticsDataSource extends ServerDataSourceDefinition {
     public static final String SEARCH_UNIQUES = "ga:searchUniques";
     public static final String SEARCH_VISITS = "ga:searchVisits";
 
+    public static final String EVENT_CATEGORY = "ga:eventCategory";
+    public static final String EVENT_ACTION = "ga:eventAction";
+    public static final String EVENT_LABEL = "ga:eventLabel";
+
+    public static final String TOTAL_EVENTS = "ga:totalEvents";
+    public static final String UNIQUE_EVENTS = "ga:uniqueEvents";
+    public static final String EVENT_VALUE = "ga:eventValue";
+
     public static String[] generalDimensions = { BROWSER, BROWSER_VERSION, CITY, CONNECTION_SPEED, CONTINENT, CONTINENT,
         COUNT_OF_VISITS, COUNTRY, DATE, DAYS_SINCE_LAST_VISIT, HOSTNAME, HOUR, JAVA_ENABLED, FLASH_VERSION, LATITUDE,
         LONGITUDE, NETWORK_DOMAIN, LANGUAGE, NETWORK_DOMAIN, NETWORK_LOCATION, PAGE_DEPTH, OPERATING_SYSTEM,
@@ -139,6 +147,10 @@ public class GoogleAnalyticsDataSource extends ServerDataSourceDefinition {
 
     public static String[] searchMeasures = { SEARCH_VISITS };
 
+    public static String[] eventDimensions = { EVENT_CATEGORY, EVENT_ACTION, EVENT_LABEL };
+
+    public static String[] eventMeasures = { TOTAL_EVENTS, UNIQUE_EVENTS, EVENT_VALUE };
+
     private static Map<String, String> compiledMap;
 
     private static void compileMap() {
@@ -158,6 +170,9 @@ public class GoogleAnalyticsDataSource extends ServerDataSourceDefinition {
             }
             for (String dimension : searchDimensions) {
                 compiledMap.put(dimension, searchMeasures[0]);
+            }
+            for (String dimension : eventDimensions) {
+                compiledMap.put(dimension, eventMeasures[0]);
             }
         }
     }
@@ -203,7 +218,8 @@ public class GoogleAnalyticsDataSource extends ServerDataSourceDefinition {
                 EC_TRANSACTION_SHIPPING, EC_TRANSACTION_TAX, EC_UNIQUE_PURCHASES, SEARCH_CATEGORY,
                 SEARCH_DESTINATION, SEARCH_KEYWORD, SEARCH_KEYWORD_REFINEMENT, SEARCH_SEARCH_START,
                 SEARCH_SEARCH_USED, SEARCH_DEPTH, SEARCH_DURATION, SEARCH_EXITS, SEARCH_REFINEMENTS,
-                SEARCH_UNIQUES, SEARCH_VISITS, SOURCE, BOUNCE_RATE);
+                SEARCH_UNIQUES, SEARCH_VISITS, SOURCE, BOUNCE_RATE, EVENT_CATEGORY, EVENT_ACTION, EVENT_LABEL,
+                TOTAL_EVENTS, EVENT_VALUE, UNIQUE_EVENTS);
     }
 
     public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, DataSet dataSet, Credentials credentials, Connection conn) {
@@ -213,6 +229,7 @@ public class GoogleAnalyticsDataSource extends ServerDataSourceDefinition {
         List<AnalysisItem> contentItems = new ArrayList<AnalysisItem>();
         List<AnalysisItem> ecommerceItems = new ArrayList<AnalysisItem>();
         List<AnalysisItem> searchItems = new ArrayList<AnalysisItem>();
+        List<AnalysisItem> eventItems = new ArrayList<AnalysisItem>();
 
         standardItems.add(new AnalysisDimension(keys.get(BROWSER), "Browser"));
         standardItems.add(new AnalysisDimension(keys.get(BROWSER_VERSION), "Browser Version"));
@@ -298,6 +315,12 @@ public class GoogleAnalyticsDataSource extends ServerDataSourceDefinition {
         searchItems.add(new AnalysisMeasure(keys.get(SEARCH_REFINEMENTS), "Search Refinements", AggregationTypes.SUM));
         searchItems.add(new AnalysisMeasure(keys.get(SEARCH_UNIQUES), "Unique Searches", AggregationTypes.SUM));
         searchItems.add(new AnalysisMeasure(keys.get(SEARCH_VISITS), "Search Visits", AggregationTypes.SUM));
+        eventItems.add(new AnalysisDimension(keys.get(EVENT_ACTION), "Event Action"));
+        eventItems.add(new AnalysisDimension(keys.get(EVENT_LABEL), "Event Label"));
+        eventItems.add(new AnalysisDimension(keys.get(EVENT_CATEGORY), "Event Category"));
+        eventItems.add(new AnalysisMeasure(keys.get(TOTAL_EVENTS), "Total Events", AggregationTypes.SUM));
+        eventItems.add(new AnalysisMeasure(keys.get(UNIQUE_EVENTS), "Unique Events", AggregationTypes.SUM));
+        eventItems.add(new AnalysisMeasure(keys.get(EVENT_VALUE), "Event Value", AggregationTypes.SUM));
         if (getDataFeedID() == 0) {
             FeedFolder visitorFolder = defineFolder("Visitor");
             visitorFolder.getChildItems().addAll(standardItems);
@@ -309,12 +332,15 @@ public class GoogleAnalyticsDataSource extends ServerDataSourceDefinition {
             ecommerceFolder.getChildItems().addAll(ecommerceItems);
             FeedFolder searchFolder = defineFolder("Search");
             searchFolder.getChildItems().addAll(searchItems);
+            FeedFolder eventFolder = defineFolder("Events");
+            eventFolder.getChildItems().addAll(eventItems);
         }
         analysisItems.addAll(standardItems);
         analysisItems.addAll(adItems);
         analysisItems.addAll(contentItems);
         analysisItems.addAll(ecommerceItems);
         analysisItems.addAll(searchItems);
+        analysisItems.addAll(eventItems);
         return analysisItems;
     }
 

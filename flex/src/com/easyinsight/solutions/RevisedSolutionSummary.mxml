@@ -10,6 +10,7 @@
 
         import com.easyinsight.help.ScreencastWindow;
 
+        import com.easyinsight.listing.IPerspective;
         import com.easyinsight.listing.ListingChangeEvent;
 
         import com.easyinsight.util.PopUpUtil;
@@ -107,8 +108,7 @@
         }
 
         private function onSelection(event:SolutionSelectionEvent):void {
-            var detail:RevisedSolutionDetail = new RevisedSolutionDetail();
-            detail.solution = event.solution;
+            var detail:IPerspective = SolutionDetailFactory.createDetailPage(event.solution, false);
             dispatchEvent(new ListingChangeEvent(detail));
         }
 

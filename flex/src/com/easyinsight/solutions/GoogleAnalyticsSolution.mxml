@@ -1,0 +1,512 @@
+<?xml version="1.0" ?>
+<mx:VBox xmlns="com.easyinsight.*" xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%"
+         paddingLeft="0" paddingBottom="0" paddingTop="0" paddingRight="0" creationComplete="onCreation()"
+         verticalGap="0"
+         backgroundColor="#818285" horizontalAlign="center" implements="com.easyinsight.listing.IPerspective">
+    <mx:states>
+        <mx:State name="NotLoggedIn">
+            <mx:AddChild relativeTo="{controlsBox}">
+                <mx:VBox horizontalAlign="center" verticalAlign="middle" height="100%" verticalGap="15">
+                    <mx:VBox verticalGap="0">
+                        <mx:Label text="You'll need to create an account or log"/>
+                        <mx:Label text="in before installing the solution."/>
+                    </mx:VBox>
+                    <mx:HBox width="100%" horizontalAlign="center">
+                        <mx:Button label="Create Account" styleName="blueButton" click="createAccount()"/>
+                        <mx:Spacer width="20"/>
+                        <mx:Button label="Log in" styleName="blueButton" click="login()"/>
+                    </mx:HBox>
+                </mx:VBox>
+            </mx:AddChild>
+        </mx:State>
+        <mx:State name="AccountBelowRequired">
+            <mx:AddChild relativeTo="{controlsBox}">
+                <mx:VBox horizontalAlign="center" verticalAlign="middle" height="100%" verticalGap="15">
+                    <mx:VBox verticalGap="0">
+                        <mx:Label text="This solution requires a higher account"/>
+                        <mx:Label text="tier than what your current subscription."/>
+                    </mx:VBox>
+                    <mx:Button label="Upgrade Account" styleName="blueButton" click="login()"/>
+                </mx:VBox>
+            </mx:AddChild>
+        </mx:State>
+        <!--<mx:State name="AuthorizationRequired">
+            <mx:RemoveChild target="{controls}"/>
+            <mx:AddChild relativeTo="{controlsBox}">
+                <mx:VBox horizontalAlign="center" verticalAlign="middle" height="100%" verticalGap="15">
+                    <mx:VBox verticalGap="0">
+                        <mx:TextArea
+                                text="This solution requires you to authorize Easy Insight to access external data."
+                                backgroundAlpha="0"
+                                borderStyle="none" editable="false" selectable="false" fontSize="16" width="300"
+                                height="90"/>
+                    </mx:VBox>
+                    <mx:Button label="Authorize" styleName="blueButton" click="authorize()" fontSize="20"/>
+                </mx:VBox>
+            </mx:AddChild>
+        </mx:State>-->
+        <mx:State name="Authorized">
+            <mx:AddChild relativeTo="{authBox}">
+                <mx:TextArea
+                        text="You're now authorized to access the external data. Click Install Solution below to start!"
+                        backgroundAlpha="0"
+                        borderStyle="none" editable="false" selectable="false" fontSize="16" width="300" height="90"/>
+            </mx:AddChild>
+        </mx:State>
+    </mx:states>
+    <mx:Script>
+		<![CDATA[
+        import com.easyinsight.LoginDialog;
+        import com.easyinsight.account.Account;
+        import com.easyinsight.customupload.ConfigureDataSource;
+        import com.easyinsight.customupload.DataSourceConfiguredEvent;
+        import com.easyinsight.framework.AuthorizationRequirement;
+        import com.easyinsight.framework.NavigationEvent;
+        import com.easyinsight.genredata.AnalyzeEvent;
+        import com.easyinsight.genredata.ModuleAnalyzeEvent;
+        import com.easyinsight.goals.GoalDataAnalyzeSource;
+        import com.easyinsight.goals.GoalTreeDescriptor;
+        import com.easyinsight.google.AuthSubNavWindow;
+        import com.easyinsight.help.ScreencastWindow;
+        import com.easyinsight.listing.DescriptorAnalyzeSource;
+        import com.easyinsight.quicksearch.EIDescriptor;
+        import com.easyinsight.report.MultiScreenAnalyzeSource;
+        import com.easyinsight.report.ReportAnalyzeSource;
+        import com.easyinsight.util.FileAlert;
+
+        import com.easyinsight.util.PopUpUtil;
+        import com.easyinsight.util.ProgressAlert;
+
+        import mx.controls.Alert;
+
+        import com.easyinsight.framework.User;
+
+        import mx.collections.ArrayCollection;
+        import mx.managers.BrowserManager;
+        import mx.managers.CursorManager;
+        import mx.managers.PopUpManager;
+        import mx.utils.URLUtil;
+
+        private function createAccount():void {
+            var urlObject:Object = new Object();
+            urlObject.solutionID = solutionID;
+            var url:String = URLUtil.objectToString(urlObject);
+            var props:Object = new Object();
+            props["destinationURL"] = url;
+            User.getEventNotifier().dispatchEvent(new NavigationEvent(NavigationEvent.ACCOUNTS, null, props));
+        }
+
+        private function lesson1():void {
+            var window:ScreencastWindow = new ScreencastWindow();
+            window.screencastSource = "../assets/" + screencastDirectory + "/" + screencastVideoFile;
+            PopUpManager.addPopUp(window, this);
+            window.x = 300;
+            window.y = 200;
+        }
+
+        private var _newAuth:Boolean;
+
+
+        public function set newAuth(value:Boolean):void {
+            _newAuth = value;
+        }
+
+        [Bindable]
+        [Embed(source="../../../../assets/document_out.png")]
+        private var closeIcon:Class;
+
+        [Bindable]
+        [Embed(source="../../../../assets/component_x16.png")]
+        private var installIcon:Class;
+
+        [Bindable]
+        [Embed(source="../../../../assets/gear.png")]
+        private var archiveIcon:Class;
+
+        [Bindable]
+        [Embed(source="../../../../assets/background2.JPG")]
+        private var background2:Class;
+
+        [Bindable]
+        private var logo:Bitmap;
+
+        [Bindable]
+        private var footerText:String;
+
+        [Bindable]
+        private var description:String;
+
+        private var _solution:Solution;
+
+        [Bindable]
+        private var startButtonText:String = "Get Started Now!";
+
+        [Bindable]
+        private var solutionName:String;
+        [Bindable]
+        private var solutionIndustry:String;
+        [Bindable]
+        private var solutionAuthor:String;
+
+        [Bindable]
+        private var solutionDescription:String;
+
+        [Bindable]
+        private var solutionFileName:String;
+
+        private var solutionID:int;
+
+        [Bindable]
+        private var screencastEnabled:Boolean;
+
+        [Bindable]
+        private var installResult:ArrayCollection;
+
+        [Bindable]
+        [Embed(source="../../../../assets/media_play.png")]
+        private var pointerIcon:Class;
+
+        [Bindable]
+        private var displayTreeData:ArrayCollection;
+
+        private var authRequirement:AuthorizationRequirement;
+
+        private var fileRef:FileReference;
+
+        private var _controlsEnabled:Boolean;
+
+        [Bindable]
+        private var screencastAddress:String;
+
+        [Bindable]
+        private var downloadAvailable:Boolean = true;
+
+        [Bindable]
+        private var installAvailable:Boolean = true;
+
+        private var screencastVideoFile:String;
+        private var screencastDirectory:String;
+
+        private var _controlsAlpha:uint = 0;
+
+        [Bindable(event="controlsEnabledChanged")]
+        public function get controlsEnabled():Boolean {
+            return _controlsEnabled;
+        }
+
+        public function set controlsEnabled(value:Boolean):void {
+            if (_controlsEnabled == value) return;
+            _controlsEnabled = value;
+            dispatchEvent(new Event("controlsEnabledChanged"));
+        }
+
+        [Bindable(event="controlsAlphaChanged")]
+        public function get controlsAlpha():uint {
+            return _controlsAlpha;
+        }
+
+        public function set controlsAlpha(value:uint):void {
+            if (_controlsAlpha == value) return;
+            _controlsAlpha = value;
+            dispatchEvent(new Event("controlsAlphaChanged"));
+        }
+
+        private function onCreation():void {
+            var fragmentObject:Object = new Object();
+            fragmentObject.solutionID = String(solutionID);
+            var fragmentString:String = URLUtil.objectToString(fragmentObject);
+            BrowserManager.getInstance().setFragment(fragmentString);
+            BrowserManager.getInstance().setTitle("Easy Insight - " + solutionName);
+            if (User.getInstance() == null) {
+                controlsEnabled = false;
+                controlsAlpha = .5;
+                currentState = "NotLoggedIn";
+            } else if (_newAuth) {
+                currentState = "Authorized";
+                startButtonText = "Install the Solution";
+            } else {
+                solutionService.determineAuthorizationRequirements.send(solutionID);
+            }
+        }
+
+        public function set treeData(data:ArrayCollection):void {
+            this.displayTreeData = data;
+        }
+
+        public function set solution(solution:Solution):void {
+            this._solution = solution;
+            description = solution.description;
+            solutionID = solution.solutionID;
+            solutionFileName = solution.solutionArchiveName;
+            solutionName = solution.name;
+            solutionAuthor = solution.author;
+            solutionIndustry = solution.industry;
+            solutionDescription = solution.description;
+            footerText = solution.footerText;
+            if (solution.solutionArchiveName == null || solution.solutionArchiveName == "") {
+                downloadAvailable = false;
+            }
+            if (solution.image != null) {
+                var loader:Loader = new Loader();
+                loader.contentLoaderInfo.addEventListener(Event.COMPLETE, onComplete);
+                loader.loadBytes(solution.image);
+            }
+            if (solution.accessible) {
+                controlsAlpha = 1;
+                controlsEnabled = true;
+            } else {
+                controlsAlpha = .5;
+                controlsEnabled = false;
+                currentState = "AccountBelowRequired";
+            }
+            installAvailable = solution.installable || solution.goalTreeID > 0;
+            if (solution.screencastDirectory == null || "" == solution.screencastDirectory) {
+                screencastEnabled = false;
+            } else {
+                screencastEnabled = true;
+                screencastDirectory = solution.screencastDirectory;
+                screencastVideoFile = solution.screencastName;
+                screencastAddress = "../assets/" + solution.screencastDirectory + "/FirstFrame.png";
+            }
+        }
+
+        private function onComplete(event:Event):void {
+            var loaderContent:LoaderInfo = event.currentTarget as LoaderInfo;
+            logo = Bitmap(loaderContent.loader.content);
+            loaderContent.loader.removeEventListener(Event.COMPLETE, onComplete);
+        }
+
+        private function download():void {
+            var request:URLRequest = new URLRequest("/app/DownloadServlet");
+            request.method = URLRequestMethod.GET;
+            var vars:URLVariables = new URLVariables();
+
+            vars.userName = User.getInstance().userName;
+            vars.password = User.getInstance().password;
+            vars.operation = String(2);
+            vars.fileID = String(_solution.solutionID);
+            request.data = vars;
+
+            fileRef = new FileReference();
+            fileRef.addEventListener(Event.CANCEL, doEvent);
+            fileRef.addEventListener(Event.COMPLETE, complete);
+            fileRef.addEventListener(Event.OPEN, doEvent);
+            fileRef.addEventListener(Event.SELECT, doEvent);
+            fileRef.addEventListener(HTTPStatusEvent.HTTP_STATUS, doEvent);
+            fileRef.addEventListener(IOErrorEvent.IO_ERROR, doEvent);
+            fileRef.addEventListener(ProgressEvent.PROGRESS, doEvent);
+            fileRef.addEventListener(SecurityErrorEvent.SECURITY_ERROR, doEvent);
+
+            FileAlert.alert(this, "Downloading...", null, fileRef);
+            fileRef.download(request, _solution.solutionArchiveName);
+        }
+
+        private function doEvent(event:Event):void {
+            trace(event);
+        }
+
+        private function onModuleAnalyze(event:ModuleAnalyzeEvent):void {
+            dispatchEvent(event);
+        }
+
+        private function login():void {
+            var login:LoginDialog = new LoginDialog();
+            login.additionalInfo = "You need to be logged in before you can install this solution.";
+            var urlObject:Object = new Object();
+            urlObject.solutionID = solutionID;
+            login.targetURL = URLUtil.objectToString(urlObject);
+            PopUpManager.addPopUp(login, this, true);
+            PopUpUtil.centerPopUp(login);
+        }
+
+        private function install():void {
+            if (User.getInstance() != null && _solution.accessible) {
+                ProgressAlert.alert(this, "Installing solution...", null, solutionService.installSolution);
+                solutionService.installSolution.send(_solution.solutionID);
+            }
+        }
+
+        private function gotRequirements():void {
+            authRequirement = solutionService.determineAuthorizationRequirements.lastResult as AuthorizationRequirement;            
+        }
+
+        private function authorize():void {
+            var window:AuthSubNavWindow = new AuthSubNavWindow();
+            window.googleURL = authRequirement.url;
+            PopUpManager.addPopUp(window, this, true);
+            PopUpUtil.centerPopUp(window);
+        }
+
+        private function onSourceConfigured(event:DataSourceConfiguredEvent):void {
+            postInstall();
+        }
+
+        private function postInstall():void {
+            var dataSources:int = 0;
+            var goalTrees:int = 0;
+            var reports:int = 0;
+            var items:ArrayCollection = new ArrayCollection();
+            var dataSourceItems:ArrayCollection = new ArrayCollection();
+            for each (var solInstall:SolutionInstallInfo in installResult) {
+                if (solInstall.descriptor.getType() == EIDescriptor.DATA_SOURCE) {
+                    dataSources++;
+                    dataSourceItems.addItem(solInstall.descriptor);
+                } else if (solInstall.descriptor.getType() == EIDescriptor.GOAL_TREE) {
+                    if (User.getInstance().getAccountType() >= Account.GROUP) {
+                        goalTrees++;
+                        items.addItem(solInstall.descriptor);
+                    }
+                } else if (solInstall.descriptor.getType() == EIDescriptor.REPORT) {
+                    reports++;
+                    items.addItem(solInstall.descriptor);
+                }
+            }
+            if (items.length == 1 && goalTrees == 1) {
+                dispatchEvent(new AnalyzeEvent(new GoalDataAnalyzeSource((GoalTreeDescriptor(items.getItemAt(0)).id))));
+            } else if (items.length == 1 && reports == 1) {
+                dispatchEvent(new ModuleAnalyzeEvent(new ReportAnalyzeSource(InsightDescriptor(items.getItemAt(0)))));
+            } else if (items.length > 1) {
+                dispatchEvent(new ModuleAnalyzeEvent(new MultiScreenAnalyzeSource(items)));
+            } else {
+                var dataSourceDescriptor:DataSourceDescriptor = dataSourceItems.getItemAt(0) as DataSourceDescriptor;
+                dispatchEvent(new ModuleAnalyzeEvent(new DescriptorAnalyzeSource(dataSourceDescriptor.id, dataSourceDescriptor.name)));
+            }
+        }
+
+        private function installedSolution():void {
+            this.installResult = solutionService.installSolution.lastResult as ArrayCollection;
+            var configuredSources:int = 0;
+            for each (var solInstall:SolutionInstallInfo in installResult) {
+                if (solInstall.descriptor.getType() == EIDescriptor.DATA_SOURCE && solInstall.requiresConfiguration) {
+                    configuredSources++;
+                }
+            }
+            var immediate:Boolean = true;
+            for each (var solutionInstallInfo:SolutionInstallInfo in installResult) {
+                if (solutionInstallInfo.descriptor.getType() == EIDescriptor.DATA_SOURCE && solutionInstallInfo.requiresConfiguration) {
+                    immediate = false;
+                    var configWindow:ConfigureDataSource = new ConfigureDataSource();
+                    configWindow.dataSourceID = solutionInstallInfo.descriptor.id;
+                    configWindow.onlyDataSource = configuredSources == 1;
+                    configWindow.addEventListener(DataSourceConfiguredEvent.DATA_SOURCE_CONFIGURED, onSourceConfigured);
+                    PopUpManager.addPopUp(configWindow, this, true);
+                    PopUpUtil.centerPopUp(configWindow);
+                }
+            }
+            if (immediate) {
+                postInstall();
+                //Alert.show("The solution has been installed. Any data sources and/or reports associated to this solution will now be available to you under the My Data page.");
+            }
+            dispatchEvent(new SolutionEvent(SolutionEvent.SOLUTION_INSTALLED, _solution.solutionID));
+        }
+
+        private function onSolutionInstalled(event:SolutionEvent):void {
+            dispatchEvent(new NavigationEvent("My Data"));
+        }
+
+        private function complete(event:Event):void {
+            Alert.show("Solution files copied!");
+        }
+
+        public function gotFocus():void {
+        }
+
+        private function toExternalPage():void {
+            if (_solution.logoLink != null && _solution.logoLink != "") {
+                flash.net.navigateToURL(new URLRequest(_solution.logoLink), "_blank");
+            }
+        }
+
+        private function determineAuth():void {
+            ProgressAlert.alert(this, "Determining authorization requirements...", null, solutionService.determineAuthorizationRequirements);
+            solutionService.determineAuthorizationRequirements.send(solutionID);
+        }
+
+        private function toBlog():void {
+            flash.net.navigateToURL(new URLRequest("http://jamesboe.blogspot.com/search/label/Google%20Analytics"), "_blank");
+        }
+		]]>
+	</mx:Script>
+    <mx:RemoteObject destination="solutionService" id="solutionService">
+        <mx:method name="installSolution" result="installedSolution()"/>
+        <mx:method name="determineAuthorizationRequirements" result="gotRequirements()"/>
+    </mx:RemoteObject>
+
+    <mx:HBox width="1000" height="100%" backgroundImage="{background2}" backgroundSize="100%" paddingLeft="20"
+             paddingRight="20" paddingTop="20" paddingBottom="20">
+        <mx:VBox horizontalAlign="center" height="100%">
+            <mx:Image source="{logo}" click="toExternalPage()"/>
+            <mx:Spacer height="100%"/>
+            <mx:VBox width="100%" backgroundColor="#FFFFFF" borderColor="#3370ce" borderThickness="3" cornerRadius="15" borderStyle="solid"
+                    paddingTop="5" paddingBottom="5" horizontalAlign="center">
+                <mx:Box height="190" verticalAlign="middle" paddingLeft="10" paddingRight="20">
+                    <mx:TextArea width="370" backgroundAlpha="0" borderStyle="none" selectable="false"
+                             borderThickness="0" editable="false" height="170" fontSize="16"
+                             text="Want to take your web analytics to the next level? You can get started with Easy Insight in a couple of clicks! If you don't already have an account, you can get started with a 30 day free trial with no obligation. The full power of enterprise business intelligence is yours for the taking, all delivered with incredible ease of use."/>
+                </mx:Box>
+                <mx:HRule width="100%" strokeColor="#3370ce"/>
+                <mx:VBox horizontalAlign="center">
+                    <mx:Label text="Looking for tips, tricks, and documentation?" fontSize="16"/>
+                    <mx:LinkButton label="Look at Google Analytics blog posts" fontSize="16" textDecoration="underline" click="toBlog()"/>
+                </mx:VBox>
+                <mx:HRule width="100%" strokeColor="#3370ce"/>
+                <mx:Box id="authBox"/>
+                <mx:VBox id="controlsBox" paddingTop="25" paddingBottom="30">
+                    <mx:Button label="{startButtonText}" fontSize="24" click="install()"
+                                   styleName="blueButton" visible="{installAvailable}" enabled="{controlsEnabled}"/>
+                    <!--<mx:VBox alpha="{controlsAlpha}" id="controls">
+
+                        <mx:Button label="Download Associated Files" fontSize="20" click="download()" styleName="blueButton"
+                                   visible="{downloadAvailable}" enabled="{controlsEnabled}"/>
+                    </mx:VBox>-->
+                </mx:VBox>
+            </mx:VBox>
+            <mx:Spacer height="100%"/>
+        </mx:VBox>
+        <mx:Spacer width="100%"/>
+        <mx:VBox width="530" height="100%">
+            <mx:VBox width="100%" backgroundColor="#FFFFFF" borderColor="#3370ce" borderThickness="3" cornerRadius="15" borderStyle="solid"
+                    paddingTop="5" paddingBottom="5">
+                <mx:HBox horizontalAlign="center" width="100%" fontFamily="Tahoma" fontWeight="bold">
+                    <mx:Label text="Why Use Easy Insight with Google Analytics?" fontSize="18"/>
+                </mx:HBox>
+                <mx:HRule width="100%" strokeColor="#3370ce"/>
+                <mx:HBox width="100%" horizontalAlign="center">
+                    <mx:Label text="Easy Data Exploration" fontSize="16"/>
+                </mx:HBox>
+                <mx:HBox paddingLeft="5" paddingRight="5" verticalAlign="middle">
+                    <mx:Image source="../assets/logos/goals1.jpg" maxWidth="200" maxHeight="150"/>
+                    <mx:VBox>
+                        <mx:Text text="Quickly slice and dice your web analytics data" fontSize="12"/>
+                        <mx:Text text="Apply a wide variety of visualizations" fontSize="12"/>
+                        <mx:Text text="Share your findings with the rest of your team" fontSize="12"/>
+                    </mx:VBox>
+                </mx:HBox>
+                <mx:HRule width="100%" strokeColor="#3370ce"/>
+                <mx:HBox width="100%" horizontalAlign="center">
+                    <mx:Label text="Combined Insight" fontSize="16"/>
+                </mx:HBox>
+                <mx:HBox paddingLeft="5" paddingRight="5" verticalAlign="middle">
+                    <mx:VBox>
+                        <mx:Text text="Extend your Google Analytics implementation &#13;with custom data" fontSize="12"/>
+                        <mx:Text text="Link your web analytics data to Basecamp, &#13;Salesforce, and more" fontSize="12"/>
+                        <mx:Text text="Look at your reports in a wide variety of popular &#13;dashboards" fontSize="12"/>
+                    </mx:VBox>
+                    <mx:Image source="../assets/logos/goals1.jpg" maxWidth="200" maxHeight="150"/>
+                </mx:HBox>
+                <mx:HRule width="100%" strokeColor="#3370ce"/>
+                <mx:HBox width="100%" horizontalAlign="center">
+                    <mx:Label text="Improve your Sales and Marketing Strategy" fontSize="16"/>
+                </mx:HBox>
+                <mx:HBox paddingLeft="5" paddingRight="5" verticalAlign="middle">
+                    <mx:Image source="../assets/logos/goals1.jpg" maxWidth="200" maxHeight="150"/>
+                    <mx:VBox>
+                        <mx:Text text="Plot out your business strategy through KPI &#13;trees" fontSize="12"/>
+                        <mx:Text text="Continually tweak and improve your campaign &#13;effectiveness" fontSize="12"/>
+                        <mx:Text text="Get the highest possible dollar value out of &#13;your web analytics" fontSize="12"/>
+                    </mx:VBox>
+                </mx:HBox>
+            </mx:VBox>
+        </mx:VBox>
+    </mx:HBox>
+</mx:VBox>

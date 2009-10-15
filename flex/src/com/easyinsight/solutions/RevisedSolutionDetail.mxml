@@ -35,8 +35,8 @@
             <mx:AddChild relativeTo="{controlsBox}">
                 <mx:VBox horizontalAlign="center" verticalAlign="middle" height="100%" verticalGap="15">
                     <mx:VBox verticalGap="0">
-                        <mx:Label text="This solution requires you to authorize"/>
-                        <mx:Label text="Easy Insight to access external data."/>
+                        <mx:TextArea text="This solution requires you to authorize Easy Insight to access external data." backgroundAlpha="0"
+                                borderStyle="none" editable="false" selectable="false" fontSize="16" width="300" height="90"/>                        
                     </mx:VBox>
                     <mx:Button label="Authorize" styleName="blueButton" click="authorize()" fontSize="20"/>
                 </mx:VBox>
@@ -44,10 +44,8 @@
         </mx:State>
         <mx:State name="Authorized">
             <mx:AddChild relativeTo="{authBox}">
-                <mx:VBox>
-                    <mx:Label text="You're now authorized to access the external"/>
-                    <mx:Label text="data. Click Install Solution below to start!"/>
-                </mx:VBox>
+                <mx:TextArea text="You're now authorized to access the external data. Click Install Solution below to start!" backgroundAlpha="0"
+                                borderStyle="none" editable="false" selectable="false" fontSize="16" width="300" height="90"/>                
             </mx:AddChild>
         </mx:State>
     </mx:states>
@@ -425,7 +423,7 @@
     </mx:RemoteObject>
     <mx:HBox width="1000" height="100%" backgroundImage="{background2}" backgroundSize="100%" paddingLeft="20"
          paddingRight="20" paddingTop="20" paddingBottom="20">
-        <mx:VBox>
+        <mx:VBox horizontalAlign="center">
             <mx:Image source="{logo}" click="toExternalPage()"/>
             <mx:Spacer height="50"/>
             <mx:Box id="authBox"/>
