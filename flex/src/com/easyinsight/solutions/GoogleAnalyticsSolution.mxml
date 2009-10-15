@@ -321,8 +321,12 @@
 
         private function install():void {
             if (User.getInstance() != null && _solution.accessible) {
-                ProgressAlert.alert(this, "Installing solution...", null, solutionService.installSolution);
-                solutionService.installSolution.send(_solution.solutionID);
+                if (authRequirement != null) {
+                    authorize();
+                } else {
+                    ProgressAlert.alert(this, "Installing solution...", null, solutionService.installSolution);
+                    solutionService.installSolution.send(_solution.solutionID);
+                }
             }
         }
 
