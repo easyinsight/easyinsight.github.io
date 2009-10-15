@@ -25,7 +25,7 @@
 
 
     if(!hashed.equals(request.getParameter("hash")) || !request.getParameter("response").equals("1") || !request.getParameter("cvvresponse").equals("M") || !Arrays.asList("X", "Y", "D", "M", "W", "Z", "P", "L").contains(request.getParameter("avsresponse")))
-        response.sendRedirect("/app/billing/billing.jsp?error=true");
+        response.sendRedirect("billing.jsp?error=true");
     else
     {
         long accountID = (Long) request.getSession().getAttribute("accountID");
