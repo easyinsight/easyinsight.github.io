@@ -25,11 +25,12 @@
 
 
     if(!hashed.equals(request.getParameter("hash")) || !request.getParameter("response").equals("1") || !request.getParameter("cvvresponse").equals("M") || !Arrays.asList("X", "Y", "D", "M", "W", "Z", "P", "L").contains(request.getParameter("avsresponse")))
-        response.sendRedirect("billing.jsp?error=true");
+        response.sendRedirect("/app/billing/billing.jsp?error=true");
     else
     {
         long accountID = (Long) request.getSession().getAttribute("accountID");
         long userID = (Long) request.getSession().getAttribute("userID");
+        System.out.println("UserID: " + userID + " AccountID: " + accountID);
         Account account = null;
         User user = null;
         EIConnection conn = Database.instance().getConnection();
@@ -50,6 +51,7 @@
                 response.sendRedirect("access.jsp");
 
             if(account.getAccountState() == Account.DELINQUENT) {
+                System.out.println("Creating account billing info...");
                 AccountCreditCardBillingInfo info = new AccountCreditCardBillingInfo();
                 info.setTransactionID(request.getParameter("transactionid"));
                 info.setAmount(request.getParameter("amount"));
@@ -66,15 +68,22 @@
                 info.setTransactionTime(transTime);
                 account.getBillingInfo().add(info);
                 s.save(info);
+                System.out.println("Saved account billing info.");
 
             } else {
                 Date trialEnd = new AccountActivityStorage().getTrialTime(account.getAccountID(), conn);
-                System.out.println("Trial end date: " + trialEnd.toString());
-                if(trialEnd != null && trialEnd.after(new Date()) && account.getBillingDayOfMonth() == null) {
-                    Calendar c = Calendar.getInstance();
-                    c.setTime(trialEnd);
-                    System.out.println("Billing day of month: " + c.get(Calendar.DAY_OF_MONTH));
-                    account.setBillingDayOfMonth(c.get(Calendar.DAY_OF_MONTH));
+                if(trialEnd != null) {
+                    System.out.println("Trial end date: " + trialEnd.toString());
+                    if(trialEnd.after(new Date()) && account.getBillingDayOfMonth() == null) {
+                        Calendar c = Calendar.getInstance();
+                        c.setTime(trialEnd);
+                        System.out.println("Billing day of month: " + c.get(Calendar.DAY_OF_MONTH));
+                        account.setBillingDayOfMonth(c.get(Calendar.DAY_OF_MONTH));
+                    }
+                    else {
+                        Calendar c = Calendar.getInstance();
+                        account.setBillingDayOfMonth(c.get(Calendar.DAY_OF_MONTH));
+                    }
                 }
             }
             account.setAccountState(Account.ACTIVE);

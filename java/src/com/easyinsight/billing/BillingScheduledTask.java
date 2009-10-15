@@ -9,6 +9,8 @@ import java.util.Date;
 import java.util.Calendar;
 import java.util.List;
 import java.sql.Connection;
+import java.sql.SQLException;
+import java.sql.PreparedStatement;
 
 import org.hibernate.Session;
 
@@ -27,6 +29,21 @@ import javax.persistence.PrimaryKeyJoinColumn;
 @PrimaryKeyJoinColumn(name="scheduled_task_id")
 public class BillingScheduledTask extends ScheduledTask {
     protected void execute(Date now, Connection conn) throws Exception {
+        expireTrials(now, conn);
+        billCustomers(now, conn);
+
+    }
+
+    private void expireTrials(Date now, Connection conn) throws SQLException {
+        PreparedStatement stmt = conn.prepareStatement("UPDATE ACCOUNT SET ACCOUNT_STATE = ? WHERE ACCOUNT_TYPE != ? AND BILLING_INFORMATION_GIVEN != TRUE AND ACCOUNT_ID IN (SELECT ACCOUNT_ID FROM ACCOUNT_TIMED_STATE WHERE date(state_change_time) < ?)");
+        stmt.setInt(1, Account.DELINQUENT);
+        stmt.setInt(2, Account.FREE);
+        stmt.setDate(3, new java.sql.Date(System.currentTimeMillis()));
+        stmt.execute();
+        stmt.close();
+    }
+
+    private void billCustomers(Date now, Connection conn) throws SQLException {
         Calendar c = Calendar.getInstance();
         int dayOfMonth = c.get(Calendar.DAY_OF_MONTH);
         String queryString = "from Account where (accountState = " + Account.ACTIVE + " or accountState = " + Account.CLOSING + ") and accountType != " + Account.FREE + " and accountType != " + Account.ADMINISTRATOR;
@@ -53,6 +70,5 @@ public class BillingScheduledTask extends ScheduledTask {
             s.save(a);
         }
         s.flush();
-
     }
 }
