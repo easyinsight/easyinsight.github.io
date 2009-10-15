@@ -38,10 +38,6 @@ public class DatabaseManager {
     }
 
     public Database getDatabase(String databaseID) {
-        Database database = dbMap.get(databaseID);
-        if (database == null) {
-            throw new RuntimeException("Could not find database by ID " + databaseID);
-        }
         return dbMap.get(databaseID);
     }
 
