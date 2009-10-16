@@ -147,16 +147,13 @@
                               fontWeight="bold" color="0x323232"/>
                     <mx:Label fontSize="16" text="Publish custom business data with ease" fontFamily="Tahoma"
                               fontWeight="bold" color="0x323232"/>
-                    <mx:Label fontSize="16" text="Look at your data in a wide variety of ways" fontFamily="Tahoma"
+                    <mx:Label fontSize="16" text="No installation required, free trial available!" fontFamily="Tahoma"
                               fontWeight="bold" color="0x323232"/>
                     <mx:Label fontSize="16" text="Track your key metrics to drive business success" fontFamily="Tahoma"
                               fontWeight="bold" color="0x323232"/>
                     <mx:TextArea fontSize="16" text="Business intelligence power made simple and affordable for the small and medium business" fontFamily="Tahoma"
                               fontWeight="bold" color="0x323232" width="500" backgroundAlpha="0" borderStyle="none" editable="false" selectable="false"/>
                     <mx:Spacer height="20"/>
-                    <!--<mx:TextArea editable="false"
-                                 text="Welcome to Easy Insight! We're in beta right now, so feel free to explore the application. You can easily get started through one of the options below."
-                                 borderStyle="none" width="100%" fontSize="14" height="80" backgroundAlpha="0"/>-->
                 </mx:VBox>
                 <mx:Spacer width="100%"/>
                 <mx:VBox height="100%" verticalAlign="middle">
