@@ -85,6 +85,9 @@
             }
         }
 
+        [Bindable]
+        private var messageListener:EIMessageListener;
+
 
         private var perspective:IPerspective;
 
@@ -107,8 +110,9 @@
             addEventListener(FaultEvent.FAULT, onFault, true);
             User.getEventNotifier().addEventListener(NavigationEvent.NAVIGATION, navigation);
             //ProgressAlert.alert(this, "Taking care of initial setup...", null, userService.isSessionLoggedIn);
-            userService.isSessionLoggedIn.send();
             EIMessageListener.initialize();
+            messageListener = EIMessageListener.instance();
+            userService.isSessionLoggedIn.send();
         }
 
         private function applicationListeners():void {
@@ -470,13 +474,13 @@
                                reportBug="launchBugReportWindow()"/>
             <mx:Box width="100%" height="5" backgroundColor="#D42525" left="0" right="0" id="highBar"/>
             <mx:HBox width="100%" height="100%" horizontalGap="0" id="primarySpace">
-                <framework:LeftApplicationDock height="100%" backgroundColor="0xF0F0F0" analyze="internalAnalyze(event)"/>
+                <framework:LeftApplicationDock height="100%" backgroundColor="0xF0F0F0" analyze="internalAnalyze(event)" messageListener="{messageListener}"/>
                 <mx:HBox width="100%" height="100%" id="coreSpace" paddingLeft="0" paddingTop="0" top="0"
                          paddingRight="0">
                     <intro1:IntroPanel id="introPanel" width="100%" height="100%" paddingTop="0"
                                        navigation="navigation(event)"/>
                 </mx:HBox>
-                <framework:RightApplicationDock height="100%" backgroundColor="0xF0F0F0" analyze="internalAnalyze(event)"/>
+                <framework:RightApplicationDock height="100%" backgroundColor="0xF0F0F0" analyze="internalAnalyze(event)" messageListener="{messageListener}"/>
             </mx:HBox>
         </mx:VBox>
      </util:AntiScrollCanvas>

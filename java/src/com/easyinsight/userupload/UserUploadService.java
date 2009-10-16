@@ -488,7 +488,7 @@ public class UserUploadService implements IUserUploadService {
             }
         }
         try {
-            if(saveCredentials) {
+            if(saveCredentials && credentials != null) {
                 EIConnection conn = Database.instance().getConnection();
                 try {
                     PasswordStorage.setPasswordCredentials(credentials.getUserName(), credentials.getPassword(), feedID, conn);
@@ -499,24 +499,29 @@ public class UserUploadService implements IUserUploadService {
             }
             CredentialsResponse credentialsResponse;
             IServerDataSourceDefinition dataSource = (IServerDataSourceDefinition) feedStorage.getFeedDefinitionData(feedID);
-            if (synchronous) {
-                credentialsResponse = dataSource.refreshData(credentials, SecurityUtil.getAccountID(), new Date(), null);
-                // TODO: refactor into event model
-                //new GoalStorage().updateGoals(feedID);
-            } else {
-                String message = dataSource.validateCredentials(credentials);
-                if (message == null) {
-                    credentialsResponse = new CredentialsResponse(true);
-                    ServerRefreshScheduledTask task = new ServerRefreshScheduledTask();
-                    task.setDataSourceID(feedID);
-                    task.setUserID(SecurityUtil.getUserID());
-                    task.setExecutionDate(new Date());
-                    task.setStatus(ScheduledTask.INMEMORY);
-                    task.setRefreshCreds(credentials);
-                    Scheduler.instance().saveTask(task);
+            FeedDefinition feedDefinition = (FeedDefinition) dataSource;
+            if ((feedDefinition.getDataSourceType() != DataSourceInfo.LIVE)) {
+                if (synchronous) {
+                    credentialsResponse = dataSource.refreshData(credentials, SecurityUtil.getAccountID(), new Date(), null);
+                    // TODO: refactor into event model
+                    //new GoalStorage().updateGoals(feedID);
                 } else {
-                    credentialsResponse = new CredentialsResponse(false, message);
+                    String message = dataSource.validateCredentials(credentials);
+                    if (message == null) {
+                        credentialsResponse = new CredentialsResponse(true);
+                        ServerRefreshScheduledTask task = new ServerRefreshScheduledTask();
+                        task.setDataSourceID(feedID);
+                        task.setUserID(SecurityUtil.getUserID());
+                        task.setExecutionDate(new Date());
+                        task.setStatus(ScheduledTask.INMEMORY);
+                        task.setRefreshCreds(credentials);
+                        Scheduler.instance().saveTask(task);
+                    } else {
+                        credentialsResponse = new CredentialsResponse(false, message);
+                    }
                 }
+            } else {
+                credentialsResponse = new CredentialsResponse(true);
             }
             return credentialsResponse;
         } catch (Exception e) {

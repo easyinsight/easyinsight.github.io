@@ -971,8 +971,7 @@ public class FeedStorage {
                         "GOAL_TREE_NODE_TO_FEED.FEED_ID IN (");
                 for (FeedDescriptor feedDescriptor : feedMap.values()) {
                     goalTreeBuilder.append("?,");
-                }
-                System.out.println(goalTreeBuilder.toString());
+                }                
                 PreparedStatement goalStmt = conn.prepareStatement(goalTreeBuilder.substring(0, goalTreeBuilder.length() - 1) + ")");
                 i = 0;
                 for (FeedDescriptor feedDescriptor : feedMap.values()) {
