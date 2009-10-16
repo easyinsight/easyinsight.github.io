@@ -5,11 +5,12 @@
          backgroundColor="#818285" horizontalAlign="center" implements="com.easyinsight.listing.IPerspective">
     <mx:states>
         <mx:State name="NotLoggedIn">
+            <mx:RemoveChild target="{installButton}"/>
             <mx:AddChild relativeTo="{controlsBox}">
                 <mx:VBox horizontalAlign="center" verticalAlign="middle" height="100%" verticalGap="15">
                     <mx:VBox verticalGap="0">
-                        <mx:Label text="You'll need to create an account or log"/>
-                        <mx:Label text="in before installing the solution."/>
+                        <mx:Label text="You'll need to create an account at the Individual or"/>
+                        <mx:Label text="higher tier or log in before installing the solution."/>
                     </mx:VBox>
                     <mx:HBox width="100%" horizontalAlign="center">
                         <mx:Button label="Create Account" styleName="blueButton" click="createAccount()"/>
@@ -20,6 +21,7 @@
             </mx:AddChild>
         </mx:State>
         <mx:State name="AccountBelowRequired">
+            <mx:RemoveChild target="{installButton}"/>
             <mx:AddChild relativeTo="{controlsBox}">
                 <mx:VBox horizontalAlign="center" verticalAlign="middle" height="100%" verticalGap="15">
                     <mx:VBox verticalGap="0">
@@ -252,11 +254,7 @@
                 loader.loadBytes(solution.image);
             }
             if (solution.accessible) {
-                controlsAlpha = 1;
-                controlsEnabled = true;
-            } else {
-                controlsAlpha = .5;
-                controlsEnabled = false;
+            } else {                
                 currentState = "AccountBelowRequired";
             }
             installAvailable = solution.installable || solution.goalTreeID > 0;
@@ -457,7 +455,7 @@
                 <mx:Box id="authBox"/>
                 <mx:VBox id="controlsBox" paddingTop="25" paddingBottom="30">
                     <mx:Button label="{startButtonText}" fontSize="24" click="install()"
-                                   styleName="blueButton" visible="{installAvailable}" enabled="{controlsEnabled}"/>
+                                   styleName="blueButton" visible="{installAvailable}" enabled="{controlsEnabled}" id="installButton"/>
                     <!--<mx:VBox alpha="{controlsAlpha}" id="controls">
 
                         <mx:Button label="Download Associated Files" fontSize="20" click="download()" styleName="blueButton"
