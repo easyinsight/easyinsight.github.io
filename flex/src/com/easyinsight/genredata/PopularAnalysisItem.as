@@ -28,7 +28,7 @@ import com.easyinsight.solutions.InsightDescriptor;
 		}
 		
 		private function analyze(event:MouseEvent):void {
-			parent.dispatchEvent(new ModuleAnalyzeEvent(new ReportAnalyzeSource(_data)));
+			parent.dispatchEvent(new AnalyzeEvent(new ReportAnalyzeSource(_data)));
 		}				
 	}
 }

@@ -49,7 +49,6 @@ public class AsyncViewStack extends ViewStack{
             selectedChild = dataViewPanel;
         } else {
             var targetIndex:int = getChildIndex(dataViewPanel);
-            //Alert.show("target index = " + targetIndex + " , selected index = " + selectedIndex);
             // TODO: make effect pluggable
             var cubeRotate:CubeRotate = new CubeRotate();
             if (targetIndex > selectedIndex) {

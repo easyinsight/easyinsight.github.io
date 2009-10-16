@@ -1,15 +1,17 @@
 package com.easyinsight.report {
+import com.easyinsight.FullScreenPage;
 import com.easyinsight.analysis.EmbeddedControllerLookup;
-import com.easyinsight.analysis.EmbeddedViewFactory;
+
 import com.easyinsight.analysis.IEmbeddedReportController;
-import com.easyinsight.framework.ModuleAnalyzeSource;
+
+import com.easyinsight.listing.AnalyzeSource;
 import com.easyinsight.solutions.InsightDescriptor;
 
-import flash.display.DisplayObject;
+
 
 import mx.collections.ArrayCollection;
 
-public class ReportAnalyzeSource extends ModuleAnalyzeSource{
+public class ReportAnalyzeSource implements AnalyzeSource{
 
     private var insightDescriptor:InsightDescriptor;
     private var filters:ArrayCollection;
@@ -22,7 +24,7 @@ public class ReportAnalyzeSource extends ModuleAnalyzeSource{
         this.installOption = installOption;
     }
 
-    override public function createDirect():DisplayObject {
+    public function createAnalysisPopup():FullScreenPage {
         var reportView:ReportView = new ReportView();
         reportView.reportID = insightDescriptor.id;
         reportView.reportType = insightDescriptor.reportType;

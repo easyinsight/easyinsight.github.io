@@ -149,7 +149,9 @@
 
         private function search():void {
         }
-        ]]></mx:Script>
+
+        public function cleanup():void {
+        }]]></mx:Script>
     <mx:RemoteObject destination="accountAdmin" id="userService">
         <mx:method name="getAccountAPISettings" result="gotSettings()"/>
     </mx:RemoteObject>

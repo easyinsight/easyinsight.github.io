@@ -1,11 +1,10 @@
 package com.easyinsight.listing
 {
+import com.easyinsight.FullScreenPage;
 import com.easyinsight.administration.feed.FeedAdministrationContainer;
-	
-    import com.easyinsight.framework.ModuleAnalyzeSource;
-import flash.display.DisplayObject;
 
-	public class FeedAdminAnalyzeSource extends ModuleAnalyzeSource
+
+public class FeedAdminAnalyzeSource implements AnalyzeSource
 	{
 		private var feedID:int;
 		
@@ -13,7 +12,7 @@ import flash.display.DisplayObject;
 			this.feedID = feedID;
 		}
 
-        override public function createDirect():DisplayObject {
+        public function createAnalysisPopup():FullScreenPage {
             var feedAdminContainer:FeedAdministrationContainer = new FeedAdministrationContainer();
             feedAdminContainer.feedID = feedID;
             return feedAdminContainer;

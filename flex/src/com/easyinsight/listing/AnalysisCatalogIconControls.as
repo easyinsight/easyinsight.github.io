@@ -3,7 +3,7 @@ package com.easyinsight.listing
 	import com.easyinsight.LoginDialog;
 	import com.easyinsight.framework.User;
 
-    import com.easyinsight.genredata.ModuleAnalyzeEvent;
+import com.easyinsight.genredata.AnalyzeEvent;
     import com.easyinsight.solutions.InsightDescriptor;
     import flash.events.MouseEvent;
 	
@@ -55,7 +55,7 @@ package com.easyinsight.listing
 		}
 		
 		private function analyze(event:MouseEvent):void {
-			dispatchEvent(new ModuleAnalyzeEvent(new AnalysisDefinitionAnalyzeSource(this.insightDescriptor)));
+			dispatchEvent(new AnalyzeEvent(new AnalysisDefinitionAnalyzeSource(this.insightDescriptor)));
 		}
 		
 		public function subscribe(event:MouseEvent):void {

@@ -3,7 +3,7 @@ import flash.events.Event;
 
 import mx.containers.Canvas;
 
-[Event(name="moduleAnalyze", type="com.easyinsight.genredata.ModuleAnalyzeEvent")]
+[Event(name="analyze", type="com.easyinsight.genredata.AnalyzeEvent")]
 
 public class ApplicationDock extends Canvas {
 

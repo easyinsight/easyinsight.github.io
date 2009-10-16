@@ -2,7 +2,7 @@ package com.easyinsight.analysis
 {
 	import com.easyinsight.LoginDialog;
 	import com.easyinsight.framework.LoginEvent;
-import com.easyinsight.genredata.ModuleAnalyzeEvent;
+import com.easyinsight.genredata.AnalyzeEvent;
 import com.easyinsight.listing.DescriptorAnalyzeSource;
 
 import com.easyinsight.util.PopUpUtil;
@@ -42,7 +42,7 @@ import flash.display.DisplayObject;
 		private function gotFeed(event:ResultEvent):void {
         	var feedResponse:FeedResponse = feedService.openFeedIfPossible.lastResult as FeedResponse;
         	if (feedResponse.status == FeedResponse.SUCCESS) {
-        		dispatchEvent(new ModuleAnalyzeEvent(new DescriptorAnalyzeSource(feedResponse.feedDescriptor.dataFeedID, feedResponse.feedDescriptor.name)));
+        		dispatchEvent(new AnalyzeEvent(new DescriptorAnalyzeSource(feedResponse.feedDescriptor.dataFeedID, feedResponse.feedDescriptor.name)));
             } else if (feedResponse.status == FeedResponse.NEED_LOGIN) {
                 var loginDialog:LoginDialog = LoginDialog(PopUpManager.createPopUp(Application.application as DisplayObject, LoginDialog, true));
         		loginDialog.addEventListener(LoginEvent.LOGIN, delayedFeed);

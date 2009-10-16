@@ -2,15 +2,11 @@
 <mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" creationComplete="setup()" width="100%" height="100%"
         implements="com.easyinsight.util.IAsyncScreen">
     <mx:Script><![CDATA[
-        import com.easyinsight.analysis.CredentialRequirement;
-        import com.easyinsight.analysis.CredentialsEvent;
-        import com.easyinsight.analysis.RuntimeCredentialsWindow;
         import com.easyinsight.framework.CredentialsCache;
 
         import com.easyinsight.framework.DataServiceLoadingEvent;
-        import com.easyinsight.genredata.ModuleAnalyzeEvent;
+        import com.easyinsight.genredata.AnalyzeEvent;
         import com.easyinsight.listing.DescriptorAnalyzeSource;
-        import com.easyinsight.util.PopUpUtil;
 
         import mx.charts.LinearAxis;
         import mx.charts.chartClasses.IAxis;
@@ -20,10 +16,9 @@
         import mx.controls.Label;
         import mx.controls.VRule;
         import mx.core.Container;
-        import mx.managers.PopUpManager;
 
         private function goDataSource():void {
-            dispatchEvent(new ModuleAnalyzeEvent(new DescriptorAnalyzeSource(_dataSourceID, _dataSourceName)));
+            dispatchEvent(new AnalyzeEvent(new DescriptorAnalyzeSource(_dataSourceID, _dataSourceName)));
         }
 
         [Bindable]

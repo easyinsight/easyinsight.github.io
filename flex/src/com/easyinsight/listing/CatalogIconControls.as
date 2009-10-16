@@ -1,11 +1,11 @@
 package com.easyinsight.listing
 {
 	import com.easyinsight.LoginDialog;
-	import com.easyinsight.customupload.UploadPolicy;
+
 	import com.easyinsight.framework.User;
 	import com.easyinsight.genredata.AnalyzeEvent;
 	
-import com.easyinsight.genredata.ModuleAnalyzeEvent;
+
 import flash.events.Event;
 	import flash.events.MouseEvent;
 	import flash.net.URLRequest;
@@ -101,7 +101,7 @@ import flash.events.Event;
 		}
 		
 		private function analyze(event:MouseEvent):void {
-			dispatchEvent(new ModuleAnalyzeEvent(new DescriptorAnalyzeSource(this.feedDescriptor.dataFeedID, this.feedDescriptor.name)));
+			dispatchEvent(new AnalyzeEvent(new DescriptorAnalyzeSource(this.feedDescriptor.dataFeedID, this.feedDescriptor.name)));
 		}
 		
 		override public function get data():Object {

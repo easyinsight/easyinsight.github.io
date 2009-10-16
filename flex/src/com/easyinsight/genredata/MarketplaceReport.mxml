@@ -25,7 +25,7 @@
             insightDescriptor.name = reportName;
             insightDescriptor.dataFeedID = dataSourceID;
             insightDescriptor.reportType = reportType;
-            dispatchEvent(new ModuleAnalyzeEvent(new ReportAnalyzeSource(insightDescriptor)));
+            dispatchEvent(new AnalyzeEvent(new ReportAnalyzeSource(insightDescriptor)));
         }
 
         private var _item:ReportExchangeItem;                

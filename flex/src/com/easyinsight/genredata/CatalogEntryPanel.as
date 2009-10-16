@@ -1,6 +1,8 @@
 package com.easyinsight.genredata
 {
-	import listing.AnalyzeSource;
+import com.easyinsight.listing.AnalyzeSource;
+
+import listing.AnalyzeSource;
 	
 	import mx.containers.HBox;
 

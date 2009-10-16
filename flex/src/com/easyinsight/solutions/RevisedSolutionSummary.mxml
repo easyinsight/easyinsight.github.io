@@ -17,7 +17,6 @@
 
         import mx.binding.utils.BindingUtils;
         import mx.events.ItemClickEvent;
-        import mx.managers.CursorManager;
         import mx.utils.URLUtil;
 
         import com.easyinsight.framework.User;
@@ -124,9 +123,9 @@
             BrowserManager.getInstance().setFragment(fragmentString);
             if (defaultView > 0) {
                 /*saas = (Solution.SAAS & defaultView == Solution.SAAS);
-                client = (Solution.CLIENT & defaultView == Solution.CLIENT);
-                learning = (Solution.LEARNING & defaultView == Solution.LEARNING);
-                biz = (Solution.BIZ & defaultView == Solution.BIZ);*/
+                 client = (Solution.CLIENT & defaultView == Solution.CLIENT);
+                 learning = (Solution.LEARNING & defaultView == Solution.LEARNING);
+                 biz = (Solution.BIZ & defaultView == Solution.BIZ);*/
                 defaultView = 0;
             }
             solutionService.getSolutions.send();
@@ -161,14 +160,17 @@
                     break;
                 case Solution.BIZ:
                     okay = biz;
-                    break;  
+                    break;
             }
             return okay;
         }
 
         private function updateFilters():void {
-            if(availableSolutions != null)
+            if (availableSolutions != null)
                 availableSolutions.refresh();
+        }
+
+        public function cleanup():void {
         }
                         
         ]]>

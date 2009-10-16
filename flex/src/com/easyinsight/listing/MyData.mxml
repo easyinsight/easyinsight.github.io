@@ -16,8 +16,6 @@
         import com.easyinsight.customupload.SimpleFeedWindow;
         import com.easyinsight.framework.AsyncInfoEvent;
         import com.easyinsight.framework.EIMessageListener;
-        import com.easyinsight.framework.ModuleAnalyzeSource;
-        import com.easyinsight.genredata.ModuleAnalyzeEvent;
         import com.easyinsight.help.MyDataHelp;
         import com.easyinsight.help.HelpWindow;
         import com.easyinsight.customupload.UserUpload;
@@ -32,10 +30,6 @@
         import mx.collections.ICollectionView;
         import mx.collections.Sort;
         import mx.events.AdvancedDataGridEvent;
-        import mx.events.CollectionEvent;
-        import mx.events.CollectionEventKind;
-        import mx.events.ScrollEvent;
-        import mx.events.ScrollEventDirection;
         import mx.utils.URLUtil;
         import mx.managers.BrowserManager;
         import mx.events.ListEvent;
@@ -196,15 +190,15 @@
         }
 
         private function gridDoubleClick(event:ListEvent):void {
-            var analyzeSource:ModuleAnalyzeSource = null;
+            var analyzeSource:AnalyzeSource = null;
             var selectedObject:Object = event.currentTarget.selectedItem;
             if (selectedObject is DataFeedDescriptor) {
                 var descriptor:DataFeedDescriptor = selectedObject as DataFeedDescriptor;
                 analyzeSource = new DescriptorAnalyzeSource(descriptor.dataFeedID, descriptor.name);
-                dispatchEvent(new ModuleAnalyzeEvent(analyzeSource));
+                dispatchEvent(new AnalyzeEvent(analyzeSource));
             } else {
                 analyzeSource = new ReportAnalyzeSource(InsightDescriptor(selectedObject));
-                dispatchEvent(new ModuleAnalyzeEvent(analyzeSource));
+                dispatchEvent(new AnalyzeEvent(analyzeSource));
             }
         }
 
@@ -281,9 +275,9 @@
                  descriptor.policy.publiclyVisible = false;*/
                 descriptor.name = event.name;
                 if (event.startInAdmin) {
-                    dispatchEvent(new ModuleAnalyzeEvent(new FeedAdminAnalyzeSource(descriptor.dataFeedID)));
+                    dispatchEvent(new AnalyzeEvent(new FeedAdminAnalyzeSource(descriptor.dataFeedID)));
                 } else {
-                    dispatchEvent(new ModuleAnalyzeEvent(new DescriptorAnalyzeSource(event.feedID, event.name)));
+                    dispatchEvent(new AnalyzeEvent(new DescriptorAnalyzeSource(event.feedID, event.name)));
                 }
             }
         }
@@ -351,6 +345,9 @@
             var item:Object = event.item;
             var children:ArrayCollection = item.children;
 
+        }
+
+        public function cleanup():void {
         }
 		]]>
 	</mx:Script>

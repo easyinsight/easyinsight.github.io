@@ -7,8 +7,7 @@
     <mx:Script><![CDATA[
         import com.easyinsight.administration.feed.FeedDefinitionData;
         import com.easyinsight.framework.CredentialsCache;
-        import com.easyinsight.genredata.ModuleAnalyzeEvent;
-        import com.easyinsight.listing.DataFeedDescriptor;
+        import com.easyinsight.genredata.AnalyzeEvent;
         import com.easyinsight.listing.DescriptorAnalyzeSource;
 
         import com.easyinsight.util.ProgressAlert;
@@ -60,7 +59,7 @@
             var id:int = uploadService.newExternalDataSource.lastResult as int;
             CredentialsCache.getCache().addCredentials(id, dataSourceCreation.credentials);
             dispatchEvent(new UploadConfigEvent(UploadConfigEvent.UPLOAD_CONFIG_COMPLETE, id, dataSourceName));
-            dispatchEvent(new ModuleAnalyzeEvent(new DescriptorAnalyzeSource(id, dataSourceName)));
+            dispatchEvent(new AnalyzeEvent(new DescriptorAnalyzeSource(id, dataSourceName)));
         }
 
         ]]></mx:Script>

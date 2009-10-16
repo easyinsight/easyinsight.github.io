@@ -26,11 +26,9 @@
         import com.easyinsight.framework.CredentialsCache;
         import com.easyinsight.framework.EIMessageListener;
         import com.easyinsight.framework.FullScreenModuleEvent;
-        import com.easyinsight.framework.IFullScreenPage;
-        import com.easyinsight.framework.ModuleAnalyzeSource;
+        import com.easyinsight.framework.IFullScreenPage;        
         import com.easyinsight.framework.TokenRedirector;
         import com.easyinsight.framework.WebCredentialsCache;
-        import com.easyinsight.genredata.ModuleAnalyzeEvent;
         import com.easyinsight.goals.DelayedGoalAdminLink;
         import com.easyinsight.goals.DelayedGoalLink;
         import com.easyinsight.goals.GoalDataAnalyzeSource;
@@ -144,9 +142,9 @@
             if (event.type == QuickSearchEvent.QUICK_SEARCH) {
                 if (event.eiDescriptor.getType() == EIDescriptor.DATA_SOURCE) {
                     var eiDescriptor:DataSourceDescriptor = event.eiDescriptor as DataSourceDescriptor;
-                    internalModuleAnalyze(new ModuleAnalyzeEvent(new DescriptorAnalyzeSource(eiDescriptor.id, eiDescriptor.name)));
+                    internalAnalyze(new AnalyzeEvent(new DescriptorAnalyzeSource(eiDescriptor.id, eiDescriptor.name)));
                 } else if (event.eiDescriptor.getType() == EIDescriptor.REPORT) {
-                    internalModuleAnalyze(new ModuleAnalyzeEvent(new ReportAnalyzeSource(event.eiDescriptor as InsightDescriptor)));
+                    internalAnalyze(new AnalyzeEvent(new ReportAnalyzeSource(event.eiDescriptor as InsightDescriptor)));
                 } else if (event.eiDescriptor.getType() == EIDescriptor.GOAL_TREE) {
                     internalAnalyze(new AnalyzeEvent(new GoalDataAnalyzeSource(event.eiDescriptor.id)));
                 }
@@ -211,19 +209,19 @@
             if (analysisID != null) {
                 //createAnalysisSource(Number(analysisID));
                 var deepAnalysisLink:DelayedDeepLink = new DelayedDeepLink(Number(analysisID));
-                deepAnalysisLink.addEventListener(ModuleAnalyzeEvent.MODULE_ANALYZE, internalModuleAnalyze);
+                deepAnalysisLink.addEventListener(AnalyzeEvent.ANALYZE, internalAnalyze);
                 deepAnalysisLink.execute();
             } else {
                 var feedID:String = o.feedID;
                 if (feedID != null) {
                     var deepFeedLink:DelayedFeedLink = new DelayedFeedLink(Number(feedID));
-                    deepFeedLink.addEventListener(ModuleAnalyzeEvent.MODULE_ANALYZE, internalModuleAnalyze);
+                    deepFeedLink.addEventListener(AnalyzeEvent.ANALYZE, internalAnalyze);
                     deepFeedLink.execute();
                 } else {
                     var feedKey:String = o.feedKey;
                     if (feedKey != null) {
                         var deepAPILink:DelayedAPIKeyLink = new DelayedAPIKeyLink(feedKey);
-                        deepAPILink.addEventListener(ModuleAnalyzeEvent.MODULE_ANALYZE, internalModuleAnalyze);
+                        deepAPILink.addEventListener(AnalyzeEvent.ANALYZE, internalAnalyze);
                         deepAPILink.execute();
                     } else {
                         var groupID:String = o.groupID;
@@ -252,13 +250,13 @@
                                         var reportID:String = o.reportID;
                                         if (reportID != null) {
                                             var deepReportLink:DelayedReportLink = new DelayedReportLink(Number(reportID));
-                                            deepReportLink.addEventListener(ModuleAnalyzeEvent.MODULE_ANALYZE, internalModuleAnalyze);
+                                            deepReportLink.addEventListener(AnalyzeEvent.ANALYZE, internalAnalyze);
                                             deepReportLink.execute();
                                         } else {
                                             var multiReportID:String = o.multiReportID;
                                             if (multiReportID != null) {
                                                 var multiReportLink:DelayedMultiReportLink = new DelayedMultiReportLink(Number(multiReportID));
-                                                multiReportLink.addEventListener(ModuleAnalyzeEvent.MODULE_ANALYZE, internalModuleAnalyze);
+                                                multiReportLink.addEventListener(AnalyzeEvent.ANALYZE, internalAnalyze);
                                                 multiReportLink.execute();
                                             } else {
                                                 var goalAdminID:String = o.goalTreeAdminID;
@@ -340,20 +338,30 @@
             }
         }
 
+        private function removeListeners(eventDispatcher:EventDispatcher):void {
+            eventDispatcher.removeEventListener(AnalyzeEvent.ANALYZE, internalAnalyze);
+            eventDispatcher.removeEventListener(AnalysisCloseEvent.ANALYSIS_CLOSE, analysisClosed);
+            eventDispatcher.removeEventListener(NavigationEvent.NAVIGATION, navigation);
+            eventDispatcher.removeEventListener(ListingChangeEvent.LISTING_CHANGE, changePerspective);
+        }
+
+        private function addListeners(eventDispatcher:EventDispatcher):void {
+            eventDispatcher.addEventListener(AnalyzeEvent.ANALYZE, internalAnalyze);            
+            eventDispatcher.addEventListener(AnalysisCloseEvent.ANALYSIS_CLOSE, analysisClosed);
+            eventDispatcher.addEventListener(NavigationEvent.NAVIGATION, navigation);
+            eventDispatcher.addEventListener(ListingChangeEvent.LISTING_CHANGE, changePerspective);
+        }
+
         private function doAnalyze(analyzeSource:AnalyzeSource):void {
             if (currentState == "Analysis") {
                 fullScreenPage.cleanup();
-                dataAnalysis.removeEventListener(AnalyzeEvent.ANALYZE, internalAnalyze);
-                dataAnalysis.removeEventListener(ModuleAnalyzeEvent.MODULE_ANALYZE, internalModuleAnalyze);
-                dataAnalysis.removeEventListener(AnalysisCloseEvent.ANALYSIS_CLOSE, analysisClosed);
+                removeListeners(dataAnalysis);
+                currentState = "";
                 validateNow();
             }
             if (analyzeSource != null) {
                 var analysisWindow:FullScreenPage = analyzeSource.createAnalysisPopup();
-                analysisWindow.addEventListener(AnalyzeEvent.ANALYZE, internalAnalyze);
-                analysisWindow.addEventListener(ModuleAnalyzeEvent.MODULE_ANALYZE, internalModuleAnalyze);
-                analysisWindow.addEventListener(AnalysisCloseEvent.ANALYSIS_CLOSE, analysisClosed);
-                analysisWindow.addEventListener(NavigationEvent.NAVIGATION, navigation);
+                addListeners(analysisWindow);
                 dataAnalysis = analysisWindow;
                 fullScreenPage = analysisWindow as IFullScreenPage;
                 currentState = "Analysis";
@@ -361,11 +369,7 @@
         }
 
         private function analysisClosed(event:AnalysisCloseEvent):void {
-            event.dataAnalysisContainer.removeEventListener(AnalysisCloseEvent.ANALYSIS_CLOSE, analysisClosed);
-            event.dataAnalysisContainer.removeEventListener(AnalyzeEvent.ANALYZE, internalAnalyze);
-            event.dataAnalysisContainer.removeEventListener(ModuleAnalyzeEvent.MODULE_ANALYZE, internalModuleAnalyze);
-            event.dataAnalysisContainer.removeEventListener(NavigationEvent.NAVIGATION, navigation);
-
+            removeListeners(dataAnalysis);
             fullScreenPage.cleanup();
             currentState = "";
             dataAnalysis = null;
@@ -380,10 +384,7 @@
             if (event.perspective != null) {
                 if (this.perspective != null) {
                     var existingDispatcher:EventDispatcher = this.perspective as EventDispatcher;
-                    existingDispatcher.removeEventListener(AnalyzeEvent.ANALYZE, internalAnalyze);
-                    existingDispatcher.removeEventListener(ModuleAnalyzeEvent.MODULE_ANALYZE, internalModuleAnalyze);
-                    existingDispatcher.removeEventListener(ListingChangeEvent.LISTING_CHANGE, changePerspective);
-                    existingDispatcher.removeEventListener(NavigationEvent.NAVIGATION, navigation);
+                    removeListeners(existingDispatcher);
                 }
                 if (currentState == "Analysis") {
                     fullScreenPage.cleanup();
@@ -403,10 +404,7 @@
                 coreSpace.addChildAt(perspective as DisplayObject, 0);
                 perspective.gotFocus();
                 var dispatcher:EventDispatcher = perspective as EventDispatcher;
-                dispatcher.addEventListener(AnalyzeEvent.ANALYZE, internalAnalyze);
-                dispatcher.addEventListener(ModuleAnalyzeEvent.MODULE_ANALYZE, internalModuleAnalyze);
-                dispatcher.addEventListener(ListingChangeEvent.LISTING_CHANGE, changePerspective);
-                dispatcher.addEventListener(NavigationEvent.NAVIGATION, navigation);
+                addListeners(dispatcher);
             }
         }
 
@@ -417,46 +415,6 @@
         private function internalAnalyze(event:AnalyzeEvent):void {
             var analyzeSource:AnalyzeSource = event.analyzeSource;
             doAnalyze(analyzeSource);
-        }
-
-        private function cleanupExistingPerspective():void {            
-            if (currentState == "Analysis") {
-                fullScreenPage.cleanup();
-                dataAnalysis.removeEventListener(AnalyzeEvent.ANALYZE, internalAnalyze);
-                dataAnalysis.removeEventListener(ModuleAnalyzeEvent.MODULE_ANALYZE, internalModuleAnalyze);
-                dataAnalysis.removeEventListener(AnalysisCloseEvent.ANALYSIS_CLOSE, analysisClosed);
-                dataAnalysis.removeEventListener(NavigationEvent.NAVIGATION, navigation);
-                fullScreenPage = null;
-                dataAnalysis = null;
-            } else if (perspective != null) {
-                var existingDispatcher:EventDispatcher = this.perspective as EventDispatcher;
-                existingDispatcher.removeEventListener(AnalyzeEvent.ANALYZE, internalAnalyze);
-                existingDispatcher.removeEventListener(ModuleAnalyzeEvent.MODULE_ANALYZE, internalModuleAnalyze);
-                existingDispatcher.removeEventListener(ListingChangeEvent.LISTING_CHANGE, changePerspective);
-                existingDispatcher.removeEventListener(NavigationEvent.NAVIGATION, navigation);
-            }
-        }
-
-        private function internalModuleAnalyze(event:ModuleAnalyzeEvent):void {
-            // add a core container, nest everything else
-            //
-            if (currentState == "Analysis") {
-                fullScreenPage.cleanup();
-                dataAnalysis.removeEventListener(AnalyzeEvent.ANALYZE, internalAnalyze);
-                dataAnalysis.removeEventListener(ModuleAnalyzeEvent.MODULE_ANALYZE, internalModuleAnalyze);
-                dataAnalysis.removeEventListener(AnalysisCloseEvent.ANALYSIS_CLOSE, analysisClosed);
-                dataAnalysis.removeEventListener(NavigationEvent.NAVIGATION, navigation);
-                validateNow();
-            }
-            var moduleAnalyzeSource:ModuleAnalyzeSource = event.analyzeSource;
-            var analysisWindow:DisplayObject = moduleAnalyzeSource.createDirect();
-            analysisWindow.addEventListener(AnalysisCloseEvent.ANALYSIS_CLOSE, analysisClosed);
-            analysisWindow.addEventListener(AnalyzeEvent.ANALYZE, internalAnalyze);
-            analysisWindow.addEventListener(ModuleAnalyzeEvent.MODULE_ANALYZE, internalModuleAnalyze);
-            analysisWindow.addEventListener(NavigationEvent.NAVIGATION, navigation);
-            dataAnalysis = analysisWindow;
-            fullScreenPage = analysisWindow as IFullScreenPage;
-            currentState = "Analysis";
         }
 
         private function moduleLoaded(event:FullScreenModuleEvent):void {
@@ -512,13 +470,13 @@
                                reportBug="launchBugReportWindow()"/>
             <mx:Box width="100%" height="5" backgroundColor="#D42525" left="0" right="0" id="highBar"/>
             <mx:HBox width="100%" height="100%" horizontalGap="0" id="primarySpace">
-                <framework:LeftApplicationDock height="100%" backgroundColor="0xF0F0F0" moduleAnalyze="internalModuleAnalyze(event)"/>
+                <framework:LeftApplicationDock height="100%" backgroundColor="0xF0F0F0" analyze="internalAnalyze(event)"/>
                 <mx:HBox width="100%" height="100%" id="coreSpace" paddingLeft="0" paddingTop="0" top="0"
                          paddingRight="0">
                     <intro1:IntroPanel id="introPanel" width="100%" height="100%" paddingTop="0"
                                        navigation="navigation(event)"/>
                 </mx:HBox>
-                <framework:RightApplicationDock height="100%" backgroundColor="0xF0F0F0" moduleAnalyze="internalModuleAnalyze(event)"/>
+                <framework:RightApplicationDock height="100%" backgroundColor="0xF0F0F0" analyze="internalAnalyze(event)"/>
             </mx:HBox>
         </mx:VBox>
      </util:AntiScrollCanvas>

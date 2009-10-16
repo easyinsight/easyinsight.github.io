@@ -1,15 +1,16 @@
 package com.easyinsight.genredata
 {
-import com.easyinsight.framework.ModuleAnalyzeSource;
+import com.easyinsight.listing.AnalyzeSource;
+
 import flash.events.Event;
 	
 	public class AsyncWindowAnalyzeEvent extends Event
 	{
 		public static const ASYNC_WINDOW_ANALYZE:String = "asyncWindowAnalyze";
 		
-		public var analyzeSource:ModuleAnalyzeSource;
+		public var analyzeSource:AnalyzeSource;
 				
-		public function AsyncWindowAnalyzeEvent(analyzeSource:ModuleAnalyzeSource)
+		public function AsyncWindowAnalyzeEvent(analyzeSource:AnalyzeSource)
 		{
 			super(ASYNC_WINDOW_ANALYZE, true);
 			this.analyzeSource = analyzeSource;

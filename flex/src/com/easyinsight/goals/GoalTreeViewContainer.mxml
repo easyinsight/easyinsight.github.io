@@ -223,7 +223,7 @@
         }
 
 
-        public function cleanup():void {
+        override public function cleanup():void {
             for each (var displayObject:DisplayObject in windows) {
                 PopUpManager.removePopUp(displayObject as IFlexDisplayObject);
             }

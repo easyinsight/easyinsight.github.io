@@ -58,7 +58,7 @@
         import com.easyinsight.framework.AuthorizationRequirement;
         import com.easyinsight.framework.NavigationEvent;
         import com.easyinsight.genredata.AnalyzeEvent;
-        import com.easyinsight.genredata.ModuleAnalyzeEvent;
+
         import com.easyinsight.goals.GoalDataAnalyzeSource;
         import com.easyinsight.goals.GoalTreeDescriptor;
         import com.easyinsight.google.AuthSubNavWindow;
@@ -296,7 +296,7 @@
             trace(event);
         }
 
-        private function onModuleAnalyze(event:ModuleAnalyzeEvent):void {
+        private function onModuleAnalyze(event:AnalyzeEvent):void {
             dispatchEvent(event);
         }
 
@@ -358,12 +358,12 @@
             if (items.length == 1 && goalTrees == 1) {
                 dispatchEvent(new AnalyzeEvent(new GoalDataAnalyzeSource((GoalTreeDescriptor(items.getItemAt(0)).id))));
             } else if (items.length == 1 && reports == 1) {
-                dispatchEvent(new ModuleAnalyzeEvent(new ReportAnalyzeSource(InsightDescriptor(items.getItemAt(0)))));
+                dispatchEvent(new AnalyzeEvent(new ReportAnalyzeSource(InsightDescriptor(items.getItemAt(0)))));
             } else if (items.length > 1) {
-                dispatchEvent(new ModuleAnalyzeEvent(new MultiScreenAnalyzeSource(items, _solution)));
+                dispatchEvent(new AnalyzeEvent(new MultiScreenAnalyzeSource(items, _solution)));
             } else {
                 var dataSourceDescriptor:DataSourceDescriptor = dataSourceItems.getItemAt(0) as DataSourceDescriptor;
-                dispatchEvent(new ModuleAnalyzeEvent(new DescriptorAnalyzeSource(dataSourceDescriptor.id, dataSourceDescriptor.name)));
+                dispatchEvent(new AnalyzeEvent(new DescriptorAnalyzeSource(dataSourceDescriptor.id, dataSourceDescriptor.name)));
             }
         }
 
@@ -414,6 +414,9 @@
         private function determineAuth():void {
             ProgressAlert.alert(this, "Determining authorization requirements...", null, solutionService.determineAuthorizationRequirements);
             solutionService.determineAuthorizationRequirements.send(solutionID);
+        }
+
+        public function cleanup():void {
         }
 		]]>
 	</mx:Script>

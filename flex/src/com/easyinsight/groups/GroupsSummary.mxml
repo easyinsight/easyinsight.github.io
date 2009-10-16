@@ -82,9 +82,9 @@
         }
 
         /*private function gotPublicGroups():void {
-            this.publicGroups = groupService.getPublicGroups.lastResult as ArrayCollection;
-            publicGroupRowCount = this.publicGroups.length;
-        }*/
+         this.publicGroups = groupService.getPublicGroups.lastResult as ArrayCollection;
+         publicGroupRowCount = this.publicGroups.length;
+         }*/
 
         private function createNewGroup():void {
             var groupWindow:NewGroupWindow = NewGroupWindow(PopUpManager.createPopUp(this, NewGroupWindow, true));
@@ -93,11 +93,13 @@
         }
 
         /*private function joinPublicGroup():void {
-            var groupJoinWindow:GroupJoinWindow = new GroupJoinWindow();
-            groupJoinWindow.addEventListener(GroupSelectedEvent.GROUP_SELECTED, groupSelected);
-            PopUpManager.addPopUp(groupJoinWindow, this, true);
-            PopUpUtil.centerPopUp(groupJoinWindow);
-        }*/
+         var groupJoinWindow:GroupJoinWindow = new GroupJoinWindow();
+         groupJoinWindow.addEventListener(GroupSelectedEvent.GROUP_SELECTED, groupSelected);
+         PopUpManager.addPopUp(groupJoinWindow, this, true);
+         PopUpUtil.centerPopUp(groupJoinWindow);
+         }*/
+        public function cleanup():void {
+        }
         ]]>
     </mx:Script>
     <mx:RemoteObject destination="groupService" id="groupService">

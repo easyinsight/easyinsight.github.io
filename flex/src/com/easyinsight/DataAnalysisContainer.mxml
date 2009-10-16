@@ -64,7 +64,7 @@
         import com.easyinsight.detail.DetailBook;
         import com.easyinsight.framework.InvalidFieldsEvent;
         import com.easyinsight.framework.LoginEvent;
-        import com.easyinsight.genredata.ModuleAnalyzeEvent;
+        import com.easyinsight.genredata.AnalyzeEvent;
         import com.easyinsight.listing.DescriptorAnalyzeSource;
         import com.easyinsight.listing.FeedAdminAnalyzeSource;
         import com.easyinsight.report.MultiReportAnalyzeSource;
@@ -278,13 +278,13 @@
                 Alert.show("You have unsaved changes. Are you sure you want to go to data source administration?", "Alert",
                         Alert.OK | Alert.CANCEL, null, adminAlertListener, null, Alert.CANCEL);
             } else {
-                dispatchEvent(new ModuleAnalyzeEvent(new FeedAdminAnalyzeSource(dataService.dataFeedID)));
+                dispatchEvent(new AnalyzeEvent(new FeedAdminAnalyzeSource(dataService.dataFeedID)));
             }
         }
 
         private function adminAlertListener(event:CloseEvent):void {
             if (event.detail == Alert.OK) {
-                dispatchEvent(new ModuleAnalyzeEvent(new FeedAdminAnalyzeSource(dataService.dataFeedID)));
+                dispatchEvent(new AnalyzeEvent(new FeedAdminAnalyzeSource(dataService.dataFeedID)));
             }
         }
 
@@ -626,7 +626,7 @@
             commandProcessor.redo();
         }
 
-        public function cleanup():void {
+        override public function cleanup():void {
             removeEventListener(CommandEvent.COMMAND, onCommand);
             if(stage != null)
                 stage.removeEventListener(KeyboardEvent.KEY_UP, onKey);
@@ -764,7 +764,7 @@
                 Alert.show("You have unsaved changes. Are you sure you want to go to reports?", "Alert",
                         Alert.OK | Alert.CANCEL, null, adminAlertListener, null, Alert.CANCEL);
             } else {
-                dispatchEvent(new ModuleAnalyzeEvent(new MultiReportAnalyzeSource(dataService.dataFeedID)));
+                dispatchEvent(new AnalyzeEvent(new MultiReportAnalyzeSource(dataService.dataFeedID)));
             }
         }
 
@@ -780,7 +780,7 @@
                 report.id = analysisDefinition.analysisID;
                 report.name = analysisDefinition.name;
                 report.reportType = analysisDefinition.reportType;
-                dispatchEvent(new ModuleAnalyzeEvent(new ReportAnalyzeSource(report)));
+                dispatchEvent(new AnalyzeEvent(new ReportAnalyzeSource(report)));
             }
         }
 
@@ -791,7 +791,7 @@
                 report.id = analysisDefinition.analysisID;
                 report.name = analysisDefinition.name;
                 report.reportType = analysisDefinition.reportType;
-                dispatchEvent(new ModuleAnalyzeEvent(new ReportAnalyzeSource(report)));
+                dispatchEvent(new AnalyzeEvent(new ReportAnalyzeSource(report)));
             }
         }
 
@@ -802,13 +802,13 @@
                 Alert.show("You have unsaved changes. Are you sure you want to create a new report?", "Alert",
                         Alert.OK | Alert.CANCEL, null, newReportListener, null, Alert.CANCEL);
             } else {
-                dispatchEvent(new ModuleAnalyzeEvent(new DescriptorAnalyzeSource(dataService.dataFeedID, dataSourceName)));
+                dispatchEvent(new AnalyzeEvent(new DescriptorAnalyzeSource(dataService.dataFeedID, dataSourceName)));
             }
         }
 
         private function newReportListener(event:CloseEvent):void {
             if (event.detail == Alert.OK) {
-                dispatchEvent(new ModuleAnalyzeEvent(new DescriptorAnalyzeSource(dataService.dataFeedID, dataSourceName)));
+                dispatchEvent(new AnalyzeEvent(new DescriptorAnalyzeSource(dataService.dataFeedID, dataSourceName)));
             }
         }
         ]]>

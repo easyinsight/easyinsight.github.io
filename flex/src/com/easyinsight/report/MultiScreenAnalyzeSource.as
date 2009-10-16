@@ -1,13 +1,13 @@
 package com.easyinsight.report {
-import com.easyinsight.framework.ModuleAnalyzeSource;
+import com.easyinsight.FullScreenPage;
 
+import com.easyinsight.listing.AnalyzeSource;
 import com.easyinsight.solutions.Solution;
 
-import flash.display.DisplayObject;
 
 import mx.collections.ArrayCollection;
 
-public class MultiScreenAnalyzeSource extends ModuleAnalyzeSource{
+public class MultiScreenAnalyzeSource implements AnalyzeSource{
 
     private var descriptors:ArrayCollection;
     private var solution:Solution;
@@ -18,7 +18,7 @@ public class MultiScreenAnalyzeSource extends ModuleAnalyzeSource{
         this.solution = solution;
     }
 
-    override public function createDirect():DisplayObject {
+    public function createAnalysisPopup():FullScreenPage {
         var view:MultiScreenView = new MultiScreenView();
         view.reports = descriptors;
         view.solution = solution;

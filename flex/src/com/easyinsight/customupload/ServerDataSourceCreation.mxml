@@ -7,7 +7,8 @@
     <mx:Script><![CDATA[
         import com.easyinsight.administration.feed.FeedDefinitionData;
         import com.easyinsight.framework.Credentials;
-        import com.easyinsight.genredata.ModuleAnalyzeEvent;
+
+        import com.easyinsight.genredata.AnalyzeEvent;
         import com.easyinsight.listing.DataFeedDescriptor;
         import com.easyinsight.listing.DescriptorAnalyzeSource;
         import mx.controls.Alert;
@@ -50,10 +51,10 @@
             var id:int = uploadService.newExternalDataSource.lastResult as int;
             var descriptor:DataFeedDescriptor = new DataFeedDescriptor();
             descriptor.dataFeedID = id;
-            descriptor.policy = new UploadPolicy();
-            descriptor.policy.publiclyVisible = false;
+            //descriptor.policy = new UploadPolicy();
+            //descriptor.policy.publiclyVisible = false;
             dispatchEvent(new UploadConfigEvent(UploadConfigEvent.UPLOAD_CONFIG_COMPLETE, id));            
-            dispatchEvent(new ModuleAnalyzeEvent(new DescriptorAnalyzeSource(descriptor)));
+            dispatchEvent(new AnalyzeEvent(new DescriptorAnalyzeSource(descriptor.dataFeedID, "")));
         }
 
         ]]></mx:Script>

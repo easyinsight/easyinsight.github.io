@@ -71,7 +71,7 @@
             this._feedList = feedList;
         }
 
-        public function cleanup():void {
+        override public function cleanup():void {
         }
 		]]>
 	</mx:Script>

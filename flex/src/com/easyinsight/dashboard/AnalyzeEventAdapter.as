@@ -1,6 +1,5 @@
 package com.easyinsight.dashboard {
 import com.easyinsight.genredata.AnalyzeEvent;
-import com.easyinsight.genredata.ModuleAnalyzeEvent;
 import com.easyinsight.goals.GoalDataAnalyzeSource;
 import com.easyinsight.listing.AnalyzeSource;
 
@@ -49,10 +48,6 @@ public class AnalyzeEventAdapter extends EventDispatcher {
             }
         }
         return desc;
-    }
-
-    public function translateModuleAnalyze(event:ModuleAnalyzeEvent):void {
-
     }
 }
 }

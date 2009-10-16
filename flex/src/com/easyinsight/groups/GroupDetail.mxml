@@ -348,6 +348,9 @@
             groupService.getGoalTrees.send(groupID);
             groupService.getGoals.send(groupID);
         }
+
+        public function cleanup():void {
+        }
 		]]>		
     </mx:Script>
     <mx:RemoteObject destination="groupService" id="groupService2">

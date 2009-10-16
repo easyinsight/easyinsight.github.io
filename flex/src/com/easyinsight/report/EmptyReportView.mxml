@@ -8,8 +8,9 @@
     <mx:Script><![CDATA[
         import com.easyinsight.framework.DataServiceLoadingEvent;
 
-        import com.easyinsight.framework.ModuleAnalyzeSource;
-        import com.easyinsight.genredata.ModuleAnalyzeEvent;
+        
+        import com.easyinsight.genredata.AnalyzeEvent;
+
 
         import com.easyinsight.listing.DescriptorAnalyzeSource;
 
@@ -28,9 +29,9 @@
         public function canRefresh():Boolean {
             return false;
         }
-        public function cleanup():void {
+        override public function cleanup():void {
         }]]></mx:Script>
     <mx:VBox width="100%" height="100%" paddingBottom="10" paddingLeft="10" paddingRight="10" paddingTop="10" verticalAlign="middle" horizontalAlign="center">
-        <mx:Label paddingLeft="0" paddingRight="0" paddingTop="0" paddingBottom="0" text="There are no reports for this data source yet. You can create one by going..." /><mx:LinkButton label="here!" paddingLeft="0" paddingRight="0" paddingTop="0" paddingBottom="0" fontFamily="Tahoma" fontSize="12" textDecoration="underline" click="dispatchEvent(new ModuleAnalyzeEvent(new DescriptorAnalyzeSource(feedID, feedName)))" />
+        <mx:Label paddingLeft="0" paddingRight="0" paddingTop="0" paddingBottom="0" text="There are no reports for this data source yet. You can create one by going..." /><mx:LinkButton label="here!" paddingLeft="0" paddingRight="0" paddingTop="0" paddingBottom="0" fontFamily="Tahoma" fontSize="12" textDecoration="underline" click="dispatchEvent(new AnalyzeEvent(new DescriptorAnalyzeSource(feedID, feedName)))" />
     </mx:VBox>
 </easyinsight:FullScreenPage>

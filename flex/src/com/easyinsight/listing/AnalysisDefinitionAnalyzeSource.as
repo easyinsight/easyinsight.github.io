@@ -1,15 +1,14 @@
 package com.easyinsight.listing
 {
 import com.easyinsight.DataAnalysisContainer;
+import com.easyinsight.FullScreenPage;
 import com.easyinsight.framework.DataService;
-import com.easyinsight.framework.ModuleAnalyzeSource;
 import com.easyinsight.solutions.InsightDescriptor;
-import flash.display.DisplayObject;
 
 import mx.collections.ArrayCollection;
 import mx.managers.BrowserManager;
 
-	public class AnalysisDefinitionAnalyzeSource extends ModuleAnalyzeSource
+	public class AnalysisDefinitionAnalyzeSource implements AnalyzeSource
 	{
 		private var insightDescriptor:InsightDescriptor;
 		private var admin:Boolean;
@@ -20,7 +19,7 @@ import mx.managers.BrowserManager;
             this.filters = filters;
 		}
 
-        override public function createDirect():DisplayObject {
+        public function createAnalysisPopup():FullScreenPage {
             var dataAnalysisContainer:DataAnalysisContainer = new DataAnalysisContainer();
             dataAnalysisContainer.filterOverrides = filters;
             var dataService:DataService = new DataService();

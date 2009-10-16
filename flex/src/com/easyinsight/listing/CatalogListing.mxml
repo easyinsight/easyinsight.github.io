@@ -7,15 +7,16 @@
     </mx:Metadata>
     <mx:Script>
 		<![CDATA[
-        import com.easyinsight.framework.ModuleAnalyzeSource;
-        import com.easyinsight.genredata.ModuleAnalyzeEvent;
+        
+        import com.easyinsight.genredata.AnalyzeEvent;
+
         import mx.events.ListEvent;
         import mx.collections.ArrayCollection;
 
         [Bindable]
         public var dataFeeds:ArrayCollection;
 
-        public function analyze():ModuleAnalyzeSource {
+        public function analyze():AnalyzeSource {
             var dataFeedDescriptor:DataFeedDescriptor = null;
             if (dataFeedGrid.selectedItem != null) {
                 dataFeedDescriptor = dataFeedGrid.selectedItem as DataFeedDescriptor;
@@ -26,7 +27,7 @@
                     dataFeedDescriptor = dataFeeds.getItemAt(0) as DataFeedDescriptor;
                 }
             }
-            var analyzeSource:ModuleAnalyzeSource = null;
+            var analyzeSource:AnalyzeSource = null;
             if (dataFeedDescriptor != null) {
                 analyzeSource = new DescriptorAnalyzeSource(dataFeedDescriptor.dataFeedID, dataFeedDescriptor.name);
             }
@@ -39,7 +40,7 @@
 
         private function gridDoubleClick(event:ListEvent):void {
             var feedDescriptor:DataFeedDescriptor = event.currentTarget.selectedItem as DataFeedDescriptor;
-            dispatchEvent(new ModuleAnalyzeEvent(new DescriptorAnalyzeSource(feedDescriptor.dataFeedID, feedDescriptor.name)));
+            dispatchEvent(new AnalyzeEvent(new DescriptorAnalyzeSource(feedDescriptor.dataFeedID, feedDescriptor.name)));
         }
 		]]>
     </mx:Script>

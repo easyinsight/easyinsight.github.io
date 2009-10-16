@@ -2,56 +2,62 @@
 <mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%" xmlns:listing="com.easyinsight.listing.*"
 	implements="com.easyinsight.listing.IPerspective" xmlns:genredata="com.easyinsight.genredata.*">
 	<mx:Metadata>
-		[Event(name="headerBarUpdate", type="com.easyinsight.listing.HeaderBarEvent")]
 		[Event(name="analyze", type="com.easyinsight.genredata.AnalyzeEvent")]
 	</mx:Metadata>	
 	<mx:Script>
 		<![CDATA[
-        import com.easyinsight.framework.ModuleAnalyzeSource;
-import com.easyinsight.genredata.AnalyzeEvent;
-                    import mx.core.Container;
-                    import com.easyinsight.genredata.ICatalogPage;
-                    import mx.collections.ArrayCollection;
-                    import com.easyinsight.framework.User;
-                    [Bindable]
-                    public var genre:String;
+        import com.easyinsight.genredata.AnalyzeEvent;
 
-                    /*private function genreChanged(event:GenreChangedEvent):void {
-                        if (this.genre != null) {
-                            this.genre.component.removeEventListener(AnalyzeEvent.ANALYZE, internalAnalyze);
-                        }
-                        genre = event.genre;
-          com.easyinsight.analysis      coreHBox.removeAllChildren();
-                        coreHBox.addChild(genre.component);
-                        genre.component.addEventListener(AnalyzeEvent.ANALYZE, internalAnalyze);
-                    }*/
+        import mx.core.Container;
 
-                    private function internalAnalyze(event:AnalyzeEvent):void {
-                        trace("internal analysis successful");
-                        //dispatchEvent(event);
-                    }
+        import com.easyinsight.genredata.ICatalogPage;
 
-                    /*private function postInitialized():void {
-                        coreHBox.addChild(genres.getCurrentGenre().component);
-                    }*/
+        import mx.collections.ArrayCollection;
 
-                    public function analyze():ModuleAnalyzeSource {
-                        /*var catalogPage:ICatalogPage = viewStack.selectedChild as ICatalogPage;
-                        return catalogPage.analyze();*/
-                        return null;
-                    }
+        import com.easyinsight.framework.User;
 
-                    public function gotFocus():void {
+        [Bindable]
+        public var genre:String;
 
-                    }
+        /*private function genreChanged(event:GenreChangedEvent):void {
+         if (this.genre != null) {
+         this.genre.component.removeEventListener(AnalyzeEvent.ANALYZE, internalAnalyze);
+         }
+         genre = event.genre;
+         com.easyinsight.analysis      coreHBox.removeAllChildren();
+         coreHBox.addChild(genre.component);
+         genre.component.addEventListener(AnalyzeEvent.ANALYZE, internalAnalyze);
+         }*/
 
-                    public function getDefaultAnalyzeState():Boolean {
-                        return false;
-                    }
+        private function internalAnalyze(event:AnalyzeEvent):void {
+            trace("internal analysis successful");
+            //dispatchEvent(event);
+        }
 
-                    public function isKeywordSearchInstant():Boolean {
-                        return false;
-                    }
+        /*private function postInitialized():void {
+         coreHBox.addChild(genres.getCurrentGenre().component);
+         }*/
+
+        public function analyze():AnalyzeSource {
+            /*var catalogPage:ICatalogPage = viewStack.selectedChild as ICatalogPage;
+             return catalogPage.analyze();*/
+            return null;
+        }
+
+        public function gotFocus():void {
+
+        }
+
+        public function getDefaultAnalyzeState():Boolean {
+            return false;
+        }
+
+        public function isKeywordSearchInstant():Boolean {
+            return false;
+        }
+
+        public function cleanup():void {
+        }
 
                 ]]>
 	</mx:Script>

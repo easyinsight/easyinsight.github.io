@@ -1,11 +1,11 @@
 package com.easyinsight.genredata
 {
-import com.easyinsight.framework.ModuleAnalyzeSource;
-	
-	[Event(name="returnToStore", type="com.easyinsight.listing.CatalogNavigationEvent")]
+import com.easyinsight.listing.AnalyzeSource;
+
+[Event(name="returnToStore", type="com.easyinsight.listing.CatalogNavigationEvent")]
 	
 	public interface ICatalogPage
 	{
-		function analyze():ModuleAnalyzeSource;
+		function analyze():AnalyzeSource;
 	}
 }

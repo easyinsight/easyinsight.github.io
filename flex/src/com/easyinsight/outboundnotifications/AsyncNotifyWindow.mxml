@@ -3,15 +3,15 @@
                 showCloseButton="true" close="PopUpManager.removePopUp(this);" title="Background Tasks"
         removedEffect="{dissolveOut}" creationCompleteEffect="{dissolveIn}" showEffect="{dissolveIn}" creationComplete="onCreationComplete()" >
     <mx:Script><![CDATA[
+        import com.easyinsight.genredata.AnalyzeEvent;
         import com.easyinsight.genredata.AsyncWindowAnalyzeEvent;
-        import com.easyinsight.genredata.ModuleAnalyzeEvent;
 
         import mx.collections.ArrayCollection;
         import mx.managers.PopUpManager;
 
 
         private function onModuleAnalyze(event:AsyncWindowAnalyzeEvent):void {
-            dispatchEvent(new ModuleAnalyzeEvent(event.analyzeSource));
+            dispatchEvent(new AnalyzeEvent(event.analyzeSource));
             PopUpManager.removePopUp(this);
         }
 

@@ -36,7 +36,7 @@
         import com.easyinsight.framework.DataServiceLoadingEvent;
         import com.easyinsight.framework.HierarchyOverride;
         import com.easyinsight.framework.User;
-        import com.easyinsight.genredata.ModuleAnalyzeEvent;
+        import com.easyinsight.genredata.AnalyzeEvent;
 
         import com.easyinsight.listing.AnalysisDefinitionAnalyzeSource;
 
@@ -406,7 +406,7 @@
             report.dataFeedID = _dataSourceID;
             report.name = reportName;
             report.reportType = _reportType;
-            dispatchEvent(new ModuleAnalyzeEvent(new AnalysisDefinitionAnalyzeSource(report, viewFactory.filterDefinitions)));
+            dispatchEvent(new AnalyzeEvent(new AnalysisDefinitionAnalyzeSource(report, viewFactory.filterDefinitions)));
         }
 
 
@@ -498,7 +498,7 @@
         }
 
         private function reportNavigation(event:ReportNavigationEvent):void {
-            dispatchEvent(new ModuleAnalyzeEvent(new ReportAnalyzeSource(event.descriptor, event.filters)));
+            dispatchEvent(new AnalyzeEvent(new ReportAnalyzeSource(event.descriptor, event.filters)));
         }
 
         private function saveReport(event:MouseEvent):void {
@@ -578,7 +578,7 @@
             _updateURL = value;
         }
 
-        public function cleanup():void {
+        override public function cleanup():void {
             reportBox.removeChild(viewFactory);
         }
 

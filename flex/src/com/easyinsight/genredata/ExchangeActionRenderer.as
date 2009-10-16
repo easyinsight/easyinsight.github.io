@@ -32,7 +32,7 @@ public class ExchangeActionRenderer extends HBox{
         insightDescriptor.name = exchangeItem.name;
         insightDescriptor.dataFeedID = exchangeItem.dataSourceID;
         insightDescriptor.reportType = exchangeItem.reportType;
-        dispatchEvent(new ModuleAnalyzeEvent(new ReportAnalyzeSource(insightDescriptor)));
+        dispatchEvent(new AnalyzeEvent(new ReportAnalyzeSource(insightDescriptor)));
     }
 
     override protected function createChildren():void {

@@ -43,7 +43,7 @@
             allDescriptors = descs;
         }
 
-        public function cleanup():void {
+        override public function cleanup():void {
         }]]></mx:Script>
     <report:MultiScreenView reports="{allDescriptors}" factory="{factory}" showBackButton="true" analysisClose="dispatchEvent(event)"/>
 </FullScreenPage>

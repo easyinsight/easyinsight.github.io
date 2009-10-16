@@ -32,7 +32,7 @@ public class DrillThroughExecutor extends EventDispatcher {
         var result:InsightResponse = analysisService.openAnalysisIfPossible.lastResult as InsightResponse;
         if (result.insightDescriptor != null) {
             if (editor) {
-                //dispatchEvent(new ModuleAnalyzeEvent(new AnalysisDefinitionAnalyzeSource(result.insightDescriptor)));
+                //dispatchEvent(new AnalyzeEvent(new AnalysisDefinitionAnalyzeSource(result.insightDescriptor)));
             } else {
                 dispatchEvent(new ReportNavigationEvent(ReportNavigationEvent.TO_REPORT, result.insightDescriptor, filters));
             }

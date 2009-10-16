@@ -14,6 +14,6 @@
                              messageListener="{messageListener}"
             />
     <notification:BackgroundTaskButton rotation="-90" x="3" y="155" image="{clockIcon}" text="Tasks"
-                                       messageListener="{messageListener}" moduleAnalyze="dispatchEvent(event)"
+                                       messageListener="{messageListener}" analyze="dispatchEvent(event)"
             />
 </framework:ApplicationDock>

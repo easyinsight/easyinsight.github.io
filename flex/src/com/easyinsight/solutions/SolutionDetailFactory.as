@@ -9,7 +9,7 @@ public class SolutionDetailFactory {
 
     public static function createDetailPage(solution:Solution, auth:Boolean):IPerspective {
         var page:IPerspective;
-        if (solution.solutionID == 12) {
+        if (solution.solutionID == 1) {
             var gSol:GoogleAnalyticsSolution = new GoogleAnalyticsSolution();
             gSol.solution = solution;
             gSol.newAuth = auth;

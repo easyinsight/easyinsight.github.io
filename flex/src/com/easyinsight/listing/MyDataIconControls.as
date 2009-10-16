@@ -7,7 +7,7 @@ import com.easyinsight.customupload.UploadConfigEvent;
 import com.easyinsight.framework.Credentials;
 import com.easyinsight.framework.GenericFaultHandler;
 import com.easyinsight.framework.User;
-import com.easyinsight.genredata.ModuleAnalyzeEvent;
+import com.easyinsight.genredata.AnalyzeEvent;
 
 import com.easyinsight.report.ReportAnalyzeSource;
 import com.easyinsight.solutions.InsightDescriptor;
@@ -121,10 +121,10 @@ public class MyDataIconControls extends HBox
     private function analyzeCalled(event:MouseEvent):void {
         if (obj is DataFeedDescriptor) {
             var descriptor:DataFeedDescriptor = obj as DataFeedDescriptor;
-            dispatchEvent(new ModuleAnalyzeEvent(new DescriptorAnalyzeSource(descriptor.dataFeedID, descriptor.name)));
+            dispatchEvent(new AnalyzeEvent(new DescriptorAnalyzeSource(descriptor.dataFeedID, descriptor.name)));
         } else {
             var analysisDefinition:InsightDescriptor = obj as InsightDescriptor;
-            dispatchEvent(new ModuleAnalyzeEvent(new ReportAnalyzeSource(analysisDefinition)));
+            dispatchEvent(new AnalyzeEvent(new ReportAnalyzeSource(analysisDefinition)));
         }
     }
 
@@ -180,10 +180,10 @@ public class MyDataIconControls extends HBox
     private function adminCalled(event:MouseEvent):void {
         if (obj is DataFeedDescriptor) {
             var descriptor:DataFeedDescriptor = obj as DataFeedDescriptor;
-            dispatchEvent(new ModuleAnalyzeEvent(new FeedAdminAnalyzeSource(descriptor.dataFeedID)));
+            dispatchEvent(new AnalyzeEvent(new FeedAdminAnalyzeSource(descriptor.dataFeedID)));
         } else {
             var analysisDefinition:InsightDescriptor = obj as InsightDescriptor;
-            dispatchEvent(new ModuleAnalyzeEvent(new AnalysisDefinitionAnalyzeSource(analysisDefinition)));
+            dispatchEvent(new AnalyzeEvent(new AnalysisDefinitionAnalyzeSource(analysisDefinition)));
         }
     }
 

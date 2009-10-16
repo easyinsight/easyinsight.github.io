@@ -1,9 +1,9 @@
 package com.easyinsight.report {
-import com.easyinsight.framework.ModuleAnalyzeSource;
+import com.easyinsight.FullScreenPage;
 
-import flash.display.DisplayObject;
+import com.easyinsight.listing.AnalyzeSource;
 
-public class MultiReportAnalyzeSource extends ModuleAnalyzeSource{
+public class MultiReportAnalyzeSource implements AnalyzeSource {
 
     private var dataSourceID:int;
     private var dataSourceName:String;
@@ -14,7 +14,7 @@ public class MultiReportAnalyzeSource extends ModuleAnalyzeSource{
         this.dataSourceName = dataSourceName;
     }
 
-    override public function createDirect():DisplayObject {
+    public function createAnalysisPopup():FullScreenPage {
         var view:MultiReportView = new MultiReportView();
         view.dataSourceID = dataSourceID;
         view.dataSourceName = dataSourceName;

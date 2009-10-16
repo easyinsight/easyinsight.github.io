@@ -1,10 +1,7 @@
 package com.easyinsight.outboundnotifications {
 import com.easyinsight.analysis.UserCapabilities;
-import com.easyinsight.framework.ModuleAnalyzeSource;
 import com.easyinsight.genredata.AsyncWindowAnalyzeEvent;
-import com.easyinsight.genredata.ModuleAnalyzeEvent;
-import com.easyinsight.gnip.*;
-import com.easyinsight.datasources.GnipFilter;
+
 
 import com.easyinsight.listing.DescriptorAnalyzeSource;
 
@@ -14,12 +11,7 @@ import flash.events.MouseEvent;
 
 import mx.containers.HBox;
 import mx.controls.Alert;
-import mx.controls.Button;
-import mx.controls.Label;
 import mx.controls.LinkButton;
-import mx.controls.ProgressBar;
-import mx.events.CloseEvent;
-import mx.managers.PopUpManager;
 import mx.rpc.events.FaultEvent;
 import mx.rpc.events.ResultEvent;
 import mx.rpc.remoting.RemoteObject;
@@ -29,7 +21,7 @@ public class DataSourceNameColumnRender extends HBox {
     private var infoLabel:LinkButton;
 
     [Embed(source="../../../../assets/navigate_cross.png")]
-    private var cancelIcon:Class
+    private var cancelIcon:Class;
 
     private var analysisService:RemoteObject;
 

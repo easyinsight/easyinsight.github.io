@@ -6,16 +6,15 @@
 	</mx:Metadata> 	
 	<mx:Script>
 		<![CDATA[
-            import com.easyinsight.framework.ModuleAnalyzeSource;
-            import com.easyinsight.genredata.ModuleAnalyzeEvent;
-            import com.easyinsight.solutions.InsightDescriptor;
+        import com.easyinsight.genredata.AnalyzeEvent;
+        import com.easyinsight.solutions.InsightDescriptor;
             import mx.events.ListEvent;
 			import mx.collections.ArrayCollection;
 
 			[Bindable]
             public var insightDescriptors:ArrayCollection;            
 			
-			public function analyze():ModuleAnalyzeSource {
+			public function analyze():AnalyzeSource {
                 var insightDescriptor:InsightDescriptor = null;
                 if (insightDescriptorGrid.selectedItem != null) {
                     insightDescriptor = insightDescriptorGrid.selectedItem as InsightDescriptor;
@@ -26,7 +25,7 @@
                         insightDescriptor = insightDescriptors.getItemAt(0) as InsightDescriptor;
                     }
                 }
-                var analyzeSource:ModuleAnalyzeSource = null;
+                var analyzeSource:AnalyzeSource = null;
                 if (insightDescriptor != null) {
                     analyzeSource = new AnalysisDefinitionAnalyzeSource(insightDescriptor);
                 }
@@ -39,7 +38,7 @@
 			
 			private function gridDoubleClick(event:ListEvent):void {
 				var insightDescriptor:InsightDescriptor = event.currentTarget.selectedItem as InsightDescriptor;
-				dispatchEvent(new ModuleAnalyzeEvent(new AnalysisDefinitionAnalyzeSource(insightDescriptor)));
+				dispatchEvent(new AnalyzeEvent(new AnalysisDefinitionAnalyzeSource(insightDescriptor)));
 			}
 		]]>
 	</mx:Script>

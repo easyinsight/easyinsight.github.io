@@ -251,6 +251,9 @@
             PopUpManager.addPopUp(window, this, true);
             PopUpUtil.centerPopUp(window);
         }
+
+        public function cleanup():void {
+        }
 		]]>
     </mx:Script>
     <mx:RemoteObject destination="goalService" id="goalService">

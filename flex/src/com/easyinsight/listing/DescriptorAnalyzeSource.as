@@ -1,16 +1,13 @@
 package com.easyinsight.listing
 {
 import com.easyinsight.DataAnalysisContainer;
+import com.easyinsight.FullScreenPage;
 import com.easyinsight.framework.DataService;
-import com.easyinsight.framework.LoginEvent;
-    import com.easyinsight.framework.ModuleAnalyzeSource;
-    import com.easyinsight.framework.User;
 
-import flash.display.DisplayObject;
 import mx.managers.BrowserManager;
 import mx.rpc.remoting.RemoteObject;
 	
-	public class DescriptorAnalyzeSource extends ModuleAnalyzeSource
+	public class DescriptorAnalyzeSource implements AnalyzeSource
 	{
         private var dataFeedID:int;
         private var name:String;
@@ -24,7 +21,7 @@ import mx.rpc.remoting.RemoteObject;
             this.name = name;
 		}
 
-        override public function createDirect():DisplayObject {
+        public function createAnalysisPopup():FullScreenPage {
             var dataAnalysisContainer:DataAnalysisContainer = new DataAnalysisContainer();
             var dataService:DataService = new DataService();
             dataService.dataFeedID = dataFeedID;

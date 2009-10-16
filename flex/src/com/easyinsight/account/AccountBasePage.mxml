@@ -95,6 +95,9 @@
              event.account.accountType, event.account.accountType.getSpaceAllowed(), event.user.permissions);
              User.getEventNotifier().dispatchEvent(new LoginEvent());*/
         }
+
+        public function cleanup():void {
+        }
 		]]>
 	</mx:Script>
 	<mx:RemoteObject destination="login" id="userService">

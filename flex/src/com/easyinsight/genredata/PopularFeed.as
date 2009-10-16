@@ -29,7 +29,7 @@ package com.easyinsight.genredata
 		}
 		
 		private function analyze(event:MouseEvent):void {
-			parent.dispatchEvent(new ModuleAnalyzeEvent(new DescriptorAnalyzeSource(_data.dataFeedID, _data.name)));
+			parent.dispatchEvent(new AnalyzeEvent(new DescriptorAnalyzeSource(_data.dataFeedID, _data.name)));
 		}		
 		
 	}

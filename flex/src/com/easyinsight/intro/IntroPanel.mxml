@@ -8,12 +8,12 @@
     <mx:Script>
 		<![CDATA[
         import com.easyinsight.framework.LoginEvent;
-import com.easyinsight.framework.User;
+        import com.easyinsight.framework.User;
         import com.easyinsight.help.ScreencastWindow;
 
         import mx.controls.Alert;
         import mx.managers.CursorManager;
-import mx.managers.PopUpManager;
+        import mx.managers.PopUpManager;
         import mx.utils.URLUtil;
         import mx.managers.BrowserManager;
 
@@ -81,6 +81,9 @@ import mx.managers.PopUpManager;
         [Bindable]
         public function set tour(value:Boolean):void {
             _tour = value;
+        }
+
+        public function cleanup():void {
         }
 
                 ]]>

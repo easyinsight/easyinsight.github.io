@@ -6,7 +6,9 @@ import com.easyinsight.framework.EIMessageListener;
 
 import com.easyinsight.framework.LoginEvent;
 import com.easyinsight.framework.User;
-import com.easyinsight.genredata.ModuleAnalyzeEvent;
+
+
+import com.easyinsight.genredata.AnalyzeEvent;
 
 import flash.events.Event;
 
@@ -22,7 +24,7 @@ import mx.rpc.events.FaultEvent;
 import mx.rpc.events.ResultEvent;
 import mx.rpc.remoting.RemoteObject;
 
-[Event(name="moduleAnalyze", type="com.easyinsight.genredata.ModuleAnalyzeEvent")]
+[Event(name="analyze", type="com.easyinsight.genredata.AnalyzeEvent")]
 public class BackgroundTaskButton extends CorePageButton{
 
     private var asyncWindow:AsyncNotifyWindow;
@@ -66,7 +68,7 @@ public class BackgroundTaskButton extends CorePageButton{
                 BindingUtils.bindProperty(asyncWindow, "data", this, "asyncData");
                 asyncWindow.addEventListener(CloseEvent.CLOSE, onClose);
                 asyncWindow.addEventListener(AsyncDeleteEvent.ASYNC_DELETE, onDelete);
-                asyncWindow.addEventListener(ModuleAnalyzeEvent.MODULE_ANALYZE, onModuleAnalyze);
+                asyncWindow.addEventListener(AnalyzeEvent.ANALYZE, onModuleAnalyze);
             }
             PopUpManager.addPopUp(asyncWindow, this, false);
             asyncWindow.x = lastX;
@@ -74,7 +76,7 @@ public class BackgroundTaskButton extends CorePageButton{
         showingWindow = true;
     }
 
-    private function onModuleAnalyze(event:ModuleAnalyzeEvent):void {
+    private function onModuleAnalyze(event:AnalyzeEvent):void {
         dispatchEvent(event.clone());
     }
 

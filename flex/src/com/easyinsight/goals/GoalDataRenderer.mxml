@@ -4,7 +4,6 @@
     <mx:Script><![CDATA[
         import com.easyinsight.analysis.PopupMenuFactory;
         import com.easyinsight.genredata.AnalyzeEvent;
-        import com.easyinsight.genredata.ModuleAnalyzeEvent;
         import com.easyinsight.util.ModelessWindowEvent;
         import com.easyinsight.util.PopUpUtil;
         import com.easyinsight.util.PrefixManager;
@@ -91,16 +90,16 @@ import mx.formatters.NumberFormatter;
         private function onDoubleClick():void {
             var window:GoalDetailWindow = new GoalDetailWindow();
             window.goalTreeNodeData = goalTreeNodeData;            
-            window.addEventListener(ModuleAnalyzeEvent.MODULE_ANALYZE, onAnalyze);
+            window.addEventListener(AnalyzeEvent.ANALYZE, onAnalyze);
             window.addEventListener(CloseEvent.CLOSE, onClose);
             PopUpManager.addPopUp(window, this);
             PopUpUtil.centerPopUp(window);
             dispatchEvent(new ModelessWindowEvent(ModelessWindowEvent.WINDOW_ADDED, window));
         }
 
-        private function onAnalyze(event:ModuleAnalyzeEvent):void {
+        private function onAnalyze(event:AnalyzeEvent):void {
             dispatchEvent(event);
-        }                                                                          
+        }
 
         private function onClose(event:CloseEvent):void {
             event.currentTarget.removeEventListener(CloseEvent.CLOSE, onClose);

@@ -3,7 +3,7 @@ import com.easyinsight.LoginDialog;
 import com.easyinsight.analysis.FeedResponse;
 import com.easyinsight.framework.LoginEvent;
 
-import com.easyinsight.genredata.ModuleAnalyzeEvent;
+import com.easyinsight.genredata.AnalyzeEvent;
 
 import com.easyinsight.util.PopUpUtil;
 
@@ -42,7 +42,7 @@ public class DelayedMultiReportLink extends EventDispatcher {
     private function gotFeed(event:ResultEvent):void {
         var feedResponse:FeedResponse = feedService.openFeedIfPossible.lastResult as FeedResponse;
         if (feedResponse.status == FeedResponse.SUCCESS) {
-            dispatchEvent(new ModuleAnalyzeEvent(new MultiReportAnalyzeSource(feedResponse.feedDescriptor.dataFeedID)));
+            dispatchEvent(new AnalyzeEvent(new MultiReportAnalyzeSource(feedResponse.feedDescriptor.dataFeedID)));
         } else if (feedResponse.status == FeedResponse.NEED_LOGIN) {
             var loginDialog:LoginDialog = LoginDialog(PopUpManager.createPopUp(Application.application as DisplayObject, LoginDialog, true));
             loginDialog.addEventListener(LoginEvent.LOGIN, delayedFeed);

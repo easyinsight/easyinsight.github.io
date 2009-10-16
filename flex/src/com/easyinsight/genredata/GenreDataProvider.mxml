@@ -140,6 +140,9 @@
 
         private var _solution:Solution;
 
+        public function cleanup():void {
+        }
+
                 ]]>
 	</mx:Script>
 

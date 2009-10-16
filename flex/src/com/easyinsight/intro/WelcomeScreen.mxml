@@ -11,6 +11,9 @@
 
         public function isKeywordSearchInstant():Boolean {
             return false;
+        }
+
+        public function cleanup():void {
         }]]></mx:Script>
     <account:AccountCreated/>
 </mx:Canvas>
