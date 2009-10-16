@@ -1,9 +1,11 @@
 package com.easyinsight.outboundnotifications {
-import com.easyinsight.analysis.UserCapabilities;
+
 import com.easyinsight.framework.AsyncInfoEvent;
 import com.easyinsight.framework.CorePageButton;
 import com.easyinsight.framework.EIMessageListener;
 
+import com.easyinsight.framework.LoginEvent;
+import com.easyinsight.framework.User;
 import com.easyinsight.genredata.ModuleAnalyzeEvent;
 
 import flash.events.Event;
@@ -14,7 +16,7 @@ import mx.binding.utils.BindingUtils;
 import mx.collections.ArrayCollection;
 import mx.controls.Alert;
 import mx.events.CloseEvent;
-import mx.events.FlexEvent;
+
 import mx.managers.PopUpManager;
 import mx.rpc.events.FaultEvent;
 import mx.rpc.events.ResultEvent;
@@ -37,7 +39,7 @@ public class BackgroundTaskButton extends CorePageButton{
         userUploadService.destination = "userUpload";
         userUploadService.getOngoingTasks.addEventListener(ResultEvent.RESULT, tasksRetrieved);
         userUploadService.getOngoingTasks.addEventListener(FaultEvent.FAULT, onFault);
-        addEventListener(FlexEvent.CREATION_COMPLETE, onCreation);
+        User.getEventNotifier().addEventListener(LoginEvent.LOGIN, onCreation);
         addEventListener(MouseEvent.CLICK, onClick);
     }
 
@@ -86,7 +88,7 @@ public class BackgroundTaskButton extends CorePageButton{
         showingWindow = false;
     }
 
-    private function onCreation(event:FlexEvent):void {
+    private function onCreation(event:LoginEvent):void {
         userUploadService.getOngoingTasks.send();
     }
 

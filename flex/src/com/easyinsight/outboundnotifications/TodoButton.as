@@ -3,7 +3,10 @@ import com.easyinsight.framework.CorePageButton;
 import com.easyinsight.framework.EIMessageListener;
 
 
+import com.easyinsight.framework.LoginEvent;
 import com.easyinsight.framework.TodoInfoEvent;
+import com.easyinsight.framework.User;
+
 import flash.events.Event;
 
 import flash.events.MouseEvent;
@@ -33,7 +36,7 @@ public class TodoButton extends CorePageButton{
         userUploadService = new RemoteObject();
         userUploadService.destination = "userUpload";
         userUploadService.getTodoEvents.addEventListener(ResultEvent.RESULT, tasksRetrieved);
-        addEventListener(FlexEvent.CREATION_COMPLETE, onCreation);
+        User.getEventNotifier().addEventListener(LoginEvent.LOGIN, onCreation);
         addEventListener(MouseEvent.CLICK, onClick);
     }
 
@@ -73,7 +76,7 @@ public class TodoButton extends CorePageButton{
         showingWindow = false;
     }
 
-    protected function onCreation(event:FlexEvent):void {
+    protected function onCreation(event:LoginEvent):void {
         userUploadService.getTodoEvents.send();
     }
 

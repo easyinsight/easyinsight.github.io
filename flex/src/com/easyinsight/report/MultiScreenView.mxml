@@ -8,14 +8,18 @@
     <mx:Script><![CDATA[
         import com.easyinsight.analysis.AnalysisCloseEvent;
 
+        import com.easyinsight.framework.NavigationEvent;
+        import com.easyinsight.framework.User;
         import com.easyinsight.quicksearch.EIDescriptor;
 
         import com.easyinsight.solutions.EmptyReportDescriptor;
+        import com.easyinsight.solutions.Solution;
         import com.easyinsight.util.AsyncLoadEvent;
 
         import com.easyinsight.util.IAsyncScreenFactory;
 
         import mx.collections.ArrayCollection;
+        import mx.controls.Label;
         import mx.events.ListEvent;
 
         [Bindable]
@@ -106,6 +110,29 @@
             if (!_showBackButton) {
                 topBar.removeChild(backButton);
             }
+            if (_solution != null) {
+                var addLabel:Label = new Label();
+                addLabel.text = "Want more reports for this solution?";
+                verticalBarBox.addChild(addLabel);
+                var addButton:Button = new Button();
+                addButton.label = "Look at reports that other users have built";
+                addButton.addEventListener(MouseEvent.CLICK, toExchange);
+                verticalBarBox.addChild(addButton);
+            }
+        }
+
+        private function toExchange(event:MouseEvent):void {
+            var props:Object = new Object();            
+            props.viewMode = 1;
+            props.displayMode = 0;
+            props.solution = _solution;
+            User.getEventNotifier().dispatchEvent(new NavigationEvent("Exchange", null, props));
+        }
+
+        private var _solution:Solution;
+
+        public function set solution(value:Solution):void {
+            _solution = value;
         }
 
         public function set showBackButton(value:Boolean):void {
@@ -122,6 +149,7 @@
                          itemRenderer="com.easyinsight.report.ReportButton" itemClick="onItemClick(event)" columnWidth="150"
                     borderStyle="none" backgroundAlpha="0"/>
         </mx:HBox>
+        <mx:HBox width="100%" horizontalAlign="center" verticalAlign="middle" id="verticalBarBox"/>
         <mx:HRule width="100%"/>
         <util:AsyncViewStack width="100%" height="100%" targetDescriptor="{report}" screenRenderer="{factory}"
                 asyncLoadStart="onLoading(event)" asyncLoadSuccess="onLoading(event)"/>

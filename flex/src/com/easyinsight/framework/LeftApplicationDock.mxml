@@ -1,0 +1,19 @@
+<?xml version="1.0" ?>
+<framework:ApplicationDock xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:framework="com.easyinsight.framework.*"
+                           xmlns:notification="com.easyinsight.outboundnotifications.*">
+    <mx:Script><![CDATA[
+        [Bindable]
+        [Embed(source="../../../../assets/note.png")]
+        private var noteIcon:Class;
+
+        [Bindable]
+        [Embed(source="../../../../assets/clock.png")]
+        private var clockIcon:Class;
+        ]]></mx:Script>
+    <notification:TodoButton rotation="-90" x="3" y="70" image="{noteIcon}" text="TODO"
+                             messageListener="{messageListener}"
+            />
+    <notification:BackgroundTaskButton rotation="-90" x="3" y="155" image="{clockIcon}" text="Tasks"
+                                       messageListener="{messageListener}" moduleAnalyze="dispatchEvent(event)"
+            />
+</framework:ApplicationDock>

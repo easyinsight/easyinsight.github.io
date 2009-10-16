@@ -30,7 +30,7 @@ public class SolutionExchangeController extends ExchangeController{
         var solutions:ArrayCollection = exchangeService.getSolutions.lastResult as ArrayCollection;
         var ph:Object = new Object();
         ph["name"] = "[ All Solutions ]";
-        solutions.addItemAt(ph, 0);
+        solutions.addItemAt(ph, 0);        
         this.solutions = solutions;
     }
 

@@ -38,6 +38,17 @@
             dispatchEvent(new Event("solutionChanged"));
         }
 
+        override protected function commitProperties():void {
+            super.commitProperties();
+            if (solution != null) {
+                for each (var sol:Solution in solutions) {
+                    if (sol.solutionID == solution.solutionID) {
+                        solution = sol;
+                    }
+                }
+            }
+        }
+
         private var _solution:Solution;
 
 
@@ -81,7 +92,7 @@
         <mx:VBox>
             <mx:HBox>
                 <mx:Label text="Solution:" fontFamily="Tahoma" fontWeight="bold" fontSize="14"/>
-                <mx:ComboBox id="solutionBox" change="changeSolution()" dataProvider="{solutions}" labelField="name"/>
+                <mx:ComboBox id="solutionBox" change="changeSolution()" dataProvider="{solutions}" labelField="name" selectedItem="{solution}"/>
             </mx:HBox>
             <mx:HBox>
                 <mx:Label text="Sort By:" fontFamily="Tahoma" fontWeight="bold" fontSize="14"/>

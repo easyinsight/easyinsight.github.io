@@ -6,6 +6,8 @@
     <mx:Script>
 		<![CDATA[
 
+        import com.easyinsight.solutions.Solution;
+
         import mx.binding.utils.BindingUtils;
         import mx.utils.URLUtil;
         import mx.managers.BrowserManager;
@@ -14,7 +16,7 @@
             BindingUtils.bindProperty(stateBar, "selectedIndex", this, "viewMode");
 
             BindingUtils.bindProperty(displayTypeBar, "selectedIndex", this, "displayMode");
-            
+
         }
 
         private function updateState():void {
@@ -123,11 +125,26 @@
         }
 
         private var exchangeController:ExchangeController;
+
+
+        [Bindable(event="solutionChanged")]
+        public function get solution():Solution {
+            return _solution;
+        }
+
+        public function set solution(value:Solution):void {
+            if (_solution == value) return;
+            _solution = value;
+            dispatchEvent(new Event("solutionChanged"));
+        }
+
+        private var _solution:Solution;
+
                 ]]>
 	</mx:Script>
 
     <genredata:PublicDataController id="publicDataController" changeView="onChangeView(event)"/>
-    <genredata:SolutionExchangeController id="solutionDataController" changeView="onChangeView(event)"/>
+    <genredata:SolutionExchangeController id="solutionDataController" changeView="onChangeView(event)" solution="{solution}"/>
 
     <mx:VBox width="100%" height="100%"  paddingLeft="0" paddingRight="0" paddingTop="0" paddingBottom="0"
                       verticalGap="0">

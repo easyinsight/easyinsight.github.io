@@ -1,0 +1,12 @@
+<?xml version="1.0" ?>
+<framework:ApplicationDock xmlns:mx="http://www.adobe.com/2006/mxml"
+                           xmlns:notification="com.easyinsight.outboundnotifications.*"
+                           xmlns:framework="com.easyinsight.framework.*">
+    <mx:Script><![CDATA[
+        [Bindable]
+        [Embed(source="../../../../assets/messagex16.png")]
+        private var chatIcon:Class;
+        ]]></mx:Script>
+    <notification:NotificationsButton rotation="90" x="26" y="3" image="{chatIcon}" text="Messages"
+                                      messageListener="{messageListener}"/>
+</framework:ApplicationDock>

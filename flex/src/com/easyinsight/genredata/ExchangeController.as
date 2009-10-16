@@ -95,6 +95,10 @@ public class ExchangeController extends EventDispatcher {
     public function set dataProvider2(value:ArrayCollection):void {
         if (_dataProvider == value) return;
         _dataProvider = value;
+        if (_dataProvider != null) {
+            _dataProvider.filterFunction = filterData;
+            _dataProvider.refresh();
+        }
         dispatchEvent(new Event("dataProviderChanged"));
     }
 

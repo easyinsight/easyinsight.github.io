@@ -275,7 +275,7 @@
                 <mx:Button label="Sign In" click="signon(userName.text, password.text)" tabIndex="3"/>
                 <mx:Button label="Cancel" click="cancel()" visible="{_cancelVisible}" tabIndex="4"/>
             </mx:FormItem>
-            <mx:FormItem label="">
+            <mx:FormItem label="" direction="horizontal">
                 <mx:Spacer height="25"/>
             </mx:FormItem>
             <mx:FormItem label="Don't have an account yet?" id="noAccount">

@@ -360,7 +360,7 @@
             } else if (items.length == 1 && reports == 1) {
                 dispatchEvent(new ModuleAnalyzeEvent(new ReportAnalyzeSource(InsightDescriptor(items.getItemAt(0)))));
             } else if (items.length > 1) {
-                dispatchEvent(new ModuleAnalyzeEvent(new MultiScreenAnalyzeSource(items)));
+                dispatchEvent(new ModuleAnalyzeEvent(new MultiScreenAnalyzeSource(items, _solution)));
             } else {
                 var dataSourceDescriptor:DataSourceDescriptor = dataSourceItems.getItemAt(0) as DataSourceDescriptor;
                 dispatchEvent(new ModuleAnalyzeEvent(new DescriptorAnalyzeSource(dataSourceDescriptor.id, dataSourceDescriptor.name)));

@@ -13,29 +13,10 @@
             <mx:RemoveChild target="{primarySpace}"/>
             <mx:RemoveChild target="{highBar}"/>
             <mx:AddChild relativeTo="{coreVBox}" target="{dataAnalysis}"/>
-        </mx:State>
-        <mx:State name="LoggedIn">
-            <mx:AddChild relativeTo="{primarySpace}" position="firstChild">
-                <mx:Canvas height="100%" width="29" backgroundColor="0xF0F0F0">
-                    <notification:TodoButton rotation="-90" x="3" y="70" image="{noteIcon}" text="TODO"
-                                             messageListener="{messageListener}"
-                            />
-                    <notification:BackgroundTaskButton rotation="-90" x="3" y="155" image="{clockIcon}" text="Tasks"
-                                                       messageListener="{messageListener}" moduleAnalyze="internalModuleAnalyze(event)"
-                            />
-                </mx:Canvas>
-            </mx:AddChild>
-            <mx:AddChild relativeTo="{primarySpace}" position="lastChild">
-                <mx:Canvas height="100%" width="29" backgroundColor="0xF0F0F0">
-                    <notification:NotificationsButton rotation="90" x="26" y="3" image="{clockIcon}" text="Messages"
-                                                      messageListener="{messageListener}"/>
-                </mx:Canvas>
-            </mx:AddChild>
-        </mx:State>
+        </mx:State>        
     </mx:states>
     <mx:Script>
-		<![CDATA[
-        import com.easyinsight.account.Account;
+		<![CDATA[        
         import com.easyinsight.analysis.DefaultMenuFactory;
         import com.easyinsight.analysis.DelayedAPIKeyLink;
         import com.easyinsight.analysis.DelayedReportLink;
@@ -68,8 +49,7 @@
         import com.easyinsight.solutions.DataSourceDescriptor;
         import com.easyinsight.solutions.DelayedSolutionLink;
         import com.easyinsight.solutions.InsightDescriptor;
-
-        import com.easyinsight.util.EITitleWindow;
+        
         import com.easyinsight.util.PopUpUtil;
         import com.easyinsight.util.ProgressAlert;
 
@@ -107,29 +87,12 @@
             }
         }
 
-        [Bindable]
-        private var messageListener:EIMessageListener;
 
         private var perspective:IPerspective;
 
         [Bindable]
         private var loggedIn:Boolean;
 
-        [Bindable]
-        [Embed(source="../assets/find.png")]
-        private var findIcon:Class;
-
-        [Bindable]
-        [Embed(source="../assets/messagex16.png")]
-        private var chatIcon:Class;
-
-        [Bindable]
-        [Embed(source="../assets/note.png")]
-        private var noteIcon:Class;
-
-        [Bindable]
-        [Embed(source="../assets/clock.png")]
-        private var clockIcon:Class;
 
         [Bindable]
         private var dataAnalysis:DisplayObject;
@@ -148,7 +111,6 @@
             //ProgressAlert.alert(this, "Taking care of initial setup...", null, userService.isSessionLoggedIn);
             userService.isSessionLoggedIn.send();
             EIMessageListener.initialize();
-            messageListener = EIMessageListener.instance();
         }
 
         private function applicationListeners():void {
@@ -223,7 +185,6 @@
         private function onLogin(event:LoginEvent):void {
             User.getEventNotifier().removeEventListener(LoginEvent.LOGIN, onLogin);
             loggedIn = true;
-            currentState = "LoggedIn";
             if (event.targetURL == null)
                 navigation(new NavigationEvent("Intro"));
             else {
@@ -319,11 +280,6 @@
                                                             var page:String = o.page;
                                                             if (page != null) {
                                                                 if (currentState == "Analysis") {
-                                                                    if (loggedIn) {
-                                                                        currentState = "LoggedIn";
-                                                                    } else {
-                                                                        currentState = "";
-                                                                    }
                                                                     dataAnalysis.removeEventListener(AnalysisCloseEvent.ANALYSIS_CLOSE, analysisClosed);
                                                                     dataAnalysis = null;
                                                                 }
@@ -390,11 +346,6 @@
                 dataAnalysis.removeEventListener(AnalyzeEvent.ANALYZE, internalAnalyze);
                 dataAnalysis.removeEventListener(ModuleAnalyzeEvent.MODULE_ANALYZE, internalModuleAnalyze);
                 dataAnalysis.removeEventListener(AnalysisCloseEvent.ANALYSIS_CLOSE, analysisClosed);
-                if (loggedIn) {
-                    currentState = "LoggedIn";
-                } else {
-                    currentState = "";
-                }
                 validateNow();
             }
             if (analyzeSource != null) {
@@ -410,16 +361,13 @@
         }
 
         private function analysisClosed(event:AnalysisCloseEvent):void {
-            if (loggedIn) {
-                currentState = "LoggedIn";
-            } else {
-                currentState = "";
-            }
             event.dataAnalysisContainer.removeEventListener(AnalysisCloseEvent.ANALYSIS_CLOSE, analysisClosed);
             event.dataAnalysisContainer.removeEventListener(AnalyzeEvent.ANALYZE, internalAnalyze);
             event.dataAnalysisContainer.removeEventListener(ModuleAnalyzeEvent.MODULE_ANALYZE, internalModuleAnalyze);
             event.dataAnalysisContainer.removeEventListener(NavigationEvent.NAVIGATION, navigation);
+
             fullScreenPage.cleanup();
+            currentState = "";
             dataAnalysis = null;
             if (this.perspective == null) {
                 navigation(new NavigationEvent("Intro"));
@@ -436,6 +384,12 @@
                     existingDispatcher.removeEventListener(ModuleAnalyzeEvent.MODULE_ANALYZE, internalModuleAnalyze);
                     existingDispatcher.removeEventListener(ListingChangeEvent.LISTING_CHANGE, changePerspective);
                     existingDispatcher.removeEventListener(NavigationEvent.NAVIGATION, navigation);
+                }
+                if (currentState == "Analysis") {
+                    fullScreenPage.cleanup();
+                    currentState = "";
+                    dataAnalysis = null;
+                    fullScreenPage = null;
                 }
                 if (coreSpace.getChildren().length > 0) {
                     coreSpace.removeChildAt(0);
@@ -465,6 +419,24 @@
             doAnalyze(analyzeSource);
         }
 
+        private function cleanupExistingPerspective():void {            
+            if (currentState == "Analysis") {
+                fullScreenPage.cleanup();
+                dataAnalysis.removeEventListener(AnalyzeEvent.ANALYZE, internalAnalyze);
+                dataAnalysis.removeEventListener(ModuleAnalyzeEvent.MODULE_ANALYZE, internalModuleAnalyze);
+                dataAnalysis.removeEventListener(AnalysisCloseEvent.ANALYSIS_CLOSE, analysisClosed);
+                dataAnalysis.removeEventListener(NavigationEvent.NAVIGATION, navigation);
+                fullScreenPage = null;
+                dataAnalysis = null;
+            } else if (perspective != null) {
+                var existingDispatcher:EventDispatcher = this.perspective as EventDispatcher;
+                existingDispatcher.removeEventListener(AnalyzeEvent.ANALYZE, internalAnalyze);
+                existingDispatcher.removeEventListener(ModuleAnalyzeEvent.MODULE_ANALYZE, internalModuleAnalyze);
+                existingDispatcher.removeEventListener(ListingChangeEvent.LISTING_CHANGE, changePerspective);
+                existingDispatcher.removeEventListener(NavigationEvent.NAVIGATION, navigation);
+            }
+        }
+
         private function internalModuleAnalyze(event:ModuleAnalyzeEvent):void {
             // add a core container, nest everything else
             //
@@ -474,11 +446,6 @@
                 dataAnalysis.removeEventListener(ModuleAnalyzeEvent.MODULE_ANALYZE, internalModuleAnalyze);
                 dataAnalysis.removeEventListener(AnalysisCloseEvent.ANALYSIS_CLOSE, analysisClosed);
                 dataAnalysis.removeEventListener(NavigationEvent.NAVIGATION, navigation);
-                if (loggedIn) {
-                    currentState = "LoggedIn";
-                } else {
-                    currentState = "";
-                }
                 validateNow();
             }
             var moduleAnalyzeSource:ModuleAnalyzeSource = event.analyzeSource;
@@ -507,9 +474,6 @@
                 User.getInstance().password = authResult.encryptedPassword;
                 User.getInstance().userName = authResult.userName;
                 loggedIn = true;
-                if (currentState == "" || currentState == null) {
-                    currentState = "LoggedIn";
-                }
                 User.getEventNotifier().dispatchEvent(new LoginEvent(LoginEvent.LOGIN));
             } else {
                 User.getEventNotifier().addEventListener(LoginEvent.LOGIN, onLogin);
@@ -548,15 +512,13 @@
                                reportBug="launchBugReportWindow()"/>
             <mx:Box width="100%" height="5" backgroundColor="#D42525" left="0" right="0" id="highBar"/>
             <mx:HBox width="100%" height="100%" horizontalGap="0" id="primarySpace">
-
-
+                <framework:LeftApplicationDock height="100%" backgroundColor="0xF0F0F0" moduleAnalyze="internalModuleAnalyze(event)"/>
                 <mx:HBox width="100%" height="100%" id="coreSpace" paddingLeft="0" paddingTop="0" top="0"
                          paddingRight="0">
                     <intro1:IntroPanel id="introPanel" width="100%" height="100%" paddingTop="0"
                                        navigation="navigation(event)"/>
                 </mx:HBox>
-
-
+                <framework:RightApplicationDock height="100%" backgroundColor="0xF0F0F0" moduleAnalyze="internalModuleAnalyze(event)"/>
             </mx:HBox>
         </mx:VBox>
      </util:AntiScrollCanvas>
