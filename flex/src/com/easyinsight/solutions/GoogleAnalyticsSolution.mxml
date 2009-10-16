@@ -220,8 +220,6 @@
             BrowserManager.getInstance().setFragment(fragmentString);
             BrowserManager.getInstance().setTitle("Easy Insight - " + solutionName);
             if (User.getInstance() == null) {
-                controlsEnabled = false;
-                controlsAlpha = .5;
                 currentState = "NotLoggedIn";
             } else if (_newAuth) {
                 currentState = "Authorized";
@@ -455,7 +453,7 @@
                 <mx:Box id="authBox"/>
                 <mx:VBox id="controlsBox" paddingTop="25" paddingBottom="30">
                     <mx:Button label="{startButtonText}" fontSize="24" click="install()"
-                                   styleName="blueButton" visible="{installAvailable}" enabled="{controlsEnabled}" id="installButton"/>
+                                   styleName="blueButton" visible="{installAvailable}" id="installButton"/>
                     <!--<mx:VBox alpha="{controlsAlpha}" id="controls">
 
                         <mx:Button label="Download Associated Files" fontSize="20" click="download()" styleName="blueButton"
