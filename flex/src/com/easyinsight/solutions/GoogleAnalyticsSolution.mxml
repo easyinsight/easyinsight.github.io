@@ -477,7 +477,7 @@
                     <mx:Label text="Easy Data Exploration" fontSize="16"/>
                 </mx:HBox>
                 <mx:HBox paddingLeft="5" paddingRight="5" verticalAlign="middle">
-                    <mx:Image source="../assets/logos/goals1.jpg" maxWidth="200" maxHeight="150"/>
+                    <mx:Image source="../assets/GA2.png" maxWidth="200" maxHeight="120"/>
                     <mx:VBox>
                         <mx:Text text="Quickly slice and dice your web analytics data" fontSize="12"/>
                         <mx:Text text="Apply a wide variety of visualizations" fontSize="12"/>
@@ -490,18 +490,18 @@
                 </mx:HBox>
                 <mx:HBox paddingLeft="5" paddingRight="5" verticalAlign="middle">
                     <mx:VBox>
-                        <mx:Text text="Extend your Google Analytics implementation &#13;with custom data" fontSize="12"/>
-                        <mx:Text text="Link your web analytics data to Basecamp, &#13;Salesforce, and more" fontSize="12"/>
-                        <mx:Text text="Look at your reports in a wide variety of popular &#13;dashboards" fontSize="12"/>
+                        <mx:Text text="Extend your Google Analytics implementation with custom data" fontSize="12"/>
+                        <mx:Text text="Link your web analytics data to Basecamp, Salesforce, and more" fontSize="12"/>
+                        <mx:Text text="Look at your reports in a wide variety of popular dashboards" fontSize="12"/>
                     </mx:VBox>
-                    <mx:Image source="../assets/logos/goals1.jpg" maxWidth="200" maxHeight="150"/>
+                    <mx:Image source="../assets/GA4.png" maxWidth="200" maxHeight="120"/>
                 </mx:HBox>
                 <mx:HRule width="100%" strokeColor="#3370ce"/>
                 <mx:HBox width="100%" horizontalAlign="center">
                     <mx:Label text="Improve your Sales and Marketing Strategy" fontSize="16"/>
                 </mx:HBox>
                 <mx:HBox paddingLeft="5" paddingRight="5" verticalAlign="middle">
-                    <mx:Image source="../assets/logos/goals1.jpg" maxWidth="200" maxHeight="150"/>
+                    <mx:Image source="../assets/GA1.png" maxWidth="200" maxHeight="120"/>
                     <mx:VBox>
                         <mx:Text text="Plot out your business strategy through KPI &#13;trees" fontSize="12"/>
                         <mx:Text text="Continually tweak and improve your campaign &#13;effectiveness" fontSize="12"/>
