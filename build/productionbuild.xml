@@ -394,11 +394,12 @@
                 <url rsl-url="rpc_3.3.0.4852.swz"/>
                 <url rsl-url="rpc_3.3.0.4852.swf"/>
             </runtime-shared-library-path>
+        </mxmlc>
         <SWFSize artifactPath="${flex.path}/EmbeddedInsight.swf" key="${ei.key}" secretKey="${ei.secret.key}" component="EmbeddedInsight"
             sizeAPIKey="${size.api.key}"/>
         <SWFAnalysis linkReportPath="embedded.txt" key="${ei.key}" secretKey="${ei.secret.key}" component="IntroApplication"
                 classAnalysisAPIKey="${analysis.api.key}" packageFilter="com.easyinsight"/>
-        </mxmlc>
+
     </target>
 
     <target name="compileYahooWidget">
