@@ -18,14 +18,11 @@
         import com.easyinsight.administration.feed.Tag;
         import com.easyinsight.analysis.AnalysisCloseEvent;
         import com.easyinsight.analysis.AnalysisDefinition;
-
         import com.easyinsight.analysis.EmbeddedDataServiceEvent;
         import com.easyinsight.analysis.ExcelCreator;
         import com.easyinsight.analysis.HierarchyDrilldownEvent;
         import com.easyinsight.analysis.HierarchyRollupEvent;
-
         import com.easyinsight.analysis.RefreshReportSourceWindow;
-
         import com.easyinsight.commands.CommandEvent;
         import com.easyinsight.commands.CommandProcessor;
         import com.easyinsight.datasources.DataSourceInfo;
@@ -35,13 +32,11 @@
         import com.easyinsight.framework.CredentialsCache;
         import com.easyinsight.framework.DataServiceLoadingEvent;
         import com.easyinsight.framework.HierarchyOverride;
+        import com.easyinsight.framework.NavigationEvent;
         import com.easyinsight.framework.User;
         import com.easyinsight.genredata.AnalyzeEvent;
-
         import com.easyinsight.listing.AnalysisDefinitionAnalyzeSource;
-
         import com.easyinsight.solutions.InsightDescriptor;
-
         import com.easyinsight.util.PopUpUtil;
 
         import mx.collections.ArrayCollection;
@@ -60,7 +55,7 @@
         }
 
         private function toBrowser():void {
-            flash.net.navigateToURL(new URLRequest("https://www.easy-insight.com/app/#reportID=" + _reportID), "_blank");
+            navigateToURL(new URLRequest("https://www.easy-insight.com/app/#reportID=" + _reportID), "_blank");
         }
 
         private function exportExcel():void {
@@ -73,6 +68,12 @@
 
         public function set embedded(value:Boolean):void {
             _embedded = value;
+        }
+
+        private var _origin:int;
+
+        public function set origin(value:int):void {
+            _origin = value;
         }
 
         private var _prefix:String = "";
@@ -199,6 +200,14 @@
         private var logo:Class;
 
         [Bindable]
+        [Embed(source="../../../../assets/chart_area_x32.png")]
+        private var myDataIcon:Class;
+
+        [Bindable]
+        [Embed(source="../../../../assets/shopping_bag_x32.png")]
+        private var exchangeIcon:Class;
+
+        [Bindable]
         private var dataSource:DataSourceInfo;
 
         [Bindable]
@@ -320,8 +329,6 @@
         }
 
 
-        
-
         private function onCredentials():void {
             viewFactory.retrieveData(false);
         }
@@ -414,7 +421,7 @@
         private var showFilters:Boolean;
 
         private function adjustFilters():void {
-            transformBox.selectedIndex = transformBox.selectedIndex == 0 ? 1 : 0;            
+            transformBox.selectedIndex = transformBox.selectedIndex == 0 ? 1 : 0;
         }
 
         public function getContainer():Container {
@@ -505,6 +512,19 @@
             analysisService.keepReport.send(_reportID);
         }
 
+        private function signup(event:MouseEvent):void {
+            User.getEventNotifier().dispatchEvent(new NavigationEvent(NavigationEvent.ACCOUNTS));
+        }
+
+        private function toExchange(event:MouseEvent):void {
+            var props:Object = new Object();
+            dispatchEvent(new AnalysisCloseEvent(this, null, "Exchange", props));
+        }
+
+        private function toMyData(event:MouseEvent):void {
+            dispatchEvent(new AnalysisCloseEvent(this));
+        }
+
         override protected function createChildren():void {
             super.createChildren();
             if (!_showLogo) {
@@ -512,6 +532,26 @@
             }
             if (!_showBack) {
                 buttonBar.removeChild(backButton);
+            } else {
+                if (_origin == ReportAnalyzeSource.ORIGIN_EXCHANGE) {
+                    var idx1:int = buttonBar.getChildIndex(backButton);
+                    buttonBar.removeChild(backButton);
+                    var exchangeButton:Button = new Button();
+                    exchangeButton.label = "More Reports";
+                    exchangeButton.labelPlacement = "bottom";
+                    exchangeButton.setStyle("icon", exchangeIcon);
+                    exchangeButton.addEventListener(MouseEvent.CLICK, toExchange);
+                    buttonBar.addChildAt(exchangeButton, idx1);
+                } else if (_origin == ReportAnalyzeSource.ORIGIN_MY_DATA) {
+                    var idx2:int = buttonBar.getChildIndex(backButton);
+                    buttonBar.removeChild(backButton);
+                    var myDataButton:Button = new Button();
+                    myDataButton.label = "My Data";
+                    myDataButton.labelPlacement = "bottom";
+                    myDataButton.setStyle("icon", myDataIcon);
+                    myDataButton.addEventListener(MouseEvent.CLICK, toMyData);
+                    buttonBar.addChildAt(myDataButton, idx2);
+                }
             }
             if (!_showFullScreen) {
                 buttonBar.removeChild(fullScreenButton);
@@ -546,6 +586,16 @@
                 addButton.label = "Save to My Data";
                 addButton.addEventListener(MouseEvent.CLICK, saveReport);
                 addReportBox.addChild(addButton);
+            }
+
+            if (User.getInstance() == null) {
+                var signUpLabel:Label = new Label();
+                signUpLabel.text = "Want to publish your own data or save your own reports?";
+                addReportBox.addChild(signUpLabel);
+                var signUpButton:Button = new Button();
+                signUpButton.label = "Free account signup";
+                signUpButton.addEventListener(MouseEvent.CLICK, signup);
+                addReportBox.addChild(signUpButton);
             }
 
             viewFactory.reportID = _reportID;

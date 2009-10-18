@@ -3,6 +3,7 @@ package com.easyinsight.analysis
 	import com.easyinsight.LoginDialog;
 	import com.easyinsight.framework.LoginEvent;
 
+import com.easyinsight.framework.User;
 import com.easyinsight.genredata.AnalyzeEvent;
 import com.easyinsight.report.ReportAnalyzeSource;
 
@@ -36,7 +37,11 @@ import flash.display.DisplayObject;
 		private function gotAnalysisDefinition(event:ResultEvent):void {
         	var insightResponse:InsightResponse = analysisService.openAnalysisIfPossible.lastResult as InsightResponse;
         	if (insightResponse.status == InsightResponse.SUCCESS) {
-        		dispatchEvent(new AnalyzeEvent(new ReportAnalyzeSource(insightResponse.insightDescriptor)));
+                if (User.getInstance() == null) {
+        		    dispatchEvent(new AnalyzeEvent(new ReportAnalyzeSource(insightResponse.insightDescriptor, null, false, ReportAnalyzeSource.ORIGIN_EXCHANGE)));
+                } else {
+                    dispatchEvent(new AnalyzeEvent(new ReportAnalyzeSource(insightResponse.insightDescriptor)));
+                }
         	} else if (insightResponse.status == InsightResponse.NEED_LOGIN) {
         		var loginDialog:LoginDialog = LoginDialog(PopUpManager.createPopUp(Application.application as DisplayObject, LoginDialog, true));
         		loginDialog.addEventListener(LoginEvent.LOGIN, delayedAnalysis);

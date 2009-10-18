@@ -377,10 +377,14 @@
             fullScreenPage.cleanup();
             currentState = "";
             dataAnalysis = null;
-            if (this.perspective == null) {
-                navigation(new NavigationEvent("Intro"));
+            if (event.targetPerspective != null) {
+                headerBar.explicitChange(event.targetPerspective, event.properties);
             } else {
-                this.perspective.gotFocus();
+                if (this.perspective == null) {
+                    navigation(new NavigationEvent("Intro"));
+                } else {
+                    this.perspective.gotFocus();
+                }
             }
         }
 

@@ -45,21 +45,23 @@
     </mx:states>
     <mx:Script>
 		<![CDATA[
-            import com.easyinsight.analysis.AnalysisDateDimension;
+        import com.easyinsight.analysis.AnalysisCalculation;
+        import com.easyinsight.analysis.AnalysisDateDimension;
         import com.easyinsight.analysis.AnalysisDimension;
         import com.easyinsight.analysis.AnalysisHierarchyItem;
         import com.easyinsight.analysis.AnalysisList;
         import com.easyinsight.analysis.AnalysisMeasure;
         import com.easyinsight.analysis.AnalysisRangeDimension;
+        import com.easyinsight.analysis.AnalysisStep;
         import com.easyinsight.analysis.ComplexAnalysisMeasure;
             import com.easyinsight.analysis.DefaultMenuFactory;
             import com.easyinsight.analysis.PopupMenuFactory;
+            import com.easyinsight.analysis.SixSigmaMeasure;
             import com.easyinsight.analysis.TemporalAnalysisMeasure;
             import com.easyinsight.framework.CredentialsCache;
             import com.easyinsight.framework.WebCredentialsCache;
             import com.easyinsight.solutions.InsightDescriptor;
-
-            import mx.controls.Alert;
+            
             import mx.rpc.events.ResultEvent;
         import mx.messaging.config.ServerConfig;
         import mx.rpc.AsyncToken;
@@ -198,7 +200,7 @@
                             case "Client.Authentication":
                             default:
                                 var failureMessage:String = event.fault.faultString;
-                                failureMessageLabel.text = failureMessage;
+                                failureMessageText = failureMessage;
                         }
                     }
                     ));
@@ -213,6 +215,9 @@
             var range:AnalysisRangeDimension;
             var list:AnalysisList;
             var hierarchy:AnalysisHierarchyItem;
+            var step:AnalysisStep;
+            var calculation:AnalysisCalculation;
+            var sigma:SixSigmaMeasure;
         }
 
         private function onGettingReports():void {
