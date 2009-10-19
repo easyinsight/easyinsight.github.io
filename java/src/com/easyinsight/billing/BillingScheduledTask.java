@@ -41,6 +41,13 @@ public class BillingScheduledTask extends ScheduledTask {
         stmt.setDate(3, new java.sql.Date(System.currentTimeMillis()));
         stmt.execute();
         stmt.close();
+
+        PreparedStatement freeStmt = conn.prepareStatement("UPDATE ACCOUNT SET ACCOUNT_STATE = ? WHERE ACCOUNT_TYPE = ? AND ACCOUNT_ID IN (SELECT ACCOUNT_ID FROM ACCOUNT_TIMED_STATE WHERE date(state_change_time) < ?)");
+        freeStmt.setInt(1, Account.ACTIVE);
+        freeStmt.setInt(2, Account.FREE);
+        freeStmt.setDate(3, new java.sql.Date(System.currentTimeMillis()));
+        freeStmt.execute();
+        freeStmt.close();
     }
 
     private void billCustomers(Date now, Connection conn) throws SQLException {

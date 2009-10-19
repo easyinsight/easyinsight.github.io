@@ -32,16 +32,21 @@
               String encryptedPass = PasswordService.getInstance().encrypt(request.getParameter("password"));
 
               List results = s.createQuery("from User where userName = ? and password = ?").setString(0, request.getParameter("username")).setString(1, encryptedPass).list();
-              if(results.size() != 1)
+              if(results.size() != 1) {
                   response.sendRedirect("login.jsp?error=true");
+                  return;
+              }
               user =(User) results.get(0);
               account = user.getAccount();
               accountID = account.getAccountID();
               request.getSession().setAttribute("accountID", accountID);
+              request.getSession().setAttribute("userID", user.getUserID());
           }
           if(account == null) {
-              if(request.getSession().getAttribute("accountID")== null)
-                response.sendRedirect("login.jsp?error=true");
+              if(request.getSession().getAttribute("accountID")== null) {
+                  response.sendRedirect("login.jsp?error=true");
+                  return;
+              }
               accountID = (Long) request.getSession().getAttribute("accountID");
               long userID = (Long) request.getSession().getAttribute("userID");
               user = (User) s.createQuery("from User where userID = ?").setLong(0, userID).list().get(0);
