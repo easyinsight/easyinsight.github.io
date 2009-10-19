@@ -14,6 +14,7 @@ import java.util.Date;
  */
 @Entity
 @Table(name = "notification_base")
+@Inheritance(strategy= InheritanceType.JOINED)
 public abstract class NotificationBase {
     @Id
     @GeneratedValue(strategy= GenerationType.IDENTITY)
@@ -30,6 +31,17 @@ public abstract class NotificationBase {
     @JoinColumn(name="acting_user_id")
     private User actingUser;
 
+    public static final int ADD = 1;
+    public static final int REMOVE = 2;
+    
+    public static final int VIEWER = 1;
+    public static final int OWNER = 2;
+    
+    public static final int USER_TO_DATA_SOURCE = 1;
+    public static final int DATA_SOURCE_TO_GROUP = 2;
+    public static final int REPORT_TO_GROUP = 3;
+
+
     public long getNotificationID() {
         return notificationID;
     }
@@ -44,6 +56,27 @@ public abstract class NotificationBase {
 
     public void setNotificationDate(Date notificationDate) {
         this.notificationDate = notificationDate;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        NotificationBase that = (NotificationBase) o;
+
+        if (notificationID != that.notificationID) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = (int) (notificationID ^ (notificationID >>> 32));
+        result = 31 * result + (notificationDate != null ? notificationDate.hashCode() : 0);
+        result = 31 * result +  notificationType;
+        result = 31 * result + (actingUser != null ? actingUser.hashCode() : 0);
+        return result;
     }
 
     public int getNotificationType() {

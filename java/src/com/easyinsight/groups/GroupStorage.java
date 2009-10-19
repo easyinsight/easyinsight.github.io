@@ -12,6 +12,9 @@ import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.audit.AuditMessage;
 import com.easyinsight.goals.GoalTreeDescriptor;
 import com.easyinsight.core.InsightDescriptor;
+import com.easyinsight.notifications.ReportToGroupNotification;
+import com.easyinsight.notifications.NotificationBase;
+import com.easyinsight.users.User;
 
 import java.util.*;
 import java.util.Date;
@@ -433,7 +436,9 @@ public class GroupStorage {
 
     public void addInsightToGroup(long feedID, long groupID) throws SQLException {
         Connection conn = Database.instance().getConnection();
+        Session s = Database.instance().createSession(conn);
         try {
+            conn.setAutoCommit(false);
             PreparedStatement existingLinkQuery = conn.prepareStatement("SELECT GROUP_TO_INSIGHT_ID FROM GROUP_TO_INSIGHT WHERE " +
                     "GROUP_ID = ? AND INSIGHT_ID = ?");
             existingLinkQuery.setLong(1, groupID);
@@ -454,7 +459,17 @@ public class GroupStorage {
                 insertFeedStmt.setLong(3, Roles.SUBSCRIBER);
                 insertFeedStmt.execute();
             }
+            ReportToGroupNotification notification = new ReportToGroupNotification();
+            notification.setActingUser((User) s.get(User.class, SecurityUtil.getUserID()));
+            notification.setAnalysisAction(NotificationBase.ADD);
+            notification.setAnalysisRole(NotificationBase.VIEWER);
+            notification.setGroupID(groupID);
+            notification.setNotificationDate(new Date());
+            notification.setAnalysisID(feedID);
+            notification.setNotificationType(NotificationBase.REPORT_TO_GROUP);
+            s.save(notification);
         } finally {
+            s.close();
             Database.instance().closeConnection(conn);
         }
     }

@@ -2,10 +2,7 @@ package com.easyinsight.notifications;
 
 import com.easyinsight.groups.Group;
 
-import javax.persistence.Table;
-import javax.persistence.Entity;
-import javax.persistence.PrimaryKeyJoinColumn;
-import javax.persistence.Column;
+import javax.persistence.*;
 
 /**
  * Created by IntelliJ IDEA.
@@ -18,6 +15,7 @@ import javax.persistence.Column;
 @Table(name="group_notification")
 @PrimaryKeyJoinColumn(name="notification_id")
 public abstract class GroupNotification extends NotificationBase {
+    
     @Column(name="group_id")
     long groupID;
 

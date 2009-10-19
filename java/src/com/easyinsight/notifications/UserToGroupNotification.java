@@ -13,7 +13,7 @@ import javax.persistence.*;
  */
 @Entity
 @Table(name="user_to_group_notification")
-@PrimaryKeyJoinColumn(name="group_notification_id")
+@PrimaryKeyJoinColumn(name="notification_id")
 public class UserToGroupNotification extends GroupNotification {
 
     @Column(name="user_action")

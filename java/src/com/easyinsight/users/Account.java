@@ -2,6 +2,7 @@ package com.easyinsight.users;
 
 import com.easyinsight.billing.BrainTreeBillingSystem;
 import com.easyinsight.config.ConfigLoader;
+import com.easyinsight.logging.LogClass;
 
 import javax.persistence.*;
 import java.util.List;
@@ -324,6 +325,8 @@ public class Account {
     }
 
     public AccountCreditCardBillingInfo bill() {
+
+        LogClass.info("Starting billing for account ID:" + this.getAccountID());
         if(getAccountType() == Account.FREE)
             setAccountState(Account.ACTIVE);
         // the indirection here is to support invoice billingSystem later
@@ -333,8 +336,12 @@ public class Account {
         billingSystem.setUsername(ConfigLoader.instance().getBillingUsername());
         billingSystem.setPassword(ConfigLoader.instance().getBillingPassword());
         Map<String, String> params = billingSystem.billAccount(this.getAccountID(), this.monthlyCharge());
-        if(!params.get("response").equals("1"))
+        if(!params.get("response").equals("1")) {
             setAccountState(Account.DELINQUENT);
+            LogClass.info("Billing failed!");
+        }
+        else
+            LogClass.info("Success!");
         AccountCreditCardBillingInfo info = new AccountCreditCardBillingInfo();
         info.setAmount(String.valueOf(monthlyCharge()));
         info.setAccountId(this.getAccountID());
@@ -343,6 +350,7 @@ public class Account {
         info.setResponseString(params.get("responsetext"));
         info.setTransactionID(params.get("transactionid"));
         info.setTransactionTime(new Date());
+        LogClass.info("Completed billing Account ID:" + this.getAccountID());
         return info;
     }
 

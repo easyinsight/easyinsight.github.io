@@ -49,4 +49,26 @@ public class GroupDescriptor extends FeedConsumer {
     public void setGroupID(long groupID) {
         this.groupID = groupID;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+
+        GroupDescriptor that = (GroupDescriptor) o;
+
+        if (groupID != that.groupID) return false;
+        if (groupMembers != that.groupMembers) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = super.hashCode();
+        result = 31 * result + (int) (groupID ^ (groupID >>> 32));
+        result = 31 * result + groupMembers;
+        return result;
+    }
 }

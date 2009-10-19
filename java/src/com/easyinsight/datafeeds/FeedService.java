@@ -16,7 +16,13 @@ import com.easyinsight.core.DataSourceDescriptor;
 import com.easyinsight.scheduler.DataSourceTaskGenerator;
 import com.easyinsight.goals.GoalTreeDescriptor;
 import com.easyinsight.PasswordStorage;
+import com.easyinsight.groups.GroupDescriptor;
+import com.easyinsight.email.UserStub;
+import com.easyinsight.notifications.UserToDataSourceNotification;
+import com.easyinsight.notifications.NotificationBase;
+import com.easyinsight.notifications.DataSourceToGroupNotification;
 import com.easyinsight.users.Credentials;
+import com.easyinsight.users.User;
 import com.easyinsight.eventing.EventDispatcher;
 import com.easyinsight.eventing.TodoCompletedEvent;
 
@@ -493,20 +499,21 @@ public class FeedService implements IDataFeedService {
             } else {
                 feedStorage.updateDataFeedConfiguration(feedDefinition, conn);
             }
-            if (newTaskGen) {
-                Session session = Database.instance().createSession(conn);
-                try {
+            Session session = Database.instance().createSession(conn);
+            try {
+                if (newTaskGen) {
                     DataSourceTaskGenerator generator = new DataSourceTaskGenerator();
                     generator.setStartTaskDate(new Date());
                     generator.setDataSourceID(feedDefinition.getDataFeedID());
                     generator.setTaskInterval((int) feedDefinition.getRefreshDataInterval());
                     session.save(generator);
-                } finally {
-                    session.close();
                 }
+                notifyNewOwners(feedDefinition, existingFeed, session);
+                notifyNewViewers(feedDefinition, existingFeed, session);
+                session.flush();
+            } finally {
+                session.close();
             }
-            notifyNewOwners(feedDefinition, existingFeed);
-            notifyNewViewers(feedDefinition, existingFeed);
 
             FeedRegistry.instance().flushCache(feedID);
 
@@ -547,23 +554,53 @@ public class FeedService implements IDataFeedService {
         }).start();*/
     }
 
-    private void notifyNewViewers(FeedDefinition feedDefinition, FeedDefinition existingFeed) {
+    private void notifyNewViewers(FeedDefinition feedDefinition, FeedDefinition existingFeed, Session session) throws SQLException {
         List<FeedConsumer> viewers = new ArrayList<FeedConsumer>(feedDefinition.getUploadPolicy().getViewers());
         List<FeedConsumer> oldViewers = new ArrayList<FeedConsumer>(existingFeed.getUploadPolicy().getViewers());
         viewers.removeAll(existingFeed.getUploadPolicy().getViewers());
-        for(FeedConsumer viewer : viewers) {
+        oldViewers.removeAll(feedDefinition.getUploadPolicy().getViewers());
+        processViewers(feedDefinition, session, viewers, NotificationBase.ADD, NotificationBase.VIEWER);
+        processViewers(feedDefinition, session, oldViewers, NotificationBase.REMOVE, NotificationBase.VIEWER);
+    }
 
+    private void processViewers(FeedDefinition feedDefinition, Session session, List<FeedConsumer> viewers, int action, int role) {
+        for(FeedConsumer viewer : viewers) {
+            switch(viewer.type()) {
+                case FeedConsumer.USER:
+                    UserToDataSourceNotification userToDataSourceNotification = new UserToDataSourceNotification();
+                    userToDataSourceNotification.setActingUser((User) session.get(User.class, SecurityUtil.getUserID()));
+                    userToDataSourceNotification.setUser((User) session.get(User.class, ((UserStub) viewer).getUserID()));
+                    userToDataSourceNotification.setFeedAction(action);
+                    userToDataSourceNotification.setFeedRole(role);
+                    userToDataSourceNotification.setNotificationDate(new Date());
+                    userToDataSourceNotification.setFeedID(feedDefinition.getDataFeedID());
+                    userToDataSourceNotification.setNotificationType(NotificationBase.USER_TO_DATA_SOURCE);
+                    session.save(userToDataSourceNotification);
+                    break;
+                case FeedConsumer.GROUP:
+                    DataSourceToGroupNotification dataSourceToGroupNotification = new DataSourceToGroupNotification();
+                    dataSourceToGroupNotification.setActingUser((User) session.get(User.class, SecurityUtil.getUserID()));
+                    dataSourceToGroupNotification.setGroupID(((GroupDescriptor) viewer).getGroupID());
+                    dataSourceToGroupNotification.setFeedAction(action);
+                    dataSourceToGroupNotification.setFeedRole(role);
+                    dataSourceToGroupNotification.setNotificationDate(new Date());
+                    dataSourceToGroupNotification.setFeedID(feedDefinition.getDataFeedID());
+                    dataSourceToGroupNotification.setNotificationType(NotificationBase.DATA_SOURCE_TO_GROUP);
+                    session.save(dataSourceToGroupNotification);
+                    break;
+                default:
+                    break;
+            }
         }
     }
 
-    private void notifyNewOwners(FeedDefinition feedDefinition, FeedDefinition existingFeed) {
-        List<FeedConsumer> owners= new ArrayList<FeedConsumer>(feedDefinition.getUploadPolicy().getViewers());
-        List<FeedConsumer> oldOwners = new ArrayList<FeedConsumer>(existingFeed.getUploadPolicy().getViewers());
+    private void notifyNewOwners(FeedDefinition feedDefinition, FeedDefinition existingFeed, Session session) {
+        List<FeedConsumer> owners= new ArrayList<FeedConsumer>(feedDefinition.getUploadPolicy().getOwners());
+        List<FeedConsumer> oldOwners = new ArrayList<FeedConsumer>(existingFeed.getUploadPolicy().getOwners());
         owners.removeAll(existingFeed.getUploadPolicy().getOwners());
-        for(FeedConsumer owner: owners) {
-        
-        }
-
+        oldOwners.removeAll(feedDefinition.getUploadPolicy().getOwners());
+        processViewers(feedDefinition, session, owners, NotificationBase.ADD,  NotificationBase.OWNER);
+        processViewers(feedDefinition, session, oldOwners, NotificationBase.REMOVE,  NotificationBase.OWNER);
     }
 
     public FeedDefinition getFeedDefinition(long dataFeedID) {

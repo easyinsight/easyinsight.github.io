@@ -15,6 +15,7 @@ import javax.persistence.*;
 @Table(name="user_notification")
 @PrimaryKeyJoinColumn(name="notification_id")
 public abstract class UserNotification extends NotificationBase {
+
     public User getUser() {
         return user;
     }

@@ -122,6 +122,13 @@
 
         <mapping class="com.easyinsight.notifications.NotificationBase" />
         <mapping class="com.easyinsight.notifications.UserNotification" />
+        <mapping class="com.easyinsight.notifications.GroupNotification" />
+        <mapping class="com.easyinsight.notifications.UserToGroupNotification" />
+        <mapping class="com.easyinsight.notifications.DataSourceToGroupNotification" />
+        <mapping class="com.easyinsight.notifications.ReportToGroupNotification" />
+        <mapping class="com.easyinsight.notifications.GroupCommentNotification" />
+        <mapping class="com.easyinsight.notifications.UserToDataSourceNotification" />
+        <mapping class="com.easyinsight.notifications.UserToReportNotification" />
     </session-factory>
 
 </hibernate-configuration>
