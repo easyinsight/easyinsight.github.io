@@ -9,16 +9,28 @@ public class SolutionDetailFactory {
 
     public static function createDetailPage(solution:Solution, auth:Boolean):IPerspective {
         var page:IPerspective;
-        if (solution.solutionID == 12) {
-            var gSol:GoogleAnalyticsSolution = new GoogleAnalyticsSolution();
-            gSol.solution = solution;
-            gSol.newAuth = auth;
-            page = gSol;
-        } else {
-            var detail:RevisedSolutionDetail = new RevisedSolutionDetail();
-            detail.solution = solution;
-            page = detail;
-        }
+        switch (solution.solutionID) {
+            case 1:
+                var gSol:GoogleAnalyticsSolutionDetail = new GoogleAnalyticsSolutionDetail();
+                gSol.solution = solution;
+                gSol.newAuth = auth;
+                page = gSol;
+                break;
+            case 8:
+                var bSol:BasecampSolutionDetail = new BasecampSolutionDetail();
+                bSol.solution = solution;
+                page = bSol;
+                break;
+            case 19:
+                var hSol:HighriseSolutionDetail = new HighriseSolutionDetail();
+                hSol.solution = solution;
+                page = hSol;
+                break;
+            default:
+                var detail:RevisedSolutionDetail = new RevisedSolutionDetail();
+                detail.solution = solution;
+                page = detail;
+        }        
         return page;
     }
 }
