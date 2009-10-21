@@ -5,7 +5,8 @@ html, body {
 }
 
 body {
-    background-color: #b0b0b0;
+    /*background-color: #b0b0b0;*/
+    background-color: #818285;
     background-repeat: repeat-y;
     background-position: top center;
     color: #333;
