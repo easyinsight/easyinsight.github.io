@@ -88,7 +88,6 @@ public class CloudWatchUtil {
         params.put("Version", "2009-05-15");
 
         String url = new SignedRequestsHelper(key, secretKey).sign(params);
-        System.out.println(url);
         HttpClient httpClient = new HttpClient();
         HttpMethod method = new GetMethod(url);
         int statusCode = httpClient.executeMethod(method);
@@ -107,7 +106,7 @@ public class CloudWatchUtil {
         Document document = builder.parse(content);
         Node result = document.getChildNodes().item(0);
         Node datapoints = result.getChildNodes().item(1).getChildNodes().item(1);
-        System.out.println(datapoints.getNodeName());
+
         NodeList members = datapoints.getChildNodes();
         DataSet dataSet = new DataSet();
         for (int i = 0; i < members.getLength(); i++) {
@@ -141,7 +140,7 @@ public class CloudWatchUtil {
                     value = findNode("Samples", memberNode);
                 }
                 if (value != null) {
-                    System.out.println(dateVal + " - " + value);
+
                     row.addValue(CloudWatchDataSource.DATE, new DateValue(dateVal));
                     row.addValue(analysisMeasure.getKey(), new NumericValue(Double.parseDouble(value)));
                 }

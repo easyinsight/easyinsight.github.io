@@ -10,7 +10,7 @@ public class SolutionDetailFactory {
     public static function createDetailPage(solution:Solution, auth:Boolean):IPerspective {
         var page:IPerspective;
         switch (solution.solutionID) {
-            case 1:
+            case 12:
                 var gSol:GoogleAnalyticsSolutionDetail = new GoogleAnalyticsSolutionDetail();
                 gSol.solution = solution;
                 gSol.newAuth = auth;

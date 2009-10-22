@@ -15,8 +15,7 @@
         import mx.controls.Label;
         import mx.rpc.events.FaultEvent;
 
-        [Bindable]
-        private var showReturnToList:Boolean;
+
         [Bindable]
         private var title:String;
         private var _analysisID:int;
@@ -107,8 +106,7 @@
                 ]]>
 	</mx:Script>
 	<mx:ApplicationControlBar width="100%" horizontalAlign="center">
-		<mx:LinkButton label="{_reportName}" click="titleClick()" textDecoration="underline"/>
-		<mx:Button label="Return" click="returnToList()" visible="{showReturnToList}"/>
+		<mx:LinkButton label="{_reportName}" click="titleClick()" textDecoration="underline"/>		
 	</mx:ApplicationControlBar>	
 	<mx:VBox id="coreVBox" height="100%" width="100%">
 	</mx:VBox>

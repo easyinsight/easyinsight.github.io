@@ -98,7 +98,7 @@ public class HighRiseCompanySource extends HighRiseBaseSource {
                     Node companyNode = companyNodes.get(i);
                     String name = queryField(companyNode, "name/text()");
                     row.addValue(COMPANY_NAME, name);
-                    System.out.println(name);
+
                     String id = queryField(companyNode, "id/text()");
                     row.addValue(COMPANY_ID, id);
                     Date createdAt = deadlineFormat.parse(queryField(companyNode, "created-at/text()"));
@@ -107,7 +107,7 @@ public class HighRiseCompanySource extends HighRiseBaseSource {
                     String personId = queryField(companyNode, "owner-id/text()");
                     String responsiblePartyName = retrieveContactInfo(client, builder, peopleCache, personId, url);
                     row.addValue(OWNER, responsiblePartyName);
-                    System.out.println("company id = " + id);
+
                     Document tags = runRestRequest("/companies/"+id+"/tags.xml", client, builder, url, null);
                     Nodes tagNodes = tags.query("/tags/tag");
                     StringBuilder tagBuilder = new StringBuilder();
@@ -119,7 +119,7 @@ public class HighRiseCompanySource extends HighRiseBaseSource {
                     if (tagBuilder.length() > 0) {
                         String tagString = tagBuilder.substring(0, tagBuilder.length() - 1);
                         row.addValue(TAGS, tagString);
-                        System.out.println(tagString);
+                        
                     }
                 }
             //} while(info.currentPage++ < info.MaxPages);

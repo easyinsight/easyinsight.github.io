@@ -49,8 +49,8 @@
         import com.easyinsight.customupload.DataSourceConfiguredEvent;
         import com.easyinsight.framework.AuthorizationRequirement;
         import com.easyinsight.framework.NavigationEvent;
+        import com.easyinsight.framework.User;
         import com.easyinsight.genredata.AnalyzeEvent;
-
         import com.easyinsight.goals.GoalDataAnalyzeSource;
         import com.easyinsight.goals.GoalTreeDescriptor;
         import com.easyinsight.google.AuthSubNavWindow;
@@ -60,15 +60,11 @@
         import com.easyinsight.report.MultiScreenAnalyzeSource;
         import com.easyinsight.report.ReportAnalyzeSource;
         import com.easyinsight.util.FileAlert;
-
         import com.easyinsight.util.PopUpUtil;
         import com.easyinsight.util.ProgressAlert;
 
-        import mx.controls.Alert;
-
-        import com.easyinsight.framework.User;
-
         import mx.collections.ArrayCollection;
+        import mx.controls.Alert;
         import mx.managers.BrowserManager;
         import mx.managers.PopUpManager;
         import mx.utils.URLUtil;
@@ -397,7 +393,7 @@
 
         private function toExternalPage():void {
             if (_solution.logoLink != null && _solution.logoLink != "") {
-                flash.net.navigateToURL(new URLRequest(_solution.logoLink), "_blank");
+                navigateToURL(new URLRequest(_solution.logoLink), "_blank");
             }
         }
 
@@ -407,7 +403,7 @@
         }
 
         private function toBlog():void {
-            flash.net.navigateToURL(new URLRequest("http://jamesboe.blogspot.com/search/label/Google%20Analytics"), "_blank");
+            navigateToURL(new URLRequest("http://jamesboe.blogspot.com/search/label/Google%20Analytics"), "_blank");
         }
 
         public function cleanup():void {

@@ -168,10 +168,7 @@ public class HighRiseDealSource extends HighRiseBaseSource {
                     row.addValue(COMPANY_ID, partyID);
                     String createdAt = queryField(currDeal, "created-at/text()");
                     row.addValue(CREATED_AT, new DateValue(deadlineFormat.parse(createdAt)));
-                    System.out.println(dealName);
-                    System.out.println(price);
-                    System.out.println(status);
-                    System.out.println(priceType);
+                    
                 }
             //} while(info.currentPage++ < info.MaxPages);
 
