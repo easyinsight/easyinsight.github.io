@@ -18,6 +18,8 @@ import com.easyinsight.util.PopUpUtil;
 import com.easyinsight.util.ProgressAlert;
 
 import flash.display.Bitmap;
+import flash.display.Loader;
+import flash.display.LoaderInfo;
 import flash.events.Event;
 import flash.events.HTTPStatusEvent;
 import flash.events.IOErrorEvent;
@@ -253,6 +255,21 @@ public class SolutionDetailRenderer extends VBox implements IPerspective {
 
     private function doEvent(event:Event):void {
         trace(event);
+    }
+
+    protected override function commitProperties():void {
+        super.commitProperties();
+        if (solution.image != null) {
+            var loader:Loader = new Loader();
+            loader.contentLoaderInfo.addEventListener(Event.COMPLETE, onComplete);
+            loader.loadBytes(solution.image);
+        }
+    }
+
+    private function onComplete(event:Event):void {
+        var loaderContent:LoaderInfo = event.currentTarget as LoaderInfo;
+        logo = Bitmap(loaderContent.loader.content);
+        loaderContent.loader.removeEventListener(Event.COMPLETE, onComplete);
     }
 }
 }
