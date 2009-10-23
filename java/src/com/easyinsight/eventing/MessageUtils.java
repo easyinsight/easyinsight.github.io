@@ -4,6 +4,7 @@ import flex.messaging.messages.AsyncMessage;
 import flex.messaging.MessageBroker;
 
 import java.util.UUID;
+import java.util.Date;
 
 /**
  * Created by IntelliJ IDEA.
@@ -19,7 +20,8 @@ public class MessageUtils {
         message.setDestination(destination);
         message.setMessageId(UUID.randomUUID().toString());
         message.setBody(messageBody);
-        message.setTimeToLive(60000); 
+        message.setTimestamp(new Date().getTime());
+        message.setTimeToLive(60000);
         if (MessageBroker.getMessageBroker(null) != null) {
             MessageBroker.getMessageBroker(null).routeMessageToService(message, null);
         }
