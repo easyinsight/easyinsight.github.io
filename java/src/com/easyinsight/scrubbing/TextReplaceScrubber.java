@@ -25,6 +25,8 @@ public class TextReplaceScrubber implements IScrubber {
         this.scrub = scrub;
         if (scrub.isRegex()) {
             pattern = Pattern.compile(scrub.getSourceText());
+        } else {
+            pattern = Pattern.compile(createWildcardPattern(scrub.getSourceText()));
         }
         if (scrub.isCaseSensitive()) {
             sourceText = scrub.getSourceText().toLowerCase();
@@ -38,16 +40,40 @@ public class TextReplaceScrubber implements IScrubber {
             Value value = entry.getValue();
             if (value.type() == Value.STRING) {
                 StringValue stringValue = (StringValue) value;
-                String newValue;
-                if (scrub.isRegex()) {
-                    Matcher matcher = pattern.matcher(stringValue.getValue());
-                    newValue = matcher.replaceAll(scrub.getReplaceText()).trim();
-                } else {
-                    newValue = stringValue.getValue().replace(sourceText, scrub.getReplaceText()).trim();
+                Matcher matcher = pattern.matcher(stringValue.getValue());
+                if (matcher.matches()) {
+                    row.getValues().put(entry.getKey(), new StringValue(scrub.getReplaceText()));   
                 }
-                stringValue = new StringValue(newValue);
-                row.getValues().put(entry.getKey(), stringValue);
+                
             }
         }
+    }
+
+    private String createWildcardPattern(String wildcard) {
+        StringBuffer s = new StringBuffer(wildcard.length());
+        s.append('^');
+        for (int i = 0, is = wildcard.length(); i < is; i++) {
+            char c = wildcard.charAt(i);
+            switch(c) {
+                case '*':
+                    s.append(".*");
+                    break;
+                case '?':
+                    s.append(".");
+                    break;
+                    // escape special regexp-characters
+                case '(': case ')': case '[': case ']': case '$':
+                case '^': case '.': case '{': case '}': case '|':
+                case '\\':
+                    s.append("\\");
+                    s.append(c);
+                    break;
+                default:
+                    s.append(c);
+                    break;
+            }
+        }
+        s.append('$');
+        return s.toString();
     }
 }
