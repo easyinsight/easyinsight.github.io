@@ -879,6 +879,8 @@
                 <mx:Button id="excludeButton" icon="@Embed(source='../../../assets/funnel_delete.png')"
                            toolTip="Exclude Data" click="exclude()"/>
             </filtering:TransformContainer>
+            <analysis:DataTransformationTab dataView="{dataView}" dataSourceID="{dataService.dataFeedID}"
+                                            analysisDefinition="{analysisDefinition}" analysisItems="{wrappers}"/>
             <analysis:ExportTab analysisDefinition="{analysisDefinition}" dataView="{dataView}"/>
         </mx:TabNavigator>
 

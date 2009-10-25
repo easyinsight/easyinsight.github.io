@@ -1,0 +1,103 @@
+<?xml version="1.0" ?>
+<mx:HBox xmlns:mx="http://www.adobe.com/2006/mxml" label="Scrubbing (F4)" visible="false" icon="@Embed(source='../../../../assets/brush2.png')"
+                     paddingLeft="10" paddingTop="10" paddingBottom="10"
+                     paddingRight="10" width="100%" height="100%">
+    <mx:Script><![CDATA[
+        import com.easyinsight.analysis.scrub.DataScrubEvent;
+        import com.easyinsight.analysis.scrub.LookupTableScrubListWindow;
+
+        import com.easyinsight.analysis.scrub.LookupTableScrubWindow;
+        import com.easyinsight.analysis.scrub.TextReplaceScrubListWindow;
+        import com.easyinsight.analysis.scrub.TextReplaceScrubWindow;
+        import com.easyinsight.util.PopUpUtil;
+
+        import mx.collections.ArrayCollection;
+        import mx.managers.PopUpManager;
+
+        private var _analysisDefinition:AnalysisDefinition;
+
+        private var _analysisItems:ArrayCollection;
+
+        private var _dataView:DataViewFactory;
+
+        private var _dataSourceID:int;
+
+        public function set dataSourceID(value:int):void {
+            _dataSourceID = value;
+        }
+
+        public function set analysisDefinition(value:AnalysisDefinition):void {
+            _analysisDefinition = value;
+        }
+
+        public function set analysisItems(value:ArrayCollection):void {
+            _analysisItems = value;
+        }
+
+        public function set dataView(value:DataViewFactory):void {
+            _dataView = value;
+        }
+
+        private function newTextReplaceScrub():void {
+            var textWindow:TextReplaceScrubWindow = TextReplaceScrubWindow(PopUpManager.createPopUp(this, TextReplaceScrubWindow, false));
+            textWindow.addEventListener(DataScrubEvent.ADDED_SCRUB, scrubAdded);
+            PopUpUtil.centerPopUp(textWindow);
+        }
+
+        private function newLookupTableScrub():void {
+            var lookupWindow:LookupTableScrubWindow = LookupTableScrubWindow(PopUpManager.createPopUp(this, LookupTableScrubWindow, false));
+            lookupWindow.availableFields = _analysisItems;
+            lookupWindow.feedID = _dataSourceID;
+            lookupWindow.addEventListener(DataScrubEvent.ADDED_SCRUB, scrubAdded);
+            PopUpUtil.centerPopUp(lookupWindow);
+        }
+
+        private function editTextReplaceScrubs():void {
+            var scrubListWindow:TextReplaceScrubListWindow = TextReplaceScrubListWindow(PopUpManager.createPopUp(this, TextReplaceScrubListWindow, false));
+            scrubListWindow.definition = _analysisDefinition;
+            scrubListWindow.addEventListener(DataScrubEvent.UPDATED_SCRUB, scrubUpdated);
+            scrubListWindow.addEventListener(DataScrubEvent.DELETED_SCRUB, scrubDeleted);
+            scrubListWindow.initState(_analysisItems, _dataSourceID);
+            PopUpUtil.centerPopUp(scrubListWindow);
+        }
+
+        private function editLookupTableScrubs():void {
+            var scrubListWindow:LookupTableScrubListWindow = LookupTableScrubListWindow(PopUpManager.createPopUp(this, LookupTableScrubListWindow, false));
+            scrubListWindow.definition = _analysisDefinition;
+            scrubListWindow.addEventListener(DataScrubEvent.UPDATED_SCRUB, scrubUpdated);
+            scrubListWindow.addEventListener(DataScrubEvent.DELETED_SCRUB, scrubDeleted);
+            scrubListWindow.initState(_analysisItems, _dataSourceID);
+            PopUpUtil.centerPopUp(scrubListWindow);
+        }
+
+        private function scrubAdded(event:DataScrubEvent):void {
+            dispatchEvent(new AnalysisChangedEvent());
+            _analysisDefinition.dataScrubs.addItem(event.dataScrub);
+            _dataView.retrieveData();
+        }
+
+        private function scrubUpdated(event:DataScrubEvent):void {
+            dispatchEvent(new AnalysisChangedEvent());
+            _dataView.retrieveData();
+        }
+
+        private function scrubDeleted(event:DataScrubEvent):void {
+            dispatchEvent(new AnalysisChangedEvent());
+            _analysisDefinition.dataScrubs.removeItemAt(_analysisDefinition.dataScrubs.getItemIndex(event.dataScrub));
+            _dataView.retrieveData();
+        }
+        ]]></mx:Script>
+    <mx:Button id="textScrubButton" toolTip="Text Replace"
+               icon="@Embed(source='../../../../assets/text_find.png')"
+               click="newTextReplaceScrub()"/>
+    <mx:Button id="textListButton" toolTip="Edit Text Replaces..."
+               icon="@Embed(source='../../../../assets/document_edit.png')"
+               click="editTextReplaceScrubs()"/>
+    <mx:Button id="lookupTableScrubButton" toolTip="Lookup Table"
+               icon="@Embed(source='../../../../assets/tables_add.png')"
+               click="newLookupTableScrub()"/>
+    <mx:Button id="lookupListButton" toolTip="Edit Lookup Tables..."
+               icon="@Embed(source='../../../../assets/tables_edit.png')"
+               click="editLookupTableScrubs()"/>
+    
+</mx:HBox>
