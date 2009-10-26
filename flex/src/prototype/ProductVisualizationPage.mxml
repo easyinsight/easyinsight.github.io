@@ -25,6 +25,20 @@
         [Bindable]
         [Embed(source="../../assets/prototype/ReverseGray.jpg")]
         private var banner:Class;
+
+        [Bindable]
+        [Embed(source="../../assets/prototype/ReportEditor.jpg")]
+        private var reportEditor:Class;
+
+        [Bindable]
+        [Embed(source="../../assets/prototype/Gauge.jpg")]
+        private var gauge:Class;
+
+        [Bindable]
+        [Embed(source="../../assets/prototype/Filters.jpg")]
+        private var filtersImage:Class;
+
+
         ]]></mx:Script>
     <mx:VBox width="1000" height="100%" verticalGap="0">
         <mx:HBox width="100%" styleName="Cell" height="70">
@@ -76,55 +90,50 @@
                     <mx:VBox styleName="Cell" horizontalAlign="center" width="700" verticalGap="0">
                         <mx:HBox verticalAlign="middle" horizontalAlign="center"
                                  width="100%" backgroundImage="{banner}" backgroundSize="100%" height="60">
-                            <mx:Label text="What is Easy Insight?" fontFamily="Tahoma" fontSize="24"
+                            <mx:Label text="Visualizing your Data" fontFamily="Tahoma" fontSize="24"
                                       color="#FFFFFF"/>
                         </mx:HBox>
                         <mx:HBox width="100%" height="100%">
                             <mx:VBox height="100%" width="2" backgroundColor="#DDDDDD"/>
-                            <mx:VBox width="100%" height="100%" paddingTop="5">
-                                <mx:VBox width="100%">
-                                    <mx:Label text="Business Intelligence On Demand"
-                                              styleName="Header"/>
-                                    <mx:TextArea
-                                            text="Traditional business intelligence has required you to make a large upfront investment--buy the software package, buy the hardware, plan out a data warehouse, design an ETL strategy, create report specifications, pass those specifications off to a report writer, and maybe start to see some results in the distant future. Easy Insight sets out to change that whole model by offering business intelligence through a Software as a Service model, with an overarching emphasis on ease of use and time to see a return on investment."
-                                            styleName="PageContent" editable="false"
-                                            selectable="false" width="100%" height="120"/>
-                                </mx:VBox>
-                                <mx:HBox width="100%">
+
+
                                     <mx:VBox width="100%">
-                                        <mx:Label text="Instant Data from Other Systems"
-                                                  styleName="Header"/>
-                                        <mx:TextArea
-                                                text="Using Google Analytics, Salesforce, Basecamp, Highrise, Amazon EC2, MySQL, SQL Server, or many others? Click a couple of buttons and you can start reporting on any of these sources!"
-                                                styleName="PageContent" editable="false"
-                                                selectable="false" width="100%" height="80"/>
-                                        <mx:Label text="Full Business Visibility"
-                                                  styleName="Header"/>
-                                        <mx:TextArea
-                                                text="Easy Insight provides a strategic, goal oriented view to your business. Connect your business data to key business initiatives to drive continuous improvement across the whole enterprise."
-                                                styleName="PageContent" editable="false"
-                                                selectable="false" width="100%" height="80"/>
-                                        <mx:Label text="Community and Collaboration"
-                                                  styleName="Header"/>
-                                        <mx:TextArea
-                                                text="Share your work with others to drive quick results! Use Google Analytics? Check out the reports on web analytics that others have built, adding them to your data in a single click."
-                                                styleName="PageContent" editable="false"
-                                                selectable="false" width="100%" height="80"/>
-
+                                        <mx:HBox width="100%" verticalAlign="middle">
+                                            <mx:VBox width="100%">
+                                                <mx:Label text="Ad Hoc Report Creation"
+                                                          styleName="Header"/>
+                                                <mx:TextArea
+                                                        text="An intuitive drag and drop report editor enables you to quickly create reports from your browser. There's no need to download and install a separate report builder--just jump right into the data and start creating meaningful reports. Once you have a report built, you can easily save and share it with your fellow users to enable quick collaborative analysis."
+                                                        styleName="PageContent" editable="false"
+                                                        selectable="false" width="100%" height="110"/>
+                                            </mx:VBox>
+                                            <mx:Image source="{reportEditor}"/>
+                                        </mx:HBox>
+                                        <mx:HBox width="100%">
+                                            <mx:Image source="{gauge}"/>
+                                            <mx:VBox width="100%">
+                                                <mx:Label text="Wide Range of Report Types"
+                                                          styleName="Header"/>
+                                                <mx:TextArea
+                                                        text="Whether you want to use lists, crosstabs, trees, column charts, pie charts, line charts, tree maps, gauges, geographic maps, or just about anything else, Easy Insight has the report type for you. We have a constantly expanding library of different reports to help you best visualize data the way you want."
+                                                        styleName="PageContent" editable="false"
+                                                        selectable="false" width="100%" height="80"/>
+                                            </mx:VBox>
+                                        </mx:HBox>
+                                        <mx:HBox width="100%" verticalAlign="middle">
+                                            <mx:VBox width="100%">
+                                                <mx:Label text="Data Slicing and Dicing"
+                                                          styleName="Header"/>
+                                                <mx:TextArea
+                                                        text="The same report editor also provides you with excellent capabilities for data analysis. The same drag and drop functionality lets you quickly filter down into key data subsets, drill into problem areas, and identify outliers. Once you've identified particular key insights, you can save the report for future reference, developing an ongoing view into your business."
+                                                        styleName="PageContent" editable="false"
+                                                        selectable="false" width="100%" height="140"/>
+                                            </mx:VBox>
+                                            <mx:Image source="{filtersImage}"/>
+                                        </mx:HBox>
                                     </mx:VBox>
-                                    <mx:VBox width="300" horizontalAlign="center">
 
-                                    </mx:VBox>
-                                </mx:HBox>
-                                <mx:VBox width="100%">
-                                    <mx:Label text="Visualize the Data in any Dashboard"
-                                              styleName="Header"/>
-                                    <mx:TextArea
-                                            text="Look at your data in grids, charts, maps, gauges, and more! A highly interactive, drag and drop report builder helps you to quickly build up custom reports and filter through data to find meaningful patterns. Once you have something you like, add the data to your iGoogle or Netvibes dashboard, or add it to your desktop for an ongoing view."
-                                            styleName="PageContent" editable="false"
-                                            selectable="false" width="100%" height="80"/>
-                                </mx:VBox>
-                            </mx:VBox>
+
                         </mx:HBox>
 
                     </mx:VBox>

@@ -25,6 +25,10 @@
         [Bindable]
         [Embed(source="../../assets/prototype/ReverseGray.jpg")]
         private var banner:Class;
+
+        [Bindable]
+        [Embed(source="../../assets/prototype/Column4.jpg")]
+        private var columnChart:Class;
         ]]></mx:Script>
     <mx:VBox width="1000" height="100%" verticalGap="0">
         <mx:HBox width="100%" styleName="Cell" height="70">
@@ -99,8 +103,8 @@
                                                 styleName="PageContent" editable="false"
                                                 selectable="false" width="100%" height="120"/>
                                     </mx:VBox>
-                                    <mx:VBox width="300" horizontalAlign="center">
-
+                                    <mx:VBox width="300" horizontalAlign="center" verticalAlign="middle" height="100%">
+                                        <mx:Image source="{columnChart}" maxWidth="280"/>
                                     </mx:VBox>
                                 </mx:HBox>
                                 <mx:VBox width="100%">
