@@ -13,6 +13,13 @@
         </mxmlc>
     </target>
 
+    <target name="compilePrototype">
+        <mxmlc file="../src/PrototypePage.mxml" output="${deployment.path}/PrototypePage.swf"
+               static-rsls="true" incremental="true">
+            <load-config filename="../prototype.xml"/>
+        </mxmlc>
+    </target>
+
     <target name="compileBillingTest">
         <mxmlc file="../src/BillingTestApplication.mxml" output="${deployment.path}/BillingTestApplication.swf"
                static-rsls="true" incremental="true">
@@ -269,7 +276,7 @@
 
     <target name="compileEmbeddedInsight">
         <mxmlc file="../src/EmbeddedInsight.mxml" output="${deployment.path}/EmbeddedInsight.swf"
-               static-rsls="false">
+               static-rsls="false" link-report="embedded-report.txt">
             <load-config filename="../embedded-insight.xml"/>
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
                 <url rsl-url="framework_3.3.0.4852.swz"/>
@@ -290,7 +297,7 @@
 
     <target name="compileYahooWidget">
         <mxmlc file="../src/YahooWidgetReport.mxml" output="${deployment.path}/YahooWidgetReport.swf"
-               static-rsls="false" incremental="true">
+               static-rsls="false" link-report="yahoo.txt">
             <load-config filename="../yahoo-report.xml"/>
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
                 <url rsl-url="framework_3.3.0.4852.swz"/>

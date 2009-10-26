@@ -1,0 +1,27 @@
+.Cell {
+    backgroundColor: #FFFFFF;
+}
+
+.Header {
+    fontSize: 16;
+    color: #cc0033;
+}
+
+.Blah {
+    color: #786e78;
+}
+
+.PageContent {
+    fontSize: 12;
+    borderStyle: none;
+    borderThickness: 0;
+    backgroundAlpha: 0;
+    color: #444444;
+}
+
+.HeaderLink {
+    fontSize: 14;
+    fontFamily: Tahoma;
+    fontWeight: bold;
+    color: #444444;
+}
