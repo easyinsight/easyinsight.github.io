@@ -25,3 +25,23 @@
     fontWeight: bold;
     color: #444444;
 }
+
+.SubHeaderLink {
+    fontSize: 12;
+    fontFamily: Tahoma;
+    fontWeight: bold;
+    color: #444444;
+}
+
+.redButton {
+   cornerRadius: 12;
+   highlightAlphas: 0.79, 0.2;
+   fillColors: #b91919, #ffadad, #b91919, #ffadad;
+   fillAlphas: 1, 1, 1, 1;
+   borderColor: #999999;
+   dropShadow: true;
+   shadowDistance: 1;
+   fontFamily: Tahoma;
+   fontSize: 12;
+   fontWeight: bold;
+}

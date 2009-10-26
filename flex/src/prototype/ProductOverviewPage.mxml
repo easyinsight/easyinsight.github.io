@@ -1,0 +1,179 @@
+<?xml version="1.0" ?>
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:twitter="com.easyinsight.twitter.*" width="100%"
+         horizontalAlign="center">
+    <mx:Metadata>
+        [Event(name="navigation", type="prototype.PrototypeEvent")]
+    </mx:Metadata>
+    <mx:Script><![CDATA[
+
+        [Bindable]
+        [Embed(source="../../assets/logo2.PNG")]
+        private var logo:Class;
+
+        [Bindable]
+        [Embed(source="../../assets/prototype/film.png")]
+        private var film:Class;
+
+        [Bindable]
+        [Embed(source="../../assets/prototype/message.png")]
+        private var message:Class;
+
+        [Bindable]
+        [Embed(source="../../assets/prototype/mouse.png")]
+        private var mouse:Class;
+
+        [Bindable]
+        [Embed(source="../../assets/prototype/ReverseGray.jpg")]
+        private var banner:Class;
+        ]]></mx:Script>
+    <mx:VBox width="1000" height="100%" verticalGap="0">
+        <mx:HBox width="100%" styleName="Cell" height="70">
+            <mx:Box height="100%" width="2" backgroundColor="#DDDDDD"/>
+            <mx:Box width="300" verticalAlign="middle" height="100%" horizontalAlign="center">
+                <mx:Image source="{logo}" click="dispatchEvent(new PrototypeEvent(''))"/>
+            </mx:Box>
+            <mx:VBox width="100%" height="100%" paddingRight="15">
+                <mx:HBox horizontalAlign="right" width="100%" height="50%" paddingTop="5">
+                    <mx:Button label="Sign In" styleName="redButton"/>
+                    <mx:Button label="Sign Up for Free Account" styleName="redButton"/>
+                </mx:HBox>
+                <mx:Spacer height="100%"/>
+                <mx:HBox width="100%" styleName="HeaderLink" height="50%" paddingBottom="5">
+                    <mx:Label text="PRODUCT" color="#cc0033"/>
+                    <mx:Spacer width="100%"/>
+                    <mx:Label text="DATA"/>
+                    <mx:Spacer width="100%"/>
+                    <mx:Label text="BLOG"/>
+                    <mx:Spacer width="100%"/>
+                    <mx:Label text="CUSTOMERS"/>
+                    <mx:Spacer width="100%"/>
+                    <mx:Label text="PARTNERS"/>
+                    <mx:Spacer width="100%"/>
+                    <mx:Label text="COMPANY"/>
+                </mx:HBox>
+            </mx:VBox>
+            <mx:Box height="100%" width="2" backgroundColor="#DDDDDD"/>
+        </mx:HBox>
+        <mx:HBox backgroundColor="#DDDDDD" width="100%" paddingBottom="5" paddingTop="5">
+            <mx:HBox width="100%" styleName="SubHeaderLink" paddingLeft="15" paddingRight="15">
+                <mx:Label text="OVERVIEW" color="#cc0033"/>
+                <mx:Spacer width="100%"/>
+                <mx:Label text="VISUALIZATION" click="dispatchEvent(new PrototypeEvent('ProductVisualization'))"/>
+                <mx:Spacer width="100%"/>
+                <mx:Label text="STRATEGY" click="dispatchEvent(new PrototypeEvent('ProductStrategy'))"/>
+                <mx:Spacer width="100%"/>
+                <mx:Label text="DASHBOARDS" click="dispatchEvent(new PrototypeEvent('ProductDashboards'))"/>
+                <mx:Spacer width="100%"/>
+                <mx:Label text="DEVELOPERS"/>
+                <mx:Spacer width="100%"/>
+                <mx:Label text="SERVICES"/>
+            </mx:HBox>
+        </mx:HBox>
+        <mx:Canvas width="1000" backgroundColor="#FFFFFF" height="100%">
+            <mx:Canvas x="700" backgroundColor="#DDDDDD" height="100%" width="300"/>
+            <mx:VBox width="100%" verticalGap="0">
+                <mx:HBox width="100%" horizontalGap="0">
+                    <mx:VBox styleName="Cell" horizontalAlign="center" width="700" verticalGap="0">
+                        <mx:HBox verticalAlign="middle" horizontalAlign="center"
+                                 width="100%" backgroundImage="{banner}" backgroundSize="100%" height="60">
+                            <mx:Label text="What is Easy Insight?" fontFamily="Tahoma" fontSize="24"
+                                      color="#FFFFFF"/>
+                        </mx:HBox>
+                        <mx:HBox width="100%" height="100%">
+                            <mx:VBox height="100%" width="2" backgroundColor="#DDDDDD"/>
+                            <mx:VBox width="100%" height="100%" paddingTop="5">
+                                <mx:VBox width="100%">
+                                    <mx:Label text="Business Intelligence On Demand"
+                                              styleName="Header"/>
+                                    <mx:TextArea
+                                            text="Traditional business intelligence has required you to make a large upfront investment--buy the software package, buy the hardware, plan out a data warehouse, design an ETL strategy, create report specifications, pass those specifications off to a report writer, and maybe start to see some results in the distant future. Easy Insight sets out to change that whole model by offering business intelligence through a Software as a Service model, with an overarching emphasis on ease of use and time to see a return on investment."
+                                            styleName="PageContent" editable="false"
+                                            selectable="false" width="100%" height="120"/>
+                                </mx:VBox>
+                                <mx:HBox width="100%">
+                                    <mx:VBox width="100%">
+                                        <mx:Label text="No More Infrastructure Worries"
+                                                  styleName="Header"/>
+                                        <mx:TextArea
+                                                text="Taking advantage of the latest in cloud computing technology, Easy Insight offloads the complicated infrastructure required to power your reporting functionality, dramatically reducing the IT budget required to support reporting and analytics. We provide a secure, reliable, and scaleable environment for your data."
+                                                styleName="PageContent" editable="false"
+                                                selectable="false" width="100%" height="120"/>
+                                    </mx:VBox>
+                                    <mx:VBox width="300" horizontalAlign="center">
+
+                                    </mx:VBox>
+                                </mx:HBox>
+                                <mx:VBox width="100%">
+                                    <mx:Label text="Ease of Use"
+                                                  styleName="Header"/>
+                                        <mx:TextArea
+                                                text="Everything in Easy Insight has been designed from the approach of making the user experience as simple and effortless as possible. Before you can see any sort of valuable insights from your data, you have to get the data into the system--hence, we make it incredibly easy to get your data into the system. Whether your data is in spreadsheets, relational databaes, or any of a wide variety of other third party applications from Google Analytics to Salesforce.com, we enable you to get that data into Easy Insight as quickly as possible."
+                                                styleName="PageContent" editable="false"
+                                                selectable="false" width="100%" height="120"/>     
+                                </mx:VBox>
+                            </mx:VBox>
+                        </mx:HBox>
+
+                    </mx:VBox>
+                    <mx:VBox horizontalAlign="center" width="100%" paddingTop="10">
+                        <mx:VBox width="280" backgroundColor="#786e78" borderStyle="solid" cornerRadius="15"
+                                 paddingLeft="5"
+                                 paddingRight="5"
+                                 paddingTop="5" paddingBottom="5" height="220" verticalAlign="middle"
+                                 buttonMode="true" borderColor="#786e78" borderThickness="2"
+                                 horizontalAlign="center">
+                            <mx:Label text="Want more info?" fontSize="16" color="#FFFFFF"/>
+                            <mx:Box width="100%" height="100%" horizontalAlign="center" verticalAlign="middle"
+                                    backgroundColor="#FFFFFF"
+                                    borderStyle="solid" borderColor="#FFFFFF" borderThickness="1"
+                                    cornerRadius="5">
+                                <mx:Grid width="100%">
+                                    <mx:GridRow>
+                                        <mx:GridItem>
+                                            <mx:Image source="{film}"/>
+                                        </mx:GridItem>
+                                        <mx:GridItem verticalAlign="middle">
+                                            <mx:Label text="Watch Product Tour" fontSize="16"
+                                                      textDecoration="underline"/>
+                                        </mx:GridItem>
+                                    </mx:GridRow>
+                                    <mx:GridRow>
+                                        <mx:GridItem>
+                                            <mx:Image source="{mouse}"/>
+                                        </mx:GridItem>
+                                        <mx:GridItem verticalAlign="middle">
+                                            <mx:Label text="Free Trial Account" fontSize="16"
+                                                      textDecoration="underline"/>
+                                        </mx:GridItem>
+                                    </mx:GridRow>
+                                    <mx:GridRow>
+                                        <mx:GridItem>
+                                            <mx:Image source="{message}"/>
+                                        </mx:GridItem>
+                                        <mx:GridItem verticalAlign="middle">
+                                            <mx:Label text="Contact Us" fontSize="16"
+                                                      textDecoration="underline"/>
+                                        </mx:GridItem>
+                                    </mx:GridRow>
+                                </mx:Grid>
+                            </mx:Box>
+                        </mx:VBox>
+                        <mx:Box width="280" backgroundColor="#FFFFFF" borderStyle="solid" cornerRadius="15"
+                                paddingLeft="5"
+                                paddingRight="5"
+                                paddingTop="5" paddingBottom="5" verticalAlign="middle"
+                                buttonMode="true" borderColor="#D42525" borderThickness="2">
+                            <twitter:TwitterDisplay person="easyinsight"/>
+                        </mx:Box>
+                    </mx:VBox>
+                </mx:HBox>
+                
+            </mx:VBox>
+        </mx:Canvas>
+
+
+        <mx:HBox width="100%" height="100" backgroundColor="#DDDDDD">
+
+        </mx:HBox>
+    </mx:VBox>
+</mx:VBox>
