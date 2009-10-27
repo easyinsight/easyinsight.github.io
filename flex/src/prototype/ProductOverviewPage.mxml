@@ -68,9 +68,9 @@
                 <mx:Spacer width="100%"/>
                 <mx:Label text="DASHBOARDS" click="dispatchEvent(new PrototypeEvent('ProductDashboards'))"/>
                 <mx:Spacer width="100%"/>
-                <mx:Label text="DEVELOPERS"/>
+                <mx:Label text="DEVELOPERS" click="dispatchEvent(new PrototypeEvent('ProductDeveloper'))"/>
                 <mx:Spacer width="100%"/>
-                <mx:Label text="SERVICES"/>
+                <mx:Label text="SERVICES" click="dispatchEvent(new PrototypeEvent('ProductServices'))"/>
             </mx:HBox>
         </mx:HBox>
         <mx:Canvas width="1000" backgroundColor="#FFFFFF" height="100%">

@@ -47,7 +47,7 @@
                 </mx:HBox>
                 <mx:Spacer height="100%"/>
                 <mx:HBox width="100%" styleName="HeaderLink" height="50%" paddingBottom="5">
-                    <mx:Label text="PRODUCT"/>
+                    <mx:Label text="PRODUCT" color="#cc0033"/>
                     <mx:Spacer width="100%"/>
                     <mx:Label text="DATA"/>
                     <mx:Spacer width="100%"/>
@@ -57,20 +57,24 @@
                     <mx:Spacer width="100%"/>
                     <mx:Label text="PARTNERS"/>
                     <mx:Spacer width="100%"/>
-                    <mx:Label text="COMPANY" color="#cc0033"/>
+                    <mx:Label text="COMPANY"/>
                 </mx:HBox>
             </mx:VBox>
             <mx:Box height="100%" width="2" backgroundColor="#DDDDDD"/>
         </mx:HBox>
         <mx:HBox backgroundColor="#DDDDDD" width="100%" paddingBottom="5" paddingTop="5">
             <mx:HBox width="100%" styleName="SubHeaderLink" paddingLeft="15" paddingRight="15">
-                <mx:Label text="OVERVIEW" color="#cc0033"/>
+                <mx:Label text="OVERVIEW" click="dispatchEvent(new PrototypeEvent('ProductOverview'))"/>
                 <mx:Spacer width="100%"/>
-                <mx:Label text="WHO WE ARE"/>
+                <mx:Label text="VISUALIZATION" click="dispatchEvent(new PrototypeEvent('ProductVisualization'))"/>
                 <mx:Spacer width="100%"/>
-                <mx:Label text="OFFICE LOCATION"/>
+                <mx:Label text="STRATEGY" click="dispatchEvent(new PrototypeEvent('ProductStrategy'))"/>
                 <mx:Spacer width="100%"/>
-                <mx:Label text="CONTACT US"/>
+                <mx:Label text="DASHBOARDS"/>
+                <mx:Spacer width="100%"/>
+                <mx:Label text="DEVELOPERS" color="#cc0033"/>
+                <mx:Spacer width="100%"/>
+                <mx:Label text="SERVICES"/>
             </mx:HBox>
         </mx:HBox>
         <mx:Canvas width="1000" backgroundColor="#FFFFFF" height="100%">
@@ -80,36 +84,56 @@
                     <mx:VBox styleName="Cell" horizontalAlign="center" width="700" verticalGap="0">
                         <mx:HBox verticalAlign="middle" horizontalAlign="center"
                                  width="100%" backgroundImage="{banner}" backgroundSize="100%" height="60">
-                            <mx:Label text="Easy Insight and Dashboards" fontFamily="Tahoma" fontSize="24"
+                            <mx:Label text="Developing Against Easy Insight" fontFamily="Tahoma" fontSize="24"
                                       color="#FFFFFF"/>
                         </mx:HBox>
                         <mx:HBox width="100%" height="100%">
                             <mx:VBox height="100%" width="2" backgroundColor="#DDDDDD"/>
                             <mx:VBox width="100%" height="100%" paddingTop="5">
 
-                                    <mx:HBox width="100%" verticalAlign="middle">
-                                        <mx:VBox width="100%">
-                                            <mx:Label text="iGoogle and Netvibes"
-                                              styleName="Header"/>
-                                    <mx:TextArea
-                                            text="You can easily add any Easy Insight report to your iGoogle or Netvibes dashboard pages. Want to assemble a dashboard of several reports? Just add and arrange them as you like within those existing dashboard applications, alongside any further widgets you may already have."
-                                            styleName="PageContent" editable="false"
-                                            selectable="false" width="100%" height="160"/>
-                                        </mx:VBox>
-                                        <mx:Image source="{igoogle}"/>
-                                    </mx:HBox>
+                                <mx:HBox width="100%" verticalAlign="middle">
+                                    <mx:VBox width="100%">
+                                        <mx:Label text="Web Services"
+                                                  styleName="Header"/>
+                                        <mx:TextArea
+                                                text="There's a lot more systems out there than Easy Insight can ever hope to directly connect to. To help accomodate passing in data from any custom system, Easy Insight offers a series of SOAP APIs to meet the differing requirements for publishing in custom data. You can use the API with any account type--the only difference is that as usual, the amount of space offered within your account, and the amount of API traffic allowed. Authentication to the web services is limited to basic auth for users at the free to group tiers. Full WS-Security authentication is offered to Professional and Enterprise accounts."
+                                                styleName="PageContent" editable="false"
+                                                selectable="false" width="100%" height="120"/>
+                                    </mx:VBox>
 
-                                 <mx:HBox width="100%" verticalAlign="middle">
-                                     <mx:Image source="{desktop}"/>
-                                        <mx:VBox width="100%">
-                                            <mx:Label text="Desktop Display"
-                                              styleName="Header"/>
-                                    <mx:TextArea
-                                            text="You can easily view Easy Insight reports and KPI trees directly from your desktop through an Adobe Air widget. This widget will work on any operating system that supports Adobe Air, providing you with an easy way to just alt tab over and take a look at your business status."
-                                            styleName="PageContent" editable="false"
-                                            selectable="false" width="100%" height="160"/>
+                                </mx:HBox>
+
+                                <mx:HBox width="100%" verticalAlign="middle">
+
+                                    <mx:VBox width="100%">
+                                        <mx:Label text="Getting Started"
+                                                  styleName="Header"/>
+                                        <mx:HBox width="100%" verticalAlign="middle">
+                                        <mx:TextArea
+                                                text="Conceptually, Easy Insight offers two primary APIs, the Unchecked and the Validated. The Unchecked API takes whatever data you send in and shapes a data source to match with that data. For example, if you pass in data for a data source called Business Data, and specify two key/value pairs, one with Revenue and a value of 500, the other with Region and a value of Northwest, the result of the call to the web service will be a new data source with a measure called Revenue and a grouping called Region, containing the appropriate values. You can use the Unchecked API to very quickly build up prototype applications and see what sort of integrations are possible from your data to Easy Insight."
+                                                styleName="PageContent" editable="false"
+                                                selectable="false" width="100%" height="250"/>
+                                        <mx:VBox width="450" backgroundColor="#FFFFFF" borderStyle="solid" cornerRadius="15"
+                                            paddingLeft="5"
+                                            paddingRight="5"
+                                            paddingTop="5" paddingBottom="5" verticalAlign="middle" horizontalAlign="center"
+                                            buttonMode="true" borderColor="#D42525" borderThickness="2">
+                                            <mx:TextArea
+                                                text="You can start by generating code against either of the WSDLs:"
+                                                styleName="Header" editable="false"
+                                                selectable="false" width="100%" height="50"/>
+                                            <mx:Label text="Unchecked API WSDL:"/>
+                                            <mx:Label text="https://www.easy-insight.com/app/services/UncheckedPublishBasic?wsdl"/>
+                                            <mx:Label text="Validated API WSDL:"/>
+                                            <mx:Label text="https://www.easy-insight.com/app/services/ValidatedPublishBasic?wsdl"/>
                                         </mx:VBox>
-                                    </mx:HBox>
+                                        </mx:HBox>
+                                        <mx:TextArea
+                                                text="For production code, it's recommended that you shift into using the Validated API. The Validated API provides identical methods to the Unchecked API, but with type safety and considerably better per-call performance. If you try to pass in a number to a field expecting a string, make a typo in a field name, or make any other similar error, the Validated API will reject the call, providing better reliability to your production functionality."
+                                                styleName="PageContent" editable="false"
+                                                selectable="false" width="100%" height="160"/>
+                                    </mx:VBox>
+                                </mx:HBox>
                             </mx:VBox>
                         </mx:HBox>
 

@@ -30,6 +30,42 @@
                 <prototype:ProductDashboardsPage navigation="currentState=event.state"/>
             </mx:AddChild>
         </mx:State>
+        <mx:State name="ProductDeveloper">
+            <mx:RemoveChild target="{frontPage}"/>
+            <mx:AddChild relativeTo="{core}">
+                <prototype:ProductDeveloperPage navigation="currentState=event.state"/>
+            </mx:AddChild>
+        </mx:State>
+        <mx:State name="ProductServices">
+            <mx:RemoveChild target="{frontPage}"/>
+            <mx:AddChild relativeTo="{core}">
+                <prototype:ProductServicesPage navigation="currentState=event.state"/>
+            </mx:AddChild>
+        </mx:State>
+        <mx:State name="CompanyOverviewPage">
+            <mx:RemoveChild target="{frontPage}"/>
+            <mx:AddChild relativeTo="{core}">
+                <prototype:CompanyOverviewPage navigation="currentState=event.state"/>
+            </mx:AddChild>
+        </mx:State>
+        <mx:State name="CompanyWhoWeAre">
+            <mx:RemoveChild target="{frontPage}"/>
+            <mx:AddChild relativeTo="{core}">
+                <prototype:CompanyWhoWeAre navigation="currentState=event.state"/>
+            </mx:AddChild>
+        </mx:State>
+        <mx:State name="CompanyOffice">
+            <mx:RemoveChild target="{frontPage}"/>
+            <mx:AddChild relativeTo="{core}">
+                <prototype:CompanyOffice navigation="currentState=event.state"/>
+            </mx:AddChild>
+        </mx:State>
+        <mx:State name="Data">
+            <mx:RemoveChild target="{frontPage}"/>
+            <mx:AddChild relativeTo="{core}">
+                <prototype:DataPage navigation="currentState=event.state"/>
+            </mx:AddChild>
+        </mx:State>
     </mx:states>
     <mx:Script><![CDATA[
         import mx.collections.ArrayCollection;
@@ -80,7 +116,7 @@
                         <mx:HBox width="100%" styleName="HeaderLink" height="50%" paddingBottom="5">
                             <mx:Label text="PRODUCT" click="currentState='ProductOverview'"/>
                             <mx:Spacer width="100%"/>
-                            <mx:Label text="DATA"/>
+                            <mx:Label text="DATA" click="currentState='Data'"/>
                             <mx:Spacer width="100%"/>
                             <mx:Label text="BLOG"/>
                             <mx:Spacer width="100%"/>
@@ -88,7 +124,7 @@
                             <mx:Spacer width="100%"/>
                             <mx:Label text="PARTNERS"/>
                             <mx:Spacer width="100%"/>
-                            <mx:Label text="COMPANY"/>
+                            <mx:Label text="COMPANY" click="currentState='CompanyOverviewPage'"/>
                         </mx:HBox>
                     </mx:VBox>
                     <mx:Box height="100%" width="2" backgroundColor="#DDDDDD"/>
