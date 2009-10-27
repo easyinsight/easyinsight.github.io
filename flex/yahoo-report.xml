@@ -1,6 +1,6 @@
 <flex-config xmlns="http://www.adobe.com/2006/flex-config">
     <compiler>
-        <debug>true</debug>
+        <debug>false</debug>
         <external-library-path>
          <path-element>${flexlib}/libs/player/9/playerglobal.swc</path-element>
             <path-element>${flexlib}/libs/datavisualization.swc</path-element>
