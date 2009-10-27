@@ -17,12 +17,5 @@ public class WorldMapController implements IReportController {
         factory.newDefinition = MapDefinition;
         return factory;
     }
-
-    public function createEmbeddedView():EmbeddedViewFactory {
-        var factory:EmbeddedViewFactory = new EmbeddedViewFactory();
-        factory.reportRenderer = "WorldMapModule.swf";
-        factory.newDefinition = MapDefinition;
-        return factory;
-    }
 }
 }

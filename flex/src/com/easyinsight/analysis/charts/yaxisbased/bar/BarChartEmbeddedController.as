@@ -9,7 +9,7 @@ public class BarChartEmbeddedController implements IEmbeddedReportController {
     public function createEmbeddedView():EmbeddedViewFactory {
         var factory:EmbeddedViewFactory = new EmbeddedViewFactory();
         factory.reportRenderer = "BarChartModule.swf";
-        factory.newDefinition = BarChartDefinition;
+        //factory.newDefinition = BarChartDefinition;
         return factory;
     }
 }

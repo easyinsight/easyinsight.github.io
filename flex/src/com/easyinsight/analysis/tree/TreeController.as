@@ -15,12 +15,5 @@ public class TreeController implements IReportController {
         factory.newDefinition = TreeDefinition;
         return factory;
     }
-
-    public function createEmbeddedView():EmbeddedViewFactory {
-        var factory:EmbeddedViewFactory = new EmbeddedViewFactory();
-        factory.reportRenderer = "TreeModule.swf";
-        factory.newDefinition = TreeDefinition;
-        return factory;
-    }
 }
 }

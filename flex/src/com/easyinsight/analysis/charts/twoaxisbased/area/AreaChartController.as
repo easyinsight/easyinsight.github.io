@@ -16,12 +16,5 @@ public class AreaChartController implements IReportController {
         factory.newDefinition = AreaChartDefinition;
         return factory;
     }
-
-    public function createEmbeddedView():EmbeddedViewFactory {
-        var factory:EmbeddedViewFactory = new EmbeddedViewFactory();
-        factory.reportRenderer = "AreaChartModule.swf";
-        factory.newDefinition = AreaChartDefinition;
-        return factory;
-    }
 }
 }

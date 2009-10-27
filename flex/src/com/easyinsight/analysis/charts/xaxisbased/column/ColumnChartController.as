@@ -21,12 +21,5 @@ public class ColumnChartController implements IReportController {
         factory.newDefinition = ColumnChartDefinition;
         return factory;
     }
-
-    public function createEmbeddedView():EmbeddedViewFactory {
-        var factory:EmbeddedViewFactory = new EmbeddedViewFactory();
-        factory.reportRenderer = "ColumnChartModule.swf";
-        factory.newDefinition = ColumnChartDefinition;
-        return factory;
-    }
 }
 }

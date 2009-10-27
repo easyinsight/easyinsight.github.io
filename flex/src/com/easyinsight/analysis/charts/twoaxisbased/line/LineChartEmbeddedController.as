@@ -8,7 +8,7 @@ public class LineChartEmbeddedController implements IEmbeddedReportController {
     public function createEmbeddedView():EmbeddedViewFactory {
         var factory:EmbeddedViewFactory = new EmbeddedViewFactory();
         factory.reportRenderer = "LineChartModule.swf";
-        factory.newDefinition = LineChartDefinition;
+        //factory.newDefinition = LineChartDefinition;
         return factory;
     }
 }

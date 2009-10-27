@@ -1,6 +1,6 @@
 package com.easyinsight.analysis
 {
-import com.easyinsight.administration.feed.VirtualDimension;
+
 import com.easyinsight.analysis.conditions.ConditionRenderer;
 	import com.easyinsight.analysis.conditions.NoConditionRenderer;
 	import com.easyinsight.analysis.formatter.FormattingConfiguration;
@@ -21,7 +21,7 @@ import mx.formatters.Formatter;
 		public var sort:int = 0;
 		public var displayName:String;
         public var width:int = 0;
-        public var virtualDimension:VirtualDimension;
+        //public var virtualDimension:VirtualDimension;
         public var links:ArrayCollection = new ArrayCollection();
         public var highIsGood:Boolean = true;
 		

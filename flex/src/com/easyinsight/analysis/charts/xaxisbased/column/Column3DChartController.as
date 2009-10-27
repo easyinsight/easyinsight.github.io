@@ -20,12 +20,5 @@ public class Column3DChartController implements IReportController {
         factory.newDefinition = Column3DChartDefinition;
         return factory;
     }
-
-    public function createEmbeddedView():EmbeddedViewFactory {
-        var factory:EmbeddedViewFactory = new EmbeddedViewFactory();
-        factory.reportRenderer = "Column3DChartModule.swf";
-        factory.newDefinition = Column3DChartDefinition;
-        return factory;
-    }
 }
 }

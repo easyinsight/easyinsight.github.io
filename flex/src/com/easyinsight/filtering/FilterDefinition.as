@@ -28,9 +28,5 @@ package com.easyinsight.filtering
 		public function getType():int {
 			return 0;
 		}
-
-        public function getDetailEditorClass():Class {
-            return null;
-        }
 	}
 }

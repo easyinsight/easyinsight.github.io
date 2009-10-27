@@ -9,7 +9,7 @@ public class PieChartEmbeddedController implements IEmbeddedReportController {
     public function createEmbeddedView():EmbeddedViewFactory {
         var factory:EmbeddedViewFactory = new EmbeddedViewFactory();
         factory.reportRenderer = "PieChartModule.swf";
-        factory.newDefinition = PieChartDefinition;
+        //factory.newDefinition = PieChartDefinition;
         return factory;
     }
 }

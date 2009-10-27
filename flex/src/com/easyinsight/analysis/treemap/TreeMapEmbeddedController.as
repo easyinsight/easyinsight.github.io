@@ -9,7 +9,7 @@ public class TreeMapEmbeddedController implements IEmbeddedReportController {
     public function createEmbeddedView():EmbeddedViewFactory {
         var factory:EmbeddedViewFactory = new EmbeddedViewFactory();
         factory.reportRenderer = "TreeMapModule.swf";
-        factory.newDefinition = TreeMapDefinition;
+        //factory.newDefinition = TreeMapDefinition;
         return factory;
     }
 }

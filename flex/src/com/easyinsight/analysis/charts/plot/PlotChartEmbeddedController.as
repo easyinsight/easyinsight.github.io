@@ -8,7 +8,7 @@ public class PlotChartEmbeddedController implements IEmbeddedReportController {
     public function createEmbeddedView():EmbeddedViewFactory {
         var factory:EmbeddedViewFactory = new EmbeddedViewFactory();
         factory.reportRenderer = "PlotChartModule.swf";
-        factory.newDefinition = PlotChartDefinition;
+        //factory.newDefinition = PlotChartDefinition;
         return factory;
     }
 }

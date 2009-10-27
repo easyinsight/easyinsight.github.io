@@ -9,7 +9,7 @@ public class MultiMeasureLineChartEmbeddedController implements IEmbeddedReportC
     public function createEmbeddedView():EmbeddedViewFactory {
         var factory:EmbeddedViewFactory = new EmbeddedViewFactory();
         factory.reportRenderer = "MultiMeasureLineChartModule.swf";
-        factory.newDefinition = MultiMeasureLineChartDefinition;
+        //factory.newDefinition = MultiMeasureLineChartDefinition;
         return factory;
     }
 }

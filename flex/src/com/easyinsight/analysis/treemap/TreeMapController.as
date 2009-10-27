@@ -16,12 +16,5 @@ public class TreeMapController implements IReportController {
         factory.newDefinition = TreeMapDefinition;
         return factory;
     }
-
-    public function createEmbeddedView():EmbeddedViewFactory {
-        var factory:EmbeddedViewFactory = new EmbeddedViewFactory();
-        factory.reportRenderer = "TreeMapModule.swf";
-        factory.newDefinition = TreeMapDefinition;
-        return factory;
-    }
 }
 }

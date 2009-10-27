@@ -8,7 +8,7 @@ public class BubbleChartEmbeddedController implements IEmbeddedReportController 
     public function createEmbeddedView():EmbeddedViewFactory {
         var factory:EmbeddedViewFactory = new EmbeddedViewFactory();
         factory.reportRenderer = "BubbleChartModule.swf";
-        factory.newDefinition = BubbleChartDefinition;
+        //factory.newDefinition = BubbleChartDefinition;
         return factory;
     }
 }

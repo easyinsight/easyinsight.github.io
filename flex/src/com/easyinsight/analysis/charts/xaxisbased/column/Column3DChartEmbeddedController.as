@@ -12,7 +12,7 @@ public class Column3DChartEmbeddedController implements IEmbeddedReportControlle
     public function createEmbeddedView():EmbeddedViewFactory {
         var factory:EmbeddedViewFactory = new EmbeddedViewFactory();
         factory.reportRenderer = "Column3DChartModule.swf";
-        factory.newDefinition = Column3DChartDefinition;
+        //factory.newDefinition = Column3DChartDefinition;
         return factory;
     }
 }

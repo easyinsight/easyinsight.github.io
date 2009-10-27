@@ -17,12 +17,5 @@ public class Bar3DChartController implements IReportController {
         factory.newDefinition = Bar3DChartDefinition;
         return factory;
     }
-
-    public function createEmbeddedView():EmbeddedViewFactory {
-        var factory:EmbeddedViewFactory = new EmbeddedViewFactory();
-        factory.reportRenderer = "Bar3DChartModule.swf";
-        factory.newDefinition = Bar3DChartDefinition;
-        return factory;
-    }
 }
 }

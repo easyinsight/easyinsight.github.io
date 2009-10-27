@@ -14,6 +14,7 @@ import mx.collections.ArrayCollection;
 	import mx.containers.HBox;
 	import mx.containers.Tile;
 import mx.controls.AdvancedDataGrid;
+import mx.controls.Alert;
 import mx.controls.DataGrid;
 import mx.controls.List;
 import mx.controls.ToolTip;
@@ -63,12 +64,11 @@ import mx.managers.ToolTipManager;
 
     public function set existingFilters(value:ArrayCollection):void {
         if (!blah && value != null) {
+
             blah = true;
             _filterDefinitions = value;
-            if (value != null) {
-                for each (var filterDefinition:FilterDefinition in _filterDefinitions) {
-                    addFilterDefinition(filterDefinition);
-                }
+            for each (var filterDefinition:FilterDefinition in _filterDefinitions) {
+                addFilterDefinition(filterDefinition);
             }
         }
     }

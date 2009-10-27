@@ -54,7 +54,7 @@
         }
         ]]>
     </mx:Script>
-    <mx:Consumer id="defConsumer" destination="dataUpdates" message="onMessage(event)"/>
+    <!--<mx:Consumer id="defConsumer" destination="dataUpdates" message="onMessage(event)"/>-->
     <mx:VBox id="coreVBox" height="100%" width="100%">
         <dashboard:DataViewPanel id="panel" analysisID="{_analysisID}" dataSourceID="{_dataSourceID}"
                 reportType="{_reportType}" reportName="{_reportName}" prefix="{_prefix}"/>

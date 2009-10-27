@@ -16,13 +16,5 @@ public class GaugeController implements IReportController {
         factory.newDefinition = GaugeDefinition;
         return factory;
     }
-
-    public function createEmbeddedView():EmbeddedViewFactory {
-        var factory:EmbeddedViewFactory = new EmbeddedViewFactory();
-        factory.reportDataService = ListDataService;
-        factory.reportRenderer = "GaugeModule.swf";
-        factory.newDefinition = GaugeDefinition;
-        return factory;
-    }
 }
 }

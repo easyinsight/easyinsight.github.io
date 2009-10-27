@@ -18,7 +18,7 @@ import mx.modules.ModuleManager;
 public class EmbeddedViewFactory extends AbstractViewFactory {
 
     private var _reportRendererModule:String;
-    private var _newDefinition:Class;
+    //private var _newDefinition:Class;
     private var _reportDataService:Class = EmbeddedDataService;
 
 
@@ -54,9 +54,9 @@ public class EmbeddedViewFactory extends AbstractViewFactory {
         _reportRendererModule = val;
     }
 
-    public function set newDefinition(val:Class):void {
+    /*public function set newDefinition(val:Class):void {
         _newDefinition = val;
-    }
+    }*/
 
     public function get dataService():IEmbeddedDataService {
         return _dataService;

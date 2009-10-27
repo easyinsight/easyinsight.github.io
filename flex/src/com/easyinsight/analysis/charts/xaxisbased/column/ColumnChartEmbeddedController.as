@@ -12,7 +12,7 @@ public class ColumnChartEmbeddedController implements IEmbeddedReportController 
     public function createEmbeddedView():EmbeddedViewFactory {
         var factory:EmbeddedViewFactory = new EmbeddedViewFactory();
         factory.reportRenderer = "ColumnChartModule.swf";
-        factory.newDefinition = ColumnChartDefinition;
+        //factory.newDefinition = ColumnChartDefinition;
         return factory;
     }
 }

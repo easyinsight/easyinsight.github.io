@@ -8,7 +8,7 @@ public class Area3DChartEmbeddedController implements IEmbeddedReportController 
     public function createEmbeddedView():EmbeddedViewFactory {
         var factory:EmbeddedViewFactory = new EmbeddedViewFactory();
         factory.reportRenderer = "Area3DChartModule.swf";
-        factory.newDefinition = Area3DChartDefinition;
+        //factory.newDefinition = Area3DChartDefinition;
         return factory;
     }
 }

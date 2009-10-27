@@ -16,12 +16,5 @@ public class LineChartController implements IReportController {
         factory.newDefinition = LineChartDefinition;
         return factory;
     }
-
-    public function createEmbeddedView():EmbeddedViewFactory {
-        var factory:EmbeddedViewFactory = new EmbeddedViewFactory();
-        factory.reportRenderer = "LineChartModule.swf";
-        factory.newDefinition = LineChartDefinition;
-        return factory;
-    }
 }
 }

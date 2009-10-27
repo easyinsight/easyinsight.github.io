@@ -12,7 +12,7 @@ public class CrosstabEmbeddedController implements IEmbeddedReportController {
         var factory:EmbeddedViewFactory = new EmbeddedViewFactory();
         factory.reportDataService = EmbeddedCrosstabDataService;
         factory.reportRenderer = "CrosstabModule.swf";
-        factory.newDefinition = CrosstabDefinition;
+        //factory.newDefinition = CrosstabDefinition;
         return factory;
     }
 }

@@ -17,10 +17,5 @@ package com.easyinsight.filtering
 		override public function getType():int {
 			return FilterDefinition.VALUE;
 		}
-
-
-        override public function getDetailEditorClass():Class {
-            return MultiValueFilterWindow;
-        }
     }
 }

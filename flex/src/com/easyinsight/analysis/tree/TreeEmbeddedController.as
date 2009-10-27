@@ -8,7 +8,7 @@ public class TreeEmbeddedController implements IEmbeddedReportController {
     public function createEmbeddedView():EmbeddedViewFactory {
         var factory:EmbeddedViewFactory = new EmbeddedViewFactory();
         factory.reportRenderer = "TreeModule.swf";
-        factory.newDefinition = TreeDefinition;
+        //factory.newDefinition = TreeDefinition;
         return factory;
     }
 }

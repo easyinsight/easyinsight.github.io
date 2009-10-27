@@ -181,7 +181,13 @@ import mx.formatters.NumberFormatter;
         }
 
         private function defineContextMenu(goalTreeNode:GoalTreeNodeData):void {
-            PopupMenuFactory.menuFactory.createGoalDataMenu(goalTreeNodeData, navigateToSubTree, this);
+            var items:Array = [];
+            if (goalTreeNode.subTreeID > 0) {
+                var subTreeItem:ContextMenuItem = new ContextMenuItem("Navigate to Sub Tree", true);
+                subTreeItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, navigateToSubTree);
+                items.push(subTreeItem);
+            }
+            PopupMenuFactory.menuFactory.assignMenu(this, items);
         }
 
         override protected function updateDisplayList(unscaledWidth:Number, unscaledHeight:Number):void {

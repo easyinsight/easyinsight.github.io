@@ -72,6 +72,7 @@
             if(_reportType != 0) {
                 if(dataViewFactory != null)
                     coreVBox.removeChild(dataViewFactory);
+
                 var controllerClass:Class = EmbeddedControllerLookup.controllerForType(_reportType);
                 var controller:IEmbeddedReportController = new controllerClass();
                 dataViewFactory = controller.createEmbeddedView();
@@ -79,7 +80,7 @@
                 dataViewFactory.reportID = _analysisID;
                 dataViewFactory.dataSourceID = _dataSourceID;
                 coreVBox.addChild(dataViewFactory);
-                dataViewFactory.retrieveData(false);
+                dataViewFactory.retrieveData(false);                
             }
         }
 

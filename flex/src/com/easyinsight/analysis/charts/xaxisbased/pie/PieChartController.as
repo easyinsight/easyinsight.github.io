@@ -22,12 +22,5 @@ public class PieChartController implements IReportController {
         factory.newDefinition = PieChartDefinition;
         return factory;
     }
-
-    public function createEmbeddedView():EmbeddedViewFactory {
-        var factory:EmbeddedViewFactory = new EmbeddedViewFactory();
-        factory.reportRenderer = "PieChartModule.swf";
-        factory.newDefinition = PieChartDefinition;
-        return factory;
-    }
 }
 }

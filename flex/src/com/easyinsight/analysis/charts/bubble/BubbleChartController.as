@@ -15,12 +15,5 @@ public class BubbleChartController implements IReportController {
         factory.newDefinition = BubbleChartDefinition;
         return factory;
     }
-
-    public function createEmbeddedView():EmbeddedViewFactory {
-        var factory:EmbeddedViewFactory = new EmbeddedViewFactory();
-        factory.reportRenderer = "BubbleChartModule.swf";
-        factory.newDefinition = BubbleChartDefinition;
-        return factory;
-    }
 }
 }

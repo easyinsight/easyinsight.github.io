@@ -17,12 +17,5 @@ public class AsiaMapController implements IReportController {
         factory.newDefinition = MapDefinition;
         return factory;
     }
-
-    public function createEmbeddedView():EmbeddedViewFactory {
-        var factory:EmbeddedViewFactory = new EmbeddedViewFactory();
-        factory.reportRenderer = "AsiaMapModule.swf";
-        factory.newDefinition = MapDefinition;
-        return factory;
-    }
 }
 }

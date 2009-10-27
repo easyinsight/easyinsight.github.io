@@ -8,7 +8,7 @@ public class WorldMapEmbeddedController implements IEmbeddedReportController {
     public function createEmbeddedView():EmbeddedViewFactory {
         var factory:EmbeddedViewFactory = new EmbeddedViewFactory();
         factory.reportRenderer = "WorldMapModule.swf";
-        factory.newDefinition = MapDefinition;
+        //factory.newDefinition = MapDefinition;
         return factory;
     }
 }

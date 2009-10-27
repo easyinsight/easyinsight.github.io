@@ -14,9 +14,5 @@ public class FilterPatternDefinition extends FilterDefinition{
     override public function getType():int {
         return FilterDefinition.PATTERN;
     }
-
-    override public function getDetailEditorClass():Class {
-        return PatternFilterWindow;
-    }
 }
 }

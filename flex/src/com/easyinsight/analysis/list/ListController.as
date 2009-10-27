@@ -15,12 +15,5 @@ public class ListController implements IReportController {
         factory.newDefinition = ListDefinition;
         return factory;
     }
-
-    public function createEmbeddedView():EmbeddedViewFactory {
-        var factory:EmbeddedViewFactory = new EmbeddedViewFactory();
-        factory.reportRenderer = "ListModule.swf";
-        factory.newDefinition = ListDefinition;
-        return factory;
-    }
 }
 }

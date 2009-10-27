@@ -9,7 +9,7 @@ public class GaugeEmbeddedController implements IEmbeddedReportController {
     public function createEmbeddedView():EmbeddedViewFactory {
         var factory:EmbeddedViewFactory = new EmbeddedViewFactory();
         factory.reportRenderer = "GaugeModule.swf";
-        factory.newDefinition = GaugeDefinition;
+        //factory.newDefinition = GaugeDefinition;
         return factory;
     }
 }

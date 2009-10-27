@@ -1,5 +1,4 @@
 package com.easyinsight.analysis {
-import com.easyinsight.goals.GoalTreeNodeData;
 
 import flash.display.InteractiveObject;
 import flash.events.ContextMenuEvent;
@@ -51,20 +50,7 @@ public class DefaultMenuFactory implements IMenuFactory {
         }
         contextMenu.customItems = items;
         interactiveObject.contextMenu = contextMenu;
-    }
-
-    public function createGoalDataMenu(goalTreeNode:GoalTreeNodeData, navigateToSubTreeFunction:Function, interactiveObject:InteractiveObject):void {
-        var contextMenu:ContextMenu = new ContextMenu();
-        contextMenu.hideBuiltInItems();
-        var items:Array = [];
-        if (goalTreeNode.subTreeID > 0) {
-            var subTreeItem:ContextMenuItem = new ContextMenuItem("Navigate to Sub Tree", true);
-            subTreeItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, navigateToSubTreeFunction);
-            items.push(subTreeItem);
-        }
-        contextMenu.customItems = items;
-        interactiveObject.contextMenu = contextMenu;
-    }
+    }    
 
     public function assignMenu(interactiveObject:InteractiveObject, menuItems:Array):void {
         var contextMenu:ContextMenu = new ContextMenu();

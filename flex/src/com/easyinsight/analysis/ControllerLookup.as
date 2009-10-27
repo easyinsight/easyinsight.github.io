@@ -18,7 +18,6 @@ import com.easyinsight.analysis.list.ListController;
 import com.easyinsight.analysis.maps.AmericasMapController;
 import com.easyinsight.analysis.maps.AsiaMapController;
 import com.easyinsight.analysis.maps.EuropeMapController;
-import com.easyinsight.analysis.maps.MapController;
 import com.easyinsight.analysis.maps.MiddleEastMapController;
 import com.easyinsight.analysis.maps.USMapController;
 import com.easyinsight.analysis.maps.WorldMapController;

@@ -8,7 +8,7 @@ public class AreaChartEmbeddedController implements IEmbeddedReportController {
     public function createEmbeddedView():EmbeddedViewFactory {
         var factory:EmbeddedViewFactory = new EmbeddedViewFactory();
         factory.reportRenderer = "AreaChartModule.swf";
-        factory.newDefinition = AreaChartDefinition;
+        //factory.newDefinition = AreaChartDefinition;
         return factory;
     }
 }

@@ -8,7 +8,7 @@ public class MiddleEastMapEmbeddedController implements IEmbeddedReportControlle
     public function createEmbeddedView():EmbeddedViewFactory {
         var factory:EmbeddedViewFactory = new EmbeddedViewFactory();
         factory.reportRenderer = "MiddleEastMapModule.swf";
-        factory.newDefinition = MapDefinition;
+        //factory.newDefinition = MapDefinition;
         return factory;
     }
 }

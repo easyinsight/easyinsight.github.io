@@ -16,12 +16,5 @@ public class Line3DChartController implements IReportController {
         factory.newDefinition = Line3DChartDefinition;
         return factory;
     }
-
-    public function createEmbeddedView():EmbeddedViewFactory {
-        var factory:EmbeddedViewFactory = new EmbeddedViewFactory();
-        factory.reportRenderer = "Line3DChartModule.swf";
-        factory.newDefinition = Line3DChartDefinition;
-        return factory;
-    }
 }
 }
