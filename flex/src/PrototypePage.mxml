@@ -66,6 +66,12 @@
                 <prototype:DataPage navigation="currentState=event.state"/>
             </mx:AddChild>
         </mx:State>
+        <mx:State name="WebAnalytics">
+            <mx:RemoveChild target="{frontPage}"/>
+            <mx:AddChild relativeTo="{core}">
+                <prototype:WebAnalytics navigation="currentState=event.state"/>
+            </mx:AddChild>
+        </mx:State>
     </mx:states>
     <mx:Script><![CDATA[
         import mx.collections.ArrayCollection;
@@ -117,6 +123,8 @@
                             <mx:Label text="PRODUCT" click="currentState='ProductOverview'"/>
                             <mx:Spacer width="100%"/>
                             <mx:Label text="DATA" click="currentState='Data'"/>
+                            <mx:Spacer width="100%"/>
+                            <mx:Label text="SOLUTIONS" click="currentState='WebAnalytics'"/>
                             <mx:Spacer width="100%"/>
                             <mx:Label text="BLOG"/>
                             <mx:Spacer width="100%"/>
