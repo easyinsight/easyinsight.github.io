@@ -37,11 +37,6 @@ li > a {
 -->
 </style>
 <!-- InstanceBeginEditable name="head" -->
-<style type="text/css">
-#dashboardsPage {
-	color:#CC0033;
-}
-</style>
 <!-- InstanceEndEditable -->
 
 <style type="text/css">
@@ -90,35 +85,35 @@ body {
 }
 
 .greybox > .top {
-	background-image:url(images/greybox.png);
+	background-image:url(file:///C|/Documents and Settings/Administrator/My Documents/web/images/greybox.png);
 }
 
 .greybox > .top > span {
-	background-image:url(images/greybox.png);
+	background-image:url(file:///C|/Documents and Settings/Administrator/My Documents/web/images/greybox.png);
 }
 
 .greybox > .content {
-	background-image:url(images/greybox.png);	
+	background-image:url(file:///C|/Documents and Settings/Administrator/My Documents/web/images/greybox.png);	
 }
 
 .greybox > .content > span {
-	background-image:url(images/greybox.png);
+	background-image:url(file:///C|/Documents and Settings/Administrator/My Documents/web/images/greybox.png);
 }
 
 .whitebox > .top {
-	background-image:url(images/whitebox.png);
+	background-image:url(file:///C|/Documents and Settings/Administrator/My Documents/web/images/whitebox.png);
 }
 
 .whitebox > .top > span {
-	background-image:url(images/whitebox.png);
+	background-image:url(file:///C|/Documents and Settings/Administrator/My Documents/web/images/whitebox.png);
 }
 
 .whitebox > .content {
-	background-image:url(images/whitebox.png);
+	background-image:url(file:///C|/Documents and Settings/Administrator/My Documents/web/images/whitebox.png);
 }
 
 .whitebox > .content > span {
-	background-image:url(images/whitebox.png);
+	background-image:url(file:///C|/Documents and Settings/Administrator/My Documents/web/images/whitebox.png);
 }
 
 .redbox > .top {
@@ -139,7 +134,7 @@ body {
 	display:inline-block;
 	width:70px;
 	height:24px;
-	background-image:url(images/buttons.png);
+	background-image:url(file:///C|/Documents and Settings/Administrator/My Documents/web/images/buttons.png);
 	background-repeat:no-repeat;
 }
 
@@ -155,7 +150,7 @@ body {
 	display:inline-block;
 	width:179px;
 	height:24px;
-	background-image:url(images/buttons.png);
+	background-image:url(file:///C|/Documents and Settings/Administrator/My Documents/web/images/buttons.png);
 	background-repeat:no-repeat;
 	background-position:-70px 0px;
 }
@@ -268,8 +263,8 @@ a > img {
                              <h2 class="sidebar-title" style="font-size:10px;margin:0px;padding:0px;color:#222222">TWITTER UPDATES</h2>
                              <div id="twitter_update_list" style="border-width:1px;border-style:solid;height:15em;list-style-type:none;overflow:auto;font-size:10px;padding:5px;margin-right:10px;"></div>
                              <a href="http://twitter.com/easyinsight" id="twitter-link" style="display:block;text-align:right;padding-right:10px;">follow me on Twitter</a>
-                             <script type="text/javascript" src="http://twitter.com/javascripts/blogger.js"></script>
-                             <script type="text/javascript" src="http://twitter.com/statuses/user_timeline/easyinsight.json?callback=twitterCallback2&amp;count=5"></script>
+                             <!--<script type="text/javascript" src="http://twitter.com/javascripts/blogger.js"></script>
+                             <script type="text/javascript" src="http://twitter.com/statuses/user_timeline/easyinsight.json?callback=twitterCallback2&amp;count=5"></script>-->
                          </div>
 
                     </div>
@@ -277,16 +272,28 @@ a > img {
             </div>
             
             <div style="width:70%;text-align:left;background-color:#FFFFFF">
-                <div style="width:100%;height:60px;background:url(images/banner.jpg);text-align:center">
-                	<h1 style="margin:0px;padding:18px;font-size:24px;color:#FFFFFF;font-size:16px;"><!-- InstanceBeginEditable name="innerTitle" -->Visibility, Insight, Improvement<!-- InstanceEndEditable --></h1>
+                <div style="width:100%;height:60px;background:url(file:///C|/Documents and Settings/Administrator/My Documents/web/images/banner.jpg);text-align:center">
+                	<h1 style="margin:0px;padding:18px;font-size:24px;color:#FFFFFF;font-size:16px;"><!-- InstanceBeginEditable name="innerTitle" -->Developing Against Easy Insight<!-- InstanceEndEditable --></h1>
 				</div>
             <!-- InstanceBeginEditable name="ProductContent" -->
-            <img style="float:right;padding:10px;" src="images/igoogle.jpg" />
-            <h2>iGoogle and Netvibes</h2>
-            <p style="height:190px">You can easily add any Easy Insight report to your iGoogle or Netvibes dashboard pages. Want to assemble a dashboard of several reports? Just add and arrange them as you like within those existing dashboard applications, alongside any further widgets you may already have.</p>
-            <img style="float:left;padding:10px;" src="images/desktop.jpg" />
-            <h2>Desktop Display</h2>
-            <p style="height:220px;">You can easily view Easy Insight reports and KPI trees directly from your desktop through an Adobe Air widget. This widget will work on any operating system that supports Adobe Air, providing you with an easy way to just alt tab over and take a look at your business status.</p>
+            <h2>Web Services</h2>
+            <p>There's a lot more systems out there than Easy Insight can ever hope to directly connect to. To help accomodate passing in data from any custom system, Easy Insight offers a series of SOAP APIs to meet the differing requirements for publishing in custom data. You can use the API with any account type--the only difference is that as usual, the amount of space offered within your account, and the amount of API traffic allowed. Authentication to the web services is limited to basic auth for users at the free to group tiers. Full WS-Security authentication is offered to Professional and Enterprise accounts.</p>
+            <div style="float:right;height:220px;width:450px;padding:12px 12px 24px 24px;">
+            	<div class="box redbox" style="width:100%;height:100%">
+                    <div class="top"><span></span></div>
+                    <div class="content"><span></span>
+                    	<h2>You can start by generating code against either of the WSDLs:</h2>
+                        <p style="width:100%;margin-left:-12px;text-align:center;">Unchecked API WSDL:</p>
+                        <p style="width:100%;margin-left:-12px;text-align:center;"><a href="https://www.easy-insight.com/app/services/UncheckedPublishBasic?wsdl">https://www.easy-insight.com/app/services/UncheckedPublishBasic?wsdl</a></p>
+						<p style="width:100%;margin-left:-12px;text-align:center;">Validated API WSDL:</p>
+						<p style="width:100%;margin-left:-12px;text-align:center;"><a href="https://www.easy-insight.com/app/services/ValidatedPublishBasic?wsdl">https://www.easy-insight.com/app/services/ValidatedPublishBasic?wsdl</a></p>
+                    </div>
+                </div>
+            </div>
+            <h2>Getting Started</h2>
+            <p>Conceptually, Easy Insight offers two primary APIs, the Unchecked and the Validated. The Unchecked API takes whatever data you send in and shapes a data source to match with that data. For example, if you pass in data for a data source called Business Data, and specify two key/value pairs, one with Revenue and a value of 500, the other with Region and a value of Northwest, the result of the call to the web service will be a new data source with a measure called Revenue and a grouping called Region, containing the appropriate values. You can use the Unchecked API to very quickly build up prototype applications and see what sort of integrations are possible from your data to Easy Insight.</p>
+            <p>For production code, it's recommended that you shift into using the Validated API. The Validated API provides identical methods to the Unchecked API, but with type safety and considerably better per-call performance. If you try to pass in a number to a field expecting a string, make a typo in a field name, or make any other similar error, the Validated API will reject the call, providing better reliability to your production functionality.</p>
+            
 			<!-- InstanceEndEditable --> </div>
            <!-- InstanceBeginEditable name="BottomContent" --><!-- InstanceEndEditable -->
 			
