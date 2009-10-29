@@ -6,7 +6,7 @@
       <additionalClassPath />
       <antReference name="EI Ant" />
       <customJdkName value="" />
-      <maximumHeapSize value="256" />
+      <maximumHeapSize value="1024" />
       <maximumStackSize value="32" />
       <properties />
     </buildFile>
