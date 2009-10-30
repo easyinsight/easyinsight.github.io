@@ -73,6 +73,12 @@ public class HistoryRun {
                 dateRange.setEndDate(endDate);
                 otherFilters.add(dateRange);
                 itemSet.add(intrinsicFilter.getField());
+            } else if (intrinsicFilter instanceof FilterDateRangeDefinition) {
+                FilterDateRangeDefinition dateRange = (FilterDateRangeDefinition) intrinsicFilter;
+                dateRange.setStartDate(realStartDate);
+                dateRange.setEndDate(endDate);
+                otherFilters.add(dateRange);
+                itemSet.add(intrinsicFilter.getField());
             }
         }
         InsightRequestMetadata dataRequest = new InsightRequestMetadata();
