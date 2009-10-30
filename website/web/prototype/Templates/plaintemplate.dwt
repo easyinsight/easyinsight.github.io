@@ -1,5 +1,5 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml"><!-- InstanceBegin template="/Templates/Base.dwt" codeOutsideHTMLIsLocked="false" -->
+<html xmlns="http://www.w3.org/1999/xhtml" style="width:100%"><!-- InstanceBegin template="/Templates/Base.dwt" codeOutsideHTMLIsLocked="false" -->
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <!-- InstanceBeginEditable name="doctitle" -->
@@ -10,10 +10,16 @@
 <style type="text/css">
 <!--
 body {
-	font-family: "Lucida Sans Unicode", "Lucida Grande", sans-serif;
+	font-family: Verdana, Helvetica, Arial, FreeSans, sans-serif;
 	margin:0px;
 	padding:0px;
 	width:100%;
+}
+
+#moreinfo a {
+	color:#000000;
+	text-decoration:underline;
+	font-size:16px;
 }
 
 .box {
@@ -179,6 +185,7 @@ p {
 	color:#444444;
 	margin:2px;
 	padding:2px;
+	line-height:18px;
 }
 h2 {
 	color:#CC0033;
@@ -192,6 +199,30 @@ a > img {
 	border:none;
 }
 
+ul.menuList > li {
+	float:left;
+	font-family: Tahoma, Geneva, sans-serif;
+    font-weight: bold;
+}
+ul.menuList > li.first {
+	padding-left:5px;
+}
+li > a {
+	color:#000000;
+	text-decoration:none;
+}
+
+.menuList {
+	list-style:none;
+	width:100%;
+	margin:0px;
+	padding:0px;
+	height:20px;
+	background-color:#DDDDDD;
+	font-size:12px;
+	padding:4px 0px 4px 0px;
+}
+
 -->
 </style>
 </head>
@@ -201,7 +232,7 @@ a > img {
         	<a href="/index.html"><img id="logo" src="../images/logo2.PNG" alt="Easy Insight Logo" /></a>
             <div class="headlines">
 				<div class="signupHeadline"><a href="https://www.easy-insight.com/app/" class="signupButton"></a> <a href="https://www.easy-insight.com/app/" class="signupforfreeButton"></a></div>
-                <div class="headline"><a id="productPage" href="product.html">PRODUCT</a> <a id="dataPage" href="data.html">DATA</a> <a id="blogPage" href="blog.html">BLOG</a> <a id="customerPage" href="customers.html">CUSTOMERS</a> <a id="partnersPage" href="partners.html">PARTNERS</a> <a id="companyPage" href="company.html">COMPANY</a></div>
+                <div class="headline"><a id="productPage" href="product.html">PRODUCT</a> <a id="dataPage" href="data.html">DATA</a> <a id="solutionsPage" href="webanalytics.html">SOLUTIONS</a> <a id="blogPage" href="blog.html">BLOG</a>  <a id="companyPage" href="company.html">COMPANY</a></div>
             </div>
         </div>
 	    <!-- InstanceBeginEditable name="submenu" -->
@@ -215,10 +246,10 @@ a > img {
                     	<div style="width:100%;color:#FFFFFF;padding:0px 0px 12px 0px;margin:0px;text-align:center">Want more info?</div>
                         <div class="box whitebox" style="position:relative;left:5px;width:240px;height:170px;">
                         	<div class="top"><span></span></div>
-                            <div class="content" style="text-align:left"><span></span>
-                            	<img src="../assets/logos/film.png" style="height:48px;width:48px;" /> <a style="color:#000000;">Watch Product Tour</a><br />
-                                <img src="../assets/logos/mouse.png" /> <a style="color:#000000;">Free Trial Account</a><br />
-                                <img src="../assets/logos/message.png" /> <a style="color:#000000;">Contact Us</a><br />
+                            <div id="moreinfo" class="content" style="text-align:left"><span></span>
+                            	<p><img src="../assets/logos/film.png" style="height:48px;width:48px;" /> <a style="color:#000000;text-decoration:underline">Watch Product Tour</a></p>
+                                <p><img src="../assets/logos/mouse.png" /> <a style="color:#000000;">Free Trial Account</a></p>
+                                <p><img src="../assets/logos/message.png" /> <a style="color:#000000;">Contact Us</a></p>
                             </div>
                         </div>
                     </div>
@@ -230,8 +261,8 @@ a > img {
                              <h2 class="sidebar-title" style="font-size:10px;margin:0px;padding:0px;color:#222222">TWITTER UPDATES</h2>
                              <div id="twitter_update_list" style="border-width:1px;border-style:solid;height:15em;list-style-type:none;overflow:auto;font-size:10px;padding:5px;margin-right:10px;"></div>
                              <a href="http://twitter.com/easyinsight" id="twitter-link" style="display:block;text-align:right;padding-right:10px;">follow me on Twitter</a>
-                             <script type="text/javascript" src="http://twitter.com/javascripts/blogger.js"></script>
-                             <script type="text/javascript" src="http://twitter.com/statuses/user_timeline/easyinsight.json?callback=twitterCallback2&amp;count=5"></script>
+                             <!--<script type="text/javascript" src="http://twitter.com/javascripts/blogger.js"></script>
+                             <script type="text/javascript" src="http://twitter.com/statuses/user_timeline/easyinsight.json?callback=twitterCallback2&amp;count=5"></script>-->
                          </div>
 
                     </div>

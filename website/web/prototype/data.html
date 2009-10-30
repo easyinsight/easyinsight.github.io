@@ -1,25 +1,42 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml" style="width:100%"><!-- InstanceBegin template="/Templates/product.dwt" codeOutsideHTMLIsLocked="false" -->
+<html xmlns="http://www.w3.org/1999/xhtml" style="width:100%"><!-- InstanceBegin template="/Templates/plaintemplate.dwt" codeOutsideHTMLIsLocked="false" -->
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <!-- InstanceBeginEditable name="doctitle" -->
 <title>Easy Insight</title>
 <!-- InstanceEndEditable -->
-
-<style type="text/css">
-<!--
-#productPage {
-	color:#CC0033;
-}
-
-ul.menuList > li {
-	padding-left:100px;
-}
--->
-</style>
 <!-- InstanceBeginEditable name="head" -->
-<!-- InstanceEndEditable -->
+<style type="text/css">
+	#dataPage {
+		color:#CC0033;
+	}
 
+	.startexploringButton {
+		display:inline-block;
+		width:124px;
+		height:24px;
+		background-image:url(images/buttons.png);
+		background-position:-249px 0px;
+	}
+	.startexploringButton:hover {
+		background-position:-249px -24px;
+	}
+	.startexploringButton:active {
+		background-position:-249px -48px;
+	}
+.solutions {
+	list-style-type:none;
+	width:100%;
+	display:block;
+}
+.solutions > li {
+	width:33%;
+	float:left;
+	height:20px;
+}
+
+</style>
+<!-- InstanceEndEditable -->
 <style type="text/css">
 <!--
 body {
@@ -248,9 +265,8 @@ li > a {
                 <div class="headline"><a id="productPage" href="product.html">PRODUCT</a> <a id="dataPage" href="data.html">DATA</a> <a id="solutionsPage" href="webanalytics.html">SOLUTIONS</a> <a id="blogPage" href="blog.html">BLOG</a>  <a id="companyPage" href="company.html">COMPANY</a></div>
             </div>
         </div>
-	    
-        <ul class="menuList"><li class="first"><a id="overviewPage" href="product.html">OVERVIEW</a></li><li><a id="visualizationPage" href="visualizations.html">VISUALIZATION</a></li><li><a id="strategyPage" href="strategy.html">STRATEGY</a></li><li><a id="dashboardsPage" href="dashboards.html">DASHBOARDS</a></li><li><a id="developerPage" href="developers.html">DEVELOPERS</a></li><li><a id="servicesPage" href="services.html">SERVICES</a></li></ul>
-        <!-- InstanceBeginEditable name="noedit" --><!-- InstanceEndEditable -->        
+	    <!-- InstanceBeginEditable name="submenu" -->
+    	<!-- InstanceEndEditable -->        
         <div id="content">
 		    
             <div style="width:30%;position:relative;float:right;">
@@ -285,27 +301,32 @@ li > a {
             
             <div style="width:70%;text-align:left;background-color:#FFFFFF">
                 <div style="width:100%;height:60px;background:url(images/banner.jpg);text-align:center">
-                	<h1 style="margin:0px;padding:18px;font-size:24px;color:#FFFFFF;font-size:16px;"><!-- InstanceBeginEditable name="innerTitle" -->Developing Against Easy Insight<!-- InstanceEndEditable --></h1>
+                	<h1 style="margin:0px;padding:18px;font-size:24px;color:#FFFFFF;font-size:16px;"><!-- InstanceBeginEditable name="innerTitle" -->Instant Data<!-- InstanceEndEditable --></h1>
 				</div>
-            <!-- InstanceBeginEditable name="ProductContent" -->
-            <h2>Web Services</h2>
-            <p>There's a lot more systems out there than Easy Insight can ever hope to directly connect to. To help accomodate passing in data from any custom system, Easy Insight offers a series of SOAP APIs to meet the differing requirements for publishing in custom data. You can use the API with any account type--the only difference is that as usual, the amount of space offered within your account, and the amount of API traffic allowed. Authentication to the web services is limited to basic auth for users at the free to group tiers. Full WS-Security authentication is offered to Professional and Enterprise accounts.</p>
-            <div style="float:right;height:220px;width:450px;padding:12px 12px 24px 24px;">
-            	<div class="box redbox" style="width:100%;height:100%">
-                    <div class="top"><span></span></div>
+            <!-- InstanceBeginEditable name="innerContent" -->
+            <div style="width:280px;height:192px;padding:10px 10px 22px 22px;float:right;">
+            	<div style="width:100%;height:100%;" class="box redbox">
+                	<div class="top"><span></span></div>
                     <div class="content"><span></span>
-                    	<h2>You can start by generating code against either of the WSDLs:</h2>
-                        <p style="width:100%;margin-left:-12px;text-align:center;">Unchecked API WSDL:</p>
-                        <p style="width:100%;margin-left:-12px;text-align:center;"><a href="https://www.easy-insight.com/app/services/UncheckedPublishBasic?wsdl">https://www.easy-insight.com/app/services/UncheckedPublishBasic?wsdl</a></p>
-						<p style="width:100%;margin-left:-12px;text-align:center;">Validated API WSDL:</p>
-						<p style="width:100%;margin-left:-12px;text-align:center;"><a href="https://www.easy-insight.com/app/services/ValidatedPublishBasic?wsdl">https://www.easy-insight.com/app/services/ValidatedPublishBasic?wsdl</a></p>
+                    <h2 style="width:100%;margin-left:-12px;margin-top:0px;padding:0px;text-align:center">Want to Explore Free Data?</h2>
+                    <p>Easy Insight offers users the ability to publish and distribute free data. If you want to simply explore some of Easy Insight's functionality against some existing data, the Data Exchange is a great place to start!</p>
+                    <h2 style="width:100%;margin-left:-12px;text-align:center"><a href="/app/" class="startexploringButton"></a></h2>
                     </div>
                 </div>
             </div>
-            <h2>Getting Started</h2>
-            <p>Conceptually, Easy Insight offers two primary APIs, the Unchecked and the Validated. The Unchecked API takes whatever data you send in and shapes a data source to match with that data. For example, if you pass in data for a data source called Business Data, and specify two key/value pairs, one with Revenue and a value of 500, the other with Region and a value of Northwest, the result of the call to the web service will be a new data source with a measure called Revenue and a grouping called Region, containing the appropriate values. You can use the Unchecked API to very quickly build up prototype applications and see what sort of integrations are possible from your data to Easy Insight.</p>
-            <p>For production code, it's recommended that you shift into using the Validated API. The Validated API provides identical methods to the Unchecked API, but with type safety and considerably better per-call performance. If you try to pass in a number to a field expecting a string, make a typo in a field name, or make any other similar error, the Validated API will reject the call, providing better reliability to your production functionality.</p>
-            
+            <h2>Immediate Connections to Data Sources</h2>
+            <p style="height:180px;">You can quickly pull data into Easy Insight for any of the data sources listed below. Simply click on the data source name to jump into the Easy Insight application and start running! Prebuilt reports are available with each solution to help improve your time to results. Further reports produced by the community can be found at the Solution Exchange.</p>
+            <ul class="solutions" style="height:200px;">
+            	<li>Amazon Cloudwatch</li>
+                <li><a href="https://www.easy-insight.com/app/#solutionID=12" style="text-decoration:underline">Google Analytics</a></li>
+                <li>MySQL</li>
+                <li>Atlassian JIRA</li>
+                <li>Highrise</li>
+                <li>Salesforce.com</li>
+                <li>Basecamp</li>
+                <li>JetBrains Teamcity</li>
+                <li>SQL Server</li>
+            </ul>
 			<!-- InstanceEndEditable --> </div>
            <!-- InstanceBeginEditable name="BottomContent" --><!-- InstanceEndEditable -->
 			
