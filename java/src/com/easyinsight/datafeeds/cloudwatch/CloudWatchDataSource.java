@@ -103,6 +103,10 @@ public class CloudWatchDataSource extends ServerDataSourceDefinition {
         return standardItems;
     }
 
+    public int getVersion() {
+        return 2;
+    }
+
     public void customStorage(Connection conn) throws SQLException {
     }
 
@@ -112,5 +116,9 @@ public class CloudWatchDataSource extends ServerDataSourceDefinition {
     @Override
     public String validateCredentials(Credentials credentials) {
         return null;
+    }
+
+    public List<DataSourceMigration> getMigrations() {
+        return Arrays.asList((DataSourceMigration) new CloudWatch1To2(this));
     }
 }

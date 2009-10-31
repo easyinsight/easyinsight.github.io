@@ -16,7 +16,8 @@ public class FormattingConfiguration implements Serializable, Cloneable {
     public static final int CURRENCY = 2;
     public static final int PERCENTAGE = 3;
     public static final int MILLISECONDS = 4;
-    public static final int SECONDS = 4;    
+    public static final int SECONDS = 5;
+    public static final int BYTES = 6;    
 
     @Id @GeneratedValue(strategy= GenerationType.IDENTITY)
     @Column(name="formatting_configuration_id")

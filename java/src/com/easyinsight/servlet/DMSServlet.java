@@ -1,8 +1,10 @@
 package com.easyinsight.servlet;
 
 import com.easyinsight.database.Database;
+import com.easyinsight.datafeeds.DataSourceTypeRegistry;
 import com.easyinsight.datafeeds.FeedRegistry;
 import com.easyinsight.api.APIManager;
+import com.easyinsight.datafeeds.migration.MigrationManager;
 import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.security.DefaultSecurityProvider;
 import com.easyinsight.logging.LogClass;
@@ -28,13 +30,17 @@ public class DMSServlet extends HttpServlet {
 
     public void init(ServletConfig servletConfig) throws ServletException {
         try {
-            LogClass.info("Starting the core Easy Insight server...");
+            LogClass.info("Starting the core Easy Insight server...b");
             if (Database.instance() == null) {
                 SecurityUtil.setSecurityProvider(new DefaultSecurityProvider());
                 Database.initialize();
                 //new Migrations().migrate();
                 // create schedulers...
                 DatabaseManager.instance();
+                DataSourceTypeRegistry dataSourceTypeRegistry = new DataSourceTypeRegistry();
+                MigrationManager migrationManager = new MigrationManager();
+                migrationManager.setDataSourceTypeRegistry(dataSourceTypeRegistry);
+                migrationManager.migrate();
                 FeedRegistry.initialize();
                 TwitterTimer.start();
                 new APIManager().start();

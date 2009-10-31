@@ -13,6 +13,7 @@ package com.easyinsight.analysis.formatter
     	public static const PERCENTAGE:int = 3;
         public static const MILLISECONDS:int = 4;
         public static const SECONDS:int = 5;
+        public static const BYTES:int = 6;
 
 		public var formattingConfigurationID:int;
 		public var formattingType:int;
@@ -45,6 +46,9 @@ package com.easyinsight.analysis.formatter
                     break;
                 case SECONDS:
                     formatter = new TimeStringFormatter(1000);
+                    break;
+                case BYTES:
+                    formatter = new ByteFormatter();
                     break;
 				default:
 					var defaultFormatter:FlexibleNumberFormatter = new FlexibleNumberFormatter();

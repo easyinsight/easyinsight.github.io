@@ -19,6 +19,9 @@
                     case FormattingConfiguration.SECONDS:
                         formattingType.selectedIndex = 4;
                         break;
+                    case FormattingConfiguration.BYTES:
+                        formattingType.selectedIndex = 5;
+                        break;
 				}				
 			}		
 		
@@ -35,5 +38,6 @@
 		<mx:Object label="Percentage" data="{FormattingConfiguration.PERCENTAGE}" value="Percentage"/>		
 		<mx:Object label="Interval (milliseconds)" data="{FormattingConfiguration.MILLISECONDS}" value="Interval (milliseconds)"/>		
 		<mx:Object label="Interval (seconds)" data="{FormattingConfiguration.SECONDS}" value="Interval (seconds)"/>
+		<mx:Object label="Bytes" data="{FormattingConfiguration.BYTES}" value="Bytes"/>
 	</mx:ComboBox>
 </mx:HBox>

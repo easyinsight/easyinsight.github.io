@@ -1,0 +1,1 @@
+alter table data_feed add version bigint(20) not null default 1;

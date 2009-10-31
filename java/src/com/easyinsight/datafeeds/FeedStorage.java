@@ -80,8 +80,8 @@ public class FeedStorage {
                     "CREATE_DATE, UPDATE_DATE, FEED_VIEWS, FEED_RATING_COUNT, FEED_RATING_AVERAGE, DESCRIPTION," +
                     "ATTRIBUTION, OWNER_NAME, DYNAMIC_SERVICE_DEFINITION_ID, ANALYSIS_ID, MARKETPLACE_VISIBLE, " +
                 "API_KEY, UNCHECKED_API_BASIC_AUTH, UNCHECKED_API_ENABLED, validated_api_basic_auth, validated_api_enabled, INHERIT_ACCOUNT_API_SETTINGS," +
-                "REFRESH_INTERVAL, CURRENT_VERSION, VISIBLE, PARENT_SOURCE_ID) " +
-                        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                "REFRESH_INTERVAL, CURRENT_VERSION, VISIBLE, PARENT_SOURCE_ID, VERSION) " +
+                        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                         Statement.RETURN_GENERATED_KEYS);
         insertDataFeedStmt.setString(1, feedDefinition.getFeedName());
         insertDataFeedStmt.setInt(2, feedDefinition.getFeedType().getType());
@@ -121,6 +121,7 @@ public class FeedStorage {
         insertDataFeedStmt.setInt(23, 1);
         insertDataFeedStmt.setBoolean(24, feedDefinition.isVisible());
         insertDataFeedStmt.setLong(25, feedDefinition.getParentSourceID());
+        insertDataFeedStmt.setInt(26, feedDefinition.getVersion());
         insertDataFeedStmt.execute();
         long feedID = Database.instance().getAutoGenKey(insertDataFeedStmt);
         feedDefinition.setDataFeedID(feedID);
@@ -608,7 +609,7 @@ public class FeedStorage {
         }
         PreparedStatement updateDataFeedStmt = conn.prepareStatement("UPDATE DATA_FEED SET FEED_NAME = ?, FEED_TYPE = ?, PUBLICLY_VISIBLE = ?, GENRE = ?, " +
                         "FEED_SIZE = ?, ANALYSIS_ID = ?, DESCRIPTION = ?, ATTRIBUTION = ?, OWNER_NAME = ?, DYNAMIC_SERVICE_DEFINITION_ID = ?, MARKETPLACE_VISIBLE = ?," +
-                "API_KEY = ?, validated_api_enabled = ?, unchecked_api_enabled = ?, REFRESH_INTERVAL = ?, VISIBLE = ?, parent_source_id = ? WHERE DATA_FEED_ID = ?");
+                "API_KEY = ?, validated_api_enabled = ?, unchecked_api_enabled = ?, REFRESH_INTERVAL = ?, VISIBLE = ?, parent_source_id = ?, VERSION = ? WHERE DATA_FEED_ID = ?");
         feedDefinition.setDateUpdated(new Date());
         updateDataFeedStmt.setString(1, feedDefinition.getFeedName());
         updateDataFeedStmt.setInt(2, feedDefinition.getFeedType().getType());
@@ -630,7 +631,8 @@ public class FeedStorage {
         updateDataFeedStmt.setLong(15, feedDefinition.getRefreshDataInterval());
         updateDataFeedStmt.setBoolean(16, feedDefinition.isVisible());
         updateDataFeedStmt.setLong(17, feedDefinition.getParentSourceID());
-        updateDataFeedStmt.setLong(18, feedDefinition.getDataFeedID());
+        updateDataFeedStmt.setLong(18, feedDefinition.getVersion());
+        updateDataFeedStmt.setLong(19, feedDefinition.getDataFeedID());
         int rows = updateDataFeedStmt.executeUpdate();
         if (rows != 1) {
             throw new RuntimeException("Could not locate row to update");

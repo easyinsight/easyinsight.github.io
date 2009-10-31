@@ -2,8 +2,6 @@ package com.easyinsight.analysis;
 
 import com.easyinsight.core.*;
 import com.easyinsight.conditions.MeasureConditionRange;
-import com.easyinsight.analysis.AnalysisItemResultMetadata;
-import com.easyinsight.analysis.AnalysisMeasureResultMetadata;
 
 import javax.persistence.*;
 
@@ -50,6 +48,20 @@ public class AnalysisMeasure extends AnalysisItem {
     public AnalysisMeasure(Key key, String displayName, int aggregation) {
         super(key, displayName);
         this.aggregation = aggregation;
+    }
+
+    public AnalysisMeasure(Key key, String displayName, int aggregation, boolean highIsGood) {
+        this(key, displayName, aggregation);
+        this.aggregation = aggregation;
+        setHighIsGood(highIsGood);
+    }
+
+    public AnalysisMeasure(Key key, String displayName, int aggregation, boolean highIsGood, int formattingType) {
+        this(key, displayName, aggregation, highIsGood);
+        this.aggregation = aggregation;
+        FormattingConfiguration formattingConfiguration = new FormattingConfiguration();
+        formattingConfiguration.setFormattingType(formattingType);
+        setFormattingConfiguration(formattingConfiguration);
     }
 
     public Value transformValue(Value value, InsightRequestMetadata insightRequestMetadata) {

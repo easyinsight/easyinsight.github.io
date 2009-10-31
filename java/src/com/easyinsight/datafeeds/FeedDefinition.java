@@ -65,6 +65,14 @@ public class FeedDefinition implements Cloneable, Serializable {
         return DataSourceInfo.STORED_PUSH;
     }
 
+    public int getVersion() {
+        return 1;
+    }
+
+    public List<DataSourceMigration> getMigrations() {
+        return new ArrayList<DataSourceMigration>();
+    }
+
     public List<FeedFolder> getFolders() {
         return folders;
     }
