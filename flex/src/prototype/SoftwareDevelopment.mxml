@@ -89,10 +89,10 @@
 
                                     <mx:HBox width="100%" verticalAlign="middle">
                                         <mx:VBox width="100%">
-                                            <mx:Label text="Getting a Full Picture"
+                                            <mx:Label text="Tracking Your Development Process"
                                               styleName="Header"/>
                                     <mx:TextArea
-                                            text="Getting a full picture of your website and how it's being used requires more than a handful of metrics around who's visited your site. You can use Easy Insight to establish full visibility of your site and web applications. Pull in the standard web metrics from Google Analytics, but augment that with reports from your application data. Taken survey data around user satisfaction with your website? Add those metrics to the KPI tree to create a single, unified view."
+                                            text=""
                                             styleName="PageContent" editable="false"
                                             selectable="false" width="100%" height="220"/>
                                         </mx:VBox>

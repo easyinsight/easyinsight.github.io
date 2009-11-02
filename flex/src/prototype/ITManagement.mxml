@@ -92,33 +92,27 @@
                                             <mx:Label text="Building an IT Dashboard"
                                               styleName="Header"/>
                                     <mx:TextArea
-                                            text="You can easily build up a dashboard of your IT system by "
-                                            styleName="PageContent" editable="false"
-                                            selectable="false" width="100%" height="220"/>
-                                        </mx:VBox>
-                                        <mx:VBox horizontalAlign="center">
-                                        <mx:Image source="{webTree}"/>
-                                            <mx:Label text="Click the image for a larger view"/>
-                                        </mx:VBox>
-                                    </mx:HBox>
-                                <mx:Label text="Intelligent Analysis of your Web Metrics"
-                                              styleName="Header"/>
-                                <mx:TextArea
-                                            text="Investigating the underlying patterns of your web metrics takes more than a handful of high level reports. You need to be able to explore data from any direction, dragging in different fields, applying a wide range of filters, and looking at data through a variety of visualizations. Easy Insight gives you these capabilities by extending Google Analytics and adding on our sophisticated yet easy to use report builder and analytical tool."
-                                            styleName="PageContent" editable="false"
-                                            selectable="false" width="100%" height="100"/>
-                                <mx:Label text="Extending your View into Application Data"
-                                              styleName="Header"/>
-                                <mx:TextArea
-                                            text="Beyond a basic level, any typical site is going to have some amount of application data in a database, whether it's MySQL, SQL Server, or Oracle. That data is just as useful for your reporting as the basic web analytics--for example, with our own use of Easy Insight on our internal data, we report on data like 'How many user have actual accounts, and of what types?', 'How many and what types of reports have users built?', and 'How long are reports taking to load for users?' Typically, your options for reporting on this data have required a fair amount of installation work, and once you have that data, you don't have any way to combine it with your data from the web analytic side. Easy Insight makes it easy to set up reporting on that custom application data and brings it into a single, unified data set for reporting and goals."
-                                            styleName="PageContent" editable="false"
-                                            selectable="false" width="100%" height="150"/>
-                                <mx:Label text="Adding Further Data"
-                                              styleName="Header"/>
-                                <mx:TextArea
-                                            text="Beyond web analytics and application data, there are plenty of other data sources out there for you to pull into that single, cohesive view of your website. Have survey data in an Excel spreadsheet? Go ahead and upload that and it's part of the data set as well! Have some other system that you want to integrate? Point a developer at the Easy Insight API and they can build a custom connection to anything, creating an ongoing view into any variety of system."
+                                            text="Particularly if you're running your application inside of Amazon EC2, you can quickly build up a system wide dashboard through Easy Insight. Take advantage of the Easy Insight integration to Amazon EC2 Cloudwatch to pull in metrics around CPU utilization and I/O volume to gauge use of your instances. Slice the data by security group or instance ID to quantify the data at different levels. You can take advantage of the database integrations we offer to query for database metrics, getting a view into the specific performance of your particular relational database."
                                             styleName="PageContent" editable="false"
                                             selectable="false" width="100%" height="120"/>
+                                        </mx:VBox>
+                                    </mx:HBox>
+                                <mx:VBox horizontalAlign="center">
+                                <mx:Image source="{webTree}"/>
+                                    <mx:Label text="Click the image for a larger view"/>
+                                </mx:VBox>
+                                <mx:Label text="Watching Our Own Application in EC2"
+                                              styleName="Header"/>
+                                <mx:TextArea
+                                            text="Easy Insight uses itself for tracking IT performance. We run on the Amazon EC2 cloud, taking advantage of Cloudwatch, so we use our reporting on Cloudwatch to look at our overall CPU and I/O usage. From that overall usage, we track the usage at a security group level, since we have several distinct sets of instances within different security groups. And below those security groups, we have tracking on the particular instances."
+                                            styleName="PageContent" editable="false"
+                                            selectable="false" width="100%" height="100"/>
+                                <mx:Label text="Watching the Database"
+                                              styleName="Header"/>
+                                <mx:TextArea
+                                            text="We take advantage of our database integration to periodically query for database sizes, giving us a good idea as to growth patterns at both a whole database level and at a particular table level. We track benchmark data on key operations, so we can query those benchmarks to get an idea as to things like 'How long are reports taking to load on average for users?'"
+                                            styleName="PageContent" editable="false"
+                                            selectable="false" width="100%" height="150"/>                              
                             </mx:VBox>
 
                         </mx:HBox>

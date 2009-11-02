@@ -59,9 +59,9 @@
             <mx:HBox width="100%" styleName="SubHeaderLink" paddingLeft="15" paddingRight="15">
                 <mx:Label text="OVERVIEW" color="#cc0033"/>
                 <mx:Spacer width="100%"/>
-                <mx:Label text="WHO WE ARE"/>
+                <mx:Label text="WHO WE ARE" click="dispatchEvent(new PrototypeEvent('CompanyWhoWeAre'))"/>
                 <mx:Spacer width="100%"/>
-                <mx:Label text="OFFICE LOCATION"/>
+                <mx:Label text="OFFICE LOCATION" click="dispatchEvent(new PrototypeEvent('CompanyOfficeLocation'))"/>
                 <mx:Spacer width="100%"/>
                 <mx:Label text="CONTACT US"/>
             </mx:HBox>

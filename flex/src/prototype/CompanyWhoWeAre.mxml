@@ -31,8 +31,8 @@
         private var desktop:Class;
 
         [Bindable]
-        [Embed(source="../../assets/prototype/igoogle.jpg")]
-        private var igoogle:Class;
+        [Embed(source="../../assets/prototype/James Boe.jpg")]
+        private var jamesBoe:Class;
         ]]></mx:Script>
     <mx:VBox width="1000" height="100%" verticalGap="0">
         <mx:HBox width="100%" styleName="Cell" height="70">
@@ -64,9 +64,9 @@
         </mx:HBox>
         <mx:HBox backgroundColor="#DDDDDD" width="100%" paddingBottom="5" paddingTop="5">
             <mx:HBox width="100%" styleName="SubHeaderLink" paddingLeft="15" paddingRight="15">
-                <mx:Label text="OVERVIEW" color="#cc0033"/>
+                <mx:Label text="OVERVIEW"/>
                 <mx:Spacer width="100%"/>
-                <mx:Label text="WHO WE ARE"/>
+                <mx:Label text="WHO WE ARE" color="#cc0033"/>
                 <mx:Spacer width="100%"/>
                 <mx:Label text="OFFICE LOCATION"/>
                 <mx:Spacer width="100%"/>
@@ -87,29 +87,16 @@
                             <mx:VBox height="100%" width="2" backgroundColor="#DDDDDD"/>
                             <mx:VBox width="100%" height="100%" paddingTop="5">
 
-                                    <mx:HBox width="100%" verticalAlign="middle">
-                                        <mx:VBox width="100%">
-                                            <mx:Label text="iGoogle and Netvibes"
-                                              styleName="Header"/>
-                                    <mx:TextArea
-                                            text="You can easily add any Easy Insight report to your iGoogle or Netvibes dashboard pages. Want to assemble a dashboard of several reports? Just add and arrange them as you like within those existing dashboard applications, alongside any further widgets you may already have."
-                                            styleName="PageContent" editable="false"
-                                            selectable="false" width="100%" height="160"/>
-                                        </mx:VBox>
-                                        <mx:Image source="{igoogle}"/>
-                                    </mx:HBox>
-
-                                 <mx:HBox width="100%" verticalAlign="middle">
-                                     <mx:Image source="{desktop}"/>
-                                        <mx:VBox width="100%">
-                                            <mx:Label text="Desktop Display"
-                                              styleName="Header"/>
-                                    <mx:TextArea
-                                            text="You can easily view Easy Insight reports and KPI trees directly from your desktop through an Adobe Air widget. This widget will work on any operating system that supports Adobe Air, providing you with an easy way to just alt tab over and take a look at your business status."
-                                            styleName="PageContent" editable="false"
-                                            selectable="false" width="100%" height="160"/>
-                                        </mx:VBox>
-                                    </mx:HBox>
+                                <mx:HBox width="100%" verticalAlign="middle">
+                                    <mx:Image source="{jamesBoe}"/>
+                                    <mx:VBox width="100%">
+                                        <mx:Label text="James Boe, Founder and CEO" styleName="Header"/>
+                                        <mx:TextArea
+                                                text="James has been involved in the development, sales, and marketing of cutting edge reporting and analytics software for the last decade. He worked as the architect on the industry leading BAM product, Software AG Optimize, taking the product through multiple acquisitions from the Dante Group to webMethods to Software AG."
+                                                styleName="PageContent" editable="false"
+                                                selectable="false" width="100%" height="110"/>
+                                    </mx:VBox>
+                                </mx:HBox>
                             </mx:VBox>
                         </mx:HBox>
 
