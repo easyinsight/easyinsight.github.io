@@ -66,13 +66,11 @@
         </mx:HBox>
         <mx:HBox backgroundColor="#DDDDDD" width="100%" paddingBottom="5" paddingTop="5">
             <mx:HBox width="100%" styleName="SubHeaderLink" paddingLeft="15" paddingRight="15">
-                <mx:Label text="WEB ANALYTICS" color="#cc0033"/>
+                <mx:Label text="WEB ANALYTICS" color="#cc0033"/>                
                 <mx:Spacer width="100%"/>
-                <mx:Label text="SALES AND MARKETING"/>
+                <mx:Label text="IT MANAGEMENT" click="dispatchEvent(new PrototypeEvent('ITManagement'))"/>
                 <mx:Spacer width="100%"/>
-                <mx:Label text="IT MANAGEMENT"/>
-                <mx:Spacer width="100%"/>
-                <mx:Label text="SOFTWARE DEVELOPMENT"/>
+                <mx:Label text="SOFTWARE DEVELOPMENT" click="dispatchEvent(new PrototypeEvent('SoftwareDevelopment'))"/>
             </mx:HBox>
         </mx:HBox>
         <mx:Canvas width="1000" backgroundColor="#FFFFFF" height="100%">

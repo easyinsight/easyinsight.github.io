@@ -72,6 +72,18 @@
                 <prototype:WebAnalytics navigation="currentState=event.state"/>
             </mx:AddChild>
         </mx:State>
+        <mx:State name="ITManagement">
+            <mx:RemoveChild target="{frontPage}"/>
+            <mx:AddChild relativeTo="{core}">
+                <prototype:ITManagement navigation="currentState=event.state"/>
+            </mx:AddChild>
+        </mx:State>
+        <mx:State name="SoftwareDevelopment">
+            <mx:RemoveChild target="{frontPage}"/>
+            <mx:AddChild relativeTo="{core}">
+                <prototype:SoftwareDevelopment navigation="currentState=event.state"/>
+            </mx:AddChild>
+        </mx:State>
     </mx:states>
     <mx:Script><![CDATA[
         import mx.collections.ArrayCollection;
