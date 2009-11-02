@@ -37,22 +37,26 @@ body {
 
 .box {
 	position:relative;
-	margin:0;
-	padding:0;
+	margin:0px;
+	padding:0px;
 }
 
 .box > .top {
 	background-position:top right;
 	height:13px;
 	width:100%;
+	padding:0px;
+	margin:0px;
 }
 
 .box > .top > span {
 	position:absolute;
 	width:12px;
-	height:12px;
+	height:13px;
 	background-position:top left;
 	top:0px; 
+	padding:0px;
+	margin:0px;
 	left:-12px;
 }
 
@@ -67,8 +71,10 @@ body {
 	width:12px;
 	height:100%;
 	background-position:bottom left;
-	top:12px;
+	top:13px;
 	left:-12px;
+	padding:0px;
+	margin:0px;
 }
 
 .greybox > .top {
@@ -152,6 +158,9 @@ body {
 .headline {
 	width:100%;
 	text-align:right;
+	position:absolute;
+	bottom:10px;
+	right:10px;
 }
 
 .headline > a {
@@ -172,21 +181,18 @@ body {
 	color:#CC0033;
 }
 .signupHeadline {
-	width:100%;
+	width:400px;
+	height:24px;
 	text-align:right;
+	position:absolute;
+	top:10px;
+	right:10px;
 }
 #logo {
 	padding-left:60px;
 	display:inline;
 }
-.headlines {
-	display:inline-block;
-	height:60px;
-	width:750px;
-	bottom:10px;
-	right:10px;
-	position:absolute;
-}
+
 #content {
 	background-color:#DDDDDD;
 	width:100%;
@@ -236,17 +242,21 @@ li > a {
 	padding:4px 0px 4px 0px;
 }
 
+#moreinfo p {
+	padding:0px;
+	margin:0px;
+}
+
 -->
 </style>
 </head>
 <body style="width:100%;text-align:center">
     <div style="width:1000px;border-left-style:solid;border-left-color:#DDDDDD;border-left-width:1px;border-right-style:solid;border-right-color:#DDDDDD;border-right-width:1px">
-    	<div style="width:100%;text-align:left;height:80px;position:relative">
+    	<div style="width:100%;text-align:left;height:70px;position:relative">
         	<a href="/index.html"><img id="logo" src="images/logo2.PNG" alt="Easy Insight Logo" /></a>
-            <div class="headlines">
 				<div class="signupHeadline"><a href="https://www.easy-insight.com/app/" class="signupButton"></a> <a href="https://www.easy-insight.com/app/" class="signupforfreeButton"></a></div>
                 <div class="headline"><a id="productPage" href="product.html">PRODUCT</a> <a id="dataPage" href="data.html">DATA</a> <a id="solutionsPage" href="webanalytics.html">SOLUTIONS</a> <a id="blogPage" href="blog.html">BLOG</a>  <a id="companyPage" href="company.html">COMPANY</a></div>
-            </div>
+
         </div>
 	    
         <ul class="menuList"><li class="first"><a id="overviewPage" href="product.html">OVERVIEW</a></li><li><a id="visualizationPage" href="visualizations.html">VISUALIZATION</a></li><li><a id="strategyPage" href="strategy.html">STRATEGY</a></li><li><a id="dashboardsPage" href="dashboards.html">DASHBOARDS</a></li><li><a id="developerPage" href="developers.html">DEVELOPERS</a></li><li><a id="servicesPage" href="services.html">SERVICES</a></li></ul>
@@ -256,19 +266,19 @@ li > a {
             <div style="width:30%;position:relative;float:right;">
             	<div style="width:250px;height:222px;position:absolute;top:25px;left:34px;" class="box greybox">
                 	<div class="top"><span></span></div>
-                    <div class="content"><span></span>
+                    <div class="content" style="padding-bottom:12px"><span style="padding-bottom:12px;"></span>
                     	<div style="width:100%;color:#FFFFFF;padding:0px 0px 12px 0px;margin:0px;text-align:center">Want more info?</div>
                         <div class="box whitebox" style="position:relative;left:5px;width:240px;height:170px;">
                         	<div class="top"><span></span></div>
-                            <div id="moreinfo" class="content" style="text-align:left"><span></span>
-                            	<p><img src="assets/logos/film.png" style="height:48px;width:48px;" /> <a style="color:#000000;text-decoration:underline">Watch Product Tour</a></p>
+                            <div id="moreinfo" class="content" style="text-align:left;padding-bottom:12px;"><span style="padding-bottom:12px;"></span>
+                            	<p style="height:48px"><img src="assets/logos/film.png" style="height:48px;width:48px;" /> <a style="color:#000000;text-decoration:underline;height:48px;padding:0px;margin:0px;">Watch Product Tour</a></p>
                                 <p><img src="assets/logos/mouse.png" /> <a style="color:#000000;">Free Trial Account</a></p>
                                 <p><img src="assets/logos/message.png" /> <a style="color:#000000;">Contact Us</a></p>
                             </div>
                         </div>
                     </div>
                 </div>
-                <div style="width:250px;height:210px;position:absolute;top:272px;left:34px;" class="box redbox">
+                <div style="width:250px;height:210px;position:absolute;top:284px;left:34px;" class="box redbox">
                 	<div class="top"><span></span></div>
                     <div class="content"><span></span>
                          <div id="twitter_div" style="font-size:10px;color:#222222">
