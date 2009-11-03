@@ -89,17 +89,17 @@ body {
 }
 
 .redbox > .top {
-	background-image:url(images/redbox.png);
+	background-image:url(../images/redbox.png);
 }
 
 .redbox > .top > span {
-	background-image:url(images/redbox.png);	
+	background-image:url(../images/redbox.png);	
 }
 .redbox > .content {
-	background-image:url(images/redbox.png);
+	background-image:url(../images/redbox.png);
 }
 .redbox > .content > span {
-	background-image:url(images/redbox.png);
+	background-image:url(../images/redbox.png);
 }
 
 .signupButton {
