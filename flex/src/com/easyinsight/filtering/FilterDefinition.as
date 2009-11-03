@@ -1,10 +1,12 @@
 package com.easyinsight.filtering
 {
 	import com.easyinsight.analysis.AnalysisItem;
-	
-	[Bindable]
+
+import flash.events.EventDispatcher;
+
+[Bindable]
 	[RemoteClass(alias="com.easyinsight.analysis.FilterDefinition")]
-	public class FilterDefinition
+	public class FilterDefinition extends EventDispatcher
 	{
 		public static const VALUE:int = 1;
 		public static const RANGE:int = 2;

@@ -9,10 +9,10 @@
         import com.easyinsight.analysis.AnalysisItemNode;
         import com.easyinsight.analysis.AnalysisItemWrapper;
         import com.easyinsight.analysis.CalculationWindow;
-        import com.easyinsight.analysis.CredentialRequirement;
+        
         import com.easyinsight.analysis.FeedMetadata;
         import com.easyinsight.analysis.MeasureItemEditor;
-        import com.easyinsight.analysis.RuntimeCredentialsWindow;
+
         import com.easyinsight.commands.CommandEvent;
         import com.easyinsight.commands.CommandProcessor;
         import com.easyinsight.framework.CredentialsCache;
@@ -123,6 +123,9 @@
             }
             goalService.getMilestones.send();
             dataProvider.searchForSubscribedFeeds.send();
+            if (_goalTreeNode.coreFeedID > 0) {
+                dataService.getFeedMetadata.send(goalTreeNode.coreFeedID);
+            }
         }
 
         private function onCommand(event:CommandEvent):void {
@@ -163,7 +166,6 @@
                     goalType = "condition";
                     targetIndex = 2;
                 }
-                dataService.getFeedMetadata.send(goalTreeNode.coreFeedID);
                 targetDefined = goalTreeNode.goalDefined;
             }
 

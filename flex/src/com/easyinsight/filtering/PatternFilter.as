@@ -5,9 +5,10 @@ package com.easyinsight.filtering
 import com.easyinsight.util.PopUpUtil;
 
 import flash.events.Event;
-import flash.events.MouseEvent;	
-	
-	import mx.collections.ArrayCollection;
+import flash.events.MouseEvent;
+
+import mx.binding.utils.BindingUtils;
+import mx.collections.ArrayCollection;
 	import mx.containers.HBox;
 	import mx.controls.Button;
 import mx.controls.CheckBox;
@@ -87,6 +88,10 @@ import mx.controls.Label;
             } else {
                 this.toolTip = _filterDefinition.field.display + ":";
             }
+            var valueLabel:Label = new Label();
+            BindingUtils.bindProperty(valueLabel, "text", filterDefinition, "pattern");
+            valueLabel.text = _filterDefinition.pattern;
+            addChild(valueLabel);
             if (_filterEditable) {
                 if (editButton == null) {
                     editButton = new Button();

@@ -5,34 +5,23 @@ package com.easyinsight.filtering
 
 
 import flash.events.Event;
-import flash.events.MouseEvent;	
 	
 
 	import mx.containers.HBox;
-	import mx.controls.Button;
 import mx.controls.CheckBox;
 import mx.controls.Label;
-
-	import mx.rpc.remoting.RemoteObject;
 
 	public class EmbeddedPatternFilter extends HBox implements IEmbeddedFilter
 	{
 		private var _filterDefinition:FilterPatternDefinition;
 		private var _analysisItem:AnalysisItem;
-		private var _feedID:int;		
-		private var deleteButton:Button;
-		private var editButton:Button;
+		private var _feedID:int;
 		private var labelText:Label;
-		private var dataService:RemoteObject;
 		
 		public function EmbeddedPatternFilter(feedID:int, analysisItem:AnalysisItem) {
 			super();
 			_analysisItem = analysisItem;
 			_feedID = feedID;
-		}
-		
-		private function onFilterEdit(event:FilterEditEvent):void {
-			dispatchEvent(new EmbeddedFilterUpdatedEvent(FilterUpdatedEvent.FILTER_UPDATED, event.filterDefinition, event.previousFilterDefinition, this, event.bubbles, event.rebuild));
 		}
 
         private function onChange(event:Event):void {
@@ -43,17 +32,11 @@ import mx.controls.Label;
 		
 		override protected function createChildren():void {
 			super.createChildren();
-            //if (!_filterEditable) {
-                var checkbox:CheckBox = new CheckBox();
-                checkbox.selected = _filterDefinition == null ? true : _filterDefinition.enabled;
-                checkbox.toolTip = "Click to disable this filter.";
-                checkbox.addEventListener(Event.CHANGE, onChange);
-                addChild(checkbox);
-            //}
-            if (_filterDefinition == null) {
-                _filterDefinition = new FilterPatternDefinition();
-                _filterDefinition.field = _analysisItem;
-            }
+            var checkbox:CheckBox = new CheckBox();
+            checkbox.selected = _filterDefinition == null ? true : _filterDefinition.enabled;
+            checkbox.toolTip = "Click to disable this filter.";
+            checkbox.addEventListener(Event.CHANGE, onChange);
+            addChild(checkbox);
             if (_showLabel) {
                 if (labelText == null) {
                     labelText = new Label();
@@ -63,11 +46,10 @@ import mx.controls.Label;
             } else {
                 this.toolTip = _filterDefinition.field.display + ":";
             }
+            var valueLabel:Label = new Label();
+            valueLabel.text = _filterDefinition.pattern;
+            addChild(valueLabel);
             dispatchEvent(new EmbeddedFilterUpdatedEvent(FilterUpdatedEvent.FILTER_ADDED, filterDefinition, null, this));
-		}
-		
-		private function deleteSelf(event:MouseEvent):void {
-			dispatchEvent(new EmbeddedFilterDeletionEvent(this));
 		}
 		
 		public function get filterDefinition():FilterDefinition {

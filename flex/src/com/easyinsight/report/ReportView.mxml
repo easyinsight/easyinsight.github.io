@@ -360,6 +360,7 @@
                 admin = event.dataSourceAccessible;
                 if (report.filterDefinitions != null && report.filterDefinitions.length > 0) {
                     filterDefinitions = report.filterDefinitions;
+                    transformContainer.addEventListener(TransformsUpdatedEvent.UPDATED_TRANSFORMS, transformsUpdated);
                     showFilters = true;
                 } else {
                     if (buttonBar.contains(adjustFiltersbutton)) {
@@ -660,7 +661,7 @@
                     <mx:Box/>
                     <filtering:TransformContainer id="transformContainer" filterEditable="false"
                                               existingFilters="{filterDefinitions}"
-                                              updatedTransforms="transformsUpdated(event)" width="100%" paddingLeft="10"
+                                              width="100%" paddingLeft="10"
                                               paddingTop="10" paddingBottom="10"
                                               paddingRight="10" feedID="{dataSourceID}"/>
                 </mx:ViewStack>
