@@ -20,16 +20,21 @@ public class MaterializedFilterPatternDefinition extends MaterializedFilterDefin
         if (pattern == null) {
             pattern = "";
         }
-        if (regex) {
-            this.pattern = Pattern.compile(caseSensitive ? pattern : pattern.toLowerCase());
-        } else {
-            this.pattern = Pattern.compile(caseSensitive ? createWildcardPattern(pattern) : createWildcardPattern(pattern.toLowerCase()));
+        if (!"".equals(pattern)) {
+            if (regex) {
+                this.pattern = Pattern.compile(caseSensitive ? pattern : pattern.toLowerCase());
+            } else {
+                this.pattern = Pattern.compile(caseSensitive ? createWildcardPattern(pattern) : createWildcardPattern(pattern.toLowerCase()));
+            }
         }
         this.caseSensitive = caseSensitive;
 
     }
 
     public boolean allows(Value value) {
+        if (pattern == null) {
+            return true;
+        }
         String string = value.toString();
         if (!caseSensitive) {
             string = string.toLowerCase();

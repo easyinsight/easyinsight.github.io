@@ -18,6 +18,7 @@ import com.easyinsight.analysis.*;
 import org.apache.poi.hssf.usermodel.*;
 
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.PreparedStatement;
@@ -49,21 +50,67 @@ public class ExportService {
         
     }
 
+    public long exportReportIDTOCSV(long reportID, List<FilterDefinition> customFilters, List<FilterDefinition> drillThroughFilters) {
+        SecurityUtil.authorizeInsight(reportID);
+        try {
+            WSAnalysisDefinition analysisDefinition = new AnalysisService().openAnalysisDefinition(reportID);
+            if (customFilters != null) {
+                analysisDefinition.setFilterDefinitions(customFilters);
+            }
+            if (drillThroughFilters != null) {
+                analysisDefinition.applyFilters(drillThroughFilters);
+            }
+            ListDataResults listDataResults = new DataService().list(analysisDefinition, new InsightRequestMetadata());
+            return toCSV(analysisDefinition, listDataResults);
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        }
+    }
+
+    private long toCSV(WSAnalysisDefinition analysisDefinition, ListDataResults listDataResults) {
+        return 0;
+    }
+
+    public long exportReportIDToExcel(long reportID, List<FilterDefinition> customFilters, List<FilterDefinition> drillThroughFilters) {
+        SecurityUtil.authorizeInsight(reportID);
+        try {
+            WSAnalysisDefinition analysisDefinition = new AnalysisService().openAnalysisDefinition(reportID);
+            if (customFilters != null) {
+                analysisDefinition.setFilterDefinitions(customFilters);
+            }
+            if (drillThroughFilters != null) {
+                analysisDefinition.applyFilters(drillThroughFilters);
+            }
+            ListDataResults listDataResults = new DataService().list(analysisDefinition, new InsightRequestMetadata());
+            return toExcel(analysisDefinition, listDataResults);
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        }
+    }
+
     public long exportToExcel(WSAnalysisDefinition analysisDefinition) {
         SecurityUtil.authorizeFeed(analysisDefinition.getDataFeedID(), Roles.SUBSCRIBER);
         long exportID;
         try {
             ListDataResults listDataResults = new DataService().list(analysisDefinition, new InsightRequestMetadata());
-            HSSFWorkbook workbook = createWorkbookFromList(analysisDefinition, listDataResults);
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            workbook.write(baos);
-            byte[] bytes = baos.toByteArray();
-            baos.close();
-            exportID = saveBytes(bytes);
+            exportID = toExcel(analysisDefinition, listDataResults);
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);
         }
+        return exportID;
+    }
+
+    private long toExcel(WSAnalysisDefinition analysisDefinition, ListDataResults listDataResults) throws IOException, SQLException {
+        long exportID;
+        HSSFWorkbook workbook = createWorkbookFromList(analysisDefinition, listDataResults);
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        workbook.write(baos);
+        byte[] bytes = baos.toByteArray();
+        baos.close();
+        exportID = saveBytes(bytes);
         return exportID;
     }
 

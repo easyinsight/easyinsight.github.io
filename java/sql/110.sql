@@ -1,0 +1,1 @@
+alter table analysis_item add item_position integer not null default 0;

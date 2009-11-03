@@ -368,6 +368,12 @@ public abstract class WSAnalysisDefinition implements Serializable {
             }
             i++;
         }
+        Collections.sort(items, new Comparator<AnalysisItem>() {
+
+            public int compare(AnalysisItem analysisItem, AnalysisItem analysisItem1) {
+                return new Integer(analysisItem.getItemPosition()).compareTo(analysisItem1.getItemPosition());
+            }
+        });
         return items;
     }
 
@@ -375,6 +381,7 @@ public abstract class WSAnalysisDefinition implements Serializable {
         for (int i = 0; i < items.size(); i++) {
             String compositeKey = key + "-" + i;
             structure.put(compositeKey, items.get(i));
+            items.get(i).setItemPosition(i);
         }
     }
 

@@ -18,8 +18,7 @@
         import com.easyinsight.administration.feed.Tag;
         import com.easyinsight.analysis.AnalysisCloseEvent;
         import com.easyinsight.analysis.AnalysisDefinition;
-        import com.easyinsight.analysis.EmbeddedDataServiceEvent;
-        import com.easyinsight.analysis.ExcelCreator;
+        import com.easyinsight.analysis.EmbeddedDataServiceEvent;        
         import com.easyinsight.analysis.HierarchyDrilldownEvent;
         import com.easyinsight.analysis.HierarchyRollupEvent;
         import com.easyinsight.analysis.RefreshReportSourceWindow;
@@ -59,8 +58,17 @@
         }
 
         private function exportExcel():void {
-            new ExcelCreator().exportExcel(report);
-
+            var window:ReportExportWindow = new ReportExportWindow();
+            window.reportID = _reportID;
+            window.reportType = _reportType;
+            window.dataSourceID = _dataSourceID;
+            window.reportName = reportName;
+            window.coreView = viewFactory.getChildAt(0);
+            window.filterDefinitions = filterDefinitions;
+            window.embeddedFilters = viewFactory.drillthroughFilters;
+            PopUpManager.addPopUp(window, this);
+            window.x = exportButton.x - 20;
+            window.y = exportButton.y + exportButton.height + 10;
         }
 
         [Bindable]
@@ -645,7 +653,7 @@
                        id="refreshButton"/>
             <mx:Button label="Bookmark" click="bookmark()" icon="{bookmarkIcon}" labelPlacement="bottom"
                        id="bookmarkButton"/>
-            <mx:Button label="Export to Excel" icon="{exportToExcelIcon}" click="exportExcel()" labelPlacement="bottom"
+            <mx:Button label="Export" icon="{exportToExcelIcon}" click="exportExcel()" labelPlacement="bottom"
                        id="exportButton"/>
             <mx:Button label="Edit this Report" icon="{reportEditorIcon}" click="toReportEditor()"
                        labelPlacement="bottom" id="editReportButton"/>

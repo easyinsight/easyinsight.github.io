@@ -1,4 +1,6 @@
 package com.easyinsight.analysis {
+import mx.collections.ArrayCollection;
+
 public class ExcelCreator {
     import mx.events.CloseEvent;
 	import com.easyinsight.framework.User;
@@ -26,6 +28,7 @@ public class ExcelCreator {
 			upload = new RemoteObject();
 			upload.destination = "exportService";
 			upload.exportToExcel.addEventListener(ResultEvent.RESULT, gotExcelID);
+			upload.exportReportIDToExcel.addEventListener(ResultEvent.RESULT, gotExcelByReportID);
 		}
 
         private function alertListener(event:CloseEvent):void {
@@ -65,6 +68,14 @@ public class ExcelCreator {
 
 		}
 
+        private function gotExcelByReportID(event:ResultEvent):void {
+			excelID = upload.exportReportIDToExcel.lastResult as int;
+            var msg:String = "Click to start download of the Excel spreadsheet.";
+            Alert.show(msg, "Alert",
+		                		Alert.OK | Alert.CANCEL, null, alertListener, null, Alert.CANCEL);
+
+		}
+
 		private function doEvent(event:Event):void {
 			trace(event);
 		}
@@ -77,5 +88,9 @@ public class ExcelCreator {
             report = definition;
 			upload.exportToExcel.send(definition);
 		}
+
+        public function exportReportIDToExcel(reportID:int, filters:ArrayCollection, hierarchies:ArrayCollection):void {
+            upload.exportReportIDToExcel.send(reportID, filters, hierarchies);    
+        }
 	}
 }

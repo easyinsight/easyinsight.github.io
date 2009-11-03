@@ -54,6 +54,9 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
     @Column(name="high_is_good")
     private boolean highIsGood;
 
+    @Column(name="item_position")
+    private int itemPosition;
+
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @JoinTable(name = "analysis_item_to_link",
             joinColumns = @JoinColumn(name = "analysis_item_id", nullable = false),
@@ -328,5 +331,13 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
         AnalysisItemNode analysisItemNode = new AnalysisItemNode();
         analysisItemNode.setAnalysisItem(this);
         return analysisItemNode;
+    }
+
+    public int getItemPosition() {
+        return itemPosition;
+    }
+
+    public void setItemPosition(int itemPosition) {
+        this.itemPosition = itemPosition;
     }
 }

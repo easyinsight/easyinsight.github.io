@@ -42,6 +42,11 @@ public class FilterPatternDefinition extends FilterDefinition {
         return start + 1;
     }
 
+    @Override
+    public boolean validForQuery() {
+        return super.validForQuery() && pattern != null;
+    }
+
     public String getPattern() {
         return pattern;
     }

@@ -24,6 +24,7 @@ import mx.formatters.Formatter;
         //public var virtualDimension:VirtualDimension;
         public var links:ArrayCollection = new ArrayCollection();
         public var highIsGood:Boolean = true;
+        public var itemPosition:int = 0;
 		
 		public function AnalysisItem() {
 			super();
