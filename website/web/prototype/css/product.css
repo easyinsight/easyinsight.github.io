@@ -1,0 +1,10 @@
+@charset "utf-8";
+/* CSS Document */
+
+#productPage {
+	color:#CC0033;
+}
+
+ul.menuList > li {
+	padding-left:108px;
+}
