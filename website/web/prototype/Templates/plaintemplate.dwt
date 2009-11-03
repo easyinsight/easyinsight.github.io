@@ -16,10 +16,11 @@ body {
 	width:100%;
 }
 
-#moreinfo a {
-	color:#000000;
-	text-decoration:underline;
-	font-size:16px;
+#moreinfo img {
+	height:48px;
+	width:48px;
+	padding: 3px 6px;
+	float:left;
 }
 
 .box {
@@ -229,20 +230,29 @@ li > a {
 	padding:4px 0px 4px 0px;
 }
 
+#moreinfo a {
+	padding: 6px 0px 6px 0px;
+}
+
 #moreinfo p {
-	padding:0px;
 	margin:0px;
+	height:24px;
+	padding:15px 0px;
+	color:#000000;
+	text-decoration:underline;
+	font-size:16px;
+	cursor:pointer;
 }
 
 -->
 </style>
 </head>
-<body style="width:100%;text-align:center">
-    <div style="width:1000px;border-left-style:solid;border-left-color:#DDDDDD;border-left-width:1px;border-right-style:solid;border-right-color:#DDDDDD;border-right-width:1px">
+<body style="width:100%;text-align:center;margin:0px auto;">
+    <div style="width:1000px;border-left-style:solid;border-left-color:#DDDDDD;border-left-width:1px;border-right-style:solid;border-right-color:#DDDDDD;border-right-width:1px;margin:0 auto;">
     	<div style="width:100%;text-align:left;height:70px;position:relative">
-        	<a href="/index.html"><img id="logo" src="../images/logo2.PNG" alt="Easy Insight Logo" /></a>
+        	<a href="/index.html"><img id="logo" src="../images/logo.jpg" alt="Easy Insight Logo" /></a>
 				<div class="signupHeadline"><a href="https://www.easy-insight.com/app/" class="signupButton"></a> <a href="https://www.easy-insight.com/app/" class="signupforfreeButton"></a></div>
-                <div class="headline"><a id="productPage" href="product.html">PRODUCT</a> <a id="dataPage" href="data.html">DATA</a> <a id="solutionsPage" href="webanalytics.html">SOLUTIONS</a> <a id="blogPage" href="blog.html">BLOG</a>  <a id="companyPage" href="company.html">COMPANY</a></div>
+                <div class="headline"><a id="productPage" href="product.html">PRODUCT</a> <a id="dataPage" href="data.html">DATA</a> <a id="solutionsPage" href="webanalytics.html">SOLUTIONS</a> <a id="blogPage" href="http://jamesboe.blogspot.com/">BLOG</a>  <a id="companyPage" href="company.html">COMPANY</a></div>
 
         </div>
 	    <!-- InstanceBeginEditable name="submenu" -->
@@ -250,16 +260,16 @@ li > a {
         <div id="content">
 		    <!-- InstanceBeginEditable name="content" -->
             <div style="width:30%;position:relative;float:right;">
-            	<div style="width:250px;height:222px;position:absolute;top:25px;left:34px;" class="box greybox">
+            	<div style="width:250px;height:210px;position:absolute;top:25px;left:34px;" class="box greybox">
                 	<div class="top"><span></span></div>
                     <div class="content" style="padding-bottom:12px"><span style="padding-bottom:12px;"></span>
                     	<div style="width:100%;color:#FFFFFF;padding:0px 0px 12px 0px;margin:0px;text-align:center">Want more info?</div>
-                        <div class="box whitebox" style="position:relative;left:5px;width:240px;height:170px;">
+                        <div class="box whitebox" style="position:relative;left:5px;width:240px;height:158px;">
                         	<div class="top"><span></span></div>
                             <div id="moreinfo" class="content" style="text-align:left;padding-bottom:12px;"><span style="padding-bottom:12px;"></span>
-                            	<p style="height:48px"><img src="../assets/logos/film.png" style="height:48px;width:48px;" /> <a style="color:#000000;text-decoration:underline;height:48px;padding:0px;margin:0px;">Watch Product Tour</a></p>
-                                <p><img src="../assets/logos/mouse.png" /> <a style="color:#000000;">Free Trial Account</a></p>
-                                <p><img src="../assets/logos/message.png" /> <a style="color:#000000;">Contact Us</a></p>
+                            	<a href="https://www.easy-insight.com/app/#page=intro&type=tour"><img src="../assets/logos/film.png" /><p>Watch Product Tour</p></a>
+                                <a><img src="../assets/logos/mouse.png" /> <p>Free Trial Account</p></a>
+                                <a><img src="../assets/logos/message.png" /><p>Contact Us</p></a>
                             </div>
                         </div>
                     </div>

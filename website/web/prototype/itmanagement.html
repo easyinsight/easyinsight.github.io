@@ -16,15 +16,6 @@
 	}
 </style>
 <!-- InstanceBeginEditable name="head" -->
-<script type="text/javascript" src="js/prototype.js"></script>
-<script type="text/javascript" src="js/scriptaculous.js?load=effects,builder"></script>
-<script type="text/javascript" src="js/lightbox.js"></script>
-<link rel="stylesheet" href="css/lightbox.css" type="text/css" media="screen" />
-<style type="text/css">
-#webanalyticsPage {
-	color:#CC0033;
-}
-</style>
 <!-- InstanceEndEditable -->
 
 <style type="text/css">
@@ -312,24 +303,18 @@ li > a {
             
             <div style="width:70%;text-align:left;background-color:#FFFFFF">
                 <div style="width:100%;height:60px;background:url(images/banner.jpg);text-align:center">
-                	<h1 style="margin:0px;padding:18px;font-size:24px;color:#FFFFFF;font-size:16px;"><!-- InstanceBeginEditable name="innerTitle" -->Web Analytics<!-- InstanceEndEditable --></h1>
+                	<h1 style="margin:0px;padding:18px;font-size:24px;color:#FFFFFF;font-size:16px;"><!-- InstanceBeginEditable name="innerTitle" -->IT Management<!-- InstanceEndEditable --></h1>
 				</div>
             <!-- InstanceBeginEditable name="innerContent" -->
-            <div style="text-align:center;padding:10px;float:right">
-            	<a href="images/Web-Analytics-Tree-Large.jpg" rel="lightbox" style="font-size:10px;color:#000000;text-decoration:none;">
-            	<img src="images/Web-Analytics-Small.jpg"  style="display:block"/>
-                Click for a larger view
-                </a>
-            </div>
-            <h2>Getting a Full Picture</h2>
-            <p style="height:230px;">Getting a full picture of your website and how it's being used requires more than a handful of metrics around who's visited your site. You can use Easy Insight to establish full visibility of your site and web applications. Pull in the standard web metrics from Google Analytics, but augment that with reports from your application data. Taken survey data around user satisfaction with your website? Add those metrics to the KPI tree to create a single, unified view.</p>
-            <h2>Intelligent Analysis of your Web Metrics</h2>
-            <p>Investigating the underlying patterns of your web metrics takes more than a handful of high level reports. You need to be able to explore data from any direction, dragging in different fields, applying a wide range of filters, and looking at data through a variety of visualizations. Easy Insight gives you these capabilities by extending Google Analytics and adding on our sophisticated yet easy to use report builder and analytical tool.</p>
-            <h2>Extending your View into Application Data</h2>
-            <p>Beyond a basic level, any typical site is going to have some amount of application data in a database, whether it's MySQL, SQL Server, or Oracle. That data is just as useful for your reporting as the basic web analytics--for example, with our own use of Easy Insight on our internal data, we report on data like 'How many user have actual accounts, and of what types?', 'How many and what types of reports have users built?', and 'How long are reports taking to load for users?' Typically, your options for reporting on this data have required a fair amount of installation work, and once you have that data, you don't have any way to combine it with your data from the web analytic side. Easy Insight makes it easy to set up reporting on that custom application data and brings it into a single, unified data set for reporting and goals.</p>
-            <h2>Adding Further Data</h2>
-            <p>Beyond web analytics and application data, there are plenty of other data sources out there for you to pull into that single, cohesive view of your website. Have survey data in an Excel spreadsheet? Go ahead and upload that and it's part of the data set as well! Have some other system that you want to integrate? Point a developer at the Easy Insight API and they can build a custom connection to anything, creating an ongoing view into any variety of system.</p>
-			<!-- InstanceEndEditable --> </div>
+            <h2>Building an IT Dashboard</h2>
+            <p>Particularly if you're running your application inside of Amazon EC2, you can quickly build up a system wide dashboard through Easy Insight. Take advantage of the Easy Insight integration to Amazon EC2 Cloudwatch to pull in metrics around CPU utilization and I/O volume to gauge use of your instances. Slice the data by security group or instance ID to quantify the data at different levels. You can take advantage of the database integrations we offer to query for database metrics, getting a view into the specific performance of your particular relational database.</p>
+            <img src="images/IT-Management.jpg" />
+            <h2>Watching Our Own Applications in EC2</h2>
+            <p>Easy Insight uses itself for tracking IT performance. We run on the Amazon EC2 cloud, taking advantage of Cloudwatch, so we use our reporting on Cloudwatch to look at our overall CPU and I/O usage. From that overall usage, we track the usage at a security group level, since we have several distinct sets of instances within different security groups. And below those security groups, we have tracking on the particular instances.</p>
+            <h2>Watching the Database</h2>
+            <p>We take advantage of our database integration to periodically query for database sizes, giving us a good idea as to growth patterns at both a whole database level and at a particular table level. We track benchmark data on key operations, so we can query those benchmarks to get an idea as to things like 'How long are reports taking to load on average for users?'</p>
+            
+            <!-- InstanceEndEditable --> </div>
            <!-- InstanceBeginEditable name="BottomContent" --><!-- InstanceEndEditable -->
 			
 	    </div>
