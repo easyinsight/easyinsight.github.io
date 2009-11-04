@@ -1,16 +1,16 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml" style="width:100%"><!-- InstanceBegin template="/Templates/solutionspage.dwt" codeOutsideHTMLIsLocked="false" -->
+<html xmlns="http://www.w3.org/1999/xhtml" style="width:100%"><!-- InstanceBegin template="/Templates/plaintemplate.dwt" codeOutsideHTMLIsLocked="false" -->
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <!-- InstanceBeginEditable name="doctitle" -->
 <title>Easy Insight</title>
 <!-- InstanceEndEditable -->
-
-<link type="text/css" rel="stylesheet" media="screen" href="css/solutionspage.css" />
 <!-- InstanceBeginEditable name="head" -->
+<link type="text/css" rel="stylesheet" media="screen" href="../css/company.css" />
+<!-- TemplateBeginEditable name="head" -->
+<!-- TemplateEndEditable -->
 <!-- InstanceEndEditable -->
-
-    <link type="text/css" rel="stylesheet" media="screen" href="css/base.css" />
+    <link type="text/css" rel="stylesheet" media="screen" href="../css/base.css" />
     <script type="text/javascript" src="js/prototype.js"></script>
     <script type="text/javascript" src="js/scriptaculous.js?load=effects,builder"></script>
     <script type="text/javascript" src="js/lightbox.js"></script>
@@ -19,14 +19,14 @@
 <body style="width:100%;text-align:center;margin:0px auto;">
     <div style="width:1000px;border-left-style:solid;border-left-color:#DDDDDD;border-left-width:1px;border-right-style:solid;border-right-color:#DDDDDD;border-right-width:1px;margin:0 auto;">
     	<div style="width:100%;text-align:left;height:70px;position:relative">
-        	<a href="/index.html"><img src="images/logo.jpg" alt="Easy Insight Logo" name="logo" id="logo" /></a>
+        	<a href="/index.html"><img src="../images/logo.jpg" alt="Easy Insight Logo" name="logo" id="logo" /></a>
     <div class="signupHeadline"><a href="https://www.easy-insight.com/app/" class="signupButton"></a> <a href="https://www.easy-insight.com/app/#page=account" class="signupforfreeButton"></a></div>
                 <div class="headline"><a id="productPage" href="product.html">PRODUCT</a> <a id="dataPage" href="data.html">DATA</a> <a id="solutionsPage" href="webanalytics.html">SOLUTIONS</a> <a id="blogPage" href="http://jamesboe.blogspot.com/">BLOG</a>  <a id="companyPage" href="company.html">COMPANY</a></div>
 
         </div>
-	    
-        <ul class="menuList"><li class="first"><a id="webanalyticsPage" href="webanalytics.html">WEB ANALYTICS</a></li><li><a id="itmanagementPage" href="itmanagement.html">IT MANAGEMENT</a></li><li><a id="softwarePage" href="software.html">SOFTWARE DEVELOPMENT</a></li></ul>
-        <!-- InstanceBeginEditable name="noedit" --><!-- InstanceEndEditable -->    	        
+	    <!-- InstanceBeginEditable name="submenu" -->
+        <ul class="menuList"><li class="first"><a id="companyOverviewPage" href="company.html">OVERVIEW</a></li><li><a id="whowearePage" href="whoweare.html">WHO WE ARE</a></li><li><a id="contactusPage" href="contactus.html">CONTACT US</a></li></ul>
+        <!-- TemplateBeginEditable name="noedit" --><!-- TemplateEndEditable -->    	<!-- InstanceEndEditable -->        
         <div id="content">
 		    
             <div style="width:30%;position:relative;float:right;">
@@ -37,9 +37,9 @@
                         <div class="box whitebox" style="position:relative;left:5px;width:240px;height:158px;">
                         	<div class="top"><span></span></div>
                             <div id="moreinfo" class="content" style="text-align:left;padding-bottom:12px;"><span style="padding-bottom:12px;"></span>
-                            	<a href="https://www.easy-insight.com/app/#page=intro&type=tour"><img src="assets/logos/film.png" /><p>Watch Product Tour</p></a>
-                                <a href="https://www.easy-insight.com/app/#page=account"><img src="assets/logos/mouse.png" /> <p>Free Trial Account</p></a>
-                                <a href="contactus.html"><img src="assets/logos/message.png" /><p>Contact Us</p></a>
+                            	<a href="https://www.easy-insight.com/app/#page=intro&type=tour"><img src="../assets/logos/film.png" /><p>Watch Product Tour</p></a>
+                                <a href="https://www.easy-insight.com/app/#page=account"><img src="../assets/logos/mouse.png" /> <p>Free Trial Account</p></a>
+                                <a href="contactus.html"><img src="../assets/logos/message.png" /><p>Contact Us</p></a>
                             </div>
                         </div>
                     </div>
@@ -60,22 +60,10 @@
             </div>
             
             <div style="width:70%;text-align:left;background-color:#FFFFFF">
-                <div style="width:100%;height:60px;background:url(images/banner.jpg);text-align:center">
-                	<h1 style="margin:0px;padding:18px;font-size:24px;color:#FFFFFF;font-size:16px;"><!-- InstanceBeginEditable name="innerTitle" -->IT Management<!-- InstanceEndEditable --></h1>
+                <div style="width:100%;height:60px;background:url(../images/banner.jpg);text-align:center">
+                	<h1 style="margin:0px;padding:18px;font-size:24px;color:#FFFFFF;font-size:16px;"><!-- InstanceBeginEditable name="innerTitle" -->Visibility, Insight, Improvement<!-- InstanceEndEditable --></h1>
 				</div>
-            <!-- InstanceBeginEditable name="innerContent" -->
-            <h2>Building an IT Dashboard</h2>
-            <p>Particularly if you're running your application inside of Amazon EC2, you can quickly build up a system wide dashboard through Easy Insight. Take advantage of the Easy Insight integration to Amazon EC2 Cloudwatch to pull in metrics around CPU utilization and I/O volume to gauge use of your instances. Slice the data by security group or instance ID to quantify the data at different levels. You can take advantage of the database integrations we offer to query for database metrics, getting a view into the specific performance of your particular relational database.</p>
-            <div style="width:100%;text-align:center">
-            	<img src="images/IT-Management.jpg" />
-                <div style="font-size:12px">Click on the image for a larger view</div>
-            </div>
-            <h2>Watching Our Own Applications in EC2</h2>
-            <p>Easy Insight uses itself for tracking IT performance. We run on the Amazon EC2 cloud, taking advantage of Cloudwatch, so we use our reporting on Cloudwatch to look at our overall CPU and I/O usage. From that overall usage, we track the usage at a security group level, since we have several distinct sets of instances within different security groups. And below those security groups, we have tracking on the particular instances.</p>
-            <h2>Watching the Database</h2>
-            <p>We take advantage of our database integration to periodically query for database sizes, giving us a good idea as to growth patterns at both a whole database level and at a particular table level. We track benchmark data on key operations, so we can query those benchmarks to get an idea as to things like 'How long are reports taking to load on average for users?'</p>
-            
-            <!-- InstanceEndEditable --> </div>
+            <!-- InstanceBeginEditable name="innerContent" -->innerContents<!-- InstanceEndEditable --> </div>
            <!-- InstanceBeginEditable name="BottomContent" --><!-- InstanceEndEditable -->
 			
 	    </div>

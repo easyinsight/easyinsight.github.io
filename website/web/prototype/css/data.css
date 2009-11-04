@@ -29,6 +29,10 @@
 	height:20px;
 }
 
+.solutions > li > a {
+	text-decoration:underline;
+}
+
 #dataPage {
 	color:#CC0033;
 }

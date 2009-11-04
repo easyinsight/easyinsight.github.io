@@ -20,7 +20,7 @@
     <div style="width:1000px;border-left-style:solid;border-left-color:#DDDDDD;border-left-width:1px;border-right-style:solid;border-right-color:#DDDDDD;border-right-width:1px;margin:0 auto;">
     	<div style="width:100%;text-align:left;height:70px;position:relative">
         	<a href="/index.html"><img src="../images/logo.jpg" alt="Easy Insight Logo" name="logo" id="logo" /></a>
-    <div class="signupHeadline"><a href="https://www.easy-insight.com/app/" class="signupButton"></a> <a href="https://www.easy-insight.com/app/" class="signupforfreeButton"></a></div>
+    <div class="signupHeadline"><a href="https://www.easy-insight.com/app/" class="signupButton"></a> <a href="https://www.easy-insight.com/app/#page=account" class="signupforfreeButton"></a></div>
                 <div class="headline"><a id="productPage" href="product.html">PRODUCT</a> <a id="dataPage" href="data.html">DATA</a> <a id="solutionsPage" href="webanalytics.html">SOLUTIONS</a> <a id="blogPage" href="http://jamesboe.blogspot.com/">BLOG</a>  <a id="companyPage" href="company.html">COMPANY</a></div>
 
         </div>
@@ -38,8 +38,8 @@
                         	<div class="top"><span></span></div>
                             <div id="moreinfo" class="content" style="text-align:left;padding-bottom:12px;"><span style="padding-bottom:12px;"></span>
                             	<a href="https://www.easy-insight.com/app/#page=intro&type=tour"><img src="../assets/logos/film.png" /><p>Watch Product Tour</p></a>
-                                <a><img src="../assets/logos/mouse.png" /> <p>Free Trial Account</p></a>
-                                <a><img src="../assets/logos/message.png" /><p>Contact Us</p></a>
+                                <a href="https://www.easy-insight.com/app/#page=account"><img src="../assets/logos/mouse.png" /> <p>Free Trial Account</p></a>
+                                <a href="contactus.html"><img src="../assets/logos/message.png" /><p>Contact Us</p></a>
                             </div>
                         </div>
                     </div>
