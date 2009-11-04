@@ -66,6 +66,12 @@
                 <prototype:DataPage navigation="currentState=event.state"/>
             </mx:AddChild>
         </mx:State>
+        <mx:State name="GoogleAnalytics">
+            <mx:RemoveChild target="{frontPage}"/>
+            <mx:AddChild relativeTo="{core}">
+                <prototype:GoogleAnalytics navigation="currentState=event.state"/>
+            </mx:AddChild>
+        </mx:State>
         <mx:State name="WebAnalytics">
             <mx:RemoveChild target="{frontPage}"/>
             <mx:AddChild relativeTo="{core}">

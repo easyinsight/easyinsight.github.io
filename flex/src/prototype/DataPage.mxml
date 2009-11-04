@@ -105,7 +105,7 @@
                                         <mx:Label text="Basecamp"/>
                                     </mx:VBox>
                                     <mx:VBox width="33%" fontSize="14" textDecoration="underline">
-                                        <mx:Label text="Google Analytics"/>
+                                        <mx:Label text="Google Analytics" click="dispatchEvent(new PrototypeEvent('GoogleAnalytics'))" textDecoration="underline"/>
                                         <mx:Label text="Highrise"/>
                                         <mx:Label text="JetBrains Teamcity"/>
                                     </mx:VBox>
