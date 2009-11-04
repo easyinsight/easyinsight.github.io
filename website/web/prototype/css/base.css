@@ -235,7 +235,29 @@ li > a {
 	cursor:pointer;
 }
 
+#content ul {
+	font-size:12px;
+	color:#444444;
+	margin:2px;
+	padding:2px 2px 2px 16px;
+	line-height:18px;	
+}
+#content li {
+	text-indent:12px;
+}
+
+h1.headliner {
+	color:#CC0033;
+	font-size:16px;
+	margin:2px;
+	padding:20px 2px 2px 10px;
+	font-weight:normal;
+}
+
 #footer ul > li {
+	padding:0px;
+	margin:0px;
+	text-indent:0px;
 	font-size:10px;
 	line-height:16px;
 }
@@ -243,5 +265,6 @@ li > a {
 #footer ul {
 	margin:0px;
 	padding:0px;
+	text-indent:0px;
 	list-style:none;
 }
