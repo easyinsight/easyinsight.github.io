@@ -13,7 +13,19 @@
 		<loc>http://www.easy-insight.com/contactus.html</loc>
 	</url>
     <url>
+		<loc>http://www.easy-insight.com/dashboards.html</loc>
+	</url>
+    <url>
+		<loc>http://www.easy-insight.com/data.html</loc>
+	</url>
+    <url>
+		<loc>http://www.easy-insight.com/developers.html</loc>
+	</url>
+    <url>
 		<loc>http://www.easy-insight.com/index.html</loc>
+	</url>
+    <url>
+		<loc>http://www.easy-insight.com/itmanagement.html</loc>
 	</url>
 	<url>
 		<loc>http://www.easy-insight.com/privacy.html</loc>
@@ -21,13 +33,25 @@
 	<url>
 		<loc>http://www.easy-insight.com/product.html</loc>
 	</url>
+    <url>
+		<loc>http://www.easy-insight.com/services.html</loc>
+	</url>
+    <url>
+		<loc>http://www.easy-insight.com/strategy.html</loc>
+	</url>
 	<url>
 		<loc>http://www.easy-insight.com/sitemap.html</loc>
 	</url>
-	<url>
-		<loc>http://www.easy-insight.com/solutions.html</loc>
-	</url>
     <url>
 		<loc>http://www.easy-insight.com/tos.html</loc>
+	</url>
+    <url>
+		<loc>http://www.easy-insight.com/visualizations.html</loc>
+	</url>
+    <url>
+		<loc>http://www.easy-insight.com/webanalytics.html</loc>
+	</url>
+    <url>
+		<loc>http://www.easy-insight.com/whoweare.html</loc>
 	</url>
 </urlset>
