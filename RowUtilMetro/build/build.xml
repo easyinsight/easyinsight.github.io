@@ -1,0 +1,24 @@
+<project default="RowUtilJar" basedir="." name="RowUtilMetro">
+    <property file="../../flex/build/local.build.properties"/>
+
+    <property name="out.path" value="../out"/>
+    <property name="out.classes.path" value="../out/classes"/>
+    <target name="RowUtilJar">
+        <mkdir dir="${out.path}"/>
+        <mkdir dir="${out.classes.path}"/>
+        <javac destdir="${out.classes.path}"
+               optimize="off"
+               debug="on" failonerror="false"
+               srcdir="../src"
+               excludes="**/*.smap">
+            <classpath>
+                <fileset dir="../lib">
+                    <include name="*.jar"/>
+                </fileset>
+            </classpath>
+            <include name="**"/>
+            <exclude name="tags/**"/>
+        </javac>
+        <jar destfile="${out.path}/eimetro.jar" baseDir="${out.classes.path}"/>
+    </target>
+</project>
