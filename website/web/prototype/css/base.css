@@ -234,3 +234,14 @@ li > a {
 	font-size:16px;
 	cursor:pointer;
 }
+
+#footer ul > li {
+	font-size:10px;
+	line-height:16px;
+}
+
+#footer ul {
+	margin:0px;
+	padding:0px;
+	list-style:none;
+}
