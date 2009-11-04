@@ -653,7 +653,7 @@
                        id="refreshButton"/>
             <mx:Button label="Bookmark" click="bookmark()" icon="{bookmarkIcon}" labelPlacement="bottom"
                        id="bookmarkButton"/>
-            <mx:Button label="Export" icon="{exportToExcelIcon}" click="exportExcel()" labelPlacement="bottom"
+            <mx:Button label="Export Report" icon="{exportToExcelIcon}" click="exportExcel()" labelPlacement="bottom"
                        id="exportButton"/>
             <mx:Button label="Edit this Report" icon="{reportEditorIcon}" click="toReportEditor()"
                        labelPlacement="bottom" id="editReportButton"/>

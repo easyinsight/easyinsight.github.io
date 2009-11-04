@@ -28,14 +28,20 @@
         import com.easyinsight.filtering.TransformsUpdatedEvent;
         import com.easyinsight.framework.DataServiceLoadingEvent;
         import com.easyinsight.framework.HierarchyOverride;
+        import com.easyinsight.report.ReportExportWindow;
 
         import mx.collections.ArrayCollection;
         import mx.controls.Label;
+        import mx.managers.PopUpManager;
         import mx.rpc.events.FaultEvent;
 
         [Bindable]
         [Embed(source="../../../../assets/funnel.png")]
         private var filterIcon:Class;
+
+        [Bindable]
+        [Embed(source="../../../../assets/table.png")]
+        private var exportIcon:Class;
 
         private var commandProcessor:CommandProcessor;
 
@@ -213,11 +219,26 @@
         public function refreshData():void {
             dataViewFactory.retrieveData(false);
         }
+
+        private function exportData():void {
+            var window:ReportExportWindow = new ReportExportWindow();
+            window.reportID = _analysisID;
+            window.reportType = _reportType;
+            window.dataSourceID = _dataSourceID;
+            window.reportName = _reportName;
+            window.coreView = dataViewFactory.getChildAt(0);
+            window.filterDefinitions = filterDefinitions;
+            window.embeddedFilters = dataViewFactory.drillthroughFilters;
+            PopUpManager.addPopUp(window, this);
+            window.x = exportButton.x - 20;
+            window.y = exportButton.y + exportButton.height + 10;
+        }
                 ]]>
     </mx:Script>
     <mx:HBox width="100%">
         <!--<mx:Button toolTip="Edit the Report Yourself" click="editReport()" icon=""/>-->
         <mx:Button toolTip="Adjust Filters" click="toggleFilters()" icon="{filterIcon}"/>
+        <mx:Button toolTip="Export Report" click="exportData()" icon="{exportIcon}" id="exportButton"/>
         <mx:HBox id="addReportBox" width="100%" horizontalAlign="center"/>
     </mx:HBox>
     <mx:ViewStack width="100%" id="transformBox" resizeToContent="true" creationPolicy="all">

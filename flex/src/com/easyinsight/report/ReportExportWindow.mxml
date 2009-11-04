@@ -16,8 +16,6 @@
         private var _hierarchyOverrides:ArrayCollection;
         private var _coreView:DisplayObject;
 
-
-
         public function set coreView(value:DisplayObject):void {
             _coreView = value;
         }
@@ -96,14 +94,15 @@
             PopUpManager.removePopUp(this);
         }
         ]]></mx:Script>
-    <mx:VBox paddingTop="5" paddingLeft="5" paddingBottom="5" paddingRight="5">
+    <mx:VBox paddingTop="5" paddingLeft="5" paddingBottom="5" paddingRight="5" horizontalAlign="center">
+        <mx:Label text="Click any of the options below to export the report:"/>
         <mx:HBox>
-            <mx:Button icon="@Embed(source='../../../../assets/table.png')" label="Excel" click="excel()" labelPlacement="bottom"/>
-            <mx:Button icon="@Embed(source='../../../../assets/camera.png')" label="PNG" click="png()" labelPlacement="bottom"/>
-            <mx:Button icon="@Embed(source='../../../../assets/link.png')" label="Link" click="url()" labelPlacement="bottom"/>
-            <mx:Button icon="@Embed(source='../../../../assets/plasma_tv.png')" label="Embed" click="embed()" labelPlacement="bottom"/>
-            <mx:Button icon="@Embed(source='../../../../assets/uwa-netvibes.png')" label="NetVibes" click="embed()" labelPlacement="bottom"/>
-            <mx:Button icon="@Embed(source='../../../../assets/uwa-google.png')" label="iGoogle" click="embed()" labelPlacement="bottom"/>
+            <mx:Button icon="@Embed(source='../../../../assets/table.png')" label="Excel" click="excel()" labelPlacement="right"/>
+            <mx:Button icon="@Embed(source='../../../../assets/camera.png')" label="PNG" click="png()" labelPlacement="right"/>
+            <mx:Button icon="@Embed(source='../../../../assets/link.png')" label="Link" click="url()" labelPlacement="right"/>
+            <mx:Button icon="@Embed(source='../../../../assets/plasma_tv.png')" label="Embed" click="embed()" labelPlacement="right"/>
+            <mx:Button icon="@Embed(source='../../../../assets/uwa-netvibes.png')" click="netvibes()"/>
+            <mx:Button icon="@Embed(source='../../../../assets/uwa-google.png')" click="igoogle()"/>
         </mx:HBox>
         <mx:HBox width="100%" horizontalAlign="center">
             <mx:Button label="Close" click="PopUpManager.removePopUp(this)"/>
