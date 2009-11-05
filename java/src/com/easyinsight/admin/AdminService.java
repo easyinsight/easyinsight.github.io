@@ -59,8 +59,9 @@ public class AdminService {
                 long analysisID = rs.getLong(2);
                 int reportType = rs.getInt(3);
                 String title = rs.getString(4);
-                String url = "https://www.easy-insight.com/app/ReportView.jsp?dataSourceID=" + dataSourceID + "&amp;reportID=" + analysisID +
-                        "&amp;reportType=" + reportType + "&amp;reportName=" + URLEncoder.encode(title, "UTF-8");
+                String url = "https://www.easy-insight.com/app/ReportView.jsp?dataSourceID=" + dataSourceID + "&reportID=" + analysisID +
+                        "&reportType=" + reportType + "&reportName=" + title;
+                url = URLEncoder.encode(url, "UTF-8");
                 sitemapBuilder.append(MessageFormat.format(LOC_XML, url));
             }
         } catch (Exception e) {
