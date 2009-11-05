@@ -1,6 +1,7 @@
 package com.easyinsight.admin;
 
 import com.easyinsight.database.Database;
+import com.easyinsight.database.EIConnection;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.outboundnotifications.BroadcastInfo;
 import com.easyinsight.eventing.MessageUtils;
@@ -12,6 +13,11 @@ import java.lang.management.ManagementFactory;
 import java.lang.management.ThreadMXBean;
 import java.lang.management.ThreadInfo;
 import java.lang.management.GarbageCollectorMXBean;
+import java.net.URLEncoder;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.text.MessageFormat;
 
 import flex.management.runtime.messaging.client.FlexClientManagerControlMBean;
 
@@ -22,7 +28,7 @@ import flex.management.runtime.messaging.client.FlexClientManagerControlMBean;
  */
 public class AdminService {
 
-    
+    private static final String LOC_XML = "<url>\r\n\t<loc>{0}</loc>\r\n</url>\r\n";
 
     public void threadDump() {
         ThreadMXBean threadMXBean = ManagementFactory.getThreadMXBean();
@@ -30,6 +36,41 @@ public class AdminService {
         for (ThreadInfo threadInfo : threadInfos) {
             LogClass.info(threadInfo.toString());
         }
+    }
+
+    public String generateSitemap() {
+        StringBuilder sitemapBuilder = new StringBuilder();
+        sitemapBuilder.append("<?xml version='1.0' encoding='UTF-8'?>\n" +
+                "<urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\"\n" +
+                "\txmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n" +
+                "\txsi:schemaLocation=\"http://www.sitemaps.org/schemas/sitemap/0.9\n" +
+                "\t\t\t    http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd\">");
+        // retrieve all public data sources
+        // create a sitemap entry for each
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            PreparedStatement queryStmt = conn.prepareStatement("SELECT DATA_FEED_ID, ANALYSIS_ID, REPORT_TYPE, TITLE FROM ANALYSIS " +
+                    "WHERE PUBLICLY_VISIBLE = ? AND MARKETPLACE_VISIBLE = ?");
+            queryStmt.setBoolean(1, true);
+            queryStmt.setBoolean(2, true);
+            ResultSet rs = queryStmt.executeQuery();
+            while (rs.next()) {
+                long dataSourceID = rs.getLong(1);
+                long analysisID = rs.getLong(2);
+                int reportType = rs.getInt(3);
+                String title = rs.getString(4);
+                String url = "https://www.easy-insight.com/app/ReportView.jsp?dataSourceID=" + dataSourceID + "&amp;reportID=" + analysisID +
+                        "&amp;reportType=" + reportType + "&amp;reportName=" + URLEncoder.encode(title, "UTF-8");
+                sitemapBuilder.append(MessageFormat.format(LOC_XML, url));
+            }
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        } finally {
+            Database.closeConnection(conn);
+        }
+        sitemapBuilder.append("</urlset>");
+        return sitemapBuilder.toString();
     }
 
     public void sendShutdownNotification(String s) {
@@ -74,7 +115,7 @@ public class AdminService {
             healthInfo.setThreadCount(threadMXBean.getThreadCount());
             healthInfo.setSystemLoadAverage(ManagementFactory.getOperatingSystemMXBean().getSystemLoadAverage());
             healthInfo.setCompilationTime(ManagementFactory.getCompilationMXBean().getTotalCompilationTime());
-            for (GarbageCollectorMXBean garbageBean : ManagementFactory.getGarbageCollectorMXBeans()) {
+            for (GarbageCollectorMXBean garbageBean : ManagementFactory.getGarbageCollectorMXBeans()) { 
                 if ("Copy".equals(garbageBean.getName())) {
                     healthInfo.setMinorCollectionCount(garbageBean.getCollectionCount());
                     healthInfo.setMinorCollectionTime(garbageBean.getCollectionTime());
