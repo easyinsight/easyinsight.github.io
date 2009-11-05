@@ -2,7 +2,8 @@
 <mx:Box xmlns:mx="http://www.adobe.com/2006/mxml" creationComplete="adminService.getHealthInfo.send()">
 	<mx:Script>
 		<![CDATA[
-			import mx.formatters.NumberFormatter;
+        import mx.controls.Alert;
+        import mx.formatters.NumberFormatter;
 			import mx.formatters.Formatter;
 			[Bindable]
 			public var currentMemory:String;
@@ -30,6 +31,8 @@
 			public var compilationTime:String;
 			[Bindable]
 			public var clientCount:String;
+
+            private var sitemapXML:String;
 			
 			private function updateFromHealthInfo(healthInfo:HealthInfo):void {
 				var formatter:Formatter = new NumberFormatter();
@@ -51,12 +54,22 @@
 			private function gotHealthInfo():void {
 				updateFromHealthInfo(adminService.getHealthInfo.lastResult as HealthInfo);
 			}
+
+            private function gotSitemap():void {
+                sitemapXML = adminService.generateSitemap.lastResult as String;
+                Alert.show("Ready to copy sitemap XML to clipboard", null, Alert.OK, this, closeHandler);
+            }
+
+            private function closeHandler(event:Event):void {
+                System.setClipboard(sitemapXML);    
+            }
 		]]>
 	</mx:Script>
 	<mx:RemoteObject id="adminService" destination="admin">
 		<mx:method name="getHealthInfo" result="gotHealthInfo()"/>
         <mx:method name="sendShutdownNotification" />
-	</mx:RemoteObject>	
+        <mx:method name="generateSitemap" result="gotSitemap()"/>
+	</mx:RemoteObject>
 	<mx:Form>
 		<mx:FormItem label="Free Memory:">
 			<mx:Label text="{this.freeMemory}"/>
@@ -96,6 +109,7 @@
 		</mx:FormItem>
 	</mx:Form>
 	<mx:Button label="Refresh" click="adminService.getHealthInfo.send()"/>
+	<mx:Button label="Generate Sitemap" click="adminService.generateSitemap.send()"/>
     <mx:TextInput id="shutdownText" />
     <mx:Button label="Send Shutdown Notification" click="adminService.sendShutdownNotification.send(shutdownText.text)" />
 </mx:Box>
