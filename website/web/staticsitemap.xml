@@ -7,9 +7,6 @@
 		<loc>http://www.easy-insight.com/company.html</loc>
 	</url>
 	<url>
-		<loc>http://www.easy-insight.com/consulting.html</loc>
-	</url>
-	<url>
 		<loc>http://www.easy-insight.com/contactus.html</loc>
 	</url>
     <url>
@@ -39,11 +36,8 @@
     <url>
 		<loc>http://www.easy-insight.com/strategy.html</loc>
 	</url>
-	<url>
-		<loc>http://www.easy-insight.com/sitemap.html</loc>
-	</url>
     <url>
-		<loc>http://www.easy-insight.com/tos.html</loc>
+		<loc>http://www.easy-insight.com/terms.html</loc>
 	</url>
     <url>
 		<loc>http://www.easy-insight.com/visualizations.html</loc>
