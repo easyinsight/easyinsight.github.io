@@ -134,6 +134,23 @@ body {
 .signupforfreeButton:active {
 	background-position:-70px -48px;
 }
+
+#getStartedButton {
+	width:200px;
+	height:32px;
+	background-image:url(../images/buttons.png);
+	background-repeat:no-repeat;
+	background-position: 0px -72px;
+	display:block;
+	margin:36px 0px 0px -12px;
+}
+#getStartedButton:hover {
+	background-position:0px -104px;
+}
+#getStartedButton:active {
+	background-position: 0px -136px;
+}
+
 .headline {
 	width:100%;
 	text-align:right;
@@ -221,10 +238,6 @@ li > a {
 	padding:4px 0px 4px 0px;
 }
 
-#moreinfo a {
-	padding: 6px 0px 6px 0px;
-}
-
 #moreinfo p {
 	margin:0px;
 	height:24px;
@@ -273,3 +286,46 @@ h1.headliner {
 	text-indent:0px;
 	list-style:none;
 }
+
+#twitter_update_list {
+	margin:0px;
+	padding:0px;
+}
+
+#twitter_update_list > li {
+	padding:5px;
+}
+
+#twitter_update_list > li:hover {
+	background-color:#888888;
+}
+
+#twitter_update_list li > a {
+	color:#888888;	
+}
+
+#twitter_update_list li > a:hover {
+	text-decoration:underline;
+}
+
+#nextSteps {
+	text-align:center;
+	padding-bottom:12px;
+}
+
+#nextSteps p {
+	margin-left:-12px;
+	font-size:14px;
+}
+
+#nextSteps > span {
+	padding-bottom:12px;
+}
+
+#nextSteps p a {
+	font-size:12px;
+	font-weight:bold;
+	text-decoration:underline;
+	color:#000000;
+}
+

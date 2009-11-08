@@ -10,7 +10,6 @@
     <link type="text/css" rel="stylesheet" media="screen" href="../css/base.css" />
     <script type="text/javascript" src="js/prototype.js"></script>
     <script type="text/javascript" src="js/scriptaculous.js?load=effects,builder"></script>
-    <script type="text/javascript" src="js/lightbox.js"></script>
     <link rel="stylesheet" href="css/lightbox.css" type="text/css" media="screen" />
 </head>
 <body style="width:100%;text-align:center;margin:0px auto;">
@@ -45,5 +44,6 @@
             </div>
 	    </div>
     </div>
+	<script type="text/javascript" src="js/lightbox.js"></script>
 </body>
 </html>

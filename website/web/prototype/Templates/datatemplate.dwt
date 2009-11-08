@@ -1,12 +1,11 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml" style="width:100%"><!-- InstanceBegin template="/Templates/plaintemplate.dwt" codeOutsideHTMLIsLocked="false" -->
+<html xmlns="http://www.w3.org/1999/xhtml" style="width:100%"><!-- InstanceBegin template="/Templates/Base.dwt" codeOutsideHTMLIsLocked="false" -->
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <!-- InstanceBeginEditable name="doctitle" -->
 <title>Easy Insight</title>
 <!-- InstanceEndEditable -->
 <!-- InstanceBeginEditable name="head" -->
-<link type="text/css" rel="stylesheet" media="screen" href="../css/solutionspage.css" />
 <!-- TemplateBeginEditable name="head" -->
 <!-- TemplateEndEditable -->
 <!-- InstanceEndEditable -->
@@ -24,22 +23,17 @@
 
         </div>
 	    <!-- InstanceBeginEditable name="submenu" -->
-        <ul class="menuList"><li class="first"><a id="webanalyticsPage" href="webanalytics.html">WEB ANALYTICS</a></li><li><a id="itmanagementPage" href="itmanagement.html">IT MANAGEMENT</a></li><li>SOFTWARE DEVELOPMENT</li></ul>
-        <!-- TemplateBeginEditable name="noedit" --><!-- TemplateEndEditable -->    	<!-- InstanceEndEditable -->        
+    	<!-- InstanceEndEditable -->        
         <div id="content">
-		    
+		    <!-- InstanceBeginEditable name="content" -->
             <div style="width:30%;position:relative;float:right;">
             	<div style="width:250px;height:210px;position:absolute;top:25px;left:34px;" class="box greybox">
                 	<div class="top"><span></span></div>
                     <div class="content" style="padding-bottom:12px"><span style="padding-bottom:12px;"></span>
-                    	<div style="width:100%;color:#FFFFFF;padding:0px 0px 12px 0px;margin:0px;text-align:center">Want more info?</div>
-                        <div class="box whitebox" style="position:relative;left:5px;width:240px;height:158px;">
-                        	<div class="top"><span></span></div>
-                            <div id="moreinfo" class="content" style="text-align:left;padding-bottom:12px;"><span style="padding-bottom:12px;"></span>
-                            	<a href="https://www.easy-insight.com/app/#page=intro&type=tour"><img alt="Film" src="../assets/logos/film.png" /><p>Watch Product Tour</p></a>
-                                <a href="https://www.easy-insight.com/app/#page=account"><img alt="Mouse" src="../assets/logos/mouse.png" /> <p>Free Trial Account</p></a>
-                                <a href="contactus.html"><img alt="Message" src="../assets/logos/message.png" /><p>Contact Us</p></a>
-                            </div>
+                    	<div style="width:100%;color:#FFFFFF;padding:0px 0px 12px 0px;margin:0px;text-align:center">Next Steps</div>
+                        <div class="box whitebox" style="position:relative;left:5px;width:240px;height:158px;z-index:1">
+                        	<div class="top" style="z-index:1"><span></span></div>
+                            <div id="nextSteps" class="content"><span style="z-index:-1"></span><!-- TemplateBeginEditable name="nextStepsText" -->nextStepsText<!-- TemplateEndEditable --> </div>
                         </div>
                     </div>
                 </div>
@@ -59,12 +53,13 @@
             </div>
             
             <div style="width:70%;text-align:left;background-color:#FFFFFF;padding-bottom:12px">
-                <div style="width:100%;height:60px;background:url(../images/banner.jpg);text-align:center">
-                	<h1 style="margin:0px;padding:18px;font-size:24px;color:#FFFFFF;font-size:16px;"><!-- InstanceBeginEditable name="innerTitle" -->Visibility, Insight, Improvement<!-- InstanceEndEditable --></h1>
-				</div>
-            <!-- InstanceBeginEditable name="innerContent" -->innerContents<!-- InstanceEndEditable --> </div>
-           <!-- InstanceBeginEditable name="BottomContent" --><!-- InstanceEndEditable -->
-			
+              <div style="width:100%;height:60px;background:url(../images/banner.jpg);text-align:center">
+               	<h1 style="margin:0px;padding:18px;font-size:24px;color:#FFFFFF;font-size:16px;"><!-- TemplateBeginEditable name="innerTitle" -->Visibility, Insight, Improvement<!-- TemplateEndEditable --></h1>
+              </div>
+              <!-- TemplateBeginEditable name="innerContent" -->innerContent<!-- TemplateEndEditable --> 
+           </div>
+           <!-- TemplateBeginEditable name="BottomContent" --><!-- TemplateEndEditable -->
+    		<!-- InstanceEndEditable -->
 <div id="footer" style="margin:0px;padding:12px 0px;width:100%;text-align:left">
             	<div style="float:right;padding-right:200px;">
                     <span style="font-weight:bold;font-size:12px">Security and Privacy</span>
