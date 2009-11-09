@@ -142,7 +142,7 @@ body {
 	background-repeat:no-repeat;
 	background-position: 0px -72px;
 	display:block;
-	margin:36px 0px 0px -12px;
+	margin: 32px 12px;
 }
 #getStartedButton:hover {
 	background-position:0px -104px;
@@ -301,7 +301,7 @@ h1.headliner {
 }
 
 #twitter_update_list li > a {
-	color:#888888;	
+	color:#DDDDDD;	
 }
 
 #twitter_update_list li > a:hover {
@@ -314,7 +314,7 @@ h1.headliner {
 }
 
 #nextSteps p {
-	margin-left:-12px;
+	margin:0px 2px 0px -12px;
 	font-size:14px;
 }
 
