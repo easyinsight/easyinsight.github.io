@@ -296,12 +296,8 @@ h1.headliner {
 	padding:5px;
 }
 
-#twitter_update_list > li:hover {
-	background-color:#888888;
-}
-
 #twitter_update_list li > a {
-	color:#DDDDDD;	
+	color:#888888;	
 }
 
 #twitter_update_list li > a:hover {
