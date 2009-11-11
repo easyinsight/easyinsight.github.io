@@ -148,13 +148,13 @@
             <%
                 String embedHTML = java.text.MessageFormat.format("<object width=\"450\" height=\"346\" codebase=\"http://fpdownload.macromedia.com/get/flashplayer/current/swflash.cab\"\n" +
                         "        classid=\"clsid:D27CDB6E-AE6D-11cf-96B8-444553540000\">\n" +
-                        "    <param name=\"movie\" value=\"EmbeddedInsight.swf\"/>\n" +
+                        "    <param name=\"movie\" value=\"/app/easyui-debug/EmbeddedInsight.swf\"/>\n" +
                         "    <param name=\"quality\" value=\"high\"/>\n" +
                         "    <param name=\"bgcolor\" value=\"#869ca7\"/>\n" +
                         "    <param name=\"wmode\" value=\"opaque\"/>\n" +
                         "    <param name=\"allowScriptAccess\" value=\"always\"/>\n" +
                         "    <param name=\"flashvars\" value=\"analysisID={0}&reportType={1}&dataSourceID={2}&reportName={3}\"/>\n" +
-                        "    <embed src=\"https://localhost:4443/app/easyui-debug/EmbeddedInsight.swf\" quality=\"high\" bgcolor=\"#869ca7\"\n" +
+                        "    <embed src=\"/app/easyui-debug/EmbeddedInsight.swf\" quality=\"high\" bgcolor=\"#869ca7\"\n" +
                         "           width=\"700\" height=\"346\" name=\"PrimaryWorkspace\" align=\"middle\" play=\"true\" loop=\"false\" quality=\"high\"\n" +
                         "           allowScriptAccess=\"always\" wmode=\"opaque\" flashvars=\"analysisID={0}&reportType={1}&dataSourceID={2}&reportName={3}\"\n" +
                         "           type=\"application/x-shockwave-flash\" pluginspage=\"http://www.adobe.com/go/getflashplayer\"></embed>\n" +
