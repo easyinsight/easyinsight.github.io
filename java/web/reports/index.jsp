@@ -76,19 +76,19 @@
     <meta name="keywords" content="<%= keywords %>">
     <meta name="description" content="<%= description %>">
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
-    <link type="text/css" rel="stylesheet" media="screen" href="../css/base.css" />
-    <script type="text/javascript" src="../../js/prototype.js"></script>
-    <script type="text/javascript" src="../../js/scriptaculous.js?load=effects,builder"></script>
-    <script type="text/javascript" src="../../js/lightbox.js"></script>
-    <link rel="stylesheet" href="../../prototype/css/lightbox.css" type="text/css" media="screen" />
-    <link rel="stylesheet" href="../report.css" type="text/css" media="screen" />
+    <link type="text/css" rel="stylesheet" media="screen" href="/css/base.css" />
+    <script type="text/javascript" src="/js/prototype.js"></script>
+    <script type="text/javascript" src="/js/scriptaculous.js?load=effects,builder"></script>
+    <script type="text/javascript" src="/js/lightbox.js"></script>
+    <link rel="stylesheet" href="/prototype/css/lightbox.css" type="text/css" media="screen" />
+    <link rel="stylesheet" href="/report.css" type="text/css" media="screen" />
 </head>
 <body style="width:100%;text-align:center;margin:0px auto;">
     <div style="width:1000px;border-left-style:solid;border-left-color:#DDDDDD;border-left-width:1px;border-right-style:solid;border-right-color:#DDDDDD;border-right-width:1px;margin:0 auto;">
     	<div style="width:100%;text-align:left;height:70px;position:relative">
-        	<a href="../../index.html"><img src="../../images/logo.jpg" alt="Easy Insight Logo" name="logo" id="logo" /></a>
+        	<a href="/index.html"><img src="/images/logo.jpg" alt="Easy Insight Logo" name="logo" id="logo" /></a>
     <div class="signupHeadline"><a href="https://www.easy-insight.com/app/" class="signupButton"></a> <a href="https://www.easy-insight.com/app/" class="signupforfreeButton"></a></div>
-                <div class="headline"><a id="productPage" href="../../product.html">PRODUCT</a> <a id="dataPage" href="../../data.html">DATA</a> <a id="solutionsPage" href="../../webanalytics.html">SOLUTIONS</a> <a id="blogPage" href="http://jamesboe.blogspot.com/">BLOG</a>  <a id="companyPage" href="../../company.html">COMPANY</a></div>
+                <div class="headline"><a id="productPage" href="/product.html">PRODUCT</a> <a id="dataPage" href="/data.html">DATA</a> <a id="solutionsPage" href="/webanalytics.html">SOLUTIONS</a> <a id="blogPage" href="http://jamesboe.blogspot.com/">BLOG</a>  <a id="companyPage" href="/company.html">COMPANY</a></div>
 
         </div>
 	    <!-- InstanceBeginEditable name="submenu" -->
@@ -142,7 +142,7 @@
             </table>
         </div>
         <div style="width:70%;text-align:left;background-color:#FFFFFF">
-            <div style="width:100%;height:60px;background:url(../../images/banner.jpg);text-align:center">
+            <div style="width:100%;height:60px;background:url(/images/banner.jpg);text-align:center">
                 <h1 style="margin:0px;padding:18px;font-size:24px;color:#FFFFFF;font-size:16px;"><!-- InstanceBeginEditable name="innerTitle" --><%= reportName %><!-- InstanceEndEditable --></h1>
             </div>
             <%
