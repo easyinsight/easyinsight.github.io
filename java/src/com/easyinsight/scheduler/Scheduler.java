@@ -108,6 +108,7 @@ public class Scheduler {
                     }
                     session.getTransaction().commit();
                 } catch (Exception e) {
+                    LogClass.error(e);
                     session.getTransaction().rollback();
                 } finally {
                     session.close();
