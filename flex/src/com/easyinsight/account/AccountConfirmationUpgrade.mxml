@@ -50,7 +50,7 @@ import com.easyinsight.framework.UserTransferObject;
                     break;
                 case Account.GROUP:
                     this.accountReviewText = "Group";
-                    this.accountReviewCost = "$200/month after free trial"
+                    this.accountReviewCost = "$200/month after free trial";
                     break;
 //                case Account.PROFESSIONAL:
 //                    this.accountReviewText = "Professional";
