@@ -6,12 +6,12 @@
         [Event(name="upgrade", type="com.easyinsight.account.UpgradeEvent")]
     </mx:Metadata>
       <mx:Label text="GROUP" fontSize="20" fontWeight="bold"/>
-                    <mx:Label text="$100/month" color="#D42525" fontWeight="bold"/>
+                    <mx:Label text="$200/month" color="#D42525" fontWeight="bold"/>                    
                     <mx:HRule width="100%"/>
                     <mx:Label text="Collaborate across your business"/>
                     <mx:Label text="Data level security"/>
-                    <mx:Label text="1 GB of storage"/>
-                    <mx:Label text="20 users"/>
+                    <mx:Label text="500 MB of storage"/>
+                    <mx:Label text="50 users"/>
                     <mx:Button label="Upgrade to Group!" click="dispatchEvent(new UpgradeEvent())" styleName="blueButton"/>
     <mx:Script><![CDATA[
         import com.easyinsight.account.UpgradeEvent;

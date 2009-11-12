@@ -46,11 +46,12 @@ import com.easyinsight.framework.UserTransferObject;
                     break;
                 case Account.INDIVIDUAL:
                     this.accountReviewText = "Individual";
-                    this.accountReviewCost = "$10/month after free trial";
+                    this.accountReviewCost = "$25/month after free trial";
                     break;
                 case Account.GROUP:
                     this.accountReviewText = "Group";
-                    this.accountReviewCost = "$100/month after free trial"
+                    this.accountReviewCost = "$200/month after free trial"
+                    break;
 //                case Account.PROFESSIONAL:
 //                    this.accountReviewText = "Professional";
 //                    this.accountReviewCost = "$1500/month after free trial";
@@ -77,7 +78,7 @@ import com.easyinsight.framework.UserTransferObject;
             </mx:FormItem>
             <mx:FormItem label="" direction="horizontal">
                 <mx:Button label="Back to Previous Page" click="backToPrevious()"/>
-                <mx:Button label="Confirm and Create the Account!" click="confirm()" id="confirmButton"/>
+                <mx:Button label="Confirm and Upgrade the Account!" click="confirm()" id="confirmButton"/>
             </mx:FormItem>
             <mx:FormItem label="Upgrading the account..." id="creationBar" visible="false">
                 <mx:ProgressBar indeterminate="true"/>

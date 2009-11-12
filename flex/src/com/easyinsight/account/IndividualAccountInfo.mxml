@@ -6,12 +6,12 @@
         [Event(name="upgrade", type="com.easyinsight.account.UpgradeEvent")]
     </mx:Metadata>
                     <mx:Label text="INDIVIDUAL" fontSize="20" fontWeight="bold"/>
-                    <mx:Label text="$10/month" color="#D42525" fontWeight="bold"/>
+                    <mx:Label text="$25/month" color="#D42525" fontWeight="bold"/>                    
                     <mx:HRule width="100%"/>
                     <mx:Label text="Connect to other SaaS"/>
                     <mx:Label text="Integrate with API"/>
                     <mx:Label text="100 MB of storage"/>
-                    <mx:Label text="One user"/>
+                    <mx:Label text="5 users"/>
                     <mx:Button label="Upgrade to Individual!" click="dispatchEvent(new UpgradeEvent())" styleName="blueButton"/>
     <mx:Script><![CDATA[
         import com.easyinsight.account.UpgradeEvent;

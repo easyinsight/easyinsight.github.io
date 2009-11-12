@@ -6,12 +6,12 @@
         [Event(name="upgrade", type="com.easyinsight.account.UpgradeEvent")]
     </mx:Metadata>
       <mx:Label text="PROFESSIONAL" fontSize="20" fontWeight="bold"/>
-                         <mx:Label text="$1500/month" color="#D42525" fontWeight="bold"/>
-                         <mx:HRule width="100%"/>
-                         <mx:Label text="Sophisticated improvement tools"/>
-                         <mx:Label text="Business process integration"/>
-                         <mx:Label text="20 GB of storage"/>
-                         <mx:Label text="Unlimited users"/>
+                         <mx:Label text="$1500/month" color="#D42525" fontWeight="bold"/>                        
+                        <mx:HRule width="100%"/>
+                        <mx:Label text="Sophisticated improvement tools"/>
+                        <mx:Label text="Business process integration"/>
+                        <mx:Label text="10 GB of storage"/>
+                        <mx:Label text="Unlimited users"/>
                          <mx:Button label="Contact us" click="dispatchEvent(new UpgradeEvent())" styleName="blueButton"/>
     <mx:Script><![CDATA[
         import com.easyinsight.account.UpgradeEvent;

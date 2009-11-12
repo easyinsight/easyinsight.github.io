@@ -7,11 +7,12 @@
     </mx:Metadata>
 <mx:Label text="ENTERPRISE" fontSize="20" fontWeight="bold"/>
                          <mx:Label text="Talk to us" color="#D42525" fontWeight="bold"/>
-                         <mx:HRule width="100%"/>
-                         <mx:Label text="Dedicated storage and systems"/>
-                         <mx:Label text="Extra customization and security"/>
-                         <mx:Label text="Terabytes of storage"/>
-                         <mx:Label text="Unlimited users"/>
+                         
+                    <mx:HRule width="100%"/>
+                    <mx:Label text="Dedicated storage and systems"/>
+                    <mx:Label text="Extra customization and security"/>
+                    <mx:Label text="Terabytes of storage"/>
+                    <mx:Label text="Unlimited users"/>
                          <mx:Button label="Contact us" click="dispatchEvent(new UpgradeEvent())" styleName="blueButton"/>
     <mx:Script><![CDATA[
         import com.easyinsight.account.UpgradeEvent;
