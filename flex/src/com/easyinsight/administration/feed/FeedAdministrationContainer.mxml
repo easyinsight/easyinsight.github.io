@@ -93,6 +93,7 @@
             this.feedDefinition = feedService.getFeedDefinition.lastResult as FeedDefinitionData;
             liveData = feedDefinition.isLiveData();
             BrowserManager.getInstance().setTitle("Easy Insight - Data Source Administration - " + feedDefinition.feedName);
+            this.feedType = feedDefinition.getFeedType();            
             if (feedType == DataFeedDescriptor.COMPOSITE) {
                 var compositeFeedDefinition:CompositeFeedDefinition = feedDefinition as CompositeFeedDefinition;
                 var compositeWorkspace:CompositeWorkspace = new CompositeWorkspace();
@@ -121,7 +122,7 @@
             this.feedDescription = feedDefinition.description;
             this.feedOwnerName = feedDefinition.ownerName;
             this.feedAttribution = feedDefinition.attribution;
-            this.feedType = feedDefinition.getFeedType();
+
 
             this.activated = User.getInstance().activated;
 

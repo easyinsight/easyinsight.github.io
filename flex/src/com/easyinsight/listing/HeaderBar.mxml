@@ -128,7 +128,7 @@
         private var loggedIn:Boolean = false;
 
         private function onListingChange(event:ListingChangeEvent):void {
-            dispatchEvent(event);
+            //dispatchEvent(event);
         }
 
         private function findNode(targetPage:String, items:Array):ListingOption {

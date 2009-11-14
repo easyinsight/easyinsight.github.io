@@ -7,7 +7,7 @@ public class DeleteUserEvent extends Event {
     public var userID:int;
 
     public function DeleteUserEvent(userID:int) {
-        super(DELETE_USER);
+        super(DELETE_USER, true);
         this.userID = userID;
     }
 

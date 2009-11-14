@@ -1,8 +1,9 @@
 package com.easyinsight.feedassembly
 {
 	import com.easyinsight.administration.feed.FeedDefinitionData;
-	
-	import mx.collections.ArrayCollection;
+import com.easyinsight.listing.DataFeedDescriptor;
+
+import mx.collections.ArrayCollection;
 
 	[Bindable]
 	[RemoteClass(alias="com.easyinsight.datafeeds.CompositeFeedDefinition")]
@@ -15,5 +16,10 @@ package com.easyinsight.feedassembly
 		{
 			super();
 		}
-	}
+
+
+        override public function getFeedType():int {
+            return DataFeedDescriptor.COMPOSITE;
+        }
+    }
 }
