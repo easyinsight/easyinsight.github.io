@@ -163,4 +163,21 @@ public class FeedDescriptor {
     public void setHasSavedCredentials(boolean hasSavedCredentials) {
         this.hasSavedCredentials = hasSavedCredentials;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        FeedDescriptor that = (FeedDescriptor) o;
+
+        if (dataFeedID != that.dataFeedID) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        return (int) (dataFeedID ^ (dataFeedID >>> 32));
+    }
 }

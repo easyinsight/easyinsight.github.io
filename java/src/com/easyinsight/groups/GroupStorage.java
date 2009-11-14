@@ -430,19 +430,19 @@ public class GroupStorage {
             }
             addGroupAudit(new GroupAuditMessage(SecurityUtil.getUserID(), new Date(), "Added data source", groupID, null), conn);
         } finally {
-            Database.instance().closeConnection(conn);
+            Database.closeConnection(conn);
         }
     }
 
-    public void addInsightToGroup(long feedID, long groupID) throws SQLException {
-        Connection conn = Database.instance().getConnection();
+    public void addReportToGroup(long reportID, long groupID) throws SQLException {
+        EIConnection conn = Database.instance().getConnection();
         Session s = Database.instance().createSession(conn);
         try {
             conn.setAutoCommit(false);
             PreparedStatement existingLinkQuery = conn.prepareStatement("SELECT GROUP_TO_INSIGHT_ID FROM GROUP_TO_INSIGHT WHERE " +
                     "GROUP_ID = ? AND INSIGHT_ID = ?");
             existingLinkQuery.setLong(1, groupID);
-            existingLinkQuery.setLong(2, feedID);
+            existingLinkQuery.setLong(2, reportID);
             ResultSet existingRS = existingLinkQuery.executeQuery();
             if (existingRS.next()) {
                 long existingID = existingRS.getLong(1);
@@ -452,12 +452,12 @@ public class GroupStorage {
                 updateLinkStmt.setLong(2, existingID);
                 updateLinkStmt.executeUpdate();
             } else {
-                PreparedStatement insertFeedStmt = conn.prepareStatement("INSERT INTO GROUP_TO_INSIGHT (GROUP_ID, INSIGHT_ID, ROLE) " +
+                PreparedStatement insightReportStmt = conn.prepareStatement("INSERT INTO GROUP_TO_INSIGHT (GROUP_ID, INSIGHT_ID, ROLE) " +
                         "VALUES (?, ?, ?)");
-                insertFeedStmt.setLong(1, groupID);
-                insertFeedStmt.setLong(2, feedID);
-                insertFeedStmt.setLong(3, Roles.SUBSCRIBER);
-                insertFeedStmt.execute();
+                insightReportStmt.setLong(1, groupID);
+                insightReportStmt.setLong(2, reportID);
+                insightReportStmt.setLong(3, Roles.SUBSCRIBER);
+                insightReportStmt.execute();
             }
             ReportToGroupNotification notification = new ReportToGroupNotification();
             notification.setActingUser((User) s.get(User.class, SecurityUtil.getUserID()));
@@ -465,12 +465,17 @@ public class GroupStorage {
             notification.setAnalysisRole(NotificationBase.VIEWER);
             notification.setGroupID(groupID);
             notification.setNotificationDate(new Date());
-            notification.setAnalysisID(feedID);
+            notification.setAnalysisID(reportID);
             notification.setNotificationType(NotificationBase.REPORT_TO_GROUP);
             s.save(notification);
+            conn.commit();
+        } catch (Exception e) {
+            conn.rollback();
+            throw new RuntimeException(e);
         } finally {
             s.close();
-            Database.instance().closeConnection(conn);
+            conn.setAutoCommit(true);
+            Database.closeConnection(conn);
         }
     }
 

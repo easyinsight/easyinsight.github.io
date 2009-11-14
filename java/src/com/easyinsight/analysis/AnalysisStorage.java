@@ -12,6 +12,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+
 import org.hibernate.Session;
 import org.hibernate.Query;
 
@@ -547,5 +548,23 @@ public class AnalysisStorage {
         } finally {
             session.close();
         }
+    }
+
+    public List<InsightDescriptor> getReportsForGroups(long userID) throws SQLException {
+        List<InsightDescriptor> reports = new ArrayList<InsightDescriptor>();
+        Connection conn = Database.instance().getConnection();
+        try {
+            PreparedStatement queryStmt = conn.prepareStatement("select analysis.analysis_id, analysis.title, analysis.data_feed_id, analysis.report_type " +
+                    "from group_to_insight, group_to_user_join, analysis where " +
+                        "group_to_user_join.group_id = group_to_insight.group_id and group_to_insight.insight_id = analysis.analysis_id and group_to_user_join.user_id = ?");
+            queryStmt.setLong(1, userID);
+            ResultSet rs = queryStmt.executeQuery();
+            while (rs.next()) {
+                reports.add(new InsightDescriptor(rs.getLong(1), rs.getString(2), rs.getLong(3), rs.getInt(4)));    
+            }
+        } finally {
+            Database.closeConnection(conn);
+        }
+        return reports;
     }
 }

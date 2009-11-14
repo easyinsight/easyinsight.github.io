@@ -1,0 +1,387 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wsdl:definitions name="DataProviderService" targetNamespace="http://sampleimpl.easyinsight.com/" xmlns:ns1="http://schemas.xmlsoap.org/soap/http" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:tns="http://sampleimpl.easyinsight.com/" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <wsdl:types>
+<xs:schema elementFormDefault="unqualified" targetNamespace="http://sampleimpl.easyinsight.com/" version="1.0" xmlns:tns="http://sampleimpl.easyinsight.com/" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+<xs:element name="defineDataSource" type="tns:defineDataSource"/>
+<xs:element name="defineDataSourceResponse" type="tns:defineDataSourceResponse"/>
+<xs:element name="getColumns" type="tns:getColumns"/>
+<xs:element name="getColumnsResponse" type="tns:getColumnsResponse"/>
+<xs:element name="getFields" type="tns:getFields"/>
+<xs:element name="getFieldsResponse" type="tns:getFieldsResponse"/>
+<xs:element name="getPossibleDateValues" type="tns:getPossibleDateValues"/>
+<xs:element name="getPossibleDateValuesResponse" type="tns:getPossibleDateValuesResponse"/>
+<xs:element name="getPossibleStringValues" type="tns:getPossibleStringValues"/>
+<xs:element name="getPossibleStringValuesResponse" type="tns:getPossibleStringValuesResponse"/>
+<xs:element name="getPropertiesForDefinition" type="tns:getPropertiesForDefinition"/>
+<xs:element name="getPropertiesForDefinitionResponse" type="tns:getPropertiesForDefinitionResponse"/>
+<xs:element name="getRows" type="tns:getRows"/>
+<xs:element name="getRowsResponse" type="tns:getRowsResponse"/>
+<xs:element name="getSpecifications" type="tns:getSpecifications"/>
+<xs:element name="getSpecificationsResponse" type="tns:getSpecificationsResponse"/>
+<xs:complexType name="getColumns">
+<xs:sequence/>
+</xs:complexType>
+<xs:complexType name="getColumnsResponse">
+<xs:sequence>
+<xs:element maxOccurs="unbounded" minOccurs="0" name="return" type="xs:string"/>
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="getPropertiesForDefinition">
+<xs:sequence/>
+</xs:complexType>
+<xs:complexType name="getPropertiesForDefinitionResponse">
+<xs:sequence>
+<xs:element maxOccurs="unbounded" minOccurs="0" name="return" type="tns:propertyMetadata"/>
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="propertyMetadata">
+<xs:sequence>
+<xs:element minOccurs="0" name="name" type="xs:string"/>
+<xs:element name="type" type="xs:int"/>
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="getFields">
+<xs:sequence/>
+</xs:complexType>
+<xs:complexType name="getFieldsResponse">
+<xs:sequence>
+<xs:element minOccurs="0" name="return" type="tns:folder"/>
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="folder">
+<xs:sequence>
+<xs:element maxOccurs="unbounded" minOccurs="0" name="fields" nillable="true" type="tns:field"/>
+<xs:element maxOccurs="unbounded" minOccurs="0" name="folders" nillable="true" type="tns:folder"/>
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="field">
+<xs:sequence>
+<xs:element minOccurs="0" name="displayName" type="xs:string"/>
+<xs:element minOccurs="0" name="fieldType" type="tns:fieldType"/>
+<xs:element minOccurs="0" name="key" type="xs:string"/>
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="getPossibleStringValues">
+<xs:sequence>
+<xs:element minOccurs="0" name="column" type="xs:string"/>
+<xs:element maxOccurs="unbounded" minOccurs="0" name="properties" type="tns:property"/>
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="property">
+<xs:sequence>
+<xs:element minOccurs="0" name="key" type="xs:string"/>
+<xs:element minOccurs="0" name="value" type="xs:string"/>
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="getPossibleStringValuesResponse">
+<xs:sequence>
+<xs:element maxOccurs="unbounded" minOccurs="0" name="return" type="tns:stringValue"/>
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="stringValue">
+<xs:sequence>
+<xs:element minOccurs="0" name="key" type="xs:string"/>
+<xs:element minOccurs="0" name="value" type="xs:string"/>
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="defineDataSource">
+<xs:sequence>
+<xs:element maxOccurs="unbounded" minOccurs="0" name="properties" type="tns:property"/>
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="defineDataSourceResponse">
+<xs:sequence>
+<xs:element minOccurs="0" name="return" type="xs:string"/>
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="getSpecifications">
+<xs:sequence/>
+</xs:complexType>
+<xs:complexType name="getSpecificationsResponse">
+<xs:sequence>
+<xs:element maxOccurs="unbounded" minOccurs="0" name="return" type="tns:filterSpecification"/>
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="filterSpecification">
+<xs:sequence>
+<xs:element minOccurs="0" name="column" type="xs:string"/>
+<xs:element name="type" type="xs:int"/>
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="getRows">
+<xs:sequence>
+<xs:element maxOccurs="unbounded" minOccurs="0" name="columns" type="xs:string"/>
+<xs:element minOccurs="0" name="where" type="tns:where"/>
+<xs:element maxOccurs="unbounded" minOccurs="0" name="properties" type="tns:property"/>
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="where">
+<xs:sequence>
+<xs:element maxOccurs="unbounded" minOccurs="0" name="dateWheres" nillable="true" type="tns:dateWhere"/>
+<xs:element maxOccurs="unbounded" minOccurs="0" name="numberWheres" nillable="true" type="tns:numberWhere"/>
+<xs:element maxOccurs="unbounded" minOccurs="0" name="stringWheres" nillable="true" type="tns:stringWhere"/>
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="dateWhere">
+<xs:sequence>
+<xs:element minOccurs="0" name="comparison" type="tns:comparison"/>
+<xs:element minOccurs="0" name="key" type="xs:string"/>
+<xs:element minOccurs="0" name="value" type="xs:dateTime"/>
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="numberWhere">
+<xs:sequence/>
+</xs:complexType>
+<xs:complexType name="stringWhere">
+<xs:sequence>
+<xs:element minOccurs="0" name="key" type="xs:string"/>
+<xs:element minOccurs="0" name="value" type="xs:string"/>
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="getRowsResponse">
+<xs:sequence>
+<xs:element maxOccurs="unbounded" minOccurs="0" name="return" type="tns:row"/>
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="row">
+<xs:sequence>
+<xs:element maxOccurs="unbounded" minOccurs="0" name="dateValues" nillable="true" type="tns:dateValue"/>
+<xs:element maxOccurs="unbounded" minOccurs="0" name="numberValues" nillable="true" type="tns:numberValue"/>
+<xs:element maxOccurs="unbounded" minOccurs="0" name="stringValues" nillable="true" type="tns:stringValue"/>
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="dateValue">
+<xs:sequence>
+<xs:element minOccurs="0" name="key" type="xs:string"/>
+<xs:element minOccurs="0" name="value" type="xs:dateTime"/>
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="numberValue">
+<xs:sequence>
+<xs:element minOccurs="0" name="key" type="xs:string"/>
+<xs:element name="value" type="xs:double"/>
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="getPossibleDateValues">
+<xs:sequence>
+<xs:element minOccurs="0" name="column" type="xs:string"/>
+<xs:element maxOccurs="unbounded" minOccurs="0" name="properties" type="tns:property"/>
+</xs:sequence>
+</xs:complexType>
+<xs:complexType name="getPossibleDateValuesResponse">
+<xs:sequence>
+<xs:element maxOccurs="unbounded" minOccurs="0" name="return" type="tns:dateValue"/>
+</xs:sequence>
+</xs:complexType>
+<xs:simpleType name="fieldType">
+<xs:restriction base="xs:string">
+<xs:enumeration value="GROUPING"/>
+<xs:enumeration value="MEASURE"/>
+<xs:enumeration value="DATE"/>
+<xs:enumeration value="TAGS"/>
+</xs:restriction>
+</xs:simpleType>
+<xs:simpleType name="comparison">
+<xs:restriction base="xs:string">
+<xs:enumeration value="GREATER_THAN"/>
+<xs:enumeration value="EQUAL_TO"/>
+<xs:enumeration value="LESS_THAN"/>
+</xs:restriction>
+</xs:simpleType>
+</xs:schema>
+  </wsdl:types>
+  <wsdl:message name="getColumnsResponse">
+    <wsdl:part element="tns:getColumnsResponse" name="parameters">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="getPossibleStringValues">
+    <wsdl:part element="tns:getPossibleStringValues" name="parameters">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="getSpecificationsResponse">
+    <wsdl:part element="tns:getSpecificationsResponse" name="parameters">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="getRowsResponse">
+    <wsdl:part element="tns:getRowsResponse" name="parameters">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="getRows">
+    <wsdl:part element="tns:getRows" name="parameters">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="getPropertiesForDefinition">
+    <wsdl:part element="tns:getPropertiesForDefinition" name="parameters">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="getColumns">
+    <wsdl:part element="tns:getColumns" name="parameters">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="getPossibleDateValues">
+    <wsdl:part element="tns:getPossibleDateValues" name="parameters">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="defineDataSourceResponse">
+    <wsdl:part element="tns:defineDataSourceResponse" name="parameters">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="getSpecifications">
+    <wsdl:part element="tns:getSpecifications" name="parameters">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="getPropertiesForDefinitionResponse">
+    <wsdl:part element="tns:getPropertiesForDefinitionResponse" name="parameters">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="getFields">
+    <wsdl:part element="tns:getFields" name="parameters">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="getPossibleDateValuesResponse">
+    <wsdl:part element="tns:getPossibleDateValuesResponse" name="parameters">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="getFieldsResponse">
+    <wsdl:part element="tns:getFieldsResponse" name="parameters">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="defineDataSource">
+    <wsdl:part element="tns:defineDataSource" name="parameters">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="getPossibleStringValuesResponse">
+    <wsdl:part element="tns:getPossibleStringValuesResponse" name="parameters">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:portType name="DataProvider">
+    <wsdl:operation name="getColumns">
+      <wsdl:input message="tns:getColumns" name="getColumns">
+    </wsdl:input>
+      <wsdl:output message="tns:getColumnsResponse" name="getColumnsResponse">
+    </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="getPropertiesForDefinition">
+      <wsdl:input message="tns:getPropertiesForDefinition" name="getPropertiesForDefinition">
+    </wsdl:input>
+      <wsdl:output message="tns:getPropertiesForDefinitionResponse" name="getPropertiesForDefinitionResponse">
+    </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="getFields">
+      <wsdl:input message="tns:getFields" name="getFields">
+    </wsdl:input>
+      <wsdl:output message="tns:getFieldsResponse" name="getFieldsResponse">
+    </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="getPossibleStringValues">
+      <wsdl:input message="tns:getPossibleStringValues" name="getPossibleStringValues">
+    </wsdl:input>
+      <wsdl:output message="tns:getPossibleStringValuesResponse" name="getPossibleStringValuesResponse">
+    </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="defineDataSource">
+      <wsdl:input message="tns:defineDataSource" name="defineDataSource">
+    </wsdl:input>
+      <wsdl:output message="tns:defineDataSourceResponse" name="defineDataSourceResponse">
+    </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="getSpecifications">
+      <wsdl:input message="tns:getSpecifications" name="getSpecifications">
+    </wsdl:input>
+      <wsdl:output message="tns:getSpecificationsResponse" name="getSpecificationsResponse">
+    </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="getRows">
+      <wsdl:input message="tns:getRows" name="getRows">
+    </wsdl:input>
+      <wsdl:output message="tns:getRowsResponse" name="getRowsResponse">
+    </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="getPossibleDateValues">
+      <wsdl:input message="tns:getPossibleDateValues" name="getPossibleDateValues">
+    </wsdl:input>
+      <wsdl:output message="tns:getPossibleDateValuesResponse" name="getPossibleDateValuesResponse">
+    </wsdl:output>
+    </wsdl:operation>
+  </wsdl:portType>
+  <wsdl:binding name="DataProviderServiceSoapBinding" type="tns:DataProvider">
+    <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+    <wsdl:operation name="getColumns">
+      <soap:operation soapAction="" style="document"/>
+      <wsdl:input name="getColumns">
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output name="getColumnsResponse">
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="getPropertiesForDefinition">
+      <soap:operation soapAction="" style="document"/>
+      <wsdl:input name="getPropertiesForDefinition">
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output name="getPropertiesForDefinitionResponse">
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="getFields">
+      <soap:operation soapAction="" style="document"/>
+      <wsdl:input name="getFields">
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output name="getFieldsResponse">
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="getPossibleStringValues">
+      <soap:operation soapAction="" style="document"/>
+      <wsdl:input name="getPossibleStringValues">
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output name="getPossibleStringValuesResponse">
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="defineDataSource">
+      <soap:operation soapAction="" style="document"/>
+      <wsdl:input name="defineDataSource">
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output name="defineDataSourceResponse">
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="getSpecifications">
+      <soap:operation soapAction="" style="document"/>
+      <wsdl:input name="getSpecifications">
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output name="getSpecificationsResponse">
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="getRows">
+      <soap:operation soapAction="" style="document"/>
+      <wsdl:input name="getRows">
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output name="getRowsResponse">
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="getPossibleDateValues">
+      <soap:operation soapAction="" style="document"/>
+      <wsdl:input name="getPossibleDateValues">
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output name="getPossibleDateValuesResponse">
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:service name="DataProviderService">
+    <wsdl:port binding="tns:DataProviderServiceSoapBinding" name="DataProviderPort">
+      <soap:address location="http://localhost:9000/DataProvider"/>
+    </wsdl:port>
+  </wsdl:service>
+</wsdl:definitions>

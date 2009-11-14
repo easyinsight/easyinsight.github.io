@@ -32,6 +32,7 @@ public class FeedType {
     public static final FeedType HIGHRISE_COMPANY = new FeedType(24);
     public static final FeedType HIGHRISE_DEAL = new FeedType(25);
     public static final FeedType TWITTER = new FeedType(26);
+    public static final FeedType CUSTOM = new FeedType(27);
 
     private int type;
 

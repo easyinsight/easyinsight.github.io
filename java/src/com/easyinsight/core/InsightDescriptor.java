@@ -39,4 +39,26 @@ public class InsightDescriptor extends EIDescriptor {
     public void setDataFeedID(long dataFeedID) {
         this.dataFeedID = dataFeedID;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+
+        InsightDescriptor that = (InsightDescriptor) o;
+
+        if (dataFeedID != that.dataFeedID) return false;
+        if (reportType != that.reportType) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = super.hashCode();
+        result = 31 * result + (int) (dataFeedID ^ (dataFeedID >>> 32));
+        result = 31 * result + reportType;
+        return result;
+    }
 }

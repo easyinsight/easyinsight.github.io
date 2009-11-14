@@ -71,7 +71,7 @@ public class DataStorage {
                 dataStorage.metadata = createDefaultMetadata(conn);
             }
         } finally {
-            Database.instance().closeConnection(conn);
+            Database.closeConnection(conn);
         }
         dataStorage.keys = keyMetadatas;
         dataStorage.feedID = feedID;
@@ -225,7 +225,7 @@ public class DataStorage {
             try {
                 addOrUpdateMetadata(feedID, metadata, conn);
             } finally {
-                Database.instance().closeConnection(conn);
+                Database.closeConnection(conn);
             }
         } else {
             addOrUpdateMetadata(feedID, metadata, coreDBConn);
@@ -260,7 +260,7 @@ public class DataStorage {
         } catch (SQLException e) {
             LogClass.error(e);
         }
-        database.closeConnection(storageConn);
+        Database.closeConnection(storageConn);
         storageConn = null;
     }
 
@@ -371,6 +371,9 @@ public class DataStorage {
                             double doubleValue = NumericValue.produceDoubleValue(string);
                             row.addValue(fieldMigration.key, new NumericValue(doubleValue));
                         } else {
+                            if (existingValue.type() == Value.NUMBER) {
+                                string = ((Integer) ((NumericValue) existingValue).getValue().intValue()).toString();
+                            }
                             row.addValue(fieldMigration.key, new StringValue(string));
                         }
                     }
@@ -978,7 +981,7 @@ public class DataStorage {
         try {
             addOrUpdateMetadata(dataFeedID, metadata, conn);
         } finally {
-            Database.instance().closeConnection(conn);
+            Database.closeConnection(conn);
         }
     }
 

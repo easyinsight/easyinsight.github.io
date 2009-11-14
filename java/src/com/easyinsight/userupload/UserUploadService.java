@@ -92,15 +92,35 @@ public class UserUploadService implements IUserUploadService {
         }
     }
 
-    public List<Object> getFeedAnalysisTree() {
+    public MyDataTree getFeedAnalysisTree(boolean includeGroups, boolean firstCall) {
         long userID = SecurityUtil.getUserID();
         try {
             List<Object> objects = new ArrayList<Object>();
             List<FeedDescriptor> descriptors = feedStorage.searchForSubscribedFeeds(userID);
-            objects.addAll(descriptors);
+            Map<Long, FeedDescriptor> descriptorMap = new HashMap<Long, FeedDescriptor>();
+            for (FeedDescriptor descriptor : descriptors) {
+                descriptorMap.put(descriptor.getDataFeedID(), descriptor);
+            }
+            if (includeGroups) {
+                List<FeedDescriptor> groupDataSources = feedStorage.getDataSourcesFromGroups(userID);
+                for (FeedDescriptor groupDescriptor : groupDataSources) {
+                    if (!descriptorMap.containsKey(groupDescriptor.getDataFeedID())) {
+                        descriptorMap.put(groupDescriptor.getDataFeedID(), groupDescriptor);
+                    }
+                }
+            }
+            objects.addAll(descriptorMap.values());
             AnalysisStorage analysisStorage = new AnalysisStorage();
             Map<Long, List<InsightDescriptor>> analysisDefinitions = new HashMap<Long, List<InsightDescriptor>>();
+            List<InsightDescriptor> groupReports = null;
+            if (includeGroups) {
+                groupReports = analysisStorage.getReportsForGroups(userID);
+            }
+
             for (InsightDescriptor analysisDefinition : analysisStorage.getInsightDescriptors(userID)) {
+                if (includeGroups) {
+                    groupReports.remove(analysisDefinition);
+                }
                 List<InsightDescriptor> defList = analysisDefinitions.get(analysisDefinition.getDataFeedID());
                 if (defList == null) {
                     defList = new ArrayList<InsightDescriptor>();
@@ -108,7 +128,19 @@ public class UserUploadService implements IUserUploadService {
                 }
                 defList.add(analysisDefinition);
             }
-            for (FeedDescriptor feedDescriptor : descriptors) {
+
+            if (includeGroups) {
+                for (InsightDescriptor analysisDefinition : groupReports) {
+                    List<InsightDescriptor> defList = analysisDefinitions.get(analysisDefinition.getDataFeedID());
+                    if (defList == null) {
+                        defList = new ArrayList<InsightDescriptor>();
+                        analysisDefinitions.put(analysisDefinition.getDataFeedID(), defList);
+                    }
+                    defList.add(analysisDefinition);
+                }
+            }
+
+            for (FeedDescriptor feedDescriptor : descriptorMap.values()) {
                 List<InsightDescriptor> analysisDefList = analysisDefinitions.remove(feedDescriptor.getDataFeedID());
                 if (analysisDefList == null) {
                     analysisDefList = new ArrayList<InsightDescriptor>();
@@ -118,7 +150,11 @@ public class UserUploadService implements IUserUploadService {
             for (List<InsightDescriptor> defList : analysisDefinitions.values()) {
                 objects.addAll(defList);
             }
-            return objects;
+            if (objects.isEmpty() && firstCall && !includeGroups) {
+                objects = getFeedAnalysisTree(true, false).getObjects();
+                return new MyDataTree(objects, true);
+            }
+            return new MyDataTree(objects, includeGroups);
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);

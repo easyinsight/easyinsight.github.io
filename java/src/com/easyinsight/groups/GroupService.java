@@ -269,7 +269,7 @@ public class GroupService {
         SecurityUtil.authorizeGroup(groupID, Roles.SHARER);
         SecurityUtil.authorizeInsight(insightID);
         try {
-            groupStorage.addInsightToGroup(insightID, groupID);
+            groupStorage.addReportToGroup(insightID, groupID);
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);

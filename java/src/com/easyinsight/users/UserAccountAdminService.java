@@ -239,7 +239,8 @@ public class UserAccountAdminService {
             } finally {
                 session.close();
             }
-            if (user != null && account.getAccountType() == Account.GROUP || account.getAccountType() == Account.PROFESSIONAL || account.getAccountType() == Account.ENTERPRISE) {
+            if (user != null && account.getAccountType() == Account.GROUP || account.getAccountType() == Account.PROFESSIONAL || account.getAccountType() == Account.ENTERPRISE
+                    || account.getAccountType() == Account.ADMINISTRATOR) {
                 try {
                     new GroupStorage().addUserToGroup(user.getUserID(), account.getGroupID(), userTransferObject.isAccountAdmin() ? Roles.OWNER : Roles.SUBSCRIBER);
                 } catch (Exception e) {
