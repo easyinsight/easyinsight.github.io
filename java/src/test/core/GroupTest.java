@@ -4,12 +4,9 @@ import junit.framework.TestCase;
 import com.easyinsight.database.Database;
 import com.easyinsight.datafeeds.FeedRegistry;
 import com.easyinsight.groups.Group;
-import com.easyinsight.groups.GroupToUserBinding;
 import com.easyinsight.groups.GroupService;
 import com.easyinsight.groups.GroupUser;
-import com.easyinsight.users.InternalUserService;
 import com.easyinsight.analysis.Tag;
-import com.easyinsight.analysis.TagCloud;
 import com.easyinsight.security.Roles;
 
 import java.util.Arrays;
@@ -47,7 +44,7 @@ public class GroupTest extends TestCase {
         groupService.addGoalTreeToGroup(0, groupID);
         groupService.addGroupComment(null);
         groupService.addMemberToGroup(groupID);
-        groupService.addInsightToGroup(0, groupID);*/
+        groupService.addReportToGroup(0, groupID);*/
         groupService.getFeeds(groupID);
         groupService.getGoals(groupID);
         groupService.getGoalTrees(groupID);
