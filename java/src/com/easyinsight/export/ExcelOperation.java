@@ -15,7 +15,7 @@ import java.sql.SQLException;
  * Time: 2:14:07 PM
  */
 public class ExcelOperation implements FileOperation {
-    public byte[] retrieve(long fileID, long userID) {
+    public byte[] retrieve(long fileID, Long userID) {
         byte[] bytes;
         Connection conn = Database.instance().getConnection();
         try {

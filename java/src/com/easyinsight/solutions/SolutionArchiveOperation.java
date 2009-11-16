@@ -15,7 +15,7 @@ import java.sql.SQLException;
  * Time: 6:42:00 PM
  */
 public class SolutionArchiveOperation implements FileOperation {
-    public byte[] retrieve(long solutionID, long userID) {
+    public byte[] retrieve(long solutionID, Long userID) {
         byte[] bytes;
         Connection conn = Database.instance().getConnection();
         try {
@@ -31,7 +31,7 @@ public class SolutionArchiveOperation implements FileOperation {
             LogClass.error(e);
             throw new RuntimeException(e);
         } finally {
-            Database.instance().closeConnection(conn);
+            Database.closeConnection(conn);
         }
         return bytes;
     }

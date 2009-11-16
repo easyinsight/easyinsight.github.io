@@ -615,7 +615,10 @@ public class UserUploadService implements IUserUploadService {
 
     public long uploadPNG(byte[] bytes) {
         try {
-            long userID = SecurityUtil.getUserID();
+            Long userID = SecurityUtil.getUserID(false);
+            if (userID == 0) {
+                userID = null;    
+            }
             return new PNGExportOperation().write(bytes, userID);
         } catch (Exception e) {
             LogClass.error(e);

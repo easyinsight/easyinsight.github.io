@@ -41,10 +41,14 @@ public class DownloadServlet extends HttpServlet {
             ServletOutputStream op;
             DataInputStream in;
             FileOperation fileOperation = getFileOperation(operation);
-            long userID = SecurityUtil.authenticate(userName, password);
+            Long userID = null;
+            if (userName != null && password != null) {
+                userID = SecurityUtil.authenticate(userName, password);
+            }
+            
             byte[] file = fileOperation.retrieve(fileID, userID);
 
-            int                 length   = 0;
+            int                 length;
             op = resp.getOutputStream();
             ServletContext context  = getServletConfig().getServletContext();
             //String              mimetype = context.getMimeType( filename );

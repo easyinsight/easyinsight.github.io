@@ -907,7 +907,7 @@ public class FeedStorage {
         try {
             PreparedStatement queryStmt = conn.prepareStatement("SELECT DISTINCT DATA_FEED.DATA_FEED_ID, DATA_FEED.FEED_NAME, " +
                     "FEED_PERSISTENCE_METADATA.SIZE, DATA_FEED.FEED_TYPE, DATA_FEED.ANALYSIS_ID, OWNER_NAME, DESCRIPTION, ATTRIBUTION, ROLE, PUBLICLY_VISIBLE, MARKETPLACE_VISIBLE, FEED_PERSISTENCE_METADATA.LAST_DATA_TIME, PASSWORD_STORAGE.USERNAME," +
-                    "DATA_FEED.PARENT_SOURCE_ID " +
+                    "DATA_FEED.PARENT_SOURCE_ID, UPLOAD_POLICY_GROUPS.GROUP_ID " +
                     " FROM (upload_policy_groups, group_to_user_join, DATA_FEED LEFT JOIN FEED_PERSISTENCE_METADATA ON DATA_FEED.DATA_FEED_ID = FEED_PERSISTENCE_METADATA.FEED_ID) LEFT JOIN PASSWORD_STORAGE ON DATA_FEED.DATA_FEED_ID = PASSWORD_STORAGE.DATA_FEED_ID WHERE " +
                     "upload_policy_groups.group_id = group_to_user_join.group_id AND GROUP_TO_USER_JOIN.USER_ID = ? AND DATA_FEED.DATA_FEED_ID = UPLOAD_POLICY_GROUPS.FEED_ID");
             queryStmt.setLong(1, userID);
@@ -940,7 +940,9 @@ public class FeedStorage {
                     }
                     lastDateMap.put(parentSourceID, lastDataTime);
                 } else {
+                    long groupID = rs.getLong(15);
                     FeedDescriptor feedDescriptor = createDescriptor(dataFeedID, feedName, userRole, feedSize, feedType, ownerName, description, attribution, lastDataTime);
+                    feedDescriptor.setGroupSourceID(groupID);
                     feedDescriptor.setHasSavedCredentials(hasSavedCredentials);
                     descriptorList.add(feedDescriptor);
                     feedMap.put(dataFeedID, feedDescriptor);

@@ -15,6 +15,7 @@ public class FeedDescriptor {
     private String name;
     private long dataFeedID;
     private int role;
+    private long groupSourceID;
     //private UploadPolicy policy;
     private long size;
     private int feedType;
@@ -42,6 +43,14 @@ public class FeedDescriptor {
         this.description = description;
         this.attribution = attribution;
         this.lastDataTime = lastDataTime;
+    }
+
+    public long getGroupSourceID() {
+        return groupSourceID;
+    }
+
+    public void setGroupSourceID(long groupSourceID) {
+        this.groupSourceID = groupSourceID;
     }
 
     public boolean isSolutionTemplate() {

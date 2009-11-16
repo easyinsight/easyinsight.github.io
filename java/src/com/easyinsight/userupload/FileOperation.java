@@ -6,5 +6,5 @@ package com.easyinsight.userupload;
  * Time: 1:53:33 PM
  */
 public interface FileOperation {
-    public byte[] retrieve(long fileID, long userID);
+    public byte[] retrieve(long fileID, Long userID);
 }
