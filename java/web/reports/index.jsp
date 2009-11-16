@@ -54,8 +54,8 @@
             keywords = "easy insight";
         }
         double ratingsAverage = results.getRatingsAverage();
-        String grayStar = "assets/star_grey.png";
-        String greenStar = "assets/star_green.png";
+        String grayStar = "/images/star_grey.png";
+        String greenStar = "/images/star_green.png";
         for (int i = 1; i <= 5; i++) {
             String star;
             if (i <= ratingsAverage) {
@@ -77,11 +77,7 @@
     <meta name="description" content="<%= description %>">
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
     <link type="text/css" rel="stylesheet" media="screen" href="/css/base.css" />
-    <script type="text/javascript" src="/js/prototype.js"></script>
-    <script type="text/javascript" src="/js/scriptaculous.js?load=effects,builder"></script>
-    <script type="text/javascript" src="/js/lightbox.js"></script>
-    <link rel="stylesheet" href="/prototype/css/lightbox.css" type="text/css" media="screen" />
-    <link rel="stylesheet" href="/report.css" type="text/css" media="screen" />
+    <link rel="stylesheet" href="/css/report.css" type="text/css" media="screen" />
 </head>
 <body style="width:100%;text-align:center;margin:0px auto;">
     <div style="width:1000px;border-left-style:solid;border-left-color:#DDDDDD;border-left-width:1px;border-right-style:solid;border-right-color:#DDDDDD;border-right-width:1px;margin:0 auto;">
