@@ -40,8 +40,10 @@ package com.easyinsight.analysis
                 request.method = URLRequestMethod.GET;
                 var vars:URLVariables = new URLVariables();
 
-                vars.userName = new String(User.getInstance().userName);
-                vars.password = new String(User.getInstance().password);
+                if (User.getInstance() != null) {
+                    vars.userName = new String(User.getInstance().userName);
+                    vars.password = new String(User.getInstance().password);
+                }
                 vars.operation = new String(1);
                 vars.fileID = new String(pngID);
                 request.data = vars;

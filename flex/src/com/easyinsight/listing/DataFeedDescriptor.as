@@ -26,6 +26,7 @@ package com.easyinsight.listing
 		public var name:String;
 		public var dataFeedID:int;		
 		public var genre:String;
+        public var groupSourceID:int;
 		//public var policy:UploadPolicy;
 		public var size:int;
         public var lastDataTime:Date;
