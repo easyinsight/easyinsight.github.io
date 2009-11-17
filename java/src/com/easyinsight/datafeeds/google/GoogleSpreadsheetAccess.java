@@ -1,6 +1,7 @@
 package com.easyinsight.datafeeds.google;
 
 import com.easyinsight.users.Credentials;
+import com.easyinsight.users.Utility;
 import com.google.gdata.client.spreadsheet.SpreadsheetService;
 import com.google.gdata.client.http.AuthSubUtil;
 import com.google.gdata.util.AuthenticationException;
@@ -23,7 +24,7 @@ public class GoogleSpreadsheetAccess {
         SpreadsheetService spreadsheetService = cacheSpreadsheetServices.get(token);
         if (spreadsheetService == null) {
             spreadsheetService = new SpreadsheetService("easyinsight-eidocs-1");
-            spreadsheetService.setAuthSubToken(token);
+            spreadsheetService.setAuthSubToken(token, Utility.getPrivateKey());
             cacheSpreadsheetServices.put(token, spreadsheetService);
         }
         return spreadsheetService;
