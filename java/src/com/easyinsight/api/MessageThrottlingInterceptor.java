@@ -67,6 +67,9 @@ public class MessageThrottlingInterceptor extends AbstractPhaseInterceptor {
 
                 s.save(bu);
                 s.getTransaction().commit();
+                if(cs.getCount() > 10485760) {
+                    throw new Fault(new Exception("You cannot send a message larger than 10mb at a time."));
+                }
                 if(bandwidthUsage > Account.getMaxCount(account.getAccountType())) {
                     throw new Fault(new Exception("Exceeded your limit."));
                 }
