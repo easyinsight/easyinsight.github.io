@@ -35,7 +35,7 @@ public class FeedRegistry {
 
     public static void initialize() {
         instance = new FeedRegistry();
-        System.out.println("Setup - Active Connections: " + Database.instance().getActiveConnections());
+        LogClass.info("Setup - Active Connections: " + Database.instance().getActiveConnections());
     }
 
     public static FeedRegistry instance() {
