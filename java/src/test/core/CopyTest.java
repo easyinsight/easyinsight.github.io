@@ -27,11 +27,16 @@ public class CopyTest extends TestCase {
             Database.initialize();
         }
         FeedRegistry.initialize();
+        System.out.println("Setup - Active Connections: " + Database.instance().getActiveConnections());
+    }
+
+    protected void tearDown() throws Exception {
+        System.out.println("TearDown - Active Connections: " + Database.instance().getActiveConnections());
     }
 
     public void testDataSourceCopy() throws SQLException {
+        System.out.println("Test - Active Connections: " + Database.instance().getActiveConnections());
         TestUtil.getIndividualTestUser();
-
         AnalysisDateDimension startedDate = new AnalysisDateDimension("Started", true, AnalysisDateDimension.DAY_LEVEL);
         AnalysisDateDimension endedDate = new AnalysisDateDimension("Completed", true, AnalysisDateDimension.DAY_LEVEL);
         AnalysisDimension correlationDim = new AnalysisDimension("Correlation ID", true);
