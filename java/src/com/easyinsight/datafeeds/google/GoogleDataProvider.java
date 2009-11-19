@@ -87,8 +87,8 @@ public class GoogleDataProvider {
             SpreadsheetService myService = GoogleSpreadsheetAccess.getOrCreateSpreadsheetService(token);
             SpreadsheetFeed spreadsheetFeed = myService.getFeed(feedUrl, SpreadsheetFeed.class);
             for (SpreadsheetEntry entry : spreadsheetFeed.getEntries()) {
-                List<WorksheetEntry> worksheetEntries = entry.getWorksheets();
                 try {
+                    List<WorksheetEntry> worksheetEntries = entry.getWorksheets();
                     List<Worksheet> worksheetList = new ArrayList<Worksheet>();
                     for (WorksheetEntry worksheetEntry : worksheetEntries) {
                         String title = worksheetEntry.getTitle().getPlainText();
