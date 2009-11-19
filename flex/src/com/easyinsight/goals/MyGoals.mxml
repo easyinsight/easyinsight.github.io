@@ -7,8 +7,13 @@
         <mx:State name="notLoggedIn">
             <mx:RemoveChild target="{controlsBox}"/>
             <mx:RemoveChild target="{dataBoxes}"/>
-            <mx:AddChild relativeTo="{coreContent}">
-                <listing:GottaLoginPage/>
+            <mx:RemoveChild target="{coreContent}" />
+            <mx:AddChild relativeTo="{wholePage}">
+                <mx:VBox width="100%" height="100%" backgroundColor="#DCE2F8">
+                    <mx:VBox height="100%" width="100%" paddingTop="10" paddingLeft="10" paddingRight="10" paddingBottom="10" verticalGap="10">
+                        <listing:GottaLoginPage/>
+                    </mx:VBox>
+                </mx:VBox>
             </mx:AddChild>
         </mx:State>
         <mx:State name="functionalityUnavailable">
@@ -260,7 +265,7 @@
         <mx:method name="getGoalTrees" result="gotTrees()"/>
         <mx:method name="deleteGoalTree" result="deletedTree()"/>
     </mx:RemoteObject>
-    <mx:VBox height="100%" width="100%" backgroundColor="#818285" horizontalAlign="center">
+    <mx:VBox id="wholePage" height="100%" width="100%" backgroundColor="#818285" horizontalAlign="center">
         <mx:VBox width="1000" height="100%" paddingTop="10" paddingBottom="10" paddingLeft="10"
                  paddingRight="10" verticalGap="10" backgroundColor="#ffffff" id="coreContent">
             <mx:HBox width="100%" id="controlsBox">
