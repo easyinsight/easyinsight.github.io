@@ -5,22 +5,12 @@ package com.easyinsight.analysis
 import com.easyinsight.detail.DataDetailEvent;
 import com.easyinsight.filtering.FilterRawData;
 import com.easyinsight.pseudocontext.PseudoContextWindow;
-import com.easyinsight.report.ReportNavigationEvent;
-
-import com.easyinsight.util.PopUpUtil;
 
 import flash.events.ContextMenuEvent;
 import flash.events.Event;
 import flash.events.MouseEvent;
-import flash.geom.Point;
 import flash.net.URLRequest;
 
-    import flash.system.System;
-    import flash.ui.ContextMenu;
-import flash.ui.ContextMenuItem;
-
-
-import mx.controls.Label;
     import mx.controls.listClasses.IListItemRenderer;
 import mx.core.UITextField;
 import mx.events.FlexEvent;
@@ -32,18 +22,10 @@ public class AnalysisCellRenderer extends UITextField implements IListItemRender
 	{
 		private var _data:Object;
 		private var URL:String;
-		private static const emptyText:String = "";
 		private var _analysisItem:AnalysisItem;
 		private var _renderer:ConditionRenderer;
-        private var linkShowing:Boolean = false;
         private var linkable:Boolean = false;
 
-        private var defaultBackground:uint;
-
-        [Bindable]
-        private var listContextMenu:ContextMenu;
-
-        private var lookupObj:Object = new Object();
 
 		//private var defaultLabel:Label;
 		//private var linkButton:LinkButton;
