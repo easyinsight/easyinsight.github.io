@@ -119,6 +119,7 @@
         }
 
         private function onRollup(event:HierarchyRollupEvent):void {
+
             var overrideObj:HierarchyOverride = new HierarchyOverride();
             overrideObj.analysisItemID = event.hierarchy.analysisItemID;
             overrideObj.position = event.position;
@@ -126,7 +127,7 @@
             transformContainer.clearFilter(event.analysisItem);
         }
 
-        private function childFilterCreation(event:HierarchyDrilldownEvent):void {
+        private function childFilterCreation(event:HierarchyDrilldownEvent):void {            
             viewFactory.noCache = true;
             var overrideObj:HierarchyOverride = new HierarchyOverride();
             overrideObj.analysisItemID = event.hierarchyItem.analysisItemID;
@@ -368,13 +369,14 @@
                 admin = event.dataSourceAccessible;
                 if (report.filterDefinitions != null && report.filterDefinitions.length > 0) {
                     filterDefinitions = report.filterDefinitions;
-                    transformContainer.addEventListener(TransformsUpdatedEvent.UPDATED_TRANSFORMS, transformsUpdated);
                     showFilters = true;
                 } else {
+                    filterDefinitions = new ArrayCollection();
                     if (buttonBar.contains(adjustFiltersbutton)) {
                         buttonBar.removeChild(adjustFiltersbutton);
                     }
                 }
+                transformContainer.addEventListener(TransformsUpdatedEvent.UPDATED_TRANSFORMS, transformsUpdated);
                 if (!admin) {
                     if (buttonBar.contains(editReportButton)) {
                         buttonBar.removeChild(editReportButton);
@@ -616,6 +618,7 @@
             viewFactory.addEventListener(DataServiceLoadingEvent.LOADING_STARTED, dataLoadingEvent);
             viewFactory.addEventListener(DataServiceLoadingEvent.LOADING_STOPPED, dataLoadingEvent);
             viewFactory.addEventListener(ReportNavigationEvent.TO_REPORT, reportNavigation);
+
             if (!_embedded) {
                 progressBar.visible = true;
             }
