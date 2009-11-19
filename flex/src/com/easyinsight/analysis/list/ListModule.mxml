@@ -310,7 +310,7 @@
                 var data:Object = dataGrid.dataProvider[selectedObject.rowIndex];
                 var dataField:String = dataGrid.columns[selectedObject.columnIndex].dataField;
 
-                var dataString:Object = data[dataField];
+                var dataString:Object = String(data[dataField]);
 
                 var analysisItem:AnalysisItem = columnMap[dataField];
                 filterRawData.addPair(analysisItem, dataString);
