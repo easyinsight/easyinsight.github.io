@@ -14,10 +14,12 @@
 
         import mx.charts.CategoryAxis;
         import mx.charts.DateTimeAxis;
+        import mx.charts.HitData;
         import mx.charts.Legend;
         import mx.charts.LineChart;
         import mx.charts.chartClasses.IAxis;
         import mx.charts.series.LineSeries;
+        import mx.charts.series.items.LineSeriesItem;
         import mx.collections.ArrayCollection;
         import mx.collections.Sort;
         import mx.collections.SortField;
@@ -28,6 +30,10 @@
         private var lineChart:LineChart;
 
         private var legend:Legend;
+
+        private var xAxisItem:AnalysisItem;
+
+        private var measureMap:Object = new Object();
 
         override protected function createChildren():void {
             super.createChildren();
@@ -45,6 +51,16 @@
                 legend.percentHeight = 100;
             }
             hbox.addChild(legend);
+        }
+
+        private function dataTipFunction(hitData:HitData):String {
+            var string:String;
+            var lineSeries:LineSeries = hitData.element as LineSeries;
+            var lineSeriesItem:LineSeriesItem = hitData.chartItem as LineSeriesItem;
+            var measureItem:AnalysisMeasure = measureMap[lineSeries.yField] as AnalysisMeasure;
+            string = lineSeries.displayName + "\n" +
+                     xAxisItem.getFormatter().format(lineSeriesItem.xValue) + "\n" + measureItem.getFormatter().format(lineSeriesItem.yValue);
+            return string;
         }
 
         public function renderReport(dataSet:ArrayCollection, analysisDefinition:AnalysisDefinition, clientProcessorMap:Object, additionalProperties:Object):void {
@@ -131,6 +147,7 @@
                     uniqueLineSeries.yField = analysisMeasure.qualifiedName();
                     uniqueLineSeries.displayName = analysisMeasure.display;
                     uniqueLineSeries.dataProvider = dataSet;
+                    measureMap[analysisMeasure.qualifiedName()] = analysisMeasure;
                     mySeries.push(uniqueLineSeries);
                 }
 
