@@ -11,6 +11,7 @@ import com.google.gdata.util.AuthenticationException;
 import com.google.gdata.util.ServiceException;
 import com.google.gdata.client.spreadsheet.SpreadsheetService;
 import com.google.gdata.data.spreadsheet.*;
+import com.google.gdata.util.ServiceForbiddenException;
 
 import java.util.*;
 import java.net.URL;
@@ -87,21 +88,25 @@ public class GoogleDataProvider {
             SpreadsheetFeed spreadsheetFeed = myService.getFeed(feedUrl, SpreadsheetFeed.class);
             for (SpreadsheetEntry entry : spreadsheetFeed.getEntries()) {
                 List<WorksheetEntry> worksheetEntries = entry.getWorksheets();
-                List<Worksheet> worksheetList = new ArrayList<Worksheet>();
-                for (WorksheetEntry worksheetEntry : worksheetEntries) {
-                    String title = worksheetEntry.getTitle().getPlainText();
-                    Worksheet worksheet = new Worksheet();
-                    worksheet.setSpreadsheet(entry.getTitle().getPlainText());
-                    worksheet.setTitle(title);
-                    String url = worksheetEntry.getListFeedUrl().toString();
-                    worksheet.setUrl(url);
-                    worksheet.setFeedDescriptor(worksheetToFeedMap.get(url));
-                    worksheetList.add(worksheet);
+                try {
+                    List<Worksheet> worksheetList = new ArrayList<Worksheet>();
+                    for (WorksheetEntry worksheetEntry : worksheetEntries) {
+                        String title = worksheetEntry.getTitle().getPlainText();
+                        Worksheet worksheet = new Worksheet();
+                        worksheet.setSpreadsheet(entry.getTitle().getPlainText());
+                        worksheet.setTitle(title);
+                        String url = worksheetEntry.getListFeedUrl().toString();
+                        worksheet.setUrl(url);
+                        worksheet.setFeedDescriptor(worksheetToFeedMap.get(url));
+                        worksheetList.add(worksheet);
+                    }
+                    Spreadsheet spreadsheet = new Spreadsheet();
+                    spreadsheet.setTitle(entry.getTitle().getPlainText());
+                    spreadsheet.setChildren(worksheetList);
+                    worksheets.add(spreadsheet);
+                } catch (Exception e) {
+                    LogClass.debug("Skipping over spreadsheet");
                 }
-                Spreadsheet spreadsheet = new Spreadsheet();
-                spreadsheet.setTitle(entry.getTitle().getPlainText());
-                spreadsheet.setChildren(worksheetList);
-                worksheets.add(spreadsheet);
             }
         } catch (IOException e) {
             throw new RuntimeException(e);
