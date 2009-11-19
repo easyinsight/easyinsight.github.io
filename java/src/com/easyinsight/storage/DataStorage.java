@@ -307,7 +307,8 @@ public class DataStorage {
                     // matched the item...
                     newKey = false;
                     if ((newItem.hasType(AnalysisItemTypes.DATE_DIMENSION) && !previousItem.hasType(AnalysisItemTypes.DATE_DIMENSION)) ||
-                            (newItem.hasType(AnalysisItemTypes.MEASURE) && !previousItem.hasType(AnalysisItemTypes.MEASURE))) {
+                            (newItem.hasType(AnalysisItemTypes.MEASURE) && !previousItem.hasType(AnalysisItemTypes.MEASURE)) ||
+                            (newItem.hasType(AnalysisItemTypes.DIMENSION) && previousItem.hasType(AnalysisItemTypes.MEASURE))) {
                         fieldMigrations.add(new FieldMigration(newItem));
                     }
                 }
@@ -346,7 +347,10 @@ public class DataStorage {
                             keyMetadatas.put(key, new KeyMetadata(key, Value.STRING, analysisItem));
                         }
                     }
-                    existing = retrieveData(previousKeys, null, null, 0, keyMetadatas, previousVersion, null);
+                    InsightRequestMetadata insightRequestMetadata = new InsightRequestMetadata();
+                    insightRequestMetadata.setNow(new Date());
+                    insightRequestMetadata.setAggregateQuery(false);
+                    existing = retrieveData(previousKeys, null, null, 0, keyMetadatas, previousVersion, insightRequestMetadata);
                     //existing = new DataSet();
                 }
             }
@@ -444,7 +448,7 @@ public class DataStorage {
         StringBuilder whereBuilder = new StringBuilder();
         StringBuilder groupByBuilder = new StringBuilder();
         Collection<Key> groupByItems = new HashSet<Key>();
-        createSelectClause(reportItems, selectBuilder, groupByItems);
+        createSelectClause(reportItems, selectBuilder, groupByItems, insightRequestMetadata.isAggregateQuery());
         addAdditionalKeysToSelect(additionalKeys, selectBuilder, groupByItems);
         selectBuilder = selectBuilder.deleteCharAt(selectBuilder.length() - 1);
         createFromClause(version, fromBuilder);
@@ -608,13 +612,13 @@ public class DataStorage {
         }
     }
 
-    private void createSelectClause(Collection<AnalysisItem> reportItems, StringBuilder selectBuilder, Collection<Key> groupByItems) {
+    private void createSelectClause(Collection<AnalysisItem> reportItems, StringBuilder selectBuilder, Collection<Key> groupByItems, boolean aggregateQuery) {
         for (AnalysisItem analysisItem : reportItems) {
             if (analysisItem.isDerived()) {
                 throw new RuntimeException("Attempt made to query a derived analysis item");
             }
             String columnName = analysisItem.toKeySQL();
-            if (analysisItem.hasType(AnalysisItemTypes.MEASURE)) {
+            if (analysisItem.hasType(AnalysisItemTypes.MEASURE) && aggregateQuery) {
                 AnalysisMeasure analysisMeasure = (AnalysisMeasure) analysisItem;
                 if (analysisMeasure.getAggregation() == AggregationTypes.SUM) {
                     columnName = "SUM(" + columnName + ")";
