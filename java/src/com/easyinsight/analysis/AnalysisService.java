@@ -345,9 +345,19 @@ public class AnalysisService {
             try {
                 SecurityUtil.authorizeInsight(analysisID);
                 addAnalysisView(analysisID);
-                AnalysisDefinition analysisDefinition = analysisStorage.getPersistableReport(analysisID);
-                insightResponse = new InsightResponse(InsightResponse.SUCCESS, new InsightDescriptor(analysisID, analysisDefinition.getTitle(),
-                        analysisDefinition.getDataFeedID(), analysisDefinition.getReportType()));
+                //AnalysisDefinition analysisDefinition = analysisStorage.getPersistableReport(analysisID);
+                Connection conn = Database.instance().getConnection();
+                try {
+                    PreparedStatement queryStmt = conn.prepareStatement("SELECT TITLE, DATA_FEED_ID, REPORT_TYPE FROM ANALYSIS WHERE ANALYSIS_ID = ?");
+                    queryStmt.setLong(1, analysisID);
+                    ResultSet rs = queryStmt.executeQuery();
+                    rs.next();
+                    insightResponse = new InsightResponse(InsightResponse.SUCCESS, new InsightDescriptor(analysisID, rs.getString(1),
+                        rs.getLong(2), rs.getInt(3)));    
+                } finally {
+                    Database.closeConnection(conn);
+                }
+
             } catch (SecurityException e) {
                 if (e.getReason() == InsightResponse.NEED_LOGIN)
                     insightResponse = new InsightResponse(InsightResponse.NEED_LOGIN, null);
