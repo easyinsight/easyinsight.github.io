@@ -12,6 +12,8 @@ package com.easyinsight.analysis.options
 		public static const LASTVALUE:String = "Last Value";
         public static const PERCENTCHANGE:String = "Percent Change";
 		public static const SIXSIGMA:String = "Six Sigma";
+        public static const MEDIAN:String = "Median";
+        public static const VARIANCE:String = "Variance";
 
 		public static const STEP:String = "Step";
 		public static const GROUPING:String = "Grouping";

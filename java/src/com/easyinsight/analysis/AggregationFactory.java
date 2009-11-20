@@ -49,6 +49,12 @@ public class AggregationFactory {
             case AggregationTypes.LAST_VALUE:
                 aggregation = new SumAggregation();
                 break;
+            case AggregationTypes.MEDIAN:
+                aggregation = new MedianAggregation();
+                break;
+            case AggregationTypes.VARIANCE:
+                aggregation = new VarianceAggregation();
+                break;
             default:
                 throw new RuntimeException("unknown value " + value);
         }

@@ -222,7 +222,7 @@
         }
 
         protected function getMeasureOptions():ArrayCollection {
-            return new ArrayCollection(["Sum", "Average", "Min", "Max", "Count"]);
+            return new ArrayCollection(["Sum", "Average", "Min", "Max", "Count", "Median", "Variance"]);
         }
 
         protected function getComplexOptions():ArrayCollection {
@@ -257,6 +257,8 @@
                 case "Max":
                 case "Min":
                 case "Count":
+                case "Median":
+                case "Variance":
                     currentState = "Measure";
                     break;
                 case "Delta":

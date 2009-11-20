@@ -30,6 +30,12 @@
                 case "Count":
                     analysisMeasure = new AnalysisMeasure(AggregationTypes.COUNT);
                     break;
+                case "Median":
+                    analysisMeasure = new AnalysisMeasure(AggregationTypes.MEDIAN);
+                    break;
+                case "Variance":
+                    analysisMeasure = new AnalysisMeasure(AggregationTypes.VARIANCE);
+                    break;
             }
             return analysisMeasure;
         }

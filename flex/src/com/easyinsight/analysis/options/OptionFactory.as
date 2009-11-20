@@ -35,6 +35,10 @@ package com.easyinsight.analysis.options
 					option = OptionTypeNames.LASTVALUE;
 				} else if (analysisMeasure.aggregation == AggregationTypes.PERCENT_CHANGE) {
                     option = OptionTypeNames.PERCENTCHANGE;
+                } else if (analysisMeasure.aggregation == AggregationTypes.MEDIAN) {
+                    option = OptionTypeNames.MEDIAN;
+                } else if (analysisMeasure.aggregation == AggregationTypes.VARIANCE) {
+                    option = OptionTypeNames.VARIANCE;
                 }
 			} else {
                 if (analysisItem.hasType(AnalysisItemTypes.STEP)) {

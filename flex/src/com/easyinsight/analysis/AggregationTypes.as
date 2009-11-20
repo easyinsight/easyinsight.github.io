@@ -13,6 +13,8 @@ package com.easyinsight.analysis
 	    public static const DELTA:int = 8;
 	    public static const LAST_VALUE:int = 9;
 	    public static const PERCENT_CHANGE:int = 10;
+        public static const MEDIAN:int = 11;
+        public static const VARIANCE:int = 12;
 
 		public function AggregationTypes()
 		{

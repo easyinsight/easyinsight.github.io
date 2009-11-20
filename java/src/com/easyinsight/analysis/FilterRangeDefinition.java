@@ -92,15 +92,25 @@ public class FilterRangeDefinition extends FilterDefinition {
         StringBuilder queryBuilder = new StringBuilder();
         String columnName = "k" + getField().getKey().getKeyID();
         queryBuilder.append(columnName);
-        queryBuilder.append(" > ? AND ");
-        queryBuilder.append(columnName);
-        queryBuilder.append(" < ?");
+        if (startValueDefined && endValueDefined) {
+            queryBuilder.append(" > ? AND ");
+            queryBuilder.append(columnName);
+            queryBuilder.append(" < ?");
+        } else if (startValueDefined) {
+            queryBuilder.append(" > ?");
+        } else if (endValueDefined) {
+            queryBuilder.append(" < ?");
+        }
         return queryBuilder.toString();
     }
 
     public int populatePreparedStatement(PreparedStatement preparedStatement, int start, int type, InsightRequestMetadata insightRequestMetadata) throws SQLException {
-        preparedStatement.setDouble(start++, startValue);
-        preparedStatement.setDouble(start++, endValue);
+        if (startValueDefined) {
+            preparedStatement.setDouble(start++, startValue);
+        }
+        if (endValueDefined) {
+            preparedStatement.setDouble(start++, endValue);
+        }
         return start;
     }
 }

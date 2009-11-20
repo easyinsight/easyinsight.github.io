@@ -10,7 +10,7 @@ package com.easyinsight.analysis
 		}
 		
 		override protected function getAggregationTypeObjects():ArrayCollection {
-			return new ArrayCollection([ "Sum", "Average", "Min", "Max","Count"] );	
+			return new ArrayCollection([ "Sum", "Average", "Min", "Max","Count", "Median", "Variance"] );	
 		}
 	}
 }
