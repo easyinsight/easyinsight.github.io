@@ -1,4 +1,7 @@
 package com.easyinsight.analysis {
+import com.easyinsight.framework.CredentialsCache;
+import com.easyinsight.framework.InsightRequestMetadata;
+
 import mx.collections.ArrayCollection;
 
 public class ExcelCreator {
@@ -86,7 +89,9 @@ public class ExcelCreator {
 
 		public function exportExcel(definition:AnalysisDefinition):void {
             report = definition;
-			upload.exportToExcel.send(definition);
+            var insightMetadata:InsightRequestMetadata = new InsightRequestMetadata();
+            insightMetadata.credentialFulfillmentList = CredentialsCache.getCache().createCredentials();
+			upload.exportToExcel.send(definition, insightMetadata);
 		}
 
         public function exportReportIDToExcel(reportID:int, filters:ArrayCollection, hierarchies:ArrayCollection):void {

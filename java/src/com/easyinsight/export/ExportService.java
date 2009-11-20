@@ -90,11 +90,11 @@ public class ExportService {
         }
     }
 
-    public long exportToExcel(WSAnalysisDefinition analysisDefinition) {
+    public long exportToExcel(WSAnalysisDefinition analysisDefinition, InsightRequestMetadata insightRequestMetadata) {
         SecurityUtil.authorizeFeed(analysisDefinition.getDataFeedID(), Roles.SUBSCRIBER);
         long exportID;
         try {
-            ListDataResults listDataResults = new DataService().list(analysisDefinition, new InsightRequestMetadata());
+            ListDataResults listDataResults = new DataService().list(analysisDefinition, insightRequestMetadata);
             exportID = toExcel(analysisDefinition, listDataResults);
         } catch (Exception e) {
             LogClass.error(e);
