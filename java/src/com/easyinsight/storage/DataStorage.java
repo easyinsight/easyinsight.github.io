@@ -448,7 +448,8 @@ public class DataStorage {
         StringBuilder whereBuilder = new StringBuilder();
         StringBuilder groupByBuilder = new StringBuilder();
         Collection<Key> groupByItems = new HashSet<Key>();
-        createSelectClause(reportItems, selectBuilder, groupByItems, insightRequestMetadata.isAggregateQuery());
+        boolean aggregateQuery = insightRequestMetadata.isAggregateQuery();        
+        createSelectClause(reportItems, selectBuilder, groupByItems, aggregateQuery);
         addAdditionalKeysToSelect(additionalKeys, selectBuilder, groupByItems);
         selectBuilder = selectBuilder.deleteCharAt(selectBuilder.length() - 1);
         createFromClause(version, fromBuilder);

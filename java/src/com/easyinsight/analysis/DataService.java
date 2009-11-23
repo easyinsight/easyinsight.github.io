@@ -253,6 +253,13 @@ public class DataService {
                 }
                 Set<AnalysisItem> analysisItems = analysisDefinition.getColumnItems(feed.getFields());
                 Collection<FilterDefinition> filters = analysisDefinition.getFilterDefinitions();
+                boolean aggregateQuery = true;
+                for (AnalysisItem analysisItem : analysisDefinition.getAllAnalysisItems()) {
+                    if (analysisItem.blocksDBAggregation()) {
+                        aggregateQuery = false;
+                    }
+                }
+                insightRequestMetadata.setAggregateQuery(aggregateQuery);
                 DataSet dataSet = feed.getAggregateDataSet(analysisItems, filters, insightRequestMetadata, feed.getFields(), false, null);
                 Pipeline pipeline = new StandardReportPipeline();
                 pipeline.setup(analysisDefinition, feed, insightRequestMetadata);
@@ -356,6 +363,13 @@ public class DataService {
                     validQueryItems.add(analysisItem);
                 }
             }
+            boolean aggregateQuery = true;
+            for (AnalysisItem analysisItem : analysisDefinition.getAllAnalysisItems()) {
+                if (analysisItem.blocksDBAggregation()) {
+                    aggregateQuery = false;
+                }
+            }
+            insightRequestMetadata.setAggregateQuery(aggregateQuery);
             Collection<FilterDefinition> filters = analysisDefinition.getFilterDefinitions();
             DataSet dataSet = feed.getAggregateDataSet(validQueryItems, filters, insightRequestMetadata, feed.getFields(), false, null);
             //results = dataSet.toList(analysisDefinition, feed.getFields(), insightRequestMetadata);

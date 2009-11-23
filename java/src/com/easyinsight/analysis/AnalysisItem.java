@@ -340,4 +340,8 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
     public void setItemPosition(int itemPosition) {
         this.itemPosition = itemPosition;
     }
+
+    public boolean blocksDBAggregation() {
+        return false;
+    }
 }

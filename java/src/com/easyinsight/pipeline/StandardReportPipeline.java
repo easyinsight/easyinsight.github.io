@@ -30,6 +30,14 @@ public class StandardReportPipeline extends Pipeline {
 
         components.add(new FilterComponent(true));
         components.add(new FilterPipelineCleanupComponent());
+
+        for (AnalysisItem calc : items(AnalysisItemTypes.CALCULATION, reportItems)) {
+            AnalysisCalculation calculation = (AnalysisCalculation) calc;
+            if (calculation.isApplyBeforeAggregation()) {
+                components.add(new CalculationComponent(calculation));
+            }
+        }
+
         for (AnalysisItem step : items(AnalysisItemTypes.STEP, allNeededAnalysisItems)) {
             components.add(new StepCorrelationComponent((AnalysisStep) step));
         }

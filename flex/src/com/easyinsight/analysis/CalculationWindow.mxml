@@ -35,6 +35,9 @@
 
         private var analysisCalculation:AnalysisCalculation;
 
+        [Bindable]
+        private var applyBefore:Boolean;
+
         public function save():AnalysisItem {
             if (analysisCalculation == null) {
                 analysisCalculation = new AnalysisCalculation();
@@ -44,6 +47,7 @@
             } else {
                 analysisCalculation.displayName = nameInput.text;
             }
+            analysisCalculation.applyBeforeAggregation = applyBeforeCheckbox.selected;
             analysisCalculation.calculationString = calculationInput.text;
             var measureConditionRange:MeasureConditionRange = measureRangeSelection.createMeasureConditionRange();
             if (measureConditionRange != null) {
@@ -85,6 +89,7 @@
                 calcName = analysisCalculation.display;
                 measureConditionRange = analysisCalculation.measureConditionRange;
                 formattingConfiguration = analysisCalculation.formattingConfiguration;
+                applyBefore = analysisCalculation.applyBeforeAggregation;
             }
         }
 
@@ -163,6 +168,10 @@
                     </mx:XMLList>
                 </mx:XMLListCollection>
             </mx:Tree>
+            <mx:HBox>
+                <mx:CheckBox id="applyBeforeCheckbox" selected="{applyBefore}"/>
+                <mx:Label text="Apply Before Aggregation"/>
+            </mx:HBox>
         </mx:VBox>
         <mx:Form>
             <mx:FormItem label="Name: " direction="horizontal" width="100%">
@@ -170,7 +179,7 @@
             </mx:FormItem>
             <mx:FormItem label="Calculation: " direction="horizontal" width="100%">
                 <mx:TextArea id="calculationInput" dragEnter="dragEnterHandler(event)" dragDrop="dragDropHandler(event)"
-                             width="100%" height="300"
+                             width="100%" height="100"
                              text="{calcText}" borderStyle="solid" borderThickness="1"/>
             </mx:FormItem>
             <mx:FormItem label="Formatting: ">

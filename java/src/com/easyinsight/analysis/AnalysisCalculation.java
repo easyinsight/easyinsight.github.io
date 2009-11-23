@@ -34,6 +34,9 @@ public class AnalysisCalculation extends AnalysisMeasure {
     @Column(name="calculation_string")
     private String calculationString;
 
+    @Column(name="apply_before_aggregation")
+    private boolean applyBeforeAggregation;
+
     private transient CalculationTreeNode calculationTreeNode;
 
     public String getCalculationString() {
@@ -44,13 +47,16 @@ public class AnalysisCalculation extends AnalysisMeasure {
         this.calculationString = calculationString;
     }
 
-    public int getType() {
-        return super.getType() | AnalysisItemTypes.CALCULATION;
+    public boolean isApplyBeforeAggregation() {
+        return applyBeforeAggregation;
     }
 
-    public void preHandleData(DataSet dataSet) {
-        calculationTreeNode = evalString(calculationString);
-        
+    public void setApplyBeforeAggregation(boolean applyBeforeAggregation) {
+        this.applyBeforeAggregation = applyBeforeAggregation;
+    }
+
+    public int getType() {
+        return super.getType() | AnalysisItemTypes.CALCULATION;
     }
 
     public List<AnalysisItem> getAnalysisItems(List<AnalysisItem> allItems, Collection<AnalysisItem> insightItems, boolean getEverything) {
@@ -93,43 +99,8 @@ public class AnalysisCalculation extends AnalysisMeasure {
         return new ArrayList<AnalysisItem>(analysisItems);
     }
 
-    public Set<AnalysisItem> getNeededKeys(List<AnalysisItem> fields) {
-        Map<Key, AnalysisItem> map = new HashMap<Key, AnalysisItem>();
-        for (AnalysisItem analysisItem : fields) {
-            map.put(analysisItem.getKey(), analysisItem);
-        }
-        Resolver resolver = new Resolver(fields);
-        CalculationTreeNode tree;
-        ICalculationTreeVisitor visitor;
-        CalculationsParser.expr_return ret;
-        CalculationsLexer lexer = new CalculationsLexer(new ANTLRStringStream(calculationString));
-        CommonTokenStream tokes = new CommonTokenStream();
-        tokes.setTokenSource(lexer);
-        CalculationsParser parser = new CalculationsParser(tokes);
-        parser.setTreeAdaptor(new NodeFactory());
-        try {
-            ret = parser.expr();
-            tree = (CalculationTreeNode) ret.getTree();
-            visitor = new ResolverVisitor(resolver, new FunctionFactory());
-            tree.accept(visitor);
-        } catch (RecognitionException e) {
-            e.printStackTrace();
-            throw new RuntimeException(e);
-        }
-        VariableListVisitor variableVisitor = new VariableListVisitor();
-        tree.accept(variableVisitor);
-        Set<AnalysisItem> analysisItems = new HashSet<AnalysisItem>();
-        Set<Key> keys = variableVisitor.getVariableList();
-        for (Key key : keys) {
-            AnalysisItem analysisItem = map.get(key);
-            analysisItems.add(analysisItem);
-        }
-        return analysisItems;
-    }
-
     private CalculationTreeNode evalString(String s) {
-        CalculationTreeNode calculationTreeNode;
-        ICalculationTreeVisitor visitor;
+        CalculationTreeNode calculationTreeNode;        
         CalculationsParser.expr_return ret;
         CalculationsLexer lexer = new CalculationsLexer(new ANTLRStringStream(s));
         CommonTokenStream tokes = new CommonTokenStream();
@@ -146,12 +117,6 @@ public class AnalysisCalculation extends AnalysisMeasure {
             throw new RuntimeException(e);
         }
         return calculationTreeNode;
-    }
-
-    public Value createValue(IRow row) {
-        ICalculationTreeVisitor visitor = new EvaluationVisitor(row);
-        calculationTreeNode.accept(visitor);
-        return visitor.getResult();
     }
 
     public Value calculate(DataSet dataSet, IRow row) {
@@ -204,7 +169,11 @@ public class AnalysisCalculation extends AnalysisMeasure {
         return true;
     }
 
+    public boolean blocksDBAggregation() {
+        return applyBeforeAggregation;
+    }
+
     public boolean isCalculated() {
-        return true;
+        return !applyBeforeAggregation;
     }
 }

@@ -71,7 +71,10 @@ public class ListTransform {
             if (measures != null) superSet.putAll(measures);
             for (AnalysisItem column : columns) {
                 if (column.hasType(AnalysisItemTypes.CALCULATION)) {
-                    continue;
+                    AnalysisCalculation analysisCalculation = (AnalysisCalculation) column;
+                    if (!analysisCalculation.isApplyBeforeAggregation()) {
+                        continue;
+                    }
                 }
                 Value obj = superSet.get(column);
                 if (obj == null) { obj = new EmptyValue(); }

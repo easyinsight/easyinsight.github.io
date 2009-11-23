@@ -5,8 +5,9 @@ package com.easyinsight.analysis
 	public class AnalysisCalculation extends AnalysisMeasure
 	{
 		public var calculationString:String;
+        public var applyBeforeAggregation:Boolean;
 		
-		public function AnalysisCalculation(aggregation:int=1)
+		public function AnalysisCalculation(aggregation:int=AggregationTypes.MEDIAN)
 		{
 			super(aggregation);
 		}
