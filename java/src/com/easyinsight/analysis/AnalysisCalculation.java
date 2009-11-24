@@ -149,13 +149,8 @@ public class AnalysisCalculation extends AnalysisMeasure {
         }
 
         ICalculationTreeVisitor rowVisitor = new EvaluationVisitor(row);
-        try {
-            calculationTreeNode.accept(rowVisitor);
-            return new NumericValue(rowVisitor.getResult().toDouble());
-        } catch (Exception e) {
-            LogClass.error(e);
-            return new EmptyValue();
-        }
+        calculationTreeNode.accept(rowVisitor);
+        return new NumericValue(rowVisitor.getResult().toDouble());
     }
 
     public List<AnalysisItem> getDerivedItems() {
