@@ -142,18 +142,21 @@ public class CalculationIntegrationTest extends TestCase {
         AnalysisCalculation calculation = new AnalysisCalculation();
         calculation.setKey(new NamedKey("Calculation"));
         calculation.setCalculationString("Count + Value");
+        calculation.setApplyBeforeAggregation(true);
+        calculation.setAggregation(AggregationTypes.SUM);
         WSListDefinition listDefinition = new WSListDefinition();
         FilterValueDefinition filterValueDefinition = new FilterValueDefinition();
         filterValueDefinition.setField(TestUtil.getItem(id, "Other"));
         filterValueDefinition.setInclusive(false);
         filterValueDefinition.setFilteredValues(Arrays.asList((Object) "Z"));
+        filterValueDefinition.setApplyBeforeAggregation(true);
         listDefinition.setFilterDefinitions(Arrays.asList((FilterDefinition) filterValueDefinition));
         listDefinition.setColumns(Arrays.asList((AnalysisItem) calculation));
         listDefinition.setDataFeedID(id);
         ListDataResults results = new DataService().list(listDefinition, new InsightRequestMetadata());
         assertEquals(1, results.getRows().length);
         Value total = results.getRows()[0].getValues()[0];
-        assertTrue(total instanceof EmptyValue);
+        assertEquals(0.0, total.toDouble());
     }
 
     public void testVariableSet() throws SQLException {

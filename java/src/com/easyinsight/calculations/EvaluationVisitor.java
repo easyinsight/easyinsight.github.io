@@ -44,6 +44,8 @@ public class EvaluationVisitor implements ICalculationTreeVisitor {
             ((CalculationTreeNode) node.getChild(1)).accept(node2);
             if(!(node2.getResult() instanceof EmptyValue) && node1.getResult().toDouble() != null && node2.getResult().toDouble() != null)
                 result = new NumericValue(result.toDouble() + node2.getResult().toDouble());
+            else
+                result = new EmptyValue();
         }
     }
 
@@ -54,6 +56,7 @@ public class EvaluationVisitor implements ICalculationTreeVisitor {
         result = node1.getResult();
         if(node1.getResult() instanceof EmptyValue || node1.getResult().toDouble() == null) {
             result = new EmptyValue();
+            return;
         }
         if(node.getChildCount() == 2) {
             EvaluationVisitor node2 = new EvaluationVisitor(row);
