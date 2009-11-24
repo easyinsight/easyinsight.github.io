@@ -95,7 +95,9 @@ public class ExcelCreator {
 		}
 
         public function exportReportIDToExcel(reportID:int, filters:ArrayCollection, hierarchies:ArrayCollection):void {
-            upload.exportReportIDToExcel.send(reportID, filters, hierarchies);    
+            var insightMetadata:InsightRequestMetadata = new InsightRequestMetadata();
+            insightMetadata.credentialFulfillmentList = CredentialsCache.getCache().createCredentials();
+            upload.exportReportIDToExcel.send(reportID, filters, hierarchies, insightMetadata);    
         }
 	}
 }

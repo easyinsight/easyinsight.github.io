@@ -132,7 +132,7 @@ public class CalculationIntegrationTest extends TestCase {
         rowA.addValue(otherDim.getKey(), "X");
         IRow rowB = dataSet.createRow();
         rowB.addValue(count.getKey(), 5);
-        rowB.addValue(value.getKey(), 10);
+        rowB.addValue(value.getKey(), new EmptyValue());
         rowB.addValue(otherDim.getKey(), "Y");
         IRow rowZ = dataSet.createRow();
         rowZ.addValue(count.getKey(), 7);
