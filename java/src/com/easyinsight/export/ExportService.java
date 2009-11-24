@@ -72,7 +72,7 @@ public class ExportService {
         return 0;
     }
 
-    public long exportReportIDToExcel(long reportID, List<FilterDefinition> customFilters, List<FilterDefinition> drillThroughFilters) {
+    public long exportReportIDToExcel(long reportID, List<FilterDefinition> customFilters, List<FilterDefinition> drillThroughFilters, InsightRequestMetadata insightRequestMetadata) {
         SecurityUtil.authorizeInsight(reportID);
         try {
             WSAnalysisDefinition analysisDefinition = new AnalysisService().openAnalysisDefinition(reportID);
@@ -82,7 +82,7 @@ public class ExportService {
             if (drillThroughFilters != null) {
                 analysisDefinition.applyFilters(drillThroughFilters);
             }
-            ListDataResults listDataResults = new DataService().list(analysisDefinition, new InsightRequestMetadata());
+            ListDataResults listDataResults = new DataService().list(analysisDefinition, insightRequestMetadata);
             return toExcel(analysisDefinition, listDataResults);
         } catch (Exception e) {
             LogClass.error(e);
