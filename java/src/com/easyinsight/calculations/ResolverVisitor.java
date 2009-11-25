@@ -1,7 +1,6 @@
 package com.easyinsight.calculations;
 
 import com.easyinsight.core.Value;
-import com.sun.javaws.exceptions.InvalidArgumentException;
 
 /**
  * Created by IntelliJ IDEA.
