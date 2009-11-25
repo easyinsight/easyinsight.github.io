@@ -60,26 +60,26 @@
 
         public function validatedCalculation():void {
             failureMessage = analysisService.validateCalculation.lastResult as String;
-            if(failureMessage == null)
+            if (failureMessage == null)
                 dispatchEvent(new AnalysisItemSaveEvent(analysisCalculation));
             else
                 Alert.show("There was a problem with your calculation syntax. Please check the calculation and try again.");
         }
 
-//        private function validatedCalculation():void {
-//            failureMessage = analysisService.validateCalculation.lastResult as String;
-//            if (failureMessage != null) {
-//                calcValidator.validate();
-//            } else {
-//                var analysisCalculation:AnalysisCalculation = new AnalysisCalculation();
-//                var namedKey:NamedKey = new NamedKey();
-//                namedKey.name = nameInput.text;
-//                analysisCalculation.key = namedKey;
-//                analysisCalculation.calculationString = calculationInput.text;
-//                dispatchEvent(new AnalysisItemCreationEvent(analysisCalculation));
-//            }
-//            PopUpManager.removePopUp(this);
-//         }
+        //        private function validatedCalculation():void {
+        //            failureMessage = analysisService.validateCalculation.lastResult as String;
+        //            if (failureMessage != null) {
+        //                calcValidator.validate();
+        //            } else {
+        //                var analysisCalculation:AnalysisCalculation = new AnalysisCalculation();
+        //                var namedKey:NamedKey = new NamedKey();
+        //                namedKey.name = nameInput.text;
+        //                analysisCalculation.key = namedKey;
+        //                analysisCalculation.calculationString = calculationInput.text;
+        //                dispatchEvent(new AnalysisItemCreationEvent(analysisCalculation));
+        //            }
+        //            PopUpManager.removePopUp(this);
+        //         }
 
 
         override protected function commitProperties():void {
@@ -130,14 +130,14 @@
             var outputStr:String = analysisItem.key.createString();
             var str:String = ":<>,.;/?\"\'{}-=+";
             var foundSpecialChar:Boolean = false;
-            for(var i:int = 0;i < str.length;i++){
-                if(outputStr.indexOf(str.charAt(i)) != -1)
+            for (var i:int = 0; i < str.length; i++) {
+                if (outputStr.indexOf(str.charAt(i)) != -1)
                     foundSpecialChar = true;
             }
-            if(foundSpecialChar)
+            if (foundSpecialChar)
                 calculationInput.text += "[";
             calculationInput.text += outputStr;
-            if(foundSpecialChar)
+            if (foundSpecialChar)
                 calculationInput.text += "]";
         }
 
@@ -146,6 +146,9 @@
         }
 
         public function set analysisItems(analysisItems:ArrayCollection):void {
+        }
+
+        public function set dataSourceID(dataSourceID:int):void {
         }
 
 		]]>

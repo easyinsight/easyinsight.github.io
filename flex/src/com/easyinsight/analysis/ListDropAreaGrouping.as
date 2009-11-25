@@ -17,6 +17,7 @@ public class ListDropAreaGrouping extends HBox
 		private var _maxElements:int = -1;
 		private var hardStop:Boolean = false;
 		private var _analysisItems:ArrayCollection;
+        private var _dataSourceID:int;
 
 		private var iHateActionScript:ListDropArea;			
 		
@@ -25,7 +26,12 @@ public class ListDropAreaGrouping extends HBox
 			//addEventListener(FlexEvent.CREATION_COMPLETE, initializeState);
 		}
 
-        public function invalidateItems(items:ArrayCollection):void {
+
+    public function set dataSourceID(value:int):void {
+        _dataSourceID = value;
+    }
+
+    public function invalidateItems(items:ArrayCollection):void {
             for each (var itemID:int in items) {
                 for each (var dropArea:DropArea in dropAreas) {
                     if (dropArea.analysisItem != null && dropArea.analysisItem.analysisItemID == itemID) {
@@ -122,6 +128,7 @@ public class ListDropAreaGrouping extends HBox
 	    
 	    private function createDropArea():DropArea {
 	    	var dropArea:DropArea = new _dropAreaType();
+            dropArea.dataSourceID = _dataSourceID;
 	    	dropArea.analysisItems = _analysisItems;
 	    	dropArea.addEventListener(DropAreaUpdateEvent.DROP_AREA_UPDATE, dropAreaUpdated);
 	    	dropArea.addEventListener(DropAreaAddedEvent.DROP_AREA_ADD, dropAreaFilledIn);
@@ -198,6 +205,7 @@ public class ListDropAreaGrouping extends HBox
 	    
 	    public function addAnalysisItem(analysisItem:AnalysisItem, position:int = -1):void {
 	    	var dropArea:DropArea = new _dropAreaType();
+            dropArea.dataSourceID = _dataSourceID;
 	    	dropArea.analysisItems = _analysisItems;
 	    	dropArea.analysisItem = analysisItem;
 	   		dropArea.addEventListener(DropAreaUpdateEvent.DROP_AREA_UPDATE, dropAreaUpdated);

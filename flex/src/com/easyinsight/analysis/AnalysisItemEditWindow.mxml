@@ -2,53 +2,62 @@
 <util:EITitleWindow xmlns:util="com.easyinsight.util.*" xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:analysis="com.easyinsight.analysis.*">
 	<mx:Script>
 		<![CDATA[
-			import mx.managers.PopUpManager;
-			import mx.collections.ArrayCollection;
-			
-			[Bindable]
-			private var _analysisItem:AnalysisItem;
-			[Bindable]
-			private var _analysisItems:ArrayCollection;
-			
-			private var _editorClass:Class;
-			
-			private var editor:IAnalysisItemEditor;
-			
-			public function set analysisItem(analysisItem:AnalysisItem):void {
-				_analysisItem = analysisItem;
-			}
-			
-			public function set analysisItems(analysisItems:ArrayCollection):void {
-				_analysisItems = analysisItems;
-			}
-			
-			public function set editorClass(editorClass:Class):void {
-				this._editorClass = editorClass;
-				invalidateProperties();
-			}
-			
-			override protected function createChildren():void {
-				super.createChildren();
-				editor = new _editorClass();
-				editor.analysisItem = _analysisItem;
-				editor.analysisItems = _analysisItems;
-				editorFormItem.addChildAt(editor as DisplayObject, 0);
-			}
-			
-			private function cancel():void {
-                PopUpManager.removePopUp(this);
-            }
+        import mx.managers.PopUpManager;
+        import mx.collections.ArrayCollection;
 
-            private function onSaveComplete(event:AnalysisItemSaveEvent):void {
-                dispatchEvent(new AnalysisItemEditEvent(event.analysisItem, true));
-                editor.removeEventListener(AnalysisItemSaveEvent.ANALYSIS_ITEM_SAVE, onSaveComplete);
-                PopUpManager.removePopUp(this);
-            }
+        [Bindable]
+        private var _analysisItem:AnalysisItem;
+        [Bindable]
+        private var _analysisItems:ArrayCollection;
 
-            private function save():void {
-                editor.addEventListener(AnalysisItemSaveEvent.ANALYSIS_ITEM_SAVE, onSaveComplete);
-                editor.save();
-            }
+        private var _editorClass:Class;
+
+        private var editor:IAnalysisItemEditor;
+
+        private var _dataSourceID:int;
+
+
+        public function set dataSourceID(value:int):void {
+            _dataSourceID = value;
+        }
+
+        public function set analysisItem(analysisItem:AnalysisItem):void {
+            _analysisItem = analysisItem;
+        }
+
+        public function set analysisItems(analysisItems:ArrayCollection):void {
+            _analysisItems = analysisItems;
+        }
+
+        public function set editorClass(editorClass:Class):void {
+            this._editorClass = editorClass;
+            invalidateProperties();
+        }
+
+        override protected function createChildren():void {
+            super.createChildren();
+            editor = new _editorClass();
+            editor.dataSourceID = _dataSourceID;
+            editor.analysisItem = _analysisItem;
+            editor.analysisItems = _analysisItems;
+
+            editorFormItem.addChildAt(editor as DisplayObject, 0);
+        }
+
+        private function cancel():void {
+            PopUpManager.removePopUp(this);
+        }
+
+        private function onSaveComplete(event:AnalysisItemSaveEvent):void {
+            dispatchEvent(new AnalysisItemEditEvent(event.analysisItem, true));
+            editor.removeEventListener(AnalysisItemSaveEvent.ANALYSIS_ITEM_SAVE, onSaveComplete);
+            PopUpManager.removePopUp(this);
+        }
+
+        private function save():void {
+            editor.addEventListener(AnalysisItemSaveEvent.ANALYSIS_ITEM_SAVE, onSaveComplete);
+            editor.save();
+        }
 		]]>
 	</mx:Script>
 	<mx:VBox styleName="TitleWindowContents" id="editorFormItem" width="100%" height="100%">			

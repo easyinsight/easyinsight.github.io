@@ -9,6 +9,7 @@ import com.easyinsight.analysis.DimensionDropArea;
 import com.easyinsight.analysis.IReportControlBar;
 import com.easyinsight.analysis.ListDropAreaGrouping;
 import com.easyinsight.analysis.MeasureDropArea;
+import com.easyinsight.analysis.ReportControlBar;
 import com.easyinsight.analysis.ReportDataEvent;
 
 import com.easyinsight.analysis.charts.ChartDefinitionEditWindow;
@@ -25,7 +26,7 @@ import mx.controls.LinkButton;
 import mx.events.FlexEvent;
 import mx.managers.PopUpManager;
 
-public class BubbleChartControlBar extends HBox implements IReportControlBar  {
+public class BubbleChartControlBar extends ReportControlBar implements IReportControlBar  {
 
     private var dimensionGrouping:ListDropAreaGrouping;
     private var xmeasureGrouping:ListDropAreaGrouping;
@@ -60,25 +61,25 @@ public class BubbleChartControlBar extends HBox implements IReportControlBar  {
         groupingLabel.text = "Grouping:";
         groupingLabel.setStyle("fontSize", 14);
         addChild(groupingLabel);
-        addChild(dimensionGrouping);
+        addDropAreaGrouping(dimensionGrouping);
 
         var yMeasureLabel:Label = new Label();
         yMeasureLabel.text = "Y Axis Measure:";
         yMeasureLabel.setStyle("fontSize", 14);
         addChild(yMeasureLabel);
-        addChild(ymeasureGrouping);
+        addDropAreaGrouping(ymeasureGrouping);
         
         var xMeasureLabel:Label = new Label();
         xMeasureLabel.text = "X Axis Measure:";
         xMeasureLabel.setStyle("fontSize", 14);
         addChild(xMeasureLabel);
-        addChild(xmeasureGrouping);
+        addDropAreaGrouping(xmeasureGrouping);
 
         var zMeasureLabel:Label = new Label();
         zMeasureLabel.text = "Radius Measure:";
         zMeasureLabel.setStyle("fontSize", 14);
         addChild(zMeasureLabel);
-        addChild(zmeasureGrouping);
+        addDropAreaGrouping(zmeasureGrouping);
          if (xAxisDefinition.dimension != null) {
             dimensionGrouping.addAnalysisItem(xAxisDefinition.dimension);
         }
@@ -149,13 +150,6 @@ public class BubbleChartControlBar extends HBox implements IReportControlBar  {
         xAxisDefinition.yaxisMeasure = ymeasureGrouping.getListColumns()[0];
         xAxisDefinition.zaxisMeasure = zmeasureGrouping.getListColumns()[0];
         return xAxisDefinition;
-    }
-
-    public function set analysisItems(analysisItems:ArrayCollection):void {
-        xmeasureGrouping.analysisItems = analysisItems;
-        dimensionGrouping.analysisItems = analysisItems;
-        ymeasureGrouping.analysisItems = analysisItems;
-        zmeasureGrouping.analysisItems = analysisItems;
     }
 
     public function addItem(analysisItem:com.easyinsight.analysis.AnalysisItem):void {

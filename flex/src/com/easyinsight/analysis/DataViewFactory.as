@@ -25,6 +25,8 @@ public class DataViewFactory extends VBox {
 
     private var moduleInfo:IModuleInfo;
 
+    private var _dataSourceID:int;
+
     private var _controlBar:IReportControlBar;
     private var _reportRenderer:IReportRenderer;
     private var _dataService:IReportDataService;
@@ -36,6 +38,11 @@ public class DataViewFactory extends VBox {
     public function DataViewFactory() {
         this.percentHeight = 100;
         this.percentWidth = 100;
+    }
+
+
+    public function set dataSourceID(value:int):void {
+        _dataSourceID = value;
     }
 
     public function set availableFields(val:ArrayCollection):void {
@@ -81,6 +88,7 @@ public class DataViewFactory extends VBox {
 
         _controlBar = createReportControlBar();
         _controlBar.analysisItems = _availableFields;
+        _controlBar.dataSourceID = _dataSourceID;
         _controlBar.addEventListener(ReportDataEvent.REQUEST_DATA, onDataRequest);
         _controlBar.addEventListener(CustomChangeEvent.CUSTOM_CHANGE, customChangeFromControlBar);
         _controlBar.analysisDefinition = _analysisDefinition;

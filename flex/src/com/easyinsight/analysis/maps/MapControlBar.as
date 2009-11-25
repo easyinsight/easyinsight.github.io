@@ -9,6 +9,7 @@ import com.easyinsight.analysis.DimensionDropArea;
 import com.easyinsight.analysis.IReportControlBar;
 import com.easyinsight.analysis.ListDropAreaGrouping;
 import com.easyinsight.analysis.MeasureDropArea;
+import com.easyinsight.analysis.ReportControlBar;
 import com.easyinsight.analysis.ReportDataEvent;
 import com.easyinsight.map.MapDropAreaGrouping;
 
@@ -19,7 +20,7 @@ import mx.controls.Label;
 import mx.events.FlexEvent;
 import mx.events.ListEvent;
 
-public class MapControlBar extends HBox implements IReportControlBar {
+public class MapControlBar extends ReportControlBar implements IReportControlBar {
 
     private var xAxisGrouping:ListDropAreaGrouping;
     private var measureGrouping:MapDropAreaGrouping;
@@ -57,8 +58,8 @@ public class MapControlBar extends HBox implements IReportControlBar {
 
     override protected function createChildren():void {
         super.createChildren();
-        addChild(xAxisGrouping);
-        addChild(measureGrouping);
+        addDropAreaGrouping(xAxisGrouping);
+        addDropAreaGrouping(measureGrouping);
          if (mapDefinition.geography != null) {
             xAxisGrouping.addAnalysisItem(mapDefinition.geography);
         }
@@ -102,11 +103,6 @@ public class MapControlBar extends HBox implements IReportControlBar {
         mapDefinition.geography = xAxisGrouping.getListColumns()[0];
         mapDefinition.measure = measureGrouping.getListColumns()[0];
         return mapDefinition;
-    }
-
-    public function set analysisItems(analysisItems:ArrayCollection):void {
-        xAxisGrouping.analysisItems = analysisItems;
-        measureGrouping.analysisItems = analysisItems;
     }
 
     public function isDataValid():Boolean {

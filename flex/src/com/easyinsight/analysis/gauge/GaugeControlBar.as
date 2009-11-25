@@ -7,6 +7,7 @@ import com.easyinsight.analysis.CustomChangeEvent;
 import com.easyinsight.analysis.DataServiceEvent;
 import com.easyinsight.analysis.IReportControlBar;
 import com.easyinsight.analysis.MeasureDropArea;
+import com.easyinsight.analysis.ReportControlBar;
 import com.easyinsight.analysis.ReportDataEvent;
 import com.easyinsight.map.MapDropAreaGrouping;
 import flash.events.Event;
@@ -19,7 +20,7 @@ import mx.controls.Button;
 import mx.controls.ComboBox;
 import mx.controls.Label;
 import mx.controls.TextInput;
-public class GaugeControlBar extends HBox implements IReportControlBar {
+public class GaugeControlBar extends ReportControlBar implements IReportControlBar {
 
     private var measureGrouping:MapDropAreaGrouping;
     private var maxValueInput:TextInput;
@@ -54,7 +55,7 @@ public class GaugeControlBar extends HBox implements IReportControlBar {
         var measureLabel:Label = new Label();
         measureLabel.text = "Measure: ";
         addChild(measureLabel);
-        addChild(measureGrouping);
+        addDropAreaGrouping(measureGrouping);
         var maxValueLabel:Label = new Label();
         maxValueLabel.text = "Max Value: ";
         addChild(maxValueLabel);
@@ -91,10 +92,6 @@ public class GaugeControlBar extends HBox implements IReportControlBar {
         gaugeDefinition.gaugeType = GaugeDefinition.CIRCULAR_GAUGE;
         gaugeDefinition.maxValue = int(maxValueInput.text);
         return gaugeDefinition;
-    }
-
-    public function set analysisItems(analysisItems:ArrayCollection):void {
-        measureGrouping.analysisItems = analysisItems;
     }
 
     public function isDataValid():Boolean {

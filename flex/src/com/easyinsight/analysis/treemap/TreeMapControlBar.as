@@ -9,6 +9,7 @@ import com.easyinsight.analysis.HierarchyDropArea;
 import com.easyinsight.analysis.IReportControlBar;
 import com.easyinsight.analysis.ListDropAreaGrouping;
 import com.easyinsight.analysis.MeasureDropArea;
+import com.easyinsight.analysis.ReportControlBar;
 import com.easyinsight.analysis.ReportDataEvent;
 
 import flash.events.Event;
@@ -20,7 +21,7 @@ import mx.controls.ComboBox;
 import mx.controls.Label;
 import mx.events.FlexEvent;
 
-public class TreeMapControlBar extends HBox implements IReportControlBar {
+public class TreeMapControlBar extends ReportControlBar implements IReportControlBar {
 
     private var hierarchyGrouping:ListDropAreaGrouping;
     private var areaMeasureGrouping:ListDropAreaGrouping;
@@ -72,17 +73,17 @@ public class TreeMapControlBar extends HBox implements IReportControlBar {
         groupingLabel.text = "Hierarchy:";
         groupingLabel.setStyle("fontSize", 14);
         addChild(groupingLabel);
-        addChild(hierarchyGrouping);
+        addDropAreaGrouping(hierarchyGrouping);
         var areaMeasureLabel:Label = new Label();
         areaMeasureLabel.text = "Area Measure:";
         areaMeasureLabel.setStyle("fontSize", 14);
         addChild(areaMeasureLabel);
-        addChild(areaMeasureGrouping);
+        addDropAreaGrouping(areaMeasureGrouping);
         var colorMeasureLabel:Label = new Label();
         colorMeasureLabel.text = "Color Measure:";
         colorMeasureLabel.setStyle("fontSize", 14);
         addChild(colorMeasureLabel);
-        addChild(colorMeasureGrouping);
+        addDropAreaGrouping(colorMeasureGrouping);
 
          if (mapDefinition.hierarchy != null) {
             hierarchyGrouping.addAnalysisItem(mapDefinition.hierarchy);
@@ -110,12 +111,6 @@ public class TreeMapControlBar extends HBox implements IReportControlBar {
         mapDefinition.measure2 = colorMeasureGrouping.getListColumns()[0];
         mapDefinition.colorScheme = colorSchemeBox.selectedIndex + 1;
         return mapDefinition;
-    }
-
-    public function set analysisItems(analysisItems:ArrayCollection):void {
-        hierarchyGrouping.analysisItems = analysisItems;
-        areaMeasureGrouping.analysisItems = analysisItems;
-        colorMeasureGrouping.analysisItems = analysisItems;
     }
 
     public function isDataValid():Boolean {

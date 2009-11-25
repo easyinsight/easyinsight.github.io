@@ -9,16 +9,16 @@ import com.easyinsight.analysis.DimensionDropArea;
 import com.easyinsight.analysis.IReportControlBar;
 import com.easyinsight.analysis.ListDropAreaGrouping;
 import com.easyinsight.analysis.MeasureDropArea;
+import com.easyinsight.analysis.ReportControlBar;
 import com.easyinsight.analysis.ReportDataEvent;
 import mx.binding.utils.BindingUtils;
 import mx.collections.ArrayCollection;
 import mx.containers.Grid;
 import mx.containers.GridItem;
 import mx.containers.GridRow;
-import mx.containers.HBox;
 import mx.controls.Label;
 import mx.events.FlexEvent;
-public class CrosstabControlBar extends HBox implements IReportControlBar {
+public class CrosstabControlBar extends ReportControlBar implements IReportControlBar {
     private var rowGrouping:ListDropAreaGrouping;
     private var columnGrouping:ListDropAreaGrouping;
     private var measureGrouping:ListDropAreaGrouping;
@@ -50,7 +50,7 @@ public class CrosstabControlBar extends HBox implements IReportControlBar {
         columnGroupingLabel.text = "Column Grouping:";
         columnGroupingLabel.setStyle("fontSize", 14);
         columnGroupingItem.addChild(columnGroupingLabel);
-        columnGroupingItem.addChild(columnGrouping);
+        addDropAreaGrouping(columnGrouping, columnGroupingItem);
         topRow.addChild(emptyGridItem);
         topRow.addChild(columnGroupingItem);
         var bottomRow:GridRow = new GridRow();
@@ -59,13 +59,13 @@ public class CrosstabControlBar extends HBox implements IReportControlBar {
         rowGroupingLabel.text = "Row Grouping:";
         rowGroupingLabel.setStyle("fontSize", 14);
         rowGroupingItem.addChild(rowGroupingLabel);
-        rowGroupingItem.addChild(rowGrouping);
+        addDropAreaGrouping(rowGrouping, rowGroupingItem);
         var measureGroupingItem:GridItem = new GridItem();
         var measureLabel:Label = new Label();
         measureLabel.text = "Measure:";
         measureLabel.setStyle("fontSize", 14);
         measureGroupingItem.addChild(measureLabel);
-        measureGroupingItem.addChild(measureGrouping);
+        addDropAreaGrouping(measureGrouping, measureGroupingItem);
         bottomRow.addChild(rowGroupingItem);
         bottomRow.addChild(measureGroupingItem);
         grid.addChild(topRow);
@@ -129,12 +129,6 @@ public class CrosstabControlBar extends HBox implements IReportControlBar {
         xAxisDefinition.measures = new ArrayCollection(measureGrouping.getListColumns());
         xAxisDefinition.rows = new ArrayCollection(rowGrouping.getListColumns());
         return xAxisDefinition;
-    }
-
-    public function set analysisItems(analysisItems:ArrayCollection):void {
-        columnGrouping.analysisItems = analysisItems;
-        rowGrouping.analysisItems = analysisItems;
-        measureGrouping.analysisItems = analysisItems;
     }
 
     public function addItem(analysisItem:com.easyinsight.analysis.AnalysisItem):void {

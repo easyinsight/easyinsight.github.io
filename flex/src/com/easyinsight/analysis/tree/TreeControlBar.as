@@ -9,11 +9,12 @@ import com.easyinsight.analysis.HierarchyDropArea;
 import com.easyinsight.analysis.IReportControlBar;
 import com.easyinsight.analysis.ListDropArea;
 import com.easyinsight.analysis.ListDropAreaGrouping;
+import com.easyinsight.analysis.ReportControlBar;
 import com.easyinsight.analysis.ReportDataEvent;
 import mx.collections.ArrayCollection;
 import mx.containers.HBox;
 import mx.controls.Label;
-public class TreeControlBar extends HBox implements IReportControlBar {
+public class TreeControlBar extends ReportControlBar implements IReportControlBar {
     private var hierarchyGrouping:ListDropAreaGrouping;
     private var itemGrouping:ListDropAreaGrouping;
     private var treeDefinition:TreeDefinition;
@@ -36,12 +37,12 @@ public class TreeControlBar extends HBox implements IReportControlBar {
         groupingLabel.text = "Hierarchy:";
         groupingLabel.setStyle("fontSize", 14);
         addChild(groupingLabel);
-        addChild(hierarchyGrouping);
+        addDropAreaGrouping(hierarchyGrouping);
         var areaMeasureLabel:Label = new Label();
         areaMeasureLabel.text = "Fields:";
         areaMeasureLabel.setStyle("fontSize", 14);
         addChild(areaMeasureLabel);
-        addChild(itemGrouping);
+        addDropAreaGrouping(itemGrouping);
 
         if (treeDefinition.hierarchy != null) {
             hierarchyGrouping.addAnalysisItem(treeDefinition.hierarchy);
@@ -65,11 +66,6 @@ public class TreeControlBar extends HBox implements IReportControlBar {
         treeDefinition.hierarchy = hierarchyGrouping.getListColumns()[0];
         treeDefinition.items = new ArrayCollection(itemGrouping.getListColumns());
         return treeDefinition;
-    }
-
-    public function set analysisItems(analysisItems:ArrayCollection):void {
-        hierarchyGrouping.analysisItems = analysisItems;
-        itemGrouping.analysisItems = analysisItems;
     }
 
     public function isDataValid():Boolean {

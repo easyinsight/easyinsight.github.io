@@ -9,6 +9,7 @@ import com.easyinsight.analysis.DimensionDropArea;
 import com.easyinsight.analysis.IReportControlBar;
 import com.easyinsight.analysis.ListDropAreaGrouping;
 import com.easyinsight.analysis.MeasureDropArea;
+import com.easyinsight.analysis.ReportControlBar;
 import com.easyinsight.analysis.ReportDataEvent;
 import com.easyinsight.analysis.charts.ChartDefinitionEditWindow;
 import com.easyinsight.analysis.charts.ChartRotationEvent;
@@ -25,7 +26,7 @@ import mx.controls.LinkButton;
 import mx.events.FlexEvent;
 import mx.managers.PopUpManager;
 
-public class YAxisControlBar extends HBox implements IReportControlBar  {
+public class YAxisControlBar extends ReportControlBar implements IReportControlBar  {
 
     private var yAxisGrouping:ListDropAreaGrouping;
     private var measureGrouping:ListDropAreaGrouping;
@@ -50,12 +51,12 @@ public class YAxisControlBar extends HBox implements IReportControlBar  {
         groupingLabel.text = "Y Axis Grouping:";
         groupingLabel.setStyle("fontSize", 14);
         addChild(groupingLabel);
-        addChild(yAxisGrouping);
+        addDropAreaGrouping(yAxisGrouping);
         var measureLabel:Label = new Label();
         measureLabel.text = "X Axis Measure:";
         measureLabel.setStyle("fontSize", 14);
         addChild(measureLabel);
-        addChild(measureGrouping);
+        addDropAreaGrouping(measureGrouping);
          if (yAxisDefinition.yaxis != null) {
             yAxisGrouping.addAnalysisItem(yAxisDefinition.yaxis);
         }
@@ -117,11 +118,6 @@ public class YAxisControlBar extends HBox implements IReportControlBar  {
         yAxisDefinition.yaxis = yAxisGrouping.getListColumns()[0];
         yAxisDefinition.measure = measureGrouping.getListColumns()[0];
         return yAxisDefinition;
-    }
-
-    public function set analysisItems(analysisItems:ArrayCollection):void {
-        yAxisGrouping.analysisItems = analysisItems;
-        measureGrouping.analysisItems = analysisItems;
     }
 
     public function addItem(analysisItem:AnalysisItem):void {

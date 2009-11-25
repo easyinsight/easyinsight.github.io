@@ -72,6 +72,9 @@
             }
         }
 
+        public function set dataSourceID(dataSourceID:int):void {
+        }
+
         ]]></mx:Script>
     <mx:VBox>
         <mx:HBox>

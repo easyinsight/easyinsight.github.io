@@ -9,6 +9,7 @@ import com.easyinsight.analysis.DimensionDropArea;
 import com.easyinsight.analysis.IReportControlBar;
 import com.easyinsight.analysis.ListDropAreaGrouping;
 import com.easyinsight.analysis.MeasureDropArea;
+import com.easyinsight.analysis.ReportControlBar;
 import com.easyinsight.analysis.ReportDataEvent;
 import com.easyinsight.analysis.charts.ChartDefinitionEditWindow;
 import com.easyinsight.analysis.charts.ChartRotationEvent;
@@ -25,7 +26,7 @@ import mx.controls.LinkButton;
 import mx.events.FlexEvent;
 import mx.managers.PopUpManager;
 
-public class TwoAxisControlBar extends HBox implements IReportControlBar {
+public class TwoAxisControlBar extends ReportControlBar implements IReportControlBar {
     private var xAxisGrouping:ListDropAreaGrouping;
     private var yAxisGrouping:ListDropAreaGrouping;
     private var measureGrouping:ListDropAreaGrouping;
@@ -54,17 +55,17 @@ public class TwoAxisControlBar extends HBox implements IReportControlBar {
         groupingLabel.text = "Y Axis Grouping:";
         groupingLabel.setStyle("fontSize", 14);
         addChild(groupingLabel);
-        addChild(yAxisGrouping);
+        addDropAreaGrouping(yAxisGrouping);
         var xAxisGroupingLabel:Label = new Label();
         xAxisGroupingLabel.text = "X Axis Grouping:";
         xAxisGroupingLabel.setStyle("fontSize", 14);
         addChild(xAxisGroupingLabel);
-        addChild(xAxisGrouping);
+        addDropAreaGrouping(xAxisGrouping);
         var measureGroupingLabel:Label = new Label();
         measureGroupingLabel.text = "Measure:";
         measureGroupingLabel.setStyle("fontSize", 14);
         addChild(measureGroupingLabel);
-        addChild(measureGrouping);
+        addDropAreaGrouping(measureGrouping);
          if (xAxisDefinition.xaxis != null) {
             xAxisGrouping.addAnalysisItem(xAxisDefinition.xaxis);
         }
@@ -131,11 +132,6 @@ public class TwoAxisControlBar extends HBox implements IReportControlBar {
         xAxisDefinition.yaxis = yAxisGrouping.getListColumns()[0];
         xAxisDefinition.measure = measureGrouping.getListColumns()[0];
         return xAxisDefinition;
-    }
-
-    public function set analysisItems(analysisItems:ArrayCollection):void {
-        xAxisGrouping.analysisItems = analysisItems;
-        measureGrouping.analysisItems = analysisItems;
     }
 
     public function addItem(analysisItem:AnalysisItem):void {

@@ -9,13 +9,14 @@ import com.easyinsight.analysis.DimensionDropArea;
 import com.easyinsight.analysis.IReportControlBar;
 import com.easyinsight.analysis.ListDropAreaGrouping;
 import com.easyinsight.analysis.MeasureDropArea;
+import com.easyinsight.analysis.ReportControlBar;
 import com.easyinsight.analysis.ReportDataEvent;
 import mx.binding.utils.BindingUtils;
 import mx.collections.ArrayCollection;
 import mx.containers.HBox;
 import mx.controls.Label;
 import mx.events.FlexEvent;
-public class MultiMeasureControlBar extends HBox implements IReportControlBar {
+public class MultiMeasureControlBar extends ReportControlBar implements IReportControlBar {
     private var xAxisGrouping:ListDropAreaGrouping;
     private var measureGrouping:ListDropAreaGrouping;
 
@@ -39,12 +40,12 @@ public class MultiMeasureControlBar extends HBox implements IReportControlBar {
         xAxisGroupingLabel.text = "X Axis Grouping:";
         xAxisGroupingLabel.setStyle("fontSize", 14);
         addChild(xAxisGroupingLabel);
-        addChild(xAxisGrouping);
+        addDropAreaGrouping(xAxisGrouping);
         var measureGroupingLabel:Label = new Label();
         measureGroupingLabel.text = "Measures:";
         measureGroupingLabel.setStyle("fontSize", 14);
         addChild(measureGroupingLabel);
-        addChild(measureGrouping);
+        addDropAreaGrouping(measureGrouping);
          if (xAxisDefinition.xaxis != null) {
             xAxisGrouping.addAnalysisItem(xAxisDefinition.xaxis);
         }
@@ -94,11 +95,6 @@ public class MultiMeasureControlBar extends HBox implements IReportControlBar {
         xAxisDefinition.xaxis = xAxisGrouping.getListColumns()[0];
         xAxisDefinition.measures = new ArrayCollection(measureGrouping.getListColumns());
         return xAxisDefinition;
-    }
-
-    public function set analysisItems(analysisItems:ArrayCollection):void {
-        xAxisGrouping.analysisItems = analysisItems;
-        measureGrouping.analysisItems = analysisItems;
     }
 
     public function addItem(analysisItem:com.easyinsight.analysis.AnalysisItem):void {

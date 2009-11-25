@@ -9,6 +9,7 @@ import com.easyinsight.analysis.DataServiceEvent;
 import com.easyinsight.analysis.IReportControlBar;
 import com.easyinsight.analysis.ListDropArea;
 import com.easyinsight.analysis.ListDropAreaGrouping;
+import com.easyinsight.analysis.ReportControlBar;
 import com.easyinsight.analysis.ReportDataEvent;
 import com.easyinsight.util.PopUpUtil;
 
@@ -21,7 +22,7 @@ import mx.controls.Label;
 import mx.events.FlexEvent;
 import mx.managers.PopUpManager;
 
-public class ListControlBar extends HBox implements IReportControlBar {
+public class ListControlBar extends ReportControlBar implements IReportControlBar {
 
     private var listViewGrouping:ListDropAreaGrouping;
     private var listDefinition:ListDefinition;
@@ -54,7 +55,7 @@ public class ListControlBar extends HBox implements IReportControlBar {
         findButton.toolTip = "Search Keyword...";
         findButton.addEventListener(MouseEvent.CLICK, startFind);
         addChild(findButton);
-        addChild(listViewGrouping);
+        addDropAreaGrouping(listViewGrouping);
         var columns:ArrayCollection = listDefinition.columns;
         if (columns != null) {
             for (var i:int = 0; i < columns.length; i++) {
@@ -116,9 +117,8 @@ public class ListControlBar extends HBox implements IReportControlBar {
         return listDefinition;
     }
 
-    public function set analysisItems(analysisItems:ArrayCollection):void {
+    override public function set analysisItems(analysisItems:ArrayCollection):void {
         availableFields = analysisItems;
-        listViewGrouping.analysisItems = analysisItems;
     }
 
     public function addItem(analysisItem:com.easyinsight.analysis.AnalysisItem):void {

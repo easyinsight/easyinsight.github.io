@@ -40,6 +40,12 @@ public class DropArea extends HBox
 
     private var _analysisItems:ArrayCollection;
 
+    private var _dataSourceID:int;
+
+    public function set dataSourceID(value:int):void {
+        _dataSourceID = value;
+    }
+
     public function DropArea()
     {
         super();
@@ -106,6 +112,7 @@ public class DropArea extends HBox
         } else {
             analysisItemEditor.editorClass = getItemEditorClass();
         }
+        analysisItemEditor.dataSourceID = _dataSourceID;
         analysisItemEditor.analysisItems = this._analysisItems;
         analysisItemEditor.analysisItem = this.analysisItem;
         PopUpManager.addPopUp(analysisItemEditor, this);

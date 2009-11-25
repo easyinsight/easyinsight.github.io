@@ -9,6 +9,7 @@ import com.easyinsight.analysis.DimensionDropArea;
 import com.easyinsight.analysis.IReportControlBar;
 import com.easyinsight.analysis.ListDropAreaGrouping;
 import com.easyinsight.analysis.MeasureDropArea;
+import com.easyinsight.analysis.ReportControlBar;
 import com.easyinsight.analysis.ReportDataEvent;
 import com.easyinsight.analysis.charts.ChartDefinitionEditWindow;
 import com.easyinsight.analysis.charts.ChartRotationEvent;
@@ -25,7 +26,7 @@ import mx.controls.LinkButton;
 import mx.events.FlexEvent;
 import mx.managers.PopUpManager;
 
-public class XAxisControlBar extends HBox implements IReportControlBar  {
+public class XAxisControlBar extends ReportControlBar implements IReportControlBar  {
 
     private var xAxisGrouping:ListDropAreaGrouping;
     private var measureGrouping:ListDropAreaGrouping;
@@ -50,12 +51,12 @@ public class XAxisControlBar extends HBox implements IReportControlBar  {
         measureLabel.text = "Y Axis Measure:";
         measureLabel.setStyle("fontSize", 14);
         addChild(measureLabel);
-        addChild(measureGrouping);
+        addDropAreaGrouping(measureGrouping);
         var groupingLabel:Label = new Label();
         groupingLabel.text = "X Axis Grouping:";
         groupingLabel.setStyle("fontSize", 14);
         addChild(groupingLabel);
-        addChild(xAxisGrouping);
+        addDropAreaGrouping(xAxisGrouping);
          if (xAxisDefinition.xaxis != null) {
             xAxisGrouping.addAnalysisItem(xAxisDefinition.xaxis);
         }
@@ -117,11 +118,6 @@ public class XAxisControlBar extends HBox implements IReportControlBar  {
         xAxisDefinition.xaxis = xAxisGrouping.getListColumns()[0];
         xAxisDefinition.measure = measureGrouping.getListColumns()[0];
         return xAxisDefinition;
-    }
-
-    public function set analysisItems(analysisItems:ArrayCollection):void {
-        xAxisGrouping.analysisItems = analysisItems;
-        measureGrouping.analysisItems = analysisItems;
     }
 
     public function addItem(analysisItem:AnalysisItem):void {

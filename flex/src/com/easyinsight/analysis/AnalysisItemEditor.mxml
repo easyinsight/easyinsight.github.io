@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<mx:Box xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*" width="500" height="400"
+<mx:Box xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*"
+        xmlns:filters="com.easyinsight.filtering.*" width="500" height="400"
         xmlns:analysis="com.easyinsight.analysis.*"
         creationComplete="initStuff()" creationPolicy="all" xmlns:formatter="com.easyinsight.analysis.formatter.*"
-        implements="com.easyinsight.analysis.IAnalysisItemEditor">
+        implements="com.easyinsight.analysis.IAnalysisItemEditor" initialize="onInit()">
     <mx:states>
 
         <mx:State name="Measure">
@@ -86,8 +87,11 @@
     </mx:states>
     <mx:Script>
 		<![CDATA[
+        import com.easyinsight.commands.CommandEvent;
+        import com.easyinsight.commands.CommandProcessor;
         import com.easyinsight.util.PopUpUtil;
 
+        import mx.controls.Alert;
         import mx.events.DropdownEvent;
 
         import com.easyinsight.analysis.options.OptionFactory;
@@ -109,6 +113,8 @@
         private var dateFields:ArrayCollection = new ArrayCollection();
         [Bindable]
         private var measureFields:ArrayCollection = new ArrayCollection();
+        [Bindable]
+        private var existingFilters:ArrayCollection;
 
         private var detailEditor:AnalysisItemDetailEditor;
 
@@ -134,11 +140,26 @@
         [Bindable]
         private var highGood:String;
 
+        [Bindable]
+        private var allItems:ArrayCollection;
+
+        [Bindable]
+        private var _dataSourceID:int;
+
+        private function onInit():void {
+
+        }
+
+        public function set dataSourceID(value:int):void {
+            _dataSourceID = value;
+        }
+
         public function set fieldNameEditable(fieldNameEditable:Boolean):void {
             _fieldNameEditable = fieldNameEditable;
         }
 
         public function set analysisItems(analysisItems:ArrayCollection):void {
+            allItems = analysisItems;
             for each (var analysisItemWrapper:AnalysisItemWrapper in analysisItems) {
                 if (analysisItemWrapper.analysisItem.hasType(AnalysisItemTypes.DIMENSION)) {
                     dimensionFields.addItem(analysisItemWrapper.analysisItem);
@@ -162,6 +183,7 @@
             this.hidden = analysisItem.hidden;
             this.links = analysisItem.links;
             this.highGood = analysisItem.highIsGood ? "yes" : "no";
+            this.existingFilters = analysisItem.filters;
         }
 
         private function indexOfType(option:String):int {
@@ -175,7 +197,11 @@
             return -1;
         }
 
+        private var commandProcessor:CommandProcessor;
+
         override protected function createChildren():void {
+            commandProcessor = new CommandProcessor();
+            addEventListener(CommandEvent.COMMAND, onCommand);
             super.createChildren();
             measureObjects = getMeasureOptions();
             if (startingAnalysisItem.hasType(AnalysisItemTypes.CALCULATION)) {
@@ -195,6 +221,7 @@
                 aggregationBox.selectedIndex = aggregationTypeObjects.getItemIndex(option);
                 aggregationChange(option);
             }
+            transformContainer.existingFilters = existingFilters;
         }
 
         private function initStuff():void {
@@ -205,6 +232,10 @@
             addEventListener(KeyboardEvent.KEY_UP, keyedComplete);
             addEventListener(LinkMetadataEvent.LINK_EDITED, onLinkUpdate);
             addEventListener(LinkMetadataEvent.LINK_DELETED, onLinkDelete);
+        }
+
+        private function onCommand(event:CommandEvent):void {
+            commandProcessor.addCommand(event.command);
         }
 
         private function keyedComplete(event:KeyboardEvent):void {
@@ -240,6 +271,7 @@
             analysisItem.hidden = hiddenCheckbox.selected;
             analysisItem.links = links;
             analysisItem.highIsGood = highGroup.selectedValue == "yes";
+            analysisItem.filters = transformContainer.getFilterDefinitions();
             detailEditor.save(analysisItem);
             dispatchEvent(new AnalysisItemSaveEvent(analysisItem));
             return analysisItem;
@@ -326,45 +358,55 @@
         ]]>
     </mx:Script>
     <mx:TabNavigator creationPolicy="all" width="100%" height="100%">
-    <mx:VBox label="Item" width="100%" height="100%" horizontalAlign="center">
-        <mx:ToggleButtonBar id="toggleBar" itemClick="toggleClick()">
-            <mx:dataProvider>
-                <mx:Array>
-                    <mx:String>Grouping</mx:String>
-                    <mx:String>Number</mx:String>
-                    <mx:String>Complex</mx:String>
-                </mx:Array>
-            </mx:dataProvider>
-        </mx:ToggleButtonBar>
-        <mx:Form id="coreForm" paddingBottom="0" paddingLeft="0" paddingRight="0" paddingTop="0">
-            <mx:FormItem label="Field Name: " direction="horizontal" id="fieldNameText">
-                <mx:TextInput id="fieldNameInput" text="{displayName}" editable="{_fieldNameEditable}"/>
-            </mx:FormItem>
-            <mx:FormItem label="Hidden: " direction="horizontal" id="hiddenText">
-                <mx:CheckBox id="hiddenCheckbox" selected="{hidden}"/>
-            </mx:FormItem>
-            <mx:FormItem label="Are high values good?" direction="horizontal">
-                <mx:RadioButtonGroup id="highGroup" selectedValue="{highGood}"/>
-                <mx:RadioButton group="{highGroup}" label="Yes" value="yes"/>
-                <mx:RadioButton group="{highGroup}" label="No" value="no"/>
-            </mx:FormItem>
-            <mx:FormItem label="Field Type: " direction="horizontal" id="firstForm">
-                <mx:ComboBox id="aggregationBox" dataProvider="{aggregationTypeObjects}"
-                             close="aggregationTypeChanged(event)" rowCount="9"/>
-            </mx:FormItem>
-        </mx:Form>
+        <mx:VBox label="Item" width="100%" height="100%" horizontalAlign="center">
+            <mx:ToggleButtonBar id="toggleBar" itemClick="toggleClick()">
+                <mx:dataProvider>
+                    <mx:Array>
+                        <mx:String>Grouping</mx:String>
+                        <mx:String>Number</mx:String>
+                        <mx:String>Complex</mx:String>
+                    </mx:Array>
+                </mx:dataProvider>
+            </mx:ToggleButtonBar>
+            <mx:Form id="coreForm" paddingBottom="0" paddingLeft="0" paddingRight="0" paddingTop="0">
+                <mx:FormItem label="Field Name: " direction="horizontal" id="fieldNameText">
+                    <mx:TextInput id="fieldNameInput" text="{displayName}" editable="{_fieldNameEditable}"/>
+                </mx:FormItem>
+                <mx:FormItem label="Hidden: " direction="horizontal" id="hiddenText">
+                    <mx:CheckBox id="hiddenCheckbox" selected="{hidden}"/>
+                </mx:FormItem>
+                <mx:FormItem label="Are high values good?" direction="horizontal">
+                    <mx:RadioButtonGroup id="highGroup" selectedValue="{highGood}"/>
+                    <mx:RadioButton group="{highGroup}" label="Yes" value="yes"/>
+                    <mx:RadioButton group="{highGroup}" label="No" value="no"/>
+                </mx:FormItem>
+                <mx:FormItem label="Field Type: " direction="horizontal" id="firstForm">
+                    <mx:ComboBox id="aggregationBox" dataProvider="{aggregationTypeObjects}"
+                                 close="aggregationTypeChanged(event)" rowCount="9"/>
+                </mx:FormItem>
+            </mx:Form>
 
-    </mx:VBox>
-        <mx:VBox label="Links" width="100%" height="100%" paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5">
+        </mx:VBox>
+        <mx:VBox label="Links" width="100%" height="100%" paddingBottom="5" paddingLeft="5" paddingRight="5"
+                 paddingTop="5">
             <mx:Button label="Add Link..." click="addLink()"/>
-        <mx:DataGrid dataProvider="{links}" width="100%">
-            <mx:columns>
-                <util:EIDataGridColumn headerText="Link Name" dataField="label"/>
-                <util:EIDataGridColumn headerText="Link Type" dataField="type"/>
-                <util:EIDataGridColumn headerText="" sortable="false" dataField="label" itemRenderer="com.easyinsight.analysis.LinkControls"
-                        width="100"/>
-            </mx:columns>
-        </mx:DataGrid>
+            <mx:DataGrid dataProvider="{links}" width="100%">
+                <mx:columns>
+                    <util:EIDataGridColumn headerText="Link Name" dataField="label"/>
+                    <util:EIDataGridColumn headerText="Link Type" dataField="type"/>
+                    <util:EIDataGridColumn headerText="" sortable="false" dataField="label"
+                                           itemRenderer="com.easyinsight.analysis.LinkControls"
+                                           width="100"/>
+                </mx:columns>
+            </mx:DataGrid>
+        </mx:VBox>
+        <mx:VBox label="Filters" width="100%" height="100%" paddingBottom="5" paddingLeft="5" paddingRight="5"
+                 paddingTop="5">
+            <filters:TransformContainer id="transformContainer" paddingLeft="10" paddingTop="10" paddingBottom="10"
+                                          paddingRight="10"
+                                          width="100%" height="100%" backgroundColor="#ffffff" backgroundAlpha=".1"
+                                          feedID="{_dataSourceID}"
+                                          analysisItems="{allItems}"/>
         </mx:VBox>
     </mx:TabNavigator>
     <mx:StringValidator id="nameValidator" source="{fieldNameInput}" property="text" minLength="3"/>
