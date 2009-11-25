@@ -88,7 +88,7 @@ public class DataSet implements Serializable {
             }
         }
         Collection<AnalysisItem> paredDownColumns = new LinkedHashSet<AnalysisItem>(columns);
-        ListTransform listTransform = new ListTransform(allItems);
+        ListTransform listTransform = new ListTransform();
         for (IRow row : rows) {
             Map<Key, Value> compositeDimensionKey = new HashMap<Key, Value>();
             for (AnalysisDimension dimension : ourDimensions) {
@@ -106,7 +106,7 @@ public class DataSet implements Serializable {
                         value = row.getValue(measure.createAggregateKey());
                     }
                     if (value != null) {
-                        listTransform.groupData(compositeDimensionKey, measure, value);
+                        listTransform.groupData(compositeDimensionKey, measure, value, row);
                     }
                 } else {
                     AnalysisDimension analysisDimension = (AnalysisDimension) column;

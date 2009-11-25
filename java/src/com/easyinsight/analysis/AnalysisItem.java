@@ -51,6 +51,12 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
     @Column(name="width")
     private int width;
 
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JoinTable(name = "analysis_item_to_filter",
+            joinColumns = @JoinColumn(name = "analysis_item_id", nullable = false),
+            inverseJoinColumns = @JoinColumn(name = "filter_id", nullable = false))
+    private List<FilterDefinition> filters = new ArrayList<FilterDefinition>();
+
     @Column(name="high_is_good")
     private boolean highIsGood;
 
@@ -97,6 +103,14 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
 
     public void setVirtualDimension(VirtualDimension virtualDimension) {
         this.virtualDimension = virtualDimension;
+    }
+
+    public List<FilterDefinition> getFilters() {
+        return filters;
+    }
+
+    public void setFilters(List<FilterDefinition> filters) {
+        this.filters = filters;
     }
 
     public String toDisplay() {
@@ -221,6 +235,11 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
         for (Link link : getLinks()) {
             clonedLinks.add(link.clone());
         }
+        List<FilterDefinition> clonedFilters = new ArrayList<FilterDefinition>();
+        for (FilterDefinition filterDefinition : getFilters()) {
+            clonedFilters.add(filterDefinition.clone());
+        }
+        setFilters(clonedFilters);
         setLinks(clonedLinks);
         return clonedItem;
     }
@@ -248,12 +267,19 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
     }
 
     public void updateIDs(Map<Long, AnalysisItem> replacementMap) {
-
+        for (FilterDefinition filter : getFilters()) {
+            filter.updateIDs(replacementMap);
+        }
     }
 
     public List<AnalysisItem> getAnalysisItems(List<AnalysisItem> allItems, Collection<AnalysisItem> insightItems, boolean getEverything) {
         List<AnalysisItem> items = new ArrayList<AnalysisItem>();
         items.add(this);
+        if (getFilters().size() > 0) {
+            for (FilterDefinition filterDefinition : getFilters()) {
+                items.add(filterDefinition.getField());
+            }
+        }
         return items;
     }
 
@@ -292,7 +318,9 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
     }
 
     public void beforeSave() {
-        
+        for (FilterDefinition filterDefinition : getFilters()) {
+            filterDefinition.beforeSave();
+        }
     }
 
     public boolean isValid() {
@@ -304,6 +332,9 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
             for (VirtualTransform transform : virtualDimension.getVirtualTransforms()) {
                 transform.toRemote();
             }
+        }        
+        for (FilterDefinition filterDefinition : getFilters()) {
+            filterDefinition.afterLoad();
         }
         setLinks(new ArrayList<Link>(getLinks()));        
     }

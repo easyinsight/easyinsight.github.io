@@ -1,5 +1,6 @@
 package com.easyinsight.pipeline;
 
+import com.easyinsight.core.NamedKey;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.analysis.ListDataResults;
 import com.easyinsight.analysis.AnalysisMeasureGrouping;
@@ -23,6 +24,7 @@ public class MeasureGroupingComponent implements IComponent {
                 Value val = row.getValue(analysisMeasure.getKey());
                 StringValue stringValue = new StringValue(analysisMeasure.getKey().toKeyString());
                 row.addValue(measureGrouping.getKey(), stringValue);
+                row.addValue(new NamedKey("Measure"), val);
                 // y-axis, x-axis, measure
                 // this is where you basically need, uh...
                 // need to add the measure as well

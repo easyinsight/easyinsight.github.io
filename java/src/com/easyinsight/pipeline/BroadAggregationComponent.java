@@ -23,7 +23,7 @@ public class BroadAggregationComponent implements IComponent {
 
         List<AnalysisItem> list = new ArrayList<AnalysisItem>(pipelineData.getReportItems());
         ListTransform listTransform = dataSet.listTransform(list, list);
-        return listTransform.aggregate(list, derivedItems, list);
+        return listTransform.aggregate(list, derivedItems);
     }
 
     public void decorate(ListDataResults listDataResults) {

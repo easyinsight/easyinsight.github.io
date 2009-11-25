@@ -21,6 +21,7 @@ public class Solution {
     private String author = "Easy Insight";
     private String industry;
     private String solutionArchiveName;
+    private String detailPageClass;
     private boolean installable;
     private boolean copyData;
     private long goalTreeID;
@@ -33,6 +34,14 @@ public class Solution {
     private int category;
     private String screencastName;
     private String screencastDirectory;
+
+    public String getDetailPageClass() {
+        return detailPageClass;
+    }
+
+    public void setDetailPageClass(String detailPageClass) {
+        this.detailPageClass = detailPageClass;
+    }
 
     public String getFooterText() {
         return footerText;

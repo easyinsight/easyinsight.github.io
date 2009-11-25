@@ -23,7 +23,7 @@ public class AggregationComponent implements IComponent {
         List<AnalysisItem> allRequestedAnalysisItems = new ArrayList<AnalysisItem>(pipelineData.getReport().getAllAnalysisItems());
         List<AnalysisItem> list = new ArrayList<AnalysisItem>(pipelineData.getReportItems());
         ListTransform listTransform = dataSet.listTransform(list, allRequestedAnalysisItems);
-        return listTransform.aggregate(list, derivedItems, allRequestedAnalysisItems);
+        return listTransform.aggregate(list, derivedItems);
     }
 
     public void decorate(ListDataResults listDataResults) {

@@ -1,7 +1,5 @@
 package com.easyinsight.analysis;
 
-import com.easyinsight.analysis.ListDataResults;
-import com.easyinsight.analysis.ListRow;
 import com.easyinsight.core.Key;
 import com.easyinsight.core.Value;
 import com.easyinsight.core.EmptyValue;
@@ -20,34 +18,30 @@ public class ListTransform {
     private Map<Map<Key, Value>, Map<AnalysisDimension, Value>> dimensionMap = new HashMap<Map<Key, Value>, Map<AnalysisDimension, Value>>();
     private Set<Map<Key, Value>> compositeKeys = new HashSet<Map<Key, Value>>();
     private Map<AnalysisMeasure, AggregationFactory> factoryMap = new HashMap<AnalysisMeasure, AggregationFactory>();
-    private List<TemporalAnalysisMeasure> temporalAnalysisMeasures = new ArrayList<TemporalAnalysisMeasure>();
 
-    public ListTransform(List<AnalysisItem> analysisItems) {
-        for (AnalysisItem analysisItem : analysisItems) {
-            if (analysisItem.hasType(AnalysisItemTypes.TEMPORAL_MEASURE)) {
-                temporalAnalysisMeasures.add((TemporalAnalysisMeasure) analysisItem);
-            }
-        }
+
+    public ListTransform() {
     }
 
-    public void groupData(Map<Key, Value> compositeDimensionKey, AnalysisMeasure measure, Value value) {
-        compositeKeys.add(compositeDimensionKey);
-        Map<AnalysisMeasure, Aggregation> values = keyMap.get(compositeDimensionKey);
-        if (values == null) {
-            values = new HashMap<AnalysisMeasure, Aggregation>();
-            keyMap.put(compositeDimensionKey, values);
-        }
-        AggregationFactory aggregationFactory = factoryMap.get(measure);
-        if (aggregationFactory == null) {
-            aggregationFactory = new AggregationFactory(measure);
-            factoryMap.put(measure, aggregationFactory);
-        }
-        Aggregation aggregation = values.get(measure);
-        if (aggregation == null) {
-            aggregation = aggregationFactory.getAggregation();
-            values.put(measure, aggregation);
-        }
-        aggregation.addValue(value);
+    public void groupData(Map<Key, Value> compositeDimensionKey, AnalysisMeasure measure, Value value, IRow row) {
+            compositeKeys.add(compositeDimensionKey);
+            Map<AnalysisMeasure, Aggregation> values = keyMap.get(compositeDimensionKey);
+            if (values == null) {
+                values = new HashMap<AnalysisMeasure, Aggregation>();
+                keyMap.put(compositeDimensionKey, values);
+            }
+            AggregationFactory aggregationFactory = factoryMap.get(measure);
+            if (aggregationFactory == null) {
+                aggregationFactory = new AggregationFactory(measure);
+                factoryMap.put(measure, aggregationFactory);
+            }
+
+            Aggregation aggregation = values.get(measure);
+            if (aggregation == null) {
+                aggregation = aggregationFactory.getAggregation();
+                values.put(measure, aggregation);
+            }
+            aggregation.addValue(value);
     }
 
     public void groupData(Map<Key, Value> compositeDimensionKey, AnalysisDimension dimension, Value value) {
@@ -60,7 +54,7 @@ public class ListTransform {
         values.put(dimension, value);
     }
 
-    public DataSet aggregate(List<AnalysisItem> columns, List<AnalysisItem> derivedItems, List<AnalysisItem> allRequestedAnalysisItems) {
+    public DataSet aggregate(List<AnalysisItem> columns, List<AnalysisItem> derivedItems) {
         DataSet dataSet = new DataSet();
         for (Map<Key, Value> compositeKey : compositeKeys) {
             IRow row = dataSet.createRow();
@@ -85,30 +79,6 @@ public class ListTransform {
                 row.addValue(column.createAggregateKey(), obj);
             }
         }
-        // for each post processor, run the values through again...
-        /*boolean postAggregationRequired = false;
-        for (TemporalAnalysisMeasure temporalAnalysisMeasure : temporalAnalysisMeasures) {
-            if (temporalAnalysisMeasure.hasBeenApplied()) {
-                continue;
-            }
-            if (temporalAnalysisMeasure.requiresReAggregation()) {
-                postAggregationRequired = true;
-            }
-            TemporalChangeTransform transform = new TemporalChangeTransform(temporalAnalysisMeasure, allRequestedAnalysisItems);
-            dataSet = transform.blah(dataSet);
-            temporalAnalysisMeasure.triggerApplied(true);
-        }
-
-        // we may need to reaggregate...
-
-        if (postAggregationRequired) {
-            List<AnalysisItem> temporalRequestedItems = new ArrayList<AnalysisItem>(columns);
-            for (TemporalAnalysisMeasure temporalAnalysisMeasure : temporalAnalysisMeasures) {
-                temporalRequestedItems.remove(temporalAnalysisMeasure.getAnalysisDimension());
-            }
-            ListTransform listTransform = dataSet.listTransform(allRequestedAnalysisItems, temporalRequestedItems);
-            dataSet = listTransform.aggregate(allRequestedAnalysisItems, derivedItems, temporalRequestedItems);
-        }*/
 
         if (derivedItems != null) {
             for (IRow row : dataSet.getRows()) {

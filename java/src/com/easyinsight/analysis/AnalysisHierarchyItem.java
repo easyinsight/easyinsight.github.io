@@ -24,6 +24,7 @@ public class AnalysisHierarchyItem extends AnalysisDimension {
     private List<HierarchyLevel> hierarchyLevels;
 
     public void beforeSave() {
+        super.beforeSave();
         int i = 0;
         for (HierarchyLevel hierarchyLevel : hierarchyLevels) {
             hierarchyLevel.setPosition(i++);

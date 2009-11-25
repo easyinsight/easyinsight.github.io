@@ -50,6 +50,11 @@ public class ExportService {
         
     }
 
+    public long exportDataSourceToCSV(long dataSourceID) {
+        
+        return 0;
+    }
+
     public long exportReportIDTOCSV(long reportID, List<FilterDefinition> customFilters, List<FilterDefinition> drillThroughFilters) {
         SecurityUtil.authorizeInsight(reportID);
         try {
