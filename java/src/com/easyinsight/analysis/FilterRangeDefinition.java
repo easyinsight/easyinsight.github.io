@@ -91,7 +91,7 @@ public class FilterRangeDefinition extends FilterDefinition {
 
     public String toQuerySQL(String tableName) {
         StringBuilder queryBuilder = new StringBuilder();
-        String columnName = "k" + getField().getKey().getKeyID();
+        String columnName = getField().toKeySQL();
         queryBuilder.append(columnName);
         if (startValueDefined && endValueDefined) {
             queryBuilder.append(" > ? AND ");
