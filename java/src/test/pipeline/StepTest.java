@@ -62,7 +62,7 @@ public class StepTest extends TestCase {
         rowB.addValue(correlationDim.getKey(), "B");
         rowB.addValue(otherDim.getKey(), "X");
 
-        PipelineData pipelineData = new PipelineData(listDefinition, Arrays.asList(startedDate, endedDate, correlationDim, otherDim, count, analysisStep), new InsightRequestMetadata());
+        PipelineData pipelineData = new PipelineData(listDefinition, Arrays.asList(startedDate, endedDate, correlationDim, otherDim, count, analysisStep), new InsightRequestMetadata(), null);
         dataSet = new TypeTransformComponent().apply(dataSet, pipelineData);
         IComponent component = new StepCorrelationComponent(analysisStep);
         DataSet result = component.apply(dataSet, pipelineData);

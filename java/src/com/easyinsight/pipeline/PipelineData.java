@@ -5,6 +5,7 @@ import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.analysis.InsightRequestMetadata;
 
 import java.util.Collection;
+import java.util.List;
 
 /**
  * User: James Boe
@@ -13,13 +14,20 @@ import java.util.Collection;
  */
 public class PipelineData {
     private WSAnalysisDefinition report;
+    private List<AnalysisItem> allItems;
     private Collection<AnalysisItem> reportItems;
     private InsightRequestMetadata insightRequestMetadata;
 
-    public PipelineData(WSAnalysisDefinition report, Collection<AnalysisItem> reportItems, InsightRequestMetadata insightRequestMetadata) {
+    public PipelineData(WSAnalysisDefinition report, Collection<AnalysisItem> reportItems, InsightRequestMetadata insightRequestMetadata,
+                        List<AnalysisItem> allItems) {
         this.report = report;
         this.reportItems = reportItems;
         this.insightRequestMetadata = insightRequestMetadata;
+        this.allItems = allItems;
+    }
+
+    public List<AnalysisItem> getAllItems() {
+        return allItems;
     }
 
     public WSAnalysisDefinition getReport() {
