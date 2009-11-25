@@ -215,6 +215,7 @@
                 dataViewFactory.analysisDefinition = analysisDefinition;
             }
             dataView = dataViewFactory;
+            dataView.dataSourceID = dataService.dataFeedID;
             dataView.addEventListener(DataServiceLoadingEvent.LOADING_STARTED, startLoading);
             dataView.addEventListener(DataServiceLoadingEvent.LOADING_STOPPED, stopLoading);
             dataView.addEventListener(AnalysisChangedEvent.ANALYSIS_CHANGED, onAnalysisChanged);
