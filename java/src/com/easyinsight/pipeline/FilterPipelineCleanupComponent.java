@@ -19,7 +19,7 @@ public class FilterPipelineCleanupComponent implements IComponent {
         if (pipelineData.getReport().getFilterDefinitions() != null) {
             for (FilterDefinition filterDefinition : pipelineData.getReport().getFilterDefinitions()) {
                 if (filterDefinition.isApplyBeforeAggregation()) {
-                    boolean itemFound = findItem(filterDefinition.getField(), allRequestedAnalysisItems);
+                    boolean itemFound = findItem(filterDefinition.getField(), allRequestedAnalysisItems, pipelineData.getAllItems());
                     if (!itemFound) {
                         pipelineData.getReportItems().remove(filterDefinition.getField());
                     }
@@ -29,10 +29,10 @@ public class FilterPipelineCleanupComponent implements IComponent {
         return dataSet;
     }
 
-    private boolean findItem(AnalysisItem field, List<AnalysisItem> allRequestedAnalysisItems) {
+    private boolean findItem(AnalysisItem field, List<AnalysisItem> allRequestedAnalysisItems, List<AnalysisItem> allItems) {
         boolean found = false;
         for (AnalysisItem item : allRequestedAnalysisItems) {
-            List<AnalysisItem> items = item.getAnalysisItems(allRequestedAnalysisItems, new ArrayList<AnalysisItem>(), false);
+            List<AnalysisItem> items = item.getAnalysisItems(allItems, allRequestedAnalysisItems, false);
             found = items.contains(field);
             if (found) {
                 break;
