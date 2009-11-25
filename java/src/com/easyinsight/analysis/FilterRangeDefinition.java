@@ -38,6 +38,7 @@ public class FilterRangeDefinition extends FilterDefinition {
 
     @Override
     public void afterLoad() {
+        super.afterLoad();
         if (startValue == null) {
             startValue = 0.;
             startValueDefined = false;

@@ -101,6 +101,6 @@ public abstract class FilterDefinition implements Serializable, Cloneable {
     }
 
     public void afterLoad() {
-        
+        getField().afterLoad();
     }
 }

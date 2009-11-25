@@ -91,6 +91,7 @@ public class FilterValueDefinition extends FilterDefinition {
     }
 
     public void afterLoad() {
+        super.afterLoad();
         List<Object> values = new ArrayList<Object>();
         if (getPersistedValues() != null) {
             for (PersistableValue filterDefinitionValue : getPersistedValues()) {
