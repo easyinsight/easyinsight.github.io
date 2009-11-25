@@ -1,6 +1,7 @@
 package com.easyinsight.calculations;
 
 import com.easyinsight.core.Value;
+import com.sun.javaws.exceptions.InvalidArgumentException;
 
 /**
  * Created by IntelliJ IDEA.
@@ -11,11 +12,20 @@ import com.easyinsight.core.Value;
 public class ResolverVisitor implements ICalculationTreeVisitor {
     private Resolver variableResolver;
     private FunctionFactory functionResolver;
+    private int aggregationType;
 
     public ResolverVisitor(Resolver r, FunctionFactory f) {
         variableResolver = r;
         functionResolver = f;
+        aggregationType = 0;
     }
+
+    public ResolverVisitor(Resolver r, FunctionFactory f, int aggregationType) {
+        variableResolver = r;
+        functionResolver = f;
+        this.aggregationType = aggregationType;
+    }
+
 
     private void visitChildren(CalculationTreeNode node) {
         for(int i = 0;i < node.getChildCount();i++) {
@@ -54,13 +64,27 @@ public class ResolverVisitor implements ICalculationTreeVisitor {
     }
 
     public void visit(VariableNode node) {
-        node.resolveVariableKey(variableResolver);
+        if(aggregationType == 0)
+            node.resolveVariableKey(variableResolver);
+        else
+            node.resolveVariableKey(variableResolver, aggregationType);
     }
 
     public void visit(FunctionNode node) {
         node.resolveFunction(functionResolver);
-        for(int i = 1;i < node.getChildCount();i++) {
-            ((CalculationTreeNode) node.getChild(i)).accept(new ResolverVisitor(variableResolver, functionResolver));
+        if(node.getFunction() instanceof CastFunction) {
+            CastFunction f = (CastFunction) node.getFunction();
+            if(node.getChildCount() != 2 || !(node.getChild(1) instanceof VariableNode)) {
+                throw new IllegalArgumentException();
+            }
+            else {
+                ((CalculationTreeNode) node.getChild(1)).accept(new ResolverVisitor(variableResolver, functionResolver, f.getAggregationType()));
+            }
+        }
+        else {
+            for(int i = 1;i < node.getChildCount();i++) {
+                ((CalculationTreeNode) node.getChild(i)).accept(new ResolverVisitor(variableResolver, functionResolver));
+            }
         }
     }
 

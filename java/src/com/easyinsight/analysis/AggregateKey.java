@@ -18,6 +18,14 @@ public class AggregateKey extends NamedKey {
         this.type = type;
     }
 
+    public Key underlyingKey() {
+        return key;
+    }
+
+    public int aggregationType() {
+        return type;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

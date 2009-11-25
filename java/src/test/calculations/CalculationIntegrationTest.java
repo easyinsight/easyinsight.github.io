@@ -159,6 +159,45 @@ public class CalculationIntegrationTest extends TestCase {
         assertEquals(0.0, total.toDouble());
     }
 
+    public void testCasts() throws SQLException {
+        TestUtil.getIndividualTestUser();
+        AnalysisDimension otherDim = new AnalysisDimension("Other", true);
+        AnalysisMeasure count = new AnalysisMeasure("Count", AggregationTypes.SUM);
+        AnalysisMeasure value = new AnalysisMeasure("Value", AggregationTypes.SUM);
+        DataSet dataSet = new DataSet();
+        IRow rowA = dataSet.createRow();
+        rowA.addValue(count.getKey(), 5);
+        rowA.addValue(value.getKey(), 5);
+        rowA.addValue(otherDim.getKey(), "X");
+        IRow rowB = dataSet.createRow();
+        rowB.addValue(count.getKey(), 5);
+        rowB.addValue(value.getKey(), 5);
+        rowB.addValue(otherDim.getKey(), "Y");
+        IRow rowZ = dataSet.createRow();
+        rowZ.addValue(count.getKey(), 7);
+        rowZ.addValue(value.getKey(), 5);
+        rowZ.addValue(otherDim.getKey(), "Z");
+        long id = TestUtil.createTestDataSource(dataSet, Arrays.asList(value, otherDim, count));
+        AnalysisCalculation calculation = new AnalysisCalculation();
+        calculation.setKey(new NamedKey("Calculation"));
+        calculation.setCalculationString("castaverage(Count)");
+        calculation.setAggregation(AggregationTypes.SUM);
+        WSListDefinition listDefinition = new WSListDefinition();
+        FilterValueDefinition filterValueDefinition = new FilterValueDefinition();
+        filterValueDefinition.setField(TestUtil.getItem(id, "Other"));
+        filterValueDefinition.setInclusive(false);
+        filterValueDefinition.setFilteredValues(Arrays.asList((Object) "Z"));
+        filterValueDefinition.setApplyBeforeAggregation(true);
+        listDefinition.setFilterDefinitions(Arrays.asList((FilterDefinition) filterValueDefinition));
+        listDefinition.setColumns(Arrays.asList((AnalysisItem) calculation));
+        listDefinition.setDataFeedID(id);
+        ListDataResults results = new DataService().list(listDefinition, new InsightRequestMetadata());
+        assertEquals(1, results.getRows().length);
+        Value total = results.getRows()[0].getValues()[0];
+        assertEquals(5.0, total.toDouble(), .001);
+    }
+
+
     public void testVariableSet() throws SQLException {
 
         FeedDefinition feedDefinition = setupStuff();
@@ -173,6 +212,23 @@ public class CalculationIntegrationTest extends TestCase {
         tree.accept(visitor);
         //assertEquals(3, visitor.getVariableList().size());
         
+    }
+
+
+    public void testCastingSet() throws SQLException {
+
+        FeedDefinition feedDefinition = setupStuff();
+        long feedID = feedDefinition.getDataFeedID();
+        Resolver resolver = new Resolver(feedDefinition);
+        // The data set provided at this point has three numeric variables--Revenue, Cost Number, and Units.
+        // TODO: use this resolver to populate your object tree with Keys for each variable
+        // TODO: our target calculation will be ((Revenue + 100) - (Cost Number)) / Units * 12
+        CalculationTreeNode tree = evalString("((Revenue + 100) - (castaverage([Cost Number]))) / [Units] * 12 + [Units] * [Revenue]", resolver);
+
+        VariableListVisitor visitor = new VariableListVisitor();
+        tree.accept(visitor);
+        assertEquals(4, visitor.getVariableList().size());
+
     }
 
     public void testMin() throws SQLException {

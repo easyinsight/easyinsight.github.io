@@ -1,5 +1,10 @@
 package com.easyinsight.calculations;
 
+import com.easyinsight.analysis.AggregationTypes;
+
+import java.util.Map;
+import java.util.HashMap;
+
 /**
  * Created by IntelliJ IDEA.
  * User: Alan
@@ -7,7 +12,22 @@ package com.easyinsight.calculations;
  * Time: 9:06:50 PM
  */
 public class FunctionFactory {
+    private static Map<String, Integer> aggregationMap;
+    static {
+        aggregationMap = new HashMap<String, Integer>();
+        aggregationMap.put("castsum", AggregationTypes.SUM);
+        aggregationMap.put("castaverage", AggregationTypes.AVERAGE);
+        aggregationMap.put("castmax", AggregationTypes.MAX);
+        aggregationMap.put("castmin", AggregationTypes.MIN);
+        aggregationMap.put("castcount", AggregationTypes.COUNT);
+        aggregationMap.put("castmedian", AggregationTypes.MEDIAN);
+        aggregationMap.put("castvariance", AggregationTypes.VARIANCE);
+    }
+
     public IFunction createFunction(String s) {
+        if(aggregationMap.containsKey(s)) {
+            return new CastFunction(aggregationMap.get(s));
+        }
         if(s.equals("ln")) {
             return new NaturalLog(); 
         }
@@ -23,7 +43,6 @@ public class FunctionFactory {
         else if(s.equals("max")) {
             return new Maximum();
         }
-
         else {
             return null;
         }

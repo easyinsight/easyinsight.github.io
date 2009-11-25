@@ -63,6 +63,7 @@ public class AnalysisCalculation extends AnalysisMeasure {
         Map<Key, AnalysisItem> map = new HashMap<Key, AnalysisItem>();
         for (AnalysisItem analysisItem : allItems) {
             map.put(analysisItem.getKey(), analysisItem);
+            map.put(analysisItem.createAggregateKey(), analysisItem);
         }
         Resolver resolver = new Resolver(allItems);
         CalculationTreeNode tree;
@@ -88,6 +89,18 @@ public class AnalysisCalculation extends AnalysisMeasure {
         Set<Key> keys = variableVisitor.getVariableList();
         for (Key key : keys) {
             AnalysisItem analysisItem = map.get(key);
+            if(analysisItem == null) {
+                AggregateKey aggregateKey = (AggregateKey) key;
+                AnalysisItem tempItem = map.get(aggregateKey.underlyingKey());
+                try {
+                    analysisItem = tempItem.clone();
+                } catch (CloneNotSupportedException e) {
+                    // This is supported
+                    LogClass.error(e);
+                }
+                ((AnalysisMeasure) analysisItem).setAggregation(aggregateKey.aggregationType());
+                map.put(analysisItem.createAggregateKey(), analysisItem);
+            }
             boolean alreadyInInsight = false;
             for (AnalysisItem insightItem : insightItems) {
                 if (insightItem.getKey().equals(analysisItem.getKey())) {
