@@ -25,7 +25,7 @@ import mx.formatters.Formatter;
         public var links:ArrayCollection = new ArrayCollection();
         public var highIsGood:Boolean = true;
         public var itemPosition:int = 0;
-        public var filters:ArrayCollection;
+        public var filters:ArrayCollection = new ArrayCollection();
 		
 		public function AnalysisItem() {
 			super();
