@@ -44,7 +44,8 @@
     <mx:Script><![CDATA[
         import com.easyinsight.framework.AuthorizationRequirement;
         import com.easyinsight.google.AuthSubNavWindow;
-        import com.easyinsight.util.PopUpUtil;        
+        import com.easyinsight.listing.DataFeedDescriptor;
+        import com.easyinsight.util.PopUpUtil;
 
         import mx.managers.PopUpManager;
 
@@ -67,7 +68,7 @@
                 currentState = "Authorized";
                 startButtonText = "Install the Solution";
             } else {
-                solutionService2.determineAuthorizationRequirements.send(solution.solutionID);
+                solutionService2.determineAuthorizationRequirements.send(DataFeedDescriptor.GOOGLE_ANALYTICS, solution.solutionID);
             }
         }
 

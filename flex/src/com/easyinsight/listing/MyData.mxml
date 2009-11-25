@@ -14,46 +14,39 @@
 	<mx:Script>
 		<![CDATA[
         import com.easyinsight.customupload.SimpleFeedWindow;
+        import com.easyinsight.customupload.UploadConfigEvent;
         import com.easyinsight.framework.AsyncInfoEvent;
         import com.easyinsight.framework.EIMessageListener;
-        import com.easyinsight.help.MyDataHelp;
-        import com.easyinsight.help.HelpWindow;
-        import com.easyinsight.customupload.UserUpload;
         import com.easyinsight.framework.LoginEvent;
-        import com.easyinsight.customupload.UploadExternalSource;
+        import com.easyinsight.framework.User;
+        import com.easyinsight.genredata.AnalyzeEvent;
+        import com.easyinsight.help.HelpWindow;
+        import com.easyinsight.help.MyDataHelp;
         import com.easyinsight.outboundnotifications.RefreshEventInfo;
         import com.easyinsight.report.ReportAnalyzeSource;
         import com.easyinsight.solutions.InsightDescriptor;
-
         import com.easyinsight.util.PopUpUtil;
-
-        import mx.binding.utils.BindingUtils;
-        import mx.collections.ICollectionView;
-        import mx.collections.Sort;
-        import mx.events.AdvancedDataGridEvent;
-        import mx.utils.URLUtil;
-        import mx.managers.BrowserManager;
-        import mx.events.ListEvent;
-
-        import com.easyinsight.genredata.AnalyzeEvent;
-
-        import mx.collections.IHierarchicalCollectionView;
-        import mx.collections.HierarchicalData;
-        import mx.controls.Alert;
-
-        import com.easyinsight.framework.User;
-        import com.easyinsight.customupload.UploadConfigEvent;
         import com.easyinsight.util.ProgressAlert;
 
-        import mx.rpc.events.FaultEvent;
-        import mx.events.CloseEvent;
-        import mx.managers.PopUpManager;
+        import mx.binding.utils.BindingUtils;
         import mx.collections.ArrayCollection;
+        import mx.collections.HierarchicalData;
+        import mx.collections.ICollectionView;
+        import mx.collections.IHierarchicalCollectionView;
+        import mx.collections.Sort;
+        import mx.controls.Alert;
+        import mx.events.AdvancedDataGridEvent;
+        import mx.events.CloseEvent;
+        import mx.events.ListEvent;
+        import mx.managers.BrowserManager;
+        import mx.managers.PopUpManager;
+        import mx.rpc.events.FaultEvent;
+        import mx.utils.URLUtil;
 
         private function downloadAirWidget():void {
             var request:URLRequest = new URLRequest("/app/assets/EIAirWidget.air");
             request.method = URLRequestMethod.GET;
-            flash.net.navigateToURL(request);
+            navigateToURL(request);
         }
 
         private var initialEntry:Boolean = true;
@@ -146,21 +139,11 @@
             if (uploadGrid.selectedItem is DataFeedDescriptor) {
                 var descriptor:DataFeedDescriptor = uploadGrid.selectedItem as DataFeedDescriptor;
                 if (descriptor.role == DataFeedDescriptor.OWNER) {
-                    /*if (descriptor.policy.getPolicyType() == UploadPolicy.COMMERCIAL) {
-                     Alert.show("This data source is currently available for sale in the marketplace.", "Alert",
-                     Alert.OK | Alert.CANCEL, this, alertFeedListener, null, Alert.CANCEL);
-                     } else {*/
                     Alert.show("Are you sure you want to delete this data source? You will not be able to undo this operation.", "Alert",
                             Alert.OK | Alert.CANCEL, this, alertFeedListener, null, Alert.CANCEL);
-                    //	}
                 } else {
-                    /*if (descriptor.policy.getPolicyType() == UploadPolicy.COMMERCIAL) {
-                     Alert.show("Are you sure you want to cancel your subscription to this data source?", "Alert",
-                     Alert.OK | Alert.CANCEL, this, alertFeedListener, null, Alert.CANCEL);
-                     } else {*/
                     Alert.show("Are you sure you want to cancel your subscription to this data source?", "Alert",
                             Alert.OK | Alert.CANCEL, this, alertFeedListener, null, Alert.CANCEL);
-                    //}
                 }
             } else {
                 Alert.show("Are you sure you want to delete this report? You will not be able to undo this operation.", "Alert",
@@ -224,38 +207,10 @@
                 showLoading = true;
                 uploadService.getFeedAnalysisTree.send(includeGroups, initialEntry);
             }
-            if (_toGDocs) {
-                var uploadExternal:UploadExternalSource = new UploadExternalSource();
-                uploadExternal.addEventListener(UploadConfigEvent.UPLOAD_CONFIG_COMPLETE, uploadConfigComplete);
-                PopUpManager.addPopUp(uploadExternal, this, true);
-                PopUpUtil.centerPopUp(uploadExternal);
-                _toGDocs = false;
-            }
-        }
-
-        private var _toGDocs:Boolean;
-
-
-        public function set toGDocs(value:Boolean):void {
-            _toGDocs = value;
-        }
-
-        public function getDefaultAnalyzeState():Boolean {
-            return true;
-        }
-
-        public function isKeywordSearchInstant():Boolean {
-            return true;
         }
 
         private function passThrough(event:Event):void {
             dispatchEvent(event);
-        }
-
-        private function toUpload():void {
-            var userUpload:UserUpload = UserUpload(PopUpManager.createPopUp(this, UserUpload, true));
-            userUpload.addEventListener(UploadConfigEvent.UPLOAD_CONFIG_COMPLETE, uploadConfigComplete);
-            PopUpUtil.centerPopUp(userUpload);
         }
 
         private function createEmptyFeed():void {
@@ -264,22 +219,12 @@
             PopUpUtil.centerPopUp(userUpload);
         }
 
-        private function externalConnect():void {
-            var uploadExternal:UploadExternalSource = UploadExternalSource(PopUpManager.createPopUp(this, UploadExternalSource, true));
-            uploadExternal.addEventListener(UploadConfigEvent.UPLOAD_CONFIG_COMPLETE, uploadConfigComplete);
-            uploadExternal.width = uploadGrid.width;
-            uploadExternal.height = uploadGrid.height;
-            PopUpUtil.centerPopUp(uploadExternal);
-        }
-
         private function uploadConfigComplete(event:UploadConfigEvent):void {
             showLoading = true;
             uploadService.getFeedAnalysisTree.send(includeGroups, initialEntry);
             if (event.feedID > 0) {
                 var descriptor:DataFeedDescriptor = new DataFeedDescriptor();
                 descriptor.dataFeedID = event.feedID;
-                /*descriptor.policy = new UploadPolicy();
-                 descriptor.policy.publiclyVisible = false;*/
                 descriptor.name = event.name;
                 if (event.startInAdmin) {
                     dispatchEvent(new AnalyzeEvent(new FeedAdminAnalyzeSource(descriptor.dataFeedID)));
@@ -335,10 +280,6 @@
         }
 
         private function createCompositeFeed():void {
-
-            /*var joinWorkspace:JoinWorkspace = JoinWorkspace(PopUpManager.createPopUp(this, JoinWorkspace, true));
-             joinWorkspace.addEventListener(UploadConfigEvent.UPLOAD_CONFIG_COMPLETE, uploadConfigComplete);
-             PopUpUtil.centerPopUp(joinWorkspace);*/
             var descriptors:ArrayCollection = new ArrayCollection();
             if (uploadGrid.selectedItems != null) {
 
@@ -398,10 +339,10 @@
 
 	<mx:VBox id="coreContent" height="100%" width="100%" paddingTop="10" paddingLeft="10" paddingRight="10" paddingBottom="10" verticalGap="10">
 		<mx:HBox width="100%" id="uploadBox" verticalAlign="middle">
-			<mx:Button toolTip="Upload data from Excel or CSV..." click="toUpload()" id="uploadButton" icon="{addIcon}" 
+			<!--<mx:Button toolTip="Upload data from Excel or CSV..." click="toUpload()" id="uploadButton" icon="{addIcon}"
 				label="Upload File" labelPlacement="bottom"/>
 			<mx:Button toolTip="Connect to Google Spreadsheets..." click="externalConnect()" id="connectButton" icon="{dataConnectionIcon}"
-				label="Google Spreadsheets" labelPlacement="bottom"/>
+				label="Google Spreadsheets" labelPlacement="bottom"/>-->
 			<mx:Button toolTip="Create composite data source..." click="createCompositeFeed()" id="compositeFeedButton" icon="{joinIcon}"
 				label="Combine Sources" labelPlacement="bottom"/>
 			<mx:Button toolTip="Create empty data source..." click="createEmptyFeed()" id="emptyFeedButton" icon="{addIcon}"

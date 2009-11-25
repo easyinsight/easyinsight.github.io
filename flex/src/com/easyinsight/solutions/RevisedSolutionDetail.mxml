@@ -30,7 +30,7 @@
                 </mx:VBox>
             </mx:AddChild>
         </mx:State>
-        <mx:State name="AuthorizationRequired">
+        <!--<mx:State name="AuthorizationRequired">
             <mx:RemoveChild target="{controls}"/>
             <mx:AddChild relativeTo="{controlsBox}">
                 <mx:VBox horizontalAlign="center" verticalAlign="middle" height="100%" verticalGap="15">
@@ -47,7 +47,7 @@
                 <mx:TextArea text="You're now authorized to access the external data. Click Install Solution below to start!" backgroundAlpha="0"
                                 borderStyle="none" editable="false" selectable="false" fontSize="16" width="300" height="90"/>                
             </mx:AddChild>
-        </mx:State>
+        </mx:State>-->
     </mx:states>
     <mx:Script>
 		<![CDATA[
@@ -61,7 +61,6 @@
 
         import com.easyinsight.goals.GoalDataAnalyzeSource;
         import com.easyinsight.goals.GoalTreeDescriptor;
-        import com.easyinsight.google.AuthSubNavWindow;
         import com.easyinsight.help.ScreencastWindow;
         import com.easyinsight.listing.DescriptorAnalyzeSource;
         import com.easyinsight.quicksearch.EIDescriptor;
@@ -213,11 +212,11 @@
                 controlsEnabled = false;
                 controlsAlpha = .5;
                 currentState = "NotLoggedIn";
-            } else if (_newAuth) {
+            } /*else if (_newAuth) {
                 currentState = "Authorized";
             } else {
                 solutionService.determineAuthorizationRequirements.send(solutionID);
-            }
+            }*/
         }
 
         public function set treeData(data:ArrayCollection):void {
@@ -317,19 +316,19 @@
             }
         }
 
-        private function gotRequirements():void {
+        /*private function gotRequirements():void {
             authRequirement = solutionService.determineAuthorizationRequirements.lastResult as AuthorizationRequirement;
             if (authRequirement != null) {
                 currentState = "AuthorizationRequired";
             }
-        }
+        }*/
 
-        private function authorize():void {
+        /*private function authorize():void {
             var window:AuthSubNavWindow = new AuthSubNavWindow();
             window.googleURL = authRequirement.url;
             PopUpManager.addPopUp(window, this, true);
             PopUpUtil.centerPopUp(window);
-        }
+        }*/
 
         private function onSourceConfigured(event:DataSourceConfiguredEvent):void {
             postInstall();
@@ -411,10 +410,10 @@
             }
         }
 
-        private function determineAuth():void {
+        /*private function determineAuth():void {
             ProgressAlert.alert(this, "Determining authorization requirements...", null, solutionService.determineAuthorizationRequirements);
             solutionService.determineAuthorizationRequirements.send(solutionID);
-        }
+        }*/
 
         public function cleanup():void {
         }
@@ -422,7 +421,7 @@
 	</mx:Script>
     <mx:RemoteObject destination="solutionService" id="solutionService">
 		<mx:method name="installSolution" result="installedSolution()"/>
-		<mx:method name="determineAuthorizationRequirements" result="gotRequirements()"/>
+		<!--<mx:method name="determineAuthorizationRequirements" result="gotRequirements()"/>-->
     </mx:RemoteObject>
     <mx:HBox width="1000" height="100%" backgroundImage="{background2}" backgroundSize="100%" paddingLeft="20"
          paddingRight="20" paddingTop="20" paddingBottom="20">

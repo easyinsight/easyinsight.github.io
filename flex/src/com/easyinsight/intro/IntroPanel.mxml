@@ -35,8 +35,8 @@
 
         public function gotFocus():void {
             var fragmentObject:Object = new Object();
-            fragmentObject.page = "intro";
-            BrowserManager.getInstance().setTitle("Easy Insight - Intro");
+            fragmentObject.page = "home";
+            BrowserManager.getInstance().setTitle("Easy Insight - Home");
             var fragmentString:String = URLUtil.objectToString(fragmentObject);
             BrowserManager.getInstance().setFragment(fragmentString);
         }

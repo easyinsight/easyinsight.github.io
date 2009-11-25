@@ -151,13 +151,17 @@
     </mx:Script>
     <mx:Image source="{logo}"/>
     <mx:Spacer width="10"/>
-    <listing:ListingOption perspective="{new IntroPanel()}" enableAnalysis="false" displayName="Intro" listingChange="onListingChange(event)" width="50">
+    <listing:ListingOption perspective="{new IntroPanel()}" enableAnalysis="false" displayName="Home" listingChange="onListingChange(event)" width="50">
         <mx:Image source="{homeIcon}" id="homeImage"/>
-        <mx:Label text="Intro" fontSize="12" fontFamily="Tahoma" fontWeight="bold" color="0x323232"/>
+        <mx:Label text="Home" fontSize="12" fontFamily="Tahoma" fontWeight="bold" color="0x323232"/>
     </listing:ListingOption>
     <listing:ListingOption perspective="{new MyData()}" enableAnalysis="false" displayName="My Data" listingChange="onListingChange(event)" id="myDataOption">
         <mx:Image source="{myDataIcon}" id="myDataImage"/>
         <mx:Label text="My Data" fontSize="12" fontFamily="Tahoma" fontWeight="bold" color="0x323232"/>
+    </listing:ListingOption>
+    <listing:ListingOption perspective="{new RevisedSolutionSummary()}" enableAnalysis="false" displayName="Connections" listingChange="onListingChange(event)">
+        <mx:Image source="{solutionsIcon}" id="solutionsImage"/>
+        <mx:Label text="Connections" fontSize="12" fontFamily="Tahoma" fontWeight="bold" color="0x323232"/>
     </listing:ListingOption>
     <listing:ListingOption perspective="{new GenreDataProvider()}" enableAnalysis="false" displayName="Exchange" listingChange="onListingChange(event)">
         <mx:Image source="{catalogIcon}" id="catalogImage"/>
@@ -166,10 +170,6 @@
     <listing:ListingOption perspective="{new GroupsSummary()}" enableAnalysis="false" displayName="Groups" listingChange="onListingChange(event)">
         <mx:Image source="{groupsIcon}" id="groupsImage"/>
         <mx:Label text="Groups" fontSize="12" fontFamily="Tahoma" fontWeight="bold" color="0x323232"/>
-    </listing:ListingOption>
-    <listing:ListingOption perspective="{new RevisedSolutionSummary()}" enableAnalysis="false" displayName="Solutions" listingChange="onListingChange(event)">
-        <mx:Image source="{solutionsIcon}" id="solutionsImage"/>
-        <mx:Label text="Solutions" fontSize="12" fontFamily="Tahoma" fontWeight="bold" color="0x323232"/>
     </listing:ListingOption>
     <listing:ListingOption perspective="{new MyGoals()}" enableAnalysis="false" displayName="Goals" listingChange="onListingChange(event)">
         <mx:Image source="{goalsIcon}" id="goalsImage"/>

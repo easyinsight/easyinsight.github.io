@@ -66,11 +66,13 @@ public class SolutionDetailRenderer extends VBox implements IPerspective {
     }
 
     private function onCreation(event:FlexEvent):void {
-        var fragmentObject:Object = new Object();
-        fragmentObject.solutionID = String(_solution.solutionID);
-        var fragmentString:String = URLUtil.objectToString(fragmentObject);
-        BrowserManager.getInstance().setFragment(fragmentString);
-        BrowserManager.getInstance().setTitle("Easy Insight - " + _solution.name);
+        if (_solution != null) {
+            var fragmentObject:Object = new Object();
+            fragmentObject.solutionID = String(_solution.solutionID);
+            var fragmentString:String = URLUtil.objectToString(fragmentObject);
+            BrowserManager.getInstance().setFragment(fragmentString);
+            BrowserManager.getInstance().setTitle("Easy Insight - " + _solution.name);
+        }
         determineInitialState();
     }
 
@@ -259,7 +261,7 @@ public class SolutionDetailRenderer extends VBox implements IPerspective {
 
     protected override function commitProperties():void {
         super.commitProperties();
-        if (solution.image != null) {
+        if (solution != null && solution.image != null) {
             var loader:Loader = new Loader();
             loader.contentLoaderInfo.addEventListener(Event.COMPLETE, onComplete);
             loader.loadBytes(solution.image);

@@ -73,6 +73,8 @@
             private var screencastName:String;
             [Bindable]
             private var screencastDirectory:String;
+            [Bindable]
+            private var detailClass:String;
 
             private function onComplete(event:Event):void {
                 var loaderContent:LoaderInfo = event.currentTarget as LoaderInfo;
@@ -94,6 +96,7 @@
                 screencastName = _solution.screencastName;
                 screencastDirectory = _solution.screencastDirectory;
                 footerText = _solution.footerText;
+                detailClass = _solution.detailPageClass;
 				if (solution.solutionID > 0) {
 					solutionService.getDescriptorsForSolution.send(solution.solutionID);
 				}
@@ -117,6 +120,7 @@
                 _solution.copyData = includeDataCheckbox.selected;
                 _solution.solutionTier = accountTierBox.selectedIndex + 1;
                 _solution.category = solutionCategoryBox.selectedIndex + 1;
+                _solution.detailPageClass = detailClassComboBox.selectedItem as String;
                 if (goalTreeComboBox.selectedIndex > 0) {
                     _solution.goalTreeID = goalTreeComboBox.selectedItem.id;
                 }
@@ -189,19 +193,10 @@
             <mx:FormItem label="Name: ">
                 <mx:TextInput id="nameInput" text="{nameText}"/>
             </mx:FormItem>
-            <!--<mx:FormItem label="Tags: ">
-                <mx:TextInput id="tagsInput" text="{tags}"/>
-            </mx:FormItem>
-            <mx:FormItem label="Industry: ">
-                <mx:TextInput id="industryInput" text="{industry}"/>
-            </mx:FormItem>-->
             <mx:FormItem label="Archive Name: " direction="horizontal">
                 <mx:Label text="{archiveName}"/>
                 <mx:Button label="Update Archive" click="updateArchive()"/>
             </mx:FormItem>
-            <!--<mx:FormItem label="Author: ">
-                <mx:TextInput id="authorInput" text="{author}"/>
-            </mx:FormItem>-->
             <mx:FormItem label="Required Account Tier: ">
                 <mx:ComboBox id="accountTierBox" selectedIndex="{solutionTier}">
                     <mx:dataProvider>
@@ -262,6 +257,22 @@
                         </mx:columns>
                     </mx:DataGrid>
                 </mx:VBox>
+            </mx:FormItem>
+            <mx:FormItem label="Solution Detail Class: ">
+                <mx:ComboBox id="detailClassComboBox" selectedItem="{detailClass}">
+                    <mx:dataProvider>
+                        <mx:ArrayCollection>
+                            <mx:Array>
+                                <mx:String>com.easyinsight.solutions.RevisedSolutionDetail</mx:String>
+                                <mx:String>com.easyinsight.solutions.GoogleAnalyticsSolutionDetail</mx:String>
+                                <mx:String>com.easyinsight.solutions.BasecampSolutionDetail</mx:String>
+                                <mx:String>com.easyinsight.solutions.HighriseSolutionDetail</mx:String>
+                                <mx:String>com.easyinsight.solutions.FileUploadSolutionDetail</mx:String>
+                                <mx:String>com.easyinsight.solutions.GoogleSpreadsheetSolutionDetail</mx:String>
+                            </mx:Array>
+                        </mx:ArrayCollection>
+                    </mx:dataProvider>
+                </mx:ComboBox>
             </mx:FormItem>
             <mx:FormItem label="" direction="horizontal">
                 <mx:Button label="Save" click="save()"/>

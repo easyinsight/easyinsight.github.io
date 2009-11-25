@@ -188,7 +188,7 @@
             User.getEventNotifier().removeEventListener(LoginEvent.LOGIN, onLogin);
             loggedIn = true;
             if (event.targetURL == null)
-                navigation(new NavigationEvent("Intro"));
+                navigation(new NavigationEvent("Home"));
             else {
                 var o:Object = URLUtil.stringToObject(event.targetURL, "&");
                 parseFragmentObject(o, event.targetURL);
@@ -197,7 +197,10 @@
 
         private function parseURL(event:Event):void {            
             var o:Object = URLUtil.stringToObject(browserManager.fragment, "&");
-            parseFragmentObject(o, browserManager.fragment);
+            if (currentFragment != browserManager.fragment) {
+                currentFragment = browserManager.fragment;
+                parseFragmentObject(o, browserManager.fragment);
+            }
         }
 
         private function postActivatePath(event:ActivationEvent):void {
@@ -207,6 +210,8 @@
         }
 
         private var passwordResetValue:String;
+
+        private var currentFragment:String;
 
         private function parseFragmentObject(o:Object, url:String):void {
             var analysisID:String = o.analysisID;
@@ -293,7 +298,6 @@
                                                                         navigation(new NavigationEvent("Goals"));
                                                                         break;
                                                                     case "exchange":
-
                                                                         var view:int = int(o.view);
                                                                         var display:int = int(o.display);
                                                                         navigation(new NavigationEvent("Exchange", null, {viewMode: view, displayMode: display}));
@@ -301,19 +305,19 @@
                                                                     case "groups":
                                                                         navigation(new NavigationEvent("Groups"));
                                                                         break;
-                                                                    case "intro":
+                                                                    case "home":
                                                                             if(o.type != null && o.type == "tour")
-                                                                                navigation(new NavigationEvent("Intro", null, { tour: true }));
+                                                                                navigation(new NavigationEvent("Home", null, { tour: true }));
                                                                             else
-                                                                                navigation(new NavigationEvent("Intro"));
+                                                                                navigation(new NavigationEvent("Home"));
                                                                         break;
-                                                                    case "solutions":
+                                                                    case "connections":
                                                                         if(o.type != null && o.type == "business")
-                                                                            navigation(new NavigationEvent("Solutions", null, { biz: true, client:false, saas: false, learning: false }));
+                                                                            navigation(new NavigationEvent("Connections", null, { biz: true, client:false, saas: false, learning: false }));
                                                                         else if(o.type != null && o.type == "application")
-                                                                            navigation(new NavigationEvent("Solutions", null, { saas: true, client:true, biz: false, learning: false }));
+                                                                            navigation(new NavigationEvent("Connections", null, { saas: true, client:true, biz: false, learning: false }));
                                                                         else
-                                                                            navigation(new NavigationEvent("Solutions"));
+                                                                            navigation(new NavigationEvent("Connections"));
                                                                         break;
                                                                     case "account":
                                                                         navigation(new NavigationEvent("Accounts"));
@@ -327,7 +331,7 @@
                                                                 userService.verifyPasswordReset.send(o.resetPassword);
                                                             }
                                                             else {
-                                                                navigation(new NavigationEvent("Intro"));
+                                                                navigation(new NavigationEvent("Home"));
                                                             }
                                                     }
                                                 }
@@ -381,7 +385,7 @@
                 headerBar.explicitChange(event.targetPerspective, event.properties);
             } else {
                 if (this.perspective == null) {
-                    navigation(new NavigationEvent("Intro"));
+                    navigation(new NavigationEvent("Home"));
                 } else {
                     this.perspective.gotFocus();
                 }
@@ -446,7 +450,8 @@
             }
             browserManager = BrowserManager.getInstance();
             browserManager.addEventListener(BrowserChangeEvent.BROWSER_URL_CHANGE, parseURL);           
-            browserManager.init("", "Intro");
+            browserManager.init("home", "Home");
+            parseURL(null);
         }
 
         private function setup():void {
@@ -481,8 +486,8 @@
                 <framework:LeftApplicationDock height="100%" backgroundColor="0xF0F0F0" analyze="internalAnalyze(event)" messageListener="{messageListener}"/>
                 <mx:HBox width="100%" height="100%" id="coreSpace" paddingLeft="0" paddingTop="0" top="0"
                          paddingRight="0">
-                    <intro1:IntroPanel id="introPanel" width="100%" height="100%" paddingTop="0"
-                                       navigation="navigation(event)"/>
+                    <!--<intro1:IntroPanel id="introPanel" width="100%" height="100%" paddingTop="0"
+                                       navigation="navigation(event)"/>-->
                 </mx:HBox>
                 <framework:RightApplicationDock height="100%" backgroundColor="0xF0F0F0" analyze="internalAnalyze(event)" messageListener="{messageListener}"/>
             </mx:HBox>
