@@ -56,6 +56,12 @@ public class StandardReportPipeline extends Pipeline {
         //if (!temporalAdded) {
             //components.add(new BroadAggregationComponent());
         components.add(new AggregationComponent());
+        for(AnalysisItem calc : items(AnalysisItemTypes.CALCULATION, reportItems)) {
+            AnalysisCalculation calculation = (AnalysisCalculation) calc;
+            if (!calculation.isApplyBeforeAggregation()) {
+                components.add(new CalculationComponent(calculation));
+            }
+        }
 
         for (AnalysisItem temporal : items(AnalysisItemTypes.TEMPORAL_MEASURE, reportItems)) {
             temporalAdded = true;

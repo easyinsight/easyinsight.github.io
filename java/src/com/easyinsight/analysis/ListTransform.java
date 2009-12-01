@@ -83,10 +83,11 @@ public class ListTransform {
         if (derivedItems != null) {
             for (IRow row : dataSet.getRows()) {
                 for (AnalysisItem analysisItem : derivedItems) {
-                    if (analysisItem.isCalculated()) {
-                        Value value = analysisItem.calculate(dataSet, row);
-                        row.addValue(analysisItem.createAggregateKey(), value);
-                    } else if (analysisItem.hasType(AnalysisItemTypes.HIERARCHY)) {
+//                    if (analysisItem.isCalculated()) {
+//                        Value value = analysisItem.calculate(dataSet, row);
+//                        row.addValue(analysisItem.createAggregateKey(), value);
+//                    } else
+                    if (analysisItem.hasType(AnalysisItemTypes.HIERARCHY)) {
                         AnalysisHierarchyItem analysisHierarchy = (AnalysisHierarchyItem) analysisItem;
                         AggregateKey aggregateKey = analysisHierarchy.getHierarchyLevel().getAnalysisItem().createAggregateKey();
                         row.addValue(new AggregateKey(analysisHierarchy.getKey(), analysisHierarchy.getType()), row.getValue(aggregateKey));
