@@ -106,7 +106,7 @@ public class StepTest extends TestCase {
         listDefinition.setColumns(Arrays.asList(analysisStep, count));
         listDefinition.setDataFeedID(id);
 
-        ListDataResults results = new DataService().list(listDefinition, new InsightRequestMetadata());
+        ListDataResults results = (ListDataResults) new DataService().list(listDefinition, new InsightRequestMetadata());
 
         System.out.println("blah");
 

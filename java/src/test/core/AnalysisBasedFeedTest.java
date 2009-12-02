@@ -42,7 +42,7 @@ public class AnalysisBasedFeedTest extends TestCase {
         long analysisFeedID = userUploadService.createAnalysisBasedFeed(analysisBasedFeedDefinition);
         WSListDefinition listDefinition = createAnalysisList(analysisFeedID, dataFeedID);
         DataService dataService = new DataService();
-        ListDataResults results = dataService.list(listDefinition, null);
+        ListDataResults results = (ListDataResults) dataService.list(listDefinition, null);
         assertEquals(1, results.getRows().length);
     }
 

@@ -106,11 +106,11 @@ public class SolutionTest extends TestCase {
                 WSListDefinition defaultQuery = new WSListDefinition();
                 defaultQuery.setDataFeedID(info.getDescriptor().getId());
                 defaultQuery.setColumns(Arrays.asList(getItem("customer", newDataSource), getItem("amount", newDataSource)));
-                ListDataResults results = new DataService().list(defaultQuery, new InsightRequestMetadata());
+                ListDataResults results = (ListDataResults) new DataService().list(defaultQuery, new InsightRequestMetadata());
                 assertEquals(1, results.getRows().length);
             } else if (info.getDescriptor().getType() == EIDescriptor.REPORT) {
                 WSAnalysisDefinition def = new AnalysisService().openAnalysisDefinition(info.getDescriptor().getId());
-                ListDataResults results = new DataService().list(def, new InsightRequestMetadata());
+                ListDataResults results = (ListDataResults) new DataService().list(def, new InsightRequestMetadata());
                 assertEquals(1, results.getRows().length);
             }
         }
@@ -173,7 +173,7 @@ public class SolutionTest extends TestCase {
                 WSListDefinition defaultQuery = new WSListDefinition();
                 defaultQuery.setDataFeedID(info.getDescriptor().getId());
                 defaultQuery.setColumns(Arrays.asList(getItem(BaseCampDataSource.CREATORNAME, newDataSource)));
-                ListDataResults results = new DataService().list(defaultQuery, new InsightRequestMetadata());
+                ListDataResults results = (ListDataResults) new DataService().list(defaultQuery, new InsightRequestMetadata());
                 assertEquals(0, results.getRows().length);
             }
         }
@@ -183,7 +183,7 @@ public class SolutionTest extends TestCase {
         WSListDefinition defaultQuery = new WSListDefinition();
         defaultQuery.setDataFeedID(newSourceID);
         defaultQuery.setColumns(Arrays.asList(getItem(BaseCampDataSource.CREATORNAME, ds)));
-        ListDataResults results = new DataService().list(defaultQuery, new InsightRequestMetadata());
+        ListDataResults results = (ListDataResults) new DataService().list(defaultQuery, new InsightRequestMetadata());
         assertTrue(results.getRows().length > 0);
     }
 

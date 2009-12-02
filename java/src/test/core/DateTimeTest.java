@@ -122,31 +122,31 @@ public class DateTimeTest extends TestCase {
         WSListDefinition yearDefinition = new WSListDefinition();
         yearDefinition.setDataFeedID(dataSourceID);
         yearDefinition.setColumns(getColumns(AnalysisDateDimension.YEAR_LEVEL, dataSourceID));
-        ListDataResults yearResults = dataService.list(yearDefinition, new InsightRequestMetadata());
+        ListDataResults yearResults = (ListDataResults) dataService.list(yearDefinition, new InsightRequestMetadata());
         validateResults(yearResults, 1);
 
         WSListDefinition monthDefinition = new WSListDefinition();
         monthDefinition.setDataFeedID(dataSourceID);
         monthDefinition.setColumns(getColumns(AnalysisDateDimension.MONTH_LEVEL, dataSourceID));
-        ListDataResults monthResults = dataService.list(monthDefinition, new InsightRequestMetadata());
+        ListDataResults monthResults = (ListDataResults) dataService.list(monthDefinition, new InsightRequestMetadata());
         validateResults(monthResults, 2);
 
         WSListDefinition dayDefinition = new WSListDefinition();
         dayDefinition.setDataFeedID(dataSourceID);
         dayDefinition.setColumns(getColumns(AnalysisDateDimension.DAY_LEVEL, dataSourceID));
-        ListDataResults dayResults = dataService.list(dayDefinition, new InsightRequestMetadata());
+        ListDataResults dayResults = (ListDataResults) dataService.list(dayDefinition, new InsightRequestMetadata());
         validateResults(dayResults, 3);
 
         WSListDefinition hourDefinition = new WSListDefinition();
         hourDefinition.setDataFeedID(dataSourceID);
         hourDefinition.setColumns(getColumns(AnalysisDateDimension.HOUR_LEVEL, dataSourceID));
-        ListDataResults hourResults = dataService.list(hourDefinition, new InsightRequestMetadata());
+        ListDataResults hourResults = (ListDataResults) dataService.list(hourDefinition, new InsightRequestMetadata());
         validateResults(hourResults, 4);
 
         WSListDefinition minuteDefinition = new WSListDefinition();
         minuteDefinition.setDataFeedID(dataSourceID);
         minuteDefinition.setColumns(getColumns(AnalysisDateDimension.MINUTE_LEVEL, dataSourceID));
-        ListDataResults minuteResults = dataService.list(minuteDefinition, new InsightRequestMetadata());
+        ListDataResults minuteResults = (ListDataResults) dataService.list(minuteDefinition, new InsightRequestMetadata());
         validateResults(minuteResults, 5);
     }
 
@@ -162,7 +162,7 @@ public class DateTimeTest extends TestCase {
         rollingFilterDefinition.setField(TestUtil.getItem(dataSourceID, "d"));
         rollingFilterDefinition.setInterval(MaterializedRollingFilterDefinition.LAST_DAY);
         noDimDefinition.setFilterDefinitions(Arrays.asList((FilterDefinition) rollingFilterDefinition));
-        ListDataResults yearResults = dataService.list(noDimDefinition, new InsightRequestMetadata());
+        ListDataResults yearResults = (ListDataResults) dataService.list(noDimDefinition, new InsightRequestMetadata());
         assertEquals(1, yearResults.getRows().length);
         ListRow row = yearResults.getRows()[0];
         for (int i = 0; i < yearResults.getHeaders().length; i++) {

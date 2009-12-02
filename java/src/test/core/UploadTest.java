@@ -59,7 +59,7 @@ public class UploadTest extends TestCase {
         List filterDefinitions = Arrays.asList(new FilterValueDefinition(new AnalysisDimension(TestUtil.createKey("Product", dataFeedID), true), true,
                 TestUtil.objectList("WidgetX")));
         listDefinition.setFilterDefinitions(filterDefinitions);
-        ListDataResults dataResults = dataService.list(listDefinition, null);
+        ListDataResults dataResults = (ListDataResults) dataService.list(listDefinition, null);
         assertEquals(3, dataResults.getHeaders().length);
         assertEquals(1, dataResults.getRows().length);
 

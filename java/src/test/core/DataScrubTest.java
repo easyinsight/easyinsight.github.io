@@ -32,7 +32,7 @@ public class DataScrubTest extends TestCase {
         long dataFeedID = TestUtil.createDefaultTestDataSource(userID);
         WSListDefinition listDefinition = createListDefinition(userID, dataFeedID);
         DataService dataService = new DataService();
-        ListDataResults results = dataService.list(listDefinition, null);
+        ListDataResults results = (ListDataResults) dataService.list(listDefinition, null);
         ListRow listRow = results.getRows()[0];
         //String firstVal = (String) listRow.getValues()[0];
         //assertTrue(firstVal.equals("Widget X") || firstVal.equals("Widget Y"));

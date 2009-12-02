@@ -71,7 +71,7 @@ public class APITest extends TestCase {
     private void validateAddRowResults(String apiKey) throws SQLException {
         long dataSourceID = getDataSource(apiKey);
         DataService dataService = new DataService();
-        ListDataResults listResults = dataService.list(getDefinition(dataSourceID), new InsightRequestMetadata());
+        ListDataResults listResults = (ListDataResults) dataService.list(getDefinition(dataSourceID), new InsightRequestMetadata());
         assertEquals(1, listResults.getRows().length);
         ListRow row = listResults.getRows()[0];
         assertEquals(3, row.getValues().length);
@@ -80,7 +80,7 @@ public class APITest extends TestCase {
     private void validateAddRowsResults(String apiKey) throws SQLException {
         long dataSourceID = getDataSource(apiKey);
         DataService dataService = new DataService();
-        ListDataResults listResults = dataService.list(getDefinition(dataSourceID), new InsightRequestMetadata());
+        ListDataResults listResults = (ListDataResults) dataService.list(getDefinition(dataSourceID), new InsightRequestMetadata());
         assertEquals(listResults.getRows().length, 2);
         ListRow row = listResults.getRows()[0];
         assertEquals(3, row.getValues().length);
@@ -89,7 +89,7 @@ public class APITest extends TestCase {
     private void validateUpdateRowResults(String apiKey) throws SQLException {
         long dataSourceID = getDataSource(apiKey);
         DataService dataService = new DataService();
-        ListDataResults listResults = dataService.list(getDefinition(dataSourceID), new InsightRequestMetadata());
+        ListDataResults listResults = (ListDataResults) dataService.list(getDefinition(dataSourceID), new InsightRequestMetadata());
     }
 
     public void testBasicUnchecked() throws ServiceException, RemoteException, SQLException {
@@ -178,7 +178,7 @@ public class APITest extends TestCase {
         listDef.setDataFeedID(id);
         listDef.setColumns(Arrays.asList(new AnalysisMeasure(TestUtil.createKey("number", id), AggregationTypes.SUM),
                 new AnalysisDateDimension(TestUtil.createKey("date", id), true, AnalysisDateDimension.DAY_LEVEL)));
-        ListDataResults results = new DataService().list(listDef, new InsightRequestMetadata());
+        ListDataResults results = (ListDataResults) new DataService().list(listDef, new InsightRequestMetadata());
         assertEquals(results.getRows().length, 2);
     }
 

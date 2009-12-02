@@ -114,7 +114,7 @@ public class CalculationIntegrationTest extends TestCase {
         listDefinition.setFilterDefinitions(Arrays.asList((FilterDefinition) filterValueDefinition));
         listDefinition.setColumns(Arrays.asList((AnalysisItem) calculation));
         listDefinition.setDataFeedID(id);
-        ListDataResults results = new DataService().list(listDefinition, new InsightRequestMetadata());
+        ListDataResults results = (ListDataResults) new DataService().list(listDefinition, new InsightRequestMetadata());
         assertEquals(1, results.getRows().length);
         NumericValue doubleValue = (NumericValue) results.getRows()[0].getValues()[0];
         assertEquals(30., doubleValue.toDouble(), .1);
@@ -153,7 +153,7 @@ public class CalculationIntegrationTest extends TestCase {
         listDefinition.setFilterDefinitions(Arrays.asList((FilterDefinition) filterValueDefinition));
         listDefinition.setColumns(Arrays.asList((AnalysisItem) calculation));
         listDefinition.setDataFeedID(id);
-        ListDataResults results = new DataService().list(listDefinition, new InsightRequestMetadata());
+        ListDataResults results = (ListDataResults) new DataService().list(listDefinition, new InsightRequestMetadata());
         assertEquals(1, results.getRows().length);
         Value total = results.getRows()[0].getValues()[0];
         assertEquals(0.0, total.toDouble());
@@ -191,7 +191,7 @@ public class CalculationIntegrationTest extends TestCase {
         listDefinition.setFilterDefinitions(Arrays.asList((FilterDefinition) filterValueDefinition));
         listDefinition.setColumns(Arrays.asList((AnalysisItem) calculation));
         listDefinition.setDataFeedID(id);
-        ListDataResults results = new DataService().list(listDefinition, new InsightRequestMetadata());
+        ListDataResults results = (ListDataResults) new DataService().list(listDefinition, new InsightRequestMetadata());
         assertEquals(1, results.getRows().length);
         Value total = results.getRows()[0].getValues()[0];
         assertEquals(5.0, total.toDouble(), .001);
@@ -410,7 +410,7 @@ public class CalculationIntegrationTest extends TestCase {
                 new AnalysisMeasure(TestUtil.createKey("Cost Number", dataFeedID), AggregationTypes.SUM),
                         new AnalysisMeasure(TestUtil.createKey("Units", dataFeedID), AggregationTypes.SUM),
                 new AnalysisDimension(TestUtil.createKey("Customer", dataFeedID), true)));
-        ListDataResults results = new DataService().list(listDefinition, null);
+        ListDataResults results = (ListDataResults) new DataService().list(listDefinition, null);
         assertEquals("The number of results is incorrect.", 1, results.getRows().length);
         return feedDefinition;
     }

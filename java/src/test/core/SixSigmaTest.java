@@ -68,7 +68,7 @@ public class SixSigmaTest extends TestCase {
         listDefinition.setColumns(Arrays.asList(getItem("customer", feedDefinition), getItem("ProcessSigma", feedDefinition),
                 getItem("DefectPercentage", feedDefinition), getItem("DefectsPerMillion", feedDefinition), getItem("YieldPercentage", feedDefinition)));
         listDefinition.setDataFeedID(dataSourceID);
-        ListDataResults results = new DataService().list(listDefinition, new InsightRequestMetadata());
+        ListDataResults results = (ListDataResults) new DataService().list(listDefinition, new InsightRequestMetadata());
         ListRow listRow = results.getRows()[0];
         
     }
