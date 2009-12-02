@@ -83,11 +83,49 @@ public class TokenStorage {
         return token;
     }
 
+    public Token getToken(long userID, int type, long dataSourceID) {
+        Token token = null;
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            PreparedStatement dataSourceTokenStmt = conn.prepareStatement("SELECT token_value FROM TOKEN where data_source_id = ?");
+            dataSourceTokenStmt.setLong(1, dataSourceID);
+            ResultSet dsRS = dataSourceTokenStmt.executeQuery();
+            if (dsRS.next()) {
+                token = new Token();
+                token.setTokenType(type);
+                token.setTokenValue(dsRS.getString(1));
+            } else {
+                PreparedStatement queryStmt = conn.prepareStatement("SELECT token_value FROM TOKEN where user_id = ? AND token_type = ?");
+                queryStmt.setLong(1, userID);
+                queryStmt.setInt(2, type);
+                ResultSet rs = queryStmt.executeQuery();
+                if (rs.next()) {
+                    String tokenValue = rs.getString(1);
+                    token = new Token();
+                    token.setUserID(userID);
+                    token.setTokenType(type);
+                    token.setTokenValue(tokenValue);
+                    PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO TOKEN (TOKEN_VALUE, TOKEN_TYPE, DATA_SOURCE_ID) VALUES (?, ?, ?)");
+                    insertStmt.setString(1, tokenValue);
+                    insertStmt.setInt(2, type);
+                    insertStmt.setLong(3, dataSourceID);
+                    insertStmt.execute();
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        } finally {
+            Database.closeConnection(conn);
+        }
+        return token;
+    }
+
     @Nullable
     public Token getToken(long userID, int type, Connection conn) {
         Token token = null;
 
         try {
+
             PreparedStatement queryStmt = conn.prepareStatement("SELECT token_value FROM TOKEN where user_id = ? AND token_type = ?");
             queryStmt.setLong(1, userID);
             queryStmt.setInt(2, type);

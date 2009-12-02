@@ -1,5 +1,6 @@
 alter table range_filter add low_value_variable varchar(255) default null;
-alter table range_filter add high_value_variable varchar(255) default null;alter table analysis_item add description text default null;
+alter table range_filter add high_value_variable varchar(255) default null;
+alter table analysis_item add description text default null;
 
 drop table if exists report_sequence;
 create table report_sequence (
