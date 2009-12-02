@@ -13,8 +13,8 @@ public class GoogleAnalyticsDataSource extends ServerDataSourceDefinition{
         return GoogleAnalyticsSourceCreation;
     }
     
-    override public function isLiveData():Boolean {
+    /*override public function isLiveData():Boolean {
         return true;
-    }
+    }*/
 }
 }
