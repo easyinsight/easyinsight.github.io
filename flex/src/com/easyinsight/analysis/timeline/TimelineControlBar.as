@@ -44,7 +44,7 @@ public class TimelineControlBar extends ReportControlBar implements IReportContr
     public function set sequence(value:Sequence):void {
         if (_sequence == value) return;
         _sequence = value;
-        dispatchEvent(new ReportDataEvent(ReportDataEvent.REQUEST_DATA));
+        //dispatchEvent(new ReportDataEvent(ReportDataEvent.REQUEST_DATA));
         dispatchEvent(new Event("sequenceChanged"));
     }
 
@@ -84,9 +84,14 @@ public class TimelineControlBar extends ReportControlBar implements IReportContr
         sequenceLabel.setStyle("fontSize", 14);
         addChild(sequenceLabel);
         sequenceBox = new SequenceBox();
+        sequenceBox.addEventListener(SequenceUpdateEvent.SEQUENCE_UPDATE, onSequenceUpdate);
         BindingUtils.bindProperty(sequenceBox, "sequence", this, "sequence");
         BindingUtils.bindProperty(this, "sequence", sequenceBox, "sequence");
         addChild(sequenceBox);
+    }
+
+    private function onSequenceUpdate(event:SequenceUpdateEvent):void {
+        dispatchEvent(new ReportDataEvent(ReportDataEvent.REQUEST_DATA));
     }
 
     private function chooseReport(event:MouseEvent):void {

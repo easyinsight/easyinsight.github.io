@@ -9,5 +9,9 @@ public class Sequence {
 
     public function Sequence() {
     }
+
+    public function createEditor():ISequenceEditor {
+        return null;
+    }
 }
 }

@@ -2,8 +2,10 @@ package com.easyinsight.analysis.timeline {
 import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.analysis.AnalysisItemTypes;
 import com.easyinsight.analysis.AnalysisItemWrapper;
+import com.easyinsight.util.PopUpUtil;
 
 import flash.events.Event;
+import flash.events.MouseEvent;
 
 import mx.binding.utils.BindingUtils;
 import mx.containers.Box;
@@ -14,6 +16,7 @@ import mx.core.IUIComponent;
 import mx.core.UIComponent;
 import mx.events.DragEvent;
 import mx.managers.DragManager;
+import mx.managers.PopUpManager;
 
 public class SequenceBox extends Box {
 
@@ -31,6 +34,7 @@ public class SequenceBox extends Box {
         this.setStyle("borderThickness", 1);
         setStyle("verticalAlign", "middle");
         setStyle("backgroundColor", 0xFFFFFF);
+        addEventListener(MouseEvent.CLICK, onClick);
     }
 
 
@@ -83,6 +87,25 @@ public class SequenceBox extends Box {
             dateSequence.analysisItem = item;
             this.sequence = dateSequence;
         }
+        edit();
+    }
+
+    private function onClick(event:MouseEvent):void {
+        if (sequence != null) {
+            edit();
+        }
+    }
+
+    private function edit():void {
+        var window:SequenceWindow = new SequenceWindow();
+        window.sequence = sequence;
+        window.addEventListener(SequenceUpdateEvent.SEQUENCE_UPDATE, onSequenceUpdate);
+        PopUpManager.addPopUp(window, this, true);
+        PopUpUtil.centerPopUp(window);
+    }
+
+    private function onSequenceUpdate(event:SequenceUpdateEvent):void {
+        dispatchEvent(event);
     }
 
     private function dragDropHandler(event:DragEvent):void {

@@ -18,10 +18,10 @@ import javax.persistence.Table;
 @PrimaryKeyJoinColumn(name="report_sequence_id")
 public class DateSequence extends Sequence {
 
-    public static final int DAY = 1;
-    public static final int WEEK = 2;
-    public static final int MONTH = 3;
-    public static final int YEAR = 4;
+    public static final int DAY = 0;
+    public static final int WEEK = 1;
+    public static final int MONTH = 2;
+    public static final int YEAR = 3;
 
     @Column(name="date_type")
     private int dateType = DAY;
@@ -37,7 +37,7 @@ public class DateSequence extends Sequence {
     @Override
     public AnalysisItem toAnalysisItem() {
         AnalysisDateDimension analysisDateDimension = (AnalysisDateDimension) getAnalysisItem();
-        /*if (dateType == DAY) {
+        if (dateType == DAY) {
             analysisDateDimension.setDateLevel(AnalysisDateDimension.DAY_LEVEL);
         } else if (dateType == WEEK) {
             analysisDateDimension.setDateLevel(AnalysisDateDimension.WEEK_LEVEL);
@@ -45,8 +45,7 @@ public class DateSequence extends Sequence {
             analysisDateDimension.setDateLevel(AnalysisDateDimension.MONTH_LEVEL);
         } else if (dateType == YEAR) {
             analysisDateDimension.setDateLevel(AnalysisDateDimension.YEAR_LEVEL);
-        }*/
-        analysisDateDimension.setDateLevel(AnalysisDateDimension.WEEK_LEVEL);
+        }        
         return analysisDateDimension;
     }
 }

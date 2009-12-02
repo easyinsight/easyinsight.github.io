@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" implements="com.easyinsight.analysis.timeline.ISequenceEditor">
+    <mx:Script><![CDATA[
+
+        [Bindable]
+        private var dateType:int;
+
+        public function set sequence(sequence:Sequence):void {
+            var dateSequence:DateSequence = sequence as DateSequence;
+            dateType = dateSequence.dateType;
+        }
+
+        public function save(sequence:Sequence):void {
+            var dateSequence:DateSequence = sequence as DateSequence;
+            dateSequence.dateType = dateTypeComboBox.selectedIndex;
+        }]]></mx:Script>
+    <mx:Label text="What unit of time should one frame of data represent?"/>
+    <mx:ComboBox id="dateTypeComboBox" selectedIndex="{dateType}">
+        <mx:dataProvider>
+            <mx:ArrayCollection>
+                <mx:Array>
+                    <mx:String>Day</mx:String>
+                    <mx:String>Week</mx:String>
+                    <mx:String>Month</mx:String>
+                    <mx:String>Year</mx:String>
+                </mx:Array>
+            </mx:ArrayCollection>
+        </mx:dataProvider>
+    </mx:ComboBox>
+</mx:VBox>

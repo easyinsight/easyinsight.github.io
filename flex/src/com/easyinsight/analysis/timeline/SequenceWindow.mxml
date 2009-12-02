@@ -1,0 +1,35 @@
+<?xml version="1.0"?>
+<util:EITitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*">
+    <mx:Script><![CDATA[
+        import mx.managers.PopUpManager;
+
+        private var _sequence:Sequence;
+        private var editor:ISequenceEditor;
+
+        public function set sequence(value:Sequence):void {
+            _sequence = value;
+        }
+
+        protected override function createChildren():void {
+            super.createChildren();
+            editor = _sequence.createEditor();
+            editor.sequence = _sequence;
+            editorBox.addChild(editor as DisplayObject);
+        }
+
+        private function save():void {
+            editor.save(_sequence);
+            dispatchEvent(new SequenceUpdateEvent());
+            PopUpManager.removePopUp(this);
+        }
+        ]]></mx:Script>
+    <mx:VBox>
+        <mx:Box id="editorBox">
+            
+        </mx:Box>
+        <mx:HBox>
+            <mx:Button label="Save" click="save()"/>
+            <mx:Button label="Cancel" click="PopUpManager.removePopUp(this)"/>
+        </mx:HBox>
+    </mx:VBox>
+</util:EITitleWindow>

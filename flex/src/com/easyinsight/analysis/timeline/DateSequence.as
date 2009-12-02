@@ -8,5 +8,9 @@ public class DateSequence extends Sequence {
     public function DateSequence() {
         super();
     }
+
+    override public function createEditor():ISequenceEditor {
+        return new DateSequenceEditor();
+    }
 }
 }

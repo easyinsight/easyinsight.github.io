@@ -129,7 +129,15 @@
                 timer.addEventListener(TimerEvent.TIMER_COMPLETE, onTimerComplete);
                 playOrPauseIcon = pauseIcon;
                 timer.start();
+            } else {
+                stopTimer();
             }
+        }
+
+        private function stopTimer():void {
+            playOrPauseIcon = playIcon;
+            timer.stop();
+            timer = null;
         }
 
         private function onTimer(event:TimerEvent):void {
@@ -155,6 +163,7 @@
         }
 
         private function previousFrame():void {
+            stopTimer();
             if (currentFrame > 0) {
                 currentFrame--;
                 frameData = allFrames.getItemAt(currentFrame) as ServiceData;
@@ -163,12 +172,14 @@
         }
 
         private function firstFrame():void {
+            stopTimer();
             currentFrame = 0;
             frameData = allFrames.getItemAt(currentFrame) as ServiceData;
             updateFrame();
         }
 
         private function lastFrame():void {
+            stopTimer();
             currentFrame = allFrames.length - 1;
             updateFrame();
         }
