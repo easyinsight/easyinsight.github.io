@@ -40,6 +40,8 @@
         <mapping class="com.easyinsight.analysis.FilterPatternDefinition"/>
         <mapping class="com.easyinsight.analysis.RollingFilterDefinition"/>
         <mapping class="com.easyinsight.analysis.FilterDefinitionValue"/>
+        <mapping class="com.easyinsight.sequence.Sequence"/>
+        <mapping class="com.easyinsight.sequence.DateSequence"/>
         <mapping class="com.easyinsight.analysis.AnalysisItem"/>
         <mapping class="com.easyinsight.analysis.AnalysisDimension"/>
         <mapping class="com.easyinsight.analysis.AnalysisRangeDimension"/>
@@ -56,6 +58,7 @@
         <mapping class="com.easyinsight.analysis.ListLimitsMetadata"/>
         <mapping class="com.easyinsight.analysis.ListDefinitionState"/>
         <mapping class="com.easyinsight.analysis.ChartDefinitionState"/>
+        <mapping class="com.easyinsight.analysis.TimelineDefinitionState"/>
         <mapping class="com.easyinsight.analysis.AnalysisDefinitionState"/>
         <mapping class="com.easyinsight.analysis.MapDefinitionState"/>
         <mapping class="com.easyinsight.analysis.CrosstabDefinitionState"/>
