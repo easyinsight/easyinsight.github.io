@@ -1,11 +1,8 @@
 package com.easyinsight.pipeline;
 
+import com.easyinsight.analysis.*;
 import com.easyinsight.core.NamedKey;
 import com.easyinsight.dataset.DataSet;
-import com.easyinsight.analysis.ListDataResults;
-import com.easyinsight.analysis.AnalysisMeasureGrouping;
-import com.easyinsight.analysis.AnalysisMeasure;
-import com.easyinsight.analysis.IRow;
 import com.easyinsight.core.Value;
 import com.easyinsight.core.StringValue;
 
@@ -33,7 +30,7 @@ public class MeasureGroupingComponent implements IComponent {
         return null;  //To change body of implemented methods use File | Settings | File Templates.
     }
 
-    public void decorate(ListDataResults listDataResults) {
+    public void decorate(DataResults listDataResults) {
 
 
     }

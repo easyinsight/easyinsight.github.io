@@ -23,7 +23,7 @@ public class WSPluggableDefinition extends WSAnalysisDefinition {
         return null;  //To change body of implemented methods use File | Settings | File Templates.
     }
 
-    protected void createReportStructure(Map<String, AnalysisItem> structure) {
+    public void createReportStructure(Map<String, AnalysisItem> structure) {
         //To change body of implemented methods use File | Settings | File Templates.
     }
 

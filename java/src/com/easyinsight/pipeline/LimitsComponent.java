@@ -1,8 +1,9 @@
 package com.easyinsight.pipeline;
 
+import com.easyinsight.analysis.DataResults;
+import com.easyinsight.analysis.ListDataResults;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.dataset.LimitsResults;
-import com.easyinsight.analysis.ListDataResults;
 
 /**
  * User: James Boe
@@ -18,9 +19,12 @@ public class LimitsComponent implements IComponent {
         return dataSet;
     }
 
-    public void decorate(ListDataResults listDataResults) {
-        listDataResults.setLimitedResults(limitsResults.isLimitedResults());
-        listDataResults.setMaxResults(limitsResults.getMaxResults());
-        listDataResults.setLimitResults(limitsResults.getLimitResults());
+    public void decorate(DataResults dataResults) {
+        if (dataResults instanceof ListDataResults) {
+            ListDataResults listDataResults = (ListDataResults) dataResults;
+            listDataResults.setLimitedResults(limitsResults.isLimitedResults());
+            listDataResults.setMaxResults(limitsResults.getMaxResults());
+            listDataResults.setLimitResults(limitsResults.getLimitResults());
+        }
     }
 }

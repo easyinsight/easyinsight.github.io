@@ -38,7 +38,7 @@ public class StepCorrelationComponent implements IComponent {
         return new DataSet(rows);
     }
 
-    public void decorate(ListDataResults listDataResults) {
+    public void decorate(DataResults listDataResults) {
     }
 
     private class Correlation {

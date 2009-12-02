@@ -1,7 +1,7 @@
 package com.easyinsight.pipeline;
 
+import com.easyinsight.analysis.DataResults;
 import com.easyinsight.dataset.DataSet;
-import com.easyinsight.analysis.ListDataResults;
 import com.easyinsight.analysis.WSAnalysisDefinition;
 import com.easyinsight.analysis.IRow;
 import com.easyinsight.analysis.definitions.WSPlotChartDefinition;
@@ -38,7 +38,7 @@ public class CorrelationComponent implements IComponent {
         return dataSet;
     }
 
-    public void decorate(ListDataResults listDataResults) {
+    public void decorate(DataResults listDataResults) {
         if (correlation != null) {
             listDataResults.getAdditionalProperties().put("correlation", correlation);
         }

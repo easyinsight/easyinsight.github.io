@@ -68,6 +68,6 @@ public class LastValueComponent implements IComponent {
         return producedSet;
     }
 
-    public void decorate(ListDataResults listDataResults) {
+    public void decorate(DataResults listDataResults) {
     }
 }

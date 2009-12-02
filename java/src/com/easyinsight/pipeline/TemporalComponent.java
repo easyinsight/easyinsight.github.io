@@ -4,7 +4,6 @@ import com.easyinsight.analysis.*;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.core.Key;
 import com.easyinsight.core.Value;
-import com.easyinsight.core.DateValue;
 
 import java.util.Map;
 import java.util.LinkedHashMap;
@@ -105,6 +104,6 @@ public class TemporalComponent implements IComponent {
         return producedSet;
     }
 
-    public void decorate(ListDataResults listDataResults) {
+    public void decorate(DataResults listDataResults) {
     }
 }

@@ -1,8 +1,11 @@
 package com.easyinsight.analysis;
 
 import com.easyinsight.analysis.definitions.*;
+import com.easyinsight.core.Key;
 
 import javax.persistence.*;
+import java.util.List;
+import java.util.Map;
 
 /**
  * User: James Boe
@@ -100,8 +103,8 @@ public class ChartDefinitionState extends AnalysisDefinitionState {
     }
 
     @Override
-    public AnalysisDefinitionState clone() throws CloneNotSupportedException {
-        ChartDefinitionState chartDefinitionState = (ChartDefinitionState) super.clone();
+    public AnalysisDefinitionState clone(Map<Key, Key> keyMap, List<AnalysisItem> allFields) throws CloneNotSupportedException {
+        ChartDefinitionState chartDefinitionState = (ChartDefinitionState) super.clone(keyMap, allFields);
         chartDefinitionState.definitionID = 0;
         if (limitsMetadata != null) {
             chartDefinitionState.limitsMetadata = limitsMetadata.clone();

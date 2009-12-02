@@ -18,6 +18,25 @@ public abstract class WSXAxisDefinition extends WSChartDefinition {
     private AnalysisItem measure;
     private AnalysisItem xaxis;
 
+    private double yAxisMin;
+    private double yAxisMax;
+
+    public double getYAxisMax() {
+        return yAxisMax;
+    }
+
+    public void setYAxisMax(double yAxisMax) {
+        this.yAxisMax = yAxisMax;
+    }
+
+    public double getYAxisMin() {
+        return yAxisMin;
+    }
+
+    public void setYAxisMin(double yAxisMin) {
+        this.yAxisMin = yAxisMin;
+    }
+
     public AnalysisItem getXaxis() {
         return xaxis;
     }
@@ -34,7 +53,7 @@ public abstract class WSXAxisDefinition extends WSChartDefinition {
         this.measure = measure;
     }
 
-    protected void createReportStructure(Map<String, AnalysisItem> structure) {
+    public void createReportStructure(Map<String, AnalysisItem> structure) {
         addItems("xAxis", Arrays.asList(xaxis), structure);
         addItems("measure", Arrays.asList(measure), structure);
     }

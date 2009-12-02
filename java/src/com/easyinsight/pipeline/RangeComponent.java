@@ -1,8 +1,8 @@
 package com.easyinsight.pipeline;
 
+import com.easyinsight.analysis.DataResults;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.analysis.AnalysisItem;
-import com.easyinsight.analysis.ListDataResults;
 
 /**
  * User: James Boe
@@ -19,6 +19,6 @@ public class RangeComponent implements IComponent {
         return dataSet;
     }
 
-    public void decorate(ListDataResults listDataResults) {
+    public void decorate(DataResults listDataResults) {
     }
 }

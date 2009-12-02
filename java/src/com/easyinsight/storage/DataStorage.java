@@ -1049,7 +1049,7 @@ public class DataStorage {
         deleteStmt.executeUpdate();
     }
 
-    public DataSet allData(Collection<FilterDefinition> filters) throws SQLException {
+    public DataSet allData(@NotNull Collection<FilterDefinition> filters, Integer limit) throws SQLException {
         InsightRequestMetadata insightRequestMetadata = new InsightRequestMetadata();
         StringBuilder sqlBuilder = new StringBuilder();
         sqlBuilder.append("SELECT ");
@@ -1060,13 +1060,17 @@ public class DataStorage {
         sqlBuilder.deleteCharAt(sqlBuilder.length() - 1);
         sqlBuilder.append(" FROM ");
         sqlBuilder.append(getTableName());
-        sqlBuilder.append(" WHERE ");
-        for (FilterDefinition filterDefinition : filters) {
-            sqlBuilder.append(filterDefinition.toQuerySQL(getTableName()));
-            sqlBuilder.append(",");
+        if (filters.size() > 0) {
+            sqlBuilder.append(" WHERE ");
+            for (FilterDefinition filterDefinition : filters) {
+                sqlBuilder.append(filterDefinition.toQuerySQL(getTableName()));
+                sqlBuilder.append(",");
+            }
+            sqlBuilder.deleteCharAt(sqlBuilder.length() - 1);
         }
-        sqlBuilder.deleteCharAt(sqlBuilder.length() - 1);
-        sqlBuilder.append(" LIMIT 10");
+        if (limit != null) {
+            sqlBuilder.append(" LIMIT " + limit);
+        }
         DataSet dataSet = new DataSet();
         PreparedStatement queryStmt = storageConn.prepareStatement(sqlBuilder.toString());
         int position = 1;

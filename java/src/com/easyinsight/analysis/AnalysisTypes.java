@@ -14,4 +14,5 @@ public interface AnalysisTypes {
     public static final String GAUGE = "Gauge";
     public static final String TREEMAP = "TreeMap";
     public static final String TREE = "Tree";
+    public static final String TIMELINE = "Timeline";
 }

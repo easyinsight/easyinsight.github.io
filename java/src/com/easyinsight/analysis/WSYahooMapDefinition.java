@@ -29,7 +29,7 @@ public class WSYahooMapDefinition extends WSAnalysisDefinition {
     private AnalysisItem measure;
     private AnalysisItem geography;
 
-    protected void createReportStructure(Map<String, AnalysisItem> structure) {
+    public void createReportStructure(Map<String, AnalysisItem> structure) {
         addItems("geography", Arrays.asList(geography), structure);
         addItems("measure", Arrays.asList(measure), structure);
     }

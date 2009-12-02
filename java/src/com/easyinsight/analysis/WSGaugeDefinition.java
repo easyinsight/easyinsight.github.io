@@ -59,7 +59,7 @@ public class WSGaugeDefinition extends WSAnalysisDefinition {
         return columnList;
     }
 
-    protected void createReportStructure(Map<String, AnalysisItem> structure) {
+    public void createReportStructure(Map<String, AnalysisItem> structure) {
         addItems("measure", Arrays.asList(measure), structure);
     }
 

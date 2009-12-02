@@ -1,6 +1,10 @@
 package com.easyinsight.analysis;
 
+import com.easyinsight.core.Key;
+
 import javax.persistence.*;
+import java.util.List;
+import java.util.Map;
 
 /**
  * User: James Boe
@@ -30,8 +34,8 @@ public class TreeDefinitionState extends AnalysisDefinitionState {
     }
 
     @Override
-    public AnalysisDefinitionState clone() throws CloneNotSupportedException {
-        TreeDefinitionState state = (TreeDefinitionState) super.clone();
+    public AnalysisDefinitionState clone(Map<Key, Key> keyMap, List<AnalysisItem> allFields) throws CloneNotSupportedException {
+        TreeDefinitionState state = (TreeDefinitionState) super.clone(keyMap, allFields);
         state.setTreeDefinitionID(0);
         return state;
     }

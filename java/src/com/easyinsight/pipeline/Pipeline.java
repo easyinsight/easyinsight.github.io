@@ -15,10 +15,14 @@ public abstract class Pipeline {
 
     private List<IComponent> components = new ArrayList<IComponent>();
     private PipelineData pipelineData;
+    private ResultsBridge resultsBridge = new ListResultsBridge();
 
     public Pipeline setup(WSAnalysisDefinition report, Feed dataSource, InsightRequestMetadata insightRequestMetadata) {
         Set<AnalysisItem> allNeededAnalysisItems = compilePipelineData(report, dataSource, insightRequestMetadata);
-        components = generatePipelineCommands(allNeededAnalysisItems, report.getAllAnalysisItems(), report.getFilterDefinitions(), report);
+        components = generatePipelineCommands(allNeededAnalysisItems, report.getAllAnalysisItems(), report.retrieveFilterDefinitions(), report);
+        if (report.hasCustomResultsBridge()) {
+            resultsBridge = report.getCustomResultsBridge();
+        }
         return this;
     }
 
@@ -27,8 +31,8 @@ public abstract class Pipeline {
     private Set<AnalysisItem> compilePipelineData(WSAnalysisDefinition report, Feed dataSource, InsightRequestMetadata insightRequestMetadata) {
         List<AnalysisItem> allRequestedAnalysisItems = new ArrayList<AnalysisItem>(report.getAllAnalysisItems());
         Set<AnalysisItem> allNeededAnalysisItems = new LinkedHashSet<AnalysisItem>();
-        if (report.getFilterDefinitions() != null) {
-            for (FilterDefinition filterDefinition : report.getFilterDefinitions()) {
+        if (report.retrieveFilterDefinitions() != null) {
+            for (FilterDefinition filterDefinition : report.retrieveFilterDefinitions()) {
                 allNeededAnalysisItems.add(filterDefinition.getField());
             }
         }
@@ -63,11 +67,11 @@ public abstract class Pipeline {
         return dataSet;
     }
 
-    public ListDataResults toList(DataSet dataSet) {
+    public DataResults toList(DataSet dataSet) {
         for (IComponent component : components) {
             dataSet = component.apply(dataSet, pipelineData);
         }
-        ListDataResults results = dataSet.toListDataResults(new ArrayList<AnalysisItem>(pipelineData.getReport().getAllAnalysisItems()));
+        DataResults results = resultsBridge.toDataResults(dataSet, new ArrayList<AnalysisItem>(pipelineData.getReport().getAllAnalysisItems()));
         for (IComponent component : components) {
             component.decorate(results);
         }

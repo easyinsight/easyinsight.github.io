@@ -72,7 +72,7 @@ public class StaticFeed extends Feed implements Serializable {
         DataSet dataSet;
         DataStorage source = DataStorage.readConnection(getFields(), getFeedID());
         try {
-            dataSet = source.allData(filters);
+            dataSet = source.allData(filters, 10);
         } catch (SQLException e) {
             LogClass.error(e);
             throw new RuntimeException(e);

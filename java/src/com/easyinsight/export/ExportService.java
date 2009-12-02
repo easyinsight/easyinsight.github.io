@@ -3,6 +3,10 @@ package com.easyinsight.export;
 import com.easyinsight.analysis.DataService;
 import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.analysis.AnalysisItemTypes;
+import com.easyinsight.datafeeds.FeedDefinition;
+import com.easyinsight.datafeeds.FeedService;
+import com.easyinsight.datafeeds.FeedStorage;
+import com.easyinsight.dataset.DataSet;
 import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.security.Roles;
 import com.easyinsight.database.Database;
@@ -15,6 +19,7 @@ import com.easyinsight.analysis.ListDataResults;
 import com.easyinsight.analysis.ListRow;
 import com.easyinsight.analysis.*;
 
+import com.easyinsight.storage.DataStorage;
 import org.apache.poi.hssf.usermodel.*;
 
 import java.io.ByteArrayOutputStream;
@@ -51,7 +56,31 @@ public class ExportService {
     }
 
     public long exportDataSourceToCSV(long dataSourceID) {
-        
+        SecurityUtil.authorizeFeedAccess(dataSourceID);
+        try {
+            FeedDefinition dataSource = new FeedService().getFeedDefinition(dataSourceID);
+            DataStorage dataStorage = DataStorage.readConnection(dataSource.getFields(), dataSource.getDataFeedID());
+            DataSet dataSet = dataStorage.allData(new ArrayList<FilterDefinition>(), null);
+            StringBuilder sb = new StringBuilder();
+            for (AnalysisItem item : dataSource.getFields()) {
+                sb.append(item.getDisplayName());
+                sb.append(",");
+                sb.deleteCharAt(sb.length());
+                sb.append("\r\n");
+            }
+            for (IRow row : dataSet.getRows()) {
+                for (AnalysisItem item : dataSource.getFields()) {
+                    Value value = row.getValue(item.getKey());
+                    sb.append(value.toString());
+                    sb.append(",");
+                }
+                sb.deleteCharAt(sb.length());
+                sb.append("\r\n");
+            }
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        }
         return 0;
     }
 
@@ -65,7 +94,7 @@ public class ExportService {
             if (drillThroughFilters != null) {
                 analysisDefinition.applyFilters(drillThroughFilters);
             }
-            ListDataResults listDataResults = new DataService().list(analysisDefinition, new InsightRequestMetadata());
+            ListDataResults listDataResults = (ListDataResults) new DataService().list(analysisDefinition, new InsightRequestMetadata());
             return toCSV(analysisDefinition, listDataResults);
         } catch (Exception e) {
             LogClass.error(e);
@@ -87,7 +116,7 @@ public class ExportService {
             if (drillThroughFilters != null) {
                 analysisDefinition.applyFilters(drillThroughFilters);
             }
-            ListDataResults listDataResults = new DataService().list(analysisDefinition, insightRequestMetadata);
+            ListDataResults listDataResults = (ListDataResults) new DataService().list(analysisDefinition, insightRequestMetadata);
             return toExcel(analysisDefinition, listDataResults);
         } catch (Exception e) {
             LogClass.error(e);
@@ -99,7 +128,7 @@ public class ExportService {
         SecurityUtil.authorizeFeed(analysisDefinition.getDataFeedID(), Roles.SUBSCRIBER);
         long exportID;
         try {
-            ListDataResults listDataResults = new DataService().list(analysisDefinition, insightRequestMetadata);
+            ListDataResults listDataResults = (ListDataResults) new DataService().list(analysisDefinition, insightRequestMetadata);
             exportID = toExcel(analysisDefinition, listDataResults);
         } catch (Exception e) {
             LogClass.error(e);

@@ -119,8 +119,8 @@ public class DataService {
                 invalidIDs.add(analysisItem.getKey().getKeyID());
             }
         }
-        if (analysisDefinition.getFilterDefinitions() != null) {
-            for (FilterDefinition filterDefinition : analysisDefinition.getFilterDefinitions()) {
+        if (analysisDefinition.retrieveFilterDefinitions() != null) {
+            for (FilterDefinition filterDefinition : analysisDefinition.retrieveFilterDefinitions()) {
                 if (filterDefinition.getField().getKey().getKeyID() != 0 && !ids.contains(filterDefinition.getField().getKey().getKeyID())) {
                     invalidIDs.add(filterDefinition.getField().getKey().getKeyID());
                 }
@@ -165,7 +165,7 @@ public class DataService {
         }
     }
 
-    public EmbeddedDataResults getEmbeddedResults(long reportID, long dataSourceID, List<FilterDefinition> customFilters,
+    public EmbeddedResults getEmbeddedResults(long reportID, long dataSourceID, List<FilterDefinition> customFilters,
                                                   InsightRequestMetadata insightRequestMetadata, List<FilterDefinition> drillThroughFilters) {
         SecurityUtil.authorizeInsight(reportID);
         try {
@@ -179,9 +179,9 @@ public class DataService {
                     }
                 }
                 if (count < credentialsRequired.size()) {
-                    EmbeddedDataResults embeddedDataResults = new EmbeddedDataResults();
-                    embeddedDataResults.setCredentialRequirements(credentialsRequired);
-                    return embeddedDataResults;
+                    EmbeddedResults embeddedResults = new EmbeddedDataResults();
+                    embeddedResults.setCredentialRequirements(credentialsRequired);
+                    return embeddedResults;
                 }
             }
             if (insightRequestMetadata.isRefreshAllSources()) {
@@ -197,14 +197,14 @@ public class DataService {
                 }
             }
             EmbeddedCacheKey key = new EmbeddedCacheKey(customFilters, reportID, drillThroughFilters);
-            Map<EmbeddedCacheKey, EmbeddedDataResults> resultsCache = null;
+            Map<EmbeddedCacheKey, EmbeddedResults> resultsCache = null;
             if (!insightRequestMetadata.isNoCache() && reportCache != null) {
                 //noinspection unchecked
-                resultsCache = (Map<EmbeddedCacheKey, EmbeddedDataResults>) reportCache.get(dataSourceID);
+                resultsCache = (Map<EmbeddedCacheKey, EmbeddedResults>) reportCache.get(dataSourceID);
                 if (resultsCache != null) {
-                    EmbeddedDataResults results = resultsCache.get(key);
+                    EmbeddedResults results = resultsCache.get(key);
                     if (results != null) {
-                        results = new EmbeddedDataResults(results);
+                        results = results.clone();
                         boolean dataSourceAccessible;
                         try {
                             SecurityUtil.authorizeFeedAccess(results.getDefinition().getDataFeedID());
@@ -216,7 +216,7 @@ public class DataService {
                         return results;
                     }
                 } else {
-                    resultsCache = new HashMap<EmbeddedCacheKey, EmbeddedDataResults>();
+                    resultsCache = new HashMap<EmbeddedCacheKey, EmbeddedResults>();
                 }
             }
             WSAnalysisDefinition analysisDefinition = new AnalysisService().openAnalysisDefinition(reportID);
@@ -235,7 +235,7 @@ public class DataService {
             }
 
             long startTime = System.currentTimeMillis();      
-            EmbeddedDataResults results;
+            EmbeddedResults results;
             /*Set<Long> ids = validate(analysisDefinition, feed);
             if (ids.size() > 0) {
                 throw new RuntimeException("Report is no longer valid.");
@@ -252,7 +252,7 @@ public class DataService {
                     }
                 }
                 Set<AnalysisItem> analysisItems = analysisDefinition.getColumnItems(feed.getFields());
-                Collection<FilterDefinition> filters = analysisDefinition.getFilterDefinitions();
+                Collection<FilterDefinition> filters = analysisDefinition.retrieveFilterDefinitions();
                 boolean aggregateQuery = true;
                 for (AnalysisItem analysisItem : analysisDefinition.getAllAnalysisItems()) {
                     if (analysisItem.blocksDBAggregation()) {
@@ -263,15 +263,14 @@ public class DataService {
                 DataSet dataSet = feed.getAggregateDataSet(analysisItems, filters, insightRequestMetadata, feed.getFields(), false, null);
                 Pipeline pipeline = new StandardReportPipeline();
                 pipeline.setup(analysisDefinition, feed, insightRequestMetadata);
-                ListDataResults listDataResults = pipeline.toList(dataSet);
-                results = new EmbeddedDataResults();
+                // todo: fix
+                DataResults listDataResults = pipeline.toList(dataSet);
+                results = listDataResults.toEmbeddedResults();
                 results.setDataSourceAccessible(dataSourceAccessible);
                 results.setDefinition(analysisDefinition);
                 ReportMetrics reportMetrics = new AnalysisStorage().getRating(reportID);
                 results.setRatingsAverage(reportMetrics.getAverage());
                 results.setRatingsCount(reportMetrics.getCount());
-                results.setHeaders(listDataResults.getHeaders());
-                results.setRows(listDataResults.getRows());
                 if (dataSet.getLastTime() == null) {
                     dataSet.setLastTime(new Date());
                 }
@@ -303,7 +302,7 @@ public class DataService {
                     validQueryItems.add(analysisItem);
                 }
             }
-            Collection<FilterDefinition> filters = analysisDefinition.getFilterDefinitions();
+            Collection<FilterDefinition> filters = analysisDefinition.retrieveFilterDefinitions();
             DataSet dataSet = feed.getAggregateDataSet(validQueryItems, filters, insightRequestMetadata, feed.getFields(), false, null);
             Pipeline pipeline = new StandardReportPipeline();
             pipeline.setup(analysisDefinition, feed, insightRequestMetadata);
@@ -314,7 +313,7 @@ public class DataService {
         }
     }
 
-    public ListDataResults list(WSAnalysisDefinition analysisDefinition, InsightRequestMetadata insightRequestMetadata) {
+    public DataResults list(WSAnalysisDefinition analysisDefinition, InsightRequestMetadata insightRequestMetadata) {
         SecurityUtil.authorizeFeedAccess(analysisDefinition.getDataFeedID());
         try {
             long startTime = System.currentTimeMillis();
@@ -348,7 +347,7 @@ public class DataService {
                     }
                 }
             }
-            ListDataResults results;
+            DataResults results;
 
             /*Set<Long> ids = validate(analysisDefinition, feed);
             if (ids.size() > 0) {
@@ -370,7 +369,7 @@ public class DataService {
                 }
             }
             insightRequestMetadata.setAggregateQuery(aggregateQuery);
-            Collection<FilterDefinition> filters = analysisDefinition.getFilterDefinitions();
+            Collection<FilterDefinition> filters = analysisDefinition.retrieveFilterDefinitions();
             DataSet dataSet = feed.getAggregateDataSet(validQueryItems, filters, insightRequestMetadata, feed.getFields(), false, null);
             //results = dataSet.toList(analysisDefinition, feed.getFields(), insightRequestMetadata);
             Pipeline pipeline = new StandardReportPipeline();

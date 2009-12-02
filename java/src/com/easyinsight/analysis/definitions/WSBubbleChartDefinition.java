@@ -52,7 +52,7 @@ public class WSBubbleChartDefinition extends WSChartDefinition {
         this.dimension = dimension;
     }
 
-    protected void createReportStructure(Map<String, AnalysisItem> structure) {
+    public void createReportStructure(Map<String, AnalysisItem> structure) {
         addItems("xAxisMeasure", Arrays.asList(xaxisMeasure), structure);
         addItems("yAxisMeasure", Arrays.asList(yaxisMeasure), structure);
         addItems("zAxisMeasure", Arrays.asList(zaxisMeasure), structure);

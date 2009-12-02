@@ -42,7 +42,7 @@ public class WSTreeDefinition extends WSAnalysisDefinition {
         this.items = items;
     }
 
-    protected void createReportStructure(Map<String, AnalysisItem> structure) {
+    public void createReportStructure(Map<String, AnalysisItem> structure) {
         addItems("hierarchy", Arrays.asList(hierarchy), structure);
         addItems("items", items, structure);
     }

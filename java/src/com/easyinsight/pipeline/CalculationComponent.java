@@ -1,8 +1,8 @@
 package com.easyinsight.pipeline;
 
 import com.easyinsight.analysis.AnalysisCalculation;
+import com.easyinsight.analysis.DataResults;
 import com.easyinsight.analysis.IRow;
-import com.easyinsight.analysis.ListDataResults;
 import com.easyinsight.core.Value;
 import com.easyinsight.dataset.DataSet;
 
@@ -28,7 +28,7 @@ public class CalculationComponent implements IComponent {
         return dataSet;
     }
 
-    public void decorate(ListDataResults listDataResults) {
+    public void decorate(DataResults listDataResults) {
 
     }
 }

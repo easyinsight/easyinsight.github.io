@@ -61,7 +61,7 @@ public class WSListDefinition extends WSAnalysisDefinition {
         return columnList;
     }
 
-    protected void createReportStructure(Map<String, AnalysisItem> structure) {
+    public void createReportStructure(Map<String, AnalysisItem> structure) {
         addItems("", getColumns(), structure);
     }
 

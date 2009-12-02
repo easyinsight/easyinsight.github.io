@@ -23,7 +23,7 @@ public class VirtualDimensionComponent implements IComponent {
         return new DataSet(rows);
     }
 
-    public void decorate(ListDataResults listDataResults) {
+    public void decorate(DataResults listDataResults) {
     }
 
     private Collection<VirtualDimension> identifyVirtualDimensions(Collection<AnalysisItem> analysisItems) {

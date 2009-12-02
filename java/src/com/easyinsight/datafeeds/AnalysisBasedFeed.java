@@ -48,11 +48,11 @@ public class AnalysisBasedFeed extends Feed {
 
         Feed feed = FeedRegistry.instance().getFeed(analysisDefinition.getDataFeedID());
 
-        if (analysisDefinition.getFilterDefinitions() != null) {
+        if (analysisDefinition.retrieveFilterDefinitions() != null) {
             if (filters == null) {
                 filters = new ArrayList<FilterDefinition>();
             }
-            filters.addAll(analysisDefinition.getFilterDefinitions());
+            filters.addAll(analysisDefinition.retrieveFilterDefinitions());
         }
         Set<Key> additionalKeys = new HashSet<Key>();
         if (analysisDefinition.getDataScrubs() != null) {

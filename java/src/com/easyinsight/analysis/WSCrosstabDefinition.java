@@ -58,7 +58,7 @@ public class WSCrosstabDefinition extends WSAnalysisDefinition {
         return AnalysisItems;
     }
 
-    protected void createReportStructure(Map<String, AnalysisItem> structure) {
+    public void createReportStructure(Map<String, AnalysisItem> structure) {
         addItems("column", getColumns(), structure);
         addItems("row", getRows(), structure);
         addItems("measure", getMeasures(), structure);

@@ -174,7 +174,7 @@ public class DataSet implements Serializable {
         rows.add(row);
     }
 
-    public ListDataResults toListDataResults(List<AnalysisItem> columns) {
+    public DataResults toListDataResults(List<AnalysisItem> columns) {
         ListRow[] listRows = new ListRow[getRows().size()];
         int rowCount = 0;
         for (IRow row : getRows()) {

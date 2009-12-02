@@ -1,8 +1,8 @@
 package com.easyinsight.pipeline;
 
 import com.easyinsight.analysis.AnalysisItem;
+import com.easyinsight.analysis.DataResults;
 import com.easyinsight.analysis.FilterDefinition;
-import com.easyinsight.analysis.ListDataResults;
 import com.easyinsight.dataset.DataSet;
 
 import java.util.ArrayList;
@@ -38,6 +38,6 @@ public class MeasureFilterPipelineCleanupComponent implements IComponent {
         return found > 1;
     }
 
-    public void decorate(ListDataResults listDataResults) {
+    public void decorate(DataResults listDataResults) {
     }
 }

@@ -1,10 +1,10 @@
 package com.easyinsight.pipeline;
 
+import com.easyinsight.analysis.DataResults;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.core.Value;
 import com.easyinsight.analysis.IRow;
 import com.easyinsight.analysis.AnalysisItem;
-import com.easyinsight.analysis.ListDataResults;
 
 /**
  * User: James Boe
@@ -28,6 +28,6 @@ public class TypeTransformComponent implements IComponent {
         return targetSet;
     }
 
-    public void decorate(ListDataResults listDataResults) {
+    public void decorate(DataResults listDataResults) {
     }
 }

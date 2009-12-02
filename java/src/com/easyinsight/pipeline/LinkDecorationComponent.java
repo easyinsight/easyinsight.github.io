@@ -36,7 +36,7 @@ public class LinkDecorationComponent implements IComponent {
         return dataSet;
     }
 
-    public void decorate(ListDataResults listDataResults) {
+    public void decorate(DataResults listDataResults) {
 
     }
 }

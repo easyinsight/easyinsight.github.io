@@ -1,6 +1,9 @@
 package com.easyinsight.analysis;
 
+import com.easyinsight.core.Key;
+
 import javax.persistence.*;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -57,8 +60,8 @@ public class ListDefinitionState extends AnalysisDefinitionState {
         return listDefinition;
     }
 
-    public ListDefinitionState clone() throws CloneNotSupportedException {
-        ListDefinitionState listDefinition = (ListDefinitionState) super.clone();
+    public ListDefinitionState clone(Map<Key, Key> keyMap, List<AnalysisItem> allFields) throws CloneNotSupportedException {
+        ListDefinitionState listDefinition = (ListDefinitionState) super.clone(keyMap, allFields);
         listDefinition.setDefinitionID(0);
         if (listLimitsMetadata != null) {
             listDefinition.listLimitsMetadata = listLimitsMetadata.clone();
@@ -66,7 +69,7 @@ public class ListDefinitionState extends AnalysisDefinitionState {
         return listDefinition;
     }
 
-    public void updateIDs(Map<Long, AnalysisItem> replacementMap) {
+    public void updateIDs(Map<Long, AnalysisItem> replacementMap, Map<Key, Key> keyMap) {
         if (listLimitsMetadata != null) {
             listLimitsMetadata.updateIDs(replacementMap);
         }

@@ -54,7 +54,7 @@ public class WSMapDefinition extends WSAnalysisDefinition {
         this.geography = geography;
     }
 
-    protected void createReportStructure(Map<String, AnalysisItem> structure) {
+    public void createReportStructure(Map<String, AnalysisItem> structure) {
         addItems("geography", Arrays.asList(geography), structure);
         addItems("measure", Arrays.asList(measure), structure);
     }

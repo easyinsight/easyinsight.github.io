@@ -1,7 +1,7 @@
 package com.easyinsight.pipeline;
 
+import com.easyinsight.analysis.DataResults;
 import com.easyinsight.dataset.DataSet;
-import com.easyinsight.analysis.ListDataResults;
 import com.easyinsight.analysis.AnalysisItem;
 
 /**
@@ -23,7 +23,7 @@ public class SortComponent implements IComponent {
         return dataSet;
     }
 
-    public void decorate(ListDataResults listDataResults) {
+    public void decorate(DataResults listDataResults) {
         
     }
 }

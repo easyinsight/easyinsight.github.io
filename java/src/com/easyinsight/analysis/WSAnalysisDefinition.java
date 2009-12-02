@@ -3,6 +3,7 @@ package com.easyinsight.analysis;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.dataset.LimitsResults;
 import com.easyinsight.core.Key;
+import com.easyinsight.pipeline.ResultsBridge;
 import com.easyinsight.scrubbing.DataScrub;
 
 import java.util.*;
@@ -42,6 +43,7 @@ public abstract class WSAnalysisDefinition implements Serializable {
     public static final int MAP_AMERICAS = 23;
     public static final int MAP_EUROPE = 24;
     public static final int MAP_MIDDLE_EAST = 25;
+    public static final int TIMELINE = 26;
 
     private String name;
     private String authorName;
@@ -269,8 +271,8 @@ public abstract class WSAnalysisDefinition implements Serializable {
                 //}
             }
         }
-        if (getFilterDefinitions() != null) {
-            for (FilterDefinition filterDefinition : getFilterDefinitions()) {
+        if (retrieveFilterDefinitions() != null) {
+            for (FilterDefinition filterDefinition : retrieveFilterDefinitions()) {
                 List<AnalysisItem> items = filterDefinition.getField().getAnalysisItems(allItems, analysisItems, false);
                 for (AnalysisItem item : items) {
                     //if (item.getAnalysisItemID() != 0) {
@@ -291,6 +293,10 @@ public abstract class WSAnalysisDefinition implements Serializable {
         return new ArrayList<Key>(columnSet);
     }
 
+    public List<FilterDefinition> retrieveFilterDefinitions() {
+        return filterDefinitions;
+    }
+
     public Set<AnalysisItem> getColumnItems(List<AnalysisItem> allItems) {
         Set<AnalysisItem> columnSet = new HashSet<AnalysisItem>();
         Set<AnalysisItem> analysisItems = getAllAnalysisItems();
@@ -308,8 +314,8 @@ public abstract class WSAnalysisDefinition implements Serializable {
                 }
             }
         }
-        if (getFilterDefinitions() != null) {
-            for (FilterDefinition filterDefinition : getFilterDefinitions()) {
+        if (retrieveFilterDefinitions() != null) {
+            for (FilterDefinition filterDefinition : retrieveFilterDefinitions()) {
                 List<AnalysisItem> items = filterDefinition.getField().getAnalysisItems(allItems, analysisItems, false);
                 for (AnalysisItem item : items) {
                     //if (item.getAnalysisItemID() != 0) {
@@ -344,7 +350,7 @@ public abstract class WSAnalysisDefinition implements Serializable {
         return structure;
     }
 
-    protected abstract void createReportStructure(Map<String, AnalysisItem> structure);
+    public abstract void createReportStructure(Map<String, AnalysisItem> structure);
 
     public abstract void populateFromReportStructure(Map<String, AnalysisItem> structure);
 
@@ -387,7 +393,7 @@ public abstract class WSAnalysisDefinition implements Serializable {
 
     public void applyFilters(List<FilterDefinition> drillThroughFilters) {
         for (FilterDefinition filterDefinition : drillThroughFilters) {
-            for (FilterDefinition ourDefinition : getFilterDefinitions()) {
+            for (FilterDefinition ourDefinition : retrieveFilterDefinitions()) {
                 if (ourDefinition.getField().getKey().equals(filterDefinition.getField().getKey())) {
                     // match the filter?
                     if (ourDefinition instanceof FilterValueDefinition && filterDefinition instanceof FilterValueDefinition) {
@@ -398,5 +404,13 @@ public abstract class WSAnalysisDefinition implements Serializable {
                 }
             }
         }
+    }
+
+    public boolean hasCustomResultsBridge() {
+        return false;
+    }
+
+    public ResultsBridge getCustomResultsBridge() {
+        return null;
     }
 }

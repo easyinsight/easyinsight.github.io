@@ -63,7 +63,7 @@ public class WSTreeMapDefinition extends WSAnalysisDefinition {
         this.measure2 = measure2;
     }
 
-    protected void createReportStructure(Map<String, AnalysisItem> structure) {
+    public void createReportStructure(Map<String, AnalysisItem> structure) {
         addItems("hierarchy", Arrays.asList(hierarchy), structure);
         addItems("areaMeasure", Arrays.asList(measure1), structure);
         addItems("colorMeasure", Arrays.asList(measure2), structure);

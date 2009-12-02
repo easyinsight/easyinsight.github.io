@@ -1,6 +1,11 @@
 package com.easyinsight.analysis;
 
+import com.easyinsight.core.Key;
+
 import javax.persistence.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -20,8 +25,7 @@ public abstract class AnalysisDefinitionState implements Cloneable {
 
     public abstract WSAnalysisDefinition createWSDefinition();
 
-    @Override
-    public AnalysisDefinitionState clone() throws CloneNotSupportedException {
+    public AnalysisDefinitionState clone(Map<Key, Key> keyMap, List<AnalysisItem> allFields) throws CloneNotSupportedException {
         AnalysisDefinitionState state = (AnalysisDefinitionState) super.clone();
         state.setId(0);
         return state;
@@ -35,7 +39,19 @@ public abstract class AnalysisDefinitionState implements Cloneable {
         this.id = id;
     }
 
-    public void updateIDs(Map<Long, AnalysisItem> replacementMap) {
+    public void updateIDs(Map<Long, AnalysisItem> replacementMap, Map<Key, Key> keyMap) throws CloneNotSupportedException {
 
+    }
+
+    public Collection<? extends AnalysisDefinition> containedReports() {
+        return new ArrayList<AnalysisDefinition>();
+    }
+
+    public void updateReportIDs(Map<Long, AnalysisDefinition> reportReplacementMap) {
+        
+    }
+
+    public void afterLoad() {
+        
     }
 }

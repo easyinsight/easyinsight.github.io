@@ -30,7 +30,7 @@ public abstract class WSMultiMeasureDefinition extends WSChartDefinition {
         this.measures = measures;
     }
 
-    protected void createReportStructure(Map<String, AnalysisItem> structure) {
+    public void createReportStructure(Map<String, AnalysisItem> structure) {
         addItems("xAxis", Arrays.asList(xaxis), structure);
         addItems("measures", measures, structure);
     }

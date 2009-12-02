@@ -1,9 +1,9 @@
 package com.easyinsight.pipeline;
 
+import com.easyinsight.analysis.DataResults;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.analysis.ListTransform;
 import com.easyinsight.analysis.AnalysisItem;
-import com.easyinsight.analysis.ListDataResults;
 
 import java.util.List;
 import java.util.ArrayList;
@@ -26,6 +26,6 @@ public class AggregationComponent implements IComponent {
         return listTransform.aggregate(list, derivedItems);
     }
 
-    public void decorate(ListDataResults listDataResults) {
+    public void decorate(DataResults listDataResults) {
     }
 }

@@ -33,7 +33,7 @@ public abstract class WSYAxisDefinition extends WSChartDefinition {
         this.measure = measure;
     }
 
-    protected void createReportStructure(Map<String, AnalysisItem> structure) {
+    public void createReportStructure(Map<String, AnalysisItem> structure) {
         addItems("yAxis", Arrays.asList(yaxis), structure);
         addItems("measure", Arrays.asList(measure), structure);
     }

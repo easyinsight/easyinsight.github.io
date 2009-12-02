@@ -1,5 +1,6 @@
 package com.easyinsight.analysis;
 
+import com.easyinsight.analysis.definitions.WSTimeline;
 import com.easyinsight.analysis.gauge.GaugeDefinitionState;
 
 /**
@@ -63,6 +64,13 @@ public class AnalysisDefinitionFactory {
             TreeDefinitionState treeDefinitionState = new TreeDefinitionState();
             treeDefinitionState.setTreeDefinitionID(wsTree.getTreeDefinitionID());
             analysisDefinitionState = treeDefinitionState;
+        } else if (wsAnalysisDefinition.getDataFeedType().equals(AnalysisTypes.TIMELINE)) {
+            WSTimeline wsTimeline = (WSTimeline) wsAnalysisDefinition;
+            TimelineDefinitionState timelineDefinitionState = new TimelineDefinitionState();
+            timelineDefinitionState.setDefinitionID(wsTimeline.getTimelineID());
+            timelineDefinitionState.setFilter(wsTimeline.getSequence());
+            timelineDefinitionState.setContainedReport(AnalysisDefinitionFactory.fromWSDefinition(wsTimeline.getReport()));
+            analysisDefinitionState = timelineDefinitionState;
         } else {
             throw new RuntimeException("Unknown data feed type " + wsAnalysisDefinition.getDataFeedType());
         }

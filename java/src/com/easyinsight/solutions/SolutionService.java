@@ -215,15 +215,45 @@ public class SolutionService {
         try {
             conn.setAutoCommit(false);
             FeedStorage feedStorage = new FeedStorage();
-            FeedDefinition targetDataSource = feedStorage.getFeedDefinitionData(dataSourceID, conn);
+
+
             Session session = Database.instance().createSession(conn);
-            AnalysisDefinition report = new AnalysisStorage().getPersistableReport(reportID, session);
-            FeedDefinition sourceDataSource = feedStorage.getFeedDefinitionData(report.getDataFeedID(), conn);
-            Map<Key, Key> keyReplacementMap = createKeyReplacementMap(targetDataSource, sourceDataSource);
-            InsightDescriptor id = installReportToDataSource(targetDataSource, report, keyReplacementMap, session);
+            AnalysisDefinition originalBaseReport = new AnalysisStorage().getPersistableReport(reportID, session);
+            FeedDefinition sourceDataSource = feedStorage.getFeedDefinitionData(originalBaseReport.getDataFeedID(), conn);
+            // okay, we might have multiple reports here...
+            // find all the other reports in the dependancy graph here
+            List<AnalysisDefinition> reports = originalBaseReport.containedReports();
+            reports.add(originalBaseReport);
+            Map<Long, AnalysisDefinition> reportReplacementMap = new HashMap<Long, AnalysisDefinition>();
+            List<AnalysisDefinition> reportList = new ArrayList<AnalysisDefinition>();
+            for (AnalysisDefinition child : reports) {
+                FeedDefinition targetDataSource = feedStorage.getFeedDefinitionData(dataSourceID, conn);
+                Map<Key, Key> keyReplacementMap = createKeyReplacementMap(targetDataSource, sourceDataSource);
+                AnalysisDefinition copyReport = copyReportToDataSource(targetDataSource, child, keyReplacementMap, session);
+                reportReplacementMap.put(child.getAnalysisID(), copyReport);
+                reportList.add(copyReport);
+            }
+
+            for (AnalysisDefinition copiedReport : reportReplacementMap.values()) {
+                copiedReport.updateReportIDs(reportReplacementMap);
+            }
+
+            session.close();
+            session = Database.instance().createSession(conn);
+            //Collections.reverse(reportList);
+
+            for (AnalysisDefinition copiedReport : reportList) {
+                session.save(copiedReport);
+                session.flush();
+            }
+
+            AnalysisDefinition copiedBaseReport = reportReplacementMap.get(reportID);
+            InsightDescriptor insightDescriptor = new InsightDescriptor(copiedBaseReport.getAnalysisID(), copiedBaseReport.getTitle(),
+                    copiedBaseReport.getDataFeedID(), copiedBaseReport.getReportType());
+
             conn.commit();
             session.close();
-            return id;
+            return insightDescriptor;
         } catch (Exception e) {
             LogClass.error(e);
             conn.rollback();
@@ -238,13 +268,27 @@ public class SolutionService {
         Map<Key, Key> keys = new HashMap<Key, Key>();
         for (AnalysisItem sourceField : sourceDefinition.getFields()) {
             for (AnalysisItem targetField : localDefinition.getFields()) {
-                if (sourceField.getKey().toKeyString().equals(targetField.getKey().toKeyString())) {
+                if (sourceField.toDisplay().equals(targetField.toDisplay())) {
                     keys.put(sourceField.getKey(), targetField.getKey());
                     break;
                 }
             }
         }
         return keys;
+    }
+
+    private AnalysisDefinition copyReportToDataSource(FeedDefinition localDefinition, AnalysisDefinition report,
+                                                        Map<Key, Key> keyReplacementMap, Session session) throws CloneNotSupportedException {
+        AnalysisDefinition clonedReport = report.clone(keyReplacementMap, localDefinition.getFields());
+        clonedReport.setSolutionVisible(false);
+        clonedReport.setAnalysisPolicy(AnalysisPolicy.PRIVATE);
+        clonedReport.setDataFeedID(localDefinition.getDataFeedID());
+
+        // what to do here...
+
+        clonedReport.setUserBindings(Arrays.asList(new UserToAnalysisBinding(SecurityUtil.getUserID(), UserPermission.OWNER)));
+        clonedReport.setTemporaryReport(true);
+        return clonedReport;
     }
 
     private InsightDescriptor installReportToDataSource(FeedDefinition localDefinition, AnalysisDefinition report,

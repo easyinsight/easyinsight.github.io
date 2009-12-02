@@ -42,7 +42,7 @@ public abstract class WSTwoAxisDefinition extends WSChartDefinition {
         this.measure = measure;
     }
 
-    protected void createReportStructure(Map<String, AnalysisItem> structure) {
+    public void createReportStructure(Map<String, AnalysisItem> structure) {
         addItems("xAxis", Arrays.asList(xaxis), structure);
         addItems("yAxis", Arrays.asList(yaxis), structure);
         addItems("measure", Arrays.asList(measure), structure);

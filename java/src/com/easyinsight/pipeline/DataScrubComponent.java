@@ -1,8 +1,8 @@
 package com.easyinsight.pipeline;
 
+import com.easyinsight.analysis.DataResults;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.scrubbing.DataSetScrubber;
-import com.easyinsight.analysis.ListDataResults;
 
 /**
  * User: James Boe
@@ -17,6 +17,6 @@ public class DataScrubComponent implements IComponent {
         return dataSet;
     }
 
-    public void decorate(ListDataResults listDataResults) {
+    public void decorate(DataResults listDataResults) {
     }
 }

@@ -324,6 +324,7 @@ public class AnalysisDefinition implements Cloneable {
 
     public AnalysisDefinition clone(Map<Key, Key> keyMap, List<AnalysisItem> allFields) throws CloneNotSupportedException {
         AnalysisDefinition analysisDefinition = (AnalysisDefinition) super.clone();
+        analysisDefinition.setAnalysisDefinitionState(analysisDefinitionState.clone(keyMap, allFields));
         analysisDefinition.setAnalysisID(null);
         Map<Long, AnalysisItem> replacementMap = new HashMap<Long, AnalysisItem>();
         List<FilterDefinition> filterDefinitions = new ArrayList<FilterDefinition>();
@@ -391,8 +392,7 @@ public class AnalysisDefinition implements Cloneable {
         for (FilterDefinition filter : filterDefinitions) {
             filter.updateIDs(replacementMap);
         }
-        analysisDefinitionState.updateIDs(replacementMap);
-        analysisDefinition.setAnalysisDefinitionState(analysisDefinitionState.clone());
+        analysisDefinition.getAnalysisDefinitionState().updateIDs(replacementMap, keyMap);
         analysisDefinition.setReportStructure(clonedStructure);
         analysisDefinition.setAddedItems(addedItems);
         analysisDefinition.setUserBindings(new ArrayList<UserToAnalysisBinding>());
@@ -421,6 +421,7 @@ public class AnalysisDefinition implements Cloneable {
         if (analysisDefinitionState == null) {
             analysisDefinitionState = migrationHandler();
         }
+        analysisDefinitionState.afterLoad();
         analysisDefinition = analysisDefinitionState.createWSDefinition();
         analysisDefinition.setReportStateID(analysisDefinitionState.getId());
         analysisDefinition.setReportType(reportType);
@@ -484,4 +485,14 @@ public class AnalysisDefinition implements Cloneable {
         }
         return analysisItems;
     }*/
+
+    public List<AnalysisDefinition> containedReports() {
+        List<AnalysisDefinition> reports = new ArrayList<AnalysisDefinition>();
+        reports.addAll(analysisDefinitionState.containedReports());
+        return reports;
+    }
+
+    public void updateReportIDs(Map<Long, AnalysisDefinition> reportReplacementMap) {
+        analysisDefinitionState.updateReportIDs(reportReplacementMap);
+    }
 }

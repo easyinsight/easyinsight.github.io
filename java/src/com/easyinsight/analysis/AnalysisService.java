@@ -34,6 +34,16 @@ public class AnalysisService {
 
     private AnalysisStorage analysisStorage = new AnalysisStorage();
 
+    public Collection<InsightDescriptor> getInsightDescriptorsForDataSource(long dataSourceID) {
+        long userID = SecurityUtil.getUserID();
+        try {
+            return analysisStorage.getInsightDescriptors(userID, dataSourceID);
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        }
+    }
+
     public Collection<InsightDescriptor> getInsightDescriptors() {
         long userID = SecurityUtil.getUserID();
         try {

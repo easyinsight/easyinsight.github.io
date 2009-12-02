@@ -24,8 +24,8 @@ public class FilterComponent implements IComponent {
 
     public DataSet apply(DataSet dataSet, PipelineData pipelineData) {
         Map<AnalysisItem, Collection<MaterializedFilterDefinition>> filterMap = new HashMap<AnalysisItem, Collection<MaterializedFilterDefinition>>();
-        if (pipelineData.getReport().getFilterDefinitions() != null) {
-            for (FilterDefinition filterDefinition : pipelineData.getReport().getFilterDefinitions()) {
+        if (pipelineData.getReport().retrieveFilterDefinitions() != null) {
+            for (FilterDefinition filterDefinition : pipelineData.getReport().retrieveFilterDefinitions()) {
                 if (filterDefinition.isEnabled()) {
                     if (filterDefinition.isApplyBeforeAggregation() == beforeAggregation) {
                         Collection<MaterializedFilterDefinition> filters = filterMap.get(filterDefinition.getField());
@@ -61,6 +61,6 @@ public class FilterComponent implements IComponent {
         return resultDataSet;
     }
 
-    public void decorate(ListDataResults listDataResults) {
+    public void decorate(DataResults listDataResults) {
     }
 }

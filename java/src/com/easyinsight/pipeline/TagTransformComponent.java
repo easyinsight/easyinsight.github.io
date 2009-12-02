@@ -1,10 +1,7 @@
 package com.easyinsight.pipeline;
 
+import com.easyinsight.analysis.*;
 import com.easyinsight.dataset.DataSet;
-import com.easyinsight.analysis.IRow;
-import com.easyinsight.analysis.AnalysisItem;
-import com.easyinsight.analysis.Row;
-import com.easyinsight.analysis.ListDataResults;
 import com.easyinsight.core.Value;
 import com.easyinsight.core.Key;
 
@@ -39,6 +36,6 @@ public class TagTransformComponent implements IComponent {
         return new DataSet(rows);
     }
 
-    public void decorate(ListDataResults listDataResults) {
+    public void decorate(DataResults listDataResults) {
     }
 }
