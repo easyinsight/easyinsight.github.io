@@ -94,6 +94,7 @@
         </node>        
         <node label="Tree Map" type="{AnalysisDefinition.TREEMAP}"/>
         <node label="Gauge" type="{AnalysisDefinition.GAUGE}"/>
+        <node label="Timeline" type="{AnalysisDefinition.TIMELINE}"/>
         <!-- <node label="Split" state="Split"/>-->
     </mx:XMLList>
     <mx:XMLList id="splitSource">        

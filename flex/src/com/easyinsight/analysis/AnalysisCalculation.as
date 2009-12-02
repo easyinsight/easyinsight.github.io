@@ -7,7 +7,7 @@ package com.easyinsight.analysis
 		public var calculationString:String;
         public var applyBeforeAggregation:Boolean;
 		
-		public function AnalysisCalculation(aggregation:int=AggregationTypes.MEDIAN)
+		public function AnalysisCalculation(aggregation:int=11)
 		{
 			super(aggregation);
 		}

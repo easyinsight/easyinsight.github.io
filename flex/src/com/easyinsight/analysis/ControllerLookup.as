@@ -21,6 +21,7 @@ import com.easyinsight.analysis.maps.EuropeMapController;
 import com.easyinsight.analysis.maps.MiddleEastMapController;
 import com.easyinsight.analysis.maps.USMapController;
 import com.easyinsight.analysis.maps.WorldMapController;
+import com.easyinsight.analysis.timeline.TimelineController;
 import com.easyinsight.analysis.tree.TreeController;
 import com.easyinsight.analysis.treemap.TreeMapController;
 
@@ -103,6 +104,9 @@ public class ControllerLookup {
                 break;
             case AnalysisDefinition.MMLINE:
                 controller = MultiMeasureLineChartController;
+                break;
+            case AnalysisDefinition.TIMELINE:
+                controller = TimelineController;
                 break;
         }
         return controller;

@@ -11,6 +11,9 @@ public class XAxisDefinition extends ChartDefinition{
     public var measure:AnalysisItem;
     public var xaxis:AnalysisItem;
 
+    public var yAxisMin:Number;
+    public var yAxisMax:Number;
+
     public function XAxisDefinition() {
         super();
     }

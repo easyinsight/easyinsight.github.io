@@ -30,16 +30,9 @@ public class ListDataService extends EventDispatcher implements IReportDataServi
         dataRemoteSource.list.addEventListener(FaultEvent.FAULT, GenericFaultHandler.genericFault);
     }
 
-    private function processListData(event:ResultEvent):void {
-        var listData:ListDataResults = dataRemoteSource.list.lastResult as ListDataResults;
-        if (listData.invalidAnalysisItemIDs != null && listData.invalidAnalysisItemIDs.length > 0) {
-            dispatchEvent(new InvalidFieldsEvent(listData.invalidAnalysisItemIDs, listData.feedMetadata));
-        }
-        if (listData.credentialRequirements != null && listData.credentialRequirements.length > 0) {
-            
-        }
+    public function translate(listData:ListDataResults):ServiceData {
         var clientProcessorMap:Object = new Object();
-        var headers:ArrayCollection = new ArrayCollection(listData.headers);        
+        var headers:ArrayCollection = new ArrayCollection(listData.headers);
         for each (var analysisItem:AnalysisItem in headers) {
             clientProcessorMap[analysisItem.qualifiedName()] = analysisItem.createClientRenderer();
         }
@@ -64,8 +57,21 @@ public class ListDataService extends EventDispatcher implements IReportDataServi
             }
             data.addItem(endObject);
         }
-        dispatchEvent(new DataServiceEvent(DataServiceEvent.DATA_RETURNED, data, clientProcessorMap, listData.dataSourceInfo,
-                listData.additionalProperties, listData.limitedResults, listData.maxResults, listData.limitResults));
+        return new ServiceData(data, clientProcessorMap);
+    }
+
+    private function processListData(event:ResultEvent):void {
+        var listData:ListDataResults = dataRemoteSource.list.lastResult as ListDataResults;
+        if (listData.invalidAnalysisItemIDs != null && listData.invalidAnalysisItemIDs.length > 0) {
+            dispatchEvent(new InvalidFieldsEvent(listData.invalidAnalysisItemIDs, listData.feedMetadata));
+        }
+        if (listData.credentialRequirements != null && listData.credentialRequirements.length > 0) {
+            
+        }
+        var serviceData:ServiceData = translate(listData);
+        dispatchEvent(new DataServiceEvent(DataServiceEvent.DATA_RETURNED, serviceData.data, serviceData.clientProcessorMap,
+                listData.dataSourceInfo, listData.additionalProperties, listData.limitedResults, listData.maxResults,
+                listData.limitResults));
         dispatchEvent(new DataServiceLoadingEvent(DataServiceLoadingEvent.LOADING_STOPPED));
     }
 

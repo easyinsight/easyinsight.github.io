@@ -4,7 +4,10 @@ import com.easyinsight.analysis.AnalysisDefinition;
 import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.analysis.EmbeddedDataResults;
 import com.easyinsight.analysis.EmbeddedDataServiceEvent;
+import com.easyinsight.analysis.EmbeddedTimelineResults;
 import com.easyinsight.analysis.IEmbeddedDataService;
+import com.easyinsight.analysis.ListDataResults;
+import com.easyinsight.analysis.SeriesDataResults;
 import com.easyinsight.analysis.Value;
 import com.easyinsight.analysis.conditions.ConditionRenderer;
 import com.easyinsight.framework.CredentialsCache;
@@ -18,11 +21,11 @@ import mx.rpc.events.ResultEvent;
 import mx.rpc.remoting.RemoteObject;
 import mx.controls.Alert;
 
-public class EmbeddedDataService extends EventDispatcher implements IEmbeddedDataService {
+public class EmbeddedTimelineDataService extends EventDispatcher implements IEmbeddedDataService {
 
     private var dataRemoteSource:RemoteObject;
 
-    public function EmbeddedDataService() {
+    public function EmbeddedTimelineDataService() {
         super();
         dataRemoteSource = new RemoteObject();
         dataRemoteSource.destination = "data";
@@ -35,38 +38,19 @@ public class EmbeddedDataService extends EventDispatcher implements IEmbeddedDat
     }
 
     private function processListData(event:ResultEvent):void {
-        var listData:EmbeddedDataResults = dataRemoteSource.getEmbeddedResults.lastResult as EmbeddedDataResults;
-        if (listData.credentialRequirements == null || listData.credentialRequirements.length == 0) {
-            var clientProcessorMap:Object = new Object();
-            var headers:ArrayCollection = new ArrayCollection(listData.headers);
-            for each (var analysisItem:AnalysisItem in headers) {
-                clientProcessorMap[analysisItem.qualifiedName()] = analysisItem.createClientRenderer();
+        var results:EmbeddedTimelineResults = dataRemoteSource.getEmbeddedResults.lastResult as EmbeddedTimelineResults;
+        var dataSets:ArrayCollection = new ArrayCollection();
+        if (results.credentialRequirements == null || results.credentialRequirements.length == 0) {
+
+
+            for each (var listData:ListDataResults in results.listDatas) {
+                dataSets.addItem(new ListDataService().translate(listData));
             }
-            var rows:ArrayCollection = new ArrayCollection(listData.rows);
-            var data:ArrayCollection = new ArrayCollection();
-            for (var i:int = 0; i < rows.length; i++) {
-                var row:Object = rows.getItemAt(i);
-                var values:Array = row.values as Array;
-                var endObject:Object = new Object();
-                for (var j:int = 0; j < headers.length; j++) {
-                    var headerDimension:AnalysisItem = headers[j];
-                    var value:Value = values[j];
-                    var key:String = headerDimension.qualifiedName();
-                    endObject[key] = value.getValue();
-                    var conditionRenderer:ConditionRenderer = clientProcessorMap[key];
-                    conditionRenderer.addValue(value);
-                    if (value.links != null) {
-                        for (var linkKey:String in value.links) {
-                            endObject[linkKey + "_link"] = value.links[linkKey];
-                        }
-                    }
-                }
-                data.addItem(endObject);
-            }
+            results.additionalProperties.seriesValues = results.seriesValues;
         }
-        dispatchEvent(new EmbeddedDataServiceEvent(EmbeddedDataServiceEvent.DATA_RETURNED, data, listData.definition, clientProcessorMap, listData.dataSourceAccessible,
-                listData.attribution, listData.credentialRequirements, listData.dataSourceInfo, listData.ratingsAverage,
-                listData.ratingsCount, listData.additionalProperties));
+        dispatchEvent(new EmbeddedDataServiceEvent(EmbeddedDataServiceEvent.DATA_RETURNED, dataSets, results.definition, new Object(), results.dataSourceAccessible,
+                results.attribution, listData.credentialRequirements, listData.dataSourceInfo, results.ratingsAverage,
+                results.ratingsCount, results.additionalProperties));
         dispatchEvent(new DataServiceLoadingEvent(DataServiceLoadingEvent.LOADING_STOPPED));
     }
 

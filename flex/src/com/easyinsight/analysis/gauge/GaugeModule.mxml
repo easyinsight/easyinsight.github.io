@@ -5,7 +5,7 @@
         <mx:State name="Circular">
             <mx:AddChild relativeTo="{box}">
                 <black:BlackCircularGauge width="100%" height="100%" value="{value}" minimum="0" maximum="{maxValue}" startAngle="210"
-                    endAngle="330" orientation="clockwise" trackMinimum="0" trackMaximum="{maxValue}" fontFamily="Tahoma"/>
+                    endAngle="330" orientation="clockwise" trackMinimum="0" trackMaximum="{maxValue}" fontFamily="Tahoma" animationDuration="2000"/>
             </mx:AddChild>
         </mx:State>
         <mx:State name="Horizontal">

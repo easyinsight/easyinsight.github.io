@@ -31,6 +31,7 @@ import mx.charts.series.ColumnSeries;
         import mx.collections.ArrayCollection;
         import mx.collections.Sort;
         import mx.collections.SortField;
+        import mx.controls.Alert;
         import mx.events.FlexEvent;
         import mx.formatters.Formatter;
         import mx.graphics.BitmapFill;
@@ -237,13 +238,13 @@ import mx.charts.series.ColumnSeries;
                 if (columnChartDef.xaxis.sort > 0) {
                     var sort:Sort = new Sort();
                     sort.fields = [ new SortField(columnChartDef.xaxis.qualifiedName(), false, columnChartDef.xaxis.sort == ChartSortButton.DESCENDING)];
-                    graphData.sort = sort;
-                    graphData.refresh();
+                    dataSet.sort = sort;
+                    dataSet.refresh();
                 } else if (columnChartDef.measure.sort > 0) {
                     var measureSort:Sort = new Sort();
                     measureSort.fields = [ new SortField(columnChartDef.measure.qualifiedName(), false, columnChartDef.measure.sort == ChartSortButton.DESCENDING)];
-                    graphData.sort = measureSort;
-                    graphData.refresh();
+                    dataSet.sort = measureSort;
+                    dataSet.refresh();    
                 }
 
                 xField = columnChartDef.xaxis.qualifiedName();

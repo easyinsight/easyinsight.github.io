@@ -2,7 +2,8 @@
 <ScrubEditWindow xmlns="com.easyinsight.analysis.scrub.*" xmlns:mx="http://www.adobe.com/2006/mxml" width="700" height="500">
 	<mx:Script>
 		<![CDATA[
-			import com.easyinsight.analysis.Value;
+        import com.easyinsight.analysis.AnalysisItemWrapper;
+        import com.easyinsight.analysis.Value;
 			import com.easyinsight.analysis.AnalysisDimensionResultMetadata;
 			import com.easyinsight.analysis.AnalysisItemTypes;
 			import com.easyinsight.analysis.AnalysisItem;
@@ -86,9 +87,9 @@ import mx.managers.PopUpManager;
 			
 			override public function set availableFields(availableFields:ArrayCollection):void {
 				var ourFields:ArrayCollection = new ArrayCollection();
-				for each (var analysisItem:AnalysisItem in availableFields) {
-					if (analysisItem.getType() == AnalysisItemTypes.DIMENSION) {
-						ourFields.addItem(analysisItem);
+				for each (var analysisItem:AnalysisItemWrapper in availableFields) {
+					if (analysisItem.analysisItem.getType() == AnalysisItemTypes.DIMENSION) {
+						ourFields.addItem(analysisItem.analysisItem);
 					}
 				}
                 ourFields.addItemAt(NO_ENTRY, 0);

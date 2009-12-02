@@ -6,19 +6,16 @@ import mx.collections.ArrayCollection;
 	
 	[Bindable]
 	[RemoteClass(alias="com.easyinsight.analysis.ListDataResults")]
-	public class ListDataResults
+	public class ListDataResults extends DataResults
 	{
 		public var headers:Array;
 		public var rows:Array;
-		public var credentialRequirements:ArrayCollection;
+
 		public var headerMetadata:Array;
 		public var limitedResults:Boolean;
 		public var limitResults:int;
 		public var maxResults:int;
-        public var invalidAnalysisItemIDs:ArrayCollection;
-        public var feedMetadata:FeedMetadata;
-        public var dataSourceInfo:DataSourceInfo;
-        public var additionalProperties:Object;
+        
 		
 		public function ListDataResults()
 			{

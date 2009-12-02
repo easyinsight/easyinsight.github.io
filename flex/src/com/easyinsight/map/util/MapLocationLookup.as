@@ -1,6 +1,8 @@
 package com.easyinsight.map.util
 {
-	public class MapLocationLookup
+import mx.collections.ArrayCollection;
+
+public class MapLocationLookup
 	{
 		private static var usAliasMap:Object = new Object();
 		private static var worldAliasMap:Object = new Object();
@@ -494,6 +496,8 @@ package com.easyinsight.map.util
 			var aliasMap:Object = getAliasMap(mapType);
 			return aliasMap[name.toUpperCase()];
 		}
+
+        
 		
 		private function getAliasMap(mapType:String):Object {
 			var aliasMap:Object;
@@ -523,5 +527,8 @@ package com.easyinsight.map.util
 		public static function instance():MapLocationLookup {
 			return new MapLocationLookup();
 		}
-	}
+
+        public function getAllLocations(param:String):Object {
+            return getAliasMap(param);
+        }}
 }

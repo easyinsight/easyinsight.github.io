@@ -21,6 +21,7 @@ import com.easyinsight.analysis.maps.EuropeMapEmbeddedController;
 import com.easyinsight.analysis.maps.MiddleEastMapEmbeddedController;
 import com.easyinsight.analysis.maps.USMapEmbeddedController;
 import com.easyinsight.analysis.maps.WorldMapEmbeddedController;
+import com.easyinsight.analysis.timeline.TimelineEmbeddedController;
 import com.easyinsight.analysis.tree.TreeEmbeddedController;
 import com.easyinsight.analysis.treemap.TreeMapEmbeddedController;
 
@@ -103,6 +104,9 @@ public class EmbeddedControllerLookup {
                 break;
             case AnalysisDefinition.TREE:
                 controller = TreeEmbeddedController;
+                break;
+            case AnalysisDefinition.TIMELINE:
+                controller = TimelineEmbeddedController;
                 break;
         }
         return controller;

@@ -448,6 +448,27 @@
         </mxmlc>
     </target>
 
+    <target name="module.timeline">
+        <mxmlc file="../src/com/easyinsight/analysis/timeline/TimelineModule.mxml" output="${deployment.path}/TimelineModule.swf"
+               static-rsls="false">
+            <load-config filename="../modules/timeseries-module.xml"/>
+            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
+                <url rsl-url="framework_3.3.0.4852.swz"/>
+                <url rsl-url="framework_3.3.0.4852.swf"/>
+            </runtime-shared-library-path>
+
+            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/datavisualization.swc">
+                <url rsl-url="datavisualization_3.3.0.4852.swz"/>
+                <url rsl-url="datavisualization_3.3.0.4852.swf"/>
+            </runtime-shared-library-path>
+
+            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
+                <url rsl-url="rpc_3.3.0.4852.swz"/>
+                <url rsl-url="rpc_3.3.0.4852.swf"/>
+            </runtime-shared-library-path>
+        </mxmlc>
+    </target>
+
     <target name="module.piechart">
         <mxmlc file="../src/com/easyinsight/analysis/charts/xaxisbased/pie/PieChartModule.mxml" output="${deployment.path}/PieChartModule.swf"
                static-rsls="false">

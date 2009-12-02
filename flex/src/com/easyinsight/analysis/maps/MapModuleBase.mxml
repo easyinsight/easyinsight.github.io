@@ -29,6 +29,7 @@
         import mx.controls.Alert;
         import mx.controls.ToolTip;
         import mx.formatters.Formatter;
+        import mx.graphics.SolidColor;
         import mx.managers.PopUpManager;
         import mx.managers.ToolTipManager;
 
@@ -55,13 +56,15 @@
         public function onover(event:MapEvent):void {
             if (event.mapFeature != null) {
                 var mf:MapFeature = event.mapFeature;
-                tooltipFeature += mf.key;
-                var point:Point = mf.mapBarycenter;
-                var canvasPoint:Point = map.drawingCanvas.localToGlobal(point);
-                tooltip.text = mf.data.label + " - " + mf.data.data;
-                tooltip.x = canvasPoint.x;
-                tooltip.y = canvasPoint.y;
-                tooltip.visible = true;
+                if (mf != null && mf.data != null) {
+                    tooltipFeature += mf.key;
+                    var point:Point = mf.mapBarycenter;
+                    var canvasPoint:Point = map.drawingCanvas.localToGlobal(point);
+                    tooltip.text = mf.data.label + " - " + mf.data.data;
+                    tooltip.x = canvasPoint.x;
+                    tooltip.y = canvasPoint.y;
+                    tooltip.visible = true;
+                }
             }
         }
 
@@ -139,12 +142,13 @@
             mapDefinition.mapType = mapType;
             dimension = mapDefinition.geography;
             graphData = new ArrayCollection();            
-            if (dataSet.length > 0) {
+            if (dataSet.length > 0) {                
                 this.formatter = mapDefinition.measure.getFormatter();
                 var renderer:ConditionRenderer = createRenderer(dataSet, mapDefinition);
                 this.conditionRenderer = renderer;
                 this.minValue = Number.MAX_VALUE;
                 this.maxValue = Number.MIN_VALUE;
+                var matchedLocations:ArrayCollection = new ArrayCollection();
                 for (var i:int = 0; i < dataSet.length; i++) {
                     var row:Object = dataSet.getItemAt(i);
                     var dimensionValue:String = row[mapDefinition.geography.qualifiedName()];
@@ -159,6 +163,7 @@
                     }
                     var location:String = MapLocationLookup.instance().getLocation(dimensionValue, String(mapType));
                     if (location != null) {
+                        matchedLocations.addItem(location);
                         var mapFeature:MapFeature = map.getFeature(location);
                         if (mapFeature != null) {
                             var dataObj:Object = new Object();
@@ -166,7 +171,18 @@
                             dataObj.data = mapDefinition.measure.getFormatter().format(measureValue);
                             var color:uint = renderer.getColor(measureValue);
                             mapFeature.data = dataObj;
-                            mapFeature.setStyle(MapBase.FILL, color);
+                            var solidFill:SolidColor = new SolidColor(color);
+                            mapFeature.setStyle(MapBase.FILL, solidFill);
+                        }
+                    }
+                }
+                var allLocations:Object = MapLocationLookup.instance().getAllLocations(String(mapType));
+                for each (var testLocation:String in allLocations) {
+                    if (matchedLocations.getItemIndex(testLocation) == -1) {
+                        var resetFeature:MapFeature = map.getFeature(testLocation);
+                        if (resetFeature != null) {
+                            var solidWhite:SolidColor = new SolidColor(0xFFFFFF);
+                            resetFeature.setStyle(MapBase.FILL, solidWhite);
                         }
                     }
                 }

@@ -16,6 +16,7 @@
             map.addEventListener(MapEvent.ITEM_ROLL_OUT, onout);
             map.percentWidth = 100;
             map.percentHeight = 100;
+            map.setStyle("animationDuration", 1000);
             map.filterEvents = true;
             return map;
         }

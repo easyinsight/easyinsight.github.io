@@ -1,5 +1,6 @@
 package com.easyinsight.datasources {
 import com.easyinsight.customupload.BaseCampDataSourceCreation;
+import com.easyinsight.listing.DataFeedDescriptor;
 
 [Bindable]
 [RemoteClass(alias="com.easyinsight.datafeeds.basecamp.BaseCampCompositeSource")]
@@ -14,6 +15,10 @@ public class BaseCampDataSource extends CompositeServerDataSource {
 
     override public function isLiveData():Boolean {
         return false;
+    }
+
+    override public function getFeedType():int {
+        return DataFeedDescriptor.BASECAMP;
     }
 
     override public function configClass():Class {

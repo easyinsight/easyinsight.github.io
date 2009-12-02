@@ -38,7 +38,9 @@ public class EmbeddedViewFactory extends AbstractViewFactory {
     }
 
 
-
+    public function get reportRendererModule():String {
+        return _reportRendererModule;
+    }
 
     override public function set prefix(val:String):void {
         _prefix = val;
@@ -110,7 +112,7 @@ public class EmbeddedViewFactory extends AbstractViewFactory {
     override public function gotData(event:EmbeddedDataServiceEvent):void {
         if (event.credentialRequirements != null && event.credentialRequirements.length > 0) {
         } else {
-            _reportRenderer.renderReport(event.dataSet, event.analysisDefinition, event.clientProcessorMap, null);
+            _reportRenderer.renderReport(event.dataSet, event.analysisDefinition, event.clientProcessorMap, event.additionalProperties);
         }
         dispatchEvent(event);
     }

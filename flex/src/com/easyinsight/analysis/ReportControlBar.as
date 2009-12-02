@@ -20,6 +20,11 @@ public class ReportControlBar extends HBox {
         _dataSourceID = dataSourceID;
     }
 
+
+    public function get dataSourceID():int {
+        return _dataSourceID;
+    }
+
     protected function addDropAreaGrouping(grouping:ListDropAreaGrouping, parent:Container = null):void {
         BindingUtils.bindProperty(grouping, "analysisItems", this, "analysisItems");
         grouping.dataSourceID = _dataSourceID;

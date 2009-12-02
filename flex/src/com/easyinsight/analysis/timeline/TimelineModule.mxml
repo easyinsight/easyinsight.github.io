@@ -1,0 +1,203 @@
+<?xml version="1.0" ?>
+<mx:Module xmlns:mx="http://www.adobe.com/2006/mxml" implements="com.easyinsight.analysis.IReportRenderer" width="100%" height="100%">
+    <mx:Script><![CDATA[
+        import com.easyinsight.analysis.AnalysisDefinition;
+        import com.easyinsight.analysis.AnalysisItem;
+        import com.easyinsight.analysis.CustomChangeEvent;
+        import com.easyinsight.analysis.DateValue;
+        import com.easyinsight.analysis.EmbeddedControllerLookup;
+        import com.easyinsight.analysis.EmbeddedViewFactory;
+        import com.easyinsight.analysis.IEmbeddedReportController;
+        import com.easyinsight.analysis.IReportRenderer;
+        import com.easyinsight.analysis.NumericValue;
+        import com.easyinsight.analysis.StringValue;
+        import com.easyinsight.analysis.Value;
+        import com.easyinsight.analysis.service.ServiceData;
+        import com.easyinsight.filtering.FilterRawData;
+
+        import mx.collections.ArrayCollection;
+        import mx.controls.Alert;
+        import mx.events.ModuleEvent;
+        import mx.modules.IModuleInfo;
+        import mx.modules.ModuleManager;
+
+        private var factory:EmbeddedViewFactory;
+
+        private var moduleInfo:IModuleInfo;
+
+        private var _reportRenderer:IReportRenderer;
+
+        private var timeline:Timeline;
+
+        private var frameData:ServiceData;
+
+        private var allFrames:ArrayCollection;
+
+        private var currentFrame:int = 0;
+
+        private var timer:Timer;
+
+        [Bindable]
+        private var showControlBar:Boolean;
+
+        [Bindable]
+        private var currentFrameText:String;
+
+        [Bindable]
+        [Embed(source="../../../../../assets/media_step_back.png")]
+        private var backIcon:Class;
+
+        [Bindable]
+        [Embed(source="../../../../../assets/media_play.png")]
+        private var playIcon:Class;
+
+        [Bindable]
+        [Embed(source="../../../../../assets/media_pause.png")]
+        private var pauseIcon:Class;
+
+        [Bindable]
+        [Embed(source="../../../../../assets/media_step_forward.png")]
+        private var forwardIcon:Class;
+
+        [Bindable]
+        [Embed(source="../../../../../assets/media_beginning.png")]
+        private var beginningIcon:Class;
+
+        [Bindable]
+        [Embed(source="../../../../../assets/media_end.png")]
+        private var endIcon:Class;
+
+        [Bindable]
+        private var playOrPauseIcon:Class = playIcon;
+
+        private var seriesValues:ArrayCollection;
+
+        public function renderReport(dataSet:ArrayCollection, analysisDefinition:AnalysisDefinition, clientProcessorMap:Object, additionalProperties:Object):void {            
+            var timeline:Timeline = analysisDefinition as Timeline;
+            this.timeline = timeline;
+            if (timeline.report != null) {
+                this.allFrames = dataSet;
+                this.frameData = dataSet.getItemAt(0) as ServiceData;
+                this.seriesValues = additionalProperties.seriesValues as ArrayCollection;
+                if (_reportRenderer == null) {                    
+                    var controllerClass:Class = EmbeddedControllerLookup.controllerForType(timeline.report.reportType);
+                    var controller:IEmbeddedReportController = new controllerClass();
+                    factory = controller.createEmbeddedView();
+                    moduleInfo = ModuleManager.getModule("/app/easyui-debug/" + factory.reportRendererModule);
+                    moduleInfo.addEventListener(ModuleEvent.READY, reportLoadHandler);
+                    moduleInfo.addEventListener(ModuleEvent.ERROR, reportFailureHandler);
+                    moduleInfo.load();
+                } else {
+                    showControlBar = true;
+                    updateFrame();
+                }
+            } else {
+                showControlBar = false;
+            }
+        }
+
+        private var dimensions:Object = new Object();
+        private var analysisGroupings:ArrayCollection;
+        private var analysisMeasures:ArrayCollection;
+        
+        private function reportLoadHandler(event:ModuleEvent):void {
+            reportBox.removeAllChildren();
+            _reportRenderer = moduleInfo.factory.create() as IReportRenderer;
+            reportBox.addChild(_reportRenderer as DisplayObject);
+            showControlBar = true;
+            updateFrame();
+        }
+
+        private function reportFailureHandler(event:ModuleEvent):void {
+
+        }
+
+        public function createFilterRawData():FilterRawData {
+            return null;
+        }
+
+        public function updateExportMetadata():void {
+        }
+
+        public function onCustomChangeEvent(event:CustomChangeEvent):void {
+        }
+
+        private function play():void {
+            if (timer == null) {
+                timer = new Timer(2000);
+                timer.addEventListener(TimerEvent.TIMER, onTimer);
+                timer.addEventListener(TimerEvent.TIMER_COMPLETE, onTimerComplete);
+                playOrPauseIcon = pauseIcon;
+                timer.start();
+            }
+        }
+
+        private function onTimer(event:TimerEvent):void {
+            if (!nextFrame()) {
+                playOrPauseIcon = playIcon;
+                timer.stop();
+                timer = null;
+            }
+        }
+
+        private function onTimerComplete(event:TimerEvent):void {
+            timer = null;
+        }
+
+        private function nextFrame():Boolean {
+            if (currentFrame < allFrames.length - 1) {
+                currentFrame++;
+                frameData = allFrames.getItemAt(currentFrame) as ServiceData;
+                updateFrame();
+                return true;
+            }
+            return false;
+        }
+
+        private function previousFrame():void {
+            if (currentFrame > 0) {
+                currentFrame--;
+                frameData = allFrames.getItemAt(currentFrame) as ServiceData;
+                updateFrame();
+            }
+        }
+
+        private function firstFrame():void {
+            currentFrame = 0;
+            frameData = allFrames.getItemAt(currentFrame) as ServiceData;
+            updateFrame();
+        }
+
+        private function lastFrame():void {
+            currentFrame = allFrames.length - 1;
+            updateFrame();
+        }
+
+        private function updateFrame():void {
+            var value:Value = seriesValues.getItemAt(currentFrame) as Value;
+            currentFrameText = timeline.sequence.analysisItem.getFormatter().format(value.getValue());
+            frameData = allFrames.getItemAt(currentFrame) as ServiceData;
+            _reportRenderer.renderReport(frameData.data, timeline.report, frameData.clientProcessorMap, null);
+        }
+
+        private function blah():void {
+            var numericValue:NumericValue;
+            var stringValue:StringValue;
+            var dateValue:DateValue;
+        }
+        ]]></mx:Script>
+    <mx:VBox width="100%" height="100%">
+        <mx:HBox id="playControls" width="100%" horizontalAlign="center" verticalAlign="middle" visible="{showControlBar}">
+            <mx:Button icon="{beginningIcon}" click="firstFrame()" toolTip="Go to Beginning"/>
+            <mx:Button icon="{backIcon}" click="previousFrame()" toolTip="Back"/>
+            <mx:Button icon="{playOrPauseIcon}" click="play()" toolTip="Play"/>
+            <mx:Button icon="{forwardIcon}" click="nextFrame()" toolTip="Forward"/>
+            <mx:Button icon="{endIcon}" click="lastFrame()" toolTip="Go to End"/>
+            <mx:Label text="Showing Data For:"/>
+            <mx:Label text="{currentFrameText}"/>
+        </mx:HBox>
+        <mx:Box width="100%" height="100%" id="reportBox">
+
+        </mx:Box>
+    </mx:VBox>
+</mx:Module>
