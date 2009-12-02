@@ -789,7 +789,7 @@
     <target name="module.timeline">
         <mxmlc file="${teamcity.build.checkoutDir}/flex/src/com/easyinsight/analysis/timeline/TimelineModule.mxml" output="${flex.path}/TimelineModule.swf"
                static-rsls="false" link-report="${basedir}/timeline.txt">
-            <load-config filename="${teamcity.build.checkoutDir}/flex/modules/timeline-module.xml"/>
+            <load-config filename="${teamcity.build.checkoutDir}/flex/modules/timeseries-module.xml"/>
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
                 <url rsl-url="framework_3.3.0.4852.swz"/>
                 <url rsl-url="framework_3.3.0.4852.swf"/>
