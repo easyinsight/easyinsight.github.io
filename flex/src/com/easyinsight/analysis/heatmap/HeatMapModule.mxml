@@ -15,12 +15,14 @@
         import com.google.maps.controls.MapTypeControl;
         import com.google.maps.controls.PositionControl;
         import com.google.maps.controls.ZoomControl;
+        import com.google.maps.interfaces.IMapType;
         import com.google.maps.interfaces.IOverlay;
         import com.michaelvandaniker.visualization.GradientDictionary;
         import com.michaelvandaniker.visualization.HeatMap;
         import com.sunild.maps.GHeatMapOverlay;
 
         import mx.collections.ArrayCollection;
+        import mx.controls.Alert;
 
         private function onInitialize():void {
             Security.allowInsecureDomain("maps.googleapis.com");
@@ -31,19 +33,50 @@
         [Bindable]
         private var dataSet:ArrayCollection;
 
-        private static const mapTypes:Array = [ null, MapType.NORMAL_MAP_TYPE, MapType.HYBRID_MAP_TYPE, MapType.SATELLITE_MAP_TYPE ];
+        private function getMapType(typeVal:int):IMapType {
+
+            switch(typeVal) {
+            case 1:
+                return MapType.NORMAL_MAP_TYPE;
+            case 2:
+                return MapType.HYBRID_MAP_TYPE;
+            case 3:
+                return MapType.SATELLITE_MAP_TYPE;
+            default:
+                return null;
+            }
+        }
+
+        private function getMapVal(mapType:IMapType):int {
+            if(mapType == MapType.NORMAL_MAP_TYPE) {
+                return 1;
+            }
+            if(mapType == MapType.HYBRID_MAP_TYPE) {
+                return 2;
+            }
+            if(mapType == MapType.SATELLITE_MAP_TYPE) {
+                return 3;
+            }
+            return 0;
+        }
 
         private function onMoveEnd(event:MapMoveEvent):void {
-            heatMapDefinition.latitude = event.latLng.lat();
-            heatMapDefinition.longitude = event.latLng.lng();
+            if(heatMapDefinition != null) {
+                heatMapDefinition.latitude = event.latLng.lat();
+                heatMapDefinition.longitude = event.latLng.lng();
+            }
         }
 
         private function onZoomChanged(event:MapZoomEvent):void {
-            heatMapDefinition.zoomLevel = event.zoomLevel;
+            if(heatMapDefinition != null) {
+                heatMapDefinition.zoomLevel = event.zoomLevel;
+            }
         }
 
         private function onMapTypeChanged(event:MapEvent):void {
-            heatMapDefinition.mapType = mapTypes.indexOf(map.getCurrentMapType()); 
+            if(heatMapDefinition != null) {
+            heatMapDefinition.mapType = getMapVal(map.getCurrentMapType());
+            }
         }
 
         private function onMapReady(event:com.google.maps.MapEvent):void {
@@ -67,14 +100,14 @@
             heatMap.weightFunction = getCount;
             var overlay:IOverlay = new GHeatMapOverlay(heatMap);
             map.addOverlay(overlay);
-            if(heatMapDefinition.mapType != 0) {
-                map.setCenter(new LatLng(heatMapDefinition.latitude, heatMapDefinition.longitude), heatMapDefinition.zoomLevel, mapTypes[heatMapDefinition.mapType]);
+            if(heatMapDefinition != null && heatMapDefinition.mapType != 0) {
+                map.setCenter(new LatLng(heatMapDefinition.latitude, heatMapDefinition.longitude), heatMapDefinition.zoomLevel, getMapType(heatMapDefinition.mapType));
             }
-            else {
+            else if(heatMapDefinition != null && map.isLoaded()) {
                 heatMapDefinition.latitude = map.getCenter().lat();
                 heatMapDefinition.longitude = map.getCenter().lng();
                 heatMapDefinition.zoomLevel = map.getZoom();
-                heatMapDefinition.mapType = mapTypes.indexOf(map.getCurrentMapType());
+                heatMapDefinition.mapType = getMapVal(map.getCurrentMapType());
             }
 
         }
