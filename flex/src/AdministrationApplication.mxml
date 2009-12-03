@@ -11,6 +11,7 @@
                     <mx:VBox width="100%" height="100%" label="System Health">
                         <system:HealthInfoDisplay/>
                         <mx:Button label="Thread Dump" click="dumpThreads()"/>
+                        <mx:Button label="Create Data Source" click="externalSources()"/>
                     </mx:VBox>
                     <mx:VBox width="100%" height="100%" label="Solutions">
                         <solutions:SolutionAdministration width="100%" height="100%"/>
@@ -25,9 +26,12 @@
     <mx:Script>
 		<![CDATA[
         import com.easyinsight.account.Account;
+        import com.easyinsight.customupload.UploadExternalSource;
         import com.easyinsight.framework.User;
         import com.easyinsight.framework.UserServiceResponse;
+        import com.easyinsight.util.PopUpUtil;
 
+        import mx.managers.PopUpManager;
         import mx.messaging.config.ServerConfig;
         import mx.rpc.AsyncResponder;
         import mx.rpc.AsyncToken;
@@ -47,6 +51,12 @@
             } else {
                 failureMessageLabel.text = authResult.failureMessage;
             }
+        }
+
+        private function externalSources():void {
+            var window:UploadExternalSource = new UploadExternalSource();
+            PopUpManager.addPopUp(window, this, true);
+            PopUpUtil.centerPopUp(window);
         }
 
         private function login():void {
