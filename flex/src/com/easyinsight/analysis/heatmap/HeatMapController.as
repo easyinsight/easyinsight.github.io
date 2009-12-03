@@ -1,8 +1,9 @@
 package com.easyinsight.analysis.heatmap {
 import com.easyinsight.analysis.DataViewFactory;
+import com.easyinsight.analysis.IReportController;
 import com.easyinsight.analysis.service.ListDataService;
 
-public class HeatMapController {
+public class HeatMapController implements IReportController {
     public function HeatMapController() {
     }
 
