@@ -20,12 +20,16 @@ public class HeatMapDefinitionState extends AnalysisDefinitionState {
     @Column(name="heat_map_id")
     private long heatMapDefinitionID;
 
+    @Column(name="map_type")
     private int mapType;
 
+    @Column(name="longitude")
     private double longitude;
 
+    @Column(name="latitude")
     private double latitude;
 
+    @Column(name="zoom_level")
     private int zoomLevel;
 
     public int getMapType() {
