@@ -1,6 +1,6 @@
 <?xml version="1.0" ?>
 <mx:Module xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:visualization="com.michaelvandaniker.visualization.*"
-           implements="com.easyinsight.analysis.IReportRenderer">
+           implements="com.easyinsight.analysis.IReportRenderer" initialize="onInitialize()" width="100%" height="100%">
     <mx:Script><![CDATA[
         import com.easyinsight.analysis.AnalysisDefinition;
         import com.easyinsight.analysis.CustomChangeEvent;
@@ -9,21 +9,83 @@
         import com.google.maps.LatLng;
         import com.google.maps.MapEvent;
 
+        import com.google.maps.MapMoveEvent;
+        import com.google.maps.MapType;
+        import com.google.maps.MapZoomEvent;
+        import com.google.maps.controls.MapTypeControl;
+        import com.google.maps.controls.PositionControl;
+        import com.google.maps.controls.ZoomControl;
+        import com.google.maps.interfaces.IOverlay;
+        import com.michaelvandaniker.visualization.GradientDictionary;
+        import com.michaelvandaniker.visualization.HeatMap;
         import com.sunild.maps.GHeatMapOverlay;
 
         import mx.collections.ArrayCollection;
 
+        private function onInitialize():void {
+            Security.allowInsecureDomain("maps.googleapis.com");
+        }
+
         private var heatMapDefinition:HeatMapDefinition;
 
+        [Bindable]
+        private var dataSet:ArrayCollection;
+
+        private static const mapTypes:Array = [ null, MapType.NORMAL_MAP_TYPE, MapType.HYBRID_MAP_TYPE, MapType.SATELLITE_MAP_TYPE ];
+
+        private function onMoveEnd(event:MapMoveEvent):void {
+            heatMapDefinition.latitude = event.latLng.lat();
+            heatMapDefinition.longitude = event.latLng.lng();
+        }
+
+        private function onZoomChanged(event:MapZoomEvent):void {
+            heatMapDefinition.zoomLevel = event.zoomLevel;
+        }
+
+        private function onMapTypeChanged(event:MapEvent):void {
+            heatMapDefinition.mapType = mapTypes.indexOf(map.getCurrentMapType()); 
+        }
+
         private function onMapReady(event:com.google.maps.MapEvent):void {
+            map.addControl(new ZoomControl());
+            map.addControl(new PositionControl());
+            map.addControl(new MapTypeControl());
+            map.addEventListener(MapMoveEvent.MOVE_END, onMoveEnd);
+            map.addEventListener(MapZoomEvent.ZOOM_CHANGED, onZoomChanged);
+            map.addEventListener(MapEvent.MAPTYPE_CHANGED, onMapTypeChanged);
+            prepareMap();
+        }
+
+        private function prepareMap():void {
+            var heatMap:HeatMap = new HeatMap();
+            heatMap.setStyle("backgroundColor", "0");
+            heatMap.setStyle("backgroundAlpha", "0");
+            heatMap.alpha = .57
+            heatMap.gradientArray = GradientDictionary.RAINBOW;
+            heatMap.dataProvider = dataSet;
+            heatMap.transformationFunction = latLonToPoint;
+            heatMap.weightFunction = getCount;
+            var overlay:IOverlay = new GHeatMapOverlay(heatMap);
+            map.addOverlay(overlay);
+            if(heatMapDefinition.mapType != 0) {
+                map.setCenter(new LatLng(heatMapDefinition.latitude, heatMapDefinition.longitude), heatMapDefinition.zoomLevel, mapTypes[heatMapDefinition.mapType]);
+            }
+            else {
+                heatMapDefinition.latitude = map.getCenter().lat();
+                heatMapDefinition.longitude = map.getCenter().lng();
+                heatMapDefinition.zoomLevel = map.getZoom();
+                heatMapDefinition.mapType = mapTypes.indexOf(map.getCurrentMapType());
+            }
 
         }
 
         public function renderReport(dataSet:ArrayCollection, analysisDefinition:AnalysisDefinition, clientProcessorMap:Object, additionalProperties:Object):void {
             if (dataSet.length > 0) {
+                this.dataSet = dataSet;
                 heatMapDefinition = analysisDefinition as HeatMapDefinition;
-                heatMap.dataProvider = dataSet;
-                map.addOverlay(new GHeatMapOverlay(heatMap));
+                if(map.isLoaded()) {
+                    prepareMap();
+                }
             }
         }
 
@@ -38,7 +100,7 @@
             return map.fromLatLngToViewport(new LatLng(o[heatMapDefinition.latitudeItem.qualifiedName()] as Number, o[heatMapDefinition.longitudeItem.qualifiedName()] as Number));
         }
         private function getCount(o:Object):Number {
-            var n = o[heatMapDefinition.measure.qualifiedName()] as Number;
+            var n:Number = o[heatMapDefinition.measure.qualifiedName()] as Number;
             return n;
         }
 
@@ -46,5 +108,4 @@
         }]]></mx:Script>
     <maps:Map xmlns:maps="com.google.maps.*" id="map" mapevent_mapready="onMapReady(event)" 
   width="100%" height="100%" key="ABQIAAAAnyGynqFqd0LwEilMNiY3fRSLyjrNh4Cxk4UOOo9GwtzG_Q7CfBQhU5o9H5gNTuxwV6qhAhJdlzoNpQ" />
-    <visualization:HeatMap id="heatMap" transformationFunction="{latLonToPoint}" weightFunction="{getCount}" alpha=".57" backgroundAlpha="0.0" backgroundColor="0"  />
 </mx:Module>
