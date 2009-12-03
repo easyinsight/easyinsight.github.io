@@ -9,6 +9,8 @@
         import com.google.maps.LatLng;
         import com.google.maps.MapEvent;
 
+        import com.sunild.maps.GHeatMapOverlay;
+
         import mx.collections.ArrayCollection;
 
         private var heatMapDefinition:HeatMapDefinition;
@@ -20,8 +22,9 @@
         public function renderReport(dataSet:ArrayCollection, analysisDefinition:AnalysisDefinition, clientProcessorMap:Object, additionalProperties:Object):void {
             if (dataSet.length > 0) {
                 heatMapDefinition = analysisDefinition as HeatMapDefinition;
+                heatMap.dataProvider = dataSet;
+                map.addOverlay(new GHeatMapOverlay(heatMap));
             }
-            heatMap.dataProvider = dataSet;
         }
 
         public function createFilterRawData():FilterRawData {
