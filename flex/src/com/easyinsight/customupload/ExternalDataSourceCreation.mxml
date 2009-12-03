@@ -57,7 +57,9 @@
 
         private function created():void {
             var id:int = uploadService.newExternalDataSource.lastResult as int;
-            CredentialsCache.getCache().addCredentials(id, dataSourceCreation.credentials);
+            if (CredentialsCache.getCache() != null) {
+                CredentialsCache.getCache().addCredentials(id, dataSourceCreation.credentials);
+            }
             dispatchEvent(new UploadConfigEvent(UploadConfigEvent.UPLOAD_CONFIG_COMPLETE, id, dataSourceName));
             dispatchEvent(new AnalyzeEvent(new DescriptorAnalyzeSource(id, dataSourceName)));
         }
