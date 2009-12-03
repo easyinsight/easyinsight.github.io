@@ -1,0 +1,35 @@
+<flex-config xmlns="http://www.adobe.com/2006/flex-config">
+    <licenses>
+        <license>
+            <product>flexbuilder3</product>
+            <serial-number>137740010947538714629349</serial-number>
+        </license>
+    </licenses>
+    <compiler>
+        <debug>true</debug>
+        <external-library-path>
+         <path-element>${flexlib}/libs/player/9/playerglobal.swc</path-element>
+            <path-element>${flexlib}/libs/datavisualization.swc</path-element>
+            <path-element>${flexlib}/libs/flex.swc</path-element>
+            <path-element>${flexlib}/libs/rpc.swc</path-element>
+        </external-library-path>
+        <library-path>
+         <path-element>${flexlib}/libs/framework.swc</path-element>
+         <path-element>${flexlib}/libs/utilities.swc</path-element>
+         <path-element>${flexlib}/locale/{locale}</path-element>
+         <path-element>../libs/ilog-elixir.swc</path-element>
+         <path-element>../libs/ilog-elixir_rb.swc</path-element>
+        </library-path>
+
+        <context-root>/app</context-root>
+       <!-- <services>C:\apache-tomcat-6.0.14\webapps\app\WEB-INF\flex\services-config.xml</services> -->
+        <services>../blazeds/services-config.xml</services>
+        <source-path>
+         <path-element>../src</path-element>
+      </source-path>
+    </compiler>
+    <file-specs>
+        <path-element>../src/com/easyinsight/analysis/heatmap/HeatMapModule.mxml</path-element>
+    </file-specs>
+    <static-link-runtime-shared-libraries>false</static-link-runtime-shared-libraries>
+</flex-config>

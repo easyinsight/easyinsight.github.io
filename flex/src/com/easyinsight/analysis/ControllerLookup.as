@@ -14,6 +14,8 @@ import com.easyinsight.analysis.charts.yaxisbased.bar.Bar3DChartController;
 import com.easyinsight.analysis.charts.yaxisbased.bar.BarChartController;
 import com.easyinsight.analysis.crosstab.CrosstabController;
 import com.easyinsight.analysis.gauge.GaugeController;
+import com.easyinsight.analysis.heatmap.HeatMapControlBar;
+import com.easyinsight.analysis.heatmap.HeatMapController;
 import com.easyinsight.analysis.list.ListController;
 import com.easyinsight.analysis.maps.AmericasMapController;
 import com.easyinsight.analysis.maps.AsiaMapController;
@@ -107,6 +109,9 @@ public class ControllerLookup {
                 break;
             case AnalysisDefinition.TIMELINE:
                 controller = TimelineController;
+                break;
+            case AnalysisDefinition.HEATMAP:
+                controller = HeatMapController;
                 break;
         }
         return controller;

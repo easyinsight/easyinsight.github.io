@@ -33,6 +33,7 @@ package com.easyinsight.analysis
         public static const MAP_EUROPE:int = 24;
         public static const MAP_MIDDLE_EAST:int = 25;
         public static const TIMELINE:int = 26;
+        public static const HEATMAP:int = 27;
 
 		public var dataFeedID:int;
 		public var name:String;
