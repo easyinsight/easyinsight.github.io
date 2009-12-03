@@ -911,7 +911,7 @@
     </target>
 
     <target name="module.heatmap">
-        <mxmlc file="../src/com/easyinsight/analysis/treemap/HeatMapModule.mxml" output="${deployment.path}/HeatMapModule.swf"
+        <mxmlc file="../src/com/easyinsight/analysis/heatmap/HeatMapModule.mxml" output="${deployment.path}/HeatMapModule.swf"
                static-rsls="false">
             <load-config filename="../modules/heatmap-module.xml"/>
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">

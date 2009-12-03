@@ -1,21 +1,27 @@
 <?xml version="1.0" ?>
-<mx:Module xmlns:mx="http://www.adobe.com/2006/mxml" implements="com.easyinsight.analysis.IReportRenderer">
+<mx:Module xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:visualization="com.michaelvandaniker.visualization.*"
+           implements="com.easyinsight.analysis.IReportRenderer">
     <mx:Script><![CDATA[
         import com.easyinsight.analysis.AnalysisDefinition;
         import com.easyinsight.analysis.CustomChangeEvent;
         import com.easyinsight.filtering.FilterRawData;
 
+        import com.google.maps.LatLng;
+        import com.google.maps.MapEvent;
+
         import mx.collections.ArrayCollection;
+
+        private var heatMapDefinition:HeatMapDefinition;
+
+        private function onMapReady(event:com.google.maps.MapEvent):void {
+
+        }
 
         public function renderReport(dataSet:ArrayCollection, analysisDefinition:AnalysisDefinition, clientProcessorMap:Object, additionalProperties:Object):void {
             if (dataSet.length > 0) {
-                var heatMapDefinition:HeatMapDefinition = analysisDefinition as HeatMapDefinition;
-                for each (var row:Object in dataSet) {
-                    var latitude:Number = Number(row[heatMapDefinition.latitudeItem.qualifiedName()]);
-                    var longitude:Number = Number(row[heatMapDefinition.longitudeItem.qualifiedName()]);
-                    var measure:Number = Number(row[heatMapDefinition.measure.qualifiedName()]);
-                }
+                heatMapDefinition = analysisDefinition as HeatMapDefinition;
             }
+            heatMap.dataProvider = dataSet;
         }
 
         public function createFilterRawData():FilterRawData {
@@ -25,6 +31,17 @@
         public function updateExportMetadata():void {
         }
 
+        private function latLonToPoint(o:Object):Object {
+            return map.fromLatLngToViewport(new LatLng(o[heatMapDefinition.latitudeItem.qualifiedName()] as Number, o[heatMapDefinition.longitudeItem.qualifiedName()] as Number));
+        }
+        private function getCount(o:Object):Number {
+            var n = o[heatMapDefinition.measure.qualifiedName()] as Number;
+            return n;
+        }
+
         public function onCustomChangeEvent(event:CustomChangeEvent):void {
         }]]></mx:Script>
+    <maps:Map xmlns:maps="com.google.maps.*" id="map" mapevent_mapready="onMapReady(event)" 
+  width="100%" height="100%" key="ABQIAAAAnyGynqFqd0LwEilMNiY3fRSLyjrNh4Cxk4UOOo9GwtzG_Q7CfBQhU5o9H5gNTuxwV6qhAhJdlzoNpQ" />
+    <visualization:HeatMap id="heatMap" transformationFunction="{latLonToPoint}" weightFunction="{getCount}" alpha=".57" backgroundAlpha="0.0" backgroundColor="0"  />
 </mx:Module>
