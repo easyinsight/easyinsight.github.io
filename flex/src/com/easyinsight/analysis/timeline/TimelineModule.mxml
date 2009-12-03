@@ -135,9 +135,11 @@
         }
 
         private function stopTimer():void {
-            playOrPauseIcon = playIcon;
-            timer.stop();
-            timer = null;
+            if (timer != null) {
+                playOrPauseIcon = playIcon;
+                timer.stop();
+                timer = null;
+            }
         }
 
         private function onTimer(event:TimerEvent):void {
