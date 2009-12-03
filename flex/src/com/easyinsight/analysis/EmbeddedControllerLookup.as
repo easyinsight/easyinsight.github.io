@@ -14,6 +14,7 @@ import com.easyinsight.analysis.charts.yaxisbased.bar.Bar3DChartEmbeddedControll
 import com.easyinsight.analysis.charts.yaxisbased.bar.BarChartEmbeddedController;
 import com.easyinsight.analysis.crosstab.CrosstabEmbeddedController;
 import com.easyinsight.analysis.gauge.GaugeEmbeddedController;
+import com.easyinsight.analysis.heatmap.HeatMapEmbeddedController;
 import com.easyinsight.analysis.list.ListEmbeddedController;
 import com.easyinsight.analysis.maps.AmericasMapEmbeddedController;
 import com.easyinsight.analysis.maps.AsiaMapEmbeddedController;
@@ -107,6 +108,9 @@ public class EmbeddedControllerLookup {
                 break;
             case AnalysisDefinition.TIMELINE:
                 controller = TimelineEmbeddedController;
+                break;
+            case AnalysisDefinition.HEATMAP:
+                controller = HeatMapEmbeddedController;
                 break;
         }
         return controller;

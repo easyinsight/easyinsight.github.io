@@ -1,5 +1,6 @@
 package com.easyinsight.analysis;
 
+import com.easyinsight.analysis.definitions.WSHeatMap;
 import com.easyinsight.analysis.definitions.WSTimeline;
 import com.easyinsight.analysis.gauge.GaugeDefinitionState;
 
@@ -71,6 +72,15 @@ public class AnalysisDefinitionFactory {
             timelineDefinitionState.setFilter(wsTimeline.getSequence());
             timelineDefinitionState.setContainedReport(AnalysisDefinitionFactory.fromWSDefinition(wsTimeline.getReport()));
             analysisDefinitionState = timelineDefinitionState;
+        } else if (wsAnalysisDefinition.getDataFeedType().equals(AnalysisTypes.HEATMAP)) {
+            WSHeatMap heatMap = (WSHeatMap) wsAnalysisDefinition;
+            HeatMapDefinitionState heatMapDefinitionState = new HeatMapDefinitionState();
+            heatMapDefinitionState.setLatitude(heatMap.getLatitude());
+            heatMapDefinitionState.setLongitude(heatMap.getLongitude());
+            heatMapDefinitionState.setMapType(heatMap.getMapType());
+            heatMapDefinitionState.setZoomLevel(heatMap.getZoomLevel());
+            heatMapDefinitionState.setHeatMapDefinitionID(heatMap.getHeatMapID());
+            analysisDefinitionState = heatMapDefinitionState;
         } else {
             throw new RuntimeException("Unknown data feed type " + wsAnalysisDefinition.getDataFeedType());
         }

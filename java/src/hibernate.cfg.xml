@@ -62,6 +62,7 @@
         <mapping class="com.easyinsight.analysis.AnalysisDefinitionState"/>
         <mapping class="com.easyinsight.analysis.MapDefinitionState"/>
         <mapping class="com.easyinsight.analysis.CrosstabDefinitionState"/>
+        <mapping class="com.easyinsight.analysis.HeatMapDefinitionState"/>
         <mapping class="com.easyinsight.analysis.gauge.GaugeDefinitionState"/>
         <mapping class="com.easyinsight.analysis.TreeMapDefinitionState"/>
         <mapping class="com.easyinsight.analysis.TreeDefinitionState"/>

@@ -19,6 +19,77 @@ public class WSHeatMap extends WSAnalysisDefinition {
     private AnalysisItem longitudeItem;
     private AnalysisItem measure;
 
+    private double latitude;
+    private double longitude;
+    private int zoomLevel;
+    private int mapType;
+
+    private long heatMapID;
+
+    public long getHeatMapID() {
+        return heatMapID;
+    }
+
+    public void setHeatMapID(long heatMapID) {
+        this.heatMapID = heatMapID;
+    }
+
+    public AnalysisItem getLatitudeItem() {
+        return latitudeItem;
+    }
+
+    public void setLatitudeItem(AnalysisItem latitudeItem) {
+        this.latitudeItem = latitudeItem;
+    }
+
+    public AnalysisItem getLongitudeItem() {
+        return longitudeItem;
+    }
+
+    public void setLongitudeItem(AnalysisItem longitudeItem) {
+        this.longitudeItem = longitudeItem;
+    }
+
+    public AnalysisItem getMeasure() {
+        return measure;
+    }
+
+    public void setMeasure(AnalysisItem measure) {
+        this.measure = measure;
+    }
+
+    public double getLatitude() {
+        return latitude;
+    }
+
+    public void setLatitude(double latitude) {
+        this.latitude = latitude;
+    }
+
+    public double getLongitude() {
+        return longitude;
+    }
+
+    public void setLongitude(double longitude) {
+        this.longitude = longitude;
+    }
+
+    public int getZoomLevel() {
+        return zoomLevel;
+    }
+
+    public void setZoomLevel(int zoomLevel) {
+        this.zoomLevel = zoomLevel;
+    }
+
+    public int getMapType() {
+        return mapType;
+    }
+
+    public void setMapType(int mapType) {
+        this.mapType = mapType;
+    }
+
     @Override
     public String getDataFeedType() {
         return "Heatmap";

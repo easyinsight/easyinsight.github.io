@@ -6,16 +6,17 @@ import com.easyinsight.analysis.AnalysisItemTypes;
 import mx.collections.ArrayCollection;
 
 [Bindable]
-[RemoteClass(alias="com.easyinsight.analysis.definitions.WSHeatMapDefinition")]
+[RemoteClass(alias="com.easyinsight.analysis.definitions.WSHeatMap")]
 public class HeatMapDefinition extends AnalysisDefinition {
 
     public var longitudeItem:AnalysisItem;
     public var latitudeItem:AnalysisItem;
     public var measure:AnalysisItem;
-    public var latX:Number;
-    public var latY:Number;
+    public var latitude:Number;
+    public var longitude:Number;
     public var zoomLevel:int;
     public var mapType:int;
+    public var heatMapID:int;
 
     public function HeatMapDefinition() {
         super();
