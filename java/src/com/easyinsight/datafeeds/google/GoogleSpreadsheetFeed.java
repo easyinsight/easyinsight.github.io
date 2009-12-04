@@ -37,7 +37,7 @@ public class GoogleSpreadsheetFeed extends Feed {
 
     private String getToken() throws TokenMissingException {
         if (token == null) {
-            Token tokenObject = new TokenStorage().getToken(SecurityUtil.getUserID(), TokenStorage.GOOGLE_DOCS_TOKEN, getFeedID());
+            Token tokenObject = new TokenStorage().getToken(SecurityUtil.getUserID(false), TokenStorage.GOOGLE_DOCS_TOKEN, getFeedID());
             if (tokenObject == null) {
                 throw new TokenMissingException();
             }
