@@ -231,8 +231,9 @@ public class GoogleAnalyticsFeed extends Feed {
                 "&start-date=2009-06-09&end-date=2009-06-11";*/
                 String next = urlBuilder.toString();
 
-                URL reportUrl = new URL(next);
+                
                 while (next != null) {
+                    URL reportUrl = new URL(next);
                     DataFeed feed = as.getFeed(reportUrl, DataFeed.class);
                     
                     for (DataEntry entry : feed.getEntries()) {
