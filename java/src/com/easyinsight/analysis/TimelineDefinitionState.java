@@ -61,6 +61,7 @@ public class TimelineDefinitionState extends AnalysisDefinitionState {
         WSTimeline timeline = new WSTimeline();
         timeline.setSequence(filter);
         timeline.setReport(containedReport.createBlazeDefinition());
+        timeline.setTimelineID(getDefinitionID());
         return timeline;
     }
 
