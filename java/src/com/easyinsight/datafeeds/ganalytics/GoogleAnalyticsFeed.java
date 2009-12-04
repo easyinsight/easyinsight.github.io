@@ -247,8 +247,8 @@ public class GoogleAnalyticsFeed extends Feed {
                         }
 
                     }
-                    String nextLink = feed.getNextLink().getHref();
-                    if (!nextLink.equals(next)) {
+                    String nextLink = feed.getNextLink() == null ? null : feed.getNextLink().getHref();
+                    if (!next.equals(nextLink)) {
                         next = nextLink;
                     } else {
                         next = null;
