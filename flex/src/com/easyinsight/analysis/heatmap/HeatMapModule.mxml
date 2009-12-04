@@ -2,7 +2,6 @@
 <mx:Module xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:visualization="com.michaelvandaniker.visualization.*"
            implements="com.easyinsight.analysis.IReportRenderer" initialize="onInitialize()" width="100%" height="100%">
     <mx:Fade id="fadeInEffect" alphaFrom="0.0" alphaTo="0.57" duration="1000" />
-    <mx:Fade id="fadeOutEffect" alphaFrom="0.57" alphaTo="0.0" duration="1000" effectEnd="onEffectEnd(event)" />
     <mx:Script><![CDATA[
         import com.easyinsight.analysis.AnalysisDefinition;
         import com.easyinsight.analysis.CustomChangeEvent;
@@ -28,8 +27,7 @@
         import mx.events.EffectEvent;
 
         private function onEffectEnd(event:mx.events.EffectEvent):void {
-            map.removeOverlay(fadeOutEffect.target as IOverlay);
-            overlays.removeItemAt(overlays.getItemIndex(fadeOutEffect.target as IOverlay));
+            map.removeOverlay((event.target as Fade).target as IOverlay);
         }
 
         private function onInitialize():void {
@@ -106,9 +104,15 @@
 
         private function prepareMap():void {
             for each (var o:Object in overlays) {
+                var fadeOutEffect:Fade = new Fade();
                 fadeOutEffect.target = o;
+                fadeOutEffect.alphaFrom = .57;
+                fadeOutEffect.alphaTo = 0.0;
+                fadeOutEffect.duration = 1000;
+                fadeOutEffect.addEventListener(EffectEvent.EFFECT_END, onEffectEnd);
                 fadeOutEffect.play();
             }
+            overlays.removeAll();
             var heatMap:HeatMap = new HeatMap();
             heatMap.setStyle("backgroundColor", "0");
             heatMap.setStyle("backgroundAlpha", "0");
