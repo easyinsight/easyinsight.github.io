@@ -229,20 +229,30 @@ public class GoogleAnalyticsFeed extends Feed {
                 /*String url = "https://www.google.com/analytics/feeds/data?ids=" + ids + "&dimensions=ga:browser,ga:city,ga:date,ga:visitorType,ga:latitude,ga:longitude" +
                 "&metrics=ga:pageviews,ga:bounces,ga:timeOnPage,ga:visitors,ga:visits,ga:timeOnSite" +
                 "&start-date=2009-06-09&end-date=2009-06-11";*/
-                URL reportUrl = new URL(urlBuilder.toString());
-                DataFeed feed = as.getFeed(reportUrl, DataFeed.class);
+                String next = urlBuilder.toString();
 
-                for (DataEntry entry : feed.getEntries()) {
-                    IRow row = dataSet.createRow();
+                URL reportUrl = new URL(next);
+                while (next != null) {
+                    DataFeed feed = as.getFeed(reportUrl, DataFeed.class);
+                    
+                    for (DataEntry entry : feed.getEntries()) {
+                        IRow row = dataSet.createRow();
 
-                    for (AnalysisItem analysisItem : analysisItems) {
-                        if ("title".equals(analysisItem.getKey().toKeyString())) {
-                            row.addValue(analysisItem.getKey(), title);
-                        } else {
-                            row.addValue(analysisItem.getKey(), getValue(analysisItem, entry));
+                        for (AnalysisItem analysisItem : analysisItems) {
+                            if ("title".equals(analysisItem.getKey().toKeyString())) {
+                                row.addValue(analysisItem.getKey(), title);
+                            } else {
+                                row.addValue(analysisItem.getKey(), getValue(analysisItem, entry));
+                            }
                         }
-                    }
 
+                    }
+                    String nextLink = feed.getNextLink().getHref();
+                    if (!nextLink.equals(next)) {
+                        next = nextLink;
+                    } else {
+                        next = null;
+                    }
                 }
             }
             //String ids = "ga:16750246";
