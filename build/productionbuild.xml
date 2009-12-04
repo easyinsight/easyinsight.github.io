@@ -462,7 +462,7 @@
     <target name="modules1" depends="module.area3dchart, module.areachart, module.bar3dchart, module.barchart, module.bubblechart"/>
     <target name="modules2" depends="module.column3dchart, module.columnchart, module.line3dchart, module.list"/>
     <target name="modules3" depends="module.pie3dchart, module.piechart, module.plotchart, module.linechart, module.timeline"/>
-    <target name="modules4" depends="module.gauge, module.crosstab, module.tree, module.treemap, module.mmlinechart"/>
+    <target name="modules4" depends="module.gauge, module.crosstab, module.tree, module.treemap, module.mmlinechart, module.heatmap"/>
     <target name="modules5" depends="module.worldmap, module.usmap, module.americasmap, module.asiamap, module.europemap, module.middleeastmap"/>
 
     <target name="module.mmlinechart">
@@ -1041,6 +1041,31 @@
         <mxmlc file="${teamcity.build.checkoutDir}/flex/src/com/easyinsight/analysis/treemap/TreeMapModule.mxml" output="${flex.path}/TreeMapModule.swf"
                static-rsls="false" link-report="${basedir}/treemap.txt">
             <load-config filename="${teamcity.build.checkoutDir}/flex/modules/treemap-module.xml"/>
+            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
+                <url rsl-url="framework_3.3.0.4852.swz"/>
+                <url rsl-url="framework_3.3.0.4852.swf"/>
+            </runtime-shared-library-path>
+
+            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/datavisualization.swc">
+                <url rsl-url="datavisualization_3.3.0.4852.swz"/>
+                <url rsl-url="datavisualization_3.3.0.4852.swf"/>
+            </runtime-shared-library-path>
+
+            <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
+                <url rsl-url="rpc_3.3.0.4852.swz"/>
+                <url rsl-url="rpc_3.3.0.4852.swf"/>
+            </runtime-shared-library-path>
+        </mxmlc>
+        <SWFSize artifactPath="${flex.path}/TreeMapModule.swf" key="${ei.key}" secretKey="${ei.secret.key}" component="TreeMapModule"
+            sizeAPIKey="${size.api.key}"/>
+        <SWFAnalysis linkReportPath="treemap.txt" key="${ei.key}" secretKey="${ei.secret.key}" component="TreeMapModule"
+                classAnalysisAPIKey="${analysis.api.key}" packageFilter="com.easyinsight"/>
+    </target>
+
+    <target name="module.heatmap">
+        <mxmlc file="${teamcity.build.checkoutDir}/flex/src/com/easyinsight/analysis/heatmap/HeatMapModule.mxml" output="${flex.path}/HeatMapModule.swf"
+               static-rsls="false" link-report="${basedir}/heatmap.txt">
+            <load-config filename="${teamcity.build.checkoutDir}/flex/modules/heatmap-module.xml"/>
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
                 <url rsl-url="framework_3.3.0.4852.swz"/>
                 <url rsl-url="framework_3.3.0.4852.swf"/>
