@@ -1,6 +1,6 @@
 package com.easyinsight.analysis;
 
-import com.easyinsight.analysis.AnalysisItem;
+import com.easyinsight.database.Database;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -15,7 +15,7 @@ import java.util.Map;
 @Table(name="list_limits_metadata")
 @PrimaryKeyJoinColumn(name="limits_metadata_id")
 public class ListLimitsMetadata extends LimitsMetadata implements Serializable, Cloneable {
-    @OneToOne
+    @OneToOne(fetch=FetchType.LAZY)
     @JoinColumn(name="analysis_item_id")
     private AnalysisItem analysisItem;
 
@@ -25,6 +25,11 @@ public class ListLimitsMetadata extends LimitsMetadata implements Serializable, 
 
     public void setAnalysisItem(AnalysisItem analysisItem) {
         this.analysisItem = analysisItem;
+    }
+
+    public void afterLoad() {
+        setAnalysisItem((AnalysisItem) Database.deproxy(getAnalysisItem()));
+        getAnalysisItem().afterLoad();
     }
 
     @Override

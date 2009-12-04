@@ -2,6 +2,7 @@ package com.easyinsight.sequence;
 
 import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.core.Key;
+import com.easyinsight.database.Database;
 
 import javax.persistence.*;
 import java.util.Map;
@@ -21,7 +22,7 @@ public abstract class Sequence implements Cloneable {
     @Column(name="report_sequence_id")
     private long sequenceID;
 
-    @OneToOne(cascade = CascadeType.ALL)
+    @OneToOne(cascade = CascadeType.ALL, fetch=FetchType.LAZY)
     @JoinColumn(name="analysis_item_id")
     private AnalysisItem analysisItem;
 
@@ -36,6 +37,7 @@ public abstract class Sequence implements Cloneable {
     }
 
     public void afterLoad() {
+        setAnalysisItem((AnalysisItem) Database.deproxy(getAnalysisItem()));
         getAnalysisItem().afterLoad();
     }
 

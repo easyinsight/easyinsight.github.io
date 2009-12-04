@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
 
+import com.easyinsight.database.Database;
 import org.hibernate.Session;
 
 /**
@@ -25,7 +26,7 @@ public class AnalysisDimension extends AnalysisItem {
     @Column(name="group_by")
     private boolean group = true;
 
-    @OneToOne(cascade=CascadeType.MERGE)
+    @OneToOne(cascade=CascadeType.MERGE, fetch = FetchType.LAZY)
     @JoinColumn(name="key_dimension_id")
     private AnalysisDimension keyDimension;
 
@@ -55,11 +56,12 @@ public class AnalysisDimension extends AnalysisItem {
 
     public List<AnalysisItem> getAnalysisItems(List<AnalysisItem> allItems, Collection<AnalysisItem> insightItems, boolean getEverything) {
         List<AnalysisItem> analysisItems = new ArrayList<AnalysisItem>();
-        if (getVirtualDimension() != null) {
+        analysisItems.add(this);
+        /*if (getVirtualDimension() != null) {
             analysisItems.add(getVirtualDimension().getBaseDimension());
         } else {
             analysisItems.add(this);
-        }
+        }*/
         if (keyDimension != null) {
             analysisItems.add(keyDimension);
         }
@@ -100,6 +102,7 @@ public class AnalysisDimension extends AnalysisItem {
     public void afterLoad() {
         super.afterLoad();
         if (keyDimension != null) {
+            setKeyDimension((AnalysisDimension) Database.deproxy(getKeyDimension()));
             keyDimension.afterLoad();
         }
     }

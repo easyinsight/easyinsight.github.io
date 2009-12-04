@@ -28,12 +28,12 @@ public class VirtualDimensionComponent implements IComponent {
 
     private Collection<VirtualDimension> identifyVirtualDimensions(Collection<AnalysisItem> analysisItems) {
         Map<Long, VirtualDimension> map = new HashMap<Long, VirtualDimension>();
-        for (AnalysisItem analysisItem : analysisItems) {
+        /*for (AnalysisItem analysisItem : analysisItems) {
             if (analysisItem.getVirtualDimension() != null) {
                 VirtualDimension virtualDimension = analysisItem.getVirtualDimension();
                 map.put(virtualDimension.getVirtualDimensionID(), virtualDimension);
             }
-        }
+        }*/
         return map.values();
     }
 

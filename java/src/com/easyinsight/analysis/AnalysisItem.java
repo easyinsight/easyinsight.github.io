@@ -69,9 +69,9 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
             inverseJoinColumns = @JoinColumn(name = "link_id", nullable = false))
     private List<Link> links = new ArrayList<Link>();
 
-    @OneToOne(cascade = CascadeType.MERGE)
+    /*@OneToOne(cascade = CascadeType.MERGE)
     @JoinColumn(name="virtual_dimension_id")
-    private VirtualDimension virtualDimension;
+    private VirtualDimension virtualDimension;*/
 
     public AnalysisItem() {
     }
@@ -97,13 +97,13 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
         this.links = links;
     }
 
-    public VirtualDimension getVirtualDimension() {
+    /*public VirtualDimension getVirtualDimension() {
         return virtualDimension;
     }
 
     public void setVirtualDimension(VirtualDimension virtualDimension) {
         this.virtualDimension = virtualDimension;
-    }
+    }*/
 
     public List<FilterDefinition> getFilters() {
         return filters;
@@ -259,11 +259,11 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
     }
 
     public boolean isDerived() {
-        return virtualDimension != null;
+        return false;
     }
 
     public boolean isVirtual() {
-        return virtualDimension != null;
+        return false;
     }
 
     public void updateIDs(Map<Long, AnalysisItem> replacementMap) {
@@ -328,11 +328,11 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
     }
 
     public void afterLoad() {
-        if (virtualDimension != null) {
+        /*if (virtualDimension != null) {
             for (VirtualTransform transform : virtualDimension.getVirtualTransforms()) {
                 transform.toRemote();
             }
-        }        
+        }*/
         for (FilterDefinition filterDefinition : getFilters()) {
             filterDefinition.afterLoad();
         }

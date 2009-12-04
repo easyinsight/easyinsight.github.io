@@ -20,7 +20,7 @@ import java.util.Map;
 @PrimaryKeyJoinColumn(name="report_state_id")
 public class TimelineDefinitionState extends AnalysisDefinitionState {
 
-    @OneToOne(cascade = CascadeType.MERGE)
+    @OneToOne(cascade = CascadeType.MERGE, fetch = FetchType.LAZY)
     @JoinColumn(name="contained_report_id")
     private AnalysisDefinition containedReport;
 

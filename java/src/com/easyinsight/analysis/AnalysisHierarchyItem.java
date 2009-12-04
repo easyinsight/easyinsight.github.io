@@ -1,5 +1,6 @@
 package com.easyinsight.analysis;
 
+import com.easyinsight.database.Database;
 import org.hibernate.Session;
 
 import javax.persistence.*;
@@ -14,10 +15,10 @@ import java.util.*;
 @Table(name="analysis_hierarchy_item")
 @PrimaryKeyJoinColumn(name="analysis_item_id")
 public class AnalysisHierarchyItem extends AnalysisDimension {
-    @OneToOne (cascade = CascadeType.ALL)
+    @OneToOne (cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinColumn(name="hierarchy_level_id")
     private HierarchyLevel hierarchyLevel;
-    @OneToMany(cascade=CascadeType.ALL)
+    @OneToMany(cascade=CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinTable(name="analysis_hierarchy_item_to_hierarchy_level",
         joinColumns = @JoinColumn(name="analysis_item_id", nullable = false),
         inverseJoinColumns = @JoinColumn(name="hierarchy_level_id", nullable = false))
@@ -34,7 +35,10 @@ public class AnalysisHierarchyItem extends AnalysisDimension {
     public void afterLoad() {
         super.afterLoad();
         if (hierarchyLevels != null) {
-            List<HierarchyLevel> hierarchyLevelList = new ArrayList<HierarchyLevel>(hierarchyLevels);
+            List<HierarchyLevel> hierarchyLevelList = new ArrayList<HierarchyLevel>();
+            for (HierarchyLevel hierarchyLevel : hierarchyLevels) {
+                hierarchyLevelList.add((HierarchyLevel) Database.deproxy(hierarchyLevel));
+            }
             Collections.sort(hierarchyLevelList, new Comparator<HierarchyLevel>() {
 
                 public int compare(HierarchyLevel o1, HierarchyLevel o2) {
@@ -43,6 +47,7 @@ public class AnalysisHierarchyItem extends AnalysisDimension {
             });
             hierarchyLevels = hierarchyLevelList;
             for (HierarchyLevel hierarchyLevel : hierarchyLevels) {
+                hierarchyLevel.setAnalysisItem((AnalysisItem) Database.deproxy(hierarchyLevel.getAnalysisItem()));
                 hierarchyLevel.getAnalysisItem().afterLoad();
             }
         }

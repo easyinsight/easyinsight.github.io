@@ -74,4 +74,12 @@ public class ListDefinitionState extends AnalysisDefinitionState {
             listLimitsMetadata.updateIDs(replacementMap);
         }
     }
+
+    @Override
+    public void afterLoad() {
+        super.afterLoad();
+        if (getListLimitsMetadata() != null) {
+            getListLimitsMetadata().afterLoad();
+        }
+    }
 }

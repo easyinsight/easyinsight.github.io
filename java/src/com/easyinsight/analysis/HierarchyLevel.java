@@ -20,7 +20,7 @@ public class HierarchyLevel implements Serializable, Cloneable {
     @GeneratedValue(strategy= GenerationType.IDENTITY)
     @Column(name="hierarchy_level_id")
     private long hierarchyLevelID;
-    @OneToOne (cascade=CascadeType.REMOVE)
+    @OneToOne (cascade=CascadeType.REMOVE, fetch = FetchType.LAZY)
     @JoinColumn(name="analysis_item_id")
     private AnalysisItem analysisItem;
     @Column(name="position")

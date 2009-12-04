@@ -27,11 +27,11 @@ public class SixSigmaMeasure extends AnalysisMeasure {
     @Column(name="sigma_type")
     private int sigmaType;
 
-    @OneToOne
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name="defects_measure_id")
     private AnalysisMeasure totalDefectsMeasure;
 
-    @OneToOne
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name="opportunities_measure_id")
     private AnalysisMeasure totalOpportunitiesMeasure;
 
