@@ -70,6 +70,20 @@
                                            measureObjects="{measureObjects}" analysisItem="{startingAnalysisItem}"/>
             </mx:AddChild>
         </mx:State>
+        <mx:State name="Latitude">
+            <mx:AddChild relativeTo="{firstForm}" position="after" creationPolicy="all">
+                <analysis:LatitudeDetailEditor addedToStage="detailEditor = latitudeDetailEditor" id="latitudeDetailEditor"
+                                           dimensionFields="{dimensionFields}" dateDimensionFields="{dateFields}"
+                                           measureObjects="{measureObjects}" analysisItem="{startingAnalysisItem}"/>
+            </mx:AddChild>
+        </mx:State>
+        <mx:State name="Longitude">
+            <mx:AddChild relativeTo="{firstForm}" position="after" creationPolicy="all">
+                <analysis:LongitudeDetailEditor addedToStage="detailEditor = longitudeDetailEditor" id="longitudeDetailEditor"
+                                           dimensionFields="{dimensionFields}" dateDimensionFields="{dateFields}"
+                                           measureObjects="{measureObjects}" analysisItem="{startingAnalysisItem}"/>
+            </mx:AddChild>
+        </mx:State>
         <mx:State name="Date">
             <mx:AddChild relativeTo="{firstForm}" position="after" creationPolicy="all">
                 <analysis:DetailDateEditor addedToStage="detailEditor = dateDetailEditor" id="dateDetailEditor"
@@ -249,7 +263,7 @@
         }
 
         protected function getGroupingOptions():ArrayCollection {
-            return new ArrayCollection(["Grouping", "Range", "Date", "Tags"]);
+            return new ArrayCollection(["Grouping", "Range", "Date", "Tags", "Latitude", "Longitude"]);
         }
 
         protected function getMeasureOptions():ArrayCollection {
@@ -321,6 +335,12 @@
                     break;
                 case "Six Sigma":
                     currentState = "SixSigmaMeasure";
+                    break;
+                case "Latitude":
+                    currentState = "Latitude";
+                    break;
+                case "Longitude":
+                    currentState = "Longitude";
                     break;
             }
         }

@@ -49,6 +49,10 @@ package com.easyinsight.analysis.options
 					option = OptionTypeNames.RANGE;
 				} else if (analysisItem.hasType(AnalysisItemTypes.LIST)) {
 					option = OptionTypeNames.LIST;
+                } else if (analysisItem.hasType(AnalysisItemTypes.LATITUDE)) {
+                    option = OptionTypeNames.LATITUDE;
+                } else if (analysisItem.hasType(AnalysisItemTypes.LONGITUDE)) {
+                    option = OptionTypeNames.LONGITUDE;
 				} else {
 					option = OptionTypeNames.GROUPING;
 				}

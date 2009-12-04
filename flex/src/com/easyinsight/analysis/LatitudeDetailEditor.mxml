@@ -1,0 +1,29 @@
+<?xml version="1.0" ?>
+<analysis:AnalysisItemDetailEditor xmlns:mx="http://www.adobe.com/2006/mxml"
+                                   xmlns:analysis="com.easyinsight.analysis.*">
+    <mx:Script><![CDATA[
+
+        [Bindable]
+        private var precision:int;
+
+        override public function createAnalysisItem(aggregation:String):AnalysisItem {
+            return new AnalysisLatitude();
+        }
+
+        override public function set analysisItem(val:AnalysisItem):void {
+            super.analysisItem = val;
+            if (val is AnalysisLatitude) {
+                var coordinate:AnalysisCoordinate = val as AnalysisCoordinate;
+                precision = coordinate.precision;
+            }
+        }
+
+        override public function save(analysisItem:AnalysisItem):void {
+            super.save(analysisItem);
+            var coordinate:AnalysisCoordinate = analysisItem as AnalysisCoordinate;
+            coordinate.precision = int(precisionInput.text);
+        }]]></mx:Script>
+    <mx:FormItem label="Precision:">
+        <mx:TextInput id="precisionInput" text="{precision}"/>
+    </mx:FormItem>
+</analysis:AnalysisItemDetailEditor>

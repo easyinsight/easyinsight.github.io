@@ -15,8 +15,9 @@ package com.easyinsight.analysis
         public static const HIERARCHY:int = 2048;
         public static const SIX_SIGMA_MEASURE:int = 4096;
         public static const STEP:int = 8192;
-        public static const MEASURE_GROUPING:int = 16384;
-		
+        public static const LATITUDE:int = 16384;
+        public static const LONGITUDE:int = 32768;
+
 		public static const YEAR_LEVEL:int = 1;
 		public static const MONTH_LEVEL:int = 2;
 		public static const DAY_LEVEL:int = 3;

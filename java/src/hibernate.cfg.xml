@@ -25,7 +25,7 @@
         <property name="cache.provider_class">org.hibernate.cache.NoCacheProvider</property>
 
         <!-- Echo all executed SQL to stdout -->
-        <property name="show_sql">false</property>
+        <property name="show_sql">true</property>
 
         <mapping class="com.easyinsight.users.User"/>
         <mapping class="com.easyinsight.users.Permission"/>
@@ -45,6 +45,9 @@
         <mapping class="com.easyinsight.analysis.AnalysisItem"/>
         <mapping class="com.easyinsight.analysis.AnalysisDimension"/>
         <mapping class="com.easyinsight.analysis.AnalysisRangeDimension"/>
+        <mapping class="com.easyinsight.analysis.AnalysisCoordinate"/>
+        <mapping class="com.easyinsight.analysis.AnalysisLongitude"/>
+        <mapping class="com.easyinsight.analysis.AnalysisLatitude"/>
         <mapping class="com.easyinsight.analysis.AnalysisMeasure"/>
         <mapping class="com.easyinsight.analysis.AnalysisDateDimension"/>
         <mapping class="com.easyinsight.analysis.AnalysisList"/>
@@ -74,8 +77,7 @@
         <mapping class="com.easyinsight.analysis.LastValueFilter"/>        
         <mapping class="com.easyinsight.analysis.Link"/>
         <mapping class="com.easyinsight.analysis.URLLink"/>
-        <mapping class="com.easyinsight.analysis.DrillThrough"/>        
-        <mapping class="com.easyinsight.analysis.AnalysisMeasureGrouping"/>        
+        <mapping class="com.easyinsight.analysis.DrillThrough"/>              
 
         <mapping class="com.easyinsight.scrubbing.DataScrub"/>
         <mapping class="com.easyinsight.scrubbing.LookupTableScrub"/>

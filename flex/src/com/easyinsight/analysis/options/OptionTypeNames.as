@@ -21,6 +21,8 @@ package com.easyinsight.analysis.options
 		public static const DATE:String = "Date";
 		public static const LIST:String = "Tags";
 		public static const MEASURE_GROUPING:String = "Measure Grouping";
+		public static const LONGITUDE:String = "Longitude";
+		public static const LATITUDE:String = "Latitude";
 
 		public function OptionTypeNames()
 		{
