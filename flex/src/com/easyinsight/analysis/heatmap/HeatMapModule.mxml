@@ -1,6 +1,8 @@
 <?xml version="1.0" ?>
 <mx:Module xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:visualization="com.michaelvandaniker.visualization.*"
            implements="com.easyinsight.analysis.IReportRenderer" initialize="onInitialize()" width="100%" height="100%">
+    <mx:Fade id="fadeInEffect" alphaFrom="0.0" alphaTo="0.57" duration="1000" />
+    <mx:Fade id="fadeOutEffect" alphaFrom="0.57" alphaTo="0.0" duration="1000" effectEnd="onEffectEnd(event)" />
     <mx:Script><![CDATA[
         import com.easyinsight.analysis.AnalysisDefinition;
         import com.easyinsight.analysis.CustomChangeEvent;
@@ -23,12 +25,20 @@
 
         import mx.collections.ArrayCollection;
         import mx.controls.Alert;
+        import mx.events.EffectEvent;
+
+        private function onEffectEnd(event:mx.events.EffectEvent):void {
+            map.removeOverlay(fadeOutEffect.target as IOverlay);
+            overlays.removeItemAt(overlays.getItemIndex(fadeOutEffect.target as IOverlay));
+        }
 
         private function onInitialize():void {
             Security.allowInsecureDomain("maps.googleapis.com");
         }
 
         private var heatMapDefinition:HeatMapDefinition;
+
+        private var overlays:ArrayCollection = new ArrayCollection();
 
         [Bindable]
         private var dataSet:ArrayCollection;
@@ -42,6 +52,8 @@
                 return MapType.HYBRID_MAP_TYPE;
             case 3:
                 return MapType.SATELLITE_MAP_TYPE;
+            case 4:
+                return MapType.PHYSICAL_MAP_TYPE;
             default:
                 return null;
             }
@@ -56,6 +68,9 @@
             }
             if(mapType == MapType.SATELLITE_MAP_TYPE) {
                 return 3;
+            }
+            if(mapType == MapType.PHYSICAL_MAP_TYPE) {
+                return 4;
             }
             return 0;
         }
@@ -90,16 +105,26 @@
         }
 
         private function prepareMap():void {
+            for each (var o:Object in overlays) {
+                fadeOutEffect.target = o;
+                fadeOutEffect.play();
+            }
             var heatMap:HeatMap = new HeatMap();
             heatMap.setStyle("backgroundColor", "0");
             heatMap.setStyle("backgroundAlpha", "0");
-            heatMap.alpha = .57
+            heatMap.alpha = 0.57;
             heatMap.gradientArray = GradientDictionary.RAINBOW;
             heatMap.dataProvider = dataSet;
             heatMap.transformationFunction = latLonToPoint;
             heatMap.weightFunction = getCount;
-            var overlay:IOverlay = new GHeatMapOverlay(heatMap);
+            var overlay:GHeatMapOverlay = new GHeatMapOverlay(heatMap);
+            overlay.alpha = 0;
+            overlays.addItem(overlay);
+            fadeInEffect.target = overlay;
+            fadeInEffect.play();
             map.addOverlay(overlay);
+            fadeInEffect.target = heatMap;
+            fadeInEffect.play();
             if(heatMapDefinition != null && heatMapDefinition.mapType != 0) {
                 map.setCenter(new LatLng(heatMapDefinition.latitude, heatMapDefinition.longitude), heatMapDefinition.zoomLevel, getMapType(heatMapDefinition.mapType));
             }
@@ -130,7 +155,7 @@
         }
 
         private function latLonToPoint(o:Object):Object {
-            return map.fromLatLngToViewport(new LatLng(o[heatMapDefinition.latitudeItem.qualifiedName()] as Number, o[heatMapDefinition.longitudeItem.qualifiedName()] as Number));
+            return map.fromLatLngToViewport(new LatLng(Number(o[heatMapDefinition.latitudeItem.qualifiedName()]), Number(o[heatMapDefinition.longitudeItem.qualifiedName()])));
         }
         private function getCount(o:Object):Number {
             var n:Number = o[heatMapDefinition.measure.qualifiedName()] as Number;
