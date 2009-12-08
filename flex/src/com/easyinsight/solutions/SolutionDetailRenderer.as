@@ -121,6 +121,7 @@ public class SolutionDetailRenderer extends VBox implements IPerspective {
         var reports:int = 0;
         var items:ArrayCollection = new ArrayCollection();
         var dataSourceItems:ArrayCollection = new ArrayCollection();
+        
         for each (var solInstall:SolutionInstallInfo in installResult) {
             if (solInstall.descriptor.getType() == EIDescriptor.DATA_SOURCE) {
                 dataSources++;
@@ -135,7 +136,15 @@ public class SolutionDetailRenderer extends VBox implements IPerspective {
                 items.addItem(solInstall.descriptor);
             }
         }
-        if (items.length == 1 && goalTrees == 1) {
+        var dataSource:DataSourceDescriptor = dataSourceItems.getItemAt(0) as DataSourceDescriptor;
+        var window:PostInstallWindow = new PostInstallWindow();
+        window.dataSourceDescriptor = dataSource;
+        window.solution = _solution;
+        window.addEventListener(AnalyzeEvent.ANALYZE, passThrough);
+        window.addEventListener(NavigationEvent.NAVIGATION, passThrough);
+        PopUpManager.addPopUp(window, this, true);
+        PopUpUtil.centerPopUp(window);
+        /*if (items.length == 1 && goalTrees == 1) {
             dispatchEvent(new AnalyzeEvent(new GoalDataAnalyzeSource((GoalTreeDescriptor(items.getItemAt(0)).id))));
         } else if (items.length == 1 && reports == 1) {
             dispatchEvent(new AnalyzeEvent(new ReportAnalyzeSource(InsightDescriptor(items.getItemAt(0)))));
@@ -144,7 +153,11 @@ public class SolutionDetailRenderer extends VBox implements IPerspective {
         } else {
             var dataSourceDescriptor:DataSourceDescriptor = dataSourceItems.getItemAt(0) as DataSourceDescriptor;
             dispatchEvent(new AnalyzeEvent(new DescriptorAnalyzeSource(dataSourceDescriptor.id, dataSourceDescriptor.name)));
-        }
+        }*/
+    }
+
+    private function passThrough(event:Event):void {
+        dispatchEvent(event);
     }
 
     private function installedSolution(event:ResultEvent):void {

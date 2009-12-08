@@ -2,31 +2,40 @@
 <mx:Box xmlns:listing="com.easyinsight.listing.*" xmlns:mx="http://www.adobe.com/2006/mxml" width="100%"
                       height="100%"
                       xmlns:genredata="com.easyinsight.genredata.*"
-                      backgroundColor="#DCE2F8" implements="com.easyinsight.listing.IPerspective" creationComplete="setupListeners()">
+                      implements="com.easyinsight.listing.IPerspective" creationComplete="setupListeners()" verticalGap="0">
     <mx:Script>
 		<![CDATA[
 
         import com.easyinsight.solutions.Solution;
 
         import mx.binding.utils.BindingUtils;
+        import mx.controls.Alert;
         import mx.utils.URLUtil;
         import mx.managers.BrowserManager;
 
-        private function setupListeners():void {
-            BindingUtils.bindProperty(stateBar, "selectedIndex", this, "viewMode");
+        [Bindable]
+        [Embed(source="../../../../assets/prototype/ReverseGray.jpg")]
+        private var banner:Class;
 
+        [Bindable]
+        private var introText:String;
+
+        private function setupListeners():void {
+            //BindingUtils.bindProperty(stateBar, "selectedIndex", this, "viewMode");            
+            BindingUtils.bindProperty(this, "solution", solutionDataController, "solution");
             BindingUtils.bindProperty(displayTypeBar, "selectedIndex", this, "displayMode");
 
         }
 
-        private function updateState():void {
-            viewMode = stateBar.selectedIndex;
+        private function toState(index:int):void {
+            viewMode = index;
             listsBox.removeAllChildren();
-            if (stateBar.selectedIndex == 0) {
+            if (index == 0) {
                 exchangeController = publicDataController;
-            } else if (stateBar.selectedIndex == 1) {
+            } else if (index == 1) {
                 exchangeController = solutionDataController;
             }
+            introText = exchangeController.text;
             updateDisplayMode2();
             updateURL();
             listsBox.addChild(exchangeController.selectedPage);
@@ -38,12 +47,16 @@
             fragmentObject.page = "exchange";
             fragmentObject.view = viewMode;
             fragmentObject.display = displayMode;
+            fragmentObject.subTopicID = subTopicID;
+            //exchangeController.decorateObject(fragmentObject);
             var fragmentString:String = URLUtil.objectToString(fragmentObject);
             fragmentString = stringReplaceAll(fragmentString, ";", "&");
             BrowserManager.getInstance().setFragment(fragmentString);
         }
 
-        public static function stringReplaceAll(source:String, find:String, replacement:String) : String
+
+
+        public static function stringReplaceAll(source:String, find:String, replacement:String):String
         {
             return source.split(find).join(replacement);
         }
@@ -74,13 +87,13 @@
 
 
         public function gotFocus():void {
-            BrowserManager.getInstance().setTitle("Easy Insight - Exchange");
-            updateURL();
+            BrowserManager.getInstance().setTitle("Easy Insight - Exchange");            
             if (viewMode == 1) {
                 exchangeController = solutionDataController;
             } else {
                 exchangeController = publicDataController;
             }
+            introText = exchangeController.text;
             if (displayMode == 1) {
                 exchangeController.displayMode = "grid";
             } else if (displayMode == 2) {
@@ -88,6 +101,11 @@
             } else {
                 exchangeController.displayMode = "summary";
             }
+            if (subTopicID > 0) {
+                exchangeController.subTopicID = subTopicID;
+            }
+            solutionDataController.initBehavior();            
+            updateURL();
             listsBox.addChild(exchangeController.selectedPage);
             exchangeController.refreshData();
         }
@@ -101,6 +119,18 @@
 
         private var _displayMode:int = 0;
 
+        private var _subTopicID:int = 0;
+
+        [Bindable(event="subTopicIDChanged")]
+        public function get subTopicID():int {
+            return _subTopicID;
+        }
+
+        public function set subTopicID(value:int):void {
+            if (_subTopicID == value) return;
+            _subTopicID = value;
+            dispatchEvent(new Event("subTopicIDChanged"));
+        }
 
         [Bindable(event="viewModeChanged")]
         public function get viewMode():int {
@@ -128,17 +158,23 @@
 
 
         [Bindable(event="solutionChanged")]
-        public function get solution():Solution {
+        public function get solution():Object {
             return _solution;
         }
 
-        public function set solution(value:Solution):void {
+        public function set solution(value:Object):void {
             if (_solution == value) return;
             _solution = value;
+            if (value is Solution) {
+                subTopicID = value.solutionID;
+            } else {
+                subTopicID = 0;
+            }
+            updateURL();
             dispatchEvent(new Event("solutionChanged"));
         }
 
-        private var _solution:Solution;
+        private var _solution:Object;
 
         public function cleanup():void {
         }
@@ -147,26 +183,36 @@
 	</mx:Script>
 
     <genredata:PublicDataController id="publicDataController" changeView="onChangeView(event)"/>
-    <genredata:SolutionExchangeController id="solutionDataController" changeView="onChangeView(event)" solution="{solution}"/>
+    <genredata:SolutionExchangeController id="solutionDataController" changeView="onChangeView(event)" solution="{solution}" updateURL="updateURL()"/>
+
+    <mx:Style>
+.gradientBackground1 {
+    backgroundImage: ClassReference("com.easyinsight.util.GradientBackground");
+    backgroundSize: "100%";
+fillColors: #D42525, #FFFFFF;
+fillAlphas: 1, 1;
+}
+</mx:Style>
 
     <mx:VBox width="100%" height="100%"  paddingLeft="0" paddingRight="0" paddingTop="0" paddingBottom="0"
                       verticalGap="0">
 
     <mx:HBox width="100%" horizontalAlign="center" height="100%" backgroundColor="#818285" paddingRight="0" paddingTop="0" paddingBottom="0">
-    <mx:VBox id="centerBox" width="1000" height="100%" backgroundImage="{background2}" backgroundSize="100%" paddingBottom="10"
-             paddingLeft="10" paddingRight="10" paddingTop="10">
-        <mx:HBox width="100%" verticalAlign="middle">
-            <mx:Spacer width="100%"/>
-                <mx:ToggleButtonBar itemClick="updateState()" id="stateBar">
-                    <mx:dataProvider>
-                        <mx:Array>
-                            <mx:String>Public Data</mx:String>
-                            <mx:String>Solution Reports</mx:String>
-                            <!--<mx:String>KPI Trees</mx:String>
-                            <mx:String>Skins</mx:String>-->
-                        </mx:Array>
-                    </mx:dataProvider>
-                </mx:ToggleButtonBar>
+    <mx:VBox id="centerBox" width="100%" height="100%" paddingBottom="10"
+             paddingLeft="0" paddingRight="0" paddingTop="0" backgroundColor="#FFFFFF" verticalGap="0">
+
+        <mx:HBox verticalAlign="middle" horizontalAlign="center"
+                                         width="100%" backgroundImage="{banner}" backgroundSize="100%">
+            <mx:Spacer width="100"/>
+            <mx:LinkButton label="Public Data" click="toState(0)" fontSize="14" fontFamily="Tahoma" fontWeight="bold" color="#FFFFFF"/>
+            <mx:Spacer width="100"/>
+            <mx:LinkButton label="Connection Reports" click="toState(1)" fontSize="14" fontFamily="Tahoma" fontWeight="bold" color="#FFFFFF"/>
+            <mx:Spacer width="100"/>
+        </mx:HBox>        
+        
+        <mx:HBox width="100%" verticalAlign="middle" paddingTop="5" paddingBottom="5" paddingLeft="20" paddingRight="20">
+            <mx:TextArea color="0x323232" borderStyle="none" editable="false" selectable="false" backgroundAlpha="0" width="400" 
+                    text="{introText}"/>
             <mx:Spacer width="100%"/>
                 <mx:ToggleButtonBar itemClick="updateDisplayMode2()" id="displayTypeBar">
                     <mx:dataProvider>
@@ -188,7 +234,7 @@
             </mx:VBox>
         </mx:HBox>
         <mx:Spacer height="20" id="topSpacer"/>
-        <mx:HBox width="100%" height="100%" id="listsBox"/>            
+        <mx:HBox width="100%" height="100%" id="listsBox" paddingTop="5" paddingBottom="5" paddingLeft="20" paddingRight="20"/>            
     </mx:VBox>
     </mx:HBox>
     </mx:VBox>

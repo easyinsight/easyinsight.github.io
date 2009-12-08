@@ -11,26 +11,21 @@
         }
 
         private function changeSolution():void {
-            var obj:Object = solutionBox.selectedItem;
-            if (obj is Solution) {
-                solution = obj as Solution;
-            } else {
-                solution = null;
-            }
+            solution = solutionBox.selectedItem;
         }
 
         [Bindable(event="solutionChanged")]
-        public function get solution():Solution {
+        public function get solution():Object {
             return _solution;
         }
 
-        public function set solution(value:Solution):void {
+        public function set solution(value:Object):void {
             if (_solution == value) return;
             _solution = value;
             dispatchEvent(new Event("solutionChanged"));
         }
 
-        private var _solution:Solution;
+        private var _solution:Object;
 
 
         [Bindable(event="solutionsChanged")]
@@ -50,8 +45,9 @@
         <mx:VBox>
             <mx:HBox>
                 <mx:Label text="Solution:" fontFamily="Tahoma" fontWeight="bold" fontSize="14"/>
-                <mx:ComboBox id="solutionBox" change="changeSolution()" dataProvider="{solutions}" labelField="name" rowCount="15"/>
+                <mx:ComboBox id="solutionBox" change="changeSolution()" dataProvider="{solutions}" labelField="name" rowCount="15" selectedItem="{solution}"/>
             </mx:HBox>
+            <genredata:ConnectionSummaryRenderer solution="{solution}"/>
             <mx:Spacer height="30"/>
             <mx:HBox width="100%" horizontalAlign="center">
                 <mx:Label text="Popular Tags" fontFamily="Tahoma" fontWeight="bold" fontSize="14"/>

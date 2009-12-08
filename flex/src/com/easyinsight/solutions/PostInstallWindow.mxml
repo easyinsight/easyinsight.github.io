@@ -1,0 +1,39 @@
+<?xml version="1.0" ?>
+<util:EITitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*">
+    <mx:Script><![CDATA[
+        import com.easyinsight.framework.NavigationEvent;
+        import com.easyinsight.genredata.AnalyzeEvent;
+        import com.easyinsight.listing.DescriptorAnalyzeSource;
+
+        import mx.managers.PopUpManager;
+
+        private var _dataSourceDescriptor:DataSourceDescriptor;
+
+        private var _solution:Solution;
+
+        public function set dataSourceDescriptor(value:DataSourceDescriptor):void {
+            _dataSourceDescriptor = value;
+        }
+
+        public function set solution(value:Solution):void {
+            _solution = value;
+        }
+
+        private function toDataSource():void {
+            dispatchEvent(new AnalyzeEvent(new DescriptorAnalyzeSource(_dataSourceDescriptor.id, _dataSourceDescriptor.name)));
+            PopUpManager.removePopUp(this);
+        }
+
+        private function toReports():void {
+            dispatchEvent(new NavigationEvent("Exchange", null, {viewMode: 1, displayMode: 0, solution: _solution}));
+            PopUpManager.removePopUp(this);
+        }
+        ]]></mx:Script>
+    <mx:VBox horizontalAlign="center" paddingTop="10" paddingBottom="10" paddingLeft="10" paddingRight="10">
+        <mx:HBox>
+            <mx:Button label="Explore Reports Built by Other Users" click="toReports()" fontSize="16"/>
+            <mx:Button label="Create Reports on this Connection" click="toDataSource()" fontSize="16"/>            
+        </mx:HBox>
+        <mx:Button label="Cancel" click="PopUpManager.removePopUp(this)" fontSize="14"/>
+    </mx:VBox>
+</util:EITitleWindow>

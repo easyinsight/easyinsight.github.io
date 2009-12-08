@@ -188,10 +188,10 @@
     </mx:VBox>
     <mx:VBox>
         <mx:HBox verticalAlign="middle">
-            <mx:CheckBox label="Solution Visible" id="solutionVisibleCheckbox"
+            <mx:CheckBox label="Connection Visible" id="solutionVisibleCheckbox"
                          selected="{solutionVisible}" enabled="{originSolution > 0}"/>
             <mx:Label fontSize="10" textDecoration="underline" text="What is this?"
-                      toolTip="By checking this box, you make the report template visible to all other Easy Insight users on the source solution."/>
+                      toolTip="By checking this box, you make the report template visible to all other Easy Insight users on the source connection. It's a great way to give back to the community!"/>
         </mx:HBox>
     </mx:VBox>
     <mx:StringValidator id="analysisNameValidator" source="{analysisNameInput}" property="text" minLength="3"

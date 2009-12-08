@@ -1,0 +1,72 @@
+<?xml version="1.0" ?>
+<mx:Box xmlns:mx="http://www.adobe.com/2006/mxml">
+    <mx:states>
+        <mx:State name="ConnectionInstallable">
+            <mx:AddChild relativeTo="{core}">
+                <mx:VBox>
+                    <mx:Image source="{logo}"/>                   
+                    <mx:TextArea backgroundAlpha="0" borderStyle="none" width="200" height="70"
+                            text="This connection is installed into your account. Go ahead and click any of the reports to the right to see how they display your data!"/>
+                </mx:VBox>
+            </mx:AddChild>
+        </mx:State>
+        <mx:State name="NoConnection">
+            <mx:AddChild relativeTo="{core}">
+                <mx:VBox>
+                    <mx:Image source="{logo}"/>
+                    <mx:TextArea backgroundAlpha="0" borderStyle="none" width="200" height="70"
+                            text="You haven't installed this connection yet. Before you can use any of the listed reports, you'll need to install the report first."/>
+                </mx:VBox>
+            </mx:AddChild>
+        </mx:State>
+    </mx:states>
+    <mx:Script><![CDATA[
+        import com.easyinsight.solutions.Solution;
+
+        private var _solution:Object;
+
+        [Bindable]
+        private var logo:Bitmap;
+
+        public function set solution(value:Object):void {
+            if (value == _solution) {
+                return;
+            }
+            _solution = value;
+            if (_solution == null || !(_solution is Solution)) {
+                currentState = "";
+            } else {
+                if (_solution.image != null) {
+                    var loader:Loader = new Loader();
+                    loader.contentLoaderInfo.addEventListener(Event.COMPLETE, onComplete);
+                    loader.loadBytes(_solution.image);
+                } else {
+                    logo = null;
+                }
+                solutionService.connectionInstalled.send(_solution.solutionID);
+            }
+        }
+
+        private function gotSolutionInfo():void {
+            var dataSources:Boolean = solutionService.connectionInstalled.lastResult as Boolean;
+            if (dataSources) {
+                currentState = "ConnectionInstallable";
+            } else {
+                currentState = "NoConnection";
+            }
+        }
+
+        private function onComplete(event:Event):void {            
+            var loaderContent:LoaderInfo = event.currentTarget as LoaderInfo;
+            logo = Bitmap(loaderContent.loader.content);
+            loaderContent.loader.removeEventListener(Event.COMPLETE, onComplete);
+        }
+        ]]>
+    </mx:Script>
+    <mx:RemoteObject destination="solutionService" id="solutionService">
+        <mx:method name="connectionInstalled" result="gotSolutionInfo()"/>
+    </mx:RemoteObject>
+    <mx:VBox id="core">
+
+    </mx:VBox>
+</mx:Box>

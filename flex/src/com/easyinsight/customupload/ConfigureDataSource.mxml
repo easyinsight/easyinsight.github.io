@@ -141,7 +141,7 @@
     </mx:RemoteObject>
     <mx:Form>
         <mx:FormItem label="">
-            <mx:Label text="Now that you've installed this solution, you need to configure it:" fontSize="14"/>
+            <mx:Label text="Now that you've installed this connection, you need to configure it:" fontSize="14"/>
         </mx:FormItem>
         <mx:Box id="coreContent"/>
         <mx:FormItem label="" direction="vertical">

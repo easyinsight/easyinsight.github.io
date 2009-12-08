@@ -10,6 +10,7 @@ import mx.collections.SortField;
 import mx.core.IFactory;
 
 [Event(name="changeView", type="com.easyinsight.genredata.ExchangeControllerEvent")]
+[Event(name="updateURL", type="flash.events.Event")]
 public class ExchangeController extends EventDispatcher {
 
     private var _exchangeGridPage:ExchangePage;
@@ -20,9 +21,25 @@ public class ExchangeController extends EventDispatcher {
     private var _selectedTag:String;
     private var _keyword:String;
     private var _selectedPage:ExchangePage;
+    private var _subTopicID:int;
 
     public function ExchangeController() {
         addEventListener(ExchangeDataEvent.EXCHANGE_DATA_RETURNED, onDataReturned);
+    }
+
+    public function initBehavior():void {        
+    }
+
+    public function get text():String {
+        return "";
+    }
+
+    public function get subTopicID():int {
+        return _subTopicID;
+    }
+
+    public function set subTopicID(value:int):void {
+        _subTopicID = value;
     }
 
     public function get selectedPage():ExchangePage {
@@ -171,6 +188,9 @@ public class ExchangeController extends EventDispatcher {
     }
 
     protected function retrieveData():void {
+    }
+
+    public function decorateObject(fragmentObject:Object):void {
     }
 }
 }

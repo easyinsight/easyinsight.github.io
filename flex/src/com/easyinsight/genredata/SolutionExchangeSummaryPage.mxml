@@ -8,12 +8,7 @@
         import mx.collections.SortField;
 
         private function changeSolution():void {
-            var obj:Object = solutionBox.selectedItem;
-            if (obj is Solution) {
-                solution = obj as Solution;
-            } else {
-                solution = null;
-            }
+            solution = solutionBox.selectedItem;
         }
 
         private function onTagFocus(event:TagFocusEvent):void {
@@ -28,11 +23,11 @@
         }
 
         [Bindable(event="solutionChanged")]
-        public function get solution():Solution {
+        public function get solution():Object {
             return _solution;
         }
 
-        public function set solution(value:Solution):void {
+        public function set solution(value:Object):void {
             if (_solution == value) return;
             _solution = value;
             dispatchEvent(new Event("solutionChanged"));
@@ -40,16 +35,19 @@
 
         override protected function commitProperties():void {
             super.commitProperties();
-            if (solution != null) {
-                for each (var sol:Solution in solutions) {
-                    if (sol.solutionID == solution.solutionID) {
-                        solution = sol;
+            /*if (solution != null) {
+                for each (var solObj:Object in solutions) {
+                    if (solObj is Solution) {
+                        var sol:Solution = solObj as Solution;
+                        if (sol.solutionID == solution.solutionID) {
+                            solution = sol;
+                        }
                     }
                 }
-            }
+            }*/
         }
 
-        private var _solution:Solution;
+        private var _solution:Object;
 
 
         [Bindable(event="solutionsChanged")]
@@ -91,9 +89,10 @@
     <mx:HBox width="100%" height="100%" id="listsBox">
         <mx:VBox>
             <mx:HBox>
-                <mx:Label text="Solution:" fontFamily="Tahoma" fontWeight="bold" fontSize="14"/>
+                <mx:Label text="Connection:" fontFamily="Tahoma" fontWeight="bold" fontSize="14"/>
                 <mx:ComboBox id="solutionBox" change="changeSolution()" dataProvider="{solutions}" labelField="name" selectedItem="{solution}"/>
             </mx:HBox>
+            <genredata:ConnectionSummaryRenderer solution="{solution}"/>
             <mx:HBox>
                 <mx:Label text="Sort By:" fontFamily="Tahoma" fontWeight="bold" fontSize="14"/>
                 <mx:ComboBox id="sortBox" change="changeSort()">
@@ -115,11 +114,6 @@
             </mx:HBox>
             <listing:TagListing width="250" borderStyle="solid" borderThickness="1" tagFocus="onTagFocus(event)" solution="true"/>
         </mx:VBox>
-        <mx:Box width="100%" horizontalAlign="center" height="100%">
-            <!--<mx:Canvas backgroundAlpha="0" width="100%" height="100%">-->
-                <mx:List dataProvider="{dataProvider2}" itemRenderer="{_itemRenderer}" height="100%" width="100%"
-                        backgroundAlpha="0" borderStyle="none"/>
-            <!--</mx:Canvas>-->
-        </mx:Box>
+        <mx:TileList dataProvider="{dataProvider2}" itemRenderer="{_itemRenderer}" height="100%" width="100%" rowHeight="200"/>        
     </mx:HBox>
 </genredata:ExchangePage>

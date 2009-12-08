@@ -300,7 +300,8 @@
                                                                     case "exchange":
                                                                         var view:int = int(o.view);
                                                                         var display:int = int(o.display);
-                                                                        navigation(new NavigationEvent("Exchange", null, {viewMode: view, displayMode: display}));
+                                                                        var subTopic:int = int(o.subTopicID);
+                                                                        navigation(new NavigationEvent("Exchange", null, {viewMode: view, displayMode: display, subTopicID: subTopic}));
                                                                         break;
                                                                     case "groups":
                                                                         navigation(new NavigationEvent("Groups"));

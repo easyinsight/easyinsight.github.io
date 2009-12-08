@@ -16,6 +16,10 @@ public class PublicDataController extends ExchangeController{
         exchangeService.getReports.addEventListener(ResultEvent.RESULT, onData);
     }
 
+    override public function get text():String {
+        return "This page enables you to quickly view reports on public data sources built by other users. Click on any report to open it up and take a look!";
+    }
+
     override protected function createExchangeSummaryPage():ExchangePage {
         var summary:ExchangeSummaryPage = new ExchangeSummaryPage();
         summary.itemRenderer = summaryItemRenderer();
