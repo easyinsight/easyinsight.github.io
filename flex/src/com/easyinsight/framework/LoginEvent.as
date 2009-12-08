@@ -8,14 +8,16 @@ package com.easyinsight.framework
 		public static const LOGOUT:String = "logout";
 
         public var targetURL:String;
+        public var newAccount:Boolean;
 		
-		public function LoginEvent(type:String, targetURL:String = null) {
+		public function LoginEvent(type:String, targetURL:String = null, newAccount:Boolean = false) {
 			super(type, true);
             this.targetURL = targetURL;
+            this.newAccount = newAccount;
 		}
 		
 		override public function clone():Event {
-            return new LoginEvent(type, targetURL);
+            return new LoginEvent(type, targetURL, newAccount);
         }
 	}
 }

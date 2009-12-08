@@ -187,8 +187,12 @@
         private function onLogin(event:LoginEvent):void {
             User.getEventNotifier().removeEventListener(LoginEvent.LOGIN, onLogin);
             loggedIn = true;
-            if (event.targetURL == null)
-                navigation(new NavigationEvent("Home"));
+            if (event.targetURL == null) {                
+                if (event.newAccount)
+                    navigation(new NavigationEvent("Help"));
+                else
+                    navigation(new NavigationEvent("Home"));
+            }
             else {
                 var o:Object = URLUtil.stringToObject(event.targetURL, "&");
                 parseFragmentObject(o, event.targetURL);
@@ -305,6 +309,9 @@
                                                                         break;
                                                                     case "groups":
                                                                         navigation(new NavigationEvent("Groups"));
+                                                                        break;
+                                                                    case "help":
+                                                                        navigation(new NavigationEvent("Help"));
                                                                         break;
                                                                     case "home":
                                                                             if(o.type != null && o.type == "tour")

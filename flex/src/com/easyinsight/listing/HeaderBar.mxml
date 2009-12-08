@@ -11,6 +11,7 @@
     </mx:Metadata>
     <mx:Script>
 		<![CDATA[
+        import com.easyinsight.account.NewFreeUserWelcome;
         import com.easyinsight.framework.LoginEvent;
         import com.easyinsight.framework.NavigationEvent;
         import com.easyinsight.framework.User;
@@ -182,6 +183,10 @@
     <listing:ListingOption perspective="{new AccountBasePage()}" enableAnalysis="false" displayName="Accounts" listingChange="onListingChange(event)">
         <mx:Image source="{accountIcon}" id="accountImage"/>
         <mx:Label text="Account" fontSize="12" fontFamily="Tahoma" fontWeight="bold" color="0x323232"/>
+    </listing:ListingOption>
+    <listing:ListingOption perspective="{new NewFreeUserWelcome()}" enableAnalysis="false" displayName="Help" listingChange="onListingChange(event)">
+        <mx:Image source="{helpIcon}" id="helpImage"/>
+        <mx:Label text="Help" fontSize="12" fontFamily="Tahoma" fontWeight="bold" color="0x323232"/>
     </listing:ListingOption>
 
     <mx:Spacer width="100%"/>

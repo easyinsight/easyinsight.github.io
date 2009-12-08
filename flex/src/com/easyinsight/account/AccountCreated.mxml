@@ -57,30 +57,6 @@
                 lesson1();
         }
 
-        private function toMarketplace():void {
-            dispatchEvent(new NavigationEvent("Marketplace"));
-        }
-
-        private function toUploads():void {
-            dispatchEvent(new NavigationEvent("My Data"));
-        }
-
-        private function toSolutions():void {
-            dispatchEvent(new NavigationEvent("Solutions"));
-        }
-
-        private function toGroups():void {
-            dispatchEvent(new NavigationEvent("Groups"));
-        }
-
-        private function toAPI():void {
-            dispatchEvent(new NavigationEvent("API"));
-        }
-
-        private function toGoals():void {
-            dispatchEvent(new NavigationEvent("My Goals"));
-        }
-
         private function lesson1():void {
             var tourWindow:TourWindow = new TourWindow();
             PopUpManager.addPopUp(tourWindow, this);
@@ -103,12 +79,12 @@
 
         private function appSolutions():void {
             var properties:Object = { saas: true, client:true, biz: false, learning: false };
-            dispatchEvent(new NavigationEvent("Solutions", null, properties));
+            dispatchEvent(new NavigationEvent("Connections", null, properties));
         }
 
         private function bizSolutions():void {
             var properties:Object = { biz: true, client:false, saas: false, learning: false };
-            dispatchEvent(new NavigationEvent("Solutions", null, properties));
+            dispatchEvent(new NavigationEvent("Connections", null, properties));
         }
 
         private function showSecurityStatement():void {

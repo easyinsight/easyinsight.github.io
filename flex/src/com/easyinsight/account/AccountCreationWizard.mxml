@@ -22,19 +22,12 @@
 				<account:ProfessionalAccountLoginCreation userDefined="postUserInfo(event)" previousPage="onPreviousPage(event)" account="{account}"/>
 			</mx:AddChild>
 		</mx:State>
-		<mx:State name="AccountCreated">
-			<mx:RemoveChild target="{initialContent}"/>
-			<mx:AddChild relativeTo="{coreContent}">
-				<account:AccountCreated/>
-			</mx:AddChild>
-		</mx:State>
 
 	</mx:states>
 	<mx:Script>
 		<![CDATA[
         import com.easyinsight.framework.LoginComponent;
         import com.easyinsight.framework.LoginEvent;
-        import com.easyinsight.framework.UserServiceResponse;
         import com.easyinsight.framework.UserTransferObject;
         import com.easyinsight.framework.User;
 
@@ -42,7 +35,6 @@
         import com.easyinsight.util.PopUpUtil;
         import com.easyinsight.util.ProgressAlert;
 
-        import mx.controls.Alert;
         import mx.managers.PopUpManager;
 
         [Bindable]
@@ -100,18 +92,19 @@
                 PopUpManager.addPopUp(window, this, true);
                 PopUpUtil.centerPopUp(window);
             }
-            User.getEventNotifier().removeEventListener(LoginEvent.LOGIN, onLogin);
+            User.getEventNotifier().removeEventListener(LoginEvent.LOGIN, onLogin);            
         }
 
         private function createdAccount():void {
             var resultID:int = creationService.createAccount.lastResult as int;
             var c:LoginComponent = new LoginComponent();
             c.targetURL = _destinationURL;
+            c.newAccount = true;
             c.signon(user.userName, password);
             User.getEventNotifier().addEventListener(LoginEvent.LOGIN, onLogin);
         }
 
-        private function gotUserInfo():void {
+        /*private function gotUserInfo():void {
             var user:UserServiceResponse = creationService.authenticate.lastResult as UserServiceResponse;
             User.initializeUser(user.name, user.email, user.accountType, user.spaceAllowed, user.accountAdmin,
                     user.dataSourceCreator, user.insightCreator, user.userID, user.activated, user.billingInformationGiven, user.accountState);
@@ -119,8 +112,8 @@
             User.getInstance().userName = user.userName;
             User.getEventNotifier().dispatchEvent(new LoginEvent(LoginEvent.LOGIN));
 
-            currentState = "AccountCreated";
-        }
+            dispatchEvent(new NavigationEvent("Help"));
+        }*/
 
         private function showSecurityStatement():void {
             var window:SecurityStatement = new SecurityStatement();
@@ -229,6 +222,6 @@
 	</mx:VBox>
 	<mx:RemoteObject id="creationService" destination="login">
 		<mx:method name="createAccount" result="createdAccount()"/>
-		<mx:method name="authenticate" result="gotUserInfo()"/>
+		<!--<mx:method name="authenticate" result="gotUserInfo()"/>-->
 	</mx:RemoteObject>
 </mx:VBox>

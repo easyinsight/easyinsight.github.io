@@ -114,6 +114,17 @@
 
         private var _showActivation:Boolean;
 
+        private var _newAccount:Boolean;
+
+
+        public function get newAccount():Boolean {
+            return _newAccount;
+        }
+
+        public function set newAccount(value:Boolean):void {
+            _newAccount = value;
+        }
+
         [Bindable]
         private var resetResult:String;
 
@@ -134,7 +145,7 @@
 
         private function delinquentAccount():void {
             var delinquent:Boolean = authService.isAccountDelinquentOrClosed.lastResult as Boolean;
-            if(delinquent)
+            if (delinquent)
                 flash.net.navigateToURL(new URLRequest("billing/login.jsp"), "_self");
         }
 
@@ -202,9 +213,9 @@
                         authResult.accountType, authResult.spaceAllowed, authResult.accountAdmin,
                         authResult.dataSourceCreator, authResult.insightCreator, authResult.userID, authResult.activated, authResult.billingInformationGiven, authResult.accountState);
                 User.getInstance().password = authResult.encryptedPassword;
-                User.getInstance().userName = authResult.userName;
-                dispatchEvent(new LoginEvent(LoginEvent.LOGIN, _targetURL));
-                User.getEventNotifier().dispatchEvent(new LoginEvent(LoginEvent.LOGIN, _targetURL));
+                User.getInstance().userName = authResult.userName;                
+                dispatchEvent(new LoginEvent(LoginEvent.LOGIN, _targetURL, _newAccount));
+                User.getEventNotifier().dispatchEvent(new LoginEvent(LoginEvent.LOGIN, _targetURL, _newAccount));
             } else {
                 failureMessageLabel.text = authResult.failureMessage;
                 authService.isAccountDelinquentOrClosed.send(userName.text);
@@ -231,7 +242,7 @@
                             case "Client.Authentication":
                             default:
                                 var failureMessage:String = event.fault.faultString;
-                                if(failureMessageLabel != null)
+                                if (failureMessageLabel != null)
                                     failureMessageLabel.text = failureMessage;
                                 else
                                     Alert.show(failureMessage);

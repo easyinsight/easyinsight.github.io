@@ -22,7 +22,7 @@
         [Embed(source="../../../../assets/background2.JPG")]
         private var background2:Class;
 
-        [Bindable]
+        [Bindable]                                                                          
         private var _destinationURL:String;
 
 

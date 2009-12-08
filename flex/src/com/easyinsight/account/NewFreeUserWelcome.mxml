@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Box xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:twitter="com.easyinsight.twitter.*"
+        xmlns:util="com.easyinsight.util.*" width="100%" height="100%"
+        paddingTop="0" top="0" implements="com.easyinsight.listing.IPerspective">
+    <mx:Script>
+		<![CDATA[
+        import com.easyinsight.framework.NavigationEvent;
+        import com.easyinsight.tour.TourWindow;
+        import com.easyinsight.util.PopUpUtil;
+
+        import mx.managers.BrowserManager;
+        import mx.managers.PopUpManager;
+        import mx.utils.URLUtil;
+
+        [Bindable]
+        [Embed(source="../../../../assets/headericons/chart_area.png")]
+        private var myDataIcon:Class;
+
+        [Bindable]
+        [Embed(source="../../../../assets/headericons/shopping_bag.png")]
+        private var catalogIcon:Class;
+
+        [Bindable]
+        [Embed(source="../../../../assets/logos/film.png")]
+        private var filmIcon:Class;
+
+        [Bindable]
+        [Embed(source="../../../../assets/background2.JPG")]
+        private var background2:Class;
+
+        [Bindable]
+        [Embed(source="../../../../assets/headericons/users2.png")]
+        private var groupsIcon:Class;
+
+        [Bindable]
+        [Embed(source="../../../../assets/headericons/components.png")]
+        private var solutionsIcon:Class;
+
+        [Bindable]
+        [Embed(source="../../../../assets/headericons/branch.png")]
+        private var goalsIcon:Class;
+
+        [Bindable]
+        [Embed(source="../../../../assets/headericons/application_enterprise.png")]
+        private var apiIcon:Class;
+
+        [Bindable]
+        [Embed(source="../../../../assets/prototype/ReverseGray.jpg")]
+        private var banner:Class;
+
+        private function lesson1():void {
+            var tourWindow:TourWindow = new TourWindow();
+            PopUpManager.addPopUp(tourWindow, this);
+            PopUpUtil.centerPopUp(tourWindow);
+        }
+
+        public function gotFocus():void {
+            var fragmentObject:Object = new Object();
+            fragmentObject.page = "help";
+            BrowserManager.getInstance().setTitle("Easy Insight - Help");
+            var fragmentString:String = URLUtil.objectToString(fragmentObject);
+            BrowserManager.getInstance().setFragment(fragmentString);
+        }
+
+        public function cleanup():void {
+        }
+		]]>
+    </mx:Script>
+    <mx:HBox width="100%" height="100%" horizontalAlign="center" backgroundColor="#818285">
+        <mx:VBox height="100%" backgroundColor="#FFFFFF" width="1000" verticalGap="0">
+            <mx:HBox verticalAlign="middle" horizontalAlign="center"
+                                         width="100%" backgroundImage="{banner}" backgroundSize="100%" paddingTop="10" paddingBottom="10">
+                <mx:Label text="Getting Started with Easy Insight" fontSize="18" fontFamily="Tahoma" fontWeight="bold" color="#FFFFFF"/>
+            </mx:HBox>
+            <mx:HBox width="100%" height="260">
+                <!--
+                    ways to get started:
+
+                    free user:
+
+                    browsing for free data
+                    uploading a spreadsheet/pulling in data                    
+
+                    individual user:
+
+                    browsing for free data
+                    uploading a spreadsheet/pulling in data
+                    connecting to external data
+
+                    group user:
+
+                    uploading a spreadsheet/pulling in data
+                    connecting to external data
+                    building from a kpi tree
+
+                    browse documentation
+                    take a tour
+
+                    configurability of user interface
+                -->
+                <mx:VBox width="33%" horizontalAlign="center" paddingLeft="10" paddingRight="15" paddingTop="30" height="100%">
+                    <mx:Button click="dispatchEvent(new NavigationEvent('Exchange', null, {viewMode: 0, displayMode: 0}))" label="Browse for Free Data" fontSize="18"
+                            styleName="redButton"/>
+                    <mx:Image source="{catalogIcon}"/>
+                    <mx:TextArea backgroundAlpha="0" borderStyle="none" height="150" fontSize="16" editable="false" selectable="false"  width="100%"
+                            text="There's already a rich library of public data sets available on Easy Insight. If you just want to check out existing data or try building your own reports, this data represents a great starting point."/>
+                    <!-- title text -->
+                    <!-- screenshot/video link -->
+                    <!-- action link -->
+                    <!-- descriptive text -->
+                </mx:VBox>
+                <mx:VBox width="33%" horizontalAlign="center" backgroundColor="#EEEEEE" paddingLeft="15" paddingRight="15" paddingTop="30" height="100%">
+                    <mx:Button label="Upload Your Own Data" click="dispatchEvent(new NavigationEvent('Connections'))" fontSize="18"
+                            styleName="redButton"/>
+                    <mx:Image source="{solutionsIcon}"/>
+                    <mx:TextArea backgroundAlpha="0" borderStyle="none" height="150" fontSize="16" editable="false" selectable="false" width="100%"
+                            text="Have a CSV or Excel spreadsheet of data? How about a Google spreadsheet? Want instant reports on Salesforce, Google Analytics, or many other sources? Click here to get started in a couple of clicks!"/>
+                </mx:VBox>
+                <mx:VBox width="33%" horizontalAlign="center" paddingLeft="15" paddingRight="10" paddingTop="30" height="100%">
+                    <mx:Button label="Find Reports" click="dispatchEvent(new NavigationEvent('Exchange', null, {viewMode: 1, displayMode: 0}))" fontSize="18"
+                            styleName="redButton"/>
+                    <mx:Image source="{myDataIcon}"/>
+                    <mx:TextArea backgroundAlpha="0" borderStyle="none" height="150" fontSize="16" editable="false" selectable="false" width="100%"
+                            text="Installed a connection to Google Analytics, but looking for more reports? Take advantage of the Easy Insight community and install reports against your own data source in a single click."/>
+                </mx:VBox>
+            </mx:HBox>
+            <mx:HBox width="100%" paddingLeft="30" paddingRight="30" paddingTop="20" backgroundColor="#DDDDDD" height="100%" borderStyle="solid" borderThickness="1">
+                <mx:Canvas width="50%" height="200">
+                    <mx:VBox width="100%" horizontalAlign="center" borderStyle="solid" borderThickness="1" cornerRadius="15" height="100%"
+                            backgroundColor="#FFFFFF" alpha=".5" enabled="false">
+                        <mx:Label text="Our Easy Insight Documentation" fontSize="16" fontFamily="Tahoma" fontWeight="bold"/>
+                        <mx:HRule width="100%"/>
+                        <mx:HBox width="90%">
+                            <mx:VBox width="50%">
+                                <mx:LinkButton label="Concepts"/>
+                                <mx:LinkButton label="Connections"/>
+                                <mx:LinkButton label="Connection Exchange"/>
+                                <mx:LinkButton label="Basic Reports"/>
+                                <mx:LinkButton label="Advanced Reports"/>
+                            </mx:VBox>
+                            <mx:VBox width="50%">
+                                <mx:LinkButton label="KPI Trees"/>
+                                <mx:LinkButton label="Collaboration"/>
+                                <mx:LinkButton label="API"/>
+                                <mx:LinkButton label="Account Management"/>
+                            </mx:VBox>
+                        </mx:HBox>
+                    </mx:VBox>
+                    <mx:Box width="100%" horizontalAlign="center" verticalAlign="middle" height="100%">
+                        <mx:Label text="Coming Soon!" fontSize="16" fontFamily="Tahoma" fontWeight="bold" color="#D42525"/>
+                    </mx:Box>
+                </mx:Canvas>
+                <mx:Spacer width="80"/>
+                <mx:VBox width="50%" horizontalAlign="center" borderStyle="solid" borderThickness="1" cornerRadius="15" height="200"
+                        backgroundColor="#FFFFFF">
+                    <mx:Label text="Video Tours of Easy Insight" fontSize="16" fontFamily="Tahoma" fontWeight="bold"/>
+                    <mx:HRule width="100%"/>
+                    <!--<mx:LinkButton label="Why Easy Insight?"/>-->
+                    <mx:LinkButton label="Seven Easy Steps to Full Business Visibility" click="lesson1()"/>
+                </mx:VBox>
+            </mx:HBox>
+            <!--<mx:VBox width="100%" horizontalAlign="center">
+                <mx:Label fontSize="18" color="#000000" text="Welcome to Easy Insight!"/>
+                <mx:Label fontSize="16" color="#000000"
+                          text="You can start by clicking any of the top buttons to navigate to that particular section."/>
+            </mx:VBox>-->
+        </mx:VBox>
+    </mx:HBox>
+</mx:Box>
