@@ -1,6 +1,6 @@
 <?xml version="1.0" ?>
 <mx:HBox xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:analysis="com.easyinsight.analysis.*" paddingTop="5" paddingBottom="5"
-        paddingLeft="5" paddingRight="5" horizontalScrollPolicy="off" verticalScrollPolicy="off">
+        paddingLeft="5" paddingRight="5" horizontalScrollPolicy="off" verticalScrollPolicy="off" width="200">
     <mx:Script><![CDATA[
         import com.easyinsight.analysis.AnalysisDefinition;
 
@@ -207,7 +207,7 @@
     </mx:RemoteObject>
     <mx:Box borderStyle="solid" borderThickness="1" backgroundColor="#FFFFFF" verticalAlign="middle" horizontalAlign="center" backgroundAlpha="1" height="180">
         <mx:VBox horizontalAlign="center">
-            <mx:LinkButton label="{reportName}" textDecoration="underline" click="addReport()" fontSize="13" fontFamily="Tahoma" fontWeight="bold"/>
+            <mx:LinkButton label="{reportName}" textDecoration="underline" click="addReport()" fontSize="13" fontFamily="Tahoma" fontWeight="bold" maxWidth="180"/>
             <mx:Image source="{reportImage}"/>
             <mx:TextArea borderStyle="none" backgroundAlpha="0" editable="false" selectable="false"
                          text="{reportDescription}" width="100%" maxChars="250" verticalScrollPolicy="off" toolTip="{reportDescription}" height="80"/>
