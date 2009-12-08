@@ -40,7 +40,7 @@
         ]]>
     </mx:Script>
     <mx:HBox width="100%" height="100%" id="listsBox">
-        <mx:VBox>
+        <mx:VBox height="100%">
             <mx:HBox>
 
                 <mx:Label text="Sort By:" fontFamily="Tahoma" fontWeight="bold" fontSize="14"/>
@@ -62,7 +62,7 @@
             <mx:HBox width="100%" horizontalAlign="center">
                 <mx:Label text="Popular Tags" fontFamily="Tahoma" fontWeight="bold" fontSize="14"/>
             </mx:HBox>
-            <listing:TagListing width="250" borderStyle="solid" borderThickness="1" tagFocus="onTagFocus(event)"/>
+            <listing:TagListing width="250" borderStyle="solid" borderThickness="1" tagFocus="onTagFocus(event)" height="100%"/>
         </mx:VBox>
         <mx:Box width="100%" horizontalAlign="center" height="100%">
             <!--<mx:Canvas backgroundAlpha="0" width="100%" height="100%">-->

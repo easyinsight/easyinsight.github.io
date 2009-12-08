@@ -87,7 +87,7 @@
         ]]>
     </mx:Script>
     <mx:HBox width="100%" height="100%" id="listsBox">
-        <mx:VBox>
+        <mx:VBox height="100%">
             <mx:HBox>
                 <mx:Label text="Connection:" fontFamily="Tahoma" fontWeight="bold" fontSize="14"/>
                 <mx:ComboBox id="solutionBox" change="changeSolution()" dataProvider="{solutions}" labelField="name" selectedItem="{solution}"/>
@@ -112,7 +112,7 @@
             <mx:HBox width="100%" horizontalAlign="center">
                 <mx:Label text="Popular Tags" fontFamily="Tahoma" fontWeight="bold" fontSize="14"/>
             </mx:HBox>
-            <listing:TagListing width="250" borderStyle="solid" borderThickness="1" tagFocus="onTagFocus(event)" solution="true"/>
+            <listing:TagListing width="250" borderStyle="solid" borderThickness="1" tagFocus="onTagFocus(event)" solution="true" height="100%"/>
         </mx:VBox>
         <mx:TileList dataProvider="{dataProvider2}" itemRenderer="{_itemRenderer}" height="100%" width="100%" rowHeight="200"/>        
     </mx:HBox>
