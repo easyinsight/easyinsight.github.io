@@ -245,7 +245,7 @@ public class InstallationSystem {
         while (rs.next()) {
             long feedID = rs.getLong(1);
             FeedDefinition feedDefinition = feedStorage.getFeedDefinitionData(feedID, conn);
-            descriptors.addAll(DataSourceCopyUtils.installFeed(userID, conn, copyData, feedID, feedDefinition, true, null, solutionID));
+            descriptors.addAll(DataSourceCopyUtils.installFeed(userID, conn, copyData, feedID, feedDefinition, false, null, solutionID));
         }
         return descriptors;
     }

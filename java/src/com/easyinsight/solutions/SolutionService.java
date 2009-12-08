@@ -174,6 +174,27 @@ public class SolutionService {
         return new AuthorizationManager().authorize(type, solutionID);        
     }
 
+    public boolean connectionInstalled(long solutionID) {
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            PreparedStatement queryStmt = conn.prepareStatement("SELECT SOLUTION_INSTALL.installed_data_source_id FROM " +
+                    "SOLUTION_INSTALL, DATA_FEED, UPLOAD_POLICY_USERS WHERE " +
+                    "SOLUTION_INSTALL.solution_id = ? AND " +
+                    "SOLUTION_INSTALL.INSTALLED_DATA_SOURCE_ID = DATA_FEED.DATA_FEED_ID AND " +
+                    "UPLOAD_POLICY_USERS.USER_ID = ? AND DATA_FEED.DATA_FEED_ID = UPLOAD_POLICY_USERS.FEED_ID");
+            queryStmt.setLong(1, solutionID);
+            queryStmt.setLong(2, SecurityUtil.getUserID(false));
+            ResultSet rs = queryStmt.executeQuery();
+            boolean valid = rs.next();
+            return valid;
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        } finally {
+            Database.closeConnection(conn);
+        }
+    }
+
     public List<DataSourceDescriptor> determineDataSource(long dataSourceID) {
         List<DataSourceDescriptor> descriptors = new ArrayList<DataSourceDescriptor>();
         EIConnection conn = Database.instance().getConnection();
@@ -319,6 +340,7 @@ public class SolutionService {
                     " LEFT JOIN USER_REPORT_RATING ON USER_REPORT_RATING.report_id = ANALYSIS.ANALYSIS_ID WHERE ANALYSIS.DATA_FEED_ID = DATA_FEED.DATA_FEED_ID AND " +
                     "ANALYSIS.DATA_FEED_ID = SOLUTION_INSTALL.installed_data_source_id AND ANALYSIS.SOLUTION_VISIBLE = ? " +
                     "AND solution_install.solution_id = solution.solution_id GROUP BY ANALYSIS.ANALYSIS_ID");
+            PreparedStatement getImageStmt = conn.prepareStatement("SELECT REPORT_IMAGE FROM REPORT_IMAGE WHERE REPORT_ID = ?");
             analysisQueryStmt.setBoolean(1, true);
             ResultSet analysisRS = analysisQueryStmt.executeQuery();
             while (analysisRS.next()) {
@@ -351,6 +373,12 @@ public class SolutionService {
                 List<String> tags = new ArrayList<String>();
                 while (tagRS.next()) {
                     tags.add(tagRS.getString(1));
+                }
+                getImageStmt.setLong(1, analysisID);
+                ResultSet imageRS = getImageStmt.executeQuery();
+                if (imageRS.next()) {
+                    byte[] bytes = imageRS.getBytes(1);
+                    item.setImage(bytes);
                 }
                 item.setTags(tags);
             }

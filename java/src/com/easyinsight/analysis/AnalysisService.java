@@ -248,9 +248,9 @@ public class AnalysisService {
             analysisDefinition.setAuthorName(SecurityUtil.getUserName());
             analysisStorage.saveAnalysis(analysisDefinition, session);
             session.flush();
-            /*if (image != null) {
+            if (image != null) {
                 saveImage(image, analysisDefinition.getAnalysisID(), conn);
-            }*/
+            }
             conn.commit();
             return analysisDefinition.createBlazeDefinition();
         } catch (Exception e) {
@@ -272,12 +272,12 @@ public class AnalysisService {
         }
     }
 
-    /*private void saveImage(byte[] image, long reportID, Connection conn) throws SQLException {
+    private void saveImage(byte[] image, long reportID, Connection conn) throws SQLException {
         PreparedStatement saveImageStmt = conn.prepareStatement("INSERT INTO REPORT_IMAGE (REPORT_ID, REPORT_IMAGE) VALUES (?, ?)");
         saveImageStmt.setLong(1, reportID);
         saveImageStmt.setBytes(2, image);
         saveImageStmt.execute();
-    }*/
+    }
 
     public void deleteAnalysisDefinition(long reportID) {
         long userID = SecurityUtil.getUserID();

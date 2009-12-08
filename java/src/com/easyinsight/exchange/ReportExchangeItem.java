@@ -12,6 +12,7 @@ public class ReportExchangeItem extends ExchangeItem {
     private long dataSourceID;
     private String dataSourceName;
     private boolean dataSourceAccessible;
+    private byte[] image;
 
     public ReportExchangeItem() {
     }
@@ -24,6 +25,14 @@ public class ReportExchangeItem extends ExchangeItem {
         this.dataSourceID = dataSourceID;
         this.dataSourceName = dataSourceName;
         this.dataSourceAccessible = dataSourceAccessible;
+    }
+
+    public byte[] getImage() {
+        return image;
+    }
+
+    public void setImage(byte[] image) {
+        this.image = image;
     }
 
     public boolean isDataSourceAccessible() {
