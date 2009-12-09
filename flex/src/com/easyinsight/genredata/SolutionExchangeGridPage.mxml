@@ -56,10 +56,13 @@
         </mx:VBox>
         <mx:DataGrid dataProvider="{dataProvider2}" width="100%" height="100%">
         <mx:columns>
-            <mx:DataGridColumn headerText="Name" dataField="name"/>
+            <mx:DataGridColumn headerText="Report Name" dataField="name"/>
+            <mx:DataGridColumn headerText="Connection" dataField="solutionName" width="160"/>
             <mx:DataGridColumn headerText="Author" dataField="author" width="120"/>
             <mx:DataGridColumn headerText="Rating" dataField="name"
                                itemRenderer="com.easyinsight.genredata.ExchangeRatingRenderer" width="120"/>
+            <mx:DataGridColumn headerText="Date Added" dataField="author" width="90"
+                    itemRenderer="com.easyinsight.genredata.ReportDateRenderer"/>
             <mx:DataGridColumn headerText="" dataField="name" sortable="false"
                                itemRenderer="com.easyinsight.genredata.SolutionGridActionRenderer" width="50"/>
         </mx:columns>

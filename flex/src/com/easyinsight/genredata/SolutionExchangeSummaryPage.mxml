@@ -114,6 +114,6 @@
             </mx:HBox>
             <listing:TagListing width="250" borderStyle="solid" borderThickness="1" tagFocus="onTagFocus(event)" solution="true" height="100%"/>
         </mx:VBox>
-        <mx:TileList dataProvider="{dataProvider2}" itemRenderer="{_itemRenderer}" height="100%" width="100%" rowHeight="200" columnWidth="210"/>        
+        <mx:TileList dataProvider="{dataProvider2}" itemRenderer="{_itemRenderer}" height="100%" width="100%" rowHeight="200" columnWidth="200"/>        
     </mx:HBox>
 </genredata:ExchangePage>

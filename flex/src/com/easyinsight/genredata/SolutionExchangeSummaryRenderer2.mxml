@@ -1,6 +1,6 @@
 <?xml version="1.0" ?>
 <mx:HBox xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:analysis="com.easyinsight.analysis.*" paddingTop="5" paddingBottom="5"
-        paddingLeft="5" paddingRight="5" horizontalScrollPolicy="off" verticalScrollPolicy="off" width="200">
+        paddingLeft="5" paddingRight="5" horizontalScrollPolicy="off" verticalScrollPolicy="off" width="200" horizontalAlign="center">
     <mx:Script><![CDATA[
         import com.easyinsight.analysis.AnalysisDefinition;
 
