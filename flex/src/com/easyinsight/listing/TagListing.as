@@ -72,6 +72,8 @@ import mx.rpc.events.FaultEvent;
                 tagText.setStyle("fontSize", 12);
                 //tagText.setStyle("textDecoration", "underline");
                 tagText.setStyle("fontColor", "#FFFFFF");
+                tagText.setStyle("paddingLeft", 0);
+                tagText.setStyle("paddingRight", 0);
                 tagText.label = tag.tagName;
                 tagText.addEventListener(MouseEvent.CLICK, focusOnTag);
                 addChild(tagText);
