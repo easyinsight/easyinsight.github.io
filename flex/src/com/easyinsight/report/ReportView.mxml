@@ -246,6 +246,9 @@
         [Bindable]
         private var reportDate:String;
 
+        [Bindable]
+        private var _placeHolderID:int;
+
         private var commandProcessor:CommandProcessor;
 
         [Bindable]
@@ -259,9 +262,9 @@
             _originReportID = value;
         }
 
-        private var _originReportScore:int;
+        private var _originReportScore:Number;
 
-        public function set originReportScore(value:int):void {
+        public function set originReportScore(value:Number):void {
             _originReportScore = value;
         }
 
@@ -352,9 +355,15 @@
                 dataSource = event.dataSourceInfo;
                 reportName = report.name;
                 var nf:NumberFormatter = new NumberFormatter();
+                if (_originReportID > 0) {
+                    _score = _originReportScore;
+                    _placeHolderID = _originReportID;
+                } else {
+                    _score = event.ratingsAverage;
+                    _placeHolderID = _dataSourceID;
+                }
                 reportRatingCount = nf.format(event.ratingsCount);
                 reportRating = nf.format(event.ratingsAverage);
-                _score = event.ratingsAverage;
                 reportViews = String(report.viewCount);
                 description = report.description;
                 attribution = event.attribution;
@@ -697,7 +706,7 @@
                         <mx:Label text="{attribution}" fontFamily="Lucida Grande" fontWeight="normal" maxWidth="180"/>
                     </mx:FormItem>
                     <mx:FormItem label="Report Rating:">
-                        <analysis:ReportRating reportID="{_reportID}" score="{_score}" rateable="true"/>
+                        <analysis:ReportRating reportID="{_placeHolderID}" score="{_score}" rateable="true"/>
                     </mx:FormItem>
                     <mx:FormItem label="Description:">
                         <mx:TextArea text="{description}" fontFamily="Lucida Grande" fontWeight="normal"

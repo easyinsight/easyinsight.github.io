@@ -29,12 +29,17 @@ public class ReportRating extends HBox{
 
     private var analysisService:RemoteObject;
 
+    private var _connection:Boolean = false;
+
     private var _rateable:Boolean = false;                                                                                  
 
     public function ReportRating() {
         super();
     }
 
+    public function set connection(value:Boolean):void {
+        _connection = value;
+    }
 
     public function set rateable(value:Boolean):void {
         _rateable = value;

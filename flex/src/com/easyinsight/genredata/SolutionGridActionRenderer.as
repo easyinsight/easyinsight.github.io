@@ -44,7 +44,7 @@ public class SolutionGridActionRenderer extends HBox{
     private function installedReport(event:ResultEvent):void {
         var insightDescriptor:InsightDescriptor = solutionService.installReport.lastResult as InsightDescriptor;
         // has to emit special property here to let us decide whether or not we want to keep this report
-        dispatchEvent(new AnalyzeEvent(new ReportAnalyzeSource(insightDescriptor, null, true)));
+        dispatchEvent(new AnalyzeEvent(new ReportAnalyzeSource(insightDescriptor, null, true, 0, exchangeItem.id, exchangeItem.ratingAverage)));
     }
 
     private function onListingEvent(event:ListingChangeEvent):void {
