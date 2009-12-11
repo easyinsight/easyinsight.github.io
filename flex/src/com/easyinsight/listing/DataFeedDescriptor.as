@@ -21,6 +21,7 @@ package com.easyinsight.listing
         public static const GNIP:int = 12;
         public static const GOOGLE_ANALYTICS:int = 13;
         public static const HIGHRISE:int = 23;
+        public static const TWITTER:int = 26;
 
 		public static const OWNER:int = 1;
 		public static const SUBSCRIBER:int = 3;

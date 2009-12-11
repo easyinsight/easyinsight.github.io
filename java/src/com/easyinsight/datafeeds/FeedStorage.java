@@ -45,6 +45,7 @@ import com.easyinsight.datafeeds.cloudwatch.CloudWatchDataSource;
 import com.easyinsight.datafeeds.highrise.HighRiseCompositeSource;
 import com.easyinsight.datafeeds.highrise.HighRiseCompanySource;
 import com.easyinsight.datafeeds.highrise.HighRiseDealSource;
+import com.easyinsight.datafeeds.twitter.TwitterDataSource;
 
 /**
  * User: jboe
@@ -737,7 +738,10 @@ public class FeedStorage {
                     feedDefinition = new HighRiseCompanySource();
                 } else if (feedType.equals(FeedType.HIGHRISE_DEAL)) {
                     feedDefinition = new HighRiseDealSource();
-                } else if (feedType.equals(FeedType.CUSTOM)) {
+                } else if (feedType.equals(FeedType.TWITTER)) {
+                    feedDefinition = new TwitterDataSource();
+                }
+                else if (feedType.equals(FeedType.CUSTOM)) {
                     feedDefinition = new CustomDataSource();
                 }
                 else {

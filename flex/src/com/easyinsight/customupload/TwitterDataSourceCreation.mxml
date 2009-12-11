@@ -1,0 +1,80 @@
+<?xml version="1.0" ?>
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%" implements="com.easyinsight.customupload.IServerDataSourceCreation" creationComplete="onCreationComplete()">
+    <mx:Metadata>
+		[Event(name="userConfigComplete", type="com.easyinsight.customupload.UploadConfigEvent")]
+		[Event(name="userConfigCancel", type="com.easyinsight.customupload.UploadConfigEvent")]
+	</mx:Metadata>
+    <mx:Script><![CDATA[
+        import com.easyinsight.administration.feed.FeedDefinitionData;
+        import com.easyinsight.datasources.TwitterDataSource;
+        import com.easyinsight.framework.Credentials;
+
+        import mx.collections.ArrayCollection;
+        import mx.controls.Alert;
+        import mx.events.CollectionEvent;
+
+        private function onCollectionChange(event:CollectionEvent):void {
+            Alert.show(searches.getItemAt(searches.length - 1) as String);
+            if (searches.getItemAt(searches.length - 1) != "")
+                searches.addItem("");
+        }
+
+        private function onTwat(event:TwitterTextEvent):void {
+            Alert.show(searches.getItemAt(0) as String);
+        }
+
+        private function onCreationComplete():void {
+            searches = new ArrayCollection();
+            _searches.addEventListener(CollectionEvent.COLLECTION_CHANGE, onCollectionChange);
+            searches.addItem("");
+            addEventListener(TwitterTextEvent.TWITTER_TEXT, onTwat);
+        }
+
+
+        private var _searches:ArrayCollection;
+
+        public function get dataSourceDefinition():FeedDefinitionData {
+            var obj:TwitterDataSource = new TwitterDataSource();
+            obj.searches = searches;
+            if (obj.searches.length > 0)
+                obj.searches.removeItemAt(obj.searches.length - 1);
+            if (searches.length == 0)
+                searches.addItem("");
+            return obj;
+        }
+
+        public function set dataSourceDefinition(feedDefinition:FeedDefinitionData):void {
+            var ds:TwitterDataSource = feedDefinition as TwitterDataSource;
+            searches = ds.searches;
+            searches.addItem("");
+        }
+
+        public function updateDataSource(feedDefinition:FeedDefinitionData):void {
+            var ds:TwitterDataSource = feedDefinition as TwitterDataSource;
+            ds.searches = searches;
+            if (ds.searches.length > 0)
+                ds.searches.removeItemAt(ds.searches.length - 1);
+        }
+
+        public function get credentials():Credentials {
+            return null;
+        }
+
+        public function set credentials(c:Credentials):void {
+        }
+
+        public function validate():Boolean {
+            return false;
+        }
+
+        [Bindable]
+        public function get searches():ArrayCollection {
+            return _searches;
+        }
+
+        public function set searches(value:ArrayCollection):void {
+            searches = value;
+        }]]></mx:Script>
+    <mx:Label text="Search Strings:" />
+    <mx:List id="tileList" width="400" columnWidth="400" dataProvider="{searches}" itemRenderer="com.easyinsight.customupload.TwitterSearchItemRenderer" rendererIsEditor="true" editorDataField="dataString" />
+</mx:VBox>
