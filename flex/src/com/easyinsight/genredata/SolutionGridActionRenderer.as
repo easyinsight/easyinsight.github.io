@@ -1,8 +1,11 @@
 package com.easyinsight.genredata {
 import com.easyinsight.listing.ListingChangeEvent;
+import com.easyinsight.report.PackageAnalyzeSource;
 import com.easyinsight.report.ReportAnalyzeSource;
+import com.easyinsight.reportpackage.ReportPackageDescriptor;
 import com.easyinsight.solutions.InsightDescriptor;
 import com.easyinsight.util.PopUpUtil;
+import com.easyinsight.util.ProgressAlert;
 
 import flash.events.MouseEvent;
 
@@ -41,8 +44,20 @@ public class SolutionGridActionRenderer extends HBox{
             solutionService.determineDataSource.addEventListener(ResultEvent.RESULT, gotMatchingDataSources);
             solutionService.installReport.addEventListener(ResultEvent.RESULT, installedReport);
             solutionService.determineDataSource.send(exchangeReportData.dataSourceID);
+        } else if (exchangeItem.exchangeData is ExchangePackageData) {
+            var exchangePackageData:ExchangePackageData = exchangeItem.exchangeData as ExchangePackageData;
+            solutionService.determineDataSourceForPackage.addEventListener(ResultEvent.RESULT, gotMatchingDataSourcesForPackage);
+            solutionService.installPackage.addEventListener(ResultEvent.RESULT, installedPackage);
+            solutionService.determineSourceForPackage.send(exchangePackageData.packageID);
         }
 
+    }
+
+    private function installedPackage():void {
+        var packageData:ExchangePackageData = exchangeItem.exchangeData as ExchangePackageData;
+        var packageDescriptor:ReportPackageDescriptor = solutionService.installPackage.lastResult as ReportPackageDescriptor;
+        // has to emit special property here to let us decide whether or not we want to keep this report
+        dispatchEvent(new AnalyzeEvent(new PackageAnalyzeSource(packageDescriptor, true, packageData.packageID, 0)));
     }
 
     private function installedReport(event:ResultEvent):void {
@@ -53,6 +68,25 @@ public class SolutionGridActionRenderer extends HBox{
 
     private function onListingEvent(event:ListingChangeEvent):void {
         dispatchEvent(event);
+    }
+
+    private function gotMatchingDataSourcesForPackage():void {
+        var packageData:ExchangePackageData = exchangeItem.exchangeData as ExchangePackageData;
+        var dataSources:ArrayCollection = solutionService.determineDataSourceForPackage.lastResult as ArrayCollection;
+        if (dataSources.length == 0) {
+            var window:NoSolutionInstalledWindow = new NoSolutionInstalledWindow();
+            window.solution = exchangeItem.solutionID;
+            window.addEventListener(ListingChangeEvent.LISTING_CHANGE, onListingEvent);
+            PopUpManager.addPopUp(window, this, true);
+            PopUpUtil.centerPopUp(window);
+        } else if (dataSources.length == 1) {
+            ProgressAlert.alert(this, "Getting the report ready...", null, solutionService.installPackage);
+            solutionService.installPackage.send(packageData.packageID, dataSources.getItemAt(0).id);
+        } else {
+            // TODO: this is a hack for now
+            ProgressAlert.alert(this, "Getting the report ready...", null, solutionService.installPackage);
+            solutionService.installPackage.send(packageData.packageID, dataSources.getItemAt(0).id);
+        }
     }
 
     private function gotMatchingDataSources(event:ResultEvent):void {
