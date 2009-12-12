@@ -48,12 +48,12 @@ public class SolutionGridActionRenderer extends HBox{
             var exchangePackageData:ExchangePackageData = exchangeItem.exchangeData as ExchangePackageData;
             solutionService.determineDataSourceForPackage.addEventListener(ResultEvent.RESULT, gotMatchingDataSourcesForPackage);
             solutionService.installPackage.addEventListener(ResultEvent.RESULT, installedPackage);
-            solutionService.determineSourceForPackage.send(exchangePackageData.packageID);
+            solutionService.determineDataSourceForPackage.send(exchangePackageData.packageID);
         }
 
     }
 
-    private function installedPackage():void {
+    private function installedPackage(event:ResultEvent):void {
         var packageData:ExchangePackageData = exchangeItem.exchangeData as ExchangePackageData;
         var packageDescriptor:ReportPackageDescriptor = solutionService.installPackage.lastResult as ReportPackageDescriptor;
         // has to emit special property here to let us decide whether or not we want to keep this report
@@ -70,7 +70,7 @@ public class SolutionGridActionRenderer extends HBox{
         dispatchEvent(event);
     }
 
-    private function gotMatchingDataSourcesForPackage():void {
+    private function gotMatchingDataSourcesForPackage(event:ResultEvent):void {
         var packageData:ExchangePackageData = exchangeItem.exchangeData as ExchangePackageData;
         var dataSources:ArrayCollection = solutionService.determineDataSourceForPackage.lastResult as ArrayCollection;
         if (dataSources.length == 0) {
