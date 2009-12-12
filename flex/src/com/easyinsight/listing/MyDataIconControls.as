@@ -8,8 +8,10 @@ import com.easyinsight.framework.Credentials;
 import com.easyinsight.framework.GenericFaultHandler;
 import com.easyinsight.framework.User;
 import com.easyinsight.genredata.AnalyzeEvent;
-
+import com.easyinsight.report.PackageAnalyzeSource;
 import com.easyinsight.report.ReportAnalyzeSource;
+import com.easyinsight.reportpackage.ReportPackageDescriptor;
+import com.easyinsight.reportpackage.ReportPackageWindow;
 import com.easyinsight.solutions.InsightDescriptor;
 
 import com.easyinsight.util.PopUpUtil;
@@ -251,9 +253,12 @@ public class MyDataIconControls extends HBox
         if (obj is DataFeedDescriptor) {
             var descriptor:DataFeedDescriptor = obj as DataFeedDescriptor;
             dispatchEvent(new AnalyzeEvent(new DescriptorAnalyzeSource(descriptor.dataFeedID, descriptor.name)));
-        } else {
+        } else if (obj is InsightDescriptor) {
             var analysisDefinition:InsightDescriptor = obj as InsightDescriptor;
             dispatchEvent(new AnalyzeEvent(new ReportAnalyzeSource(analysisDefinition)));
+        } else if (obj is ReportPackageDescriptor) {
+            var packageDescriptor:ReportPackageDescriptor = obj as ReportPackageDescriptor;
+            dispatchEvent(new AnalyzeEvent(new PackageAnalyzeSource(packageDescriptor)));
         }
     }
 
@@ -310,9 +315,15 @@ public class MyDataIconControls extends HBox
         if (obj is DataFeedDescriptor) {
             var descriptor:DataFeedDescriptor = obj as DataFeedDescriptor;
             dispatchEvent(new AnalyzeEvent(new FeedAdminAnalyzeSource(descriptor.dataFeedID)));
-        } else {
+        } else if (obj is InsightDescriptor) {
             var analysisDefinition:InsightDescriptor = obj as InsightDescriptor;
             dispatchEvent(new AnalyzeEvent(new AnalysisDefinitionAnalyzeSource(analysisDefinition)));
+        } else if (obj is ReportPackageDescriptor) {
+            var packageDescriptor:ReportPackageDescriptor = obj as ReportPackageDescriptor;
+            var window:ReportPackageWindow = new ReportPackageWindow();
+            window.reportPackageID = packageDescriptor.id;
+            PopUpManager.addPopUp(window, this, true);
+            PopUpUtil.centerPopUp(window);
         }
     }
 
@@ -325,10 +336,15 @@ public class MyDataIconControls extends HBox
             adminTooltip = "Administer the data source...";
             copyVisible = true;
             deleteVisible = descriptor.groupSourceID == 0;
-        } else {
+        } else if (value is InsightDescriptor) {
             refreshVisible = false;
             adminVisible = true;
             adminTooltip = "Open report in the report editor...";
+            copyVisible = false;
+        } else if (value is ReportPackageDescriptor) {
+            refreshVisible = false;
+            adminVisible = true;
+            adminTooltip = "Edit the package definition...";
             copyVisible = false;
         }
     }

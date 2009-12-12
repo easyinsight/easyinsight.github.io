@@ -12,6 +12,7 @@ public abstract class EIDescriptor {
     public static final int GROUP = 3;
     public static final int GOAL_TREE = 4;
     public static final int SOLUTION = 5;
+    public static final int PACKAGE = 8;
 
     private String name;
     private long id;

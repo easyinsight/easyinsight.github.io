@@ -1,0 +1,117 @@
+<?xml version="1.0" ?>
+<report:MultiScreenView xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:easyinsight="com.easyinsight.*"
+                        xmlns:util="com.easyinsight.util.*" xmlns:report="com.easyinsight.report.*" width="100%"
+                        height="100%" creationComplete="setupListeners()">
+    <mx:Script><![CDATA[
+        import com.easyinsight.genredata.AnalyzeEvent;
+        import com.easyinsight.reportpackage.ReportPackage;
+        import com.easyinsight.solutions.InsightDescriptor;
+
+        import mx.controls.Alert;
+        import mx.controls.Button;
+        import mx.controls.Label;
+        import mx.managers.BrowserManager;
+        import mx.utils.URLUtil;
+
+        import com.easyinsight.analysis.AnalysisCloseEvent;
+
+        private var _packageID:int;
+
+        private var _showAddBar:Boolean;
+
+        private var _originPackageID:int;
+
+        private var _originPackageScore:Number;
+
+
+        public function set showAddBar(value:Boolean):void {
+            _showAddBar = value;
+        }
+
+        public function set originPackageID(value:int):void {
+            _originPackageID = value;
+        }
+
+        public function set originPackageScore(value:Number):void {
+            _originPackageScore = value;
+        }
+
+        public function set packageID(value:int):void {
+            _packageID = value;
+        }
+
+        private function setupListeners():void {
+            //addEventListener(AnalyzeEvent.ANALYZE, onAnalyze);
+            packageService.getReportPackage.send(_packageID);
+        }
+
+        private function onAnalyze(event:ReportNavigationEvent):void {
+
+            
+                for each (var desc:InsightDescriptor in reports) {
+                    if (event.descriptor.id == desc.id) {
+                        var properties:Object = { parameterFilters: event.filters};
+                        changeReport(desc, properties);                        
+                        break;
+                    }
+                }
+
+        }
+
+        override protected function setupBrowser():void {
+            var feedFragmentObject:Object = new Object();
+            feedFragmentObject.packageID = String(_packageID);
+            var feedFragmentString:String = URLUtil.objectToString(feedFragmentObject);
+            BrowserManager.getInstance().setFragment(feedFragmentString);
+            BrowserManager.getInstance().setTitle("Easy Insight - Reports");
+        }
+
+        [Bindable]
+        [Embed(source="../../../../assets/document_out_x32.png")]
+        private var closeIcon:Class;
+
+        override protected function commitProperties():void {
+            super.commitProperties();
+            if (factory is ReportScreenFactory) {
+                var reportFactory:ReportScreenFactory = factory as ReportScreenFactory;
+                reportFactory.reportNavHandler = onAnalyze; 
+            }
+        }
+
+
+
+        private function gotPackage():void {
+            var reportPackage:ReportPackage = packageService.getReportPackage.lastResult as ReportPackage;
+            this.reports = reportPackage.reports;
+        }
+
+        private function saveReport(event:MouseEvent):void {
+            packageService.keepPackage.send(_packageID);
+        }
+
+        private function retainedPackage():void {
+            verticalBarBox.removeAllChildren();
+        }
+
+        override protected function createChildren():void {
+            super.createChildren();
+            if (_showAddBar) {
+                var addLabel:Label = new Label();
+                addLabel.text = "Want to save this package permanently?";
+                verticalBarBox.addChild(addLabel);
+                var addButton:Button = new Button();
+                addButton.label = "Save to My Data";
+                addButton.addEventListener(MouseEvent.CLICK, saveReport);
+                verticalBarBox.addChild(addButton);
+            }
+        }
+
+        private function close():void {
+            dispatchEvent(new AnalysisCloseEvent(this));
+        }
+        ]]></mx:Script>
+    <mx:RemoteObject id="packageService" destination="analysisDefinition">
+        <mx:method name="getReportPackage" result="gotPackage()"/>
+        <mx:method name="keepPackage" result="retainedPackage()"/>
+    </mx:RemoteObject>
+</report:MultiScreenView>

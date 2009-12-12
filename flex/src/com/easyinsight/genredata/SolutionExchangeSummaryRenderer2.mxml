@@ -6,8 +6,9 @@
 
         import com.easyinsight.framework.User;
         import com.easyinsight.listing.ListingChangeEvent;
+        import com.easyinsight.report.PackageAnalyzeSource;
         import com.easyinsight.report.ReportAnalyzeSource;
-
+        import com.easyinsight.reportpackage.ReportPackageDescriptor;
         import com.easyinsight.solutions.InsightDescriptor;
 
         import com.easyinsight.util.PopUpUtil;
@@ -22,6 +23,13 @@
             var insightDescriptor:InsightDescriptor = solutionService.installReport.lastResult as InsightDescriptor;
             // has to emit special property here to let us decide whether or not we want to keep this report
             dispatchEvent(new AnalyzeEvent(new ReportAnalyzeSource(insightDescriptor, null, true, 0, reportID, score)));
+        }
+
+        private function installedPackage():void {
+            var packageData:ExchangePackageData = _item.exchangeData as ExchangePackageData;
+            var packageDescriptor:ReportPackageDescriptor = solutionService.installPackage.lastResult as ReportPackageDescriptor;
+            // has to emit special property here to let us decide whether or not we want to keep this report
+            dispatchEvent(new AnalyzeEvent(new PackageAnalyzeSource(packageDescriptor, true, packageData.packageID, score)));
         }
 
         private function onListingEvent(event:ListingChangeEvent):void {
@@ -46,10 +54,35 @@
             }
         }
 
+        private function gotMatchingDataSourcesForPackage():void {
+            var packageData:ExchangePackageData = _item.exchangeData as ExchangePackageData;
+            var dataSources:ArrayCollection = solutionService.determineDataSourceForPackage.lastResult as ArrayCollection;
+            if (dataSources.length == 0) {
+                var window:NoSolutionInstalledWindow = new NoSolutionInstalledWindow();
+                window.solution = _item.solutionID;
+                window.addEventListener(ListingChangeEvent.LISTING_CHANGE, onListingEvent);
+                PopUpManager.addPopUp(window, this, true);
+                PopUpUtil.centerPopUp(window);
+            } else if (dataSources.length == 1) {
+                ProgressAlert.alert(this, "Getting the report ready...", null, solutionService.installPackage);
+                solutionService.installPackage.send(packageData.packageID, dataSources.getItemAt(0).id);
+            } else {
+                // TODO: this is a hack for now
+                ProgressAlert.alert(this, "Getting the report ready...", null, solutionService.installPackage);
+                solutionService.installPackage.send(packageData.packageID, dataSources.getItemAt(0).id);
+            }
+        }
+
         private function addReport():void {
             if (User.getInstance() != null) {
-                ProgressAlert.alert(this, "Getting the report ready...", null, solutionService.determineDataSource);
-                solutionService.determineDataSource.send(dataSourceID);
+                if (_item.exchangeData is ExchangeReportData) {
+                    ProgressAlert.alert(this, "Getting the report ready...", null, solutionService.determineDataSource);
+                    solutionService.determineDataSource.send(dataSourceID);
+                } else if (_item.exchangeData is ExchangePackageData) {
+                    ProgressAlert.alert(this, "Getting the report ready...", null, solutionService.determineDataSourceForPackage);
+                    var packageData:ExchangePackageData = _item.exchangeData as ExchangePackageData;
+                    solutionService.determineDataSourceForPackage.send(packageData.packageID);
+                }
             }
         }
         
@@ -126,6 +159,10 @@
         private var grid:Class;
 
         [Bindable]
+        [Embed(source="../../../../assets/report/package.png")]
+        private var packageIcon:Class;
+
+        [Bindable]
         [Embed(source="../../../../assets/report/data.png")]
         private var dataIcon:Class;
 
@@ -180,8 +217,15 @@
                 reportName = _item.name;
                 reportDescription = _item.description;
                 reportID = _item.id;
-                reportType = _item.reportType;
-                dataSourceID = _item.dataSourceID;
+                if (_item.exchangeData is ExchangeReportData) {
+                    var exchangeReportData:ExchangeReportData = _item.exchangeData as ExchangeReportData;
+                    reportType = exchangeReportData.reportType;
+                    dataSourceID = exchangeReportData.dataSourceID;
+                    assignIcon();
+                } else {
+                    reportImage = packageIcon;
+                }
+
                 score = _item.ratingAverage;
                 var df:DateFormatter = new DateFormatter();
                 if (_item.dateAdded == null) {
@@ -191,7 +235,7 @@
                 }
                 solutionName = _item.solutionName;
                 author = _item.author;
-                assignIcon();
+
             }
         }
 
@@ -203,7 +247,9 @@
         ]]></mx:Script>
     <mx:RemoteObject destination="solutionService" id="solutionService">
         <mx:method name="determineDataSource" result="gotMatchingDataSources()"/>
+        <mx:method name="determineDataSourceForPackage" result="gotMatchingDataSourcesForPackage()"/>
         <mx:method name="installReport" result="installedReport()"/>
+        <mx:method name="installPackage" result="installedPackage()"/>
     </mx:RemoteObject>
     <mx:Box borderStyle="solid" borderThickness="1" backgroundColor="#FFFFFF" verticalAlign="middle" horizontalAlign="center" backgroundAlpha="1" height="180">
         <mx:VBox horizontalAlign="center">

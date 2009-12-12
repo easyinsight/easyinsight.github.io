@@ -36,9 +36,13 @@ public class SolutionGridActionRenderer extends HBox{
     private function viewReport(event:MouseEvent):void {
         solutionService = new RemoteObject();
         solutionService.destination = "solutionService";
-        solutionService.determineDataSource.addEventListener(ResultEvent.RESULT, gotMatchingDataSources);
-        solutionService.installReport.addEventListener(ResultEvent.RESULT, installedReport);
-        solutionService.determineDataSource.send(exchangeItem.dataSourceID);
+        if (exchangeItem.exchangeData is ExchangeReportData) {
+            var exchangeReportData:ExchangeReportData = exchangeItem.exchangeData as ExchangeReportData;
+            solutionService.determineDataSource.addEventListener(ResultEvent.RESULT, gotMatchingDataSources);
+            solutionService.installReport.addEventListener(ResultEvent.RESULT, installedReport);
+            solutionService.determineDataSource.send(exchangeReportData.dataSourceID);
+        }
+
     }
 
     private function installedReport(event:ResultEvent):void {

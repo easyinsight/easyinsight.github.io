@@ -16,6 +16,12 @@
         </properties>
     </destination>
 
+    <destination id="reportPackageService">
+        <properties>
+            <source>com.easyinsight.reportpackage.ReportPackageService</source>
+        </properties>
+    </destination>
+
     <destination id="tokenService">
         <properties>
             <source>com.easyinsight.users.TokenService</source>

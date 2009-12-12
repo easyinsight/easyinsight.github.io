@@ -239,8 +239,8 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
         for (FilterDefinition filterDefinition : getFilters()) {
             clonedFilters.add(filterDefinition.clone());
         }
-        setFilters(clonedFilters);
-        setLinks(clonedLinks);
+        clonedItem.setFilters(clonedFilters);
+        clonedItem.setLinks(clonedLinks);
         return clonedItem;
     }
 

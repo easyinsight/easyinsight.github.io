@@ -1,0 +1,178 @@
+<?xml version="1.0" ?>
+<util:EITitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*" creationComplete="addListeners()">
+    <mx:Script><![CDATA[
+        import com.easyinsight.listing.DataFeedDescriptor;
+        import com.easyinsight.util.PopUpUtil;
+
+        import mx.collections.ArrayCollection;
+        import mx.managers.PopUpManager;
+
+        private var _reportPackage:ReportPackage;
+
+        [Bindable]
+        private var publiclyVisible:Boolean;
+        [Bindable]
+        private var marketplaceVisible:Boolean;
+        [Bindable]
+        private var connectionVisible:Boolean;
+        [Bindable]
+        private var packageName:String;
+        [Bindable]
+        private var singleSource:Boolean;
+        [Bindable]
+        private var description:String;
+        [Bindable]
+        private var reports:ArrayCollection = new ArrayCollection();
+        [Bindable]
+        private var dataSources:ArrayCollection;
+
+        private var _reportPackageID:int;
+
+        public function set reportPackageID(value:int):void {
+            _reportPackageID = value;
+        }
+
+        private function addListeners():void {
+            addEventListener(PackageReportEvent.REMOVE_REPORT, onReportDelete);
+            feedService.searchForSubscribedFeeds.send();
+        }
+
+        public function set reportPackage(value:ReportPackage):void {
+            _reportPackage = value;
+        }
+
+        protected override function commitProperties():void {
+            super.commitProperties();
+
+            if (_reportPackage != null) {
+                packageName = _reportPackage.name;
+                publiclyVisible = _reportPackage.publiclyVisible;
+                connectionVisible = _reportPackage.connectionVisible;
+                marketplaceVisible = _reportPackage.marketplaceVisible;
+                description = _reportPackage.description;
+                singleSource = _reportPackage.singleDataSource;
+                reports = _reportPackage.reports;
+            } else if (_reportPackageID > 0 ) {
+                packageService.getReportPackage.send(_reportPackageID);
+            }
+        }
+
+        private function gotPackage():void {
+            _reportPackage = packageService.getReportPackage.lastResult as ReportPackage;
+            invalidateProperties();
+        }
+
+        private function save():void {
+            if (_reportPackage == null) {
+                _reportPackage = new ReportPackage();
+            }
+            _reportPackage.name = packageNameInput.text;
+            _reportPackage.marketplaceVisible = marketplaceVisibleCheckbox.selected;
+            _reportPackage.publiclyVisible = publiclyVisibleCheckbox.selected;
+            _reportPackage.connectionVisible = connectionVisibleCheckbox.selected;
+            _reportPackage.singleDataSource = singleSourceCheckbox.selected;
+            _reportPackage.authorName = "";
+            _reportPackage.description = "";
+            if (_reportPackage.singleDataSource) {
+                _reportPackage.dataSourceID = dataSourceComboBox.selectedItem.dataFeedID;
+            } else {
+                _reportPackage.dataSourceID = 0;
+            }
+            _reportPackage.reports = reports;
+            _reportPackage.temporaryPackage = false;
+            packageService.saveReportPackage.send(_reportPackage);
+        }
+
+        private function saved():void {
+            _reportPackage.reportPackageID = packageService.saveReportPackage.lastResult as int;
+            dispatchEvent(new PackageEvent(PackageEvent.PACKAGE_ADDED, _reportPackage))
+            PopUpManager.removePopUp(this);
+        }
+
+        private function addReport():void {
+            var window:AddReportToPackageWindow = new AddReportToPackageWindow();
+            window.dataSourceID = singleSourceCheckbox.selected ? dataSourceComboBox.selectedItem.dataFeedID : 0;
+            window.addEventListener(PackageReportEvent.ADD_REPORT, onReportAdd);
+            PopUpManager.addPopUp(window, this, true);
+            PopUpUtil.centerPopUp(window);
+        }
+
+        private function onReportAdd(event:PackageReportEvent):void {
+            reports.addItem(event.insightDescriptor);
+        }
+
+        private function onReportDelete(event:PackageReportEvent):void {
+            reports.removeItemAt(reports.getItemIndex(event.insightDescriptor));
+        }
+
+        private var dataSourceID:int;
+        [Bindable]
+        private var selectedSource:DataFeedDescriptor;
+
+        private function gotDataSources():void {
+            dataSources = feedService.searchForSubscribedFeeds.lastResult as ArrayCollection;
+            if (dataSourceID > 0) {
+                for each (var desc:DataFeedDescriptor in dataSources) {
+                    if (desc.dataFeedID == dataSourceID) {
+                        selectedSource = desc;
+                    }
+                }
+            }
+        }
+        ]]></mx:Script>
+    <mx:RemoteObject destination="reportPackageService" id="packageService">
+        <mx:method name="saveReportPackage" result="saved()"/>
+        <mx:method name="getReportPackage" result="gotPackage()"/>
+    </mx:RemoteObject>
+    <mx:RemoteObject destination="feeds" id="feedService">
+        <mx:method name="searchForSubscribedFeeds" result="gotDataSources()"/>
+    </mx:RemoteObject>
+    <mx:VBox>
+        <mx:HBox>
+            <mx:Form>
+                <mx:FormItem label="Package Name:">
+                    <mx:TextInput id="packageNameInput" text="{packageName}"/>
+                </mx:FormItem>
+                <mx:FormItem label="Publicly Visible:" direction="horizontal">
+                    <mx:CheckBox id="publiclyVisibleCheckbox" selected="{publiclyVisible}"/>
+                    <mx:Label fontSize="10" textDecoration="underline" text="What is this?"
+                          toolTip="By checking this box, you make the report visible to other users that you send the URL to."/>
+                </mx:FormItem>
+                <mx:FormItem label="Marketplace Visible:" direction="horizontal">
+                    <mx:CheckBox id="marketplaceVisibleCheckbox" selected="{marketplaceVisible}"/>
+                    <mx:Label fontSize="10" textDecoration="underline" text="What is this?"
+                          toolTip="By checking this box, you make the report visible to other users that you send the URL to."/>
+                </mx:FormItem>
+                <mx:FormItem label="Limit This Package to One Data Source:" direction="horizontal">
+                    <mx:CheckBox id="singleSourceCheckbox" selected="{singleSource}" change="singleSource = singleSourceCheckbox.selected"/>
+                    <mx:Label fontSize="10" textDecoration="underline" text="What is this?"
+                          toolTip="By checking this box, you make the report visible to other users that you send the URL to."/>
+                </mx:FormItem>
+                <mx:FormItem label="Single Data Source:" direction="horizontal" enabled="{singleSource}">
+                    <mx:ComboBox dataProvider="{dataSources}" id="dataSourceComboBox" labelField="name" selectedItem="{selectedSource}"/>
+                </mx:FormItem>
+                <mx:FormItem label="Connection Visible:" direction="horizontal" enabled="{singleSource}">
+                    <mx:CheckBox id="connectionVisibleCheckbox" selected="{connectionVisible}"/>
+                    <mx:Label fontSize="10" textDecoration="underline" text="What is this?"
+                          toolTip="By checking this box, you make the report visible to other users that you send the URL to."/>
+                </mx:FormItem>
+            </mx:Form>
+            <mx:VBox>
+                <mx:Label text="Reports"/>
+                <mx:HBox>
+                    <mx:Button label="Add Report..." click="addReport()"/>
+                </mx:HBox>
+                <mx:DataGrid id="reportGrid" dataProvider="{reports}" rowHeight="26" dragEnabled="true" dragMoveEnabled="true" dropEnabled="true">
+                    <mx:columns>
+                        <mx:DataGridColumn headerText="Report" dataField="name" width="300"/>
+                        <mx:DataGridColumn sortable="false" itemRenderer="com.easyinsight.reportpackage.ReportPackageControls" width="50"/>
+                    </mx:columns>
+                </mx:DataGrid>
+            </mx:VBox>
+        </mx:HBox>
+        <mx:HBox width="100%" horizontalAlign="center">
+            <mx:Button label="Save" click="save()"/>
+            <mx:Button label="Cancel" click="PopUpManager.removePopUp(this)"/>
+        </mx:HBox>
+    </mx:VBox>
+</util:EITitleWindow>

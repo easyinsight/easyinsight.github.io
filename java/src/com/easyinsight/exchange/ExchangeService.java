@@ -23,6 +23,7 @@ public class ExchangeService {
         Connection conn = Database.instance().getConnection();
         try {
             PreparedStatement analysisQueryStmt;
+            PreparedStatement packageQueryStmt;
             PreparedStatement getTagsStmt = conn.prepareStatement("SELECT TAG FROM ANALYSIS_TO_TAG, ANALYSIS_TAGS WHERE " +
                     "ANALYSIS_TO_TAG.analysis_tags_id = ANALYSIS_TAGS.analysis_tags_id AND analysis_to_tag.analysis_id = ?");
             if (tag == null) {
@@ -36,6 +37,9 @@ public class ExchangeService {
                 analysisQueryStmt.setBoolean(2, true);
                 analysisQueryStmt.setBoolean(3, true);
                 analysisQueryStmt.setBoolean(4, false);
+                packageQueryStmt = conn.prepareStatement("SELECT REPORT_PACKAGE.REPORT_PACKAGE_ID, REPORT_PACKAGE.PACKAGE_NAME FROM " +
+                        "REPORT_PACKAGE WHERE REPORT_PACKAGE.MARKETPLACE_VISIBLE = ?");
+                packageQueryStmt.setBoolean(1, true);
             } else {
                 analysisQueryStmt = conn.prepareStatement("SELECT DISTINCT ANALYSIS.ANALYSIS_ID, ANALYSIS.TITLE, ANALYSIS.DATA_FEED_ID, ANALYSIS.REPORT_TYPE FROM ANALYSIS, DATA_FEED, " +
                         "FEED_TO_TAG, ANALYSIS_TAGS, ANALYSIS_TO_TAG WHERE ANALYSIS.DATA_FEED_ID = DATA_FEED.DATA_FEED_ID AND " +
@@ -49,6 +53,9 @@ public class ExchangeService {
                 analysisQueryStmt.setString(4, tag);
                 analysisQueryStmt.setString(5, tag);
                 analysisQueryStmt.setBoolean(6, false);
+                packageQueryStmt = conn.prepareStatement("SELECT REPORT_PACKAGE.REPORT_PACKAGE_ID, REPORT_PACKAGE.PACKAGE_NAME FROM " +
+                        "REPORT_PACKAGE WHERE REPORT_PACKAGE.MARKETPLACE_VISIBLE = ?");
+                packageQueryStmt.setBoolean(1, true);
             }
             ResultSet analysisRS = analysisQueryStmt.executeQuery();
             while (analysisRS.next()) {
@@ -73,8 +80,12 @@ public class ExchangeService {
                 String authorName = analysisRS.getString(10);
                 boolean accessible = analysisRS.getBoolean(11);
                 getTagsStmt.setLong(1, analysisID);
-                ReportExchangeItem item = new ReportExchangeItem(title, analysisID, reportType, dataSourceID, attribution, ratingAverage, 0, created, description, authorName, dataSourceName,
-                        accessible);
+                ExchangeReportData exchangeReportData = new ExchangeReportData();
+                exchangeReportData.setDataSourceAccessible(accessible);
+                exchangeReportData.setDataSourceID(dataSourceID);
+                exchangeReportData.setDataSourceName(dataSourceName);
+                exchangeReportData.setReportType(reportType);
+                ReportExchangeItem item = new ReportExchangeItem(title, analysisID, attribution, ratingAverage, 0, created, description, authorName, exchangeReportData);
                 exchangeItems.add(item);
                 ResultSet tagRS = getTagsStmt.executeQuery();
                 List<String> tags = new ArrayList<String>();
@@ -82,6 +93,17 @@ public class ExchangeService {
                     tags.add(tagRS.getString(1));
                 }
                 item.setTags(tags);                
+            }
+            ResultSet packageRS = packageQueryStmt.executeQuery();
+            while (packageRS.next()) {
+                long packageID = packageRS.getLong(1);
+                String packageName = packageRS.getString(2);
+                ExchangePackageData exchangePackageData = new ExchangePackageData();
+                exchangePackageData.setPackageID(packageID);
+                exchangePackageData.setPackageName(packageName);
+                // TODO: fill in this fields for packages
+                ReportExchangeItem item = new ReportExchangeItem(packageName, packageID, "", 0, 0, new Date(), "", "", exchangePackageData);
+                exchangeItems.add(item);
             }
         } catch (Exception e) {
             LogClass.error(e);

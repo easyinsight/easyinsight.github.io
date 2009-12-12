@@ -30,8 +30,12 @@ public class ExchangeActionRenderer extends HBox{
         var insightDescriptor:InsightDescriptor = new InsightDescriptor();
         insightDescriptor.id = exchangeItem.id;
         insightDescriptor.name = exchangeItem.name;
-        insightDescriptor.dataFeedID = exchangeItem.dataSourceID;
-        insightDescriptor.reportType = exchangeItem.reportType;
+        if (exchangeItem.exchangeData is ExchangeReportData) {
+            var exchangeReportData:ExchangeReportData = exchangeItem.exchangeData as ExchangeReportData;
+            insightDescriptor.dataFeedID = exchangeReportData.dataSourceID;
+            insightDescriptor.reportType = exchangeReportData.reportType;
+        }
+
         dispatchEvent(new AnalyzeEvent(new ReportAnalyzeSource(insightDescriptor)));
     }
 

@@ -3,6 +3,7 @@ import com.adobe.ac.mxeffects.CubeRotate;
 import com.easyinsight.framework.DataServiceLoadingEvent;
 
 import com.easyinsight.quicksearch.EIDescriptor;
+import com.easyinsight.report.ReportView;
 
 import mx.containers.ViewStack;
 import mx.controls.Alert;
@@ -22,8 +23,14 @@ public class AsyncViewStack extends ViewStack{
 
     private var selectedDescriptorChanged:Boolean;
 
+    private var _queuedProperties:Object = new Object();
+
     public function AsyncViewStack() {
         super();
+    }
+
+    public function queuePropertiesForReport(descriptor:EIDescriptor, value:Object):void {
+        _queuedProperties[String(descriptor.getType() + "-" + descriptor.id)] = value;
     }
 
     public function set screenRenderer(value:IAsyncScreenFactory):void {
@@ -37,8 +44,6 @@ public class AsyncViewStack extends ViewStack{
             invalidateProperties();
         }
     }
-
-    
 
     private function gotInitialData(event:DataServiceLoadingEvent):void {
         var screen:IAsyncScreen = loadingScreen;
@@ -78,6 +83,15 @@ public class AsyncViewStack extends ViewStack{
                 screen = _screenRenderer.createScreen(selectedDescriptor);
                 descriptorMap[idString] = screen;
             }
+            var needsRefresh:Boolean = false;
+            var queuedPropertiesForReport:Object = _queuedProperties[idString];
+            if (queuedPropertiesForReport != null) {
+                needsRefresh = true;
+                for (var propertyName:String in queuedPropertiesForReport) {                    
+                    screen[propertyName] = queuedPropertiesForReport[propertyName];
+                }
+                _queuedProperties[idString] = null;
+            }
             loadingScreen = screen;
             var container:Container = screen.getContainer();
             container.addEventListener(DataServiceLoadingEvent.LOADING_STOPPED, gotInitialData);
@@ -85,8 +99,14 @@ public class AsyncViewStack extends ViewStack{
             if (newScreen) {
                 addChild(container);
             } else {
-                var event:DataServiceLoadingEvent = new DataServiceLoadingEvent(DataServiceLoadingEvent.LOADING_STOPPED);
-                gotInitialData(event);
+                // if queued properties, wait until we receive data...
+                if (needsRefresh && screen is ReportView) {
+                    var reportView:ReportView = screen as ReportView;
+                    reportView.forceRefresh();
+                } else {
+                    var event:DataServiceLoadingEvent = new DataServiceLoadingEvent(DataServiceLoadingEvent.LOADING_STOPPED);
+                    gotInitialData(event);
+                }
             }
         }
     }

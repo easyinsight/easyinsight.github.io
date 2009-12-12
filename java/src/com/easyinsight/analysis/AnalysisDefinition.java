@@ -494,5 +494,10 @@ public class AnalysisDefinition implements Cloneable {
 
     public void updateReportIDs(Map<Long, AnalysisDefinition> reportReplacementMap) {
         analysisDefinitionState.updateReportIDs(reportReplacementMap);
+        for (AnalysisItem analysisItem : reportStructure.values()) {
+            for (Link link : analysisItem.getLinks()) {
+                link.updateReportIDs(reportReplacementMap);    
+            }
+        }
     }
 }

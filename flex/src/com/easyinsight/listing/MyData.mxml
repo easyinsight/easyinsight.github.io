@@ -24,6 +24,10 @@
         import com.easyinsight.help.MyDataHelp;
         import com.easyinsight.outboundnotifications.RefreshEventInfo;
         import com.easyinsight.report.ReportAnalyzeSource;
+        import com.easyinsight.reportpackage.AddReportToPackageWindow;
+        import com.easyinsight.reportpackage.PackageEvent;
+        import com.easyinsight.reportpackage.ReportPackageDescriptor;
+        import com.easyinsight.reportpackage.ReportPackageWindow;
         import com.easyinsight.solutions.InsightDescriptor;
         import com.easyinsight.util.PopUpUtil;
         import com.easyinsight.util.ProgressAlert;
@@ -54,6 +58,9 @@
         [Embed(source="../../../../assets/data_blue_x16.png")]
         public var listIcon:Class;
 
+        [Embed(source="../../../../assets/package.png")]
+        public var packageIcon:Class;
+
         [Bindable]
         [Embed(source="../../../../assets/monitor2.png")]
         public var monitorIcon:Class;
@@ -69,6 +76,10 @@
         [Bindable]
         [Embed(source="../../../../assets/data_table_x64.png")]
         public var joinIcon:Class;
+
+        [Bindable]
+        [Embed(source="../../../../assets/package_add.png")]
+        public var packageAddIcon:Class;
 
         [Bindable]
         [Embed(source="../../../../assets/data_add_x64.png")]
@@ -145,9 +156,12 @@
                     Alert.show("Are you sure you want to cancel your subscription to this data source?", "Alert",
                             Alert.OK | Alert.CANCEL, this, alertFeedListener, null, Alert.CANCEL);
                 }
-            } else {
+            } else if (uploadGrid.selectedItem is InsightDescriptor) {
                 Alert.show("Are you sure you want to delete this report? You will not be able to undo this operation.", "Alert",
                         Alert.OK | Alert.CANCEL, this, alertInsightListener, null, Alert.CANCEL);
+            } else if (uploadGrid.selectedItem is ReportPackageDescriptor) {
+                Alert.show("Are you sure you want to delete this package? You will not be able to undo this operation.", "Alert",
+                        Alert.OK | Alert.CANCEL, this, alertPackageListener, null, Alert.CANCEL);
             }
         }
 
@@ -157,6 +171,20 @@
                 ProgressAlert.alert(this, "Deleting data source...", "Deleted data souce!", uploadService.deleteUserUpload);
                 uploadService.deleteUserUpload.send(feedDescriptor.dataFeedID);
             }
+        }
+
+        private function alertPackageListener(event:CloseEvent):void {
+            if (event.detail == Alert.OK) {
+                var reportDescriptor:ReportPackageDescriptor = uploadGrid.selectedItem as ReportPackageDescriptor;
+                ProgressAlert.alert(this, "Deleting package...", "Deleted package!", packageService.deleteReportPackage);
+                packageService.deleteReportPackage.send(reportDescriptor.id);
+            }
+        }
+
+        private function deletedPackage():void {
+            ProgressAlert.alert(this, "Refreshing...", null, uploadService.getFeedAnalysisTree);
+            showLoading = true;
+            uploadService.getFeedAnalysisTree.send(includeGroups, initialEntry);
         }
 
         private function alertInsightListener(event:CloseEvent):void {
@@ -262,12 +290,25 @@
         }
 
         private function iconFunction(item:Object, depth:int):Class {
-            /*if (item is DataFeedDescriptor) {
-             return listIcon;
-             } else {
+            if (item is DataFeedDescriptor) {
+                return listIcon;
+             } else if (item is InsightDescriptor) {
              return crosstabIcon;
-             }*/
-            return listIcon;
+             } else if (item is ReportPackageDescriptor) {
+                return packageIcon;
+            }
+            return null;
+        }
+
+        private function simpleIconFunction(item:Object):Class {
+            if (item is DataFeedDescriptor) {
+                return listIcon;
+             } else if (item is InsightDescriptor) {
+             return crosstabIcon;
+             } else if (item is ReportPackageDescriptor) {
+                return packageIcon;
+            }
+            return null;
         }
 
         private function failure(event:FaultEvent):void {
@@ -325,10 +366,22 @@
             uploadService.getFeedAnalysisTree.send(groupInclude.selected, initialEntry);
         }
 
+        private function createPackage():void {
+            var window:ReportPackageWindow = new ReportPackageWindow();
+            window.addEventListener(PackageEvent.PACKAGE_ADDED, onPackageAdded);
+            PopUpManager.addPopUp(window, this, true);
+            PopUpUtil.centerPopUp(window);
+        }
+
+        private function onPackageAdded(event:PackageEvent):void {
+            showLoading = true;
+            uploadService.getFeedAnalysisTree.send(groupInclude.selected, initialEntry);
+        }
+
         [Bindable]
         private var showLoading:Boolean = false;
 		]]>
-	</mx:Script>
+</mx:Script>
 	<mx:RemoteObject id="uploadService" destination="userUpload">
 		<mx:method name="getFeedAnalysisTree" result="gotFeedAnalysisTree()"/>
 		<mx:method name="deleteUserUpload" result="deleted()"/>		
@@ -336,15 +389,16 @@
 	<mx:RemoteObject id="analysisService" destination="analysisDefinition">
 		<mx:method name="deleteAnalysisDefinition" result="deletedAnalysis()"/>
 	</mx:RemoteObject>
+    <mx:RemoteObject id="packageService" destination="reportPackageService">
+		<mx:method name="deleteReportPackage" result="deletedPackage()"/>
+	</mx:RemoteObject>
 
 	<mx:VBox id="coreContent" height="100%" width="100%" paddingTop="10" paddingLeft="10" paddingRight="10" paddingBottom="10" verticalGap="10">
 		<mx:HBox width="100%" id="uploadBox" verticalAlign="middle">
-			<!--<mx:Button toolTip="Upload data from Excel or CSV..." click="toUpload()" id="uploadButton" icon="{addIcon}"
-				label="Upload File" labelPlacement="bottom"/>
-			<mx:Button toolTip="Connect to Google Spreadsheets..." click="externalConnect()" id="connectButton" icon="{dataConnectionIcon}"
-				label="Google Spreadsheets" labelPlacement="bottom"/>-->
 			<mx:Button toolTip="Create composite data source..." click="createCompositeFeed()" id="compositeFeedButton" icon="{joinIcon}"
 				label="Combine Sources" labelPlacement="bottom"/>
+            <mx:Button toolTip="Create package..." click="createPackage()" id="createPackageButton" icon="{packageAddIcon}"
+				label="Create Package" labelPlacement="bottom"/>
 			<mx:Button toolTip="Create empty data source..." click="createEmptyFeed()" id="emptyFeedButton" icon="{addIcon}"
 				label="New Empty Source" labelPlacement="bottom"/>
             <!--<mx:Button icon="{helpIcon}" label="Help..." labelPlacement="bottom" click="help()"/>-->
@@ -365,7 +419,8 @@
 		</mx:HBox>
 
 		<mx:AdvancedDataGrid width="100%" height="100%" id="uploadGrid" allowMultipleSelection="true" fontSize="12"
-			groupIconFunction="iconFunction" defaultLeafIcon="{crosstabIcon}" itemDoubleClick="gridDoubleClick(event)" headerStyleName="BlueHeader" itemOpen="onItemOpen(event)">
+			itemDoubleClick="gridDoubleClick(event)" headerStyleName="BlueHeader" itemOpen="onItemOpen(event)"
+                iconFunction="simpleIconFunction">
 			<mx:dataProvider>
 	            <mx:HierarchicalData source="{displayTreeData}"/>
 	        </mx:dataProvider>

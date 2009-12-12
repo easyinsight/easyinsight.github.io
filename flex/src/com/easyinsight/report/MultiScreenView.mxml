@@ -19,6 +19,7 @@
         import com.easyinsight.util.IAsyncScreenFactory;
 
         import mx.collections.ArrayCollection;
+        import mx.controls.Alert;
         import mx.controls.Label;
         import mx.events.ListEvent;
 
@@ -47,9 +48,30 @@
         [Bindable]
         private var _reports:ArrayCollection;
 
-        [Bindable]
-        private var report:EIDescriptor;
 
+        private var _report:EIDescriptor;
+
+
+        [Bindable(event="reportChanged")]
+        public function get report():EIDescriptor {
+            return _report;
+        }
+
+        public function set report(value:EIDescriptor):void {
+            if (_report == value) return;
+            _report = value;
+            if (reports != null) {
+                var index:int = reports.getItemIndex(report);
+                reportsList.selectedIndex = index;
+            }
+            dispatchEvent(new Event("reportChanged"));
+        }
+
+        public function changeReport(value:EIDescriptor, properties:Object):void {
+            viewStack.queuePropertiesForReport(value, properties);
+            
+            report = value;
+        }
 
         private var _factory:IAsyncScreenFactory = new ReportScreenFactory();
 
@@ -80,6 +102,10 @@
             else {
                 report = new EmptyReportDescriptor(_dataSourceID, _dataSourceName);
             }
+        }
+
+        public function get reports():ArrayCollection {
+            return _reports;
         }
 
         override protected function commitProperties():void {
@@ -122,7 +148,7 @@
         }
 
         private function toExchange(event:MouseEvent):void {
-            var props:Object = new Object();            
+            var props:Object = new Object();
             props.viewMode = 1;
             props.displayMode = 0;
             props.solution = _solution;
@@ -152,6 +178,6 @@
         <mx:HBox width="100%" horizontalAlign="center" verticalAlign="middle" id="verticalBarBox"/>
         <mx:HRule width="100%"/>
         <util:AsyncViewStack width="100%" height="100%" targetDescriptor="{report}" screenRenderer="{factory}"
-                asyncLoadStart="onLoading(event)" asyncLoadSuccess="onLoading(event)"/>
+                asyncLoadStart="onLoading(event)" asyncLoadSuccess="onLoading(event)" id="viewStack"/>
     </mx:VBox>
 </easyinsight:FullScreenPage>

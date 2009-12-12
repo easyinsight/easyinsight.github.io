@@ -3,6 +3,7 @@ package com.easyinsight.analysis;
 import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * User: jamesboe
@@ -22,5 +23,10 @@ public class DrillThrough extends Link {
 
     public void setReportID(long reportID) {
         this.reportID = reportID;
+    }
+
+    public void updateReportIDs(Map<Long, AnalysisDefinition> replacementMap) {
+        AnalysisDefinition report = replacementMap.get(reportID);
+        setReportID(report.getAnalysisID());
     }
 }

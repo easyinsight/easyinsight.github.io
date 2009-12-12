@@ -1,6 +1,8 @@
 package com.easyinsight.userupload;
 
 import com.easyinsight.dataset.DataSet;
+import com.easyinsight.reportpackage.ReportPackageDescriptor;
+import com.easyinsight.reportpackage.ReportPackageStorage;
 import com.easyinsight.storage.DataStorage;
 import com.easyinsight.storage.StorageLimitException;
 import com.easyinsight.database.Database;
@@ -97,6 +99,8 @@ public class UserUploadService implements IUserUploadService {
         try {
             List<Object> objects = new ArrayList<Object>();
             List<FeedDescriptor> descriptors = feedStorage.searchForSubscribedFeeds(userID);
+            List<ReportPackageDescriptor> packages = new ReportPackageStorage().getReportPackagesForUser();
+            objects.addAll(packages);
             Map<Long, FeedDescriptor> descriptorMap = new HashMap<Long, FeedDescriptor>();
             for (FeedDescriptor descriptor : descriptors) {
                 descriptorMap.put(descriptor.getDataFeedID(), descriptor);

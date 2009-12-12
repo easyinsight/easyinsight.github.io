@@ -6,6 +6,7 @@ import com.easyinsight.calculations.Resolver;
 import javax.persistence.*;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Map;
 
 /**
  * User: jamesboe
@@ -59,5 +60,9 @@ public class Link implements Cloneable {
 
     public String generateLink(IRow row) {
         throw new UnsupportedOperationException();
+    }
+
+    public void updateReportIDs(Map<Long, AnalysisDefinition> replacementMap) {
+        
     }
 }

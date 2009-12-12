@@ -4,7 +4,12 @@ import com.easyinsight.datafeeds.*;
 import com.easyinsight.analysis.*;
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
+import com.easyinsight.exchange.ExchangePackageData;
+import com.easyinsight.exchange.ExchangeReportData;
 import com.easyinsight.logging.LogClass;
+import com.easyinsight.reportpackage.ReportPackage;
+import com.easyinsight.reportpackage.ReportPackageDescriptor;
+import com.easyinsight.reportpackage.ReportPackageStorage;
 import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.security.AuthorizationManager;
 import com.easyinsight.security.AuthorizationRequirement;
@@ -195,6 +200,45 @@ public class SolutionService {
         }
     }
 
+    public List<DataSourceDescriptor> determineDataSourceForPackage(long packageID) {
+        List<DataSourceDescriptor> descriptors = new ArrayList<DataSourceDescriptor>();
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            PreparedStatement packageQuery = conn.prepareStatement("SELECT REPORT_PACKAGE.data_source_id FROM REPORT_PACKAGE WHERE REPORT_PACKAGE_ID = ?");
+            packageQuery.setLong(1, packageID);
+            ResultSet packageRS = packageQuery.executeQuery();
+            while (packageRS.next()) {
+                long dataSourceID = packageRS.getLong(1);
+                PreparedStatement dsQueryStmt = conn.prepareStatement("SELECT SOLUTION_INSTALL.ORIGINAL_DATA_SOURCE_ID FROM " +
+                    "SOLUTION_INSTALL WHERE SOLUTION_INSTALL.installed_data_source_id = ?");
+                dsQueryStmt.setLong(1, dataSourceID);
+                ResultSet dsRS = dsQueryStmt.executeQuery();
+                if (dsRS.next()) {
+                    long originalDataSourceID = dsRS.getLong(1);
+                    PreparedStatement queryStmt = conn.prepareStatement("SELECT SOLUTION_INSTALL.installed_data_source_id, DATA_FEED.FEED_NAME FROM " +
+                        "SOLUTION_INSTALL, DATA_FEED, UPLOAD_POLICY_USERS WHERE " +
+                        "SOLUTION_INSTALL.original_data_source_id = ? AND " +
+                        "SOLUTION_INSTALL.INSTALLED_DATA_SOURCE_ID = DATA_FEED.DATA_FEED_ID AND " +
+                        "UPLOAD_POLICY_USERS.USER_ID = ? AND DATA_FEED.DATA_FEED_ID = UPLOAD_POLICY_USERS.FEED_ID");
+                    queryStmt.setLong(1, originalDataSourceID);
+                    queryStmt.setLong(2, SecurityUtil.getUserID());
+                    ResultSet rs = queryStmt.executeQuery();
+                    while (rs.next()) {
+                        long id = rs.getLong(1);
+                        String name = rs.getString(2);
+                        descriptors.add(new DataSourceDescriptor(name, id));
+                    }
+                }
+            }
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        } finally {
+            Database.closeConnection(conn);
+        }
+        return descriptors;
+    }
+
     public List<DataSourceDescriptor> determineDataSource(long dataSourceID) {
         List<DataSourceDescriptor> descriptors = new ArrayList<DataSourceDescriptor>();
         EIConnection conn = Database.instance().getConnection();
@@ -229,6 +273,78 @@ public class SolutionService {
             Database.closeConnection(conn);
         }
         return descriptors;
+    }
+
+    public ReportPackageDescriptor installPackage(long packageID, long dataSourceID) {
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            conn.setAutoCommit(false);
+            FeedStorage feedStorage = new FeedStorage();
+
+            Session session = Database.instance().createSession(conn);
+            ReportPackageStorage reportPackageStorage = new ReportPackageStorage();
+            ReportPackage reportPackage = reportPackageStorage.getReportPackage(packageID, conn);
+            List<InsightDescriptor> packageReports = reportPackage.getReports();
+            List<AnalysisDefinition> reportList = new ArrayList<AnalysisDefinition>();
+            Map<Long, AnalysisDefinition> reportReplacementMap = new HashMap<Long, AnalysisDefinition>();
+            FeedDefinition targetDataSource = feedStorage.getFeedDefinitionData(dataSourceID, conn);
+            for (InsightDescriptor report : packageReports) {
+                AnalysisDefinition originalBaseReport = new AnalysisStorage().getPersistableReport(report.getId(), session);
+                FeedDefinition sourceDataSource = feedStorage.getFeedDefinitionData(originalBaseReport.getDataFeedID(), conn);
+                List<AnalysisDefinition> reports = originalBaseReport.containedReports();
+                reports.add(originalBaseReport);
+
+
+                for (AnalysisDefinition child : reports) {
+
+                    Map<Key, Key> keyReplacementMap = createKeyReplacementMap(targetDataSource, sourceDataSource);
+                    AnalysisDefinition copyReport = copyReportToDataSource(targetDataSource, child, keyReplacementMap, session);
+                    reportReplacementMap.put(child.getAnalysisID(), copyReport);
+                    reportList.add(copyReport);
+                }
+            }
+
+            session.close();
+            session = Database.instance().createSession(conn);
+            //Collections.reverse(reportList);
+
+            List<InsightDescriptor> newReports = new ArrayList<InsightDescriptor>();
+            for (AnalysisDefinition copiedReport : reportList) {
+                session.save(copiedReport);
+                session.flush();
+                newReports.add(new InsightDescriptor(copiedReport.getAnalysisID(), copiedReport.getTitle(), copiedReport.getDataFeedID(),
+                        copiedReport.getReportType()));
+            }
+            for (AnalysisDefinition copiedReport : reportReplacementMap.values()) {
+                copiedReport.updateReportIDs(reportReplacementMap);
+            }
+
+            for (AnalysisDefinition copiedReport : reportList) {
+                session.update(copiedReport);
+                session.flush();
+            }
+            ReportPackage clonedPackage = reportPackage.clone();
+            clonedPackage.setTemporaryPackage(true);
+            clonedPackage.setConnectionVisible(false);
+            clonedPackage.setPubliclyVisible(false);
+            clonedPackage.setMarketplaceVisible(false);
+            clonedPackage.setReports(newReports);
+            long id = reportPackageStorage.saveReportPackage(clonedPackage, conn);
+
+            conn.commit();
+            session.close();
+            ReportPackageDescriptor clonedDescriptor = new ReportPackageDescriptor();
+            clonedDescriptor.setId(id);
+            clonedDescriptor.setName(clonedPackage.getName());
+            return clonedDescriptor;
+        }  catch (Exception e) {
+            LogClass.error(e);
+            conn.rollback();
+            throw new RuntimeException(e);
+        } finally {
+            conn.setAutoCommit(true);
+            Database.closeConnection(conn);
+        }
     }
 
     public InsightDescriptor installReport(long reportID, long dataSourceID) {
@@ -340,6 +456,11 @@ public class SolutionService {
                     " LEFT JOIN USER_REPORT_RATING ON USER_REPORT_RATING.report_id = ANALYSIS.ANALYSIS_ID WHERE ANALYSIS.DATA_FEED_ID = DATA_FEED.DATA_FEED_ID AND " +
                     "ANALYSIS.DATA_FEED_ID = SOLUTION_INSTALL.installed_data_source_id AND ANALYSIS.SOLUTION_VISIBLE = ? " +
                     "AND solution_install.solution_id = solution.solution_id GROUP BY ANALYSIS.ANALYSIS_ID");
+            PreparedStatement packageQueryStmt = conn.prepareStatement("SELECT REPORT_PACKAGE.REPORT_PACKAGE_ID, REPORT_PACKAGE.PACKAGE_NAME, " +
+                    "SOLUTION.NAME, SOLUTION.SOLUTION_ID FROM DATA_FEED, SOLUTION_INSTALL, SOLUTION, REPORT_PACKAGE " +
+                    " LEFT JOIN USER_PACKAGE_RATING ON USER_PACKAGE_RATING.report_package_id = REPORT_PACKAGE.REPORT_PACKAGE_ID WHERE REPORT_PACKAGE.data_source_id = DATA_FEED.DATA_FEED_ID AND " +
+                    "REPORT_PACKAGE.data_source_id = SOLUTION_INSTALL.installed_data_source_id AND REPORT_PACKAGE.CONNECTION_VISIBLE = ? " +
+                    "AND solution_install.solution_id = solution.solution_id AND report_package.temporary_package = ?");
             PreparedStatement getImageStmt = conn.prepareStatement("SELECT REPORT_IMAGE FROM REPORT_IMAGE WHERE REPORT_ID = ?");
             analysisQueryStmt.setBoolean(1, true);
             ResultSet analysisRS = analysisQueryStmt.executeQuery();
@@ -366,8 +487,13 @@ public class SolutionService {
                 String solutionName = analysisRS.getString(11);
                 long solutionID = analysisRS.getLong(12);
                 getTagsStmt.setLong(1, analysisID);
-                SolutionReportExchangeItem item = new SolutionReportExchangeItem(title, analysisID, reportType, dataSourceID,
-                        ratingAverage, 0, created, description, authorName, dataSourceName, accessible, solutionID, solutionName);
+                ExchangeReportData exchangeReportData = new ExchangeReportData();
+                exchangeReportData.setDataSourceAccessible(accessible);
+                exchangeReportData.setDataSourceID(dataSourceID);
+                exchangeReportData.setDataSourceName(dataSourceName);
+                exchangeReportData.setReportType(reportType);
+                SolutionReportExchangeItem item = new SolutionReportExchangeItem(title, analysisID, "",
+                        ratingAverage, 0, created, authorName, description, exchangeReportData, solutionID, solutionName);
                 reports.add(item);
                 ResultSet tagRS = getTagsStmt.executeQuery();
                 List<String> tags = new ArrayList<String>();
@@ -381,6 +507,21 @@ public class SolutionService {
                     item.setImage(bytes);
                 }
                 item.setTags(tags);
+            }
+            packageQueryStmt.setBoolean(1, true);
+            packageQueryStmt.setBoolean(2, false);
+            ResultSet packageRS = packageQueryStmt.executeQuery();
+            while (packageRS.next()) {
+                long packageID = packageRS.getLong(1);
+                String packageName = packageRS.getString(2);
+                String solutionName = packageRS.getString(3);
+                long solutionID = packageRS.getLong(4);
+                ExchangePackageData exchangePackageData = new ExchangePackageData();
+                exchangePackageData.setPackageID(packageID);
+                exchangePackageData.setPackageName(packageName);
+                SolutionReportExchangeItem item = new SolutionReportExchangeItem(packageName, packageID, "",
+                        0, 0, new Date(), "", "", exchangePackageData, solutionID, solutionName);
+                reports.add(item);
             }
         } catch (Exception e) {
             LogClass.error(e);

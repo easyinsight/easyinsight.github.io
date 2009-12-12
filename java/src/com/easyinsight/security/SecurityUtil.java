@@ -223,6 +223,36 @@ public class SecurityUtil {
         }
     }
 
+    public static int getPackageRole(long userID, long packageID) {
+        Connection conn = Database.instance().getConnection();
+        try {
+            PreparedStatement existingLinkQuery = conn.prepareStatement("SELECT ROLE FROM user_to_report_package WHERE " +
+                    "USER_ID = ? AND REPORT_PACKAGE_ID = ?");
+            existingLinkQuery.setLong(1, userID);
+            existingLinkQuery.setLong(2, packageID);
+            ResultSet rs = existingLinkQuery.executeQuery();
+            if (rs.next()) {
+                return rs.getInt(1);
+            } else {
+                PreparedStatement groupQueryStmt = conn.prepareStatement("select role from GROUP_TO_REPORT_PACKAGE, group_to_user_join where " +
+                        "group_to_user_join.group_id = GROUP_TO_REPORT_PACKAGE.group_id and group_to_user_join.user_id = ? and GROUP_TO_REPORT_PACKAGE.REPORT_PACKAGE_ID = ?");
+                groupQueryStmt.setLong(1, userID);
+                groupQueryStmt.setLong(2, packageID);
+                ResultSet groupRS = groupQueryStmt.executeQuery();
+                if (groupRS.next()) {
+                    return groupRS.getInt(1);
+                } else {
+                    return Integer.MAX_VALUE;
+                }
+            }
+        } catch (SQLException e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        } finally {
+            Database.closeConnection(conn);
+        }
+    }
+
     public static int getRole(long userID, long feedID) {
         Connection conn = Database.instance().getConnection();
         try {
@@ -337,6 +367,39 @@ public class SecurityUtil {
             throw new RuntimeException(e);
         } finally {
             Database.closeConnection(conn);
+        }
+    }
+
+    public static void authorizePackage(long packageID) {
+        boolean publiclyVisible = false;
+        Connection conn = Database.instance().getConnection();
+        try {
+            PreparedStatement authorizeStmt = conn.prepareStatement("SELECT PUBLICLY_VISIBLE FROM REPORT_PACKAGE WHERE REPORT_PACKAGE_ID = ?");
+            authorizeStmt.setLong(1, packageID);
+            ResultSet rs = authorizeStmt.executeQuery();
+            if (rs.next()) {
+                publiclyVisible = rs.getBoolean(1);
+            } else {
+                throw new SecurityException();
+            }
+        } catch (SQLException e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        } finally {
+            Database.closeConnection(conn);
+        }
+
+        if (publiclyVisible) {
+            // we're okay
+        } else {
+            UserPrincipal userPrincipal = securityProvider.getUserPrincipal();
+            if (userPrincipal == null) {
+                throw new SecurityException();
+            }
+            int role = getPackageRole(userPrincipal.getUserID(), packageID);
+            if (role != Roles.OWNER && role != Roles.SUBSCRIBER) {
+                throw new SecurityException();
+            }
         }
     }
 

@@ -155,8 +155,17 @@
                 reportName = _item.name;
                 reportDescription = _item.description;
                 reportID = _item.id;
-                reportType = _item.reportType;
-                dataSourceID = _item.dataSourceID;
+                if (_item.exchangeData is ExchangeReportData) {
+                    var exchangeReportData:ExchangeReportData = _item.exchangeData as ExchangeReportData;
+                    reportType = exchangeReportData.reportType;
+                    dataSourceID = exchangeReportData.dataSourceID;
+                    dataSourceName = exchangeReportData.dataSourceName;
+                    if (!exchangeReportData.dataSourceAccessible) {
+                        currentState = "UnavailableDataSource";
+                    }
+                }
+
+
                 score = _item.ratingAverage;
                 var df:DateFormatter = new DateFormatter();
                 if (_item.dateAdded == null) {
@@ -164,11 +173,9 @@
                 } else {
                     dateCreated = df.format(_item.dateAdded);
                 }
-                dataSourceName = _item.dataSourceName;
+
                 author = _item.author;
-                if (!_item.dataSourceAccessible) {
-                    currentState = "UnavailableDataSource";
-                }
+
 
 
                 tagBox.removeAllChildren();

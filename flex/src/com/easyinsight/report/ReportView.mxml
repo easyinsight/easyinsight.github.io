@@ -18,7 +18,7 @@
         import com.easyinsight.administration.feed.Tag;
         import com.easyinsight.analysis.AnalysisCloseEvent;
         import com.easyinsight.analysis.AnalysisDefinition;
-        import com.easyinsight.analysis.EmbeddedDataServiceEvent;        
+        import com.easyinsight.analysis.EmbeddedDataServiceEvent;
         import com.easyinsight.analysis.HierarchyDrilldownEvent;
         import com.easyinsight.analysis.HierarchyRollupEvent;
         import com.easyinsight.analysis.RefreshReportSourceWindow;
@@ -38,6 +38,7 @@
         import com.easyinsight.solutions.InsightDescriptor;
         import com.easyinsight.util.PopUpUtil;
 
+        import mx.binding.utils.BindingUtils;
         import mx.collections.ArrayCollection;
         import mx.controls.Alert;
         import mx.core.Application;
@@ -48,9 +49,20 @@
         import mx.managers.PopUpManager;
         import mx.utils.URLUtil;
 
+        public function forceRefresh():void {
+            viewFactory.retrieveData();
+        }
+
         private function confirmedKeep():void {
             addReportBox.removeAllChildren();
             buttonBar.addChildAt(editReportButton, 4);
+        }
+
+        private var _reportNavHandler:Function;
+
+
+        public function set reportNavHandler(value:Function):void {
+            _reportNavHandler = value;
         }
 
         private function toBrowser():void {
@@ -127,7 +139,7 @@
             transformContainer.clearFilter(event.analysisItem);
         }
 
-        private function childFilterCreation(event:HierarchyDrilldownEvent):void {            
+        private function childFilterCreation(event:HierarchyDrilldownEvent):void {
             viewFactory.noCache = true;
             var overrideObj:HierarchyOverride = new HierarchyOverride();
             overrideObj.analysisItemID = event.hierarchyItem.analysisItemID;
@@ -268,8 +280,17 @@
             _originReportScore = value;
         }
 
+
+        [Bindable(event="parameterFiltersChanged")]
+        public function get parameterFilters():ArrayCollection {
+            return _parameterFilters;
+        }
+
         public function set parameterFilters(value:ArrayCollection):void {
+            if (_parameterFilters == value) return;
             _parameterFilters = value;
+            invalidateProperties();
+            dispatchEvent(new Event("parameterFiltersChanged"));
         }
 
         [Bindable]
@@ -334,7 +355,12 @@
                 setStyle("backgroundImage", background2);
                 setStyle("backgroundSize", "100%");
             }
+            if (retrievedDataOnce) {
+                viewFactory.retrieveData();
+            }
         }
+
+        private var retrievedDataOnce:Boolean = false;
 
         private function dataLoadingEvent(event:DataServiceLoadingEvent):void {
             progressBar.visible = event.type == DataServiceLoadingEvent.LOADING_STARTED;
@@ -407,6 +433,7 @@
                 }
                 receivedData = true;
                 dispatchEvent(new DataServiceLoadingEvent(DataServiceLoadingEvent.LOADING_STOPPED));
+                retrievedDataOnce = true;
             }
         }
 
@@ -525,7 +552,11 @@
         }
 
         private function reportNavigation(event:ReportNavigationEvent):void {
-            dispatchEvent(new AnalyzeEvent(new ReportAnalyzeSource(event.descriptor, event.filters)));
+            if (_reportNavHandler == null) {
+                dispatchEvent(new AnalyzeEvent(new ReportAnalyzeSource(event.descriptor, event.filters)));
+            } else {
+                _reportNavHandler.call(null, event);
+            }
         }
 
         private function saveReport(event:MouseEvent):void {
@@ -621,6 +652,7 @@
             viewFactory.reportID = _reportID;
             viewFactory.prefix = _prefix;
             viewFactory.dataSourceID = _dataSourceID;
+            BindingUtils.bindProperty(viewFactory, "drillthroughFilters", this, "parameterFilters");
             viewFactory.drillthroughFilters = _parameterFilters;
             reportBox.addChild(viewFactory);
             viewFactory.addEventListener(EmbeddedDataServiceEvent.DATA_RETURNED, gotData);

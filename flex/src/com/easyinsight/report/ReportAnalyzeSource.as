@@ -16,7 +16,7 @@ public class ReportAnalyzeSource implements AnalyzeSource{
     public static const ORIGIN_MY_DATA:int = 1;
     public static const ORIGIN_EXCHANGE:int = 2;
 
-    private var insightDescriptor:InsightDescriptor;
+    public var insightDescriptor:InsightDescriptor;
     private var filters:ArrayCollection;
     private var installOption:Boolean;
     private var origin:int;

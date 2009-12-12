@@ -5,6 +5,10 @@ import com.easyinsight.calculations.generated.CalculationsLexer;
 import com.easyinsight.calculations.NodeFactory;
 import com.easyinsight.calculations.CalculationTreeNode;
 import com.easyinsight.calculations.ValidationVisitor;
+import com.easyinsight.reportpackage.ReportPackage;
+import com.easyinsight.reportpackage.ReportPackageDescriptor;
+import com.easyinsight.reportpackage.ReportPackageResponse;
+import com.easyinsight.reportpackage.ReportPackageStorage;
 import com.easyinsight.security.*;
 import com.easyinsight.security.SecurityException;
 import com.easyinsight.logging.LogClass;
@@ -442,5 +446,61 @@ public class AnalysisService {
             Database.instance().closeConnection(conn);
         }
         return userCapabilities;
+    }
+
+    private ReportPackageStorage reportPackageStorage = new ReportPackageStorage();
+
+    public long saveReportPackage(ReportPackage reportPackage) {
+        try {
+            return reportPackageStorage.saveReportPackage(reportPackage);
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        }
+    }
+
+    public ReportPackage getReportPackage(long packageID) {
+        try {
+            return reportPackageStorage.getReportPackage(packageID);
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        }
+    }
+
+    public ReportPackageResponse openPackageIfPossible(long packageID) {
+        try {
+            return reportPackageStorage.openPackageIfPossible(packageID);
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void deleteReportPackage(long packageID) {
+        try {
+            reportPackageStorage.deleteReportPackage(packageID);
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void keepPackage(long packageID) {
+        try {
+            reportPackageStorage.keepPackage(packageID);
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        }
+    }
+
+    public List<ReportPackageDescriptor> getReportPackagesForUser() {
+        try {
+            return reportPackageStorage.getReportPackagesForUser();
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        }
     }
 }
