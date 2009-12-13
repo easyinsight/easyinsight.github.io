@@ -70,7 +70,7 @@ public class TwitterFeed extends Feed {
             DataSet dataSet = new DataSet();
             for(String search:searches) {
                 Builder b = new Builder();
-                Document doc = runRestRequest("/searches.atom?q=" + URLEncoder.encode(search, "UTF-8"), new HttpClient(), b, "http://searches.twitter.com", null);
+                Document doc = runRestRequest("/search.atom?q=" + URLEncoder.encode(search, "UTF-8"), new HttpClient(), b, "http://search.twitter.com", null);
                 Nodes statuses = doc.query("atom:feed/atom:entry", namespaces);
 
                 for(int i = 0;i < statuses.size();i++) {

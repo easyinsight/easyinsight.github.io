@@ -37,7 +37,7 @@ public class TwitterDataSource extends ServerDataSourceDefinition {
     public static final String AUTHOR_URL = "Author URL";
     public static final String COUNT = "Count";
 
-    private ArrayList<String> searches;
+    private ArrayList<String> searches = new ArrayList<String>();
 
     public int getDataSourceType() {
         return DataSourceInfo.LIVE;

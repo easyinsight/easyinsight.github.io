@@ -13,47 +13,46 @@
         import mx.controls.Alert;
         import mx.events.CollectionEvent;
 
-        private function onCollectionChange(event:CollectionEvent):void {
-            Alert.show(searches.getItemAt(searches.length - 1) as String);
-            if (searches.getItemAt(searches.length - 1) != "")
-                searches.addItem("");
-        }
-
-        private function onTwat(event:TwitterTextEvent):void {
-            Alert.show(searches.getItemAt(0) as String);
+        private function addRow():void {
+            var info:TwitterInfo = new TwitterInfo();
+            _searches.addItem(info);
         }
 
         private function onCreationComplete():void {
-            searches = new ArrayCollection();
-            _searches.addEventListener(CollectionEvent.COLLECTION_CHANGE, onCollectionChange);
-            searches.addItem("");
-            addEventListener(TwitterTextEvent.TWITTER_TEXT, onTwat);
+            _searches = new ArrayCollection();
         }
 
-
+        [Bindable]
         private var _searches:ArrayCollection;
 
         public function get dataSourceDefinition():FeedDefinitionData {
             var obj:TwitterDataSource = new TwitterDataSource();
-            obj.searches = searches;
-            if (obj.searches.length > 0)
-                obj.searches.removeItemAt(obj.searches.length - 1);
-            if (searches.length == 0)
-                searches.addItem("");
+            var coll = new ArrayCollection();
+            for each (var i:TwitterInfo in _searches) {
+                coll.addItem(i.search);
+            }
+            obj.searches = coll;
             return obj;
         }
 
         public function set dataSourceDefinition(feedDefinition:FeedDefinitionData):void {
             var ds:TwitterDataSource = feedDefinition as TwitterDataSource;
-            searches = ds.searches;
-            searches.addItem("");
+            var coll:ArrayCollection = new ArrayCollection();
+            for each(var s:String in ds.searches) {
+                var v:TwitterInfo = new TwitterInfo();
+                v.search = s;
+                coll.addItem(v);
+            }
+            _searches = coll;
         }
 
         public function updateDataSource(feedDefinition:FeedDefinitionData):void {
             var ds:TwitterDataSource = feedDefinition as TwitterDataSource;
-            ds.searches = searches;
-            if (ds.searches.length > 0)
-                ds.searches.removeItemAt(ds.searches.length - 1);
+            var coll = new ArrayCollection();
+            for each (var i:TwitterInfo in _searches) {
+                coll.addItem(i.search);
+            }
+            ds.searches = coll;
         }
 
         public function get credentials():Credentials {
@@ -67,14 +66,7 @@
             return false;
         }
 
-        [Bindable]
-        public function get searches():ArrayCollection {
-            return _searches;
-        }
-
-        public function set searches(value:ArrayCollection):void {
-            searches = value;
-        }]]></mx:Script>
-    <mx:Label text="Search Strings:" />
-    <mx:List id="tileList" width="400" columnWidth="400" dataProvider="{searches}" itemRenderer="com.easyinsight.customupload.TwitterSearchItemRenderer" rendererIsEditor="true" editorDataField="dataString" />
+]]></mx:Script>
+    <mx:Label text="Search Strings:" /><mx:Button label="addButton" click="addRow()" />
+    <mx:List id="tileList" width="400" columnWidth="400" dataProvider="{_searches}" itemRenderer="com.easyinsight.customupload.TwitterSearchItemRenderer" rendererIsEditor="true" editorDataField="data" />
 </mx:VBox>
