@@ -55,13 +55,10 @@ public class AdminService {
             queryStmt.setBoolean(2, true);
             ResultSet rs = queryStmt.executeQuery();
             while (rs.next()) {
-                long dataSourceID = rs.getLong(1);
                 long analysisID = rs.getLong(2);
-                int reportType = rs.getInt(3);
                 String title = rs.getString(4);
-                String url = "https://www.easy-insight.com/app/ReportView.jsp?dataSourceID=" + dataSourceID + "&reportID=" + analysisID +
-                        "&reportType=" + reportType + "&reportName=" + title;
-                url = URLEncoder.encode(url, "UTF-8");
+                title = title.replaceAll("[ @\"&*#$%^~]", "-");
+                String url = "https://www.easy-insight.com/reports/" + title + "-" + analysisID;                
                 sitemapBuilder.append(MessageFormat.format(LOC_XML, url));
             }
         } catch (Exception e) {

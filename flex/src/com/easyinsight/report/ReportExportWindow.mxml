@@ -63,7 +63,8 @@
         }
 
         private function url():void {
-            var url:String = "http://www.easy-insight.com/app/reportID=" + _reportID + "&dataSourceID=" + _dataSourceID + "&reportType" + _reportType + "&reportName=" + escape(_reportName);
+            var escapedName:String = _reportName.replace(/[ @\"&*#$%^~]/g, "-");
+            var url:String = "https://www.easy-insight.com/reports/" + escapedName + "-" + _reportID;
             var urlWindow:URLWindow = new URLWindow();
             urlWindow.x = this.x;
             urlWindow.y = this.y;

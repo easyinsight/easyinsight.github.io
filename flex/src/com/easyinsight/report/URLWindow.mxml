@@ -17,7 +17,7 @@
             dispatchEvent(new Event("urlChanged"));
         }]]></mx:Script>
     <mx:VBox>
-        <mx:Text text="{url}" selectable="true"/>
+        <mx:TextArea text="{url}" selectable="true" editable="false" width="400" height="200"/>
         <mx:HBox width="100%" horizontalAlign="center">
             <mx:Button label="Copy to Clipboard" click="System.setClipboard(url)"/>
             <mx:Button label="Close" click="PopUpManager.removePopUp(this)"/>
