@@ -29,7 +29,7 @@
     String reportRatingHTML = "";
     StringBuilder reportRatingHTMLBuilder = new StringBuilder();
     try {
-        EmbeddedDataResults results = new DataService().getEmbeddedResults(Long.parseLong(reportID), dataSourceID, null, insightRequestMetadata,
+        EmbeddedResults results = new DataService().getEmbeddedResults(Long.parseLong(reportID), dataSourceID, null, insightRequestMetadata,
                 null);
         authorName = results.getDefinition().getAuthorName();
         description = results.getDefinition().getDescription();
