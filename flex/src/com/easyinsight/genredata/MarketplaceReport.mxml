@@ -104,6 +104,10 @@
         [Embed(source="../../../../assets/report/data.png")]
         private var dataIcon:Class;
 
+        [Bindable]
+        [Embed(source="../../../../assets/report/film.png")]
+        private var film:Class;
+
         private function assignIcon():void {
             switch (reportType) {
                 case AnalysisDefinition.AREA:
@@ -142,7 +146,19 @@
                     reportImage = pieChart;
                     break;
                 case AnalysisDefinition.MAP:
+                case AnalysisDefinition.MAP_AMERICAS:
+                case AnalysisDefinition.MAP_ASIA:
+                case AnalysisDefinition.MAP_EUROPE:
+                case AnalysisDefinition.MAP_MIDDLE_EAST:
+                case AnalysisDefinition.MAP_USA:
+                case AnalysisDefinition.MAP_WORLD:
                     reportImage = map;
+                    break;
+                case AnalysisDefinition.GAUGE:
+                    reportImage = gauge;
+                    break;
+                case AnalysisDefinition.TIMELINE:
+                    reportImage = film;
                     break;
             }
         }

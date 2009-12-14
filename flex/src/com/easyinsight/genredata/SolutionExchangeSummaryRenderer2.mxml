@@ -64,11 +64,11 @@
                 PopUpManager.addPopUp(window, this, true);
                 PopUpUtil.centerPopUp(window);
             } else if (dataSources.length == 1) {
-                ProgressAlert.alert(this, "Getting the report ready...", null, solutionService.installPackage);
+                ProgressAlert.alert(this, "Getting the package ready...", null, solutionService.installPackage);
                 solutionService.installPackage.send(packageData.packageID, dataSources.getItemAt(0).id);
             } else {
                 // TODO: this is a hack for now
-                ProgressAlert.alert(this, "Getting the report ready...", null, solutionService.installPackage);
+                ProgressAlert.alert(this, "Getting the package ready...", null, solutionService.installPackage);
                 solutionService.installPackage.send(packageData.packageID, dataSources.getItemAt(0).id);
             }
         }
@@ -79,7 +79,7 @@
                     ProgressAlert.alert(this, "Getting the report ready...", null, solutionService.determineDataSource);
                     solutionService.determineDataSource.send(dataSourceID);
                 } else if (_item.exchangeData is ExchangePackageData) {
-                    ProgressAlert.alert(this, "Getting the report ready...", null, solutionService.determineDataSourceForPackage);
+                    ProgressAlert.alert(this, "Getting the package ready...", null, solutionService.determineDataSourceForPackage);
                     var packageData:ExchangePackageData = _item.exchangeData as ExchangePackageData;
                     solutionService.determineDataSourceForPackage.send(packageData.packageID);
                 }
@@ -166,6 +166,14 @@
         [Embed(source="../../../../assets/report/data.png")]
         private var dataIcon:Class;
 
+        [Bindable]
+        [Embed(source="../../../../assets/report/control_panel2.png")]
+        private var gaugeIcon:Class;
+
+        [Bindable]
+        [Embed(source="../../../../assets/report/film.png")]
+        private var film:Class;
+
         private function assignIcon():void {
             switch (reportType) {
                 case AnalysisDefinition.AREA:
@@ -204,7 +212,19 @@
                     reportImage = pieChart;
                     break;
                 case AnalysisDefinition.MAP:
+                case AnalysisDefinition.MAP_AMERICAS:
+                case AnalysisDefinition.MAP_ASIA:
+                case AnalysisDefinition.MAP_EUROPE:
+                case AnalysisDefinition.MAP_MIDDLE_EAST:
+                case AnalysisDefinition.MAP_USA:
+                case AnalysisDefinition.MAP_WORLD:
                     reportImage = map;
+                    break;
+                case AnalysisDefinition.GAUGE:
+                    reportImage = gauge;
+                    break;
+                case AnalysisDefinition.TIMELINE:
+                    reportImage = film;
                     break;
             }
         }

@@ -80,11 +80,11 @@ public class SolutionGridActionRenderer extends HBox{
             PopUpManager.addPopUp(window, this, true);
             PopUpUtil.centerPopUp(window);
         } else if (dataSources.length == 1) {
-            ProgressAlert.alert(this, "Getting the report ready...", null, solutionService.installPackage);
+            ProgressAlert.alert(this, "Getting the package ready...", null, solutionService.installPackage);
             solutionService.installPackage.send(packageData.packageID, dataSources.getItemAt(0).id);
         } else {
             // TODO: this is a hack for now
-            ProgressAlert.alert(this, "Getting the report ready...", null, solutionService.installPackage);
+            ProgressAlert.alert(this, "Getting the package ready...", null, solutionService.installPackage);
             solutionService.installPackage.send(packageData.packageID, dataSources.getItemAt(0).id);
         }
     }
