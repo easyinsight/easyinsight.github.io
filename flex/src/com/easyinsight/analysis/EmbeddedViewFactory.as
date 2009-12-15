@@ -8,6 +8,7 @@ import com.easyinsight.report.AbstractViewFactory;
 import com.easyinsight.report.ReportNavigationEvent;
 
 import flash.display.DisplayObject;
+import flash.system.ApplicationDomain;
 
 import mx.collections.ArrayCollection;
 import mx.controls.Alert;
@@ -121,7 +122,7 @@ public class EmbeddedViewFactory extends AbstractViewFactory {
         moduleInfo = ModuleManager.getModule(_prefix + "/app/easyui-debug/" + _reportRendererModule);
         moduleInfo.addEventListener(ModuleEvent.READY, reportLoadHandler);
         moduleInfo.addEventListener(ModuleEvent.ERROR, reportFailureHandler);
-        moduleInfo.load();
+        moduleInfo.load(ApplicationDomain.currentDomain);
     }
 
     private function reportLoadHandler(event:ModuleEvent):void {
