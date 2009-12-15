@@ -6,6 +6,8 @@ import com.easyinsight.analysis.URLPattern;
 import com.easyinsight.analysis.Row;
 import com.easyinsight.core.Key;
 
+import java.util.HashMap;
+
 /**
  * Created by IntelliJ IDEA.
  * User: abaldwin
@@ -22,7 +24,7 @@ public class URLTests extends TestCase {
     public void testCorrectDynamicURL() {
         Row row = new Row();
         row.addValue("Feed ID", "1");
-        String url = URLPattern.getURL("http://www.easy-insight.com/app#feedid=[Feed ID]", row);
+        String url = URLPattern.getURL("http://www.easy-insight.com/app#feedid=[Feed ID]", row, new HashMap<String, String>());
         Assert.assertEquals("http://www.easy-insight.com/app#feedid=1", url);
     }
 
@@ -30,7 +32,7 @@ public class URLTests extends TestCase {
         Row row = new Row();
         row.addValue("Location", "biz");
         row.addValue("Feed ID", "2");
-        String url = URLPattern.getURL("http://www.easy-insight.[Location]/app#feedid=[Feed ID]", row);
+        String url = URLPattern.getURL("http://www.easy-insight.[Location]/app#feedid=[Feed ID]", row, new HashMap<String, String>());
         Assert.assertEquals("http://www.easy-insight.biz/app#feedid=2", url);
     }
 
@@ -38,14 +40,14 @@ public class URLTests extends TestCase {
         Row row = new Row();
         row.addValue("Location", "biz");
         row.addValue("Feed ID", "2");
-        String url = URLPattern.getURL("http://www.[easy]-insight.[Location]/app#feedid=[Feed ID]", row);
+        String url = URLPattern.getURL("http://www.[easy]-insight.[Location]/app#feedid=[Feed ID]", row, new HashMap<String, String>());
         Assert.assertEquals("http://www.[easy]-insight.biz/app#feedid=2", url);
     }
 
     public void testURLOnly() {
         Row row = new Row();
         row.addValue("URL", "http://www.easy-insight.com/app");
-        String url = URLPattern.getURL("[URL]", row);
+        String url = URLPattern.getURL("[URL]", row, new HashMap<String, String>());
         Assert.assertEquals("http://www.easy-insight.com/app", url);
     }
 

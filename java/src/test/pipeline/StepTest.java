@@ -8,10 +8,7 @@ import com.easyinsight.core.NamedKey;
 import com.easyinsight.database.Database;
 import com.easyinsight.datafeeds.FeedRegistry;
 
-import java.util.Date;
-import java.util.Calendar;
-import java.util.Arrays;
-import java.util.ArrayList;
+import java.util.*;
 import java.sql.SQLException;
 
 import test.util.TestUtil;
@@ -62,7 +59,7 @@ public class StepTest extends TestCase {
         rowB.addValue(correlationDim.getKey(), "B");
         rowB.addValue(otherDim.getKey(), "X");
 
-        PipelineData pipelineData = new PipelineData(listDefinition, Arrays.asList(startedDate, endedDate, correlationDim, otherDim, count, analysisStep), new InsightRequestMetadata(), null);
+        PipelineData pipelineData = new PipelineData(listDefinition, Arrays.asList(startedDate, endedDate, correlationDim, otherDim, count, analysisStep), new InsightRequestMetadata(), null, new HashMap<String, String>());
         dataSet = new TypeTransformComponent().apply(dataSet, pipelineData);
         IComponent component = new StepCorrelationComponent(analysisStep);
         DataSet result = component.apply(dataSet, pipelineData);

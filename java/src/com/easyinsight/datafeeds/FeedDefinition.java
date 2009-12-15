@@ -346,10 +346,15 @@ public class FeedDefinition implements Cloneable, Serializable {
         return new StaticFeed();
     }
 
+    protected Map<String, String> createProperties() {
+        return new HashMap<String, String>();
+    }
+
     public Feed createFeed() {
         Feed feed = createFeedObject();
         feed.setFeedID(getDataFeedID());
         feed.setAttribution(getAttribution());
+        feed.setProperties(createProperties());
         Map<Long, AnalysisItem> replacementMap = new HashMap<Long, AnalysisItem>();
         List<AnalysisItem> clones = new ArrayList<AnalysisItem>();
         for (AnalysisItem field : getFields()) {

@@ -277,6 +277,9 @@ public class AnalysisService {
     }
 
     private void saveImage(byte[] image, long reportID, Connection conn) throws SQLException {
+        PreparedStatement clearStmt = conn.prepareStatement("DELETE FROM REPORT_IMAGE WHERE REPORT_ID = ?");
+        clearStmt.setLong(1, reportID);
+        clearStmt.executeUpdate();
         PreparedStatement saveImageStmt = conn.prepareStatement("INSERT INTO REPORT_IMAGE (REPORT_ID, REPORT_IMAGE) VALUES (?, ?)");
         saveImageStmt.setLong(1, reportID);
         saveImageStmt.setBytes(2, image);

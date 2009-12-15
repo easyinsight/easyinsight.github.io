@@ -8,7 +8,6 @@ import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 
 /**
- * Created by IntelliJ IDEA.
  * User: abaldwin
  * Date: Sep 8, 2009
  * Time: 10:38:19 AM
@@ -33,7 +32,7 @@ public class URLPattern {
         return results;
     }
 
-    public static String getURL(String pattern, IRow row) {
+    public static String getURL(String pattern, IRow row, Map<String, String> dataSourceProperties) {
         Map<String, Key> values = new HashMap<String, Key>();
         for(Key k : row.getKeys()) {
             values.put(k.toKeyString(), k);
@@ -41,7 +40,7 @@ public class URLPattern {
         Matcher m = keyPattern.matcher(pattern);
         String[] fragments = pattern.split(patternStr);
         int i = 0;
-        StringBuilder sb = null;
+        StringBuilder sb;
         if(i < fragments.length)
              sb = new StringBuilder(fragments[i++]);
         else
@@ -50,7 +49,11 @@ public class URLPattern {
             String t = m.group();
             String s = t.substring(1, t.length() - 1).trim();
             if(values.get(s) == null) {
-                sb.append(t);
+                String dsProp = dataSourceProperties.get(s);
+                if (dsProp == null)
+                    sb.append(t);
+                else
+                    sb.append(dsProp);
             }
             sb.append(row.getValue(values.get(s)).toString());
             if(i < fragments.length)

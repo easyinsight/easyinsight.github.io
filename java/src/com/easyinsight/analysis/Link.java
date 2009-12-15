@@ -58,7 +58,7 @@ public class Link implements Cloneable {
         return false;
     }
 
-    public String generateLink(IRow row) {
+    public String generateLink(IRow row, Map<String, String> dataSourceProperties) {
         throw new UnsupportedOperationException();
     }
 

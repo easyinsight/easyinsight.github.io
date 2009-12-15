@@ -1,6 +1,7 @@
 package com.easyinsight.datafeeds;
 
 import com.easyinsight.analysis.*;
+import com.easyinsight.reportpackage.ReportPackageDescriptor;
 import com.easyinsight.userupload.UploadPolicy;
 import com.easyinsight.userupload.UserUploadInternalService;
 import com.easyinsight.analysis.AnalysisItem;
@@ -126,6 +127,16 @@ public class FeedService implements IDataFeedService {
             ResultSet goalTreeRS = getGoalTreeStmt.executeQuery();
             while (goalTreeRS.next()) {
                 descriptorList.add(new GoalTreeDescriptor(goalTreeRS.getLong(1), goalTreeRS.getString(2), goalTreeRS.getInt(3), goalTreeRS.getString(4)));
+            }
+            PreparedStatement getPackageStmt = conn.prepareStatement("SELECT REPORT_PACKAGE.package_name, REPORT_PACKAGE.report_package_id FROM REPORT_PACKAGE, user_to_report_package WHERE " +
+                    "user_to_report_package.user_id = ? AND report_package.report_package_id = user_to_report_package.report_package_id AND REPORT_PACKAGE.TEMPORARY_PACKAGE = ?");
+            getPackageStmt.setLong(1, SecurityUtil.getUserID());
+            getPackageStmt.setBoolean(2, false);
+            ResultSet packageRS = getPackageStmt.executeQuery();
+            while (packageRS.next()) {
+                String packageName = packageRS.getString(1);
+                long packageID = packageRS.getLong(2);
+                descriptorList.add(new ReportPackageDescriptor(packageName, packageID));
             }
         } catch (Exception e) {
             LogClass.error(e);

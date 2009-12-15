@@ -8,6 +8,14 @@ import com.easyinsight.core.EIDescriptor;
  * Time: 10:41:48 AM
  */
 public class ReportPackageDescriptor extends EIDescriptor {
+
+    public ReportPackageDescriptor(String name, long id) {
+        super(name, id);
+    }
+
+    public ReportPackageDescriptor() {
+    }
+
     @Override
     public int getType() {
         return EIDescriptor.PACKAGE;

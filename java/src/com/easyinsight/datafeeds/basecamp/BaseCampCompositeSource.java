@@ -10,10 +10,7 @@ import com.easyinsight.users.Account;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.analysis.DataSourceInfo;
 
-import java.util.Set;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Arrays;
+import java.util.*;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.PreparedStatement;
@@ -39,6 +36,13 @@ public class BaseCampCompositeSource extends CompositeServerDataSource {
 
     public int getDataSourceType() {
         return DataSourceInfo.COMPOSITE_PULL;
+    }
+
+    @Override
+    protected Map<String, String> createProperties() {
+        Map<String, String> properties = super.createProperties();
+        properties.put("basecamp.url", url);
+        return properties;
     }
 
     @Override

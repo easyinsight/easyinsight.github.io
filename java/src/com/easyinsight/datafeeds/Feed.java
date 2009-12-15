@@ -23,6 +23,15 @@ public abstract class Feed implements Serializable {
     private boolean visible;
     private int type;
     private long originSolution;
+    private Map<String, String> properties;
+
+    public Map<String, String> getProperties() {
+        return properties;
+    }
+
+    public void setProperties(Map<String, String> properties) {
+        this.properties = properties;
+    }
 
     public long getOriginSolution() {
         return originSolution;

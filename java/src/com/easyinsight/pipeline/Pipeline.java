@@ -46,7 +46,7 @@ public abstract class Pipeline {
             }
         }
         allNeededAnalysisItems.addAll(report.getLimitFields());
-        pipelineData = new PipelineData(report, allNeededAnalysisItems, insightRequestMetadata, dataSource.getFields());
+        pipelineData = new PipelineData(report, allNeededAnalysisItems, insightRequestMetadata, dataSource.getFields(), dataSource.getProperties());
         return allNeededAnalysisItems;
     }
 

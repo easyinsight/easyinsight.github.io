@@ -9,10 +9,7 @@ import com.easyinsight.datafeeds.CredentialsDefinition;
 import com.easyinsight.analysis.DataSourceInfo;
 import com.easyinsight.users.Account;
 
-import java.util.Set;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Arrays;
+import java.util.*;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.PreparedStatement;
@@ -38,6 +35,13 @@ public class HighRiseCompositeSource extends CompositeServerDataSource {
 
     public int getDataSourceType() {
         return DataSourceInfo.COMPOSITE_PULL;
+    }
+
+    @Override
+    protected Map<String, String> createProperties() {
+        Map<String, String> properties = super.createProperties();
+        properties.put("highrise.url", url);
+        return properties;
     }
 
     @Override

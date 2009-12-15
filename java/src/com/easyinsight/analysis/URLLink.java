@@ -9,6 +9,7 @@ import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Column;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Map;
 
 /**
  * User: jamesboe
@@ -46,7 +47,7 @@ public class URLLink extends Link {
         return true;
     }
 
-    public String generateLink(IRow row) {
-        return URLPattern.getURL(url, row);
+    public String generateLink(IRow row, Map<String, String> dataSourceProperties) {
+        return URLPattern.getURL(url, row, dataSourceProperties);
     }
 }
