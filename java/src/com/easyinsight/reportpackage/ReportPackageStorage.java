@@ -78,7 +78,7 @@ public class ReportPackageStorage {
                 if (reportPackage.getDataSourceID() > 0) {
                     updateStmt.setLong(5, reportPackage.getDataSourceID());
                 } else {
-                    updateStmt.setLong(5, reportPackage.getDataSourceID());
+                    updateStmt.setNull(5, Types.BIGINT);
                 }
                 updateStmt.setDate(6, new java.sql.Date(reportPackage.getDateCreated().getTime()));
                 updateStmt.setString(7, reportPackage.getAuthorName());
