@@ -111,7 +111,7 @@
         }
 
         private function reportFailureHandler(event:ModuleEvent):void {
-
+            Alert.show(event.errorText);
         }
 
         public function createFilterRawData():FilterRawData {
