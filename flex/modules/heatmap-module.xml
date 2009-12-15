@@ -6,7 +6,7 @@
         </license>
     </licenses>
     <compiler>
-        <debug>false</debug>
+        <debug>true</debug>
         <external-library-path>
          <path-element>${flexlib}/libs/player/9/playerglobal.swc</path-element>
             <path-element>${flexlib}/libs/datavisualization.swc</path-element>
