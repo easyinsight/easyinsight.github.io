@@ -34,6 +34,37 @@ import org.hibernate.Session;
  */
 public class SolutionService {
 
+    public StaticReport getStaticReport(long reportID) {
+        StaticReport staticReport = null;
+        Connection conn = Database.instance().getConnection();
+        try {
+            PreparedStatement queryStmt = conn.prepareStatement("SELECT TITLE, DESCRIPTION, SOLUTION_ID FROM ANALYSIS, SOLUTION_INSTALL WHERE ANALYSIS_ID = ? AND SOLUTION_VISIBLE = ?" +
+                    " AND ANALYSIS.DATA_FEED_ID = SOLUTION_INSTALL.installed_data_source_id");
+            queryStmt.setLong(1, reportID);
+            queryStmt.setBoolean(2, true);
+            ResultSet reportRS = queryStmt.executeQuery();
+            if (reportRS.next()) {
+                String title = reportRS.getString(1);
+                String description = reportRS.getString(2);
+                long solutionID = reportRS.getLong(3);
+                PreparedStatement imageStmt = conn.prepareStatement("SELECT REPORT_IMAGE FROM REPORT_IMAGE WHERE REPORT_ID = ?");
+                imageStmt.setLong(1, reportID);
+                ResultSet imageRS = imageStmt.executeQuery();
+                if (imageRS.next()) {
+                    byte[] bytes = imageRS.getBytes(1);
+                    staticReport = new StaticReport(reportID, bytes, title, description, solutionID, "", 0, "");
+                }
+            }
+
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        } finally {
+            Database.closeConnection(conn);
+        }
+        return staticReport;
+    }
+
     public Solution retrieveSolution(long solutionID) {
         try {
             return getSolution(solutionID);
@@ -310,7 +341,7 @@ public class SolutionService {
 
             List<InsightDescriptor> newReports = new ArrayList<InsightDescriptor>();
             for (AnalysisDefinition copiedReport : reportList) {
-                session.save(copiedReport);
+                new AnalysisStorage().saveAnalysis(copiedReport, session);
                 session.flush();
                 newReports.add(new InsightDescriptor(copiedReport.getAnalysisID(), copiedReport.getTitle(), copiedReport.getDataFeedID(),
                         copiedReport.getReportType()));
@@ -320,7 +351,7 @@ public class SolutionService {
             }
 
             for (AnalysisDefinition copiedReport : reportList) {
-                session.update(copiedReport);
+                new AnalysisStorage().saveAnalysis(copiedReport, session);
                 session.flush();
             }
             ReportPackage clonedPackage = reportPackage.clone();
@@ -380,7 +411,7 @@ public class SolutionService {
             //Collections.reverse(reportList);
 
             for (AnalysisDefinition copiedReport : reportList) {
-                session.save(copiedReport);
+                new AnalysisStorage().saveAnalysis(copiedReport, session);
                 session.flush();
             }
 
