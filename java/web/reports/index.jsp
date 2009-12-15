@@ -144,7 +144,7 @@
             <%
                 String embedHTML = java.text.MessageFormat.format("<object width=\"450\" height=\"346\" codebase=\"http://fpdownload.macromedia.com/get/flashplayer/current/swflash.cab\"\n" +
                         "        classid=\"clsid:D27CDB6E-AE6D-11cf-96B8-444553540000\">\n" +
-                        "    <param name=\"movie\" value=\"/app/easyui-debug/EmbeddedInsight.swf\"/>\n" +
+                        "    <param name=\"movie\" value=\"https://www.easy-insight.com/app/easyui-debug/EmbeddedInsight.swf\"/>\n" +
                         "    <param name=\"quality\" value=\"high\"/>\n" +
                         "    <param name=\"bgcolor\" value=\"#869ca7\"/>\n" +
                         "    <param name=\"wmode\" value=\"opaque\"/>\n" +
