@@ -3,6 +3,9 @@ package com.easyinsight.analysis {
 import com.easyinsight.filtering.FilterRawData;
 import com.easyinsight.framework.DataServiceLoadingEvent;
 import flash.display.DisplayObject;
+import flash.events.Event;
+
+import mx.binding.utils.BindingUtils;
 import mx.collections.ArrayCollection;
 import mx.containers.VBox;
 import mx.controls.Alert;
@@ -78,6 +81,20 @@ public class DataViewFactory extends VBox {
         return new _reportControlBar();
     }
 
+    private var _obfuscate:Boolean;
+
+
+    [Bindable(event="obfuscateChanged")]
+    public function get obfuscate():Boolean {
+        return _obfuscate;
+    }
+
+    public function set obfuscate(value:Boolean):void {
+        if (_obfuscate == value) return;
+        _obfuscate = value;
+        dispatchEvent(new Event("obfuscateChanged"));
+    }
+
     override protected function createChildren():void {
         super.createChildren();
 
@@ -85,6 +102,7 @@ public class DataViewFactory extends VBox {
         _dataService.addEventListener(DataServiceLoadingEvent.LOADING_STARTED, dataLoadingEvent);
         _dataService.addEventListener(DataServiceLoadingEvent.LOADING_STOPPED, dataLoadingEvent);
         _dataService.addEventListener(DataServiceEvent.DATA_RETURNED, gotData);
+        BindingUtils.bindProperty(_dataService, "obfuscate", this, "obfuscate");
 
         _controlBar = createReportControlBar();
         _controlBar.analysisItems = _availableFields;

@@ -7,5 +7,10 @@ public class ReportPackageDescriptor extends EIDescriptor {
     public function ReportPackageDescriptor() {
         super();
     }
+
+
+    override public function getType():int {
+        return EIDescriptor.PACKAGE;
+    }
 }
 }

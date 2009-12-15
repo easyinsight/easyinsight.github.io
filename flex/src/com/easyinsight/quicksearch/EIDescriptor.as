@@ -13,6 +13,7 @@ public class EIDescriptor {
     public static const AIR_INTRO:int = 6;
 
     public static const GOAL_HISTORY:int = 7;
+    public static const PACKAGE:int = 8;
 
     public var id:int;
     public var name:String;

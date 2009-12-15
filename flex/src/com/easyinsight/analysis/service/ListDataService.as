@@ -30,7 +30,20 @@ public class ListDataService extends EventDispatcher implements IReportDataServi
         dataRemoteSource.list.addEventListener(FaultEvent.FAULT, GenericFaultHandler.genericFault);
     }
 
+    private var _obfuscate:Boolean;
+
+    public function get obfuscate():Boolean {
+        return _obfuscate;
+    }
+
+    public function set obfuscate(value:Boolean):void {
+        _obfuscate = value;
+    }
+
     public function translate(listData:ListDataResults):ServiceData {
+        if (obfuscate) {
+            new Obfuscator().obfuscate(listData);
+        }
         var clientProcessorMap:Object = new Object();
         var headers:ArrayCollection = new ArrayCollection(listData.headers);
         for each (var analysisItem:AnalysisItem in headers) {

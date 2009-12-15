@@ -29,7 +29,20 @@ public class CrosstabDataService extends EventDispatcher implements IReportDataS
         dataRemoteSource.list.addEventListener(FaultEvent.FAULT, GenericFaultHandler.genericFault);
     }
 
+    private var _obfuscate:Boolean;
+
+    public function get obfuscate():Boolean {
+        return _obfuscate;
+    }
+
+    public function set obfuscate(value:Boolean):void {
+        _obfuscate = value;
+    }
+
     private function processListData(event:ResultEvent):void {
+        if (obfuscate) {
+            new Obfuscator().obfuscate(listData);
+        }
         var listData:ListDataResults = dataRemoteSource.list.lastResult as ListDataResults;
         if (listData.invalidAnalysisItemIDs != null && listData.invalidAnalysisItemIDs.length > 0) {
             dispatchEvent(new InvalidFieldsEvent(listData.invalidAnalysisItemIDs, listData.feedMetadata));

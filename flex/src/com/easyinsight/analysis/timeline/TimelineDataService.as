@@ -5,6 +5,7 @@ import com.easyinsight.analysis.IReportDataService;
 import com.easyinsight.analysis.ListDataResults;
 import com.easyinsight.analysis.SeriesDataResults;
 import com.easyinsight.analysis.service.ListDataService;
+import com.easyinsight.analysis.service.Obfuscator;
 import com.easyinsight.framework.CredentialsCache;
 import com.easyinsight.framework.DataServiceLoadingEvent;
 import com.easyinsight.framework.GenericFaultHandler;
@@ -28,7 +29,20 @@ public class TimelineDataService extends EventDispatcher implements IReportDataS
         dataRemoteSource.list.addEventListener(FaultEvent.FAULT, GenericFaultHandler.genericFault);
     }
 
+    private var _obfuscate:Boolean;
+
+    public function get obfuscate():Boolean {
+        return _obfuscate;
+    }
+
+    public function set obfuscate(value:Boolean):void {
+        _obfuscate = value;
+    }
+
     private function processListData(event:ResultEvent):void {
+        if (obfuscate) {
+            new Obfuscator().obfuscate(listData);
+        }
         var seriesData:SeriesDataResults = dataRemoteSource.list.lastResult as SeriesDataResults;
         var dataSets:ArrayCollection = new ArrayCollection();
         for each (var listData:ListDataResults in seriesData.listDatas) {
