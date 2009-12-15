@@ -378,7 +378,7 @@
 
     <target name="compileEmbeddedInsight">
         <mxmlc file="${teamcity.build.checkoutDir}/flex/src/EmbeddedInsight.mxml" output="${flex.path}/EmbeddedInsight.swf"
-               static-rsls="true" link-report="${basedir}/embedded.txt">
+               static-rsls="false" link-report="${basedir}/embedded.txt">
             <load-config filename="${teamcity.build.checkoutDir}/flex/embedded-insight.xml"/>
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
                 <url rsl-url="framework_3.3.0.4852.swz"/>
