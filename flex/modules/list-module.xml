@@ -11,6 +11,7 @@
          <path-element>${flexlib}/libs/player/9/playerglobal.swc</path-element>
             <path-element>${flexlib}/libs/datavisualization.swc</path-element>
             <path-element>${flexlib}/libs/framework.swc</path-element>
+
             <path-element>${flexlib}/libs/rpc.swc</path-element>
         </external-library-path>
         <library-path>

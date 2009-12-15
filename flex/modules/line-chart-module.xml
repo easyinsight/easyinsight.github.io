@@ -10,11 +10,12 @@
         <external-library-path>
          <path-element>${flexlib}/libs/player/9/playerglobal.swc</path-element>
             <path-element>${flexlib}/libs/datavisualization.swc</path-element>
-            <path-element>${flexlib}/libs/flex.swc</path-element>
+
+            <path-element>${flexlib}/libs/framework.swc</path-element>
             <path-element>${flexlib}/libs/rpc.swc</path-element>
         </external-library-path>
         <library-path>
-         <path-element>${flexlib}/libs/framework.swc</path-element>
+            <path-element>${flexlib}/libs/flex.swc</path-element>
          <path-element>${flexlib}/libs/utilities.swc</path-element>
          <path-element>${flexlib}/locale/{locale}</path-element>
         </library-path>
