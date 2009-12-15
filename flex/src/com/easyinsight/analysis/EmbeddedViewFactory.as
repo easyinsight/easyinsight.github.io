@@ -113,6 +113,7 @@ public class EmbeddedViewFactory extends AbstractViewFactory {
     override public function gotData(event:EmbeddedDataServiceEvent):void {
         if (event.credentialRequirements != null && event.credentialRequirements.length > 0) {
         } else {
+            event.additionalProperties.prefix = _prefix;
             _reportRenderer.renderReport(event.dataSet, event.analysisDefinition, event.clientProcessorMap, event.additionalProperties);
         }
         dispatchEvent(event);
