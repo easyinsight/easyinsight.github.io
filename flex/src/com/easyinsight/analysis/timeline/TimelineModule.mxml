@@ -83,8 +83,9 @@
                     var controllerClass:Class = EmbeddedControllerLookup.controllerForType(timeline.report.reportType);
                     var controller:IEmbeddedReportController = new controllerClass();
                     factory = controller.createEmbeddedView();
-                    factory.prefix = additionalProperties.prefix == null ? "" : additionalProperties.prefix;
-                    moduleInfo = ModuleManager.getModule("/app/easyui-debug/" + factory.reportRendererModule);
+                    var prefix:String = additionalProperties.prefix == null ? "" : additionalProperties.prefix;
+                    factory.prefix = prefix;
+                    moduleInfo = ModuleManager.getModule(prefix + "/app/easyui-debug/" + factory.reportRendererModule);
                     moduleInfo.addEventListener(ModuleEvent.READY, reportLoadHandler);
                     moduleInfo.addEventListener(ModuleEvent.ERROR, reportFailureHandler);
                     moduleInfo.load();
