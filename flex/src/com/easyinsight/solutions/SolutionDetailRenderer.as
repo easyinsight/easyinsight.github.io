@@ -197,7 +197,7 @@ public class SolutionDetailRenderer extends VBox implements IPerspective {
     }
 
     protected function installSolution():void {
-        ProgressAlert.alert(this, "Installing solution...", null, solutionService.installSolution);
+        ProgressAlert.alert(this, "Installing connection...", null, solutionService.installSolution);
         solutionService.installSolution.send(_solution.solutionID);
     }
 
