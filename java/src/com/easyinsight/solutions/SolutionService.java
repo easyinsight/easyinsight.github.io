@@ -524,7 +524,7 @@ public class SolutionService {
                 exchangeReportData.setDataSourceName(dataSourceName);
                 exchangeReportData.setReportType(reportType);
                 SolutionReportExchangeItem item = new SolutionReportExchangeItem(title, analysisID, "",
-                        ratingAverage, 0, created, authorName, description, exchangeReportData, solutionID, solutionName);
+                        ratingAverage, 0, created, description, authorName, exchangeReportData, solutionID, solutionName);
                 reports.add(item);
                 ResultSet tagRS = getTagsStmt.executeQuery();
                 List<String> tags = new ArrayList<String>();
