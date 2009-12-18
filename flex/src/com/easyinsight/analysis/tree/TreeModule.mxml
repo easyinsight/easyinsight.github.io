@@ -16,6 +16,7 @@
         import mx.collections.Grouping;
         import mx.collections.GroupingCollection;
         import mx.collections.GroupingField;
+        import mx.controls.Alert;
         import mx.controls.advancedDataGridClasses.AdvancedDataGridColumn;
 
         [Bindable]
@@ -74,17 +75,28 @@
                 var analysisItems:Array = [];
                 var grouping:Grouping = new Grouping();
                 var groupingFields:Array = [];
-                for each (var level:HierarchyLevel in hierarchy.hierarchyLevels) {
-                    analysisItems.push(level.analysisItem);
+                //analysisItems.push(hierarchy.hierarchyLevels.getItemAt(0).analysisItem);
+                for (var lvlCount:int = 0; lvlCount < hierarchy.hierarchyLevels.length - 1; lvlCount++) {
+                    var level:HierarchyLevel = hierarchy.hierarchyLevels.getItemAt(lvlCount) as HierarchyLevel;
                     var groupingField:GroupingField = new GroupingField();
                     groupingField.name = level.analysisItem.qualifiedName();
                     groupingFields.push(groupingField);
                 }
+                /*for each (var level:HierarchyLevel in hierarchy.hierarchyLevels) {
+                    //analysisItems.push(level.analysisItem);
+
+                }*/
                 grouping.fields = groupingFields;
                 groupingColl.grouping = grouping;
                 for each (var item:AnalysisItem in treeDefinition.items) {
                     analysisItems.push(item);
                 }
+                var hierarchyColumn:AdvancedDataGridColumn = new AdvancedDataGridColumn();
+                hierarchyColumn.headerText = hierarchy.display;                                                                             
+                hierarchyColumn.dataField = hierarchy.hierarchyLevels.getItemAt(hierarchy.hierarchyLevels.length - 1).analysisItem.qualifiedName();
+                
+                hierarchyColumn.headerRenderer = new ListViewHeaderRendererFactory(hierarchy.display);
+                columns[0] = hierarchyColumn;
                 for (var k:int = 0; k < analysisItems.length; k++) {
                     var myHeader:AnalysisItem = analysisItems[k] as AnalysisItem;
                     //columnMap[myHeader.qualifiedName()] = myHeader;
@@ -93,17 +105,17 @@
                     //columnHeaderObject.headerText = "";
                     columnHeaderObject.dataField = myHeader.qualifiedName();
                     columnHeaderObject.headerRenderer = new ListViewHeaderRendererFactory(myHeader.display);
-                    if (k > 0) {
+
                         var factory:ClassFactory = new ClassFactory(AnalysisCellRenderer);
                         factory.properties = { analysisItem: myHeader, renderer: clientProcessorMap[myHeader.qualifiedName()] };
                         columnHeaderObject.itemRenderer = factory;
-                    }
+
                     /*columnHeaderObject.itemRenderer = new AnalysisCellRendererFactory(keyString, myHeader,
                      clientProcessorMap[keyString]);*/
                     /*var factory:ClassFactory = new ClassFactory(AnalysisCellRenderer);
                      factory.properties = { analysisItem: myHeader, renderer: clientProcessorMap[keyString] };
                      columnHeaderObject.itemRenderer = factory;*/
-                    columns[k] = columnHeaderObject;
+                    columns[k + 1] = columnHeaderObject;
                 }
                 myData = dataSet;
                 groupingColl.refresh();
