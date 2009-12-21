@@ -104,6 +104,7 @@ public class FeedService implements IDataFeedService {
     public List<EIDescriptor> getDescriptors() {
         List<EIDescriptor> descriptorList = new ArrayList<EIDescriptor>();
         Connection conn = Database.instance().getConnection();
+
         try {
             PreparedStatement queryDataSources = conn.prepareStatement("SELECT FEED_NAME, DATA_FEED.DATA_FEED_ID FROM DATA_FEED, UPLOAD_POLICY_USERS WHERE " +
                     "DATA_FEED.DATA_FEED_ID = UPLOAD_POLICY_USERS.FEED_ID AND UPLOAD_POLICY_USERS.user_id = ?");
@@ -137,6 +138,26 @@ public class FeedService implements IDataFeedService {
                 String packageName = packageRS.getString(1);
                 long packageID = packageRS.getLong(2);
                 descriptorList.add(new ReportPackageDescriptor(packageName, packageID));
+            }
+            Map<String, Integer> countMap = new HashMap<String, Integer>();
+            Set<String> dupeNames = new HashSet<String>();
+            Set<String> allNames = new HashSet<String>();
+            for (EIDescriptor descriptor : descriptorList) {
+                if (!allNames.add(descriptor.getName())) {
+                    dupeNames.add(descriptor.getName());
+                }
+            }
+            for (EIDescriptor descriptor : descriptorList) {
+                if (dupeNames.contains(descriptor.getName())) {
+                    Integer count = countMap.get(descriptor.getName());
+                    if (count == null) {
+                        count = 1;
+                    } else {
+                        count = count + 1;
+                    }
+                    countMap.put(descriptor.getName(), count);
+                    descriptor.setName(descriptor.getName() + " (" + count + ")");
+                }    
             }
         } catch (Exception e) {
             LogClass.error(e);

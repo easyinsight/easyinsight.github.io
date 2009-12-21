@@ -33,7 +33,7 @@
         private var packageIcon:Class;
 
         [Bindable]
-        private var factory:ClassFactory;
+        private var factory:ClassFactory;                     
 
 
         [Bindable(event="descriptorsChanged")]
@@ -83,7 +83,7 @@
                 if (descriptor == null) {
                     error = true;
                     searchInput.setStyle("color", "red");
-                    noMatchesLabel.setStyle("color", "red");
+                    //noMatchesLabel.setStyle("color", "red");
                 } else {
                     if (!keyRun) {
                         keyRun = true;
@@ -95,6 +95,7 @@
         }
 
         private function onCompletionClose():void {
+            
             var descriptor:EIDescriptor = descriptorMap[searchInput.text];
             if (descriptor != null && !keyRun) {
                 keyRun = true;
@@ -124,13 +125,13 @@
         private function onChange():void {
             if (error) {
                 searchInput.setStyle("color", 0x000000);
-                noMatchesLabel.setStyle("color", 0x000000);
+                //noMatchesLabel.setStyle("color", 0x000000);
             }
             if (searchInput.text == "") {
-                noMatchesLabel.visible = false;
+                //noMatchesLabel.visible = false;
             } else {
                 var descriptor:EIDescriptor = descriptorMap[searchInput.text];
-                noMatchesLabel.visible = descriptor == null;
+                //noMatchesLabel.visible = descriptor == null;
             }
         }
         ]]></mx:Script>
@@ -140,9 +141,9 @@
     <util:AutoCompleteManager id="autoCompleteManager" target="{searchInput}" dataProvider="{descriptors}"
                               labelField="name" minCharsForCompletion="1" close="onCompletionClose()"
                               popUpRenderer="{factory}"/>
-    <mx:HBox verticalAlign="middle">
+    <mx:HBox verticalAlign="middle" width="225">
         <mx:Label text="Enter name:" fontWeight="bold" fontFamily="Tahoma" fontSize="13"/>
-        <mx:Label text="(no matches found)" id="noMatchesLabel" visible="false"/>
+        <!--<mx:Label text="(no matches found)" id="noMatchesLabel" visible="false"/>-->
     </mx:HBox>
     <mx:TextInput id="searchInput" width="100%" enabled="false" change="onChange()"/>
 </mx:VBox>

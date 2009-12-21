@@ -1721,7 +1721,7 @@ public class AutoCompleteManager extends EventDispatcher
             event.stopPropagation();
 
         }
-        else if (event.keyCode == Keyboard.LEFT || event.keyCode == Keyboard.RIGHT || event.keyCode == Keyboard.ENTER)
+        else if (event.keyCode == Keyboard.ENTER)
         {
         	if(_currentDropdown && _currentCollection)
         	{
