@@ -67,10 +67,12 @@ public class BasicAuthAuthorizationInterceptor extends SoapHeaderInterceptor {
 
         // Set the response headers
         Map<String, List<String>> responseHeaders =
-                (Map<String, List<String>>) message.get(Message.PROTOCOL_HEADERS);
+                (Map<String, List<String>>) outMessage.get(Message.PROTOCOL_HEADERS);
         if (responseHeaders != null) {
+            responseHeaders.remove("WWW-Authenticate");
+            responseHeaders.remove("content-length");
             responseHeaders.put("WWW-Authenticate", Arrays.asList("Basic realm=realm"));
-            responseHeaders.put("Content-Length", Arrays.asList("0"));
+            responseHeaders.put("content-length", Arrays.asList("0"));
         }
         message.getInterceptorChain().abort();
         try {
