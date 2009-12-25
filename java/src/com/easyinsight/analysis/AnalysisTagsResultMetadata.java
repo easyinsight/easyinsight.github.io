@@ -15,6 +15,8 @@ public class AnalysisTagsResultMetadata extends AnalysisDimensionResultMetadata 
             for (Value transformedValue : transformedValues) {
                 super.addValue(analysisItem, transformedValue, insightRequestMetadata);
             }
+        } else {
+            super.addValue(analysisItem, value, insightRequestMetadata);
         }
     }
 }

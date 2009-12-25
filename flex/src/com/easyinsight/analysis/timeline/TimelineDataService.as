@@ -40,17 +40,18 @@ public class TimelineDataService extends EventDispatcher implements IReportDataS
     }
 
     private function processListData(event:ResultEvent):void {
-        if (obfuscate) {
-            new Obfuscator().obfuscate(listData);
-        }
+
         var seriesData:SeriesDataResults = dataRemoteSource.list.lastResult as SeriesDataResults;
+        /*if (obfuscate) {
+            new Obfuscator().obfuscate(seriesData);
+        }*/
         var dataSets:ArrayCollection = new ArrayCollection();
         for each (var listData:ListDataResults in seriesData.listDatas) {
             dataSets.addItem(new ListDataService().translate(listData));
         }
-        listData.additionalProperties.seriesValues = seriesData.seriesValues;
-        dispatchEvent(new DataServiceEvent(DataServiceEvent.DATA_RETURNED, dataSets, new Object(), listData.dataSourceInfo,
-                listData.additionalProperties, false, 0, 0));
+        seriesData.additionalProperties.seriesValues = seriesData.seriesValues;
+        dispatchEvent(new DataServiceEvent(DataServiceEvent.DATA_RETURNED, dataSets, new Object(), seriesData.dataSourceInfo,
+                seriesData.additionalProperties, false, 0, 0));
         dispatchEvent(new DataServiceLoadingEvent(DataServiceLoadingEvent.LOADING_STOPPED));
     }
 

@@ -34,6 +34,10 @@ package com.easyinsight.analysis
             return analysisItem.hasType(AnalysisItemTypes.HIERARCHY);
         }
 
+        override public function customEditor():Class {
+            return HierarchyWindow;
+        }
+
         override public function set analysisItem(analysisItem:AnalysisItem):void {
 
             if (analysisItem != null) {

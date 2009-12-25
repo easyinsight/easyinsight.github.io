@@ -72,12 +72,15 @@
 
         private var seriesValues:ArrayCollection;
 
+        private var additionalProperties:Object;
+
         public function renderReport(dataSet:ArrayCollection, analysisDefinition:AnalysisDefinition, clientProcessorMap:Object, additionalProperties:Object):void {            
             var timeline:Timeline = analysisDefinition as Timeline;
             this.timeline = timeline;
             if (timeline.report != null && dataSet.length > 0) {
                 this.allFrames = dataSet;
                 this.frameData = dataSet.getItemAt(0) as ServiceData;
+                this.additionalProperties = additionalProperties;
                 this.seriesValues = additionalProperties.seriesValues as ArrayCollection;
                 if (_reportRenderer == null) {                    
                     var controllerClass:Class = EmbeddedControllerLookup.controllerForType(timeline.report.reportType);
@@ -192,7 +195,7 @@
             var value:Value = seriesValues.getItemAt(currentFrame) as Value;
             currentFrameText = timeline.sequence.analysisItem.getFormatter().format(value.getValue());
             frameData = allFrames.getItemAt(currentFrame) as ServiceData;
-            _reportRenderer.renderReport(frameData.data, timeline.report, frameData.clientProcessorMap, null);
+            _reportRenderer.renderReport(frameData.data, timeline.report, frameData.clientProcessorMap, additionalProperties);
         }
 
         private function blah():void {

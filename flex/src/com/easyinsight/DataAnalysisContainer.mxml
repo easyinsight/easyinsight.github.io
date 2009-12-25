@@ -54,6 +54,7 @@
         import com.easyinsight.analysis.DataViewFactory;
         import com.easyinsight.analysis.HierarchyRollupEvent;
         import com.easyinsight.analysis.IReportController;
+        import com.easyinsight.analysis.ReportSizingEvent;
         import com.easyinsight.analysis.list.ListController;
         import com.easyinsight.analysis.AddFeedToGroupWindow;
         import com.easyinsight.analysis.SubscriptionEvent;
@@ -70,6 +71,7 @@
         import com.easyinsight.report.MultiReportAnalyzeSource;
         import com.easyinsight.report.ReportAnalyzeSource;
         import com.easyinsight.solutions.InsightDescriptor;
+        import com.easyinsight.util.PNGEnc;
         import com.easyinsight.util.PopUpUtil;
         import mx.collections.Sort;
         import mx.events.DragEvent;
@@ -381,7 +383,7 @@
             } else if (!wrapper1.isAnalysisItem() && wrapper2.isAnalysisItem()) {
                 return -1;
             } else {
-                return ObjectUtil.stringCompare(wrapper1.displayName, wrapper2.displayName);
+                return ObjectUtil.stringCompare(wrapper1.displayName, wrapper2.displayName, true);
             }
         }
 
@@ -418,6 +420,7 @@
             addEventListener(AnalysisChangedEvent.ANALYSIS_CHANGED, onAnalysisChanged);
             addEventListener(DeleteAnalysisItemEvent.DELETE_ANALYSIS_ITEM, onFieldDelete);
             addEventListener(CommandEvent.COMMAND, onCommand);
+            addEventListener(AnalysisItemDeleteEvent.ANALYSIS_ITEM_DELETE, onAnalysisItemDelete);
             stage.addEventListener(KeyboardEvent.KEY_UP, onKey);
             addEventListener(HierarchyDrilldownEvent.DRILLDOWN, childFilterCreation);
             addEventListener(HierarchyRollupEvent.HIERARCHY_ROLLUP, onRollup);
@@ -558,8 +561,14 @@
                     var valid:Boolean = reportMetadataTab.updateReport().length == 0;
                     if (valid) {
                         dataView.updateExportMetadata();
+                        var ba:ByteArray = null;
+                        if (analysisDefinition.solutionVisible) {
+                            var bd:BitmapData = new BitmapData(dataView.getCoreView().width, dataView.getCoreView().height);
+                            bd.draw(dataView.getCoreView());
+                            ba = PNGEnc.encode(bd);
+                        }
                         ProgressAlert.alert(this, "Saving the report...", "Saved!", analysisService.saveAnalysisDefinition);
-                        analysisService.saveAnalysisDefinition(analysisDefinition);
+                        analysisService.saveAnalysisDefinition(analysisDefinition, ba);
                     } else {
                         tabNavigator.selectedIndex = 0;
                         Alert.show("There are one or more errors which need to be corrected before this report can be saved.");
@@ -812,6 +821,30 @@
                 dispatchEvent(new AnalyzeEvent(new DescriptorAnalyzeSource(dataService.dataFeedID, dataSourceName)));
             }
         }
+
+        private function onReportSizing(event:ReportSizingEvent):void {
+            if (event.width > 0) {
+                dataView.width = event.width;
+            } else {
+                dataView.width = 0;
+                dataView.percentWidth = 100;
+            }
+        }
+
+        private function onAnalysisItemDelete(event:AnalysisItemDeleteEvent):void {
+            var wrapperIndex:int = wrappers.getItemIndex(event.analysisItem);
+            if (wrapperIndex != -1) {
+                wrappers.removeItemAt(wrapperIndex);
+            }
+            var availableFieldIndex:int = availableFields.getItemIndex(event.analysisItem.analysisItem);
+            if (availableFieldIndex != -1) {
+                availableFields.removeItemAt(availableFieldIndex);
+            }
+            var addedIndex:int = analysisDefinition.addedItems.getItemIndex(event.analysisItem.analysisItem);
+            if (addedIndex != -1) {
+                analysisDefinition.addedItems.removeItemAt(addedIndex);
+            }
+        }
         ]]>
     </mx:Script>
     <mx:RemoteObject id="analysisService" destination="analysisDefinition">
@@ -868,7 +901,7 @@
             <analysis:ReportMetadataTab id="reportMetadataTab" analysisDefinition="{analysisDefinition}" originSolution="{originSolution}"/>
             <analysis:ReportDataTab id="reportDataTab" analysisDefinition="{analysisDefinition}" dataService="{dataService}"
                     wrappers="{wrappers}" availableFields="{availableFields}" dataSourceInfo="{dataSourceInfo}"
-                    dataView="{dataView}" analysisItemCreated="sortFields()"/>
+                    dataView="{dataView}" analysisItemCreated="sortFields()" reportSizing="onReportSizing(event)"/>
             <filtering:TransformContainer id="transformContainer" paddingLeft="10" paddingTop="10" paddingBottom="10"
                                           paddingRight="10" transformAdded="transformsUpdated(event)" label="Filters (F3)"
                                           icon="@Embed(source='../../../assets/funnel.png')"

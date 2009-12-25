@@ -89,6 +89,14 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
         this.key = key;
     }
 
+    public String qualifiedName() {
+        return key.internalString() + getQualifiedSuffix();
+    }
+
+    protected String getQualifiedSuffix() {
+        return String.valueOf(getType());
+    }
+
     public List<Link> getLinks() {
         return links;
     }

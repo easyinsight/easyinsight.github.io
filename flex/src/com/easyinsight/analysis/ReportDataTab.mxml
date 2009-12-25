@@ -5,6 +5,7 @@
          xmlns:datasources="com.easyinsight.datasources.*" xmlns:analysis="com.easyinsight.analysis.*">
     <mx:Metadata>
         [Event(name="analysisItemCreated", type="com.easyinsight.analysis.AnalysisItemCreationEvent")]
+        [Event(name="reportSizing", type="com.easyinsight.analysis.ReportSizingEvent")]
     </mx:Metadata>
     <mx:Script><![CDATA[
         import com.easyinsight.datasources.DataSourceInfo;
@@ -157,6 +158,16 @@
             }
             analysisDefinition.addedItems.addItem(event.analysisItem);
         }
+
+        private function obfuscate():void {
+            dataView.obfuscate = !dataView.obfuscate;
+            if (dataView.obfuscate) {
+                dispatchEvent(new ReportSizingEvent(700));
+            } else {
+                dispatchEvent(new ReportSizingEvent(0));
+            }
+            dataView.retrieveData();
+        }
         ]]></mx:Script>
     <mx:Button id="refreshButton" toolTip="Refresh Data"
                icon="@Embed(source='../../../../assets/refresh.png')"
@@ -171,6 +182,8 @@
                toolTip="Add Hierarchy..." click="createHierarchy()"/>
     <mx:Button id="apiButton" toolTip="Show API Info for this Data Source"
                icon="@Embed(source='../../../../assets/app_enterprise_x16.png')" click="showAPIInfo()"/>
+    <mx:Button id="obfuscateButton" toolTip="Toggle Obfuscation"
+               icon="@Embed(source='../../../../assets/lock.png')" click="obfuscate()"/>
     <!--<analysis:ResultLimitComboBox limits="{limits}"/>-->
     <datasources:DataSourceDisplay dataSource="{dataSourceInfo}" width="100%"/>
 </mx:HBox>

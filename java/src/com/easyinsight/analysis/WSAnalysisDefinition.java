@@ -3,6 +3,7 @@ package com.easyinsight.analysis;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.dataset.LimitsResults;
 import com.easyinsight.core.Key;
+import com.easyinsight.pipeline.IComponent;
 import com.easyinsight.pipeline.ResultsBridge;
 import com.easyinsight.scrubbing.DataScrub;
 
@@ -66,7 +67,7 @@ public abstract class WSAnalysisDefinition implements Serializable {
     private Date dateCreated;
     private Date dateUpdated;
     private String description;
-    private boolean temporaryReport;
+    private boolean temporaryReport;    
 
     public boolean isTemporaryReport() {
         return temporaryReport;
@@ -413,5 +414,9 @@ public abstract class WSAnalysisDefinition implements Serializable {
 
     public ResultsBridge getCustomResultsBridge() {
         return null;
+    }
+
+    public List<IComponent> createComponents() {
+        return new ArrayList<IComponent>();
     }
 }

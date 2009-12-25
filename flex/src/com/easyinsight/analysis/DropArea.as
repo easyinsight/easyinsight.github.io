@@ -103,15 +103,17 @@ public class DropArea extends HBox
         return true;
     }
 
+    public function customEditor():Class {
+        if (analysisItem.hasType(AnalysisItemTypes.CALCULATION)) {
+            return CalculationWindow;
+        } else {
+            return getItemEditorClass();
+        }
+    }
+
     private function editEvent(event:MouseEvent):void {
         var analysisItemEditor:AnalysisItemEditWindow = new AnalysisItemEditWindow();
-        if (analysisItem.hasType(AnalysisItemTypes.HIERARCHY) && supportsDrilldown()) {
-            analysisItemEditor.editorClass = HierarchyWindow;
-        } else if (analysisItem.hasType(AnalysisItemTypes.CALCULATION)) {
-            analysisItemEditor.editorClass = CalculationWindow;
-        } else {
-            analysisItemEditor.editorClass = getItemEditorClass();
-        }
+        analysisItemEditor.editorClass = customEditor();
         analysisItemEditor.dataSourceID = _dataSourceID;
         analysisItemEditor.analysisItems = this._analysisItems;
         analysisItemEditor.analysisItem = this.analysisItem;

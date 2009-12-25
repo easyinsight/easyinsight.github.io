@@ -50,6 +50,11 @@ public class NamedKey extends Key {
         return name;
     }
 
+    @Override
+    public String internalString() {
+        return name;
+    }
+
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof NamedKey)) return false;

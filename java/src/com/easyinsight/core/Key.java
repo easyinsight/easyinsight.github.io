@@ -33,6 +33,8 @@ public abstract class Key implements Comparable<Key>, Serializable, Cloneable {
 
     public abstract String toKeyString();
 
+    public abstract String internalString();
+
     public int compareTo(Key o) {
         return toDisplayName().compareTo(o.toDisplayName());
     }

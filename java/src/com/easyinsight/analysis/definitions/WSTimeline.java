@@ -1,6 +1,7 @@
 package com.easyinsight.analysis.definitions;
 
 import com.easyinsight.analysis.*;
+import com.easyinsight.pipeline.IComponent;
 import com.easyinsight.pipeline.ResultsBridge;
 import com.easyinsight.pipeline.TimelineResultsBridge;
 import com.easyinsight.sequence.Sequence;
@@ -92,5 +93,10 @@ public class WSTimeline extends WSAnalysisDefinition {
             }
         }
         return new TimelineResultsBridge(this, dimensions, measures);
+    }
+
+    @Override
+    public List<IComponent> createComponents() {
+        return report.createComponents();
     }
 }

@@ -76,9 +76,7 @@ public class StandardReportPipeline extends Pipeline {
         components.add(new FilterComponent(false));
         //components.add(new AggregationComponent());
         components.add(new LimitsComponent());
-        if (report instanceof WSPlotChartDefinition) {
-            components.add(new CorrelationComponent());
-        }
+        components.addAll(report.createComponents());        
         components.add(new SortComponent());
         return components;
     }

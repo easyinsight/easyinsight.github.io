@@ -64,6 +64,11 @@ public class AnalysisMeasure extends AnalysisItem {
         setFormattingConfiguration(formattingConfiguration);
     }
 
+    @Override
+    protected String getQualifiedSuffix() {
+        return getType() + ":" + aggregation;
+    }
+
     public Value transformValue(Value value, InsightRequestMetadata insightRequestMetadata) {
         Value result;
         if (value == null) {

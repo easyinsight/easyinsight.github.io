@@ -32,6 +32,7 @@ import java.util.*;
 import java.util.Date;
 import java.io.Serializable;
 
+import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.apache.jcs.JCS;
 import org.apache.jcs.access.exception.CacheException;
@@ -484,14 +485,20 @@ public class FeedStorage {
         Session session = Database.instance().createSession(conn);
         try {
             for (Long analysisItemID : analysisItemIDs) {
-                List items = session.createQuery("from AnalysisItem where analysisItemID = ?").setLong(0, analysisItemID).list();
-                if (items.size() > 0) {
-                    AnalysisItem analysisItem = (AnalysisItem) items.get(0);
-                    /*if (analysisItem.hasType(AnalysisItemTypes.HIERARCHY)) {
-                        AnalysisHierarchyItem analysisHierarchyItem = (AnalysisHierarchyItem) analysisItem;
-                        analysisHierarchyItem.setHierarchyLevels(new ArrayList<HierarchyLevel>(analysisHierarchyItem.getHierarchyLevels()));
-                    }*/
-                    analysisItems.add((AnalysisItem) Database.deproxy(analysisItem));
+                try {
+                    List items = session.createQuery("from AnalysisItem where analysisItemID = ?").setLong(0, analysisItemID).list();
+                    if (items.size() > 0) {
+                        AnalysisItem analysisItem = (AnalysisItem) items.get(0);
+                        /*if (analysisItem.hasType(AnalysisItemTypes.HIERARCHY)) {
+                            AnalysisHierarchyItem analysisHierarchyItem = (AnalysisHierarchyItem) analysisItem;
+                            analysisHierarchyItem.setHierarchyLevels(new ArrayList<HierarchyLevel>(analysisHierarchyItem.getHierarchyLevels()));
+                        }*/
+                        analysisItems.add((AnalysisItem) Database.deproxy(analysisItem));
+                    }
+                } catch (HibernateException e) {
+                    PreparedStatement fixStmt = conn.prepareStatement("DELETE FROM FEED_TO_ANALYSIS_ITEM WHERE ANALYSIS_ITEM_ID = ?");
+                    fixStmt.setLong(1, analysisItemID);
+                    fixStmt.executeUpdate();
                 }
             }
             for (Long virtualID : virtualIDSet) {

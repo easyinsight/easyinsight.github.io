@@ -2,8 +2,11 @@ package com.easyinsight.analysis;
 
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.dataset.LimitsResults;
+import com.easyinsight.pipeline.IComponent;
+import com.easyinsight.pipeline.MinMaxComponent;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -81,5 +84,12 @@ public abstract class WSChartDefinition extends WSAnalysisDefinition {
             limitsResults = super.applyLimits(dataSet);
         }
         return limitsResults;
+    }
+
+    @Override
+    public List<IComponent> createComponents() {
+        List<IComponent> components = super.createComponents();
+        components.add(new MinMaxComponent());
+        return components;
     }
 }

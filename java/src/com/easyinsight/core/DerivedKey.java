@@ -59,6 +59,11 @@ public class DerivedKey extends Key {
         return getParentKey().toKeyString();
     }
 
+    @Override
+    public String internalString() {
+        return feedID + "-" + parentKey.internalString();
+    }
+
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
