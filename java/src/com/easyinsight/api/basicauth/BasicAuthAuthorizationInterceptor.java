@@ -71,6 +71,7 @@ public class BasicAuthAuthorizationInterceptor extends SoapHeaderInterceptor {
         if (responseHeaders != null) {
             responseHeaders.remove("WWW-Authenticate");
             responseHeaders.remove("content-length");
+            responseHeaders.remove("Content-Length");
             responseHeaders.put("WWW-Authenticate", Arrays.asList("Basic realm=realm"));
             responseHeaders.put("content-length", Arrays.asList("0"));
         }
