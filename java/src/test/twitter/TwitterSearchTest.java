@@ -42,7 +42,7 @@ public class TwitterSearchTest extends TestCase {
         List<AnalysisItem> items;
         items = tds.createAnalysisItems(keys, new DataSet(), null, conn);
         Set<AnalysisItem> itemSet = new HashSet<AnalysisItem>(items);
-        DataSet ds = feed.getAggregateDataSet(itemSet, null, null, null, false, null);
+        DataSet ds = feed.getAggregateDataSet(itemSet, null, null, items, false, null);
 
     }
 
