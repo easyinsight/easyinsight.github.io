@@ -123,6 +123,8 @@
                 _solution.detailPageClass = detailClassComboBox.selectedItem as String;
                 if (goalTreeComboBox.selectedIndex > 0) {
                     _solution.goalTreeID = goalTreeComboBox.selectedItem.id;
+                } else {
+                    _solution.goalTreeID = 0;
                 }
                 _solution.screencastDirectory = screencastDirectoryInput.text;
                 _solution.screencastName = screencastNameInput.text;
