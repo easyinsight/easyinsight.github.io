@@ -5,6 +5,10 @@ import com.easyinsight.calculations.generated.CalculationsLexer;
 import com.easyinsight.calculations.NodeFactory;
 import com.easyinsight.calculations.CalculationTreeNode;
 import com.easyinsight.calculations.ValidationVisitor;
+import com.easyinsight.core.Key;
+import com.easyinsight.database.EIConnection;
+import com.easyinsight.datafeeds.FeedDefinition;
+import com.easyinsight.datafeeds.FeedStorage;
 import com.easyinsight.reportpackage.ReportPackage;
 import com.easyinsight.reportpackage.ReportPackageDescriptor;
 import com.easyinsight.reportpackage.ReportPackageResponse;
@@ -60,28 +64,37 @@ public class AnalysisService {
 
     public WSAnalysisDefinition saveAs(WSAnalysisDefinition saveDefinition, String newName) {
         SecurityUtil.authorizeInsight(saveDefinition.getAnalysisID());
-        Session session = Database.instance().createSession();
+        EIConnection conn = Database.instance().getConnection();
         try {
-            session.getTransaction().begin();
+            conn.setAutoCommit(false);
+
+            Map<Key, Key> keyReplacementMap = new HashMap<Key, Key>();
+            
+            Session session = Database.instance().createSession(conn);            
             AnalysisDefinition analysisDefinition = AnalysisDefinitionFactory.fromWSDefinition(saveDefinition);
             Feed feed = FeedRegistry.instance().getFeed(analysisDefinition.getDataFeedID());
-            // TODO: fix me
-            AnalysisDefinition clone = analysisDefinition.clone(null, feed.getFields());
+            for (AnalysisItem item : feed.getFields()) {
+                keyReplacementMap.put(item.getKey(), item.getKey());
+            }
+            AnalysisDefinition clone = analysisDefinition.clone(keyReplacementMap, feed.getFields());
             clone.setAuthorName(SecurityUtil.getUserName());
             clone.setTitle(newName);
             List<UserToAnalysisBinding> bindings = new ArrayList<UserToAnalysisBinding>();
             bindings.add(new UserToAnalysisBinding(SecurityUtil.getUserID(), UserPermission.OWNER));
             clone.setUserBindings(bindings);
+            session.close();
+            session = Database.instance().createSession(conn);            
             analysisStorage.saveAnalysis(clone, session);
             WSAnalysisDefinition returnDef = clone.createBlazeDefinition();
-            session.getTransaction().commit();
+            session.flush();
+            session.close();
             return returnDef;
         } catch (Exception e) {
             LogClass.error(e);
-            session.getTransaction().rollback();
+            conn.rollback();
             throw new RuntimeException(e);
         } finally {
-            session.close();
+            conn.setAutoCommit(true);
         }
     }
 
