@@ -1,11 +1,8 @@
 package com.easyinsight.datafeeds.basecamp;
 
+import com.easyinsight.datafeeds.*;
 import com.easyinsight.datafeeds.composite.CompositeServerDataSource;
 import com.easyinsight.datafeeds.composite.ChildConnection;
-import com.easyinsight.datafeeds.FeedType;
-import com.easyinsight.datafeeds.IServerDataSourceDefinition;
-import com.easyinsight.datafeeds.FeedDefinition;
-import com.easyinsight.datafeeds.CredentialsDefinition;
 import com.easyinsight.users.Account;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.analysis.DataSourceInfo;
@@ -142,7 +139,7 @@ public class BaseCampCompositeSource extends CompositeServerDataSource {
     }
 
     public String getUrl() {
-        String basecampUrl = (url.startsWith("http://") ? "" : "http://") + url;
+        String basecampUrl = ((url.startsWith("http://") || url.startsWith("https://")) ? "" : "http://") + url;
         if(basecampUrl.endsWith("/")) {
             basecampUrl = basecampUrl.substring(0, basecampUrl.length() - 1);
         }
@@ -158,7 +155,17 @@ public class BaseCampCompositeSource extends CompositeServerDataSource {
     @Override
     public FeedDefinition clone(Connection conn) throws CloneNotSupportedException, SQLException {
         BaseCampCompositeSource dataSource = (BaseCampCompositeSource) super.clone(conn);
-        dataSource.setUrl("");
+        dataSource.setUrl("");      
         return dataSource;
     }
+
+    @Override
+    public int getVersion() {
+        return 1;
+    }
+
+    /*@Override
+    public List<DataSourceMigration> getMigrations() {
+        return Arrays.asList((DataSourceMigration) new BaseCamp1To2(this));
+    }*/
 }
