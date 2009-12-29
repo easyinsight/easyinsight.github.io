@@ -143,7 +143,8 @@ public class BaseCampCompositeSource extends CompositeServerDataSource {
         if(basecampUrl.endsWith("/")) {
             basecampUrl = basecampUrl.substring(0, basecampUrl.length() - 1);
         }
-        if(!basecampUrl.endsWith(".basecamphq.com"))
+        if(!(basecampUrl.endsWith(".basecamphq.com") || basecampUrl.endsWith(".projectpath.com") || basecampUrl.endsWith(".seework.com")
+        || basecampUrl.endsWith(".clientsection.com") || basecampUrl.endsWith(".grouphub.com") || basecampUrl.endsWith(".updatelog.com")))
             basecampUrl = basecampUrl + ".basecamphq.com";
         return basecampUrl;
     }

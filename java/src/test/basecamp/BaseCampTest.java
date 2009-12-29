@@ -64,6 +64,16 @@ public class BaseCampTest extends TestCase {
         assertEquals("http://easyinsight.basecamphq.com", ds.getUrl());
     }
 
+    public void testHttpsUrl() {
+        ds.setUrl("https://easyinsight.basecamphq.com");
+        assertEquals("https://easyinsight.basecamphq.com", ds.getUrl());
+    }
+
+    public void testHttpsProjectPathUrl() {
+        ds.setUrl("https://clearnetsecurity.projectpath.com/");
+        assertEquals("https://clearnetsecurity.projectpath.com", ds.getUrl());
+    }
+
     public void testBaseCampInvalidLogin() {
         Credentials c = new Credentials();
         c.setUserName("failure");
@@ -72,6 +82,7 @@ public class BaseCampTest extends TestCase {
         String result = ds.validateCredentials(c);
         assertEquals("Invalid username/password. Please try again.", result);
     }
+    
     public void testValidLogin() {
         Credentials c = new Credentials();
         c.setUserName("apiuser");
