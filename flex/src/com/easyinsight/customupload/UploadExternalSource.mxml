@@ -47,7 +47,7 @@
                                     <mx:String>Wesabe</mx:String>
                                     <mx:String>Cloud Watch</mx:String>
                                     <mx:String>Highrise</mx:String>
-                                    <mx:String>Custom</mx:String>
+                                    <!--<mx:String>Custom</mx:String>-->
                                     <mx:String>Twitter</mx:String>
                                 </mx:Array>
                             </mx:ArrayCollection>
@@ -96,10 +96,10 @@
                                 dataSourceClass="com.easyinsight.customupload.HighRiseDataSourceCreation"
                                 userConfigComplete="onFeedCreation(event)"
                                 userConfigCancel="cancel(event)"/>
-                        <customupload:ExternalDataSourceCreation
+                        <!--<customupload:ExternalDataSourceCreation
                                 dataSourceClass="com.easyinsight.customupload.CustomDataSourceCreation"
                                 userConfigComplete="onFeedCreation(event)"
-                                userConfigCancel="cancel(event)"/>
+                                userConfigCancel="cancel(event)"/>-->
                         <customupload:ExternalDataSourceCreation
                                 dataSourceClass="com.easyinsight.customupload.TwitterDataSourceCreation"
                                 userConfigComplete="onFeedCreation(event)"
