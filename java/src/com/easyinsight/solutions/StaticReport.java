@@ -1,5 +1,8 @@
 package com.easyinsight.solutions;
 
+import java.util.Date;
+import java.util.List;
+
 /**
  * User: jamesboe
  * Date: Dec 14, 2009
@@ -11,15 +14,16 @@ public class StaticReport {
     private String reportName;
     private String description;
     private long connectionID;
-    private String tags;
+    private List<String> tags;
     private double score;
     private String author;
+    private Date creationDate;
 
     public StaticReport() {
     }
 
     public StaticReport(long reportID, byte[] reportImage, String reportName, String description, long connectionID,
-                        String tags, double score, String author) {
+                        List<String> tags, double score, String author, Date creationDate) {
         this.reportID = reportID;
         this.reportImage = reportImage;
         this.reportName = reportName;
@@ -28,6 +32,15 @@ public class StaticReport {
         this.tags = tags;
         this.score = score;
         this.author = author;
+        this.creationDate = creationDate;
+    }
+
+    public Date getCreationDate() {
+        return creationDate;
+    }
+
+    public void setCreationDate(Date creationDate) {
+        this.creationDate = creationDate;
     }
 
     public long getReportID() {
@@ -70,11 +83,11 @@ public class StaticReport {
         this.connectionID = connectionID;
     }
 
-    public String getTags() {
+    public List<String> getTags() {
         return tags;
     }
 
-    public void setTags(String tags) {
+    public void setTags(List<String> tags) {
         this.tags = tags;
     }
 

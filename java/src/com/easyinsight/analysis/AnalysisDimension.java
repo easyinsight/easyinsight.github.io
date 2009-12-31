@@ -158,6 +158,6 @@ public class AnalysisDimension extends AnalysisItem {
 
     @Override
     public String toString() {
-        return getKey().toKeyString() + " - " + getAnalysisItemID();
+        return toDisplay() + " - " + getAnalysisItemID();
     }
 }

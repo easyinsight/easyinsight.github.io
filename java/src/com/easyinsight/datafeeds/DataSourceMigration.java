@@ -1,8 +1,12 @@
 package com.easyinsight.datafeeds;
 
 import com.easyinsight.analysis.AnalysisItem;
+import com.easyinsight.core.DerivedKey;
 import com.easyinsight.core.Key;
 
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -32,6 +36,30 @@ public class DataSourceMigration {
         }
     }
 
+    protected AnalysisItem findAnalysisItem(String displayName) {
+        AnalysisItem matchedItem = null;
+        for (AnalysisItem analysisItem : dataSource.getFields()) {
+            if (analysisItem.toDisplay().equals(displayName)) {
+                matchedItem = analysisItem;
+            }
+        }
+        return matchedItem;
+    }
+
+    protected void migrateAnalysisItemByDisplay(String displayName, AnalysisItem toAnalysisItem) {
+        AnalysisItem matchedItem = null;
+        for (AnalysisItem analysisItem : dataSource.getFields()) {
+            if (analysisItem.toDisplay().equals(displayName)) {
+                matchedItem = analysisItem;
+            }
+        }
+        if (matchedItem != null) {
+            toAnalysisItem.setAnalysisItemID(matchedItem.getAnalysisItemID());
+            dataSource.getFields().remove(matchedItem);
+            dataSource.getFields().add(toAnalysisItem);
+        }
+    }
+
     protected void addAnalysisItem(AnalysisItem analysisItem) {
         dataSource.getFields().add(analysisItem);
     }
@@ -41,10 +69,10 @@ public class DataSourceMigration {
     }
 
     public int fromVersion() {
-        return 1;
+        return 2;
     }
 
     public int toVersion() {
-        return 2;
+        return 3;
     }
 }

@@ -162,11 +162,11 @@ public class BaseCampCompositeSource extends CompositeServerDataSource {
 
     @Override
     public int getVersion() {
-        return 1;
+        return 2;
     }
 
-    /*@Override
+    @Override
     public List<DataSourceMigration> getMigrations() {
         return Arrays.asList((DataSourceMigration) new BaseCamp1To2(this));
-    }*/
+    }
 }

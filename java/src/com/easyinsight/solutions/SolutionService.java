@@ -38,7 +38,7 @@ public class SolutionService {
         StaticReport staticReport = null;
         Connection conn = Database.instance().getConnection();
         try {
-            PreparedStatement queryStmt = conn.prepareStatement("SELECT TITLE, DESCRIPTION, SOLUTION_ID FROM ANALYSIS, SOLUTION_INSTALL WHERE ANALYSIS_ID = ? AND SOLUTION_VISIBLE = ?" +
+            PreparedStatement queryStmt = conn.prepareStatement("SELECT TITLE, DESCRIPTION, SOLUTION_ID, ANALYSIS.author_name, ANALYSIS.create_date FROM ANALYSIS, SOLUTION_INSTALL WHERE ANALYSIS_ID = ? AND SOLUTION_VISIBLE = ?" +
                     " AND ANALYSIS.DATA_FEED_ID = SOLUTION_INSTALL.installed_data_source_id");
             queryStmt.setLong(1, reportID);
             queryStmt.setBoolean(2, true);
@@ -47,13 +47,30 @@ public class SolutionService {
                 String title = reportRS.getString(1);
                 String description = reportRS.getString(2);
                 long solutionID = reportRS.getLong(3);
+                String authorName = reportRS.getString(4);
                 PreparedStatement imageStmt = conn.prepareStatement("SELECT REPORT_IMAGE FROM REPORT_IMAGE WHERE REPORT_ID = ?");
                 imageStmt.setLong(1, reportID);
                 ResultSet imageRS = imageStmt.executeQuery();
+                byte[] bytes = null;
                 if (imageRS.next()) {
-                    byte[] bytes = imageRS.getBytes(1);
-                    staticReport = new StaticReport(reportID, bytes, title, description, solutionID, "", 0, "");
+                    bytes = imageRS.getBytes(1);
                 }
+                PreparedStatement getRatingStmt = conn.prepareStatement("SELECT AVG(RATING) FROM USER_REPORT_RATING WHERE REPORT_ID = ?");
+                getRatingStmt.setLong(1, reportID);
+                ResultSet avgRS = getRatingStmt.executeQuery();
+                double rating = 0;
+                if (avgRS.next()) {
+                    rating = avgRS.getLong(1);
+                }
+                PreparedStatement getTagsStmt = conn.prepareStatement("SELECT ANALYSIS_TAGS.TAG FROM ANALYSIS_TO_TAG, ANALYSIS_TAGS WHERE ANALYSIS_ID = ?");
+                getTagsStmt.setLong(1, reportID);
+                ResultSet tagRS = getTagsStmt.executeQuery();
+                List<String> tags = new ArrayList<String>();
+                while (tagRS.next()) {
+                    String tag = tagRS.getString(1);
+                    tags.add(tag);
+                }
+                staticReport = new StaticReport(reportID, bytes, title, description, solutionID, tags, rating, authorName, new java.util.Date(reportRS.getTimestamp(5).getTime()));
             }
 
         } catch (Exception e) {

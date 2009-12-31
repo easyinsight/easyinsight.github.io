@@ -7,6 +7,7 @@ import javax.persistence.Table;
 import java.util.*;
 import java.io.Serializable;
 
+import com.easyinsight.core.DerivedKey;
 import com.easyinsight.core.Key;
 import com.easyinsight.core.NamedKey;
 import com.easyinsight.core.Value;
@@ -294,11 +295,23 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
     public List<AnalysisItem> addLinkItems(List<AnalysisItem> allItems, Collection<AnalysisItem> insightItems) {
         List<AnalysisItem> items = new ArrayList<AnalysisItem>();
         if (getLinks().size() > 0) {
+            Key myKey = getKey();
+            DerivedKey myDerivedKey = null;
+            if (myKey instanceof DerivedKey) {
+                myDerivedKey = (DerivedKey) myKey;
+            }
             Map<Key, AnalysisItem> map = new HashMap<Key, AnalysisItem>();
             for (AnalysisItem analysisItem : allItems) {
+                Key key = analysisItem.getKey();
+                if (key instanceof DerivedKey) {
+                    DerivedKey derivedKey = (DerivedKey) key;
+                    if (myDerivedKey != null && derivedKey.getFeedID() != myDerivedKey.getFeedID()) {
+                        continue;
+                    }
+                }
                 map.put(analysisItem.getKey(), analysisItem);
             }
-            Resolver resolver = new Resolver(allItems);
+            Resolver resolver = new Resolver(new ArrayList<AnalysisItem>(map.values()));
             for (Link link : getLinks()) {
                 List<Key> keys = link.neededKeys(resolver);
                 //Set<Key> keys = variableVisitor.getVariableList();

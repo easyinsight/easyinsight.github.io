@@ -1,0 +1,1 @@
+alter table account add opt_in_email tinyint(4) not null default 0;

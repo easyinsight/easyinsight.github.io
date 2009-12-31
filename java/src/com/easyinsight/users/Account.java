@@ -107,6 +107,9 @@ public class Account {
     @JoinColumn(name="account_id")
     private List<AccountCreditCardBillingInfo> billingInfo = new ArrayList<AccountCreditCardBillingInfo>();
 
+    @Column(name="opt_in_email")
+    private boolean optInEmail;
+
     private static final double GROUP_BILLING_AMOUNT = 200.00;
     private static final double INDIVIDUAL_BILLING_AMOUNT = 25.00;
 
@@ -154,6 +157,14 @@ public class Account {
 
     public void addLicense(SubscriptionLicense subscriptionLicense) {
         this.licenses.add(subscriptionLicense);
+    }
+
+    public boolean isOptInEmail() {
+        return optInEmail;
+    }
+
+    public void setOptInEmail(boolean optInEmail) {
+        this.optInEmail = optInEmail;
     }
 
     public String getAccountKey() {

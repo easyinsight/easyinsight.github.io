@@ -32,15 +32,16 @@ public class MigrationManager {
             try {
                 EIConnection conn = Database.instance().getConnection();
                 try {
-                    PreparedStatement queryStmt = conn.prepareStatement("SELECT VERSION, DATA_FEED_ID FROM DATA_FEED WHERE FEED_TYPE = ? AND VERSION <> ?");
+                    PreparedStatement queryStmt = conn.prepareStatement("SELECT VERSION, DATA_FEED_ID FROM DATA_FEED WHERE FEED_TYPE = ? AND VERSION < ?");
                     conn.setAutoCommit(false);
                     for (Map.Entry<FeedType, Class> entry : dataSourceTypeRegistry.getDataSourceMap().entrySet()) {
                         FeedDefinition feedDefinition = dataSourceTypeRegistry.createDataSource(entry.getKey());
-                        if (feedDefinition.getDataSourceType() == DataSourceInfo.STORED_PULL ||
-                                feedDefinition.getDataSourceType() == DataSourceInfo.LIVE) {
+                        /*if (feedDefinition.getDataSourceType() == DataSourceInfo.STORED_PULL ||
+                                feedDefinition.getDataSourceType() == DataSourceInfo.LIVE) {*/
 
                             queryStmt.setInt(1, entry.getKey().getType());
                             queryStmt.setInt(2, feedDefinition.getVersion());
+                        System.out.println("querying for " + entry.getKey().getType() + " - " + feedDefinition.getVersion());
                             ResultSet migrationTargetRS = queryStmt.executeQuery();
                             while (migrationTargetRS.next()) {
                                 int currentVersion = migrationTargetRS.getInt(1);
@@ -52,13 +53,13 @@ public class MigrationManager {
                                 }
                                 List<DataSourceMigration> migrations = migrateSource.getMigrations();
                                 for (DataSourceMigration migration : migrations) {
-                                    if (migration.fromVersion() >= currentVersion) {
+                                    if (migration.fromVersion() >= currentVersion && migration.toVersion() != currentVersion) {
                                         migration.migrate(keyMap);
                                     }
                                 }
                                 new FeedStorage().updateDataFeedConfiguration(migrateSource, conn);
                             }
-                        }
+                        //}
                     }
                     conn.commit();
                 } catch (Exception e) {
