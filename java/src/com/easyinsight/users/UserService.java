@@ -688,7 +688,7 @@ public class UserService implements IUserService {
                         userServiceResponse = new UserServiceResponse(false, "Incorrect password, please try again.");
                     }
                 } else {
-                    userServiceResponse = new UserServiceResponse(false, "Incorrect user name, please try again.");
+                    userServiceResponse = new UserServiceResponse(false, "Unknown user name or email address, please try again.");
                 }
                 session.getTransaction().commit();
             } finally {
@@ -712,26 +712,20 @@ public class UserService implements IUserService {
                 results = session.createQuery("from User where userName = ?").setString(0, userName).list();
                 if (results.size() > 0) {
                     User user = (User) results.get(0);
-                    String actualPassword = user.getPassword();
-                    String encryptedPassword = PasswordService.getInstance().encrypt(password);
-                    if (encryptedPassword.equals(actualPassword)) {
-                        List accountResults = session.createQuery("from Account where accountID = ?").setLong(0, user.getAccount().getAccountID()).list();
-                        Account account = (Account) accountResults.get(0);
-                        if (account.getAccountState() == Account.ACTIVE || account.getAccountState() == Account.TRIAL || account.getAccountState() == Account.CLOSING) {
-                            userServiceResponse = new UserServiceResponse(true, user.getUserID(), user.getAccount().getAccountID(), user.getName(),
-                                 user.getAccount().getAccountType(), account.getMaxSize(), user.getEmail(), user.getUserName(), encryptedPassword, user.isAccountAdmin(), user.isDataSourceCreator(), user.isInsightCreator(), (user.getAccount().isBillingInformationGiven() != null && user.getAccount().isBillingInformationGiven()), user.getAccount().getAccountState());
-                            userServiceResponse.setActivated(account.isActivated());
-                        } else {
-                            userServiceResponse = new UserServiceResponse(false, "Your account is not active.");
-                        }
-                        // FlexContext.getFlexSession().getRemoteCredentials();
-                    } else {
-                        userServiceResponse = new UserServiceResponse(false, "Incorrect password, please try again.");
-                    }
+                    userServiceResponse = getUser(password, session, user);
                 } else {
-                    userServiceResponse = new UserServiceResponse(false, "Incorrect user name, please try again.");
+                    results = session.createQuery("from User where email = ?").setString(0, userName).list();
+                    if (results.size() > 0) {
+                        User user = (User) results.get(0);
+                        userServiceResponse = getUser(password, session, user);
+                    } else {
+                        userServiceResponse = new UserServiceResponse(false, "Unknown user name or email address, please try again.");
+                    }
                 }
                 session.getTransaction().commit();
+            } catch (Exception e) {
+                session.getTransaction().rollback();
+                throw e;
             } finally {
                 session.close();
             }
@@ -740,6 +734,27 @@ public class UserService implements IUserService {
             LogClass.error(e);
             throw new RuntimeException(e);
         }
+    }
+
+    private UserServiceResponse getUser(String password, Session session, User user) {
+        UserServiceResponse userServiceResponse;
+        String actualPassword = user.getPassword();
+        String encryptedPassword = PasswordService.getInstance().encrypt(password);
+        if (encryptedPassword.equals(actualPassword)) {
+            List accountResults = session.createQuery("from Account where accountID = ?").setLong(0, user.getAccount().getAccountID()).list();
+            Account account = (Account) accountResults.get(0);
+            if (account.getAccountState() == Account.ACTIVE || account.getAccountState() == Account.TRIAL || account.getAccountState() == Account.CLOSING  || account.getAccountState() == Account.DELINQUENT) {
+                userServiceResponse = new UserServiceResponse(true, user.getUserID(), user.getAccount().getAccountID(), user.getName(),
+                     user.getAccount().getAccountType(), account.getMaxSize(), user.getEmail(), user.getUserName(), encryptedPassword, user.isAccountAdmin(), user.isDataSourceCreator(), user.isInsightCreator(), (user.getAccount().isBillingInformationGiven() != null && user.getAccount().isBillingInformationGiven()), user.getAccount().getAccountState());
+                userServiceResponse.setActivated(account.isActivated());
+            } else {
+                userServiceResponse = new UserServiceResponse(false, "Your account is not active.");
+            }
+            // FlexContext.getFlexSession().getRemoteCredentials();
+        } else {
+            userServiceResponse = new UserServiceResponse(false, "Incorrect password, please try again.");
+        }
+        return userServiceResponse;
     }
 
     public AccountTransferObject retrieveAccount() {
