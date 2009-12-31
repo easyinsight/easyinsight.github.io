@@ -901,7 +901,7 @@
             <analysis:ReportMetadataTab id="reportMetadataTab" analysisDefinition="{analysisDefinition}" originSolution="{originSolution}"/>
             <analysis:ReportDataTab id="reportDataTab" analysisDefinition="{analysisDefinition}" dataService="{dataService}"
                     wrappers="{wrappers}" availableFields="{availableFields}" dataSourceInfo="{dataSourceInfo}"
-                    dataView="{dataView}" analysisItemCreated="sortFields()" reportSizing="onReportSizing(event)"/>
+                    dataView="{dataView}" analysisItemCreated="sortFields()" reportSizing="onReportSizing(event)" analysisItemEdit="sortFields()"/>
             <filtering:TransformContainer id="transformContainer" paddingLeft="10" paddingTop="10" paddingBottom="10"
                                           paddingRight="10" transformAdded="transformsUpdated(event)" label="Filters (F3)"
                                           icon="@Embed(source='../../../assets/funnel.png')"

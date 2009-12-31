@@ -5,6 +5,7 @@
          xmlns:datasources="com.easyinsight.datasources.*" xmlns:analysis="com.easyinsight.analysis.*">
     <mx:Metadata>
         [Event(name="analysisItemCreated", type="com.easyinsight.analysis.AnalysisItemCreationEvent")]
+        [Event(name="analysisItemEdit", type="com.easyinsight.analysis.AnalysisItemEditEvent")]
         [Event(name="reportSizing", type="com.easyinsight.analysis.ReportSizingEvent")]
     </mx:Metadata>
     <mx:Script><![CDATA[
