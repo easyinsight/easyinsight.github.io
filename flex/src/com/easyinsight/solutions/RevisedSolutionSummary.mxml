@@ -128,6 +128,7 @@
                  biz = (Solution.BIZ & defaultView == Solution.BIZ);*/
                 defaultView = 0;
             }
+            stackIndex = 0;
             solutionService.getSolutions.send();
         }
 
@@ -136,6 +137,7 @@
             solutionColl.filterFunction = filterFunction;
             solutionColl.refresh();
             this.availableSolutions = solutionColl;
+            stackIndex = 1;
         }
 
         private function lesson1():void {
@@ -175,6 +177,9 @@
 
         public function cleanup():void {
         }
+
+        [Bindable]
+        private var stackIndex:int;
                         
         ]]>
 	</mx:Script>
@@ -203,8 +208,15 @@
                     </mx:HBox>
                 </mx:VBox>
             </mx:HBox>
-            <mx:TileList width="100%" height="100%" itemRenderer="com.easyinsight.solutions.SolutionView" dataProvider="{availableSolutions}" id="solutionGrid"
-                    columnWidth="240" rowHeight="160"  backgroundImage="{background2}" backgroundSize="100%"/>
+            <mx:ViewStack width="100%" height="100%" selectedIndex="{stackIndex}">
+                <mx:Box width="100%" height="100%" horizontalAlign="center" verticalAlign="middle">
+                    <mx:ProgressBar indeterminate="true" label="Loading available connections..."/>
+                </mx:Box>
+                <mx:Box width="100%" height="100%">
+                    <mx:TileList width="100%" height="100%" itemRenderer="com.easyinsight.solutions.SolutionView" dataProvider="{availableSolutions}" id="solutionGrid"
+                        columnWidth="240" rowHeight="160"  backgroundImage="{background2}" backgroundSize="100%"/>
+                </mx:Box>
+            </mx:ViewStack>
         </mx:VBox>
     </mx:VBox>
 </mx:VBox>

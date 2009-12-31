@@ -37,6 +37,18 @@
             dataProvider2.sort = sort;
             dataProvider2.refresh();
         }
+
+        [Bindable]
+        private var stackIndex:int;
+
+        override protected function commitProperties():void {
+            super.commitProperties();
+            if (loading) {
+                stackIndex = 0;
+            } else {
+                stackIndex = 1;                
+            }
+        }
         ]]>
     </mx:Script>
     <mx:HBox width="100%" height="100%" id="listsBox">
@@ -66,8 +78,15 @@
         </mx:VBox>
         <mx:Box width="100%" horizontalAlign="center" height="100%">
             <!--<mx:Canvas backgroundAlpha="0" width="100%" height="100%">-->
-                <mx:List dataProvider="{dataProvider2}" itemRenderer="{_itemRenderer}" height="100%" width="100%"
+            <mx:ViewStack width="100%" height="100%" selectedIndex="{stackIndex}">
+                <mx:Box width="100%" height="100%" horizontalAlign="center" verticalAlign="middle">
+                    <mx:ProgressBar indeterminate="true" label="Loading the available reports..."/>
+                </mx:Box>
+                <mx:Box width="100%" height="100%">
+                    <mx:List dataProvider="{dataProvider2}" itemRenderer="{_itemRenderer}" height="100%" width="100%"
                         backgroundAlpha="0" borderStyle="none"/>
+                </mx:Box>
+            </mx:ViewStack>
             <!--</mx:Canvas>-->
         </mx:Box>
     </mx:HBox>
