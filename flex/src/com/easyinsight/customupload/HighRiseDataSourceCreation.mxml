@@ -54,10 +54,10 @@
 			<mx:TextInput id="urlInput" fontWeight="normal" fontFamily="Lucida Grande" text="{url}"/>
 		</mx:FormItem>
         <mx:FormItem label="Example: easyinsight for easyinsight.highrisehq.com" fontSize="10"/>
-		<mx:FormItem label="User Name: " direction="horizontal" fontWeight="bold" fontFamily="Tahoma">
+		<mx:FormItem label="Highrise User Name: " direction="horizontal" fontWeight="bold" fontFamily="Tahoma">
 			<mx:TextInput id="userNameInput" fontWeight="normal" fontFamily="Lucida Grande" text="{usernameInputText}"/>
 		</mx:FormItem>
-		<mx:FormItem label="Password: " direction="horizontal" fontWeight="bold" fontFamily="Tahoma">
+		<mx:FormItem label="Highrise Password: " direction="horizontal" fontWeight="bold" fontFamily="Tahoma">
 			<mx:TextInput id="passwordInput" displayAsPassword="true" text="{passwordText}"/>
 		</mx:FormItem>
 	</mx:Form>

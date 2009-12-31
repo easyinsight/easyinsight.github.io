@@ -16,6 +16,6 @@ public class ExchangeItem {
     public var author:String;
 
     public function ExchangeItem() {
-    }
+    }        
 }
 }

@@ -1,0 +1,175 @@
+<?xml version="1.0" ?>
+<easyinsight:FullScreenPage xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:easyinsight="com.easyinsight.*"
+                            xmlns:analysis="com.easyinsight.analysis.*" width="100%" height="100%"
+        implements="com.easyinsight.listing.IPerspective, com.easyinsight.framework.IFullScreenPage">
+    <mx:Script><![CDATA[
+        import com.easyinsight.analysis.AnalysisCloseEvent;
+        import com.easyinsight.framework.NavigationEvent;
+        import com.easyinsight.framework.User;        
+        import com.easyinsight.genredata.NoSolutionInstalledWindow;
+        import com.easyinsight.listing.ListingChangeEvent;
+        import com.easyinsight.util.PopUpUtil;
+
+        import mx.formatters.DateFormatter;
+        import mx.managers.BrowserManager;
+        import mx.managers.PopUpManager;
+        import mx.utils.URLUtil;
+
+        [Bindable]
+        private var reportName:String;
+
+        [Bindable]
+        private var ownerName:String;
+
+        [Bindable]
+        private var reportDate:String;
+
+        [Bindable]
+        private var tags:String;
+
+        [Bindable]
+        private var _score:Number;
+
+        [Bindable]
+        private var description:String;
+
+        private var _connectionID:int;
+
+        [Bindable]
+        [Embed(source="../../../../assets/logo2.PNG")]
+        private var logo:Class;
+
+        [Bindable]
+        private var reportImage:Bitmap;
+
+        private var _reportID:int;
+
+        public function set reportID(value:int):void {
+            _reportID = value;
+        }
+
+        protected override function commitProperties():void {
+            super.commitProperties();
+            if (User.getInstance() == null) {
+                stackIndex = 1;
+            } else {
+                stackIndex = 0;
+            }
+            solutionService.getStaticReport.send(_reportID);
+        }
+
+        [Bindable]
+        private var stackIndex:int;
+
+        private function gotStaticReport():void {
+            var staticReport:StaticReport = solutionService.getStaticReport.lastResult as StaticReport;
+            reportName = staticReport.reportName;
+            ownerName = staticReport.author;
+            reportDate = new DateFormatter().format(staticReport.creationDate);
+            tags = staticReport.tags;
+            description = staticReport.description;
+            _score = staticReport.score;
+            _connectionID = staticReport.connectionID;
+            var loader:Loader = new Loader();
+            loader.contentLoaderInfo.addEventListener(Event.COMPLETE, onImageLoaded);
+            loader.loadBytes(staticReport.reportImage);
+            var feedFragmentObject:Object = new Object();
+            feedFragmentObject.staticReportID = String(_reportID);
+            var feedFragmentString:String = URLUtil.objectToString(feedFragmentObject);
+            BrowserManager.getInstance().setFragment(feedFragmentString);
+            BrowserManager.getInstance().setTitle("Easy Insight - " + reportName);
+            progressBar.visible = false;
+        }
+
+        private function onImageLoaded(event:Event):void {
+            var loaderContent:LoaderInfo = event.currentTarget as LoaderInfo;
+            reportImage = Bitmap(loaderContent.loader.content);
+            loaderContent.loader.removeEventListener(Event.COMPLETE, onImageLoaded);
+        }
+
+        private function installConnection():void {
+            var window:NoSolutionInstalledWindow = new NoSolutionInstalledWindow();
+            window.solution = _connectionID;
+            window.addEventListener(ListingChangeEvent.LISTING_CHANGE, onListingEvent);
+            PopUpManager.addPopUp(window, this, true);
+            PopUpUtil.centerPopUp(window);
+        }
+
+        private function onListingEvent(event:ListingChangeEvent):void {
+            dispatchEvent(event);
+        }
+
+        private function accountSignup():void {
+            dispatchEvent(new NavigationEvent(NavigationEvent.ACCOUNTS));
+        }
+
+        private function moreReports():void {
+            var props:Object = new Object();
+            props.viewMode = 1;
+            dispatchEvent(new AnalysisCloseEvent(this, null, "Exchange", props));
+        }
+
+        [Bindable]
+        [Embed(source="../../../../assets/shopping_bag_x32.png")]
+        private var exchangeIcon:Class;
+
+        [Bindable]
+        [Embed(source="../../../../assets/document_out_x32.png")]
+        private var closeIcon:Class;
+        ]]></mx:Script>
+    <mx:RemoteObject destination="solutionService" id="solutionService">
+        <mx:method name="getStaticReport" result="gotStaticReport()"/>
+    </mx:RemoteObject>
+    <mx:VBox width="100%" height="100%" backgroundColor="#818285" horizontalAlign="center">
+        <mx:VBox horizontalAlign="center" backgroundColor="#FFFFFF" width="1090" paddingBottom="10" paddingLeft="10"
+                 paddingRight="10" paddingTop="10" height="100%">
+            <mx:HBox id="buttonBar" verticalAlign="middle" width="100%">
+                <mx:Button label="View More Reports" icon="{exchangeIcon}" click="moreReports()"/>
+                <mx:Spacer width="100%"/>
+                <mx:ViewStack height="100%" selectedIndex="{stackIndex}">
+                    <mx:HBox verticalAlign="middle" height="100%">
+                        <mx:Label text="Want to use your own data for this report and more?" fontSize="14"/>
+                        <mx:Button label="Install Connection" click="installConnection()" fontSize="14" styleName="blueButton"/>
+                    </mx:HBox>
+                    <mx:HBox verticalAlign="middle" height="100%">
+                        <mx:Label text="Want to use your own data for this report and more?" fontSize="14"/>
+                        <mx:Button label="Sign Up for Account" click="accountSignup()" fontSize="14" styleName="blueButton"/>
+                    </mx:HBox>
+                </mx:ViewStack>
+                <mx:Spacer width="100%"/>
+            </mx:HBox>
+            <mx:HBox width="100%" height="100%" id="coreBox">
+                <mx:VBox id="reportBox" width="100%" height="100%" verticalAlign="middle" horizontalAlign="center">
+                    <mx:Label text="The screenshot below is a sample of how this report will appear for you."/>
+                    <mx:Image source="{reportImage}" maxWidth="700"/>
+                </mx:VBox>
+                <mx:VBox id="reportMetadata" backgroundColor="#DDDDDD" height="100%" borderStyle="inset" borderThickness="2" borderColor="#212121">
+                    <mx:Form width="350">
+                        <mx:FormItem label="Report Name:">
+                            <mx:Label text="{reportName}" fontFamily="Lucida Grande" fontWeight="normal"
+                                      maxWidth="180"/>
+                        </mx:FormItem>
+                        <mx:FormItem label="Author Name:">
+                            <mx:Label text="{ownerName}" fontFamily="Lucida Grande" fontWeight="normal" maxWidth="180"/>
+                        </mx:FormItem>
+                        <mx:FormItem label="Report Creation Date:">
+                            <mx:Label text="{reportDate}" fontFamily="Lucida Grande" fontWeight="normal"
+                                      maxWidth="180"/>
+                        </mx:FormItem>
+                        <mx:FormItem label="Report Rating:">
+                            <analysis:ReportRating score="{_score}" rateable="false"/>
+                        </mx:FormItem>
+                        <mx:FormItem label="Description:">
+                            <mx:TextArea text="{description}" fontFamily="Lucida Grande" fontWeight="normal"
+                                         borderStyle="none"
+                                         editable="false" selectable="false" backgroundAlpha="0" width="180"
+                                         height="240"/>
+                        </mx:FormItem>
+                    </mx:Form>
+                    <mx:ProgressBar id="progressBar" visible="false" indeterminate="true"/>
+                </mx:VBox>
+            </mx:HBox>
+        </mx:VBox>
+
+    </mx:VBox>
+</easyinsight:FullScreenPage>

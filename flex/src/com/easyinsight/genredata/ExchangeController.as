@@ -7,6 +7,7 @@ import mx.binding.utils.BindingUtils;
 import mx.collections.ArrayCollection;
 import mx.collections.Sort;
 import mx.collections.SortField;
+import mx.controls.Alert;
 import mx.core.IFactory;
 
 [Event(name="changeView", type="com.easyinsight.genredata.ExchangeControllerEvent")]
@@ -22,6 +23,19 @@ public class ExchangeController extends EventDispatcher {
     private var _keyword:String;
     private var _selectedPage:ExchangePage;
     private var _subTopicID:int;
+    private var _loading:Boolean;
+
+
+    [Bindable(event="loadingChanged")]
+    public function get loading():Boolean {
+        return _loading;
+    }
+
+    public function set loading(value:Boolean):void {
+        if (_loading == value) return;
+        _loading = value;
+        dispatchEvent(new Event("loadingChanged"));
+    }
 
     public function ExchangeController() {
         addEventListener(ExchangeDataEvent.EXCHANGE_DATA_RETURNED, onDataReturned);
@@ -120,6 +134,7 @@ public class ExchangeController extends EventDispatcher {
     }
 
     private function configureExchangePage(exchangePage:ExchangePage):void {
+        BindingUtils.bindProperty(exchangePage, "loading", this, "loading");
         BindingUtils.bindProperty(exchangePage, "dataProvider2", this, "dataProvider2");
         BindingUtils.bindProperty(exchangePage, "selectedTag", this, "selectedTag");
         BindingUtils.bindProperty(this, "selectedTag", exchangePage, "selectedTag");
@@ -131,6 +146,7 @@ public class ExchangeController extends EventDispatcher {
     }
 
     private function onDataReturned(event:ExchangeDataEvent):void {
+        loading = false;
         var data:ArrayCollection = event.data;
         data.filterFunction = filterData;
         if (dataProvider2.sort == null) {
@@ -180,6 +196,7 @@ public class ExchangeController extends EventDispatcher {
     }
 
     public function refreshData():void {
+        loading = true;
         retrieveData();
     }
 

@@ -2,6 +2,7 @@ package com.easyinsight.genredata {
 import com.easyinsight.listing.ListingChangeEvent;
 import com.easyinsight.report.PackageAnalyzeSource;
 import com.easyinsight.report.ReportAnalyzeSource;
+import com.easyinsight.report.StaticReportSource;
 import com.easyinsight.reportpackage.ReportPackageDescriptor;
 import com.easyinsight.solutions.InsightDescriptor;
 import com.easyinsight.util.PopUpUtil;
@@ -80,11 +81,11 @@ public class SolutionGridActionRenderer extends HBox{
             PopUpManager.addPopUp(window, this, true);
             PopUpUtil.centerPopUp(window);
         } else if (dataSources.length == 1) {
-            ProgressAlert.alert(this, "Getting the package ready...", null, solutionService.installPackage);
+            ProgressAlert.alert(this, "Preparing the package...", null, solutionService.installPackage);
             solutionService.installPackage.send(packageData.packageID, dataSources.getItemAt(0).id);
         } else {
             // TODO: this is a hack for now
-            ProgressAlert.alert(this, "Getting the package ready...", null, solutionService.installPackage);
+            ProgressAlert.alert(this, "Preparing the package...", null, solutionService.installPackage);
             solutionService.installPackage.send(packageData.packageID, dataSources.getItemAt(0).id);
         }
     }
@@ -92,15 +93,13 @@ public class SolutionGridActionRenderer extends HBox{
     private function gotMatchingDataSources(event:ResultEvent):void {
         var dataSources:ArrayCollection = solutionService.determineDataSource.lastResult as ArrayCollection;
         if (dataSources.length == 0) {
-            var window:NoSolutionInstalledWindow = new NoSolutionInstalledWindow();
-            window.solution = exchangeItem.solutionID;
-            window.addEventListener(ListingChangeEvent.LISTING_CHANGE, onListingEvent);
-            PopUpManager.addPopUp(window, this, true);
-            PopUpUtil.centerPopUp(window);
+            dispatchEvent(new AnalyzeEvent(new StaticReportSource(exchangeItem.id)));
         } else if (dataSources.length == 1) {
+            ProgressAlert.alert(this, "Preparing the report...", null, solutionService.installReport);
             solutionService.installReport.send(exchangeItem.id, dataSources.getItemAt(0).id);
         } else {
             // TODO: this is a hack for now
+            ProgressAlert.alert(this, "Preparing the report...", null, solutionService.installReport);
             solutionService.installReport.send(exchangeItem.id, dataSources.getItemAt(0).id);
         }
     }

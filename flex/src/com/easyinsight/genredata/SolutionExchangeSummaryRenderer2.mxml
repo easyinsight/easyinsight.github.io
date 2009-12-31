@@ -8,6 +8,7 @@
         import com.easyinsight.listing.ListingChangeEvent;
         import com.easyinsight.report.PackageAnalyzeSource;
         import com.easyinsight.report.ReportAnalyzeSource;
+        import com.easyinsight.report.StaticReportSource;
         import com.easyinsight.reportpackage.ReportPackageDescriptor;
         import com.easyinsight.solutions.InsightDescriptor;
 
@@ -39,17 +40,18 @@
         private function gotMatchingDataSources():void {
             var dataSources:ArrayCollection = solutionService.determineDataSource.lastResult as ArrayCollection;
             if (dataSources.length == 0) {
-                var window:NoSolutionInstalledWindow = new NoSolutionInstalledWindow();
+                /*var window:NoSolutionInstalledWindow = new NoSolutionInstalledWindow();
                 window.solution = _item.solutionID;
                 window.addEventListener(ListingChangeEvent.LISTING_CHANGE, onListingEvent);
                 PopUpManager.addPopUp(window, this, true);
-                PopUpUtil.centerPopUp(window);
+                PopUpUtil.centerPopUp(window);*/
+                dispatchEvent(new AnalyzeEvent(new StaticReportSource(reportID)));
             } else if (dataSources.length == 1) {
-                ProgressAlert.alert(this, "Getting the report ready...", null, solutionService.installReport);
+                ProgressAlert.alert(this, "Preparing the report...", null, solutionService.installReport);
                 solutionService.installReport.send(reportID, dataSources.getItemAt(0).id);
             } else {
                 // TODO: this is a hack for now
-                ProgressAlert.alert(this, "Getting the report ready...", null, solutionService.installReport);
+                ProgressAlert.alert(this, "Preparing the report...", null, solutionService.installReport);
                 solutionService.installReport.send(reportID, dataSources.getItemAt(0).id);
             }
         }
@@ -64,11 +66,11 @@
                 PopUpManager.addPopUp(window, this, true);
                 PopUpUtil.centerPopUp(window);
             } else if (dataSources.length == 1) {
-                ProgressAlert.alert(this, "Getting the package ready...", null, solutionService.installPackage);
+                ProgressAlert.alert(this, "Preparing the package...", null, solutionService.installPackage);
                 solutionService.installPackage.send(packageData.packageID, dataSources.getItemAt(0).id);
             } else {
                 // TODO: this is a hack for now
-                ProgressAlert.alert(this, "Getting the package ready...", null, solutionService.installPackage);
+                ProgressAlert.alert(this, "Preparing the package...", null, solutionService.installPackage);
                 solutionService.installPackage.send(packageData.packageID, dataSources.getItemAt(0).id);
             }
         }
@@ -273,7 +275,8 @@
     </mx:RemoteObject>
     <mx:Box borderStyle="solid" borderThickness="1" backgroundColor="#FFFFFF" verticalAlign="middle" horizontalAlign="center" backgroundAlpha="1" height="180">
         <mx:VBox horizontalAlign="center">
-            <mx:LinkButton label="{reportName}" textDecoration="underline" click="addReport()" fontSize="13" fontFamily="Tahoma" fontWeight="bold" maxWidth="180"/>
+            <mx:LinkButton label="{reportName}" textDecoration="underline" click="addReport()" fontSize="13" fontFamily="Tahoma" fontWeight="bold" maxWidth="180"
+                    toolTip="View This Report"/>
             <mx:Image source="{reportImage}"/>
             <mx:TextArea borderStyle="none" backgroundAlpha="0" editable="false" selectable="false"
                          text="{reportDescription}" width="100%" maxChars="250" verticalScrollPolicy="off" toolTip="{reportDescription}" height="80"/>

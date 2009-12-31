@@ -5,7 +5,7 @@
     <mx:Script><![CDATA[
         import mx.managers.PopUpManager;
 ]]></mx:Script>
-    <mx:TextArea width="800" height="100%" editable="false">
+    <mx:TextArea width="760" height="100%" editable="false">
             <mx:htmlText><![CDATA[
 By using the easy-insight.com application (“Service”), all services of Easy Insight, LLC (“the Company”), you are agreeing to be bound by the following terms and conditions (“Terms of Service”).
 

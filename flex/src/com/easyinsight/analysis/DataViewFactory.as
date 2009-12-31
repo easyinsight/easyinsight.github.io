@@ -262,6 +262,11 @@ public class DataViewFactory extends VBox {
         target.ratingCount = source.ratingCount;
         target.ratingAverage = source.ratingAverage;
         target.canSaveDirectly = source.canSaveDirectly;
+        target.description = source.description;
+        target.marketplaceVisible = source.marketplaceVisible;
+        target.solutionVisible = source.solutionVisible;
+        target.publiclyVisible = source.publiclyVisible;
+        target.temporaryReport = source.temporaryReport;        
     }
 
     public function createNewDefinition():AnalysisDefinition {

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<mx:HBox xmlns:mx="http://www.adobe.com/2006/mxml">
+<mx:HBox xmlns:mx="http://www.adobe.com/2006/mxml" width="100%">
 	<mx:Script>
 		<![CDATA[
         import com.easyinsight.util.PopUpUtil;
@@ -19,6 +19,8 @@
                         dispatchEvent(event);
                     }
                 ]]>
-	</mx:Script>	
-	<mx:Button label="Log In" click="login()" id="loginButton"/>
+	</mx:Script>
+    <mx:Spacer width="100%"/>
+	<mx:Button label="Log In" click="login()" id="loginButton" fontSize="16" styleName="redButton"/>
+    <mx:Spacer width="100%"/>
 </mx:HBox>

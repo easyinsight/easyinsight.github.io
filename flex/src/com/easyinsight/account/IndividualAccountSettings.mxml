@@ -76,7 +76,7 @@
             </mx:Box>
             <mx:Form width="100%">
                 <mx:FormItem label="Account Type: " fontFamily="Tahoma" fontWeight="bold">
-                    <mx:Label text="Individual" fontFamily="Lucida Grande" fontWeight="normal"/>
+                    <mx:Label text="Basic" fontFamily="Lucida Grande" fontWeight="normal"/>
                 </mx:FormItem>
                 <mx:FormItem label="Account Space Used: " fontFamily="Tahoma" fontWeight="bold">
                     <account:AvailableSpace/>

@@ -33,16 +33,16 @@
             }
             switch (accountInfo.accountType) {
                 case Account.FREE:
-                    accountType = "Free";
+                    accountType = "Personal";
                     break;
                 case Account.INDIVIDUAL:
-                    accountType = "Individual";
+                    accountType = "Basic";
                     break;
                 case Account.GROUP:
-                    accountType = "Group";
+                    accountType = "Professional";
                     break;
                 case Account.PROFESSIONAL:
-                    accountType = "Professional";
+                    accountType = "Premium";
                     break;
                 case Account.ENTERPRISE:
                     accountType = "Enterprise";

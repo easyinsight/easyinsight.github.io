@@ -46,10 +46,10 @@
             return true;
         }]]></mx:Script>
     <mx:Form>
-		<mx:FormItem label="Key: " direction="horizontal" fontWeight="bold" fontFamily="Tahoma">
+		<mx:FormItem label="EC2 Key: " direction="horizontal" fontWeight="bold" fontFamily="Tahoma">
 			<mx:TextInput id="userNameInput" fontWeight="normal" fontFamily="Lucida Grande" text="{usernameInputText}"/>
 		</mx:FormItem>
-		<mx:FormItem label="Secret Key: " direction="horizontal" fontWeight="bold" fontFamily="Tahoma">
+		<mx:FormItem label="EC2 Secret Key: " direction="horizontal" fontWeight="bold" fontFamily="Tahoma">
 			<mx:TextInput id="passwordInput" displayAsPassword="true" text="{passwordText}"/>
 		</mx:FormItem>
 	</mx:Form>

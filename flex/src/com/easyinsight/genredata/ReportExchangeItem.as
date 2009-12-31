@@ -11,5 +11,13 @@ public class ReportExchangeItem extends ExchangeItem{
     public function ReportExchangeItem() {
         super();
     }
+
+    public function get dataSourceName():String {
+        if (exchangeData is ExchangeReportData) {
+            var exchangeReportData:ExchangeReportData = exchangeData as ExchangeReportData;
+            return exchangeReportData.dataSourceName;
+        }
+        return null;
+    }
 }
 }

@@ -45,14 +45,15 @@
         public function updateDataSource(feedDefinition:FeedDefinitionData):void {
         }]]></mx:Script>
     <mx:Form>
-		<mx:FormItem label="Email Address:" direction="horizontal" fontWeight="bold" fontFamily="Tahoma">
+		<mx:FormItem label="Salesforce.com Email Address:" direction="horizontal" fontWeight="bold" fontFamily="Tahoma">
 			<mx:TextInput id="userNameInput" fontWeight="normal" fontFamily="Lucida Grande" text="{usernameInputText}"/>
 		</mx:FormItem>
-		<mx:FormItem label="Password: " direction="horizontal" fontWeight="bold" fontFamily="Tahoma">
+		<mx:FormItem label="Salesforce.com Password: " direction="horizontal" fontWeight="bold" fontFamily="Tahoma">
 			<mx:TextInput id="passwordInput" displayAsPassword="true" text="{passwordText}"/>
 		</mx:FormItem>
         <mx:FormItem label="Security Token: " direction="horizontal" fontWeight="bold" fontFamily="Tahoma">
 			<mx:TextInput id="securityTokenInput" displayAsPassword="true"/>
+            <mx:Label text="What is this?" fontSize="11" textDecoration="underline" toolTip="The security token is required to authorize API access from external machines to your Salesforce account. You can find it under the server configuration of your Salesforce system, or ask your administrator for help with retrieving the token."/>
 		</mx:FormItem>
 	</mx:Form>
 </mx:VBox>

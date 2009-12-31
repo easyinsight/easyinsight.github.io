@@ -5,9 +5,10 @@ import flash.events.Event;
 
 import mx.binding.utils.BindingUtils;
 import mx.collections.ArrayCollection;
-
+import mx.controls.Alert;
 import mx.core.ClassFactory;
 import mx.core.IFactory;
+import mx.rpc.events.FaultEvent;
 import mx.rpc.events.ResultEvent;
 import mx.rpc.remoting.RemoteObject;
 
@@ -23,9 +24,9 @@ public class SolutionExchangeController extends ExchangeController{
         exchangeService = new RemoteObject();
         exchangeService.destination = "solutionService";
         exchangeService.getSolutionReports.addEventListener(ResultEvent.RESULT, onData);
-        exchangeService.getSolutions.addEventListener(ResultEvent.RESULT, gotSolutions);        
+        exchangeService.getSolutions.addEventListener(ResultEvent.RESULT, gotSolutions);
     }
-
+    
     override public function initBehavior():void {
         if (_solutions == null) {
             exchangeService.getSolutions.send();
@@ -93,7 +94,7 @@ public class SolutionExchangeController extends ExchangeController{
 
     private function onData(event:ResultEvent):void {
         var reports:ArrayCollection = exchangeService.getSolutionReports.lastResult as ArrayCollection;
-        dispatchEvent(new ExchangeDataEvent(reports));
+        dispatchEvent(new ExchangeDataEvent(reports));        
     }
 
     override protected function createExchangedGridPage():ExchangePage {

@@ -40,6 +40,13 @@
 
         private function initHandlers():void {
             validators = [ emailValidator, userNameValidator, passwordValidator, fullNameValidator ];
+            addEventListener(KeyboardEvent.KEY_UP, onKey);
+        }
+
+        private function onKey(event:KeyboardEvent):void {
+            if (event.keyCode == Keyboard.ENTER) {
+                createAccount();
+            }
         }
 
         public function createAccount():void {
@@ -60,6 +67,7 @@
                 user.insightCreator = true;
                 user.dataSourceCreator = true;
                 _account.name = userName.text;
+                _account.optInEmail = optInCheckbox.selected;
                 creationService.doesUserExist.send(userName.text, email.text);
             }
         }
@@ -90,6 +98,9 @@
 			<mx:FormItem label="Email Address:" direction="horizontal" fontFamily="Tahoma" fontWeight="bold">
 				<mx:TextInput id="email" fontFamily="Lucida Grande" fontWeight="normal"/>				
 			</mx:FormItem>
+            <mx:FormItem label="Send Me Occasional Updates About Easy Insight" direction="horizontal">
+                <mx:CheckBox id="optInCheckbox"/>
+            </mx:FormItem>
             <mx:FormItem label="I Accept the Terms of Service:" direction="horizontal">
                 <mx:CheckBox id="tosCheckbox"/>
                 <mx:LinkButton label="View Terms of Service" click="showTerms()" textDecoration="underline"/>

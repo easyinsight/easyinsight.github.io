@@ -9,7 +9,6 @@
     <easyinsight:states>
         <mx:State name="FullScreen">
             <mx:RemoveChild target="{buttonBar}"/>
-            <mx:RemoveChild target="{hrule}"/>
             <mx:RemoveChild target="{reportMetadata}"/>
         </mx:State>
     </easyinsight:states>
@@ -362,8 +361,11 @@
 
         private var retrievedDataOnce:Boolean = false;
 
+        [Bindable]
+        private var loading:Boolean = false;
+
         private function dataLoadingEvent(event:DataServiceLoadingEvent):void {
-            progressBar.visible = event.type == DataServiceLoadingEvent.LOADING_STARTED;
+            loading = event.type == DataServiceLoadingEvent.LOADING_STARTED;
         }
 
 
@@ -402,19 +404,21 @@
                     tags = tags.substring(0, tags.length - 1);
                 }
                 admin = event.dataSourceAccessible;
+
                 if (report.filterDefinitions != null && report.filterDefinitions.length > 0) {
                     filterDefinitions = report.filterDefinitions;
                     showFilters = true;
                 } else {
-                    filterDefinitions = new ArrayCollection();
-                    if (buttonBar.contains(adjustFiltersbutton)) {
-                        buttonBar.removeChild(adjustFiltersbutton);
+                    filterDefinitions = new ArrayCollection();                    
+                    if (filterBox.contains(adjustFiltersbutton)) {
+                        filterBox.removeChild(adjustFiltersbutton);
                     }
                 }
+                
                 transformContainer.addEventListener(TransformsUpdatedEvent.UPDATED_TRANSFORMS, transformsUpdated);
                 if (!admin) {
-                    if (buttonBar.contains(editReportButton)) {
-                        buttonBar.removeChild(editReportButton);
+                    if (leftButtonBar.contains(editReportButton)) {
+                        leftButtonBar.removeChild(editReportButton);
                     }
                     showReportEditor = false;
                 }
@@ -429,7 +433,7 @@
                     var feedFragmentString:String = URLUtil.objectToString(feedFragmentObject);
                     BrowserManager.getInstance().setFragment(feedFragmentString);
                     BrowserManager.getInstance().setTitle("Easy Insight - " + reportName);
-                    progressBar.visible = false;
+                    loading = false;
                 }
                 receivedData = true;
                 dispatchEvent(new DataServiceLoadingEvent(DataServiceLoadingEvent.LOADING_STOPPED));
@@ -442,7 +446,6 @@
         }
 
         private function toFullScreen():void {
-            Alert.show("You can return to normal view by hitting Escape.");
             addEventListener(KeyboardEvent.KEY_UP, onKey);
             Application.application.stage.displayState = StageDisplayState.FULL_SCREEN;
             currentState = "FullScreen";
@@ -469,6 +472,12 @@
 
         private function adjustFilters():void {
             transformBox.selectedIndex = transformBox.selectedIndex == 0 ? 1 : 0;
+            showingFilters = !showingFilters;
+            if (showingFilters) {
+                filterBox.setStyle("backgroundAlpha", 1);
+            } else {
+                filterBox.setStyle("backgroundAlpha", 0);
+            }
         }
 
         public function getContainer():Container {
@@ -582,51 +591,51 @@
                 buttonBar.removeChild(logoImage);
             }
             if (!_showBack) {
-                buttonBar.removeChild(backButton);
+                leftButtonBar.removeChild(backButton);
             } else {
                 if (_origin == ReportAnalyzeSource.ORIGIN_EXCHANGE) {
                     var idx1:int = buttonBar.getChildIndex(backButton);
-                    buttonBar.removeChild(backButton);
+                    leftButtonBar.removeChild(backButton);
                     var exchangeButton:Button = new Button();
                     exchangeButton.label = "More Reports";
                     exchangeButton.labelPlacement = "bottom";
                     exchangeButton.setStyle("icon", exchangeIcon);
                     exchangeButton.addEventListener(MouseEvent.CLICK, toExchange);
-                    buttonBar.addChildAt(exchangeButton, idx1);
+                    leftButtonBar.addChildAt(exchangeButton, idx1);
                 } else if (_origin == ReportAnalyzeSource.ORIGIN_MY_DATA) {
                     var idx2:int = buttonBar.getChildIndex(backButton);
-                    buttonBar.removeChild(backButton);
+                    leftButtonBar.removeChild(backButton);
                     var myDataButton:Button = new Button();
                     myDataButton.label = "My Data";
                     myDataButton.labelPlacement = "bottom";
                     myDataButton.setStyle("icon", myDataIcon);
                     myDataButton.addEventListener(MouseEvent.CLICK, toMyData);
-                    buttonBar.addChildAt(myDataButton, idx2);
+                    leftButtonBar.addChildAt(myDataButton, idx2);
                 }
             }
             if (!_showFullScreen) {
-                buttonBar.removeChild(fullScreenButton);
+                leftButtonBar.removeChild(fullScreenButton);
             }
             if (!_showBookmark || _showAddBar) {
-                buttonBar.removeChild(bookmarkButton);
+                leftButtonBar.removeChild(bookmarkButton);
             }
             if (!_showExport) {
-                buttonBar.removeChild(exportButton);
+                leftButtonBar.removeChild(exportButton);
             }
             if (!_showFilters) {
-                buttonBar.removeChild(adjustFiltersbutton);
+                filterBox.removeChild(adjustFiltersbutton);
             }
             if (!_showReportEditor || _showAddBar) {
-                buttonBar.removeChild(editReportButton);
+                leftButtonBar.removeChild(editReportButton);
             }
             if (!_showMetadata) {
                 coreBox.removeChild(reportMetadata);
             }
             if (!_showBrowser) {
-                buttonBar.removeChild(browserButton);
+                leftButtonBar.removeChild(browserButton);
             }
             if (!_showRefresh) {
-                buttonBar.removeChild(refreshButton);
+                leftButtonBar.removeChild(refreshButton);
             }
 
             if (_showAddBar) {
@@ -661,7 +670,7 @@
             viewFactory.addEventListener(ReportNavigationEvent.TO_REPORT, reportNavigation);
 
             if (!_embedded) {
-                progressBar.visible = true;
+                loading = true;
             }
 
             // if filters were passed in
@@ -685,42 +694,44 @@
             reportBox.removeChild(viewFactory);
         }
 
+        [Bindable]
+        private var showingFilters:Boolean = false;
+
         ]]></mx:Script>
-    <mx:VBox width="100%" height="100%" paddingBottom="10" paddingLeft="10" paddingRight="10" paddingTop="10">
-        <mx:HBox id="buttonBar" verticalAlign="middle" visible="{receivedData}" width="100%">
+    <mx:VBox width="100%" height="100%" paddingBottom="10" paddingLeft="10" paddingRight="10" verticalGap="0">
+        <mx:HBox id="buttonBar" visible="{receivedData}" width="100%" paddingBottom="0">
             <mx:Image source="{logo}" id="logoImage"
-                      click="navigateToURL(new URLRequest('http://www.easy-insight.com/'), 'blank')"/>
-            <mx:Button label="Back" click="close()" icon="{closeIcon}" labelPlacement="bottom" id="backButton"/>
-            <mx:Button label="Full Screen" click="toFullScreen()" icon="{fullScreenIcon}" labelPlacement="bottom"
-                       id="fullScreenButton"/>
-            <mx:Button label="Refresh" click="refreshData()" icon="{refreshIcon}" labelPlacement="bottom"
-                       id="refreshButton"/>
-            <mx:Button label="Bookmark" click="bookmark()" icon="{bookmarkIcon}" labelPlacement="bottom"
-                       id="bookmarkButton"/>
-            <mx:Button label="Export Report" icon="{exportToExcelIcon}" click="exportExcel()" labelPlacement="bottom"
-                       id="exportButton"/>
-            <mx:Button label="Edit this Report" icon="{reportEditorIcon}" click="toReportEditor()"
-                       labelPlacement="bottom" id="editReportButton"/>
-            <mx:Button label="View in Browser" click="toBrowser()" icon="{browserIcon}" labelPlacement="bottom"
-                       id="browserButton"/>
-            <mx:Button label="Adjust Filters" icon="{filterIcon}" click="adjustFilters()" visible="{showFilters}"
-                       labelPlacement="bottom" id="adjustFiltersbutton"/>
-            <datasources:DataSourceDisplay dataSource="{dataSource}" width="100%"/>
+                          click="navigateToURL(new URLRequest('http://www.easy-insight.com/'), 'blank')"/>
+            <mx:HBox paddingTop="10" id="leftButtonBar" paddingBottom="10">
+                <mx:Button label="Back" click="close()" icon="{closeIcon}" labelPlacement="bottom" id="backButton" paddingTop="10"/>
+                <mx:Button label="Full Screen" click="toFullScreen()" icon="{fullScreenIcon}" labelPlacement="bottom"
+                           id="fullScreenButton" paddingTop="10"/>
+                <mx:Button label="Refresh" click="refreshData()" icon="{refreshIcon}" labelPlacement="bottom"
+                           id="refreshButton" paddingTop="10"/>
+                <mx:Button label="Bookmark" click="bookmark()" icon="{bookmarkIcon}" labelPlacement="bottom"
+                           id="bookmarkButton" paddingTop="10"/>
+                <mx:Button label="Export Report" icon="{exportToExcelIcon}" click="exportExcel()" labelPlacement="bottom"
+                           id="exportButton" paddingTop="10"/>
+                <mx:Button label="Edit this Report" icon="{reportEditorIcon}" click="toReportEditor()"
+                           labelPlacement="bottom" id="editReportButton" paddingTop="10"/>
+                <mx:Button label="View in Browser" click="toBrowser()" icon="{browserIcon}" labelPlacement="bottom"
+                           id="browserButton" paddingTop="10"/>
+            </mx:HBox>
+            <mx:HBox backgroundAlpha="0" backgroundColor="#FFFFFF">
+                <mx:VRule visible="{showingFilters}" strokeColor="#AAAAAA" height="86"/>
+                <mx:VBox paddingTop="10" paddingBottom="10" id="filterBox">
+                    <mx:Button label="Adjust Filters" icon="{filterIcon}" click="adjustFilters()" visible="{showFilters}"
+                       labelPlacement="bottom" id="adjustFiltersbutton" paddingTop="10"/>
+                </mx:VBox>
+                <mx:VRule visible="{showingFilters}" strokeColor="#AAAAAA" height="86"/>
+            </mx:HBox>
+            <mx:Box verticalAlign="middle" height="100%" width="100%">
+                <datasources:DataSourceDisplay dataSource="{dataSource}" width="100%"/>
+            </mx:Box>
         </mx:HBox>
         <mx:HBox width="100%" height="100%" id="coreBox">
-            <mx:VBox id="reportBox" width="100%" height="100%">
-                <mx:ViewStack width="100%" id="transformBox" resizeToContent="true" creationPolicy="all">
-                    <mx:Box/>
-                    <filtering:TransformContainer id="transformContainer" filterEditable="false"
-                                              existingFilters="{filterDefinitions}"
-                                              width="100%" paddingLeft="10"
-                                              paddingTop="10" paddingBottom="10"
-                                              paddingRight="10" feedID="{dataSourceID}"/>
-                </mx:ViewStack>
-                <mx:HBox width="100%" id="addReportBox" horizontalAlign="center" verticalAlign="middle"/>
-                <mx:HRule width="100%" id="hrule"/>
-            </mx:VBox>
-            <mx:VBox id="reportMetadata">
+            <mx:VBox id="reportMetadata" paddingTop="30">
+                <mx:HRule width="100%"/>
                 <mx:Form width="350">
                     <mx:FormItem label="Report Name:">
                         <mx:Label text="{reportName}" fontFamily="Lucida Grande" fontWeight="normal" maxWidth="180"/>
@@ -746,7 +757,24 @@
                                      editable="false" selectable="false" backgroundAlpha="0" width="180" height="240"/>
                     </mx:FormItem>
                 </mx:Form>
-                <mx:ProgressBar id="progressBar" visible="false" indeterminate="true"/>
+                <!--<mx:ProgressBar id="progressBar" visible="false" indeterminate="true"/>-->
+            </mx:VBox>
+            <mx:VBox width="100%" height="100%">
+                <mx:ViewStack width="100%" id="transformBox" resizeToContent="true" creationPolicy="all">
+                    <mx:Box/>
+                    <filtering:TransformContainer id="transformContainer" filterEditable="false" borderStyle="solid" borderThickness="1"
+                                              existingFilters="{filterDefinitions}"
+                                              width="100%" paddingLeft="10"
+                                              paddingTop="10" paddingBottom="10"
+                                              paddingRight="10" feedID="{dataSourceID}" borderColor="#AAAAAA" backgroundColor="#FFFFFF"/>
+                </mx:ViewStack>
+                <mx:HBox width="100%" id="addReportBox" horizontalAlign="center" verticalAlign="middle"/>
+                <mx:Canvas width="100%" height="100%">
+                    <mx:Canvas width="100%" height="100%" id="reportBox"/>
+                    <mx:Box width="100%" height="100%" id="loadingLayer" visible="{loading}" horizontalAlign="center" verticalAlign="middle">
+                        <mx:ProgressBar indeterminate="true" label="Loading the report..." visible="true"/>
+                    </mx:Box>
+                </mx:Canvas>
             </mx:VBox>
         </mx:HBox>
     </mx:VBox>

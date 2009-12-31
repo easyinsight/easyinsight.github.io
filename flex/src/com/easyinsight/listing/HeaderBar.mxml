@@ -70,8 +70,11 @@
         }
 
         private function loginEvent(event:LoginEvent):void {
-            loggedIn = event.type == LoginEvent.LOGIN;
+            stackIndex = event.type == LoginEvent.LOGIN ? 1 : 0;
         }
+
+        [Bindable]
+        private var stackIndex:int = 0;
 
         [Bindable]
         [Embed(source="../../../../assets/find.png")]
@@ -189,16 +192,18 @@
         <mx:Label text="Help" fontSize="12" fontFamily="Tahoma" fontWeight="bold" color="0x323232"/>
     </listing:ListingOption>
 
-    <mx:Spacer width="100%"/>
-
-    <mx:Button icon="{preferencesIcon}" click="showPreferences()" toolTip="Preferences" visible="{loggedIn}" />
-
-    <mx:Button icon="{bugIcon}" click="dispatchEvent(new ReportBugEvent())" toolTip="Report Bug" visible="{loggedIn}" />
-
-    <mx:Button icon="{findIcon}" click="dispatchEvent(new LaunchQuickSearchEvent())" toolTip="Search (Ctrl .)" visible="{loggedIn}"/>
 
 
-        
-    <easyinsight:LoginStatusDisplay id="loginStatusDisplay" horizontalAlign="right"/>
-
+    <mx:ViewStack selectedIndex="{stackIndex}" width="100%">
+        <mx:HBox width="100%" horizontalAlign="center">
+            <easyinsight:AnonymousLogonStatus/>
+        </mx:HBox>
+        <mx:HBox verticalAlign="middle">
+            <mx:Spacer width="100%"/>
+            <mx:Button icon="{preferencesIcon}" click="showPreferences()" toolTip="Preferences"/>
+            <mx:Button icon="{bugIcon}" click="dispatchEvent(new ReportBugEvent())" toolTip="Report Bug"/>
+            <mx:Button icon="{findIcon}" click="dispatchEvent(new LaunchQuickSearchEvent())" toolTip="Search (Ctrl .)"/>
+            <easyinsight:LoggedOnStatus/>
+        </mx:HBox>
+    </mx:ViewStack>
 </mx:HBox>

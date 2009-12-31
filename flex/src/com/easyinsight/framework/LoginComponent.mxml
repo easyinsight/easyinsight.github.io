@@ -25,24 +25,6 @@
                 </mx:Form>
             </mx:AddChild>
         </mx:State>
-        <mx:State name="RemindUserName" enterState="enterRemindUserNameStateChange()" exitState="exitRemindUserNameStateChange()">
-            <mx:RemoveChild target="{loginForm}"/>
-            <mx:AddChild relativeTo="{coreBox}">
-                <mx:Form>
-                    <mx:FormItem label="Email Address:" direction="horizontal">
-                        <mx:TextInput id="userEmailAddressInput"/>
-                        <mx:Label text="{emailFailure}" visible="{emailFailure != null}"/>
-                    </mx:FormItem>
-                    <mx:FormItem label="">
-                        <mx:Button label="Send User Name to Email" click="remindUserName()"/>
-                    </mx:FormItem>
-                    <mx:FormItem label="">
-                        <mx:Button label="Back to Login" click="currentState=''"/>
-                        <mx:Button label="Cancel" click="cancel()" visible="{_cancelVisible}"/>
-                    </mx:FormItem>
-                </mx:Form>
-            </mx:AddChild>
-        </mx:State>
         <mx:State name="PasswordReset">
             <mx:AddChild relativeTo="{activationBox}">
                 <mx:Label text="An email has been sent to your email address to allow you to reset your password."/>
@@ -67,28 +49,11 @@
     </mx:states>
     <mx:Script>
 		<![CDATA[
-        import mx.controls.Alert;
+        import mx.messaging.config.ServerConfig;
         import mx.rpc.AsyncResponder;
+        import mx.rpc.AsyncToken;
         import mx.rpc.events.FaultEvent;
         import mx.rpc.events.ResultEvent;
-        import mx.rpc.AsyncToken;
-        import mx.messaging.config.ServerConfig;
-
-        private function remindUserNameEnter(event:KeyboardEvent):void {
-            if (event.keyCode == Keyboard.ENTER) {
-                remindUserName();
-            }
-        }
-
-        private function exitRemindUserNameStateChange():void {
-            this.removeEventListener(KeyboardEvent.KEY_UP, remindUserNameEnter);
-            this.addEventListener(KeyboardEvent.KEY_UP, keyedSignon);
-        }
-
-        private function enterRemindUserNameStateChange():void {
-            this.removeEventListener(KeyboardEvent.KEY_UP, keyedSignon);
-            this.addEventListener(KeyboardEvent.KEY_UP, remindUserNameEnter);
-        }
 
         private function passwordResetEnter(event:KeyboardEvent):void {
             if (event.keyCode == Keyboard.ENTER) {
@@ -146,7 +111,7 @@
         private function delinquentAccount():void {
             var delinquent:Boolean = authService.isAccountDelinquentOrClosed.lastResult as Boolean;
             if (delinquent)
-                flash.net.navigateToURL(new URLRequest("billing/login.jsp"), "_self");
+                navigateToURL(new URLRequest("billing/login.jsp"), "_self");
         }
 
         private function toBaseState():void {
@@ -172,10 +137,6 @@
 
         private function resetPassword():void {
             authService.remindPassword.send(emailAddressInput.text);
-        }
-
-        private function remindUserName():void {
-            authService.remindUserName.send(userEmailAddressInput.text);
         }
 
         private function reset():void {
@@ -209,47 +170,49 @@
             var authResult:UserServiceResponse = authService.authenticate.lastResult as UserServiceResponse;
             var successful:Boolean = authResult.successful;
             if (successful) {
-                User.initializeUser(authResult.name, authResult.email,
-                        authResult.accountType, authResult.spaceAllowed, authResult.accountAdmin,
-                        authResult.dataSourceCreator, authResult.insightCreator, authResult.userID, authResult.activated, authResult.billingInformationGiven, authResult.accountState);
-                User.getInstance().password = authResult.encryptedPassword;
-                User.getInstance().userName = authResult.userName;                
-                dispatchEvent(new LoginEvent(LoginEvent.LOGIN, _targetURL, _newAccount));
-                User.getEventNotifier().dispatchEvent(new LoginEvent(LoginEvent.LOGIN, _targetURL, _newAccount));
+                if (authService.channelSet == null) {
+                    authService.channelSet = ServerConfig.getChannelSet(authService.destination);
+                }
+                var token:AsyncToken = authService.channelSet.login(userName.text, password.text);
+                token.addResponder(new AsyncResponder(
+                        function (event:ResultEvent, token:Object = null):void {
+                            switch (event.result) {
+                                case "success":
+                                    User.initializeUser(authResult.name, authResult.email,
+                                            authResult.accountType, authResult.spaceAllowed, authResult.accountAdmin,
+                                            authResult.dataSourceCreator, authResult.insightCreator, authResult.userID, authResult.activated, authResult.billingInformationGiven, authResult.accountState);
+                                    User.getInstance().password = authResult.encryptedPassword;
+                                    User.getInstance().userName = authResult.userName;
+                                    dispatchEvent(new LoginEvent(LoginEvent.LOGIN, _targetURL, _newAccount));
+                                    User.getEventNotifier().dispatchEvent(new LoginEvent(LoginEvent.LOGIN, _targetURL, _newAccount));
+                                    break;
+                                default:
+                                    trace(event.result);
+                            }
+                        },
+                        function (event:FaultEvent, token:Object = null):void {
+                            switch (event.fault.faultCode) {
+                                case "Client.Authentication":
+                                default:
+                                    failureMessage = event.fault.faultString;
+                                /*if (failureMessageLabel != null)
+                                 failureMessageLabel.text = failureMessage;
+                                 else
+                                 Alert.show(failureMessage);
+                                 authService.isAccountDelinquentOrClosed.send(userNameStr);*/
+                            }
+                        }
+                        ));
+
             } else {
-                failureMessageLabel.text = authResult.failureMessage;
+                failureMessage = authResult.failureMessage;
                 authService.isAccountDelinquentOrClosed.send(userName.text);
             }
         }
 
         public function signon(userNameStr:String, passwordStr:String):void {
-            if (authService.channelSet == null) {
-                authService.channelSet = ServerConfig.getChannelSet(authService.destination);
-            }
-            var token:AsyncToken = authService.channelSet.login(userNameStr, passwordStr);
-            token.addResponder(new AsyncResponder(
-                    function (event:ResultEvent, token:Object = null):void {
-                        switch (event.result) {
-                            case "success":
-                                authService.authenticate.send(userNameStr, passwordStr);
-                                break;
-                            default:
-                                trace(event.result);
-                        }
-                    },
-                    function (event:FaultEvent, token:Object = null):void {
-                        switch (event.fault.faultCode) {
-                            case "Client.Authentication":
-                            default:
-                                var failureMessage:String = event.fault.faultString;
-                                if (failureMessageLabel != null)
-                                    failureMessageLabel.text = failureMessage;
-                                else
-                                    Alert.show(failureMessage);
-                                authService.isAccountDelinquentOrClosed.send(userNameStr);
-                        }
-                    }
-                    ));
+            authService.authenticate.send(userNameStr, passwordStr);
+
 
         }
 
@@ -267,15 +230,18 @@
             User.getEventNotifier().dispatchEvent(new NavigationEvent(NavigationEvent.ACCOUNTS));
             dispatchEvent(new Event("loginClose"));
         }
+
+        [Bindable]
+        private var failureMessage:String = "";
                 ]]>
 	</mx:Script>
     <mx:VBox id="coreBox">
         <mx:Box id="activationBox" width="100%" horizontalAlign="center" paddingTop="10"/>
         <mx:Form id="loginForm">
-            <mx:FormItem label="User Name:" direction="horizontal">
+            <mx:FormItem label="User Name or Email:" direction="horizontal">
                 <mx:TextInput id="userName" tabIndex="1"/>
-                <mx:LinkButton fontSize="10" textDecoration="underline" label="Forgot your User Name?"
-                               click="currentState='RemindUserName'"/>
+                <!--<mx:LinkButton fontSize="10" textDecoration="underline" label="Forgot your User Name?"
+                               click="currentState='RemindUserName'"/>-->
             </mx:FormItem>
             <mx:FormItem label="Password:" direction="horizontal">
                 <mx:TextInput id="password" displayAsPassword="true" tabIndex="2"/>
@@ -293,7 +259,7 @@
                 <mx:Button label="Create Account" click="createNewAccount()"/>
             </mx:FormItem>
         </mx:Form>
-        <mx:Text text="" id="failureMessageLabel"/>
+        <mx:Text text="{failureMessage}"/>
     </mx:VBox>
     <mx:RemoteObject id="authService" destination="login">
         <mx:method name="authenticate" result="handleAuthentication()"/>

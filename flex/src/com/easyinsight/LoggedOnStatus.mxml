@@ -1,10 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
-<mx:HBox xmlns:mx="http://www.adobe.com/2006/mxml">
+<mx:HBox xmlns:mx="http://www.adobe.com/2006/mxml" addedToStage="onAdd()" verticalAlign="middle">
 	<mx:Script>
 		<![CDATA[
 			import com.easyinsight.framework.LoginEvent;
 			import mx.messaging.config.ServerConfig;
             import com.easyinsight.framework.User;
+
+            [Bindable]
+            private var message:String;
+
+            private function onAdd():void {
+                message = User.getInstance().userName;
+            }
 
             public function logout():void {
                 User.destroy();
@@ -15,5 +22,8 @@
 	</mx:Script>
 	<mx:RemoteObject id="authService" destination="login">
 	</mx:RemoteObject>
+    <mx:Spacer width="100%"/>
+    <mx:Label text="{message}"/>
+    <mx:VRule height="20"/>
 	<mx:Button label="Log Out" click="logout()"/>
 </mx:HBox>

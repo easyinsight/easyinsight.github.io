@@ -11,6 +11,15 @@
 
         private var _solution:Solution;
 
+        [Bindable]
+        private var dsMessage:String;
+
+
+        protected override function commitProperties():void {
+            super.commitProperties();
+            dsMessage = "You now have a data source connected to " + _solution.name + ". This\ndata source will be available to you under the My Data page.";
+        }
+
         public function set dataSourceDescriptor(value:DataSourceDescriptor):void {
             _dataSourceDescriptor = value;
         }
@@ -30,9 +39,12 @@
         }
         ]]></mx:Script>
     <mx:VBox horizontalAlign="center" paddingTop="10" paddingBottom="10" paddingLeft="10" paddingRight="10">
+        <mx:Text text="{dsMessage}" fontSize="18"/>
+        <mx:Label text="Getting Started" fontSize="16" fontWeight="bold"/>
+        <mx:Label text="We have a couple of ways to start from here:" fontSize="16"/>
         <mx:HBox>
-            <mx:Button label="Explore Reports Built by Other Users" click="toReports()" fontSize="16"/>
-            <mx:Button label="Create Reports on this Connection" click="toDataSource()" fontSize="16"/>            
+            <mx:Button label="Try Reports Built by Other Users" click="toReports()" fontSize="16"/>
+            <mx:Button label="Create Your Own Reports" click="toDataSource()" fontSize="16"/>
         </mx:HBox>
         <mx:Button label="Cancel" click="PopUpManager.removePopUp(this)" fontSize="14"/>
     </mx:VBox>

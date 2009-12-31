@@ -30,6 +30,7 @@ public class SolutionView extends VBox{
         setStyle("paddingTop", 10);
         setStyle("paddingBottom", 10);
         setStyle("backgroundAlpha", 0);
+        setStyle("horizontalAlign", "center");
         addEventListener(MouseEvent.CLICK, onClick);
     }
 

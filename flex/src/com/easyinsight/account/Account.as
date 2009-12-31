@@ -32,6 +32,7 @@ package com.easyinsight.account
         public var accountState:int;
         public var apiEnabled:Boolean;
         public var activated:Boolean;
+        public var optInEmail:Boolean;
 		
 		public function Account()
 		{

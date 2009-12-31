@@ -25,8 +25,8 @@
         }
         ]]></mx:Script>
     <mx:VBox horizontalAlign="center">
-        <mx:Label text="We couldn't find any installs of this solution in your account." fontSize="14"/>
-        <mx:Button label="Install this Solution" styleName="blueButton" fontSize="14" click="toSolution()"/>
+        <mx:Label text="We couldn't find any installs of this connection in your account." fontSize="14"/>
+        <mx:Button label="Install this Connection" styleName="blueButton" fontSize="14" click="toSolution()"/>
         <mx:LinkButton textDecoration="underline" label="Cancel" click="PopUpManager.removePopUp(this)" fontSize="14"/>
     </mx:VBox>
 </util:EITitleWindow>

@@ -46,6 +46,7 @@
         import com.easyinsight.report.DelayedPackageLink;
         import com.easyinsight.report.PackageAnalyzeSource;
         import com.easyinsight.report.ReportAnalyzeSource;
+        import com.easyinsight.report.StaticReportSource;
         import com.easyinsight.reportpackage.ReportPackageDescriptor;
         import com.easyinsight.solutions.DataSourceDescriptor;
         import com.easyinsight.solutions.DelayedSolutionLink;
@@ -248,112 +249,117 @@
                             groupLink.addEventListener(AnalyzeEvent.ANALYZE, internalAnalyze);
                             groupLink.execute();
                         } else {
-                            var goalTreeID:String = o.goalTreeID;
-                            if (goalTreeID != null) {
-                                var goalLink:DelayedGoalLink = new DelayedGoalLink(Number(goalTreeID));
-                                goalLink.addEventListener(AnalyzeEvent.ANALYZE, internalAnalyze);
-                                goalLink.execute();
+                            var staticReportID:String = o.staticReportID;
+                            if (staticReportID != null) {
+                                internalAnalyze(new AnalyzeEvent(new StaticReportSource(Number(staticReportID))));
                             } else {
-                                var activationString:String = o.activationID;
-                                if (activationString != null) {
-                                    ProgressAlert.alert(this, "Activating account", null, accountService.activateAccount);
-                                    accountService.activateAccount.send(activationString);
+                                var goalTreeID:String = o.goalTreeID;
+                                if (goalTreeID != null) {
+                                    var goalLink:DelayedGoalLink = new DelayedGoalLink(Number(goalTreeID));
+                                    goalLink.addEventListener(AnalyzeEvent.ANALYZE, internalAnalyze);
+                                    goalLink.execute();
                                 } else {
-                                    var solution:String = o.solutionID;
-                                    if (solution != null) {
-                                        var solutionLink:DelayedSolutionLink = new DelayedSolutionLink(Number(solution));
-                                        solutionLink.addEventListener(ListingChangeEvent.LISTING_CHANGE, changePerspective);
-                                        solutionLink.execute();
+                                    var activationString:String = o.activationID;
+                                    if (activationString != null) {
+                                        ProgressAlert.alert(this, "Activating account", null, accountService.activateAccount);
+                                        accountService.activateAccount.send(activationString);
                                     } else {
-                                        var reportID:String = o.reportID;
-                                        if (reportID != null) {
-                                            var deepReportLink:DelayedReportLink = new DelayedReportLink(Number(reportID));
-                                            deepReportLink.addEventListener(AnalyzeEvent.ANALYZE, internalAnalyze);
-                                            deepReportLink.execute();
+                                        var solution:String = o.solutionID;
+                                        if (solution != null) {
+                                            var solutionLink:DelayedSolutionLink = new DelayedSolutionLink(Number(solution));
+                                            solutionLink.addEventListener(ListingChangeEvent.LISTING_CHANGE, changePerspective);
+                                            solutionLink.execute();
                                         } else {
-                                            var multiReportID:String = o.multiReportID;
-                                            if (multiReportID != null) {
-                                                var multiReportLink:DelayedMultiReportLink = new DelayedMultiReportLink(Number(multiReportID));
-                                                multiReportLink.addEventListener(AnalyzeEvent.ANALYZE, internalAnalyze);
-                                                multiReportLink.execute();
+                                            var reportID:String = o.reportID;
+                                            if (reportID != null) {
+                                                var deepReportLink:DelayedReportLink = new DelayedReportLink(Number(reportID));
+                                                deepReportLink.addEventListener(AnalyzeEvent.ANALYZE, internalAnalyze);
+                                                deepReportLink.execute();
                                             } else {
-                                                var packageID:String = o.packageID;
-                                                if (packageID != null) {
-                                                    var delayedPackageLink:DelayedPackageLink = new DelayedPackageLink(Number(packageID));
-                                                    delayedPackageLink.addEventListener(AnalyzeEvent.ANALYZE, internalAnalyze);
-                                                    delayedPackageLink.execute();
+                                                var multiReportID:String = o.multiReportID;
+                                                if (multiReportID != null) {
+                                                    var multiReportLink:DelayedMultiReportLink = new DelayedMultiReportLink(Number(multiReportID));
+                                                    multiReportLink.addEventListener(AnalyzeEvent.ANALYZE, internalAnalyze);
+                                                    multiReportLink.execute();
                                                 } else {
-
-                                                var goalAdminID:String = o.goalTreeAdminID;
-                                                if (goalAdminID != null) {
-                                                    var delayedGoalAdminLink:DelayedGoalAdminLink = new DelayedGoalAdminLink(Number(goalAdminID));
-                                                    delayedGoalAdminLink.addEventListener(AnalyzeEvent.ANALYZE, internalAnalyze);
-                                                    delayedGoalAdminLink.execute();
-                                                } else {
-                                                    var redirectID:String = o.redirectID;
-                                                    if (redirectID != null) {
-                                                        var redirectType:int = int(redirectID);
-                                                        var sessionToken:String = String(o.token);
-                                                        var redirector:TokenRedirector = new TokenRedirector();
-                                                        redirector.solutionID = int(o.refSolutionID);
-                                                        redirector.type = redirectType;
-                                                        redirector.onURL(sessionToken);
-                                                        redirector.addEventListener(ListingChangeEvent.LISTING_CHANGE, changePerspective);
+                                                    var packageID:String = o.packageID;
+                                                    if (packageID != null) {
+                                                        var delayedPackageLink:DelayedPackageLink = new DelayedPackageLink(Number(packageID));
+                                                        delayedPackageLink.addEventListener(AnalyzeEvent.ANALYZE, internalAnalyze);
+                                                        delayedPackageLink.execute();
                                                     } else {
-                                                            var page:String = o.page;
-                                                            if (page != null) {
-                                                                if (currentState == "Analysis") {
-                                                                    dataAnalysis.removeEventListener(AnalysisCloseEvent.ANALYSIS_CLOSE, analysisClosed);
-                                                                    dataAnalysis = null;
-                                                                }
-                                                                switch (page) {
-                                                                    case "myData":
-                                                                        navigation(new NavigationEvent("My Data"));
-                                                                        break;
-                                                                    case "myGoals":
-                                                                        navigation(new NavigationEvent("Goals"));
-                                                                        break;
-                                                                    case "exchange":
-                                                                        var view:int = int(o.view);
-                                                                        var display:int = int(o.display);
-                                                                        var subTopic:int = int(o.subTopicID);
-                                                                        navigation(new NavigationEvent("Exchange", null, {viewMode: view, displayMode: display, subTopicID: subTopic}));
-                                                                        break;
-                                                                    case "groups":
-                                                                        navigation(new NavigationEvent("Groups"));
-                                                                        break;
-                                                                    case "help":
-                                                                        navigation(new NavigationEvent("Help"));
-                                                                        break;
-                                                                    case "home":
-                                                                            if(o.type != null && o.type == "tour")
-                                                                                navigation(new NavigationEvent("Home", null, { tour: true }));
+
+                                                    var goalAdminID:String = o.goalTreeAdminID;
+                                                    if (goalAdminID != null) {
+                                                        var delayedGoalAdminLink:DelayedGoalAdminLink = new DelayedGoalAdminLink(Number(goalAdminID));
+                                                        delayedGoalAdminLink.addEventListener(AnalyzeEvent.ANALYZE, internalAnalyze);
+                                                        delayedGoalAdminLink.execute();
+                                                    } else {
+                                                        var redirectID:String = o.redirectID;
+                                                        if (redirectID != null) {
+                                                            var redirectType:int = int(redirectID);
+                                                            var sessionToken:String = String(o.token);
+                                                            var redirector:TokenRedirector = new TokenRedirector();
+                                                            redirector.solutionID = int(o.refSolutionID);
+                                                            redirector.type = redirectType;
+                                                            redirector.onURL(sessionToken);
+                                                            redirector.addEventListener(ListingChangeEvent.LISTING_CHANGE, changePerspective);
+                                                        } else {
+                                                                var page:String = o.page;
+                                                                if (page != null) {
+                                                                    if (currentState == "Analysis") {
+                                                                        dataAnalysis.removeEventListener(AnalysisCloseEvent.ANALYSIS_CLOSE, analysisClosed);
+                                                                        dataAnalysis = null;
+                                                                    }
+                                                                    switch (page) {
+                                                                        case "myData":
+                                                                            navigation(new NavigationEvent("My Data"));
+                                                                            break;
+                                                                        case "myGoals":
+                                                                            navigation(new NavigationEvent("Goals"));
+                                                                            break;
+                                                                        case "exchange":
+                                                                            var view:int = int(o.view);
+                                                                            var display:int = int(o.display);
+                                                                            var subTopic:int = int(o.subTopicID);
+                                                                            navigation(new NavigationEvent("Exchange", null, {viewMode: view, displayMode: display, subTopicID: subTopic}));
+                                                                            break;
+                                                                        case "groups":
+                                                                            navigation(new NavigationEvent("Groups"));
+                                                                            break;
+                                                                        case "help":
+                                                                            navigation(new NavigationEvent("Help"));
+                                                                            break;
+                                                                        case "home":
+                                                                                if(o.type != null && o.type == "tour")
+                                                                                    navigation(new NavigationEvent("Home", null, { tour: true }));
+                                                                                else
+                                                                                    navigation(new NavigationEvent("Home"));
+                                                                            break;
+                                                                        case "connections":
+                                                                            if(o.type != null && o.type == "business")
+                                                                                navigation(new NavigationEvent("Connections", null, { biz: true, client:false, saas: false, learning: false }));
+                                                                            else if(o.type != null && o.type == "application")
+                                                                                navigation(new NavigationEvent("Connections", null, { saas: true, client:true, biz: false, learning: false }));
                                                                             else
-                                                                                navigation(new NavigationEvent("Home"));
-                                                                        break;
-                                                                    case "connections":
-                                                                        if(o.type != null && o.type == "business")
-                                                                            navigation(new NavigationEvent("Connections", null, { biz: true, client:false, saas: false, learning: false }));
-                                                                        else if(o.type != null && o.type == "application")
-                                                                            navigation(new NavigationEvent("Connections", null, { saas: true, client:true, biz: false, learning: false }));
-                                                                        else
-                                                                            navigation(new NavigationEvent("Connections"));
-                                                                        break;
-                                                                    case "account":
-                                                                        navigation(new NavigationEvent("Accounts"));
-                                                                        break;
-                                                                    case "welcome":
-                                                                        navigation(new NavigationEvent(null, new WelcomeScreen()));
+                                                                                navigation(new NavigationEvent("Connections"));
+                                                                            break;
+                                                                        case "account":
+                                                                            navigation(new NavigationEvent("Accounts"));
+                                                                            break;
+                                                                        case "welcome":
+                                                                            navigation(new NavigationEvent(null, new WelcomeScreen()));
+                                                                    }
                                                                 }
-                                                            }
-                                                            else if (o.resetPassword != null) {
-                                                                passwordResetValue = o.resetPassword;
-                                                                userService.verifyPasswordReset.send(o.resetPassword);
-                                                            }
-                                                            else {
-                                                                navigation(new NavigationEvent("Home"));
-                                                            }
-                                                    }
+                                                                else if (o.resetPassword != null) {
+                                                                    passwordResetValue = o.resetPassword;
+                                                                    userService.verifyPasswordReset.send(o.resetPassword);
+                                                                }
+                                                                else {
+                                                                    navigation(new NavigationEvent("Home"));
+                                                                }
+                                                        }
+                                                        }
                                                     }
                                                 }
                                             }
