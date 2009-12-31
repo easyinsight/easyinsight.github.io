@@ -18,13 +18,13 @@ public class PercentageNumberFormatter extends NumberFormatter{
 			 (decimalSeparatorTo == thousandsSeparatorTo)))
         {
             error = defaultInvalidFormatError;
-            return "";
+            return "0%";
         }
 
         if (decimalSeparatorTo == "" || !isNaN(Number(decimalSeparatorTo)))
         {
             error = defaultInvalidFormatError;
-            return "";
+            return "0%";
         }
 
         var dataFormatter:NumberBase = new NumberBase(decimalSeparatorFrom,
@@ -40,7 +40,7 @@ public class PercentageNumberFormatter extends NumberFormatter{
         if (value === null || isNaN(Number(value)))
         {
             error = defaultInvalidValueError;
-            return "";
+            return "0%";
         }
 
         // -- format --
@@ -106,7 +106,7 @@ public class PercentageNumberFormatter extends NumberFormatter{
         if (!dataFormatter.isValid)
         {
             error = defaultInvalidFormatError;
-            return "";
+            return "0%";
         }
 
         return numStr + "%";
