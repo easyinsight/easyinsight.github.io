@@ -40,7 +40,8 @@
         ]]></mx:Script>
     <mx:VBox horizontalAlign="center" paddingTop="10" paddingBottom="10" paddingLeft="10" paddingRight="10">
         <mx:Text text="{dsMessage}" fontSize="18"/>
-        <mx:Label text="Getting Started" fontSize="16" fontWeight="bold"/>
+        <mx:HRule width="100%"/>
+        <mx:Label text="Getting Started" fontSize="16"/>
         <mx:Label text="We have a couple of ways to start from here:" fontSize="16"/>
         <mx:HBox>
             <mx:Button label="Try Reports Built by Other Users" click="toReports()" fontSize="16"/>
