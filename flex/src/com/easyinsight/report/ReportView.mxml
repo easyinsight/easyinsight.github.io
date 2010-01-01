@@ -594,7 +594,7 @@
                 leftButtonBar.removeChild(backButton);
             } else {
                 if (_origin == ReportAnalyzeSource.ORIGIN_EXCHANGE) {
-                    var idx1:int = buttonBar.getChildIndex(backButton);
+                    var idx1:int = leftButtonBar.getChildIndex(backButton);
                     leftButtonBar.removeChild(backButton);
                     var exchangeButton:Button = new Button();
                     exchangeButton.label = "More Reports";
@@ -603,7 +603,7 @@
                     exchangeButton.addEventListener(MouseEvent.CLICK, toExchange);
                     leftButtonBar.addChildAt(exchangeButton, idx1);
                 } else if (_origin == ReportAnalyzeSource.ORIGIN_MY_DATA) {
-                    var idx2:int = buttonBar.getChildIndex(backButton);
+                    var idx2:int = leftButtonBar.getChildIndex(backButton);
                     leftButtonBar.removeChild(backButton);
                     var myDataButton:Button = new Button();
                     myDataButton.label = "My Data";
