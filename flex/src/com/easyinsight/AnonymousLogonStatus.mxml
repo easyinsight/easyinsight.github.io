@@ -21,6 +21,6 @@
                 ]]>
 	</mx:Script>
     <mx:Spacer width="100%"/>
-	<mx:Button label="Log In" click="login()" id="loginButton" fontSize="16" styleName="redButton"/>
+	<mx:Button label="Log In" click="login()" id="loginButton" styleName="redButton"/>
     <mx:Spacer width="100%"/>
 </mx:HBox>
