@@ -92,7 +92,7 @@ public class BaseCampCompositeSource extends CompositeServerDataSource {
 
     public String validateCredentials(com.easyinsight.users.Credentials credentials) {
         HttpClient client = getHttpClient(credentials.getUserName(), credentials.getPassword());
-        Pattern p = Pattern.compile("(http(s?)://)?([A-Za-z0-9]|\\-)+(\\.(basecamphq | projectpath | seework | clientsection | grouphub | updatelog)\\.com)?");
+        Pattern p = Pattern.compile("(http(s?)://)?([A-Za-z0-9]|\\-)+(\\.(basecamphq|projectpath|seework|clientsection|grouphub|updatelog)\\.com)?");
         Matcher m = p.matcher(url);
         String result = null;
         if(!m.matches()) {
