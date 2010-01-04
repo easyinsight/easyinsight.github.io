@@ -53,7 +53,9 @@
         <mx:FormItem label="Basecamp Path: " direction="horizontal" fontWeight="bold" fontFamily="Tahoma">
 			<mx:TextInput id="urlInput" fontWeight="normal" fontFamily="Lucida Grande" text="{url}"/>
 		</mx:FormItem>
-        <mx:FormItem label="Example: easyinsight for easyinsight.basecamphq.com" fontSize="10"/>
+        <mx:FormItem>
+            <mx:Label text="Example: &quot;easyinsight&quot; for &quot;easyinsight.basecamphq.com&quot;" fontSize="10" />
+        </mx:FormItem>
 		<mx:FormItem label="Basecamp User Name: " direction="horizontal" fontWeight="bold" fontFamily="Tahoma">
 			<mx:TextInput id="userNameInput" fontWeight="normal" fontFamily="Lucida Grande" text="{usernameInputText}"/>
 		</mx:FormItem>

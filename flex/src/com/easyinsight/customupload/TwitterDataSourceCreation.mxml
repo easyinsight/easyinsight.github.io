@@ -27,7 +27,7 @@
 
         public function get dataSourceDefinition():FeedDefinitionData {
             var obj:TwitterDataSource = new TwitterDataSource();
-            var coll = new ArrayCollection();
+            var coll:ArrayCollection = new ArrayCollection();
             for each (var i:TwitterInfo in _searches) {
                 coll.addItem(i.search);
             }
@@ -48,7 +48,7 @@
 
         public function updateDataSource(feedDefinition:FeedDefinitionData):void {
             var ds:TwitterDataSource = feedDefinition as TwitterDataSource;
-            var coll = new ArrayCollection();
+            var coll:ArrayCollection = new ArrayCollection();
             for each (var i:TwitterInfo in _searches) {
                 coll.addItem(i.search);
             }
