@@ -54,7 +54,7 @@
 
         private function confirmedKeep():void {
             addReportBox.removeAllChildren();
-            buttonBar.addChildAt(editReportButton, 4);
+            leftButtonBar.addChildAt(editReportButton, 4);
         }
 
         private var _reportNavHandler:Function;
