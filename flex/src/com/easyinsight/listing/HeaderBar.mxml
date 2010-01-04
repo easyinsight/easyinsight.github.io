@@ -194,7 +194,7 @@
 
 
 
-    <mx:ViewStack selectedIndex="{stackIndex}" width="100%">
+    <mx:ViewStack selectedIndex="{stackIndex}" width="100%" resizeToContent="true">
         <mx:HBox width="100%" horizontalAlign="center">
             <easyinsight:AnonymousLogonStatus/>
         </mx:HBox>
