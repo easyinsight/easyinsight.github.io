@@ -11,6 +11,11 @@
 
             private function onAdd():void {
                 message = User.getInstance().userName;
+                User.getEventNotifier().addEventListener(LoginEvent.LOGIN, onLogin);
+            }
+
+            private function onLogin(event:LoginEvent):void {
+                message = User.getInstance().userName;
             }
 
             public function logout():void {
