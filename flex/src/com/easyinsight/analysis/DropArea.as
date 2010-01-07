@@ -7,6 +7,7 @@ import com.easyinsight.util.PopUpUtil;
 import flash.display.Bitmap;
 import flash.display.BitmapData;
 import flash.events.ContextMenuEvent;
+import flash.events.Event;
 import flash.events.KeyboardEvent;
 import flash.events.MouseEvent;
 import flash.ui.ContextMenuItem;
@@ -36,7 +37,12 @@ public class DropArea extends HBox
 
     private var coreComponent:UIComponent;
 
+    [Bindable]
+    [Embed(source="../../../../assets/navigate_cross.png")]
+    private var deleteIcon:Class;
+
     private var editButton:Button;
+    private var deleteButton:Button;
 
     private var _analysisItems:ArrayCollection;
 
@@ -65,7 +71,14 @@ public class DropArea extends HBox
         var addChildAction:AddChild = new AddChild();
         addChildAction.relativeTo = this;
         addChildAction.target = editButton;
-        configured.overrides = [ addChildAction ];
+        var addDeleteButton:AddChild = new AddChild();
+        deleteButton = new Button();
+        deleteButton.setStyle("icon", deleteIcon);
+        deleteButton.addEventListener(MouseEvent.CLICK, onDelete);
+        deleteButton.toolTip = "Clear This Field";
+        addDeleteButton.relativeTo = this;
+        addDeleteButton.target = deleteButton;
+        configured.overrides = [ addChildAction, addDeleteButton ];
         states = [ configured ];
 
         this.setStyle("borderStyle", "solid");
@@ -87,7 +100,7 @@ public class DropArea extends HBox
         return label;
     }
 
-    private function onDelete(event:ContextMenuEvent):void {
+    private function onDelete(event:Event):void {
         deletion();
     }
 
