@@ -1,30 +1,96 @@
 <?xml version="1.0" encoding="utf-8"?>
-<util:EITitleWindow xmlns:util="com.easyinsight.util.*" xmlns:mx="http://www.adobe.com/2006/mxml" showCloseButton="true" close="videoViewer.stop(); PopUpManager.removePopUp(this)">
+<util:EITitleWindow xmlns:util="com.easyinsight.util.*" xmlns:mx="http://www.adobe.com/2006/mxml" headerHeight="0"
+        width="700" height="500">
 	<mx:Script>
 		<![CDATA[
+        import com.easyinsight.util.PopUpUtil;
+
+        import mx.events.SliderEvent;
         import mx.managers.PopUpManager;
 
         [Bindable]
         private var _screencastSource:String;
 
         [Bindable]
+        [Embed(source="../../../../assets/media_step_back.png")]
+        private var backIcon:Class;
+
+        [Bindable]
         [Embed(source="../../../../assets/media_play.png")]
         private var playIcon:Class;
+
+        [Bindable]
+        [Embed(source="../../../../assets/media_play_128.png")]
+        private var bigPlayIcon:Class;
 
         [Bindable]
         [Embed(source="../../../../assets/media_pause.png")]
         private var pauseIcon:Class;
 
+        [Bindable]
+        [Embed(source="../../../../assets/media_step_forward.png")]
+        private var forwardIcon:Class;
+
+        [Bindable]
+        [Embed(source="../../../../assets/media_beginning.png")]
+        private var beginningIcon:Class;
+
+        [Bindable]
+        [Embed(source="../../../../assets/media_end.png")]
+        private var endIcon:Class;
+
+        [Bindable]
+        private var playOrPauseIcon:Class = pauseIcon;
+
+        private function firstFrame():void {
+            videoViewer.playheadTime = 0;
+        }
+
+        private function play():void {
+            if (playOrPauseIcon == pauseIcon) {
+                playOrPauseIcon = playIcon;
+                videoViewer.pause();
+            } else {
+                playOrPauseIcon = pauseIcon;
+                videoViewer.play();
+            }
+        }
+
+        private function lastFrame():void {
+            videoViewer.playheadTime = videoViewer.totalTime;
+        }
+
         public function set screencastSource(val:String):void {
             _screencastSource = val;
         }
+
+        private function onThumbRelease(event:SliderEvent):void {
+            videoViewer.playheadTime = event.value;
+        }
+
+        private function closeVideo():void {
+            videoViewer.stop();
+            PopUpManager.removePopUp(this)
+        }
 		]]>
 	</mx:Script>
-	<mx:VBox id="coreBox" width="100%" height="100%">
-        <mx:VideoDisplay source="{_screencastSource}" id="videoViewer"/>
+	<mx:VBox id="coreBox" width="100%" height="100%" horizontalAlign="center" verticalAlign="middle" backgroundColor="#FFFFFF">
+        <mx:HBox width="100%">
+            <mx:Spacer width="100%"/>
+            <mx:Button label="Close" click="closeVideo()" styleName="blueButton"/>
+            <mx:Spacer width="100%"/>
+        </mx:HBox>
+        <mx:VideoDisplay source="{_screencastSource}" id="videoViewer" ready="PopUpUtil.centerPopUp(this)"/>
         <mx:HBox width="100%" horizontalAlign="center">
-            <mx:Button toolTip="Pause" icon="{pauseIcon}" click="videoViewer.pause()"/>
-            <mx:Button toolTip="Play" icon="{playIcon}" click="videoViewer.play()"/>
+            <mx:Button icon="{beginningIcon}" click="firstFrame()" toolTip="Go to Beginning"/>
+            <mx:Button icon="{playOrPauseIcon}" click="play()" toolTip="Play"/>
+            <mx:Button icon="{endIcon}" click="lastFrame()" toolTip="Go to End"/>
+        </mx:HBox>
+        <!--<mx:HSlider thumbCount="1" value="{videoViewer.playheadTime}" minimum="0" maximum="{videoViewer.totalTime}" width="80%" thumbDrag="onThumbRelease(event)"/>-->
+        <mx:HBox width="100%">
+            <mx:Spacer width="100%"/>
+            <mx:Button label="Close" click="closeVideo()" styleName="blueButton"/>
+            <mx:Spacer width="100%"/>
         </mx:HBox>
 	</mx:VBox>
 	
