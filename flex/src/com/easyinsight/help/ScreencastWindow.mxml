@@ -20,10 +20,6 @@
         private var playIcon:Class;
 
         [Bindable]
-        [Embed(source="../../../../assets/media_play_128.png")]
-        private var bigPlayIcon:Class;
-
-        [Bindable]
         [Embed(source="../../../../assets/media_pause.png")]
         private var pauseIcon:Class;
 
