@@ -4,9 +4,9 @@ import com.easyinsight.datafeeds.*;
 import com.easyinsight.datafeeds.composite.CompositeServerDataSource;
 import com.easyinsight.datafeeds.composite.ChildConnection;
 import com.easyinsight.users.Account;
-import com.easyinsight.logging.LogClass;
 import com.easyinsight.analysis.DataSourceInfo;
 
+import java.net.UnknownHostException;
 import java.util.*;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
@@ -80,6 +80,8 @@ public class BaseCampCompositeSource extends CompositeServerDataSource {
         try {
             client.executeMethod(restMethod);
             doc = builder.build(restMethod.getResponseBodyAsStream());
+        } catch (UnknownHostException uhe) {
+            throw new RuntimeException("Could not recognize host " + getUrl() + " ");
         }
         catch (nu.xom.ParsingException e) {
                 throw new BaseCampLoginException("Invalid username/password.");
@@ -110,7 +112,7 @@ public class BaseCampCompositeSource extends CompositeServerDataSource {
 
     @Override
     public int getRequiredAccountTier() {
-        return Account.INDIVIDUAL;
+        return Account.BASIC;
     }
 
     protected Collection<ChildConnection> getChildConnections() {

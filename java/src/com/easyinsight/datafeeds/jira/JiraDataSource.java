@@ -56,7 +56,7 @@ public class JiraDataSource extends ServerDataSourceDefinition {
     }
 
     public int getRequiredAccountTier() {
-        return Account.INDIVIDUAL;
+        return Account.BASIC;
     }
 
     public FeedType getFeedType() {

@@ -16,8 +16,6 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.io.InputStream;
 
-import org.w3c.dom.Document;
-
 /**
  * User: jboe
  * Date: Jul 16, 2009
@@ -78,7 +76,7 @@ public class WesabeDataSource extends CompositeServerDataSource {
 
     @Override
     public int getRequiredAccountTier() {
-        return Account.INDIVIDUAL;
+        return Account.BASIC;
     }
 
     @Override

@@ -72,7 +72,7 @@ public class CloudWatchDataSource extends ServerDataSourceDefinition {
 
     @Override
     public int getRequiredAccountTier() {
-        return Account.INDIVIDUAL;
+        return Account.BASIC;
     }
 
     public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, DataSet dataSet, Credentials credentials, Connection conn) {

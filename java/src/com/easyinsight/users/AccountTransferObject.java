@@ -2,6 +2,7 @@ package com.easyinsight.users;
 
 import org.hibernate.Session;
 
+import java.util.Date;
 import java.util.List;
 import java.util.ArrayList;
 
@@ -21,6 +22,15 @@ public class AccountTransferObject {
     private String name;
     private int accountState;
     private boolean apiEnabled;
+    private Date creationDate;
+
+    public Date getCreationDate() {
+        return creationDate;
+    }
+
+    public void setCreationDate(Date creationDate) {
+        this.creationDate = creationDate;
+    }
 
     public boolean isApiEnabled() {
         return apiEnabled;
@@ -93,6 +103,7 @@ public class AccountTransferObject {
         account.setAccountID(accountID);
         account.setName(name);
         account.setApiEnabled(apiEnabled);
+        account.setCreationDate(creationDate);
         return account;
     }
 }

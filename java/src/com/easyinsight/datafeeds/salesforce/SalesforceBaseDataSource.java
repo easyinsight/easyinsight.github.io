@@ -57,7 +57,7 @@ public class SalesforceBaseDataSource extends ServerDataSourceDefinition {
 
     @Override
     public int getRequiredAccountTier() {
-        return Account.GROUP;
+        return Account.PROFESSIONAL;
     }
 
     public int getCredentialsDefinition() {

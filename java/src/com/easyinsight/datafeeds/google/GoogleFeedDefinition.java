@@ -159,7 +159,7 @@ public class GoogleFeedDefinition extends ServerDataSourceDefinition {
 
     @Override
     public int getRequiredAccountTier() {
-        return Account.FREE;
+        return Account.PERSONAL;
     }
 
     private List<AnalysisItem> populateFields(DataSet dataSet) {

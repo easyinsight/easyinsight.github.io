@@ -237,11 +237,11 @@ public class AccountActivityStorage {
         double baseAccountMonthlyCost;
         double userLicenseCost;
         switch (accountType) {
-            case Account.INDIVIDUAL:
+            case Account.BASIC:
                 baseAccountMonthlyCost = 0;
                 userLicenseCost = 10;
                 break;
-            case Account.PROFESSIONAL:
+            case Account.PREMIUM:
                 baseAccountMonthlyCost = 0;
                 userLicenseCost = 50;
                 break;

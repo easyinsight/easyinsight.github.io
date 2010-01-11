@@ -48,7 +48,7 @@ public class GroupService {
     }
 
     public long addGroup(Group group) {
-        SecurityUtil.authorizeAccountTier(Account.INDIVIDUAL);
+        SecurityUtil.authorizeAccountTier(Account.BASIC);
         long userID = SecurityUtil.getUserID();
         try {
             return groupStorage.addGroup(group, userID);

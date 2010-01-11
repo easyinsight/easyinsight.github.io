@@ -19,10 +19,10 @@ import java.util.Date;
 @Table(name="account")
 public class Account {
 
-    public static final int FREE = 1;
-    public static final int INDIVIDUAL = 2;
-    public static final int GROUP = 3;
-    public static final int PROFESSIONAL = 4;
+    public static final int PERSONAL = 1;
+    public static final int BASIC = 2;
+    public static final int PROFESSIONAL = 3;
+    public static final int PREMIUM = 4;
     public static final int ENTERPRISE = 5;
     public static final int ADMINISTRATOR = 6;
 
@@ -90,6 +90,9 @@ public class Account {
     @Column(name="billing_information_given")
     private Boolean billingInformationGiven;
 
+    @Column(name="creation_date")
+    private Date creationDate;
+
     @Column(name="billing_day_of_month")
     private Integer billingDayOfMonth;
 
@@ -145,6 +148,14 @@ public class Account {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public Date getCreationDate() {
+        return creationDate;
+    }
+
+    public void setCreationDate(Date creationDate) {
+        this.creationDate = creationDate;
     }
 
     public List<SubscriptionLicense> getLicenses() {
@@ -231,6 +242,7 @@ public class Account {
         //transfer.setUsers(users);
         transfer.setAccountType(accountType);
         transfer.setMaxSize(maxSize);
+        transfer.setCreationDate(creationDate);
         transfer.setName(name);
         transfer.setMaxUsers(maxUsers);
         transfer.setAccountState(accountState);
@@ -251,16 +263,24 @@ public class Account {
         if (groupID != null) {
             transfer.setGroupID(groupID);
         }
+        long latestLoginDate = 0;
         List<UserTransferObject> adminUsers = new ArrayList<UserTransferObject>();
         for (User user : getUsers()) {
             if (user.isAccountAdmin()) {
                 adminUsers.add(user.toUserTransferObject());
+            }
+            if (user.getLastLoginDate() != null) {
+                if (user.getLastLoginDate().getTime() > latestLoginDate) {
+                    latestLoginDate = user.getLastLoginDate().getTime();
+                }
             }
         }
         List<ConsultantTO> consultants = new ArrayList<ConsultantTO>();
         for (Consultant consultant : getGuestUsers()) {
             consultants.add(consultant.toConsultantTO());
         }
+        transfer.setCreationDate(getCreationDate());
+        transfer.setLastUserLoginDate(new Date(latestLoginDate));
         transfer.setConsultants(consultants);
         transfer.setAdminUsers(adminUsers);
         transfer.setAccountState(accountState);
@@ -302,13 +322,13 @@ public class Account {
 
     public static long getMaxCount(int tier) {
         switch(tier) {
-            case Account.FREE:
+            case Account.PERSONAL:
                 return FREE_MAX;
-            case Account.INDIVIDUAL:
+            case Account.BASIC:
                 return INDIVIDUAL_MAX;
-            case Account.GROUP:
-                return PROFESSIONAL_MAX;
             case Account.PROFESSIONAL:
+                return PROFESSIONAL_MAX;
+            case Account.PREMIUM:
                 return PROFESSIONAL_MAX;
             case Account.ENTERPRISE:
                 return ENTERPRISE_MAX;
@@ -338,7 +358,7 @@ public class Account {
     public AccountCreditCardBillingInfo bill() {
 
         LogClass.info("Starting billing for account ID:" + this.getAccountID());
-        if(getAccountType() == Account.FREE)
+        if(getAccountType() == Account.PERSONAL)
             setAccountState(Account.ACTIVE);
         // the indirection here is to support invoice billingSystem later
         BrainTreeBillingSystem billingSystem = new BrainTreeBillingSystem();
@@ -367,9 +387,9 @@ public class Account {
 
     public double monthlyCharge() {
         switch(getAccountType()) {
-            case Account.INDIVIDUAL:
+            case Account.BASIC:
                 return INDIVIDUAL_BILLING_AMOUNT;
-            case Account.GROUP:
+            case Account.PROFESSIONAL:
                 return GROUP_BILLING_AMOUNT;
             default:
                 throw new RuntimeException("Only doing credit card billing for Individual and Group accounts at the moment.");

@@ -239,7 +239,7 @@ public class UserAccountAdminService {
             } finally {
                 session.close();
             }
-            if (user != null && account.getAccountType() == Account.GROUP || account.getAccountType() == Account.PROFESSIONAL || account.getAccountType() == Account.ENTERPRISE
+            if (user != null && account.getAccountType() == Account.PROFESSIONAL || account.getAccountType() == Account.PREMIUM || account.getAccountType() == Account.ENTERPRISE
                     || account.getAccountType() == Account.ADMINISTRATOR) {
                 try {
                     new GroupStorage().addUserToGroup(user.getUserID(), account.getGroupID(), userTransferObject.isAccountAdmin() ? Roles.OWNER : Roles.SUBSCRIBER);
@@ -279,7 +279,7 @@ public class UserAccountAdminService {
             if(account.isBillingInformationGiven() == null || !account.isBillingInformationGiven())
                 response.setBillingInformationNeeded(true);
 
-            if (toType == Account.GROUP || toType == Account.PROFESSIONAL || toType == Account.ENTERPRISE) {
+            if (toType == Account.PROFESSIONAL || toType == Account.PREMIUM || toType == Account.ENTERPRISE) {
                 user.setAccountAdmin(true);
                 user.setDataSourceCreator(true);
                 user.setInsightCreator(true);
@@ -387,7 +387,7 @@ public class UserAccountAdminService {
                 account.setActivated(true);
                 session.update(account);
                 session.flush();
-                if (account.getAccountType() == Account.FREE) {
+                if (account.getAccountType() == Account.PERSONAL) {
                     new AccountActivityStorage().saveAccountActivity(new AccountActivity(account.getAccountType(),
                         new Date(), account.getAccountID(), 0, AccountActivity.ACCOUNT_CREATED, "", 0, 0, Account.ACTIVE), conn);
                 } else {
@@ -416,16 +416,16 @@ public class UserAccountAdminService {
         if (accountType == Account.ENTERPRISE) {
             maxUsers = 1000;
 
-        } else if (accountType == Account.PROFESSIONAL) {
+        } else if (accountType == Account.PREMIUM) {
             maxUsers = 1000;
 
-        } else if (accountType == Account.INDIVIDUAL) {
+        } else if (accountType == Account.BASIC) {
             maxUsers = 1;
 
-        } else if (accountType == Account.FREE) {
+        } else if (accountType == Account.PERSONAL) {
             maxUsers = 1;
 
-        } else if (accountType == Account.GROUP) {
+        } else if (accountType == Account.PROFESSIONAL) {
 
             maxUsers = 50;
         } else if (accountType == Account.ADMINISTRATOR) {
@@ -471,16 +471,16 @@ public class UserAccountAdminService {
             if (accountType == Account.ENTERPRISE) {
                 maxUsers = 1000;
                 maxSize = Account.ENTERPRISE_MAX;
-            } else if (accountType == Account.PROFESSIONAL) {
+            } else if (accountType == Account.PREMIUM) {
                 maxUsers = 1000;
                 maxSize = Account.PROFESSIONAL_MAX;
-            } else if (accountType == Account.INDIVIDUAL) {
+            } else if (accountType == Account.BASIC) {
                 maxUsers = 1;
                 maxSize = Account.INDIVIDUAL_MAX;
-            } else if (accountType == Account.FREE) {
+            } else if (accountType == Account.PERSONAL) {
                 maxUsers = 1;
                 maxSize = Account.FREE_MAX;
-            } else if (accountType == Account.GROUP) {
+            } else if (accountType == Account.PROFESSIONAL) {
                 maxSize = Account.GROUP_MAX;
                 maxUsers = 50;
             } else if (accountType == Account.ADMINISTRATOR) {

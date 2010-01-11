@@ -1,6 +1,7 @@
 package com.easyinsight.users;
 
 import javax.persistence.*;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -45,6 +46,9 @@ public class User {
     @Column(name="user_secret_key")
     private String userSecretKey;
 
+    @Column(name="last_login_date")
+    private Date lastLoginDate;
+
     @ManyToOne
     @JoinColumn (name="account_id")
     private Account account;
@@ -85,6 +89,14 @@ public class User {
 
     public void setUserSecretKey(String userSecretKey) {
         this.userSecretKey = userSecretKey;
+    }
+
+    public Date getLastLoginDate() {
+        return lastLoginDate;
+    }
+
+    public void setLastLoginDate(Date lastLoginDate) {
+        this.lastLoginDate = lastLoginDate;
     }
 
     public long getUserID() {

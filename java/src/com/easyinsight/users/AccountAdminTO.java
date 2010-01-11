@@ -1,5 +1,6 @@
 package com.easyinsight.users;
 
+import java.util.Date;
 import java.util.List;
 import java.util.ArrayList;
 
@@ -21,6 +22,24 @@ public class AccountAdminTO {
     private List<UserTransferObject> adminUsers = new ArrayList<UserTransferObject>();
     private boolean apiEnabled;
     private List<ConsultantTO> consultants = new ArrayList<ConsultantTO>();
+    private Date creationDate;
+    private Date lastUserLoginDate;
+
+    public Date getCreationDate() {
+        return creationDate;
+    }
+
+    public void setCreationDate(Date creationDate) {
+        this.creationDate = creationDate;
+    }
+
+    public Date getLastUserLoginDate() {
+        return lastUserLoginDate;
+    }
+
+    public void setLastUserLoginDate(Date lastUserLoginDate) {
+        this.lastUserLoginDate = lastUserLoginDate;
+    }
 
     public boolean isApiEnabled() {
         return apiEnabled;

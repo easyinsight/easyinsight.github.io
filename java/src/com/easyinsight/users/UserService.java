@@ -2,6 +2,7 @@ package com.easyinsight.users;
 
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
+import com.easyinsight.salesautomation.SalesEmail;
 import com.easyinsight.security.PasswordService;
 import com.easyinsight.security.UserPrincipal;
 import com.easyinsight.security.SecurityUtil;
@@ -359,13 +360,14 @@ public class UserService implements IUserService {
         try {
             conn.setAutoCommit(false);
             Account account = accountTransferObject.toAccount();
+            account.setCreationDate(new Date());
             configureNewAccount(account);
             User user = createInitialUser(userTransferObject, password, account);
             account.addUser(user);
             session.save(account);
             user.setAccount(account);
             session.update(user);
-            if (account.getAccountType() == Account.GROUP || account.getAccountType() == Account.PROFESSIONAL || account.getAccountType() == Account.ENTERPRISE) {
+            if (account.getAccountType() == Account.PROFESSIONAL || account.getAccountType() == Account.PREMIUM || account.getAccountType() == Account.ENTERPRISE) {
                 Group group = new Group();
                 group.setName(account.getName());
                 group.setPubliclyVisible(false);
@@ -374,7 +376,7 @@ public class UserService implements IUserService {
                 account.setGroupID(new GroupStorage().addGroup(group, user.getUserID(), conn));
                 session.update(account);
             }
-            if(account.getAccountType() != Account.FREE) {
+            if(account.getAccountType() != Account.PERSONAL) {
                 BuyOurStuffTodo todo = new BuyOurStuffTodo();
                 todo.setUserID(user.getUserID());
                 session.save(todo);
@@ -389,7 +391,7 @@ public class UserService implements IUserService {
             insertActivationStmt.execute();
             new AccountActivityStorage().saveAccountActivity(new AccountActivity(account.getAccountType(),
                     new Date(), account.getAccountID(), 0, AccountActivity.ACCOUNT_CREATED, "", 0, 0, Account.ACTIVE), conn);
-            if (account.getAccountType() != Account.FREE) {
+            if (account.getAccountType() != Account.PERSONAL) {
                 Calendar cal = Calendar.getInstance();
                 cal.add(Calendar.DAY_OF_YEAR, 30);
                 new AccountActivityStorage().saveAccountTimeChange(account.getAccountID(), Account.ACTIVE, cal.getTime(), conn);
@@ -399,6 +401,7 @@ public class UserService implements IUserService {
             conn.commit();
             if (SecurityUtil.getSecurityProvider() instanceof DefaultSecurityProvider) {
                 new AccountMemberInvitation().sendActivationEmail(user.getEmail(), activationKey);
+                new Thread(new SalesEmail(account, user)).start();
             }
             return account.getAccountID();
         } catch (Exception e) {
@@ -434,7 +437,7 @@ public class UserService implements IUserService {
     }
 
     private void configureNewAccount(Account account) {
-        if (account.getAccountType() == Account.FREE) {
+        if (account.getAccountType() == Account.PERSONAL) {
             account.setAccountState(Account.ACTIVE);
         } else {
             account.setAccountState(Account.TRIAL);
@@ -443,16 +446,16 @@ public class UserService implements IUserService {
         if (account.getAccountType() == Account.ENTERPRISE) {
             account.setMaxUsers(500);
             account.setMaxSize(1000000000);
-        } else if (account.getAccountType() == Account.PROFESSIONAL) {
+        } else if (account.getAccountType() == Account.PREMIUM) {
             account.setMaxUsers(50);
             account.setMaxSize(200000000);
-        } else if (account.getAccountType() == Account.INDIVIDUAL) {
+        } else if (account.getAccountType() == Account.BASIC) {
             account.setMaxUsers(1);
             account.setMaxSize(20000000);
-        } else if (account.getAccountType() == Account.FREE) {
+        } else if (account.getAccountType() == Account.PERSONAL) {
             account.setMaxUsers(1);
             account.setMaxSize(1000000);
-        } else if (account.getAccountType() == Account.GROUP) {
+        } else if (account.getAccountType() == Account.PROFESSIONAL) {
             account.setMaxUsers(10);
             account.setMaxSize(10000000);
         }
@@ -747,6 +750,8 @@ public class UserService implements IUserService {
                 userServiceResponse = new UserServiceResponse(true, user.getUserID(), user.getAccount().getAccountID(), user.getName(),
                      user.getAccount().getAccountType(), account.getMaxSize(), user.getEmail(), user.getUserName(), encryptedPassword, user.isAccountAdmin(), user.isDataSourceCreator(), user.isInsightCreator(), (user.getAccount().isBillingInformationGiven() != null && user.getAccount().isBillingInformationGiven()), user.getAccount().getAccountState());
                 userServiceResponse.setActivated(account.isActivated());
+                user.setLastLoginDate(new Date());
+                session.update(user);
             } else {
                 userServiceResponse = new UserServiceResponse(false, "Your account is not active.");
             }

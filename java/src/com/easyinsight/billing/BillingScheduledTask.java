@@ -37,14 +37,14 @@ public class BillingScheduledTask extends ScheduledTask {
     private void expireTrials(Date now, Connection conn) throws SQLException {
         PreparedStatement stmt = conn.prepareStatement("UPDATE ACCOUNT SET ACCOUNT_STATE = ? WHERE ACCOUNT_TYPE != ? AND BILLING_INFORMATION_GIVEN != TRUE AND ACCOUNT_ID IN (SELECT ACCOUNT_ID FROM ACCOUNT_TIMED_STATE WHERE date(state_change_time) < ?)");
         stmt.setInt(1, Account.DELINQUENT);
-        stmt.setInt(2, Account.FREE);
+        stmt.setInt(2, Account.PERSONAL);
         stmt.setDate(3, new java.sql.Date(System.currentTimeMillis()));
         stmt.execute();
         stmt.close();
 
         PreparedStatement freeStmt = conn.prepareStatement("UPDATE ACCOUNT SET ACCOUNT_STATE = ? WHERE ACCOUNT_TYPE = ? AND ACCOUNT_ID IN (SELECT ACCOUNT_ID FROM ACCOUNT_TIMED_STATE WHERE date(state_change_time) < ?)");
         freeStmt.setInt(1, Account.ACTIVE);
-        freeStmt.setInt(2, Account.FREE);
+        freeStmt.setInt(2, Account.PERSONAL);
         freeStmt.setDate(3, new java.sql.Date(System.currentTimeMillis()));
         freeStmt.execute();
         freeStmt.close();
@@ -53,7 +53,7 @@ public class BillingScheduledTask extends ScheduledTask {
     private void billCustomers(Date now, Connection conn) throws SQLException {
         Calendar c = Calendar.getInstance();
         int dayOfMonth = c.get(Calendar.DAY_OF_MONTH);
-        String queryString = "from Account where (accountState = " + Account.ACTIVE + " or accountState = " + Account.CLOSING + ") and accountType != " + Account.FREE + " and accountType != " + Account.ADMINISTRATOR;
+        String queryString = "from Account where (accountState = " + Account.ACTIVE + " or accountState = " + Account.CLOSING + ") and accountType != " + Account.PERSONAL + " and accountType != " + Account.ADMINISTRATOR;
 
         if(dayOfMonth == c.getActualMaximum(Calendar.DAY_OF_MONTH)) {
             queryString += " and billingDayOfMonth >= ?";

@@ -106,15 +106,15 @@ public class EIAccountManagementService {
             account.setAccountState(Account.BETA);
             account.setMaxUsers(5);
             account.setMaxSize(1000000000);
-        } else if (account.getAccountType() == Account.PROFESSIONAL) {
+        } else if (account.getAccountType() == Account.PREMIUM) {
             account.setAccountState(Account.BETA);
             account.setMaxUsers(1);
             account.setMaxSize(200000000);
-        } else if (account.getAccountType() == Account.INDIVIDUAL) {
+        } else if (account.getAccountType() == Account.BASIC) {
             account.setAccountState(Account.BETA);
             account.setMaxUsers(1);
             account.setMaxSize(20000000);
-        } else if (account.getAccountType() == Account.FREE) {
+        } else if (account.getAccountType() == Account.PERSONAL) {
             account.setAccountState(Account.ACTIVE);
             account.setMaxUsers(1);
             account.setMaxSize(1000000);

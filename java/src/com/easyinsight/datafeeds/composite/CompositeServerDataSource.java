@@ -37,7 +37,7 @@ public abstract class CompositeServerDataSource extends CompositeFeedDefinition 
 
     @Override
     public int getRequiredAccountTier() {
-        return Account.INDIVIDUAL;
+        return Account.BASIC;
     }
 
     protected abstract Set<FeedType> getFeedTypes();

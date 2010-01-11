@@ -95,7 +95,7 @@ public class HighRiseCompositeSource extends CompositeServerDataSource {
 
     @Override
     public int getRequiredAccountTier() {
-        return Account.INDIVIDUAL;
+        return Account.BASIC;
     }
 
     protected Collection<ChildConnection> getChildConnections() {

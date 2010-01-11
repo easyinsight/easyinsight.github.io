@@ -17,7 +17,7 @@ import java.util.Comparator;
 public class IconService {
     
     public List<Icon> getIcons() {
-        SecurityUtil.authorizeAccountTier(Account.INDIVIDUAL);
+        SecurityUtil.authorizeAccountTier(Account.BASIC);
         File iconFolder = new File("../webapps/app/assets/icons/32x32");
         File[] iconFiles = iconFolder.listFiles();
         List<Icon> icons = new ArrayList<Icon>(); 

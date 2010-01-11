@@ -63,7 +63,7 @@ public class CustomDataSource extends ServerDataSourceDefinition {
 
     @Override
     public int getRequiredAccountTier() {
-        return Account.GROUP;
+        return Account.PROFESSIONAL;
     }
 
     public int getDataSourceType() {

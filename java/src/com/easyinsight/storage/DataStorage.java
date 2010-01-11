@@ -148,13 +148,13 @@ public class DataStorage {
         long allowed;
         if (accountType == Account.ENTERPRISE) {
             allowed = Account.ENTERPRISE_MAX;
-        } else if (accountType == Account.PROFESSIONAL) {
+        } else if (accountType == Account.PREMIUM) {
             allowed = Account.PROFESSIONAL_MAX;
-        } else if (accountType == Account.INDIVIDUAL) {
+        } else if (accountType == Account.BASIC) {
             allowed = Account.INDIVIDUAL_MAX;
-        } else if (accountType == Account.FREE) {
+        } else if (accountType == Account.PERSONAL) {
             allowed = Account.FREE_MAX;
-        } else if (accountType == Account.GROUP) {
+        } else if (accountType == Account.PROFESSIONAL) {
             allowed = Account.GROUP_MAX;
         } else if (accountType == Account.ADMINISTRATOR) {
             allowed = Account.ADMINISTRATOR_MAX;           

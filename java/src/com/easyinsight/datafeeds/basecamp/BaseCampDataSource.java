@@ -70,7 +70,7 @@ public class BaseCampDataSource extends ServerDataSourceDefinition {
     private String url;
 
     public int getRequiredAccountTier() {
-        return Account.INDIVIDUAL;
+        return Account.BASIC;
     }
 
     public FeedType getFeedType() {

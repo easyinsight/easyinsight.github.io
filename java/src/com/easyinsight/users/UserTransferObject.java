@@ -1,5 +1,6 @@
 package com.easyinsight.users;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -12,6 +13,7 @@ public class UserTransferObject {
     private long userID;
     private String email;
     private String name;
+    private Date lastLoginDate;
     private List<SubscriptionLicense> licenses;
 
     private boolean accountAdmin;
@@ -36,6 +38,14 @@ public class UserTransferObject {
 
     public void setAccountAdmin(boolean accountAdmin) {
         this.accountAdmin = accountAdmin;
+    }
+
+    public Date getLastLoginDate() {
+        return lastLoginDate;
+    }
+
+    public void setLastLoginDate(Date lastLoginDate) {
+        this.lastLoginDate = lastLoginDate;
     }
 
     public boolean isDataSourceCreator() {
