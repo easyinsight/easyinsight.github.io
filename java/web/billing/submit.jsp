@@ -46,7 +46,7 @@
                 s.delete(l.get(0));
             }
 
-            if((account.getAccountType() == Account.GROUP || account.getAccountType() == Account.PROFESSIONAL || account.getAccountType() == Account.ENTERPRISE)
+            if((account.getAccountType() == Account.PROFESSIONAL || account.getAccountType() == Account.PREMIUM || account.getAccountType() == Account.ENTERPRISE)
               && !user.isAccountAdmin())
                 response.sendRedirect("access.jsp");
 

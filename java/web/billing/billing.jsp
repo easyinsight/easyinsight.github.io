@@ -56,7 +56,7 @@
       finally {
           s.close();
       }
-      if((account.getAccountType() == Account.GROUP || account.getAccountType() == Account.PROFESSIONAL || account.getAccountType() == Account.ENTERPRISE)
+      if((account.getAccountType() == Account.PROFESSIONAL || account.getAccountType() == Account.PREMIUM || account.getAccountType() == Account.ENTERPRISE)
               && !user.isAccountAdmin())
         response.sendRedirect("access.jsp");
 
@@ -78,10 +78,10 @@
       String hash = BillingUtil.MD5Hash(hashString);
       String accountInfoString = null;
       switch(account.getAccountType()) {
-          case Account.INDIVIDUAL:
+          case Account.BASIC:
               accountInfoString = "Individual";
               break;
-          case Account.GROUP:
+          case Account.PROFESSIONAL:
               accountInfoString = "Group";
               break;
           default:
