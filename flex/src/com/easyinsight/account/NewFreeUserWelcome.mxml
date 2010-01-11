@@ -5,6 +5,7 @@
     <mx:Script>
 		<![CDATA[
         import com.easyinsight.framework.NavigationEvent;
+        import com.easyinsight.help.ScreencastWindow;
         import com.easyinsight.tour.TourWindow;
         import com.easyinsight.util.PopUpUtil;
 
@@ -52,6 +53,13 @@
             var tourWindow:TourWindow = new TourWindow();
             PopUpManager.addPopUp(tourWindow, this);
             PopUpUtil.centerPopUp(tourWindow);
+        }
+
+        private function basecamp():void {
+            var window:ScreencastWindow = new ScreencastWindow();
+            window.screencastSource = "http://eivideo.s3.amazonaws.com/basecamp1.mp4";
+            PopUpManager.addPopUp(window, this, true);
+            PopUpUtil.centerPopUp(window);
         }
 
         public function gotFocus():void {
@@ -157,6 +165,7 @@
                     <mx:HRule width="100%"/>
                     <!--<mx:LinkButton label="Why Easy Insight?"/>-->
                     <mx:LinkButton label="Seven Easy Steps to Full Business Visibility" click="lesson1()"/>
+                    <mx:LinkButton label="Intro to Basecamp and Easy Insight" click="basecamp()"/>
                 </mx:VBox>
             </mx:HBox>
             <!--<mx:VBox width="100%" horizontalAlign="center">
