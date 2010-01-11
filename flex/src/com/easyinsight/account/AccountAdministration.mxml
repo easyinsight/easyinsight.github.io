@@ -35,6 +35,8 @@
             <mx:DataGridColumn dataField="name" headerText="Name"/>
             <mx:DataGridColumn dataField="accountType" width="100" headerText="Type" itemRenderer="com.easyinsight.account.AccountTypeRenderer"/>
             <mx:DataGridColumn dataField="accountType" width="100" headerText="State" itemRenderer="com.easyinsight.account.AccountStatusRenderer"/>
+            <mx:DataGridColumn dataField="creationDate" width="100" headerText="Creation Date"/>
+            <mx:DataGridColumn dataField="lastUserLoginDate" width="100" headerText="Last Login"/>
             <mx:DataGridColumn dataField="accountType" width="100" sortable="false" headerText="" itemRenderer="com.easyinsight.account.AccountActions"/>
         </mx:columns>
     </mx:DataGrid>

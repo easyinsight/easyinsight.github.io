@@ -31,6 +31,8 @@ package com.easyinsight.account
         public var accountState:int;
         public var groupID:int;
         public var apiEnabled:Boolean;
+        public var lastUserLoginDate:Date;
+        public var creationDate:Date;
 		
 		public function AccountAdminTO()
 		{

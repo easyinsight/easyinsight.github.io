@@ -77,11 +77,11 @@
                     <mx:dataProvider>
                         <mx:ArrayCollection>
                             <mx:Array>
-                                <mx:String>Free</mx:String>
-                                <mx:String>Individual</mx:String>
+                                <mx:String>Personal</mx:String>
+                                <mx:String>Basic</mx:String>
                                 <mx:String>Professional</mx:String>
+                                <mx:String>Premium</mx:String>
                                 <mx:String>Enterprise</mx:String>
-                                <mx:String>Administration</mx:String>
                             </mx:Array>
                         </mx:ArrayCollection>
                     </mx:dataProvider>
@@ -116,16 +116,7 @@
                 <mx:DataGridColumn dataField="name" headerText="Name"/>
                 <mx:DataGridColumn dataField="email" headerText="Email Address"/>
             </mx:columns>
-        </mx:DataGrid>
-        <mx:HBox>
-            <mx:Label text="Consultants"/>
-            <mx:Button label="Add Consultant" click="addConsultant()"/>
-        </mx:HBox>
-        <mx:DataGrid dataProvider="{consultants}">
-            <mx:columns>
-                <mx:DataGridColumn dataField="name" headerText="Name"/>
-            </mx:columns>
-        </mx:DataGrid>
+        </mx:DataGrid>        
         <mx:HBox width="100%" horizontalAlign="center">
             <mx:Button label="Apply" click="create()"/>
             <mx:Button label="Close" click="PopUpManager.removePopUp(this)"/>

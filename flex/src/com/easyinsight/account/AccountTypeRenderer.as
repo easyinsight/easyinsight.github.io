@@ -22,16 +22,16 @@ public class AccountTypeRenderer extends HBox{
         this.account = val as AccountAdminTO;
         switch (account.accountType) {
             case Account.FREE:
-                typeLabel.text = "Free";
+                typeLabel.text = "Personal";
                 break;
             case Account.INDIVIDUAL:
-                typeLabel.text = "Individual";
+                typeLabel.text = "Basic";
                 break;
             case Account.GROUP:
-                typeLabel.text = "Group";
+                typeLabel.text = "Professional";
                 break;
             case Account.PROFESSIONAL:
-                typeLabel.text = "Professional";
+                typeLabel.text = "Premium";
                 break;
             case Account.ENTERPRISE:
                 typeLabel.text = "Enterprise";

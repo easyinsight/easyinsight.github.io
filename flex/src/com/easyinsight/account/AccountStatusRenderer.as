@@ -46,6 +46,12 @@ public class AccountStatusRenderer extends HBox{
             case Account.BETA:
                 statusLabel.text = "Beta";
                 break;
+            case Account.TRIAL:
+                statusLabel.text = "Trial";
+                break;
+            default:
+                statusLabel.text = "(Unknown State)";
+                break;
         }
     }
 
