@@ -759,8 +759,10 @@ public class DataStorage {
             if (value.type() != Value.DATE) {
                 AnalysisItem analysisItem = keyMetadata.getAnalysisItem();
                 AnalysisDateDimension analysisDateDimension = (AnalysisDateDimension) analysisItem;
+                int prevLevel = analysisDateDimension.getDateLevel();
                 analysisDateDimension.setDateLevel(AnalysisDateDimension.DAY_LEVEL);
                 Value transformedValue = analysisItem.transformValue(value, new InsightRequestMetadata());
+                analysisDateDimension.setDateLevel(prevLevel);
                 if (transformedValue.type() == Value.EMPTY)
                     insertStmt.setNull(i++, Types.DATE);
                 else {

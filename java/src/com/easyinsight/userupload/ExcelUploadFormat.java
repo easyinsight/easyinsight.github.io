@@ -95,22 +95,24 @@ public class ExcelUploadFormat extends UploadFormat {
                 if (orientation == VERTICAL_HEADERS) {
                     if (dataTypeGuesser != null && !gotValue) {
                         for (int headerKeyCounter = 0; headerKeyCounter < headerColumns.length; headerKeyCounter++) {
-                            Value value = values[headerKeyCounter];
-                            if (value != null) {
-                                String headerColumn = headerColumns[headerKeyCounter];
-                                if (headerColumn == null) {
-                                    headerColumn = String.valueOf(headerKeyCounter);
-                                }
-                                Key key;
-                                if (keyMap == null) {
-                                    key = new NamedKey(headerColumn);
-                                } else {
-                                    key = keyMap.get(headerColumn);
-                                }
-                                dataTypeGuesser.addValue(key, value);
-                                headerValuesObtained.remove(headerColumn);
-                                if (headerValuesObtained.isEmpty()) {
-                                    gotValue = true;
+                            if (headerKeyCounter < values.length) {
+                                Value value = values[headerKeyCounter];
+                                if (value != null) {
+                                    String headerColumn = headerColumns[headerKeyCounter];
+                                    if (headerColumn == null) {
+                                        headerColumn = String.valueOf(headerKeyCounter);
+                                    }
+                                    Key key;
+                                    if (keyMap == null) {
+                                        key = new NamedKey(headerColumn);
+                                    } else {
+                                        key = keyMap.get(headerColumn);
+                                    }
+                                    dataTypeGuesser.addValue(key, value);
+                                    headerValuesObtained.remove(headerColumn);
+                                    if (headerValuesObtained.isEmpty()) {
+                                        gotValue = true;
+                                    }
                                 }
                             }
                         }

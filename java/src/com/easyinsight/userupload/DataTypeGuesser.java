@@ -1,6 +1,7 @@
 package com.easyinsight.userupload;
 
 import com.easyinsight.core.Key;
+import com.easyinsight.core.NumericValue;
 import com.easyinsight.core.Value;
 import com.easyinsight.core.StringValue;
 import com.easyinsight.analysis.*;
@@ -29,20 +30,32 @@ public class DataTypeGuesser implements IDataTypeGuesser {
 
     public void addValue(Key tag, Value value) {
         if (value != null) {
-            AnalysisItem newGuess;
+            AnalysisItem newGuess = null;
             if (value.type() == Value.STRING) {
                 AnalysisItem existingGuess = dataTypeMap.get(tag);
                 if (existingGuess == null) {
                     StringValue stringValue = (StringValue) value;
-                    try {
-                        Double.parseDouble(stringValue.getValue());
-                        newGuess = new AnalysisMeasure(tag, AggregationTypes.SUM);
-                    } catch (NumberFormatException e) {
-                        SimpleDateFormat dateFormat = guessDate(stringValue.getValue());
-                        if (dateFormat != null) {
-                            newGuess = new AnalysisDateDimension(tag, true, AnalysisDateDimension.YEAR_LEVEL, dateFormat.toPattern());
-                        } else {
-                            newGuess = new AnalysisDimension(tag, true);
+                    String string = stringValue.getValue();
+                    if (string.length() == 4) {
+                        try {
+                            int intValue = Integer.parseInt(string);
+                            if (intValue >= 1900 && intValue <= 2100) {
+                                newGuess = new AnalysisDateDimension(tag, true, AnalysisDateDimension.YEAR_LEVEL, "yyyy");
+                            }
+                        } catch (NumberFormatException e) {
+                        }
+                    }
+                    if (newGuess != null) {
+                        try {
+                            Double.parseDouble(stringValue.getValue());
+                            newGuess = new AnalysisMeasure(tag, AggregationTypes.SUM);
+                        } catch (NumberFormatException e) {
+                            SimpleDateFormat dateFormat = guessDate(stringValue.getValue());
+                            if (dateFormat != null) {
+                                newGuess = new AnalysisDateDimension(tag, true, AnalysisDateDimension.YEAR_LEVEL, dateFormat.toPattern());
+                            } else {
+                                newGuess = new AnalysisDimension(tag, true);
+                            }
                         }
                     }
                 } else {
@@ -54,7 +67,14 @@ public class DataTypeGuesser implements IDataTypeGuesser {
                         newGuess = new AnalysisDateDimension(tag, true, AnalysisDateDimension.YEAR_LEVEL);
                         break;
                     case Value.NUMBER:
-                        newGuess = new AnalysisMeasure(tag, AggregationTypes.SUM);
+                        NumericValue numericValue = (NumericValue) value;
+                        double doubleValue = numericValue.getValue();
+                        int intValue = (int) doubleValue;
+                        if (doubleValue == intValue && intValue >= 1900 && intValue <= 2100) {
+                            newGuess = new AnalysisDateDimension(tag, true, AnalysisDateDimension.YEAR_LEVEL, "yyyy");
+                        } else {
+                            newGuess = new AnalysisMeasure(tag, AggregationTypes.SUM);
+                        }
                         break;
                     case Value.STRING:
                     case Value.EMPTY:
