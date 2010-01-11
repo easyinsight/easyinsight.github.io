@@ -58,18 +58,20 @@ public class CsvFileUploadFormat extends UploadFormat {
 
                 if (dataTypeGuesser != null && !gotValue) {
                     for (int headerKeyCounter = 0; headerKeyCounter < headerColumns.length; headerKeyCounter++) {
-                        Value value = convertedValues[headerKeyCounter];
-                        if (value != null) {
-                            Key key;
-                            if (keyMap == null) {
-                                key = new NamedKey(headerColumns[headerKeyCounter]);
-                            } else {
-                                key = keyMap.get(headerColumns[headerKeyCounter]);
-                            }
-                            dataTypeGuesser.addValue(key, value);
-                            headerValuesObtained.remove(headerColumns[headerKeyCounter]);
-                            if (headerValuesObtained.isEmpty()) {
-                                gotValue = true;
+                        if (headerKeyCounter < values.length) {
+                            Value value = convertedValues[headerKeyCounter];
+                            if (value != null) {
+                                Key key;
+                                if (keyMap == null) {
+                                    key = new NamedKey(headerColumns[headerKeyCounter]);
+                                } else {
+                                    key = keyMap.get(headerColumns[headerKeyCounter]);
+                                }
+                                dataTypeGuesser.addValue(key, value);
+                                headerValuesObtained.remove(headerColumns[headerKeyCounter]);
+                                if (headerValuesObtained.isEmpty()) {
+                                    gotValue = true;
+                                }
                             }
                         }
                     }
