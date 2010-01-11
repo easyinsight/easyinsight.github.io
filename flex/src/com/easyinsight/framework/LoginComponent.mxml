@@ -166,14 +166,13 @@
         }
 
         private function handleAuthentication():void {
-
             var authResult:UserServiceResponse = authService.authenticate.lastResult as UserServiceResponse;
             var successful:Boolean = authResult.successful;
             if (successful) {
                 if (authService.channelSet == null) {
                     authService.channelSet = ServerConfig.getChannelSet(authService.destination);
                 }
-                var token:AsyncToken = authService.channelSet.login(userName.text, password.text);
+                var token:AsyncToken = authService.channelSet.login(this.userNameStr, this.passwordStr);
                 token.addResponder(new AsyncResponder(
                         function (event:ResultEvent, token:Object = null):void {
                             switch (event.result) {
@@ -205,13 +204,19 @@
                         ));
 
             } else {
+
                 failureMessage = authResult.failureMessage;
                 authService.isAccountDelinquentOrClosed.send(userName.text);
             }
         }
 
+        private var userNameStr:String;
+        private var passwordStr:String;
+
         public function signon(userNameStr:String, passwordStr:String):void {
-            authService.authenticate.send(userNameStr, passwordStr);
+            this.userNameStr = userNameStr;
+            this.passwordStr = passwordStr;
+            authService.authenticate.send(this.userNameStr, this.passwordStr);
 
 
         }
