@@ -111,7 +111,7 @@
             <mx:Label text="Administators"/>
             <mx:Button label="Add Admin User" click="addAdminUser()"/>
         </mx:HBox>
-        <mx:DataGrid dataProvider="{adminUsers}">
+        <mx:DataGrid dataProvider="{adminUsers}" width="100%">
             <mx:columns>
                 <mx:DataGridColumn dataField="name" headerText="Name"/>
                 <mx:DataGridColumn dataField="email" headerText="Email Address"/>
