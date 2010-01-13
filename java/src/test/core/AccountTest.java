@@ -40,7 +40,7 @@ public class AccountTest extends TestCase {
         UserTransferObject initialUser = new UserTransferObject("testprouser", 0, "testprouser99@blah.com", "James Boe", null);
         AccountTransferObject accountTransferObject = new AccountTransferObject();
         accountTransferObject.setName("Test Pro Account");
-        accountTransferObject.setAccountType(Account.PROFESSIONAL);
+        accountTransferObject.setAccountType(Account.PREMIUM);
         long accountID = userService.createAccount(initialUser, accountTransferObject, "password");
         long userID = userService.getUserStub("testprouser").getUserID();
         TestSecurityProvider testSecurityProvider = new TestSecurityProvider();

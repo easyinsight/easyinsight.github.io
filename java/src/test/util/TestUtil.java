@@ -114,7 +114,7 @@ public class TestUtil {
         if (user == null) {
             UserTransferObject initialUser = new UserTransferObject("testuser", 0, "testuser99@gmail.com", "James Boe", null);
             AccountTransferObject account = new AccountTransferObject();
-            account.setAccountType(Account.INDIVIDUAL);
+            account.setAccountType(Account.BASIC);
             long accountID = userService.createAccount(initialUser, account, "password");
             Session session = Database.instance().createSession();
             session.beginTransaction();
@@ -150,7 +150,7 @@ public class TestUtil {
         if (user == null) {
             UserTransferObject initialUser = new UserTransferObject("prouser", 0, "prouser@gmail.com", "James Boe", null);
             AccountTransferObject account = new AccountTransferObject();
-            account.setAccountType(Account.PROFESSIONAL);
+            account.setAccountType(Account.PREMIUM);
             long accountID = userService.createAccount(initialUser, account, "password");
             Session session = Database.instance().createSession();
             session.beginTransaction();
