@@ -10,6 +10,8 @@ import com.easyinsight.analysis.DataSourceInfo;
 import com.easyinsight.users.Account;
 
 import java.util.*;
+import java.util.regex.Pattern;
+import java.util.regex.Matcher;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.PreparedStatement;
@@ -84,11 +86,18 @@ public class HighRiseCompositeSource extends CompositeServerDataSource {
 
     public String validateCredentials(com.easyinsight.users.Credentials credentials) {
         HttpClient client = getHttpClient(credentials.getUserName(), credentials.getPassword());
+        Pattern p = Pattern.compile("(http(s?)://)?([A-Za-z0-9]|\\-)+(\\.highrisehq\\.com)?");
+        Matcher m = p.matcher(url);
         String result = null;
-        try {
-            runRestRequest("/companies.xml", client, new Builder());
-        } catch (HighRiseLoginException e) {
-           result = "Invalid username/password. Please try again.";
+        if(!m.matches()) {
+            result = "Invalid url. Please input a proper URL.";
+        }
+        else {
+            try {
+                runRestRequest("/companies.xml", client, new Builder());
+            } catch (HighRiseLoginException e) {
+               result = "Invalid username/password. Please try again.";
+            }
         }
         return result;
     }

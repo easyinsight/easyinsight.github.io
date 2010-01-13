@@ -37,7 +37,7 @@
         public function get credentials():Credentials {
             var credentials:Credentials = new Credentials();
             credentials.userName = userNameInput.text;
-            credentials.password = passwordInput.text;
+            credentials.password = "x"
             return credentials;
         }
 
@@ -54,11 +54,8 @@
 			<mx:TextInput id="urlInput" fontWeight="normal" fontFamily="Lucida Grande" text="{url}"/>
 		</mx:FormItem>
         <mx:FormItem label="Example: &quot;easyinsight&quot; for &quot;easyinsight.highrisehq.com&quot;" fontSize="10"/>
-		<mx:FormItem label="Highrise User Name: " direction="horizontal" fontWeight="bold" fontFamily="Tahoma">
+		<mx:FormItem label="Highrise API Authentication Token: " direction="horizontal" fontWeight="bold" fontFamily="Tahoma">
 			<mx:TextInput id="userNameInput" fontWeight="normal" fontFamily="Lucida Grande" text="{usernameInputText}"/>
-		</mx:FormItem>
-		<mx:FormItem label="Highrise Password: " direction="horizontal" fontWeight="bold" fontFamily="Tahoma">
-			<mx:TextInput id="passwordInput" displayAsPassword="true" text="{passwordText}"/>
 		</mx:FormItem>
 	</mx:Form>
 </mx:VBox>
