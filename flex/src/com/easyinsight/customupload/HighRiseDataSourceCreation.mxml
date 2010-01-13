@@ -57,5 +57,6 @@
 		<mx:FormItem label="Highrise API Authentication Token: " direction="horizontal" fontWeight="bold" fontFamily="Tahoma">
 			<mx:TextInput id="userNameInput" fontWeight="normal" fontFamily="Lucida Grande" text="{usernameInputText}"/>
 		</mx:FormItem>
+        <mx:FormItem label="You can find the token on your Highrise page under My Info - API Token." fontSize="10"/>
 	</mx:Form>
 </mx:VBox>
