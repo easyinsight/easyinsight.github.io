@@ -1,9 +1,6 @@
 package com.easyinsight.userupload;
 
-import com.easyinsight.core.Key;
-import com.easyinsight.core.NumericValue;
-import com.easyinsight.core.Value;
-import com.easyinsight.core.StringValue;
+import com.easyinsight.core.*;
 import com.easyinsight.analysis.*;
 
 import java.util.*;
@@ -29,7 +26,9 @@ public class DataTypeGuesser implements IDataTypeGuesser {
     private Map<Key, AnalysisItem> dataTypeMap = new HashMap<Key, AnalysisItem>();
 
     public void addValue(Key tag, Value value) {
-        if (value != null) {
+        if (value == null) {
+            value = new EmptyValue();
+        }
             AnalysisItem newGuess = null;
             if (value.type() == Value.STRING) {
                 AnalysisItem existingGuess = dataTypeMap.get(tag);
@@ -45,7 +44,7 @@ public class DataTypeGuesser implements IDataTypeGuesser {
                         } catch (NumberFormatException e) {
                         }
                     }
-                    if (newGuess != null) {
+                    if (newGuess == null) {
                         try {
                             Double.parseDouble(stringValue.getValue());
                             newGuess = new AnalysisMeasure(tag, AggregationTypes.SUM);
@@ -84,7 +83,7 @@ public class DataTypeGuesser implements IDataTypeGuesser {
                 }
             }
             dataTypeMap.put(tag, newGuess);
-        }
+
     }
 
     private SimpleDateFormat guessDate(String value) {
