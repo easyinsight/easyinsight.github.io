@@ -1,5 +1,5 @@
 <?xml version="1.0" ?>
-<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%" implements="com.easyinsight.customupload.IServerDataSourceCreation">
+<mx:HBox xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%" implements="com.easyinsight.customupload.IServerDataSourceCreation">
     <mx:Metadata>
 		[Event(name="userConfigComplete", type="com.easyinsight.customupload.UploadConfigEvent")]
 		[Event(name="userConfigCancel", type="com.easyinsight.customupload.UploadConfigEvent")]
@@ -8,13 +8,15 @@
         import com.easyinsight.administration.feed.FeedDefinitionData;
         import com.easyinsight.datasources.BaseCampDataSource;
         import com.easyinsight.framework.Credentials;
+        import com.easyinsight.help.ScreencastWindow;
+        import com.easyinsight.util.PopUpUtil;
+
+        import mx.managers.PopUpManager;
 
         [Bindable]
         private var url:String;
         [Bindable]
         private var usernameInputText:String;
-        [Bindable]
-        private var passwordText:String;
 
         public function get dataSourceDefinition():FeedDefinitionData {
             var obj:BaseCampDataSource = new BaseCampDataSource();
@@ -26,7 +28,6 @@
             var ds:BaseCampDataSource = feedDefinition as BaseCampDataSource;
             url = ds.url;
             usernameInputText = ds.username;
-            passwordText = ds.password;
         }
 
         public function updateDataSource(feedDefinition:FeedDefinitionData):void {
@@ -37,13 +38,18 @@
         public function get credentials():Credentials {
             var credentials:Credentials = new Credentials();
             credentials.userName = userNameInput.text;
-            credentials.password = passwordInput.text;
             return credentials;
         }
 
         public function set credentials(c:Credentials):void {
             usernameInputText = c.userName;
-            passwordText = c.password;
+        }
+
+        private function video1():void {
+            var window:ScreencastWindow = new ScreencastWindow();
+            window.screencastSource = "http://eivideo.s3.amazonaws.com/basecamp1.mp4";
+            PopUpManager.addPopUp(window, this, true);
+            PopUpUtil.centerPopUp(window);                                                                                                  
         }
 
         public function validate():Boolean {
@@ -53,14 +59,20 @@
         <mx:FormItem label="Basecamp Path: " direction="horizontal" fontWeight="bold" fontFamily="Tahoma">
 			<mx:TextInput id="urlInput" fontWeight="normal" fontFamily="Lucida Grande" text="{url}"/>
 		</mx:FormItem>
-        <mx:FormItem>
-            <mx:Label text="Example: &quot;easyinsight&quot; for &quot;easyinsight.basecamphq.com&quot;" fontSize="10" />
-        </mx:FormItem>
-		<mx:FormItem label="Basecamp User Name: " direction="horizontal" fontWeight="bold" fontFamily="Tahoma">
+        <mx:FormItem label="Example: &quot;easyinsight&quot; for &quot;easyinsight.basecamphq.com&quot;" fontSize="10"/>            
+		<mx:FormItem label="Basecamp API Authentication Token: " direction="horizontal" fontWeight="bold" fontFamily="Tahoma">
 			<mx:TextInput id="userNameInput" fontWeight="normal" fontFamily="Lucida Grande" text="{usernameInputText}"/>
 		</mx:FormItem>
-		<mx:FormItem label="Basecamp Password: " direction="horizontal" fontWeight="bold" fontFamily="Tahoma">
-			<mx:TextInput id="passwordInput" displayAsPassword="true" text="{passwordText}"/>
-		</mx:FormItem>
+        <mx:FormItem label="You can find the token on your Basecamp page under My Info - API Token." fontSize="10"/>
 	</mx:Form>
-</mx:VBox>
+    <!--<mx:VRule/>
+    <mx:VBox>
+        <mx:VBox borderStyle="solid" cornerRadius="10"
+                             backgroundColor="0xFFFFFF" verticalAlign="middle" paddingLeft="10" paddingRight="10" paddingTop="10"
+                            paddingBottom="10" horizontalAlign="center">
+            <mx:Image source="../assets/logos/film.png" click="video1()"
+                      useHandCursor="true" buttonMode="true"/>
+            <mx:LinkButton label="Video Intro" fontSize="14" click="video1()" textDecoration="underline"/>
+        </mx:VBox>        
+    </mx:VBox>-->
+</mx:HBox>
