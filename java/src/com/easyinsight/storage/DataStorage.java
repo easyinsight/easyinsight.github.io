@@ -626,6 +626,7 @@ public class DataStorage {
                 } else if (analysisMeasure.getAggregation() == AggregationTypes.AVERAGE) {
                     columnName = "AVG(" + columnName + ")";
                 } else if (analysisMeasure.getAggregation() == AggregationTypes.COUNT) {
+                    columnName = "COUNT(" + columnName + ")";
                 } else if (analysisMeasure.getAggregation() == AggregationTypes.MAX) {
                     columnName = "MAX(" + columnName + ")";
                 } else if (analysisMeasure.getAggregation() == AggregationTypes.MIN) {
