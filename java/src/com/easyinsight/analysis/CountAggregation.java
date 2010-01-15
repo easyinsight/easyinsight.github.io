@@ -13,7 +13,14 @@ public class CountAggregation extends Aggregation {
     private double count;
 
     public void addValue(Value value) {
-        count++;
+        double addValue;
+        if (value.type() == Value.NUMBER) {
+            NumericValue numericValue = (NumericValue) value;
+            addValue = numericValue.toDouble();
+        } else {
+            addValue = 1;
+        }
+        count += addValue;
     }
 
     public Value getValue() {
