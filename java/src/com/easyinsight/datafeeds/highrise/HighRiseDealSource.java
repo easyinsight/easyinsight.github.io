@@ -1,8 +1,10 @@
 package com.easyinsight.datafeeds.highrise;
 
+import com.easyinsight.logging.LogClass;
 import org.jetbrains.annotations.NotNull;
 import org.apache.commons.httpclient.HttpClient;
 
+import java.text.ParseException;
 import java.util.*;
 import java.sql.Connection;
 import java.text.DateFormat;
@@ -136,39 +138,55 @@ public class HighRiseDealSource extends HighRiseBaseSource {
                 Document deals = runRestRequest("/deals.xml", client, builder, url, null);
                 Nodes dealNodes = deals.query("/deals/deal");
                 for(int i = 0;i < dealNodes.size();i++) {
-                    IRow row = ds.createRow();
-                    Node currDeal = dealNodes.get(i);
-                    String dealName = queryField(currDeal, "name/text()");
-                    row.addValue(DEAL_NAME, dealName);
-                    String price = queryField(currDeal, "price/text()");
-                    row.addValue(PRICE, price);
-                    String status = queryField(currDeal, "status/text()");
-                    row.addValue(STATUS, status);
-                    String priceType = queryField(currDeal, "price-type/text()");
-                    row.addValue(PRICE_TYPE, priceType);
-                    double totalDealValue;
-                    if ("fixed".equals(priceType)) {
-                        totalDealValue = Double.parseDouble(price);
-                    } else {
-                        String durationString = queryField(currDeal, "duration/text()");
-                        int duration = Integer.parseInt(durationString);
-                        totalDealValue = Double.parseDouble(price) * duration;
-                        row.addValue(DURATION, new NumericValue(duration));
+                    try {
+                        IRow row = ds.createRow();
+                        Node currDeal = dealNodes.get(i);
+                        String dealName = queryField(currDeal, "name/text()");
+                        row.addValue(DEAL_NAME, dealName);
+                        String price = queryField(currDeal, "price/text()");
+                        row.addValue(PRICE, price);
+                        String status = queryField(currDeal, "status/text()");
+                        row.addValue(STATUS, status);
+                        String priceType = queryField(currDeal, "price-type/text()");
+                        row.addValue(PRICE_TYPE, priceType);
+                        double totalDealValue;
+                        if ("fixed".equals(priceType)) {
+                            try {
+                                totalDealValue = Double.parseDouble(price);
+                            } catch (Exception e) {
+                                totalDealValue = 0;
+                            }
+                        } else {
+                            String durationString = queryField(currDeal, "duration/text()");
+                            int duration = 0;
+                            try {
+                                duration = Integer.parseInt(durationString);
+                            } catch (Exception e) {
+                                duration = 0;
+                            }
+                            try {
+                                totalDealValue = Double.parseDouble(price) * duration;
+                            } catch (Exception e) {
+                                totalDealValue = 0;
+                            }
+                            row.addValue(DURATION, new NumericValue(duration));
 
+                        }
+                        row.addValue(TOTAL_DEAL_VALUE, new NumericValue(totalDealValue));
+
+                        String personID = queryField(currDeal, "person-id/text()");
+                        row.addValue(DEAL_OWNER, retrieveContactInfo(client, builder, peopleCache, personID, url));
+                        String categoryID = queryField(currDeal, "category-id/text()");
+                        row.addValue(CATEGORY, retrieveCategoryInfo(client, builder, categoryCache, categoryID, url));
+                        row.addValue(COUNT, new NumericValue(1));
+
+                        String partyID = queryField(currDeal, "party-id/text()");
+                        row.addValue(COMPANY_ID, partyID);
+                        String createdAt = queryField(currDeal, "created-at/text()");
+                        row.addValue(CREATED_AT, new DateValue(deadlineFormat.parse(createdAt)));
+                    } catch (Exception e) {
+                        LogClass.error(e);
                     }
-                    row.addValue(TOTAL_DEAL_VALUE, new NumericValue(totalDealValue));
-
-                    String personID = queryField(currDeal, "person-id/text()");
-                    row.addValue(DEAL_OWNER, retrieveContactInfo(client, builder, peopleCache, personID, url));
-                    String categoryID = queryField(currDeal, "category-id/text()");
-                    row.addValue(CATEGORY, retrieveCategoryInfo(client, builder, categoryCache, categoryID, url));
-                    row.addValue(COUNT, new NumericValue(1));
-
-                    String partyID = queryField(currDeal, "party-id/text()");
-                    row.addValue(COMPANY_ID, partyID);
-                    String createdAt = queryField(currDeal, "created-at/text()");
-                    row.addValue(CREATED_AT, new DateValue(deadlineFormat.parse(createdAt)));
-                    
                 }
             //} while(info.currentPage++ < info.MaxPages);
 
