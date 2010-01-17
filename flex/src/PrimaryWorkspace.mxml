@@ -331,6 +331,7 @@
                                                                             navigation(new NavigationEvent("Help"));
                                                                             break;
                                                                         case "home":
+                                                                        case "intro":
                                                                                 if(o.type != null && o.type == "tour")
                                                                                     navigation(new NavigationEvent("Home", null, { tour: true }));
                                                                                 else
