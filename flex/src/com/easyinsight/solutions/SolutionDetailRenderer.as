@@ -203,7 +203,7 @@ public class SolutionDetailRenderer extends VBox implements IPerspective {
 
     protected function login():void {
         var login:LoginDialog = new LoginDialog();
-        login.additionalInfo = "You need to be logged in before you can install this solution.";
+        login.additionalInfo = "You need to be logged in before you can install this connection.";
         var urlObject:Object = new Object();
         urlObject.solutionID = _solution.solutionID;
         login.targetURL = URLUtil.objectToString(urlObject);

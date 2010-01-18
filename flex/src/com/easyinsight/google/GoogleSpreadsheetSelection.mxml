@@ -59,10 +59,7 @@
 
         private function retrieveSpreadsheets():void {
             //addEventListener(UploadConfigEvent.UPLOAD_CONFIG_COMPLETE, onComplete);
-            if (_straightToConnect) {
-                ProgressAlert.alert(this, "Retrieving available spreadsheets...", null, dataService.getAvailableGoogleSpreadsheets);
-                dataService.getAvailableGoogleSpreadsheets.send();
-            }
+            dataService.getAvailableGoogleSpreadsheets.send();            
         }
 
         private function processSpreadsheets():void {
@@ -142,16 +139,6 @@
 	<mx:WipeRight id="wipeIn" duration="1000"/>
 	<mx:VBox id="coreContent" width="100%" height="100%">
 		<mx:HBox id="coreHBox" width="100%">
-			<mx:Form id="loginForm" keyUp="onKeyUp(event)">
-				<mx:FormItem label="" direction="horizontal">						
-					<mx:Button label="Connect" click="attemptGoogleConnect()"/>					
-					<mx:Button label="Cancel" click="cancel()"/>								
-				</mx:FormItem>
-				<mx:FormItem label="">
-					<mx:Label id="connectMessageLabel" text="{connectMessage}"/>
-				</mx:FormItem>
-			</mx:Form>
-	
 			<mx:VBox verticalAlign="middle" height="100%">
 				<mx:Spacer/>
 				<mx:ProgressBar id="progressBar" indeterminate="true" visible="false"/>

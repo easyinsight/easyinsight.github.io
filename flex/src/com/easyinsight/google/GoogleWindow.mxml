@@ -1,0 +1,18 @@
+<?xml version="1.0" ?>
+<util:EITitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*"
+                    xmlns:google="com.easyinsight.google.*">
+    <mx:Script><![CDATA[
+        import com.easyinsight.customupload.UploadConfigEvent;
+
+        import mx.managers.PopUpManager;
+
+        private function onFeedCreation(event:UploadConfigEvent):void {
+            PopUpManager.removePopUp(this);
+        }
+
+        private function cancel(event:UploadConfigEvent):void {
+            PopUpManager.removePopUp(this);
+        }
+        ]]></mx:Script>
+    <google:GoogleSpreadsheetSelection userConfigComplete="onFeedCreation(event)" userConfigCancel="cancel(event)"/>
+</util:EITitleWindow>
