@@ -543,6 +543,10 @@ public class UserUploadService implements IUserUploadService {
             if ((feedDefinition.getDataSourceType() != DataSourceInfo.LIVE)) {
                 if (synchronous) {
                     credentialsResponse = dataSource.refreshData(credentials, SecurityUtil.getAccountID(), new Date(), null);
+                    if (!feedDefinition.isVisible()) {
+                        feedDefinition.setVisible(true);
+                        feedStorage.updateDataFeedConfiguration(feedDefinition);
+                    }
                     // TODO: refactor into event model
                     //new GoalStorage().updateGoals(feedID);
                 } else {

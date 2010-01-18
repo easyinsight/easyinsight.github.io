@@ -215,7 +215,7 @@ public class FeedService implements IDataFeedService {
         DataStorage metadata = null;
         try {
             conn.setAutoCommit(false);
-            FeedDefinition feedDefinition = getFeedDefinition(feedID);
+            FeedDefinition feedDefinition = feedStorage.getFeedDefinitionData(feedID, conn);
             metadata = DataStorage.writeConnection(feedDefinition, conn);
             metadata.truncate();
             metadata.commit();

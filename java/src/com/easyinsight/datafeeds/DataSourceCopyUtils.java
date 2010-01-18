@@ -41,7 +41,7 @@ public class DataSourceCopyUtils {
         // result here needs to have the core keys
         // 
 
-        DataSourceCloneResult result = cloneFeed(userID, conn, feedDefinition);
+        DataSourceCloneResult result = cloneFeed(userID, conn, feedDefinition, solutionID > 0);
         FeedDefinition clonedFeedDefinition = result.getFeedDefinition();
         if (newDataSourceName != null) {
             clonedFeedDefinition.setFeedName(newDataSourceName);
@@ -144,11 +144,17 @@ public class DataSourceCopyUtils {
         }
     }
 
-    public static DataSourceCloneResult cloneFeed(long userID, Connection conn, FeedDefinition feedDefinition) throws CloneNotSupportedException, SQLException {
+    public static DataSourceCloneResult cloneFeed(long userID, Connection conn, FeedDefinition feedDefinition,
+                                                  boolean installingFromConnection) throws CloneNotSupportedException, SQLException {
         FeedStorage feedStorage = new FeedStorage();
         AnalysisStorage analysisStorage = new AnalysisStorage();
         DataSourceCloneResult result = feedDefinition.cloneDataSource(conn);
         FeedDefinition clonedFeedDefinition = result.getFeedDefinition();
+        if (installingFromConnection) {
+            if (clonedFeedDefinition.getCredentialsDefinition() != CredentialsDefinition.NO_CREDENTIALS) {
+                clonedFeedDefinition.setVisible(false);
+            }
+        }
         clonedFeedDefinition.setUploadPolicy(new UploadPolicy(userID));
         feedStorage.addFeedDefinitionData(clonedFeedDefinition, conn);
         if (feedDefinition.getAnalysisDefinitionID() > 0) {

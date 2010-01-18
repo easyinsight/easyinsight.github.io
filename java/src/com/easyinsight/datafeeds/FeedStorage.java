@@ -980,7 +980,7 @@ public class FeedStorage {
         try {
             PreparedStatement queryStmt = conn.prepareStatement("SELECT DISTINCT DATA_FEED.DATA_FEED_ID, DATA_FEED.FEED_NAME, " +
                     "FEED_PERSISTENCE_METADATA.SIZE, DATA_FEED.FEED_TYPE, DATA_FEED.ANALYSIS_ID, OWNER_NAME, DESCRIPTION, ATTRIBUTION, ROLE, PUBLICLY_VISIBLE, MARKETPLACE_VISIBLE, FEED_PERSISTENCE_METADATA.LAST_DATA_TIME, PASSWORD_STORAGE.USERNAME," +
-                    "DATA_FEED.PARENT_SOURCE_ID " +
+                    "DATA_FEED.PARENT_SOURCE_ID, VISIBLE " +
                     " FROM (UPLOAD_POLICY_USERS, DATA_FEED LEFT JOIN FEED_PERSISTENCE_METADATA ON DATA_FEED.DATA_FEED_ID = FEED_PERSISTENCE_METADATA.FEED_ID) LEFT JOIN PASSWORD_STORAGE ON DATA_FEED.DATA_FEED_ID = PASSWORD_STORAGE.DATA_FEED_ID WHERE " +
                     "UPLOAD_POLICY_USERS.USER_ID = ? AND DATA_FEED.DATA_FEED_ID = UPLOAD_POLICY_USERS.FEED_ID");
             queryStmt.setLong(1, userID);
@@ -1004,6 +1004,7 @@ public class FeedStorage {
                     lastDataTime = new Date(lastTime.getTime());
                 }
                 Long parentSourceID = rs.getLong(14);
+                boolean visible = rs.getBoolean(15);
                 if (!rs.wasNull() && parentSourceID > 0) {
                     Long size = sizeMap.get(parentSourceID);
                     if (size == null) {
@@ -1013,10 +1014,12 @@ public class FeedStorage {
                     }
                     lastDateMap.put(parentSourceID, lastDataTime);
                 } else {
-                    FeedDescriptor feedDescriptor = createDescriptor(dataFeedID, feedName, userRole, feedSize, feedType, ownerName, description, attribution, lastDataTime);
-                    feedDescriptor.setHasSavedCredentials(hasSavedCredentials);
-                    descriptorList.add(feedDescriptor);
-                    feedMap.put(dataFeedID, feedDescriptor);
+                    if (visible) {
+                        FeedDescriptor feedDescriptor = createDescriptor(dataFeedID, feedName, userRole, feedSize, feedType, ownerName, description, attribution, lastDataTime);
+                        feedDescriptor.setHasSavedCredentials(hasSavedCredentials);
+                        descriptorList.add(feedDescriptor);
+                        feedMap.put(dataFeedID, feedDescriptor);
+                    }
                 }
             }
             for (Map.Entry<Long, Long> sizeEntry : sizeMap.entrySet()) {
