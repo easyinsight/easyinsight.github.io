@@ -552,7 +552,7 @@ public class UserUploadService implements IUserUploadService {
                 } else {
                     String message = dataSource.validateCredentials(credentials);
                     if (message == null) {
-                        credentialsResponse = new CredentialsResponse(true);
+                        credentialsResponse = new CredentialsResponse(true, feedID);
                         ServerRefreshScheduledTask task = new ServerRefreshScheduledTask();
                         task.setDataSourceID(feedID);
                         task.setUserID(SecurityUtil.getUserID());
@@ -561,11 +561,11 @@ public class UserUploadService implements IUserUploadService {
                         task.setRefreshCreds(credentials);
                         Scheduler.instance().saveTask(task);
                     } else {
-                        credentialsResponse = new CredentialsResponse(false, message);
+                        credentialsResponse = new CredentialsResponse(false, message, feedID);
                     }
                 }
             } else {
-                credentialsResponse = new CredentialsResponse(true);
+                credentialsResponse = new CredentialsResponse(true, feedID);
             }
             return credentialsResponse;
         } catch (Exception e) {
@@ -653,12 +653,12 @@ public class UserUploadService implements IUserUploadService {
             String failureMessage = feedDefinition.validateCredentials(credentials);
             CredentialsResponse credentialsResponse;
             if (failureMessage == null) {
-                credentialsResponse = new CredentialsResponse(true);
+                credentialsResponse = new CredentialsResponse(true, feedDefinition.getDataFeedID());
                 if (needsEncryption) {
                     credentialsResponse.setEncryptedResponse(encryptCredentials(credentials));
                 }
             } else {
-                credentialsResponse = new CredentialsResponse(false, failureMessage);
+                credentialsResponse = new CredentialsResponse(false, failureMessage, feedDefinition.getDataFeedID());
             }
             return credentialsResponse;
         } catch (Exception e) {

@@ -11,17 +11,28 @@ public class CredentialsResponse {
     private boolean successful;
     private String failureMessage;
     private Credentials encryptedResponse;
+    private long dataSourceID;
 
     public CredentialsResponse() {
     }
 
-    public CredentialsResponse(boolean successful) {
+    public CredentialsResponse(boolean successful, long dataSourceID) {
         this.successful = successful;
+        this.dataSourceID = dataSourceID;
     }
 
-    public CredentialsResponse(boolean successful, String failureMessage) {
+    public CredentialsResponse(boolean successful, String failureMessage, long dataSourceID) {
         this.successful = successful;
         this.failureMessage = failureMessage;
+        this.dataSourceID = dataSourceID;
+    }
+
+    public long getDataSourceID() {
+        return dataSourceID;
+    }
+
+    public void setDataSourceID(long dataSourceID) {
+        this.dataSourceID = dataSourceID;
     }
 
     public Credentials getEncryptedResponse() {

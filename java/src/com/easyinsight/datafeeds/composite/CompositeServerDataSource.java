@@ -178,7 +178,7 @@ public abstract class CompositeServerDataSource extends CompositeFeedDefinition 
             conn.setAutoCommit(false);
             refreshData(credentials, accountID, now, conn, null);
             conn.commit();
-            return new CredentialsResponse(true);
+            return new CredentialsResponse(true, getDataFeedID());
         } catch (Exception e) {
             LogClass.error(e);
             try {
@@ -186,7 +186,7 @@ public abstract class CompositeServerDataSource extends CompositeFeedDefinition 
             } catch (SQLException e1) {
                 LogClass.error(e1);
             }
-            return new CredentialsResponse(false, e.getMessage());
+            return new CredentialsResponse(false, e.getMessage(), getDataFeedID());
         } finally {
             Database.instance().closeConnection(conn);
         }

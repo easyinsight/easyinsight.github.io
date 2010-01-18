@@ -10,6 +10,7 @@ import com.easyinsight.framework.Credentials;
 		public var successful:Boolean;
 		public var failureMessage:String;
         public var encryptedResponse:Credentials;
+        public var dataSourceID:int;
 		
 		public function CredentialsResponse()
 		{

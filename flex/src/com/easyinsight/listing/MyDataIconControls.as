@@ -307,9 +307,15 @@ public class MyDataIconControls extends HBox
 
     private function completedRefresh(event:ResultEvent):void {
         var credentialsResponse:CredentialsResponse = userUploadSource.refreshData.lastResult as CredentialsResponse;
-        if (!credentialsResponse.successful)
-            Alert.show(credentialsResponse.failureMessage, "Error");
-        dispatchEvent(new UploadConfigEvent(UploadConfigEvent.UPLOAD_CONFIG_COMPLETE));
+        if (!credentialsResponse.successful) {
+            var refreshWindow:RefreshWindow = new RefreshWindow();
+            refreshWindow.dataSourceID = credentialsResponse.dataSourceID;
+            refreshWindow.addEventListener(DataSourceConfiguredEvent.DATA_SOURCE_CONFIGURED, dsConfigured);
+            PopUpManager.addPopUp(refreshWindow, this, true);
+            PopUpUtil.centerPopUp(refreshWindow);
+        } else {
+            dispatchEvent(new UploadConfigEvent(UploadConfigEvent.UPLOAD_CONFIG_COMPLETE));
+        }
     }
 
     private function fileData(feedDescriptor:DataFeedDescriptor):void {
