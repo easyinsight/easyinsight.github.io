@@ -38,7 +38,7 @@ public class CredentialRequirementState extends EventDispatcher {
             if (encryptedCredentials == null) {
                 neededCredentialCount++;
                 var window:RuntimeCredentialsWindow = new RuntimeCredentialsWindow();
-                window.requirement = credential;
+                window.dataSourceID = credential.dataSourceID;
                 window.addEventListener(CredentialsEvent.CREDENTIALS_SAVED, onCredentials);
                 PopUpManager.addPopUp(window, displayObject, true);
                 PopUpUtil.centerPopUp(window);

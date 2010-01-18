@@ -1,77 +1,173 @@
-<?xml version="1.0" encoding="utf-8"?>
-<util:EITitleWindow xmlns:util="com.easyinsight.util.*" xmlns:mx="http://www.adobe.com/2006/mxml" creationComplete="onCreationComplete()">
-    <mx:Metadata>
-        [Event(name="userConfigComplete", type="com.easyinsight.customupload.UploadConfigEvent")]
-        [Event(name="userConfigCancel", type="com.easyinsight.customupload.UploadConfigEvent")]
-    </mx:Metadata>
-	<mx:Script>
-		<![CDATA[
+<?xml version="1.0" ?>
+<util:EITitleWindow xmlns:util="com.easyinsight.util.*" xmlns:mx="http://www.adobe.com/2006/mxml" creationComplete="setupListeners()">
+    <mx:Script><![CDATA[
+        import com.easyinsight.administration.feed.CredentialsResponse;
+        import com.easyinsight.administration.feed.FeedDefinitionData;
+
+        import com.easyinsight.datasources.IServerDataSourceDefinition;
         import com.easyinsight.framework.User;
-        import com.easyinsight.listing.RefreshNotificationEvent;
-        import com.easyinsight.salesforce.SalesforceCredentialsWindow;
-			import mx.managers.PopUpManager;
-			import com.easyinsight.administration.feed.CredentialsResponse;
-			import com.easyinsight.analysis.CredentialsWindow;
-			import com.easyinsight.analysis.CredentialsDefinition;
-			
-			public var feedID:int;
-			private var credentialsWindow:CredentialsWindow;
-			
-			private function onCreationComplete():void {
-				uploadService.getCredentialsForFeed.send(feedID);
-			}
-			
-			private function gotCredentialRequirements():void {
-				var credentialsType:int = uploadService.getCredentialsForFeed.lastResult as int;				
-				switch (credentialsType) {
-					case CredentialsDefinition.STANDARD_USERNAME_PW:
-						credentialsWindow = new StandardCredentialsWindow();
-						break;
-					case CredentialsDefinition.SALESFORCE:
-						credentialsWindow = new SalesforceCredentialsWindow();
-						break;
-				}
-				credentialsBox.addChild(credentialsWindow);
-			}
-			
-			private function refresh():void {			
-				uploadService.refreshData.send(feedID, credentialsWindow.credentials, credentialsWindow.saved);
-				progressBar.visible = true;
-				failureMessage.visible = false;
-			}
-			
-			private function updatedData():void {
-				progressBar.visible = false;
-				var credentialsResponse:CredentialsResponse = uploadService.refreshData.lastResult as CredentialsResponse;
-				if (credentialsResponse.successful) {
-                    if (credentialsResponse.encryptedResponse != null) {
-                        User.saveCredentials(feedID, credentialsResponse.encryptedResponse);
-                    }
-                    dispatchEvent(new UploadConfigEvent(UploadConfigEvent.UPLOAD_CONFIG_COMPLETE));
-                    dispatchEvent(new RefreshNotificationEvent());
-					PopUpManager.removePopUp(this);
-				} else {
-					failureMessage.visible = true;
-					failureMessage.text = credentialsResponse.failureMessage;
-				}
-			}
-			
-			private function cancel():void {
-				PopUpManager.removePopUp(this);
-			}
-		]]>
-	</mx:Script>
-	<mx:RemoteObject id="uploadService" destination="userUpload">
-		<mx:method name="getCredentialsForFeed" result="gotCredentialRequirements()"/>		
-		<mx:method name="refreshData" result="updatedData()"/>
-	</mx:RemoteObject>
-	<mx:VBox width="100%" height="100%" id="coreVBox" styleName="TitleWindowContents">
-		<mx:VBox width="100%" height="100%" id="credentialsBox"/>
-		<mx:Label text="" visible="false" id="failureMessage"/>
-		<mx:ProgressBar id="progressBar" indeterminate="true" visible="false"/>		
-		<mx:HBox width="100%">
-			<mx:Button label="Refresh" click="refresh()"/>
-			<mx:Button label="Cancel" click="cancel()"/>
-		</mx:HBox>
-	</mx:VBox>
+        import com.easyinsight.listing.DataFeedDescriptor;
+        import com.easyinsight.framework.CredentialsCache;
+        import com.easyinsight.util.PopUpUtil;
+
+        import mx.controls.Alert;
+        import mx.core.UIComponent;
+        import mx.events.FlexEvent;
+        import mx.managers.PopUpManager;
+        import mx.rpc.events.FaultEvent;
+
+        private function updateFault(event:FaultEvent):void {
+            Alert.show(event.fault.faultString);
+        }
+
+        private function onKey(event:KeyboardEvent):void {
+            if (event.keyCode == Keyboard.ENTER) {
+                validate();
+            }
+        }
+
+        private function setupListeners():void {
+            stage.addEventListener(KeyboardEvent.KEY_UP, onKey);
+        }
+
+        private var _dataSourceClass:Class;
+        private var dataSourceCreation:IServerDataSourceCreation;
+        private var _dataSourceID:int;
+        private var _dataSourceDefinition:FeedDefinitionData;
+
+        private var _onlyDataSource:Boolean;
+
+        [Bindable]
+        private var ready:Boolean;
+
+
+        private var _credentialsSaved:Boolean = false;
+
+        [Bindable(event="credentialsSavedChanged")]
+        public function get credentialsSaved():Boolean {
+            return _credentialsSaved;
+        }
+
+        public function set credentialsSaved(value:Boolean):void {
+            if (_credentialsSaved == value) return;
+            _credentialsSaved = value;
+            dispatchEvent(new Event("credentialsSavedChanged"));
+        }
+
+        public function set onlyDataSource(value:Boolean):void {
+            _onlyDataSource = value;
+        }
+
+        override protected function createChildren():void {
+            super.createChildren();
+            if (_dataSourceDefinition == null) {
+                feedService.getFeedDefinition.send(_dataSourceID);
+            } else {
+                ready = true;
+                dataSourceCreation = new _dataSourceClass();
+                coreContent.addChild(dataSourceCreation as DisplayObject);
+            }
+        }
+
+        private function gotDataSource():void {
+            dataSourceDefinition = feedService.getFeedDefinition.lastResult as FeedDefinitionData;
+            ready = true;
+            var configClass:Class = (dataSourceDefinition as IServerDataSourceDefinition).configClass();
+            dataSourceCreation = new configClass();
+            dataSourceCreation.dataSourceDefinition = dataSourceDefinition;
+            var uicomp:UIComponent = dataSourceCreation as UIComponent;
+            uicomp.addEventListener(FlexEvent.CREATION_COMPLETE, onCreation);
+            coreContent.addChild(dataSourceCreation as DisplayObject);
+        }
+
+        private function onCreation(event:FlexEvent):void {
+            PopUpUtil.centerPopUp(this);
+        }
+
+        public function set dataSourceID(value:int):void {
+            _dataSourceID = value;
+        }
+
+        public function get dataSourceDefinition():FeedDefinitionData {
+            return _dataSourceDefinition;
+        }
+
+        public function set dataSourceDefinition(value:FeedDefinitionData):void {
+            _dataSourceDefinition = value;
+        }
+
+        private function validate():void {
+            progressBar.visible = true;
+            dataSourceCreation.updateDataSource(dataSourceDefinition);
+            uploadService.validateCredentials.send(dataSourceDefinition, dataSourceCreation.credentials, saveCredentialsCheckbox.selected);
+        }
+
+        private function validated():void {
+            var validation:CredentialsResponse = uploadService.validateCredentials.lastResult as CredentialsResponse;
+            if (validation.successful) {
+                if (validation.encryptedResponse) {
+                    User.saveCredentials(dataSourceDefinition.dataFeedID, validation.encryptedResponse);
+                    CredentialsCache.getCache().addCredentials(dataSourceDefinition.dataFeedID, validation.encryptedResponse);
+                } else {
+                    CredentialsCache.getCache().addCredentials(dataSourceDefinition.dataFeedID, dataSourceCreation.credentials);
+                }
+                //dataSourceDefinition.refreshDataInterval = (dailyRefresh.selected ? 1 : 0) * 24 * 1000 * 60 * 60;
+                dataSourceCreation.updateDataSource(dataSourceDefinition);
+                feedService.updateFeedDefinition.send(dataSourceDefinition, "", null);
+            } else {
+                progressBar.visible = false;
+                Alert.show(validation.failureMessage);
+            }
+        }
+
+        private function created():void {
+            uploadService.refreshData.send(dataSourceDefinition.dataFeedID, dataSourceCreation.credentials, credentialsSaved, true);
+        }
+
+        private function refreshed():void {
+            progressBar.visible = true;
+            var response:CredentialsResponse = uploadService.refreshData.lastResult as CredentialsResponse;
+            if (response.successful) {
+                var descriptor:DataFeedDescriptor = new DataFeedDescriptor();
+                descriptor.dataFeedID = dataSourceDefinition.dataFeedID;
+                descriptor.name = dataSourceDefinition.feedName;
+                dispatchEvent(new DataSourceConfiguredEvent(descriptor));
+                stage.removeEventListener(KeyboardEvent.KEY_UP, onKey);
+                PopUpManager.removePopUp(this);
+            } else {
+                Alert.show(response.failureMessage);
+            }
+        }
+
+        public function set dataSourceClass(value:Class):void {
+            _dataSourceClass = value;
+        }
+        ]]></mx:Script>
+    <mx:RemoteObject destination="userUpload" id="uploadService">
+        <mx:method name="validateCredentials" result="validated()"/>
+        <mx:method name="refreshData" result="refreshed()"/>
+    </mx:RemoteObject>
+    <mx:RemoteObject destination="feeds" id="feedService">
+        <mx:method name="updateFeedDefinition" result="created()" fault="updateFault(event)" />
+        <mx:method name="getFeedDefinition" result="gotDataSource()"/>
+    </mx:RemoteObject>
+    <mx:Form>
+        <mx:Box id="coreContent"/>
+        <mx:FormItem label="" direction="vertical">
+            <mx:ProgressBar id="progressBar" indeterminate="true" visible="false" label="Retrieving data..."/>
+        </mx:FormItem>
+        <mx:FormItem label="Save Credentials:" enabled="{ready}" direction="horizontal">
+            <mx:HBox verticalAlign="middle">
+            <mx:CheckBox id="saveCredentialsCheckbox"/>
+            <mx:Label text="Security Note" fontSize="10" textDecoration="underline" toolTip="Your credentials will be saved in an encrypted form on your local system, so do not do this if you're using a public machine."/>
+            </mx:HBox>
+        </mx:FormItem>
+        <!--<mx:FormItem label="Daily Refresh:" enabled="{credentialsSaved}">
+            <mx:CheckBox id="dailyRefresh"/>
+        </mx:FormItem>-->
+        <mx:FormItem label="" direction="horizontal">
+            <mx:Button label="Refresh" click="validate()" enabled="{ready}"/>
+            <mx:Button label="Cancel" click="stage.removeEventListener(KeyboardEvent.KEY_UP, onKey); PopUpManager.removePopUp(this)"/>
+        </mx:FormItem>
+	</mx:Form>
 </util:EITitleWindow>

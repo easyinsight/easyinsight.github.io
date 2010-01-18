@@ -37,7 +37,7 @@
         public function get credentials():Credentials {
             var credentials:Credentials = new Credentials();
             credentials.userName = userNameInput.text;
-            credentials.password = "x"
+            credentials.password = "x";
             return credentials;
         }
 
@@ -51,11 +51,11 @@
         }]]></mx:Script>
     <mx:Form>
         <mx:FormItem label="Highrise Path: " direction="horizontal" fontWeight="bold" fontFamily="Tahoma">
-			<mx:TextInput id="urlInput" fontWeight="normal" fontFamily="Lucida Grande" text="{url}"/>
+			<mx:TextInput id="urlInput" fontWeight="normal" fontFamily="Lucida Grande" text="{url}" width="350"/>
 		</mx:FormItem>
         <mx:FormItem label="Example: &quot;easyinsight&quot; for &quot;easyinsight.highrisehq.com&quot;" fontSize="10"/>
 		<mx:FormItem label="Highrise API Authentication Token: " direction="horizontal" fontWeight="bold" fontFamily="Tahoma">
-			<mx:TextInput id="userNameInput" fontWeight="normal" fontFamily="Lucida Grande" text="{usernameInputText}"/>
+			<mx:TextInput id="userNameInput" fontWeight="normal" fontFamily="Lucida Grande" text="{usernameInputText}" width="350"/>
 		</mx:FormItem>
         <mx:FormItem label="You can find the token on your Highrise page under My Info - API Token." fontSize="10"/>
 	</mx:Form>

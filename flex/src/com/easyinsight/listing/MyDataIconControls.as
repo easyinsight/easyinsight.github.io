@@ -1,6 +1,7 @@
 package com.easyinsight.listing
 {
 import com.easyinsight.administration.feed.CredentialsResponse;
+import com.easyinsight.customupload.DataSourceConfiguredEvent;
 import com.easyinsight.customupload.FileFeedUpdateWindow;
 import com.easyinsight.customupload.RefreshWindow;
 import com.easyinsight.customupload.UploadConfigEvent;
@@ -15,6 +16,7 @@ import com.easyinsight.reportpackage.ReportPackageWindow;
 import com.easyinsight.solutions.InsightDescriptor;
 
 import com.easyinsight.util.PopUpUtil;
+import com.easyinsight.util.ProgressAlert;
 
 import flash.events.Event;
 import flash.events.MouseEvent;
@@ -279,16 +281,23 @@ public class MyDataIconControls extends HBox
             userUploadSource.destination = "userUpload";
             userUploadSource.refreshData.addEventListener(ResultEvent.RESULT, completedRefresh);
             userUploadSource.refreshData.addEventListener(FaultEvent.FAULT, GenericFaultHandler.genericFault);
-            userUploadSource.refreshData.send(feedDescriptor.dataFeedID, c, false);
-            dispatchEvent(new RefreshNotificationEvent());
+            ProgressAlert.alert(this, "Refreshing data...", null, userUploadSource.refreshData);
+            userUploadSource.refreshData.send(feedDescriptor.dataFeedID, c, false, true);
+            //dispatchEvent(new RefreshNotificationEvent());
             return;
         }
 
-        var refreshWindow:RefreshWindow = RefreshWindow(PopUpManager.createPopUp(this.parent.parent.parent, RefreshWindow, true));
-        refreshWindow.feedID = feedDescriptor.dataFeedID;
-        refreshWindow.addEventListener(UploadConfigEvent.UPLOAD_CONFIG_COMPLETE, passEvent);
-        refreshWindow.addEventListener(RefreshNotificationEvent.REFRESH_NOTIFICATION, notifyRefresh);
+        var refreshWindow:RefreshWindow = new RefreshWindow();
+        refreshWindow.dataSourceID = feedDescriptor.dataFeedID;
+        refreshWindow.addEventListener(DataSourceConfiguredEvent.DATA_SOURCE_CONFIGURED, dsConfigured);
+        /*refreshWindow.addEventListener(UploadConfigEvent.UPLOAD_CONFIG_COMPLETE, passEvent);
+        refreshWindow.addEventListener(RefreshNotificationEvent.REFRESH_NOTIFICATION, notifyRefresh);*/
+        PopUpManager.addPopUp(refreshWindow, this, true);
         PopUpUtil.centerPopUp(refreshWindow);
+    }
+
+    private function dsConfigured(event:DataSourceConfiguredEvent):void {
+        dispatchEvent(new UploadConfigEvent(UploadConfigEvent.UPLOAD_CONFIG_COMPLETE));
     }
 
     private function passEvent(event:UploadConfigEvent):void {

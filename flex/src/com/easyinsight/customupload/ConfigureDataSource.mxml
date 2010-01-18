@@ -8,8 +8,11 @@
         import com.easyinsight.framework.User;
         import com.easyinsight.listing.DataFeedDescriptor;
         import com.easyinsight.framework.CredentialsCache;
+        import com.easyinsight.util.PopUpUtil;
 
         import mx.controls.Alert;
+        import mx.core.UIComponent;
+        import mx.events.FlexEvent;
         import mx.managers.PopUpManager;
         import mx.rpc.events.FaultEvent;
 
@@ -62,8 +65,14 @@
             } else {
                 ready = true;
                 dataSourceCreation = new _dataSourceClass();
+                var uicomp:UIComponent = dataSourceCreation as UIComponent;
+                uicomp.addEventListener(FlexEvent.CREATION_COMPLETE, onCreation);
                 coreContent.addChild(dataSourceCreation as DisplayObject);
             }
+        }
+
+        private function onCreation(event:FlexEvent):void {
+            PopUpUtil.centerPopUp(this);
         }
 
         private function gotDataSource():void {
@@ -96,7 +105,10 @@
             var validation:CredentialsResponse = uploadService.validateCredentials.lastResult as CredentialsResponse;
             if (validation.successful) {
                 if (validation.encryptedResponse) {
-                    User.saveCredentials(dataSourceDefinition.dataFeedID, dataSourceCreation.credentials);
+                    User.saveCredentials(dataSourceDefinition.dataFeedID, validation.encryptedResponse);
+                    CredentialsCache.getCache().addCredentials(dataSourceDefinition.dataFeedID, validation.encryptedResponse);
+                } else {
+                    CredentialsCache.getCache().addCredentials(dataSourceDefinition.dataFeedID, dataSourceCreation.credentials);
                 }
                 //dataSourceDefinition.refreshDataInterval = (dailyRefresh.selected ? 1 : 0) * 24 * 1000 * 60 * 60;
                 dataSourceCreation.updateDataSource(dataSourceDefinition);
@@ -108,7 +120,6 @@
         }
 
         private function created():void {
-            CredentialsCache.getCache().addCredentials(dataSourceDefinition.dataFeedID, dataSourceCreation.credentials);
             uploadService.refreshData.send(dataSourceDefinition.dataFeedID, dataSourceCreation.credentials, credentialsSaved, true);
         }
 
