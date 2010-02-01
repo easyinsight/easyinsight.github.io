@@ -607,6 +607,7 @@
                     leftButtonBar.removeChild(backButton);
                     var myDataButton:Button = new Button();
                     myDataButton.label = "My Data";
+
                     myDataButton.labelPlacement = "bottom";
                     myDataButton.setStyle("icon", myDataIcon);
                     myDataButton.addEventListener(MouseEvent.CLICK, toMyData);
@@ -644,6 +645,7 @@
                 addReportBox.addChild(addLabel);
                 var addButton:Button = new Button();
                 addButton.label = "Save to My Data";
+                addButton.id = "myDataButton";
                 addButton.addEventListener(MouseEvent.CLICK, saveReport);
                 addReportBox.addChild(addButton);
             }

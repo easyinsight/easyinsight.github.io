@@ -158,10 +158,10 @@
         ]]></mx:Script>
     <mx:Form paddingTop="0" paddingBottom="0" id="analysisNameForm">
         <mx:FormItem label="Report Name:">
-            <mx:TextInput text="{labelNameField}" id="analysisNameInput"/>
+            <mx:TextInput text="{labelNameField}" id="analysisNameInput" width="300"/>
         </mx:FormItem>
         <mx:FormItem label="Tags:">
-            <mx:TextInput text="{tags}" id="analysisTagsInput"/>
+            <mx:TextInput text="{tags}" id="analysisTagsInput" width="300"/>
         </mx:FormItem>
         <mx:FormItem label="Description:">
             <mx:Button icon="@Embed(source='../../../../assets/text.png')" toolTip="Edit Description..."
@@ -195,5 +195,5 @@
         </mx:HBox>
     </mx:VBox>
     <mx:StringValidator id="analysisNameValidator" source="{analysisNameInput}" property="text" minLength="3"
-                        maxLength="40"/>
+                        maxLength="80"/>
 </mx:HBox>

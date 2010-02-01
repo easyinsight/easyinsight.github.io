@@ -1,0 +1,80 @@
+<?xml version="1.0" ?>
+<easyinsight:FullScreenPage xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:easyinsight="com.easyinsight.*"
+                            xmlns:solutions="com.easyinsight.solutions.*"
+                            creationComplete="kpiService.getKPIsForStart.send(_dataSourceDescriptor.id, CredentialsCache.getCache().createCredentials())"
+        width="100%" height="100%" implements="com.easyinsight.framework.IFullScreenPage">
+    <mx:Script><![CDATA[
+        import com.easyinsight.framework.CredentialsCache;
+
+        import mx.collections.ArrayCollection;
+
+        private var _dataSourceDescriptor:DataSourceDescriptor;
+
+
+        [Bindable(event="dataSourceDescriptorChanged")]
+        public function get dataSourceDescriptor():DataSourceDescriptor {
+            return _dataSourceDescriptor;
+        }
+
+        public function set dataSourceDescriptor(value:DataSourceDescriptor):void {
+            if (_dataSourceDescriptor == value) return;
+            _dataSourceDescriptor = value;
+            dispatchEvent(new Event("dataSourceDescriptorChanged"));
+        }
+
+        private function gotInitialKPIs():void {
+            var kpis:ArrayCollection = kpiService.getKPIsForStart.lastResult as ArrayCollection;
+            if (kpis.length > 0) {
+                this.kpis = kpis;
+                coreStackIndex = 1;
+            } else {
+                coreStackIndex = 2;
+            }
+        }
+
+        private var _solution:Solution;
+
+
+        [Bindable(event="solutionChanged")]
+        public function get solution():Solution {
+            return _solution;
+        }
+
+        public function set solution(value:Solution):void {
+            if (_solution == value) return;
+            _solution = value;
+            dispatchEvent(new Event("solutionChanged"));
+        }
+
+        [Bindable]
+        private var kpis:ArrayCollection;
+
+        [Bindable]
+        private var coreStackIndex:int = 0;
+        ]]></mx:Script>
+    <mx:RemoteObject destination="kpiService" id="kpiService">
+        <mx:method name="getKPIsForStart" result="gotInitialKPIs()"/>
+    </mx:RemoteObject>
+    <mx:ViewStack selectedIndex="{coreStackIndex}" width="100%" height="100%">
+        <!--
+            first step: show some KPIs, boil things into a handful of #'s
+                explain the KPIs
+                need steps around scorecard
+                adding to dashboard
+            next step: diving into #'s
+                jump to connection report summary, showing the list of reports
+                need to explain the concept here
+                clicking on a report, show the report view, explain it
+                        
+        -->
+        <mx:Box width="100%" height="100%" horizontalAlign="center" verticalAlign="middle">
+            <mx:ProgressBar label="Getting ready for the next step..." indeterminate="true"/>
+        </mx:Box>
+        <solutions:SolutionKPIWindow kpis="{kpis}" connectionProgression="coreStackIndex = 2" width="100%" height="100%"
+                dataSourceDescriptor="{dataSourceDescriptor}" solution="{solution}"/>
+        <!--
+            we'll have post install window there for the moment, but fill that in later
+        -->
+        <solutions:PostInstallWindow dataSourceDescriptor="{dataSourceDescriptor}" solution="{solution}" width="100%" height="100%"/>
+    </mx:ViewStack>
+</easyinsight:FullScreenPage>

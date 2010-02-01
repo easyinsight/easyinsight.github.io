@@ -19,10 +19,9 @@ import mx.collections.SortField;
 
         [Bindable]
         private var solutions:ArrayCollection;
+
         [Bindable]
-        private var dataSources:ArrayCollection;
-        [Bindable]
-        private var insights:ArrayCollection;
+        private var kpis:ArrayCollection;
         [Bindable]
         private var goalTrees:ArrayCollection;
         [Bindable]
@@ -55,17 +54,15 @@ import mx.collections.SortField;
             accordion.getHeaderAt(1).labelPlacement = "right";
             accordion.getHeaderAt(1).setStyle("fontfamily", "Tahoma");
             accordion.getHeaderAt(1).setStyle("fontWeight", "bold");
-            accordion.getHeaderAt(2).setStyle("fontSize", 12);
+            /*accordion.getHeaderAt(2).setStyle("fontSize", 12);
             accordion.getHeaderAt(2).setStyle("icon", dataSourceIcon);
             accordion.getHeaderAt(2).labelPlacement = "right";
             accordion.getHeaderAt(2).setStyle("fontfamily", "Tahoma");
-            accordion.getHeaderAt(2).setStyle("fontWeight", "bold");
-            ProgressAlert.alert(this, "Retrieving possible data...", null, feedService.searchForSubscribedFeeds,
-                    solutionService.getSolutions, goalService.getGoalTreesForInstall, analysisService.getInsightDescriptors);
-            feedService.searchForSubscribedFeeds.send();
-            solutionService.getSolutions.send();
+            accordion.getHeaderAt(2).setStyle("fontWeight", "bold");*/
+            ProgressAlert.alert(this, "Retrieving possible data...", null, kpiService.getKPIs,
+                    goalService.getGoalTreesForInstall);
             goalService.getGoalTreesForInstall.send(_goalTreeID);
-            analysisService.getInsightDescriptors.send();
+            kpiService.getKPIs.send();
         }
 
         public function set goalTreeID(val:int):void {
@@ -76,28 +73,12 @@ import mx.collections.SortField;
             _goalTreeNode = goalTreeNode;
         }
 
-        private function gotFeeds():void {
-            dataSources = feedService.searchForSubscribedFeeds.lastResult as ArrayCollection;
+        private function gotKPIs():void {
+            kpis = kpiService.getKPIs.lastResult as ArrayCollection;
             var sort:Sort = new Sort();
             sort.fields = [ new SortField("name") ];
-            dataSources.sort = sort;
-            dataSources.refresh();
-        }
-
-        private function gotSolutions():void {
-            solutions = solutionService.getSolutions.lastResult as ArrayCollection;
-            var sort:Sort = new Sort();
-            sort.fields = [ new SortField("name") ];
-            solutions.sort = sort;
-            solutions.refresh();
-        }
-
-        private function gotInsights():void {
-            insights = analysisService.getInsightDescriptors.lastResult as ArrayCollection;
-            var sort:Sort = new Sort();
-            sort.fields = [ new SortField("name") ];
-            insights.sort = sort;
-            insights.refresh();
+            kpis.sort = sort;
+            kpis.refresh();
         }
 
         private function gotGoalTrees():void {
@@ -127,40 +108,31 @@ import mx.collections.SortField;
 
 		]]>
 	</mx:Script>
-    <mx:RemoteObject destination="feeds" id="feedService">
-        <mx:method name="searchForSubscribedFeeds" result="gotFeeds()"/>
-    </mx:RemoteObject>
-    <mx:RemoteObject destination="solutionService" id="solutionService">
-        <mx:method name="getSolutions" result="gotSolutions()"/>
-    </mx:RemoteObject>
     <mx:RemoteObject destination="goalService" id="goalService">
         <mx:method name="getGoalTreesForInstall" result="gotGoalTrees()"/>
     </mx:RemoteObject>
-    <mx:RemoteObject destination="analysisDefinition" id="analysisService">
-        <mx:method name="getInsightDescriptors" result="gotInsights()"/>
+    <mx:RemoteObject destination="kpiService" id="kpiService">
+        <mx:method name="getKPIs" result="gotKPIs()"/>
     </mx:RemoteObject>
     <mx:VBox height="100%">
         <mx:VBox verticalGap="0" height="100%" width="100%">
             <mx:Box width="100%" backgroundColor="#3B56AF" horizontalAlign="center">
-                <mx:TextArea editable="false" text="You can drag the below items onto goals to create associations." color="0xFFFFFF" backgroundAlpha="0" borderThickness="0" width="100%" height="57"/>
+                <mx:TextArea editable="false" text="You can drag the below items onto nodes to create associations." color="0xFFFFFF" backgroundAlpha="0" borderThickness="0" width="100%" height="57"/>
             </mx:Box>
             <mx:Accordion height="100%" id="accordion" width="100%" headerHeight="18">
-                <mx:VBox label="Goal Trees" width="100%" height="100%" verticalGap="0">
+                <mx:VBox label="KPI Trees" width="100%" height="100%" verticalGap="0">
                     <mx:Box width="100%">
-                        <mx:Label text="My Goal Trees"/>
+                        <mx:Label text="My KPI Trees"/>
                     </mx:Box>
                     <mx:List dataProvider="{accountTrees}" width="100%" height="100%" labelField="name" dragEnabled="true"/>
                     <mx:Box width="100%">
-                        <mx:Label text="External Goal Trees"/>
+                        <mx:Label text="External KPI Trees"/>
                     </mx:Box>
                     <mx:List dataProvider="{goalTrees}" width="100%" height="100%" labelField="name" dragEnabled="true"/>
                 </mx:VBox>
-                <mx:VBox label="Data Sources" width="100%" height="100%">
-                    <mx:List dataProvider="{dataSources}" width="100%" height="100%" labelField="name" dragEnabled="true"/>
-                </mx:VBox>
-                <mx:VBox label="Reports" width="100%" height="100%">
-                    <mx:List dataProvider="{insights}" width="100%" height="100%" labelField="name" dragEnabled="true"/>
-                </mx:VBox>
+                <mx:VBox label="KPIs" width="100%" height="100%">
+                    <mx:List dataProvider="{kpis}" width="100%" height="100%" labelField="name" dragEnabled="true"/>
+                </mx:VBox>                
             </mx:Accordion>
         </mx:VBox>
     </mx:VBox>

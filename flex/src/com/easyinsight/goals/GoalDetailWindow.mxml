@@ -37,12 +37,12 @@
         public function set goalTreeNodeData(val:GoalTreeNodeData):void {
             _goalTreeNodeData = val;
             var descs:ArrayCollection = new ArrayCollection();
-            var history:GoalHistoryDescriptor = new GoalHistoryDescriptor(val.coreFeedID, val.coreFeedName);
+            var history:GoalHistoryDescriptor = new GoalHistoryDescriptor(val.kpi.coreFeedID, val.kpi.coreFeedName);
             history.id = val.goalTreeNodeID;
             descs.addItem(history);
-            for each (var report:InsightDescriptor in _goalTreeNodeData.associatedInsights) {
+            /*for each (var report:InsightDescriptor in _goalTreeNodeData.associatedInsights) {
                 descs.addItem(report);
-            }
+            }*/
             allDescriptors = descs;
         }        
         ]]></mx:Script>

@@ -118,7 +118,7 @@
             itemSelected = myOrgChart.selectedItems.length > 0;
         }
 
-        private function onItemDoubleClick(event:OrgChartEvent):void {
+        /*private function onItemDoubleClick(event:OrgChartEvent):void {
             //var item:OrgChartItem = event.item as OrgChartItem;
             var node:GoalTreeNode = event.item as GoalTreeNode;
             var goalNodeWindow:GoalNodeAdminWindow = new GoalNodeAdminWindow();
@@ -127,7 +127,7 @@
             PopUpManager.addPopUp(goalNodeWindow, this, true);
             goalNodeWindow.x = 20;
             goalNodeWindow.y = 20;
-        }
+        }*/
 
         private function goalEdited(event:GoalEditEvent):void {
             dispatchEvent(new GoalTreeChangedEvent());
@@ -144,7 +144,7 @@
     <mx:Canvas height="100%" width="100%">
         <orgchart:OrgChart id="myOrgChart"
                        width="100%" height="100%" minZoomLevel="1" maxZoomLevel="1" allowSelection="true" allowMultipleSelection="false"
-                       allowNavigation="true" layoutXPadding="50" itemClick="onOrgClick()" itemDoubleClick="onItemDoubleClick(event)">
+                       allowNavigation="true" layoutXPadding="50" itemClick="onOrgClick()">
             <orgchart:itemRenderer>
                 <mx:Component>
                     <goals:GoalAdminRenderer2/>

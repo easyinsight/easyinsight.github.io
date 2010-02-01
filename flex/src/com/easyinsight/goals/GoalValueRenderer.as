@@ -38,10 +38,10 @@ public class GoalValueRenderer extends HBox{
         this._goalTreeNodeData = val as GoalTreeNodeData;
         if (this._goalTreeNodeData.goalOutcome != null) {
             var formatter:Formatter;
-            if (_goalTreeNodeData.analysisMeasure == null) {
+            if (_goalTreeNodeData.kpi.analysisMeasure == null) {
                 formatter = new NumberFormatter();
             } else {
-                formatter = _goalTreeNodeData.analysisMeasure.getFormatter();
+                formatter = _goalTreeNodeData.kpi.analysisMeasure.getFormatter();
             }
             valueLabel.text = formatter.format(_goalTreeNodeData.goalOutcome.outcomeValue);
         }

@@ -1,0 +1,501 @@
+<?xml version="1.0" ?>
+<util:EITitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*"
+                    xmlns:filtering="com.easyinsight.filtering.*" xmlns:goals="com.easyinsight.goals.*"
+                    title="KPI Window"
+                    creationComplete="setupData()" paddingBottom="5" paddingTop="5" paddingLeft="5" paddingRight="5">
+    <mx:Script><![CDATA[
+        import com.easyinsight.analysis.AnalysisItem;
+        import com.easyinsight.analysis.AnalysisItemEditEvent;
+        import com.easyinsight.analysis.AnalysisItemEditWindow;
+        import com.easyinsight.analysis.AnalysisItemNode;
+        import com.easyinsight.analysis.AnalysisItemTypes;
+        import com.easyinsight.analysis.AnalysisItemWrapper;
+        import com.easyinsight.analysis.AnalysisMeasure;
+        import com.easyinsight.analysis.CalculationWindow;
+        import com.easyinsight.analysis.FeedMetadata;
+        import com.easyinsight.analysis.MeasureItemEditor;
+        import com.easyinsight.commands.CommandEvent;
+        import com.easyinsight.commands.CommandProcessor;
+        import com.easyinsight.filtering.FilterDefinition;
+        import com.easyinsight.framework.CredentialsCache;
+        import com.easyinsight.icons.IconSelectionEvent;
+        import com.easyinsight.icons.IconSelectionWindow;
+        import com.easyinsight.listing.DataFeedDescriptor;
+        import com.easyinsight.util.CompletionItemEvent;
+        import com.easyinsight.util.PopUpUtil;
+
+        import mx.collections.ArrayCollection;
+        import mx.collections.Sort;
+        import mx.collections.SortField;
+        import mx.managers.PopUpManager;
+
+        [Bindable]
+        private var descriptors:ArrayCollection;
+
+        [Bindable]
+        private var dataSource:DataFeedDescriptor;
+
+        [Bindable]
+        private var tagString:String;
+
+        [Bindable]
+        private var description:String;
+
+        [Bindable]
+        private var insightBound:Boolean;
+
+        [Bindable]
+        private var availableItems:ArrayCollection;
+
+        [Bindable]
+        private var connectionVisible:Boolean;
+        
+        [Bindable]
+        private var problemDefinition:FilterDefinition;
+
+        [Bindable]
+        private var feedID:int;
+
+        [Bindable]
+        private var availableDimensions:ArrayCollection;
+
+        [Bindable]
+        private var analysisMeasure:AnalysisMeasure;
+
+        [Bindable]
+        [Embed(source="../../../../assets/pencil.png")]
+        private var editIcon:Class;
+
+        private function onDataSourceChange(event:CompletionItemEvent):void {
+            var descriptor:DataFeedDescriptor = event.selectedItem as DataFeedDescriptor;
+            feedID = descriptor.dataFeedID;
+            dataSource = descriptor;
+            insightBound = true;
+            analysisMeasure = null;
+            dataService.getFeedMetadata.send(descriptor.dataFeedID);
+        }
+
+        [Bindable]
+        private var allFields:ArrayCollection;
+
+        private var commandProcessor:CommandProcessor;
+
+        private function onCommand(event:CommandEvent):void {
+            commandProcessor.addCommand(event.command);
+        }
+
+        private function itemEdited(event:AnalysisItemEditEvent):void {
+            analysisMeasure = event.analysisItem as AnalysisMeasure;
+            if (analysisMeasure != null) {
+                var foundAnalysisItem:AnalysisItem = null;
+                for (var i:int = 0; i < availableItems.length && foundAnalysisItem == null; i++) {
+                    var analysisTest:AnalysisItem = availableItems.getItemAt(i) as AnalysisItem;
+                    if (analysisTest.display == analysisMeasure.display) {
+                        foundAnalysisItem = analysisTest;
+                    }
+                }
+                if (foundAnalysisItem != null) {
+                    var index:int = availableItems.getItemIndex(foundAnalysisItem);
+                    availableItems.removeItemAt(index);
+                    availableItems.addItemAt(analysisMeasure, index);
+                    availableItemBox.selectedItem = analysisMeasure;
+                }
+            }
+        }
+
+        private function editMeasure():void {
+            var analysisItemEditor:AnalysisItemEditWindow = new AnalysisItemEditWindow();
+            if (analysisMeasure.hasType(AnalysisItemTypes.CALCULATION)) {
+                analysisItemEditor.editorClass = CalculationWindow;
+            } else {
+                analysisItemEditor.editorClass = MeasureItemEditor;
+            }
+            analysisItemEditor.analysisItems = this.allFields;
+            analysisItemEditor.analysisItem = this.analysisMeasure;
+            PopUpManager.addPopUp(analysisItemEditor, this, true);
+            PopUpUtil.centerPopUp(analysisItemEditor);
+            analysisItemEditor.addEventListener(AnalysisItemEditEvent.ANALYSIS_ITEM_EDIT, itemEdited);
+        }
+
+        private static const NONE:AnalysisItem = new AnalysisItem();
+
+        [Bindable]
+        private var _kpi:KPI;
+
+
+        public function set kpi(value:KPI):void {
+            _kpi = value;
+        }
+
+        private function setupData():void {
+            commandProcessor = new CommandProcessor();
+            addEventListener(CommandEvent.COMMAND, onCommand);
+            NONE.displayName = "[ No Selection ]";
+            if (_kpi != null) {
+                feedID = _kpi.coreFeedID;
+                dataService.getFeedMetadata.send(_kpi.coreFeedID);
+
+                analysisMeasure = _kpi.analysisMeasure;
+                insightBound = true;
+                var descriptor:DataFeedDescriptor = new DataFeedDescriptor();
+                descriptor.dataFeedID = _kpi.coreFeedID;
+                descriptor.name = _kpi.coreFeedName;
+                //connectionVisible = _kpi.connectionVisible;
+                description = _kpi.description;
+                dataSource = descriptor;
+                kpiName = _kpi.name;
+                if (_kpi.problemConditions.length > 0) {
+                    problemDefinition = _kpi.problemConditions.getItemAt(0) as FilterDefinition;
+                }
+                kpiIconPath = _kpi.iconImage;
+                if (_kpi.iconImage != null) {
+                    iconPath = "/app/assets/icons/16x16/" + kpiIconPath;
+                    iconExists = true;
+                }
+                /*if (_kpi.highIsGood == 2) {
+                    radioValue = "highGoodRadio";
+                } else if (_kpi.highIsGood == 1) {
+                    radioValue = "lowGoodRadio";
+                } else {
+                    radioValue = "undefinedRadio";
+                }*/
+                highGood = _kpi.highIsGood;
+                if (_kpi.goalDefined) {
+                    goalType = "goal";
+                    targetIndex = 1;
+                } else if (_kpi.problemConditions.length > 0) {
+                    goalType = "condition";
+                    targetIndex = 2;
+                }               
+                for each (var filter:FilterDefinition in _kpi.filters) {
+                    transformContainer.addFilterDefinition(filter);
+                }
+            }
+            dataProvider.searchForSubscribedFeeds.send();
+            PopUpUtil.centerPopUpWithY(this, 20);
+        }
+
+        private function gotFeeds():void {
+            descriptors = dataProvider.searchForSubscribedFeeds.lastResult as ArrayCollection;
+            var sort:Sort = new Sort();
+            var sortField:SortField = new SortField("name");
+            sort.fields = [ sortField ];
+            descriptors.sort = sort;
+            descriptors.refresh();
+        }
+
+        private function onCredentials():void {
+        }
+
+        private function gotDefinition():void {
+            var feedDefinition:FeedMetadata = dataService.getFeedMetadata.lastResult as FeedMetadata;
+            CredentialsCache.getCache().obtainCredentials(this, feedDefinition.credentials, onCredentials);
+            allFields = new ArrayCollection();
+
+            var measures:ArrayCollection = new ArrayCollection();
+            var dimensions:ArrayCollection = new ArrayCollection();
+            for each (var analysisItem:AnalysisItem in feedDefinition.fields) {
+                if (analysisItem.hasType(AnalysisItemTypes.MEASURE)) {
+                    measures.addItem(analysisItem);
+                } else if (analysisItem.hasType(AnalysisItemTypes.DIMENSION)) {
+                    dimensions.addItem(analysisItem);
+                }
+                var aNode:AnalysisItemNode = new AnalysisItemNode();
+                aNode.analysisItem = analysisItem;
+                allFields.addItem(new AnalysisItemWrapper(aNode));
+            }
+            this.availableItems = measures;
+            this.availableDimensions = dimensions;
+            if (transformContainer.getFilterDefinitions().length == 0) {
+                for each (var filter:FilterDefinition in feedDefinition.intrinsicFilters) {
+                    transformContainer.addFilterDefinition(filter);
+                }
+            }
+            //processFeed(feedDefinition);            
+            if (analysisMeasure != null) {
+                var foundAnalysisItem:AnalysisItem = null;
+                for (var i:int = 0; i < availableItems.length && foundAnalysisItem == null; i++) {
+                    var analysisTest:AnalysisItem = availableItems.getItemAt(i) as AnalysisItem;
+                    if (analysisTest.display == analysisMeasure.display) {
+                        foundAnalysisItem = analysisTest;
+                    }
+                }
+                if (foundAnalysisItem != null) {
+                    var index:int = availableItems.getItemIndex(foundAnalysisItem);
+                    availableItems.removeItemAt(index);
+                    availableItems.addItemAt(analysisMeasure, index);
+                    availableItemBox.selectedItem = analysisMeasure;
+                }
+            } else {
+                if (availableItems.length > 0) {
+                    analysisMeasure = availableItems.getItemAt(0) as AnalysisMeasure;
+                }
+            }
+        }
+
+        private function save():void {
+            var newKPI:Boolean = false;
+            if (_kpi == null) {
+                _kpi = new KPI();
+                newKPI = true;
+            }
+            _kpi.analysisMeasure = availableItemBox.selectedItem as AnalysisMeasure;
+            _kpi.coreFeedID = dataSourceBox.selectedItem.dataFeedID;
+            _kpi.name = kpiNameInput.text;
+            _kpi.iconImage = kpiIconPath;
+            _kpi.filters = transformContainer.getFilterDefinitions();
+            if (highGoodOption.selected) {
+                _kpi.highIsGood = 2;
+            } else if (lowGoodOption.selected) {
+                _kpi.highIsGood = 1;
+            } else {
+                _kpi.highIsGood = 0;
+            }
+            if (targetBox.selectedIndex == 1) {
+                _kpi.problemConditions = new ArrayCollection();
+                var goalWindow:GoalDefinitionWindow = targetBox.getChildAt(1) as GoalDefinitionWindow;
+                goalWindow.update(_kpi);
+            } else if (targetBox.selectedIndex == 2) {
+                _kpi.goalDefined = false;
+                _kpi.goalValue = 0;
+                var problemWindow:ProblemDefinitionWindow = targetBox.getChildAt(2) as ProblemDefinitionWindow;
+                problemWindow.update(_kpi);
+            } else {
+                _kpi.goalDefined = false;
+                _kpi.goalValue = 0;
+                _kpi.problemConditions = new ArrayCollection();
+            }
+            //_kpi.connectionVisible = connectionVisibleCheckbox.selected;
+
+            if (_scorecardID > 0) {
+                if (newKPI) {
+                    scorecardService.addKPIToScorecard(_kpi, _scorecardID);
+                } else {
+                    scorecardService.updateKPI(_kpi);
+                }
+            } else {
+                kpiService.saveKPI(_kpi);
+            }
+        }
+
+        private var _scorecardID:int;
+
+        public function set scorecardID(value:int):void {
+            _scorecardID = value;
+        }
+
+        private function cancel():void {
+            PopUpManager.removePopUp(this);
+        }
+
+        private function addedKPI():void {
+            _kpi.kpiID = scorecardService.addKPIToScorecard.lastResult as int;
+            dispatchEvent(new KPIEvent(KPIEvent.KPI_ADDED, _kpi));
+            PopUpManager.removePopUp(this);
+        }
+
+        private function updatedKPI():void {
+            dispatchEvent(new KPIEvent(KPIEvent.KPI_EDITED, _kpi));
+            PopUpManager.removePopUp(this);
+        }
+
+        private function savedKPI():void {
+            _kpi.kpiID = kpiService.saveKPI.lastResult as int;
+            dispatchEvent(new KPIEvent(KPIEvent.KPI_ADDED, _kpi));
+            PopUpManager.removePopUp(this);
+        }
+
+        private function assignIcon():void {
+            var iconWindow:IconSelectionWindow = IconSelectionWindow(PopUpManager.createPopUp(this, IconSelectionWindow, true));
+            iconWindow.addEventListener(IconSelectionEvent.ICON_SELECTION, iconSelected);
+            iconWindow.addEventListener(IconSelectionEvent.ICON_REMOVED, iconRemoved);
+            PopUpUtil.centerPopUp(iconWindow);
+        }
+
+        private function toggleGoalState():void {
+            if (goalTypeGroup.selectedValue == "goal") {
+                targetBox.selectedIndex = 1;
+            } else if (goalTypeGroup.selectedValue == "condition") {
+                targetBox.selectedIndex = 2;
+            } else {
+                targetBox.selectedIndex = 0;
+            }
+        }
+
+        private function iconSelected(event:IconSelectionEvent):void {
+            iconExists = true;
+            kpiIconPath = event.icon.path;
+            iconPath = "/app/assets/icons/16x16/" + event.icon.path;
+        }
+
+        private function iconRemoved(event:IconSelectionEvent):void {
+            iconExists = false;
+            kpiIconPath = null;
+            iconPath = null;
+        }
+
+        [Bindable]
+        private var kpiName:String;
+
+        [Bindable]
+        private var radioValue:String;
+
+        [Bindable]
+        private var iconPath:String;
+
+        private var kpiIconPath:String;
+
+        [Bindable]
+        private var highGood:int;
+
+        [Bindable]
+        private var accountIndex:int;
+
+        [Bindable]
+        private var iconExists:Boolean;
+
+        [Bindable]
+        private var goalType:String = "none";
+        
+        [Bindable]
+        private var targetIndex:int;
+
+        ]]></mx:Script>
+    <mx:RemoteObject destination="data" id="dataService">
+        <mx:method name="getFeedMetadata" result="gotDefinition()"/>
+    </mx:RemoteObject>
+    <mx:RemoteObject id="dataProvider" destination="feeds">
+        <mx:method name="searchForSubscribedFeeds" result="gotFeeds()"/>
+    </mx:RemoteObject>
+    <mx:RemoteObject destination="kpiService" id="kpiService">
+        <mx:method name="saveKPI" result="savedKPI()"/>
+    </mx:RemoteObject>
+    <mx:RemoteObject id="scorecardService" destination="scorecardService">
+        <mx:method name="addKPIToScorecard" result="addedKPI()"/>
+        <mx:method name="updateKPI" result="updatedKPI()"/>
+    </mx:RemoteObject>
+    <mx:VBox width="100%" height="100%">
+        <mx:VBox width="100%" height="100%">            
+            <mx:HBox paddingTop="10" width="100%" paddingLeft="10" paddingRight="10">
+                <mx:Form width="50%" paddingLeft="0" paddingRight="0" paddingBottom="0" paddingTop="0">
+                    <mx:FormItem label="KPI Name:">
+                        <mx:TextInput id="kpiNameInput" text="{kpiName}" width="280"/>
+                    </mx:FormItem>
+                    <mx:FormItem label="KPI Icon:">
+                        <mx:Box borderStyle="solid" borderThickness="1" click="assignIcon()"
+                                toolTip="Click to assign or change icon...">
+                            <mx:Image id="iconImage" source="{iconPath}" visible="{iconExists}" width="20" height="20"/>
+                        </mx:Box>
+                    </mx:FormItem>
+
+                    <!--<mx:FormItem label="Connection Visible:">
+                        <mx:CheckBox id="connectionVisibleCheckbox" selected="{connectionVisible}"/>
+                    </mx:FormItem>-->
+                </mx:Form>
+                <mx:Form width="50%" paddingLeft="0" paddingRight="0" paddingBottom="0" paddingTop="0">
+                    <mx:FormItem label="Data Source:" direction="horizontal" fontFamily="Tahoma"
+                                 fontWeight="bold">
+                        <util:AnalysisItemCompletionInput items="{descriptors}" id="dataSourceBox"
+                                                          selectedItem="{dataSource}"
+                                                          fontFamily="Lucida Grande" fontWeight="normal"
+                                                          labelField="name" itemChanged="onDataSourceChange(event)"/>
+                    </mx:FormItem>
+                    <mx:FormItem label="Measure:" fontFamily="Tahoma" fontWeight="bold"
+                                 enabled="{insightBound}" direction="horizontal">
+                        <util:AnalysisItemCompletionInput items="{availableItems}" id="availableItemBox"
+                                                          selectedItem="{analysisMeasure}"
+                                                          fontFamily="Lucida Grande" fontWeight="normal"
+                                                          labelField="display"/>
+                        <mx:Button icon="{editIcon}" toolTip="Edit Measure..." click="editMeasure()"/>
+                    </mx:FormItem>
+                    <mx:FormItem label="">
+                        <mx:RadioButtonGroup id="goalGroup" selectedValue="{radioValue}"/>
+                        <mx:RadioButton label="High Values are Good" value="highGoodRadio"
+                                        group="{goalGroup}"
+                                        selected="{highGood == 2}" id="highGoodOption"/>
+                        <mx:RadioButton label="Low Values are Good" value="lowGoodRadio"
+                                group="{goalGroup}"
+                                selected="{highGood == 1}" id="lowGoodOption"/>
+                        <mx:RadioButton label="Neither" value="undefinedRadio"
+                                group="{goalGroup}"
+                                selected="{highGood == 0}" id="undefinedOption"/>
+                    </mx:FormItem>
+                </mx:Form>
+            </mx:HBox>
+            <mx:HRule width="100%"/>
+            <mx:HBox width="100%" horizontalAlign="center">
+                    <mx:ToggleButtonBar id="toggleBar">
+                        <mx:dataProvider>
+                            <mx:Array>
+                                <mx:String>Filters</mx:String>
+                                <mx:String>Goals</mx:String>
+                            </mx:Array>
+                        </mx:dataProvider>
+                    </mx:ToggleButtonBar>
+                </mx:HBox>
+            <mx:ViewStack selectedIndex="{toggleBar.selectedIndex}" resizeToContent="true" creationPolicy="all">
+                <mx:VBox width="800" enabled="{insightBound}" paddingTop="10" height="300">
+                    <mx:HBox width="100%" horizontalAlign="center">
+                        <mx:Label fontSize="14" text="Define the Filters" fontWeight="bold"
+                                  fontFamily="Tahoma"/>
+                    </mx:HBox>
+                    <mx:HDividedBox height="100%" width="100%">
+                        <mx:List dataProvider="{availableDimensions}" labelField="display"
+                                 dragEnabled="true"
+                                 dragMoveEnabled="false" enabled="{insightBound}" width="30%"
+                                 height="100%"/>
+                        <mx:Canvas width="70%" height="100%">
+                            <filtering:TransformContainer id="transformContainer" width="100%" height="100%"
+                                                          borderStyle="solid"
+                                                          borderThickness="1" backgroundColor="#ffffff"
+                                                          backgroundAlpha=".1" feedID="{feedID}"
+                                                          analysisItems="{allFields}"
+                                                          showLabel="true"
+                                                          paddingBottom="5" paddingLeft="5" paddingRight="5"
+                                                          paddingTop="5"/>
+                        </mx:Canvas>
+                    </mx:HDividedBox>
+                </mx:VBox>
+                <mx:VBox>
+                    <mx:HBox width="100%" height="100%" paddingLeft="5">
+                        <goals:GoalAdminHistoryDisplay id="historyDisplay"
+                                                       analysisMeasure="{availableItemBox.selectedItem}"
+                                                       feedID="{feedID}"
+                                                       transformContainer="{transformContainer}"/>
+                        <mx:VRule height="100%"/>
+                        <mx:VBox>
+                            <mx:HBox width="100%" horizontalAlign="center" verticalAlign="middle"
+                                     enabled="{insightBound}">
+                                <mx:Label fontSize="14" text="Define the Condition" fontWeight="bold"
+                                          fontFamily="Tahoma"/>
+                                <mx:RadioButtonGroup id="goalTypeGroup" selectedValue="{goalType}"
+                                                     change="toggleGoalState()"/>
+                                <mx:RadioButton group="{goalTypeGroup}" value="none" label="None" fontSize="14"/>
+                                <mx:RadioButton group="{goalTypeGroup}" value="goal" label="Goal" fontSize="14"/>
+                                <mx:RadioButton group="{goalTypeGroup}" value="condition" label="Problem"
+                                                fontSize="14"/>
+                            </mx:HBox>
+                            <mx:HRule width="100%"/>
+                            <mx:ViewStack id="targetBox" width="100%" height="100%" selectedIndex="{targetIndex}" resizeToContent="true"
+                                    creationPolicy="all">
+                                <mx:Box width="100%" height="100%"/>
+                                <goals:GoalDefinitionWindow node="{_kpi}" width="100%"
+                                                            height="100%"/>
+                                <goals:ProblemDefinitionWindow id="problemWindow"
+                                                               analysisMeasure="{availableItemBox.selectedItem}"
+                                                               filterDefinition="{problemDefinition}" width="100%"
+                                                               height="100%"/>
+                            </mx:ViewStack>
+                        </mx:VBox>
+                    </mx:HBox>
+                </mx:VBox>
+            </mx:ViewStack>
+
+        </mx:VBox>
+
+        <mx:HBox width="100%" horizontalAlign="center">
+            <mx:Button label="Save" click="save()"/>
+            <mx:Button label="Cancel" click="cancel()"/>
+        </mx:HBox>
+    </mx:VBox>
+</util:EITitleWindow>

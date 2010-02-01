@@ -125,10 +125,10 @@ import mx.formatters.NumberFormatter;
             if (goalTreeNodeData != null) {
                 goalIcon = PrefixManager.prefix + "/app/assets/icons/32x32/" + goalTreeNodeData.iconImage;
                 if (goalTreeNodeData.goalOutcome.valueDefined) {
-                    if (goalTreeNodeData.analysisMeasure == null) {
+                    if (goalTreeNodeData.kpi.analysisMeasure == null) {
                         currentValue = numberFormatter.format(goalTreeNodeData.goalOutcome.outcomeValue);
                     } else {
-                        currentValue = goalTreeNodeData.analysisMeasure.getFormatter().format(goalTreeNodeData.goalOutcome.outcomeValue);
+                        currentValue = goalTreeNodeData.kpi.analysisMeasure.getFormatter().format(goalTreeNodeData.goalOutcome.outcomeValue);
                     }
                     currentValueExists = true;
                 } else {
@@ -140,9 +140,9 @@ import mx.formatters.NumberFormatter;
                 subTreePresent = goalTreeNodeData.subTreeID > 0;
                 if (goalTreeNodeData.goalOutcome.problemEvaluated) {
                     trendImage = negativeIcon;
-                } else if (goalTreeNodeData.problemConditions.length > 0) {
+                } /*else if (goalTreeNodeData.kpi.problemConditions.length > 0) {
                     trendImage = positiveIcon;
-                } else {
+                }*/ else {
                     switch (goalTreeNodeData.goalOutcome.outcomeState) {
                         case GoalOutcome.EXCEEDING_GOAL:
                         case GoalOutcome.POSITIVE:

@@ -1,0 +1,13 @@
+<?xml version="1.0" ?>
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml">
+    <!--
+        this'll have the following:
+
+    -->
+    <mx:Script><![CDATA[
+
+        ]]></mx:Script>
+    <mx:ViewStack>
+        
+    </mx:ViewStack>
+</mx:VBox>

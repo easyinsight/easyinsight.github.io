@@ -35,10 +35,10 @@
 
         override protected function commitProperties():void {
             super.commitProperties();
-            if (loading) {               
+            if (loading) {
                 summaryIndex = 0;
             } else {
-                summaryIndex = 1;                
+                summaryIndex = 1;
             }
         }
 

@@ -1,0 +1,62 @@
+<?xml version="1.0" ?>
+<util:EITitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*" paddingBottom="5"
+        paddingLeft="5" paddingRight="5" paddingTop="5">
+    <mx:Script><![CDATA[
+        import com.easyinsight.util.ProgressAlert;
+
+        import mx.managers.PopUpManager;
+
+        [Bindable]
+        private var scorecardName:String;
+
+        private var _scorecard:Scorecard;
+
+        protected override function commitProperties():void {
+            super.commitProperties();
+            if (_scorecard != null) {
+                scorecardName = _scorecard.name;
+                newScorecard = false;
+            } else {
+                newScorecard = true;
+            }
+        }
+
+        public function set scorecard(value:Scorecard):void {
+            _scorecard = value;
+        }
+
+        private var newScorecard:Boolean;
+
+        private function save():void {
+            if (_scorecard == null) {
+                _scorecard = new Scorecard();
+            }
+            _scorecard.name = nameInput.text;
+            ProgressAlert.alert(this, "Saving the scorecard...", null, scorecardService.saveScorecardForUser);
+            scorecardService.saveScorecardForUser.send(_scorecard);
+        }
+
+        private function saved():void {
+            _scorecard.scorecardID = scorecardService.saveScorecardForUser.lastResult as int;
+            if (newScorecard) {
+                dispatchEvent(new ScorecardEvent(ScorecardEvent.SCORECARD_ADDED, _scorecard));
+            } else {
+                dispatchEvent(new ScorecardEvent(ScorecardEvent.SCORECARD_UPDATED, _scorecard));
+            }
+        }
+        ]]></mx:Script>
+    <mx:RemoteObject destination="scorecardService" id="scorecardService">
+        <mx:method name="saveScorecardForUser" result="saved()"/>
+    </mx:RemoteObject>
+    <mx:VBox>
+        <mx:Form>
+            <mx:FormItem label="Scorecard Name:">
+                <mx:TextInput id="nameInput" text="{scorecardName}"/>
+            </mx:FormItem>
+        </mx:Form>
+        <mx:HBox width="100%" horizontalAlign="center">
+            <mx:Button label="Save" click="save()"/>
+            <mx:Button label="Cancel" click="PopUpManager.removePopUp(this)"/>
+        </mx:HBox>
+    </mx:VBox>
+</util:EITitleWindow>

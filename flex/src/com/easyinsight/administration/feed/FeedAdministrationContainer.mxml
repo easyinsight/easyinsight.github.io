@@ -8,11 +8,17 @@
         import com.easyinsight.customupload.CsvFileUploadFormat;
         import com.easyinsight.customupload.ExcelUploadFormat;
         import com.easyinsight.customupload.FlatFileUploadFormat;
+        import com.easyinsight.datasources.BaseCampDataSource;
+        import com.easyinsight.datasources.CloudWatchDataSource;
+        import com.easyinsight.datasources.HighRiseDataSource;
         import com.easyinsight.datasources.IServerDataSourceDefinition;
+        import com.easyinsight.datasources.JiraDataSource;
         import com.easyinsight.framework.User;
         import com.easyinsight.genredata.AnalyzeEvent;
         import com.easyinsight.listing.DescriptorAnalyzeSource;
+        import com.easyinsight.salesforce.SalesforceFeedDefinition;
         import com.easyinsight.util.ProgressAlert;
+        import com.easyinsight.wesabe.WesabeDataSource;
 
         import mx.events.CloseEvent;
         import mx.managers.BrowserManager;
@@ -78,6 +84,8 @@
         private function setupListeners():void {
             addEventListener(AnalysisChangedEvent.ANALYSIS_CHANGED, onChange);
             addEventListener(DeleteHierarchyEvent.DELETE_HIERARCHY, onHierarchyDelete);
+            ProgressAlert.alert(this, "Retrieving the data source details...", null, feedService.getFeedDefinition);
+            feedService.getFeedDefinition.send(_feedID);
         }
 
         public function set feedID(feedID:int):void {
@@ -86,7 +94,7 @@
 
         override protected function createChildren():void {
             super.createChildren();
-            feedService.getFeedDefinition.send(_feedID);
+
         }
 
         private function gotFeedDefinition():void {
@@ -249,6 +257,14 @@
             var excelUploadFormat:ExcelUploadFormat;
             var flatFileUploadFormat:FlatFileUploadFormat;
             var csvFileUploadFormat:CsvFileUploadFormat;
+            var basecamp:BaseCampDataSource;
+            var highrise:HighRiseDataSource;
+            var google:GoogleAnalyticsDataSource;
+            var salesforce:SalesforceFeedDefinition;
+            var jira:JiraDataSource;
+            var wesabe:WesabeDataSource;
+            var cloudwatch:CloudWatchDataSource;
+            var googleDoc:GoogleFeedDefinition;
         }
 
         [Bindable]
@@ -325,5 +341,5 @@
 			</mx:Box>
 		</mx:TabNavigator>	
 	</mx:VBox>
-	<mx:StringValidator id="nameValidator" source="{feedNameInput}" property="text" minLength="3" maxLength="40"/>	
+	<mx:StringValidator id="nameValidator" source="{feedNameInput}" property="text" minLength="3" maxLength="40"/>
 </FullScreenPage>

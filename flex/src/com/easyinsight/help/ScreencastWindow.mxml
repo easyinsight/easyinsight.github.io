@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <util:EITitleWindow xmlns:util="com.easyinsight.util.*" xmlns:mx="http://www.adobe.com/2006/mxml" headerHeight="0"
-        width="700" height="500">
+        width="700" height="500" creationComplete="setupVideo()">
 	<mx:Script>
 		<![CDATA[
         import com.easyinsight.util.PopUpUtil;
 
         import mx.events.SliderEvent;
+        import mx.events.VideoEvent;
         import mx.managers.PopUpManager;
 
         [Bindable]
@@ -52,6 +53,10 @@
             }
         }
 
+        private function setupVideo():void {
+            videoViewer.source = _screencastSource;
+        }
+
         private function lastFrame():void {
             videoViewer.playheadTime = videoViewer.totalTime;
         }
@@ -68,6 +73,16 @@
             videoViewer.stop();
             PopUpManager.removePopUp(this)
         }
+
+        [Bindable]
+        private var videoIndex:int = 0;
+
+        private function onStateChange(event:VideoEvent):void {
+            if (event.state == VideoEvent.READY) {
+                PopUpUtil.centerPopUp(this);
+                videoIndex = 1;
+            }
+        }
 		]]>
 	</mx:Script>
 	<mx:VBox id="coreBox" width="100%" height="100%" horizontalAlign="center" verticalAlign="middle" backgroundColor="#FFFFFF">
@@ -76,7 +91,14 @@
             <mx:Button label="Close" click="closeVideo()" styleName="blueButton"/>
             <mx:Spacer width="100%"/>
         </mx:HBox>
-        <mx:VideoDisplay source="{_screencastSource}" id="videoViewer" ready="PopUpUtil.centerPopUp(this)"/>
+        <mx:ViewStack resizeToContent="true" creationPolicy="all" selectedIndex="{videoIndex}">
+            <mx:Box width="100%" height="100%" horizontalAlign="center" verticalAlign="middle">
+                <mx:ProgressBar label="Loading the video..." indeterminate="true" width="500" height="350"/>
+            </mx:Box>
+            <mx:Box width="100%" height="100%" horizontalAlign="center" verticalAlign="middle">
+                <mx:VideoDisplay id="videoViewer" ready="videoIndex = 1"/>
+            </mx:Box>
+        </mx:ViewStack>
         <mx:HBox width="100%" horizontalAlign="center">
             <mx:Button icon="{beginningIcon}" click="firstFrame()" toolTip="Go to Beginning"/>
             <mx:Button icon="{playOrPauseIcon}" click="play()" toolTip="Play"/>

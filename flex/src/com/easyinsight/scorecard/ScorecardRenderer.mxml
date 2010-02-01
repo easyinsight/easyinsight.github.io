@@ -1,0 +1,190 @@
+<?xml version="1.0" ?>
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*"
+         xmlns:scorecard="com.easyinsight.scorecard.*"
+         creationComplete="setupListeners()" width="800">
+    <mx:Metadata>
+        [Event(name="analyze", type="com.easyinsight.genredata.AnalyzeEvent")]
+    </mx:Metadata>
+    <mx:Script><![CDATA[
+        import com.easyinsight.kpi.KPI;
+        import com.easyinsight.kpi.KPIEvent;
+        import com.easyinsight.kpi.KPIWindow;
+        import com.easyinsight.util.Callout;
+        import com.easyinsight.util.PopUpUtil;
+
+        import mx.binding.utils.BindingUtils;
+        import mx.collections.ArrayCollection;
+        import mx.controls.TextArea;
+        import mx.events.CollectionEvent;
+        import mx.managers.PopUpManager;
+
+        private var _scorecard:Scorecard;
+
+        [Bindable]
+        private var configurationIndex:int = 0;
+
+        [Bindable]
+        private var kpis:ArrayCollection;
+
+        [Bindable]
+        private var rows:int;
+
+        private var _configurationMode:Boolean;
+
+        [Bindable]
+        private var controlFactory:KPIControlFactory = new KPIControlFactory(0);
+
+        [Bindable]
+        private var kpiNameFactory:KPINameFactory = new KPINameFactory();
+
+        private var _contextMenuAvailable:Boolean = true;
+
+
+        [Bindable(event="contextMenuAvailableChanged")]
+        public function get contextMenuAvailable():Boolean {
+            return _contextMenuAvailable;
+        }
+
+        public function set contextMenuAvailable(value:Boolean):void {
+            if (_contextMenuAvailable == value) return;
+            _contextMenuAvailable = value;
+            dispatchEvent(new Event("contextMenuAvailableChanged"));
+        }
+
+        [Bindable(event="configurationModeChanged")]
+        public function get configurationMode():Boolean {
+            return _configurationMode;
+        }
+
+        public function set configurationMode(value:Boolean):void {
+            if (_configurationMode == value) return;
+            _configurationMode = value;
+            if (kpis == null || kpis.length == 0) {
+                baseIndex = 0;
+            } else {
+                baseIndex = _configurationMode ? 2 : 1;
+            }
+            dispatchEvent(new Event("configurationModeChanged"));
+        }
+
+        public function set scorecard(value:Scorecard):void {
+            _scorecard = value;
+            kpis = _scorecard.kpis;
+            kpis.addEventListener(CollectionEvent.COLLECTION_CHANGE, onKPIChange);
+            rows = kpis.length + 1;
+            controlFactory = new KPIControlFactory(value.scorecardID);
+            if (kpis.length == 0) {
+                baseIndex = 0;
+            } else {
+                baseIndex = configurationMode ? 2 : 1;
+            }
+            invalidateProperties();
+        }
+
+
+        private function setupListeners():void {
+            addEventListener(KPIEvent.KPI_EDITED, onKPIEdit);
+            addEventListener(KPIEvent.KPI_ADDED, addedKPI);
+            addEventListener(KPIEvent.KPI_REMOVED, onKPIDelete);
+            BindingUtils.bindProperty(kpiNameFactory, "contextMenuAvailable", this, "contextMenuAvailable");
+        }
+
+        private function onKPIEdit(event:KPIEvent):void {
+
+        }
+
+        private function onKPIDelete(event:KPIEvent):void {
+            kpis.removeItemAt(kpis.getItemIndex(event.kpi));
+        }
+
+
+        private function onScorecardRefresh(event:ScorecardRefreshEvent):void {
+
+        }
+
+        private function addKPI():void {
+            var kpiWindow:KPIWindow = new KPIWindow();
+            kpiWindow.scorecardID = _scorecard.scorecardID;
+            kpiWindow.addEventListener(KPIEvent.KPI_ADDED, addedKPI);
+            PopUpManager.addPopUp(kpiWindow, this, true);
+            PopUpUtil.centerPopUp(kpiWindow);
+        }
+
+        private function addedKPI(event:KPIEvent):void {
+            kpis.addItem(event.kpi);
+        }
+
+        private function onKPIChange(event:CollectionEvent):void {
+            if (baseIndex == 0) {
+                baseIndex = configurationMode ? 2 : 1;
+            }
+        }
+
+        public function firstRenderer(kpi:KPI):Callout {
+            var rowRenderers:Array = plainGrid.listRendererArray;
+            var index:int = kpis.getItemIndex(kpi);
+            var kpiNameRenderer:KPINameRenderer = rowRenderers[index][1];
+            var callout:Callout = new Callout();
+            callout.setStyle("backgroundColor", 0xffe96c);
+            callout.setStyle("backgroundAlpha", 1);
+            var contentLabel:TextArea = new TextArea();
+            contentLabel.width = 200;
+            contentLabel.height = 50;
+            contentLabel.setStyle("backgroundAlpha", 0);
+            contentLabel.setStyle("textDecoration", "none");
+            contentLabel.setStyle("borderStyle", "none");
+            contentLabel.text = "You can click on a KPI name to pull up a context menu with options for diving into the data.";
+            callout.content = contentLabel;
+            callout.show(kpiNameRenderer);
+            return callout;
+        }
+
+        [Bindable]
+        private var baseIndex:int = 0;
+        ]]></mx:Script>
+    <mx:ViewStack selectedIndex="{baseIndex}" resizeToContent="true" width="100%">
+        <mx:VBox width="100%" height="100%" horizontalAlign="center" verticalAlign="middle">
+            <mx:Label text="You haven't defined any KPIs yet for this scorecard." fontSize="16"/>
+            <mx:Button label="Create Your First KPI" styleName="blueButton" fontSize="16" click="addKPI()"/>
+        </mx:VBox>
+        <mx:Box width="100%">
+            <scorecard:HackDataGrid dataProvider="{kpis}" rowCount="{rows}" rowHeight="40" selectable="false"
+                                    width="800" id="plainGrid">
+                <scorecard:columns>
+                    <util:EIDataGridColumn headerText="" dataField="name"
+                                           itemRenderer="com.easyinsight.kpi.KPIIconRenderer" width="50"/>
+                    <util:EIDataGridColumn headerText="KPI Name" dataField="name"
+                                           itemRenderer="{kpiNameFactory}"/>
+                    <util:EIDataGridColumn headerText="Latest Value" dataField="name"
+                                           itemRenderer="com.easyinsight.scorecard.KPIValueRenderer" width="110"/>
+                    <util:EIDataGridColumn headerText="Date" dataField="name"
+                                           itemRenderer="com.easyinsight.scorecard.KPIDateRenderer" width="100"/>
+                    <util:EIDataGridColumn headerText="" dataField="name"
+                                           itemRenderer="com.easyinsight.scorecard.KPIStatusRenderer" width="30"
+                                           sortable="false"/>
+                </scorecard:columns>
+            </scorecard:HackDataGrid>
+        </mx:Box>
+    <mx:VBox width="100%">
+        <mx:HBox>
+
+        </mx:HBox>
+        <mx:DataGrid dataProvider="{kpis}" rowCount="{rows}" rowHeight="40" dragEnabled="true" width="800">
+            <mx:columns>
+                <util:EIDataGridColumn headerText="" dataField="name"
+                                       itemRenderer="com.easyinsight.kpi.KPIIconRenderer" width="50"/>
+                <util:EIDataGridColumn headerText="KPI Name" dataField="name" itemRenderer="{kpiNameFactory}"/>
+                <util:EIDataGridColumn headerText="Latest Value" dataField="name"
+                                       itemRenderer="com.easyinsight.scorecard.KPIValueRenderer" width="110"/>
+                <util:EIDataGridColumn headerText="Date" dataField="name"
+                                       itemRenderer="com.easyinsight.scorecard.KPIDateRenderer" width="100"/>
+                <util:EIDataGridColumn headerText="" dataField="name"
+                                       itemRenderer="com.easyinsight.scorecard.KPIStatusRenderer" width="30"
+                                       sortable="false"/>
+                <util:EIDataGridColumn headerText="" dataField="name" sortable="false"
+                                       itemRenderer="{controlFactory}" width="150"/>
+            </mx:columns>
+        </mx:DataGrid>
+    </mx:VBox>
+</mx:ViewStack>
+</mx:VBox>

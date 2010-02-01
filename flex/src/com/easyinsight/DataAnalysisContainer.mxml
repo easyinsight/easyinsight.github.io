@@ -42,7 +42,7 @@
 		<![CDATA[
         import com.easyinsight.account.Account;
         import com.easyinsight.administration.feed.DeleteAnalysisItemEvent;
-        import com.easyinsight.analysis.AnalysisChangedEvent;        
+        import com.easyinsight.analysis.AnalysisChangedEvent;
         import com.easyinsight.analysis.AnalysisItemNode;
         import com.easyinsight.analysis.AnalysisItemTypeRenderer;
         import com.easyinsight.analysis.AnalysisUtil;
@@ -71,21 +71,26 @@
         import com.easyinsight.report.MultiReportAnalyzeSource;
         import com.easyinsight.report.ReportAnalyzeSource;
         import com.easyinsight.solutions.InsightDescriptor;
+        import com.easyinsight.tour.ReportEditorTutorial;
         import com.easyinsight.util.PNGEnc;
         import com.easyinsight.util.PopUpUtil;
+
         import mx.collections.Sort;
         import mx.events.DragEvent;
         import mx.events.ListEvent;
+
         import com.easyinsight.analysis.AnalysisItemWrapper;
-        import com.easyinsight.analysis.AnalysisCloseEvent;        
+        import com.easyinsight.analysis.AnalysisCloseEvent;
         import com.easyinsight.analysis.AnalysisItem;
         import com.easyinsight.util.ProgressAlert;
         import com.easyinsight.commands.CommandEvent;
+
         import mx.utils.ObjectUtil;
         import mx.utils.URLUtil;
         import mx.managers.BrowserManager;
         import mx.controls.Alert;
         import mx.events.CloseEvent;
+
         import com.easyinsight.commands.CommandProcessor;
         import com.easyinsight.framework.DataServiceLoadingEvent;
         import com.easyinsight.framework.DataService;
@@ -93,16 +98,20 @@
         import com.easyinsight.framework.User;
         import com.easyinsight.filtering.TransformsUpdatedEvent;
         import com.easyinsight.feedassembly.CompositeFeedCreatedEvent;
+
         import mx.managers.PopUpManager;
+
         import com.easyinsight.filtering.FilterDefinition;
         import com.easyinsight.filtering.FilterRawData;
         import com.easyinsight.analysis.FeedMetadata;
         import com.easyinsight.framework.CredentialsCache;
+
         import mx.collections.ArrayCollection;
+
         import com.easyinsight.analysis.AnalysisDefinition;
 
         private function cleanupStage():void {
-            stage.removeEventListener(KeyboardEvent.KEY_UP, onKey);    
+            stage.removeEventListener(KeyboardEvent.KEY_UP, onKey);
         }
 
         [Bindable]
@@ -169,6 +178,12 @@
 
         [Bindable]
         private var originSolution:int;
+
+        private var _tutorialOnStart:int;
+
+        public function set tutorialOnStart(value:int):void {
+            _tutorialOnStart = value;
+        }
 
         private var loading:Boolean = false;
 
@@ -250,7 +265,7 @@
         public function openAnalysis(analysisDefinition:AnalysisDefinition):void {
             BrowserManager.getInstance().setTitle("Easy Insight - " + analysisDefinition.name);
             this.analysisDefinition = analysisDefinition;
-            
+
             //analysisPolicy = analysisDefinition.policy;
         }
 
@@ -299,7 +314,7 @@
                 setState();
             }
 
-            
+
             this.feedMetadata = feedMetadata;
             this.originSolution = feedMetadata.originSolution;
             this.admin = feedMetadata.dataSourceAdmin;
@@ -319,15 +334,24 @@
                 wrappers.addItem(wrapper);
             }
 
+            if (analysisDefinition == null || analysisDefinition.analysisID == 0) {
+                var fragmentObject:Object = new Object();
+                fragmentObject.feedID = String(dataService.dataFeedID);
+                var fragmentString:String = URLUtil.objectToString(fragmentObject);
+                BrowserManager.getInstance().setFragment(fragmentString);
+            } else {
+                var feedFragmentObject:Object = new Object();
+                feedFragmentObject.analysisID = String(analysisDefinition.analysisID);
+                var feedFragmentString:String = URLUtil.objectToString(feedFragmentObject);
+                BrowserManager.getInstance().setFragment(feedFragmentString);
+            }
+
             if (analysisDefinition == null) {
                 newAnalysis();
                 for each (var filter:FilterDefinition in feedMetadata.intrinsicFilters) {
                     transformContainer.addFilterDefinition(filter);
                 }
-                var fragmentObject:Object = new Object();
-                fragmentObject.feedID = String(dataService.dataFeedID);
-                var fragmentString:String = URLUtil.objectToString(fragmentObject);
-                BrowserManager.getInstance().setFragment(fragmentString);
+
             } else {
                 //this.title = analysisDefinition.name;
                 var controllerClass:Class = ControllerLookup.controllerForType(analysisDefinition.type);
@@ -336,10 +360,7 @@
 
                 analysisState.selectedLabel = analysisDefinition.type;
 
-                var feedFragmentObject:Object = new Object();
-                feedFragmentObject.analysisID = String(analysisDefinition.analysisID);
-                var feedFragmentString:String = URLUtil.objectToString(feedFragmentObject);
-                BrowserManager.getInstance().setFragment(feedFragmentString);
+
                 if (analysisDefinition.filterDefinitions == null) {
                     analysisDefinition.filterDefinitions = new ArrayCollection();
                 }
@@ -364,6 +385,9 @@
             dataView.availableFields = wrappers;
             loading = false;
             stopLoading(null);
+            if (_tutorialOnStart > 0) {
+                tutorial();
+            }
         }
 
         private function sortFields():void {
@@ -413,6 +437,12 @@
         private function onAnalysisChanged(event:AnalysisChangedEvent):void {
             this.analysisChanged = true;
         }
+
+        // tutorial ramifications...
+        // we need a good tooltip rendering
+        // we need to be able to selectively disable the various parts
+        // we have to be able to look for key events that will trigger the next stage of the tutorial
+
 
         public function initializeForWorksheet():void {
             loading = true;
@@ -489,12 +519,12 @@
             PopUpUtil.centerPopUp(window);
         }
 
-        private function onKey(event:KeyboardEvent):void {            
+        private function onKey(event:KeyboardEvent):void {
             if (event.ctrlKey && event.shiftKey) {
                 if (event.keyCode == 90) {
                     redo();
                 }
-            } else if (event.ctrlKey) {                
+            } else if (event.ctrlKey) {
                 if (event.keyCode == 90) {
                     undo();
                 }
@@ -627,7 +657,7 @@
             return item["icon"];
         }
 
-        
+
         private function undo():void {
             commandProcessor.undo();
         }
@@ -638,18 +668,18 @@
 
         override public function cleanup():void {
             removeEventListener(CommandEvent.COMMAND, onCommand);
-            if(stage != null)
+            if (stage != null)
                 stage.removeEventListener(KeyboardEvent.KEY_UP, onKey);
             removeEventListener(AnalysisChangedEvent.ANALYSIS_CHANGED, onAnalysisChanged);
             removeEventListener(DeleteAnalysisItemEvent.DELETE_ANALYSIS_ITEM, onFieldDelete);
             removeEventListener(HierarchyDrilldownEvent.DRILLDOWN, childFilterCreation);
             removeEventListener(HierarchyRollupEvent.HIERARCHY_ROLLUP, onRollup);
-            if(dataService != null) {
+            if (dataService != null) {
                 dataService.removeEventListener(DataServiceLoadingEvent.LOADING_STARTED, startLoading);
                 dataService.removeEventListener(DataServiceLoadingEvent.LOADING_STOPPED, stopLoading);
                 dataService.removeEventListener(InvalidFieldsEvent.INVALID_FIELDS, onInvalidFields);
             }
-            if(transformContainer != null) {
+            if (transformContainer != null) {
                 transformContainer.removeEventListener(TransformsUpdatedEvent.UPDATED_TRANSFORMS, transformsUpdated);
             }
             if (dataView != null) {
@@ -737,9 +767,6 @@
             Alert.show("This report will now show in your My Data page.");
         }
 
-        
-
-        
 
         private function onItemDoubleClick(event:ListEvent):void {
             var field:AnalysisItemWrapper = event.currentTarget.selectedItem as AnalysisItemWrapper;
@@ -805,7 +832,6 @@
             }
         }
 
-        
 
         private function newReport():void {
             if (analysisChanged) {
@@ -845,6 +871,13 @@
                 analysisDefinition.addedItems.removeItemAt(addedIndex);
             }
         }
+
+        private function tutorial():void {
+            /*var reportEditorTutorial:ReportEditorTutorial = new ReportEditorTutorial();
+            reportEditorTutorial.reportEditor = this;
+            reportEditorTutorial.startTutorial();
+            PrimaryWorkspace.registerTutorial(reportEditorTutorial);*/
+        }
         ]]>
     </mx:Script>
     <mx:RemoteObject id="analysisService" destination="analysisDefinition">
@@ -861,8 +894,8 @@
         <mx:method name="getAllData" result="gotDetailData()"/>
         <mx:method name="getCredentialRequirements" result="gotCredentialRequirements()"/>
     </mx:RemoteObject>
-    <mx:VBox height="100%" width="100%">
-        <mx:HBox verticalAlign="middle">
+    <mx:VBox height="100%" width="100%" id="reportEditor" disabledOverlayAlpha=".275">
+        <mx:HBox verticalAlign="middle" id="controlBar">
             <mx:Button id="wrapButton" icon="@Embed(source='../../../assets/document_out.png')" click="close()"
                toolTip="Close"/>
                 <!--<mx:VRule strokeColor="#DDDDDD" height="16"/>
@@ -881,8 +914,7 @@
             <mx:Button id="reportButton" icon="@Embed(source='../../../assets/media_play_green.png')" click="goReport()"
                        toolTip="View Report"/>
             <mx:Button id="adminButton" icon="@Embed(source='../../../assets/businessman_edit.png')" click="goAdmin()"
-                       toolTip="Adminster"
-                       visible="{admin}"/>
+                       toolTip="Adminster" visible="{admin}"/>
             <mx:VRule strokeColor="#DDDDDD" height="16"/>
             <mx:Button id="subscribeToFeedButton" icon="@Embed(source='../../../assets/folder_into.png')"
                        click="subscribeToFeed()" toolTip="Add Data Source to My Data" enabled="{canSubscribeToFeed}"/>
@@ -892,6 +924,8 @@
                        click="subscribeToInsight()" toolTip="Add Report to My Data" enabled="{canSubscribeToInsight}"/>
             <mx:Button id="groupAddInsightButton" icon="@Embed(source='../../../assets/users_into.png')"
                        click="addInsightToGroup()" toolTip="Add Report to Group" enabled="{canAddInsightToGroup}"/>
+            <!--<mx:Button icon="@Embed(source='../../../assets/blackboard.png')"
+                       click="tutorial()"/>-->
             <mx:VRule strokeColor="#DDDDDD" height="16"/>
             <mx:ProgressBar indeterminate="true" visible="false" id="loadingBar"/>
         </mx:HBox>
@@ -914,8 +948,8 @@
                            toolTip="Exclude Data" click="exclude()"/>
             </filtering:TransformContainer>
             <analysis:DataTransformationTab dataView="{dataView}" dataSourceID="{dataService.dataFeedID}"
-                                            analysisDefinition="{analysisDefinition}" analysisItems="{wrappers}"/>
-            <analysis:ExportTab analysisDefinition="{analysisDefinition}" dataView="{dataView}"/>
+                                            analysisDefinition="{analysisDefinition}" analysisItems="{wrappers}" id="scrubTab"/>
+            <analysis:ExportTab analysisDefinition="{analysisDefinition}" dataView="{dataView}" id="exportTab"/>
         </mx:TabNavigator>
 
         <mx:HDividedBox id="hbox1" height="100%" width="100%">

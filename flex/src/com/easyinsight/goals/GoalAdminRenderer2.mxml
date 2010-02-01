@@ -6,6 +6,7 @@
         import com.easyinsight.analysis.PopupMenuFactory;
         import com.easyinsight.icons.IconSelectionEvent;
         import com.easyinsight.icons.IconSelectionWindow;
+        import com.easyinsight.kpi.KPI;
         import com.easyinsight.listing.DataFeedDescriptor;
         import com.easyinsight.solutions.InsightDescriptor;
         import com.easyinsight.solutions.Solution;
@@ -110,7 +111,7 @@
             } else {
                 var dragNode:GoalTreeNode = event.dragSource.dataForFormat("GoalTreeNode") as GoalTreeNode;
             }
-            if (obj is Solution) {
+           /* if (obj is Solution) {
                 var solution:Solution = obj as Solution;
                 var goalSolution:GoalSolution = new GoalSolution();
                 goalSolution.solutionID = solution.solutionID;
@@ -126,7 +127,8 @@
             } else if (obj is InsightDescriptor) {
                 var analysisDefinition:InsightDescriptor = obj as InsightDescriptor;
                 goalTreeNode.associatedInsights.addItem(analysisDefinition);
-            } else if (obj is GoalTreeDescriptor) {
+            } else */
+            if (obj is GoalTreeDescriptor) {
                 var goalTreeDescriptor:GoalTreeDescriptor = obj as GoalTreeDescriptor;
                 var window:GoalTreeDropWindow = new GoalTreeDropWindow();
                 window.goalTreeNode = goalTreeNode;
@@ -136,10 +138,15 @@
                 window.addEventListener(SubTreeInstallEvent.SUB_TREE_INSTALL, subTreeInstall);
                 PopUpManager.addPopUp(window, this, true);
                 PopUpUtil.centerPopUp(window);
+            } else if (obj is KPI) {
+                var kpi:KPI = obj as KPI;
+                goalTreeNode.kpi = kpi;
+                goalTreeNode.iconImage = kpi.iconImage;
+                goalTreeNode.name = kpi.name;
             }
-            showBinding = goalTreeNode.coreFeedID > 0;
-            showAssociations = goalTreeNode.associatedFeeds.length > 0 || goalTreeNode.associatedInsights.length > 0 ||
-                               goalTreeNode.associatedSolutions.length > 0;
+            showBinding = goalTreeNode.kpi != null;
+            /*showAssociations = goalTreeNode.associatedFeeds.length > 0 || goalTreeNode.associatedInsights.length > 0 ||
+                               goalTreeNode.associatedSolutions.length > 0;*/
             dispatchEvent(new GoalTreeChangedEvent());
         }
 
@@ -180,9 +187,9 @@
                 goalIconExists = goalTreeNode.iconImage != null && goalTreeNode.iconImage != "";
                 nodeText = "This goal is bound to a data source.";
                 subTreePresent = goalTreeNode.subTreeID > 0;
-                showBinding = goalTreeNode.coreFeedID > 0;
-                showAssociations = goalTreeNode.associatedFeeds.length > 0 || goalTreeNode.associatedInsights.length > 0 ||
-                                   goalTreeNode.associatedSolutions.length > 0;
+                showBinding = goalTreeNode.kpi != null;
+                /*showAssociations = goalTreeNode.associatedFeeds.length > 0 || goalTreeNode.associatedInsights.length > 0 ||
+                                   goalTreeNode.associatedSolutions.length > 0;*/
                 defineContextMenu(goalTreeNode);
             }
         }
@@ -327,20 +334,18 @@
         private function editNode(event:Event):void {
             var goalTreeNode:GoalTreeNode = orgChartItem.data as GoalTreeNode;
             goalTreeNode.updateName();
-            var goalNodeWindow:GoalNodeAdminWindow = new GoalNodeAdminWindow();
-            goalNodeWindow.goalTreeNode = goalTreeNode;
-            goalNodeWindow.addEventListener(GoalEditEvent.GOAL_EDIT, goalEdited);
-            PopUpManager.addPopUp(goalNodeWindow, this, true);
-            PopUpUtil.centerPopUp(goalNodeWindow);
+            var kpiWindow:GoalKPIWindow = new GoalKPIWindow();
+            kpiWindow.goalTreeNode = goalTreeNode;
+            kpiWindow.addEventListener(GoalEditEvent.GOAL_EDIT, goalEdited);
+            PopUpManager.addPopUp(kpiWindow, this, true);
+            PopUpUtil.centerPopUp(kpiWindow);
         }
 
         private function goalEdited(event:GoalEditEvent):void {
             event.currentTarget.removeEventListener(GoalEditEvent.GOAL_EDIT, goalEdited);
             var goalTreeNode:GoalTreeNode = orgChartItem.data as GoalTreeNode;
             goalNameInput.text = goalTreeNode.name;
-            showBinding = goalTreeNode.coreFeedID > 0;
-            showAssociations = goalTreeNode.associatedFeeds.length > 0 || goalTreeNode.associatedInsights.length > 0 ||
-                               goalTreeNode.associatedSolutions.length > 0;
+            showBinding = goalTreeNode.kpi != null;
             dispatchEvent(new GoalTreeChangedEvent());
         }
 

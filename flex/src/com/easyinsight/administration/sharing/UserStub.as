@@ -9,6 +9,7 @@ package com.easyinsight.administration.sharing
 		public var userID:int;
 		public var fullName:String;
 		public var email:String;
+        public var accountID:int;
 		
 		public function UserStub()
 		{

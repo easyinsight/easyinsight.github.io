@@ -2,6 +2,7 @@ package com.easyinsight.genredata {
 import mx.collections.ArrayCollection;
 import mx.core.ClassFactory;
 import mx.core.IFactory;
+import mx.rpc.events.FaultEvent;
 import mx.rpc.events.ResultEvent;
 import mx.rpc.remoting.RemoteObject;
 
@@ -14,6 +15,11 @@ public class PublicDataController extends ExchangeController{
         exchangeService = new RemoteObject();
         exchangeService.destination = "exchangeService";
         exchangeService.getReports.addEventListener(ResultEvent.RESULT, onData);
+        exchangeService.getReports.addEventListener(FaultEvent.FAULT, onFault);
+    }
+
+    private function onFault(event:FaultEvent):void {
+        
     }
 
     override public function get text():String {

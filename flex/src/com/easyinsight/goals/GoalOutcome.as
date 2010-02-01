@@ -1,6 +1,6 @@
 package com.easyinsight.goals {
-[Bindable]
-[RemoteClass(alias="com.easyinsight.goals.GoalOutcome")]
+/*[Bindable]
+[RemoteClass(alias="com.easyinsight.goals.GoalOutcome")]*/
 public class GoalOutcome {
 
 

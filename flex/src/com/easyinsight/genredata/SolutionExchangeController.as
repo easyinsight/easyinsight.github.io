@@ -109,6 +109,7 @@ public class SolutionExchangeController extends ExchangeController{
 
     override protected function createExchangeSummaryPage():ExchangePage {
         var summary:SolutionExchangeSummaryPage = new SolutionExchangeSummaryPage();
+        summary.id = "connectionSummary";
         summary.itemRenderer = summaryItemRenderer();
         BindingUtils.bindProperty(summary, "solutions", this, "solutions");
         BindingUtils.bindProperty(summary, "solution", this, "solution");

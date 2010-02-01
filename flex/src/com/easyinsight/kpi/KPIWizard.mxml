@@ -1,0 +1,14 @@
+<?xml version="1.0" ?>
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml">
+    <mx:ViewStack>
+        <mx:VBox>
+            <mx:Text text="First, you need to choose a data source. This data source is where the data for the KPI will be coming from."/>
+        </mx:VBox>
+        <mx:VBox>
+            <mx:Text text="Next, you need to choose a measure. This is the numeric value that the KPI will be measuring."/>
+        </mx:VBox>
+        <mx:VBox>
+            <mx:Text text="Finally, you can filter down the KPI to a particular subset of data."/>
+        </mx:VBox>
+    </mx:ViewStack>
+</mx:VBox>

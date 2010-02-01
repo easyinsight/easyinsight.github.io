@@ -1,5 +1,5 @@
 <?xml version="1.0" ?>
-<util:EITitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*" backgroundColor="#FFFFFF">
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*" backgroundColor="#FFFFFF">
     <mx:Script><![CDATA[
         import com.easyinsight.framework.NavigationEvent;
         import com.easyinsight.genredata.AnalyzeEvent;
@@ -55,4 +55,4 @@
         </mx:HBox>
         <mx:Button label="Cancel" click="PopUpManager.removePopUp(this)" fontSize="14"/>
     </mx:VBox>
-</util:EITitleWindow>
+</mx:VBox>

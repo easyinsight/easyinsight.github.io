@@ -422,11 +422,14 @@
         </mx:VBox>
         <mx:VBox label="Filters" width="100%" height="100%" paddingBottom="5" paddingLeft="5" paddingRight="5"
                  paddingTop="5">
+            <mx:HBox width="100%" horizontalAlign="center">
+                <mx:Label text="Drag Fields Below to Create Filters" fontSize="14"/>
+            </mx:HBox>
             <filters:TransformContainer id="transformContainer" paddingLeft="10" paddingTop="10" paddingBottom="10"
                                           paddingRight="10"
                                           width="100%" height="100%" backgroundColor="#ffffff" backgroundAlpha=".1"
                                           feedID="{_dataSourceID}"
-                                          analysisItems="{allItems}"/>
+                                          analysisItems="{allItems}" borderStyle="solid" borderThickness="1"/>
         </mx:VBox>
     </mx:TabNavigator>
     <mx:StringValidator id="nameValidator" source="{fieldNameInput}" property="text" minLength="3"/>

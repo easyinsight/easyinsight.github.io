@@ -77,10 +77,11 @@
 
         private function gotDataSource():void {
             dataSourceDefinition = feedService.getFeedDefinition.lastResult as FeedDefinitionData;
-            ready = true;
+            ready = true;            
             var configClass:Class = (dataSourceDefinition as IServerDataSourceDefinition).configClass();
             dataSourceCreation = new configClass();
             coreContent.addChild(dataSourceCreation as DisplayObject);
+            PopUpUtil.centerPopUp(this);
         }
 
         public function set dataSourceID(value:int):void {

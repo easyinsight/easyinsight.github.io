@@ -35,7 +35,7 @@
             </mx:AddChild>
         </mx:State>
     </mx:states>
-    <mx:RemoteObject destination="goalService" id="goalService">
+    <mx:RemoteObject destination="kpiService" id="kpiService">
         <mx:method name="generateHistory" result="gotHistory()"/>
     </mx:RemoteObject>
     <mx:Script><![CDATA[
@@ -43,7 +43,7 @@
 
         import com.easyinsight.filtering.TransformContainer;
         import com.easyinsight.framework.CredentialsCache;
-
+        import com.easyinsight.kpi.KPIValue;
         import com.easyinsight.util.ProgressAlert;
 
         import mx.charts.LinearAxis;
@@ -57,7 +57,7 @@
             startDate = new Date(endDate.getTime() - (1000 * 60 * 60 * 24 * 14));
         }
 
-        private var _milestone:GoalTreeMilestone;
+        //private var _milestone:GoalTreeMilestone;
         private var _analysisMeasure:AnalysisMeasure;
 
         private var _transformContainer:TransformContainer;
@@ -103,24 +103,13 @@
             dispatchEvent(new Event("analysisMeasureChanged"));
         }
 
-        [Bindable(event="milestoneChanged")]
-        public function get milestone():GoalTreeMilestone {
-            return _milestone;
-        }
-
-        public function set milestone(value:GoalTreeMilestone):void {
-            if (_milestone == value) return;
-            _milestone = value;
-            dispatchEvent(new Event("milestoneChanged"));
-        }
-
         private function drawLine():void {
             linesCanvas.removeAllChildren();
             /*var dateFormatter:DateFormatter = new DateFormatter();
              dateFormatter.formatString = "MM/DD/YY";
              var format:String = dateFormatter.format(milestone.milestoneDate);
              Alert.show(format);*/
-            if (milestone != null) {
+            /*if (milestone != null) {
                 var chartXValue:Object = getNumericChartValue(milestone.milestoneDate, horAxis);
                 var thePosition:Point = chartToScreen(chartXValue.numericValue, 0, horSeries);
 
@@ -139,7 +128,7 @@
                 //milestoneLabel.width = milestoneLabel.height = 20;
                 milestoneLabel.x = thePosition.x - (milestoneLabel.width / 2) + 1;
                 milestoneLabel.y = 5;
-            }
+            }*/
         }
 
 
@@ -165,19 +154,18 @@
         }
 
         private function generateHistory():void {
-            ProgressAlert.alert(this, "Generating goal history...", null, goalService.generateHistory);
-            goalService.generateHistory.send(analysisMeasure, _transformContainer.getFilterDefinitions(),
+            ProgressAlert.alert(this, "Generating goal history...", null, kpiService.generateHistory);
+            kpiService.generateHistory.send(analysisMeasure, _transformContainer.getFilterDefinitions(),
                     feedID, startChooser.selectedDate, endChooser.selectedDate, CredentialsCache.getCache().createCredentials());
         }
 
 
         private function gotHistory():void {
-            var results:ArrayCollection = goalService.generateHistory.lastResult as ArrayCollection;
+            var results:ArrayCollection = kpiService.generateHistory.lastResult as ArrayCollection;
             if (results.length == 0) {
                 currentState = "noHistory";
             } else if (results.length == 1) {
-                var goalValue:GoalValue = results.getItemAt(0) as GoalValue;
-
+                var goalValue:KPIValue = results.getItemAt(0) as KPIValue;
                 latestValue = analysisMeasure.getFormatter().format(goalValue.value);
                 currentState = "oneResult";
             } else {

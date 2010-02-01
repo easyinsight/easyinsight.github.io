@@ -31,6 +31,9 @@ public class SolutionView extends VBox{
         setStyle("paddingBottom", 10);
         setStyle("backgroundAlpha", 0);
         setStyle("horizontalAlign", "center");
+        mouseChildren = false;
+        buttonMode = true;
+        useHandCursor = true;
         addEventListener(MouseEvent.CLICK, onClick);
     }
 
@@ -72,13 +75,13 @@ public class SolutionView extends VBox{
         titleText = solution.name;
         if (User.getInstance() == null) {
             backgroundColor = 0xFFFFFF;
-            toolTip = "Click to look at details about this solution.";
+            toolTip = "Click to look at details about this connection.";
         } else if (solution.accessible) {
             backgroundColor = 0xFFFFFF;
-            toolTip = "Click to look at details about this solution.";
+            toolTip = "Click to look at details about this connection.";
         } else {
             backgroundColor = 0xCCCCCC;
-            toolTip = "This solution is not accessible to your account tier.";
+            toolTip = "This connection is not accessible to your account tier.";
         }
         if (box != null) box.setStyle("backgroundColor", backgroundColor);
 

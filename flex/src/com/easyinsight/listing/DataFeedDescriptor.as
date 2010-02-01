@@ -17,9 +17,12 @@ package com.easyinsight.listing
 		public static const SALESFORCE_SUB:int = 6;
 		public static const EMPTY:int = 8;
 		public static const JIRA:int = 9;
-		public static const BASECAMP:int = 10;
+
         public static const GNIP:int = 12;
         public static const GOOGLE_ANALYTICS:int = 13;
+        public static const BASECAMP:int = 18;
+        public static const CLOUD_WATCH:int = 21;
+        public static const CLARITY:int = 22;
         public static const HIGHRISE:int = 23;
         public static const TWITTER:int = 26;
 

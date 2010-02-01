@@ -136,14 +136,15 @@ public class SolutionDetailRenderer extends VBox implements IPerspective {
                 items.addItem(solInstall.descriptor);
             }
         }
-        var dataSource:DataSourceDescriptor = dataSourceItems.getItemAt(0) as DataSourceDescriptor;
-        var window:PostInstallWindow = new PostInstallWindow();
+        var dataSource:DataSourceDescriptor = dataSourceItems.getItemAt(0) as DataSourceDescriptor;        
+        dispatchEvent(new AnalyzeEvent(new PostInstallSource(dataSource, _solution)));
+        /*var window:PostInstallWindow = new PostInstallWindow();
         window.dataSourceDescriptor = dataSource;
         window.solution = _solution;
         window.addEventListener(AnalyzeEvent.ANALYZE, passThrough);
         window.addEventListener(NavigationEvent.NAVIGATION, passThrough);
         PopUpManager.addPopUp(window, this, true);
-        PopUpUtil.centerPopUp(window);
+        PopUpUtil.centerPopUp(window);*/
         /*if (items.length == 1 && goalTrees == 1) {
             dispatchEvent(new AnalyzeEvent(new GoalDataAnalyzeSource((GoalTreeDescriptor(items.getItemAt(0)).id))));
         } else if (items.length == 1 && reports == 1) {

@@ -81,6 +81,10 @@ public class DataViewFactory extends VBox {
         return new _reportControlBar();
     }
 
+    public function get dropAreaControlBar():IReportControlBar {
+        return _controlBar;
+    }
+
     private var _obfuscate:Boolean;
 
 
@@ -105,6 +109,7 @@ public class DataViewFactory extends VBox {
         BindingUtils.bindProperty(_dataService, "obfuscate", this, "obfuscate");
 
         _controlBar = createReportControlBar();
+        _controlBar["id"] = "_controlBar";
         _controlBar.analysisItems = _availableFields;
         _controlBar.dataSourceID = _dataSourceID;
         _controlBar.addEventListener(ReportDataEvent.REQUEST_DATA, onDataRequest);

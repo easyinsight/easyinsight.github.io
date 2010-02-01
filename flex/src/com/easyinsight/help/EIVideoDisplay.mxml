@@ -1,0 +1,81 @@
+<?xml version="1.0" ?>
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" horizontalAlign="center">
+    <mx:states>
+        <mx:State name="playing">
+            <mx:AddChild relativeTo="{box}">
+                <mx:VBox width="100%" height="100%">
+                    <mx:VideoDisplay source="{_screencastSource}" id="videoViewer"/>
+                    <mx:HBox width="100%" horizontalAlign="center">
+                        <mx:Button icon="{beginningIcon}" click="firstFrame()" toolTip="Go to Beginning"/>
+                        <mx:Button icon="{playOrPauseIcon}" click="play()" toolTip="Play"/>
+                        <mx:Button icon="{endIcon}" click="lastFrame()" toolTip="Go to End"/>
+                    </mx:HBox>
+                    <mx:HBox>
+                        <mx:HSlider thumbCount="1" value="{videoViewer.playheadTime}" minimum="0" maximum="{videoViewer.totalTime}"/>
+                    </mx:HBox>
+                </mx:VBox>
+            </mx:AddChild>
+        </mx:State>
+    </mx:states>
+    <mx:Script><![CDATA[
+        [Bindable]
+        private var _screencastSource:String;
+
+        [Bindable]
+        [Embed(source="../../../../assets/media_step_back.png")]
+        private var backIcon:Class;
+
+        [Bindable]
+        [Embed(source="../../../../assets/media_play.png")]
+        private var playIcon:Class;
+
+        [Bindable]
+        [Embed(source="../../../../assets/media_play_128.png")]
+        private var bigPlayIcon:Class;
+
+        [Bindable]
+        [Embed(source="../../../../assets/media_pause.png")]
+        private var pauseIcon:Class;
+
+        [Bindable]
+        [Embed(source="../../../../assets/media_step_forward.png")]
+        private var forwardIcon:Class;
+
+        [Bindable]
+        [Embed(source="../../../../assets/media_beginning.png")]
+        private var beginningIcon:Class;
+
+        [Bindable]
+        [Embed(source="../../../../assets/media_end.png")]
+        private var endIcon:Class;
+
+        [Bindable]
+        private var playOrPauseIcon:Class = playIcon;
+
+        public function set screencastSource(val:String):void {
+            _screencastSource = val;
+        }
+
+        private function firstFrame():void {
+            videoViewer.playheadTime = 0;
+        }
+
+        private function play():void {
+            if (playOrPauseIcon == pauseIcon) {
+                playOrPauseIcon = playIcon;
+                videoViewer.play();
+            } else {
+                playOrPauseIcon = pauseIcon;
+                videoViewer.pause();
+            }
+        }
+
+        private function lastFrame():void {
+            videoViewer.playheadTime = videoViewer.totalTime;
+        }
+
+    ]]></mx:Script>
+    <mx:Box width="100%" height="100%" id="box" horizontalAlign="center" verticalAlign="middle">
+        <mx:Image source="{bigPlayIcon}" click="currentState='playing'"/>
+    </mx:Box>
+</mx:VBox>

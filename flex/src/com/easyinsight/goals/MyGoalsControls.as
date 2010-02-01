@@ -45,7 +45,8 @@ package com.easyinsight.goals
 			deleteButton.toolTip = "Delete";
 			deleteButton.addEventListener(MouseEvent.CLICK, deleteGoalTree);
             BindingUtils.bindProperty(deleteButton, "visible", this, "admin");
-			addChild(deleteButton);			
+			addChild(deleteButton);
+            setStyle("verticalAlign", "middle");
 		}
 
         [Bindable]        

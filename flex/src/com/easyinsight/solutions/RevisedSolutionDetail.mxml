@@ -340,6 +340,7 @@
             var reports:int = 0;
             var items:ArrayCollection = new ArrayCollection();
             var dataSourceItems:ArrayCollection = new ArrayCollection();
+
             for each (var solInstall:SolutionInstallInfo in installResult) {
                 if (solInstall.descriptor.getType() == EIDescriptor.DATA_SOURCE) {
                     dataSources++;
@@ -354,16 +355,8 @@
                     items.addItem(solInstall.descriptor);
                 }
             }
-            if (items.length == 1 && goalTrees == 1) {
-                dispatchEvent(new AnalyzeEvent(new GoalDataAnalyzeSource((GoalTreeDescriptor(items.getItemAt(0)).id))));
-            } else if (items.length == 1 && reports == 1) {
-                dispatchEvent(new AnalyzeEvent(new ReportAnalyzeSource(InsightDescriptor(items.getItemAt(0)))));
-            } else if (items.length > 1) {
-                dispatchEvent(new AnalyzeEvent(new MultiScreenAnalyzeSource(items, _solution)));
-            } else {
-                var dataSourceDescriptor:DataSourceDescriptor = dataSourceItems.getItemAt(0) as DataSourceDescriptor;
-                dispatchEvent(new AnalyzeEvent(new DescriptorAnalyzeSource(dataSourceDescriptor.id, dataSourceDescriptor.name)));
-            }
+            var dataSource:DataSourceDescriptor = dataSourceItems.getItemAt(0) as DataSourceDescriptor;
+            dispatchEvent(new AnalyzeEvent(new PostInstallSource(dataSource, _solution)));
         }
 
         private function installedSolution():void {

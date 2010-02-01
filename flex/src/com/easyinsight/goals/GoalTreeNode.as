@@ -1,7 +1,9 @@
 package com.easyinsight.goals
 {
 import com.easyinsight.analysis.AnalysisMeasure;
-	import mx.collections.ArrayCollection;
+import com.easyinsight.kpi.KPI;
+
+import mx.collections.ArrayCollection;
 	
 	[Bindable]
 	[RemoteClass(alias="com.easyinsight.goals.GoalTreeNode")]
@@ -14,7 +16,9 @@ import com.easyinsight.analysis.AnalysisMeasure;
         public var subTreeName:String;
         public var subTreeIcon:String;
 
-		public var coreFeedID:int;
+        public var kpi:KPI;
+
+		/*public var coreFeedID:int;
 		public var coreFeedName:String;
 
         public var analysisMeasure:AnalysisMeasure;
@@ -27,7 +31,7 @@ import com.easyinsight.analysis.AnalysisMeasure;
 		public var associatedFeeds:ArrayCollection = new ArrayCollection();
 		public var associatedInsights:ArrayCollection = new ArrayCollection();
 		public var associatedSolutions:ArrayCollection = new ArrayCollection();
-        public var problemConditions:ArrayCollection = new ArrayCollection();
+        public var problemConditions:ArrayCollection = new ArrayCollection();*/
 
 		public var tags:ArrayCollection = new ArrayCollection();
 		public var name:String;
@@ -39,7 +43,7 @@ import com.easyinsight.analysis.AnalysisMeasure;
 
         public var users:ArrayCollection = new ArrayCollection();
         public var newSubTree:SolutionGoalTreeDescriptor;
-        public var milestone:GoalTreeMilestone;
+        //public var milestone:GoalTreeMilestone;
 
         private var _renderer:IGoalRenderer;
 		
@@ -68,20 +72,21 @@ import com.easyinsight.analysis.AnalysisMeasure;
         public function clone():GoalTreeNode {
             var clonedNode:GoalTreeNode = new GoalTreeNode();
             // recurse children?
-            clonedNode.analysisMeasure = this.analysisMeasure;
+            /*clonedNode.analysisMeasure = this.analysisMeasure;
             clonedNode.coreFeedID = this.coreFeedID;
             clonedNode.coreFeedName = this.coreFeedName;
             clonedNode.goalValue = this.goalValue;
             clonedNode.filters = new ArrayCollection(filters.toArray());
-            clonedNode.highIsGood = this.highIsGood;
+            clonedNode.highIsGood = this.highIsGood;*/
             clonedNode.name = this.name;
             clonedNode.description = this.description;
             clonedNode.iconImage = this.iconImage;
-            clonedNode.problemConditions = new ArrayCollection(problemConditions.toArray());
+            /*clonedNode.problemConditions = new ArrayCollection(problemConditions.toArray());
             clonedNode.associatedFeeds = new ArrayCollection(associatedFeeds.toArray());
             clonedNode.associatedInsights = new ArrayCollection(associatedInsights.toArray());
             clonedNode.measureLabel = this.measureLabel;
-            clonedNode.goalDefined = this.goalDefined;
+            clonedNode.goalDefined = this.goalDefined;*/
+            clonedNode.kpi = this.kpi;
             var newChildren:ArrayCollection = new ArrayCollection();
             for each (var childNode:GoalTreeNode in children) {
                 var clonedChild:GoalTreeNode = childNode.clone();

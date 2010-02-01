@@ -240,7 +240,8 @@ public class MyDataIconControls extends HBox
                 case DataFeedDescriptor.EMPTY:
                     fileData(feedDescriptor);
                     break;
-                default:
+                case DataFeedDescriptor.BASECAMP:
+                case DataFeedDescriptor.HIGHRISE:
                     refreshData(feedDescriptor);
                     break;
             }
@@ -275,6 +276,7 @@ public class MyDataIconControls extends HBox
             return;
         }
         else */
+
         var c:Credentials = User.getCredentials(feedDescriptor.dataFeedID);
         if (c != null) {
             userUploadSource = new RemoteObject();
@@ -346,11 +348,22 @@ public class MyDataIconControls extends HBox
         this.obj = value;
         if (value is DataFeedDescriptor) {
             var descriptor:DataFeedDescriptor = value as DataFeedDescriptor;
-            refreshButton.setVisible(true);
             adminVisible = descriptor.role == DataFeedDescriptor.OWNER;
             adminTooltip = "Administer the data source...";
             copyVisible = true;
             deleteVisible = descriptor.groupSourceID == 0;
+            switch (descriptor.feedType) {
+                case DataFeedDescriptor.STATIC:
+                case DataFeedDescriptor.EMPTY:
+                case DataFeedDescriptor.BASECAMP:
+                case DataFeedDescriptor.HIGHRISE:
+                    refreshVisible = true;
+                    break;
+                default:
+                    refreshVisible = false;
+                    break;
+            }
+
         } else if (value is InsightDescriptor) {
             refreshVisible = false;
             adminVisible = true;
