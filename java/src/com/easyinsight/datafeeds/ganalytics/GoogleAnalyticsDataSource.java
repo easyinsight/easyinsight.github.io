@@ -1,6 +1,8 @@
 package com.easyinsight.datafeeds.ganalytics;
 
 import com.easyinsight.datafeeds.*;
+import com.easyinsight.kpi.KPI;
+import com.easyinsight.kpi.KPIUtil;
 import com.easyinsight.users.Credentials;
 import com.easyinsight.users.Account;
 import com.easyinsight.dataset.DataSet;
@@ -348,5 +350,17 @@ public class GoogleAnalyticsDataSource extends ServerDataSourceDefinition {
     }
 
     public void customLoad(Connection conn) throws SQLException {
+    }
+
+    @Override
+    public List<KPI> createKPIs() {
+        List<KPI> kpis = new ArrayList<KPI>();
+        kpis.add(KPIUtil.createKPIForDateFilter("Visits in the Last Week", "user.png", (AnalysisMeasure) findAnalysisItem(GoogleAnalyticsDataSource.VISITS),
+                (AnalysisDimension) findAnalysisItem(GoogleAnalyticsDataSource.DATE), MaterializedRollingFilterDefinition.LAST_FULL_WEEK,
+                null, KPI.GOOD));
+        kpis.add(KPIUtil.createKPIForDateFilter("New Visits in the Last Week", "user3.png", (AnalysisMeasure) findAnalysisItem(GoogleAnalyticsDataSource.NEW_VISITS),
+                (AnalysisDimension) findAnalysisItem(GoogleAnalyticsDataSource.DATE), MaterializedRollingFilterDefinition.LAST_FULL_WEEK,
+                null, KPI.GOOD));
+        return kpis;
     }
 }

@@ -3,6 +3,8 @@ package com.easyinsight.datafeeds.cloudwatch;
 import com.easyinsight.datafeeds.*;
 import com.easyinsight.analysis.*;
 import com.easyinsight.dataset.DataSet;
+import com.easyinsight.kpi.KPI;
+import com.easyinsight.kpi.KPIUtil;
 import com.easyinsight.users.Credentials;
 import com.easyinsight.users.Account;
 import com.easyinsight.core.Key;
@@ -120,5 +122,14 @@ public class CloudWatchDataSource extends ServerDataSourceDefinition {
 
     public List<DataSourceMigration> getMigrations() {
         return Arrays.asList((DataSourceMigration) new CloudWatch1To2(this));
+    }
+
+    @Override
+    public List<KPI> createKPIs() {
+        List<KPI> kpis = new ArrayList<KPI>();
+        kpis.add(KPIUtil.createKPIForDateFilter("Average CPU Utilization in the Last 24 Hours", "cpu.png", (AnalysisMeasure) findAnalysisItem(CloudWatchDataSource.CPU_UTILIZATION),
+                (AnalysisDimension) findAnalysisItem(CloudWatchDataSource.DATE), MaterializedRollingFilterDefinition.LAST_DAY,
+                null, 0));
+        return kpis;
     }
 }

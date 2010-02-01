@@ -1,10 +1,12 @@
 package com.easyinsight.datafeeds.basecamp;
 
+import com.easyinsight.analysis.*;
 import com.easyinsight.datafeeds.*;
 import com.easyinsight.datafeeds.composite.CompositeServerDataSource;
 import com.easyinsight.datafeeds.composite.ChildConnection;
+import com.easyinsight.kpi.KPI;
+import com.easyinsight.kpi.KPIUtil;
 import com.easyinsight.users.Account;
-import com.easyinsight.analysis.DataSourceInfo;
 
 import java.net.UnknownHostException;
 import java.util.*;
@@ -179,5 +181,25 @@ public class BaseCampCompositeSource extends CompositeServerDataSource {
     @Override
     public List<DataSourceMigration> getMigrations() {
         return Arrays.asList((DataSourceMigration) new BaseCamp1To2(this));
+    }
+
+    @Override
+    public List<KPI> createKPIs() {
+        List<KPI> kpis = new ArrayList<KPI>();
+        FilterValueDefinition openFilter = new FilterValueDefinition();
+        openFilter.setField(findAnalysisItem(BaseCampTodoSource.COMPLETED));
+        openFilter.setFilteredValues(Arrays.asList((Object) "false"));
+        kpis.add(KPIUtil.createKPIWithFilters("Total Open Todo Items", "inbox.png", (AnalysisMeasure) findAnalysisItem(BaseCampTodoSource.COUNT),
+                Arrays.asList((FilterDefinition) openFilter), KPI.BAD));
+        FilterValueDefinition closedFilter = new FilterValueDefinition();
+        closedFilter.setField(findAnalysisItem(BaseCampTodoSource.COMPLETED));
+        closedFilter.setFilteredValues(Arrays.asList((Object) "false"));
+        kpis.add(KPIUtil.createKPIForDateFilter("Todo Items Closed in the Last Seven Days", "inbox.png", (AnalysisMeasure) findAnalysisItem(BaseCampTodoSource.COUNT),
+                (AnalysisDimension) findAnalysisItem(BaseCampTodoSource.COMPLETEDDATE), MaterializedRollingFilterDefinition.WEEK,
+                Arrays.asList((FilterDefinition) closedFilter), KPI.GOOD));
+        kpis.add(KPIUtil.createKPIForDateFilter("Hours Worked Month to Date", "clock.png", (AnalysisMeasure) findAnalysisItem(BaseCampTimeSource.HOURS),
+                (AnalysisDimension) findAnalysisItem(BaseCampTimeSource.DATE), MaterializedRollingFilterDefinition.MONTH_TO_NOW,
+                null, KPI.GOOD));
+        return kpis;
     }
 }

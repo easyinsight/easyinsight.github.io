@@ -63,14 +63,14 @@ public class GoalTest extends TestCase {
         rootNode.setName("Root Node");
         GoalTreeNode dataNode = new GoalTreeNode();
         dataNode.setParent(rootNode);
-        dataNode.setCoreFeedID(dataSourceID);
+        /*dataNode.setCoreFeedID(dataSourceID);
         dataNode.setAnalysisMeasure((AnalysisMeasure) findAnalysisItem(dataSourceID, "Revenue"));
         RollingFilterDefinition rollingFilterDefinition = new RollingFilterDefinition();
         rollingFilterDefinition.setField(findAnalysisItem(dataSourceID, "When"));
         rollingFilterDefinition.setInterval(MaterializedRollingFilterDefinition.DAY);
         dataNode.setFilters(Arrays.asList((FilterDefinition) rollingFilterDefinition));
         dataNode.setGoalValue(1000);
-        dataNode.setHighIsGood(true);
+        dataNode.setHighIsGood(true);*/
         dataNode.setName("Data Node");
         rootNode.setChildren(Arrays.asList(dataNode));
         goalTree.setRootNode(rootNode);
@@ -91,7 +91,7 @@ public class GoalTest extends TestCase {
         milestone.setMilestoneName("Milestone");
         milestone.setMilestoneDate(cal.getTime());
         goalService.saveMilestone(milestone);
-        dataNode.setMilestone(milestone);
+        //dataNode.setMilestone(milestone);
         goalService.updateGoalTree(goalTree);
         GoalTree dataTree = goalService.createDataTree(goalTreeID);
         GoalTreeNodeData data = (GoalTreeNodeData) dataTree.getRootNode().getChildren().get(0);

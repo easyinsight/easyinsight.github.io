@@ -12,12 +12,10 @@ import com.easyinsight.logging.LogClass;
 import com.easyinsight.email.UserStub;
 import com.easyinsight.users.Account;
 import com.easyinsight.users.Credentials;
-import com.easyinsight.users.MalformedCredentialsException;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.database.Database;
 import com.easyinsight.datafeeds.*;
 import com.easyinsight.pipeline.HistoryRun;
-import com.easyinsight.PasswordStorage;
 
 import java.util.*;
 import java.sql.SQLException;
@@ -107,7 +105,7 @@ public class GoalService {
         }
     }
 
-    public List<GoalValue> generateHistory(AnalysisMeasure analysisMeasure, List<FilterDefinition> filters, long dataSourceID, Date startDate, Date endDate,
+    /*public List<GoalValue> generateHistory(AnalysisMeasure analysisMeasure, List<FilterDefinition> filters, long dataSourceID, Date startDate, Date endDate,
                                            List<CredentialFulfillment> credentials) {
         try {
             return new HistoryRun().calculateHistoricalValues(dataSourceID, analysisMeasure, filters, startDate, endDate, credentials);
@@ -115,7 +113,7 @@ public class GoalService {
             LogClass.error(e);
             throw new RuntimeException(e);
         }
-    }
+    }*/
 
     public GoalSaveInfo updateGoalTree(GoalTree goalTree) {
         SecurityUtil.authorizeGoalTree(goalTree.getGoalTreeID(), Roles.OWNER);
@@ -260,23 +258,7 @@ public class GoalService {
         }
 
         return new ArrayList<CredentialRequirement>(credentialMap.values());
-    }
-
-    private Credentials decryptCredentials(Credentials creds) throws MalformedCredentialsException {
-        Credentials c = new Credentials();
-        String s = PasswordStorage.decryptString(creds.getUserName());
-        int i = s.lastIndexOf(":" + SecurityUtil.getUserName());
-        if(i == -1) {
-            throw new MalformedCredentialsException();
-        }
-        c.setUserName(s.substring(0, i));
-        s = PasswordStorage.decryptString(creds.getPassword());
-        i = s.lastIndexOf(":" + SecurityUtil.getUserName());
-        if(i == -1)
-            throw new MalformedCredentialsException();
-        c.setPassword(s.substring(0, i));
-        return c;
-    }
+    }    
 
     public GoalTree forceRefresh(long goalTreeID, List<CredentialFulfillment> credentialsList, boolean allSources, boolean includeSubTrees) {
         SecurityUtil.authorizeGoalTree(goalTreeID, Roles.SUBSCRIBER);
@@ -294,7 +276,7 @@ public class GoalService {
                             }
                         }
                         if (credentials != null && credentials.isEncrypted()) {
-                            credentials = decryptCredentials(credentials);
+                            credentials = credentials.decryptCredentials();
                         }
                         dataSource.refreshData(credentials, SecurityUtil.getAccountID(), new Date(), null);
                     }
@@ -334,7 +316,7 @@ public class GoalService {
         }
     }
 
-    public List<GoalValue> getGoalValues(final long goalTreeNodeID, final Date startDate, final Date endDate, List<CredentialFulfillment> credentialsList) {
+    /*public List<GoalValue> getGoalValues(final long goalTreeNodeID, final Date startDate, final Date endDate, List<CredentialFulfillment> credentialsList) {
         SecurityUtil.authorizeGoal(goalTreeNodeID, Roles.SUBSCRIBER);
         try {
             return goalEvaluationStorage.getGoalValuesFromDatabase(goalTreeNodeID, startDate, endDate, credentialsList);
@@ -342,9 +324,9 @@ public class GoalService {
             LogClass.error(e);
             throw new RuntimeException(e);
         }
-    }
+    }*/
 
-    public List<CredentialRequirement> getCredentialsForNode(long goalTreeNodeID, List<CredentialFulfillment> existingCredentials, boolean forceRefresh) {
+    /*public List<CredentialRequirement> getCredentialsForNode(long goalTreeNodeID, List<CredentialFulfillment> existingCredentials, boolean forceRefresh) {
         Map<Long, CredentialRequirement> credentialMap = new HashMap<Long, CredentialRequirement>();
         EIConnection conn = Database.instance().getConnection();
         GoalTreeNode goalTreeNode;
@@ -403,7 +385,7 @@ public class GoalService {
             throw new RuntimeException(e);
         }
         return new ArrayList<CredentialRequirement>(credentialMap.values());
-    }
+    }*/
 
     private GoalTreeNodeData createDataTreeForDates(GoalTree goalTree) {
         GoalTreeNodeData dataNode = new GoalTreeNodeDataBuilder().build(goalTree.getRootNode());
@@ -416,11 +398,11 @@ public class GoalService {
                         GoalStorage goalStorage = new GoalStorage();
                         GoalTree subTree = goalStorage.retrieveGoalTree(data.getSubTreeID());
                         GoalTreeNodeData subData = createDataTreeForDates(subTree);
-                        if (data.getAnalysisMeasure() == null) {
+                        /*if (data.getAnalysisMeasure() == null) {
                             data.setGoalOutcome(subData.getGoalOutcome());
                         } else {
                             data.populateCurrentValue();
-                        }
+                        }*/
                     } else {
                         data.populateCurrentValue();
                     }
@@ -514,12 +496,12 @@ public class GoalService {
         return nodes;
     }
 
-    public List<GoalValue> calculateSlope(long goalID, Date startDate, Date endDate) {
+    /*public List<GoalValue> calculateSlope(long goalID, Date startDate, Date endDate) {
         try {
             return goalEvaluationStorage.calculateSlope(goalID, startDate, endDate);
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);
         }
-    }
+    }*/
 }

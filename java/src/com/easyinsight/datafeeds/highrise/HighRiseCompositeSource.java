@@ -1,12 +1,13 @@
 package com.easyinsight.datafeeds.highrise;
 
+import com.easyinsight.analysis.*;
 import com.easyinsight.datafeeds.composite.CompositeServerDataSource;
 import com.easyinsight.datafeeds.composite.ChildConnection;
 import com.easyinsight.datafeeds.FeedType;
 import com.easyinsight.datafeeds.IServerDataSourceDefinition;
 import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.datafeeds.CredentialsDefinition;
-import com.easyinsight.analysis.DataSourceInfo;
+import com.easyinsight.kpi.KPI;
 import com.easyinsight.users.Account;
 
 import java.util.*;
@@ -168,4 +169,37 @@ public class HighRiseCompositeSource extends CompositeServerDataSource {
     public int getCredentialsDefinition() {
         return CredentialsDefinition.STANDARD_USERNAME_PW;
     }
+
+    public List<KPI> createKPIs() {
+        KPI dealValueKPI = new KPI();
+        dealValueKPI.setName("Pending Dollar Value of the Sales Pipeline");
+        dealValueKPI.setIconImage("credit_card.png");
+        dealValueKPI.setAnalysisMeasure((AnalysisMeasure) findAnalysisItem(HighRiseDealSource.TOTAL_DEAL_VALUE));
+        FilterValueDefinition filterValueDefinition = new FilterValueDefinition();
+        filterValueDefinition.setField(findAnalysisItem(HighRiseDealSource.STATUS));
+        filterValueDefinition.setFilteredValues(Arrays.asList((Object) "pending"));
+        dealValueKPI.setFilters(Arrays.asList((FilterDefinition) filterValueDefinition));
+        KPI pendingDealCountKPI = new KPI();
+        pendingDealCountKPI.setName("Number of Pending Deals in the Pipeline");
+        pendingDealCountKPI.setIconImage("funnel.png");
+        pendingDealCountKPI.setAnalysisMeasure((AnalysisMeasure) findAnalysisItem(HighRiseDealSource.COUNT));
+        FilterValueDefinition pendingCountFilter = new FilterValueDefinition();
+        pendingCountFilter.setField(findAnalysisItem(HighRiseDealSource.STATUS));
+        pendingCountFilter.setFilteredValues(Arrays.asList((Object) "pending"));
+        pendingDealCountKPI.setFilters(Arrays.asList((FilterDefinition) pendingCountFilter));
+        KPI dealsClosedMonthKPI = new KPI();
+        dealsClosedMonthKPI.setName("Dollar Value of Deals Created in the Last 30 Days");
+        dealsClosedMonthKPI.setIconImage("symbol_dollar.png");
+        dealsClosedMonthKPI.setAnalysisMeasure((AnalysisMeasure) findAnalysisItem(HighRiseDealSource.TOTAL_DEAL_VALUE));
+        FilterValueDefinition wonFilterDefinition = new FilterValueDefinition();
+        wonFilterDefinition.setField(findAnalysisItem(HighRiseDealSource.STATUS));
+        wonFilterDefinition.setFilteredValues(Arrays.asList((Object) "won"));
+        RollingFilterDefinition rollingFilterDefinition = new RollingFilterDefinition();
+        rollingFilterDefinition.setField(findAnalysisItem(HighRiseDealSource.CREATED_AT));
+        rollingFilterDefinition.setInterval(MaterializedRollingFilterDefinition.LAST_FULL_MONTH);
+        dealsClosedMonthKPI.setFilters(Arrays.asList((FilterDefinition) rollingFilterDefinition));
+        return Arrays.asList(dealValueKPI, pendingDealCountKPI, dealsClosedMonthKPI);
+    }
+
+    
 }

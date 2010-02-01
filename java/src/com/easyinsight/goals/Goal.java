@@ -9,15 +9,6 @@ import java.util.List;
  */
 public class Goal {
     private List<GoalCondition> goalCondition;
-    private long analysisID;
-
-    public long getAnalysisID() {
-        return analysisID;
-    }
-
-    public void setAnalysisID(long analysisID) {
-        this.analysisID = analysisID;
-    }
 
     public List<GoalCondition> getGoalCondition() {
         return goalCondition;

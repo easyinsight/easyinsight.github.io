@@ -32,7 +32,8 @@ import javax.xml.bind.annotation.XmlType;
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "folder", propOrder = {
     "fields",
-    "folders"
+    "folders",
+    "name"
 })
 public class Folder {
 

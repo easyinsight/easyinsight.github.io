@@ -1,5 +1,7 @@
 package com.easyinsight.goals;
 
+import com.easyinsight.database.EIConnection;
+import com.easyinsight.kpi.KPI;
 import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.security.Roles;
 import com.easyinsight.security.AuthorizationRequirement;
@@ -39,13 +41,13 @@ public class InstallationSystem {
     private Map<SolutionElementKey, Long> installedObjectMap = new HashMap<SolutionElementKey, Long>();
     private List<SolutionInstallInfo> allSolutions = new ArrayList<SolutionInstallInfo>();
     private List<AuthorizationRequirement> authRequirements = new ArrayList<AuthorizationRequirement>();
-    private Connection conn;
+    private EIConnection conn;
     private long userID;
     private GoalStorage goalStorage = new GoalStorage();
     private FeedStorage feedStorage = new FeedStorage();
     private SolutionService solutionService = new SolutionService();
 
-    public InstallationSystem(Connection conn) {
+    public InstallationSystem(EIConnection conn) {
         this.conn = conn;
         this.userID = SecurityUtil.getUserID();
     }
@@ -58,14 +60,14 @@ public class InstallationSystem {
         return authRequirements;
     }
 
-    public void installSolution(Solution solution) throws SQLException, CloneNotSupportedException {
+    public void installSolution(Solution solution) throws Exception {
         allSolutions.addAll(generateFeedsForSolution(solution.getSolutionID(), userID, conn, solution.isCopyData()));
         if (solution.getGoalTreeID() > 0) {
             duplicateTree(solution.getGoalTreeID(), solution.getSolutionID());
         }
     }
 
-    public void installUserTree(GoalTree goalTree, List<Integer> inlineSolutionIDs) throws SQLException, CloneNotSupportedException {
+    public void installUserTree(GoalTree goalTree, List<Integer> inlineSolutionIDs) throws Exception, CloneNotSupportedException {
 
         for (Integer solutionID : inlineSolutionIDs) {
             Solution solution = solutionService.getSolution(solutionID, conn);
@@ -87,7 +89,7 @@ public class InstallationSystem {
         //sendTodos();
     }
 
-    private long duplicateTree(long goalTreeID, long solutionID) throws SQLException, CloneNotSupportedException {
+    private long duplicateTree(long goalTreeID, long solutionID) throws Exception {
         GoalTree goalTree = new GoalStorage().retrieveGoalTree(goalTreeID, conn);
         GoalTree clonedTree = goalTree.clone();
         FeedConsumer feedConsumer = new UserStub(userID, null, null, null);
@@ -122,21 +124,23 @@ public class InstallationSystem {
         GoalTreeVisitor idReplacementVisitor = new GoalTreeVisitor() {
 
             protected void accept(GoalTreeNode goalTreeNode) {
-                if (goalTreeNode.getCoreFeedID() > 0) {
-                    Long newID = installedObjectMap.get(new SolutionElementKey(SolutionElementKey.DATA_SOURCE, goalTreeNode.getCoreFeedID()));
+                if (goalTreeNode.getKpi() != null) {
+                    KPI kpi = goalTreeNode.getKpi();
+                    Long newID = installedObjectMap.get(new SolutionElementKey(SolutionElementKey.DATA_SOURCE, kpi.getCoreFeedID()));
+                    KPI clonedKPI = kpi.clone();
                     if (newID != null) {
-                        goalTreeNode.setCoreFeedID(newID);
+                        clonedKPI.setCoreFeedID(newID);
                         FeedDefinition feedDefinition;
                         try {
                             feedDefinition = feedStorage.getFeedDefinitionData(newID);
-                            goalTreeNode.setAnalysisMeasure((AnalysisMeasure) findItem(goalTreeNode.getAnalysisMeasure(), feedDefinition).clone());
+                            clonedKPI.setAnalysisMeasure((AnalysisMeasure) findItem(kpi.getAnalysisMeasure(), feedDefinition).clone());
                         } catch (Exception e) {
                             LogClass.error(e);
                             throw new RuntimeException(e);
                         }
-                        if (goalTreeNode.getFilters() != null) {
+                        if (kpi.getFilters() != null) {
                             List<FilterDefinition> newFilters = new ArrayList<FilterDefinition>();
-                            for (FilterDefinition filterDefinition : goalTreeNode.getFilters()) {
+                            for (FilterDefinition filterDefinition : kpi.getFilters()) {
                                 filterDefinition.afterLoad();
 
                                 FilterDefinition clonedPersistableFilterDefinition;
@@ -149,9 +153,9 @@ public class InstallationSystem {
                                 clonedPersistableFilterDefinition.setField(findItem(filterDefinition.getField(), feedDefinition));
                                 newFilters.add(clonedPersistableFilterDefinition);
                             }
-                            goalTreeNode.setFilters(newFilters);
+                            clonedKPI.setFilters(newFilters);
                         }
-                        if (goalTreeNode.getProblemConditions() != null) {
+                        /*if (goalTreeNode.getProblemConditions() != null) {
                             List<FilterDefinition> newFilters = new ArrayList<FilterDefinition>();
                             for (FilterDefinition filterDefinition : goalTreeNode.getProblemConditions()) {
                                 filterDefinition.afterLoad();
@@ -166,19 +170,7 @@ public class InstallationSystem {
                                 newFilters.add(clonedPersistableFilterDefinition);
                             }
                             goalTreeNode.setProblemConditions(newFilters);
-                        }
-                    }
-                }
-                for (GoalFeed goalFeed : goalTreeNode.getAssociatedFeeds()) {
-                    Long newID = installedObjectMap.get(new SolutionElementKey(SolutionElementKey.DATA_SOURCE, goalFeed.getFeedID()));
-                    if (newID != null) {
-                        goalFeed.setFeedID(newID);
-                    }
-                }
-                for (InsightDescriptor goalInsight : goalTreeNode.getAssociatedInsights()) {
-                    Long newID = installedObjectMap.get(new SolutionElementKey(SolutionElementKey.INSIGHT, goalInsight.getId()));
-                    if (newID != null) {
-                        goalInsight.setId(newID);
+                        }*/
                     }
                 }
             }
@@ -192,12 +184,12 @@ public class InstallationSystem {
         GoalTreeVisitor visitor = new GoalTreeVisitor() {
 
             protected void accept(GoalTreeNode goalTreeNode) {
-                if (goalTreeNode.getCoreFeedID() > 0) {
+                /*if (goalTreeNode.getCoreFeedID() > 0) {
                     dataSourceIDs.add(goalTreeNode.getCoreFeedID());
                 }
                 for (GoalFeed dataSource : goalTreeNode.getAssociatedFeeds()) {
                     dataSourceIDs.add(dataSource.getFeedID());
-                }
+                }*/
             }
         };
         visitor.visit(goalTree.getRootNode());
@@ -227,7 +219,7 @@ public class InstallationSystem {
                             throw new RuntimeException(e);
                         }
                     }
-                } catch (SQLException e) {
+                } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
             }

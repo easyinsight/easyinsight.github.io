@@ -4,6 +4,7 @@ package com.easyinsight.datafeeds;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.analysis.*;
 import com.easyinsight.core.Key;
+import com.easyinsight.kpi.KPI;
 
 import java.util.*;
 import java.io.Serializable;
@@ -139,4 +140,8 @@ public abstract class Feed implements Serializable {
     }*/
 
     public abstract DataSet getDetails(Collection<FilterDefinition> filters);
+
+    public List<KPI> createKPIs() {
+        return new ArrayList<KPI>();
+    }
 }

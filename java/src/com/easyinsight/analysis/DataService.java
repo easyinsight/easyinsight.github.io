@@ -302,6 +302,13 @@ public class DataService {
                     validQueryItems.add(analysisItem);
                 }
             }
+            boolean aggregateQuery = true;
+            for (AnalysisItem analysisItem : analysisDefinition.getAllAnalysisItems()) {
+                if (analysisItem.blocksDBAggregation()) {
+                    aggregateQuery = false;
+                }
+            }
+            insightRequestMetadata.setAggregateQuery(aggregateQuery);
             Collection<FilterDefinition> filters = analysisDefinition.retrieveFilterDefinitions();
             DataSet dataSet = feed.getAggregateDataSet(validQueryItems, filters, insightRequestMetadata, feed.getFields(), false, null);
             Pipeline pipeline = new StandardReportPipeline();

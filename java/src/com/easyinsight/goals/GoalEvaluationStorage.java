@@ -1,10 +1,10 @@
 package com.easyinsight.goals;
 
 import com.easyinsight.database.Database;
-import com.easyinsight.core.NumericValue;
-import com.easyinsight.analysis.*;
+
+import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.CredentialFulfillment;
-import com.easyinsight.pipeline.HistoryRun;
+
 
 import java.util.*;
 import java.util.Date;
@@ -81,18 +81,21 @@ public class GoalEvaluationStorage {
     private class PopulationGoalTreeVisitor extends GoalTreeVisitor {
 
         final List<GoalOutcome> goalOutcomes = new ArrayList<GoalOutcome>();
-        Connection conn;
+        EIConnection conn;
         List<CredentialFulfillment> credentials; 
         boolean includeSubtrees;
 
-        private PopulationGoalTreeVisitor(Connection conn, List<CredentialFulfillment> credentials, boolean includeSubtrees) {
+        private PopulationGoalTreeVisitor(EIConnection conn, List<CredentialFulfillment> credentials, boolean includeSubtrees) {
             this.conn = conn;
             this.credentials = credentials;
             this.includeSubtrees = includeSubtrees;
         }
 
         protected void accept(GoalTreeNode goalTreeNode) {
-                if (goalTreeNode.getCoreFeedID() > 0) {
+            if (goalTreeNode.getKpi() != null) {
+
+            }
+                /*if (goalTreeNode.getCoreFeedID() > 0) {
                     // if there's no date filter, we're screwed on this...
                     // can we retrieve the last outcome value?
 
@@ -155,12 +158,12 @@ public class GoalEvaluationStorage {
                     GoalOutcome goalOutcome = new GoalOutcome(outcomeState, direction, oldValue, failedCondition, newValue, new Date(), goalTreeNode.getGoalTreeNodeID());
                     goalOutcomes.add(goalOutcome);
 
-                }
+                }*/
             if (includeSubtrees && goalTreeNode.getSubTreeID() > 0) {
                         GoalTree subTree;
                         try {
                             subTree = new GoalStorage().retrieveGoalTree(goalTreeNode.getSubTreeID(), conn);
-                        } catch (SQLException e) {
+                        } catch (Exception e) {
                             throw new RuntimeException(e);
                         }
                         if (subTree != null) {
@@ -173,7 +176,7 @@ public class GoalEvaluationStorage {
             }
     }
 
-    public void forceEvaluate(GoalTree goalTree, Connection conn, final List<CredentialFulfillment> credentials, boolean includeSubtrees) throws SQLException {
+    public void forceEvaluate(GoalTree goalTree, EIConnection conn, final List<CredentialFulfillment> credentials, boolean includeSubtrees) throws SQLException {
         final List<GoalOutcome> goalOutcomes = new ArrayList<GoalOutcome>();
 
         PopulationGoalTreeVisitor goalTreeVisitor = new PopulationGoalTreeVisitor(conn, credentials, includeSubtrees);
@@ -243,8 +246,8 @@ public class GoalEvaluationStorage {
         return values;
     }
 
-    public List<GoalValue> calculateSlope(long goalID, Date startDate, Date endDate) throws SQLException {
-        Connection conn = Database.instance().getConnection();
+    /*public List<GoalValue> calculateSlope(long goalID, Date startDate, Date endDate) throws SQLException {
+        EIConnection conn = Database.instance().getConnection();
         try {
             GoalTreeNode node = new GoalStorage().retrieveNode(goalID, conn);
             GoalTreeMilestone milestone = node.getMilestone();
@@ -262,9 +265,9 @@ public class GoalEvaluationStorage {
         } finally {
             Database.closeConnection(conn);
         }
-    }
+    }*/
 
-    public List<GoalValue> getGoalValues(long goalTreeNodeID, Date startDate, Date endDate, List<CredentialFulfillment> credentials) throws SQLException, TokenMissingException {
+    /*public List<GoalValue> getGoalValues(long goalTreeNodeID, Date startDate, Date endDate, List<CredentialFulfillment> credentials) throws SQLException, TokenMissingException {
         GoalTreeNode goalTreeNode = null;
         Connection conn = Database.instance().getConnection();
         try {
@@ -280,9 +283,9 @@ public class GoalEvaluationStorage {
             goalValues = new ArrayList<GoalValue>();
         }
         return goalValues;
-    }
+    }*/
 
-    public List<GoalValue> getGoalValuesFromDatabase(long goalTreeNodeID, Date startDate, Date endDate, List<CredentialFulfillment> credentials) throws SQLException, TokenMissingException {
+    /*public List<GoalValue> getGoalValuesFromDatabase(long goalTreeNodeID, Date startDate, Date endDate, List<CredentialFulfillment> credentials) throws SQLException, TokenMissingException {
         List<GoalValue> goalValues = new ArrayList<GoalValue>();
         boolean hasDate = false;
         GoalTreeNode goalTreeNode;
@@ -343,5 +346,5 @@ public class GoalEvaluationStorage {
             }
         }
         return outcome;
-    }
+    }*/
 }

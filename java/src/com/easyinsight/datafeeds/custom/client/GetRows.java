@@ -37,7 +37,7 @@ import javax.xml.bind.annotation.XmlType;
 })
 public class GetRows {
 
-    protected List<String> columns;
+    protected List<Field> columns;
     protected Where where;
     protected List<Property> properties;
 
@@ -63,9 +63,9 @@ public class GetRows {
      * 
      * 
      */
-    public List<String> getColumns() {
+    public List<Field> getColumns() {
         if (columns == null) {
-            columns = new ArrayList<String>();
+            columns = new ArrayList<Field>();
         }
         return this.columns;
     }

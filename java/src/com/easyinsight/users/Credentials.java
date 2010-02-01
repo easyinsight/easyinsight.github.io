@@ -1,5 +1,8 @@
 package com.easyinsight.users;
 
+import com.easyinsight.PasswordStorage;
+import com.easyinsight.security.SecurityUtil;
+
 /**
  * User: jboe
  * Date: Jan 2, 2008
@@ -81,5 +84,21 @@ public class Credentials {
         result = userName.hashCode();
         result = 31 * result + password.hashCode();
         return result;
+    }
+
+    public Credentials decryptCredentials() throws MalformedCredentialsException {
+        Credentials c = new Credentials();
+        String s = PasswordStorage.decryptString(getUserName());
+        int i = s.lastIndexOf(":" + SecurityUtil.getUserName());
+        if(i == -1) {
+            throw new MalformedCredentialsException();
+        }
+        c.setUserName(s.substring(0, i));
+        s = PasswordStorage.decryptString(getPassword());
+        i = s.lastIndexOf(":" + SecurityUtil.getUserName());
+        if(i == -1)
+            throw new MalformedCredentialsException();
+        c.setPassword(s.substring(0, i));
+        return c;
     }
 }

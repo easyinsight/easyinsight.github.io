@@ -1,6 +1,7 @@
 package com.easyinsight.datafeeds.salesforce;
 
 import com.easyinsight.datafeeds.*;
+import com.easyinsight.kpi.KPI;
 import com.easyinsight.users.Credentials;
 import com.easyinsight.users.Account;
 import com.easyinsight.analysis.*;
@@ -195,5 +196,12 @@ public class SalesforceBaseDataSource extends ServerDataSourceDefinition {
     @NotNull
     protected List<String> getKeys() {
         return new ArrayList<String>();
+    }
+
+    @Override
+    public List<KPI> createKPIs() {
+        List<KPI> kpis = new ArrayList<KPI>();
+        
+        return kpis;
     }
 }

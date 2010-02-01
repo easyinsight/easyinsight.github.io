@@ -1,10 +1,8 @@
 package com.easyinsight.goals;
 
-import com.easyinsight.analysis.AnalysisMeasure;
-import com.easyinsight.analysis.FilterDefinition;
 import com.easyinsight.analysis.Tag;
+import com.easyinsight.kpi.KPI;
 import com.easyinsight.solutions.SolutionGoalTreeDescriptor;
-import com.easyinsight.core.InsightDescriptor;
 
 import java.util.List;
 import java.util.ArrayList;
@@ -24,50 +22,25 @@ public class GoalTreeNode implements Cloneable {
     private List<GoalTreeNode> children = new ArrayList<GoalTreeNode>();
     private GoalTreeNode parent;
 
-    private long coreFeedID;
-    private List<FilterDefinition> filters = new ArrayList<FilterDefinition>();
-    private String coreFeedName;
-    private AnalysisMeasure analysisMeasure;
-    private GoalTreeMilestone milestone;
-    private String measureLabel;
-
-    private boolean goalDefined;
-    private double goalValue;
-    private boolean highIsGood;
-
-    private List<FilterDefinition> problemConditions = new ArrayList<FilterDefinition>();
-
-    private List<GoalFeed> associatedFeeds = new ArrayList<GoalFeed>();
-    private List<InsightDescriptor> associatedInsights = new ArrayList<InsightDescriptor>();
-    private List<GoalSolution> associatedSolutions = new ArrayList<GoalSolution>();
-
     private List<Tag> tags = new ArrayList<Tag>();
 
     private String name;
     private String description;
     private String iconImage;
-    
-    private List<Integer> users = new ArrayList<Integer>();
 
     private long subTreeID;
     private String subTreeName;
     private String subTreeIcon;
     private SolutionGoalTreeDescriptor newSubTree;
 
-    public List<FilterDefinition> getProblemConditions() {
-        return problemConditions;
+    private KPI kpi;
+
+    public KPI getKpi() {
+        return kpi;
     }
 
-    public void setProblemConditions(List<FilterDefinition> problemConditions) {
-        this.problemConditions = problemConditions;
-    }
-
-    public String getMeasureLabel() {
-        return measureLabel;
-    }
-
-    public void setMeasureLabel(String measureLabel) {
-        this.measureLabel = measureLabel;
+    public void setKpi(KPI kpi) {
+        this.kpi = kpi;
     }
 
     public String getSubTreeIcon() {
@@ -78,36 +51,12 @@ public class GoalTreeNode implements Cloneable {
         this.subTreeIcon = subTreeIcon;
     }
 
-    public boolean isGoalDefined() {
-        return goalDefined;
-    }
-
-    public void setGoalDefined(boolean goalDefined) {
-        this.goalDefined = goalDefined;
-    }
-
-    public List<FilterDefinition> getFilters() {
-        return filters;
-    }
-
-    public void setFilters(List<FilterDefinition> filters) {
-        this.filters = filters;
-    }
-
     public String getSubTreeName() {
         return subTreeName;
     }
 
     public void setSubTreeName(String subTreeName) {
         this.subTreeName = subTreeName;
-    }
-
-    public GoalTreeMilestone getMilestone() {
-        return milestone;
-    }
-
-    public void setMilestone(GoalTreeMilestone milestone) {
-        this.milestone = milestone;
     }
 
     public SolutionGoalTreeDescriptor getNewSubTree() {
@@ -126,13 +75,13 @@ public class GoalTreeNode implements Cloneable {
         this.subTreeID = subTreeID;
     }
 
-    public List<Integer> getUsers() {
+    /*public List<Integer> getUsers() {
         return users;
     }
 
     public void setUsers(List<Integer> users) {
         this.users = users;
-    }
+    }*/
 
     public String getIconImage() {
         return iconImage;
@@ -142,13 +91,7 @@ public class GoalTreeNode implements Cloneable {
         this.iconImage = iconImage;
     }
 
-    public boolean isHighIsGood() {
-        return highIsGood;
-    }
 
-    public void setHighIsGood(boolean highIsGood) {
-        this.highIsGood = highIsGood;
-    }
 
     public long getGoalTreeNodeID() {
         return goalTreeNodeID;
@@ -156,38 +99,6 @@ public class GoalTreeNode implements Cloneable {
 
     public void setGoalTreeNodeID(long goalTreeNodeID) {
         this.goalTreeNodeID = goalTreeNodeID;
-    }
-
-    public long getCoreFeedID() {
-        return coreFeedID;
-    }
-
-    public void setCoreFeedID(long coreFeedID) {
-        this.coreFeedID = coreFeedID;
-    }
-
-    public String getCoreFeedName() {
-        return coreFeedName;
-    }
-
-    public void setCoreFeedName(String coreFeedName) {
-        this.coreFeedName = coreFeedName;
-    }
-
-    public AnalysisMeasure getAnalysisMeasure() {
-        return analysisMeasure;
-    }
-
-    public void setAnalysisMeasure(AnalysisMeasure analysisMeasure) {
-        this.analysisMeasure = analysisMeasure;
-    }
-
-    public double getGoalValue() {
-        return goalValue;
-    }
-
-    public void setGoalValue(double goalValue) {
-        this.goalValue = goalValue;
     }
 
     public GoalTreeNode getParent() {
@@ -228,31 +139,7 @@ public class GoalTreeNode implements Cloneable {
 
     public void setChildren(List<GoalTreeNode> children) {
         this.children = children;
-    }
-
-    public List<GoalFeed> getAssociatedFeeds() {
-        return associatedFeeds;
-    }
-
-    public void setAssociatedFeeds(List<GoalFeed> associatedFeeds) {
-        this.associatedFeeds = associatedFeeds;
-    }
-
-    public List<InsightDescriptor> getAssociatedInsights() {
-        return associatedInsights;
-    }
-
-    public void setAssociatedInsights(List<InsightDescriptor> associatedInsights) {
-        this.associatedInsights = associatedInsights;
-    }
-
-    public List<GoalSolution> getAssociatedSolutions() {
-        return associatedSolutions;
-    }
-
-    public void setAssociatedSolutions(List<GoalSolution> associatedSolutions) {
-        this.associatedSolutions = associatedSolutions;
-    }
+    }    
 
     @Override
     public GoalTreeNode clone() throws CloneNotSupportedException {

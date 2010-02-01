@@ -137,6 +137,53 @@ public class SecurityUtil {
         }
     }
 
+    public static void authorizeScorecard(long scorecardID) {
+        Connection conn = Database.instance().getConnection();
+        long userID = SecurityUtil.getUserID();
+        try {
+            PreparedStatement queryStmt = conn.prepareStatement("SELECT USER_ID FROM SCORECARD WHERE SCORECARD_ID = ?");
+            queryStmt.setLong(1, scorecardID);
+            ResultSet rs = queryStmt.executeQuery();
+            if (rs.next()) {
+                long scorecardUserID = rs.getLong(1);
+                if (scorecardUserID != userID) {
+                    throw new SecurityException();
+                }
+            } else {
+                throw new SecurityException();
+            }
+        } catch (SQLException e) {
+            LogClass.error(e);
+            throw new SecurityException();
+        } finally {
+            Database.closeConnection(conn);
+        }
+    }
+
+    public static void authorizeKPI(long kpiID) {
+        Connection conn = Database.instance().getConnection();
+        long userID = SecurityUtil.getUserID();
+        try {
+            PreparedStatement queryStmt = conn.prepareStatement("SELECT USER_ID FROM SCORECARD, SCORECARD_TO_KPI WHERE SCORECARD_TO_KPI.kpi_id = ? AND " +
+                    "SCORECARD.scorecard_id = SCORECARD_TO_KPI.scorecard_id");
+            queryStmt.setLong(1, kpiID);
+            ResultSet rs = queryStmt.executeQuery();
+            if (rs.next()) {
+                long scorecardUserID = rs.getLong(1);
+                if (scorecardUserID != userID) {
+                    throw new SecurityException();
+                }
+            } else {
+                throw new SecurityException();
+            }
+        } catch (SQLException e) {
+            LogClass.error(e);
+            throw new SecurityException();
+        } finally {
+            Database.closeConnection(conn);
+        }
+    }
+
     public static int getAccountTier() {
         UserPrincipal userPrincipal = securityProvider.getUserPrincipal();
         if (userPrincipal == null) {

@@ -7,6 +7,7 @@ import com.easyinsight.datafeeds.Feed;
 import com.easyinsight.datafeeds.FeedRegistry;
 import com.easyinsight.datafeeds.CredentialFulfillment;
 import com.easyinsight.core.Value;
+import com.easyinsight.kpi.KPIValue;
 
 import java.util.*;
 
@@ -17,7 +18,7 @@ import java.util.*;
  */
 public class HistoryRun {
 
-    public List<GoalValue> lastTwoValues(long dataSourceID, AnalysisMeasure measure, List<FilterDefinition> filters,
+    public List<KPIValue> lastTwoValues(long dataSourceID, AnalysisMeasure measure, List<FilterDefinition> filters,
                                                      List<CredentialFulfillment> credentials) throws TokenMissingException {
         Calendar cal = Calendar.getInstance();
         Date endDate = cal.getTime();
@@ -25,8 +26,8 @@ public class HistoryRun {
         cal.set(Calendar.HOUR_OF_DAY, 0);
         cal.set(Calendar.MINUTE, 0);
         Date startDate = cal.getTime();
-        List<GoalValue> values = calculateHistoricalValues(dataSourceID, measure, filters, startDate, endDate, credentials);
-        List<GoalValue> retValues = new ArrayList<GoalValue>();
+        List<KPIValue> values = calculateHistoricalValues(dataSourceID, measure, filters, startDate, endDate, credentials);
+        List<KPIValue> retValues = new ArrayList<KPIValue>();
         if (values.size() == 1) {
             retValues.add(values.get(0));
         } else if (values.size() == 2) {
@@ -39,9 +40,9 @@ public class HistoryRun {
         return retValues;
     }
 
-    public List<GoalValue> calculateHistoricalValues(long dataSourceID, AnalysisMeasure measure, List<FilterDefinition> filters, Date startDate, Date endDate,
+    public List<KPIValue> calculateHistoricalValues(long dataSourceID, AnalysisMeasure measure, List<FilterDefinition> filters, Date startDate, Date endDate,
                                                      List<CredentialFulfillment> credentials) throws TokenMissingException {
-        List<GoalValue> goalValues = new ArrayList<GoalValue>();
+        List<KPIValue> goalValues = new ArrayList<KPIValue>();
         Set<AnalysisItem> itemSet = new HashSet<AnalysisItem>();
 
         List<FilterDefinition> otherFilters = new ArrayList<FilterDefinition>();
@@ -94,7 +95,7 @@ public class HistoryRun {
             if (result.getRows().size() > 0) {
                 IRow row = result.getRow(0);
                 Value value = row.getValue(measure.createAggregateKey());
-                GoalValue goalValue = new GoalValue();
+                KPIValue goalValue = new KPIValue();
                 goalValue.setDate(new Date());
                 goalValue.setValue(value.toDouble());
                 goalValues.add(goalValue);
@@ -116,12 +117,12 @@ public class HistoryRun {
                 if (result.getRows().size() > 0) {
                     IRow row = result.getRow(0);
                     Value value = row.getValue(measure.createAggregateKey());
-                    GoalValue goalValue = new GoalValue();
+                    KPIValue goalValue = new KPIValue();
                     goalValue.setDate(cal.getTime());
                     goalValue.setValue(value.toDouble());
                     goalValues.add(goalValue);
                 } else {
-                    GoalValue goalValue = new GoalValue();
+                    KPIValue goalValue = new KPIValue();
                     goalValue.setDate(cal.getTime());
                     goalValue.setValue(0);
                     goalValues.add(goalValue);

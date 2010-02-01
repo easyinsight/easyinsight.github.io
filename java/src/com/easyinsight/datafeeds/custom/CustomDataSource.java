@@ -3,10 +3,7 @@ package com.easyinsight.datafeeds.custom;
 import com.easyinsight.analysis.*;
 import com.easyinsight.core.Key;
 import com.easyinsight.core.NamedKey;
-import com.easyinsight.datafeeds.Feed;
-import com.easyinsight.datafeeds.FeedFolder;
-import com.easyinsight.datafeeds.FeedType;
-import com.easyinsight.datafeeds.ServerDataSourceDefinition;
+import com.easyinsight.datafeeds.*;
 import com.easyinsight.datafeeds.custom.client.*;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.users.Account;
@@ -21,10 +18,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * User: jamesboe
@@ -33,7 +27,7 @@ import java.util.Map;
  */
 public class CustomDataSource extends ServerDataSourceDefinition {
 
-    private static final QName SERVICE_NAME = new QName("http://sampleimpl.easyinsight.com/", "DataProviderService");
+    private static final QName SERVICE_NAME = new QName("http://db.easyinsight.com/", "DatabaseServerService");
 
     private String wsdl;
     private Map<String, String> properties;
@@ -62,6 +56,16 @@ public class CustomDataSource extends ServerDataSourceDefinition {
     }
 
     @Override
+    public int getCredentialsDefinition() {
+        return CredentialsDefinition.STANDARD_USERNAME_PW;
+    }
+
+    @Override
+    public DataSet getDataSet(Credentials credentials, Map<String, Key> keys, Date now, FeedDefinition parentDefinition) {
+        return new DataSet();
+    }
+
+    @Override
     public int getRequiredAccountTier() {
         return Account.PROFESSIONAL;
     }
@@ -72,7 +76,7 @@ public class CustomDataSource extends ServerDataSourceDefinition {
 
     @Override
     public Feed createFeedObject() {
-        return new CustomDataFeed();
+        return new CustomDataFeed(wsdl);
     }
 
     @Override
@@ -80,11 +84,12 @@ public class CustomDataSource extends ServerDataSourceDefinition {
         try {
             URL url = new URL(wsdl);
             DataProviderService ss = new DataProviderService(url, SERVICE_NAME);
-            BindingProvider provider = (BindingProvider) ss;
+            DataProvider dataProvider = ss.getDataProviderPort();
+            BindingProvider provider = (BindingProvider) dataProvider;
             Map<String, Object> requestContext = provider.getRequestContext();
             requestContext.put(BindingProvider.USERNAME_PROPERTY, credentials.getUserName());
             requestContext.put(BindingProvider.PASSWORD_PROPERTY, credentials.getPassword());
-            ss.getDataProviderPort().getFields();
+            dataProvider.getFields();
             return null;
         } catch (Exception e) {
             return e.getMessage();
@@ -96,11 +101,11 @@ public class CustomDataSource extends ServerDataSourceDefinition {
             if (port == null) {
                 URL url = new URL(wsdl);
                 DataProviderService ss = new DataProviderService(url, SERVICE_NAME);
-                BindingProvider provider = (BindingProvider) ss;
+                port = ss.getDataProviderPort();
+                BindingProvider provider = (BindingProvider) port;
                 Map<String, Object> requestContext = provider.getRequestContext();
                 requestContext.put(BindingProvider.USERNAME_PROPERTY, credentials.getUserName());
                 requestContext.put(BindingProvider.PASSWORD_PROPERTY, credentials.getPassword());
-                port = ss.getDataProviderPort();
             }
             return port;
         } catch (MalformedURLException e) {
@@ -117,7 +122,7 @@ public class CustomDataSource extends ServerDataSourceDefinition {
     @Override
     public Map<String, Key> newDataSourceFields(Credentials credentials) {
         Map<String, Key> fieldMap = new HashMap<String, Key>();
-        Folder folder = port.getFields();
+        Folder folder = getPort(credentials).getFields();
         List<String> keys = recurseFields(folder);
         for (String field : keys) {
             fieldMap.put(field, new NamedKey(field));
@@ -159,7 +164,7 @@ public class CustomDataSource extends ServerDataSourceDefinition {
 
     @Override
     public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, DataSet dataSet, Credentials credentials, Connection conn) {
-        Folder base = port.getFields();
+        Folder base = getPort(credentials).getFields();
         return recurseItems(keys, base);
     }
 

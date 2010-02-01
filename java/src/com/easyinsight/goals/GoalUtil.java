@@ -1,8 +1,8 @@
 package com.easyinsight.goals;
 
 import com.easyinsight.database.Database;
+import com.easyinsight.database.EIConnection;
 import com.easyinsight.logging.LogClass;
-import com.easyinsight.core.InsightDescriptor;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -27,15 +27,9 @@ public class GoalUtil {
         }
 
         protected void accept(GoalTreeNode goalTreeNode) {
-            if (goalTreeNode.getCoreFeedID() > 0) {
-                dataSourceIDs.add(goalTreeNode.getCoreFeedID());
-            }
-            for (GoalFeed goalFeed : goalTreeNode.getAssociatedFeeds()) {
-                dataSourceIDs.add(goalFeed.getFeedID());
-            }
-            for (InsightDescriptor insightDescriptor : goalTreeNode.getAssociatedInsights()) {
-                dataSourceIDs.add(insightDescriptor.getDataFeedID());
-            }
+            if (goalTreeNode.getKpi() != null) {
+                dataSourceIDs.add(goalTreeNode.getKpi().getCoreFeedID());
+            }            
             if (includeSubTrees && goalTreeNode.getSubTreeID() > 0) {
                 GoalStorage goalStorage = new GoalStorage();
                 GoalTree subTree = goalStorage.retrieveGoalTree(goalTreeNode.getSubTreeID());
@@ -51,10 +45,10 @@ public class GoalUtil {
     }
 
     public static Set<Long> getDataSourceIDs(long goalTreeID, boolean includeSubTrees) {
-        Connection conn = Database.instance().getConnection();
+        EIConnection conn = Database.instance().getConnection();
         try {
             return getDataSourceIDs(goalTreeID, includeSubTrees, conn);
-        } catch (SQLException e) {
+        } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);
         } finally {
@@ -62,7 +56,7 @@ public class GoalUtil {
         }
     }
 
-    public static Set<Long> getDataSourceIDs(long goalTreeID, boolean includeSubTrees, Connection conn) throws SQLException {
+    public static Set<Long> getDataSourceIDs(long goalTreeID, boolean includeSubTrees, EIConnection conn) throws Exception {
         GoalDataSourceVisitor visitor = new GoalDataSourceVisitor(includeSubTrees, conn);
         GoalTree goalTree = new GoalStorage().retrieveGoalTree(goalTreeID, conn);
         visitor.visit(goalTree.getRootNode());

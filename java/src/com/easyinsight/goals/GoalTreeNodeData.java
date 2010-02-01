@@ -30,7 +30,7 @@ public class GoalTreeNodeData extends GoalTreeNode {
     }
 
     public GoalOutcome summarizeOutcomes() {
-        if (getChildren() != null) {
+        /*if (getChildren() != null) {
             int worstOutcome = GoalOutcome.NO_DATA;
             boolean problemCondition = false;
             if (goalOutcome != null) {
@@ -62,7 +62,7 @@ public class GoalTreeNodeData extends GoalTreeNode {
         }
         if (goalOutcome == null) {
             goalOutcome = new GoalOutcome(GoalOutcome.NO_DATA, GoalOutcome.NO_DIRECTION, null, false, null, new Date(), getGoalTreeNodeID());
-        }
+        }*/
         return goalOutcome;
     }
 }

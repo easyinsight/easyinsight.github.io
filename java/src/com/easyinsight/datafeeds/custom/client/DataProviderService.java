@@ -27,8 +27,8 @@ import javax.xml.ws.Service;
 public class DataProviderService extends Service {
 
     public final static URL WSDL_LOCATION;
-    public final static QName SERVICE = new QName("http://sampleimpl.easyinsight.com/", "DataProviderService");
-    public final static QName DataProviderPort = new QName("http://sampleimpl.easyinsight.com/", "DataProviderPort");
+    public final static QName SERVICE = new QName("http://db.easyinsight.com/", "DatabaseServerService");
+    public final static QName DataProviderPort = new QName("http://db.easyinsight.com/", "DatabaseServerPort");
     static {
         URL url = null;
         try {

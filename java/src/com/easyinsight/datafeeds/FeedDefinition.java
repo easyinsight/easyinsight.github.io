@@ -1,5 +1,6 @@
 package com.easyinsight.datafeeds;
 
+import com.easyinsight.kpi.KPI;
 import com.easyinsight.userupload.UploadPolicy;
 import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.core.Key;
@@ -482,6 +483,20 @@ public class FeedDefinition implements Cloneable, Serializable {
 
     public int getCredentialsDefinition() {
         return CredentialsDefinition.NO_CREDENTIALS;
+    }
+
+    public List<KPI> createKPIs() {
+        return new ArrayList<KPI>();
+    }
+
+    protected AnalysisItem findAnalysisItem(String key) {
+        AnalysisItem item = null;
+        for (AnalysisItem field : getFields()) {
+            if (field.getKey().toKeyString().equals(key)) {
+                item = field;
+            }
+        }
+        return item;
     }
     
      public DataSet getDataSet(Credentials credentials, Map<String, Key> keys, Date now, FeedDefinition parentDefinition) {

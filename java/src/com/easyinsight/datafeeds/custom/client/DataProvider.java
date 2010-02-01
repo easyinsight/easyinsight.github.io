@@ -69,7 +69,7 @@ public interface DataProvider {
     @WebMethod
     public java.util.List<com.easyinsight.datafeeds.custom.client.Row> getRows(
         @WebParam(name = "columns", targetNamespace = "")
-        java.util.List<java.lang.String> columns,
+        java.util.List<Field> columns,
         @WebParam(name = "where", targetNamespace = "")
         com.easyinsight.datafeeds.custom.client.Where where,
         @WebParam(name = "properties", targetNamespace = "")
