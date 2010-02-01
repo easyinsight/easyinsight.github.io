@@ -90,7 +90,7 @@
             var feedFragmentString:String = URLUtil.objectToString(feedFragmentObject);
             BrowserManager.getInstance().setFragment(feedFragmentString);
             ProgressAlert.alert(this, "Retrieving latest goal data", null, goalService.createDataTree);
-            goalService.createDataTree.send(_goalTreeID);
+            goalService.getGoalTree.send(_goalTreeID);
         }
 
 
@@ -124,7 +124,7 @@
 
         private function onDatesChanged():void {
             ProgressAlert.alert(this, "Retrieving latest goal data...", null, goalService.createDataTree);
-            goalService.createDataTree.send(_goalTreeID);
+            goalService.getGoalTree.send(_goalTreeID);
         }
 
         private function parentTreeClick(event:MouseEvent):void {
@@ -133,7 +133,7 @@
         }
 
         private function gotTree():void {
-            goalTree = goalService.createDataTree.lastResult as GoalTree;
+            goalTree = goalService.getGoalTree.lastResult as GoalTree;
             for each (var user:FeedConsumer in goalTree.administrators) {
                 if (user is UserStub) {
                     var userStub:UserStub = user as UserStub;
@@ -229,7 +229,7 @@
             }
         }]]></mx:Script>
     <mx:RemoteObject destination="goalService" id="goalService">
-        <mx:method name="createDataTree" result="gotTree()"/>
+        <mx:method name="getGoalTree" result="gotTree()"/>
     </mx:RemoteObject>
     <mx:HBox id="buttonBox" paddingLeft="10" paddingTop="10" paddingRight="10" width="100%" verticalAlign="middle">
         <mx:Button id="backButton" icon="{closeIcon}" click="close()" toolTip="Close" label="Back" labelPlacement="bottom"/>

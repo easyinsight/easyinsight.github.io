@@ -514,8 +514,9 @@ public class GoalStorage {
             new KPIStorage().saveKPI(goalTreeNode.getKpi(), conn);
         }
         if (goalTreeNode.getGoalTreeNodeID() == 0) {
-            PreparedStatement insertNodeStmt = conn.prepareStatement("INSERT INTO GOAL_TREE_NODE (PARENT_GOAL_TREE_NODE_ID, NAME, DESCRIPTION, ICON_IMAGE, GOAL_TREE_ID, SUB_TREE_ID) " +
-                        "VALUES (?, ?, ?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
+            PreparedStatement insertNodeStmt = conn.prepareStatement("INSERT INTO GOAL_TREE_NODE (PARENT_GOAL_TREE_NODE_ID, " +
+                    "NAME, DESCRIPTION, ICON_IMAGE, GOAL_TREE_ID, SUB_TREE_ID, KPI_ID) " +
+                        "VALUES (?, ?, ?, ?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
             if (goalTreeNode.getParent() == null) {
                 insertNodeStmt.setNull(1, Types.BIGINT);
             } else {
@@ -530,6 +531,11 @@ public class GoalStorage {
             } else {
                 insertNodeStmt.setLong(6, goalTreeNode.getSubTreeID());
             }
+            if (goalTreeNode.getKpi() == null) {
+                insertNodeStmt.setNull(7, Types.BIGINT);
+            } else {
+                insertNodeStmt.setLong(7, goalTreeNode.getKpi().getKpiID());
+            }
             insertNodeStmt.execute();
             nodeID = Database.instance().getAutoGenKey(insertNodeStmt);
             goalTreeNode.setGoalTreeNodeID(nodeID);
@@ -537,7 +543,7 @@ public class GoalStorage {
         } else {
            nodeID = goalTreeNode.getGoalTreeNodeID();
             PreparedStatement updateNodeStmt = conn.prepareStatement("UPDATE GOAL_TREE_NODE SET PARENT_GOAL_TREE_NODE_ID = ?, NAME = ?, DESCRIPTION = ?, " +
-                    "ICON_IMAGE = ?, GOAL_TREE_ID = ?, SUB_TREE_ID = ? " +
+                    "ICON_IMAGE = ?, GOAL_TREE_ID = ?, SUB_TREE_ID = ?, KPI_ID = ? " +
                     "WHERE GOAL_TREE_NODE_ID = ?");
             if (goalTreeNode.getParent() == null) {
                 updateNodeStmt.setNull(1, Types.BIGINT);
@@ -554,7 +560,12 @@ public class GoalStorage {
             } else {
                 updateNodeStmt.setLong(6, goalTreeNode.getSubTreeID());
             }
-            updateNodeStmt.setLong(7, goalTreeNode.getGoalTreeNodeID());
+            if (goalTreeNode.getKpi() == null) {
+                updateNodeStmt.setNull(7, Types.BIGINT);
+            } else {
+                updateNodeStmt.setLong(7, goalTreeNode.getKpi().getKpiID());
+            }
+            updateNodeStmt.setLong(8, goalTreeNode.getGoalTreeNodeID());
             updateNodeStmt.executeUpdate();
             updateNodeStmt.close();
 
@@ -650,7 +661,7 @@ public class GoalStorage {
         saveTagStmt.close();
     }
 
-    public List<GoalTreeNodeData> getGoalsForUser(long userID) throws Exception {
+    /*public List<GoalTreeNodeData> getGoalsForUser(long userID) throws Exception {
         List<GoalTreeNodeData> nodes = new ArrayList<GoalTreeNodeData>();
         EIConnection conn = Database.instance().getConnection();
         try {
@@ -666,25 +677,25 @@ public class GoalStorage {
             Database.closeConnection(conn);
         }
         return nodes;
-    }
+    }*/
 
-    private void populateGoal(List<GoalTreeNodeData> nodes, EIConnection conn, long goalTreeNodeID) throws Exception {
+    /*private void populateGoal(List<GoalTreeNodeData> nodes, EIConnection conn, long goalTreeNodeID) throws Exception {
         GoalTreeNode goalTreeNode = retrieveNode(goalTreeNodeID, conn);
         GoalTreeNodeData dataNode = new GoalTreeNodeDataBuilder().build(goalTreeNode);
         nodes.add(dataNode);
         GoalTreeVisitor visitor = new GoalTreeVisitor() {
 
             protected void accept(GoalTreeNode goalTreeNode) {
-                GoalTreeNodeData data = (GoalTreeNodeData) goalTreeNode;
+                GoalTreeNode data = (GoalTreeNode) goalTreeNode;
                 data.populateCurrentValue();
             }
         };
         visitor.visit(dataNode);
         dataNode.summarizeOutcomes();
-    }
+    }*/
 
-    public List<GoalTreeNodeData> getGoalsForGroup(long groupID) throws Exception {
-        List<GoalTreeNodeData> nodes = new ArrayList<GoalTreeNodeData>();
+    public List<GoalTreeNode> getGoalsForGroup(long groupID) throws Exception {
+        List<GoalTreeNode> nodes = new ArrayList<GoalTreeNode>();
         EIConnection conn = Database.instance().getConnection();
         try {
             PreparedStatement queryStmt = conn.prepareStatement("SELECT GOAL_TREE_NODE_ID FROM GROUP_TO_GOAL_TREE_NODE_JOIN WHERE GROUP_ID = ?");
@@ -692,7 +703,7 @@ public class GoalStorage {
             ResultSet rs = queryStmt.executeQuery();
             while (rs.next()) {
                 long goalTreeNodeID = rs.getLong(1);
-                populateGoal(nodes, conn, goalTreeNodeID);
+                nodes.add(retrieveNode(goalTreeNodeID, conn));                
             }
             queryStmt.close();
         } finally {

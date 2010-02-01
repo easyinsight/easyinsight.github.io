@@ -1,5 +1,6 @@
 package com.easyinsight.groups;
 
+import com.easyinsight.goals.GoalTreeNode;
 import com.easyinsight.security.*;
 import com.easyinsight.security.SecurityException;
 import com.easyinsight.logging.LogClass;
@@ -8,7 +9,6 @@ import com.easyinsight.database.Database;
 import com.easyinsight.audit.AuditMessage;
 import com.easyinsight.users.Account;
 import com.easyinsight.goals.GoalTreeDescriptor;
-import com.easyinsight.goals.GoalTreeNodeData;
 import com.easyinsight.goals.GoalStorage;
 import com.easyinsight.core.InsightDescriptor;
 
@@ -333,7 +333,7 @@ public class GroupService {
         }
     }
 
-    public List<GoalTreeNodeData> getGoals(long groupID) {
+    public List<GoalTreeNode> getGoals(long groupID) {
         SecurityUtil.authorizeGroup(groupID, Roles.SUBSCRIBER);
         try {
             Calendar cal = Calendar.getInstance();

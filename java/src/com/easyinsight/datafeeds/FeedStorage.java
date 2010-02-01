@@ -1046,24 +1046,7 @@ public class FeedStorage {
                     //long solutionID = solutionRS.getLong(1);
                     feedMap.get(feedID).setSolutionTemplate(true);
                 }
-                StringBuilder goalTreeBuilder = new StringBuilder("SELECT GOAL_TREE_NODE_TO_FEED.FEED_ID, SOLUTION.SOLUTION_ID, SOLUTION.GOAL_TREE_ID FROM " +
-                        "GOAL_TREE_NODE, GOAL_TREE_NODE_TO_FEED, SOLUTION WHERE GOAL_TREE_NODE.GOAL_TREE_ID = " +
-                        "SOLUTION.GOAL_TREE_ID AND GOAL_TREE_NODE.GOAL_TREE_NODE_ID = GOAL_TREE_NODE_TO_FEED.GOAL_TREE_NODE_ID AND " +
-                        "GOAL_TREE_NODE_TO_FEED.FEED_ID IN (");
-                for (FeedDescriptor feedDescriptor : feedMap.values()) {
-                    goalTreeBuilder.append("?,");
-                }                
-                PreparedStatement goalStmt = conn.prepareStatement(goalTreeBuilder.substring(0, goalTreeBuilder.length() - 1) + ")");
-                i = 0;
-                for (FeedDescriptor feedDescriptor : feedMap.values()) {
-                    goalStmt.setLong(++i, feedDescriptor.getDataFeedID());
-                }
-                solutionRS = goalStmt.executeQuery();
-                while (solutionRS.next()) {
-                    long feedID = solutionRS.getLong(1);
-                    //long solutionID = solutionRS.getLong(1);
-                    feedMap.get(feedID).setSolutionTemplate(true);
-                }
+
             }
             descriptorList = new ArrayList<FeedDescriptor>(feedMap.values());
             queryStmt.close();

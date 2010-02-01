@@ -60,7 +60,7 @@
             scorecardRenderer.scorecard = event.scorecard;
             scorecardStack.addChild(scorecardRenderer);
             tabsIndex = newIndex;
-            primaryStackIndex = 1;
+            primaryStackIndex = 2;
         }
 
         public function gotFocus():void {

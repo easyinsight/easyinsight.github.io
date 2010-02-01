@@ -72,7 +72,7 @@
     <mx:Script>
 		<![CDATA[
         import com.easyinsight.account.Account;
-
+        import com.easyinsight.kpi.KPIEvent;
         import com.easyinsight.util.PopUpUtil;
 
         import mx.controls.Alert;
@@ -144,6 +144,12 @@
             User.getEventNotifier().addEventListener(LoginEvent.LOGIN, onLogin);
             //dataBoxes.addEventListener(DividerEvent.DIVIDER_RELEASE, onDividerRelease);
             addEventListener(DeleteGoalTreeEvent.DELETE_GOAL_TREE, onDelete);
+            addEventListener(KPIEvent.KPI_ADDED, onKPIChange);
+            addEventListener(KPIEvent.KPI_REMOVED, onKPIChange);
+        }
+
+        private function onKPIChange(event:KPIEvent):void {
+            kpiService.getKPIs.send();
         }
 
         private function onDelete(event:DeleteGoalTreeEvent):void {
@@ -302,13 +308,15 @@
                 <!--<mx:Button icon="@Embed('../../../../assets/helpx48.png')" label="Help..." labelPlacement="bottom"/>-->
             </mx:HBox>
 
-            <mx:DataGrid dataProvider="{kpis}" rowCount="{kpiCount}" id="kpiBox" width="100%" rowHeight="28">
+            <mx:DataGrid dataProvider="{kpis}" id="kpiBox" width="100%" rowHeight="28">
                 <mx:columns>
                     <util:EIDataGridColumn headerText="KPI Name" dataField="name"/>
+                    <util:EIDataGridColumn headerText="" dataField="name" sortable="false"
+                                       itemRenderer="com.easyinsight.kpi.KPIControls" width="150"/>
                 </mx:columns>
             </mx:DataGrid>
             <mx:DataGrid dataProvider="{goalTrees}" width="100%" id="goalTreesBox"
-                     itemDoubleClick="gridDoubleClick(event)" rowCount="{kpiTreeCount}" rowHeight="28">
+                     itemDoubleClick="gridDoubleClick(event)" rowHeight="28">
                 <mx:columns>
                     <util:EIDataGridColumn headerText="KPI Tree Name" dataField="name"/>
                     <util:EIDataGridColumn headerText="" dataField="goalTreeName" width="150"

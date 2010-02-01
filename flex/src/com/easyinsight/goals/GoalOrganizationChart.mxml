@@ -135,7 +135,7 @@
 		]]>
     </mx:Script>
     <mx:HBox width="100%" backgroundColor="#BDC5E2" paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5">
-        <mx:Label text="Right click on the goals in the tree below to manipulate the tree structure. Double click on a goal to edit its properties."/>
+        <mx:Label text="Right click on the goals in the tree below to manipulate the tree structure or edit properties."/>
         <!--<mx:Button icon="{addNodeIcon}" click="newNode()" toolTip="New Child" enabled="{itemSelected}"/>
         <mx:Button icon="{newParentIcon}" click="newParent()" toolTip="New Parent" enabled="{itemSelected}"/>
         <mx:Button icon="{copyNodeIcon}" click="copyNode()" toolTip="Copy Goal" enabled="{itemSelected}"/>

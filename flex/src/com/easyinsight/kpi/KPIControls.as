@@ -1,4 +1,4 @@
-package com.easyinsight.scorecard {
+package com.easyinsight.kpi {
 import com.easyinsight.kpi.KPI;
 import com.easyinsight.kpi.KPIEvent;
 import com.easyinsight.kpi.KPIWindow;
@@ -18,12 +18,6 @@ public class KPIControls extends HBox {
     private var editButton:Button;
     private var deleteButton:Button;
     private var copyButton:Button;
-
-    private var _scorecardID:int;
-
-    public function set scorecardID(value:int):void {
-        _scorecardID = value;
-    }
 
     [Bindable]
     [Embed(source="../../../../assets/pencil.png")]
@@ -64,14 +58,14 @@ public class KPIControls extends HBox {
         kpiService = new RemoteObject();
         kpiService.destination = "kpiService";
         kpiService.copyKPI.addEventListener(ResultEvent.RESULT, onCopyResult);
-        kpiService.copyKPI.send(kpi, _scorecardID);
+        kpiService.copyKPI.send(kpi, 0);
     }
 
     private function onCopyResult(event:ResultEvent):void {
         var copy:KPI = kpiService.copyKPI.lastResult as KPI;
         dispatchEvent(new KPIEvent(KPIEvent.KPI_ADDED, copy));
         var kpiWindow:KPIWindow = new KPIWindow();
-        kpiWindow.scorecardID = _scorecardID;
+        kpiWindow.scorecardID = 0;
         kpiWindow.kpi = copy;
         kpiWindow.addEventListener(KPIEvent.KPI_EDITED, updatedKPI);
         PopUpManager.addPopUp(kpiWindow, this, true);
@@ -80,7 +74,7 @@ public class KPIControls extends HBox {
 
     private function onEdit(event:MouseEvent):void {
         var kpiWindow:KPIWindow = new KPIWindow();
-        kpiWindow.scorecardID = _scorecardID;
+        kpiWindow.scorecardID = 0;
         kpiWindow.kpi = kpi;
         kpiWindow.addEventListener(KPIEvent.KPI_EDITED, updatedKPI);
         PopUpManager.addPopUp(kpiWindow, this, true);
@@ -93,9 +87,9 @@ public class KPIControls extends HBox {
 
     private function onDelete(event:MouseEvent):void {
         kpiService = new RemoteObject();
-        kpiService.destination = "scorecardService";
-        kpiService.removeKPIFromScorecard.addEventListener(ResultEvent.RESULT, onDeleteResult);
-        kpiService.removeKPIFromScorecard.send(kpi.kpiID, _scorecardID);
+        kpiService.destination = "kpiService";
+        kpiService.deleteKPI.addEventListener(ResultEvent.RESULT, onDeleteResult);
+        kpiService.deleteKPI.send(kpi.kpiID);
     }
 
     private function onDeleteResult(event:ResultEvent):void {

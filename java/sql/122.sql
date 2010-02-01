@@ -93,8 +93,8 @@ create table kpi_to_filter (
 drop table goal_tree_node_to_feed;
 drop table goal_tree_node_to_insight;
 drop table goal_tree_node_to_solution;
-drop table goal_tree_to_filter;
-drop table goal_tree_to_problem_filter;
+drop table goal_to_filter;
+drop table goal_to_problem_filter;
 drop table goal_node_to_user;
 drop table goal_outcome;
 drop table goal_history;

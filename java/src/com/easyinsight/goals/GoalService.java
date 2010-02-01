@@ -1,8 +1,9 @@
 package com.easyinsight.goals;
 
 import com.easyinsight.analysis.Tag;
-import com.easyinsight.analysis.AnalysisMeasure;
-import com.easyinsight.analysis.FilterDefinition;
+
+import com.easyinsight.kpi.KPI;
+import com.easyinsight.scorecard.ScorecardService;
 import com.easyinsight.solutions.Solution;
 import com.easyinsight.solutions.SolutionService;
 import com.easyinsight.solutions.SolutionGoalTreeDescriptor;
@@ -11,14 +12,11 @@ import com.easyinsight.security.Roles;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.email.UserStub;
 import com.easyinsight.users.Account;
-import com.easyinsight.users.Credentials;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.database.Database;
 import com.easyinsight.datafeeds.*;
-import com.easyinsight.pipeline.HistoryRun;
 
 import java.util.*;
-import java.sql.SQLException;
 
 /**
  * User: James Boe
@@ -202,91 +200,24 @@ public class GoalService {
         final Set<Long> dataSourceIDs;
         try {
             dataSourceIDs = GoalUtil.getDataSourceIDs(goalTreeID, includeSubTrees, conn);
-            if (allSources) {
-                for (Long dataSourceID : dataSourceIDs) {
-                    FeedDefinition feedDefinition = new FeedStorage().getFeedDefinitionData(dataSourceID, conn);
-                    if (feedDefinition.getCredentialsDefinition() == CredentialsDefinition.STANDARD_USERNAME_PW) {
-                        IServerDataSourceDefinition dataSource = (IServerDataSourceDefinition) feedDefinition;
-                        Credentials credentials = null;
-                        for (CredentialFulfillment fulfillment : existingCredentials) {
-                            if (fulfillment.getDataSourceID() == feedDefinition.getDataFeedID()) {
-                                credentials = fulfillment.getCredentials();
-                            }
-                        }
-                        boolean noCredentials = true;
-                        if (credentials != null) {
-                            noCredentials = dataSource.validateCredentials(credentials) != null;
-                        }
-                        if (noCredentials) {
-                            credentialMap.put(feedDefinition.getDataFeedID(), new CredentialRequirement(feedDefinition.getDataFeedID(), feedDefinition.getFeedName(),
-                                    CredentialsDefinition.STANDARD_USERNAME_PW));
-                        }
-                    }
-                }
-            }
+            new ScorecardService().getCredentialsForDataSources(allSources, existingCredentials, credentialMap, dataSourceIDs);
+            return new ArrayList<CredentialRequirement>(credentialMap.values());
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);
         } finally {
             Database.closeConnection(conn);
         }
-        try {
-            if (!allSources) {
-                for (Long dataSourceID : dataSourceIDs) {
-                    Feed feed = FeedRegistry.instance().getFeed(dataSourceID);
-                    Credentials credentials = null;
-                    for (CredentialFulfillment fulfillment : existingCredentials) {
-                        if (fulfillment.getDataSourceID() == dataSourceID) {
-                            credentials = fulfillment.getCredentials();
-                        }
-                    }
-                    boolean noCredentials = true;
-                    if (credentials != null) {
-                        noCredentials = new FeedStorage().getFeedDefinitionData(dataSourceID).validateCredentials(credentials) != null;
-                    }
-                    if (noCredentials) {
-                        Set<CredentialRequirement> credentialRequirements = feed.getCredentialRequirement(false);
-                        for (CredentialRequirement credentialRequirement : credentialRequirements) {
-                            credentialMap.put(credentialRequirement.getDataSourceID(), credentialRequirement);
-                        }
-                    }
-                }
-            }
-        } catch (Exception e) {
-            LogClass.error(e);
-            throw new RuntimeException(e);
-        }
-
-        return new ArrayList<CredentialRequirement>(credentialMap.values());
     }    
 
     public GoalTree forceRefresh(long goalTreeID, List<CredentialFulfillment> credentialsList, boolean allSources, boolean includeSubTrees) {
         SecurityUtil.authorizeGoalTree(goalTreeID, Roles.SUBSCRIBER);
         try {
-            if (allSources) {
-                Set<Long> dataSourceIDs = GoalUtil.getDataSourceIDs(goalTreeID, includeSubTrees);
-                for (Long dataSourceID : dataSourceIDs) {
-                    FeedDefinition feedDefinition = new FeedStorage().getFeedDefinitionData(dataSourceID);
-                    if (feedDefinition.getCredentialsDefinition() == CredentialsDefinition.STANDARD_USERNAME_PW) {
-                        IServerDataSourceDefinition dataSource = (IServerDataSourceDefinition) feedDefinition;
-                        Credentials credentials = null;
-                        for (CredentialFulfillment fulfillment : credentialsList) {
-                            if (fulfillment.getDataSourceID() == feedDefinition.getDataFeedID()) {
-                                credentials = fulfillment.getCredentials();
-                            }
-                        }
-                        if (credentials != null && credentials.isEncrypted()) {
-                            credentials = credentials.decryptCredentials();
-                        }
-                        dataSource.refreshData(credentials, SecurityUtil.getAccountID(), new Date(), null);
-                    }
-                }
-            }
             EIConnection conn = Database.instance().getConnection();
             try {
-                conn.setAutoCommit(false);
-                GoalTree goalTree = goalStorage.retrieveGoalTree(goalTreeID, conn);
-                goalEvaluationStorage.forceEvaluate(goalTree, conn, credentialsList, includeSubTrees);
+                conn.setAutoCommit(false);                
+                List<KPI> kpis = new ArrayList<KPI>(GoalUtil.getKPIs(goalTreeID, includeSubTrees, conn));
+                new ScorecardService().refreshValuesForList(kpis, conn, credentialsList);
                 conn.commit();
             } catch (Exception e) {
                 conn.rollback();
@@ -295,26 +226,26 @@ public class GoalService {
                 conn.setAutoCommit(true);
                 Database.closeConnection(conn);
             }
-            return createDataTree(goalTreeID);
+            return getGoalTree(goalTreeID);
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);
         }
     }
 
-    public GoalTree createDataTree(long goalTreeID) {
+    /*public GoalTree createDataTree(long goalTreeID) {
         SecurityUtil.authorizeGoalTree(goalTreeID, Roles.SUBSCRIBER);
         try {
             GoalTree goalTree = getGoalTree(goalTreeID);
             goalStorage.decorateDataTree(goalTree);
-            GoalTreeNodeData data = createDataTreeForDates(goalTree);
+            GoalTreeNode data = createDataTreeForDates(goalTree);
             goalTree.setRootNode(data);
             return goalTree;
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);
         }
-    }
+    }*/
 
     /*public List<GoalValue> getGoalValues(final long goalTreeNodeID, final Date startDate, final Date endDate, List<CredentialFulfillment> credentialsList) {
         SecurityUtil.authorizeGoal(goalTreeNodeID, Roles.SUBSCRIBER);
@@ -387,7 +318,7 @@ public class GoalService {
         return new ArrayList<CredentialRequirement>(credentialMap.values());
     }*/
 
-    private GoalTreeNodeData createDataTreeForDates(GoalTree goalTree) {
+    /*private GoalTreeNodeData createDataTreeForDates(GoalTree goalTree) {
         GoalTreeNodeData dataNode = new GoalTreeNodeDataBuilder().build(goalTree.getRootNode());
         GoalTreeVisitor visitor = new GoalTreeVisitor() {
 
@@ -398,11 +329,11 @@ public class GoalService {
                         GoalStorage goalStorage = new GoalStorage();
                         GoalTree subTree = goalStorage.retrieveGoalTree(data.getSubTreeID());
                         GoalTreeNodeData subData = createDataTreeForDates(subTree);
-                        /*if (data.getAnalysisMeasure() == null) {
+                        *//*if (data.getAnalysisMeasure() == null) {
                             data.setGoalOutcome(subData.getGoalOutcome());
                         } else {
                             data.populateCurrentValue();
-                        }*/
+                        }*//*
                     } else {
                         data.populateCurrentValue();
                     }
@@ -414,7 +345,7 @@ public class GoalService {
         visitor.visit(dataNode);
         dataNode.summarizeOutcomes();
         return dataNode;
-    }
+    }*/
 
     public GoalTree getGoalTree(long goalTreeID) {
         SecurityUtil.authorizeGoalTreeSolutionInstall(goalTreeID);
@@ -463,7 +394,7 @@ public class GoalService {
     // sparkline seems useful as one thing there
 
 
-    public List<GoalTreeNodeData> getGoals() {
+    /*public List<GoalTreeNodeData> getGoals() {
         long userID = SecurityUtil.getUserID();
         try {
             Calendar cal = Calendar.getInstance();
@@ -475,7 +406,7 @@ public class GoalService {
             LogClass.error(e);
             throw new RuntimeException(e);
         }
-    }
+    }*/
 
     public List<GoalDescriptor> getGoalsForTree(long treeID) {
         final List<GoalDescriptor> nodes = new ArrayList<GoalDescriptor>();

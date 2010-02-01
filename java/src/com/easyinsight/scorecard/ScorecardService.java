@@ -17,6 +17,7 @@ import com.easyinsight.pipeline.StandardReportPipeline;
 import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.users.Credentials;
 
+import java.sql.SQLException;
 import java.util.*;
 
 /**
@@ -104,54 +105,58 @@ public class ScorecardService {
                 for (KPI kpi : scorecard.getKpis()) {
                     dataSourceIDs.add(kpi.getCoreFeedID());
                 }
-                if (allSources) {
-                    for (Long dataSourceID : dataSourceIDs) {
-                        FeedDefinition feedDefinition = new FeedStorage().getFeedDefinitionData(dataSourceID);
-                        if (feedDefinition.getCredentialsDefinition() == CredentialsDefinition.STANDARD_USERNAME_PW) {
-                            IServerDataSourceDefinition dataSource = (IServerDataSourceDefinition) feedDefinition;
-                            Credentials credentials = null;
-                            for (CredentialFulfillment fulfillment : existingCredentials) {
-                                if (fulfillment.getDataSourceID() == feedDefinition.getDataFeedID()) {
-                                    credentials = fulfillment.getCredentials();
-                                }
-                            }
-                            boolean noCredentials = true;
-                            if (credentials != null) {
-                                noCredentials = dataSource.validateCredentials(credentials) != null;
-                            }
-                            if (noCredentials) {
-                                credentialMap.put(feedDefinition.getDataFeedID(), new CredentialRequirement(feedDefinition.getDataFeedID(), feedDefinition.getFeedName(),
-                                        CredentialsDefinition.STANDARD_USERNAME_PW));
-                            }
-                        }
-                    }
-                } else {
-                    for (Long dataSourceID : dataSourceIDs) {
-                        Feed feed = FeedRegistry.instance().getFeed(dataSourceID);
-                        Credentials credentials = null;
-                        for (CredentialFulfillment fulfillment : existingCredentials) {
-                            if (fulfillment.getDataSourceID() == dataSourceID) {
-                                credentials = fulfillment.getCredentials();
-                            }
-                        }
-                        boolean noCredentials = true;
-                        if (credentials != null) {
-                            noCredentials = new FeedStorage().getFeedDefinitionData(dataSourceID).validateCredentials(credentials) != null;
-                        }
-                        if (noCredentials) {
-                            Set<CredentialRequirement> credentialRequirements = feed.getCredentialRequirement(false);
-                            for (CredentialRequirement credentialRequirement : credentialRequirements) {
-                                credentialMap.put(credentialRequirement.getDataSourceID(), credentialRequirement);
-                            }
-                        }
-                    }
-                }
+                getCredentialsForDataSources(allSources, existingCredentials, credentialMap, dataSourceIDs);
             }
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);
         }
         return new ArrayList<CredentialRequirement>(credentialMap.values());
+    }
+
+    public void getCredentialsForDataSources(boolean allSources, List<CredentialFulfillment> existingCredentials, Map<Long, CredentialRequirement> credentialMap, Set<Long> dataSourceIDs) throws SQLException {
+        if (allSources) {
+            for (Long dataSourceID : dataSourceIDs) {
+                FeedDefinition feedDefinition = new FeedStorage().getFeedDefinitionData(dataSourceID);
+                if (feedDefinition.getCredentialsDefinition() == CredentialsDefinition.STANDARD_USERNAME_PW) {
+                    IServerDataSourceDefinition dataSource = (IServerDataSourceDefinition) feedDefinition;
+                    Credentials credentials = null;
+                    for (CredentialFulfillment fulfillment : existingCredentials) {
+                        if (fulfillment.getDataSourceID() == feedDefinition.getDataFeedID()) {
+                            credentials = fulfillment.getCredentials();
+                        }
+                    }
+                    boolean noCredentials = true;
+                    if (credentials != null) {
+                        noCredentials = dataSource.validateCredentials(credentials) != null;
+                    }
+                    if (noCredentials) {
+                        credentialMap.put(feedDefinition.getDataFeedID(), new CredentialRequirement(feedDefinition.getDataFeedID(), feedDefinition.getFeedName(),
+                                CredentialsDefinition.STANDARD_USERNAME_PW));
+                    }
+                }
+            }
+        } else {
+            for (Long dataSourceID : dataSourceIDs) {
+                Feed feed = FeedRegistry.instance().getFeed(dataSourceID);
+                Credentials credentials = null;
+                for (CredentialFulfillment fulfillment : existingCredentials) {
+                    if (fulfillment.getDataSourceID() == dataSourceID) {
+                        credentials = fulfillment.getCredentials();
+                    }
+                }
+                boolean noCredentials = true;
+                if (credentials != null) {
+                    noCredentials = new FeedStorage().getFeedDefinitionData(dataSourceID).validateCredentials(credentials) != null;
+                }
+                if (noCredentials) {
+                    Set<CredentialRequirement> credentialRequirements = feed.getCredentialRequirement(false);
+                    for (CredentialRequirement credentialRequirement : credentialRequirements) {
+                        credentialMap.put(credentialRequirement.getDataSourceID(), credentialRequirement);
+                    }
+                }
+            }
+        }
     }
 
     private int determineOutcome(double goalValue, int highIsGood, double delta, double endValue) {
@@ -186,7 +191,7 @@ public class ScorecardService {
         int outcome;
         double thresholdValue = Math.abs(endValue * .002);
         if (highIsGood == KPI.GOOD) {
-            if (Math.abs(delta) < thresholdValue) {
+            if (Math.abs(delta) <= thresholdValue) {
                 outcome = KPIOutcome.NEUTRAL;
             } else if (delta > 0) {
                 outcome = KPIOutcome.POSITIVE;
@@ -194,7 +199,7 @@ public class ScorecardService {
                 outcome = KPIOutcome.NEGATIVE;
             }
         } else if (highIsGood == KPI.BAD) {
-            if (Math.abs(delta) < thresholdValue) {
+            if (Math.abs(delta) <= thresholdValue) {
                 outcome = KPIOutcome.NEUTRAL;
             } else if (delta < 0) {
                 outcome = KPIOutcome.POSITIVE;
@@ -237,7 +242,7 @@ public class ScorecardService {
                 if (kpi.isGoalDefined()) {
                     outcomeState = determineOutcome(kpi.getGoalValue(), highIsGood, delta, newValue);
                 } else {
-                    outcomeState = determineSimpleOutcome(highIsGood, delta, newValue);
+                    outcomeState = determineSimpleOutcome(highIsGood, newValue, delta);
                 }
             } else {
                 oldValue = new KPIStorage().findLastGoalValue(conn, kpi.getKpiID());

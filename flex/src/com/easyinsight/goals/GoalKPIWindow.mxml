@@ -6,6 +6,7 @@
         import com.easyinsight.kpi.KPIWindow;
         import com.easyinsight.util.PopUpUtil;
 
+        import mx.controls.Alert;
         import mx.managers.PopUpManager;
 
         [Bindable]
@@ -48,33 +49,35 @@
         private function save():void {
             _goalTreeNode.kpi = kpi;
             _goalTreeNode.name = _goalTreeNode.kpi.name;
+            PopUpManager.removePopUp(this);
         }
 
-        private function addedKPI(event:KPIEvent):void {
+        private function addedKPI(event:KPIEvent):void {           
             kpi = event.kpi;
-            kpiName = _goalTreeNode.kpi.name;
+            kpiName = kpi.name;
             kpiIndex = 1;
         }
         ]]></mx:Script>
-    <mx:ViewStack selectedIndex="{kpiIndex}">
-        <mx:VBox>
-            <mx:Button label="Create a new KPI" click="newKPI()"/>
+    <mx:ViewStack selectedIndex="{kpiIndex}" resizeToContent="true">
+        <mx:VBox paddingBottom="10" paddingLeft="10" paddingRight="10" paddingTop="10">
+            <mx:Button label="Create a new KPI" click="newKPI()" fontSize="14"/>
+            <mx:HRule/>
             <mx:HBox width="100%" horizontalAlign="center">
-                <mx:Button label="Save" click="save()"/>
-                <mx:Button label="Cancel" click="PopUpManager.removePopUp(this)"/>
+                <mx:Button label="Save" click="save()" fontSize="14"/>
+                <mx:Button label="Cancel" click="PopUpManager.removePopUp(this)" fontSize="14"/>
             </mx:HBox>
         </mx:VBox>
-        <mx:VBox>
-            <mx:Form>
-                <mx:FormItem label="Assigned KPI Name:" direction="horizontal">
-                    <mx:Label text="{kpiName}"/>
-                    <mx:Button icon="{deleteIcon}" click="deleteKPI()"/>
+        <mx:VBox paddingBottom="10" paddingLeft="10" paddingRight="10" paddingTop="10">
+            <mx:Form  paddingBottom="0" paddingLeft="0" paddingRight="0" paddingTop="0">
+                <mx:FormItem label="Assigned KPI Name:" direction="horizontal" fontSize="14">
+                    <mx:Label text="{kpiName}" fontSize="14" fontWeight="normal"/>
+                    <mx:Button icon="{deleteIcon}" click="deleteKPI()" fontWeight="normal"/>
                 </mx:FormItem>
                 
             </mx:Form>
-            <mx:HBox>
-                <mx:Button label="Save" click="save()"/>
-                <mx:Button label="Cancel" click="PopUpManager.removePopUp(this)"/>
+            <mx:HBox width="100%" horizontalAlign="center">
+                <mx:Button label="Save" click="save()" fontSize="14"/>
+                <mx:Button label="Cancel" click="PopUpManager.removePopUp(this)" fontSize="14"/>
             </mx:HBox>
         </mx:VBox>
     </mx:ViewStack>

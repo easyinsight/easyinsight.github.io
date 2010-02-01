@@ -26,9 +26,6 @@
         [Bindable]
         private var kpis:ArrayCollection;
 
-        [Bindable]
-        private var rows:int;
-
         private var _configurationMode:Boolean;
 
         [Bindable]
@@ -70,8 +67,7 @@
         public function set scorecard(value:Scorecard):void {
             _scorecard = value;
             kpis = _scorecard.kpis;
-            kpis.addEventListener(CollectionEvent.COLLECTION_CHANGE, onKPIChange);
-            rows = kpis.length + 1;
+            kpis.addEventListener(CollectionEvent.COLLECTION_CHANGE, onKPIChange);            
             controlFactory = new KPIControlFactory(value.scorecardID);
             if (kpis.length == 0) {
                 baseIndex = 0;
@@ -79,8 +75,18 @@
                 baseIndex = configurationMode ? 2 : 1;
             }
             invalidateProperties();
+            invalidateSize();
         }
 
+        protected override function measure():void {
+            super.measure();
+            if (kpis != null) {
+                plainGrid.verticalScrollPolicy = "off";
+                plainGrid.height = plainGrid.measureHeightOfItems(0, kpis.length) + plainGrid.headerHeight + 4;
+                adminGrid.verticalScrollPolicy = "off";
+                adminGrid.height = adminGrid.measureHeightOfItems(0, kpis.length) + adminGrid.headerHeight + 4;
+            }
+        }
 
         private function setupListeners():void {
             addEventListener(KPIEvent.KPI_EDITED, onKPIEdit);
@@ -118,6 +124,7 @@
             if (baseIndex == 0) {
                 baseIndex = configurationMode ? 2 : 1;
             }
+            invalidateSize();
         }
 
         public function firstRenderer(kpi:KPI):Callout {
@@ -141,6 +148,9 @@
 
         [Bindable]
         private var baseIndex:int = 0;
+
+        [Bindable]
+        private var gridHeight:uint = 0;
         ]]></mx:Script>
     <mx:ViewStack selectedIndex="{baseIndex}" resizeToContent="true" width="100%">
         <mx:VBox width="100%" height="100%" horizontalAlign="center" verticalAlign="middle">
@@ -148,7 +158,7 @@
             <mx:Button label="Create Your First KPI" styleName="blueButton" fontSize="16" click="addKPI()"/>
         </mx:VBox>
         <mx:Box width="100%">
-            <scorecard:HackDataGrid dataProvider="{kpis}" rowCount="{rows}" rowHeight="40" selectable="false"
+            <scorecard:HackDataGrid dataProvider="{kpis}" rowHeight="40" selectable="false"
                                     width="800" id="plainGrid">
                 <scorecard:columns>
                     <util:EIDataGridColumn headerText="" dataField="name"
@@ -169,7 +179,7 @@
         <mx:HBox>
 
         </mx:HBox>
-        <mx:DataGrid dataProvider="{kpis}" rowCount="{rows}" rowHeight="40" dragEnabled="true" width="800">
+        <mx:DataGrid dataProvider="{kpis}" rowHeight="40" dragEnabled="true" width="800" id="adminGrid">
             <mx:columns>
                 <util:EIDataGridColumn headerText="" dataField="name"
                                        itemRenderer="com.easyinsight.kpi.KPIIconRenderer" width="50"/>

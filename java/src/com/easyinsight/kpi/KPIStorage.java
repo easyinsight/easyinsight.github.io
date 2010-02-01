@@ -374,7 +374,14 @@ public class KPIStorage {
         }
     }
 
-    public void deleteKPI(long kpiID) {
-        
+    public void deleteKPI(long kpiID) throws SQLException {
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            PreparedStatement deleteKPIStmt = conn.prepareStatement("DELETE FROM KPI WHERE KPI_ID = ?");
+            deleteKPIStmt.setLong(1, kpiID);
+            deleteKPIStmt.executeUpdate();
+        } finally {
+            Database.closeConnection(conn);
+        }
     }
 }

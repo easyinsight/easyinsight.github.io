@@ -1,5 +1,5 @@
 package com.easyinsight.scorecard {
-import com.easyinsight.analysis.AnalysisDefinition;
+
 import com.easyinsight.analysis.list.ListDefinition;
 import com.easyinsight.framework.NavigationEvent;
 import com.easyinsight.genredata.AnalyzeEvent;
@@ -8,7 +8,6 @@ import com.easyinsight.listing.ReportEditorAnalyzeSource;
 import com.easyinsight.pseudocontext.*;
 
 import com.easyinsight.report.ReportAnalyzeSource;
-import com.easyinsight.report.ReportNavigationEvent;
 import com.easyinsight.solutions.InsightDescriptor;
 
 import flash.events.Event;
@@ -60,7 +59,7 @@ public class ScorecardContextWindow extends VBox {
         setStyle("borderThickness", 1);
         setStyle("cornerRadius", 5);
         setStyle("dropShadowEnabled", true);
-        this.width = 200;
+        this.width = 250;
         setStyle("paddingTop", 10);
         setStyle("paddingBottom", 10);
         setStyle("backgroundColor", 0xFFFFFF);
@@ -132,7 +131,7 @@ public class ScorecardContextWindow extends VBox {
             var label:Label = new Label();
             label.setStyle("fontSize", 13);
             label.text = item.label;
-            label.maxWidth = 200;
+            label.maxWidth = 220;
             labelBox.data = item.data;
             labelBox.addEventListener(MouseEvent.CLICK, item.click);
             labelBox.addEventListener(MouseEvent.MOUSE_OVER, labelMouseOver);
@@ -155,14 +154,10 @@ public class ScorecardContextWindow extends VBox {
             label.setStyle("backgroundColor", 0xFFFFFF);
         }
     }
-    
-    private function onReport(event:ReportNavigationEvent):void {
-        destroy();
-        passthroughFunction.call(passthroughObject, event);
-    }
 
     private function reportClick(event:MouseEvent):void {
-        dispatchEvent(new AnalyzeEvent(new ReportAnalyzeSource(event.currentTarget.data as InsightDescriptor)));
+        destroy();
+        passthroughFunction.call(passthroughObject, new AnalyzeEvent(new ReportAnalyzeSource(event.currentTarget.data as InsightDescriptor)));
     }
 }
 }

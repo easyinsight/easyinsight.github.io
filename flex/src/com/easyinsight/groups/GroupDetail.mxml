@@ -137,8 +137,7 @@
         private var dataSourceItemFactory:ClassFactory = new ClassFactory(GroupDataSourceItem);
         [Bindable]
         private var goalTreeFactory:ClassFactory = new ClassFactory(GoalTreeNameRenderer);
-        [Bindable]
-        private var goalFactory:ClassFactory = new ClassFactory(GoalNameRenderer);
+
 
         private function setup():void {
             addEventListener(RemoveItemFromGroupEvent.REMOVE_DATA_SOURCE_FROM_GROUP, removeFromGroup);
@@ -219,8 +218,7 @@
             dataSourceItemFactory.properties = { admin: adminEnabled };
             goalTreeFactory = new ClassFactory(GoalTreeNameRenderer);
             goalTreeFactory.properties = { admin: adminEnabled };
-            goalFactory = new ClassFactory(GoalNameRenderer);
-            goalFactory.properties = { admin: adminEnabled };
+            
             if (!foundUser) {
                 joinEnabled = true;
             }
@@ -467,7 +465,7 @@
                         </mx:columns>
                     </mx:DataGrid>
                 </mx:VBox>
-                <mx:VBox verticalGap="0" width="100%">
+                <!--<mx:VBox verticalGap="0" width="100%">
                     <mx:Box width="100%" height="5" backgroundColor="#D42525" left="0" right="0"/>
                     <mx:Box width="100%" backgroundColor="#F6A76B" horizontalAlign="center">
                         <mx:Label text="Goals"/>
@@ -485,11 +483,11 @@
                             <mx:DataGridColumn headerText="Date" dataField="name"
                                                headerRenderer="com.easyinsight.groups.CustomGroupHeader"
                                                itemRenderer="com.easyinsight.goals.GoalDateRenderer" width="80"/>
-                            <!--<mx:DataGridColumn headerText="" dataField="com.easyinsight.goals.GoalControls" sortable="false"
-                                               itemRenderer="com.easyinsight.goals.GoalControls" width="30"/>-->
+                            &lt;!&ndash;<mx:DataGridColumn headerText="" dataField="com.easyinsight.goals.GoalControls" sortable="false"
+                                               itemRenderer="com.easyinsight.goals.GoalControls" width="30"/>&ndash;&gt;
                         </mx:columns>
                     </mx:DataGrid>
-                </mx:VBox>
+                </mx:VBox>-->
             </mx:VBox>
         </mx:HBox>
     </mx:VBox>

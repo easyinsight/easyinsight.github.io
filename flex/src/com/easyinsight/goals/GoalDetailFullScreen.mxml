@@ -16,7 +16,7 @@
 
         private var buttonBar:ButtonBar;
 
-        private var _goalTreeNodeData:GoalTreeNodeData;
+        private var _goalTreeNodeData:GoalTreeNode;
         private var _startDate:Date;
         private var _endDate:Date;
 
@@ -31,7 +31,7 @@
         [Bindable]
         private var allDescriptors:ArrayCollection;
 
-        public function set goalTreeNodeData(val:GoalTreeNodeData):void {
+        public function set goalTreeNodeData(val:GoalTreeNode):void {
             _goalTreeNodeData = val;
             var descs:ArrayCollection = new ArrayCollection();
             var history:GoalHistoryDescriptor = new GoalHistoryDescriptor(val.kpi.coreFeedID, val.kpi.coreFeedName);

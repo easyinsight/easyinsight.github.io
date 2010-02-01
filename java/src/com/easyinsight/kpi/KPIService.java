@@ -180,6 +180,7 @@ public class KPIService {
             kpiStorage.deleteKPI(kpiID);
         } catch (Exception e) {
             LogClass.error(e);
+            throw new RuntimeException(e);
         }
     }
 }

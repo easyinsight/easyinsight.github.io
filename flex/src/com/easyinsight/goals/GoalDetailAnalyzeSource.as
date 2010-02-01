@@ -3,9 +3,9 @@ import com.easyinsight.FullScreenPage;
 import com.easyinsight.listing.AnalyzeSource;
 public class GoalDetailAnalyzeSource implements AnalyzeSource{
 
-    private var goalNodeData:GoalTreeNodeData;
+    private var goalNodeData:GoalTreeNode;
 
-    public function GoalDetailAnalyzeSource(val:GoalTreeNodeData) {
+    public function GoalDetailAnalyzeSource(val:GoalTreeNode) {
         super();
         this.goalNodeData = val;
     }
