@@ -176,6 +176,7 @@ public class HighRiseCompositeSource extends CompositeServerDataSource {
         dealValueKPI.setIconImage("credit_card.png");
         dealValueKPI.setAnalysisMeasure((AnalysisMeasure) findAnalysisItem(HighRiseDealSource.TOTAL_DEAL_VALUE));
         FilterValueDefinition filterValueDefinition = new FilterValueDefinition();
+        filterValueDefinition.setInclusive(true);
         filterValueDefinition.setField(findAnalysisItem(HighRiseDealSource.STATUS));
         filterValueDefinition.setFilteredValues(Arrays.asList((Object) "pending"));
         dealValueKPI.setFilters(Arrays.asList((FilterDefinition) filterValueDefinition));
@@ -185,6 +186,7 @@ public class HighRiseCompositeSource extends CompositeServerDataSource {
         pendingDealCountKPI.setAnalysisMeasure((AnalysisMeasure) findAnalysisItem(HighRiseDealSource.COUNT));
         FilterValueDefinition pendingCountFilter = new FilterValueDefinition();
         pendingCountFilter.setField(findAnalysisItem(HighRiseDealSource.STATUS));
+        pendingCountFilter.setInclusive(true);
         pendingCountFilter.setFilteredValues(Arrays.asList((Object) "pending"));
         pendingDealCountKPI.setFilters(Arrays.asList((FilterDefinition) pendingCountFilter));
         KPI dealsClosedMonthKPI = new KPI();

@@ -52,6 +52,16 @@ create table kpi_to_problem_filter (
   constraint kpi_to_problem_filter_ibfk2 foreign key (filter_id) references filter (filter_id) on delete cascade
 );
 
+drop table if exists kpi_to_filter;
+create table kpi_to_filter (
+  kpi_to_filter_id bigint(20) auto_increment not null,
+  kpi_id bigint(20) not null,
+  filter_id bigint(20) not null,
+  primary key (kpi_to_filter_id),
+  constraint kpi_to_filter_ibfk1 foreign key (kpi_id) references kpi (kpi_id) on delete cascade,
+  constraint kpi_to_filter_ibfk2 foreign key (filter_id) references filter (filter_id) on delete cascade
+) ENGINE=INNODB;
+
 drop table if exists scorecard_to_kpi;
 create table scorecard_to_kpi (
   scorecard_to_kpi_id bigint(20) auto_increment not null,
@@ -61,9 +71,6 @@ create table scorecard_to_kpi (
   constraint scorecard_to_kpi_ibfk1 foreign key (scorecard_id) references scorecard (scorecard_id) on delete cascade,
   constraint scorecard_to_kpi_ibfk2 foreign key (kpi_id) references kpi (kpi_id) on delete cascade
 )ENGINE=InnoDB;
-
-alter table solution add scorecard_id bigint(20) default null;
-alter table solution add constraint solution_scorecard_ibfk foreign key (scorecard_id) references scorecard (scorecard_id) on delete set null;
 
 alter table goal_tree_node drop foreign key goal_tree_node_ibfk2;
 alter table goal_tree_node drop foreign key goal_tree_node_ibfk3;
@@ -79,16 +86,6 @@ alter table goal_tree_node drop feed_id;
 
 alter table goal_tree_node add kpi_id bigint(20) default null;
 alter table goal_tree_node add constraint goal_tree_node_ibfk2 foreign key (kpi_id) references kpi (kpi_id) on delete set null;
-
-drop table if exists kpi_to_filter;
-create table kpi_to_filter (
-  kpi_to_filter_id bigint(20) auto_increment not null,
-  kpi_id bigint(20) not null,
-  filter_id bigint(20) not null,
-  primary key (kpi_to_filter_id),
-  constraint kpi_to_filter_ibfk1 foreign key (kpi_id) references kpi (kpi_id) on delete cascade,
-  constraint kpi_to_filter_ibfk2 foreign key (filter_id) references filter (filter_id) on delete cascade
-) ENGINE=INNODB;
 
 drop table goal_tree_node_to_feed;
 drop table goal_tree_node_to_insight;

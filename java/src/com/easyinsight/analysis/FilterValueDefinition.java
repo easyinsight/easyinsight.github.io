@@ -17,7 +17,7 @@ import java.sql.SQLException;
 @PrimaryKeyJoinColumn(name="filter_id")
 public class FilterValueDefinition extends FilterDefinition {
     @Column(name="inclusive")
-    private boolean inclusive;
+    private boolean inclusive = true;
     @Transient
     private List<Object> filteredValues;
     @OneToMany(cascade= CascadeType.ALL)
