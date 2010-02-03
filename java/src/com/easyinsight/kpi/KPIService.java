@@ -15,6 +15,7 @@ import com.easyinsight.scorecard.ScorecardService;
 import com.easyinsight.scorecard.ScorecardStorage;
 import com.easyinsight.security.SecurityUtil;
 
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -31,6 +32,7 @@ public class KPIService {
         EIConnection conn = Database.instance().getConnection();
         try {
             KPI kpi = sourceKPI.clone();
+            kpi.setKpiUsers(Arrays.asList(KPIUtil.defaultUser()));
             kpi.setName("Copy of " + kpi.getName());
             kpiStorage.saveKPI(kpi, conn);
             if (scorecardID > 0) {
@@ -97,6 +99,7 @@ public class KPIService {
             for (KPI kpi : kpis) {
                 kpi.setTemporary(true);
                 //kpi.setConnectionID(connectionID);
+                kpi.setKpiUsers(Arrays.asList(KPIUtil.defaultUser()));
                 kpi.setCoreFeedID(targetDataSourceID);
                 kpiStorage.saveKPI(kpi, conn);
             }
@@ -155,6 +158,7 @@ public class KPIService {
         EIConnection conn = Database.instance().getConnection();
         try {
             conn.setAutoCommit(false);
+            kpi.setKpiUsers(Arrays.asList(KPIUtil.defaultUser()));
             kpiStorage.saveKPI(kpi, conn);
             conn.commit();
         } catch (Exception e) {

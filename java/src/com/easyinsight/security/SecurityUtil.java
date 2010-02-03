@@ -164,16 +164,16 @@ public class SecurityUtil {
         Connection conn = Database.instance().getConnection();
         long userID = SecurityUtil.getUserID();
         try {
-            PreparedStatement queryStmt = conn.prepareStatement("SELECT USER_ID FROM SCORECARD, SCORECARD_TO_KPI WHERE SCORECARD_TO_KPI.kpi_id = ? AND " +
-                    "SCORECARD.scorecard_id = SCORECARD_TO_KPI.scorecard_id");
+
+            // HOW DO I DO THIS
+            PreparedStatement queryStmt = conn.prepareStatement("SELECT OWNER " +
+                    "FROM KPI_ROLE WHERE " +
+                "KPI_ROLE.kpi_id = ? AND KPI_ROLE.USER_ID = ?");
+
             queryStmt.setLong(1, kpiID);
+            queryStmt.setLong(2, userID);
             ResultSet rs = queryStmt.executeQuery();
-            if (rs.next()) {
-                long scorecardUserID = rs.getLong(1);
-                if (scorecardUserID != userID) {
-                    throw new SecurityException();
-                }
-            } else {
+            if (!rs.next()) {
                 throw new SecurityException();
             }
         } catch (SQLException e) {

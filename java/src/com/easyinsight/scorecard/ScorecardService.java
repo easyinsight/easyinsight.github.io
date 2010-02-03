@@ -7,10 +7,7 @@ import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.*;
 import com.easyinsight.dataset.DataSet;
-import com.easyinsight.kpi.KPI;
-import com.easyinsight.kpi.KPIOutcome;
-import com.easyinsight.kpi.KPIStorage;
-import com.easyinsight.kpi.KPIValue;
+import com.easyinsight.kpi.*;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.pipeline.HistoryRun;
 import com.easyinsight.pipeline.StandardReportPipeline;
@@ -57,6 +54,7 @@ public class ScorecardService {
     public long addKPIToScorecard(KPI kpi, long scorecardID) {
         SecurityUtil.authorizeScorecard(scorecardID);
         try {
+            kpi.setKpiUsers(Arrays.asList(KPIUtil.defaultUser()));
             return scorecardStorage.addKPIToScorecard(kpi, scorecardID);
         } catch (Exception e) {
             LogClass.error(e);

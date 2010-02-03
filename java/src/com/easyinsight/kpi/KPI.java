@@ -50,6 +50,16 @@ public class KPI implements Cloneable {
 
     private List<InsightDescriptor> reports;
 
+    private List<KPIUser> kpiUsers = new ArrayList<KPIUser>();
+
+    public List<KPIUser> getKpiUsers() {
+        return kpiUsers;
+    }
+
+    public void setKpiUsers(List<KPIUser> kpiUsers) {
+        this.kpiUsers = kpiUsers;
+    }
+
     public long getConnectionID() {
         return connectionID;
     }
@@ -127,7 +137,7 @@ public class KPI implements Cloneable {
                 copyFilters.add(clonedFilter);
             }
             clonedKPI.setFilters(copyFilters);
-            clonedKPI.setAnalysisMeasure((AnalysisMeasure) getAnalysisMeasure().clone());            
+            clonedKPI.setAnalysisMeasure((AnalysisMeasure) getAnalysisMeasure().clone());
             return clonedKPI;
         } catch (CloneNotSupportedException e) {
             throw new RuntimeException(e);

@@ -5,6 +5,9 @@ import com.easyinsight.analysis.FilterDefinition;
 import com.easyinsight.core.InsightDescriptor;
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
+import com.easyinsight.datafeeds.FeedConsumer;
+import com.easyinsight.email.UserStub;
+import com.easyinsight.groups.GroupDescriptor;
 import org.hibernate.Session;
 
 import java.sql.*;
@@ -59,6 +62,7 @@ public class KPIStorage {
         }
         saveFilters(kpi, conn);
         saveProblemFilters(kpi, conn);
+        saveUsers(kpi, conn);
     }
 
     
@@ -130,6 +134,7 @@ public class KPIStorage {
         kpi.setProblemConditions(getProblemFilters(kpiID, conn));
         kpi.setTemporary(temporary);
         kpi.setReports(getReports(dataFeedID, conn));
+        kpi.setKpiUsers(getKPIUsers(kpiID, conn));
         PreparedStatement queryStmt = conn.prepareStatement("SELECT SOLUTION_ID FROM SOLUTION_INSTALL WHERE INSTALLED_DATA_SOURCE_ID = ?");
         queryStmt.setLong(1, dataFeedID);
         ResultSet solutionRS = queryStmt.executeQuery();
@@ -289,6 +294,36 @@ public class KPIStorage {
         return null;
     }
 
+    private void saveUsers(KPI kpi, Connection conn) throws SQLException {
+        PreparedStatement clearExistingStmt = conn.prepareStatement("DELETE FROM KPI_ROLE WHERE KPI_ID = ?");
+        clearExistingStmt.setLong(1, kpi.getKpiID());
+        clearExistingStmt.executeUpdate();
+        Session session = Database.instance().createSession(conn);
+        try {
+            PreparedStatement saveUsersStmt = conn.prepareStatement("INSERT INTO KPI_ROLE (KPI_ID, USER_ID, GROUP_ID, OWNER, RESPONSIBLE) VALUES (?, ?, ?, ?, ?)");
+            for (KPIUser kpiUser : kpi.getKpiUsers()) {
+                saveUsersStmt.setLong(1, kpi.getKpiID());
+                if (kpiUser.getFeedConsumer().type() == FeedConsumer.USER) {
+                    UserStub userStub = (UserStub) kpiUser.getFeedConsumer();
+                    saveUsersStmt.setLong(2, userStub.getUserID());
+                } else {
+                    saveUsersStmt.setNull(2, Types.BIGINT);
+                }
+                if (kpiUser.getFeedConsumer().type() == FeedConsumer.GROUP) {
+                    GroupDescriptor groupStub = (GroupDescriptor) kpiUser.getFeedConsumer();
+                    saveUsersStmt.setLong(3, groupStub.getGroupID());
+                } else {
+                    saveUsersStmt.setNull(3, Types.BIGINT);
+                }
+                saveUsersStmt.setBoolean(4, kpiUser.isOwner());
+                saveUsersStmt.setBoolean(5, kpiUser.isResponsible());
+                saveUsersStmt.execute();
+            }
+        } finally {
+            session.close();
+        }
+    }
+
     private void saveFilters(KPI kpi, Connection conn) throws SQLException {
         PreparedStatement clearExistingStmt = conn.prepareStatement("DELETE FROM KPI_TO_FILTER WHERE KPI_ID = ?");
         clearExistingStmt.setLong(1, kpi.getKpiID());
@@ -330,6 +365,30 @@ public class KPIStorage {
             session.close();
         }
         return filters;
+    }
+
+    private List<KPIUser> getKPIUsers(long kpiID, EIConnection conn) throws SQLException {
+        PreparedStatement queryStmt = conn.prepareStatement("SELECT KPI_ROLE.USER_ID, GROUP_ID, USER.USERNAME, USER.EMAIL, USER.NAME, COMMUNITY_GROUP.name, OWNER, RESPONSIBLE FROM " +
+                "KPI_ROLE LEFT JOIN USER ON KPI_ROLE.USER_ID = USER.USER_ID LEFT JOIN COMMUNITY_GROUP ON KPI_ROLE.GROUP_ID = COMMUNITY_GROUP.COMMUNITY_GROUP_ID " +
+                "WHERE KPI_ID = ? ");
+        queryStmt.setLong(1, kpiID);
+        ResultSet rs = queryStmt.executeQuery();
+        List<KPIUser> users = new ArrayList<KPIUser>();
+        while (rs.next()) {
+            long userID = rs.getLong(1);
+            FeedConsumer feedConsumer;
+            if (!rs.wasNull()) {
+                feedConsumer = new UserStub(userID, rs.getString(3), rs.getString(4), rs.getString(5));
+            } else {
+                feedConsumer = new GroupDescriptor(rs.getString(6), rs.getLong(3), 0, "");
+            }
+            KPIUser kpiUser = new KPIUser();
+            kpiUser.setFeedConsumer(feedConsumer);
+            kpiUser.setOwner(rs.getBoolean(7));
+            kpiUser.setResponsible(rs.getBoolean(8));
+            users.add(kpiUser);
+        }
+        return users;
     }
 
     private List<FilterDefinition> getProblemFilters(long kpiID, Connection conn) throws SQLException {

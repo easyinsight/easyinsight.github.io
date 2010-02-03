@@ -21,6 +21,8 @@ public class AnalysisRangeDimension extends AnalysisDimension {
     private static final int THRESHOLD = 10;
     private transient Range range;
 
+    
+
     public AnalysisRangeDimension(Key key, boolean group) {
         super(key, group);
     }

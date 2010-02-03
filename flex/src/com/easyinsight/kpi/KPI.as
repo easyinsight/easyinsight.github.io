@@ -37,6 +37,8 @@ public class KPI extends EventDispatcher {
     public var filters:ArrayCollection;
     public var objectives:ArrayCollection;
 
+    public var kpiUsers:ArrayCollection;
+
     public var connectionID:int;
 
     public function KPI() {
@@ -54,6 +56,10 @@ public class KPI extends EventDispatcher {
         if (_configurationMode == value) return;
         _configurationMode = value;
         dispatchEvent(new Event("configurationModeChanged"));
+    }
+
+    private function blah():void {
+        var kpiUser:KPIUser;
     }
 }
 }
