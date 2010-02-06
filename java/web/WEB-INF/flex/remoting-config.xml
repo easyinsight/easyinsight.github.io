@@ -15,6 +15,18 @@
             <source>com.easyinsight.exchange.ExchangeService</source>
         </properties>
     </destination>
+    
+    <destination id="scorecardService">
+        <properties>
+            <source>com.easyinsight.scorecard.ScorecardService</source>
+        </properties>
+    </destination>
+
+    <destination id="kpiService">
+        <properties>
+            <source>com.easyinsight.kpi.KPIService</source>
+        </properties>
+    </destination>
 
     <destination id="reportPackageService">
         <properties>
