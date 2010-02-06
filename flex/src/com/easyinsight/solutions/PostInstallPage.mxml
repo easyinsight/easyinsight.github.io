@@ -7,6 +7,7 @@
         import com.easyinsight.framework.CredentialsCache;
 
         import mx.collections.ArrayCollection;
+        import mx.controls.Alert;
 
         private var _dataSourceDescriptor:DataSourceDescriptor;
 
@@ -53,7 +54,7 @@
         private var coreStackIndex:int = 0;
         ]]></mx:Script>
     <mx:RemoteObject destination="kpiService" id="kpiService">
-        <mx:method name="getKPIsForStart" result="gotInitialKPIs()"/>
+        <mx:method name="getKPIsForStart" result="gotInitialKPIs()" fault="Alert.show(event.fault.faultString)"/>
     </mx:RemoteObject>
     <mx:ViewStack selectedIndex="{coreStackIndex}" width="100%" height="100%">
         <!--
