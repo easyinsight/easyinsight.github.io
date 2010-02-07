@@ -74,8 +74,10 @@ public class KPIStorage {
             PreparedStatement getKPIStmt = conn.prepareStatement("SELECT KPI.KPI_ID, ANALYSIS_MEASURE_ID, KPI.DATA_FEED_ID, KPI.DESCRIPTION," +
                 "ICON_IMAGE, KPI_NAME, DATA_FEED.feed_name, KPI.goal_defined, KPI.goal_value, KPI.high_is_good, KPI.temporary " +
                     "FROM KPI, DATA_FEED, UPLOAD_POLICY_USERS WHERE " +
-                "data_feed.data_feed_id = kpi.data_feed_id AND UPLOAD_POLICY_USERS.USER_ID = ? AND DATA_FEED.DATA_FEED_ID = UPLOAD_POLICY_USERS.FEED_ID");
+                "data_feed.data_feed_id = kpi.data_feed_id AND UPLOAD_POLICY_USERS.USER_ID = ? AND DATA_FEED.DATA_FEED_ID = UPLOAD_POLICY_USERS.FEED_ID AND " +
+                    "KPI.TEMPORARY = ?");
             getKPIStmt.setLong(1, userID);
+            getKPIStmt.setBoolean(2, false);
             ResultSet kpiRS = getKPIStmt.executeQuery();
             while (kpiRS.next()) {
                 kpis.add(getKPIFromResultSet(conn, kpiRS));

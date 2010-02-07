@@ -127,11 +127,14 @@
             invalidateSize();
         }
 
+        private var callout:Callout;
+
         public function firstRenderer(kpi:KPI):Callout {
+            if (callout == null) {
             var rowRenderers:Array = plainGrid.listRendererArray;
             var index:int = kpis.getItemIndex(kpi);
             var kpiNameRenderer:KPINameRenderer = rowRenderers[index][1];
-            var callout:Callout = new Callout();
+            callout = new Callout();
             callout.setStyle("backgroundColor", 0xffe96c);
             callout.setStyle("backgroundAlpha", 1);
             var contentLabel:TextArea = new TextArea();
@@ -143,6 +146,7 @@
             contentLabel.text = "You can click on a KPI name to pull up a context menu with options for diving into the data.";
             callout.content = contentLabel;
             callout.show(kpiNameRenderer);
+                }
             return callout;
         }
 

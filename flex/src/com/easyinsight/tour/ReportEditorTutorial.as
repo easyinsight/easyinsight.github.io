@@ -53,8 +53,8 @@ public class ReportEditorTutorial extends TutorialFramework {
         notes.addItem(new NoteAnchor("solutionBox", "Restricting the view to those reports created against " + _solution.name + ", you can see a variety of report options for you. Clicking on the name of one of the reports in this list will open it up, applying that report template to your data."));
         notes.addItem(new InstallReportTutorialElement(_solution.solutionID));
         notes.addItem(new ScreenNoteAnchor("What you see here is the report view, displaying the report template chosen a moment ago against your data set.", "center", 100));
-        notes.addItem(new NoteAnchor("leftButtonBar", "You can export the report to a variety of locations, view in full screen for demonstration purposes, or adjust any filters on the report."));
-        notes.addItem(new NoteAnchor("myDataButton", "If you feel like a particular report helps provide you with meaningful insight, you can add it to your own My Data page for future reference, as well as enabling you to change it however you like. Clicking on the Add to My Data button here will accomplish this task.", true, true, null, 180));
+        notes.addItem(new ScreenNoteAnchor("You can export the report to a variety of locations, view in full screen for demonstration purposes, or adjust any filters on the report.", "center", 120));
+        notes.addItem(new ScreenNoteAnchor("If you feel like a particular report helps provide you with meaningful insight, you can add it to your own My Data page for future reference, as well as enabling you to change it however you like. Clicking on the Add to My Data button here will accomplish this task.", "center", 200));
         notes.addItem(new ActionTutorialElement(new NavigationEvent("Home")));
         notes.addItem(new ScreenNoteAnchor("Here, we've returned to the Home page, which now shows you the scorecard we created. As you add reports, you can access those reports from the popup menu that appears when you left click on a KPI.", "center", 150, "Close Tutorial"));
         notes.addItem(new SetNoteProperty("coreVBox", "enabled", true));
