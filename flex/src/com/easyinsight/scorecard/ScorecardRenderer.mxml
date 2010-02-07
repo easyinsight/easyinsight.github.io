@@ -131,23 +131,27 @@
 
         public function firstRenderer(kpi:KPI):Callout {
             if (callout == null) {
-            var rowRenderers:Array = plainGrid.listRendererArray;
-            var index:int = kpis.getItemIndex(kpi);
-            var kpiNameRenderer:KPINameRenderer = rowRenderers[index][1];
-            callout = new Callout();
-            callout.setStyle("backgroundColor", 0xffe96c);
-            callout.setStyle("backgroundAlpha", 1);
-            var contentLabel:TextArea = new TextArea();
-            contentLabel.width = 200;
-            contentLabel.height = 50;
-            contentLabel.setStyle("backgroundAlpha", 0);
-            contentLabel.setStyle("textDecoration", "none");
-            contentLabel.setStyle("borderStyle", "none");
-            contentLabel.text = "You can click on a KPI name to pull up a context menu with options for diving into the data.";
-            callout.content = contentLabel;
-            callout.show(kpiNameRenderer);
-                }
+                var rowRenderers:Array = plainGrid.listRendererArray;
+                var index:int = kpis.getItemIndex(kpi);
+                var kpiNameRenderer:KPINameRenderer = rowRenderers[index][1];
+                callout = new Callout();
+                callout.setStyle("backgroundColor", 0xffe96c);
+                callout.setStyle("backgroundAlpha", 1);
+                var contentLabel:TextArea = new TextArea();
+                contentLabel.width = 200;
+                contentLabel.height = 50;
+                contentLabel.setStyle("backgroundAlpha", 0);
+                contentLabel.setStyle("textDecoration", "none");
+                contentLabel.setStyle("borderStyle", "none");
+                contentLabel.text = "You can click on a KPI name to pull up a context menu with options for diving into the data.";
+                callout.content = contentLabel;
+                callout.show(kpiNameRenderer);
+            }
             return callout;
+        }
+
+        public function clearRenderer():void {
+            callout = null;
         }
 
         [Bindable]
