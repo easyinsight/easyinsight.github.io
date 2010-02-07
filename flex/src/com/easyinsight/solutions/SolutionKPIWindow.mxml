@@ -93,16 +93,21 @@
             stackIndex = 3;
         }
 
+        private function backFromLast():void {
+            
+        }
+
         private function kpiLinkStart():void {
             linksEnabled = true;
             callout = scorecardRenderer.firstRenderer(_kpis.getItemAt(0) as KPI);
-            stackIndex = 4;
+
         }
 
         private function onReport(event:AnalyzeEvent):void {
 
             if (callout != null) {
                 callout.hide();
+                scorecardRenderer.clearRenderer();
                 callout = null;
             }
 
@@ -122,11 +127,13 @@
         private function gotScorecards():void {
             var scorecards:ArrayCollection = scorecardService.getScorecardsForUser.lastResult as ArrayCollection;
             if (scorecards.length == 0) {
+                userHasKPIs = false;
                 stackIndex = 1;
-                backIndex = 1;
+
             } else {
+                userHasKPIs = true;
                 stackIndex = 2;
-                backIndex = 2;
+
             }
         }
 
@@ -134,7 +141,18 @@
             dispatchEvent(new AnalyzeEvent(new DescriptorAnalyzeSource(_dataSourceDescriptor.id, _dataSourceDescriptor.name)));
         }
 
+        private function kpiLinkBack():void {
+            linksEnabled = false;
+            if (callout != null) {
+                callout.hide();
+                scorecardRenderer.clearRenderer();
+                callout = null;
+            }
+        }
+
         private var callout:Callout;
+
+        private var userHasKPIs:Boolean = false;
 
         [Bindable]
         private var linksEnabled:Boolean = false;
@@ -159,15 +177,15 @@
         </mx:Box>
         <mx:Box height="50%" width="100%" horizontalAlign="center" verticalAlign="middle" backgroundColor="#404041">
             <mx:ViewStack width="100%" selectedIndex="{stackIndex}">
-                <mx:VBox width="100%" horizontalAlign="center">
+                <mx:VBox width="100%" horizontalAlign="center" data="0">
                     <mx:TextArea text="Now that you have a connection, we can take a look at a few Key Performance Indicators or KPIs. These are simple, high level metrics about your business."
                                  editable="false" borderStyle="none" backgroundAlpha="0" width="600" fontSize="24" height="200"
                                  color="#FFFFFF"/>
                     <mx:HBox>
-                        <mx:Button label="Next" fontSize="24" click="scorecardService.getScorecardsForUser.send()"/>
+                        <mx:Button label="Next" fontSize="24" click="scorecardService.getScorecardsForUser.send(); backIndex = 0"/>
                     </mx:HBox>
                 </mx:VBox>
-                <mx:VBox width="100%" horizontalAlign="center">
+                <mx:VBox width="100%" horizontalAlign="center" data="1">
                     <mx:TextArea text="Together, these KPIs form a scorecard, providing quick, high level visibility into how things are going. This scorecard will be available to you under your Home page. There, you can easily create custom KPIs of your own."
                                  editable="false" borderStyle="none" backgroundAlpha="0" width="600" fontSize="24" height="200"
                             color="#FFFFFF"/>
@@ -176,7 +194,7 @@
                         <mx:Button label="Next" fontSize="24" click="addToNew()"/>
                     </mx:HBox>
                 </mx:VBox>
-                <mx:VBox width="100%" horizontalAlign="center">
+                <mx:VBox width="100%" horizontalAlign="center" data="2">
                     <mx:TextArea text="You already have a scorecard defined, so we can add these KPIs to that existing scorecard, add them to a new scorecard, or just skip them entirely."
                                  editable="false" borderStyle="none" backgroundAlpha="0" width="600" fontSize="24" height="200"
                             color="#FFFFFF"/>
@@ -187,7 +205,7 @@
                         <mx:Button label="Just Skip Them" fontSize="24" click="stackIndex = 3"/>
                     </mx:HBox>
                 </mx:VBox>
-                <mx:VBox width="100%" horizontalAlign="center">
+                <mx:VBox width="100%" horizontalAlign="center" data="3">
                     <mx:TextArea text="It looks like you may have seen this tutorial already--do you want to continue with the tutorial or just jump over to your new data source?"
                                  editable="false" borderStyle="none" backgroundAlpha="0" width="600" fontSize="24" height="200"
                             color="#FFFFFF"/>
@@ -197,23 +215,40 @@
                         <mx:Button label="Just Go to the Data Source" fontSize="24" click="done()"/>
                     </mx:HBox>
                 </mx:VBox>
-                <mx:VBox width="100%" horizontalAlign="center">
+                <mx:VBox width="100%" horizontalAlign="center" data="4">
                     <mx:TextArea text="Next, you need to be able to dig deeper into the numbers--find the insights underlying those measures."
                                  editable="false" borderStyle="none" backgroundAlpha="0" width="600" fontSize="24" height="200"
                             color="#FFFFFF"/>
                     <mx:HBox>
-                        <mx:Button label="Back" fontSize="24" click="stackIndex = backIndex"/>
-                        <mx:Button label="Next" fontSize="24" click="kpiLinkStart()"/>
+                        <mx:Button label="Back" fontSize="24" click="stackIndex = 1"/>
+                        <mx:Button label="Next" fontSize="24" click="stackIndex = 7; kpiLinkStart()"/>
                     </mx:HBox>
                 </mx:VBox>
-                <mx:VBox width="100%" horizontalAlign="center">
+                <mx:VBox width="100%" horizontalAlign="center" data="5">
+                    <mx:TextArea text="Next, you need to be able to dig deeper into the numbers--find the insights underlying those measures."
+                                 editable="false" borderStyle="none" backgroundAlpha="0" width="600" fontSize="24" height="200"
+                            color="#FFFFFF"/>
+                    <mx:HBox>
+                        <mx:Button label="Back" fontSize="24" click="stackIndex = 3"/>
+                        <mx:Button label="Next" fontSize="24" click="stackIndex = 6; kpiLinkStart()"/>
+                    </mx:HBox>
+                </mx:VBox>
+                <mx:VBox width="100%" horizontalAlign="center" data="6">
                     <mx:TextArea text="You can click on a KPI name to pull up a context menu with options for diving into the data. Go ahead and click the first option, Analyze the KPI, to pull up the report editor."
                                  editable="false" borderStyle="none" backgroundAlpha="0" width="600" fontSize="24" height="200"
                                  color="#FFFFFF"/>
                     <mx:HBox>
-                        <mx:Button label="Back" fontSize="24" click="stackIndex = 3"/>
+                        <mx:Button label="Back" fontSize="24" click="kpiLinkBack(); stackIndex = 5"/>
                     </mx:HBox>
-                </mx:VBox>                
+                </mx:VBox>
+                <mx:VBox width="100%" horizontalAlign="center" data="7">
+                    <mx:TextArea text="You can click on a KPI name to pull up a context menu with options for diving into the data. Go ahead and click the first option, Analyze the KPI, to pull up the report editor."
+                                 editable="false" borderStyle="none" backgroundAlpha="0" width="600" fontSize="24" height="200"
+                                 color="#FFFFFF"/>
+                    <mx:HBox>
+                        <mx:Button label="Back" fontSize="24" click="kpiLinkBack(); stackIndex = 4"/>
+                    </mx:HBox>
+                </mx:VBox>
             </mx:ViewStack>
         </mx:Box>
     </mx:VBox>
