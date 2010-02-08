@@ -1,6 +1,6 @@
 <?xml version="1.0" ?>
 <util:EITitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*"
-                    xmlns:google="com.easyinsight.google.*">
+                    xmlns:google="com.easyinsight.google.*" width="500" height="500">
     <mx:Script><![CDATA[
         import com.easyinsight.customupload.UploadConfigEvent;
 
@@ -15,4 +15,7 @@
         }
         ]]></mx:Script>
     <google:GoogleSpreadsheetSelection userConfigComplete="onFeedCreation(event)" userConfigCancel="cancel(event)"/>
+    <mx:HBox width="100%" horizontalAlign="center">
+        <mx:Button label="Cancel" click="PopUpManager.removePopUp(this)"/>
+    </mx:HBox>
 </util:EITitleWindow>

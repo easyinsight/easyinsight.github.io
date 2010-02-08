@@ -76,22 +76,6 @@
             tokenService.isTokenEstablished.send(1);
         }
 
-        /*private function googleConnectAttempted():void {
-            var response:CredentialsResponse = dataService.testGoogleConnect.lastResult as CredentialsResponse;
-            if (response.successful) {
-                if (response.encryptedResponse == null) {
-                    SpreadsheetFeedButton.credentials = credentials;
-                } else {
-                    SpreadsheetFeedButton.credentials = response.encryptedResponse;
-                }
-                connectMessage = "Successfully connected to Google Spreadsheets, retrieving available spreadsheets...";
-                dataService.getAvailableGoogleSpreadsheets.send(credentials);
-            } else {
-                connectMessage = response.failureMessage;
-                progressBar.visible = false;
-            }
-        }*/
-
         private function onKeyUp(event:KeyboardEvent):void {
             if (event.keyCode == Keyboard.ENTER) {
                 attemptGoogleConnect();
