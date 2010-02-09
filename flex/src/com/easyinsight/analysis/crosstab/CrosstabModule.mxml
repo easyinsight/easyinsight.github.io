@@ -46,6 +46,10 @@
             dispatchEvent(event);
         }
 
+        public function preserveValues():Boolean {
+            return false;
+        }
+
         public function onCustomChangeEvent(event:CustomChangeEvent):void {
         }]]></mx:Script>
     <mx:OLAPDataGrid id="dataSet" height="100%" width="100%" itemClick="onClick(event)" fontFamily="Tahoma"/>

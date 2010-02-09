@@ -16,10 +16,14 @@ import java.util.Collection;
 public class StandardReportPipeline extends Pipeline {
     protected List<IComponent> generatePipelineCommands(Set<AnalysisItem> allNeededAnalysisItems, Set<AnalysisItem> reportItems, Collection<FilterDefinition> filters, WSAnalysisDefinition report) {
         List<IComponent> components = new ArrayList<IComponent>();
+        
         components.add(new DataScrubComponent());
         components.add(new TagTransformComponent());
-        components.add(new RangeComponent());
-        components.add(new VirtualDimensionComponent());
+
+        for (AnalysisItem range : items(AnalysisItemTypes.RANGE_DIMENSION, reportItems)) {
+            components.add(new RangeComponent((AnalysisRangeDimension) range));
+        }
+        //components.add(new VirtualDimensionComponent());
         components.add(new TypeTransformComponent());
 
         // for each filtered measure, apply an additional filtering component
@@ -56,6 +60,10 @@ public class StandardReportPipeline extends Pipeline {
         //if (!temporalAdded) {
             //components.add(new BroadAggregationComponent());
         components.add(new AggregationComponent());
+
+        // TODO: if a calculation is based on second calculation, populate results with the first calculation first
+        // directed graph required? or just list
+
         for(AnalysisItem calc : items(AnalysisItemTypes.CALCULATION, reportItems)) {
             AnalysisCalculation calculation = (AnalysisCalculation) calc;
             if (!calculation.isApplyBeforeAggregation()) {

@@ -150,8 +150,8 @@
                 visuals.chart = columnChart;
 
                 /*if (selectable) {
-                    columnChart.selectionMode = "multiple";
-                }*/
+                 columnChart.selectionMode = "multiple";
+                 }*/
                 columnChart.dataProvider = graphData;
 
                 // define the X axis
@@ -202,6 +202,7 @@
                 columnSeries.yField = yField;
                 //columnSeries.labelFunction = renderChartLabel;
                 columnSeries.dataProvider = graphData;
+                columnSeries.dataFunction = myDataFunction;
                 BindingUtils.bindProperty(columnSeries, "displayName", this, "xAxisTitle");
                 columnSeries.setStyle("showDataEffect", interpolateIn);
                 //var mySeries:Array = new Array();
@@ -211,6 +212,15 @@
                 columnChart.addEventListener(ChartItemEvent.ITEM_CLICK, onClick);
                 addChild(columnChart);
             }
+        }
+
+        private function myDataFunction(series:Series3D, item:Object, fieldName:String):Object {
+            if (fieldName == 'yValue')
+                return(item[yAxisItem.qualifiedName()].toNumber());
+            else if (fieldName == "xValue")
+                return(item[xAxisItem.qualifiedName()].toString());
+            else
+                return null;
         }
 
         private function renderChartLabel(element:ChartItem, series:Series3D):String {
@@ -324,6 +334,10 @@
         }
 
         public function updateExportMetadata():void {
+        }
+
+        public function preserveValues():Boolean {
+            return true;
         }
 
         public function onCustomChangeEvent(event:CustomChangeEvent):void {

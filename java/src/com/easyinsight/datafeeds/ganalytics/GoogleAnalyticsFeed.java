@@ -152,7 +152,7 @@ public class GoogleAnalyticsFeed extends Feed {
             List<AnalysisItem> convertedItems = new ArrayList<AnalysisItem>();
             for (AnalysisItem analysisItem : analysisItems) {
                 for (AnalysisItem field : getFields()) {
-                    if (field.getKey().equals(analysisItem.getKey())) {
+                    if (field.getKey().equals(analysisItem.getKey().toBaseKey())) {
                         if (field.hasType(AnalysisItemTypes.DIMENSION) && analysisItem.hasType(AnalysisItemTypes.MEASURE)) {
                             convertedItems.add(field);
                         } else if (field.hasType(AnalysisItemTypes.MEASURE) && analysisItem.hasType(AnalysisItemTypes.DIMENSION)) {
@@ -241,9 +241,9 @@ public class GoogleAnalyticsFeed extends Feed {
 
                         for (AnalysisItem analysisItem : analysisItems) {
                             if ("title".equals(analysisItem.getKey().toKeyString())) {
-                                row.addValue(analysisItem.getKey(), title);
+                                row.addValue(analysisItem.createAggregateKey(), title);
                             } else {
-                                row.addValue(analysisItem.getKey(), getValue(analysisItem, entry));
+                                row.addValue(analysisItem.createAggregateKey(), getValue(analysisItem, entry));
                             }
                         }
 

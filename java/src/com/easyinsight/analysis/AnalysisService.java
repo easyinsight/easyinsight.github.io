@@ -42,6 +42,18 @@ public class AnalysisService {
 
     private AnalysisStorage analysisStorage = new AnalysisStorage();
 
+    public AnalysisItem cloneItem(AnalysisItem analysisItem) {
+        try {
+            AnalysisItem copy =  analysisItem.clone();
+            copy.setDisplayName("Copy of " + analysisItem.toDisplay());
+            copy.setConcrete(false);
+            return copy;
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        }
+    }
+
     public Collection<InsightDescriptor> getInsightDescriptorsForDataSource(long dataSourceID) {
         long userID = SecurityUtil.getUserID();
         try {

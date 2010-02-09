@@ -385,8 +385,8 @@ public class CalculationIntegrationTest extends TestCase {
         try {
             ret = parser.startExpr();
             c = (CalculationTreeNode) ret.getTree();
-            visitor = new ResolverVisitor(r, new FunctionFactory());
-            c.accept(visitor);
+            //visitor = new ResolverVisitor(r, new FunctionFactory());
+            //c.accept(visitor);
         } catch (RecognitionException e) {
             e.printStackTrace(); 
         }

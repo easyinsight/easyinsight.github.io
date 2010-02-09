@@ -91,13 +91,13 @@ public class AnalysisCellRenderer extends UITextField implements IListItemRender
 			if (value != null) {
                 var field:String = analysisItem.qualifiedName();
                 var formatter:Formatter = analysisItem.getFormatter();
-				var objVal:Object = value[field];
+				var objVal:Value = value[field];
 				
 				
 				if (objVal == null) {
 					this.text = "";
 				} else {
-					this.text = formatter.format(objVal);
+                    this.text = formatter.format(objVal.getValue());                    
 
                     //Alert.show("retrieving " + field + " produced " + objVal + " gave us formatted text = " + this.text);
 					if (renderer.hasCustomColor()) {

@@ -116,6 +116,10 @@
 
         public function onCustomChangeEvent(event:CustomChangeEvent):void {
         }
+
+        public function preserveValues():Boolean {
+            return false;
+        }
 		]]>
     </mx:Script>
     <mx:HBox width="100%" height="100%">

@@ -83,18 +83,18 @@
                     groupingFields.push(groupingField);
                 }
                 /*for each (var level:HierarchyLevel in hierarchy.hierarchyLevels) {
-                    //analysisItems.push(level.analysisItem);
+                 //analysisItems.push(level.analysisItem);
 
-                }*/
+                 }*/
                 grouping.fields = groupingFields;
                 groupingColl.grouping = grouping;
                 for each (var item:AnalysisItem in treeDefinition.items) {
                     analysisItems.push(item);
                 }
                 var hierarchyColumn:AdvancedDataGridColumn = new AdvancedDataGridColumn();
-                hierarchyColumn.headerText = hierarchy.display;                                                                             
+                hierarchyColumn.headerText = hierarchy.display;
                 hierarchyColumn.dataField = hierarchy.hierarchyLevels.getItemAt(hierarchy.hierarchyLevels.length - 1).analysisItem.qualifiedName();
-                
+
                 hierarchyColumn.headerRenderer = new ListViewHeaderRendererFactory(hierarchy.display);
                 columns[0] = hierarchyColumn;
                 for (var k:int = 0; k < analysisItems.length; k++) {
@@ -106,9 +106,9 @@
                     columnHeaderObject.dataField = myHeader.qualifiedName();
                     columnHeaderObject.headerRenderer = new ListViewHeaderRendererFactory(myHeader.display);
 
-                        var factory:ClassFactory = new ClassFactory(AnalysisCellRenderer);
-                        factory.properties = { analysisItem: myHeader, renderer: clientProcessorMap[myHeader.qualifiedName()] };
-                        columnHeaderObject.itemRenderer = factory;
+                    var factory:ClassFactory = new ClassFactory(AnalysisCellRenderer);
+                    factory.properties = { analysisItem: myHeader, renderer: clientProcessorMap[myHeader.qualifiedName()] };
+                    columnHeaderObject.itemRenderer = factory;
 
                     /*columnHeaderObject.itemRenderer = new AnalysisCellRendererFactory(keyString, myHeader,
                      clientProcessorMap[keyString]);*/
@@ -133,6 +133,10 @@
         }
 
         public function updateExportMetadata():void {
+        }
+
+        public function preserveValues():Boolean {
+            return false;
         }
 
         public function onCustomChangeEvent(event:CustomChangeEvent):void {

@@ -242,6 +242,7 @@ import mx.events.FlexEvent;
                 barSeries.dataProvider = graphData;
                 barSeries.displayName = yAxisTitle;
                 barSeries.setStyle("showDataEffect", interpolateIn);
+                barSeries.dataFunction = myDataFunction;
                 //barSeries.setStyle("fills", standardBlue);
                 var mySeries:Array = new Array();
                 barChart.series = mySeries;
@@ -249,6 +250,15 @@ import mx.events.FlexEvent;
                 addChild(barChart);
             }
         }
+
+        private function myDataFunction(series:Series, item:Object, fieldName:String):Object {
+              if(fieldName == 'xValue')
+                  return(item[xAxisItem.qualifiedName()].toNumber());
+              else if(fieldName == "yValue")
+                  return(item[yAxisItem.qualifiedName()].toString());
+              else
+                  return null;
+         }
 
         private function renderChartLabel(element:ChartItem, series:Series):String {
             var barSeriesItem:BarSeriesItem = element as BarSeriesItem;
@@ -341,6 +351,10 @@ import mx.events.FlexEvent;
             }
 
             graphData = dataSet;
+        }
+
+        public function preserveValues():Boolean {
+            return true;
         }
 
         public function updateExportMetadata():void {

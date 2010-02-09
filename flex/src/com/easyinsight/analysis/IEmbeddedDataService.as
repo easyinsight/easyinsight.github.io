@@ -7,5 +7,6 @@ public interface IEmbeddedDataService {
             noCache:Boolean, hierarchyOverrides:ArrayCollection):void;
     function addEventListener(type:String, listener:Function, useCapture:Boolean = false, priority:int = 0,
                 useWeakReference:Boolean = false):void;
+    function set preserveValues(value:Boolean):void;
 }
 }

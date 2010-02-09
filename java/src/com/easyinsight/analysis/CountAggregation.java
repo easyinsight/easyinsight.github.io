@@ -14,12 +14,13 @@ public class CountAggregation extends Aggregation {
 
     public void addValue(Value value) {
         double addValue;
-        if (value.type() == Value.NUMBER) {
+        /*if (value.type() == Value.NUMBER) {
             NumericValue numericValue = (NumericValue) value;
             addValue = numericValue.toDouble();
         } else {
             addValue = 1;
-        }
+        }*/
+        addValue = 1;
         count += addValue;
     }
 

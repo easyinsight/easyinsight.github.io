@@ -32,6 +32,7 @@
         <mapping class="com.easyinsight.analysis.AnalysisDefinition"/>
         <mapping class="com.easyinsight.analysis.Tag"/>
         <mapping class="com.easyinsight.analysis.TagCloud"/>
+        <mapping class="com.easyinsight.analysis.RangeOption"/>
         <mapping class="com.easyinsight.analysis.FormattingConfiguration"/>
         <mapping class="com.easyinsight.analysis.FilterDefinition"/>
         <mapping class="com.easyinsight.analysis.FilterValueDefinition"/>
@@ -74,7 +75,7 @@
         <mapping class="com.easyinsight.analysis.VirtualTransform"/>
         <mapping class="com.easyinsight.analysis.AnalysisStep"/>
         <mapping class="com.easyinsight.analysis.TemporalAnalysisMeasure"/>
-        <mapping class="com.easyinsight.analysis.LastValueFilter"/>        
+        <mapping class="com.easyinsight.analysis.LastValueFilter"/>
         <mapping class="com.easyinsight.analysis.Link"/>
         <mapping class="com.easyinsight.analysis.URLLink"/>
         <mapping class="com.easyinsight.analysis.DrillThrough"/>              

@@ -43,52 +43,52 @@
 
         private function getMapType(typeVal:int):IMapType {
 
-            switch(typeVal) {
-            case 1:
-                return MapType.NORMAL_MAP_TYPE;
-            case 2:
-                return MapType.HYBRID_MAP_TYPE;
-            case 3:
-                return MapType.SATELLITE_MAP_TYPE;
-            case 4:
-                return MapType.PHYSICAL_MAP_TYPE;
-            default:
-                return null;
+            switch (typeVal) {
+                case 1:
+                    return MapType.NORMAL_MAP_TYPE;
+                case 2:
+                    return MapType.HYBRID_MAP_TYPE;
+                case 3:
+                    return MapType.SATELLITE_MAP_TYPE;
+                case 4:
+                    return MapType.PHYSICAL_MAP_TYPE;
+                default:
+                    return null;
             }
         }
 
         private function getMapVal(mapType:IMapType):int {
-            if(mapType == MapType.NORMAL_MAP_TYPE) {
+            if (mapType == MapType.NORMAL_MAP_TYPE) {
                 return 1;
             }
-            if(mapType == MapType.HYBRID_MAP_TYPE) {
+            if (mapType == MapType.HYBRID_MAP_TYPE) {
                 return 2;
             }
-            if(mapType == MapType.SATELLITE_MAP_TYPE) {
+            if (mapType == MapType.SATELLITE_MAP_TYPE) {
                 return 3;
             }
-            if(mapType == MapType.PHYSICAL_MAP_TYPE) {
+            if (mapType == MapType.PHYSICAL_MAP_TYPE) {
                 return 4;
             }
             return 0;
         }
 
         private function onMoveEnd(event:MapMoveEvent):void {
-            if(heatMapDefinition != null) {
+            if (heatMapDefinition != null) {
                 heatMapDefinition.latitude = event.latLng.lat();
                 heatMapDefinition.longitude = event.latLng.lng();
             }
         }
 
         private function onZoomChanged(event:MapZoomEvent):void {
-            if(heatMapDefinition != null) {
+            if (heatMapDefinition != null) {
                 heatMapDefinition.zoomLevel = event.zoomLevel;
             }
         }
 
         private function onMapTypeChanged(event:MapEvent):void {
-            if(heatMapDefinition != null) {
-            heatMapDefinition.mapType = getMapVal(map.getCurrentMapType());
+            if (heatMapDefinition != null) {
+                heatMapDefinition.mapType = getMapVal(map.getCurrentMapType());
             }
         }
 
@@ -129,10 +129,10 @@
             map.addOverlay(overlay);
             fadeInEffect.target = heatMap;
             fadeInEffect.play();
-            if(heatMapDefinition != null && heatMapDefinition.mapType != 0) {
+            if (heatMapDefinition != null && heatMapDefinition.mapType != 0) {
                 map.setCenter(new LatLng(heatMapDefinition.latitude, heatMapDefinition.longitude), heatMapDefinition.zoomLevel, getMapType(heatMapDefinition.mapType));
             }
-            else if(heatMapDefinition != null && map.isLoaded()) {
+            else if (heatMapDefinition != null && map.isLoaded()) {
                 heatMapDefinition.latitude = map.getCenter().lat();
                 heatMapDefinition.longitude = map.getCenter().lng();
                 heatMapDefinition.zoomLevel = map.getZoom();
@@ -145,7 +145,7 @@
             if (dataSet.length > 0) {
                 this.dataSet = dataSet;
                 heatMapDefinition = analysisDefinition as HeatMapDefinition;
-                if(map.isLoaded()) {
+                if (map.isLoaded()) {
                     prepareMap();
                 }
             }
@@ -161,9 +161,14 @@
         private function latLonToPoint(o:Object):Object {
             return map.fromLatLngToViewport(new LatLng(Number(o[heatMapDefinition.latitudeItem.qualifiedName()]), Number(o[heatMapDefinition.longitudeItem.qualifiedName()])));
         }
+
         private function getCount(o:Object):Number {
             var n:Number = o[heatMapDefinition.measure.qualifiedName()] as Number;
             return n;
+        }
+
+        public function preserveValues():Boolean {
+            return false;
         }
 
         public function onCustomChangeEvent(event:CustomChangeEvent):void {

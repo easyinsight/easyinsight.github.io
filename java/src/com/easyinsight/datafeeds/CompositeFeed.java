@@ -281,8 +281,11 @@ public class CompositeFeed extends Feed {
         }*/
 
         public void produceDataSet(InsightRequestMetadata insightRequestMetadata) throws TokenMissingException {
+
+            //
+
             Feed feed = FeedRegistry.instance().getFeed(feedID);
-            Map<Key, Key> columnSet = new LinkedHashMap<Key, Key>();
+            /*Map<Key, Key> columnSet = new LinkedHashMap<Key, Key>();
             for (Key key : neededKeys) {
                 if (key instanceof DerivedKey) {
                     DerivedKey derivedKey = (DerivedKey) key;
@@ -308,16 +311,19 @@ public class CompositeFeed extends Feed {
                 } else {
                     columnSet.put(key, key);
                 }
-            }
+            }*/
+
+            // The set of items passed into getAggregateDataSet() needs to resolve down to certain keys
+
             DataSet dataSet = feed.getAggregateDataSet(neededItems, filters, insightRequestMetadata, allAnalysisItems, false, additionalKeys);
-            for (Map.Entry<Key, Key> entry : columnSet.entrySet()) {
+            /*for (Map.Entry<Key, Key> entry : columnSet.entrySet()) {
                 if (entry.getValue() != null) {
-                    dataSet.replaceKey(entry.getKey(), entry.getValue());
+                    dataSet.replaceKey(entry.getKey().toBaseKey(), entry.getValue());
                 }
             }
             for (AnalysisItem analysisItem : neededItems) {
                 analysisItem.setKey(columnSet.get(analysisItem.getKey()));
-            }
+            }*/
             myDataSet = dataSet;
         }
 

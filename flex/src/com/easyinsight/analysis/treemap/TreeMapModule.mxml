@@ -123,7 +123,7 @@
             if (dataSet.length > 0) {
                 areaFormatter = treeDefinition.measure1.getFormatter();
                 switch (treeDefinition.colorScheme) {
-                    case TreeMapDefinition.DIV:
+                    case TreeMapDefinition.DIV_RED_GREEN:
                         colorScheme = "div-red-green";
                         break;
                     case TreeMapDefinition.DEPTH:
@@ -161,6 +161,10 @@
         }
 
         public function updateExportMetadata():void {
+        }
+
+        public function preserveValues():Boolean {
+            return false;
         }
 
         public function onCustomChangeEvent(event:CustomChangeEvent):void {

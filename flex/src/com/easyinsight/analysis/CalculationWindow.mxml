@@ -41,6 +41,7 @@
         public function save():AnalysisItem {
             if (analysisCalculation == null) {
                 analysisCalculation = new AnalysisCalculation();
+                analysisCalculation.concrete = false;
                 var namedKey:NamedKey = new NamedKey();
                 namedKey.name = nameInput.text;
                 analysisCalculation.key = namedKey;
@@ -167,6 +168,15 @@
                         </group>
                         <group label="Statistics">
                             <function label="stddev"/>
+                        </group>
+                        <group label="Data Type">
+                            <function label="castsum"/>
+                            <function label="castaverage"/>
+                            <function label="castmax"/>
+                            <function label="castmin"/>
+                            <function label="castcount"/>
+                            <function label="castmedian"/>
+                            <function label="castvariance"/>
                         </group>
                     </mx:XMLList>
                 </mx:XMLListCollection>

@@ -95,12 +95,12 @@
 
         private var tooltip:ToolTip;
 
-        public function onover(event:MapEvent):void {            
+        public function onover(event:MapEvent):void {
             if (event.mapFeature != null) {
                 var mf:MapFeature = event.mapFeature;
                 tooltipFeature += mf.key;
                 var point:Point = mf.mapBarycenter;
-                var canvasPoint:Point = map.drawingCanvas.localToGlobal(point);                
+                var canvasPoint:Point = map.drawingCanvas.localToGlobal(point);
                 tooltip = ToolTipManager.createToolTip(mf.data.label + " - " + mf.data.data,
                         canvasPoint.x, canvasPoint.y) as ToolTip;
             }
@@ -108,7 +108,7 @@
 
         public function onout(event:MapEvent):void {
             if (tooltip != null) {
-                ToolTipManager.destroyToolTip(tooltip);                
+                ToolTipManager.destroyToolTip(tooltip);
                 tooltip = null;
             }
         }
@@ -245,7 +245,7 @@
                         }
                     }
                 }
-                if (minValue != Number.MAX_VALUE && maxValue != Number.MIN_VALUE) {                    
+                if (minValue != Number.MAX_VALUE && maxValue != Number.MIN_VALUE) {
                     legend.recreate();
                 }
             }
@@ -298,6 +298,10 @@
                     }
                 }
             }
+        }
+
+        public function preserveValues():Boolean {
+            return false;
         }
 		]]>
     </mx:Script>

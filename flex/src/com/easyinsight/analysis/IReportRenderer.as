@@ -9,5 +9,6 @@ public interface IReportRenderer {
     function removeEventListener(type:String, listener:Function, useCapture:Boolean = false):void;
     function updateExportMetadata():void;
     function onCustomChangeEvent(event:CustomChangeEvent):void;
+    function preserveValues():Boolean;
 }
 }

@@ -22,8 +22,10 @@
         import com.easyinsight.analysis.AnalysisItem;
         import com.easyinsight.analysis.AnalysisItemWrapper;
         import com.easyinsight.analysis.CustomChangeEvent;
+        import com.easyinsight.analysis.EmptyValue;
         import com.easyinsight.analysis.ListViewHeaderRendererFactory;
         import com.easyinsight.analysis.ReportRendererEvent;
+        import com.easyinsight.analysis.Value;
         import com.easyinsight.filtering.FilterRawData;
 
         import mx.collections.ArrayCollection;
@@ -38,6 +40,7 @@
         import mx.events.IndexChangedEvent;
         import mx.managers.DragManager;
         import mx.managers.IFocusManagerComponent;
+        import mx.utils.ObjectUtil;
 
         private function onSort(event:AdvancedDataGridEvent):void {
             var columnIndex:int = event.columnIndex;
@@ -155,6 +158,14 @@
             return color;
         }
 
+        private function customSort(obj1:Object, obj2:Object, fields:Array = null):int {
+            var value1:Value = obj1 as Value;
+            var value2:Value = obj2 as Value;
+            var sortValue1:Object = value1.toSortValue();
+            var sortValue2:Object = value2.toSortValue();
+            return 0;
+        }
+
         public function renderReport(dataSet:ArrayCollection, analysisDefinition:AnalysisDefinition, clientProcessorMap:Object, additionalProperties:Object):void {
             var def:ListDefinition = analysisDefinition as ListDefinition;
             this.listDef = def;
@@ -196,6 +207,7 @@
                 var myHeader:AnalysisItem = def.columns.getItemAt(k) as AnalysisItem;
                 columnMap[myHeader.qualifiedName()] = myHeader;
                 var columnHeaderObject:AdvancedDataGridColumn = new AdvancedDataGridColumn();
+                columnHeaderObject.sortCompareFunction = createSortFunction(myHeader, columnHeaderObject);
                 columnHeaderObject.headerText = myHeader.display;
                 //columnHeaderObject.headerText = "";
                 var keyString:String = myHeader.qualifiedName();
@@ -216,6 +228,79 @@
             if (dataGrid.selectionMode == "none") {
                 dataGrid.selectionMode = "multipleCells";
             }
+        }
+
+        private function createSortFunction(myHeader:AnalysisItem, column:AdvancedDataGridColumn):Function {
+            return function(obj1:Object, obj2:Object):int {
+
+                var value1:Value = obj1[myHeader.qualifiedName()];
+                var value2:Value = obj2[myHeader.qualifiedName()];
+
+                if (value1 == null) {
+                    value1 = new EmptyValue();
+                }
+                if (value2 == null) {
+                    value2 = new EmptyValue();
+                }
+
+                if (value1.toSortValue().type() == Value.EMPTY && value2.toSortValue().type() == Value.EMPTY) {
+                    return 0;
+                }
+                if (value1.type() == Value.EMPTY) {
+
+                    if (column.sortDescending) {
+                        return -1;
+                    } else {
+                        return 1;
+                    }
+                }
+                if (value2.type == Value.EMPTY || value2.toSortValue().type() == Value.EMPTY) {
+                    if (column.sortDescending) {
+                        return 1;
+                    } else {
+                        return -1;
+                    }
+                }
+                if (value1.toSortValue().type() == Value.NUMBER && value2.toSortValue().type() == Value.NUMBER) {
+                    var number1:Number = value1.toSortValue().toNumber();
+                    if (isNaN(number1) || !isFinite(number1)) {
+                        if (column.sortDescending) {
+                            return -1;
+                        } else {
+                            return 1;
+                        }
+                    }
+
+                    var number2:Number = value2.toSortValue().toNumber();
+                    if (isNaN(number2) || !isFinite(number2)) {
+                        if (column.sortDescending) {
+                            return 1;
+                        } else {
+                            return -1;
+                        }
+                    }
+                    if (number1 < number2) {
+                        return -1;
+                    } else if (number1 > number2) {
+                        return 1;
+                    } else {
+                        return 0;
+                    }
+                }
+                if (value1.toSortValue().type() == Value.STRING && value2.toSortValue().type() == Value.STRING) {
+                    var string1:String = value1.toSortValue().toString();
+                    var string2:String = value2.toSortValue().toString();
+                    return ObjectUtil.stringCompare(string1, string2, true);
+                }
+                if (value1.toSortValue().type() == Value.DATE && value2.toSortValue().type() == Value.DATE) {
+                    var date1:Date = value1.toSortValue().toDate();
+                    var date2:Date = value2.toSortValue().toDate();
+                    return ObjectUtil.dateCompare(date1, date2);
+                }
+                Alert.show("this isn't good, comparing " + value1.toSortValue().toString() + " to " + value2.toSortValue().toString());
+                return 0;
+                //return Number(value1.getValue()) - Number(value2.getValue());
+            };
         }
 
         private function globalListeners():void {
@@ -336,6 +421,10 @@
                     item.sort = 0;
                 }
             }
+        }
+
+        public function preserveValues():Boolean {
+            return true;
         }
 
         public function onCustomChangeEvent(event:CustomChangeEvent):void {

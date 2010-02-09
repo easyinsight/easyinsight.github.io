@@ -65,6 +65,11 @@ public class AnalysisMeasure extends AnalysisItem {
     }
 
     @Override
+    public AggregateKey createAggregateKey() {
+        return new AggregateMeasureKey(getKey(), getType(), aggregation);
+    }
+
+    @Override
     protected String getQualifiedSuffix() {
         return getType() + ":" + aggregation;
     }

@@ -194,6 +194,7 @@ import mx.charts.series.ColumnSeries;
                 columnSeries.yField = yField;
                 columnSeries.labelFunction = renderChartLabel;
                 columnSeries.dataProvider = graphData;
+                columnSeries.dataFunction = myDataFunction;
                 columnSeries.displayName = xAxisTitle;
                 columnSeries.setStyle("showDataEffect", interpolateIn);
                 //columnSeries.setStyle("fills", standardBlue);
@@ -203,6 +204,16 @@ import mx.charts.series.ColumnSeries;
                 addChild(columnChart);
             }
         }
+
+        private function myDataFunction(series:Series, item:Object, fieldName:String):Object {
+              if(fieldName == 'yValue')
+                  return(item[yAxisItem.qualifiedName()].toNumber());
+              else if(fieldName == "xValue")
+                  return(item[xAxisItem.qualifiedName()].toString());
+              else
+                  return null;
+         }
+
 
         private function renderChartLabel(element:ChartItem, series:Series):String {
             var columnSeriesItem:ColumnSeriesItem = element as ColumnSeriesItem;
@@ -308,6 +319,10 @@ import mx.charts.series.ColumnSeries;
             }
 
             graphData = dataSet;
+        }
+
+        public function preserveValues():Boolean {
+            return true;
         }
 
         public function updateExportMetadata():void {

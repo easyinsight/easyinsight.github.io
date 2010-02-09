@@ -32,6 +32,9 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
     @JoinColumn(name="item_key_id")
     private Key key;
 
+    @Column(name="concrete")
+    private boolean concrete = true;
+
     @Id @GeneratedValue(strategy=GenerationType.IDENTITY)
     @Column(name="analysis_item_id")
     private long analysisItemID;
@@ -120,6 +123,14 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
 
     public void setFilters(List<FilterDefinition> filters) {
         this.filters = filters;
+    }
+
+    public boolean isConcrete() {
+        return concrete;
+    }
+
+    public void setConcrete(boolean concrete) {
+        this.concrete = concrete;
     }
 
     public String toDisplay() {
@@ -364,12 +375,8 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
         if (isDerived()) {
             throw new RuntimeException("Attempt made to retrieve SQL for a derived analysis item.");
         }
-        return getKey().toSQL();
-    }
-
-    public Value calculate(DataSet dataSet, IRow row) {
-        throw new UnsupportedOperationException();
-    }
+        return getKey().toBaseKey().toSQL();
+    }    
 
     public boolean isCalculated() {
         return false;

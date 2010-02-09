@@ -1,5 +1,6 @@
 <?xml version="1.0" ?>
 <mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*"
+           xmlns:analysis="com.easyinsight.analysis.*"
            creationComplete="setupListeners()" height="100%" width="100%">
     <mx:Script><![CDATA[
         import com.easyinsight.analysis.AnalysisCalculation;
@@ -8,6 +9,7 @@
         import com.easyinsight.analysis.AnalysisDimension;
         import com.easyinsight.analysis.AnalysisHierarchyItem;
         import com.easyinsight.analysis.AnalysisItem;
+        import com.easyinsight.analysis.AnalysisItemCopyEvent;
         import com.easyinsight.analysis.AnalysisItemEditor;
         import com.easyinsight.analysis.AnalysisItemNode;
         import com.easyinsight.analysis.AnalysisItemTypes;
@@ -90,6 +92,7 @@
 
         private function setupListeners():void {
             addEventListener(DeleteAnalysisItemEvent.DELETE_ANALYSIS_ITEM, onDelete);
+            addEventListener(AnalysisItemCopyEvent.ITEM_COPY, onCopy);
         }
 
         private function onDelete(event:DeleteAnalysisItemEvent):void {
@@ -290,7 +293,23 @@
             toFocus(wrapper);
         }
 
+        private function onCopy(event:AnalysisItemCopyEvent):void {
+            dispatchEvent(new AnalysisChangedEvent());
+            var node:AnalysisItemNode = new AnalysisItemNode();
+            node.analysisItem = event.analysisItem;
+            var wrapper:AnalysisItemWrapper = new AnalysisItemWrapper(node);
+            derivedFields.addItem(wrapper);
+            var sort:Sort = new Sort();
+            sort.fields = [ new SortField("displayName", false) ];
+            derivedFields.sort = sort;
+            derivedFields.refresh();
+            allFields.addItem(wrapper);
+            dispatchEvent(new AnalysisChangedEvent());
+            toFocus(wrapper);
+        }
+
         ]]></mx:Script>
+    <analysis:BaseEditorFieldControlsFactory fields="{allFields}" id="controlsFactory"/>
     <mx:HBox height="100%" width="100%">
         <mx:VDividedBox height="100%">
             <mx:VBox height="50%">
@@ -307,7 +326,8 @@
                     <mx:Button icon="@Embed(source='../../../../../assets/calendar.png')" toolTip="Add Date..."
                                click="addDate()"/>
                 </mx:HBox>
-                <mx:DataGrid dataProvider="{coreFields}" itemClick="onItemClick(event)" height="100%" dragEnabled="true" rowHeight="30">
+                <mx:DataGrid dataProvider="{coreFields}" itemClick="onItemClick(event)" height="100%" dragEnabled="true"
+                             rowHeight="30">
                     <mx:columns>
                         <util:EIDataGridColumn dataField="displayName" headerText=""
                                                itemRenderer="com.easyinsight.analysis.AnalysisItemTypeRenderer"
@@ -316,7 +336,7 @@
                         <util:EIDataGridColumn dataField="displayName" headerText="Display Name"/>
                         <util:EIDataGridColumn dataField="displayName"
                                                itemRenderer="com.easyinsight.analysis.BaseFieldEditButton"
-                                               rendererIsEditor="true" editorDataField="displayName" width="100"
+                                               rendererIsEditor="true" editorDataField="displayName" width="150"
                                                headerText=""/>
                     </mx:columns>
                 </mx:DataGrid>
@@ -335,7 +355,8 @@
                     <mx:Button icon="@Embed(source='../../../../../assets/graph_edge_curved.png')"
                                toolTip="Add Cycle..." click="addCycle()()"/>
                 </mx:HBox>
-                <mx:DataGrid dataProvider="{derivedFields}" itemClick="onItemClick(event)" height="100%" dragEnabled="true" rowHeight="30">
+                <mx:DataGrid dataProvider="{derivedFields}" itemClick="onItemClick(event)" height="100%"
+                             dragEnabled="true" rowHeight="30">
                     <mx:columns>
                         <mx:DataGridColumn dataField="displayName" headerText=""
                                            itemRenderer="com.easyinsight.analysis.AnalysisItemTypeRenderer"
@@ -343,12 +364,14 @@
                         <mx:DataGridColumn dataField="displayName" headerText=""/>
                         <mx:DataGridColumn dataField="displayName"
                                            itemRenderer="com.easyinsight.analysis.BaseFieldEditButton"
-                                           rendererIsEditor="true" editorDataField="displayName" width="100"
+                                           rendererIsEditor="true" editorDataField="displayName" width="150"
                                            headerText=""/>
                     </mx:columns>
                 </mx:DataGrid>
             </mx:VBox>
         </mx:VDividedBox>
-        <mx:Box id="editCanvas" paddingBottom="10" paddingTop="10" paddingLeft="10" paddingRight="10" backgroundImage="{background2}" backgroundSize="100%" horizontalAlign="center" width="100%" height="100%"/>
+        <mx:Box id="editCanvas" paddingBottom="10" paddingTop="10" paddingLeft="10" paddingRight="10"
+                backgroundImage="{background2}" backgroundSize="100%" horizontalAlign="center" width="100%"
+                height="100%"/>
     </mx:HBox>
 </mx:Canvas>

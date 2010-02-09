@@ -1,0 +1,136 @@
+<?xml version="1.0" ?>
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*"
+        creationComplete="setupListeners()">
+    <mx:Script><![CDATA[
+        import com.easyinsight.analysis.*;
+
+        import mx.collections.ArrayCollection;
+
+        private var measureObjects:ArrayCollection;
+
+        [Bindable]
+        private var ranges:ArrayCollection;
+
+        private function setupListeners():void {
+            addEventListener(RangeEvent.DELETE_RANGE, onRangeDelete);
+            addEventListener(RangeEvent.NEW_RANGE_ABOVE, newRangeAbove);
+            addEventListener(RangeEvent.NEW_RANGE_BELOW, newRangeBelow);
+        }
+
+        private var _analysisRange:AnalysisRangeDimension;
+
+        public function set analysisRange(value:AnalysisRangeDimension):void {
+            _analysisRange = value;
+        }
+
+        protected override function commitProperties():void {
+            super.commitProperties();
+
+            var ranges:ArrayCollection = new ArrayCollection();
+            var upperRange:RangeOption = _analysisRange.upperBound;
+            if (upperRange != null) {
+                var upperRangeValue:RangeValue = new RangeValue();
+                upperRangeValue.value = upperRange.rangeMinimum;
+            }
+
+            // the UI actually works by certain values...
+
+            // design's not really an explicit value set
+            // but it *is* for measures anyway...
+
+            // what if instead, we do the following...
+            // four settings in the end:
+            // most even distribution (quantity)
+            // most even distribution (values)
+            // explicit ranges
+            // explicit points  
+
+            var highVal:Boolean = false;
+
+            for each (var range:RangeOption in _analysisRange.explicitOptions) {
+                var rangeValue:RangeValue = new RangeValue();
+                rangeValue.value = range.rangeMinimum;
+                
+            }
+
+            var lowerRange:RangeOption = _analysisRange.lowerBound;
+            if (lowerRange != null) {
+                var lowerRangeValue:RangeValue = new RangeValue();
+                lowerRangeValue.value = lowerRange.rangeMaximum;
+            } else {
+                
+            }
+        }
+
+        private function compileRanges():void {
+
+            if (topCheckbox.selected) {
+
+            }
+            if (bottomCheckbox.selected) {
+
+            }
+        }
+
+        private function addRange():void {
+
+        }
+
+        private function onRangeDelete(event:RangeEvent):void {
+            ranges.removeItemAt(ranges.getItemIndex(event.rangeOption));
+        }
+
+        private function newRangeAbove(event:RangeEvent):void {
+            var index:int = ranges.getItemIndex(event.rangeOption);
+            var rangeOption:RangeOption = new RangeOption();
+            ranges.addItemAt(rangeOption, index);
+        }
+
+        private function newRangeBelow(event:RangeEvent):void {
+            var index:int = ranges.getItemIndex(event.rangeOption) + 1;
+            var rangeOption:RangeOption = new RangeOption();
+            ranges.addItemAt(rangeOption, index);
+        }
+
+        ]]></mx:Script>
+    <mx:FormItem label="Wrapped Aggregation: ">
+        <mx:ComboBox dataProvider="{measureObjects}" id="complexWrappedAggregations" selectedItem="{aggregationString}"/>
+    </mx:FormItem>
+    <mx:Button label="Add Range" click="addRange()"/>
+    <!--
+        Less Than [ A ]
+        [ B ]
+        [ C ]
+        [ D ]
+        Greater Than [ E ]
+    -->
+    <mx:HBox>
+        <mx:CheckBox id="topCheckbox"/>
+    </mx:HBox>
+    <mx:List itemRenderer="com.easyinsight.analysis.range.RangeEditor" dataProvider="{ranges}"/>
+    <mx:HBox>
+        <mx:CheckBox id="bottomCheckbox"/>
+    </mx:HBox>
+    <mx:DataGrid showHeaders="false">
+        <mx:columns>
+            <util:EIDataGridColumn headerText="Label" dataField="displayName"/>
+            <util:EIDataGridColumn headerText="Minimum" dataField="minimum"/>
+            <util:EIDataGridColumn headerText="Maximum" dataField="maximum"/>
+        </mx:columns>
+    </mx:DataGrid>
+    <mx:DataGrid dragMoveEnabled="true" dragEnabled="true" showHeaders="false">
+        <mx:columns>
+            <util:EIDataGridColumn headerText="Label" dataField="displayName"/>
+            <util:EIDataGridColumn headerText="Minimum" dataField="minimum"/>
+            <util:EIDataGridColumn headerText="Maximum" dataField="maximum"/>
+            <util:EIDataGridColumn headerText="" dataField="maximum"/>
+        </mx:columns>
+    </mx:DataGrid>
+    <mx:DataGrid showHeaders="false">
+        <mx:columns>
+            <util:EIDataGridColumn headerText="Label" dataField="displayName"/>
+            <util:EIDataGridColumn headerText="Minimum" dataField="minimum"/>
+            <util:EIDataGridColumn headerText="Maximum" dataField="maximum"/>
+        </mx:columns>
+    </mx:DataGrid>
+</mx:VBox>

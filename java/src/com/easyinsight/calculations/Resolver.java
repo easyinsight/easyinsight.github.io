@@ -1,9 +1,11 @@
 package com.easyinsight.calculations;
 
+import com.easyinsight.analysis.AggregateMeasureKey;
 import com.easyinsight.core.Key;
 import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.analysis.AnalysisItem;
 
+import java.util.ArrayList;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.List;
@@ -17,7 +19,7 @@ import org.jetbrains.annotations.Nullable;
  */
 public class Resolver {
 
-    private Map<String, Key> keyMap = new HashMap<String, Key>();
+    private Map<String, List<Key>> keyMap = new HashMap<String, List<Key>>();
 
     public Resolver(FeedDefinition feedDefinition) {
         this(feedDefinition.getFields());
@@ -25,7 +27,12 @@ public class Resolver {
 
     public Resolver(List<AnalysisItem> analysisItems) {
         for (AnalysisItem analysisItem : analysisItems) {
-            keyMap.put(analysisItem.getKey().toKeyString(), analysisItem.getKey());
+            List<Key> keys = keyMap.get(analysisItem.getKey().toKeyString());
+            if (keys == null) {
+                keys = new ArrayList<Key>();
+                keyMap.put(analysisItem.getKey().toKeyString(), keys);
+            }
+            keys.add(analysisItem.getKey());
         }
     }
 
@@ -35,10 +42,28 @@ public class Resolver {
 
     @Nullable
     public Key getKey(String name) {
-        return keyMap.get(name);
+        return keyMap.get(name).get(0);
+    }
+
+    public Key getKey(String name, int aggregation) {
+        List<Key> keys = keyMap.get(name);
+        for (Key key : keys) {
+            if (key instanceof AggregateMeasureKey) {
+                AggregateMeasureKey aggregateMeasureKey = (AggregateMeasureKey) key;
+                if (aggregateMeasureKey.getAggregation() == aggregation) {
+                    return aggregateMeasureKey;
+                }
+            }
+        }
+        return null;
     }
 
     public void addKey(Key key) {
-        keyMap.put(key.toKeyString(), key);
+        List<Key> keys = keyMap.get(key.toKeyString());
+        if (keys == null) {
+            keys = new ArrayList<Key>();
+            keyMap.put(key.toKeyString(), keys);
+        }
+        keys.add(key);
     }
 }

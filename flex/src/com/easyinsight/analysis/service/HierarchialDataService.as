@@ -25,6 +25,12 @@ public class HierarchialDataService extends EventDispatcher implements IReportDa
 
     private var dataRemoteSource:RemoteObject;
 
+    private var _preserveValues:Boolean = true;
+
+    public function set preserveValues(value:Boolean):void {
+        _preserveValues = value;
+    }
+
     public function HierarchialDataService() {
         super();
         dataRemoteSource = new RemoteObject();
@@ -105,6 +111,13 @@ public class HierarchialDataService extends EventDispatcher implements IReportDa
         var metadata:InsightRequestMetadata = new InsightRequestMetadata();
         metadata.credentialFulfillmentList = CredentialsCache.getCache().createCredentials();
         dataRemoteSource.list.send(definition, metadata);
+    }
+
+    public function get obfuscate():Boolean {
+        return false;
+    }
+
+    public function set obfuscate(value:Boolean):void {
     }
 }
 }

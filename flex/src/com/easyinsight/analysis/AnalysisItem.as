@@ -21,6 +21,7 @@ import mx.formatters.Formatter;
 		public var sort:int = 0;
 		public var displayName:String;
         public var width:int = 0;
+        public var concrete:Boolean;
         //public var virtualDimension:VirtualDimension;
         public var links:ArrayCollection = new ArrayCollection();
         public var highIsGood:Boolean = true;
@@ -70,6 +71,12 @@ import mx.formatters.Formatter;
 		
 		public function getFormatter():Formatter {
 			return formattingConfiguration.getFormatter();					
-		}		
+		}
+
+        public function getSortFunction():Function {
+            return null;
+        }
 	}
+
+
 }

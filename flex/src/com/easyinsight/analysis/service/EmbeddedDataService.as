@@ -21,6 +21,7 @@ import mx.controls.Alert;
 public class EmbeddedDataService extends EventDispatcher implements IEmbeddedDataService {
 
     private var dataRemoteSource:RemoteObject;
+    private var _preserveValues:Boolean;
 
     public function EmbeddedDataService() {
         super();
@@ -32,6 +33,10 @@ public class EmbeddedDataService extends EventDispatcher implements IEmbeddedDat
 
     private function onFault(event:FaultEvent):void {
         dispatchEvent(new ReportRetrievalFault(event.fault.message));
+    }
+
+    public function set preserveValues(value:Boolean):void {
+        _preserveValues = value;
     }
 
     private function processListData(event:ResultEvent):void {
@@ -52,7 +57,12 @@ public class EmbeddedDataService extends EventDispatcher implements IEmbeddedDat
                     var headerDimension:AnalysisItem = headers[j];
                     var value:Value = values[j];
                     var key:String = headerDimension.qualifiedName();
-                    endObject[key] = value.getValue();
+                    if (_preserveValues) {
+                        endObject[key] = value;
+                    } else {
+                        endObject[key] = value.getValue();
+                    }
+
                     var conditionRenderer:ConditionRenderer = clientProcessorMap[key];
                     conditionRenderer.addValue(value);
                     if (value.links != null) {

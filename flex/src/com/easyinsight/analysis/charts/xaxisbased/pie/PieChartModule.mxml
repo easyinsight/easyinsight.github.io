@@ -4,10 +4,10 @@
     <mx:Script>
 		<![CDATA[
         import com.easyinsight.analysis.AnalysisDefinition;
-        
-import com.easyinsight.analysis.AnalysisItem;
+
+        import com.easyinsight.analysis.AnalysisItem;
         import com.easyinsight.analysis.CustomChangeEvent;
-import com.easyinsight.filtering.FilterRawData;
+        import com.easyinsight.filtering.FilterRawData;
 
         import com.easyinsight.pseudocontext.PseudoContextWindow;
 
@@ -98,11 +98,14 @@ import com.easyinsight.filtering.FilterRawData;
         }
 
 
-
         public function updateExportMetadata():void {
         }
 
         public function onCustomChangeEvent(event:CustomChangeEvent):void {
+        }
+
+        public function preserveValues():Boolean {
+            return false;
         }
 		]]>
 	</mx:Script>

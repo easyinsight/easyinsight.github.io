@@ -9,5 +9,6 @@ public interface IReportDataService {
     function removeEventListener(type:String, listener:Function, useCapture:Boolean = false):void;
     function get obfuscate():Boolean;
     function set obfuscate(value:Boolean):void;
+    function set preserveValues(value:Boolean):void;
 }
 }

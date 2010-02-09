@@ -10,6 +10,14 @@ package com.easyinsight.analysis
 		{
 			super();
 		}
+
+        override public function type():int {
+            return Value.STRING;
+        }
+
+        override public function toString():String {
+            return value;
+        }
 		
 		override public function getValue():Object {
 			return value;

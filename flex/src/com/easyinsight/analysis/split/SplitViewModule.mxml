@@ -3,18 +3,19 @@
     <mx:Script><![CDATA[
         import com.easyinsight.analysis.AnalysisDefinition;
         import com.easyinsight.analysis.AnalysisItem;
-import com.easyinsight.analysis.AnalysisStateChangeEvent;
-import com.easyinsight.analysis.CustomChangeEvent;
+        import com.easyinsight.analysis.AnalysisStateChangeEvent;
+        import com.easyinsight.analysis.CustomChangeEvent;
         import com.easyinsight.analysis.DataViewFactory;
         import com.easyinsight.analysis.IReportController;
-import com.easyinsight.filtering.FilterRawData;
+        import com.easyinsight.filtering.FilterRawData;
 
         import com.easyinsight.filtering.FilterValueDefinition;
         import com.easyinsight.framework.DataServiceLoadingEvent;
+
         import mx.collections.ArrayCollection;
         import mx.containers.VBox;
-import mx.controls.AdvancedDataGrid;
-import mx.events.DragEvent;
+        import mx.controls.AdvancedDataGrid;
+        import mx.events.DragEvent;
         import mx.managers.DragManager;
 
         [Bindable]
@@ -68,7 +69,7 @@ import mx.events.DragEvent;
 
         private function sourceStateChange(event:AnalysisStateChangeEvent):void {
 
-            
+
         }
 
         private function createSourceDataViewFactory(controllerClassName:String):void {
@@ -149,6 +150,10 @@ import mx.events.DragEvent;
         }
 
         public function updateExportMetadata():void {
+        }
+
+        public function preserveValues():Boolean {
+            return false;
         }
 
         public function onCustomChangeEvent(event:CustomChangeEvent):void {

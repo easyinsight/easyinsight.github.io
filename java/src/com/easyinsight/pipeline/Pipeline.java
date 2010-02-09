@@ -18,7 +18,7 @@ public abstract class Pipeline {
     private ResultsBridge resultsBridge = new ListResultsBridge();
 
     public Pipeline setup(WSAnalysisDefinition report, Feed dataSource, InsightRequestMetadata insightRequestMetadata) {
-        Set<AnalysisItem> allNeededAnalysisItems = compilePipelineData(report, dataSource, insightRequestMetadata);
+        Set<AnalysisItem> allNeededAnalysisItems = compilePipelineData(report, dataSource, insightRequestMetadata, report.getAddedItems());
         components = generatePipelineCommands(allNeededAnalysisItems, report.getAllAnalysisItems(), report.retrieveFilterDefinitions(), report);
         if (report.hasCustomResultsBridge()) {
             resultsBridge = report.getCustomResultsBridge();
@@ -28,7 +28,7 @@ public abstract class Pipeline {
 
     protected abstract List<IComponent> generatePipelineCommands(Set<AnalysisItem> allNeededAnalysisItems, Set<AnalysisItem> reportItems, Collection<FilterDefinition> filters, WSAnalysisDefinition report);
          
-    private Set<AnalysisItem> compilePipelineData(WSAnalysisDefinition report, Feed dataSource, InsightRequestMetadata insightRequestMetadata) {
+    private Set<AnalysisItem> compilePipelineData(WSAnalysisDefinition report, Feed dataSource, InsightRequestMetadata insightRequestMetadata, List<AnalysisItem> additionalFields) {
         List<AnalysisItem> allRequestedAnalysisItems = new ArrayList<AnalysisItem>(report.getAllAnalysisItems());
         Set<AnalysisItem> allNeededAnalysisItems = new LinkedHashSet<AnalysisItem>();
         if (report.retrieveFilterDefinitions() != null) {
@@ -46,6 +46,17 @@ public abstract class Pipeline {
             }
         }
         allNeededAnalysisItems.addAll(report.getLimitFields());
+        /// TODO: this needs to factor in user added fields
+        // there's the question of resolution here as well, really need a uniquely defined name for fields
+        // have to bubble that up to visibility
+        // that's what we're sort of defining as Key right now, but without the appropriate unique constraint
+
+        List<AnalysisItem> masterFieldList = new ArrayList<AnalysisItem>(dataSource.getFields());
+        if (additionalFields != null) {
+            masterFieldList.addAll(additionalFields);
+        }
+        
+
         pipelineData = new PipelineData(report, allNeededAnalysisItems, insightRequestMetadata, dataSource.getFields(), dataSource.getProperties());
         return allNeededAnalysisItems;
     }

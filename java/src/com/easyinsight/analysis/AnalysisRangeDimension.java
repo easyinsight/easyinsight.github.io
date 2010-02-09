@@ -1,12 +1,11 @@
 package com.easyinsight.analysis;
 
 import com.easyinsight.core.*;
+import com.easyinsight.database.Database;
 
-import javax.persistence.Entity;
-import javax.persistence.Table;
-import javax.persistence.PrimaryKeyJoinColumn;
-import java.util.List;
+import javax.persistence.*;
 import java.util.Collection;
+import java.util.List;
 import java.util.ArrayList;
 
 /**
@@ -19,9 +18,23 @@ import java.util.ArrayList;
 @PrimaryKeyJoinColumn(name="analysis_item_id")
 public class AnalysisRangeDimension extends AnalysisDimension {
     private static final int THRESHOLD = 10;
-    private transient Range range;
 
-    
+    private transient ExplicitRange range;
+
+    @Column(name="aggregation_type")
+    private int aggregationType;
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JoinTable(name = "analysis_range_to_range_option",
+            joinColumns = @JoinColumn(name = "analysis_item_id", nullable = false),
+            inverseJoinColumns = @JoinColumn(name = "range_option_id", nullable = false))
+    private List<RangeOption> explicitOptions = new ArrayList<RangeOption>();
+
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name="lower_range_option_id")
+    private RangeOption lowerBound;
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name="higher_range_option_id")
+    private RangeOption upperBound;
 
     public AnalysisRangeDimension(Key key, boolean group) {
         super(key, group);
@@ -30,40 +43,90 @@ public class AnalysisRangeDimension extends AnalysisDimension {
     public AnalysisRangeDimension() {
     }
 
+    public int getAggregationType() {
+        return aggregationType;
+    }
+
+    public void setAggregationType(int aggregationType) {
+        this.aggregationType = aggregationType;
+    }
+
+    @Override
+    public void afterLoad() {
+        super.afterLoad();
+        setExplicitOptions(new ArrayList<RangeOption>(getExplicitOptions()));
+    }
+
+    /* @Override
+    public List<AnalysisItem> getAnalysisItems(List<AnalysisItem> allItems, Collection<AnalysisItem> insightItems, boolean getEverything) {
+        List<AnalysisItem> items = new ArrayList<AnalysisItem>();
+        items.add(this);
+        AnalysisMeasure analysisMeasure = new AnalysisMeasure(getKey(), aggregationType);
+        items.add(analysisMeasure);
+        return items;
+    }*/
+
+    public RangeOption getLowerBound() {
+        return lowerBound;
+    }
+
+    public void setLowerBound(RangeOption lowerBound) {
+        this.lowerBound = lowerBound;
+    }
+
+    public RangeOption getUpperBound() {
+        return upperBound;
+    }
+
+    public void setUpperBound(RangeOption upperBound) {
+        this.upperBound = upperBound;
+    }
+
+    public List<RangeOption> getExplicitOptions() {
+        return explicitOptions;
+    }
+
+    public void setExplicitOptions(List<RangeOption> explicitOptions) {
+        this.explicitOptions = explicitOptions;
+    }
+
     public int getType() {
         return super.getType() | AnalysisItemTypes.RANGE_DIMENSION;
     }
 
-    public Value transformValue(Value value, InsightRequestMetadata insightRequestMetadata) {
+    public Value toRange(Value value, InsightRequestMetadata insightRequestMetadata) {
+        if (range == null) {
+            range = new ExplicitRange(explicitOptions);
+        }
         Value transformedValue;
         try {
             Double doubleValue = value.toDouble();
-            transformedValue = new StringValue(range.getRange(doubleValue));
+            if (doubleValue != null) {
+                RangeOption matchedOption = range.getRange(doubleValue);
+
+                if (matchedOption == null) {
+                    transformedValue = new EmptyValue();
+                } else {
+                    String string = matchedOption.getRangeMinimum() + " to " + matchedOption.getRangeMaximum();
+                    transformedValue = new StringValue(string);
+                    transformedValue.setOriginalValue(new NumericValue(matchedOption.getRangeMinimum()));
+                }
+            } else {
+                transformedValue = new EmptyValue();
+            }
         } catch (NumberFormatException e) {
             transformedValue = new EmptyValue();
         }
         return transformedValue;
     }
 
-    public boolean requiresDataEarly() {
-        return true;
-    }
-
-    public void handleEarlyData(List<IRow> rows) {
-        Collection<Double> doubleValues = new ArrayList<Double>();
-        for (IRow row : rows) {
-            Value value = row.getValue(this);
-            Double doubleValue = value.toDouble();
-            if (doubleValue != null) {
-                doubleValues.add(doubleValue);
-            }            
-        }
-        range = new Range(doubleValues, THRESHOLD);
-    }
-
     public boolean equals(Object o) {
         return this == o || o instanceof AnalysisRangeDimension && super.equals(o);
 
+    }
+
+    public boolean blocksDBAggregation() {
+        return true;
     }
 }
 

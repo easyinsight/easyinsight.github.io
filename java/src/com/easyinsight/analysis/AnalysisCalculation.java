@@ -60,12 +60,15 @@ public class AnalysisCalculation extends AnalysisMeasure {
     }
 
     public List<AnalysisItem> getAnalysisItems(List<AnalysisItem> allItems, Collection<AnalysisItem> insightItems, boolean getEverything) {
-        Map<Key, AnalysisItem> map = new HashMap<Key, AnalysisItem>();
+
+        /*Map<Key, AnalysisItem> map = new HashMap<Key, AnalysisItem>();
         for (AnalysisItem analysisItem : allItems) {
             map.put(analysisItem.getKey(), analysisItem);
             map.put(analysisItem.createAggregateKey(), analysisItem);
-        }
+        }*/
+
         Resolver resolver = new Resolver(allItems);
+
         CalculationTreeNode tree;
         ICalculationTreeVisitor visitor;
         CalculationsParser.startExpr_return ret;
@@ -77,7 +80,7 @@ public class AnalysisCalculation extends AnalysisMeasure {
         try {
             ret = parser.startExpr();
             tree = (CalculationTreeNode) ret.getTree();
-            visitor = new ResolverVisitor(resolver, new FunctionFactory());
+            visitor = new ResolverVisitor(allItems, new FunctionFactory());
             tree.accept(visitor);
         } catch (RecognitionException e) {
             e.printStackTrace();
@@ -85,9 +88,32 @@ public class AnalysisCalculation extends AnalysisMeasure {
         }
         VariableListVisitor variableVisitor = new VariableListVisitor();
         tree.accept(variableVisitor);
-        Set<AnalysisItem> analysisItems = new HashSet<AnalysisItem>();
-        Set<Key> keys = variableVisitor.getVariableList();
-        for (Key key : keys) {
+
+        // Which analysis items does this calculation need?
+
+        // Set<AnalysisItem> analysisItems = new HashSet<AnalysisItem>();
+
+        // What are the set of keys that we need?
+
+        // Set<Key> keys = variableVisitor.getVariableList();
+
+        Set<KeySpecification> specs = variableVisitor.getVariableList();
+
+        List<AnalysisItem> analysisItemList = new ArrayList<AnalysisItem>();
+
+        for (KeySpecification spec : specs) {
+            AnalysisItem analysisItem = null;
+            try {
+                analysisItem = spec.findAnalysisItem(allItems);
+            } catch (CloneNotSupportedException e) {
+                throw new RuntimeException(e);
+            }
+            if (analysisItem != null) {
+                analysisItemList.add(analysisItem);
+            }
+        }
+
+        /*for (Key key : keys) {
             AnalysisItem analysisItem = map.get(key);
             if(analysisItem == null) {
                 AggregateKey aggregateKey = (AggregateKey) key;
@@ -103,13 +129,14 @@ public class AnalysisCalculation extends AnalysisMeasure {
             }
             boolean alreadyInInsight = false;
             for (AnalysisItem insightItem : insightItems) {
-                if (insightItem.getKey().equals(analysisItem.getKey())) {
+                if (insightItem.createAggregateKey().equals(analysisItem.createAggregateKey())) {
                     alreadyInInsight = true;
                 }
             }
             if (!alreadyInInsight) analysisItems.add(analysisItem);
-        }
-        return new ArrayList<AnalysisItem>(analysisItems);
+        }*/
+        //return new ArrayList<AnalysisItem>(analysisItems);
+        return analysisItemList;
     }
 
     private CalculationTreeNode evalString(String s) {
@@ -132,7 +159,7 @@ public class AnalysisCalculation extends AnalysisMeasure {
         return calculationTreeNode;
     }
 
-    public Value calculate(DataSet dataSet, IRow row) {
+    public Value calculate(IRow row, Collection<AnalysisItem> analysisItems) {
         CalculationTreeNode calculationTreeNode;
         ICalculationTreeVisitor visitor;
         CalculationsParser.expr_return ret;
@@ -154,7 +181,7 @@ public class AnalysisCalculation extends AnalysisMeasure {
                     break;
                 }
             }
-            visitor = new ResolverVisitor(r, new FunctionFactory());
+            visitor = new ResolverVisitor(analysisItems, new FunctionFactory());
             calculationTreeNode.accept(visitor);
         } catch (RecognitionException e) {
             LogClass.error(e);

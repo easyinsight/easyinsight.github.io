@@ -195,6 +195,7 @@ public class DataViewFactory extends VBox {
             _reportRenderer.addEventListener(CustomChangeEvent.CUSTOM_CHANGE, customChangeFromRenderer);
             _reportRenderer.addEventListener(HierarchyDrilldownEvent.DRILLDOWN, drilldown);
             _reportRenderer.addEventListener(HierarchyRollupEvent.HIERARCHY_ROLLUP, onRollup);
+            _dataService.preserveValues = _reportRenderer.preserveValues();
             if (_loadingDisplay != null) {
                 removeChild(_loadingDisplay);
                 _loadingDisplay.moduleInfo = null;

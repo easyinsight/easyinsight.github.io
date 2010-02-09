@@ -11,7 +11,7 @@
 
         import com.easyinsight.analysis.CustomChangeEvent;
         import com.easyinsight.analysis.charts.Chart3DVisuals;
-import com.easyinsight.filtering.FilterRawData;
+        import com.easyinsight.filtering.FilterRawData;
 
         import com.easyinsight.pseudocontext.PseudoContextWindow;
 
@@ -41,7 +41,7 @@ import com.easyinsight.filtering.FilterRawData;
         private var measureItem:AnalysisItem;
 
         private var legend:Legend;
-        
+
         private var visuals:Chart3DVisuals = new Chart3DVisuals();
 
         private function onCreation():void {
@@ -99,11 +99,9 @@ import com.easyinsight.filtering.FilterRawData;
             var lineChartDef:Line3DChartDefinition = analysisDefinition as Line3DChartDefinition;
 
 
-
             this.chartData = new ArrayCollection(dataSet.toArray());
 
             hbox.removeChild(lineChart);
-
 
 
             lineChart = new LineChart3D();
@@ -240,6 +238,10 @@ import com.easyinsight.filtering.FilterRawData;
         }
 
         public function updateExportMetadata():void {
+        }
+
+        public function preserveValues():Boolean {
+            return false;
         }
 
         public function onCustomChangeEvent(event:CustomChangeEvent):void {

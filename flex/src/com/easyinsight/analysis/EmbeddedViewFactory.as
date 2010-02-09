@@ -132,6 +132,7 @@ public class EmbeddedViewFactory extends AbstractViewFactory {
         _reportRenderer.addEventListener(HierarchyDrilldownEvent.DRILLDOWN, drilldown);
         _reportRenderer.addEventListener(HierarchyRollupEvent.HIERARCHY_ROLLUP, onRollup);
         _reportRenderer.addEventListener(ReportNavigationEvent.TO_REPORT, toReport);
+        _dataService.preserveValues = _reportRenderer.preserveValues();
         addChild(_reportRenderer as DisplayObject);
         if (pendingRequest) {
             pendingRequest = false;

@@ -3,6 +3,7 @@ package com.easyinsight.analysis.service {
 import com.easyinsight.analysis.AnalysisDefinition;
 import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.analysis.DataServiceEvent;
+import com.easyinsight.analysis.EmptyValue;
 import com.easyinsight.analysis.IReportDataService;
 import com.easyinsight.analysis.ListDataResults;
 import com.easyinsight.analysis.Value;
@@ -22,6 +23,8 @@ public class ListDataService extends EventDispatcher implements IReportDataServi
 
     private var dataRemoteSource:RemoteObject;
 
+
+
     public function ListDataService() {
         super();
         dataRemoteSource = new RemoteObject();
@@ -38,6 +41,12 @@ public class ListDataService extends EventDispatcher implements IReportDataServi
 
     public function set obfuscate(value:Boolean):void {
         _obfuscate = value;
+    }
+
+    private var _preserveValues:Boolean = true;
+
+    public function set preserveValues(value:Boolean):void {
+        _preserveValues = value;
     }
 
     public function translate(listData:ListDataResults):ServiceData {
@@ -59,7 +68,11 @@ public class ListDataService extends EventDispatcher implements IReportDataServi
                 var headerDimension:AnalysisItem = headers[j];
                 var value:Value = values[j];
                 var key:String = headerDimension.qualifiedName();
-                endObject[key] = value.getValue();
+                if (_preserveValues) {
+                    endObject[key] = value;
+                } else {
+                    endObject[key] = value.getValue();
+                }
                 var conditionRenderer:ConditionRenderer = clientProcessorMap[key];
                 conditionRenderer.addValue(value);
                 if (value.links != null) {
@@ -95,6 +108,10 @@ public class ListDataService extends EventDispatcher implements IReportDataServi
         metadata.refreshAllSources = refreshAllSources;
         metadata.credentialFulfillmentList = CredentialsCache.getCache().createCredentials();
         dataRemoteSource.list.send(definition, metadata);
+    }
+
+    private function blah():void {
+        var emptyValue:EmptyValue;
     }
 }
 }

@@ -54,7 +54,7 @@ public class FilterDateRangeDefinition extends FilterDefinition {
 
     public String toQuerySQL(String tableName) {
         StringBuilder queryBuilder = new StringBuilder();
-        String columnName = "k" + getField().getKey().getKeyID();
+        String columnName = "k" + getField().getKey().toBaseKey().getKeyID();
         queryBuilder.append(columnName);
         queryBuilder.append(" >= ? AND ");
         queryBuilder.append(columnName);

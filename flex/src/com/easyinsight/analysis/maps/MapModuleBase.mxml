@@ -6,7 +6,7 @@
            implements="com.easyinsight.analysis.IReportRenderer" removedFromStage="cleanup()" creationComplete="blah()">
     <mx:Script>
 		<![CDATA[
-        
+
         import com.easyinsight.analysis.AnalysisItem;
         import com.easyinsight.analysis.CustomChangeEvent;
         import com.easyinsight.analysis.ReportRendererEvent;
@@ -47,7 +47,7 @@
 
         private function cleanup():void {
             if (tooltip != null) {
-                ToolTipManager.destroyToolTip(tooltip);                
+                ToolTipManager.destroyToolTip(tooltip);
             }
         }
 
@@ -102,7 +102,6 @@
 
         private var map:MapBase;
 
-        
 
         private var hasDropAreas:Boolean = true;
 
@@ -141,8 +140,8 @@
             var mapDefinition:MapDefinition = analysisDefinition as MapDefinition;
             mapDefinition.mapType = mapType;
             dimension = mapDefinition.geography;
-            graphData = new ArrayCollection();            
-            if (dataSet.length > 0) {                
+            graphData = new ArrayCollection();
+            if (dataSet.length > 0) {
                 this.formatter = mapDefinition.measure.getFormatter();
                 var renderer:ConditionRenderer = createRenderer(dataSet, mapDefinition);
                 this.conditionRenderer = renderer;
@@ -210,6 +209,10 @@
             super.createChildren();
             map = createMap();
             coreCanvas.addChild(map);
+        }
+
+        public function preserveValues():Boolean {
+            return false;
         }
 
 		]]>

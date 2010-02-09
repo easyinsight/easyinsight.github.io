@@ -298,7 +298,7 @@ public class DataStorage {
         List<FieldMigration> fieldMigrations = new ArrayList<FieldMigration>();
         boolean newFieldsFound = false;
         for (AnalysisItem newItem : newItems) {
-            if (newItem.isDerived()) {
+            if (newItem.isDerived() || !newItem.isConcrete()) {
                 continue;
             }
             boolean newKey = true;
@@ -454,7 +454,11 @@ public class DataStorage {
         selectBuilder = selectBuilder.deleteCharAt(selectBuilder.length() - 1);
         createFromClause(version, fromBuilder);
         createWhereClause(filters, whereBuilder);
-        groupByBuilder = createGroupByClause(groupByBuilder, groupByItems);
+        if (aggregateQuery) {
+            groupByBuilder = createGroupByClause(groupByBuilder, groupByItems);
+        } else {
+            groupByItems = new HashSet<Key>();
+        }
         createSQL(filters, limit, queryBuilder, selectBuilder, fromBuilder, whereBuilder, groupByBuilder, groupByItems);
         PreparedStatement queryStmt = storageConn.prepareStatement(queryBuilder.toString());
         populateParameters(filters, keys, queryStmt, insightRequestMetadata);
@@ -484,28 +488,29 @@ public class DataStorage {
             int i = 1;
             for (AnalysisItem analysisItem : reportItems) {
                 Key key = analysisItem.getKey().toBaseKey();
+                AggregateKey aggregateKey = analysisItem.createAggregateKey();
                 KeyMetadata keyMetadata = keys.get(key);
                 if (keyMetadata != null) {
                     if (keyMetadata.getType() == Value.DATE) {
                         Timestamp time = dataRS.getTimestamp(i++);
                         if (dataRS.wasNull()) {
-                            row.addValue(key, new EmptyValue());
+                            row.addValue(aggregateKey, new EmptyValue());
                         } else {
-                            row.addValue(key, new DateValue(new java.util.Date(time.getTime())));
+                            row.addValue(aggregateKey, new DateValue(new java.util.Date(time.getTime())));
                         }
                     } else if (keyMetadata.getType() == Value.NUMBER) {
                         double value = dataRS.getDouble(i++);
                         if (dataRS.wasNull()) {
-                            row.addValue(key, new EmptyValue());
+                            row.addValue(aggregateKey, new EmptyValue());
                         } else {
-                            row.addValue(key, new NumericValue(value));
+                            row.addValue(aggregateKey, new NumericValue(value));
                         }
                     } else {
                         String value = dataRS.getString(i++);
                         if (dataRS.wasNull()) {
-                            row.addValue(key, new EmptyValue());
+                            row.addValue(aggregateKey, new EmptyValue());
                         } else {
-                            row.addValue(key, new StringValue(value));
+                            row.addValue(aggregateKey, new StringValue(value));
                         }
                     }
                 }
@@ -632,10 +637,10 @@ public class DataStorage {
                 } else if (analysisMeasure.getAggregation() == AggregationTypes.MIN) {
                     columnName = "MIN(" + columnName + ")";
                 } else {
-                    groupByItems.add(analysisItem.getKey());
+                    groupByItems.add(analysisItem.getKey().toBaseKey());
                 }
             } else {
-                groupByItems.add(analysisItem.getKey());
+                groupByItems.add(analysisItem.getKey().toBaseKey());
             }
             selectBuilder.append(columnName);
             selectBuilder.append(",");

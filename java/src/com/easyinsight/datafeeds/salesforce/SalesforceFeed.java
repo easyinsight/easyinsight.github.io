@@ -154,7 +154,7 @@ public class SalesforceFeed extends Feed {
             String keyName = element.getNodeName().split(":")[1];
             String qualifiedName = type + "." + keyName;
             AnalysisItem analysisItem = keyLookupMap.get(qualifiedName);
-            row.addValue(analysisItem.getKey(), element.getTextContent());
+            row.addValue(analysisItem.createAggregateKey(), element.getTextContent());
         } else if (element.getChildNodes().getLength() > 1) {
             String querySubject = element.getNodeName().split(":")[1];
             NodeList childList = element.getChildNodes();
@@ -163,7 +163,7 @@ public class SalesforceFeed extends Feed {
                 String qualifiedName = querySubject + "." + child.getNodeName().split(":")[1];
                 AnalysisItem analysisItem = keyLookupMap.get(qualifiedName);
                 if (analysisItem != null) {
-                    row.addValue(analysisItem.getKey(), child.getTextContent());
+                    row.addValue(analysisItem.createAggregateKey(), child.getTextContent());
                 }
             }
         }

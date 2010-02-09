@@ -1,8 +1,8 @@
 package com.easyinsight.pipeline;
 
-import com.easyinsight.analysis.DataResults;
+import com.easyinsight.analysis.*;
+import com.easyinsight.core.Value;
 import com.easyinsight.dataset.DataSet;
-import com.easyinsight.analysis.AnalysisItem;
 
 /**
  * User: James Boe
@@ -10,11 +10,17 @@ import com.easyinsight.analysis.AnalysisItem;
  * Time: 2:45:33 PM
  */
 public class RangeComponent implements IComponent {
+
+    private AnalysisRangeDimension analysisRangeDimension;
+
+    public RangeComponent(AnalysisRangeDimension analysisRangeDimension) {
+        this.analysisRangeDimension = analysisRangeDimension;
+    }
+
     public DataSet apply(DataSet dataSet, PipelineData pipelineData) {
-        for (AnalysisItem analysisItem : pipelineData.getReportItems()) {
-            if (analysisItem.requiresDataEarly()) {
-                analysisItem.handleEarlyData(dataSet.getRows());
-            }
+        for (IRow row : dataSet.getRows()) {
+            Value value = row.getValue(analysisRangeDimension.createAggregateKey());
+            row.addValue(analysisRangeDimension.createAggregateKey(), analysisRangeDimension.toRange(value, pipelineData.getInsightRequestMetadata()));
         }
         return dataSet;
     }

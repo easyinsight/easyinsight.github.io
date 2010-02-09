@@ -219,6 +219,10 @@
         public function updateExportMetadata():void {
         }
 
+        public function preserveValues():Boolean {
+            return false;
+        }
+
         public function onCustomChangeEvent(event:CustomChangeEvent):void {
         }]]></mx:Script>
     <mx:Array id="fills">

@@ -154,6 +154,10 @@
         private function passThrough(event:Event):void {
             dispatchEvent(event);
         }
+
+        public function preserveValues():Boolean {
+            return false;
+        }
 		]]>
 	</mx:Script>
 

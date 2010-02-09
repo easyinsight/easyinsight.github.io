@@ -8,8 +8,17 @@ package com.easyinsight.analysis
 		{
 			super();
 		}
-		
-		override public function getValue():Object {
+
+
+        override public function type():int {
+            return Value.EMPTY; 
+        }
+
+        override public function toString():String {
+            return "(Null)";
+        }
+
+        override public function getValue():Object {
 			return "";
 		}
 	}

@@ -84,9 +84,11 @@ public class CloudWatchFeed extends Feed {
             Date endDate = null;
 
             int period = 1000;
+            AnalysisDateDimension analysisDateDimension = null;
             for (AnalysisDimension dimension : dimensions) {
                 if (dimension.hasType(AnalysisItemTypes.DATE_DIMENSION)) {
                     AnalysisDateDimension dateDimension = (AnalysisDateDimension) dimension;
+                    analysisDateDimension = dateDimension;
                     switch (dateDimension.getDateLevel()) {
                         case AnalysisDateDimension.MINUTE_LEVEL:
                             period = 60;
@@ -105,10 +107,12 @@ public class CloudWatchFeed extends Feed {
                 if (filterDefinition.getField().getKey().toKeyString().equals(CloudWatchDataSource.DATE)) {
                     if (filterDefinition instanceof FilterDateRangeDefinition) {
                         FilterDateRangeDefinition dateRange = (FilterDateRangeDefinition) filterDefinition;
+                        analysisDateDimension = (AnalysisDateDimension) dateRange.getField();
                         startDate = dateRange.getStartDate();
                         endDate = dateRange.getEndDate();
                     } else if (filterDefinition instanceof RollingFilterDefinition) {
                         RollingFilterDefinition rollingFilterDefinition = (RollingFilterDefinition) filterDefinition;
+                        analysisDateDimension = (AnalysisDateDimension) rollingFilterDefinition.getField();
                         endDate = new Date();
                         startDate = new Date(MaterializedRollingFilterDefinition.findStartDate(rollingFilterDefinition.getInterval(), endDate));
                     }
@@ -122,7 +126,7 @@ public class CloudWatchFeed extends Feed {
                     for (EC2Info info : ec2Infos) {
                         for (AnalysisMeasure analysisMeasure : measures) {
                             DataSet childSet = CloudWatchUtil.getDataSet(credentials.getUserName(), credentials.getPassword(), info, analysisMeasure, dimensions, startDate, endDate,
-                                    period);
+                                    period, analysisDateDimension);
                             for (IRow row : childSet.getRows()) {
                                 dataSet.addRow(row);
                             }
@@ -132,7 +136,7 @@ public class CloudWatchFeed extends Feed {
                     // just retrieve with no instance IDs
                     for (AnalysisMeasure analysisMeasure : measures) {
                         DataSet childSet = CloudWatchUtil.getDataSet(credentials.getUserName(), credentials.getPassword(), null, analysisMeasure, dimensions, startDate, endDate,
-                                period);
+                                period, analysisDateDimension);
                         for (IRow row : childSet.getRows()) {
                             dataSet.addRow(row);
                         }

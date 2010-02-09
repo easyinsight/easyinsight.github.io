@@ -1,8 +1,11 @@
 package com.easyinsight.calculations;
 
+import com.easyinsight.analysis.*;
 import org.antlr.runtime.Token;
 import com.easyinsight.core.Key;
-import com.easyinsight.analysis.AggregateKey;
+
+import java.util.Collection;
+import java.util.List;
 
 public class VariableNode extends CalculationTreeNode {
 
@@ -10,22 +13,52 @@ public class VariableNode extends CalculationTreeNode {
 		super(t);                
     }
 
-    public Key getVariableKey() {
+    public KeySpecification getVariableKey() {
         return variableKey;
     }
+
+    public AggregateKey createAggregateKey() {
+        return analysisItem.createAggregateKey();
+    }
     
-    public void resolveVariableKey(Resolver r) {
+    public void resolveVariableKey(Collection<AnalysisItem> allItems) {
         String s = getText().trim();
         if(s.startsWith("[") && s.endsWith("]"))
             s = s.substring(1, s.length() - 1);
-        variableKey = r.getKey(s);
+        variableKey = new NamedKeySpecification(s);
+        for (AnalysisItem item : allItems) {
+            if (item.getKey().toKeyString().equals(s)) {
+                analysisItem = item;
+            }
+        }
     }
 
-    public void resolveVariableKey(Resolver r, int aggregationType) {
+    public void resolveVariableKey(Collection<AnalysisItem> allItems, int aggregationType) {
         String s = getText().trim();
         if(s.startsWith("[") && s.endsWith("]"))
             s = s.substring(1, s.length() - 1);
-        variableKey = new AggregateKey(r.getKey(s), aggregationType);
+        variableKey = new AggregateKeySpecification(s, aggregationType);
+        for (AnalysisItem item : allItems) {
+            if (item.getKey().toKeyString().equals(s)) {
+                if (item.getType() == AnalysisItemTypes.MEASURE) {
+                    AnalysisMeasure analysisMeasure = (AnalysisMeasure) item;
+                    if (analysisMeasure.getAggregation() == aggregationType) {
+                        analysisItem = item;
+                        break;
+                    } else {
+                        AnalysisMeasure clonedMeasure;
+                        try {
+                            clonedMeasure = (AnalysisMeasure) analysisMeasure.clone();
+                        } catch (CloneNotSupportedException e) {
+                            throw new RuntimeException(e);
+                        }
+                        clonedMeasure.setAggregation(aggregationType);
+                        analysisItem = clonedMeasure;
+                        break;
+                    }
+                }
+            }
+        }
     }
 
     @Override
@@ -33,6 +66,7 @@ public class VariableNode extends CalculationTreeNode {
 		visitor.visit(this);
 	}
 
-    private Key variableKey;
-	
+    private KeySpecification variableKey;
+
+    private AnalysisItem analysisItem;
 }

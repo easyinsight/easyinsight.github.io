@@ -43,7 +43,7 @@ public class DerivedKey extends Key {
 
     @Override
     public String toSQL() {
-        return getParentKey().toSQL();
+        return toBaseKey().toSQL();
     }
 
     @Override
@@ -52,11 +52,11 @@ public class DerivedKey extends Key {
     }
 
     public String toDisplayName() {
-        return getParentKey().toDisplayName();
+        return toBaseKey().toDisplayName();
     }
 
     public String toKeyString() {
-        return getParentKey().toKeyString();
+        return toBaseKey().toKeyString();
     }
 
     @Override

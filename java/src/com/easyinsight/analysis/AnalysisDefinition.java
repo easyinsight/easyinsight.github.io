@@ -36,13 +36,13 @@ public class AnalysisDefinition implements Cloneable {
     @Column(name = "temporary_report")
     private boolean temporaryReport;
 
-    @OneToMany(cascade = CascadeType.ALL)
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinTable(name = "analysis_to_filter_join",
             joinColumns = @JoinColumn(name = "analysis_id", nullable = false),
             inverseJoinColumns = @JoinColumn(name = "filter_id", nullable = false))
     private List<FilterDefinition> filterDefinitions;
 
-    @OneToMany(cascade = CascadeType.ALL)
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinTable(name = "additional_items",
             joinColumns = @JoinColumn(name = "analysis_id", nullable = false),
             inverseJoinColumns = @JoinColumn(name = "analysis_item_id", nullable = false))
@@ -52,7 +52,7 @@ public class AnalysisDefinition implements Cloneable {
     @JoinColumn(name = "analysis_id", nullable = false)
     private List<UserToAnalysisBinding> userBindings = new ArrayList<UserToAnalysisBinding>();
 
-    @OneToMany(cascade = CascadeType.ALL)
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinTable(name = "analysis_to_data_scrub",
             joinColumns = @JoinColumn(name = "analysis_id", nullable = false),
             inverseJoinColumns = @JoinColumn(name = "data_scrub_id", nullable = false))
@@ -64,7 +64,7 @@ public class AnalysisDefinition implements Cloneable {
             inverseJoinColumns = @JoinColumn(name = "analysis_tags_id", nullable = false))
     private List<Tag> tags = new ArrayList<Tag>();
 
-    @OneToOne(cascade = CascadeType.ALL)
+    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinColumn(name = "report_state_id")
     private AnalysisDefinitionState analysisDefinitionState;
 
@@ -107,7 +107,7 @@ public class AnalysisDefinition implements Cloneable {
     @Column(name = "description")
     private String description;
 
-    @OneToMany(cascade = CascadeType.ALL)
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @MapKey(columns = @Column(name = "structure_key"))
     @JoinTable(name = "report_structure",
             joinColumns = @JoinColumn(name = "analysis_id"),

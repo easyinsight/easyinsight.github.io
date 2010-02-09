@@ -29,6 +29,12 @@ public class CrosstabDataService extends EventDispatcher implements IReportDataS
         dataRemoteSource.list.addEventListener(FaultEvent.FAULT, GenericFaultHandler.genericFault);
     }
 
+    private var _preserveValues:Boolean = true;
+
+    public function set preserveValues(value:Boolean):void {
+        _preserveValues = value;
+    }
+
     private var _obfuscate:Boolean;
 
     public function get obfuscate():Boolean {

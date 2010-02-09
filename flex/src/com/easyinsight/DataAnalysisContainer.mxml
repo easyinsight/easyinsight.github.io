@@ -43,6 +43,7 @@
         import com.easyinsight.account.Account;
         import com.easyinsight.administration.feed.DeleteAnalysisItemEvent;
         import com.easyinsight.analysis.AnalysisChangedEvent;
+        import com.easyinsight.analysis.AnalysisItemCopyEvent;
         import com.easyinsight.analysis.AnalysisItemNode;
         import com.easyinsight.analysis.AnalysisItemTypeRenderer;
         import com.easyinsight.analysis.AnalysisUtil;
@@ -448,6 +449,7 @@
             loading = true;
             commandProcessor = new CommandProcessor();
             addEventListener(AnalysisChangedEvent.ANALYSIS_CHANGED, onAnalysisChanged);
+            addEventListener(AnalysisItemCopyEvent.ITEM_COPY, onCopy);
             addEventListener(DeleteAnalysisItemEvent.DELETE_ANALYSIS_ITEM, onFieldDelete);
             addEventListener(CommandEvent.COMMAND, onCommand);
             addEventListener(AnalysisItemDeleteEvent.ANALYSIS_ITEM_DELETE, onAnalysisItemDelete);
@@ -748,6 +750,19 @@
             }
         }
 
+        private function onCopy(event:AnalysisItemCopyEvent):void {
+            dispatchEvent(new AnalysisChangedEvent());
+            var node:AnalysisItemNode = new AnalysisItemNode();
+            node.analysisItem = event.analysisItem;
+            var wrapper:AnalysisItemWrapper = new AnalysisItemWrapper(node);
+            availableFields.addItem(wrapper);
+            wrappers.addItem(wrapper);
+            if (analysisDefinition.addedItems == null) {
+                analysisDefinition.addedItems = new ArrayCollection();
+            }
+            analysisDefinition.addedItems.addItem(event.analysisItem);
+        }
+
         private function gotUserCapabilitiesForInsight():void {
             var userCapabilities:UserCapabilities = analysisService.getUserCapabilitiesForInsight.lastResult as UserCapabilities;
 
@@ -872,11 +887,24 @@
             }
         }
 
+        [Bindable]
+        private var fieldsIndex:int = 0;
+
         private function tutorial():void {
             /*var reportEditorTutorial:ReportEditorTutorial = new ReportEditorTutorial();
             reportEditorTutorial.reportEditor = this;
             reportEditorTutorial.startTutorial();
             PrimaryWorkspace.registerTutorial(reportEditorTutorial);*/
+        }
+
+        private function editToggle():void {
+            if (fieldsIndex == 0) {
+                leftHandBox.width = leftHandBox.width + 150;
+                fieldsIndex = 1;
+            } else {
+                leftHandBox.width = leftHandBox.width - 150;
+                fieldsIndex = 0;
+            }
         }
         ]]>
     </mx:Script>
@@ -894,6 +922,7 @@
         <mx:method name="getAllData" result="gotDetailData()"/>
         <mx:method name="getCredentialRequirements" result="gotCredentialRequirements()"/>
     </mx:RemoteObject>
+    <analysis:ReportEditorFieldControlsFactory fields="{wrappers}" id="controlsFactory"/>
     <mx:VBox height="100%" width="100%" id="reportEditor" disabledOverlayAlpha=".275">
         <mx:HBox verticalAlign="middle" id="controlBar">
             <mx:Button id="wrapButton" icon="@Embed(source='../../../assets/document_out.png')" click="close()"
@@ -961,22 +990,49 @@
                 <mx:VBox height="100%" width="100%" verticalGap="0" borderThickness="1" borderColor="#DCE2F8"
                          borderStyle="solid" dropShadowEnabled="true">
                     <mx:Box width="100%" height="5" backgroundColor="#10319A" left="0" right="0"/>
-                    <mx:Box width="100%" backgroundColor="#3B56AF" horizontalAlign="center">
-                        <mx:Label text="{dataSourceName}" color="0xFFFFFF"/>
-                    </mx:Box>
-                    <mx:AdvancedDataGrid width="100%" height="100%" dragEnabled="true" iconFunction="iconFunction"
+                    <mx:Canvas width="100%" height="28">
+                        <mx:Box width="100%" backgroundColor="#3B56AF" horizontalAlign="center" verticalAlign="middle" height="100%">
+                            <mx:Label text="{dataSourceName}" color="0xFFFFFF"/>
+                        </mx:Box>
+                        <mx:Box width="100%" horizontalAlign="right" verticalAlign="middle" height="100%" paddingRight="5">
+                            <mx:Button icon="@Embed(source='../../../assets/funnel_new.png')" click="editToggle()"/>
+                        </mx:Box>
+                    </mx:Canvas>
+                    <mx:ViewStack selectedIndex="{fieldsIndex}" width="100%" height="100%">
+                        <mx:Box width="100%" height="100%">
+                            <mx:AdvancedDataGrid width="100%" height="100%" dragEnabled="true" iconFunction="iconFunction"
                                          id="Measure" backgroundColor="#FFFFFF"
                                          alternatingItemColors="#FFFFFF" fontSize="12" rowHeight="28"
                                          itemDoubleClick="onItemDoubleClick(event)"
                                          dragComplete="onDragComplete(event)" mouseDown="onDragStart()"
+                                         mouseUp="onDragEnd()" showHeaders="false">
+                                <mx:dataProvider>
+                                    <mx:HierarchicalData source="{availableFields}"/>
+                                </mx:dataProvider>
+                                <mx:columns>
+                                    <mx:AdvancedDataGridColumn dataField="displayName" headerText=""/>
+                                </mx:columns>
+                            </mx:AdvancedDataGrid>
+                        </mx:Box>
+                        <mx:Box width="100%" height="100%">
+                            <mx:AdvancedDataGrid width="100%" height="100%" dragEnabled="true" iconFunction="iconFunction"
+                                         id="adminGrid" backgroundColor="#FFFFFF"
+                                         alternatingItemColors="#FFFFFF" fontSize="12" rowHeight="28"
+                                         itemDoubleClick="onItemDoubleClick(event)"
+                                         dragComplete="onDragComplete(event)" mouseDown="onDragStart()"
                                          mouseUp="onDragEnd()">
-                        <mx:dataProvider>
-                            <mx:HierarchicalData source="{availableFields}"/>
-                        </mx:dataProvider>
-                        <mx:columns>
-                            <mx:AdvancedDataGridColumn dataField="displayName" headerText=""/>
-                        </mx:columns>
-                    </mx:AdvancedDataGrid>
+                                <mx:dataProvider>
+                                    <mx:HierarchicalData source="{availableFields}"/>
+                                </mx:dataProvider>
+                                <mx:columns>
+                                    <mx:AdvancedDataGridColumn dataField="displayName" headerText=""/>
+                                    <mx:AdvancedDataGridColumn dataField="displayName" headerText="" width="150" 
+                                                               itemRenderer="{controlsFactory}"/>
+                                </mx:columns>
+                            </mx:AdvancedDataGrid>
+                        </mx:Box>
+                    </mx:ViewStack>
+
                 </mx:VBox>
             </mx:VBox>
             <mx:VBox width="100%" height="100%" id="dataControlVBox"/>

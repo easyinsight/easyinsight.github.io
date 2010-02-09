@@ -34,6 +34,7 @@
             super.commitProperties();
             if (_hierarchy == null) {
                 _hierarchy = new AnalysisHierarchyItem();
+                _hierarchy.concrete = false;
                 _hierarchy.key = new NamedKey();
             }
         }

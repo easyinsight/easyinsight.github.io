@@ -11,21 +11,36 @@ import mx.managers.PopUpManager;
 
     import com.easyinsight.administration.feed.DeleteAnalysisItemEvent;
 
-	public class BaseFieldEditButton extends HBox
+import mx.rpc.events.ResultEvent;
+import mx.rpc.remoting.RemoteObject;
+
+public class BaseFieldEditButton extends HBox
 	{
 		private var analysisItemWrapper:AnalysisItemWrapper;
 		private var _displayName:String;
 		private var _analysisItems:ArrayCollection;
 		private var button:Button;
 		private var deleteButton:Button;
+		private var copyButton:Button;
 
-		[Bindable]
+
+        public function set analysisItems(value:ArrayCollection):void {
+            _analysisItems = value;
+        }
+
+        [Bindable]
 		[Embed(source="../../../../assets/clipboard.png")]
         public var editIcon:Class;
 
         [Bindable]
+		[Embed(source="../../../../assets/copy.png")]
+        public var copyIcon:Class;
+
+        [Bindable]
 		[Embed(source="../../../../assets/navigate_cross.png")]
         public var deleteIcon:Class;
+
+        private var analysisService:RemoteObject;
         
 		public function BaseFieldEditButton()
 		{
@@ -38,10 +53,17 @@ import mx.managers.PopUpManager;
 			if (button == null) {
 				button = new Button();
 				button.setStyle("icon", editIcon);
-				button.toolTip = "Copy...";
+				button.toolTip = "Edit Field";
 				//button.addEventListener(MouseEvent.CLICK, editItem);
 			}
             addChild(button);
+            if (copyButton == null) {
+				copyButton = new Button();
+				copyButton.setStyle("icon", copyIcon);
+				copyButton.toolTip = "Copy...";
+                copyButton.addEventListener(MouseEvent.CLICK, copy);
+			}
+            addChild(copyButton);
             if (deleteButton == null) {
                 deleteButton = new Button();
                 deleteButton.setStyle("icon", deleteIcon);
@@ -50,6 +72,18 @@ import mx.managers.PopUpManager;
             }
             addChild(deleteButton);
 		}
+
+        private function copy(event:MouseEvent):void {
+            analysisService = new RemoteObject();
+            analysisService.destination = "analysisDefinition";
+            analysisService.cloneItem.addEventListener(ResultEvent.RESULT, onCopy);
+            analysisService.cloneItem.send(analysisItemWrapper.analysisItem);
+        }
+
+    private function onCopy(event:ResultEvent):void {
+        var copyItem:AnalysisItem = analysisService.cloneItem.lastResult as AnalysisItem;
+        dispatchEvent(new AnalysisItemCopyEvent(copyItem));
+    }
 		
 		[Bindable]
 		public function get displayName():String {

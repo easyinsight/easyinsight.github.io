@@ -1,10 +1,7 @@
 package com.easyinsight.datafeeds.cloudwatch;
 
+import com.easyinsight.analysis.*;
 import com.easyinsight.dataset.DataSet;
-import com.easyinsight.analysis.AnalysisMeasure;
-import com.easyinsight.analysis.IRow;
-import com.easyinsight.analysis.AnalysisDimension;
-import com.easyinsight.analysis.AggregationTypes;
 import com.easyinsight.core.DateValue;
 import com.easyinsight.core.NumericValue;
 
@@ -46,7 +43,7 @@ public class CloudWatchUtil {
     }
 
     public static DataSet getDataSet(String key, String secretKey, EC2Info ec2Info, AnalysisMeasure analysisMeasure, Collection<AnalysisDimension> dimensions,
-                                     Date startDate, Date endDate, int period)
+                                     Date startDate, Date endDate, int period, AnalysisDateDimension dateDimension)
             throws NoSuchAlgorithmException,
             IOException, InvalidKeyException, ParserConfigurationException, SAXException, ParseException {
         Map<String, String> params = new HashMap<String, String>();
@@ -115,13 +112,13 @@ public class CloudWatchUtil {
                 IRow row = dataSet.createRow();
                 for (AnalysisDimension dimension : dimensions) {
                     if (CloudWatchDataSource.IMAGE_ID.equals(dimension.getKey().toKeyString())) {
-                        row.addValue(dimension.getKey(), ec2Info.getAmiID());
+                        row.addValue(dimension.createAggregateKey(), ec2Info.getAmiID());
                     } else if (CloudWatchDataSource.INSTANCE_ID.equals(dimension.getKey().toKeyString())) {
-                        row.addValue(dimension.getKey(), ec2Info.getInstanceID());
+                        row.addValue(dimension.createAggregateKey(), ec2Info.getInstanceID());
                     } else if (CloudWatchDataSource.GROUP_NAME.equals(dimension.getKey().toKeyString())) {
-                        row.addValue(dimension.getKey(), ec2Info.getGroup());
+                        row.addValue(dimension.createAggregateKey(), ec2Info.getGroup());
                     } else if (CloudWatchDataSource.HOST_NAME.equals(dimension.getKey().toKeyString())) {
-                        row.addValue(dimension.getKey(), ec2Info.getHostName());
+                        row.addValue(dimension.createAggregateKey(), ec2Info.getHostName());
                     }
                 }
                 String timestamp = memberNode.getChildNodes().item(1).getTextContent();
@@ -141,8 +138,8 @@ public class CloudWatchUtil {
                 }
                 if (value != null) {
 
-                    row.addValue(CloudWatchDataSource.DATE, new DateValue(dateVal));
-                    row.addValue(analysisMeasure.getKey(), new NumericValue(Double.parseDouble(value)));
+                    row.addValue(dateDimension.createAggregateKey(), new DateValue(dateVal));
+                    row.addValue(analysisMeasure.createAggregateKey(), new NumericValue(Double.parseDouble(value)));
                 }
             }
         }

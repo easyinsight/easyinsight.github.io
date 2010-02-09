@@ -1,20 +1,17 @@
 package com.easyinsight.calculations;
 
 import com.easyinsight.core.Value;
-import com.easyinsight.core.Key;
 
 import java.util.Set;
 import java.util.HashSet;
 
 /**
- * Created by IntelliJ IDEA.
  * User: Alan
  * Date: Aug 3, 2008
  * Time: 10:14:02 AM
- * To change this template use File | Settings | File Templates.
  */
 public class VariableListVisitor implements ICalculationTreeVisitor {
-    private Set<Key> variableList = new HashSet<Key>();
+    private Set<KeySpecification> variableList = new HashSet<KeySpecification>();
 
     public void visit(CalculationTreeNode node) {
         visitChildren(node);
@@ -55,7 +52,7 @@ public class VariableListVisitor implements ICalculationTreeVisitor {
     public Value getResult() {
         return null;  //To change body of implemented methods use File | Settings | File Templates.
     }
-    public Set<Key> getVariableList() {
+    public Set<KeySpecification> getVariableList() {
         return variableList;
     }
 

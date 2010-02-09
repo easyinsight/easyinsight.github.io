@@ -40,7 +40,7 @@ public class PercentageNumberFormatter extends NumberFormatter{
         if (value === null || isNaN(Number(value)))
         {
             error = defaultInvalidValueError;
-            return "0%";
+            return "";
         }
 
         // -- format --

@@ -10,6 +10,7 @@ import com.easyinsight.filtering.FilterRawData;
 
         import com.easyinsight.pseudocontext.PseudoContextWindow;
 
+        import ilog.charts3d.charts3dClasses.Series3D;
         import ilog.charts3d.series.BarSeries3D;
         import ilog.charts3d.series.BarSet3D;
         import ilog.charts3d.BarChart3D;
@@ -170,6 +171,7 @@ import com.easyinsight.filtering.FilterRawData;
                 barSeries.dataProvider = graphData;
                 barSeries.displayName = yAxisTitle;
                 barSeries.setStyle("showDataEffect", interpolateIn);
+                barSeries.dataFunction = myDataFunction;
                 var barSet:BarSet3D = new BarSet3D();
                 barSet.series = [ barSeries ];
                 barChart.series = [ barSet ];
@@ -177,6 +179,15 @@ import com.easyinsight.filtering.FilterRawData;
                 addChild(barChart);
             }
         }
+
+        private function myDataFunction(series:Series3D, item:Object, fieldName:String):Object {
+              if(fieldName == 'xValue')
+                  return(item[xAxisItem.qualifiedName()].toNumber());
+              else if(fieldName == "yValue")
+                  return(item[yAxisItem.qualifiedName()].toString());
+              else
+                  return null;
+         }
 
         private function onClick(event:ChartItemEvent):void {
             if (event.shiftKey) {
@@ -291,6 +302,10 @@ import com.easyinsight.filtering.FilterRawData;
         }
 
         public function updateExportMetadata():void {
+        }
+
+        public function preserveValues():Boolean {
+            return true;
         }
 
         public function onCustomChangeEvent(event:CustomChangeEvent):void {

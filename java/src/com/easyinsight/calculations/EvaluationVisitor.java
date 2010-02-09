@@ -115,7 +115,7 @@ public class EvaluationVisitor implements ICalculationTreeVisitor {
     }
 
     public void visit(VariableNode node) {
-        result = row.getValue(node.getVariableKey());
+        result = row.getValue(node.createAggregateKey());
     }
 
     public void visit(FunctionNode node) {

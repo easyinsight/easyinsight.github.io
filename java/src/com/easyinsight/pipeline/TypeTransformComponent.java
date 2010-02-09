@@ -17,7 +17,7 @@ public class TypeTransformComponent implements IComponent {
         for (IRow row : dataSet.getRows()) {
             IRow targetRow = targetSet.createRow();
             for (AnalysisItem analysisItem : pipelineData.getReportItems()) {
-                Value value = row.getValue(analysisItem);
+                Value value = row.getValue(analysisItem.createAggregateKey());
                 // TODO: why was this here?
                 //Value preFilterValue = analysisItem.renameMeLater(value);
                 Value transformedValue = analysisItem.transformValue(value, pipelineData.getInsightRequestMetadata());

@@ -80,5 +80,8 @@ public class EmbeddedCrosstabDataService extends EventDispatcher implements IEmb
         insightRequestMetadata.hierarchyOverrides = hierarchyOverrides;
         dataRemoteSource.getEmbeddedResults.send(reportID, dataSourceID, filters, insightRequestMetadata, drillthroughFilters);
     }
+
+    public function set preserveValues(value:Boolean):void {
+    }
 }
 }

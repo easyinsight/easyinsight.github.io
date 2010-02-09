@@ -11,7 +11,7 @@
 
         import com.easyinsight.analysis.CustomChangeEvent;
         import com.easyinsight.analysis.charts.Chart3DVisuals;
-import com.easyinsight.filtering.FilterRawData;
+        import com.easyinsight.filtering.FilterRawData;
 
         import com.easyinsight.pseudocontext.PseudoContextWindow;
 
@@ -41,7 +41,7 @@ import com.easyinsight.filtering.FilterRawData;
         private var measureItem:AnalysisItem;
 
         private var legend:Legend;
-        
+
         private var visuals:Chart3DVisuals = new Chart3DVisuals();
 
         private function dataTipFunction(hitData:HitData):String {
@@ -103,12 +103,12 @@ import com.easyinsight.filtering.FilterRawData;
             hbox.removeChild(areaChart);
 
             areaChart = new AreaChart3D();
-                areaChart.percentHeight = 100;
-                areaChart.percentWidth = 100;
-                visuals.chart = areaChart;
-                areaChart.dataProvider = chartData;
-                areaChart.selectionMode = "multiple";
-                areaChart.showDataTips = true;
+            areaChart.percentHeight = 100;
+            areaChart.percentWidth = 100;
+            visuals.chart = areaChart;
+            areaChart.dataProvider = chartData;
+            areaChart.selectionMode = "multiple";
+            areaChart.showDataTips = true;
             areaChart.dataTipFunction = dataTipFunction;
             areaChart.addEventListener(ChartItemEvent.ITEM_CLICK, onClick);
 
@@ -117,8 +117,6 @@ import com.easyinsight.filtering.FilterRawData;
                     visuals.elevationAngle = areaChartDef.elevationAngle;
                     visuals.rotationAngle = areaChartDef.rotationAngle;
                 }
-
-
 
 
                 var xAxisDimension:AnalysisItem = areaChartDef.xaxis;
@@ -236,6 +234,10 @@ import com.easyinsight.filtering.FilterRawData;
         }
 
         public function updateExportMetadata():void {
+        }
+
+        public function preserveValues():Boolean {
+            return false;
         }
 
         public function onCustomChangeEvent(event:CustomChangeEvent):void {
