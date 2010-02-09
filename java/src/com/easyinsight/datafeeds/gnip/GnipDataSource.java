@@ -78,7 +78,7 @@ public class GnipDataSource extends ServerDataSourceDefinition {
         return result;
     }
 
-    public DataSet getDataSet(com.easyinsight.users.Credentials credentials, Map<String, Key> keys, Date now, FeedDefinition parentDefinition) {
+    public DataSet getDataSet(Credentials credentials, Map<String, Key> keys, Date now, FeedDefinition parentDefinition, DataStorage dataStorage) {
         DataSet ds = new DataSet();
         List<Exception> exceptions = new LinkedList<Exception>();
         GnipHelper gh = new GnipHelper();

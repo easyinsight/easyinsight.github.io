@@ -1,5 +1,6 @@
 package com.easyinsight.datafeeds;
 
+import com.easyinsight.storage.DataStorage;
 import com.easyinsight.users.Credentials;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.core.Key;
@@ -52,7 +53,7 @@ public interface IServerDataSourceDefinition {
      * @param now
      * @return the data set
      */
-    DataSet getDataSet(Credentials credentials, Map<String, Key> keys, Date now, FeedDefinition feedDefinition);
+    DataSet getDataSet(Credentials credentials, Map<String, Key> keys, Date now, FeedDefinition feedDefinition, DataStorage dataStorage);
 
     /**
      * Retrieves the analysis items for the data source, defining such traits as dimensions, measures, dates, and so on. Use

@@ -7,6 +7,7 @@ import com.easyinsight.core.Key;
 import com.easyinsight.core.StringValue;
 import com.easyinsight.core.NumericValue;
 import com.easyinsight.dataset.DataSet;
+import com.easyinsight.storage.DataStorage;
 import com.easyinsight.users.Credentials;
 import com.easyinsight.logging.LogClass;
 import org.jetbrains.annotations.NotNull;
@@ -60,7 +61,7 @@ public class WesabeTransactionDataSource extends WesabeBaseSource {
     }
 
     @Override
-    public DataSet getDataSet(Credentials credentials, Map<String, Key> keys, Date now, FeedDefinition parentDefinition) {
+    public DataSet getDataSet(Credentials credentials, Map<String, Key> keys, Date now, FeedDefinition parentDefinition, DataStorage dataStorage) {
         DataSet dataSet = new DataSet();
         try {
             NodeList transactions = getNodes(credentials, "transactions", "txaction");

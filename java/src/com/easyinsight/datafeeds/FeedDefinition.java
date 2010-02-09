@@ -499,7 +499,7 @@ public class FeedDefinition implements Cloneable, Serializable {
         return item;
     }
     
-     public DataSet getDataSet(Credentials credentials, Map<String, Key> keys, Date now, FeedDefinition parentDefinition) {
+     public DataSet getDataSet(Credentials credentials, Map<String, Key> keys, Date now, FeedDefinition parentDefinition, DataStorage dataStorage) {
         throw new UnsupportedOperationException();
     }
 

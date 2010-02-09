@@ -8,6 +8,7 @@ import com.easyinsight.core.Key;
 import com.easyinsight.core.DateValue;
 import com.easyinsight.core.NumericValue;
 import com.easyinsight.analysis.*;
+import com.easyinsight.storage.DataStorage;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.Credentials;
 import org.apache.commons.httpclient.UsernamePasswordCredentials;
@@ -97,7 +98,7 @@ public class BaseCampTodoSource extends ServerDataSourceDefinition {
         return doc;
     }
 
-    public DataSet getDataSet(com.easyinsight.users.Credentials credentials, Map<String, Key> keys, Date now, FeedDefinition parentDefinition) {
+    public DataSet getDataSet(com.easyinsight.users.Credentials credentials, Map<String, Key> keys, Date now, FeedDefinition parentDefinition, DataStorage dataStorage) {
         BaseCampCompositeSource source = (BaseCampCompositeSource) parentDefinition;
         String url = source.getUrl();
         DateFormat df = new XmlSchemaDateFormat();

@@ -7,6 +7,8 @@ import com.easyinsight.core.Key;
 import com.easyinsight.core.StringValue;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.logging.LogClass;
+import com.easyinsight.storage.DataStorage;
+import com.easyinsight.users.Credentials;
 import org.jetbrains.annotations.NotNull;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -47,7 +49,7 @@ public class WesabeAccountDataSource extends WesabeBaseSource {
         return analysisItems;
     }
 
-    public DataSet getDataSet(com.easyinsight.users.Credentials credentials, Map<String, Key> keys, Date now, FeedDefinition parentDefinition) {
+    public DataSet getDataSet(Credentials credentials, Map<String, Key> keys, Date now, FeedDefinition parentDefinition, DataStorage dataStorage) {
         DataSet dataSet = new DataSet();        
         try {
             NodeList accounts = getNodes(credentials, "accounts", "account");

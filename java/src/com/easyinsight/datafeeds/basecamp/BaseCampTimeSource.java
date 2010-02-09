@@ -8,6 +8,7 @@ import com.easyinsight.core.Key;
 import com.easyinsight.core.NumericValue;
 import com.easyinsight.core.DateValue;
 import com.easyinsight.analysis.*;
+import com.easyinsight.storage.DataStorage;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.Credentials;
 import org.apache.commons.httpclient.UsernamePasswordCredentials;
@@ -84,11 +85,12 @@ public class BaseCampTimeSource extends ServerDataSourceDefinition {
         return doc;
     }
 
-    public DataSet getDataSet(com.easyinsight.users.Credentials credentials, Map<String, Key> keys, Date now, FeedDefinition parentDefinition) {
+    public DataSet getDataSet(com.easyinsight.users.Credentials credentials, Map<String, Key> keys, Date now, FeedDefinition parentDefinition, DataStorage dataStorage) {
         BaseCampCompositeSource baseCampCompositeSource = (BaseCampCompositeSource) parentDefinition;
         String url = baseCampCompositeSource.getUrl();
 
         DateFormat deadlineFormat = new SimpleDateFormat(XMLDATEFORMAT);
+
 
         DataSet ds = new DataSet();
         HttpClient client = getHttpClient(credentials.getUserName(), credentials.getPassword());
@@ -105,6 +107,7 @@ public class BaseCampTimeSource extends ServerDataSourceDefinition {
                 EIPageInfo info = new EIPageInfo();
                 info.currentPage = 1;
                 do {
+
                     Document todoLists = runRestRequest("/projects/" + projectIdToRetrieve + "/time_entries.xml?page=" + info.currentPage, client, builder, url, info);
                     Nodes todoListNodes = todoLists.query("/time-entries/time-entry");
                     for(int j = 0;j < todoListNodes.size();j++) {
@@ -127,12 +130,20 @@ public class BaseCampTimeSource extends ServerDataSourceDefinition {
                         row.addValue(keys.get(DATE), new DateValue(date));
                         row.addValue(keys.get(COUNT), new NumericValue(1));
                     }
+                    if (dataStorage != null) {
+                        dataStorage.insertData(ds);
+                        ds = new DataSet();
+                    }
                 } while(info.currentPage++ < info.MaxPages);
             }
         } catch (Throwable e) {
             throw new RuntimeException(e);
         }
-        return ds;
+        if (dataStorage == null) {
+            return ds;
+        } else {
+            return null;
+        }
     }
 
     private String retrieveContactInfo(HttpClient client, Builder builder, Map<String, String> peopleCache, String contactId, String url) throws BaseCampLoginException {

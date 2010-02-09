@@ -42,7 +42,7 @@ public abstract class ServerDataSourceDefinition extends FeedDefinition implemen
         DataStorage metadata = null;
         try {
             Map<String, Key> keys = newDataSourceFields(credentials);
-            DataSet dataSet = getDataSet(credentials, keys, new Date(), null);
+            DataSet dataSet = getDataSet(credentials, keys, new Date(), null, null);
             setFields(createAnalysisItems(keys, dataSet, credentials, conn));
             setOwnerName(retrieveUser(conn, SecurityUtil.getUserID()).getUserName());
             UploadPolicy uploadPolicy = new UploadPolicy(SecurityUtil.getUserID());
@@ -112,8 +112,10 @@ public abstract class ServerDataSourceDefinition extends FeedDefinition implemen
     }
 
     protected void addData(DataStorage dataStorage, DataSet dataSet) throws SQLException {
-        dataStorage.truncate();
-        dataStorage.insertData(dataSet);
+
+        if (dataSet != null) {
+            dataStorage.insertData(dataSet);
+        }
     }
 
     public CredentialsResponse refreshData(Credentials credentials, long accountID, Date now, FeedDefinition parentDefinition) {
@@ -147,9 +149,10 @@ public abstract class ServerDataSourceDefinition extends FeedDefinition implemen
                 }
             }
             Map<String, Key> keys = newDataSourceFields(credentials);
-            DataSet dataSet = getDataSet(credentials, newDataSourceFields(credentials), now, parentDefinition);
-            List<AnalysisItem> items = createAnalysisItems(keys, dataSet, credentials, conn);
             dataStorage = DataStorage.writeConnection(this, conn, accountID);
+            dataStorage.truncate();
+            DataSet dataSet = getDataSet(credentials, newDataSourceFields(credentials), now, parentDefinition, dataStorage);
+            List<AnalysisItem> items = createAnalysisItems(keys, dataSet, credentials, conn);
             int version = dataStorage.getVersion();
             int newVersion = dataStorage.migrate(getFields(), items);
             addData(dataStorage, dataSet);

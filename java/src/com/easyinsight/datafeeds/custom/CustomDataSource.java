@@ -6,6 +6,7 @@ import com.easyinsight.core.NamedKey;
 import com.easyinsight.datafeeds.*;
 import com.easyinsight.datafeeds.custom.client.*;
 import com.easyinsight.dataset.DataSet;
+import com.easyinsight.storage.DataStorage;
 import com.easyinsight.users.Account;
 import com.easyinsight.users.Credentials;
 import org.jetbrains.annotations.NotNull;
@@ -61,7 +62,7 @@ public class CustomDataSource extends ServerDataSourceDefinition {
     }
 
     @Override
-    public DataSet getDataSet(Credentials credentials, Map<String, Key> keys, Date now, FeedDefinition parentDefinition) {
+    public DataSet getDataSet(Credentials credentials, Map<String, Key> keys, Date now, FeedDefinition parentDefinition, DataStorage dataStorage) {
         return new DataSet();
     }
 

@@ -4,11 +4,8 @@ import com.easyinsight.datafeeds.*;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.core.Key;
 import com.easyinsight.analysis.*;
+import com.easyinsight.storage.DataStorage;
 import com.easyinsight.users.Account;
-import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.Credentials;
-import org.apache.commons.httpclient.UsernamePasswordCredentials;
-import org.apache.commons.httpclient.auth.AuthScope;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
@@ -71,7 +68,7 @@ public class TwitterDataSource extends ServerDataSourceDefinition {
         this.searches = searches;
     }
 
-    public DataSet getDataSet(com.easyinsight.users.Credentials credentials, Map<String, Key> keys, Date now, FeedDefinition parentDefinition) {
+    public DataSet getDataSet(com.easyinsight.users.Credentials credentials, Map<String, Key> keys, Date now, FeedDefinition parentDefinition, DataStorage dataStorage) {
         DataSet ds = new DataSet();
         return ds;
     }

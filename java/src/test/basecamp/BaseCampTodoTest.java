@@ -7,7 +7,6 @@ import com.easyinsight.datafeeds.FeedRegistry;
 import com.easyinsight.database.Database;
 import com.easyinsight.userupload.UserUploadService;
 import com.easyinsight.users.Credentials;
-import com.easyinsight.analysis.DataService;
 import com.easyinsight.dataset.DataSet;
 import test.util.TestUtil;
 
@@ -39,7 +38,7 @@ public class BaseCampTodoTest extends TestCase {
         c.setUserName("apiuser");
         c.setPassword("@p!user");
 
-        DataSet dataSet = ds.getDataSet(c, ds.newDataSourceFields(c), new Date(), comp);
+        DataSet dataSet = ds.getDataSet(c, ds.newDataSourceFields(c), new Date(), comp, null);
         dataSet.toString();
     }
 }

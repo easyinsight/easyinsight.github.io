@@ -3,6 +3,7 @@ package com.easyinsight.datafeeds.ganalytics;
 import com.easyinsight.datafeeds.*;
 import com.easyinsight.kpi.KPI;
 import com.easyinsight.kpi.KPIUtil;
+import com.easyinsight.storage.DataStorage;
 import com.easyinsight.users.Credentials;
 import com.easyinsight.users.Account;
 import com.easyinsight.dataset.DataSet;
@@ -201,7 +202,7 @@ public class GoogleAnalyticsDataSource extends ServerDataSourceDefinition {
         return new GoogleAnalyticsFeed();
     }
 
-    public DataSet getDataSet(Credentials credentials, Map<String, Key> keys, Date now, FeedDefinition parentDefinition) {
+    public DataSet getDataSet(Credentials credentials, Map<String, Key> keys, Date now, FeedDefinition parentDefinition, DataStorage dataStorage) {
         return new DataSet();
     }
 

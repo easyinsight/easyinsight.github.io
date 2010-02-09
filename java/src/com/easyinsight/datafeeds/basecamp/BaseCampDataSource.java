@@ -1,5 +1,6 @@
 package com.easyinsight.datafeeds.basecamp;
 
+import com.easyinsight.storage.DataStorage;
 import org.apache.commons.httpclient.*;
 import org.apache.commons.httpclient.Credentials;
 import org.apache.commons.httpclient.methods.GetMethod;
@@ -119,7 +120,7 @@ public class BaseCampDataSource extends ServerDataSourceDefinition {
         return doc;
     }
 
-    public DataSet getDataSet(com.easyinsight.users.Credentials credentials, Map<String, Key> keys, Date now, FeedDefinition parentDefinition) {
+    public DataSet getDataSet(com.easyinsight.users.Credentials credentials, Map<String, Key> keys, Date now, FeedDefinition parentDefinition, DataStorage dataStorage) {
         DateFormat df = new XmlSchemaDateFormat();
         DateFormat deadlineFormat = new SimpleDateFormat(XMLDATEFORMAT);
 

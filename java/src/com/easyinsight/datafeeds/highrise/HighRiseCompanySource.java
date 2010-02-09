@@ -1,5 +1,7 @@
 package com.easyinsight.datafeeds.highrise;
 
+import com.easyinsight.storage.DataStorage;
+import com.easyinsight.users.Credentials;
 import org.jetbrains.annotations.NotNull;
 import org.apache.commons.httpclient.HttpClient;
 
@@ -77,7 +79,7 @@ public class HighRiseCompanySource extends HighRiseBaseSource {
         return FeedType.HIGHRISE_COMPANY;
     }
 
-    public DataSet getDataSet(com.easyinsight.users.Credentials credentials, Map<String, Key> keys, Date now, FeedDefinition parentDefinition) {
+    public DataSet getDataSet(Credentials credentials, Map<String, Key> keys, Date now, FeedDefinition parentDefinition, DataStorage dataStorage) {
         HighRiseCompositeSource highRiseCompositeSource = (HighRiseCompositeSource) parentDefinition;
         String url = highRiseCompositeSource.getUrl();
 
