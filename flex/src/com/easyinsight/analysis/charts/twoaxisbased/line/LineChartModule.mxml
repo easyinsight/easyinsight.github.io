@@ -202,7 +202,7 @@
                 lineChart.series = mySeries;
             }
 
-            hbox.addChildAt(lineChart, 0);            
+            hbox.addChildAt(lineChart, 0);
 
             legend.dataProvider = lineChart;
             legend.direction = "vertical";
@@ -214,6 +214,10 @@
         }
 
         public function updateExportMetadata():void {
+        }
+
+        public function preserveValues():Boolean {
+            return false;
         }
 
         public function onCustomChangeEvent(event:CustomChangeEvent):void {
