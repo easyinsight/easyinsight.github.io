@@ -8,8 +8,16 @@ import mx.collections.ArrayCollection;
 public class TreeMapDefinition extends AnalysisDefinition{
 
     public static const DEPTH:int = 1;
-    public static const DIV:int = 2;
+    public static const DIV_RED_GREEN:int = 2;
+    public static const DIV_GREEN_RED:int = 4;
     public static const QUALITATIVE:int = 3;
+    public static const SEQUENTIAL:int = 5;
+    public static const DIV_BLUE_YELLOW:int = 6;
+    public static const DIV_YELLOW_BLUE:int = 7;
+    public static const AVG_RED_GREEN:int = 8;
+    public static const AVG_GREEN_RED:int = 9;
+    public static const AVG_BLUE_YELLOW:int = 10;
+    public static const AVG_YELLOW_BLUE:int = 11;
 
     public function TreeMapDefinition() {
         super();
