@@ -8,7 +8,6 @@ import com.easyinsight.dataset.DataSet;
 import com.easyinsight.analysis.*;
 import com.easyinsight.core.DateValue;
 import com.easyinsight.core.NumericValue;
-import com.easyinsight.core.NamedKey;
 import com.easyinsight.pipeline.StandardReportPipeline;
 
 import java.util.*;
@@ -44,7 +43,7 @@ public class GoalHistoryTest extends TestCase {
         long id = TestUtil.createTestDataSource(dataSet, items);
         Set<AnalysisItem> itemSet = new HashSet<AnalysisItem>(Arrays.asList(TestUtil.getItem(id, "Date"), TestUtil.getItem(id, "Value")));
         Feed feed = FeedRegistry.instance().getFeed(id);
-        dataSet = feed.getAggregateDataSet(itemSet, new ArrayList<FilterDefinition>(), new InsightRequestMetadata() , feed.getFields(), false, null);
+        dataSet = feed.getAggregateDataSet(itemSet, new ArrayList<FilterDefinition>(), new InsightRequestMetadata() , feed.getFields(), false);
         cal.setTime(startDate);
         RollingFilterDefinition rollingFilterDefinition = new RollingFilterDefinition();
         rollingFilterDefinition.setField(TestUtil.getItem(id, "Date"));

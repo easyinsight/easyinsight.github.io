@@ -7,7 +7,6 @@ import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.analysis.AnalysisItemTypes;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.analysis.*;
-import com.easyinsight.core.Key;
 import com.easyinsight.core.Value;
 
 import java.util.*;
@@ -54,7 +53,7 @@ public class StaticFeed extends Feed implements Serializable {
         DataStorage source = DataStorage.readConnection(getFields(), getFeedID());
         DataSet dataSet;
         try {
-            dataSet = source.retrieveData(queryList, null, null, null, null);
+            dataSet = source.retrieveData(queryList, null, null, null);
         } catch (SQLException e) {
             LogClass.error(e);
             throw new RuntimeException(e);
@@ -62,7 +61,7 @@ public class StaticFeed extends Feed implements Serializable {
             source.closeConnection();
         }
         for (IRow row : dataSet.getRows()) {
-            Value value = row.getValue(queryItem.getKey().toBaseKey());
+            Value value = row.getValue(queryItem.createAggregateKey());
             metadata.addValue(analysisItem, value, insightRequestMetadata);
         }
         return metadata;
@@ -83,14 +82,14 @@ public class StaticFeed extends Feed implements Serializable {
     }
 
     @Override
-    public DataSet getAggregateDataSet(Set<AnalysisItem> analysisItems, Collection<FilterDefinition> filters, InsightRequestMetadata insightRequestMetadata, List<AnalysisItem> allAnalysisItems, boolean adminMode, Collection<Key> additionalNeededKeys) {
+    public DataSet getAggregateDataSet(Set<AnalysisItem> analysisItems, Collection<FilterDefinition> filters, InsightRequestMetadata insightRequestMetadata, List<AnalysisItem> allAnalysisItems, boolean adminMode) {
         if (analysisItems.size() == 0) {
             return new DataSet();
         }
         DataSet dataSet;
         DataStorage source = DataStorage.readConnection(getFields(), getFeedID());
         try {
-            dataSet = source.retrieveData(analysisItems, filters, additionalNeededKeys, null, insightRequestMetadata);
+            dataSet = source.retrieveData(analysisItems, filters, null, insightRequestMetadata);
         } catch (SQLException e) {
             LogClass.error(e);
             throw new RuntimeException(e);

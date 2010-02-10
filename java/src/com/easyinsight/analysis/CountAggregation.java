@@ -12,19 +12,33 @@ public class CountAggregation extends Aggregation {
 
     private double count;
 
+    public void setCount(double count) {
+        this.count = count;
+    }
+
     public void addValue(Value value) {
         double addValue;
-        /*if (value.type() == Value.NUMBER) {
-            NumericValue numericValue = (NumericValue) value;
-            addValue = numericValue.toDouble();
-        } else {
-            addValue = 1;
-        }*/
-        addValue = 1;
-        count += addValue;
+        if (value.type() != Value.EMPTY) {
+            if (value.type() == Value.NUMBER) {
+                NumericValue numericValue = (NumericValue) value;
+                Aggregation aggregation = numericValue.getAggregation();
+                if (aggregation == null) {
+                    addValue = 1;
+                } else if (aggregation instanceof CountAggregation) {
+                    CountAggregation countAggregation = (CountAggregation) aggregation;
+                    addValue = countAggregation.count;
+                } else {
+                    addValue = 1;
+                }
+            } else {
+                addValue = 1;
+            }
+            //addValue = 1;
+            count += addValue;
+        }
     }
 
     public Value getValue() {
-        return new NumericValue(count);
+        return new NumericValue(count, this);
     }
 }

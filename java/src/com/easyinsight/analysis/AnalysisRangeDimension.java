@@ -94,25 +94,28 @@ public class AnalysisRangeDimension extends AnalysisDimension {
         return super.getType() | AnalysisItemTypes.RANGE_DIMENSION;
     }
 
-    public Value toRange(Value value, InsightRequestMetadata insightRequestMetadata) {
+    public Value toRange(Value value) {
         if (range == null) {
             range = new ExplicitRange(explicitOptions);
         }
         Value transformedValue;
         try {
-            Double doubleValue = value.toDouble();
-            if (doubleValue != null) {
-                RangeOption matchedOption = range.getRange(doubleValue);
-
-                if (matchedOption == null) {
-                    transformedValue = new EmptyValue();
-                } else {
-                    String string = matchedOption.getRangeMinimum() + " to " + matchedOption.getRangeMaximum();
-                    transformedValue = new StringValue(string);
-                    transformedValue.setOriginalValue(new NumericValue(matchedOption.getRangeMinimum()));
-                }
+            if (value.getOriginalValue() != null && value.type() == Value.STRING) {
+                transformedValue = value;
             } else {
-                transformedValue = new EmptyValue();
+                Double doubleValue = value.toDouble();
+                if (doubleValue != null) {
+                    RangeOption matchedOption = range.getRange(doubleValue);
+                    if (matchedOption == null) {
+                        transformedValue = new EmptyValue();
+                    } else {
+                        String string = matchedOption.getRangeMinimum() + " to " + matchedOption.getRangeMaximum();
+                        transformedValue = new StringValue(string);
+                        transformedValue.setOriginalValue(new NumericValue(matchedOption.getRangeMinimum()));
+                    }
+                } else {
+                    transformedValue = new EmptyValue();
+                }
             }
         } catch (NumberFormatException e) {
             transformedValue = new EmptyValue();

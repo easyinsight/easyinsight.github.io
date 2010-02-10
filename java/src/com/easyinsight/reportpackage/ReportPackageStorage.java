@@ -3,6 +3,9 @@ package com.easyinsight.reportpackage;
 import com.easyinsight.core.InsightDescriptor;
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
+import com.easyinsight.datafeeds.FeedConsumer;
+import com.easyinsight.email.UserStub;
+import com.easyinsight.groups.GroupDescriptor;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.security.*;
 import com.easyinsight.security.SecurityException;
@@ -66,7 +69,7 @@ public class ReportPackageStorage {
                 insertStmt.setBoolean(10, reportPackage.isTemporaryPackage());
                 insertStmt.execute();
                 reportPackageID = Database.instance().getAutoGenKey(insertStmt);
-                addUserToPackage(userID, reportPackageID, conn, Roles.OWNER);
+                reportPackage.setReportPackageID(reportPackageID);
             } else {
                 PreparedStatement updateStmt = conn.prepareStatement("UPDATE REPORT_PACKAGE SET PACKAGE_NAME = ?, CONNECTION_VISIBLE = ?," +
                         "PUBLICLY_VISIBLE = ?, MARKETPLACE_VISIBLE = ?, DATA_SOURCE_ID = ?, DATE_CREATED = ?, AUTHOR_NAME = ?, DESCRIPTION = ?," +
@@ -89,6 +92,7 @@ public class ReportPackageStorage {
                 updateStmt.executeUpdate();
                 reportPackageID = reportPackage.getReportPackageID();
             }
+            saveUsers(reportPackage, conn);
             PreparedStatement clearReportsStmt = conn.prepareStatement("DELETE FROM REPORT_PACKAGE_TO_REPORT WHERE REPORT_PACKAGE_ID = ?");
             clearReportsStmt.setLong(1, reportPackage.getReportPackageID());
             clearReportsStmt.executeUpdate();
@@ -161,6 +165,7 @@ public class ReportPackageStorage {
                 reportPackage.setSingleDataSource(limitedSource);
                 reportPackage.setTemporaryPackage(temporaryPackage);
                 reportPackage.setReports(reports);
+                populateUsers(reportPackage, conn);
             }
 
         return reportPackage;
@@ -202,12 +207,68 @@ public class ReportPackageStorage {
         }
     }
 
-    private void addUserToPackage(long userID, long packageID, EIConnection conn, int role) throws SQLException {
-        PreparedStatement addUserStmt = conn.prepareStatement("INSERT INTO USER_TO_REPORT_PACKAGE (REPORT_PACKAGE_ID, USER_ID, ROLE) VALUES (?, ?, ?)");
-        addUserStmt.setLong(1, packageID);
-        addUserStmt.setLong(2, userID);
-        addUserStmt.setInt(3, role);
-        addUserStmt.execute();
+    private void saveUsers(ReportPackage reportPackage, EIConnection conn) throws SQLException {
+        PreparedStatement clearStmt = conn.prepareStatement("DELETE FROM USER_TO_REPORT_PACKAGE WHERE REPORT_PACKAGE_ID = ?");
+        clearStmt.setLong(1, reportPackage.getReportPackageID());
+        clearStmt.executeUpdate();
+        for (FeedConsumer feedConsumer : reportPackage.getAdministrators()) {
+            PreparedStatement addUserStmt = conn.prepareStatement("INSERT INTO USER_TO_REPORT_PACKAGE (REPORT_PACKAGE_ID, USER_ID, ROLE) VALUES (?, ?, ?)");
+            if (feedConsumer instanceof UserStub) {
+                UserStub userStub = (UserStub) feedConsumer;
+                addUserStmt.setLong(1, reportPackage.getReportPackageID());
+                addUserStmt.setLong(2, userStub.getUserID());
+                addUserStmt.setInt(3, Roles.OWNER);
+                addUserStmt.execute();
+            }
+        }
+        for (FeedConsumer feedConsumer : reportPackage.getConsumers()) {
+            PreparedStatement addUserStmt = conn.prepareStatement("INSERT INTO USER_TO_REPORT_PACKAGE (REPORT_PACKAGE_ID, USER_ID, ROLE) VALUES (?, ?, ?)");
+            if (feedConsumer instanceof UserStub) {
+                UserStub userStub = (UserStub) feedConsumer;
+                addUserStmt.setLong(1, reportPackage.getReportPackageID());
+                addUserStmt.setLong(2, userStub.getUserID());
+                addUserStmt.setInt(3, Roles.SUBSCRIBER);
+                addUserStmt.execute();
+            }
+        }
+    }
+
+    private void populateUsers(ReportPackage reportPackage, Connection conn) throws SQLException {
+        List<FeedConsumer> administrators = new ArrayList<FeedConsumer>();
+        List<FeedConsumer> consumers = new ArrayList<FeedConsumer>();
+        PreparedStatement getUsersStmt = conn.prepareStatement("SELECT USER.USER_ID, role, USER.email, USER.name, USER.username FROM " +
+                "USER_TO_REPORT_PACKAGE, USER WHERE REPORT_PACKAGE_ID = ? AND USER_TO_REPORT_PACKAGE.USER_ID = USER.USER_ID");
+        getUsersStmt.setLong(1, reportPackage.getReportPackageID());
+        ResultSet userRS = getUsersStmt.executeQuery();
+        while (userRS.next()) {
+            long userID = userRS.getLong(1);
+            int role = userRS.getInt(2);
+            String email = userRS.getString(3);
+            String fullName = userRS.getString(4);
+            String userName = userRS.getString(5);
+            if (role == Roles.OWNER) {
+                administrators.add(new UserStub(userID, userName, email, fullName));
+            } else {
+                consumers.add(new UserStub(userID, userName, email, fullName));
+            }
+        }
+        /*PreparedStatement getGroupsStmt = conn.prepareStatement("SELECT COMMUNITY_GROUP.COMMUNITY_GROUP_ID, ROLE, COMMUNITY_GROUP.name " +
+                "FROM GOAL_TREE_TO_GROUP, COMMUNITY_GROUP WHERE GOAL_TREE_ID = ? AND " +
+                "COMMUNITY_GROUP.COMMUNITY_GROUP_ID = GOAL_TREE_TO_GROUP.GROUP_ID");
+        getGroupsStmt.setLong(1, reportPackage.getReportPackageID());
+        ResultSet groupRS = getGroupsStmt.executeQuery();
+        while (groupRS.next()) {
+            long groupID = groupRS.getLong(1);
+            int role = groupRS.getInt(2);
+            String name = groupRS.getString(3);
+            if (role == Roles.OWNER) {
+                administrators.add(new GroupDescriptor(name, groupID, 0, null));
+            } else {
+                consumers.add(new GroupDescriptor(name, groupID, 0, null));
+            }
+        }*/
+        reportPackage.setAdministrators(administrators);
+        reportPackage.setConsumers(consumers);
     }
 
     private ReportPackageDescriptor getDescriptor(long packageID) {

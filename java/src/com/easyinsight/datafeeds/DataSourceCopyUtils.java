@@ -113,7 +113,7 @@ public class DataSourceCopyUtils {
                         validQueryItems.add(analysisItem);
                     }
                 }
-                dataSet = sourceTable.retrieveData(validQueryItems, null, null, null, null);
+                dataSet = sourceTable.retrieveData(validQueryItems, null, null, null);
             } finally {
                 sourceTable.closeConnection();
             }

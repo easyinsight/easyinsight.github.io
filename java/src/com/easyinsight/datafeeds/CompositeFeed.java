@@ -8,6 +8,8 @@ import com.easyinsight.analysis.*;
 
 import java.util.*;
 
+import com.easyinsight.pipeline.CompositeReportPipeline;
+import com.easyinsight.pipeline.Pipeline;
 import org.jgrapht.UndirectedGraph;
 import org.jgrapht.alg.DijkstraShortestPath;
 import org.jgrapht.graph.SimpleGraph;
@@ -92,9 +94,9 @@ public class CompositeFeed extends Feed {
         return null;
     }
 
-    public DataSet getAggregateDataSet(Set<AnalysisItem> analysisItems, Collection<FilterDefinition> filters, InsightRequestMetadata insightRequestMetadata, List<AnalysisItem> allAnalysisItems, boolean adminMode, Collection<Key> additionalNeededKeys) {
+    public DataSet getAggregateDataSet(Set<AnalysisItem> analysisItems, Collection<FilterDefinition> filters, InsightRequestMetadata insightRequestMetadata, List<AnalysisItem> allAnalysisItems, boolean adminMode) {
         try {
-            return getDataSet(analysisItems, filters, additionalNeededKeys, insightRequestMetadata);
+            return getDataSet(analysisItems, filters, insightRequestMetadata);
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);
@@ -105,7 +107,7 @@ public class CompositeFeed extends Feed {
         return null;  //To change body of implemented methods use File | Settings | File Templates.
     }
 
-    private DataSet getDataSet(Set<AnalysisItem> analysisItems, Collection<FilterDefinition> filters, Collection<Key> additionalKeys, InsightRequestMetadata insightRequestMetadata) throws TokenMissingException {
+    private DataSet getDataSet(Set<AnalysisItem> analysisItems, Collection<FilterDefinition> filters, InsightRequestMetadata insightRequestMetadata) throws TokenMissingException {
 
         Map<Long, QueryStateNode> queryNodeMap = new HashMap<Long, QueryStateNode>();
 
@@ -123,12 +125,7 @@ public class CompositeFeed extends Feed {
                     neededNodes.put(queryStateNode.feedID, queryStateNode);
                     queryStateNode.addItem(analysisItem);
                 }
-            }
-            if (additionalKeys != null) {
-                for (Key key : additionalKeys) {
-                    queryStateNode.addKey(key);
-                }
-            }
+            }            
             if (filters != null) {
                 for (FilterDefinition filterDefinition : filters) {
                     if (queryStateNode.handles(filterDefinition.getField().getKey())) {
@@ -231,8 +228,20 @@ public class CompositeFeed extends Feed {
         for (Edge edge : edgeSet) {
             QueryStateNode sourceNode = neededNodes.get(edge.connection.getSourceFeedID());
             QueryStateNode targetNode = neededNodes.get(edge.connection.getTargetFeedID());
-            Key sourceJoin = new DerivedKey(edge.connection.getSourceJoin(), edge.connection.getSourceFeedID());
-            Key targetJoin = new DerivedKey(edge.connection.getTargetJoin(), edge.connection.getTargetFeedID());
+            Key sourceJoin = null;
+            for (AnalysisItem item :sourceNode.neededItems) {
+                if (item.hasType(AnalysisItemTypes.DIMENSION) && item.getKey().toKeyString().equals(edge.connection.getSourceJoin().toKeyString())) {
+                    sourceJoin = item.createAggregateKey();
+                }
+            }
+            Key targetJoin = null;
+            for (AnalysisItem item : targetNode.neededItems) {
+                if (item.hasType(AnalysisItemTypes.DIMENSION) && item.getKey().toKeyString().equals(edge.connection.getTargetJoin().toKeyString())) {
+                    targetJoin = item.createAggregateKey();
+                }
+            }
+            //Key sourceJoin = new DerivedKey(edge.connection.getSourceJoin(), edge.connection.getSourceFeedID());
+            //Key targetJoin = new DerivedKey(edge.connection.getTargetJoin(), edge.connection.getTargetFeedID());
             dataSet = sourceNode.myDataSet.merge(targetNode.myDataSet, sourceJoin, targetJoin);
             sourceNode.myDataSet = dataSet;
             targetNode.myDataSet = dataSet;
@@ -243,15 +252,17 @@ public class CompositeFeed extends Feed {
 
     private static class QueryStateNode {
         private long feedID;
-        private Set<Key> neededKeys = new HashSet<Key>();
+        //private Set<Key> neededKeys = new HashSet<Key>();
         private Set<AnalysisItem> neededItems = new HashSet<AnalysisItem>();
         private List<AnalysisItem> allAnalysisItems = new ArrayList<AnalysisItem>();
         private Collection<FilterDefinition> filters = new ArrayList<FilterDefinition>();
-        private Set<Key> additionalKeys = new HashSet<Key>();
+        private Collection<AnalysisItem> allFeedItems;
         private DataSet myDataSet;
 
         private QueryStateNode(long feedID) {
             this.feedID = feedID;
+            Feed feed = FeedRegistry.instance().getFeed(feedID);
+            allFeedItems = feed.getFields();
         }
 
         public boolean handles(Key key) {
@@ -265,15 +276,23 @@ public class CompositeFeed extends Feed {
 
         public void addItem(AnalysisItem analysisItem) {
             neededItems.add(analysisItem);
-            neededKeys.add(analysisItem.getKey());
+            //neededKeys.add(analysisItem.getKey());
         }
 
         public void addKey(Key key) {
-            if (!neededKeys.contains(key)) {
-                DerivedKey derivedKey = new DerivedKey(key, feedID);
-                neededKeys.add(derivedKey);
-                neededItems.add(new AnalysisDimension(derivedKey, true));
+            for (AnalysisItem analysisItem : allFeedItems) {
+                if (analysisItem.hasType(AnalysisItemTypes.DIMENSION) && analysisItem.getKey().toKeyString().equals(key.toKeyString())) {
+                    neededItems.add(analysisItem);
+                }
             }
+            /*if (!neededKeys.contains(key)) {
+                DerivedKey derivedKey = new DerivedKey(key, feedID);
+                if (!neededKeys.contains(derivedKey)) {
+
+                    neededKeys.add(derivedKey);
+                    //neededItems.add(new AnalysisDimension(derivedKey, true));
+                }
+            }*/
         }
 
         /*public void addKey(Key key) {
@@ -282,49 +301,17 @@ public class CompositeFeed extends Feed {
 
         public void produceDataSet(InsightRequestMetadata insightRequestMetadata) throws TokenMissingException {
 
-            //
-
             Feed feed = FeedRegistry.instance().getFeed(feedID);
-            /*Map<Key, Key> columnSet = new LinkedHashMap<Key, Key>();
-            for (Key key : neededKeys) {
-                if (key instanceof DerivedKey) {
-                    DerivedKey derivedKey = (DerivedKey) key;
-                    columnSet.put(derivedKey.getParentKey(), derivedKey);
-                } else {
-                    columnSet.put(key, key);
-                }
-            }
-            for (Key key : additionalKeys) {
-                if (key instanceof DerivedKey) {
-                    DerivedKey derivedKey = (DerivedKey) key;
-                    columnSet.put(derivedKey.getParentKey(), derivedKey);
-                } else {
-                    columnSet.put(key, key);
-                }
-            }
-            for (AnalysisItem analysisItem : neededItems) {
-                Key key = analysisItem.getKey();
-                if (key instanceof DerivedKey) {
-                    DerivedKey derivedKey = (DerivedKey) key;
-                    columnSet.put(derivedKey.getParentKey(), derivedKey);
-                    analysisItem.setKey(derivedKey.getParentKey());
-                } else {
-                    columnSet.put(key, key);
-                }
-            }*/
 
             // The set of items passed into getAggregateDataSet() needs to resolve down to certain keys
 
-            DataSet dataSet = feed.getAggregateDataSet(neededItems, filters, insightRequestMetadata, allAnalysisItems, false, additionalKeys);
-            /*for (Map.Entry<Key, Key> entry : columnSet.entrySet()) {
-                if (entry.getValue() != null) {
-                    dataSet.replaceKey(entry.getKey().toBaseKey(), entry.getValue());
-                }
-            }
-            for (AnalysisItem analysisItem : neededItems) {
-                analysisItem.setKey(columnSet.get(analysisItem.getKey()));
-            }*/
-            myDataSet = dataSet;
+            DataSet dataSet = feed.getAggregateDataSet(neededItems, filters, insightRequestMetadata, allAnalysisItems, false);
+
+            Pipeline pipeline = new CompositeReportPipeline();
+            WSListDefinition analysisDefinition = new WSListDefinition();
+            analysisDefinition.setColumns(new ArrayList<AnalysisItem>(neededItems));
+            pipeline.setup(analysisDefinition, feed, insightRequestMetadata);
+            myDataSet = pipeline.toDataSet(dataSet);            
         }
 
         public void addFilter(FilterDefinition filterDefinition) {

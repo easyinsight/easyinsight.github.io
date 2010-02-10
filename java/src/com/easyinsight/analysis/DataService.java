@@ -260,7 +260,7 @@ public class DataService {
                     }
                 }
                 insightRequestMetadata.setAggregateQuery(aggregateQuery);
-                DataSet dataSet = feed.getAggregateDataSet(analysisItems, filters, insightRequestMetadata, feed.getFields(), false, null);
+                DataSet dataSet = feed.getAggregateDataSet(analysisItems, filters, insightRequestMetadata, feed.getFields(), false);
                 Pipeline pipeline = new StandardReportPipeline();
                 pipeline.setup(analysisDefinition, feed, insightRequestMetadata);
                 // todo: fix
@@ -310,7 +310,7 @@ public class DataService {
             }
             insightRequestMetadata.setAggregateQuery(aggregateQuery);
             Collection<FilterDefinition> filters = analysisDefinition.retrieveFilterDefinitions();
-            DataSet dataSet = feed.getAggregateDataSet(validQueryItems, filters, insightRequestMetadata, feed.getFields(), false, null);
+            DataSet dataSet = feed.getAggregateDataSet(validQueryItems, filters, insightRequestMetadata, feed.getFields(), false);
             Pipeline pipeline = new StandardReportPipeline();
             pipeline.setup(analysisDefinition, feed, insightRequestMetadata);
             return pipeline.toDataSet(dataSet);
@@ -377,7 +377,7 @@ public class DataService {
             }
             insightRequestMetadata.setAggregateQuery(aggregateQuery);
             Collection<FilterDefinition> filters = analysisDefinition.retrieveFilterDefinitions();
-            DataSet dataSet = feed.getAggregateDataSet(validQueryItems, filters, insightRequestMetadata, feed.getFields(), false, null);
+            DataSet dataSet = feed.getAggregateDataSet(validQueryItems, filters, insightRequestMetadata, feed.getFields(), false);
             //results = dataSet.toList(analysisDefinition, feed.getFields(), insightRequestMetadata);
             Pipeline pipeline = new StandardReportPipeline();
             pipeline.setup(analysisDefinition, feed, insightRequestMetadata);

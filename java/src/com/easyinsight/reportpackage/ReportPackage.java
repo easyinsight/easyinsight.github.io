@@ -1,7 +1,9 @@
 package com.easyinsight.reportpackage;
 
 import com.easyinsight.core.InsightDescriptor;
+import com.easyinsight.datafeeds.FeedConsumer;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -14,6 +16,8 @@ public class ReportPackage implements Cloneable {
     private String name;
     private long reportPackageID;
     private List<InsightDescriptor> reports;
+    private List<FeedConsumer> administrators = new ArrayList<FeedConsumer>();
+    private List<FeedConsumer> consumers = new ArrayList<FeedConsumer>();
     private boolean marketplaceVisible;
     private boolean connectionVisible;
     private boolean publiclyVisible;
@@ -23,6 +27,22 @@ public class ReportPackage implements Cloneable {
     private Date dateCreated;
     private long dataSourceID;
     private boolean temporaryPackage;
+
+    public List<FeedConsumer> getAdministrators() {
+        return administrators;
+    }
+
+    public void setAdministrators(List<FeedConsumer> administrators) {
+        this.administrators = administrators;
+    }
+
+    public List<FeedConsumer> getConsumers() {
+        return consumers;
+    }
+
+    public void setConsumers(List<FeedConsumer> consumers) {
+        this.consumers = consumers;
+    }
 
     public boolean isTemporaryPackage() {
         return temporaryPackage;

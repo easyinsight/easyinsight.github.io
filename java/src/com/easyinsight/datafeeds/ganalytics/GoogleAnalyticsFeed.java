@@ -145,7 +145,7 @@ public class GoogleAnalyticsFeed extends Feed {
         return Arrays.asList((FilterDefinition) rollingFilterDefinition);
     }
 
-    public DataSet getAggregateDataSet(Set<AnalysisItem> analysisItems, Collection<FilterDefinition> filters, InsightRequestMetadata insightRequestMetadata, List<AnalysisItem> allAnalysisItems, boolean adminMode, Collection<Key> additionalNeededKeys) throws TokenMissingException {
+    public DataSet getAggregateDataSet(Set<AnalysisItem> analysisItems, Collection<FilterDefinition> filters, InsightRequestMetadata insightRequestMetadata, List<AnalysisItem> allAnalysisItems, boolean adminMode) throws TokenMissingException {
         try {
             Collection<AnalysisDimension> dimensions = new ArrayList<AnalysisDimension>();
             Collection<AnalysisMeasure> measures = new ArrayList<AnalysisMeasure>();

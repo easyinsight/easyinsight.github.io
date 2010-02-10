@@ -5,7 +5,6 @@ import com.easyinsight.datafeeds.CredentialRequirement;
 import com.easyinsight.datafeeds.CredentialsDefinition;
 import com.easyinsight.analysis.*;
 import com.easyinsight.dataset.DataSet;
-import com.easyinsight.core.Key;
 import com.easyinsight.core.DateValue;
 import com.easyinsight.users.Credentials;
 import com.easyinsight.logging.LogClass;
@@ -36,7 +35,7 @@ public class CloudWatchFeed extends Feed {
                 DataSet childSet = EC2Util.createDataSet(ec2Infos, Arrays.asList((AnalysisDimension) analysisItem));
                 AnalysisItemResultMetadata metadata = analysisItem.createResultMetadata();
                 for (IRow row : childSet.getRows()) {
-                    metadata.addValue(analysisItem, row.getValue(analysisItem.getKey()), insightRequestMetadata);
+                    metadata.addValue(analysisItem, row.getValue(analysisItem.createAggregateKey()), insightRequestMetadata);
                 }
                 return metadata;
             } catch (Exception e) {
@@ -64,7 +63,7 @@ public class CloudWatchFeed extends Feed {
         return Arrays.asList((FilterDefinition) rollingFilterDefinition);
     }
 
-    public DataSet getAggregateDataSet(Set<AnalysisItem> analysisItems, Collection<FilterDefinition> filters, InsightRequestMetadata insightRequestMetadata, List<AnalysisItem> allAnalysisItems, boolean adminMode, Collection<Key> additionalNeededKeys) throws TokenMissingException {
+    public DataSet getAggregateDataSet(Set<AnalysisItem> analysisItems, Collection<FilterDefinition> filters, InsightRequestMetadata insightRequestMetadata, List<AnalysisItem> allAnalysisItems, boolean adminMode) throws TokenMissingException {
         // do we need a dimension?
         try {
             Credentials credentials = insightRequestMetadata.getCredentialForDataSource(getFeedID());

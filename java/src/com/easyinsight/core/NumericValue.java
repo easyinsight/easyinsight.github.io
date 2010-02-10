@@ -1,5 +1,6 @@
 package com.easyinsight.core;
 
+import com.easyinsight.analysis.Aggregation;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.Serializable;
@@ -12,6 +13,7 @@ import java.io.Serializable;
 public class NumericValue extends Value implements Serializable {
 
     private Double value;
+    private Aggregation aggregation;
     private static final long serialVersionUID = -9170406442789546755L;
 
 
@@ -20,6 +22,20 @@ public class NumericValue extends Value implements Serializable {
 
     public NumericValue(Number value) {
         this.value = value.doubleValue();
+    }
+
+    public NumericValue(Double value, Aggregation aggregation) {
+        this.value = value;
+        this.aggregation = aggregation;
+    }
+
+    @Nullable
+    public Aggregation getAggregation() {
+        return aggregation;
+    }
+
+    public void setAggregation(Aggregation aggregation) {
+        this.aggregation = aggregation;
     }
 
     @Override

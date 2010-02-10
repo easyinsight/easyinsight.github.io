@@ -5,7 +5,6 @@ import com.easyinsight.datafeeds.CredentialRequirement;
 import com.easyinsight.datafeeds.CredentialsDefinition;
 import com.easyinsight.analysis.*;
 import com.easyinsight.dataset.DataSet;
-import com.easyinsight.core.Key;
 import com.easyinsight.core.StringValue;
 import com.easyinsight.users.Credentials;
 import com.sforce.soap.partner.*;
@@ -105,7 +104,7 @@ public class SalesforceFeed extends Feed {
         return -1;
     }
 
-    public DataSet getAggregateDataSet(Set<AnalysisItem> analysisItems, Collection<FilterDefinition> filters, InsightRequestMetadata insightRequestMetadata, List<AnalysisItem> allAnalysisItems, boolean adminMode, Collection<Key> additionalNeededKeys) {
+    public DataSet getAggregateDataSet(Set<AnalysisItem> analysisItems, Collection<FilterDefinition> filters, InsightRequestMetadata insightRequestMetadata, List<AnalysisItem> allAnalysisItems, boolean adminMode) {
         DataSet dataSet = new DataSet();
         try {
             if (sessionHeader == null)

@@ -43,7 +43,7 @@ public class AnalysisBasedFeed extends Feed {
     }
 
     @Override
-    public DataSet getAggregateDataSet(Set<AnalysisItem> analysisItems, Collection<FilterDefinition> filters, InsightRequestMetadata insightRequestMetadata, List<AnalysisItem> allAnalysisItems, boolean adminMode, Collection<Key> additionalNeededKeys) throws TokenMissingException {
+    public DataSet getAggregateDataSet(Set<AnalysisItem> analysisItems, Collection<FilterDefinition> filters, InsightRequestMetadata insightRequestMetadata, List<AnalysisItem> allAnalysisItems, boolean adminMode) throws TokenMissingException {
         WSAnalysisDefinition analysisDefinition = getAnalysisDefinition();
 
         Feed feed = FeedRegistry.instance().getFeed(analysisDefinition.getDataFeedID());
@@ -60,7 +60,7 @@ public class AnalysisBasedFeed extends Feed {
                 additionalKeys.addAll(dataScrub.createNeededKeys(feed.getFields()));
             }
         }
-        DataSet dataSet = feed.getAggregateDataSet(analysisItems, filters, insightRequestMetadata, allAnalysisItems, adminMode, additionalKeys);
+        DataSet dataSet = feed.getAggregateDataSet(analysisItems, filters, insightRequestMetadata, allAnalysisItems, adminMode);
 
         return new DerivedDataSourcePipeline().setup(getAnalysisDefinition(), this, insightRequestMetadata).toDataSet(dataSet);
     }

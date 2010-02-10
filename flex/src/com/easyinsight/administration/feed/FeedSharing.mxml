@@ -6,7 +6,6 @@
         import com.easyinsight.util.PopUpUtil;
 
         import mx.controls.Alert;
-        import mx.core.UIComponent;
         import mx.managers.PopUpManager;
 
         import com.easyinsight.customupload.UploadPolicy;

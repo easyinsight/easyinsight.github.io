@@ -134,7 +134,7 @@ public abstract class ServerDataSourceDefinition extends FeedDefinition implemen
             }
             return new CredentialsResponse(false, e.getMessage(), getDataFeedID());
         } finally {
-            Database.instance().closeConnection(conn);
+            Database.closeConnection(conn);
         }
     }
 

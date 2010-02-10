@@ -20,7 +20,7 @@ public class RangeComponent implements IComponent {
     public DataSet apply(DataSet dataSet, PipelineData pipelineData) {
         for (IRow row : dataSet.getRows()) {
             Value value = row.getValue(analysisRangeDimension.createAggregateKey());
-            row.addValue(analysisRangeDimension.createAggregateKey(), analysisRangeDimension.toRange(value, pipelineData.getInsightRequestMetadata()));
+            row.addValue(analysisRangeDimension.createAggregateKey(), analysisRangeDimension.toRange(value));
         }
         return dataSet;
     }

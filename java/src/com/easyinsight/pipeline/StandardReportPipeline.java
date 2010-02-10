@@ -20,7 +20,7 @@ public class StandardReportPipeline extends Pipeline {
         components.add(new DataScrubComponent());
         components.add(new TagTransformComponent());
 
-        for (AnalysisItem range : items(AnalysisItemTypes.RANGE_DIMENSION, reportItems)) {
+        for (AnalysisItem range : items(AnalysisItemTypes.RANGE_DIMENSION, allNeededAnalysisItems)) {
             components.add(new RangeComponent((AnalysisRangeDimension) range));
         }
         //components.add(new VirtualDimensionComponent());
@@ -75,14 +75,9 @@ public class StandardReportPipeline extends Pipeline {
             temporalAdded = true;
             components.add(new TemporalComponent((TemporalAnalysisMeasure) temporal));
         }
-        //}
-        /*if (temporalAdded) {
-            components.add(new AggregationComponent());
-        }*/
 
         components.add(new LinkDecorationComponent());
         components.add(new FilterComponent(false));
-        //components.add(new AggregationComponent());
         components.add(new LimitsComponent());
         components.addAll(report.createComponents());        
         components.add(new SortComponent());

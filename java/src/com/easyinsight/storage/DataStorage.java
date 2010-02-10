@@ -55,7 +55,7 @@ public class DataStorage {
             if (analysisItem.isDerived()) {
                 continue;
             }
-            Key key = analysisItem.getKey();
+            Key key = analysisItem.createAggregateKey(false);
             if (analysisItem.hasType(AnalysisItemTypes.DATE_DIMENSION)) {
                 keyMetadatas.put(key, new KeyMetadata(key, Value.DATE, analysisItem));
             } else if (analysisItem.hasType(AnalysisItemTypes.MEASURE)) {
@@ -350,7 +350,7 @@ public class DataStorage {
                     InsightRequestMetadata insightRequestMetadata = new InsightRequestMetadata();
                     insightRequestMetadata.setNow(new Date());
                     insightRequestMetadata.setAggregateQuery(false);
-                    existing = retrieveData(previousKeys, null, null, 0, keyMetadatas, previousVersion, insightRequestMetadata);
+                    existing = retrieveData(previousKeys, null, 0, keyMetadatas, previousVersion, insightRequestMetadata);
                     //existing = new DataSet();
                 }
             }
@@ -408,14 +408,13 @@ public class DataStorage {
      *
      * @param reportItems    the analysis items you're looking to retrieve
      * @param filters        any filter definitions you want to constrain data by
-     * @param additionalKeys any additional keys not associated to analysis items, like data scrubs or composite connections
      * @param limit          optional limit on result set
      * @return the created data set
      * @throws java.sql.SQLException if something goes wrong
      */
 
-    public DataSet retrieveData(@NotNull Collection<AnalysisItem> reportItems, @Nullable Collection<FilterDefinition> filters, @Nullable Collection<Key> additionalKeys, @Nullable Integer limit) throws SQLException {
-        return retrieveData(reportItems, filters, additionalKeys, limit, keys, version, null);
+    public DataSet retrieveData(@NotNull Collection<AnalysisItem> reportItems, @Nullable Collection<FilterDefinition> filters, @Nullable Integer limit) throws SQLException {
+        return retrieveData(reportItems, filters, limit, null, version, null);
     }
 
     /**
@@ -423,23 +422,38 @@ public class DataStorage {
      *
      * @param reportItems            the analysis items you're looking to retrieve
      * @param filters                any filter definitions you want to constrain data by
-     * @param additionalKeys         any additional keys not associated to analysis items, like data scrubs or composite connections
      * @param limit                  optional limit on result set
      * @param insightRequestMetadata the request metadata
      * @return the created data set
      * @throws java.sql.SQLException if something goes wrong
      */
 
-    public DataSet retrieveData(Collection<AnalysisItem> reportItems, Collection<FilterDefinition> filters, Collection<Key> additionalKeys, Integer limit,
+    public DataSet retrieveData(Collection<AnalysisItem> reportItems, Collection<FilterDefinition> filters, Integer limit,
                                 InsightRequestMetadata insightRequestMetadata) throws SQLException {
-        return retrieveData(reportItems, filters, additionalKeys, limit, keys, version, insightRequestMetadata);
+        return retrieveData(reportItems, filters, limit, null, version, insightRequestMetadata);
     }
 
-    private DataSet retrieveData(@NotNull Collection<AnalysisItem> reportItems, @Nullable Collection<FilterDefinition> filters, @Nullable Collection<Key> additionalKeys, @Nullable Integer limit,
-                                 @NotNull Map<Key, KeyMetadata> keys, int version, @Nullable InsightRequestMetadata insightRequestMetadata) throws SQLException {
+    private DataSet retrieveData(@NotNull Collection<AnalysisItem> reportItems, @Nullable Collection<FilterDefinition> filters, @Nullable Integer limit,
+                                 @Nullable Map<Key, KeyMetadata> keys, int version, @Nullable InsightRequestMetadata insightRequestMetadata) throws SQLException {
         if (insightRequestMetadata == null) {
             insightRequestMetadata = new InsightRequestMetadata();
             insightRequestMetadata.setNow(new Date());
+        }
+        if (keys == null) {
+            keys = new HashMap<Key, KeyMetadata>();
+            for (AnalysisItem analysisItem : reportItems) {
+                if (analysisItem.isDerived()) {
+                    continue;
+                }
+                Key key = analysisItem.createAggregateKey(false);
+                if (analysisItem.hasType(AnalysisItemTypes.DATE_DIMENSION)) {
+                    keys.put(key, new KeyMetadata(key, Value.DATE, analysisItem));
+                } else if (analysisItem.hasType(AnalysisItemTypes.MEASURE)) {
+                    keys.put(key, new KeyMetadata(key, Value.NUMBER, analysisItem));
+                } else {
+                    keys.put(key, new KeyMetadata(key, Value.STRING, analysisItem));
+                }
+            }
         }
         filters = eligibleFilters(filters);
         StringBuilder queryBuilder = new StringBuilder();
@@ -450,7 +464,6 @@ public class DataStorage {
         Collection<Key> groupByItems = new HashSet<Key>();
         boolean aggregateQuery = insightRequestMetadata.isAggregateQuery();        
         createSelectClause(reportItems, selectBuilder, groupByItems, aggregateQuery);
-        addAdditionalKeysToSelect(additionalKeys, selectBuilder, groupByItems);
         selectBuilder = selectBuilder.deleteCharAt(selectBuilder.length() - 1);
         createFromClause(version, fromBuilder);
         createWhereClause(filters, whereBuilder);
@@ -464,7 +477,7 @@ public class DataStorage {
         populateParameters(filters, keys, queryStmt, insightRequestMetadata);
         DataSet dataSet = new DataSet();
         ResultSet dataRS = queryStmt.executeQuery();
-        processQueryResults(reportItems, keys, dataSet, dataRS, additionalKeys);
+        processQueryResults(reportItems, keys, dataSet, dataRS, aggregateQuery);
         dataSet.setLastTime(metadata.getLastData());
         return dataSet;
     }
@@ -482,12 +495,13 @@ public class DataStorage {
         return eligibleFilters;
     }
 
-    private void processQueryResults(@NotNull Collection<AnalysisItem> reportItems, @NotNull Map<Key, KeyMetadata> keys, @NotNull DataSet dataSet, @NotNull ResultSet dataRS, Collection<Key> additionalKeys) throws SQLException {
+    private void processQueryResults(@NotNull Collection<AnalysisItem> reportItems, @NotNull Map<Key, KeyMetadata> keys, @NotNull DataSet dataSet, @NotNull ResultSet dataRS,
+                                     boolean aggregateQuery) throws SQLException {
         while (dataRS.next()) {
             IRow row = dataSet.createRow();
             int i = 1;
             for (AnalysisItem analysisItem : reportItems) {
-                Key key = analysisItem.getKey().toBaseKey();
+                Key key = analysisItem.createAggregateKey(false);
                 AggregateKey aggregateKey = analysisItem.createAggregateKey();
                 KeyMetadata keyMetadata = keys.get(key);
                 if (keyMetadata != null) {
@@ -503,7 +517,16 @@ public class DataStorage {
                         if (dataRS.wasNull()) {
                             row.addValue(aggregateKey, new EmptyValue());
                         } else {
-                            row.addValue(aggregateKey, new NumericValue(value));
+                            NumericValue numericValue = new NumericValue(value);
+                            if (aggregateQuery && analysisItem.hasType(AnalysisItemTypes.MEASURE)) {
+                                AnalysisMeasure analysisMeasure = (AnalysisMeasure) analysisItem;
+                                if (analysisMeasure.getAggregation() == AggregationTypes.COUNT) {
+                                    CountAggregation countAggregation = new CountAggregation();
+                                    countAggregation.setCount(value);
+                                    numericValue.setAggregation(countAggregation);
+                                }
+                            }
+                            row.addValue(aggregateKey, numericValue);
                         }
                     } else {
                         String value = dataRS.getString(i++);
@@ -514,36 +537,7 @@ public class DataStorage {
                         }
                     }
                 }
-            }
-            if (additionalKeys != null) {
-                for (Key key : additionalKeys) {
-                    KeyMetadata keyMetadata = keys.get(key);
-                    if (keyMetadata != null) {
-                        if (keyMetadata.getType() == Value.DATE) {
-                            Timestamp time = dataRS.getTimestamp(i++);
-                            if (dataRS.wasNull()) {
-                                row.addValue(key, new EmptyValue());
-                            } else {
-                                row.addValue(key, new DateValue(new java.util.Date(time.getTime())));
-                            }
-                        } else if (keyMetadata.getType() == Value.NUMBER) {
-                            double value = dataRS.getDouble(i++);
-                            if (dataRS.wasNull()) {
-                                row.addValue(key, new EmptyValue());
-                            } else {
-                                row.addValue(key, new NumericValue(value));
-                            }
-                        } else {
-                            String value = dataRS.getString(i++);
-                            if (dataRS.wasNull()) {
-                                row.addValue(key, new EmptyValue());
-                            } else {
-                                row.addValue(key, new StringValue(value));
-                            }
-                        }
-                    }
-                }
-            }
+            }            
         }
     }
 
@@ -551,7 +545,7 @@ public class DataStorage {
         if (filters.size() > 0) {
             int i = 1;
             for (FilterDefinition filterDefinition : filters) {
-                KeyMetadata keyMetadata = keys.get(filterDefinition.getField().getKey().toBaseKey());
+                KeyMetadata keyMetadata = keys.get(filterDefinition.getField().createAggregateKey(false));
                 int type = keyMetadata.type;
                 i = filterDefinition.populatePreparedStatement(queryStmt, i, type, insightRequestMetadata);
             }

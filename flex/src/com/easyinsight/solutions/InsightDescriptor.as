@@ -6,6 +6,9 @@ public class InsightDescriptor extends EIDescriptor {
     public var dataFeedID:int;
     public var reportType:int;
 
+    public var size:int = 0;
+    public var lastDataTime:Date = null;
+
     public function InsightDescriptor() {
         
     }

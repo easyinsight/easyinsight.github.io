@@ -69,6 +69,14 @@ public class AnalysisMeasure extends AnalysisItem {
         return new AggregateMeasureKey(getKey(), getType(), aggregation);
     }
 
+    public AggregateKey createAggregateKey(boolean measure) {
+        if (measure) {
+            return new AggregateKey(getKey(), getType());
+        } else {
+            return super.createAggregateKey();
+        }
+    }
+
     @Override
     protected String getQualifiedSuffix() {
         return getType() + ":" + aggregation;

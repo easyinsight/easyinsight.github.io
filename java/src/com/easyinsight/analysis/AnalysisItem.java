@@ -349,6 +349,10 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
         return new AggregateKey(getKey(), getType());
     }
 
+    public AggregateKey createAggregateKey(boolean measure) {
+        return new AggregateKey(getKey(), getType());
+    }
+
     public void beforeSave() {
         for (FilterDefinition filterDefinition : getFilters()) {
             filterDefinition.beforeSave();

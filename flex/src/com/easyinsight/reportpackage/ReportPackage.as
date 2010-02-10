@@ -17,6 +17,8 @@ public class ReportPackage {
     public var authorName:String;
     public var dateCreated:Date;
     public var temporaryPackage:Boolean;
+    public var administrators:ArrayCollection = new ArrayCollection();
+    public var consumers:ArrayCollection = new ArrayCollection();
 
     public function ReportPackage() {
     }

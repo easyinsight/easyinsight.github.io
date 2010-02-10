@@ -1,6 +1,5 @@
 package com.easyinsight.pipeline;
 
-import com.easyinsight.goals.GoalValue;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.analysis.*;
 import com.easyinsight.datafeeds.Feed;
@@ -84,7 +83,7 @@ public class HistoryRun {
         }
         InsightRequestMetadata dataRequest = new InsightRequestMetadata();
         dataRequest.setCredentialFulfillmentList(credentials);
-        DataSet dataSet = feed.getAggregateDataSet(itemSet, otherFilters, dataRequest, feed.getFields(), false, null);
+        DataSet dataSet = feed.getAggregateDataSet(itemSet, otherFilters, dataRequest, feed.getFields(), false);
         if (rollingFilterDefinition == null) {
             StandardReportPipeline pipeline = new StandardReportPipeline();
             WSListDefinition report = new WSListDefinition();

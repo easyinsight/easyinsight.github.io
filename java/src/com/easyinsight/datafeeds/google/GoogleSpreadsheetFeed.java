@@ -90,7 +90,7 @@ public class GoogleSpreadsheetFeed extends Feed {
         }
     }
 
-    public DataSet getAggregateDataSet(Set<AnalysisItem> analysisItems, Collection<FilterDefinition> filters, InsightRequestMetadata insightRequestMetadata, List<AnalysisItem> allAnalysisItems, boolean adminMode, Collection<Key> additionalNeededKeys) {
+    public DataSet getAggregateDataSet(Set<AnalysisItem> analysisItems, Collection<FilterDefinition> filters, InsightRequestMetadata insightRequestMetadata, List<AnalysisItem> allAnalysisItems, boolean adminMode) {
         try {
             SpreadsheetService myService = GoogleSpreadsheetAccess.getOrCreateSpreadsheetService(getToken());
             URL listFeedUrl = new URL(worksheetURL);

@@ -39,7 +39,7 @@ public class AggregateKey extends NamedKey {
 
         AggregateKey that = (AggregateKey) o;
 
-        return type == that.type && key.equals(that.key);
+        return type == that.type && key.toKeyString().equals(that.key.toKeyString());
 
     }
 

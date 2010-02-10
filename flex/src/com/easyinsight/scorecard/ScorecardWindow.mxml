@@ -43,6 +43,7 @@
             } else {
                 dispatchEvent(new ScorecardEvent(ScorecardEvent.SCORECARD_UPDATED, _scorecard));
             }
+            PopUpManager.removePopUp(this);
         }
         ]]></mx:Script>
     <mx:RemoteObject destination="scorecardService" id="scorecardService">
