@@ -20,6 +20,7 @@
         import com.easyinsight.analysis.AnalysisCellRenderer;
         import com.easyinsight.analysis.AnalysisDefinition;
         import com.easyinsight.analysis.AnalysisItem;
+        import com.easyinsight.analysis.AnalysisItemTypes;
         import com.easyinsight.analysis.AnalysisItemWrapper;
         import com.easyinsight.analysis.CustomChangeEvent;
         import com.easyinsight.analysis.EmptyValue;
@@ -152,9 +153,14 @@
             }
         }
 
+        private var summaryRows:ArrayCollection = new ArrayCollection();
+
         private function rowColor(item:Object, color:uint):uint {
             if (hits.getItemIndex(item) > -1)
                 return 0xEBEF80;
+            if (summaryRows.getItemIndex(item) > -1) {
+                return 0x6699ff;
+            }
             return color;
         }
 
@@ -169,6 +175,19 @@
         public function renderReport(dataSet:ArrayCollection, analysisDefinition:AnalysisDefinition, clientProcessorMap:Object, additionalProperties:Object):void {
             var def:ListDefinition = analysisDefinition as ListDefinition;
             this.listDef = def;
+            summaryRows = new ArrayCollection();
+            if (def.summaryTotal) {
+                var summaryRow:Object = new Object();
+                for each (var defItem:AnalysisItem in def.columns) {
+                    if (defItem.hasType(AnalysisItemTypes.MEASURE)) {
+                        var value:Value = additionalProperties["summary" + defItem.qualifiedName()];
+                        value.summary = true;
+                        summaryRow[defItem.qualifiedName()] = value;
+                    }
+                }
+                summaryRows.addItem(summaryRow);
+                dataSet.addItem(summaryRow);
+            }
             var sort:Sort = myDataSet.sort;
             myDataSet = dataSet;
             myDataSet.sort = sort;
@@ -203,6 +222,7 @@
             for each (var column:AdvancedDataGridColumn in dataGrid.columns) {
                 widthMap[column.dataField] = String(column.width - modifier);
             }
+
             for (var k:int = 0; k < def.columns.length; k++) {
                 var myHeader:AnalysisItem = def.columns.getItemAt(k) as AnalysisItem;
                 columnMap[myHeader.qualifiedName()] = myHeader;
@@ -241,6 +261,22 @@
                 }
                 if (value2 == null) {
                     value2 = new EmptyValue();
+                }
+
+                if (value1.summary) {
+                    if (column.sortDescending) {
+                        return -1;
+                    } else {
+                        return 1;
+                    }
+                }
+
+                if (value2.summary) {
+                    if (column.sortDescending) {
+                        return 1;
+                    } else {
+                        return -1;
+                    }    
                 }
 
                 if (value1.toSortValue().type() == Value.EMPTY && value2.toSortValue().type() == Value.EMPTY) {

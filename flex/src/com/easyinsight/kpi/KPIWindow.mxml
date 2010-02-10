@@ -182,6 +182,14 @@
             sort.fields = [ sortField ];
             descriptors.sort = sort;
             descriptors.refresh();
+            if (dataSource != null) {
+                for each (var desc:DataFeedDescriptor in descriptors) {
+                    if (desc.dataFeedID == dataSource.dataFeedID) {
+                        dataSource = desc;
+                        break;
+                    }
+                }
+            }
         }
 
         private function onCredentials():void {

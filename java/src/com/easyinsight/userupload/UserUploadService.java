@@ -517,6 +517,7 @@ public class UserUploadService implements IUserUploadService {
     }
 
     public CredentialsResponse refreshData(long feedID, Credentials credentials, boolean saveCredentials, boolean synchronous) {
+        System.out.println("******* REFRESHING ********");
         SecurityUtil.authorizeFeed(feedID, Roles.OWNER);
         if(credentials != null && credentials.isEncrypted()) {
             try {

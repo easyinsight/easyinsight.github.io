@@ -2,6 +2,9 @@ package com.easyinsight.analysis;
 
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.dataset.LimitsResults;
+import com.easyinsight.pipeline.IComponent;
+import com.easyinsight.pipeline.ListSummaryComponent;
+import com.easyinsight.pipeline.MinMaxComponent;
 
 import java.util.*;
 
@@ -14,7 +17,16 @@ public class WSListDefinition extends WSAnalysisDefinition {
     private List<AnalysisItem> columns;
     private boolean showLineNumbers = false;
     private ListLimitsMetadata listLimitsMetadata;
+    private boolean summaryTotal;
     private long listDefinitionID;
+
+    public boolean isSummaryTotal() {
+        return summaryTotal;
+    }
+
+    public void setSummaryTotal(boolean summaryTotal) {
+        this.summaryTotal = summaryTotal;
+    }
 
     public long getListDefinitionID() {
         return listDefinitionID;
@@ -88,5 +100,14 @@ public class WSListDefinition extends WSAnalysisDefinition {
         } else {
             return super.getLimitFields();
         }
+    }
+
+    @Override
+    public List<IComponent> createComponents() {
+        List<IComponent> components = super.createComponents();
+        if (summaryTotal) {
+            components.add(new ListSummaryComponent());
+        }
+        return components;
     }
 }

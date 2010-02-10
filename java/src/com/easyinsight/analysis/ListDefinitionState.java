@@ -27,12 +27,23 @@ public class ListDefinitionState extends AnalysisDefinitionState {
     @Column(name="show_row_numbers")
     private boolean showRowNumbers = false;
 
+    @Column(name="summarize_all")
+    private boolean summarizeAll = false;
+
     public long getDefinitionID() {
         return definitionID;
     }
 
     public void setDefinitionID(long definitionID) {
         this.definitionID = definitionID;
+    }
+
+    public boolean isSummarizeAll() {
+        return summarizeAll;
+    }
+
+    public void setSummarizeAll(boolean summarizeAll) {
+        this.summarizeAll = summarizeAll;
     }
 
     public ListLimitsMetadata getListLimitsMetadata() {
@@ -57,6 +68,7 @@ public class ListDefinitionState extends AnalysisDefinitionState {
         listDefinition.setShowLineNumbers(showRowNumbers);
         listDefinition.setReportType(WSAnalysisDefinition.LIST);
         listDefinition.setListDefinitionID(definitionID);
+        listDefinition.setSummaryTotal(summarizeAll);
         return listDefinition;
     }
 

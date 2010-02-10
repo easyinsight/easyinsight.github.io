@@ -49,7 +49,7 @@
         }
 
         private function excel():void {
-            new ExcelCreator().exportReportIDToExcel(_reportID, _filterDefinitions, _embeddedFilters);
+            new ExcelCreator().exportReportIDToExcel(_reportID, _filterDefinitions, _embeddedFilters, this);
             PopUpManager.removePopUp(this);
         }
 

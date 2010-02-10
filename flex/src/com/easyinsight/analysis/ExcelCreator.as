@@ -1,8 +1,10 @@
 package com.easyinsight.analysis {
 import com.easyinsight.framework.CredentialsCache;
 import com.easyinsight.framework.InsightRequestMetadata;
+import com.easyinsight.util.ProgressAlert;
 
 import mx.collections.ArrayCollection;
+import mx.core.UIComponent;
 
 public class ExcelCreator {
     import mx.events.CloseEvent;
@@ -87,16 +89,18 @@ public class ExcelCreator {
 			Alert.show("Excel spreadsheet saved!");
 		}
 
-		public function exportExcel(definition:AnalysisDefinition):void {
+		public function exportExcel(definition:AnalysisDefinition, parent:UIComponent):void {
             report = definition;
             var insightMetadata:InsightRequestMetadata = new InsightRequestMetadata();
             insightMetadata.credentialFulfillmentList = CredentialsCache.getCache().createCredentials();
+            ProgressAlert.alert(parent, "Generating the Excel spreadsheet...", null, upload.exportToExcel);
 			upload.exportToExcel.send(definition, insightMetadata);
 		}
 
-        public function exportReportIDToExcel(reportID:int, filters:ArrayCollection, hierarchies:ArrayCollection):void {
+        public function exportReportIDToExcel(reportID:int, filters:ArrayCollection, hierarchies:ArrayCollection, parent:UIComponent):void {
             var insightMetadata:InsightRequestMetadata = new InsightRequestMetadata();
             insightMetadata.credentialFulfillmentList = CredentialsCache.getCache().createCredentials();
+            ProgressAlert.alert(parent, "Generating the Excel spreadsheet...", null, upload.exportReportIDToExcel);
             upload.exportReportIDToExcel.send(reportID, filters, hierarchies, insightMetadata);    
         }
 	}

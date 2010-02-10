@@ -27,3 +27,8 @@ alter table analysis_range add constraint analysis_range_ibfk3 foreign key (high
 alter table analysis_range add aggregation_type integer not null;
 
 alter table analysis_item add concrete tinyint(4) not null default 1;
+
+alter table list_report add summarize_all tinyint(4) not null default 0;
+
+alter table range_filter add low_value_defined tinyint(4) not null default 1;
+alter table range_filter add high_value_defined tinyint(4) not null default 1;

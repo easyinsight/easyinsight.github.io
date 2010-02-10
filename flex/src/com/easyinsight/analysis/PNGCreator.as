@@ -1,6 +1,8 @@
 package com.easyinsight.analysis
 {
-    import mx.events.CloseEvent;
+import com.easyinsight.util.ProgressAlert;
+
+import mx.events.CloseEvent;
 	import com.easyinsight.framework.User;
 	import com.easyinsight.util.PNGEnc;
 	
@@ -64,7 +66,7 @@ package com.easyinsight.analysis
 		
 		private function gotPNGID(event:ResultEvent):void {
 			pngID = upload.uploadPNG.lastResult as int;
-            Alert.show("Click to start download of the image.", "Alert",
+            Alert.show("Click to start download of the PNG image.", "Alert",
 		                		Alert.OK | Alert.CANCEL, null, alertListener, null, Alert.CANCEL);
 
 		}
@@ -77,10 +79,12 @@ package com.easyinsight.analysis
 			Alert.show("Image saved!");
 		}
 
-		public function draw(renderable:DisplayObject):void {			
+		public function draw(renderable:DisplayObject):void {
+            ProgressAlert.alert(renderable, "Generating the PNG...", null, upload.uploadPNG);
 			var bd:BitmapData = new BitmapData(renderable.width, renderable.height);
 			bd.draw(renderable);
 			var ba:ByteArray = PNGEnc.encode(bd);
+
 			upload.uploadPNG.send(ba);
 		}
 	}

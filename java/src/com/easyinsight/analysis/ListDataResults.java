@@ -85,6 +85,7 @@ public class ListDataResults extends DataResults implements Serializable {
         EmbeddedDataResults embeddedDataResults = new EmbeddedDataResults();
         embeddedDataResults.setHeaders(headers);
         embeddedDataResults.setRows(rows);
+        embeddedDataResults.setAdditionalProperties(getAdditionalProperties());
         return embeddedDataResults;
     }
 }

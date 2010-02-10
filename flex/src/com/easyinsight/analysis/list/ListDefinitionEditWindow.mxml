@@ -18,6 +18,9 @@
         private var rowNumbersSelected:Boolean;
 
         [Bindable]
+        private var summarizeRows:Boolean;
+
+        [Bindable]
         private var availableFields:ArrayCollection;
 
         [Bindable]
@@ -29,6 +32,7 @@
         public function set listDefinition(listDefinition:ListDefinition):void {
             this.definition = listDefinition;
             rowNumbersSelected = this.definition.showLineNumbers;
+            summarizeRows = listDefinition.summaryTotal;
             var existingLimits:ListLimitsMetadata = listDefinition.listLimitsMetadata;
             if (existingLimits != null) {
                 limitsEnabled = true;
@@ -65,6 +69,7 @@
 
         public function save():void {
             definition.showLineNumbers = rowNumbersOn.selected;
+            definition.summaryTotal = summarizeRowsOn.selected;
             var limitsMetadata:ListLimitsMetadata;
             if (limitsEnabled) {
                 limitsMetadata = new ListLimitsMetadata();
@@ -97,6 +102,9 @@
     <mx:Form styleName="TitleWindowContents">
         <mx:FormItem label="Row Numbers: " direction="horizontal">
             <mx:CheckBox id="rowNumbersOn" selected="{rowNumbersSelected}"/>
+        </mx:FormItem>
+        <mx:FormItem label="Summarize Rows: " direction="horizontal">
+            <mx:CheckBox id="summarizeRowsOn" selected="{summarizeRows}"/>
         </mx:FormItem>
         <mx:FormItem label="Limits: " direction="horizontal">
             <mx:Form paddingTop="0" paddingLeft="0" paddingRight="0" paddingBottom="0">

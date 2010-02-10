@@ -23,6 +23,7 @@ public class AnalysisDefinitionFactory {
             ListDefinitionState listDefinition = new ListDefinitionState();
             listDefinition.setShowRowNumbers(wsListDefinition.isShowLineNumbers());
             listDefinition.setListLimitsMetadata(wsListDefinition.getListLimitsMetadata());
+            listDefinition.setSummarizeAll(wsListDefinition.isSummaryTotal());
             listDefinition.setDefinitionID(wsListDefinition.getListDefinitionID());
             analysisDefinitionState = listDefinition;
         } else if (wsAnalysisDefinition.getDataFeedType().equals(AnalysisTypes.CHART)) {

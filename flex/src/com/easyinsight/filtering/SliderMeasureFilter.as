@@ -107,9 +107,13 @@ public class SliderMeasureFilter extends HBox implements IFilter
             var measureFilter:FilterRangeDefinition = event.filterDefinition as FilterRangeDefinition;
             if (measureFilter.startValueDefined) {
                 lowValueString = String(measureFilter.startValue);
+            } else {
+                lowValueString = "";
             }
             if (measureFilter.endValueDefined) {
                 highValueString = String(measureFilter.endValue);
+            } else {
+                highValueString = "";
             }
             if (measureFilter.startValueDefined || measureFilter.endValueDefined) {
                 currentState = "Configured";

@@ -13,44 +13,17 @@ import java.sql.SQLException;
 @Table(name="range_filter")
 @PrimaryKeyJoinColumn(name="filter_id")
 public class FilterRangeDefinition extends FilterDefinition {
-    @Column(name="low_value", nullable = true)
-    private Double startValue;
-    @Transient
+    @Column(name="low_value")
+    private double startValue;
+    @Column(name="low_value_defined")
     private boolean startValueDefined;
-    @Column(name="high_value", nullable = true)
-    private Double endValue;
-    @Transient
+    @Column(name="high_value")
+    private double endValue;
+    @Column(name="high_value_defined")
     private boolean endValueDefined;
 
     public FilterRangeDefinition() {
         setApplyBeforeAggregation(false);
-    }
-
-    @Override
-    public void beforeSave() {
-        if (!startValueDefined) {
-            startValue = null;
-        }
-        if (!endValueDefined) {
-            endValue = null;
-        }
-    }
-
-    @Override
-    public void afterLoad() {
-        super.afterLoad();
-        if (startValue == null) {
-            startValue = 0.;
-            startValueDefined = false;
-        } else {
-            startValueDefined = true;
-        }
-        if (endValue == null) {
-            endValue = 0.;
-            endValueDefined = false;
-        } else {
-            endValueDefined = true;
-        }
     }
 
     public boolean isStartValueDefined() {

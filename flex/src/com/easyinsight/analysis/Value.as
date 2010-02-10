@@ -12,6 +12,7 @@ package com.easyinsight.analysis
 
         public var links:Object;
         public var originalValue:Value;
+        public var summary:Boolean;
 
 		public function Value()
 		{

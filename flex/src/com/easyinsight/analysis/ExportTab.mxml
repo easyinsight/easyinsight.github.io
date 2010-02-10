@@ -120,7 +120,7 @@
 
         private function exportExcel():void {
             _dataView.updateExportMetadata();
-            new ExcelCreator().exportExcel(analysisDefinition);
+            new ExcelCreator().exportExcel(analysisDefinition, this);
         }
 
         private function netvibes():void {

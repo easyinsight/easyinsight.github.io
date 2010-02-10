@@ -89,7 +89,7 @@
             feedFragmentObject.goalTreeID = String(_goalTreeID);
             var feedFragmentString:String = URLUtil.objectToString(feedFragmentObject);
             BrowserManager.getInstance().setFragment(feedFragmentString);
-            ProgressAlert.alert(this, "Retrieving latest goal data", null, goalService.createDataTree);
+            ProgressAlert.alert(this, "Retrieving latest goal data", null, goalService.getGoalTree);
             goalService.getGoalTree.send(_goalTreeID);
         }
 
@@ -120,11 +120,6 @@
                 setStyle("backgroundImage", background2);
                 setStyle("backgroundSize", "100%");
             }
-        }
-
-        private function onDatesChanged():void {
-            ProgressAlert.alert(this, "Retrieving latest goal data...", null, goalService.createDataTree);
-            goalService.getGoalTree.send(_goalTreeID);
         }
 
         private function parentTreeClick(event:MouseEvent):void {
