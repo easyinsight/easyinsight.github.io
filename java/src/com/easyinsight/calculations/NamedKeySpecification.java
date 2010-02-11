@@ -1,6 +1,7 @@
 package com.easyinsight.calculations;
 
 import com.easyinsight.analysis.AnalysisItem;
+import com.easyinsight.analysis.AnalysisItemTypes;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -20,7 +21,7 @@ public class NamedKeySpecification implements KeySpecification {
     @Nullable
     public AnalysisItem findAnalysisItem(List<AnalysisItem> currentItems) {
         for (AnalysisItem item : currentItems) {
-            if (item.getKey().toKeyString().equals(key)) {
+            if (item.getKey().toKeyString().equals(key) && item.hasType(AnalysisItemTypes.MEASURE)) {
                 return item;
             }
         }
