@@ -333,8 +333,9 @@
                     var date2:Date = value2.toSortValue().toDate();
                     return ObjectUtil.dateCompare(date1, date2);
                 }
-                Alert.show("this isn't good, comparing " + value1.toSortValue().toString() + " to " + value2.toSortValue().toString());
-                return 0;
+                var strCopy1:String = String(value1.toSortValue().getValue());
+                var strCopy2:String = String(value2.toSortValue().getValue());
+                return ObjectUtil.stringCompare(strCopy1, strCopy2, true);                
                 //return Number(value1.getValue()) - Number(value2.getValue());
             };
         }
