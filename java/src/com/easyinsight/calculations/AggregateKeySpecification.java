@@ -34,8 +34,7 @@ public class AggregateKeySpecification implements KeySpecification {
                         clonedMeasure.setAggregation(aggregationType);
                         return clonedMeasure;
                     }
-                }
-                return item;
+                }                
             }
         }
         return null;
