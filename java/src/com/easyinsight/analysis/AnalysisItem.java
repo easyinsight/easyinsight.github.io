@@ -369,13 +369,11 @@ public abstract class AnalysisItem implements Cloneable, Serializable {
                 transform.toRemote();
             }
         }*/
-        try {
+      
             for (FilterDefinition filterDefinition : getFilters()) {
                 filterDefinition.afterLoad();
             }
-        } catch (StackOverflowError e) {
-            // TODO: fix this hack as soon as data source is fixed
-        }
+
         setLinks(new ArrayList<Link>(getLinks()));        
     }
 
