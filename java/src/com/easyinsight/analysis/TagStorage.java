@@ -38,9 +38,7 @@ public class TagStorage {
         try {
             if (conn == null) session.beginTransaction();
             for (Tag tag : tagCloud.getTags()) {
-                if (tag.getTagID() != null && tag.getTagID() == 0) {
-                    tag.setTagID(null);
-                }
+                
             }
             session.saveOrUpdate(tagCloud);
             session.flush();
@@ -108,7 +106,7 @@ public class TagStorage {
 
     public Tag addTag(Tag tag, Session session) {
         Tag returnTag;
-        if (tag.getTagID() == null) {
+        if (tag.getTagID() == 0) {
             List tags = session.createQuery("from Tag where tagName = ?").setString(0, tag.getTagName()).list();
             if (tags.isEmpty()) {
                 // it's a new tag

@@ -5,7 +5,9 @@ import flash.events.Event;
 import flash.events.MouseEvent;
 
 import mx.containers.HBox;
+import mx.controls.Alert;
 import mx.controls.Label;
+import mx.core.Application;
 import mx.managers.PopUpManager;
 
 public class KPINameRenderer extends HBox {
@@ -60,9 +62,18 @@ public class KPINameRenderer extends HBox {
         var window:ScorecardContextWindow = new ScorecardContextWindow(kpi, passThrough, this);
         window.data = this.data;
         PopUpManager.addPopUp(window, this);
-        window.x = event.stageX + 5;
-        window.y = event.stageY + 5;
+        var clippingY:uint = Application.application.height;
 
+        window.x = event.stageX + 5;
+
+        var startY:uint = event.stageY + 5;
+
+        var endYPosition:uint = event.stageY + 25 + kpi.reports.length * 35;
+        
+        if (endYPosition > clippingY) {
+            startY -= (endYPosition - clippingY); 
+        }
+        window.y = startY;
     }
 
     private function passThrough(event:Event):void {

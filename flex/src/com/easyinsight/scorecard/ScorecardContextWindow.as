@@ -86,6 +86,7 @@ public class ScorecardContextWindow extends VBox {
     private function analyzeKPI(event:MouseEvent):void {
         var report:ListDefinition = new ListDefinition();
         report.filterDefinitions = kpi.filters;
+        report.canSaveDirectly = true;
         report.dataFeedID = kpi.coreFeedID;
         report.columns = new ArrayCollection([ kpi.analysisMeasure ]);
         report.name = kpi.name;

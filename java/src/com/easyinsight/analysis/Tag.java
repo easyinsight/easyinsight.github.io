@@ -14,7 +14,7 @@ public class Tag implements Serializable {
     @Id
     @GeneratedValue(strategy=GenerationType.IDENTITY)
     @Column(name="analysis_tags_id")
-    private Long tagID;
+    private long tagID;
     @Column(name="tag")
     private String tagName;
     @Column(name="use_count")
@@ -35,11 +35,11 @@ public class Tag implements Serializable {
         this.useCount = useCount;
     }
 
-    public Long getTagID() {
+    public long getTagID() {
         return tagID;
     }
 
-    public void setTagID(Long tagID) {
+    public void setTagID(long tagID) {
         this.tagID = tagID;
     }
 
@@ -67,7 +67,7 @@ public class Tag implements Serializable {
 
     public Tag clone() throws CloneNotSupportedException {
         Tag clonedTag = (Tag) super.clone();
-        clonedTag.setTagID(null);
+        clonedTag.setTagID(0);
         return clonedTag;
     }
 }

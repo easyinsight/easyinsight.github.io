@@ -175,6 +175,8 @@
                                            itemRenderer="{kpiNameFactory}"/>
                     <util:EIDataGridColumn headerText="Latest Value" dataField="name"
                                            itemRenderer="com.easyinsight.scorecard.KPIValueRenderer" width="110"/>
+                    <util:EIDataGridColumn headerText="% Change" dataField="name"
+                                           itemRenderer="com.easyinsight.scorecard.KPIChangeRenderer" width="110"/>
                     <util:EIDataGridColumn headerText="Date" dataField="name"
                                            itemRenderer="com.easyinsight.scorecard.KPIDateRenderer" width="100"/>
                     <util:EIDataGridColumn headerText="" dataField="name"

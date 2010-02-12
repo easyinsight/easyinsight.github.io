@@ -22,6 +22,7 @@ public class KPIOutcome {
     public var evaluationDate:Date;
     public var kpiID:int;
     public var valueDefined:Boolean;
+    public var percentChange:Number;
 
     public function KPIOutcome() {
         

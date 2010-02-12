@@ -249,13 +249,7 @@ public class AnalysisService {
         Connection conn = Database.instance().getConnection();
         Session session = Database.instance().createSession(conn);
         try {
-            conn.setAutoCommit(false);
-            for (Tag tag : wsAnalysisDefinition.getTagCloud()) {
-                if (tag.getTagID() != null && tag.getTagID() == 0) {
-                    tag.setTagID(null);
-                }
-            }
-
+            conn.setAutoCommit(false);            
             PreparedStatement getBindingsStmt = conn.prepareStatement("SELECT USER_ID, RELATIONSHIP_TYPE FROM USER_TO_ANALYSIS WHERE ANALYSIS_ID = ?");
             getBindingsStmt.setLong(1, wsAnalysisDefinition.getAnalysisID());
             ResultSet rs = getBindingsStmt.executeQuery();

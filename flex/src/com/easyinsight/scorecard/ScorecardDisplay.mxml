@@ -179,13 +179,13 @@
             </mx:VBox>
             <mx:VBox width="100%">
                 <mx:ViewStack resizeToContent="true" selectedIndex="{controlsIndex}" creationPolicy="all" width="100%">
-                    <mx:Box width="100%" horizontalAlign="center">
+                    <mx:HBox width="100%" horizontalAlign="center">
                         <mx:Button label="Configure Scorecards" click="configureMode()"/>
-                    </mx:Box>
+                        <mx:Button label="Refresh KPI Values..." click="refreshData()"/>
+                    </mx:HBox>
                     <mx:HBox width="100%" horizontalAlign="center">
                         <mx:Button label="Leave Configuration" click="configureMode()"/>
                         <mx:Button label="New Scorecard..." click="newScorecard()"/>
-                        <mx:Button label="Refresh KPI Values..." click="refreshData()"/>
                         <mx:Button label="Edit this Scorecard..." />
                         <mx:Button label="Delete this Scorecard..." click="deleteScorecard()"/>
                         <mx:Button label="Add a KPI..." click="addKPI()"/>

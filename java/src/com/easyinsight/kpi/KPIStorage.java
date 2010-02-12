@@ -163,12 +163,12 @@ public class KPIStorage {
     }
 
     public void saveKPIOutcome(long kpiID, Double newValue, Double oldValue, Date evaluationDate, int outcomeValue,
-                                   int direction, boolean problemEvaluated, Connection conn) throws SQLException {
+                                   int direction, boolean problemEvaluated, Double percentChange, Connection conn) throws SQLException {
         if (newValue != null && (Double.isNaN(newValue) || Double.isInfinite(newValue))) {
             newValue = null;
         }
         PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO KPI_VALUE (kpi_id, start_value, end_value," +
-                    "evaluation_date, outcome_value, direction, problem_evaluated) VALUES (?, ?, ?, ?, ?, ?, ?)");
+                    "evaluation_date, outcome_value, direction, problem_evaluated, percent_change) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
         insertStmt.setLong(1, kpiID);
         if (oldValue == null) {
             insertStmt.setNull(2, Types.DOUBLE);
@@ -184,6 +184,11 @@ public class KPIStorage {
         insertStmt.setInt(5, outcomeValue);
         insertStmt.setInt(6, direction);
         insertStmt.setBoolean(7, problemEvaluated);
+        if (percentChange == null) {
+            insertStmt.setNull(8, Types.DOUBLE);
+        } else {
+            insertStmt.setDouble(8, percentChange);
+        }
         insertStmt.execute();
     }
 
@@ -223,7 +228,7 @@ public class KPIStorage {
             Timestamp maxDate = dateRS.getTimestamp(1);
             if (!dateRS.wasNull()) {
                 PreparedStatement queryStmt = conn.prepareStatement("SELECT DIRECTION, END_VALUE, EVALUATION_DATE," +
-                    "OUTCOME_VALUE, PROBLEM_EVALUATED, START_VALUE FROM KPI_VALUE WHERE KPI_ID = ? AND EVALUATION_DATE = ?");
+                    "OUTCOME_VALUE, PROBLEM_EVALUATED, START_VALUE, PERCENT_CHANGE FROM KPI_VALUE WHERE KPI_ID = ? AND EVALUATION_DATE = ?");
                 queryStmt.setLong(1, kpi.getKpiID());
                 queryStmt.setTimestamp(2, maxDate);
                 ResultSet rs = queryStmt.executeQuery();
@@ -244,7 +249,11 @@ public class KPIStorage {
                         value = null;
                     }
                     boolean problem = rs.getBoolean(5);
-                    return new KPIOutcome(outcome, direction, endValue, problem, value, evaluationDate, kpi.getKpiID());
+                    Double percentChange = rs.getDouble(7);
+                    if (rs.wasNull()) {
+                        percentChange = null;
+                    }
+                    return new KPIOutcome(outcome, direction, endValue, problem, value, evaluationDate, kpi.getKpiID(), percentChange);
                 }
             }
         }

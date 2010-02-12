@@ -18,13 +18,13 @@ import java.util.*;
 public class HistoryRun {
 
     public List<KPIValue> lastTwoValues(long dataSourceID, AnalysisMeasure measure, List<FilterDefinition> filters,
-                                                     List<CredentialFulfillment> credentials) throws TokenMissingException {
-        Calendar cal = Calendar.getInstance();
-        Date endDate = cal.getTime();
-        cal.add(Calendar.DAY_OF_YEAR, -2);
-        cal.set(Calendar.HOUR_OF_DAY, 0);
-        cal.set(Calendar.MINUTE, 0);
-        Date startDate = cal.getTime();
+                                                     List<CredentialFulfillment> credentials, long timeWindow) throws TokenMissingException {
+
+        Date endDate = new Date();
+        if (timeWindow == 0) {
+            timeWindow = 1000 * 60 * 60 * 24 * 2;
+        }
+        Date startDate = new Date(endDate.getTime() - timeWindow);
         List<KPIValue> values = calculateHistoricalValues(dataSourceID, measure, filters, startDate, endDate, credentials);
         List<KPIValue> retValues = new ArrayList<KPIValue>();
         if (values.size() == 1) {

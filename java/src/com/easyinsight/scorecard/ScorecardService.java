@@ -211,13 +211,11 @@ public class ScorecardService {
     }
 
     private KPIOutcome refreshKPIValue(KPI kpi, List<CredentialFulfillment> credentials, EIConnection conn) {
-
-        // TODO: specify the trend window
-        // TODO: if there's no date filter included in the KPI, use the configured date
         List<KPIValue> lastTwoValues = new HistoryRun().lastTwoValues(kpi.getCoreFeedID(), kpi.getAnalysisMeasure(),
-                kpi.getFilters(), credentials);
+                kpi.getFilters(), credentials, 0);
         Double newValue = null;
         Double oldValue = null;
+        Double percentChange = null;
         boolean failedCondition = false;
         int outcomeState = KPIOutcome.NO_DATA;
         int direction = KPIOutcome.NO_DIRECTION;
@@ -230,6 +228,7 @@ public class ScorecardService {
                 newValue = newGoalValue.getValue();
 
                 double delta = newValue - oldValue;
+                percentChange = delta / oldValue * 100;
                 if (delta > 0) {
                     direction = KPIOutcome.UP_DIRECTION;
                 } else if (delta < 0) {
@@ -248,6 +247,7 @@ public class ScorecardService {
                 newValue = goalValue.getValue();
                 if (oldValue != null && newValue != null && kpi.isGoalDefined()) {
                     double delta = newValue - oldValue;
+                    percentChange = delta / oldValue * 100;
                     outcomeState = determineOutcome(kpi.getGoalValue(), highIsGood, delta, newValue);
                     if (delta > 0) {
                         direction = KPIOutcome.UP_DIRECTION;
@@ -269,7 +269,10 @@ public class ScorecardService {
                 }
             }
         }
-        return new KPIOutcome(outcomeState, direction, oldValue, failedCondition, newValue, new Date(), kpi.getKpiID());
+        if (percentChange != null && Double.isNaN(percentChange)) {
+            percentChange = null;
+        }
+        return new KPIOutcome(outcomeState, direction, oldValue, failedCondition, newValue, new Date(), kpi.getKpiID(), percentChange);
     }
 
     public List<KPI> refreshValuesForList(List<KPI> kpis, EIConnection conn, List<CredentialFulfillment> credentialsList) throws Exception {
@@ -280,7 +283,7 @@ public class ScorecardService {
             //kpi.setKpiValue(kpiValue);
             new KPIStorage().saveKPIOutcome(kpi.getKpiID(), kpiValue.getOutcomeValue(), kpiValue.getPreviousValue(),
                             kpiValue.getEvaluationDate(), kpiValue.getOutcomeState(), kpiValue.getDirection(), kpiValue.isProblemEvaluated(),
-                            conn);
+                    kpiValue.getPercentChange(), conn);
         }
         return kpis;
     }
@@ -321,6 +324,7 @@ public class ScorecardService {
                     kpiValues.add(kpiValue);
                     new KPIStorage().saveKPIOutcome(kpi.getKpiID(), kpiValue.getOutcomeValue(), kpiValue.getPreviousValue(),
                             kpiValue.getEvaluationDate(), kpiValue.getOutcomeState(), kpiValue.getDirection(), kpiValue.isProblemEvaluated(),
+                            kpiValue.getPercentChange(),
                             conn);
                 }
             }

@@ -174,9 +174,7 @@ public class GroupStorage {
             Session session = Database.instance().createSession(conn);
             try {
                 for (Tag tag : tags) {
-                    if (tag.getTagID() != null && tag.getTagID() == 0) {
-                        tag.setTagID(null);
-                    }
+                    
                     session.saveOrUpdate(tag);
                 }
                 session.flush();

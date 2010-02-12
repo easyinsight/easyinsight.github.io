@@ -1,0 +1,1 @@
+alter table kpi_value add percent_change double default null; 
