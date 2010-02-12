@@ -53,7 +53,9 @@ public class TimelineDataService extends EventDispatcher implements IReportDataS
         }*/
         var dataSets:ArrayCollection = new ArrayCollection();
         for each (var listData:ListDataResults in seriesData.listDatas) {
-            dataSets.addItem(new ListDataService().translate(listData));
+            var listServ:ListDataService = new ListDataService();
+            listServ.preserveValues = false;
+            dataSets.addItem(listServ.translate(listData));
         }
         seriesData.additionalProperties.seriesValues = seriesData.seriesValues;
         dispatchEvent(new DataServiceEvent(DataServiceEvent.DATA_RETURNED, dataSets, new Object(), seriesData.dataSourceInfo,
