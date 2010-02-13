@@ -45,6 +45,7 @@
         import mx.managers.BrowserManager;
         import mx.managers.PopUpManager;
         import mx.rpc.events.FaultEvent;
+        import mx.utils.ObjectUtil;
         import mx.utils.URLUtil;
 
         private function downloadAirWidget():void {
@@ -378,6 +379,19 @@
             uploadService.getFeedAnalysisTree.send(groupInclude.selected, initialEntry);
         }
 
+        private function customSort(obj1:Object, obj2:Object):int {
+            if (obj1 is DataFeedDescriptor && obj2 is DataFeedDescriptor) {
+                var date1:Date = DataFeedDescriptor(obj1).lastDataTime;
+                var date2:Date = DataFeedDescriptor(obj2).lastDataTime;
+                return ObjectUtil.dateCompare(date1, date2);
+            }
+            if (dataColumn.sortDescending) {
+                return -1;
+            } else {
+                return 1;
+            }
+        }
+
         [Bindable]
         private var showLoading:Boolean = false;
 		]]>
@@ -427,7 +441,8 @@
 			<mx:columns>
 				<mx:AdvancedDataGridColumn headerText="Name" dataField="name"/>
 				<mx:AdvancedDataGridColumn headerText="Size" dataField="size" width="110" itemRenderer="com.easyinsight.listing.SizeRenderer"/>
-				<mx:AdvancedDataGridColumn headerText="Last Data Time" dataField="lastDataTime" width="140" itemRenderer="com.easyinsight.listing.MyDataLastDataLabel"/>
+				<mx:AdvancedDataGridColumn id="dataColumn" headerText="Last Data Time" dataField="lastDataTime" width="140" itemRenderer="com.easyinsight.listing.MyDataLastDataLabel"
+                        sortCompareFunction="customSort"/>
 				<mx:AdvancedDataGridColumn width="250" headerText="" dataField="name" sortable="false" itemRenderer="com.easyinsight.listing.MyDataIconControls"/>
 			</mx:columns>
 		</mx:AdvancedDataGrid>

@@ -68,7 +68,7 @@ public class KPINameRenderer extends HBox {
 
         var startY:uint = event.stageY + 5;
 
-        var endYPosition:uint = event.stageY + 25 + kpi.reports.length * 35;
+        var endYPosition:uint = event.stageY + 25 + kpi.reports != null ? (kpi.reports.length * 35) : 0;
         
         if (endYPosition > clippingY) {
             startY -= (endYPosition - clippingY); 
