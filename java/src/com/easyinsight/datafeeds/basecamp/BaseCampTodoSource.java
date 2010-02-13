@@ -8,6 +8,7 @@ import com.easyinsight.core.Key;
 import com.easyinsight.core.DateValue;
 import com.easyinsight.core.NumericValue;
 import com.easyinsight.analysis.*;
+import com.easyinsight.logging.LogClass;
 import com.easyinsight.storage.DataStorage;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.Credentials;
@@ -21,7 +22,9 @@ import nu.xom.Builder;
 import nu.xom.Document;
 import nu.xom.Nodes;
 import nu.xom.Node;
+import org.jetbrains.annotations.Nullable;
 
+import java.text.ParseException;
 import java.util.*;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -80,6 +83,7 @@ public class BaseCampTodoSource extends ServerDataSourceDefinition {
         return client;
     }
 
+    @Nullable
     private Document runRestRequest(String path, HttpClient client, Builder builder, String url, EIPageInfo info) throws BaseCampLoginException {
         HttpMethod restMethod = new GetMethod(url + path);
         restMethod.setRequestHeader("Accept", "application/xml");
@@ -144,48 +148,53 @@ public class BaseCampTodoSource extends ServerDataSourceDefinition {
                     }
 
 
-                    Document todoItems = runRestRequest("/todo_lists/" + todoListId + "/todo_items.xml", client, builder, url, null);
-                    Nodes todoItemNodes = todoItems.query("/todo-items/todo-item");
-                    for(int k = 0;k < todoItemNodes.size();k++) {
-                        Node todoItem = todoItemNodes.get(k);
-                        String responsiblePartyId = queryField(todoItem, "responsible-party-id/text()");
-                        String responsiblePartyName = retrieveContactInfo(client, builder, peopleCache, responsiblePartyId, url);
-                        String creatorId = queryField(todoItem, "creator-id/text()");
-                        String creatorName = retrieveContactInfo(client, builder, peopleCache, creatorId, url);
-                        String completerId = queryField(todoItem, "completer-id/text()");
-                        String completerName = retrieveContactInfo(client, builder, peopleCache, completerId, url);
-                        String createdDateString = queryField(todoItem, "created-on/text()");
-                        Date createdDate = null;
-                        if(createdDateString != null )
-                            createdDate = df.parse(createdDateString);
-                        String completedDateString = queryField(todoItem, "completed-on/text()");
-                        Date completedDate = null;
-                        if(completedDateString != null)
-                            completedDate = df.parse(completedDateString);
+                    try {
+                        Document todoItems = runRestRequest("/todo_lists/" + todoListId + "/todo_items.xml", client, builder, url, null);
 
-                        IRow row = ds.createRow();
-                        row.addValue(keys.get(PROJECTNAME), projectName);
-                        row.addValue(keys.get(PROJECTSTATUS), projectStatus);
-                        row.addValue(keys.get(PROJECTID), projectIdToRetrieve);
-                        row.addValue(keys.get(MILESTONENAME), milestoneName);
-                        row.addValue(keys.get(DEADLINE), new DateValue(milestoneDeadline));
-                        row.addValue(keys.get(TODOLISTDESC), todoListDesc);
-                        row.addValue(keys.get(TODOLISTNAME), todoListName);
-                        row.addValue(keys.get(TODOLISTID), todoListId);
-                        row.addValue(keys.get(TODOLISTPRIVATE), todoListPrivacy);
-                        row.addValue(keys.get(ITEMID), queryField(todoItem, "id/text()"));
-                        row.addValue(keys.get(CONTENT), queryField(todoItem, "content/text()"));
-                        row.addValue(keys.get(COMPLETED), queryField(todoItem, "completed/text()").toLowerCase());
-                        row.addValue(keys.get(RESPONSIBLEPARTYID), responsiblePartyId);
-                        row.addValue(keys.get(RESPONSIBLEPARTYNAME), responsiblePartyName);
-                        row.addValue(keys.get(CREATORID), creatorId);
-                        row.addValue(keys.get(CREATORNAME), creatorName);
-                        row.addValue(keys.get(COMPLETEDDATE), new DateValue(completedDate));
-                        row.addValue(keys.get(CREATEDDATE), new DateValue(createdDate));
-                        row.addValue(keys.get(COMPLETERNAME), completerName);
-                        row.addValue(keys.get(COMPLETERID), completerId);
+                        Nodes todoItemNodes = todoItems.query("/todo-items/todo-item");
+                        for(int k = 0;k < todoItemNodes.size();k++) {
+                            Node todoItem = todoItemNodes.get(k);
+                            String responsiblePartyId = queryField(todoItem, "responsible-party-id/text()");
+                            String responsiblePartyName = retrieveContactInfo(client, builder, peopleCache, responsiblePartyId, url);
+                            String creatorId = queryField(todoItem, "creator-id/text()");
+                            String creatorName = retrieveContactInfo(client, builder, peopleCache, creatorId, url);
+                            String completerId = queryField(todoItem, "completer-id/text()");
+                            String completerName = retrieveContactInfo(client, builder, peopleCache, completerId, url);
+                            String createdDateString = queryField(todoItem, "created-on/text()");
+                            Date createdDate = null;
+                            if(createdDateString != null )
+                                createdDate = df.parse(createdDateString);
+                            String completedDateString = queryField(todoItem, "completed-on/text()");
+                            Date completedDate = null;
+                            if(completedDateString != null)
+                                completedDate = df.parse(completedDateString);
 
-                        row.addValue(keys.get(COUNT), new NumericValue(1));
+                            IRow row = ds.createRow();
+                            row.addValue(keys.get(PROJECTNAME), projectName);
+                            row.addValue(keys.get(PROJECTSTATUS), projectStatus);
+                            row.addValue(keys.get(PROJECTID), projectIdToRetrieve);
+                            row.addValue(keys.get(MILESTONENAME), milestoneName);
+                            row.addValue(keys.get(DEADLINE), new DateValue(milestoneDeadline));
+                            row.addValue(keys.get(TODOLISTDESC), todoListDesc);
+                            row.addValue(keys.get(TODOLISTNAME), todoListName);
+                            row.addValue(keys.get(TODOLISTID), todoListId);
+                            row.addValue(keys.get(TODOLISTPRIVATE), todoListPrivacy);
+                            row.addValue(keys.get(ITEMID), queryField(todoItem, "id/text()"));
+                            row.addValue(keys.get(CONTENT), queryField(todoItem, "content/text()"));
+                            row.addValue(keys.get(COMPLETED), queryField(todoItem, "completed/text()").toLowerCase());
+                            row.addValue(keys.get(RESPONSIBLEPARTYID), responsiblePartyId);
+                            row.addValue(keys.get(RESPONSIBLEPARTYNAME), responsiblePartyName);
+                            row.addValue(keys.get(CREATORID), creatorId);
+                            row.addValue(keys.get(CREATORNAME), creatorName);
+                            row.addValue(keys.get(COMPLETEDDATE), new DateValue(completedDate));
+                            row.addValue(keys.get(CREATEDDATE), new DateValue(createdDate));
+                            row.addValue(keys.get(COMPLETERNAME), completerName);
+                            row.addValue(keys.get(COMPLETERID), completerId);
+
+                            row.addValue(keys.get(COUNT), new NumericValue(1));
+                        }
+                    } catch (Exception e) {
+                        LogClass.debug("Orphan data for todo list " + todoListId);
                     }
                 }
             }
