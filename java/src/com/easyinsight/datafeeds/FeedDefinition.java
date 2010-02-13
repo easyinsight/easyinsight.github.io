@@ -498,6 +498,16 @@ public class FeedDefinition implements Cloneable, Serializable {
         }
         return item;
     }
+
+    protected AnalysisItem findAnalysisItemByDisplayName(String key) {
+        AnalysisItem item = null;
+        for (AnalysisItem field : getFields()) {
+            if (field.toDisplay().equals(key)) {
+                item = field;
+            }
+        }
+        return item;
+    }
     
      public DataSet getDataSet(Credentials credentials, Map<String, Key> keys, Date now, FeedDefinition parentDefinition, DataStorage dataStorage) {
         throw new UnsupportedOperationException();
