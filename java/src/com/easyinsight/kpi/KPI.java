@@ -5,7 +5,6 @@ import com.easyinsight.analysis.AnalysisMeasure;
 import com.easyinsight.analysis.FilterDefinition;
 import com.easyinsight.analysis.Tag;
 import com.easyinsight.core.InsightDescriptor;
-import com.easyinsight.goals.Objective;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -48,7 +47,7 @@ public class KPI implements Cloneable {
 
     private KPIOutcome kpiOutcome;
 
-    private List<InsightDescriptor> reports;
+    private List<InsightDescriptor> reports = new ArrayList<InsightDescriptor>();
 
     private List<KPIUser> kpiUsers = new ArrayList<KPIUser>();
 
