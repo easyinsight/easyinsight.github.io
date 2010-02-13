@@ -77,7 +77,13 @@ public class HighRiseCompositeSource extends CompositeServerDataSource {
             doc = builder.build(restMethod.getResponseBodyAsStream());
         }
         catch (nu.xom.ParsingException e) {
-                throw new HighRiseLoginException("Invalid username/password.");
+            String statusLine = restMethod.getStatusLine().toString();
+            if ("HTTP/1.1 404 Not Found".equals(statusLine)) {
+                throw new HighRiseLoginException("Could not locate a Highrise instance at " + getUrl());
+            } else {
+                throw new HighRiseLoginException("Invalid Highrise authentication token--you can find the token under your the My Info link in the upper right corner on your Highrise page.");
+            }
+
         }
         catch (Throwable e) {
             throw new RuntimeException(e);
@@ -97,7 +103,7 @@ public class HighRiseCompositeSource extends CompositeServerDataSource {
             try {
                 runRestRequest("/companies.xml", client, new Builder());
             } catch (HighRiseLoginException e) {
-               result = "Invalid username/password. Please try again.";
+               result = e.getMessage();
             }
         }
         return result;

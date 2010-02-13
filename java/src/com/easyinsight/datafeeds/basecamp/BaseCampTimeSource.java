@@ -77,7 +77,12 @@ public class BaseCampTimeSource extends ServerDataSourceDefinition {
             }
         }
         catch (nu.xom.ParsingException e) {
-                throw new BaseCampLoginException("Invalid username/password.");
+            String statusLine = restMethod.getStatusLine().toString();
+            if ("HTTP/1.1 404 Not Found".equals(statusLine)) {
+                throw new BaseCampLoginException("Could not locate a Basecamp instance at " + url);
+            } else {
+                throw new BaseCampLoginException("Invalid Basecamp authentication token--you can find the token under your the My Info link in the upper right corner on your Basecamp page.");
+            }
         }
         catch (Throwable e) {
             throw new RuntimeException(e);
