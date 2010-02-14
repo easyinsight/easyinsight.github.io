@@ -196,7 +196,7 @@ public class BaseCampCompositeSource extends CompositeServerDataSource {
         openFilter.setField(findAnalysisItem(BaseCampTodoSource.COMPLETED));
         openFilter.setFilteredValues(Arrays.asList((Object) "false"));
         openFilter.setInclusive(true);
-        kpis.add(KPIUtil.createKPIWithFilters("Total Open Todo Items", "inbox.png", (AnalysisMeasure) findAnalysisItem(BaseCampTodoSource.COUNT),
+        kpis.add(KPIUtil.createKPIWithFilters("Total Open Todo Items", "inbox.png", (AnalysisMeasure) findAnalysisItemByDisplayName("Todo - Count"),
                 Arrays.asList((FilterDefinition) openFilter), KPI.BAD));
         FilterValueDefinition closedFilter = new FilterValueDefinition();
         closedFilter.setField(findAnalysisItem(BaseCampTodoSource.COMPLETED));
