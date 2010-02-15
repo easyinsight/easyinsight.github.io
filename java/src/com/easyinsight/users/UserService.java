@@ -82,6 +82,7 @@ public class UserService implements IUserService {
                 if(l.size() == 1) {
                     User u = (User) l.get(0);
                     u.setPassword(PasswordService.getInstance().encrypt(password));
+                    s.update(u);
                     success = true;
                     PreparedStatement deleteStatement = conn.prepareStatement("delete from password_reset where password_request_string = ?");
                     deleteStatement.setString(1, passwordResetValidation);
@@ -90,6 +91,7 @@ public class UserService implements IUserService {
             }
 
             stmt.close();
+            s.flush();
             conn.commit();
         } catch(SQLException e) {
 
