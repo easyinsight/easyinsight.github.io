@@ -65,9 +65,9 @@ public class UserService implements IUserService {
     public boolean resetPassword(String passwordResetValidation, String username, String password) {
         boolean success = false;
         EIConnection conn = Database.instance().getConnection();
-        Session s = Database.instance().createSession(conn);
         try {
             conn.setAutoCommit(false);
+            Session s = Database.instance().createSession(conn);
             PreparedStatement stmt = conn.prepareStatement("select user_id, password_request_string from password_reset where password_request_string = ? and request_date > ?");
             Calendar c = Calendar.getInstance();
 
@@ -87,17 +87,30 @@ public class UserService implements IUserService {
                     PreparedStatement deleteStatement = conn.prepareStatement("delete from password_reset where password_request_string = ?");
                     deleteStatement.setString(1, passwordResetValidation);
                     deleteStatement.executeUpdate();
+                } else if (l.size() == 0) {
+                    l = s.createQuery("from User where email = ? and userID = ?").setString(0, username).setLong(1, rs.getLong(1)).list();
+                    if (l.size() == 1) {
+                        User u = (User) l.get(0);
+                        u.setPassword(PasswordService.getInstance().encrypt(password));
+                        s.update(u);
+                        success = true;
+                        PreparedStatement deleteStatement = conn.prepareStatement("delete from password_reset where password_request_string = ?");
+                        deleteStatement.setString(1, passwordResetValidation);
+                        deleteStatement.executeUpdate();
+                    }
                 }
             }
 
             stmt.close();
             s.flush();
             conn.commit();
+            s.close();
         } catch(SQLException e) {
-
             conn.rollback();
+            LogClass.error(e);
             throw new RuntimeException(e);
         } finally {
+            conn.setAutoCommit(true);
             Database.closeConnection(conn);
         }
 

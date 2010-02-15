@@ -364,6 +364,7 @@
                                                                 else if (o.resetPassword != null) {
                                                                     passwordResetValue = o.resetPassword;
                                                                     userService.verifyPasswordReset.send(o.resetPassword);
+                                                                    navigation(new NavigationEvent("Home"));
                                                                 }
                                                                 else {
                                                                     navigation(new NavigationEvent("Home"));

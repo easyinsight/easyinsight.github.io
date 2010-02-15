@@ -10,8 +10,12 @@
             private var message:String;
 
             private function onAdd():void {
-                message = User.getInstance().userName;
-                User.getEventNotifier().addEventListener(LoginEvent.LOGIN, onLogin);
+                if (User.getInstance() == null) {
+                    message = "";
+                } else {
+                    message = User.getInstance().userName;
+                    User.getEventNotifier().addEventListener(LoginEvent.LOGIN, onLogin);
+                }
             }
 
             private function onLogin(event:LoginEvent):void {
