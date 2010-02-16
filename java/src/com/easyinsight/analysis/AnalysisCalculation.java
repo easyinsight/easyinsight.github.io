@@ -60,15 +60,6 @@ public class AnalysisCalculation extends AnalysisMeasure {
     }
 
     public List<AnalysisItem> getAnalysisItems(List<AnalysisItem> allItems, Collection<AnalysisItem> insightItems, boolean getEverything) {
-
-        /*Map<Key, AnalysisItem> map = new HashMap<Key, AnalysisItem>();
-        for (AnalysisItem analysisItem : allItems) {
-            map.put(analysisItem.getKey(), analysisItem);
-            map.put(analysisItem.createAggregateKey(), analysisItem);
-        }*/
-
-        Resolver resolver = new Resolver(allItems);
-
         CalculationTreeNode tree;
         ICalculationTreeVisitor visitor;
         CalculationsParser.startExpr_return ret;
@@ -89,14 +80,6 @@ public class AnalysisCalculation extends AnalysisMeasure {
         VariableListVisitor variableVisitor = new VariableListVisitor();
         tree.accept(variableVisitor);
 
-        // Which analysis items does this calculation need?
-
-        // Set<AnalysisItem> analysisItems = new HashSet<AnalysisItem>();
-
-        // What are the set of keys that we need?
-
-        // Set<Key> keys = variableVisitor.getVariableList();
-
         Set<KeySpecification> specs = variableVisitor.getVariableList();
 
         List<AnalysisItem> analysisItemList = new ArrayList<AnalysisItem>();
@@ -112,30 +95,7 @@ public class AnalysisCalculation extends AnalysisMeasure {
                 analysisItemList.add(analysisItem);
             }
         }
-
-        /*for (Key key : keys) {
-            AnalysisItem analysisItem = map.get(key);
-            if(analysisItem == null) {
-                AggregateKey aggregateKey = (AggregateKey) key;
-                AnalysisItem tempItem = map.get(aggregateKey.underlyingKey());
-                try {
-                    analysisItem = tempItem.clone();
-                } catch (CloneNotSupportedException e) {
-                    // This is supported
-                    LogClass.error(e);
-                }
-                ((AnalysisMeasure) analysisItem).setAggregation(aggregateKey.aggregationType());
-                map.put(analysisItem.createAggregateKey(), analysisItem);
-            }
-            boolean alreadyInInsight = false;
-            for (AnalysisItem insightItem : insightItems) {
-                if (insightItem.createAggregateKey().equals(analysisItem.createAggregateKey())) {
-                    alreadyInInsight = true;
-                }
-            }
-            if (!alreadyInInsight) analysisItems.add(analysisItem);
-        }*/
-        //return new ArrayList<AnalysisItem>(analysisItems);
+        
         return analysisItemList;
     }
 

@@ -56,7 +56,7 @@
 
         private function save():void {
             editor.addEventListener(AnalysisItemSaveEvent.ANALYSIS_ITEM_SAVE, onSaveComplete);
-            editor.save();
+            editor.save(_dataSourceID);
         }
 		]]>
 	</mx:Script>

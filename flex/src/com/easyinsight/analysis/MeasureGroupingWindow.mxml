@@ -28,7 +28,7 @@
             availableMeasures.refresh();
         }
 
-        public function save():AnalysisItem {
+        public function save(dataSourceID:int):AnalysisItem {
             return null;
         }]]></mx:Script>
 </mx:VBox>

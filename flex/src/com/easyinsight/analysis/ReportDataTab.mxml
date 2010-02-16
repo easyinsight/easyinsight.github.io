@@ -112,6 +112,7 @@
         private function createCalculation():void {
             var window:AnalysisItemEditWindow = new AnalysisItemEditWindow();
             window.editorClass = CalculationWindow;
+            window.dataSourceID = _dataService.dataFeedID;
             window.addEventListener(AnalysisItemEditEvent.ANALYSIS_ITEM_EDIT, onNewItem);
             PopUpManager.addPopUp(window, this);
             PopUpUtil.centerPopUp(window);

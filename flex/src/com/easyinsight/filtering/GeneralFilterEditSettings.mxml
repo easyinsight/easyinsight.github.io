@@ -111,7 +111,7 @@
             var previousDefinition:FilterDefinition = _filterDefinition;
             _filterDefinition = filterDetailEditor.makeUpdates();
             if (currentState == "editorState") {
-                _filterDefinition.field = editor.save();
+                _filterDefinition.field = editor.save(_feedID);
             }
             _filterDefinition.applyBeforeAggregation = aggregationCheckbox.selected;
 

@@ -258,7 +258,7 @@
 
         private function keyedComplete(event:KeyboardEvent):void {
             if (event.keyCode == Keyboard.ENTER) {
-                save();
+                save(0);
             }
         }
 
@@ -278,7 +278,7 @@
             return new ArrayCollection(["Delta", "Last Value", "Percent Change", "Normality", "Step", "Six Sigma"]);
         }
 
-        public function save():AnalysisItem {
+        public function save(dataSourceID:int):AnalysisItem {
             var existingType:int = startingAnalysisItem.getType();
             var analysisItem:AnalysisItem = detailEditor.createAnalysisItem(aggregationBox.selectedItem as String);
             if (analysisItem.getType() == existingType) {

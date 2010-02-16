@@ -58,7 +58,7 @@
 
         private function toFocus(wrapper:AnalysisItemWrapper):void {
             if (selectedWrapper != null) {
-                selectedWrapper.analysisItem = openEditor.save();
+                selectedWrapper.analysisItem = openEditor.save(_feedDefinition.dataFeedID);
                 selectedWrapper.displayName = selectedWrapper.analysisItem.display;
             }
             selectedWrapper = wrapper;
@@ -145,7 +145,7 @@
 
         public function createFields():ArrayCollection {
             if (selectedWrapper != null) {
-                selectedWrapper.analysisItem = openEditor.save();
+                selectedWrapper.analysisItem = openEditor.save(_feedDefinition.dataFeedID);
             }
             var fields:ArrayCollection = new ArrayCollection();
             for each (var wrapper:AnalysisItemWrapper in allFields) {

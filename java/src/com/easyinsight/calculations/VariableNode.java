@@ -31,6 +31,9 @@ public class VariableNode extends CalculationTreeNode {
                 analysisItem = item;
             }
         }
+        if (analysisItem == null) {
+            throw new RuntimeException("Could not find " + s);
+        }
     }
 
     public void resolveVariableKey(Collection<AnalysisItem> allItems, int aggregationType) {
@@ -58,6 +61,9 @@ public class VariableNode extends CalculationTreeNode {
                     }
                 }
             }
+        }
+        if (analysisItem == null) {
+            throw new RuntimeException("Could not find " + s);
         }
     }
 

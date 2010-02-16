@@ -1,10 +1,8 @@
 package com.easyinsight.analysis;
 
+import com.easyinsight.calculations.*;
 import com.easyinsight.calculations.generated.CalculationsParser;
 import com.easyinsight.calculations.generated.CalculationsLexer;
-import com.easyinsight.calculations.NodeFactory;
-import com.easyinsight.calculations.CalculationTreeNode;
-import com.easyinsight.calculations.ValidationVisitor;
 import com.easyinsight.core.Key;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.FeedDefinition;
@@ -30,6 +28,7 @@ import java.sql.SQLException;
 
 import org.antlr.runtime.ANTLRStringStream;
 import org.antlr.runtime.CommonTokenStream;
+import org.antlr.runtime.RecognitionException;
 import org.hibernate.Session;
 import org.apache.jcs.access.exception.CacheException;
 
@@ -44,7 +43,7 @@ public class AnalysisService {
 
     public AnalysisItem cloneItem(AnalysisItem analysisItem) {
         try {
-            AnalysisItem copy =  analysisItem.clone();
+            AnalysisItem copy = analysisItem.clone();
             copy.setDisplayName("Copy of " + analysisItem.toDisplay());
             copy.setConcrete(false);
             return copy;
@@ -81,8 +80,8 @@ public class AnalysisService {
             conn.setAutoCommit(false);
 
             Map<Key, Key> keyReplacementMap = new HashMap<Key, Key>();
-            
-            Session session = Database.instance().createSession(conn);            
+
+            Session session = Database.instance().createSession(conn);
             AnalysisDefinition analysisDefinition = AnalysisDefinitionFactory.fromWSDefinition(saveDefinition);
             Feed feed = FeedRegistry.instance().getFeed(analysisDefinition.getDataFeedID());
             for (AnalysisItem item : feed.getFields()) {
@@ -95,7 +94,7 @@ public class AnalysisService {
             bindings.add(new UserToAnalysisBinding(SecurityUtil.getUserID(), UserPermission.OWNER));
             clone.setUserBindings(bindings);
             session.close();
-            session = Database.instance().createSession(conn);            
+            session = Database.instance().createSession(conn);
             analysisStorage.saveAnalysis(clone, session);
             WSAnalysisDefinition returnDef = clone.createBlazeDefinition();
             session.flush();
@@ -164,24 +163,36 @@ public class AnalysisService {
         return descriptorList;
     }
 
-    public String validateCalculation(String calculationString) {
+    public String validateCalculation(String calculationString, long dataSourceID) {
+        SecurityUtil.authorizeFeed(dataSourceID, Roles.SUBSCRIBER);
         String validationString = null;
         CalculationTreeNode node = null;
         try {
+            Feed feed = FeedRegistry.instance().getFeed(dataSourceID);
+            CalculationTreeNode tree;
+            ICalculationTreeVisitor visitor;
+            CalculationsParser.startExpr_return ret;
             CalculationsLexer lexer = new CalculationsLexer(new ANTLRStringStream(calculationString));
             CommonTokenStream tokes = new CommonTokenStream();
             tokes.setTokenSource(lexer);
             CalculationsParser parser = new CalculationsParser(tokes);
             parser.setTreeAdaptor(new NodeFactory());
-            node = (CalculationTreeNode) parser.startExpr().getTree();
+            try {
+                ret = parser.startExpr();
+                tree = (CalculationTreeNode) ret.getTree();
+                visitor = new ResolverVisitor(feed.getFields(), new FunctionFactory());
+                tree.accept(visitor);
+            } catch (RecognitionException e) {
+                e.printStackTrace();
+                throw new RuntimeException(e);
+            }
+            VariableListVisitor variableVisitor = new VariableListVisitor();
+            tree.accept(variableVisitor);
+
         } catch (Exception e) {
             validationString = e.getMessage();
         }
-        ValidationVisitor v = new ValidationVisitor();
-        node.accept(v);
-        if(validationString == null && v.getErrors().size() > 0) {
-            validationString = v.getErrors().get(0);
-        }
+
         return validationString;
     }
 
@@ -249,7 +260,7 @@ public class AnalysisService {
         Connection conn = Database.instance().getConnection();
         Session session = Database.instance().createSession(conn);
         try {
-            conn.setAutoCommit(false);            
+            conn.setAutoCommit(false);
             PreparedStatement getBindingsStmt = conn.prepareStatement("SELECT USER_ID, RELATIONSHIP_TYPE FROM USER_TO_ANALYSIS WHERE ANALYSIS_ID = ?");
             getBindingsStmt.setLong(1, wsAnalysisDefinition.getAnalysisID());
             ResultSet rs = getBindingsStmt.executeQuery();
@@ -389,7 +400,7 @@ public class AnalysisService {
                     ResultSet rs = queryStmt.executeQuery();
                     rs.next();
                     insightResponse = new InsightResponse(InsightResponse.SUCCESS, new InsightDescriptor(analysisID, rs.getString(1),
-                        rs.getLong(2), rs.getInt(3)));    
+                            rs.getLong(2), rs.getInt(3)));
                 } finally {
                     Database.closeConnection(conn);
                 }

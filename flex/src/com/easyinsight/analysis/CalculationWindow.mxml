@@ -38,7 +38,7 @@
         [Bindable]
         private var applyBefore:Boolean;
 
-        public function save():AnalysisItem {
+        public function save(dataSourceID:int):AnalysisItem {
             if (analysisCalculation == null) {
                 analysisCalculation = new AnalysisCalculation();
                 analysisCalculation.concrete = false;
@@ -55,7 +55,7 @@
                 analysisCalculation.measureConditionRange = measureRangeSelection.createMeasureConditionRange();
             }
             analysisCalculation.formattingConfiguration = formattingSetup.formattingConfiguration;
-            analysisService.validateCalculation.send(analysisCalculation.calculationString);
+            analysisService.validateCalculation.send(analysisCalculation.calculationString, dataSourceID);
             return analysisCalculation;
         }
 
