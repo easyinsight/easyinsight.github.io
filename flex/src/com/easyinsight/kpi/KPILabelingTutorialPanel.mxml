@@ -1,0 +1,88 @@
+<?xml version="1.0" ?>
+<kpi:KPITutorialPanel xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:kpi="com.easyinsight.kpi.*"
+        implements="com.easyinsight.kpi.ITutorialPanel">
+    <mx:Script><![CDATA[
+        import com.easyinsight.icons.IconSelectionEvent;
+        import com.easyinsight.icons.IconSelectionWindow;
+        import com.easyinsight.util.PopUpUtil;
+
+        import mx.managers.PopUpManager;
+
+        [Bindable]
+        private var iconExists:Boolean;
+
+        [Bindable]
+        private var kpiName:String;
+
+        private var kpiIconPath:String;
+
+        [Bindable]
+        private var iconPath:String;
+
+        public function saveValues():void {
+            kpiData.kpiName = kpiNameInput.text;
+            kpiData.kpiIcon = kpiIconPath;
+        }
+
+        private function assignIcon():void {
+            var iconWindow:IconSelectionWindow = IconSelectionWindow(PopUpManager.createPopUp(this, IconSelectionWindow, true));
+            iconWindow.addEventListener(IconSelectionEvent.ICON_SELECTION, iconSelected);
+            iconWindow.addEventListener(IconSelectionEvent.ICON_REMOVED, iconRemoved);
+            PopUpUtil.centerPopUp(iconWindow);
+        }
+
+        private function iconSelected(event:IconSelectionEvent):void {
+            iconExists = true;
+            kpiIconPath = event.icon.path;
+            iconPath = "/app/assets/icons/32x32/" + event.icon.path;
+        }
+
+        private function iconRemoved(event:IconSelectionEvent):void {
+            iconExists = false;
+            kpiIconPath = null;
+            iconPath = null;
+        }
+
+        public function validate():Boolean {
+            return true;
+        }
+
+        public function gotFocus():void {
+            kpiName = kpiData.kpiName;
+            kpiIconPath = kpiData.kpiIcon;
+            if (kpiIconPath != null) {
+                iconExists = true;
+                iconPath = "/app/assets/icons/32x32/" + kpiIconPath;
+            } else {
+                iconExists = false;
+            }
+        }]]></mx:Script>
+    <mx:VBox width="100%" height="100%" verticalGap="0">
+        <mx:Box height="50%" width="100%"  backgroundColor="#000000" horizontalAlign="center" verticalAlign="middle">
+            <mx:Text text="How do you want to label this KPI?" fontSize="24" color="#FFFFFF"/>
+        </mx:Box>
+        <mx:VBox verticalAlign="middle" horizontalAlign="center" height="50%" width="100%" backgroundColor="#FFFFFF">
+            <mx:Grid>
+                <mx:GridRow>
+                    <mx:GridItem height="100%" verticalAlign="middle">
+                        <mx:Label text="What do you want to call this KPI?" fontSize="18"/>
+                    </mx:GridItem>
+                    <mx:GridItem height="100%" verticalAlign="middle">
+                        <mx:TextArea id="kpiNameInput" text="{kpiName}" width="220" height="40" borderStyle="solid" editable="true"/>
+                    </mx:GridItem>
+                </mx:GridRow>
+                <mx:GridRow>
+                    <mx:GridItem height="100%" verticalAlign="middle">
+                        <mx:Label text="What icon do you want for this KPI?" fontSize="18"/>
+                    </mx:GridItem>
+                    <mx:GridItem height="100%" verticalAlign="middle">
+                        <mx:Box borderStyle="solid" borderThickness="1" click="assignIcon()" width="40" height="40" horizontalAlign="center" verticalAlign="middle"
+                                            toolTip="Click to assign or change icon...">
+                            <mx:Image id="iconImage" source="{iconPath}" visible="{iconExists}"/>
+                        </mx:Box>
+                    </mx:GridItem>
+                </mx:GridRow>
+            </mx:Grid>
+        </mx:VBox>
+    </mx:VBox>
+</kpi:KPITutorialPanel>

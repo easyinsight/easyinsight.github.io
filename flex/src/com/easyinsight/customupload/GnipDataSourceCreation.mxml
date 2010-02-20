@@ -42,6 +42,10 @@
             obj.filters = gnipDataGrid._filters;
         }
 
+        public function get savesCredentials():Boolean {
+            return true;
+        }
+
         public function validate():Boolean {
             return true;
         }]]></mx:Script>

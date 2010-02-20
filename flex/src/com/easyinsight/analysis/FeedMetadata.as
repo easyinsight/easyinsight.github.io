@@ -14,6 +14,7 @@ import mx.collections.ArrayCollection;
         public var credentials:ArrayCollection;
         public var intrinsicFilters:ArrayCollection;
         public var fieldHierarchy:ArrayCollection;
+        public var filterExampleMessage:String;
         public var dataSourceInfos:ArrayCollection;
         public var originSolution:int;
 		

@@ -67,5 +67,9 @@ public class AnalysisItemDetailEditor extends Form {
 
     public function save(analysisItem:AnalysisItem):void {
     }
+
+    public function validate():Boolean {
+        return true;
+    }
 }
 }

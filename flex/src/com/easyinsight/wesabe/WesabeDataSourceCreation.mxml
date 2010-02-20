@@ -32,6 +32,10 @@
             return credentials;
         }
 
+        public function get savesCredentials():Boolean {
+            return true;
+        }
+
         public function set credentials(c:Credentials):void {
             usernameInputText = c.userName;
             passwordText = c.password;

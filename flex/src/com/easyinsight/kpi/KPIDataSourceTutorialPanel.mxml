@@ -1,0 +1,67 @@
+<?xml version="1.0" ?>
+<kpi:KPITutorialPanel xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:kpi="com.easyinsight.kpi.*"
+        implements="com.easyinsight.kpi.ITutorialPanel">
+    <mx:Metadata>
+        [Event(name="expertMode", type="com.easyinsight.kpi.KPIModeEvent")]
+    </mx:Metadata>
+    <mx:Script><![CDATA[
+        import com.easyinsight.listing.DataFeedDescriptor;
+
+        import mx.collections.ArrayCollection;
+        import mx.collections.Sort;
+        import mx.collections.SortField;
+        import mx.controls.Alert;
+
+        [Bindable]
+        private var descriptors:ArrayCollection;
+
+        [Bindable]
+        private var dataSource:DataFeedDescriptor;
+
+        public function gotFocus():void {
+            if (kpiData.dataSourceID > 0) {
+                dataSource = new DataFeedDescriptor();
+                dataSource.dataFeedID = kpiData.dataSourceID;
+                dataSource.name = kpiData.dataSourceName;
+            }
+            dataProvider.searchForSubscribedFeeds.send();
+        }
+
+        public function validate():Boolean {
+            return true;
+        }
+
+        public function saveValues():void {
+            kpiData.dataSourceID = dataSourceComboBox.selectedItem.dataFeedID;
+        }
+
+        private function gotFeeds():void {
+            descriptors = dataProvider.searchForSubscribedFeeds.lastResult as ArrayCollection;
+            var sort:Sort = new Sort();
+            var sortField:SortField = new SortField("name");
+            sort.fields = [ sortField ];
+            descriptors.sort = sort;
+            descriptors.refresh();
+            if (dataSource != null) {
+                for each (var desc:DataFeedDescriptor in descriptors) {
+                    if (desc.dataFeedID == dataSource.dataFeedID) {
+                        dataSource = desc;
+                        break;
+                    }
+                }
+            }
+        }
+        ]]></mx:Script>
+    <mx:RemoteObject id="dataProvider" destination="feeds">
+            <mx:method name="searchForSubscribedFeeds" result="gotFeeds()"/>
+        </mx:RemoteObject>
+    <mx:VBox width="100%" height="100%" verticalGap="0">
+        <mx:Box height="50%" width="100%"  backgroundColor="#000000" horizontalAlign="center" verticalAlign="middle">
+            <mx:Text text="Where is the data for the KPI?" fontSize="24" color="#FFFFFF"/>
+        </mx:Box>
+        <mx:HBox verticalAlign="middle" horizontalAlign="center" height="50%" width="100%" backgroundColor="#FFFFFF">
+            <mx:Label text="Data Source: " fontSize="18"/>
+            <mx:ComboBox dataProvider="{descriptors}" id="dataSourceComboBox" labelField="name" fontSize="18" selectedItem="{dataSource}"/>
+        </mx:HBox>
+    </mx:VBox>
+</kpi:KPITutorialPanel>

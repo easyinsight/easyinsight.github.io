@@ -65,6 +65,9 @@
             } else {
                 ready = true;
                 dataSourceCreation = new _dataSourceClass();
+                if (dataSourceCreation.savesCredentials) {
+                    credentialsIndex = 1;
+                }
                 var uicomp:UIComponent = dataSourceCreation as UIComponent;
                 uicomp.addEventListener(FlexEvent.CREATION_COMPLETE, onCreation);
                 coreContent.addChild(dataSourceCreation as DisplayObject);
@@ -80,6 +83,9 @@
             ready = true;            
             var configClass:Class = (dataSourceDefinition as IServerDataSourceDefinition).configClass();
             dataSourceCreation = new configClass();
+            if (dataSourceCreation.savesCredentials) {
+                credentialsIndex = 1;
+            }
             coreContent.addChild(dataSourceCreation as DisplayObject);
             PopUpUtil.centerPopUp(this);
         }
@@ -142,6 +148,9 @@
         public function set dataSourceClass(value:Class):void {
             _dataSourceClass = value;
         }
+
+        [Bindable]
+        private var credentialsIndex:int;
         ]]></mx:Script>
     <mx:RemoteObject destination="userUpload" id="uploadService">
         <mx:method name="validateCredentials" result="validated()"/>
@@ -151,26 +160,24 @@
         <mx:method name="updateFeedDefinition" result="created()" fault="updateFault(event)" />
         <mx:method name="getFeedDefinition" result="gotDataSource()"/>
     </mx:RemoteObject>
-    <mx:Form>
-        <mx:FormItem label="">
-            <mx:Label text="Now that you've installed this connection, you need to configure it:" fontSize="14"/>
-        </mx:FormItem>
+    <mx:VBox>
+        <mx:Label text="Now that you've installed this connection, you need to configure it:" fontSize="14"/>
         <mx:Box id="coreContent"/>
-        <mx:FormItem label="" direction="vertical">
-            <mx:ProgressBar id="progressBar" indeterminate="true" visible="false"/>
-        </mx:FormItem>
-        <mx:FormItem label="Save Credentials:" enabled="{ready}" direction="horizontal">
-            <mx:HBox verticalAlign="middle">
-            <mx:CheckBox id="saveCredentialsCheckbox"/>
-            <mx:Label text="Security Note" fontSize="10" textDecoration="underline" toolTip="Your credentials will be saved in an encrypted form on your local system, so do not do this if you're using a public machine."/>
+        <mx:ProgressBar id="progressBar" indeterminate="true" visible="false"/>
+        <mx:ViewStack selectedIndex="{credentialsIndex}">
+            <mx:Box/>
+            <mx:HBox>
+                <mx:Label text="Save Credentials:"/>
+                <mx:CheckBox id="saveCredentialsCheckbox"/>
+                <mx:Label text="Security Note" fontSize="10" textDecoration="underline" toolTip="Your credentials will be saved in an encrypted form on your local system, so do not do this if you're using a public machine."/>
             </mx:HBox>
-        </mx:FormItem>
+        </mx:ViewStack>
         <!--<mx:FormItem label="Daily Refresh:" enabled="{credentialsSaved}">
             <mx:CheckBox id="dailyRefresh"/>
         </mx:FormItem>-->
-        <mx:FormItem label="" direction="horizontal">
+        <mx:HBox width="100%" horizontalAlign="center">
             <mx:Button label="Create" click="validate()" enabled="{ready}"/>
             <mx:Button label="Cancel" click="stage.removeEventListener(KeyboardEvent.KEY_UP, onKey); PopUpManager.removePopUp(this)"/>
-        </mx:FormItem>
-	</mx:Form>
+        </mx:HBox>
+	</mx:VBox>
 </util:EITitleWindow>

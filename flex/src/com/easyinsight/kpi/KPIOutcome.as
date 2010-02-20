@@ -23,6 +23,7 @@ public class KPIOutcome {
     public var kpiID:int;
     public var valueDefined:Boolean;
     public var percentChange:Number;
+    public var directional:Boolean;
 
     public function KPIOutcome() {
         

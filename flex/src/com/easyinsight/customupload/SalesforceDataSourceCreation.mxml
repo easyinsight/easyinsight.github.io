@@ -42,6 +42,10 @@
             return true;
         }
 
+        public function get savesCredentials():Boolean {
+            return true;
+        }
+
         public function updateDataSource(feedDefinition:FeedDefinitionData):void {
         }]]></mx:Script>
     <mx:Form>

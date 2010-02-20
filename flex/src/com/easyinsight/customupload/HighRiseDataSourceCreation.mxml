@@ -46,6 +46,11 @@
             passwordText = c.password;
         }
 
+
+        public function get savesCredentials():Boolean {
+            return false;
+        }
+
         public function validate():Boolean {
             return true;
         }]]></mx:Script>

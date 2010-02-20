@@ -1,0 +1,21 @@
+<?xml version="1.0" ?>
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml">
+    <mx:Script><![CDATA[
+        import mx.binding.utils.BindingUtils;
+        import mx.containers.HBox;
+        import mx.controls.Button;
+
+
+
+
+
+        protected function saveValues():void {
+
+        }
+
+        public function validate():Boolean {
+            return true;
+        }
+
+        ]]></mx:Script>
+</mx:VBox>

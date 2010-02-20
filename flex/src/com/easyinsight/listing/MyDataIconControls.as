@@ -51,6 +51,8 @@ public class MyDataIconControls extends HBox
 
     private var userUploadSource:RemoteObject;
 
+    private var feedService:RemoteObject;
+
     private var refreshButton:Button;
     private var adminButton:Button;
     private var analyzeButton:Button;
@@ -289,13 +291,33 @@ public class MyDataIconControls extends HBox
             return;
         }
 
-        var refreshWindow:RefreshWindow = new RefreshWindow();
-        refreshWindow.dataSourceID = feedDescriptor.dataFeedID;
-        refreshWindow.addEventListener(DataSourceConfiguredEvent.DATA_SOURCE_CONFIGURED, dsConfigured);
-        /*refreshWindow.addEventListener(UploadConfigEvent.UPLOAD_CONFIG_COMPLETE, passEvent);
-        refreshWindow.addEventListener(RefreshNotificationEvent.REFRESH_NOTIFICATION, notifyRefresh);*/
-        PopUpManager.addPopUp(refreshWindow, this, true);
-        PopUpUtil.centerPopUp(refreshWindow);
+        feedService = new RemoteObject();
+        feedService.destination = "feeds";
+        feedService.needsConfig.addEventListener(ResultEvent.RESULT, gotConfigNeed);
+        feedService.needsConfig.addEventListener(FaultEvent.FAULT, GenericFaultHandler.genericFault);
+        ProgressAlert.alert(this, "Getting ready to refresh data...", null, feedService.needsConfig);
+        feedService.needsConfig.send(feedDescriptor.dataFeedID);
+    }
+
+    private function gotConfigNeed(event:ResultEvent):void {
+        var config:Boolean = feedService.needsConfig.lastResult as Boolean;
+        var descriptor:DataFeedDescriptor = obj as DataFeedDescriptor;
+        if (config) {
+            var refreshWindow:RefreshWindow = new RefreshWindow();
+            refreshWindow.dataSourceID = descriptor.dataFeedID;
+            refreshWindow.addEventListener(DataSourceConfiguredEvent.DATA_SOURCE_CONFIGURED, dsConfigured);
+            /*refreshWindow.addEventListener(UploadConfigEvent.UPLOAD_CONFIG_COMPLETE, passEvent);
+            refreshWindow.addEventListener(RefreshNotificationEvent.REFRESH_NOTIFICATION, notifyRefresh);*/
+            PopUpManager.addPopUp(refreshWindow, this, true);
+            PopUpUtil.centerPopUp(refreshWindow);
+        } else {
+            userUploadSource = new RemoteObject();
+            userUploadSource.destination = "userUpload";
+            userUploadSource.refreshData.addEventListener(ResultEvent.RESULT, completedRefresh);
+            userUploadSource.refreshData.addEventListener(FaultEvent.FAULT, GenericFaultHandler.genericFault);
+            ProgressAlert.alert(this, "Refreshing data...", null, userUploadSource.refreshData);
+            userUploadSource.refreshData.send(descriptor.dataFeedID, null, false, true);    
+        }
     }
 
     private function dsConfigured(event:DataSourceConfiguredEvent):void {

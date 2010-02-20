@@ -1,6 +1,7 @@
 package com.easyinsight.scorecard {
 import com.easyinsight.kpi.KPI;
 import com.easyinsight.kpi.KPIEvent;
+import com.easyinsight.kpi.KPIParentWindow;
 import com.easyinsight.kpi.KPIWindow;
 import com.easyinsight.util.PopUpUtil;
 
@@ -79,7 +80,7 @@ public class KPIControls extends HBox {
     }
 
     private function onEdit(event:MouseEvent):void {
-        var kpiWindow:KPIWindow = new KPIWindow();
+        var kpiWindow:KPIParentWindow = new KPIParentWindow();
         kpiWindow.scorecardID = _scorecardID;
         kpiWindow.kpi = kpi;
         kpiWindow.addEventListener(KPIEvent.KPI_EDITED, updatedKPI);

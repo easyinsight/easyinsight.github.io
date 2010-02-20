@@ -30,6 +30,10 @@
             var ds:CloudWatchDataSource = feedDefinition as CloudWatchDataSource;
         }
 
+        public function get savesCredentials():Boolean {
+            return true;
+        }
+
         public function get credentials():Credentials {
             var credentials:Credentials = new Credentials();
             credentials.userName = userNameInput.text;

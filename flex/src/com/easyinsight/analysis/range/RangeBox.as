@@ -46,6 +46,14 @@ public class RangeBox extends VBox {
         }
     }
 
+    public function validate():Array {
+        var results:Array = [];
+        for each (var rangeEditor:RangeRowEditor in getChildren()) {
+            results.push(rangeEditor.validate());
+        }
+        return results;
+    }
+
     public function save():void {
         for each (var rangeEditor:RangeRowEditor in getChildren()) {
             rangeEditor.save();

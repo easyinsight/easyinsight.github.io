@@ -1,0 +1,30 @@
+<?xml version="1.0" ?>
+<kpi:KPITutorialPanel xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:kpi="com.easyinsight.kpi.*"
+        implements="com.easyinsight.kpi.ITutorialPanel">
+    <mx:Script><![CDATA[
+
+        [Bindable]
+        private var dayValue:int = 7;
+
+        public function saveValues():void {
+            kpiData.dayWindow = stepper.value;
+        }
+
+        public function validate():Boolean {
+            return true;
+        }
+
+        public function gotFocus():void {
+            dayValue = kpiData.dayWindow;
+        }]]></mx:Script>
+    <mx:VBox width="100%" height="100%" verticalGap="0">
+        <mx:Box height="50%" width="100%"  backgroundColor="#000000" horizontalAlign="center" verticalAlign="middle">
+            <mx:Text text="What's the time interval for this KPI?" fontSize="24" color="#FFFFFF"/>
+            <mx:Text text="This value represents the time window at which you want&#13;to track KPI change. For example, 7 days would track&#13;the current value and the % change since one&#13;week ago." fontSize="18" color="#FFFFFF"/>
+        </mx:Box>
+        <mx:HBox verticalAlign="middle" horizontalAlign="center" height="50%" width="100%" backgroundColor="#FFFFFF">
+            <mx:Label text="Number of Days: " fontSize="18"/>
+            <mx:NumericStepper id="stepper" value="{dayValue}" fontSize="18"/>
+        </mx:HBox>
+    </mx:VBox>
+</kpi:KPITutorialPanel>

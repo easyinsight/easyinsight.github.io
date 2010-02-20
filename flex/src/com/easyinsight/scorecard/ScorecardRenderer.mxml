@@ -96,7 +96,9 @@
         }
 
         private function onKPIEdit(event:KPIEvent):void {
-
+            var index:int = kpis.getItemIndex(event.previousKPI);
+            kpis.removeItemAt(index);
+            kpis.addItemAt(event.kpi, index);
         }
 
         private function onKPIDelete(event:KPIEvent):void {
@@ -175,10 +177,10 @@
                                            itemRenderer="{kpiNameFactory}"/>
                     <util:EIDataGridColumn headerText="Latest Value" dataField="name"
                                            itemRenderer="com.easyinsight.scorecard.KPIValueRenderer" width="110"/>
+                    <util:EIDataGridColumn headerText="Time" dataField="name"
+                                           itemRenderer="com.easyinsight.scorecard.KPITimeRenderer" width="100"/>
                     <util:EIDataGridColumn headerText="% Change" dataField="name"
                                            itemRenderer="com.easyinsight.scorecard.KPIChangeRenderer" width="110"/>
-                    <util:EIDataGridColumn headerText="Date" dataField="name"
-                                           itemRenderer="com.easyinsight.scorecard.KPIDateRenderer" width="100"/>
                     <util:EIDataGridColumn headerText="" dataField="name"
                                            itemRenderer="com.easyinsight.scorecard.KPIStatusRenderer" width="30"
                                            sortable="false"/>
@@ -196,8 +198,6 @@
                 <util:EIDataGridColumn headerText="KPI Name" dataField="name" itemRenderer="{kpiNameFactory}"/>
                 <util:EIDataGridColumn headerText="Latest Value" dataField="name"
                                        itemRenderer="com.easyinsight.scorecard.KPIValueRenderer" width="110"/>
-                <util:EIDataGridColumn headerText="Date" dataField="name"
-                                       itemRenderer="com.easyinsight.scorecard.KPIDateRenderer" width="100"/>
                 <util:EIDataGridColumn headerText="" dataField="name"
                                        itemRenderer="com.easyinsight.scorecard.KPIStatusRenderer" width="30"
                                        sortable="false"/>

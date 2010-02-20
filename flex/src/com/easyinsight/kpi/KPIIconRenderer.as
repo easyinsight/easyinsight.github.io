@@ -33,6 +33,8 @@ public class KPIIconRenderer extends HBox{
         this.kpi = val as KPI;
         if (this.kpi.iconImage != null) {
             image.load(PrefixManager.prefix + "/app/assets/icons/32x32/" + this.kpi.iconImage);
+        } else {
+            image.source = null;
         }
     }
 

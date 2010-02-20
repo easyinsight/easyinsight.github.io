@@ -11,34 +11,16 @@
         [Bindable]
         private var ranges:ArrayCollection = new ArrayCollection();
 
-        [Bindable]
-        private var aggregationString:String;
+        override public function validate():Boolean {
+            var results:Array = rangeBox.validate();
+            return results.length == 0;
+        }
 
         override public function set analysisItem(val:AnalysisItem):void {
             super.analysisItem = val;
             if (val is AnalysisRangeDimension) {
                 var range:AnalysisRangeDimension = val as AnalysisRangeDimension;
                 ranges = range.explicitOptions;
-
-                var measureString:String;
-                switch (range.aggregationType) {
-                    case AggregationTypes.SUM:
-                        measureString = "Sum";
-                        break;
-                    case AggregationTypes.AVERAGE:
-                        measureString = "Average";
-                        break;
-                    case AggregationTypes.MIN:
-                        measureString = "Min";
-                        break;
-                    case AggregationTypes.MAX:
-                        measureString = "Max";
-                        break;
-                    case AggregationTypes.COUNT:
-                        measureString = "Count";
-                        break;
-                }
-                aggregationString = measureString;
             }
         }
 
@@ -46,25 +28,6 @@
             var analysisRange:AnalysisRangeDimension = analysisItem as AnalysisRangeDimension;
             rangeBox.save();
             analysisRange.explicitOptions = ranges;
-            var complexAggregationType:int;
-            switch (complexWrappedAggregations.selectedLabel) {
-                case "Sum":
-                    complexAggregationType = AggregationTypes.SUM;
-                    break;
-                case "Average":
-                    complexAggregationType = AggregationTypes.AVERAGE;
-                    break;
-                case "Max":
-                    complexAggregationType = AggregationTypes.MAX;
-                    break;
-                case "Min":
-                    complexAggregationType = AggregationTypes.MIN;
-                    break;
-                case "Count":
-                    complexAggregationType = AggregationTypes.COUNT;
-                    break;
-            }
-            analysisRange.aggregationType = complexAggregationType;
         }
 
         private function setupListeners():void {
@@ -83,10 +46,6 @@
         override public function createAnalysisItem(aggregation:String):AnalysisItem {
             return new AnalysisRangeDimension();
         }]]></mx:Script>
-    <mx:FormItem label="Range Aggregation: ">
-        <mx:ComboBox dataProvider="{measureObjects}" id="complexWrappedAggregations"
-                     selectedItem="{aggregationString}"/>
-    </mx:FormItem>
     <!--<mx:FormItem label="How do you want to produce the range values?">
         <mx:RadioButtonGroup/>
         <mx:RadioButton label="Let Me Set Explicit Ranges"/>

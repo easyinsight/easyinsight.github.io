@@ -1,5 +1,5 @@
 package com.easyinsight.kpi {
-
+import com.easyinsight.analysis.AnalysisDateDimension;
 import com.easyinsight.analysis.AnalysisMeasure;
 
 import flash.events.Event;
@@ -15,6 +15,7 @@ public class KPI extends EventDispatcher {
     public var coreFeedID:int;
     public var coreFeedName:String;
     public var analysisMeasure:AnalysisMeasure;
+    public var dateDimension:AnalysisDateDimension;
 
     public var name:String;
     public var description:String;
@@ -22,10 +23,13 @@ public class KPI extends EventDispatcher {
 
     public var kpiOutcome:KPIOutcome;
     public var goalDefined:Boolean;
-    public var goalValue:Number;
+    public var goalValue:Number = 0;
     public var highIsGood:int;
 
-    public var problemConditions:ArrayCollection;
+    public var dayWindow:int;
+    public var threshold:Number = 0;
+
+    public var problemConditions:ArrayCollection = new ArrayCollection();
 
     public var temporary:Boolean;
 
@@ -33,7 +37,7 @@ public class KPI extends EventDispatcher {
 
     public var connectionVisible:Boolean;
 
-    public var tags:ArrayCollection;
+    public var tags:ArrayCollection = new ArrayCollection();
     public var filters:ArrayCollection;
     public var objectives:ArrayCollection;
 

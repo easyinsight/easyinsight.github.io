@@ -279,20 +279,24 @@
         }
 
         public function save(dataSourceID:int):AnalysisItem {
-            var existingType:int = startingAnalysisItem.getType();
-            var analysisItem:AnalysisItem = detailEditor.createAnalysisItem(aggregationBox.selectedItem as String);
-            if (analysisItem.getType() == existingType) {
-                analysisItem.analysisItemID = startingAnalysisItem.analysisItemID;
+            if (detailEditor.validate()) {
+                var existingType:int = startingAnalysisItem.getType();
+                var analysisItem:AnalysisItem = detailEditor.createAnalysisItem(aggregationBox.selectedItem as String);
+                if (analysisItem.getType() == existingType) {
+                    analysisItem.analysisItemID = startingAnalysisItem.analysisItemID;
+                }
+                analysisItem.displayName = fieldNameInput.text;
+                analysisItem.key = key;
+                analysisItem.hidden = hiddenCheckbox.selected;
+                analysisItem.links = links;
+                analysisItem.highIsGood = highGroup.selectedValue == "yes";
+                analysisItem.filters = transformContainer.getFilterDefinitions();
+                detailEditor.save(analysisItem);
+                dispatchEvent(new AnalysisItemSaveEvent(analysisItem));
+                return analysisItem;
+            } else {
+                return null;
             }
-            analysisItem.displayName = fieldNameInput.text;
-            analysisItem.key = key;
-            analysisItem.hidden = hiddenCheckbox.selected;
-            analysisItem.links = links;
-            analysisItem.highIsGood = highGroup.selectedValue == "yes";
-            analysisItem.filters = transformContainer.getFilterDefinitions();
-            detailEditor.save(analysisItem);
-            dispatchEvent(new AnalysisItemSaveEvent(analysisItem));
-            return analysisItem;
         }
 
         private function aggregationTypeChanged(event:DropdownEvent):void {

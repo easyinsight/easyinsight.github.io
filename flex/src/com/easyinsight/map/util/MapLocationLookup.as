@@ -494,7 +494,12 @@ public class MapLocationLookup
 		
 		public function getLocation(name:String, mapType:String):String {
 			var aliasMap:Object = getAliasMap(mapType);
-			return aliasMap[name.toUpperCase()];
+			var location:String = aliasMap[name.toUpperCase()];
+            if (location == null) {
+                return name;
+            } else {
+                return location;
+            }
 		}
 
         

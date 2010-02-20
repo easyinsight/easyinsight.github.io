@@ -1,9 +1,16 @@
 <?xml version="1.0" ?>
-<util:EITitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*"
-                    xmlns:filtering="com.easyinsight.filtering.*" xmlns:goals="com.easyinsight.goals.*"
-                    title="KPI Window"
-                    creationComplete="setupData()" paddingBottom="5" paddingTop="5" paddingLeft="5" paddingRight="5">
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*"
+         xmlns:filtering="com.easyinsight.filtering.*" xmlns:goals="com.easyinsight.goals.*"
+         creationComplete="setupData()" paddingBottom="5" paddingTop="5" paddingLeft="5" paddingRight="5">
+    <mx:Metadata>
+        [Event(name="wizardMode", type="com.easyinsight.kpi.KPIModeEvent")]
+        [Event(name="kpiAdded", type="com.easyinsight.kpi.KPIEvent")]
+        [Event(name="kpiEdited", type="com.easyinsight.kpi.KPIEvent")]
+        [Event(name="kpiCancel", type="com.easyinsight.kpi.KPIModeEvent")]
+    </mx:Metadata>
     <mx:Script><![CDATA[
+        import com.easyinsight.administration.sharing.UserStub;
+        import com.easyinsight.analysis.AnalysisDateDimension;
         import com.easyinsight.analysis.AnalysisItem;
         import com.easyinsight.analysis.AnalysisItemEditEvent;
         import com.easyinsight.analysis.AnalysisItemEditWindow;
@@ -17,7 +24,9 @@
         import com.easyinsight.commands.CommandEvent;
         import com.easyinsight.commands.CommandProcessor;
         import com.easyinsight.filtering.FilterDefinition;
+        import com.easyinsight.filtering.TransformsUpdatedEvent;
         import com.easyinsight.framework.CredentialsCache;
+        import com.easyinsight.framework.User;
         import com.easyinsight.icons.IconSelectionEvent;
         import com.easyinsight.icons.IconSelectionWindow;
         import com.easyinsight.listing.DataFeedDescriptor;
@@ -45,11 +54,14 @@
         private var insightBound:Boolean;
 
         [Bindable]
-        private var availableItems:ArrayCollection;
+        private var measures:ArrayCollection;
+
+        [Bindable]
+        private var dateDims:ArrayCollection;
 
         [Bindable]
         private var connectionVisible:Boolean;
-        
+
         [Bindable]
         private var problemDefinition:FilterDefinition;
 
@@ -61,6 +73,14 @@
 
         [Bindable]
         private var analysisMeasure:AnalysisMeasure;
+
+        [Bindable]
+        private var dateDimension:AnalysisDateDimension;
+
+        [Bindable]
+        private var kpiTime:int;
+        [Bindable]
+        private var thresholdString:String = "0";
 
         [Bindable]
         [Embed(source="../../../../assets/pencil.png")]
@@ -88,16 +108,16 @@
             analysisMeasure = event.analysisItem as AnalysisMeasure;
             if (analysisMeasure != null) {
                 var foundAnalysisItem:AnalysisItem = null;
-                for (var i:int = 0; i < availableItems.length && foundAnalysisItem == null; i++) {
-                    var analysisTest:AnalysisItem = availableItems.getItemAt(i) as AnalysisItem;
+                for (var i:int = 0; i < measures.length && foundAnalysisItem == null; i++) {
+                    var analysisTest:AnalysisItem = measures.getItemAt(i) as AnalysisItem;
                     if (analysisTest.display == analysisMeasure.display) {
                         foundAnalysisItem = analysisTest;
                     }
                 }
                 if (foundAnalysisItem != null) {
-                    var index:int = availableItems.getItemIndex(foundAnalysisItem);
-                    availableItems.removeItemAt(index);
-                    availableItems.addItemAt(analysisMeasure, index);
+                    var index:int = measures.getItemIndex(foundAnalysisItem);
+                    measures.removeItemAt(index);
+                    measures.addItemAt(analysisMeasure, index);
                     availableItemBox.selectedItem = analysisMeasure;
                 }
             }
@@ -144,6 +164,9 @@
                 description = _kpi.description;
                 dataSource = descriptor;
                 kpiName = _kpi.name;
+                thresholdString = String(_kpi.threshold);
+                kpiTime = _kpi.dayWindow;
+                dateDimension = _kpi.dateDimension;
                 if (_kpi.problemConditions.length > 0) {
                     problemDefinition = _kpi.problemConditions.getItemAt(0) as FilterDefinition;
                 }
@@ -153,12 +176,12 @@
                     iconExists = true;
                 }
                 /*if (_kpi.highIsGood == 2) {
-                    radioValue = "highGoodRadio";
-                } else if (_kpi.highIsGood == 1) {
-                    radioValue = "lowGoodRadio";
-                } else {
-                    radioValue = "undefinedRadio";
-                }*/
+                 radioValue = "highGoodRadio";
+                 } else if (_kpi.highIsGood == 1) {
+                 radioValue = "lowGoodRadio";
+                 } else {
+                 radioValue = "undefinedRadio";
+                 }*/
                 highGood = _kpi.highIsGood;
                 if (_kpi.goalDefined) {
                     goalType = "goal";
@@ -166,13 +189,12 @@
                 } else if (_kpi.problemConditions.length > 0) {
                     goalType = "condition";
                     targetIndex = 2;
-                }               
+                }
                 for each (var filter:FilterDefinition in _kpi.filters) {
                     transformContainer.addFilterDefinition(filter);
                 }
             }
-            dataProvider.searchForSubscribedFeeds.send();
-            PopUpUtil.centerPopUpWithY(this, 20);
+            dataProvider.searchForSubscribedFeeds.send();            
         }
 
         private function gotFeeds():void {
@@ -192,6 +214,10 @@
             }
         }
 
+        private function onTransformAdd(event:TransformsUpdatedEvent):void {
+
+        }
+
         private function onCredentials():void {
         }
 
@@ -202,7 +228,11 @@
 
             var measures:ArrayCollection = new ArrayCollection();
             var dimensions:ArrayCollection = new ArrayCollection();
+            var dates:ArrayCollection = new ArrayCollection();
             for each (var analysisItem:AnalysisItem in feedDefinition.fields) {
+                if (analysisItem.hasType(AnalysisItemTypes.DATE)) {
+                    dates.addItem(analysisItem);
+                }
                 if (analysisItem.hasType(AnalysisItemTypes.MEASURE)) {
                     measures.addItem(analysisItem);
                 } else if (analysisItem.hasType(AnalysisItemTypes.DIMENSION)) {
@@ -212,8 +242,9 @@
                 aNode.analysisItem = analysisItem;
                 allFields.addItem(new AnalysisItemWrapper(aNode));
             }
-            this.availableItems = measures;
+            this.measures = measures;
             this.availableDimensions = dimensions;
+            this.dateDims = dates;
             if (transformContainer.getFilterDefinitions().length == 0) {
                 for each (var filter:FilterDefinition in feedDefinition.intrinsicFilters) {
                     transformContainer.addFilterDefinition(filter);
@@ -222,21 +253,36 @@
             //processFeed(feedDefinition);            
             if (analysisMeasure != null) {
                 var foundAnalysisItem:AnalysisItem = null;
-                for (var i:int = 0; i < availableItems.length && foundAnalysisItem == null; i++) {
-                    var analysisTest:AnalysisItem = availableItems.getItemAt(i) as AnalysisItem;
+                for (var i:int = 0; i < measures.length && foundAnalysisItem == null; i++) {
+                    var analysisTest:AnalysisItem = measures.getItemAt(i) as AnalysisItem;
                     if (analysisTest.display == analysisMeasure.display) {
                         foundAnalysisItem = analysisTest;
                     }
                 }
                 if (foundAnalysisItem != null) {
-                    var index:int = availableItems.getItemIndex(foundAnalysisItem);
-                    availableItems.removeItemAt(index);
-                    availableItems.addItemAt(analysisMeasure, index);
+                    var index:int = measures.getItemIndex(foundAnalysisItem);
+                    measures.removeItemAt(index);
+                    measures.addItemAt(analysisMeasure, index);
                     availableItemBox.selectedItem = analysisMeasure;
                 }
             } else {
-                if (availableItems.length > 0) {
-                    analysisMeasure = availableItems.getItemAt(0) as AnalysisMeasure;
+                if (measures.length > 0) {
+                    analysisMeasure = measures.getItemAt(0) as AnalysisMeasure;
+                }
+            }
+            if (dateDimension != null) {
+                var foundDate:AnalysisItem = null;
+                for (var j:int = 0; j < measures.length && foundAnalysisItem == null; j++) {
+                    var dateTest:AnalysisItem = measures.getItemAt(i) as AnalysisItem;
+                    if (dateTest.display == dateDimension.display) {
+                        foundDate = dateTest;
+                    }
+                }
+                if (foundDate != null) {
+                    var dateIndex:int = measures.getItemIndex(foundDate);
+                    measures.removeItemAt(dateIndex);
+                    measures.addItemAt(dateDimension, dateIndex);
+                    availableItemBox.selectedItem = dateDimension;
                 }
             }
         }
@@ -248,6 +294,9 @@
                 newKPI = true;
             }
             _kpi.analysisMeasure = availableItemBox.selectedItem as AnalysisMeasure;
+            //_kpi.dateDimension = dateDimBox.selectedItem as AnalysisDateDimension;
+            _kpi.threshold = Number(thresholdInput.text);
+            _kpi.dayWindow = timeStepper.value;
             _kpi.coreFeedID = dataSourceBox.selectedItem.dataFeedID;
             _kpi.name = kpiNameInput.text;
             _kpi.iconImage = kpiIconPath;
@@ -274,15 +323,24 @@
                 _kpi.problemConditions = new ArrayCollection();
             }
             //_kpi.connectionVisible = connectionVisibleCheckbox.selected;
-
+            if (_kpi.kpiUsers == null) {
+                _kpi.kpiUsers = new ArrayCollection();
+                var user:KPIUser = new KPIUser();
+                user.owner = true;
+                user.responsible = true;
+                var userStub:UserStub = new UserStub();
+                userStub.userID = User.getInstance().userID;
+                user.feedConsumer = userStub;
+                _kpi.kpiUsers.addItem(user);
+            }
             if (_scorecardID > 0) {
                 if (newKPI) {
-                    scorecardService.addKPIToScorecard(_kpi, _scorecardID);
+                    scorecardService.addKPIToScorecard(_kpi, _scorecardID, CredentialsCache.getCache().createCredentials());
                 } else {
-                    scorecardService.updateKPI(_kpi);
+                    scorecardService.updateKPI(_kpi, CredentialsCache.getCache().createCredentials());
                 }
             } else {
-                kpiService.saveKPI(_kpi);
+                kpiService.saveKPI(_kpi, CredentialsCache.getCache().createCredentials());
             }
         }
 
@@ -293,24 +351,24 @@
         }
 
         private function cancel():void {
-            PopUpManager.removePopUp(this);
+            dispatchEvent(new KPIModeEvent(KPIModeEvent.CANCEL));
         }
 
         private function addedKPI():void {
-            _kpi.kpiID = scorecardService.addKPIToScorecard.lastResult as int;
+            _kpi = scorecardService.addKPIToScorecard.lastResult as KPI;
             dispatchEvent(new KPIEvent(KPIEvent.KPI_ADDED, _kpi));
-            PopUpManager.removePopUp(this);
         }
 
         private function updatedKPI():void {
-            dispatchEvent(new KPIEvent(KPIEvent.KPI_EDITED, _kpi));
-            PopUpManager.removePopUp(this);
+            var prevKPI:KPI = _kpi;
+            _kpi = scorecardService.updateKPI.lastResult as KPI;
+            dispatchEvent(new KPIEvent(KPIEvent.KPI_EDITED, _kpi, prevKPI));
         }
 
         private function savedKPI():void {
-            _kpi.kpiID = kpiService.saveKPI.lastResult as int;
-            dispatchEvent(new KPIEvent(KPIEvent.KPI_ADDED, _kpi));
-            PopUpManager.removePopUp(this);
+            var prevKPI:KPI = _kpi;
+            _kpi = kpiService.saveKPI.lastResult as KPI;
+            dispatchEvent(new KPIEvent(KPIEvent.KPI_ADDED, _kpi, prevKPI));
         }
 
         private function assignIcon():void {
@@ -364,7 +422,7 @@
 
         [Bindable]
         private var goalType:String = "none";
-        
+
         [Bindable]
         private var targetIndex:int;
 
@@ -382,128 +440,141 @@
         <mx:method name="addKPIToScorecard" result="addedKPI()"/>
         <mx:method name="updateKPI" result="updatedKPI()"/>
     </mx:RemoteObject>
-    <mx:VBox width="100%" height="100%">
-        <mx:VBox width="100%" height="100%">            
-            <mx:HBox paddingTop="10" width="100%" paddingLeft="10" paddingRight="10">
-                <mx:Form width="50%" paddingLeft="0" paddingRight="0" paddingBottom="0" paddingTop="0">
-                    <mx:FormItem label="KPI Name:">
-                        <mx:TextInput id="kpiNameInput" text="{kpiName}" width="280"/>
-                    </mx:FormItem>
-                    <mx:FormItem label="KPI Icon:">
-                        <mx:Box borderStyle="solid" borderThickness="1" click="assignIcon()"
-                                toolTip="Click to assign or change icon...">
-                            <mx:Image id="iconImage" source="{iconPath}" visible="{iconExists}" width="20" height="20"/>
-                        </mx:Box>
-                    </mx:FormItem>
-
-                    <!--<mx:FormItem label="Connection Visible:">
-                        <mx:CheckBox id="connectionVisibleCheckbox" selected="{connectionVisible}"/>
-                    </mx:FormItem>-->
-                </mx:Form>
-                <mx:Form width="50%" paddingLeft="0" paddingRight="0" paddingBottom="0" paddingTop="0">
-                    <mx:FormItem label="Data Source:" direction="horizontal" fontFamily="Tahoma"
-                                 fontWeight="bold">
-                        <util:AnalysisItemCompletionInput items="{descriptors}" id="dataSourceBox"
-                                                          selectedItem="{dataSource}"
-                                                          fontFamily="Lucida Grande" fontWeight="normal"
-                                                          labelField="name" itemChanged="onDataSourceChange(event)"/>
-                    </mx:FormItem>
-                    <mx:FormItem label="Measure:" fontFamily="Tahoma" fontWeight="bold"
-                                 enabled="{insightBound}" direction="horizontal">
-                        <util:AnalysisItemCompletionInput items="{availableItems}" id="availableItemBox"
-                                                          selectedItem="{analysisMeasure}"
-                                                          fontFamily="Lucida Grande" fontWeight="normal"
-                                                          labelField="display"/>
-                        <mx:Button icon="{editIcon}" toolTip="Edit Measure..." click="editMeasure()"/>
-                    </mx:FormItem>
-                    <mx:FormItem label="">
-                        <mx:RadioButtonGroup id="goalGroup" selectedValue="{radioValue}"/>
-                        <mx:RadioButton label="High Values are Good" value="highGoodRadio"
-                                        group="{goalGroup}"
-                                        selected="{highGood == 2}" id="highGoodOption"/>
-                        <mx:RadioButton label="Low Values are Good" value="lowGoodRadio"
+    <mx:HBox paddingTop="10" width="100%" paddingLeft="10" paddingRight="10">
+        <mx:Form width="50%" paddingLeft="0" paddingRight="0" paddingBottom="0" paddingTop="0">
+            <mx:FormItem label="KPI Name:">
+                <mx:TextInput id="kpiNameInput" text="{kpiName}" width="280"/>
+            </mx:FormItem>
+            <mx:FormItem label="KPI Icon:">
+                <mx:Box borderStyle="solid" borderThickness="1" click="assignIcon()"
+                        toolTip="Click to assign or change icon...">
+                    <mx:Image id="iconImage" source="{iconPath}" visible="{iconExists}" width="20" height="20"/>
+                </mx:Box>
+            </mx:FormItem>
+            <mx:FormItem label="Data Source:" direction="horizontal" fontFamily="Tahoma"
+                         fontWeight="bold">
+                <util:AnalysisItemCompletionInput items="{descriptors}" id="dataSourceBox"
+                                                  selectedItem="{dataSource}"
+                                                  fontFamily="Lucida Grande" fontWeight="normal"
+                                                  labelField="name" itemChanged="onDataSourceChange(event)"/>
+            </mx:FormItem>
+            <mx:FormItem label="Measure:" fontFamily="Tahoma" fontWeight="bold"
+                         enabled="{insightBound}" direction="horizontal">
+                <util:AnalysisItemCompletionInput items="{measures}" id="availableItemBox"
+                                                  selectedItem="{analysisMeasure}"
+                                                  fontFamily="Lucida Grande" fontWeight="normal"
+                                                  labelField="display"/>
+                <mx:Button icon="{editIcon}" toolTip="Edit Measure..." click="editMeasure()"/>
+            </mx:FormItem>
+            <!--<mx:FormItem label="Connection Visible:">
+                <mx:CheckBox id="connectionVisibleCheckbox" selected="{connectionVisible}"/>
+            </mx:FormItem>-->
+        </mx:Form>
+        <mx:Form width="50%" paddingLeft="0" paddingRight="0" paddingBottom="0" paddingTop="0">
+            <mx:FormItem label="">
+                <mx:RadioButtonGroup id="goalGroup" selectedValue="{radioValue}"/>
+                <mx:RadioButton label="High Values are Good" value="highGoodRadio"
+                                group="{goalGroup}"
+                                selected="{highGood == 2}" id="highGoodOption"/>
+                <mx:RadioButton label="Low Values are Good" value="lowGoodRadio"
                                 group="{goalGroup}"
                                 selected="{highGood == 1}" id="lowGoodOption"/>
-                        <mx:RadioButton label="Neither" value="undefinedRadio"
+                <mx:RadioButton label="Neither" value="undefinedRadio"
                                 group="{goalGroup}"
                                 selected="{highGood == 0}" id="undefinedOption"/>
-                    </mx:FormItem>
-                </mx:Form>
-            </mx:HBox>
-            <mx:HRule width="100%"/>
+            </mx:FormItem>
+            <!--<mx:FormItem label="Time Dimension:">
+                <util:AnalysisItemCompletionInput items="{measures}" id="dateDimBox"
+                                                  selectedItem="{analysisMeasure}"
+                                                  fontFamily="Lucida Grande" fontWeight="normal"
+                                                  labelField="display"/>
+            </mx:FormItem>-->
+            <mx:FormItem label="Time Window:" direction="horizontal">
+                <mx:NumericStepper id="timeStepper" value="{kpiTime}" maximum="100" minimum="1"/>
+                <mx:Label text="days"/>
+            </mx:FormItem>
+            <mx:FormItem label="Change Threshold:" direction="horizontal">
+                <mx:TextInput id="thresholdInput" text="{thresholdString}" width="80"/>
+                <mx:Label text="%"/>
+            </mx:FormItem>
+        </mx:Form>
+    </mx:HBox>
+    <mx:HRule width="100%"/>
+    <mx:HBox width="100%" horizontalAlign="center">
+        <mx:ToggleButtonBar id="toggleBar">
+            <mx:dataProvider>
+                <mx:Array>
+                    <mx:String>Filters</mx:String>
+                    <mx:String>Goals</mx:String>
+                </mx:Array>
+            </mx:dataProvider>
+        </mx:ToggleButtonBar>
+    </mx:HBox>
+    <mx:ViewStack selectedIndex="{toggleBar.selectedIndex}" resizeToContent="true" creationPolicy="all" borderStyle="solid" borderThickness="1">
+        <mx:VBox width="800" enabled="{insightBound}" paddingTop="10" height="300">
             <mx:HBox width="100%" horizontalAlign="center">
-                    <mx:ToggleButtonBar id="toggleBar">
-                        <mx:dataProvider>
-                            <mx:Array>
-                                <mx:String>Filters</mx:String>
-                                <mx:String>Goals</mx:String>
-                            </mx:Array>
-                        </mx:dataProvider>
-                    </mx:ToggleButtonBar>
-                </mx:HBox>
-            <mx:ViewStack selectedIndex="{toggleBar.selectedIndex}" resizeToContent="true" creationPolicy="all">
-                <mx:VBox width="800" enabled="{insightBound}" paddingTop="10" height="300">
-                    <mx:HBox width="100%" horizontalAlign="center">
-                        <mx:Label fontSize="14" text="Define the Filters" fontWeight="bold"
-                                  fontFamily="Tahoma"/>
-                    </mx:HBox>
-                    <mx:HDividedBox height="100%" width="100%">
-                        <mx:List dataProvider="{availableDimensions}" labelField="display"
-                                 dragEnabled="true"
-                                 dragMoveEnabled="false" enabled="{insightBound}" width="30%"
-                                 height="100%"/>
-                        <mx:Canvas width="70%" height="100%">
-                            <filtering:TransformContainer id="transformContainer" width="100%" height="100%"
-                                                          borderStyle="solid"
-                                                          borderThickness="1" backgroundColor="#ffffff"
-                                                          backgroundAlpha=".1" feedID="{feedID}"
-                                                          analysisItems="{allFields}"
-                                                          showLabel="true"
-                                                          paddingBottom="5" paddingLeft="5" paddingRight="5"
-                                                          paddingTop="5"/>
-                        </mx:Canvas>
-                    </mx:HDividedBox>
-                </mx:VBox>
-                <mx:VBox>
-                    <mx:HBox width="100%" height="100%" paddingLeft="5">
-                        <goals:GoalAdminHistoryDisplay id="historyDisplay"
-                                                       analysisMeasure="{availableItemBox.selectedItem}"
-                                                       feedID="{feedID}"
-                                                       transformContainer="{transformContainer}"/>
-                        <mx:VRule height="100%"/>
-                        <mx:VBox>
-                            <mx:HBox width="100%" horizontalAlign="center" verticalAlign="middle"
-                                     enabled="{insightBound}">
-                                <mx:Label fontSize="14" text="Define the Condition" fontWeight="bold"
-                                          fontFamily="Tahoma"/>
-                                <mx:RadioButtonGroup id="goalTypeGroup" selectedValue="{goalType}"
-                                                     change="toggleGoalState()"/>
-                                <mx:RadioButton group="{goalTypeGroup}" value="none" label="None" fontSize="14"/>
-                                <mx:RadioButton group="{goalTypeGroup}" value="goal" label="Goal" fontSize="14"/>
-                                <mx:RadioButton group="{goalTypeGroup}" value="condition" label="Problem"
-                                                fontSize="14"/>
-                            </mx:HBox>
-                            <mx:HRule width="100%"/>
-                            <mx:ViewStack id="targetBox" width="100%" height="100%" selectedIndex="{targetIndex}" resizeToContent="true"
-                                    creationPolicy="all">
-                                <mx:Box width="100%" height="100%"/>
-                                <goals:GoalDefinitionWindow node="{_kpi}" width="100%"
-                                                            height="100%"/>
-                                <goals:ProblemDefinitionWindow id="problemWindow"
-                                                               analysisMeasure="{availableItemBox.selectedItem}"
-                                                               filterDefinition="{problemDefinition}" width="100%"
-                                                               height="100%"/>
-                            </mx:ViewStack>
-                        </mx:VBox>
-                    </mx:HBox>
-                </mx:VBox>
-            </mx:ViewStack>
-
+                <mx:Label fontSize="14" text="Define the Filters" fontWeight="bold"
+                          fontFamily="Tahoma"/>
+            </mx:HBox>
+            <mx:HDividedBox height="100%" width="100%">
+                <mx:List dataProvider="{availableDimensions}" labelField="display"
+                         dragEnabled="true"
+                         dragMoveEnabled="false" enabled="{insightBound}" width="30%"
+                         height="100%"/>
+                <mx:Canvas width="70%" height="100%">
+                    <filtering:TransformContainer id="transformContainer" width="100%" height="100%"
+                                                  borderStyle="solid"
+                                                  borderThickness="1" backgroundColor="#ffffff"
+                                                  backgroundAlpha=".1" feedID="{feedID}"
+                                                  analysisItems="{allFields}"
+                                                  showLabel="true"
+                                                  paddingBottom="5" paddingLeft="5" paddingRight="5"
+                                                  paddingTop="5" transformAdded="onTransformAdd(event)"/>
+                </mx:Canvas>
+            </mx:HDividedBox>
         </mx:VBox>
+        <mx:VBox>
+            <mx:HBox width="100%" height="100%" paddingLeft="5">
+                <goals:GoalAdminHistoryDisplay id="historyDisplay"
+                                               analysisMeasure="{availableItemBox.selectedItem}"
+                                               feedID="{feedID}"
+                                               transformContainer="{transformContainer}"/>
+                <mx:VRule height="100%"/>
+                <mx:VBox>
+                    <mx:HBox width="100%" horizontalAlign="center" verticalAlign="middle"
+                             enabled="{insightBound}">
+                        <mx:Label fontSize="14" text="Define the Condition" fontWeight="bold"
+                                  fontFamily="Tahoma"/>
+                        <mx:RadioButtonGroup id="goalTypeGroup" selectedValue="{goalType}"
+                                             change="toggleGoalState()"/>
+                        <mx:RadioButton group="{goalTypeGroup}" value="none" label="None" fontSize="14"/>
+                        <mx:RadioButton group="{goalTypeGroup}" value="goal" label="Goal" fontSize="14"/>
+                        <mx:RadioButton group="{goalTypeGroup}" value="condition" label="Problem"
+                                        fontSize="14"/>
+                    </mx:HBox>
+                    <mx:HRule width="100%"/>
+                    <mx:ViewStack id="targetBox" width="100%" height="100%" selectedIndex="{targetIndex}"
+                                  resizeToContent="true"
+                                  creationPolicy="all">
+                        <mx:Box width="100%" height="100%"/>
+                        <goals:GoalDefinitionWindow node="{_kpi}" width="100%"
+                                                    height="100%"/>
+                        <goals:ProblemDefinitionWindow id="problemWindow"
+                                                       analysisMeasure="{availableItemBox.selectedItem}"
+                                                       filterDefinition="{problemDefinition}" width="100%"
+                                                       height="100%"/>
+                    </mx:ViewStack>
+                </mx:VBox>
+            </mx:HBox>
+        </mx:VBox>
+    </mx:ViewStack>
 
+    <mx:Canvas width="100%">
+        <mx:Button label="Wizard Mode" click="dispatchEvent(new KPIModeEvent(KPIModeEvent.WIZARD_MODE))"/>
         <mx:HBox width="100%" horizontalAlign="center">
             <mx:Button label="Save" click="save()"/>
             <mx:Button label="Cancel" click="cancel()"/>
         </mx:HBox>
-    </mx:VBox>
-</util:EITitleWindow>
+    </mx:Canvas>
+
+</mx:VBox>

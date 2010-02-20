@@ -8,5 +8,6 @@ public interface IServerDataSourceCreation extends IFeedAdminDetail {
     function get dataSourceDefinition():FeedDefinitionData;
     function set credentials(credentials:Credentials):void;
     function get credentials():Credentials;
+    function get savesCredentials():Boolean;
 }
 }

@@ -3,7 +3,9 @@
          creationComplete="gotFocus()">
     <mx:Script><![CDATA[
         import com.easyinsight.kpi.KPIEvent;
+        import com.easyinsight.kpi.KPIParentWindow;
         import com.easyinsight.kpi.KPIWindow;
+        import com.easyinsight.kpi.KPIWizard;
         import com.easyinsight.util.PopUpUtil;
 
         import mx.binding.utils.BindingUtils;
@@ -81,11 +83,11 @@
         }
 
         private function addKPI():void {
-            var kpiWindow:KPIWindow = new KPIWindow();
+            var kpiWindow:KPIParentWindow = new KPIParentWindow();
             kpiWindow.scorecardID = selectedScorecard.scorecardID;
             kpiWindow.addEventListener(KPIEvent.KPI_ADDED, addedKPI);
             PopUpManager.addPopUp(kpiWindow, this, true);
-            PopUpUtil.centerPopUp(kpiWindow);
+            PopUpUtil.centerPopUpWithY(kpiWindow, 20);
         }
 
         private function addedKPI(event:KPIEvent):void {
@@ -181,7 +183,7 @@
                 <mx:ViewStack resizeToContent="true" selectedIndex="{controlsIndex}" creationPolicy="all" width="100%">
                     <mx:HBox width="100%" horizontalAlign="center">
                         <mx:Button label="Configure Scorecards" click="configureMode()"/>
-                        <mx:Button label="Refresh KPI Values..." click="refreshData()"/>
+                        <mx:Button label="Refresh KPI Values" click="refreshData()"/>
                     </mx:HBox>
                     <mx:HBox width="100%" horizontalAlign="center">
                         <mx:Button label="Leave Configuration" click="configureMode()"/>

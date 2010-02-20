@@ -4,6 +4,7 @@ package com.easyinsight.twitter {
 public class Tweet {
 
     public var status:String;
+    public var timeString:String;
 
     public function Tweet() {
     }
