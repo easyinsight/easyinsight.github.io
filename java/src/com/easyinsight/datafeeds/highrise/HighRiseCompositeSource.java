@@ -207,6 +207,7 @@ public class HighRiseCompositeSource extends CompositeServerDataSource {
         dealsClosedMonthKPI.setName("Dollar Value of Deals Created in the Last 30 Days");
         dealsClosedMonthKPI.setIconImage("symbol_dollar.png");
         dealsClosedMonthKPI.setAnalysisMeasure((AnalysisMeasure) findAnalysisItem(HighRiseDealSource.TOTAL_DEAL_VALUE));
+        dealsClosedMonthKPI.setDayWindow(30);
         FilterValueDefinition wonFilterDefinition = new FilterValueDefinition();
         wonFilterDefinition.setField(findAnalysisItem(HighRiseDealSource.STATUS));
         wonFilterDefinition.setFilteredValues(Arrays.asList((Object) "won"));
