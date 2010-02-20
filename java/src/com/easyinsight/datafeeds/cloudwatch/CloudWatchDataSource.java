@@ -135,7 +135,7 @@ public class CloudWatchDataSource extends ServerDataSourceDefinition {
         List<KPI> kpis = new ArrayList<KPI>();
         kpis.add(KPIUtil.createKPIForDateFilter("Average CPU Utilization in the Last 24 Hours", "cpu.png", (AnalysisMeasure) findAnalysisItem(CloudWatchDataSource.CPU_UTILIZATION),
                 (AnalysisDimension) findAnalysisItem(CloudWatchDataSource.DATE), MaterializedRollingFilterDefinition.LAST_DAY,
-                null, 0));
+                null, 0, 1));
         return kpis;
     }
 }

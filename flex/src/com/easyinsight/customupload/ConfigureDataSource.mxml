@@ -105,7 +105,7 @@
         private function validate():void {
             progressBar.visible = true;
             dataSourceCreation.updateDataSource(dataSourceDefinition);
-            uploadService.validateCredentials.send(dataSourceDefinition, dataSourceCreation.credentials, saveCredentialsCheckbox.selected);
+            uploadService.validateCredentials.send(dataSourceDefinition, dataSourceCreation.credentials, saveCredentialsCheckbox != null ? saveCredentialsCheckbox.selected : false);
         }
 
         private function validated():void {
@@ -160,10 +160,10 @@
         <mx:method name="updateFeedDefinition" result="created()" fault="updateFault(event)" />
         <mx:method name="getFeedDefinition" result="gotDataSource()"/>
     </mx:RemoteObject>
-    <mx:VBox>
+    <mx:VBox paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5">
         <mx:Label text="Now that you've installed this connection, you need to configure it:" fontSize="14"/>
         <mx:Box id="coreContent"/>
-        <mx:ProgressBar id="progressBar" indeterminate="true" visible="false"/>
+        <mx:ProgressBar id="progressBar" indeterminate="true" visible="false" label="Retrieving data, this may take a few minutes..."/>
         <mx:ViewStack selectedIndex="{credentialsIndex}">
             <mx:Box/>
             <mx:HBox>

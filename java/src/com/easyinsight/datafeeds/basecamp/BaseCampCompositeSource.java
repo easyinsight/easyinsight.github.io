@@ -204,21 +204,18 @@ public class BaseCampCompositeSource extends CompositeServerDataSource {
         openFilter.setField(findAnalysisItem(BaseCampTodoSource.COMPLETED));
         openFilter.setFilteredValues(Arrays.asList((Object) "false"));
         openFilter.setInclusive(true);
-        RollingFilterDefinition cycleFilter = new RollingFilterDefinition();
-        cycleFilter.setField(findAnalysisItem(BaseCampTodoSource.ITEMCYCLE));
-        cycleFilter.setInterval(MaterializedRollingFilterDefinition.WEEK);
         kpis.add(KPIUtil.createKPIWithFilters("Total Open Todo Items", "inbox.png", (AnalysisMeasure) findAnalysisItemByDisplayName("Todo - Count"),
-                Arrays.asList(openFilter, cycleFilter), KPI.BAD));
+                Arrays.asList((FilterDefinition) openFilter), KPI.BAD, 0));
         FilterValueDefinition closedFilter = new FilterValueDefinition();
         closedFilter.setField(findAnalysisItem(BaseCampTodoSource.COMPLETED));
         closedFilter.setInclusive(true);
         closedFilter.setFilteredValues(Arrays.asList((Object) "false"));
         kpis.add(KPIUtil.createKPIForDateFilter("Todo Items Closed in the Last Seven Days", "inbox.png", (AnalysisMeasure) findAnalysisItemByDisplayName("Todo - Count"),
                 (AnalysisDimension) findAnalysisItem(BaseCampTodoSource.COMPLETEDDATE), MaterializedRollingFilterDefinition.WEEK,
-                Arrays.asList((FilterDefinition) closedFilter), KPI.GOOD));
+                Arrays.asList((FilterDefinition) closedFilter), KPI.GOOD, 7));
         kpis.add(KPIUtil.createKPIForDateFilter("Hours Worked Month to Date", "clock.png", (AnalysisMeasure) findAnalysisItem(BaseCampTimeSource.HOURS),
                 (AnalysisDimension) findAnalysisItem(BaseCampTimeSource.DATE), MaterializedRollingFilterDefinition.MONTH_TO_NOW,
-                null, KPI.GOOD));
+                null, KPI.GOOD, 7));
         return kpis;
     }
 }

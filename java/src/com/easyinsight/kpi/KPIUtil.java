@@ -27,7 +27,7 @@ public class KPIUtil {
     }
 
     public static KPI createKPIForDateFilter(String name, String icon, AnalysisMeasure measure, AnalysisDimension date, int dateType,
-                                      List<FilterDefinition> otherFilters, int highIsGood) {
+                                      List<FilterDefinition> otherFilters, int highIsGood, int days) {
         KPI kpi = new KPI();
         kpi.setName(name);
         kpi.setIconImage(icon);
@@ -42,16 +42,18 @@ public class KPIUtil {
         }
         kpi.setFilters(filters);
         kpi.setHighIsGood(highIsGood);
+        kpi.setDayWindow(days);
         return kpi;
     }
 
-    public static KPI createKPIWithFilters(String name, String icon, AnalysisMeasure measure, List<FilterDefinition> filters, int highIsGood) {
+    public static KPI createKPIWithFilters(String name, String icon, AnalysisMeasure measure, List<FilterDefinition> filters, int highIsGood, int days) {
         KPI kpi = new KPI();
         kpi.setName(name);
         kpi.setIconImage(icon);
         kpi.setAnalysisMeasure(measure);
         kpi.setFilters(filters);
         kpi.setHighIsGood(highIsGood);
+        kpi.setDayWindow(days);
         return kpi;
     }
 }
