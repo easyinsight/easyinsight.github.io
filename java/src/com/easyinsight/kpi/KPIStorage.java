@@ -1,5 +1,6 @@
 package com.easyinsight.kpi;
 
+import com.easyinsight.analysis.AnalysisDateDimension;
 import com.easyinsight.analysis.AnalysisMeasure;
 import com.easyinsight.analysis.FilterDefinition;
 import com.easyinsight.core.InsightDescriptor;
@@ -23,7 +24,8 @@ public class KPIStorage {
     public void saveKPI(KPI kpi, EIConnection conn) throws Exception {
         if (kpi.getKpiID() == 0) {
             PreparedStatement insertKPIStmt = conn.prepareStatement("INSERT INTO KPI (ANALYSIS_MEASURE_ID, DATA_FEED_ID," +
-                    "DESCRIPTION, ICON_IMAGE, KPI_NAME, HIGH_IS_GOOD, GOAL_VALUE, GOAL_DEFINED, TEMPORARY) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
+                    "DESCRIPTION, ICON_IMAGE, KPI_NAME, HIGH_IS_GOOD, GOAL_VALUE, GOAL_DEFINED, TEMPORARY, DAY_WINDOW, THRESHOLD, DATE_DIMENSION_ID) " +
+                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
             Session session = Database.instance().createSession(conn);
             kpi.getAnalysisMeasure().beforeSave();
             session.saveOrUpdate(kpi.getAnalysisMeasure());
@@ -38,11 +40,19 @@ public class KPIStorage {
             insertKPIStmt.setDouble(7, kpi.getGoalValue());
             insertKPIStmt.setBoolean(8, kpi.isGoalDefined());
             insertKPIStmt.setBoolean(9, kpi.isTemporary());
+            insertKPIStmt.setInt(10, kpi.getDayWindow());
+            insertKPIStmt.setDouble(11, kpi.getThreshold());
+            if (kpi.getDateDimension() == null) {
+                insertKPIStmt.setNull(12, Types.BIGINT);
+            } else {
+                insertKPIStmt.setLong(12, kpi.getDateDimension().getAnalysisItemID());
+            }
             insertKPIStmt.execute();
             kpi.setKpiID(Database.instance().getAutoGenKey(insertKPIStmt));
         } else {
             PreparedStatement updateKPIStmt = conn.prepareStatement("UPDATE KPI SET ANALYSIS_MEASURE_ID = ?, DATA_FEED_ID = ?," +
-                    "DESCRIPTION = ?, ICON_IMAGE = ?, KPI_NAME = ?, HIGH_IS_GOOD = ?, GOAL_VALUE = ?, GOAL_DEFINED = ?, TEMPORARY = ? WHERE KPI_ID = ?");
+                    "DESCRIPTION = ?, ICON_IMAGE = ?, KPI_NAME = ?, HIGH_IS_GOOD = ?, GOAL_VALUE = ?, GOAL_DEFINED = ?, TEMPORARY = ?," +
+                    "DAY_WINDOW = ?, THRESHOLD = ?, DATE_DIMENSION_ID = ? WHERE KPI_ID = ?");
             kpi.getAnalysisMeasure().beforeSave();
             Session session = Database.instance().createSession(conn);
             session.saveOrUpdate(kpi.getAnalysisMeasure());
@@ -57,7 +67,14 @@ public class KPIStorage {
             updateKPIStmt.setDouble(7, kpi.getGoalValue());
             updateKPIStmt.setBoolean(8, kpi.isGoalDefined());
             updateKPIStmt.setBoolean(9, kpi.isTemporary());
-            updateKPIStmt.setLong(10, kpi.getKpiID());
+            updateKPIStmt.setInt(10, kpi.getDayWindow());
+            updateKPIStmt.setDouble(11, kpi.getThreshold());
+            if (kpi.getDateDimension() == null) {
+                updateKPIStmt.setNull(12, Types.BIGINT);
+            } else {
+                updateKPIStmt.setLong(12, kpi.getDateDimension().getAnalysisItemID());
+            }
+            updateKPIStmt.setLong(13, kpi.getKpiID());
             updateKPIStmt.executeUpdate();
         }
         saveFilters(kpi, conn);
@@ -72,8 +89,8 @@ public class KPIStorage {
         EIConnection conn = Database.instance().getConnection();
         try {
             PreparedStatement getKPIStmt = conn.prepareStatement("SELECT KPI.KPI_ID, ANALYSIS_MEASURE_ID, KPI.DATA_FEED_ID, KPI.DESCRIPTION," +
-                "ICON_IMAGE, KPI_NAME, DATA_FEED.feed_name, KPI.goal_defined, KPI.goal_value, KPI.high_is_good, KPI.temporary " +
-                    "FROM KPI, DATA_FEED, UPLOAD_POLICY_USERS WHERE " +
+                "ICON_IMAGE, KPI_NAME, DATA_FEED.feed_name, KPI.goal_defined, KPI.goal_value, KPI.high_is_good, KPI.temporary, KPI.DAY_WINDOW, KPI.THRESHOLD," +
+                    "KPI.DATE_DIMENSION_ID FROM KPI, DATA_FEED, UPLOAD_POLICY_USERS WHERE " +
                 "data_feed.data_feed_id = kpi.data_feed_id AND UPLOAD_POLICY_USERS.USER_ID = ? AND DATA_FEED.DATA_FEED_ID = UPLOAD_POLICY_USERS.FEED_ID AND " +
                     "KPI.TEMPORARY = ?");
             getKPIStmt.setLong(1, userID);
@@ -90,8 +107,8 @@ public class KPIStorage {
 
     public KPI getKPI(long kpiID, EIConnection conn) throws Exception {
         PreparedStatement getKPIStmt = conn.prepareStatement("SELECT KPI.KPI_ID, ANALYSIS_MEASURE_ID, KPI.DATA_FEED_ID, KPI.DESCRIPTION," +
-                "ICON_IMAGE, KPI_NAME, DATA_FEED.feed_name, KPI.goal_defined, KPI.goal_value, KPI.high_is_good, KPI.temporary" +
-                " FROM KPI, DATA_FEED WHERE kpi.kpi_id = ? AND data_feed.data_feed_id = kpi.data_feed_id");
+                "ICON_IMAGE, KPI_NAME, DATA_FEED.feed_name, KPI.goal_defined, KPI.goal_value, KPI.high_is_good, KPI.temporary, KPI.DAY_WINDOW, KPI.THRESHOLD," +
+                "KPI.DATE_DIMENSION_ID FROM KPI, DATA_FEED WHERE kpi.kpi_id = ? AND data_feed.data_feed_id = kpi.data_feed_id");
         getKPIStmt.setLong(1, kpiID);
         KPI kpi = null;
         ResultSet kpiRS = getKPIStmt.executeQuery();
@@ -114,9 +131,17 @@ public class KPIStorage {
         double goalValue = kpiRS.getDouble(9);
         int highIsGood = kpiRS.getInt(10);
         boolean temporary = kpiRS.getBoolean(11);
+        int dayWindow = kpiRS.getInt(12);
+        double threshold = kpiRS.getDouble(13);
+        long dateDimensionID = kpiRS.getLong(14);
+        boolean dateDefined = !kpiRS.wasNull();
         Session session = Database.instance().createSession(conn);
         List measures = session.createQuery("from AnalysisMeasure where analysisItemID = ?").setLong(0, measureID).list();
         AnalysisMeasure measure = (AnalysisMeasure) measures.get(0);
+        AnalysisDateDimension date = null;
+        if (dateDefined) {
+            date = (AnalysisDateDimension) session.createQuery("from AnalysisDateDimension where analysisItemID = ?").setLong(0, dateDimensionID).list().get(0);
+        }
         measure.afterLoad();
         session.flush();
         session.close();
@@ -136,6 +161,9 @@ public class KPIStorage {
         kpi.setProblemConditions(getProblemFilters(kpiID, conn));
         kpi.setTemporary(temporary);
         kpi.setReports(getReports(dataFeedID, conn));
+        kpi.setDayWindow(dayWindow);
+        kpi.setThreshold(threshold);
+        kpi.setDateDimension(date);
         kpi.setKpiUsers(getKPIUsers(kpiID, conn));
         PreparedStatement queryStmt = conn.prepareStatement("SELECT SOLUTION_ID FROM SOLUTION_INSTALL WHERE INSTALLED_DATA_SOURCE_ID = ?");
         queryStmt.setLong(1, dataFeedID);
@@ -163,12 +191,12 @@ public class KPIStorage {
     }
 
     public void saveKPIOutcome(long kpiID, Double newValue, Double oldValue, Date evaluationDate, int outcomeValue,
-                                   int direction, boolean problemEvaluated, Double percentChange, Connection conn) throws SQLException {
+                                   int direction, boolean problemEvaluated, Double percentChange, boolean directional, Connection conn) throws SQLException {
         if (newValue != null && (Double.isNaN(newValue) || Double.isInfinite(newValue))) {
             newValue = null;
         }
         PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO KPI_VALUE (kpi_id, start_value, end_value," +
-                    "evaluation_date, outcome_value, direction, problem_evaluated, percent_change) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+                    "evaluation_date, outcome_value, direction, problem_evaluated, percent_change, directional) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
         insertStmt.setLong(1, kpiID);
         if (oldValue == null) {
             insertStmt.setNull(2, Types.DOUBLE);
@@ -189,6 +217,7 @@ public class KPIStorage {
         } else {
             insertStmt.setDouble(8, percentChange);
         }
+        insertStmt.setBoolean(9, directional);
         insertStmt.execute();
     }
 
@@ -228,7 +257,7 @@ public class KPIStorage {
             Timestamp maxDate = dateRS.getTimestamp(1);
             if (!dateRS.wasNull()) {
                 PreparedStatement queryStmt = conn.prepareStatement("SELECT DIRECTION, END_VALUE, EVALUATION_DATE," +
-                    "OUTCOME_VALUE, PROBLEM_EVALUATED, START_VALUE, PERCENT_CHANGE FROM KPI_VALUE WHERE KPI_ID = ? AND EVALUATION_DATE = ?");
+                    "OUTCOME_VALUE, PROBLEM_EVALUATED, START_VALUE, PERCENT_CHANGE, DIRECTIONAL FROM KPI_VALUE WHERE KPI_ID = ? AND EVALUATION_DATE = ?");
                 queryStmt.setLong(1, kpi.getKpiID());
                 queryStmt.setTimestamp(2, maxDate);
                 ResultSet rs = queryStmt.executeQuery();
@@ -253,7 +282,8 @@ public class KPIStorage {
                     if (rs.wasNull()) {
                         percentChange = null;
                     }
-                    return new KPIOutcome(outcome, direction, endValue, problem, value, evaluationDate, kpi.getKpiID(), percentChange);
+                    boolean directional = rs.getBoolean(8);
+                    return new KPIOutcome(outcome, direction, endValue, problem, value, evaluationDate, kpi.getKpiID(), percentChange, directional);
                 }
             }
         }
@@ -309,30 +339,28 @@ public class KPIStorage {
         PreparedStatement clearExistingStmt = conn.prepareStatement("DELETE FROM KPI_ROLE WHERE KPI_ID = ?");
         clearExistingStmt.setLong(1, kpi.getKpiID());
         clearExistingStmt.executeUpdate();
-        Session session = Database.instance().createSession(conn);
-        try {
-            PreparedStatement saveUsersStmt = conn.prepareStatement("INSERT INTO KPI_ROLE (KPI_ID, USER_ID, GROUP_ID, OWNER, RESPONSIBLE) VALUES (?, ?, ?, ?, ?)");
-            for (KPIUser kpiUser : kpi.getKpiUsers()) {
-                saveUsersStmt.setLong(1, kpi.getKpiID());
-                if (kpiUser.getFeedConsumer().type() == FeedConsumer.USER) {
-                    UserStub userStub = (UserStub) kpiUser.getFeedConsumer();
-                    saveUsersStmt.setLong(2, userStub.getUserID());
-                } else {
-                    saveUsersStmt.setNull(2, Types.BIGINT);
-                }
-                if (kpiUser.getFeedConsumer().type() == FeedConsumer.GROUP) {
-                    GroupDescriptor groupStub = (GroupDescriptor) kpiUser.getFeedConsumer();
-                    saveUsersStmt.setLong(3, groupStub.getGroupID());
-                } else {
-                    saveUsersStmt.setNull(3, Types.BIGINT);
-                }
-                saveUsersStmt.setBoolean(4, kpiUser.isOwner());
-                saveUsersStmt.setBoolean(5, kpiUser.isResponsible());
-                saveUsersStmt.execute();
+
+
+        PreparedStatement saveUsersStmt = conn.prepareStatement("INSERT INTO KPI_ROLE (KPI_ID, USER_ID, GROUP_ID, OWNER, RESPONSIBLE) VALUES (?, ?, ?, ?, ?)");
+        for (KPIUser kpiUser : kpi.getKpiUsers()) {
+            saveUsersStmt.setLong(1, kpi.getKpiID());
+            if (kpiUser.getFeedConsumer().type() == FeedConsumer.USER) {
+                UserStub userStub = (UserStub) kpiUser.getFeedConsumer();
+                saveUsersStmt.setLong(2, userStub.getUserID());
+            } else {
+                saveUsersStmt.setNull(2, Types.BIGINT);
             }
-        } finally {
-            session.close();
+            if (kpiUser.getFeedConsumer().type() == FeedConsumer.GROUP) {
+                GroupDescriptor groupStub = (GroupDescriptor) kpiUser.getFeedConsumer();
+                saveUsersStmt.setLong(3, groupStub.getGroupID());
+            } else {
+                saveUsersStmt.setNull(3, Types.BIGINT);
+            }
+            saveUsersStmt.setBoolean(4, kpiUser.isOwner());
+            saveUsersStmt.setBoolean(5, kpiUser.isResponsible());
+            saveUsersStmt.execute();
         }
+
     }
 
     private void saveFilters(KPI kpi, Connection conn) throws SQLException {
@@ -343,8 +371,8 @@ public class KPIStorage {
         try {
             PreparedStatement saveFiltersStmt = conn.prepareStatement("INSERT INTO KPI_TO_FILTER (KPI_ID, FILTER_ID) VALUES (?, ?)");
             for (FilterDefinition filterDefinition : kpi.getFilters()) {
+                filterDefinition.getField().reportSave(session);
                 filterDefinition.beforeSave();
-
                 session.saveOrUpdate(filterDefinition);
                 session.flush();
                 saveFiltersStmt.setLong(1, kpi.getKpiID());

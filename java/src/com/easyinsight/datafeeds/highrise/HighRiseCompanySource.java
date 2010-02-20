@@ -1,7 +1,10 @@
 package com.easyinsight.datafeeds.highrise;
 
+import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.storage.DataStorage;
 import com.easyinsight.users.Credentials;
+import com.easyinsight.users.Token;
+import com.easyinsight.users.TokenStorage;
 import org.jetbrains.annotations.NotNull;
 import org.apache.commons.httpclient.HttpClient;
 
@@ -86,7 +89,15 @@ public class HighRiseCompanySource extends HighRiseBaseSource {
         DateFormat deadlineFormat = new SimpleDateFormat(XMLDATEFORMAT);
 
         DataSet ds = new DataSet();
-        HttpClient client = getHttpClient(credentials.getUserName(), credentials.getPassword());
+        Token token = new TokenStorage().getToken(SecurityUtil.getUserID(), TokenStorage.HIGHRISE_TOKEN, parentDefinition.getDataFeedID(), false);
+        if (token == null) {
+            token = new Token();
+            token.setTokenValue(credentials.getUserName());
+            token.setTokenType(TokenStorage.HIGHRISE_TOKEN);
+            token.setUserID(SecurityUtil.getUserID());
+            new TokenStorage().saveToken(token, parentDefinition.getDataFeedID());
+        }
+        HttpClient client = getHttpClient(token.getTokenValue(), "");
         Builder builder = new Builder();
         Map<String, String> peopleCache = new HashMap<String, String>();
         try {

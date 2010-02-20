@@ -50,7 +50,15 @@ public class FeedService implements IDataFeedService {
         // this goes into a different data provider        
     }
 
-    
+    public boolean needsConfig(long dataSourceID) {
+        SecurityUtil.authorizeFeed(dataSourceID, Roles.SUBSCRIBER);
+        try {
+            return feedStorage.getFeedDefinitionData(dataSourceID).getCredentialsDefinition() != CredentialsDefinition.NO_CREDENTIALS;
+        } catch (SQLException e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        }
+    }
 
     public List<CredentialRequirement> getCredentials(List<Integer> dataSourceIDs, List<CredentialFulfillment> existingCredentials) {
         try {

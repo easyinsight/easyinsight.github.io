@@ -1,0 +1,32 @@
+<company>
+  <id type="integer">1</id>
+  <name>Doe Inc.</name>
+  <background>A popular company for random data</background>
+  <created-at type="datetime">2007-02-27T03:11:52Z</created-at>
+  <updated-at type="datetime">2007-03-10T15:11:52Z</updated-at>
+  <visible-to>Everyone</visible-to>
+  <owner-id type="integer"></owner-id>
+  <group-id type="integer"></group-id>
+  <author-id type="integer">2</author-id>
+  <contact-data>
+    <email-addresses>
+      <email-address>
+        <id type="integer">1</id>
+        <address>corporate@example.com</address>
+        <location>Work</location>
+      </email-address>
+    </email-addresses>
+    <phone-numbers>
+      <phone-number>
+        <id type="integer">2</id>
+        <number>555-555-5555</number>
+        <location>Work</location>
+      </phone-number>
+      <phone-number>
+        <id type="integer">3</id>
+        <number>555-666-6667</number>
+        <location>Fax</location>
+      </phone-number>
+    </phone-numbers>
+  </contact-data>
+</company>

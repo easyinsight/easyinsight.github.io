@@ -85,6 +85,9 @@ public abstract class FilterDefinition implements Serializable, Cloneable {
     public abstract int populatePreparedStatement(PreparedStatement preparedStatement, int start, int type, InsightRequestMetadata insightRequestMetadata) throws SQLException;
 
     public boolean validForQuery() {
+        if (getField().hasType(AnalysisItemTypes.STEP)) {
+            return false;
+        }
         return enabled;
     }
 

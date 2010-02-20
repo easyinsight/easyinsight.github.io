@@ -193,6 +193,11 @@ public class GoogleAnalyticsDataSource extends ServerDataSourceDefinition {
         return DataSourceInfo.LIVE;
     }
 
+    @Override
+    public String getFilterExampleMessage() {
+        return "For example, drag Visitor Type into the area to the right to restrict the KPI to only show metrics around Returning Visitors.";
+    }
+
     public FeedType getFeedType() {
         return FeedType.GOOGLE_ANALYTICS;
     }

@@ -14,11 +14,18 @@ import java.util.ArrayList;
  * Time: 9:05:37 AM
  */
 public class FilterPipelineCleanupComponent implements IComponent {
+
+    private boolean before;
+
+    public FilterPipelineCleanupComponent(boolean before) {
+        this.before = before;
+    }
+
     public DataSet apply(DataSet dataSet, PipelineData pipelineData) {
         List<AnalysisItem> allRequestedAnalysisItems = new ArrayList<AnalysisItem>(pipelineData.getReport().getAllAnalysisItems());
         if (pipelineData.getReport().retrieveFilterDefinitions() != null) {
             for (FilterDefinition filterDefinition : pipelineData.getReport().retrieveFilterDefinitions()) {
-                if (filterDefinition.isApplyBeforeAggregation()) {
+                if ((before && filterDefinition.isApplyBeforeAggregation()) || (!before && !filterDefinition.isApplyBeforeAggregation())) {
                     boolean itemFound = findItem(filterDefinition.getField(), allRequestedAnalysisItems, pipelineData.getAllItems());
                     if (!itemFound) {
                         pipelineData.getReportItems().remove(filterDefinition.getField());

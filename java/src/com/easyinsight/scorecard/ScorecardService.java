@@ -2,15 +2,12 @@ package com.easyinsight.scorecard;
 
 import com.easyinsight.analysis.*;
 import com.easyinsight.core.NumericValue;
-import com.easyinsight.core.Value;
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.*;
-import com.easyinsight.dataset.DataSet;
 import com.easyinsight.kpi.*;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.pipeline.HistoryRun;
-import com.easyinsight.pipeline.StandardReportPipeline;
 import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.users.Credentials;
 
@@ -51,14 +48,22 @@ public class ScorecardService {
 
     }
 
-    public long addKPIToScorecard(KPI kpi, long scorecardID) {
+    public KPI addKPIToScorecard(KPI kpi, long scorecardID, List<CredentialFulfillment> credentials) {
         SecurityUtil.authorizeScorecard(scorecardID);
+        EIConnection conn = Database.instance().getConnection();
         try {
-            kpi.setKpiUsers(Arrays.asList(KPIUtil.defaultUser()));
-            return scorecardStorage.addKPIToScorecard(kpi, scorecardID);
+            conn.setAutoCommit(false);
+            scorecardStorage.addKPIToScorecard(kpi, scorecardID, conn);
+            refreshValuesForList(Arrays.asList(kpi), conn, credentials);
+            conn.commit();
+            return kpi;
         } catch (Exception e) {
             LogClass.error(e);
+            conn.rollback();
             throw new RuntimeException(e);
+        } finally {
+            conn.setAutoCommit(true);
+            Database.closeConnection(conn);
         }
     }
 
@@ -82,13 +87,22 @@ public class ScorecardService {
         }
     }
 
-    public void updateKPI(KPI kpi) {
+    public KPI updateKPI(KPI kpi, List<CredentialFulfillment> credentials) {
         SecurityUtil.authorizeKPI(kpi.getKpiID());
+        EIConnection conn = Database.instance().getConnection();
         try {
-            scorecardStorage.updateKPI(kpi);
+            conn.setAutoCommit(false);
+            new KPIStorage().saveKPI(kpi, conn);
+            refreshValuesForList(Arrays.asList(kpi), conn, credentials);
+            conn.commit();
+            return kpi;
         } catch (Exception e) {
             LogClass.error(e);
+            conn.rollback();
             throw new RuntimeException(e);
+        } finally {
+            conn.setAutoCommit(true);
+            Database.closeConnection(conn);
         }
     }
 
@@ -157,12 +171,12 @@ public class ScorecardService {
         }
     }
 
-    private int determineOutcome(double goalValue, int highIsGood, double delta, double endValue) {
+    private int determineOutcome(double goalValue, int highIsGood, double delta, double endValue, double tolerance) {
         int outcome;
         if (highIsGood == KPI.GOOD) {
             if (endValue >= goalValue) {
                 outcome = KPIOutcome.EXCEEDING_GOAL;
-            } else if (Math.abs(delta) < Math.abs(goalValue * .002)) {
+            } else if (Math.abs(delta) < Math.abs(goalValue * (tolerance / 100))) {
                 outcome = KPIOutcome.NEUTRAL;
             } else if (delta > 0) {
                 outcome = KPIOutcome.POSITIVE;
@@ -172,7 +186,7 @@ public class ScorecardService {
         } else if (highIsGood == KPI.BAD) {
             if (endValue <= goalValue) {
                 outcome = KPIOutcome.EXCEEDING_GOAL;
-            } else if (Math.abs(delta) < Math.abs(goalValue * .002)) {
+            } else if (Math.abs(delta) < Math.abs(goalValue * (tolerance / 100))) {
                 outcome = KPIOutcome.NEUTRAL;
             } else if (delta < 0) {
                 outcome = KPIOutcome.POSITIVE;
@@ -185,9 +199,9 @@ public class ScorecardService {
         return outcome;
     }
 
-    private int determineSimpleOutcome(int highIsGood, double endValue, double delta) {
+    private int determineSimpleOutcome(int highIsGood, double endValue, double delta, double tolerance) {
         int outcome;
-        double thresholdValue = Math.abs(endValue * .002);
+        double thresholdValue = Math.abs(endValue * (tolerance / 100));
         if (highIsGood == KPI.GOOD) {
             if (Math.abs(delta) <= thresholdValue) {
                 outcome = KPIOutcome.NEUTRAL;
@@ -212,16 +226,18 @@ public class ScorecardService {
 
     private KPIOutcome refreshKPIValue(KPI kpi, List<CredentialFulfillment> credentials, EIConnection conn) {
         List<KPIValue> lastTwoValues = new HistoryRun().lastTwoValues(kpi.getCoreFeedID(), kpi.getAnalysisMeasure(),
-                kpi.getFilters(), credentials, 0);
+                kpi.getFilters(), credentials, kpi.getDayWindow());
         Double newValue = null;
         Double oldValue = null;
         Double percentChange = null;
         boolean failedCondition = false;
+        boolean directional = false;
         int outcomeState = KPIOutcome.NO_DATA;
         int direction = KPIOutcome.NO_DIRECTION;
         if (lastTwoValues.size() > 0) {
             int highIsGood = kpi.getHighIsGood();
             if (lastTwoValues.size() > 1) {
+                directional = true;
                 KPIValue previousGoalValue = lastTwoValues.get(0);
                 oldValue = previousGoalValue.getValue();
                 KPIValue newGoalValue = lastTwoValues.get(1);
@@ -237,9 +253,9 @@ public class ScorecardService {
                     direction = KPIOutcome.NO_DIRECTION;
                 }
                 if (kpi.isGoalDefined()) {
-                    outcomeState = determineOutcome(kpi.getGoalValue(), highIsGood, delta, newValue);
+                    outcomeState = determineOutcome(kpi.getGoalValue(), highIsGood, delta, newValue, kpi.getThreshold());
                 } else {
-                    outcomeState = determineSimpleOutcome(highIsGood, newValue, delta);
+                    outcomeState = determineSimpleOutcome(highIsGood, newValue, delta, kpi.getThreshold());
                 }
             } else {
                 oldValue = new KPIStorage().findLastGoalValue(conn, kpi.getKpiID());
@@ -248,7 +264,7 @@ public class ScorecardService {
                 if (oldValue != null && newValue != null && kpi.isGoalDefined()) {
                     double delta = newValue - oldValue;
                     percentChange = delta / oldValue * 100;
-                    outcomeState = determineOutcome(kpi.getGoalValue(), highIsGood, delta, newValue);
+                    outcomeState = determineOutcome(kpi.getGoalValue(), highIsGood, delta, newValue, kpi.getThreshold());
                     if (delta > 0) {
                         direction = KPIOutcome.UP_DIRECTION;
                     } else if (delta < 0) {
@@ -272,7 +288,7 @@ public class ScorecardService {
         if (percentChange != null && Double.isNaN(percentChange)) {
             percentChange = null;
         }
-        return new KPIOutcome(outcomeState, direction, oldValue, failedCondition, newValue, new Date(), kpi.getKpiID(), percentChange);
+        return new KPIOutcome(outcomeState, direction, oldValue, failedCondition, newValue, new Date(), kpi.getKpiID(), percentChange, directional);
     }
 
     public List<KPI> refreshValuesForList(List<KPI> kpis, EIConnection conn, List<CredentialFulfillment> credentialsList) throws Exception {
@@ -283,7 +299,7 @@ public class ScorecardService {
             //kpi.setKpiValue(kpiValue);
             new KPIStorage().saveKPIOutcome(kpi.getKpiID(), kpiValue.getOutcomeValue(), kpiValue.getPreviousValue(),
                             kpiValue.getEvaluationDate(), kpiValue.getOutcomeState(), kpiValue.getDirection(), kpiValue.isProblemEvaluated(),
-                    kpiValue.getPercentChange(), conn);
+                    kpiValue.getPercentChange(), kpiValue.isDirectional(), conn);
         }
         return kpis;
     }
@@ -324,7 +340,7 @@ public class ScorecardService {
                     kpiValues.add(kpiValue);
                     new KPIStorage().saveKPIOutcome(kpi.getKpiID(), kpiValue.getOutcomeValue(), kpiValue.getPreviousValue(),
                             kpiValue.getEvaluationDate(), kpiValue.getOutcomeState(), kpiValue.getDirection(), kpiValue.isProblemEvaluated(),
-                            kpiValue.getPercentChange(),
+                            kpiValue.getPercentChange(), kpiValue.isDirectional(),
                             conn);
                 }
             }

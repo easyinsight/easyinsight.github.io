@@ -22,9 +22,18 @@ public abstract class Feed implements Serializable {
     private String name;
     private String attribution;
     private boolean visible;
+    private String filterExampleMessage;
     private int type;
     private long originSolution;
     private Map<String, String> properties;
+
+    public String getFilterExampleMessage() {
+        return filterExampleMessage;
+    }
+
+    public void setFilterExampleMessage(String filterExampleMessage) {
+        this.filterExampleMessage = filterExampleMessage;
+    }
 
     public Map<String, String> getProperties() {
         return properties;

@@ -3,10 +3,7 @@ package com.easyinsight.users;
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
 
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import java.sql.ResultSet;
-import java.sql.Connection;
+import java.sql.*;
 
 import org.jetbrains.annotations.Nullable;
 
@@ -18,8 +15,10 @@ import org.jetbrains.annotations.Nullable;
 public class TokenStorage {
     public static final int GOOGLE_DOCS_TOKEN = 1;
     public static final int GOOGLE_ANALYTICS_TOKEN = 13;
+    public static final int BASECAMP_TOKEN = 18;
+    public static final int HIGHRISE_TOKEN = 23;
 
-    public void saveToken(Token token) {
+    public void saveToken(Token token, long dataSourceID) {
         EIConnection conn = Database.instance().getConnection();
         try {
             PreparedStatement queryStmt = conn.prepareStatement("SELECT token_id FROM TOKEN where user_id = ? AND token_type = ?");
@@ -27,15 +26,25 @@ public class TokenStorage {
             queryStmt.setInt(2, token.getTokenType());
             ResultSet rs = queryStmt.executeQuery();
             if (rs.next()) {
-                PreparedStatement updateStmt = conn.prepareStatement("UPDATE TOKEN set token_value = ? WHERE token_id = ?");
+                PreparedStatement updateStmt = conn.prepareStatement("UPDATE TOKEN set token_value = ?, data_source_id = ? WHERE token_id = ?");
                 updateStmt.setString(1, token.getTokenValue());
-                updateStmt.setLong(2, rs.getLong(1));
+                if (dataSourceID == 0) {
+                    updateStmt.setNull(2, Types.BIGINT);
+                } else {
+                    updateStmt.setLong(2, dataSourceID);
+                }
+                updateStmt.setLong(3, rs.getLong(1));
                 updateStmt.executeUpdate();
             } else {
-                PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO TOKEN (token_type, user_id, token_value) VALUES (?, ?, ?)");
+                PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO TOKEN (token_type, user_id, token_value, data_source_id) VALUES (?, ?, ?, ?)");
                 insertStmt.setInt(1, token.getTokenType());
                 insertStmt.setLong(2, token.getUserID());
                 insertStmt.setString(3, token.getTokenValue());
+                if (dataSourceID == 0) {
+                    insertStmt.setNull(4, Types.BIGINT);
+                } else {
+                    insertStmt.setLong(4, dataSourceID);
+                }
                 insertStmt.execute();
             }
         } catch (SQLException e) {
@@ -83,7 +92,7 @@ public class TokenStorage {
         return token;
     }
 
-    public Token getToken(long userID, int type, long dataSourceID) {
+    public Token getToken(long userID, int type, long dataSourceID, boolean queryFromType) {
         Token token = null;
         EIConnection conn = Database.instance().getConnection();
         try {
@@ -95,21 +104,23 @@ public class TokenStorage {
                 token.setTokenType(type);
                 token.setTokenValue(dsRS.getString(1));
             } else {
-                PreparedStatement queryStmt = conn.prepareStatement("SELECT token_value FROM TOKEN where user_id = ? AND token_type = ?");
-                queryStmt.setLong(1, userID);
-                queryStmt.setInt(2, type);
-                ResultSet rs = queryStmt.executeQuery();
-                if (rs.next()) {
-                    String tokenValue = rs.getString(1);
-                    token = new Token();
-                    token.setUserID(userID);
-                    token.setTokenType(type);
-                    token.setTokenValue(tokenValue);
-                    PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO TOKEN (TOKEN_VALUE, TOKEN_TYPE, DATA_SOURCE_ID) VALUES (?, ?, ?)");
-                    insertStmt.setString(1, tokenValue);
-                    insertStmt.setInt(2, type);
-                    insertStmt.setLong(3, dataSourceID);
-                    insertStmt.execute();
+                if (queryFromType) {
+                    PreparedStatement queryStmt = conn.prepareStatement("SELECT token_value FROM TOKEN where user_id = ? AND token_type = ?");
+                    queryStmt.setLong(1, userID);
+                    queryStmt.setInt(2, type);
+                    ResultSet rs = queryStmt.executeQuery();
+                    if (rs.next()) {
+                        String tokenValue = rs.getString(1);
+                        token = new Token();
+                        token.setUserID(userID);
+                        token.setTokenType(type);
+                        token.setTokenValue(tokenValue);
+                        PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO TOKEN (TOKEN_VALUE, TOKEN_TYPE, DATA_SOURCE_ID) VALUES (?, ?, ?)");
+                        insertStmt.setString(1, tokenValue);
+                        insertStmt.setInt(2, type);
+                        insertStmt.setLong(3, dataSourceID);
+                        insertStmt.execute();
+                    }
                 }
             }
         } catch (SQLException e) {

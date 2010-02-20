@@ -6,6 +6,7 @@ import com.easyinsight.datafeeds.composite.CompositeServerDataSource;
 import com.easyinsight.datafeeds.composite.ChildConnection;
 import com.easyinsight.kpi.KPI;
 import com.easyinsight.kpi.KPIUtil;
+import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.users.Account;
 
 import java.net.UnknownHostException;
@@ -17,6 +18,7 @@ import java.sql.SQLException;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 
+import com.easyinsight.users.TokenStorage;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.Credentials;
 import org.apache.commons.httpclient.UsernamePasswordCredentials;
@@ -59,7 +61,8 @@ public class BaseCampCompositeSource extends CompositeServerDataSource {
     }
 
     public int getCredentialsDefinition() {
-        return CredentialsDefinition.STANDARD_USERNAME_PW;
+        return new TokenStorage().getToken(SecurityUtil.getUserID(), TokenStorage.BASECAMP_TOKEN, getDataFeedID(), false) == null ? CredentialsDefinition.STANDARD_USERNAME_PW :
+                CredentialsDefinition.NO_CREDENTIALS;        
     }
 
     public boolean isConfigured() {
@@ -190,14 +193,22 @@ public class BaseCampCompositeSource extends CompositeServerDataSource {
     }
 
     @Override
+    public String getFilterExampleMessage() {
+        return "On the left, you'll see the list of fields available to you. Drag a field from that list into the area to the right to create a filter. For example, drag Project Name into the area to the right to restrict the KPI to a particular project.";
+    }
+
+    @Override
     public List<KPI> createKPIs() {
         List<KPI> kpis = new ArrayList<KPI>();
         FilterValueDefinition openFilter = new FilterValueDefinition();
         openFilter.setField(findAnalysisItem(BaseCampTodoSource.COMPLETED));
         openFilter.setFilteredValues(Arrays.asList((Object) "false"));
         openFilter.setInclusive(true);
+        RollingFilterDefinition cycleFilter = new RollingFilterDefinition();
+        cycleFilter.setField(findAnalysisItem(BaseCampTodoSource.ITEMCYCLE));
+        cycleFilter.setInterval(MaterializedRollingFilterDefinition.WEEK);
         kpis.add(KPIUtil.createKPIWithFilters("Total Open Todo Items", "inbox.png", (AnalysisMeasure) findAnalysisItemByDisplayName("Todo - Count"),
-                Arrays.asList((FilterDefinition) openFilter), KPI.BAD));
+                Arrays.asList(openFilter, cycleFilter), KPI.BAD));
         FilterValueDefinition closedFilter = new FilterValueDefinition();
         closedFilter.setField(findAnalysisItem(BaseCampTodoSource.COMPLETED));
         closedFilter.setInclusive(true);

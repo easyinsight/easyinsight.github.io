@@ -8,6 +8,7 @@ import com.easyinsight.datafeeds.IServerDataSourceDefinition;
 import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.datafeeds.CredentialsDefinition;
 import com.easyinsight.kpi.KPI;
+import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.users.Account;
 
 import java.util.*;
@@ -18,6 +19,7 @@ import java.sql.SQLException;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 
+import com.easyinsight.users.TokenStorage;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.Credentials;
 import org.apache.commons.httpclient.UsernamePasswordCredentials;
@@ -38,6 +40,11 @@ public class HighRiseCompositeSource extends CompositeServerDataSource {
 
     public int getDataSourceType() {
         return DataSourceInfo.COMPOSITE_PULL;
+    }
+
+    @Override
+    public String getFilterExampleMessage() {
+        return "For example, drag Status into the area to the right to restrict the KPI to only those deals that are Pending.";
     }
 
     @Override
@@ -173,7 +180,8 @@ public class HighRiseCompositeSource extends CompositeServerDataSource {
 
     @Override
     public int getCredentialsDefinition() {
-        return CredentialsDefinition.STANDARD_USERNAME_PW;
+        return new TokenStorage().getToken(SecurityUtil.getUserID(), TokenStorage.HIGHRISE_TOKEN, getDataFeedID(), false) == null ? CredentialsDefinition.STANDARD_USERNAME_PW :
+                CredentialsDefinition.NO_CREDENTIALS;
     }
 
     public List<KPI> createKPIs() {

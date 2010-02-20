@@ -74,15 +74,18 @@ public class StepCorrelationComponent implements IComponent {
             if (startDate != null) {
                 long startTime = startDate.getTime();
                 long endTime = endDate == null ? System.currentTimeMillis() : endDate.getTime();
-                long interval = 1000 * 60 * 60 * 24;
-                for (; startTime < endTime; startTime += interval) {
+                Calendar cal = Calendar.getInstance();
+                cal.setTimeInMillis(startTime);
+                //long interval = 1000 * 60 * 60 * 24;
+                while (cal.getTimeInMillis() < endTime) {
                     IRow row = new Row();
                     row.addValues(this.row.getValues());
-                    row.addValue(analysisStep.getKey(), new DateValue(new Date(startTime)));
+                    row.addValue(analysisStep.getKey(), new DateValue(cal.getTime()));
                     row.removeValue(start.createAggregateKey());
                     row.removeValue(end.createAggregateKey());
                     row.removeValue(analysisStep.getCorrelationDimension().createAggregateKey());
                     rows.add(row);
+                    cal.add(Calendar.DAY_OF_YEAR, 1);
                 }
             }
             return rows;

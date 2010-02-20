@@ -9,7 +9,10 @@ import com.easyinsight.core.DateValue;
 import com.easyinsight.core.NumericValue;
 import com.easyinsight.analysis.*;
 import com.easyinsight.logging.LogClass;
+import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.storage.DataStorage;
+import com.easyinsight.users.Token;
+import com.easyinsight.users.TokenStorage;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.Credentials;
 import org.apache.commons.httpclient.UsernamePasswordCredentials;
@@ -114,7 +117,15 @@ public class BaseCampTodoSource extends ServerDataSourceDefinition {
         DateFormat deadlineFormat = new SimpleDateFormat(XMLDATEFORMAT);
 
         DataSet ds = new DataSet();
-        HttpClient client = getHttpClient(credentials.getUserName(), credentials.getPassword());
+        Token token = new TokenStorage().getToken(SecurityUtil.getUserID(), TokenStorage.BASECAMP_TOKEN, parentDefinition.getDataFeedID(), false);
+        if (token == null) {
+            token = new Token();
+            token.setTokenValue(credentials.getUserName());
+            token.setTokenType(TokenStorage.BASECAMP_TOKEN);
+            token.setUserID(SecurityUtil.getUserID());
+            new TokenStorage().saveToken(token, parentDefinition.getDataFeedID());
+        }
+        HttpClient client = getHttpClient(token.getTokenValue(), "");
         Builder builder = new Builder();
         Map<String, String> peopleCache = new HashMap<String, String>();
         try {

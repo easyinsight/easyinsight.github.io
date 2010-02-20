@@ -33,7 +33,7 @@ public class StandardReportPipeline extends Pipeline {
         // then join them back together
 
         components.add(new FilterComponent(true));
-        components.add(new FilterPipelineCleanupComponent());
+        components.add(new FilterPipelineCleanupComponent(true));
 
         components.add(new MeasureFilterComponent());
         components.add(new MeasureFilterPipelineCleanupComponent());

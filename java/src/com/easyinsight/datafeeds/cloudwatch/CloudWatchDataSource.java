@@ -126,6 +126,11 @@ public class CloudWatchDataSource extends ServerDataSourceDefinition {
     }
 
     @Override
+    public String getFilterExampleMessage() {
+        return "For example, drag Security Group into the area to the right to restrict the KPI to a particular security group.";
+    }
+
+    @Override
     public List<KPI> createKPIs() {
         List<KPI> kpis = new ArrayList<KPI>();
         kpis.add(KPIUtil.createKPIForDateFilter("Average CPU Utilization in the Last 24 Hours", "cpu.png", (AnalysisMeasure) findAnalysisItem(CloudWatchDataSource.CPU_UTILIZATION),

@@ -104,7 +104,7 @@ public class GoogleAnalyticsFeed extends Feed {
 
     private String getToken() throws TokenMissingException {
         if (token == null) {
-            Token tokenObject = new TokenStorage().getToken(SecurityUtil.getUserID(false), TokenStorage.GOOGLE_ANALYTICS_TOKEN, getFeedID());
+            Token tokenObject = new TokenStorage().getToken(SecurityUtil.getUserID(false), TokenStorage.GOOGLE_ANALYTICS_TOKEN, getFeedID(), true);
             if (tokenObject == null) {
                 throw new TokenMissingException();
             }
@@ -192,7 +192,7 @@ public class GoogleAnalyticsFeed extends Feed {
                         endDate = dateRange.getEndDate();
                     } else if (filterDefinition instanceof RollingFilterDefinition) {
                         RollingFilterDefinition rollingFilterDefinition = (RollingFilterDefinition) filterDefinition;
-                        endDate = new Date();
+                        endDate = insightRequestMetadata.getNow();
                         startDate = new Date(MaterializedRollingFilterDefinition.findStartDate(rollingFilterDefinition.getInterval(), endDate));
                     }
                 }

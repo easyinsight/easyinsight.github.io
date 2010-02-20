@@ -1,22 +1,18 @@
 package com.easyinsight.kpi;
 
 import com.easyinsight.analysis.AnalysisItem;
-import com.easyinsight.analysis.AnalysisMeasure;
-import com.easyinsight.analysis.FilterDefinition;
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.CredentialFulfillment;
 import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.datafeeds.FeedStorage;
 import com.easyinsight.logging.LogClass;
-import com.easyinsight.pipeline.HistoryRun;
 import com.easyinsight.scorecard.Scorecard;
 import com.easyinsight.scorecard.ScorecardService;
 import com.easyinsight.scorecard.ScorecardStorage;
 import com.easyinsight.security.SecurityUtil;
 
 import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -36,7 +32,7 @@ public class KPIService {
             kpi.setName("Copy of " + kpi.getName());
             kpiStorage.saveKPI(kpi, conn);
             if (scorecardID > 0) {
-                new ScorecardStorage().addKPIToScorecard(kpi, scorecardID, conn);
+                new ScorecardStorage().linkKPIToScorecard(kpi, scorecardID, conn);
             }
             return kpi;
         } catch (Exception e) {
@@ -48,15 +44,15 @@ public class KPIService {
         }
     }
 
-    public List<KPIValue> generateHistory(AnalysisMeasure analysisMeasure, List<FilterDefinition> filters, long dataSourceID, Date startDate, Date endDate,
+    /*public List<KPIValue> generateHistory(AnalysisMeasure analysisMeasure, List<FilterDefinition> filters, long dataSourceID, Date startDate, Date endDate,
                                            List<CredentialFulfillment> credentials) {
         try {
-            return new HistoryRun().calculateHistoricalValues(dataSourceID, analysisMeasure, filters, startDate, endDate, credentials);
+            return new HistoryRun().calculateHistoricalValues(dataSourceID, analysisMeasure, filters, startDate, endDate, credentials, null);
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);
         }
-    }
+    }*/
 
     public void installKPIsToScorecard(String dataSourceName, List<KPI> kpis, boolean newScorecard) {
         long userID = SecurityUtil.getUserID();
@@ -77,7 +73,7 @@ public class KPIService {
             for (KPI kpi : kpis) {
                 kpi.setTemporary(false);
                 new KPIStorage().saveKPI(kpi, conn);
-                new ScorecardStorage().addKPIToScorecard(kpi, targetScorecard.getScorecardID(), conn);                
+                new ScorecardStorage().linkKPIToScorecard(kpi, targetScorecard.getScorecardID(), conn);
             }
             conn.commit();
         } catch (Exception e) {
@@ -154,16 +150,18 @@ public class KPIService {
         }
     }
 
-    public void saveKPI(KPI kpi) {
+    public KPI saveKPI(KPI kpi, List<CredentialFulfillment> credentials) {
         EIConnection conn = Database.instance().getConnection();
         try {
             conn.setAutoCommit(false);
-            kpi.setKpiUsers(Arrays.asList(KPIUtil.defaultUser()));
             kpiStorage.saveKPI(kpi, conn);
+            new ScorecardService().refreshValuesForList(Arrays.asList(kpi), conn, credentials);
             conn.commit();
+            return kpi;
         } catch (Exception e) {
             conn.rollback();
             LogClass.error(e);
+            throw new RuntimeException(e);
         } finally {
             conn.setAutoCommit(true);
             Database.closeConnection(conn);

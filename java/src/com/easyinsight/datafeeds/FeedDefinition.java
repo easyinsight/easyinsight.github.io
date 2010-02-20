@@ -98,6 +98,10 @@ public class FeedDefinition implements Cloneable, Serializable {
         this.visible = visible;
     }
 
+    public String getFilterExampleMessage() {
+        return "On the left, you'll see the list of fields available to you. Drag a field from that list into the area to the right to create a filter.";
+    }
+
     private Credentials cachedCredentials;
 
     public FeedDefinition() {
@@ -356,6 +360,7 @@ public class FeedDefinition implements Cloneable, Serializable {
         feed.setFeedID(getDataFeedID());
         feed.setAttribution(getAttribution());
         feed.setProperties(createProperties());
+        feed.setFilterExampleMessage(getFilterExampleMessage());
         Map<Long, AnalysisItem> replacementMap = new HashMap<Long, AnalysisItem>();
         List<AnalysisItem> clones = new ArrayList<AnalysisItem>();
         for (AnalysisItem field : getFields()) {

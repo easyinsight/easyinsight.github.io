@@ -82,6 +82,7 @@ public class DataService {
             sortedList.toArray(feedItemArray);
             FeedMetadata feedMetadata = new FeedMetadata();            
             feedMetadata.setCredentials(credentialRequirements);
+            feedMetadata.setFilterExampleMessage(feed.getFilterExampleMessage());
             feedMetadata.setDataSourceName(feed.getName());
             feedMetadata.setFields(feedItemArray);
             feedMetadata.setFieldHierarchy(feed.getFieldHierarchy());

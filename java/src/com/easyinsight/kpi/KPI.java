@@ -1,9 +1,6 @@
 package com.easyinsight.kpi;
 
-import com.easyinsight.analysis.AnalysisItem;
-import com.easyinsight.analysis.AnalysisMeasure;
-import com.easyinsight.analysis.FilterDefinition;
-import com.easyinsight.analysis.Tag;
+import com.easyinsight.analysis.*;
 import com.easyinsight.core.InsightDescriptor;
 
 import java.util.ArrayList;
@@ -25,11 +22,15 @@ public class KPI implements Cloneable {
     private long coreFeedID;
     private String coreFeedName;
     private AnalysisMeasure analysisMeasure;
+    private AnalysisDateDimension dateDimension;
     private List<FilterDefinition> filters = new ArrayList<FilterDefinition>();
 
     private List<Tag> tags = new ArrayList<Tag>();
     
     private boolean goalDefined;
+
+    private int dayWindow;
+    private double threshold;
     
     private List<FilterDefinition> problemConditions = new ArrayList<FilterDefinition>();
     private int highIsGood;
@@ -83,12 +84,36 @@ public class KPI implements Cloneable {
         this.goalDefined = goalDefined;
     }
 
+    public AnalysisDateDimension getDateDimension() {
+        return dateDimension;
+    }
+
+    public void setDateDimension(AnalysisDateDimension dateDimension) {
+        this.dateDimension = dateDimension;
+    }
+
     public List<FilterDefinition> getProblemConditions() {
         return problemConditions;
     }
 
     public void setProblemConditions(List<FilterDefinition> problemConditions) {
         this.problemConditions = problemConditions;
+    }
+
+    public int getDayWindow() {
+        return dayWindow;
+    }
+
+    public void setDayWindow(int dayWindow) {
+        this.dayWindow = dayWindow;
+    }
+
+    public double getThreshold() {
+        return threshold;
+    }
+
+    public void setThreshold(double threshold) {
+        this.threshold = threshold;
     }
 
     public int getHighIsGood() {

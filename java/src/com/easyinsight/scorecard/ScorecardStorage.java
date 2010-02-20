@@ -1,19 +1,14 @@
 package com.easyinsight.scorecard;
 
-import com.easyinsight.analysis.AnalysisMeasure;
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.kpi.KPI;
 import com.easyinsight.kpi.KPIStorage;
-import com.easyinsight.kpi.KPIValue;
-import org.hibernate.Session;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
-import java.sql.Timestamp;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -182,7 +177,6 @@ public class ScorecardStorage {
         EIConnection conn = Database.instance().getConnection();
         try {
             conn.setAutoCommit(false);
-            new KPIStorage().saveKPI(kpi, conn);
             addKPIToScorecard(kpi, scorecardID, conn);
             conn.commit();
             return kpi.getKpiID();
@@ -196,6 +190,11 @@ public class ScorecardStorage {
     }
 
     public void addKPIToScorecard(KPI kpi, long scorecardID, EIConnection conn) throws Exception {
+        new KPIStorage().saveKPI(kpi, conn);
+        linkKPIToScorecard(kpi, scorecardID, conn);     
+    }
+
+    public void linkKPIToScorecard(KPI kpi, long scorecardID, EIConnection conn) throws Exception {
         PreparedStatement addLinkStmt = conn.prepareStatement("INSERT INTO SCORECARD_TO_KPI (SCORECARD_ID, KPI_ID) VALUES (?, ?)");
         
         addLinkStmt.setLong(1, scorecardID);

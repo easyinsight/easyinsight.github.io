@@ -46,6 +46,9 @@ public class StaticFeed extends Feed implements Serializable {
         if (analysisItem.hasType(AnalysisItemTypes.HIERARCHY)) {
             AnalysisHierarchyItem analysisHierarchyItem = (AnalysisHierarchyItem) analysisItem;
             queryItem = analysisHierarchyItem.getHierarchyLevel().getAnalysisItem();
+        } else if (analysisItem.hasType(AnalysisItemTypes.STEP)) {
+            AnalysisStep step = (AnalysisStep) analysisItem;
+            queryItem = step.getEndDate();
         } else {
             queryItem = analysisItem;
         }

@@ -59,7 +59,7 @@ public class TokenService {
         tokenObject.setUserID(SecurityUtil.getUserID());
         tokenObject.setTokenType(type);
         tokenObject.setTokenValue(sessionToken);
-        new TokenStorage().saveToken(tokenObject);
+        new TokenStorage().saveToken(tokenObject, 0);
         return null;
     }
 

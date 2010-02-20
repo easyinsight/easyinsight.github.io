@@ -18,118 +18,91 @@ import java.util.*;
 public class HistoryRun {
 
     public List<KPIValue> lastTwoValues(long dataSourceID, AnalysisMeasure measure, List<FilterDefinition> filters,
-                                                     List<CredentialFulfillment> credentials, long timeWindow) throws TokenMissingException {
+                                                     List<CredentialFulfillment> credentials, int timeWindow) throws TokenMissingException {
+        // the way this should work...
+
+        // if date dimension and time window
+        // make the query where the date is X and the filter is Y
+
+        FilterDefinition rollingFilter = null;
+        for (FilterDefinition filter : filters) {
+            if (filter instanceof RollingFilterDefinition) {
+                rollingFilter = filter;
+                filter.getField().setSort(2);
+            }
+        }
+
+        Feed feed = FeedRegistry.instance().getFeed(dataSourceID);
+
 
         Date endDate = new Date();
-        if (timeWindow == 0) {
-            timeWindow = 1000 * 60 * 60 * 24 * 2;
+
+
+        if (rollingFilter != null) {
+
+            long time;
+            if (timeWindow == 0) {
+                time = 1000L * 60L * 60L * 24L * 2L;
+            } else {
+                time = 1000L * 60L * 60L * 24L * timeWindow;
+            }
+            Date startDate = new Date(endDate.getTime() - time);
+
+
+            KPIValue startValue = blah(createReport(dataSourceID, measure, filters), feed, startDate, measure, credentials);
+            KPIValue endValue = blah(createReport(dataSourceID, measure, filters), feed, endDate, measure, credentials);
+            return Arrays.asList(startValue, endValue);
+        } else {
+            KPIValue value = blah(createReport(dataSourceID, measure, filters), feed, endDate, measure, credentials);
+            return Arrays.asList(value);
         }
-        Date startDate = new Date(endDate.getTime() - timeWindow);
-        List<KPIValue> values = calculateHistoricalValues(dataSourceID, measure, filters, startDate, endDate, credentials);
-        List<KPIValue> retValues = new ArrayList<KPIValue>();
-        if (values.size() == 1) {
-            retValues.add(values.get(0));
-        } else if (values.size() == 2) {
-            retValues.add(values.get(0));
-            retValues.add(values.get(1));
-        } else if (values.size() > 2) {
-            retValues.add(values.get(values.size() - 2));
-            retValues.add(values.get(values.size() - 1));
-        }
-        return retValues;
     }
 
-    public List<KPIValue> calculateHistoricalValues(long dataSourceID, AnalysisMeasure measure, List<FilterDefinition> filters, Date startDate, Date endDate,
-                                                     List<CredentialFulfillment> credentials) throws TokenMissingException {
-        List<KPIValue> goalValues = new ArrayList<KPIValue>();
-        Set<AnalysisItem> itemSet = new HashSet<AnalysisItem>();
+    public WSAnalysisDefinition createReport(long dataSourceID, AnalysisMeasure analysisMeasure, List<FilterDefinition> filters) {
+        WSListDefinition report = new WSListDefinition();
+        report.setDataFeedID(dataSourceID);
+        report.setColumns(Arrays.asList((AnalysisItem) analysisMeasure));
+        report.setFilterDefinitions(filters);
+        return report;
+    }
 
-        List<FilterDefinition> otherFilters = new ArrayList<FilterDefinition>();
-        RollingFilterDefinition rollingFilterDefinition = null;
-        Date realStartDate = startDate;
-        for (FilterDefinition filterDefinition : filters) {
-            if (filterDefinition instanceof RollingFilterDefinition) {
-
-                rollingFilterDefinition = (RollingFilterDefinition) filterDefinition;
-                InsightRequestMetadata insightRequestMetadata = new InsightRequestMetadata();
-                insightRequestMetadata.setNow(startDate);
-                realStartDate = new Date(MaterializedRollingFilterDefinition.findStartDate(rollingFilterDefinition.getInterval(), startDate));
-                if (rollingFilterDefinition.getInterval() == MaterializedRollingFilterDefinition.LAST_DAY) {
-                    rollingFilterDefinition.setInterval(MaterializedRollingFilterDefinition.DAY);
-                }
-            } else {
-                otherFilters.add(filterDefinition);
-            }
-            itemSet.add(filterDefinition.getField());
-        }
-        Feed feed = FeedRegistry.instance().getFeed(dataSourceID);
-        itemSet.addAll(measure.getAnalysisItems(feed.getFields(), Arrays.asList((AnalysisItem) measure), false));
-        List<FilterDefinition> intrinsicFilters = feed.getIntrinsicFilters();
-        for (FilterDefinition intrinsicFilter : intrinsicFilters) {
-            if (intrinsicFilter instanceof RollingFilterDefinition) {
-                FilterDateRangeDefinition dateRange = new FilterDateRangeDefinition();
-                dateRange.setField(intrinsicFilter.getField());
-                dateRange.setStartDate(realStartDate);
-                dateRange.setEndDate(endDate);
-                otherFilters.add(dateRange);
-                itemSet.add(intrinsicFilter.getField());
-            } else if (intrinsicFilter instanceof FilterDateRangeDefinition) {
-                FilterDateRangeDefinition dateRange = (FilterDateRangeDefinition) intrinsicFilter;
-                dateRange.setStartDate(realStartDate);
-                dateRange.setEndDate(endDate);
-                otherFilters.add(dateRange);
-                itemSet.add(intrinsicFilter.getField());
+    public KPIValue blah(WSAnalysisDefinition analysisDefinition, Feed feed, Date endDate,
+                         AnalysisMeasure measure, List<CredentialFulfillment> credentials) {
+        InsightRequestMetadata insightRequestMetadata = new InsightRequestMetadata();
+        insightRequestMetadata.setCredentialFulfillmentList(credentials);
+        insightRequestMetadata.setNow(endDate);
+        Set<AnalysisItem> analysisItems = analysisDefinition.getColumnItems(feed.getFields());
+        Set<AnalysisItem> validQueryItems = new HashSet<AnalysisItem>();
+        for (AnalysisItem analysisItem : analysisItems) {
+            if (!analysisItem.isDerived()) {
+                validQueryItems.add(analysisItem);
             }
         }
-        InsightRequestMetadata dataRequest = new InsightRequestMetadata();
-        dataRequest.setCredentialFulfillmentList(credentials);
-        DataSet dataSet = feed.getAggregateDataSet(itemSet, otherFilters, dataRequest, feed.getFields(), false);
-        if (rollingFilterDefinition == null) {
-            StandardReportPipeline pipeline = new StandardReportPipeline();
-            WSListDefinition report = new WSListDefinition();
-            report.setColumns(Arrays.asList((AnalysisItem) measure));
-            report.setFilterDefinitions(filters);
-            report.setDataFeedID(dataSourceID);
-            DataSet result = pipeline.setup(report, feed, new InsightRequestMetadata()).toDataSet(dataSet);
-            if (result.getRows().size() > 0) {
-                IRow row = result.getRow(0);
-                Value value = row.getValue(measure.createAggregateKey());
-                KPIValue goalValue = new KPIValue();
-                goalValue.setDate(new Date());
-                goalValue.setValue(value.toDouble());
-                goalValues.add(goalValue);
+        boolean aggregateQuery = true;
+        for (AnalysisItem analysisItem : analysisDefinition.getAllAnalysisItems()) {
+            if (analysisItem.blocksDBAggregation()) {
+                aggregateQuery = false;
             }
+        }
+        insightRequestMetadata.setAggregateQuery(aggregateQuery);
+        Collection<FilterDefinition> filters = analysisDefinition.retrieveFilterDefinitions();
+        DataSet dataSet = feed.getAggregateDataSet(validQueryItems, filters, insightRequestMetadata, feed.getFields(), false);
+        //results = dataSet.toList(analysisDefinition, feed.getFields(), insightRequestMetadata);
+        Pipeline pipeline = new StandardReportPipeline();
+        pipeline.setup(analysisDefinition, feed, insightRequestMetadata);
+        DataSet result = pipeline.toDataSet(dataSet);
+        KPIValue goalValue;
+        if (result.getRows().size() > 0) {
+            IRow row = result.getRow(0);
+            Value value = row.getValue(measure.createAggregateKey());
+            goalValue = new KPIValue();
+            goalValue.setDate(endDate);
+            goalValue.setValue(value.toDouble());
         } else {
-            Calendar cal = Calendar.getInstance();
-            cal.setTime(startDate);
-            long startTime = cal.getTimeInMillis();
-            long endTime = endDate.getTime();
-            for (long time = startTime; time < endTime;) {
-                StandardReportPipeline pipeline = new StandardReportPipeline();
-                WSListDefinition report = new WSListDefinition();
-                report.setColumns(Arrays.asList((AnalysisItem) measure));
-                report.setDataFeedID(dataSourceID);
-                report.setFilterDefinitions(filters);
-                InsightRequestMetadata insightRequestMetadata = new InsightRequestMetadata();
-                insightRequestMetadata.setNow(new Date(time));
-                DataSet result = pipeline.setup(report, feed, insightRequestMetadata).toDataSet(dataSet);
-                if (result.getRows().size() > 0) {
-                    IRow row = result.getRow(0);
-                    Value value = row.getValue(measure.createAggregateKey());
-                    KPIValue goalValue = new KPIValue();
-                    goalValue.setDate(cal.getTime());
-                    goalValue.setValue(value.toDouble());
-                    goalValues.add(goalValue);
-                } else {
-                    KPIValue goalValue = new KPIValue();
-                    goalValue.setDate(cal.getTime());
-                    goalValue.setValue(0);
-                    goalValues.add(goalValue);
-                }
-                cal.add(Calendar.DAY_OF_YEAR, 1);
-                time = cal.getTimeInMillis();
-            }
+            goalValue = new KPIValue();
+            goalValue.setDate(endDate);
+            goalValue.setValue(0);
         }
-        return goalValues;
+        return goalValue;
     }
 }
