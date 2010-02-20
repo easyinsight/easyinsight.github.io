@@ -331,18 +331,18 @@
                static-rsls="false" link-report="${basedir}/optimized.txt">
             <load-config filename="${teamcity.build.checkoutDir}/flex/core-optimized-config.xml"/>
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
-                <url rsl-url="framework_3.3.0.4852.swz"/>
-                <url rsl-url="framework_3.3.0.4852.swf"/>
+                <url rsl-url="framework_3.5.0.12683.swz"/>
+                <url rsl-url="framework_3.5.0.12683.swf"/>
             </runtime-shared-library-path>
 
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/datavisualization.swc">
-                <url rsl-url="datavisualization_3.3.0.4852.swz"/>
-                <url rsl-url="datavisualization_3.3.0.4852.swf"/>
+                <url rsl-url="datavisualization_3.5.0.12683.swz"/>
+                <url rsl-url="datavisualization_3.5.0.12683.swf"/>
             </runtime-shared-library-path>
 
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
-                <url rsl-url="rpc_3.3.0.4852.swz"/>
-                <url rsl-url="rpc_3.3.0.4852.swf"/>
+                <url rsl-url="rpc_3.5.0.12683.swz"/>
+                <url rsl-url="rpc_3.5.0.12683.swf"/>
             </runtime-shared-library-path>
         </mxmlc>
         <SWFSize artifactPath="${flex.path}/PrimaryWorkspace.swf" key="${ei.key}" secretKey="${ei.secret.key}" component="PrimaryWorkspace"
@@ -356,18 +356,18 @@
                static-rsls="false" link-report="${basedir}/intro.txt">
             <load-config filename="${teamcity.build.checkoutDir}/flex/intro-config.xml"/>
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
-                <url rsl-url="framework_3.3.0.4852.swz"/>
-                <url rsl-url="framework_3.3.0.4852.swf"/>
+                <url rsl-url="framework_3.5.0.12683.swz"/>
+                <url rsl-url="framework_3.5.0.12683.swf"/>
             </runtime-shared-library-path>
 
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/datavisualization.swc">
-                <url rsl-url="datavisualization_3.3.0.4852.swz"/>
-                <url rsl-url="datavisualization_3.3.0.4852.swf"/>
+                <url rsl-url="datavisualization_3.5.0.12683.swz"/>
+                <url rsl-url="datavisualization_3.5.0.12683.swf"/>
             </runtime-shared-library-path>
 
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
-                <url rsl-url="rpc_3.3.0.4852.swz"/>
-                <url rsl-url="rpc_3.3.0.4852.swf"/>
+                <url rsl-url="rpc_3.5.0.12683.swz"/>
+                <url rsl-url="rpc_3.5.0.12683.swf"/>
             </runtime-shared-library-path>
         </mxmlc>
         <SWFSize artifactPath="${flex.path}/IntroApplication.swf" key="${ei.key}" secretKey="${ei.secret.key}" component="IntroApplication"
@@ -381,18 +381,18 @@
                static-rsls="false" link-report="${basedir}/embedded.txt">
             <load-config filename="${teamcity.build.checkoutDir}/flex/embedded-insight.xml"/>
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
-                <url rsl-url="framework_3.3.0.4852.swz"/>
-                <url rsl-url="framework_3.3.0.4852.swf"/>
+                <url rsl-url="framework_3.5.0.12683.swz"/>
+                <url rsl-url="framework_3.5.0.12683.swf"/>
             </runtime-shared-library-path>
 
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/datavisualization.swc">
-                <url rsl-url="datavisualization_3.3.0.4852.swz"/>
-                <url rsl-url="datavisualization_3.3.0.4852.swf"/>
+                <url rsl-url="datavisualization_3.5.0.12683.swz"/>
+                <url rsl-url="datavisualization_3.5.0.12683.swf"/>
             </runtime-shared-library-path>
 
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
-                <url rsl-url="rpc_3.3.0.4852.swz"/>
-                <url rsl-url="rpc_3.3.0.4852.swf"/>
+                <url rsl-url="rpc_3.5.0.12683.swz"/>
+                <url rsl-url="rpc_3.5.0.12683.swf"/>
             </runtime-shared-library-path>
         </mxmlc>
         <SWFSize artifactPath="${flex.path}/EmbeddedInsight.swf" key="${ei.key}" secretKey="${ei.secret.key}" component="EmbeddedInsight"
@@ -407,18 +407,18 @@
                static-rsls="false" link-report="${basedir}/yahoo.txt">
             <load-config filename="${teamcity.build.checkoutDir}/flex/yahoo-report.xml"/>
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
-                <url rsl-url="framework_3.3.0.4852.swz"/>
-                <url rsl-url="framework_3.3.0.4852.swf"/>
+                <url rsl-url="framework_3.5.0.12683.swz"/>
+                <url rsl-url="framework_3.5.0.12683.swf"/>
             </runtime-shared-library-path>
 
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/datavisualization.swc">
-                <url rsl-url="datavisualization_3.3.0.4852.swz"/>
-                <url rsl-url="datavisualization_3.3.0.4852.swf"/>
+                <url rsl-url="datavisualization_3.5.0.12683.swz"/>
+                <url rsl-url="datavisualization_3.5.0.12683.swf"/>
             </runtime-shared-library-path>
 
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
-                <url rsl-url="rpc_3.3.0.4852.swz"/>
-                <url rsl-url="rpc_3.3.0.4852.swf"/>
+                <url rsl-url="rpc_3.5.0.12683.swz"/>
+                <url rsl-url="rpc_3.5.0.12683.swf"/>
             </runtime-shared-library-path>
         </mxmlc>
         <SWFSize artifactPath="${flex.path}/YahooWidgetReport.swf" key="${ei.key}" secretKey="${ei.secret.key}" component="YahooWidgetReport"
@@ -432,18 +432,18 @@
                static-rsls="false" link-report="${basedir}/yahoo-goals.txt">
             <load-config filename="${teamcity.build.checkoutDir}/flex/yahoo-goals.xml"/>
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
-                <url rsl-url="framework_3.3.0.4852.swz"/>
-                <url rsl-url="framework_3.3.0.4852.swf"/>
+                <url rsl-url="framework_3.5.0.12683.swz"/>
+                <url rsl-url="framework_3.5.0.12683.swf"/>
             </runtime-shared-library-path>
 
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/datavisualization.swc">
-                <url rsl-url="datavisualization_3.3.0.4852.swz"/>
-                <url rsl-url="datavisualization_3.3.0.4852.swf"/>
+                <url rsl-url="datavisualization_3.5.0.12683.swz"/>
+                <url rsl-url="datavisualization_3.5.0.12683.swf"/>
             </runtime-shared-library-path>
 
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
-                <url rsl-url="rpc_3.3.0.4852.swz"/>
-                <url rsl-url="rpc_3.3.0.4852.swf"/>
+                <url rsl-url="rpc_3.5.0.12683.swz"/>
+                <url rsl-url="rpc_3.5.0.12683.swf"/>
             </runtime-shared-library-path>
         </mxmlc>
         <SWFSize artifactPath="${flex.path}/YahooWidgetGoals.swf" key="${ei.key}" secretKey="${ei.secret.key}" component="YahooWidgetGoals"
@@ -470,18 +470,18 @@
                static-rsls="false">
             <load-config filename="${teamcity.build.checkoutDir}/flex/modules/mm-line-chart-module.xml"/>
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
-                <url rsl-url="framework_3.3.0.4852.swz"/>
-                <url rsl-url="framework_3.3.0.4852.swf"/>
+                <url rsl-url="framework_3.5.0.12683.swz"/>
+                <url rsl-url="framework_3.5.0.12683.swf"/>
             </runtime-shared-library-path>
 
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/datavisualization.swc">
-                <url rsl-url="datavisualization_3.3.0.4852.swz"/>
-                <url rsl-url="datavisualization_3.3.0.4852.swf"/>
+                <url rsl-url="datavisualization_3.5.0.12683.swz"/>
+                <url rsl-url="datavisualization_3.5.0.12683.swf"/>
             </runtime-shared-library-path>
 
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
-                <url rsl-url="rpc_3.3.0.4852.swz"/>
-                <url rsl-url="rpc_3.3.0.4852.swf"/>
+                <url rsl-url="rpc_3.5.0.12683.swz"/>
+                <url rsl-url="rpc_3.5.0.12683.swf"/>
             </runtime-shared-library-path>
         </mxmlc>
     </target>
@@ -491,18 +491,18 @@
                static-rsls="false" link-report="${basedir}/list.txt">
             <load-config filename="${teamcity.build.checkoutDir}/flex/modules/list-module.xml"/>
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
-                <url rsl-url="framework_3.3.0.4852.swz"/>
-                <url rsl-url="framework_3.3.0.4852.swf"/>
+                <url rsl-url="framework_3.5.0.12683.swz"/>
+                <url rsl-url="framework_3.5.0.12683.swf"/>
             </runtime-shared-library-path>
 
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/datavisualization.swc">
-                <url rsl-url="datavisualization_3.3.0.4852.swz"/>
-                <url rsl-url="datavisualization_3.3.0.4852.swf"/>
+                <url rsl-url="datavisualization_3.5.0.12683.swz"/>
+                <url rsl-url="datavisualization_3.5.0.12683.swf"/>
             </runtime-shared-library-path>
 
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
-                <url rsl-url="rpc_3.3.0.4852.swz"/>
-                <url rsl-url="rpc_3.3.0.4852.swf"/>
+                <url rsl-url="rpc_3.5.0.12683.swz"/>
+                <url rsl-url="rpc_3.5.0.12683.swf"/>
             </runtime-shared-library-path>
         </mxmlc>
         <SWFSize artifactPath="${flex.path}/ListModule.swf" key="${ei.key}" secretKey="${ei.secret.key}" component="ListModule"
@@ -516,18 +516,18 @@
                static-rsls="false" link-report="${basedir}/column.txt">
             <load-config filename="${teamcity.build.checkoutDir}/flex/modules/column-chart-module.xml"/>
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
-                <url rsl-url="framework_3.3.0.4852.swz"/>
-                <url rsl-url="framework_3.3.0.4852.swf"/>
+                <url rsl-url="framework_3.5.0.12683.swz"/>
+                <url rsl-url="framework_3.5.0.12683.swf"/>
             </runtime-shared-library-path>
 
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/datavisualization.swc">
-                <url rsl-url="datavisualization_3.3.0.4852.swz"/>
-                <url rsl-url="datavisualization_3.3.0.4852.swf"/>
+                <url rsl-url="datavisualization_3.5.0.12683.swz"/>
+                <url rsl-url="datavisualization_3.5.0.12683.swf"/>
             </runtime-shared-library-path>
 
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
-                <url rsl-url="rpc_3.3.0.4852.swz"/>
-                <url rsl-url="rpc_3.3.0.4852.swf"/>
+                <url rsl-url="rpc_3.5.0.12683.swz"/>
+                <url rsl-url="rpc_3.5.0.12683.swf"/>
             </runtime-shared-library-path>
         </mxmlc>
         <SWFSize artifactPath="${flex.path}/ColumnChartModule.swf" key="${ei.key}" secretKey="${ei.secret.key}" component="ColumnChartModule"
@@ -541,18 +541,18 @@
                static-rsls="false" link-report="${basedir}/column3d.txt">
             <load-config filename="${teamcity.build.checkoutDir}/flex/modules/column-3d-chart-module.xml"/>
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
-                <url rsl-url="framework_3.3.0.4852.swz"/>
-                <url rsl-url="framework_3.3.0.4852.swf"/>
+                <url rsl-url="framework_3.5.0.12683.swz"/>
+                <url rsl-url="framework_3.5.0.12683.swf"/>
             </runtime-shared-library-path>
 
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/datavisualization.swc">
-                <url rsl-url="datavisualization_3.3.0.4852.swz"/>
-                <url rsl-url="datavisualization_3.3.0.4852.swf"/>
+                <url rsl-url="datavisualization_3.5.0.12683.swz"/>
+                <url rsl-url="datavisualization_3.5.0.12683.swf"/>
             </runtime-shared-library-path>
 
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
-                <url rsl-url="rpc_3.3.0.4852.swz"/>
-                <url rsl-url="rpc_3.3.0.4852.swf"/>
+                <url rsl-url="rpc_3.5.0.12683.swz"/>
+                <url rsl-url="rpc_3.5.0.12683.swf"/>
             </runtime-shared-library-path>
         </mxmlc>
         <SWFSize artifactPath="${flex.path}/Column3DChartModule.swf" key="${ei.key}" secretKey="${ei.secret.key}" component="Column3DChartModule"
@@ -566,18 +566,18 @@
                static-rsls="false" link-report="${basedir}/pie.txt">
             <load-config filename="${teamcity.build.checkoutDir}/flex/modules/pie-chart-module.xml"/>
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
-                <url rsl-url="framework_3.3.0.4852.swz"/>
-                <url rsl-url="framework_3.3.0.4852.swf"/>
+                <url rsl-url="framework_3.5.0.12683.swz"/>
+                <url rsl-url="framework_3.5.0.12683.swf"/>
             </runtime-shared-library-path>
 
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/datavisualization.swc">
-                <url rsl-url="datavisualization_3.3.0.4852.swz"/>
-                <url rsl-url="datavisualization_3.3.0.4852.swf"/>
+                <url rsl-url="datavisualization_3.5.0.12683.swz"/>
+                <url rsl-url="datavisualization_3.5.0.12683.swf"/>
             </runtime-shared-library-path>
 
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
-                <url rsl-url="rpc_3.3.0.4852.swz"/>
-                <url rsl-url="rpc_3.3.0.4852.swf"/>
+                <url rsl-url="rpc_3.5.0.12683.swz"/>
+                <url rsl-url="rpc_3.5.0.12683.swf"/>
             </runtime-shared-library-path>
         </mxmlc>
         <SWFSize artifactPath="${flex.path}/PieChartModule.swf" key="${ei.key}" secretKey="${ei.secret.key}" component="PieChartModule"
@@ -591,18 +591,18 @@
                static-rsls="false" link-report="${basedir}/pie3d.txt">
             <load-config filename="${teamcity.build.checkoutDir}/flex/modules/pie-3d-chart-module.xml"/>
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
-                <url rsl-url="framework_3.3.0.4852.swz"/>
-                <url rsl-url="framework_3.3.0.4852.swf"/>
+                <url rsl-url="framework_3.5.0.12683.swz"/>
+                <url rsl-url="framework_3.5.0.12683.swf"/>
             </runtime-shared-library-path>
 
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/datavisualization.swc">
-                <url rsl-url="datavisualization_3.3.0.4852.swz"/>
-                <url rsl-url="datavisualization_3.3.0.4852.swf"/>
+                <url rsl-url="datavisualization_3.5.0.12683.swz"/>
+                <url rsl-url="datavisualization_3.5.0.12683.swf"/>
             </runtime-shared-library-path>
 
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
-                <url rsl-url="rpc_3.3.0.4852.swz"/>
-                <url rsl-url="rpc_3.3.0.4852.swf"/>
+                <url rsl-url="rpc_3.5.0.12683.swz"/>
+                <url rsl-url="rpc_3.5.0.12683.swf"/>
             </runtime-shared-library-path>
         </mxmlc>
         <SWFSize artifactPath="${flex.path}/Pie3DChartModule.swf" key="${ei.key}" secretKey="${ei.secret.key}" component="Pie3DChartModule"
@@ -616,18 +616,18 @@
                static-rsls="false" link-report="${basedir}/bar.txt">
             <load-config filename="${teamcity.build.checkoutDir}/flex/modules/bar-chart-module.xml"/>
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
-                <url rsl-url="framework_3.3.0.4852.swz"/>
-                <url rsl-url="framework_3.3.0.4852.swf"/>
+                <url rsl-url="framework_3.5.0.12683.swz"/>
+                <url rsl-url="framework_3.5.0.12683.swf"/>
             </runtime-shared-library-path>
 
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/datavisualization.swc">
-                <url rsl-url="datavisualization_3.3.0.4852.swz"/>
-                <url rsl-url="datavisualization_3.3.0.4852.swf"/>
+                <url rsl-url="datavisualization_3.5.0.12683.swz"/>
+                <url rsl-url="datavisualization_3.5.0.12683.swf"/>
             </runtime-shared-library-path>
 
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
-                <url rsl-url="rpc_3.3.0.4852.swz"/>
-                <url rsl-url="rpc_3.3.0.4852.swf"/>
+                <url rsl-url="rpc_3.5.0.12683.swz"/>
+                <url rsl-url="rpc_3.5.0.12683.swf"/>
             </runtime-shared-library-path>
         </mxmlc>
         <SWFSize artifactPath="${flex.path}/BarChartModule.swf" key="${ei.key}" secretKey="${ei.secret.key}" component="BarChartModule"
@@ -641,18 +641,18 @@
                static-rsls="false" link-report="${basedir}/bar3d.txt">
             <load-config filename="${teamcity.build.checkoutDir}/flex/modules/bar-3d-chart-module.xml"/>
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
-                <url rsl-url="framework_3.3.0.4852.swz"/>
-                <url rsl-url="framework_3.3.0.4852.swf"/>
+                <url rsl-url="framework_3.5.0.12683.swz"/>
+                <url rsl-url="framework_3.5.0.12683.swf"/>
             </runtime-shared-library-path>
 
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/datavisualization.swc">
-                <url rsl-url="datavisualization_3.3.0.4852.swz"/>
-                <url rsl-url="datavisualization_3.3.0.4852.swf"/>
+                <url rsl-url="datavisualization_3.5.0.12683.swz"/>
+                <url rsl-url="datavisualization_3.5.0.12683.swf"/>
             </runtime-shared-library-path>
 
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
-                <url rsl-url="rpc_3.3.0.4852.swz"/>
-                <url rsl-url="rpc_3.3.0.4852.swf"/>
+                <url rsl-url="rpc_3.5.0.12683.swz"/>
+                <url rsl-url="rpc_3.5.0.12683.swf"/>
             </runtime-shared-library-path>
         </mxmlc>
         <SWFSize artifactPath="${flex.path}/Bar3DChartModule.swf" key="${ei.key}" secretKey="${ei.secret.key}" component="Bar3DChartModule"
@@ -666,18 +666,18 @@
                static-rsls="false" link-report="${basedir}/area.txt">
             <load-config filename="${teamcity.build.checkoutDir}/flex/modules/area-chart-module.xml"/>
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
-                <url rsl-url="framework_3.3.0.4852.swz"/>
-                <url rsl-url="framework_3.3.0.4852.swf"/>
+                <url rsl-url="framework_3.5.0.12683.swz"/>
+                <url rsl-url="framework_3.5.0.12683.swf"/>
             </runtime-shared-library-path>
 
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/datavisualization.swc">
-                <url rsl-url="datavisualization_3.3.0.4852.swz"/>
-                <url rsl-url="datavisualization_3.3.0.4852.swf"/>
+                <url rsl-url="datavisualization_3.5.0.12683.swz"/>
+                <url rsl-url="datavisualization_3.5.0.12683.swf"/>
             </runtime-shared-library-path>
 
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
-                <url rsl-url="rpc_3.3.0.4852.swz"/>
-                <url rsl-url="rpc_3.3.0.4852.swf"/>
+                <url rsl-url="rpc_3.5.0.12683.swz"/>
+                <url rsl-url="rpc_3.5.0.12683.swf"/>
             </runtime-shared-library-path>
         </mxmlc>
         <SWFSize artifactPath="${flex.path}/AreaChartModule.swf" key="${ei.key}" secretKey="${ei.secret.key}" component="AreaChartModule"
@@ -691,18 +691,18 @@
                static-rsls="false" link-report="${basedir}/area3d.txt">
             <load-config filename="${teamcity.build.checkoutDir}/flex/modules/area-3d-chart-module.xml"/>
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
-                <url rsl-url="framework_3.3.0.4852.swz"/>
-                <url rsl-url="framework_3.3.0.4852.swf"/>
+                <url rsl-url="framework_3.5.0.12683.swz"/>
+                <url rsl-url="framework_3.5.0.12683.swf"/>
             </runtime-shared-library-path>
 
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/datavisualization.swc">
-                <url rsl-url="datavisualization_3.3.0.4852.swz"/>
-                <url rsl-url="datavisualization_3.3.0.4852.swf"/>
+                <url rsl-url="datavisualization_3.5.0.12683.swz"/>
+                <url rsl-url="datavisualization_3.5.0.12683.swf"/>
             </runtime-shared-library-path>
 
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
-                <url rsl-url="rpc_3.3.0.4852.swz"/>
-                <url rsl-url="rpc_3.3.0.4852.swf"/>
+                <url rsl-url="rpc_3.5.0.12683.swz"/>
+                <url rsl-url="rpc_3.5.0.12683.swf"/>
             </runtime-shared-library-path>
         </mxmlc>
         <SWFSize artifactPath="${flex.path}/Area3DChartModule.swf" key="${ei.key}" secretKey="${ei.secret.key}" component="Area3DChartModule"
@@ -716,18 +716,18 @@
                static-rsls="false" link-report="${basedir}/line.txt">
             <load-config filename="${teamcity.build.checkoutDir}/flex/modules/line-chart-module.xml"/>
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
-                <url rsl-url="framework_3.3.0.4852.swz"/>
-                <url rsl-url="framework_3.3.0.4852.swf"/>
+                <url rsl-url="framework_3.5.0.12683.swz"/>
+                <url rsl-url="framework_3.5.0.12683.swf"/>
             </runtime-shared-library-path>
 
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/datavisualization.swc">
-                <url rsl-url="datavisualization_3.3.0.4852.swz"/>
-                <url rsl-url="datavisualization_3.3.0.4852.swf"/>
+                <url rsl-url="datavisualization_3.5.0.12683.swz"/>
+                <url rsl-url="datavisualization_3.5.0.12683.swf"/>
             </runtime-shared-library-path>
 
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
-                <url rsl-url="rpc_3.3.0.4852.swz"/>
-                <url rsl-url="rpc_3.3.0.4852.swf"/>
+                <url rsl-url="rpc_3.5.0.12683.swz"/>
+                <url rsl-url="rpc_3.5.0.12683.swf"/>
             </runtime-shared-library-path>
         </mxmlc>
         <SWFSize artifactPath="${flex.path}/LineChartModule.swf" key="${ei.key}" secretKey="${ei.secret.key}" component="LineChartModule"
@@ -741,18 +741,18 @@
                static-rsls="false" link-report="${basedir}/line3d.txt">
             <load-config filename="${teamcity.build.checkoutDir}/flex/modules/line-3d-chart-module.xml"/>
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
-                <url rsl-url="framework_3.3.0.4852.swz"/>
-                <url rsl-url="framework_3.3.0.4852.swf"/>
+                <url rsl-url="framework_3.5.0.12683.swz"/>
+                <url rsl-url="framework_3.5.0.12683.swf"/>
             </runtime-shared-library-path>
 
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/datavisualization.swc">
-                <url rsl-url="datavisualization_3.3.0.4852.swz"/>
-                <url rsl-url="datavisualization_3.3.0.4852.swf"/>
+                <url rsl-url="datavisualization_3.5.0.12683.swz"/>
+                <url rsl-url="datavisualization_3.5.0.12683.swf"/>
             </runtime-shared-library-path>
 
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
-                <url rsl-url="rpc_3.3.0.4852.swz"/>
-                <url rsl-url="rpc_3.3.0.4852.swf"/>
+                <url rsl-url="rpc_3.5.0.12683.swz"/>
+                <url rsl-url="rpc_3.5.0.12683.swf"/>
             </runtime-shared-library-path>
         </mxmlc>
         <SWFSize artifactPath="${flex.path}/Line3DChartModule.swf" key="${ei.key}" secretKey="${ei.secret.key}" component="Line3DChartModule"
@@ -766,18 +766,18 @@
                static-rsls="false" link-report="${basedir}/bubble.txt">
             <load-config filename="${teamcity.build.checkoutDir}/flex/modules/bubble-chart-module.xml"/>
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
-                <url rsl-url="framework_3.3.0.4852.swz"/>
-                <url rsl-url="framework_3.3.0.4852.swf"/>
+                <url rsl-url="framework_3.5.0.12683.swz"/>
+                <url rsl-url="framework_3.5.0.12683.swf"/>
             </runtime-shared-library-path>
 
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/datavisualization.swc">
-                <url rsl-url="datavisualization_3.3.0.4852.swz"/>
-                <url rsl-url="datavisualization_3.3.0.4852.swf"/>
+                <url rsl-url="datavisualization_3.5.0.12683.swz"/>
+                <url rsl-url="datavisualization_3.5.0.12683.swf"/>
             </runtime-shared-library-path>
 
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
-                <url rsl-url="rpc_3.3.0.4852.swz"/>
-                <url rsl-url="rpc_3.3.0.4852.swf"/>
+                <url rsl-url="rpc_3.5.0.12683.swz"/>
+                <url rsl-url="rpc_3.5.0.12683.swf"/>
             </runtime-shared-library-path>
         </mxmlc>
         <SWFSize artifactPath="${flex.path}/BubbleChartModule.swf" key="${ei.key}" secretKey="${ei.secret.key}" component="BubbleChartModule"
@@ -791,18 +791,18 @@
                static-rsls="false" link-report="${basedir}/timeline.txt">
             <load-config filename="${teamcity.build.checkoutDir}/flex/modules/timeseries-module.xml"/>
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
-                <url rsl-url="framework_3.3.0.4852.swz"/>
-                <url rsl-url="framework_3.3.0.4852.swf"/>
+                <url rsl-url="framework_3.5.0.12683.swz"/>
+                <url rsl-url="framework_3.5.0.12683.swf"/>
             </runtime-shared-library-path>
 
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/datavisualization.swc">
-                <url rsl-url="datavisualization_3.3.0.4852.swz"/>
-                <url rsl-url="datavisualization_3.3.0.4852.swf"/>
+                <url rsl-url="datavisualization_3.5.0.12683.swz"/>
+                <url rsl-url="datavisualization_3.5.0.12683.swf"/>
             </runtime-shared-library-path>
 
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
-                <url rsl-url="rpc_3.3.0.4852.swz"/>
-                <url rsl-url="rpc_3.3.0.4852.swf"/>
+                <url rsl-url="rpc_3.5.0.12683.swz"/>
+                <url rsl-url="rpc_3.5.0.12683.swf"/>
             </runtime-shared-library-path>
         </mxmlc>
         <SWFSize artifactPath="${flex.path}/BubbleChartModule.swf" key="${ei.key}" secretKey="${ei.secret.key}" component="BubbleChartModule"
@@ -816,18 +816,18 @@
                static-rsls="false" link-report="${basedir}/plot.txt">
             <load-config filename="${teamcity.build.checkoutDir}/flex/modules/plot-chart-module.xml"/>
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
-                <url rsl-url="framework_3.3.0.4852.swz"/>
-                <url rsl-url="framework_3.3.0.4852.swf"/>
+                <url rsl-url="framework_3.5.0.12683.swz"/>
+                <url rsl-url="framework_3.5.0.12683.swf"/>
             </runtime-shared-library-path>
 
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/datavisualization.swc">
-                <url rsl-url="datavisualization_3.3.0.4852.swz"/>
-                <url rsl-url="datavisualization_3.3.0.4852.swf"/>
+                <url rsl-url="datavisualization_3.5.0.12683.swz"/>
+                <url rsl-url="datavisualization_3.5.0.12683.swf"/>
             </runtime-shared-library-path>
 
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
-                <url rsl-url="rpc_3.3.0.4852.swz"/>
-                <url rsl-url="rpc_3.3.0.4852.swf"/>
+                <url rsl-url="rpc_3.5.0.12683.swz"/>
+                <url rsl-url="rpc_3.5.0.12683.swf"/>
             </runtime-shared-library-path>
         </mxmlc>
         <SWFSize artifactPath="${flex.path}/PlotChartModule.swf" key="${ei.key}" secretKey="${ei.secret.key}" component="PlotChartModule"
@@ -841,18 +841,18 @@
                static-rsls="false" link-report="${basedir}/map.txt">
             <load-config filename="${teamcity.build.checkoutDir}/flex/modules/map-module.xml"/>
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
-                <url rsl-url="framework_3.3.0.4852.swz"/>
-                <url rsl-url="framework_3.3.0.4852.swf"/>
+                <url rsl-url="framework_3.5.0.12683.swz"/>
+                <url rsl-url="framework_3.5.0.12683.swf"/>
             </runtime-shared-library-path>
 
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/datavisualization.swc">
-                <url rsl-url="datavisualization_3.3.0.4852.swz"/>
-                <url rsl-url="datavisualization_3.3.0.4852.swf"/>
+                <url rsl-url="datavisualization_3.5.0.12683.swz"/>
+                <url rsl-url="datavisualization_3.5.0.12683.swf"/>
             </runtime-shared-library-path>
 
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
-                <url rsl-url="rpc_3.3.0.4852.swz"/>
-                <url rsl-url="rpc_3.3.0.4852.swf"/>
+                <url rsl-url="rpc_3.5.0.12683.swz"/>
+                <url rsl-url="rpc_3.5.0.12683.swf"/>
             </runtime-shared-library-path>
         </mxmlc>
         <SWFSize artifactPath="${flex.path}/MapModule.swf" key="${ei.key}" secretKey="${ei.secret.key}" component="MapModule"
@@ -866,18 +866,18 @@
                static-rsls="false">
             <load-config filename="${teamcity.build.checkoutDir}/flex/modules/map-us-module.xml"/>
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
-                <url rsl-url="framework_3.3.0.4852.swz"/>
-                <url rsl-url="framework_3.3.0.4852.swf"/>
+                <url rsl-url="framework_3.5.0.12683.swz"/>
+                <url rsl-url="framework_3.5.0.12683.swf"/>
             </runtime-shared-library-path>
 
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/datavisualization.swc">
-                <url rsl-url="datavisualization_3.3.0.4852.swz"/>
-                <url rsl-url="datavisualization_3.3.0.4852.swf"/>
+                <url rsl-url="datavisualization_3.5.0.12683.swz"/>
+                <url rsl-url="datavisualization_3.5.0.12683.swf"/>
             </runtime-shared-library-path>
 
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
-                <url rsl-url="rpc_3.3.0.4852.swz"/>
-                <url rsl-url="rpc_3.3.0.4852.swf"/>
+                <url rsl-url="rpc_3.5.0.12683.swz"/>
+                <url rsl-url="rpc_3.5.0.12683.swf"/>
             </runtime-shared-library-path>
         </mxmlc>
     </target>
@@ -887,18 +887,18 @@
                static-rsls="false">
             <load-config filename="${teamcity.build.checkoutDir}/flex/modules/map-europe-module.xml"/>
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
-                <url rsl-url="framework_3.3.0.4852.swz"/>
-                <url rsl-url="framework_3.3.0.4852.swf"/>
+                <url rsl-url="framework_3.5.0.12683.swz"/>
+                <url rsl-url="framework_3.5.0.12683.swf"/>
             </runtime-shared-library-path>
 
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/datavisualization.swc">
-                <url rsl-url="datavisualization_3.3.0.4852.swz"/>
-                <url rsl-url="datavisualization_3.3.0.4852.swf"/>
+                <url rsl-url="datavisualization_3.5.0.12683.swz"/>
+                <url rsl-url="datavisualization_3.5.0.12683.swf"/>
             </runtime-shared-library-path>
 
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
-                <url rsl-url="rpc_3.3.0.4852.swz"/>
-                <url rsl-url="rpc_3.3.0.4852.swf"/>
+                <url rsl-url="rpc_3.5.0.12683.swz"/>
+                <url rsl-url="rpc_3.5.0.12683.swf"/>
             </runtime-shared-library-path>
         </mxmlc>
     </target>
@@ -908,18 +908,18 @@
                static-rsls="false">
             <load-config filename="${teamcity.build.checkoutDir}/flex/modules/map-asia-module.xml"/>
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
-                <url rsl-url="framework_3.3.0.4852.swz"/>
-                <url rsl-url="framework_3.3.0.4852.swf"/>
+                <url rsl-url="framework_3.5.0.12683.swz"/>
+                <url rsl-url="framework_3.5.0.12683.swf"/>
             </runtime-shared-library-path>
 
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/datavisualization.swc">
-                <url rsl-url="datavisualization_3.3.0.4852.swz"/>
-                <url rsl-url="datavisualization_3.3.0.4852.swf"/>
+                <url rsl-url="datavisualization_3.5.0.12683.swz"/>
+                <url rsl-url="datavisualization_3.5.0.12683.swf"/>
             </runtime-shared-library-path>
 
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
-                <url rsl-url="rpc_3.3.0.4852.swz"/>
-                <url rsl-url="rpc_3.3.0.4852.swf"/>
+                <url rsl-url="rpc_3.5.0.12683.swz"/>
+                <url rsl-url="rpc_3.5.0.12683.swf"/>
             </runtime-shared-library-path>
         </mxmlc>
     </target>
@@ -929,18 +929,18 @@
                static-rsls="false">
             <load-config filename="${teamcity.build.checkoutDir}/flex/modules/map-world-module.xml"/>
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
-                <url rsl-url="framework_3.3.0.4852.swz"/>
-                <url rsl-url="framework_3.3.0.4852.swf"/>
+                <url rsl-url="framework_3.5.0.12683.swz"/>
+                <url rsl-url="framework_3.5.0.12683.swf"/>
             </runtime-shared-library-path>
 
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/datavisualization.swc">
-                <url rsl-url="datavisualization_3.3.0.4852.swz"/>
-                <url rsl-url="datavisualization_3.3.0.4852.swf"/>
+                <url rsl-url="datavisualization_3.5.0.12683.swz"/>
+                <url rsl-url="datavisualization_3.5.0.12683.swf"/>
             </runtime-shared-library-path>
 
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
-                <url rsl-url="rpc_3.3.0.4852.swz"/>
-                <url rsl-url="rpc_3.3.0.4852.swf"/>
+                <url rsl-url="rpc_3.5.0.12683.swz"/>
+                <url rsl-url="rpc_3.5.0.12683.swf"/>
             </runtime-shared-library-path>
         </mxmlc>
     </target>
@@ -950,18 +950,18 @@
                static-rsls="false">
             <load-config filename="${teamcity.build.checkoutDir}/flex/modules/map-americas-module.xml"/>
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
-                <url rsl-url="framework_3.3.0.4852.swz"/>
-                <url rsl-url="framework_3.3.0.4852.swf"/>
+                <url rsl-url="framework_3.5.0.12683.swz"/>
+                <url rsl-url="framework_3.5.0.12683.swf"/>
             </runtime-shared-library-path>
 
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/datavisualization.swc">
-                <url rsl-url="datavisualization_3.3.0.4852.swz"/>
-                <url rsl-url="datavisualization_3.3.0.4852.swf"/>
+                <url rsl-url="datavisualization_3.5.0.12683.swz"/>
+                <url rsl-url="datavisualization_3.5.0.12683.swf"/>
             </runtime-shared-library-path>
 
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
-                <url rsl-url="rpc_3.3.0.4852.swz"/>
-                <url rsl-url="rpc_3.3.0.4852.swf"/>
+                <url rsl-url="rpc_3.5.0.12683.swz"/>
+                <url rsl-url="rpc_3.5.0.12683.swf"/>
             </runtime-shared-library-path>
         </mxmlc>
     </target>
@@ -971,18 +971,18 @@
                static-rsls="false">
             <load-config filename="${teamcity.build.checkoutDir}/flex/modules/map-middleeast-module.xml"/>
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
-                <url rsl-url="framework_3.3.0.4852.swz"/>
-                <url rsl-url="framework_3.3.0.4852.swf"/>
+                <url rsl-url="framework_3.5.0.12683.swz"/>
+                <url rsl-url="framework_3.5.0.12683.swf"/>
             </runtime-shared-library-path>
 
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/datavisualization.swc">
-                <url rsl-url="datavisualization_3.3.0.4852.swz"/>
-                <url rsl-url="datavisualization_3.3.0.4852.swf"/>
+                <url rsl-url="datavisualization_3.5.0.12683.swz"/>
+                <url rsl-url="datavisualization_3.5.0.12683.swf"/>
             </runtime-shared-library-path>
 
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
-                <url rsl-url="rpc_3.3.0.4852.swz"/>
-                <url rsl-url="rpc_3.3.0.4852.swf"/>
+                <url rsl-url="rpc_3.5.0.12683.swz"/>
+                <url rsl-url="rpc_3.5.0.12683.swf"/>
             </runtime-shared-library-path>
         </mxmlc>
     </target>
@@ -992,18 +992,18 @@
                static-rsls="false" link-report="${basedir}/crosstab.txt">
             <load-config filename="${teamcity.build.checkoutDir}/flex/modules/crosstab-module.xml"/>
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
-                <url rsl-url="framework_3.3.0.4852.swz"/>
-                <url rsl-url="framework_3.3.0.4852.swf"/>
+                <url rsl-url="framework_3.5.0.12683.swz"/>
+                <url rsl-url="framework_3.5.0.12683.swf"/>
             </runtime-shared-library-path>
 
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/datavisualization.swc">
-                <url rsl-url="datavisualization_3.3.0.4852.swz"/>
-                <url rsl-url="datavisualization_3.3.0.4852.swf"/>
+                <url rsl-url="datavisualization_3.5.0.12683.swz"/>
+                <url rsl-url="datavisualization_3.5.0.12683.swf"/>
             </runtime-shared-library-path>
 
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
-                <url rsl-url="rpc_3.3.0.4852.swz"/>
-                <url rsl-url="rpc_3.3.0.4852.swf"/>
+                <url rsl-url="rpc_3.5.0.12683.swz"/>
+                <url rsl-url="rpc_3.5.0.12683.swf"/>
             </runtime-shared-library-path>
         </mxmlc>
         <SWFSize artifactPath="${flex.path}/CrosstabModule.swf" key="${ei.key}" secretKey="${ei.secret.key}" component="CrosstabModule"
@@ -1017,18 +1017,18 @@
                static-rsls="false" link-report="${basedir}/gauge.txt">
             <load-config filename="${teamcity.build.checkoutDir}/flex/modules/gauge-module.xml"/>
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
-                <url rsl-url="framework_3.3.0.4852.swz"/>
-                <url rsl-url="framework_3.3.0.4852.swf"/>
+                <url rsl-url="framework_3.5.0.12683.swz"/>
+                <url rsl-url="framework_3.5.0.12683.swf"/>
             </runtime-shared-library-path>
 
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/datavisualization.swc">
-                <url rsl-url="datavisualization_3.3.0.4852.swz"/>
-                <url rsl-url="datavisualization_3.3.0.4852.swf"/>
+                <url rsl-url="datavisualization_3.5.0.12683.swz"/>
+                <url rsl-url="datavisualization_3.5.0.12683.swf"/>
             </runtime-shared-library-path>
 
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
-                <url rsl-url="rpc_3.3.0.4852.swz"/>
-                <url rsl-url="rpc_3.3.0.4852.swf"/>
+                <url rsl-url="rpc_3.5.0.12683.swz"/>
+                <url rsl-url="rpc_3.5.0.12683.swf"/>
             </runtime-shared-library-path>
         </mxmlc>
         <SWFSize artifactPath="${flex.path}/GaugeModule.swf" key="${ei.key}" secretKey="${ei.secret.key}" component="GaugeModule"
@@ -1042,18 +1042,18 @@
                static-rsls="false" link-report="${basedir}/treemap.txt">
             <load-config filename="${teamcity.build.checkoutDir}/flex/modules/treemap-module.xml"/>
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
-                <url rsl-url="framework_3.3.0.4852.swz"/>
-                <url rsl-url="framework_3.3.0.4852.swf"/>
+                <url rsl-url="framework_3.5.0.12683.swz"/>
+                <url rsl-url="framework_3.5.0.12683.swf"/>
             </runtime-shared-library-path>
 
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/datavisualization.swc">
-                <url rsl-url="datavisualization_3.3.0.4852.swz"/>
-                <url rsl-url="datavisualization_3.3.0.4852.swf"/>
+                <url rsl-url="datavisualization_3.5.0.12683.swz"/>
+                <url rsl-url="datavisualization_3.5.0.12683.swf"/>
             </runtime-shared-library-path>
 
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
-                <url rsl-url="rpc_3.3.0.4852.swz"/>
-                <url rsl-url="rpc_3.3.0.4852.swf"/>
+                <url rsl-url="rpc_3.5.0.12683.swz"/>
+                <url rsl-url="rpc_3.5.0.12683.swf"/>
             </runtime-shared-library-path>
         </mxmlc>
         <SWFSize artifactPath="${flex.path}/TreeMapModule.swf" key="${ei.key}" secretKey="${ei.secret.key}" component="TreeMapModule"
@@ -1067,18 +1067,18 @@
                static-rsls="false" link-report="${basedir}/heatmap.txt">
             <load-config filename="${teamcity.build.checkoutDir}/flex/modules/heatmap-module.xml"/>
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
-                <url rsl-url="framework_3.3.0.4852.swz"/>
-                <url rsl-url="framework_3.3.0.4852.swf"/>
+                <url rsl-url="framework_3.5.0.12683.swz"/>
+                <url rsl-url="framework_3.5.0.12683.swf"/>
             </runtime-shared-library-path>
 
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/datavisualization.swc">
-                <url rsl-url="datavisualization_3.3.0.4852.swz"/>
-                <url rsl-url="datavisualization_3.3.0.4852.swf"/>
+                <url rsl-url="datavisualization_3.5.0.12683.swz"/>
+                <url rsl-url="datavisualization_3.5.0.12683.swf"/>
             </runtime-shared-library-path>
 
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
-                <url rsl-url="rpc_3.3.0.4852.swz"/>
-                <url rsl-url="rpc_3.3.0.4852.swf"/>
+                <url rsl-url="rpc_3.5.0.12683.swz"/>
+                <url rsl-url="rpc_3.5.0.12683.swf"/>
             </runtime-shared-library-path>
         </mxmlc>
         <SWFSize artifactPath="${flex.path}/TreeMapModule.swf" key="${ei.key}" secretKey="${ei.secret.key}" component="TreeMapModule"
@@ -1092,18 +1092,18 @@
                static-rsls="false" link-report="${basedir}/tree.txt">
             <load-config filename="${teamcity.build.checkoutDir}/flex/modules/tree-module.xml"/>
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/framework.swc">
-                <url rsl-url="framework_3.3.0.4852.swz"/>
-                <url rsl-url="framework_3.3.0.4852.swf"/>
+                <url rsl-url="framework_3.5.0.12683.swz"/>
+                <url rsl-url="framework_3.5.0.12683.swf"/>
             </runtime-shared-library-path>
 
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/datavisualization.swc">
-                <url rsl-url="datavisualization_3.3.0.4852.swz"/>
-                <url rsl-url="datavisualization_3.3.0.4852.swf"/>
+                <url rsl-url="datavisualization_3.5.0.12683.swz"/>
+                <url rsl-url="datavisualization_3.5.0.12683.swf"/>
             </runtime-shared-library-path>
 
             <runtime-shared-library-path path-element="${FLEX_HOME}/frameworks/libs/rpc.swc">
-                <url rsl-url="rpc_3.3.0.4852.swz"/>
-                <url rsl-url="rpc_3.3.0.4852.swf"/>
+                <url rsl-url="rpc_3.5.0.12683.swz"/>
+                <url rsl-url="rpc_3.5.0.12683.swf"/>
             </runtime-shared-library-path>
         </mxmlc>
         <SWFSize artifactPath="${flex.path}/TreeModule.swf" key="${ei.key}" secretKey="${ei.secret.key}" component="TreeModule"
