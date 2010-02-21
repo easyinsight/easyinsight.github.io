@@ -136,7 +136,7 @@
         }
 
         public function preserveValues():Boolean {
-            return false;
+            return true;
         }
 
         public function onCustomChangeEvent(event:CustomChangeEvent):void {
