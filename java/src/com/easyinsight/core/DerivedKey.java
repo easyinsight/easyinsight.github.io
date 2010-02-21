@@ -25,6 +25,10 @@ public class DerivedKey extends Key {
         this.feedID = feedID;
     }
 
+    public boolean hasDataSource(long dataSourceID) {
+        return feedID == dataSourceID || parentKey.hasDataSource(dataSourceID);
+    }
+
     public Key getParentKey() {
         return parentKey;
     }

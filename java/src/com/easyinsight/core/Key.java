@@ -21,6 +21,10 @@ public abstract class Key implements Comparable<Key>, Serializable, Cloneable {
 
     public abstract Key toBaseKey();
 
+    public boolean hasDataSource(long dataSourceID) {
+        return false;
+    }
+
     public long getKeyID() {
         return keyID;
     }

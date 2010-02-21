@@ -22,7 +22,11 @@ public class NamedKey extends Key {
 
     public NamedKey(String name) {
         this.name = name;
-    }  
+    }
+
+    public boolean hasDataSource(long dataSourceID) {
+        return false;
+    }
 
     public String getName() {
         return name;
