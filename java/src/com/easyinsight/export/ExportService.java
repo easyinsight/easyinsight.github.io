@@ -205,7 +205,7 @@ public class ExportService {
             PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO EXCEL_EXPORT (excel_file, user_id) VALUES (?, ?)",
                     Statement.RETURN_GENERATED_KEYS);
             ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
-            BufferedInputStream bis = new BufferedInputStream(bais, 1024);
+            BufferedInputStream bis = new BufferedInputStream(bais, 1024);         
             insertStmt.setBinaryStream(1, bis, bytes.length);
             insertStmt.setLong(2, SecurityUtil.getUserID());
             insertStmt.execute();
