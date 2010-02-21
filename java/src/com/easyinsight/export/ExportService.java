@@ -22,6 +22,8 @@ import com.easyinsight.analysis.*;
 import com.easyinsight.storage.DataStorage;
 import org.apache.poi.hssf.usermodel.*;
 
+import java.io.BufferedInputStream;
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.sql.Connection;
@@ -202,7 +204,9 @@ public class ExportService {
         try {
             PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO EXCEL_EXPORT (excel_file, user_id) VALUES (?, ?)",
                     Statement.RETURN_GENERATED_KEYS);
-            insertStmt.setBytes(1, bytes);
+            ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
+            BufferedInputStream bis = new BufferedInputStream(bais, 1024);
+            insertStmt.setBinaryStream(1, bis);
             insertStmt.setLong(2, SecurityUtil.getUserID());
             insertStmt.execute();
             exportID = Database.instance().getAutoGenKey(insertStmt);

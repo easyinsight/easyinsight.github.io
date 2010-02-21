@@ -3,6 +3,8 @@ package com.easyinsight.userupload;
 import com.easyinsight.database.Database;
 import com.easyinsight.logging.LogClass;
 
+import java.io.BufferedInputStream;
+import java.io.ByteArrayInputStream;
 import java.sql.*;
 
 /**
@@ -43,7 +45,9 @@ public class PNGExportOperation implements FileOperation {
         try {
             PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO PNG_EXPORT (PNG_IMAGE, USER_ID) VALUES (?, ?)",
                     Statement.RETURN_GENERATED_KEYS);
-            insertStmt.setBytes(1, file);
+            ByteArrayInputStream bais = new ByteArrayInputStream(file);
+            BufferedInputStream bis = new BufferedInputStream(bais, 1024);
+            insertStmt.setBinaryStream(1, bis);
             if (userID == null) {
                 insertStmt.setNull(2, Types.BIGINT);
             } else {
