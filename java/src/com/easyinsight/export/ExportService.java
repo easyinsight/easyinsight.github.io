@@ -206,7 +206,7 @@ public class ExportService {
                     Statement.RETURN_GENERATED_KEYS);
             ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
             BufferedInputStream bis = new BufferedInputStream(bais, 1024);
-            insertStmt.setBinaryStream(1, bis);
+            insertStmt.setBinaryStream(1, bis, bytes.length);
             insertStmt.setLong(2, SecurityUtil.getUserID());
             insertStmt.execute();
             exportID = Database.instance().getAutoGenKey(insertStmt);
