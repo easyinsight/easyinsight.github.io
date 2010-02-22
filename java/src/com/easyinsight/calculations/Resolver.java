@@ -42,7 +42,12 @@ public class Resolver {
 
     @Nullable
     public Key getKey(String name) {
-        return keyMap.get(name).get(0);
+        List<Key> keys = keyMap.get(name);
+        if (keys != null) {
+            return keyMap.get(name).get(0);
+        } else {
+            return null;
+        }
     }
 
     public Key getKey(String name, int aggregation) {
