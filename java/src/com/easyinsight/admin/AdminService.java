@@ -13,6 +13,7 @@ import java.lang.management.ManagementFactory;
 import java.lang.management.ThreadMXBean;
 import java.lang.management.ThreadInfo;
 import java.lang.management.GarbageCollectorMXBean;
+import java.net.InetAddress;
 import java.net.URLEncoder;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -108,7 +109,7 @@ public class AdminService {
             long currentMemory = maxMemory - freeMemory;
             healthInfo.setCurrentMemory(currentMemory);
             healthInfo.setMaxMemory(maxMemory);
-            healthInfo.setServer("");
+            healthInfo.setServer(InetAddress.getLocalHost().getHostAddress());
             ThreadMXBean threadMXBean = ManagementFactory.getThreadMXBean();
             healthInfo.setThreadCount(threadMXBean.getThreadCount());
             healthInfo.setSystemLoadAverage(ManagementFactory.getOperatingSystemMXBean().getSystemLoadAverage());

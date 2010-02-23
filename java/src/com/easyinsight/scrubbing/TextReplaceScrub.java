@@ -1,9 +1,8 @@
 package com.easyinsight.scrubbing;
 
-import javax.persistence.Entity;
-import javax.persistence.Table;
-import javax.persistence.PrimaryKeyJoinColumn;
-import javax.persistence.Column;
+import com.easyinsight.analysis.AnalysisItem;
+
+import javax.persistence.*;
 
 /**
  * User: James Boe
@@ -22,7 +21,18 @@ public class TextReplaceScrub extends DataScrub {
     private boolean regex;
     @Column(name="case_sensitive")
     private boolean caseSensitive;
-    
+
+    @OneToOne
+    @JoinColumn(name = "analysis_item_id")
+    private AnalysisItem analysisItem;
+
+    public AnalysisItem getAnalysisItem() {
+        return analysisItem;
+    }
+
+    public void setAnalysisItem(AnalysisItem analysisItem) {
+        this.analysisItem = analysisItem;
+    }
 
     public String getSourceText() {
         return sourceText;

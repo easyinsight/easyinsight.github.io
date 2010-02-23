@@ -31,7 +31,7 @@ public class AnalysisItemComboBox extends ComboBox{
                     var item:AnalysisItem = this.dataProvider[i];
 
                     // Check if is selectedValue
-                    if (item.analysisItemID == _selectedValue.analysisItemID) {
+                    if (item.display == _selectedValue.display) {
                         // Yes, set selectedIndex
                         this.selectedIndex = i;
                         break;

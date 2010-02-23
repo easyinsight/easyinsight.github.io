@@ -2,6 +2,8 @@ package com.easyinsight.solutions
 {
 import flash.utils.ByteArray;
 
+import mx.collections.ArrayCollection;
+
 [Bindable]
 	[RemoteClass(alias="com.easyinsight.solutions.Solution")]
 	public class Solution
@@ -24,6 +26,7 @@ import flash.utils.ByteArray;
         public var solutionTier:int;
         public var image:ByteArray;
         public var accessible:Boolean;
+        public var tags:ArrayCollection;
         public var category:int;
         public var screencastName:String;
         public var screencastDirectory:String;

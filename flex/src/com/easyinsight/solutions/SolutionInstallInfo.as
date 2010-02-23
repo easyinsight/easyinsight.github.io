@@ -8,6 +8,7 @@ public class SolutionInstallInfo {
     public var previousID:int;
     public var descriptor:EIDescriptor;
     public var requiresConfiguration:Boolean;
+    public var feedName:String;
 
     public function SolutionInstallInfo() {
     }

@@ -4,6 +4,7 @@
 		<![CDATA[
         import com.easyinsight.framework.CredentialsCache;
 
+        import mx.binding.utils.BindingUtils;
         import mx.collections.Sort;
         import mx.rpc.remoting.RemoteObject;
         import mx.rpc.events.ResultEvent;
@@ -11,6 +12,8 @@
 
         import com.easyinsight.analysis.Value;
         import com.easyinsight.analysis.AnalysisDimensionResultMetadata;
+
+        import mx.utils.ObjectUtil;
 
         private var _filterValueDefinition:FilterValueDefinition;
 
@@ -22,6 +25,10 @@
         private var _feedID:int;
 
         private var dataService:RemoteObject;
+
+        private function setup():void {
+            BindingUtils.bindProperty(this, "keyword", availableSearch, "text");
+        }
 
         public function set filterValueDefinition(filterValueDefinition:FilterValueDefinition):void {
             this._filterValueDefinition = filterValueDefinition;
@@ -39,9 +46,15 @@
             dataService.getAnalysisItemMetadata.send(_feedID, _filterValueDefinition.field, CredentialsCache.getCache().createCredentials(), new Date().getTimezoneOffset());
         }
 
+        private function compare(obj1:Object, obj2:Object, fields:Array = null):int {
+            var string1:String = obj1 as String;
+            var string2:String = obj2 as String;
+            return ObjectUtil.stringCompare(string1, string2, true);
+        }
+
         private function gotMetadata(event:ResultEvent):void {
             var analysisDimensionResultMetadata:AnalysisDimensionResultMetadata = dataService.getAnalysisItemMetadata.lastResult as
-                                                                                    AnalysisDimensionResultMetadata;
+                                                                                  AnalysisDimensionResultMetadata;
             var filteredStrings:ArrayCollection = new ArrayCollection();
             for each (var filterValue:Object in _filterValueDefinition.filteredValues) {
                 var filterString:String;
@@ -60,13 +73,39 @@
                 }
             }
             strings.sort = new Sort();
+            strings.sort.compareFunction = compare;
+            strings.filterFunction = filterFunction;
             strings.refresh();
             sourceValues = strings;
             filteredStrings.sort = new Sort();
+            filteredStrings.sort.compareFunction = compare;
             filteredStrings.refresh();
             targetValues = filteredStrings;
+            stackIndex = 1;
         }
 
+        private function filterFunction(item:Object):Boolean {
+            if (keyword != null) {
+                var string:String = item as String;
+                return string.toLowerCase().indexOf(keyword) != -1;
+            }
+            return true;
+        }
+
+        private function sourceChange():void {
+            keyword = availableSearch.text;
+            sourceValues.refresh();
+        }
+
+        private var _keyword:String;
+
+        public function get keyword():String {
+            return _keyword;
+        }
+
+        public function set keyword(value:String):void {
+            _keyword = value;
+        }
 
         public function makeUpdates():FilterDefinition {
             _filterValueDefinition.filteredValues = targetList.dataProvider as ArrayCollection;
@@ -84,6 +123,9 @@
                 dispatchEvent(new FilterEditEvent(_filterValueDefinition, _filterValueDefinition, PatternFilterWindow));
             }
         }
+
+        [Bindable]
+        private var stackIndex:int = 0;
 		]]>
 	</mx:Script>
     <mx:HBox>
@@ -92,20 +134,28 @@
         <mx:RadioButton group="{typeGroup}" label="Multi Value" selected="true" value="multi"/>
         <mx:RadioButton group="{typeGroup}" label="Pattern Match" value="pattern"/>
     </mx:HBox>
-    <mx:Label text="Drag Items Between Available and Included to Filter"/>
-    <mx:HBox>
+    <mx:ViewStack resizeToContent="true" selectedIndex="{stackIndex}">
+        <mx:Box>
+            <mx:ProgressBar label="Loading the available values..."/>
+        </mx:Box>
         <mx:VBox>
-            <mx:ApplicationControlBar width="200">
-                <mx:Label text="Available Values"/>
-            </mx:ApplicationControlBar>
-            <mx:List dataProvider="{sourceValues}" dragMoveEnabled="true" dropEnabled="true" dragEnabled="true" width="200"/>
+            <mx:Label text="Drag Items Between Available and Included to Filter"/>
+            <mx:HBox>
+                <mx:VBox>
+                    <mx:ApplicationControlBar width="200">
+                        <mx:Label text="Available Values"/>
+                    </mx:ApplicationControlBar>
+                    <mx:TextInput id="availableSearch" change="sourceChange()"/>
+                    <mx:List dataProvider="{sourceValues}" dragMoveEnabled="true" dropEnabled="true" dragEnabled="true" width="200"/>
+                </mx:VBox>
+                <mx:VBox>
+                    <mx:ApplicationControlBar width="200">
+                        <mx:Label text="Included Values"/>
+                    </mx:ApplicationControlBar>
+                    <mx:List dataProvider="{targetValues}" dropEnabled="true" dragEnabled="true" dragMoveEnabled="true" id="targetList"
+                        width="200"/>
+                </mx:VBox>
+            </mx:HBox>
         </mx:VBox>
-        <mx:VBox>
-            <mx:ApplicationControlBar width="200">
-                <mx:Label text="Included Values"/>
-            </mx:ApplicationControlBar>
-            <mx:List dataProvider="{targetValues}" dropEnabled="true" dragEnabled="true" dragMoveEnabled="true" id="targetList"
-                width="200"/>
-        </mx:VBox>
-    </mx:HBox>
+    </mx:ViewStack>
 </mx:VBox>

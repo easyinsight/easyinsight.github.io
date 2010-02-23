@@ -36,15 +36,27 @@ public class TextReplaceScrubber implements IScrubber {
     }
 
     public void apply(IRow row) {
-        for (Map.Entry<Key, Value> entry : new HashMap<Key, Value>(row.getValues()).entrySet()) {
-            Value value = entry.getValue();
+        if (scrub.getAnalysisItem() == null) {
+            for (Map.Entry<Key, Value> entry : new HashMap<Key, Value>(row.getValues()).entrySet()) {
+                Value value = entry.getValue();
+                if (value.type() == Value.STRING) {
+                    StringValue stringValue = (StringValue) value;
+                    Matcher matcher = pattern.matcher(stringValue.getValue());
+                    if (matcher.matches()) {
+                        row.getValues().put(entry.getKey(), new StringValue(scrub.getReplaceText()));
+                    }
+
+                }
+            }
+        } else {
+            Value value = row.getValue(scrub.getAnalysisItem().createAggregateKey());
             if (value.type() == Value.STRING) {
                 StringValue stringValue = (StringValue) value;
                 Matcher matcher = pattern.matcher(stringValue.getValue());
                 if (matcher.matches()) {
-                    row.getValues().put(entry.getKey(), new StringValue(scrub.getReplaceText()));   
+                    row.getValues().put(scrub.getAnalysisItem().createAggregateKey(), new StringValue(scrub.getReplaceText()));   
                 }
-                
+
             }
         }
     }

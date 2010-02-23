@@ -40,6 +40,7 @@
 
         private function newTextReplaceScrub():void {
             var textWindow:TextReplaceScrubWindow = TextReplaceScrubWindow(PopUpManager.createPopUp(this, TextReplaceScrubWindow, false));
+            textWindow.fields = _analysisItems;
             textWindow.addEventListener(DataScrubEvent.ADDED_SCRUB, scrubAdded);
             PopUpUtil.centerPopUp(textWindow);
         }

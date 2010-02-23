@@ -26,6 +26,13 @@
     </servlet>
 
     <servlet>
+        <servlet-name>Benchmark</servlet-name>
+        <display-name>Benchmark</display-name>
+        <servlet-class>com.easyinsight.benchmark.BenchmarkServlet</servlet-class>
+        <load-on-startup>2</load-on-startup>
+    </servlet>
+
+    <servlet>
         <servlet-name>GoalTask</servlet-name>
         <display-name>GoalTask</display-name>
         <servlet-class>com.easyinsight.goals.GoalTaskServlet</servlet-class>
