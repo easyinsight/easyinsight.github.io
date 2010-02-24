@@ -118,7 +118,7 @@ public class BaseCampTodoSource extends ServerDataSourceDefinition {
 
         DataSet ds = new DataSet();
         Token token = new TokenStorage().getToken(SecurityUtil.getUserID(), TokenStorage.BASECAMP_TOKEN, parentDefinition.getDataFeedID(), false);
-        if (token == null) {
+        if (token == null && credentials.getUserName() != null) {
             token = new Token();
             token.setTokenValue(credentials.getUserName());
             token.setTokenType(TokenStorage.BASECAMP_TOKEN);
