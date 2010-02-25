@@ -9,7 +9,7 @@ import javax.persistence.*;
  */
 @Entity
 @Table(name="range_option")
-public class RangeOption {
+public class RangeOption implements Cloneable {
     @Id
     @GeneratedValue(strategy= GenerationType.IDENTITY)
     @Column(name="range_option_id")
@@ -20,6 +20,12 @@ public class RangeOption {
     private double rangeMaximum;
     @Column(name="display_name")
     private String displayName;
+
+    public RangeOption clone() throws CloneNotSupportedException {
+        RangeOption rangeOption = (RangeOption) super.clone();
+        rangeOption.setRangeOptionID(0);
+        return rangeOption;
+    }
 
     public String getDisplayName() {
         return displayName;

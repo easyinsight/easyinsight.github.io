@@ -43,6 +43,17 @@ public class AnalysisRangeDimension extends AnalysisDimension {
     public AnalysisRangeDimension() {
     }
 
+    @Override
+    public AnalysisItem clone() throws CloneNotSupportedException {
+        AnalysisRangeDimension clonedDimension = (AnalysisRangeDimension) super.clone();
+        List<RangeOption> options = new ArrayList<RangeOption>();
+        for (RangeOption rangeOption : explicitOptions) {
+            options.add(rangeOption.clone());
+        }
+        clonedDimension.setExplicitOptions(options);
+        return clonedDimension;
+    }
+
     public int getAggregationType() {
         return aggregationType;
     }
