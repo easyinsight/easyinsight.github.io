@@ -12,6 +12,7 @@
         import com.easyinsight.framework.CredentialsCache;
         import com.easyinsight.framework.User;
         import com.easyinsight.util.PopUpUtil;
+        import com.easyinsight.util.ProgressAlert;
 
         import mx.collections.ArrayCollection;
         import mx.core.UIComponent;
@@ -98,11 +99,14 @@
             }
             if (_scorecardID > 0) {
                 if (newKPI) {
+                    ProgressAlert.alert(this, "Saving the KPI...", null, scorecardService.addKPIToScorecard);
                     scorecardService.addKPIToScorecard(_kpi, _scorecardID, CredentialsCache.getCache().createCredentials());
                 } else {
+                    ProgressAlert.alert(this, "Saving the KPI...", null, scorecardService.updateKPI);
                     scorecardService.updateKPI(_kpi, CredentialsCache.getCache().createCredentials());
                 }
             } else {
+                ProgressAlert.alert(this, "Saving the KPI...", null, kpiService.saveKPI);
                 kpiService.saveKPI(_kpi, CredentialsCache.getCache().createCredentials());
             }
         }

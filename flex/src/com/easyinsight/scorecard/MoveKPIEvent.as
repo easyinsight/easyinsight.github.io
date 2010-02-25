@@ -8,9 +8,9 @@ public class MoveKPIEvent extends Event {
     public static const KPI_MOVE:String = "kpiMove";
 
     public var kpi:KPI;
-    public var destinationScorecard:Scorecard;
+    public var destinationScorecard:ScorecardDescriptor;
 
-    public function MoveKPIEvent(kpi:KPI, destinationScorecard:Scorecard) {
+    public function MoveKPIEvent(kpi:KPI, destinationScorecard:ScorecardDescriptor) {
         super(KPI_MOVE);
         this.kpi = kpi;
         this.destinationScorecard = destinationScorecard;

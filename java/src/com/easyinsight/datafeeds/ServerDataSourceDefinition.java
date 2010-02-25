@@ -38,6 +38,19 @@ public abstract class ServerDataSourceDefinition extends FeedDefinition implemen
 
     public void setCredentialsDefinition(int i) { }
 
+    public boolean needsCredentials(List<CredentialFulfillment> existingCredentials) {
+        if (getCredentialsDefinition() == CredentialsDefinition.STANDARD_USERNAME_PW) {
+            Credentials credentials = null;
+            for (CredentialFulfillment credentialFulfillment : existingCredentials) {
+                if (credentialFulfillment.getDataSourceID() == getDataFeedID()) {
+                    credentials = credentialFulfillment.getCredentials();
+                }
+            }
+            return credentials == null || validateCredentials(credentials) != null;
+        }
+        return false;
+    }
+
     public long create(Credentials credentials, Connection conn) throws SQLException, CloneNotSupportedException {
         DataStorage metadata = null;
         try {

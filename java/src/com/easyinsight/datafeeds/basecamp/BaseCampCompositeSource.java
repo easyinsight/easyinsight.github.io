@@ -18,6 +18,7 @@ import java.sql.SQLException;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 
+import com.easyinsight.users.Token;
 import com.easyinsight.users.TokenStorage;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.Credentials;
@@ -58,6 +59,30 @@ public class BaseCampCompositeSource extends CompositeServerDataSource {
         feedTypes.add(FeedType.BASECAMP);
         feedTypes.add(FeedType.BASECAMP_TIME);
         return feedTypes;
+    }
+
+    public boolean needsCredentials(List<CredentialFulfillment> existingCredentials) {
+        String userName = null;
+        Token token = new TokenStorage().getToken(SecurityUtil.getUserID(), TokenStorage.BASECAMP_TOKEN, getDataFeedID(), false);
+        if (token == null) {
+            for (CredentialFulfillment credentialFulfillment : existingCredentials) {
+                if (credentialFulfillment.getDataSourceID() == getDataFeedID()) {
+                    userName = credentialFulfillment.getCredentials().getUserName();
+                }
+            }
+        } else {
+            userName = token.getTokenValue();
+        }
+        if (userName == null) {
+            return true;
+        }
+        HttpClient client = getHttpClient(userName, "");
+        try {
+            runRestRequest("/projects.xml", client, new Builder());
+        } catch (BaseCampLoginException e) {
+            return true;
+        }
+        return false;
     }
 
     public int getCredentialsDefinition() {
@@ -217,5 +242,9 @@ public class BaseCampCompositeSource extends CompositeServerDataSource {
                 (AnalysisDimension) findAnalysisItem(BaseCampTimeSource.DATE), MaterializedRollingFilterDefinition.MONTH_TO_NOW,
                 null, KPI.GOOD, 7));
         return kpis;
+    }
+
+    public boolean isLongRefresh() {
+        return true;
     }
 }

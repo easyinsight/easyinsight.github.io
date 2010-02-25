@@ -46,6 +46,19 @@ public abstract class CompositeServerDataSource extends CompositeFeedDefinition 
 
     protected abstract IServerDataSourceDefinition createForFeedType(FeedType feedType);
 
+    public boolean needsCredentials(List<CredentialFulfillment> existingCredentials) {
+        if (getCredentialsDefinition() == CredentialsDefinition.STANDARD_USERNAME_PW) {
+            Credentials credentials = null;
+            for (CredentialFulfillment credentialFulfillment : existingCredentials) {
+                if (credentialFulfillment.getDataSourceID() == getDataFeedID()) {
+                    credentials = credentialFulfillment.getCredentials();
+                }
+            }
+            return credentials == null || validateCredentials(credentials) != null;
+        }
+        return false;
+    }
+
     public long create(Credentials credentials, Connection conn) throws SQLException, CloneNotSupportedException {
         setOwnerName(retrieveUser(conn, SecurityUtil.getUserID()).getUserName());
         UploadPolicy uploadPolicy = new UploadPolicy(SecurityUtil.getUserID());

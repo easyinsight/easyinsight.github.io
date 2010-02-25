@@ -6,9 +6,10 @@
         [Event(name="analyze", type="com.easyinsight.genredata.AnalyzeEvent")]
     </mx:Metadata>
     <mx:Script><![CDATA[
+        import com.easyinsight.framework.CredentialsCache;
         import com.easyinsight.kpi.KPI;
         import com.easyinsight.kpi.KPIEvent;
-        import com.easyinsight.kpi.KPIWindow;
+        import com.easyinsight.kpi.KPIParentWindow;
         import com.easyinsight.util.Callout;
         import com.easyinsight.util.PopUpUtil;
 
@@ -17,8 +18,46 @@
         import mx.controls.TextArea;
         import mx.events.CollectionEvent;
         import mx.managers.PopUpManager;
+        import mx.messaging.Consumer;
+        import mx.messaging.events.MessageEvent;
+
+        private var _scorecardDescriptor:ScorecardDescriptor;
+
+        public function set scorecardDescriptor(value:ScorecardDescriptor):void {
+            _scorecardDescriptor = value;
+            invalidateProperties();
+        }
+
+        public function forceRefresh():void {
+            baseIndex = 4;
+            forcedRefresh = true;
+            scorecardService.getScorecard.send(_scorecardDescriptor.id, CredentialsCache.getCache().createCredentials(), true);
+        }
+
+        private var forcedRefresh:Boolean = false;
+
+        protected override function commitProperties():void {
+            super.commitProperties();
+
+            forcedRefresh = false;
+            if (!_tutorialMode) {
+                baseIndex = 0;
+                if (consumer == null) {
+                    consumer = new Consumer();
+                    consumer.destination = "scorecardUpdates";
+                    consumer.addEventListener(MessageEvent.MESSAGE, onMessage);
+                    consumer.subscribe();
+                }
+                scorecardService.getScorecard.send(_scorecardDescriptor.id, CredentialsCache.getCache().createCredentials(), false);
+            }
+        }
 
         private var _scorecard:Scorecard;
+
+
+        public function get scorecard():Scorecard {
+            return _scorecard;
+        }
 
         [Bindable]
         private var configurationIndex:int = 0;
@@ -36,6 +75,8 @@
 
         private var _contextMenuAvailable:Boolean = true;
 
+        private var _tutorialMode:Boolean = false;
+        
 
         [Bindable(event="contextMenuAvailableChanged")]
         public function get contextMenuAvailable():Boolean {
@@ -53,28 +94,79 @@
             return _configurationMode;
         }
 
+        private function determineIndex():void {
+            if (_scorecard == null) {
+                baseIndex = 0;
+            } else {
+                if (kpis == null || kpis.length == 0) {
+                    baseIndex = 1;
+                } else {
+                    baseIndex = configurationMode ? 3 : 2;
+                }
+            }
+        }
+
         public function set configurationMode(value:Boolean):void {
             if (_configurationMode == value) return;
             _configurationMode = value;
-            if (kpis == null || kpis.length == 0) {
-                baseIndex = 0;
-            } else {
-                baseIndex = _configurationMode ? 2 : 1;
-            }
+            determineIndex();
             dispatchEvent(new Event("configurationModeChanged"));
         }
 
+        private function gotScorecard():void {
+            var scorecardWrapper:ScorecardWrapper = scorecardService.getScorecard.lastResult as ScorecardWrapper;
+            _scorecard = scorecardWrapper.scorecard;
+            if (scorecardWrapper.credentials != null && scorecardWrapper.credentials.length > 0) {
+                refreshIndex = 2;
+                this.credentials = scorecardWrapper.credentials;
+            } else if (scorecardWrapper.asyncRefresh) {
+                asyncMessage = "Refreshing data sources in the background...";
+                refreshIndex = 1;
+                // TODO: create a message consumer for the asynchronous refresh to finish
+
+            } else {
+                refreshIndex = 0;
+            }
+            kpis = _scorecard.kpis;
+            kpis.addEventListener(CollectionEvent.COLLECTION_CHANGE, onKPIChange);
+            controlFactory = new KPIControlFactory(_scorecard.scorecardID);
+            determineIndex();
+            invalidateSize();
+        }
+
+        private function onMessage(event:MessageEvent):void {
+            var scorecardEvent:ScorecardAsyncEvent = event.message.body as ScorecardAsyncEvent;
+            if (scorecardEvent.scorecardID == _scorecard.scorecardID) {
+                if (scorecardEvent.type == ScorecardAsyncEvent.NAME_UPDATE) {
+                    asyncMessage = "Synchronizing with the latest data from " + scorecardEvent.dataSourceName + "...";
+                } else {
+                    kpis = scorecardEvent.kpis;
+                    kpis.addEventListener(CollectionEvent.COLLECTION_CHANGE, onKPIChange);
+                    refreshIndex = 0;
+                    /*consumer.removeEventListener(MessageEvent.MESSAGE, onMessage);
+                    consumer.disconnect();
+                    consumer = null;
+                    */
+                }
+            }
+        }
+
+        [Bindable]
+        private var asyncMessage:String;
+
+        private var consumer:Consumer;
+
         public function set scorecard(value:Scorecard):void {
             _scorecard = value;
+            _tutorialMode = true;
+            var desc:ScorecardDescriptor = new ScorecardDescriptor();
+            desc.id = value.scorecardID;
+            desc.name = value.name;
+            _scorecardDescriptor = desc;
             kpis = _scorecard.kpis;
-            kpis.addEventListener(CollectionEvent.COLLECTION_CHANGE, onKPIChange);            
-            controlFactory = new KPIControlFactory(value.scorecardID);
-            if (kpis.length == 0) {
-                baseIndex = 0;
-            } else {
-                baseIndex = configurationMode ? 2 : 1;
-            }
-            invalidateProperties();
+            kpis.addEventListener(CollectionEvent.COLLECTION_CHANGE, onKPIChange);
+            controlFactory = new KPIControlFactory(_scorecard.scorecardID);
+            baseIndex = 2;
             invalidateSize();
         }
 
@@ -110,12 +202,12 @@
 
         }
 
-        private function addKPI():void {
-            var kpiWindow:KPIWindow = new KPIWindow();
+        public function addKPI():void {
+            var kpiWindow:KPIParentWindow = new KPIParentWindow();
             kpiWindow.scorecardID = _scorecard.scorecardID;
             kpiWindow.addEventListener(KPIEvent.KPI_ADDED, addedKPI);
             PopUpManager.addPopUp(kpiWindow, this, true);
-            PopUpUtil.centerPopUp(kpiWindow);
+            PopUpUtil.centerPopUpWithY(kpiWindow, 20);
         }
 
         private function addedKPI(event:KPIEvent):void {
@@ -123,10 +215,19 @@
         }
 
         private function onKPIChange(event:CollectionEvent):void {
-            if (baseIndex == 0) {
-                baseIndex = configurationMode ? 2 : 1;
-            }
+            determineIndex();
             invalidateSize();
+        }
+
+        private var credentials:ArrayCollection;
+
+        private function refreshValues():void {
+            CredentialsCache.getCache().obtainCredentials(this, credentials, onCredentials);
+        }
+
+        private function onCredentials():void {
+            baseIndex = 4;
+            scorecardService.getScorecard.send(_scorecardDescriptor.id, CredentialsCache.getCache().createCredentials(), forcedRefresh);
         }
 
         private var callout:Callout;
@@ -152,6 +253,9 @@
             return callout;
         }
 
+        [Bindable]
+        private var refreshIndex:int = 0;
+
         public function clearRenderer():void {
             callout = null;
         }
@@ -162,12 +266,31 @@
         [Bindable]
         private var gridHeight:uint = 0;
         ]]></mx:Script>
+    <mx:RemoteObject destination="scorecardService" id="scorecardService">
+        <mx:method name="getScorecard" result="gotScorecard()"/>
+    </mx:RemoteObject>
     <mx:ViewStack selectedIndex="{baseIndex}" resizeToContent="true" width="100%" creationPolicy="all">
-        <mx:VBox width="100%" height="100%" horizontalAlign="center" verticalAlign="middle">
+        <mx:Box width="100%" height="250" horizontalAlign="center" verticalAlign="middle">
+            <mx:ProgressBar label="Loading the scorecard..." indeterminate="true"/>
+        </mx:Box>
+        <mx:VBox width="100%" height="250" horizontalAlign="center" verticalAlign="middle">
             <mx:Label text="You haven't defined any KPIs yet for this scorecard." fontSize="16"/>
             <mx:Button label="Create Your First KPI" styleName="blueButton" fontSize="16" click="addKPI()"/>
         </mx:VBox>
-        <mx:Box width="100%">
+        <mx:VBox width="100%">
+            <mx:HBox width="100%" verticalAlign="middle">
+                <mx:ViewStack width="100%" selectedIndex="{refreshIndex}" resizeToContent="true">
+                    <mx:Box/>
+                    <mx:HBox width="100%" horizontalAlign="center" verticalAlign="middle">
+                        <mx:ProgressBar label="{asyncMessage}" indeterminate="true"/>
+                    </mx:HBox>
+                    <mx:HBox width="100%" horizontalAlign="center" verticalAlign="middle">
+                        <mx:Label text="Some of your KPIs are out of date:"/>
+                        <mx:Button label="Refresh Values..." click="refreshValues()"/>
+                    </mx:HBox>
+                </mx:ViewStack>
+            </mx:HBox>
+
             <scorecard:HackDataGrid dataProvider="{kpis}" rowHeight="40" selectable="false"
                                     width="800" id="plainGrid">
                 <scorecard:columns>
@@ -186,10 +309,19 @@
                                            sortable="false"/>
                 </scorecard:columns>
             </scorecard:HackDataGrid>
-        </mx:Box>
+        </mx:VBox>
     <mx:VBox width="100%">
-        <mx:HBox>
-
+        <mx:HBox width="100%" verticalAlign="middle">            
+            <mx:ViewStack width="100%" selectedIndex="{refreshIndex}">
+                <mx:Box/>
+                <mx:HBox width="100%" horizontalAlign="center" verticalAlign="middle">
+                    <mx:ProgressBar label="Refreshing data sources in the background..." indeterminate="true"/>
+                </mx:HBox>
+                <mx:HBox width="100%" horizontalAlign="center" verticalAlign="middle">
+                    <mx:Label text="Some of your KPIs are out of date:"/>
+                    <mx:Button label="Refresh Values" click="refreshValues()"/>
+                </mx:HBox>
+            </mx:ViewStack>
         </mx:HBox>
         <mx:DataGrid dataProvider="{kpis}" rowHeight="40" dragEnabled="true" width="800" id="adminGrid">
             <mx:columns>
@@ -206,5 +338,8 @@
             </mx:columns>
         </mx:DataGrid>
     </mx:VBox>
+        <mx:Box width="100%" height="250" horizontalAlign="center" verticalAlign="middle">
+            <mx:ProgressBar label="Refreshing the scorecard..." indeterminate="true"/>
+        </mx:Box>
 </mx:ViewStack>
 </mx:VBox>

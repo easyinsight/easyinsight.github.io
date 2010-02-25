@@ -8,9 +8,9 @@ public class ScorecardEvent extends Event {
     public static const SCORECARD_REMOVED:String = "scorecardRemoved";
     public static const SCORECARD_FOCUS:String = "scorecardFocus";
 
-    public var scorecard:Scorecard;
+    public var scorecard:ScorecardDescriptor;
 
-    public function ScorecardEvent(type:String, scorecard:Scorecard) {
+    public function ScorecardEvent(type:String, scorecard:ScorecardDescriptor) {
         super(type);
         this.scorecard = scorecard;
     }

@@ -1,12 +1,9 @@
 <?xml version="1.0" ?>
-<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:scorecard="com.easyinsight.scorecard.*"
-         creationComplete="gotFocus()">
+<mx:HBox xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:scorecard="com.easyinsight.scorecard.*"
+         creationComplete="primaryStackIndex = 0; scorecardService.getScorecardDescriptors.send();" width="100%">
     <mx:Script><![CDATA[
-        import com.easyinsight.kpi.KPIEvent;
-        import com.easyinsight.kpi.KPIParentWindow;
-        import com.easyinsight.kpi.KPIWindow;
-        import com.easyinsight.kpi.KPIWizard;
         import com.easyinsight.util.PopUpUtil;
+        import com.easyinsight.util.ProgressAlert;
 
         import mx.binding.utils.BindingUtils;
         import mx.collections.ArrayCollection;
@@ -30,7 +27,10 @@
         private var _configurationMode:Boolean;
 
         [Bindable]
-        private var selectedScorecard:Scorecard;
+        private var selectedScorecard:ScorecardDescriptor;
+
+        [Bindable]
+        private var scorecards:ArrayCollection;
 
         [Bindable(event="configurationModeChanged")]
         public function get configurationMode():Boolean {
@@ -43,8 +43,14 @@
             dispatchEvent(new Event("configurationModeChanged"));
         }
 
-        [Bindable]
-        private var scorecards:ArrayCollection;
+        private function configureMode():void {
+            this.configurationMode = !configurationMode;
+        }
+
+        private function addKPI():void {
+            var renderer:ScorecardRenderer = scorecardStack.selectedChild as ScorecardRenderer;
+            renderer.addKPI();
+        }
 
         private function newScorecard():void {
             var scorecardWindow:ScorecardWindow = new ScorecardWindow();
@@ -55,66 +61,43 @@
 
         private function onScorecardAdd(event:ScorecardEvent):void {
             scorecards.addItem(event.scorecard);
-            selectedScorecard = event.scorecard;
             var newIndex:int = scorecards.getItemIndex(event.scorecard);
             var scorecardRenderer:ScorecardRenderer = new ScorecardRenderer();
             BindingUtils.bindProperty(scorecardRenderer, "configurationMode", this, "configurationMode");
-            scorecardRenderer.scorecard = event.scorecard;
+            scorecardRenderer.scorecardDescriptor = event.scorecard;
             scorecardStack.addChild(scorecardRenderer);
-            tabsIndex = newIndex;
-            primaryStackIndex = 2;
+            if (tabsIndex == 0) {
+                tabsIndex = 1;
+            }
+            scorecardIndex = newIndex;            
+            selectedScorecard = event.scorecard;            
+            if (primaryStackIndex != 2) {
+                primaryStackIndex = 2;
+            }
         }
 
         public function gotFocus():void {
-            primaryStackIndex = 0;
-            scorecardService.getScorecardsForUser.send();
-        }
-
-        private function configureMode():void {
-            controlsIndex = controlsIndex == 1 ? 0 : 1;
-            this.configurationMode = controlsIndex == 1;
-            /*for each (var scorecard:Scorecard in scorecards) {
-             for each (var kpi:KPI in scorecard.kpis) {
-             kpi.configurationMode = controlsIndex == 1;
-             }
-             scorecard.configuring = co
-
-             }*/
-        }
-
-        private function addKPI():void {
-            var kpiWindow:KPIParentWindow = new KPIParentWindow();
-            kpiWindow.scorecardID = selectedScorecard.scorecardID;
-            kpiWindow.addEventListener(KPIEvent.KPI_ADDED, addedKPI);
-            PopUpManager.addPopUp(kpiWindow, this, true);
-            PopUpUtil.centerPopUpWithY(kpiWindow, 20);
-        }
-
-        private function addedKPI(event:KPIEvent):void {
-            selectedScorecard.kpis.addItem(event.kpi);
+            /*primaryStackIndex = 0;
+            scorecardService.getScorecardDescriptors.send();*/
         }
 
         private function refreshData():void {
-            var window:RefreshScorecardWindow = new RefreshScorecardWindow();
-            //window.scorecard = selectedScorecard;
-            window.scorecards = scorecards;
-            //window.addEventListener(ScorecardRefreshEvent.SCORECARD_REFRESH, onScorecardRefresh);
-            PopUpManager.addPopUp(window, this, true);
-            PopUpUtil.centerPopUp(window);
+            var renderer:ScorecardRenderer = scorecardStack.selectedChild as ScorecardRenderer;
+            renderer.forceRefresh();
         }
 
-        private function gotScorecards():void {
-            scorecards = scorecardService.getScorecardsForUser.lastResult as ArrayCollection;
+        private function gotDescriptors():void {
+            scorecards = scorecardService.getScorecardDescriptors.lastResult as ArrayCollection;
             scorecardStack.removeAllChildren();
-            for each (var scorecard:Scorecard in scorecards) {
+            for each (var scorecard:ScorecardDescriptor in scorecards) {
                 var scorecardRenderer:ScorecardRenderer = new ScorecardRenderer();
                 BindingUtils.bindProperty(scorecardRenderer, "configurationMode", this, "configurationMode");
-                scorecardRenderer.scorecard = scorecard;
+                scorecardRenderer.scorecardDescriptor = scorecard;
                 scorecardStack.addChild(scorecardRenderer);
             }
 
             if (scorecards.length > 0) {
-                selectedScorecard = scorecards.getItemAt(0) as Scorecard;
+                selectedScorecard = scorecards.getItemAt(0) as ScorecardDescriptor;
                 primaryStackIndex = 2;
                 if (scorecards.length > 1) {
                     tabsIndex = 1;
@@ -132,7 +115,7 @@
 
         private function changeScorecard(event:ScorecardEvent):void {
             for (var i:int = 0; i < scorecards.length; i++) {
-                var scorecard:Scorecard = scorecards.getItemAt(i) as Scorecard;
+                var scorecard:ScorecardDescriptor = scorecards.getItemAt(i) as ScorecardDescriptor;
                 if (scorecard == event.scorecard) {
                     break;
                 }
@@ -147,12 +130,14 @@
 
         private function onClose(event:CloseEvent):void {
             if (event.detail == Alert.OK) {
-                scorecardService.deleteScorecard.send(selectedScorecard.scorecardID);
+                ProgressAlert.alert(this, "Deleting the scorecard...", null, scorecardService.deleteScorecard, scorecardService.getScorecardDescriptors);
+                scorecardService.deleteScorecard.send(selectedScorecard.id);
             }
         }
 
         private function deleted():void {
-            scorecardService.getScorecardsForUser.send();
+            primaryStackIndex = 0;
+            scorecardService.getScorecardDescriptors.send();
         }
 
         [Bindable]
@@ -160,7 +145,7 @@
         private var backgroundImage:Class;
         ]]></mx:Script>
     <mx:RemoteObject id="scorecardService" destination="scorecardService">
-        <mx:method name="getScorecardsForUser" result="gotScorecards()" fault="onFault(event)"/>
+        <mx:method name="getScorecardDescriptors" result="gotDescriptors()" fault="onFault(event)"/>
         <mx:method name="deleteScorecard" result="deleted()" fault="onFault(event)"/>
     </mx:RemoteObject>
     <mx:VBox verticalGap="0">
@@ -172,7 +157,7 @@
                 borderStyle="inset" borderThickness="1" cornerRadius="15"
                 paddingTop="15" paddingBottom="15" paddingLeft="15" paddingRight="15">
             <mx:Box width="100%" height="100%" horizontalAlign="center" verticalAlign="middle">
-                <mx:ProgressBar label="Loading scorecards..."/>
+                <mx:ProgressBar label="Loading scorecards..." indeterminate="true"/>
             </mx:Box>
             <mx:VBox horizontalAlign="center" width="100%">
                 <mx:Label text="You haven't defined any scorecards yet." fontSize="16"/>
@@ -180,24 +165,11 @@
                            fontSize="16" click="newScorecard()"/>
             </mx:VBox>
             <mx:VBox width="100%">
-                <mx:ViewStack resizeToContent="true" selectedIndex="{controlsIndex}" creationPolicy="all" width="100%">
-                    <mx:HBox width="100%" horizontalAlign="center">
-                        <mx:Button label="Configure Scorecards" click="configureMode()"/>
-                        <mx:Button label="Refresh KPI Values" click="refreshData()"/>
-                    </mx:HBox>
-                    <mx:HBox width="100%" horizontalAlign="center">
-                        <mx:Button label="Leave Configuration" click="configureMode()"/>
-                        <mx:Button label="New Scorecard..." click="newScorecard()"/>
-                        <mx:Button label="Edit this Scorecard..." />
-                        <mx:Button label="Delete this Scorecard..." click="deleteScorecard()"/>
-                        <mx:Button label="Add a KPI..." click="addKPI()"/>
-                    </mx:HBox>
-                </mx:ViewStack>
-                <mx:HRule width="100%"/>
                 <mx:ViewStack resizeToContent="true" selectedIndex="{tabsIndex}" creationPolicy="all" width="100%">
                     <mx:Box/>
                     <mx:VBox width="100%">
-                        <scorecard:ScorecardTabsRenderer scorecards="{scorecards}" scorecardFocus="changeScorecard(event)"/>
+                        <scorecard:ScorecardTabsRenderer scorecards="{scorecards}" scorecardFocus="changeScorecard(event)"
+                                scorecard="{selectedScorecard}"/>
                         <mx:HRule width="100%"/>
                     </mx:VBox>
                 </mx:ViewStack>
@@ -207,4 +179,15 @@
             </mx:VBox>
         </mx:ViewStack>
     </mx:VBox>
-</mx:VBox>
+    <mx:Spacer width="100%"/>
+    <mx:VBox paddingRight="0" paddingTop="25">
+        <mx:Label text="Scorecard Controls" fontSize="13" fontWeight="bold" paddingRight="0"/>
+        <mx:HRule width="100%"/>
+        <mx:LinkButton label="Add scorecard..." color="#333333" fontSize="12" paddingLeft="0" paddingRight="0" click="newScorecard()"/>
+        <mx:LinkButton label="Edit scorecard..." color="#333333" fontSize="12" paddingLeft="0" paddingRight="0"/>
+        <mx:LinkButton label="Delete scorecard" color="#333333" fontSize="12" paddingLeft="0" paddingRight="0" click="deleteScorecard()"/>
+        <mx:LinkButton label="Add a KPI..." color="#333333" fontSize="12" paddingLeft="0" paddingRight="0" click="addKPI()"/>
+        <mx:LinkButton label="Configure KPIs..." color="#333333" fontSize="12" paddingLeft="0" paddingRight="0" click="configureMode()"/>
+        <mx:LinkButton label="Refresh data..." color="#333333" fontSize="12" paddingLeft="0" paddingRight="0" click="refreshData()"/>
+    </mx:VBox>
+</mx:HBox>

@@ -1,12 +1,9 @@
 package com.easyinsight.datafeeds.highrise;
 
 import com.easyinsight.analysis.*;
+import com.easyinsight.datafeeds.*;
 import com.easyinsight.datafeeds.composite.CompositeServerDataSource;
 import com.easyinsight.datafeeds.composite.ChildConnection;
-import com.easyinsight.datafeeds.FeedType;
-import com.easyinsight.datafeeds.IServerDataSourceDefinition;
-import com.easyinsight.datafeeds.FeedDefinition;
-import com.easyinsight.datafeeds.CredentialsDefinition;
 import com.easyinsight.kpi.KPI;
 import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.users.Account;
@@ -19,6 +16,7 @@ import java.sql.SQLException;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 
+import com.easyinsight.users.Token;
 import com.easyinsight.users.TokenStorage;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.Credentials;
@@ -64,6 +62,30 @@ public class HighRiseCompositeSource extends CompositeServerDataSource {
         feedTypes.add(FeedType.HIGHRISE_COMPANY);
         feedTypes.add(FeedType.HIGHRISE_DEAL);
         return feedTypes;
+    }
+
+    public boolean needsCredentials(List<CredentialFulfillment> existingCredentials) {
+        String userName = null;
+        Token token = new TokenStorage().getToken(SecurityUtil.getUserID(), TokenStorage.HIGHRISE_TOKEN, getDataFeedID(), false);
+        if (token == null) {
+            for (CredentialFulfillment credentialFulfillment : existingCredentials) {
+                if (credentialFulfillment.getDataSourceID() == getDataFeedID()) {
+                    userName = credentialFulfillment.getCredentials().getUserName();
+                }
+            }
+        } else {
+            userName = token.getTokenValue();
+        }
+        if (userName == null) {
+            return true;
+        }
+        HttpClient client = getHttpClient(userName, "");
+        try {
+            runRestRequest("/companies.xml", client, new Builder());
+        } catch (HighRiseLoginException e) {
+            return true;
+        }
+        return false;
     }
 
     private static HttpClient getHttpClient(String username, String password) {
@@ -162,10 +184,12 @@ public class HighRiseCompositeSource extends CompositeServerDataSource {
         PreparedStatement clearStmt = conn.prepareStatement("DELETE FROM HIGHRISE WHERE FEED_ID = ?");
         clearStmt.setLong(1, getDataFeedID());
         clearStmt.executeUpdate();
+        clearStmt.close();
         PreparedStatement basecampStmt = conn.prepareStatement("INSERT INTO HIGHRISE (FEED_ID, URL) VALUES (?, ?)");
         basecampStmt.setLong(1, getDataFeedID());
         basecampStmt.setString(2, getUrl());
         basecampStmt.execute();
+        basecampStmt.close();
     }
 
     public void customLoad(Connection conn) throws SQLException {
@@ -176,6 +200,7 @@ public class HighRiseCompositeSource extends CompositeServerDataSource {
         if (rs.next()) {
             this.setUrl(rs.getString(1));
         }
+        loadStmt.close();
     }
 
     @Override
@@ -218,5 +243,7 @@ public class HighRiseCompositeSource extends CompositeServerDataSource {
         return Arrays.asList(dealValueKPI, pendingDealCountKPI, dealsClosedMonthKPI);
     }
 
-    
+    public boolean isLongRefresh() {
+        return true;
+    }
 }

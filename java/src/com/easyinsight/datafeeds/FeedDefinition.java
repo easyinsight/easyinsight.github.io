@@ -633,4 +633,12 @@ public class FeedDefinition implements Cloneable, Serializable {
         parent.getChildFolders().add(feedFolder);
         return feedFolder;
     }
+
+    public boolean isLongRefresh() {
+        return false;
+    }
+
+    public boolean needsCredentials(List<CredentialFulfillment> existingCredentials) {
+        return false;
+    }
 }

@@ -49,6 +49,7 @@ public class KPIStorage {
             }
             insertKPIStmt.execute();
             kpi.setKpiID(Database.instance().getAutoGenKey(insertKPIStmt));
+            insertKPIStmt.close();
         } else {
             PreparedStatement updateKPIStmt = conn.prepareStatement("UPDATE KPI SET ANALYSIS_MEASURE_ID = ?, DATA_FEED_ID = ?," +
                     "DESCRIPTION = ?, ICON_IMAGE = ?, KPI_NAME = ?, HIGH_IS_GOOD = ?, GOAL_VALUE = ?, GOAL_DEFINED = ?, TEMPORARY = ?," +
@@ -76,6 +77,7 @@ public class KPIStorage {
             }
             updateKPIStmt.setLong(13, kpi.getKpiID());
             updateKPIStmt.executeUpdate();
+            updateKPIStmt.close();
         }
         saveFilters(kpi, conn);
         saveProblemFilters(kpi, conn);
@@ -99,6 +101,7 @@ public class KPIStorage {
             while (kpiRS.next()) {
                 kpis.add(getKPIFromResultSet(conn, kpiRS));
             }
+            getKPIStmt.close();
         } finally {
             Database.closeConnection(conn);
         }
@@ -115,6 +118,7 @@ public class KPIStorage {
         if (kpiRS.next()) {
             kpi = getKPIFromResultSet(conn, kpiRS);
         }
+        getKPIStmt.close();
         return kpi;
     }
 
@@ -171,6 +175,7 @@ public class KPIStorage {
         if (solutionRS.next()) {
             kpi.setConnectionID(solutionRS.getLong(1));
         }
+        queryStmt.close();
         return kpi;
     }
 
@@ -187,6 +192,7 @@ public class KPIStorage {
             int reportType = rs.getInt(3);
             reports.add(new InsightDescriptor(reportID, reportName, dataFeedID, reportType));
         }
+        queryStmt.close();
         return reports;
     }
 
@@ -215,15 +221,19 @@ public class KPIStorage {
         if (percentChange == null) {
             insertStmt.setNull(8, Types.DOUBLE);
         } else {
+            if (Double.isInfinite(percentChange) || Double.isNaN(percentChange)) {
+                percentChange = 0.;
+            }
             insertStmt.setDouble(8, percentChange);
         }
         insertStmt.setBoolean(9, directional);
         insertStmt.execute();
+        insertStmt.close();
     }
 
-    public Double findLastGoalValue(Connection conn, long kpiID) {
+    public Double findLastGoalValue(Connection conn, long kpiID) throws SQLException {
         Double oldValue = null;
-        try {
+
             PreparedStatement findMaxStmt = conn.prepareStatement("SELECT MAX(EVALUATION_DATE) FROM KPI_VALUE WHERE KPI_ID = ? AND EVALUATION_DATE < ?");
             findMaxStmt.setLong(1, kpiID);
             findMaxStmt.setDate(2, new java.sql.Date(System.currentTimeMillis()));
@@ -241,15 +251,16 @@ public class KPIStorage {
                             oldValue = rs.getDouble(1);
                         }
                     }
+                    lastValStmt.close();
                 }
             }
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
+            findMaxStmt.close();
+
         return oldValue;
     }
 
     public KPIOutcome getLatestGoalValue(KPI kpi, EIConnection conn) throws SQLException {
+        KPIOutcome kpiOutcome = null;
         PreparedStatement findLastDateStmt = conn.prepareStatement("SELECT MAX(EVALUATION_DATE) FROM KPI_VALUE WHERE KPI_ID = ?");
         findLastDateStmt.setLong(1, kpi.getKpiID());
         ResultSet dateRS = findLastDateStmt.executeQuery();
@@ -283,11 +294,13 @@ public class KPIStorage {
                         percentChange = null;
                     }
                     boolean directional = rs.getBoolean(8);
-                    return new KPIOutcome(outcome, direction, endValue, problem, value, evaluationDate, kpi.getKpiID(), percentChange, directional);
+                    kpiOutcome = new KPIOutcome(outcome, direction, endValue, problem, value, evaluationDate, kpi.getKpiID(), percentChange, directional);
                 }
+                queryStmt.close();
             }
         }
-        return null;
+        findLastDateStmt.close();
+        return kpiOutcome;
     }
 
     public KPIOutcome getLatestGoalValue(KPI kpi) throws SQLException {        
@@ -305,6 +318,7 @@ public class KPIStorage {
         insertKPIValueStmt.setTimestamp(2, new java.sql.Timestamp(kpiValue.getDate().getTime()));
         insertKPIValueStmt.setLong(3, kpi.getKpiID());
         insertKPIValueStmt.execute();
+        insertKPIValueStmt.close();
     }
 
     public KPIValue getLastKPIValue(long kpiID, EIConnection conn) throws Exception {
@@ -330,8 +344,10 @@ public class KPIStorage {
                         return kpiValue;
                     }
                 }
+                lastValStmt.close();
             }
         }
+        findMaxStmt.close();
         return null;
     }
 
@@ -339,7 +355,7 @@ public class KPIStorage {
         PreparedStatement clearExistingStmt = conn.prepareStatement("DELETE FROM KPI_ROLE WHERE KPI_ID = ?");
         clearExistingStmt.setLong(1, kpi.getKpiID());
         clearExistingStmt.executeUpdate();
-
+        clearExistingStmt.close();
 
         PreparedStatement saveUsersStmt = conn.prepareStatement("INSERT INTO KPI_ROLE (KPI_ID, USER_ID, GROUP_ID, OWNER, RESPONSIBLE) VALUES (?, ?, ?, ?, ?)");
         for (KPIUser kpiUser : kpi.getKpiUsers()) {
@@ -360,13 +376,14 @@ public class KPIStorage {
             saveUsersStmt.setBoolean(5, kpiUser.isResponsible());
             saveUsersStmt.execute();
         }
-
+        saveUsersStmt.close();
     }
 
     private void saveFilters(KPI kpi, Connection conn) throws SQLException {
         PreparedStatement clearExistingStmt = conn.prepareStatement("DELETE FROM KPI_TO_FILTER WHERE KPI_ID = ?");
         clearExistingStmt.setLong(1, kpi.getKpiID());
         clearExistingStmt.executeUpdate();
+        clearExistingStmt.close();
         Session session = Database.instance().createSession(conn);
         try {
             PreparedStatement saveFiltersStmt = conn.prepareStatement("INSERT INTO KPI_TO_FILTER (KPI_ID, FILTER_ID) VALUES (?, ?)");
@@ -379,6 +396,7 @@ public class KPIStorage {
                 saveFiltersStmt.setLong(2, filterDefinition.getFilterID());
                 saveFiltersStmt.execute();
             }
+            saveFiltersStmt.close();
         } finally {
             session.close();
         }
@@ -403,6 +421,7 @@ public class KPIStorage {
         } finally {
             session.close();
         }
+        feedQueryStmt.close();
         return filters;
     }
 
@@ -427,6 +446,7 @@ public class KPIStorage {
             kpiUser.setResponsible(rs.getBoolean(8));
             users.add(kpiUser);
         }
+        queryStmt.close();
         return users;
     }
 
@@ -449,6 +469,7 @@ public class KPIStorage {
         } finally {
             session.close();
         }
+        feedQueryStmt.close();
         return filters;
     }
 
@@ -456,6 +477,7 @@ public class KPIStorage {
         PreparedStatement clearExistingStmt = conn.prepareStatement("DELETE FROM KPI_TO_PROBLEM_FILTER WHERE KPI_ID = ?");
         clearExistingStmt.setLong(1, kpi.getKpiID());
         clearExistingStmt.executeUpdate();
+        clearExistingStmt.close();
         Session session = Database.instance().createSession(conn);
         try {
             PreparedStatement saveFiltersStmt = conn.prepareStatement("INSERT INTO KPI_TO_PROBLEM_FILTER (KPI_ID, FILTER_ID) VALUES (?, ?)");
@@ -467,6 +489,7 @@ public class KPIStorage {
                 saveFiltersStmt.setLong(2, filterDefinition.getFilterID());
                 saveFiltersStmt.execute();
             }
+            saveFiltersStmt.close();
         } finally {
             session.close();
         }
@@ -478,6 +501,7 @@ public class KPIStorage {
             PreparedStatement deleteKPIStmt = conn.prepareStatement("DELETE FROM KPI WHERE KPI_ID = ?");
             deleteKPIStmt.setLong(1, kpiID);
             deleteKPIStmt.executeUpdate();
+            deleteKPIStmt.close();
         } finally {
             Database.closeConnection(conn);
         }

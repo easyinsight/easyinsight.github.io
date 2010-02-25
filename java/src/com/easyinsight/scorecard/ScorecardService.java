@@ -11,6 +11,8 @@ import com.easyinsight.pipeline.HistoryRun;
 import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.users.Credentials;
 
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
 
@@ -23,6 +25,42 @@ public class ScorecardService {
 
     private ScorecardStorage scorecardStorage = new ScorecardStorage();
 
+    public List<ScorecardDescriptor> getScorecardDescriptors() {
+        List<ScorecardDescriptor> scorecards = new ArrayList<ScorecardDescriptor>();
+        long userID = SecurityUtil.getUserID();
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            PreparedStatement queryStmt = conn.prepareStatement("SELECT SCORECARD.scorecard_id, SCORECARD.scorecard_name from " +
+                    "scorecard where scorecard.user_id = ?");
+            queryStmt.setLong(1, userID);
+            ResultSet rs = queryStmt.executeQuery();
+            while (rs.next()) {
+                long scorecardID = rs.getLong(1);
+                String scorecardName = rs.getString(2);
+                ScorecardDescriptor scorecardDescriptor = new ScorecardDescriptor();
+                scorecardDescriptor.setId(scorecardID);
+                scorecardDescriptor.setName(scorecardName);
+                scorecards.add(scorecardDescriptor);
+            }
+        } catch (SQLException e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        } finally {
+            Database.closeConnection(conn);
+        }
+        return scorecards;
+    }
+
+    public ScorecardWrapper getScorecard(long scorecardID, List<CredentialFulfillment> credentials, boolean forceRefresh) {
+        SecurityUtil.authorizeScorecard(scorecardID);
+        try {
+            return scorecardStorage.getScorecard(scorecardID, credentials, forceRefresh);
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        }
+    }
+
     public long saveScorecardForUser(Scorecard scorecard) {
         long userID = SecurityUtil.getUserID();
         try {
@@ -34,15 +72,15 @@ public class ScorecardService {
         }
     }
 
-    public List<Scorecard> getScorecardsForUser() {
+    /*public List<Scorecard> getScorecardsForUser(List<CredentialFulfillment> credentials) {
         long userID = SecurityUtil.getUserID();
         try {
-            return scorecardStorage.getScorecardsForUser(userID);
+            return scorecardStorage.getScorecardsForUser(userID, credentials);
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);
         }
-    }
+    }*/
 
     public void addKPIsToDefaultScorecard() {
 
@@ -54,7 +92,7 @@ public class ScorecardService {
         try {
             conn.setAutoCommit(false);
             scorecardStorage.addKPIToScorecard(kpi, scorecardID, conn);
-            refreshValuesForList(Arrays.asList(kpi), conn, credentials);
+            refreshValuesForList(Arrays.asList(kpi), conn, credentials, false);
             conn.commit();
             return kpi;
         } catch (Exception e) {
@@ -93,7 +131,7 @@ public class ScorecardService {
         try {
             conn.setAutoCommit(false);
             new KPIStorage().saveKPI(kpi, conn);
-            refreshValuesForList(Arrays.asList(kpi), conn, credentials);
+            refreshValuesForList(Arrays.asList(kpi), conn, credentials, false);
             conn.commit();
             return kpi;
         } catch (Exception e) {
@@ -106,12 +144,12 @@ public class ScorecardService {
         }
     }
 
-    public List<CredentialRequirement> getCredentialsForScorecard(boolean allSources, List<CredentialFulfillment> existingCredentials) {
+    /*public List<CredentialRequirement> getCredentialsForScorecard(boolean allSources, List<CredentialFulfillment> existingCredentials) {
 
         // identify the data sources
         Map<Long, CredentialRequirement> credentialMap = new HashMap<Long, CredentialRequirement>();
         try {
-            List<Scorecard> scorecards = scorecardStorage.getScorecardsForUser(SecurityUtil.getUserID());
+            List<Scorecard> scorecards = scorecardStorage.getScorecardsForUser(SecurityUtil.getUserID(), existingCredentials);
             for (Scorecard scorecard : scorecards) {
                 Set<Long> dataSourceIDs = new HashSet<Long>();
                 for (KPI kpi : scorecard.getKpis()) {
@@ -124,7 +162,7 @@ public class ScorecardService {
             throw new RuntimeException(e);
         }
         return new ArrayList<CredentialRequirement>(credentialMap.values());
-    }
+    }*/
 
     public void getCredentialsForDataSources(boolean allSources, List<CredentialFulfillment> existingCredentials, Map<Long, CredentialRequirement> credentialMap, Set<Long> dataSourceIDs) throws SQLException {
         if (allSources) {
@@ -224,7 +262,7 @@ public class ScorecardService {
         return outcome;
     }
 
-    private KPIOutcome refreshKPIValue(KPI kpi, List<CredentialFulfillment> credentials, EIConnection conn) {
+    private KPIOutcome refreshKPIValue(KPI kpi, List<CredentialFulfillment> credentials, EIConnection conn) throws SQLException {
         List<KPIValue> lastTwoValues = new HistoryRun().lastTwoValues(kpi.getCoreFeedID(), kpi.getAnalysisMeasure(),
                 kpi.getFilters(), credentials, kpi.getDayWindow());
         Double newValue = null;
@@ -291,7 +329,29 @@ public class ScorecardService {
         return new KPIOutcome(outcomeState, direction, oldValue, failedCondition, newValue, new Date(), kpi.getKpiID(), percentChange, directional);
     }
 
-    public List<KPI> refreshValuesForList(List<KPI> kpis, EIConnection conn, List<CredentialFulfillment> credentialsList) throws Exception {
+    public List<KPI> refreshValuesForList(List<KPI> kpis, EIConnection conn, List<CredentialFulfillment> credentialsList, boolean allSources) throws Exception {
+        if (allSources) {
+            Set<Long> dataSourceIDs = new HashSet<Long>();
+            for (KPI kpi : kpis) {
+                dataSourceIDs.add(kpi.getCoreFeedID());
+            }
+            for (Long dataSourceID : dataSourceIDs) {
+                FeedDefinition feedDefinition = new FeedStorage().getFeedDefinitionData(dataSourceID, conn);
+                if (feedDefinition.getCredentialsDefinition() == CredentialsDefinition.STANDARD_USERNAME_PW) {
+                    IServerDataSourceDefinition dataSource = (IServerDataSourceDefinition) feedDefinition;
+                    Credentials credentials = null;
+                    for (CredentialFulfillment fulfillment : credentialsList) {
+                        if (fulfillment.getDataSourceID() == feedDefinition.getDataFeedID()) {
+                            credentials = fulfillment.getCredentials();
+                        }
+                    }
+                    if (credentials != null && credentials.isEncrypted()) {
+                        credentials = credentials.decryptCredentials();
+                    }
+                    dataSource.refreshData(credentials, SecurityUtil.getAccountID(), new Date(), null);
+                }
+            }
+        }
         for (KPI kpi : kpis) {
             KPIOutcome kpiValue = refreshKPIValue(kpi, credentialsList, conn);
             kpi.setKpiOutcome(kpiValue);
@@ -304,13 +364,12 @@ public class ScorecardService {
         return kpis;
     }
 
-    public List<KPIOutcome> refreshValues(boolean allSources, List<CredentialFulfillment> credentialsList) {
-        /*SecurityUtil.authorizeScorecard(scorecardID);*/
+    /*public List<KPIOutcome> refreshValues(boolean allSources, List<CredentialFulfillment> credentialsList) {
         List<KPIOutcome> kpiValues = new ArrayList<KPIOutcome>();
         EIConnection conn = Database.instance().getConnection();
         try {
             conn.setAutoCommit(false);
-            List<Scorecard> scorecards = scorecardStorage.getScorecardsForUser(SecurityUtil.getUserID(), conn);
+            List<Scorecard> scorecards = scorecardStorage.getScorecardsForUser(SecurityUtil.getUserID(), conn, credentialsList);
             for (Scorecard scorecard : scorecards) {
                 Set<Long> dataSourceIDs = new HashSet<Long>();
                 if (allSources) {
@@ -354,5 +413,5 @@ public class ScorecardService {
             Database.closeConnection(conn);
         }
         return kpiValues;
-    }
+    }*/
 }

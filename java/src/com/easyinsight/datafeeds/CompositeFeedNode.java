@@ -39,6 +39,6 @@ public class CompositeFeedNode implements Serializable {
         insertNodeStmt.execute();
         long id = Database.instance().getAutoGenKey(insertNodeStmt);
         insertNodeStmt.close();
-        
+
     }
 }

@@ -52,6 +52,7 @@ public class CompositeFeedDefinition extends FeedDefinition {
         PreparedStatement clearStmt = conn.prepareStatement("DELETE FROM COMPOSITE_FEED WHERE DATA_FEED_ID = ?");
         clearStmt.setLong(1, getDataFeedID());
         clearStmt.executeUpdate();
+        clearStmt.close();
         PreparedStatement nodeStmt = conn.prepareStatement("INSERT INTO COMPOSITE_FEED (DATA_FEED_ID) " +
                 "VALUES (?)", Statement.RETURN_GENERATED_KEYS);
         nodeStmt.setLong(1, getDataFeedID());
@@ -64,6 +65,7 @@ public class CompositeFeedDefinition extends FeedDefinition {
         for (CompositeFeedConnection connection : connections) {
             connection.store(conn, compositeFeedID);
         }
+        nodeStmt.close();
     }
 
     public void customLoad(Connection conn) throws SQLException {
@@ -73,6 +75,7 @@ public class CompositeFeedDefinition extends FeedDefinition {
         ResultSet rs = getCustomFeedIDStmt.executeQuery();
         rs.next();
         long compositeFeedID = rs.getLong(1);
+        getCustomFeedIDStmt.close();
         PreparedStatement queryStmt = conn.prepareStatement("SELECT DATA_FEED_ID FROM COMPOSITE_NODE WHERE COMPOSITE_FEED_ID = ?");
         queryStmt.setLong(1, compositeFeedID);
         ResultSet nodeRS = queryStmt.executeQuery();
@@ -81,6 +84,7 @@ public class CompositeFeedDefinition extends FeedDefinition {
             long feedID = nodeRS.getLong(1);
             nodes.add(new CompositeFeedNode(feedID));
         }
+        queryStmt.close();
         PreparedStatement queryConnStmt = conn.prepareStatement("SELECT SOURCE_FEED_NODE_ID, TARGET_FEED_NODE_ID," +
                 "SOURCE_JOIN, TARGET_JOIN FROM COMPOSITE_CONNECTION WHERE COMPOSITE_FEED_ID = ?");
         queryConnStmt.setLong(1, compositeFeedID);
@@ -95,7 +99,7 @@ public class CompositeFeedDefinition extends FeedDefinition {
         }
         this.compositeFeedNodes = nodes;
         this.connections = edges;
-        queryStmt.close();
+        queryConnStmt.close();
     }
 
     public Feed createFeedObject() {
@@ -191,7 +195,9 @@ public class CompositeFeedDefinition extends FeedDefinition {
             nameStmt.setLong(1, feedID);
             ResultSet rs = nameStmt.executeQuery();
             rs.next();
-            return rs.getString(1);
+            String name = rs.getString(1);
+            nameStmt.close();
+            return name;
         } catch (SQLException e) {
             LogClass.error(e);
             throw new RuntimeException(e);

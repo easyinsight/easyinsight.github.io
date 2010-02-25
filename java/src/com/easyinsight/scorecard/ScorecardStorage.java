@@ -2,14 +2,19 @@ package com.easyinsight.scorecard;
 
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
+import com.easyinsight.datafeeds.*;
+import com.easyinsight.eventing.MessageUtils;
 import com.easyinsight.kpi.KPI;
 import com.easyinsight.kpi.KPIStorage;
+import com.easyinsight.logging.LogClass;
+import com.easyinsight.security.SecurityUtil;
+import com.easyinsight.users.Credentials;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 /**
  * User: jamesboe
@@ -41,6 +46,7 @@ public class ScorecardStorage {
             insertScorecardStmt.setInt(3, scorecard.getScorecardOrder());
             insertScorecardStmt.execute();
             scorecard.setScorecardID(Database.instance().getAutoGenKey(insertScorecardStmt));
+            insertScorecardStmt.close();
         } else {
             PreparedStatement updateScorecardStmt = conn.prepareStatement("UPDATE SCORECARD SET SCORECARD_NAME = ?," +
                     "USER_ID = ?, SCORECARD_ORDER = ? WHERE SCORECARD_ID = ?");
@@ -49,10 +55,12 @@ public class ScorecardStorage {
             updateScorecardStmt.setInt(3, scorecard.getScorecardOrder());
             updateScorecardStmt.setLong(4, scorecard.getScorecardID());
             updateScorecardStmt.executeUpdate();
+            updateScorecardStmt.close();
         }
         PreparedStatement clearKPILinksStmt = conn.prepareStatement("DELETE FROM SCORECARD_TO_KPI WHERE SCORECARD_ID = ?");
         clearKPILinksStmt.setLong(1, scorecard.getScorecardID());
         clearKPILinksStmt.executeUpdate();
+        clearKPILinksStmt.close();
         PreparedStatement addLinkStmt = conn.prepareStatement("INSERT INTO SCORECARD_TO_KPI (SCORECARD_ID, KPI_ID) VALUES (?, ?)");
         for (KPI kpi : scorecard.getKpis()) {
             new KPIStorage().saveKPI(kpi, conn);
@@ -60,6 +68,7 @@ public class ScorecardStorage {
             addLinkStmt.setLong(2, kpi.getKpiID());
             addLinkStmt.execute();
         }
+        addLinkStmt.close();
     }
 
 
@@ -70,6 +79,7 @@ public class ScorecardStorage {
             PreparedStatement deleteStmt = conn.prepareStatement("DELETE FROM SCORECARD WHERE SCORECARD_ID = ?");
             deleteStmt.setLong(1, scorecardID);
             deleteStmt.executeUpdate();
+            deleteStmt.close();
             conn.commit();
         } catch (Exception e) {
             conn.rollback();
@@ -80,11 +90,11 @@ public class ScorecardStorage {
         }
     }
 
-    public Scorecard getScorecard(long scorecardID) throws Exception {
+    public ScorecardWrapper getScorecard(long scorecardID, List<CredentialFulfillment> credentials, boolean forceRefresh) throws Exception {
         EIConnection conn = Database.instance().getConnection();
         try {
             conn.setAutoCommit(false);
-            Scorecard scorecard = getScorecard(scorecardID, conn);
+            ScorecardWrapper scorecard = getScorecard(scorecardID, conn, credentials, forceRefresh);
             conn.commit();
             return scorecard;
         } catch (Exception e) {
@@ -96,50 +106,190 @@ public class ScorecardStorage {
         }
     }
 
-    public Scorecard getScorecard(long scorecardID, EIConnection conn) throws Exception {
+    public ScorecardWrapper getScorecard(long scorecardID, EIConnection conn, List<CredentialFulfillment> credentials, boolean forceRefresh) throws Exception {
         PreparedStatement queryStmt = conn.prepareStatement("SELECT SCORECARD_ID, SCORECARD_NAME FROM SCORECARD WHERE SCORECARD_ID = ?");
         queryStmt.setLong(1, scorecardID);
         ResultSet rs = queryStmt.executeQuery();
         if (rs.next()) {
-            return loadScorecoard(rs, conn);
+            return loadScorecoard(rs, conn, credentials, forceRefresh);
         }
         return null;
     }
 
-    public List<Scorecard> getScorecardsForUser(long userID) throws Exception {
-        List<Scorecard> scorecards = new ArrayList<Scorecard>();
-        EIConnection conn = Database.instance().getConnection();
-        try {
-            conn.setAutoCommit(false);
-            PreparedStatement queryStmt = conn.prepareStatement("SELECT SCORECARD_ID, SCORECARD_NAME FROM SCORECARD WHERE USER_ID = ? ORDER BY scorecard_order");
-            queryStmt.setLong(1, userID);
-            ResultSet rs = queryStmt.executeQuery();
-            while (rs.next()) {
-                scorecards.add(loadScorecoard(rs, conn));
+    private ScorecardWrapper updateScorecard(Scorecard scorecard, EIConnection conn, List<CredentialFulfillment> existingCredentials, boolean forceRefresh) throws Exception {
+        List<KPI> longRefreshKPIs = new ArrayList<KPI>();
+        List<KPI> shortRefreshKPIs = new ArrayList<KPI>();
+        for (KPI kpi : scorecard.getKpis()) {
+            if (forceRefresh || needsUpdate(kpi, conn)) {
+                if (isLongRefresh(kpi, conn)) {
+                    longRefreshKPIs.add(kpi);
+                } else {
+                    shortRefreshKPIs.add(kpi);
+                }
             }
-            conn.commit();
-        } catch (Exception e) {
-            conn.rollback();
-            throw e;
-        } finally {
-            conn.setAutoCommit(true);
-            Database.closeConnection(conn);
         }
-        return scorecards;
-    }
+        List<CredentialRequirement> credentialRequirements = new ArrayList<CredentialRequirement>();
 
-    public List<Scorecard> getScorecardsForUser(long userID, EIConnection conn) throws Exception {
-        List<Scorecard> scorecards = new ArrayList<Scorecard>();
-        PreparedStatement queryStmt = conn.prepareStatement("SELECT SCORECARD_ID, SCORECARD_NAME FROM SCORECARD WHERE USER_ID = ? ORDER BY scorecard_order");
-            queryStmt.setLong(1, userID);
-            ResultSet rs = queryStmt.executeQuery();
-            while (rs.next()) {
-                scorecards.add(loadScorecoard(rs, conn));
+        List<KPI> credentialedLongRefreshKPIs = pareKPIs(longRefreshKPIs, existingCredentials, credentialRequirements);
+        List<KPI> credentialedShortRefreshKPIs = pareKPIs(shortRefreshKPIs, existingCredentials, credentialRequirements);
+
+        ScorecardWrapper scorecardWrapper = new ScorecardWrapper();
+
+        if (credentialRequirements.isEmpty()) {
+            new ScorecardService().refreshValuesForList(credentialedShortRefreshKPIs, conn, existingCredentials, false);
+            if (credentialedLongRefreshKPIs != null && credentialedLongRefreshKPIs.size() > 0) {
+                scorecardWrapper.setAsyncRefresh(true);
+                longKPIs(credentialedLongRefreshKPIs, existingCredentials, scorecard.getScorecardID());
             }
-        return scorecards;
+        }
+
+        scorecardWrapper.setCredentials(credentialRequirements);
+        return scorecardWrapper;
     }
 
-    private Scorecard loadScorecoard(ResultSet rs, EIConnection conn) throws Exception {
+    private void longKPIs(final List<KPI> kpiList, final List<CredentialFulfillment> credentialsList, final long scorecardID) {
+        final Map<Long, List<KPI>> kpiMap = new HashMap<Long, List<KPI>>();
+        for (KPI kpi : kpiList) {
+            List<KPI> kpis = kpiMap.get(kpi.getCoreFeedID());
+            if (kpis == null) {
+                kpis = new ArrayList<KPI>();
+                kpiMap.put(kpi.getCoreFeedID(), kpis);
+            }
+            kpis.add(kpi);
+        }
+        final long userID = SecurityUtil.getUserID();
+        final long accountID = SecurityUtil.getAccountID();
+        final int accountType = SecurityUtil.getAccountTier();
+        final boolean accountAdmin = SecurityUtil.isAccountAdmin();
+
+        Thread thread = new Thread(new Runnable() {
+
+            public void run() {
+                SecurityUtil.populateThreadLocal(userID, accountID, accountType, accountAdmin);
+                try {
+                    for (Long dataSourceID : kpiMap.keySet()) {
+                        FeedDefinition feedDefinition = new FeedStorage().getFeedDefinitionData(dataSourceID);
+                        IServerDataSourceDefinition dataSource = (IServerDataSourceDefinition) feedDefinition;
+                        Credentials credentials = null;
+                        for (CredentialFulfillment fulfillment : credentialsList) {
+                            if (fulfillment.getDataSourceID() == feedDefinition.getDataFeedID()) {
+                                credentials = fulfillment.getCredentials();
+                            }
+                        }
+                        if (credentials != null && credentials.isEncrypted()) {
+                            credentials = credentials.decryptCredentials();
+                        }
+                        ScorecardRefreshEvent info = new ScorecardRefreshEvent();
+                        info.setScorecardID(scorecardID);
+                        info.setDataSourceName(feedDefinition.getFeedName());
+                        info.setType(ScorecardRefreshEvent.DATA_SOURCE_NAME);
+                        info.setUserId(userID);
+                        MessageUtils.sendMessage("scorecardUpdates", info);
+                        dataSource.refreshData(credentials, accountID, new Date(), null);
+                    }
+                    List<KPI> kpis;
+                    EIConnection conn = Database.instance().getConnection();
+                    try {
+                        conn.setAutoCommit(false);
+                        new ScorecardService().refreshValuesForList(kpiList, conn, credentialsList, false);
+                        PreparedStatement getKPIStmt = conn.prepareStatement("SELECT SCORECARD_TO_KPI.KPI_ID FROM SCORECARD_TO_KPI WHERE " +
+                                "scorecard_to_kpi.scorecard_id = ?");
+                        getKPIStmt.setLong(1, scorecardID);
+
+                        kpis = new ArrayList<KPI>();
+                        ResultSet kpiRS = getKPIStmt.executeQuery();
+                        while (kpiRS.next()) {
+                            long kpiID = kpiRS.getLong(1);
+                            kpis.add(new KPIStorage().getKPI(kpiID, conn));
+                        }
+                        conn.commit();
+                    } catch (Exception e) {
+                        conn.rollback();
+                        throw new RuntimeException(e);
+                    } finally {
+                        conn.setAutoCommit(true);
+                        Database.closeConnection(conn);
+                    }
+                    ScorecardRefreshEvent info = new ScorecardRefreshEvent();
+                    info.setScorecardID(scorecardID);
+                    info.setType(ScorecardRefreshEvent.DONE);
+                    info.setKpis(kpis);
+                    info.setUserId(userID);
+                    MessageUtils.sendMessage("scorecardUpdates", info);
+                } catch (Exception e) {
+                    LogClass.error(e);
+                }
+            }
+        });
+        thread.setDaemon(true);
+        thread.start();
+    }
+
+    private List<KPI> pareKPIs(List<KPI> kpiList, List<CredentialFulfillment> existingCredentials, List<CredentialRequirement> credentialRequirements) throws SQLException {
+        List<KPI> credentialedKPIs = new ArrayList<KPI>();
+        Map<Long, List<KPI>> kpiMap = new HashMap<Long, List<KPI>>();
+        for (KPI kpi : kpiList) {
+            List<KPI> kpis = kpiMap.get(kpi.getCoreFeedID());
+            if (kpis == null) {
+                kpis = new ArrayList<KPI>();
+                kpiMap.put(kpi.getCoreFeedID(), kpis);
+            }
+            kpis.add(kpi);
+        }
+        for (Long dataSourceID : kpiMap.keySet()) {
+            FeedDefinition feedDefinition = new FeedStorage().getFeedDefinitionData(dataSourceID);
+            if (feedDefinition.needsCredentials(existingCredentials)) {
+                credentialRequirements.add(new CredentialRequirement(feedDefinition.getDataFeedID(), feedDefinition.getFeedName(),
+                            CredentialsDefinition.STANDARD_USERNAME_PW));
+            } else {
+                credentialedKPIs.addAll(kpiMap.get(dataSourceID));
+            }            
+        }
+        return credentialedKPIs;
+    }
+
+    private boolean needsUpdate(KPI kpi, EIConnection conn) throws SQLException {
+        long threshold;
+        long kpiTime = 0;
+        if (isLongRefresh(kpi, conn)) {
+            PreparedStatement queryStmt = conn.prepareStatement("SELECT FEED_PERSISTENCE_METADATA.SIZE, FEED_PERSISTENCE_METADATA.last_data_time FROM feed_persistence_metadata WHERE feed_id = ?");
+            queryStmt.setLong(1, kpi.getCoreFeedID());
+            ResultSet rs = queryStmt.executeQuery();
+            if (rs.next()) {
+                long size = rs.getLong(1);
+                if (size == 0) {
+                    PreparedStatement detailStmt = conn.prepareStatement("SELECT FEED_PERSISTENCE_METADATA.SIZE, FEED_PERSISTENCE_METADATA.last_data_time FROM " +
+                            "feed_persistence_metadata, data_feed WHERE feed_persistence_metadata.feed_id = data_feed.data_feed_id AND " +
+                            "data_feed.parent_source_id = ?");
+                    detailStmt.setLong(1, kpi.getCoreFeedID());
+                    rs = detailStmt.executeQuery();
+                    if (rs.next()) {
+                        kpiTime = rs.getTimestamp(2).getTime();
+                    }
+                    detailStmt.close();
+                } else {
+                    kpiTime = rs.getTimestamp(2).getTime();
+                }
+            }
+            queryStmt.close();
+            threshold = 1000 * 60 * 60 * 12;
+        } else {
+            threshold = 1000 * 60 * 60;
+        }
+        long time = System.currentTimeMillis() - threshold;
+        if (kpiTime == 0 && kpi.getKpiOutcome() != null) {
+            kpiTime = kpi.getKpiOutcome().getEvaluationDate().getTime();
+        }
+        return (kpiTime < time);
+    }
+
+    private boolean isLongRefresh(KPI kpi, EIConnection conn) throws SQLException {
+        long dataSourceID = kpi.getCoreFeedID();
+        FeedDefinition feedDefinition = new FeedStorage().getFeedDefinitionData(dataSourceID, conn);
+        return feedDefinition.isLongRefresh();
+    }
+
+    private ScorecardWrapper loadScorecoard(ResultSet rs, EIConnection conn, List<CredentialFulfillment> credentials, boolean forceRefresh) throws Exception {
         Scorecard scorecard = new Scorecard();
         scorecard.setScorecardID(rs.getLong(1));
         scorecard.setName(rs.getString(2));
@@ -152,8 +302,11 @@ public class ScorecardStorage {
             long kpiID = kpiRS.getLong(1);
             kpis.add(new KPIStorage().getKPI(kpiID, conn));
         }
+        getKPIStmt.close();
         scorecard.setKpis(kpis);
-        return scorecard;
+        ScorecardWrapper scorecardWrapper = updateScorecard(scorecard, conn, credentials, forceRefresh);
+        scorecardWrapper.setScorecard(scorecard);
+        return scorecardWrapper;
     }
 
     public List<Scorecard> getScorecardsFromGroup(long userID) throws Exception {
@@ -200,6 +353,7 @@ public class ScorecardStorage {
         addLinkStmt.setLong(1, scorecardID);
         addLinkStmt.setLong(2, kpi.getKpiID());
         addLinkStmt.execute();
+        addLinkStmt.close();
     }
 
     public void removeKPIFromScorecard(long kpiID, long scorecardID) throws Exception {
@@ -210,6 +364,7 @@ public class ScorecardStorage {
             deleteLinkStmt.setLong(1, scorecardID);
             deleteLinkStmt.setLong(2, kpiID);
             deleteLinkStmt.executeUpdate();
+            deleteLinkStmt.close();
             conn.commit();
         } catch (Exception e) {
             conn.rollback();
@@ -233,5 +388,14 @@ public class ScorecardStorage {
             conn.setAutoCommit(true);
             Database.closeConnection(conn);
         }
+    }
+
+    public long getFirstScorecard(EIConnection conn) throws SQLException {
+        PreparedStatement queryStmt = conn.prepareStatement("SELECT SCORECARD_ID FROM SCORECARD ORDER BY SCORECARD_ORDER ASC LIMIT 1");
+        ResultSet rs = queryStmt.executeQuery();
+        rs.next();
+        long id = rs.getLong(1);
+        queryStmt.close();
+        return id;
     }
 }

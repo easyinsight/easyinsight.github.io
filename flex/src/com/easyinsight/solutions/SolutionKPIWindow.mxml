@@ -125,7 +125,7 @@
         }
 
         private function gotScorecards():void {
-            var scorecards:ArrayCollection = scorecardService.getScorecardsForUser.lastResult as ArrayCollection;
+            var scorecards:ArrayCollection = scorecardService.getScorecardDescriptors.lastResult as ArrayCollection;
             if (scorecards.length == 0) {
                 userHasKPIs = false;
                 stackIndex = 1;
@@ -168,7 +168,7 @@
         <mx:method name="installKPIsToScorecard" result="esInstalled()"/>
     </mx:RemoteObject>
     <mx:RemoteObject id="scorecardService" destination="scorecardService">
-        <mx:method name="getScorecardsForUser" result="gotScorecards()"/>
+        <mx:method name="getScorecardDescriptors" result="gotScorecards()"/>
     </mx:RemoteObject>
     <mx:VBox width="1000" height="100%" verticalGap="0">
         <mx:Box height="50%" width="100%" horizontalAlign="center" verticalAlign="middle" backgroundColor="#FFFFFF">
@@ -182,7 +182,7 @@
                                  editable="false" borderStyle="none" backgroundAlpha="0" width="600" fontSize="24" height="200"
                                  color="#FFFFFF"/>
                     <mx:HBox>
-                        <mx:Button label="Next" fontSize="24" click="scorecardService.getScorecardsForUser.send(); backIndex = 0"/>
+                        <mx:Button label="Next" fontSize="24" click="scorecardService.getScorecardDescriptors.send(); backIndex = 0"/>
                     </mx:HBox>
                 </mx:VBox>
                 <mx:VBox width="100%" horizontalAlign="center" data="1">

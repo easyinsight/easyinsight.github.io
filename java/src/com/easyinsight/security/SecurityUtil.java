@@ -24,6 +24,11 @@ import org.hibernate.Session;
 public class SecurityUtil {
 
     private static ISecurityProvider securityProvider;
+    private static ThreadLocal<UserPrincipal> threadLocal = new ThreadLocal<UserPrincipal>();
+
+    public static void populateThreadLocal(long userID, long accountID, int accountType, boolean accountAdmin) {
+        threadLocal.set(new UserPrincipal(null, accountID, userID, accountType, accountAdmin));
+    }
 
     public static void setSecurityProvider(ISecurityProvider securityProvider) {
         SecurityUtil.securityProvider = securityProvider;
@@ -113,12 +118,17 @@ public class SecurityUtil {
     public static long getUserID(boolean required) {
         UserPrincipal userPrincipal = securityProvider.getUserPrincipal();
         if (userPrincipal == null) {
-            if (required) {
-                SecurityLogger.error("Could not retrieve user principal.");
-                throw new SecurityException(SecurityException.LOGIN_REQUIRED);
+            userPrincipal = threadLocal.get();
+            if (userPrincipal == null) {
+                if (required) {
+                    SecurityLogger.error("Could not retrieve user principal.");
+                    throw new SecurityException(SecurityException.LOGIN_REQUIRED);
+                }
+                else
+                    return 0;
+            } else {
+                return userPrincipal.getUserID();
             }
-            else
-                return 0;
         } else {
             return userPrincipal.getUserID();
         }
@@ -197,7 +207,12 @@ public class SecurityUtil {
     public static long getAccountID() {
         UserPrincipal userPrincipal = securityProvider.getUserPrincipal();
         if (userPrincipal == null) {
-            throw new SecurityException();
+            userPrincipal = threadLocal.get();
+            if (userPrincipal == null) {
+                throw new SecurityException();
+            } else {
+                return userPrincipal.getAccountID();
+            }
         } else {
             return userPrincipal.getAccountID();
         }

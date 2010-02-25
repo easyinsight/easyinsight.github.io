@@ -11,7 +11,7 @@ import mx.managers.DragManager;
 public class ScorecardTab extends Button {
 
     private var _selectedTab:Boolean;
-    private var _scorecard:Scorecard;
+    private var _scorecard:ScorecardDescriptor;
 
     public function ScorecardTab() {
         super();
@@ -22,7 +22,7 @@ public class ScorecardTab extends Button {
         setStyle("fontSize", 16);
     }
 
-    public function set scorecard(value:Scorecard):void {
+    public function set scorecard(value:ScorecardDescriptor):void {
         _scorecard = value;
         if (_scorecard != null) {
             BindingUtils.bindProperty(this, "label", _scorecard, "name");
@@ -35,7 +35,7 @@ public class ScorecardTab extends Button {
     }
 
 
-    public function get scorecard():Scorecard {
+    public function get scorecard():ScorecardDescriptor {
         return _scorecard;
     }
 

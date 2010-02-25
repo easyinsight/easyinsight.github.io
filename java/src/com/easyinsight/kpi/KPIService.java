@@ -28,6 +28,7 @@ public class KPIService {
         EIConnection conn = Database.instance().getConnection();
         try {
             KPI kpi = sourceKPI.clone();
+            kpi.setKpiOutcome(null);
             kpi.setKpiUsers(Arrays.asList(KPIUtil.defaultUser()));
             kpi.setName("Copy of " + kpi.getName());
             kpiStorage.saveKPI(kpi, conn);
@@ -59,21 +60,20 @@ public class KPIService {
         EIConnection conn = Database.instance().getConnection();
         try {
             conn.setAutoCommit(false);
-            Scorecard targetScorecard;
+            long targetScorecardID;
             if (newScorecard) {
                 Scorecard scorecard = new Scorecard();
                 scorecard.setName(dataSourceName + " Scorecard");
                 scorecard.setScorecardOrder(0);
                 new ScorecardStorage().saveScorecardForUser(scorecard, userID, conn);
-                targetScorecard = scorecard;
+                targetScorecardID = scorecard.getScorecardID();
             } else {
-                List<Scorecard> scorecards = new ScorecardStorage().getScorecardsForUser(userID, conn);
-                targetScorecard = scorecards.get(0);
+                targetScorecardID = new ScorecardStorage().getFirstScorecard(conn);
             }
             for (KPI kpi : kpis) {
                 kpi.setTemporary(false);
                 new KPIStorage().saveKPI(kpi, conn);
-                new ScorecardStorage().linkKPIToScorecard(kpi, targetScorecard.getScorecardID(), conn);
+                new ScorecardStorage().linkKPIToScorecard(kpi, targetScorecardID, conn);
             }
             conn.commit();
         } catch (Exception e) {
@@ -99,7 +99,7 @@ public class KPIService {
                 kpi.setCoreFeedID(targetDataSourceID);
                 kpiStorage.saveKPI(kpi, conn);
             }
-            new ScorecardService().refreshValuesForList(kpis, conn, credentials);
+            new ScorecardService().refreshValuesForList(kpis, conn, credentials, false);
             conn.commit();
             return kpis;
         } catch (Exception e) {
@@ -155,7 +155,7 @@ public class KPIService {
         try {
             conn.setAutoCommit(false);
             kpiStorage.saveKPI(kpi, conn);
-            new ScorecardService().refreshValuesForList(Arrays.asList(kpi), conn, credentials);
+            new ScorecardService().refreshValuesForList(Arrays.asList(kpi), conn, credentials, false);
             conn.commit();
             return kpi;
         } catch (Exception e) {

@@ -72,7 +72,7 @@ public class FeedStorage {
         try {
             feedCache.remove(feedId);
         }
-        catch(Exception e) {
+        catch (Exception e) {
             LogClass.error(e);
         }
     }
@@ -80,12 +80,12 @@ public class FeedStorage {
     public long addFeedDefinitionData(FeedDefinition feedDefinition, Connection conn) throws SQLException {
         PreparedStatement insertDataFeedStmt;
         insertDataFeedStmt = conn.prepareStatement("INSERT INTO DATA_FEED (FEED_NAME, FEED_TYPE, PUBLICLY_VISIBLE, FEED_SIZE, " +
-                    "CREATE_DATE, UPDATE_DATE, FEED_VIEWS, FEED_RATING_COUNT, FEED_RATING_AVERAGE, DESCRIPTION," +
-                    "ATTRIBUTION, OWNER_NAME, DYNAMIC_SERVICE_DEFINITION_ID, ANALYSIS_ID, MARKETPLACE_VISIBLE, " +
+                "CREATE_DATE, UPDATE_DATE, FEED_VIEWS, FEED_RATING_COUNT, FEED_RATING_AVERAGE, DESCRIPTION," +
+                "ATTRIBUTION, OWNER_NAME, DYNAMIC_SERVICE_DEFINITION_ID, ANALYSIS_ID, MARKETPLACE_VISIBLE, " +
                 "API_KEY, UNCHECKED_API_BASIC_AUTH, UNCHECKED_API_ENABLED, validated_api_basic_auth, validated_api_enabled, INHERIT_ACCOUNT_API_SETTINGS," +
                 "REFRESH_INTERVAL, CURRENT_VERSION, VISIBLE, PARENT_SOURCE_ID, VERSION) " +
-                        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-                        Statement.RETURN_GENERATED_KEYS);
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                Statement.RETURN_GENERATED_KEYS);
         insertDataFeedStmt.setString(1, feedDefinition.getFeedName());
         insertDataFeedStmt.setInt(2, feedDefinition.getFeedType().getType());
         insertDataFeedStmt.setBoolean(3, feedDefinition.getUploadPolicy().isPubliclyVisible());
@@ -134,6 +134,7 @@ public class FeedStorage {
         saveFolders(feedID, conn, feedDefinition.getFolders());
         saveTags(feedID, conn, feedDefinition.getTags());
         feedDefinition.customStorage(conn);
+        insertDataFeedStmt.close();
         return feedID;
     }
 
@@ -141,6 +142,7 @@ public class FeedStorage {
         PreparedStatement wipeStmt = conn.prepareStatement("DELETE FROM FOLDER WHERE DATA_SOURCE_ID = ?");
         wipeStmt.setLong(1, feedID);
         wipeStmt.executeUpdate();
+        wipeStmt.close();
         for (FeedFolder folder : folders) {
             saveFolder(folder, feedID, conn);
         }
@@ -153,17 +155,20 @@ public class FeedStorage {
         insertFolderStmt.setLong(2, feedID);
         insertFolderStmt.execute();
         folder.setFolderID(Database.instance().getAutoGenKey(insertFolderStmt));
+        insertFolderStmt.close();
         saveFields(conn, folder);
         PreparedStatement insertChildFolderStmt = conn.prepareStatement("INSERT INTO folder_to_folder (parent_folder_id, child_folder_id) values (?, ?)");
         PreparedStatement clearFoldersStmt = conn.prepareStatement("DELETE FROM folder_to_folder WHERE parent_folder_id = ?");
         clearFoldersStmt.setLong(1, folder.getFolderID());
         clearFoldersStmt.executeUpdate();
+        clearFoldersStmt.close();
         for (FeedFolder childFolder : folder.getChildFolders()) {
             saveFolder(childFolder, feedID, conn);
             insertChildFolderStmt.setLong(1, folder.getFolderID());
             insertChildFolderStmt.setLong(2, childFolder.getFolderID());
             insertChildFolderStmt.execute();
         }
+        insertChildFolderStmt.close();
         return folder.getFolderID();
     }
 
@@ -171,12 +176,14 @@ public class FeedStorage {
         PreparedStatement clearJoinsStmt = conn.prepareStatement("DELETE FROM folder_to_analysis_item WHERE folder_id = ?");
         clearJoinsStmt.setLong(1, folder.getFolderID());
         clearJoinsStmt.executeUpdate();
+        clearJoinsStmt.close();
         PreparedStatement insertFieldStmt = conn.prepareStatement("INSERT INTO folder_to_analysis_item (folder_id, analysis_item_id) values (?, ?)");
         for (AnalysisItem analysisItem : folder.getChildItems()) {
             insertFieldStmt.setLong(1, folder.getFolderID());
             insertFieldStmt.setLong(2, analysisItem.getAnalysisItemID());
             insertFieldStmt.execute();
         }
+        insertFieldStmt.close();
     }
 
     public List<FeedFolder> getFolders(long dataSourceID, List<AnalysisItem> fields, Connection conn) throws SQLException {
@@ -190,6 +197,7 @@ public class FeedStorage {
             FeedFolder feedFolder = getFolder(folderID, fields, conn);
             folders.add(feedFolder);
         }
+        queryStmt.close();
         return folders;
     }
 
@@ -198,9 +206,11 @@ public class FeedStorage {
         queryStmt.setLong(1, folderID);
         ResultSet rs = queryStmt.executeQuery();
         rs.next();
+
         FeedFolder feedFolder = new FeedFolder();
         feedFolder.setFolderID(folderID);
         feedFolder.setName(rs.getString(1));
+        queryStmt.close();
         PreparedStatement analysisItemStmt = conn.prepareStatement("SELECT ANALYSIS_ITEM_ID FROM FOLDER_TO_ANALYSIS_ITEM WHERE FOLDER_ID = ?");
         analysisItemStmt.setLong(1, folderID);
         ResultSet fieldRS = analysisItemStmt.executeQuery();
@@ -212,6 +222,7 @@ public class FeedStorage {
                 }
             }
         }
+        analysisItemStmt.close();
         PreparedStatement childFoldersStmt = conn.prepareStatement("SELECT CHILD_FOLDER_ID FROM FOLDER_TO_FOLDER WHERE parent_folder_id = ?");
         childFoldersStmt.setLong(1, folderID);
         ResultSet childRS = childFoldersStmt.executeQuery();
@@ -220,6 +231,7 @@ public class FeedStorage {
             long childID = childRS.getLong(1);
             childFolders.add(getFolder(childID, fields, conn));
         }
+        childFoldersStmt.close();
         feedFolder.setChildFolders(childFolders);
         return feedFolder;
     }
@@ -253,7 +265,7 @@ public class FeedStorage {
         finally {
             s.close();
         }*/
-        
+
         PreparedStatement clearExistingStmt = conn.prepareStatement("DELETE FROM UPLOAD_POLICY_USERS WHERE FEED_ID = ?");
         clearExistingStmt.setLong(1, feedID);
         clearExistingStmt.executeUpdate();
@@ -294,6 +306,8 @@ public class FeedStorage {
                 addGroupStmt.execute();
             }
         }
+        addUserStmt.close();
+        addGroupStmt.close();
     }
 
     public void updateVersion(FeedDefinition feedDefinition, int version, Connection conn) throws SQLException {
@@ -301,6 +315,7 @@ public class FeedStorage {
         updateVersionStmt.setInt(1, version);
         updateVersionStmt.setLong(2, feedDefinition.getDataFeedID());
         updateVersionStmt.executeUpdate();
+        updateVersionStmt.close();
     }
 
     private void saveTags(long feedID, Connection conn, Collection<Tag> tags) throws SQLException {
@@ -312,7 +327,7 @@ public class FeedStorage {
             Session session = Database.instance().createSession(conn);
             try {
                 for (Tag tag : tags) {
-                    
+
                     session.saveOrUpdate(tag);
                 }
                 session.flush();
@@ -332,18 +347,18 @@ public class FeedStorage {
 
     private void saveFields(long feedID, Connection conn, List<AnalysisItem> analysisItems, List<VirtualDimension> virtualDimensions) throws SQLException {
         PreparedStatement deleteStmt = conn.prepareStatement("DELETE FROM FEED_TO_ANALYSIS_ITEM WHERE FEED_ID = ?");
-        PreparedStatement virtualStmt = conn.prepareStatement("DELETE FROM DATA_SOURCE_TO_VIRTUAL_DIMENSION WHERE DATA_SOURCE_ID = ?");
+        //PreparedStatement virtualStmt = conn.prepareStatement("DELETE FROM DATA_SOURCE_TO_VIRTUAL_DIMENSION WHERE DATA_SOURCE_ID = ?");
         deleteStmt.setLong(1, feedID);
         deleteStmt.executeUpdate();
         deleteStmt.close();
-        virtualStmt.setLong(1, feedID);
+        /*virtualStmt.setLong(1, feedID);
         virtualStmt.executeUpdate();
-        virtualStmt.close();
+        virtualStmt.close();*/
         if (analysisItems != null) {
             Session session = Database.instance().createSession(conn);
             try {
                 //session.getTransaction().begin();
-                if (virtualDimensions != null) {
+                /*if (virtualDimensions != null) {
                     for (VirtualDimension virtualDimension : virtualDimensions) {
                         AnalysisDimension dim = virtualDimension.getDefaultTransform().getTransformDimension();
                         if (dim.getAnalysisItemID() == 0) {
@@ -364,7 +379,7 @@ public class FeedStorage {
                             }
                         }
                     }
-                }
+                }*/
                 for (AnalysisItem analysisItem : analysisItems) {
                     if (analysisItem.getKey().getKeyID() == 0) {
                         session.save(analysisItem.getKey());
@@ -382,12 +397,12 @@ public class FeedStorage {
                     }
                     //session.saveOrUpdate(analysisItem);
                 }
-                if (virtualDimensions != null) {
+                /*if (virtualDimensions != null) {
                     for (VirtualDimension remoteDimension : virtualDimensions) {
                         remoteDimension.fromRemote();
                         session.saveOrUpdate(remoteDimension);
                     }
-                }
+                }*/
                 /*for (AnalysisItem analysisItem : analysisItems) {
                     analysisItem.resetIDs();
                     session.save(analysisItem);
@@ -420,7 +435,7 @@ public class FeedStorage {
 
     public void setPasswordCredentials(Connection conn, IServerDataSourceDefinition ds) throws SQLException {
         Credentials c = PasswordStorage.getPasswordCredentials(ds.getDataFeedID(), conn);
-        if(c != null) {
+        if (c != null) {
             ds.setUsername(c.getUserName());
             ds.setPassword(c.getPassword());
         }
@@ -430,9 +445,10 @@ public class FeedStorage {
         PreparedStatement selectStmt = conn.prepareStatement("SELECT session_id from session_id_storage WHERE data_feed_id = ?");
         selectStmt.setLong(1, ds.getDataFeedID());
         ResultSet rs = selectStmt.executeQuery();
-        if(rs.next()) {
+        if (rs.next()) {
             ds.setSessionId(rs.getString(1));
         }
+        selectStmt.close();
     }
 
     public Set<Tag> getTags(long feedID, Connection conn) throws SQLException {
@@ -463,8 +479,7 @@ public class FeedStorage {
     public void retrieveFields(FeedDefinition feedDefinition, Connection conn) throws SQLException {
         long feedID = feedDefinition.getDataFeedID();
         PreparedStatement queryFieldsStmt = conn.prepareStatement("SELECT ANALYSIS_ITEM_ID FROM FEED_TO_ANALYSIS_ITEM WHERE FEED_ID = ?");
-        PreparedStatement queryVirtualDimStmt = conn.prepareStatement("SELECT VIRTUAL_DIMENSION_ID FROM data_source_to_virtual_dimension WHERE " +
-                "DATA_SOURCE_ID = ?");
+
         queryFieldsStmt.setLong(1, feedID);
         Set<Long> analysisItemIDs = new HashSet<Long>();
         ResultSet rs = queryFieldsStmt.executeQuery();
@@ -472,14 +487,9 @@ public class FeedStorage {
             analysisItemIDs.add(rs.getLong(1));
         }
         queryFieldsStmt.close();
-        queryVirtualDimStmt.setLong(1, feedID);
-        Set<Long> virtualIDSet = new HashSet<Long>();
-        ResultSet virtualRS = queryVirtualDimStmt.executeQuery();
-        while (virtualRS.next()) {
-            virtualIDSet.add(virtualRS.getLong(1));
-        }
+
         List<AnalysisItem> analysisItems = new ArrayList<AnalysisItem>();
-        List<VirtualDimension> virtualDimensions = new ArrayList<VirtualDimension>();
+
         Session session = Database.instance().createSession(conn);
         try {
             for (Long analysisItemID : analysisItemIDs) {
@@ -499,22 +509,14 @@ public class FeedStorage {
                     fixStmt.executeUpdate();
                 }
             }
-            for (Long virtualID : virtualIDSet) {
-                List items = session.createQuery("from VirtualDimension where virtualDimensionID = ?").setLong(0, virtualID).list();
-                if (items.size() > 0) {
-                    VirtualDimension dim = (VirtualDimension) items.get(0);
-                    dim.toRemote();
-                    virtualDimensions.add(dim);
-                }
-            }
+
             for (AnalysisItem item : analysisItems) {
-                item.afterLoad();                
+                item.afterLoad();
             }
         } finally {
             session.close();
         }
         feedDefinition.setFields(analysisItems);
-        feedDefinition.setVirtualDimensions(virtualDimensions);
     }
 
     public List<AnalysisItem> retrieveFields(long feedID, Connection conn) throws SQLException {
@@ -565,14 +567,16 @@ public class FeedStorage {
 
                 // update views in feedCache
                 FeedDefinition f = null;
-                if(feedCache != null)
+                if (feedCache != null)
                     f = (FeedDefinition) feedCache.get(feedID);
-                if(f != null) {
+                if (f != null) {
                     f.setViewCount(newFeedViews);
                     feedCache.remove(feedID);
                     feedCache.put(feedID, feedCache);
                 }
             }
+            getViewCountStmt.close();
+            updateViewsStmt.close();
         } finally {
             Database.closeConnection(conn);
         }
@@ -593,6 +597,7 @@ public class FeedStorage {
                 updateRatingStmt.setInt(1, rating);
                 updateRatingStmt.setLong(2, rs.getLong(1));
                 updateRatingStmt.executeQuery();
+                updateRatingStmt.close();
             } else {
                 PreparedStatement insertRatingStmt = conn.prepareStatement("INSERT INTO USER_DATA_SOURCE_RATING " +
                         "(USER_ID, data_source_id, rating) values (?, ?, ?)");
@@ -600,22 +605,24 @@ public class FeedStorage {
                 insertRatingStmt.setLong(2, feedID);
                 insertRatingStmt.setInt(3, rating);
                 insertRatingStmt.execute();
+                insertRatingStmt.close();
             }
+            getExistingRatingStmt.close();
         } finally {
             Database.closeConnection(conn);
         }
-    }    
+    }
 
     public void updateDataFeedConfiguration(FeedDefinition feedDefinition, Connection conn) throws SQLException {
         try {
-            if(feedCache != null)
+            if (feedCache != null)
                 feedCache.remove(feedDefinition.getDataFeedID());
-            LogClass.info("Removed " + feedDefinition.getDataFeedID() + " from feed cache.");
+            LogClass.debug("Removed " + feedDefinition.getDataFeedID() + " from feed cache.");
         } catch (CacheException e) {
             LogClass.error(e);
         }
         PreparedStatement updateDataFeedStmt = conn.prepareStatement("UPDATE DATA_FEED SET FEED_NAME = ?, FEED_TYPE = ?, PUBLICLY_VISIBLE = ?, GENRE = ?, " +
-                        "FEED_SIZE = ?, ANALYSIS_ID = ?, DESCRIPTION = ?, ATTRIBUTION = ?, OWNER_NAME = ?, DYNAMIC_SERVICE_DEFINITION_ID = ?, MARKETPLACE_VISIBLE = ?," +
+                "FEED_SIZE = ?, ANALYSIS_ID = ?, DESCRIPTION = ?, ATTRIBUTION = ?, OWNER_NAME = ?, DYNAMIC_SERVICE_DEFINITION_ID = ?, MARKETPLACE_VISIBLE = ?," +
                 "API_KEY = ?, validated_api_enabled = ?, unchecked_api_enabled = ?, REFRESH_INTERVAL = ?, VISIBLE = ?, parent_source_id = ?, VERSION = ? WHERE DATA_FEED_ID = ?");
         feedDefinition.setDateUpdated(new Date());
         updateDataFeedStmt.setString(1, feedDefinition.getFeedName());
@@ -650,10 +657,8 @@ public class FeedStorage {
         saveFolders(feedDefinition.getDataFeedID(), conn, feedDefinition.getFolders());
         saveTags(feedDefinition.getDataFeedID(), conn, feedDefinition.getTags());
         feedDefinition.customStorage(conn);
-        
-        if (feedDefinition.getRefreshDataInterval() > 0) {
 
-        }
+        updateDataFeedStmt.close();
     }
 
     public void updateDataFeedConfiguration(FeedDefinition feedDefinition) throws SQLException {
@@ -678,139 +683,137 @@ public class FeedStorage {
 
     public FeedDefinition getFeedDefinitionData(long identifier, Connection conn, boolean cache) throws SQLException {
         FeedDefinition feedDefinition = null;
-        if(feedCache != null && cache)
+        if (feedCache != null && cache)
             feedDefinition = (FeedDefinition) feedCache.get(identifier);
-        if(feedDefinition != null) {
-            LogClass.info("Cache hit for data source definition id: " + identifier);
+        if (feedDefinition != null) {
+            LogClass.debug("Cache hit for data source definition id: " + identifier);
             return feedDefinition;
         }
 
-            LogClass.info("Cache miss for data source definition id: " + identifier);
-            PreparedStatement queryFeedStmt = conn.prepareStatement("SELECT FEED_NAME, FEED_TYPE, PUBLICLY_VISIBLE, GENRE, CREATE_DATE," +
-                    "UPDATE_DATE, FEED_VIEWS, FEED_RATING_COUNT, FEED_RATING_AVERAGE, FEED_SIZE, ANALYSIS_ID," +
-                    "ATTRIBUTION, DESCRIPTION, OWNER_NAME, DYNAMIC_SERVICE_DEFINITION_ID, MARKETPLACE_VISIBLE, API_KEY, unchecked_api_enabled, validated_api_enabled," +
-                    "REFRESH_INTERVAL, VISIBLE, PARENT_SOURCE_ID " +
-                    "FROM DATA_FEED WHERE " +
-                    "DATA_FEED_ID = ?");
-            queryFeedStmt.setLong(1, identifier);
-            ResultSet rs = queryFeedStmt.executeQuery();
-            if (rs.next()) {
-                String feedName = rs.getString(1);
-                FeedType feedType = FeedType.valueOf(rs.getInt(2));
-                if (feedType.equals(FeedType.STATIC)) {
-                    feedDefinition = new FileBasedFeedDefinition();
-                } else if (feedType.equals(FeedType.ANALYSIS_BASED)) {
-                    feedDefinition = new AnalysisBasedFeedDefinition();
-                } else if (feedType.equals(FeedType.GOOGLE)) {
-                    feedDefinition = new GoogleFeedDefinition();
-                } else if (feedType.equals(FeedType.COMPOSITE)) {
-                    feedDefinition = new CompositeFeedDefinition();
-                } else if (feedType.equals(FeedType.SALESFORCE)) {
-                    feedDefinition = new SalesforceBaseDataSource();
-                } else if (feedType.equals(FeedType.DEFAULT)) {
-                    feedDefinition = new FeedDefinition();
-                } else if (feedType.equals(FeedType.JIRA)) {
-                    feedDefinition = new JiraDataSource();
-                } else if (feedType.equals(FeedType.BASECAMP_MASTER)) {
-                    feedDefinition = new BaseCampCompositeSource();
-                } else if (feedType.equals(FeedType.ADMIN_STATS)) {
-                    feedDefinition = new AdminStatsDataSource();
-                } else if (feedType.equals(FeedType.GNIP)) {
-                    feedDefinition = new GnipDataSource();
-                } else if (feedType.equals(FeedType.GOOGLE_ANALYTICS)) {
-                    feedDefinition = new GoogleAnalyticsDataSource();
-                } else if (feedType.equals(FeedType.TEST_ALPHA)) {
-                    feedDefinition = new TestAlphaDataSource();
-                } else if (feedType.equals(FeedType.TEST_BETA)) {
-                    feedDefinition = new TestBetaDataSource();
-                } else if (feedType.equals(FeedType.TEST_GAMMA)) {
-                    feedDefinition = new TestGammaDataSource();
-                } else if (feedType.equals(FeedType.BASECAMP)) {
-                    feedDefinition = new BaseCampTodoSource();
-                } else if (feedType.equals(FeedType.BASECAMP_TIME)) {
-                    feedDefinition = new BaseCampTimeSource();
-                } else if (feedType.equals(FeedType.WESABE)) {
-                    feedDefinition = new WesabeDataSource();
-                } else if (feedType.equals(FeedType.WESABE_ACCOUNTS)) {
-                    feedDefinition = new WesabeAccountDataSource();
-                } else if (feedType.equals(FeedType.WESABE_TRANSACTIONS)) {
-                    feedDefinition = new WesabeTransactionDataSource();
-                } else if (feedType.equals(FeedType.CLOUD_WATCH)) {
-                    feedDefinition = new CloudWatchDataSource();
-                } else if (feedType.equals(FeedType.HIGHRISE_COMPOSITE)) {
-                    feedDefinition = new HighRiseCompositeSource();
-                } else if (feedType.equals(FeedType.HIGHRISE_COMPANY)) {
-                    feedDefinition = new HighRiseCompanySource();
-                } else if (feedType.equals(FeedType.HIGHRISE_DEAL)) {
-                    feedDefinition = new HighRiseDealSource();
-                } else if (feedType.equals(FeedType.TWITTER)) {
-                    feedDefinition = new TwitterDataSource();
-                }
-                else if (feedType.equals(FeedType.CUSTOM)) {
-                    feedDefinition = new CustomDataSource();
-                }
-                else {
-                    throw new RuntimeException("Couldn't identify type");
-                }
-                String genre = rs.getString(4);
-                feedDefinition.setFeedName(feedName);
-                feedDefinition.setDataFeedID(identifier);
-                boolean publiclyVisible = rs.getBoolean(3);
-                boolean marketplaceVisible = rs.getBoolean(16);
-                feedDefinition.setUploadPolicy(createUploadPolicy(conn, identifier, publiclyVisible, marketplaceVisible));
-                Date createDate = new Date(rs.getDate(5).getTime());
-                Date updateDate = new Date(rs.getDate(6).getTime());
-                int views = rs.getInt(7);
-                int ratingCount = rs.getInt(8);
-                double ratingAverage = rs.getDouble(9);
-                long feedSize = rs.getLong(10);
-                long analysisDefinitionID = rs.getLong(11);
-                String attribution = rs.getString(12);
-                String description = rs.getString(13);
-                String ownerName = rs.getString(14);
-                feedDefinition.setSize(feedSize);
-                feedDefinition.setDateCreated(createDate);
-                feedDefinition.setDateUpdated(updateDate);
-                feedDefinition.setViewCount(views);
-                feedDefinition.setRatingCount(ratingCount);
-                feedDefinition.setRatingAverage(ratingAverage);
-                feedDefinition.setGenre(genre);
-                if (!feedType.equals(FeedType.ANALYSIS_BASED)) {
-                    retrieveFields(feedDefinition, conn);
-                }
-                feedDefinition.setAnalysisDefinitionID(analysisDefinitionID);
-                feedDefinition.setAttribution(attribution);
-                feedDefinition.setDescription(description);
-                feedDefinition.setOwnerName(ownerName);
-                feedDefinition.setDynamicServiceDefinitionID(rs.getLong(15));
-                feedDefinition.setApiKey(rs.getString(17));
-                feedDefinition.setUncheckedAPIEnabled(rs.getBoolean(18));
-                feedDefinition.setValidatedAPIEnabled(rs.getBoolean(19));
-                feedDefinition.setRefreshDataInterval(rs.getLong(20));
-                feedDefinition.setVisible(rs.getBoolean(21));
-                long parentSourceID = rs.getLong(22);
-                if (!rs.wasNull()) {
-                    feedDefinition.setParentSourceID(parentSourceID);
-                }
-                feedDefinition.setFolders(getFolders(feedDefinition.getDataFeedID(), feedDefinition.getFields(), conn));
-                feedDefinition.setTags(getTags(feedDefinition.getDataFeedID(), conn));
-                feedDefinition.customLoad(conn);
-                if(feedDefinition instanceof IServerDataSourceDefinition) {
-                    IServerDataSourceDefinition ds = (IServerDataSourceDefinition) feedDefinition;
-                    if(ds.getCredentialsDefinition() == CredentialsDefinition.SALESFORCE)
-                        setSessionIdCredentials(conn, ds);
-                    else if(ds.getCredentialsDefinition() == CredentialsDefinition.STANDARD_USERNAME_PW) {
-                        setPasswordCredentials(conn, ds);
-                    }
-                }
+        LogClass.debug("Cache miss for data source definition id: " + identifier);
+        PreparedStatement queryFeedStmt = conn.prepareStatement("SELECT FEED_NAME, FEED_TYPE, PUBLICLY_VISIBLE, GENRE, CREATE_DATE," +
+                "UPDATE_DATE, FEED_VIEWS, FEED_RATING_COUNT, FEED_RATING_AVERAGE, FEED_SIZE, ANALYSIS_ID," +
+                "ATTRIBUTION, DESCRIPTION, OWNER_NAME, DYNAMIC_SERVICE_DEFINITION_ID, MARKETPLACE_VISIBLE, API_KEY, unchecked_api_enabled, validated_api_enabled," +
+                "REFRESH_INTERVAL, VISIBLE, PARENT_SOURCE_ID " +
+                "FROM DATA_FEED WHERE " +
+                "DATA_FEED_ID = ?");
+        queryFeedStmt.setLong(1, identifier);
+        ResultSet rs = queryFeedStmt.executeQuery();
+        if (rs.next()) {
+            String feedName = rs.getString(1);
+            FeedType feedType = FeedType.valueOf(rs.getInt(2));
+            if (feedType.equals(FeedType.STATIC)) {
+                feedDefinition = new FileBasedFeedDefinition();
+            } else if (feedType.equals(FeedType.ANALYSIS_BASED)) {
+                feedDefinition = new AnalysisBasedFeedDefinition();
+            } else if (feedType.equals(FeedType.GOOGLE)) {
+                feedDefinition = new GoogleFeedDefinition();
+            } else if (feedType.equals(FeedType.COMPOSITE)) {
+                feedDefinition = new CompositeFeedDefinition();
+            } else if (feedType.equals(FeedType.SALESFORCE)) {
+                feedDefinition = new SalesforceBaseDataSource();
+            } else if (feedType.equals(FeedType.DEFAULT)) {
+                feedDefinition = new FeedDefinition();
+            } else if (feedType.equals(FeedType.JIRA)) {
+                feedDefinition = new JiraDataSource();
+            } else if (feedType.equals(FeedType.BASECAMP_MASTER)) {
+                feedDefinition = new BaseCampCompositeSource();
+            } else if (feedType.equals(FeedType.ADMIN_STATS)) {
+                feedDefinition = new AdminStatsDataSource();
+            } else if (feedType.equals(FeedType.GNIP)) {
+                feedDefinition = new GnipDataSource();
+            } else if (feedType.equals(FeedType.GOOGLE_ANALYTICS)) {
+                feedDefinition = new GoogleAnalyticsDataSource();
+            } else if (feedType.equals(FeedType.TEST_ALPHA)) {
+                feedDefinition = new TestAlphaDataSource();
+            } else if (feedType.equals(FeedType.TEST_BETA)) {
+                feedDefinition = new TestBetaDataSource();
+            } else if (feedType.equals(FeedType.TEST_GAMMA)) {
+                feedDefinition = new TestGammaDataSource();
+            } else if (feedType.equals(FeedType.BASECAMP)) {
+                feedDefinition = new BaseCampTodoSource();
+            } else if (feedType.equals(FeedType.BASECAMP_TIME)) {
+                feedDefinition = new BaseCampTimeSource();
+            } else if (feedType.equals(FeedType.WESABE)) {
+                feedDefinition = new WesabeDataSource();
+            } else if (feedType.equals(FeedType.WESABE_ACCOUNTS)) {
+                feedDefinition = new WesabeAccountDataSource();
+            } else if (feedType.equals(FeedType.WESABE_TRANSACTIONS)) {
+                feedDefinition = new WesabeTransactionDataSource();
+            } else if (feedType.equals(FeedType.CLOUD_WATCH)) {
+                feedDefinition = new CloudWatchDataSource();
+            } else if (feedType.equals(FeedType.HIGHRISE_COMPOSITE)) {
+                feedDefinition = new HighRiseCompositeSource();
+            } else if (feedType.equals(FeedType.HIGHRISE_COMPANY)) {
+                feedDefinition = new HighRiseCompanySource();
+            } else if (feedType.equals(FeedType.HIGHRISE_DEAL)) {
+                feedDefinition = new HighRiseDealSource();
+            } else if (feedType.equals(FeedType.TWITTER)) {
+                feedDefinition = new TwitterDataSource();
+            } else if (feedType.equals(FeedType.CUSTOM)) {
+                feedDefinition = new CustomDataSource();
             } else {
-                throw new RuntimeException("Could not find data source " + identifier);
+                throw new RuntimeException("Couldn't identify type");
             }
-            queryFeedStmt.close();
+            String genre = rs.getString(4);
+            feedDefinition.setFeedName(feedName);
+            feedDefinition.setDataFeedID(identifier);
+            boolean publiclyVisible = rs.getBoolean(3);
+            boolean marketplaceVisible = rs.getBoolean(16);
+            feedDefinition.setUploadPolicy(createUploadPolicy(conn, identifier, publiclyVisible, marketplaceVisible));
+            Date createDate = new Date(rs.getDate(5).getTime());
+            Date updateDate = new Date(rs.getDate(6).getTime());
+            int views = rs.getInt(7);
+            int ratingCount = rs.getInt(8);
+            double ratingAverage = rs.getDouble(9);
+            long feedSize = rs.getLong(10);
+            long analysisDefinitionID = rs.getLong(11);
+            String attribution = rs.getString(12);
+            String description = rs.getString(13);
+            String ownerName = rs.getString(14);
+            feedDefinition.setSize(feedSize);
+            feedDefinition.setDateCreated(createDate);
+            feedDefinition.setDateUpdated(updateDate);
+            feedDefinition.setViewCount(views);
+            feedDefinition.setRatingCount(ratingCount);
+            feedDefinition.setRatingAverage(ratingAverage);
+            feedDefinition.setGenre(genre);
+            if (!feedType.equals(FeedType.ANALYSIS_BASED)) {
+                retrieveFields(feedDefinition, conn);
+            }
+            feedDefinition.setAnalysisDefinitionID(analysisDefinitionID);
+            feedDefinition.setAttribution(attribution);
+            feedDefinition.setDescription(description);
+            feedDefinition.setOwnerName(ownerName);
+            feedDefinition.setDynamicServiceDefinitionID(rs.getLong(15));
+            feedDefinition.setApiKey(rs.getString(17));
+            feedDefinition.setUncheckedAPIEnabled(rs.getBoolean(18));
+            feedDefinition.setValidatedAPIEnabled(rs.getBoolean(19));
+            feedDefinition.setRefreshDataInterval(rs.getLong(20));
+            feedDefinition.setVisible(rs.getBoolean(21));
+            long parentSourceID = rs.getLong(22);
+            if (!rs.wasNull()) {
+                feedDefinition.setParentSourceID(parentSourceID);
+            }
+            feedDefinition.setFolders(getFolders(feedDefinition.getDataFeedID(), feedDefinition.getFields(), conn));
+            feedDefinition.setTags(getTags(feedDefinition.getDataFeedID(), conn));
+            feedDefinition.customLoad(conn);
+            if (feedDefinition instanceof IServerDataSourceDefinition) {
+                IServerDataSourceDefinition ds = (IServerDataSourceDefinition) feedDefinition;
+                if (ds.getCredentialsDefinition() == CredentialsDefinition.SALESFORCE)
+                    setSessionIdCredentials(conn, ds);
+                else if (ds.getCredentialsDefinition() == CredentialsDefinition.STANDARD_USERNAME_PW) {
+                    setPasswordCredentials(conn, ds);
+                }
+            }
+        } else {
+            throw new RuntimeException("Could not find data source " + identifier);
+        }
+        queryFeedStmt.close();
 
 
         try {
-            if(feedCache != null)
+            if (feedCache != null)
                 feedCache.put(identifier, feedDefinition);
         } catch (CacheException e) {
             LogClass.error(e);
@@ -849,59 +852,59 @@ public class FeedStorage {
                 // queryStmt.setLong(1, accountID);
                 queryStmt.setLong(1, feedID);
                 ResultSet rs = queryStmt.executeQuery();
-            if (rs.next()) {
-                String feedName = rs.getString(1);
-                int feedType = rs.getInt(2);
-                String ownerName = rs.getString(3);
-                String description = rs.getString(4);
-                String attribution = rs.getString(5);
-                int role = Roles.NONE;
-                feedDescriptor = createDescriptor(feedID, feedName, role, 0, feedType, ownerName, description, attribution, null);
-                Collection<Tag> tags = getTags(feedID, conn);
-                StringBuilder tagStringBuilder = new StringBuilder();
-                Iterator<Tag> tagIter = tags.iterator();
-                while (tagIter.hasNext()) {
-                    Tag tag = tagIter.next();
-                    tagStringBuilder.append(tag.getTagName());
-                    if (tagIter.hasNext()){
-                        tagStringBuilder.append(" ");
+                if (rs.next()) {
+                    String feedName = rs.getString(1);
+                    int feedType = rs.getInt(2);
+                    String ownerName = rs.getString(3);
+                    String description = rs.getString(4);
+                    String attribution = rs.getString(5);
+                    int role = Roles.NONE;
+                    feedDescriptor = createDescriptor(feedID, feedName, role, 0, feedType, ownerName, description, attribution, null);
+                    Collection<Tag> tags = getTags(feedID, conn);
+                    StringBuilder tagStringBuilder = new StringBuilder();
+                    Iterator<Tag> tagIter = tags.iterator();
+                    while (tagIter.hasNext()) {
+                        Tag tag = tagIter.next();
+                        tagStringBuilder.append(tag.getTagName());
+                        if (tagIter.hasNext()) {
+                            tagStringBuilder.append(" ");
+                        }
                     }
+                    feedDescriptor.setTagString(tagStringBuilder.toString());
                 }
-                feedDescriptor.setTagString(tagStringBuilder.toString());
-            }
-            queryStmt.close();
+                queryStmt.close();
             } else {
                 StringBuilder queryBuilder = new StringBuilder("SELECT FEED_NAME, FEED_TYPE, OWNER_NAME, DESCRIPTION, ATTRIBUTION, ROLE, PUBLICLY_VISIBLE, MARKETPLACE_VISIBLE, ANALYSIS_ID " +
-                    "FROM DATA_FEED LEFT JOIN UPLOAD_POLICY_USERS ON DATA_FEED.DATA_FEED_ID = UPLOAD_POLICY_USERS.FEED_ID AND UPLOAD_POLICY_USERS.USER_ID = ?" +
-                    " WHERE DATA_FEED.DATA_FEED_ID = ?");
+                        "FROM DATA_FEED LEFT JOIN UPLOAD_POLICY_USERS ON DATA_FEED.DATA_FEED_ID = UPLOAD_POLICY_USERS.FEED_ID AND UPLOAD_POLICY_USERS.USER_ID = ?" +
+                        " WHERE DATA_FEED.DATA_FEED_ID = ?");
                 PreparedStatement queryStmt = conn.prepareStatement(queryBuilder.toString());
                 queryStmt.setLong(1, userID);
                 queryStmt.setLong(2, feedID);
                 ResultSet rs = queryStmt.executeQuery();
-            if (rs.next()) {
-                String feedName = rs.getString(1);
-                int feedType = rs.getInt(2);
-                String ownerName = rs.getString(3);
-                String description = rs.getString(4);
-                String attribution = rs.getString(5);
-                int role = rs.getInt(6);
-                if (rs.wasNull()) {
-                    role = Roles.NONE;
-                }
-                feedDescriptor = createDescriptor(feedID, feedName, role, 0, feedType, ownerName, description, attribution, null);
-                Collection<Tag> tags = getTags(feedID, conn);
-                StringBuilder tagStringBuilder = new StringBuilder();
-                Iterator<Tag> tagIter = tags.iterator();
-                while (tagIter.hasNext()) {
-                    Tag tag = tagIter.next();
-                    tagStringBuilder.append(tag.getTagName());
-                    if (tagIter.hasNext()){
-                        tagStringBuilder.append(" ");
+                if (rs.next()) {
+                    String feedName = rs.getString(1);
+                    int feedType = rs.getInt(2);
+                    String ownerName = rs.getString(3);
+                    String description = rs.getString(4);
+                    String attribution = rs.getString(5);
+                    int role = rs.getInt(6);
+                    if (rs.wasNull()) {
+                        role = Roles.NONE;
                     }
+                    feedDescriptor = createDescriptor(feedID, feedName, role, 0, feedType, ownerName, description, attribution, null);
+                    Collection<Tag> tags = getTags(feedID, conn);
+                    StringBuilder tagStringBuilder = new StringBuilder();
+                    Iterator<Tag> tagIter = tags.iterator();
+                    while (tagIter.hasNext()) {
+                        Tag tag = tagIter.next();
+                        tagStringBuilder.append(tag.getTagName());
+                        if (tagIter.hasNext()) {
+                            tagStringBuilder.append(" ");
+                        }
+                    }
+                    feedDescriptor.setTagString(tagStringBuilder.toString());
                 }
-                feedDescriptor.setTagString(tagStringBuilder.toString());
-            }
-            queryStmt.close();
+                queryStmt.close();
             }
 
         } finally {
@@ -909,7 +912,7 @@ public class FeedStorage {
         }
         return feedDescriptor;
     }
-    
+
     public List<FeedDescriptor> getDataSourcesFromGroups(long userID) throws SQLException {
         List<FeedDescriptor> descriptorList = new ArrayList<FeedDescriptor>();
         Connection conn = Database.instance().getConnection();
@@ -1079,6 +1082,7 @@ public class FeedStorage {
                 viewers.add(userStub);
             }
         }
+        policyUserStmt.close();
         PreparedStatement policyGroupsStmt = conn.prepareStatement("SELECT COMMUNITY_GROUP.NAME, COMMUNITY_GROUP.COMMUNITY_GROUP_ID, ROLE FROM UPLOAD_POLICY_GROUPS, COMMUNITY_GROUP WHERE FEED_ID = ? AND " +
                 "UPLOAD_POLICY_GROUPS.GROUP_ID = COMMUNITY_GROUP.COMMUNITY_GROUP_ID");
         policyGroupsStmt.setLong(1, feedID);
@@ -1094,6 +1098,7 @@ public class FeedStorage {
                 viewers.add(groupDescriptor);
             }
         }
+        policyGroupsStmt.close();
         uploadPolicy.setOwners(owners);
         uploadPolicy.setViewers(viewers);
         return uploadPolicy;
@@ -1102,28 +1107,28 @@ public class FeedStorage {
     public long getFeedForAPIKey(long userID, String apiKey) throws CacheException, SQLException {
         Connection conn = Database.instance().getConnection();
         Long feedID = null;
-        if(apiKeyCache != null)
+        if (apiKeyCache != null)
             feedID = (Long) apiKeyCache.get(new FeedApiKey(apiKey, userID));
-        if(feedID != null) {
-            LogClass.info("Cache hit for API key: " + apiKey + " & User id: " + userID);
+        if (feedID != null) {
+            LogClass.debug("Cache hit for API key: " + apiKey + " & User id: " + userID);
             return feedID;
         }
         try {
-            LogClass.info("Cache miss for API key: " + apiKey + " & User id: " + userID);
+            LogClass.debug("Cache miss for API key: " + apiKey + " & User id: " + userID);
             PreparedStatement queryStmt = conn.prepareStatement("SELECT DISTINCT DATA_FEED.DATA_FEED_ID" +
-                        " FROM UPLOAD_POLICY_USERS, DATA_FEED WHERE " +
-                        "UPLOAD_POLICY_USERS.user_id = ? AND DATA_FEED.DATA_FEED_ID = UPLOAD_POLICY_USERS.FEED_ID AND DATA_FEED.API_KEY = ?");
+                    " FROM UPLOAD_POLICY_USERS, DATA_FEED WHERE " +
+                    "UPLOAD_POLICY_USERS.user_id = ? AND DATA_FEED.DATA_FEED_ID = UPLOAD_POLICY_USERS.FEED_ID AND DATA_FEED.API_KEY = ?");
             queryStmt.setLong(1, userID);
             queryStmt.setString(2, apiKey);
             ResultSet rs = queryStmt.executeQuery();
             if (rs.next()) {
                 feedID = rs.getLong(1);
-                if(apiKeyCache != null)
+                if (apiKeyCache != null)
                     apiKeyCache.put(new FeedApiKey(apiKey, userID), feedID);
                 return feedID;
             }
         } finally {
-            Database.instance().closeConnection(conn);
+            Database.closeConnection(conn);
         }
         throw new RuntimeException("No data source found for API key " + apiKey);
     }

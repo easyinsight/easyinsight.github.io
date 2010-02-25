@@ -21,19 +21,20 @@ public class TokenStorage {
     public void saveToken(Token token, long dataSourceID) {
         EIConnection conn = Database.instance().getConnection();
         try {
-            PreparedStatement queryStmt = conn.prepareStatement("SELECT token_id FROM TOKEN where user_id = ? AND token_type = ?");
+            PreparedStatement queryStmt = conn.prepareStatement("SELECT token_id FROM TOKEN where user_id = ? AND token_type = ? AND data_source_id = ?");
             queryStmt.setLong(1, token.getUserID());
             queryStmt.setInt(2, token.getTokenType());
+            queryStmt.setLong(3, dataSourceID);
             ResultSet rs = queryStmt.executeQuery();
             if (rs.next()) {
-                PreparedStatement updateStmt = conn.prepareStatement("UPDATE TOKEN set token_value = ?, data_source_id = ? WHERE token_id = ?");
+                PreparedStatement updateStmt = conn.prepareStatement("UPDATE TOKEN set token_value = ? WHERE token_id = ? AND data_source_id = ?");
                 updateStmt.setString(1, token.getTokenValue());
+                updateStmt.setLong(2, rs.getLong(1));
                 if (dataSourceID == 0) {
-                    updateStmt.setNull(2, Types.BIGINT);
+                    updateStmt.setNull(3, Types.BIGINT);
                 } else {
-                    updateStmt.setLong(2, dataSourceID);
+                    updateStmt.setLong(3, dataSourceID);
                 }
-                updateStmt.setLong(3, rs.getLong(1));
                 updateStmt.executeUpdate();
             } else {
                 PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO TOKEN (token_type, user_id, token_value, data_source_id) VALUES (?, ?, ?, ?)");

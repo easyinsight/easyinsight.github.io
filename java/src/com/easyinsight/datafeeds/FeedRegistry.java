@@ -3,7 +3,6 @@ package com.easyinsight.datafeeds;
 import com.easyinsight.database.Database;
 import com.easyinsight.logging.LogClass;
 
-import java.util.*;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -57,8 +56,8 @@ public class FeedRegistry {
             feed = (Feed) cache.get(identifier);
 
         if (feed == null || !isLatestVersion(feed, identifier)) {
-            LogClass.info("Cache miss for feed id: " + identifier);
-            FeedDefinition feedDefinition = null;
+            LogClass.debug("Cache miss for feed id: " + identifier);
+            FeedDefinition feedDefinition;
             try {
                 feedDefinition = feedStorage.getFeedDefinitionData(identifier);
             } catch (SQLException e) {
@@ -75,16 +74,16 @@ public class FeedRegistry {
             }
         }
         else
-            LogClass.info("Cache hit for feed id: " + identifier);
+            LogClass.debug("Cache hit for feed id: " + identifier);
         return feed;
     }
 
     private boolean isLatestVersion(Feed feed, long identifier) {
         if(feed == null)
             return false;
-        LogClass.info("Feed version: " + feed.getVersion());
+        LogClass.debug("Feed version: " + feed.getVersion());
         int latestVersion = getLatestVersion(identifier);
-        LogClass.info("Latest version: " + latestVersion);
+        LogClass.debug("Latest version: " + latestVersion);
         return feed.getVersion() == latestVersion;
     }
 
@@ -98,10 +97,11 @@ public class FeedRegistry {
             if (rs.next()) {
                 version = rs.getInt(1);
             }
+            stmt.close();
         } catch (SQLException e) {
             LogClass.error(e);
         } finally {
-            Database.instance().closeConnection(conn);
+            Database.closeConnection(conn);
         }
         return version;
     }

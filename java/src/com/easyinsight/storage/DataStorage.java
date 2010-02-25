@@ -164,6 +164,8 @@ public class DataStorage {
         if (size > allowed) {
             throw new StorageLimitException("Storage boundary for this account has been reached.");
         }
+        spaceAllowed.close();
+        queryStmt.close();
     }
 
     public int getVersion() {
@@ -967,6 +969,7 @@ public class DataStorage {
                 updateStmt.setTimestamp(4, new Timestamp(metadata.getLastData().getTime()));
                 updateStmt.setLong(5, metadata.getMetadataID());
                 updateStmt.executeUpdate();
+                updateStmt.close();
             } else {
                 PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO FEED_PERSISTENCE_METADATA (FEED_ID, " +
                         "VERSION, SIZE, DATABASE_NAME, LAST_DATA_TIME) VALUES (?, ?, ?, ?, ?)");
@@ -976,6 +979,7 @@ public class DataStorage {
                 insertStmt.setString(4, metadata.getDatabase());
                 insertStmt.setTimestamp(5, new Timestamp(metadata.getLastData().getTime()));
                 insertStmt.execute();
+                insertStmt.close();
             }
         } catch (SQLException e) {
             LogClass.error(e);
@@ -1035,9 +1039,11 @@ public class DataStorage {
                     metadata.setDatabase(rs.getString(4));
                     metadata.setLastData(rs.getTimestamp(5));
                 }
+                queryStmt.close();
             } else {
                 throw new RuntimeException("No metadata found for " + dataFeedID);
             }
+            versionStmt.close();
         } catch (SQLException e) {
             LogClass.error(e);
             throw new RuntimeException(e);
@@ -1049,6 +1055,7 @@ public class DataStorage {
         PreparedStatement deleteStmt = conn.prepareStatement("DELETE FROM feed_persistence_metadata WHERE feed_id = ?");
         deleteStmt.setLong(1, feedID);
         deleteStmt.executeUpdate();
+        deleteStmt.close();
     }
 
     public DataSet allData(@NotNull Collection<FilterDefinition> filters, Integer limit) throws SQLException {

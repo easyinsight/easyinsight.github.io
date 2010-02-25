@@ -22,6 +22,17 @@
         </channels>
      </destination>
 
+    <destination id="scorecardUpdates">
+        <properties>
+                <server>
+                <allow-subtopics>false</allow-subtopics>
+                </server>
+        </properties>
+        <channels>
+                <channel ref="my-polling-amf"/>
+        </channels>
+     </destination>
+
     <destination id="dataUpdates">
         <properties>
                 <server>

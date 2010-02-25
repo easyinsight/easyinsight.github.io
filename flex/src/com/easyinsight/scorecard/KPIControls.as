@@ -71,7 +71,7 @@ public class KPIControls extends HBox {
     private function onCopyResult(event:ResultEvent):void {
         var copy:KPI = kpiService.copyKPI.lastResult as KPI;
         dispatchEvent(new KPIEvent(KPIEvent.KPI_ADDED, copy));
-        var kpiWindow:KPIWindow = new KPIWindow();
+        var kpiWindow:KPIParentWindow = new KPIParentWindow();
         kpiWindow.scorecardID = _scorecardID;
         kpiWindow.kpi = copy;
         kpiWindow.addEventListener(KPIEvent.KPI_EDITED, updatedKPI);

@@ -38,10 +38,13 @@
 
         private function saved():void {
             _scorecard.scorecardID = scorecardService.saveScorecardForUser.lastResult as int;
+            var descriptor:ScorecardDescriptor = new ScorecardDescriptor();
+            descriptor.id = _scorecard.scorecardID;
+            descriptor.name = _scorecard.name;
             if (newScorecard) {
-                dispatchEvent(new ScorecardEvent(ScorecardEvent.SCORECARD_ADDED, _scorecard));
+                dispatchEvent(new ScorecardEvent(ScorecardEvent.SCORECARD_ADDED, descriptor));
             } else {
-                dispatchEvent(new ScorecardEvent(ScorecardEvent.SCORECARD_UPDATED, _scorecard));
+                dispatchEvent(new ScorecardEvent(ScorecardEvent.SCORECARD_UPDATED, descriptor));
             }
             PopUpManager.removePopUp(this);
         }

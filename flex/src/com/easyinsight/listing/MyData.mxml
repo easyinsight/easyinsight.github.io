@@ -10,6 +10,13 @@
 				<listing:GottaLoginPage/>
 			</mx:AddChild>
 		</mx:State>
+        <mx:State name="noData">
+            <mx:RemoveChild target="{uploadBox}"/>
+            <mx:RemoveChild target="{uploadGrid}"/>
+            <mx:AddChild relativeTo="{coreContent}">
+				<listing:GottaLoginPage/>
+			</mx:AddChild>
+        </mx:State>
 	</mx:states>
 	<mx:Script>
 		<![CDATA[
@@ -24,7 +31,6 @@
         import com.easyinsight.help.MyDataHelp;
         import com.easyinsight.outboundnotifications.RefreshEventInfo;
         import com.easyinsight.report.ReportAnalyzeSource;
-        import com.easyinsight.reportpackage.AddReportToPackageWindow;
         import com.easyinsight.reportpackage.PackageEvent;
         import com.easyinsight.reportpackage.ReportPackageDescriptor;
         import com.easyinsight.reportpackage.ReportPackageWindow;

@@ -14,6 +14,7 @@ public class EIDescriptor {
 
     public static const GOAL_HISTORY:int = 7;
     public static const PACKAGE:int = 8;
+    public static const SCORECARD:int = 9;
 
     public var id:int;
     public var name:String;
