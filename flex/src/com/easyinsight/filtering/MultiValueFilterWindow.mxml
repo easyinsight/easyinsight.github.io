@@ -79,6 +79,7 @@
             sourceValues = strings;
             filteredStrings.sort = new Sort();
             filteredStrings.sort.compareFunction = compare;
+            filteredStrings.filterFunction = targetFilterFunction;
             filteredStrings.refresh();
             targetValues = filteredStrings;
             stackIndex = 1;
@@ -92,9 +93,32 @@
             return true;
         }
 
+        private function targetFilterFunction(item:Object):Boolean {
+            if (includedKeyword != null) {
+                var string:String = item as String;
+                return string.toLowerCase().indexOf(includedKeyword) != -1;
+            }
+            return true;
+        }
+
         private function sourceChange():void {
-            keyword = availableSearch.text;
+            keyword = availableSearch.text.toLowerCase();
             sourceValues.refresh();
+        }
+
+        private function includedChange():void {
+            includedKeyword = includedSearch.text.toLowerCase();
+            targetValues.refresh();
+        }
+
+        private var _includedKeyword:String;
+
+        public function get includedKeyword():String {
+            return _includedKeyword;
+        }
+
+        public function set includedKeyword(value:String):void {
+            _includedKeyword = value;
         }
 
         private var _keyword:String;
@@ -136,7 +160,7 @@
     </mx:HBox>
     <mx:ViewStack resizeToContent="true" selectedIndex="{stackIndex}">
         <mx:Box>
-            <mx:ProgressBar label="Loading the available values..."/>
+            <mx:ProgressBar label="Loading the available values..." indeterminate="true"/>
         </mx:Box>
         <mx:VBox>
             <mx:Label text="Drag Items Between Available and Included to Filter"/>
@@ -152,6 +176,7 @@
                     <mx:ApplicationControlBar width="200">
                         <mx:Label text="Included Values"/>
                     </mx:ApplicationControlBar>
+                    <mx:TextInput id="includedSearch" change="includedChange()"/>
                     <mx:List dataProvider="{targetValues}" dropEnabled="true" dragEnabled="true" dragMoveEnabled="true" id="targetList"
                         width="200"/>
                 </mx:VBox>

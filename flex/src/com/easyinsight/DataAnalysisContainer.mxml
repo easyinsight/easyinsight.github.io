@@ -814,8 +814,14 @@
         private function toReports():void {
             if (analysisChanged) {
                 Alert.show("You have unsaved changes. Are you sure you want to go to reports?", "Alert",
-                        Alert.OK | Alert.CANCEL, null, adminAlertListener, null, Alert.CANCEL);
+                        Alert.OK | Alert.CANCEL, null, multiReportAlertListener, null, Alert.CANCEL);
             } else {
+                dispatchEvent(new AnalyzeEvent(new MultiReportAnalyzeSource(dataService.dataFeedID)));
+            }
+        }
+
+        private function multiReportAlertListener(event:CloseEvent):void {
+            if (event.detail == Alert.OK) {
                 dispatchEvent(new AnalyzeEvent(new MultiReportAnalyzeSource(dataService.dataFeedID)));
             }
         }
