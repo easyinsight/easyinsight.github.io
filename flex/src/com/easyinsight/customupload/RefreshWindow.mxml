@@ -105,7 +105,7 @@
         private function validate():void {
             progressBar.visible = true;
             dataSourceCreation.updateDataSource(dataSourceDefinition);
-            uploadService.validateCredentials.send(dataSourceDefinition, dataSourceCreation.credentials, saveCredentialsCheckbox.selected);
+            uploadService.validateCredentials.send(dataSourceDefinition, dataSourceCreation.credentials, saveCredentialsCheckbox != null ? saveCredentialsCheckbox.selected : false);
         }
 
         private function validated():void {
