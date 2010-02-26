@@ -24,7 +24,7 @@ public class TagTransformComponent implements IComponent {
                     Map<Key, Value> existingContents = row.getValues();
                     for (Value multipleVal : transformedValues) {
                         Map<Key, Value> newRowContents = new HashMap<Key, Value>(existingContents);
-                        newRowContents.put(analysisItem.getKey(), multipleVal);
+                        newRowContents.put(analysisItem.createAggregateKey(), multipleVal);
                         IRow tempRow = new Row();
                         tempRow.addValues(newRowContents);
                         tempRows.add(tempRow);
