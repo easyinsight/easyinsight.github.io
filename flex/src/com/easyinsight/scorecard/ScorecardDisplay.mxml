@@ -196,7 +196,7 @@
         <mx:HRule width="100%"/>
         <mx:LinkButton label="Add scorecard..." color="#333333" fontSize="12" paddingLeft="0" paddingRight="0"
                        click="newScorecard()"/>
-        <mx:LinkButton label="Edit scorecard..." color="#333333" fontSize="12" paddingLeft="0" paddingRight="0"/>
+        <!--<mx:LinkButton label="Edit scorecard..." color="#333333" fontSize="12" paddingLeft="0" paddingRight="0"/>-->
         <mx:LinkButton label="Delete scorecard" color="#333333" fontSize="12" paddingLeft="0" paddingRight="0"
                        click="deleteScorecard()"/>
         <mx:LinkButton label="Add a KPI..." color="#333333" fontSize="12" paddingLeft="0" paddingRight="0"
