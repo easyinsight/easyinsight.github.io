@@ -41,14 +41,17 @@
 
             forcedRefresh = false;
             if (!_tutorialMode) {
-                baseIndex = 0;
+
                 if (consumer == null) {
                     consumer = new Consumer();
                     consumer.destination = "scorecardUpdates";
                     consumer.addEventListener(MessageEvent.MESSAGE, onMessage);
                     consumer.subscribe();
                 }
-                scorecardService.getScorecard.send(_scorecardDescriptor.id, CredentialsCache.getCache().createCredentials(), false);
+                if (_scorecard == null) {
+                    baseIndex = 0;
+                    scorecardService.getScorecard.send(_scorecardDescriptor.id, CredentialsCache.getCache().createCredentials(), false);
+                }
             }
         }
 

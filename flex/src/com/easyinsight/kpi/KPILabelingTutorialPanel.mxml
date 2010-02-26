@@ -1,12 +1,13 @@
 <?xml version="1.0" ?>
 <kpi:KPITutorialPanel xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:kpi="com.easyinsight.kpi.*"
-        implements="com.easyinsight.kpi.ITutorialPanel">
+        implements="com.easyinsight.kpi.ITutorialPanel" creationComplete="setupValidators()">
     <mx:Script><![CDATA[
         import com.easyinsight.icons.IconSelectionEvent;
         import com.easyinsight.icons.IconSelectionWindow;
         import com.easyinsight.util.PopUpUtil;
 
         import mx.managers.PopUpManager;
+        import mx.validators.Validator;
 
         [Bindable]
         private var iconExists:Boolean;
@@ -22,6 +23,12 @@
         public function saveValues():void {
             kpiData.kpiName = kpiNameInput.text;
             kpiData.kpiIcon = kpiIconPath;
+        }
+
+        private var validators:Array;
+
+        private function setupValidators():void {
+            validators = [ nameValidator ];
         }
 
         private function assignIcon():void {
@@ -44,7 +51,14 @@
         }
 
         public function validate():Boolean {
-            return true;
+            var results:Array = Validator.validateAll(validators);
+            if (results.length > 0) {
+                kpiNameInput.setFocus();
+                kpiNameInput.dispatchEvent(new MouseEvent(MouseEvent.MOUSE_OVER));
+                return false;
+            } else {
+                return true;
+            }
         }
 
         public function gotFocus():void {
@@ -57,6 +71,7 @@
                 iconExists = false;
             }
         }]]></mx:Script>
+    <mx:StringValidator source="{kpiNameInput}" property="text" minLength="3" maxLength="50" id="nameValidator"/>
     <mx:VBox width="100%" height="100%" verticalGap="0">
         <mx:Box height="50%" width="100%"  backgroundColor="#000000" horizontalAlign="center" verticalAlign="middle">
             <mx:Text text="How do you want to label this KPI?" fontSize="24" color="#FFFFFF"/>

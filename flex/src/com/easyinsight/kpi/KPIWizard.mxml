@@ -1,6 +1,7 @@
 <?xml version="1.0" ?>
 <mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:kpi="com.easyinsight.kpi.*"
-                    xmlns:util="com.easyinsight.util.*" creationComplete="ITutorialPanel(UIComponent(viewStack.getChildAt(0)).getChildAt(0)).gotFocus()">
+         xmlns:util="com.easyinsight.util.*" xmlns:viewStackEffects="org.efflex.mx.viewStackEffects.*"
+         creationComplete="ITutorialPanel(UIComponent(viewStack.getChildAt(0)).getChildAt(0)).gotFocus()">
     <mx:Metadata>
         [Event(name="expertMode", type="com.easyinsight.kpi.KPIModeEvent")]
         [Event(name="kpiAdded", type="com.easyinsight.kpi.KPIEvent")]
@@ -16,6 +17,7 @@
 
         import mx.collections.ArrayCollection;
         import mx.core.UIComponent;
+        import mx.effects.Effect;
         import mx.events.IndexChangedEvent;
         import mx.managers.PopUpManager;
 
@@ -116,6 +118,9 @@
             var tutorialPanel:ITutorialPanel = panel.getChildAt(0) as ITutorialPanel;
             tutorialPanel.gotFocus();
         }
+
+        [Bindable]
+        private var slideEffect:Effect = rightEffect;
         ]]></mx:Script>
     <mx:RemoteObject destination="kpiService" id="kpiService">
         <mx:method name="saveKPI" result="savedKPI()"/>
@@ -124,37 +129,53 @@
         <mx:method name="addKPIToScorecard" result="addedKPI()"/>
         <mx:method name="updateKPI" result="updatedKPI()"/>
     </mx:RemoteObject>
+    <mx:Fade id="fadeOut" duration="1000" alphaFrom="1.0" alphaTo="0.0"/>
+    <mx:Fade id="fadeIn" duration="1000" alphaFrom="0.0" alphaTo="1.0"/>
+    <viewStackEffects:Slide id="leftEffect" direction="left"/>
+    <viewStackEffects:Slide id="rightEffect" direction="right"/>
     <mx:ViewStack selectedIndex="{panelIndex}" change="onChange(event)"
-            id="viewStack" resizeToContent="true" width="100%" height="100%" creationPolicy="all">
-        <kpi:TutorialPanel verticalGap="0" width="100%" height="100%">
+                  id="viewStack" resizeToContent="true" width="100%" height="100%" creationPolicy="all">
+        <kpi:TutorialPanel verticalGap="0" width="100%" height="100%" hideEffect="{slideEffect}" showEffect="{slideEffect}">
             <kpi:KPIDataSourceTutorialPanel kpiData="{kpiData}" id="panel1" width="100%" height="100%"/>
-            <kpi:TutorialButtons backEnabled="false" nextEnabled="true" finishEnabled="false" kpiTutorialCancel="onCancel()"
-                kpiTutorialNext="panelIndex = 1" tutorialPanel="{panel1}" expertMode="dispatchEvent(event)"/>
+            <kpi:TutorialButtons backEnabled="false" nextEnabled="true" finishEnabled="false"
+                                 kpiTutorialCancel="onCancel()"
+                                 kpiTutorialNext="slideEffect = rightEffect; panelIndex = 1" tutorialPanel="{panel1}"
+                                 expertMode="dispatchEvent(event)"/>
         </kpi:TutorialPanel>
-        <kpi:TutorialPanel verticalGap="0" width="100%" height="100%">
+        <kpi:TutorialPanel verticalGap="0" width="100%" height="100%" hideEffect="{slideEffect}" showEffect="{slideEffect}">
             <kpi:KPIMeasureTutorialPanel kpiData="{kpiData}" id="panel2" width="100%" height="100%"/>
-            <kpi:TutorialButtons backEnabled="true" nextEnabled="true" finishEnabled="false" kpiTutorialCancel="onCancel()"
-                kpiTutorialNext="panelIndex = 2" kpiTutorialPrevious="panelIndex = 0" tutorialPanel="{panel2}" expertMode="dispatchEvent(event)"/>
+            <kpi:TutorialButtons backEnabled="true" nextEnabled="true" finishEnabled="false"
+                                 kpiTutorialCancel="onCancel()"
+                                 kpiTutorialNext="slideEffect = rightEffect; panelIndex = 2" kpiTutorialPrevious="slideEffect = leftEffect; panelIndex = 0"
+                                 tutorialPanel="{panel2}" expertMode="dispatchEvent(event)"/>
         </kpi:TutorialPanel>
-        <kpi:TutorialPanel verticalGap="0" width="100%" height="100%">
+        <kpi:TutorialPanel verticalGap="0" width="100%" height="100%" hideEffect="{slideEffect}" showEffect="{slideEffect}">
             <kpi:KPIFilterTutorialPanel kpiData="{kpiData}" id="panel3" width="100%" height="100%"/>
-            <kpi:TutorialButtons backEnabled="true" nextEnabled="true" finishEnabled="false" kpiTutorialCancel="onCancel()"
-                kpiTutorialNext="panelIndex = 3" kpiTutorialPrevious="panelIndex = 1" tutorialPanel="{panel3}" expertMode="dispatchEvent(event)"/>
+            <kpi:TutorialButtons backEnabled="true" nextEnabled="true" finishEnabled="false"
+                                 kpiTutorialCancel="onCancel()"
+                                 kpiTutorialNext="slideEffect = rightEffect; panelIndex = 3" kpiTutorialPrevious="slideEffect = leftEffect; panelIndex = 1"
+                                 tutorialPanel="{panel3}" expertMode="dispatchEvent(event)"/>
         </kpi:TutorialPanel>
-        <kpi:TutorialPanel verticalGap="0" width="100%" height="100%">
+        <kpi:TutorialPanel verticalGap="0" width="100%" height="100%" hideEffect="{slideEffect}" showEffect="{slideEffect}">
             <kpi:KPIHighLowTutorialPanel kpiData="{kpiData}" id="panel4" width="100%" height="100%"/>
-            <kpi:TutorialButtons backEnabled="true" nextEnabled="true" finishEnabled="false" kpiTutorialCancel="onCancel()"
-                kpiTutorialNext="panelIndex = 4" kpiTutorialPrevious="panelIndex = 2" tutorialPanel="{panel4}" expertMode="dispatchEvent(event)"/>
+            <kpi:TutorialButtons backEnabled="true" nextEnabled="true" finishEnabled="false"
+                                 kpiTutorialCancel="onCancel()"
+                                 kpiTutorialNext="slideEffect = rightEffect; panelIndex = 4" kpiTutorialPrevious="slideEffect = leftEffect;panelIndex = 2"
+                                 tutorialPanel="{panel4}" expertMode="dispatchEvent(event)"/>
         </kpi:TutorialPanel>
-        <kpi:TutorialPanel verticalGap="0" width="100%" height="100%">
+        <kpi:TutorialPanel verticalGap="0" width="100%" height="100%" hideEffect="{slideEffect}" showEffect="{slideEffect}">
             <kpi:KPICompareTutorialPanel kpiData="{kpiData}" id="panel5" width="100%" height="100%"/>
-            <kpi:TutorialButtons backEnabled="true" nextEnabled="true" finishEnabled="false" kpiTutorialCancel="onCancel()"
-                kpiTutorialNext="panelIndex = 5" kpiTutorialPrevious="panelIndex = 3" tutorialPanel="{panel5}" expertMode="dispatchEvent(event)"/>
+            <kpi:TutorialButtons backEnabled="true" nextEnabled="true" finishEnabled="false"
+                                 kpiTutorialCancel="onCancel()"
+                                 kpiTutorialNext="slideEffect = rightEffect; panelIndex = 5" kpiTutorialPrevious="slideEffect = leftEffect; panelIndex = 3"
+                                 tutorialPanel="{panel5}" expertMode="dispatchEvent(event)"/>
         </kpi:TutorialPanel>
-        <kpi:TutorialPanel verticalGap="0" width="100%" height="100%">
+        <kpi:TutorialPanel verticalGap="0" width="100%" height="100%" hideEffect="{slideEffect}" showEffect="{slideEffect}">
             <kpi:KPILabelingTutorialPanel kpiData="{kpiData}" id="panel6" width="100%" height="100%"/>
-            <kpi:TutorialButtons backEnabled="true" nextEnabled="false" finishEnabled="true" kpiTutorialCancel="onCancel()"
-                                 kpiTutorialFinish="finish()" kpiTutorialPrevious="panelIndex = 4" tutorialPanel="{panel6}" expertMode="dispatchEvent(event)"/>
+            <kpi:TutorialButtons backEnabled="true" nextEnabled="false" finishEnabled="true"
+                                 kpiTutorialCancel="onCancel()"
+                                 kpiTutorialFinish="finish()" kpiTutorialPrevious="slideEffect = leftEffect; panelIndex = 4"
+                                 tutorialPanel="{panel6}" expertMode="dispatchEvent(event)"/>
         </kpi:TutorialPanel>
     </mx:ViewStack>
 </mx:VBox>

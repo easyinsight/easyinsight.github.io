@@ -23,6 +23,7 @@
          <path-element>/libs/YahooMap.swc</path-element>
          <path-element>/libs/flexlib.swc</path-element>
          <path-element>/libs/IconUtility.swc</path-element>
+           <path-element>/libs/Efflex_v0.03_fx3_fp9.swc</path-element>
       </library-path>
         <context-root>/app</context-root>
        <!-- <services>C:\apache-tomcat-6.0.14\webapps\app\WEB-INF\flex\services-config.xml</services> -->
