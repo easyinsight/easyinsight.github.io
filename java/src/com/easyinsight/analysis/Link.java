@@ -4,6 +4,7 @@ import com.easyinsight.core.Key;
 import com.easyinsight.calculations.Resolver;
 
 import javax.persistence.*;
+import java.io.Serializable;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Map;
@@ -16,7 +17,7 @@ import java.util.Map;
 @Entity
 @Table(name="link")
 @Inheritance(strategy=InheritanceType.JOINED)
-public class Link implements Cloneable {
+public class Link implements Cloneable, Serializable {
     public static final int URL = 1;
     public static final int DRILLTHROUGH = 2;
 
