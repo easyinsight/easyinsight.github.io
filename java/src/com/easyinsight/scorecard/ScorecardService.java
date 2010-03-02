@@ -51,6 +51,16 @@ public class ScorecardService {
         return scorecards;
     }
 
+    public ScorecardWrapper getScorecard(long scorecardID, long userID, List<CredentialFulfillment> credentials, boolean forceRefresh) {
+        SecurityUtil.authorizeScorecard(scorecardID, userID);
+        try {
+            return scorecardStorage.getScorecard(scorecardID, credentials, forceRefresh);
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        }
+    }
+
     public ScorecardWrapper getScorecard(long scorecardID, List<CredentialFulfillment> credentials, boolean forceRefresh) {
         SecurityUtil.authorizeScorecard(scorecardID);
         try {

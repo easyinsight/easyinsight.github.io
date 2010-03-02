@@ -148,8 +148,12 @@ public class SecurityUtil {
     }
 
     public static void authorizeScorecard(long scorecardID) {
-        Connection conn = Database.instance().getConnection();
         long userID = SecurityUtil.getUserID();
+        authorizeScorecard(scorecardID, userID);
+    }
+
+    public static void authorizeScorecard(long scorecardID, long userID) {
+        Connection conn = Database.instance().getConnection();
         try {
             PreparedStatement queryStmt = conn.prepareStatement("SELECT USER_ID FROM SCORECARD WHERE SCORECARD_ID = ?");
             queryStmt.setLong(1, scorecardID);

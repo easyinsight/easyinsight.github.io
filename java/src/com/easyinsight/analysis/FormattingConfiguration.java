@@ -2,6 +2,9 @@ package com.easyinsight.analysis;
 
 import javax.persistence.*;
 import java.io.Serializable;
+import java.util.Formatter;
+import java.text.NumberFormat;
+import java.text.DecimalFormat;
 
 /**
  * User: James Boe
@@ -35,6 +38,27 @@ public class FormattingConfiguration implements Serializable, Cloneable {
 
     public long getFormattingConfigurationID() {
         return formattingConfigurationID;
+    }
+
+    public NumberFormat createFormatter() {
+        NumberFormat nf = null;
+
+        switch(formattingType) {
+            case NUMBER:
+                nf = new DecimalFormat();
+                nf.setMaximumFractionDigits(2);
+                break;
+            case CURRENCY:
+                nf = NumberFormat.getCurrencyInstance();
+                break;
+            case PERCENTAGE:
+                nf = NumberFormat.getPercentInstance();
+                break;
+            default:
+                nf = new DecimalFormat();
+                nf.setMaximumFractionDigits(2);
+        }
+        return nf;
     }
 
     public void setFormattingConfigurationID(long formattingConfigurationID) {

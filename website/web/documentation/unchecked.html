@@ -16,8 +16,8 @@
     <div style="width:1000px;border-left-style:solid;border-left-color:#DDDDDD;border-left-width:1px;border-right-style:solid;border-right-color:#DDDDDD;border-right-width:1px;margin:0 auto;">
     	<div style="width:100%;text-align:left;height:70px;position:relative">
         	<a href="/index.html"><img src="../images/logo.jpg" alt="Easy Insight Logo" name="logo" id="logo" /></a>
-    <div class="signupHeadline"><a href="https://www.easy-insight.com/app/" class="signupButton"></a> <a href="https://www.easy-insight.com/app/#page=account" class="signupforfreeButton"></a></div>
-                <div class="headline"><a id="productPage" href="/product.html">PRODUCT</a> <a id="dataPage" href="/data.html">DATA</a> <a id="solutionsPage" href="/webanalytics.html">SOLUTIONS</a> <a id="blogPage" href="http://jamesboe.blogspot.com/">BLOG</a>  <a id="companyPage" href="/company.html">COMPANY</a></div>
+            <div class="signupHeadline"><a href="https://www.easy-insight.com/app/" class="signupButton"></a> <a href="https://www.easy-insight.com/app/#page=account" class="signupforfreeButton"></a></div>
+            <div class="headline"><a id="productPage" href="/product.html">PRODUCT</a> <a id="dataPage" href="/data.html">DATA</a> <a id="solutionsPage" href="/webanalytics.html">SOLUTIONS</a> <a id="blogPage" href="http://jamesboe.blogspot.com/">BLOG</a>  <a id="companyPage" href="/company.html">COMPANY</a></div>
 
         </div>
 	    <!-- InstanceBeginEditable name="submenu" -->
@@ -34,7 +34,7 @@
                             <li>What's the Difference?</li>
                             <li>Unchecked</li>
                             <ul>
-                                <li>addRow</li>
+                                <li><a href="#addRow">addRow</a></li>
                                 <li>addRows</li>
                                 <li>updateRow</li>
                                 <li>updateRows</li>
@@ -67,7 +67,7 @@
                 <h2>The Row Data Type</h2>
                 <p></p>
                 <h2>Unchecked API</h2>
-                <h3>addRow</h3>
+                <h3><a name="addRow" />addRow</h3>
                 <h4>Params:</h4>
                 <ul>
                     <li><i>dataSourceName</i> - string - the name of the data source to be added to</li>
@@ -79,9 +79,27 @@
                     API, use care in choosing data source names.
                 </p>
                 <h4>See Also:</h4>
-                <p><i><a href="#">row</a></i></p>
+                <p><i><a href="#row">row</a></i></p>
                 <h4>Example</h4>
-                <p>&lt;row&gt;&lt;/row&gt;</p>
+                <p>
+                    <pre>            &lt;addRow&gt;
+                &lt;dataSourceName&gt;User Counts&lt;/dataSourceName&gt;
+                &lt;row&gt;
+                    &lt;numberPairs&gt;
+                        &lt;numberPair&gt;
+                            &lt;key&gt;Count&lt;/key&gt;
+                            &lt;value&gt;76& lt;/value&gt;
+                        &lt;/numberPair&gt;
+                    &lt;/numberPairs&gt;
+                    &lt;stringPairs&gt;
+                        &lt;stringPair&gt;
+                            &lt;key&gt;Type&lt;/key&gt;
+                            &lt;value&gt;Free&lt;/value&gt;
+                        &lt;/stringPair&gt;
+                    &lt;/stringPairs&gt;
+                &lt;/row&gt;
+            &lt;/addRow&gt;</pre>
+                </p>
             </div>
     		<!-- InstanceEndEditable -->
 <div id="footer" style="margin:0px;padding:12px 0px;width:100%;text-align:left">

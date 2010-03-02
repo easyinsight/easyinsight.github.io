@@ -7,66 +7,82 @@
 <%@ page import="com.easyinsight.datafeeds.CredentialFulfillment" %>
 <%@ page import="java.util.ArrayList" %>
 <%@ page import="com.easyinsight.scorecard.ScorecardWrapper" %>
+<%@ page import="java.text.DecimalFormat" %>
+<%@ page import="java.text.NumberFormat" %>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
-<table>
-    <tr>
-        <td></td>
-        <td>KPI Name</td>
-        <td>Latest Value</td>
-        <td>Time</td>
-        <td>% Change</td>
-        <td></td>
-    </tr>
-<%
-    
-    String userIDString = (String) request.getSession().getAttribute("userID");
-    long userID;
-    long scorecardID;
-    if (userIDString == null) {
-        // TODO: force login
-        throw new UnsupportedOperationException();
-    } else {
-        userID = Long.parseLong(userIDString);
-    }
-    String scorecardIDString = (String) request.getSession().getAttribute("scorecardID");
-    if (scorecardIDString == null) {
-        // TODO: not sure what to do here
-        throw new UnsupportedOperationException();
-    } else {
-        scorecardID = Long.parseLong(scorecardIDString);    
-    }
 
-    com.easyinsight.scorecard.ScorecardWrapper scorecardWrapper = new com.easyinsight.scorecard.ScorecardService().getScorecard(scorecardID,
-            new java.util.ArrayList<com.easyinsight.datafeeds.CredentialFulfillment>(), false);
-    if (scorecardWrapper.getCredentials() != null && scorecardWrapper.getCredentials().size() > 0) {
-        // TODO: in this case, you need to manually prompt for credentials for the required data sources
-    } else if (scorecardWrapper.isAsyncRefresh()) {
-        // TODO: set up ajax async refresh here
-    }
-    com.easyinsight.scorecard.Scorecard scorecard = scorecardWrapper.getScorecard();
-    for (com.easyinsight.kpi.KPI kpi : scorecard.getKpis()) {
-        StringBuilder rowBuilder = new StringBuilder();
-        rowBuilder.append("<tr>");
-        rowBuilder.append("<td>");
-        if (kpi.getIconImage() != null) {
-            rowBuilder.append("<img src='").append("/app/assets/icons/32x32/").append(kpi.getIconImage()).append("'/>");
-        }
-        rowBuilder.append("</td>");
-        rowBuilder.append("<td>");
-        rowBuilder.append(kpi.getName());
-        rowBuilder.append("</td>");
-        rowBuilder.append("<td>");
-        rowBuilder.append(kpi.getKpiOutcome().getOutcomeValue());
-        rowBuilder.append("</td>");
-        rowBuilder.append("<td>");
-        rowBuilder.append(kpi.getDayWindow());
-        rowBuilder.append("</td>");
-        rowBuilder.append("<td>");
-        rowBuilder.append(kpi.getKpiOutcome().getPercentChange());
-        rowBuilder.append("</td>");
-        rowBuilder.append("<td></td>");
-        rowBuilder.append("</tr>");
-        out.println(rowBuilder.toString());
+<%
+    boolean loggedIn = true;
+    com.easyinsight.scorecard.Scorecard scorecard = null;
+    NumberFormat nf = NumberFormat.getPercentInstance();
+    nf.setMaximumFractionDigits(2);
+    Long userID = (Long) request.getSession().getAttribute("userID");
+    long scorecardID;
+    if (userID == null || userID == 0) {
+        loggedIn = false;
     }
 %>
-</table>
+<html>
+    <head>
+        <title>Easy Insight Scorecard - <%= scorecard != null ? scorecard.getName() : "Unknown" %></title>
+        <script type=”text/javascript” src=”http://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js”></script>
+        <link type="text/css" href="http://jqueryui.com/latest/themes/base/jquery.ui.all.css" rel="stylesheet" />
+        <script type="text/javascript" src="http://jqueryui.com/latest/jquery-1.4.2.js"></script>
+        <script type="text/javascript" src="http://jquery-ui.googlecode.com/svn/tags/1.8rc1/jquery-1.4.1.js"></script>
+        <script type="text/javascript" src="http://jquery-ui.googlecode.com/svn/tags/1.8rc1/ui/jquery-ui.js"></script>
+        <script type="text/javascript">
+            $(document).ready(function() {
+                $("#loginDialog").dialog({bigframe: true,
+                    autoOpen: <%= loggedIn ? "false" : "true" %>,
+                    modal: true, resizable: false, draggable: false, closeOnEscape: false,
+                    buttons: {"Log In": login }
+                })
+                $("#loginDialog").keyup(function(e) {
+                    if (e.keyCode == 13) {
+                        login();
+                    }
+                });
+            });
+
+            function login() {
+                var params = $("form#loginForm").serialize();
+                $("#notice").html("");
+                jQuery.ajax({data: params,
+                    url: 'login.jsp',
+                    type: 'post',
+                    success: function(request) {$("#results").html(request)}});
+                return false;
+            }
+        </script>
+    </head>
+    <body>
+
+        <div title="Please Login" id="loginDialog">
+            <form id="loginForm" onsubmit="return false;">
+                <label for="login">Username or Email:</label><input name="login" id="login" type="text" />
+                <label for="password">Password</label><input name="password" id="password" type="password" />
+                <div id="notice"></div>
+            </form>
+        </div>
+        <div id="scorecard">
+            <table>
+                <thead>
+                <tr>
+                    <th></th>
+                    <th>KPI Name</th>
+                    <th>Latest Value</th>
+                    <th>Time</th>
+                    <th>% Change</th>
+                    <th></th>
+                </tr>
+                </thead>
+                <tbody>
+                    <% if(loggedIn) { %>
+                        <jsp:include page="table.jsp" />
+                    <% } %>
+                </tbody>
+            </table>
+        </div>
+        <div id="results"></div>
+    </body>
+</html>
