@@ -46,6 +46,7 @@
 
             function login() {
                 var params = $("form#loginForm").serialize();
+                alert(params);
                 $("#notice").html("");
                 jQuery.ajax({data: params,
                     url: 'login.jsp',
@@ -61,6 +62,7 @@
             <form id="loginForm" onsubmit="return false;">
                 <label for="login">Username or Email:</label><input name="login" id="login" type="text" />
                 <label for="password">Password</label><input name="password" id="password" type="password" />
+                <input type="hidden" id="scorecardID" name="scorecardID" value="<%= request.getParameter("scorecardID") %>" />
                 <div id="notice"></div>
             </form>
         </div>

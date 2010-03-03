@@ -28,7 +28,26 @@
     }
 %>
 <% if(success) {%>
-<script type="text/javascript">$("#loginDialog").dialog('close')</script>
+<div>
+    <div id="added" style="display:none">
+        <table>
+            <thead>
+            <tr>
+                <th></th>
+                <th>KPI Name</th>
+                <th>Latest Value</th>
+                <th>Time</th>
+                <th>% Change</th>
+                <th></th>
+            </tr>
+            </thead>
+            <tbody>
+                <jsp:include page="table.jsp" />
+            </tbody>
+        </table>
+    </div>
+</div>
+<script type="text/javascript">$(document).ready(function() {$("#loginDialog").dialog('close');$("#scorecard").html($("#added").html())})</script>
 
 <% } else { %>
 <script type="text/javascript">$("#notice").html("Invalid username or password.");</script>
