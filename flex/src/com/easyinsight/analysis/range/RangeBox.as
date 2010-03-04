@@ -49,7 +49,10 @@ public class RangeBox extends VBox {
     public function validate():Array {
         var results:Array = [];
         for each (var rangeEditor:RangeRowEditor in getChildren()) {
-            results.push(rangeEditor.validate());
+            var editorResults:Array = rangeEditor.validate();
+            for each (var obj:Object in editorResults) {
+                results.push(obj);
+            }            
         }
         return results;
     }
