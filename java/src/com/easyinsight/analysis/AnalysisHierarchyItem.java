@@ -35,6 +35,9 @@ public class AnalysisHierarchyItem extends AnalysisDimension {
     public void afterLoad() {
         super.afterLoad();
         if (hierarchyLevels != null) {
+            if (getHierarchyLevel() != null) {
+                setHierarchyLevel((HierarchyLevel) Database.deproxy(getHierarchyLevel()));
+            }
             List<HierarchyLevel> hierarchyLevelList = new ArrayList<HierarchyLevel>();
             for (HierarchyLevel hierarchyLevel : hierarchyLevels) {
                 hierarchyLevelList.add((HierarchyLevel) Database.deproxy(hierarchyLevel));
