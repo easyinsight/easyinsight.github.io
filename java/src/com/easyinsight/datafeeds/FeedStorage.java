@@ -2,6 +2,7 @@ package com.easyinsight.datafeeds;
 
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
+import com.easyinsight.datafeeds.basecamp.*;
 import com.easyinsight.datafeeds.custom.CustomDataSource;
 import com.easyinsight.userupload.*;
 import com.easyinsight.analysis.*;
@@ -9,9 +10,6 @@ import com.easyinsight.datafeeds.google.GoogleFeedDefinition;
 import com.easyinsight.datafeeds.salesforce.SalesforceBaseDataSource;
 import com.easyinsight.datafeeds.file.FileBasedFeedDefinition;
 import com.easyinsight.datafeeds.jira.JiraDataSource;
-import com.easyinsight.datafeeds.basecamp.BaseCampCompositeSource;
-import com.easyinsight.datafeeds.basecamp.BaseCampTimeSource;
-import com.easyinsight.datafeeds.basecamp.BaseCampTodoSource;
 import com.easyinsight.datafeeds.admin.AdminStatsDataSource;
 import com.easyinsight.datafeeds.gnip.GnipDataSource;
 import com.easyinsight.datafeeds.ganalytics.GoogleAnalyticsDataSource;
@@ -752,6 +750,10 @@ public class FeedStorage {
                 feedDefinition = new TwitterDataSource();
             } else if (feedType.equals(FeedType.CUSTOM)) {
                 feedDefinition = new CustomDataSource();
+            } else if (feedType.equals(FeedType.BASECAMP_COMPANY)) {
+                feedDefinition = new BaseCampCompanySource();
+            } else if (feedType.equals(FeedType.BASECAMP_COMPANY_PROJECT_JOIN)) {
+                feedDefinition = new BaseCampCompanyProjectJoinSource();
             } else {
                 throw new RuntimeException("Couldn't identify type");
             }

@@ -1,9 +1,7 @@
 package com.easyinsight.datafeeds;
 
 import com.easyinsight.datafeeds.admin.AdminStatsDataSource;
-import com.easyinsight.datafeeds.basecamp.BaseCampCompositeSource;
-import com.easyinsight.datafeeds.basecamp.BaseCampTimeSource;
-import com.easyinsight.datafeeds.basecamp.BaseCampTodoSource;
+import com.easyinsight.datafeeds.basecamp.*;
 import com.easyinsight.datafeeds.cloudwatch.CloudWatchDataSource;
 import com.easyinsight.datafeeds.file.FileBasedFeedDefinition;
 import com.easyinsight.datafeeds.ganalytics.GoogleAnalyticsDataSource;
@@ -53,6 +51,8 @@ public class DataSourceTypeRegistry {
         registerType(FeedType.TEST_GAMMA, TestGammaDataSource.class);
         registerType(FeedType.BASECAMP, BaseCampTodoSource.class);
         registerType(FeedType.BASECAMP_TIME, BaseCampTimeSource.class);
+        registerType(FeedType.BASECAMP_COMPANY, BaseCampCompanySource.class);
+        registerType(FeedType.BASECAMP_COMPANY_PROJECT_JOIN, BaseCampCompanyProjectJoinSource.class);
         registerType(FeedType.WESABE, WesabeDataSource.class);
         registerType(FeedType.WESABE_ACCOUNTS, WesabeAccountDataSource.class);
         registerType(FeedType.WESABE_TRANSACTIONS, WesabeTransactionDataSource.class);

@@ -58,6 +58,8 @@ public class BaseCampCompositeSource extends CompositeServerDataSource {
         Set<FeedType> feedTypes = new HashSet<FeedType>();
         feedTypes.add(FeedType.BASECAMP);
         feedTypes.add(FeedType.BASECAMP_TIME);
+        feedTypes.add(FeedType.BASECAMP_COMPANY);
+        feedTypes.add(FeedType.BASECAMP_COMPANY_PROJECT_JOIN);
         return feedTypes;
     }
 
@@ -152,7 +154,9 @@ public class BaseCampCompositeSource extends CompositeServerDataSource {
     }
 
     protected Collection<ChildConnection> getChildConnections() {
-        return Arrays.asList(new ChildConnection(FeedType.BASECAMP,  FeedType.BASECAMP_TIME, BaseCampTodoSource.ITEMID,  BaseCampTimeSource.TODOID));
+        return Arrays.asList(new ChildConnection(FeedType.BASECAMP,  FeedType.BASECAMP_TIME, BaseCampTodoSource.ITEMID,  BaseCampTimeSource.TODOID),
+                new ChildConnection(FeedType.BASECAMP, FeedType.BASECAMP_COMPANY_PROJECT_JOIN, BaseCampTodoSource.PROJECTID, BaseCampCompanyProjectJoinSource.PROJECT_ID),
+                new ChildConnection(FeedType.BASECAMP_COMPANY_PROJECT_JOIN, FeedType.BASECAMP_COMPANY, BaseCampCompanyProjectJoinSource.COMPANY_ID, BaseCampCompanySource.COMPANY_ID));
     }
 
     protected IServerDataSourceDefinition createForFeedType(FeedType feedType) {
@@ -160,6 +164,10 @@ public class BaseCampCompositeSource extends CompositeServerDataSource {
             return new BaseCampTodoSource();
         } else if (feedType.equals(FeedType.BASECAMP_TIME)) {
             return new BaseCampTimeSource();
+        } else if (feedType.equals(FeedType.BASECAMP_COMPANY)) {
+            return new BaseCampCompanySource();
+        } else if (feedType.equals(FeedType.BASECAMP_COMPANY_PROJECT_JOIN)) {
+            return new BaseCampCompanyProjectJoinSource();
         }
         throw new RuntimeException();
     }
@@ -209,12 +217,12 @@ public class BaseCampCompositeSource extends CompositeServerDataSource {
 
     @Override
     public int getVersion() {
-        return 2;
+        return 3;
     }
 
     @Override
     public List<DataSourceMigration> getMigrations() {
-        return Arrays.asList((DataSourceMigration) new BaseCamp1To2(this));
+        return Arrays.asList(new BaseCamp1To2(this), new BaseCamp2To3(this));
     }
 
     @Override

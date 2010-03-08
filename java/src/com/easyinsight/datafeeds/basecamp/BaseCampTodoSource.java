@@ -39,7 +39,9 @@ public class BaseCampTodoSource extends BaseCampBaseSource {
     public static final String DEADLINE = "Milestone Deadline";
 
     public static final String COMPLETED = "Completed";
+    public static final String COMPANY = "Company";
     public static final String CONTENT = "Content";
+    public static final String TODO_ITEM_NAME = "To-do Name";
     public static final String CREATEDDATE = "Created On";
     public static final String COMPLETEDDATE = "Completed On";
     public static final String RESPONSIBLEPARTYNAME = "Responsible Party";
@@ -47,6 +49,8 @@ public class BaseCampTodoSource extends BaseCampBaseSource {
     public static final String CREATORNAME = "Creator";
     public static final String CREATORID = "Creator ID";
     public static final String ITEMID = "Item ID";
+
+    public static final String MILESTONE_LAST_COMMENT = "Latest Milestone Comment";
 
     public static final String PROJECTNAME = "Project Name";
     public static final String PROJECTSTATUS = "Project Status";
@@ -89,6 +93,7 @@ public class BaseCampTodoSource extends BaseCampBaseSource {
         Builder builder = new Builder();
         Map<String, String> peopleCache = new HashMap<String, String>();
         try {
+
             Document projects = runRestRequest("/projects.xml", client, builder, url, null);
             Nodes projectNodes = projects.query("/projects/project");
             for(int i = 0;i < projectNodes.size();i++) {
@@ -97,7 +102,25 @@ public class BaseCampTodoSource extends BaseCampBaseSource {
                 String projectStatus = queryField(curProject, "status/text()");
                 String projectIdToRetrieve = queryField(curProject, "id/text()");
 
+                
+
+
+
                 Document milestoneList = runRestRequest("/projects/" + projectIdToRetrieve + "/milestones/list", client, builder, url, null);
+
+                Map<String, String> milestoneCommentMap = new HashMap<String, String>();
+                Nodes milestoneCacheNodes = milestoneList.query("/milestones/milestone");
+                for (int milestoneIndex = 0; milestoneIndex < milestoneCacheNodes.size(); milestoneIndex++) {
+                    Node milestoneNode = milestoneCacheNodes.get(milestoneIndex);
+                    String id = queryField(milestoneNode, "id/text()");
+                    Document comments = runRestRequest("/milestones/" + id + "/comments.xml", client, builder, url, null);
+                    Nodes commentNodes = comments.query("/comments/comment");
+                    if (commentNodes.size() > 0) {
+                        Node commentNode = commentNodes.get(0);
+                        milestoneCommentMap.put(id, queryField(commentNode, "body"));
+                    }
+                }
+
                 Document todoLists = runRestRequest("/projects/" + projectIdToRetrieve + "/todo_lists.xml", client, builder, url, null);
                 Nodes todoListNodes = todoLists.query("/todo-lists/todo-list");
                 for(int j = 0;j < todoListNodes.size();j++) {
@@ -111,11 +134,13 @@ public class BaseCampTodoSource extends BaseCampBaseSource {
                     Node milestoneNode;
                     String milestoneName = null;
                     Date milestoneDeadline = null;
+                    String milestoneComment = null;
                     if(milestoneNodes.size() > 0) {
                         milestoneNode = milestoneNodes.get(0);
                         milestoneName = queryField(milestoneNode, "title/text()");
                         String milestoneDl = queryField(milestoneNode, "deadline/text()");
                         milestoneDeadline = deadlineFormat.parse(milestoneDl);
+                        milestoneComment = milestoneCommentMap.get(milestoneIdToRetrieve);
                     }
 
 
@@ -156,6 +181,7 @@ public class BaseCampTodoSource extends BaseCampBaseSource {
                             row.addValue(keys.get(RESPONSIBLEPARTYID), responsiblePartyId);
                             row.addValue(keys.get(RESPONSIBLEPARTYNAME), responsiblePartyName);
                             row.addValue(keys.get(CREATORID), creatorId);
+                            row.addValue(keys.get(MILESTONE_LAST_COMMENT), milestoneComment);
                             row.addValue(keys.get(CREATORNAME), creatorName);
                             row.addValue(keys.get(COMPLETEDDATE), new DateValue(completedDate));
                             row.addValue(keys.get(CREATEDDATE), new DateValue(createdDate));
@@ -180,10 +206,8 @@ public class BaseCampTodoSource extends BaseCampBaseSource {
         return Arrays.asList(ITEMID, CREATORNAME, CREATORID, RESPONSIBLEPARTYNAME,
                 RESPONSIBLEPARTYID, CONTENT, COMPLETED, CREATEDDATE, COMPLETEDDATE,
                 TODOLISTNAME, MILESTONENAME, DEADLINE, PROJECTNAME, PROJECTSTATUS,
-                PROJECTID, TODOLISTDESC, TODOLISTID, TODOLISTPRIVATE, COMPLETERNAME, COMPLETERID, COUNT, ITEMCYCLE);
+                PROJECTID, TODOLISTDESC, TODOLISTID, TODOLISTPRIVATE, COMPLETERNAME, COMPLETERID, COUNT, ITEMCYCLE, MILESTONE_LAST_COMMENT);
     }
-
-
 
     public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, DataSet dataSet, com.easyinsight.users.Credentials credentials, Connection conn) {
         List<AnalysisItem> analysisItems = new ArrayList<AnalysisItem>();
@@ -193,7 +217,7 @@ public class BaseCampTodoSource extends BaseCampBaseSource {
         analysisItems.add(new AnalysisDimension(keys.get(CREATORID), true));
         analysisItems.add(new AnalysisDimension(keys.get(RESPONSIBLEPARTYNAME), true));
         analysisItems.add(new AnalysisDimension(keys.get(RESPONSIBLEPARTYID), true));
-        analysisItems.add(new AnalysisDimension(keys.get(CONTENT), true));
+        analysisItems.add(new AnalysisDimension(keys.get(CONTENT), TODO_ITEM_NAME));
         analysisItems.add(new AnalysisDimension(keys.get(COMPLETED), true));
         AnalysisDateDimension createdDim = new AnalysisDateDimension(keys.get(CREATEDDATE), true, AnalysisDateDimension.DAY_LEVEL);
         analysisItems.add(createdDim);
@@ -201,6 +225,7 @@ public class BaseCampTodoSource extends BaseCampBaseSource {
         analysisItems.add(completedDim);
         analysisItems.add(new AnalysisDimension(keys.get(TODOLISTNAME), true));
         analysisItems.add(new AnalysisDimension(keys.get(MILESTONENAME), true));
+        analysisItems.add(new AnalysisDimension(keys.get(MILESTONE_LAST_COMMENT), true));
         analysisItems.add(new AnalysisDateDimension(keys.get(DEADLINE), true, AnalysisDateDimension.DAY_LEVEL));
         analysisItems.add(new AnalysisDimension(keys.get(PROJECTNAME), true));
         analysisItems.add(new AnalysisDimension(keys.get(PROJECTSTATUS), true));

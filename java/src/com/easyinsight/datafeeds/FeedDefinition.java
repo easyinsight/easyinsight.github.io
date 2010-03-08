@@ -371,7 +371,9 @@ public class FeedDefinition implements Cloneable, Serializable {
             try {
                 FeedFolder clonedFolder = feedFolder.clone();
                 clonedFolder.updateIDs(replacementMap);
-                feedNodes.add(clonedFolder.toFeedNode());
+                if (clonedFolder.getChildFolders().size() > 0 || clonedFolder.getChildItems().size() > 0) {
+                    feedNodes.add(clonedFolder.toFeedNode());
+                }
             } catch (CloneNotSupportedException e) {
                 LogClass.error(e);
             }

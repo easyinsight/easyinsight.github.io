@@ -18,8 +18,8 @@ import java.io.IOException;
  */
 public class BaseCampBugReportProvider {
 
-    private static final String BASECAMP_API_USERNAME = "apiuser";
-    private static final String BASECAMP_API_PASSWORD = "@p!user";
+    private static final String BASECAMP_API_USERNAME = "78cb157999474d892228c3a35b5b99a268a5bd50";
+    private static final String BASECAMP_API_PASSWORD = "";
     private static final String BASECAMP_API_ENDPOINT = "https://easyinsight.basecamphq.com/todo_lists";
     private static final String GENERAL_BUGS = "Generic";
     private static final String GENERAL_BUGS_TODO = "/6600933/todo_items.xml";

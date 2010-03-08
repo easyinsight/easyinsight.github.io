@@ -1,5 +1,6 @@
 package com.easyinsight.datafeeds.basecamp;
 
+import com.easyinsight.analysis.AnalysisDimension;
 import com.easyinsight.core.Key;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.DataSourceMigration;
@@ -23,8 +24,17 @@ public class BaseCamp2To3 extends DataSourceMigration {
 
     @Override
     public void migrate(Map<String, Key> keys, EIConnection conn) throws SQLException {
-        BaseCampCommentSource baseCampCommentSource = new BaseCampCommentSource();
-        addChildDataSource(baseCampCommentSource, Arrays.asList(new ChildConnection(FeedType.BASECAMP, FeedType.BASECAMP_COMMENT, BaseCampTodoSource.ITEMID,
-                BaseCampCommentSource.TODO_ITEM_ID)), conn);
+        BaseCampCompanySource companySource = new BaseCampCompanySource();
+        BaseCampCompanyProjectJoinSource joinSource = new BaseCampCompanyProjectJoinSource();
+        addChildDataSource(companySource, conn);
+        addChildDataSource(joinSource, conn);
+        addConnection(new ChildConnection(FeedType.BASECAMP, FeedType.BASECAMP_COMPANY_PROJECT_JOIN, BaseCampTodoSource.PROJECTID,
+                BaseCampCompanyProjectJoinSource.PROJECT_ID), conn);
+        addConnection(new ChildConnection(FeedType.BASECAMP_COMPANY, FeedType.BASECAMP_COMPANY_PROJECT_JOIN, BaseCampCompanySource.COMPANY_ID,
+                BaseCampCompanyProjectJoinSource.COMPANY_ID), conn);
+        AnalysisDimension contentDim = (AnalysisDimension) findAnalysisItem(BaseCampTodoSource.CONTENT);
+        if (contentDim != null) {
+            contentDim.setDisplayName(BaseCampTodoSource.TODO_ITEM_NAME);
+        }
     }
 }
