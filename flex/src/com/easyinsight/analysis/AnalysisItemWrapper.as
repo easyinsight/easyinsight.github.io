@@ -33,6 +33,10 @@ public class AnalysisItemWrapper extends EventDispatcher
         return null;
     }
 
+    public function invalidateItem():void {
+        dispatchEvent(new ItemWrapperInvalidationEvent());
+    }
+
     public function set analysisItem(item:AnalysisItem):void {
         if (isAnalysisItem()) {
             var node:AnalysisItemNode = _feedNode as AnalysisItemNode;

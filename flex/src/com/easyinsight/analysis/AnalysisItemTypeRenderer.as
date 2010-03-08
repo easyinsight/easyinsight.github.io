@@ -97,8 +97,20 @@ public class AnalysisItemTypeRenderer extends HBox {
         return typeSource;
     }
 
+    private function invalidateStuff(event:ItemWrapperInvalidationEvent):void {
+        updateIcon();
+    }
+
     override public function set data(obj:Object):void {
+        if (analysisItemWrapper != null) {
+            analysisItemWrapper.removeEventListener(ItemWrapperInvalidationEvent.ITEM_INVALIDATION, invalidateStuff);
+        }
         this.analysisItemWrapper = obj as AnalysisItemWrapper;
+        analysisItemWrapper.addEventListener(ItemWrapperInvalidationEvent.ITEM_INVALIDATION, invalidateStuff);
+        updateIcon();
+    }
+
+    private function updateIcon():void {
         if (analysisItemWrapper.isAnalysisItem()) {
             if (analysisItemWrapper.analysisItem.hasType(AnalysisItemTypes.CALCULATION)) {
                 typeSource = calculationIcon;

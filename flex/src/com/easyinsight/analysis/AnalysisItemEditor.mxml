@@ -392,7 +392,7 @@
                 <mx:dataProvider>
                     <mx:Array>
                         <mx:String>Grouping</mx:String>
-                        <mx:String>Number</mx:String>
+                        <mx:String>Measure</mx:String>
                         <mx:String>Complex</mx:String>
                     </mx:Array>
                 </mx:dataProvider>

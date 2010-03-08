@@ -61,6 +61,7 @@
             if (selectedWrapper != null) {
                 selectedWrapper.analysisItem = openEditor.save(_feedDefinition.dataFeedID);
                 selectedWrapper.displayName = selectedWrapper.analysisItem.display;
+                selectedWrapper.invalidateItem();
             }
             selectedWrapper = wrapper;
             if (wrapper.analysisItem.concrete) {
