@@ -77,10 +77,10 @@ public class TestUtil {
         FeedDefinition feedDefinition = new FeedDefinition();
         feedDefinition.setFeedName("Test");
         feedDefinition.setOwnerName("Test User");
-        UploadPolicy uploadPolicy = new UploadPolicy(SecurityUtil.getUserID());
+        UploadPolicy uploadPolicy = new UploadPolicy(SecurityUtil.getUserID(), SecurityUtil.getAccountID());
         feedDefinition.setUploadPolicy(uploadPolicy);
         feedDefinition.setFields(analysisItems);
-        FeedCreationResult result = new FeedCreation().createFeed(feedDefinition, conn, new DataSet(), SecurityUtil.getUserID());
+        FeedCreationResult result = new FeedCreation().createFeed(feedDefinition, conn, new DataSet(), uploadPolicy);
         DataStorage dataStorage = result.getTableDefinitionMetadata();
         dataStorage.insertData(dataSet);
         dataStorage.commit();

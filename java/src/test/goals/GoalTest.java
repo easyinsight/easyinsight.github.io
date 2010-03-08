@@ -74,7 +74,7 @@ public class GoalTest extends TestCase {
         dataNode.setName("Data Node");
         rootNode.setChildren(Arrays.asList(dataNode));
         goalTree.setRootNode(rootNode);
-        UserStub user = new UserStub(userID, null, null, null);
+        UserStub user = new UserStub(userID, null, null, null, 0);
         List<FeedConsumer> admins = new ArrayList<FeedConsumer>();
         admins.add(user);
         goalTree.setAdministrators(admins);

@@ -47,13 +47,13 @@ public class DataSourceLoader {
         feedDefinition.setOwnerName("Test User");
         feedDefinition.setPubliclyVisible(true);
         feedDefinition.setMarketplaceVisible(true);
-        UploadPolicy uploadPolicy = new UploadPolicy(SecurityUtil.getUserID());
+        UploadPolicy uploadPolicy = new UploadPolicy(SecurityUtil.getUserID(), SecurityUtil.getAccountID());
         uploadPolicy.setPubliclyVisible(true);
         uploadPolicy.setMarketplaceVisible(true);
         feedDefinition.setUploadPolicy(uploadPolicy);
         feedDefinition.setFields(Arrays.asList(new AnalysisDimension(DIM1_KEY, true), new AnalysisDimension(DIM2_KEY, true), new AnalysisMeasure(MEASURE, AggregationTypes.SUM),
                 new AnalysisDateDimension(DATE, true, AnalysisDateDimension.DAY_LEVEL)));
-        FeedCreationResult result = new FeedCreation().createFeed(feedDefinition, conn, new DataSet(), SecurityUtil.getUserID());
+        FeedCreationResult result = new FeedCreation().createFeed(feedDefinition, conn, new DataSet(), uploadPolicy);
         result.getTableDefinitionMetadata().commit();
         result.getTableDefinitionMetadata().closeConnection();
         conn.commit();

@@ -65,7 +65,7 @@ public class UploadTest extends TestCase {
 
         UserUploadService userUploadService = new UserUploadService();
         FeedDefinition update = userUploadService.getDataFeedConfiguration(dataFeedID);
-        update.setGenre("MoreTesting");
+        
         update.setFeedName("Renamed Feed");
         userUploadService.updateFeedDefinition(update);
     }
