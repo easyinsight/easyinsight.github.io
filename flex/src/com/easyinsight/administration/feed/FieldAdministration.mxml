@@ -32,6 +32,7 @@
         import mx.collections.IList;
         import mx.collections.Sort;
         import mx.collections.SortField;
+        import mx.controls.Alert;
         import mx.events.FlexEvent;
         import mx.events.ListEvent;
         import mx.managers.PopUpManager;
@@ -62,6 +63,13 @@
                 selectedWrapper.displayName = selectedWrapper.analysisItem.display;
             }
             selectedWrapper = wrapper;
+            if (wrapper.analysisItem.concrete) {
+                coreGrid.selectedIndex = coreFields.getItemIndex(wrapper);
+                derivedGrid.selectedIndex = -1;
+            } else {
+                derivedGrid.selectedIndex = derivedFields.getItemIndex(wrapper);
+                coreGrid.selectedIndex = -1;
+            }
             var editor:IAnalysisItemEditor;
             var analysisItem:AnalysisItem = wrapper.analysisItem;
             if (analysisItem.hasType(AnalysisItemTypes.HIERARCHY)) {
@@ -127,7 +135,7 @@
                     var aNode:AnalysisItemNode = new AnalysisItemNode();
                     aNode.analysisItem = item;
                     var wrapper:AnalysisItemWrapper = new AnalysisItemWrapper(aNode);
-                    if (item.hasType(AnalysisItemTypes.HIERARCHY) || item.hasType(AnalysisItemTypes.CALCULATION)) {
+                    if (!item.concrete) {
                         derivedFields.addItem(wrapper);
                     } else {
                         coreFields.addItem(wrapper);
@@ -185,6 +193,7 @@
 
         private function gotGroupingName(event:NewFieldEvent):void {
             var grouping:AnalysisDimension = new AnalysisDimension();
+            grouping.concrete = true;
             grouping.key = findName(event.name);
             var aNode:AnalysisItemNode = new AnalysisItemNode();
             aNode.analysisItem = grouping;
@@ -208,6 +217,7 @@
 
         private function gotMeasureName(event:NewFieldEvent):void {
             var measure:AnalysisMeasure = new AnalysisMeasure();
+            measure.concrete = true;
             measure.key = findName(event.name);
             var aNode:AnalysisItemNode = new AnalysisItemNode();
             aNode.analysisItem = measure;
@@ -231,6 +241,7 @@
 
         private function gotDateName(event:NewFieldEvent):void {
             var date:AnalysisDateDimension = new AnalysisDateDimension(AnalysisItemTypes.DAY_LEVEL);
+            date.concrete = true;
             date.key = findName(event.name);
             var aNode:AnalysisItemNode = new AnalysisItemNode();
             aNode.analysisItem = date;
@@ -295,6 +306,7 @@
 
         private function onCopy(event:AnalysisItemCopyEvent):void {
             dispatchEvent(new AnalysisChangedEvent());
+            event.analysisItem.concrete = false;
             var node:AnalysisItemNode = new AnalysisItemNode();
             node.analysisItem = event.analysisItem;
             var wrapper:AnalysisItemWrapper = new AnalysisItemWrapper(node);
@@ -311,6 +323,10 @@
         ]]></mx:Script>
     <analysis:BaseEditorFieldControlsFactory fields="{allFields}" id="controlsFactory"/>
     <mx:HBox height="100%" width="100%">
+        <mx:VBox height="100%">
+            <mx:Box width="100%" horizontalAlign="center">
+                <mx:Label text="Click on the fields below to edit their properties." fontSize="14"/>
+            </mx:Box>
         <mx:VDividedBox height="100%">
             <mx:VBox height="50%">
                 <mx:HBox width="100%" horizontalAlign="center">
@@ -327,7 +343,7 @@
                                click="addDate()"/>
                 </mx:HBox>
                 <mx:DataGrid dataProvider="{coreFields}" itemClick="onItemClick(event)" height="100%" dragEnabled="true"
-                             rowHeight="30">
+                             rowHeight="30" id="coreGrid">
                     <mx:columns>
                         <util:EIDataGridColumn dataField="displayName" headerText=""
                                                itemRenderer="com.easyinsight.analysis.AnalysisItemTypeRenderer"
@@ -356,7 +372,7 @@
                                toolTip="Add Cycle..." click="addCycle()()"/>
                 </mx:HBox>
                 <mx:DataGrid dataProvider="{derivedFields}" itemClick="onItemClick(event)" height="100%"
-                             dragEnabled="true" rowHeight="30">
+                             dragEnabled="true" rowHeight="30" id="derivedGrid">
                     <mx:columns>
                         <mx:DataGridColumn dataField="displayName" headerText=""
                                            itemRenderer="com.easyinsight.analysis.AnalysisItemTypeRenderer"
@@ -370,6 +386,7 @@
                 </mx:DataGrid>
             </mx:VBox>
         </mx:VDividedBox>
+        </mx:VBox>
         <mx:Box id="editCanvas" paddingBottom="10" paddingTop="10" paddingLeft="10" paddingRight="10"
                 backgroundImage="{background2}" backgroundSize="100%" horizontalAlign="center" width="100%"
                 height="100%"/>

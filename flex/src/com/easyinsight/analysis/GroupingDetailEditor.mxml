@@ -25,7 +25,6 @@
                 useKeyDimensionSelected = analysisDimension.keyDimension != null;
                 keyDimension = analysisDimension.keyDimension;
                 group = analysisDimension.group;
-                summary = analysisDimension.summary;
             }
         }
 
@@ -33,7 +32,6 @@
             super.save(analysisItem);
             var analysisDimension:AnalysisDimension = analysisItem as AnalysisDimension;
             analysisDimension.group = groupCheckbox.selected;
-            analysisDimension.summary = summaryCheckbox.selected;
             if (useKeyDimension.selected) {
                 analysisDimension.keyDimension = dimensionKeyComboBox.selectedItem as AnalysisDimension;
             }
@@ -41,9 +39,6 @@
         ]]></mx:Script>
     <mx:FormItem label="Group: ">
         <mx:CheckBox id="groupCheckbox" selected="{group}"/>
-    </mx:FormItem>
-    <mx:FormItem label="Summary: ">
-        <mx:CheckBox id="summaryCheckbox" selected="{summary}"/>
     </mx:FormItem>
     <mx:CheckBox label="Use Another Grouping as Key: " id="useKeyDimension"
                  selected="{useKeyDimensionSelected}"

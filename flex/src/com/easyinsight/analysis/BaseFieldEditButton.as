@@ -74,6 +74,7 @@ public class BaseFieldEditButton extends HBox
 		}
 
         private function copy(event:MouseEvent):void {
+            event.stopPropagation();
             analysisService = new RemoteObject();
             analysisService.destination = "analysisDefinition";
             analysisService.cloneItem.addEventListener(ResultEvent.RESULT, onCopy);
