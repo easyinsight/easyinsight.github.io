@@ -339,6 +339,9 @@
                                                                         case "help":
                                                                             navigation(new NavigationEvent("Help"));
                                                                             break;
+                                                                        case "apis":
+                                                                            navigation(new NavigationEvent("API"));
+                                                                            break;
                                                                         case "home":
                                                                         case "intro":
                                                                                 if(o.type != null && o.type == "tour")

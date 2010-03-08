@@ -25,6 +25,7 @@
         import com.easyinsight.framework.AsyncInfoEvent;
         import com.easyinsight.framework.EIMessageListener;
         import com.easyinsight.framework.LoginEvent;
+        import com.easyinsight.framework.NavigationEvent;
         import com.easyinsight.framework.User;
         import com.easyinsight.genredata.AnalyzeEvent;
         import com.easyinsight.help.HelpWindow;
@@ -69,6 +70,10 @@
         public var packageIcon:Class;
 
         [Bindable]
+        [Embed(source="../../../../assets/components_x_48.png")]
+        public var connectionsIcon:Class;
+
+        [Bindable]
         [Embed(source="../../../../assets/monitor2.png")]
         public var monitorIcon:Class;
 
@@ -88,9 +93,7 @@
         [Embed(source="../../../../assets/package_add.png")]
         public var packageAddIcon:Class;
 
-        [Bindable]
-        [Embed(source="../../../../assets/data_add_x64.png")]
-        public var addIcon:Class;
+        
 
         [Bindable]
         [Embed(source="../../../../assets/application_enterprise.png")]
@@ -248,11 +251,7 @@
             dispatchEvent(event);
         }
 
-        private function createEmptyFeed():void {
-            var userUpload:SimpleFeedWindow = SimpleFeedWindow(PopUpManager.createPopUp(this, SimpleFeedWindow, true));
-            userUpload.addEventListener(UploadConfigEvent.UPLOAD_CONFIG_COMPLETE, uploadConfigComplete);
-            PopUpUtil.centerPopUp(userUpload);
-        }
+
 
         private function uploadConfigComplete(event:UploadConfigEvent):void {
             showLoading = true;
@@ -367,6 +366,10 @@
             dispatchEvent(new Event("includeGroupsChanged"));
         }
 
+        private function toConnections():void {
+            User.getEventNotifier().dispatchEvent(new NavigationEvent("Connections"));
+        }
+
         private function groupIncludeChanged():void {
             showLoading = true;
             uploadService.getFeedAnalysisTree.send(groupInclude.selected, initialEntry);
@@ -417,14 +420,16 @@
 			<mx:Button toolTip="Create composite data source..." click="createCompositeFeed()" id="compositeFeedButton" icon="{joinIcon}"
 				label="Combine Sources" labelPlacement="bottom"/>
             <mx:Button toolTip="Create package..." click="createPackage()" id="createPackageButton" icon="{packageAddIcon}"
-				label="Create Package" labelPlacement="bottom"/>
-			<mx:Button toolTip="Create empty data source..." click="createEmptyFeed()" id="emptyFeedButton" icon="{addIcon}"
-				label="New Empty Source" labelPlacement="bottom"/>
+				label="Create Package" labelPlacement="bottom"/>			
             <!--<mx:Button icon="{helpIcon}" label="Help..." labelPlacement="bottom" click="help()"/>-->
 			<mx:Button toolTip="Download desktop widget..." click="downloadAirWidget()" id="downloadAirButton" icon="{monitorIcon}"
                label="Desktop Widget" labelPlacement="bottom"/>
             <mx:ProgressBar indeterminate="true" visible="{showLoading}"/>
-            <mx:Spacer width="100%"/>
+            <mx:HBox width="100%" horizontalAlign="center" verticalAlign="middle">
+                <mx:Label text="Need to add data?" fontSize="16"/>
+                <mx:Button toolTip="Go to connections..." click="toConnections()" icon="{connectionsIcon}"
+                           label="Go to Connections" labelPlacement="bottom"/>
+            </mx:HBox>
             <mx:VBox horizontalAlign="center">
                 <mx:HBox borderStyle="inset" borderThickness="1" paddingTop="5" paddingBottom="5" paddingLeft="5" paddingRight="5">
                     <mx:TextInput id="searchText" keyUp="search()"/>

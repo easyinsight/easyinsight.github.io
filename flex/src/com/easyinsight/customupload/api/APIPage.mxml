@@ -14,6 +14,8 @@
     <mx:Script><![CDATA[
         import com.easyinsight.account.APIUserAdmin;
         import com.easyinsight.account.AccountAPISettings;
+        import com.easyinsight.customupload.SimpleFeedWindow;
+        import com.easyinsight.customupload.UploadConfigEvent;
         import com.easyinsight.framework.LoginEvent;
         import com.easyinsight.framework.User;
 
@@ -147,6 +149,20 @@
             flash.net.navigateToURL(new URLRequest("https://www.easy-insight.com/app/services/UncheckedPublishBasic?wsdl"), "_blank");
         }
 
+        [Bindable]
+        [Embed(source="../../../../../assets/data_add_x64.png")]
+        public var addIcon:Class;
+
+        private function createEmptyFeed():void {
+            var userUpload:SimpleFeedWindow = SimpleFeedWindow(PopUpManager.createPopUp(this, SimpleFeedWindow, true));
+            userUpload.addEventListener(UploadConfigEvent.UPLOAD_CONFIG_COMPLETE, uploadConfigComplete);
+            PopUpUtil.centerPopUp(userUpload);
+        }
+
+        private function uploadConfigComplete(event:UploadConfigEvent):void {
+            apiService.getDataSourceAPIs.send();            
+        }
+
         private function search():void {
         }
 
@@ -165,9 +181,11 @@
             <mx:Box paddingLeft="10" paddingTop="10" paddingRight="10" paddingBottom="10" width="100%" height="100%"
                     verticalGap="10" id="apiListing">
 
-                <mx:HBox width="100%">
+                <mx:HBox width="100%" verticalAlign="middle">
                     <mx:TextArea text="The Easy Insight API gives you a SOAP interface to publish in your data. You can access the API with an account level of Basic or higher."
-                             borderStyle="none" backgroundAlpha="0" editable="false" selectable="false" width="400"/>
+                             borderStyle="none" backgroundAlpha="0" editable="false" selectable="false" width="300" height="50"/>
+                    <mx:Button toolTip="Create a new data source for the API..." click="createEmptyFeed()" id="emptyFeedButton" icon="{addIcon}"
+				        label="New API Source" labelPlacement="bottom"/>
                     <mx:VBox horizontalAlign="center">
                         <mx:Label text="{apiLabel}"/>
                         <mx:Button label="My API Information..." click="apiInformation()" styleName="redButton"/>
