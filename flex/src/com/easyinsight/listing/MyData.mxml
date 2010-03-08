@@ -290,8 +290,7 @@
 
         private function filterFunction(item:Object):Boolean {
             if (keyword != null && keyword.length > 0) {
-                return (item.name.toLowerCase().indexOf(keyword) > -1 ||
-                        (item.genre != null && item.genre.toLowerCase().indexOf(keyword) > -1));
+                return (item.name.toLowerCase().indexOf(keyword) > -1);
             }
             return true;
         }
