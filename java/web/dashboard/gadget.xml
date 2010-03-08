@@ -4,5 +4,5 @@
       <Require feature="setprefs"/>
     </ModulePrefs>
     <UserPref name="scorecardID" />
-    <Content type="url" href="https://localhost/app/dashboard/index.jsp" />
+    <Content type="url" href="https://www.easy-insight.com/app/dashboard/index.jsp" />
 </Module>
