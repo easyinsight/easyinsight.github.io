@@ -42,11 +42,15 @@
             forcedRefresh = false;
             if (!_tutorialMode) {
 
-                if (consumer == null) {
-                    consumer = new Consumer();
-                    consumer.destination = "scorecardUpdates";
-                    consumer.addEventListener(MessageEvent.MESSAGE, onMessage);
-                    consumer.subscribe();
+                try {
+                    if (consumer == null) {
+                        consumer = new Consumer();
+                        consumer.destination = "scorecardUpdates";
+                        consumer.addEventListener(MessageEvent.MESSAGE, onMessage);
+                        consumer.subscribe();
+                    }
+                } catch(e:Error) {
+                    trace(e.message);                                           
                 }
                 if (_scorecard == null) {
                     baseIndex = 0;
@@ -79,7 +83,7 @@
         private var _contextMenuAvailable:Boolean = true;
 
         private var _tutorialMode:Boolean = false;
-        
+
 
         [Bindable(event="contextMenuAvailableChanged")]
         public function get contextMenuAvailable():Boolean {
@@ -138,18 +142,20 @@
         }
 
         private function onMessage(event:MessageEvent):void {
-            var scorecardEvent:ScorecardAsyncEvent = event.message.body as ScorecardAsyncEvent;
-            if (scorecardEvent.scorecardID == _scorecard.scorecardID) {
-                if (scorecardEvent.type == ScorecardAsyncEvent.NAME_UPDATE) {
-                    asyncMessage = "Synchronizing with the latest data from " + scorecardEvent.dataSourceName + "...";
-                } else {
-                    kpis = scorecardEvent.kpis;
-                    kpis.addEventListener(CollectionEvent.COLLECTION_CHANGE, onKPIChange);
-                    refreshIndex = 0;
-                    /*consumer.removeEventListener(MessageEvent.MESSAGE, onMessage);
-                    consumer.disconnect();
-                    consumer = null;
-                    */
+            if (event.message.body is ScorecardAsyncEvent) {
+                var scorecardEvent:ScorecardAsyncEvent = event.message.body as ScorecardAsyncEvent;
+                if (scorecardEvent.scorecardID == _scorecard.scorecardID) {
+                    if (scorecardEvent.type == ScorecardAsyncEvent.NAME_UPDATE) {
+                        asyncMessage = "Synchronizing with the latest data from " + scorecardEvent.dataSourceName + "...";
+                    } else {
+                        kpis = scorecardEvent.kpis;
+                        kpis.addEventListener(CollectionEvent.COLLECTION_CHANGE, onKPIChange);
+                        refreshIndex = 0;
+                        /*consumer.removeEventListener(MessageEvent.MESSAGE, onMessage);
+                         consumer.disconnect();
+                         consumer = null;
+                         */
+                    }
                 }
             }
         }

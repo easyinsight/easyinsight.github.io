@@ -1,6 +1,5 @@
 package com.easyinsight.datafeeds.basecamp;
 
-import com.easyinsight.datafeeds.ServerDataSourceDefinition;
 import com.easyinsight.datafeeds.FeedType;
 import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.dataset.DataSet;
@@ -13,11 +12,6 @@ import com.easyinsight.storage.DataStorage;
 import com.easyinsight.users.Token;
 import com.easyinsight.users.TokenStorage;
 import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.Credentials;
-import org.apache.commons.httpclient.UsernamePasswordCredentials;
-import org.apache.commons.httpclient.HttpMethod;
-import org.apache.commons.httpclient.methods.GetMethod;
-import org.apache.commons.httpclient.auth.AuthScope;
 import org.jetbrains.annotations.NotNull;
 import nu.xom.Builder;
 import nu.xom.Document;
@@ -34,7 +28,7 @@ import java.sql.Connection;
  * Date: Jun 16, 2009
  * Time: 9:37:38 PM
  */
-public class BaseCampTimeSource extends ServerDataSourceDefinition {
+public class BaseCampTimeSource extends BaseCampBaseSource {
     public static final String XMLDATEFORMAT = "yyyy-MM-dd";
     public static final String XMLDATETIMEFORMAT = "yyyy-MM-dd'T'HH:mm:ss";
 
@@ -59,39 +53,8 @@ public class BaseCampTimeSource extends ServerDataSourceDefinition {
         return FeedType.BASECAMP_TIME;
     }
 
-    private static HttpClient getHttpClient(String username, String password) {
-        HttpClient client = new HttpClient();
-        client.getParams().setAuthenticationPreemptive(true);
-        Credentials defaultcreds = new UsernamePasswordCredentials(username, password);
-        client.getState().setCredentials(new AuthScope(AuthScope.ANY), defaultcreds);
-        return client;
-    }
+    
 
-    private Document runRestRequest(String path, HttpClient client, Builder builder, String url, EIPageInfo pageInfo) throws BaseCampLoginException {
-        HttpMethod restMethod = new GetMethod(url + path);
-        restMethod.setRequestHeader("Accept", "application/xml");
-        restMethod.setRequestHeader("Content-Type", "application/xml");
-        Document doc;
-        try {
-            client.executeMethod(restMethod);
-            doc = builder.build(restMethod.getResponseBodyAsStream());
-            if(pageInfo != null) {
-                pageInfo.MaxPages = Integer.parseInt(restMethod.getResponseHeader("X-Pages").getValue());
-            }
-        }
-        catch (nu.xom.ParsingException e) {
-            String statusLine = restMethod.getStatusLine().toString();
-            if ("HTTP/1.1 404 Not Found".equals(statusLine)) {
-                throw new BaseCampLoginException("Could not locate a Basecamp instance at " + url);
-            } else {
-                throw new BaseCampLoginException("Invalid Basecamp authentication token--you can find the token under your the My Info link in the upper right corner on your Basecamp page.");
-            }
-        }
-        catch (Throwable e) {
-            throw new RuntimeException(e);
-        }
-        return doc;
-    }
 
     public DataSet getDataSet(com.easyinsight.users.Credentials credentials, Map<String, Key> keys, Date now, FeedDefinition parentDefinition, DataStorage dataStorage) {
         BaseCampCompositeSource baseCampCompositeSource = (BaseCampCompositeSource) parentDefinition;
@@ -162,32 +125,6 @@ public class BaseCampTimeSource extends ServerDataSourceDefinition {
         }
     }
 
-    private String retrieveContactInfo(HttpClient client, Builder builder, Map<String, String> peopleCache, String contactId, String url) throws BaseCampLoginException {
-        String contactName = null;
-        try {
-            if(contactId != null) {
-                contactName = peopleCache.get(contactId);
-                if(contactName == null) {
-                    Document contactInfo = runRestRequest("/contacts/person/" + contactId, client, builder, url, null);
-                    contactName = queryField(contactInfo, "/person/first-name/text()") + " " + queryField(contactInfo, "/person/last-name/text()");
-                    peopleCache.put(contactId, contactName);
-                }
-
-            }
-            return contactName;            
-        } catch (BaseCampLoginException e) {
-            return "";
-        }
-    }
-
-    private static String queryField(Node n, String xpath) {
-        Nodes results = n.query(xpath);
-        if(results.size() > 0)
-            return results.get(0).getValue();
-        else
-            return null;
-    }
-
     @NotNull
     protected List<String> getKeys() {
         return Arrays.asList(PERSONID, PERSONNAME, HOURS, DESCRIPTION, PROJECTNAME, PROJECTID, COUNT, TODOID, DATE);
@@ -211,11 +148,6 @@ public class BaseCampTimeSource extends ServerDataSourceDefinition {
         todoDimension.setHidden(true);
         analysisItems.add(todoDimension);
         return analysisItems;
-    }
-
-    private class EIPageInfo {
-        public int MaxPages;
-        public int currentPage;
     }
 
 }

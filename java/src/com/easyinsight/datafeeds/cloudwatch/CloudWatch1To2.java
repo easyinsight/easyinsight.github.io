@@ -4,6 +4,7 @@ import com.easyinsight.analysis.AggregationTypes;
 import com.easyinsight.analysis.AnalysisMeasure;
 import com.easyinsight.analysis.FormattingConfiguration;
 import com.easyinsight.core.Key;
+import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.DataSourceMigration;
 import com.easyinsight.datafeeds.FeedDefinition;
 
@@ -19,7 +20,7 @@ public class CloudWatch1To2 extends DataSourceMigration {
         super(dataSource);
     }
 
-    public void migrate(Map<String, Key> keys) {
+    public void migrate(Map<String, Key> keys, EIConnection conn) {
         migrateAnalysisItem(CloudWatchDataSource.NETWORK_IN, new AnalysisMeasure(keys.get(CloudWatchDataSource.NETWORK_IN), "Network Bytes Received", AggregationTypes.SUM,
                 false, FormattingConfiguration.BYTES));
         migrateAnalysisItem(CloudWatchDataSource.NETWORK_OUT, new AnalysisMeasure(keys.get(CloudWatchDataSource.NETWORK_OUT), "Network Bytes Sent", AggregationTypes.SUM,

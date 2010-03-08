@@ -103,7 +103,7 @@ public class GoalStorage {
     private void populateUsers(GoalTree goalTree, Connection conn) throws SQLException {
         List<FeedConsumer> administrators = new ArrayList<FeedConsumer>();
         List<FeedConsumer> consumers = new ArrayList<FeedConsumer>();
-        PreparedStatement getUsersStmt = conn.prepareStatement("SELECT USER.USER_ID, USER_ROLE, USER.email, USER.name, USER.username FROM " +
+        PreparedStatement getUsersStmt = conn.prepareStatement("SELECT USER.USER_ID, USER_ROLE, USER.email, USER.name, USER.username, USER.account_id FROM " +
                 "USER_TO_GOAL_TREE, USER WHERE GOAL_TREE_ID = ? AND USER_TO_GOAL_TREE.USER_ID = USER.USER_ID");
         getUsersStmt.setLong(1, goalTree.getGoalTreeID());
         ResultSet userRS = getUsersStmt.executeQuery();
@@ -113,10 +113,11 @@ public class GoalStorage {
             String email = userRS.getString(3);
             String fullName = userRS.getString(4);
             String userName = userRS.getString(5);
+            long accountID = userRS.getLong(6);
             if (role == Roles.OWNER) {
-                administrators.add(new UserStub(userID, userName, email, fullName));
+                administrators.add(new UserStub(userID, userName, email, fullName, accountID));
             } else {
-                consumers.add(new UserStub(userID, userName, email, fullName));
+                consumers.add(new UserStub(userID, userName, email, fullName, accountID));
             }
         }
         PreparedStatement getGroupsStmt = conn.prepareStatement("SELECT COMMUNITY_GROUP.COMMUNITY_GROUP_ID, ROLE, COMMUNITY_GROUP.name " +

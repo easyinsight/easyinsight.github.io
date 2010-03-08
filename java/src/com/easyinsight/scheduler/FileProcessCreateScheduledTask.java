@@ -2,6 +2,7 @@ package com.easyinsight.scheduler;
 
 import com.easyinsight.storage.DataStorage;
 import com.easyinsight.storage.StorageLimitException;
+import com.easyinsight.users.User;
 import com.easyinsight.userupload.*;
 import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.dataset.PersistableDataSetForm;
@@ -111,11 +112,12 @@ public class FileProcessCreateScheduledTask extends ScheduledTask {
             FileBasedFeedDefinition feedDefinition = new FileBasedFeedDefinition();
             feedDefinition.setUploadFormat(uploadFormat);
             feedDefinition.setFeedName(name);
-            feedDefinition.setOwnerName(UserUploadService.retrieveUser(conn, userID).getUserName());
-            UploadPolicy uploadPolicy = new UploadPolicy(userID);
+            User user = UserUploadService.retrieveUser(conn, userID);
+            feedDefinition.setOwnerName(user.getUserName());
+            UploadPolicy uploadPolicy = new UploadPolicy(user.getUserID(), user.getAccount().getAccountID());
             feedDefinition.setUploadPolicy(uploadPolicy);
             feedDefinition.setFields(fields);
-            FeedCreationResult result = new FeedCreation().createFeed(feedDefinition, conn, dataSet.toDataSet(), userID, accountID);
+            FeedCreationResult result = new FeedCreation().createFeed(feedDefinition, conn, dataSet.toDataSet(), uploadPolicy);
             tableDef = result.getTableDefinitionMetadata();
             feedID = result.getFeedID();
             analysisID = feedDefinition.getAnalysisDefinitionID();

@@ -61,9 +61,9 @@ public abstract class CompositeServerDataSource extends CompositeFeedDefinition 
 
     public long create(Credentials credentials, Connection conn) throws SQLException, CloneNotSupportedException {
         setOwnerName(retrieveUser(conn, SecurityUtil.getUserID()).getUserName());
-        UploadPolicy uploadPolicy = new UploadPolicy(SecurityUtil.getUserID());
+        UploadPolicy uploadPolicy = new UploadPolicy(SecurityUtil.getUserID(), SecurityUtil.getAccountID());
         setUploadPolicy(uploadPolicy);
-        FeedCreationResult feedCreationResult = new FeedCreation().createFeed(this, conn, null, SecurityUtil.getUserID());
+        FeedCreationResult feedCreationResult = new FeedCreation().createFeed(this, conn, null, uploadPolicy);
         obtainChildDataSources(conn, credentials);
         new FeedStorage().updateDataFeedConfiguration(this, conn);
         return feedCreationResult.getFeedID();
@@ -79,7 +79,7 @@ public abstract class CompositeServerDataSource extends CompositeFeedDefinition 
         if (newSource) {
             for (FeedType feedType : feedTypes) {
                 IServerDataSourceDefinition definition = createForFeedType(feedType);
-                newDefinition(definition, conn, credentials, retrieveUser(conn, SecurityUtil.getUserID()).getUserName(), SecurityUtil.getUserID());
+                newDefinition(definition, conn, credentials, "", getUploadPolicy());
                 dataSources.add(definition);
                 CompositeFeedNode node = new CompositeFeedNode();
                 node.setDataFeedID(definition.getDataFeedID());
@@ -108,7 +108,7 @@ public abstract class CompositeServerDataSource extends CompositeFeedDefinition 
         return dataSources;
     }
 
-    private void newDefinition(IServerDataSourceDefinition definition, Connection conn, Credentials credentials, String userName, long userID) throws SQLException {
+    public void newDefinition(IServerDataSourceDefinition definition, Connection conn, Credentials credentials, String userName, UploadPolicy uploadPolicy) throws SQLException {
         DataStorage metadata = null;
         try {
             FeedDefinition feedDefinition = (FeedDefinition) definition;
@@ -118,9 +118,9 @@ public abstract class CompositeServerDataSource extends CompositeFeedDefinition 
             feedDefinition.setFields(feedDefinition.createAnalysisItems(keys, dataSet, credentials, conn));
             feedDefinition.setOwnerName(userName);
             feedDefinition.setParentSourceID(getDataFeedID());
-            UploadPolicy uploadPolicy = new UploadPolicy(userID);
+            //UploadPolicy uploadPolicy = new UploadPolicy(userID);
             feedDefinition.setUploadPolicy(uploadPolicy);
-            FeedCreationResult feedCreationResult = new FeedCreation().createFeed(feedDefinition, conn, dataSet, userID);
+            FeedCreationResult feedCreationResult = new FeedCreation().createFeed(feedDefinition, conn, dataSet, uploadPolicy);
             metadata = feedCreationResult.getTableDefinitionMetadata();
             metadata.commit();
         } catch (SQLException e) {

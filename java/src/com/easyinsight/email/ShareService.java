@@ -15,13 +15,13 @@ import java.text.MessageFormat;
  */
 public class ShareService {
 
-    private static final String USERS_FROM_FEEDS = "SELECT DISTINCT USER.USER_ID, USERNAME, NAME, EMAIL FROM UPLOAD_POLICY_USERS, " +
+    private static final String USERS_FROM_FEEDS = "SELECT DISTINCT USER.USER_ID, USERNAME, NAME, EMAIL, ACCOUNT_ID FROM UPLOAD_POLICY_USERS, " +
                     "USER WHERE FEED_ID IN {0} AND UPLOAD_POLICY_USERS.USER_ID = USER.USER_ID";
 
-    private static final String USERS_FROM_ANALYSIS = "SELECT DISTINCT USER.USER_ID, USERNAME, NAME, EMAIL FROM " +
+    private static final String USERS_FROM_ANALYSIS = "SELECT DISTINCT USER.USER_ID, USERNAME, NAME, EMAIL, ACCOUNT_ID FROM " +
                     "USER_TO_ANALYSIS, USER WHERE ANALYSIS_ID IN {0} AND USER_TO_ANALYSIS.USER_ID = USER.USER_ID";
 
-    private static final String USERS_IN_ACCOUNT = "SELECT USER_ID, USERNAME, NAME, EMAIL FROM USER WHERE ACCOUNT_ID = ?";
+    private static final String USERS_IN_ACCOUNT = "SELECT USER_ID, USERNAME, NAME, EMAIL, ACCOUNT_ID FROM USER WHERE ACCOUNT_ID = ?";
 
     public List<UserStub> getUserStubs() {
         long userID = SecurityUtil.getUserID();
@@ -57,7 +57,7 @@ public class ShareService {
             ResultSet userFeedRS = findUsersStmt.executeQuery(usersFromFeeds);
             while (userFeedRS.next()) {
                 UserStub userStub = new UserStub(userFeedRS.getLong(1), userFeedRS.getString(2), userFeedRS.getString(3),
-                        userFeedRS.getString(4));
+                        userFeedRS.getString(4), userFeedRS.getLong(5));
                 userStubs.add(userStub);
             }
 
@@ -65,7 +65,7 @@ public class ShareService {
             ResultSet userAnalysisRS = findUsersStmt.executeQuery(usersFromAnalysis);
             while (userAnalysisRS.next()) {
                 UserStub userStub = new UserStub(userAnalysisRS.getLong(1), userAnalysisRS.getString(2), userAnalysisRS.getString(3),
-                        userAnalysisRS.getString(4));
+                        userAnalysisRS.getString(4), userFeedRS.getLong(5));
                 userStubs.add(userStub);
             }
 
@@ -74,7 +74,7 @@ public class ShareService {
             ResultSet userAccountRS = usersStmt.executeQuery();
             while (userAccountRS.next()) {
                 UserStub userStub = new UserStub(userAccountRS.getLong(1), userAccountRS.getString(2), userAccountRS.getString(3),
-                        userAccountRS.getString(4));
+                        userAccountRS.getString(4), userFeedRS.getLong(5));
                 userStubs.add(userStub);
             }
 

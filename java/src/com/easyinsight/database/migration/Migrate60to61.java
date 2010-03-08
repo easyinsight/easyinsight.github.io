@@ -34,7 +34,7 @@ public class Migrate60to61 implements Migration {
             LogClass.error(e);
             throw new RuntimeException(e);
         } finally {
-            Database.instance().closeConnection(conn);
+            Database.closeConnection(conn);
         }
     }
 

@@ -217,10 +217,10 @@ public abstract class UncheckedPublishService extends PublishService {
             feedDefinition.setFeedName(dataSourceName);
             feedDefinition.setUncheckedAPIEnabled(true);
             feedDefinition.setValidatedAPIEnabled(true);
-            UploadPolicy uploadPolicy = new UploadPolicy(userID);
+            UploadPolicy uploadPolicy = new UploadPolicy(userID, getAccountID());
             feedDefinition.setUploadPolicy(uploadPolicy);
             feedDefinition.setFields(analysisItems);
-            FeedCreationResult result = new FeedCreation().createFeed(feedDefinition, conn, new DataSet(), userID, getAccountID());
+            FeedCreationResult result = new FeedCreation().createFeed(feedDefinition, conn, new DataSet(), uploadPolicy);
             apiKey = feedDefinition.getApiKey();
             dataStorage = result.getTableDefinitionMetadata();
         } else if (dataSourceIDs.size() > 1) {

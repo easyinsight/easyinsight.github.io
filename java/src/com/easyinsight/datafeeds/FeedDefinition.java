@@ -29,8 +29,7 @@ import org.hibernate.Session;
  */
 public class FeedDefinition implements Cloneable, Serializable {
     private String feedName;
-    private String genre;
-    private List<AnalysisItem> fields;
+    private List<AnalysisItem> fields = new ArrayList<AnalysisItem>();
     private UploadPolicy uploadPolicy = new UploadPolicy();
     private boolean publiclyVisible;
     private boolean marketplaceVisible;
@@ -301,14 +300,6 @@ public class FeedDefinition implements Cloneable, Serializable {
 
     public void setSize(long size) {
         this.size = size;
-    }
-
-    public String getGenre() {
-        return genre;
-    }
-
-    public void setGenre(String genre) {
-        this.genre = genre;
     }
 
     public List<AnalysisItem> getFields() {

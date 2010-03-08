@@ -109,6 +109,10 @@ public class CompositeFeed extends Feed {
 
     private DataSet getDataSet(Set<AnalysisItem> analysisItems, Collection<FilterDefinition> filters, InsightRequestMetadata insightRequestMetadata) throws TokenMissingException {
 
+        if (analysisItems.size() == 0) {
+            return new DataSet();
+        }
+
         Map<Long, QueryStateNode> queryNodeMap = new HashMap<Long, QueryStateNode>();
 
         UndirectedGraph<QueryStateNode, Edge> graph = new SimpleGraph<QueryStateNode, Edge>(Edge.class);
@@ -116,16 +120,18 @@ public class CompositeFeed extends Feed {
         // convert the nodes and edges into the graph with addVertex() and addEdge()
         Map<Long, QueryStateNode> neededNodes = new HashMap<Long, QueryStateNode>();
 
+        Set<AnalysisItem> itemSet = new HashSet<AnalysisItem>(analysisItems);
         for (CompositeFeedNode node : compositeFeedNodes) {
             QueryStateNode queryStateNode = new QueryStateNode(node.getDataFeedID());
             queryNodeMap.put(node.getDataFeedID(), queryStateNode);
             graph.addVertex(queryStateNode);
             for (AnalysisItem analysisItem : analysisItems) {
                 if (queryStateNode.handles(analysisItem.getKey())) {
+                    itemSet.remove(analysisItem);
                     neededNodes.put(queryStateNode.feedID, queryStateNode);
                     queryStateNode.addItem(analysisItem);
                 }
-            }            
+            }
             if (filters != null) {
                 for (FilterDefinition filterDefinition : filters) {
                     if (queryStateNode.handles(filterDefinition.getField().getKey())) {
@@ -133,6 +139,15 @@ public class CompositeFeed extends Feed {
                     }
                 }
             }
+        }
+
+        if (itemSet.size() > 0) {
+            StringBuilder builder = new StringBuilder();
+            for (AnalysisItem analysisItem : itemSet) {
+                builder.append(analysisItem.toDisplay()).append(",");
+            }
+            builder.deleteCharAt(builder.length() - 1);
+            throw new RuntimeException("Could not find a data source to handle fields " + builder.toString() + ".");
         }
 
         for (CompositeFeedConnection connection : connections) {

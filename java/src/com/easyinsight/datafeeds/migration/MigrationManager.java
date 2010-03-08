@@ -1,7 +1,6 @@
 package com.easyinsight.datafeeds.migration;
 
 import com.easyinsight.analysis.AnalysisItem;
-import com.easyinsight.analysis.DataSourceInfo;
 import com.easyinsight.core.Key;
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
@@ -36,30 +35,25 @@ public class MigrationManager {
                     conn.setAutoCommit(false);
                     for (Map.Entry<FeedType, Class> entry : dataSourceTypeRegistry.getDataSourceMap().entrySet()) {
                         FeedDefinition feedDefinition = dataSourceTypeRegistry.createDataSource(entry.getKey());
-                        /*if (feedDefinition.getDataSourceType() == DataSourceInfo.STORED_PULL ||
-                                feedDefinition.getDataSourceType() == DataSourceInfo.LIVE) {*/
-
-                            queryStmt.setInt(1, entry.getKey().getType());
-                            queryStmt.setInt(2, feedDefinition.getVersion());
-                        System.out.println("querying for " + entry.getKey().getType() + " - " + feedDefinition.getVersion());
-                            ResultSet migrationTargetRS = queryStmt.executeQuery();
-                            while (migrationTargetRS.next()) {
-                                int currentVersion = migrationTargetRS.getInt(1);
-                                long dataSourceID = migrationTargetRS.getLong(2);
-                                FeedDefinition migrateSource = new FeedStorage().getFeedDefinitionData(dataSourceID, conn);
-                                Map<String, Key> keyMap = new HashMap<String, Key>();
-                                for (AnalysisItem analysisItem : migrateSource.getFields()) {
-                                    keyMap.put(analysisItem.getKey().toKeyString(), analysisItem.getKey());
-                                }
-                                List<DataSourceMigration> migrations = migrateSource.getMigrations();
-                                for (DataSourceMigration migration : migrations) {
-                                    if (migration.fromVersion() >= currentVersion && migration.toVersion() != currentVersion) {
-                                        migration.migrate(keyMap);
-                                    }
-                                }
-                                new FeedStorage().updateDataFeedConfiguration(migrateSource, conn);
+                        queryStmt.setInt(1, entry.getKey().getType());
+                        queryStmt.setInt(2, feedDefinition.getVersion());                        
+                        ResultSet migrationTargetRS = queryStmt.executeQuery();
+                        while (migrationTargetRS.next()) {
+                            int currentVersion = migrationTargetRS.getInt(1);
+                            long dataSourceID = migrationTargetRS.getLong(2);
+                            FeedDefinition migrateSource = new FeedStorage().getFeedDefinitionData(dataSourceID, conn);
+                            Map<String, Key> keyMap = new HashMap<String, Key>();
+                            for (AnalysisItem analysisItem : migrateSource.getFields()) {
+                                keyMap.put(analysisItem.getKey().toKeyString(), analysisItem.getKey());
                             }
-                        //}
+                            List<DataSourceMigration> migrations = migrateSource.getMigrations();
+                            for (DataSourceMigration migration : migrations) {
+                                if (migration.fromVersion() >= currentVersion && migration.toVersion() != currentVersion) {
+                                    migration.migrate(keyMap, conn);
+                                }
+                            }
+                            new FeedService().updateFeedDefinition(migrateSource, conn, true);
+                        }
                     }
                     conn.commit();
                 } catch (Exception e) {

@@ -58,9 +58,9 @@ public abstract class ServerDataSourceDefinition extends FeedDefinition implemen
             DataSet dataSet = getDataSet(credentials, keys, new Date(), null, null);
             setFields(createAnalysisItems(keys, dataSet, credentials, conn));
             setOwnerName(retrieveUser(conn, SecurityUtil.getUserID()).getUserName());
-            UploadPolicy uploadPolicy = new UploadPolicy(SecurityUtil.getUserID());
+            UploadPolicy uploadPolicy = new UploadPolicy(SecurityUtil.getUserID(), SecurityUtil.getAccountID());
             setUploadPolicy(uploadPolicy);
-            FeedCreationResult feedCreationResult = new FeedCreation().createFeed(this, conn, dataSet, SecurityUtil.getUserID());
+            FeedCreationResult feedCreationResult = new FeedCreation().createFeed(this, conn, dataSet, uploadPolicy);
             metadata = feedCreationResult.getTableDefinitionMetadata();
             if (metadata != null) metadata.commit();
             return feedCreationResult.getFeedID();

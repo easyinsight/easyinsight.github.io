@@ -1,18 +1,22 @@
 package com.easyinsight.kpi;
 
 import com.easyinsight.analysis.AnalysisItem;
+import com.easyinsight.analysis.AnalysisMeasure;
+import com.easyinsight.analysis.FilterDefinition;
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.CredentialFulfillment;
 import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.datafeeds.FeedStorage;
 import com.easyinsight.logging.LogClass;
+import com.easyinsight.pipeline.HistoryRun;
 import com.easyinsight.scorecard.Scorecard;
 import com.easyinsight.scorecard.ScorecardService;
 import com.easyinsight.scorecard.ScorecardStorage;
 import com.easyinsight.security.SecurityUtil;
 
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -83,6 +87,16 @@ public class KPIService {
         } finally {
             conn.setAutoCommit(true);
             Database.closeConnection(conn);
+        }
+    }
+
+    public List<KPIValue> generateHistory(AnalysisMeasure analysisMeasure, List<FilterDefinition> filters, long dataSourceID, Date startDate, Date endDate,
+                                           List<CredentialFulfillment> credentials) {
+        try {
+            return new HistoryRun().calculateHistoricalValues(dataSourceID, analysisMeasure, filters, startDate, endDate, credentials);
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
         }
     }
 

@@ -1,5 +1,6 @@
 package com.easyinsight.datafeeds;
 
+import com.easyinsight.analysis.AggregateKey;
 import com.easyinsight.core.Key;
 import com.easyinsight.core.DerivedKey;
 import com.easyinsight.analysis.AnalysisItem;
@@ -117,7 +118,12 @@ public class CompositeFeedDefinition extends FeedDefinition {
         try {
             AnalysisItemVisitor analysisItemVisitor = new AnalysisItemVisitor(conn);
             analysisItemVisitor.visit(this);
-            List<AnalysisItem> fields = new ArrayList<AnalysisItem>();
+
+            // have to reconcile what was returned by the visitor with existing fields
+
+            
+
+            List<AnalysisItem> fields = getFields() == null ? new ArrayList<AnalysisItem>() : getFields();
             
             // define folder for each child
             Map<String, AnalysisItem> keyMap = new HashMap<String, AnalysisItem>();
@@ -151,6 +157,8 @@ public class CompositeFeedDefinition extends FeedDefinition {
                 folderMap.put(feed.getDataFeedID(), defineFolder(name));
             }
 
+
+
             for (Map.Entry<Long, List<FeedNode>> entry : analysisItemVisitor.nodeMap.entrySet()) {
                 long dataSourceID = entry.getKey();
                 FeedFolder dataSourceFolder = folderMap.get(dataSourceID);
@@ -158,11 +166,19 @@ public class CompositeFeedDefinition extends FeedDefinition {
                     addFeedNode(feedNode, dataSourceFolder);
                 }
             }
-            for (AnalysisItem analysisItem : analysisItemVisitor.derivedItems) {
-                // is the item already in a folder?                
-                fields.add(analysisItem);
+            Map<AggregateKey, AnalysisItem> existingItems = new HashMap<AggregateKey, AnalysisItem>();
+            if (getFields() != null) {
+                for (AnalysisItem analysisItem : getFields()) {
+                    existingItems.put(analysisItem.createAggregateKey(), analysisItem);
+                }
             }
-
+            for (AnalysisItem analysisItem : analysisItemVisitor.derivedItems) {
+                // TODO: is the analysis item already here?
+                // is the item already in a folder?
+                if (existingItems.get(analysisItem.createAggregateKey()) == null) {
+                    fields.add(analysisItem);
+                }
+            }
 
             setFields(fields);
         } catch (SQLException e) {
@@ -185,7 +201,10 @@ public class CompositeFeedDefinition extends FeedDefinition {
             }
         } else {
             AnalysisItemNode itemNode = (AnalysisItemNode) feedNode;
-            parentFolder.addAnalysisItem(itemNode.getAnalysisItem());
+            // TODO: is the analysis item already in this folder?
+            if (parentFolder.getAnalysisItem(itemNode.getAnalysisItem().getKey().toKeyString()) == null) {
+                parentFolder.addAnalysisItem(itemNode.getAnalysisItem());    
+            }
         }
     }
 
@@ -280,7 +299,7 @@ public class CompositeFeedDefinition extends FeedDefinition {
         List<CompositeFeedNode> newChildren = new ArrayList<CompositeFeedNode>();
         for (CompositeFeedNode child : getCompositeFeedNodes()) {
             FeedDefinition childDefinition = new FeedStorage().getFeedDefinitionData(child.getDataFeedID(), conn);
-            DataSourceCloneResult result = DataSourceCopyUtils.cloneFeed(SecurityUtil.getUserID(), conn, childDefinition, false);
+            DataSourceCloneResult result = DataSourceCopyUtils.cloneFeed(SecurityUtil.getUserID(), conn, childDefinition, false, SecurityUtil.getAccountID());
             FeedDefinition clonedDefinition = result.getFeedDefinition();
             DataSourceCopyUtils.buildClonedDataStores(false, feedDefinition, clonedDefinition, conn);
             new UserUploadInternalService().createUserFeedLink(SecurityUtil.getUserID(), clonedDefinition.getDataFeedID(), Roles.OWNER, conn);

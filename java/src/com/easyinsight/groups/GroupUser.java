@@ -19,7 +19,7 @@ public class GroupUser extends UserStub {
     }
 
     public GroupUser(long userID, String userName, String email, String fullName, int role) {
-        super(userID, userName, email, fullName);
+        super(userID, userName, email, fullName, 0);
         this.role = role;
     }
 

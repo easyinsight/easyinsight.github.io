@@ -430,8 +430,8 @@ public class FeedService implements IDataFeedService {
             feedDef.setFeedName(feedName);
             feedDef.setCompositeFeedNodes(compositeFeedNodes);
             feedDef.setConnections(edges);
-            feedDef.setUploadPolicy(new UploadPolicy(userID));
-            final ContainedInfo containedInfo = new ContainedInfo();
+            feedDef.setUploadPolicy(new UploadPolicy(userID, SecurityUtil.getAccountID()));
+            /*final ContainedInfo containedInfo = new ContainedInfo();
             new CompositeFeedNodeShallowVisitor() {
 
                 protected void accept(CompositeFeedNode compositeFeedNode) throws SQLException {
@@ -439,11 +439,11 @@ public class FeedService implements IDataFeedService {
                     FeedDefinition feedDefinition = feedStorage.getFeedDefinitionData(compositeFeedNode.getDataFeedID(), conn);
                     containedInfo.feedItems.addAll(feedDefinition.getFields());
                 }
-            }.visit(feedDef);
+            }.visit(feedDef);*/
             feedDef.populateFields(conn);
             long feedID = feedStorage.addFeedDefinitionData(feedDef, conn);
             DataStorage.liveDataSource(feedID, conn);
-            new UserUploadInternalService().createUserFeedLink(userID, feedID, Roles.OWNER, conn);
+            //new UserUploadInternalService().createUserFeedLink(userID, feedID, Roles.OWNER, conn);
             conn.commit();
             return feedDef;
         } catch (Exception e) {
@@ -469,15 +469,59 @@ public class FeedService implements IDataFeedService {
         }
     }
 
-    public void updateFeedDefinition(FeedDefinition feedDefinition, String tagString, WSAnalysisDefinition baseDefinition) {
-        SecurityUtil.authorizeFeed(feedDefinition.getDataFeedID(), Roles.OWNER);
-        Connection conn = Database.instance().getConnection();
+    public void updateFeedDefinition(FeedDefinition feedDefinition, EIConnection conn) throws Exception {
+        updateFeedDefinition(feedDefinition, conn, false);
+    }
+
+    public void updateFeedDefinition(FeedDefinition feedDefinition, EIConnection conn, boolean systemUpdate) throws Exception {
         DataStorage metadata = null;
         try {
-            conn.setAutoCommit(false);
-            if (baseDefinition != null) {
-                new AnalysisStorage().saveAnalysis(AnalysisDefinitionFactory.fromWSDefinition(baseDefinition), conn);
+            FeedDefinition existingFeed = feedStorage.getFeedDefinitionData(feedDefinition.getDataFeedID(), conn, false);
+            if (feedDefinition.getDataSourceType() == DataSourceInfo.STORED_PUSH || feedDefinition.getDataSourceType() == DataSourceInfo.STORED_PULL) {
+                List<AnalysisItem> existingFields = existingFeed.getFields();
+                metadata = DataStorage.writeConnection(feedDefinition, conn, systemUpdate);
+                feedStorage.updateDataFeedConfiguration(feedDefinition, conn);
+                int version = metadata.migrate(existingFields, feedDefinition.getFields());
+                feedStorage.updateVersion(feedDefinition, version, conn);
+                metadata.commit();
+            } else {
+                feedStorage.updateDataFeedConfiguration(feedDefinition, conn);
             }
+            /*Session session = Database.instance().createSession(conn);
+            try {
+                if (newTaskGen) {
+                    DataSourceTaskGenerator generator = new DataSourceTaskGenerator();
+                    generator.setStartTaskDate(new Date());
+                    generator.setDataSourceID(feedDefinition.getDataFeedID());
+                    generator.setTaskInterval((int) feedDefinition.getRefreshDataInterval());
+                    session.save(generator);
+                }
+                notifyNewOwners(feedDefinition, existingFeed, session);
+                notifyNewViewers(feedDefinition, existingFeed, session);
+                session.flush();
+            } finally {
+                session.close();
+            }*/
+
+            updateComposites(feedDefinition, conn);
+
+        } catch (Exception e) {
+            if (metadata != null) {
+                metadata.rollback();
+            }
+            throw e;
+        } finally {
+            if (metadata != null) {
+                metadata.closeConnection();
+            }
+        }
+    }
+
+    public void updateFeedDefinition(FeedDefinition feedDefinition, String tagString, WSAnalysisDefinition baseDefinition) {
+        SecurityUtil.authorizeFeed(feedDefinition.getDataFeedID(), Roles.OWNER);
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            conn.setAutoCommit(false);
             if (tagString == null) {
                 tagString = "";
             }
@@ -487,10 +531,7 @@ public class FeedService implements IDataFeedService {
                 tagList.add(new Tag(tagName));
             }
             feedDefinition.setTags(tagList);
-            final long feedID = feedDefinition.getDataFeedID();
-            FeedDefinition existingFeed = feedStorage.getFeedDefinitionData(feedDefinition.getDataFeedID(), conn, false);
-            boolean newTaskGen = false;
-            if (existingFeed.getRefreshDataInterval() != feedDefinition.getRefreshDataInterval()) {
+            /*if (existingFeed.getRefreshDataInterval() != feedDefinition.getRefreshDataInterval()) {
                 newTaskGen = feedDefinition.getRefreshDataInterval() > 0;
                 if (existingFeed.getRefreshDataInterval() > 0) {
                     // nuke the existing generator
@@ -504,8 +545,8 @@ public class FeedService implements IDataFeedService {
                         session.close();
                     }
                 }
-            }
-            if(feedDefinition instanceof IServerDataSourceDefinition) {
+            }*/
+            /*if(feedDefinition instanceof IServerDataSourceDefinition) {
                 IServerDataSourceDefinition serverSource = (IServerDataSourceDefinition) feedDefinition;
                 if(serverSource.getCredentialsDefinition() == CredentialsDefinition.STANDARD_USERNAME_PW){
                     if(serverSource.getUsername() != null && serverSource.retrievePassword() != null && !"".equals(serverSource.retrievePassword())) {
@@ -528,56 +569,17 @@ public class FeedService implements IDataFeedService {
                     if (rows == 0)
                         insertStatement.execute();
                 }
-            }
-            if (feedDefinition.getDataSourceType() == DataSourceInfo.STORED_PUSH || feedDefinition.getDataSourceType() == DataSourceInfo.STORED_PULL) {
-                List<AnalysisItem> existingFields = existingFeed.getFields();
-                metadata = DataStorage.writeConnection(feedDefinition, conn);
-                feedStorage.updateDataFeedConfiguration(feedDefinition, conn);
-                int version = metadata.migrate(existingFields, feedDefinition.getFields());
-                feedStorage.updateVersion(feedDefinition, version, conn);
-                metadata.commit();
-            } else {
-                feedStorage.updateDataFeedConfiguration(feedDefinition, conn);
-            }
-            Session session = Database.instance().createSession(conn);
-            try {
-                if (newTaskGen) {
-                    DataSourceTaskGenerator generator = new DataSourceTaskGenerator();
-                    generator.setStartTaskDate(new Date());
-                    generator.setDataSourceID(feedDefinition.getDataFeedID());
-                    generator.setTaskInterval((int) feedDefinition.getRefreshDataInterval());
-                    session.save(generator);
-                }
-                notifyNewOwners(feedDefinition, existingFeed, session);
-                notifyNewViewers(feedDefinition, existingFeed, session);
-                session.flush();
-            } finally {
-                session.close();
-            }
-
-            FeedRegistry.instance().flushCache(feedID);
-
+            }*/
+            updateFeedDefinition(feedDefinition, conn);
+            FeedRegistry.instance().flushCache(feedDefinition.getDataFeedID());
             conn.commit();
         } catch (Exception e) {
             LogClass.error(e);
-            if (metadata != null) {
-                metadata.rollback();
-            }
-            try {
-                conn.rollback();
-            } catch (SQLException e1) {
-                LogClass.error(e1);
-            }
+
+            conn.rollback();
             throw new RuntimeException(e);
-        } finally {
-            try {
-                conn.setAutoCommit(true);
-            } catch (SQLException e) {
-                LogClass.error(e);
-            }
-            if (metadata != null) {
-                metadata.closeConnection();
-            }
+        } finally {            
+            conn.setAutoCommit(true);
             Database.closeConnection(conn);
         }
         EventDispatcher.instance().dispatch(new TodoCompletedEvent(feedDefinition));
@@ -592,6 +594,19 @@ public class FeedService implements IDataFeedService {
                 }
             }
         }).start();*/
+    }
+
+    private void updateComposites(FeedDefinition feedDefinition, Connection conn) throws SQLException {
+        PreparedStatement stmt = conn.prepareStatement("SELECT COMPOSITE_FEED.data_feed_id FROM COMPOSITE_NODE, COMPOSITE_FEED WHERE COMPOSITE_NODE.DATA_FEED_ID = ? AND " +
+                "COMPOSITE_NODE.composite_feed_id = COMPOSITE_FEED.composite_feed_id");
+        stmt.setLong(1, feedDefinition.getDataFeedID());        
+        ResultSet rs = stmt.executeQuery();
+        while (rs.next()) {
+            long parentDataSourceID = rs.getLong(1);
+            CompositeFeedDefinition compositeFeedDefinition = (CompositeFeedDefinition) feedStorage.getFeedDefinitionData(parentDataSourceID, conn);
+            compositeFeedDefinition.populateFields(conn);
+            feedStorage.updateDataFeedConfiguration(compositeFeedDefinition, conn);
+        }
     }
 
     private void notifyNewViewers(FeedDefinition feedDefinition, FeedDefinition existingFeed, Session session) throws SQLException {

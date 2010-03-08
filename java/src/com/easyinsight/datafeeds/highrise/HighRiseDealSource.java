@@ -1,5 +1,6 @@
 package com.easyinsight.datafeeds.highrise;
 
+import com.easyinsight.datafeeds.DataSourceMigration;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.storage.DataStorage;
@@ -42,6 +43,7 @@ public class HighRiseDealSource extends HighRiseBaseSource {
     public static final String CATEGORY = "Category";
     public static final String STATUS = "Status";
     public static final String CREATED_AT = "Created At";
+    public static final String STATUS_CHANGED_ON = "Status Changed On";
     public static final String COUNT = "Count";
     public static final String TOTAL_DEAL_VALUE = "Total Deal Value";
 
@@ -52,7 +54,7 @@ public class HighRiseDealSource extends HighRiseBaseSource {
     @NotNull
     protected List<String> getKeys() {
         return Arrays.asList(DEAL_NAME, COMPANY_ID, PRICE, DURATION, PRICE_TYPE, DEAL_OWNER,
-                CATEGORY, STATUS, CREATED_AT, COUNT, TOTAL_DEAL_VALUE);
+                CATEGORY, STATUS, CREATED_AT, COUNT, TOTAL_DEAL_VALUE, STATUS_CHANGED_ON);
     }
 
     public List<AnalysisItem> createAnalysisItems(Map<String, Key> keys, DataSet dataSet, com.easyinsight.users.Credentials credentials, Connection conn) {
@@ -73,6 +75,7 @@ public class HighRiseDealSource extends HighRiseBaseSource {
         analysisItems.add(new AnalysisDimension(keys.get(PRICE_TYPE), true));
         analysisItems.add(new AnalysisDimension(keys.get(CATEGORY), true));
         analysisItems.add(new AnalysisDimension(keys.get(STATUS), true));
+        analysisItems.add(new AnalysisDateDimension(keys.get(STATUS_CHANGED_ON), true, AnalysisDateDimension.DAY_LEVEL));
         analysisItems.add(new AnalysisDateDimension(keys.get(CREATED_AT), true, AnalysisDateDimension.DAY_LEVEL));
         analysisItems.add(new AnalysisMeasure(keys.get(COUNT), AggregationTypes.SUM));
         return analysisItems;
@@ -144,9 +147,9 @@ public class HighRiseDealSource extends HighRiseBaseSource {
         Map<String, String> peopleCache = new HashMap<String, String>();
         Map<String, String> categoryCache = new HashMap<String, String>();
         try {
-            /*EIPageInfo info = new EIPageInfo();
+            EIPageInfo info = new EIPageInfo();
             info.currentPage = 1;
-            do {*/
+            //do {
                 Document deals = runRestRequest("/deals.xml", client, builder, url, null);
                 Nodes dealNodes = deals.query("/deals/deal");
                 for(int i = 0;i < dealNodes.size();i++) {
@@ -196,6 +199,10 @@ public class HighRiseDealSource extends HighRiseBaseSource {
                         row.addValue(COMPANY_ID, partyID);
                         String createdAt = queryField(currDeal, "created-at/text()");
                         row.addValue(CREATED_AT, new DateValue(deadlineFormat.parse(createdAt)));
+                        String statusChangedOn = queryField(currDeal, "status-changed-on/text()");
+                        if (statusChangedOn != null) {
+                            row.addValue(STATUS_CHANGED_ON, new DateValue(deadlineFormat.parse(statusChangedOn)));
+                        }
                     } catch (Exception e) {
                         LogClass.error(e);
                     }
@@ -206,5 +213,15 @@ public class HighRiseDealSource extends HighRiseBaseSource {
             throw new RuntimeException(e);
         }
         return ds;
+    }
+
+    @Override
+    public int getVersion() {
+        return 2;
+    }
+
+    @Override
+    public List<DataSourceMigration> getMigrations() {
+        return Arrays.asList((DataSourceMigration) new HighRise1To2(this));
     }
 }

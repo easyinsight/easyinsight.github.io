@@ -14,7 +14,6 @@ import com.easyinsight.datafeeds.FeedDefinition;
 import com.easyinsight.datafeeds.FeedConsumer;
 import com.easyinsight.datafeeds.DataSourceCopyUtils;
 import com.easyinsight.core.EIDescriptor;
-import com.easyinsight.core.InsightDescriptor;
 import com.easyinsight.analysis.AnalysisMeasure;
 import com.easyinsight.analysis.FilterDefinition;
 import com.easyinsight.analysis.AnalysisItem;
@@ -43,6 +42,7 @@ public class InstallationSystem {
     private List<AuthorizationRequirement> authRequirements = new ArrayList<AuthorizationRequirement>();
     private EIConnection conn;
     private long userID;
+    private long accountID;
     private GoalStorage goalStorage = new GoalStorage();
     private FeedStorage feedStorage = new FeedStorage();
     private SolutionService solutionService = new SolutionService();
@@ -50,6 +50,7 @@ public class InstallationSystem {
     public InstallationSystem(EIConnection conn) {
         this.conn = conn;
         this.userID = SecurityUtil.getUserID();
+        this.accountID = SecurityUtil.getAccountID();
     }
 
     public List<SolutionInstallInfo> getAllSolutions() {
@@ -92,7 +93,7 @@ public class InstallationSystem {
     private long duplicateTree(long goalTreeID, long solutionID) throws Exception {
         GoalTree goalTree = new GoalStorage().retrieveGoalTree(goalTreeID, conn);
         GoalTree clonedTree = goalTree.clone();
-        FeedConsumer feedConsumer = new UserStub(userID, null, null, null);
+        FeedConsumer feedConsumer = new UserStub(userID, null, null, null, accountID);
         clonedTree.setAdministrators(Arrays.asList(feedConsumer));
         duplicateGoalDataSources(goalTree, solutionID);
         installDataSourcesAndReports(clonedTree);
@@ -195,7 +196,7 @@ public class InstallationSystem {
         visitor.visit(goalTree.getRootNode());
         for (Long dataSourceID : dataSourceIDs) {
             FeedDefinition feedDefinition = feedStorage.getFeedDefinitionData(dataSourceID, conn, false);
-            allSolutions.addAll(DataSourceCopyUtils.installFeed(userID, conn, true, dataSourceID, feedDefinition, true, null, solutionID));
+            allSolutions.addAll(DataSourceCopyUtils.installFeed(userID, conn, true, dataSourceID, feedDefinition, true, null, solutionID, accountID));
         }
 
         for (SolutionInstallInfo solutionInstallInfo : allSolutions) {
@@ -237,7 +238,7 @@ public class InstallationSystem {
         while (rs.next()) {
             long feedID = rs.getLong(1);
             FeedDefinition feedDefinition = feedStorage.getFeedDefinitionData(feedID, conn);
-            descriptors.addAll(DataSourceCopyUtils.installFeed(userID, conn, copyData, feedID, feedDefinition, false, null, solutionID));
+            descriptors.addAll(DataSourceCopyUtils.installFeed(userID, conn, copyData, feedID, feedDefinition, false, null, solutionID, accountID));
         }
         return descriptors;
     }

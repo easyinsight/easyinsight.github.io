@@ -106,4 +106,13 @@ public class FeedFolder implements Cloneable, Serializable {
         }
         return null;
     }
+
+    public AnalysisItem getAnalysisItem(String name) {
+        for (AnalysisItem node : getChildItems()) {
+            if (node.getKey().toKeyString().equals(name)) {
+                return node;
+            }
+        }
+        return null;
+    }
 }

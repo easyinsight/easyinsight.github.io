@@ -426,7 +426,7 @@ public class KPIStorage {
     }
 
     private List<KPIUser> getKPIUsers(long kpiID, EIConnection conn) throws SQLException {
-        PreparedStatement queryStmt = conn.prepareStatement("SELECT KPI_ROLE.USER_ID, GROUP_ID, USER.USERNAME, USER.EMAIL, USER.NAME, COMMUNITY_GROUP.name, OWNER, RESPONSIBLE FROM " +
+        PreparedStatement queryStmt = conn.prepareStatement("SELECT KPI_ROLE.USER_ID, GROUP_ID, USER.USERNAME, USER.EMAIL, USER.NAME, COMMUNITY_GROUP.name, OWNER, RESPONSIBLE, USER.ACCOUNT_ID FROM " +
                 "KPI_ROLE LEFT JOIN USER ON KPI_ROLE.USER_ID = USER.USER_ID LEFT JOIN COMMUNITY_GROUP ON KPI_ROLE.GROUP_ID = COMMUNITY_GROUP.COMMUNITY_GROUP_ID " +
                 "WHERE KPI_ID = ? ");
         queryStmt.setLong(1, kpiID);
@@ -436,7 +436,7 @@ public class KPIStorage {
             long userID = rs.getLong(1);
             FeedConsumer feedConsumer;
             if (!rs.wasNull()) {
-                feedConsumer = new UserStub(userID, rs.getString(3), rs.getString(4), rs.getString(5));
+                feedConsumer = new UserStub(userID, rs.getString(3), rs.getString(4), rs.getString(5), rs.getLong(9));
             } else {
                 feedConsumer = new GroupDescriptor(rs.getString(6), rs.getLong(3), 0, "");
             }

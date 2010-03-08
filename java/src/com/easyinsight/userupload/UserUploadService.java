@@ -81,7 +81,8 @@ public class UserUploadService implements IUserUploadService {
         try {
             conn.setAutoCommit(false);
             FeedDefinition existingDef = feedStorage.getFeedDefinitionData(dataSourceID, conn);
-            List<SolutionInstallInfo> results = DataSourceCopyUtils.installFeed(SecurityUtil.getUserID(), conn, copyData, dataSourceID, existingDef, includeChildren, newName, 0);
+            List<SolutionInstallInfo> results = DataSourceCopyUtils.installFeed(SecurityUtil.getUserID(), conn, copyData, dataSourceID, existingDef, includeChildren, newName, 0,
+                    SecurityUtil.getAccountID());
             conn.commit();
             return results;
         } catch (Exception e) {
@@ -242,10 +243,10 @@ public class UserUploadService implements IUserUploadService {
             FeedDefinition feedDefinition = new FeedDefinition();
             feedDefinition.setFeedName(name);
             feedDefinition.setOwnerName(retrieveUser(conn).getUserName());
-            UploadPolicy uploadPolicy = new UploadPolicy(SecurityUtil.getUserID());
+            UploadPolicy uploadPolicy = new UploadPolicy(SecurityUtil.getUserID(), SecurityUtil.getAccountID());
             feedDefinition.setUploadPolicy(uploadPolicy);
             feedDefinition.setFields(new ArrayList<AnalysisItem>());
-            FeedCreationResult result = new FeedCreation().createFeed(feedDefinition, conn, new DataSet(), SecurityUtil.getUserID());
+            FeedCreationResult result = new FeedCreation().createFeed(feedDefinition, conn, new DataSet(), uploadPolicy);
             tableDef = result.getTableDefinitionMetadata();
             tableDef.commit();
             conn.commit();
@@ -517,7 +518,6 @@ public class UserUploadService implements IUserUploadService {
     }
 
     public CredentialsResponse refreshData(long feedID, Credentials credentials, boolean saveCredentials, boolean synchronous) {
-        System.out.println("******* REFRESHING ********");
         SecurityUtil.authorizeFeed(feedID, Roles.OWNER);
         if(credentials != null && credentials.isEncrypted()) {
             try {

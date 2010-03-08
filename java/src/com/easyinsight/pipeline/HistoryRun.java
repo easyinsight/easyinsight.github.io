@@ -105,4 +105,9 @@ public class HistoryRun {
         }
         return goalValue;
     }
+
+    public List<KPIValue> calculateHistoricalValues(long dataSourceID, AnalysisMeasure analysisMeasure, List<FilterDefinition> filters, Date startDate, Date endDate, List<CredentialFulfillment> credentials) {
+        Feed feed = FeedRegistry.instance().getFeed(dataSourceID);
+        return null;
+    }
 }

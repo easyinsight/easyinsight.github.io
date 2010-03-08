@@ -31,6 +31,7 @@ public class DataStorage {
     private long feedID;
     private long accountID;
     private int version;
+    private boolean systemUpdate;
     private Database database;
     private Connection storageConn;
     private Connection coreDBConn;
@@ -96,12 +97,21 @@ public class DataStorage {
      */
 
     public static DataStorage writeConnection(FeedDefinition feedDefinition, Connection conn) throws SQLException {
-        return writeConnection(feedDefinition, conn, SecurityUtil.getAccountID());
+        return writeConnection(feedDefinition, conn, SecurityUtil.getAccountID(), false);
+    }
+
+    public static DataStorage writeConnection(FeedDefinition feedDefinition, Connection conn, boolean systemUpdate) throws SQLException {
+        return writeConnection(feedDefinition, conn, 0, systemUpdate);
     }
 
     public static DataStorage writeConnection(FeedDefinition feedDefinition, Connection conn, long accountID) throws SQLException {
+        return writeConnection(feedDefinition, conn, accountID, false);
+    }
+
+    public static DataStorage writeConnection(FeedDefinition feedDefinition, Connection conn, long accountID, boolean systemUpdate) throws SQLException {
         DataStorage dataStorage = new DataStorage();
         dataStorage.accountID = accountID;
+        dataStorage.systemUpdate = systemUpdate;
         Map<Key, KeyMetadata> keyMetadatas = new HashMap<Key, KeyMetadata>();
         for (AnalysisItem analysisItem : feedDefinition.getFields()) {
             if (analysisItem.isDerived()) {
@@ -132,6 +142,7 @@ public class DataStorage {
     }
 
     private void validateSpace(Connection conn) throws SQLException, StorageLimitException {
+        if (systemUpdate) return;
         PreparedStatement queryStmt = conn.prepareStatement("SELECT SUM(SIZE) " +
                 "FROM FEED_PERSISTENCE_METADATA, upload_policy_users, user WHERE feed_persistence_metadata.feed_id = upload_policy_users.feed_id and " +
                 "upload_policy_users.role = ? and upload_policy_users.user_id = user.user_id and user.account_id = ?");
@@ -295,7 +306,7 @@ public class DataStorage {
         return migrate(previousItems, newItems, true);
     }
 
-    public int migrate(List<AnalysisItem> previousItems, List<AnalysisItem> newItems, boolean migrateData) throws SQLException {
+    public int migrate(List<AnalysisItem> previousItems, List<AnalysisItem> newItems, final boolean migrateData) throws SQLException {
         // did any items change in a way that requires us to migrate...
         List<FieldMigration> fieldMigrations = new ArrayList<FieldMigration>();
         boolean newFieldsFound = false;
@@ -326,21 +337,23 @@ public class DataStorage {
             this.metadata.setVersion(this.version);
             List<AnalysisItem> previousKeys = new ArrayList<AnalysisItem>();
             for (AnalysisItem previousItem : previousItems) {
-                if (!previousItem.isDerived()) {
+                if (!previousItem.isDerived() && previousItem.isConcrete()) {
                     previousKeys.add(previousItem);
                 }
             }
             DataSet existing = null;
+            Map<Key, KeyMetadata> keyMetadatas = null;
             if (migrateData) {
                 if (previousKeys.isEmpty()) {
                     existing = new DataSet();
                 } else {
-                    Map<Key, KeyMetadata> keyMetadatas = new HashMap<Key, KeyMetadata>();
+
+                    keyMetadatas = new HashMap<Key, KeyMetadata>();
                     for (AnalysisItem analysisItem : previousItems) {
                         if (analysisItem.isDerived()) {
                             continue;
                         }
-                        Key key = analysisItem.getKey();
+                        Key key = analysisItem.createAggregateKey(false);
                         if (analysisItem.hasType(AnalysisItemTypes.DATE_DIMENSION)) {
                             keyMetadatas.put(key, new KeyMetadata(key, Value.DATE, analysisItem));
                         } else if (analysisItem.hasType(AnalysisItemTypes.MEASURE)) {
@@ -372,7 +385,6 @@ public class DataStorage {
                         Value existingValue = row.getValue(fieldMigration.key);
                         String string = existingValue.toString();
                         if (fieldMigration.newType == Value.DATE) {
-
                         } else if (fieldMigration.newType == Value.NUMBER) {
                             double doubleValue = NumericValue.produceDoubleValue(string);
                             row.addValue(fieldMigration.key, new NumericValue(doubleValue));
@@ -384,7 +396,14 @@ public class DataStorage {
                         }
                     }
                 }
-                insertData(existing);
+                DataSet mirror = new DataSet();
+                for (IRow row : existing.getRows()) {
+                    IRow mirrorRow = mirror.createRow();
+                    for (Key key : row.getKeys()) {
+                        mirrorRow.addValue(key.toBaseKey(), row.getValue(key));
+                    }
+                }
+                insertData(mirror);
             }
 
             String dropSQL = "DROP TABLE " + "df" + feedID + "v" + previousVersion;
@@ -644,6 +663,10 @@ public class DataStorage {
     }
 
     public void insertData(DataSet dataSet) throws SQLException {
+        insertData(dataSet, keys);
+    }
+
+    public void insertData(DataSet dataSet, Map<Key, KeyMetadata> keys) throws SQLException {
         StringBuilder columnBuilder = new StringBuilder();
         StringBuilder paramBuilder = new StringBuilder();
         Iterator<KeyMetadata> keyIter = keys.values().iterator();

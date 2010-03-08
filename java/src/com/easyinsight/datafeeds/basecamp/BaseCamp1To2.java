@@ -2,9 +2,9 @@ package com.easyinsight.datafeeds.basecamp;
 
 import com.easyinsight.analysis.*;
 import com.easyinsight.core.Key;
+import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.DataSourceMigration;
 import com.easyinsight.datafeeds.FeedDefinition;
-import com.easyinsight.datafeeds.cloudwatch.CloudWatchDataSource;
 
 import java.util.Arrays;
 import java.util.Map;
@@ -19,7 +19,7 @@ public class BaseCamp1To2 extends DataSourceMigration {
         super(dataSource);
     }
 
-    public void migrate(Map<String, Key> keys) {
+    public void migrate(Map<String, Key> keys, EIConnection conn) {
         AnalysisDimension startTodoDim = (AnalysisDimension) findAnalysisItem(BaseCampDataSource.TODOLISTNAME);
         if (startTodoDim != null) {
             AnalysisDimension todoDimension = new AnalysisDimension(startTodoDim.getKey(), BaseCampDataSource.TODOLISTNAME);

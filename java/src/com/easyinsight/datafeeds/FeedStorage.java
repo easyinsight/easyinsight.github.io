@@ -621,32 +621,32 @@ public class FeedStorage {
         } catch (CacheException e) {
             LogClass.error(e);
         }
-        PreparedStatement updateDataFeedStmt = conn.prepareStatement("UPDATE DATA_FEED SET FEED_NAME = ?, FEED_TYPE = ?, PUBLICLY_VISIBLE = ?, GENRE = ?, " +
+        PreparedStatement updateDataFeedStmt = conn.prepareStatement("UPDATE DATA_FEED SET FEED_NAME = ?, FEED_TYPE = ?, PUBLICLY_VISIBLE = ?, " +
                 "FEED_SIZE = ?, ANALYSIS_ID = ?, DESCRIPTION = ?, ATTRIBUTION = ?, OWNER_NAME = ?, DYNAMIC_SERVICE_DEFINITION_ID = ?, MARKETPLACE_VISIBLE = ?," +
                 "API_KEY = ?, validated_api_enabled = ?, unchecked_api_enabled = ?, REFRESH_INTERVAL = ?, VISIBLE = ?, parent_source_id = ?, VERSION = ? WHERE DATA_FEED_ID = ?");
         feedDefinition.setDateUpdated(new Date());
-        updateDataFeedStmt.setString(1, feedDefinition.getFeedName());
-        updateDataFeedStmt.setInt(2, feedDefinition.getFeedType().getType());
-        updateDataFeedStmt.setBoolean(3, feedDefinition.getUploadPolicy().isPubliclyVisible());
-        updateDataFeedStmt.setString(4, feedDefinition.getGenre());
-        updateDataFeedStmt.setLong(5, feedDefinition.getSize());
-        updateDataFeedStmt.setLong(6, feedDefinition.getAnalysisDefinitionID());
-        updateDataFeedStmt.setString(7, feedDefinition.getDescription());
-        updateDataFeedStmt.setString(8, feedDefinition.getAttribution());
-        updateDataFeedStmt.setString(9, feedDefinition.getOwnerName());
+        int i = 1;
+        updateDataFeedStmt.setString(i++, feedDefinition.getFeedName());
+        updateDataFeedStmt.setInt(i++, feedDefinition.getFeedType().getType());
+        updateDataFeedStmt.setBoolean(i++, feedDefinition.getUploadPolicy().isPubliclyVisible());
+        updateDataFeedStmt.setLong(i++, feedDefinition.getSize());
+        updateDataFeedStmt.setLong(i++, feedDefinition.getAnalysisDefinitionID());
+        updateDataFeedStmt.setString(i++, feedDefinition.getDescription());
+        updateDataFeedStmt.setString(i++, feedDefinition.getAttribution());
+        updateDataFeedStmt.setString(i++, feedDefinition.getOwnerName());
         if (feedDefinition.getDynamicServiceDefinitionID() > 0)
-            updateDataFeedStmt.setLong(10, feedDefinition.getDynamicServiceDefinitionID());
+            updateDataFeedStmt.setLong(i++, feedDefinition.getDynamicServiceDefinitionID());
         else
-            updateDataFeedStmt.setNull(10, Types.BIGINT);
-        updateDataFeedStmt.setBoolean(11, feedDefinition.getUploadPolicy().isMarketplaceVisible());
-        updateDataFeedStmt.setString(12, feedDefinition.getApiKey());
-        updateDataFeedStmt.setBoolean(13, feedDefinition.isValidatedAPIEnabled());
-        updateDataFeedStmt.setBoolean(14, feedDefinition.isUncheckedAPIEnabled());
-        updateDataFeedStmt.setLong(15, feedDefinition.getRefreshDataInterval());
-        updateDataFeedStmt.setBoolean(16, feedDefinition.isVisible());
-        updateDataFeedStmt.setLong(17, feedDefinition.getParentSourceID());
-        updateDataFeedStmt.setLong(18, feedDefinition.getVersion());
-        updateDataFeedStmt.setLong(19, feedDefinition.getDataFeedID());
+            updateDataFeedStmt.setNull(i++, Types.BIGINT);
+        updateDataFeedStmt.setBoolean(i++, feedDefinition.getUploadPolicy().isMarketplaceVisible());
+        updateDataFeedStmt.setString(i++, feedDefinition.getApiKey());
+        updateDataFeedStmt.setBoolean(i++, feedDefinition.isValidatedAPIEnabled());
+        updateDataFeedStmt.setBoolean(i++, feedDefinition.isUncheckedAPIEnabled());
+        updateDataFeedStmt.setLong(i++, feedDefinition.getRefreshDataInterval());
+        updateDataFeedStmt.setBoolean(i++, feedDefinition.isVisible());
+        updateDataFeedStmt.setLong(i++, feedDefinition.getParentSourceID());
+        updateDataFeedStmt.setLong(i++, feedDefinition.getVersion());
+        updateDataFeedStmt.setLong(i, feedDefinition.getDataFeedID());
         int rows = updateDataFeedStmt.executeUpdate();
         if (rows != 1) {
             throw new RuntimeException("Could not locate row to update");
@@ -776,8 +776,7 @@ public class FeedStorage {
             feedDefinition.setDateUpdated(updateDate);
             feedDefinition.setViewCount(views);
             feedDefinition.setRatingCount(ratingCount);
-            feedDefinition.setRatingAverage(ratingAverage);
-            feedDefinition.setGenre(genre);
+            feedDefinition.setRatingAverage(ratingAverage);            
             if (!feedType.equals(FeedType.ANALYSIS_BASED)) {
                 retrieveFields(feedDefinition, conn);
             }
@@ -798,14 +797,14 @@ public class FeedStorage {
             feedDefinition.setFolders(getFolders(feedDefinition.getDataFeedID(), feedDefinition.getFields(), conn));
             feedDefinition.setTags(getTags(feedDefinition.getDataFeedID(), conn));
             feedDefinition.customLoad(conn);
-            if (feedDefinition instanceof IServerDataSourceDefinition) {
+            /*if (feedDefinition instanceof IServerDataSourceDefinition) {
                 IServerDataSourceDefinition ds = (IServerDataSourceDefinition) feedDefinition;
                 if (ds.getCredentialsDefinition() == CredentialsDefinition.SALESFORCE)
                     setSessionIdCredentials(conn, ds);
                 else if (ds.getCredentialsDefinition() == CredentialsDefinition.STANDARD_USERNAME_PW) {
                     setPasswordCredentials(conn, ds);
                 }
-            }
+            }*/
         } else {
             throw new RuntimeException("Could not find data source " + identifier);
         }
@@ -1074,8 +1073,7 @@ public class FeedStorage {
             String userName = usersRS.getString(4);
             String email = usersRS.getString(5);
             long accountID = usersRS.getLong(6);
-            UserStub userStub = new UserStub(userID, userName, email, name);
-            userStub.setAccountID(accountID);
+            UserStub userStub = new UserStub(userID, userName, email, name, accountID);
             if (role == Roles.OWNER) {
                 owners.add(userStub);
             } else {

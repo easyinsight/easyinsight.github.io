@@ -19,7 +19,7 @@ public class KPIUtil {
 
     public static KPIUser defaultUser() {
         KPIUser kpiUser = new KPIUser();
-        UserStub userStub = new UserStub(SecurityUtil.getUserID(), SecurityUtil.getUserName(), "", "");
+        UserStub userStub = new UserStub(SecurityUtil.getUserID(), SecurityUtil.getUserName(), "", "", SecurityUtil.getAccountID());
         kpiUser.setOwner(true);
         kpiUser.setResponsible(true);
         kpiUser.setFeedConsumer(userStub);

@@ -16,11 +16,12 @@ public class UserStub extends FeedConsumer {
     public UserStub() {
     }
 
-    public UserStub(long userID, String userName, String email, String fullName) {
+    public UserStub(long userID, String userName, String email, String fullName, long accountID) {
         super(userName);
         this.userID = userID;
         this.fullName = fullName;
         this.email = email;
+        this.accountID = accountID;
     }
 
     public int type() {
