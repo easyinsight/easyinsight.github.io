@@ -82,6 +82,7 @@ public class KPIIconFactory {
                         }
                         break;
                     case KPIOutcome.NO_DATA:
+                    default:
                         trendImage = noDataIcon;
                         break;
                 }

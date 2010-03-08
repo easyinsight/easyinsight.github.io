@@ -25,16 +25,31 @@
 <html>
     <head>
         <title>Easy Insight Scorecard - <%= scorecard != null ? scorecard.getName() : "Unknown" %></title>
-        <script type=”text/javascript” src=”http://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js”></script>
-        <link type="text/css" href="http://jqueryui.com/latest/themes/base/jquery.ui.all.css" rel="stylesheet" />
-        <script type="text/javascript" src="http://jqueryui.com/latest/jquery-1.4.2.js"></script>
-        <script type="text/javascript" src="http://jquery-ui.googlecode.com/svn/tags/1.8rc1/jquery-1.4.1.js"></script>
-        <script type="text/javascript" src="http://jquery-ui.googlecode.com/svn/tags/1.8rc1/ui/jquery-ui.js"></script>
+        <link type="text/css" href="/css/scorecard.css" rel="stylesheet" media="screen" />
+        <link type="text/css" href="/css/jquery-ui.css" rel="stylesheet" media="screen" />
+        <script type="text/javascript" src="/js/jquery.min.js"></script>
+        <script type="text/javascript" src="/js/jquery-ui.min.js"></script>
+        <%
+            String googleLibs = request.getParameter("libs");
+            if(googleLibs != null && !googleLibs.isEmpty() && !"null".equals(googleLibs)) {
+                for(String lib : googleLibs.split(",")) {
+                    %>
+            <script type="text/javascript" src="http://www.google.com/ig/f/<%= lib %>"></script>
+        <%
+                }
+            }
+        %>
         <script type="text/javascript">
             $(document).ready(function() {
+                $("#progressbar").hide();
+                $("#progressbar").progressbar({
+			        value: 100
+		        });
                 $("#loginDialog").dialog({bigframe: true,
                     autoOpen: <%= loggedIn ? "false" : "true" %>,
                     modal: true, resizable: false, draggable: false, closeOnEscape: false,
+                    minheight: 250,
+                    maxheight: 250,
                     buttons: {"Log In": login }
                 })
                 $("#loginDialog").keyup(function(e) {
@@ -42,49 +57,176 @@
                         login();
                     }
                 });
+                $("#scorecardList").dialog({
+                    bigframe: true,
+                    autoOpen: false,
+                    modal: true, resizable: false, draggable: false, closeOnEscape: false,
+                    minheight: 250,
+                    maxheight: 250,
+                    buttons: {}
+                })
+                $("#credentialsDialog").dialog({
+                    bigframe: true,
+                    autoOpen: false,
+                    modal: true, resizable: false, draggable: false, closeOnEscape: false,
+                    minheight: 250,
+                    maxheight: 250,
+                    buttons: {
+                        'Next': nextDialog,
+                        'Previous': backDialog,
+                        'Cancel': function() { $("#credentialsDialog").dialog('close'); }
+                    }
+                })
+
+                if(typeof(_IG_Prefs) == typeof(Function)) {
+                    prefs = new _IG_Prefs();
+                    var scorecardID = prefs.getString("scorecardID");
+                    if(scorecardID) {
+                        $("#scorecardID").val(scorecardID);
+                        $("#credsScorecardID").val(scorecardID);
+                    <% if (loggedIn) {%>
+                        loadScorecard(scorecardID);
+                   <% } %>
+                    }
+                }
             });
 
             function login() {
                 var params = $("form#loginForm").serialize();
-                alert(params);
                 $("#notice").html("");
-                jQuery.ajax({data: params,
+                $("#progressbar").show();
+                $.ajax({data: params,
                     url: 'login.jsp',
                     type: 'post',
-                    success: function(request) {$("#results").html(request)}});
+                    success: loadResults 
+                });
                 return false;
             }
+
+            function signout() {
+                $("#progressbar").show();
+                $.ajax({
+                    url: 'logout.jsp',
+                    type: 'post',
+                    success: loadResults
+                });
+            }
+            
+            function loadScorecardList() {
+                $("#progressbar").show();
+                $.ajax({
+                    url: 'scorecardList.jsp',
+                    type: 'post',
+                    success: loadResults
+                })
+            }
+            function loadScorecard(scorecardID) {
+                $("#scorecardList").dialog("close");
+                if(typeof(prefs) == typeof(Function) && typeof(prefs.set) == typeof(Function)) {
+                    prefs.set("scorecardID", scorecardID)
+                }
+                $("#scorecardID").val(scorecardID);
+                $("#credsScorecardID").val(scorecardID);
+                var params = $("form#loginForm").serialize();
+                $("#progressbar").show();
+                $.ajax({
+                    data: params,
+                    url: 'loadScorecard.jsp',
+                    type: 'post',
+                    success: loadResults
+                })
+            }
+
+            function refresh() {
+                var params = $("form#credentialsForm").serialize() + "&refresh=true";
+                $("#progressbar").show();
+                $.ajax({
+                    data: params,
+                    url: 'loadScorecard.jsp',
+                    type: 'post',
+                    success: loadResults
+                });
+            }
+
+            function loadResults(request) {
+                $("#results").html(request)
+                $("#progressbar").hide();
+            }
+
+            function resetCredentialsDialog() {
+                credentialsIndex = 0;
+                showCredentialsIndex();
+            }
+
+            function nextDialog() {
+                credentialsIndex = credentialsIndex + 1;
+                showCredentialsIndex();
+            }
+
+            function backDialog() {
+                credentialsIndex = credentialsIndex - 1;
+                showCredentialsIndex();
+            }
+
+            function showCredentialsIndex() {
+                if(credentialsIndex == ($("#credentialsData > div").size() - 1)) {
+                    $("#credentialsDialog").dialog("option", "buttons", {
+                        'Cancel': function() { $("#credentialsDialog").dialog('close'); },
+                        'Finish': refresh,
+                        'Previous': backDialog
+                    })
+                } else if(credentialsIndex == 0) {
+                    $("#credentialsDialog").dialog("option", "buttons", {
+                        'Cancel': function() { $("#credentialsDialog").dialog('close'); },
+                        'Next': nextDialog
+                    })
+                } else {
+                    $("#credentialsDialog").dialog("option", "buttons", {
+                        'Cancel': function() { $("#credentialsDialog").dialog('close'); },
+                        'Next': nextDialog,
+                        'Previous': backDialog
+                    })
+                }
+                $("#credentialsData div:eq(" + credentialsIndex + ")").show();
+                $("#credentialsData div:not(:eq(" + credentialsIndex + "))").hide();
+            }
+
         </script>
     </head>
     <body>
-
+        <div title="Select a Scorecard" id="scorecardList">
+        </div>
+        <div title="Credentials Required" id="credentialsDialog">
+            <form id="credentialsForm" action="loadScorecard.jsp" onsubmit="return false;">
+                <input type="hidden" name="scorecardID" id="credsScorecardID" value="<%= request.getParameter("scorecardID") %>" />
+                <div id="credentialsData">
+                    
+                </div>
+            </form>
+        </div>
         <div title="Please Login" id="loginDialog">
-            <form id="loginForm" onsubmit="return false;">
-                <label for="login">Username or Email:</label><input name="login" id="login" type="text" />
-                <label for="password">Password</label><input name="password" id="password" type="password" />
+            <form id="loginForm" action="login.jsp" onsubmit="return false;">
+                <label for="login">Username or Email</label><br />
+                <input name="login" id="login" type="text" /><br />
+                <br />
+                <label for="password">Password</label><br />
+                <input name="password" id="password" type="password" />
                 <input type="hidden" id="scorecardID" name="scorecardID" value="<%= request.getParameter("scorecardID") %>" />
                 <div id="notice"></div>
             </form>
+            <span id="signup">Don't have an account? sign up <a href="https://www.easy-insight.com/app" target="_blank">here!</a></span>
+        </div>
+        <div id="buttons">
+            <span id="refresh"><button class="ui-state-default ui-corner-all" type="button" onclick="refresh();">Refresh</button></span><span id="showScorecardList"><button class="ui-state-default ui-corner-all" type="button" onclick="loadScorecardList();">Scorecards</button></span> <span id="signout"><button class="ui-state-default ui-corner-all" type="button" onclick="signout();">Sign Out</button></span>
         </div>
         <div id="scorecard">
-            <table>
-                <thead>
-                <tr>
-                    <th></th>
-                    <th>KPI Name</th>
-                    <th>Latest Value</th>
-                    <th>Time</th>
-                    <th>% Change</th>
-                    <th></th>
-                </tr>
-                </thead>
-                <tbody>
-                    <% if(loggedIn) { %>
-                        <jsp:include page="table.jsp" />
-                    <% } %>
-                </tbody>
-            </table>
+            <% if(loggedIn && request.getParameter("scorecardID") != null) { %>
+                <jsp:include page="table.jsp">
+                    <jsp:param name="ajax" value="false" />
+                </jsp:include>
+            <% } %>
         </div>
+        <div id="progressbar"></div>
         <div id="results"></div>
     </body>
 </html>

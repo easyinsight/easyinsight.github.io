@@ -27,28 +27,21 @@
         s.close();
     }
 %>
-<% if(success) {%>
-<div>
-    <div id="added" style="display:none">
-        <table>
-            <thead>
-            <tr>
-                <th></th>
-                <th>KPI Name</th>
-                <th>Latest Value</th>
-                <th>Time</th>
-                <th>% Change</th>
-                <th></th>
-            </tr>
-            </thead>
-            <tbody>
-                <jsp:include page="table.jsp" />
-            </tbody>
-        </table>
-    </div>
-</div>
-<script type="text/javascript">$(document).ready(function() {$("#loginDialog").dialog('close');$("#scorecard").html($("#added").html())})</script>
+<%  if(success) {
+        String scorecardIDString = (String) request.getParameter("scorecardID");
+        if (scorecardIDString == null || scorecardIDString.isEmpty() || "null".equals(scorecardIDString)) {
+        %>
+    <jsp:include page="scorecardList.jsp" />
+    <script type="text/javascript">$(document).ready(function(){$("#username").val("");$("#password").val("");$("#loginDialog").dialog('close');})</script>
+    <%
+        } else {
+    %>
 
-<% } else { %>
-<script type="text/javascript">$("#notice").html("Invalid username or password.");</script>
-<% } %>
+        <jsp:include page="table.jsp" />
+        <script type="text/javascript">$(document).ready(function(){$("#username").val("");$("#password").val("");$("#loginDialog").dialog('close');})</script>
+
+    <%  }
+
+    } else { %>
+        <script type="text/javascript">$("#notice").html("Invalid username or password.");</script>
+    <% } %>

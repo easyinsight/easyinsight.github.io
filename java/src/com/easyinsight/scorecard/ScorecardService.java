@@ -26,8 +26,13 @@ public class ScorecardService {
     private ScorecardStorage scorecardStorage = new ScorecardStorage();
 
     public List<ScorecardDescriptor> getScorecardDescriptors() {
-        List<ScorecardDescriptor> scorecards = new ArrayList<ScorecardDescriptor>();
         long userID = SecurityUtil.getUserID();
+        return getScorecardDescriptors(userID);
+    }
+
+    public List<ScorecardDescriptor> getScorecardDescriptors(long userID) {
+        List<ScorecardDescriptor> scorecards = new ArrayList<ScorecardDescriptor>();
+
         EIConnection conn = Database.instance().getConnection();
         try {
             PreparedStatement queryStmt = conn.prepareStatement("SELECT SCORECARD.scorecard_id, SCORECARD.scorecard_name from " +

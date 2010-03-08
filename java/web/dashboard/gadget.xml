@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Module>
+    <ModulePrefs title="Easy Insight Scorecard" height="320" width="320">
+      <Require feature="setprefs"/>
+    </ModulePrefs>
+    <UserPref name="scorecardID" />
+    <Content type="url" href="https://localhost/app/dashboard/index.jsp" />
+</Module>

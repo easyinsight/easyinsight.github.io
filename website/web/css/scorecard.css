@@ -1,0 +1,131 @@
+#buttons {
+    width:100%;
+    min-width:310px;
+}
+#scorecard {
+    width:100%;
+}
+
+#scorecard table {
+    position: relative;
+    left: 50%;
+    margin: 0px 0px 0px -155px;
+    border: #B7BABC solid 1px;
+    border-spacing: 0px;
+    width:310px;
+}
+
+#scorecard table tbody tr > td, #scorecard table thead tr > th {
+    border-left: #B7BABC solid 1px;
+    font-family: arial,sans-serif;
+    font-size: 12px;
+    margin: 0px;
+    padding: 3px;
+}
+
+#scorecard table thead tr > th {
+    border-bottom: #B7BABC solid 1px;
+}
+
+#scorecard table tbody tr > td:first-child, #scorecard table thead tr > th:first-child {
+    border-left: 0;
+}
+
+#scorecard table tbody tr > td.value, #scorecard table tbody tr > td.percent {
+    text-align:center;
+}
+
+#scorecard table tbody tr > td.kpiName {
+    padding-left: 5px;
+}
+
+#scorecard table tbody tr.alternate {
+    background-color: #F7F7F7
+}
+
+#loginDialog label {
+    font-size: 10px;
+}
+
+#credentialsDialog {
+    font-size: 12px;
+}
+
+#credentialsDialog label {
+    width: 60px;
+    display: inline-block;
+}
+
+#credentialsDialog input {
+    display: inline-block;
+    width: 190px;
+    margin: 3px;
+}
+
+.ui-button-text {
+    font-size: 12px;
+}
+
+.ui-dialog-buttonpane {
+    padding: .3em !important;
+    
+}
+#login, #password {
+    font-size: 10px;
+}
+
+.ui-dialog-titlebar-close {
+    display:none;
+}
+
+#signup {
+    float:right;
+    font-size:10px
+}
+
+#signout {
+    float:right;
+    width: 33%;
+    padding: 3px 0px;
+    margin: 0px;
+    text-align:right;
+}
+#refresh {
+    float:left;
+    width: 33%;                                                    ;
+    padding: 3px 0px;
+    margin: 0px;
+    text-align:left;
+}
+#showScorecardList {
+    text-align:center;
+    width:100%;
+    display:inline-block;
+    width: 33%;
+    padding: 3px 0px;
+    margin: 0px;
+}
+
+#scorecardList ul {
+    height:200px;
+    overflow:auto;
+    list-style-type: none;
+}
+
+#notice {
+    font-size:10px;
+    color:#FF0000;
+}
+
+#progressbar {
+    position: absolute;
+    bottom: 0px;
+    left: 50%;
+    margin: 0px 0px 0px -160px;
+    width:320px;
+    height: 22px;
+}
+
+.ui-progressbar-value {
+    background-image: url(images/pbar-ani.gif) !important;
+}

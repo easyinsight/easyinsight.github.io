@@ -253,4 +253,42 @@ public class KPI implements Cloneable {
     public void setIconImage(String iconImage) {
         this.iconImage = iconImage;
     }
+
+    public String createIconText() {
+        if(getKpiOutcome().isProblemEvaluated()) {
+            return "bullet_square_glass_red.png";
+        } else if (getProblemConditions().size() > 0) {
+            return "bullet_ball_green.png";
+        }
+        switch(getKpiOutcome().getOutcomeState()) {
+            case KPIOutcome.EXCEEDING_GOAL:
+            case KPIOutcome.POSITIVE:
+                if (getKpiOutcome().getDirection() == KPIOutcome.UP_DIRECTION) {
+                    return "arrow2_up_green.png";
+                } else if (getKpiOutcome().getDirection() == KPIOutcome.DOWN_DIRECTION) {
+                    return "arrow2_down_green.png";
+                } else {
+                    return "bullet_ball_green.png";
+                }
+            case KPIOutcome.NEGATIVE:
+                if (getKpiOutcome().getDirection() == KPIOutcome.UP_DIRECTION) {
+                    return "arrow2_up_red.png";
+                } else if (getKpiOutcome().getDirection() == KPIOutcome.DOWN_DIRECTION) {
+                    return "arrow2_down_red.png";
+                } else {
+                    return "bullet_square_glass_red.png";
+                }
+            case KPIOutcome.NEUTRAL:
+                if (getKpiOutcome().getDirection() == KPIOutcome.UP_DIRECTION) {
+                    return "arrow2_up_blue.png";
+                } else if (getKpiOutcome().getDirection() == KPIOutcome.DOWN_DIRECTION) {
+                    return "arrow2_down_blue.png";
+                } else {
+                    return "bullet_ball_blue.png";
+                }
+            case KPIOutcome.NO_DATA:
+            default:
+                return "bullet_square_grey.png";
+        }
+    }
 }
