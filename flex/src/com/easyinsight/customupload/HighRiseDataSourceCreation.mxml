@@ -8,6 +8,7 @@
         import com.easyinsight.administration.feed.FeedDefinitionData;
         import com.easyinsight.datasources.HighRiseDataSource;
         import com.easyinsight.framework.Credentials;
+        import com.easyinsight.framework.CredentialsCache;
 
         [Bindable]
         private var url:String;
@@ -24,6 +25,7 @@
 
         public function set dataSourceDefinition(feedDefinition:FeedDefinitionData):void {
             var ds:HighRiseDataSource = feedDefinition as HighRiseDataSource;
+            CredentialsCache.getCache().nukeCredentials(ds.dataFeedID);
             url = ds.url;
             usernameInputText = ds.username;
             passwordText = ds.password;

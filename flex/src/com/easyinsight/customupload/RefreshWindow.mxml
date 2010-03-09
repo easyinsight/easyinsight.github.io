@@ -162,7 +162,7 @@
     </mx:RemoteObject>
     <mx:VBox paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5">
         <mx:Box id="coreContent"/>
-        <mx:ProgressBar id="progressBar" indeterminate="true" visible="false"/>
+        <mx:ProgressBar id="progressBar" indeterminate="true" visible="false" label="Retrieving data, this may take a few minutes..."/>
         <mx:ViewStack selectedIndex="{credentialsIndex}">
             <mx:Box/>
             <mx:HBox>

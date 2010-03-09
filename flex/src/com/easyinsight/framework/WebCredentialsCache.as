@@ -17,6 +17,10 @@ public class WebCredentialsCache extends EventDispatcher implements ICredentials
         cache[String(dataSourceID)] = credentials;
     }
 
+    public function nukeCredentials(dataSourceID:int):void {
+        cache[String(dataSourceID)] = null;
+    }
+
     public function getCredentials(dataSourceID:int):Credentials {
         return cache[String(dataSourceID)];
     }
