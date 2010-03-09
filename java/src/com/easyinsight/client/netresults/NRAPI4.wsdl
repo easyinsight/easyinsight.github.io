@@ -1,0 +1,2080 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wsdl:definitions name='NRAPI' targetNamespace='https://apps.net-results.com/soap/v1' xmlns:nrtypens="https://apps.net-results.com/soap/v1/NRAPI.xsd" xmlns:nrns='https://apps.net-results.com/soap/v1' xmlns:soap='http://schemas.xmlsoap.org/wsdl/soap/'  xmlns:xsd='http://www.w3.org/2001/XMLSchema'  xmlns:soapenc='http://schemas.xmlsoap.org/soap/encoding/'  xmlns:wsdl='http://schemas.xmlsoap.org/wsdl/'  xmlns='http://schemas.xmlsoap.org/wsdl/'>
+	<wsdl:types>
+	    <xsd:schema targetNamespace="https://apps.net-results.com/soap/v1/NRAPI.xsd">
+		<xsd:import namespace="http://schemas.xmlsoap.org/soap/encoding/"/>
+		<xsd:import namespace="http://schemas.xmlsoap.org/wsdl/"/>
+		<xsd:complexType name="createCustomFieldArgs">
+		    <xsd:sequence>
+			<xsd:element minOccurs="1" maxOccurs="1" name="custom_field_name" type="xsd:string" >
+			    <xsd:annotation>
+				<xsd:documentation>
+				    The name of the CustomField.
+				</xsd:documentation>
+			    </xsd:annotation>
+			</xsd:element>
+			<xsd:element minOccurs="1" nillable="true" maxOccurs="1" name="role_id" type="xsd:integer" >
+			    <xsd:annotation>
+				<xsd:documentation>
+				    The Role ID of the CustomField.
+				</xsd:documentation>
+			    </xsd:annotation>
+			</xsd:element>
+		    </xsd:sequence>
+		</xsd:complexType>
+		<xsd:complexType name="createEmailListArgs">
+		    <xsd:sequence>
+			<xsd:element minOccurs="1" maxOccurs="1" name="email_list_name" type="xsd:string" >
+			    <xsd:annotation>
+				<xsd:documentation>
+				    The name of the EmailList.
+				</xsd:documentation>
+			    </xsd:annotation>
+			</xsd:element>
+			<xsd:element minOccurs="1" nillable="true" maxOccurs="1" name="role_id" type="xsd:integer" >
+			    <xsd:annotation>
+				<xsd:documentation>
+				    The Role ID of the EmailList.
+				</xsd:documentation>
+			    </xsd:annotation>
+			</xsd:element>
+		    </xsd:sequence>
+		</xsd:complexType>
+		<xsd:complexType name="associateEmailIdWithCampaignActionGroupIdArgs">
+		    <xsd:sequence>
+			<xsd:element minOccurs="1" maxOccurs="1" name="email_id" type="xsd:integer" >
+			    <xsd:annotation>
+				<xsd:documentation>
+				    The Id of the Email.
+				</xsd:documentation>
+			    </xsd:annotation>
+			</xsd:element>
+			<xsd:element minOccurs="1" maxOccurs="1" name="campaign_action_group_id" type="xsd:integer" >
+			    <xsd:annotation>
+				<xsd:documentation>
+				    The ID of the Campaign Action Group.
+				</xsd:documentation>
+			    </xsd:annotation>
+			</xsd:element>
+		    </xsd:sequence>
+		</xsd:complexType>
+		<xsd:complexType name="createRootCampaignActionGroupWithEmailListIdConditionArgs">
+		    <xsd:sequence>
+			<xsd:element minOccurs="1" maxOccurs="1" name="campaign_action_group_name" type="xsd:string" >
+			    <xsd:annotation>
+				<xsd:documentation>
+				    The Name of the Campaign Action Group
+				</xsd:documentation>
+			    </xsd:annotation>
+			</xsd:element>
+			<xsd:element minOccurs="1" maxOccurs="1" name="campaign_id" type="xsd:integer" >
+			    <xsd:annotation>
+				<xsd:documentation>
+				    The ID of the Campaign.
+				</xsd:documentation>
+			    </xsd:annotation>
+			</xsd:element>
+			<xsd:element minOccurs="1" maxOccurs="1" name="email_list_id" type="xsd:integer" >
+			    <xsd:annotation>
+				<xsd:documentation>
+				    The ID of the EmailList.
+				</xsd:documentation>
+			    </xsd:annotation>
+			</xsd:element>
+		    </xsd:sequence>
+		</xsd:complexType>
+		<xsd:complexType name="createCampaignArgs">
+		    <xsd:sequence>
+			<xsd:element minOccurs="1" maxOccurs="1" name="campaign_name" type="xsd:string" >
+			    <xsd:annotation>
+				<xsd:documentation>
+				    The Name of the Campaign.
+				</xsd:documentation>
+			    </xsd:annotation>
+			</xsd:element>
+			<xsd:element minOccurs="0" nillable="true" maxOccurs="1" name="campaign_description" type="xsd:string" >
+			    <xsd:annotation>
+				<xsd:documentation>
+				    The description of the campaign.
+				</xsd:documentation>
+			    </xsd:annotation>
+			</xsd:element>
+			<xsd:element minOccurs="1" maxOccurs="1" name="campaign_launch_date" type="xsd:dateTime" >
+			    <xsd:annotation>
+				<xsd:documentation>
+				    The Campaign's Launch Date.
+				</xsd:documentation>
+			    </xsd:annotation>
+			</xsd:element>
+			<xsd:element minOccurs="1" nillable="true" maxOccurs="1" name="role_id" type="xsd:integer" >
+			    <xsd:annotation>
+				<xsd:documentation>
+				    The Role Id of the Campaign.
+				</xsd:documentation>
+			    </xsd:annotation>
+			</xsd:element>
+		    </xsd:sequence>
+		</xsd:complexType>
+		<xsd:complexType name="createEmailArgs">
+		    <xsd:sequence>
+			<xsd:element minOccurs="1" maxOccurs="1" name="email_name" type="xsd:string" >
+			    <xsd:annotation>
+				<xsd:documentation>
+				    The Name of the Email.
+				</xsd:documentation>
+			    </xsd:annotation>
+			</xsd:element>
+			<xsd:element minOccurs="1" maxOccurs="1" name="email_content_text" type="xsd:string" >
+			    <xsd:annotation>
+				<xsd:documentation>
+				    The Text Content of the Email.
+				</xsd:documentation>
+			    </xsd:annotation>
+			</xsd:element>
+			<xsd:element minOccurs="1" maxOccurs="1" name="email_content_html" type="xsd:string" >
+			    <xsd:annotation>
+				<xsd:documentation>
+				    The HTML Content of the Email.
+				</xsd:documentation>
+			    </xsd:annotation>
+			</xsd:element>
+			<xsd:element minOccurs="1" maxOccurs="1" name="email_reply_to_address" type="xsd:string" >
+			    <xsd:annotation>
+				<xsd:documentation>
+				    The Reply To Address for the Email.
+				</xsd:documentation>
+			    </xsd:annotation>
+			</xsd:element>
+			<xsd:element minOccurs="1" maxOccurs="1" name="email_reply_to_label" type="xsd:string" >
+			    <xsd:annotation>
+				<xsd:documentation>
+				    The Reply To Address's Label. (Full name or Company Name as required by CAN-SPAM)
+				</xsd:documentation>
+			    </xsd:annotation>
+			</xsd:element>
+			<xsd:element minOccurs="1" maxOccurs="1" name="email_subject" type="xsd:string" >
+			    <xsd:annotation>
+				<xsd:documentation>
+				    The Subject of the Email.
+				</xsd:documentation>
+			    </xsd:annotation>
+			</xsd:element>
+			<xsd:element minOccurs="1" nillable="true" maxOccurs="1" name="role_id" type="xsd:integer" >
+			    <xsd:annotation>
+				<xsd:documentation>
+				    The Role Id of the Email
+				</xsd:documentation>
+			    </xsd:annotation>
+			</xsd:element>
+		    </xsd:sequence>
+		</xsd:complexType>
+		<xsd:complexType name="ArrayOfEmailList">
+		    <xsd:complexContent>
+			<xsd:restriction base="soapenc:Array">
+			    <xsd:attribute ref="soapenc:arrayType" wsdl:arrayType="nrtypens:EmailList[]">
+			    </xsd:attribute>
+			</xsd:restriction>
+		    </xsd:complexContent>
+		</xsd:complexType>
+		<xsd:complexType name="ArrayOfInteger">
+		    <xsd:complexContent>
+			<xsd:restriction base="soapenc:Array">
+			    <xsd:attribute ref="soapenc:arrayType" wsdl:arrayType="xsd:int[]">
+			    </xsd:attribute>
+			</xsd:restriction>
+		    </xsd:complexContent>
+		</xsd:complexType>
+		<xsd:complexType name="ArrayOfContactImportMapping">
+		    <xsd:complexContent>
+			<xsd:restriction base="soapenc:Array">
+			    <xsd:attribute ref="soapenc:arrayType" wsdl:arrayType="nrtypens:ContactImportMapping[]">
+			    </xsd:attribute>
+			</xsd:restriction>
+		    </xsd:complexContent>
+		</xsd:complexType>
+		<xsd:complexType name="ArrayOfRecipient">
+		    <xsd:complexContent>
+			<xsd:restriction base="soapenc:Array">
+			    <xsd:attribute ref="soapenc:arrayType" wsdl:arrayType="xsd:string[]">
+			    </xsd:attribute>
+			</xsd:restriction>
+		    </xsd:complexContent>
+		</xsd:complexType>
+		<xsd:complexType name="EmailList">
+		    <xsd:sequence>
+			<xsd:element minOccurs="1" maxOccurs="1" name="email_list_id" type="xsd:int" >
+			    <xsd:annotation>
+				<xsd:documentation>
+				    The Id of the EmailList
+				</xsd:documentation>
+			    </xsd:annotation>
+			</xsd:element>
+			<xsd:element minOccurs="1" maxOccurs="1" name="email_list_name" type="xsd:string" >
+			    <xsd:annotation>
+				<xsd:documentation>
+				    The name of the EmailList
+				</xsd:documentation>
+			    </xsd:annotation>
+			</xsd:element>
+		    </xsd:sequence>
+		</xsd:complexType>
+		<xsd:complexType name="ContactImportMapping">
+		    <xsd:sequence>
+			<xsd:element minOccurs="1" maxOccurs="1" name="csv_header" type="xsd:string" >
+			    <xsd:annotation>
+				<xsd:documentation>
+				    The heading (i.e. first row in the column) in the CSV file.
+				</xsd:documentation>
+			    </xsd:annotation>
+			</xsd:element>
+			<xsd:element minOccurs="1" maxOccurs="1" name="nr_contact_attribute" type="xsd:string" >
+			    <xsd:annotation>
+				<xsd:documentation>
+				    The Net-Results Contact Attribute, must exist in the array returned by getContactFields().
+				</xsd:documentation>
+			    </xsd:annotation>
+			</xsd:element>
+		    </xsd:sequence>
+		</xsd:complexType>
+		<xsd:complexType name="arrayType">
+		    <xsd:complexContent>
+			<xsd:restriction base="soapenc:Array">
+			    <xsd:attribute ref="soapenc:arrayType" wsdl:arrayType="xsd:string[]">
+			    </xsd:attribute>
+			</xsd:restriction>
+		    </xsd:complexContent>
+		</xsd:complexType>
+		<xsd:complexType name="submitContactExportArgs">
+		    <xsd:sequence>
+			<xsd:element minOccurs="0" maxOccurs="1" name="export_recipients" type="nrtypens:ArrayOfRecipient" nillable="false" >
+			    <xsd:annotation>
+				<xsd:documentation>
+				    An array of email addresses. Each email address will receive a copy of the ContactExport csv.
+				</xsd:documentation>
+			    </xsd:annotation>
+			</xsd:element>
+			<xsd:element minOccurs="0" maxOccurs="1" name="contact_ids" type="nrtypens:ArrayOfInteger" >
+			    <xsd:annotation>
+				<xsd:documentation>
+				    An optional array of Contact Ids. If not specified, all Contacts will be included in the ContactExport.
+				</xsd:documentation>
+			    </xsd:annotation>
+			</xsd:element>
+		    </xsd:sequence>
+		</xsd:complexType>
+		<xsd:complexType name="createContactArgs">
+		    <xsd:sequence>
+			<xsd:element minOccurs="1" nillable="true" maxOccurs="1" name="contact_email_address" type="xsd:string" >
+			    <xsd:annotation>
+				<xsd:documentation>
+				    The Contacts properly formed email address.
+				</xsd:documentation>
+			    </xsd:annotation>
+			</xsd:element>
+			<xsd:element minOccurs="1" nillable="true" maxOccurs="1" name="contact_title" type="xsd:string" >
+			    <xsd:annotation>
+				<xsd:documentation>
+				    The Contact's title.
+				</xsd:documentation>
+			    </xsd:annotation>
+			</xsd:element>
+			<xsd:element minOccurs="1" nillable="true" maxOccurs="1" name="contact_first_name" type="xsd:string" >
+			    <xsd:annotation>
+				<xsd:documentation>
+				    The Contact's first name.
+				</xsd:documentation>
+			    </xsd:annotation>
+			</xsd:element>
+			<xsd:element minOccurs="1" nillable="true" maxOccurs="1" name="contact_last_name" type="xsd:string" >
+			    <xsd:annotation>
+				<xsd:documentation>
+				    The Contact's last name.
+				</xsd:documentation>
+			    </xsd:annotation>
+			</xsd:element>
+			<xsd:element minOccurs="1" nillable="false" maxOccurs="1" name="company_name" type="xsd:string" >
+			    <xsd:annotation>
+				<xsd:documentation>
+				    The Contact's Company name.
+				</xsd:documentation>
+			    </xsd:annotation>
+			</xsd:element>
+			<xsd:element minOccurs="1" nillable="true" maxOccurs="1" name="contact_address_1" type="xsd:string" >
+			    <xsd:annotation>
+				<xsd:documentation>
+				    The Contact's Address 1.
+				</xsd:documentation>
+			    </xsd:annotation>
+			</xsd:element>
+			<xsd:element minOccurs="1" nillable="true" maxOccurs="1" name="contact_address_2" type="xsd:string" >
+			    <xsd:annotation>
+				<xsd:documentation>
+				    The Contact's Address 2.
+				</xsd:documentation>
+			    </xsd:annotation>
+			</xsd:element>
+			<xsd:element minOccurs="1" nillable="true" maxOccurs="1" name="contact_mobile_phone" type="xsd:string" >
+			    <xsd:annotation>
+				<xsd:documentation>
+				    The Contact's Mobile Phone2.
+				</xsd:documentation>
+			    </xsd:annotation>
+			</xsd:element>
+			<xsd:element minOccurs="1" nillable="true" maxOccurs="1" name="contact_home_phone" type="xsd:string" >
+			    <xsd:annotation>
+				<xsd:documentation>
+				    The Contact's Home Phone.
+				</xsd:documentation>
+			    </xsd:annotation>
+			</xsd:element>
+			<xsd:element minOccurs="1" nillable="true" maxOccurs="1" name="contact_work_phone" type="xsd:string" >
+			    <xsd:annotation>
+				<xsd:documentation>
+				    The Contact's Work Phone.
+				</xsd:documentation>
+			    </xsd:annotation>
+			</xsd:element>
+			<xsd:element minOccurs="1" nillable="true" maxOccurs="1" name="contact_fax" type="xsd:string" >
+			    <xsd:annotation>
+				<xsd:documentation>
+				    The Contact's Fax.
+				</xsd:documentation>
+			    </xsd:annotation>
+			</xsd:element>
+			<xsd:element minOccurs="1" nillable="true" maxOccurs="1" name="city_name" type="xsd:string" >
+			    <xsd:annotation>
+				<xsd:documentation>
+				    The Contact's City name.
+				</xsd:documentation>
+			    </xsd:annotation>
+			</xsd:element>
+			<xsd:element minOccurs="1" nillable="true" maxOccurs="1" name="contact_postalcode" type="xsd:string" >
+			    <xsd:annotation>
+				<xsd:documentation>
+				    The Contact's postal code.
+				</xsd:documentation>
+			    </xsd:annotation>
+			</xsd:element>
+			<xsd:element minOccurs="1" nillable="true" maxOccurs="1" name="country_name" type="xsd:string" >
+			    <xsd:annotation>
+				<xsd:documentation>
+				    The Contact's Country name.
+				</xsd:documentation>
+			    </xsd:annotation>
+			</xsd:element>
+			<xsd:element minOccurs="1" nillable="true" maxOccurs="1" name="state_name" type="xsd:string" >
+			    <xsd:annotation>
+				<xsd:documentation>
+				    The Contact's State name.
+				</xsd:documentation>
+			    </xsd:annotation>
+			</xsd:element>
+			<xsd:element minOccurs="1" nillable="true" maxOccurs="1" name="contact_lead_score" type="xsd:string" >
+			    <xsd:annotation>
+				<xsd:documentation>
+				    The Contact's Lead score.
+				</xsd:documentation>
+			    </xsd:annotation>
+			</xsd:element>
+			<xsd:element minOccurs="1" nillable="true" maxOccurs="1" name="contact_twitter_username" type="xsd:string" >
+			    <xsd:annotation>
+				<xsd:documentation>
+				    The Contact's Twitter Username/handle.
+				</xsd:documentation>
+			    </xsd:annotation>
+			</xsd:element>
+			<xsd:element minOccurs="1" nillable="true" maxOccurs="1" name="role_id" type="xsd:integer" >
+			    <xsd:annotation>
+				<xsd:documentation>
+				    The Role Id of the Contact.
+				</xsd:documentation>
+			    </xsd:annotation>
+			</xsd:element>
+		    </xsd:sequence>
+		</xsd:complexType>
+		<xsd:complexType name="submitContactImportArgs">
+		    <xsd:sequence>
+			<xsd:element minOccurs="1" maxOccurs="1" name="file" type="nrtypens:fileSpec">
+			</xsd:element>
+			<xsd:element nillable="true" minOccurs="1" maxOccurs="1" name="add_email_list_ids" type="nrtypens:ArrayOfInteger" >
+			    <xsd:annotation>
+				<xsd:documentation>
+				    An array of the Email List Ids you would like the submitted contacts to become members of. If the overwrite flag is set, this will only add the contacts to the lists they are not already a member of.
+				</xsd:documentation>
+			    </xsd:annotation>
+			</xsd:element>
+			<xsd:element nillable="true" minOccurs="1" maxOccurs="1" name="remove_email_list_ids" type="nrtypens:ArrayOfInteger" >
+			    <xsd:annotation>
+				<xsd:documentation>
+				    An array of the Email List Ids you would like the submitted contacts to removed from. If any submitted contact is not already member of the list, no action will be taken. This argument will only apply to existing contacts in the system, it will have no effect on new contacts, or contacts who are not a member of any specified list.
+				</xsd:documentation>
+			    </xsd:annotation>
+			</xsd:element>
+			<xsd:element minOccurs="1" maxOccurs="1" name="overwrite_duplicates" type="xsd:boolean" >
+			    <xsd:annotation>
+				<xsd:documentation>
+				    This argument allows you to specify that duplicates (Determined off, in order of precedence: Email Address, Net-Results Contact Id, or your Company's Primary Custom Field) should not be skipped - rather any information in the file for duplicate contacts will overwrite current information. This is especially useful if you'd like to batch change list membership for a number of contacts.
+				</xsd:documentation>
+			    </xsd:annotation>
+			</xsd:element>
+			<xsd:element minOccurs="1" maxOccurs="1" name="clobber_lists" type="xsd:boolean" >
+			    <xsd:annotation>
+				<xsd:documentation>
+				    This argument is not yet implemented and will be ignored.
+				</xsd:documentation>
+			    </xsd:annotation>
+			</xsd:element>
+			<xsd:element minOccurs="1" maxOccurs="1" name="contact_import_mappings" type="nrtypens:ArrayOfContactImportMapping" >
+			    <xsd:annotation>
+				<xsd:documentation>
+				    An array of ContactImportMapping, specifying which field in the CSV maps to which field in the Net-Results database.
+				</xsd:documentation>
+			    </xsd:annotation>
+			</xsd:element>
+			<xsd:element minOccurs="1" maxOccurs="1" name="notification_recipients" type="nrtypens:ArrayOfRecipient">
+			    <xsd:annotation>
+				<xsd:documentation>
+				    An array of email addresses that will be notified upon completion of the ContactImport job.
+				</xsd:documentation>
+			    </xsd:annotation>
+			</xsd:element>
+		    </xsd:sequence>
+		</xsd:complexType>
+		<xsd:complexType name="fileSpec">
+		    <xsd:sequence>
+			<xsd:element minOccurs="1" maxOccurs="1" name="filename" type="xsd:string" >
+			    <xsd:annotation>
+				<xsd:documentation>
+				    The name of the file you are submitting.
+				</xsd:documentation>
+			    </xsd:annotation>
+			</xsd:element>
+			<xsd:element minOccurs="0" maxOccurs="1" name="contents" type="soapenc:base64" >
+			    <xsd:annotation>
+				<xsd:documentation>
+				    base64-encoded contents of the file.
+				</xsd:documentation>
+			    </xsd:annotation>
+			</xsd:element>
+		    </xsd:sequence>
+		</xsd:complexType>
+		<xsd:complexType name="Contact">
+		    <xsd:sequence>
+			<xsd:element minOccurs="1" maxOccurs="1" name="contact_email_address" type="xsd:string" >
+			    <xsd:annotation>
+				<xsd:documentation>
+				    The Contact's Email Address
+				</xsd:documentation>
+			    </xsd:annotation>
+			</xsd:element>
+			<xsd:element minOccurs="1" maxOccurs="1" name="contact_first_name" type="xsd:string" >
+			    <xsd:annotation>
+				<xsd:documentation>
+				    The Contact's First Name
+				</xsd:documentation>
+			    </xsd:annotation>
+			</xsd:element>
+			<xsd:element minOccurs="1" maxOccurs="1" name="contact_last_name" type="xsd:string" >
+			    <xsd:annotation>
+				<xsd:documentation>
+				    The Contact's Last Name
+				</xsd:documentation>
+			    </xsd:annotation>
+			</xsd:element>
+			<xsd:element minOccurs="1" maxOccurs="1" name="contact_title" type="xsd:string" >
+			    <xsd:annotation>
+				<xsd:documentation>
+				    The Contact's Title
+				</xsd:documentation>
+			    </xsd:annotation>
+			</xsd:element>
+			<xsd:element minOccurs="1" maxOccurs="1" name="Company" type="nrtypens:Company">
+			</xsd:element>
+			<xsd:element minOccurs="1" maxOccurs="1" name="contact_address_1" type="xsd:string" >
+			    <xsd:annotation>
+				<xsd:documentation>
+				    The Contact's Address 1
+				</xsd:documentation>
+			    </xsd:annotation>
+			</xsd:element>
+			<xsd:element minOccurs="1" maxOccurs="1" name="contact_address_2" type="xsd:string" >
+			    <xsd:annotation>
+				<xsd:documentation>
+				    The Contact's Address 2
+				</xsd:documentation>
+			    </xsd:annotation>
+			</xsd:element>
+			<xsd:element minOccurs="1" maxOccurs="1" name="City" type="nrtypens:City">
+			</xsd:element>
+			<xsd:element minOccurs="1" maxOccurs="1" name="State" type="nrtypens:State">
+			</xsd:element>
+			<xsd:element minOccurs="1" maxOccurs="1" name="Country" type="nrtypens:Country">
+			</xsd:element>
+			<xsd:element minOccurs="1" maxOccurs="1" name="contact_postalcode" type="xsd:string" >
+			    <xsd:annotation>
+				<xsd:documentation>
+				    The Contact's Postal/Zip code.
+				</xsd:documentation>
+			    </xsd:annotation>
+			</xsd:element>
+			<xsd:element minOccurs="1" maxOccurs="1" name="contact_home_phone" type="xsd:string" >
+			    <xsd:annotation>
+				<xsd:documentation>
+				    The Contact's Home Phone.
+				</xsd:documentation>
+			    </xsd:annotation>
+			</xsd:element>
+			<xsd:element minOccurs="1" maxOccurs="1" name="contact_work_phone" type="xsd:string" >
+			    <xsd:annotation>
+				<xsd:documentation>
+				    The Contact's Work Phone.
+				</xsd:documentation>
+			    </xsd:annotation>
+			</xsd:element>
+			<xsd:element minOccurs="1" maxOccurs="1" name="contact_mobile_phone" type="xsd:string" >
+			    <xsd:annotation>
+				<xsd:documentation>
+				    The Contact's Mobile Phone.
+				</xsd:documentation>
+			    </xsd:annotation>
+			</xsd:element>
+			<xsd:element minOccurs="1" maxOccurs="1" name="contact_fax" type="xsd:string" >
+			    <xsd:annotation>
+				<xsd:documentation>
+				    The Contact's Fax.
+				</xsd:documentation>
+			    </xsd:annotation>
+			</xsd:element>
+			<xsd:element minOccurs="1" maxOccurs="1" name="contact_ip_address" type="xsd:string" >
+			    <xsd:annotation>
+				<xsd:documentation>
+				    The Contact's IP Address.
+				</xsd:documentation>
+			    </xsd:annotation>
+			</xsd:element>
+			<xsd:element minOccurs="1" maxOccurs="1" name="contact_id" type="xsd:int" >
+			    <xsd:annotation>
+				<xsd:documentation>
+				    The Contact's Id.
+				</xsd:documentation>
+			    </xsd:annotation>
+			</xsd:element>
+			<xsd:element minOccurs="1" maxOccurs="1" name="contact_lead_score" type="xsd:int" >
+			    <xsd:annotation>
+				<xsd:documentation>
+				    The Contact's Lead Score.
+				</xsd:documentation>
+			    </xsd:annotation>
+			</xsd:element>
+		    </xsd:sequence>
+		</xsd:complexType>
+		<xsd:complexType name="Company">
+		    <xsd:sequence>
+			<xsd:element minOccurs="1" maxOccurs="1" name="company_id" type="xsd:int" >
+			    <xsd:annotation>
+				<xsd:documentation>
+				    The Id of the Company
+				</xsd:documentation>
+			    </xsd:annotation>
+			</xsd:element>
+			<xsd:element minOccurs="1" maxOccurs="1" name="company_name" type="xsd:string" >
+			    <xsd:annotation>
+				<xsd:documentation>
+				    The Company Name
+				</xsd:documentation>
+			    </xsd:annotation>
+			</xsd:element>
+		    </xsd:sequence>
+		</xsd:complexType>
+		<xsd:complexType name="City">
+		    <xsd:sequence>
+			<xsd:element minOccurs="1" maxOccurs="1" name="city_id" type="xsd:int" >
+			    <xsd:annotation>
+				<xsd:documentation>
+				    The Id of the City
+				</xsd:documentation>
+			    </xsd:annotation>
+			</xsd:element>
+			<xsd:element minOccurs="1" maxOccurs="1" name="city" type="xsd:string" >
+			    <xsd:annotation>
+				<xsd:documentation>
+				    The City Name
+				</xsd:documentation>
+			    </xsd:annotation>
+			</xsd:element>
+		    </xsd:sequence>
+		</xsd:complexType>
+		<xsd:complexType name="State">
+		    <xsd:sequence>
+			<xsd:element minOccurs="1" maxOccurs="1" name="state_id" type="xsd:int" >
+			    <xsd:annotation>
+				<xsd:documentation>
+				    The Id of the State
+				</xsd:documentation>
+			    </xsd:annotation>
+			</xsd:element>
+			<xsd:element minOccurs="1" maxOccurs="1" name="state" type="xsd:string" >
+			    <xsd:annotation>
+				<xsd:documentation>
+				    The State Name
+				</xsd:documentation>
+			    </xsd:annotation>
+			</xsd:element>
+		    </xsd:sequence>
+		</xsd:complexType>
+		<xsd:complexType name="Country">
+		    <xsd:sequence>
+			<xsd:element minOccurs="1" maxOccurs="1" name="country_id" type="xsd:int" >
+			    <xsd:annotation>
+				<xsd:documentation>
+				    The Id of the Country
+				</xsd:documentation>
+			    </xsd:annotation>
+			</xsd:element>
+			<xsd:element minOccurs="1" maxOccurs="1" name="country" type="xsd:string" >
+			    <xsd:annotation>
+				<xsd:documentation>
+				    The Country Name
+				</xsd:documentation>
+			    </xsd:annotation>
+			</xsd:element>
+		    </xsd:sequence>
+		</xsd:complexType>
+		<xsd:complexType name="VisitSummary">
+		    <xsd:sequence>
+			<xsd:element minOccurs="1" maxOccurs="1" name="visit_id" type="xsd:int" >
+			    <xsd:annotation>
+				<xsd:documentation>
+				    The Visit Id of the Visit.
+				</xsd:documentation>
+			    </xsd:annotation>
+			</xsd:element>
+			<xsd:element minOccurs="1" maxOccurs="1" name="domain_group_id" type="xsd:int" >
+			    <xsd:annotation>
+				<xsd:documentation>
+				    The DomainGroup Id of the Visit.
+				</xsd:documentation>
+			    </xsd:annotation>
+			</xsd:element>
+			<xsd:element minOccurs="1" maxOccurs="1" name="access_count" type="xsd:int" >
+			    <xsd:annotation>
+				<xsd:documentation>
+				    The number of Page Views counted for the Visit.
+				</xsd:documentation>
+			    </xsd:annotation>
+			</xsd:element>
+			<xsd:element minOccurs="1" maxOccurs="1" name="last_access" type="xsd:dateTime" >
+			    <xsd:annotation>
+				<xsd:documentation>
+				    The time of the last recorded Page View.
+				</xsd:documentation>
+			    </xsd:annotation>
+			</xsd:element>
+			<xsd:element minOccurs="1" maxOccurs="1" name="access_duration" nillable="true" type="xsd:int" >
+			    <xsd:annotation>
+				<xsd:documentation>
+				    The total duration of the Visit in seconds. If this is null, the value is unknown.
+				</xsd:documentation>
+			    </xsd:annotation>
+			</xsd:element>
+			<xsd:element minOccurs="1" maxOccurs="1" name="ip" type="xsd:int" >
+			    <xsd:annotation>
+				<xsd:documentation>
+				    The IP address of the Contact when the performmed the visit. This has been converted to long (binary) format.
+				</xsd:documentation>
+			    </xsd:annotation>
+			</xsd:element>
+			<xsd:element minOccurs="1" maxOccurs="1" name="traffic_source_type_id" type="xsd:int" >
+			    <xsd:annotation>
+				<xsd:documentation>
+				    The type Id of the Traffic Source.
+				</xsd:documentation>
+			    </xsd:annotation>
+			</xsd:element>
+			<xsd:element minOccurs="1" maxOccurs="1" name="contact_id" type="xsd:int" >
+			    <xsd:annotation>
+				<xsd:documentation>
+				    The Contact Id associated with the Visit.
+				</xsd:documentation>
+			    </xsd:annotation>
+			</xsd:element>
+			<xsd:element minOccurs="1" maxOccurs="1" name="Visit" type="nrtypens:Visit">
+			</xsd:element>
+		    </xsd:sequence>
+		</xsd:complexType>
+		<xsd:complexType name="Visit">
+		    <xsd:sequence>
+			<xsd:element minOccurs="1" maxOccurs="1" name="visit_id" type="xsd:int" >
+			    <xsd:annotation>
+				<xsd:documentation>
+				    The Visit Id of the Visit.
+				</xsd:documentation>
+			    </xsd:annotation>
+			</xsd:element>
+			<xsd:element minOccurs="1" maxOccurs="1" name="ip" type="xsd:int" >
+			    <xsd:annotation>
+				<xsd:documentation>
+				    The IP address of the Contact when the performmed the visit. This has been converted to long (binary) format.
+				</xsd:documentation>
+			    </xsd:annotation>
+			</xsd:element>
+			<xsd:element minOccurs="1" maxOccurs="1" name="last_access" type="xsd:dateTime" >
+			    <xsd:annotation>
+				<xsd:documentation>
+				    The time of the last recorded Page View.
+				</xsd:documentation>
+			    </xsd:annotation>
+			</xsd:element>
+			<xsd:element minOccurs="1" maxOccurs="1" name="user_agent_id" type="xsd:int" >
+			    <xsd:annotation>
+				<xsd:documentation>
+				    The UserAgent Id of the Contact.
+				</xsd:documentation>
+			    </xsd:annotation>
+			</xsd:element>
+			<xsd:element minOccurs="1" maxOccurs="1" name="traffic_source_type_id" type="xsd:int" >
+			    <xsd:annotation>
+				<xsd:documentation>
+				    The type Id of the Traffic Source.
+				</xsd:documentation>
+			    </xsd:annotation>
+			</xsd:element>
+			<xsd:element minOccurs="1" maxOccurs="1" name="domain_group_id" type="xsd:int" >
+			    <xsd:annotation>
+				<xsd:documentation>
+				    The DomainGroup Id of the Visit.
+				</xsd:documentation>
+			    </xsd:annotation>
+			</xsd:element>
+			<xsd:element minOccurs="1" maxOccurs="1" name="contact_id" type="xsd:int" >
+			    <xsd:annotation>
+				<xsd:documentation>
+				    The Contact Id associated with the Visit.
+				</xsd:documentation>
+			    </xsd:annotation>
+			</xsd:element>
+			<xsd:element minOccurs="0" maxOccurs="1" name="DirectAccess" type="nrtypens:DirectAccess" nillable="true">
+			</xsd:element>
+			<xsd:element minOccurs="0" maxOccurs="1" name="Search" type="nrtypens:Search" nillable="true">
+			</xsd:element>
+			<xsd:element minOccurs="0" maxOccurs="1" name="Referral" type="nrtypens:Referral" nillable="true">
+			</xsd:element>
+			<xsd:element minOccurs="0" maxOccurs="1" name="Adsense" type="nrtypens:Adsense" nillable="true">
+			</xsd:element>
+		    </xsd:sequence>
+		</xsd:complexType>
+		<xsd:complexType name="Adsense">
+		    <xsd:sequence>
+			<xsd:element minOccurs="1" maxOccurs="1" name="adsense_id" type="xsd:int" >
+			    <xsd:annotation>
+				<xsd:documentation>
+				    The Adsense Id.
+				</xsd:documentation>
+			    </xsd:annotation>
+			</xsd:element>
+		    </xsd:sequence>
+		</xsd:complexType>
+		<xsd:complexType name="DirectAccess">
+		    <xsd:sequence>
+			<xsd:element minOccurs="1" maxOccurs="1" name="direct_access_id" type="xsd:int" >
+			    <xsd:annotation>
+				<xsd:documentation>
+				    The DirectAccess Id.
+				</xsd:documentation>
+			    </xsd:annotation>
+			</xsd:element>
+			<xsd:element minOccurs="1" maxOccurs="1" name="visit_id" type="xsd:int" >
+			    <xsd:annotation>
+				<xsd:documentation>
+				    The Visit Id.
+				</xsd:documentation>
+			    </xsd:annotation>
+			</xsd:element>
+			<xsd:element minOccurs="1" maxOccurs="1" name="date" type="xsd:dateTime" >
+			    <xsd:annotation>
+				<xsd:documentation>
+				    The Date/Time of the DirectAccess.
+				</xsd:documentation>
+			    </xsd:annotation>
+			</xsd:element>
+		    </xsd:sequence>
+		</xsd:complexType>
+		<xsd:complexType name="Search">
+		    <xsd:sequence>
+			<xsd:element minOccurs="1" maxOccurs="1" name="search_id" type="xsd:int" >
+			    <xsd:annotation>
+				<xsd:documentation>
+				    The Id of the Search.
+				</xsd:documentation>
+			    </xsd:annotation>
+			</xsd:element>
+			<xsd:element minOccurs="1" maxOccurs="1" name="search_engine_domain_id" type="xsd:int" >
+			    <xsd:annotation>
+				<xsd:documentation>
+				    The SearchEngineDomain Id.
+				</xsd:documentation>
+			    </xsd:annotation>
+			</xsd:element>
+			<xsd:element minOccurs="1" maxOccurs="1" name="search_engine_id" type="xsd:int" >
+			    <xsd:annotation>
+				<xsd:documentation>
+				    The SearchEngine Id.
+				</xsd:documentation>
+			    </xsd:annotation>
+			</xsd:element>
+			<xsd:element minOccurs="1" maxOccurs="1" name="visit_id" type="xsd:int" >
+			    <xsd:annotation>
+				<xsd:documentation>
+				    The Visit Id.
+				</xsd:documentation>
+			    </xsd:annotation>
+			</xsd:element>
+			<xsd:element minOccurs="1" maxOccurs="1" name="date" type="xsd:dateTime" >
+			    <xsd:annotation>
+				<xsd:documentation>
+				    The Date/Time of the Search.
+				</xsd:documentation>
+			    </xsd:annotation>
+			</xsd:element>
+			<xsd:element minOccurs="1" maxOccurs="1" name="search_term" type="xsd:string" >
+			    <xsd:annotation>
+				<xsd:documentation>
+				    The Search Term.
+				</xsd:documentation>
+			    </xsd:annotation>
+			</xsd:element>
+			<xsd:element minOccurs="1" maxOccurs="1" name="SearchEngine" type="nrtypens:SearchEngine">
+			</xsd:element>
+			<xsd:element minOccurs="1" maxOccurs="1" name="SearchEngineDomain" type="nrtypens:SearchEngineDomain">
+			</xsd:element>
+			<xsd:element minOccurs="1" maxOccurs="1" name="Adword" type="nrtypens:Adword" nillable="true">
+			</xsd:element>
+		    </xsd:sequence>
+		</xsd:complexType>
+		<xsd:complexType name="SearchEngine">
+		    <xsd:sequence>
+			<xsd:element minOccurs="1" maxOccurs="1" name="search_engine_id" type="xsd:int" >
+			    <xsd:annotation>
+				<xsd:documentation>
+				    The Search Engine Id.
+				</xsd:documentation>
+			    </xsd:annotation>
+			</xsd:element>
+			<xsd:element minOccurs="1" maxOccurs="1" name="search_engine" type="xsd:string" >
+			    <xsd:annotation>
+				<xsd:documentation>
+				    The Search Engine name.
+				</xsd:documentation>
+			    </xsd:annotation>
+			</xsd:element>
+			<xsd:element minOccurs="1" maxOccurs="1" name="search_format" type="xsd:string" >
+			    <xsd:annotation>
+				<xsd:documentation>
+				    The format of the Search Term.
+				</xsd:documentation>
+			    </xsd:annotation>
+			</xsd:element>
+			<xsd:element minOccurs="1" maxOccurs="1" name="url_encode" type="xsd:boolean" >
+			    <xsd:annotation>
+				<xsd:documentation>
+				    Whether or not the url has to be encoded before being used to link to the search results.
+				</xsd:documentation>
+			    </xsd:annotation>
+			</xsd:element>
+		    </xsd:sequence>
+		</xsd:complexType>
+		<xsd:complexType name="SearchEngineDomain">
+		    <xsd:sequence>
+			<xsd:element minOccurs="1" maxOccurs="1" name="search_engine_domain_id" type="xsd:int" >
+			    <xsd:annotation>
+				<xsd:documentation>
+				     The SearchEngine Domain Id.
+				</xsd:documentation>
+			    </xsd:annotation>
+			</xsd:element>
+			<xsd:element minOccurs="1" maxOccurs="1" name="search_engine_domain" type="xsd:string" >
+			    <xsd:annotation>
+				<xsd:documentation>
+				    The SearchEngineDomain
+				</xsd:documentation>
+			    </xsd:annotation>
+			</xsd:element>
+			<xsd:element minOccurs="1" maxOccurs="1" name="search_engine_id" type="xsd:int" >
+			    <xsd:annotation>
+				<xsd:documentation>
+				    The SearchEngine Id.
+				</xsd:documentation>
+			    </xsd:annotation>
+			</xsd:element>
+			<xsd:element minOccurs="1" maxOccurs="1" name="search_engine_regex_id" type="xsd:int" >
+			    <xsd:annotation>
+				<xsd:documentation>
+				    The regular expression that must be applied to incoming referrers to parse out the SearchTerm.
+				</xsd:documentation>
+			    </xsd:annotation>
+			</xsd:element>
+		    </xsd:sequence>
+		</xsd:complexType>
+		<xsd:complexType name="Adword">
+		    <xsd:sequence>
+			<xsd:element minOccurs="1" maxOccurs="1" name="adword_id" type="xsd:int" nillable="true" >
+			    <xsd:annotation>
+				<xsd:documentation>
+				    The Adword Id.
+				</xsd:documentation>
+			    </xsd:annotation>
+			</xsd:element>
+			<xsd:element minOccurs="1" maxOccurs="1" name="adword_term" type="xsd:string" nillable="true" >
+			    <xsd:annotation>
+				<xsd:documentation>
+				    The Adword Term.
+				</xsd:documentation>
+			    </xsd:annotation>
+			</xsd:element>
+			<xsd:element minOccurs="1" maxOccurs="1" name="adword_gclid" type="xsd:int" nillable="true" >
+			    <xsd:annotation>
+				<xsd:documentation>
+				    The Adword GCLID.
+				</xsd:documentation>
+			    </xsd:annotation>
+			</xsd:element>
+			<xsd:element minOccurs="1" maxOccurs="1" name="adword_engine_domain_id" type="xsd:int" nillable="true" >
+			    <xsd:annotation>
+				<xsd:documentation>
+				    The AdwordEngineDomain Id.
+				</xsd:documentation>
+			    </xsd:annotation>
+			</xsd:element>
+			<xsd:element minOccurs="1" maxOccurs="1" name="adword_engine_id" type="xsd:int" nillable="true" >
+			    <xsd:annotation>
+				<xsd:documentation>
+				    The AdwordEngine Id.
+				</xsd:documentation>
+			    </xsd:annotation>
+			</xsd:element>
+			<xsd:element minOccurs="1" maxOccurs="1" name="search_id" type="xsd:int" nillable="true" >
+			    <xsd:annotation>
+				<xsd:documentation>
+				    The Search Id.
+				</xsd:documentation>
+			    </xsd:annotation>
+			</xsd:element>
+			<xsd:element minOccurs="1" maxOccurs="1" name="date" type="xsd:dateTime" nillable="true" >
+			    <xsd:annotation>
+				<xsd:documentation>
+				    The Date/Time of the Adword.
+				</xsd:documentation>
+			    </xsd:annotation>
+			</xsd:element>
+			<xsd:element minOccurs="1" maxOccurs="1" name="visit_id" type="xsd:int" nillable="true" >
+			    <xsd:annotation>
+				<xsd:documentation>
+				    The Visit Id of the Adword.
+				</xsd:documentation>
+			    </xsd:annotation>
+			</xsd:element>
+			<xsd:element minOccurs="1" maxOccurs="1" name="AdwordEngine" type="nrtypens:AdwordEngine" nillable="true">
+			</xsd:element>
+			<xsd:element minOccurs="1" maxOccurs="1" name="AdwordEngineDomain" type="nrtypens:AdwordEngineDomain" nillable="true">
+			</xsd:element>
+		    </xsd:sequence>
+		</xsd:complexType>
+		<xsd:complexType name="AdwordEngine">
+		    <xsd:sequence>
+			<xsd:element minOccurs="1" maxOccurs="1" name="adword_engine_id" type="xsd:int" nillable="true" >
+			    <xsd:annotation>
+				<xsd:documentation>
+				    The AdwordEngine Id.
+				</xsd:documentation>
+			    </xsd:annotation>
+			</xsd:element>
+			<xsd:element minOccurs="1" maxOccurs="1" name="adword_engine" type="xsd:string" nillable="true" >
+			    <xsd:annotation>
+				<xsd:documentation>
+				    The AdwordEngine.
+				</xsd:documentation>
+			    </xsd:annotation>
+			</xsd:element>
+			<xsd:element minOccurs="1" maxOccurs="1" name="adword_search_format" type="xsd:string" nillable="true" >
+			    <xsd:annotation>
+				<xsd:documentation>
+				    The AdwordEngine Search format.
+				</xsd:documentation>
+			    </xsd:annotation>
+			</xsd:element>
+			<xsd:element minOccurs="1" maxOccurs="1" name="url_encode" type="xsd:boolean" nillable="true" >
+			    <xsd:annotation>
+				<xsd:documentation>
+				    Whether or not the url has to be encoded before being used to link to the search results.
+				</xsd:documentation>
+			    </xsd:annotation>
+			</xsd:element>
+		    </xsd:sequence>
+		</xsd:complexType>
+		<xsd:complexType name="AdwordEngineDomain">
+		    <xsd:sequence>
+			<xsd:element minOccurs="1" maxOccurs="1" name="adword_engine_domain_id" type="xsd:int" nillable="true" >
+			    <xsd:annotation>
+				<xsd:documentation>
+				    The AdwordEngineDomain Id.
+				</xsd:documentation>
+			    </xsd:annotation>
+			</xsd:element>
+			<xsd:element minOccurs="1" maxOccurs="1" name="adword_engine_domain" type="xsd:string" nillable="true" >
+			    <xsd:annotation>
+				<xsd:documentation>
+				    The AdwordEngineDomain.
+				</xsd:documentation>
+			    </xsd:annotation>
+			</xsd:element>
+		    </xsd:sequence>
+		</xsd:complexType>
+		<xsd:complexType name="Referral">
+		    <xsd:sequence>
+			<xsd:element minOccurs="1" maxOccurs="1" name="referral_id" type="xsd:int" nillable="true" >
+			    <xsd:annotation>
+				<xsd:documentation>
+				    The Id of the EmailList
+				</xsd:documentation>
+			    </xsd:annotation>
+			</xsd:element>
+			<xsd:element minOccurs="1" maxOccurs="1" name="referral" type="xsd:string" nillable="true" >
+			    <xsd:annotation>
+				<xsd:documentation>
+				    The link of the Referral.
+				</xsd:documentation>
+			    </xsd:annotation>
+			</xsd:element>
+			<xsd:element minOccurs="1" maxOccurs="1" name="referrer_id" type="xsd:int" nillable="true" >
+			    <xsd:annotation>
+				<xsd:documentation>
+				    The Id of the referrer. Each FQDN TLD has an Id.
+				</xsd:documentation>
+			    </xsd:annotation>
+			</xsd:element>
+			<xsd:element minOccurs="1" maxOccurs="1" name="visit_id" type="xsd:int" nillable="true" >
+			    <xsd:annotation>
+				<xsd:documentation>
+				    The Visit Id of the the Referral.
+				</xsd:documentation>
+			    </xsd:annotation>
+			</xsd:element>
+			<xsd:element minOccurs="1" maxOccurs="1" name="date" type="xsd:dateTime" >
+			    <xsd:annotation>
+				<xsd:documentation>
+				    The Date/Time of the Referral.
+				</xsd:documentation>
+			    </xsd:annotation>
+			</xsd:element>
+			<xsd:element minOccurs="1" maxOccurs="1" name="Referrer" type="nrtypens:Referrer">
+			</xsd:element>
+		    </xsd:sequence>
+		</xsd:complexType>
+		<xsd:complexType name="Referrer">
+		    <xsd:sequence>
+			<xsd:element minOccurs="1" maxOccurs="1" name="referrer_id" type="xsd:int" nillable="true" >
+			    <xsd:annotation>
+				<xsd:documentation>
+				    The Referrer Id.
+				</xsd:documentation>
+			    </xsd:annotation>
+			</xsd:element>
+			<xsd:element minOccurs="1" maxOccurs="1" name="referrer" type="xsd:string" nillable="true" >
+			    <xsd:annotation>
+				<xsd:documentation>
+				    The unique FQDN TLD of the referrer.
+				</xsd:documentation>
+			    </xsd:annotation>
+			</xsd:element>
+		    </xsd:sequence>
+		</xsd:complexType>
+		<xsd:complexType name="ContactImportStatus">
+		    <xsd:sequence>
+			<xsd:element minOccurs="1" maxOccurs="1" name="status" type="xsd:string" >
+			    <xsd:annotation>
+				<xsd:documentation>
+				    The status of the ContactImport.
+				</xsd:documentation>
+			    </xsd:annotation>
+			</xsd:element>
+			<xsd:element minOccurs="0" maxOccurs="1" name="added" type="xsd:int" >
+			    <xsd:annotation>
+				<xsd:documentation>
+				    The number of contacts added by the ContactImport. Only returned upon a successful ContactImport.
+				</xsd:documentation>
+			    </xsd:annotation>
+			</xsd:element>
+			<xsd:element minOccurs="0" maxOccurs="1" name="overwritten" type="xsd:int" >
+			    <xsd:annotation>
+				<xsd:documentation>
+				    The number of contacts overwritten by the ContactImport. Only returned upon a successful ContactImport.
+				</xsd:documentation>
+			    </xsd:annotation>
+			</xsd:element>
+			<xsd:element minOccurs="0" maxOccurs="1" name="duplicates" type="xsd:int" >
+			    <xsd:annotation>
+				<xsd:documentation>
+				    The number of contacts skipped due to duplication by the ContactImport. Only returned upon a successful ContactImport.
+				</xsd:documentation>
+			    </xsd:annotation>
+			</xsd:element>
+			<xsd:element minOccurs="0" maxOccurs="1" name="invalid" type="xsd:int" >
+			    <xsd:annotation>
+				<xsd:documentation>
+				    The number of contacts skipped due to invalid data by the ContactImport. Only returned upon a successful ContactImport.
+				</xsd:documentation>
+			    </xsd:annotation>
+			</xsd:element>
+			<xsd:element minOccurs="0" maxOccurs="1" name="affected_contact_ids" type="nrtypens:ArrayOfInteger" >
+			    <xsd:annotation>
+				<xsd:documentation>
+				    An array of Contact Ids that were added or overwritten by this ContactImport.
+				</xsd:documentation>
+			    </xsd:annotation>
+			</xsd:element>
+		    </xsd:sequence>
+		</xsd:complexType>
+	    </xsd:schema>
+	</wsdl:types>
+
+	<wsdl:message name='associateEmailIdWithCampaignActionGroupIdRequest'>
+	    <wsdl:part name='associateEmailIdWithCampaignActionGroupIdArgs' type='nrtypens:associateEmailIdWithCampaignActionGroupIdArgs'/>
+	</wsdl:message>
+	<wsdl:message name='associateEmailIdWithCampaignActionGroupIdResponse'>
+	    <wsdl:part name='campaign_action_id' type='xsd:integer'>
+	    </wsdl:part>
+	</wsdl:message>
+	<wsdl:message name='createRootCampaignActionGroupWithEmailListIdConditionRequest'>
+	    <wsdl:part name='createRootCampaignActionGroupWithEmailListIdConditionArgs' type='nrtypens:createRootCampaignActionGroupWithEmailListIdConditionArgs'/>
+	</wsdl:message>
+	<wsdl:message name='createRootCampaignActionGroupWithEmailListIdConditionResponse'>
+	    <wsdl:part name='campaign_action_group_id' type='xsd:integer'>
+	    </wsdl:part>
+	</wsdl:message>
+	<wsdl:message name='getContactIdByContactEmailAddressRequest'>
+	    <wsdl:part name='contact_email_address' type='xsd:string'>
+	    </wsdl:part>
+	</wsdl:message>
+	<wsdl:message name='getContactIdByContactEmailAddressResponse'>
+	    <wsdl:part name='contact_id' type='xsd:int'>
+	    </wsdl:part>
+	</wsdl:message>
+	<wsdl:message name='createCustomFieldRequest'>
+	    <wsdl:part name='createCustomFieldRequestArgs' type='nrtypens:createCustomFieldArgs'/>
+	</wsdl:message>
+	<wsdl:message name='createCustomFieldResponse'>
+	    <wsdl:part name='custom_field_id' type='xsd:integer'>
+	    </wsdl:part>
+	</wsdl:message>
+	<wsdl:message name='getEmailListsRequest'>
+	</wsdl:message>
+	<wsdl:message name='getEmailListsResponse'>
+	    <wsdl:part name='getEmailListsResult' type='nrtypens:ArrayOfEmailList'/>
+	</wsdl:message>
+	<wsdl:message name='createContactRequest'>
+	    <wsdl:part name='createContactArgs' type='nrtypens:createContactArgs'/>
+	</wsdl:message>
+	<wsdl:message name='createContactResponse'>
+	    <wsdl:part name='contact_id' type='xsd:string'>
+	    </wsdl:part>
+	</wsdl:message>
+	<wsdl:message name='createEmailListRequest'>
+	    <wsdl:part name='createEmailListArgs' type='nrtypens:createEmailListArgs'/>
+	</wsdl:message>
+	<wsdl:message name='createEmailListResponse'>
+	    <wsdl:part name='email_list_id' type='xsd:integer'>
+	    </wsdl:part>
+	</wsdl:message>
+	<wsdl:message name='submitContactExportRequest'>
+	    <wsdl:part name='submitContactExportArgs' type='nrtypens:submitContactExportArgs'/>
+	</wsdl:message>
+	<wsdl:message name='submitContactExportResponse'>
+	    <wsdl:part name='contact_export_id' type='xsd:integer'>
+	    </wsdl:part>
+	</wsdl:message>
+	<wsdl:message name='getContactImportStatusRequest'>
+	    <wsdl:part name='contact_import_id' type='xsd:integer'>
+	    </wsdl:part>
+	</wsdl:message>
+	<wsdl:message name='getContactImportStatusResponse'>
+	    <wsdl:part name='getContactImportStatusArgs' type='nrtypens:ContactImportStatus'/>
+	</wsdl:message>
+	<wsdl:message name='getContactIdFromVisitorIdRequest'>
+	    <wsdl:part name='visitor_id' type='xsd:integer'>
+	    </wsdl:part>
+	</wsdl:message>
+	<wsdl:message name='getContactIdFromVisitorIdResponse'>
+	    <wsdl:part name='contact_id' type='xsd:integer'>
+	    </wsdl:part>
+	</wsdl:message>
+	<wsdl:message name='createCampaignRequest'>
+	    <wsdl:part name='createCampaignArgs' type='nrtypens:createCampaignArgs'/>
+	</wsdl:message>
+	<wsdl:message name='createCampaignResponse'>
+	    <wsdl:part name='campaign_id' type='xsd:integer'>
+	    </wsdl:part>
+	</wsdl:message>
+	<wsdl:message name='createEmailRequest'>
+	    <wsdl:part name='createEmailArgs' type='nrtypens:createEmailArgs'/>
+	</wsdl:message>
+	<wsdl:message name='createEmailResponse'>
+	    <wsdl:part name='email_id' type='xsd:string'>
+	    </wsdl:part>
+	</wsdl:message>
+	<wsdl:message name='getContactRecentVisitSummaryRequest'>
+	    <wsdl:part name='contact_id' type='xsd:integer'>
+	    </wsdl:part>
+	</wsdl:message>
+	<wsdl:message name='getContactRecentVisitSummaryResponse'>
+	    <wsdl:part name='getVisitSummaryResult' type='nrtypens:VisitSummary'/>
+	</wsdl:message>
+	<wsdl:message name='getContactExportStatusRequest'>
+	    <wsdl:part name='contact_export_id' type='xsd:integer'>
+	    </wsdl:part>
+	</wsdl:message>
+	<wsdl:message name='getContactExportStatusResponse'>
+	    <wsdl:part name='contact_import_status' type='xsd:boolean'>
+	    </wsdl:part>
+	</wsdl:message>
+	<wsdl:message name='submitContactImportRequest'>
+	    <wsdl:part name='submitContactImportArgs' type='nrtypens:submitContactImportArgs'/>
+	</wsdl:message>
+	<wsdl:message name='submitContactImportResponse'>
+	    <wsdl:part name='contact_import_id' type='xsd:integer'>
+	    </wsdl:part>
+	</wsdl:message>
+	<wsdl:message name='getContactFieldsRequest'>
+	</wsdl:message>
+	<wsdl:message name='getContactFieldsResponse'>
+	    <wsdl:part name='getContactFieldsResult' type='nrtypens:arrayType'/>
+	</wsdl:message>
+	<wsdl:message name='getEmailListContactsRequest'>
+	    <wsdl:part name='email_list_id' type='xsd:integer'>
+	    </wsdl:part>
+	</wsdl:message>
+	<wsdl:message name='getEmailListContactsResponse'>
+	    <wsdl:part name='getEmailListContactsResult' type='nrtypens:ArrayOfInteger'/>
+	</wsdl:message>
+	<wsdl:message name='getContactEmailListsRequest'>
+	    <wsdl:part name='contact_id' type='xsd:integer'>
+	    </wsdl:part>
+	</wsdl:message>
+	<wsdl:message name='getContactEmailListsResponse'>
+	    <wsdl:part name='getContactEmailListsResult' type='nrtypens:ArrayOfInteger'/>
+	</wsdl:message>
+	<wsdl:message name='getContactByContactIdRequest'>
+	    <wsdl:part name='contact_id' type='xsd:integer'>
+	    </wsdl:part>
+	</wsdl:message>
+	<wsdl:message name='getContactByContactIdResponse'>
+	    <wsdl:part name='getContactByContactIdResult' type='nrtypens:Contact'/>
+	</wsdl:message>
+	<wsdl:message name='associateContactIdsWithEmailListIdsRequest'>
+	    <wsdl:part name='contact_ids' type='nrtypens:arrayType'>
+	    </wsdl:part>
+	    <wsdl:part name='email_list_ids' type='nrtypens:arrayType'>
+	    </wsdl:part>
+	</wsdl:message>
+	<wsdl:message name='associateContactIdsWithEmailListIdsResponse'>
+	    <wsdl:part name='status' type='xsd:boolean'>
+	    </wsdl:part>
+	</wsdl:message>
+	<wsdl:message name='launchCampaignRequest'>
+	    <wsdl:part name='campaign_id' type='xsd:integer'>
+	    </wsdl:part>
+	</wsdl:message>
+	<wsdl:message name='launchCampaignResponse'>
+	    <wsdl:part name='campaign_launch_status' type='xsd:boolean'>
+	    </wsdl:part>
+	</wsdl:message>
+	<wsdl:message name='getDefaultRoleIdRequest'>
+	</wsdl:message>
+	<wsdl:message name='getDefaultRoleIdResponse'>
+	    <wsdl:part name='role_id' type='xsd:integer'>
+	    </wsdl:part>
+	</wsdl:message>
+
+	<portType name="NRAPIPortType">
+	    <wsdl:operation name="getDefaultRoleId">
+		<wsdl:documentation>
+		    <class name="User"/>
+		    <description>
+			The getDefaultRoleId() returns your User's role ID. If a role has not been specified or the User's role is Global/Company Wide, this call will return NULL.
+		    </description>
+
+		    <example>
+			<php5>
+			    $objSoapClient = new SoapClient('https://apps.net-results.com/soap/v1/NRAPI.wsdl', array(
+								'login' => 'username',
+								'password' => 'password',
+								'features' => SOAP_SINGLE_ELEMENT_ARRAYS + SOAP_USE_XSI_ARRAY_TYPE
+							    ));
+
+			    $intRoleId = $objSoapClient->getDefaultRoleId();
+			</php5>
+		    </example>
+		</wsdl:documentation>
+		<wsdl:input message="nrns:getDefaultRoleIdRequest"/>
+		<wsdl:output message="nrns:getDefaultRoleIdResponse"/>
+	    </wsdl:operation>
+	    <wsdl:operation name="launchCampaign">
+		<wsdl:documentation>
+		    <class name="Campaign"/>
+		    <description>
+			The launchCampaign() attempts to launch the specified Campaign.
+		    </description>
+
+		    <example>
+			<php5>
+			    $objSoapClient = new SoapClient('https://apps.net-results.com/soap/v1/NRAPI.wsdl', array(
+								'login' => 'username',
+								'password' => 'password',
+								'features' => SOAP_SINGLE_ELEMENT_ARRAYS + SOAP_USE_XSI_ARRAY_TYPE
+							    ));
+
+			    $blnLaunchResult = $objSoapClient->launchCampaign($intCampaignId);
+			</php5>
+		    </example>
+		</wsdl:documentation>
+		<wsdl:input message="nrns:launchCampaignRequest"/>
+		<wsdl:output message="nrns:launchCampaignResponse"/>
+	    </wsdl:operation>
+	    <wsdl:operation name="associateEmailIdWithCampaignActionGroupId">
+		<wsdl:documentation>
+		    <class name="Campaign"/>
+		    <description>
+			The associateEmailIdWithCampaignActionGroupId() method associates a Send Email action of the specified Email Id with the specified Campaign Action Group Id. It returns the Campaign Action Id.
+		    </description>
+
+		    <example>
+			<php5>
+			    $objSoapClient = new SoapClient('https://apps.net-results.com/soap/v1/NRAPI.wsdl', array(
+								'login' => 'username',
+								'password' => 'password',
+								'features' => SOAP_SINGLE_ELEMENT_ARRAYS + SOAP_USE_XSI_ARRAY_TYPE
+							    ));
+
+			    $intCampaignActionId = $objSoapClient->associateEmailIdWithCampaignActionGroupId(
+									    array(
+										'campaign_action_group_id' => 12,
+										'email_id' => 33
+									    )
+									);
+			</php5>
+		    </example>
+		</wsdl:documentation>
+		<wsdl:input message="nrns:associateEmailIdWithCampaignActionGroupIdRequest"/>
+		<wsdl:output message="nrns:associateEmailIdWithCampaignActionGroupIdResponse"/>
+	    </wsdl:operation>
+	    <wsdl:operation name="createRootCampaignActionGroupWithEmailListIdCondition">
+		<wsdl:documentation>
+		    <class name="Campaign"/>
+		    <description>
+			The createRootCampaignActionGroupWithEmailListIdCondition() method associates a Send Email action of the specified Email Id with the specified Campaign Action Group Id. It returns the Campaign Action Id.
+		    </description>
+
+		    <example>
+			<php5>
+			    $objSoapClient = new SoapClient('https://apps.net-results.com/soap/v1/NRAPI.wsdl', array(
+								'login' => 'username',
+								'password' => 'password',
+								'features' => SOAP_SINGLE_ELEMENT_ARRAYS + SOAP_USE_XSI_ARRAY_TYPE
+							    ));
+
+			    $intCampaignActionId = $objSoapClient->createRootCampaignActionGroupWithEmailListIdCondition(
+									    array(
+										'campaign_action_group_name' => 'New Campaign Action',
+										'campaign_id' => 12,
+										'email_list_id' => 37,
+									    )
+									);
+			</php5>
+		    </example>
+		</wsdl:documentation>
+		<wsdl:input message="nrns:createRootCampaignActionGroupWithEmailListIdConditionRequest"/>
+		<wsdl:output message="nrns:createRootCampaignActionGroupWithEmailListIdConditionResponse"/>
+	    </wsdl:operation>
+	    <wsdl:operation name="associateContactIdsWithEmailListIds">
+		<wsdl:documentation>
+		    <class name="Contact"/>
+		    <description>
+			The associateContactIdsWithEmailListIds() method accepts an array of Contact Ids to associate with an array of EmailList Ids. All Ids must be valid, or an exception will be thrown. If a Contact is already a member of a list, there will be no change.
+			If an exception is not thrown, this method will always return true.
+		    </description>
+
+		    <example>
+			<php5>
+			    $objSoapClient = new SoapClient('https://apps.net-results.com/soap/v1/NRAPI.wsdl', array(
+			    'login' => 'username',
+			    'password' => 'password',
+			    'features' => SOAP_SINGLE_ELEMENT_ARRAYS + SOAP_USE_XSI_ARRAY_TYPE
+			    ));
+
+			    $blnResult = $objSoapClient->associateContactIdsWithEmailListIds(array(1, 2, 3), array(4, 5, 6));
+			</php5>
+		    </example>
+		</wsdl:documentation>
+		<wsdl:input message="nrns:associateContactIdsWithEmailListIdsRequest"/>
+		<wsdl:output message="nrns:associateContactIdsWithEmailListIdsResponse"/>
+	    </wsdl:operation>
+	    <wsdl:operation name="getContactByContactId">
+		<wsdl:documentation>
+		    <class name="Contact"/>
+		    <description>
+			The getContactByContactId() method returns the Contact whose Id matches the specified argument.
+		    </description>
+
+		    <example>
+			<php5>
+			    $objSoapClient = new SoapClient('https://apps.net-results.com/soap/v1/NRAPI.wsdl', array(
+			    'login' => 'username',
+			    'password' => 'password',
+			    'features' => SOAP_SINGLE_ELEMENT_ARRAYS + SOAP_USE_XSI_ARRAY_TYPE
+			    ));
+
+			    $objContact = $objSoapClient->getContactByContactId();
+			</php5>
+		    </example>
+		</wsdl:documentation>
+		<wsdl:input message="nrns:getContactByContactIdRequest"/>
+		<wsdl:output message="nrns:getContactByContactIdResponse"/>
+	    </wsdl:operation>
+	    <wsdl:operation name="getContactEmailLists">
+		<wsdl:documentation>
+		    <class name="Contact"/>
+		    <description>
+			The getContactEmailLists method returns an array of EmailList Ids for those EmailLists that the Contact is a member of.
+		    </description>
+
+		    <example>
+			<php5>
+			    $objSoapClient = new SoapClient('https://apps.net-results.com/soap/v1/NRAPI.wsdl', array(
+			    'login' => 'username',
+			    'password' => 'password',
+			    'features' => SOAP_SINGLE_ELEMENT_ARRAYS + SOAP_USE_XSI_ARRAY_TYPE
+			    ));
+
+			    $arrEmailListIds = $objSoapClient->getContactEmailLists($intContactId);
+			</php5>
+		    </example>
+		</wsdl:documentation>
+		<wsdl:input message="nrns:getContactEmailListsRequest"/>
+		<wsdl:output message="nrns:getContactEmailListsResponse"/>
+	    </wsdl:operation>
+	    <wsdl:operation name="getEmailListContacts">
+		<wsdl:documentation>
+		    <class name="EmailList"/>
+		    <description>
+			The getEmailListContacts() method returns an array of Contact Ids for those Contacts that are members of the specified EmailList.
+		    </description>
+
+		    <example>
+			<php5>
+			    $objSoapClient = new SoapClient('https://apps.net-results.com/soap/v1/NRAPI.wsdl', array(
+			    'login' => 'username',
+			    'password' => 'password',
+			    'features' => SOAP_SINGLE_ELEMENT_ARRAYS + SOAP_USE_XSI_ARRAY_TYPE
+			    ));
+
+			    $arrContactIds = $objSoapClient->getEmailListContacts($intEmailListId);
+			</php5>
+		    </example>
+		</wsdl:documentation>
+		<wsdl:input message="nrns:getEmailListContactsRequest"/>
+		<wsdl:output message="nrns:getEmailListContactsResponse"/>
+	    </wsdl:operation>
+	    <wsdl:operation name="getContactIdByContactEmailAddress">
+		<wsdl:documentation>
+		    <class name="Contact"/>
+		    <description>
+			The getContactIdByContactEmailAddress() method returns the Contact Id whose Email Address matches the specified argument.
+		    </description>
+
+		    <example>
+			<php5>
+			    $objSoapClient = new SoapClient('https://apps.net-results.com/soap/v1/NRAPI.wsdl', array(
+			    'login' => 'username',
+			    'password' => 'password',
+			    'features' => SOAP_SINGLE_ELEMENT_ARRAYS + SOAP_USE_XSI_ARRAY_TYPE
+			    ));
+
+			    $intContactId = $objSoapClient->getContactIdByContactEmailAddress('support@net-results.com');
+			</php5>
+		    </example>
+		</wsdl:documentation>
+		<wsdl:input message="nrns:getContactIdByContactEmailAddressRequest"/>
+		<wsdl:output message="nrns:getContactIdByContactEmailAddressResponse"/>
+	    </wsdl:operation>
+	    <wsdl:operation name="getContactFields">
+		<wsdl:documentation>
+		    <class name="Contact"/>
+		    <description>
+			The getContactFields() method returns all available attributes for your company's contacts.
+		    </description>
+
+		    <example>
+			<php5>
+			    $objSoapClient = new SoapClient('https://apps.net-results.com/soap/v1/NRAPI.wsdl', array(
+			    'login' => 'username',
+			    'password' => 'password',
+			    'features' => SOAP_SINGLE_ELEMENT_ARRAYS + SOAP_USE_XSI_ARRAY_TYPE
+			    ));
+
+			    $arrContactFields = $objSoapClient->getContactFields();
+			</php5>
+		    </example>
+		</wsdl:documentation>
+		<wsdl:input message="nrns:getContactFieldsRequest"/>
+		<wsdl:output message="nrns:getContactFieldsResponse"/>
+	    </wsdl:operation>
+	    <wsdl:operation name="createCustomField">
+		<wsdl:documentation>
+		    <class name="Contact"/>
+		    <description>
+			The createCustomField() method creates an CustomField with the name given in the argument, and returns the CustomField Id of the newly created field.
+		    </description>
+
+		    <example>
+			<php5>
+			    $objSoapClient = new SoapClient('https://apps.net-results.com/soap/v1/NRAPI.wsdl', array(
+			    'login' => 'username',
+			    'password' => 'password',
+			    'features' => SOAP_SINGLE_ELEMENT_ARRAYS + SOAP_USE_XSI_ARRAY_TYPE
+			    ));
+
+			    $intNewCustomFieldId = $objSoapClient->createCustomField(array('custom_field_name' => 'my custom field', 'role_id' => null));
+			</php5>
+		    </example>
+		</wsdl:documentation>
+		<wsdl:input message="nrns:createCustomFieldRequest"/>
+		<wsdl:output message="nrns:createCustomFieldResponse"/>
+	    </wsdl:operation>
+	    <wsdl:operation name="getEmailLists">
+		<wsdl:documentation>
+		    <class name="EmailList"/>
+		    <description>
+			The getEmailLists() method returns all Email Lists.
+		    </description>
+
+		    <example>
+			<php5>
+			    $objSoapClient = new SoapClient('https://apps.net-results.com/soap/v1/NRAPI.wsdl', array(
+			    'login' => 'username',
+			    'password' => 'password',
+			    'features' => SOAP_SINGLE_ELEMENT_ARRAYS + SOAP_USE_XSI_ARRAY_TYPE
+			    ));
+
+			    $objEmailLists = $objSoapClient->getEmailLists();
+			</php5>
+		    </example>
+		</wsdl:documentation>
+		<wsdl:input message="nrns:getEmailListsRequest"/>
+		<wsdl:output message="nrns:getEmailListsResponse"/>
+	    </wsdl:operation>
+	    <wsdl:operation name="createContact">
+		<wsdl:documentation>
+		    <class name="Contact"/>
+		    <description>
+			The contact method creates an Contact, and returns the ContactId. It will throw an Exception if a duplicate Email Address or Custom Primary Field already exists.
+			If you need to add a contact with Custom Fields or with more control, please use the submitContactImport method.
+		    </description>
+
+		    <example>
+			<php5>
+			    $objSoapClient = new SoapClient('https://apps.net-results.com/soap/v1/NRAPI.wsdl', array(
+			    'login' => 'username',
+			    'password' => 'password',
+			    'features' => SOAP_SINGLE_ELEMENT_ARRAYS + SOAP_USE_XSI_ARRAY_TYPE
+			    ));
+
+			    $intNewContactId = $objSoapClient->createContact(
+			    'contact_email_address' => 'support@net-results.com',
+			    'contact_title' => 'Mr.',
+			    'contact_first_name' => 'John',
+			    'contact_last_name' => 'Doe',
+			    'company_name' => 'Net-Results',
+			    'contact_address_1' => '651 Corporate Circle',
+			    'contact_address_2' => 'Suite 100',
+			    'contact_mobile_phone' => '303-771-2552',
+			    'contact_home_phone' => '303-771-2552',
+			    'contact_work_phone' => '303-771-2552',
+			    'contact_fax' => '720-746-1110',
+			    'city_name' => 'Golden',
+			    'contact_postalcode' => '80401',
+			    'country_name' => 'United States',
+			    'state_name' => 'Colorado',
+			    'contact_lead_score' => '10',
+			    'contact_twitter_username' => 'NetResults'
+			    );
+			    );
+			</php5>
+		    </example>
+		</wsdl:documentation>
+		<wsdl:input message="nrns:createContactRequest"/>
+		<wsdl:output message="nrns:createContactResponse"/>
+	    </wsdl:operation>
+	    <wsdl:operation name="createEmailList">
+		<wsdl:documentation>
+		    <class name="EmailList"/>
+		    <description>
+			The createEmailList() method creates an EmailList with the name given in the argument, and returns the EmailList Id of the newly created list.
+		    </description>
+
+		    <example>
+			<php5>
+			    $objSoapClient = new SoapClient('https://apps.net-results.com/soap/v1/NRAPI.wsdl', array(
+			    'login' => 'username',
+			    'password' => 'password',
+			    'features' => SOAP_SINGLE_ELEMENT_ARRAYS + SOAP_USE_XSI_ARRAY_TYPE
+			    ));
+
+			    $intNewEmailListId = $objSoapClient->createEmailList('My New List');
+			</php5>
+		    </example>
+		</wsdl:documentation>
+		<wsdl:input message="nrns:createEmailListRequest"/>
+		<wsdl:output message="nrns:createEmailListResponse"/>
+	    </wsdl:operation>
+	    <wsdl:operation name="submitContactImport">
+		<wsdl:documentation>
+		    <class name="Contact"/>
+		    <description>
+			The submitContactImport() method accepts an argument of configuration values specifiying contacts to upload.
+		    </description>
+
+		    <example>
+			<php5>
+			    $objSoapClient = new SoapClient('https://apps.net-results.com/soap/v1/NRAPI.wsdl', array(
+			    'login' => 'username',
+			    'password' => 'password',
+			    'features' => SOAP_SINGLE_ELEMENT_ARRAYS + SOAP_USE_XSI_ARRAY_TYPE
+			    ));
+
+			    $objSoapClient->submitContactImport(
+			    array(
+			    'file' => array(
+			    'filename' => 'my_list.csv',
+			    'contents' => base64_encode(file_get_contents('/home/user/my_list.csv'))
+			    ),
+			    'add_email_list_ids' => array(1, 2),
+			    'remove_email_list_ids' => null,
+			    'overwrite_duplicates' => 0,
+			    'clobber_lists' => 0,
+			    'contact_import_mappings' => array(
+			    array(
+			    'csv_header' => 'email',
+			    'nr_contact_attribute' => 'Email Address'
+			    ),
+			    array(
+			    'csv_header' => 'first name',
+			    'nr_contact_attribute' => 'First Name'
+			    ),
+			    array(
+			    'csv_header' => 'Whats your favorite animal',
+			    'nr_contact_attribute' => 'Whats your favorite animal'
+			    )
+			    ),
+			    'notification_recipients' => array(
+			    'support@net-results.com'
+			    )
+			    )
+			    );
+			</php5>
+		    </example>
+		</wsdl:documentation>
+		<wsdl:input message="nrns:submitContactImportRequest"/>
+		<wsdl:output message="nrns:submitContactImportResponse"/>
+	    </wsdl:operation>
+	    <wsdl:operation name="submitContactExport">
+		<wsdl:documentation>
+		    <class name="Contact"/>
+		    <description>
+			The submitContactExport() method accepts an argument of configuration values specifiying contacts to export.
+		    </description>
+
+		    <example>
+			<php5>
+			    $objSoapClient = new SoapClient('https://apps.net-results.com/soap/v1/NRAPI.wsdl', array(
+			    'login' => 'username',
+			    'password' => 'password',
+			    'features' => SOAP_SINGLE_ELEMENT_ARRAYS + SOAP_USE_XSI_ARRAY_TYPE
+			    ));
+
+			    $objSoapClient->submitContactExport(
+			    array(
+
+			    )
+			    );
+			</php5>
+		    </example>
+		</wsdl:documentation>
+		<wsdl:input message="nrns:submitContactExportRequest"/>
+		<wsdl:output message="nrns:submitContactExportResponse"/>
+	    </wsdl:operation>
+	    <wsdl:operation name="getContactImportStatus">
+		<wsdl:documentation>
+		    <class name="Contact"/>
+		    <description>
+			The getContactImportStatus() method accepts a ContactImportId and returns the status of the ContactImport.
+		    </description>
+
+		    <example>
+			<php5>
+			    $objSoapClient = new SoapClient('https://apps.net-results.com/soap/v1/NRAPI.wsdl', array(
+			    'login' => 'username',
+			    'password' => 'password',
+			    'features' => SOAP_SINGLE_ELEMENT_ARRAYS + SOAP_USE_XSI_ARRAY_TYPE
+			    ));
+
+			    $objSoapClient->getContactImportStatus(779);
+			</php5>
+		    </example>
+		</wsdl:documentation>
+		<wsdl:input message="nrns:getContactImportStatusRequest"/>
+		<wsdl:output message="nrns:getContactImportStatusResponse"/>
+	    </wsdl:operation>
+	    <wsdl:operation name="getContactExportStatus">
+		<wsdl:documentation>
+		    <class name="Contact"/>
+		    <description>
+			The getContactExportStatus() method accepts a ContactExportId and returns the status of the ContactExport.
+		    </description>
+
+		    <example>
+			<php5>
+			    $objSoapClient = new SoapClient('https://apps.net-results.com/soap/v1/NRAPI.wsdl', array(
+			    'login' => 'username',
+			    'password' => 'password',
+			    'features' => SOAP_SINGLE_ELEMENT_ARRAYS + SOAP_USE_XSI_ARRAY_TYPE
+			    ));
+
+			    $objSoapClient->getContactExportStatus(779);
+			</php5>
+		    </example>
+		</wsdl:documentation>
+		<wsdl:input message="nrns:getContactExportStatusRequest"/>
+		<wsdl:output message="nrns:getContactExportStatusResponse"/>
+	    </wsdl:operation>
+	    <wsdl:operation name="getContactRecentVisitSummary">
+		<wsdl:documentation>
+		    <class name="Contact"/>
+		    <description>
+			The getContactRecentVisitSummary method returns the most recent Visit for the specified Contact Id.
+		    </description>
+
+		    <example>
+			<php5>
+			    $objSoapClient = new SoapClient('https://apps.net-results.com/soap/v1/NRAPI.wsdl', array(
+			    'login' => 'username',
+			    'password' => 'password',
+			    'features' => SOAP_SINGLE_ELEMENT_ARRAYS + SOAP_USE_XSI_ARRAY_TYPE
+			    ));
+
+			    $objContactVisit = $objSoapClient->getContactRecentVisitSummary();
+			</php5>
+		    </example>
+		</wsdl:documentation>
+		<wsdl:input message="nrns:getContactRecentVisitSummaryRequest"/>
+		<wsdl:output message="nrns:getContactRecentVisitSummaryResponse"/>
+	    </wsdl:operation>
+	    <wsdl:operation name="getContactIdFromVisitorId">
+		<wsdl:documentation>
+		    <class name="Contact"/>
+		    <description>
+			The getContactIdFromVisitorId() method returns your Net-Results Contact ID from the passed Visitor Id.
+		    </description>
+
+		    <example>
+			<php5>
+
+			    $objSoapClient = new SoapClient('https://apps.net-results.com/soap/v1/NRAPI.wsdl', array(
+			    'login' => 'username',
+			    'password' => 'password',
+			    'features' => SOAP_SINGLE_ELEMENT_ARRAYS + SOAP_USE_XSI_ARRAY_TYPE
+			    ));
+
+			    $intContactId = $objSoapClient->getContactIdFromVisitorId();
+			</php5>
+		    </example>
+		</wsdl:documentation>
+		<wsdl:input message="nrns:getContactIdFromVisitorIdRequest"/>
+		<wsdl:output message="nrns:getContactIdFromVisitorIdResponse"/>
+	    </wsdl:operation>
+	    <wsdl:operation name="createEmail">
+		<wsdl:documentation>
+		    <class name="Email"/>
+		    <description>
+			The createEmail method allows creation of an Email. All fields are required.
+
+			#1. Links in the html content will be named using the W3C "title" attribute of the anchor tag. In the case of the "title" attribute's absence, a link name will be generated.
+			#2. At this time, the Net-Results API allows only Emails with English content and unsubscribe messages.
+			#3. Personalized fields are supported, though a default text is required. Append a | to the Personalized Field followed by the Default Text, and surround the Personalized field and Default text with { and }. See the example below.
+			#4. Contents of html_content should be the entire HTML document, and will be validated according to the supplied doctype. If the email fails validation, an exception will be thrown.
+		    </description>
+
+		    <example>
+			<php5>
+			    $objSoapClient = new SoapClient('https://apps.net-results.com/soap/v1/NRAPI.wsdl', array(
+			    'login' => 'username',
+			    'password' => 'password',
+			    'features' => SOAP_SINGLE_ELEMENT_ARRAYS + SOAP_USE_XSI_ARRAY_TYPE
+			    ));
+
+			    $intEmailId = $objSoapClient->createEmail(
+			    'name' => 'Test Email One',
+			    'text_content' =>
+			    'This is test text content
+
+			    Regards,
+
+			    Net-Results Support',
+			    'html_content' => $html_content,
+			    'reply_to_address' => 'support@net-results.com',
+			    'reply_to_label' => 'Net-Results Support',
+			    'subject' => 'This is an Email with a test Subject'
+			    );
+			</php5>
+		    </example>
+		</wsdl:documentation>
+		<wsdl:input message="nrns:createEmailRequest"/>
+		<wsdl:output message="nrns:createEmailResponse"/>
+	    </wsdl:operation>
+	    <wsdl:operation name="createCampaign">
+		<wsdl:documentation>
+		    <class name="Campaign"/>
+		    <description>
+			The createCampaign() method creates a new campaign. Only One-Time Campaigns are supported.
+		    </description>
+
+		    <example>
+			<php5>
+			    $objSoapClient = new SoapClient('https://apps.net-results.com/soap/v1/NRAPI.wsdl', array(
+								'login' => 'username',
+								'password' => 'password',
+								'features' => SOAP_SINGLE_ELEMENT_ARRAYS + SOAP_USE_XSI_ARRAY_TYPE
+							    ));
+
+			    $intCampaignId = $objSoapClient->createCampaign(
+									    array(
+										'campaign_name' => 'New Campaign',
+										'campaign_description' => 'A test Campaign',
+										'campaign_launch_date' => $objDateTime
+									    )
+									);
+			</php5>
+		    </example>
+		</wsdl:documentation>
+		<wsdl:input message="nrns:createCampaignRequest"/>
+		<wsdl:output message="nrns:createCampaignResponse"/>
+	    </wsdl:operation>
+	</portType>
+	<wsdl:binding name="NRAPIBinding" type="nrns:NRAPIPortType">
+	    <soap:binding style="rpc" transport="http://schemas.xmlsoap.org/soap/http" />
+	    <wsdl:operation name="createEmailList">
+		<soap:operation soapAction="https://apps.net-results.com/soap/createEmailList"/>
+		<wsdl:input>
+		    <soap:body use="literal" namespace='https://apps.net-results.com/soap/v1' encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+		</wsdl:input>
+		<wsdl:output>
+		    <soap:body use="literal" namespace='https://apps.net-results.com/soap/v1' encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+		</wsdl:output>
+	    </wsdl:operation>
+	    <wsdl:operation name="submitContactImport">
+		<soap:operation soapAction="https://apps.net-results.com/soap/submitContactImport"/>
+		<wsdl:input>
+		    <soap:body use="literal" namespace='https://apps.net-results.com/soap/v1' encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+		</wsdl:input>
+		<wsdl:output>
+		    <soap:body use="literal" namespace='https://apps.net-results.com/soap/v1' encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+		</wsdl:output>
+	    </wsdl:operation>
+	    <wsdl:operation name="submitContactExport">
+		<soap:operation soapAction="https://apps.net-results.com/soap/submitContactExport"/>
+		<wsdl:input>
+		    <soap:body use="literal" namespace='https://apps.net-results.com/soap/v1' encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+		</wsdl:input>
+		<wsdl:output>
+		    <soap:body use="literal" namespace='https://apps.net-results.com/soap/v1' encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+		</wsdl:output>
+	    </wsdl:operation>
+	    <wsdl:operation name="getContactImportStatus">
+		<soap:operation soapAction="https://apps.net-results.com/soap/getContactImportStatus"/>
+		<wsdl:input>
+		    <soap:body use="literal" namespace='https://apps.net-results.com/soap/v1' encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+		</wsdl:input>
+		<wsdl:output>
+		    <soap:body use="literal" namespace='https://apps.net-results.com/soap/v1' encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+		</wsdl:output>
+	    </wsdl:operation>
+	    <wsdl:operation name="getContactExportStatus">
+		<soap:operation soapAction="https://apps.net-results.com/soap/getContactExportStatus"/>
+		<wsdl:input>
+		    <soap:body use="literal" namespace='https://apps.net-results.com/soap/v1' encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+		</wsdl:input>
+		<wsdl:output>
+		    <soap:body use="literal" namespace='https://apps.net-results.com/soap/v1' encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+		</wsdl:output>
+	    </wsdl:operation>
+	    <wsdl:operation name="createEmail">
+		<soap:operation soapAction="https://apps.net-results.com/soap/createEmail"/>
+		<wsdl:input>
+		    <soap:body use="literal" namespace='https://apps.net-results.com/soap/v1' encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+		</wsdl:input>
+		<wsdl:output>
+		    <soap:body use="literal" namespace='https://apps.net-results.com/soap/v1' encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+		</wsdl:output>
+	    </wsdl:operation>
+	    <wsdl:operation name="createCampaign">
+		<soap:operation soapAction="https://apps.net-results.com/soap/createCampaign"/>
+		<wsdl:input>
+		    <soap:body use="literal" namespace='https://apps.net-results.com/soap/v1' encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+		</wsdl:input>
+		<wsdl:output>
+		    <soap:body use="literal" namespace='https://apps.net-results.com/soap/v1' encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+		</wsdl:output>
+	    </wsdl:operation>
+	    <wsdl:operation name="getContactIdFromVisitorId">
+		<soap:operation soapAction="https://apps.net-results.com/soap/getContactIdFromVisitorId"/>
+		<wsdl:input>
+		    <soap:body use="literal" namespace='https://apps.net-results.com/soap/v1' encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+		</wsdl:input>
+		<wsdl:output>
+		    <soap:body use="literal" namespace='https://apps.net-results.com/soap/v1' encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+		</wsdl:output>
+	    </wsdl:operation>
+	    <wsdl:operation name="getContactRecentVisitSummary">
+		<soap:operation soapAction="https://apps.net-results.com/soap/getContactRecentVisitSummary"/>
+		<wsdl:input>
+		    <soap:body use="literal" namespace='https://apps.net-results.com/soap/v1' encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+		</wsdl:input>
+		<wsdl:output>
+		    <soap:body use="literal" namespace='https://apps.net-results.com/soap/v1' encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+		</wsdl:output>
+	    </wsdl:operation>
+	    <wsdl:operation name="createContact">
+		<soap:operation soapAction="https://apps.net-results.com/soap/createContact"/>
+		<wsdl:input>
+		    <soap:body use="literal" namespace='https://apps.net-results.com/soap/v1' encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+		</wsdl:input>
+		<wsdl:output>
+		    <soap:body use="literal" namespace='https://apps.net-results.com/soap/v1' encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+		</wsdl:output>
+	    </wsdl:operation>
+	    <wsdl:operation name="getEmailLists">
+		<soap:operation soapAction="https://apps.net-results.com/soap/getEmailLists"/>
+		<wsdl:input>
+		    <soap:body use="literal" namespace='https://apps.net-results.com/soap/v1' encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+		</wsdl:input>
+		<wsdl:output>
+		    <soap:body use="literal" namespace='https://apps.net-results.com/soap/v1' encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+		</wsdl:output>
+	    </wsdl:operation>
+	    <wsdl:operation name="createCustomField">
+		<soap:operation soapAction="https://apps.net-results.com/soap/createCustomField"/>
+		<wsdl:input>
+		    <soap:body use="literal" namespace='https://apps.net-results.com/soap/v1' encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+		</wsdl:input>
+		<wsdl:output>
+		    <soap:body use="literal" namespace='https://apps.net-results.com/soap/v1' encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+		</wsdl:output>
+	    </wsdl:operation>
+	    <wsdl:operation name="getContactFields">
+		<soap:operation soapAction="https://apps.net-results.com/soap/getContactFields"/>
+		<wsdl:input>
+		    <soap:body use="literal" namespace='https://apps.net-results.com/soap/v1' encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+		</wsdl:input>
+		<wsdl:output>
+		    <soap:body use="literal" namespace='https://apps.net-results.com/soap/v1' encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+		</wsdl:output>
+	    </wsdl:operation>
+	    <wsdl:operation name="getContactIdByContactEmailAddress">
+		<soap:operation soapAction="https://apps.net-results.com/soap/getContactIdByContactEmailAddress"/>
+		<wsdl:input >
+		    <soap:body use="literal" namespace='https://apps.net-results.com/soap/v1' encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+		</wsdl:input>
+		<wsdl:output>
+		    <soap:body use="literal" namespace='https://apps.net-results.com/soap/v1' encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+		</wsdl:output>
+	    </wsdl:operation>
+	    <wsdl:operation name="getEmailListContacts">
+		<soap:operation soapAction="https://apps.net-results.com/soap/getEmailListContacts"/>
+		<wsdl:input>
+		    <soap:body use="literal" namespace='https://apps.net-results.com/soap/v1' encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+		</wsdl:input>
+		<wsdl:output>
+		    <soap:body use="literal" namespace='https://apps.net-results.com/soap/v1' encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+		</wsdl:output>
+	    </wsdl:operation>
+	    <wsdl:operation name="getContactEmailLists">
+		<soap:operation soapAction="https://apps.net-results.com/soap/getContactsEmailList"/>
+		<wsdl:input>
+		    <soap:body use="literal" namespace='https://apps.net-results.com/soap/v1' encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+		</wsdl:input>
+		<wsdl:output>
+		    <soap:body use="literal" namespace='https://apps.net-results.com/soap/v1' encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+		</wsdl:output>
+	    </wsdl:operation>
+	    <wsdl:operation name="getContactByContactId">
+		<soap:operation soapAction="https://apps.net-results.com/soap/getContactByContactId"/>
+		<wsdl:input>
+		    <soap:body use="literal" namespace='https://apps.net-results.com/soap/v1' encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+		</wsdl:input>
+		<wsdl:output>
+		    <soap:body use="literal" namespace='https://apps.net-results.com/soap/v1' encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+		</wsdl:output>
+	    </wsdl:operation>
+	    <wsdl:operation name="associateContactIdsWithEmailListIds">
+		<soap:operation soapAction="https://apps.net-results.com/soap/associateContactIdsWithEmailListIds"/>
+		<wsdl:input>
+		    <soap:body use="literal" namespace='https://apps.net-results.com/soap/v1' encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+		</wsdl:input>
+		<wsdl:output>
+		    <soap:body use="literal" namespace='https://apps.net-results.com/soap/v1' encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+		</wsdl:output>
+	    </wsdl:operation>
+	    <wsdl:operation name="createRootCampaignActionGroupWithEmailListIdCondition">
+		<soap:operation soapAction="https://apps.net-results.com/soap/createRootCampaignActionGroupWithEmailListIdCondition"/>
+		<wsdl:input>
+		    <soap:body use="literal" namespace='https://apps.net-results.com/soap/v1' encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+		</wsdl:input>
+		<wsdl:output>
+		    <soap:body use="literal" namespace='https://apps.net-results.com/soap/v1' encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+		</wsdl:output>
+	    </wsdl:operation>
+	    <wsdl:operation name="associateEmailIdWithCampaignActionGroupId">
+		<soap:operation soapAction="https://apps.net-results.com/soap/associateEmailIdWithCampaignActionGroupId"/>
+		<wsdl:input>
+		    <soap:body use="literal" namespace='https://apps.net-results.com/soap/v1' encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+		</wsdl:input>
+		<wsdl:output>
+		    <soap:body use="literal" namespace='https://apps.net-results.com/soap/v1' encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+		</wsdl:output>
+	    </wsdl:operation>
+	    <wsdl:operation name="launchCampaign">
+		<soap:operation soapAction="https://apps.net-results.com/soap/launchCampaign"/>
+		<wsdl:input>
+		    <soap:body use="literal" namespace='https://apps.net-results.com/soap/v1' encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+		</wsdl:input>
+		<wsdl:output>
+		    <soap:body use="literal" namespace='https://apps.net-results.com/soap/v1' encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+		</wsdl:output>
+	    </wsdl:operation>
+	    <wsdl:operation name="getDefaultRoleId">
+		<soap:operation soapAction="getDefaultRoleId"/>
+		<wsdl:input>
+		    <soap:body use="literal" namespace='https://apps.net-results.com/soap/v1' encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+		</wsdl:input>
+		<wsdl:output>
+		    <soap:body use="literal" namespace='https://apps.net-results.com/soap/v1' encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+		</wsdl:output>
+	    </wsdl:operation>
+	</wsdl:binding>
+	<wsdl:service name='NRAPI'>
+	    <wsdl:documentation>
+		The Net-Results API
+	    </wsdl:documentation>
+	    <wsdl:port name='NRAPIPort' binding='nrns:NRAPIBinding'>
+		<soap:address location='https://apps.net-results.com/soap/v1/NRAPI.php'/>
+	    </wsdl:port>
+	</wsdl:service>
+</wsdl:definitions>
