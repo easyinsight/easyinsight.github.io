@@ -9,8 +9,5 @@
         public function set moduleInfo(val:IModuleInfo):void {
             _moduleInfo = val;
         }]]></mx:Script>
-    <mx:VBox>
-        <mx:Label text="Loading module for display..."/>
-        <mx:ProgressBar id="progressBar" source="{_moduleInfo}"/>
-    </mx:VBox>
+    <mx:ProgressBar id="progressBar" source="{_moduleInfo}" label="Loading module for display..." fontSize="18"/>
 </mx:Box>

@@ -7,8 +7,12 @@ import flash.events.Event;
 
 import mx.binding.utils.BindingUtils;
 import mx.collections.ArrayCollection;
+import mx.containers.Box;
+import mx.containers.Canvas;
 import mx.containers.VBox;
+import mx.containers.ViewStack;
 import mx.controls.Alert;
+import mx.controls.ProgressBar;
 import mx.events.ModuleEvent;
 import mx.modules.IModuleInfo;
 import mx.modules.ModuleManager;
@@ -117,7 +121,52 @@ public class DataViewFactory extends VBox {
         _controlBar.analysisDefinition = _analysisDefinition;
         addChild(_controlBar as DisplayObject);
 
+        canvas = new Canvas();
+        canvas.percentHeight = 100;
+        canvas.percentWidth = 100;
+        var box:Box = new Box();
+        BindingUtils.bindProperty(box, "visible", this, "showLoading");
+        box.percentWidth = 100;
+        box.percentHeight = 100;
+        box.setStyle("horizontalAlign", "center");
+        box.setStyle("verticalAlign", "middle");
+        var screen:Canvas = new Canvas();
+        screen.percentHeight = 100;
+        screen.percentWidth = 100;
+        screen.setStyle("backgroundColor", 0x000000);
+        screen.setStyle("backgroundAlpha", .1);
+        BindingUtils.bindProperty(screen, "visible", this, "showLoading");
+        reportCanvas = new Canvas();
+        reportCanvas.percentHeight = 100;
+        reportCanvas.percentWidth = 100;
+        var progressBar:ProgressBar = new ProgressBar();
+        progressBar.indeterminate = true;
+        progressBar.label = "Loading the report...";
+        progressBar.setStyle("fontSize", 18);
+        box.addChild(progressBar);
+        canvas.addChild(reportCanvas);
+        canvas.addChild(screen);
+        canvas.addChild(box);
+        addChild(canvas);
         loadReportRenderer();
+    }
+
+    private var canvas:Canvas;
+
+    private var reportCanvas:Canvas;
+
+    private var _showLoading:Boolean = false;
+
+
+    [Bindable(event="showLoadingChanged")]
+    public function get showLoading():Boolean {
+        return _showLoading;
+    }
+
+    public function set showLoading(value:Boolean):void {
+        if (_showLoading == value) return;
+        _showLoading = value;
+        dispatchEvent(new Event("showLoadingChanged"));
     }
 
     public function cleanup():void {
@@ -132,12 +181,13 @@ public class DataViewFactory extends VBox {
             _reportRenderer.removeEventListener(CustomChangeEvent.CUSTOM_CHANGE, customChangeFromRenderer);
             _reportRenderer.removeEventListener(HierarchyDrilldownEvent.DRILLDOWN, drilldown);
             _reportRenderer.removeEventListener(HierarchyRollupEvent.HIERARCHY_ROLLUP, onRollup);
-            removeChild(_reportRenderer as DisplayObject);
+            reportCanvas.removeChild(_reportRenderer as DisplayObject);
         }
         moduleInfo = null;
     }
 
     private function dataLoadingEvent(event:DataServiceLoadingEvent):void {
+        showLoading = (event.type == DataServiceLoadingEvent.LOADING_STARTED);
         dispatchEvent(event);
     }
 
@@ -180,7 +230,7 @@ public class DataViewFactory extends VBox {
         moduleInfo.addEventListener(ModuleEvent.ERROR, reportFailureHandler);
         _loadingDisplay = new LoadingModuleDisplay();
         _loadingDisplay.moduleInfo = moduleInfo;
-        addChild(_loadingDisplay);
+        reportCanvas.addChild(_loadingDisplay);
         moduleInfo.load();
     }
             
@@ -197,11 +247,11 @@ public class DataViewFactory extends VBox {
             _reportRenderer.addEventListener(HierarchyRollupEvent.HIERARCHY_ROLLUP, onRollup);
             _dataService.preserveValues = _reportRenderer.preserveValues();
             if (_loadingDisplay != null) {
-                removeChild(_loadingDisplay);
+                reportCanvas.removeChild(_loadingDisplay);
                 _loadingDisplay.moduleInfo = null;
                 _loadingDisplay = null;
             }
-            addChild(_reportRenderer as DisplayObject);
+            reportCanvas.addChild(_reportRenderer as DisplayObject);
             if (pendingRequest) {
                 pendingRequest = false;
                 retrieveData();

@@ -92,7 +92,7 @@ public class SliderMeasureFilter extends HBox implements IFilter
 			_analysisItems = analysisItems;
 		}		
 		
-		private function edit(event:MouseEvent):void {
+		public function edit(event:MouseEvent):void {
 			var window:GeneralFilterEditSettings = new GeneralFilterEditSettings();
 			window.detailClass = MeasureFilterEditor;
 			window.addEventListener(FilterEditEvent.FILTER_EDIT, onFilterEdit);

@@ -128,6 +128,9 @@
                 analysisDefinition.publiclyVisible = publiclyVisibleCheckbox.selected;
                 analysisDefinition.visibleAtFeedLevel = shareDataSourceSharingCheckbox.selected;
                 analysisDefinition.solutionVisible = solutionVisibleCheckbox.selected;
+            } else {
+                analysisNameInput.setFocus();
+                analysisNameInput.dispatchEvent(new MouseEvent(MouseEvent.MOUSE_OVER));
             }
             return results;
         }

@@ -11,7 +11,7 @@ public class FilterAddCommand implements ICommand {
     }
 
     public function execute():void {
-        transformContainer.commandFilterAdd(filter);
+        transformContainer.commandFilterAdd2(filter);
     }
 
     public function undo():Boolean {
