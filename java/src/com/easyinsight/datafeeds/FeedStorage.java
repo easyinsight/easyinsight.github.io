@@ -179,7 +179,12 @@ public class FeedStorage {
         for (AnalysisItem analysisItem : folder.getChildItems()) {
             insertFieldStmt.setLong(1, folder.getFolderID());
             insertFieldStmt.setLong(2, analysisItem.getAnalysisItemID());
-            insertFieldStmt.execute();
+            try {
+                insertFieldStmt.execute();
+            } catch (SQLException e) {
+                LogClass.error("Analysis item " + analysisItem.toDisplay() + " was not yet saved in folder " + folder.getName());
+                throw e;
+            }
         }
         insertFieldStmt.close();
     }
