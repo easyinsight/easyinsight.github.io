@@ -479,7 +479,11 @@ public class FeedService implements IDataFeedService {
             FeedDefinition existingFeed = feedStorage.getFeedDefinitionData(feedDefinition.getDataFeedID(), conn, false);
             if (feedDefinition.getDataSourceType() == DataSourceInfo.STORED_PUSH || feedDefinition.getDataSourceType() == DataSourceInfo.STORED_PULL) {
                 List<AnalysisItem> existingFields = existingFeed.getFields();
-                metadata = DataStorage.writeConnection(feedDefinition, conn, SecurityUtil.getAccountID(), systemUpdate);
+                if (systemUpdate) {
+                    metadata = DataStorage.writeConnection(feedDefinition, conn, 0, systemUpdate);
+                } else {
+                    metadata = DataStorage.writeConnection(feedDefinition, conn, SecurityUtil.getAccountID(), systemUpdate);
+                }
                 feedStorage.updateDataFeedConfiguration(feedDefinition, conn);
                 int version = metadata.migrate(existingFields, feedDefinition.getFields());
                 feedStorage.updateVersion(feedDefinition, version, conn);

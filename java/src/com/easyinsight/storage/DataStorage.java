@@ -380,15 +380,8 @@ public class DataStorage {
             createSQL.execute();
 
             if (migrateData) {
-                DataSet mirror = new DataSet();
-                for (IRow row : existing.getRows()) {
-                    IRow mirrorRow = mirror.createRow();
-                    for (Key key : row.getKeys()) {
-                        mirrorRow.addValue(key.toBaseKey(), row.getValue(key));
-                    }
-                }
                 for (FieldMigration fieldMigration : fieldMigrations) {
-                    for (IRow row : mirror.getRows()) {
+                    for (IRow row : existing.getRows()) {
                         Value existingValue = row.getValue(fieldMigration.key);
                         String string = existingValue.toString();
                         if (fieldMigration.newType == Value.DATE) {
@@ -403,7 +396,13 @@ public class DataStorage {
                         }
                     }
                 }
-
+                DataSet mirror = new DataSet();
+                for (IRow row : existing.getRows()) {
+                    IRow mirrorRow = mirror.createRow();
+                    for (Key key : row.getKeys()) {
+                        mirrorRow.addValue(key.toBaseKey(), row.getValue(key));
+                    }
+                }
                 insertData(mirror);
             }
 

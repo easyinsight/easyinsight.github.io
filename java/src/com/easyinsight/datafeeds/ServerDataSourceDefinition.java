@@ -165,13 +165,13 @@ public abstract class ServerDataSourceDefinition extends FeedDefinition implemen
             dataStorage = DataStorage.writeConnection(this, conn, accountID);
             dataStorage.truncate();
             DataSet dataSet = getDataSet(credentials, newDataSourceFields(credentials), now, parentDefinition, dataStorage);
-            List<AnalysisItem> items = createAnalysisItems(keys, dataSet, credentials, conn);
+            //List<AnalysisItem> items = createAnalysisItems(keys, dataSet, credentials, conn);
             int version = dataStorage.getVersion();
-            int newVersion = dataStorage.migrate(getFields(), items);
+            //int newVersion = dataStorage.migrate(getFields(), items);
             addData(dataStorage, dataSet);
             dataStorage.commit();
             notifyOfDataUpdate();
-            return version != newVersion;
+            return true;
         } catch (Exception e) {
             if (dataStorage != null) {
                 dataStorage.rollback();
