@@ -5,16 +5,16 @@
 	<mx:states>
 		<mx:State name="notLoggedIn">
 			<mx:RemoveChild target="{uploadBox}"/>
-			<mx:RemoveChild target="{uploadGrid}"/>
+			<mx:RemoveChild target="{myDataBox}"/>
 			<mx:AddChild relativeTo="{coreContent}">
 				<listing:GottaLoginPage/>
 			</mx:AddChild>
 		</mx:State>
         <mx:State name="noData">
             <mx:RemoveChild target="{uploadBox}"/>
-            <mx:RemoveChild target="{uploadGrid}"/>
+            <mx:RemoveChild target="{myDataBox}"/>
             <mx:AddChild relativeTo="{coreContent}">
-				<listing:GottaLoginPage/>
+				<listing:MyNoData/>
 			</mx:AddChild>
         </mx:State>
 	</mx:states>
@@ -272,6 +272,11 @@
 
             var sort:Sort = ICollectionView(uploadGrid.dataProvider).sort;
             var myDataTree:MyDataTree = uploadService.getFeedAnalysisTree.lastResult as MyDataTree;
+            if (myDataTree.objects.length == 0) {
+                currentState = "noData";
+            } else {
+                currentState = "";
+            }
             if (initialEntry) {
                 initialEntry = false;
                 includeGroups = myDataTree.includeGroup;
@@ -415,8 +420,8 @@
 		<mx:method name="deleteReportPackage" result="deletedPackage()"/>
 	</mx:RemoteObject>
 
-	<mx:VBox id="coreContent" height="100%" width="100%" paddingTop="10" paddingLeft="10" paddingRight="10" paddingBottom="10" verticalGap="10">
-		<mx:HBox width="100%" id="uploadBox" verticalAlign="middle">
+	<mx:VBox id="coreContent" height="100%" width="100%" verticalGap="10">
+		<mx:HBox width="100%" id="uploadBox" verticalAlign="middle"  paddingTop="10" paddingLeft="10" paddingRight="10">
 			<mx:Button toolTip="Create composite data source..." click="createCompositeFeed()" id="compositeFeedButton" icon="{joinIcon}"
 				label="Combine Sources" labelPlacement="bottom"/>
             <mx:Button toolTip="Create package..." click="createPackage()" id="createPackageButton" icon="{packageAddIcon}"
@@ -442,6 +447,7 @@
             </mx:VBox>
 		</mx:HBox>
 
+        <mx:Box width="100%" height="100%" paddingLeft="10" paddingRight="10" paddingBottom="10" id="myDataBox">
 		<mx:AdvancedDataGrid width="100%" height="100%" id="uploadGrid" allowMultipleSelection="true" fontSize="12"
 			itemDoubleClick="gridDoubleClick(event)" headerStyleName="BlueHeader" itemOpen="onItemOpen(event)"
                 iconFunction="simpleIconFunction">
@@ -456,5 +462,6 @@
 				<mx:AdvancedDataGridColumn width="250" headerText="" dataField="name" sortable="false" itemRenderer="com.easyinsight.listing.MyDataIconControls"/>
 			</mx:columns>
 		</mx:AdvancedDataGrid>
+        </mx:Box>
 	</mx:VBox>
 </mx:VBox>

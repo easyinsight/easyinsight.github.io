@@ -2,7 +2,7 @@
 <mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:yahoo="http://www.yahoo.com/astra/2006/mxml"
          xmlns:util="com.easyinsight.util.*" creationComplete="setupListeners()"
          borderThickness="1" borderColor="0x000000" borderStyle="solid" dropShadowEnabled="true"
-         backgroundColor="0xECE9D8">
+         backgroundColor="0xECE9D8" xmlns:viewStackEffects="org.efflex.mx.viewStackEffects.*">
     <mx:Script><![CDATA[
         import mx.collections.ArrayCollection;
         import mx.controls.List;
@@ -120,6 +120,7 @@
                 }
             }
             searchInput.enabled = true;
+            viewStack.selectedIndex = 1;
         }
 
         private function onChange():void {
@@ -138,12 +139,20 @@
     <mx:RemoteObject destination="feeds" id="feedService">
         <mx:method name="getDescriptors" result="gotDescriptors()"/>
     </mx:RemoteObject>
+    <viewStackEffects:Slide id="slideEffect" direction="down"/>
     <util:AutoCompleteManager id="autoCompleteManager" target="{searchInput}" dataProvider="{descriptors}"
                               labelField="name" minCharsForCompletion="1" close="onCompletionClose()"
                               popUpRenderer="{factory}"/>
-    <mx:HBox verticalAlign="middle" width="225">
-        <mx:Label text="Enter name:" fontWeight="bold" fontFamily="Tahoma" fontSize="13"/>
-        <!--<mx:Label text="(no matches found)" id="noMatchesLabel" visible="false"/>-->
-    </mx:HBox>
-    <mx:TextInput id="searchInput" width="100%" enabled="false" change="onChange()"/>
+    <mx:ViewStack creationPolicy="all" id="viewStack" width="240" height="55">
+        <mx:HBox width="225" height="50" verticalAlign="middle" horizontalAlign="center" hideEffect="{slideEffect}">
+            <mx:ProgressBar indeterminate="true" label="Retrieving items..."/>
+        </mx:HBox>
+        <mx:VBox showEffect="{slideEffect}">
+            <mx:HBox verticalAlign="middle" width="225">
+                <mx:Label text="Enter name:" fontWeight="bold" fontFamily="Tahoma" fontSize="13"/>
+                <!--<mx:Label text="(no matches found)" id="noMatchesLabel" visible="false"/>-->
+            </mx:HBox>
+            <mx:TextInput id="searchInput" width="100%" enabled="false" change="onChange()"/>
+        </mx:VBox>
+    </mx:ViewStack>
 </mx:VBox>

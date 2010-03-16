@@ -22,6 +22,7 @@
 
         import mx.events.CloseEvent;
         import mx.managers.BrowserManager;
+        import mx.utils.URLUtil;
         import mx.validators.Validator;
         import mx.controls.Alert;
 
@@ -138,9 +139,11 @@
             this.sessionIdInputText = feedDefinition.sessionId;
             this.usernameInputText = feedDefinition.username;
 
+            var fragmentObject:Object = new Object();
+            fragmentObject.feedID = String(feedDefinition.dataFeedID);
+            var fragmentString:String = URLUtil.objectToString(fragmentObject);
+            BrowserManager.getInstance().setFragment(fragmentString);
             haveFeed = true;
-
-            //analysisService.openAnalysisDefinition.send(feedDefinition.analysisDefinitionID);
         }
 
         private function onChange(event:AnalysisChangedEvent):void {
@@ -162,34 +165,12 @@
             if (results.length > 0 || !detailValidated) {
                 Alert.show("There are one or more errors which must be fixed before you can save this data source.");
             } else {
-                //var analysisDefinition:AnalysisDefinition = dataAnalysisContainer.getAnalysisDefinition();
                 var analysisItems:ArrayCollection;
                 if (fieldAdministration == null) {
                     analysisItems = feedDefinition.fields;
                 } else {
                     analysisItems = fieldAdministration.createFields();
                 }
-                /*if (hierarchiesBox != null) {
-                 for each (var analysisItem:AnalysisHierarchyItem in hierarchiesBox.getHierarchies()) {
-                 if (analysisItem.analysisItemID == 0) {
-                 analysisItems.addItem(analysisItem);
-                 }
-                 }
-                 /* }*//*
-                 if (virtualBox != null) {
-                 virtualBox.save();
-                 for each (var dimension:VirtualDimension in virtualBox.getVirtualDimensions()) {
-                 for each (var transform:VirtualTransform in dimension.virtualTransforms) {
-                 if (transform.transformDimension.analysisItemID == 0) {
-                 analysisItems.addItem(transform.transformDimension);
-                 }
-                 }
-                 if (dimension.defaultTransform.transformDimension.analysisItemID == 0) {
-                 analysisItems.addItem(dimension.defaultTransform.transformDimension);
-                 }
-                 }
-                 feedDefinition.virtualDimensions = virtualBox.getVirtualDimensions();
-                 }*/
                 feedDefinition.fields = analysisItems;
                 feedDefinition.feedName = feedNameInput.text;
                 feedDefinition.uploadPolicy = feedPolicy.uploadPolicy;
@@ -280,11 +261,6 @@
 		<mx:method name="updateFeedDefinition"/>
 		<mx:method name="wipeData" result="wipedData()"/>
 	</mx:RemoteObject>
-
-    <!--<mx:RemoteObject id="analysisService" destination="analysisDefinition">
-        <mx:method name="saveAnalysisDefinition"/>
-        <mx:method name="openAnalysisDefinition" result="gotAnalysis()"/>
-    </mx:RemoteObject>-->
 	<mx:VBox width="100%" height="100%" paddingLeft="5">
 		<mx:HBox id="buttonBox" paddingLeft="5" paddingTop="5" paddingBottom="5">
             <mx:Button id="wrapButton" icon="@Embed(source='../../../../../assets/document_out.png')" click="close()" toolTip="Close"/>
@@ -333,10 +309,7 @@
 			</mx:HBox>
             <mx:Box label="Fields">
                 <feed:FieldAdministration feedDefinition="{feedDefinition}" id="fieldAdministration"/>
-            </mx:Box>
-            <!--<mx:Box label="Virtual Groupings" paddingLeft="10" paddingTop="10" paddingBottom="10" paddingRight="10">
-                <feed:VirtualDimensionAdministration id="virtualBox" feedDefinition="{feedDefinition}"/>
-            </mx:Box>-->
+            </mx:Box>            
 			<mx:Box label="Impl" paddingLeft="10" paddingTop="10" paddingBottom="10" paddingRight="10" id="implBox" visible="{showImpl}">
 
 			</mx:Box>

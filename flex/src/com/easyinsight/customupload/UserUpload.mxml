@@ -137,9 +137,8 @@
             </mx:FormItem>
             <mx:FormItem label="" direction="vertical" visible="false" id="finishingSection">
                 <mx:HBox horizontalAlign="center">
-                    <mx:ProgressBar indeterminate="true"/>
+                    <mx:ProgressBar indeterminate="true" label="Creating the data source..."/>
                 </mx:HBox>
-                <mx:Label text="Creating the data source..." fontFamily="Tahoma" fontWeight="bold"/>
             </mx:FormItem>
         </mx:Form>
 	    <mx:VBox>

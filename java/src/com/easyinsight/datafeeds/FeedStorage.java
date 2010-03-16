@@ -56,6 +56,8 @@ public class FeedStorage {
     private JCS feedCache = getCache("feedDefinitions");
     private JCS apiKeyCache = getCache("apiKeys");
 
+    private DataSourceTypeRegistry registry = new DataSourceTypeRegistry();
+
     private JCS getCache(String cacheName) {
 
         try {
@@ -705,63 +707,7 @@ public class FeedStorage {
         if (rs.next()) {
             String feedName = rs.getString(1);
             FeedType feedType = FeedType.valueOf(rs.getInt(2));
-            if (feedType.equals(FeedType.STATIC)) {
-                feedDefinition = new FileBasedFeedDefinition();
-            } else if (feedType.equals(FeedType.ANALYSIS_BASED)) {
-                feedDefinition = new AnalysisBasedFeedDefinition();
-            } else if (feedType.equals(FeedType.GOOGLE)) {
-                feedDefinition = new GoogleFeedDefinition();
-            } else if (feedType.equals(FeedType.COMPOSITE)) {
-                feedDefinition = new CompositeFeedDefinition();
-            } else if (feedType.equals(FeedType.SALESFORCE)) {
-                feedDefinition = new SalesforceBaseDataSource();
-            } else if (feedType.equals(FeedType.DEFAULT)) {
-                feedDefinition = new FeedDefinition();
-            } else if (feedType.equals(FeedType.JIRA)) {
-                feedDefinition = new JiraDataSource();
-            } else if (feedType.equals(FeedType.BASECAMP_MASTER)) {
-                feedDefinition = new BaseCampCompositeSource();
-            } else if (feedType.equals(FeedType.ADMIN_STATS)) {
-                feedDefinition = new AdminStatsDataSource();
-            } else if (feedType.equals(FeedType.GNIP)) {
-                feedDefinition = new GnipDataSource();
-            } else if (feedType.equals(FeedType.GOOGLE_ANALYTICS)) {
-                feedDefinition = new GoogleAnalyticsDataSource();
-            } else if (feedType.equals(FeedType.TEST_ALPHA)) {
-                feedDefinition = new TestAlphaDataSource();
-            } else if (feedType.equals(FeedType.TEST_BETA)) {
-                feedDefinition = new TestBetaDataSource();
-            } else if (feedType.equals(FeedType.TEST_GAMMA)) {
-                feedDefinition = new TestGammaDataSource();
-            } else if (feedType.equals(FeedType.BASECAMP)) {
-                feedDefinition = new BaseCampTodoSource();
-            } else if (feedType.equals(FeedType.BASECAMP_TIME)) {
-                feedDefinition = new BaseCampTimeSource();
-            } else if (feedType.equals(FeedType.WESABE)) {
-                feedDefinition = new WesabeDataSource();
-            } else if (feedType.equals(FeedType.WESABE_ACCOUNTS)) {
-                feedDefinition = new WesabeAccountDataSource();
-            } else if (feedType.equals(FeedType.WESABE_TRANSACTIONS)) {
-                feedDefinition = new WesabeTransactionDataSource();
-            } else if (feedType.equals(FeedType.CLOUD_WATCH)) {
-                feedDefinition = new CloudWatchDataSource();
-            } else if (feedType.equals(FeedType.HIGHRISE_COMPOSITE)) {
-                feedDefinition = new HighRiseCompositeSource();
-            } else if (feedType.equals(FeedType.HIGHRISE_COMPANY)) {
-                feedDefinition = new HighRiseCompanySource();
-            } else if (feedType.equals(FeedType.HIGHRISE_DEAL)) {
-                feedDefinition = new HighRiseDealSource();
-            } else if (feedType.equals(FeedType.TWITTER)) {
-                feedDefinition = new TwitterDataSource();
-            } else if (feedType.equals(FeedType.CUSTOM)) {
-                feedDefinition = new CustomDataSource();
-            } else if (feedType.equals(FeedType.BASECAMP_COMPANY)) {
-                feedDefinition = new BaseCampCompanySource();
-            } else if (feedType.equals(FeedType.BASECAMP_COMPANY_PROJECT_JOIN)) {
-                feedDefinition = new BaseCampCompanyProjectJoinSource();
-            } else {
-                throw new RuntimeException("Couldn't identify type");
-            }
+            feedDefinition = registry.createDataSource(feedType);
             String genre = rs.getString(4);
             feedDefinition.setFeedName(feedName);
             feedDefinition.setDataFeedID(identifier);

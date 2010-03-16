@@ -194,6 +194,7 @@ public class SolutionDetailRenderer extends VBox implements IPerspective {
         var url:String = URLUtil.objectToString(urlObject);
         var props:Object = new Object();
         props["destinationURL"] = url;
+        props["requiredTier"] = 1;
         User.getEventNotifier().dispatchEvent(new NavigationEvent(NavigationEvent.ACCOUNTS, null, props));
     }
 

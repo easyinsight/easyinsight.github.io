@@ -29,6 +29,8 @@ import mx.controls.Image;
             addEventListener(MouseEvent.CLICK, listingChange);
             addEventListener(MouseEvent.MOUSE_OVER, onMouseOver);
             addEventListener(MouseEvent.MOUSE_OUT, onMouseOut);
+            useHandCursor = true;
+            buttonMode = true;
 		}
 
         private function listingChange(event:MouseEvent):void {

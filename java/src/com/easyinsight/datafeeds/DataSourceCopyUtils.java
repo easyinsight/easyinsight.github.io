@@ -77,8 +77,8 @@ public class DataSourceCopyUtils {
         }
 
         ConfigureDataFeedTodo todo = null;        
-        if (feedDefinition instanceof IServerDataSourceDefinition) {
-            IServerDataSourceDefinition def = (IServerDataSourceDefinition) feedDefinition;
+        if (clonedFeedDefinition instanceof IServerDataSourceDefinition) {
+            IServerDataSourceDefinition def = (IServerDataSourceDefinition) clonedFeedDefinition;
             if (def.getCredentialsDefinition() != CredentialsDefinition.NO_CREDENTIALS) {
                 Session session = Database.instance().createSession(conn);
 

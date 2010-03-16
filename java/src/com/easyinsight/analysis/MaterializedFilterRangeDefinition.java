@@ -11,13 +11,13 @@ import com.easyinsight.core.Value;
  */
 public class MaterializedFilterRangeDefinition extends MaterializedFilterDefinition {
 
-    private double lowValue;
-    private double highValue;
+    private Double lowValue;
+    private Double highValue;
 
     public MaterializedFilterRangeDefinition(AnalysisItem key, Double lowValue, Double highValue) {
         super(key);
-        this.lowValue = lowValue == null ? Double.MIN_VALUE : lowValue;
-        this.highValue = highValue == null ? Double.MAX_VALUE : highValue;
+        this.lowValue = lowValue;
+        this.highValue = highValue;
     }
 
     public boolean allows(Value value) {
@@ -25,7 +25,7 @@ public class MaterializedFilterRangeDefinition extends MaterializedFilterDefinit
         if (value.type() == Value.NUMBER) {
             Double doubleValue = value.toDouble();
             if (doubleValue != null) {
-                allowed = doubleValue > lowValue && doubleValue < highValue;
+                allowed = (lowValue == null || doubleValue > lowValue) && (highValue == null || doubleValue < highValue);
             }
         }
         return allowed;

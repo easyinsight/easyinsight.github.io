@@ -1,12 +1,12 @@
 package com.easyinsight.report {
 import com.easyinsight.analysis.EmbeddedDataServiceEvent;
-
+import com.easyinsight.analysis.IRetrievable;
 import com.easyinsight.framework.HierarchyOverride;
 
 import mx.collections.ArrayCollection;
 import mx.containers.VBox;
 
-public class AbstractViewFactory extends VBox{
+public class AbstractViewFactory extends VBox implements IRetrievable {
 
     private var _reportID:int;
     private var _dataSourceID:int;

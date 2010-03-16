@@ -14,7 +14,7 @@ import java.math.BigInteger;
 public class NetResultsDataSource {
     public static void main(String[] args) throws Exception {
         NRAPILocator locator = new NRAPILocator();
-        locator.setNRAPIPortEndpointAddress("https://apps.net-results.com/soap/v1/NRAPI.wsdl");
+        //locator.setNRAPIPortEndpointAddress("https://apps.net-results.com/soap/v1");
 
         NRAPIPortType port = locator.getNRAPIPort();
         ((Stub) port)._setProperty(Call.USERNAME_PROPERTY, "jboe@easy-insight.com");

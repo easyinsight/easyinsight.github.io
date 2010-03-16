@@ -186,6 +186,5 @@
                icon="@Embed(source='../../../../assets/app_enterprise_x16.png')" click="showAPIInfo()"/>
     <mx:Button id="obfuscateButton" toolTip="Toggle Obfuscation"
                icon="@Embed(source='../../../../assets/lock.png')" click="obfuscate()"/>
-    <!--<analysis:ResultLimitComboBox limits="{limits}"/>-->
-    <datasources:DataSourceDisplay dataSource="{dataSourceInfo}" width="100%"/>
+    <!--<analysis:ResultLimitComboBox limits="{limits}"/>-->    
 </mx:HBox>

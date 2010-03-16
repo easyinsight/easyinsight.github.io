@@ -10,6 +10,7 @@ import com.easyinsight.logging.LogClass;
 import com.easyinsight.pipeline.HistoryRun;
 import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.users.Credentials;
+import com.easyinsight.userupload.UserUploadService;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -25,12 +26,12 @@ public class ScorecardService {
 
     private ScorecardStorage scorecardStorage = new ScorecardStorage();
 
-    public List<ScorecardDescriptor> getScorecardDescriptors() {
+    public ScorecardList getScorecardDescriptors() {
         long userID = SecurityUtil.getUserID();
         return getScorecardDescriptors(userID);
     }
 
-    public List<ScorecardDescriptor> getScorecardDescriptors(long userID) {
+    public ScorecardList getScorecardDescriptors(long userID) {
         List<ScorecardDescriptor> scorecards = new ArrayList<ScorecardDescriptor>();
 
         EIConnection conn = Database.instance().getConnection();
@@ -47,13 +48,19 @@ public class ScorecardService {
                 scorecardDescriptor.setName(scorecardName);
                 scorecards.add(scorecardDescriptor);
             }
+
         } catch (SQLException e) {
             LogClass.error(e);
             throw new RuntimeException(e);
         } finally {
             Database.closeConnection(conn);
         }
-        return scorecards;
+
+        boolean hasData = true;
+        if (scorecards.isEmpty()) {
+            hasData = (new UserUploadService().getFeedAnalysisTree(true, true).getObjects().size() > 0);
+        }
+        return new ScorecardList(scorecards, hasData);        
     }
 
     public ScorecardWrapper getScorecard(long scorecardID, long userID, List<CredentialFulfillment> credentials, boolean forceRefresh) {

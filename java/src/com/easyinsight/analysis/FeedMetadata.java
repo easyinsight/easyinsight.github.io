@@ -23,8 +23,17 @@ public class FeedMetadata implements Serializable {
     private boolean dataSourceAdmin;
     private long originSolution;
     private String filterExampleMessage;
+    private DataSourceInfo dataSourceInfo;
     private Set<CredentialRequirement> credentials = new HashSet<CredentialRequirement>();
     private List<FilterDefinition> intrinsicFilters = new ArrayList<FilterDefinition>();
+
+    public DataSourceInfo getDataSourceInfo() {
+        return dataSourceInfo;
+    }
+
+    public void setDataSourceInfo(DataSourceInfo dataSourceInfo) {
+        this.dataSourceInfo = dataSourceInfo;
+    }
 
     public String getFilterExampleMessage() {
         return filterExampleMessage;

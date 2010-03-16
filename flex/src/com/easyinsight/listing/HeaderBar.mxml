@@ -44,7 +44,7 @@
         }
 
         private function onKey(event:KeyboardEvent):void {            
-            if (event.keyCode == Keyboard.F1) {
+            /*if (event.keyCode == Keyboard.F1) {
                 User.getEventNotifier().dispatchEvent(new NavigationEvent("Intro"));
             } else if (event.keyCode == Keyboard.F2) {
                 User.getEventNotifier().dispatchEvent(new NavigationEvent("My Data"));
@@ -60,7 +60,7 @@
                 User.getEventNotifier().dispatchEvent(new NavigationEvent("API"));
             } else if (event.keyCode == Keyboard.F8) {
                 User.getEventNotifier().dispatchEvent(new NavigationEvent("Accounts"));
-            }
+            }*/
         }
 
         private function setup():void {

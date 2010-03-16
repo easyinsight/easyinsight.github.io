@@ -1,5 +1,7 @@
 package com.easyinsight.analysis
 {
+import com.easyinsight.datasources.DataSourceInfo;
+
 import mx.collections.ArrayCollection;
 
 [Bindable]
@@ -15,7 +17,7 @@ import mx.collections.ArrayCollection;
         public var intrinsicFilters:ArrayCollection;
         public var fieldHierarchy:ArrayCollection;
         public var filterExampleMessage:String;
-        public var dataSourceInfos:ArrayCollection;
+        public var dataSourceInfo:DataSourceInfo;
         public var originSolution:int;
 		
 		public function FeedMetadata()

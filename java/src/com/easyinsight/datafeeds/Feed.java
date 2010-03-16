@@ -1,11 +1,16 @@
 package com.easyinsight.datafeeds;
 
 
+import com.easyinsight.database.Database;
+import com.easyinsight.database.EIConnection;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.analysis.*;
 import com.easyinsight.core.Key;
 import com.easyinsight.kpi.KPI;
 
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.*;
 import java.io.Serializable;
 
@@ -152,5 +157,22 @@ public abstract class Feed implements Serializable {
 
     public List<KPI> createKPIs() {
         return new ArrayList<KPI>();
+    }
+
+    public DataSourceInfo createSourceInfo(EIConnection conn) throws SQLException {
+        PreparedStatement stmt = conn.prepareStatement("SELECT FEED_PERSISTENCE_METADATA.last_data_time FROM DATA_FEED," +
+                "FEED_PERSISTENCE_METADATA WHERE DATA_FEED.DATA_FEED_ID = FEED_PERSISTENCE_METADATA.feed_id AND " +
+                "(DATA_FEED.DATA_FEED_ID = ? OR DATA_FEED.PARENT_SOURCE_ID = ?)");
+        stmt.setLong(1, getFeedID());
+        stmt.setLong(2, getFeedID());
+        DataSourceInfo dataSourceInfo = new DataSourceInfo();
+        Date date = null;
+        ResultSet rs = stmt.executeQuery();
+        while (rs.next()) {
+            Date dataDate = new Date(rs.getTimestamp(1).getTime());
+            date = dataDate;
+        }
+        dataSourceInfo.setLastDataTime(date);
+        return dataSourceInfo;
     }
 }

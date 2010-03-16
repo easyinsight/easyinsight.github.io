@@ -13,16 +13,21 @@ import flash.events.MouseEvent;
 	import mx.collections.ArrayCollection;
 	import mx.collections.Sort;
 	import mx.containers.HBox;
-	import mx.controls.Button;
+import mx.containers.ViewStack;
+import mx.controls.Button;
 import mx.controls.CheckBox;
 import mx.controls.ComboBox;
 import mx.controls.Label;
+import mx.controls.ProgressBar;
 import mx.events.DropdownEvent;
 	import mx.managers.PopUpManager;
 	import mx.rpc.events.ResultEvent;
 	import mx.rpc.remoting.RemoteObject;
 
-	public class ComboBoxFilter extends HBox implements IFilter
+import org.efflex.mx.viewStackEffects.CubePapervision3D;
+import org.efflex.mx.viewStackEffects.Slide;
+
+public class ComboBoxFilter extends HBox implements IFilter
 	{
 		private var _filterDefinition:FilterValueDefinition;
 		private var _feedID:int;
@@ -64,6 +69,8 @@ import mx.events.DropdownEvent;
 			this._feedID = feedID;
 			this._analysisItem = analysisItem;
             setStyle("verticalAlign", "middle");
+
+
 		}
 
         private var _filterEditable:Boolean = true;
@@ -102,10 +109,16 @@ import mx.events.DropdownEvent;
             comboBox.enabled = checkbox.selected;
             dispatchEvent(new FilterUpdatedEvent(FilterUpdatedEvent.FILTER_UPDATED, _filterDefinition, null, this));
         }
+
+        private var viewStack:ViewStack;
 		
 		override protected function createChildren():void {
 			super.createChildren();
+            viewStack = new ViewStack();
             //if (!_filterEditable) {
+            var hbox:HBox = new HBox();
+            hbox.percentHeight = 100;
+            hbox.setStyle("verticalAlign", "middle");
                 var checkbox:CheckBox = new CheckBox();
                 checkbox.selected = _filterDefinition == null ? true : _filterDefinition.enabled;
                 checkbox.toolTip = "Click to disable this filter.";
@@ -125,7 +138,8 @@ import mx.events.DropdownEvent;
 				comboBox.addEventListener(DropdownEvent.CLOSE, filterValueChanged);
 				comboBox.enabled = false;				
 			}
-			addChild(comboBox);
+			hbox.addChild(comboBox);
+            addChild(viewStack);
             if (_filterEditable) {
                 if (editButton == null) {
                     editButton = new Button();
@@ -133,7 +147,7 @@ import mx.events.DropdownEvent;
                     editButton.setStyle("icon", editIcon);
                     editButton.toolTip = "Edit";
                 }
-                addChild(editButton);
+                hbox.addChild(editButton);
                 if (deleteButton == null) {
                     deleteButton = new Button();
                     deleteButton.addEventListener(MouseEvent.CLICK, deleteSelf);
@@ -141,8 +155,29 @@ import mx.events.DropdownEvent;
                     deleteButton.toolTip = "Delete";
                     deleteButton.enabled = false;
                 }
-                addChild(deleteButton);
+                hbox.addChild(deleteButton);
             }
+
+
+            var loadingBox:HBox = new HBox();
+            loadingBox.height = 23;
+            loadingBox.setStyle("verticalAlign", "middle");
+            var loadingBar:ProgressBar = new ProgressBar();
+            loadingBar.width = 300;
+            var showEffect:Slide  = new Slide();
+            showEffect.direction = "down";
+            loadingBar.label = "";
+            loadingBar.labelPlacement = "right";
+            loadingBar.indeterminate = true;
+            loadingBox.addChild(loadingBar);
+            loadingBox.setStyle("hideEffect", showEffect);
+            viewStack.addChild(loadingBox);
+            hbox.setStyle("showEffect", showEffect);
+            viewStack.addChild(hbox);
+            dataService = new RemoteObject();
+			dataService.destination = "data";
+			dataService.getAnalysisItemMetadata.addEventListener(ResultEvent.RESULT, gotMetadata);
+			dataService.getAnalysisItemMetadata.send(_feedID, _analysisItem, CredentialsCache.getCache().createCredentials(), new Date().getTimezoneOffset());
 		}
 		
 		private function filterValueChanged(event:DropdownEvent):void {			
@@ -155,14 +190,6 @@ import mx.events.DropdownEvent;
 				_filterDefinition.filteredValues = newFilteredValues;
 				dispatchEvent(new FilterUpdatedEvent(FilterUpdatedEvent.FILTER_UPDATED, _filterDefinition, null, this));
 			} 
-		}
-		
-		override protected function commitProperties():void {
-			super.commitProperties();						
-			dataService = new RemoteObject();
-			dataService.destination = "data";
-			dataService.getAnalysisItemMetadata.addEventListener(ResultEvent.RESULT, gotMetadata);
-			dataService.getAnalysisItemMetadata.send(_feedID, _analysisItem, CredentialsCache.getCache().createCredentials(), new Date().getTimezoneOffset());
 		}
 
         private function blah():void {
@@ -206,6 +233,7 @@ import mx.events.DropdownEvent;
             if (deleteButton != null) {
 			    deleteButton.enabled = true;
             }
+            viewStack.selectedIndex = 1;
 			dispatchEvent(new FilterUpdatedEvent(FilterUpdatedEvent.FILTER_ADDED, filterDefinition, null, this));
 		}
 		

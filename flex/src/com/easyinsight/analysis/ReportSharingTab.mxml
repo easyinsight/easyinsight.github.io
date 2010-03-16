@@ -1,0 +1,224 @@
+<?xml version="1.0" ?>
+<mx:HBox xmlns:mx="http://www.adobe.com/2006/mxml" label="Sharing (F6)" icon="@Embed(source='../../../../assets/users.png')" paddingLeft="10" paddingTop="10"
+         paddingBottom="10" creationComplete="onCreation()" verticalAlign="middle">
+    <mx:Script><![CDATA[
+        import com.easyinsight.framework.DataService;
+        import com.easyinsight.util.PopUpUtil;
+
+        import mx.controls.Alert;
+        import mx.managers.PopUpManager;
+
+        private function onCreation():void {
+
+        }
+
+        [Bindable]
+        private var marketplaceVisible:Boolean;
+
+        [Bindable]
+        private var publiclyVisible:Boolean;
+
+        [Bindable]
+        private var solutionVisible:Boolean;
+
+        [Bindable]
+        private var shareDataSourceSharing:Boolean;
+
+        private var _dataService:DataService;
+
+        public function set dataService(value:DataService):void {
+            _dataService = value;
+        }
+
+        private var _originSolution:int;
+
+        private var _analysisDefinition:AnalysisDefinition;
+
+        [Bindable(event="analysisDefinitionChanged")]
+        public function get analysisDefinition():AnalysisDefinition {
+            return _analysisDefinition;
+        }
+
+        public function set analysisDefinition(value:AnalysisDefinition):void {
+            if (_analysisDefinition == value) return;
+            _analysisDefinition = value;
+            marketplaceVisible = value.marketplaceVisible;
+            publiclyVisible = value.publiclyVisible;
+            shareDataSourceSharing = value.visibleAtFeedLevel;
+            solutionVisible = value.solutionVisible;
+            dispatchEvent(new Event("analysisDefinitionChanged"));
+        }
+
+        public function updateReport():void {
+            analysisDefinition.marketplaceVisible = marketplaceVisibleCheckbox.selected;
+            analysisDefinition.publiclyVisible = publiclyVisibleCheckbox.selected;
+            analysisDefinition.visibleAtFeedLevel = shareDataSourceSharingCheckbox.selected;
+            analysisDefinition.solutionVisible = solutionVisibleCheckbox.selected;
+        }
+
+
+        [Bindable(event="originSolutionChanged")]
+        public function get originSolution():int {
+            return _originSolution;
+        }
+
+        public function set originSolution(value:int):void {
+            if (_originSolution == value) return;
+            _originSolution = value;
+            dispatchEvent(new Event("originSolutionChanged"));
+        }
+
+        private function sourceSharingChange(event:MouseEvent):void {
+            if (shareDataSourceSharingCheckbox.selected) {
+                marketplaceVisibleCheckbox.selected = false;
+                marketplaceVisibleCheckbox.enabled = false;
+                publiclyVisibleCheckbox.selected = false;
+                publiclyVisibleCheckbox.enabled = false;
+            } else {
+                marketplaceVisibleCheckbox.enabled = true;
+                publiclyVisibleCheckbox.enabled = true;
+            }
+        }
+
+        private var _reportSaveable:Boolean;
+
+        private var _canSaveToMyData:Boolean;
+
+
+        [Bindable(event="canSaveToMyDataChanged")]
+        public function get canSaveToMyData():Boolean {
+            return _canSaveToMyData;
+        }
+
+        public function set canSaveToMyData(value:Boolean):void {
+            if (_canSaveToMyData == value) return;
+            _canSaveToMyData = value;
+            dispatchEvent(new Event("canSaveToMyDataChanged"));
+        }
+
+        [Bindable(event="reportSaveableChanged")]
+        public function get reportSaveable():Boolean {
+            return _reportSaveable;
+        }
+
+        public function set reportSaveable(value:Boolean):void {
+            if (_reportSaveable == value) return;
+            _reportSaveable = value;
+            dispatchEvent(new Event("reportSaveableChanged"));
+        }
+
+        private function subscribedToInsight():void {
+            canSaveToMyData = false;
+            Alert.show("This report will now show in your My Data page.");
+        }
+
+        private function addReportToGroup():void {
+            var window:AddInsightToGroupWindow = AddInsightToGroupWindow(PopUpManager.createPopUp(this, AddInsightToGroupWindow));
+            window.insightID = analysisDefinition.analysisID;
+            PopUpUtil.centerPopUp(window);
+        }
+
+        private function toMyData():void {
+            analysisService.subscribeToAnalysis.send(analysisDefinition.analysisID);
+        }
+
+        private var _canSubscribeToFeed:Boolean;
+
+        private var _canAddFeedToGroup:Boolean;
+
+        private function subscribeToFeed():void {
+            userUploadService.subscribe.send(_dataService.dataFeedID);
+        }
+
+        private function addFeedToGroup():void {
+            var window:AddFeedToGroupWindow = AddFeedToGroupWindow(PopUpManager.createPopUp(this, AddFeedToGroupWindow));
+            window.feedID = _dataService.dataFeedID;
+            //window.addEventListener(SubscriptionEvent.GROUP_TO_INSIGHT, addedToGroup);
+            PopUpUtil.centerPopUp(window);
+        }
+
+        [Bindable(event="canSubscribeToFeedChanged")]
+        public function get canSubscribeToFeed():Boolean {
+            return _canSubscribeToFeed;
+        }
+
+        public function set canSubscribeToFeed(value:Boolean):void {
+            if (_canSubscribeToFeed == value) return;
+            _canSubscribeToFeed = value;
+            dispatchEvent(new Event("canSubscribeToFeedChanged"));
+        }
+
+        [Bindable(event="canAddFeedToGroupChanged")]
+        public function get canAddFeedToGroup():Boolean {
+            return _canAddFeedToGroup;
+        }
+
+        public function set canAddFeedToGroup(value:Boolean):void {
+            if (_canAddFeedToGroup == value) return;
+            _canAddFeedToGroup = value;
+            dispatchEvent(new Event("canAddFeedToGroupChanged"));
+        }]]></mx:Script>
+    <mx:RemoteObject id="analysisService" destination="analysisDefinition">
+        <mx:method name="subscribeToAnalysis" result="subscribedToInsight()"/>
+    </mx:RemoteObject>
+    <mx:RemoteObject id="userUploadService" destination="userUpload">
+        <mx:method name="subscribe"/>
+    </mx:RemoteObject>
+    <mx:HBox verticalAlign="middle">
+        <mx:Label text="Sharing with Others:"/>
+        <mx:Grid>
+            <mx:GridRow>
+                <mx:GridItem>
+                    <mx:Button id="subscribeToFeedButton" icon="@Embed(source='../../../../assets/folder_into.png')"
+                       click="subscribeToFeed()" toolTip="Add Data Source to My Data" enabled="{canSubscribeToFeed}"/>
+                </mx:GridItem>
+                <mx:GridItem>
+                    <mx:Button id="groupAddFeedButton" icon="@Embed(source='../../../../assets/users_into.png')"
+                       click="addFeedToGroup()" toolTip="Add Data Source to Group" enabled="{canAddFeedToGroup}"/>
+                </mx:GridItem>
+            </mx:GridRow>
+            <mx:GridRow>
+                <mx:GridItem>
+                    <mx:Button id="subscribeToInsightButton" icon="@Embed(source='../../../../assets/folder_into.png')"
+                       click="toMyData()" toolTip="Add Report to My Data" enabled="{canSaveToMyData}"/>
+                </mx:GridItem>
+                <mx:GridItem>
+                <mx:Button id="groupAddInsightButton" icon="@Embed(source='../../../../assets/users_into.png')"
+                       click="addReportToGroup()" toolTip="Add Report to Group" enabled="{reportSaveable}"/>
+                </mx:GridItem>
+            </mx:GridRow>
+        </mx:Grid>
+    </mx:HBox>
+    <mx:VRule height="50"/>
+    <mx:HBox verticalAlign="middle">
+        <mx:Label text="Sharing with the World:"/>
+        <mx:VBox>
+            <mx:CheckBox label="Use Data Source Sharing Settings"
+                     id="shareDataSourceSharingCheckbox" selected="{shareDataSourceSharing}"
+                     click="sourceSharingChange(event)"/>
+            <mx:HBox verticalAlign="middle">
+                <mx:CheckBox label="Publicly Visible" id="publiclyVisibleCheckbox"
+                             selected="{publiclyVisible}"
+                             change="publiclyVisible = publiclyVisibleCheckbox.selected"/>
+                <mx:Label fontSize="10" textDecoration="underline" text="What is this?"
+                          toolTip="By checking this box, you make the report visible to other users that you send the URL to."/>
+            </mx:HBox>
+            <mx:HBox verticalAlign="middle">
+                <mx:CheckBox label="Marketplace Visible" id="marketplaceVisibleCheckbox"
+                             selected="{marketplaceVisible}" enabled="{publiclyVisible}"/>
+                <mx:Label fontSize="10" textDecoration="underline" text="What is this?"
+                          toolTip="By checking this box, you make the report visible to all other Easy Insight users in the marketplace."/>
+            </mx:HBox>
+        </mx:VBox>
+    </mx:HBox>
+    <mx:VRule height="50"/>
+    <mx:HBox verticalAlign="middle">
+        <mx:Label text="Sharing the Template:"/>
+        <mx:VBox>
+            <mx:CheckBox label="Connection Visible" id="solutionVisibleCheckbox"
+                         selected="{solutionVisible}" enabled="{originSolution > 0}"/>
+            <mx:Label fontSize="10" textDecoration="underline" text="What is this?"
+                      toolTip="By checking this box, you make the report template visible to all other Easy Insight users on the source connection. It's a great way to give back to the community!"/>
+        </mx:VBox>
+    </mx:HBox>
+</mx:HBox>

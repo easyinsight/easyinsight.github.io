@@ -9,6 +9,7 @@
         import com.easyinsight.kpi.KPI;
         import com.easyinsight.listing.DescriptorAnalyzeSource;
         import com.easyinsight.scorecard.Scorecard;
+        import com.easyinsight.scorecard.ScorecardList;
         import com.easyinsight.tour.ActionTutorialElement;
         import com.easyinsight.tour.ReportEditorTutorial;
         import com.easyinsight.util.Callout;
@@ -125,8 +126,8 @@
         }
 
         private function gotScorecards():void {
-            var scorecards:ArrayCollection = scorecardService.getScorecardDescriptors.lastResult as ArrayCollection;
-            if (scorecards.length == 0) {
+            var scorecardList:ScorecardList = scorecardService.getScorecardDescriptors.lastResult as ScorecardList;
+            if (scorecardList.scorecardDescriptors.length == 0) {
                 userHasKPIs = false;
                 stackIndex = 1;
 

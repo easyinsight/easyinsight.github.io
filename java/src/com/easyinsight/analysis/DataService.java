@@ -1,5 +1,7 @@
 package com.easyinsight.analysis;
 
+import com.easyinsight.database.Database;
+import com.easyinsight.database.EIConnection;
 import com.easyinsight.datafeeds.*;
 import com.easyinsight.dataset.DataSet;
 import com.easyinsight.logging.LogClass;
@@ -10,8 +12,10 @@ import com.easyinsight.core.Key;
 import com.easyinsight.core.Value;
 import com.easyinsight.pipeline.Pipeline;
 import com.easyinsight.pipeline.StandardReportPipeline;
+import com.easyinsight.storage.DataStorage;
 import com.easyinsight.users.Credentials;
 
+import java.sql.PreparedStatement;
 import java.util.*;
 import java.io.Serializable;
 
@@ -90,6 +94,13 @@ public class DataService {
             feedMetadata.setDataFeedID(feedID);
             feedMetadata.setVersion(feed.getVersion());
             feedMetadata.setOriginSolution(feed.getOriginSolution());
+            feedMetadata.setDataSourceInfo(feed.getDataSourceInfo());
+            EIConnection conn = Database.instance().getConnection();
+            try {
+                feedMetadata.getDataSourceInfo().setLastDataTime(feed.createSourceInfo(conn).getLastDataTime());
+            } finally {
+                Database.closeConnection(conn);
+            }
             feedMetadata.setDataSourceAdmin(SecurityUtil.getRole(SecurityUtil.getUserID(false), feedID) == Roles.OWNER);
             return feedMetadata;
         } catch (Exception e) {
@@ -213,6 +224,12 @@ public class DataService {
                         } catch (Exception e) {
                             dataSourceAccessible = false;
                         }
+                        EIConnection conn = Database.instance().getConnection();
+                        try {
+                            results.getDataSourceInfo().setLastDataTime(feed.createSourceInfo(conn).getLastDataTime());
+                        } finally {
+                            Database.closeConnection(conn);
+                        }
                         results.setDataSourceAccessible(dataSourceAccessible);
                         return results;
                     }
@@ -276,7 +293,6 @@ public class DataService {
                     dataSet.setLastTime(new Date());
                 }
                 DataSourceInfo dataSourceInfo = feed.getDataSourceInfo();
-                dataSourceInfo.setLastDataTime(dataSet.getLastTime());
                 results.setDataSourceInfo(dataSourceInfo);
                 results.setAttribution(feed.getAttribution());
                 if (resultsCache != null) {
@@ -387,7 +403,13 @@ public class DataService {
             if (dataSet.getLastTime() == null) {
                 dataSet.setLastTime(new Date());
             }
-            dataSourceInfo.setLastDataTime(dataSet.getLastTime());
+            EIConnection conn = Database.instance().getConnection();
+            try {
+                dataSourceInfo.setLastDataTime(feed.createSourceInfo(conn).getLastDataTime());
+            } finally {
+                Database.closeConnection(conn);
+            }
+            //dataSourceInfo.setLastDataTime(dataSet.getLastTime());
             results.setDataSourceInfo(dataSourceInfo);
            // }
             BenchmarkManager.recordBenchmark("DataService:List", System.currentTimeMillis() - startTime);

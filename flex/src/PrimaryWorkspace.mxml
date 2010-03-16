@@ -18,42 +18,29 @@
     <mx:Script>
 		<![CDATA[        
         import com.easyinsight.analysis.DefaultMenuFactory;
-        import com.easyinsight.analysis.DelayedAPIKeyLink;
-        import com.easyinsight.analysis.DelayedReportLink;
         import com.easyinsight.analysis.PopupMenuFactory;
         import com.easyinsight.bugreports.BugReportWindow;
         import com.easyinsight.framework.ActivationEvent;
         import com.easyinsight.framework.CredentialsCache;
         import com.easyinsight.framework.EIMessageListener;
+        import com.easyinsight.framework.FragmentParser;
         import com.easyinsight.framework.FullScreenModuleEvent;
-        import com.easyinsight.framework.IFullScreenPage;        
-        import com.easyinsight.framework.TokenRedirector;
+        import com.easyinsight.framework.IFullScreenPage;
         import com.easyinsight.framework.WebCredentialsCache;
-        import com.easyinsight.goals.DelayedGoalAdminLink;
-        import com.easyinsight.goals.DelayedGoalLink;
         import com.easyinsight.goals.GoalDataAnalyzeSource;
-        import com.easyinsight.groups.DelayedGroupLink;
         import com.easyinsight.intro.WelcomeScreen;
         import com.easyinsight.FullScreenPage;
-        import com.easyinsight.analysis.DelayedFeedLink;
-        import com.easyinsight.analysis.DelayedDeepLink;
-        import com.easyinsight.listing.DescriptorAnalyzeSource;
-        import com.easyinsight.listing.PasswordResetWindow;
+        import com.easyinsight.listing.DescriptorAnalyzeSource;        
         import com.easyinsight.quicksearch.EIDescriptor;
         import com.easyinsight.quicksearch.QuickSearchEvent;
         import com.easyinsight.quicksearch.QuickSearchWindow;
-        import com.easyinsight.report.DelayedMultiReportLink;
-        import com.easyinsight.report.DelayedPackageLink;
         import com.easyinsight.report.PackageAnalyzeSource;
         import com.easyinsight.report.ReportAnalyzeSource;
-        import com.easyinsight.report.StaticReportSource;
         import com.easyinsight.reportpackage.ReportPackageDescriptor;
         import com.easyinsight.solutions.DataSourceDescriptor;
-        import com.easyinsight.solutions.DelayedSolutionLink;
         import com.easyinsight.solutions.InsightDescriptor;
         import com.easyinsight.tour.TutorialFramework;
-        import com.easyinsight.util.PopUpUtil;
-        import com.easyinsight.util.ProgressAlert;
+        import com.easyinsight.util.PopUpUtil;        
 
         import mx.rpc.events.FaultEvent;
 
@@ -79,15 +66,7 @@
 
         import mx.managers.PopUpManager;
 
-        private function passwordResetCheck():void {
-            var result:Boolean = userService.verifyPasswordReset.lastResult as Boolean;
-            if (result) {
-                var window:PasswordResetWindow = new PasswordResetWindow();
-                window.passwordValidation = passwordResetValue;
-                PopUpManager.addPopUp(window, this, true);
-                PopUpUtil.centerPopUp(window);
-            }
-        }
+        
 
         [Bindable]
         private var messageListener:EIMessageListener;
@@ -170,24 +149,12 @@
             PopUpUtil.centerPopUp(loginDialog);
         }
 
-        private function navigation(event:NavigationEvent):void {
+        public function navigation(event:NavigationEvent):void {
             if (event.targetPerspective == null) {
                 headerBar.explicitChange(event.targetPage, event.properties);
             } else {
                 changePerspective(new ListingChangeEvent(event.targetPerspective, event.properties));
             }
-        }
-
-        private function activated():void {
-            var targetURL:String = accountService.activateAccount.lastResult as String;
-            var loginDialog:LoginDialog = new LoginDialog();
-            loginDialog.targetURL = targetURL;
-            loginDialog.showActivation = true;
-            PopUpManager.addPopUp(loginDialog, this, true);
-            PopUpUtil.centerPopUp(loginDialog);
-            //loginDialog.addEventListener(ActivationEvent.URL_ACTIVATION, postActivatePath);
-            User.getEventNotifier().addEventListener(LoginEvent.LOGIN, onLogin);
-            //navigation(new NavigationEvent(null, new WelcomeScreen()));
         }
 
         public static function registerTutorial(tutorial:TutorialFramework):void {
@@ -199,7 +166,7 @@
             addListeners(tutorial);
         }
 
-        private function onLogin(event:LoginEvent):void {
+        public function onLogin(event:LoginEvent):void {
             User.getEventNotifier().removeEventListener(LoginEvent.LOGIN, onLogin);
             loggedIn = true;
             if (event.targetURL == null) {                
@@ -210,7 +177,7 @@
             }
             else {
                 var o:Object = URLUtil.stringToObject(event.targetURL, "&");
-                parseFragmentObject(o, event.targetURL);
+                parseFragmentObject(o);
             }
         }
 
@@ -218,171 +185,75 @@
             var o:Object = URLUtil.stringToObject(browserManager.fragment, "&");
             if (currentFragment != browserManager.fragment) {
                 currentFragment = browserManager.fragment;
-                parseFragmentObject(o, browserManager.fragment);
+                parseFragmentObject(o);
             }
         }
 
         private function postActivatePath(event:ActivationEvent):void {
             var url:String = event.url;
             var o:Object = URLUtil.stringToObject(url, "&");
-            parseFragmentObject(o, url);
+            parseFragmentObject(o);
         }
 
         private var passwordResetValue:String;
 
         private var currentFragment:String;
 
-        private function parseFragmentObject(o:Object, url:String):void {
-            var analysisID:String = o.analysisID;
-            if (analysisID != null) {
-                //createAnalysisSource(Number(analysisID));
-                var deepAnalysisLink:DelayedDeepLink = new DelayedDeepLink(Number(analysisID));
-                deepAnalysisLink.addEventListener(AnalyzeEvent.ANALYZE, internalAnalyze);
-                deepAnalysisLink.execute();
-            } else {
-                var feedID:String = o.feedID;
-                if (feedID != null) {
-                    var deepFeedLink:DelayedFeedLink = new DelayedFeedLink(Number(feedID));
-                    deepFeedLink.addEventListener(AnalyzeEvent.ANALYZE, internalAnalyze);
-                    deepFeedLink.execute();
-                } else {
-                    var feedKey:String = o.feedKey;
-                    if (feedKey != null) {
-                        var deepAPILink:DelayedAPIKeyLink = new DelayedAPIKeyLink(feedKey);
-                        deepAPILink.addEventListener(AnalyzeEvent.ANALYZE, internalAnalyze);
-                        deepAPILink.execute();
-                    } else {
-                        var groupID:String = o.groupID;
-                        if (groupID != null) {
-                            var groupLink:DelayedGroupLink = new DelayedGroupLink(Number(groupID));
-                            groupLink.addEventListener(AnalyzeEvent.ANALYZE, internalAnalyze);
-                            groupLink.execute();
-                        } else {
-                            var staticReportID:String = o.staticReportID;
-                            if (staticReportID != null) {
-                                internalAnalyze(new AnalyzeEvent(new StaticReportSource(Number(staticReportID))));
-                            } else {
-                                var goalTreeID:String = o.goalTreeID;
-                                if (goalTreeID != null) {
-                                    var goalLink:DelayedGoalLink = new DelayedGoalLink(Number(goalTreeID));
-                                    goalLink.addEventListener(AnalyzeEvent.ANALYZE, internalAnalyze);
-                                    goalLink.execute();
-                                } else {
-                                    var activationString:String = o.activationID;
-                                    if (activationString != null) {
-                                        ProgressAlert.alert(this, "Activating account", null, accountService.activateAccount);
-                                        accountService.activateAccount.send(activationString);
-                                    } else {
-                                        var solution:String = o.solutionID;
-                                        if (solution != null) {
-                                            var solutionLink:DelayedSolutionLink = new DelayedSolutionLink(Number(solution));
-                                            solutionLink.addEventListener(ListingChangeEvent.LISTING_CHANGE, changePerspective);
-                                            solutionLink.execute();
-                                        } else {
-                                            var reportID:String = o.reportID;
-                                            if (reportID != null) {
-                                                var deepReportLink:DelayedReportLink = new DelayedReportLink(Number(reportID));
-                                                deepReportLink.addEventListener(AnalyzeEvent.ANALYZE, internalAnalyze);
-                                                deepReportLink.execute();
-                                            } else {
-                                                var multiReportID:String = o.multiReportID;
-                                                if (multiReportID != null) {
-                                                    var multiReportLink:DelayedMultiReportLink = new DelayedMultiReportLink(Number(multiReportID));
-                                                    multiReportLink.addEventListener(AnalyzeEvent.ANALYZE, internalAnalyze);
-                                                    multiReportLink.execute();
-                                                } else {
-                                                    var packageID:String = o.packageID;
-                                                    if (packageID != null) {
-                                                        var delayedPackageLink:DelayedPackageLink = new DelayedPackageLink(Number(packageID));
-                                                        delayedPackageLink.addEventListener(AnalyzeEvent.ANALYZE, internalAnalyze);
-                                                        delayedPackageLink.execute();
-                                                    } else {
-
-                                                    var goalAdminID:String = o.goalTreeAdminID;
-                                                    if (goalAdminID != null) {
-                                                        var delayedGoalAdminLink:DelayedGoalAdminLink = new DelayedGoalAdminLink(Number(goalAdminID));
-                                                        delayedGoalAdminLink.addEventListener(AnalyzeEvent.ANALYZE, internalAnalyze);
-                                                        delayedGoalAdminLink.execute();
-                                                    } else {
-                                                        var redirectID:String = o.redirectID;
-                                                        if (redirectID != null) {
-                                                            var redirectType:int = int(redirectID);
-                                                            var sessionToken:String = String(o.token);
-                                                            var redirector:TokenRedirector = new TokenRedirector();
-                                                            redirector.solutionID = int(o.refSolutionID);
-                                                            redirector.type = redirectType;
-                                                            redirector.onURL(sessionToken);
-                                                            redirector.addEventListener(ListingChangeEvent.LISTING_CHANGE, changePerspective);
-                                                        } else {
-                                                                var page:String = o.page;
-                                                                if (page != null) {
-                                                                    if (currentState == "Analysis") {
-                                                                        dataAnalysis.removeEventListener(AnalysisCloseEvent.ANALYSIS_CLOSE, analysisClosed);
-                                                                        dataAnalysis = null;
-                                                                    }
-                                                                    switch (page) {
-                                                                        case "myData":
-                                                                            navigation(new NavigationEvent("My Data"));
-                                                                            break;
-                                                                        case "myGoals":
-                                                                            navigation(new NavigationEvent("Goals"));
-                                                                            break;
-                                                                        case "exchange":
-                                                                            var view:int = int(o.view);
-                                                                            var display:int = int(o.display);
-                                                                            var subTopic:int = int(o.subTopicID);
-                                                                            navigation(new NavigationEvent("Exchange", null, {viewMode: view, displayMode: display, subTopicID: subTopic}));
-                                                                            break;
-                                                                        case "groups":
-                                                                            navigation(new NavigationEvent("Groups"));
-                                                                            break;
-                                                                        case "help":
-                                                                            navigation(new NavigationEvent("Help"));
-                                                                            break;
-                                                                        case "apis":
-                                                                            navigation(new NavigationEvent("API"));
-                                                                            break;
-                                                                        case "home":
-                                                                        case "intro":
-                                                                                if(o.type != null && o.type == "tour")
-                                                                                    navigation(new NavigationEvent("Home", null, { tour: true }));
-                                                                                else
-                                                                                    navigation(new NavigationEvent("Home"));
-                                                                            break;
-                                                                        case "connections":
-                                                                            if(o.type != null && o.type == "business")
-                                                                                navigation(new NavigationEvent("Connections", null, { biz: true, client:false, saas: false, learning: false }));
-                                                                            else if(o.type != null && o.type == "application")
-                                                                                navigation(new NavigationEvent("Connections", null, { saas: true, client:true, biz: false, learning: false }));
-                                                                            else
-                                                                                navigation(new NavigationEvent("Connections"));
-                                                                            break;
-                                                                        case "account":
-                                                                            navigation(new NavigationEvent("Accounts"));
-                                                                            break;
-                                                                        case "welcome":
-                                                                            navigation(new NavigationEvent(null, new WelcomeScreen()));
-                                                                    }
-                                                                }
-                                                                else if (o.resetPassword != null) {
-                                                                    passwordResetValue = o.resetPassword;
-                                                                    userService.verifyPasswordReset.send(o.resetPassword);
-                                                                    navigation(new NavigationEvent("Home"));
-                                                                }
-                                                                else {
-                                                                    navigation(new NavigationEvent("Home"));
-                                                                }
-                                                        }
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
+        private function parseFragmentObject(o:Object):void {
+            var parser:FragmentParser = new FragmentParser();
+            var matched:Boolean = parser.parseFragmentObject(o, this);
+            if (!matched) {
+                var page:String = o.page;
+                if (page != null) {
+                    if (currentState == "Analysis") {
+                        dataAnalysis.removeEventListener(AnalysisCloseEvent.ANALYSIS_CLOSE, analysisClosed);
+                        dataAnalysis = null;
                     }
+                    switch (page) {
+                        case "myData":
+                            navigation(new NavigationEvent("My Data"));
+                            break;
+                        case "myGoals":
+                            navigation(new NavigationEvent("Goals"));
+                            break;
+                        case "exchange":
+                            var view:int = int(o.view);
+                            var display:int = int(o.display);
+                            var subTopic:int = int(o.subTopicID);
+                            navigation(new NavigationEvent("Exchange", null, {viewMode: view, displayMode: display, subTopicID: subTopic}));
+                            break;
+                        case "groups":
+                            navigation(new NavigationEvent("Groups"));
+                            break;
+                        case "help":
+                            navigation(new NavigationEvent("Help"));
+                            break;
+                        case "apis":
+                            navigation(new NavigationEvent("API"));
+                            break;
+                        case "home":
+                        case "intro":
+                                if(o.type != null && o.type == "tour")
+                                    navigation(new NavigationEvent("Home", null, { tour: true }));
+                                else
+                                    navigation(new NavigationEvent("Home"));
+                            break;
+                        case "connections":
+                            if(o.type != null && o.type == "business")
+                                navigation(new NavigationEvent("Connections", null, { biz: true, client:false, saas: false, learning: false }));
+                            else if(o.type != null && o.type == "application")
+                                navigation(new NavigationEvent("Connections", null, { saas: true, client:true, biz: false, learning: false }));
+                            else
+                                navigation(new NavigationEvent("Connections"));
+                            break;
+                        case "account":
+                            navigation(new NavigationEvent("Accounts"));
+                            break;
+                        case "welcome":
+                            navigation(new NavigationEvent(null, new WelcomeScreen()));
+                    }
+                } else {
+                    navigation(new NavigationEvent("Home"));
                 }
             }
         }
@@ -433,7 +304,7 @@
             }
         }
 
-        private function changePerspective(event:ListingChangeEvent):void {
+        public function changePerspective(event:ListingChangeEvent):void {
             if (event.perspective != null) {
                 if (this.perspective != null) {
                     var existingDispatcher:EventDispatcher = this.perspective as EventDispatcher;
@@ -465,7 +336,7 @@
             return this.perspective;
         }
 
-        private function internalAnalyze(event:AnalyzeEvent):void {
+        public function internalAnalyze(event:AnalyzeEvent):void {
             var analyzeSource:AnalyzeSource = event.analyzeSource;
             doAnalyze(analyzeSource);
         }
@@ -511,11 +382,7 @@
 
     <mx:RemoteObject id="userService" destination="login">
         <mx:method name="isSessionLoggedIn" result="sessionCheck()"/>
-        <mx:method name="verifyPasswordReset" result="passwordResetCheck()"/>
-    </mx:RemoteObject>
-    <mx:RemoteObject id="accountService" destination="accountAdmin">
-        <mx:method name="activateAccount" result="activated()"/>
-    </mx:RemoteObject>
+    </mx:RemoteObject>    
 
     <util:AntiScrollCanvas width="100%" height="100%">
         <mx:VBox width="100%" height="100%" id="coreVBox" paddingLeft="0" verticalGap="0" paddingRight="0"  disabledOverlayAlpha=".275">

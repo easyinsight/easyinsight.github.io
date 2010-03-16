@@ -322,12 +322,16 @@
 
         private var _viewFactory:AbstractViewFactory;
 
+
+        [Bindable(event="viewFactoryChanged")]
         public function get viewFactory():AbstractViewFactory {
             return _viewFactory;
         }
 
         public function set viewFactory(value:AbstractViewFactory):void {
+            if (_viewFactory == value) return;
             _viewFactory = value;
+            dispatchEvent(new Event("viewFactoryChanged"));
         }
 
         [Bindable]
@@ -409,12 +413,12 @@
                     filterDefinitions = report.filterDefinitions;
                     showFilters = true;
                 } else {
-                    filterDefinitions = new ArrayCollection();                    
+                    filterDefinitions = new ArrayCollection();
                     if (filterBox.contains(adjustFiltersbutton)) {
                         filterBox.removeChild(adjustFiltersbutton);
                     }
                 }
-                
+
                 transformContainer.addEventListener(TransformsUpdatedEvent.UPDATED_TRANSFORMS, transformsUpdated);
                 if (!admin) {
                     if (leftButtonBar.contains(editReportButton)) {
@@ -728,7 +732,7 @@
                 <mx:VRule visible="{showingFilters}" strokeColor="#AAAAAA" height="86"/>
             </mx:HBox>
             <mx:Box verticalAlign="middle" height="100%" width="100%">
-                <datasources:DataSourceDisplay dataSource="{dataSource}" width="100%"/>
+                <datasources:DataSourceDisplay dataSource="{dataSource}" width="100%" dataView="{viewFactory}"/>
             </mx:Box>
         </mx:HBox>
         <mx:HBox width="100%" height="100%" id="coreBox">

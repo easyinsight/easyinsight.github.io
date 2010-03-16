@@ -16,7 +16,7 @@ import mx.events.ModuleEvent;
 import mx.modules.IModuleInfo;
 import mx.modules.ModuleManager;
 
-public class EmbeddedViewFactory extends AbstractViewFactory {
+public class EmbeddedViewFactory extends AbstractViewFactory implements IRetrievable {
 
     private var _reportRendererModule:String;
     //private var _newDefinition:Class;

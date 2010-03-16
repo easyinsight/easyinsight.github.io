@@ -1039,7 +1039,7 @@ public class DataStorage {
         }
     }
 
-    private static FeedPersistenceMetadata getMetadata(long dataFeedID, Connection conn) {
+    public static FeedPersistenceMetadata getMetadata(long dataFeedID, Connection conn) {
         FeedPersistenceMetadata metadata = null;
         try {
             PreparedStatement versionStmt = conn.prepareStatement("SELECT MAX(VERSION) FROM FEED_PERSISTENCE_METADATA WHERE " +

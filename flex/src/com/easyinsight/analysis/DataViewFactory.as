@@ -17,7 +17,7 @@ import mx.events.ModuleEvent;
 import mx.modules.IModuleInfo;
 import mx.modules.ModuleManager;
 
-public class DataViewFactory extends VBox {
+public class DataViewFactory extends VBox implements IRetrievable {
 
     private var _reportControlBar:Class;
     private var _reportRendererModule:String;

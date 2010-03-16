@@ -37,6 +37,7 @@ package com.easyinsight.filtering
 					filterToReturn = _filterDefinition;
 				} else {
 					var newFilter:FilterDateRangeDefinition = new FilterDateRangeDefinition();
+                    newFilter.intrinsic = _filterDefinition.intrinsic;
 					newFilter.field = _filterDefinition.field;
 					newFilter.applyBeforeAggregation = _filterDefinition.applyBeforeAggregation;
 					filterToReturn = newFilter;
@@ -46,6 +47,7 @@ package com.easyinsight.filtering
 					filterToReturn = _filterDefinition;
 				} else {
 					var newDateFilter:RollingDateRangeFilterDefinition = new RollingDateRangeFilterDefinition();
+                    newDateFilter.intrinsic = _filterDefinition.intrinsic;
 					newDateFilter.field = _filterDefinition.field;
 					newDateFilter.applyBeforeAggregation = _filterDefinition.applyBeforeAggregation;
 					filterToReturn = newDateFilter;					

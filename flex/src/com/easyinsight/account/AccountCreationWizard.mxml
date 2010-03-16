@@ -104,17 +104,6 @@
             User.getEventNotifier().addEventListener(LoginEvent.LOGIN, onLogin);
         }
 
-        /*private function gotUserInfo():void {
-            var user:UserServiceResponse = creationService.authenticate.lastResult as UserServiceResponse;
-            User.initializeUser(user.name, user.email, user.accountType, user.spaceAllowed, user.accountAdmin,
-                    user.dataSourceCreator, user.insightCreator, user.userID, user.activated, user.billingInformationGiven, user.accountState);
-            User.getInstance().password = user.encryptedPassword;
-            User.getInstance().userName = user.userName;
-            User.getEventNotifier().dispatchEvent(new LoginEvent(LoginEvent.LOGIN));
-
-            dispatchEvent(new NavigationEvent("Help"));
-        }*/
-
         private function showSecurityStatement():void {
             var window:SecurityStatement = new SecurityStatement();
             PopUpManager.addPopUp(window, this, true);
@@ -149,7 +138,7 @@
             <mx:Spacer height="15"/>
             <mx:HBox width="100%" horizontalAlign="center" paddingLeft="2" paddingRight="2">
                 <mx:VBox borderStyle="solid" dropShadowEnabled="true" cornerRadius="8" horizontalAlign="center" backgroundColor="#FFFFFF"
-                        width="180" paddingTop="5" paddingBottom="10">
+                        width="180" paddingTop="5" paddingBottom="10" id="personalBox">
                     <mx:Label text="PERSONAL" fontSize="20" fontWeight="bold"/>
                     <mx:Text selectable="false" text="Enhance your spreadsheets&#13;and explore public data" color="#3A3A3A"/>
                     <mx:Label text="Not a cent!" color="#D42525" fontWeight="bold" fontSize="14"/>
@@ -164,7 +153,7 @@
                     </mx:VBox>
                 </mx:VBox>
                 <mx:VBox borderStyle="solid" dropShadowEnabled="true" cornerRadius="8" horizontalAlign="center" backgroundColor="#FFFFFF"
-                        width="180" paddingTop="5" paddingBottom="10">
+                        width="180" paddingTop="5" paddingBottom="10" id="basicBox">
                     <mx:Label text="BASIC" fontSize="20" fontWeight="bold"/>
                     <mx:Text selectable="false" text="Get started with full&#13;business intelligence power" color="#3A3A3A"/>
                     <mx:Label text="$25/month" color="#D42525" fontWeight="bold" fontSize="14"/>
@@ -180,7 +169,7 @@
                     </mx:VBox>
                 </mx:VBox>
                 <mx:VBox borderStyle="solid" dropShadowEnabled="true" cornerRadius="8" horizontalAlign="center" backgroundColor="#FFFFFF"
-                        width="180" paddingTop="5" paddingBottom="10">
+                        width="180" paddingTop="5" paddingBottom="10" id="professionalBox">
                     <mx:Label text="PROFESSIONAL" fontSize="20" fontWeight="bold"/>
                     <mx:Text selectable="false" text="Achieve full business&#13;visibility and insight" color="#3A3A3A"/>
                     <mx:Label text="$200/month" color="#D42525" fontWeight="bold" fontSize="14"/>
@@ -196,7 +185,7 @@
                 </mx:VBox>
 
                 <mx:VBox borderStyle="solid" dropShadowEnabled="true" cornerRadius="8" horizontalAlign="center" backgroundColor="#FFFFFF"
-                        width="180" paddingTop="5" paddingBottom="10">
+                        width="180" paddingTop="5" paddingBottom="10" id="premiumBox">
                     <mx:Label text="PREMIUM" fontSize="20" fontWeight="bold"/>
                     <mx:Text selectable="false" text="Customize and integrate&#13;BI for your unique needs" color="#3A3A3A"/>
                     <mx:Label text="$1500/month" color="#D42525" fontWeight="bold" fontSize="14"/>
@@ -211,7 +200,7 @@
                     </mx:VBox>
                 </mx:VBox>
                 <mx:VBox borderStyle="solid" dropShadowEnabled="true" cornerRadius="8" horizontalAlign="center" backgroundColor="#FFFFFF"
-                        width="180" paddingTop="5" paddingBottom="10">
+                        width="180" paddingTop="5" paddingBottom="10" id="enterpriseBox">
                     <mx:Label text="ENTERPRISE" fontSize="20" fontWeight="bold"/>
                     <mx:Text selectable="false" text="Unlimited power to drive&#13;your business to the top" color="#3A3A3A"/>
                     <mx:Label text="Talk to us" color="#D42525" fontWeight="bold" fontSize="14"/>

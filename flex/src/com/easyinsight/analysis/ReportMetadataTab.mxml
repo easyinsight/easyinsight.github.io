@@ -1,9 +1,9 @@
 <?xml version="1.0" ?>
 <mx:HBox label="Metadata (F1)" icon="@Embed(source='../../../../assets/note.png')" paddingLeft="10" paddingTop="10"
-         paddingBottom="10" xmlns:mx="http://www.adobe.com/2006/mxml" creationComplete="onCreation()">
+         paddingBottom="10" xmlns:mx="http://www.adobe.com/2006/mxml" creationComplete="onCreation()"
+         xmlns:datasources="com.easyinsight.datasources.*">
     <mx:states>
-        <mx:State name="NotLoggedIn">            
-            <mx:RemoveChild target="{sharingSettingsBox}"/>
+        <mx:State name="NotLoggedIn">
             <mx:SetProperty target="{analysisNameInput}" name="editable" value="false"/>
             <mx:SetProperty target="{analysisTagsInput}" name="editable" value="false"/>
         </mx:State>
@@ -22,6 +22,7 @@
     <mx:Script><![CDATA[
         import com.easyinsight.account.Account;
         import com.easyinsight.administration.feed.TagCloud;
+        import com.easyinsight.datasources.DataSourceInfo;
         import com.easyinsight.framework.LoginEvent;
         import com.easyinsight.framework.User;
         import com.easyinsight.util.PopUpUtil;
@@ -39,6 +40,19 @@
             }
         }
 
+        private var _dataView:DataViewFactory;
+
+        [Bindable(event="dataViewChanged")]
+        public function get dataView():DataViewFactory {
+            return _dataView;
+        }
+
+        public function set dataView(value:DataViewFactory):void {
+            if (_dataView == value) return;
+            _dataView = value;
+            dispatchEvent(new Event("dataViewChanged"));
+        }
+
         private var _analysisDefinition:AnalysisDefinition;
 
         private var analysisValidators:Array;
@@ -49,31 +63,18 @@
         [Bindable]
         private var tags:String;
 
-        [Bindable]
-        private var marketplaceVisible:Boolean;
-
-        [Bindable]
-        private var publiclyVisible:Boolean;
-
-        [Bindable]
-        private var solutionVisible:Boolean;
-
-        [Bindable]
-        private var shareDataSourceSharing:Boolean;
+        private var _dataSourceInfo:DataSourceInfo;
 
 
-        private var _originSolution:int;
-
-
-        [Bindable(event="originSolutionChanged")]
-        public function get originSolution():int {
-            return _originSolution;
+        [Bindable(event="dataSourceInfoChanged")]
+        public function get dataSourceInfo():DataSourceInfo {
+            return _dataSourceInfo;
         }
 
-        public function set originSolution(value:int):void {
-            if (_originSolution == value) return;
-            _originSolution = value;
-            dispatchEvent(new Event("originSolutionChanged"));
+        public function set dataSourceInfo(value:DataSourceInfo):void {
+            if (_dataSourceInfo == value) return;
+            _dataSourceInfo = value;
+            dispatchEvent(new Event("dataSourceInfoChanged"));
         }
 
         public function updateName(name:String):void {
@@ -111,11 +112,7 @@
             if (_analysisDefinition == value) return;
             _analysisDefinition = value;
             labelNameField = analysisDefinition.name;
-            tags = TagCloud.toString(analysisDefinition.tagCloud);
-            marketplaceVisible = value.marketplaceVisible;
-            publiclyVisible = value.publiclyVisible;
-            shareDataSourceSharing = value.visibleAtFeedLevel;
-            solutionVisible = value.solutionVisible;
+            tags = TagCloud.toString(analysisDefinition.tagCloud);            
             dispatchEvent(new Event("analysisDefinitionChanged"));
         }
 
@@ -124,10 +121,6 @@
             if (results.length == 0) {
                 analysisDefinition.name = analysisNameInput.text;
                 analysisDefinition.tagCloud = TagCloud.fromString(analysisTagsInput.text);
-                analysisDefinition.marketplaceVisible = marketplaceVisibleCheckbox.selected;
-                analysisDefinition.publiclyVisible = publiclyVisibleCheckbox.selected;
-                analysisDefinition.visibleAtFeedLevel = shareDataSourceSharingCheckbox.selected;
-                analysisDefinition.solutionVisible = solutionVisibleCheckbox.selected;
             } else {
                 analysisNameInput.setFocus();
                 analysisNameInput.dispatchEvent(new MouseEvent(MouseEvent.MOUSE_OVER));
@@ -137,18 +130,6 @@
 
         private function onDescriptionUpdate(event:DescriptionUpdateEvent):void {
             analysisDefinition.description = event.text;
-        }
-
-        private function sourceSharingChange(event:MouseEvent):void {
-            if (shareDataSourceSharingCheckbox.selected) {
-                marketplaceVisibleCheckbox.selected = false;
-                marketplaceVisibleCheckbox.enabled = false;
-                publiclyVisibleCheckbox.selected = false;
-                publiclyVisibleCheckbox.enabled = false;
-            } else {
-                marketplaceVisibleCheckbox.enabled = true;
-                publiclyVisibleCheckbox.enabled = true;
-            }
         }
 
         private function editDescription():void {
@@ -171,32 +152,7 @@
                        click="editDescription()"/>
         </mx:FormItem>
     </mx:Form>
-    <mx:VBox id="sharingSettingsBox">
-        <mx:CheckBox label="Use Data Source Sharing Settings"
-                     id="shareDataSourceSharingCheckbox" selected="{shareDataSourceSharing}"
-                     click="sourceSharingChange(event)"/>
-        <mx:HBox verticalAlign="middle">
-            <mx:CheckBox label="Publicly Visible" id="publiclyVisibleCheckbox"
-                         selected="{publiclyVisible}"
-                         change="publiclyVisible = publiclyVisibleCheckbox.selected"/>
-            <mx:Label fontSize="10" textDecoration="underline" text="What is this?"
-                      toolTip="By checking this box, you make the report visible to other users that you send the URL to."/>
-        </mx:HBox>
-        <mx:HBox verticalAlign="middle">
-            <mx:CheckBox label="Marketplace Visible" id="marketplaceVisibleCheckbox"
-                         selected="{marketplaceVisible}" enabled="{publiclyVisible}"/>
-            <mx:Label fontSize="10" textDecoration="underline" text="What is this?"
-                      toolTip="By checking this box, you make the report visible to all other Easy Insight users in the marketplace."/>
-        </mx:HBox>
-    </mx:VBox>
-    <mx:VBox>
-        <mx:HBox verticalAlign="middle">
-            <mx:CheckBox label="Connection Visible" id="solutionVisibleCheckbox"
-                         selected="{solutionVisible}" enabled="{originSolution > 0}"/>
-            <mx:Label fontSize="10" textDecoration="underline" text="What is this?"
-                      toolTip="By checking this box, you make the report template visible to all other Easy Insight users on the source connection. It's a great way to give back to the community!"/>
-        </mx:HBox>
-    </mx:VBox>
+    <datasources:DataSourceDisplay dataSource="{dataSourceInfo}" dataView="{dataView}"/>
     <mx:StringValidator id="analysisNameValidator" source="{analysisNameInput}" property="text" minLength="3"
                         maxLength="80"/>
 </mx:HBox>

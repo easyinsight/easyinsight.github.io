@@ -14,10 +14,6 @@
         implements="com.easyinsight.framework.IFullScreenPage">
     <core:states>
         <mx:State name="NotLoggedIn">
-            <mx:RemoveChild target="{subscribeToFeedButton}"/>
-            <mx:RemoveChild target="{groupAddFeedButton}"/>
-            <mx:RemoveChild target="{subscribeToInsightButton}"/>
-            <mx:RemoveChild target="{groupAddInsightButton}"/>
             <mx:RemoveChild target="{saveButton}"/>
             <mx:RemoveChild target="{saveAsButton}"/>
             <!--<mx:RemoveChild target="{sharingSettingsBox}"/>
@@ -57,9 +53,6 @@
         import com.easyinsight.analysis.IReportController;
         import com.easyinsight.analysis.ReportSizingEvent;
         import com.easyinsight.analysis.list.ListController;
-        import com.easyinsight.analysis.AddFeedToGroupWindow;
-        import com.easyinsight.analysis.SubscriptionEvent;
-        import com.easyinsight.analysis.AddInsightToGroupWindow;
         import com.easyinsight.analysis.UserCapabilities;
         import com.easyinsight.datasources.DataSourceInfo;
         import com.easyinsight.detail.DataDetailEvent;
@@ -72,7 +65,6 @@
         import com.easyinsight.report.MultiReportAnalyzeSource;
         import com.easyinsight.report.ReportAnalyzeSource;
         import com.easyinsight.solutions.InsightDescriptor;
-        import com.easyinsight.tour.ReportEditorTutorial;
         import com.easyinsight.util.PNGEnc;
         import com.easyinsight.util.PopUpUtil;
 
@@ -86,7 +78,6 @@
         import com.easyinsight.util.ProgressAlert;
         import com.easyinsight.commands.CommandEvent;
 
-        import mx.events.ValidationResultEvent;
         import mx.utils.ObjectUtil;
         import mx.utils.URLUtil;
         import mx.managers.BrowserManager;
@@ -126,8 +117,20 @@
         [Bindable]
         private var availableFields:ArrayCollection;
 
-        [Bindable]
-        private var dataSourceInfo:DataSourceInfo;
+
+        private var _dataSourceInfo:DataSourceInfo;
+
+
+        [Bindable(event="dataSourceInfoChanged")]
+        public function get dataSourceInfo():DataSourceInfo {
+            return _dataSourceInfo;
+        }
+
+        public function set dataSourceInfo(value:DataSourceInfo):void {
+            if (_dataSourceInfo == value) return;
+            _dataSourceInfo = value;
+            dispatchEvent(new Event("dataSourceInfoChanged"));
+        }
 
         [Bindable]
         private var selectedMode:int;
@@ -163,9 +166,6 @@
 
         [Bindable]
         private var wrappers:ArrayCollection;
-
-        [Bindable]
-        private var modeText:String = "";
 
         private var analysisChanged:Boolean = false;
 
@@ -223,6 +223,7 @@
                 dataView.removeEventListener(DataServiceLoadingEvent.LOADING_STARTED, startLoading);
                 dataView.removeEventListener(DataServiceLoadingEvent.LOADING_STOPPED, stopLoading);
                 dataView.removeEventListener(AnalysisChangedEvent.ANALYSIS_CHANGED, onAnalysisChanged);
+                dataView.removeEventListener(DataServiceEvent.DATA_RETURNED, onDataReturn);
                 dataControlVBox.removeChild(dataView);
             }
             if (analysisDefinition == null) {
@@ -318,6 +319,7 @@
 
 
             this.feedMetadata = feedMetadata;
+            dataSourceInfo = feedMetadata.dataSourceInfo;
             this.originSolution = feedMetadata.originSolution;
             this.admin = feedMetadata.dataSourceAdmin;
             dataSourceName = this.feedMetadata.dataSourceName;
@@ -494,8 +496,7 @@
         }
 
         private function gotCredentialRequirements():void {
-            var requirements:ArrayCollection = detailService.getCredentialRequirements.lastResult as ArrayCollection;
-            var canDirectly:Boolean = true;
+            var requirements:ArrayCollection = detailService.getCredentialRequirements.lastResult as ArrayCollection;            
             CredentialsCache.getCache().obtainCredentials(this, requirements, onCredentials);
         }
 
@@ -592,6 +593,7 @@
             } else {
                 if (analysisDefinition.canSaveDirectly) {
                     var results:Array = reportMetadataTab.updateReport();
+                    reportSharingTab.updateReport();
                     var valid:Boolean = results.length == 0;
                     if (valid) {
                         dataView.updateExportMetadata();
@@ -604,7 +606,7 @@
                         ProgressAlert.alert(this, "Saving the report...", "Saved!", analysisService.saveAnalysisDefinition);
                         analysisService.saveAnalysisDefinition(analysisDefinition, ba);
                     } else {
-                        tabNavigator.selectedIndex = 0;                        
+                        tabNavigator.selectedIndex = 0;
                     }
                 } else {
                     Alert.show("You are not allowed to directly modify this report--use Save As instead.");
@@ -619,6 +621,7 @@
             feedFragmentObject.analysisID = String(analysisDefinition.analysisID);
             var feedFragmentString:String = URLUtil.objectToString(feedFragmentObject);
             BrowserManager.getInstance().setFragment(feedFragmentString);
+            reportSaveable = true;
             this.analysisChanged = false;
         }
 
@@ -678,7 +681,7 @@
             if (dataService != null) {
                 dataService.removeEventListener(DataServiceLoadingEvent.LOADING_STARTED, startLoading);
                 dataService.removeEventListener(DataServiceLoadingEvent.LOADING_STOPPED, stopLoading);
-                dataService.removeEventListener(InvalidFieldsEvent.INVALID_FIELDS, onInvalidFields);
+                dataService.removeEventListener(InvalidFieldsEvent.INVALID_FIELDS, onInvalidFields);                
             }
             if (transformContainer != null) {
                 transformContainer.removeEventListener(TransformsUpdatedEvent.UPDATED_TRANSFORMS, transformsUpdated);
@@ -687,6 +690,7 @@
                 dataView.removeEventListener(DataServiceLoadingEvent.LOADING_STARTED, startLoading);
                 dataView.removeEventListener(DataServiceLoadingEvent.LOADING_STOPPED, stopLoading);
                 dataView.removeEventListener(AnalysisChangedEvent.ANALYSIS_CHANGED, onAnalysisChanged);
+                dataView.removeEventListener(DataServiceEvent.DATA_RETURNED, onDataReturn);
                 dataView.cleanup();
             }
         }
@@ -707,31 +711,10 @@
         }
 
 
-        private function subscribeToFeed():void {
-            userUploadService.subscribe.send(dataService.dataFeedID);
-        }
 
-        private function subscribeToInsight():void {
-            analysisService.subscribeToAnalysis.send(analysisDefinition.analysisID);
-        }
 
-        private function addInsightToGroup():void {
-            var window:AddInsightToGroupWindow = AddInsightToGroupWindow(PopUpManager.createPopUp(this, AddInsightToGroupWindow));
-            window.insightID = analysisDefinition.analysisID;
-            window.addEventListener(SubscriptionEvent.GROUP_TO_INSIGHT, addedToGroup);
-            PopUpUtil.centerPopUp(window);
-        }
-
-        private function addFeedToGroup():void {
-            var window:AddFeedToGroupWindow = AddFeedToGroupWindow(PopUpManager.createPopUp(this, AddFeedToGroupWindow));
-            window.feedID = dataService.dataFeedID;
-            window.addEventListener(SubscriptionEvent.GROUP_TO_INSIGHT, addedToGroup);
-            PopUpUtil.centerPopUp(window);
-        }
-
-        private function addedToGroup(event:SubscriptionEvent):void {
-
-        }
+        [Bindable]
+        private var reportSaveable:Boolean;
 
         private function gotUserCapabilitiesForFeed():void {
             var userCapabilities:UserCapabilities = analysisService.getUserCapabilitiesForFeed.lastResult as UserCapabilities;
@@ -764,7 +747,7 @@
 
         private function gotUserCapabilitiesForInsight():void {
             var userCapabilities:UserCapabilities = analysisService.getUserCapabilitiesForInsight.lastResult as UserCapabilities;
-
+            reportSaveable = userCapabilities.groupMember;
             canSubscribeToFeed = userCapabilities.feedRole > 3;
             canSubscribeToInsight = userCapabilities.analysisRole > 3;
             canAddFeedToGroup = userCapabilities.groupMember;
@@ -774,11 +757,6 @@
         private function subscribedToFeed():void {
             canSubscribeToFeed = false;
             Alert.show("This data source will now show in your My Data page.");
-        }
-
-        private function subscribedToInsight():void {
-            canSubscribeToInsight = false;
-            Alert.show("This report will now show in your My Data page.");
         }
 
 
@@ -897,9 +875,9 @@
 
         private function tutorial():void {
             /*var reportEditorTutorial:ReportEditorTutorial = new ReportEditorTutorial();
-            reportEditorTutorial.reportEditor = this;
-            reportEditorTutorial.startTutorial();
-            PrimaryWorkspace.registerTutorial(reportEditorTutorial);*/
+             reportEditorTutorial.reportEditor = this;
+             reportEditorTutorial.startTutorial();
+             PrimaryWorkspace.registerTutorial(reportEditorTutorial);*/
         }
 
         private function editToggle():void {
@@ -918,10 +896,6 @@
         <mx:method name="openAnalysisDefinition" result="gotReport()"/>
         <mx:method name="getUserCapabilitiesForFeed" result="gotUserCapabilitiesForFeed()"/>
         <mx:method name="getUserCapabilitiesForInsight" result="gotUserCapabilitiesForInsight()"/>
-        <mx:method name="subscribeToAnalysis" result="subscribedToInsight()"/>
-    </mx:RemoteObject>
-    <mx:RemoteObject id="userUploadService" destination="userUpload">
-        <mx:method name="subscribe" result="subscribedToFeed()"/>
     </mx:RemoteObject>
     <mx:RemoteObject id="detailService" destination="data">
         <mx:method name="getAllData" result="gotDetailData()"/>
@@ -949,25 +923,16 @@
                        toolTip="View Report"/>
             <mx:Button id="adminButton" icon="@Embed(source='../../../assets/businessman_edit.png')" click="goAdmin()"
                        toolTip="Adminster" visible="{admin}"/>
-            <mx:VRule strokeColor="#DDDDDD" height="16"/>
-            <mx:Button id="subscribeToFeedButton" icon="@Embed(source='../../../assets/folder_into.png')"
-                       click="subscribeToFeed()" toolTip="Add Data Source to My Data" enabled="{canSubscribeToFeed}"/>
-            <mx:Button id="groupAddFeedButton" icon="@Embed(source='../../../assets/users_into.png')"
-                       click="addFeedToGroup()" toolTip="Add Data Source to Group" enabled="{canAddFeedToGroup}"/>
-            <mx:Button id="subscribeToInsightButton" icon="@Embed(source='../../../assets/folder_into.png')"
-                       click="subscribeToInsight()" toolTip="Add Report to My Data" enabled="{canSubscribeToInsight}"/>
-            <mx:Button id="groupAddInsightButton" icon="@Embed(source='../../../assets/users_into.png')"
-                       click="addInsightToGroup()" toolTip="Add Report to Group" enabled="{canAddInsightToGroup}"/>
             <!--<mx:Button icon="@Embed(source='../../../assets/blackboard.png')"
                        click="tutorial()"/>-->
-            <mx:VRule strokeColor="#DDDDDD" height="16"/>
         </mx:HBox>
         <mx:TabNavigator id="tabNavigator" width="100%" creationPolicy="all" enabled="{!_previewMode}" paddingTop="0"
                          paddingBottom="0"
                          paddingLeft="0" paddingRight="0" resizeToContent="true">
-            <analysis:ReportMetadataTab id="reportMetadataTab" analysisDefinition="{analysisDefinition}" originSolution="{originSolution}"/>
+            <analysis:ReportMetadataTab id="reportMetadataTab" analysisDefinition="{analysisDefinition}"  dataSourceInfo="{dataSourceInfo}"
+                    dataView="{dataView}"/>
             <analysis:ReportDataTab id="reportDataTab" analysisDefinition="{analysisDefinition}" dataService="{dataService}"
-                    wrappers="{wrappers}" availableFields="{availableFields}" dataSourceInfo="{dataSourceInfo}"
+                    wrappers="{wrappers}" availableFields="{availableFields}"
                     dataView="{dataView}" analysisItemCreated="sortFields()" reportSizing="onReportSizing(event)" analysisItemEdit="sortFields()"/>
             <filtering:TransformContainer id="transformContainer" paddingLeft="10" paddingTop="10" paddingBottom="10"
                                           paddingRight="10" transformAdded="transformsUpdated(event)" label="Filters (F3)"
@@ -983,6 +948,9 @@
             <analysis:DataTransformationTab dataView="{dataView}" dataSourceID="{dataService.dataFeedID}"
                                             analysisDefinition="{analysisDefinition}" analysisItems="{wrappers}" id="scrubTab"/>
             <analysis:ExportTab analysisDefinition="{analysisDefinition}" dataView="{dataView}" id="exportTab"/>
+            <analysis:ReportSharingTab analysisDefinition="{analysisDefinition}" originSolution="{originSolution}" id="reportSharingTab"
+                    reportSaveable="{reportSaveable}" canSubscribeToFeed="{canSubscribeToFeed}" canAddFeedToGroup="{canAddFeedToGroup}"
+                    canSaveToMyData="{canSubscribeToInsight}" dataService="{dataService}"/>
         </mx:TabNavigator>
 
         <mx:HDividedBox id="hbox1" height="100%" width="100%">

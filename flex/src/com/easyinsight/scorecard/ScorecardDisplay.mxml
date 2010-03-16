@@ -2,6 +2,10 @@
 <mx:HBox xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:scorecard="com.easyinsight.scorecard.*"
          xmlns:viewStackEffects="org.efflex.mx.viewStackEffects.*"
          creationComplete="onCreationComplete()" width="100%">
+    <mx:Metadata>
+        [Event(name="noData", type="flash.events.Event")]
+        [Event(name="gotData", type="flash.events.Event")]
+    </mx:Metadata>
     <mx:Script><![CDATA[
         import com.easyinsight.util.PopUpUtil;
         import com.easyinsight.util.ProgressAlert;
@@ -83,8 +87,8 @@
         }
 
         public function gotFocus():void {
-            /*primaryStackIndex = 0;
-             scorecardService.getScorecardDescriptors.send();*/
+            primaryStackIndex = 0;
+            scorecardService.getScorecardDescriptors.send();
         }
 
         private function refreshData():void {
@@ -93,27 +97,33 @@
         }
 
         private function gotDescriptors():void {
-            scorecards = scorecardService.getScorecardDescriptors.lastResult as ArrayCollection;
-            scorecardStack.removeAllChildren();
-            for each (var scorecard:ScorecardDescriptor in scorecards) {
-                var scorecardRenderer:ScorecardRenderer = new ScorecardRenderer();
-                /*scorecardRenderer.setStyle("hideEffect", effect);
-                scorecardRenderer.setStyle("hideEffect", effect);*/
-                BindingUtils.bindProperty(scorecardRenderer, "configurationMode", this, "configurationMode");
-                scorecardRenderer.scorecardDescriptor = scorecard;
-                scorecardStack.addChild(scorecardRenderer);
-            }
-
-            if (scorecards.length > 0) {
-                selectedScorecard = scorecards.getItemAt(0) as ScorecardDescriptor;
-                primaryStackIndex = 2;
-                if (scorecards.length > 1) {
-                    tabsIndex = 1;
-                } else {
-                    tabsIndex = 0;
+            var scorecardList:ScorecardList = scorecardService.getScorecardDescriptors.lastResult as ScorecardList;
+            if (scorecardList.anyData) {
+                scorecards = scorecardList.scorecardDescriptors;
+                scorecardStack.removeAllChildren();
+                for each (var scorecard:ScorecardDescriptor in scorecards) {
+                    var scorecardRenderer:ScorecardRenderer = new ScorecardRenderer();
+                    /*scorecardRenderer.setStyle("hideEffect", effect);
+                    scorecardRenderer.setStyle("hideEffect", effect);*/
+                    BindingUtils.bindProperty(scorecardRenderer, "configurationMode", this, "configurationMode");
+                    scorecardRenderer.scorecardDescriptor = scorecard;
+                    scorecardStack.addChild(scorecardRenderer);
                 }
+
+                if (scorecards.length > 0) {
+                    selectedScorecard = scorecards.getItemAt(0) as ScorecardDescriptor;
+                    primaryStackIndex = 2;
+                    if (scorecards.length > 1) {
+                        tabsIndex = 1;
+                    } else {
+                        tabsIndex = 0;
+                    }
+                } else {
+                    primaryStackIndex = 1;
+                }
+                dispatchEvent(new Event("gotData"));
             } else {
-                primaryStackIndex = 1;
+                dispatchEvent(new Event("noData"));
             }
         }
 

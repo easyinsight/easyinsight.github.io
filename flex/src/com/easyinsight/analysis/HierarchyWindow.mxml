@@ -6,6 +6,7 @@
         import mx.collections.Sort;
         import mx.collections.SortField;
         import mx.events.DragEvent;
+        import mx.events.ListEvent;
         import mx.managers.DragManager;
 
         [Bindable]
@@ -42,7 +43,7 @@
         public function set analysisItems(analysisItems:ArrayCollection):void {
             availableDimensions = new ArrayCollection();
             for each (var analysisItemWrapper:AnalysisItemWrapper in analysisItems) {
-                if (analysisItemWrapper.analysisItem.hasType(AnalysisItemTypes.DIMENSION)) {
+                if (analysisItemWrapper.analysisItem.hasType(AnalysisItemTypes.DIMENSION) && !analysisItemWrapper.analysisItem.hasType(AnalysisItemTypes.HIERARCHY)) {
                     availableDimensions.addItem(analysisItemWrapper.analysisItem);
                 }
             }
@@ -76,16 +77,24 @@
         public function set dataSourceID(dataSourceID:int):void {
         }
 
+        private function onDoubleClick(event:ListEvent):void {
+            var field:AnalysisItem = event.currentTarget.selectedItem as AnalysisItem;
+            var hierarchyLevel:HierarchyLevel = new HierarchyLevel();
+            hierarchyLevel.analysisItem = field;
+            var data:ArrayCollection = ArrayCollection(hierarchyAdmin.list.dataProvider);
+            data.addItem(hierarchyLevel);
+        }
+
         ]]></mx:Script>
     <mx:VBox>
         <mx:HBox>
             <mx:VBox horizontalAlign="center" width="220" height="300">
                 <mx:Label text="Available Fields" fontFamily="Tahoma" fontSize="14" fontWeight="bold"/>
                 <mx:List dataProvider="{availableDimensions}" labelField="display" dragEnabled="true" dragMoveEnabled="false" dragComplete="onDragComplete(event)" width="100%"
-                        height="100%"/>
+                        height="100%" itemDoubleClick="onDoubleClick(event)"/>
             </mx:VBox>
             <mx:VBox width="100%" height="300" borderStyle="solid" borderThickness="1" cornerRadius="8">
-                <mx:Label text="Drag groupings from the left onto the list below to create and edit your hierarchy"
+                <mx:Text text="Drag groupings from the left onto the list below to create and edit your hierarchy.&#13;Hierarchies go from the highest level at the top to the lowest level&#13;at the bottom."
                          fontFamily="Tahoma" fontSize="14" fontWeight="bold"/>
                 <mx:Box width="100%" height="100%" horizontalAlign="center" verticalAlign="middle" id="workspace">
                     <feed:HierarchyAdminBox id="hierarchyAdmin" analysisHierarchyItem="{_hierarchy}"/>

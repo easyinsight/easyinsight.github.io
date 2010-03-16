@@ -2,6 +2,7 @@ package com.easyinsight.datafeeds;
 
 import com.easyinsight.analysis.*;
 import com.easyinsight.reportpackage.ReportPackageDescriptor;
+import com.easyinsight.scorecard.ScorecardStorage;
 import com.easyinsight.userupload.UploadPolicy;
 import com.easyinsight.userupload.UserUploadInternalService;
 import com.easyinsight.analysis.AnalysisItem;
@@ -107,6 +108,15 @@ public class FeedService implements IDataFeedService {
             }
         }
         return validDescriptors;
+    }
+
+    public List<CredentialRequirement> launchAsyncRefresh(long dataSourceID, List<CredentialFulfillment> credentials) {
+        try {
+            return new ScorecardStorage().blah(dataSourceID, credentials);
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        }
     }
 
     public List<EIDescriptor> getDescriptors() {

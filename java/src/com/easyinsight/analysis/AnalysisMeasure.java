@@ -17,16 +17,9 @@ public class AnalysisMeasure extends AnalysisItem {
     @Column(name="aggregation")
     private int aggregation;
 
-    /*@GeneratedValue(strategy=GenerationType.IDENTITY)
-    @Column(name="analysis_measure_id")
-    private long analysisMeasureID;*/
-
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name="measure_condition_range_id")
     private MeasureConditionRange measureConditionRange;
-
-    /*@OneToMany(cascade = CascadeType.ALL)
-    private List<PersistableFilterDefinition> filters;*/
 
     public AnalysisMeasure() {
     }
@@ -96,14 +89,6 @@ public class AnalysisMeasure extends AnalysisItem {
         }
         return result;
     }
-
-    /*public long getAnalysisMeasureID() {
-        return analysisMeasureID;
-    }
-
-    public void setAnalysisMeasureID(long analysisMeasureID) {
-        this.analysisMeasureID = analysisMeasureID;
-    }*/
 
     public int getAggregation() {
         return aggregation;

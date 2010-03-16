@@ -11,7 +11,6 @@ import org.apache.commons.httpclient.HttpMethod;
 import org.apache.commons.httpclient.UsernamePasswordCredentials;
 import org.apache.commons.httpclient.auth.AuthScope;
 import org.apache.commons.httpclient.methods.GetMethod;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.Map;
 
@@ -73,7 +72,7 @@ public abstract class BaseCampBaseSource extends ServerDataSourceDefinition {
             if ("HTTP/1.1 404 Not Found".equals(statusLine)) {
                 throw new BaseCampLoginException("Could not locate a Basecamp instance at " + url);
             } else {
-                throw new BaseCampLoginException("Invalid Basecamp authentication token--you can find the token under your the My Info link in the upper right corner on your Basecamp page.");
+                throw new BaseCampLoginException("Invalid Basecamp authentication token in connecting to " + url + "--you can find the token under your the My Info link in the upper right corner on your Basecamp page.");
             }
         }
         catch (Throwable e) {
