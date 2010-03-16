@@ -103,6 +103,7 @@
         }
 
         private function validate():void {
+            ready = false;
             progressBar.visible = true;
             dataSourceCreation.updateDataSource(dataSourceDefinition);
             uploadService.validateCredentials.send(dataSourceDefinition, dataSourceCreation.credentials, saveCredentialsCheckbox != null ? saveCredentialsCheckbox.selected : false);
@@ -121,6 +122,7 @@
                 dataSourceCreation.updateDataSource(dataSourceDefinition);
                 feedService.updateFeedDefinition.send(dataSourceDefinition, "", null);
             } else {
+                ready = true;
                 progressBar.visible = false;
                 Alert.show(validation.failureMessage);
             }
@@ -131,7 +133,7 @@
         }
 
         private function refreshed():void {
-            progressBar.visible = true;
+            progressBar.visible = false;
             var response:CredentialsResponse = uploadService.refreshData.lastResult as CredentialsResponse;
             if (response.successful) {
                 var descriptor:DataFeedDescriptor = new DataFeedDescriptor();
@@ -141,6 +143,7 @@
                 stage.removeEventListener(KeyboardEvent.KEY_UP, onKey);
                 PopUpManager.removePopUp(this);
             } else {
+                ready = true;
                 Alert.show(response.failureMessage);
             }
         }

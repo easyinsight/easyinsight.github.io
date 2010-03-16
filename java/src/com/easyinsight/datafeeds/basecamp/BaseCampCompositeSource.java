@@ -120,7 +120,7 @@ public class BaseCampCompositeSource extends CompositeServerDataSource {
             if ("HTTP/1.1 404 Not Found".equals(statusLine)) {
                 throw new BaseCampLoginException("Could not locate a Basecamp instance at " + getUrl());
             } else {
-                throw new BaseCampLoginException("Invalid Basecamp authentication token connectiong to + " + getUrl() + "--you can find the token under your the My Info link in the upper right corner on your Basecamp page.");
+                throw new BaseCampLoginException("Invalid Basecamp authentication token connecting to " + getUrl() + "--you can find the token under your the My Info link in the upper right corner on your Basecamp page.");
             }
 
         }
