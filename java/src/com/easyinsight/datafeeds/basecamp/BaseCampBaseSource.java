@@ -1,10 +1,7 @@
 package com.easyinsight.datafeeds.basecamp;
 
 import com.easyinsight.datafeeds.ServerDataSourceDefinition;
-import nu.xom.Builder;
-import nu.xom.Document;
-import nu.xom.Node;
-import nu.xom.Nodes;
+import nu.xom.*;
 import org.apache.commons.httpclient.Credentials;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpMethod;
@@ -29,13 +26,13 @@ public abstract class BaseCampBaseSource extends ServerDataSourceDefinition {
         return client;
     }
 
-    protected String retrieveContactInfo(HttpClient client, Builder builder, Map<String, String> peopleCache, String contactId, String url) throws BaseCampLoginException {
+    protected String retrieveContactInfo(HttpClient client, Builder builder, Map<String, String> peopleCache, String contactId, String url) throws BaseCampLoginException, ParsingException {
         String contactName = null;
         try {
             if(contactId != null) {
                 contactName = peopleCache.get(contactId);
                 if(contactName == null) {
-                    Document contactInfo = runRestRequest("/contacts/person/" + contactId, client, builder, url, null);
+                    Document contactInfo = runRestRequest("/contacts/person/" + contactId, client, builder, url, null, false);
                     contactName = queryField(contactInfo, "/person/first-name/text()") + " " + queryField(contactInfo, "/person/last-name/text()");
                     peopleCache.put(contactId, contactName);
                 }
@@ -55,7 +52,7 @@ public abstract class BaseCampBaseSource extends ServerDataSourceDefinition {
             return null;
     }
 
-    protected Document runRestRequest(String path, HttpClient client, Builder builder, String url, EIPageInfo pageInfo) throws BaseCampLoginException {
+    protected Document runRestRequest(String path, HttpClient client, Builder builder, String url, EIPageInfo pageInfo, boolean badCredentialsOnError) throws BaseCampLoginException, ParsingException {
         HttpMethod restMethod = new GetMethod(url + path);
         restMethod.setRequestHeader("Accept", "application/xml");
         restMethod.setRequestHeader("Content-Type", "application/xml");
@@ -72,7 +69,11 @@ public abstract class BaseCampBaseSource extends ServerDataSourceDefinition {
             if ("HTTP/1.1 404 Not Found".equals(statusLine)) {
                 throw new BaseCampLoginException("Could not locate a Basecamp instance at " + url);
             } else {
-                throw new BaseCampLoginException("Invalid Basecamp authentication token in connecting to " + url + "--you can find the token under your the My Info link in the upper right corner on your Basecamp page.");
+                if (badCredentialsOnError) {
+                    throw new BaseCampLoginException("Invalid Basecamp authentication token in connecting to " + url + "--you can find the token under your the My Info link in the upper right corner on your Basecamp page.");
+                } else {
+                    throw e;
+                }
             }
         }
         catch (Throwable e) {

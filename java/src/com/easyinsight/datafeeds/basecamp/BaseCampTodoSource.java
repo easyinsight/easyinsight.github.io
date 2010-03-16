@@ -95,7 +95,7 @@ public class BaseCampTodoSource extends BaseCampBaseSource {
         Map<String, String> peopleCache = new HashMap<String, String>();
         try {
 
-            Document projects = runRestRequest("/projects.xml", client, builder, url, null);
+            Document projects = runRestRequest("/projects.xml", client, builder, url, null, true);
             Nodes projectNodes = projects.query("/projects/project");
             for(int i = 0;i < projectNodes.size();i++) {
                 Node curProject = projectNodes.get(i);
@@ -107,14 +107,14 @@ public class BaseCampTodoSource extends BaseCampBaseSource {
 
 
 
-                Document milestoneList = runRestRequest("/projects/" + projectIdToRetrieve + "/milestones/list", client, builder, url, null);
+                Document milestoneList = runRestRequest("/projects/" + projectIdToRetrieve + "/milestones/list", client, builder, url, null, false);
 
                 Map<String, String> milestoneCommentMap = new HashMap<String, String>();
                 Nodes milestoneCacheNodes = milestoneList.query("/milestones/milestone");
                 for (int milestoneIndex = 0; milestoneIndex < milestoneCacheNodes.size(); milestoneIndex++) {
                     Node milestoneNode = milestoneCacheNodes.get(milestoneIndex);
                     String id = queryField(milestoneNode, "id/text()");
-                    Document comments = runRestRequest("/milestones/" + id + "/comments.xml", client, builder, url, null);
+                    Document comments = runRestRequest("/milestones/" + id + "/comments.xml", client, builder, url, null, false);
                     Nodes commentNodes = comments.query("/comments/comment");
                     if (commentNodes.size() > 0) {
                         Node commentNode = commentNodes.get(0);
@@ -122,7 +122,7 @@ public class BaseCampTodoSource extends BaseCampBaseSource {
                     }
                 }
 
-                Document todoLists = runRestRequest("/projects/" + projectIdToRetrieve + "/todo_lists.xml", client, builder, url, null);
+                Document todoLists = runRestRequest("/projects/" + projectIdToRetrieve + "/todo_lists.xml", client, builder, url, null, false);
                 Nodes todoListNodes = todoLists.query("/todo-lists/todo-list");
                 for(int j = 0;j < todoListNodes.size();j++) {
                     Node todoListNode = todoListNodes.get(j);
@@ -146,7 +146,7 @@ public class BaseCampTodoSource extends BaseCampBaseSource {
 
 
                     try {
-                        Document todoItems = runRestRequest("/todo_lists/" + todoListId + "/todo_items.xml", client, builder, url, null);
+                        Document todoItems = runRestRequest("/todo_lists/" + todoListId + "/todo_items.xml", client, builder, url, null, false);
 
                         Nodes todoItemNodes = todoItems.query("/todo-items/todo-item");
                         for(int k = 0;k < todoItemNodes.size();k++) {

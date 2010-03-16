@@ -58,7 +58,7 @@ public class BaseCampCompanySource extends BaseCampBaseSource {
         Builder builder = new Builder();
         try {
 
-            Document projects = runRestRequest("/companies.xml", client, builder, url, null);
+            Document projects = runRestRequest("/companies.xml", client, builder, url, null, false);
             Nodes projectNodes = projects.query("/companies/company");
             for(int i = 0;i < projectNodes.size();i++) {
                 Node companyNode = projectNodes.get(i);

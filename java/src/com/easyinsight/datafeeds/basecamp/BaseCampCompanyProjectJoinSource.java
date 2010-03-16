@@ -16,12 +16,9 @@ import nu.xom.Document;
 import nu.xom.Node;
 import nu.xom.Nodes;
 import org.apache.commons.httpclient.HttpClient;
-import org.apache.ws.security.util.XmlSchemaDateFormat;
 import org.jetbrains.annotations.NotNull;
 
 import java.sql.Connection;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
@@ -61,12 +58,12 @@ public class BaseCampCompanyProjectJoinSource extends BaseCampBaseSource {
         HttpClient client = getHttpClient(token.getTokenValue(), "");
         Builder builder = new Builder();
         try {
-            Document projects = runRestRequest("/projects.xml", client, builder, url, null);
+            Document projects = runRestRequest("/projects.xml", client, builder, url, null, false);
             Nodes projectNodes = projects.query("/projects/project");
             for(int i = 0;i < projectNodes.size();i++) {
                 Node curProject = projectNodes.get(i);
                 String projectID = queryField(curProject, "id/text()");
-                Document companies = runRestRequest("/projects/" + projectID + "/companies.xml", client, builder, url, null);
+                Document companies = runRestRequest("/projects/" + projectID + "/companies.xml", client, builder, url, null, false);
                 Nodes companyNodes = companies.query("/companies/company");
                 for (int companyIndex = 0; companyIndex < companyNodes.size(); companyIndex++) {
                     Node companyNode = companyNodes.get(companyIndex);
