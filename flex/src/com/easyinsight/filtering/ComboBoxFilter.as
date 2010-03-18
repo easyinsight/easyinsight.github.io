@@ -100,6 +100,8 @@ public class ComboBoxFilter extends HBox implements IFilter
 		}
 		
 		private function onFilterEdit(event:FilterEditEvent):void {
+            _analysisItem = event.filterDefinition.field;
+            dataService.getAnalysisItemMetadata.send(_feedID, event.filterDefinition.field, CredentialsCache.getCache().createCredentials(), new Date().getTimezoneOffset());
 			dispatchEvent(new FilterUpdatedEvent(FilterUpdatedEvent.FILTER_UPDATED, event.filterDefinition, event.previousFilterDefinition, this, event.bubbles, event.rebuild));
 		}
 
@@ -115,6 +117,7 @@ public class ComboBoxFilter extends HBox implements IFilter
 		override protected function createChildren():void {
 			super.createChildren();
             viewStack = new ViewStack();
+            viewStack.resizeToContent = true;
             //if (!_filterEditable) {
             var hbox:HBox = new HBox();
             hbox.percentHeight = 100;
