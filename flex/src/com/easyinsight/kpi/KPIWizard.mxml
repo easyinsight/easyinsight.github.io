@@ -12,14 +12,12 @@
         import com.easyinsight.administration.sharing.UserStub;
         import com.easyinsight.framework.CredentialsCache;
         import com.easyinsight.framework.User;
-        import com.easyinsight.util.PopUpUtil;
         import com.easyinsight.util.ProgressAlert;
 
         import mx.collections.ArrayCollection;
         import mx.core.UIComponent;
         import mx.effects.Effect;
         import mx.events.IndexChangedEvent;
-        import mx.managers.PopUpManager;
 
         [Bindable]
         private var panelIndex:int;
