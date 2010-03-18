@@ -142,6 +142,7 @@
 
         private function onCreation():void {
             User.getEventNotifier().addEventListener(LoginEvent.LOGIN, onLogin);
+            User.getEventNotifier().addEventListener(LoginEvent.LOGOUT, onLogin);
             //dataBoxes.addEventListener(DividerEvent.DIVIDER_RELEASE, onDividerRelease);
             addEventListener(DeleteGoalTreeEvent.DELETE_GOAL_TREE, onDelete);
             addEventListener(KPIEvent.KPI_ADDED, onKPIChange);

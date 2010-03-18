@@ -2,7 +2,7 @@
 
 <mx:HBox xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:local="*" xmlns:listing="com.easyinsight.listing.*"
          width="100%" borderStyle="none" xmlns:easyinsight="com.easyinsight.*" horizontalGap="25" verticalAlign="middle" backgroundColor="0xF0F0F0"
-        creationComplete="setup()" addedToStage="onAdded()" removedFromStage="onRemoved()">
+        creationComplete="setup()">
     <mx:Metadata>
         [Event(name="triggerAnalyze", type="com.easyinsight.listing.TriggerAnalyzeEvent")]
         [Event(name="listingChange", type="com.easyinsight.listing.ListingChangeEvent")]
@@ -29,38 +29,10 @@
         import mx.controls.Alert;
         import mx.managers.PopUpManager;
 
-        private function onRemoved():void {
-            stage.removeEventListener(KeyboardEvent.KEY_UP, onKey);
-        }
-
-        private function onAdded():void {
-            stage.addEventListener(KeyboardEvent.KEY_UP, onKey);
-        }
-
         private function showPreferences():void {
             var window:PreferencesWindow = new PreferencesWindow();
             PopUpManager.addPopUp(window, this, true);
             PopUpUtil.centerPopUp(window);
-        }
-
-        private function onKey(event:KeyboardEvent):void {            
-            /*if (event.keyCode == Keyboard.F1) {
-                User.getEventNotifier().dispatchEvent(new NavigationEvent("Intro"));
-            } else if (event.keyCode == Keyboard.F2) {
-                User.getEventNotifier().dispatchEvent(new NavigationEvent("My Data"));
-            } else if (event.keyCode == Keyboard.F3) {
-                User.getEventNotifier().dispatchEvent(new NavigationEvent("Exchange"));
-            } else if (event.keyCode == Keyboard.F4) {
-                User.getEventNotifier().dispatchEvent(new NavigationEvent("Groups"));
-            } else if (event.keyCode == Keyboard.F5) {
-                User.getEventNotifier().dispatchEvent(new NavigationEvent("Solutions"));
-            } else if (event.keyCode == Keyboard.F6) {
-                User.getEventNotifier().dispatchEvent(new NavigationEvent("Goals"));
-            } else if (event.keyCode == Keyboard.F7) {
-                User.getEventNotifier().dispatchEvent(new NavigationEvent("API"));
-            } else if (event.keyCode == Keyboard.F8) {
-                User.getEventNotifier().dispatchEvent(new NavigationEvent("Accounts"));
-            }*/
         }
 
         private function setup():void {

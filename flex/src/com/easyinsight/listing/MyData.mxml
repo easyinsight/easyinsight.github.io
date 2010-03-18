@@ -19,8 +19,7 @@
         </mx:State>
 	</mx:states>
 	<mx:Script>
-		<![CDATA[
-        import com.easyinsight.customupload.SimpleFeedWindow;
+		<![CDATA[        
         import com.easyinsight.customupload.UploadConfigEvent;
         import com.easyinsight.framework.AsyncInfoEvent;
         import com.easyinsight.framework.EIMessageListener;
@@ -129,10 +128,15 @@
         private function initListeners():void {
             addEventListener(KeyboardEvent.KEY_UP, keyHit);
             User.getEventNotifier().addEventListener(LoginEvent.LOGIN, onLogin);
+            User.getEventNotifier().addEventListener(LoginEvent.LOGOUT, onLogout);
             addEventListener(DeleteDataSourceEvent.DELETE_DATA_SOURCE, onDelete);
             addEventListener(UploadConfigEvent.UPLOAD_CONFIG_COMPLETE, uploadConfigComplete);
             messageListener = EIMessageListener.instance();
             BindingUtils.bindProperty(this, "includeGroups", groupInclude, "selected");
+        }
+
+        private function onLogout(event:LoginEvent):void {
+            gotFocus();
         }
 
         private function onLogin(event:LoginEvent):void {
