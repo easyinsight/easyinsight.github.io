@@ -1,5 +1,7 @@
 package com.easyinsight.groups;
 
+import com.easyinsight.analysis.AnalysisStorage;
+import com.easyinsight.datafeeds.FeedStorage;
 import com.easyinsight.goals.GoalTreeNode;
 import com.easyinsight.security.*;
 import com.easyinsight.security.SecurityException;
@@ -11,11 +13,9 @@ import com.easyinsight.users.Account;
 import com.easyinsight.goals.GoalTreeDescriptor;
 import com.easyinsight.goals.GoalStorage;
 import com.easyinsight.core.InsightDescriptor;
+import com.easyinsight.userupload.MyDataTree;
 
-import java.util.List;
-import java.util.Date;
-import java.util.ArrayList;
-import java.util.Calendar;
+import java.util.*;
 import java.sql.Connection;
 import java.sql.SQLException;
 
@@ -109,20 +109,44 @@ public class GroupService {
         }
     }
 
-    public void updateGroup(Group group, List<GroupUser> users) {
+    public void updateGroup(Group group) {
         SecurityUtil.authorizeGroup(group.getGroupID(), Roles.OWNER);
         Connection conn = Database.instance().getConnection();
         try {
             conn.setAutoCommit(false);
             groupStorage.updateGroup(group, conn);
             groupStorage.addGroupAudit(new GroupAuditMessage(SecurityUtil.getUserID(), new Date(), "Group updated", group.getGroupID(), null), conn);
-            List<GroupUser> existingUsers = getUsers(group.getGroupID());
+            conn.commit();
+        } catch (Exception e) {
+            LogClass.error(e);
+            try {
+                conn.rollback();
+            } catch (SQLException e1) {
+                LogClass.error(e1);
+            }
+            throw new RuntimeException(e);
+        } finally {
+            try {
+                conn.setAutoCommit(true);
+            } catch (SQLException e) {
+                LogClass.error(e);
+            }
+            Database.closeConnection(conn);
+        }
+    }
+
+    public void updateGroupUsers(long groupID, List<GroupUser> users) {
+        SecurityUtil.authorizeGroup(groupID, Roles.OWNER);
+        Connection conn = Database.instance().getConnection();
+        try {
+            conn.setAutoCommit(false);
+            List<GroupUser> existingUsers = getUsers(groupID);
             existingUsers.removeAll(users);
             for (GroupUser user : existingUsers) {
-                groupStorage.removeUserFromGroup(user.getUserID(), group.getGroupID(), conn);
+                groupStorage.removeUserFromGroup(user.getUserID(), groupID, conn);
             }
             for (GroupUser user : users) {
-                groupStorage.addUserToGroup(user.getUserID(), group.getGroupID(), user.getRole(), conn);
+                groupStorage.addUserToGroup(user.getUserID(), groupID, user.getRole(), conn);
             }
             conn.commit();
         } catch (Exception e) {
@@ -139,7 +163,7 @@ public class GroupService {
             } catch (SQLException e) {
                 LogClass.error(e);
             }
-            Database.instance().closeConnection(conn);
+            Database.closeConnection(conn);
         }
     }
 
@@ -197,6 +221,61 @@ public class GroupService {
                 throw new RuntimeException();
             }
             groupStorage.addUserToGroup(userID, groupID, role);
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        }
+    }
+
+    public List<FeedDescriptor> getGroupDataSources(long groupID) {
+        try {
+            return new FeedStorage().getDataSourcesForGroup(groupID);
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        }
+    }
+
+    public MyDataTree getFeedAnalysisTree(long groupID) {
+        try {
+            FeedStorage feedStorage = new FeedStorage();
+            List<Object> objects = new ArrayList<Object>();
+
+            Map<Long, FeedDescriptor> descriptorMap = new HashMap<Long, FeedDescriptor>();
+
+            List<FeedDescriptor> groupDataSources = feedStorage.getDataSourcesForGroup(groupID);
+            for (FeedDescriptor groupDescriptor : groupDataSources) {
+                if (!descriptorMap.containsKey(groupDescriptor.getDataFeedID())) {
+                    descriptorMap.put(groupDescriptor.getDataFeedID(), groupDescriptor);
+                }
+            }
+
+            objects.addAll(descriptorMap.values());
+            AnalysisStorage analysisStorage = new AnalysisStorage();
+            Map<Long, List<InsightDescriptor>> analysisDefinitions = new HashMap<Long, List<InsightDescriptor>>();
+
+
+
+            for (InsightDescriptor analysisDefinition : analysisStorage.getReportsForGroup(groupID)) {
+                List<InsightDescriptor> defList = analysisDefinitions.get(analysisDefinition.getDataFeedID());
+                if (defList == null) {
+                    defList = new ArrayList<InsightDescriptor>();
+                    analysisDefinitions.put(analysisDefinition.getDataFeedID(), defList);
+                }
+                defList.add(analysisDefinition);
+            }
+
+            for (FeedDescriptor feedDescriptor : descriptorMap.values()) {
+                List<InsightDescriptor> analysisDefList = analysisDefinitions.remove(feedDescriptor.getDataFeedID());
+                if (analysisDefList == null) {
+                    analysisDefList = new ArrayList<InsightDescriptor>();
+                }
+                feedDescriptor.setChildren(analysisDefList);
+            }
+            for (List<InsightDescriptor> defList : analysisDefinitions.values()) {
+                objects.addAll(defList);
+            }
+            return new MyDataTree(objects, true);
         } catch (Exception e) {
             LogClass.error(e);
             throw new RuntimeException(e);

@@ -2,17 +2,8 @@ package com.easyinsight.datafeeds;
 
 import com.easyinsight.database.Database;
 import com.easyinsight.database.EIConnection;
-import com.easyinsight.datafeeds.basecamp.*;
-import com.easyinsight.datafeeds.custom.CustomDataSource;
 import com.easyinsight.userupload.*;
 import com.easyinsight.analysis.*;
-import com.easyinsight.datafeeds.google.GoogleFeedDefinition;
-import com.easyinsight.datafeeds.salesforce.SalesforceBaseDataSource;
-import com.easyinsight.datafeeds.file.FileBasedFeedDefinition;
-import com.easyinsight.datafeeds.jira.JiraDataSource;
-import com.easyinsight.datafeeds.admin.AdminStatsDataSource;
-import com.easyinsight.datafeeds.gnip.GnipDataSource;
-import com.easyinsight.datafeeds.ganalytics.GoogleAnalyticsDataSource;
 import com.easyinsight.analysis.AnalysisItem;
 import com.easyinsight.email.UserStub;
 import com.easyinsight.groups.GroupDescriptor;
@@ -34,17 +25,6 @@ import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.apache.jcs.JCS;
 import org.apache.jcs.access.exception.CacheException;
-import com.easyinsight.datafeeds.test.TestAlphaDataSource;
-import com.easyinsight.datafeeds.test.TestBetaDataSource;
-import com.easyinsight.datafeeds.test.TestGammaDataSource;
-import com.easyinsight.datafeeds.wesabe.WesabeAccountDataSource;
-import com.easyinsight.datafeeds.wesabe.WesabeTransactionDataSource;
-import com.easyinsight.datafeeds.wesabe.WesabeDataSource;
-import com.easyinsight.datafeeds.cloudwatch.CloudWatchDataSource;
-import com.easyinsight.datafeeds.highrise.HighRiseCompositeSource;
-import com.easyinsight.datafeeds.highrise.HighRiseCompanySource;
-import com.easyinsight.datafeeds.highrise.HighRiseDealSource;
-import com.easyinsight.datafeeds.twitter.TwitterDataSource;
 
 /**
  * User: jboe
@@ -905,6 +885,67 @@ public class FeedStorage {
                     lastDateMap.put(parentSourceID, lastDataTime);
                 } else {
                     long groupID = rs.getLong(15);
+                    FeedDescriptor feedDescriptor = createDescriptor(dataFeedID, feedName, userRole, feedSize, feedType, ownerName, description, attribution, lastDataTime);
+                    feedDescriptor.setGroupSourceID(groupID);
+                    feedDescriptor.setHasSavedCredentials(hasSavedCredentials);
+                    descriptorList.add(feedDescriptor);
+                    feedMap.put(dataFeedID, feedDescriptor);
+                }
+            }
+            for (Map.Entry<Long, Long> sizeEntry : sizeMap.entrySet()) {
+                FeedDescriptor feedDescriptor = feedMap.get(sizeEntry.getKey());
+                if (feedDescriptor != null) {
+                    feedDescriptor.setSize(sizeEntry.getValue());
+                    feedDescriptor.setLastDataTime(lastDateMap.get(sizeEntry.getKey()));
+                }
+            }
+            descriptorList = new ArrayList<FeedDescriptor>(feedMap.values());
+            queryStmt.close();
+        } finally {
+            Database.closeConnection(conn);
+        }
+        return descriptorList;
+    }
+
+    public List<FeedDescriptor> getDataSourcesForGroup(long groupID) throws SQLException {
+        List<FeedDescriptor> descriptorList = new ArrayList<FeedDescriptor>();
+        Connection conn = Database.instance().getConnection();
+        try {
+            PreparedStatement queryStmt = conn.prepareStatement("SELECT DISTINCT DATA_FEED.DATA_FEED_ID, DATA_FEED.FEED_NAME, " +
+                    "FEED_PERSISTENCE_METADATA.SIZE, DATA_FEED.FEED_TYPE, DATA_FEED.ANALYSIS_ID, OWNER_NAME, DESCRIPTION, ATTRIBUTION, ROLE, PUBLICLY_VISIBLE, MARKETPLACE_VISIBLE, FEED_PERSISTENCE_METADATA.LAST_DATA_TIME, PASSWORD_STORAGE.USERNAME," +
+                    "DATA_FEED.PARENT_SOURCE_ID " +
+                    " FROM (upload_policy_groups, DATA_FEED LEFT JOIN FEED_PERSISTENCE_METADATA ON DATA_FEED.DATA_FEED_ID = FEED_PERSISTENCE_METADATA.FEED_ID) LEFT JOIN PASSWORD_STORAGE ON DATA_FEED.DATA_FEED_ID = PASSWORD_STORAGE.DATA_FEED_ID WHERE " +
+                    "upload_policy_groups.group_id = ? AND DATA_FEED.DATA_FEED_ID = UPLOAD_POLICY_GROUPS.FEED_ID");
+            queryStmt.setLong(1, groupID);
+            Map<Long, Long> sizeMap = new HashMap<Long, Long>();
+            Map<Long, FeedDescriptor> feedMap = new HashMap<Long, FeedDescriptor>();
+            Map<Long, Date> lastDateMap = new HashMap<Long, Date>();
+            ResultSet rs = queryStmt.executeQuery();
+            while (rs.next()) {
+                long dataFeedID = rs.getLong(1);
+                String feedName = rs.getString(2);
+                long feedSize = rs.getLong(3);
+                int feedType = rs.getInt(4);
+                String ownerName = rs.getString(6);
+                String description = rs.getString(7);
+                String attribution = rs.getString(8);
+                int userRole = rs.getInt(9);
+                Timestamp lastTime = rs.getTimestamp(12);
+                Date lastDataTime = null;
+                boolean hasSavedCredentials = rs.getString(13) != null;
+                if (lastTime != null) {
+                    lastDataTime = new Date(lastTime.getTime());
+                }
+                Long parentSourceID = rs.getLong(14);
+                if (!rs.wasNull() && parentSourceID > 0) {
+                    Long size = sizeMap.get(parentSourceID);
+                    if (size == null) {
+                        sizeMap.put(parentSourceID, feedSize);
+                    } else {
+                        sizeMap.put(parentSourceID, feedSize + size);
+                    }
+                    lastDateMap.put(parentSourceID, lastDataTime);
+                } else {
                     FeedDescriptor feedDescriptor = createDescriptor(dataFeedID, feedName, userRole, feedSize, feedType, ownerName, description, attribution, lastDataTime);
                     feedDescriptor.setGroupSourceID(groupID);
                     feedDescriptor.setHasSavedCredentials(hasSavedCredentials);

@@ -10,11 +10,9 @@ import com.easyinsight.logging.LogClass;
 import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.users.Credentials;
 
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 import java.util.*;
+import java.util.Date;
 
 /**
  * User: jamesboe
@@ -27,6 +25,21 @@ public class ScorecardStorage {
         try {
             conn.setAutoCommit(false);
             saveScorecardForUser(scorecard, userID, conn);
+            conn.commit();
+        } catch (Exception e) {
+            conn.rollback();
+            throw e;
+        } finally {
+            conn.setAutoCommit(true);
+            Database.closeConnection(conn);
+        }
+    }
+
+    public void saveScorecardForGroup(Scorecard scorecard, long groupID) throws Exception {
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            conn.setAutoCommit(false);
+            saveScorecardForGroup(scorecard, groupID, conn);
             conn.commit();
         } catch (Exception e) {
             conn.rollback();
@@ -71,6 +84,40 @@ public class ScorecardStorage {
         addLinkStmt.close();
     }
 
+    public void saveScorecardForGroup(Scorecard scorecard, long groupID, EIConnection conn) throws Exception {
+        if (scorecard.getScorecardID() == 0) {
+            PreparedStatement insertScorecardStmt = conn.prepareStatement("INSERT INTO SCORECARD (SCORECARD_NAME, GROUP_ID, SCORECARD_ORDER, USER_ID) " +
+                    "VALUES (?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
+            insertScorecardStmt.setString(1, scorecard.getName());
+            insertScorecardStmt.setLong(2, groupID);
+            insertScorecardStmt.setInt(3, scorecard.getScorecardOrder());
+            insertScorecardStmt.setNull(4, Types.BIGINT);
+            insertScorecardStmt.execute();
+            scorecard.setScorecardID(Database.instance().getAutoGenKey(insertScorecardStmt));
+            insertScorecardStmt.close();
+        } else {
+            PreparedStatement updateScorecardStmt = conn.prepareStatement("UPDATE SCORECARD SET SCORECARD_NAME = ?," +
+                    "GROUP_ID = ?, SCORECARD_ORDER = ? WHERE SCORECARD_ID = ?");
+            updateScorecardStmt.setString(1, scorecard.getName());
+            updateScorecardStmt.setLong(2, groupID);
+            updateScorecardStmt.setInt(3, scorecard.getScorecardOrder());
+            updateScorecardStmt.setLong(4, scorecard.getScorecardID());
+            updateScorecardStmt.executeUpdate();
+            updateScorecardStmt.close();
+        }
+        PreparedStatement clearKPILinksStmt = conn.prepareStatement("DELETE FROM SCORECARD_TO_KPI WHERE SCORECARD_ID = ?");
+        clearKPILinksStmt.setLong(1, scorecard.getScorecardID());
+        clearKPILinksStmt.executeUpdate();
+        clearKPILinksStmt.close();
+        PreparedStatement addLinkStmt = conn.prepareStatement("INSERT INTO SCORECARD_TO_KPI (SCORECARD_ID, KPI_ID) VALUES (?, ?)");
+        for (KPI kpi : scorecard.getKpis()) {
+            new KPIStorage().saveKPI(kpi, conn);
+            addLinkStmt.setLong(1, scorecard.getScorecardID());
+            addLinkStmt.setLong(2, kpi.getKpiID());
+            addLinkStmt.execute();
+        }
+        addLinkStmt.close();
+    }
 
     public void deleteScorecard(long scorecardID) throws Exception {
         EIConnection conn = Database.instance().getConnection();
@@ -242,7 +289,7 @@ public class ScorecardStorage {
                         info.setDataSourceName(feedDefinition.getFeedName());
                         info.setType(ScorecardRefreshEvent.DATA_SOURCE_NAME);
                         info.setUserId(userID);
-                        MessageUtils.sendMessage("scorecardUpdates", info);
+                        MessageUtils.sendMessage("generalNotifications", info);
                         dataSource.refreshData(credentials, accountID, new Date(), null);
                     }
                     List<KPI> kpis;
@@ -273,7 +320,7 @@ public class ScorecardStorage {
                     info.setType(ScorecardRefreshEvent.DONE);
                     info.setKpis(kpis);
                     info.setUserId(userID);
-                    MessageUtils.sendMessage("scorecardUpdates", info);
+                    MessageUtils.sendMessage("generalNotifications", info);
                 } catch (Exception e) {
                     LogClass.error(e);
                 }

@@ -8,6 +8,7 @@ import com.easyinsight.datafeeds.*;
 import com.easyinsight.kpi.*;
 import com.easyinsight.logging.LogClass;
 import com.easyinsight.pipeline.HistoryRun;
+import com.easyinsight.security.Roles;
 import com.easyinsight.security.SecurityUtil;
 import com.easyinsight.users.Credentials;
 import com.easyinsight.userupload.UserUploadService;
@@ -63,6 +64,39 @@ public class ScorecardService {
         return new ScorecardList(scorecards, hasData);        
     }
 
+    public ScorecardList getScorecardDescriptorsForGroup(long groupID) {
+        SecurityUtil.authorizeGroup(groupID, Roles.SUBSCRIBER);
+        List<ScorecardDescriptor> scorecards = new ArrayList<ScorecardDescriptor>();
+
+        EIConnection conn = Database.instance().getConnection();
+        try {
+            PreparedStatement queryStmt = conn.prepareStatement("SELECT SCORECARD.scorecard_id, SCORECARD.scorecard_name from " +
+                    "scorecard where scorecard.group_id = ?");
+            queryStmt.setLong(1, groupID);
+            ResultSet rs = queryStmt.executeQuery();
+            while (rs.next()) {
+                long scorecardID = rs.getLong(1);
+                String scorecardName = rs.getString(2);
+                ScorecardDescriptor scorecardDescriptor = new ScorecardDescriptor();
+                scorecardDescriptor.setId(scorecardID);
+                scorecardDescriptor.setName(scorecardName);
+                scorecards.add(scorecardDescriptor);
+            }
+
+        } catch (SQLException e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        } finally {
+            Database.closeConnection(conn);
+        }
+
+        boolean hasData = true;
+        if (scorecards.isEmpty()) {
+            hasData = (new UserUploadService().getFeedAnalysisTree(true, true).getObjects().size() > 0);
+        }
+        return new ScorecardList(scorecards, hasData);
+    }
+
     public ScorecardWrapper getScorecard(long scorecardID, long userID, List<CredentialFulfillment> credentials, boolean forceRefresh) {
         SecurityUtil.authorizeScorecard(scorecardID, userID);
         try {
@@ -87,6 +121,17 @@ public class ScorecardService {
         long userID = SecurityUtil.getUserID();
         try {
             scorecardStorage.saveScorecardForUser(scorecard, userID);
+            return scorecard.getScorecardID();
+        } catch (Exception e) {
+            LogClass.error(e);
+            throw new RuntimeException(e);
+        }
+    }
+
+    public long saveScorecardForGroup(Scorecard scorecard, long groupID) {
+        SecurityUtil.authorizeGroup(groupID, Roles.SUBSCRIBER);
+        try {
+            scorecardStorage.saveScorecardForGroup(scorecard, groupID);
             return scorecard.getScorecardID();
         } catch (Exception e) {
             LogClass.error(e);
@@ -165,26 +210,6 @@ public class ScorecardService {
             Database.closeConnection(conn);
         }
     }
-
-    /*public List<CredentialRequirement> getCredentialsForScorecard(boolean allSources, List<CredentialFulfillment> existingCredentials) {
-
-        // identify the data sources
-        Map<Long, CredentialRequirement> credentialMap = new HashMap<Long, CredentialRequirement>();
-        try {
-            List<Scorecard> scorecards = scorecardStorage.getScorecardsForUser(SecurityUtil.getUserID(), existingCredentials);
-            for (Scorecard scorecard : scorecards) {
-                Set<Long> dataSourceIDs = new HashSet<Long>();
-                for (KPI kpi : scorecard.getKpis()) {
-                    dataSourceIDs.add(kpi.getCoreFeedID());
-                }
-                getCredentialsForDataSources(allSources, existingCredentials, credentialMap, dataSourceIDs);
-            }
-        } catch (Exception e) {
-            LogClass.error(e);
-            throw new RuntimeException(e);
-        }
-        return new ArrayList<CredentialRequirement>(credentialMap.values());
-    }*/
 
     public void getCredentialsForDataSources(boolean allSources, List<CredentialFulfillment> existingCredentials, Map<Long, CredentialRequirement> credentialMap, Set<Long> dataSourceIDs) throws SQLException {
         if (allSources) {
@@ -385,55 +410,4 @@ public class ScorecardService {
         }
         return kpis;
     }
-
-    /*public List<KPIOutcome> refreshValues(boolean allSources, List<CredentialFulfillment> credentialsList) {
-        List<KPIOutcome> kpiValues = new ArrayList<KPIOutcome>();
-        EIConnection conn = Database.instance().getConnection();
-        try {
-            conn.setAutoCommit(false);
-            List<Scorecard> scorecards = scorecardStorage.getScorecardsForUser(SecurityUtil.getUserID(), conn, credentialsList);
-            for (Scorecard scorecard : scorecards) {
-                Set<Long> dataSourceIDs = new HashSet<Long>();
-                if (allSources) {
-                    for (KPI kpi : scorecard.getKpis()) {
-                        dataSourceIDs.add(kpi.getCoreFeedID());
-                    }
-                    for (Long dataSourceID : dataSourceIDs) {
-                        FeedDefinition feedDefinition = new FeedStorage().getFeedDefinitionData(dataSourceID, conn);
-                        if (feedDefinition.getCredentialsDefinition() == CredentialsDefinition.STANDARD_USERNAME_PW) {
-                            IServerDataSourceDefinition dataSource = (IServerDataSourceDefinition) feedDefinition;
-                            Credentials credentials = null;
-                            for (CredentialFulfillment fulfillment : credentialsList) {
-                                if (fulfillment.getDataSourceID() == feedDefinition.getDataFeedID()) {
-                                    credentials = fulfillment.getCredentials();
-                                }
-                            }
-                            if (credentials != null && credentials.isEncrypted()) {
-                                credentials = credentials.decryptCredentials();
-                            }
-                            dataSource.refreshData(credentials, SecurityUtil.getAccountID(), new Date(), null);
-                        }
-                    }
-                }
-                for (KPI kpi : scorecard.getKpis()) {
-                    KPIOutcome kpiValue = refreshKPIValue(kpi, credentialsList, conn);
-                    kpiValue.setKpiID(kpi.getKpiID());
-                    kpiValues.add(kpiValue);
-                    new KPIStorage().saveKPIOutcome(kpi.getKpiID(), kpiValue.getOutcomeValue(), kpiValue.getPreviousValue(),
-                            kpiValue.getEvaluationDate(), kpiValue.getOutcomeState(), kpiValue.getDirection(), kpiValue.isProblemEvaluated(),
-                            kpiValue.getPercentChange(), kpiValue.isDirectional(),
-                            conn);
-                }
-            }
-            conn.commit();
-        } catch (Exception e) {
-            LogClass.error(e);
-            conn.rollback();
-            throw new RuntimeException(e);
-        } finally {
-            conn.setAutoCommit(true);
-            Database.closeConnection(conn);
-        }
-        return kpiValues;
-    }*/
 }

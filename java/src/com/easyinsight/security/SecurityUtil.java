@@ -159,9 +159,22 @@ public class SecurityUtil {
             queryStmt.setLong(1, scorecardID);
             ResultSet rs = queryStmt.executeQuery();
             if (rs.next()) {
+
                 long scorecardUserID = rs.getLong(1);
-                if (scorecardUserID != userID) {
-                    throw new SecurityException();
+                if (scorecardUserID == 0) {
+                    PreparedStatement queryGroupStmt = conn.prepareStatement("SELECT GROUP_TO_USER_JOIN.group_to_user_join_id FROM " +
+                            "SCORECARD, GROUP_TO_USER_JOIN WHERE SCORECARD.group_id = GROUP_TO_USER_JOIN.group_id AND " +
+                            "GROUP_TO_USER_JOIN.user_id = ? AND scorecard.scorecard_id = ?");
+                    queryGroupStmt.setLong(1, userID);
+                    queryGroupStmt.setLong(2, scorecardID);
+                    ResultSet groupRS = queryGroupStmt.executeQuery();
+                    if (!groupRS.next()) {
+                        throw new SecurityException();
+                    }
+                } else {
+                    if (scorecardUserID != userID) {
+                        throw new SecurityException();
+                    }
                 }
             } else {
                 throw new SecurityException();

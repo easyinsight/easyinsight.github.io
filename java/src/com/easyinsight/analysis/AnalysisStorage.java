@@ -590,4 +590,22 @@ public class AnalysisStorage {
         }
         return reports;
     }
+
+    public List<InsightDescriptor> getReportsForGroup(long groupID) throws SQLException {
+        List<InsightDescriptor> reports = new ArrayList<InsightDescriptor>();
+        Connection conn = Database.instance().getConnection();
+        try {
+            PreparedStatement queryStmt = conn.prepareStatement("select analysis.analysis_id, analysis.title, analysis.data_feed_id, analysis.report_type " +
+                    "from group_to_insight, analysis where " +
+                        "group_to_insight.group_id = ? and group_to_insight.insight_id = analysis.analysis_id");
+            queryStmt.setLong(1, groupID);
+            ResultSet rs = queryStmt.executeQuery();
+            while (rs.next()) {
+                reports.add(new InsightDescriptor(rs.getLong(1), rs.getString(2), rs.getLong(3), rs.getInt(4)));
+            }
+        } finally {
+            Database.closeConnection(conn);
+        }
+        return reports;
+    }
 }

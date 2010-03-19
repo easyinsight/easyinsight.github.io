@@ -229,11 +229,11 @@ public abstract class CompositeServerDataSource extends CompositeFeedDefinition 
             allItems.addAll(source.getFields());
         }
         
-        notifyOfDataUpdate();
+        //notifyOfDataUpdate();
         return false;
     }
 
-    private void notifyOfDataUpdate() {
+    /*private void notifyOfDataUpdate() {
         MessageBroker msgBroker = MessageBroker.getMessageBroker(null);
         String clientID = UUIDUtils.createUUID();
         AsyncMessage msg = new AsyncMessage();
@@ -244,7 +244,7 @@ public abstract class CompositeServerDataSource extends CompositeFeedDefinition 
         if (msgBroker != null) {
             msgBroker.routeMessageToService(msg, null);
         }
-    }
+    }*/
 
     public String retrievePassword() {
         return password;
