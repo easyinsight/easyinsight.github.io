@@ -1,0 +1,175 @@
+<?xml version="1.0" ?>
+<mx:HBox xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:groups="com.easyinsight.groups.*" width="100%">
+    <mx:Script><![CDATA[
+        import com.easyinsight.genredata.AnalyzeEvent;
+        import com.easyinsight.listing.AnalyzeSource;
+        import com.easyinsight.listing.DataFeedDescriptor;
+        import com.easyinsight.listing.DescriptorAnalyzeSource;
+        import com.easyinsight.listing.MyDataTree;
+        import com.easyinsight.report.ReportAnalyzeSource;
+        import com.easyinsight.reportpackage.ReportPackageDescriptor;
+        import com.easyinsight.solutions.InsightDescriptor;
+        import com.easyinsight.util.PopUpUtil;
+
+        import mx.collections.ArrayCollection;
+        import mx.collections.HierarchicalData;
+        import mx.collections.ICollectionView;
+        import mx.collections.Sort;
+        import mx.events.ListEvent;
+        import mx.managers.PopUpManager;
+        import mx.utils.ObjectUtil;
+
+        [Bindable]
+        private var displayTreeData:ArrayCollection;
+        private var sourceTreeData:ArrayCollection;
+
+        private var _groupID:int;
+
+        public function set groupID(value:int):void {
+            _groupID = value;
+        }
+
+        public function gotFocus():void {
+            groupService.getFeedAnalysisTree.send(_groupID);
+        }
+
+        private function gotFeedAnalysisTree():void {
+
+            var sort:Sort = ICollectionView(uploadGrid.dataProvider).sort;
+            var myDataTree:MyDataTree = groupService.getFeedAnalysisTree.lastResult as MyDataTree;
+            if (myDataTree.objects.length == 0) {
+                currentState = "noData";
+            } else {
+                currentState = "";
+            }
+            sourceTreeData = myDataTree.objects;
+            displayTreeData = new ArrayCollection(sourceTreeData.toArray());
+            var hierarchicalData:HierarchicalData = new HierarchicalData();
+            hierarchicalData.source = displayTreeData;
+            uploadGrid.dataProvider = hierarchicalData;
+            displayTreeData.sort = sort;
+            displayTreeData.refresh();
+        }
+
+        private function gridDoubleClick(event:ListEvent):void {
+            var analyzeSource:AnalyzeSource = null;
+            var selectedObject:Object = event.currentTarget.selectedItem;
+            if (selectedObject is DataFeedDescriptor) {
+                var descriptor:DataFeedDescriptor = selectedObject as DataFeedDescriptor;
+                analyzeSource = new DescriptorAnalyzeSource(descriptor.dataFeedID, descriptor.name);
+                dispatchEvent(new AnalyzeEvent(analyzeSource));
+            } else {
+                analyzeSource = new ReportAnalyzeSource(InsightDescriptor(selectedObject));
+                dispatchEvent(new AnalyzeEvent(analyzeSource));
+
+            }
+        }
+
+        [Bindable]
+        [Embed(source="../../../../assets/data_blue_x16.png")]
+        public var listIcon:Class;
+
+        [Bindable]
+        [Embed(source="../../../../assets/package.png")]
+        public var packageIcon:Class;
+
+        [Bindable]
+        [Embed(source="../../../../assets/chart_column.png")]
+        public var crosstabIcon:Class;
+
+        private function simpleIconFunction(item:Object):Class {
+            if (item is DataFeedDescriptor) {
+                return listIcon;
+            } else if (item is InsightDescriptor) {
+                return crosstabIcon;
+            } else if (item is ReportPackageDescriptor) {
+                return packageIcon;
+            }
+            return null;
+        }
+
+        private function customSort(obj1:Object, obj2:Object):int {
+            if (obj1 is DataFeedDescriptor && obj2 is DataFeedDescriptor) {
+                var date1:Date = DataFeedDescriptor(obj1).lastDataTime;
+                var date2:Date = DataFeedDescriptor(obj2).lastDataTime;
+                return ObjectUtil.dateCompare(date1, date2);
+            }
+            if (dataColumn.sortDescending) {
+                return -1;
+            } else {
+                return 1;
+            }
+        }
+
+        private function addReport():void {
+            var window:AddReportToGroupWindow = new AddReportToGroupWindow();
+            window.groupID = _groupID;
+            window.addEventListener(GroupRefreshEvent.GROUP_REFRESH, onGroupRefresh);
+            PopUpManager.addPopUp(window, this, true);
+            PopUpUtil.centerPopUp(window);
+        }
+
+        private function addDataSource():void {
+            var window:AddDataSourceToGroupWindow = new AddDataSourceToGroupWindow();
+            window.groupID = _groupID;
+            window.addEventListener(GroupRefreshEvent.GROUP_REFRESH, onGroupRefresh);
+            PopUpManager.addPopUp(window, this, true);
+            PopUpUtil.centerPopUp(window);
+        }
+
+        private function onGroupRefresh(event:GroupRefreshEvent):void {
+            gotFocus();
+        }
+
+        [Bindable]
+        [Embed(source="../../../../assets/prototype/ReverseGray.jpg")]
+        private var backgroundImage:Class;
+
+        private var _groupAdmin:Boolean;
+
+        [Bindable(event="groupAdminChanged")]
+        public function get groupAdmin():Boolean {
+            return _groupAdmin;
+        }
+
+        public function set groupAdmin(value:Boolean):void {
+            if (_groupAdmin == value) return;
+            _groupAdmin = value;
+            dispatchEvent(new Event("groupAdminChanged"));
+        }]]></mx:Script>
+    <mx:RemoteObject destination="groupService" id="groupService">
+        <mx:method name="getFeedAnalysisTree" result="gotFeedAnalysisTree()"/>
+    </mx:RemoteObject>
+    <groups:GroupDataControlsFactory id="controlsFactory" groupAdmin="{groupAdmin}"/>
+    <mx:VBox>
+        <mx:Box width="100%" horizontalAlign="center" backgroundImage="{backgroundImage}" backgroundSize="100%"
+                paddingTop="5"
+                paddingBottom="5">
+            <mx:Label text="Group Data" fontSize="20" fontFamily="Tahoma" fontWeight="bold" color="#FFFFFF"/>
+        </mx:Box>
+        <mx:AdvancedDataGrid width="800" height="100%" id="uploadGrid" allowMultipleSelection="true" fontSize="12"
+                             itemDoubleClick="gridDoubleClick(event)" headerStyleName="BlueHeader"
+                             iconFunction="simpleIconFunction">
+            <mx:dataProvider>
+                <mx:HierarchicalData source="{displayTreeData}"/>
+            </mx:dataProvider>
+            <mx:columns>
+                <mx:AdvancedDataGridColumn headerText="Name" dataField="name"/>
+                <mx:AdvancedDataGridColumn id="dataColumn" headerText="Last Data Time" dataField="lastDataTime"
+                                           width="140" itemRenderer="com.easyinsight.listing.MyDataLastDataLabel"
+                                           sortCompareFunction="customSort"/>
+                <mx:AdvancedDataGridColumn width="200" headerText="" dataField="name" sortable="false"
+                                           itemRenderer="{controlsFactory}"/>
+            </mx:columns>
+        </mx:AdvancedDataGrid>
+    </mx:VBox>
+    <mx:VBox paddingRight="0" paddingTop="25">
+        <mx:Label text="Group Data Controls" fontSize="13" fontWeight="bold" paddingRight="0"/>
+        <mx:HRule width="100%"/>
+        <mx:LinkButton label="Add data source..." color="#333333" fontSize="12" paddingLeft="0" paddingRight="0"
+                       click="addDataSource()"/>
+        <mx:LinkButton label="Add a report..." color="#333333" fontSize="12" paddingLeft="0" paddingRight="0"
+                       click="addReport()"/>
+    </mx:VBox>
+
+</mx:HBox>

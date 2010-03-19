@@ -24,7 +24,7 @@
     <mx:HBox horizontalAlign="center" width="100%" height="100%" backgroundColor="#818285" id="core">
         <mx:VBox width="1000" backgroundColor="#FFFFFF" height="100%" paddingTop="10" paddingLeft="5" paddingRight="5"
                  id="scorecardBox">
-            <scorecard:ScorecardDisplay id="scorecardDisplay" noData="currentState='noData'" gotData="currentState=''"/>
+            <scorecard:ScorecardUserDisplay id="scorecardDisplay" noData="currentState='noData'" gotData="currentState=''"/>
         </mx:VBox>
     </mx:HBox>
 </mx:VBox>

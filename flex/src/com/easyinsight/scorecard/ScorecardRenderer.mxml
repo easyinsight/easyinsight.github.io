@@ -7,6 +7,7 @@
     </mx:Metadata>
     <mx:Script><![CDATA[
         import com.easyinsight.framework.CredentialsCache;
+        import com.easyinsight.framework.EIMessageListener;
         import com.easyinsight.kpi.KPI;
         import com.easyinsight.kpi.KPIEvent;
         import com.easyinsight.kpi.KPIParentWindow;
@@ -18,8 +19,6 @@
         import mx.controls.TextArea;
         import mx.events.CollectionEvent;
         import mx.managers.PopUpManager;
-        import mx.messaging.Consumer;
-        import mx.messaging.events.MessageEvent;
 
         private var _scorecardDescriptor:ScorecardDescriptor;
 
@@ -41,17 +40,6 @@
 
             forcedRefresh = false;
             if (!_tutorialMode) {
-
-                try {
-                    if (consumer == null) {
-                        consumer = new Consumer();
-                        consumer.destination = "scorecardUpdates";
-                        consumer.addEventListener(MessageEvent.MESSAGE, onMessage);
-                        consumer.subscribe();
-                    }
-                } catch(e:Error) {
-                    trace(e.message);                                           
-                }
                 if (_scorecard == null) {
                     baseIndex = 0;
                     scorecardService.getScorecard.send(_scorecardDescriptor.id, CredentialsCache.getCache().createCredentials(), false);
@@ -75,7 +63,7 @@
         private var _configurationMode:Boolean;
 
         [Bindable]
-        private var controlFactory:KPIControlFactory = new KPIControlFactory(0);
+        private var controlFactory:KPIControlFactory = new KPIControlFactory(0, 0);
 
         [Bindable]
         private var kpiNameFactory:KPINameFactory = new KPINameFactory();
@@ -136,34 +124,26 @@
             }
             kpis = _scorecard.kpis;
             kpis.addEventListener(CollectionEvent.COLLECTION_CHANGE, onKPIChange);
-            controlFactory = new KPIControlFactory(_scorecard.scorecardID);
+            controlFactory = new KPIControlFactory(_scorecard.scorecardID, _groupID);
             determineIndex();
             invalidateSize();
         }
 
-        private function onMessage(event:MessageEvent):void {
-            if (event.message.body is ScorecardAsyncEvent) {
-                var scorecardEvent:ScorecardAsyncEvent = event.message.body as ScorecardAsyncEvent;
-                if (scorecardEvent.scorecardID == _scorecard.scorecardID) {
-                    if (scorecardEvent.type == ScorecardAsyncEvent.NAME_UPDATE) {
-                        asyncMessage = "Synchronizing with the latest data from " + scorecardEvent.dataSourceName + "...";
-                    } else {
-                        kpis = scorecardEvent.kpis;
-                        kpis.addEventListener(CollectionEvent.COLLECTION_CHANGE, onKPIChange);
-                        refreshIndex = 0;
-                        /*consumer.removeEventListener(MessageEvent.MESSAGE, onMessage);
-                         consumer.disconnect();
-                         consumer = null;
-                         */
-                    }
+        private function onMessage(event:ScorecardMessageEvent):void {
+            var scorecardEvent:ScorecardAsyncEvent = event.scorecardAsyncEvent;
+            if (scorecardEvent.scorecardID == _scorecard.scorecardID) {
+                if (scorecardEvent.type == ScorecardAsyncEvent.NAME_UPDATE) {
+                    asyncMessage = "Synchronizing with the latest data from " + scorecardEvent.dataSourceName + "...";
+                } else {
+                    kpis = scorecardEvent.kpis;
+                    kpis.addEventListener(CollectionEvent.COLLECTION_CHANGE, onKPIChange);
+                    refreshIndex = 0;
                 }
             }
         }
 
         [Bindable]
         private var asyncMessage:String;
-
-        private var consumer:Consumer;
 
         public function set scorecard(value:Scorecard):void {
             _scorecard = value;
@@ -174,7 +154,7 @@
             _scorecardDescriptor = desc;
             kpis = _scorecard.kpis;
             kpis.addEventListener(CollectionEvent.COLLECTION_CHANGE, onKPIChange);
-            controlFactory = new KPIControlFactory(_scorecard.scorecardID);
+            controlFactory = new KPIControlFactory(_scorecard.scorecardID, _groupID);
             baseIndex = 2;
             invalidateSize();
         }
@@ -193,6 +173,7 @@
             addEventListener(KPIEvent.KPI_EDITED, onKPIEdit);
             addEventListener(KPIEvent.KPI_ADDED, addedKPI);
             addEventListener(KPIEvent.KPI_REMOVED, onKPIDelete);
+            EIMessageListener.instance().addEventListener(ScorecardMessageEvent.SCORECARD_MESSAGE, onMessage);
             BindingUtils.bindProperty(kpiNameFactory, "contextMenuAvailable", this, "contextMenuAvailable");
         }
 
@@ -211,9 +192,20 @@
 
         }
 
+        private var _groupID:int;
+
+        public function get groupID():int {
+            return _groupID;
+        }
+
+        public function set groupID(value:int):void {
+            _groupID = value;
+        }
+
         public function addKPI():void {
             var kpiWindow:KPIParentWindow = new KPIParentWindow();
             kpiWindow.scorecardID = _scorecard.scorecardID;
+            kpiWindow.groupID = _groupID;
             kpiWindow.addEventListener(KPIEvent.KPI_ADDED, addedKPI);
             PopUpManager.addPopUp(kpiWindow, this, true);
             PopUpUtil.centerPopUpWithY(kpiWindow, 20);

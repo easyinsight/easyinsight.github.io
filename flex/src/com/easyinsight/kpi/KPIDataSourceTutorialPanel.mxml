@@ -10,7 +10,6 @@
         import mx.collections.ArrayCollection;
         import mx.collections.Sort;
         import mx.collections.SortField;
-        import mx.controls.Alert;
 
         [Bindable]
         private var descriptors:ArrayCollection;
@@ -18,13 +17,25 @@
         [Bindable]
         private var dataSource:DataFeedDescriptor;
 
+        [Bindable]
+        private var _groupID:int;
+
+
+        public function set groupID(value:int):void {
+            _groupID = value;
+        }
+
         public function gotFocus():void {
             if (kpiData.dataSourceID > 0) {
                 dataSource = new DataFeedDescriptor();
                 dataSource.dataFeedID = kpiData.dataSourceID;
                 dataSource.name = kpiData.dataSourceName;
             }
-            dataProvider.searchForSubscribedFeeds.send();
+            if (_groupID == 0) {
+                dataProvider.searchForSubscribedFeeds.send();
+            } else {
+                groupService.getGroupDataSources.send(_groupID);
+            }
         }
 
         public function validate():Boolean {
@@ -51,10 +62,30 @@
                 }
             }
         }
+
+        private function gotDataSources():void {
+            descriptors = groupService.getGroupDataSources.lastResult as ArrayCollection;
+            var sort:Sort = new Sort();
+            var sortField:SortField = new SortField("name");
+            sort.fields = [ sortField ];
+            descriptors.sort = sort;
+            descriptors.refresh();
+            if (dataSource != null) {
+                for each (var desc:DataFeedDescriptor in descriptors) {
+                    if (desc.dataFeedID == dataSource.dataFeedID) {
+                        dataSource = desc;
+                        break;
+                    }
+                }
+            }
+        }
         ]]></mx:Script>
     <mx:RemoteObject id="dataProvider" destination="feeds">
-            <mx:method name="searchForSubscribedFeeds" result="gotFeeds()"/>
-        </mx:RemoteObject>
+        <mx:method name="searchForSubscribedFeeds" result="gotFeeds()"/>
+    </mx:RemoteObject>
+    <mx:RemoteObject id="groupService" destination="groupService">
+        <mx:method name="getGroupDataSources" result="gotDataSources()"/>
+    </mx:RemoteObject>
     <mx:VBox width="100%" height="100%" verticalGap="0">
         <mx:Box height="50%" width="100%"  backgroundColor="#000000" horizontalAlign="center" verticalAlign="middle">
             <mx:Text text="Where is the data for the KPI?" fontSize="24" color="#FFFFFF"/>

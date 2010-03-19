@@ -9,7 +9,13 @@
         [Bindable]
         private var _scorecardID:int;
         [Bindable]
+        private var _groupID:int;
+        [Bindable]
         private var _kpi:KPI;
+
+        public function set groupID(value:int):void {
+            _groupID = value;
+        }
 
         private function determineEditor():void {
             if (User.getSharedObject() != null) {
@@ -61,8 +67,10 @@
     <mx:ViewStack selectedIndex="{stackIndex}" resizeToContent="true" width="100%" height="100%">
         <mx:Box/>
         <kpi:KPIWizard kpi="{_kpi}" scorecardID="{_scorecardID}" kpiAdded="onKPIEvent(event)" kpiEdited="onKPIEvent(event)"
-               expertMode="toExpertMode()" width="100%" height="100%" kpiCancel="PopUpManager.removePopUp(this)"/>
+               expertMode="toExpertMode()" width="100%" height="100%" kpiCancel="PopUpManager.removePopUp(this)"
+                groupID="{_groupID}"/>
         <kpi:KPIWindow kpi="{_kpi}" scorecardID="{_scorecardID}" kpiAdded="onKPIEvent(event)" kpiEdited="onKPIEvent(event)"
-                wizardMode="toWizardMode()" width="100%" height="100%" kpiCancel="PopUpManager.removePopUp(this)"/>
+                wizardMode="toWizardMode()" width="100%" height="100%" kpiCancel="PopUpManager.removePopUp(this)"
+                groupID="{_groupID}"/>
     </mx:ViewStack>
 </util:EITitleWindow>

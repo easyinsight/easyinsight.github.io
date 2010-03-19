@@ -678,6 +678,7 @@
             removeEventListener(DeleteAnalysisItemEvent.DELETE_ANALYSIS_ITEM, onFieldDelete);
             removeEventListener(HierarchyDrilldownEvent.DRILLDOWN, childFilterCreation);
             removeEventListener(HierarchyRollupEvent.HIERARCHY_ROLLUP, onRollup);
+            reportMetadataTab.cleanup();
             if (dataService != null) {
                 dataService.removeEventListener(DataServiceLoadingEvent.LOADING_STARTED, startLoading);
                 dataService.removeEventListener(DataServiceLoadingEvent.LOADING_STOPPED, stopLoading);

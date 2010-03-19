@@ -42,6 +42,13 @@
         [Bindable]
         private var descriptors:ArrayCollection;
 
+
+        private var _groupID:int;
+
+        public function set groupID(value:int):void {
+            _groupID = value;
+        }
+
         [Bindable]
         private var dataSource:DataFeedDescriptor;
 
@@ -195,11 +202,28 @@
                     transformContainer.addFilterDefinition(filter);
                 }
             }
-            dataProvider.searchForSubscribedFeeds.send();            
+            dataProvider.searchForSubscribedFeeds.send();
         }
 
         private function gotFeeds():void {
             descriptors = dataProvider.searchForSubscribedFeeds.lastResult as ArrayCollection;
+            var sort:Sort = new Sort();
+            var sortField:SortField = new SortField("name");
+            sort.fields = [ sortField ];
+            descriptors.sort = sort;
+            descriptors.refresh();
+            if (dataSource != null) {
+                for each (var desc:DataFeedDescriptor in descriptors) {
+                    if (desc.dataFeedID == dataSource.dataFeedID) {
+                        dataSource = desc;
+                        break;
+                    }
+                }
+            }
+        }
+
+        private function gotDataSources():void {
+            descriptors = groupService.getGroupDataSources.lastResult as ArrayCollection;
             var sort:Sort = new Sort();
             var sortField:SortField = new SortField("name");
             sort.fields = [ sortField ];
@@ -436,6 +460,9 @@
     </mx:RemoteObject>
     <mx:RemoteObject id="dataProvider" destination="feeds">
         <mx:method name="searchForSubscribedFeeds" result="gotFeeds()"/>
+    </mx:RemoteObject>
+    <mx:RemoteObject id="groupService" destination="groupService">
+        <mx:method name="getGroupDataSources" result="gotDataSources()"/>
     </mx:RemoteObject>
     <mx:RemoteObject destination="kpiService" id="kpiService">
         <mx:method name="saveKPI" result="savedKPI()"/>

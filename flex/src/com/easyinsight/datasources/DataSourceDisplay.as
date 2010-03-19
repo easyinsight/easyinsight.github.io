@@ -1,7 +1,9 @@
 package com.easyinsight.datasources {
 import com.easyinsight.analysis.IRetrievable;
 import com.easyinsight.framework.CredentialsCache;
+import com.easyinsight.framework.EIMessageListener;
 import com.easyinsight.scorecard.DataSourceAsyncEvent;
+import com.easyinsight.scorecard.DataSourceMessageEvent;
 import com.easyinsight.util.AutoSizeTextArea;
 
 import flash.events.Event;
@@ -19,8 +21,6 @@ import mx.controls.Label;
 import mx.controls.ProgressBar;
 import mx.controls.TextArea;
 import mx.formatters.DateFormatter;
-import mx.messaging.Consumer;
-import mx.messaging.events.MessageEvent;
 import mx.rpc.events.ResultEvent;
 import mx.rpc.remoting.RemoteObject;
 
@@ -31,13 +31,16 @@ public class DataSourceDisplay extends VBox {
 
     private var _labelText:String;
 
-    private var consumer:Consumer;
-
     private var feedService:RemoteObject;
 
     public function DataSourceDisplay() {
         super();
         setStyle("horizontalAlign", "center");
+        EIMessageListener.instance().addEventListener(DataSourceMessageEvent.DATA_SOURCE_MESSAGE, onMessage);
+    }
+
+    public function cleanup():void {
+        EIMessageListener.instance().removeEventListener(DataSourceMessageEvent.DATA_SOURCE_MESSAGE, onMessage);
     }
 
     private var _dataView:IRetrievable;
@@ -166,25 +169,13 @@ public class DataSourceDisplay extends VBox {
         stackIndex = 1;
     }
 
-    private function createConsumer():void {
-        consumer = new Consumer();
-        consumer.destination = "generalNotifications";
-        consumer.addEventListener(MessageEvent.MESSAGE, onMessage);
-        consumer.subscribe();
-    }
-
-    private function onMessage(event:MessageEvent):void {
-        if (event.message.body is DataSourceAsyncEvent) {
-            var scorecardEvent:DataSourceAsyncEvent = event.message.body as DataSourceAsyncEvent;
-            if (scorecardEvent.dataSourceID == _dataSource.dataSourceID) {
-                if (scorecardEvent.type == DataSourceAsyncEvent.NAME_UPDATE) {
-                    asyncLabel = "Synchronizing with the latest data from " + scorecardEvent.dataSourceName + "...";
-                } else {
-                    stackIndex = 3;
-                    consumer.removeEventListener(MessageEvent.MESSAGE, onMessage);
-                    consumer.disconnect();
-                    consumer = null; 
-                }
+    private function onMessage(event:DataSourceMessageEvent):void {
+        var scorecardEvent:DataSourceAsyncEvent = event.dataSourceAsyncEvent;
+        if (scorecardEvent.dataSourceID == _dataSource.dataSourceID) {
+            if (scorecardEvent.type == DataSourceAsyncEvent.NAME_UPDATE) {
+                asyncLabel = "Synchronizing with the latest data from " + scorecardEvent.dataSourceName + "...";
+            } else {
+                stackIndex = 3;
             }
         }
     }
@@ -204,7 +195,6 @@ public class DataSourceDisplay extends VBox {
 
     private function onClick(event:MouseEvent):void {
         stackIndex = 2;
-
         feedService = new RemoteObject();
         feedService.destination = "feeds";
         feedService.launchAsyncRefresh.addEventListener(ResultEvent.RESULT, onResult);
@@ -213,9 +203,7 @@ public class DataSourceDisplay extends VBox {
 
     private function onResult(event:ResultEvent):void {
         var credentials:ArrayCollection = feedService.launchAsyncRefresh.lastResult as ArrayCollection;
-        if (credentials.length == 0) {
-            createConsumer();
-        } else {
+        if (credentials.length > 0) {
             CredentialsCache.getCache().obtainCredentials(this, credentials, onSuccess);
         }
     }

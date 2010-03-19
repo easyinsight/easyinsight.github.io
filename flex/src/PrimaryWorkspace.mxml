@@ -182,7 +182,7 @@
         }
 
         private function parseURL(event:Event):void {            
-            var o:Object = URLUtil.stringToObject(browserManager.fragment, "&");
+            var o:Object = URLUtil.stringToObject(browserManager.fragment, "&");            
             if (currentFragment != browserManager.fragment) {
                 currentFragment = browserManager.fragment;
                 parseFragmentObject(o);

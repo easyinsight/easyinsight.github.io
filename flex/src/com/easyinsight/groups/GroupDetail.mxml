@@ -1,43 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 <mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:util="com.easyinsight.util.*"
-         xmlns:listing="com.easyinsight.listing.*" width="100%" height="100%"
+         xmlns:listing="com.easyinsight.listing.*" xmlns:scorecards="com.easyinsight.scorecard.*" width="100%"
+         height="100%"
          implements="com.easyinsight.listing.IPerspective"
          xmlns:groups="com.easyinsight.groups.*" xmlns:discussion="com.easyinsight.discussion.*"
-        creationComplete="setup()">
-    <mx:states>
-        <mx:State name="Discussion">
-            <mx:RemoveChild target="{groupAttributesBox}"/>
-        </mx:State>
-        <mx:State name="SearchState">
-            <mx:RemoveChild target="{sourcesBox}"/>
-            <mx:AddChild relativeTo="{primaryCanvas}">
-                <listing:CatalogListing id="catalogListing" returnToStore="navigateToHome(event)"/>
-            </mx:AddChild>
-        </mx:State>
-        <mx:State name="AnalysisSearchState">
-            <mx:RemoveChild target="{sourcesBox}"/>
-            <mx:AddChild relativeTo="{primaryCanvas}">
-                <listing:CatalogAnalysisListing id="analysisCatalogListing" returnToStore="navigateToHome(event)"/>
-            </mx:AddChild>
-        </mx:State>
-    </mx:states>
-    <mx:transitions>
-        <mx:Transition id="toDiscussion" fromState="*" toState="Discussion">
-            <mx:Sequence targets="{[groupAttributesBox, discussionBox]}">
-                <mx:RemoveChildAction/>
-                <mx:Resize target="{discussionBox}"/>
-            </mx:Sequence>
-        </mx:Transition>
-    </mx:transitions>
+         creationComplete="setup()" xmlns:viewStackEffects="org.efflex.mx.viewStackEffects.*">
     <mx:Script>
 		<![CDATA[
         import com.easyinsight.discussion.MessagePostedEvent;
         import com.easyinsight.discussion.NewMessageWindow;
-
+        import com.easyinsight.listing.DataFeedDescriptor;
+        import com.easyinsight.listing.DeleteDataSourceEvent;
+        import com.easyinsight.reportpackage.ReportPackageDescriptor;
+        import com.easyinsight.solutions.InsightDescriptor;
         import com.easyinsight.util.PopUpUtil;
         import com.easyinsight.util.ProgressAlert;
 
         import mx.controls.Alert;
+        import mx.effects.Effect;
+        import mx.events.CloseEvent;
         import mx.managers.BrowserManager;
         import mx.managers.PopUpManager;
 
@@ -46,9 +27,6 @@
 
         import mx.collections.ArrayCollection;
 
-        import com.easyinsight.genredata.ChildSearchEvent;
-        import com.easyinsight.listing.CatalogNavigationEvent;
-        import com.easyinsight.listing.AnalyzeSource;
         import com.easyinsight.framework.NavigationEvent;
 
         import mx.utils.URLUtil;
@@ -129,6 +107,7 @@
         [Bindable]
         private var goalTrees:ArrayCollection;
 
+        [Bindable]
         private var _group:Group;
 
         [Bindable]
@@ -144,41 +123,62 @@
             addEventListener(RemoveItemFromGroupEvent.REMOVE_REPORT_FROM_GROUP, removeFromGroup);
             addEventListener(RemoveItemFromGroupEvent.REMOVE_GOAL_TREE_FROM_GROUP, removeFromGroup);
             addEventListener(RemoveItemFromGroupEvent.REMOVE_GOAL_FROM_GROUP, removeFromGroup);
+            addEventListener(DeleteDataSourceEvent.DELETE_DATA_SOURCE, onDelete);
         }
 
-        private function onSearchAnalysis(event:ChildSearchEvent):void {
-            var analysisDefs:ArrayCollection = event.items;
-            currentState = "AnalysisSearchState";
-            analysisCatalogListing.insightDescriptors = analysisDefs;
+        private function onDelete(event:DeleteDataSourceEvent):void {
+            deleteItem(event.descriptor);
         }
 
-        private function onSearchFeed(event:ChildSearchEvent):void {
-            var dataProviderDescriptors:ArrayCollection = event.items;
-            currentState = "SearchState";
-            catalogListing.dataFeeds = dataProviderDescriptors;
+        private function deleteItem(selectedItem:Object):void {
+            this.selectedItem = selectedItem;
+            if (selectedItem is DataFeedDescriptor) {
+                Alert.show("Are you sure you want to remove this data source from the group?", "Alert",
+                        Alert.OK | Alert.CANCEL, this, alertFeedListener, null, Alert.CANCEL);
+            } else if (selectedItem is InsightDescriptor) {
+                Alert.show("Are you sure you want to remove this report from the group?.", "Alert",
+                        Alert.OK | Alert.CANCEL, this, alertInsightListener, null, Alert.CANCEL);
+            } else if (selectedItem is ReportPackageDescriptor) {
+                Alert.show("Are you sure you want to remove this package from the group?", "Alert",
+                        Alert.OK | Alert.CANCEL, this, alertPackageListener, null, Alert.CANCEL);
+            }
         }
 
-        private function navigateToHome(event:CatalogNavigationEvent):void {
-            currentState = "";
+        private var selectedItem:Object;
+
+         private function alertFeedListener(event:CloseEvent):void {
+            if (event.detail == Alert.OK) {
+                var feedDescriptor:DataFeedDescriptor = selectedItem as DataFeedDescriptor;
+                ProgressAlert.alert(this, "Removing data source...", null, groupService.removeDataSourceFromGroup);
+                groupService.removeDataSourceFromGroup.send(feedDescriptor.dataFeedID, groupID);
+            }
         }
 
-        public function analyze():AnalyzeSource {
-            return null;
+        private function alertPackageListener(event:CloseEvent):void {
+            if (event.detail == Alert.OK) {
+                /*var reportDescriptor:ReportPackageDescriptor = uploadGrid.selectedItem as ReportPackageDescriptor;
+                ProgressAlert.alert(this, "Deleting package...", "Deleted package!", packageService.deleteReportPackage);
+                packageService.deleteReportPackage.send(reportDescriptor.id);*/
+            }
         }
+
+        private function alertInsightListener(event:CloseEvent):void {
+            if (event.detail == Alert.OK) {
+                var definition:InsightDescriptor = selectedItem as InsightDescriptor;
+                ProgressAlert.alert(this, "Removing report...", null, groupService.removeReportFromGroup);
+                groupService.removeReportFromGroup.send(definition.id, groupID);
+            }
+        }        
 
         public function gotFocus():void {
             var fragmentObject:Object = new Object();
             fragmentObject.groupID = String(groupID);
             var fragmentString:String = URLUtil.objectToString(fragmentObject);
             BrowserManager.getInstance().setFragment(fragmentString);
-            ProgressAlert.alert(this, "Retrieving group data...", null, groupService.getGroup, groupService.getGroupMessages,
-                    groupService.getGoalTrees, groupService.getGoals, groupInsights.operation, groupFeeds.operation);
+            ProgressAlert.alert(this, "Retrieving group data...", null, groupService.getGroup, groupService.getGroupMessages);
             groupService.getGroup.send(groupID);
-            groupService.getGroupMessages.send(groupID, null, null);
-            groupService.getGoalTrees.send(groupID);
-            groupService.getGoals.send(groupID);
-            groupInsights.refreshData();
-            groupFeeds.refreshData();
+            groupService.getGroupMessages.send(groupID, null, null);            
+            groupData.gotFocus();
         }
 
         private function backToGroupList():void {
@@ -187,22 +187,13 @@
 
         private function gotGroupDetails():void {
             var group:Group = groupService.getGroup.lastResult as Group;
-            this.description = group.description;
-            if (description != null && description.length > 0) {
-                hasDescription = true;
-            }
-            this.groupName = group.name;
-            BrowserManager.getInstance().setTitle("Easy Insight - " + groupName);
-            ownerText = "";
-            var secondUser:Boolean = false;
+
+            groupName = group.name;
+            BrowserManager.getInstance().setTitle("Easy Insight - " + group.name);
+
             var foundUser:Boolean = false;
             for each (var groupUser:GroupUser in group.groupUsers) {
                 if (groupUser.role == GroupUser.OWNER) {
-                    if (secondUser) {
-                        ownerText += ", ";
-                    }
-                    ownerText += "<b>" + groupUser.name + "</b>";
-                    ownerText += ",";
                     if (groupUser.name == User.getInstance().userName) {
                         adminEnabled = true;
                     }
@@ -211,20 +202,16 @@
                     foundUser = true;
                 }
             }
-            ownerText = ownerText.substring(0, ownerText.length - 1);
+
             reportItemFactory = new ClassFactory(GroupReportItem);
             reportItemFactory.properties = { admin: adminEnabled };
             dataSourceItemFactory = new ClassFactory(GroupDataSourceItem);
             dataSourceItemFactory.properties = { admin: adminEnabled };
-            goalTreeFactory = new ClassFactory(GoalTreeNameRenderer);
-            goalTreeFactory.properties = { admin: adminEnabled };
-            
+
             if (!foundUser) {
                 joinEnabled = true;
             }
-            if (secondUser && ownerText != "") {
-                ownerLabel = "Group Owners:";
-            }
+            
             numberMembersText = group.groupUsers.length > 1 ? (group.groupUsers.length + " members") : (group.groupUsers.length + " member");
             this._group = group;
         }
@@ -237,12 +224,7 @@
             gotFocus();
         }
 
-        private function administer():void {
-            var window:GroupAdministration = GroupAdministration(PopUpManager.createPopUp(this, GroupAdministration, true));
-            window.group = _group;
-            window.addEventListener(GroupCreatedEvent.GROUP_UPDATED, groupUpdated);
-            PopUpUtil.centerPopUp(window);
-        }
+        
 
         private function joinGroup():void {
             groupService.addMemberToGroup.send(_group.groupID);
@@ -277,53 +259,10 @@
             groupService.getGroupMessages.send(_group.groupID);
         }
 
-        private function addReport():void {
-            var window:AddReportToGroupWindow = new AddReportToGroupWindow();
-            window.groupID = _group.groupID;
-            window.addEventListener(GroupRefreshEvent.GROUP_REFRESH, onGroupRefresh);
-            PopUpManager.addPopUp(window, this, true);
-            PopUpUtil.centerPopUp(window);
-        }
 
-        private function addDataSource():void {
-            var window:AddDataSourceToGroupWindow = new AddDataSourceToGroupWindow();
-            window.groupID = _group.groupID;
-            window.addEventListener(GroupRefreshEvent.GROUP_REFRESH, onGroupRefresh);
-            PopUpManager.addPopUp(window, this, true);
-            PopUpUtil.centerPopUp(window);
-        }
 
         private function onGroupRefresh(event:GroupRefreshEvent):void {
-            ProgressAlert.alert(this, "Refreshing group data...", null, groupInsights.operation, groupFeeds.operation,
-                    groupService.getGoalTrees, groupService.getGoals);
-            groupInsights.refreshData();
-            groupFeeds.refreshData();
-            groupService.getGoalTrees.send(groupID);
-            groupService.getGoals.send(groupID);
-        }
 
-        private function addGoalTree():void {
-            var window:AddGoalTreeToGroupWindow = new AddGoalTreeToGroupWindow();
-            window.groupID = _group.groupID;
-            window.addEventListener(GroupRefreshEvent.GROUP_REFRESH, onGroupRefresh);
-            PopUpManager.addPopUp(window, this, true);
-            PopUpUtil.centerPopUp(window);
-        }
-
-        private function gotGoalTrees():void {
-            goalTrees = groupService.getGoalTrees.lastResult as ArrayCollection;
-        }
-
-        private function gotGoals():void {
-            goals = groupService.getGoals.lastResult as ArrayCollection;
-        }
-
-        private function addGoal():void {
-            var window:AddGoalToGroupWindow = new AddGoalToGroupWindow();
-            window.groupID = _group.groupID;
-            window.addEventListener(GroupRefreshEvent.GROUP_REFRESH, onGroupRefresh);
-            PopUpManager.addPopUp(window, this, true);
-            PopUpUtil.centerPopUp(window);
         }
 
         private function removeFromGroup(event:RemoveItemFromGroupEvent):void {
@@ -339,15 +278,17 @@
         }
 
         private function removed():void {
-            ProgressAlert.alert(this, "Retrieving group data...", null, groupInsights.operation, groupFeeds.operation,
-                    groupService.getGoalTrees, groupService.getGoals);
-            groupInsights.refreshData();
-            groupFeeds.refreshData();
-            groupService.getGoalTrees.send(groupID);
-            groupService.getGoals.send(groupID);
+            groupData.gotFocus();
         }
 
         public function cleanup():void {
+        }
+
+        [Bindable]
+        private var changeEffect:Effect = rightEffect;
+
+        private function blah():void {
+            viewStack.selectedIndex = buttonBar.selectedIndex;
         }
 		]]>		
     </mx:Script>
@@ -360,135 +301,52 @@
         <mx:method name="getGroupMessages" result="gotGroupMessages()"/>
         <mx:method name="addMemberToGroup" result="addedToGroup()"/>
         <mx:method name="addGroupComment" result="addedComment()"/>
-        <mx:method name="getInsights"/>
-        <mx:method name="getFeeds"/>
-        <mx:method name="getGoalTrees" result="gotGoalTrees()"/>
-        <mx:method name="getGoals" result="gotGoals()"/>
         <mx:method name="removeReportFromGroup" result="removed()"/>
         <mx:method name="removeDataSourceFromGroup" result="removed()"/>
         <mx:method name="removeGoalTreeFromGroup" result="removed()"/>
         <mx:method name="removeGoalFromGroup" result="removed()"/>
-    </mx:RemoteObject>    
-    <mx:VBox width="100%" height="100%" id="primaryCanvas" paddingTop="10" paddingLeft="10" paddingRight="10"
-             paddingBottom="10">
-        <mx:HBox width="100%">
-            <mx:Button label="Back to Group List" click="backToGroupList()"/>
-            <mx:Button icon="{connectIcon}" toolTip="Join Group" click="joinGroup()" visible="{joinEnabled}"
-                       label="Join Group..." labelPlacement="bottom"/>
-            <mx:Button icon="{administerIcon}" toolTip="Administer Group" click="administer()"
-                       visible="{adminEnabled}" label="Group Admin..." labelPlacement="bottom"/>
-            <mx:Button icon="{addDataSourceIcon}" toolTip="Add Data Source..." click="addDataSource()"
-                       visible="{adminEnabled}" label="Add Data Source..." labelPlacement="bottom"/>
-            <mx:Button icon="{addInsightIcon}" toolTip="Add Report..." click="addReport()" visible="{adminEnabled}"
-                       label="Add Report..." labelPlacement="bottom"/>
-            <mx:Button icon="{addGoalTreeIcon}" toolTip="Add Goal Tree..." click="addGoalTree()"
-                       visible="{adminEnabled}"
-                       label="Add Goal Tree..." labelPlacement="bottom"/>
-            <mx:Button icon="{addGoalIcon}" toolTip="Add Goal..." click="addGoal()" visible="{adminEnabled}"
-                       label="Add Goal..." labelPlacement="bottom"/>
-            <mx:Button icon="{messageIcon}" toolTip="New Comment..." click="newMessage()" visible="{!joinEnabled}"
-                       label="Add Comment..." labelPlacement="bottom"/>
-            <mx:Button icon="{helpIcon}" toolTip="Help!" click="help()"
-                       label="Help..." labelPlacement="bottom"/>
-        </mx:HBox>
-        <mx:Spacer height="20"/>
-        <mx:HBox width="100%">
+    </mx:RemoteObject>
+    <!--
+        a few things we have to address:
 
-            <mx:VBox verticalGap="0" id="groupAttributesBox">
-                <mx:Box width="100%" height="5" backgroundColor="#D42525" left="0" right="0"/>
-                <mx:Box width="100%" backgroundColor="#F6A76B" horizontalAlign="center">
-                    <mx:Label text="Group Attributes"/>
-                </mx:Box>
-                <mx:Form paddingTop="0" paddingLeft="0" paddingRight="0" paddingBottom="0" backgroundColor="#F5CDAF">
-                    <mx:FormItem label="Name:" fontFamily="Tahoma" fontWeight="bold">
-                        <mx:Label text="{groupName}" fontFamily="Lucida Grande" fontWeight="normal"/>
-                    </mx:FormItem>
-                    <mx:FormItem label="Description:" fontFamily="Tahoma" fontWeight="bold">
-                        <mx:TextArea editable="false" text="{description}" fontFamily="Lucida Grande"
-                                     fontWeight="normal" height="100"/>
-                    </mx:FormItem>
-                    <mx:FormItem label="{ownerLabel}" fontFamily="Tahoma" fontWeight="bold">
-                        <mx:Label htmlText="{ownerText}" fontFamily="Lucida Grande" fontWeight="normal"/>
-                    </mx:FormItem>
-                    <mx:FormItem label="Number of Members:" fontFamily="Tahoma" fontWeight="bold">
-                        <mx:Label text="{numberMembersText}" fontFamily="Lucida Grande" fontWeight="normal"/>
-                    </mx:FormItem>
-                </mx:Form>
-            </mx:VBox>
-
-            <mx:VBox width="100%" verticalGap="0" id="discussionBox">
-                <discussion:DiscussionPanel dataProvider="{messages}" width="100%"/>
-            </mx:VBox>
-
-        </mx:HBox>
-        <mx:VBox>
-            <!--
-			<mx:DataGrid dataProvider="{recentChanges}" rowCount="{recentChangesRowCount}">
-				<mx:columns>
-					<mx:DataGridColumn headerText="" dataFielditemRenderer=""
-				</mx:columns>
-			</mx:DataGrid>
-			-->
+        what actually shows up in the group screen
+            scorecards
+        for non-admin users
+            persona concept?
+            
+    -->
+    <viewStackEffects:CoverFlowPapervision3D id="leftEffect" direction="horizontal"/>
+    <viewStackEffects:Slide id="rightEffect" direction="right"/>
+    <mx:Canvas width="100%" height="100%">
+        <mx:VBox width="100%" height="100%" verticalGap="0">
+        <mx:Canvas height="50%" width="100%" backgroundColor="#888888"/>
+        <mx:Canvas height="50%" width="100%" backgroundColor="#000000"/>
         </mx:VBox>
-        <mx:HBox width="100%" id="sourcesBox">
-            <mx:HBox width="100%" backgroundColor="#FFFFFF" backgroundAlpha=".1" id="coreHBox" horizontalAlign="center">
-                <mx:Spacer width="8%"/>
-                <groups:GroupItemPanel rendererClass="{reportItemFactory}" width="40%"
-                                       id="groupInsights"
-                                       title="Group Reports" groupID="{groupID}"
-                                       dataOperation="{groupService.getInsights}"
-                                       fullDataOperation="{groupService2.getInsights}"
-                                       fullEventType="{ChildSearchEvent.ANALYSIS_SEARCH}"
-                                       analysisSearch="onSearchAnalysis(event)"/>
-                <mx:Spacer width="4%"/>
-                <groups:GroupItemPanel rendererClass="{dataSourceItemFactory}" width="40%" id="groupFeeds"
-                                       title="Group Data Sources" groupID="{groupID}"
-                                       dataOperation="{groupService.getFeeds}"
-                                       fullDataOperation="{groupService2.getFeeds}"
-                                       fullEventType="{ChildSearchEvent.FEED_SEARCH}"
-                                       feedSearch="onSearchFeed(event)"/>
-                <mx:Spacer width="8%"/>
-            </mx:HBox>
-            <mx:VBox width="600">
-                <mx:VBox verticalGap="0" width="100%">
-                    <mx:Box width="100%" height="5" backgroundColor="#D42525" left="0" right="0"/>
-                    <mx:Box width="100%" backgroundColor="#F6A76B" horizontalAlign="center">
-                        <mx:Label text="Goal Trees"/>
-                    </mx:Box>
-                    <mx:DataGrid dataProvider="{goalTrees}" width="100%" id="goalTreesBox">
-                        <mx:columns>
-                            <util:EIDataGridColumn headerText="Goal Tree Name" dataField="goalTreeName"
-                                    itemRenderer="{goalTreeFactory}"/>
-                            <util:EIDataGridColumn headerText="" dataField="goalTreeName" width="50"
-                                                   itemRenderer="com.easyinsight.groups.GroupGoalsControls"
-                                                   sortable="false"/>
-                        </mx:columns>
-                    </mx:DataGrid>
-                </mx:VBox>
-                <!--<mx:VBox verticalGap="0" width="100%">
-                    <mx:Box width="100%" height="5" backgroundColor="#D42525" left="0" right="0"/>
-                    <mx:Box width="100%" backgroundColor="#F6A76B" horizontalAlign="center">
-                        <mx:Label text="Goals"/>
-                    </mx:Box>
-                    <mx:DataGrid dataProvider="{goals}" id="goalsGrid" width="100%" rowHeight="28">
-                        <mx:columns>
-                            <mx:DataGridColumn headerText="" dataField="name"
-                                               itemRenderer="com.easyinsight.goals.GoalIconRenderer" width="30"/>
-                            <mx:DataGridColumn headerText="Goal Name" dataField="name"
-                                               headerRenderer="com.easyinsight.groups.CustomGroupHeader"
-                                               itemRenderer="{goalFactory}"/>
-                            <mx:DataGridColumn headerText="Latest Value" dataField="name"
-                                               itemRenderer="com.easyinsight.goals.GoalValueRenderer"
-                                               headerRenderer="com.easyinsight.groups.CustomGroupHeader" width="110"/>
-                            <mx:DataGridColumn headerText="Date" dataField="name"
-                                               headerRenderer="com.easyinsight.groups.CustomGroupHeader"
-                                               itemRenderer="com.easyinsight.goals.GoalDateRenderer" width="80"/>
-                            &lt;!&ndash;<mx:DataGridColumn headerText="" dataField="com.easyinsight.goals.GoalControls" sortable="false"
-                                               itemRenderer="com.easyinsight.goals.GoalControls" width="30"/>&ndash;&gt;
-                        </mx:columns>
-                    </mx:DataGrid>
-                </mx:VBox>-->
-            </mx:VBox>
-        </mx:HBox>
+    <mx:VBox width="100%" height="100%" id="primaryCanvas" paddingTop="10" paddingLeft="10" paddingRight="10"
+             paddingBottom="10" horizontalAlign="center">
+        <mx:Label text="{groupName}" fontSize="20" color="#FFFFFF" fontFamily="Tahoma" fontWeight="bold"/>
+        <mx:VBox width="1020" horizontalAlign="center" backgroundColor="#FFFFFF" height="100%" paddingTop="10">
+            <mx:ToggleButtonBar id="buttonBar" itemClick="blah()">
+                <mx:dataProvider>
+                    <mx:Array>
+                        <mx:String>Scorecards</mx:String>
+                        <mx:String>Messages</mx:String>
+                        <mx:String>Data Sources and Reports</mx:String>
+                        <mx:String>Info</mx:String>
+                        <mx:String>Members</mx:String>
+                    </mx:Array>
+                </mx:dataProvider>
+            </mx:ToggleButtonBar>
+            <mx:ViewStack width="100%" creationPolicy="all" resizeToContent="true"
+                    paddingLeft="10" paddingBottom="10" paddingRight="10" paddingTop="10" id="viewStack">
+                <scorecards:ScorecardGroupDisplay groupID="{groupID}" label="Scorecards" hideEffect="leftEffect" showEffect="leftEffect"/>
+                <discussion:DiscussionPanel dataProvider="{messages}" width="100%" label="Messages" hideEffect="leftEffect" showEffect="leftEffect"/>
+                <groups:GroupMyData groupID="{groupID}" label="Data Sources and Reports" groupAdmin="{adminEnabled}" id="groupData" hideEffect="leftEffect" showEffect="leftEffect"/>
+                <groups:GroupInfo group="{_group}" label="Info" groupAdmin="{adminEnabled}" hideEffect="leftEffect" showEffect="leftEffect"/>
+                <groups:ManageGroupUsers groupID="{groupID}" id="manageUsers" label="Members" groupAdmin="{adminEnabled}" hideEffect="leftEffect" showEffect="leftEffect"/>
+            </mx:ViewStack>
+        </mx:VBox>
+
     </mx:VBox>
+    </mx:Canvas>
 </mx:VBox>

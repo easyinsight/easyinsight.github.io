@@ -2,7 +2,6 @@ package com.easyinsight.scorecard {
 import com.easyinsight.kpi.KPI;
 import com.easyinsight.kpi.KPIEvent;
 import com.easyinsight.kpi.KPIParentWindow;
-import com.easyinsight.kpi.KPIWindow;
 import com.easyinsight.util.PopUpUtil;
 
 import flash.events.MouseEvent;
@@ -40,6 +39,8 @@ public class KPIControls extends HBox {
 
     private var kpiService:RemoteObject;
 
+    private var _groupID:int;
+
     public function KPIControls() {
         super();
         editButton = new Button();
@@ -59,6 +60,10 @@ public class KPIControls extends HBox {
         this.percentWidth = 100;
         this.percentHeight = 100;
         
+    }
+
+    public function set groupID(value:int):void {
+        _groupID = value;
     }
 
     private function onCopy(event:MouseEvent):void {
@@ -83,6 +88,7 @@ public class KPIControls extends HBox {
         var kpiWindow:KPIParentWindow = new KPIParentWindow();
         kpiWindow.scorecardID = _scorecardID;
         kpiWindow.kpi = kpi;
+        kpiWindow.groupID = _groupID;
         kpiWindow.addEventListener(KPIEvent.KPI_EDITED, updatedKPI);
         PopUpManager.addPopUp(kpiWindow, this, true);
         PopUpUtil.centerPopUp(kpiWindow);

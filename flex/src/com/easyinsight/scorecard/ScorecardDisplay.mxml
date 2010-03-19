@@ -8,12 +8,10 @@
     </mx:Metadata>
     <mx:Script><![CDATA[
         import com.easyinsight.util.PopUpUtil;
-        import com.easyinsight.util.ProgressAlert;
 
         import mx.binding.utils.BindingUtils;
         import mx.collections.ArrayCollection;
         import mx.controls.Alert;
-        import mx.events.CloseEvent;
         import mx.managers.PopUpManager;
         import mx.rpc.events.FaultEvent;
 
@@ -33,11 +31,11 @@
 
         private function onCreationComplete():void {
             primaryStackIndex = 0;
-            scorecardService.getScorecardDescriptors.send();
+            retrieveScorecards();
         }
 
         [Bindable]
-        private var selectedScorecard:ScorecardDescriptor;
+        protected var selectedScorecard:ScorecardDescriptor;
 
         [Bindable]
         private var scorecards:ArrayCollection;
@@ -62,8 +60,13 @@
             renderer.addKPI();
         }
 
+        protected function configureNewScorecardWindow(scorecardWindow:ScorecardWindow):void {
+
+        }
+
         private function newScorecard():void {
             var scorecardWindow:ScorecardWindow = new ScorecardWindow();
+            configureNewScorecardWindow(scorecardWindow);
             scorecardWindow.addEventListener(ScorecardEvent.SCORECARD_ADDED, onScorecardAdd);
             PopUpManager.addPopUp(scorecardWindow, this, true);
             PopUpUtil.centerPopUp(scorecardWindow);
@@ -88,7 +91,7 @@
 
         public function gotFocus():void {
             primaryStackIndex = 0;
-            scorecardService.getScorecardDescriptors.send();
+            retrieveScorecards();
         }
 
         private function refreshData():void {
@@ -96,8 +99,11 @@
             renderer.forceRefresh();
         }
 
-        private function gotDescriptors():void {
-            var scorecardList:ScorecardList = scorecardService.getScorecardDescriptors.lastResult as ScorecardList;
+        protected function configureRenderer(scorecardRenderer:ScorecardRenderer):void {
+            BindingUtils.bindProperty(scorecardRenderer, "configurationMode", this, "configurationMode");
+        }
+
+        protected function handleDescriptors(scorecardList:ScorecardList):void {            
             if (scorecardList.anyData) {
                 scorecards = scorecardList.scorecardDescriptors;
                 scorecardStack.removeAllChildren();
@@ -105,7 +111,7 @@
                     var scorecardRenderer:ScorecardRenderer = new ScorecardRenderer();
                     /*scorecardRenderer.setStyle("hideEffect", effect);
                     scorecardRenderer.setStyle("hideEffect", effect);*/
-                    BindingUtils.bindProperty(scorecardRenderer, "configurationMode", this, "configurationMode");
+                    configureRenderer(scorecardRenderer);
                     scorecardRenderer.scorecardDescriptor = scorecard;
                     scorecardStack.addChild(scorecardRenderer);
                 }
@@ -127,7 +133,7 @@
             }
         }
 
-        private function onFault(event:FaultEvent):void {
+        protected function onFault(event:FaultEvent):void {
             Alert.show(event.fault.message);
         }
 
@@ -142,30 +148,23 @@
             scorecardIndex = i;
         }
 
-        private function deleteScorecard():void {
-            Alert.show("Are you sure you want to delete the currently selected scorecard?", "Alert", Alert.OK | Alert.CANCEL, null, onClose);
-        }
-
-        private function onClose(event:CloseEvent):void {
-            if (event.detail == Alert.OK) {
-                ProgressAlert.alert(this, "Deleting the scorecard...", null, scorecardService.deleteScorecard, scorecardService.getScorecardDescriptors);
-                scorecardService.deleteScorecard.send(selectedScorecard.id);
-            }
-        }
-
-        private function deleted():void {
+        protected function deleted():void {
             primaryStackIndex = 0;
-            scorecardService.getScorecardDescriptors.send();
+            retrieveScorecards();
         }
 
         [Bindable]
         [Embed(source="../../../../assets/prototype/ReverseGray.jpg")]
         private var backgroundImage:Class;
+
+        protected function retrieveScorecards():void {
+
+        }
+
+        protected function deleteScorecard():void {
+            
+        }
         ]]></mx:Script>
-    <mx:RemoteObject id="scorecardService" destination="scorecardService">
-        <mx:method name="getScorecardDescriptors" result="gotDescriptors()" fault="onFault(event)"/>
-        <mx:method name="deleteScorecard" result="deleted()" fault="onFault(event)"/>
-    </mx:RemoteObject>
     <!--<viewStackEffects:Slide id="effect"/>-->
     <mx:VBox verticalGap="0">
         <mx:Box width="100%" horizontalAlign="center" backgroundImage="{backgroundImage}" backgroundSize="100%"

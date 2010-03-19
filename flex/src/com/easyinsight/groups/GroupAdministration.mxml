@@ -75,7 +75,6 @@
 				<mx:CheckBox selected="{anyoneCanJoin}" id="anyoneCanJoinCheckbox"/>
 			</mx:FormItem>			
 		</mx:Form>
-		<groups:ManageGroupUsers groupID="{_groupID}" id="manageUsers"/>
 		<mx:HBox width="100%" horizontalAlign="center">
 			<mx:Button label="Save" click="save()"/>
 			<mx:Button label="Cancel" click="cancel()"/>

@@ -26,18 +26,32 @@
         }
 
         private var newScorecard:Boolean;
+        private var _groupID:int;
+
+        public function set groupID(value:int):void {
+            _groupID = value;
+        }
 
         private function save():void {
             if (_scorecard == null) {
                 _scorecard = new Scorecard();
             }
             _scorecard.name = nameInput.text;
-            ProgressAlert.alert(this, "Saving the scorecard...", null, scorecardService.saveScorecardForUser);
-            scorecardService.saveScorecardForUser.send(_scorecard);
+            if (_groupID == 0) {
+                ProgressAlert.alert(this, "Saving the scorecard...", null, scorecardService.saveScorecardForUser);
+                scorecardService.saveScorecardForUser.send(_scorecard);
+            } else {
+                ProgressAlert.alert(this, "Saving the scorecard...", null, scorecardService.saveScorecardForGroup);
+                scorecardService.saveScorecardForGroup.send(_scorecard, _groupID);
+            }
         }
 
         private function saved():void {
-            _scorecard.scorecardID = scorecardService.saveScorecardForUser.lastResult as int;
+            if (_groupID == 0) {
+                _scorecard.scorecardID = scorecardService.saveScorecardForUser.lastResult as int;
+            } else {
+                _scorecard.scorecardID = scorecardService.saveScorecardForGroup.lastResult as int;
+            }
             var descriptor:ScorecardDescriptor = new ScorecardDescriptor();
             descriptor.id = _scorecard.scorecardID;
             descriptor.name = _scorecard.name;
@@ -51,6 +65,7 @@
         ]]></mx:Script>
     <mx:RemoteObject destination="scorecardService" id="scorecardService">
         <mx:method name="saveScorecardForUser" result="saved()"/>
+        <mx:method name="saveScorecardForGroup" result="saved()"/>
     </mx:RemoteObject>
     <mx:VBox>
         <mx:Form>

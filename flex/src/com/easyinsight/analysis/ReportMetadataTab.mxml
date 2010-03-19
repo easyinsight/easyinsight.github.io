@@ -77,6 +77,10 @@
             dispatchEvent(new Event("dataSourceInfoChanged"));
         }
 
+        public function cleanup():void {
+            dataSourceDisplay.cleanup();
+        }
+
         public function updateName(name:String):void {
             labelNameField = name;
         }
@@ -152,7 +156,7 @@
                        click="editDescription()"/>
         </mx:FormItem>
     </mx:Form>
-    <datasources:DataSourceDisplay dataSource="{dataSourceInfo}" dataView="{dataView}"/>
+    <datasources:DataSourceDisplay dataSource="{dataSourceInfo}" dataView="{dataView}" id="dataSourceDisplay"/>
     <mx:StringValidator id="analysisNameValidator" source="{analysisNameInput}" property="text" minLength="3"
                         maxLength="80"/>
 </mx:HBox>
