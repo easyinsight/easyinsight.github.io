@@ -26,6 +26,7 @@
 
         public function set groupAdmin(value:Boolean):void {
             _groupAdmin = value;
+            viewIndex = _groupAdmin ? 1 : 0;
         }
 
         public function set groupID(groupID:int):void {
@@ -70,6 +71,9 @@
         [Bindable]
         private var changesIndex:int;
 
+        [Bindable]
+        private var viewIndex:int;
+
         private function saveChanges():void {
             groupService.updateGroupUsers.send(_groupID, users);
         }
@@ -96,14 +100,29 @@
                 <mx:Button label="Save Changes" click="saveChanges()"/>
             </mx:HBox>
         </mx:ViewStack>
-        <mx:Button label="Add User..." click="addUser()"/>
-        <mx:DataGrid dataProvider="{users}" id="userGrid">
-            <mx:columns>
-                <mx:DataGridColumn headerText="User Name" dataField="name" width="200" headerRenderer="com.easyinsight.groups.CustomGroupHeader"/>
-                <mx:DataGridColumn headerText="Role" dataField="name" itemRenderer="com.easyinsight.groups.GroupRoleEditor"
-                    rendererIsEditor="true" editorDataField="data" headerRenderer="com.easyinsight.groups.CustomGroupHeader"/>
-                <mx:DataGridColumn headerText="" dataField="name" itemRenderer="com.easyinsight.groups.GroupUserIcons" width="50"/>
-            </mx:columns>
-        </mx:DataGrid>
+        <mx:ViewStack selectedIndex="{viewIndex}" resizeToContent="true">
+            <mx:Box>
+                <mx:DataGrid dataProvider="{users}">
+                    <mx:columns>
+                        <mx:DataGridColumn headerText="User Name" dataField="name" width="200" headerRenderer="com.easyinsight.groups.CustomGroupHeader"/>
+                        <mx:DataGridColumn headerText="Role" dataField="name" itemRenderer="com.easyinsight.groups.GroupRoleEditor"
+                            rendererIsEditor="true" editorDataField="data" headerRenderer="com.easyinsight.groups.CustomGroupHeader"/>
+                    </mx:columns>
+                </mx:DataGrid>
+            </mx:Box>
+            <mx:VBox>
+                <mx:Button label="Add User..." click="addUser()"/>
+                <mx:DataGrid dataProvider="{users}" id="userGrid">
+                    <mx:columns>
+                        <mx:DataGridColumn headerText="User Name" dataField="name" width="200" headerRenderer="com.easyinsight.groups.CustomGroupHeader"/>
+                        <mx:DataGridColumn headerText="Role" dataField="name" itemRenderer="com.easyinsight.groups.GroupRoleEditor"
+                            rendererIsEditor="true" editorDataField="data" headerRenderer="com.easyinsight.groups.CustomGroupHeader"/>
+                        <mx:DataGridColumn headerText="" dataField="name" itemRenderer="com.easyinsight.groups.GroupUserIcons" width="50"/>
+                    </mx:columns>
+                </mx:DataGrid>
+            </mx:VBox>
+
+        </mx:ViewStack>
+
     </mx:VBox>
 </mx:VBox>
