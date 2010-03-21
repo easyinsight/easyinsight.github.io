@@ -39,12 +39,12 @@
             PopUpUtil.centerPopUp(window);
         }
 
-        private function onChange():void {
+        private function onChange(event:Event):void {
             changesIndex = 1;
         }
 
         private function userChange(event:UserLinkEvent):void {
-            onChange();
+            onChange(null);
             var userStub:UserStub = event.userStub as UserStub;
             var groupUser:GroupUser = new GroupUser();
             groupUser.email = userStub.email;
@@ -57,6 +57,7 @@
 
         private function onCreation():void {
             userGrid.addEventListener(UserLinkEvent.DELETE_USER_LINK, userChange);
+            addEventListener("groupInvalidation", onChange);
             groupService.getUsers.send(_groupID);
         }
 
@@ -96,8 +97,11 @@
         <mx:ViewStack selectedIndex="{changesIndex}" resizeToContent="true">
             <mx:Box/>
             <mx:HBox width="100%" horizontalAlign="center">
-                <mx:Label text="You have unsaved changes:"/>
-                <mx:Button label="Save Changes" click="saveChanges()"/>
+                <mx:HBox verticalAlign="middle" backgroundColor="#DDDDDD" cornerRadius="5" borderStyle="solid" borderColor="#DDDDDD" borderThickness="1"
+                        paddingLeft="10" paddingTop="5" paddingBottom="5" paddingRight="10">
+                    <mx:Label text="You have unsaved changes:"/>
+                    <mx:Button label="Save Changes" click="saveChanges()"/>
+                </mx:HBox>
             </mx:HBox>
         </mx:ViewStack>
         <mx:ViewStack selectedIndex="{viewIndex}" resizeToContent="true">
@@ -105,8 +109,8 @@
                 <mx:DataGrid dataProvider="{users}">
                     <mx:columns>
                         <mx:DataGridColumn headerText="User Name" dataField="name" width="200" headerRenderer="com.easyinsight.groups.CustomGroupHeader"/>
-                        <mx:DataGridColumn headerText="Role" dataField="name" itemRenderer="com.easyinsight.groups.GroupRoleEditor"
-                            rendererIsEditor="true" editorDataField="data" headerRenderer="com.easyinsight.groups.CustomGroupHeader"/>
+                        <mx:DataGridColumn headerText="Role" dataField="name" itemRenderer="com.easyinsight.groups.GroupRoleRenderer"
+                            headerRenderer="com.easyinsight.groups.CustomGroupHeader"/>
                     </mx:columns>
                 </mx:DataGrid>
             </mx:Box>

@@ -597,11 +597,21 @@ public class AnalysisStorage {
         try {
             PreparedStatement queryStmt = conn.prepareStatement("select analysis.analysis_id, analysis.title, analysis.data_feed_id, analysis.report_type " +
                     "from group_to_insight, analysis where " +
-                        "group_to_insight.group_id = ? and group_to_insight.insight_id = analysis.analysis_id");
+                        "(group_to_insight.group_id = ? and group_to_insight.insight_id = analysis.analysis_id)");
             queryStmt.setLong(1, groupID);
             ResultSet rs = queryStmt.executeQuery();
             while (rs.next()) {
                 reports.add(new InsightDescriptor(rs.getLong(1), rs.getString(2), rs.getLong(3), rs.getInt(4)));
+            }
+            PreparedStatement dsShareStmt = conn.prepareStatement("select analysis.analysis_id, analysis.title, analysis.data_feed_id, analysis.report_type " +
+                    "from analysis, data_feed, upload_policy_groups where " +
+                    "(analysis.feed_visibility = ? AND analysis.data_feed_id = data_feed.data_feed_id AND data_feed.data_feed_id = upload_policy_groups.feed_id AND " +
+                    "upload_policy_groups.group_id = ?)");
+            dsShareStmt.setBoolean(1, true);
+            dsShareStmt.setLong(2, groupID);
+            ResultSet shareRS = dsShareStmt.executeQuery();
+            while (shareRS.next()) {
+                reports.add(new InsightDescriptor(shareRS.getLong(1), shareRS.getString(2), shareRS.getLong(3), shareRS.getInt(4)));
             }
         } finally {
             Database.closeConnection(conn);

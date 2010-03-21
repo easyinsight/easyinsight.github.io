@@ -112,8 +112,11 @@
         <mx:ViewStack selectedIndex="{changesIndex}" resizeToContent="true">
             <mx:Box/>
             <mx:HBox width="100%" horizontalAlign="center">
-                <mx:Label text="You have unsaved changes:"/>
-                <mx:Button label="Save Changes" click="saveChanges()"/>
+                <mx:HBox verticalAlign="middle" backgroundColor="#DDDDDD" cornerRadius="5" borderStyle="solid" borderColor="#DDDDDD" borderThickness="1"
+                        paddingLeft="10" paddingTop="5" paddingBottom="5" paddingRight="10">
+                    <mx:Label text="You have unsaved changes:"/>
+                    <mx:Button label="Save Changes" click="saveChanges()"/>
+                </mx:HBox>
             </mx:HBox>
         </mx:ViewStack>
         <mx:Form paddingTop="0" paddingLeft="0" paddingRight="0" paddingBottom="0">

@@ -93,6 +93,9 @@
         private var adminEnabled:Boolean = false;
 
         [Bindable]
+        private var editorEnabled:Boolean = false;
+
+        [Bindable]
         private var joinEnabled:Boolean = false;
 
         [Bindable]
@@ -136,7 +139,7 @@
                 Alert.show("Are you sure you want to remove this data source from the group?", "Alert",
                         Alert.OK | Alert.CANCEL, this, alertFeedListener, null, Alert.CANCEL);
             } else if (selectedItem is InsightDescriptor) {
-                Alert.show("Are you sure you want to remove this report from the group?.", "Alert",
+                Alert.show("Are you sure you want to remove this report from the group?", "Alert",
                         Alert.OK | Alert.CANCEL, this, alertInsightListener, null, Alert.CANCEL);
             } else if (selectedItem is ReportPackageDescriptor) {
                 Alert.show("Are you sure you want to remove this package from the group?", "Alert",
@@ -194,8 +197,11 @@
             var foundUser:Boolean = false;
             for each (var groupUser:GroupUser in group.groupUsers) {
                 if (groupUser.role == GroupUser.OWNER) {
-                    if (groupUser.name == User.getInstance().userName) {
+                    if (groupUser.name == User.getInstance().userName && groupUser.role == 1) {
+                        editorEnabled = true;
                         adminEnabled = true;
+                    } else if (groupUser.name == User.getInstance().userName && groupUser.role == 2) {
+                        editorEnabled = true;
                     }
                 }
                 if (groupUser.name == User.getInstance().userName) {
@@ -341,7 +347,7 @@
                     paddingLeft="10" paddingBottom="10" paddingRight="10" paddingTop="10" id="viewStack">
                 <scorecards:ScorecardGroupDisplay groupID="{groupID}" label="Scorecards" hideEffect="leftEffect" showEffect="leftEffect"/>
                 <discussion:DiscussionPanel dataProvider="{messages}" width="100%" label="Messages" hideEffect="leftEffect" showEffect="leftEffect"/>
-                <groups:GroupMyData groupID="{groupID}" label="Data Sources and Reports" groupAdmin="{adminEnabled}" id="groupData" hideEffect="leftEffect" showEffect="leftEffect"/>
+                <groups:GroupMyData groupID="{groupID}" label="Data Sources and Reports" groupAdmin="{editorEnabled}" id="groupData" hideEffect="leftEffect" showEffect="leftEffect"/>
                 <groups:GroupInfo group="{_group}" label="Info" groupAdmin="{adminEnabled}" hideEffect="leftEffect" showEffect="leftEffect"/>
                 <groups:ManageGroupUsers groupID="{groupID}" id="manageUsers" label="Members" groupAdmin="{adminEnabled}" hideEffect="leftEffect" showEffect="leftEffect"/>
             </mx:ViewStack>

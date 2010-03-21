@@ -1,6 +1,8 @@
 package com.easyinsight.groups
 {
-	import mx.collections.ArrayCollection;
+import flash.events.Event;
+
+import mx.collections.ArrayCollection;
 	import mx.containers.HBox;
 	import mx.controls.ComboBox;
 	import mx.events.ListEvent;
@@ -51,6 +53,7 @@ package com.easyinsight.groups
 		
 		private function change(event:ListEvent):void {				
 			userStub.role = event.currentTarget.selectedItem.data;
+            dispatchEvent(new Event("groupInvalidation", true));
 		}
 		
 		[Bindable]

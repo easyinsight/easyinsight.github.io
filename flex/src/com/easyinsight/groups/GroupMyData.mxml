@@ -101,6 +101,8 @@
             }
         }
 
+        private var dataColumn:AdvancedDataGridColumn;
+
         private function addReport():void {
             var window:AddReportToGroupWindow = new AddReportToGroupWindow();
             window.groupID = _groupID;
@@ -127,49 +129,101 @@
 
         private var _groupAdmin:Boolean;
 
+        [Bindable]
+        private var adminIndex:int = 0;
+
         [Bindable(event="groupAdminChanged")]
         public function get groupAdmin():Boolean {
             return _groupAdmin;
         }
 
+        private var uploadGrid:AdvancedDataGrid;
+
+
+        protected override function commitProperties():void {
+            super.commitProperties();
+            if (_groupAdmin) {
+                adminIndex = 1;
+                dataColumn = lastDataAdminColumn;
+                uploadGrid = adminMyDataGrid;
+            } else {
+                adminIndex = 0;
+                dataColumn = lastDataColumn;
+                uploadGrid = myDataGrid;
+            }
+        }
+
         public function set groupAdmin(value:Boolean):void {
             if (_groupAdmin == value) return;
             _groupAdmin = value;
+
             dispatchEvent(new Event("groupAdminChanged"));
         }]]></mx:Script>
     <mx:RemoteObject destination="groupService" id="groupService">
         <mx:method name="getFeedAnalysisTree" result="gotFeedAnalysisTree()"/>
     </mx:RemoteObject>
     <groups:GroupDataControlsFactory id="controlsFactory" groupAdmin="{groupAdmin}"/>
-    <mx:VBox>
-        <mx:Box width="100%" horizontalAlign="center" backgroundImage="{backgroundImage}" backgroundSize="100%"
-                paddingTop="5"
-                paddingBottom="5">
-            <mx:Label text="Group Data" fontSize="20" fontFamily="Tahoma" fontWeight="bold" color="#FFFFFF"/>
-        </mx:Box>
-        <mx:AdvancedDataGrid width="800" height="100%" id="uploadGrid" allowMultipleSelection="true" fontSize="12"
-                             itemDoubleClick="gridDoubleClick(event)" headerStyleName="BlueHeader"
-                             iconFunction="simpleIconFunction">
-            <mx:dataProvider>
-                <mx:HierarchicalData source="{displayTreeData}"/>
-            </mx:dataProvider>
-            <mx:columns>
-                <mx:AdvancedDataGridColumn headerText="Name" dataField="name"/>
-                <mx:AdvancedDataGridColumn id="dataColumn" headerText="Last Data Time" dataField="lastDataTime"
-                                           width="140" itemRenderer="com.easyinsight.listing.MyDataLastDataLabel"
-                                           sortCompareFunction="customSort"/>
-                <mx:AdvancedDataGridColumn width="200" headerText="" dataField="name" sortable="false"
-                                           itemRenderer="{controlsFactory}"/>
-            </mx:columns>
-        </mx:AdvancedDataGrid>
-    </mx:VBox>
-    <mx:VBox paddingRight="0" paddingTop="25">
-        <mx:Label text="Group Data Controls" fontSize="13" fontWeight="bold" paddingRight="0"/>
-        <mx:HRule width="100%"/>
-        <mx:LinkButton label="Add data source..." color="#333333" fontSize="12" paddingLeft="0" paddingRight="0"
-                       click="addDataSource()"/>
-        <mx:LinkButton label="Add a report..." color="#333333" fontSize="12" paddingLeft="0" paddingRight="0"
-                       click="addReport()"/>
-    </mx:VBox>
+    <mx:ViewStack selectedIndex="{adminIndex}" creationPolicy="all" resizeToContent="true">
+        <mx:HBox>
+            <mx:VBox>
+                <mx:Box width="100%" horizontalAlign="center" backgroundImage="{backgroundImage}" backgroundSize="100%"
+                        paddingTop="5"
+                        paddingBottom="5">
+                    <mx:Label text="Group Data" fontSize="20" fontFamily="Tahoma" fontWeight="bold" color="#FFFFFF"/>
+                </mx:Box>
+
+                <mx:AdvancedDataGrid width="800" height="100%" allowMultipleSelection="true" fontSize="12"
+                                     itemDoubleClick="gridDoubleClick(event)" headerStyleName="BlueHeader"
+                                     iconFunction="simpleIconFunction" id="myDataGrid">
+                    <mx:dataProvider>
+                        <mx:HierarchicalData source="{displayTreeData}"/>
+                    </mx:dataProvider>
+                    <mx:columns>
+                        <mx:AdvancedDataGridColumn headerText="Name" dataField="name"/>
+                        <mx:AdvancedDataGridColumn headerText="Last Data Time" dataField="lastDataTime"
+                                                   id="lastDataColumn"
+                                                   width="140" itemRenderer="com.easyinsight.listing.MyDataLastDataLabel"
+                                                   sortCompareFunction="customSort"/>
+                        <mx:AdvancedDataGridColumn width="100" headerText="" dataField="name" sortable="false"
+                                                   itemRenderer="com.easyinsight.groups.GroupMyDataIconControls"/>
+                    </mx:columns>
+                </mx:AdvancedDataGrid>
+            </mx:VBox>
+        </mx:HBox>
+        <mx:HBox>
+            <mx:VBox>
+                <mx:Box width="100%" horizontalAlign="center" backgroundImage="{backgroundImage}" backgroundSize="100%"
+                        paddingTop="5"
+                        paddingBottom="5">
+                    <mx:Label text="Group Data" fontSize="20" fontFamily="Tahoma" fontWeight="bold" color="#FFFFFF"/>
+                </mx:Box>
+
+                <mx:AdvancedDataGrid width="800" height="100%" id="adminMyDataGrid" allowMultipleSelection="true" fontSize="12"
+                                     itemDoubleClick="gridDoubleClick(event)" headerStyleName="BlueHeader"
+                                     iconFunction="simpleIconFunction">
+                    <mx:dataProvider>
+                        <mx:HierarchicalData source="{displayTreeData}"/>
+                    </mx:dataProvider>
+                    <mx:columns>
+                        <mx:AdvancedDataGridColumn headerText="Name" dataField="name"/>
+                        <mx:AdvancedDataGridColumn headerText="Last Data Time" dataField="lastDataTime" id="lastDataAdminColumn"
+                                                   width="140" itemRenderer="com.easyinsight.listing.MyDataLastDataLabel"
+                                                   sortCompareFunction="customSort"/>
+                        <mx:AdvancedDataGridColumn width="200" headerText="" dataField="name" sortable="false"
+                                                   itemRenderer="com.easyinsight.groups.GroupAdminMyDataIconControls"/>
+                    </mx:columns>
+                </mx:AdvancedDataGrid>
+            </mx:VBox>
+            <mx:VBox paddingRight="0" paddingTop="25">
+                <mx:Label text="Group Data Controls" fontSize="13" fontWeight="bold" paddingRight="0"/>
+                <mx:HRule width="100%"/>
+                <mx:LinkButton label="Add data source..." color="#333333" fontSize="12" paddingLeft="0" paddingRight="0"
+                               click="addDataSource()"/>
+                <mx:LinkButton label="Add a report..." color="#333333" fontSize="12" paddingLeft="0" paddingRight="0"
+                               click="addReport()"/>
+            </mx:VBox>
+        </mx:HBox>
+    </mx:ViewStack>
+
 
 </mx:HBox>

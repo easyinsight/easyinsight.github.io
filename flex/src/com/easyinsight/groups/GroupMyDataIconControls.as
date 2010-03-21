@@ -44,14 +44,10 @@ public class GroupMyDataIconControls extends HBox
     [Embed(source="../../../../assets/media_play_green.png")]
     public var playIcon:Class;
 
-    [Embed(source="../../../../assets/navigate_cross.png")]
-    public var deleteIcon:Class;
-
     private var userUploadSource:RemoteObject;
 
     private var feedService:RemoteObject;
 
-    private var refreshButton:Button;
     private var adminButton:Button;
     private var analyzeButton:Button;
     private var deleteButton:Button;
@@ -73,25 +69,13 @@ public class GroupMyDataIconControls extends HBox
         BindingUtils.bindProperty(analyzeButton, "toolTip", this, "analyzeTooltip");
         BindingUtils.bindProperty(analyzeButton, "visible", this, "analyzeVisible");
         analyzeButton.addEventListener(MouseEvent.CLICK, analyzeCalled);
-        addChild(analyzeButton);
-        refreshButton = new Button();
-        refreshButton.setStyle("icon", refreshIcon);
-        BindingUtils.bindProperty(refreshButton, "toolTip", this, "refreshTooltip");
-        BindingUtils.bindProperty(refreshButton, "visible", this, "refreshVisible");
-        refreshButton.addEventListener(MouseEvent.CLICK, refreshCalled);
-        addChild(refreshButton);
+        addChild(analyzeButton);        
         adminButton = new Button();
         adminButton.setStyle("icon", adminIcon);
         BindingUtils.bindProperty(adminButton, "toolTip", this, "adminTooltip");
         BindingUtils.bindProperty(adminButton, "visible", this, "adminVisible");
         adminButton.addEventListener(MouseEvent.CLICK, adminCalled);
         addChild(adminButton);
-        deleteButton = new Button();
-        deleteButton.setStyle("icon", deleteIcon);
-        BindingUtils.bindProperty(deleteButton, "toolTip", this, "deleteTooltip");
-        BindingUtils.bindProperty(deleteButton, "visible", this, "deleteVisible");
-        deleteButton.addEventListener(MouseEvent.CLICK, deleteCalled);
-        addChild(deleteButton);
 
         this.addEventListener(RefreshNotificationEvent.REFRESH_NOTIFICATION, notifyRefresh);
 
@@ -121,28 +105,6 @@ public class GroupMyDataIconControls extends HBox
         dispatchEvent(new Event("analyzeVisibleChanged"));
     }
 
-    [Bindable(event="refreshTooltipChanged")]
-    public function get refreshTooltip():String {
-        return _refreshTooltip;
-    }
-
-    public function set refreshTooltip(value:String):void {
-        if (_refreshTooltip == value) return;
-        _refreshTooltip = value;
-        dispatchEvent(new Event("refreshTooltipChanged"));
-    }
-
-    [Bindable(event="refreshVisibleChanged")]
-    public function get refreshVisible():Boolean {
-        return _refreshVisible;
-    }
-
-    public function set refreshVisible(value:Boolean):void {
-        if (_refreshVisible == value) return;
-        _refreshVisible = value;
-        dispatchEvent(new Event("refreshVisibleChanged"));
-    }
-
     [Bindable(event="adminTooltipChanged")]
     public function get adminTooltip():String {
         return _adminTooltip;
@@ -163,28 +125,6 @@ public class GroupMyDataIconControls extends HBox
         if (_adminVisible == value) return;
         _adminVisible = value;
         dispatchEvent(new Event("adminVisibleChanged"));
-    }
-
-    [Bindable(event="deleteTooltipChanged")]
-    public function get deleteTooltip():String {
-        return _deleteTooltip;
-    }
-
-    public function set deleteTooltip(value:String):void {
-        if (_deleteTooltip == value) return;
-        _deleteTooltip = value;
-        dispatchEvent(new Event("deleteTooltipChanged"));
-    }
-
-    [Bindable(event="deleteVisibleChanged")]
-    public function get deleteVisible():Boolean {
-        return _deleteVisible;
-    }
-
-    public function set deleteVisible(value:Boolean):void {
-        if (_deleteVisible == value) return;
-        _deleteVisible = value;
-        dispatchEvent(new Event("deleteVisibleChanged"));
     }
 
     private function notifyRefresh(event:RefreshNotificationEvent):void {
@@ -323,28 +263,11 @@ public class GroupMyDataIconControls extends HBox
     override public function set data(value:Object):void {
         this.obj = value;
         if (value is DataFeedDescriptor) {
-            var descriptor:DataFeedDescriptor = value as DataFeedDescriptor;
-            adminVisible = descriptor.role == DataFeedDescriptor.OWNER;
-            adminTooltip = "Administer the data source...";
-            deleteVisible = descriptor.groupSourceID == 0;
-            switch (descriptor.feedType) {
-                case DataFeedDescriptor.STATIC:
-                case DataFeedDescriptor.EMPTY:
-                case DataFeedDescriptor.BASECAMP:
-                case DataFeedDescriptor.HIGHRISE:
-                    refreshVisible = true;
-                    break;
-                default:
-                    refreshVisible = false;
-                    break;
-            }
-
+            adminVisible = false;            
         } else if (value is InsightDescriptor) {
-            refreshVisible = false;
             adminVisible = true;
             adminTooltip = "Open report in the report editor...";
         } else if (value is ReportPackageDescriptor) {
-            refreshVisible = false;
             adminVisible = true;
             adminTooltip = "Edit the package definition...";            
         }
