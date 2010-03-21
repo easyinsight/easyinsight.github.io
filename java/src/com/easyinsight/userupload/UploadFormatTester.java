@@ -42,6 +42,9 @@ public class UploadFormatTester {
     private UploadFormat isFlatFile(byte[] data) {
         String delimiter = null;
         String dataString = new String(data);
+        Pattern repl = Pattern.compile("\r[^\n]");
+        dataString = dataString.replaceAll("\\r[^\\n]", "\r\n");
+        dataString = dataString.replaceAll("[^\\r]\\n", "\r\n");
         Pattern pattern = Pattern.compile("\r\n");
 
         String[] lines = pattern.split(dataString);
@@ -58,7 +61,7 @@ public class UploadFormatTester {
                 String delimiterPattern = escapedPatterns[i];
                 String [] headerResult = headerLine.split(delimiterPattern);
                 String [] firstDataLineResult = firstDataLine.split(delimiterPattern);
-                if (headerResult.length > 1 && headerResult.length == firstDataLineResult.length) {
+                if (headerResult.length > 1 && headerResult.length >= firstDataLineResult.length) {
                     delimiter = patterns[i];
                     break;
                 }
