@@ -38,7 +38,7 @@ public class DataTypeGuesser implements IDataTypeGuesser {
                     if (string.length() == 4) {
                         try {
                             int intValue = Integer.parseInt(string);
-                            if (intValue >= 1900 && intValue <= 2100) {
+                            if (intValue >= 1980 && intValue <= 2014) {
                                 newGuess = new AnalysisDateDimension(tag, true, AnalysisDateDimension.YEAR_LEVEL, "yyyy");
                             }
                         } catch (NumberFormatException e) {
@@ -69,7 +69,7 @@ public class DataTypeGuesser implements IDataTypeGuesser {
                         NumericValue numericValue = (NumericValue) value;
                         double doubleValue = numericValue.getValue();
                         int intValue = (int) doubleValue;
-                        if (doubleValue == intValue && intValue >= 1900 && intValue <= 2100) {
+                        if (doubleValue == intValue && intValue >= 1980 && intValue <= 2014) {
                             newGuess = new AnalysisDateDimension(tag, true, AnalysisDateDimension.YEAR_LEVEL, "yyyy");
                         } else {
                             newGuess = new AnalysisMeasure(tag, AggregationTypes.SUM);
