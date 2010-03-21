@@ -15,6 +15,8 @@ import java.text.SimpleDateFormat;
 import java.text.ParseException;
 
 import org.apache.poi.hssf.usermodel.*;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -58,33 +60,33 @@ public class ExcelUploadFormat extends UploadFormat {
 
             List<Value[]> gridList = new ArrayList<Value[]>();
 
-            Iterator<HSSFRow> rit = (Iterator<HSSFRow>)sheet.rowIterator();
+            Iterator<Row> rit = (Iterator<Row>)sheet.rowIterator();
             if (orientation == VERTICAL_HEADERS) {
                 rit.next();
             }
             int rowCounter = 0;
             for (; rit.hasNext(); ) {
-                HSSFRow row = rit.next();
+                Row row = rit.next();
                 if (row.getLastCellNum() < columnModifier) {
                     continue;
                 }
                 Value[] values = new Value[row.getLastCellNum() - columnModifier];
                 boolean foundAtLeastOneValue = false;
-                Iterator<HSSFCell> cit = (Iterator<HSSFCell>)row.cellIterator();
+                Iterator<Cell> cit = (Iterator<Cell>)row.cellIterator();
                 if (orientation == HORIZONTAL_HEADERS) {
-                    HSSFCell cell = cit.next();
+                    Cell cell = cit.next();
                     if (cell.toString() != null && !"".equals(cell.toString())) {
                         foundAtLeastOneValue = true;
                     }
                 }
                 for (; cit.hasNext(); ) {
 
-                    HSSFCell cell = cit.next();
+                    Cell cell = cit.next();
                     if (cell.toString().length() > 0) {
                         foundAtLeastOneValue = true;
                     }
                     Value cellValue = getCellValue(cell);
-                    values[cell.getCellNum() - columnModifier] = cellValue;
+                    values[cell.getColumnIndex() - columnModifier] = cellValue;
                 }
                 if (!foundAtLeastOneValue) {
                     continue;
@@ -159,8 +161,8 @@ public class ExcelUploadFormat extends UploadFormat {
         boolean topRowIsDates = false;
         Pattern pattern = Pattern.compile("[0-9]{4}-[0-9]{2}-[0-9]{2}");
         HSSFRow row = sheet.getRow(0);
-        for (Iterator<HSSFCell> cit = (Iterator<HSSFCell>)row.cellIterator(); cit.hasNext(); ) {
-            HSSFCell cell = cit.next();
+        for (Iterator<Cell> cit = row.cellIterator(); cit.hasNext(); ) {
+            Cell cell = cit.next();
             Matcher matcher = pattern.matcher(cell.toString());
             if (matcher.find()) {
                 topRowIsDates = true;
@@ -179,7 +181,7 @@ public class ExcelUploadFormat extends UploadFormat {
     }
 
     @NotNull
-    private static Value getCellValue(HSSFCell cell) {
+    private static Value getCellValue(Cell cell) {
         Value obj;
         switch (cell.getCellType()) {
             case HSSFCell.CELL_TYPE_BLANK:
@@ -223,8 +225,8 @@ public class ExcelUploadFormat extends UploadFormat {
         if (alignment == VERTICAL_HEADERS) {
             HSSFRow row = sheet.getRow(0);
             List<String> rowList = new ArrayList<String>();
-            for (Iterator<HSSFCell> cit = (Iterator<HSSFCell>)row.cellIterator(); cit.hasNext(); ) {
-                HSSFCell cell = cit.next();
+            for (Iterator<Cell> cit = row.cellIterator(); cit.hasNext(); ) {
+                Cell cell = cit.next();
                 String header = cell.toString().trim();
                 if ("".equals(header)) {
                     continue;
@@ -239,10 +241,10 @@ public class ExcelUploadFormat extends UploadFormat {
             return rows;
         } else {
             List<String> rowList = new ArrayList<String>();
-            Iterator<HSSFRow> rit = (Iterator<HSSFRow>)sheet.rowIterator();
+            Iterator<Row> rit = (Iterator<Row>)sheet.rowIterator();
             for (; rit.hasNext(); ) {
-                HSSFRow row = rit.next();
-                HSSFCell cell = row.getCell(0);
+                Row row = rit.next();
+                Cell cell = row.getCell(0);
                 String header = cell.toString().trim();
                 if ("".equals(header)) {
                     continue;
