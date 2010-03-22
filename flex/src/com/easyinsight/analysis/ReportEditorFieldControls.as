@@ -42,7 +42,18 @@ public class ReportEditorFieldControls extends HBox
         public var deleteIcon:Class;
 
     private var _showDelete:Boolean;
+    private var _showCopy:Boolean;
 
+    [Bindable(event="showCopyChanged")]
+    public function get showCopy():Boolean {
+        return _showCopy;
+    }
+
+    public function set showCopy(value:Boolean):void {
+        if (_showCopy == value) return;
+        _showCopy = value;
+        dispatchEvent(new Event("showCopyChanged"));
+    }
 
     [Bindable(event="showDeleteChanged")]
     public function get showDelete():Boolean {
@@ -81,6 +92,7 @@ public class ReportEditorFieldControls extends HBox
 				button = new Button();
 				button.setStyle("icon", copyIcon);
 				button.toolTip = "Copy...";
+                BindingUtils.bindProperty(button, "visible", this, "showCopy");
                 button.addEventListener(MouseEvent.CLICK, copy);
 			}
             addChild(button);
@@ -153,6 +165,7 @@ public class ReportEditorFieldControls extends HBox
 			this.analysisItemWrapper = value as AnalysisItemWrapper;
 			this.displayName = analysisItemWrapper.displayName;
             if (analysisItemWrapper.analysisItem != null) {
+                showCopy = true;
                 if (analysisItemWrapper.analysisItem.concrete) {
                     showEdit = false;
                     showDelete = false;
@@ -160,6 +173,8 @@ public class ReportEditorFieldControls extends HBox
                     showEdit = true;
                     showDelete = true;
                 }
+            } else {
+                showCopy = false;
             }
 		}
 		
