@@ -5,6 +5,9 @@ import org.apache.poi.hssf.usermodel.HSSFSheet;
 
 import java.util.regex.Pattern;
 import java.io.ByteArrayInputStream;
+import java.nio.charset.Charset;
+
+import com.csvreader.CsvReader;
 
 /**
  * User: James Boe
@@ -13,14 +16,17 @@ import java.io.ByteArrayInputStream;
  */
 public class UploadFormatTester {
 
-    private static String patterns[] = new String [] { ",", "|", " ", "\t"};
-    private static String escapedPatterns[] = new String [] { ",", "\\|", " ", "\t"};
+    private static String patterns[] = new String [] { ",", "|", "\t", " "};
+    private static String escapedPatterns[] = new String [] { ",", "\\|", "\t", " "};
 
     public UploadFormat determineFormat(byte[] data) {
         UploadFormat uploadFormat;
         uploadFormat = isExcel(data);
         if (uploadFormat == null) {
-            uploadFormat = isFlatFile(data);
+            uploadFormat = isCsv(data);
+            if(uploadFormat == null) {
+                uploadFormat = isFlatFile(data);
+            }
         }
         return uploadFormat;
     }
@@ -39,12 +45,23 @@ public class UploadFormatTester {
         return uploadFormat;
     }
 
+    private UploadFormat isCsv(byte[] data) {
+        UploadFormat uploadFormat = null;
+        try {
+            ByteArrayInputStream bais = new ByteArrayInputStream(data);
+            CsvReader reader = new CsvReader(bais, Charset.defaultCharset());
+            if(reader.readHeaders() && reader.readRecord() && reader.getHeaders().length >= reader.getColumnCount()) {
+                uploadFormat = new CsvFileUploadFormat();
+            }
+        } catch(Exception e) {
+            uploadFormat = null;
+        }
+        return uploadFormat;
+    }
+
     private UploadFormat isFlatFile(byte[] data) {
         String delimiter = null;
         String dataString = new String(data);
-        Pattern repl = Pattern.compile("\r[^\n]");
-        dataString = dataString.replaceAll("\\r[^\\n]", "\r\n");
-        dataString = dataString.replaceAll("[^\\r]\\n", "\r\n");
         Pattern pattern = Pattern.compile("\r\n");
 
         String[] lines = pattern.split(dataString);
